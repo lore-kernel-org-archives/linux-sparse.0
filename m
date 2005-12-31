@@ -1,16 +1,17 @@
 From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: pre-process.c:569:18: error: bad constant expression
-Date: Sat, 31 Dec 2005 11:50:39 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0512311140290.3249@g5.osdl.org>
+Date: Sat, 31 Dec 2005 13:19:16 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0512311314000.3249@g5.osdl.org>
 References: <20051231073006.GA3583@localhost> <Pine.LNX.4.64.0512311122400.3249@g5.osdl.org>
+ <Pine.LNX.4.64.0512311140290.3249@g5.osdl.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:5045 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S932118AbVLaTup (ORCPT
+Received: from smtp.osdl.org ([65.172.181.4]:29887 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S1750751AbVLaVTZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 31 Dec 2005 14:50:45 -0500
-In-Reply-To: <Pine.LNX.4.64.0512311122400.3249@g5.osdl.org>
+	Sat, 31 Dec 2005 16:19:25 -0500
+In-Reply-To: <Pine.LNX.4.64.0512311140290.3249@g5.osdl.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Alecs King <alecsk@gmail.com>
@@ -20,54 +21,38 @@ Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
 On Sat, 31 Dec 2005, Linus Torvalds wrote:
 > 
-> And one of the things it doesn't like is variable-sized arrays. It will 
-> actually correctly handle _some_ aspects of them (it should parse them and 
-> so on), but never got it working properly even enough to make "sizeof" 
-> work
+> Just in case somebody cares, a partial list of the problems I know 
+> about with variable-sized arrays as far as current sparse is concerned:
+> 
+>  - sparse just generates a list of symbols per block (and per function). 
 
-Just in case somebody cares, a partial list of the problems I know 
-about with variable-sized arrays as far as current sparse is concerned:
+Ok, I fixed this one. Instead of having just a list of symbols per block, 
+declarations are not a special kind of statement in the block. It wasn't 
+even that hard to do, although the amount of testing my change-over has 
+gotten is pretty minimal.
 
- - sparse just generates a list of symbols per block (and per function). 
-   That's correct and proper for _all_ other kinds of variables, but not 
-   for variable-sized ones. Why? Because those depend on where in the 
-   block they are declared.
+So sparse now gets
 
-   Example:
-
-	int main(int argc, char **argv)
+	int test(int arg)
 	{
-		char p[argc];
-		argc++;
-		char q[argc];
-		return sizeof(p) + sizeof(q);
+		int a = arg;
+		arg++;
+		int b = arg;
+		return a+b;
 	}
 
-   iow, we'd have to make variable declarations real statements in the 
-   statement list. Which is by no means impossible, but it's a big change 
-   for something that has little gain for _me_ (ie the kernel). So I'm 
-   personally not very likely to do it.
+right, which it didn't use to do (it would end up rewriting the above as
 
-   Side note: it's not just variable-sized arrays that need this. Any 
-   initializers of mixed declarations also have this same issue. That's 
-   another thing sparse warns about right now, as you already noticed.
+	symbol_list: a = arg; b = arg;
 
- - "sizeof()" needs to generate a temporary variable. Example:
+	statement_list: arg++;
+			return a+b;
 
-	int main(int argc, char **argv)
-	{
-		char p[argc++];
-		return sizeof(p);
-	}
+and thus return "arg+arg" rather than "arg+arg+1".
 
-   should obviously return the original value of "argc", and only evaluate 
-   the expression once. The way sparse is set up right now, we parse the 
-   expression properly, but we don't create the internal temporary result 
-   for it.
-
-   This is likely a fairly small change, though.
-
-If those two problems are fixed, sparse probably could handle 
-variable-sized arrays fairly well.
+It still warns about mixing code and declarations, and there are still 
+other issues that keep it from handling variable-sized arrays, but I think 
+this was the main "conceptual" difficulty in sparse to handling some of 
+it.
 
 		Linus
