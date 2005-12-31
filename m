@@ -1,17 +1,16 @@
 From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: pre-process.c:569:18: error: bad constant expression
-Date: Sat, 31 Dec 2005 13:19:16 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0512311314000.3249@g5.osdl.org>
-References: <20051231073006.GA3583@localhost> <Pine.LNX.4.64.0512311122400.3249@g5.osdl.org>
- <Pine.LNX.4.64.0512311140290.3249@g5.osdl.org>
+Subject: Re: [RFC] [PATCH] clean up cclass
+Date: Sat, 31 Dec 2005 13:26:39 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0512311320350.3249@g5.osdl.org>
+References: <20051231072055.GA2323@localhost>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:29887 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1750751AbVLaVTZ (ORCPT
+Received: from smtp.osdl.org ([65.172.181.4]:62143 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S1751317AbVLaV0o (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 31 Dec 2005 16:19:25 -0500
-In-Reply-To: <Pine.LNX.4.64.0512311140290.3249@g5.osdl.org>
+	Sat, 31 Dec 2005 16:26:44 -0500
+In-Reply-To: <20051231072055.GA2323@localhost>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Alecs King <alecsk@gmail.com>
@@ -19,40 +18,31 @@ Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
 
 
-On Sat, 31 Dec 2005, Linus Torvalds wrote:
-> 
-> Just in case somebody cares, a partial list of the problems I know 
-> about with variable-sized arrays as far as current sparse is concerned:
-> 
->  - sparse just generates a list of symbols per block (and per function). 
+On Sat, 31 Dec 2005, Alecs King wrote:
+>
+> Is there a good reason to always add that '+ 1' in both initialization
+> and dereference of cclass?
 
-Ok, I fixed this one. Instead of having just a list of symbols per block, 
-declarations are not a special kind of statement in the block. It wasn't 
-even that hard to do, although the amount of testing my change-over has 
-gotten is pretty minimal.
+EOF, aka -1.
 
-So sparse now gets
+Now, whether that's a good enough reason for ugly code, I don't know. You 
+could do the same by doing something like
 
-	int test(int arg)
-	{
-		int a = arg;
-		arg++;
-		int b = arg;
-		return a+b;
-	}
+	static const struct {
+		long eof;
+		long c[256];
+	} cclass = { 0 , { ..sane initializer.. } };
 
-right, which it didn't use to do (it would end up rewriting the above as
+and then using
 
-	symbol_list: a = arg; b = arg;
+	cclass.c[next]
 
-	statement_list: arg++;
-			return a+b;
+without the "+1". It might noe be strictly conforming, but it sure as hell 
+should work in practice.
 
-and thus return "arg+arg" rather than "arg+arg+1".
+Another (perhaps better) alternative is to change the #define of EOF from 
+-1 to 256, and then make sure that we don't rely on "next < 0" anywhere 
+(which we might do by changing the type to "unsigned int" and expecting 
+the compiler to complain.
 
-It still warns about mixing code and declarations, and there are still 
-other issues that keep it from handling variable-sized arrays, but I think 
-this was the main "conceptual" difficulty in sparse to handling some of 
-it.
-
-		Linus
+			Linus
