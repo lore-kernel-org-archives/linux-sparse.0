@@ -1,110 +1,101 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 6/7] implement #strong_define
-Date: Mon, 02 Jan 2006 22:20:21 +0300
-Message-ID: <43B97CF5.B57A133A@tv-sign.ru>
+Subject: [PATCH 5/7] prepare for #strong_{define,undef}
+Date: Mon, 02 Jan 2006 22:20:17 +0300
+Message-ID: <43B97CF1.8A073C26@tv-sign.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.tv-sign.ru ([213.234.233.51]:32727 "EHLO several.ru")
-	by vger.kernel.org with ESMTP id S1750926AbWABSEW (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:30679 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1750923AbWABSER (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Jan 2006 13:04:22 -0500
+	Mon, 2 Jan 2006 13:04:17 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-Example
+This patch renames symbol->weak to symbol->attr and adds
+symbolic names for it's values.
 
-	#strong_define FOO 1
+I don't like the new name, and will be happy to rename if
+you suggest me something different.
 
-	#undef	FOO	// silently ignored
-	#define	FOO 2	// silently ignored
+Probably it is also better to move ->attr into the NS_MACRO
+part of the union and make it integer.
 
-This allows (for example) to override CONFIG_XXX values without
-editing include/linux/autoconf.h
-
-I think this is useful. If you think differently, I will appreciate
-your comments on this patch correctness.
+No changes in pre-process.o
 
 Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
---- git-snapshot-20060101/symbol.h~6_DEF	2006-01-02 23:36:40.000000000 +0300
-+++ git-snapshot-20060101/symbol.h	2006-01-02 23:51:36.000000000 +0300
-@@ -70,13 +70,14 @@ struct symbol_op {
+--- git-snapshot-20060101/symbol.h~5_PREP	2006-01-02 22:51:09.000000000 +0300
++++ git-snapshot-20060101/symbol.h	2006-01-02 23:36:40.000000000 +0300
+@@ -70,10 +70,13 @@ struct symbol_op {
  extern int expand_safe_p(struct expression *expr, int cost);
  extern int expand_constant_p(struct expression *expr, int cost);
  
--#define SYM_ATTR_WEAK		1
--#define SYM_ATTR_NORMAL		0
-+#define SYM_ATTR_WEAK		0
-+#define SYM_ATTR_NORMAL		1
-+#define SYM_ATTR_STRONG		2
- 
++#define SYM_ATTR_WEAK		1
++#define SYM_ATTR_NORMAL		0
++
  struct symbol {
  	enum namespace namespace:8;
  	enum type type:8;
--	unsigned char used:1, attr:1;
-+	unsigned char used:1, attr:2;
+-	unsigned char used:1, weak:1;
++	unsigned char used:1, attr:1;
  	struct position pos;		/* Where this symbol was declared */
  	struct ident *ident;		/* What identifier this symbol is associated with */
  	struct symbol *next_id;		/* Next semantic symbol that shares this identifier */
---- git-snapshot-20060101/pre-process.c~6_DEF	2006-01-02 23:45:31.000000000 +0300
-+++ git-snapshot-20060101/pre-process.c	2006-01-03 00:28:36.000000000 +0300
-@@ -1088,7 +1088,7 @@ static int do_handle_define(struct strea
+--- git-snapshot-20060101/pre-process.c~5_PREP	2006-01-02 23:15:07.000000000 +0300
++++ git-snapshot-20060101/pre-process.c	2006-01-02 23:45:32.000000000 +0300
+@@ -1055,7 +1055,7 @@ Earg:
+ 	return NULL;
+ }
+ 
+-static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int weak)
++static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int attr)
+ {
+ 	struct token *arglist, *expansion;
+ 	struct token *left = token->next;
+@@ -1088,15 +1088,16 @@ static int do_handle_define(struct strea
  	if (sym) {
  		int clean;
  
--		if (attr > sym->attr)
-+		if (attr < sym->attr)
+-		if (weak > sym->weak)
++		if (attr > sym->attr)
  			goto out;
  
- 		clean = (attr == sym->attr);
-@@ -1134,6 +1134,11 @@ static int handle_weak_define(struct str
- 	return do_handle_define(stream, line, token, SYM_ATTR_WEAK);
- }
+-		clean = (weak == sym->weak);
++		clean = (attr == sym->attr);
  
-+static int handle_strong_define(struct stream *stream, struct token **line, struct token *token)
-+{
-+	return do_handle_define(stream, line, token, SYM_ATTR_STRONG);
-+}
-+
- static int handle_undef(struct stream *stream, struct token **line, struct token *token)
- {
- 	struct token *left = token->next;
-@@ -1145,7 +1150,7 @@ static int handle_undef(struct stream *s
+ 		if (token_list_different(sym->expansion, expansion) ||
+ 		    token_list_different(sym->arglist, arglist)) {
+ 			ret = 0;
+-			if ((clean && !weak) || sym->used_in == file_scope) {
++			if ((clean && attr == SYM_ATTR_NORMAL)
++					|| sym->used_in == file_scope) {
+ 				warning(left->pos, "preprocessor token %.*s redefined",
+ 						name->len, name->name);
+ 				info(sym->pos, "this was the original definition");
+@@ -1118,19 +1119,19 @@ static int do_handle_define(struct strea
  	}
  
- 	sym = lookup_macro(left->ident);
--	if (!sym)
-+	if (!sym || sym->attr > SYM_ATTR_NORMAL)
- 		return 1;
+ 	sym->used_in = NULL;
+-	sym->weak = weak;
++	sym->attr = attr;
+ out:
+ 	return ret;
+ }
  
- 	if (sym->scope != file_scope) {
-@@ -1565,15 +1570,16 @@ static void init_preprocessor(void)
- 		const char *name;
- 		int (*handler)(struct stream *, struct token **, struct token *);
- 	} normal[] = {
--		{ "define",	handle_define },
--		{ "weak_define",handle_weak_define },
--		{ "undef",	handle_undef },
--		{ "warning",	handle_warning },
--		{ "error",	handle_error },
--		{ "include",	handle_include },
--		{ "include_next",handle_include_next },
--		{ "pragma",	handle_pragma },
--		{ "line",	handle_line },
-+		{ "define",		handle_define },
-+		{ "weak_define",	handle_weak_define },
-+		{ "strong_define",	handle_strong_define },
-+		{ "undef",		handle_undef },
-+		{ "warning",		handle_warning },
-+		{ "error",		handle_error },
-+		{ "include",		handle_include },
-+		{ "include_next",	handle_include_next },
-+		{ "pragma",		handle_pragma },
-+		{ "line",		handle_line },
+ static int handle_define(struct stream *stream, struct token **line, struct token *token)
+ {
+-	return do_handle_define(stream, line, token, 0);
++	return do_handle_define(stream, line, token, SYM_ATTR_NORMAL);
+ }
  
- 		// our internal preprocessor tokens
- 		{ "nostdinc",	   handle_nostdinc },
+ static int handle_weak_define(struct stream *stream, struct token **line, struct token *token)
+ {
+-	return do_handle_define(stream, line, token, 1);
++	return do_handle_define(stream, line, token, SYM_ATTR_WEAK);
+ }
+ 
+ static int handle_undef(struct stream *stream, struct token **line, struct token *token)
