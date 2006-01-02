@@ -1,101 +1,116 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 5/7] prepare for #strong_{define,undef}
-Date: Mon, 02 Jan 2006 22:20:17 +0300
-Message-ID: <43B97CF1.8A073C26@tv-sign.ru>
+Subject: [PATCH 7/7] implement #strong_undef
+Date: Mon, 02 Jan 2006 22:20:24 +0300
+Message-ID: <43B97CF8.22FC0C49@tv-sign.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.tv-sign.ru ([213.234.233.51]:30679 "EHLO several.ru")
-	by vger.kernel.org with ESMTP id S1750923AbWABSER (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:34519 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1750931AbWABSE0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Jan 2006 13:04:17 -0500
+	Mon, 2 Jan 2006 13:04:26 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-This patch renames symbol->weak to symbol->attr and adds
-symbolic names for it's values.
+Example
 
-I don't like the new name, and will be happy to rename if
-you suggest me something different.
+	// pre-buffer
+	#strong_undef CONFIG_SMP
 
-Probably it is also better to move ->attr into the NS_MACRO
-part of the union and make it integer.
+	// include/linux/autoconf.h
+	#define CONFIG_SMP 1		// silently ignored
 
-No changes in pre-process.o
+	#ifdef CONFIG_SMP
+		...			// not taken
+	#endif
 
 Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
---- git-snapshot-20060101/symbol.h~5_PREP	2006-01-02 22:51:09.000000000 +0300
-+++ git-snapshot-20060101/symbol.h	2006-01-02 23:36:40.000000000 +0300
-@@ -70,10 +70,13 @@ struct symbol_op {
- extern int expand_safe_p(struct expression *expr, int cost);
- extern int expand_constant_p(struct expression *expr, int cost);
+--- git-snapshot-20060101/pre-process.c~7_UNDEF	2006-01-03 00:31:42.000000000 +0300
++++ git-snapshot-20060101/pre-process.c	2006-01-03 00:46:37.000000000 +0300
+@@ -1084,14 +1084,14 @@ static int do_handle_define(struct strea
+ 		return 1;
  
-+#define SYM_ATTR_WEAK		1
-+#define SYM_ATTR_NORMAL		0
-+
- struct symbol {
- 	enum namespace namespace:8;
- 	enum type type:8;
--	unsigned char used:1, weak:1;
-+	unsigned char used:1, attr:1;
- 	struct position pos;		/* Where this symbol was declared */
- 	struct ident *ident;		/* What identifier this symbol is associated with */
- 	struct symbol *next_id;		/* Next semantic symbol that shares this identifier */
---- git-snapshot-20060101/pre-process.c~5_PREP	2006-01-02 23:15:07.000000000 +0300
-+++ git-snapshot-20060101/pre-process.c	2006-01-02 23:45:32.000000000 +0300
-@@ -1055,7 +1055,7 @@ Earg:
- 	return NULL;
- }
- 
--static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int weak)
-+static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int attr)
- {
- 	struct token *arglist, *expansion;
- 	struct token *left = token->next;
-@@ -1088,15 +1088,16 @@ static int do_handle_define(struct strea
+ 	ret = 1;
+-	sym = lookup_macro(name);
++	sym = lookup_symbol(name, NS_MACRO | NS_UNDEF);
  	if (sym) {
  		int clean;
  
--		if (weak > sym->weak)
-+		if (attr > sym->attr)
+ 		if (attr < sym->attr)
  			goto out;
  
--		clean = (weak == sym->weak);
-+		clean = (attr == sym->attr);
+-		clean = (attr == sym->attr);
++		clean = (attr == sym->attr && sym->namespace == NS_MACRO);
  
  		if (token_list_different(sym->expansion, expansion) ||
  		    token_list_different(sym->arglist, arglist)) {
- 			ret = 0;
--			if ((clean && !weak) || sym->used_in == file_scope) {
-+			if ((clean && attr == SYM_ATTR_NORMAL)
-+					|| sym->used_in == file_scope) {
- 				warning(left->pos, "preprocessor token %.*s redefined",
- 						name->len, name->name);
- 				info(sym->pos, "this was the original definition");
-@@ -1118,19 +1119,19 @@ static int do_handle_define(struct strea
+@@ -1118,6 +1118,7 @@ static int do_handle_define(struct strea
+ 		__free_token(token);	/* Free the "define" token, but not the rest of the line */
  	}
  
++	sym->namespace = NS_MACRO;
  	sym->used_in = NULL;
--	sym->weak = weak;
-+	sym->attr = attr;
+ 	sym->attr = attr;
  out:
- 	return ret;
+@@ -1139,7 +1140,7 @@ static int handle_strong_define(struct s
+ 	return do_handle_define(stream, line, token, SYM_ATTR_STRONG);
  }
  
- static int handle_define(struct stream *stream, struct token **line, struct token *token)
+-static int handle_undef(struct stream *stream, struct token **line, struct token *token)
++static int do_handle_undef(struct stream *stream, struct token **line, struct token *token, int attr)
  {
--	return do_handle_define(stream, line, token, 0);
-+	return do_handle_define(stream, line, token, SYM_ATTR_NORMAL);
+ 	struct token *left = token->next;
+ 	struct symbol *sym;
+@@ -1149,21 +1150,37 @@ static int handle_undef(struct stream *s
+ 		return 1;
+ 	}
+ 
+-	sym = lookup_macro(left->ident);
+-	if (!sym || sym->attr > SYM_ATTR_NORMAL)
++	sym = lookup_symbol(left->ident, NS_MACRO | NS_UNDEF);
++	if (sym) {
++		if (attr < sym->attr)
++			return 1;
++		if (attr == sym->attr && sym->namespace == NS_UNDEF)
++			return 1;
++	} else if (attr <= SYM_ATTR_NORMAL)
+ 		return 1;
+ 
+-	if (sym->scope != file_scope) {
++	if (!sym || sym->scope != file_scope) {
+ 		sym = alloc_symbol(left->pos, SYM_NODE);
+ 		bind_symbol(sym, left->ident, NS_MACRO);
+ 	}
+ 
+ 	sym->namespace = NS_UNDEF;
+ 	sym->used_in = NULL;
++	sym->attr = attr;
+ 
+ 	return 1;
  }
  
- static int handle_weak_define(struct stream *stream, struct token **line, struct token *token)
++static int handle_undef(struct stream *stream, struct token **line, struct token *token)
++{
++	return do_handle_undef(stream, line, token, SYM_ATTR_NORMAL);
++}
++
++static int handle_strong_undef(struct stream *stream, struct token **line, struct token *token)
++{
++	return do_handle_undef(stream, line, token, SYM_ATTR_STRONG);
++}
++
+ static int preprocessor_if(struct stream *stream, struct token *token, int true)
  {
--	return do_handle_define(stream, line, token, 1);
-+	return do_handle_define(stream, line, token, SYM_ATTR_WEAK);
- }
- 
- static int handle_undef(struct stream *stream, struct token **line, struct token *token)
+ 	token_type(token) = false_nesting ? TOKEN_SKIP_GROUPS : TOKEN_IF;
+@@ -1574,6 +1591,7 @@ static void init_preprocessor(void)
+ 		{ "weak_define",	handle_weak_define },
+ 		{ "strong_define",	handle_strong_define },
+ 		{ "undef",		handle_undef },
++		{ "strong_undef",	handle_strong_undef },
+ 		{ "warning",		handle_warning },
+ 		{ "error",		handle_error },
+ 		{ "include",		handle_include },
