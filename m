@@ -1,84 +1,110 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 4/7] fix 'weak' attribute loss
-Date: Mon, 02 Jan 2006 22:20:12 +0300
-Message-ID: <43B97CEC.6E90F4B3@tv-sign.ru>
+Subject: [PATCH 6/7] implement #strong_define
+Date: Mon, 02 Jan 2006 22:20:21 +0300
+Message-ID: <43B97CF5.B57A133A@tv-sign.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.tv-sign.ru ([213.234.233.51]:29143 "EHLO several.ru")
-	by vger.kernel.org with ESMTP id S1750920AbWABSEM (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:32727 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1750926AbWABSEW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Jan 2006 13:04:12 -0500
+	Mon, 2 Jan 2006 13:04:22 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-When NS_MACRO symbol is used, sparse clears it's 'weak' flag.
-This is bad for multifile parsing, and wrong:
+Example
 
-	#weak_define FOO 1
-	FOO
-	#weak_define FOO 2	// silently ignored
+	#strong_define FOO 1
 
-After this patch sparse never writes to NS_MACRO symbols from
-another scope (except ->used_in).
+	#undef	FOO	// silently ignored
+	#define	FOO 2	// silently ignored
+
+This allows (for example) to override CONFIG_XXX values without
+editing include/linux/autoconf.h
+
+I think this is useful. If you think differently, I will appreciate
+your comments on this patch correctness.
 
 Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
---- git-snapshot-20060101/symbol.h~4_USED	2006-01-02 20:10:26.000000000 +0300
-+++ git-snapshot-20060101/symbol.h	2006-01-02 22:51:09.000000000 +0300
-@@ -87,6 +87,7 @@ struct symbol {
- 		struct /* NS_MACRO */ {
- 			struct token *expansion;
- 			struct token *arglist;
-+			struct scope *used_in;
- 		};
- 		struct /* NS_PREPROCESSOR */ {
- 			int (*handler)(struct stream *, struct token **, struct token *);
---- git-snapshot-20060101/pre-process.c~4_USED	2006-01-02 22:48:30.000000000 +0300
-+++ git-snapshot-20060101/pre-process.c	2006-01-02 23:15:07.000000000 +0300
-@@ -114,7 +114,7 @@ static int token_defined(struct token *t
- 	if (token_type(token) == TOKEN_IDENT) {
- 		struct symbol *sym = lookup_macro(token->ident);
- 		if (sym) {
--			sym->weak = 0;
-+			sym->used_in = file_scope;
- 			return 1;
- 		}
- 		return 0;
-@@ -143,7 +143,7 @@ static int expand_one_symbol(struct toke
+--- git-snapshot-20060101/symbol.h~6_DEF	2006-01-02 23:36:40.000000000 +0300
++++ git-snapshot-20060101/symbol.h	2006-01-02 23:51:36.000000000 +0300
+@@ -70,13 +70,14 @@ struct symbol_op {
+ extern int expand_safe_p(struct expression *expr, int cost);
+ extern int expand_constant_p(struct expression *expr, int cost);
  
- 	sym = lookup_macro(token->ident);
+-#define SYM_ATTR_WEAK		1
+-#define SYM_ATTR_NORMAL		0
++#define SYM_ATTR_WEAK		0
++#define SYM_ATTR_NORMAL		1
++#define SYM_ATTR_STRONG		2
+ 
+ struct symbol {
+ 	enum namespace namespace:8;
+ 	enum type type:8;
+-	unsigned char used:1, attr:1;
++	unsigned char used:1, attr:2;
+ 	struct position pos;		/* Where this symbol was declared */
+ 	struct ident *ident;		/* What identifier this symbol is associated with */
+ 	struct symbol *next_id;		/* Next semantic symbol that shares this identifier */
+--- git-snapshot-20060101/pre-process.c~6_DEF	2006-01-02 23:45:31.000000000 +0300
++++ git-snapshot-20060101/pre-process.c	2006-01-03 00:28:36.000000000 +0300
+@@ -1088,7 +1088,7 @@ static int do_handle_define(struct strea
  	if (sym) {
--		sym->weak = 0;
-+		sym->used_in = file_scope;
- 		return expand(list, sym);
- 	}
- 	if (token->ident == &__LINE___ident) {
-@@ -1096,7 +1096,7 @@ static int do_handle_define(struct strea
- 		if (token_list_different(sym->expansion, expansion) ||
- 		    token_list_different(sym->arglist, arglist)) {
- 			ret = 0;
--			if (clean && !weak) {
-+			if ((clean && !weak) || sym->used_in == file_scope) {
- 				warning(left->pos, "preprocessor token %.*s redefined",
- 						name->len, name->name);
- 				info(sym->pos, "this was the original definition");
-@@ -1117,6 +1117,7 @@ static int do_handle_define(struct strea
- 		__free_token(token);	/* Free the "define" token, but not the rest of the line */
- 	}
+ 		int clean;
  
-+	sym->used_in = NULL;
- 	sym->weak = weak;
- out:
- 	return ret;
-@@ -1152,6 +1153,7 @@ static int handle_undef(struct stream *s
- 	}
+-		if (attr > sym->attr)
++		if (attr < sym->attr)
+ 			goto out;
  
- 	sym->namespace = NS_UNDEF;
-+	sym->used_in = NULL;
- 
- 	return 1;
+ 		clean = (attr == sym->attr);
+@@ -1134,6 +1134,11 @@ static int handle_weak_define(struct str
+ 	return do_handle_define(stream, line, token, SYM_ATTR_WEAK);
  }
+ 
++static int handle_strong_define(struct stream *stream, struct token **line, struct token *token)
++{
++	return do_handle_define(stream, line, token, SYM_ATTR_STRONG);
++}
++
+ static int handle_undef(struct stream *stream, struct token **line, struct token *token)
+ {
+ 	struct token *left = token->next;
+@@ -1145,7 +1150,7 @@ static int handle_undef(struct stream *s
+ 	}
+ 
+ 	sym = lookup_macro(left->ident);
+-	if (!sym)
++	if (!sym || sym->attr > SYM_ATTR_NORMAL)
+ 		return 1;
+ 
+ 	if (sym->scope != file_scope) {
+@@ -1565,15 +1570,16 @@ static void init_preprocessor(void)
+ 		const char *name;
+ 		int (*handler)(struct stream *, struct token **, struct token *);
+ 	} normal[] = {
+-		{ "define",	handle_define },
+-		{ "weak_define",handle_weak_define },
+-		{ "undef",	handle_undef },
+-		{ "warning",	handle_warning },
+-		{ "error",	handle_error },
+-		{ "include",	handle_include },
+-		{ "include_next",handle_include_next },
+-		{ "pragma",	handle_pragma },
+-		{ "line",	handle_line },
++		{ "define",		handle_define },
++		{ "weak_define",	handle_weak_define },
++		{ "strong_define",	handle_strong_define },
++		{ "undef",		handle_undef },
++		{ "warning",		handle_warning },
++		{ "error",		handle_error },
++		{ "include",		handle_include },
++		{ "include_next",	handle_include_next },
++		{ "pragma",		handle_pragma },
++		{ "line",		handle_line },
+ 
+ 		// our internal preprocessor tokens
+ 		{ "nostdinc",	   handle_nostdinc },
