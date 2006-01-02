@@ -1,48 +1,86 @@
-From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: [RFC] [PATCH] clean up cclass
-Date: Sat, 31 Dec 2005 13:26:39 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0512311320350.3249@g5.osdl.org>
-References: <20051231072055.GA2323@localhost>
+From: Oleg Nesterov <oleg@tv-sign.ru>
+Subject: [PATCH 2/7] kill NS_INVISIBLEMACRO, introduce NS_UNDEF
+Date: Mon, 02 Jan 2006 22:19:49 +0300
+Message-ID: <43B97CD5.493EF3C2@tv-sign.ru>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:62143 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1751317AbVLaV0o (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:24791 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1750882AbWABSD6 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 31 Dec 2005 16:26:44 -0500
-In-Reply-To: <20051231072055.GA2323@localhost>
+	Mon, 2 Jan 2006 13:03:58 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alecs King <alecsk@gmail.com>
-Cc: linux-sparse <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@osdl.org>
+Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
+With this patch handle_undef() doesn't corrupt the builtin macros.
 
+This (imho) cleanups the code and is used in the next patches.
 
-On Sat, 31 Dec 2005, Alecs King wrote:
->
-> Is there a good reason to always add that '+ 1' in both initialization
-> and dereference of cclass?
+Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
-EOF, aka -1.
-
-Now, whether that's a good enough reason for ugly code, I don't know. You 
-could do the same by doing something like
-
-	static const struct {
-		long eof;
-		long c[256];
-	} cclass = { 0 , { ..sane initializer.. } };
-
-and then using
-
-	cclass.c[next]
-
-without the "+1". It might noe be strictly conforming, but it sure as hell 
-should work in practice.
-
-Another (perhaps better) alternative is to change the #define of EOF from 
--1 to 256, and then make sure that we don't rely on "next < 0" anywhere 
-(which we might do by changing the type to "unsigned int" and expecting 
-the compiler to complain.
-
-			Linus
+--- git-snapshot-20060101/symbol.h~2_UNDEF	2006-01-01 00:13:52.000000000 +0300
++++ git-snapshot-20060101/symbol.h	2006-01-02 20:10:26.000000000 +0300
+@@ -32,7 +32,7 @@ enum namespace {
+ 	NS_SYMBOL = 16,
+ 	NS_ITERATOR = 32,
+ 	NS_PREPROCESSOR = 64,
+-	NS_INVISIBLEMACRO = 128,
++	NS_UNDEF = 128,
+ };
+ 
+ enum type {
+--- git-snapshot-20060101/scope.c~2_UNDEF	2006-01-01 00:13:52.000000000 +0300
++++ git-snapshot-20060101/scope.c	2006-01-02 20:28:40.000000000 +0300
+@@ -41,7 +41,6 @@ static void start_scope(struct scope **s
+ void start_file_scope(void)
+ {
+ 	struct scope *scope = __alloc_scope(0);
+-	struct symbol *sym;
+ 
+ 	memset(scope, 0, sizeof(*scope));
+ 	scope->next = &builtin_scope;
+@@ -50,12 +49,6 @@ void start_file_scope(void)
+ 	/* top-level stuff defaults to file scopt, "extern" etc will choose global scope */
+ 	function_scope = scope;
+ 	block_scope = scope;
+-
+-	/* Make the builtin macros visible again */
+-	FOR_EACH_PTR(builtin_scope.symbols, sym) {
+-		if (sym->namespace == NS_INVISIBLEMACRO)
+-			sym->namespace = NS_MACRO;
+-	} END_FOR_EACH_PTR(sym);
+ }
+ 
+ void start_symbol_scope(void)
+--- git-snapshot-20060101/pre-process.c~2_UNDEF	2006-01-02 20:02:57.000000000 +0300
++++ git-snapshot-20060101/pre-process.c	2006-01-02 20:34:38.000000000 +0300
+@@ -103,7 +103,7 @@ static void replace_with_integer(struct 
+ 
+ static struct symbol *lookup_macro(struct ident *ident)
+ {
+-	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_INVISIBLEMACRO);
++	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_UNDEF);
+ 	if (sym && sym->namespace != NS_MACRO)
+ 		sym = NULL;
+ 	return sym;
+@@ -1134,8 +1134,15 @@ static int handle_undef(struct stream *s
+ 	}
+ 
+ 	sym = lookup_macro(left->ident);
+-	if (sym)
+-		sym->namespace = NS_INVISIBLEMACRO;
++	if (!sym)
++		return 1;
++
++	if (sym->scope != file_scope) {
++		sym = alloc_symbol(left->pos, SYM_NODE);
++		bind_symbol(sym, left->ident, NS_MACRO);
++	}
++
++	sym->namespace = NS_UNDEF;
+ 
+ 	return 1;
+ }
