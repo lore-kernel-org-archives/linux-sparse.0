@@ -1,86 +1,135 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 2/7] kill NS_INVISIBLEMACRO, introduce NS_UNDEF
-Date: Mon, 02 Jan 2006 22:19:49 +0300
-Message-ID: <43B97CD5.493EF3C2@tv-sign.ru>
+Subject: [PATCH 3/7] fix redefine of #weak_define
+Date: Mon, 02 Jan 2006 22:19:56 +0300
+Message-ID: <43B97CDC.4BA569C0@tv-sign.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.tv-sign.ru ([213.234.233.51]:24791 "EHLO several.ru")
-	by vger.kernel.org with ESMTP id S1750882AbWABSD6 (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:27095 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1750845AbWABSD5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Jan 2006 13:03:58 -0500
+	Mon, 2 Jan 2006 13:03:57 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-With this patch handle_undef() doesn't corrupt the builtin macros.
+This patch fixes 2 bugs in do_handle_define()
 
-This (imho) cleanups the code and is used in the next patches.
+1.	if (sym->weak)
+		goto replace_it;
+
+	This is wrong, we should allocate a new symbol if
+	sym->scope != file_scope, example:
+
+	inc.h:
+		#weak_define FOO default
+
+	redefine.c:
+		#define FOO redefine
+		FOO
+
+	default.c:
+		FOO
+
+	$ ./test-lexing -include inc.h redefine.c default.c
+	redefine
+	Segmentation fault
+
+2.	if (token_list_different(...)) {
+		...
+	}
+	return 1;
+
+	This is wrong too:
+
+		#weak_define	FOO	1
+		#define		FOO	1	// has no effect
+		#define		FOO	2	// redefined without warning
+
 
 Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
---- git-snapshot-20060101/symbol.h~2_UNDEF	2006-01-01 00:13:52.000000000 +0300
-+++ git-snapshot-20060101/symbol.h	2006-01-02 20:10:26.000000000 +0300
-@@ -32,7 +32,7 @@ enum namespace {
- 	NS_SYMBOL = 16,
- 	NS_ITERATOR = 32,
- 	NS_PREPROCESSOR = 64,
--	NS_INVISIBLEMACRO = 128,
-+	NS_UNDEF = 128,
- };
+--- git-snapshot-20060101/pre-process.c~3_WEAK	2006-01-02 20:34:38.000000000 +0300
++++ git-snapshot-20060101/pre-process.c	2006-01-02 22:45:36.000000000 +0300
+@@ -1061,6 +1061,7 @@ static int do_handle_define(struct strea
+ 	struct token *left = token->next;
+ 	struct symbol *sym;
+ 	struct ident *name;
++	int ret;
  
- enum type {
---- git-snapshot-20060101/scope.c~2_UNDEF	2006-01-01 00:13:52.000000000 +0300
-+++ git-snapshot-20060101/scope.c	2006-01-02 20:28:40.000000000 +0300
-@@ -41,7 +41,6 @@ static void start_scope(struct scope **s
- void start_file_scope(void)
- {
- 	struct scope *scope = __alloc_scope(0);
--	struct symbol *sym;
+ 	if (token_type(left) != TOKEN_IDENT) {
+ 		sparse_error(token->pos, "expected identifier to 'define'");
+@@ -1082,35 +1083,43 @@ static int do_handle_define(struct strea
+ 	if (!expansion)
+ 		return 1;
  
- 	memset(scope, 0, sizeof(*scope));
- 	scope->next = &builtin_scope;
-@@ -50,12 +49,6 @@ void start_file_scope(void)
- 	/* top-level stuff defaults to file scopt, "extern" etc will choose global scope */
- 	function_scope = scope;
- 	block_scope = scope;
++	ret = 1;
+ 	sym = lookup_macro(name);
+-	if (sym) {
+-		if (token_list_different(sym->expansion, expansion) || 
+-		    token_list_different(sym->arglist, arglist)) {
+-			if (sym->weak)
+-				goto replace_it;
+-			if (weak)
+-				return 1;
+-			warning(left->pos, "preprocessor token %.*s redefined",
+-					name->len, name->name);
+-			info(sym->pos, "this was the original definition");
 -
--	/* Make the builtin macros visible again */
--	FOR_EACH_PTR(builtin_scope.symbols, sym) {
--		if (sym->namespace == NS_INVISIBLEMACRO)
--			sym->namespace = NS_MACRO;
--	} END_FOR_EACH_PTR(sym);
- }
- 
- void start_symbol_scope(void)
---- git-snapshot-20060101/pre-process.c~2_UNDEF	2006-01-02 20:02:57.000000000 +0300
-+++ git-snapshot-20060101/pre-process.c	2006-01-02 20:34:38.000000000 +0300
-@@ -103,7 +103,7 @@ static void replace_with_integer(struct 
- 
- static struct symbol *lookup_macro(struct ident *ident)
- {
--	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_INVISIBLEMACRO);
-+	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_UNDEF);
- 	if (sym && sym->namespace != NS_MACRO)
- 		sym = NULL;
- 	return sym;
-@@ -1134,8 +1134,15 @@ static int handle_undef(struct stream *s
- 	}
- 
- 	sym = lookup_macro(left->ident);
--	if (sym)
--		sym->namespace = NS_INVISIBLEMACRO;
-+	if (!sym)
-+		return 1;
+-			/* Don't overwrite global defs */
+-			if (sym->scope != file_scope)
+-				goto allocate_new;
+-			goto replace_it;
+-		}
+-		return 1;
+-	}
+-allocate_new:
+-	sym = alloc_symbol(left->pos, SYM_NODE);
+-	bind_symbol(sym, name, NS_MACRO);
+-
+-replace_it:
+-	sym->expansion = expansion;
+-	sym->arglist = arglist;
+-	sym->weak = weak;
+-	__free_token(token);		/* Free the "define" token, but not the rest of the line */
+-	return 0;
++	if (sym) {
++		int clean;
 +
-+	if (sym->scope != file_scope) {
-+		sym = alloc_symbol(left->pos, SYM_NODE);
-+		bind_symbol(sym, left->ident, NS_MACRO);
++		if (weak > sym->weak)
++			goto out;
++
++		clean = (weak == sym->weak);
++
++		if (token_list_different(sym->expansion, expansion) ||
++		    token_list_different(sym->arglist, arglist)) {
++			ret = 0;
++			if (clean && !weak) {
++				warning(left->pos, "preprocessor token %.*s redefined",
++						name->len, name->name);
++				info(sym->pos, "this was the original definition");
++			}
++		} else if (clean)
++			goto out;
 +	}
 +
-+	sym->namespace = NS_UNDEF;
- 
- 	return 1;
++	if (!sym || sym->scope != file_scope) {
++		sym = alloc_symbol(left->pos, SYM_NODE);
++		bind_symbol(sym, name, NS_MACRO);
++		ret = 0;
++	}
++
++	if (!ret) {
++		sym->expansion = expansion;
++		sym->arglist = arglist;
++		__free_token(token);	/* Free the "define" token, but not the rest of the line */
++	}
++
++	sym->weak = weak;
++out:
++	return ret;
  }
+ 
+ static int handle_define(struct stream *stream, struct token **line, struct token *token)
