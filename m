@@ -1,116 +1,133 @@
-From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 7/7] implement #strong_undef
-Date: Mon, 02 Jan 2006 22:20:24 +0300
-Message-ID: <43B97CF8.22FC0C49@tv-sign.ru>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: sparse triggers OOM killer
+Date: Sat, 7 Jan 2006 12:18:27 +0100
+Message-ID: <20060107111827.GA16133@mars.ravnborg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="T4sUOijqQbZv57TR"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.tv-sign.ru ([213.234.233.51]:34519 "EHLO several.ru")
-	by vger.kernel.org with ESMTP id S1750931AbWABSE0 (ORCPT
+Received: from pasmtp.tele.dk ([193.162.159.95]:11782 "EHLO pasmtp.tele.dk")
+	by vger.kernel.org with ESMTP id S1030412AbWAGLSl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Jan 2006 13:04:26 -0500
+	Sat, 7 Jan 2006 06:18:41 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
-Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Example
 
-	// pre-buffer
-	#strong_undef CONFIG_SMP
+--T4sUOijqQbZv57TR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-	// include/linux/autoconf.h
-	#define CONFIG_SMP 1		// silently ignored
+I have played a little with attached patch.
+It teach kbuild to check all files in one go in a directory when
+sparsing the kernel.
 
-	#ifdef CONFIG_SMP
-		...			// not taken
-	#endif
+I did a make allmodconfig and then ran:
+make fs/xfs/ C=A
 
-Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
+On my machine with 1 GB RAM it started a swap storm and later the OOM
+triggered.
+xfs is one of the bigger modules but still I was suprised to see it
+causing such dramatic effect on my box.
+[amd64 3.7 GHz  UP  1 GB RAM]
 
---- git-snapshot-20060101/pre-process.c~7_UNDEF	2006-01-03 00:31:42.000000000 +0300
-+++ git-snapshot-20060101/pre-process.c	2006-01-03 00:46:37.000000000 +0300
-@@ -1084,14 +1084,14 @@ static int do_handle_define(struct strea
- 		return 1;
+There was no oops or similar and sparse just exited after a while with
+an errorcode (137).
+Now I wonder if I have hit a bug in sparse or this is what I should
+expect.
+
+An easy way to try it out would be to run the sparse command from
+attached file (it's long..).
+If I can do anything to find out if this is a sparse bug or just
+expected behaviour please say so.
+
+	Sam
+
+diff --git a/scripts/Makefile.build b/scripts/Makefile.build
+index c33e62b..7e1b40a 100644
+--- a/scripts/Makefile.build
++++ b/scripts/Makefile.build
+@@ -85,16 +85,23 @@ __build: $(if $(KBUILD_BUILTIN),$(builti
+ 	@:
  
- 	ret = 1;
--	sym = lookup_macro(name);
-+	sym = lookup_symbol(name, NS_MACRO | NS_UNDEF);
- 	if (sym) {
- 		int clean;
+ # Linus' kernel sanity checking tool
+-ifneq ($(KBUILD_CHECKSRC),0)
+-  ifeq ($(KBUILD_CHECKSRC),2)
+-    quiet_cmd_force_checksrc = CHECK   $<
+-          cmd_force_checksrc = $(CHECK) $(CHECKFLAGS) $(c_flags) $< ;
+-  else
+-      quiet_cmd_checksrc     = CHECK   $<
+-            cmd_checksrc     = $(CHECK) $(CHECKFLAGS) $(c_flags) $< ;
+-  endif
++ifeq ($(KBUILD_CHECKSRC),1)
++  quiet_cmd_checksrc     = CHECK   $<
++        cmd_checksrc     = $(CHECK) $(CHECKFLAGS) $(c_flags) $< ;
++endif
++ifeq ($(KBUILD_CHECKSRC),2)
++  quiet_cmd_force_checksrc = CHECK   $<
++        cmd_force_checksrc = $(CHECK) $(CHECKFLAGS) $(c_flags) $< ;
++endif
++ifeq ($(KBUILD_CHECKSRC),A)
++  all-c-files = $(wildcard $(patsubst %.o, %.c, $(real-objs-y) $(real-objs-m)))
++  all-o-files = $(patsubst %.c, %.o, $(all-c-files))
++  all-o-flags = $(strip $(foreach o, $(all-o-files), $(CFLAGS_$(notdir $(o)))))
++  quiet_cmd_sparse-all = CHECK $(notdir $(all-c-files))
++        cmd_sparse-all = $(CHECK) $(CHECKFLAGS) \
++                                  $(c_flags) $(all-o-flags) $(all-c-files)
++  sparse-all = $(call cmd,sparse-all)
+ endif
+-
  
- 		if (attr < sym->attr)
- 			goto out;
+ # Compile C sources (.c)
+ # ---------------------------------------------------------------------------
+@@ -256,6 +263,7 @@ cmd_link_o_target = $(if $(strip $(obj-y
+ 		      rm -f $@; $(AR) rcs $@)
  
--		clean = (attr == sym->attr);
-+		clean = (attr == sym->attr && sym->namespace == NS_MACRO);
+ $(builtin-target): $(obj-y) FORCE
++	$(call sparse-all)
+ 	$(call if_changed,link_o_target)
  
- 		if (token_list_different(sym->expansion, expansion) ||
- 		    token_list_different(sym->arglist, arglist)) {
-@@ -1118,6 +1118,7 @@ static int do_handle_define(struct strea
- 		__free_token(token);	/* Free the "define" token, but not the rest of the line */
- 	}
- 
-+	sym->namespace = NS_MACRO;
- 	sym->used_in = NULL;
- 	sym->attr = attr;
- out:
-@@ -1139,7 +1140,7 @@ static int handle_strong_define(struct s
- 	return do_handle_define(stream, line, token, SYM_ATTR_STRONG);
- }
- 
--static int handle_undef(struct stream *stream, struct token **line, struct token *token)
-+static int do_handle_undef(struct stream *stream, struct token **line, struct token *token, int attr)
- {
- 	struct token *left = token->next;
- 	struct symbol *sym;
-@@ -1149,21 +1150,37 @@ static int handle_undef(struct stream *s
- 		return 1;
- 	}
- 
--	sym = lookup_macro(left->ident);
--	if (!sym || sym->attr > SYM_ATTR_NORMAL)
-+	sym = lookup_symbol(left->ident, NS_MACRO | NS_UNDEF);
-+	if (sym) {
-+		if (attr < sym->attr)
-+			return 1;
-+		if (attr == sym->attr && sym->namespace == NS_UNDEF)
-+			return 1;
-+	} else if (attr <= SYM_ATTR_NORMAL)
- 		return 1;
- 
--	if (sym->scope != file_scope) {
-+	if (!sym || sym->scope != file_scope) {
- 		sym = alloc_symbol(left->pos, SYM_NODE);
- 		bind_symbol(sym, left->ident, NS_MACRO);
- 	}
- 
- 	sym->namespace = NS_UNDEF;
- 	sym->used_in = NULL;
-+	sym->attr = attr;
- 
- 	return 1;
- }
- 
-+static int handle_undef(struct stream *stream, struct token **line, struct token *token)
-+{
-+	return do_handle_undef(stream, line, token, SYM_ATTR_NORMAL);
-+}
-+
-+static int handle_strong_undef(struct stream *stream, struct token **line, struct token *token)
-+{
-+	return do_handle_undef(stream, line, token, SYM_ATTR_STRONG);
-+}
-+
- static int preprocessor_if(struct stream *stream, struct token *token, int true)
- {
- 	token_type(token) = false_nesting ? TOKEN_SKIP_GROUPS : TOKEN_IF;
-@@ -1574,6 +1591,7 @@ static void init_preprocessor(void)
- 		{ "weak_define",	handle_weak_define },
- 		{ "strong_define",	handle_strong_define },
- 		{ "undef",		handle_undef },
-+		{ "strong_undef",	handle_strong_undef },
- 		{ "warning",		handle_warning },
- 		{ "error",		handle_error },
- 		{ "include",		handle_include },
+ targets += $(builtin-target)
+
+--T4sUOijqQbZv57TR
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: attachment; filename=sparse-xfs
+Content-Transfer-Encoding: quoted-printable
+
+sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -D__x86_6=
+4__ -m64 -nostdinc -isystem /usr/lib/gcc/x86_64-pc-linux-gnu/3.4.4/include =
+-Wp,-MD,fs/xfs/.built-in.o.d -nostdinc -isystem /usr/lib/gcc/x86_64-pc-linu=
+x-gnu/3.4.4/include -D__KERNEL__ -Iinclude -include include/linux/autoconf.=
+h -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fn=
+o-common -ffreestanding -Os -fno-omit-frame-pointer -fno-optimize-sibling-c=
+alls -g -march=3Dk8 -mno-red-zone -mcmodel=3Dkernel -pipe -fno-reorder-bloc=
+ks -Wno-sign-compare -funit-at-a-time -mno-sse -mno-mmx -mno-sse2 -mno-3dno=
+w -Wdeclaration-after-statement -Ifs/xfs -Ifs/xfs/linux-2.6 -funsigned-char=
+ -DKBUILD_STR(s)=3D#s -DKBUILD_BASENAME=3DKBUILD_STR(built_in) -DKBUILD_MOD=
+NAME=3DKBUILD_STR(built_in) fs/xfs/quota/xfs_dquot.c fs/xfs/quota/xfs_dquot=
+_item.c fs/xfs/quota/xfs_trans_dquot.c fs/xfs/quota/xfs_qm_syscalls.c fs/xf=
+s/quota/xfs_qm_bhv.c fs/xfs/quota/xfs_qm.c fs/xfs/quota/xfs_qm_stats.c fs/x=
+fs/xfs_rtalloc.c fs/xfs/xfs_acl.c fs/xfs/linux-2.6/xfs_stats.c fs/xfs/linux=
+-2.6/xfs_sysctl.c fs/xfs/linux-2.6/xfs_ioctl32.c fs/xfs/linux-2.6/xfs_expor=
+t.c fs/xfs/xfs_alloc.c fs/xfs/xfs_alloc_btree.c fs/xfs/xfs_attr.c fs/xfs/xf=
+s_attr_leaf.c fs/xfs/xfs_behavior.c fs/xfs/xfs_bit.c fs/xfs/xfs_bmap.c fs/x=
+fs/xfs_bmap_btree.c fs/xfs/xfs_btree.c fs/xfs/xfs_buf_item.c fs/xfs/xfs_da_=
+btree.c fs/xfs/xfs_dir.c fs/xfs/xfs_dir2.c fs/xfs/xfs_dir2_block.c fs/xfs/x=
+fs_dir2_data.c fs/xfs/xfs_dir2_leaf.c fs/xfs/xfs_dir2_node.c fs/xfs/xfs_dir=
+2_sf.c fs/xfs/xfs_dir_leaf.c fs/xfs/xfs_error.c fs/xfs/xfs_extfree_item.c f=
+s/xfs/xfs_fsops.c fs/xfs/xfs_ialloc.c fs/xfs/xfs_ialloc_btree.c fs/xfs/xfs_=
+iget.c fs/xfs/xfs_inode.c fs/xfs/xfs_inode_item.c fs/xfs/xfs_iocore.c fs/xf=
+s/xfs_iomap.c fs/xfs/xfs_itable.c fs/xfs/xfs_dfrag.c fs/xfs/xfs_log.c fs/xf=
+s/xfs_log_recover.c fs/xfs/xfs_mount.c fs/xfs/xfs_rename.c fs/xfs/xfs_trans=
+=2Ec fs/xfs/xfs_trans_ail.c fs/xfs/xfs_trans_buf.c fs/xfs/xfs_trans_extfree=
+=2Ec fs/xfs/xfs_trans_inode.c fs/xfs/xfs_trans_item.c fs/xfs/xfs_utils.c fs=
+/xfs/xfs_vfsops.c fs/xfs/xfs_vnodeops.c fs/xfs/xfs_rw.c fs/xfs/xfs_dmops.c =
+fs/xfs/xfs_qmops.c fs/xfs/linux-2.6/kmem.c fs/xfs/linux-2.6/xfs_aops.c fs/x=
+fs/linux-2.6/xfs_buf.c fs/xfs/linux-2.6/xfs_file.c fs/xfs/linux-2.6/xfs_fs_=
+subr.c fs/xfs/linux-2.6/xfs_globals.c fs/xfs/linux-2.6/xfs_ioctl.c fs/xfs/l=
+inux-2.6/xfs_iops.c fs/xfs/linux-2.6/xfs_lrw.c fs/xfs/linux-2.6/xfs_super.c=
+ fs/xfs/linux-2.6/xfs_vfs.c fs/xfs/linux-2.6/xfs_vnode.c fs/xfs/support/deb=
+ug.c fs/xfs/support/move.c fs/xfs/support/uuid.c
+
+--T4sUOijqQbZv57TR--
