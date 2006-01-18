@@ -1,32 +1,22 @@
-From: Bryan O'Sullivan <bos@serpentine.com>
-Subject: Re: Try to teach sparse about construct like 'struct
-	__attribute__((foo)) bar'
-Date: Tue, 17 Jan 2006 17:05:15 -0800
-Message-ID: <1137546315.4757.20.camel@serpentine.pathscale.com>
-References: <20060118003942.GA1419@ralph05.lan>
+From: Oleg Nesterov <oleg@tv-sign.ru>
+Subject: Re: [PATCH 1/7] use lookup_macro() in handle_undef()
+Date: Wed, 18 Jan 2006 13:31:09 +0300
+Message-ID: <43CE18ED.79C43324@tv-sign.ru>
+References: <43B97CCD.5BD4F335@tv-sign.ru>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx.pathscale.com ([64.160.42.68]:41685 "EHLO mx.pathscale.com")
-	by vger.kernel.org with ESMTP id S932318AbWARBFU (ORCPT
+Received: from mail.tv-sign.ru ([213.234.233.51]:65214 "EHLO several.ru")
+	by vger.kernel.org with ESMTP id S1030218AbWARJOa (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jan 2006 20:05:20 -0500
-In-Reply-To: <20060118003942.GA1419@ralph05.lan>
+	Wed, 18 Jan 2006 04:14:30 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@looxix.net>
-Cc: linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@osdl.org>, linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-On Wed, 2006-01-18 at 01:39 +0100, Luc Van Oostenryck wrote:
-> On the current linux git tree, sparse spit a lot of errors:
-> 	include/asm/lppaca.h:34:8: error: Trying to use reserved word '__attribute__' as identifier
-> 
-> which is caused by a declaration:
-> 	struct __attribute__((__aligned__(0x400))) lppaca {
+Any comments?
 
-Funny, I just posted a patch to lkml regarding this.  It'll be in the
-next -mm patch.
+Please note that patches 3-4 are bugfixes.
 
-	<b
-
+Oleg.
