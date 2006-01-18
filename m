@@ -1,51 +1,69 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: sparse triggers OOM killer
-Date: Tue, 17 Jan 2006 00:23:32 +0100
-Message-ID: <20060116232332.GC8752@mars.ravnborg.org>
-References: <20060107111827.GA16133@mars.ravnborg.org> <Pine.LNX.4.64.0601071004130.3169@g5.osdl.org>
+From: Luc Van Oostenryck <luc.vanoostenryck@looxix.net>
+Subject: Try to teach sparse about construct like 'struct __attribute__((foo)) bar'
+Date: Wed, 18 Jan 2006 01:39:43 +0100
+Message-ID: <20060118003942.GA1419@ralph05.lan>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from pasmtp.tele.dk ([193.162.159.95]:275 "EHLO pasmtp.tele.dk")
-	by vger.kernel.org with ESMTP id S1751271AbWAPXXh (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Jan 2006 18:23:37 -0500
+Received: from smtp3.mail.be.easynet.net ([212.100.160.66]:8942 "EHLO
+	smtp3.mail.be.easynet.net") by vger.kernel.org with ESMTP
+	id S932436AbWARAic (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 17 Jan 2006 19:38:32 -0500
+Received: from [81.188.80.169] (helo=ralph05.pc.home)
+	by smtp3.mail.be.easynet.net with esmtp (Exim 4.60)
+	(envelope-from <luc.vanoostenryck@looxix.net>)
+	id 1Ez1LL-00057d-7i
+	for linux-sparse@vger.kernel.org; Wed, 18 Jan 2006 01:38:31 +0100
+Received: from luc by ralph05.pc.home with local (Exim 4.10)
+	id 1Ez1MV-0000Mw-00
+	for linux-sparse@vger.kernel.org; Wed, 18 Jan 2006 01:39:43 +0100
 Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0601071004130.3169@g5.osdl.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Hi Linus.
+On the current linux git tree, sparse spit a lot of errors:
+	include/asm/lppaca.h:34:8: error: Trying to use reserved word '__attribute__' as identifier
 
-On Sat, Jan 07, 2006 at 10:07:10AM -0800, Linus Torvalds wrote:
-> 
-> 
-> On Sat, 7 Jan 2006, Sam Ravnborg wrote:
-> > 
-> > There was no oops or similar and sparse just exited after a while with
-> > an errorcode (137).
-> 
-> That's just SIGKILL (128+9). Which is normal for the OOM killer.
-> 
-> > Now I wonder if I have hit a bug in sparse or this is what I should
-> > expect.
-> 
-> Well, sparse does keep a _lot_ of stuff in memory, and the "do many files 
-> at once" will basically keep every single one (with full types, full 
-> linearization etc) in memory at the same time.
-> 
-> It's probably fairly easy to fix: I should just make sparse release all 
-> the linearizations and symbols when they go out of file scope.
-> 
-> The "do many files at once" thing really was just a quick hack, so the 
-> lack of memory release is not that susprising.
-> 
-> I'll see what I can do.
+which is caused by a declaration:
+	struct __attribute__((__aligned__(0x400))) lppaca {
 
-Any news on this (call this a polite remineder)?
-I have not tried to dig into it myself - assuming that it will take me
-considerably time to do right..
+The following patch seems to solve the symptom but I'm not sure that the ctype
+is not handled correctly.
+Also, now sparse produce a lot of others errors, mainly about address space
+mismatch like:
+	init/do_mounts.c:69:16: warning: incorrect type in argument 1 (different address spaces)
+	init/do_mounts.c:69:16:    expected char const [noderef] *filename<asn:1>
+	init/do_mounts.c:69:16:    got char *<noident>
 
-	Sam
+What is strange is that these warning seems to be about a real address space problem
+but why sparse didn't warn before?
+(IIRC, the warnings in init/do_mounts.c were reported by sparse some time ago).
+
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@looxix.net>
+
+---
+
+
+diff --git a/parse.c b/parse.c
+index d871afd..3c071d6 100644
+--- a/parse.c
++++ b/parse.c
+@@ -34,6 +34,7 @@ struct symbol_list *function_computed_ta
+ struct statement_list *function_computed_goto_list;
+ 
+ static struct token *statement(struct token *token, struct statement **tree);
++static struct token *handle_attributes(struct token *token, struct ctype *ctype);
+ 
+ // Add a symbol to the list of function-local symbols
+ static void fn_local_symbol(struct symbol *sym)
+@@ -112,6 +113,7 @@ static struct token *struct_union_enum_s
+ 	struct position *repos;
+ 
+ 	ctype->modifiers = 0;
++	token = handle_attributes(token, ctype);
+ 	if (token_type(token) == TOKEN_IDENT) {
+ 		sym = lookup_symbol(token->ident, NS_STRUCT);
+ 		if (!sym ||
+
