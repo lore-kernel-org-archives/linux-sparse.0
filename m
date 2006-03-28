@@ -1,60 +1,57 @@
-From: "Mitesh Shah" <mshah@teja.com>
-Subject: assignment expressions are not validated
-Date: Tue, 21 Mar 2006 12:37:00 -0800
-Message-ID: <AKEOJDDJLNPHDAKOMMBHGEGDCJAA.mshah@teja.com>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+From: terra@gnome.org (Morten Welinder)
+Subject: [PATCH] Attribute "sentinel"
+Date: Tue, 28 Mar 2006 15:07:14 -0500 (EST)
+Message-ID: <20060328200714.D9B03C000E2@dunnock.rentec.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.teja.com ([209.10.202.133]:33988 "EHLO mail.teja.com")
-	by vger.kernel.org with ESMTP id S1751586AbWCUUf4 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 21 Mar 2006 15:35:56 -0500
-Received: from SURAT ([172.20.3.88])
-	(authenticated user mshah@teja.com)
-	by mail.teja.com (Kerio MailServer 6.0.8)
-	for linux-sparse@vger.kernel.org;
-	Tue, 21 Mar 2006 12:35:48 -0800
+Received: from centaur.rentec.com ([216.223.240.8]:65475 "EHLO
+	centaur.rentec.com") by vger.kernel.org with ESMTP id S932125AbWC1UH1
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 28 Mar 2006 15:07:27 -0500
+Received: from ram.rentec.com (ram [192.5.35.66])
+	by centaur.rentec.com (8.13.6/8.12.1) with ESMTP id k2SK7QSA002192
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2006 15:07:26 -0500 (EST)
+Received: from dunnock.rentec.com (dunnock.rentec.com [172.26.132.207])
+	by ram.rentec.com (8.13.1/8.12.1) with ESMTP id k2SK7E9M029175
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2006 15:07:15 -0500 (EST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
 
-There is no error/warning for the following code:
+[This is a resend.]
 
-void f(void) {
-
-  int a;
-
-  a = ;
-
-}
-
-
-Looks like there is no check for empty expression in primary_expression.
-default case simply ignores the token. Instead we can add a sparse_error
-at line 360.
-
--Mitesh
+This makes sparse ignore the "sentinel" attribute.
 
 
 
- Index: expression.c
-===================================================================
-RCS file: /home/cvs/root/sparse-bk/expression.c,v
-retrieving revision 1.10
-diff -u -r1.10 expression.c
---- expression.c        16 Nov 2005 23:28:58 -0000      1.10
-+++ expression.c        21 Mar 2006 20:36:52 -0000
-@@ -357,7 +357,7 @@
-                }
 
-        default:
--               ;
-+               sparse_error(token->pos, "Expected an expression");
-        }
-        *tree = expr;
-        return token;
+Signed-off-by: Morten Welinder <terra@gnome.org>
 
 
+diff --git a/ident-list.h b/ident-list.h
+index f5812de..3051e56 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -53,6 +53,7 @@ IDENT(noinline);
+ IDENT(deprecated);
+ IDENT(__const); IDENT(__const__); IDENT(noreturn);
+ IDENT(__noreturn__); IDENT(regparm); IDENT(weak); IDENT(__weak__);
++IDENT(__sentinel__); IDENT(sentinel);
+ IDENT(alias); IDENT(pure); IDENT(always_inline);
+ IDENT(syscall_linkage); IDENT(visibility);
+ IDENT(bitwise); IDENT(__bitwise__);
+diff --git a/parse.c b/parse.c
+index d871afd..4339657 100644
+--- a/parse.c
++++ b/parse.c
+@@ -517,6 +517,9 @@ static const char * handle_attribute(str
+ 	if (attribute == &noreturn_ident ||
+ 	    attribute == &__noreturn___ident)
+ 		return NULL;
++	if (attribute == &sentinel_ident ||
++	    attribute == &__sentinel___ident)
++		return NULL;
+ 	if (attribute == &regparm_ident)
+ 		return NULL;
+ 	if (attribute == &weak_ident ||
