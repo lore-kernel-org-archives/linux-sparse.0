@@ -1,73 +1,61 @@
-From: Jeff Garzik <jeff@garzik.org>
+From: =?iso-8859-1?Q?J=F6rn?= Engel <joern@wohnheim.fh-wedel.de>
 Subject: Re: [PATCH] sparse: gcc 4.1 warnings
-Date: Mon, 10 Apr 2006 20:30:28 -0400
-Message-ID: <443AF8A4.2090007@garzik.org>
-References: <20060408041419.GA8943@havoc.gtf.org> <20060410132157.4AF15C000E2@dunnock.rentec.com>
+Date: Tue, 11 Apr 2006 10:56:02 +0200
+Message-ID: <20060411085602.GA11643@wohnheim.fh-wedel.de>
+References: <20060408041419.GA8943@havoc.gtf.org> <20060410132157.4AF15C000E2@dunnock.rentec.com> <443AF8A4.2090007@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252;
-	format=flowed
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from srv5.dvmed.net ([207.36.208.214]:11209 "EHLO mail.dvmed.net")
-	by vger.kernel.org with ESMTP id S932207AbWDKAad (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 10 Apr 2006 20:30:33 -0400
-In-Reply-To: <20060410132157.4AF15C000E2@dunnock.rentec.com>
+Received: from wohnheim.fh-wedel.de ([213.39.233.138]:5550 "EHLO
+	wohnheim.fh-wedel.de") by vger.kernel.org with ESMTP
+	id S932364AbWDKI4T (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 11 Apr 2006 04:56:19 -0400
+Content-Disposition: inline
+In-Reply-To: <443AF8A4.2090007@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Morten Welinder <terra@gnome.org>
-Cc: linux-sparse@vger.kernel.org
+To: Jeff Garzik <jeff@garzik.org>
+Cc: Morten Welinder <terra@gnome.org>, linux-sparse@vger.kernel.org
 
-Morten Welinder wrote:
-> This doesn't look quite right.
+On Mon, 10 April 2006 20:30:28 -0400, Jeff Garzik wrote:
+> Morten Welinder wrote:
+> >This doesn't look quite right.
+> >
+> >So it looks like gcc 4.1 complains over non-used values that are the
+> >result of a cast.  That feels obnoxious, but in this case maybe you
 >=20
-> So it looks like gcc 4.1 complains over non-used values that are the
-> result of a cast.  That feels obnoxious, but in this case maybe you
+> Yes, it is :)  See below for vanilla sparse build under gcc 4.1...
+>=20
+>=20
+> >could try just casting to void in add_ptr_list -- is the value ever
+> >used?
+>=20
+> All uses except for add_pseudo() ignore the return value.
 
-Yes, it is :)  See below for vanilla sparse build under gcc 4.1...
+How about making this two functions instead?  Something like
 
+void add_ptr_list(...)
+{
+	(void) __add_ptr_list(...);
+}
 
-> could try just casting to void in add_ptr_list -- is the value ever
-> used?
+And use the __add_ptr_list version in add_pseudo().
 
-All uses except for add_pseudo() ignore the return value.
+Hmm.  Except that this is userspace and double underscores are not
+allowed.  Maybe do_add_ptr_list(...) then?
 
-	Jeff
+And yes, this is really obnoxious.  I have read code before that
+constantly does
+	(void) this(...);
+	(void) that(...);
+and didn't like it much.  Ignoring the issue and fixing the code
+checker instead might be a better idea.
 
+J=F6rn
 
-
-gcc -O -g -Wall -Wwrite-strings -fpic -DDEBUG   -c -o lib.o lib.c
-In file included from lib.c:21:
-lib.h: In function =91add_symbol=92:
-lib.h:171: warning: value computed is not used
-lib.h: In function =91add_statement=92:
-lib.h:176: warning: value computed is not used
-lib.h: In function =91add_expression=92:
-lib.h:181: warning: value computed is not used
-In file included from lib.c:28:
-linearize.h: In function =91add_bb=92:
-linearize.h:227: warning: value computed is not used
-linearize.h: In function =91add_instruction=92:
-linearize.h:232: warning: value computed is not used
-linearize.h: In function =91add_multijmp=92:
-linearize.h:237: warning: value computed is not used
-linearize.h: In function =91add_pseudo_ptr=92:
-linearize.h:266: warning: value computed is not used
-gcc -O -g -Wall -Wwrite-strings -fpic -DDEBUG   -c -o scope.o scope.c
-In file included from scope.c:15:
-lib.h: In function =91add_symbol=92:
-lib.h:171: warning: value computed is not used
-lib.h: In function =91add_statement=92:
-lib.h:176: warning: value computed is not used
-lib.h: In function =91add_expression=92:
-lib.h:181: warning: value computed is not used
-gcc -O -g -Wall -Wwrite-strings -fpic -DDEBUG   -c -o expression.o=20
-expression.c
-In file included from expression.c:21:
-lib.h: In function =91add_symbol=92:
-lib.h:171: warning: value computed is not used
-lib.h: In function =91add_statement=92:
-lib.h:176: warning: value computed is not used
-lib.h: In function =91add_expression=92:
-lib.h:181: warning: value computed is not used
-[...]
+--=20
+More computing sins are committed in the name of efficiency (without
+necessarily achieving it) than for any other single reason - including
+blind stupidity.
+-- W. A. Wulf=20
