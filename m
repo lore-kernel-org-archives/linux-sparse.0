@@ -1,53 +1,54 @@
-From: Judith Lebzelter <judith@osdl.org>
-Subject: 'old compiler' warning in sparse output
-Date: Fri, 14 Apr 2006 11:16:47 -0700
-Message-ID: <20060414181647.GD1021@shell0.pdx.osdl.net>
+From: "Randy.Dunlap" <rdunlap@xenotime.net>
+Subject: Re: C++ pushback + sparse
+Date: Tue, 2 May 2006 13:09:50 -0700
+Message-ID: <20060502130950.61792c71.rdunlap@xenotime.net>
+References: <MDEHLPKNGKAHNMBLJOLKOENKLIAB.davids@webmaster.com>
+	<1146082192.11123.4.camel@bip.parateam.prv>
+	<20060426134419.a0515561.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:20420 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1751379AbWDNSQz (ORCPT
+Received: from xenotime.net ([66.160.160.81]:47028 "HELO xenotime.net")
+	by vger.kernel.org with SMTP id S1751280AbWEBUHZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 14 Apr 2006 14:16:55 -0400
-Received: from shell0.pdx.osdl.net (fw.osdl.org [65.172.181.6])
-	by smtp.osdl.org (8.12.8/8.12.8) with ESMTP id k3EIGltH021748
-	(version=TLSv1/SSLv3 cipher=EDH-RSA-DES-CBC3-SHA bits=168 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Fri, 14 Apr 2006 11:16:50 -0700
-Content-Disposition: inline
+	Tue, 2 May 2006 16:07:25 -0400
+Received: from midway.site ([71.111.157.99]) by xenotime.net for <linux-sparse@vger.kernel.org>; Tue, 2 May 2006 13:07:23 -0700
+In-Reply-To: <20060426134419.a0515561.rdunlap@xenotime.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: bryce@osdl.org
+Cc: xavier.bestel@free.fr, davids@webmaster.com, linux-kernel@vger.kernel.org
 
-Hello, 
+On Wed, 26 Apr 2006 13:44:19 -0700 Randy.Dunlap wrote:
 
-I am trying to run sparse on the linux kernel build using a compiler 
-that is not my default compiler, but am having problems with it using 
-the default(old) include files.
+> > > 	C++ has how many additional reserved words? I believe the list is delete,
+> > > friend, private, protected, public, template, throw, try, and catch.
+> > 
+> > You forgot namespace, mutable, new, class, const_cast, dynamic_cast,
+> > static_cast, reinterpret_cast, explicit, true, false, operator, typeid,
+> > typename and virtual. Maybe I forgot some (interface ?). Probably some
+> > new ones will appear.
+> 
+> I did a sparse patch to check for all(?) of those once (with Linus's
+> help).  I don't know if it still applies or not...
+> 
+> It's at http://www.xenotime.net/linux/sparse/check_keywords_v7.patch
+> (You'll also need the other patch there; they got a bit comingled:
+> http://www.xenotime.net/linux/sparse/check_sizeof_v7.patch)
 
-I set the environment up as I would for compiling the kernel:
-export ARCH=i386
-export CROSS_COMPILE=i686-unknown-linux-gnu-
-export PATH=$PATH:/var/crosstool/gcc-3.4.4-glibc-2.3.5/i686-unknown-linux-gnu/bin
+I updated this patch so that it works with sparse (snapshot of
+2006-may-01).  The patch is here:
+http://www.xenotime.net/linux/sparse/sparse-keywords-sizes.patch
 
-Then I run the make:
-make C=2 all 2>&1
 
-But it gives warnings which show (by the path) that the sparse is looking at 
-the wrong include files:
-/usr/lib/gcc-lib/i586-suse-linux/3.3.4/include/stdarg.h:53:34: warning: undefined preprocessor identifier '__STDC_VERSION__'
-include/linux/compiler.h:46:3: warning: Sorry, your compiler is too old/not recognized.
+sparse additions to:
+- check for C/C++ keywords: usage: -keywords
+- print all global data symbols and their sizes: usage: -list-symbols
+  Example of -list-symbols:
+  make C=2 CF="-list-symbols" arch/x86_64/kernel/smpboot.o
+  arch/x86_64/kernel/smpboot.c:90:20: struct cpuinfo_x86 [addressable] [toplevel
+] [assigned] cpu_data[8]: compound size 1344, alignment 64
 
-Yet, when I see the sparse command actually running, it appears as though it 
-should be looking at the correct compiler, gcc-3.4.4:
-
-plm@plm-000:~/scratch/5> ps -ef 
-plm      28340 28339  0 10:35 pts/0    00:00:00  sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -D__i386__ -nostdinc -isystem /var/crosstool/gcc-3.4.4-glibc-2.3.5/i686-unknown-linux-gnu/bin/../lib/gcc/i686-unknown-linux-gnu/3.4.4/include -Wp,-MD,arch/i386/kernel/cpu/.cyrix.o.d -nostdinc -isystem /var/crosstool/gcc-3.4.4-glibc-2.3.5/i686-unknown-linux-gnu/bin/../lib/gcc/i686-unknown-linux-gnu/3.4.4/include -D__KERNEL__ -Iinclude -include include/linux/autoconf.h -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -ffreestanding -O2 -fomit-frame-pointer -pipe -msoft-float -mpreferred-stack-boundary=2 -fno-unit-at-a-time -march=i686 -Iinclude/asm-i386/mach-default -Wdeclaration-after-statement -DKBUILD_STR(s) #s -DKBUILD_BASENAME KBUILD_STR(cyrix) -DKBUILD_MODNAME KBUILD_STR(cyrix) arch/i386/kernel/cpu/cyrix.c
-
-I am using sparse git-snapshot-20051028.  
-
-Do I need to set some other setting or options to get it to look in the 
-desired include directory?
-
-Thanks,
-Judith
+---
+~Randy
