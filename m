@@ -1,40 +1,42 @@
-From: Derek M Jones <derek@knosof.co.uk>
-Subject: Re: [PATCH] let sparse warn on &inline_function
-Date: Mon, 22 May 2006 11:06:49 +0100
-Message-ID: <44718D39.4020000@knosof.co.uk>
-References: <200605201621.48466.mb@bu3sch.de> <446F3149.4060606@knosof.co.uk> <200605201734.40756.mb@bu3sch.de> <446F3B91.6020709@knosof.co.uk> <20060521193709.GA22520@wohnheim.fh-wedel.de> <4470EBB6.6030404@knosof.co.uk> <20060522083650.GA19072@wohnheim.fh-wedel.de>
+From: "Bibian M." <bad@aaanet.ru>
+Subject: Greeting!
+Date: Fri, 02 Jun 2006 16:43:23 +0300
+Message-ID: <004801c6864a$7b3dfe00$4903000a__48761.9457454004$1149255819$gmane$org@201-13-42-221.dsl.telesp.net.br>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="windows-1251"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mta08-winn.ispmail.ntl.com ([81.103.221.48]:26876 "EHLO
-	mtaout02-winn.ispmail.ntl.com") by vger.kernel.org with ESMTP
-	id S1750702AbWEVKGy (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 May 2006 06:06:54 -0400
-In-Reply-To: <20060522083650.GA19072@wohnheim.fh-wedel.de>
+Received: from 201-13-42-221.dsl.telesp.net.br ([201.13.42.221]:9220 "EHLO
+	201-13-42-221.dsl.telesp.net.br") by vger.kernel.org with ESMTP
+	id S932070AbWFBNmp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 2 Jun 2006 09:42:45 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@wohnheim.fh-wedel.de>
-Cc: Michael Buesch <mb@bu3sch.de>, linux-sparse@vger.kernel.org
+To: Steffen <linux-sound@vger.kernel.org>
 
-J=F6rn,
+Hi my Dear Stranger!
 
->>>> It makes perfect sense for me to want 'direct' calls to be
->>>> inlined and be willing to accept that calls via pointers
->>>> will not be inlined.
->>> Does this still make sense with CONFIG_CC_OPTIMIZE_FOR_SIZE set?
->> Using the inline specifier may or may not make sense in this case.
->=20
-> And this is exactly what warnings are all about.  If the code in
-> question may make sense, but there is a certain likelyhood that it
-> does not, print a warning.
+I want to start my first letter from a question: "Is it possible to be happy without LOVE?"
+I think that you will agree with me if the answer will be "NO WAY". Love is the most beautiful and exciting thing
+that may happen between man and woman! It inspires us only for doing positive things towards each other.
+One very famous writer said: "The beauty will rescue the world" i agree with his words but still i would add :
+" LOVE and Beauty will rescure the world". 
 
-In which case the message needs to be changed to flag the function
-definition that contains the inline function specifier, not the point
-at which it is the operand of an address-of operator.
+I hope you agree with me that Love is a big notion.
+There's love to  God, to Mother, to a child to the country where you were born, and there's love that joins a man
+and woman for all their life. That is the LOVE i'm looking for! And i'm seeking for the man who is also eager to have
+this life long adventure full of surprises and new experience we can share together! Will you join me for this trip?
 
---=20
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+I do realise that it should be very difficult to say "Yes" from the first letter having no idea about me.
+That's why i just offer to get to know each other better though correspondence that will help us to reveal many things
+about each other whether we mach perfectly or not. In addition you can look at my pictures and read some info about me here
+http://ojbf5HinfFcJyKG9bDUk.i-am-waiting4love.net/
+I hope you'll like what you see and read there.
+
+Well closing my first letter to you i just want to thank you for reading it and i really hope that you'll share
+my point of view on what i said above. I do really hope that you'll answer me soon.
+
+so long...
+
+Bi M.
