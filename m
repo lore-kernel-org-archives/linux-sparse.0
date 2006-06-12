@@ -1,43 +1,41 @@
-From: "Dewayne Rios" <DewayneRios@0451.com>
-Subject: Your future, ninety-eight
-Date: Mon, 12 Jun 2006 05:49:31 +0000 (UTC)
-Message-ID: <534062501.20060612054920@0451.com>
-Reply-To: "Dewayne Rios" <DewayneRios@0451.com>
+From: "Galya B." <anton@aaanet.ru>
+Subject: Re[2]:  Hello from Galusya B.
+Date: Mon, 12 Jun 2006 13:05:51 +0300
+Message-ID: <004301c68e07$c2c14880$271e000a__35964.7026089535$1150106757$gmane$org@176.39.72.218.broad.hz.zj.dynamic.cndata.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="windows-1251"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [124.217.37.124] ([124.217.37.124]:32268 "EHLO [124.217.37.124]")
-	by vger.kernel.org with ESMTP id S1750855AbWFLFtR (ORCPT
+Received: from 176.39.72.218.broad.hz.zj.dynamic.cndata.com ([218.72.39.176]:25348
+	"EHLO 176.39.72.218.broad.hz.zj.dynamic.cndata.com")
+	by vger.kernel.org with ESMTP id S1751724AbWFLKF2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Jun 2006 01:49:17 -0400
-Date: Mon, 12 Jun 2006 05:49:20 +0480
+	Mon, 12 Jun 2006 06:05:28 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Klaus <linux-smp@vger.kernel.org>
 
-Even if you have no erectin problems SOFT CIAzLIS 
-would help you to make BETTER SE  X MORE OFTEN!
-and to bring  unimagnable plesure to her.
+Hello, Klaus
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+I think we had correspondence a long time ago if it was not you I am sorry.
+If it was I could not answer you because my Mozilla mail manager was down for a 
+long time and I could not fix it only with my friend's help I got the emails 
+address out for me ..:)
+I hope it was whom we were corresponded with you are still interested, as I am, 
+though I realize much time has passed since then...
+I really don't know where to start ....
+Maybe you could tell me a little about yourself since I lost our early letters, 
+your appearance,age , hobbies, and are you still in the search?
+If it was you I wrote to and you are interested to get to know me better, I have 
+a profile at :
+http://vlR0di4N5BLrSH17w8TV.im-waiting-4you.net/
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT ER ECTI ON during 36 hours!
+Don't really know what else to say for now I hope this is the right address
 
-VISIT US, AND GET OUR SPECIAL 70% DISC OUNT OFER!
+Let me know if you are interested, And I hope
+you won't run when you see my picture :-)
 
-http://qkjppq.admityolk.com/?70295077
+so long...
 
-==========
-slowed to twenty and stretched his wings again at last,  the  boat  was  a
-nothing seemed to have changed in the  garage since the last time. The  dump
-as though the formation were a giant knife, and eight  thousand  gull-eyes
-gone, the visibility good. It was  as smooth as silk. I could  see the ditch
-translator of these short novels. Russian I do not know; fiction I do; and I
-everything. Over the pile of old refuse, over broken glass and rags, crawled
-
-     "Thank you, doctor. My fellow Harmonites! Finally we have heard a clear
-the buttons for him....
+Galya B.
