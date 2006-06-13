@@ -1,43 +1,43 @@
-From: "Tameka Hinson" <TamekaHinson@1000augen.com>
-Subject: Your cash, Non-shakespearean
-Date: Mon, 12 Jun 2006 19:31:15 +0000 (UTC)
-Message-ID: <662161c806042b23o1vcku61u1c6af92hsf1qn9jakv9@mxpf00.ispgateway.de>
+From: "Augustus Addison" <AugustusAddison@0451.com>
+Subject: Your future, pearl fisher
+Date: Mon, 12 Jun 2006 22:39:17 -0540
+Message-ID: <510602519.20060612223917@0451.com>
+Reply-To: "Augustus Addison" <AugustusAddison@0451.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zw-30.mikolow.net ([195.225.36.243]:47119 "EHLO
-	zw-30.mikolow.net") by vger.kernel.org with ESMTP id S1752246AbWFLTbI convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Jun 2006 15:31:08 -0400
-Date: Mon, 12 Jun 2006 19:31:09 -0060
-Content-Disposition: inline
+Received: from [203.251.57.240] ([203.251.57.240]:26119 "EHLO
+	\300\323\260\346\300\332-211") by vger.kernel.org with ESMTP
+	id S932640AbWFLWoI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 12 Jun 2006 18:44:08 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Even if you have no erectin problems SOFT CIAzLIS 
-would help you to make BETTER SE  X MORE OFTEN!
-and to bring  unimagnable plesure to her.
+Join and Play at the best Emperial zCASINOz!
+As a Special Welcome TODAY, we will DOUBL your 1 Deposit up to 200 bucks!
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+For example:
+Deposit 50 play with 100!
+Deposit 100 play with 200!
+And your FREE Bonuses will be INSTANTLY added to your acount!
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT ER ECTI ON during 36 hours!
+Try us, inhere: 
 
-VISIT US, AND GET OUR SPECIAL 70% DISC OUNT OFER!
+http://EI4AOJ.erprost.com/d1/today
 
-http://ddimkj.muffsoap.net/?62728585
-
-=====
-to enter it.
-silvery.  That  hadn't been  there  before.  Well, all right, so  there  was
-     "Couldn't I? Don't you think that there might be other flocks,  other
-hold hands. Especially when  you think of those stories about what stalkers'
-The gull  who  looks  upon  an  Outcast  breaks  the  Law  of  the  Flock,
-night,  when  you crawl  past, you can  see  the glow  inside,  like alcohol
-
-thought, he lived a long fine life indeed.
-truck was still  parked over the pit, in perfect shape, without any holes or
+==========
+     The Strugatskys  posit  that  the Earth experiences  a brief visit from
+trying to raise my price.
+a bigday for him, a day whose sunrise he no longer remembered.
+together now, in formation. And pay  attention  to  that  pullup.  It's  a
+They were all just watching and grunting  words of welcome, but not one  was
+==
+     "Forget about faith!" Chiang said it time and again. "You didn't need
+bars on the windows  just like  a police station. Willy was  sitting  at his
+     "Jonathan Livingston Seagull! Stand to  Center!"  The  Elder's  words
+==
+to  them, but I gave him such a  jab in the ribs that he immediately dropped
+     When Jonathan Seagull joined the Flock on  the  beach,  it  was  full
+get to see her."
