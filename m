@@ -1,17 +1,17 @@
-From: "Humberto Klein" <HumbertoKlein@0451.com>
-Subject: Your health, Non-european
-Date: Thu, 15 Jun 2006 00:33:11 -0540
-Message-ID: <662161c80604xb6v2w7r0p0ht5uiy54kvvvw5m2m1oaj__25672.3001170487$1150331601$gmane$org@mail.0451.com>
+From: "Garrett Maxwell" <GarrettMaxwell@0451.com>
+Subject: Hi, oil sand
+Date: Thu, 15 Jun 2006 01:57:25 +0000 (UTC)
+Message-ID: <806986347.20060615015721@0451.com>
+Reply-To: "Garrett Maxwell" <GarrettMaxwell@0451.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [222.108.128.180] ([222.108.128.180]:56580 "EHLO
-	mailscanner2.1-call.com") by vger.kernel.org with ESMTP
-	id S1750971AbWFOAdN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Jun 2006 20:33:13 -0400
-Content-Disposition: inline
+Received: from bb220-255-167-169.singnet.com.sg ([220.255.167.169]:39432 "EHLO
+	bb220-255-167-169.singnet.com.sg") by vger.kernel.org with ESMTP
+	id S964900AbWFOB5K (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 14 Jun 2006 21:57:10 -0400
+Date: Thu, 15 Jun 2006 01:57:21 -0480
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-x25@vger.kernel.org
@@ -29,15 +29,15 @@ PERFECT ER ECTI ON during 36 hours!
 
 VISIT US, AND GET OUR SPECIAL 70% DISC OUNT OFER!
 
-http://sbnpjl.motivefood.com/?88745077
+http://duaocm.jugjest.com/?18594477
 
-=====
-     And so he shut his eyes.
-went over each of  my nuts and bolts. I could have gathered them up if I had
-scorn.
-     We got up into the boot, and Kirill took the controls and said:
-imagine that anything like that could possibly happen In our little Harmont.
-     "Here," he said. "From a grateful humanity.
+==========
+brothers in a novel called Hard  to Be a Cod Remarkable, purely as a  novel,
+     "The devil knows. It was, and now it's gone.  Thank  God. And shut  up,
+old one had ever flown. Why, with half the effort, he  thought,  I'll  get
+     My Kirill was cured. Bright-eyed and bushy-tailed.
+times, "is nothing more than your thought itself, in a form you  can  see.
+like graviconcentrate, he thought that he understood everything and life was
 
-     "The first and last."
-I'd  never seen. We have  more sergeants  at the institute than  at division
+certain portion suffers  from execrable translation. Some works have had the
+right down  the middle of the street. It had been ages since  the  last time
