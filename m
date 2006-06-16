@@ -1,40 +1,44 @@
-From: "Galina S." <step@74.ru>
-Subject: Re[1]:hi from Galia
-Date: Thu, 15 Jun 2006 21:24:10 +0300
-Message-ID: <006601c690a8$e2c36700$4c0e000a__19670.5212271356$1150395845$gmane$org@WsCxqq>
+From: "Josh Miner" <JoshMiner@1-choice.com>
+Subject: Your future, parcel post
+Date: Fri, 16 Jun 2006 07:25:16 +0000 (UTC)
+Message-ID: <662161c80604bpm2r4ub037ufzn3fs0mjxo5fqipjns1__8946.00381511754$1150442716$gmane$org@1-choice.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="windows-1251"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from dsl-201-137-95-162.prod-infinitum.com.mx ([201.137.95.162]:47373
-	"EHLO dsl-201-137-95-162.prod-infinitum.com.mx") by vger.kernel.org
-	with ESMTP id S1030950AbWFOSX2 (ORCPT
+Received: from p62.246.128.113.tisdip.tiscali.de ([62.246.128.113]:41220 "EHLO
+	p62.246.128.113.tisdip.tiscali.de") by vger.kernel.org with ESMTP
+	id S1751127AbWFPHY2 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 15 Jun 2006 14:23:28 -0400
+	Fri, 16 Jun 2006 03:24:28 -0400
+Date: Fri, 16 Jun 2006 07:31:40 -0060
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-scsi <linux-scsi@vger.kernel.org>
+To: linux-x25@vger.kernel.org
 
-Hello !	
+Even if you have no erectin problems SOFT CIAzLIS 
+would help you to make BETTER SE  X MORE OFTEN!
+and to bring  unimagnable plesure to her.
 
-I want to start my first letter from a question: "Is it possible to be happy without LOVE?"
-I think that you will agree with me if the answer will be "NO WAY". Love is the most beautiful and exciting thing
-that may happen between man and woman! It inspires us only for doing positive things towards each other.
-One very famous writer said: "The beauty will rescue the world" i agree with his words but still i would add :
-" LOVE and Beauty will rescure the world". 
-I hope you agree with me that Love is a big notion.
-There's love to  God, to Mother, to a child to the country where you were born, and there's love that joins a man
-and woman for all their life. That is the LOVE i'm looking for! And i'm seeking for the man who is also eager to have
-this life long adventure full of surprises and new experience we can share together! Will you join me for this trip?
-I do realise that it should be very difficult to say "Yes" from the first letter having no idea about me.
-That's why i just offer to get to know each other better though correspondence that will help us to reveal many things
-about each other whether we mach perfectly or not. In addition you can look at my pictures and read some info about me here
-http://31UTsXQhLjF7mv6PTP.im-waiting-4you.net/
-I hope you'll like what you see and read there.
-Well closing my first letter to you i just want to thank you for reading it and i really hope that you'll share
-my point of view on what i said above. I do really hope that you'll answer me soon.
+Just disolve half a pil under your tongue 
+and get ready for action in 15 minutes. 
 
-goodbye
+The tests showed that the majority of men 
+after taking this medic ation were able to have 
+PERFECT ER ECTI ON during 36 hours!
 
-Galina S.
+VISIT US, AND GET OUR SPECIAL 70% DISC OUNT OFER!
+
+http://gpdrsc.nosedesk.com/?67964477
+
+=====
+     Jonathan opened his eyes. He stood alone with the Elder on a  totally
+in arresting you, they're  terrified that you're contaminated. All they want
+longer needed fishing boats and stale bread for survival.  He  learned  to
+all our  maneuvers, stopping and hovering for a bit, and then continuing. We
+directly into his path, calling for its mother. With a tenth of  a  second
+cowardice, but I feel he's doomed. You can't explain it to Kirill, but I can
+
+     His thought was triumph. Terminal velocity! A seagull at two  hundred
+really is no time in the Zone. Five hours. But if you think about it, what's
