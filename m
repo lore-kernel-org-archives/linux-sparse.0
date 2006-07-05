@@ -1,50 +1,30 @@
-From: Josh Triplett <josht@vnet.ibm.com>
-Subject: [PATCH] Add test-dissect to .gitignore
-Date: Fri, 30 Jun 2006 11:49:04 -0700
-Message-ID: <1151693344.6507.84.camel@josh-work.beaverton.ibm.com>
+From: "Galinka S." <interzone@74.ru>
+Subject: hey from Galia
+Date: Wed, 05 Jul 2006 12:39:34 +0300
+Message-ID: <001c01c6a016$e8143180$4200000a__28406.8446759649$1152092375$gmane$org@202.137.212.151>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="windows-1251"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:64181 "EHLO
-	e33.co.us.ibm.com") by vger.kernel.org with ESMTP id S933021AbWF3StE
+Received: from [202.137.212.151] ([202.137.212.151]:51208 "EHLO
+	202.137.212.151") by vger.kernel.org with ESMTP id S932419AbWGEJi5
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 30 Jun 2006 14:49:04 -0400
-Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
-	by e33.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k5UIn4OQ017241
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Fri, 30 Jun 2006 14:49:04 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by westrelay02.boulder.ibm.com (8.13.6/NCO/VER7.0) with ESMTP id k5UImSdQ286928
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Fri, 30 Jun 2006 12:48:28 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k5UIn3ik026848
-	for <linux-sparse@vger.kernel.org>; Fri, 30 Jun 2006 12:49:03 -0600
-Received: from dyn9047018143.beaverton.ibm.com (dyn9047018143.beaverton.ibm.com [9.47.18.143])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k5UIn353026820
-	for <linux-sparse@vger.kernel.org>; Fri, 30 Jun 2006 12:49:03 -0600
+	Wed, 5 Jul 2006 05:38:57 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Alfred <linux-scsi@vger.kernel.org>
 
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
+Hallo .	
 
----
+I'm a very young and energetic lady! I have very positive attitude to life and people. I do enjoy new experience life can offer me: to see new interesting places, to meet new people.
+I do try to enjoy every moment of life and accept everything the way it comes without complaining.
+Though my life seems to be quite enjoyable there's one important thing missing. It's LOVE!
+Without my beloved one, my soul mate, my King my life is not completed.
+I wish i coud find him very soon so that we could share together every momement of the life-time romance! 
+What about you? Could you be my King? If answer is "yes" - you can find more about me 
+http://foryou-mydestiny.com/
 
- .gitignore |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+Yourth faithfully,
 
-50d7ca63b85abe691beeb4d0ea39f6d8653798e9
-diff --git a/.gitignore b/.gitignore
-index a7e5514..32d6e70 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -13,6 +13,7 @@ test-parsing
- obfuscate
- check
- compile
-+test-dissect
- test-linearize
- example
- test-unssa
+Galechka S.
