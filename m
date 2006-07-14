@@ -1,49 +1,88 @@
 From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [PATCH] Fix warnings from gcc 4.1.1
-Date: Tue, 11 Jul 2006 03:03:36 -0400
-Message-ID: <1152601416.29932.63.camel@dv>
-References: <20060708060004.20321.50429.stgit@dv.roinet.com>
-	 <Pine.LNX.4.64.0607081053560.3869@g5.osdl.org> <1152426703.6603.2.camel@dv>
-	 <20060710191359.27AACC000E4@dunnock.rentec.com>
+Subject: [RFC PATCH] Fix -Wtypesign
+Date: Thu, 13 Jul 2006 21:56:18 -0400
+Message-ID: <1152842178.480.26.camel@dv>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:27337 "EHLO
-	fencepost.gnu.org") by vger.kernel.org with ESMTP id S1030211AbWGKHDj
+Received: from fencepost.gnu.org ([199.232.76.164]:16877 "EHLO
+	fencepost.gnu.org") by vger.kernel.org with ESMTP id S1161167AbWGNB40
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Jul 2006 03:03:39 -0400
+	Thu, 13 Jul 2006 21:56:26 -0400
 Received: from proski by fencepost.gnu.org with local (Exim 4.34)
-	id 1G0CHS-0000cV-NN
-	for linux-sparse@vger.kernel.org; Tue, 11 Jul 2006 03:03:38 -0400
-In-Reply-To: <20060710191359.27AACC000E4@dunnock.rentec.com>
+	id 1G1Cun-0001z7-ER
+	for linux-sparse@vger.kernel.org; Thu, 13 Jul 2006 21:56:25 -0400
+Received: from proski by dv.roinet.com with local (Exim 4.62)
+	(envelope-from <proski@dv.roinet.com>)
+	id 1G1Cug-0007W4-LM
+	for linux-sparse@vger.kernel.org; Thu, 13 Jul 2006 21:56:18 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Morten Welinder <terra@gnome.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Mon, 2006-07-10 at 15:13 -0400, Morten Welinder wrote:
-> > Indeed, that's a bug number 26632:
-> > http://gcc.gnu.org/bugzilla/show_bug.cgi?id=26632
-> > Nobody is arguing that it's a feature.
-> 
-> That's a bit too optimistic in my reading.  As I read it, they
-> want to keep the warning for explicit casts, but drop it for
-> casts that the gcc front end decides to insert itself.
+Hello!
 
-Now I understand why 27825 is a duplicate of 26632!
+The current sparse has problems with the -Wtypesign flag.  If causes
+bogus warnings.  Take for example following test.c:
 
-> I'm sure they mean well, but this warning is getting in the way
-> of lots of people doing stuff with macros.
+static unsigned char foobar(void);
+static unsigned char foobar(void)
+{
+	return 0;
+}
 
-OK, I didn't search well enough.  This issue is bug 24900, which is
-marked "WONTFIX".  It's interesting that the statement expression is
-proposed as a workaround - exactly what Linus did!
+$ sparse -Wtypesign test.c
+test.c:2:22: error: symbol 'foobar' redeclared with different type
+(originally declared at test.c:1) - different signedness
 
-http://gcc.gnu.org/bugzilla/show_bug.cgi?id=24900
+Debugging shows that the function definition doesn't have the
+signed/unsigned modifiers, unlike the function declaration:
 
-The argument that statement expressions are not portable has been
-ignored so far.
+2412                    typediff = type_difference(sym, next, 0, 0);
+(gdb) p/ sym->ctype.modifiers
+$1 = 0x800004
+(gdb) p/ next->ctype.modifiers
+$2 = 0x800084
+
+0x80 is MOD_UNSIGNED.
+
+The signedness modifiers are set in evaluate_symbol(), which hasn't been
+called for sym yet.  I have devised following patch, that appears to fix
+the problem:
+
+---
+Fix -Wtypesign
+
+Run evaluate_symbol() before check_duplicates() so that the signedness
+of the token is known by the time the token is compared with other
+tokens.
+
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
+
+ evaluate.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/evaluate.c b/evaluate.c
+index 42005eb..2561f38 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -2473,8 +2473,8 @@ void evaluate_symbol_list(struct symbol_
+ 	struct symbol *sym;
+ 
+ 	FOR_EACH_PTR(list, sym) {
+-		check_duplicates(sym);
+ 		evaluate_symbol(sym);
++		check_duplicates(sym);
+ 	} END_FOR_EACH_PTR(sym);
+ }
+
+I tested -Wtypesign on some Linux drivers.  It found some real sign
+mismatches and no bogus warnings.
+
+Still, I haven't seen sparse code until today, so the patch should be
+evaluated carefully.
 
 -- 
 Regards,
