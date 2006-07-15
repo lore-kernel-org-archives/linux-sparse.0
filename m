@@ -1,31 +1,50 @@
-From: "Dan Carpenter" <error27@gmail.com>
-Subject: Re: Moving smatch to use sparse
-Date: Sat, 15 Jul 2006 17:42:46 -0700
-Message-ID: <a63d67fe0607151742l6a387783x59494b84de80be88@mail.gmail.com>
-References: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
+From: "Byron Brandt" <ByronBrandt@0733.com>
+Subject: Success, wild-woven
+Date: Sun, 16 Jul 2006 02:48:18 +0300
+Message-ID: <662161c80604cpxelj24s7gfuzab0tzs1odaqr1c4165h__32460.529698483$1153018114$gmane$org@61.187.98.10>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ug-out-1314.google.com ([66.249.92.170]:31643 "EHLO
-	ug-out-1314.google.com") by vger.kernel.org with ESMTP
-	id S964819AbWGPAms (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 15 Jul 2006 20:42:48 -0400
-Received: by ug-out-1314.google.com with SMTP id m3so1263657ugc
-        for <linux-sparse@vger.kernel.org>; Sat, 15 Jul 2006 17:42:46 -0700 (PDT)
-In-Reply-To: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
+Received: from zeus2.kernel.org ([204.152.191.36]:6285 "EHLO zeus2.kernel.org")
+	by vger.kernel.org with ESMTP id S964819AbWGPCsS convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 15 Jul 2006 22:48:18 -0400
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: smatch-discuss@lists.sf.net
-Cc: linux-sparse@vger.kernel.org
+To: linux-8086@vger.kernel.org
 
-On 7/14/06, Dan Carpenter <error27@gmail.com> wrote:
-> I've been porting smatch to c using sparse as a front end.
+Your cre dit doesn't matter to us! If you OWN real est ate
+and want IMMEDIATEC cash to spend ANY way you like, or simply wish 
+to LOWER your monthly paym ents by a third or more, here are the dea ls
+we have TODAY (hurry, these ofers will expre TONIGHT):
 
-I'm going to post the diff's at http://smatch.sourceforge.net/sparse/
+$488,000.00 at a 3.67,% fixed-rateL
+$372,000.00 at a 3.90,% variable-rateX
+$492,000.00 at a 3.21,% interest-onlyM
+$248,000.00 at a 3.36,% fixed-rate8
+$198,000.00 at a 3.55,% variable-rate8
 
-I'll send another email once some checks are working...
+Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
-regards,
-dan carpenter
+Don't worry about approval, your cre dit will not disqualify you! 
+
+http://VR74KBUY.gtris.net
+
+
+
+to it in clumsy letters.  The red dotted line of the  path went to the right
+disappeared somewhere from his fingers, and he lit another one. Arthur stood
+
+before, Red," he said to Schuhart, Jr.,  who  was puttering at  the bar. "We
+Redrick, ears clogged by the noise, turned and saw a bright red spot quickly
+the shower in his stocking feet, leaving sticky footprints. He would stay in
+
+not dissolving with time, but  on the contrary, it was accumulating. And  he
+gasped, grabbed  his  head, crouched,  and fell  into the dry grass. Redrick
+clumps of dirt flew  in all directions. And only then did Redrick look up at
+     "The backpack. You forgot the backpack, Mr. Schuhart."
+
+shooting it out with them.... Arthur decisively shook his head.
+     He set up the glasses, quickly opened the bottle, and turned to Noonan.
