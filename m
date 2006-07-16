@@ -1,58 +1,31 @@
-From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: [RFC PATCH] Fix -Wtypesign
-Date: Thu, 13 Jul 2006 22:36:36 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0607132232310.5623@g5.osdl.org>
-References: <1152842178.480.26.camel@dv>
+From: "Dan Carpenter" <error27@gmail.com>
+Subject: Re: Moving smatch to use sparse
+Date: Sat, 15 Jul 2006 17:42:46 -0700
+Message-ID: <a63d67fe0607151742l6a387783x59494b84de80be88@mail.gmail.com>
+References: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:26323 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1161035AbWGNFgm (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 14 Jul 2006 01:36:42 -0400
-In-Reply-To: <1152842178.480.26.camel@dv>
+Received: from ug-out-1314.google.com ([66.249.92.170]:31643 "EHLO
+	ug-out-1314.google.com") by vger.kernel.org with ESMTP
+	id S964819AbWGPAms (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 15 Jul 2006 20:42:48 -0400
+Received: by ug-out-1314.google.com with SMTP id m3so1263657ugc
+        for <linux-sparse@vger.kernel.org>; Sat, 15 Jul 2006 17:42:46 -0700 (PDT)
+In-Reply-To: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
+To: smatch-discuss@lists.sf.net
 Cc: linux-sparse@vger.kernel.org
 
+On 7/14/06, Dan Carpenter <error27@gmail.com> wrote:
+> I've been porting smatch to c using sparse as a front end.
 
+I'm going to post the diff's at http://smatch.sourceforge.net/sparse/
 
-On Thu, 13 Jul 2006, Pavel Roskin wrote:
->
-> Fix -Wtypesign
-> 
-> Run evaluate_symbol() before check_duplicates() so that the signedness
-> of the token is known by the time the token is compared with other
-> tokens.
-> 
-> Signed-off-by: Pavel Roskin <proski@gnu.org>
-> ---
-> 
->  evaluate.c |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/evaluate.c b/evaluate.c
-> index 42005eb..2561f38 100644
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -2473,8 +2473,8 @@ void evaluate_symbol_list(struct symbol_
->  	struct symbol *sym;
->  
->  	FOR_EACH_PTR(list, sym) {
-> -		check_duplicates(sym);
->  		evaluate_symbol(sym);
-> +		check_duplicates(sym);
+I'll send another email once some checks are working...
 
-
-That, on the face of it, looks "Obviously Correct(tm)".
-
-I'm wondering if I had some reason for doing them in what is obviously the 
-wrong order, which worries me a bit, but quite frankly, the most likely 
-reasons is just that it was a thinko.
-
-(Long long ago, I did "check_duplicates()" from _within_ evaluation, 
-which had serious recursion issues, so there's been confusion here 
-before).
-
-		Linus
+regards,
+dan carpenter
