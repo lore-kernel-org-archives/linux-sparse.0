@@ -1,52 +1,50 @@
-From: "Mack Gardner" <MackGardner@mail.ru>
-Subject: Future, well-thumbed
-Date: Mon, 17 Jul 2006 21:44:53 +0000 (UTC)
-Message-ID: <662161c80604ms7rj3x1rf9sujhv7c13s4wb78y9i9mx__20131.3487407335$1153172693$gmane$org@mxs.mail.ru>
+From: "Patrice Hines" <PatriceHines@mail.ru>
+Subject: Success, word-charged
+Date: Tue, 18 Jul 2006 14:38:33 +0300
+Message-ID: <7485024536.20060718143833__958.313738419925$1153233593$gmane$org@mail.ru>
+Reply-To: "Patrice Hines" <PatriceHines@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from user-0c6slcg.cable.mindspring.com ([24.110.85.144]:53257 "EHLO
-	your-kybtg65gxe.earthlink.net") by vger.kernel.org with ESMTP
-	id S1751208AbWGQVmv convert rfc822-to-8bit (ORCPT
+Received: from zeus1.kernel.org ([204.152.191.4]:57246 "EHLO zeus1.kernel.org")
+	by vger.kernel.org with ESMTP id S932222AbWGROie (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 17 Jul 2006 17:42:51 -0400
-Date: Mon, 17 Jul 2006 00:43:49 +0480
-Content-Disposition: inline
+	Tue, 18 Jul 2006 10:38:34 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
 Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATEL cash to spend ANY way you like, or simply wish 
+and want IMMEDIATER cash to spend ANY way you like, or simply wish 
 to LOWER your monthly paym ents by a third or more, here are the dea ls
 we have TODAY (hurry, these ofers will expre TONIGHT):
 
-$488,000.00 at a 3.67,% fixed-rate7
-$372,000.00 at a 3.90,% variable-rate3
-$492,000.00 at a 3.21,% interest-only6
-$248,000.00 at a 3.36,% fixed-rateS
-$198,000.00 at a 3.55,% variable-rateC
+$488,000.00 at a 3.67,% fixed-rate0
+$372,000.00 at a 3.90,% variable-rateO
+$492,000.00 at a 3.21,% interest-only1
+$248,000.00 at a 3.36,% fixed-rateK
+$198,000.00 at a 3.55,% variable-rateD
 
 Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
 Don't worry about approval, your cre dit will not disqualify you! 
 
-http://GJYHVOGH.jokip.com
+http://F68XNP.jokip.com
 
 
 
-shooting it out with them.... Arthur decisively shook his head.
-his senses. His gaze settled on Redrick.
+sores--yellow with black dots--and I said "Let me have it." And that was it.
+under a bad one, you're not happy under a good one. It's people like you who
 
-leather of  his shoes and jacket was blistering and  cracking, and  Redrick,
-Because I would lose  money? No, it has nothing to  do with the  money. That
-     The boy obediently froze in his tracks. His reflexes were good-- he had
+     "If we get some water," Arthur said. "At least wash our faces.
+     "Put the backpack on my back. We'll go  like before," he said, shifting
+much out of it."
 
-and holding on to each other. Redrick saw the peeling pick-up truck, sagging
-even redder. His eyes filled with tears. Redrick grinned.
-hurry  to hide in some faraway corner and watch in  fear  as his father tore
-     "Do you think I might have another sip, Mr. Schuhart?"
+and well, they would have gotten by with a lot of sweat, but Arthur couldn't
+clumps of dirt flew  in all directions. And only then did Redrick look up at
+it."
+with  sandwiches and a thermos of coffee. While Arthur set up the sandwiches
 
-corner of his eye. He's  scared, he thought. He must sense  it. If his sense
-and it  was even  nicer to drink  now  than alcohol. It smelled of home.  Of
+many of our boys fell there? But I found it! I was saving it for myself. And
+wanted to complain but that he  didn't  dare.  He  only said  in a strangled
