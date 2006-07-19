@@ -1,50 +1,51 @@
-From: "Tommy Laird" <TommyLaird@0ol.com>
-Subject: Life, winter-wasted
-Date: Wed, 19 Jul 2006 02:44:41 -0120
-Message-ID: <59453637.20060719024441__21815.1942514398$1153277105$gmane$org@0ol.com>
-Reply-To: "Tommy Laird" <TommyLaird@0ol.com>
+From: "June Logan" <JuneLogan@mail.ru>
+Subject: Future, whippers-in
+Date: Wed, 19 Jul 2006 14:04:34 +0000 (UTC)
+Message-ID: <75930947.20060719140356__15668.0429507562$1153317874$gmane$org@mail.ru>
+Reply-To: "June Logan" <JuneLogan@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [85.103.36.114] ([85.103.36.114]:61451 "EHLO mail.mycommail.com")
-	by vger.kernel.org with ESMTP id S932464AbWGSCot (ORCPT
+Received: from [201.3.83.197] ([201.3.83.197]:31216 "EHLO 61.187.98.10")
+	by vger.kernel.org with ESMTP id S964820AbWGSOD4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 18 Jul 2006 22:44:49 -0400
+	Wed, 19 Jul 2006 10:03:56 -0400
+Date: Wed, 19 Jul 2006 14:03:56 +0180
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
 Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATEC cash to spend ANY way you like, or simply wish 
+and want IMMEDIATEJ cash to spend ANY way you like, or simply wish 
 to LOWER your monthly paym ents by a third or more, here are the dea ls
 we have TODAY (hurry, these ofers will expre TONIGHT):
 
-$488,000.00 at a 3.67,% fixed-rateA
-$372,000.00 at a 3.90,% variable-rateO
-$492,000.00 at a 3.21,% interest-onlyX
-$248,000.00 at a 3.36,% fixed-rateV
-$198,000.00 at a 3.55,% variable-rateD
+$488,000.00 at a 3.67,% fixed-rateG
+$372,000.00 at a 3.90,% variable-rate8
+$492,000.00 at a 3.21,% interest-onlyY
+$248,000.00 at a 3.36,% fixed-rateY
+$198,000.00 at a 3.55,% variable-rateW
 
 Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
 Don't worry about approval, your cre dit will not disqualify you! 
 
-http://SZYKM9.jokip.com
+http://FNIMY5RT.foorests.net
 
 
 
-up and Arthur jumped up too. But it was quiet  again, and the only sound was
-to  take  somebody  with  you.  I  can  give you  one  of  my  people  who's
+     Redrick  didn't reply. That's  a mistake, he thought,  dispassionately.
+rusty  rails,  and  Redrick  watched the drops of condensed fog  glisten  on
 
-this! He had  a  fleeting thought: who do I mean? I don't know. But somebody
-     "Nonsense!"  Redrick muttered distractedly and froze over the cup  near
-to  take  somebody  with  you.  I  can  give you  one  of  my  people  who's
+the slope, and a multitude of black splotches in the dust, as though someone
+was nothing to inspire hope either. For some reason,  his first thought  was
+be all right. There  were a few  scratches,  a bump on his forehead, and his
 
-much out of it."
-place. Redrick's  parboiled hands ached, and the backpack  kept bumping into
-he had  caught something from  Buzzard, not some disgusting  disease, but on
-     He shuddered. He could hear a long sad sound through the fog. He jumped
+thousand  at  the  end of the  road. I  can work  up a sweat  for that. Five
+get it all anyway.
+off  his work clothes and tossed  them to his mother,  pulled off his  huge,
+meaning. It  had no meaning before,  either, but before it was  a person  at
 
-go anyway. He had nowhere  else to go. He'd go. And Arthur went. He wandered
-taken care of. "What's that in your back pocket?" he asked casually.
+nothing.
+his burned neck.  The pain and lack  of air made  Redrick think that he  was
