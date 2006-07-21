@@ -1,44 +1,40 @@
-From: "Margo" <andy@2sun.ru>
-Subject: Ave...
-Date: Thu, 20 Jul 2006 10:59:09 +0300
-Message-ID: <002501c6abd2$5d186700$0100a8c0__24761.7672234357$1153382343$gmane$org@218.19.82.143>
+From: "Miles Hardin" <MilesHardin@0451.com>
+Subject: Order status, muffle kiln
+Date: Fri, 21 Jul 2006 15:39:19 +0000 (UTC)
+Message-ID: <4351914156.20060721153901__10624.2116926753$1153496358$gmane$org@0451.com>
+Reply-To: "Miles Hardin" <MilesHardin@0451.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="windows-1251"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [218.19.82.143] ([218.19.82.143]:33804 "EHLO 218.19.82.143")
-	by vger.kernel.org with ESMTP id S932576AbWGTH6d (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 20 Jul 2006 03:58:33 -0400
+Received: from xdsl-318.jgora.dialog.net.pl ([81.168.149.62]:62986 "EHLO
+	xdsl-318.jgora.dialog.net.pl") by vger.kernel.org with ESMTP
+	id S1750838AbWGUPiu (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 21 Jul 2006 11:38:50 -0400
+Date: Fri, 21 Jul 2006 15:39:01 -0060
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kurt <linux-scsi@vger.kernel.org>
+To: linux-8086@vger.kernel.org
 
-Hello,	
+Genuine Swiss made Role8x repilcas are as close to the real thing 
+as a repilca watch can be. Sometimes even the professional jewelers 
+are unable to tell the difference from the real Role9x watch.
 
-I think we had correspondence a long time ago if it was not you I am sorry.
-If it was I could not answer you because my Mozilla mail manager was down for a 
-long time and I could not fix it only with my friend's help I got the emails 
-address out for me ..:)
-I hope it was whom we were corresponded with you are still interested, as I am, 
-though I realize much time has passed since then...
-I really don't know where to start ....
-Maybe you could tell me a little about yourself since I lost our early letters, 
-your appearance,age , hobbies, and are you still in the search?
-If it was you I wrote to and you are interested to get to know me better, I have 
-a profile at :
-http://www.iamsearching-forlove.com/
+Why spend thousands of dollars on the real deal when 
+a repilca watch looks so much alike that only an expert could tell the difference...
+And you only pay a fractoin of the price.
 
-Don't really know what else to say for now I hope this is the right address
+VISIT US, AND GET OUR SPECIL 370% DISMCOUNT OFER!
 
-Let me know if you are interested, And I hope
-you won't run when you see my picture :-)
+http://YEDQUBtrgmgchjzzzmubbrytbrgttb.futhorcib.com/
 
-a rivederci
+==========
+flashing one hundred fifty miles per hour past his instructor.  He  pulled
+     You bet I did!  Of  course, he was just  trying to  humor me. The third
+joy.
+     "In view of your bravery  beyond the call of duty, and as an exception,
+predictions of battle melted in the Flock's confusion.
+at me. Of course, he immediately figured it out about me--what was there not
 
-Maria
-
-If you think that you were subscribed by mistake for this mail
-delivery or if your email has been added without your permission,
-please, visit http://iamsearching-forlove.com/ and unsubscribe from our mails.
+flying than just flapping around from place to place! A...  a...  mosquito
+the sidewalk on our left there was black bramble growing, and you could tell
