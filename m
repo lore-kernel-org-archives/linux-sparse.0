@@ -1,24 +1,24 @@
-From: "Miles Hardin" <MilesHardin@0451.com>
-Subject: Order status, muffle kiln
-Date: Fri, 21 Jul 2006 15:39:19 +0000 (UTC)
-Message-ID: <4351914156.20060721153901__10624.2116926753$1153496358$gmane$org@0451.com>
-Reply-To: "Miles Hardin" <MilesHardin@0451.com>
+From: "Simone Stern" <SimoneStern@0451.com>
+Subject: Your future, owl midge
+Date: Sat, 22 Jul 2006 02:25:23 +0000 (UTC)
+Message-ID: <69092071.20060722022456__537.965368903492$1153535123$gmane$org@0451.com>
+Reply-To: "Simone Stern" <SimoneStern@0451.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xdsl-318.jgora.dialog.net.pl ([81.168.149.62]:62986 "EHLO
-	xdsl-318.jgora.dialog.net.pl") by vger.kernel.org with ESMTP
-	id S1750838AbWGUPiu (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 21 Jul 2006 11:38:50 -0400
-Date: Fri, 21 Jul 2006 15:39:01 -0060
+Received: from zeus1.kernel.org ([204.152.191.4]:8617 "EHLO zeus1.kernel.org")
+	by vger.kernel.org with ESMTP id S1751116AbWGVCY5 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 21 Jul 2006 22:24:57 -0400
+Date: Sat, 22 Jul 2006 02:24:56 -0480
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Genuine Swiss made Role8x repilcas are as close to the real thing 
+Genuine Swiss made RoleJx repilcas are as close to the real thing 
 as a repilca watch can be. Sometimes even the professional jewelers 
-are unable to tell the difference from the real Role9x watch.
+are unable to tell the difference from the real Role6x watch.
 
 Why spend thousands of dollars on the real deal when 
 a repilca watch looks so much alike that only an expert could tell the difference...
@@ -26,15 +26,15 @@ And you only pay a fractoin of the price.
 
 VISIT US, AND GET OUR SPECIL 370% DISMCOUNT OFER!
 
-http://YEDQUBtrgmgchjzzzmubbrytbrgttb.futhorcib.com/
+http://7OE5YGZcsznhdik00i5vuushucszucu.prunetolij.com/
 
 ==========
-flashing one hundred fifty miles per hour past his instructor.  He  pulled
-     You bet I did!  Of  course, he was just  trying to  humor me. The third
-joy.
-     "In view of your bravery  beyond the call of duty, and as an exception,
-predictions of battle melted in the Flock's confusion.
-at me. Of course, he immediately figured it out about me--what was there not
+more he wanted to go back to Earth. For  in  spite  of  his  lonely  past,
+was terrifically heavy, the bitch, it was hard for the two of us to drag it.
+There was a great clamor of squawks and screes from the crowd  when  first
+table.
+to enter it.
+search me, the toads, and I wasn't too crazy about the idea just then.
 
-flying than just flapping around from place to place! A...  a...  mosquito
-the sidewalk on our left there was black bramble growing, and you could tell
+exactly in harmony with his instructor's.
+     "He knows," Kirill said. "He's a good driver.
