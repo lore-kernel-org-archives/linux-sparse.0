@@ -1,51 +1,87 @@
-From: "Theron Schwartz" <TheronSchwartz@mail.ru>
-Subject: Better Life, wind tunnel
-Date: Sat, 22 Jul 2006 02:34:11 -0420
-Message-ID: <89728418.20060722023411__5421.39165704629$1153535670$gmane$org@mail.ru>
-Reply-To: "Theron Schwartz" <TheronSchwartz@mail.ru>
+From: Josh Triplett <josht@us.ibm.com>
+Subject: [PATCH] Add -Wno-address-space
+Date: Fri, 21 Jul 2006 19:35:09 -0700
+Message-ID: <1153535709.1797.3.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ppp-58.10.210.230.revip2.asianet.co.th ([58.10.210.230]:35117
-	"EHLO ppp-58.10.210.230.revip2.asianet.co.th") by vger.kernel.org
-	with ESMTP id S1751222AbWGVCeO (ORCPT
+Received: from e34.co.us.ibm.com ([32.97.110.152]:7578 "EHLO e34.co.us.ibm.com")
+	by vger.kernel.org with ESMTP id S1751129AbWGVCfI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 21 Jul 2006 22:34:14 -0400
+	Fri, 21 Jul 2006 22:35:08 -0400
+Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
+	by e34.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k6M2Z74I030116
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Fri, 21 Jul 2006 22:35:07 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by d03relay04.boulder.ibm.com (8.13.6/NCO/VER7.0) with ESMTP id k6M2Z7HA081118
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Fri, 21 Jul 2006 20:35:07 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k6M2Z7J6004251
+	for <linux-sparse@vger.kernel.org>; Fri, 21 Jul 2006 20:35:07 -0600
+Received: from IBM-882E9B45D97.beaverton.ibm.com (IBM-882E9B45D97.beaverton.ibm.com [9.47.18.143])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k6M2Z6Ld004103
+	for <linux-sparse@vger.kernel.org>; Fri, 21 Jul 2006 20:35:06 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-8086@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATE0 cash to spend ANY way you like, or simply wish 
-to LOWER your monthly paym ents by a third or more, here are the dea ls
-we have TODAY (hurry, these ofers will expre TONIGHT):
+Add the ability to turn off address-space mismatch warnings using
+-Wno-address-space, helpful when attempting to track down a particular class
+of warnings only without losing them amongst others.  Address space checking
+defaults to on, so this does not change the default behavior of sparse.
 
-$488,000.00 at a 3.67,% fixed-rate5
-$372,000.00 at a 3.90,% variable-rateE
-$492,000.00 at a 3.21,% interest-onlyJ
-$248,000.00 at a 3.36,% fixed-rate6
-$198,000.00 at a 3.55,% variable-rateR
+Signed-off-by: Josh Triplett <josh@freedesktop.org>
+---
+ evaluate.c |    2 +-
+ lib.c      |    2 ++
+ lib.h      |    1 +
+ 3 files changed, 4 insertions(+), 1 deletions(-)
 
-Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
+diff --git a/evaluate.c b/evaluate.c
+index 2561f38..c5d2526 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -681,7 +681,7 @@ const char * type_difference(struct symb
+ 			return "different base types";
+ 
+ 		/* Must be same address space to be comparable */
+-		if (as1 != as2)
++		if (Waddress_space && as1 != as2)
+ 			return "different address spaces";
+ 
+ 		/* Ignore differences in storage types or addressability */
+diff --git a/lib.c b/lib.c
+index ad19696..84d0647 100644
+--- a/lib.c
++++ b/lib.c
+@@ -177,6 +177,7 @@ int Wptr_subtraction_blows = 0;
+ int Wcast_to_address_space = 0;
+ int Wdecl = 0;
+ int Wtransparent_union = 1;
++int Waddress_space = 1;
+ int preprocess_only;
+ char *include;
+ int include_fd = -1;
+@@ -321,6 +322,7 @@ static const struct warning {
+ 	{ "typesign", &Wtypesign },
+ 	{ "context", &Wcontext },
+ 	{ "transparent-union", &Wtransparent_union },
++	{ "address-space", &Waddress_space },
+ };
+ 
 
-Don't worry about approval, your cre dit will not disqualify you! 
-
-http://70LVKUJ.foorests.net
-
-
-
-"Maria! Are you  asleep?"  He had to  wait until his  father  had washed and
-up.  Maybe  we'll have to  shoot it  out  with  the patrol  guards. However,
-
-would you wish?"
-smack at his feet, raising a cloud of white dust. He was
-clearly as if they were in the palm of his hand. Right in front, two hundred
-
-     "A gun."
-meaning. It  had no meaning before,  either, but before it was  a person  at
-laughed and gave Arthur a poke in the shoulder.
-visible against the bright sky. Arthur sat down, shoulder deep in the slime.
-
-to  take  somebody  with  you.  I  can  give you  one  of  my  people  who's
-Redrick rummaged in his pocket, took out a bolt weighing an ounce or so, and
+diff --git a/lib.h b/lib.h
+index a61b2dd..e6b9bfa 100644
+--- a/lib.h
++++ b/lib.h
+@@ -77,6 +77,7 @@ extern int Wdefault_bitfield_sign;
+ extern int Wundefined_preprocessor;
+ extern int Wbitwise, Wtypesign, Wcontext;
+ extern int Wtransparent_union;
++extern int Waddress_space;
+ extern int Wcast_to_address_space;
+ extern int Wdecl;
+ extern int Wone_bit_signed_bitfield;
