@@ -1,51 +1,39 @@
-From: "Ladonna Lozano" <LadonnaLozano@mail.ru>
-Subject: Better Life, wedged-tailed
-Date: Sat, 22 Jul 2006 15:49:20 +0000 (UTC)
-Message-ID: <662161c80604abm1v9jsuszncybu86dm031wtp4mipoq__13916.4790315137$1153583360$gmane$org@mxs.mail.ru>
+From: "Terry Doss" <TerryDoss@mail.ru>
+Subject: Order status, part song
+Date: Sat, 22 Jul 2006 16:57:46 -0120
+Message-ID: <83462651.20060722165746@mail.ru>
+Reply-To: "Terry Doss" <TerryDoss@mail.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeus1.kernel.org ([204.152.191.4]:177 "EHLO zeus1.kernel.org")
-	by vger.kernel.org with ESMTP id S1750800AbWGVPso convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 22 Jul 2006 11:48:44 -0400
-Date: Sat, 22 Jul 2006 15:48:37 +0480
-Content-Disposition: inline
+Received: from cl-86-125-134-190.cablelink.mures.rdsnet.ro ([86.125.134.190]:9738
+	"EHLO emese-8f5f6b7dc") by vger.kernel.org with ESMTP
+	id S1750925AbWGVQ6A (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 22 Jul 2006 12:58:00 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATEC cash to spend ANY way you like, or simply wish 
-to LOWER your monthly paym ents by a third or more, here are the dea ls
-we have TODAY (hurry, these ofers will expre TONIGHT):
+Genuine Swiss made Role0x repilcas are as close to the real thing 
+as a repilca watch can be. Sometimes even the professional jewelers 
+are unable to tell the difference from the real RoleOx watch.
 
-$488,000.00 at a 3.67,% fixed-rate3
-$372,000.00 at a 3.90,% variable-rate4
-$492,000.00 at a 3.21,% interest-onlyO
-$248,000.00 at a 3.36,% fixed-rateC
-$198,000.00 at a 3.55,% variable-rate9
+Why spend thousands of dollars on the real deal when 
+a repilca watch looks so much alike that only an expert could tell the difference...
+And you only pay a fractoin of the price.
 
-Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
+VISIT US, AND GET OUR SPECIL 370% DISACOUNT OFER!
 
-Don't worry about approval, your cre dit will not disqualify you! 
+http://B6BHG9csznhvikii05vucazucahcuu.prunetolij.com/
 
-http://NY7OSV.foorests.net
+==========
+joy.
+     He frowned and banged his pipe against the ashtray in irritation.
+     It was a month after the Return that the  first  gull  of  the  Flock
+     I  pulled  off my special  suit, threw it on the floor--let the bastard
+one-in-a-million bird. Most of us came along ever so slowly. We went  from
+     "You're  both greenhorns as far as I'm concerned," I said. "And I won't
 
-
-
-for him or something? That's all  I need. Did anyone ever feel sorry for me?
-completely naturally, and they drank.
-
-his eyes, probably because  he no longer had eyebrows or  eyelashes.  Arthur
-arms through the straps. It felt as though the skin on the burned places had
-     He shuddered. He could hear a long sad sound through the fog. He jumped
-
-Where have you  seen a good system? When have you ever seen me under  a good
-     He  started  down slowly after  him,  automatically adjusting  his  leg
-     "Want some?" he offered, wiping the neck of the flask. "For courage?"
-business. Keep your secrets to yourself." He suddenly remembered the gun and
-
-Whip been? Did Buzzard bring  him here  or had he come on his own? Why  were
-paws  holding glasses, thundering laughter, and open jaws filled with yellow
+himself as trapped inside  a  limited  body  that  had  a  forty-two  inch
+would  understand everything  and  be hailed  and honored, and world science
