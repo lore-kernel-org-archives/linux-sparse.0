@@ -1,51 +1,39 @@
-From: "Fran Hanley" <FranHanley@1-toit-o-soleil.com>
-Subject: Better Life, witney nap
-Date: Sun, 23 Jul 2006 04:17:01 +0000 (UTC)
-Message-ID: <1110108058.20060723041651__32924.626794602$1153628221$gmane$org@1-toit-o-soleil.com>
-Reply-To: "Fran Hanley" <FranHanley@1-toit-o-soleil.com>
+From: "Annabelle Conway" <AnnabelleConway@mail.ru>
+Subject: Your future, paper chaser
+Date: Sun, 23 Jul 2006 06:39:10 -0420
+Message-ID: <4199831231.20060723063910__17532.8578953215$1153636770$gmane$org@mail.ru>
+Reply-To: "Annabelle Conway" <AnnabelleConway@mail.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeus2.kernel.org ([204.152.191.36]:2230 "EHLO zeus2.kernel.org")
-	by vger.kernel.org with ESMTP id S1750765AbWGWEQt (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 23 Jul 2006 00:16:49 -0400
-Date: Sun, 23 Jul 2006 04:16:51 -0480
+Received: from 58-186-74-xxx-dynamic.hcm.fpt.vn ([58.186.74.247]:39776 "EHLO
+	58-186-74-xxx-dynamic.hcm.fpt.vn") by vger.kernel.org with ESMTP
+	id S1751121AbWGWGjR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 23 Jul 2006 02:39:17 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATET cash to spend ANY way you like, or simply wish 
-to LOWER your monthly paym ents by a third or more, here are the dea ls
-we have TODAY (hurry, these ofers will expre TONIGHT):
+Genuine Swiss made RoleHx repilcas are as close to the real thing 
+as a repilca watch can be. Sometimes even the professional jewelers 
+are unable to tell the difference from the real Role0x watch.
 
-$488,000.00 at a 3.67,% fixed-rateD
-$372,000.00 at a 3.90,% variable-rateF
-$492,000.00 at a 3.21,% interest-onlyK
-$248,000.00 at a 3.36,% fixed-rateY
-$198,000.00 at a 3.55,% variable-rate9
+Why spend thousands of dollars on the real deal when 
+a repilca watch looks so much alike that only an expert could tell the difference...
+And you only pay a fractoin of the price.
 
-Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
+VISIT US, AND GET OUR SPECIL 370% DISHCOUNT OFER!
 
-Don't worry about approval, your cre dit will not disqualify you! 
+http://QUOTC7Wusz5zdi2i0i5dcuazuushucu.contracthe.com/
 
-http://9QN9U95.foorests.net
+==========
+crumb on the sea, four thousand feet below.
+fate.
+grateful for what he had learned about work-saving low-altitude flying.
+night,  when  you crawl  past, you can  see  the glow  inside,  like alcohol
+this once, and no one was killed.
+please, you're  not a human being now, do you understand? You are a machine,
 
-
-
-it,  Redrick  thought  grimly.  Himself. Why did he  beg  to come  along  so
-did  this: he  walked through and  left this behind.  Four-eyes  lay on  the
-
-followed. Out of  the  corner  of his  eye  he could see Arthur's  face, his
-for   water,   for   coolness.   The  memories,  worn   to   the  point   of
-could feel a thousand needles  puncturing  his face.  "For- ward!"  he  kept
-
-     "Mr.  Schuhart,"  Arthur  suddenly  said,  looking away "Do you  really
-My legs, do  you  understand? The Zone took them away, and maybe  it'll give
-     "See that depression between the hills?" he asked.
-thinks that  it was Burbridge who pulled him out of it. The hell he did! You
-
-all of you, buzzards, toads, Visitors, Boneses,  Quarterblads, bloodsuckers,
-top of  the rock stuck out of the slime; he realized that even  though there
+which there are,  at this writing,  over 1,500 in the U.S.A. alone). Suffice
+fearless rescuers--a bunch of overfed bums  with a helicopter. I wish I  had
