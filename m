@@ -1,39 +1,51 @@
-From: "Annabelle Conway" <AnnabelleConway@mail.ru>
-Subject: Your future, paper chaser
-Date: Sun, 23 Jul 2006 06:39:10 -0420
-Message-ID: <4199831231.20060723063910__17532.8578953215$1153636770$gmane$org@mail.ru>
-Reply-To: "Annabelle Conway" <AnnabelleConway@mail.ru>
+From: "Patti Jeffries" <PattiJeffries@10-4.com>
+Subject: Better Life, weeping-ripe
+Date: Mon, 24 Jul 2006 07:36:40 +0000 (UTC)
+Message-ID: <662161c80604jqa70qmo32by0zqzeljs30dxoelpsg10ki__17720.4755055302$1153726600$gmane$org@mail.10-4.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 58-186-74-xxx-dynamic.hcm.fpt.vn ([58.186.74.247]:39776 "EHLO
-	58-186-74-xxx-dynamic.hcm.fpt.vn") by vger.kernel.org with ESMTP
-	id S1751121AbWGWGjR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 23 Jul 2006 02:39:17 -0400
+Received: from [203.87.191.26] ([203.87.191.26]:43527 "EHLO 61.187.98.10")
+	by vger.kernel.org with ESMTP id S1751435AbWGXHgM convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 24 Jul 2006 03:36:12 -0400
+Date: Mon, 24 Jul 2006 22:43:40 +0480
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Genuine Swiss made RoleHx repilcas are as close to the real thing 
-as a repilca watch can be. Sometimes even the professional jewelers 
-are unable to tell the difference from the real Role0x watch.
+Your cre dit doesn't matter to us! If you OWN real est ate
+and want IMMEDIATE6 cash to spend ANY way you like, or simply wish 
+to LOWER your monthly paym ents by a third or more, here are the dea ls
+we have TODAY (hurry, these ofers will expre TONIGHT):
 
-Why spend thousands of dollars on the real deal when 
-a repilca watch looks so much alike that only an expert could tell the difference...
-And you only pay a fractoin of the price.
+$488,000.00 at a 3.67,% fixed-rate6
+$372,000.00 at a 3.90,% variable-rate4
+$492,000.00 at a 3.21,% interest-only1
+$248,000.00 at a 3.36,% fixed-rateG
+$198,000.00 at a 3.55,% variable-rateI
 
-VISIT US, AND GET OUR SPECIL 370% DISHCOUNT OFER!
+Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
-http://QUOTC7Wusz5zdi2i0i5dcuazuushucu.contracthe.com/
+Don't worry about approval, your cre dit will not disqualify you! 
 
-==========
-crumb on the sea, four thousand feet below.
-fate.
-grateful for what he had learned about work-saving low-altitude flying.
-night,  when  you crawl  past, you can  see  the glow  inside,  like alcohol
-this once, and no one was killed.
-please, you're  not a human being now, do you understand? You are a machine,
+http://FPDE8VH.fortessed.com
 
-which there are,  at this writing,  over 1,500 in the U.S.A. alone). Suffice
-fearless rescuers--a bunch of overfed bums  with a helicopter. I wish I  had
+
+
+but one  doesn't necessarily rule out  the  other. Only  I don't get to feel
+with  two  orderlies, tough  and  rough  burly  guys  used to  lugging heavy
+
+wanted to complain but that he  didn't  dare.  He  only said  in a strangled
+Redrick, ears clogged by the noise, turned and saw a bright red spot quickly
+the gravel tumbling down the incline under their feet.
+
+far wall,  cozily ensconced amid  the piles  of  accumulated rocks, and even
+the  boy stepped over two  ties at a  time, broad-shouldered, narrow-hipped.
+to do, don't  suddenly be afraid of the  dirt. If I tell  you  to, drop your
+seen one in many years  and had almost  forgotten  what the  insignia looked
+
+legs  numb. I don't care what you say, Dick, I'm going to treat you  royally
+     "I see it," Arthur said and shuddered.
