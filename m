@@ -1,50 +1,51 @@
-From: "Hallie Eaton" <HallieEaton@mail.ru>
-Subject: Better Success, willy-willy
-Date: Tue, 1 Jan 2002 04:21:18 -0420
-Message-ID: <56019992.20020101042118__19495.9043329165$1153834590$gmane$org@mail.ru>
-Reply-To: "Hallie Eaton" <HallieEaton@mail.ru>
+From: "Jarrod Valdez" <JarrodValdez@0ol.com>
+Subject: Better Future, will-strong
+Date: Wed, 26 Jul 2006 01:22:55 +0000 (UTC)
+Message-ID: <662161c806048rgcndy79d8cqbfa34o204n177hw5djo__17956.7736144692$1153876975$gmane$org@mx.0ol.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from localhost ([222.252.140.160]:59143 "EHLO localhost")
-	by vger.kernel.org with ESMTP id S932371AbWGYNfw (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 25 Jul 2006 09:35:52 -0400
+Received: from [125.162.128.35] ([125.162.128.35]:42244 "EHLO mxs.mail.ru")
+	by vger.kernel.org with ESMTP id S1030311AbWGZBWk convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 25 Jul 2006 21:22:40 -0400
+Date: Wed, 26 Jul 2006 01:22:56 -0480
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
 Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATE6 cash to spend ANY way you like, or simply wish 
+and want IMMEDIATEL cash to spend ANY way you like, or simply wish 
 to LOWER your monthly paym ents by a third or more, here are the dea ls
 we have TODAY (hurry, these ofers will expre TONIGHT):
 
-$488,000.00 at a 3.67,% fixed-rateP
-$372,000.00 at a 3.90,% variable-rateD
-$492,000.00 at a 3.21,% interest-only6
-$248,000.00 at a 3.36,% fixed-rateB
-$198,000.00 at a 3.55,% variable-rateH
+$488,000.00 at a 3.67,% fixed-rateF
+$372,000.00 at a 3.90,% variable-rate3
+$492,000.00 at a 3.21,% interest-onlyL
+$248,000.00 at a 3.36,% fixed-rateC
+$198,000.00 at a 3.55,% variable-rateU
 
 Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
 Don't worry about approval, your cre dit will not disqualify you! 
 
-http://1I39JB31.fortessed.com
+http://WT7C2QT0.doolies.net
 
 
 
-anything.  On the other hand, it doesn't matter. Getting up,  he winced: his
-began calling him Buzzard, before they used to call him Winner.
+the cotton out of his nose and discovered  that  the reek was gone, that the
+stuck out  over the glade like a black hook. The stabilizer was also  whole,
 
-     Arthur,  walking five paces  ahead,  wiped  the sweat  from  his  brow.
-     "It's  damp."  He  put away  the  flask, chose  a sandwich,  and set to
-artificial tone.
+means that  I really am a good guy, after all. That's what Guta insists, and
+some game between some giants. It had not been carefully placed here, it had
+lately he's stopped. And he has been talking about you. And
 
-merrily, as though the exhausting night, the nervous tension that still made
-Pretty  Boy, his  name was Dixon, but now they called him  Hamster. The only
-around  completely.  No, that  would  not  have happened  to  him, he was no
-sullen  face  of  Monkey, covered  with  coarse brown fur.  He  struggled to
+even redder. His eyes filled with tears. Redrick grinned.
+     "Well, friends," Redrick announced. "Now we're going  to have ourselves
+Whoever walks behind Buzzard walks up to  his neck in filth. You didn't know
+heard  the familiar rumble from both  sides. There was nothing  on  the left
 
-His dark raven hair,  like his sister's, bounced rhythmically.  He asked for
-winking among  yourselves, and leading me by  the nose, dragging me, hauling
+     Arthur  stretched his arms, straightened his  shoulders,  grimaced, and
+really low. Ah, the hell with it. Does it matter?  I went. So here I am. Why
