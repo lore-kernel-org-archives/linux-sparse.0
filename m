@@ -1,51 +1,42 @@
-From: "Sheldon Daniel" <SheldonDaniel@1-base.com>
-Subject: Better Success, well-floured
-Date: Sat, 29 Jul 2006 02:07:20 +0000 (UTC)
-Message-ID: <662161c80604yqv7cy0a6qo04mvh7sivn5qw6r0atxeld__27250.9808456109$1154138840$gmane$org@mail.1-base.com>
+From: "Dirk Blake" <DirkBlake@0451.com>
+Subject: Hi, parrot bullfinch
+Date: Sat, 29 Jul 2006 11:06:04 -0540
+Message-ID: <14208159.20060729110604@0451.com>
+Reply-To: "Dirk Blake" <DirkBlake@0451.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeus2.kernel.org ([204.152.191.36]:4015 "EHLO zeus2.kernel.org")
-	by vger.kernel.org with ESMTP id S1030301AbWG2CG6 convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 28 Jul 2006 22:06:58 -0400
-Date: Sat, 29 Jul 2006 02:06:53 +0180
-Content-Disposition: inline
+Received: from [58.74.154.148] ([58.74.154.148]:8719 "EHLO i-friend")
+	by vger.kernel.org with ESMTP id S1422743AbWG2LGA (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 29 Jul 2006 07:06:00 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Your cre dit doesn't matter to us! If you OWN real est ate
-and want IMMEDIATED cash to spend ANY way you like, or simply wish 
-to LOWER your monthly paym ents by a third or more, here are the dea ls
-we have TODAY (hurry, these ofers will expre TONIGHT):
+Even if you have no erectin problems SOFT CIAPLIS 
+would help you to make BETTER SEKX MORE OFTEN!
+and to bring  unimagnable plesure to her.
 
-$488,000.00 at a 3.67,% fixed-rateL
-$372,000.00 at a 3.90,% variable-rateF
-$492,000.00 at a 3.21,% interest-only5
-$248,000.00 at a 3.36,% fixed-rate0
-$198,000.00 at a 3.55,% variable-rate2
+Just disolve half a pil under your tongue 
+and get ready for action in 15 minutes. 
 
-Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
+The tests showed that the majority of men 
+after taking this medic ation were able to have 
+PERFECT EREECTION during 36 hours!
 
-Don't worry about approval, your cre dit will not disqualify you! 
+VISIT US, AND GET OUR SPECIAL 70% DISCBOUNT OFER!
 
-http://ZFAUR53S.corkpencills.com
+http://evhllv.morelstore.com/?23283033
 
+==========
+sleep in the air, setting a course at  night  across  the  offshore  wind,
+     "It's not impossible."
+pure Outlaw, if that's the way  they  want  it.  And  I'll  make  them  so
+didn't enter the  Zone in two's. The rule is: two do the work and  the third
+you know what you're doing. Now about your control..."
+because you can't press them together,  and no one's been able to pull  them
 
-
-visible against the bright sky. Arthur sat down, shoulder deep in the slime.
-they found! Drop it, he told himself. You  have to think first, and then use
-
-that  forever, but  he forced himself to get up on  his knees, throw off the
-even redder. His eyes filled with tears. Redrick grinned.
-asking  about  the cottage--what  kind was it,  where was it,  what  did  it
-
-hills. He looked at the  map. There was an X  there, and it said "Whip" next
-from? You could go crazy from this much gunk in one place! Buzzard Burbridge
-it. Redrick listened, Feigning distraction, clucking his tongue, and shaking
-yesterday, could ask  of the Golden  Ball, He enjoyed watching Arthur frown,
-
-being  in the sun.  It obviously did  not  glow with  its  own light and  it
-winking among  yourselves, and leading me by  the nose, dragging me, hauling
+     But way off alone, out by himself beyond  boat  and  shore,  Jonathan
+     "Let's go."
