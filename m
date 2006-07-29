@@ -1,42 +1,50 @@
-From: "Dirk Blake" <DirkBlake@0451.com>
-Subject: Hi, parrot bullfinch
-Date: Sat, 29 Jul 2006 11:06:04 -0540
-Message-ID: <14208159.20060729110604@0451.com>
-Reply-To: "Dirk Blake" <DirkBlake@0451.com>
+From: "Maggie Abrams" <MaggieAbrams@mail.ru>
+Subject: Better Success, well-paid
+Date: Sat, 29 Jul 2006 18:39:52 +0300
+Message-ID: <67897476.20060729183952__8852.51345248452$1154198414$gmane$org@mail.ru>
+Reply-To: "Maggie Abrams" <MaggieAbrams@mail.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [58.74.154.148] ([58.74.154.148]:8719 "EHLO i-friend")
-	by vger.kernel.org with ESMTP id S1422743AbWG2LGA (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 29 Jul 2006 07:06:00 -0400
+Received: from nc-71-54-152-180.dhcp.embarqhsd.net ([71.54.152.180]:5173 "EHLO
+	nc-71-54-152-180.dhcp.embarqhsd.net") by vger.kernel.org with ESMTP
+	id S932204AbWG2Sjt (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 29 Jul 2006 14:39:49 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Even if you have no erectin problems SOFT CIAPLIS 
-would help you to make BETTER SEKX MORE OFTEN!
-and to bring  unimagnable plesure to her.
+Your cre dit doesn't matter to us! If you OWN real est ate
+and want IMMEDIATEZ cash to spend ANY way you like, or simply wish 
+to LOWER your monthly paym ents by a third or more, here are the dea ls
+we have TODAY (hurry, these ofers will expre TONIGHT):
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+$488,000.00 at a 3.67,% fixed-rateX
+$372,000.00 at a 3.90,% variable-rateZ
+$492,000.00 at a 3.21,% interest-only4
+$248,000.00 at a 3.36,% fixed-rateC
+$198,000.00 at a 3.55,% variable-rate3
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT EREECTION during 36 hours!
+Hurry, when these deals are gone, they are gone Simply fill out this one-min ute form... 
 
-VISIT US, AND GET OUR SPECIAL 70% DISCBOUNT OFER!
+Don't worry about approval, your cre dit will not disqualify you! 
 
-http://evhllv.morelstore.com/?23283033
+http://Q4R7LO0C.corkpencills.com
 
-==========
-sleep in the air, setting a course at  night  across  the  offshore  wind,
-     "It's not impossible."
-pure Outlaw, if that's the way  they  want  it.  And  I'll  make  them  so
-didn't enter the  Zone in two's. The rule is: two do the work and  the third
-you know what you're doing. Now about your control..."
-because you can't press them together,  and no one's been able to pull  them
 
-     But way off alone, out by himself beyond  boat  and  shore,  Jonathan
-     "Let's go."
+
+and all of him covered with a crust of oozing slime, and he felt no pity, no
+ball, when I get to the ball, I'm no Buzzard, I'll get what I want from you.
+
+     And  during all this  time, he never stopped being a  stalker.  Without
+     "Fine. And next time I'll let you have it in the teeth. If you're still
+the  Zone with Red  after  Buzzard's legs,  not  some  expendable  punk.  He
+
+     "Yes," said Arthur.
+His dark raven hair,  like his sister's, bounced rhythmically.  He asked for
+really  taken  a beating. The top buckles  had melted  and the  vials in the
+home."
+
+     Arthur shook his head, hurt.
+song. And  the repairs would be  almost free,  because he  could  apply  for
