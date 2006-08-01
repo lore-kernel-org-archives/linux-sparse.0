@@ -1,43 +1,44 @@
-From: "Rosalie Weaver" <RosalieWeaver@0451.com>
-Subject: Your health, mountain making
-Date: Sun, 30 Jul 2006 05:59:05 +0000 (UTC)
-Message-ID: <6465553996.20060730055812__22627.7306014255$1154239145$gmane$org@0451.com>
-Reply-To: "Rosalie Weaver" <RosalieWeaver@0451.com>
+From: "Caris" <dek251@74.ru>
+Subject: Re[2]:  Greeting!
+Date: Tue, 01 Aug 2006 18:23:12 +0300
+Message-ID: <009601c6b57e$63b5bf80$e418000a__14286.8761824959$1154445784$gmane$org@201-1-206-16.dsl.telesp.net.br>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain;
+	charset="windows-1251"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeus1.kernel.org ([204.152.191.4]:48854 "EHLO zeus1.kernel.org")
-	by vger.kernel.org with ESMTP id S1751177AbWG3F6k (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Jul 2006 01:58:40 -0400
-Date: Sun, 30 Jul 2006 05:58:12 +0180
+Received: from 201-1-206-16.dsl.telesp.net.br ([201.1.206.16]:25362 "EHLO
+	201-1-206-16.dsl.telesp.net.br") by vger.kernel.org with ESMTP
+	id S1751221AbWHAPW3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 1 Aug 2006 11:22:29 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-8086@vger.kernel.org
+To: Tom <linux-sound@vger.kernel.org>
 
-Even if you have no erectin problems SOFT CIA1LIS 
-would help you to make BETTER SE6X MORE OFTEN!
-and to bring  unimagnable plesure to her.
+Hello, Tom
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+I think we had correspondence a long time ago if it was not you I am sorry.
+If it was I could not answer you because my Mozilla mail manager was down for a 
+long time and I could not fix it only with my friend's help I got the emails 
+address out for me ..:)
+I hope it was whom we were corresponded with you are still interested, as I am, 
+though I realize much time has passed since then...
+I really don't know where to start ....
+Maybe you could tell me a little about yourself since I lost our early letters, 
+your appearance,age , hobbies, and are you still in the search?
+If it was you I wrote to and you are interested to get to know me better, I have 
+a profile at :
+http://dating-foryou.com/passion/
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT ER2ECTION during 36 hours!
+Don't really know what else to say for now I hope this is the right address
 
-VISIT US, AND GET OUR SPECIAL 70% DISCZOUNT OFER!
+Let me know if you are interested, And I hope
+you won't run when you see my picture :-)
 
-http://hudfmn.morelstore.com/?35416393
+Yourth faithfully,
 
-==========
-Flock: Ignore them. The gull who speaks to an Outcast is himself  Outcast.
-quickly  figured  what was what  and  dropped the cable  and  made  a  quick
-Jonathan's voice raised. "Irresponsibility? My brothers!" he  cried.  "Who
-way back, the  boot drives itself.  In other words,  it has  a mechanism,  a
-precision flying is a step toward expressing  our  real  nature.Everything
-hankies and an orchestra.
+Caris
 
-     Get down! Seagulls never fly in the dark! If you were meant to fly in
-     "How is he telling them?"
+If you think that you were subscribed by mistake for this mail
+delivery or if your email has been added without your permission,
+please, visit http://dating-foryou.com/passion/ and unsubscribe from our mails.
