@@ -1,43 +1,60 @@
-From: "Marcia Mayo" <MarciaMayo@0451.com>
-Subject: Order status, orange lily
-Date: Fri, 4 Aug 2006 18:13:51 +0000 (UTC)
-Message-ID: <662161c80604pnvb15u3c7helc975ynu3zpqc0ymaskmz__3155.72001641176$1154715231$gmane$org@mail.0451.com>
+From: Josh Triplett <josht@us.ibm.com>
+Subject: [PATCH] Use $(BINDIR) consistently in Makefile rather than
+	$(PREFIX)/bin
+Date: Mon, 07 Aug 2006 09:44:44 -0700
+Message-ID: <1154969084.14202.5.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeus1.kernel.org ([204.152.191.4]:55523 "EHLO zeus1.kernel.org")
-	by vger.kernel.org with ESMTP id S932357AbWHDSN2 convert rfc822-to-8bit
+Received: from e36.co.us.ibm.com ([32.97.110.154]:10161 "EHLO
+	e36.co.us.ibm.com") by vger.kernel.org with ESMTP id S932121AbWHGQoq
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 4 Aug 2006 14:13:28 -0400
-Date: Fri, 4 Aug 2006 18:13:42 -0480
-Content-Disposition: inline
+	Mon, 7 Aug 2006 12:44:46 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e36.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k77GijmV009101
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Mon, 7 Aug 2006 12:44:45 -0400
+Received: from d03av02.boulder.ibm.com (d03av02.boulder.ibm.com [9.17.195.168])
+	by westrelay02.boulder.ibm.com (8.13.6/NCO/VER7.0) with ESMTP id k77GiiY3268980
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Mon, 7 Aug 2006 10:44:44 -0600
+Received: from d03av02.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av02.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k77GiiIB008206
+	for <linux-sparse@vger.kernel.org>; Mon, 7 Aug 2006 10:44:44 -0600
+Received: from dyn9047018143.beaverton.ibm.com (dyn9047018143.beaverton.ibm.com [9.47.18.143])
+	by d03av02.boulder.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k77GiiQU008184
+	for <linux-sparse@vger.kernel.org>; Mon, 7 Aug 2006 10:44:44 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-8086@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Even if you have no erectin problems SOFT CIAFLIS 
-would help you to make BETTER SE4X MORE OFTEN!
-and to bring  unimagnable plesure to her.
+The Makefile has variables for both PREFIX (default $(HOME)) and BINDIR
+(default $(PREFIX)/bin); however, it then uses $(PREFIX)/bin in several other
+places, making it difficult to install to an alternate BINDIR.  Fix this by
+using $(BINDIR) consistently throughout the Makefile.
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+Signed-off-by: Josh Triplett <josh@freedesktop.org>
+---
+ Makefile |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT ERXECTION during 36 hours!
-
-VISIT US, AND GET OUR SPECIAL 70% DISCROUNT OFER!
-
-http://wkmbdd.markerbeach.com/?99591414
-
-=====
-but he didn't appear to notice. He held  his  practice  sessions  directly
-stupid map?
-through the night, and all so peaceful and still...
-looks  of those  two hillocks!  A  straight line to  the  asphalt led  right
-startled that you obliged them so well."
-But  what  was  the  silvery thing  shining  back  there?  Was  it  just  my
-
-     "I don't think  so.  The Pilman  Radiant wasn't the first, nor  was  it
-order you to start walking on your hands you will immediately hoist your fat
+diff --git a/Makefile b/Makefile
+index 378ee72..6755e07 100644
+--- a/Makefile
++++ b/Makefile
+@@ -45,11 +45,11 @@ #
+ #		"The better to keep you on your toes, my dear".
+ #
+ install: check $(SLIB_FILE) bin-dir
+-	if test $< -nt $(PREFIX)/bin/sparse ; then install -v $< $(BINDIR)/sparse ; install -v $(SLIB_FILE) $(BINDIR) ; fi
++	if test $< -nt $(BINDIR)/sparse ; then install -v $< $(BINDIR)/sparse ; install -v $(SLIB_FILE) $(BINDIR) ; fi
+ 
+ bin-dir:
+-	@if ! test -d $(PREFIX)/bin; then \
+-		echo "No '$(PREFIX)/bin' directory to install in"; \
++	@if ! test -d $(BINDIR); then \
++		echo "No '$(BINDIR)' directory to install in"; \
+ 		echo "Please create it and add it to your PATH"; \
+ 		exit 1; \
+ 	fi
