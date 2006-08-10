@@ -1,43 +1,63 @@
-From: "Marlon Gould" <MarlonGould@0451.com>
-Subject: Your money, Mindel-riss
-Date: Mon, 7 Aug 2006 18:31:30 +0000 (UTC)
-Message-ID: <80393208.20060807183004@0451.com>
-Reply-To: "Marlon Gould" <MarlonGould@0451.com>
+From: "PIDA INC" <pidaincn15@hotmail.com>
+Subject: COMPLIMENT! PIDA INC LOAN.
+Date: Thu, 10 Aug 2006 22:58:58 +0000
+Message-ID: <BAY18-F16B740F5AF1D79D8108798DD4A0__21046.8474579558$1155250797$gmane$org@phx.gbl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; format=flowed
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e177011089.adsl.alicedsl.de ([85.177.11.89]:13581 "EHLO
-	e177011089.adsl.alicedsl.de") by vger.kernel.org with ESMTP
-	id S932283AbWHGS3x (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 7 Aug 2006 14:29:53 -0400
-Date: Mon, 7 Aug 2006 18:30:04 -0060
+Received: from bay0-omc1-s22.bay0.hotmail.com ([65.54.246.94]:45350 "EHLO
+	bay0-omc1-s22.bay0.hotmail.com") by vger.kernel.org with ESMTP
+	id S932122AbWHJW7C (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 10 Aug 2006 18:59:02 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-8086@vger.kernel.org
 
-Even if you have no erectin problems SOFT CIAMLIS 
-would help you to make BETTER SE4X MORE OFTEN!
-and to bring  unimagnable plesure to her.
+PRUDENT INDUSTRIAL DEVELOPMENT AGENCY(PIDA INC)
+Educating And Granting Of Loans.
+A symbol of entrepreneural relationship and growth.
 
-Just disolve half a pil under your tongue 
-and get ready for action in 15 minutes. 
+Email: pidainc26@yahoo.co.nz
 
-The tests showed that the majority of men 
-after taking this medic ation were able to have 
-PERFECT ERAECTION during 36 hours!
+Dear Sir/Madam,
 
-VISIT US, AND GET OUR SPECIAL 70% DISCCOUNT OFER!
+I write to you based on a request by an investor and his need for 
+investment/funding in your country. My name is MR LARRY GREEN, a financial 
+consultant with PRUDENT INDUSTRIAL DEVELOPMENT AGENCY (PIDA INC) which is a 
+reputable financial services firm. My company most times represents the 
+interests of very wealthy investors. Due to the sensitivity of the position 
+they hold in their society and the unstable investment environment of their 
+country, they evacuate majority of their funds into more stable economies 
+and developed nations where they can get good yield for their money.
 
-http://mwddcf.forgettry.net/?83283351
+I was recently approached by a Reserved Client, whom I had personally worked 
+with a few years ago with a proposal. What he request is an individual such 
+as you, who will be willing to receive money on his behalf abroad, and put 
+it to good use for a period not exceeding 6 years for a start.
 
-==========
-     "I don't care what they say," he thought  fiercely,  and  his  vision
-nearer to Heaven."
-end it all.
-I won't take Tender along.  What do you  think, Red? Maybe I  shouldn't take
-fourteen miles per hour! It was a breakthrough, the greatest single moment
-borders in Rexopolis.  The  flying boot was  waiting  for us, brought by the
+The client has offered these terms: 1. 10% commission paid to me and my 
+foreign partner of the total funds successfully evacuated. The funds in 
+question are over 13.2Million US Dollars.
 
-dazzling clear skies... in the very times when every other gull  stood  on
-somewhere around here, then there wouldn't  even be  a little damp spot left
+2. The funds will be used by the foreign partner for six years as a loan 
+without any interest. That is, you do not pay any interest on the money but 
+you give the client 50% of all profits after tax that accrued from the use 
+of the funds.
+
+If these terms are agreeable to you, kindly let me know and I will provide 
+you with all necessary information and procedures involved.
+
+
+All reply should be sent to this Email: pidainc26@yahoo.co.nz    for urgent 
+attendance.
+
+Sincerely yours,
+MR. LARRY GREEN
+Consultant Officer PIDA INC. Belfast
+Email:pidainc26@yahoo.co.nz
+
+PS* The client is willing to make available the fund to your possession and 
+in your country within 7days of confirmation of your capabilities.
+
+_________________________________________________________________
+Don’t just search. Find. Check out the new MSN Search! 
+http://search.msn.click-url.com/go/onm00200636ave/direct/01/
