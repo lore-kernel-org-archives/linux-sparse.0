@@ -1,63 +1,161 @@
-From: "PIDA INC" <pidaincn15@hotmail.com>
-Subject: COMPLIMENT! PIDA INC LOAN.
-Date: Thu, 10 Aug 2006 22:58:58 +0000
-Message-ID: <BAY18-F16B740F5AF1D79D8108798DD4A0__21046.8474579558$1155250797$gmane$org@phx.gbl>
+From: Josh Triplett <josht@us.ibm.com>
+Subject: [PATCH] Add backend to graph basic blocks
+Date: Fri, 11 Aug 2006 18:37:11 -0700
+Message-ID: <1155346631.22069.5.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; format=flowed
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bay0-omc1-s22.bay0.hotmail.com ([65.54.246.94]:45350 "EHLO
-	bay0-omc1-s22.bay0.hotmail.com") by vger.kernel.org with ESMTP
-	id S932122AbWHJW7C (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 10 Aug 2006 18:59:02 -0400
+Received: from e35.co.us.ibm.com ([32.97.110.153]:38353 "EHLO
+	e35.co.us.ibm.com") by vger.kernel.org with ESMTP id S932462AbWHLBhO
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 11 Aug 2006 21:37:14 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e35.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k7C1bC7j021405
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 21:37:12 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by westrelay02.boulder.ibm.com (8.13.6/NCO/VER7.0) with ESMTP id k7C1bCA0312278
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:12 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k7C1bB3u020643
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:12 -0600
+Received: from dyn9047018143.beaverton.ibm.com (dyn9047018143.beaverton.ibm.com [9.47.18.143])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k7C1bBAh020638
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:11 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-PRUDENT INDUSTRIAL DEVELOPMENT AGENCY(PIDA INC)
-Educating And Granting Of Loans.
-A symbol of entrepreneural relationship and growth.
+Add a new backend program which parses the input files, processes them =
+through
+the linearization pass, and outputs a graphviz graph of the resulting b=
+asic
+blocks.  Each entrypoint gets labelled by name, but for now the basic b=
+locks
+just get labelled with the address of the basic_block structure.
 
-Email: pidainc26@yahoo.co.nz
+Signed-off-by: Josh Triplett <josh@freedesktop.org>
+---
+ .gitignore |    1 +
+ Makefile   |    6 +++++-
+ graph.c    |   63 ++++++++++++++++++++++++++++++++++++++++++++++++++++=
+++++++++
+ 3 files changed, 69 insertions(+), 1 deletions(-)
 
-Dear Sir/Madam,
-
-I write to you based on a request by an investor and his need for 
-investment/funding in your country. My name is MR LARRY GREEN, a financial 
-consultant with PRUDENT INDUSTRIAL DEVELOPMENT AGENCY (PIDA INC) which is a 
-reputable financial services firm. My company most times represents the 
-interests of very wealthy investors. Due to the sensitivity of the position 
-they hold in their society and the unstable investment environment of their 
-country, they evacuate majority of their funds into more stable economies 
-and developed nations where they can get good yield for their money.
-
-I was recently approached by a Reserved Client, whom I had personally worked 
-with a few years ago with a proposal. What he request is an individual such 
-as you, who will be willing to receive money on his behalf abroad, and put 
-it to good use for a period not exceeding 6 years for a start.
-
-The client has offered these terms: 1. 10% commission paid to me and my 
-foreign partner of the total funds successfully evacuated. The funds in 
-question are over 13.2Million US Dollars.
-
-2. The funds will be used by the foreign partner for six years as a loan 
-without any interest. That is, you do not pay any interest on the money but 
-you give the client 50% of all profits after tax that accrued from the use 
-of the funds.
-
-If these terms are agreeable to you, kindly let me know and I will provide 
-you with all necessary information and procedures involved.
-
-
-All reply should be sent to this Email: pidainc26@yahoo.co.nz    for urgent 
-attendance.
-
-Sincerely yours,
-MR. LARRY GREEN
-Consultant Officer PIDA INC. Belfast
-Email:pidainc26@yahoo.co.nz
-
-PS* The client is willing to make available the fund to your possession and 
-in your country within 7days of confirmation of your capabilities.
-
-_________________________________________________________________
-Don’t just search. Find. Check out the new MSN Search! 
-http://search.msn.click-url.com/go/onm00200636ave/direct/01/
+diff --git a/.gitignore b/.gitignore
+index 32d6e70..3e12ce7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -13,6 +13,7 @@ test-parsing
+ obfuscate
+ check
+ compile
++graph
+ test-dissect
+ test-linearize
+ example
+diff --git a/Makefile b/Makefile
+index 378ee72..e71f360 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ # LDFLAGS +=3D -Wl,-rpath,$(BINDIR)
+=20
+ PREFIX=3D$(HOME)
+ BINDIR=3D$(PREFIX)/bin
+-PROGRAMS=3Dtest-lexing test-parsing obfuscate check compile test-linea=
+rize example test-unssa test-dissect
++PROGRAMS=3Dtest-lexing test-parsing obfuscate check compile graph test=
+-linearize example test-unssa test-dissect
+=20
+ LIB_H=3D    token.h parse.h lib.h symbol.h scope.h expression.h target=
+=2Eh \
+ 	  linearize.h bitmap.h ident-list.h compat.h flow.h allocate.h \
+@@ -77,6 +77,9 @@ obfuscate: obfuscate.o $(LIBS)
+ check: check.o $(LIBS)
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
+=20
++graph: graph.o $(LIBS)
++	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
++
+ example: example.o $(LIBS)
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
+=20
+@@ -123,6 +126,7 @@ obfuscate.o: $(LIB_H)
+ example.o: $(LIB_H)
+ storage.o: $(LIB_H) storage.h
+ dissect.o: $(LIB_H) dissect.h
++graph.o: $(LIB_H)
+=20
+ compat-linux.o: compat/strtold.c compat/mmap-blob.c \
+ 	$(LIB_H)
+diff --git a/graph.c b/graph.c
+new file mode 100644
+index 0000000..db940ae
+--- /dev/null
++++ b/graph.c
+@@ -0,0 +1,63 @@
++/* Copyright =C2=A9 International Business Machines Corp., 2006
++ *
++ * Author: Josh Triplett <josh@freedesktop.org>
++ *
++ * Licensed under the Open Software License version 1.1
++ */
++#include <stdarg.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <ctype.h>
++#include <unistd.h>
++#include <fcntl.h>
++
++#include "lib.h"
++#include "allocate.h"
++#include "token.h"
++#include "parse.h"
++#include "symbol.h"
++#include "expression.h"
++#include "linearize.h"
++
++static void graph_ep(struct entrypoint *ep)
++{
++	struct basic_block *bb;
++
++	printf("ep%p [label=3D\"%s\",shape=3Dellipse];\n",
++	       ep, show_ident(ep->name->ident));
++	FOR_EACH_PTR(ep->bbs, bb) {
++		printf("bb%p [shape=3Drecord,label=3D\"bb at %p\"]\n", bb, bb);
++	} END_FOR_EACH_PTR(bb);
++	FOR_EACH_PTR(ep->bbs, bb) {
++		struct basic_block *child;
++		FOR_EACH_PTR(bb->children, child) {
++			printf("bb%p -> bb%p;\n", bb, child);
++		} END_FOR_EACH_PTR(child);
++	} END_FOR_EACH_PTR(bb);
++	printf("ep%p -> bb%p;\n", ep, ep->entry->bb);
++}
++
++static void graph_symbols(struct symbol_list *list)
++{
++	struct symbol *sym;
++
++	FOR_EACH_PTR(list, sym) {
++		struct entrypoint *ep;
++
++		expand_symbol(sym);
++		ep =3D linearize_symbol(sym);
++		if (ep)
++			graph_ep(ep);
++	} END_FOR_EACH_PTR(sym);
++}
++
++int main(int argc, char **argv)
++{
++	printf("digraph control_flow {\n");
++	graph_symbols(sparse_initialize(argc, argv));
++	while (*argv)
++		graph_symbols(sparse(argv));
++	printf("}\n");
++	return 0;
++}
