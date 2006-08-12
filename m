@@ -1,161 +1,30 @@
-From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH] Add backend to graph basic blocks
-Date: Fri, 11 Aug 2006 18:37:11 -0700
-Message-ID: <1155346631.22069.5.camel@josh-work.beaverton.ibm.com>
+From: "Folv" <Multik@74.ru>
+Subject: Ave...
+Date: Sat, 12 Aug 2006 18:22:19 +0300
+Message-ID: <008801c6be23$1578aa00$6320000a__5363.59218317575$1155396172$gmane$org@201-43-133-108.dsl.telesp.net.br>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain;
+	charset="windows-1251"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e35.co.us.ibm.com ([32.97.110.153]:38353 "EHLO
-	e35.co.us.ibm.com") by vger.kernel.org with ESMTP id S932462AbWHLBhO
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Aug 2006 21:37:14 -0400
-Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
-	by e35.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k7C1bC7j021405
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 21:37:12 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by westrelay02.boulder.ibm.com (8.13.6/NCO/VER7.0) with ESMTP id k7C1bCA0312278
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:12 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k7C1bB3u020643
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:12 -0600
-Received: from dyn9047018143.beaverton.ibm.com (dyn9047018143.beaverton.ibm.com [9.47.18.143])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k7C1bBAh020638
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2006 19:37:11 -0600
+Received: from 201-43-133-108.dsl.telesp.net.br ([201.43.133.108]:14345 "EHLO
+	201-43-133-108.dsl.telesp.net.br") by vger.kernel.org with ESMTP
+	id S964860AbWHLPVg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 12 Aug 2006 11:21:36 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Thomas <linux-sparse@vger.kernel.org>
 
-Add a new backend program which parses the input files, processes them =
-through
-the linearization pass, and outputs a graphviz graph of the resulting b=
-asic
-blocks.  Each entrypoint gets labelled by name, but for now the basic b=
-locks
-just get labelled with the address of the basic_block structure.
+Hi my Dear Stranger!
 
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
----
- .gitignore |    1 +
- Makefile   |    6 +++++-
- graph.c    |   63 ++++++++++++++++++++++++++++++++++++++++++++++++++++=
-++++++++
- 3 files changed, 69 insertions(+), 1 deletions(-)
+I am a lovely and lonely Lady who is looking for the man who will make me happy and whom I want to feel like in paradise with!
+If you want to be my beautiful Hero who will save me from this loneliness find me 
+http://www.justwaitingforyou.com/loveyou/
+and wake me up with a warm kiss.
 
-diff --git a/.gitignore b/.gitignore
-index 32d6e70..3e12ce7 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -13,6 +13,7 @@ test-parsing
- obfuscate
- check
- compile
-+graph
- test-dissect
- test-linearize
- example
-diff --git a/Makefile b/Makefile
-index 378ee72..e71f360 100644
---- a/Makefile
-+++ b/Makefile
-@@ -21,7 +21,7 @@ # LDFLAGS +=3D -Wl,-rpath,$(BINDIR)
-=20
- PREFIX=3D$(HOME)
- BINDIR=3D$(PREFIX)/bin
--PROGRAMS=3Dtest-lexing test-parsing obfuscate check compile test-linea=
-rize example test-unssa test-dissect
-+PROGRAMS=3Dtest-lexing test-parsing obfuscate check compile graph test=
--linearize example test-unssa test-dissect
-=20
- LIB_H=3D    token.h parse.h lib.h symbol.h scope.h expression.h target=
-=2Eh \
- 	  linearize.h bitmap.h ident-list.h compat.h flow.h allocate.h \
-@@ -77,6 +77,9 @@ obfuscate: obfuscate.o $(LIBS)
- check: check.o $(LIBS)
- 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-=20
-+graph: graph.o $(LIBS)
-+	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+
- example: example.o $(LIBS)
- 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-=20
-@@ -123,6 +126,7 @@ obfuscate.o: $(LIB_H)
- example.o: $(LIB_H)
- storage.o: $(LIB_H) storage.h
- dissect.o: $(LIB_H) dissect.h
-+graph.o: $(LIB_H)
-=20
- compat-linux.o: compat/strtold.c compat/mmap-blob.c \
- 	$(LIB_H)
-diff --git a/graph.c b/graph.c
-new file mode 100644
-index 0000000..db940ae
---- /dev/null
-+++ b/graph.c
-@@ -0,0 +1,63 @@
-+/* Copyright =C2=A9 International Business Machines Corp., 2006
-+ *
-+ * Author: Josh Triplett <josh@freedesktop.org>
-+ *
-+ * Licensed under the Open Software License version 1.1
-+ */
-+#include <stdarg.h>
-+#include <stdlib.h>
-+#include <stdio.h>
-+#include <string.h>
-+#include <ctype.h>
-+#include <unistd.h>
-+#include <fcntl.h>
-+
-+#include "lib.h"
-+#include "allocate.h"
-+#include "token.h"
-+#include "parse.h"
-+#include "symbol.h"
-+#include "expression.h"
-+#include "linearize.h"
-+
-+static void graph_ep(struct entrypoint *ep)
-+{
-+	struct basic_block *bb;
-+
-+	printf("ep%p [label=3D\"%s\",shape=3Dellipse];\n",
-+	       ep, show_ident(ep->name->ident));
-+	FOR_EACH_PTR(ep->bbs, bb) {
-+		printf("bb%p [shape=3Drecord,label=3D\"bb at %p\"]\n", bb, bb);
-+	} END_FOR_EACH_PTR(bb);
-+	FOR_EACH_PTR(ep->bbs, bb) {
-+		struct basic_block *child;
-+		FOR_EACH_PTR(bb->children, child) {
-+			printf("bb%p -> bb%p;\n", bb, child);
-+		} END_FOR_EACH_PTR(child);
-+	} END_FOR_EACH_PTR(bb);
-+	printf("ep%p -> bb%p;\n", ep, ep->entry->bb);
-+}
-+
-+static void graph_symbols(struct symbol_list *list)
-+{
-+	struct symbol *sym;
-+
-+	FOR_EACH_PTR(list, sym) {
-+		struct entrypoint *ep;
-+
-+		expand_symbol(sym);
-+		ep =3D linearize_symbol(sym);
-+		if (ep)
-+			graph_ep(ep);
-+	} END_FOR_EACH_PTR(sym);
-+}
-+
-+int main(int argc, char **argv)
-+{
-+	printf("digraph control_flow {\n");
-+	graph_symbols(sparse_initialize(argc, argv));
-+	while (*argv)
-+		graph_symbols(sparse(argv));
-+	printf("}\n");
-+	return 0;
-+}
+good-bye,
+Folv A.
+
+If you think that you were subscribed by mistake for this mail
+delivery or if your email has been added without your permission,
+please, visit http://justwaitingforyou.com/loveyou/ and unsubscribe from our mails.
