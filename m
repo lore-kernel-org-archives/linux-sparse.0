@@ -1,69 +1,33 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: [PATCH] Recognize and ignore __alias__ and __visibility__
-Date: Sun, 13 Aug 2006 01:51:58 -0400
-Message-ID: <20060813055158.28706.93407.stgit@dv.roinet.com>
-Content-Type: text/plain; charset=utf-8; format=fixed
-Content-Transfer-Encoding: 8bit
+From: NewsAlert <hitchcock@letterbox.org>
+Subject: Mortgage Servicing News Sun, 13 Aug 2006 12:14:10 +0200
+Date: Sun, 13 Aug 2006 05:15:10 -0500
+Message-ID: <spew.auxiliary__40288.501562509$1155460302$gmane$org@akin>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from h-64-105-159-118.phlapafg.covad.net ([64.105.159.118]:39866
-	"EHLO smtp.roinet.com") by vger.kernel.org with ESMTP
-	id S1750701AbWHMFwB (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 13 Aug 2006 01:52:01 -0400
-Received: from dv.roinet.com (192.168.1.21 [192.168.1.21])
-    by smtp.roinet.com with SMTP;
-    for linux-sparse@vger.kernel.org;
-    Sun, 13 Aug 2006 01:55:57 -0400 (EDT)
-    (envelope-from proski@gnu.org)
+Received: from pool-70-110-44-232.sea.dsl-w.verizon.net ([70.110.44.232]:42756
+	"HELO pool-70-110-44-232.sea.dsl-w.verizon.net") by vger.kernel.org
+	with SMTP id S1750766AbWHMJLd (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 13 Aug 2006 05:11:33 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: linux-ide@vger.kernel.org
 
-From: Pavel Roskin <proski@gnu.org>
+Hello,
 
-They are equivalent to "alias" and "visibility" except that gcc won't
-complain about them in ANSI programs.
+We tried contacting you awhile ago about your low interest mor/tag rate.
 
-Signed-off-by: Pavel Roskin <proski@gnu.org>
----
+You have qualified for the lowest rate in years...
 
- ident-list.h |    4 ++--
- parse.c      |    4 ++++
- 2 files changed, 6 insertions(+), 2 deletions(-)
+You could get over 380,000 for as little as 500 a month!
 
-diff --git a/ident-list.h b/ident-list.h
-index 95bb96a..ecdce6d 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -56,8 +56,8 @@ IDENT(__const); IDENT(__const__); IDENT(
- IDENT(__noreturn__); IDENT(regparm); IDENT(weak); IDENT(__weak__);
- IDENT(__no_instrument_function__); IDENT(no_instrument_function);
- IDENT(__sentinel__); IDENT(sentinel);
--IDENT(alias); IDENT(pure); IDENT(always_inline);
--IDENT(syscall_linkage); IDENT(visibility);
-+IDENT(alias); IDENT(__alias__); IDENT(pure); IDENT(always_inline);
-+IDENT(syscall_linkage); IDENT(visibility); IDENT(__visibility__);
- IDENT(bitwise); IDENT(__bitwise__);
- IDENT(model); IDENT(__model__);
- IDENT(__format_arg__);
-diff --git a/parse.c b/parse.c
-index c536ec2..1c9aab8 100644
---- a/parse.c
-+++ b/parse.c
-@@ -530,6 +530,8 @@ static const char * handle_attribute(str
- 		return NULL;
- 	if (attribute == &alias_ident)
- 		return NULL;
-+	if (attribute == &__alias___ident)
-+		return NULL;
- 	if (attribute == &pure_ident ||
- 	    attribute == &__pure___ident)
- 		return NULL;
-@@ -539,6 +541,8 @@ static const char * handle_attribute(str
- 		return NULL;
- 	if (attribute == &visibility_ident)
- 		return NULL;
-+	if (attribute == &__visibility___ident)
-+		return NULL;
- 	if (attribute == &deprecated_ident ||
- 	    attribute == &__deprecated___ident)
- 		return NULL;
+B ad credit? Doesn't matter, low rates are fixed no matter what!
+
+To get a free, no oblig-ation consultation click below:
+
+http://neckerchiefloving.com/
+
+Regards,
+Vicki Brooks
