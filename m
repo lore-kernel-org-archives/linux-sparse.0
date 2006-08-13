@@ -1,30 +1,69 @@
-From: "Folv" <Multik@74.ru>
-Subject: Ave...
-Date: Sat, 12 Aug 2006 18:22:19 +0300
-Message-ID: <008801c6be23$1578aa00$6320000a__5363.59218317575$1155396172$gmane$org@201-43-133-108.dsl.telesp.net.br>
-Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="windows-1251"
+From: Pavel Roskin <proski@gnu.org>
+Subject: [PATCH] Recognize and ignore __alias__ and __visibility__
+Date: Sun, 13 Aug 2006 01:51:58 -0400
+Message-ID: <20060813055158.28706.93407.stgit@dv.roinet.com>
+Content-Type: text/plain; charset=utf-8; format=fixed
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 201-43-133-108.dsl.telesp.net.br ([201.43.133.108]:14345 "EHLO
-	201-43-133-108.dsl.telesp.net.br") by vger.kernel.org with ESMTP
-	id S964860AbWHLPVg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 12 Aug 2006 11:21:36 -0400
+Received: from h-64-105-159-118.phlapafg.covad.net ([64.105.159.118]:39866
+	"EHLO smtp.roinet.com") by vger.kernel.org with ESMTP
+	id S1750701AbWHMFwB (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 13 Aug 2006 01:52:01 -0400
+Received: from dv.roinet.com (192.168.1.21 [192.168.1.21])
+    by smtp.roinet.com with SMTP;
+    for linux-sparse@vger.kernel.org;
+    Sun, 13 Aug 2006 01:55:57 -0400 (EDT)
+    (envelope-from proski@gnu.org)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Thomas <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-Hi my Dear Stranger!
+From: Pavel Roskin <proski@gnu.org>
 
-I am a lovely and lonely Lady who is looking for the man who will make me happy and whom I want to feel like in paradise with!
-If you want to be my beautiful Hero who will save me from this loneliness find me 
-http://www.justwaitingforyou.com/loveyou/
-and wake me up with a warm kiss.
+They are equivalent to "alias" and "visibility" except that gcc won't
+complain about them in ANSI programs.
 
-good-bye,
-Folv A.
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
 
-If you think that you were subscribed by mistake for this mail
-delivery or if your email has been added without your permission,
-please, visit http://justwaitingforyou.com/loveyou/ and unsubscribe from our mails.
+ ident-list.h |    4 ++--
+ parse.c      |    4 ++++
+ 2 files changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/ident-list.h b/ident-list.h
+index 95bb96a..ecdce6d 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -56,8 +56,8 @@ IDENT(__const); IDENT(__const__); IDENT(
+ IDENT(__noreturn__); IDENT(regparm); IDENT(weak); IDENT(__weak__);
+ IDENT(__no_instrument_function__); IDENT(no_instrument_function);
+ IDENT(__sentinel__); IDENT(sentinel);
+-IDENT(alias); IDENT(pure); IDENT(always_inline);
+-IDENT(syscall_linkage); IDENT(visibility);
++IDENT(alias); IDENT(__alias__); IDENT(pure); IDENT(always_inline);
++IDENT(syscall_linkage); IDENT(visibility); IDENT(__visibility__);
+ IDENT(bitwise); IDENT(__bitwise__);
+ IDENT(model); IDENT(__model__);
+ IDENT(__format_arg__);
+diff --git a/parse.c b/parse.c
+index c536ec2..1c9aab8 100644
+--- a/parse.c
++++ b/parse.c
+@@ -530,6 +530,8 @@ static const char * handle_attribute(str
+ 		return NULL;
+ 	if (attribute == &alias_ident)
+ 		return NULL;
++	if (attribute == &__alias___ident)
++		return NULL;
+ 	if (attribute == &pure_ident ||
+ 	    attribute == &__pure___ident)
+ 		return NULL;
+@@ -539,6 +541,8 @@ static const char * handle_attribute(str
+ 		return NULL;
+ 	if (attribute == &visibility_ident)
+ 		return NULL;
++	if (attribute == &__visibility___ident)
++		return NULL;
+ 	if (attribute == &deprecated_ident ||
+ 	    attribute == &__deprecated___ident)
+ 		return NULL;
