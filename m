@@ -1,37 +1,99 @@
-From: "Mack Frey" <MackFrey@1-call.com>
-Subject: Better Future, wing-borne
-Date: Mon, 14 Aug 2006 15:34:15 -0120
-Message-ID: <662161c80604s0zpnxfc1yanmq6xbptzydg9bwsz2cpi__20699.8808928349$1155569701$gmane$org@mailscanner.1-call.com>
+From: Josh Triplett <josht@us.ibm.com>
+Subject: Re: [PATCH] Recognize and ignore __alias__ and __visibility__
+Date: Mon, 14 Aug 2006 08:52:25 -0700
+Message-ID: <1155570745.5410.8.camel@josh-work.beaverton.ibm.com>
+References: <20060813055158.28706.93407.stgit@dv.roinet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [85.101.169.62] ([85.101.169.62]:47625 "EHLO pro2000")
-	by vger.kernel.org with ESMTP id S1750783AbWHNPeT convert rfc822-to-8bit
+Received: from e32.co.us.ibm.com ([32.97.110.150]:23487 "EHLO
+	e32.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751440AbWHNPw1
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 14 Aug 2006 11:34:19 -0400
-Content-Disposition: inline
+	Mon, 14 Aug 2006 11:52:27 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e32.co.us.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id k7EFqPxH002848
+	for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2006 11:52:25 -0400
+Received: from d03av04.boulder.ibm.com (d03av04.boulder.ibm.com [9.17.195.170])
+	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k7EFqPo0031702
+	for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2006 09:52:25 -0600
+Received: from d03av04.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av04.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k7EFqORi012553
+	for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2006 09:52:24 -0600
+In-Reply-To: <20060813055158.28706.93407.stgit@dv.roinet.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-8086@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-We sent you an email a while ago, because you qualified for a   
-much lower rate based on our records from a national database.   
-Why is this? Because currently it is a buyers market with the   
-lowest rates in years.
-   
-You can now get $325,000 for as little as $709 a month at as low as 3.75%!   
-We realize many homeowners struggle and that makes it difficult   
-to maintain good credit. But we specialize in poor credit cases- helping you   
-to refinance even with bad credt, helping you lower your monthly   
-burden and build back your credt.   
+On Sun, 2006-08-13 at 01:51 -0400, Pavel Roskin wrote:
+> diff --git a/parse.c b/parse.c
+> index c536ec2..1c9aab8 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -530,6 +530,8 @@ static const char * handle_attribute(str
+>  		return NULL;
+>  	if (attribute == &alias_ident)
+>  		return NULL;
+> +	if (attribute == &__alias___ident)
+> +		return NULL;
+>  	if (attribute == &pure_ident ||
+>  	    attribute == &__pure___ident)
+>  		return NULL;
+> @@ -539,6 +541,8 @@ static const char * handle_attribute(str
+>  		return NULL;
+>  	if (attribute == &visibility_ident)
+>  		return NULL;
+> +	if (attribute == &__visibility___ident)
+> +		return NULL;
+>  	if (attribute == &deprecated_ident ||
+>  	    attribute == &__deprecated___ident)
+>  		return NULL;
 
-You will receive the lowest rate possible in your special circumstance   
-   
-You can fill out this quick form and be approved within 24 hours:  
+Stylistically, it looks like all of the existing ignored keywords in
+this function use a single combined if condition for the underscored and
+non-underscored versions of a given keyword, rather than two separate if
+conditions.  For consistency, what about something like the following
+instead:
 
-http://PSJX.cnf2e.com
+diff --git a/ident-list.h b/ident-list.h
+index 95bb96a..ecdce6d 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -56,8 +56,8 @@ IDENT(__const); IDENT(__const__); IDENT(
+ IDENT(__noreturn__); IDENT(regparm); IDENT(weak); IDENT(__weak__);
+ IDENT(__no_instrument_function__); IDENT(no_instrument_function);
+ IDENT(__sentinel__); IDENT(sentinel);
+-IDENT(alias); IDENT(pure); IDENT(always_inline);
+-IDENT(syscall_linkage); IDENT(visibility);
++IDENT(alias); IDENT(__alias__); IDENT(pure); IDENT(always_inline);
++IDENT(syscall_linkage); IDENT(visibility); IDENT(__visibility__);
+ IDENT(bitwise); IDENT(__bitwise__);
+ IDENT(model); IDENT(__model__);
+ IDENT(__format_arg__);
+diff --git a/parse.c b/parse.c
+index c536ec2..6857541 100644
+--- a/parse.c
++++ b/parse.c
+@@ -528,7 +528,8 @@ static const char * handle_attribute(str
+ 	if (attribute == &weak_ident ||
+ 	    attribute == &__weak___ident)
+ 		return NULL;
+-	if (attribute == &alias_ident)
++	if (attribute == &alias_ident ||
++	    attribute == &__alias___ident)
+ 		return NULL;
+ 	if (attribute == &pure_ident ||
+ 	    attribute == &__pure___ident)
+@@ -537,7 +538,8 @@ static const char * handle_attribute(str
+ 		return NULL;
+ 	if (attribute == &syscall_linkage_ident)
+ 		return NULL;
+-	if (attribute == &visibility_ident)
++	if (attribute == &visibility_ident ||
++	    attribute == &__visibility___ident)
+ 		return NULL;
+ 	if (attribute == &deprecated_ident ||
+ 	    attribute == &__deprecated___ident)
 
-=======================
-and bottle  of catsup were  ready  for him. Wait until he had slurped up all
-     "All  right," he said.  "Let's  say  that  the Golden Ball really--what
+- Josh Triplett
