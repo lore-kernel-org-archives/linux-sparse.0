@@ -1,35 +1,37 @@
-From: "Woodrow Busby" <WoodrowBusby@0451.com>
-Subject: Order status, nickel ocher
-Date: Sun, 13 Aug 2006 16:54:46 +0000 (UTC)
-Message-ID: <7333494693.20060813165436__10724.2551552647$1155488086$gmane$org@0451.com>
-Reply-To: "Woodrow Busby" <WoodrowBusby@0451.com>
+From: "Mack Frey" <MackFrey@1-call.com>
+Subject: Better Future, wing-borne
+Date: Mon, 14 Aug 2006 15:34:15 -0120
+Message-ID: <662161c80604s0zpnxfc1yanmq6xbptzydg9bwsz2cpi__20699.8808928349$1155569701$gmane$org@mailscanner.1-call.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 200-127-131-189.dsl.prima.net.ar ([200.127.131.189]:48392 "EHLO
-	maquina") by vger.kernel.org with ESMTP id S1751317AbWHMQyb (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 13 Aug 2006 12:54:31 -0400
-Date: Sun, 13 Aug 2006 16:54:36 +0180
+Received: from [85.101.169.62] ([85.101.169.62]:47625 "EHLO pro2000")
+	by vger.kernel.org with ESMTP id S1750783AbWHNPeT convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 14 Aug 2006 11:34:19 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-8086@vger.kernel.org
 
-Worried about the loss of erectoin? EVEN if you have no 
-erectoin problems SOFT CIADLIS would help you to bring 
-back some romantic moments that u lost in past.
+We sent you an email a while ago, because you qualified for a   
+much lower rate based on our records from a national database.   
+Why is this? Because currently it is a buyers market with the   
+lowest rates in years.
+   
+You can now get $325,000 for as little as $709 a month at as low as 3.75%!   
+We realize many homeowners struggle and that makes it difficult   
+to maintain good credit. But we specialize in poor credit cases- helping you   
+to refinance even with bad credt, helping you lower your monthly   
+burden and build back your credt.   
 
-Just disolve half a pil under your tongue and get ready for action 
-in 15 minutes. SOFT CIA1LIS! It makes your lovemaking incredible!
+You will receive the lowest rate possible in your special circumstance   
+   
+You can fill out this quick form and be approved within 24 hours:  
 
-VISIT US TODAY, AND GET OUR SPECIAL 70% DISCTOUNT OFER!
+http://PSJX.cnf2e.com
 
-http://uqcmbd.thetropictan.com/?18298533
-
-Instant shipping worldwide. Absolutely CONFIDENTIAL and SECURE purchase.
-
-------------------
-If I were meant to learn so much about flying, I'd have charts for brains.
-
-VAIO Update, Recovery Wizard, Help and Support
+=======================
+and bottle  of catsup were  ready  for him. Wait until he had slurped up all
+     "All  right," he said.  "Let's  say  that  the Golden Ball really--what
