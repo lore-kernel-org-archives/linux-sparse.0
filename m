@@ -1,91 +1,58 @@
 From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH RESEND] sparse_error() should not silence info() after
-	sparse_error()s
-Date: Tue, 29 Aug 2006 17:41:56 -0700
-Message-ID: <1156898516.5203.8.camel@josh-work.beaverton.ibm.com>
+Subject: [PATCH RESEND] Use $(BINDIR) consistently in Makefile rather than
+	$(PREFIX)/bin
+Date: Tue, 29 Aug 2006 17:41:46 -0700
+Message-ID: <1156898507.5203.7.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e35.co.us.ibm.com ([32.97.110.153]:17882 "EHLO
-	e35.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751468AbWH3Alu
+Received: from e34.co.us.ibm.com ([32.97.110.152]:61672 "EHLO
+	e34.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751468AbWH3Alk
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 29 Aug 2006 20:41:50 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e35.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k7U0fnY2013116
-	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 20:41:49 -0400
-Received: from d03av04.boulder.ibm.com (d03av04.boulder.ibm.com [9.17.195.170])
-	by d03relay04.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k7U0fnmb222970
-	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 18:41:49 -0600
-Received: from d03av04.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av04.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k7U0fnqr019640
-	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 18:41:49 -0600
+	Tue, 29 Aug 2006 20:41:40 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e34.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k7U0fel9022306
+	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 20:41:40 -0400
+Received: from d03av02.boulder.ibm.com (d03av02.boulder.ibm.com [9.17.195.168])
+	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k7U0fePP338512
+	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 18:41:40 -0600
+Received: from d03av02.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av02.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k7U0fdKw008148
+	for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2006 18:41:40 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@osdl.org>
 
-sparse_error() sets max_warnings = 0 to silence subsequent sparse_warning()s
-or info()s; however, this also silences the info() after that sparse_error()
-and subsequent sparse_errors() which still get shown.  bad_expr_type runs into
-this problem: it reports an error with sparse_error() and then provides
-further information with info(), which the user never sees.  Make info()
-continue to print as long as the immediately preceeding warning or error does.
+The Makefile has variables for both PREFIX (default $(HOME)) and BINDIR
+(default $(PREFIX)/bin); however, it then uses $(PREFIX)/bin in several other
+places, making it difficult to install to an alternate BINDIR.  Fix this by
+using $(BINDIR) consistently throughout the Makefile.
 
 Signed-off-by: Josh Triplett <josh@freedesktop.org>
 ---
- lib.c |   13 ++++++++++---
- 1 files changed, 10 insertions(+), 3 deletions(-)
+ Makefile |    6 +++---
+ 1 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/lib.c b/lib.c
-index feb755a..05ed848 100644
---- a/lib.c
-+++ b/lib.c
-@@ -94,12 +94,13 @@ static void do_warn(const char *type, st
- }
+diff --git a/Makefile b/Makefile
+index 378ee72..6755e07 100644
+--- a/Makefile
++++ b/Makefile
+@@ -45,11 +45,11 @@ #
+ #		"The better to keep you on your toes, my dear".
+ #
+ install: check $(SLIB_FILE) bin-dir
+-	if test $< -nt $(PREFIX)/bin/sparse ; then install -v $< $(BINDIR)/sparse ; install -v $(SLIB_FILE) $(BINDIR) ; fi
++	if test $< -nt $(BINDIR)/sparse ; then install -v $< $(BINDIR)/sparse ; install -v $(SLIB_FILE) $(BINDIR) ; fi
  
- static int max_warnings = 100;
-+static int show_info = 1;
- 
- void info(struct position pos, const char * fmt, ...)
- {
- 	va_list args;
- 
--	if (!max_warnings)
-+	if (!show_info)
- 		return;
- 	va_start(args, fmt);
- 	do_warn("", pos, fmt, args);
-@@ -110,11 +111,15 @@ void warning(struct position pos, const 
- {
- 	va_list args;
- 
--	if (!max_warnings)
-+	if (!max_warnings) {
-+		show_info = 0;
- 		return;
-+	}
- 
--	if (!--max_warnings)
-+	if (!--max_warnings) {
-+		show_info = 0;
- 		fmt = "too many warnings";
-+	}
- 
- 	va_start(args, fmt);
- 	do_warn("warning: ", pos, fmt, args);
-@@ -126,10 +131,12 @@ void sparse_error(struct position pos, c
- 	static int errors = 0;
- 	va_list args;
-         die_if_error = 1;
-+	show_info = 1;
- 	/* Shut up warnings after an error */
- 	max_warnings = 0;
- 	if (errors > 100) {
- 		static int once = 0;
-+		show_info = 0;
- 		if (once)
- 			return;
- 		fmt = "too many errors";
+ bin-dir:
+-	@if ! test -d $(PREFIX)/bin; then \
+-		echo "No '$(PREFIX)/bin' directory to install in"; \
++	@if ! test -d $(BINDIR); then \
++		echo "No '$(BINDIR)' directory to install in"; \
+ 		echo "Please create it and add it to your PATH"; \
+ 		exit 1; \
+ 	fi
 -- 
 1.4.1.1
