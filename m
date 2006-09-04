@@ -1,25 +1,105 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 0/3] implement strong define/undef
-Date: Mon, 4 Sep 2006 20:15:52 +0400
-Message-ID: <20060904161552.GA7686@oleg>
+Subject: [PATCH 1/3] prepare for #strong_{define,undef}
+Date: Mon, 4 Sep 2006 20:16:07 +0400
+Message-ID: <20060904161607.GA7689@oleg>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from taganka54-host.corbina.net ([213.234.233.54]:19354 "EHLO
-	screens.ru") by vger.kernel.org with ESMTP id S964817AbWIDMPz (ORCPT
+Received: from taganka54-host.corbina.net ([213.234.233.54]:21914 "EHLO
+	screens.ru") by vger.kernel.org with ESMTP id S964776AbWIDMQG (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Sep 2006 08:15:55 -0400
+	Mon, 4 Sep 2006 08:16:06 -0400
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Josh Triplett <josht@us.ibm.com>, Al Viro <viro@zeniv.linux.org.uk>
 
-Re-send. Imho, this is a useful feature. It allows to override
-the defines in the source code without editing it.
+This patch renames symbol->weak to symbol->attr and adds
+symbolic names for it's values.
 
-Oleg.
+I don't like the new name, and will be happy to rename if
+you suggest me something different.
+
+Probably it is also better to move ->attr into the NS_MACRO
+part of the union and make it integer.
+
+No changes in pre-process.o
+
+Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
+
+--- git-snapshot-20060904/symbol.h~5PREP	2006-09-04 19:22:36.000000000 +0400
++++ git-snapshot-20060904/symbol.h	2006-09-04 19:44:19.000000000 +0400
+@@ -80,10 +80,13 @@ struct symbol_op {
+ extern int expand_safe_p(struct expression *expr, int cost);
+ extern int expand_constant_p(struct expression *expr, int cost);
+ 
++#define SYM_ATTR_WEAK		1
++#define SYM_ATTR_NORMAL		0
++
+ struct symbol {
+ 	enum namespace namespace:8;
+ 	enum type type:8;
+-	unsigned char used:1, weak:1;
++	unsigned char used:1, attr:1;
+ 	struct position pos;		/* Where this symbol was declared */
+ 	struct ident *ident;		/* What identifier this symbol is associated with */
+ 	struct symbol *next_id;		/* Next semantic symbol that shares this identifier */
+--- git-snapshot-20060904/pre-process.c~5PREP	2006-09-04 19:22:36.000000000 +0400
++++ git-snapshot-20060904/pre-process.c	2006-09-04 19:44:19.000000000 +0400
+@@ -1055,7 +1055,7 @@ Earg:
+ 	return NULL;
+ }
+ 
+-static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int weak)
++static int do_handle_define(struct stream *stream, struct token **line, struct token *token, int attr)
+ {
+ 	struct token *arglist, *expansion;
+ 	struct token *left = token->next;
+@@ -1088,15 +1088,16 @@ static int do_handle_define(struct strea
+ 	if (sym) {
+ 		int clean;
+ 
+-		if (weak > sym->weak)
++		if (attr > sym->attr)
+ 			goto out;
+ 
+-		clean = (weak == sym->weak);
++		clean = (attr == sym->attr);
+ 
+ 		if (token_list_different(sym->expansion, expansion) ||
+ 		    token_list_different(sym->arglist, arglist)) {
+ 			ret = 0;
+-			if ((clean && !weak) || sym->used_in == file_scope) {
++			if ((clean && attr == SYM_ATTR_NORMAL)
++					|| sym->used_in == file_scope) {
+ 				warning(left->pos, "preprocessor token %.*s redefined",
+ 						name->len, name->name);
+ 				info(sym->pos, "this was the original definition");
+@@ -1118,19 +1119,19 @@ static int do_handle_define(struct strea
+ 	}
+ 
+ 	sym->used_in = NULL;
+-	sym->weak = weak;
++	sym->attr = attr;
+ out:
+ 	return ret;
+ }
+ 
+ static int handle_define(struct stream *stream, struct token **line, struct token *token)
+ {
+-	return do_handle_define(stream, line, token, 0);
++	return do_handle_define(stream, line, token, SYM_ATTR_NORMAL);
+ }
+ 
+ static int handle_weak_define(struct stream *stream, struct token **line, struct token *token)
+ {
+-	return do_handle_define(stream, line, token, 1);
++	return do_handle_define(stream, line, token, SYM_ATTR_WEAK);
+ }
+ 
+ static int handle_undef(struct stream *stream, struct token **line, struct token *token)
 
 
 -- 
-VGER BF report: H 2.8265e-10
+VGER BF report: H 0.0993777
