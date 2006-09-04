@@ -1,101 +1,88 @@
 From: Oleg Nesterov <oleg@tv-sign.ru>
-Subject: [PATCH 2/4] fix handle_undef() on builtin macros
-Date: Mon, 4 Sep 2006 19:41:48 +0400
-Message-ID: <20060904154148.GA6431@oleg>
+Subject: [PATCH 4/4] fix loss of 'weak' attribute on usage
+Date: Mon, 4 Sep 2006 19:42:11 +0400
+Message-ID: <20060904154211.GA6437@oleg>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from taganka54-host.corbina.net ([213.234.233.54]:9947 "EHLO
-	screens.ru") by vger.kernel.org with ESMTP id S964801AbWIDLlm (ORCPT
+Received: from taganka54-host.corbina.net ([213.234.233.54]:26604 "EHLO
+	screens.ru") by vger.kernel.org with ESMTP id S964812AbWIDLmK (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Sep 2006 07:41:42 -0400
+	Mon, 4 Sep 2006 07:42:10 -0400
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@osdl.org>
 Cc: linux-sparse@vger.kernel.org, Josh Triplett <josht@us.ibm.com>, Al Viro <viro@zeniv.linux.org.uk>
 
-Example:
+When NS_MACRO symbol is used, sparse clears it's 'weak' flag.
+This is bad for multifile parsing, and wrong:
 
-	inc.h:
-		#define FOO bar
-		#undef FOO
+	#weak_define FOO 1
+	FOO
+	#weak_define FOO 2	// silently ignored
 
-	file.c:
-		FOO
-
-	$ test-lexing -include inc.h file.c
-	bar					<------ should be 'FOO'
-
-This patch kills NS_INVISIBLEMACRO and introduces NS_UNDEF,
-this is also used in the next patches.
+After this patch sparse never writes to NS_MACRO symbols from
+another scope.
 
 Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
 
---- git-snapshot-20060904/symbol.h~2UNDEF	2006-09-03 23:32:31.000000000 +0400
-+++ git-snapshot-20060904/symbol.h	2006-09-04 18:20:23.000000000 +0400
-@@ -32,7 +32,7 @@ enum namespace {
- 	NS_SYMBOL = 16,
- 	NS_ITERATOR = 32,
- 	NS_PREPROCESSOR = 64,
--	NS_INVISIBLEMACRO = 128,
-+	NS_UNDEF = 128,
- };
+--- git-snapshot-20060904/symbol.h~4USED	2006-09-04 18:20:23.000000000 +0400
++++ git-snapshot-20060904/symbol.h	2006-09-04 19:22:36.000000000 +0400
+@@ -97,6 +97,7 @@ struct symbol {
+ 		struct /* NS_MACRO */ {
+ 			struct token *expansion;
+ 			struct token *arglist;
++			struct scope *used_in;
+ 		};
+ 		struct /* NS_PREPROCESSOR */ {
+ 			int (*handler)(struct stream *, struct token **, struct token *);
+--- git-snapshot-20060904/pre-process.c~4USED	2006-09-04 19:17:22.000000000 +0400
++++ git-snapshot-20060904/pre-process.c	2006-09-04 19:22:36.000000000 +0400
+@@ -114,7 +114,7 @@ static int token_defined(struct token *t
+ 	if (token_type(token) == TOKEN_IDENT) {
+ 		struct symbol *sym = lookup_macro(token->ident);
+ 		if (sym) {
+-			sym->weak = 0;
++			sym->used_in = file_scope;
+ 			return 1;
+ 		}
+ 		return 0;
+@@ -143,7 +143,7 @@ static int expand_one_symbol(struct toke
  
- enum type {
---- git-snapshot-20060904/scope.c~2UNDEF	2006-09-03 23:32:31.000000000 +0400
-+++ git-snapshot-20060904/scope.c	2006-09-04 18:20:23.000000000 +0400
-@@ -41,7 +41,6 @@ static void start_scope(struct scope **s
- void start_file_scope(void)
- {
- 	struct scope *scope = __alloc_scope(0);
--	struct symbol *sym;
- 
- 	memset(scope, 0, sizeof(*scope));
- 	scope->next = &builtin_scope;
-@@ -50,12 +49,6 @@ void start_file_scope(void)
- 	/* top-level stuff defaults to file scopt, "extern" etc will choose global scope */
- 	function_scope = scope;
- 	block_scope = scope;
--
--	/* Make the builtin macros visible again */
--	FOR_EACH_PTR(builtin_scope.symbols, sym) {
--		if (sym->namespace == NS_INVISIBLEMACRO)
--			sym->namespace = NS_MACRO;
--	} END_FOR_EACH_PTR(sym);
- }
- 
- void start_symbol_scope(void)
---- git-snapshot-20060904/pre-process.c~2UNDEF	2006-09-04 17:19:51.000000000 +0400
-+++ git-snapshot-20060904/pre-process.c	2006-09-04 18:20:23.000000000 +0400
-@@ -103,7 +103,7 @@ static void replace_with_integer(struct 
- 
- static struct symbol *lookup_macro(struct ident *ident)
- {
--	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_INVISIBLEMACRO);
-+	struct symbol *sym = lookup_symbol(ident, NS_MACRO | NS_UNDEF);
- 	if (sym && sym->namespace != NS_MACRO)
- 		sym = NULL;
- 	return sym;
-@@ -1134,8 +1134,15 @@ static int handle_undef(struct stream *s
+ 	sym = lookup_macro(token->ident);
+ 	if (sym) {
+-		sym->weak = 0;
++		sym->used_in = file_scope;
+ 		return expand(list, sym);
+ 	}
+ 	if (token->ident == &__LINE___ident) {
+@@ -1096,7 +1096,7 @@ static int do_handle_define(struct strea
+ 		if (token_list_different(sym->expansion, expansion) ||
+ 		    token_list_different(sym->arglist, arglist)) {
+ 			ret = 0;
+-			if (clean && !weak) {
++			if ((clean && !weak) || sym->used_in == file_scope) {
+ 				warning(left->pos, "preprocessor token %.*s redefined",
+ 						name->len, name->name);
+ 				info(sym->pos, "this was the original definition");
+@@ -1117,6 +1117,7 @@ static int do_handle_define(struct strea
+ 		__free_token(token);	/* Free the "define" token, but not the rest of the line */
  	}
  
- 	sym = lookup_macro(left->ident);
--	if (sym)
--		sym->namespace = NS_INVISIBLEMACRO;
-+	if (!sym)
-+		return 1;
-+
-+	if (sym->scope != file_scope) {
-+		sym = alloc_symbol(left->pos, SYM_NODE);
-+		bind_symbol(sym, left->ident, NS_MACRO);
-+	}
-+
-+	sym->namespace = NS_UNDEF;
++	sym->used_in = NULL;
+ 	sym->weak = weak;
+ out:
+ 	return ret;
+@@ -1152,6 +1153,7 @@ static int handle_undef(struct stream *s
+ 	}
+ 
+ 	sym->namespace = NS_UNDEF;
++	sym->used_in = NULL;
  
  	return 1;
  }
 
 
 -- 
-VGER BF report: U 0.500014
+VGER BF report: U 0.500211
