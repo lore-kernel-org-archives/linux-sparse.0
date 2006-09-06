@@ -1,47 +1,58 @@
-From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: broken 0 sized memset checks?
-Date: Tue, 5 Sep 2006 14:20:30 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0609051417270.27779@g5.osdl.org>
-References: <20060905210512.GF22261@redhat.com>
+From: Josh Triplett <josht@us.ibm.com>
+Subject: [PATCH] Turn on -Wcontext by default
+Date: Wed, 06 Sep 2006 13:10:00 -0700
+Message-ID: <1157573400.4911.19.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.4]:62850 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1751287AbWIEVUk (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 5 Sep 2006 17:20:40 -0400
-In-Reply-To: <20060905210512.GF22261@redhat.com>
+Received: from e34.co.us.ibm.com ([32.97.110.152]:32394 "EHLO
+	e34.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751546AbWIFUJv
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 6 Sep 2006 16:09:51 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e34.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k86K9oFT026588
+	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 16:09:50 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k86K9ooG353096
+	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 14:09:50 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k86K9oCx011825
+	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 14:09:50 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dave Jones <davej@redhat.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@osdl.org>
 
+Context checking currently requires explicitly passing the -Wcontext option.
+In a Linux build, this requires passing CF=-Wcontext.  Thus, running people
+running sparse over Linux or other software in the default way will not see
+context warnings.  Change this by enabling -Wcontext.
 
+While context checking does generate false positives, due to both missing
+annotations on kernel functions and insufficiently clever checking in sparse,
+the context warnings still do provide useful information and help track down
+real bugs.  Furthermore, showing these warnings by default may incite more
+people to add annotations or enhance sparse.  As a last resort, -Wno-context
+will still work.
 
-On Tue, 5 Sep 2006, Dave Jones wrote:
->
-> I ran sparse over the current linux kernel, and noticed this..
-> 
-> drivers/net/chelsio/sge.c:341:9: warning: memset with byte count of 0
-> drivers/net/chelsio/sge.c:469:9: warning: memset with byte count of 0
-> 
-> The first..
-> 
->         q->size = p->freelQ_size[i];
->         ....
->         size = sizeof(struct freelQ_ce) * q->size;
->         q->centries = kmalloc(size, GFP_KERNEL);
->         if (!q->centries)
->             goto err_no_mem;
->         memset(q->centries, 0, size);
->
-> Sparse bug ?
+Signed-off-by: Josh Triplett <josh@freedesktop.org>
+---
+ lib.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-I _suspect_ sparse has had some type-parsing bug, and thinks that 
-"sizeof(struct freelQ_ce)" is zero for some reason, and then does all the 
-constant folding (yeah, sparse is clever when it isn't really stupid ;), 
-and that's what is going on.
-
-I'll see if I can figure out what's up.
-
-		Linus
+diff --git a/lib.c b/lib.c
+index cd46e03..c89ac75 100644
+--- a/lib.c
++++ b/lib.c
+@@ -179,7 +179,7 @@ int Wone_bit_signed_bitfield = 1;
+ int Wcast_truncate = 1;
+ int Wbitwise = 0;
+ int Wtypesign = 0;
+-int Wcontext = 0;
++int Wcontext = 1;
+ int Wundefined_preprocessor = 0;
+ int Wptr_subtraction_blows = 0;
+ int Wcast_to_address_space = 0;
+-- 
+1.4.1.1
