@@ -1,82 +1,92 @@
 From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH RESEND] Recognize and ignore __alias__ and __visibility__
-Date: Mon, 11 Sep 2006 14:09:36 -0700
-Message-ID: <1158008976.4373.47.camel@josh-work.beaverton.ibm.com>
-References: <20060813055158.28706.93407.stgit@dv.roinet.com>
+Subject: [PATCH RESEND] sparse_error() should not silence info() after
+	sparse_error()s
+Date: Mon, 11 Sep 2006 14:11:27 -0700
+Message-ID: <1158009087.4373.49.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:29380 "EHLO
-	e33.co.us.ibm.com") by vger.kernel.org with ESMTP id S965027AbWIKVJR
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 11 Sep 2006 17:09:17 -0400
+Received: from e31.co.us.ibm.com ([32.97.110.149]:688 "EHLO e31.co.us.ibm.com")
+	by vger.kernel.org with ESMTP id S965043AbWIKVLJ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 11 Sep 2006 17:11:09 -0400
 Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e33.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8BL9GqF004684
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 17:09:16 -0400
+	by e31.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8BLB8AB031622
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 17:11:08 -0400
 Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8BL9GiL235836
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:09:16 -0600
+	by d03relay04.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8BLB8o9240774
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:11:08 -0600
 Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8BL9GwM019735
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:09:16 -0600
-In-Reply-To: <20060813055158.28706.93407.stgit@dv.roinet.com>
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8BLB7I4024659
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:11:07 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Pavel Roskin <proski@gnu.org>, Linus Torvalds <torvalds@osdl.org>
+Cc: Linus Torvalds <torvalds@osdl.org>, Adam DiCarlo <adam.dicarlo@gmail.com>
 
-Sparse currently parses and ignores the alias and visibility attributes,
-but not the variants __alias__ and __visibility__, which GCC permits
-even in ANSI C to allow for use in headers.  Add support for these
-variants.
+sparse_error() sets max_warnings = 0 to silence subsequent sparse_warning()s
+or info()s; however, this also silences the info() after that sparse_error()
+and subsequent sparse_errors() which still get shown.  bad_expr_type runs into
+this problem: it reports an error with sparse_error() and then provides
+further information with info(), which the user never sees.  Make info()
+continue to print as long as the immediately preceeding warning or error does.
+
+Thanks to Adam DiCarlo <adam.dicarlo@gmail.com> for reporting the problem.
 
 Signed-off-by: Josh Triplett <josh@freedesktop.org>
-Signed-off-by: Pavel Roskin <proski@gnu.org>
+Cc: Adam DiCarlo <adam.dicarlo@gmail.com>
 ---
-Original patch by Pavel Roskin; modified version with consolidated if
-statements by me, with signoff from Pavel.
+ lib.c |   13 ++++++++++---
+ 1 files changed, 10 insertions(+), 3 deletions(-)
 
- parse.c      |    6 ++++--
- ident-list.h |    4 ++--
- 2 files changed, 6 insertions(+), 4 deletions(-)
-
-diff --git a/ident-list.h b/ident-list.h
-index 95bb96a..ecdce6d 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -56,8 +56,8 @@ IDENT(__const); IDENT(__const__); IDENT(
- IDENT(__noreturn__); IDENT(regparm); IDENT(weak); IDENT(__weak__);
- IDENT(__no_instrument_function__); IDENT(no_instrument_function);
- IDENT(__sentinel__); IDENT(sentinel);
--IDENT(alias); IDENT(pure); IDENT(always_inline);
--IDENT(syscall_linkage); IDENT(visibility);
-+IDENT(alias); IDENT(__alias__); IDENT(pure); IDENT(always_inline);
-+IDENT(syscall_linkage); IDENT(visibility); IDENT(__visibility__);
- IDENT(bitwise); IDENT(__bitwise__);
- IDENT(model); IDENT(__model__);
- IDENT(__format_arg__);
-diff --git a/parse.c b/parse.c
-index c536ec2..6857541 100644
---- a/parse.c
-+++ b/parse.c
-@@ -528,7 +528,8 @@ static const char * handle_attribute(str
- 	if (attribute == &weak_ident ||
- 	    attribute == &__weak___ident)
- 		return NULL;
--	if (attribute == &alias_ident)
-+	if (attribute == &alias_ident ||
-+	    attribute == &__alias___ident)
- 		return NULL;
- 	if (attribute == &pure_ident ||
- 	    attribute == &__pure___ident)
-@@ -537,7 +538,8 @@ static const char * handle_attribute(str
- 		return NULL;
- 	if (attribute == &syscall_linkage_ident)
- 		return NULL;
--	if (attribute == &visibility_ident)
-+	if (attribute == &visibility_ident ||
-+	    attribute == &__visibility___ident)
- 		return NULL;
- 	if (attribute == &deprecated_ident ||
- 	    attribute == &__deprecated___ident)
+diff --git a/lib.c b/lib.c
+index feb755a..05ed848 100644
+--- a/lib.c
++++ b/lib.c
+@@ -94,12 +94,13 @@ static void do_warn(const char *type, st
+ }
+ 
+ static int max_warnings = 100;
++static int show_info = 1;
+ 
+ void info(struct position pos, const char * fmt, ...)
+ {
+ 	va_list args;
+ 
+-	if (!max_warnings)
++	if (!show_info)
+ 		return;
+ 	va_start(args, fmt);
+ 	do_warn("", pos, fmt, args);
+@@ -110,11 +111,15 @@ void warning(struct position pos, const 
+ {
+ 	va_list args;
+ 
+-	if (!max_warnings)
++	if (!max_warnings) {
++		show_info = 0;
+ 		return;
++	}
+ 
+-	if (!--max_warnings)
++	if (!--max_warnings) {
++		show_info = 0;
+ 		fmt = "too many warnings";
++	}
+ 
+ 	va_start(args, fmt);
+ 	do_warn("warning: ", pos, fmt, args);
+@@ -126,10 +131,12 @@ void sparse_error(struct position pos, c
+ 	static int errors = 0;
+ 	va_list args;
+         die_if_error = 1;
++	show_info = 1;
+ 	/* Shut up warnings after an error */
+ 	max_warnings = 0;
+ 	if (errors > 100) {
+ 		static int once = 0;
++		show_info = 0;
+ 		if (once)
+ 			return;
+ 		fmt = "too many errors";
