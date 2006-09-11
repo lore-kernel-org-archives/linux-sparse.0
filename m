@@ -1,58 +1,52 @@
-From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH] Turn on -Wcontext by default
-Date: Wed, 06 Sep 2006 13:10:00 -0700
-Message-ID: <1157573400.4911.19.camel@josh-work.beaverton.ibm.com>
+From: Adam DiCarlo <bikko@us.ibm.com>
+Subject: [PATCH RESEND] Add type information to enum mismatch warning
+Date: Mon, 11 Sep 2006 14:06:14 -0700
+Message-ID: <4505CFC6.4000807@us.ibm.com>
+Reply-To: bikko@us.ibm.com
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e34.co.us.ibm.com ([32.97.110.152]:32394 "EHLO
-	e34.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751546AbWIFUJv
+Received: from e33.co.us.ibm.com ([32.97.110.151]:14012 "EHLO
+	e33.co.us.ibm.com") by vger.kernel.org with ESMTP id S964926AbWIKVGQ
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 6 Sep 2006 16:09:51 -0400
+	Mon, 11 Sep 2006 17:06:16 -0400
 Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
-	by e34.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k86K9oFT026588
-	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 16:09:50 -0400
+	by e33.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8BL6GtK001299
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 17:06:16 -0400
 Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k86K9ooG353096
-	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 14:09:50 -0600
+	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8BL6Gqt369312
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:06:16 -0600
 Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k86K9oCx011825
-	for <linux-sparse@vger.kernel.org>; Wed, 6 Sep 2006 14:09:50 -0600
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8BL6FqE011788
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:06:16 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@osdl.org>
 
-Context checking currently requires explicitly passing the -Wcontext option.
-In a Linux build, this requires passing CF=-Wcontext.  Thus, running people
-running sparse over Linux or other software in the default way will not see
-context warnings.  Change this by enabling -Wcontext.
 
-While context checking does generate false positives, due to both missing
-annotations on kernel functions and insufficiently clever checking in sparse,
-the context warnings still do provide useful information and help track down
-real bugs.  Furthermore, showing these warnings by default may incite more
-people to add annotations or enhance sparse.  As a last resort, -Wno-context
-will still work.
-
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
+Signed-off-by: Adam DiCarlo <adam.dicarlo@gmail.com>
 ---
- lib.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+  evaluate.c |    5 ++++-
+  1 files changed, 4 insertions(+), 1 deletions(-)
 
-diff --git a/lib.c b/lib.c
-index cd46e03..c89ac75 100644
---- a/lib.c
-+++ b/lib.c
-@@ -179,7 +179,7 @@ int Wone_bit_signed_bitfield = 1;
- int Wcast_truncate = 1;
- int Wbitwise = 0;
- int Wtypesign = 0;
--int Wcontext = 0;
-+int Wcontext = 1;
- int Wundefined_preprocessor = 0;
- int Wptr_subtraction_blows = 0;
- int Wcast_to_address_space = 0;
+diff --git a/evaluate.c b/evaluate.c
+index 177797a..3076d41 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -253,8 +253,11 @@ warn_for_different_enum_types (struct po
+  	if (typea == typeb)
+  		return;
+
+-	if (typea->type == SYM_ENUM && typeb->type == SYM_ENUM)
++	if (typea->type == SYM_ENUM && typeb->type == SYM_ENUM) {
+  		warning(pos, "mixing different enum types");
++		info(pos, "    %s versus", show_typename(typea));
++		info(pos, "    %s", show_typename(typeb));
++	}
+  }
+
+  /*
 -- 
-1.4.1.1
+1.4.2.ga444
