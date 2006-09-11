@@ -1,51 +1,52 @@
 From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH RESEND] graph: Show position in basic block nodes
-Date: Mon, 11 Sep 2006 14:14:45 -0700
-Message-ID: <1158009285.4373.51.camel@josh-work.beaverton.ibm.com>
+Subject: [PATCH RESEND] bb_terminated: Use boundary values rather than
+	specific opcodes
+Date: Mon, 11 Sep 2006 14:15:17 -0700
+Message-ID: <1158009317.4373.53.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e31.co.us.ibm.com ([32.97.110.149]:20154 "EHLO
-	e31.co.us.ibm.com") by vger.kernel.org with ESMTP id S965035AbWIKVO1
+Received: from e36.co.us.ibm.com ([32.97.110.154]:14729 "EHLO
+	e36.co.us.ibm.com") by vger.kernel.org with ESMTP id S965046AbWIKVO6
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 11 Sep 2006 17:14:27 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e31.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8BLEQOD003974
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 17:14:26 -0400
-Received: from d03av03.boulder.ibm.com (d03av03.boulder.ibm.com [9.17.195.169])
-	by d03relay04.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8BLEQ1a252294
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:14:26 -0600
-Received: from d03av03.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av03.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8BLEPCA000891
-	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:14:25 -0600
+	Mon, 11 Sep 2006 17:14:58 -0400
+Received: from westrelay02.boulder.ibm.com (westrelay02.boulder.ibm.com [9.17.195.11])
+	by e36.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8BLEveR002445
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 17:14:57 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by westrelay02.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8BLEvTf294858
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:14:57 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8BLEvJH000978
+	for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2006 15:14:57 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@osdl.org>
 
-Change the label for basic block nodes from the basic block address to the
-position (file, line, column) of the basic block.
+The opcode enum defines the boundary values OP_TERMINATOR and
+OP_TERMINATOR_END for terminator instructions; use those in bb_terminated
+rather than the specific values they currently equal.
 
 Signed-off-by: Josh Triplett <josh@freedesktop.org>
 ---
-
- graph.c |    3 ++-
+ linearize.h |    3 ++-
  1 files changed, 2 insertions(+), 1 deletions(-)
 
-diff --git a/graph.c b/graph.c
-index db940ae..ede3dfa 100644
---- a/graph.c
-+++ b/graph.c
-@@ -27,7 +27,8 @@ static void graph_ep(struct entrypoint *
- 	printf("ep%p [label=\"%s\",shape=ellipse];\n",
- 	       ep, show_ident(ep->name->ident));
- 	FOR_EACH_PTR(ep->bbs, bb) {
--		printf("bb%p [shape=record,label=\"bb at %p\"]\n", bb, bb);
-+		printf("bb%p [shape=record,label=\"%s:%d:%d\"]\n", bb,
-+		       stream_name(bb->pos.stream), bb->pos.line, bb->pos.pos);
- 	} END_FOR_EACH_PTR(bb);
- 	FOR_EACH_PTR(ep->bbs, bb) {
- 		struct basic_block *child;
+diff --git a/linearize.h b/linearize.h
+index ac946f3..517ec67 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -254,7 +254,8 @@ static inline int bb_terminated(struct b
+ 	if (!bb)
+ 		return 0;
+ 	insn = last_instruction(bb->insns);
+-	return insn && insn->opcode >= OP_RET && insn->opcode <= OP_UNWIND;
++	return insn && insn->opcode >= OP_TERMINATOR
++	            && insn->opcode <= OP_TERMINATOR_END;
+ }
+ 
+ static inline int bb_reachable(struct basic_block *bb)
 -- 
 1.4.1.1
