@@ -1,121 +1,55 @@
-From: Josh Triplett <josht@us.ibm.com>
-Subject: [PATCH] "Initializer entry defined twice" should not trigger with
-	zero-size fields
-Date: Wed, 13 Sep 2006 15:30:49 -0700
-Message-ID: <1158186650.5097.40.camel@josh-work.beaverton.ibm.com>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: [PATCH 1/7] casting null pointer constant to non-zero address space is always OK
+Date: Sun, 01 Oct 2006 14:57:11 +0100
+Message-ID: <E1GU1od-0006tw-PF@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e34.co.us.ibm.com ([32.97.110.152]:19087 "EHLO
-	e34.co.us.ibm.com") by vger.kernel.org with ESMTP id S1751232AbWIMWa3
+Received: from zeniv.linux.org.uk ([195.92.253.2]:32940 "EHLO
+	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S932194AbWJAN5J
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Sep 2006 18:30:29 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e34.co.us.ibm.com (8.13.8/8.12.11) with ESMTP id k8DMUT5Q031393
-	for <linux-sparse@vger.kernel.org>; Wed, 13 Sep 2006 18:30:29 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.6/8.13.6/NCO v8.1.1) with ESMTP id k8DMUSsO275276
-	for <linux-sparse@vger.kernel.org>; Wed, 13 Sep 2006 16:30:28 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id k8DMUSnA025987
-	for <linux-sparse@vger.kernel.org>; Wed, 13 Sep 2006 16:30:28 -0600
+	Sun, 1 Oct 2006 09:57:09 -0400
+Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
+	id 1GU1od-0006tw-PF
+	for linux-sparse@vger.kernel.org; Sun, 01 Oct 2006 14:57:11 +0100
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@osdl.org>, Paul McKenney <paulmck@us.ibm.com>
 
-If a field of a structure has size 0 (which happens with an empty struct), the
-subsequent field will have the same offset.  Assigning to both thus triggers
-the "Initializer entry defined twice" error, which should not happen.  Change
-verify_nonoverlapping to not warn about overlaps where the first field has
-size 0.
 
-Add a validation file (validation/initializer-entry-defined-twice.c) for this
-warning, which covers two cases where it should trigger (same struct field
-twice; two fields of a union) and this case where it should not.
-
-This fixes numerous warnings in Linux which triggered on initialization
-of structs containing empty structs; for example, this happens when
-raw_spinlock_t has no members, spinlock_t has no members other than a
-raw_spinlock_t, and a structure initializer initializes a spinlock_t
-(with SPIN_LOCK_UNLOCKED or SPIN_LOCK_LOCKED) followed by other fields.
-
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- expand.c                                     |   10 ++----
- validation/initializer-entry-defined-twice.c |   43 ++++++++++++++++++++++++++
- 2 files changed, 47 insertions(+), 6 deletions(-)
+ evaluate.c |   13 ++++++++++++-
+ 1 files changed, 12 insertions(+), 1 deletions(-)
 
-diff --git a/expand.c b/expand.c
-index 1539446..58d41f9 100644
---- a/expand.c
-+++ b/expand.c
-@@ -872,12 +872,10 @@ static void verify_nonoverlapping(struct
- 	struct expression *b;
+diff --git a/evaluate.c b/evaluate.c
+index 0dc05b9..fd29edf 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -2126,14 +2126,25 @@ static int get_as(struct symbol *sym)
+ static void cast_to_as(struct expression *e, int as)
+ {
+ 	struct expression *v = e->cast_expression;
++	struct symbol *type = v->ctype;
  
- 	FOR_EACH_PTR(*list, b) {
--		if (a) {
--			if (bit_offset(a) == bit_offset(b)) {
--				sparse_error(a->pos, "Initializer entry defined twice");
--				info(b->pos, "  also defined here");
--				return;
--			}
-+		if (a && a->ctype->bit_size && bit_offset(a) == bit_offset(b)) {
-+			sparse_error(a->pos, "Initializer entry defined twice");
-+			info(b->pos, "  also defined here");
-+			return;
- 		}
- 		a = b;
- 	} END_FOR_EACH_PTR(b);
-diff --git a/validation/initializer-entry-defined-twice.c b/validation/initializer-entry-defined-twice.c
-new file mode 100644
-index 0000000..80434f1
---- /dev/null
-+++ b/validation/initializer-entry-defined-twice.c
-@@ -0,0 +1,43 @@
-+/* Tests for the "Initializer entry defined twice" warning. */
+ 	if (!Wcast_to_address_space)
+ 		return;
+ 
++	if (v->type != EXPR_VALUE || v->value)
++		goto out;
 +
-+/* Initializing a struct field twice should trigger the warning. */
-+struct normal {
-+	int field1;
-+	int field2;
-+};
+ 	/* cast from constant 0 to pointer is OK */
+-	if (v->type == EXPR_VALUE && is_int_type(v->ctype) && !v->value)
++	if (is_int_type(type))
++		return;
 +
-+struct normal struct_error = {
-+	.field1 = 0,
-+	.field1 = 0
-+};
++	if (type->type == SYM_NODE)
++		type = type->ctype.base_type;
 +
-+/* Initializing two different fields of a union should trigger the warning. */
-+struct has_union {
-+	int x;
-+	union {
-+		int a;
-+		int b;
-+	} y;
-+	int z;
-+};
-+
-+struct has_union union_error = {
-+	.y = {
-+		.a = 0,
-+		.b = 0
-+	}
-+};
-+
-+/* Empty structures can make two fields have the same offset in a struct.
-+ * Initialzing both should not trigger the warning. */
-+struct empty { };
-+
-+struct same_offset {
-+	struct empty field1;
-+	int field2;
-+};
-+
-+struct same_offset not_an_error = {
-+	.field1 = { },
-+	.field2 = 0
-+};
++	if (type->type == SYM_PTR && type->ctype.base_type == &void_ctype)
+ 		return;
+ 
++out:
+ 	warning(e->pos, "cast adds address space to expression (<asn:%d>)", as);
+ }
+ 
 -- 
-1.4.1.1
+1.4.2.GIT
