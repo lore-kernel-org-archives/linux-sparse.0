@@ -1,24 +1,40 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: [PATCHSET] fouled-bitwise handling
-Date: Sun, 1 Oct 2006 18:29:11 +0100
-Message-ID: <20061001172911.GY29920@ftp.linux.org.uk>
-References: <E1GU1od-0006tu-Oo@ZenIV.linux.org.uk> <Pine.LNX.4.64.0610010906030.3952@g5.osdl.org> <Pine.LNX.4.64.0610010934590.3952@g5.osdl.org> <20061001172253.GX29920@ftp.linux.org.uk>
+Date: Sun, 1 Oct 2006 10:33:44 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.0610011031280.3952@g5.osdl.org>
+References: <E1GU1od-0006tu-Oo@ZenIV.linux.org.uk> <Pine.LNX.4.64.0610010906030.3952@g5.osdl.org>
+ <Pine.LNX.4.64.0610010934590.3952@g5.osdl.org> <20061001172253.GX29920@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:25550 "EHLO
-	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S932088AbWJAR3M
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 1 Oct 2006 13:29:12 -0400
-Content-Disposition: inline
+Received: from smtp.osdl.org ([65.172.181.4]:23261 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S932118AbWJAReL (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 1 Oct 2006 13:34:11 -0400
 In-Reply-To: <20061001172253.GX29920@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: linux-sparse@vger.kernel.org
 
-PS: "fouled(le16)" is exactly "int, and if you narrow it to 16bit, it'd
-better be le16".  We could separate that from type information, but hey,
-if we want to carry reference to some type + indication that we do have
-that reference + int as type, we might as well introduce a type node
-saying "I'm int, might be base_type".  Which is exactly what I've done...
+
+
+On Sun, 1 Oct 2006, Al Viro wrote:
+> 
+> Hrm...  The gut feeling: we mangle expression trees too much to be able
+> to do that decently.
+
+Having looked at it a bit now, I think I agree.
+
+We warn about the whole "~" thing too early, so we'd have to remove that 
+warning anyway (easy enough to do), but then we'd have to track the ops 
+that don't like using a "~" because of its C semantics.
+
+And at that point, your "fouled" bit is actually probably simpler.
+
+Let me think about this a bit more, but I'm starting to think that you're 
+right.
+
+As usual.
+
+		Linus
