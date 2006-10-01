@@ -1,67 +1,90 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: [PATCHSET] fouled-bitwise handling
-Date: Sun, 1 Oct 2006 17:45:13 +0100
-Message-ID: <20061001164513.GW29920@ftp.linux.org.uk>
+Date: Sun, 1 Oct 2006 09:52:31 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.0610010934590.3952@g5.osdl.org>
 References: <E1GU1od-0006tu-Oo@ZenIV.linux.org.uk> <Pine.LNX.4.64.0610010906030.3952@g5.osdl.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:18146 "EHLO
-	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S1751263AbWJAQpO
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 1 Oct 2006 12:45:14 -0400
-Content-Disposition: inline
+Received: from smtp.osdl.org ([65.172.181.4]:21971 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S1751280AbWJAQwq (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 1 Oct 2006 12:52:46 -0400
 In-Reply-To: <Pine.LNX.4.64.0610010906030.3952@g5.osdl.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: linux-sparse@vger.kernel.org
 
-On Sun, Oct 01, 2006 at 09:21:21AM -0700, Linus Torvalds wrote:
-> The only reason I think you're doing it wrong is that you're using this 
-> totally new separate mechanism for it (which is not a bad mechanism, but 
-> it's very much a special case), and you should not need to!
- 
-> The fact is, regardless of any bitwise issues, the
-> 
-> 	(cast) narrower-type <op> (wider-type "&" (cast) narrower-type)
-> 
-> should _always_ be simplified to a small-type.
- 
-Sure.  Now try to carry that to more complex expressions.
- 
-> And I _think_ we should be able to do exactly the same for this one, by 
-> simply noticing that doing a
-> 
-> 	(widening-cast) a == b & (widening-cast) c
-> 
-> is by definition throwing away the higher bits on both sides, and we can 
-> just turn it into the simpler
-> 
-> 	a == c & (narrowing-cast) b
-> 
-> instead. Of course, we can only do this with ops that don't have overflow 
-> from the narrower type (but comparisons and bitops are ok).
-> 
-> No?
 
-At which phase would you do that?  We assign types pretty much leaves
-to root - type of node is derived from the types of children.
 
-Now, you suggest basically going *other* way.  I.e. noticing that
-we have
-	<complex expression in narrow> & <complex expression in wide>
-and trying to propagate narrowing down another subexpression.
+On Sun, 1 Oct 2006, Linus Torvalds wrote:
+>
+> See? Even from a purely optimization angle, we're actually better off just 
+> noticing that the whole comparison can be done in the narrower type.
 
-Note that we need *both* arguments typed - we don't know which one
-might be narrow here.  So it's really re-evaluation of subexpression.
+So here's a test-case:
 
-OK, so we have expand phase that could do that.  _However_, we'd have
-to postpone the bitwise checks until that phase, or we'd get them
-anyway.  And that is not to mention the fun with evaluate_expression()
-mangling the tree, so re-walking it won't be easy.
+	typedef unsigned short le16;
 
-IOW, I very much prefer to deal with that by _existing_ mechanism;
-namely, the type assignment.  It's easier to propagate the information
-along with the rest of type information, in the direction we are
-already doing.
+	int cmp(le16 a, le16 b)
+	{
+		return a == (a & ~b);
+	}
+
+and doing a "./test-linearize" on this gets us:
+
+	cmp:
+	.L0xf7fa500c:
+	        <entry-point>
+	        dead        %arg1
+	        scast.32    %r2 <- (16) %arg1
+	        dead        %arg2
+	        scast.32    %r6 <- (16) %arg2
+	        dead        %r6
+	        not.32      %r7 <- %r6
+	        dead        %r7
+	        and.32      %r8 <- %r2, %r7
+	        dead        %r8
+	        dead        %r2
+	        seteq.32    %r9 <- %r2, %r8
+	        dead        %r9
+	        scast.32    %r10 <- (1) %r9
+	        dead        %r10
+	        ret.32      %r10
+
+which is just horrible code anyway.
+
+I think it _should_ be
+
+	cmp:
+	.L0xf7fa500c:
+	        <entry-point>
+	        dead        %arg2
+	        not         %r4 <- %arg2
+	        dead        %r4
+	        and         %r5 <- %arg1, %r4
+	        dead        %r5
+	        dead        %arg1
+	        seteq.16    %r6 <- %arg1, %r5
+	        dead        %r6
+	        scast.32    %r7 <- (1) %r6
+	        dead        %r7
+	        ret.32      %r7
+
+instead, which is obviously smaller and avoids the two unnecessary casts.
+
+(Now, it's entirely possible that we warn so early that we can't 
+reasonably do this optimization until after we've already warned, but I've 
+been able to remove these kinds of warnings before, so I think it should 
+be possible to do it here too).
+
+I much prefer (if possible) the "make sparse so much smarter that it sees 
+that it's ok" approach over "let's add a magic special case". For example, 
+a lot of the work I did to make the lock acquire/release logic useful was 
+very much about teaching sparse to simplify code-flow rather than anything 
+else.
+
+But hey, maybe this case is too hard or nasty..
+
+		Linus
