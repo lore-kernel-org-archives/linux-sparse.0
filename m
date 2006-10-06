@@ -1,73 +1,67 @@
-From: Michael Stefaniuc <mstefani@redhat.com>
+From: "Dan Carpenter" <error27@gmail.com>
 Subject: Re: Moving smatch to use sparse
-Date: Fri, 06 Oct 2006 00:46:35 +0200
-Message-ID: <45258B4B.6010907@redhat.com>
-References: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>	 <a63d67fe0607151742l6a387783x59494b84de80be88@mail.gmail.com>	 <a63d67fe0610050141x251253fei59b93fff28505dc4@mail.gmail.com>	 <45252A39.3050008@redhat.com> <a63d67fe0610051358j6181f558p2baaf1b59b0a042e@mail.gmail.com>
+Date: Thu, 5 Oct 2006 23:31:14 -0700
+Message-ID: <a63d67fe0610052331y4e914869k7c0feaf42bb8b14c@mail.gmail.com>
+References: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
+	 <a63d67fe0607151742l6a387783x59494b84de80be88@mail.gmail.com>
+	 <a63d67fe0610050141x251253fei59b93fff28505dc4@mail.gmail.com>
+	 <20061005092656.GA17866@uranus.ravnborg.org>
+	 <a63d67fe0610050249j1cadc3bfk438b66ec8ad34586@mail.gmail.com>
+	 <20061005102542.GD23093@wohnheim.fh-wedel.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([66.187.233.31]:50564 "EHLO mx1.redhat.com")
-	by vger.kernel.org with ESMTP id S1751364AbWJEWqv (ORCPT
+Received: from ug-out-1314.google.com ([66.249.92.174]:2415 "EHLO
+	ug-out-1314.google.com") by vger.kernel.org with ESMTP
+	id S932242AbWJFGbQ convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Oct 2006 18:46:51 -0400
-In-Reply-To: <a63d67fe0610051358j6181f558p2baaf1b59b0a042e@mail.gmail.com>
+	Fri, 6 Oct 2006 02:31:16 -0400
+Received: by ug-out-1314.google.com with SMTP id o38so285354ugd
+        for <linux-sparse@vger.kernel.org>; Thu, 05 Oct 2006 23:31:14 -0700 (PDT)
+In-Reply-To: <20061005102542.GD23093@wohnheim.fh-wedel.de>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <error27@gmail.com>
-Cc: smatch-discuss@lists.sourceforge.net, linux-sparse@vger.kernel.org
+To: =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@wohnheim.fh-wedel.de>
+Cc: Sam Ravnborg <sam@ravnborg.org>, smatch-discuss@lists.sf.net, linux-sparse@vger.kernel.org
 
-Dan Carpenter wrote:
-> On 10/5/06, Michael Stefaniuc <mstefani@redhat.com> wrote:
->> Dan Carpenter wrote:
->> > Work on smatch is going ahead.  I have one real life check is working
->> > and I've added a patched up the core code quite a bit.
->> great work! What about the old smatch.pm and perl scripts? Will i be
->> still able to use those or would i have to port them over? I'm still
->> using the old smatch on checking Wine.
-> 
-> They'll have to be ported I'm afraid.
-That's not realy a problem especialy as i can keep using the old smatch
-for a while.
+On 10/5/06, J=F6rn Engel <joern@wohnheim.fh-wedel.de> wrote:
+>
+> One advantage over gcc or plain sparse is that code checking can be
+> done in two passes.  Pass one collects all sorts of information for
+> every compilation unit.  Pass two can then combine the information fo=
+r
+> all compilation units and do global checking of some sort.
+>
+> For example, the currently debated "may be used uninitialized" warnin=
+g
+> in gcc is simply not able to detect something like:
+>
+> foo.c:
+>         int foo;
+>         do_initialize(&foo);
+>         do_something(foo);
+> bar.c:
+> void do_initialize(int *bar)
+> {
+>         *bar =3D 0;
+> }
+>
+> The code is 100% correct, but gcc only looks at foo.c and spits out a
+> warning.  Smatch can do better than that - if someone writes a
+> checker.
+>
+> J=F6rn
+>
 
-> Rewrites are a pain, but it's worth it because now it's easier to
-> install, it's easier to use, and it runs a bajillion times faster.
-I'm more concerned about how easy it is to write new "scripts" or modify
-existing ones. For Wine I use only unreached-code.pl as is. Due to the
-Win32 API i had to modify unfree.pl quite a bit.
+Actually, I think gcc handles that specific example correctly...  If
+do_initialize() is in the same file it looks to see if it actually
+initializes it or not.  If it's in a seperate file then it assumes
+that it initializes it and doesn't print a warning.
 
-> Using sparse also buys us a bunch of features for free, for example if
-> you have 'i' defined in two different scopes with sparse handles that.
-> Another example is compound conditions.  The old code was confused by
-> stuff like:
-> if (a && a->foo() || a && a->bar())
-> there wasn't a good way to deal with that with the old way.
-> 
-> Which checks do you use most?  I'll port those first...
-The scripts used regularly for Wine are on
-http://people.redhat.com/mstefani/wine/smatch/scripts.html. Except that
-i use only unreached-code.pl from the original smatch scripts.
-Though not all scripts are that usefull; i probably could throw out
-immediately while_for_check.pl and crosscalls_WtoA.pl. Most successfull
-script is redundant_null_check.pl (finds "if (bla) free(bla);") as i had
-only 2 false positives until now. unfree-wine.pl is the adaptation+bug
-fixes of the original unfree.pl (usefull but lots of false positives).
-The other usefull script is wine_locks.pl that found quite a few missing
-unlocks on error paths. And i have some other ideas about a couple of
-usefull smatch scripts for Wine but lack the time to implement them.
+I'm using gcc 4.0.3.
 
-So most usefull would be a short documentation how to port things. Maybe
-a short mapping between the most importand smatch.pm functions and their
- C counter part would be enough for the start. I looked at the smatch
-sparse diff and it didn't look that complicated to use. I have anyway a
-longish train ride next week so i will give it a try; maybe with an easy
-and dumb version of redundant_null_check.pl
-
-bye
-	michael
--- 
-Michael Stefaniuc               Tel.: +49-711-96437-199
-Sr. Network Engineer            Fax.: +49-711-96437-111
-Red Hat GmbH                    Email: mstefani@redhat.com
-Hauptstaetterstr. 58            http://www.redhat.de/
-D-70178 Stuttgart
+regards,
+dan carpenter
