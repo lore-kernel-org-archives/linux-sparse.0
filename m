@@ -1,67 +1,70 @@
 From: "Dan Carpenter" <error27@gmail.com>
 Subject: Re: Moving smatch to use sparse
-Date: Thu, 5 Oct 2006 23:31:14 -0700
-Message-ID: <a63d67fe0610052331y4e914869k7c0feaf42bb8b14c@mail.gmail.com>
+Date: Fri, 6 Oct 2006 01:57:06 -0700
+Message-ID: <a63d67fe0610060157g117228fambc77363513a464d9@mail.gmail.com>
 References: <a63d67fe0607140925h3665cd98ibc2fab07f6f80360@mail.gmail.com>
 	 <a63d67fe0607151742l6a387783x59494b84de80be88@mail.gmail.com>
 	 <a63d67fe0610050141x251253fei59b93fff28505dc4@mail.gmail.com>
-	 <20061005092656.GA17866@uranus.ravnborg.org>
-	 <a63d67fe0610050249j1cadc3bfk438b66ec8ad34586@mail.gmail.com>
-	 <20061005102542.GD23093@wohnheim.fh-wedel.de>
+	 <45252A39.3050008@redhat.com>
+	 <a63d67fe0610051358j6181f558p2baaf1b59b0a042e@mail.gmail.com>
+	 <45258B4B.6010907@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1;
-	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ug-out-1314.google.com ([66.249.92.174]:2415 "EHLO
+Received: from ug-out-1314.google.com ([66.249.92.175]:23208 "EHLO
 	ug-out-1314.google.com") by vger.kernel.org with ESMTP
-	id S932242AbWJFGbQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 6 Oct 2006 02:31:16 -0400
-Received: by ug-out-1314.google.com with SMTP id o38so285354ugd
-        for <linux-sparse@vger.kernel.org>; Thu, 05 Oct 2006 23:31:14 -0700 (PDT)
-In-Reply-To: <20061005102542.GD23093@wohnheim.fh-wedel.de>
+	id S1751367AbWJFI5I (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 6 Oct 2006 04:57:08 -0400
+Received: by ug-out-1314.google.com with SMTP id o38so294052ugd
+        for <linux-sparse@vger.kernel.org>; Fri, 06 Oct 2006 01:57:07 -0700 (PDT)
+In-Reply-To: <45258B4B.6010907@redhat.com>
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?J=F6rn_Engel?= <joern@wohnheim.fh-wedel.de>
-Cc: Sam Ravnborg <sam@ravnborg.org>, smatch-discuss@lists.sf.net, linux-sparse@vger.kernel.org
+To: Michael Stefaniuc <mstefani@redhat.com>
+Cc: smatch-discuss@lists.sourceforge.net, linux-sparse@vger.kernel.org
 
-On 10/5/06, J=F6rn Engel <joern@wohnheim.fh-wedel.de> wrote:
->
-> One advantage over gcc or plain sparse is that code checking can be
-> done in two passes.  Pass one collects all sorts of information for
-> every compilation unit.  Pass two can then combine the information fo=
-r
-> all compilation units and do global checking of some sort.
->
-> For example, the currently debated "may be used uninitialized" warnin=
-g
-> in gcc is simply not able to detect something like:
->
-> foo.c:
->         int foo;
->         do_initialize(&foo);
->         do_something(foo);
-> bar.c:
-> void do_initialize(int *bar)
-> {
->         *bar =3D 0;
-> }
->
-> The code is 100% correct, but gcc only looks at foo.c and spits out a
-> warning.  Smatch can do better than that - if someone writes a
-> checker.
->
-> J=F6rn
->
+Sparse reads the source and creates a parse tree.  At the base, are
+function symbols, the function has a bunch statements and the
+statements have a bunch of expressions which branch out into even more
+expressions.  If you have data that's a symbol.
 
-Actually, I think gcc handles that specific example correctly...  If
-do_initialize() is in the same file it looks to see if it actually
-initializes it or not.  If it's in a seperate file then it assumes
-that it initializes it and doesn't print a warning.
+struct expression is defined in expression.h
+struct symbol is defined in symbol.h
+struct statement is in parse.h
 
-I'm using gcc 4.0.3.
+The important functions are:
+set_state(name, my_id, sym, ISNULL);
+get_state(deref, my_id, sym)
+set_true_false_states(left, my_id, sym_left, ISNULL, NONNULL);
+add_hook(&match_assign, ASSIGNMENT_HOOK);
+void register_your_check(int id)
+left = get_variable_from_expr(expr->left, &sym_left);
+left = alloc_string(left);
+
+my_id is a different int for every check script.
+sym is a symbol * to the sparse symbol.
+The condition hook feeds you one condition at a time.
+add_hook() sets up a call back that will be called for every
+assignment in this case.
+add the register_your_check() to smatch.c.
+get_variable_from_expr() is a bit buggy still but it's supposed to
+give a string representation of an expression and it also gives you a
+symbol pointer.  If you want to keep the string instead of just
+printing it out or using it for get_state() then you have to call
+alloc_string().
+
+I haven't added setting up custom merge_rules yet.  Will do.
+
+Internally smatch_states are a struct.  I'm going to add some more
+fields to that so it might be useful to have a get_state_struct()
+function...
+
+smatch_flow.c interprets that sparse tree.  If you want to add another
+hook that's the place to do it.
+
+That's pretty much it.
 
 regards,
 dan carpenter
