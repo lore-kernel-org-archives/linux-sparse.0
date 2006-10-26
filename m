@@ -1,48 +1,36 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: [PATCH] Add __builtin_popcountl
-Date: Thu, 26 Oct 2006 19:43:01 +0100
-Message-ID: <20061026184301.GJ29920@ftp.linux.org.uk>
-References: <20061026174730.GE5591@parisc-linux.org>
+Date: Thu, 26 Oct 2006 11:56:00 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.0610261153510.3962@g5.osdl.org>
+References: <20061026174730.GE5591@parisc-linux.org> <20061026184301.GJ29920@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:59832 "EHLO
-	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S1423716AbWJZSnC
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Oct 2006 14:43:02 -0400
-Content-Disposition: inline
-In-Reply-To: <20061026174730.GE5591@parisc-linux.org>
+Received: from smtp.osdl.org ([65.172.181.4]:11207 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S1423485AbWJZS4P (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 26 Oct 2006 14:56:15 -0400
+In-Reply-To: <20061026184301.GJ29920@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Matthew Wilcox <matthew@wil.cx>
-Cc: linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: Matthew Wilcox <matthew@wil.cx>, linux-sparse@vger.kernel.org
 
-On Thu, Oct 26, 2006 at 11:47:30AM -0600, Matthew Wilcox wrote:
+
+
+On Thu, 26 Oct 2006, Al Viro wrote:
 > 
-> IA-64 uses __builtin_popcountl() which wasn't a function sparse knew
-> about.  This patch adds it.  I've never looked at sparse before, so this
-> is a hack-and-run job.  Please feel free to rewrite it if it doesn't suit.
+> AFAICS, that's way over the top.  That kind of stuff is needed only
+> when builtin can't be described as a normal function.  This, OTOH...
 
-AFAICS, that's way over the top.  That kind of stuff is needed only
-when builtin can't be described as a normal function.  This, OTOH...
+On the other hand, adding "true" builtin functions is actually a lot 
+cheaper than adding bogus code to be parsed explicitly.
 
-diff --git a/lib.c b/lib.c
---- a/lib.c
-+++ b/lib.c
-@@ -467,6 +467,16 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern void __builtin_trap(void);\n");
- 	add_pre_buffer("extern int __builtin_ffs(int);\n");
- 	add_pre_buffer("extern void *__builtin_alloca(__SIZE_TYPE__);\n");
-+	add_pre_buffer("extern int __builtin_popcount(unsigned int);\n");
-+	add_pre_buffer("extern int __builtin_popcountl(unsigned long);\n");
-+	add_pre_buffer("extern void __builtin_prefetch (const void *, ...);\n");
-+	add_pre_buffer("extern long __builtin_alpha_extbl(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_extwl(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_insbl(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_inswl(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_insql(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_inslh(long, long);\n");
-+	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
- }
- 
- void create_builtin_stream(void)
+So I'd actually prefer a way to have a table to describe and initialize 
+these things, as a way to make it a lot more efficient, and without the 
+silly preprocessor buffer hacks..
+
+The preprocessor hack is certainly simple, but it's not what you really 
+want in real life.
+
+		Linus
