@@ -1,43 +1,33 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: [PATCH] Add __builtin_popcountl
-Date: Thu, 26 Oct 2006 20:19:41 +0100
-Message-ID: <20061026191941.GK29920@ftp.linux.org.uk>
-References: <20061026174730.GE5591@parisc-linux.org> <20061026184301.GJ29920@ftp.linux.org.uk> <Pine.LNX.4.64.0610261153510.3962@g5.osdl.org>
+From: Josh Boyer <jwboyer@jdub.homelinux.org>
+Subject: Official releases?
+Date: Tue, 31 Oct 2006 09:03:45 -0600
+Message-ID: <1162307025.11613.1.camel@zod.rchland.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:30856 "EHLO
-	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S1422739AbWJZTTq
+Received: from 67-41-71-127.roch.qwest.net ([67.41.71.127]:63632 "EHLO
+	jdub.homelinux.org") by vger.kernel.org with ESMTP id S1423465AbWJaPE0
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Oct 2006 15:19:46 -0400
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0610261153510.3962@g5.osdl.org>
+	Tue, 31 Oct 2006 10:04:26 -0500
+Received: from rchp4.rochester.ibm.com ([129.42.161.36] helo=[9.10.86.46])
+	by jdub.homelinux.org with esmtpsa (TLSv1:RC4-MD5:128)
+	(Exim 4.62)
+	(envelope-from <jwboyer@jdub.homelinux.org>)
+	id 1GevB5-0001vT-Qw
+	for linux-sparse@vger.kernel.org; Tue, 31 Oct 2006 09:05:24 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
-Cc: Matthew Wilcox <matthew@wil.cx>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Thu, Oct 26, 2006 at 11:56:00AM -0700, Linus Torvalds wrote:
-> 
-> 
-> On Thu, 26 Oct 2006, Al Viro wrote:
-> > 
-> > AFAICS, that's way over the top.  That kind of stuff is needed only
-> > when builtin can't be described as a normal function.  This, OTOH...
-> 
-> On the other hand, adding "true" builtin functions is actually a lot 
-> cheaper than adding bogus code to be parsed explicitly.
-> 
-> So I'd actually prefer a way to have a table to describe and initialize 
-> these things, as a way to make it a lot more efficient, and without the 
-> silly preprocessor buffer hacks..
-> 
-> The preprocessor hack is certainly simple, but it's not what you really 
-> want in real life.
+Howdy,
 
-Well...  Keep in mind that those _are_ functions; i.e. unlike something
-like __builtin_choose_expr() you can pass such puppy to a function
-expecting a callback, etc.
+I'm just curious if anyone is ever really going to do an "official"
+release of sparse.  We've got daily snapshots provided by Dave Jones,
+and git of course, but will an official release tarball with shiny
+version numbers and everything be created?
 
-So it's not enough to special-case them; we really need types for those
-symbols.  I don't think that it will be more efficient in the end.
+The only reason I ask is because it makes packaging sparse a bit easier
+to some degree.
+
+josh
