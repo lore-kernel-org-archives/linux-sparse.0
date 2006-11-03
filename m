@@ -1,42 +1,67 @@
-From: Josh Boyer <jwboyer@jdub.homelinux.org>
-Subject: Re: Official releases?
-Date: Tue, 31 Oct 2006 14:45:18 -0600
-Message-ID: <1162327518.26960.0.camel@zod.rchland.ibm.com>
-References: <1162307025.11613.1.camel@zod.rchland.ibm.com>
-	 <4547B3C7.5030608@freedesktop.org>
-Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+From: Pavel Roskin <proski@gnu.org>
+Subject: [PATCH 1/4] Compile sparse executable under it's own name, not as "check"
+Date: Fri, 03 Nov 2006 17:16:59 -0500
+Message-ID: <20061103221659.7811.73832.stgit@dv.roinet.com>
+Content-Type: text/plain; charset=utf-8; format=fixed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 67-41-71-127.roch.qwest.net ([67.41.71.127]:31152 "EHLO
-	jdub.homelinux.org") by vger.kernel.org with ESMTP id S1423620AbWJaUqI
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 31 Oct 2006 15:46:08 -0500
-In-Reply-To: <4547B3C7.5030608@freedesktop.org>
+Received: from static-72-92-88-10.phlapa.fios.verizon.net ([72.92.88.10]:63881
+	"EHLO smtp.roinet.com") by vger.kernel.org with ESMTP
+	id S1753545AbWKCWRA (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 3 Nov 2006 17:17:00 -0500
+Received: from dv.roinet.com (192.168.1.21 [192.168.1.21])
+    by smtp.roinet.com with SMTP;
+    for linux-sparse@vger.kernel.org;
+    Fri, 03 Nov 2006 17:16:59 -0500 (EST)
+    (envelope-from proski@gnu.org)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Tue, 2006-10-31 at 12:36 -0800, Josh Triplett wrote:
-> Josh Boyer wrote:
-> > I'm just curious if anyone is ever really going to do an "official"
-> > release of sparse.  We've got daily snapshots provided by Dave Jones,
-> > and git of course, but will an official release tarball with shiny
-> > version numbers and everything be created?
-> 
-> Since sparse doesn't use any autofoolery, and doesn't include a version number
-> in the source anywhere, making a release should just require running git tag
-> and git archive, and putting the resulting tarball up in an official location.
-> As far as version numbering, it seems reasonable to use the former kernel
-> versioning system: major.oddeven.revision, starting from something like 0.1.0,
-> and keeping major version 0 until sparse can comfortably provide some
-> guarantee of backward compatibility for sparse extensions.  Thus, periodic
-> releases (0.1.1, 0.1.2, ...) wouldn't take much effort at all, and eventually
-> calling one "stable" (0.2.0, with crash-fixes an similar backported to produce
-> 0.2.1, 0.2.2, ...) would mostly consist of a judgement call.
+From: Pavel Roskin <proski@gnu.org>
 
-Great.  Did you see Linus' email suggesting that I ask you to do
-this? :)
+No need to confuse everyone.  Besides, it allows to use "make check" for
+some something meaningful in the future.
 
-josh
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
+
+ Makefile |   11 +++--------
+ 1 files changed, 3 insertions(+), 8 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index ccf9f89..da4a47a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -21,7 +21,7 @@ CFLAGS += -DDEBUG
+ 
+ PREFIX=$(HOME)
+ BINDIR=$(PREFIX)/bin
+-PROGRAMS=test-lexing test-parsing obfuscate check compile graph test-linearize example test-unssa test-dissect
++PROGRAMS=test-lexing test-parsing obfuscate compile graph sparse test-linearize example test-unssa test-dissect
+ 
+ LIB_H=    token.h parse.h lib.h symbol.h scope.h expression.h target.h \
+ 	  linearize.h bitmap.h ident-list.h compat.h flow.h allocate.h \
+@@ -39,12 +39,7 @@ LIBS=$(LIB_FILE)
+ 
+ all: $(PROGRAMS) $(SLIB_FILE)
+ 
+-#
+-# Install the 'check' binary as 'sparse', just to confuse people.
+-#
+-#		"The better to keep you on your toes, my dear".
+-#
+-install: check $(SLIB_FILE) bin-dir
++install: sparse $(SLIB_FILE) bin-dir
+ 	if test $< -nt $(BINDIR)/sparse ; then install -v $< $(BINDIR)/sparse ; install -v $(SLIB_FILE) $(BINDIR) ; fi
+ 
+ bin-dir:
+@@ -74,7 +69,7 @@ compile: compile.o compile-i386.o $(LIBS
+ obfuscate: obfuscate.o $(LIBS)
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
+ 
+-check: check.o $(LIBS)
++sparse: check.o $(LIBS)
+ 	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
+ 
+ graph: graph.o $(LIBS)
