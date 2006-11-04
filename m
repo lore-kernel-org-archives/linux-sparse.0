@@ -1,164 +1,76 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: [PATCH 4/4] Typo fixes
-Date: Fri, 03 Nov 2006 17:17:17 -0500
-Message-ID: <20061103221717.7811.2112.stgit@dv.roinet.com>
-References: <20061103221659.7811.73832.stgit@dv.roinet.com>
-Content-Type: text/plain; charset=utf-8; format=fixed
-Content-Transfer-Encoding: 8bit
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: Official releases?
+Date: Fri, 03 Nov 2006 21:16:29 -0800
+Message-ID: <454C222D.8000901@freedesktop.org>
+References: <1162307025.11613.1.camel@zod.rchland.ibm.com>	 <4547B3C7.5030608@freedesktop.org> <1162327518.26960.0.camel@zod.rchland.ibm.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigE6D149A71CBCDB16D7CCB96D"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from static-72-92-88-10.phlapa.fios.verizon.net ([72.92.88.10]:65417
-	"EHLO smtp.roinet.com") by vger.kernel.org with ESMTP
-	id S932080AbWKCWRS (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 3 Nov 2006 17:17:18 -0500
-Received: from dv.roinet.com (192.168.1.21 [192.168.1.21])
-    by smtp.roinet.com with SMTP;
-    for linux-sparse@vger.kernel.org;
-    Fri, 03 Nov 2006 17:17:17 -0500 (EST)
-    (envelope-from proski@gnu.org)
-In-Reply-To: <20061103221659.7811.73832.stgit@dv.roinet.com>
+Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:14764 "EHLO
+	mail3.sea5.speakeasy.net") by vger.kernel.org with ESMTP
+	id S1753595AbWKDFQd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 4 Nov 2006 00:16:33 -0500
+In-Reply-To: <1162327518.26960.0.camel@zod.rchland.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Josh Boyer <jwboyer@jdub.homelinux.org>
+Cc: linux-sparse@vger.kernel.org
 
-From: Pavel Roskin <proski@gnu.org>
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigE6D149A71CBCDB16D7CCB96D
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Pavel Roskin <proski@gnu.org>
----
+Josh Boyer wrote:
+> On Tue, 2006-10-31 at 12:36 -0800, Josh Triplett wrote:
+>> Josh Boyer wrote:
+>>> I'm just curious if anyone is ever really going to do an "official"
+>>> release of sparse.  We've got daily snapshots provided by Dave Jones,=
 
- evaluate.c                                   |    2 +-
- example.c                                    |    4 ++--
- expand.c                                     |    2 +-
- inline.c                                     |    2 +-
- memops.c                                     |    2 +-
- pre-process.c                                |    2 +-
- simplify.c                                   |    2 +-
- symbol.c                                     |    2 +-
- validation/initializer-entry-defined-twice.c |    2 +-
- 9 files changed, 10 insertions(+), 10 deletions(-)
+>>> and git of course, but will an official release tarball with shiny
+>>> version numbers and everything be created?
+>> Since sparse doesn't use any autofoolery, and doesn't include a versio=
+n number
+>> in the source anywhere, making a release should just require running g=
+it tag
+>> and git archive, and putting the resulting tarball up in an official l=
+ocation.
+>> As far as version numbering, it seems reasonable to use the former ker=
+nel
+>> versioning system: major.oddeven.revision, starting from something lik=
+e 0.1.0,
+>> and keeping major version 0 until sparse can comfortably provide some
+>> guarantee of backward compatibility for sparse extensions.  Thus, peri=
+odic
+>> releases (0.1.1, 0.1.2, ...) wouldn't take much effort at all, and eve=
+ntually
+>> calling one "stable" (0.2.0, with crash-fixes an similar backported to=
+ produce
+>> 0.2.1, 0.2.2, ...) would mostly consist of a judgement call.
+>=20
+> Great.  Did you see Linus' email suggesting that I ask you to do
+> this? :)
 
-diff --git a/evaluate.c b/evaluate.c
-index 6fb6be2..ca49ed0 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1475,7 +1475,7 @@ static struct symbol *evaluate_dereferen
- 
- 	switch (ctype->type) {
- 	default:
--		sparse_error(expr->pos, "cannot derefence this type");
-+		sparse_error(expr->pos, "cannot dereference this type");
- 		return NULL;
- 	case SYM_PTR:
- 		node->ctype.modifiers = target->ctype.modifiers & MOD_SPECIFIER;
-diff --git a/example.c b/example.c
-index 7e30c22..7c2bae3 100644
---- a/example.c
-+++ b/example.c
-@@ -942,7 +942,7 @@ static void generate_commutative_binop(s
- 	if (!is_dead_reg(state, src1, reg1))
- 		goto do_switch;
- 
--	/* Both are dead. Is one preferrable? */
-+	/* Both are dead. Is one preferable? */
- 	if (reg2 != preferred_reg(state, insn->target))
- 		goto dont_switch;
- 
-@@ -1493,7 +1493,7 @@ static void write_reg_to_storage(struct
- 
- 		/* Fall back on stack allocation ... */
- 		alloc_stack(state, storage);
--		/* Fallthroigh */
-+		/* Fallthrough */
- 	default:
- 		output_insn(state, "movl %s,%s", reg->name, show_memop(storage));
- 		return;
-diff --git a/expand.c b/expand.c
-index a34d07d..90f7f36 100644
---- a/expand.c
-+++ b/expand.c
-@@ -562,7 +562,7 @@ static int expand_dereference(struct exp
- 	/*
- 	 * NOTE! We get a bogus warning right now for some special
- 	 * cases: apparently I've screwed up the optimization of
--	 * a zero-offset derefence, and the ctype is wrong.
-+	 * a zero-offset dereference, and the ctype is wrong.
- 	 *
- 	 * Leave the warning in anyway, since this is also a good
- 	 * test for me to get the type evaluation right..
-diff --git a/inline.c b/inline.c
-index 81530d1..77adfab 100644
---- a/inline.c
-+++ b/inline.c
-@@ -428,7 +428,7 @@ static struct statement *copy_one_statem
- }
- 
- /*
-- * Copy a stateemnt tree from 'src' to 'dst', where both
-+ * Copy a statement tree from 'src' to 'dst', where both
-  * source and destination are of type STMT_COMPOUND.
-  *
-  * We do this for the tree-level inliner.
-diff --git a/memops.c b/memops.c
-index 8fd777d..bdecf14 100644
---- a/memops.c
-+++ b/memops.c
-@@ -69,7 +69,7 @@ found_dominator:
-  * we can no longer really use "container()" to get from a user to
-  * the instruction that uses it.
-  *
-- * This happens to work, simply because the likelyhood of the
-+ * This happens to work, simply because the likelihood of the
-  * (possibly non-instruction) containing the right bitpattern
-  * in the right place is pretty low. But this is still wrong.
-  *
-diff --git a/pre-process.c b/pre-process.c
-index 08d1a2e..81a535e 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -630,7 +630,7 @@ static int already_tokenized(const char
- 	return 0;
- }
- 
--/* Hande include of header files.
-+/* Handle include of header files.
-  * The relevant options are made compatible with gcc. The only options that
-  * are not supported is -withprefix and friends.
-  *
-diff --git a/simplify.c b/simplify.c
-index 495f5d3..a8b736b 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -550,7 +550,7 @@ offset:
- 
- /*
-  * We walk the whole chain of adds/subs backwards. That's not
-- * only more efficient, but it allows us to find looops.
-+ * only more efficient, but it allows us to find loops.
-  */
- static int simplify_memop(struct instruction *insn)
- {
-diff --git a/symbol.c b/symbol.c
-index 6c91112..a9b26b5 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -360,7 +360,7 @@ static struct symbol *examine_pointer_ty
- 	 * We need to set the pointer size first, and
- 	 * examine the thing we point to only afterwards.
- 	 * That's because this pointer type may end up
--	 * being needed for the base type size evalutation.
-+	 * being needed for the base type size evaluation.
- 	 */
- 	if (!sym->bit_size)
- 		sym->bit_size = bits_in_pointer;
-diff --git a/validation/initializer-entry-defined-twice.c b/validation/initializer-entry-defined-twice.c
-index 80434f1..58f314b 100644
---- a/validation/initializer-entry-defined-twice.c
-+++ b/validation/initializer-entry-defined-twice.c
-@@ -29,7 +29,7 @@ struct has_union union_error = {
- };
- 
- /* Empty structures can make two fields have the same offset in a struct.
-- * Initialzing both should not trigger the warning. */
-+ * Initializing both should not trigger the warning. */
- struct empty { };
- 
- struct same_offset {
+I did, and I plan to roll a release this weekend.
+
+- Josh Triplett
+
+
+
+--------------enigE6D149A71CBCDB16D7CCB96D
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.5 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFFTCItGJuZRtD+evsRAmtIAJ97+BEmzs0geRYr8UmbtHhTPWL8rgCgvfzP
+fkF7qNj7U/g2HM15hgzBC1g=
+=09iF
+-----END PGP SIGNATURE-----
+
+--------------enigE6D149A71CBCDB16D7CCB96D--
