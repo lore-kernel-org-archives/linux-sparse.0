@@ -1,64 +1,165 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 1/4] Compile sparse executable under it's own name, not
- as "check"
-Date: Mon, 06 Nov 2006 10:50:00 -0800
-Message-ID: <454F83D8.9030204@freedesktop.org>
-References: <20061103221659.7811.73832.stgit@dv.roinet.com>
-Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig7881ED88C2CE8722D95B4121"
+From: Pavel Roskin <proski@gnu.org>
+Subject: [PATCH] Add a testsuite, call it on "make check"
+Date: Mon, 06 Nov 2006 18:51:42 -0500
+Message-ID: <20061106235142.27050.95901.stgit@dv.roinet.com>
+Content-Type: text/plain; charset=utf-8; format=fixed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:10669 "EHLO
-	mail3.sea5.speakeasy.net") by vger.kernel.org with ESMTP
-	id S1752267AbWKFSuD (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 6 Nov 2006 13:50:03 -0500
-In-Reply-To: <20061103221659.7811.73832.stgit@dv.roinet.com>
+Received: from static-72-92-88-10.phlapa.fios.verizon.net ([72.92.88.10]:40919
+	"EHLO smtp.roinet.com") by vger.kernel.org with ESMTP
+	id S1753762AbWKFXvo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 6 Nov 2006 18:51:44 -0500
+Received: from dv.roinet.com (192.168.1.21 [192.168.1.21])
+    by smtp.roinet.com with SMTP;
+    for linux-sparse@vger.kernel.org;
+    Mon, 06 Nov 2006 18:51:42 -0500 (EST)
+    (envelope-from proski@gnu.org)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig7881ED88C2CE8722D95B4121
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+From: Pavel Roskin <proski@gnu.org>
 
-I've applied this series of four patches; thanks.
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
 
-Your "typo fixes" patch also reminded me that I needed to fix the typo in=
- the
-name of "validation/bad-assignement.c", which I have now done.
+ Makefile             |    3 +
+ validation/testsuite |  118 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 121 insertions(+), 0 deletions(-)
 
-Regarding your comment about using "make check" for something more useful=
-, I
-would greatly welcome a patch which actually checked sparse against all t=
-he
-files in validation/ and tested what those files intended to test.  As fa=
-r as
-I can tell, it looks like some of them may not work as intended right now=
-; for
-example, it looks like validation/builtin_safe1.c expects
-__attribute__((pure)) and __attribute__((const)) to work and mark a funct=
-ion
-as side-effect-free, which doesn't currently happen in sparse.
-
-- Josh Triplett
-
-
-
---------------enig7881ED88C2CE8722D95B4121
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.5 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFFT4PYGJuZRtD+evsRAtdlAJ9+d8GrP0qDZZRzanc6sROK49rMJgCdG9iH
-nwXtFsiyg6dvynVEjLPOZMQ=
-=F9vm
------END PGP SIGNATURE-----
-
---------------enig7881ED88C2CE8722D95B4121--
+diff --git a/Makefile b/Makefile
+index 2dcd514..40e916b 100644
+--- a/Makefile
++++ b/Makefile
+@@ -138,4 +138,7 @@ pre-process.h:
+ clean:
+ 	rm -f *.[oasi] core core.[0-9]* $(PROGRAMS) $(SLIB_FILE) pre-process.h
+ 
++check:
++	cd validation && ./testsuite
++
+ % : SCCS/s.%s
+diff --git a/validation/testsuite b/validation/testsuite
+new file mode 100755
+index 0000000..5498290
+--- /dev/null
++++ b/validation/testsuite
+@@ -0,0 +1,118 @@
++#! /bin/sh
++
++set -e
++
++: ${SPARSE=../sparse}
++: ${SPARSE_FLAGS=}
++
++# sparse should report a problem and it does
++BAD_EXP_BAD="
++bad-array-designated-initializer.c
++bad-assignment.c
++bad-cast.c
++bad-ternary-cond.c
++badtype2.c
++badtype3.c
++badtype4.c
++"
++
++# sparse should not report a problem and it doesn't
++OK_EXP_OK="
++bitfields.c
++field-overlap.c
++foul-bitwise.c
++init-char-array.c
++inline_compound_literals.c
++preprocessor16.c
++preprocessor17.c
++preprocessor6.c
++struct-as.c
++struct-ns1.c
++struct-ns2.c
++struct-size1.c
++test-be.c
++type1.c
++typeconvert.c
++varargs1.c
++phase3/comments
++"
++
++# sparse should report a problem but it doesn't
++# This needs to be fixed!
++BAD_EXP_OK="
++badtype1.c
++"
++
++# sparse should not report a problem but it does
++# This needs to be fixed!
++OK_EXP_BAD="
++builtin_safe1.c
++check_byte_count-ice.c
++choose_expr.c
++cond_expr.c
++context.c
++initializer-entry-defined-twice.c
++noderef.c
++preprocessor1.c
++preprocessor10.c
++preprocessor11.c
++preprocessor12.c
++preprocessor13.c
++preprocessor14.c
++preprocessor15.c
++preprocessor18.c
++preprocessor19.c
++preprocessor2.c
++preprocessor20.c
++preprocessor3.c
++preprocessor4.c
++preprocessor5.c
++preprocessor7.c
++preprocessor8.c
++preprocessor9.c
++phase2/backslash
++"
++
++unexp=0
++
++for t in $BAD_EXP_BAD; do
++	$SPARSE $SPARSE_FLAGS $t 2>test-err
++	if test -s test-err; then
++		echo "PASS: $t"
++	else
++		echo "UNEXPECTED FAIL: $t"
++		unexp=1
++	fi
++done
++
++for t in $OK_EXP_OK; do
++	$SPARSE $SPARSE_FLAGS $t 2>test-err
++	if test -s test-err; then
++		echo "UNEXPECTED FAIL: $t"
++		unexp=1
++	else
++		echo "PASS: $t"
++	fi
++done
++
++for t in $BAD_EXP_OK; do
++	$SPARSE $SPARSE_FLAGS $t 2>test-err
++	if test -s test-err; then
++		echo "UNEXPECTED PASS: $t"
++		unexp=1
++	else
++		echo "(known) FAIL: $t"
++	fi
++done
++
++for t in $OK_EXP_BAD; do
++	$SPARSE $SPARSE_FLAGS $t 2>test-err
++	if test -s test-err; then
++		echo "(known) FAIL: $t"
++	else
++		echo "UNEXPECTED PASS: $t"
++		unexp=1
++	fi
++done
++
++exit $unexp
