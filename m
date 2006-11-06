@@ -1,49 +1,64 @@
-From: Josh Boyer <jwboyer@jdub.homelinux.org>
-Subject: Re: Official releases?
-Date: Sat, 04 Nov 2006 00:09:25 -0600
-Message-ID: <1162620565.3139.100.camel@vader.jdub.homelinux.org>
-References: <1162307025.11613.1.camel@zod.rchland.ibm.com>
-	 <4547B3C7.5030608@freedesktop.org>
-	 <1162327518.26960.0.camel@zod.rchland.ibm.com>
-	 <454C222D.8000901@freedesktop.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 1/4] Compile sparse executable under it's own name, not
+ as "check"
+Date: Mon, 06 Nov 2006 10:50:00 -0800
+Message-ID: <454F83D8.9030204@freedesktop.org>
+References: <20061103221659.7811.73832.stgit@dv.roinet.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig7881ED88C2CE8722D95B4121"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 67-41-71-127.roch.qwest.net ([67.41.71.127]:63981 "EHLO
-	jdub.homelinux.org") by vger.kernel.org with ESMTP id S932365AbWKDGKd
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 4 Nov 2006 01:10:33 -0500
-In-Reply-To: <454C222D.8000901@freedesktop.org>
+Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:10669 "EHLO
+	mail3.sea5.speakeasy.net") by vger.kernel.org with ESMTP
+	id S1752267AbWKFSuD (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 6 Nov 2006 13:50:03 -0500
+In-Reply-To: <20061103221659.7811.73832.stgit@dv.roinet.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
+To: Pavel Roskin <proski@gnu.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2006-11-03 at 21:16 -0800, Josh Triplett wrote:
-> Josh Boyer wrote:
-> > On Tue, 2006-10-31 at 12:36 -0800, Josh Triplett wrote:
-> >> Josh Boyer wrote:
-> >>> I'm just curious if anyone is ever really going to do an "official"
-> >>> release of sparse.  We've got daily snapshots provided by Dave Jones,
-> >>> and git of course, but will an official release tarball with shiny
-> >>> version numbers and everything be created?
-> >> Since sparse doesn't use any autofoolery, and doesn't include a version number
-> >> in the source anywhere, making a release should just require running git tag
-> >> and git archive, and putting the resulting tarball up in an official location.
-> >> As far as version numbering, it seems reasonable to use the former kernel
-> >> versioning system: major.oddeven.revision, starting from something like 0.1.0,
-> >> and keeping major version 0 until sparse can comfortably provide some
-> >> guarantee of backward compatibility for sparse extensions.  Thus, periodic
-> >> releases (0.1.1, 0.1.2, ...) wouldn't take much effort at all, and eventually
-> >> calling one "stable" (0.2.0, with crash-fixes an similar backported to produce
-> >> 0.2.1, 0.2.2, ...) would mostly consist of a judgement call.
-> > 
-> > Great.  Did you see Linus' email suggesting that I ask you to do
-> > this? :)
-> 
-> I did, and I plan to roll a release this weekend.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig7881ED88C2CE8722D95B4121
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Excellent.  Thanks much!
+I've applied this series of four patches; thanks.
 
-josh
+Your "typo fixes" patch also reminded me that I needed to fix the typo in=
+ the
+name of "validation/bad-assignement.c", which I have now done.
+
+Regarding your comment about using "make check" for something more useful=
+, I
+would greatly welcome a patch which actually checked sparse against all t=
+he
+files in validation/ and tested what those files intended to test.  As fa=
+r as
+I can tell, it looks like some of them may not work as intended right now=
+; for
+example, it looks like validation/builtin_safe1.c expects
+__attribute__((pure)) and __attribute__((const)) to work and mark a funct=
+ion
+as side-effect-free, which doesn't currently happen in sparse.
+
+- Josh Triplett
+
+
+
+--------------enig7881ED88C2CE8722D95B4121
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.5 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFFT4PYGJuZRtD+evsRAtdlAJ9+d8GrP0qDZZRzanc6sROK49rMJgCdG9iH
+nwXtFsiyg6dvynVEjLPOZMQ=
+=F9vm
+-----END PGP SIGNATURE-----
+
+--------------enig7881ED88C2CE8722D95B4121--
