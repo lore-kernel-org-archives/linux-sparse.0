@@ -1,59 +1,145 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: ANNOUNCE: Sparse 0.1 - first release version of Sparse; new maintainer
-Date: Tue, 07 Nov 2006 01:25:02 -0800
-Message-ID: <455050EE.2060505@freedesktop.org>
-References: <4550228A.6060701@freedesktop.org> <20061107063245.GA26539@redhat.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: [PATCH] Add a testsuite, call it on "make check"
+Date: Tue, 07 Nov 2006 11:08:43 -0500
+Message-ID: <1162915723.28006.35.camel@dv>
+References: <20061106235142.27050.95901.stgit@dv.roinet.com>
+	 <454FD75F.7020600@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig63908FB2B03D3A1A0EB07C72"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:14260 "EHLO
-	mail2.sea5.speakeasy.net") by vger.kernel.org with ESMTP
-	id S1754138AbWKGJZF (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 7 Nov 2006 04:25:05 -0500
-In-Reply-To: <20061107063245.GA26539@redhat.com>
+Received: from fencepost.gnu.org ([199.232.76.164]:428 "EHLO fencepost.gnu.org")
+	by vger.kernel.org with ESMTP id S964857AbWKGQIr (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 7 Nov 2006 11:08:47 -0500
+Received: from proski by fencepost.gnu.org with local (Exim 4.34)
+	id 1GhTVF-0002PU-UI
+	for linux-sparse@vger.kernel.org; Tue, 07 Nov 2006 11:08:46 -0500
+In-Reply-To: <454FD75F.7020600@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dave Jones <davej@redhat.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@osdl.org>
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig63908FB2B03D3A1A0EB07C72
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Mon, 2006-11-06 at 16:46 -0800, Josh Triplett wrote:
+> You rock.  A few comments:
+> 
+> In the long run, I'd like to check that the expected output matches the actual
+> output, rather than just checking for the presence of output; we could do this
+> by storing expected warning/error output in a file matching the test but with
+> a .err extension.  That won't stop me from committing this test suite
+> implementation in the meantime, though.
 
-Dave Jones wrote:
-> On Mon, Nov 06, 2006 at 10:07:06PM -0800, Josh Triplett wrote:
->  >     git clone git://git.kernel.org/pub/scm/linux/kernel/git/josh/spa=
-rse.git
->=20
-> For the git-impaired, I've updated my daily-snapshot script to pull
-> from here instead of the old location.
+Actually, the output could be stored in the test itself with a certain
+prefix, e.g.:
 
-Thanks!
+//experr FILE:3:9: error: undefined identifier 'x'
+//experr FILE:4:7: error: incompatible types for 'case' statement
 
-> As always, they're auto-updated once an hour at ..
-> http://www.codemonkey.org.uk/projects/git-snapshots/sparse/
+The testsuite would grep for "//experr " and remove it.  Also, "FILE:"
+will be substituted with the actual filename.
 
-I've added this URL and the URL for the sparse-latest tarball to the Spar=
-se
-homepage.
+If no "experr" is found, the output is expected to be empty.  The
+"experr" lines should be at the end to avoid the need to change the line
+numbers when the error message changes.
 
-- Josh Triplett
+> I don't know for sure, since many of the test suite files don't include
+> documentation, but I believe that some of them (like the preprocessor tests)
+> only run as far as sparse -E, and they don't actually compile as C.  Thus,
+> they shouldn't get listed under BAD_EXP_OK.  For these, I'd eventually like to
+> check both the preprocessed output and the warning/error output against the
+> expected values.
 
+I didn't even know about the "-E" switch.  This reminds us that the
+documentation need to be written.
 
---------------enig63908FB2B03D3A1A0EB07C72
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Maybe all the information about the test should be embedded into the
+test?  That would be the flags and the expected result.  The only bit of
+information stored in the testsuite would be whether the test is known
+to pass, and I'm not even sure about that.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.5 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+> Several tests appear miscategorized in this test suite.  For example,
+> struct-ns2.c includes a comment saying "This is not in scope and should barf
+> loudly.", and includes code which should indeed cause sparse to barf loudly,
+> but sparse does not output anything when run on that file, even with -Wall.
 
-iD8DBQFFUFDuGJuZRtD+evsRArlsAKCF+6j5haplHLExUT4h7LP0rRh0wACgmueF
-aDl8Qffl7kMrIMOSxEldP9M=
-=JmFC
------END PGP SIGNATURE-----
+Actually, my patch for -Wall support was never applied, so sparse just
+ignores it.  I guess I should resend it.
 
---------------enig63908FB2B03D3A1A0EB07C72--
+> Conversely, on initializer-entry-defined-twice.c, sparse actually *should*
+> report a problem here (two problems, in fact), and it does; it just shouldn't
+> report a problem on the third.  Also, builtin_safe1.c falls in the category of
+> "doesn't currently pass", as it warns in two places it shouldn't, in addition
+> to the various places it should; however, this would require checking the
+> actual warning/error output.  Figuring out which of these various tests should
+> pass and which should fail will require a fair bit of work.
+
+I agree.  That's why we want to find the best infrastructure for the
+testsuite first.
+
+> Ideally, I'd love to see the test suite find new tests automatically, rather
+> than needing to list them explicitly; with a warning/error output file for
+> each test, the only difference between an OK_EXP_OK and a BAD_EXP_BAD becomes
+> "does the .err file have any content", so that just leaves the known failures,
+> which we can list explicitly since we don't need to make it easy to add more.
+
+I think the testsuite can find all files ending with ".c" in the
+validation directory.  I guess the tests from phase2 and phase3 could be
+moved up and given the ".c" extension as well.  But I have no idea why
+those directories were created in the first place.
+
+We also have test-*.c files in the main directory.  They should probably
+be moved elsewhere, but I'm not sure if they are suitable for automated
+testing.
+
+> Pavel Roskin wrote:
+> > --- /dev/null
+> > +++ b/validation/testsuite
+> > @@ -0,0 +1,118 @@
+> > +#! /bin/sh
+> > +
+> > +set -e
+> 
+> At first, this seemed wrong, since sparse should exit with a non-zero exit
+> code if it emits any errors; however, I then realized that sparse doesn't
+> actually *do* this, which seems like a bug.
+
+That's the first bug found by the testsuite :)
+
+I think it would be reasonable to fix it and then rethink the testsuite.
+
+> > +: ${SPARSE=../sparse}
+> > +: ${SPARSE_FLAGS=}
+> 
+> I don't think the test suite should allow setting sparse flags, partly since
+> changing the flags may well cause a test to pass or fail when it shouldn't,
+> and partly since at some point different parts of the test suite might need
+> different flags.
+
+I agree.  However, we need to be able to specify flags for some tests.
+
+> At first I balked a bit at the idea of having the test suite succeed while
+> some tests don't actually pass, but more I thought about it, I started to
+> agree that it seems like the right approach.  It means that we can ensure that
+> the test suite passes in every single Git revision of sparse.  Once all the
+> tests run as expected, we can dump this part of the test suite code.
+
+The idea is that the testsuite fails if some tests don't behave as
+expected.  This means that the behavior of sparse has changed and the
+testsuite needs to be reexamined.  Even if a test that used to fail is
+passing now, it needs attention to make sure that the test passes for
+legitimate reasons.
+
+It's also very important to catch the cases when sparse produces
+different output on different machines.  It's a clear sign that there is
+a major bug e.g. an endianess issue or an uninitialized variable.  This
+should not be tolerated even temporarily.
+
+I even tend to think that we want to encode the actual output even if
+it's known to be wrong.  A flag should indicate that it's not what we
+want sparse to do, but it's what it does.  It may be hard to predict the
+output from the code that have not be written yet :)
+
+-- 
+Regards,
+Pavel Roskin
