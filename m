@@ -1,141 +1,138 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Add a testsuite, call it on "make check"
-Date: Mon, 06 Nov 2006 16:46:23 -0800
-Message-ID: <454FD75F.7020600@freedesktop.org>
-References: <20061106235142.27050.95901.stgit@dv.roinet.com>
+Subject: ANNOUNCE: Sparse 0.1 - first release version of Sparse; new maintainer
+Date: Mon, 06 Nov 2006 22:07:06 -0800
+Message-ID: <4550228A.6060701@freedesktop.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig2FB12FF3EA81FF9ECC11FA95"
+ boundary="------------enigEAEB546D91651AA04C05A1F0"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:44418 "EHLO
-	mail6.sea5.speakeasy.net") by vger.kernel.org with ESMTP
-	id S1753802AbWKGAq0 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 6 Nov 2006 19:46:26 -0500
-In-Reply-To: <20061106235142.27050.95901.stgit@dv.roinet.com>
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:1163 "EHLO
+	mail7.sea5.speakeasy.net") by vger.kernel.org with ESMTP
+	id S932090AbWKGGHK (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 7 Nov 2006 01:07:10 -0500
+Received: from dsl093-040-092.pdx1.dsl.speakeasy.net (HELO [192.168.0.121]) (josh@[66.93.40.92])
+          (envelope-sender <josh@freedesktop.org>)
+          by mail7.sea5.speakeasy.net (qmail-ldap-1.03) with AES256-SHA encrypted SMTP
+          for <linux-sparse@vger.kernel.org>; 7 Nov 2006 06:07:09 -0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@osdl.org>
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig2FB12FF3EA81FF9ECC11FA95
+--------------enigEAEB546D91651AA04C05A1F0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-You rock.  A few comments:
+I have tagged and tarballed a 0.1 release of Sparse, now available
+from:
 
-In the long run, I'd like to check that the expected output matches the a=
-ctual
-output, rather than just checking for the presence of output; we could do=
- this
-by storing expected warning/error output in a file matching the test but =
-with
-a .err extension.  That won't stop me from committing this test suite
-implementation in the meantime, though.
+<http://kernel.org/pub/linux/kernel/people/josh/sparse/dist/sparse-0.1.ta=
+r.gz>
+sha1sum: 9e0a4d5abb8e8a4be4cf8d9fe632c69dbec3e242=20
 
-I don't know for sure, since many of the test suite files don't include
-documentation, but I believe that some of them (like the preprocessor tes=
-ts)
-only run as far as sparse -E, and they don't actually compile as C.  Thus=
-,
-they shouldn't get listed under BAD_EXP_OK.  For these, I'd eventually li=
-ke to
-check both the preprocessed output and the warning/error output against t=
-he
-expected values.
+As discussed in
+<http://marc.theaimsgroup.com/?i=3DPine.LNX.4.64.0610311030370.25218@g5.o=
+sdl.org>,
+I've taken maintainership of sparse.  Thanks to Linus Torvalds for his
+previous maintainership.
 
-Several tests appear miscategorized in this test suite.  For example,
-struct-ns2.c includes a comment saying "This is not in scope and should b=
-arf
-loudly.", and includes code which should indeed cause sparse to barf loud=
-ly,
-but sparse does not output anything when run on that file, even with -Wal=
-l.
-Conversely, on initializer-entry-defined-twice.c, sparse actually *should=
-*
-report a problem here (two problems, in fact), and it does; it just shoul=
-dn't
-report a problem on the third.  Also, builtin_safe1.c falls in the catego=
-ry of
-"doesn't currently pass", as it warns in two places it shouldn't, in addi=
-tion
-to the various places it should; however, this would require checking the=
+As a result, this release comes from my sparse Git repository.  You can
+obtain the latest version of sparse directly from my Git repository with
+the command:
 
-actual warning/error output.  Figuring out which of these various tests s=
-hould
-pass and which should fail will require a fair bit of work.
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.g=
+it
 
-Ideally, I'd love to see the test suite find new tests automatically, rat=
-her
-than needing to list them explicitly; with a warning/error output file fo=
-r
-each test, the only difference between an OK_EXP_OK and a BAD_EXP_BAD bec=
-omes
-"does the .err file have any content", so that just leaves the known fail=
-ures,
-which we can list explicitly since we don't need to make it easy to add m=
-ore.
+You can also browse the Git repository via gitweb, at
+<http://www.kernel.org/git/?p=3Dlinux/kernel/git/josh/sparse.git>
 
-Pavel Roskin wrote:
-> --- /dev/null
-> +++ b/validation/testsuite
-> @@ -0,0 +1,118 @@
-> +#! /bin/sh
-> +
-> +set -e
+This release corresponds to the Git tag "0.1", signed by my GPG key,
+with key ID D0FE7AFB.  In the sparse Git repository, you can verify this
+tag with the command:
 
-At first, this seemed wrong, since sparse should exit with a non-zero exi=
-t
-code if it emits any errors; however, I then realized that sparse doesn't=
+    git verify-tag 0.1
 
-actually *do* this, which seems like a bug.
+I've chosen to use a versioning system similar to the current system
+used for the Linux kernel, with s/2\.6/0/.  The major number (0 for this
+release) will change only with major architectural changes to Sparse.
+The minor number (1 for this release) represents the normal release
+number; thus, the next release will have version 0.2.  If a need arises
+to make bugfixes to a released version of sparse, the bugfix versions
+will use a third, micro number; for example, a bugfix release for 0.1
+would use the version number 0.1.1.  (I considered the idea of using the
+old Linux versioning system, with the odd/even unstable/stable
+convention for the second number, but I believe that git feature
+branches should satisfy any need for an "unstable" tree.)
 
-> +: ${SPARSE=3D../sparse}
-> +: ${SPARSE_FLAGS=3D}
+In addition to all the work in the previous Sparse repository
+(pub/scm/devel/sparse/sparse.git), this release includes the following
+changes:
 
-I don't think the test suite should allow setting sparse flags, partly si=
-nce
-changing the flags may well cause a test to pass or fail when it shouldn'=
-t,
-and partly since at some point different parts of the test suite might ne=
-ed
-different flags.
+Adam DiCarlo (1):
+      Add type information to enum mismatch warning
 
-> +for t in $BAD_EXP_OK; do
-> +	$SPARSE $SPARSE_FLAGS $t 2>test-err
-> +	if test -s test-err; then
-> +		echo "UNEXPECTED PASS: $t"
-> +		unexp=3D1
-> +	else
-> +		echo "(known) FAIL: $t"
-> +	fi
-> +done
-> +
-> +for t in $OK_EXP_BAD; do
-> +	$SPARSE $SPARSE_FLAGS $t 2>test-err
-> +	if test -s test-err; then
-> +		echo "(known) FAIL: $t"
-> +	else
-> +		echo "UNEXPECTED PASS: $t"
-> +		unexp=3D1
-> +	fi
-> +done
+Al Viro (2):
+      added a bunch of gcc builtins
+      switch to hash-based get_one_special()
 
-At first I balked a bit at the idea of having the test suite succeed whil=
-e
-some tests don't actually pass, but more I thought about it, I started to=
+Josh Triplett (15):
+      "Initializer entry defined twice" should not trigger with zero-size=
+ fields
+      Fix incorrect symbol in comment on #endif for multiple-inclusion gu=
+ard
+      Add -Wno-uninitialized
+      graph: Show position in basic block nodes
+      bb_terminated: Use boundary values rather than specific opcodes
+      Turn on -Wcontext by default
+      Merge branch 'fix-defined-twice-error-on-empty-struct' into staging=
 
-agree that it seems like the right approach.  It means that we can ensure=
- that
-the test suite passes in every single Git revision of sparse.  Once all t=
-he
-tests run as expected, we can dump this part of the test suite code.
+      Merge branch 'graph' into staging
+      merge branch 'more-warning-flags' into staging and fix conflicts
+      merge branch 'no-semantic-h' into staging and fix conflicts
+      Merge branch 'Wcontext-default' into staging
+      Add test cases to validation/context.c for the Linux __cond_lock ma=
+cro
+      Merge branch 'context-test-cases-for-cond-lock' into josh
+      Rename test case bad-assignement.c to bad-assignment.c, fixing the =
+typo.
+      Stop building and installing libsparse.so
+
+Josh Triplett and Pavel Roskin (1):
+      Recognize and ignore __alias__ and __visibility__
+
+Pavel Roskin (4):
+      Compile sparse executable under it's own name, not as "check"
+      Add support for __builtin_strpbrk()
+      Typo fixes
+      Install cgcc on "make install", refactor installation code
+
+Known issue with this release:
+
+* Sparse does not produce the expected set of warnings for several of the=
+
+  validation programs, included in the sparse source in the directory
+  validation/ .  Some scripts should provoke warnings but don't, and othe=
+rs
+  provoke warnings they shouldn't.
+
+
+I've also put up a sparse website, at
+<http://kernel.org/pub/linux/kernel/people/josh/sparse/>.  This site will=
+
+include news and updates about sparse (including release announcements),
+information on obtaining sparse, and documentation about sparse.  This ne=
+w
+website uses ikiwiki <http://ikiwiki.kitenet.net/>, by Joey Hess, and the=
+
+ikiwiki Git backend.  I plan to move the underlying Git repository to
+kernel.org as soon as I get ikiwiki and its dependencies installed on
+master.kernel.org.
 
 - Josh Triplett
 
 
---------------enig2FB12FF3EA81FF9ECC11FA95
+--------------enigEAEB546D91651AA04C05A1F0
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -144,9 +141,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.5 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFFT9dfGJuZRtD+evsRAmPNAKCUYmfQiR3tphgeE4UKCI/9WGvCTwCeNaVp
-NdTLcawg6GJSDylmaORfYQY=
-=trgD
+iD8DBQFFUCKKGJuZRtD+evsRAhSyAJ4qTWIXotHSsCsTeqi60TUtH9G/mgCfYhRn
+UKqEI+8A3hlJ4YGxianFBc4=
+=o+kw
 -----END PGP SIGNATURE-----
 
---------------enig2FB12FF3EA81FF9ECC11FA95--
+--------------enigEAEB546D91651AA04C05A1F0--
