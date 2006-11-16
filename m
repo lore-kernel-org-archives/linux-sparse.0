@@ -1,51 +1,34 @@
-From: Nicolas Kaiser <nikai@nikai.net>
-Subject: [TRIVIAL][PATCH] double inclusions
-Date: Tue, 14 Nov 2006 10:00:26 +0100
-Message-ID: <20061114100026.1f00f29b@lucky.kitzblitz>
+From: "Valiusha" <griffin@nadiscorp.com>
+Subject: Re[3]: Hello, I want to know you!
+Date: Thu, 16 Nov 2006 20:52:59 +0200
+Message-ID: <004d01c709b0$4f23f880$bb18000a@220-131-17-35.HINET-IP.hinet.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain;
+	charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ensim03.ffm.m2soft.com ([195.38.20.12]:61324 "EHLO
-	ensim03.ffm.m2soft.com") by vger.kernel.org with ESMTP
-	id S933244AbWKNJCg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 14 Nov 2006 04:02:36 -0500
-Received: from lucky.kitzblitz ([85.127.135.138])
-	(authenticated bits=0)
-	by ensim03.ffm.m2soft.com (8.12.11.20060308/8.12.10) with ESMTP id kAE92VZ6017560
-	for <linux-sparse@vger.kernel.org>; Tue, 14 Nov 2006 10:02:33 +0100
+Received: from 220-131-17-35.HINET-IP.hinet.net ([220.131.17.35]:56591 "EHLO
+	220-131-17-35.HINET-IP.hinet.net") by vger.kernel.org with ESMTP
+	id S1424322AbWKPSwI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 16 Nov 2006 13:52:08 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Dirk <dccp@vger.kernel.org>
 
-Remove two double inclusions.
+Hi, Dirk
 
-Signed-off-by: Nicolas Kaiser <nikai@nikai.net>
----
+Sincere lady wants to meet a nice, responsible man to create a
+loving and caring family. I will do my best to make my man happy and
+proud of his family.
+I am very kind and understanding. I listen to people and try to help
+them. I love children. I want to have a good house where all of us
+will live in happiness and prosperity.
+I have decided to send you this message as maybe you are looking for
+the same things in life...
+If you want to reply to me, you can find me here
+http://greatfeelingoflove.com/flirtwithlove
+I will be waiting for a note from you!
 
- expression.c |    1 -
- symbol.c     |    1 -
- 2 files changed, 2 deletions(-)
 
-diff -uprN sparse-0.1.orig/expression.c sparse-0.1/expression.c
---- sparse-0.1.orig/expression.c	2006-11-06 20:26:11.000000000 +0100
-+++ sparse-0.1/expression.c	2006-11-14 09:34:22.000000000 +0100
-@@ -20,7 +20,6 @@
- 
- #include "lib.h"
- #include "allocate.h"
--#include "allocate.h"
- #include "token.h"
- #include "parse.h"
- #include "symbol.h"
-diff -uprN sparse-0.1.orig/symbol.c sparse-0.1/symbol.c
---- sparse-0.1.orig/symbol.c	2006-11-06 20:26:11.000000000 +0100
-+++ sparse-0.1/symbol.c	2006-11-14 09:35:16.000000000 +0100
-@@ -8,7 +8,6 @@
-  */
- #include <stdlib.h>
- #include <stdio.h>
--#include <stdlib.h>
- #include <string.h>
- 
- #include "lib.h"
+Looking forward to get a letter from you!
+Valentyna
