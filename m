@@ -1,51 +1,34 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [TRIVIAL][PATCH] double inclusions
-Date: Tue, 21 Nov 2006 09:09:55 -0800
-Message-ID: <456332E3.6020107@freedesktop.org>
-References: <20061114100026.1f00f29b@lucky.kitzblitz>
+From: Christopher Li <sparse@chrisli.org>
+Subject: [TRIVIAL][PATCH] trivial fix for seg fault.
+Date: Wed, 22 Nov 2006 23:45:53 -0800
+Message-ID: <20061123074553.GA9322@chrisli.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig3E45579D5CE5762751CF3478"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:63618 "EHLO
-	mail6.sea5.speakeasy.net") by vger.kernel.org with ESMTP
-	id S1031223AbWKURJ5 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 21 Nov 2006 12:09:57 -0500
-In-Reply-To: <20061114100026.1f00f29b@lucky.kitzblitz>
+Received: from sccrmhc14.comcast.net ([204.127.200.84]:62099 "EHLO
+	sccrmhc14.comcast.net") by vger.kernel.org with ESMTP
+	id S933071AbWKWHzz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 23 Nov 2006 02:55:55 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Nicolas Kaiser <nikai@nikai.net>
+To: Josh Triplett <josh@freedesktop.org>
 Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig3E45579D5CE5762751CF3478
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Trivial fix for some seg fault.
 
-Nicolas Kaiser wrote:
-> Remove two double inclusions.
->=20
-> Signed-off-by: Nicolas Kaiser <nikai@nikai.net>
+Signed-Off-By: Christopher Li <sparse@chrisli.org>
 
-Applied, thanks.
-
-- Josh Triplett
-
-
-
---------------enig3E45579D5CE5762751CF3478
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.5 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFFYzLjGJuZRtD+evsRAtPBAKCozVTm7Twz0ohvArQMcKJKtP/0CACgvzmq
-bdor9Y+8Sh+NV/RxULFWcMI=
-=QHOc
------END PGP SIGNATURE-----
-
---------------enig3E45579D5CE5762751CF3478--
+Index: sparse/token.h
+===================================================================
+--- sparse.orig/token.h	2006-11-22 23:34:35.000000000 -0800
++++ sparse/token.h	2006-11-22 23:36:28.000000000 -0800
+@@ -94,7 +94,7 @@
+ 	"||", "|=",		\
+ 	"^=", "##",		\
+ 	"<<", ">>", "..",	\
+-	"<<=", ">>=", "..."	\
++	"<<=", ">>=", "...",	\
+ 	"",			\
+ 	"<", ">", "<=", ">="	\
+ }
