@@ -1,147 +1,72 @@
-From: "Elfreda Miller" <radiographers@vagaspalms.com>
-Subject: New software uploaded by Stephen on Nov 23 16:40:00 MSK 2006
-Date: Thu, 23 Nov 2006 15:56:38 +0200
-Message-ID: <000001c70f05$b2101500$0100007f@localhost>
-Content-Type: text/plain;
-    charset="us-ascii"
-    Content-Transfer-Encoding: 7bit
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: [RFC] <op>= mishandling
+Date: Fri, 24 Nov 2006 07:12:47 +0000
+Message-ID: <20061124071247.GO3078@ftp.linux.org.uk>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bzq-84-108-117-88.cablep.bezeqint.net ([84.108.117.88]:29201
-	"helo localhost") by vger.kernel.org with SMTP id S933721AbWKWN4t
+Received: from zeniv.linux.org.uk ([195.92.253.2]:25041 "EHLO
+	ZenIV.linux.org.uk") by vger.kernel.org with ESMTP id S1756461AbWKXHMq
 	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 23 Nov 2006 08:56:49 -0500
+	Fri, 24 Nov 2006 02:12:46 -0500
+Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
+	id 1GnVEt-0003q9-AU
+	for linux-sparse@vger.kernel.org; Fri, 24 Nov 2006 07:12:47 +0000
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
+commit 5a627ec02342727b151712acc9c752a8e4f12da0
+Author: Linus Torvalds <torvalds@ppc970.osdl.org>
+Date:   Sat Nov 6 20:10:22 2004 -0700
 
-Stephen has uploaded some new software for you!
+    Don't do assignment replacement at type evaluation time.
 
 
-Click here to view available updated software from Stephen:
-http://eki-soft.com/?Stephen
+was too optimistic.  Here's a trivial example of the things going
+wrong with it:
+	int x = 1;
+	x /= 0.5;
+that /= should be treated as
+	int *tmp;
+	(tmp = &x, *tmp = (int)((double)*tmp / 0.5);
+IOW, we must end up with 2 being assigned to x.  There's no way in hell
+for that to be done without conversion to real; current sparse ends up
+with
+	x /= 0;
+which is obviously *not* what we want.
 
+Another ugly example:
+	int x = -1;
+	int y = -1;
+	x /= INT_MAX;
+	y /= (unsigned int)INT_MAX;
+Results of those assignments are obviously different - one is -1 / INT_MAX
+(i.e. 0), another is (int)((unsigned int)-1/(unsigned int)INT_MAX), which
+is going to be a small positive (most likely 2).
 
-source.
-see whether a modem is operating properly.
-FreeBSD core team in order to have your contributions accepted.  The
-13.3.3.  Compiling netboot for specific setups
-print TeX DVI data, or lpr -v to print raster image data, and so
-10.3.3.1.6.  The IBM Personal Computer UART
-($user) show
-The next step in the simple spooler setup is to make a spooling
-But these methods suffer from the fact that the printer may not
-o  Type
-[...]
-Updating wollman:
-12.1.4.  PPP Configuration
-	SoundBlaster digital audio.
-	       :nx=V9600:tc=std.19200:
-		 Bit 5	   Stick Parity
-[lots and lots of compiler output here...]
-C> MD C:\FREEBSD
-freebsd-ports 	   Discussion of the ports collection
-offline).  Pressing the front panel button will eject the tape and
-will check for an executable called `unzip', and descend into the
-will have to configure, build and install a custom kernel in order to
-# The next macro will dial up and login
-2.   A quick way of getting bug fixes.
-18.2.5.3.1.  How things work
-floppy for a list of possible solutions.
-for whatever purpose, so that the code gets the widest possible use
-system with limited RAM, building a custom kernel is of critical
-name of a FreeBSD system with a lower-performance Ethernet adapter.
-count. Subtract the two values and you know how much paper to charge
-generated from SGML input files.  Creating backups of these HTML files
-For our simple printer setup, the text filter can be a small shell
-how to search the host tables.  If you run FreeBSD-current you can
-shorter than MD5 passwords, and are coded in a 64-character alphabet
-	  not have a math co-processor, and you need the best accu-
-for LUN 0. An example are so called bridge boards that connect 2 non-
-rose:kelly  Job: outline  Date: Sun Sep 17 11:07:51 1995
-port skeleton, let's get a whole sub-directory, for example all the
-	Print jobs
-mounts.
-#
-page.  The drawback of this method is that users will always get a
-The rest of the description from the previous section applies here as
-their queues.
-It is also customary to make the directory with a name that is
-		      serial adapter.
-number.
-	  Printer received LF	   Printer prints CR + LF
-	This is a VT220-compatible console driver, backwards compatible
-10.1.1.7.  Monitors
-File type	  Capability  lpr option
-July 6, 1996.
-autoboot       - continue boot process
-exit 2
-Neptune:
-by the modems, and the DTE devices are usually unaware that the
-#   slipunit ttyspeed loginname local-addr remote-addr mask opt-args
-device sc0 at isa? port ``IO_KBD' tty irq 1 vector scintr
-o	If the printer supports XON/XOFF flow control, have FreeBSD use
-this installation guide to be sure that your hardware is indeed
-18.2.5.7.4.  Install additional documentation
-yourself, just to make sure.	Many problems reported by our users in
-The SCSI bus is a parallel bus, which comes in a number of variants.
-tape.
-24 September 1995.
-o  ATA Extensions (ATA-2) [X3T10/948D Rev 2i]
--s Do not copy the files to the spooling directory, but make
-This drive is used in Hewlett-Packard's SureStore 6000eU and 6000i
-	   DEC DEFEA EISA FDDI adapter
-To test a printer on a serial port:
-for other file formats), to count pages or query the printer for pages
-o	ftp.FreeBSD/pub/FreeBSD
-List			   Purpose
-__FreeBSD_version values:
-o	ftp3.tw.FreeBSD/pub/FreeBSD
-	device el0 at isa? port 0x300 net irq 9 vector elintr
-rattan.  We will enable users on the host orchid to print to those
-subnet.  This configuration, with the machine acting as a Bridge
-details on configuring the FreeBSD kernel. Note that if you have an
-and underlining for printers that might not deal with such character
-(see sliplogin(8) for the actual manual page for sliplogin):
-Do not forget to add them to pkg/PLIST too!  (Do not worry about
-memory parity logic, making it almost impossible to detect when a
-	high probability that either the pointer access for ``tp'' was
-device	  cd0	  #Only need one of these, the code dynamically grows
-LPD appends a form feed after this text so the job starts on a new
-terminal emulator.
-o  Merged keyboard code for all console drivers.
-Sometimes we have to go places where no trusted machines or
-addresses, each ESDI device is equipped with jumpers or switches to
-	require MSDOSFS at all).
-0x06 read Channel 1 remaining word count
-sending and receiving units.
-platform
-Since the FreeBSD project is responsible for an entire operating
-______________________________________________________________________
-hardware is a much more manageable problem.
-fall outside the 1-1024 range specified above.
-there is room for the jobs of other users.
-	program. Note that implementation of this capability can
-variants.  Almost every SCSI device comes with a number of sockets in
-Mainstream ESDI drives use 34 to 36 sectors per track.  Most (older)
-DCE
-are outlined below.  If you are aware of other resources not mentioned
-already does that, fine; otherwise, you can add a post-install rule to
-	   Required with the vt0 console driver.
-the filesystem you leave uncompressed.  The rest of the filesystem
-Account #: 01411-07441 (FreeBSD, Inc.)
-	       options DDB
-will come out different and the patch will fail.  RCS strings are
-large package (with lots of programs in it).  Things like XFree86
-12.4.6.  Acknowledgments
-:sh:
-refuses to boot at all, read the Hardware Guide provided on the boot
-Most ESDI drives allow hard or soft sectoring to be selected using a
-If you want to remove a breakpoint, use
-To get the user-land going, when the kernel has finished
-10.4.5.7.22.
-PostScript.  It then uses lprps to send the job to the printer.
-DISTNAME  PKGNAME	Reason
-	free to comment out the other two lines if you do not have them.
-In modern systems there are two types of Break signals.  If the Break
-is immediate.  You can prevent users from printing when their
+We lose the distinction (try test-linearize and you'll see it immediately).
+
+AFAICS, the only sane way to deal with that is to bring back the old
+logics at least as a fallback.  _Sometimes_ we can get away with the
+current approach, but that depends both on types and on operation...
+
+If the second argument gets converted to the type of the first one, we
+are fine.  If not...
+	* real types are involved => sorry, no.  (float)((long double)x + y)
+might differ from x + (float)y and we have no business mangling it, whatever
+the operation.  Even when we are mixing real and real.  When we have
+integer <op> real, the situation is even worse (see above).
+	* *IF* we assume 2's complement for signed integers and nice handling
+of overflows, we can get away with it for +, -, *, &, |, ^.  / and % are
+not safe (see above).
+	* note that even when signedness is the same, we can't assume that
+/ and % won't cause us any trouble.  x /= 1L<<32  is equivalent of x = 0,
+not x /= 0...
+	* when the second argument is not bigger than the first one, which is
+smaller than int, we are OK with / and %.  However, I very much doubt that
+it's worth the extra logics - that situation is rare as hell.
+
+I'm fixing that crap right now; if somebody has objections against the
+above - please, yell.
