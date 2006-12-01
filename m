@@ -1,52 +1,67 @@
-From: Derek M Jones <derek@knosof.co.uk>
+From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: cast truncates bits from constant value (8000000000000000 becomes
  0)
-Date: Fri, 01 Dec 2006 20:49:19 +0000
-Message-ID: <4570954F.70302@knosof.co.uk>
-References: <4563D00D.4010704@am.sony.com> <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be> <Pine.LNX.4.64.0612010723190.3695@woody.osdl.org> <45705D79.6000107@am.sony.com> <Pine.LNX.4.64.0612011215110.3695@woody.osdl.org>
+Date: Fri, 1 Dec 2006 12:50:35 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0612011242050.3695@woody.osdl.org>
+References: <4563D00D.4010704@am.sony.com> <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be>
+ <Pine.LNX.4.64.0612010723190.3695@woody.osdl.org> <45705D79.6000107@am.sony.com>
+ <Pine.LNX.4.64.0612011215110.3695@woody.osdl.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mtaout03-winn.ispmail.ntl.com ([81.103.221.49]:25262 "EHLO
-	mtaout03-winn.ispmail.ntl.com") by vger.kernel.org with ESMTP
-	id S936561AbWLAUt1 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 1 Dec 2006 15:49:27 -0500
+Received: from smtp.osdl.org ([65.172.181.25]:57216 "EHLO smtp.osdl.org")
+	by vger.kernel.org with ESMTP id S936562AbWLAUuo (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 1 Dec 2006 15:50:44 -0500
 In-Reply-To: <Pine.LNX.4.64.0612011215110.3695@woody.osdl.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
-Cc: Geoff Levand <geoffrey.levand@am.sony.com>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-sparse@vger.kernel.org, Andrew Pinski <Andrew_Pinski@PlayStation.Sony.Com>
+To: Geoff Levand <geoffrey.levand@am.sony.com>
+Cc: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-sparse@vger.kernel.org, Andrew Pinski <Andrew_Pinski@PlayStation.Sony.Com>
 
-Linus,
 
->> One of the gcc maintainers (Andrew Pinski) told me to set it up that
->> way, so I figured it was safe.
+
+On Fri, 1 Dec 2006, Linus Torvalds wrote:
 > 
-> It _is_ safe, as long as you stick to gcc, and as long as you don't mix 
-> signs in your values, for example.
-> 
-> But we actually want to let people compile even the kernel with other 
-> compilers than gcc. Most of the time, that means that we strongly 
-> encourage those compiler people to support all the gcc extensions (let's 
-> face it, standardization is good, and open standards work better than 
-> closed ones, and gcc is the most widely spread open and portable compiler 
-> BY FAR, so it would be stupid to _not_ do that).
+> But at times, some of the gcc extensions aren't necessarily that well 
+> defined or thought out, or simply not worth it. The extended type system 
+> for enums in gcc is just basically messy, and it doesn't really offer you 
+> anything important.
 
-The C++ Standard explicitly supports enumeration constants not
-having type int.  See sentence 858 of
-http://www.coding-guidelines.com/cbook/cbook1_0b.pdf
-for a discussion of the issues (plus some other sentences).
+Btw, try this stupid program, to see just how _strange_ gcc enums are.. A 
+sizeof of the enum is not the same as the size of the individual entries. 
 
-C compiler vendors, at least those who extend the language, are more
-likely to want to follow the C++ rules (which are documented) than the
-gcc rules (which are poorly documented).
+Notice also how the size of the enum entry is _not_ tied to the type of 
+the expression it had, but literally to its _value_. The size of "one" 
+ends up being 4, even though it was initialized with a "1ll" value.
 
-The C++ way of doing things is also likely to be followed by vendors
-whose C compiler is enabled by a command line switch on their C++
-compiler (eg, at least one vendor based in Seattle).
+So with gcc-enums, you CANNOT get a sane type result.
 
--- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+In contrast, if you want sane types, you could easily do
+
+	#define one (1ull)
+	#define other (0x10000ull)
+	#define strange (0x100000000ull)
+
+and they'd all have the same type (and having the same type means that 
+they act the same in expressions - you get the same expression type in 
+mixing these values, _unlike_ the insane gcc enum cases)
+
+		Linus
+
+---
+enum hello {
+	one = 1ll,
+	other = 0x10000,
+	bigval = 0x1000000000000ll,
+};
+
+int main(int argc, char **argv)
+{
+	printf("%zu %zu %zu %zu\n",
+		sizeof(enum hello),
+		sizeof(one),
+		sizeof(other),
+		sizeof(bigval));
+	return 0;
+}
