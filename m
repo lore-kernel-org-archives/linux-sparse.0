@@ -1,31 +1,56 @@
-From: "Valentyna" <allenblank@btopenworld.com>
-Subject: Re[1]:  I am writing to find love!
-Date: Thu, 30 Nov 2006 23:24:44 +0200
-Message-ID: <006601c714c5$eebfab80$d30f000a@220.224.10.189>
+From: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Subject: cast truncates bits from constant value (8000000000000000 becomes
+ 0)
+Date: Fri, 1 Dec 2006 15:25:08 +0100 (CET)
+Message-ID: <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be>
+References: <4563D00D.4010704@am.sony.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [220.224.10.189] ([220.224.10.189]:47110 "EHLO 220.224.10.189")
-	by vger.kernel.org with ESMTP id S1031493AbWK3VPv (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 30 Nov 2006 16:15:51 -0500
+Received: from vervifontaine.sonytel.be ([80.88.33.193]:3021 "EHLO
+	vervifontaine.sonycom.com") by vger.kernel.org with ESMTP
+	id S1759157AbWLAOZK (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 1 Dec 2006 09:25:10 -0500
+In-Reply-To: <4563D00D.4010704@am.sony.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dieter <dccp@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linux/PPC Development <linuxppc-dev@ozlabs.org>
 
-Hello, Dieter
+On Tue, 21 Nov 2006, Geoff Levand wrote:
+> +enum ps3_vendor_id {
+> +	PS3_VENDOR_ID_NONE = 0,
+> +	PS3_VENDOR_ID_SONY = 0x8000000000000000UL,
+> +};
 
-I am attractive and easy-going but despite all my positive traits of character:) I am very lonely.
-I feel so sad about it and if you feel sad - come to see me and let's speak about everything in the world!
-We can discuss any subject, share any ideas and thoughts!
-So, I am waiting for you and let's start chatting.
-Have a nice day!
+I've just ran `make C=1' (PPC in 64-bit mode, and sparse is called with -m64),
+and noticed that sparse (cloned from
+git://git.kernel.org/pub/scm/devel/sparse/sparse.git a few minutes ago)
+complains about the second value with:
 
-P.S. Forgot to tell you that you can find me here http://iamheremyfriend.com/loveinside
+| warning: cast truncates bits from constant value (8000000000000000 becomes 0)
 
+Section 6.7.2.2.4 of C99 says:
 
-Waiting for your response:)
+| Each enumerated type shall be compatible with char, a signed integer type, or
+| an unsigned integer type. The choice of type is implementation-defined, but
+| shall be capable of representing the values of all the members of the
+| enumeration.
 
-Valentyna
+The code snippet
+
+| u64 x = PS3_VENDOR_ID_SONY;
+| printk("PS3_VENDOR_ID_SONY = %lu\n", x);
+
+does print the expected (i.e. non-zero) result.
+
+Hence this looks like a bug in sparse.
+
+Gr{oetje,eeting}s,
+
+						Geert
+
+--
+Geert Uytterhoeven -- Sony Network and Software Technology Center Europe (NSCE)
+Geert.Uytterhoeven@sonycom.com ------- The Corporate Village, Da Vincilaan 7-D1
+Voice +32-2-7008453 Fax +32-2-7008622 ---------------- B-1935 Zaventem, Belgium
