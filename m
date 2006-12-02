@@ -1,77 +1,104 @@
-From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: cast truncates bits from constant value (8000000000000000 becomes
- 0)
-Date: Fri, 1 Dec 2006 13:19:27 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0612011309480.3695@woody.osdl.org>
-References: <4563D00D.4010704@am.sony.com> <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be>
- <Pine.LNX.4.64.0612010723190.3695@woody.osdl.org> <45705D79.6000107@am.sony.com>
- <Pine.LNX.4.64.0612011215110.3695@woody.osdl.org> <4570954F.70302@knosof.co.uk>
- <20061201210011.GE3078@ftp.linux.org.uk>
+From: Michael Ellerman <michael@ellerman.id.au>
+Subject: Re: cast truncates bits from constant value (8000000000000000
+	becomes 0)
+Date: Sat, 02 Dec 2006 18:50:26 +1100
+Message-ID: <1165045826.6246.5.camel@concordia.ozlabs.ibm.com>
+References: <4563D00D.4010704@am.sony.com>
+	 <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be>
+	 <20061201143940.GB3078@ftp.linux.org.uk>
+	 <Pine.LNX.4.62.0612011553100.30940@pademelon.sonytel.be>
+Reply-To: michael@ellerman.id.au
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-pv/Cw+SRebEp+T+e19p4"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.25]:28045 "EHLO smtp.osdl.org")
-	by vger.kernel.org with ESMTP id S1161748AbWLAVTq (ORCPT
+Received: from ozlabs.org ([203.10.76.45]:38606 "EHLO ozlabs.org")
+	by vger.kernel.org with ESMTP id S1162265AbWLBHu2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 1 Dec 2006 16:19:46 -0500
-In-Reply-To: <20061201210011.GE3078@ftp.linux.org.uk>
+	Sat, 2 Dec 2006 02:50:28 -0500
+In-Reply-To: <Pine.LNX.4.62.0612011553100.30940@pademelon.sonytel.be>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Derek M Jones <derek@knosof.co.uk>, Geoff Levand <geoffrey.levand@am.sony.com>, Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-sparse@vger.kernel.org, Andrew Pinski <Andrew_Pinski@PlayStation.Sony.Com>
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: Al Viro <viro@ftp.linux.org.uk>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-sparse@vger.kernel.org
 
 
+--=-pv/Cw+SRebEp+T+e19p4
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-On Fri, 1 Dec 2006, Al Viro wrote:
-> 
-> "C++ way of doing things" is hardly an endorsement.  _IF_ we are changing
-> the way enum works, might as well do it sanely and have the type of
-> enumeration constant same as that of expression initializing it (with
-> usual implicit initializers).  But yes, that explicitly changes semantics -
-> enum { A = 0L, B, C }; will have A, B and C long, not int.  Direct
-> contradiction with C90/C99...
+On Fri, 2006-12-01 at 15:55 +0100, Geert Uytterhoeven wrote:
+> On Fri, 1 Dec 2006, Al Viro wrote:
+> > On Fri, Dec 01, 2006 at 03:25:08PM +0100, Geert Uytterhoeven wrote:
+> > > On Tue, 21 Nov 2006, Geoff Levand wrote:
+> > > > +enum ps3_vendor_id {
+> > > > +	PS3_VENDOR_ID_NONE =3D 0,
+> > > > +	PS3_VENDOR_ID_SONY =3D 0x8000000000000000UL,
+> > > > +};
+> > >=20
+> > > I've just ran `make C=3D1' (PPC in 64-bit mode, and sparse is called =
+with -m64),
+> > > and noticed that sparse (cloned from
+> > > git://git.kernel.org/pub/scm/devel/sparse/sparse.git a few minutes ag=
+o)
+> > > complains about the second value with:
+> > >=20
+> > > | warning: cast truncates bits from constant value (8000000000000000 =
+becomes 0)
+> > >=20
+> > > Section 6.7.2.2.4 of C99 says:
+> > >=20
+> > > | Each enumerated type shall be compatible with char, a signed intege=
+r type, or
+> > > | an unsigned integer type. The choice of type is implementation-defi=
+ned, but
+> > > | shall be capable of representing the values of all the members of t=
+he
+> > > | enumeration.
+> >=20
+> > FWIW, that code is *not* valid C99; note that all enumeration members m=
+ust
+> > fit the range of int (see 6.7.2.2.2).  What you quote speaks about the
+>=20
+> You're right. I missed that one.
+>=20
+> > IOW, you are using a gccism in an area where gcc is bloody inconsistent
+> > in the set of bugs it shows in different versions.
+>=20
+> Hmmm...
+>=20
+> > Generally safe way is to split the anonymous huge enum members into
+> > single-element enums and pray that gcc will at least stay consistent
+> > in handling of those.
+>=20
+> Or fall back to #defines, which is what we were trying to avoid in the fi=
+rst
+> place (i.e. group related values together in enums)...
 
-Well, the C++ definition at least means that enumerated names have the 
-same types _after_ the enumaration is closed (ie the example I sent out 
-will at least give the same value for the sizeof() of everything).
+The enum achieves very little in this case IMHO, it's just a more
+verbose way of #defining - and it doesn't even have reliable semantics.
 
-So the C++ definition is a lot saner than what gcc does now.
+cheers
 
-On the other hand, I do agree that "keeping the enumerated type the same 
-as the initializer expression type" is _also_ a sane situation. And it's 
-better than the C++ situation in the sense that at least the sizes are 
-_consistent_ (which C++ is not - the size AT DEFINITION time is 
-potentially different from the size AFTER the definition).
+--=20
+Michael Ellerman
+OzLabs, IBM Australia Development Lab
 
-So in the C++ world, you have the odd situation that
+wwweb: http://michael.ellerman.id.au
+phone: +61 2 6212 1183 (tie line 70 21183)
 
-	enum strange {
-		one = (char) 1,
-		other = sizeof(one),
-	};
+We do not inherit the earth from our ancestors,
+we borrow it from our children. - S.M.A.R.T Person
 
-we will actually end up with
+--=-pv/Cw+SRebEp+T+e19p4
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
 
-	other != sizeof(one)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.3 (GNU/Linux)
 
-AFTER the declaration (because when "other" got its value, "one" had a 
-type of "char", but _after_ the declaration, "one" will have a type of 
-"size_t" or "int" or whatever, because the final type of "one" depends on 
-the type of the enumerator.
+iD8DBQBFcTBBdSjSd0sB4dIRAqCxAJwK2RBu4/SGzBLncIzE1PDOct1uBgCgt+6W
+xPvL+xvtbgoVEEmGHxhfSMw=
+=SakU
+-----END PGP SIGNATURE-----
 
-So the C++ definition is really odd, but it's better than what gcc does, 
-because at least all the values end up having a common type at the end.
-
-The version where all the values _keep_ their types all the time, and you 
-can force them to be whatever you want (by just making sure the 
-initializer expression has the right type) is the most flexible one and at 
-least doesn't have inconsistencies like the above example, but it's 
-neither what gcc nor the C++ standard (or any older C standard, for that 
-matter) actually says.
-
-Anyway, because of all this, enum types are a mess. sparse warns if you 
-can't fit it in an "int", which is the traditional and fairly dependable 
-old C behaviour, and basically says "extended integer types for enums are 
-flaky as hell - warn about them!"
-
-		Linus
+--=-pv/Cw+SRebEp+T+e19p4--
