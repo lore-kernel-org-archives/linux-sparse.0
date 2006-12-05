@@ -1,104 +1,58 @@
-From: Michael Ellerman <michael@ellerman.id.au>
-Subject: Re: cast truncates bits from constant value (8000000000000000
-	becomes 0)
-Date: Sat, 02 Dec 2006 18:50:26 +1100
-Message-ID: <1165045826.6246.5.camel@concordia.ozlabs.ibm.com>
-References: <4563D00D.4010704@am.sony.com>
-	 <Pine.LNX.4.62.0612011516120.28210@pademelon.sonytel.be>
-	 <20061201143940.GB3078@ftp.linux.org.uk>
-	 <Pine.LNX.4.62.0612011553100.30940@pademelon.sonytel.be>
-Reply-To: michael@ellerman.id.au
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] delay removing file scope
+Date: Mon, 04 Dec 2006 18:04:10 -0800
+Message-ID: <4574D39A.9000703@freedesktop.org>
+References: <20061130101608.GB27500@chrisli.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-pv/Cw+SRebEp+T+e19p4"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig2245999EE7B4F2CB24604329"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ozlabs.org ([203.10.76.45]:38606 "EHLO ozlabs.org")
-	by vger.kernel.org with ESMTP id S1162265AbWLBHu2 (ORCPT
+Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:57977 "EHLO
+	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S968016AbWLECEO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 2 Dec 2006 02:50:28 -0500
-In-Reply-To: <Pine.LNX.4.62.0612011553100.30940@pademelon.sonytel.be>
+	Mon, 4 Dec 2006 21:04:14 -0500
+In-Reply-To: <20061130101608.GB27500@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: Al Viro <viro@ftp.linux.org.uk>, Linux/PPC Development <linuxppc-dev@ozlabs.org>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
 
-
---=-pv/Cw+SRebEp+T+e19p4
-Content-Type: text/plain
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig2245999EE7B4F2CB24604329
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-On Fri, 2006-12-01 at 15:55 +0100, Geert Uytterhoeven wrote:
-> On Fri, 1 Dec 2006, Al Viro wrote:
-> > On Fri, Dec 01, 2006 at 03:25:08PM +0100, Geert Uytterhoeven wrote:
-> > > On Tue, 21 Nov 2006, Geoff Levand wrote:
-> > > > +enum ps3_vendor_id {
-> > > > +	PS3_VENDOR_ID_NONE =3D 0,
-> > > > +	PS3_VENDOR_ID_SONY =3D 0x8000000000000000UL,
-> > > > +};
-> > >=20
-> > > I've just ran `make C=3D1' (PPC in 64-bit mode, and sparse is called =
-with -m64),
-> > > and noticed that sparse (cloned from
-> > > git://git.kernel.org/pub/scm/devel/sparse/sparse.git a few minutes ag=
-o)
-> > > complains about the second value with:
-> > >=20
-> > > | warning: cast truncates bits from constant value (8000000000000000 =
-becomes 0)
-> > >=20
-> > > Section 6.7.2.2.4 of C99 says:
-> > >=20
-> > > | Each enumerated type shall be compatible with char, a signed intege=
-r type, or
-> > > | an unsigned integer type. The choice of type is implementation-defi=
-ned, but
-> > > | shall be capable of representing the values of all the members of t=
-he
-> > > | enumeration.
-> >=20
-> > FWIW, that code is *not* valid C99; note that all enumeration members m=
-ust
-> > fit the range of int (see 6.7.2.2.2).  What you quote speaks about the
+Christopher Li wrote:
+> Sparse only returns the used symbol. By the time it return
+> the symbol, it already destroyed the file scope.
 >=20
-> You're right. I missed that one.
->=20
-> > IOW, you are using a gccism in an area where gcc is bloody inconsistent
-> > in the set of bugs it shows in different versions.
->=20
-> Hmmm...
->=20
-> > Generally safe way is to split the anonymous huge enum members into
-> > single-element enums and pray that gcc will at least stay consistent
-> > in handling of those.
->=20
-> Or fall back to #defines, which is what we were trying to avoid in the fi=
-rst
-> place (i.e. group related values together in enums)...
+> This patch preserve the file scope. The caller can
+> examine the unused symbols. e.g. If I want to generate
+> ctags base on sparse, it need those unused symbols.
 
-The enum achieves very little in this case IMHO, it's just a more
-verbose way of #defining - and it doesn't even have reliable semantics.
+Merged, thanks.  I look forward to seeing your sparse-based ctags generat=
+or; a
+ctags which actually *parses C* would provide significant improvements. :=
+)
 
-cheers
+- Josh Triplett
 
---=20
-Michael Ellerman
-OzLabs, IBM Australia Development Lab
 
-wwweb: http://michael.ellerman.id.au
-phone: +61 2 6212 1183 (tie line 70 21183)
 
-We do not inherit the earth from our ancestors,
-we borrow it from our children. - S.M.A.R.T Person
-
---=-pv/Cw+SRebEp+T+e19p4
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+--------------enig2245999EE7B4F2CB24604329
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.3 (GNU/Linux)
+Version: GnuPG v1.4.5 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQBFcTBBdSjSd0sB4dIRAqCxAJwK2RBu4/SGzBLncIzE1PDOct1uBgCgt+6W
-xPvL+xvtbgoVEEmGHxhfSMw=
-=SakU
+iD8DBQFFdNOaGJuZRtD+evsRAiN+AJwM7ED4OGGnx6k3l3lI6rBS2fDscACfczys
+Ak3VOpgMS6hwkby0kqXwT3s=
+=l1Om
 -----END PGP SIGNATURE-----
 
---=-pv/Cw+SRebEp+T+e19p4--
+--------------enig2245999EE7B4F2CB24604329--
