@@ -1,84 +1,30 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: basic block output order?
-Date: Tue, 12 Dec 2006 02:24:22 -0800
-Message-ID: <20061212102422.GA6013@chrisli.org>
+From: "jule peterson" <arlinebityu@shawcable.net>
+Subject: Do away with all that you owe with out mailing an other dime
+Date: Tue, 12 Dec 2006 19:02:25 +0700
+Message-ID: <09F6BB8F.F9F28998@shawcable.net>
+Reply-To: "jule peterson" <arlinebityu@shawcable.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from alnrmhc11.comcast.net ([206.18.177.51]:59883 "EHLO
-	alnrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751213AbWLLKiz (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Dec 2006 05:38:55 -0500
-Content-Disposition: inline
+Received: from S01060020ed8f8f73.ed.shawcable.net ([68.148.131.29]:4875 "HELO
+	shawcable.net" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with SMTP
+	id S932198AbWLLLM3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 12 Dec 2006 06:12:29 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@osdl.org>
+To: Stephine <linux-sparse@vger.kernel.org>
 
-I am playing with the example.c. I am wondering why the parent
-basic blocks need to generate first?
+ Lawyers have found a loop hole in the laws of the banking system. Using
+this discovery, we have been 5uccessful at totally eliminating peoples
+creditcarddebt with 0ut them paying another dime.  We GuaranteeThat we can
+do this for you.
 
-The entry point has it's own "entry" instruction now, it should
-remain as the first basic block in entry->bbs.
+Contact us at:
+1--313-263-2706
 
-e.g. what is wrong with the following patch?
 
-The reason I ask is because I think I need a few more pass
-on the basic block. I try to avoid recursive if it is not necessary.
-
-Thanks
-
-Chris
-
-Index: sparse/flow.c
-===================================================================
---- sparse.orig/flow.c	2006-12-12 01:52:06.000000000 -0800
-+++ sparse/flow.c	2006-12-12 01:52:40.000000000 -0800
-@@ -903,12 +903,10 @@ void vrfy_flow(struct entrypoint *ep)
- 	struct basic_block *bb;
- 	struct basic_block *entry = ep->entry->bb;
- 
-+	assert(first_basic_block(ep->bbs) == entry);
- 	FOR_EACH_PTR(ep->bbs, bb) {
--		if (bb == entry)
--			entry = NULL;
- 		vrfy_bb_flow(bb);
- 	} END_FOR_EACH_PTR(bb);
--	assert(!entry);
- }
- 
- void pack_basic_blocks(struct entrypoint *ep)
-Index: sparse/example.c
-===================================================================
---- sparse.orig/example.c	2006-12-12 01:52:06.000000000 -0800
-+++ sparse/example.c	2006-12-12 01:52:40.000000000 -0800
-@@ -1765,9 +1765,6 @@ static void output_bb(struct basic_block
- 
- 	bb->generation = generation;
- 
--	/* Make sure all parents have been generated first */
--	generate_list(bb->parents, generation);
--
- 	state.pos = bb->pos;
- 	state.inputs = gather_storage(bb, STOR_IN);
- 	state.outputs = gather_storage(bb, STOR_OUT);
-@@ -1782,9 +1779,6 @@ static void output_bb(struct basic_block
- 
- 	free_ptr_list(&state.inputs);
- 	free_ptr_list(&state.outputs);
--
--	/* Generate all children... */
--	generate_list(bb->children, generation);
- }
- 
- /*
-@@ -1920,7 +1914,7 @@ static void output(struct entrypoint *ep
- 	arch_set_up_storage(ep);
- 
- 	/* Show the results ... */
--	output_bb(ep->entry->bb, generation);
-+	generate_list(ep->bbs, generation);
- 
- 	/* Clear the storage hashes for the next function.. */
- 	free_storage();
+I'd like to get home again, I'm sure. He sat calmly throughout the meal,
+eating nothing, but apparently in good health and spirits, while even his
+sisters regarded him with troubled countenances
