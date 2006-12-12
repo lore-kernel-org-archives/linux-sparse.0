@@ -1,40 +1,84 @@
-From: Matt Domsch <Matt_Domsch@dell.com>
-Subject: Re: sparse as a compiler front-end
-Date: Sat, 9 Dec 2006 10:17:04 -0600
-Message-ID: <20061209161704.GA20975@lists.us.dell.com>
-References: <45564680.8090806@garzik.org> <455679B0.8030106@freedesktop.org> <4575A3F0.2090502@freedesktop.org> <20061208193418.GA17790@lists.us.dell.com> <457A8D4A.5060007@garzik.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: basic block output order?
+Date: Tue, 12 Dec 2006 02:24:22 -0800
+Message-ID: <20061212102422.GA6013@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ausc60pc101.us.dell.com ([143.166.85.206]:18603 "EHLO
-	ausc60pc101.us.dell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S937056AbWLIQRC (ORCPT
+Received: from alnrmhc11.comcast.net ([206.18.177.51]:59883 "EHLO
+	alnrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751213AbWLLKiz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Dec 2006 11:17:02 -0500
+	Tue, 12 Dec 2006 05:38:55 -0500
 Content-Disposition: inline
-In-Reply-To: <457A8D4A.5060007@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jeff@garzik.org>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@osdl.org>
 
-On Sat, Dec 09, 2006 at 05:17:46AM -0500, Jeff Garzik wrote:
-> Matt Domsch wrote:
-> >I've got a test build of sparse-0.2 posted at
-> >http://domsch.com/linux/fedora/extras/sparse/0.2/
-> >
-> >Jeff, does this suit your needs?
-> 
-> Yep, both sparse and sparse-devel look great, here on FC6!
+I am playing with the example.c. I am wondering why the parent
+basic blocks need to generate first?
 
-Great.  This will be in tomorrow's push of Fedora Extras for
-FC{5,6,devel} then.
+The entry point has it's own "entry" instruction now, it should
+remain as the first basic block in entry->bbs.
 
-Thanks,
-Matt
+e.g. what is wrong with the following patch?
 
--- 
-Matt Domsch
-Software Architect
-Dell Linux Solutions linux.dell.com & www.dell.com/linux
-Linux on Dell mailing lists @ http://lists.us.dell.com
+The reason I ask is because I think I need a few more pass
+on the basic block. I try to avoid recursive if it is not necessary.
+
+Thanks
+
+Chris
+
+Index: sparse/flow.c
+===================================================================
+--- sparse.orig/flow.c	2006-12-12 01:52:06.000000000 -0800
++++ sparse/flow.c	2006-12-12 01:52:40.000000000 -0800
+@@ -903,12 +903,10 @@ void vrfy_flow(struct entrypoint *ep)
+ 	struct basic_block *bb;
+ 	struct basic_block *entry = ep->entry->bb;
+ 
++	assert(first_basic_block(ep->bbs) == entry);
+ 	FOR_EACH_PTR(ep->bbs, bb) {
+-		if (bb == entry)
+-			entry = NULL;
+ 		vrfy_bb_flow(bb);
+ 	} END_FOR_EACH_PTR(bb);
+-	assert(!entry);
+ }
+ 
+ void pack_basic_blocks(struct entrypoint *ep)
+Index: sparse/example.c
+===================================================================
+--- sparse.orig/example.c	2006-12-12 01:52:06.000000000 -0800
++++ sparse/example.c	2006-12-12 01:52:40.000000000 -0800
+@@ -1765,9 +1765,6 @@ static void output_bb(struct basic_block
+ 
+ 	bb->generation = generation;
+ 
+-	/* Make sure all parents have been generated first */
+-	generate_list(bb->parents, generation);
+-
+ 	state.pos = bb->pos;
+ 	state.inputs = gather_storage(bb, STOR_IN);
+ 	state.outputs = gather_storage(bb, STOR_OUT);
+@@ -1782,9 +1779,6 @@ static void output_bb(struct basic_block
+ 
+ 	free_ptr_list(&state.inputs);
+ 	free_ptr_list(&state.outputs);
+-
+-	/* Generate all children... */
+-	generate_list(bb->children, generation);
+ }
+ 
+ /*
+@@ -1920,7 +1914,7 @@ static void output(struct entrypoint *ep
+ 	arch_set_up_storage(ep);
+ 
+ 	/* Show the results ... */
+-	output_bb(ep->entry->bb, generation);
++	generate_list(ep->bbs, generation);
+ 
+ 	/* Clear the storage hashes for the next function.. */
+ 	free_storage();
