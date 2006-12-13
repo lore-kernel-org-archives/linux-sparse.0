@@ -1,45 +1,62 @@
-From: Linus Torvalds <torvalds@osdl.org>
-Subject: Re: basic block output order?
-Date: Tue, 12 Dec 2006 17:44:37 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0612121740420.3535@woody.osdl.org>
-References: <20061212102422.GA6013@chrisli.org> <Pine.LNX.4.64.0612120824420.6452@woody.osdl.org>
- <20061213011549.GA12570@chrisli.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: [PATCH][RFC] Re: sparse handles int64_t type wrong
+Date: Tue, 12 Dec 2006 21:18:27 -0800
+Message-ID: <20061213051827.GA13748@chrisli.org>
+References: <1165952070.17896.7.camel@chaos.malinovka7.net> <Pine.LNX.4.64.0612121143280.3535@woody.osdl.org> <Pine.LNX.4.64.0612121155450.3535@woody.osdl.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.25]:40432 "EHLO smtp.osdl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S964879AbWLMCEa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Dec 2006 21:04:30 -0500
-In-Reply-To: <20061213011549.GA12570@chrisli.org>
+Received: from rwcrmhc12.comcast.net ([216.148.227.152]:50480 "EHLO
+	rwcrmhc12.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964936AbWLMFlG (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 13 Dec 2006 00:41:06 -0500
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.0612121155450.3535@woody.osdl.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@osdl.org>
+Cc: Yura Pakhuchiy <pakhuchiy@gmail.com>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
 
+I took a stab at it.  It seems that direct_declarator() does handle
+attributes, but it does not change the ctype to the declarator.
+It is kind of awkward that the type is already build when it hit
+the attribute in the end. It need to go back to overwrite
+the already parsed type.
 
+I have this patch seems make the test case happy. I am not sure
+this is correct or not.
+ 
+Chris
+ 
 
-On Tue, 12 Dec 2006, Christopher Li wrote:
->
-> Thanks for your explain. I see, you want to generate the dominator
-> first.
-
-Basically, yes. That way, when we start generating code in any basic 
-block, we usually either (a) have the outputs from the dominators or (b) 
-we're the top block in a loop and any freedom we can use to pick our 
-preferred registers is probably a good thing.
-
-The current "example.c" was very much written with the intent that it 
-would not ever do any _smart_ register allocation, but just allocate 
-registers on-the-fly. But doing that requires that you set things up so 
-that the stupid approach can still get reasonable results.
-
-The way the death-notes work etc was all designed exactly so that the 
-register "allocator" never really needed any global visibility at all, it 
-could just work on an instruction-per-instruction basis.
-
-That said, the simplicity of it all in example.c still doesn't mean that 
-it _works_. It really doesn't, and isn't even really close. But it 
-occasionally results in code that looks _almost_ like it could be run ;)
-
-		Linus
+Index: sparse/parse.c
+===================================================================
+--- sparse.orig/parse.c	2006-12-12 21:12:29.000000000 -0800
++++ sparse/parse.c	2006-12-12 21:12:47.000000000 -0800
+@@ -837,6 +837,10 @@ static struct token *handle_attributes(s
+ 			struct ctype thistype = { 0, };
+ 			token = attribute_specifier(token->next, &thistype);
+ 			apply_ctype(token->pos, &thistype, ctype);
++			if (is_int_type(ctype->base_type) && ctype->modifiers & MOD_SPECIFIER) {
++				ctype->base_type = ctype_integer(ctype->modifiers);
++				ctype->modifiers &= ~MOD_SPECIFIER;
++			}
+ 			continue;
+ 		}
+ 		if (match_idents(token, &asm_ident, &__asm_ident, &__asm___ident)) {
+Index: sparse/show-parse.c
+===================================================================
+--- sparse.orig/show-parse.c	2006-12-12 21:12:29.000000000 -0800
++++ sparse/show-parse.c	2006-12-12 21:12:47.000000000 -0800
+@@ -98,7 +98,7 @@ const char *modifier_string(unsigned lon
+ 	const char *res,**ptr, *names[] = {
+ 		"auto", "register", "static", "extern",
+ 		"const", "volatile", "[signed]", "[unsigned]",
+-		"[char]", "[short]", "[long]", "[long]",
++		"[char]", "[short]", "[long]", "[long long]",
+ 		"[typdef]", "[structof]", "[unionof]", "[enum]",
+ 		"[typeof]", "[attribute]", "inline", "[addressable]",
+ 		"[nocast]", "[noderef]", "[accessed]", "[toplevel]",
+Index: sparse/test-parsing.c
+===================================================================
