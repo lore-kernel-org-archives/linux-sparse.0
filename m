@@ -1,63 +1,45 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Linus Torvalds <torvalds@osdl.org>
 Subject: Re: basic block output order?
-Date: Tue, 12 Dec 2006 17:15:49 -0800
-Message-ID: <20061213011549.GA12570@chrisli.org>
+Date: Tue, 12 Dec 2006 17:44:37 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0612121740420.3535@woody.osdl.org>
 References: <20061212102422.GA6013@chrisli.org> <Pine.LNX.4.64.0612120824420.6452@woody.osdl.org>
+ <20061213011549.GA12570@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc12.comcast.net ([204.127.200.82]:36065 "EHLO
-	sccrmhc12.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964879AbWLMBka (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Dec 2006 20:40:30 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0612120824420.6452@woody.osdl.org>
+Received: from smtp.osdl.org ([65.172.181.25]:40432 "EHLO smtp.osdl.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S964879AbWLMCEa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 12 Dec 2006 21:04:30 -0500
+In-Reply-To: <20061213011549.GA12570@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@osdl.org>
+To: Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org
 
-Thanks for your explain. I see, you want to generate the dominator
-first.
 
-Chris
 
-On Tue, Dec 12, 2006 at 08:36:43AM -0800, Linus Torvalds wrote:
-> 
-> 
-> On Tue, 12 Dec 2006, Christopher Li wrote:
-> 
-> They don't have to. But it generated nicer code, iirc, mainly because it 
-> did the storage allocation the natural way. In particular, if I recall 
-> correctly, it causes loops to have the storage for the _innermost_ loop to 
-> be done first.
-> 
-> Notes off the top of my head, without actually looking at the code: 
-> because when you hit a loop, the "parent" set is actually both the entry 
-> and the BB that ha the loopback, so you actually end up going to the 
-> loopback thing, which goes to _its_ parents, etc etc, until you actually 
-> get back to the _top_ of the loop (and now the "generation" count triggers 
-> you to break the looping), so you end up doing the actual register 
-> allocation at tops of loops, but because you do this all recursively, and 
-> the inner loop will have _its_ parents point to the callback too, you 
-> generally tend to have started storage allocation at loop-tops.
-> 
-> HOWEVER. There's a reason the thing is called "example.c". The reason is 
-> simply that it's stupid, idiotic, and not meant to be taken seriously. I 
-> also ended up just hackign things around randomly to make it output 
-> something that looked half-way sane, _and_ I ended up changign it to use 
-> the "unssa" pass by Luc, _and_ I'm border-line psychotic when it comes to 
-> compilers anyway.
-> 
-> In other words, what I'm trying to say is that you shouldn't take anything 
-> I say too seriously, and that the "example.c" code wasn't really even 
-> meant to be serious. I always wanted somebody else to write the back-end, 
-> and held back as long as I could from writing example.c, and when I wrote 
-> it, it was more a case of desperately trying to find somebody interested 
-> in it, and having it as an example of how things _might_ work.
-> 
-> So as far as I am concerned, the whole "example.c" is just total 
-> throw-away code. Go wild with it.
-> 
-> 		Linus
+On Tue, 12 Dec 2006, Christopher Li wrote:
+>
+> Thanks for your explain. I see, you want to generate the dominator
+> first.
+
+Basically, yes. That way, when we start generating code in any basic 
+block, we usually either (a) have the outputs from the dominators or (b) 
+we're the top block in a loop and any freedom we can use to pick our 
+preferred registers is probably a good thing.
+
+The current "example.c" was very much written with the intent that it 
+would not ever do any _smart_ register allocation, but just allocate 
+registers on-the-fly. But doing that requires that you set things up so 
+that the stupid approach can still get reasonable results.
+
+The way the death-notes work etc was all designed exactly so that the 
+register "allocator" never really needed any global visibility at all, it 
+could just work on an instruction-per-instruction basis.
+
+That said, the simplicity of it all in example.c still doesn't mean that 
+it _works_. It really doesn't, and isn't even really close. But it 
+occasionally results in code that looks _almost_ like it could be run ;)
+
+		Linus
