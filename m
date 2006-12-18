@@ -1,46 +1,41 @@
-From: James Westby <jw+debian@jameswestby.net>
-Subject: Re: [PATCH] Update README to match changes in the initialization code
-Date: Mon, 18 Dec 2006 22:43:23 +0000
-Message-ID: <20061218224322.GD8251@jameswestby.net>
-References: <20061218170107.GA7269@jameswestby.net>
+From: Oleg Nesterov <oleg@tv-sign.ru>
+Subject: Re: [PATCH] dissect: fix multidimensional array initializer
+Date: Tue, 19 Dec 2006 01:54:27 +0300
+Message-ID: <20061218225427.GA592@tv-sign.ru>
+References: <20061214213547.GA422@tv-sign.ru> <20061218215051.GB28336@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp-out3.blueyonder.co.uk ([195.188.213.6]:42392 "EHLO
-	smtp-out3.blueyonder.co.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754693AbWLRWn2 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 18 Dec 2006 17:43:28 -0500
-Received: from [172.23.170.146] (helo=anti-virus03-09)
-	by smtp-out3.blueyonder.co.uk with smtp (Exim 4.52)
-	id 1GwRCh-00028O-71
-	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 22:43:27 +0000
-Received: from [82.32.6.109] (helo=loser.MSHOME)
-	by asmtp-out2.blueyonder.co.uk with esmtp (Exim 4.52)
-	id 1GwRCd-00009L-OP
-	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 22:43:23 +0000
-Received: from jw2328 by loser.MSHOME with local (Exim 4.63)
-	(envelope-from <jw+debian@jameswestby.net>)
-	id 1GwRCd-0002Ue-77
-	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 22:43:23 +0000
+Received: from mail.sgg.ru ([217.23.135.1]:38974 "EHLO mail.sgg.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754728AbWLRXAN (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 18 Dec 2006 18:00:13 -0500
 Content-Disposition: inline
-In-Reply-To: <20061218170107.GA7269@jameswestby.net>
+In-Reply-To: <20061218215051.GB28336@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
 
-On (18/12/06 17:01), James Westby wrote:
-> There have been changes in the functions to call to get the parse tree
-> from sparse, so update the README file to reflect these changes.
-> 
+On 12/18, Christopher Li wrote:
+>
+> I did not test it myself, but it looks seasonable to me.
 
-My apologies, I didn't think that this message had made it, and the
-patch is incorrect anyway. My other patch supercedes this one.
+Thanks.
 
-Thanks,
+> BTW, did you look at the show-parse series of function?
+> It is a good example of how to traverse the symbol tree.
+> I would love to see dissect using similar structure. 
 
-James
+dissect is quite different, please look at
+	http://marc.theaimsgroup.com/?l=linux-sparse&m=112585110531119
 
--- 
-  James Westby   --    GPG Key ID: B577FE13    --     http://jameswestby.net/
-  seccure key - (3+)k7|M*edCX/.A:n*N!>|&7U.L#9E)Tu)T0>AM - secp256r1/nistp256
+And it is (I hope) complete. Note also it doesn't use evaluate.c,
+it calls __sparse(). I am still waiting somebody will implement
+sparse based cscope using dissect :)
+
+What exactly you don't like in how it traverses the tree?
+Actually, the structure is similar, but diisect has to track
+"usage_t mode".
+
+Oleg.
