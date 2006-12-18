@@ -1,66 +1,75 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] dissect: fix multidimensional array initializer
-Date: Mon, 18 Dec 2006 13:50:51 -0800
-Message-ID: <20061218215051.GB28336@chrisli.org>
-References: <20061214213547.GA422@tv-sign.ru>
+From: James Westby <jw+debian@jameswestby.net>
+Subject: [PATCH] Update README to match changes in the initialization code
+Date: Mon, 18 Dec 2006 17:01:13 +0000
+Message-ID: <20061218170107.GA7269@jameswestby.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc15.comcast.net ([216.148.227.155]:60784 "EHLO
-	rwcrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754675AbWLRWGz (ORCPT
+Received: from smtp-out2.blueyonder.co.uk ([195.188.213.5]:45953 "EHLO
+	smtp-out2.blueyonder.co.uk" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754714AbWLRWgl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 18 Dec 2006 17:06:55 -0500
+	Mon, 18 Dec 2006 17:36:41 -0500
+Received: from [172.23.170.143] (helo=anti-virus02-10)
+	by smtp-out2.blueyonder.co.uk with smtp (Exim 4.52)
+	id 1GwLrW-0001NI-VI
+	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 17:01:15 +0000
+Received: from [82.32.6.109] (helo=loser.MSHOME)
+	by asmtp-out1.blueyonder.co.uk with esmtp (Exim 4.52)
+	id 1GwLrW-0003NZ-3q
+	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 17:01:14 +0000
+Received: from jw2328 by loser.MSHOME with local (Exim 4.63)
+	(envelope-from <jw+debian@jameswestby.net>)
+	id 1GwLrV-0001tR-Rr
+	for linux-sparse@vger.kernel.org; Mon, 18 Dec 2006 17:01:13 +0000
 Content-Disposition: inline
-In-Reply-To: <20061214213547.GA422@tv-sign.ru>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@tv-sign.ru>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-I did not test it myself, but it looks seasonable to me.
+There have been changes in the functions to call to get the parse tree
+from sparse, so update the README file to reflect these changes.
 
-BTW, did you look at the show-parse series of function?
-It is a good example of how to traverse the symbol tree.
-I would love to see dissect using similar structure. 
+Signed-off-by: James Westby <jw+debian@jameswestby.net>
+---
+ README |   20 +++-----------------
+ 1 files changed, 3 insertions(+), 17 deletions(-)
+
+diff --git a/README b/README
+index 6b1034b..b9ee73c 100644
+--- a/README
++++ b/README
+@@ -47,28 +47,14 @@ requires the information.
  
-Chris
-
-On Fri, Dec 15, 2006 at 12:35:47AM +0300, Oleg Nesterov wrote:
-> dissect can't parse initializers like
-> 
-> 	struct T { int i; } a[2][3] = { [0][0] = {123} };
-> 
-> , output is:
-> 
-> 	   1:8   s def  T
-> 	   1:21  g def  a                                struct T [3][2]
-> 	   1:21  g -w-  a                                struct T [3][2]
-> 	T.c:1:37: warning: bad expr->type: 25
-> 
-> with this patch applied:
-> 
-> 	   1:8   s def  T
-> 	   1:21  g def  a                                struct T [3][2]
-> 	   1:21  g -w-  a                                struct T [3][2]
-> 	   1:43  s -w-  T.i                              int
-> 
-> Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
-> 
-> --- DS/dissect.c~	2006-04-20 03:03:33.000000000 +0400
-> +++ DS/dissect.c	2006-04-20 03:03:42.000000000 +0400
-> @@ -507,10 +507,13 @@ static struct symbol *do_initializer(str
->  	default:
->  		do_expression(u_lval(type), expr);
->  
-> +	break; case EXPR_INDEX:
-> +		do_initializer(base_type(type), expr->idx_expression);
-> +
->  	break; case EXPR_INITIALIZER:
->  		m_addr = 0;
->  		FOR_EACH_PTR(expr->expr_list, m_expr)
-> -			if(type->type == SYM_ARRAY) {
-> +			if (type->type == SYM_ARRAY) {
->  				m_type = base_type(type);
->  				if (m_expr->type == EXPR_INDEX)
->  					m_expr = m_expr->idx_expression;
+ This means that a user of the library will literally just need to do
+ 
+-	struct token *token;
+-	int fd = open(filename, O_RDONLY);
+ 	struct symbol_list *list = NULL;
+ 
+-	if (fd < 0)
+-		exit_with_complaint();
+-
+-	// Initialize parse symbols
+-	init_symbols();
+-
+-	// Tokenize the input stream
+-	token = tokenize(filename, fd, NULL);
+-
+-	// Pre-process the stream
+-	token = preprocess(token);
+-
+-	// Parse the resulting C code
+-	translation_unit(token, &list);
++	// Initialise sparse and tokenize, preprocess and parse the file.
++	list = sparse(filename);
+ 
+ 	// Evaluate the types now if we want to
+ 	// Or leave it until later.
+-	symbol_iterate(list, evaluate_symbol, NULL);
++	evaluate_symbol_list(list);
+ 
+ and he is now done - having a full C parse of the file he opened.  The
+ library doesn't need any more setup, and once done does not impose any
+-- 
+1.4.4.2
