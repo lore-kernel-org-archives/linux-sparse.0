@@ -1,58 +1,74 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH] adding anonymous string
-Date: Tue, 19 Dec 2006 18:34:15 -0800
-Message-ID: <20061220023415.GC8137@chrisli.org>
+From: Mathieu Desnoyers <compudj@krystal.dyndns.org>
+Subject: Linux Kernel Markers format string idea
+Date: Thu, 21 Dec 2006 11:20:35 -0500
+Message-ID: <20061221162035.GA9609@Krystal>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc13.comcast.net ([216.148.227.153]:42185 "EHLO
-	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964834AbWLTCug (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Dec 2006 21:50:36 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <ltt-dev-bounces@listserv.shafik.org>
 Content-Disposition: inline
-Sender: linux-sparse-owner@vger.kernel.org
+List-Unsubscribe: <http://listserv.shafik.org/mailman/listinfo/ltt-dev>,
+	<mailto:ltt-dev-request@listserv.shafik.org?subject=unsubscribe>
+List-Archive: <http://listserv.shafik.org/pipermail/ltt-dev>
+List-Post: <mailto:ltt-dev@listserv.shafik.org>
+List-Help: <mailto:ltt-dev-request@listserv.shafik.org?subject=help>
+List-Subscribe: <http://listserv.shafik.org/mailman/listinfo/ltt-dev>,
+	<mailto:ltt-dev-request@listserv.shafik.org?subject=subscribe>
+Sender: ltt-dev-bounces@listserv.shafik.org
+Errors-To: ltt-dev-bounces@listserv.shafik.org
+To: "Frank Ch. Eigler" <fche@redhat.com>, ltt-dev@shafik.org, systemtap@sources.redhat.com, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Josh Triplett <josh@freedesktop.org>, Linus Torvalds <torvalds@osdl.org>
 
-Anonymous string is one exception that the back end does
-need to generate storage on (read only) data section.
+Hi,
 
-Currently in order to determine a symbol is anonymous string,
-we can test:
-	symbol is array
-	and symbol has no ident.
-	and symbol base type is char.
-	and symbol initializer is a string expression.
+First, some context : I created the Linux Kernel Markers as a lightweight
+code instrumentation mechanism with which we can connect a probe dynamically.
+Type checking is done dynamically by comparing the string in the probe to the
+string found at the instrumentation site. If we want to have strong type
+checking with this mechanism, all the information used for typing must be in
+the format string and validated. Frank showed some concerns about the use of
+format strings regarding type checking. Here is a proposal to fix this.
 
-This patch add a bitfield to easier identify an anonymous string.
+I just had an idea about a format string extension that would help fix the
+missing type checking with format strings for Linux Kernel Markers. It would
+however imply that we extend the format string standard. One of the goals is
+to keep backward compatibility with existing format strings.
 
-Signed-off-by: Christopher Li <sparse@chrisli.org>
+The two sample cases I would like to "dynamically type check" are the
+following :
 
-Index: sparse/symbol.h
-===================================================================
---- sparse.orig/symbol.h	2006-12-12 02:04:05.000000000 -0800
-+++ sparse/symbol.h	2006-12-12 02:05:24.000000000 -0800
-@@ -118,7 +118,8 @@ struct symbol {
- 					initialized:1,
- 					examined:1,
- 					expanding:1,
--					evaluated:1;
-+					evaluated:1,
-+					string:1;
- 			struct expression *array_size;
- 			struct ctype ctype;
- 			struct symbol_list *arguments;
-Index: sparse/evaluate.c
-===================================================================
---- sparse.orig/evaluate.c	2006-12-12 02:04:05.000000000 -0800
-+++ sparse/evaluate.c	2006-12-12 02:05:24.000000000 -0800
-@@ -74,6 +74,7 @@ static struct symbol *evaluate_string(st
- 	sym->array_size = alloc_const_expression(expr->pos, length);
- 	sym->bit_size = bits_in_char * length;
- 	sym->ctype.alignment = 1;
-+	sym->string = 1;
- 	sym->ctype.modifiers = MOD_STATIC;
- 	sym->ctype.base_type = array;
- 	sym->initializer = initstr;
+- Passing a "struct mystruct *" as an argument.
+- Passing a "__be64" as an argument
+  (typedef as "__u64 __bitwise", where __bitwise is undefined when compiled by
+  gcc but is defined as __attribute__((bitwise)) when compiled with __CHECKER__
+  for sparse).
+  (http://kernel.org/pub/linux/kernel/people/josh/sparse/)
+
+The idea is to add the type between brackets after the conversion specifier.
+
+For a pointer to a structure :
+"%p[struct mystruct *]"
+
+For a __be64 :
+"%llu[__be64]"
+
+The current format string validation of gcc will not perform more or less
+validation than what is actually done, which is to verify that the type is a
+pointer or a 64 bytes integer. Printing it through printk will show, for
+instance :
+
+0xfffffff[struct mystruct *]
+1152921504606846976[__be64]
+
+However, an enhanced format string verificator could check the type of the
+pointer and the complete type of the __be64. It could start by being integrated
+to the "checker", and only later make its way into gcc.
+
+Comments on this idea are welcome.
+
+Mathieu
+
+
+-- 
+OpenPGP public key:              http://krystal.dyndns.org:8080/key/compudj.gpg
+Key fingerprint:     8CD5 52C3 8E3C 4140 715F  BA06 3F25 A8FE 3BAE 9A68 
