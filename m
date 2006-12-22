@@ -1,74 +1,104 @@
-From: Mathieu Desnoyers <compudj@krystal.dyndns.org>
-Subject: Linux Kernel Markers format string idea
-Date: Thu, 21 Dec 2006 11:20:35 -0500
-Message-ID: <20061221162035.GA9609@Krystal>
+From: Pavel Roskin <proski@gnu.org>
+Subject: [RFC PATCH] Handling multiple -include directives
+Date: Fri, 22 Dec 2006 02:06:29 -0500
+Message-ID: <1166771189.18955.10.camel@dv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <ltt-dev-bounces@listserv.shafik.org>
-Content-Disposition: inline
-List-Unsubscribe: <http://listserv.shafik.org/mailman/listinfo/ltt-dev>,
-	<mailto:ltt-dev-request@listserv.shafik.org?subject=unsubscribe>
-List-Archive: <http://listserv.shafik.org/pipermail/ltt-dev>
-List-Post: <mailto:ltt-dev@listserv.shafik.org>
-List-Help: <mailto:ltt-dev-request@listserv.shafik.org?subject=help>
-List-Subscribe: <http://listserv.shafik.org/mailman/listinfo/ltt-dev>,
-	<mailto:ltt-dev-request@listserv.shafik.org?subject=subscribe>
-Sender: ltt-dev-bounces@listserv.shafik.org
-Errors-To: ltt-dev-bounces@listserv.shafik.org
-To: "Frank Ch. Eigler" <fche@redhat.com>, ltt-dev@shafik.org, systemtap@sources.redhat.com, linux-sparse@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from fencepost.gnu.org ([199.232.76.164]:33557 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1423191AbWLVHGb (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 22 Dec 2006 02:06:31 -0500
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1GxeU7-0007GD-5I
+	for linux-sparse@vger.kernel.org; Fri, 22 Dec 2006 02:06:27 -0500
+Received: from proski by gnu.org with local (Exim 4.63)
+	(envelope-from <proski@gnu.org>)
+	id 1GxeU9-0005O1-8a
+	for linux-sparse@vger.kernel.org; Fri, 22 Dec 2006 02:06:29 -0500
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Hi,
+Hello!
 
-First, some context : I created the Linux Kernel Markers as a lightweight
-code instrumentation mechanism with which we can connect a probe dynamically.
-Type checking is done dynamically by comparing the string in the probe to the
-string found at the instrumentation site. If we want to have strong type
-checking with this mechanism, all the information used for typing must be in
-the format string and validated. Frank showed some concerns about the use of
-format strings regarding type checking. Here is a proposal to fix this.
+sparse doesn't handle multiple -include directives.  Variables "include"
+and "include_fd" have file scope in lib.c.  The file for inclusion is
+processed only once in sparse_initial() after the command line has been
+processed.
 
-I just had an idea about a format string extension that would help fix the
-missing type checking with format strings for Linux Kernel Markers. It would
-however imply that we extend the format string standard. One of the goals is
-to keep backward compatibility with existing format strings.
+It seems to me that the existing add_pre_buffer() mechanism can be used
+instead.  I'm just a bit worried why it wasn't done like this in the
+first place.
 
-The two sample cases I would like to "dynamically type check" are the
-following :
+---
+Handle multiple -include directives
 
-- Passing a "struct mystruct *" as an argument.
-- Passing a "__be64" as an argument
-  (typedef as "__u64 __bitwise", where __bitwise is undefined when compiled by
-  gcc but is defined as __attribute__((bitwise)) when compiled with __CHECKER__
-  for sparse).
-  (http://kernel.org/pub/linux/kernel/people/josh/sparse/)
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
 
-The idea is to add the type between brackets after the conversion specifier.
+ lib.c |   26 ++++++--------------------
+ 1 files changed, 6 insertions(+), 20 deletions(-)
 
-For a pointer to a structure :
-"%p[struct mystruct *]"
-
-For a __be64 :
-"%llu[__be64]"
-
-The current format string validation of gcc will not perform more or less
-validation than what is actually done, which is to verify that the type is a
-pointer or a 64 bytes integer. Printing it through printk will show, for
-instance :
-
-0xfffffff[struct mystruct *]
-1152921504606846976[__be64]
-
-However, an enhanced format string verificator could check the type of the
-pointer and the complete type of the __be64. It could start by being integrated
-to the "checker", and only later make its way into gcc.
-
-Comments on this idea are welcome.
-
-Mathieu
+diff --git a/lib.c b/lib.c
+index 51c415d..3ea3bde 100644
+--- a/lib.c
++++ b/lib.c
+@@ -191,8 +191,6 @@ int Wenum_mismatch = 1;
+ int Wdo_while = 1;
+ int Wuninitialized = 1;
+ int preprocess_only;
+-char *include;
+-int include_fd = -1;
+ 
+ 
+ void add_pre_buffer(const char *fmt, ...)
+@@ -266,21 +264,15 @@ static char **handle_switch_i(char *arg, char **next)
+ {
+ 	if (*next && !strcmp(arg, "include")) {
+ 		char *name = *++next;
+-		int fd = open(name, O_RDONLY);
+-
+-		include_fd = fd;
+-		include = name;
+-		if (fd < 0)
+-			perror(name);
++		if (!name)
++			die("missing argument for -include option");
++		add_pre_buffer("#include \"%s\"\n", name);
+ 	}
+ 	if (*next && !strcmp(arg, "imacros")) {
+ 		char *name = *++next;
+-		int fd = open(name, O_RDONLY);
+-
+-		include_fd = fd;
+-		include = name;
+-		if (fd < 0)
+-			perror(name);
++		if (!name)
++			die("missing argument for -include option");
++		add_pre_buffer("#include \"%s\"\n", name);
+ 	}
+ 	else if (*next && !strcmp(arg, "isystem")) {
+ 		char *path = *++next;
+@@ -624,12 +616,6 @@ static struct symbol_list *sparse_initial(void)
+ {
+ 	struct token *token;
+ 
+-	// Prepend any "include" file to the stream.
+-	// We're in global scope, it will affect all files!
+-	token = NULL;
+-	if (include_fd >= 0)
+-		token = tokenize(include, include_fd, NULL, includepath);
+-
+ 	// Prepend the initial built-in stream
+ 	token = tokenize_buffer(pre_buffer, pre_buffer_size, token);
+ 	return sparse_tokenstream(token);
 
 
 -- 
-OpenPGP public key:              http://krystal.dyndns.org:8080/key/compudj.gpg
-Key fingerprint:     8CD5 52C3 8E3C 4140 715F  BA06 3F25 A8FE 3BAE 9A68 
+Regards,
+Pavel Roskin
