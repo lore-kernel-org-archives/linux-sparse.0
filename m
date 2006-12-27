@@ -1,36 +1,31 @@
-From: "Frank Ch. Eigler" <fche@redhat.com>
-Subject: Re: Linux Kernel Markers format string idea
-Date: Tue, 26 Dec 2006 14:48:13 -0500
-Message-ID: <20061226194813.GB20627@redhat.com>
-References: <20061221162035.GA9609@Krystal>
+From: "Sanghyeon Seo" <sanxiyn@gmail.com>
+Subject: Sparse and LLVM
+Date: Wed, 27 Dec 2006 18:01:58 +0900
+Message-ID: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <systemtap-return-5221-gls-systemtap=m.gmane.org@sourceware.org>
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from ug-out-1314.google.com ([66.249.92.174]:24646 "EHLO
+	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753730AbWL0JCA (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 27 Dec 2006 04:02:00 -0500
+Received: by ug-out-1314.google.com with SMTP id 44so3822487uga
+        for <linux-sparse@vger.kernel.org>; Wed, 27 Dec 2006 01:01:58 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <20061221162035.GA9609@Krystal>
-List-Unsubscribe: <mailto:systemtap-unsubscribe-gls-systemtap=m.gmane.org@sourceware.org>
-List-Subscribe: <mailto:systemtap-subscribe@sourceware.org>
-List-Post: <mailto:systemtap@sourceware.org>
-List-Help: <mailto:systemtap-help@sourceware.org>, <http://sourceware.org/lists.html#faqs>
-Sender: systemtap-owner@sourceware.org
-To: Mathieu Desnoyers <compudj@krystal.dyndns.org>
-Cc: "Frank Ch. Eigler" <fche@redhat.com>, ltt-dev@shafik.org, systemtap@sources.redhat.com, linux-sparse@vger.kernel.org, michel.dagenais@polymtl.ca
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: llvmdev@cs.uiuc.edu, linux-sparse@vger.kernel.org
 
-Hi -
+I can't be the first person to think of this, can I? But I couldn't
+locate any reference on this combination. If you know of one, please
+tell me.
 
-On Thu, Dec 21, 2006 at 11:20:35AM -0500, Mathieu Desnoyers wrote:
+Sparse: http://kernel.org/pub/linux/kernel/people/josh/sparse/
+LLVM: http://llvm.org/
 
-> [...]  I just had an idea about a format string extension that would
-> help fix the missing type checking with format strings for Linux
-> Kernel Markers. [...]  The idea is to add the type between brackets
-> after the conversion specifier.  For a pointer to a structure :
-> "%p[struct mystruct *]" [...]
+So, you may expect compile-llvm.c in a few days. :)
 
-It's probably an improvement, though as it is still at the
-programmers' discretion, it is less useful for checking and more as
-documenting.  I remain ambivalent about whether exposing this level of
-detail (complex typing) is a good idea, or whether imposing a small
-fixed set of types (string/number/blob) is better.
-
-- FChE
+-- 
+Seo Sanghyeon
