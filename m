@@ -1,40 +1,43 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [RFC] [PATCH 3/4] and other branch usage fix
-Date: Thu, 28 Dec 2006 01:26:18 -0800
-Message-ID: <20061228092618.GD6573@chrisli.org>
+From: Reid Spencer <rspencer@reidspencer.com>
+Subject: Re: Sparse and LLVM
+Date: Thu, 28 Dec 2006 18:47:45 +0000
+Message-ID: <1167331665.25999.78.camel@bashful.x10sys.com>
+References: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
+Reply-To: LLVM Developers Mailing List <llvmdev@cs.uiuc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc11.comcast.net ([204.127.192.81]:44034 "EHLO
-	rwcrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932827AbWL1JuK (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 28 Dec 2006 04:50:10 -0500
-Content-Disposition: inline
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <llvmdev-bounces@cs.uiuc.edu>
+In-Reply-To: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
+List-Unsubscribe: <http://lists.cs.uiuc.edu/mailman/listinfo/llvmdev>,
+	<mailto:llvmdev-request@cs.uiuc.edu?subject=unsubscribe>
+List-Archive: <http://lists.cs.uiuc.edu/pipermail/llvmdev>
+List-Post: <mailto:llvmdev@cs.uiuc.edu>
+List-Help: <mailto:llvmdev-request@cs.uiuc.edu?subject=help>
+List-Subscribe: <http://lists.cs.uiuc.edu/mailman/listinfo/llvmdev>,
+	<mailto:llvmdev-request@cs.uiuc.edu?subject=subscribe>
+Sender: llvmdev-bounces@cs.uiuc.edu
+Errors-To: llvmdev-bounces@cs.uiuc.edu
+To: LLVM Developers Mailing List <llvmdev@cs.uiuc.edu>
+Cc: linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@osdl.org>, Josh Triplett <josh@freedesktop.org>, Dan Carpenter <error27@gmail.com>
 
-Remove dead branch from usage chain.
+Hi Sanghyeon,
 
-Branch like the following will get simplify and removed.
-But the usage information is not updated.
+On Wed, 2006-12-27 at 18:01 +0900, Sanghyeon Seo wrote:
+> I can't be the first person to think of this, can I? But I couldn't
+> locate any reference on this combination. If you know of one, please
+> tell me.
+> 
+> Sparse: http://kernel.org/pub/linux/kernel/people/josh/sparse/
+> LLVM: http://llvm.org/
 
-br %c, 0x10, 0x10
+I haven't heard of anyone integrating sparse with llvm, but then I
+haven't heard of everything either.
 
-Singed-off-by: Christopher Li <sparse@chrisli.org>
+> 
+> So, you may expect compile-llvm.c in a few days. :)
 
-Index: sparse/flow.c
-===================================================================
---- sparse.orig/flow.c	2006-12-21 20:48:07.000000000 -0800
-+++ sparse/flow.c	2006-12-21 22:20:44.000000000 -0800
-@@ -987,7 +987,7 @@ out:
- 			replace_bb_in_list(&child->parents, bb, parent, 0);
- 		} END_FOR_EACH_PTR(child);
- 
--		delete_last_instruction(&parent->insns);
-+		kill_instruction(delete_last_instruction(&parent->insns));
- 		FOR_EACH_PTR(bb->insns, insn) {
- 			if (insn->bb) {
- 				assert(insn->bb == bb);
+What will compile-llvm.c  do?
+
+Reid.
