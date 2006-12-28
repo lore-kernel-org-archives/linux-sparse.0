@@ -1,56 +1,43 @@
-From: "Chris Li" <sparse@chrisli.org>
-Subject: Re: Sparse and LLVM
-Date: Wed, 27 Dec 2006 03:15:33 -0800
-Message-ID: <70318cbf0612270315p483df383l6d91ca0280a0af27@mail.gmail.com>
-References: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: [RFC] More checking with sparse 0/4
+Date: Thu, 28 Dec 2006 01:23:59 -0800
+Message-ID: <20061228092359.GA6573@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.184]:52700 "EHLO
-	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932235AbWL0LPf (ORCPT
+Received: from alnrmhc11.comcast.net ([204.127.225.91]:60086 "EHLO
+	alnrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932832AbWL1JmS (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 27 Dec 2006 06:15:35 -0500
-Received: by nf-out-0910.google.com with SMTP id o25so5165591nfa
-        for <linux-sparse@vger.kernel.org>; Wed, 27 Dec 2006 03:15:34 -0800 (PST)
-In-Reply-To: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
+	Thu, 28 Dec 2006 04:42:18 -0500
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sanghyeon Seo <sanxiyn@gmail.com>
-Cc: llvmdev@cs.uiuc.edu, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@osdl.org>, Josh Triplett <josh@freedesktop.org>, Dan Carpenter <error27@gmail.com>
 
-It is on my todo list, I even have some half baked patches try to do
-that.
+Hi,
 
-Converting from sparse linearized code to llvm byte code should
-be very straight forward. Like llvm, the sparse pesudo stay in SSA
-from. The only tricky part is GEP, sparse convert member deference
-to ptr + constant + type cast on the symbol expand stage. Even before
-linearization. It is still doable by guesting the type plus offset. I have
-some idea how to preserve that information in sparse but I haven't complete
-it.
+I have been play with sparse to add more Stanford checker style
+of checking. The paper is "Checking System Rules Using System-
+Specific, Programmer-Written Compiler Extensions" by Dawson Engler
+etc.
 
-If you try to write a sparse to llvm byte code converter, please start
-from the linearized instructions. It will save you a lot of work.
+Unlike the Stanford checker and smatch, this checker is working on
+the linearization level instead of AST level. Linearization code
+can be very convenient (when it works) to trace the data flow because
+pseudo is in SSA form. There is define/user chain to avoid scan
+every instruction.
+
+I write the demo of checking null pointer and irq checking. It is mostly
+an example.
+
+The checking seems very fast. It adds about 10 seconds to the whole
+make C=1 run. We might able to add it to stander sparse checking.
+
+The some of the patch I send it to the list before. I post it again
+to make it easy for the people who want to try it out.
+
+As always, comments and suggestions are welcome.
 
 Chris
-
-On 12/27/06, Sanghyeon Seo <sanxiyn@gmail.com> wrote:
-> I can't be the first person to think of this, can I? But I couldn't
-> locate any reference on this combination. If you know of one, please
-> tell me.
->
-> Sparse: http://kernel.org/pub/linux/kernel/people/josh/sparse/
-> LLVM: http://llvm.org/
->
-> So, you may expect compile-llvm.c in a few days. :)
->
-> --
-> Seo Sanghyeon
-> -
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
