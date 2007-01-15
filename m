@@ -1,43 +1,40 @@
-From: Reid Spencer <rspencer@reidspencer.com>
-Subject: Re: Sparse and LLVM
-Date: Thu, 28 Dec 2006 18:47:45 +0000
-Message-ID: <1167331665.25999.78.camel@bashful.x10sys.com>
-References: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
-Reply-To: LLVM Developers Mailing List <llvmdev@cs.uiuc.edu>
+From: "Mitesh Shah" <mshah@teja.com>
+Subject: How do I get the latest sparse?
+Date: Mon, 15 Jan 2007 15:48:26 -0800
+Message-ID: <AKEOJDDJLNPHDAKOMMBHCEGHCPAA.mshah@teja.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain;
+	charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
-Return-path: <llvmdev-bounces@cs.uiuc.edu>
-In-Reply-To: <5b0248170612270101o14ad99e0r897fbffdb41e3009@mail.gmail.com>
-List-Unsubscribe: <http://lists.cs.uiuc.edu/mailman/listinfo/llvmdev>,
-	<mailto:llvmdev-request@cs.uiuc.edu?subject=unsubscribe>
-List-Archive: <http://lists.cs.uiuc.edu/pipermail/llvmdev>
-List-Post: <mailto:llvmdev@cs.uiuc.edu>
-List-Help: <mailto:llvmdev-request@cs.uiuc.edu?subject=help>
-List-Subscribe: <http://lists.cs.uiuc.edu/mailman/listinfo/llvmdev>,
-	<mailto:llvmdev-request@cs.uiuc.edu?subject=subscribe>
-Sender: llvmdev-bounces@cs.uiuc.edu
-Errors-To: llvmdev-bounces@cs.uiuc.edu
-To: LLVM Developers Mailing List <llvmdev@cs.uiuc.edu>
-Cc: linux-sparse@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail.teja.com ([209.10.202.133]:59428 "EHLO mail.teja.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932127AbXAPAVH (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 15 Jan 2007 19:21:07 -0500
+Received: from SURAT ([172.20.3.219])
+	(authenticated user mshah@teja.com)
+	by mail.teja.com (Kerio MailServer 6.1.4)
+	for linux-sparse@vger.kernel.org;
+	Mon, 15 Jan 2007 15:49:33 -0800
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Sanghyeon,
+Hi,
 
-On Wed, 2006-12-27 at 18:01 +0900, Sanghyeon Seo wrote:
-> I can't be the first person to think of this, can I? But I couldn't
-> locate any reference on this combination. If you know of one, please
-> tell me.
-> 
-> Sparse: http://kernel.org/pub/linux/kernel/people/josh/sparse/
-> LLVM: http://llvm.org/
+How do I get the latest version of sparse? The git repository from the
+sparse home page
+(http://kernel.org/pub/linux/kernel/people/josh/sparse/) does not show
+any update since Dec 05, 2006, while I see few patched submitted after
+that.
 
-I haven't heard of anyone integrating sparse with llvm, but then I
-haven't heard of everything either.
+Also the latest tarball URL gives me a version which is not updated
+since Nov 06
+(http://www.codemonkey.org.uk/projects/git-snapshots/sparse/sparse-lates
+t.tar.gz)
 
-> 
-> So, you may expect compile-llvm.c in a few days. :)
+Is there something I am missing?
 
-What will compile-llvm.c  do?
+Thanks,
 
-Reid.
+-Mitesh
