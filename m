@@ -1,52 +1,42 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: How do I get the latest sparse?
-Date: Mon, 15 Jan 2007 16:17:35 -0800
-Message-ID: <20070116001735.GA12002@chrisli.org>
-References: <AKEOJDDJLNPHDAKOMMBHCEGHCPAA.mshah@teja.com>
+From: "Mitesh Shah" <mshah@teja.com>
+Subject: RE: How do I get the latest sparse?
+Date: Mon, 15 Jan 2007 17:07:10 -0800
+Message-ID: <AKEOJDDJLNPHDAKOMMBHCEGJCPAA.mshah@teja.com>
+References: <20070115165947.f2d4af01.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc11.comcast.net ([204.127.200.81]:43784 "EHLO
-	sccrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932156AbXAPAkl (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 15 Jan 2007 19:40:41 -0500
-Content-Disposition: inline
-In-Reply-To: <AKEOJDDJLNPHDAKOMMBHCEGHCPAA.mshah@teja.com>
+Received: from mail.teja.com ([209.10.202.133]:50648 "EHLO mail.teja.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932156AbXAPBG7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 15 Jan 2007 20:06:59 -0500
+In-Reply-To: <20070115165947.f2d4af01.rdunlap@xenotime.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mitesh Shah <mshah@teja.com>
+To: Randy Dunlap <rdunlap@xenotime.net>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-That is the same git repository I am pulling from. There is not
-much update recently. I assume it is the Christmas/New Year holidays.
+> http://www.codemonkey.org.uk/projects/git-snapshots/sparse/ says:
+>
+> [ ]	sparse-2007-01-10.tar.gz	10-Jan-2007 23:01 	169K
+> [ ]	sparse-2007-01-11.tar.gz	11-Jan-2007 23:01 	169K
+> [ ]	sparse-2007-01-12.tar.gz	12-Jan-2007 23:01 	169K
+> [ ]	sparse-2007-01-13.tar.gz	13-Jan-2007 23:00 	169K
+> [ ]	sparse-2007-01-14.tar.gz	14-Jan-2007 23:00 	169K
+> [ ]	sparse-2007-01-15.tar.gz	15-Jan-2007 23:01 	169K
+> [ ]	sparse-2007-01-16.tar.gz	16-Jan-2007 00:01 	169K
+> [ ]	sparse-latest.tar.gz		16-Jan-2007 00:01 	169K
+>         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+>
+> ---
+> ~Randy
+>
 
-Don't worry, Josh will get back to us.
+Yes, but if you unzip and untar that file, you will see that the sources
+are not updated since Nov 6, 2006. So my guess is that the tar is being
+built everyday but the checkout is not happening from the correct source
+repository.
 
-Chris
-
-On Mon, Jan 15, 2007 at 03:48:26PM -0800, Mitesh Shah wrote:
-> Hi,
-> 
-> How do I get the latest version of sparse? The git repository from the
-> sparse home page
-> (http://kernel.org/pub/linux/kernel/people/josh/sparse/) does not show
-> any update since Dec 05, 2006, while I see few patched submitted after
-> that.
-> 
-> Also the latest tarball URL gives me a version which is not updated
-> since Nov 06
-> (http://www.codemonkey.org.uk/projects/git-snapshots/sparse/sparse-lates
-> t.tar.gz)
-> 
-> Is there something I am missing?
-> 
-> Thanks,
-> 
-> -Mitesh
-> 
-> 
-> -
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-Mitesh
