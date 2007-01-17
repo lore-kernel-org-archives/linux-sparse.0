@@ -1,181 +1,198 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 8] Enhance debug information.
-Date: Tue, 16 Jan 2007 18:42:39 -0800
-Message-ID: <20070117024239.GI962@chrisli.org>
+Subject: [PATCH 9] Another attempt to fix the attribute parsing.
+Date: Tue, 16 Jan 2007 18:43:57 -0800
+Message-ID: <20070117024357.GJ962@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc15.comcast.net ([204.127.192.85]:47761 "EHLO
+Received: from rwcrmhc15.comcast.net ([216.148.227.155]:49689 "EHLO
 	rwcrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751981AbXAQDFg (ORCPT
+	with ESMTP id S1751984AbXAQDGy (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 16 Jan 2007 22:05:36 -0500
+	Tue, 16 Jan 2007 22:06:54 -0500
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Josh Triplett <josh@freedesktop.org>
 
-I found it very useful for debug_symbol to show the builtin
-type name.
+This patch delay the finalized of the abstract int type so it
+can take the __attribute__ in the end of declaration. 
 
-Signed-off-by: Christopher Li<sparse@chrisli.org>
+It complicate the bit field parsing because abstract type can
+show up in the base type of bit field.
 
-Index: sparse/symbol.h
+Signed-off-by: Christopher Li <sparse@chrisli.org>
+
+Index: sparse/parse.c
 ===================================================================
---- sparse.orig/symbol.h	2006-12-14 20:26:32.000000000 -0800
-+++ sparse/symbol.h	2006-12-14 20:28:01.000000000 -0800
-@@ -239,6 +239,8 @@ extern void bind_symbol(struct symbol *,
- extern struct symbol *examine_symbol_type(struct symbol *);
- extern void examine_simple_symbol_type(struct symbol *);
- extern const char *show_typename(struct symbol *sym);
-+extern const char* builtin_typename(struct symbol *sym);
-+extern const char* builtin_ctypename(struct ctype *ctype);
+--- sparse.orig/parse.c	2006-12-14 20:26:32.000000000 -0800
++++ sparse/parse.c	2006-12-14 20:27:44.000000000 -0800
+@@ -70,6 +70,50 @@ struct statement *alloc_statement(struct
  
- extern void debug_symbol(struct symbol *);
- extern void merge_type(struct symbol *sym, struct symbol *base_type);
-Index: sparse/show-parse.c
-===================================================================
---- sparse.orig/show-parse.c	2006-12-14 20:26:32.000000000 -0800
-+++ sparse/show-parse.c	2006-12-14 20:28:01.000000000 -0800
-@@ -56,11 +56,12 @@ static void do_debug_symbol(struct symbo
+ static struct token *struct_declaration_list(struct token *token, struct symbol_list **list);
  
- 	if (!sym)
- 		return;
--	fprintf(stderr, "%.*s%s%3d:%lu %lx %s (as: %d) %p (%s:%d:%d)\n",
-+	fprintf(stderr, "%.*s%s%3d:%lu %s %s (as: %d) %p (%s:%d:%d) %s\n",
- 		indent, indent_string, typestr[sym->type],
- 		sym->bit_size, sym->ctype.alignment,
--		sym->ctype.modifiers, show_ident(sym->ident), sym->ctype.as,
--		sym, stream_name(sym->pos.stream), sym->pos.line, sym->pos.pos);
-+		modifier_string(sym->ctype.modifiers), show_ident(sym->ident), sym->ctype.as,
-+		sym, stream_name(sym->pos.stream), sym->pos.line, sym->pos.pos,
-+		builtin_typename(sym) ?: "");
- 	i = 0;
- 	FOR_EACH_PTR(sym->ctype.contexts, context) {
- 		/* FIXME: should print context expression */
-@@ -98,7 +99,7 @@ const char *modifier_string(unsigned lon
- 	const char *res,**ptr, *names[] = {
- 		"auto", "register", "static", "extern",
- 		"const", "volatile", "[signed]", "[unsigned]",
--		"[char]", "[short]", "[long]", "[long]",
-+		"[char]", "[short]", "[long]", "[long long]",
- 		"[typdef]", "[structof]", "[unionof]", "[enum]",
- 		"[typeof]", "[attribute]", "inline", "[addressable]",
- 		"[nocast]", "[noderef]", "[accessed]", "[toplevel]",
-@@ -171,53 +172,74 @@ static void append(struct type_name *nam
- 	name->end += n;
++static int apply_modifiers(struct position pos, struct ctype *ctype)
++{
++	struct symbol *base;
++
++	while ((base = ctype->base_type)) {
++		switch (base->type) {
++		case SYM_FN:
++		case SYM_ENUM:
++		case SYM_ARRAY:
++		case SYM_BITFIELD:
++		case SYM_PTR:
++			ctype = &base->ctype;
++			continue;
++		}
++		break;
++	}
++
++	/* Turn the "virtual types" into real types with real sizes etc */
++	if (ctype->base_type == &int_type) {
++		ctype->base_type = ctype_integer(ctype->modifiers);
++		ctype->modifiers &= ~MOD_SPECIFIER;
++	} else if (ctype->base_type == &fp_type) {
++		ctype->base_type = ctype_fp(ctype->modifiers);
++		ctype->modifiers &= ~MOD_SPECIFIER;
++	}
++
++	if (ctype->modifiers & MOD_BITWISE) {
++		struct symbol *type;
++		ctype->modifiers &= ~(MOD_BITWISE | MOD_SPECIFIER);
++		if (!is_int_type(ctype->base_type)) {
++			sparse_error(pos, "invalid modifier");
++			return 1;
++		}
++		type = alloc_symbol(pos, SYM_BASETYPE);
++		*type = *ctype->base_type;
++		type->ctype.base_type = ctype->base_type;
++		type->type = SYM_RESTRICT;
++		type->ctype.modifiers &= ~MOD_SPECIFIER;
++		ctype->base_type = type;
++		create_fouled(type);
++	}
++	return 0;
++}
++
+ static struct symbol * indirect(struct position pos, struct ctype *ctype, int type)
+ {
+ 	struct symbol *sym = alloc_symbol(pos, type);
+@@ -724,7 +768,6 @@ static void check_modifiers(struct posit
+ 		     modifier_string (wrong));
  }
  
-+static struct ctype_name {
-+	struct symbol *sym;
-+	const char *name;
-+} typenames[] = {
-+	{ & char_ctype,  "char" },
-+	{ &schar_ctype,  "signed char" },
-+	{ &uchar_ctype,  "unsigned char" },
-+	{ & short_ctype, "short" },
-+	{ &sshort_ctype, "signed short" },
-+	{ &ushort_ctype, "unsigned short" },
-+	{ & int_ctype,   "int" },
-+	{ &sint_ctype,   "signed int" },
-+	{ &uint_ctype,   "unsigned int" },
-+	{ &slong_ctype,  "signed long" },
-+	{ & long_ctype,  "long" },
-+	{ &ulong_ctype,  "unsigned long" },
-+	{ & llong_ctype, "long long" },
-+	{ &sllong_ctype, "signed long long" },
-+	{ &ullong_ctype, "unsigned long long" },
-+
-+	{ &void_ctype,   "void" },
-+	{ &bool_ctype,   "bool" },
-+	{ &string_ctype, "string" },
-+
-+	{ &float_ctype,  "float" },
-+	{ &double_ctype, "double" },
-+	{ &ldouble_ctype,"long double" },
-+	{ &incomplete_ctype, "incomplete type" },
-+	{ &int_type, "abstract int" },
-+	{ &fp_type, "abstract fp" },
-+	{ &label_ctype, "label type" },
-+	{ &bad_ctype, "bad type" },
-+};
-+
-+const char* builtin_typename(struct symbol *sym)
-+{
-+	int i;
-+
-+	for (i = 0; i < sizeof(typenames)/sizeof(typenames[0]); i++)
-+		if (typenames[i].sym == sym)
-+			return typenames[i].name;
-+	return NULL;
-+}
-+
-+const char* builtin_ctypename(struct ctype *ctype)
-+{
-+	int i;
-+
-+	for (i = 0; i < sizeof(typenames)/sizeof(typenames[0]); i++)
-+		if (&typenames[i].sym->ctype == ctype)
-+			return typenames[i].name;
-+	return NULL;
-+}
-+
- static void do_show_type(struct symbol *sym, struct type_name *name)
+-
+ static struct token *declaration_specifiers(struct token *next, struct ctype *ctype, int qual)
  {
--	int i, modlen;
-+	int modlen;
- 	const char *mod;
--	static struct ctype_name {
--		struct symbol *sym;
--		const char *name;
--	} typenames[] = {
--		{ & char_ctype,  "char" },
--		{ &schar_ctype,  "signed char" },
--		{ &uchar_ctype,  "unsigned char" },
--		{ & short_ctype, "short" },
--		{ &sshort_ctype, "signed short" },
--		{ &ushort_ctype, "unsigned short" },
--		{ & int_ctype,   "int" },
--		{ &sint_ctype,   "signed int" },
--		{ &uint_ctype,   "unsigned int" },
--		{ &slong_ctype,  "signed long" },
--		{ & long_ctype,  "long" },
--		{ &ulong_ctype,  "unsigned long" },
--		{ & llong_ctype, "long long" },
--		{ &sllong_ctype, "signed long long" },
--		{ &ullong_ctype, "unsigned long long" },
--
--		{ &void_ctype,   "void" },
--		{ &bool_ctype,   "bool" },
--		{ &string_ctype, "string" },
--
--		{ &float_ctype,  "float" },
--		{ &double_ctype, "double" },
--		{ &ldouble_ctype,"long double" },
--		{ &incomplete_ctype, "incomplete type" },
--		{ &label_ctype, "label type" },
--		{ &bad_ctype, "bad type" },
--	};
--
-+	const char *typename;
- 	if (!sym)
- 		return;
- 
--	for (i = 0; i < sizeof(typenames)/sizeof(typenames[0]); i++) {
--		if (typenames[i].sym == sym) {
--			int len = strlen(typenames[i].name);
--			*--name->start = ' ';
--			name->start -= len;
--			memcpy(name->start, typenames[i].name, len);
--			return;
--		}
-+	if ((typename = builtin_typename(sym))) {
-+		int len = strlen(typename);
-+		*--name->start = ' ';
-+		name->start -= len;
-+		memcpy(name->start, typename, len);
-+		return;
+ 	struct token *token;
+@@ -778,7 +821,6 @@ static struct token *declaration_specifi
+ 		apply_ctype(token->pos, &thistype, ctype);
  	}
  
- 	/* Prepend */
+-	/* Turn the "virtual types" into real types with real sizes etc */
+ 	if (!ctype->base_type) {
+ 		struct symbol *base = &incomplete_ctype;
+ 
+@@ -791,28 +833,6 @@ static struct token *declaration_specifi
+ 			base = &int_type;
+ 		ctype->base_type = base;
+ 	}
+-	if (ctype->base_type == &int_type) {
+-		ctype->base_type = ctype_integer(ctype->modifiers);
+-		ctype->modifiers &= ~MOD_SPECIFIER;
+-	} else if (ctype->base_type == &fp_type) {
+-		ctype->base_type = ctype_fp(ctype->modifiers);
+-		ctype->modifiers &= ~MOD_SPECIFIER;
+-	}
+-	if (ctype->modifiers & MOD_BITWISE) {
+-		struct symbol *type;
+-		ctype->modifiers &= ~(MOD_BITWISE | MOD_SPECIFIER);
+-		if (!is_int_type(ctype->base_type)) {
+-			sparse_error(token->pos, "invalid modifier");
+-			return token;
+-		}
+-		type = alloc_symbol(token->pos, SYM_BASETYPE);
+-		*type = *ctype->base_type;
+-		type->ctype.base_type = ctype->base_type;
+-		type->type = SYM_RESTRICT;
+-		type->ctype.modifiers &= ~MOD_SPECIFIER;
+-		ctype->base_type = type;
+-		create_fouled(type);
+-	}
+ 	return token;
+ }
+ 
+@@ -947,7 +967,7 @@ static struct token *handle_bitfield(str
+ 	struct symbol *bitfield;
+ 	long long width;
+ 
+-	if (!is_int_type(ctype->base_type)) {
++	if (ctype->base_type != &int_type && !is_int_type(ctype->base_type)) {
+ 		sparse_error(token->pos, "invalid bitfield specifier for type %s.",
+ 			show_typename(ctype->base_type));
+ 		// Parse this to recover gracefully.
+@@ -968,15 +988,16 @@ static struct token *handle_bitfield(str
+ 		width = -1;
+ 	} else if (decl->ident) {
+ 		struct symbol *base_type = bitfield->ctype.base_type;
+-		int is_signed = !(base_type->ctype.modifiers & MOD_UNSIGNED);
++		struct symbol *bitfield_type = base_type == &int_type ? bitfield : base_type;
++		int is_signed = !(bitfield_type->ctype.modifiers & MOD_UNSIGNED);
+ 		if (Wone_bit_signed_bitfield && width == 1 && is_signed) {
+ 			// Valid values are either {-1;0} or {0}, depending on integer
+ 			// representation.  The latter makes for very efficient code...
+ 			sparse_error(token->pos, "dubious one-bit signed bitfield");
+ 		}
+ 		if (Wdefault_bitfield_sign &&
+-		    base_type->type != SYM_ENUM &&
+-		    !(base_type->ctype.modifiers & MOD_EXPLICITLY_SIGNED) &&
++		    bitfield_type->type != SYM_ENUM &&
++		    !(bitfield_type->ctype.modifiers & MOD_EXPLICITLY_SIGNED) &&
+ 		    is_signed) {
+ 			// The sign of bitfields is unspecified by default.
+ 			sparse_error(token->pos, "dubious bitfield without explicit `signed' or `unsigned'");
+@@ -1001,6 +1022,7 @@ static struct token *declaration_list(st
+ 			token = handle_bitfield(token, decl);
+ 			token = handle_attributes(token, &decl->ctype);
+ 		}
++		apply_modifiers(token->pos, &decl->ctype);
+ 		add_symbol(list, decl);
+ 		if (!match_op(token, ','))
+ 			break;
+@@ -1034,6 +1056,7 @@ static struct token *parameter_declarati
+ 	*tree = sym;
+ 	token = declarator(token, sym, &ident);
+ 	sym->ident = ident;
++	apply_modifiers(token->pos, &sym->ctype);
+ 	return token;
+ }
+ 
+@@ -1042,7 +1065,9 @@ struct token *typename(struct token *tok
+ 	struct symbol *sym = alloc_symbol(token->pos, SYM_NODE);
+ 	*p = sym;
+ 	token = declaration_specifiers(token, &sym->ctype, 0);
+-	return declarator(token, sym, NULL);
++	token = declarator(token, sym, NULL);
++	apply_modifiers(token->pos, &sym->ctype);
++	return token;
+ }
+ 
+ static struct token *expression_statement(struct token *token, struct expression **tree)
+@@ -1770,6 +1795,7 @@ struct token *external_declaration(struc
+ 	decl = alloc_symbol(token->pos, SYM_NODE);
+ 	decl->ctype = ctype;
+ 	token = declarator(token, decl, &ident);
++	apply_modifiers(token->pos, &decl->ctype);
+ 
+ 	/* Just a type declaration? */
+ 	if (!ident)
+@@ -1830,6 +1856,7 @@ struct token *external_declaration(struc
+ 		decl->ctype = ctype;
+ 		token = declaration_specifiers(token, &decl->ctype, 1);
+ 		token = declarator(token, decl, &ident);
++		apply_modifiers(token->pos, &decl->ctype);
+ 		if (!ident) {
+ 			sparse_error(token->pos, "expected identifier name in type definition");
+ 			return token;
