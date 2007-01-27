@@ -1,40 +1,44 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 10] Marking anonymous string.
-Date: Sat, 27 Jan 2007 01:32:05 -0800
-Message-ID: <45BB1C15.9060509@freedesktop.org>
-References: <20070117024545.GK962@chrisli.org>
+Subject: Re: [PATCH] Fix mistaken comparison that becomes a no-op.
+Date: Sat, 27 Jan 2007 01:39:50 -0800
+Message-ID: <45BB1DE6.5060706@freedesktop.org>
+References: <20061218204435.GA8251@jameswestby.net>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig50463CD71B9AAD9F7255C1AA"
+ boundary="------------enigAEAD2C143C0C43ABB41AEFAE"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:51458 "EHLO
-	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752224AbXA0JcI (ORCPT
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:33445 "EHLO
+	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752241AbXA0Jjx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Jan 2007 04:32:08 -0500
-In-Reply-To: <20070117024545.GK962@chrisli.org>
+	Sat, 27 Jan 2007 04:39:53 -0500
+Received: from dsl093-040-092.pdx1.dsl.speakeasy.net (HELO [192.168.0.121]) (josh@[66.93.40.92])
+          (envelope-sender <josh@freedesktop.org>)
+          by mail7.sea5.speakeasy.net (qmail-ldap-1.03) with AES256-SHA encrypted SMTP
+          for <linux-sparse@vger.kernel.org>; 27 Jan 2007 09:39:52 -0000
+In-Reply-To: <20061218204435.GA8251@jameswestby.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig50463CD71B9AAD9F7255C1AA
+--------------enigAEAD2C143C0C43ABB41AEFAE
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Christopher Li wrote:
-> The back end need to generate some storage for anonymous string.=20
-> This simplify testing of anonymous string.
+James Westby wrote:
+> Fix a mistake in same_cast_type where the second test became a no-op as=
+ it
+> compared a value to itself, rather than to the second operand.
 
-Applied; thanks.
+Applied; good catch!
 
 - Josh Triplett
 
 
 
---------------enig50463CD71B9AAD9F7255C1AA
+--------------enigAEAD2C143C0C43ABB41AEFAE
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -43,9 +47,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFFuxwVGJuZRtD+evsRAqE5AJ4uVkVWv6cpdoBIoWU2NGPwH9gACgCggw5y
-aCIJl4oER4IwygaeA98Bxi4=
-=JZrz
+iD8DBQFFux3mGJuZRtD+evsRAuC6AKCktte4aaX2lmxfOD1YFrLQLcaxygCfUB+3
+LDOId98F5lCTIafiks/tWMg=
+=T2xE
 -----END PGP SIGNATURE-----
 
---------------enig50463CD71B9AAD9F7255C1AA--
+--------------enigAEAD2C143C0C43ABB41AEFAE--
