@@ -1,34 +1,50 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [PATCH](take II) Sparse fooled by double semicolon
-Date: Wed, 31 Jan 2007 02:46:38 -0500
-Message-ID: <1170229598.11455.104.camel@dv>
-References: <1170219027.11455.68.camel@dv>
-	 <20070131065838.GA23326@chrisli.org>  <20070131071717.GA23495@chrisli.org>
+From: "Mitesh Shah" <mshah@teja.com>
+Subject: attributes are not stored at right location for array variables
+Date: Wed, 31 Jan 2007 08:57:55 -0800
+Message-ID: <AKEOJDDJLNPHDAKOMMBHGEPKCPAA.mshah@teja.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+	charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:34778 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750889AbXAaHql (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 31 Jan 2007 02:46:41 -0500
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HCAA0-0007lk-SQ
-	for linux-sparse@vger.kernel.org; Wed, 31 Jan 2007 02:45:41 -0500
-In-Reply-To: <20070131071717.GA23495@chrisli.org>
+Received: from mail.teja.com ([209.10.202.133]:33147 "EHLO mail.teja.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932950AbXAaQ5h (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 31 Jan 2007 11:57:37 -0500
+Received: from SURAT ([70.231.247.214])
+	(authenticated user mshah@teja.com)
+	by mail.teja.com (Kerio MailServer 6.1.4)
+	for linux-sparse@vger.kernel.org;
+	Wed, 31 Jan 2007 08:59:17 -0800
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, 2007-01-30 at 23:17 -0800, Christopher Li wrote:
-> Actually, this version is better because it handle semicolon
-> as the first member as well.
 
-That's working too.
+It seems that the attributes are not stored with the variable ctype when the variable is an array. For declaration such as,
 
--- 
-Regards,
-Pavel Roskin
+char c[100] __attribute__((aligned(64)));
+
+The attribute is stored with the array ctype instead of the variable C ctype.
+
+In function direct_declarator in parse.c at line 920 the ctype gets replaced with the array ctype and in the next iteration it is
+passed to handle_attributes. handle_attributes should be passed the original ctype so here is the patch.
+
+Thanks,
+
+-Mitesh
+
+-------------------------------------------------------
+
+index 5077ee6..306b144 100644
+--- a/parse.c
++++ b/parse.c
+@@ -881,7 +881,7 @@ static struct token *direct_declarator(struct token *token, struct symbol *decl,
+        }
+
+        for (;;) {
+-               token = handle_attributes(token, ctype);
++               token = handle_attributes(token, &decl->ctype);
+
+                if (token_type(token) != TOKEN_SPECIAL)
+                        return token;
