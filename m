@@ -1,91 +1,69 @@
-From: "Mitesh Shah" <mshah@teja.com>
-Subject: RE: attributes are not stored at right location for array variables
-Date: Wed, 31 Jan 2007 14:33:28 -0800
-Message-ID: <AKEOJDDJLNPHDAKOMMBHAEAIDAAA.mshah@teja.com>
-References: <70318cbf0701311153k126d4aeam5f68f1c519d3a7af@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: sparse 0.2 - incomprehensible context warnings
+Date: Wed, 31 Jan 2007 15:06:23 -0800
+Message-ID: <20070131230623.GA28548@chrisli.org>
+References: <20061205220710.GA12614@p15091797.pureserver.info>
 Mime-Version: 1.0
-Content-Type: text/plain;
-	charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.teja.com ([209.10.202.133]:34880 "EHLO mail.teja.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751614AbXAaWdJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 31 Jan 2007 17:33:09 -0500
-In-Reply-To: <70318cbf0701311153k126d4aeam5f68f1c519d3a7af@mail.gmail.com>
+Received: from sccrmhc15.comcast.net ([63.240.77.85]:53167 "EHLO
+	sccrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1161080AbXAaXcx (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 31 Jan 2007 18:32:53 -0500
+Content-Disposition: inline
+In-Reply-To: <20061205220710.GA12614@p15091797.pureserver.info>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Chris Li <christ.li@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Ulrich Kunitz <kune@deine-taler.de>
+Cc: linux-sparse@vger.kernel.org
 
+It has been a while. I find out why during this happen during
+I debugging my other interrupt checker.
 
-Yes, there are attributes that can be applied to types so I do not want to change that.
+_spin_unlock_irq() is a macro which will expand to __raw_spin_unlock(),
+which inline into a function. But _spin_lock_irq is an external function
+which does not inline.
 
-The problem I am seeing is only with array variables and if you see the function direct_delcalartor, when it starts processing array
-variables, the ctye gets reassigned with the type of the variables instead of the ctype of the variable itself and in the next
-iteration the attribute will be applied to the ctype of the type of the variable.
+So sparse only sees the unlock, it can't see the locking.
 
-May be a patch specific to array variable will solve the problem.
+Chris
 
-Thanks,
-
--Mitesh
-
-
-
-> -----Original Message-----
-> From: Chris Li [mailto:christ.li@gmail.com]
-> Sent: Wednesday, January 31, 2007 11:54 AM
-> To: Mitesh Shah
-> Cc: Linux-Sparse
-> Subject: Re: attributes are not stored at right location for array
-> variables
->
->
-> Your patch assumes every attribute apply to node instead of type.
-> Is there any attribute need to apply to type instead?
->
-> For your change, apply_modifiers() need to change where it take the
-> __mode__ attribute as well.
->
-> Chris
->
->
-> On 1/31/07, Mitesh Shah <mshah@teja.com> wrote:
-> >
-> > It seems that the attributes are not stored with the variable ctype when the variable is an array. For declaration such as,
-> >
-> > char c[100] __attribute__((aligned(64)));
-> >
-> > The attribute is stored with the array ctype instead of the variable C ctype.
-> >
-> > In function direct_declarator in parse.c at line 920 the ctype gets replaced with the array ctype and in the next
-> iteration it is
-> > passed to handle_attributes. handle_attributes should be passed the original ctype so here is the patch.
-> >
-> > Thanks,
-> >
-> > -Mitesh
-> >
-> > -------------------------------------------------------
-> >
-> > index 5077ee6..306b144 100644
-> > --- a/parse.c
-> > +++ b/parse.c
-> > @@ -881,7 +881,7 @@ static struct token *direct_declarator(struct token *token, struct symbol *decl,
-> >         }
-> >
-> >         for (;;) {
-> > -               token = handle_attributes(token, ctype);
-> > +               token = handle_attributes(token, &decl->ctype);
-> >
-> >                 if (token_type(token) != TOKEN_SPECIAL)
-> >                         return token;
-> >
-> >
-> > -
-> > To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >
->
+On Tue, Dec 05, 2006 at 11:07:10PM +0100, Ulrich Kunitz wrote:
+> Hi,
+> 
+> I have tried sparse 0.2 for the zd1211rw WLAN driver, which I
+> happen to contribute too.
+> 
+> I get numerous context imbalance warnings, that I don't
+> understand. This is on an SMP (x86-64) build of a vanilla 2.6.19.
+> I get the same warning on an SMP build of PPC32.
+> 
+> A simple example is:
+> 
+> /home/kunitz/zd1211/rw/zd_usb.c:1167:13: warning: context imbalance in 'disable_read_regs_int' - wrong count at exit
+> 
+> zd_usb.c
+> 1167 static void disable_read_regs_int(struct zd_usb *usb)
+> 1168 {
+> 1169         struct zd_usb_interrupt *intr = &usb->intr;
+> 1170
+> 1171         spin_lock_irq(&intr->lock);
+> 1172         intr->read_regs_enabled = 0;
+> 1173         spin_unlock_irq(&intr->lock);
+> 1174 }
+> 
+> Please set me on CC of the answer I'm not a regular reader of this
+> list.
+> 
+> You will find the driver source in the kernel itself. I tested it
+> however against my latest git tree, which is available from
+> 
+> git-clone http://deine-taler.de/zd1211/zd1211.git
+> 
+> -- 
+> Uli Kunitz
+> -
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
