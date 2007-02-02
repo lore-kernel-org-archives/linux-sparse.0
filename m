@@ -1,42 +1,51 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Feature request - suppress warnings for system libraries
-Date: Fri, 02 Feb 2007 12:43:03 -0500
-Message-ID: <1170438183.2272.29.camel@dv>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Feature request - allow boolean operations of undefined cpp
+ symbols
+Date: Fri, 2 Feb 2007 10:25:12 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0702021021570.15057@woody.linux-foundation.org>
+References: <1170437836.2272.22.camel@dv>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:39532 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1945998AbXBBRnE (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 2 Feb 2007 12:43:04 -0500
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HD2QD-0006ER-7D
-	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:42:01 -0500
-Received: from proski by gnu.org with local (Exim 4.63)
-	(envelope-from <proski@gnu.org>)
-	id 1HD2RD-00019A-DR
-	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:43:03 -0500
+Received: from smtp.osdl.org ([65.172.181.24]:33994 "EHLO smtp.osdl.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1946016AbXBBSZ2 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 2 Feb 2007 13:25:28 -0500
+In-Reply-To: <1170437836.2272.22.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
 
-It would be great if sparse could optionally suppress warnings about
-system headers included using from implicit locations, such as
-"usr/include", "/usr/local/include" and GCC_INTERNAL_INCLUDE (see
-pre-process.c).
 
-Perhaps some major warnings could be left if they can indicate that
-sparse may have failed to parse the header properly.  But the petty
-stuff should be suppressed.
+On Fri, 2 Feb 2007, Pavel Roskin wrote:
+> 
+> I think sparse should distinguish between safe and unsafe preprocessor
+> operations on undefined symbols.
 
-This would greatly help make sparse useful for code other than Linux
-kernel.
+It does.
 
--- 
-Regards,
-Pavel Roskin
+Try this:
+
+	#define NECESSARY 1
+
+	#if NECESSARY || UNNECESSARY
+	#endif
+
+and notice how sparse does NOT warn about UNNECESSARY not being defined. 
+Because it doesn't matter.
+
+> For instance, "#if SYMBOL" has a very specific meaning
+
+No.
+
+	#if SYMBOL
+
+has a very specific *problem* - it very possibly is a typo.
+
+So this is a warning I absolutely *want* for the kernel. If some other 
+projects don't want it, fine, but it should be on by default as a warnign 
+for potentially dangerous use of preprocessor symbols.
+
+		Linus
