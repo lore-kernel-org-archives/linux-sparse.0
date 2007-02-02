@@ -1,53 +1,41 @@
 From: Pavel Roskin <proski@gnu.org>
-Subject: Feature request - allow boolean operations of undefined cpp symbols
-Date: Fri, 02 Feb 2007 12:37:16 -0500
-Message-ID: <1170437836.2272.22.camel@dv>
+Subject: Feature request - suppress warnings for system libraries
+Date: Fri, 02 Feb 2007 12:43:03 -0500
+Message-ID: <1170438183.2272.29.camel@dv>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:60725 "EHLO
+Received: from fencepost.gnu.org ([199.232.76.164]:39532 "EHLO
 	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1945993AbXBBRhT (ORCPT
+	with ESMTP id S1945998AbXBBRnE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 2 Feb 2007 12:37:19 -0500
+	Fri, 2 Feb 2007 12:43:04 -0500
 Received: from proski by fencepost.gnu.org with local (Exim 4.60)
 	(envelope-from <proski@gnu.org>)
-	id 1HD2Kd-000682-4l
-	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:36:15 -0500
+	id 1HD2QD-0006ER-7D
+	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:42:01 -0500
 Received: from proski by gnu.org with local (Exim 4.63)
 	(envelope-from <proski@gnu.org>)
-	id 1HD2Ld-00018t-12
-	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:37:17 -0500
+	id 1HD2RD-00019A-DR
+	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 12:43:03 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 Hello!
 
-I think sparse should distinguish between safe and unsafe preprocessor
-operations on undefined symbols.
+It would be great if sparse could optionally suppress warnings about
+system headers included using from implicit locations, such as
+"usr/include", "/usr/local/include" and GCC_INTERNAL_INCLUDE (see
+pre-process.c).
 
-For instance, "#if SYMBOL" has a very specific meaning, namely in
-enables the subsequent code is SYMBOL is defined and not equal 0.
-Implementing this in a "sparse friendly way" would be "#if
-defined(SYMBOL) && SYMBOL", which is longer and more prone to errors
-(the same symbol is used once, and nobody will warn in the first
-instance is mistyped).
+Perhaps some major warnings could be left if they can indicate that
+sparse may have failed to parse the header properly.  But the petty
+stuff should be suppressed.
 
-Some projects use configuration files with entries like "#define FEATURE
-1".  Some users will replace "1" with "0", some users will comment it
-out.  Supporting both requires "#if FEATURE", as opposed to "#ifdef
-FEATURE", or somebody will be bitterly surprised that his or her edits
-had no effect.
-
-On the other hand, "#if FOO > BAR" is highly suspicious if FOO is
-undefined.  Maybe sparse could allow boolean (and only boolean)
-operations on undefined cpp symbols?
-
-Unlike Linux kernel, the cases of "#if SYMBOL" with undefined SYMBOL
-exist in glibc and other system libraries.  Relaxing sparse check would
-make sparse more useful for checking other software.
+This would greatly help make sparse useful for code other than Linux
+kernel.
 
 -- 
 Regards,
