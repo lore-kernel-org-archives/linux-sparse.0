@@ -1,50 +1,44 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: Feature request - allow boolean operations of undefined cpp
-	symbols
-Date: Fri, 02 Feb 2007 17:58:30 -0500
-Message-ID: <1170457110.4698.18.camel@dv>
-References: <1170437836.2272.22.camel@dv>
-	 <Pine.LNX.4.64.0702021021570.15057@woody.linux-foundation.org>
-	 <20070202215603.GA27667@chrisli.org> <1170455437.4698.2.camel@dv>
-	 <20070202221009.GC27667@chrisli.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Feature request - suppress warnings for system libraries
+Date: Fri, 2 Feb 2007 14:31:55 -0800
+Message-ID: <20070202223155.GD27667@chrisli.org>
+References: <1170438183.2272.29.camel@dv> <20070202220148.GB27667@chrisli.org> <1170455865.4698.8.camel@dv>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:60557 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946121AbXBBW6d (ORCPT
+Received: from rwcrmhc13.comcast.net ([204.127.192.83]:36069 "EHLO
+	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946123AbXBBW6v (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 2 Feb 2007 17:58:33 -0500
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HD7LV-0004fm-Tu
-	for linux-sparse@vger.kernel.org; Fri, 02 Feb 2007 17:57:30 -0500
-In-Reply-To: <20070202221009.GC27667@chrisli.org>
+	Fri, 2 Feb 2007 17:58:51 -0500
+Content-Disposition: inline
+In-Reply-To: <1170455865.4698.8.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2007-02-02 at 14:10 -0800, Christopher Li wrote:
-> On Fri, Feb 02, 2007 at 05:30:37PM -0500, Pavel Roskin wrote:
-> > 
-> > You need -Wundef or -Wall to check for undefined preprocessor symbols.
-> > 
-> > $ sparse -Wundef test.c 
-> > test.c:1:5: warning: undefined preprocessor identifier
-> > 'SYMBOL_NOT_DEFINED'
-> > test.c:4:2: warning: "not defined"
+On Fri, Feb 02, 2007 at 05:37:45PM -0500, Pavel Roskin wrote:
 > 
-> Ha, I see. So do you still want some thing more than -Wno-undef?
+> /usr/include/sys/socket.h:88:62: error: attribute
+> '__transparent_union__': ignoring attribute __transparent_union__
+> /usr/include/sys/socket.h:92:68: error: attribute
+> '__transparent_union__': ignoring attribute __transparent_union__
+> /usr/include/netdb.h:661:60: error: typename in expression
+> /usr/include/stdlib.h:72:56: error: attribute '__transparent_union__':
+> ignoring attribute __transparent_union__
 
-My intention was that we always allow boolean operations of undefined
-cpp symbols, regardless of the flags.
+I see, that is because sparse does not handle attribute
+__transparent_union__ yet. We should improve sparse instead of paper
+cover the error message.
 
-Since Linus wants the existing strictness of -Wundef for the kernel, and
-the kernel is sparse's "number one customer", I'll need to think of
-something better to accommodate both the kernel and the userspace.
+> /usr/include/regex.h:543:27: error: typename in expression
 
--- 
-Regards,
-Pavel Roskin
+Similar here, that is because gcc has this key word "restrict"
+inside bracket. Sparse know nothing about "restrict".
+
+> I'm not going to fix socket.h.  I'm checking my code, not glibc.
+
+Again, we should fix sparse instead.
+
+Chris
