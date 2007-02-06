@@ -1,37 +1,37 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Pavel Roskin <proski@gnu.org>
 Subject: Re: [PATCH] Re: error, types differ in signedness
-Date: Mon, 5 Feb 2007 16:16:22 -0800
-Message-ID: <20070206001622.GB14964@chrisli.org>
-References: <20070205105420.6f19a57d.rdunlap@xenotime.net> <20070205200617.GA14964@chrisli.org> <1170714431.1453.10.camel@dv>
+Date: Mon, 05 Feb 2007 20:12:55 -0500
+Message-ID: <20070205201255.j8kk0w80gsggo4oo@webmail.spamcop.net>
+References: <20070205105420.6f19a57d.rdunlap@xenotime.net>
+	<20070205200617.GA14964@chrisli.org> <1170714431.1453.10.camel@dv>
+	<20070206001622.GB14964@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc13.comcast.net ([216.148.227.153]:53990 "EHLO
-	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S965393AbXBFAoD (ORCPT
+Received: from mailgate.cesmail.net ([216.154.195.36]:39290 "HELO
+	mailgate.cesmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S965431AbXBFBTg (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 5 Feb 2007 19:44:03 -0500
+	Mon, 5 Feb 2007 20:19:36 -0500
+In-Reply-To: <20070206001622.GB14964@chrisli.org>
 Content-Disposition: inline
-In-Reply-To: <1170714431.1453.10.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Randy Dunlap <rdunlap@xenotime.net>, linux-sparse@vger.kernel.org
 
-On Mon, Feb 05, 2007 at 05:27:11PM -0500, Pavel Roskin wrote:
-> I think any difference between declarations other than missing argument
-> names is an example of sloppy coding and should be avoided.
+Quoting Christopher Li <sparse@chrisli.org>:
 
-The original warning about pointer signedness difference is simply wrong.
+> > I would prefer that sparse emits a specific warning about function vs
+> > function pointer mismatch.  Even if it doesn't matter, it makes the code
+> > easier to read and safer to modify.
+>
+> I did not find a easy way to do it yet.
 
-There might be value to have warning about function vs function pointer. 
-On the other hand, some attribute can be only specified in function prototype
-declares but not the function body.
+I see.  I thought it was easy.  Then your patch is fine for me.  It's better to
+have no warning than a misleading warning about a stylistic issue.
 
-> I would prefer that sparse emits a specific warning about function vs
-> function pointer mismatch.  Even if it doesn't matter, it makes the code
-> easier to read and safer to modify.
-
-I did not find a easy way to do it yet.
-
-Chris
+--
+Regards,
+Pavel Roskin
