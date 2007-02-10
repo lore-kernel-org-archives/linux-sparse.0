@@ -1,114 +1,44 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 7] Adding the interrupt checker
-Date: Fri, 9 Feb 2007 16:26:04 -0800
-Message-ID: <20070210002604.GA20748@chrisli.org>
+Subject: [PATCH 8] Adding spinlock checker
+Date: Fri, 9 Feb 2007 16:28:58 -0800
+Message-ID: <20070210002858.GF20644@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc14.comcast.net ([204.127.200.84]:51647 "EHLO
-	sccrmhc14.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946812AbXBJAyl (ORCPT
+Received: from alnrmhc15.comcast.net ([206.18.177.55]:63981 "EHLO
+	alnrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946812AbXBJA5f (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 9 Feb 2007 19:54:41 -0500
+	Fri, 9 Feb 2007 19:57:35 -0500
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Josh Triplett <josh@freedesktop.org>
 
-Changelog:
- - Using the new inline function calling annotation to find
-   out the irq related call. It now works both inline and
-   external functions. Bonus is no more x86 asm any more.
- - The noise level of interrupt check drop considerably.
-   I think it is less nosier than the context checking.
+The spinlock checker is aim to replace the current sparse
+spinlock context checking.
 
-Signed-off-by: Christopher Li<sparse@chrisli.org>
+Current all the spinlock operation inside a function apply
+to one checking state, because I have not good way to identify
+the locking storage.  e.g.
 
-Index: sparse/lib.c
+spin_lock(current->xxx_lock);
+/* do some thing */
+spin_unlock(current->xxx_lock);
+
+Unless we know current is a constant function here, we don't know
+unlocking is using the same lock storage as locking.
+
+Other than that, the spinlock checker is generating less warning than
+the context checking because it known the non-inlined spinlock function
+as well.
+
+Index: sparse/check-spinlock.c
 ===================================================================
---- sparse.orig/lib.c	2007-02-09 14:14:33.000000000 -0800
-+++ sparse/lib.c	2007-02-09 14:15:08.000000000 -0800
-@@ -191,6 +191,7 @@ int Wenum_mismatch = 1;
- int Wdo_while = 1;
- int Wuninitialized = 1;
- int Wmalloc = 1;
-+int Winterrupt = 1;
- 
- int dbg_entry = 0;
- int dbg_dead = 0;
-@@ -341,6 +342,7 @@ static const struct warning {
- 	{ "do-while", &Wdo_while },
- 	{ "uninitialized", &Wuninitialized },
- 	{ "malloc", &Wmalloc},
-+	{ "interrupt", &Winterrupt},
- };
- 
- enum {
-Index: sparse/Makefile
-===================================================================
---- sparse.orig/Makefile	2007-02-09 14:14:33.000000000 -0800
-+++ sparse/Makefile	2007-02-09 14:15:08.000000000 -0800
-@@ -34,7 +34,7 @@ LIB_OBJS= target.o parse.o tokenize.o pr
- 	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
- 	  sort.o allocate.o compat-$(OS).o ptrlist.o \
- 	  flow.o cse.o simplify.o memops.o liveness.o storage.o unssa.o dissect.o \
--	  blobhash.o check-nullptr.o
-+	  blobhash.o check-nullptr.o check-interrupt.o
- 
- LIB_FILE= libsparse.a
- SLIB_FILE= libsparse.so
-@@ -139,6 +139,7 @@ dissect.o: $(LIB_H)
- graph.o: $(LIB_H)
- blobstate.o: $(LIB_H)
- check-nullptr.o: $(LIB_H)
-+check-interrupt.o: $(LIB_H)
- 
- compat-linux.o: compat/strtold.c compat/mmap-blob.c \
- 	$(LIB_H)
-Index: sparse/checker.h
-===================================================================
---- sparse.orig/checker.h	2007-02-09 14:14:53.000000000 -0800
-+++ sparse/checker.h	2007-02-09 14:15:27.000000000 -0800
-@@ -137,6 +137,8 @@ static inline int match_call_function(st
- 
- extern void check_null_ptr_init(void);
- extern void check_null_ptr(struct entrypoint *ep);
-+extern void check_interrupt(struct entrypoint *ep);
-+extern void check_interrupt_init(void);
- 
- #endif
- 
-Index: sparse/lib.h
-===================================================================
---- sparse.orig/lib.h	2007-02-09 14:14:33.000000000 -0800
-+++ sparse/lib.h	2007-02-09 14:15:08.000000000 -0800
-@@ -97,6 +97,7 @@ extern int Wcast_truncate;
- extern int Wdo_while;
- extern int Wuninitialized;
- extern int Wmalloc;
-+extern int Winterrupt;
- 
- extern int dbg_entry;
- extern int dbg_dead;
-Index: sparse/sparse.c
-===================================================================
---- sparse.orig/sparse.c	2007-02-09 14:14:33.000000000 -0800
-+++ sparse/sparse.c	2007-02-09 14:15:08.000000000 -0800
-@@ -273,6 +273,8 @@ static void check_symbols(struct symbol_
- 			check_context(ep);
- 			if (Wmalloc)
- 				check_null_ptr(ep);
-+			if (Winterrupt)
-+				check_interrupt(ep);
- 		}
- 	} END_FOR_EACH_PTR(sym);
- }
-Index: sparse/check-interrupt.c
-===================================================================
---- sparse.orig/check-interrupt.c	2007-02-09 14:15:08.000000000 -0800
-+++ sparse/check-interrupt.c	2007-02-09 14:15:08.000000000 -0800
-@@ -0,0 +1,210 @@
+--- sparse.orig/check-spinlock.c	2007-02-09 14:13:45.000000000 -0800
++++ sparse/check-spinlock.c	2007-02-09 14:13:45.000000000 -0800
+@@ -0,0 +1,233 @@
 +/*
 + * Copyright (C) 2006 Christopher Li <sparse@chrisli.org>
 + *
@@ -129,51 +59,64 @@ Index: sparse/check-interrupt.c
 +#include "checker.h"
 +
 +
-+static unsigned char current;
++/*
++ * There is no good way to identify which the locking variable for
++ * pairing unlock yet.
++ * 	e.g. current->xxx_lock is a function call.
++ * The current spinlock checker just mix all the spinlock operation
++ * into one spinlock level state.
++ */
++
++static int state_count = 0;
++
++static struct blob *current;
 +static struct blob *hashed_state;
 +static struct state_list *state_stack = NULL;
-+static struct ptr_list *irq_enable_list;
-+static struct ptr_list *irq_disable_list;
-+static struct ptr_list *irq_restore_list;
++static struct ptr_list *spin_lock_list;
++static struct ptr_list *spin_unlock_list;
 +
 +enum {
-+	OP_IRQ_ENABLE = OP_LAST,
-+	OP_IRQ_DISABLE,
-+	OP_IRQ_RESTORE,
++	OP_LOCK = OP_LAST,
++	OP_UNLOCK,
 +};
 +
 +enum {
-+	INTR_ENABLE,
-+	INTR_DISABLE,
++	SPIN_UNLOCKED,
++	SPIN_LOCKED,
 +};
 +
-+static inline void execute_enable(struct instruction *insn)
++#define alloc_state() alloc_blob(state_count)
++#define reg_state(pseudo) ((current)->data[0 /*pseudo->state_index */])
++
++
++static inline void execute_lock(struct instruction *insn)
 +{
-+	if (current == INTR_ENABLE) {
-+		warning(insn->pos, "checker function %s double enable",
-+			show_ident(insn->bb->ep->name->ident));
-+		return;
-+	}
-+	new_state(&state_stack, &current, INTR_ENABLE); 
++	char level = reg_state(insn->src) + 1;
++	new_state(&state_stack, &reg_state(insn->src), level); 
 +	hashed_state = NULL;
 +}
 +
-+static inline void execute_disable(struct instruction *insn)
++static inline void execute_unlock(struct instruction *insn)
 +{
-+	if (current == INTR_DISABLE) {
-+		warning(insn->pos, "checker function %s double enable",
++	char level = reg_state(insn->src);
++	if (!level) {
++		warning(insn->pos, "checker-spinlock function %s unlock level below zero\n",
 +			show_ident(insn->bb->ep->name->ident));
 +		return;
 +	}
-+	new_state(&state_stack, &current, INTR_DISABLE); 
++	level--;
++	new_state(&state_stack, &reg_state(insn->src), level); 
 +	hashed_state = NULL;
 +}
 +
 +static inline void execute_ret(struct instruction *insn)
 +{
-+	if (current == INTR_DISABLE)
-+		warning(insn->pos, "checker function %s exit with interrupt disabled",
++	char level = current->data[0];
++
++	if (level) {
++		warning(insn->pos, "checker-spinlock function %s exit with locking",
 +			show_ident(insn->bb->ep->name->ident));
++	}
 +}
 +
 +static void check_bb(struct basic_block *bb)
@@ -187,7 +130,7 @@ Index: sparse/check-interrupt.c
 +		return;
 +
 +	if (!hashed_state)
-+		hashed_state = create_hashed_blob(&current, 1);
++		hashed_state = create_hashed_blob(current->data, state_count);
 +
 +	/*
 +	 * Try to find out if we execute the same state before. If the state is
@@ -202,12 +145,11 @@ Index: sparse/check-interrupt.c
 +
 +	FOR_EACH_PTR(bbs->insns, insn) {
 +		switch (insn->opcode) {
-+		case OP_IRQ_DISABLE:
-+			execute_disable(insn);
++		case OP_LOCK:
++			execute_lock(insn);
 +			break;
-+		case OP_IRQ_ENABLE:
-+		case OP_IRQ_RESTORE:
-+			execute_enable(insn);
++		case OP_UNLOCK:
++			execute_unlock(insn);
 +			break;
 +		case OP_RET:
 +			execute_ret(insn);
@@ -231,23 +173,39 @@ Index: sparse/check-interrupt.c
 +	bbs->generation = 0;
 +}
 +
++static inline pseudo_t spinlock_argument(struct pseudo_list *args)
++{
++	pseudo_t pseudo = first_pseudo(args);
++	if (pseudo && !pseudo->tracking) {
++		pseudo->tracking = 1;
++		pseudo->state_index = state_count++;
++	}
++	return pseudo;
++}
++
 +static inline void scan_call_instruction(struct bb_state *bbs, struct instruction *insn)
 +{
 +	pseudo_t fn = insn->func;
 +	struct ident *name;
++	int op = OP_BADOP;
++	pseudo_t pseudo;
 +
 +	if (fn->type != PSEUDO_SYM)
 +		return;
 + 	name = fn->sym->ident;
-+	if (find_ptr_in_list(irq_enable_list, name))
-+		add_instruction(&bbs->insns, checker_instruction(insn, OP_IRQ_ENABLE, NULL));
-+	else if (find_ptr_in_list(irq_disable_list, name))
-+		add_instruction(&bbs->insns, checker_instruction(insn, OP_IRQ_DISABLE, NULL));
-+	else if (find_ptr_in_list(irq_restore_list, name))
-+		add_instruction(&bbs->insns, checker_instruction(insn, OP_IRQ_RESTORE, NULL));
++	if (find_ptr_in_list(spin_lock_list, name))
++		op = OP_LOCK;
++	else if (find_ptr_in_list(spin_unlock_list, name))
++		op = OP_UNLOCK;
++	else
++		return;
++	pseudo = spinlock_argument(insn->arguments);
++	if (!pseudo)
++		return;
++	add_instruction(&bbs->insns, checker_instruction(insn, op, pseudo));
 +}
 +
-+static inline void scan_interrupt_insn(struct entrypoint *ep)
++static inline void scan_spinlock_insn(struct entrypoint *ep)
 +{
 +	struct basic_block *bb;
 +	struct instruction *insn;
@@ -271,18 +229,20 @@ Index: sparse/check-interrupt.c
 +	} END_FOR_EACH_PTR(bb);
 +}
 +
-+void check_interrupt_init(void)
++void check_spinlock_init(void)
 +{
-+	static const char *enable[] = {
-+		"raw_local_irq_enable",
-+		"raw_safe_halt",
-+		"_spin_unlock_irq",
-+		"_read_unlock_irq",
-+		"_write_unlock_irq",
-+		"schedule",		// XXX: is it always true?
++	static const char *unlock[] = {
++		"_spin_unlock",
++		"__raw_spin_unlock",
++		"__raw_read_unlock",
++		"__raw_write_unlock",
++		"_spin_unlock_irqrestore",
++		"_read_unlock_irqrestore",
++		"_write_unlock_irqrestore",
 +	};
-+	static const char *disable[] = {
-+		"raw_local_irq_disable",
++	static const char *lock[] = {
++		"__raw_spin_lock",
++		"_spin_lock",
 +		"_spin_lock_irq",
 +		"task_rq_lock",
 +		"_spin_lock_irqsave",
@@ -290,32 +250,106 @@ Index: sparse/check-interrupt.c
 +		"_read_lock_irqsave",
 +		"_write_lock_irq",
 +		"_write_lock_irqsave",
-+		"lock_timer_base",
-+		"lock_timer",
-+	};
-+	static const char *restore[] = {
-+		"raw_local_irq_restore",
-+		"_spin_unlock_irqrestore",
-+		"_read_unlock_irqrestore",
-+		"_write_unlock_irqrestore",
 +	};
 +	
-+	irq_enable_list = build_ident_list(enable);
-+	irq_disable_list = build_ident_list(disable);
-+	irq_restore_list = build_ident_list(restore);
++	spin_lock_list = build_ident_list(lock);
++	spin_unlock_list = build_ident_list(unlock);
 +}
 +
-+void check_interrupt(struct entrypoint *ep)
++void check_spinlock(struct entrypoint *ep)
 +{
 +	struct basic_block *bb;
++
++	state_count = 0;
 +
 +	FOR_EACH_PTR(ep->bbs, bb) {
 +		bb->state = alloc_bb_state();
 +	} END_FOR_EACH_PTR(bb);
 +
-+	current = INTR_ENABLE;
 +	hashed_state = NULL;
-+	scan_interrupt_insn(ep);
++	scan_spinlock_insn(ep);
++	current = alloc_state();
 +	check_bb(ep->entry->bb);
 +}
 +
+Index: sparse/lib.c
+===================================================================
+--- sparse.orig/lib.c	2007-02-09 14:13:37.000000000 -0800
++++ sparse/lib.c	2007-02-09 14:13:45.000000000 -0800
+@@ -192,6 +192,7 @@ int Wdo_while = 1;
+ int Wuninitialized = 1;
+ int Wmalloc = 1;
+ int Winterrupt = 1;
++int Wspinlock = 1;
+ 
+ int dbg_entry = 0;
+ int dbg_dead = 0;
+Index: sparse/Makefile
+===================================================================
+--- sparse.orig/Makefile	2007-02-09 14:13:37.000000000 -0800
++++ sparse/Makefile	2007-02-09 14:13:45.000000000 -0800
+@@ -34,7 +34,7 @@ LIB_OBJS= target.o parse.o tokenize.o pr
+ 	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
+ 	  sort.o allocate.o compat-$(OS).o ptrlist.o \
+ 	  flow.o cse.o simplify.o memops.o liveness.o storage.o unssa.o dissect.o \
+-	  blobhash.o check-nullptr.o check-interrupt.o
++	  blobhash.o check-nullptr.o check-interrupt.o check-spinlock.o
+ 
+ LIB_FILE= libsparse.a
+ SLIB_FILE= libsparse.so
+@@ -140,6 +140,7 @@ graph.o: $(LIB_H)
+ blobstate.o: $(LIB_H)
+ check-nullptr.o: $(LIB_H)
+ check-interrupt.o: $(LIB_H)
++check-spinlock.o: $(LIB_H)
+ 
+ compat-linux.o: compat/strtold.c compat/mmap-blob.c \
+ 	$(LIB_H)
+Index: sparse/checker.h
+===================================================================
+--- sparse.orig/checker.h	2007-02-09 14:13:35.000000000 -0800
++++ sparse/checker.h	2007-02-09 14:13:57.000000000 -0800
+@@ -139,6 +139,8 @@ extern void check_null_ptr_init(void);
+ extern void check_null_ptr(struct entrypoint *ep);
+ extern void check_interrupt(struct entrypoint *ep);
+ extern void check_interrupt_init(void);
++extern void check_spinlock(struct entrypoint *ep);
++extern void check_spinlock_init(void);
+ 
+ #endif
+ 
+Index: sparse/lib.h
+===================================================================
+--- sparse.orig/lib.h	2007-02-09 14:13:37.000000000 -0800
++++ sparse/lib.h	2007-02-09 14:13:45.000000000 -0800
+@@ -98,6 +98,7 @@ extern int Wdo_while;
+ extern int Wuninitialized;
+ extern int Wmalloc;
+ extern int Winterrupt;
++extern int Wspinlock;
+ 
+ extern int dbg_entry;
+ extern int dbg_dead;
+Index: sparse/sparse.c
+===================================================================
+--- sparse.orig/sparse.c	2007-02-09 14:13:37.000000000 -0800
++++ sparse/sparse.c	2007-02-09 14:13:45.000000000 -0800
+@@ -275,6 +275,8 @@ static void check_symbols(struct symbol_
+ 				check_null_ptr(ep);
+ 			if (Winterrupt)
+ 				check_interrupt(ep);
++			if (Wspinlock)
++				check_spinlock(ep);
+ 		}
+ 	} END_FOR_EACH_PTR(sym);
+ }
+@@ -289,6 +291,7 @@ int main(int argc, char **argv)
+ 
+ 	check_null_ptr_init();
+ 	check_interrupt_init();
++	check_spinlock_init();
+ 	FOR_EACH_PTR_NOTAG(filelist, file) {
+ 		check_symbols(sparse(file));
+ 	} END_FOR_EACH_PTR_NOTAG(file);
+Index: sparse/check-interrupt.c
+===================================================================
