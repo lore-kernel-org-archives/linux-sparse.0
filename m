@@ -1,87 +1,263 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 4] Disable liveness "dead" instruction by default.
-Date: Fri, 9 Feb 2007 16:18:10 -0800
-Message-ID: <20070210001810.GC20644@chrisli.org>
+Subject: [PATCH 5] Add annotation for inline function call.
+Date: Fri, 9 Feb 2007 16:19:12 -0800
+Message-ID: <20070210001912.GD20644@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc15.comcast.net ([204.127.200.85]:59257 "EHLO
-	sccrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1423378AbXBJAqq (ORCPT
+Received: from [204.127.225.96] ([204.127.225.96]:64022 "EHLO
+	alnrmhc16.comcast.net" rhost-flags-FAIL-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1946811AbXBJAr4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 9 Feb 2007 19:46:46 -0500
+	Fri, 9 Feb 2007 19:47:56 -0500
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Josh Triplett <josh@freedesktop.org>
 
-The liveness instruction take up about 10% of the bytecode bloat file.
-It is not very useful, it is duplicate information can be obtain
-from the def/user chain.
 
-This change disable the liveness instruction by default.
-The caller can track_pseudo_death() if needed.
+Sparse inline function body at evaluation. It very hard
+to find out the original function call. This change try
+to preserved the original call is preserved as annotation.
 
-Signed-Off-By: Christopher Li <sparse@chrisli.org>
-
-Index: sparse/lib.c
+Index: sparse/parse.h
 ===================================================================
---- sparse.orig/lib.c	2007-02-02 16:03:32.000000000 -0800
-+++ sparse/lib.c	2007-02-02 16:06:25.000000000 -0800
-@@ -191,7 +191,8 @@ int Wenum_mismatch = 1;
- int Wdo_while = 1;
- int Wuninitialized = 1;
- 
--int dbg_entry;
-+int dbg_entry = 0;
-+int dbg_dead = 0;
- 
- int preprocess_only;
- char *include;
-@@ -391,6 +392,7 @@ static char **handle_switch_W(char *arg,
- 
- static struct warning debugs[] = {
- 	{ "entry", &dbg_entry},
-+	{ "dead", &dbg_dead},
- };
- 
- 
-Index: sparse/example.c
+--- sparse.orig/parse.h	2007-02-01 00:55:07.000000000 -0800
++++ sparse/parse.h	2007-02-02 01:24:11.000000000 -0800
+@@ -55,6 +55,8 @@ struct statement {
+ 		struct /* compound_struct */ {
+ 			struct statement_list *stmts;
+ 			struct symbol *ret;
++			struct symbol *inline_fn;
++			struct statement *args;
+ 		};
+ 		struct /* labeled_struct */ {
+ 			struct symbol *label_identifier;
+Index: sparse/expression.h
 ===================================================================
---- sparse.orig/example.c	2007-02-02 16:00:51.000000000 -0800
-+++ sparse/example.c	2007-02-02 16:06:02.000000000 -0800
-@@ -1946,6 +1946,7 @@ int main(int argc, char **argv)
- 	char *file;
- 
- 	compile(sparse_initialize(argc, argv, &filelist));
-+	dbg_dead = 1;
- 	FOR_EACH_PTR_NOTAG(filelist, file) {
- 		compile(sparse(file));
- 	} END_FOR_EACH_PTR_NOTAG(file);
-Index: sparse/lib.h
+Index: sparse/evaluate.c
 ===================================================================
---- sparse.orig/lib.h	2007-02-02 16:04:07.000000000 -0800
-+++ sparse/lib.h	2007-02-02 16:04:46.000000000 -0800
-@@ -98,6 +98,7 @@ extern int Wdo_while;
- extern int Wuninitialized;
- 
- extern int dbg_entry;
-+extern int dbg_dead;
- 
- extern void declare_builtin_functions(void);
- extern void create_builtin_stream(void);
-Index: sparse/linearize.c
+--- sparse.orig/evaluate.c	2007-02-01 00:55:07.000000000 -0800
++++ sparse/evaluate.c	2007-02-02 01:24:11.000000000 -0800
+@@ -2791,7 +2791,7 @@ struct symbol *evaluate_statement(struct
+ 		 * Then, evaluate each statement, making the type of the
+ 		 * compound statement be the type of the last statement
+ 		 */
+-		type = NULL;
++		type = evaluate_statement(stmt->args);
+ 		FOR_EACH_PTR(stmt->stmts, s) {
+ 			type = evaluate_statement(s);
+ 		} END_FOR_EACH_PTR(s);
+Index: sparse/inline.c
 ===================================================================
---- sparse.orig/linearize.c	2007-02-02 16:00:51.000000000 -0800
-+++ sparse/linearize.c	2007-02-02 16:05:15.000000000 -0800
-@@ -2134,7 +2134,8 @@ repeat:
+--- sparse.orig/inline.c	2007-02-01 00:55:07.000000000 -0800
++++ sparse/inline.c	2007-02-02 01:24:11.000000000 -0800
+@@ -443,8 +443,9 @@ void copy_statement(struct statement *sr
+ 	FOR_EACH_PTR(src->stmts, stmt) {
+ 		add_statement(&dst->stmts, copy_one_statement(stmt));
+ 	} END_FOR_EACH_PTR(stmt);
+-
++	dst->args = copy_one_statement(src->args);
+ 	dst->ret = copy_symbol(src->pos, src->ret);
++	dst->inline_fn = src->inline_fn;
+ }
+ 
+ static struct symbol *create_copy_symbol(struct symbol *orig)
+@@ -489,6 +490,7 @@ int inline_function(struct expression *e
+ 	}
+ 	if (fn->expanding)
+ 		return 0;
++
+ 	fn->expanding = 1;
+ 
+ 	name_list = fn->arguments;
+@@ -517,13 +519,14 @@ int inline_function(struct expression *e
+ 	} END_FOR_EACH_PTR(arg);
+ 	FINISH_PTR_LIST(name);
+ 
++	copy_statement(fn->inline_stmt, stmt);
++
+ 	if (arg_decl) {
+ 		struct statement *decl = alloc_statement(expr->pos, STMT_DECLARATION);
+ 		decl->declaration = arg_decl;
+-		add_statement(&stmt->stmts, decl);
++		stmt->args = decl;
+ 	}
+-
+-	copy_statement(fn->inline_stmt, stmt);
++	stmt->inline_fn = sym;
+ 
+ 	unset_replace_list(fn_symbol_list);
+ 
+Index: sparse/expand.c
+===================================================================
+--- sparse.orig/expand.c	2007-02-01 00:55:07.000000000 -0800
++++ sparse/expand.c	2007-02-02 01:24:11.000000000 -0800
+@@ -1053,9 +1053,9 @@ static int expand_compound(struct statem
+ 	if (stmt->ret)
+ 		expand_symbol(stmt->ret);
+ 
+-	cost = 0;
+-	last = NULL;
+-	statements = 0;
++	last = stmt->args;
++	cost = expand_statement(last);
++	statements = last != NULL;
+ 	FOR_EACH_PTR(stmt->stmts, s) {
+ 		statements++;
+ 		last = s;
+Index: sparse/show-parse.c
+===================================================================
+--- sparse.orig/show-parse.c	2007-02-01 00:55:07.000000000 -0800
++++ sparse/show-parse.c	2007-02-02 01:24:11.000000000 -0800
+@@ -485,6 +485,10 @@ int show_statement(struct statement *stm
+ 		struct statement *s;
+ 		int last = 0;
+ 
++		if (stmt->inline_fn) {
++			show_statement(stmt->args);
++			printf("\tbegin_inline \t%s\n", show_ident(stmt->inline_fn->ident));
++		}
+ 		FOR_EACH_PTR(stmt->stmts, s) {
+ 			last = show_statement(s);
+ 		} END_FOR_EACH_PTR(s);
+@@ -496,6 +500,8 @@ int show_statement(struct statement *stm
+ 			last = new_pseudo();
+ 			printf("\tld.%d\t\tv%d,[v%d]\n", bits, last, addr);
+ 		}
++		if (stmt->inline_fn)
++			printf("\tend_inlined\t%s\n", show_ident(stmt->inline_fn->ident));
+ 		return last;
  	}
  
- 	/* Finally, add deathnotes to pseudos now that we have them */
--	track_pseudo_death(ep);
-+	if (dbg_dead)
-+		track_pseudo_death(ep);
+Index: sparse/linearize.h
+===================================================================
+--- sparse.orig/linearize.h	2007-02-01 00:55:07.000000000 -0800
++++ sparse/linearize.h	2007-02-02 01:24:11.000000000 -0800
+@@ -196,6 +196,7 @@ enum opcode {
+ 	OP_SCAST,
+ 	OP_FPCAST,
+ 	OP_PTRCAST,
++	OP_INLINED_CALL,
+ 	OP_CALL,
+ 	OP_VANEXT,
+ 	OP_VAARG,
+Index: sparse/linearize.c
+===================================================================
+--- sparse.orig/linearize.c	2007-02-02 01:23:59.000000000 -0800
++++ sparse/linearize.c	2007-02-02 01:24:11.000000000 -0800
+@@ -27,11 +27,11 @@ pseudo_t linearize_expression(struct ent
  
- 	return ep;
+ static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right);
+ static pseudo_t add_setval(struct entrypoint *ep, struct symbol *ctype, struct expression *val);
+-static void linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
++static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
+ 
+ struct access_data;
+ static pseudo_t add_load(struct entrypoint *ep, struct access_data *);
+-pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *);
++static pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *);
+ 
+ struct pseudo void_pseudo = {};
+ 
+@@ -226,6 +226,7 @@ static const char *opcodes[] = {
+ 	[OP_SCAST] = "scast",
+ 	[OP_FPCAST] = "fpcast",
+ 	[OP_PTRCAST] = "ptrcast",
++	[OP_INLINED_CALL] = "# call",
+ 	[OP_CALL] = "call",
+ 	[OP_VANEXT] = "va_next",
+ 	[OP_VAARG] = "va_arg",
+@@ -399,6 +400,7 @@ const char *show_instruction(struct inst
+ 	case OP_STORE: case OP_SNOP:
+ 		buf += sprintf(buf, "%s -> %d[%s]", show_pseudo(insn->target), insn->offset, show_pseudo(insn->src));
+ 		break;
++	case OP_INLINED_CALL:
+ 	case OP_CALL: {
+ 		struct pseudo *arg;
+ 		if (insn->target && insn->target != VOID)
+@@ -1487,7 +1489,7 @@ static pseudo_t linearize_position(struc
+ 	return linearize_initializer(ep, init_expr, ad);
  }
+ 
+-pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *ad)
++static pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *ad)
+ {
+ 	switch (initializer->type) {
+ 	case EXPR_INITIALIZER: {
+@@ -1505,6 +1507,7 @@ pseudo_t linearize_initializer(struct en
+ 		ad->source_type = base_type(initializer->ctype);
+ 		ad->result_type = initializer->ctype;
+ 		linearize_store_gen(ep, value, ad);
++		return value;
+ 	}
+ 	}
+ 
+@@ -1595,21 +1598,23 @@ pseudo_t linearize_expression(struct ent
+ 	return VOID;
+ }
+ 
+-static void linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
++static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
+ {
+ 	struct access_data ad = { NULL, };
++	pseudo_t value;
+ 
+ 	if (!sym || !sym->initializer || sym->initialized)
+-		return;
++		return VOID;
+ 
+ 	/* We need to output these puppies some day too.. */
+ 	if (sym->ctype.modifiers & (MOD_STATIC | MOD_TOPLEVEL))
+-		return;
++		return VOID;
+ 
+ 	sym->initialized = 1;
+ 	ad.address = symbol_pseudo(ep, sym);
+-	linearize_initializer(ep, sym->initializer, &ad);
++	value = linearize_initializer(ep, sym->initializer, &ad);
+ 	finish_address_gen(ep, &ad);
++	return value;
+ }
+ 
+ static pseudo_t linearize_compound_statement(struct entrypoint *ep, struct statement *stmt)
+@@ -1637,6 +1642,29 @@ static pseudo_t linearize_compound_state
+ 		}
+ 		return phi_node->target;
+ 	}
++
++	return pseudo;
++}
++
++static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *stmt)
++{
++	struct instruction *insn = alloc_instruction(OP_INLINED_CALL, 0);
++	struct statement *args = stmt->args;
++	pseudo_t pseudo;
++
++	if (args) {
++		struct symbol *sym;
++
++		concat_symbol_list(args->declaration, &ep->syms);
++		FOR_EACH_PTR(args->declaration, sym) {
++			pseudo_t value = linearize_one_symbol(ep, sym);
++			use_pseudo(insn, value, add_pseudo(&insn->arguments, value));
++		} END_FOR_EACH_PTR(sym);
++	}
++
++	insn->target = pseudo = linearize_compound_statement(ep, stmt);
++	use_pseudo(insn, symbol_pseudo(ep, stmt->inline_fn), &insn->func);
++	add_one_insn(ep, insn);
+ 	return pseudo;
+ }
+ 
+@@ -1920,6 +1948,8 @@ pseudo_t linearize_statement(struct entr
+ 	}
+ 
+ 	case STMT_COMPOUND:
++		if (stmt->inline_fn)
++			return linearize_inlined_call(ep, stmt);
+ 		return linearize_compound_statement(ep, stmt);
+ 
+ 	/*
