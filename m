@@ -1,101 +1,182 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [ANNOUNCE] sparse-0.2-cl2 is now available
-Date: Fri, 9 Feb 2007 16:00:55 -0800
-Message-ID: <20070210000055.GA19968@chrisli.org>
-References: <20070204085329.GA6520@chrisli.org>
+Subject: [PATCH 1] Adding debug option for showing the linearized instruction.
+Date: Fri, 9 Feb 2007 16:13:32 -0800
+Message-ID: <20070210001332.GA20604@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc12.comcast.net ([216.148.227.152]:49228 "EHLO
-	rwcrmhc12.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946804AbXBJA3b (ORCPT
+Received: from sccrmhc11.comcast.net ([204.127.200.81]:44651 "EHLO
+	sccrmhc11.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946794AbXBJAmJ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 9 Feb 2007 19:29:31 -0500
+	Fri, 9 Feb 2007 19:42:09 -0500
 Content-Disposition: inline
-In-Reply-To: <20070204085329.GA6520@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: linux kernel mail list <linux-kernel@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
+Cc: Josh Triplett <josh@freedesktop.org>
 
 
-Temporarily at:
-    http://userweb.kernel.org/~chrisl/sparse-0.2-cl2
-
-Will appear later at:
-    http://ftp.kernel.org//pub/linux/kernel/people/chrisl/patches/sparse/sparse-0.2-cl2/
-
-
-I have been play with sparse to add more Stanford checker style
-of checking. The paper is "Checking System Rules Using System-
-Specific, Programmer-Written Compiler Extensions" by Dawson Engler
-etc.
-
-Unlike the Stanford checker and smatch, this checker is working on
-the linearization level instead of AST level. Linearization code
-can be very convenient (when it works) to trace the data flow because
-pseudo is in SSA form. There is define/user chain to avoid scan
-every instruction.
-
-I take the malloc checking for example to explain how the checker
-works. The checking usually happen in three step:
-
-The first step is scanning the linearize instruction. It look for
-relevant operations. For malloc checker, the task is find out
-the malloc/free function call and usage of malloced pointer.
-
-The second step is converting the relevant operations into checker
-instruction. The checker instruction is a simplification of the whole
-program, only contain the operation relevant to checker.
-
-The third step is executing the checker instruction. It try to execute
-every possible execution flow in the function. The execution engine
-will let the checker instruction perform state changes.
-
-Thanks to step two, the size and complexity of the of program has been
-greatly reduced.
-
-The new checking has been very fast, it add a few seconds to the make C=1
-run.
-
-Again, comment and feed back are always welcome.
-
-Chris
-
-Change log in sparse-0.2-cl2:
- - adding pointer signedness fix
- - adding spinlock checking
-
-Change log in sparse-0.2-cl1:
-  The most interesting part is the inline function annotation.
-  The new checker can find out inlined function usage. The interrupt
-  checker does not depend on x86 asm instruction any more.
-
-
-origin.patch
-    006eff06c7adcfb0d06c6fadf6e9b64f0488b2bf URL: git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git
-incompatible-ptr-signess
-    Bug fix in pointer modifiers inherent at function degeneration.
-sizeof-incomplete
-    Fix double semicolon in struct declare
-anon-symbol
-    Fix core dump on anonymous symbol.
-instruction-buffer-size
-    Fix core dump on huge switch
-debug-checker
-    Adding debug option for showing the linearized instruction.
-no-dead-instruction
-    Disable liveness "dead" instruction by default.
-ptr-allocator
-    Make the ptrlist using the sparse allocator.
-annotate-inline-2
-    Add annotation for inline function call.
-malloc-checker
-    Adding the malloc NULL pointer checker.
-interrupt-checker
-    Adding the interrupt checker
-spinlock-checker
-    Adding spinlock checker
-
-
-Total 12 patches
+Index: sparse/lib.c
+===================================================================
+--- sparse.orig/lib.c	2007-02-02 16:57:04.000000000 -0800
++++ sparse/lib.c	2007-02-02 17:06:51.000000000 -0800
+@@ -190,6 +190,9 @@ int Waddress_space = 1;
+ int Wenum_mismatch = 1;
+ int Wdo_while = 1;
+ int Wuninitialized = 1;
++
++int dbg_entry;
++
+ int preprocess_only;
+ char *include;
+ 
+@@ -237,14 +240,6 @@ static char **handle_switch_E(char *arg,
+ 	return next;
+ }
+ 
+-static char **handle_switch_v(char *arg, char **next)
+-{
+-	do {
+-		verbose++;
+-	} while (*++arg == 'v');
+-	return next;
+-}
+-
+ static char **handle_switch_I(char *arg, char **next)
+ {
+ 	char *path = arg+1;
+@@ -352,14 +347,14 @@ enum {
+ };
+ 
+ 
+-static char **handle_switch_W(char *arg, char **next)
++static char **handle_onoff_switch(char *arg, char **next, const struct warning warnings[], int n)
+ {
+ 	int flag = WARNING_ON;
+ 	char *p = arg + 1;
+ 	unsigned i;
+ 
+ 	if (!strcmp(p, "all")) {
+-		for (i = 0; i < sizeof(warnings) / sizeof(warnings[0]); i++) {
++		for (i = 0; i < n; i++) {
+ 			if (*warnings[i].flag != WARNING_FORCE_OFF)
+ 				*warnings[i].flag = WARNING_ON;
+ 		}
+@@ -373,7 +368,7 @@ static char **handle_switch_W(char *arg,
+ 		flag = WARNING_FORCE_OFF;
+ 	}
+ 
+-	for (i = 0; i < sizeof(warnings) / sizeof(warnings[0]); i++) {
++	for (i = 0; i < n; i++) {
+ 		if (!strcmp(p,warnings[i].name)) {
+ 			*warnings[i].flag = flag;
+ 			return next;
+@@ -381,26 +376,65 @@ static char **handle_switch_W(char *arg,
+ 	}
+ 
+ 	// Unknown.
++	return NULL;
++}
++
++static char **handle_switch_W(char *arg, char **next)
++{
++	char ** ret = handle_onoff_switch(arg, next, warnings, sizeof warnings/sizeof warnings[0]);
++	if (ret)
++		return ret;
++
++	// Unknown.
+ 	return next;
+ }
+ 
+-static void handle_switch_W_finalize(void)
++static struct warning debugs[] = {
++	{ "entry", &dbg_entry},
++};
++
++
++static char **handle_switch_v(char *arg, char **next)
++{
++	char ** ret = handle_onoff_switch(arg, next, debugs, sizeof debugs/sizeof debugs[0]);
++	if (ret)
++		return ret;
++
++	// Unknown.
++	do {
++		verbose++;
++	} while (*++arg == 'v');
++	return next;
++}
++
++
++static void handle_onoff_switch_finalize(const struct warning warnings[], int n)
+ {
+ 	unsigned i;
+ 
+-	for (i = 0; i < sizeof(warnings) / sizeof(warnings[0]); i++) {
++	for (i = 0; i < n; i++) {
+ 		if (*warnings[i].flag == WARNING_FORCE_OFF)
+ 			*warnings[i].flag = WARNING_OFF;
+ 	}
+ }
+ 
++static void handle_switch_W_finalize(void)
++{
++	handle_onoff_switch_finalize(warnings, sizeof(warnings) / sizeof(warnings[0]));
++}
++
++static void handle_switch_v_finalize(void)
++{
++	handle_onoff_switch_finalize(debugs, sizeof(debugs) / sizeof(debugs[0]));
++}
++
+ static char **handle_switch_U(char *arg, char **next)
+ {
+ 	const char *name = arg + 1;
+ 	add_pre_buffer ("#undef %s\n", name);
+ 	return next;
+ }
+-
++ 
+ static char **handle_switch_O(char *arg, char **next)
+ {
+ 	int level = 1;
+@@ -661,6 +695,7 @@ struct symbol_list *sparse_initialize(in
+ 		add_ptr_list_notag(filelist, arg);
+ 	}
+ 	handle_switch_W_finalize();
++	handle_switch_v_finalize();
+ 
+ 	list = NULL;
+ 	if (!ptr_list_empty(filelist)) {
+Index: sparse/lib.h
+===================================================================
+--- sparse.orig/lib.h	2007-02-02 16:57:04.000000000 -0800
++++ sparse/lib.h	2007-02-02 17:06:51.000000000 -0800
+@@ -97,6 +97,8 @@ extern int Wcast_truncate;
+ extern int Wdo_while;
+ extern int Wuninitialized;
+ 
++extern int dbg_entry;
++
+ extern void declare_builtin_functions(void);
+ extern void create_builtin_stream(void);
+ extern struct symbol_list *sparse_initialize(int argc, char **argv, struct string_list **files);
+Index: sparse/sparse.c
+===================================================================
+--- sparse.orig/sparse.c	2007-02-02 16:57:04.000000000 -0800
++++ sparse/sparse.c	2007-02-02 17:06:51.000000000 -0800
+@@ -264,8 +264,12 @@ static void check_symbols(struct symbol_
+ 
+ 		expand_symbol(sym);
+ 		ep = linearize_symbol(sym);
+-		if (ep)
++		if (ep) {
++			if (dbg_entry)
++				show_entry(ep);
++
+ 			check_context(ep);
++		}
+ 	} END_FOR_EACH_PTR(sym);
+ }
+ 
