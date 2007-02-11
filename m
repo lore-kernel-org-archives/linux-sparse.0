@@ -1,34 +1,52 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [ANNOUNCE] sparse-0.2-cl2 is now available
-Date: Sun, 11 Feb 2007 05:50:15 +0000
-Message-ID: <20070211055015.GR10050@ftp.linux.org.uk>
-References: <20070204085329.GA6520@chrisli.org> <20070210000055.GA19968@chrisli.org> <p73hctthq8q.fsf@bingen.suse.de> <20070211051758.GA2113@chrisli.org>
+Date: Sat, 10 Feb 2007 22:02:55 -0800
+Message-ID: <20070211060255.GA2312@chrisli.org>
+References: <20070204085329.GA6520@chrisli.org> <20070210000055.GA19968@chrisli.org> <p73hctthq8q.fsf@bingen.suse.de> <20070211051758.GA2113@chrisli.org> <20070211055015.GR10050@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:42040 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763AbXBKFuT (ORCPT
+Received: from rwcrmhc13.comcast.net ([204.127.192.83]:43271 "EHLO
+	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753114AbXBKGbu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 11 Feb 2007 00:50:19 -0500
+	Sun, 11 Feb 2007 01:31:50 -0500
 Content-Disposition: inline
-In-Reply-To: <20070211051758.GA2113@chrisli.org>
+In-Reply-To: <20070211055015.GR10050@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: Andi Kleen <ak@suse.de>, linux-sparse@vger.kernel.org, linux kernel mail list <linux-kernel@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
 
-On Sat, Feb 10, 2007 at 09:17:58PM -0800, Christopher Li wrote:
-> e.g. sparse has not way to know some function only get called with interrupt
-> disabled (or some lock already hold). So it assume interrupt is still
-> enable and generate wrong warnings. Another example is that some helper
-> function will wrap the locking function. Complain about the exit with locking
-> hold is wrong.
+On Sun, Feb 11, 2007 at 05:50:15AM +0000, Al Viro wrote:
 > 
-> I am hoping adding the cross function checking will reduce those false positive.
-> Any way, it need more information to reduce false positive.
-> 
-> I am still working on the cross function checking. May be it will become
-> more useful one day.
+> I have some stuff in that direction, but it take some resurrecting...
 
-I have some stuff in that direction, but it take some resurrecting...
+OK, we should talk.
+
+Here is what I have:
+
+Linearize bytecode writer, which produce the binary linearized code.
+The uncompress size is about 10 times the i386 .o file. I don't have
+the loader ready to verify it yet. It is aim at fast loading bytecode
+and simple, I havn't done much toward optimized the code size.
+
+If we keep it 10 times over head, my home computer can load the full linux
+kernel and have some spare for checking.
+
+I am still working on the bytecode loader and linker for merging symbols.
+It need to answer the question:
+
+Which file define which function.
+Which external symbol does this function use.
+
+Once we get the function user/define chain, it can enable a lot of new checking.
+
+The current linearized code is not very friendly to linking because we
+keep abstract declare and real declare as different node. Depend on the
+position, the caller will get different node even in one file.
+ 
+I am going to take out the LKML on later email because discussion is
+more sparse specific now.
+
+Chris
