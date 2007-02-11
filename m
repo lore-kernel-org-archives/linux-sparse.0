@@ -1,52 +1,41 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Andi Kleen <ak@suse.de>
 Subject: Re: [ANNOUNCE] sparse-0.2-cl2 is now available
-Date: Sat, 10 Feb 2007 22:02:55 -0800
-Message-ID: <20070211060255.GA2312@chrisli.org>
-References: <20070204085329.GA6520@chrisli.org> <20070210000055.GA19968@chrisli.org> <p73hctthq8q.fsf@bingen.suse.de> <20070211051758.GA2113@chrisli.org> <20070211055015.GR10050@ftp.linux.org.uk>
+Date: Sun, 11 Feb 2007 11:41:54 +0100
+Message-ID: <200702111141.54900.ak@suse.de>
+References: <20070204085329.GA6520@chrisli.org> <20070211055015.GR10050@ftp.linux.org.uk> <20070211060255.GA2312@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc13.comcast.net ([204.127.192.83]:43271 "EHLO
-	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753114AbXBKGbu (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 11 Feb 2007 01:31:50 -0500
+Received: from mx2.suse.de ([195.135.220.15]:37943 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753172AbXBKKmG (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 11 Feb 2007 05:42:06 -0500
+In-Reply-To: <20070211060255.GA2312@chrisli.org>
 Content-Disposition: inline
-In-Reply-To: <20070211055015.GR10050@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Andi Kleen <ak@suse.de>, linux-sparse@vger.kernel.org, linux kernel mail list <linux-kernel@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Al Viro <viro@ftp.linux.org.uk>, linux-sparse@vger.kernel.org, linux kernel mail list <linux-kernel@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
 
-On Sun, Feb 11, 2007 at 05:50:15AM +0000, Al Viro wrote:
+
 > 
-> I have some stuff in that direction, but it take some resurrecting...
+> If we keep it 10 times over head, my home computer can load the full linux
+> kernel and have some spare for checking.
+> 
+> I am still working on the bytecode loader and linker for merging symbols.
+> It need to answer the question:
+> 
+> Which file define which function.
+> Which external symbol does this function use.
+> 
+> Once we get the function user/define chain, it can enable a lot of new checking.
 
-OK, we should talk.
+At least for interrupts on/off you'll likely need new annotations because
+this state can be changed in assembly files before/after calling out to 
+C.
 
-Here is what I have:
+For locks this fortunately cannot happen (at least not on x86*) 
 
-Linearize bytecode writer, which produce the binary linearized code.
-The uncompress size is about 10 times the i386 .o file. I don't have
-the loader ready to verify it yet. It is aim at fast loading bytecode
-and simple, I havn't done much toward optimized the code size.
-
-If we keep it 10 times over head, my home computer can load the full linux
-kernel and have some spare for checking.
-
-I am still working on the bytecode loader and linker for merging symbols.
-It need to answer the question:
-
-Which file define which function.
-Which external symbol does this function use.
-
-Once we get the function user/define chain, it can enable a lot of new checking.
-
-The current linearized code is not very friendly to linking because we
-keep abstract declare and real declare as different node. Depend on the
-position, the caller will get different node even in one file.
- 
-I am going to take out the LKML on later email because discussion is
-more sparse specific now.
-
-Chris
+-Andi
