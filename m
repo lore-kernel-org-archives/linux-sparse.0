@@ -1,77 +1,64 @@
-From: Anton Altaparmakov <aia21@cam.ac.uk>
-Subject: Bogus sparse warning?
-Date: Mon, 12 Feb 2007 10:05:08 +0000
-Message-ID: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk>
-Mime-Version: 1.0 (Apple Message framework v752.3)
-Content-Type: text/plain; charset=US-ASCII; delsp=yes; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Another sparse warning...
+Date: Mon, 12 Feb 2007 07:50:24 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0702120742030.8424@woody.linux-foundation.org>
+References: <4975FCBA-D3D4-4DF2-AC20-C11A5F97DE51@cam.ac.uk>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ppsw-0.csi.cam.ac.uk ([131.111.8.130]:38193 "EHLO
-	ppsw-0.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964823AbXBLK1U (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Feb 2007 05:27:20 -0500
+Received: from smtp.osdl.org ([65.172.181.24]:59138 "EHLO smtp.osdl.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933014AbXBLPu3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 12 Feb 2007 10:50:29 -0500
+In-Reply-To: <4975FCBA-D3D4-4DF2-AC20-C11A5F97DE51@cam.ac.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Anton Altaparmakov <aia21@cam.ac.uk>
+Cc: linux-sparse@vger.kernel.org
 
-Hi,
 
-Using latest code from git://git.kernel.org/pub/scm/linux/kernel/git/ 
-josh/sparse.git
 
-When I run:  make CHECKFLAGS="-D__CHECK_ENDIAN__" C=2 modules
+On Mon, 12 Feb 2007, Anton Altaparmakov wrote:
+> 
+> What can I do to tell sparse that this code is ok and there should not be a
+> warning?  Is there a "__ignore_context_imbalance" or something that I can mark
+> up the {un,}lock_kernel() with or something like that?
 
-I get this warning:
+No, you should annotate the function as already having the lock when 
+entered.
 
-   CHECK   fs/ntfs/file.c
-fs/ntfs/file.c:2241:5: warning: incorrect type in argument 8  
-(different signedness)
-fs/ntfs/file.c:2241:5:    expected int [signed] ( [signed] [usertype]  
-get_block )( ... )
-fs/ntfs/file.c:2241:5:    got int [signed] ( static [toplevel]  
-*<noident> )( ... )
+What sparse warns about is not a locking imbalance (it's all balanced) but 
+the fact that locking counts go negative (which is always a bug). And they 
+go negative because you drop a lock that git didn't even know about 
+(because it doesn't do global analysis - just per-function).
 
-The relevant code to reproduce this is:
+Now, you can either try to make sparsedo global analysis (which some 
+people apparently really _are_ trying to do), or you can tell sparse that 
+it holds a certain lock on entry, and is _supposed_ to release it. You can 
+do that by annotating the function with __acquires/__releases():
 
- From <include/linux/fs.h>:
+	int myfunction(..)
+		__releases(kernel_lock)
+		__acquires(kernel_lock)
+	{
+		unlock_kernel();
+		..
+		lock_kernel();
+	}
 
-typedef int (get_block_t)(struct inode *inode, sector_t iblock,
-                         struct buffer_head *bh_result, int create);
+which does two things:
 
-static inline ssize_t blockdev_direct_IO(int rw, struct kiocb *iocb,
-         struct inode *inode, struct block_device *bdev, const struct  
-iovec *iov,
-         loff_t offset, unsigned long nr_segs, get_block_t get_block,
-         dio_iodone_t end_io)
-{
-}
+ - it shows the *programmer* that the function is doing somethign 
+   "strange" (not really strange, but still: it's basically a fairly 
+   readable way that it's doing locking in a weird way).
 
-In my current <fs/ntfs/file.c>:
+ - it tells sparse that the function is actually supposed to release the 
+   lock and then re-acquire it.
 
-static int ntfs_get_block_for_direct_IO_write(struct inode *vi,  
-sector_t blk,
-                 struct buffer_head *bh, int create)
-{
-}
+This would also be how you annotate functions that really *are* 
+unbalanced. Some functions get entered with a lock held, and release it, 
+or the other way around (the simplest example of that is obviously the 
+"__raw_spin_[un]lock()" functions themselves, but it's pretty common in 
+"locking helper functions" too).
 
-And later (this is line 2240 from the error message):
-
-                 written = blockdev_direct_IO(WRITE, iocb, vi, vi- 
- >i_sb->s_bdev,
-                                 iov, pos, *nr_segs,
-                                 ntfs_get_block_for_direct_IO_write,  
-NULL);
-
-Why is sparse complaining?  And perhaps more importantly how do I  
-make the warning go away?
-
-Thanks a lot in advance!
-
-Best regards,
-
-	Anton
--- 
-Anton Altaparmakov <aia21 at cam.ac.uk> (replace at with @)
-Unix Support, Computing Service, University of Cambridge, CB2 3QH, UK
-Linux NTFS maintainer, http://www.linux-ntfs.org/
+		Linus
