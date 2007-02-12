@@ -1,70 +1,86 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Bogus sparse warning?
-Date: Mon, 12 Feb 2007 10:28:19 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org>
-References: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk>
+Date: Mon, 12 Feb 2007 11:14:34 -0800
+Message-ID: <20070212191434.GA1041@chrisli.org>
+References: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk> <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.24]:37460 "EHLO smtp.osdl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965023AbXBLS2j (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Feb 2007 13:28:39 -0500
-In-Reply-To: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk>
+Received: from alnrmhc15.comcast.net ([204.127.225.95]:33385 "EHLO
+	alnrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965338AbXBLTnx (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 12 Feb 2007 14:43:53 -0500
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Anton Altaparmakov <aia21@cam.ac.uk>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Anton Altaparmakov <aia21@cam.ac.uk>, linux-sparse@vger.kernel.org
 
-
-
-On Mon, 12 Feb 2007, Anton Altaparmakov wrote:
+On Mon, Feb 12, 2007 at 10:28:19AM -0800, Linus Torvalds wrote:
 > 
-> Using latest code from
-> git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git
 > 
-> When I run:  make CHECKFLAGS="-D__CHECK_ENDIAN__" C=2 modules
+> > From <include/linux/fs.h>:
+> > 
+> > typedef int (get_block_t)(struct inode *inode, sector_t iblock,
+> >                        struct buffer_head *bh_result, int create);
 > 
-> I get this warning:
+> so that it looks like
 > 
->  CHECK   fs/ntfs/file.c
-> fs/ntfs/file.c:2241:5: warning: incorrect type in argument 8 (different
-> signedness)
-> fs/ntfs/file.c:2241:5:    expected int [signed] ( [signed] [usertype] get_block )( ... )
-> fs/ntfs/file.c:2241:5:    got int [signed] ( static [toplevel] *<noident> )( ... )
-
-Ok, that does seem like a sparse bug. I _think_ that the trigger here is 
-the fact that we make "get_block_t" be the *function* type, rather than a 
-"pointer to function" type, and then we screw up somewhere when we do the 
-don't do the implicit pointer conversion, and we also thus don't move the 
-type attributes around properly (notice how "get_block" is marked as being 
-a "signed usertype", _not_ a pointer).
-
-So we should really have converted the function type in the declaration to 
-a "pointer to function", but since this is such an unusual thing to have, 
-nobody noticed.
-
-Does the warning go away if you make "get_block_t" explicitly a pointer to 
-a function, ie you add the "*" to the typedef:
-
-> From <include/linux/fs.h>:
+> 	typedef int (*get_block_t)(...)
 > 
-> typedef int (get_block_t)(struct inode *inode, sector_t iblock,
->                        struct buffer_head *bh_result, int create);
+> instead?
+> 
+> (It is perfectly proper to have a typedef that is actually of a function 
+> type, so this looks like a sparse bug regardless, it looks just as if we 
+> don't turn a function type into a function pointer type when we see it as 
+> an argument in the declaration).
 
-so that it looks like
+Yes, we does, in examine_fn_arguments(). But not correctly inherent the attribute bits.
 
-	typedef int (*get_block_t)(...)
+> 
+> Has this been there for a long time, or was it something recent in sparse 
+> that seemed to trigger it (like the recent ctype conversion changes due to 
+> attribute parsing?)
 
-instead?
+I think this patch should fix it, I haven't try it myself on this bug yet.
+It works on a different test case "function vs function ptr".
+It has been posted to the list before. It is in my series as well.
 
-(It is perfectly proper to have a typedef that is actually of a function 
-type, so this looks like a sparse bug regardless, it looks just as if we 
-don't turn a function type into a function pointer type when we see it as 
-an argument in the declaration).
+Chris
 
-Has this been there for a long time, or was it something recent in sparse 
-that seemed to trigger it (like the recent ctype conversion changes due to 
-attribute parsing?)
-
-			Linus
+Index: sparse/symbol.h
+===================================================================
+--- sparse.orig/symbol.h	2007-02-04 23:46:07.000000000 -0800
++++ sparse/symbol.h	2007-02-05 12:18:30.000000000 -0800
+@@ -191,6 +191,7 @@ struct symbol {
+ #define MOD_SIZE	(MOD_CHAR | MOD_SHORT | MOD_LONG | MOD_LONGLONG)
+ #define MOD_IGNORE (MOD_TOPLEVEL | MOD_STORAGE | MOD_ADDRESSABLE |	\
+ 	MOD_ASSIGNED | MOD_USERTYPE | MOD_FORCE | MOD_ACCESSED | MOD_EXPLICITLY_SIGNED)
++#define MOD_PTRINHERIT (MOD_VOLATILE | MOD_CONST | MOD_NODEREF | MOD_STORAGE)
+ 
+ 
+ /* Current parsing/evaluation function */
+Index: sparse/evaluate.c
+===================================================================
+--- sparse.orig/evaluate.c	2007-02-04 00:47:46.000000000 -0800
++++ sparse/evaluate.c	2007-02-05 12:20:08.000000000 -0800
+@@ -1282,7 +1282,7 @@ static void examine_fn_arguments(struct 
+ 				else
+ 					ptr->ctype.base_type = arg;
+ 				ptr->ctype.as |= s->ctype.as;
+-				ptr->ctype.modifiers |= s->ctype.modifiers;
++				ptr->ctype.modifiers |= s->ctype.modifiers & MOD_PTRINHERIT;
+ 
+ 				s->ctype.base_type = ptr;
+ 				s->ctype.as = 0;
+@@ -1313,8 +1313,6 @@ static struct symbol *convert_to_as_mod(
+ 	return sym;
+ }
+ 
+-#define MOD_PTRINHERIT (MOD_VOLATILE | MOD_CONST | MOD_NODEREF | MOD_STORAGE)
+-
+ static struct symbol *create_pointer(struct expression *expr, struct symbol *sym, int degenerate)
+ {
+ 	struct symbol *node = alloc_symbol(expr->pos, SYM_NODE);
