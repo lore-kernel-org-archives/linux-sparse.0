@@ -1,53 +1,70 @@
 From: Anton Altaparmakov <aia21@cam.ac.uk>
-Subject: Another sparse warning...
-Date: Mon, 12 Feb 2007 10:23:38 +0000
-Message-ID: <4975FCBA-D3D4-4DF2-AC20-C11A5F97DE51@cam.ac.uk>
+Subject: Bogus sparse warning?
+Date: Mon, 12 Feb 2007 10:05:08 +0000
+Message-ID: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk>
 Mime-Version: 1.0 (Apple Message framework v752.3)
 Content-Type: text/plain; charset=US-ASCII; delsp=yes; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ppsw-0.csi.cam.ac.uk ([131.111.8.130]:37015 "EHLO
+Received: from ppsw-0.csi.cam.ac.uk ([131.111.8.130]:38193 "EHLO
 	ppsw-0.csi.cam.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964816AbXBLKZg (ORCPT
+	with ESMTP id S964823AbXBLK1U (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Feb 2007 05:25:36 -0500
+	Mon, 12 Feb 2007 05:27:20 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 Hi,
 
-Again, using latest code from git://git.kernel.org/pub/scm/linux/ 
-kernel/git/josh/sparse.git
+Using latest code from git://git.kernel.org/pub/scm/linux/kernel/git/ 
+josh/sparse.git
 
 When I run:  make CHECKFLAGS="-D__CHECK_ENDIAN__" C=2 modules
 
 I get this warning:
 
-   CHECK   fs/ntfs/super.c
-fs/ntfs/super.c:3003:2: warning: context imbalance in  
-'ntfs_fill_super' - unexpected unlock
+   CHECK   fs/ntfs/file.c
+fs/ntfs/file.c:2241:5: warning: incorrect type in argument 8  
+(different signedness)
+fs/ntfs/file.c:2241:5:    expected int [signed] ( [signed] [usertype]  
+get_block )( ... )
+fs/ntfs/file.c:2241:5:    got int [signed] ( static [toplevel]  
+*<noident> )( ... )
 
-And ntfs_fill_super does on entry:
+The relevant code to reproduce this is:
 
-unlock_kernel();
+ From <include/linux/fs.h>:
 
-And then does "lock_kernel();" on exit.
+typedef int (get_block_t)(struct inode *inode, sector_t iblock,
+                         struct buffer_head *bh_result, int create);
 
-Which is what causes the warning as the warning goes away if I remove  
-it...
+static inline ssize_t blockdev_direct_IO(int rw, struct kiocb *iocb,
+         struct inode *inode, struct block_device *bdev, const struct  
+iovec *iov,
+         loff_t offset, unsigned long nr_segs, get_block_t get_block,
+         dio_iodone_t end_io)
+{
+}
 
-The unlock+lock was added by Ingo Molnar IIRC because ntfs_fill_super 
-() was causing a huge latency which is bad for RT code...
+In my current <fs/ntfs/file.c>:
 
-It is a perfectly legitimate thing to do as the kernel lock is held  
-by the VFS but NTFS does not need it as it locks everything  
-appropriately internally.
+static int ntfs_get_block_for_direct_IO_write(struct inode *vi,  
+sector_t blk,
+                 struct buffer_head *bh, int create)
+{
+}
 
-What can I do to tell sparse that this code is ok and there should  
-not be a warning?  Is there a "__ignore_context_imbalance" or  
-something that I can mark up the {un,}lock_kernel() with or something  
-like that?
+And later (this is line 2240 from the error message):
+
+                 written = blockdev_direct_IO(WRITE, iocb, vi, vi- 
+ >i_sb->s_bdev,
+                                 iov, pos, *nr_segs,
+                                 ntfs_get_block_for_direct_IO_write,  
+NULL);
+
+Why is sparse complaining?  And perhaps more importantly how do I  
+make the warning go away?
 
 Thanks a lot in advance!
 
