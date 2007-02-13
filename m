@@ -1,44 +1,92 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Another sparse warning...
-Date: Mon, 12 Feb 2007 20:21:52 -0800
-Message-ID: <20070213042152.GC2922@chrisli.org>
-References: <4975FCBA-D3D4-4DF2-AC20-C11A5F97DE51@cam.ac.uk> <Pine.LNX.4.64.0702120742030.8424@woody.linux-foundation.org> <20070213020054.GB2922@chrisli.org> <Pine.LNX.4.64.0702121947240.8424@woody.linux-foundation.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: Bogus sparse warning?
+Date: Tue, 13 Feb 2007 00:22:44 -0800
+Message-ID: <45D17554.5010000@freedesktop.org>
+References: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk> <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org> <20070212191434.GA1041@chrisli.org> <Pine.LNX.4.64.0702130014290.6264@hermes-1.csi.cam.ac.uk> <20070213014657.GA2922@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig5CAA32827314F38408E7E7A4"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc15.comcast.net ([204.127.200.85]:36595 "EHLO
-	sccrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030626AbXBMEv1 (ORCPT
+Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:58288 "EHLO
+	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751181AbXBMIWs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Feb 2007 23:51:27 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0702121947240.8424@woody.linux-foundation.org>
+	Tue, 13 Feb 2007 03:22:48 -0500
+In-Reply-To: <20070213014657.GA2922@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 
-On Mon, Feb 12, 2007 at 07:48:18PM -0800, Linus Torvalds wrote:
-> > When call one of those functions, it can know that function will change
-> > context.  That might be a way to solve the problem that some of the
-> > spinlock function is not a inline function at all.
-> 
-> I thought we did that already. I'm fairly sure I had this working at some 
-> point - exactly by having the calls just add up the (known) lock/unlock 
-> offsets.
->
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig5CAA32827314F38408E7E7A4
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-You are right. It is already there. I never see it before because my ctags
-get confused about the context annotation:
+Christopher Li wrote:
+> On Tue, Feb 13, 2007 at 12:15:56AM +0000, Anton Altaparmakov wrote:
+>> I applied this patch to the current spares git code and reran my test =
+and=20
+>> now we have two warnings:
+>>
+>>   CHECK   fs/ntfs/file.c
+>> fs/ntfs/file.c:2241:5: warning: incorrect type in argument 8 (differen=
+t=20
+>> signedness)
+>> fs/ntfs/file.c:2241:5:    expected int [signed] ( [signed] [usertype] =
 
-void __lockfunc _spin_lock(spinlock_t *lock)		__acquires(lock); 
+>> get_block )( ... )
+>> fs/ntfs/file.c:2241:5:    got int [signed] ( static [toplevel] *<noide=
+nt>=20
+>> )( ... )
+>> include/linux/fs.h:1791:14: warning: incorrect type in argument 8=20
+>> (different signedness)
+>> include/linux/fs.h:1791:14:    expected int [signed] ( [signed] [usert=
+ype]=20
+>> get_block )( ... )
+>> include/linux/fs.h:1791:14:    got int [signed] ( *get_block )( ... )
+>>
+>> Best regards,
+>>
+>=20
+> I see. In evaluate_call().
+> evaluate_arguments() is called before target function arguments
+> are converted into pointers.
+>=20
+> Can you please try this patch instead?
 
-It generate tags for "lock" instead of "_spin_lock".
+Anton reported success with this revision of your patch, so I'd like to a=
+pply
+it to the sparse tree; could you please supply a Signed-off-by so I can d=
+o so?
 
-When I look up _spin_lock, it only shows the UP version. I never see
-the SMP version of the _spin_lock.
+The same goes for several of the patches in your -cl2 tree, which I would=
 
-Exactly why I want to have a ctags from sparse.
+eagerly like to apply.  Your patches look quite excellent, and greatly ad=
+vance
+the capabilities of Sparse in directions I've wanted to see it progress i=
+n.
+I'd prefer to pull your patches in as a block, to avoid inconveniencing y=
+ou by
+pulling them in piecemeal and forcing you to rebase the remaining patches=
+=2E
 
-Chris
- 
+- Josh Triplett
+
+
+--------------enig5CAA32827314F38408E7E7A4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFF0XVVGJuZRtD+evsRAlTqAJwJWeER7xgGlafPz6jepKYKdgMyjwCdGQgC
+fI1mIyD6X8UWtY0b3CsDKJk=
+=xZ2Z
+-----END PGP SIGNATURE-----
+
+--------------enig5CAA32827314F38408E7E7A4--
