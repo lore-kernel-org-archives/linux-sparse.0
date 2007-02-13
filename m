@@ -1,81 +1,71 @@
 From: Josh Triplett <josh@freedesktop.org>
 Subject: Re: Bogus sparse warning?
-Date: Tue, 13 Feb 2007 00:22:44 -0800
-Message-ID: <45D17554.5010000@freedesktop.org>
-References: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk> <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org> <20070212191434.GA1041@chrisli.org> <Pine.LNX.4.64.0702130014290.6264@hermes-1.csi.cam.ac.uk> <20070213014657.GA2922@chrisli.org>
+Date: Tue, 13 Feb 2007 00:30:58 -0800
+Message-ID: <45D17742.4010809@freedesktop.org>
+References: <780B1941-729E-47CB-9716-578AD8D25302@cam.ac.uk> <Pine.LNX.4.64.0702121018270.8424@woody.linux-foundation.org> <20070212191434.GA1041@chrisli.org> <Pine.LNX.4.64.0702121147170.8424@woody.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig5CAA32827314F38408E7E7A4"
+ boundary="------------enig421489E4EFBD2689D36FCF20"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:58288 "EHLO
+Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:46270 "EHLO
 	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751181AbXBMIWs (ORCPT
+	with ESMTP id S1751188AbXBMIbA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 13 Feb 2007 03:22:48 -0500
-In-Reply-To: <20070213014657.GA2922@chrisli.org>
+	Tue, 13 Feb 2007 03:31:00 -0500
+In-Reply-To: <Pine.LNX.4.64.0702121147170.8424@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Christopher Li <sparse@chrisli.org>, Anton Altaparmakov <aia21@cam.ac.uk>, linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig5CAA32827314F38408E7E7A4
+--------------enig421489E4EFBD2689D36FCF20
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Christopher Li wrote:
-> On Tue, Feb 13, 2007 at 12:15:56AM +0000, Anton Altaparmakov wrote:
->> I applied this patch to the current spares git code and reran my test =
-and=20
->> now we have two warnings:
->>
->>   CHECK   fs/ntfs/file.c
->> fs/ntfs/file.c:2241:5: warning: incorrect type in argument 8 (differen=
-t=20
->> signedness)
->> fs/ntfs/file.c:2241:5:    expected int [signed] ( [signed] [usertype] =
-
->> get_block )( ... )
->> fs/ntfs/file.c:2241:5:    got int [signed] ( static [toplevel] *<noide=
-nt>=20
->> )( ... )
->> include/linux/fs.h:1791:14: warning: incorrect type in argument 8=20
->> (different signedness)
->> include/linux/fs.h:1791:14:    expected int [signed] ( [signed] [usert=
-ype]=20
->> get_block )( ... )
->> include/linux/fs.h:1791:14:    got int [signed] ( *get_block )( ... )
->>
->> Best regards,
->>
+Linus Torvalds wrote:
+> On Mon, 12 Feb 2007, Christopher Li wrote:
+>> On Mon, Feb 12, 2007 at 10:28:19AM -0800, Linus Torvalds wrote:
+>>> (It is perfectly proper to have a typedef that is actually of a funct=
+ion=20
+>>> type, so this looks like a sparse bug regardless, it looks just as if=
+ we=20
+>>> don't turn a function type into a function pointer type when we see i=
+t as=20
+>>> an argument in the declaration).
+>> Yes, we does, in examine_fn_arguments(). But not correctly inherent th=
+e attribute bits.
 >=20
-> I see. In evaluate_call().
-> evaluate_arguments() is called before target function arguments
-> are converted into pointers.
+> Ahh.=20
 >=20
-> Can you please try this patch instead?
+>> I think this patch should fix it, I haven't try it myself on this bug =
+yet.
+>> It works on a different test case "function vs function ptr".
+>> It has been posted to the list before. It is in my series as well.
+>=20
+> This looks good. Ack.  Josh?
 
-Anton reported success with this revision of your patch, so I'd like to a=
-pply
-it to the sparse tree; could you please supply a Signed-off-by so I can d=
-o so?
+See my response to Christopher later in the thread; his revised patch app=
+ears
+to solve the problem fully.
 
-The same goes for several of the patches in your -cl2 tree, which I would=
+> The only thing that I reacted to is that maybe we should change the
+>=20
+> 	s->ctype.modifiers =3D 0;
+>=20
+> a few lines down into a
+>=20
+> 	s->ctype.modifiers &=3D ~MOD_PTRINHERIT;
+>=20
+> or something?
 
-eagerly like to apply.  Your patches look quite excellent, and greatly ad=
-vance
-the capabilities of Sparse in directions I've wanted to see it progress i=
-n.
-I'd prefer to pull your patches in as a block, to avoid inconveniencing y=
-ou by
-pulling them in piecemeal and forcing you to rebase the remaining patches=
-=2E
+Christopher's revised patch does exactly that.
 
 - Josh Triplett
 
 
---------------enig5CAA32827314F38408E7E7A4
+--------------enig421489E4EFBD2689D36FCF20
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -84,9 +74,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFF0XVVGJuZRtD+evsRAlTqAJwJWeER7xgGlafPz6jepKYKdgMyjwCdGQgC
-fI1mIyD6X8UWtY0b3CsDKJk=
-=xZ2Z
+iD8DBQFF0XdCGJuZRtD+evsRAob+AKCdiPYxElwEzacnUdjA99bxpSCFLwCffafs
+KwRuOHH710o9Tw7ldHbGLi0=
+=blZa
 -----END PGP SIGNATURE-----
 
---------------enig5CAA32827314F38408E7E7A4--
+--------------enig421489E4EFBD2689D36FCF20--
