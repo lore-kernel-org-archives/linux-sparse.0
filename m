@@ -1,35 +1,44 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
-Date: Wed, 14 Feb 2007 12:36:55 -0800
-Message-ID: <20070214203655.GD18753@chrisli.org>
-References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk> <20070214172905.GA17959@chrisli.org> <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org> <20070214195447.GA18753@chrisli.org> <Pine.LNX.4.64.0702141242460.20368@woody.linux-foundation.org>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: Re: [PATCH] Re: __attribute__ annotations and struct types
+Date: Wed, 14 Feb 2007 13:05:29 -0800
+Message-ID: <20070214130529.08546166.rdunlap@xenotime.net>
+References: <1171483314.14504.9.camel@systems03.mmm.com>
+	<20070214201549.GB18753@chrisli.org>
+	<1171486927.8554.0.camel@systems03.mmm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc15.comcast.net ([63.240.77.85]:52713 "EHLO
-	sccrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932595AbXBNVGs (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 16:06:48 -0500
-Content-Disposition: inline
-In-Reply-To: <Pine.LNX.4.64.0702141242460.20368@woody.linux-foundation.org>
+Received: from xenotime.net ([66.160.160.81]:39225 "HELO xenotime.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S932590AbXBNVIm (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 14 Feb 2007 16:08:42 -0500
+Received: from midway.site ([71.245.99.70]) by xenotime.net for <linux-sparse@vger.kernel.org>; Wed, 14 Feb 2007 13:08:38 -0800
+In-Reply-To: <1171486927.8554.0.camel@systems03.mmm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
+To: Daniel Drake <ddrake@brontes3d.com>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
 
-On Wed, Feb 14, 2007 at 12:48:17PM -0800, Linus Torvalds wrote:
-> Yeah. I started out leaving bad stuff as NULL originally, but over time, 
-> as I noticed SIGSEGV's, I mostly changed the ones that I ended up having 
-> trigger to &bad_ctype.
+On Wed, 14 Feb 2007 16:02:07 -0500 Daniel Drake wrote:
+
+> On Wed, 2007-02-14 at 12:15 -0800, Christopher Li wrote:
+> > On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
+> > > sparse doesn't like it:
+> > > 
+> > > 	test.c:7:8: error: Trying to use reserved word '__attribute__' 
+> > > 	as identifier
+> > 
+> > Can you please try this:
+> > 
+> > Chris
+> > 
+> > Handle structure attribute.
 > 
-> Otherwise we either need to test for NULL all the time (and especially 
-> since NULL under _some_ circumstances is ok and means "not evaluated yet", 
-> that can be confusing), and having to pass up errors higher and higher up.
+> Thanks for the quick response, works nicely!
 
-I think I run into the exact same situations. It start out as simple
-rules "&bad_ctype" means error. But then all the test against NULL need
-to change to test against &bad_ctpye as well. It is getting subtle for
-some place NULL means not evaluated yet.
+so now drivers/kvm/* should be less nasty  ;)
 
-Chris
+---
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
