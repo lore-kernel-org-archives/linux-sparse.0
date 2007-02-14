@@ -1,58 +1,49 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH] Re: __attribute__ annotations and struct types
-Date: Wed, 14 Feb 2007 12:15:49 -0800
-Message-ID: <20070214201549.GB18753@chrisli.org>
-References: <1171483314.14504.9.camel@systems03.mmm.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
+Date: Wed, 14 Feb 2007 12:48:17 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0702141242460.20368@woody.linux-foundation.org>
+References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk>
+ <20070214172905.GA17959@chrisli.org> <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org>
+ <20070214195447.GA18753@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc14.comcast.net ([204.127.192.84]:49123 "EHLO
-	rwcrmhc14.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751225AbXBNUpp (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 15:45:45 -0500
-Content-Disposition: inline
-In-Reply-To: <1171483314.14504.9.camel@systems03.mmm.com>
+Received: from smtp.osdl.org ([65.172.181.24]:44901 "EHLO smtp.osdl.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751243AbXBNUsZ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 14 Feb 2007 15:48:25 -0500
+In-Reply-To: <20070214195447.GA18753@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Drake <ddrake@brontes3d.com>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
 
-On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
-> sparse doesn't like it:
+
+
+On Wed, 14 Feb 2007, Christopher Li wrote:
+> > 
+> > It's nice if a NULL type means "type has not been evaluated yet", and then 
+> > using "&bad_ctype" to mean "type evaluated to crap".
 > 
-> 	test.c:7:8: error: Trying to use reserved word '__attribute__' 
-> 	as identifier
+> Good idea. Some of the code already doing that.
 
-Can you please try this:
+Yeah. I started out leaving bad stuff as NULL originally, but over time, 
+as I noticed SIGSEGV's, I mostly changed the ones that I ended up having 
+trigger to &bad_ctype.
 
-Chris
+Otherwise we either need to test for NULL all the time (and especially 
+since NULL under _some_ circumstances is ok and means "not evaluated yet", 
+that can be confusing), and having to pass up errors higher and higher up.
 
-Handle structure attribute.
+I at some point considered having a "silent bad_ctype" - a way of saying 
+"ok, the type here is bad, but I already warned about the thing that 
+_caused_ it to be bad, so don't warn any more about any type clashes".
 
-struct __attribute__((__aligned__(16))) foo {
-    int a;
-};
+But I don't think I ever did that, so now you often get two different 
+warnings (first a warning about "no such symbol" or something and then a 
+warning about "bad types to binary operation" or similar). Anyway, if 
+somebody ever gets irritated about the duplicate warnings, I thought I'd 
+mention that as a potential way to perhaps avoid havign things that 
+already caused errors cause even more verbose errors up the chain..
 
-Signed-Off-By: Christopher Li <sparse@chrisli.org>
-
-Index: sparse/parse.c
-===================================================================
---- sparse.orig/parse.c	2007-02-14 12:37:17.000000000 -0800
-+++ sparse/parse.c	2007-02-14 12:40:48.000000000 -0800
-@@ -34,6 +34,7 @@ struct symbol_list *function_computed_ta
- struct statement_list *function_computed_goto_list;
- 
- static struct token *statement(struct token *token, struct statement **tree);
-+static struct token *handle_attributes(struct token *token, struct ctype *ctype);
- 
- // Add a symbol to the list of function-local symbols
- static void fn_local_symbol(struct symbol *sym)
-@@ -156,6 +157,7 @@ static struct token *struct_union_enum_s
- 	struct position *repos;
- 
- 	ctype->modifiers = 0;
-+	token = handle_attributes(token, ctype);
- 	if (token_type(token) == TOKEN_IDENT) {
- 		sym = lookup_symbol(token->ident, NS_STRUCT);
- 		if (!sym ||
+		Linus
