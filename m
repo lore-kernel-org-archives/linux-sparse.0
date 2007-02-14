@@ -1,36 +1,39 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
-Date: Wed, 14 Feb 2007 12:18:55 -0800
-Message-ID: <20070214201855.GC18753@chrisli.org>
-References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk> <20070214172905.GA17959@chrisli.org> <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org> <20070214195447.GA18753@chrisli.org>
+From: Daniel Drake <ddrake@brontes3d.com>
+Subject: Re: [PATCH] Re: __attribute__ annotations and struct types
+Date: Wed, 14 Feb 2007 16:02:07 -0500
+Message-ID: <1171486927.8554.0.camel@systems03.mmm.com>
+References: <1171483314.14504.9.camel@systems03.mmm.com>
+	 <20070214201549.GB18753@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sccrmhc13.comcast.net ([63.240.77.83]:58651 "EHLO
-	sccrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751289AbXBNUsl (ORCPT
+Received: from smtp136.iad.emailsrvr.com ([207.97.245.136]:43129 "EHLO
+	smtp136.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932586AbXBNVCI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 15:48:41 -0500
-Content-Disposition: inline
-In-Reply-To: <20070214195447.GA18753@chrisli.org>
+	Wed, 14 Feb 2007 16:02:08 -0500
+In-Reply-To: <20070214201549.GB18753@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
 
-On Wed, Feb 14, 2007 at 11:54:47AM -0800, Christopher Li wrote:
-> On Wed, Feb 14, 2007 at 10:24:09AM -0800, Linus Torvalds wrote:
-> > Actually, it's often better to just explicitly make "ctype" be 
-> > "&bad_ctype" instead.
+On Wed, 2007-02-14 at 12:15 -0800, Christopher Li wrote:
+> On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
+> > sparse doesn't like it:
 > > 
-> > It's nice if a NULL type means "type has not been evaluated yet", and then 
-> > using "&bad_ctype" to mean "type evaluated to crap".
+> > 	test.c:7:8: error: Trying to use reserved word '__attribute__' 
+> > 	as identifier
 > 
-> Good idea. Some of the code already doing that. I am making it as a separate
-> patch because touch a lot of code.
+> Can you please try this:
+> 
+> Chris
+> 
+> Handle structure attribute.
 
-This is very messy. The current evaluate_* functions are assuming NULL means for
-"some error happen in this expression, I can't get the ctype". It is all over the
-place.
+Thanks for the quick response, works nicely!
 
-Chris
+-- 
+Daniel Drake
+Brontes Technologies, A 3M Company
