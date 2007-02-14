@@ -1,39 +1,35 @@
-From: Daniel Drake <ddrake@brontes3d.com>
-Subject: Re: [PATCH] Re: __attribute__ annotations and struct types
-Date: Wed, 14 Feb 2007 16:02:07 -0500
-Message-ID: <1171486927.8554.0.camel@systems03.mmm.com>
-References: <1171483314.14504.9.camel@systems03.mmm.com>
-	 <20070214201549.GB18753@chrisli.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
+Date: Wed, 14 Feb 2007 12:36:55 -0800
+Message-ID: <20070214203655.GD18753@chrisli.org>
+References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk> <20070214172905.GA17959@chrisli.org> <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org> <20070214195447.GA18753@chrisli.org> <Pine.LNX.4.64.0702141242460.20368@woody.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp136.iad.emailsrvr.com ([207.97.245.136]:43129 "EHLO
-	smtp136.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932586AbXBNVCI (ORCPT
+Received: from sccrmhc15.comcast.net ([63.240.77.85]:52713 "EHLO
+	sccrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932595AbXBNVGs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 16:02:08 -0500
-In-Reply-To: <20070214201549.GB18753@chrisli.org>
+	Wed, 14 Feb 2007 16:06:48 -0500
+Content-Disposition: inline
+In-Reply-To: <Pine.LNX.4.64.0702141242460.20368@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
 
-On Wed, 2007-02-14 at 12:15 -0800, Christopher Li wrote:
-> On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
-> > sparse doesn't like it:
-> > 
-> > 	test.c:7:8: error: Trying to use reserved word '__attribute__' 
-> > 	as identifier
+On Wed, Feb 14, 2007 at 12:48:17PM -0800, Linus Torvalds wrote:
+> Yeah. I started out leaving bad stuff as NULL originally, but over time, 
+> as I noticed SIGSEGV's, I mostly changed the ones that I ended up having 
+> trigger to &bad_ctype.
 > 
-> Can you please try this:
-> 
-> Chris
-> 
-> Handle structure attribute.
+> Otherwise we either need to test for NULL all the time (and especially 
+> since NULL under _some_ circumstances is ok and means "not evaluated yet", 
+> that can be confusing), and having to pass up errors higher and higher up.
 
-Thanks for the quick response, works nicely!
+I think I run into the exact same situations. It start out as simple
+rules "&bad_ctype" means error. But then all the test against NULL need
+to change to test against &bad_ctpye as well. It is getting subtle for
+some place NULL means not evaluated yet.
 
--- 
-Daniel Drake
-Brontes Technologies, A 3M Company
+Chris
