@@ -1,35 +1,43 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
-Date: Wed, 14 Feb 2007 10:24:09 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org>
-References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk>
- <20070214172905.GA17959@chrisli.org>
+From: Daniel Drake <ddrake@brontes3d.com>
+Subject: __attribute__ annotations and struct types
+Date: Wed, 14 Feb 2007 15:01:54 -0500
+Message-ID: <1171483314.14504.9.camel@systems03.mmm.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.24]:38332 "EHLO smtp.osdl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932431AbXBNSYQ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 13:24:16 -0500
-In-Reply-To: <20070214172905.GA17959@chrisli.org>
+Received: from smtp136.iad.emailsrvr.com ([207.97.245.136]:47598 "EHLO
+	smtp136.iad.emailsrvr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932526AbXBNUWU (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 14 Feb 2007 15:22:20 -0500
+Received: from [169.14.245.222] (host34.155.212.242.conversent.net [155.212.242.34])
+	(Authenticated sender: ddrake@brontes3d.com)
+	by relay3.r3.iad.emailsrvr.com (SMTP Server) with ESMTP id 42B0444C066
+	for <linux-sparse@vger.kernel.org>; Wed, 14 Feb 2007 15:01:55 -0500 (EST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
+To: linux-sparse@vger.kernel.org
 
+gcc-4.1.1 accepts this as valid code:
 
+struct __attribute__((__aligned__(16))) foo {
+    int a;
+};
 
-On Wed, 14 Feb 2007, Christopher Li wrote:
->
-> > fs/ntfs/sysctl.c:38:15: error: undefined identifier 'CTL_UNNUMBRED'
->
-> Sparse left empty ctype when error happen. Sparse should skip
-> the expand_symbol() at all if error happen. 
+sparse doesn't like it:
 
-Actually, it's often better to just explicitly make "ctype" be 
-"&bad_ctype" instead.
+	test.c:7:8: error: Trying to use reserved word '__attribute__' 
+	as identifier
 
-It's nice if a NULL type means "type has not been evaluated yet", and then 
-using "&bad_ctype" to mean "type evaluated to crap".
+I'm not sure if this is a bug that people are interested in solving, as
+the more common form works in both gcc and sparse:
 
-		Linus
+struct foo {
+    int a;
+} __attribute__((__aligned__(16)));
+
+Thanks,
+-- 
+Daniel Drake
+Brontes Technologies, A 3M Company
