@@ -1,44 +1,67 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: Re: [PATCH] Re: __attribute__ annotations and struct types
-Date: Wed, 14 Feb 2007 13:05:29 -0800
-Message-ID: <20070214130529.08546166.rdunlap@xenotime.net>
-References: <1171483314.14504.9.camel@systems03.mmm.com>
-	<20070214201549.GB18753@chrisli.org>
-	<1171486927.8554.0.camel@systems03.mmm.com>
+From: Dan Sheridan <djs@postman.org.uk>
+Subject: Over-eager code elimination?
+Date: Tue, 20 Feb 2007 10:38:22 +0000
+Message-ID: <1171967902.5848.2.camel@localhost.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xenotime.net ([66.160.160.81]:39225 "HELO xenotime.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
-	id S932590AbXBNVIm (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 Feb 2007 16:08:42 -0500
-Received: from midway.site ([71.245.99.70]) by xenotime.net for <linux-sparse@vger.kernel.org>; Wed, 14 Feb 2007 13:08:38 -0800
-In-Reply-To: <1171486927.8554.0.camel@systems03.mmm.com>
+Received: from mailout01.dsvr.x-isp.net ([213.253.179.5]:55995 "EHLO
+	mailout01.dsvr.x-isp.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932894AbXBTL3Z (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 20 Feb 2007 06:29:25 -0500
+Received: from adelard.dsvr.co.uk ([212.69.201.135])
+	by mailout01.dsvr.x-isp.net with esmtp id 1HJSOH-0000nu-A9
+	for linux-sparse@vger.kernel.org; Tue, 20 Feb 2007 10:38:33 +0000
+Received: from [80.229.44.105] (helo=[192.168.254.4])
+	by adelard.dsvr.co.uk with esmtp (Exim 4.62)
+	(envelope-from <djs@postman.org.uk>)
+	id 1HJSO9-0005DF-E9
+	for linux-sparse@vger.kernel.org; Tue, 20 Feb 2007 10:38:25 +0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Drake <ddrake@brontes3d.com>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+To: linux-sparse@vger.kernel.org
 
-On Wed, 14 Feb 2007 16:02:07 -0500 Daniel Drake wrote:
+Running test-linearize on some of my code, I seem to be losing an
+assignment after a break.
 
-> On Wed, 2007-02-14 at 12:15 -0800, Christopher Li wrote:
-> > On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
-> > > sparse doesn't like it:
-> > > 
-> > > 	test.c:7:8: error: Trying to use reserved word '__attribute__' 
-> > > 	as identifier
-> > 
-> > Can you please try this:
-> > 
-> > Chris
-> > 
-> > Handle structure attribute.
-> 
-> Thanks for the quick response, works nicely!
+In this minimal test code, y should have the previous iteration's value
+of x, so the value returned is the difference between the final two
+values from fetch():
 
-so now drivers/kvm/* should be less nasty  ;)
+int fetch(int);
+int test(int v) {
+  int x, y;
+  for (int i=0; ; i++) {
+    x = fetch(i);
+    if (v < x) break;
+    y = x;
+  }
+  return x-y;
+}
 
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+test-linearize produces:
+test:
+.L0xb7db300c:
+        <entry-point>
+        br          .L0xb7db3034
+
+.L0xb7db3034:
+        call.32     %r2 <- fetch, $0
+        setlt.32    %r5 <- %arg1, %r2
+        dead        %r5
+        br          %r5, .L0xb7db3084, .L0xb7db3034
+
+.L0xb7db3084:
+        dead        %r2
+        sub.32      %r11 <- %r2, %r2
+        dead        %r11
+        ret.32      %r11
+
+So it thinks that both x and y are in %r2. However, if y is initialised,
+the assignment happens as expected.
+
+Any ideas?
+
+	Dan.
