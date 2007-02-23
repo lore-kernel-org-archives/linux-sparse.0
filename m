@@ -1,68 +1,49 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] dissect: fix multidimensional array initializer
-Date: Thu, 22 Feb 2007 21:27:39 -0800
-Message-ID: <45DE7B4B.4080100@freedesktop.org>
-References: <20061214213547.GA422@tv-sign.ru>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Fun with Linux 2.6.21-rc1
+Date: Fri, 23 Feb 2007 12:25:18 -0500
+Message-ID: <1172251518.6229.6.camel@dv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig9F0ED00F7E23FB8A49F277C7"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [69.17.117.10] ([69.17.117.10]:49418 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1750891AbXBWF2c (ORCPT
+Received: from fencepost.gnu.org ([199.232.76.164]:36703 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1946021AbXBWRZU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 Feb 2007 00:28:32 -0500
-In-Reply-To: <20061214213547.GA422@tv-sign.ru>
+	Fri, 23 Feb 2007 12:25:20 -0500
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1HKe97-000237-2C
+	for linux-sparse@vger.kernel.org; Fri, 23 Feb 2007 12:23:49 -0500
+Received: from proski by gnu.org with local (Exim 4.66)
+	(envelope-from <proski@gnu.org>)
+	id 1HKeAY-0001ii-G7
+	for linux-sparse@vger.kernel.org; Fri, 23 Feb 2007 12:25:18 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@tv-sign.ru>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig9F0ED00F7E23FB8A49F277C7
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hello!
 
-Oleg Nesterov wrote:
-> dissect can't parse initializers like
->=20
-> 	struct T { int i; } a[2][3] =3D { [0][0] =3D {123} };
->=20
-> , output is:
->=20
-> 	   1:8   s def  T
-> 	   1:21  g def  a                                struct T [3][2]
-> 	   1:21  g -w-  a                                struct T [3][2]
-> 	T.c:1:37: warning: bad expr->type: 25
->=20
-> with this patch applied:
->=20
-> 	   1:8   s def  T
-> 	   1:21  g def  a                                struct T [3][2]
-> 	   1:21  g -w-  a                                struct T [3][2]
-> 	   1:43  s -w-  T.i                              int
->=20
-> Signed-off-by: Oleg Nesterov <oleg@tv-sign.ru>
+The current sparse reports many errors with Linux 2.6.21-rc1.  There are
+screenfuls of errors for every file.  I have reduced one of them to this
+simple file:
 
-Applied.
+struct st {
+	char c;
+} __attribute__ ((aligned(2)));
+struct st s1;
+struct st s2;
 
-- Josh Triplett
+$ sparse test.c 
+test.c:5:18: error: Expected ( after asm
+test.c:5:18: error: got s2
+test.c:5:20: error: Expected ) after asm
+test.c:5:20: error: got ;
+builtin:0:0: error: expected declaration
 
+The strange thing is that there is no "asm" here at all.
 
-
---------------enig9F0ED00F7E23FB8A49F277C7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFF3ntLGJuZRtD+evsRAqz0AJ0cg65lrPd2R8He7cCb+vWf3sWi/QCggc/d
-2LiOaGSzi8iNdn3vx5HnxFA=
-=+sje
------END PGP SIGNATURE-----
-
---------------enig9F0ED00F7E23FB8A49F277C7--
+-- 
+Regards,
+Pavel Roskin
