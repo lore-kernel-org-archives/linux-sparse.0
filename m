@@ -1,51 +1,56 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Re: __attribute__ annotations and struct types
-Date: Thu, 22 Feb 2007 18:23:19 -0800
-Message-ID: <45DE5017.6030202@freedesktop.org>
-References: <1171483314.14504.9.camel@systems03.mmm.com>	 <20070214201549.GB18753@chrisli.org> <1171486927.8554.0.camel@systems03.mmm.com>
+Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
+Date: Thu, 22 Feb 2007 18:25:30 -0800
+Message-ID: <45DE509A.4040002@freedesktop.org>
+References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk> <20070214172905.GA17959@chrisli.org> <Pine.LNX.4.64.0702141022570.3604@woody.linux-foundation.org> <20070214195447.GA18753@chrisli.org> <20070214201855.GC18753@chrisli.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig796E47C6493C99BEFA6726E8"
+ boundary="------------enig086CD6A19DAFEA85E3A6CADC"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [69.17.117.3] ([69.17.117.3]:52549 "EHLO
-	mail1.sea5.speakeasy.net" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1750714AbXBWCXz (ORCPT
+Received: from [69.17.117.10] ([69.17.117.10]:57010 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1750720AbXBWC0Y (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 22 Feb 2007 21:23:55 -0500
-In-Reply-To: <1171486927.8554.0.camel@systems03.mmm.com>
+	Thu, 22 Feb 2007 21:26:24 -0500
+In-Reply-To: <20070214201855.GC18753@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Drake <ddrake@brontes3d.com>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig796E47C6493C99BEFA6726E8
-Content-Type: text/plain; charset=UTF-8
+--------------enig086CD6A19DAFEA85E3A6CADC
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Daniel Drake wrote:
-> On Wed, 2007-02-14 at 12:15 -0800, Christopher Li wrote:
->> On Wed, Feb 14, 2007 at 03:01:54PM -0500, Daniel Drake wrote:
->>> sparse doesn't like it:
+Christopher Li wrote:
+> On Wed, Feb 14, 2007 at 11:54:47AM -0800, Christopher Li wrote:
+>> On Wed, Feb 14, 2007 at 10:24:09AM -0800, Linus Torvalds wrote:
+>>> Actually, it's often better to just explicitly make "ctype" be=20
+>>> "&bad_ctype" instead.
 >>>
->>> 	test.c:7:8: error: Trying to use reserved word '__attribute__'=20
->>> 	as identifier
->> Can you please try this:
->>
->> Chris
->>
->> Handle structure attribute.
+>>> It's nice if a NULL type means "type has not been evaluated yet", and=
+ then=20
+>>> using "&bad_ctype" to mean "type evaluated to crap".
+>> Good idea. Some of the code already doing that. I am making it as a se=
+parate
+>> patch because touch a lot of code.
 >=20
-> Thanks for the quick response, works nicely!
+> This is very messy. The current evaluate_* functions are assuming NULL =
+means for
+> "some error happen in this expression, I can't get the ctype". It is al=
+l over the
+> place.
 
-Applied, along with a test case.
+In that case, I will go ahead and apply your patch to eliminate the segfa=
+ult, and
+I can merge a new patch that uses &bad_ctype later.
 
 - Josh Triplett
 
 
-
---------------enig796E47C6493C99BEFA6726E8
+--------------enig086CD6A19DAFEA85E3A6CADC
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -54,9 +59,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFF3lAXGJuZRtD+evsRAvT8AJ9w7E+YbG6HitjflQCkK54UkapEHgCeJJFJ
-/xT9gTmvBLXTvr7U9zQWUq0=
-=eRFk
+iD8DBQFF3lCaGJuZRtD+evsRAsSjAKCChxNuMiEQedy5p03nO/Sw5/uJEACfYefN
+TWt3D/RZ8MJzeEqOMC8oGIE=
+=xxni
 -----END PGP SIGNATURE-----
 
---------------enig796E47C6493C99BEFA6726E8--
+--------------enig086CD6A19DAFEA85E3A6CADC--
