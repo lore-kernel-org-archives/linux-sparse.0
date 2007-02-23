@@ -1,45 +1,55 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Re: Sparse just seg faulted on me!
-Date: Thu, 22 Feb 2007 18:42:46 -0800
-Message-ID: <45DE54A6.7090109@freedesktop.org>
-References: <9C17AC42-0C51-44D9-B126-1FB781DE0ECA@cam.ac.uk> <20070214172905.GA17959@chrisli.org>
+Subject: Re: [PATCH](take II) Sparse fooled by double semicolon
+Date: Thu, 22 Feb 2007 19:43:29 -0800
+Message-ID: <45DE62E1.9040606@freedesktop.org>
+References: <1170219027.11455.68.camel@dv> <20070131065838.GA23326@chrisli.org> <20070131071717.GA23495@chrisli.org>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigC99EB487981CAE8023E816E1"
+ boundary="------------enig3A7C6254D1E2B6ECAB54A132"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [69.17.117.10] ([69.17.117.10]:42114 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1750703AbXBWCni (ORCPT
+Received: from [69.17.117.8] ([69.17.117.8]:57712 "EHLO
+	mail6.sea5.speakeasy.net" rhost-flags-FAIL-FAIL-OK-OK)
+	by vger.kernel.org with ESMTP id S1750839AbXBWDoV (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 22 Feb 2007 21:43:38 -0500
-In-Reply-To: <20070214172905.GA17959@chrisli.org>
+	Thu, 22 Feb 2007 22:44:21 -0500
+In-Reply-To: <20070131071717.GA23495@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Anton Altaparmakov <aia21@cam.ac.uk>, Sparse <linux-sparse@vger.kernel.org>
+Cc: Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigC99EB487981CAE8023E816E1
+--------------enig3A7C6254D1E2B6ECAB54A132
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
 Christopher Li wrote:
->> fs/ntfs/sysctl.c:38:15: error: undefined identifier 'CTL_UNNUMBRED'
-> Sparse left empty ctype when error happen. Sparse should skip
-> the expand_symbol() at all if error happen.=20
+> Actually, this version is better because it handle semicolon
+> as the first member as well.
 >=20
-> Please try this patch:
+> Fix double semicolon in struct declare
 >=20
-> Fix the segfault when initializer has unknown symbol
+> Pavel discover this test case:
+> #include <string.h>
+> void test(void)
+> {
+>        struct { int foo;; } val;
+>        memset(&val, 0, sizeof(val));
+> }
+>=20
+> Sparse ends up create a node with empty ctype in the member list.
+> Skip that seems fix it.
+>=20
+> Signed-Off-By: Christopher Li<spase@chrisli.org>
 
-Applied.
+Applied, along with the test case.
 
 - Josh Triplett
 
 
 
---------------enigC99EB487981CAE8023E816E1
+--------------enig3A7C6254D1E2B6ECAB54A132
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -48,9 +58,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFF3lSmGJuZRtD+evsRAiBYAJ0Yn2SSC5nfKcollEgZf/PhVetSJgCgl+Uc
-GBBL+lkENAZSgiThmMEXY64=
-=/B4e
+iD8DBQFF3mLhGJuZRtD+evsRAkLqAJ9w4tRIQuSbsv3X4clEuVYy9s2VQACeKb+M
+d75LaSIJ2DNJGcdL9fdW5gI=
+=MVqk
 -----END PGP SIGNATURE-----
 
---------------enigC99EB487981CAE8023E816E1--
+--------------enig3A7C6254D1E2B6ECAB54A132--
