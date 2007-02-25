@@ -1,48 +1,68 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [PATCH] Re: Fun with Linux 2.6.21-rc1
-Date: Fri, 23 Feb 2007 20:53:12 -0500
-Message-ID: <1172281992.19767.20.camel@dv>
-References: <1172251518.6229.6.camel@dv> <1172260766.14431.3.camel@dv>
-	 <20070223223027.GA5671@chrisli.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: exposing __attribute__ portability macros in lib.h; any objections?
+Date: Sun, 25 Feb 2007 14:45:29 -0800
+Message-ID: <45E21189.1060202@freedesktop.org>
+References: <1172251518.6229.6.camel@dv> <1172260766.14431.3.camel@dv> <20070223223027.GA5671@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigF0F6B131E04194344F0CBC42"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:55953 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933327AbXBXBxO (ORCPT
+Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:41437 "EHLO
+	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965190AbXBYWpc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 Feb 2007 20:53:14 -0500
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HKm4c-0006B9-SN
-	for linux-sparse@vger.kernel.org; Fri, 23 Feb 2007 20:51:42 -0500
+	Sun, 25 Feb 2007 17:45:32 -0500
 In-Reply-To: <20070223223027.GA5671@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+Cc: Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
 
-On Fri, 2007-02-23 at 14:30 -0800, Christopher Li wrote:
-> On Fri, Feb 23, 2007 at 02:59:26PM -0500, Pavel Roskin wrote:
-> > P.S. The breakage has nothing to do to Linux changes.  It was caused by
-> > the patch called "Make the ptrlist using the sparse allocator".  Undoing
-> > the patch fixes the problem.
-> >
-> 
-> No, that was not it. The bug does not trigger if I remove "-O" or remove
-> the recent struct attribute patch.
-> 
-> You make me guilt for 5 mins. But the real bugs is match_idents did not
-> end with NULL.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigF0F6B131E04194344F0CBC42
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-I understand your patch triggered a bug that was sitting there for more
-than two years.  That's quite rare.  Sorry for assuming your guilt.
+Christopher Li wrote:
+> Fix a bug that match_idents forget to end with NULL
+[...]
+> Signed-Off-By: Christopher Li <sparse@chrisli.org>
+[...]
+> -		if (match_idents(token, &asm_ident, &__asm_ident, &__asm___ident)) {=
 
-> This patch should fix it:
+> +		if (match_idents(token, &asm_ident, &__asm_ident, &__asm___ident, NU=
+LL)) {
 
-Yes, it's working.  Thank you!
+Applied.
 
--- 
-Regards,
-Pavel Roskin
+I'd also like to apply a patch to use __attribute__((__sentinel__)) on
+match_idents, which would have caught this problem.  In order to do so
+portably, I plan to add a portability macro SENTINEL_ATTR, like the
+FORMAT_ATTR macro currently in lib.h.  However, lib.h currently defines
+FORMAT_ATTR, uses it for a few prototypes, and then undefines it.  Any
+objections to defining SENTINEL_ATTR and leaving it defined (and probably=
+
+doing the same for FORMAT_ATTR)?  I don't think those would pollute the
+namespace any more than lib.h already does with position, verbose, info, =
+and
+similar.
+
+- Josh Triplett
+
+
+--------------enigF0F6B131E04194344F0CBC42
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFF4hGJGJuZRtD+evsRAuAYAJ9o6irCXFE4cEk5we5fTIzJjl4JpACdEghh
+ZvrjF25dHtL+/qoioV/0HcA=
+=LPxi
+-----END PGP SIGNATURE-----
+
+--------------enigF0F6B131E04194344F0CBC42--
