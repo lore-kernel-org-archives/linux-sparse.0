@@ -1,43 +1,63 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: exposing __attribute__ portability macros in lib.h; any objections?
-Date: Mon, 26 Feb 2007 02:43:48 -0800
-Message-ID: <20070226104348.GA27482@chrisli.org>
-References: <1172251518.6229.6.camel@dv> <1172260766.14431.3.camel@dv> <20070223223027.GA5671@chrisli.org> <45E21189.1060202@freedesktop.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 3] Fix core dump on huge switch
+Date: Mon, 26 Feb 2007 11:57:28 -0800
+Message-ID: <45E33BA8.80904@freedesktop.org>
+References: <20070210001647.GB20644@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigD5393556A3D2DB900A30FCCD"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rwcrmhc13.comcast.net ([216.148.227.153]:48176 "EHLO
-	rwcrmhc13.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751217AbXBZLQS (ORCPT
+Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:55904 "EHLO
+	mail3.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030506AbXBZT5b (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 26 Feb 2007 06:16:18 -0500
-Content-Disposition: inline
-In-Reply-To: <45E21189.1060202@freedesktop.org>
+	Mon, 26 Feb 2007 14:57:31 -0500
+In-Reply-To: <20070210001647.GB20644@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Sun, Feb 25, 2007 at 02:45:29PM -0800, Josh Triplett wrote:
-> Applied.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigD5393556A3D2DB900A30FCCD
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Thanks!
+Christopher Li wrote:
+> Bump up the size of the instruction buffer. vt_ioctl.c has
+> a huge switch statement causing sparse over flow the instruction
+> buffer.
+>=20
+> Signed-Off-By: Christopher Li <sparse@chrisli.org>
 
-> 
-> I'd also like to apply a patch to use __attribute__((__sentinel__)) on
-> match_idents, which would have caught this problem.  In order to do so
-> portably, I plan to add a portability macro SENTINEL_ATTR, like the
-> FORMAT_ATTR macro currently in lib.h.  However, lib.h currently defines
-> FORMAT_ATTR, uses it for a few prototypes, and then undefines it.  Any
-> objections to defining SENTINEL_ATTR and leaving it defined (and probably
-> doing the same for FORMAT_ATTR)?  I don't think those would pollute the
-> namespace any more than lib.h already does with position, verbose, info, and
-> similar.
+I've applied this fix for now, to solve the immediate problem; thanks for=
+ the patch. =20
 
-No objection for __sentinel__ per se. In the long run, I would like to
-get ride of match_idents completely. I want to define more parser
-operation function for pre-defined keywords. So it is driven by the
-symbol table rather than comparing the keyword one by one. It is a
-big change though.
+Ideally I'd like to see some solution that grows the buffer as needed.
 
-Chris
+I also committed one minor style fix after your patch:
+
+> +	if (buf >=3D buffer + sizeof buffer)
+
+Please use parentheses with sizeof, per the Linux Documentation/CodingSty=
+le.
+
+- Josh Triplett
+
+
+--------------enigD5393556A3D2DB900A30FCCD
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFF4zuoGJuZRtD+evsRAq6jAKCbKMgX7KvDyGA+dXiwSKyXkQ80OwCeML2A
+qXauG5qPKqeiMvvmnzD5CwM=
+=a7KW
+-----END PGP SIGNATURE-----
+
+--------------enigD5393556A3D2DB900A30FCCD--
