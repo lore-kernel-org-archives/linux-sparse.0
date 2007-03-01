@@ -1,57 +1,85 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 4] Disable liveness "dead" instruction by default.
-Date: Wed, 28 Feb 2007 11:46:36 -0800
-Message-ID: <45E5DC1C.4050000@freedesktop.org>
-References: <20070210001810.GC20644@chrisli.org>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: [PATCH 7] Adding the interrupt checker
+Date: Thu, 01 Mar 2007 01:07:06 -0500
+Message-ID: <1172729226.2337.31.camel@dv>
+References: <20070210002604.GA20748@chrisli.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig91BF94D50E726FF54782326C"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:59339 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751877AbXB1Tqj (ORCPT
+Received: from fencepost.gnu.org ([199.232.76.164]:45994 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932664AbXCAGHK (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 28 Feb 2007 14:46:39 -0500
-In-Reply-To: <20070210001810.GC20644@chrisli.org>
+	Thu, 1 Mar 2007 01:07:10 -0500
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1HMePz-00041I-Kp
+	for linux-sparse@vger.kernel.org; Thu, 01 Mar 2007 01:05:31 -0500
+In-Reply-To: <20070210002604.GA20748@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig91BF94D50E726FF54782326C
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hello!
 
-Christopher Li wrote:
-> The liveness instruction take up about 10% of the bytecode bloat file.
-> It is not very useful, it is duplicate information can be obtain
-> from the def/user chain.
->=20
-> This change disable the liveness instruction by default.
-> The caller can track_pseudo_death() if needed.
->=20
-> Signed-Off-By: Christopher Li <sparse@chrisli.org>
+On Fri, 2007-02-09 at 16:26 -0800, Christopher Li wrote:
+> Changelog:
+>  - Using the new inline function calling annotation to find
+>    out the irq related call. It now works both inline and
+>    external functions. Bonus is no more x86 asm any more.
+>  - The noise level of interrupt check drop considerably.
+>    I think it is less nosier than the context checking.
+> 
+> Signed-off-by: Christopher Li<sparse@chrisli.org>
+[skip]
+> +	static const char *enable[] = {
+> +		"raw_local_irq_enable",
+> +		"raw_safe_halt",
+> +		"_spin_unlock_irq",
+> +		"_read_unlock_irq",
+> +		"_write_unlock_irq",
+> +		"schedule",		// XXX: is it always true?
+> +	};
 
-Good idea; applied.
+Sorry for late comments.  I actually applied the series to my copy of
+sparse, and I found today that it catches schedule() for no reason.
 
-- Josh Triplett
+"schedule" doesn't belong here.  It doesn't enable or disable
+interrupts.  However, it requires interrupts to be enabled.  Annotating
+functions requiring a specific context is not covered by your patch, so
+I think it would be better to drop "schedule" from this list.
 
+This patch helped me find some places where interrupts were disabled and
+enabled twice.  But the output is confusing:
 
+/home/proski/src/madwifi/net80211/ieee80211_node.c:1631:2: warning:
+checker function ieee80211_timeout_stations double enable
 
---------------enig91BF94D50E726FF54782326C
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+It's not even clear that the message is about interrupts.  And the
+"checker function" part is quite useless.  See other sparse warnings to
+compare the style.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+I think the patch is mildly useful, but shouldn't be applied as is.
 
-iD4DBQFF5dwcGJuZRtD+evsRAtPJAJj1v64DTHFxJezlLerOU9x5zGN+AJ42bjv5
-bvktUlD+PdK86hX3/Gkq9g==
-=fi2M
------END PGP SIGNATURE-----
+Moreover, I think that incorrect use of locking is a remaining major
+issue not covered by sparse.  Runtime checks only cover the code that is
+executed.  Besides, the don't enforce better coding style.
 
---------------enig91BF94D50E726FF54782326C--
+I think all functions capable of supporting atomic contexts should be
+annotated as such, and sparse should be always aware of the allowed
+locking contexts for the code.
+
+This would be a major, major change, perhaps more intrusive than the
+endianess annotation.  But I think it would be worth the trouble.  It
+would probably catch hundreds of bugs capable of hosing a working
+system.
+
+Another nice feature would be to annotate data so that it can be
+accessed with certain locks held.  That would catch even more bugs, but
+first sparse should be made lock aware.
+
+-- 
+Regards,
+Pavel Roskin
