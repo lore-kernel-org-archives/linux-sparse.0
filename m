@@ -1,85 +1,35 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [PATCH 7] Adding the interrupt checker
-Date: Thu, 01 Mar 2007 01:07:06 -0500
-Message-ID: <1172729226.2337.31.camel@dv>
-References: <20070210002604.GA20748@chrisli.org>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: sparse segfault in kernel -mm tree
+Date: Mon, 5 Mar 2007 17:53:22 -0800
+Message-ID: <20070305175322.cbe0bb66.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:45994 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932664AbXCAGHK (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 1 Mar 2007 01:07:10 -0500
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HMePz-00041I-Kp
-	for linux-sparse@vger.kernel.org; Thu, 01 Mar 2007 01:05:31 -0500
-In-Reply-To: <20070210002604.GA20748@chrisli.org>
+Received: from xenotime.net ([66.160.160.81]:54687 "HELO xenotime.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S933841AbXCFBz0 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 5 Mar 2007 20:55:26 -0500
+Received: from midway.site ([71.245.96.156]) by xenotime.net for <linux-sparse@vger.kernel.org>; Mon, 5 Mar 2007 17:55:17 -0800
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+To: linux-sparse@vger.kernel.org
 
-Hello!
+Hi,
 
-On Fri, 2007-02-09 at 16:26 -0800, Christopher Li wrote:
-> Changelog:
->  - Using the new inline function calling annotation to find
->    out the irq related call. It now works both inline and
->    external functions. Bonus is no more x86 asm any more.
->  - The noise level of interrupt check drop considerably.
->    I think it is less nosier than the context checking.
-> 
-> Signed-off-by: Christopher Li<sparse@chrisli.org>
-[skip]
-> +	static const char *enable[] = {
-> +		"raw_local_irq_enable",
-> +		"raw_safe_halt",
-> +		"_spin_unlock_irq",
-> +		"_read_unlock_irq",
-> +		"_write_unlock_irq",
-> +		"schedule",		// XXX: is it always true?
-> +	};
+sparse (latest git tarball from DaveJones) segfaults when
+checking the 2.6.21-rc2-mm1 tree:
 
-Sorry for late comments.  I actually applied the series to my copy of
-sparse, and I found today that it catches schedule() for no reason.
 
-"schedule" doesn't belong here.  It doesn't enable or disable
-interrupts.  However, it requires interrupts to be enabled.  Annotating
-functions requiring a specific context is not covered by your patch, so
-I think it would be better to drop "schedule" from this list.
+  CHECK   drivers/net/vioc/vioc_provision.c
+/bin/sh: line 1:  4021 Segmentation fault      sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -D__x86_64__ -m64 -nostdinc -isystem /usr/lib64/gcc/x86_64-suse-linux/4.1.0/include -Wp,-MD,drivers/net/vioc/.vioc_provision.o.d -nostdinc -isystem /usr/lib64/gcc/x86_64-suse-linux/4.1.0/include -D__KERNEL__ -Iinclude -include include/linux/autoconf.h -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Os -mtune=generic -m64 -mno-red-zone -mcmodel=kernel -pipe -fno-reorder-blocks -Wno-sign-compare -fno-asynchronous-unwind-tables -funit-at-a-time -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -maccumulate-outgoing-args -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -fno-stack-protector -Wdeclaration-after-statement -Wno-pointer-sign -DMODULE -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(vioc_pr
+ ovision)" -D"KBUILD_MODNAME=KBUILD_STR(vioc)" drivers/net/vioc/vioc_provision.c
+make[3]: *** [drivers/net/vioc/vioc_provision.o] Error 139
+make[2]: *** [drivers/net/vioc] Error 2
+make[1]: *** [drivers/net] Error 2
+make: *** [drivers] Error 2
 
-This patch helped me find some places where interrupts were disabled and
-enabled twice.  But the output is confusing:
+sparse[4021]: segfault at 0000000000000050 rip 000000000040fd63 rsp 00007fff6e1cccb0 error 4
 
-/home/proski/src/madwifi/net80211/ieee80211_node.c:1631:2: warning:
-checker function ieee80211_timeout_stations double enable
-
-It's not even clear that the message is about interrupts.  And the
-"checker function" part is quite useless.  See other sparse warnings to
-compare the style.
-
-I think the patch is mildly useful, but shouldn't be applied as is.
-
-Moreover, I think that incorrect use of locking is a remaining major
-issue not covered by sparse.  Runtime checks only cover the code that is
-executed.  Besides, the don't enforce better coding style.
-
-I think all functions capable of supporting atomic contexts should be
-annotated as such, and sparse should be always aware of the allowed
-locking contexts for the code.
-
-This would be a major, major change, perhaps more intrusive than the
-endianess annotation.  But I think it would be worth the trouble.  It
-would probably catch hundreds of bugs capable of hosing a working
-system.
-
-Another nice feature would be to annotate data so that it can be
-accessed with certain locks held.  That would catch even more bugs, but
-first sparse should be made lock aware.
-
--- 
-Regards,
-Pavel Roskin
+---
+~Randy
