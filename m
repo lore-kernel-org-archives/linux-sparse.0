@@ -1,50 +1,39 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: sparse using insane amounts of memory
-Date: Thu, 08 Mar 2007 18:43:11 +0100
-Message-ID: <1173375791.3248.37.camel@johannes.berg>
-References: <1173319356.3546.54.camel@johannes.berg>
-	 <1173371608.21465.12.camel@dv>  <1173372315.3248.19.camel@johannes.berg>
-	 <1173375270.15842.24.camel@dv>
+Date: Thu, 8 Mar 2007 09:43:23 -0800 (PST)
+Message-ID: <Pine.LNX.4.64.0703080935120.10832@woody.linux-foundation.org>
+References: <1173319356.3546.54.camel@johannes.berg>  <1173371608.21465.12.camel@dv>
+  <1173372315.3248.19.camel@johannes.berg> <1173374010.15842.13.camel@dv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-1L5dBuRR18RsTJcX4AER"
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:48898 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752607AbXCHRnX (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Mar 2007 12:43:23 -0500
-In-Reply-To: <1173375270.15842.24.camel@dv>
+Received: from smtp.osdl.org ([65.172.181.24]:55238 "EHLO smtp.osdl.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752604AbXCHRnr (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 8 Mar 2007 12:43:47 -0500
+In-Reply-To: <1173374010.15842.13.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Pavel Roskin <proski@gnu.org>
-Cc: linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
+Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org
 
 
---=-1L5dBuRR18RsTJcX4AER
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
 
-On Thu, 2007-03-08 at 12:34 -0500, Pavel Roskin wrote:
+On Thu, 8 Mar 2007, Pavel Roskin wrote:
+> 
+> Reducing the file may be tricky, since there is no definite way to say
+> if the problem exists once the code becomes shorter.  But I'll try.
 
-> FIELDS32 expands to some monstrosities.  Look for rt2x00_bbp_write in
-> the dump.  Also behold the amount of parentheses in LOWEST_BIT32.
-> That's almost certainly the culprit.
+I would guess at
 
-And I even had CONFIG_RT2X00_DEBUG enabled so it's worse that the
-regular case.
+	static inline __attribute__((always_inline)) void device_rate_entry(..)
 
-johannes
+because while that function *looks* really simple ("Hey, it's just ten 
+lines"), those lines expand to some nested compile-time constant macros 
+from hell, and the end result is hundreds and hundreds of lines of really 
+dense code because the macros are set up to be able to handle constant 
+arguments asa constant.
 
---=-1L5dBuRR18RsTJcX4AER
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+That thing is a thing from hell.
 
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iD8DBQBF8Esv/ETPhpq3jKURAkQEAJ9PUdX5enuFa5B+i2O8cK/9xQ9X9wCfZLeo
-qbc0+FWnNkvRPovwP62d5ew=
-=g7NP
------END PGP SIGNATURE-----
-
---=-1L5dBuRR18RsTJcX4AER--
+			Linus
