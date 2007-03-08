@@ -1,71 +1,62 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Pavel Roskin <proski@gnu.org>
 Subject: Re: sparse using insane amounts of memory
-Date: Thu, 08 Mar 2007 17:45:14 +0100
-Message-ID: <1173372315.3248.19.camel@johannes.berg>
+Date: Thu, 08 Mar 2007 12:13:30 -0500
+Message-ID: <1173374010.15842.13.camel@dv>
 References: <1173319356.3546.54.camel@johannes.berg>
-	 <1173371608.21465.12.camel@dv>
+	 <1173371608.21465.12.camel@dv>  <1173372315.3248.19.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-gy5OON78MuuNFRX/xO4L"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:51060 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752536AbXCHQpZ (ORCPT
+Received: from fencepost.gnu.org ([199.232.76.164]:60430 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752582AbXCHRNl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Mar 2007 11:45:25 -0500
-In-Reply-To: <1173371608.21465.12.camel@dv>
+	Thu, 8 Mar 2007 12:13:41 -0500
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1HPM9g-0004zn-Ih
+	for linux-sparse@vger.kernel.org; Thu, 08 Mar 2007 12:11:53 -0500
+In-Reply-To: <1173372315.3248.19.camel@johannes.berg>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
-Cc: linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-sparse@vger.kernel.org
 
+[Dropping linux-wireless, as there is nothing wireless below]
 
---=-gy5OON78MuuNFRX/xO4L
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+On Thu, 2007-03-08 at 17:45 +0100, Johannes Berg wrote:
+>   make CC="gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=1 M=drivers/net/wireless/mac80211/rt2x00/
+> 
+> and aborted when I got lots of errors, rt2400pci.i was created and has
+> about 26k lines. Running sparse on it (sparse rt2400pci.i) takes a lot
+> of memory too. I put the file up at
+> http://johannes.sipsolutions.net/files/rt2400pci.i
 
-On Thu, 2007-03-08 at 11:33 -0500, Pavel Roskin wrote:
+Thanks!  I see it now.  Sparse is taking about 700M on x86 and 1100M on
+x86_64, which is much more than it uses for other files.
 
-> You forgot the version of sparse.
+Valgrind reports something interesting, but not necessarily related to
+the memory hogging:
 
-Good point. The commit is c4670dfcbe52b598e263c452762a66d22e636585.
+==15775== Warning: invalid file descriptor -1 in syscall read()
+==15775== Source and destination overlap in memcpy(0xBEFA84B4, 0xBEFA84D0, 48)
+==15775==    at 0x4007242: memcpy (mc_replace_strmem.c:402)
+==15775==    by 0x805E5CB: sort_list (sort.c:207)
+==15775==    by 0x8061D7C: cleanup_and_cse (cse.c:247)
+==15775==    by 0x805DE7B: linearize_symbol (linearize.c:2147)
+==15775==    by 0x804AEC2: check_symbols (sparse.c:266)
+==15775==    by 0x804B296: main (sparse.c:284)
 
->   I cannot reproduce the problem with
-> the current sparse from git
-> (git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git)
+If sparse is compiled without optimization, the "overlap" warning is not
+reported.  I think it can be ignored.
 
-I just upgraded to 309f3805ddec9ab2f9c62da573586a7cf7c1f17a and still
-observe that it uses a lot of memory.
+It takes several minutes for sparse to process rt2400pci.i under
+valgrind.  I haven't tried looking for leaks yet.
 
-> If you still have the problem, please remove rt2400pci.o and run:
->=20
-> make CC=3D"gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=3D1
->=20
-> rt2400pci.i will be found in the root of the build tree.  Please see if
-> you have a problem with it.  If you do, please put it online and post
-> the URL.
+Reducing the file may be tricky, since there is no definite way to say
+if the problem exists once the code becomes shorter.  But I'll try.
 
-I ran=20
-
-  make CC=3D"gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=3D1 M=3Ddrivers=
-/net/wireless/mac80211/rt2x00/
-
-and aborted when I got lots of errors, rt2400pci.i was created and has
-about 26k lines. Running sparse on it (sparse rt2400pci.i) takes a lot
-of memory too. I put the file up at
-http://johannes.sipsolutions.net/files/rt2400pci.i
-
-johannes
-
---=-gy5OON78MuuNFRX/xO4L
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iD8DBQBF8D2a/ETPhpq3jKURAn6GAJwPeORchTuh9CGHfRGKq7sNcMyztACfQvKQ
-yqjjKFBkh8Z7ZUNw9GmLSBo=
-=ZU1/
------END PGP SIGNATURE-----
-
---=-gy5OON78MuuNFRX/xO4L--
+-- 
+Regards,
+Pavel Roskin
