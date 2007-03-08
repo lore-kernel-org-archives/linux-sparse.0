@@ -1,43 +1,45 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: BUG: sparse redeclaration warning when assigning to a declared
- variable!
-Date: Thu, 8 Mar 2007 10:06:30 -0800 (PST)
-Message-ID: <Pine.LNX.4.64.0703081003400.10832@woody.linux-foundation.org>
-References: <200703081853.15693.blaisorblade@yahoo.it>
+From: Ivo van Doorn <ivdoorn@gmail.com>
+Subject: Re: sparse using insane amounts of memory
+Date: Thu, 8 Mar 2007 19:08:40 +0100
+Message-ID: <200703081908.40997.IvDoorn@gmail.com>
+References: <1173319356.3546.54.camel@johannes.berg> <1173375270.15842.24.camel@dv> <1173375791.3248.37.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.24]:56563 "EHLO smtp.osdl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752390AbXCHSGc (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Mar 2007 13:06:32 -0500
-In-Reply-To: <200703081853.15693.blaisorblade@yahoo.it>
+Received: from wx-out-0506.google.com ([66.249.82.226]:6053 "EHLO
+	wx-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752402AbXCHSIz (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 8 Mar 2007 13:08:55 -0500
+Received: by wx-out-0506.google.com with SMTP id h31so597913wxd
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Mar 2007 10:08:55 -0800 (PST)
+In-Reply-To: <1173375791.3248.37.camel@johannes.berg>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Blaisorblade <blaisorblade@yahoo.it>
-Cc: Sparse ML <linux-sparse@vger.kernel.org>
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: Pavel Roskin <proski@gnu.org>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
 
+On Thursday 08 March 2007 18:43, Johannes Berg wrote:
+> On Thu, 2007-03-08 at 12:34 -0500, Pavel Roskin wrote:
+> 
+> > FIELDS32 expands to some monstrosities.  Look for rt2x00_bbp_write in
+> > the dump.  Also behold the amount of parentheses in LOWEST_BIT32.
+> > That's almost certainly the culprit.
+> 
+> And I even had CONFIG_RT2X00_DEBUG enabled so it's worse that the
+> regular case.
 
+Those checks are intended to doublecheck the register FIELD{16,32}
+defines. Since all register definitions were rewritten from the legacy driver,
+(legacy driver used unions and structs for all registers) some of those
+defines weren't done correctly (A bitmask could for example be in binary 000110111
+which is very wrong).
 
-On Thu, 8 Mar 2007, Blaisorblade wrote:
->
-> Code giving one of these warnings (kernel tree 2.6.20.1), other warnings are 
-> like this. I.e.:
-> ret = something()
-> is seen as redeclaration.
+To check those the register checks were added to ensure the register defines
+were at least correct. I am however open to suggestions on how this should be improved
+and cleaned up, since it is not my favorite piece of code. ;)
 
-No. Sparse is actually correct, but you didn't notice that there is 
-*another* "ret" there.
-
-See how TestClearPageWriteback() is declared in <linux/page-flags.h>. THAT 
-is the "ret" that shadows an earlier one..
-
-(And no, a macro should not use a common name like that - imagine if you 
-call it with an argument that really is "struct page *ret", and thing what 
-happens to the TestClearPageWritepage expansion..)
-
-So sparse in this case does seem to be pointing out a potentially 
-dangerous situation, where a macro declares a local variable with the same 
-name as a user of that macro.
-
-			Linus
+Ivo
