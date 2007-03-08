@@ -1,48 +1,71 @@
-From: Pavel Roskin <proski-mXXj517/zsQ@public.gmane.org>
+From: Johannes Berg <johannes@sipsolutions.net>
 Subject: Re: sparse using insane amounts of memory
-Date: Thu, 08 Mar 2007 11:33:28 -0500
-Message-ID: <1173371608.21465.12.camel@dv>
+Date: Thu, 08 Mar 2007 17:45:14 +0100
+Message-ID: <1173372315.3248.19.camel@johannes.berg>
 References: <1173319356.3546.54.camel@johannes.berg>
+	 <1173371608.21465.12.camel@dv>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <1173319356.3546.54.camel-YfaajirXv214zXjbi5bjpg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Cc: linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-gy5OON78MuuNFRX/xO4L"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from crystal.sipsolutions.net ([195.210.38.204]:51060 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752536AbXCHQpZ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 8 Mar 2007 11:45:25 -0500
+In-Reply-To: <1173371608.21465.12.camel@dv>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Thu, 2007-03-08 at 03:02 +0100, Johannes Berg wrote:
-> Hi,
-> 
-> I was running make C=2 over the current wireless-dev tree (as of commit
-> 4533da881f2d8c3e0dbb5b3dbc7a919e12438a8a) and reached
-> drivers/net/wireless/mac80211/rt2x00/rt2400pci.c when sparse started
-> using more and more memory. It went up to about 1 GB. Now I don't know
-> whether to blame sparse or if something's wrong with that file but it
-> does seem to be a bit excessive... Similar with all the other driver
-> files in that directory, yet I've not seen such a case before.
 
-You forgot the version of sparse.  I cannot reproduce the problem with
-the current sparse from git
-(git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git)
+--=-gy5OON78MuuNFRX/xO4L
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-There were some bad bugs fixed recently.  If you are using the snapshot,
-please download the latest snapshot now, as they were out-of-date until
-very recently.
+On Thu, 2007-03-08 at 11:33 -0500, Pavel Roskin wrote:
 
-If you still have the problem, please remove rt2400pci.o and run:
+> You forgot the version of sparse.
 
-make CC="gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=1
+Good point. The commit is c4670dfcbe52b598e263c452762a66d22e636585.
 
-rt2400pci.i will be found in the root of the build tree.  Please see if
-you have a problem with it.  If you do, please put it online and post
-the URL.
+>   I cannot reproduce the problem with
+> the current sparse from git
+> (git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git)
 
-If git sparse resolves the problem, I urge sparse developers to make
-another release soon.
+I just upgraded to 309f3805ddec9ab2f9c62da573586a7cf7c1f17a and still
+observe that it uses a lot of memory.
 
--- 
-Regards,
-Pavel Roskin
+> If you still have the problem, please remove rt2400pci.o and run:
+>=20
+> make CC=3D"gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=3D1
+>=20
+> rt2400pci.i will be found in the root of the build tree.  Please see if
+> you have a problem with it.  If you do, please put it online and post
+> the URL.
+
+I ran=20
+
+  make CC=3D"gcc -save-temps -D__CHECKER__" KBUILD_NOCMDDEP=3D1 M=3Ddrivers=
+/net/wireless/mac80211/rt2x00/
+
+and aborted when I got lots of errors, rt2400pci.i was created and has
+about 26k lines. Running sparse on it (sparse rt2400pci.i) takes a lot
+of memory too. I put the file up at
+http://johannes.sipsolutions.net/files/rt2400pci.i
+
+johannes
+
+--=-gy5OON78MuuNFRX/xO4L
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iD8DBQBF8D2a/ETPhpq3jKURAn6GAJwPeORchTuh9CGHfRGKq7sNcMyztACfQvKQ
+yqjjKFBkh8Z7ZUNw9GmLSBo=
+=ZU1/
+-----END PGP SIGNATURE-----
+
+--=-gy5OON78MuuNFRX/xO4L--
