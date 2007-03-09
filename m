@@ -1,40 +1,35 @@
-From: Ivo van Doorn <ivdoorn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Subject: Re: sparse using insane amounts of memory
-Date: Thu, 8 Mar 2007 20:26:15 +0100
-Message-ID: <200703082026.15305.IvDoorn@gmail.com>
-References: <1173319356.3546.54.camel@johannes.berg> <200703081908.40997.IvDoorn@gmail.com> <Pine.LNX.4.64.0703081023490.10832@woody.linux-foundation.org>
+From: "Tommy Thorn" <tommy@numba-tu.com>
+Subject: OT [Re: sparse using insane amounts of memory]
+Date: Thu, 8 Mar 2007 17:12:44 -0800 (PST)
+Message-ID: <44121.209.213.198.25.1173402764.squirrel@numba-tu.com>
+References: <1173319356.3546.54.camel@johannes.berg>  
+    <1173375270.15842.24.camel@dv><1173375791.3248.37.camel@johannes.berg>
+     <200703081908.40997.IvDoorn@gmail.com>  
+    <Pine.LNX.4.64.0703081023490.10832@woody.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <Pine.LNX.4.64.0703081023490.10832-5CScLwifNT1QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
-Content-Disposition: inline
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
-Cc: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, Pavel Roskin <proski-mXXj517/zsQ@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from 208.65.183.75.static.etheric.net ([208.65.183.75]:3719 "EHLO
+	numba-tu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S2992873AbXCIBmo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 8 Mar 2007 20:42:44 -0500
+In-Reply-To: <Pine.LNX.4.64.0703081023490.10832@woody.linux-foundation.org>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Ivo van Doorn <ivdoorn@gmail.com>, Johannes Berg <johannes@sipsolutions.net>, Pavel Roskin <proski@gnu.org>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
 
-> > 	#define is_power_of_two(x) (!((x) & ((x)-1)))
-> > 	#define low_bit_mask(x) (((x)-1) & ~(x))
-> > 	#define is_contiguous_mask(x) is_power_of_two(1 + (x) + low_bit_mask(x))
-> 
-> Side note: I didn't check this. So if you actually do this, please 
-> double-check. The math should all be good, but there's a few caveats:
+Linus Torvalds said:
+....
+> Thus endeth Linus' "games with bits" lecture. It was probably more than you
+> really wanted to know. There's a ton of games you can play with simple "x-1"
+and
+> bitmasking ops like this).
 
-Checked, and seems to work. Even sparse appears to be very happy. :)
-I'll do some more extensive testing later today before submitting a patch.
- 
-> The "zero is special" thing means that if you don't want to accept zero as 
-> a valid mask (it technically *is* a contiguous set of bits set - it's just 
-> the empty set) you'd need to check for it specially.
+For anyone who enjoy this stuff (don't we all?), I heartily recommend Knuth's
+recent "Bitwise Tricks and Techniques" Pre-Fascicle:
+http://www-cs-faculty.stanford.edu/~knuth/news.html
 
-Good point, I'll add a check for that as well.
-
-> Thus endeth Linus' "games with bits" lecture. It was probably more than 
-> you really wanted to know. There's a ton of games you can play with simple 
-> "x-1" and bitmasking ops like this).
-
-Thanks, for both the macro's and the lecture. ;)
-
-Ivo
+Regards,
+Tommy
