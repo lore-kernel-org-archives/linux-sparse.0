@@ -1,81 +1,58 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 0/5] keyword driven parsing
-Date: Fri, 09 Mar 2007 15:29:32 -0800
-Message-ID: <45F1EDDC.800@freedesktop.org>
-References: <20070307100109.GA10577@chrisli.org> <45EFB34B.6030101@freedesktop.org> <20070308085925.GA19829@chrisli.org>
+From: "Darren Jenkins" <darrenrjenkins-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
+Subject: Re: sparse using insane amounts of memory
+Date: Sat, 10 Mar 2007 16:05:08 +1100
+Message-ID: <82faac5b0703092105x75149bcdx5813e18f96db8004@mail.gmail.com>
+References: <1173319356.3546.54.camel@johannes.berg>
+	 <1173375270.15842.24.camel@dv>
+	 <1173375791.3248.37.camel@johannes.berg>
+	 <200703081908.40997.IvDoorn@gmail.com>
+	 <Pine.LNX.4.64.0703081023490.10832@woody.linux-foundation.org>
+	 <Pine.LNX.4.64.0703081104010.10832@woody.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigD417D9E64282C09F2D4120E5"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:36192 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1767643AbXCIXaA (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 9 Mar 2007 18:30:00 -0500
-In-Reply-To: <20070308085925.GA19829@chrisli.org>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <Pine.LNX.4.64.0703081104010.10832-5CScLwifNT1QetFLy7KEm3xJsTq8ys+cHZ5vskTnxNA@public.gmane.org>
+Content-Disposition: inline
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org>
+Cc: Ivo van Doorn <ivdoorn-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>, Pavel Roskin <proski-mXXj517/zsQ@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@osdl.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigD417D9E64282C09F2D4120E5
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Christopher Li wrote:
-> On Wed, Mar 07, 2007 at 10:55:07PM -0800, Josh Triplett wrote:
->> Christopher Li wrote:
->>
->> Beautiful!  Looks far more elegant and maintainable; thanks.
->>
->> I've applied the first four patches in this series.  The fifth causes =
-a
->> regression in validation/context.c; see the attached diff of the outpu=
-t from
->> the fourth to the fifth patches.
->=20
-> Hah. I misunderstand the syntax of context with only two arguments.
-> This syntax sucks. The meaning of the each argument depends on the tota=
-l
-> number of arguments.
-
-Guilty. :) I had to keep the two-argument version for backward compatibil=
-ity,
-but I still wanted what I considered a more intuitive argument order for =
-the
-new three-argument version.  Think of the two-argument version as depreca=
-ted.
-
-> The patch is updated.
+On 3/9/07, Linus Torvalds <torvalds-de/tnXTf+JLsfHDXvbKv3WD2FQJk+8+b@public.gmane.org> wrote:
 >
-> Chris
->=20
-> Introduce keyword driven attribute parsing
->=20
-> Now we are really parsing the attribute rather than building the
-> expression tree first.
->=20
-> Signed-Off-By: Christopher Li <sparse@chrisli.org>
+>
+> On Thu, 8 Mar 2007, Linus Torvalds wrote:
+> >
+> > To check a value for being a nice range of consecutive bits, you can
+> > simply do:
+> >
+> >       #define is_power_of_two(x) (!((x) & ((x)-1)))
 
-Thanks, applied.
+There is already an inline for this in log2.h
 
-- Josh Triplett
+/*
+ *  Determine whether some value is a power of two, where zero is
+ * *not* considered a power of two.
+ */
 
+static inline __attribute__((const))
+bool is_power_of_2(unsigned long n)
+{
+	return (n != 0 && ((n & (n - 1)) == 0));
+}
 
---------------enigD417D9E64282C09F2D4120E5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+>  - 0 is special, and is generally considered to be a power of two (and
+>    this is more fundamental than you'd think: it's not just fall-out from
+>    the particular expression chosen, it is fundamentally *required* to
+>    handle overflow, and you can think of 0 as 2**x, x > wordsize if that
+>    makes you more comfortable with the notion that zero is a power-of-two
+>    in any finite representation of 2's complement)
+>
+> The "zero is special" thing means that if you don't want to accept zero as
+> a valid mask (it technically *is* a contiguous set of bits set - it's just
+> the empty set) you'd need to check for it specially.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+I guess the person who wrote it wasn't thinking discrete maths at the time.
 
-iD8DBQFF8e3kGJuZRtD+evsRAqqiAJ9lR+t6uOfLqimT2wGD4lk/Y1VQ6wCgjAHZ
-rT/BRMy6SSUGvXL5wJcjzko=
-=cFlY
------END PGP SIGNATURE-----
-
---------------enigD417D9E64282C09F2D4120E5--
+Darren J.
