@@ -1,59 +1,36 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: sparse context tags
-Date: Mon, 12 Mar 2007 21:31:06 -0400
-Message-ID: <1173749466.13436.32.camel@dv>
-References: <ee9e417a0703121537p49657eai662b3dce82c7af5d@mail.gmail.com>
-	 <20070313003234.GA4640@chrisli.org>
+From: "Russ Cox" <rsc@swtch.com>
+Subject: constness bug in include/linux/compiler.h
+Date: Tue, 13 Mar 2007 18:23:45 -0400
+Message-ID: <ee9e417a0703131523x2cc701f7l7938624175bf1fe0@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:55695 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753012AbXCMBbL (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.246]:27358 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933779AbXCMWXp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Mar 2007 21:31:11 -0400
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HQvpH-0007s9-Eb
-	for linux-sparse@vger.kernel.org; Mon, 12 Mar 2007 21:29:19 -0400
-In-Reply-To: <20070313003234.GA4640@chrisli.org>
+	Tue, 13 Mar 2007 18:23:45 -0400
+Received: by an-out-0708.google.com with SMTP id b33so2062462ana
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Mar 2007 15:23:45 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Russ Cox <rsc@swtch.com>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Tom Bergan <tbergan@ucla.edu>
 
-On Mon, 2007-03-12 at 17:32 -0700, Christopher Li wrote:
+Probably sparse just doesn't pay attention to const,
+but shouldn't the definitions of __chk_user_ptr
+and __chk_io_ptr be
 
-> That is because sparse can't distinguish which lock is
-> acquired. It is actually hard to get that information.
-> Even though the expression is the same, the actual lock
-> might be different.
-> 
-> e.g.
-> 
-> redlock(foo->redlock);
-> foo = bar;
-> redunlock (foo->redlock);
+    extern void __chk_user_ptr(const void __user *);
+    extern void __chk_io_ptr(const void __iomem *);
 
-Just an idea.  The Linux "runtime locking correctness validator" (see
-Documentation/lockdep-design.txt in the Linux sources) distinguishes
-between lock classes.
+instead of
 
-Sparse could use a similar approach.  I think it would not catch your
-example, but it would catch a more realistic case when one lock is
-acquired and another is released even by the same function with the same
-attributes:
+    extern void __chk_user_ptr(void __user *);
+    extern void __chk_io_ptr(void __iomem *);
 
-lock(foo->redlock);
-lock(foo->bluelock);
-unlock(foo->redlock);
-unlock(foo->bluelock);
+?
 
-Lock class could be just a unique reference to a place where the lock
-was declared.  That would put some limitations on what a lock could be
-(an address of a variable or a field), but I think it's OK.
-
--- 
-Regards,
-Pavel Roskin
+Russ
