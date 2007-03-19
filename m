@@ -1,32 +1,44 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: constness bug in include/linux/compiler.h
-Date: Fri, 16 Mar 2007 19:30:58 -0700 (PDT)
-Message-ID: <Pine.LNX.4.64.0703161930260.3910@woody.linux-foundation.org>
-References: <ee9e417a0703131523x2cc701f7l7938624175bf1fe0@mail.gmail.com>
- <45F8206E.8030706@freedesktop.org> <ee9e417a0703141210n7d8e8834j56c17b69ce68ff2c@mail.gmail.com>
- <45FAE16A.3080601@freedesktop.org>
+From: Josh Triplett <josh@kernel.org>
+Subject: Re: Sparse homepage moved; Git repository moving soon [Re: update
+ 'getting sparse' info.]
+Date: Sun, 18 Mar 2007 18:08:54 -0700
+Message-ID: <45FDE2A6.1090901@kernel.org>
+References: <20070309004526.GA17459@redhat.com> <45F0B45C.9060706@zytor.com> <Pine.LNX.4.64.0703091039280.10832@woody.linux-foundation.org> <45F1AD49.1080604@zytor.com> <45F73351.5080505@kernel.org> <45F7346B.6040605@zytor.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.osdl.org ([65.172.181.24]:47594 "EHLO smtp.osdl.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753690AbXCQCbR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 16 Mar 2007 22:31:17 -0400
-In-Reply-To: <45FAE16A.3080601@freedesktop.org>
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:46327 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933571AbXCSBJS (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 18 Mar 2007 21:09:18 -0400
+In-Reply-To: <45F7346B.6040605@zytor.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Russ Cox <rsc@swtch.com>, linux-sparse@vger.kernel.org, Tom Bergan <tbergan@ucla.edu>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: linux-sparse@vger.kernel.org, ftpadmin@kernel.org
 
-
-
-On Fri, 16 Mar 2007, Josh Triplett wrote:
+H. Peter Anvin wrote:
+> Josh Triplett wrote:
+>> Also, if possible, I'd like to have an HTTP 301 redirect from
+>> http://kernel.org/pub/linux/kernel/people/josh/sparse (and everything under
+>> it, via RedirectMatch) to the corresponding page under the new homepage at
+>> http://kernel.org/pub/software/devel/sparse .  Could someone with the
+>> appropriate access please do so, or let me know if I can do so somehow?
 > 
-> Hmmm, odd.  After a few iterations, I managed to discover that Sparse will
-> warn if you attempt to convert a const int * to an int *, but not if you
-> attempt to convert a const void * to a void *.  This seems like a bug to me.
+> I *think* you can just put an .htaccess file in your directory to have 
+> that happen.
 
-Yeah, I think we allow *any* conversion to "void *". We probably should 
-still check const/volatile.
+That doesn't seem to work.  The .htaccess file
+(/pub/linux/kernel/people/josh/sparse/.htaccess) gets mirrored, but seems to
+get ignored.  It contains the following:
 
-		Linus
+Redirect /pub/linux/kernel/people/josh/sparse http://www.kernel.org/pub/software/devel/sparse
+
+> However, please note that the URL should be 
+> http://www.kernel.org/... ; it may matter in the future.
+
+No problem.
+
+- Josh Triplett
