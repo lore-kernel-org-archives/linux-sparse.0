@@ -1,50 +1,107 @@
-From: Josh Triplett <josh@kernel.org>
-Subject: Re: Sparse homepage moved; Git repository moving soon [Re: update
- 'getting sparse' info.]
-Date: Sun, 18 Mar 2007 18:38:35 -0700
-Message-ID: <45FDE99B.20909@kernel.org>
-References: <20070309004526.GA17459@redhat.com> <45F0B45C.9060706@zytor.com> <Pine.LNX.4.64.0703091039280.10832@woody.linux-foundation.org> <45F1AD49.1080604@zytor.com> <45F73351.5080505@kernel.org> <45F7346B.6040605@zytor.com> <45FDE2A6.1090901@kernel.org> <45FDE59B.6030702@zytor.com>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Sparse participating in Google Summer of Code 2007; apply by March
+ 24th
+Date: Tue, 20 Mar 2007 16:48:05 -0700
+Message-ID: <460072B5.9060104@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigD4DDABB1E6D8CA751CDD9A37"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:41060 "EHLO
-	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933572AbXCSBi7 (ORCPT
+Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:38800 "EHLO
+	mail3.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750900AbXCTXs1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 18 Mar 2007 21:38:59 -0400
-In-Reply-To: <45FDE59B.6030702@zytor.com>
+	Tue, 20 Mar 2007 19:48:27 -0400
+Received: from dsl093-040-092.pdx1.dsl.speakeasy.net (HELO [192.168.0.121]) (josh@[66.93.40.92])
+          (envelope-sender <josh@freedesktop.org>)
+          by mail3.sea5.speakeasy.net (qmail-ldap-1.03) with AES256-SHA encrypted SMTP
+          for <linux-sparse@vger.kernel.org>; 20 Mar 2007 23:48:25 -0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: linux-sparse@vger.kernel.org, ftpadmin@kernel.org
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-H. Peter Anvin wrote:
-> Josh Triplett wrote:
->> H. Peter Anvin wrote:
->>> Josh Triplett wrote:
->>>> Also, if possible, I'd like to have an HTTP 301 redirect from
->>>> http://kernel.org/pub/linux/kernel/people/josh/sparse (and everything under
->>>> it, via RedirectMatch) to the corresponding page under the new homepage at
->>>> http://kernel.org/pub/software/devel/sparse .  Could someone with the
->>>> appropriate access please do so, or let me know if I can do so somehow?
->>> I *think* you can just put an .htaccess file in your directory to have 
->>> that happen.
->> That doesn't seem to work.  The .htaccess file
->> (/pub/linux/kernel/people/josh/sparse/.htaccess) gets mirrored, but seems to
->> get ignored.  It contains the following:
->>
->> Redirect /pub/linux/kernel/people/josh/sparse http://www.kernel.org/pub/software/devel/sparse
-> 
-> That should be fixed,
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigD4DDABB1E6D8CA751CDD9A37
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Thanks!  Seems to work now.
+[Sending this to LKML as well, to reach more of Sparse's user community.]=
 
-> but you want to change that to "Redirect permanent 
-> ..." otherwise you get a 302 redirect, not 301.
 
-Argh; I noted that when doublechecking the syntax in the Apache documentation,
-and promptly failed to do it when writing the .htaccess file.  Fixed, and
-thanks for noticing.
+Google has accepted Sparse as a mentoring organization for Summer of Code=
+
+2007.  Interested students can propose work on Sparse-related projects, w=
+ork
+on those projects over the summer, and receive a stipend from Google for =
+their
+work.
+
+Student application deadline: March 24th
+
+Sparse, the semantic parser, provides a compiler frontend capable of pars=
+ing
+most of ANSI C as well as many GCC extensions, and a collection of sample=
+
+compiler backends, including a static analyzer also called 'sparse'. Spar=
+se
+provides a set of annotations designed to convey semantic information abo=
+ut
+types, such as what address space pointers point to, or what locks a func=
+tion
+acquires or releases.  The Linux kernel community uses Sparse to check fo=
+r
+common errors in kernel source code.  Other projects, such as X.org, have=
+
+begun to use Sparse as well.
+
+Working on a Sparse project gives students the opportunity to put many co=
+re CS
+skills into practice on a real-world compiler and static analyzer, and ga=
+in
+some recognition within the prominent community of Free and Open Source
+Software developers working on the Linux kernel.
+
+You can see the current Summer of Code project list for Sparse at
+<http://www.kernel.org/pub/software/devel/sparse/soc.html>, or propose an=
+ idea
+of your own.
+
+Students need to apply by March 24th.  You can apply at
+<http://code.google.com/soc>.
+
+Any Sparse developers interested in mentoring projects over the summer (w=
+hich
+primarily consists of answering questions about Sparse, such as on the ma=
+iling
+list), please apply via the Google Summer of Code mentorship application =
+at
+http://code.google.com/soc/mentor.html , and check the "Sparse" box.  Ple=
+ase
+also mail me with details.
+
+Any Linux developers interested in seeing Sparse do something that it can=
+'t
+currently do, please propose possible Summer of Code projects as soon as =
+you
+can, and I'll add them to
+http://www.kernel.org/pub/software/devel/sparse/soc.html .
 
 - Josh Triplett
+
+
+--------------enigD4DDABB1E6D8CA751CDD9A37
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGAHK1GJuZRtD+evsRAiOnAJ9LM0ykguk7Kl+jisIOfIFqoBgLgwCgjUAM
+E+J84cpgjYtp51vT2/3p6/4=
+=HjPE
+-----END PGP SIGNATURE-----
+
+--------------enigD4DDABB1E6D8CA751CDD9A37--
