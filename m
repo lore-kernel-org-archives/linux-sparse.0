@@ -1,47 +1,39 @@
-From: Derek M Jones <derek@knosof.co.uk>
-Subject: Re: Sparse RFC
-Date: Mon, 26 Mar 2007 17:15:23 +0100
-Message-ID: <4607F19B.6080303@knosof.co.uk>
-References: <1174915776.1142.21.camel@localhost.localdomain>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Add const to pointer qualifiers for __chk_user_ptr and __chk_io_ptr.
+Date: Mon, 26 Mar 2007 11:01:55 -0700
+Message-ID: <20070326180155.GA24764@chrisli.org>
+References: <ee9e417a0703260823k55c6de8ay715be1db11692355@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from queue02-winn.ispmail.ntl.com ([81.103.221.56]:44801 "EHLO
-	queue02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752933AbXCZQib (ORCPT
+Received: from alnrmhc15.comcast.net ([204.127.225.95]:50708 "EHLO
+	alnrmhc15.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753675AbXCZSlW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 26 Mar 2007 12:38:31 -0400
-In-Reply-To: <1174915776.1142.21.camel@localhost.localdomain>
+	Mon, 26 Mar 2007 14:41:22 -0400
+Content-Disposition: inline
+In-Reply-To: <ee9e417a0703260823k55c6de8ay715be1db11692355@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Darren Jenkins <darrenrjenkins@gmail.com>
-Cc: Sparse mailing list <linux-sparse@vger.kernel.org>
+To: Russ Cox <rsc@swtch.com>
+Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-Darren,
+On Mon, Mar 26, 2007 at 11:23:56AM -0400, Russ Cox wrote:
+> Change prototypes for  __chk_user_ptr and __chk_io_ptr
+> to take const void* instead of void*, so that code can pass
+> const void* to them.  (Right now sparse does not warn
+> about passing const void* to void* functions, but that
+> is a separate bug that I believe Josh is working on,
+> and once sparse does check this, the changed prototypes
+> will be necessary.)
 
-> I have been playing around with the sparse code, and was thinking of
-> adding a few of the checks that my company uses from other code
-> checkers, starting with checking that macro arguments have brackets
-> around them. (Because this is the test my/other code most often fails)
+I don't think it is needed. The __user has noderef attribute.
+Which means it is not allow to dereference the pointer. The
+const qualifier allow read dereference, only write is not allowed.
 
-This is a useful check.  However, you need to make sure that
-cases where the presence of () have no impact are not flagged
-if the parameter is always used in such contexts.  Otherwise the
-noise can be excessive.
+Adding const here will likely force the caller to do a cast at
+the pointer arguments. Which defeats the checker.
 
-> 2) For the macro argument checking would it be better if I checked for
-> either a bracket or low precedence operator on both sides of the
-> argument ? like either a comma or a type of assignment operator? it
-> would not be a foolproof check then but would seem more sensible to me,
-> and might be more acceptable to users.
+Sparse allow passing const void* to void* is a different issue.
 
-Don't make the assumption that everybody knows the precedence
-of binary operators.  An experiment I ran last year with experienced
-developers (average over 10 years) threw up some unexpected results.
-See: http://www.knosof.co.uk/cbook/accu06a.pdf
-
--- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+Chris
