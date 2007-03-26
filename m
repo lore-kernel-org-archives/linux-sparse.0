@@ -1,55 +1,47 @@
-From: "Russ Cox" <rsc@swtch.com>
-Subject: [PATCH] Add const to pointer qualifiers for __chk_user_ptr and __chk_io_ptr.
-Date: Mon, 26 Mar 2007 11:23:56 -0400
-Message-ID: <ee9e417a0703260823k55c6de8ay715be1db11692355@mail.gmail.com>
+From: Derek M Jones <derek@knosof.co.uk>
+Subject: Re: Sparse RFC
+Date: Mon, 26 Mar 2007 17:15:23 +0100
+Message-ID: <4607F19B.6080303@knosof.co.uk>
+References: <1174915776.1142.21.camel@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from an-out-0708.google.com ([209.85.132.247]:59367 "EHLO
-	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752854AbXCZPX5 (ORCPT
+Received: from queue02-winn.ispmail.ntl.com ([81.103.221.56]:44801 "EHLO
+	queue02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752933AbXCZQib (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 26 Mar 2007 11:23:57 -0400
-Received: by an-out-0708.google.com with SMTP id b33so2356182ana
-        for <linux-sparse@vger.kernel.org>; Mon, 26 Mar 2007 08:23:57 -0700 (PDT)
-Content-Disposition: inline
+	Mon, 26 Mar 2007 12:38:31 -0400
+In-Reply-To: <1174915776.1142.21.camel@localhost.localdomain>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: linux-sparse@vger.kernel.org
+To: Darren Jenkins <darrenrjenkins@gmail.com>
+Cc: Sparse mailing list <linux-sparse@vger.kernel.org>
 
-Change prototypes for  __chk_user_ptr and __chk_io_ptr
-to take const void* instead of void*, so that code can pass
-const void* to them.  (Right now sparse does not warn
-about passing const void* to void* functions, but that
-is a separate bug that I believe Josh is working on,
-and once sparse does check this, the changed prototypes
-will be necessary.)
+Darren,
 
-Signed-off-by: Russ Cox <rsc@swtch.com>
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
+> I have been playing around with the sparse code, and was thinking of
+> adding a few of the checks that my company uses from other code
+> checkers, starting with checking that macro arguments have brackets
+> around them. (Because this is the test my/other code most often fails)
 
----
+This is a useful check.  However, you need to make sure that
+cases where the presence of () have no impact are not flagged
+if the parameter is always used in such contexts.  Otherwise the
+noise can be excessive.
 
- include/linux/compiler.h |    4 ++--
- 1 files changed, 2 insertions(+), 2 deletions(-)
+> 2) For the macro argument checking would it be better if I checked for
+> either a bracket or low precedence operator on both sides of the
+> argument ? like either a comma or a type of assignment operator? it
+> would not be a foolproof check then but would seem more sensible to me,
+> and might be more acceptable to users.
 
-e5174dfa73190036ae1086110292594a3ffb3752
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index aca6698..3b6949b 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -15,8 +15,8 @@
- # define __acquire(x)	__context__(x,1)
- # define __release(x)	__context__(x,-1)
- # define __cond_lock(x,c)	((c) ? ({ __acquire(x); 1; }) : 0)
--extern void __chk_user_ptr(void __user *);
--extern void __chk_io_ptr(void __iomem *);
-+extern void __chk_user_ptr(const void __user *);
-+extern void __chk_io_ptr(const void __iomem *);
- #else
- # define __user
- # define __kernel
+Don't make the assumption that everybody knows the precedence
+of binary operators.  An experiment I ran last year with experienced
+developers (average over 10 years) threw up some unexpected results.
+See: http://www.knosof.co.uk/cbook/accu06a.pdf
+
 -- 
-1.1.3
+Derek M. Jones                              tel: +44 (0) 1252 520 667
+Knowledge Software Ltd                      mailto:derek@knosof.co.uk
+Applications Standards Conformance Testing    http://www.knosof.co.uk
