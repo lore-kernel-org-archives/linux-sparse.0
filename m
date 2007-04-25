@@ -1,47 +1,48 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: Feature request - allow boolean operations of undefined cpp
-	symbols
-Date: Fri, 20 Apr 2007 18:42:32 -0400
-Message-ID: <1177108952.8787.6.camel@dv>
-References: <1170437836.2272.22.camel@dv>
-	 <Pine.LNX.4.64.0702021021570.15057@woody.linux-foundation.org>
-	 <46288FA2.4040700@freedesktop.org>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: sparse preprocessing confused
+Date: Wed, 25 Apr 2007 16:43:55 -0700
+Message-ID: <20070425164355.2c250388.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:56383 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1767299AbXDTWmg (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Apr 2007 18:42:36 -0400
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1Hf1lm-000329-L5
-	for linux-sparse@vger.kernel.org; Fri, 20 Apr 2007 18:39:58 -0400
-In-Reply-To: <46288FA2.4040700@freedesktop.org>
+Received: from xenotime.net ([66.160.160.81]:47335 "HELO xenotime.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1754351AbXDYXkU (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 25 Apr 2007 19:40:20 -0400
+Received: from midway.site ([71.245.96.31]) by xenotime.net for <linux-sparse@vger.kernel.org>; Wed, 25 Apr 2007 16:40:16 -0700
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Fri, 2007-04-20 at 03:02 -0700, Josh Triplett wrote:
+Although this may just be a case of "it's fugly, kill it".
 
-> This states that we must substitute 0 for any undefined preprocessor symbol
-> in a #if or #elif condition, no matter what kind of expression they show up
-> in.
+In net/core/skbuff.c (2.6.21-rc7-mm1), we have:
 
-My point was that it's more likely to be a user error in case of
-non-trivial expressions.  But arguing with Linus about probabilities of
-user errors and other fuzzy matters is not something I'm prepared to.
+	memcpy(data + nhead, skb->head,
+#ifdef NET_SKBUFF_DATA_USES_OFFSET
+		skb->tail);
+#else
+		skb->tail - skb->head);
+#endif
 
-> However, Pavel, if you feel you could make part of -Wundef suitable to join
-> the default set of warnings, feel free.
+and sparse says:
 
-I really don't care about this part.  I actually think that sparse
-should augment gcc capabilities rather than duplicate them.  If we
-cannot do better than gcc, we can just stop bothering.
+net/core/skbuff.c:651:2: error: unmatched #else within stream
+net/core/skbuff.c:653:2: error: unmatched #endif in stream
+net/core/skbuff.c:648:2: error: Expected ) in expression
+net/core/skbuff.c:648:2: error: got #
+net/core/skbuff.c:648:2: error: Expected ) in function call
+net/core/skbuff.c:648:2: error: got #
+net/core/skbuff.c:648:2: error: Expected ; at end of statement
+net/core/skbuff.c:648:2: error: got __ret
+net/core/skbuff.c:652:24: error: Expected ; at end of statement
+net/core/skbuff.c:652:24: error: got )
+net/core/skbuff.c:648:2: error: undefined identifier 'else'
+net/core/skbuff.c:652:13: error: incompatible types for operation (-)
+net/core/skbuff.c:652:13:    left side has type unsigned int [unsigned] [usertype] tail
+net/core/skbuff.c:652:13:    right side has type unsigned char *head
 
--- 
-Regards,
-Pavel Roskin
+---
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
