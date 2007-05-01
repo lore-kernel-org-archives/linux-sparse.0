@@ -1,67 +1,73 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: C++ support
-Date: Tue, 01 May 2007 10:50:37 -0700
-Message-ID: <46377DED.5070608@freedesktop.org>
-References: <DAE2DE304D25FE4FA8D2B55FBB0842DA010B73@sjvm-exch01.arc.com>
+Subject: Re: Style checking
+Date: Tue, 01 May 2007 11:09:58 -0700
+Message-ID: <46378276.8060307@freedesktop.org>
+References: <c38fc0de0704300030x6ab610acge10482904056d1db@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigFB64FF555E83317B9B3D48BB"
+ boundary="------------enigE468B29D7D6014600CD522E0"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:49593 "EHLO
-	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755161AbXEARuk (ORCPT
+Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:57282 "EHLO
+	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755269AbXEASKB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 May 2007 13:50:40 -0400
-In-Reply-To: <DAE2DE304D25FE4FA8D2B55FBB0842DA010B73@sjvm-exch01.arc.com>
+	Tue, 1 May 2007 14:10:01 -0400
+In-Reply-To: <c38fc0de0704300030x6ab610acge10482904056d1db@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mitesh Shah <Mitesh.Shah@arc.com>
-Cc: "Linux-Sparse (E-mail)" <linux-sparse@vger.kernel.org>
+To: Mike Goodwin <mike.goodwin@cantab.net>
+Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigFB64FF555E83317B9B3D48BB
+--------------enigE468B29D7D6014600CD522E0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Mitesh Shah wrote:
-> Has any one have any idea about how to sparse C++ code? Is there any
-> wrapper or converter to convert it to C before passing it to sparse?
+Mike Goodwin wrote:
+> I have begun modifying sparse (read: adding in various hooks to the
+> preprocessing and parsing stages) in order to be able to use it as a
+> style checker. Checking rules such as order of includes, function and
+> variable naming ... etc.
+>=20
+> The style checking is intended to be for linux/driver modules and as
+> far as I am aware the only two freely available c parsers which can
+> parse all the headers in the linux kernel are those that are part of
+> sparse and gcc. As sparse is a lot simpler to modify it seems the
+> logical choice
+>=20
+> So I was wondering:-
+>  1) if anyone had used sparse similarly?
 
-Sparse doesn't support C++ natively.  In theory, someone could write a C+=
-+
-frontend that provides similar output to the C frontend (same data struct=
-ures
-and linearized bytecode format), but barring someone providing the *huge*=
- pile
-of code this would require *and* committing to support it, I don't see th=
-is
-happening anytime soon.  (That said, if someone genuinely has an interest=
- in
-doing so, feel free to contact linux-sparse@vger.kernel.org to coordinate=
-=2E)
+Not that I know of.
 
-Some tools exist to translate C++ to C, most of them proprietary and most=
- of
-them quite old.  Some of them come from the days when everyone used such =
-tools
-to compile C++ in the first place.  To the best of my knowledge, all of t=
-hese
-tools primarily target the ability to compile with a C compiler; they don=
-'t
-target easily readable C code.  If you could manage to get the Sparse key=
-words
-to pass through them into the C code, you *might* manage to get some usef=
-ul
-semantic warnings out of one of them, such as locking validation or
-user/kernel pointer checking, though you'd have to wade through a lot of =
-noise
-to find them.
+>  2) would it ever be desirable to have this kind of feature as a part o=
+f sparse?
+
+Yes!  I'd love to see the frontend save enough information to do things
+like this, such as saving the tree of "#include"s.  I don't know if these=
+
+kinds of rules should go in the Sparse backend or in another backend usin=
+g
+libsparse; if the former, you'll need to include options to turn these
+checks on, and they should likely default to "off" because they will vary=
+
+between projects.
+
+In addition to the warnings you suggest, I'd love to see a warning for "H=
+eader
+not self-contained": a header does not #include all the headers it needs,=
+ and
+instead relied on the inclusion of another header first.
+
+>  3) is there anything wrong with this approach?!
+
+Not that I can see; I look forward to seeing your patches.
 
 - Josh Triplett
 
 
---------------enigFB64FF555E83317B9B3D48BB
+--------------enigE468B29D7D6014600CD522E0
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -70,9 +76,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGN33tGJuZRtD+evsRAqA0AJ93FGir4E6PyDUquUS/w3R7yoWK5wCeMpgz
-DF+tNs8FeGO+OthEKJm0HPI=
-=EnEs
+iD8DBQFGN4J2GJuZRtD+evsRApUuAJ9RyI4e4V8/1rA+YsR36Jb+7x9PogCguZ/K
+rNaUgOcuGnP/z2aB9AjWVNs=
+=wwGq
 -----END PGP SIGNATURE-----
 
---------------enigFB64FF555E83317B9B3D48BB--
+--------------enigE468B29D7D6014600CD522E0--
