@@ -1,73 +1,68 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: Style checking
-Date: Tue, 01 May 2007 11:09:58 -0700
-Message-ID: <46378276.8060307@freedesktop.org>
-References: <c38fc0de0704300030x6ab610acge10482904056d1db@mail.gmail.com>
+Subject: Re: 0.3 ?
+Date: Tue, 01 May 2007 11:39:41 -0700
+Message-ID: <4637896D.6090700@freedesktop.org>
+References: <20070417162947.GA15753@redhat.com> <1176863474.3631.58.camel@dv>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigE468B29D7D6014600CD522E0"
+ boundary="------------enig04144877F9B029962D8AAB8E"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:57282 "EHLO
-	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755269AbXEASKB (ORCPT
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:37012 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1031273AbXEASjo (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 May 2007 14:10:01 -0400
-In-Reply-To: <c38fc0de0704300030x6ab610acge10482904056d1db@mail.gmail.com>
+	Tue, 1 May 2007 14:39:44 -0400
+In-Reply-To: <1176863474.3631.58.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mike Goodwin <mike.goodwin@cantab.net>
-Cc: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: Dave Jones <davej@redhat.com>, linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE468B29D7D6014600CD522E0
-Content-Type: text/plain; charset=ISO-8859-1
+--------------enig04144877F9B029962D8AAB8E
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Mike Goodwin wrote:
-> I have begun modifying sparse (read: adding in various hooks to the
-> preprocessing and parsing stages) in order to be able to use it as a
-> style checker. Checking rules such as order of includes, function and
-> variable naming ... etc.
+Pavel Roskin wrote:
+> On Tue, 2007-04-17 at 12:29 -0400, Dave Jones wrote:
+>> Any plans to do another release sometime soon?
+>> I'm hitting a segfault with 0.2, that seems to be
+>> fixed in the current git tree.
 >=20
-> The style checking is intended to be for linux/driver modules and as
-> far as I am aware the only two freely available c parsers which can
-> parse all the headers in the linux kernel are those that are part of
-> sparse and gcc. As sparse is a lot simpler to modify it seems the
-> logical choice
->=20
-> So I was wondering:-
->  1) if anyone had used sparse similarly?
+> Absolutely.  It would be very welcome.
+[...]
+> I'm using sparse from git a lot, and whenever I have any issues, they
+> are in the sources sparse is checking, not in sparse itself.  It looks
+> quite stable to me.  It would be great to see sparse 0.3 released soon.=
 
-Not that I know of.
 
->  2) would it ever be desirable to have this kind of feature as a part o=
-f sparse?
+Your mails made me realize that because Sparse doesn't have a pre-release=
+ or
+release-candidate process (not yet needed, in my opinion), people don't
+necessarily know when I prep for a release and when I just take random
+patches.  (Also, most of the most recent patches to Sparse have provided
+bugfixes, so it likely still looked like "taking all patches".)  In the
+future, I will try to remember to mail the list when I start going into
+"process bugfixes and release" mode.
 
-Yes!  I'd love to see the frontend save enough information to do things
-like this, such as saving the tree of "#include"s.  I don't know if these=
+After 0.2, several major chages occurred, such as the impressive new feat=
+ures
+from Christopher Li; these patches needed some time to stabilize.  In
+addition, I noticed some embarrassing self-warnings and an issue with gli=
+bc
+2.5.
 
-kinds of rules should go in the Sparse backend or in another backend usin=
-g
-libsparse; if the former, you'll need to include options to turn these
-checks on, and they should likely default to "off" because they will vary=
+> I actually developed a habit of never loading any kernel code that
+> doesn't pass sparse checks on any system I don't want to hang, e.g. if
+> it's remote, it lacks a reset button or I'm writing an e-mail on it :)
 
-between projects.
-
-In addition to the warnings you suggest, I'd love to see a warning for "H=
-eader
-not self-contained": a header does not #include all the headers it needs,=
- and
-instead relied on the inclusion of another header first.
-
->  3) is there anything wrong with this approach?!
-
-Not that I can see; I look forward to seeing your patches.
+Nice to hear. :)
 
 - Josh Triplett
 
 
---------------enigE468B29D7D6014600CD522E0
+--------------enig04144877F9B029962D8AAB8E
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -76,9 +71,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGN4J2GJuZRtD+evsRApUuAJ9RyI4e4V8/1rA+YsR36Jb+7x9PogCguZ/K
-rNaUgOcuGnP/z2aB9AjWVNs=
-=wwGq
+iD8DBQFGN4ltGJuZRtD+evsRAmL/AJ94f6vmLcl4h/jJwBIdzejEYW3U7gCfR4On
+QzM3nMnkju0TpOnp0MmCUrc=
+=a7Bh
 -----END PGP SIGNATURE-----
 
---------------enigE468B29D7D6014600CD522E0--
+--------------enig04144877F9B029962D8AAB8E--
