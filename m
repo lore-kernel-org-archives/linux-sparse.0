@@ -1,55 +1,50 @@
-From: Andi Kleen <andi@firstfloor.org>
-Subject: Re: sparse -Wptr-subtraction-blows: still needed?
-Date: 02 May 2007 15:19:11 +0200
-Message-ID: <p734pmvxt0w.fsf@bingen.suse.de>
-References: <4637AC3D.6000008@freedesktop.org>
-	<alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
-	<4637D47D.7040203@freedesktop.org>
-	<alpine.LFD.0.98.0705011719520.3808@woody.linux-foundation.org>
-	<20070502130204.2cc2fd1a@the-village.bc.nu>
+From: Neil Booth <neil@daikokuya.co.uk>
+Subject: Array declarators not well diagnosed
+Date: Wed, 2 May 2007 22:59:13 +0900
+Message-ID: <20070502135913.GA917@daikokuya.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ns1.suse.de ([195.135.220.2]:52850 "EHLO mx1.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S2993078AbXEBMVe (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 May 2007 08:21:34 -0400
-In-Reply-To: <20070502130204.2cc2fd1a@the-village.bc.nu>
+Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7572 "HELO
+	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with SMTP id S2993198AbXEBN7K (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 May 2007 09:59:10 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alan Cox <alan@lxorguk.ukuu.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>
+To: linux-sparse@vger.kernel.org
 
-Alan Cox <alan@lxorguk.ukuu.org.uk> writes:
-> 
-> Good compilers even in the 1990's would defer the divide and try and
-> propogate it out as a multiply the other side for constants, and they'll
-> also use shifts when possible.
+I have a small and woefully incomplete conformance testsuite (C90
+and C99), compile-time logic only, that I've been gradually building
+up.  I'm keeping it to myself for now.  I thought I'd run sparse on it.
+It has both positive and negative tests, i.e., things that should be
+accepted are compiled successfully, and things that should be diagnosed
+are diagnosed.
 
-gcc has an algorithm that tends to generate a near perfect shift/add etc.
-code sequence and also knows the obvious x / y ==> x*1/y
+Of course, I realise sparse isn't really intended to be a conforming
+compiler and AFAIK you can't even switch between C90 and C99.  As
+such I had difficulty finding appropriate switches; I chose to run
+"sparse" with -W and -Wall with anything sent to stderr indicating
+a diagnostic.  Let me know if something is more appropriate.
 
-However it doesn't do that with -Os, prefering smaller code on x86
-(idiv is fairly small compared to the expanded sequences for non power
-of two dividends) and kernels are usually compiled with -Os these
-days.
+Anyway, under these admittedly poor conditions for C90, sparse
+failed 47 of 959 tests, which isn't bad.  Some of these will be
+logical duplicates (i.e. testing essentially the same thing in
+different circumstances; if the thing being tested isn't implemented
+at all it'll fail several tests).  For comparison GCC fails 5 of
+them.
 
-We've had a few cases in the past where this showed up as regression
-against older kernels that still used -O2.
- 
-> Thus they'll turn
-> 
-> 	(ptr.element - base.element) < NELEM
-> 
-> into
-> 	(ptr.char - base.char) < (constant) [NELEM *sizeof(element) ]
-> 
-> 
-> at least for constant operations. Dunno if gcc is that clever
+Here are some failures regarding array declarators that
+someone may be interested in.  All should be diagnosed but are not.
 
-It is. However a few more complex transformations I would have liked
-in the past are missing -- in particular 
+extern int a[2][];
 
-x / (cond ? const1 : const2) ==> cond ? (x / const1) : (x / const2)
+struct b
+{
+  struct b c[2];
+};
 
--Andi
+int c[-1];
+
+Neil.
