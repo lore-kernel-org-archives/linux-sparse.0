@@ -1,64 +1,96 @@
-From: Dave Jones <davej@redhat.com>
-Subject: Re: sparse -Wptr-subtraction-blows: still needed?
-Date: Tue, 1 May 2007 22:42:42 -0400
-Message-ID: <20070502024242.GC6935@redhat.com>
-References: <4637AC3D.6000008@freedesktop.org> <alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: barrier macro
+Date: Tue, 01 May 2007 20:17:53 -0700
+Message-ID: <463802E1.4030303@freedesktop.org>
+References: <20070501153448.a65c81c2.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig859311D22C273CA43340E3AD"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([66.187.233.31]:59485 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965104AbXEBCnQ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 May 2007 22:43:16 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:44649 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932975AbXEBDR4 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 1 May 2007 23:17:56 -0400
+In-Reply-To: <20070501153448.a65c81c2.rdunlap@xenotime.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>
+To: Randy Dunlap <rdunlap@xenotime.net>
+Cc: linux-sparse@vger.kernel.org
 
-On Tue, May 01, 2007 at 02:43:30PM -0700, Linus Torvalds wrote:
- > 
- > 
- > On Tue, 1 May 2007, Josh Triplett wrote:
- > > 
- > > Does this still apply?  Do current versions of GCC still have this problem?
- > > If not, can the option and warning go away?
- > 
- > Even if current versions of gcc don't triple the build time (and for the 
- > kernel, I suspect it doesn't, because we've tried to clean up our header 
- > files), the generated _code_ will invariably suck.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig859311D22C273CA43340E3AD
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-FWIW, I do sparse runs on the fedora development kernels as part of
-our daily builds now, and of the latest ones at
-http://people.redhat.com/davej/kernels/Fedora/fc7/warnings.txt
-(concatenated warning logs from i586/i686/x86_64/ppc/ppc64/s390 builds)
-that 'expensive pointer subtraction' turns up 3705 times.
-Interestingly, 1873 of those instances are from include/linux/mm.h
-on the x86-64 build.
+Randy Dunlap wrote:
+> (using sparse 0.3)
+>=20
+> ./compiler-gcc.h:10:#define barrier() __asm__ __volatile__("": : :"memo=
+ry")
+>=20
+> causes this output:
+>=20
+> net/sunrpc/xprtsock.c:640:2: error: Expected ( after asm
+> net/sunrpc/xprtsock.c:640:2: error: got __volatile__
+> net/sunrpc/xprtsock.c:640:2: error: typename in expression
+> net/sunrpc/xprtsock.c:640:2: error: Expected ) in function call
+> net/sunrpc/xprtsock.c:640:2: error: got :
+>=20
+>=20
+> Maybe sparse could allow modifiers between asm|__asm__ and the
+> (...) ?
 
-It's complaining about this line...
+Sparse specifically allows volatile, and double-underscore variants, betw=
+een the asm keyword and the open parenthesis:
 
-static __always_inline void *lowmem_page_address(struct page *page)
+static struct token *parse_asm_statement(struct token *token, struct stat=
+ement *stmt)
 {
-        return __va(page_to_pfn(page) << PAGE_SHIFT);
+        token =3D token->next;
+        stmt->type =3D STMT_ASM;
+        if (match_idents(token, &__volatile___ident, &__volatile_ident, &=
+volatile_ident, NULL)) {
+                token =3D token->next;
+        }
+        token =3D expect(token, '(', "after asm");
+[...]
+
+
+I cannot reproduce your report with the following test case (just added t=
+o git
+as validation/asm-volatile.c):
+
+#define barrier() __asm__ __volatile__("": : :"memory")
+
+static void f(void)
+{
+        barrier();
 }
 
-...
 
-unsigned long page_to_pfn(struct page *page)
-{
-        return __page_to_pfn(page);
-}
+Perhaps something else has caused the problem.  Could you please generate=
+ a
+preprocessed file with "make net/sunrpc/xprtsock.i", and strip it down to=
+ a
+minimal test case that still generates the Sparse warning?
 
-...
+- Josh Triplett
 
-#define __page_to_pfn(page)     ((unsigned long)((page) - mem_map) + \
-                                 ARCH_PFN_OFFSET)
 
-looks like the other two variants of __page_to_pfn also use similar arithmatic.
+--------------enig859311D22C273CA43340E3AD
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-	Dave
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
--- 
-http://www.codemonkey.org.uk
+iD8DBQFGOALhGJuZRtD+evsRAk6KAJ9cnAIWQoxpyJX51BtlTt8DPO9ZdACeO94I
+0VVkyqpTVmrCHthgCMvPuNw=
+=HQMM
+-----END PGP SIGNATURE-----
+
+--------------enig859311D22C273CA43340E3AD--
