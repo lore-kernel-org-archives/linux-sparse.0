@@ -1,50 +1,59 @@
-From: Neil Booth <neil@daikokuya.co.uk>
-Subject: Array declarators not well diagnosed
-Date: Wed, 2 May 2007 22:59:13 +0900
-Message-ID: <20070502135913.GA917@daikokuya.co.uk>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: barrier macro
+Date: Wed, 02 May 2007 11:11:00 -0700
+Message-ID: <4638D434.7010205@freedesktop.org>
+References: <20070501153448.a65c81c2.rdunlap@xenotime.net> <463802E1.4030303@freedesktop.org> <46381269.9090305@freedesktop.org> <46382387.4010903@freedesktop.org> <20070502072056.GA9889@chrisli.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig36A6F2E5487DD508909105F2"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7572 "HELO
-	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S2993198AbXEBN7K (ORCPT
+Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:45104 "EHLO
+	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1767082AbXEBSLE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 May 2007 09:59:10 -0400
-Content-Disposition: inline
+	Wed, 2 May 2007 14:11:04 -0400
+In-Reply-To: <20070502072056.GA9889@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Randy Dunlap <rdunlap@xenotime.net>, linux-sparse@vger.kernel.org
 
-I have a small and woefully incomplete conformance testsuite (C90
-and C99), compile-time logic only, that I've been gradually building
-up.  I'm keeping it to myself for now.  I thought I'd run sparse on it.
-It has both positive and negative tests, i.e., things that should be
-accepted are compiled successfully, and things that should be diagnosed
-are diagnosed.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig36A6F2E5487DD508909105F2
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Of course, I realise sparse isn't really intended to be a conforming
-compiler and AFAIK you can't even switch between C90 and C99.  As
-such I had difficulty finding appropriate switches; I chose to run
-"sparse" with -W and -Wall with anything sent to stderr indicating
-a diagnostic.  Let me know if something is more appropriate.
+Christopher Li wrote:
+> On Tue, May 01, 2007 at 10:37:11PM -0700, Josh Triplett wrote:
+>> Fixed in current Git.
+>=20
+> May I purpose a slightly different fix?
+>=20
+> The reason I use bit mask in the keyword so that it can allow
+> select a sub set of keywords. If we want, We can fine tune exactly
+> what keyword is allowed. It also makes the caller of handle_attributes
+> show exactly what kind of attribute it takes.
 
-Anyway, under these admittedly poor conditions for C90, sparse
-failed 47 of 959 tests, which isn't bad.  Some of these will be
-logical duplicates (i.e. testing essentially the same thing in
-different circumstances; if the thing being tested isn't implemented
-at all it'll fail several tests).  For comparison GCC fails 5 of
-them.
+Applied, with a minor fix: a bitmask of values from "enum keyword" does n=
+ot
+have type "enum keyword", so I made the argument an unsigned int.
 
-Here are some failures regarding array declarators that
-someone may be interested in.  All should be diagnosed but are not.
+- Josh Triplett
 
-extern int a[2][];
 
-struct b
-{
-  struct b c[2];
-};
+--------------enig36A6F2E5487DD508909105F2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-int c[-1];
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-Neil.
+iD8DBQFGONQ0GJuZRtD+evsRAhWfAKCGPYVJcQBYOkUt8oVLrwT3Wdxc0QCgoYMs
+es+YcOmhyorZKUkOE5VqEMM=
+=pCru
+-----END PGP SIGNATURE-----
+
+--------------enig36A6F2E5487DD508909105F2--
