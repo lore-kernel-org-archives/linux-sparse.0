@@ -1,54 +1,32 @@
-From: Alan Cox <alan@lxorguk.ukuu.org.uk>
+From: Andi Kleen <andi@firstfloor.org>
 Subject: Re: sparse -Wptr-subtraction-blows: still needed?
-Date: Wed, 2 May 2007 13:02:04 +0100
-Message-ID: <20070502130204.2cc2fd1a@the-village.bc.nu>
+Date: 02 May 2007 15:03:59 +0200
+Message-ID: <p73abwnxtq8.fsf@bingen.suse.de>
 References: <4637AC3D.6000008@freedesktop.org>
 	<alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
-	<4637D47D.7040203@freedesktop.org>
-	<alpine.LFD.0.98.0705011719520.3808@woody.linux-foundation.org>
+	<20070502024242.GC6935@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from outpipe-village-512-1.bc.nu ([81.2.110.250]:50453 "EHLO
-	the-village.bc.nu" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S2993054AbXEBL7P (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 May 2007 07:59:15 -0400
-In-Reply-To: <alpine.LFD.0.98.0705011719520.3808@woody.linux-foundation.org>
+Received: from cantor2.suse.de ([195.135.220.15]:46791 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S2993052AbXEBMGd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 May 2007 08:06:33 -0400
+In-Reply-To: <20070502024242.GC6935@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>
+To: Dave Jones <davej@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>
 
-On Tue, 1 May 2007 17:24:54 -0700 (PDT)
-Linus Torvalds <torvalds@linux-foundation.org> wrote:
-
+Dave Jones <davej@redhat.com> writes:
 > 
+> #define __page_to_pfn(page)     ((unsigned long)((page) - mem_map) + \
+>                                  ARCH_PFN_OFFSET)
 > 
-> On Tue, 1 May 2007, Josh Triplett wrote:
-> > 
-> > Do you know whether the current version of GCC generates poor code for pointer
-> > subtraction?
-> 
-> You _cannot_ generate good code.
-> 
-> When you subtract two pointers, the C definition means that you first 
-> subtract the values (cheap), and then you *divide* the result by the size 
-> of the object the pointer points to (expensive!).
+> looks like the other two variants of __page_to_pfn also use similar arithmatic.
 
-Good compilers even in the 1990's would defer the divide and try and
-propogate it out as a multiply the other side for constants, and they'll
-also use shifts when possible.
+No way around this. The only way to turn a page into a pfn is to do 
+a constant division.  Should be fairly cheap here though.
 
-Thus they'll turn
-
-	(ptr.element - base.element) < NELEM
-
-into
-	(ptr.char - base.char) < (constant) [NELEM *sizeof(element) ]
-
-
-at least for constant operations. Dunno if gcc is that clever
-
-Alan
+-Andi (who thinks the sparse warning is dumb; better to look at oprofiles
+of hot paths)
