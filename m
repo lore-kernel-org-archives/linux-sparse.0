@@ -1,50 +1,59 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: sparse -Wptr-subtraction-blows: still needed?
-Date: Wed, 2 May 2007 01:02:40 +0100
-Message-ID: <20070502000240.GI4095@ftp.linux.org.uk>
-References: <4637AC3D.6000008@freedesktop.org> <alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
+Date: Tue, 1 May 2007 17:24:54 -0700 (PDT)
+Message-ID: <alpine.LFD.0.98.0705011719520.3808@woody.linux-foundation.org>
+References: <4637AC3D.6000008@freedesktop.org>
+ <alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
+ <4637D47D.7040203@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:47924 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1946090AbXEBACm (ORCPT
+Received: from smtp1.linux-foundation.org ([65.172.181.25]:53875 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1946156AbXEBAZY (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 May 2007 20:02:42 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.0.98.0705011442320.3808@woody.linux-foundation.org>
+	Tue, 1 May 2007 20:25:24 -0400
+In-Reply-To: <4637D47D.7040203@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>
 
-On Tue, May 01, 2007 at 02:43:30PM -0700, Linus Torvalds wrote:
-> 
-> 
-> On Tue, 1 May 2007, Josh Triplett wrote:
-> > 
-> > Does this still apply?  Do current versions of GCC still have this problem?
-> > If not, can the option and warning go away?
-> 
-> Even if current versions of gcc don't triple the build time (and for the 
-> kernel, I suspect it doesn't, because we've tried to clean up our header 
-> files), the generated _code_ will invariably suck.
-> 
-> So I'd not want to remove the warning.
 
-Note that code *will* blow: in effect, when we have a*2^b as object size,
-we have to choose between
-	* generic division by a*2^b (dog-slow pretty much on anything)
-	* multiplication by such c that a*c == 1 (mod 2^word_size-b), then
-shift down by b.
-	* shift down by b, then multiplication by such c that a*c == 1
-(mod 2^word_size).
-And c in the above won't be small or pretty, so doing multiplication as
-series of additions won't be short.
 
-FWIW, I've seen very nasty cases (in userland code) where hot path got blown
-by factor of 5 or so in size due to that; basically, it started with
-#define INDEX(p) ((p)-array)
-and that sucker got used a lot in other macros, so it wasn't immediately
-obvious what had been going on.  So yes, we do want to be able to see
-such cases.
+On Tue, 1 May 2007, Josh Triplett wrote:
+> 
+> Do you know whether the current version of GCC generates poor code for pointer
+> subtraction?
+
+You _cannot_ generate good code.
+
+When you subtract two pointers, the C definition means that you first 
+subtract the values (cheap), and then you *divide* the result by the size 
+of the object the pointer points to (expensive!).
+
+So pointer subtraction is by definition expensive, if the size of the 
+object is not some kind of nice power-of-two or similar.
+
+Of course, modern CPU's are getting better at divides.
+
+> Has anyone reported this poor code generation to the GCC bugzilla?  If so, I
+> can add a reference to the bug in any (hypothetical) documentation for
+> -Wptr-subtraction-blows.
+
+The only thing that was gcc-specific about it is that gcc goes to some 
+extreme lengths to turn the constant-sized division into a sequence of 
+shifts/multiples/subtracts, and can often turn a division into something 
+like ten cheaper operations instead.
+
+But that optimization was also what made gcc take such a long time if the 
+constant division is very common (ie a header file with an inline 
+function, whether that function is actually _used_ or not apparently 
+didn't matter to gcc)
+
+So gcc does pretty well on these divisions, and makes them cheaper (except 
+on CPU's where divides are really fast and possibly even cheaper than the 
+combination of shifts/subtracts, but afaik, that probably won't be until 
+the next-generation Intel Core 2 45nm "Penryn" thing)
+
+			Linus
