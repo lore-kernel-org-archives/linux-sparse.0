@@ -1,65 +1,59 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: barrier macro
-Date: Tue, 01 May 2007 22:37:11 -0700
-Message-ID: <46382387.4010903@freedesktop.org>
-References: <20070501153448.a65c81c2.rdunlap@xenotime.net> <463802E1.4030303@freedesktop.org> <46381269.9090305@freedesktop.org>
+Subject: Re: sparse memset warnings
+Date: Tue, 01 May 2007 23:28:41 -0700
+Message-ID: <46382F99.1000104@freedesktop.org>
+References: <20061129101026.8aeb47ac.randy.dunlap@oracle.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigD8A0D70FB15548F6850360E1"
+ boundary="------------enigF3950DD7F5F635FE8D76D695"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:34030 "EHLO
-	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754857AbXEBFhQ (ORCPT
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:42817 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1030664AbXEBG2p (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 May 2007 01:37:16 -0400
-In-Reply-To: <46381269.9090305@freedesktop.org>
+	Wed, 2 May 2007 02:28:45 -0400
+In-Reply-To: <20061129101026.8aeb47ac.randy.dunlap@oracle.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Randy Dunlap <rdunlap@xenotime.net>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Randy Dunlap <randy.dunlap@oracle.com>
+Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigD8A0D70FB15548F6850360E1
+--------------enigF3950DD7F5F635FE8D76D695
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Josh Triplett wrote:
-> After analyzing net/sunrpc/xprtsock.i, I managed to reproduce the probl=
-em with
-> the following test case:
+Randy Dunlap wrote:
+> in 2.6.19-rc6-mm2, kvm:
 >=20
-> #define barrier() __asm__ __volatile__("": : :"memory")
+> drivers/kvm/kvm_main.c:632:9: error: too many arguments for function me=
+mset
+> drivers/kvm/kvm_main.c:647:9: error: too many arguments for function me=
+mset
+> drivers/kvm/kvm_main.c:733:9: error: too many arguments for function me=
+mset
+> drivers/kvm/kvm_main.c:1866:8: error: too many arguments for function m=
+emset
 >=20
-> static void f(void)
-> {
-> 	barrier();
-> l:
-> 	barrier();
-> }
->=20
->=20
-> Apparently sparse doesn't like __asm__ __volatile__ after a label.  Loo=
-ks like
-> the change to enable attributes on labels makes Sparse interpret the __=
-asm__
-> as an attribute on the label, not as a statement.  If I locally revert =
-the
-> label attributes change, aec53c938c34c47cdbdd6824552e0f2a5104b1cb, this=
- test
-> case compiles without warning, as does net/sunrpc/xprtsock.c.
->=20
-> The label attributes change needs some additional work, to make it only=
- handle
-> attribute and __attribute__, and nothing else.
+> I don't see the problem...
 
-Fixed in current Git.
+I just rechecked 2.6.19-rc6-mm2 with current Sparse from Git (commit
+6b595d01c196bb013d6d95fc297ae2cb07c1fce7), and after commenting out line =
+739
+to get rid of this error suppressing the warnings:
+
+drivers/kvm/kvm_main.c:739:18: error: macro "flush_tlb" passed 1 argument=
+s, but takes just 0
+
+, I looked through the list of warnings and did not see any about memset.=
+  I
+suspect your bug got fixed, either intentionally or unintentionally. :)
 
 - Josh Triplett
 
 
-
---------------enigD8A0D70FB15548F6850360E1
+--------------enigF3950DD7F5F635FE8D76D695
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -68,9 +62,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGOCOHGJuZRtD+evsRAp6rAJ0buWJSry3XihEBa9V4wzX2yI9xBgCcDJzx
-lwoJKD1e0vzDv2bh9YXVlb0=
-=J5B9
+iD8DBQFGOC+aGJuZRtD+evsRAqUjAKCoFI1jf+HIWhJFGLi2XPim7KNHQACfSymd
+BdNzhrzSVAdy5UnC9Cx762k=
+=TgBr
 -----END PGP SIGNATURE-----
 
---------------enigD8A0D70FB15548F6850360E1--
+--------------enigF3950DD7F5F635FE8D76D695--
