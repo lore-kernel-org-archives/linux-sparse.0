@@ -1,70 +1,101 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: sparse memset warnings
-Date: Tue, 01 May 2007 23:28:41 -0700
-Message-ID: <46382F99.1000104@freedesktop.org>
-References: <20061129101026.8aeb47ac.randy.dunlap@oracle.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: barrier macro
+Date: Wed, 2 May 2007 00:20:56 -0700
+Message-ID: <20070502072056.GA9889@chrisli.org>
+References: <20070501153448.a65c81c2.rdunlap@xenotime.net> <463802E1.4030303@freedesktop.org> <46381269.9090305@freedesktop.org> <46382387.4010903@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigF3950DD7F5F635FE8D76D695"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:42817 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1030664AbXEBG2p (ORCPT
+Received: from sccrmhc12.comcast.net ([204.127.200.82]:39569 "EHLO
+	sccrmhc12.comcast.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753043AbXEBIG4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 May 2007 02:28:45 -0400
-In-Reply-To: <20061129101026.8aeb47ac.randy.dunlap@oracle.com>
+	Wed, 2 May 2007 04:06:56 -0400
+Content-Disposition: inline
+In-Reply-To: <46382387.4010903@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Randy Dunlap <rdunlap@xenotime.net>, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigF3950DD7F5F635FE8D76D695
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Tue, May 01, 2007 at 10:37:11PM -0700, Josh Triplett wrote:
+> 
+> Fixed in current Git.
+> 
 
-Randy Dunlap wrote:
-> in 2.6.19-rc6-mm2, kvm:
->=20
-> drivers/kvm/kvm_main.c:632:9: error: too many arguments for function me=
-mset
-> drivers/kvm/kvm_main.c:647:9: error: too many arguments for function me=
-mset
-> drivers/kvm/kvm_main.c:733:9: error: too many arguments for function me=
-mset
-> drivers/kvm/kvm_main.c:1866:8: error: too many arguments for function m=
-emset
->=20
-> I don't see the problem...
+May I purpose a slightly different fix?
 
-I just rechecked 2.6.19-rc6-mm2 with current Sparse from Git (commit
-6b595d01c196bb013d6d95fc297ae2cb07c1fce7), and after commenting out line =
-739
-to get rid of this error suppressing the warnings:
+The reason I use bit mask in the keyword so that it can allow
+select a sub set of keywords. If we want, We can fine tune exactly
+what keyword is allowed. It also makes the caller of handle_attributes
+show exactly what kind of attribute it takes.
 
-drivers/kvm/kvm_main.c:739:18: error: macro "flush_tlb" passed 1 argument=
-s, but takes just 0
+Signed-Off-By: Christopher Li <sparse@chrisli.org>
 
-, I looked through the list of warnings and did not see any about memset.=
-  I
-suspect your bug got fixed, either intentionally or unintentionally. :)
-
-- Josh Triplett
-
-
---------------enigF3950DD7F5F635FE8D76D695
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGOC+aGJuZRtD+evsRAqUjAKCoFI1jf+HIWhJFGLi2XPim7KNHQACfSymd
-BdNzhrzSVAdy5UnC9Cx762k=
-=TgBr
------END PGP SIGNATURE-----
-
---------------enigF3950DD7F5F635FE8D76D695--
+Index: sparse/parse.c
+===================================================================
+--- sparse.orig/parse.c	2007-05-02 00:41:30.000000000 -0700
++++ sparse/parse.c	2007-05-02 00:53:09.000000000 -0700
+@@ -35,7 +35,7 @@ struct symbol_list *function_computed_ta
+ struct statement_list *function_computed_goto_list;
+ 
+ static struct token *statement(struct token *token, struct statement **tree);
+-static struct token *handle_attributes(struct token *token, struct ctype *ctype, int allow_asm);
++static struct token *handle_attributes(struct token *token, struct ctype *ctype, enum keyword keywords);
+ 
+ static struct token *struct_specifier(struct token *token, struct ctype *ctype);
+ static struct token *union_specifier(struct token *token, struct ctype *ctype);
+@@ -458,7 +458,7 @@ static struct token *struct_union_enum_s
+ 	struct position *repos;
+ 
+ 	ctype->modifiers = 0;
+-	token = handle_attributes(token, ctype, 1);
++	token = handle_attributes(token, ctype, KW_ATTRIBUTE | KW_ASM);
+ 	if (token_type(token) == TOKEN_IDENT) {
+ 		sym = lookup_symbol(token->ident, NS_STRUCT);
+ 		if (!sym ||
+@@ -1094,7 +1094,7 @@ static struct token *abstract_array_decl
+ static struct token *parameter_type_list(struct token *, struct symbol *, struct ident **p);
+ static struct token *declarator(struct token *token, struct symbol *sym, struct ident **p);
+ 
+-static struct token *handle_attributes(struct token *token, struct ctype *ctype, int allow_asm)
++static struct token *handle_attributes(struct token *token, struct ctype *ctype, enum keyword keywords)
+ {
+ 	struct symbol *keyword;
+ 	for (;;) {
+@@ -1104,7 +1104,7 @@ static struct token *handle_attributes(s
+ 		keyword = lookup_keyword(token->ident, NS_KEYWORD | NS_TYPEDEF);
+ 		if (!keyword || keyword->type != SYM_KEYWORD)
+ 			break;
+-		if (!(keyword->op->type & (KW_ATTRIBUTE | (allow_asm ? KW_ASM : 0))))
++		if (!(keyword->op->type & keywords))
+ 			break;
+ 		token = keyword->op->declarator(token->next, &thistype);
+ 		apply_ctype(token->pos, &thistype, ctype);
+@@ -1122,7 +1122,7 @@ static struct token *direct_declarator(s
+ 	}
+ 
+ 	for (;;) {
+-		token = handle_attributes(token, ctype, 1);
++		token = handle_attributes(token, ctype, KW_ATTRIBUTE | KW_ASM);
+ 
+ 		if (token_type(token) != TOKEN_SPECIAL)
+ 			return token;
+@@ -1261,7 +1261,7 @@ static struct token *declaration_list(st
+ 		decl->ident = ident;
+ 		if (match_op(token, ':')) {
+ 			token = handle_bitfield(token, decl);
+-			token = handle_attributes(token, &decl->ctype, 1);
++			token = handle_attributes(token, &decl->ctype, KW_ATTRIBUTE | KW_ASM);
+ 		}
+ 		apply_modifiers(token->pos, &decl->ctype);
+ 		add_symbol(list, decl);
+@@ -1702,7 +1702,7 @@ static struct token *statement(struct to
+ 		if (match_op(token->next, ':')) {
+ 			stmt->type = STMT_LABEL;
+ 			stmt->label_identifier = label_symbol(token);
+-			token = handle_attributes(token->next->next, &stmt->label_identifier->ctype, 0);
++			token = handle_attributes(token->next->next, &stmt->label_identifier->ctype, KW_ATTRIBUTE);
+ 			return statement(token, &stmt->label_statement);
+ 		}
+ 	}
