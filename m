@@ -1,50 +1,100 @@
-From: Dan Sheridan <djs@postman.org.uk>
-Subject: [PATCH 0/2] Improved flow graphs
-Date: Wed, 16 May 2007 11:11:21 +0100
-Message-ID: <1179310281.31308.54.camel@localhost.localdomain>
+From: Michael Stefaniuc <mstefani@redhat.com>
+Subject: Re: Ignore the cdecl and stdcall attributes for now.
+Date: Wed, 16 May 2007 13:19:26 +0200
+Message-ID: <464AE8BE.9020805@redhat.com>
+References: <20070515220536.GA23923@redhat.com> <464AA57B.3010205@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------070800090406030504000403"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from tuschin.blackcatnetworks.co.uk ([193.201.200.34]:50503 "EHLO
-	tuschin.blackcatnetworks.co.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757046AbXEPK6K (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 16 May 2007 06:58:10 -0400
-Received: from adelard.plus.com ([80.229.44.105] helo=[192.168.254.4])
-	by tuschin.blackcatnetworks.co.uk with esmtpa (Exim 4.50)
-	id 1HoGTb-0007z1-N4
-	for linux-sparse@vger.kernel.org; Wed, 16 May 2007 11:11:23 +0100
+Received: from mx1.redhat.com ([66.187.233.31]:41170 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757550AbXEPLTk (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 16 May 2007 07:19:40 -0400
+In-Reply-To: <464AA57B.3010205@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org
 
-Dear all,
+This is a multi-part message in MIME format.
+--------------070800090406030504000403
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 
-It doesn't look like this 0/2 made it the first time round...
+Josh Triplett wrote:
+> Michael Stefaniuc wrote:
+>> Wine uses the __stdcall__ attribute extensively. The effects of the
+>> patch on a sparse run on the Wine code are:
+>> - Removes 143000 "attribute '__stdcall__': unknown attribute" errors.
+>> - Removes 116 "attribute '__cdecl__': unknown attribute" errors.
+>> - Reduces the amount of "error: too many errors" from 1992 to 1459.
+>>
+>> Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
+> 
+> Applied, along with a test case.  Thanks!
+Thanks.
 
-These two patches are the first of several implementing improved graph
-generation for Sparse. Initially, I am dealing with straight-forward
-control flow. Forthcoming patches will add program dependency graphs (a
-control and data flow representation suitable for program slicing) and
-simple pointer alias analysis (for handling indirect calls).
+> I'd love to see the results you get with Wine; in particular, I'd love to see
+> and fix any parse errors.  Would you consider posting a build log somewhere
+I thankfully accept your offer :)
 
-I've tried to keep the C part of the flow graph relatively simple, and
-put the hard stuff (like return edges and subgraph processing) in
-post-processing scripts. 
+> with latest Sparse from Git?
+The output is still big. But i have a test case for the next big problem 
+generator in Wine. It's attached as a git patch to 
+validate/calling-convention-attributes.c (I can send it separately to 
+the linux-sparse mailing list if you want). Sparse gives:
+calling-convention-attributes.c:7:12: error: Expected ; at end of 
+declaration
+calling-convention-attributes.c:7:12: error: got f5ptr
 
-Example graph can be seen at
-http://www.postman.org.uk/djs52/example.png, generated with
+> Did you integrate Sparse into the Wine build system, or did you use CC=cgcc?
+Crude hack in my git tree to Make.rules adding a sparse call to the .c 
+=> .o build rule. Tried to see how the Kernel build system integrates 
+that and my  head started to smoke ... . I do not plan to send it 
+upstream for the moment.
 
-  ./graph validation/context.c | gvpr -f gvpr/return-paths | \
-    gvpr -f gvpr/subg-fwd -a good_while3 | dot -Tpng > /tmp/example.png
-
-Comments welcome.
-
-	Dan Sheridan.
-
+bye
+	michael
 -- 
-Daniel Sheridan (djs@adelard.com), Consultant
-Adelard LLP, College Building, Northampton Square, London  EC1V 0HB, UK
-Tel: +44 (0)20 7490 9455, Fax: +44 (0)20 7490 9451, 
-Web: http://www.adelard.com
+Michael Stefaniuc               Tel.: +49-711-96437-199
+Sr. Network Engineer            Fax.: +49-711-96437-111
+Red Hat GmbH                    Email: mstefani@redhat.com
+Hauptstaetterstr. 58            http://www.redhat.de/
+D-70178 Stuttgart
+
+--------------070800090406030504000403
+Content-Type: text/x-patch;
+ name*0="0001-Add-test-for-typedef-on-pointer-to-function-with-std.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename*0="0001-Add-test-for-typedef-on-pointer-to-function-with-std.pa";
+ filename*1="tch"
+
+From a31ddd057217701c239677f820fa4bb5456ab079 Mon Sep 17 00:00:00 2001
+From: Michael Stefaniuc <mstefani@redhat.com>
+Date: Wed, 16 May 2007 13:12:42 +0200
+Subject: [PATCH] Add test for typedef on pointer to function with stdcall attribute.
+
+
+Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
+---
+ validation/calling-convention-attributes.c |    3 +++
+ 1 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/validation/calling-convention-attributes.c b/validation/calling-convention-attributes.c
+index 0546754..1bbe575 100644
+--- a/validation/calling-convention-attributes.c
++++ b/validation/calling-convention-attributes.c
+@@ -2,3 +2,6 @@ extern void __attribute__((cdecl)) f1(void);
+ extern void __attribute__((__cdecl__)) f2(void);
+ extern void __attribute__((stdcall)) f3(void);
+ extern void __attribute__((__stdcall__)) f4(void);
++
++typedef void (__attribute__((__stdcall__)) *f5)(void);
++typedef f5 f5ptr;
+-- 
+1.5.0.6
+
+
+--------------070800090406030504000403--
