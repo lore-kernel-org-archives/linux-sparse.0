@@ -1,36 +1,36 @@
-From: Damien Lespiau <damien.lespiau@gmail.com>
-Subject: [PATCH] Fix compilation warning on 64 bits platforms
-Date: Mon, 21 May 2007 02:04:35 +0200
-Message-ID: <11797058752907-git-send-email-damien.lespiau@gmail.com>
+From: Derek M Jones <derek@knosof.co.uk>
+Subject: Re: [PATCH] __DATE__ & __TIME expansion
+Date: Mon, 21 May 2007 01:06:56 +0100
+Message-ID: <4650E2A0.2040000@knosof.co.uk>
+References: <11796983862564-git-send-email-damien.lespiau@gmail.com>	 <11796983861111-git-send-email-damien.lespiau@gmail.com>	 <20070520225019.GA2547@daikokuya.co.uk>	 <4650D368.1060806@freedesktop.org> <cbf3148c0705201649q46627dk228e8c0f427d5879@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp14.orange.fr ([193.252.23.69]:19061 "EHLO smtp14.orange.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758252AbXEUAEi (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 20 May 2007 20:04:38 -0400
+Received: from queueout03-winn.ispmail.ntl.com ([81.103.221.33]:46057 "EHLO
+	queueout03-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1758304AbXEUAQI (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 20 May 2007 20:16:08 -0400
+In-Reply-To: <cbf3148c0705201649q46627dk228e8c0f427d5879@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Damien Lespiau <damien.lespiau@gmail.com>
+To: Damien Lespiau <damien.lespiau@gmail.com>
+Cc: Josh Triplett <josh@freedesktop.org>, Neil Booth <neil@daikokuya.co.uk>, linux-sparse@vger.kernel.org
 
-Fix: format '%d' expects type 'int', but argument 2 has type 'long int'
+Damien,
 
-Signed-off-by: Damien Lespiau <damien.lespiau@gmail.com>
----
- linearize.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+>> > It seems your code could lead to these macros having different
+>> > values in a long compilation, which the standard doesn't permit.
+> 
+> Ouch, I didn't know that either. I learned to be humble before C. Still, 
+> I had
+> a quick look at the C99 standard and couldn't find it explicitly. No wonder
+> why I didn't know it in the first place.
 
-diff --git a/linearize.c b/linearize.c
-index d428d92..6c9fae4 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -461,7 +461,7 @@ const char *show_instruction(struct instruction *insn)
- 	}
- 
- 	if (buf >= buffer + sizeof(buffer))
--		die("instruction buffer overflowed %d\n", buf - buffer);
-+		die("instruction buffer overflowed %d\n", (int)(buf - buffer));
- 	do { --buf; } while (*buf == ' ');
- 	*++buf = 0;
- 	return buffer;
+Sentence 2004: http://c0x.coding-guidelines.com/6.10.8.html
+
 -- 
-1.5.2.rc3.87.g404fd
+Derek M. Jones                              tel: +44 (0) 1252 520 667
+Knowledge Software Ltd                      mailto:derek@knosof.co.uk
+Applications Standards Conformance Testing    http://www.knosof.co.uk
