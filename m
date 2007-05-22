@@ -1,86 +1,99 @@
-From: Michael Stefaniuc <mstefani@redhat.com>
-Subject: Running sparse on the Wine code (Was: Re: Ignore the cdecl and stdcall
- attributes for now.)
-Date: Wed, 23 May 2007 01:44:13 +0200
-Message-ID: <4653804D.3040306@redhat.com>
-References: <20070515220536.GA23923@redhat.com> <464AA57B.3010205@freedesktop.org> <46520647.9090802@redhat.com> <4652819D.4040101@freedesktop.org> <46530112.2030105@redhat.com> <46535373.3020109@freedesktop.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 0/5] Sparse on Cygwin (and git).
+Date: Tue, 22 May 2007 16:44:43 -0700
+Message-ID: <4653806B.1000901@freedesktop.org>
+References: <46532ECD.2020502@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig8F6971FE1A14A5E57941EF6E"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([66.187.233.31]:49455 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757911AbXEVXoT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 19:44:19 -0400
-In-Reply-To: <46535373.3020109@freedesktop.org>
+Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:38351 "EHLO
+	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758337AbXEVXpZ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 22 May 2007 19:45:25 -0400
+In-Reply-To: <46532ECD.2020502@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Josh Triplett wrote:
-> Michael Stefaniuc wrote:
->> Josh Triplett wrote:
->>> Don't pass -Wall to sparse unless you really mean it.  cgcc filters it out for
->>> a reason; just because you have -Wall in CFLAGS for GCC doesn't mean you want
->>> -Wall for sparse.  Sparse -Wall includes some warnings with high false
->>> positive rates that you probably don't want.
->> Ok good to know. I went the easy way just duplicating the gcc command 
->> line and replacing gcc with sparse and adding -D__i386___ as Wine won't 
->> build without a processor type defined.
-> 
-> cgcc will define the processor type too.
-> 
-> I highly recommend trying a build with CC=cgcc.  You can then pass sparse
-> flags in CFLAGS, and cgcc will filter them out before calling CC; you can
-> also specify CHECK="sparse -Wfoo -Wno-bar" if you prefer not to change
-> CFLAGS.
-Hmm ... somehow i have confused cgcc with the code generating backend
-that Jeff Garzik planned to write for sparse. With cgcc i won't need my
-Wine build hack anymore and makes things even easier for me.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig8F6971FE1A14A5E57941EF6E
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
->> I'm still trying to figure out 
->> if sparse is useful (signal to noise ratio) for Wine.
-> 
-> It will likely take some time and Sparse modifications in order to parse
-> Wine; however, I want Sparse to handle as much code as it can, not just
-With cgcc Wine builds just fine (I didn't try yet the configure and make
-depend stage of the build process). The only nitpick is that the ccache
-cache from a normal build isn't valid anymore for the CC=cgcc run. I'll
-have a look into it the next time i'll have to wait for the build to finish.
+Ramsay Jones wrote:
+> Since git uses sparse in it's "check" make target,
 
-> Linux.  I appreciate you trying it on Wine; I think working on this will
-> help both Wine and Sparse.
-> 
->> Wine has some 
->> constraints (having to follow an existing old grown API; compatibility 
->> with other C processors on non Linux OSes) that aren't a burden for the 
->> Linux Kernel. E.g. a patch to move to C99 struct initializer was 
->> recently rejected due to compatibility concerns with other C compilers.
-> 
-> I just committed support for a -Wno-old-initializer flag to turn off the
-> sparse warning on non-C99 initializers.
-That was fast and I didn't even request it :)
+Cool; I didn't know that. :)
 
->>> The undefined preprocessor identifiers from limits.h come from not using cgcc,
->>> which defines them.  Sparse should ideally define those itself.  You can work
->>> around the problem by using cgcc or by defining the symbols on the sparse
->>> command line as cgcc does.
->> I'll do a run with cgcc tonight instead of sparse and check the difference.
-Updated
-http://people.redhat.com/mstefani/wine/download/wine+sparse-make.output.bz2
-That is the result of:
-make clean; CHECK='sparse -Wno-transparent-union -Wno-old-initializer'
-make CC=cgcc > make.out 2>&1
-The output is with latest git sparse including the fix for the typedefs
-to functions with a stdcall attribute.
-I didn't look at the output yet as it is past bed time around here.
+> I decided to download the
+> (then current) 0.2 tar-ball and see what sparse was about.
 
-bye
-	michael
--- 
-Michael Stefaniuc               Tel.: +49-711-96437-199
-Sr. Network Engineer            Fax.: +49-711-96437-111
-Red Hat GmbH                    Email: mstefani@redhat.com
-Hauptstaetterstr. 58            http://www.redhat.de/
-D-70178 Stuttgart
+Great!
+
+> Unfortunately, at present,
+> I am using cygwin on win32 until I get around to installing Linux. ;-)
+
+Fortunately, that resulted in some excellent patches. :)
+
+[...]
+> As I am somewhat bandwidth challenged, until recently, I had never clon=
+ed a
+> git repository (not even the git repo). So, last week I cloned the spar=
+se
+> repository; thankfully it only took about ten minutes (yep a slow pipe!=
+).
+
+I think you'll find that keeping the git repo up-to-date requires quite a=
+ bit
+less bandwidth than the initial checkout.
+
+> Thus, again I had to update the patch series.
+
+In general, you'll probably run into conflicts if you try to generate pat=
+ches
+from the last release tarball, especially on frequently changed files lik=
+e
+ident-list.h and the attribute table.
+
+> Patch 0003 overlapped a
+> recent commit (baf2c5a8) by Michael Stefaniuc and patch 0004 required a=
+n
+> update due to handle_attributes() gaining a third parameter. So the fin=
+al
+> patch series is:
+>=20
+> 0001-Fix-an-__sentinel__-attribute-directive-ignored.patch
+> 0002-Fix-some-enum-value-XXX-not-handled-in-switch-wa.patch
+> 0003-Add-more-support-for-WIN32-attribute-names.patch
+> 0004-Fix-an-__attribute__-parsing-error.patch
+> 0005-Add-cygwin-support-to-cgcc.patch
+>=20
+> which was built on top of: 0.3-15-gb5bd30f
+
+Looks like a good set of patches.  However, only patches 3 and 4 seem to =
+have
+hit the list.
+
+- Josh Triplett
+
+
+
+--------------enig8F6971FE1A14A5E57941EF6E
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGU4BrGJuZRtD+evsRArnHAJ959Eb1+3211w1xuI2ilQzXONXONQCfTNVj
+pTjAFJGCnwvcAmJFUrhkl2w=
+=K3gl
+-----END PGP SIGNATURE-----
+
+--------------enig8F6971FE1A14A5E57941EF6E--
