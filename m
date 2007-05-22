@@ -1,36 +1,42 @@
-From: Damien Lespiau <damien.lespiau@gmail.com>
-Subject: [PATCH] Fix compilation warning on 64 bits platforms v2
-Date: Tue, 22 May 2007 20:07:37 +0200
-Message-ID: <11798572573555-git-send-email-damien.lespiau@gmail.com>
+From: "Damien Lespiau" <damien.lespiau@gmail.com>
+Subject: Re: [PATCH] Beautify all & install Makefile targets
+Date: Tue, 22 May 2007 20:28:11 +0200
+Message-ID: <cbf3148c0705221128s884ad1l9a0986cee98445bb@mail.gmail.com>
+References: <11796983862564-git-send-email-damien.lespiau@gmail.com>
+	 <4650E944.1060506@freedesktop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp21.orange.fr ([80.12.242.48]:48907 "EHLO smtp21.orange.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755640AbXEVSHj (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 14:07:39 -0400
+Received: from wx-out-0506.google.com ([66.249.82.231]:54064 "EHLO
+	wx-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757419AbXEVS2M (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 22 May 2007 14:28:12 -0400
+Received: by wx-out-0506.google.com with SMTP id h29so317465wxd
+        for <linux-sparse@vger.kernel.org>; Tue, 22 May 2007 11:28:11 -0700 (PDT)
+In-Reply-To: <4650E944.1060506@freedesktop.org>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Damien Lespiau <damien.lespiau@gmail.com>
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org
 
-Fix: format '%d' expects type 'int', but argument 2 has type 'long int'
+> I'd also like to hear from other people on whether or not they prefer this
+> style of output.  It doesn't matter much to me either way.
 
-Signed-off-by: Damien Lespiau <damien.lespiau@gmail.com>
----
- linearize.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+That won't prevent me from resending a more decent patch :p
 
-diff --git a/linearize.c b/linearize.c
-index d428d92..c38dd7d 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -461,7 +461,7 @@ const char *show_instruction(struct instruction *insn)
- 	}
- 
- 	if (buf >= buffer + sizeof(buffer))
--		die("instruction buffer overflowed %d\n", buf - buffer);
-+		die("instruction buffer overflowed %td\n", buf - buffer);
- 	do { --buf; } while (*buf == ' ');
- 	*++buf = 0;
- 	return buffer;
+> > +     QUIET_LD       = @echo    '   ' LD'      '$@;
+>
+> This always seems misleading to me, given that the corresponding rules run CC,
+> not LD.
+
+Well, calling the linker through gcc front-end does not change the fact
+that we are linking. To me CC or LD are just saying we are compiling
+or linking.
+
+I'll resend a patch, trying to take care of your comments.
+
 -- 
-1.5.2.rc3.87.g404fd
+Damien
