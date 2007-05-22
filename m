@@ -1,54 +1,69 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: fun with ?:
-Date: Tue, 22 May 2007 23:46:19 +0100
-Message-ID: <20070522224619.GI4095@ftp.linux.org.uk>
-References: <20070519025249.GZ4095@ftp.linux.org.uk> <4653633B.3000000@freedesktop.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 3/5] Add (more) support for WIN32 attribute names
+Date: Tue, 22 May 2007 15:50:57 -0700
+Message-ID: <465373D1.9060303@freedesktop.org>
+References: <46532FD5.6000307@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig0C92E01C6FB1A3A7CA659B0A"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:42911 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755619AbXEVWqU (ORCPT
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:36736 "EHLO
+	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756869AbXEVWvj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 18:46:20 -0400
-Content-Disposition: inline
-In-Reply-To: <4653633B.3000000@freedesktop.org>
+	Tue, 22 May 2007 18:51:39 -0400
+In-Reply-To: <46532FD5.6000307@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Tue, May 22, 2007 at 02:40:11PM -0700, Josh Triplett wrote:
-> > What's going on here is pretty simple: there are two degenerate cases of
-> > conditional operator: pointer vs. null pointer constant and pointer vs.
-> > possibly qualified pointer to void.  Look at these cases:
-> > 	n ? p : NULL => should be the same type as p
-> > 	n ? p : v => clearly const void * - pointer to void with union of
-> > qualifiers; in this case we obviously lose any information about the type
-> > of object being pointed to.
-> 
-> I didn't actually know about the special case for a null pointer constant.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig0C92E01C6FB1A3A7CA659B0A
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Rationale is pretty simple: normally if you have void * in the mix, you
-_can't_ expect more type information from the result; i.e. you are not
-promised that result of ?: will point to int.  However, null pointer constant
-is a chameleon - it accepts whatever pointer type you might need in given
-context.  So in that case you do _not_ lose the type information.
+Ramsay Jones wrote:
+> In particular, the following identifiers (along with their __X__ varian=
+ts)
+> are now accepted as attribute names: fastcall, dllimport and dllexport.=
 
-> In particular:
-> > n ? p : (void *)NULL		int *	=>	void *
-> Shouldn't this have type int * just like n ? p : NULL ?
+> (cdecl and stdcall were added in baf2c5a84e by Michael Stefaniuc).
+> For now, at least, these attributes are just ignored.
 
-No.  It's "void * and I _mean_ it".  Well... actually (void *)(void *)0 if
-you want to be 100% portable and protect yourself against cretinous systems
-that define NULL to 0.
+Your patch seems to have some whitespace damage in the form of extra lead=
+ing
+spaces.  I've manually modified it to apply this time, but please figure =
+out
+what causes these patches to break and fix it.  You may want to test by
+sending patches to yourself and trying to apply them.  I notice that you =
+use
+Thunderbird; format=3Dflowed may cause the problem, so try turning it off=
+ by
+disabling the preference mailnews.send_plaintext_flowed .  You can do so
+either via Edit -> Preferences -> Advanced -> Config Editor; alternativel=
+y, if
+you have Enigmail installed, it offers a checkbox to turn off format=3Dfl=
+owed in
+its preferneces.
 
-Again, null pointer constant is not the same thing as null pointer to void.
+- Josh Triplett
 
-BTW, there's another painful area: what do we do to somebody who uses
-(void *)(69 + 1 - 70) as null pointer constant?  Currenly sparse doesn't
-recognize it as such; C standard does.  IMO the right thing to do is
-to add a flag that would switch to full-blown standard rules in that area
-("integer constant expression returning 0" instead of basically "0 in some
-layers of ()") and flame to the crisp any wanker caught at actually doing
-that.  Any suggestions re sufficiently violent warning messages?
+
+
+--------------enig0C92E01C6FB1A3A7CA659B0A
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGU3PRGJuZRtD+evsRAvcJAKCIWuWA/LZakE3EqqNtNQ4eBrjR1ACgtlzZ
+w61+4k2RCEppxaR69Cz0k9U=
+=flOr
+-----END PGP SIGNATURE-----
+
+--------------enig0C92E01C6FB1A3A7CA659B0A--
