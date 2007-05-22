@@ -1,149 +1,84 @@
-From: Damien Lespiau <damien.lespiau@gmail.com>
-Subject: [PATCH] Beautify all & install Makefile targets v2
-Date: Tue, 22 May 2007 20:29:43 +0200
-Message-ID: <11798585832088-git-send-email-damien.lespiau@gmail.com>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: [PATCH 4/5] Fix an __attribute__() parsing error
+Date: Tue, 22 May 2007 19:11:47 +0100
+Message-ID: <46533263.3010108@ramsay1.demon.co.uk>
+Mime-Version: 1.0
+Content-Type: multipart/mixed;
+ boundary="------------070606050006040203050907"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp25.orange.fr ([193.252.22.24]:28495 "EHLO smtp25.orange.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1758422AbXEVS3q (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 14:29:46 -0400
+Received: from anchor-fallback-96.mail.demon.net ([194.217.242.83]:41531 "EHLO
+	anchor-fallback-96.mail.demon.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1757578AbXEVTN5 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 22 May 2007 15:13:57 -0400
+Received: from anchor-post-34.mail.demon.net ([194.217.242.92]:4077 "EHLO
+	anchor-post-34.mail.demon.net") by anchor-fallback-96.mail.demon.net
+	with ESMTP id S613936AbXEVSRV (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 22 May 2007 18:17:21 +0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Damien Lespiau <damien.lespiau@gmail.com>
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Beautify make's output like kbuild or git. The install
-target is especially much more readable.
-make V=1 (install) to get back to the old behaviour.
+This is a multi-part message in MIME format.
+--------------070606050006040203050907
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 
-Signed-off-by: Damien Lespiau <damien.lespiau@gmail.com>
+
+
+Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 ---
- Makefile |   70 ++++++++++++++++++++++++++++++++++++++-----------------------
- 1 files changed, 43 insertions(+), 27 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 77a6877..5eeffdb 100644
---- a/Makefile
-+++ b/Makefile
-@@ -37,68 +37,81 @@ SLIB_FILE= libsparse.so
- 
- LIBS=$(LIB_FILE)
- 
-+#
-+# Pretty print
-+#
-+V	      = @
-+Q	      = $(V:1=)
-+QUIET_CC      = $(Q:@=@echo    '     CC     '$@;)
-+QUIET_AR      = $(Q:@=@echo    '     AR     '$@;)
-+QUIET_GEN     = $(Q:@=@echo    '     GEN    '$@;)
-+QUIET_LD      = $(Q:@=@echo    '     LD     '$@;)
-+# We rely on the -v switch of install to print 'file -> $ install_dir/file'
-+QUIET_INST_SH = $(Q:@=echo -n  '     INSTALL  ';)
-+QUIET_INST    = $(Q:@=@echo -n '     INSTALL  ';)
+When updating this patch from the 0.3 version, I made the (new) third parameter
+KW_ATTRIBUTE only, rather than (KW_ATTRIBUTE | KW_ASM), since it did not seem
+correct to allow an asm there; is that correct?
+
+The test case for this was abstracted from an example in the "expat.h" header file.
+
+$cat ape.c
+
+typedef void (__attribute__((__cdecl__)) *FP)(void *u, const char *n);
+
+void set_FP(void *cb, FP f);
+
+$
+
+  parse.c |    5 ++++-
+  1 files changed, 4 insertions(+), 1 deletions(-)
+
+diff --git a/parse.c b/parse.c
+index db5c9e6..16a6dce 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1149,7 +1149,10 @@ static struct token *direct_declarator(struct token *token, struct symbol *decl,
+  		if (token->special == '(') {
+  			struct symbol *sym;
+  			struct token *next = token->next;
+-			int fn = (p && *p) || match_op(next, ')') || lookup_type(next);
++			int fn;
 +
- all: $(PROGRAMS) sparse.pc
- 
- install: $(INST_PROGRAMS) $(LIBS) $(LIB_H) sparse.pc
--	install -d $(DESTDIR)$(BINDIR)
--	install -d $(DESTDIR)$(LIBDIR)
--	install -d $(DESTDIR)$(INCLUDEDIR)/sparse
--	install -d $(DESTDIR)$(PKGCONFIGDIR)
--	for f in $(INST_PROGRAMS); do \
--		install -v $$f $(DESTDIR)$(BINDIR)/$$f || exit 1; \
-+	$(Q)install -d $(DESTDIR)$(BINDIR)
-+	$(Q)install -d $(DESTDIR)$(LIBDIR)
-+	$(Q)install -d $(DESTDIR)$(INCLUDEDIR)/sparse
-+	$(Q)install -d $(DESTDIR)$(PKGCONFIGDIR)
-+	$(Q)for f in $(INST_PROGRAMS); do \
-+		$(QUIET_INST_SH)install -v $$f $(DESTDIR)$(BINDIR)/$$f || exit 1; \
- 	done
--	for f in $(LIBS); do \
--		install -m 644 -v $$f $(DESTDIR)$(LIBDIR)/$$f || exit 1; \
-+	$(Q)for f in $(LIBS); do \
-+		$(QUIET_INST_SH)install -m 644 -v $$f $(DESTDIR)$(LIBDIR)/$$f || exit 1; \
- 	done
--	for f in $(LIB_H); do \
--		install -m 644 -v $$f $(DESTDIR)$(INCLUDEDIR)/sparse/$$f || exit 1; \
-+	$(Q)for f in $(LIB_H); do \
-+		$(QUIET_INST_SH)install -m 644 -v $$f $(DESTDIR)$(INCLUDEDIR)/sparse/$$f || exit 1; \
- 	done
--	install -m 644 -v sparse.pc $(DESTDIR)$(PKGCONFIGDIR)/sparse.pc
-+	$(QUIET_INST)install -m 644 -v sparse.pc $(DESTDIR)$(PKGCONFIGDIR)/sparse.pc
- 
- sparse.pc: sparse.pc.in
--	sed 's|@version@|$(VERSION)|g;s|@prefix@|$(PREFIX)|g;s|@libdir@|$(LIBDIR)|g;s|@includedir@|$(INCLUDEDIR)|g' sparse.pc.in > sparse.pc
-+	$(QUIET_GEN)sed 's|@version@|$(VERSION)|g;s|@prefix@|$(PREFIX)|g;s|@libdir@|$(LIBDIR)|g;s|@includedir@|$(INCLUDEDIR)|g' sparse.pc.in > sparse.pc
- 
- test-lexing: test-lexing.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- test-parsing: test-parsing.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- test-linearize: test-linearize.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- test-sort: test-sort.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- compile: compile.o compile-i386.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< compile-i386.o $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< compile-i386.o $(LIBS)
- 
- obfuscate: obfuscate.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- sparse: sparse.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- graph: graph.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- example: example.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- test-unssa: test-unssa.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- test-dissect: test-dissect.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- ctags: ctags.o $(LIBS)
--	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-+	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- $(LIB_FILE): $(LIB_OBJS)
--	$(AR) rcs $@ $(LIB_OBJS)
-+	$(QUIET_AR)$(AR) rcs $@ $(LIB_OBJS)
- 
- $(SLIB_FILE): $(LIB_OBJS)
--	$(CC) -shared -o $@ $(LIB_OBJS)
-+	$(QUIET_LD)$(CC) -shared -o $@ $(LIB_OBJS)
- 
- evaluate.o: $(LIB_H)
- expression.o: $(LIB_H)
-@@ -141,7 +154,10 @@ compat-mingw.o: $(LIB_H)
- compat-cygwin.o: $(LIB_H)
- 
- pre-process.h:
--	echo "#define GCC_INTERNAL_INCLUDE \"`$(CC) -print-file-name=include`\"" > pre-process.h
-+	$(QUIET_GEN)echo "#define GCC_INTERNAL_INCLUDE \"`$(CC) -print-file-name=include`\"" > pre-process.h
-+
-+.c.o:
-+	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
- 
- clean:
- 	rm -f *.[oasi] core core.[0-9]* $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc
++			next = handle_attributes(next, ctype, KW_ATTRIBUTE);
++			fn = (p && *p) || match_op(next, ')') || lookup_type(next);
+
+  			if (!fn) {
+  				struct symbol *base_type = ctype->base_type;
 -- 
-1.5.2.rc3.87.g404fd
+1.5.1
+
+
+--------------070606050006040203050907
+Content-Type: text/plain;
+ name="ape.c"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline;
+ filename="ape.c"
+
+
+typedef void (__attribute__((__cdecl__)) *FP)(void *u, const char *n);
+
+void set_FP(void *cb, FP f);
+
+
+--------------070606050006040203050907--
