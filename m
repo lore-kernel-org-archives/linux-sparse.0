@@ -1,187 +1,143 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Beautify all & install Makefile targets v2
-Date: Tue, 22 May 2007 14:24:50 -0700
-Message-ID: <46535FA2.4070208@freedesktop.org>
-References: <11798585832088-git-send-email-damien.lespiau@gmail.com>
+Subject: Re: fun with ?:
+Date: Tue, 22 May 2007 14:40:11 -0700
+Message-ID: <4653633B.3000000@freedesktop.org>
+References: <20070519025249.GZ4095@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigC461DE9176F0D98318D57609"
+ boundary="------------enig9883604EB15A73613B69775B"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:52317 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759230AbXEVVZb (ORCPT
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:49771 "EHLO
+	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757429AbXEVVkx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 17:25:31 -0400
-In-Reply-To: <11798585832088-git-send-email-damien.lespiau@gmail.com>
+	Tue, 22 May 2007 17:40:53 -0400
+In-Reply-To: <20070519025249.GZ4095@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Damien Lespiau <damien.lespiau@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigC461DE9176F0D98318D57609
-Content-Type: text/plain; charset=UTF-8
+--------------enig9883604EB15A73613B69775B
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Damien Lespiau wrote:
-> Beautify make's output like kbuild or git. The install
-> target is especially much more readable.
-> make V=3D1 (install) to get back to the old behaviour.
+Al Viro wrote:
+> 	There's an unpleasant case in conditional operator we are getting
+> wrong.
+> 	int *p;
+> 	const void *v;
+> 	int n;
+>=20
+> 	n ? p : (const void *)0
+>=20
+> According to C standard, the type of that expression is const void *.  =
+Note
+> that
+> 	n ? p : (void *)0
+> is an entirely different story - it's int *.
 
-Thinking about this further, I think I like the new output, and the new p=
-atch
-with broader make compatibility removes the rest of the reservations I ha=
-d
-about this change.  Applied, thanks.
+That much actually makes sense to me.  You can convert from (int *) to (c=
+onst
+void *), but not from (const void *) to (int *), so I'd expect the behavi=
+or of
+the first case.  You *can* convert bidirectionally between (void *) and (=
+int
+*), so I expect the behavior of the second case as well.
+
+> What's going on here is pretty simple: there are two degenerate cases o=
+f
+> conditional operator: pointer vs. null pointer constant and pointer vs.=
+
+> possibly qualified pointer to void.  Look at these cases:
+> 	n ? p : NULL =3D> should be the same type as p
+> 	n ? p : v =3D> clearly const void * - pointer to void with union of
+> qualifiers; in this case we obviously lose any information about the ty=
+pe
+> of object being pointed to.
+
+I didn't actually know about the special case for a null pointer constant=
+=2E
+
+> The tricky part comes from definition of what null pointer constant _is=
+_.
+> C allows two variants - integer constant expression with value 0 (we ac=
+cept
+> it, but warn about bad taste) and the same cast to void * (we also acce=
+pt
+> that, of course).
+
+Right.
+
+> Note that this is specific type - pointer to void.  Without any qualifi=
+ers.
+> We are guaranteed that we can convert it to any pointer type and get
+> a pointer distinct from address of any object.  So (const void *)0 is t=
+he same
+> thing as (const void *)(void *)0 and it is the null pointer to const vo=
+id.
+> *HOWEVER*, it is not a null pointer constant.  The standard is clear he=
+re and
+> frankly, it's reasonable.  If you cast to anything other than void *, t=
+hen
+> you presumably mean it and want the conversion rules as for any pointer=
+
+> of that type.  Think of something like
+> #ifdef FOO
+> const void *f(int n);
+> #else
+> #define f(n) ((const void *)NULL)
+> #endif
+> You don't want to have types suddenly change under you depending on FOO=
+=2E
+
+Definitely not.  I don't want qualifiers to disappear just because I appl=
+ied
+them to NULL.
+
+> sparse is more liberal than standard C in what it accepts as null point=
+er
+> constant.  It almost never matters; however, in case of conditional ope=
+rator
+> we end up with a different type for an expression both sparse and any
+> C compiler will accept as valid.
+>
+> I'm fixing other fun stuff in that area (e.g. we ought to take a union =
+of
+> qualifiers, ought _not_ to mix different structs or unions, etc.), so
+> unless there are serious objections I'd rather go with standard behavio=
+ur
+> in that case.  What will change:
+>=20
+> int n;
+> int *p;
+>=20
+> n ? p : (const void *)NULL	int *	=3D>	const void *
+> n ? p : (const void *)0		ditto
+> n ? p : (char *)0		int *	=3D>	a warning on mixing int * with							char=
+ *
+> n ? p : (char *)NULL		ditto
+> n ? p : (void *)NULL		int *	=3D>	void *
+> n ? p : (void *)0		unchanged
+> n ? p : NULL			unchanged
+>=20
+> Objections?
+
+Thanks for the clear explanation.  I think following the standard seems l=
+ike a
+good idea here, though I find some of the cases somewhat unintuitive and
+potentially error-prone.
+
+In particular:
+> n ? p : (void *)NULL		int *	=3D>	void *
+Shouldn't this have type int * just like n ? p : NULL ?
 
 - Josh Triplett
 
-> Signed-off-by: Damien Lespiau <damien.lespiau@gmail.com>
-> ---
->  Makefile |   70 ++++++++++++++++++++++++++++++++++++++----------------=
--------
->  1 files changed, 43 insertions(+), 27 deletions(-)
->=20
-> diff --git a/Makefile b/Makefile
-> index 77a6877..5eeffdb 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -37,68 +37,81 @@ SLIB_FILE=3D libsparse.so
-> =20
->  LIBS=3D$(LIB_FILE)
-> =20
-> +#
-> +# Pretty print
-> +#
-> +V	      =3D @
-> +Q	      =3D $(V:1=3D)
-> +QUIET_CC      =3D $(Q:@=3D@echo    '     CC     '$@;)
-> +QUIET_AR      =3D $(Q:@=3D@echo    '     AR     '$@;)
-> +QUIET_GEN     =3D $(Q:@=3D@echo    '     GEN    '$@;)
-> +QUIET_LD      =3D $(Q:@=3D@echo    '     LD     '$@;)
-> +# We rely on the -v switch of install to print 'file -> $ install_dir/=
-file'
-> +QUIET_INST_SH =3D $(Q:@=3Decho -n  '     INSTALL  ';)
-> +QUIET_INST    =3D $(Q:@=3D@echo -n '     INSTALL  ';)
-> +
->  all: $(PROGRAMS) sparse.pc
-> =20
->  install: $(INST_PROGRAMS) $(LIBS) $(LIB_H) sparse.pc
-> -	install -d $(DESTDIR)$(BINDIR)
-> -	install -d $(DESTDIR)$(LIBDIR)
-> -	install -d $(DESTDIR)$(INCLUDEDIR)/sparse
-> -	install -d $(DESTDIR)$(PKGCONFIGDIR)
-> -	for f in $(INST_PROGRAMS); do \
-> -		install -v $$f $(DESTDIR)$(BINDIR)/$$f || exit 1; \
-> +	$(Q)install -d $(DESTDIR)$(BINDIR)
-> +	$(Q)install -d $(DESTDIR)$(LIBDIR)
-> +	$(Q)install -d $(DESTDIR)$(INCLUDEDIR)/sparse
-> +	$(Q)install -d $(DESTDIR)$(PKGCONFIGDIR)
-> +	$(Q)for f in $(INST_PROGRAMS); do \
-> +		$(QUIET_INST_SH)install -v $$f $(DESTDIR)$(BINDIR)/$$f || exit 1; \
->  	done
-> -	for f in $(LIBS); do \
-> -		install -m 644 -v $$f $(DESTDIR)$(LIBDIR)/$$f || exit 1; \
-> +	$(Q)for f in $(LIBS); do \
-> +		$(QUIET_INST_SH)install -m 644 -v $$f $(DESTDIR)$(LIBDIR)/$$f || exi=
-t 1; \
->  	done
-> -	for f in $(LIB_H); do \
-> -		install -m 644 -v $$f $(DESTDIR)$(INCLUDEDIR)/sparse/$$f || exit 1; =
-\
-> +	$(Q)for f in $(LIB_H); do \
-> +		$(QUIET_INST_SH)install -m 644 -v $$f $(DESTDIR)$(INCLUDEDIR)/sparse=
-/$$f || exit 1; \
->  	done
-> -	install -m 644 -v sparse.pc $(DESTDIR)$(PKGCONFIGDIR)/sparse.pc
-> +	$(QUIET_INST)install -m 644 -v sparse.pc $(DESTDIR)$(PKGCONFIGDIR)/sp=
-arse.pc
-> =20
->  sparse.pc: sparse.pc.in
-> -	sed 's|@version@|$(VERSION)|g;s|@prefix@|$(PREFIX)|g;s|@libdir@|$(LIB=
-DIR)|g;s|@includedir@|$(INCLUDEDIR)|g' sparse.pc.in > sparse.pc
-> +	$(QUIET_GEN)sed 's|@version@|$(VERSION)|g;s|@prefix@|$(PREFIX)|g;s|@l=
-ibdir@|$(LIBDIR)|g;s|@includedir@|$(INCLUDEDIR)|g' sparse.pc.in > sparse.=
-pc
-> =20
->  test-lexing: test-lexing.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  test-parsing: test-parsing.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  test-linearize: test-linearize.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  test-sort: test-sort.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  compile: compile.o compile-i386.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< compile-i386.o $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< compile-i386.o $(LIBS)
-> =20
->  obfuscate: obfuscate.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  sparse: sparse.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  graph: graph.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  example: example.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  test-unssa: test-unssa.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  test-dissect: test-dissect.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  ctags: ctags.o $(LIBS)
-> -	$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> +	$(QUIET_LD)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
-> =20
->  $(LIB_FILE): $(LIB_OBJS)
-> -	$(AR) rcs $@ $(LIB_OBJS)
-> +	$(QUIET_AR)$(AR) rcs $@ $(LIB_OBJS)
-> =20
->  $(SLIB_FILE): $(LIB_OBJS)
-> -	$(CC) -shared -o $@ $(LIB_OBJS)
-> +	$(QUIET_LD)$(CC) -shared -o $@ $(LIB_OBJS)
-> =20
->  evaluate.o: $(LIB_H)
->  expression.o: $(LIB_H)
-> @@ -141,7 +154,10 @@ compat-mingw.o: $(LIB_H)
->  compat-cygwin.o: $(LIB_H)
-> =20
->  pre-process.h:
-> -	echo "#define GCC_INTERNAL_INCLUDE \"`$(CC) -print-file-name=3Dinclud=
-e`\"" > pre-process.h
-> +	$(QUIET_GEN)echo "#define GCC_INTERNAL_INCLUDE \"`$(CC) -print-file-n=
-ame=3Dinclude`\"" > pre-process.h
-> +
-> +.c.o:
-> +	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
-> =20
->  clean:
->  	rm -f *.[oasi] core core.[0-9]* $(PROGRAMS) $(SLIB_FILE) pre-process.=
-h sparse.pc
 
-
-
---------------enigC461DE9176F0D98318D57609
+--------------enig9883604EB15A73613B69775B
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -190,9 +146,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGU1+iGJuZRtD+evsRAhK1AJ9HM44IgVpiaDJCHA7hWa8raTiqUwCePKRF
-8AW3ud+memixhyUkgnxSWiE=
-=ns9o
+iD8DBQFGU2M7GJuZRtD+evsRArjNAKCFcJRa5/9gcD5ne0Zy7jBJQCS7dwCfclFC
+Uvt/nVoWINGggJy2BvaVzbM=
+=Hgkv
 -----END PGP SIGNATURE-----
 
---------------enigC461DE9176F0D98318D57609--
+--------------enig9883604EB15A73613B69775B--
