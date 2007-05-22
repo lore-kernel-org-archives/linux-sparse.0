@@ -1,69 +1,54 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 3/5] Add (more) support for WIN32 attribute names
-Date: Tue, 22 May 2007 15:50:57 -0700
-Message-ID: <465373D1.9060303@freedesktop.org>
-References: <46532FD5.6000307@ramsay1.demon.co.uk>
+From: Michael Stefaniuc <mstefani@redhat.com>
+Subject: Re: [PATCH 4/5] Fix an __attribute__() parsing error
+Date: Wed, 23 May 2007 01:17:31 +0200
+Message-ID: <46537A0B.1020302@redhat.com>
+References: <46533263.3010108@ramsay1.demon.co.uk> <465370C2.3010801@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig0C92E01C6FB1A3A7CA659B0A"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:36736 "EHLO
-	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756869AbXEVWvj (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 18:51:39 -0400
-In-Reply-To: <46532FD5.6000307@ramsay1.demon.co.uk>
+Received: from mx1.redhat.com ([66.187.233.31]:43550 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1756938AbXEVXRg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 22 May 2007 19:17:36 -0400
+In-Reply-To: <465370C2.3010801@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Ramsay Jones <ramsay@ramsay1.demon.co.uk>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig0C92E01C6FB1A3A7CA659B0A
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Josh Triplett wrote:
+> Ramsay Jones wrote:
+>> When updating this patch from the 0.3 version, I made the (new) third parameter
+>> KW_ATTRIBUTE only, rather than (KW_ATTRIBUTE | KW_ASM), since it did not seem
+>> correct to allow an asm there; is that correct?
+> 
+> Correct; I don't think you can have an asm there.
+> 
+>> The test case for this was abstracted from an example in the "expat.h" header file.
+>>
+>> $cat ape.c
+>>
+>> typedef void (__attribute__((__cdecl__)) *FP)(void *u, const char *n);
+>>
+>> void set_FP(void *cb, FP f);
+> 
+> Applied.  I think you just made a Wine developer very happy.  Michael, this
+> patch fixes the test case you provided for Wine; I applied your patch for the
+> new test case.
+Cool, thanks. Was just running a Wine build with cgcc when I have seen
+this so i've stopped it and run it again with the latest git checkout.
+And indeed it looks definitely better; the "error: too many errors"
+count went down from 1459 to 7.
 
-Ramsay Jones wrote:
-> In particular, the following identifiers (along with their __X__ varian=
-ts)
-> are now accepted as attribute names: fastcall, dllimport and dllexport.=
+> Thanks, Ramsay!
+Thanks indeed.
 
-> (cdecl and stdcall were added in baf2c5a84e by Michael Stefaniuc).
-> For now, at least, these attributes are just ignored.
-
-Your patch seems to have some whitespace damage in the form of extra lead=
-ing
-spaces.  I've manually modified it to apply this time, but please figure =
-out
-what causes these patches to break and fix it.  You may want to test by
-sending patches to yourself and trying to apply them.  I notice that you =
-use
-Thunderbird; format=3Dflowed may cause the problem, so try turning it off=
- by
-disabling the preference mailnews.send_plaintext_flowed .  You can do so
-either via Edit -> Preferences -> Advanced -> Config Editor; alternativel=
-y, if
-you have Enigmail installed, it offers a checkbox to turn off format=3Dfl=
-owed in
-its preferneces.
-
-- Josh Triplett
-
-
-
---------------enig0C92E01C6FB1A3A7CA659B0A
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGU3PRGJuZRtD+evsRAvcJAKCIWuWA/LZakE3EqqNtNQ4eBrjR1ACgtlzZ
-w61+4k2RCEppxaR69Cz0k9U=
-=flOr
------END PGP SIGNATURE-----
-
---------------enig0C92E01C6FB1A3A7CA659B0A--
+bye
+	michael
+-- 
+Michael Stefaniuc               Tel.: +49-711-96437-199
+Sr. Network Engineer            Fax.: +49-711-96437-111
+Red Hat GmbH                    Email: mstefani@redhat.com
+Hauptstaetterstr. 58            http://www.redhat.de/
+D-70178 Stuttgart
