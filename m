@@ -1,53 +1,41 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: [PATCH 5/5] Add cygwin support to cgcc
-Date: Tue, 22 May 2007 19:12:42 +0100
-Message-ID: <4653329A.9040407@ramsay1.demon.co.uk>
+From: "Morten Welinder" <mwelinder@gmail.com>
+Subject: Re: fun with ?:
+Date: Wed, 23 May 2007 08:26:28 -0400
+Message-ID: <118833cc0705230526o46eb1633i69a12219f24c1343@mail.gmail.com>
+References: <20070519025249.GZ4095@ftp.linux.org.uk>
+	 <4653633B.3000000@freedesktop.org>
+	 <20070522224619.GI4095@ftp.linux.org.uk>
+	 <46537BC1.9000808@freedesktop.org>
+	 <20070523000234.GJ4095@ftp.linux.org.uk>
+	 <20070523002506.GK4095@ftp.linux.org.uk>
+	 <20070523045319.GL4095@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from anchor-fallback-93.mail.demon.net ([194.217.242.93]:63328 "EHLO
-	anchor-fallback-93.mail.demon.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1764356AbXEWJ0q (ORCPT
+Received: from ug-out-1314.google.com ([66.249.92.171]:64635 "EHLO
+	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757870AbXEWM0a (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 23 May 2007 05:26:46 -0400
-Received: from anchor-post-34.mail.demon.net ([194.217.242.92]:4081 "EHLO
-	anchor-post-34.mail.demon.net") by anchor-fallback-93.mail.demon.net
-	with ESMTP id S358122AbXEVSRX (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 19:17:23 +0100
+	Wed, 23 May 2007 08:26:30 -0400
+Received: by ug-out-1314.google.com with SMTP id j3so494749ugf
+        for <linux-sparse@vger.kernel.org>; Wed, 23 May 2007 05:26:28 -0700 (PDT)
+In-Reply-To: <20070523045319.GL4095@ftp.linux.org.uk>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
+>[...] but $DEITY help you if you pass NULL
+> in vararg in place of pointer to function - on minimally weird targets
+> it will be ugly.  I don't think that sparse can catch that kind of
+> braindamage, though...
 
+If the rules for the types in any given function's varargs can be taught to
+sparse, I don't see why not.  I did some vararg checking -- "must end with
+-1" kind of thing -- early for sparse.  It should be in the archives.  (An
+early prototype with sub-standard monkey-see-monkey-do coding, but
+still.)
 
-Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
----
-  cgcc |   10 ++++++++++
-  1 files changed, 10 insertions(+), 0 deletions(-)
-
-diff --git a/cgcc b/cgcc
-index e56226e..d50220c 100755
---- a/cgcc
-+++ b/cgcc
-@@ -214,6 +214,16 @@ sub add_specs {
-  	    ' -D__STDC__=1';
-      } elsif ($spec eq 'unix') {
-  	return ' -Dunix=1 -D__unix=1 -D__unix__=1';
-+    } elsif ( $spec =~ /^cygwin/) {
-+	return &add_specs ('unix') .
-+	    ' -D__STDC__=1 -D__CYGWIN__=1 -D__CYGWIN32__=1' .
-+	    " -D'_cdecl=__attribute__((__cdecl__))'" .
-+	    " -D'__cdecl=__attribute__((__cdecl__))'" .
-+	    " -D'_stdcall=__attribute__((__stdcall__))'" .
-+	    " -D'__stdcall=__attribute__((__stdcall__))'" .
-+	    " -D'_fastcall=__attribute__((__fastcall__))'" .
-+	    " -D'__fastcall=__attribute__((__fastcall__))'" .
-+	    " -D'__declspec(x)=__attribute__((x))'";
-      } elsif ($spec eq 'i86') {
-  	return (' -Di386=1 -D__i386=1 -D__i386__=1' .
-  		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
--- 
-1.5.1
+Morten
