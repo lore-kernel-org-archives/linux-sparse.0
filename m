@@ -1,50 +1,52 @@
-From: Derek M Jones <derek@knosof.co.uk>
-Subject: Re: fun with ?:
-Date: Wed, 23 May 2007 22:16:02 +0100
-Message-ID: <4654AF12.9040101@knosof.co.uk>
-References: <20070519025249.GZ4095@ftp.linux.org.uk> <4653633B.3000000@freedesktop.org> <20070522224619.GI4095@ftp.linux.org.uk> <46537BC1.9000808@freedesktop.org> <20070523000234.GJ4095@ftp.linux.org.uk> <20070523142544.GB2547@daikokuya.co.uk> <20070523143202.GY4095@ftp.linux.org.uk>
+From: Michael Stefaniuc <mstefani@redhat.com>
+Subject: '$' as "valid" character in identifiers
+Date: Wed, 23 May 2007 23:43:54 +0200
+Message-ID: <4654B59A.50302@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mtaout03-winn.ispmail.ntl.com ([81.103.221.49]:40803 "EHLO
-	mtaout03-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1756100AbXEWVQL (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 23 May 2007 17:16:11 -0400
-In-Reply-To: <20070523143202.GY4095@ftp.linux.org.uk>
+Received: from mx1.redhat.com ([66.187.233.31]:50505 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755560AbXEWVn4 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 23 May 2007 17:43:56 -0400
+Received: from int-mx1.corp.redhat.com (int-mx1.corp.redhat.com [172.16.52.254])
+	by mx1.redhat.com (8.13.1/8.13.1) with ESMTP id l4NLhtw9031310
+	for <linux-sparse@vger.kernel.org>; Wed, 23 May 2007 17:43:55 -0400
+Received: from pobox.stuttgart.redhat.com (pobox.stuttgart.redhat.com [172.16.2.10])
+	by int-mx1.corp.redhat.com (8.13.1/8.13.1) with ESMTP id l4NLhsFq002614
+	for <linux-sparse@vger.kernel.org>; Wed, 23 May 2007 17:43:55 -0400
+Received: from [10.32.4.19] (vpn-4-19.str.redhat.com [10.32.4.19])
+	by pobox.stuttgart.redhat.com (8.12.11.20060308/8.12.11) with ESMTP id l4NLhsxr011748
+	for <linux-sparse@vger.kernel.org>; Wed, 23 May 2007 23:43:54 +0200
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Neil Booth <neil@daikokuya.co.uk>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Al,
+echo 'int dollar$ = 1;' > /tmp/dollar.c
+gcc -c -Wall -Wextra -o /tmp/dollar.o /tmp/dollar.c
+echo $?
+0
+No comment ...
 
->> cast of float bit painful in recursive descent parsers.  I've managed
->> to find cases where Comeau's online compiler doesn't get it right,
->> and they're pretty good.
+I didn't find '$' as valid identifier character in "The C Programming
+Language (ANSI C)" nor does http://c0x.coding-guidelines.com/5.2.1.html
+allow it as valid char in the "source character set".
 
-I would be interested to know what these cases were.
+I found it because sparse tripped over that in the Wine source code.
+Yes, i already sent a patch to fix that in Wine.
 
-> extern int n;
-> struct {
-> 	int x : 1 + n - n;
-> } y;
-> 
-> passes with -pedantic -std=c99.  Replacing that with 1 + n - n + n - n
-> is still OK with gcc; 1 + n + n - n - n is not.
-> 
-> So that's hardly an example of, well, anything.
+Not sure if sparse should change its behavior here;
+cgcc -c -Wall -Wextra -o /tmp/dollar.o /tmp/dollar.c
+/tmp/dollar.c:1:11: error: Expected ; at end of declaration
+/tmp/dollar.c:1:11: error: got $
+is a adequate response.
 
-It is an example of order of evaluation mattering when overflow
-occurs.
-
-What with game programming growing and growing in importance
-I think it won't be long before saturated interger arithmetic
-overflow will be encountered just as often as the 'conventional'
-wrapping behavior.
-
+bye
+	michael
 -- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+Michael Stefaniuc               Tel.: +49-711-96437-199
+Sr. Network Engineer            Fax.: +49-711-96437-111
+Red Hat GmbH                    Email: mstefani@redhat.com
+Hauptstaetterstr. 58            http://www.redhat.de/
+D-70178 Stuttgart
