@@ -1,63 +1,177 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Josh Triplett <josh@freedesktop.org>
 Subject: Re: fun with ?:
-Date: Wed, 23 May 2007 01:25:06 +0100
-Message-ID: <20070523002506.GK4095@ftp.linux.org.uk>
+Date: Tue, 22 May 2007 18:03:31 -0700
+Message-ID: <465392E3.3000300@freedesktop.org>
 References: <20070519025249.GZ4095@ftp.linux.org.uk> <4653633B.3000000@freedesktop.org> <20070522224619.GI4095@ftp.linux.org.uk> <46537BC1.9000808@freedesktop.org> <20070523000234.GJ4095@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigB70B423F60D2A8D1D0C3E576"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:36035 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757669AbXEWAZH (ORCPT
+Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:47079 "EHLO
+	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756880AbXEWBEQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 20:25:07 -0400
-Content-Disposition: inline
+	Tue, 22 May 2007 21:04:16 -0400
 In-Reply-To: <20070523000234.GJ4095@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, May 23, 2007 at 01:02:34AM +0100, Al Viro wrote:
-> Moral: void * -> int * may lose parts of value and trigger undefined behaviour;
-> int * -> void * loses information about type, is always revertible and always
-> safe.  In assignment operator it's your responsibility to make sure that
-> void * you are converting to int * is properly aligned (anything that started
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigB70B423F60D2A8D1D0C3E576
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+
+Al Viro wrote:
+> On Tue, May 22, 2007 at 04:24:49PM -0700, Josh Triplett wrote:
+>> Makes sense, except that in C you can assign a void pointer to an arbi=
+trary *
+>> without a warning, so why can't conditional expressions do the equival=
+ent?
+>=20
+> {in sparse it's obviously not true due to address_space, but that hadn'=
+t
+> affected C standard decisions; the rest applies to standard C}
+>=20
+> For one thing, no, you can't (pointers to functions have every right to=
+
+> be unrelated to void *).  For another, you are not guaranteed that
+> conversion from void * to int * will not yield undefined behaviour.
+> It is OK if the value of void * is properly aligned; then you know
+> that conversion back to void * will give the original pointer.  Otherwi=
+se
+> you are in nasal demon country.  The other way round (int * to void *
+> to int *) you are always safe.
+>=20
+> Rationale: systems that have pointers to words and char smaller than wo=
+rd.
+> There you can very well have pointers to void and pointers to less-than=
+-word
+> objects bigger than pointers to anything word-sized or bigger (e.g. the=
+y
+> can be represented as word address + bit offset).  Conversion to the la=
+tter
+> will lose offset and compiler is allowed to throw up on that at runtime=
+=2E
+
+Go Cray go.
+
+> Moral: void * -> int * may lose parts of value and trigger undefined be=
+haviour;
+> int * -> void * loses information about type, is always revertible and =
+always
+> safe.  In assignment operator it's your responsibility to make sure tha=
+t
+> void * you are converting to int * is properly aligned (anything that s=
+tarted
 > its life as int * will be).  In ?: C could
 > 	* lose type information, allowing any values (result is void *); if
-> you are sure that it's well-aligned, you can cast void * argument to int *
+> you are sure that it's well-aligned, you can cast void * argument to in=
+t *
 > or cast the result.
 > 	* require the void * argument to be well-aligned, keep the type.
-> 
+>=20
 > The former makes more sense...
 
-PS: that's a design decision that had to be made back when void * got added
-to the language and it had to work for all architectures.  IOW, the text
-above is explanation why it had to be done that way and why we have to
-stick to it on all targets.
+Fair enough.
 
-> > I see.  I find it very strange that (void *)0 and (void *)(void *)0 have
-> > different behavior.  I also find it strange that conditional expressions can't
-> > convert void * to an arbitrary pointer as assignment can.
-> 
-> It would be nicer if C had __null__ as the *only* null pointer constant
-> (with flexible type) and could refuse to accept anything else.  Too late
+>>> Again, null pointer constant is not the same thing as null pointer to=
+ void.
+>> I see.  I find it very strange that (void *)0 and (void *)(void *)0 ha=
+ve
+>> different behavior.  I also find it strange that conditional expressio=
+ns can't
+>> convert void * to an arbitrary pointer as assignment can.
+>=20
+> It would be nicer if C had __null__ as the *only* null pointer constant=
+
+> (with flexible type) and could refuse to accept anything else.  Too lat=
+e
 > for that, unfortunately.  As for conversions - see above.
 
-To clarify: all mess with null pointer constants comes from lack of
-explicit token and need to avoid massive breakage of old programs.  That's
-what it's all about - compiler recognizing some subexpressions as
-representations of that missing token and trying to do that in a way that
-would break as little as possible of existing C code.  It's an old story -
-decisions had to be made in 80s and now we are stuck with them.
+Agreed; that seems far saner.  (Or, as long as we wishfully redefine the
+original C spec, just NULL or null, sans underscores.)
 
-IOW, (void *)0 in contexts that allow null pointer constant is *not* a
-0 cast to pointer to void; it's a compiler-recognized kludge for __null__.
-And it's not a pointer to void.  It can become a pointer to any type,
-including void.  If converted to a pointer type it gives the same value
-you get if you convert 0 to that type ("null pointer to type").  But
-unlike null pointer to type it retains full flexibility.
+>>> BTW, there's another painful area: what do we do to somebody who uses=
 
-NULL is required to expand to null pointer constant and that's one of
-the reasons why sane code should be using it instead of explicitly spelled
-variants.  The next best thing to actually having __null__ in the language...
+>>> (void *)(69 + 1 - 70) as null pointer constant?  Currenly sparse does=
+n't
+>>> recognize it as such; C standard does.  IMO the right thing to do is
+>>> to add a flag that would switch to full-blown standard rules in that =
+area
+>>> ("integer constant expression returning 0" instead of basically "0 in=
+ some
+>>> layers of ()") and flame to the crisp any wanker caught at actually d=
+oing
+>>> that.  Any suggestions re sufficiently violent warning messages?
+>> I didn't know that the C standard actually *required* constant folding=
+=2E
+>> Interesting.  Would it add excessively to compilation time to apply th=
+e usual
+>> Sparse constant folding here?  If so, and if you really think this cas=
+e
+>> matters, let's have an option to turn on this constant folding, and wa=
+rn
+>> whenever we see it.
+>=20
+> Usual sparse constant folding is _almost_ OK, provided that we play a b=
+it
+> with evaluate_expression() and let it decide if subexpression is an int=
+eger
+> constant expression.  No prototype changes, we just get a global flag
+> and save/restore it around sizeof argument handling and several other
+> places.  It's actually pretty easy.  And if we get "it is an integer
+> constant expression", well, then caller can call expand stuff.
+
+Sounds reasonable to me.  Possibly better written as some kind of generic=
+
+parse-tree-walking operation, but this approach should work fine.
+
+> "Almost" bit above refers to another bit of insanity, fortunately easil=
+y
+> handled; we need division by zero to raise no error and just yield "the=
+
+> entire thing is not an integer constant expression with value 0".  That=
+'s
+> exactly what longjmp() is for...
+
+$ egrep -r 'setjmp|longjmp' ~/src/sparse/*
+$
+
+Let's keep it that way, please. :) Evaluation almost certainly should war=
+n for
+a compile-time divide-by-zero regardless, though we don't want to warn tw=
+ice
+for the same expression.  With the global "check for integer constant
+expression" flag set, if evaluation encounters a compile-time divide-by-z=
+ero,
+evaluation could just set a divided_by_zero flag.  Or something like that=
+=2E
+
+> Speaking of C standard, if you need access to the current one - yell.
+
+I use http://c0x.coding-guidelines.com/ , which has the C99 spec and some=
+
+subsequent updates.
+
+- Josh Triplett
+
+
+
+--------------enigB70B423F60D2A8D1D0C3E576
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGU5LjGJuZRtD+evsRAjgrAJ9TgfVhTnrbcDtWYvFYMkJF7HQsKACfaQRQ
+FemkdvZKlq64kg3m269Kdbs=
+=zxWT
+-----END PGP SIGNATURE-----
+
+--------------enigB70B423F60D2A8D1D0C3E576--
