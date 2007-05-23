@@ -1,69 +1,178 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: fun with ?:
-Date: Tue, 22 May 2007 18:05:39 -0700
-Message-ID: <46539363.3010202@freedesktop.org>
-References: <20070519025249.GZ4095@ftp.linux.org.uk> <4653633B.3000000@freedesktop.org> <20070522224619.GI4095@ftp.linux.org.uk> <46537BC1.9000808@freedesktop.org> <20070523000234.GJ4095@ftp.linux.org.uk> <20070523002506.GK4095@ftp.linux.org.uk>
+Subject: Re: Running sparse on the Wine code (Was: Re: Ignore the cdecl and
+ stdcall attributes for now.)
+Date: Tue, 22 May 2007 19:01:48 -0700
+Message-ID: <4653A08C.40700@freedesktop.org>
+References: <20070515220536.GA23923@redhat.com> <464AA57B.3010205@freedesktop.org> <46520647.9090802@redhat.com> <4652819D.4040101@freedesktop.org> <46530112.2030105@redhat.com> <46535373.3020109@freedesktop.org> <4653804D.3040306@redhat.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigCCBAE6645D19D5A6EEF27C26"
+ boundary="------------enigB74E50F6B9A13F6732E9E66B"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:39064 "EHLO
-	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757436AbXEWBGW (ORCPT
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:44210 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757291AbXEWCCd (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 22 May 2007 21:06:22 -0400
-In-Reply-To: <20070523002506.GK4095@ftp.linux.org.uk>
+	Tue, 22 May 2007 22:02:33 -0400
+In-Reply-To: <4653804D.3040306@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Michael Stefaniuc <mstefani@redhat.com>
+Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigCCBAE6645D19D5A6EEF27C26
-Content-Type: text/plain; charset=ISO-8859-1
+--------------enigB74E50F6B9A13F6732E9E66B
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Al Viro wrote:
-> On Wed, May 23, 2007 at 01:02:34AM +0100, Al Viro wrote:
->> It would be nicer if C had __null__ as the *only* null pointer constan=
+Michael Stefaniuc wrote:
+> Josh Triplett wrote:
+>> Michael Stefaniuc wrote:
+>>> Josh Triplett wrote:
+>>>> Don't pass -Wall to sparse unless you really mean it.  cgcc filters =
+it out for
+>>>> a reason; just because you have -Wall in CFLAGS for GCC doesn't mean=
+ you want
+>>>> -Wall for sparse.  Sparse -Wall includes some warnings with high fal=
+se
+>>>> positive rates that you probably don't want.
+>>> Ok good to know. I went the easy way just duplicating the gcc command=
+=20
+>>> line and replacing gcc with sparse and adding -D__i386___ as Wine won=
+'t=20
+>>> build without a processor type defined.
+>> cgcc will define the processor type too.
+>>
+>> I highly recommend trying a build with CC=3Dcgcc.  You can then pass s=
+parse
+>> flags in CFLAGS, and cgcc will filter them out before calling CC; you =
+can
+>> also specify CHECK=3D"sparse -Wfoo -Wno-bar" if you prefer not to chan=
+ge
+>> CFLAGS.
+> Hmm ... somehow i have confused cgcc with the code generating backend
+> that Jeff Garzik planned to write for sparse. With cgcc i won't need my=
+
+> Wine build hack anymore and makes things even easier for me.
+
+Glad to hear it.
+
+>>> I'm still trying to figure out=20
+>>> if sparse is useful (signal to noise ratio) for Wine.
+>> It will likely take some time and Sparse modifications in order to par=
+se
+>> Wine; however, I want Sparse to handle as much code as it can, not jus=
 t
->> (with flexible type) and could refuse to accept anything else.  Too la=
-te
->> for that, unfortunately.  As for conversions - see above.
->=20
-> To clarify: all mess with null pointer constants comes from lack of
-> explicit token and need to avoid massive breakage of old programs.  Tha=
-t's
-> what it's all about - compiler recognizing some subexpressions as
-> representations of that missing token and trying to do that in a way th=
+> With cgcc Wine builds just fine (I didn't try yet the configure and mak=
+e
+> depend stage of the build process). The only nitpick is that the ccache=
+
+> cache from a normal build isn't valid anymore for the CC=3Dcgcc run. I'=
+ll
+> have a look into it the next time i'll have to wait for the build to fi=
+nish.
+
+This might happen due to differing compilation flags.  ccache records the=
+
+compiler command line.
+
+>> Linux.  I appreciate you trying it on Wine; I think working on this wi=
+ll
+>> help both Wine and Sparse.
+>>
+>>> Wine has some=20
+>>> constraints (having to follow an existing old grown API; compatibilit=
+y=20
+>>> with other C processors on non Linux OSes) that aren't a burden for t=
+he=20
+>>> Linux Kernel. E.g. a patch to move to C99 struct initializer was=20
+>>> recently rejected due to compatibility concerns with other C compiler=
+s.
+>> I just committed support for a -Wno-old-initializer flag to turn off t=
+he
+>> sparse warning on non-C99 initializers.
+> That was fast and I didn't even request it :)
+
+:)
+
+>>>> The undefined preprocessor identifiers from limits.h come from not u=
+sing cgcc,
+>>>> which defines them.  Sparse should ideally define those itself.  You=
+ can work
+>>>> around the problem by using cgcc or by defining the symbols on the s=
+parse
+>>>> command line as cgcc does.
+>>> I'll do a run with cgcc tonight instead of sparse and check the diffe=
+rence.
+> Updated
+> http://people.redhat.com/mstefani/wine/download/wine+sparse-make.output=
+=2Ebz2
+> That is the result of:
+> make clean; CHECK=3D'sparse -Wno-transparent-union -Wno-old-initializer=
+'
+> make CC=3Dcgcc > make.out 2>&1
+> The output is with latest git sparse including the fix for the typedefs=
+
+> to functions with a stdcall attribute.
+> I didn't look at the output yet as it is past bed time around here.
+
+Looks much better.
+
+I've added a new -Wno-non-pointer-null flag which will turn off the "Usin=
+g
+plain integer as NULL pointer" warning, though unless you have a good rea=
+son I
+suggest fixing those warnings by using a pointer type like NULL rather th=
+an 0.
+
+"Bad character constant" seems to come from lines like this:
+#define PROFILE_LINKED   'LINK'
+The C standard says:
+> The value of an integer character constant containing more than one
+> character (e.g., 'ab'), or containing a character or escape sequence th=
 at
-> would break as little as possible of existing C code.  It's an old stor=
-y -
-> decisions had to be made in 80s and now we are stuck with them.
->=20
-> IOW, (void *)0 in contexts that allow null pointer constant is *not* a
-> 0 cast to pointer to void; it's a compiler-recognized kludge for __null=
-__.
-> And it's not a pointer to void.  It can become a pointer to any type,
-> including void.  If converted to a pointer type it gives the same value=
+> does not map to a single-byte execution character, is
+> implementation-defined.
+(http://c0x.coding-guidelines.com/6.4.4.4.html#879)
+GCC seems to treat it as an integer, but GCC warns about it too.  If you =
+want
+to supply a patch to parse it the same way GCC does and generate an optio=
+nal
+warning, that seems reasonable.
 
-> you get if you convert 0 to that type ("null pointer to type").  But
-> unlike null pointer to type it retains full flexibility.
->=20
-> NULL is required to expand to null pointer constant and that's one of
-> the reasons why sane code should be using it instead of explicitly spel=
-led
-> variants.  The next best thing to actually having __null__ in the langu=
-age...
+The yacc-generated source seems to have some non-ANSI function declaratio=
+ns.
+I don't know if you can make it generate properly prototyped declarations=
+=2E
 
-That makes perfect sense now.  Thanks for the explanation.
+I added __builtin_strcat and __builtin_strncat.  Wine seems to want the
+latter, so this should fix several errors.
+
+I added the constructor and destructor attributes, which Wine seems to wa=
+nt.
+That should fix a few errors.
+
+You can turn off "do-while statement is not a compound statement" with
+-Wno-do-while, but I'd recommend just fixing such loops to use compound
+statements.  That said, I don't know why that warning occurs by default;
+possibly it shouldn't.
+
+You can fix the "preprocessor token SYMBOL redefined" warnings by using:
+#ifndef SYMBOL
+#define SYMBOL ...
+#endif
+You might manage to talk me into a -Wno-redefined-preprocessor, though.
+
+Unknown escape warnings for \? and \E seem odd.  What does Wine expect
+those to do?
+
+"warning: crazy programmer" needs a better description, as soon as I
+figure out what it means. :)
 
 - Josh Triplett
 
 
-
---------------enigCCBAE6645D19D5A6EEF27C26
+--------------enigB74E50F6B9A13F6732E9E66B
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -72,9 +181,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGU5NjGJuZRtD+evsRArLmAJwOVIKyEuiOc+h2G99U4GaZ/UzHkgCdEja1
-f/Rx8xY+yfDrYyKSWMHo+YE=
-=SvPN
+iD8DBQFGU6CMGJuZRtD+evsRAr2OAKCgQnZZnOdvvE2sqvxlJp67yoTSugCgq110
+xwA6EL4eYH348Z2DzY0pnHw=
+=QQWy
 -----END PGP SIGNATURE-----
 
---------------enigCCBAE6645D19D5A6EEF27C26--
+--------------enigB74E50F6B9A13F6732E9E66B--
