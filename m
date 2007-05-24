@@ -1,52 +1,35 @@
-From: Derek M Jones <derek@knosof.co.uk>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: '$' as "valid" character in identifiers
-Date: Thu, 24 May 2007 14:18:11 +0100
-Message-ID: <46559093.5060908@knosof.co.uk>
-References: <4654B59A.50302@redhat.com> <alpine.LFD.0.98.0705231501430.3890@woody.linux-foundation.org> <20070524100433.GE4095@ftp.linux.org.uk> <4655737B.7010701@knosof.co.uk> <20070524123512.GF4095@ftp.linux.org.uk>
+Date: Thu, 24 May 2007 15:10:15 +0100
+Message-ID: <20070524141015.GG4095@ftp.linux.org.uk>
+References: <4654B59A.50302@redhat.com> <alpine.LFD.0.98.0705231501430.3890@woody.linux-foundation.org> <20070524100433.GE4095@ftp.linux.org.uk> <4655737B.7010701@knosof.co.uk> <20070524123512.GF4095@ftp.linux.org.uk> <46559093.5060908@knosof.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mtaout01-winn.ispmail.ntl.com ([81.103.221.47]:16914 "EHLO
-	mtaout01-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755588AbXEXNSQ (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:45143 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750731AbXEXOKV (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 24 May 2007 09:18:16 -0400
-In-Reply-To: <20070524123512.GF4095@ftp.linux.org.uk>
+	Thu, 24 May 2007 10:10:21 -0400
+Content-Disposition: inline
+In-Reply-To: <46559093.5060908@knosof.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
+To: Derek M Jones <derek@knosof.co.uk>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Michael Stefaniuc <mstefani@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Al,
+On Thu, May 24, 2007 at 02:18:11PM +0100, Derek M Jones wrote:
+> Al,
+> 
+> >And now for reality: of course if we set out to imitate the implementation
+> >allowing $, we'd better imitate it.  The question is what to watch out
+> >for and how to avoid buggering the tokenizer in process.
+> 
+> If sparse is going to imitate a VAX implementation then how $ is glued
+> is probably the least of the implemention worries.
 
-> And now for reality: of course if we set out to imitate the implementation
-> allowing $, we'd better imitate it.  The question is what to watch out
-> for and how to avoid buggering the tokenizer in process.
-
-If sparse is going to imitate a VAX implementation then how $ is glued
-is probably the least of the implemention worries.
-
-VAX C supported a whole host of extensions (eg, the ability to
-glue comments, 8 & 9 in octal constants).
-
-I have a pdf of the DEC C language reference manual for Tru64 which
-people are welcome to a copy of.
-
-> I don't have access to VMS boxen (thanks $DEITY);
-
-Continuing in the vein of Irrelevant, AFAICS.  You can access various
-Crays here: http://www.cray-cyber.org/access/index.php
-
-Perhaps there is a similar site available for Vaxes?
-
-> IOW, we need documentation of the native compilers to find out which kind
-> of behaviour is expected.
-
-I collect old C compiler manuals, if anybody locates a ps or pdf of
-an original VAC C compiler manual, please forward me a copy.
-
--- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+I suspect that the real issue is whatever stuff Windows uses (and no,
+I don't have Windows boxen either).  Anybody who wants to work on
+code that last compiled on VAX is not going to be happy with what
+sparse will say about it, anyway.  More realistic case is a codebase
+with some VMS ancestry that got moved to Windows.
