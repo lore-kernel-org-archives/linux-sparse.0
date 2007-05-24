@@ -1,35 +1,46 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Neil Booth <neil@daikokuya.co.uk>
 Subject: Re: '$' as "valid" character in identifiers
-Date: Thu, 24 May 2007 15:10:15 +0100
-Message-ID: <20070524141015.GG4095@ftp.linux.org.uk>
-References: <4654B59A.50302@redhat.com> <alpine.LFD.0.98.0705231501430.3890@woody.linux-foundation.org> <20070524100433.GE4095@ftp.linux.org.uk> <4655737B.7010701@knosof.co.uk> <20070524123512.GF4095@ftp.linux.org.uk> <46559093.5060908@knosof.co.uk>
+Date: Thu, 24 May 2007 23:26:08 +0900
+Message-ID: <20070524142608.GJ2547@daikokuya.co.uk>
+References: <4654B59A.50302@redhat.com> <alpine.LFD.0.98.0705231501430.3890@woody.linux-foundation.org> <20070524100433.GE4095@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:45143 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750731AbXEXOKV (ORCPT
+Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7466 "HELO
+	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with SMTP id S1750709AbXEXOZx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 24 May 2007 10:10:21 -0400
+	Thu, 24 May 2007 10:25:53 -0400
 Content-Disposition: inline
-In-Reply-To: <46559093.5060908@knosof.co.uk>
+In-Reply-To: <20070524100433.GE4095@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Derek M Jones <derek@knosof.co.uk>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Michael Stefaniuc <mstefani@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Thu, May 24, 2007 at 02:18:11PM +0100, Derek M Jones wrote:
-> Al,
-> 
-> >And now for reality: of course if we set out to imitate the implementation
-> >allowing $, we'd better imitate it.  The question is what to watch out
-> >for and how to avoid buggering the tokenizer in process.
-> 
-> If sparse is going to imitate a VAX implementation then how $ is glued
-> is probably the least of the implemention worries.
+Al Viro wrote:-
 
-I suspect that the real issue is whatever stuff Windows uses (and no,
-I don't have Windows boxen either).  Anybody who wants to work on
-code that last compiled on VAX is not going to be happy with what
-sparse will say about it, anyway.  More realistic case is a codebase
-with some VMS ancestry that got moved to Windows.
+> > I think it was a common extension for some strange operating systems 
+> > (read: VMS), where system symbols have "$" embedded in the name. So you'd 
+> > have names like "sys$function()" for system functions.
+> > 
+> > It's possible others did it too - gcc says it's "traditional", but the 
+> > only case I've seen it is from VMS (and thus from DEC->Compaq->HP C 
+> > compilers).
+> > 
+> > But I certainly wouldn't object to sparse supporting it, although I would 
+> > suggest that it at least warn by default.
+> 
+> The question is how do they treat $ in preprocessor tokens.  Is it a full
+> equivalent of letter?  I.e. is $x a valid identifier?  If it is, that's
+
+Apparently yes:
+
+http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V50_HTML/ARH9NATE/DOCU_026.HTM
+
+My personal opinion is we don't want to encourage $ in identifiers,
+and so I'd urge you to drop the idea :).  Too many poor mis-featured
+extensions in GCC already.  At least if you do go ahead it seems the
+implementation is trivial (assembler aside).
+
+Neil.
