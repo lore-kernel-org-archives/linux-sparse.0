@@ -1,52 +1,40 @@
 From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [PATCH 0/5] Sparse on Cygwin (and git).
-Date: Thu, 24 May 2007 18:11:06 +0100
-Message-ID: <4655C72A.3010106@ramsay1.demon.co.uk>
-References: <46532ECD.2020502@ramsay1.demon.co.uk> <4653806B.1000901@freedesktop.org>
+Subject: Re: [PATCH 4/5] Fix an __attribute__() parsing error
+Date: Thu, 24 May 2007 18:07:25 +0100
+Message-ID: <4655C64D.4000704@ramsay1.demon.co.uk>
+References: <46533263.3010108@ramsay1.demon.co.uk> <465370C2.3010801@freedesktop.org> <46537A0B.1020302@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from anchor-post-34.mail.demon.net ([194.217.242.92]:4297 "EHLO
+Received: from anchor-post-34.mail.demon.net ([194.217.242.92]:4240 "EHLO
 	anchor-post-34.mail.demon.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750929AbXEXROq (ORCPT
+	by vger.kernel.org with ESMTP id S1751107AbXEXROe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 24 May 2007 13:14:46 -0400
-In-Reply-To: <4653806B.1000901@freedesktop.org>
+	Thu, 24 May 2007 13:14:34 -0400
+In-Reply-To: <46537A0B.1020302@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Michael Stefaniuc <mstefani@redhat.com>
+Cc: Josh Triplett <josh@freedesktop.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Josh Triplett wrote:
-> Ramsay Jones wrote:
->> Since git uses sparse in it's "check" make target,
-> 
-> Cool; I didn't know that. :)
-heh, I don't know how often git developers "make check" ;-)
+Michael Stefaniuc wrote:
+> Josh Triplett wrote:
+>> Ramsay Jones wrote:
 
-[...]
->> Unfortunately, at present,
->> I am using cygwin on win32 until I get around to installing Linux. ;-)
+>> Applied.  I think you just made a Wine developer very happy.  Michael, this
+>> patch fixes the test case you provided for Wine; I applied your patch for the
+>> new test case.
+> Cool, thanks. Was just running a Wine build with cgcc when I have seen
+> this so i've stopped it and run it again with the latest git checkout.
+> And indeed it looks definitely better; the "error: too many errors"
+> count went down from 1459 to 7.
 > 
-> Fortunately, that resulted in some excellent patches. :)
-> 
-Apart from the whitespace breakage!
+>> Thanks, Ramsay!
+> Thanks indeed.
 
-> [...]
->> 0001-Fix-an-__sentinel__-attribute-directive-ignored.patch
->> 0002-Fix-some-enum-value-...-not-handled-in-switch-wa.patch
->> 0003-Add-more-support-for-WIN32-attribute-names.patch
->> 0004-Fix-an-__attribute__-parsing-error.patch
->> 0005-Add-cygwin-support-to-cgcc.patch
->>
->> which was built on top of: 0.3-15-gb5bd30f
-> 
-> Looks like a good set of patches.  However, only patches 3 and 4 seem to have
-> hit the list.
-> 
-Patch 2 was bounced by the vger spam blocker (because of the 3 uppercase x chars).
+My pleasure; glad to be of help.
 
-ATB,
+All the Best,
 
 Ramsay Jones
