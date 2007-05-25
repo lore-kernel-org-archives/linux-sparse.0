@@ -1,47 +1,62 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: comparison of safe pointers
-Date: Fri, 25 May 2007 16:44:37 +0100
-Message-ID: <20070525154437.GJ4095@ftp.linux.org.uk>
-References: <20070525130749.GI4095@ftp.linux.org.uk> <alpine.LFD.0.98.0705250827460.26602@woody.linux-foundation.org>
+Subject: pointer arithmetics and casts
+Date: Fri, 25 May 2007 22:23:00 +0100
+Message-ID: <20070525212300.GL4095@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:43404 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:39031 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750791AbXEYPoi (ORCPT
+	with ESMTP id S1761664AbXEYVXB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 May 2007 11:44:38 -0400
+	Fri, 25 May 2007 17:23:01 -0400
+Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
+	id 1HrhFU-00036q-L7
+	for linux-sparse@vger.kernel.org; Fri, 25 May 2007 22:23:00 +0100
 Content-Disposition: inline
-In-Reply-To: <alpine.LFD.0.98.0705250827460.26602@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Fri, May 25, 2007 at 08:29:11AM -0700, Linus Torvalds wrote:
-> 
-> 
-> On Fri, 25 May 2007, Al Viro wrote:
-> > 
-> > What did you want that check in evaluate_compare() to catch?  Is that
-> > about warning on explicit comparison with NULL?
-> 
-> Yes. It was explicitly meant to be a "anybody who tests this pointer 
-> missed the 'safe' part of it".
-> 
-> But I never used it, so it was really meant as a concept thing, and I 
-> don't think it's wrong to test against non-null.
+	Looking through the old problems: pointer addition is not done
+right.  What happens is simple - p + i turns into
 
-OK...  Pointer comparisons care about null pointer constants anyway
-(BTW, ordered comparison with NULL should give a warning - it's not
-a valid C and it makes no sense whatsoever even as an extension),
-so that's not a problem.
+	BINOP[+]
+		<tree for p>
+		BINOP[*]
+			<tree for i>
+			VAL[sizeof(*p)]
 
-Other places that care are ?:, simple assignment when target is a pointer,
-passing arguments to function with prototype when parameter type is a pointer
-(same logics as with assignment) and cast adding address space (valid for
-NULL, not valid for random void *).
+and we end up multiplying i and sizeof(*p) in wrong type.  On 64bit host
+we _must_ expand i to 64 bits before we multiply; otherwise we get
+wraparounds.
 
-AFAICS, that covers everything; definitely all contexts where null pointer
-constants are recognized by C and I think that it covers all places where
-they matter for sparse extensions...
+The question is, what do we do about that?  The obvious way would be
+to do cast_to(), i.e. turn the above into
+
+	BINOP[+]
+		<tree for p>
+		BINOP[*]
+			IMPLICIEDT_CAST[ptrdiff_t]
+				<tree for i>
+			VAL[sizeof(*p)]
+
+But that means a fsckload of extra nodes allocated on pretty much any
+program - use of arrays is not rare and indices tend to be int, so we
+hit an extra allocated node on each such place.
+
+Another possible solution is to add a primitive for combined conversion
+and multiplication - basically, convert the first argument to the type of
+the second one and multiply.  We would actually need it only for ptrdiff_t;
+sizeof(*p) is going to fit into the range anyway (it has to - the difference
+between (char *)(p+1) and (char *)p must fit into it, or we couldn't do any
+arithmetics on that pointer type at all; as soon as product overflows
+ptrdiff_t we are free to do whatever the hell we like, since that's an
+undefined behaviour and "multiply as ptrdiff_t values" gives an reasonable
+result even in such cases).
+
+That would cut down on extra nodes, but we pay for that by getting an
+extra node type for linearizer, etc. to deal with.  Not sure how nasty
+that's going to be...
+
+Comments?
