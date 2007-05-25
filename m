@@ -1,54 +1,41 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH] check for whitespace before object-like macro body
-Date: Fri, 25 May 2007 04:57:39 +0100
-Message-ID: <E1HrQvr-00018V-Ir@ZenIV.linux.org.uk>
+Subject: [PATCH] fix alignment for _Bool
+Date: Fri, 25 May 2007 04:57:44 +0100
+Message-ID: <E1HrQvw-00018c-J7@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:58094 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:58095 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751331AbXEYD5k (ORCPT
+	with ESMTP id S1751298AbXEYD5p (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 24 May 2007 23:57:40 -0400
+	Thu, 24 May 2007 23:57:45 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1HrQvr-00018V-Ir
-	for linux-sparse@vger.kernel.org; Fri, 25 May 2007 04:57:39 +0100
+	id 1HrQvw-00018c-J7
+	for linux-sparse@vger.kernel.org; Fri, 25 May 2007 04:57:44 +0100
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 
-6.10.3(3) requires a whitespace between object-like macro
-and its replacement list.
+_Bool ends up with 0 for alignment, which means that _Bool member in a struct
+resets the next field offset to 0.  Should be (at least) 1...
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- pre-process.c |   15 ++++++++++-----
- 1 files changed, 10 insertions(+), 5 deletions(-)
+ symbol.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/pre-process.c b/pre-process.c
-index 2b9cecc..8fca383 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -1089,11 +1089,16 @@ static int do_handle_define(struct stream *stream, struct token **line, struct t
+diff --git a/symbol.c b/symbol.c
+index 45d40ee..20a04f3 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -832,7 +832,7 @@ void init_ctype(void)
+ 		struct symbol *sym = ctype->ptr;
+ 		unsigned long bit_size = ctype->bit_size ? *ctype->bit_size : -1;
+ 		unsigned long maxalign = ctype->maxalign ? *ctype->maxalign : 0;
+-		unsigned long alignment = bit_size >> 3;
++		unsigned long alignment = (bit_size + 7) >> 3;
  
- 	arglist = NULL;
- 	expansion = left->next;
--	if (!expansion->pos.whitespace && match_op(expansion, '(')) {
--		arglist = expansion;
--		expansion = parse_arguments(expansion);
--		if (!expansion)
--			return 1;
-+	if (!expansion->pos.whitespace) {
-+		if (match_op(expansion, '(')) {
-+			arglist = expansion;
-+			expansion = parse_arguments(expansion);
-+			if (!expansion)
-+				return 1;
-+		} else if (!eof_token(expansion)) {
-+			warning(expansion->pos,
-+				"no whitespace before object-like macro body");
-+		}
- 	}
- 
- 	expansion = parse_expansion(expansion, arglist, name);
+ 		if (alignment > maxalign)
+ 			alignment = maxalign;
 -- 
 1.5.0-rc2.GIT
