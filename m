@@ -1,42 +1,37 @@
-From: Neil Booth <neil@daikokuya.co.uk>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: pointer arithmetics and casts
-Date: Sat, 26 May 2007 12:44:09 +0900
-Message-ID: <20070526034409.GO2547@daikokuya.co.uk>
-References: <20070525212300.GL4095@ftp.linux.org.uk>
+Date: Sat, 26 May 2007 04:43:55 +0100
+Message-ID: <20070526034354.GP4095@ftp.linux.org.uk>
+References: <20070525212300.GL4095@ftp.linux.org.uk> <118833cc0705251814h9fffa39xc4a0f3f9e61242b9@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7510 "HELO
-	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S1752021AbXEZDnZ (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:54945 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751800AbXEZDn4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 May 2007 23:43:25 -0400
+	Fri, 25 May 2007 23:43:56 -0400
 Content-Disposition: inline
-In-Reply-To: <20070525212300.GL4095@ftp.linux.org.uk>
+In-Reply-To: <118833cc0705251814h9fffa39xc4a0f3f9e61242b9@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
+To: Morten Welinder <mwelinder@gmail.com>
 Cc: linux-sparse@vger.kernel.org
 
-Al Viro wrote:-
-
-> But that means a fsckload of extra nodes allocated on pretty much any
-> program - use of arrays is not rare and indices tend to be int, so we
-> hit an extra allocated node on each such place.
+On Fri, May 25, 2007 at 09:14:33PM -0400, Morten Welinder wrote:
+> >        BINOP[+]
+> >                <tree for p>
+> >                BINOP[*]
+> >                        IMPLICIEDT_CAST[ptrdiff_t]
+> >                                <tree for i>
+> >                        VAL[sizeof(*p)]
 > 
-> Another possible solution is to add a primitive for combined conversion
-> and multiplication - basically, convert the first argument to the type of
-> the second one and multiply.  We would actually need it only for ptrdiff_t;
-> sizeof(*p) is going to fit into the range anyway (it has to - the difference
-> between (char *)(p+1) and (char *)p must fit into it, or we couldn't do any
-> arithmetics on that pointer type at all; as soon as product overflows
-> ptrdiff_t we are free to do whatever the hell we like, since that's an
-> undefined behaviour and "multiply as ptrdiff_t values" gives an reasonable
-> result even in such cases).
+> I don't think you want ptrdiff_t there.  It isn't guaranteed to
+> be big enough.
 
-Perhaps not overloading the "+" node; reserve that for arithmetic types.
-Have a ptr_add, (maybe) ptr_sub, and ptr_diff operations.
+Only if you are allowed to have an array object with elements too far
+for their addresses to be subtracted...
+ 
+> size_t should do, though.
 
-GCC's moved to having at least a ptr_add recently.
-
-Neil.
+size_t is an unsigned type, so by definition it won't do...
