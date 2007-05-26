@@ -1,44 +1,45 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: pointer arithmetics and casts
-Date: Fri, 25 May 2007 23:00:51 +0100
-Message-ID: <20070525220051.GO4095@ftp.linux.org.uk>
-References: <20070525212300.GL4095@ftp.linux.org.uk>
+From: Alexey Dobriyan <adobriyan@gmail.com>
+Subject: [RFC] infinite loop in free_preprocessor_line()
+Date: Sat, 26 May 2007 04:24:38 +0400
+Message-ID: <20070526002437.GB5786@martell.zuzino.mipt.ru>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:35395 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757365AbXEYWAw (ORCPT
+Received: from ug-out-1314.google.com ([66.249.92.169]:38682 "EHLO
+	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752863AbXEZAUe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 May 2007 18:00:52 -0400
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1Hrhq7-0003cU-GD
-	for linux-sparse@vger.kernel.org; Fri, 25 May 2007 23:00:51 +0100
+	Fri, 25 May 2007 20:20:34 -0400
+Received: by ug-out-1314.google.com with SMTP id j3so1240542ugf
+        for <linux-sparse@vger.kernel.org>; Fri, 25 May 2007 17:20:32 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <20070525212300.GL4095@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-On Fri, May 25, 2007 at 10:23:00PM +0100, Al Viro wrote:
-> 	BINOP[+]
-> 		<tree for p>
-> 		BINOP[*]
-> 			IMPLICIEDT_CAST[ptrdiff_t]
-> 				<tree for i>
-> 			VAL[sizeof(*p)]
-> 
-> But that means a fsckload of extra nodes allocated on pretty much any
-> program - use of arrays is not rare and indices tend to be int, so we
-> hit an extra allocated node on each such place.
+While running if-2.c from gcc testsuite sparse goes into infinite loop in
+free_preprocessor_line().
 
-Argh...  Question: how much do we care if we see BINOP[+] with 64bit
-type as result and 32bit type in one of the arguments?  That's what
-we get when we have
-	char *p;
-	int i;
+Trimmed down test-case is
 
-	p + i
+	#if 1
+	#if
 
-with -m64.  IOW, how much does it violate the assumptions outside of
-frontend?  We do not allocate any new nodes if sizeof(*p) is 1...
+(two lines)
+
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -763,11 +763,11 @@ out:
+ 
+ static int free_preprocessor_line(struct token *token)
+ {
+-	do {
++	while (token_type(token) != TOKEN_EOF) {
+ 		struct token *free = token;
+ 		token = token->next;
+ 		__free_token(free);
+-	} while (token_type(token) != TOKEN_EOF);
++	};
+ 	return 1;
+ }
+ 
