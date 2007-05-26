@@ -1,49 +1,42 @@
-From: Derek M Jones <derek@knosof.co.uk>
+From: Neil Booth <neil@daikokuya.co.uk>
 Subject: Re: pointer arithmetics and casts
-Date: Sat, 26 May 2007 04:32:47 +0100
-Message-ID: <4657AA5F.1020705@knosof.co.uk>
-References: <20070525212300.GL4095@ftp.linux.org.uk> <118833cc0705251814h9fffa39xc4a0f3f9e61242b9@mail.gmail.com>
+Date: Sat, 26 May 2007 12:44:09 +0900
+Message-ID: <20070526034409.GO2547@daikokuya.co.uk>
+References: <20070525212300.GL4095@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mtaout01-winn.ispmail.ntl.com ([81.103.221.47]:21785 "EHLO
-	mtaout01-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750957AbXEZDcz (ORCPT
+Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7510 "HELO
+	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with SMTP id S1752021AbXEZDnZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 May 2007 23:32:55 -0400
-In-Reply-To: <118833cc0705251814h9fffa39xc4a0f3f9e61242b9@mail.gmail.com>
+	Fri, 25 May 2007 23:43:25 -0400
+Content-Disposition: inline
+In-Reply-To: <20070525212300.GL4095@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Morten Welinder <mwelinder@gmail.com>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
-Morten,
+Al Viro wrote:-
 
->>         BINOP[+]
->>                 <tree for p>
->>                 BINOP[*]
->>                         IMPLICIEDT_CAST[ptrdiff_t]
->>                                 <tree for i>
->>                         VAL[sizeof(*p)]
+> But that means a fsckload of extra nodes allocated on pretty much any
+> program - use of arrays is not rare and indices tend to be int, so we
+> hit an extra allocated node on each such place.
 > 
-> I don't think you want ptrdiff_t there.  It isn't guaranteed to
-> be big enough.
+> Another possible solution is to add a primitive for combined conversion
+> and multiplication - basically, convert the first argument to the type of
+> the second one and multiply.  We would actually need it only for ptrdiff_t;
+> sizeof(*p) is going to fit into the range anyway (it has to - the difference
+> between (char *)(p+1) and (char *)p must fit into it, or we couldn't do any
+> arithmetics on that pointer type at all; as soon as product overflows
+> ptrdiff_t we are free to do whatever the hell we like, since that's an
+> undefined behaviour and "multiply as ptrdiff_t values" gives an reasonable
+> result even in such cases).
 
-It is also a signed type.
+Perhaps not overloading the "+" node; reserve that for arithmetic types.
+Have a ptr_add, (maybe) ptr_sub, and ptr_diff operations.
 
-> size_t should do, though.
+GCC's moved to having at least a ptr_add recently.
 
-This is an unsigned type, so the wrap around behavior is defined.
-But do you really want to map a small negative index into a large 
-positive one?
-
-You probably have to use intptr_t and uintptr_t.
-
-On the other hand if sizeof(size_t) == sizeof(type_of(tree for i))
-is an implicit cast needed?
-
--- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+Neil.
