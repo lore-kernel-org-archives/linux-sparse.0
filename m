@@ -1,59 +1,61 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: pointer arithmetics and casts
-Date: Sat, 26 May 2007 16:45:51 +0100
-Message-ID: <20070526154551.GS4095@ftp.linux.org.uk>
-References: <20070525212300.GL4095@ftp.linux.org.uk> <20070525220051.GO4095@ftp.linux.org.uk>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [RFC] infinite loop in free_preprocessor_line()
+Date: Sat, 26 May 2007 17:35:26 -0700
+Message-ID: <4658D24E.30607@freedesktop.org>
+References: <20070526002437.GB5786@martell.zuzino.mipt.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig4A941C9349B3E0232D29B103"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:43223 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760861AbXEZPpw (ORCPT
+Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:35402 "EHLO
+	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750910AbXE0Afy (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 26 May 2007 11:45:52 -0400
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1HrySl-0001px-Pp
-	for linux-sparse@vger.kernel.org; Sat, 26 May 2007 16:45:51 +0100
-Content-Disposition: inline
-In-Reply-To: <20070525220051.GO4095@ftp.linux.org.uk>
+	Sat, 26 May 2007 20:35:54 -0400
+In-Reply-To: <20070526002437.GB5786@martell.zuzino.mipt.ru>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Alexey Dobriyan <adobriyan@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Fri, May 25, 2007 at 11:00:51PM +0100, Al Viro wrote:
-> > But that means a fsckload of extra nodes allocated on pretty much any
-> > program - use of arrays is not rare and indices tend to be int, so we
-> > hit an extra allocated node on each such place.
-> 
-> Argh...  Question: how much do we care if we see BINOP[+] with 64bit
-> type as result and 32bit type in one of the arguments?  That's what
-> we get when we have
-> 	char *p;
-> 	int i;
-> 
-> 	p + i
-> 
-> with -m64.  IOW, how much does it violate the assumptions outside of
-> frontend?  We do not allocate any new nodes if sizeof(*p) is 1...
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig4A941C9349B3E0232D29B103
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Actually, turns out that at least on the kernel builds a straightforward
-variant (IMPLIED_CAST when width of i is smaller than bits_in_pointer,
-whatever sizeof(*p) might be) isn't visibly smaller...  It would need
-more profiling, but there's a chance that nothing trickier would be
-needed.
+Alexey Dobriyan wrote:
+> While running if-2.c from gcc testsuite sparse goes into infinite loop =
+in
+> free_preprocessor_line().
+>=20
+> Trimmed down test-case is
+>=20
+> 	#if 1
+> 	#if
+>=20
+> (two lines)
 
-BTW, _Bool is seriously mishandled - for one thing, some places treat it 
-as one-bit unsigned integer (i.e. (_Bool)2 becomes 0 with a warning, while
-it should yield 1).  For another, sizeof(_Bool) becomes 0, with all obvious
-breakage.  And finally, assignment of pointer to _Bool generates a warning
-and cast.1 in linearizer.  Correct behaviour is (a) no warning whatsoever
-and (b) replacement with b = (p != NULL).  The same thing applies in
-passing arguments and in return statement, of course...
+Thanks for this fix.
 
-Oh, and type of comparison result is int, not _Bool...  It rarely matters,
-but sometimes it does - e.g. sizeof(0 == 0) should evaluate to sizeof(int),
-not sizeof(_Bool) (which basically casts the damn thing in stone - changing
-the type of == result on valid C90 arguments would break existing programs).
+Can I get a Signed-off-by for this patch, please?
 
-I agree that use of bool_ctype in evaluate_compare() is very natural, but
-we should at least take care interaction with sizeof ;-/
+- Josh Triplett
+
+
+
+--------------enig4A941C9349B3E0232D29B103
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGWNJdGJuZRtD+evsRAl9qAJ9GXRiGsx0ST9hUXdTPv7NUdz8isgCbBLue
+8WeHsXl21/z0eEGU5xZB3fQ=
+=BgMK
+-----END PGP SIGNATURE-----
+
+--------------enig4A941C9349B3E0232D29B103--
