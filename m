@@ -1,58 +1,41 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Please make "no member" error more informative
-Date: Thu, 31 May 2007 01:30:21 -0400
-Message-ID: <1180589421.4159.58.camel@dv>
+From: Alexey Dobriyan <adobriyan@gmail.com>
+Subject: Re: [RFC] infinite loop in free_preprocessor_line()
+Date: Sun, 3 Jun 2007 01:55:26 +0400
+Message-ID: <20070602215526.GA5710@martell.zuzino.mipt.ru>
+References: <20070526002437.GB5786@martell.zuzino.mipt.ru> <4658D24E.30607@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:41003 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750825AbXEaFaa (ORCPT
+Received: from ug-out-1314.google.com ([66.249.92.168]:6105 "EHLO
+	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757767AbXFBVtO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 31 May 2007 01:30:30 -0400
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1HtdEh-00007k-0F
-	for linux-sparse@vger.kernel.org; Thu, 31 May 2007 01:30:11 -0400
-Received: from proski by gnu.org with local (Exim 4.66)
-	(envelope-from <proski@gnu.org>)
-	id 1HtdEr-0005WU-Ei
-	for linux-sparse@vger.kernel.org; Thu, 31 May 2007 01:30:21 -0400
+	Sat, 2 Jun 2007 17:49:14 -0400
+Received: by ug-out-1314.google.com with SMTP id j3so467003ugf
+        for <linux-sparse@vger.kernel.org>; Sat, 02 Jun 2007 14:49:12 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <4658D24E.30607@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
+On Sat, May 26, 2007 at 05:35:26PM -0700, Josh Triplett wrote:
+> Alexey Dobriyan wrote:
+> > While running if-2.c from gcc testsuite sparse goes into infinite loop in
+> > free_preprocessor_line().
+> > 
+> > Trimmed down test-case is
+> > 
+> > 	#if 1
+> > 	#if
+> > 
+> > (two lines)
+> 
+> Thanks for this fix.
+> 
+> Can I get a Signed-off-by for this patch, please?
 
-sparse reports the same error for two different situations.  Suppose
-file test.c is:
+Sorry, lost email in noise
 
-struct ctl_table {
-	int foo;
-};
-
-void test(struct ctl_table *sc)
-{
-	sc->ctl_name = 0;
-}
-
-$ sparse -Wall test.c 
-test.c:7:4: error: no member 'ctl_name' in struct ctl_table
-
-Rename the first ctl_table to ctl_table1, and the error will be the
-same.
-
-In the first case, the structure is known and lacks the requested
-member.  In the second case, the structure is unknown.
-
-I'll appreciate if somebody makes the messages different.  The message
-is printed in evaluate_member_dereference() in evaluate.c.
-
-Please test the case when only a forward declaration is available.  This
-should be reported like the undeclared case.  Another test case is a
-structure with no members.  It should be treated as declared.
-
--- 
-Regards,
-Pavel Roskin
+Patch is Signed-off-by: Alexey Dobriyan <adobriyan@gmail.com>
