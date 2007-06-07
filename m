@@ -1,62 +1,77 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: [PATCH] Improve error message if using a member of an incomplete
-	struct or union
-Date: Tue, 05 Jun 2007 18:01:46 -0400
-Message-ID: <20070605220145.5683.71073.stgit@dv.roinet.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: warnings in git-wireless
+Date: Wed, 6 Jun 2007 18:04:21 -0700
+Message-ID: <20070606180421.c575f24b.akpm@linux-foundation.org>
+References: <20070605020614.3f06b2ab.akpm@linux-foundation.org>
+	<46671E5D.9070304@linux.intel.com>
+	<20070606163534.6a6cffb7.akpm@linux-foundation.org>
+	<4667364A.4040803@linux.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([199.232.76.164]:42968 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759965AbXFEWBs (ORCPT
+Received: from smtp2.linux-foundation.org ([207.189.120.14]:38199 "EHLO
+	smtp2.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755211AbXFGBE2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 5 Jun 2007 18:01:48 -0400
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1Hvh5h-0004F7-8z
-	for linux-sparse@vger.kernel.org; Tue, 05 Jun 2007 18:01:25 -0400
-Received: from localhost.localdomain ([127.0.0.1] helo=dv.roinet.com)
-	by gnu.org with esmtp (Exim 4.66)
-	(envelope-from <proski@gnu.org>)
-	id 1Hvh62-0001Tw-2S
-	for linux-sparse@vger.kernel.org; Tue, 05 Jun 2007 18:01:46 -0400
+	Wed, 6 Jun 2007 21:04:28 -0400
+In-Reply-To: <4667364A.4040803@linux.intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: James Ketrenos <jketreno@linux.intel.com>
+Cc: NetDev <netdev@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, linux-sparse@vger.kernel.org
 
-sparse should distinguish two cases.  One is when the structure or union
-is declared and the member is not found.  Another is when the structure
-or union is not yet declared.  In the later case, the message should
-indicate that the type is incomplete, rather than complain that the
-particular member is not found.
+On Wed, 06 Jun 2007 15:33:46 -0700 James Ketrenos <jketreno@linux.intel.com> wrote:
 
-Mention the incomplete type like gcc does, but provide the member name
-too, it may be useful.
+> Andrew Morton wrote:
+> > On Wed, 06 Jun 2007 13:51:41 -0700 James Ketrenos <jketreno@linux.intel.com> wrote:
+> > 
+> >>>>  * make C=2 CF=-Wall will complain if you use ARRAY_SIZE on global data
+> >>>>  */
+> >>>> #define GLOBAL_ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+> >>> This is identical to ARRAY_SIZE.
+> >>>
+> >>> And if there's some problem with ARRAY_SIZE then fix ARRAY_SIZE!  Don't go 
+> >>> off and create some private thing and leave everyone else twisting in the
+> >>> wind.
+> >> The code was resolving the sparse warnings.  
+> > 
+> ...
+> > Your GLOBAL_ARRAY_SIZE() is, afaict, identical to ARRAY_SIZE().
+> 
+> >From include/linux/kernel.h
+> 
+> #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
 
-Signed-off-by: Pavel Roskin <proski@gnu.org>
----
+o crap, sorry, I was looking at one of the other definitions of ARRAY_SIZE :(
 
- evaluate.c |    9 +++++++--
- 1 files changed, 7 insertions(+), 2 deletions(-)
 
-diff --git a/evaluate.c b/evaluate.c
-index 80ac7d1..f68b55e 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1723,8 +1723,13 @@ static struct symbol *evaluate_member_dereference(struct expression *expr)
- 			name = ctype->ident->name;
- 			namelen = ctype->ident->len;
- 		}
--		expression_error(expr, "no member '%s' in %s %.*s",
--			show_ident(ident), type, namelen, name);
-+		if (ctype->symbol_list)
-+			expression_error(expr, "no member '%s' in %s %.*s",
-+				show_ident(ident), type, namelen, name);
-+		else
-+			expression_error(expr, "using member '%s' in "
-+				"incomplete %s %.*s", show_ident(ident),
-+				type, namelen, name);
- 		return NULL;
- 	}
- 
+> >From drivers/net/wireless/mac80211/iwlwifi/iwl-helpers.h
+> 
+> #define GLOBAL_ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+> 
+> The '+ __must_be_array(arr)' part of ARRAY_SIZE was causing sparse to complain 
+> with:
+> 
+> drivers/net/wireless/mac80211/iwlwifi/base.c:4646:22: error: cannot size expression
+> ...
+
+OK, that's a problem in sparse, I guess.
+
+There _should_ be some #ifdeffable thing which is being passed to cpp when
+we run sparse (but I'm not sure what it is).  If there is such a thing then
+we could disable the __must_be_array() thing during sparse runs.
+
+But longer-term, sparse should be taught about __must_be_array().
+
+> When I had run my builds, I had restricted the sparse checks to just iwlwifi 
+> (vs. checking the rest of the kernel).
+> 
+> I just ran it C=2 CF=-Wall against the rest of the kernel and do see other code 
+> with the same problem, eg:
+> 
+> sound/core/memalloc.c:521:14: error: cannot size expression
+> ...
+> 
+> I had erroneously thought it was just a problem with iwlwifi...
+> 
