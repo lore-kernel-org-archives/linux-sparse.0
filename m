@@ -1,28 +1,69 @@
-From: Dave Jones <davej@redhat.com>
-Subject: Re: warnings in git-wireless
-Date: Wed, 6 Jun 2007 21:13:05 -0400
-Message-ID: <20070607011305.GB24941@redhat.com>
-References: <20070605020614.3f06b2ab.akpm@linux-foundation.org> <46671E5D.9070304@linux.intel.com> <20070606163534.6a6cffb7.akpm@linux-foundation.org> <4667364A.4040803@linux.intel.com> <20070606180421.c575f24b.akpm@linux-foundation.org>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: sparse missing bitwise warnings with dubious bitfields
+Date: Fri, 08 Jun 2007 10:24:10 +0200
+Message-ID: <1181291050.6533.19.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20070606180421.c575f24b.akpm@linux-foundation.org>
-Sender: netdev-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: James Ketrenos <jketreno@linux.intel.com>, NetDev <netdev@vger.kernel.org>, linux-wireless <linux-wireless@vger.kernel.org>, linux-sparse@vger.kernel.org
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-S+YzpUUZoCxsy5RUL+TD"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from crystal.sipsolutions.net ([195.210.38.204]:60062 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932131AbXFHIXx (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 8 Jun 2007 04:23:53 -0400
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse <linux-sparse@vger.kernel.org>
+Cc: Michael Wu <flamingice@sourmilk.net>, Christoph Hellwig <hch@infradead.org>
 
-On Wed, Jun 06, 2007 at 06:04:21PM -0700, Andrew Morton wrote:
 
- > There _should_ be some #ifdeffable thing which is being passed to cpp when
- > we run sparse (but I'm not sure what it is).
+--=-S+YzpUUZoCxsy5RUL+TD
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-#ifdef __CHECKER__
+Hi,
 
-(See include/linux/compiler.h, this is how we implement __user & friends)
+Not sure if this is intended but it is surely quite weird. Take the
+following code:
 
-	Dave
+--- begin code ---
+#ifdef DUBIOUS
+struct { =20
+  int x:1;
+};
+#endif
 
--- 
-http://www.codemonkey.org.uk
+typedef unsigned short __attribute__((bitwise)) __le32;
+
+int main(int argc, char **argv)
+{
+  __le32 i =3D 5;
+}
+--- end code ---
+
+and save it as test.c, and then observe:
+
+$ sparse test.c
+test.c:11:14: warning: incorrect type in initializer (different base types)
+test.c:11:14:    expected restricted unsigned short [usertype] i
+test.c:11:14:    got int=20
+
+$ sparse test.c -DDUBIOUS
+test.c:3:10: error: dubious one-bit signed bitfield
+
+[note that no warning about the bitwise error is there!]
+
+johannes
+
+--=-S+YzpUUZoCxsy5RUL+TD
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iD8DBQBGaRIp/ETPhpq3jKURApcGAKCxdZt5VeSqwDfp/9CWvNS48TuxpACeI8KE
+H77CsLyJCKlISOi+THJmMQM=
+=gSGh
+-----END PGP SIGNATURE-----
+
+--=-S+YzpUUZoCxsy5RUL+TD--
