@@ -1,28 +1,41 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Messing typedefs?
-Date: Mon, 11 Jun 2007 13:59:34 +0200
-Message-ID: <OF97379DC1.5009215C-ONC12572F7.0034F56B-C12572F7.0041E12D@br-automation.com>
+From: Alexey Dobriyan <adobriyan@gmail.com>
+Subject: [PATCH] Fix -E handling
+Date: Tue, 12 Jun 2007 14:37:02 +0400
+Message-ID: <20070612103702.GA5719@martell.zuzino.mipt.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.automotion.info ([213.33.116.60]:36923 "EHLO
-	mail1.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750935AbXFKL7z (ORCPT
+Received: from wr-out-0506.google.com ([64.233.184.227]:52505 "EHLO
+	wr-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752106AbXFLK3O (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 11 Jun 2007 07:59:55 -0400
+	Tue, 12 Jun 2007 06:29:14 -0400
+Received: by wr-out-0506.google.com with SMTP id 76so1245925wra
+        for <linux-sparse@vger.kernel.org>; Tue, 12 Jun 2007 03:29:13 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Following code
+sparse accepts -E[anything] as directive to preprocess only. On some mips
+targets -EL slips into command line resulting in 400-800M logs with
+preprocessing results :^) Accept '-E' only from now.
 
-        typedef unsigned char  plcbit;
-        typedef unsigned char  USINT;
+Signed-off-by: Alexey Dobriyan <adobriyan@gmail.com>
+---
 
-        USINT usVar1;
+ lib.c |    3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-leads to a symbol "usVar1" with base_type->ident named "plcbit".
-Is this behaviour expected?
-
-Best regards,
-Thomas Schmid
+--- a/lib.c
++++ b/lib.c
+@@ -252,7 +252,8 @@ static char **handle_switch_D(char *arg, char **next)
+ 
+ static char **handle_switch_E(char *arg, char **next)
+ {
+-	preprocess_only = 1;
++	if (arg[1] == '\0')
++		preprocess_only = 1;
+ 	return next;
+ }
+ 
