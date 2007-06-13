@@ -1,68 +1,84 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [RFC][PATCH 00/10] Sparse: Git's "make check" target
-Date: Tue, 12 Jun 2007 18:37:18 +0100
-Message-ID: <466ED9CE.3000800@ramsay1.demon.co.uk>
-References: <4669D2F2.90801@ramsay1.demon.co.uk> <466A5204.6060200@freedesktop.org>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: Messing typedefs?
+Date: Wed, 13 Jun 2007 01:22:02 -0400
+Message-ID: <1181712122.22924.15.camel@dv>
+References: <OF97379DC1.5009215C-ONC12572F7.0034F56B-C12572F7.0041E12D@br-automation.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from anchor-post-33.mail.demon.net ([194.217.242.91]:2215 "EHLO
-	anchor-post-33.mail.demon.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752997AbXFLRpT (ORCPT
+Received: from fencepost.gnu.org ([140.186.70.10]:37962 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752680AbXFMFWF (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Jun 2007 13:45:19 -0400
-In-Reply-To: <466A5204.6060200@freedesktop.org>
+	Wed, 13 Jun 2007 01:22:05 -0400
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1HyLIy-0002UD-GV
+	for linux-sparse@vger.kernel.org; Wed, 13 Jun 2007 01:22:04 -0400
+In-Reply-To: <OF97379DC1.5009215C-ONC12572F7.0034F56B-C12572F7.0041E12D@br-automation.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Junio C Hamano <junkio@cox.net>, GIT Mailing-list <git@vger.kernel.org>, linux-sparse@vger.kernel.org
+To: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Cc: linux-sparse@vger.kernel.org
 
-Josh Triplett wrote:
-> Ramsay Jones wrote:
->> fix most of those problems. (the output from "make check" was about 16k
->> lines at one point!). Git also tickled a bug in sparse 0.2, which resulted
->> in some 120+ lines of bogus warnings; that was fixed in version 0.3 (commit
->> 0.2-15-gef25961).  As a result, sparse version 0.3 + my patches, elicits 106
->> lines of output from "make check".
+Hello Thomas,
+
+On Mon, 2007-06-11 at 13:59 +0200, Thomas Schmid wrote:
+> Following code
 > 
-> One note about using Sparse with Git: you almost certainly don't want to pass
-> -Wall to sparse, and current Git passes CFLAGS to Sparse which will do exactly
-> that.  -Wall turns on all possible Sparse warnings, including nitpicky
-> warnings and warnings with a high false positive rate.
-
-I have to say that, my initial reaction, was to disagree; I certainly want to
-pass -Wall to sparse! Why not? Did you have any particular warnings in mind?
-(I haven't noticed any that were nitpicky or had a high false positive rate!)
-
-...  You should start from
-> the default set of Sparse warnings, and add additional warnings as desired, or
-> turn off those you absolutely can't live with.  
-
-Why not "-Wall -Wno-nitpicky -Wno-false-positive" ;-)
-
-... Current Sparse from Git (post
-> 0.3, after commit e18c1014449adf42520daa9d3e53f78a3d98da34) has a change to
-> cgcc to filter out -Wall, so you can pass -Wall to GCC but not Sparse.  
-
-Yes, I noticed that. Again, I'm not sure I agree.
-I didn't comment on that patch, because my exposure to sparse is very limited.
-So far I've only run it on git, so I can hardly claim any great experience with
-the output from sparse. However, 105 lines of output (which represents 71 warnings)
-for 72,974 lines of C (in 179 .c files) did not seem at all unreasonable.
-
->> [Note: As far as the NULL pointer warnings are concerned, I don't much care either
->> way. I just used that as an example (also note patch 02). Having said that, I
->> do think that the "NULL is the only one true null pointer" brigade need to
->> chill out a little; in fact I remember when 0 was the *only* null pointer.]
+>         typedef unsigned char  plcbit;
+>         typedef unsigned char  USINT;
 > 
-> And at one point prototypes didn't exist either. :)
+>         USINT usVar1;
+> 
+> leads to a symbol "usVar1" with base_type->ident named "plcbit".
+> Is this behaviour expected?
 
-Yes, but that was actually an improvement to the language ;-)
+This looks like a serious bug to me, although I'm surprised that it
+doesn't seem to affect the sparse functionality (at least on the
+surface).
 
-(As I say above, I don't really care about the NULL pointer example; I hope
-the main point was not lost)
+What happens is the base types like uchar_ctype, which are supposed to
+be initialized once and never changed again, are actually initialized by
+the first typedef, so they are sort of "imprinted" with the new name.
 
-All the Best,
+This sparse was compiled without optimization to avoid any additional
+weirdness.
 
-Ramsay Jones
+(gdb) set args usvar.c
+(gdb) tb main
+Breakpoint 1 at 0x4017bc: file sparse.c, line 278.
+(gdb) r
+Starting program: /home/proski/src/sparse/sparse usvar.c
+main (argc=2, argv=0x7fff6616d7e8) at sparse.c:278
+278             struct string_list *filelist = NULL;
+(gdb) watch uchar_ctype->ident
+Hardware watchpoint 2: uchar_ctype->ident
+(gdb) c
+Continuing.
+Hardware watchpoint 2: uchar_ctype->ident
+
+Old value = (struct ident *) 0x0
+New value = (struct ident *) 0x2b3e44959008
+0x00000000004257bd in external_declaration (token=0x2b3e44988088, list=0x65ad70)
+    at parse.c:2108
+2108                            base_type->ident = ident;
+(gdb) p *ident
+$1 = {next = 0x0, symbols = 0x2b3e4497d548, len = 6 '\006', tainted = 0 '\0', 
+  reserved = 0 '\0', keyword = 0 '\0', name = 0x2b3e4495901a "plcbit"}
+(gdb)
+
+And the code is:
+
+        if (is_typedef) {
+                if (base_type && !base_type->ident)
+                        base_type->ident = ident;
+        } else if (base_type && base_type->type == SYM_FN) {
+
+I don't know what base_type->ident needs to be updated at all.  At least
+SYM_BASETYPE should be exempt from this retroactive update.
+
+-- 
+Regards,
+Pavel Roskin
