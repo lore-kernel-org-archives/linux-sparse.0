@@ -1,47 +1,32 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [patchset] rewrite of initializer handling
-Date: Mon, 18 Jun 2007 12:27:07 -0700 (PDT)
-Message-ID: <alpine.LFD.0.98.0706181223070.3593@woody.linux-foundation.org>
-References: <20070618101929.GE21478@ftp.linux.org.uk> <4676CC9C.3050903@freedesktop.org>
- <20070618191653.GG21478@ftp.linux.org.uk>
+Date: Mon, 18 Jun 2007 20:30:26 +0100
+Message-ID: <20070618193026.GH21478@ftp.linux.org.uk>
+References: <20070618101929.GE21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706181002590.14121@woody.linux-foundation.org> <4676C8CF.6020201@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=us-ascii
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp2.linux-foundation.org ([207.189.120.14]:38794 "EHLO
-	smtp2.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1761241AbXFRT2S (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:39478 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761331AbXFRTa2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 18 Jun 2007 15:28:18 -0400
-In-Reply-To: <20070618191653.GG21478@ftp.linux.org.uk>
+	Mon, 18 Jun 2007 15:30:28 -0400
+Content-Disposition: inline
+In-Reply-To: <4676C8CF.6020201@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 
+On Mon, Jun 18, 2007 at 11:02:55AM -0700, Josh Triplett wrote:
+ 
+> Yeah, I've observed the same thing from activity in both the kernel community
+> and the Sparse community.  I still look at the patches, but primarily so I
+> can understand them and learn something from them, not because I expect to
+> find anything wrong. :)
 
-
-On Mon, 18 Jun 2007, Al Viro wrote:
-> > 
-> > That seems like a great approach to me; logically, an initializer should
-> > expand an array of unspecified size to hold elements up to its maximum index.
-> 
-> That's what count_array_initializer() is trying to do, but the trouble is
-> that it doesn't notice that some list elements may end up initializing
-> parts of the same array member.  IOW, it tries to do the right thing,
-> but to do it correctly you need to look at more than just "this has
-> explicit designator, this doesn't".
-> 
-> I'm not sure that I understand the details of type examination in symbol.c
-> enough to say whether we'd break anything by doing it that way, though.
-> The question is how much of the laziness would be destroyed by that.
-> Linus?
-
-I really forget - but I do remember that arrays were a bitch from the type 
-handling perspective. We need to examine their types properly early, and 
-then we wanted to set their size as part of that, and there were various 
-subtle ordering requirements there.
-
-It is entirely possible that your patch fixes these things, but that whole 
-type evaluation is quite easy to break by mistake..
-
-			Linus
+That's never a good idea, no matter where the patches are coming from.
+Odds are that you have a different set of blind spots, so having "why
+isn't that broken here?" as background attitude while reading any code
+tends to find exactly the crap that happens to be hard to find for author
+of the code in question...
