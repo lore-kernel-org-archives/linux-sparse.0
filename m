@@ -1,149 +1,164 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 9/16] clean up usual_conversions(), kill evaluate_shift()
-Date: Sun, 24 Jun 2007 09:04:41 +0100
-Message-ID: <E1I2N5N-0003dX-6u@ZenIV.linux.org.uk>
+Subject: [PATCH 10/16] fix index conversions in evaluate_ptr_add()
+Date: Sun, 24 Jun 2007 09:04:51 +0100
+Message-ID: <E1I2N5X-0003dl-76@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:34704 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:34705 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752776AbXFXIEm (ORCPT
+	with ESMTP id S1752786AbXFXIEw (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 24 Jun 2007 04:04:42 -0400
+	Sun, 24 Jun 2007 04:04:52 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1I2N5N-0003dX-6u
-	for linux-sparse@vger.kernel.org; Sun, 24 Jun 2007 09:04:41 +0100
+	id 1I2N5X-0003dl-76
+	for linux-sparse@vger.kernel.org; Sun, 24 Jun 2007 09:04:51 +0100
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 
+index may need to be expanded
+
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- evaluate.c |   78 ++++++++++++++++++++++++++---------------------------------
- 1 files changed, 34 insertions(+), 44 deletions(-)
+ evaluate.c |   92 ++++++++++++++++++++++++++++++++---------------------------
+ 1 files changed, 50 insertions(+), 42 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index abd3b3e..79f1ac9 100644
+index 79f1ac9..6cb29ff 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -492,6 +492,17 @@ static struct symbol *restricted_binop_type(int op,
+@@ -559,27 +559,12 @@ static int ptr_object_size(struct symbol *ptr_type)
+ 	return ptr_type->bit_size;
+ }
+ 
+-static inline void want_int(struct expression **expr, struct symbol **ctype)
++static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *ctype, struct symbol *itype)
+ {
+-	int class = classify_type((*expr)->ctype, ctype);
+-
+-	if (!(class & TYPE_RESTRICT))
+-		return;
+-	warning((*expr)->pos, "restricted degrades to integer");
+-	if (class & TYPE_FOULED)	/* unfoul it first */
+-		(*ctype) = (*ctype)->ctype.base_type;
+-	(*ctype) = (*ctype)->ctype.base_type;	/* get to arithmetic type */
+-	*expr = cast_to(*expr, *ctype);
+-}
+-
+-static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *ctype, struct expression **ip)
+-{
+-	struct expression *i = *ip;
+-	struct symbol *itype;
++	struct expression *index = expr->right;
++	int multiply;
+ 	int bit_size;
+ 
+-	want_int(&i, &itype);
+-
+ 	examine_symbol_type(ctype);
+ 
+ 	if (!ctype->ctype.base_type) {
+@@ -589,31 +574,48 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *c
+ 
+ 	/* Get the size of whatever the pointer points to */
+ 	bit_size = ptr_object_size(ctype);
++	multiply = bit_size >> 3;
++
++	expr->ctype = ctype;
++
++	if (multiply == 1 && itype->bit_size >= bits_in_pointer)
++		return ctype;
+ 
+-	if (bit_size > bits_in_char) {
+-		int multiply = bit_size >> 3;
++	if (index->type == EXPR_VALUE) {
+ 		struct expression *val = alloc_expression(expr->pos, EXPR_VALUE);
++		unsigned long long v = index->value, mask;
++		mask = 1ULL << (itype->bit_size - 1);
++		if (v & mask)
++			v |= -mask;
++		else
++			v &= mask - 1;
++		v *= multiply;
++		mask = 1ULL << (bits_in_pointer - 1);
++		v &= mask | (mask - 1);
++		val->value = v;
++		val->ctype = ssize_t_ctype;
++		expr->right = val;
++		return ctype;
++	}
+ 
+-		if (i->type == EXPR_VALUE) {
+-			val->value = i->value * multiply;
+-			val->ctype = size_t_ctype;
+-			*ip = val;
+-		} else {
+-			struct expression *mul = alloc_expression(expr->pos, EXPR_BINOP);
++	if (itype->bit_size < bits_in_pointer)
++		index = cast_to(index, ssize_t_ctype);
+ 
+-			val->ctype = size_t_ctype;
+-			val->value = bit_size >> 3;
++	if (multiply > 1) {
++		struct expression *val = alloc_expression(expr->pos, EXPR_VALUE);
++		struct expression *mul = alloc_expression(expr->pos, EXPR_BINOP);
+ 
+-			mul->op = '*';
+-			mul->ctype = size_t_ctype;
+-			mul->left = i;
+-			mul->right = val;
++		val->ctype = ssize_t_ctype;
++		val->value = multiply;
+ 
+-			*ip = mul;
+-		}
++		mul->op = '*';
++		mul->ctype = ssize_t_ctype;
++		mul->left = index;
++		mul->right = val;
++		index = mul;
+ 	}
+ 
+-	expr->ctype = ctype;	
++	expr->right = index;
  	return ctype;
  }
  
-+static inline void unrestrict(struct expression *expr,
-+			      int class, struct symbol **ctype)
-+{
-+	if (class & TYPE_RESTRICT) {
-+		warning(expr->pos, "restricted degrades to integer");
-+		if (class & TYPE_FOULED)	/* unfoul it first */
-+			*ctype = (*ctype)->ctype.base_type;
-+		*ctype = (*ctype)->ctype.base_type; /* get to arithmetic type */
-+	}
-+}
-+
- static struct symbol *usual_conversions(int op,
- 					struct expression *left,
- 					struct expression *right,
-@@ -509,40 +520,28 @@ static struct symbol *usual_conversions(int op,
- Normal:
- 	if (!(lclass & TYPE_FLOAT)) {
- 		if (!(rclass & TYPE_FLOAT))
--			ctype = bigger_int_type(ltype, rtype);
-+			return bigger_int_type(ltype, rtype);
- 		else
--			ctype = rtype;
-+			return rtype;
- 	} else if (rclass & TYPE_FLOAT) {
- 		unsigned long lmod = ltype->ctype.modifiers;
- 		unsigned long rmod = rtype->ctype.modifiers;
- 		if (rmod & ~lmod & (MOD_LONG | MOD_LONGLONG))
--			ctype = rtype;
-+			return rtype;
- 		else
--			ctype = ltype;
-+			return ltype;
- 	} else
--		ctype = ltype;
--
--Convert:
--	return ctype;
-+		return ltype;
- 
- Restr:
- 	ctype = restricted_binop_type(op, left, right,
- 				      lclass, rclass, ltype, rtype);
- 	if (ctype)
--		goto Convert;
-+		return ctype;
-+
-+	unrestrict(left, lclass, &ltype);
-+	unrestrict(right, rclass, &rtype);
- 
--	if (lclass & TYPE_RESTRICT) {
--		warning(left->pos, "restricted degrades to integer");
--		if (lclass & TYPE_FOULED)
--			ltype = ltype->ctype.base_type;
--		ltype = ltype->ctype.base_type;
--	}
--	if (rclass & TYPE_RESTRICT) {
--		warning(right->pos, "restricted degrades to integer");
--		if (rclass & TYPE_FOULED)
--			rtype = rtype->ctype.base_type;
--		rtype = rtype->ctype.base_type;
--	}
- 	goto Normal;
- }
- 
-@@ -882,21 +881,6 @@ static struct symbol *evaluate_logical(struct expression *expr)
- 	return &bool_ctype;
- }
- 
--static struct symbol *evaluate_shift(struct expression *expr)
--{
--	struct symbol *ltype, *rtype;
--	struct symbol *ctype;
--
--	want_int(&expr->left, &ltype);
--	want_int(&expr->right, &rtype);
--	ctype = integer_promotion(ltype);
--	expr->left = cast_to(expr->left, ctype);
--	expr->ctype = ctype;
--	ctype = integer_promotion(rtype);
--	expr->right = cast_to(expr->right, ctype);
--	return expr->ctype;
--}
--
- static struct symbol *evaluate_binop(struct expression *expr)
- {
- 	struct symbol *ltype, *rtype, *ctype;
-@@ -915,15 +899,21 @@ static struct symbol *evaluate_binop(struct expression *expr)
- 			}
- 		}
- 
--		// shifts do integer promotions, but that's it.
--		if (op == SPECIAL_LEFTSHIFT || op == SPECIAL_RIGHTSHIFT)
--			return evaluate_shift(expr);
-+		if (op == SPECIAL_LEFTSHIFT || op == SPECIAL_RIGHTSHIFT) {
-+			// shifts do integer promotions, but that's it.
-+			unrestrict(expr->left, lclass, &ltype);
-+			unrestrict(expr->right, rclass, &rtype);
-+			ctype = ltype = integer_promotion(ltype);
-+			rtype = integer_promotion(rtype);
-+		} else {
-+			// The rest do usual conversions
-+			ltype = usual_conversions(op, expr->left, expr->right,
-+						  lclass, rclass, ltype, rtype);
-+			ctype = rtype = ltype;
-+		}
- 
--		// The rest do usual conversions
--		ctype = usual_conversions(op, expr->left, expr->right,
--					  lclass, rclass, ltype, rtype);
--		expr->left = cast_to(expr->left, ctype);
--		expr->right = cast_to(expr->right, ctype);
-+		expr->left = cast_to(expr->left, ltype);
-+		expr->right = cast_to(expr->right, rtype);
- 		expr->ctype = ctype;
- 		return ctype;
+@@ -919,14 +921,19 @@ static struct symbol *evaluate_binop(struct expression *expr)
  	}
+ 
+ 	/* pointer (+|-) integer */
+-	if (lclass & TYPE_PTR && is_int(rclass) && (op == '+' || op == '-'))
+-		return evaluate_ptr_add(expr, degenerate(expr->left),
+-					&expr->right);
++	if (lclass & TYPE_PTR && is_int(rclass) && (op == '+' || op == '-')) {
++		unrestrict(expr->right, rclass, &rtype);
++		return evaluate_ptr_add(expr, degenerate(expr->left), rtype);
++	}
+ 
+ 	/* integer + pointer */
+-	if (rclass & TYPE_PTR && is_int(lclass) && op == '+')
+-		return evaluate_ptr_add(expr, degenerate(expr->right),
+-					&expr->left);
++	if (rclass & TYPE_PTR && is_int(lclass) && op == '+') {
++		struct expression *index = expr->left;
++		unrestrict(index, lclass, &ltype);
++		expr->left = expr->right;
++		expr->right = index;
++		return evaluate_ptr_add(expr, degenerate(expr->left), ltype);
++	}
+ 
+ 	/* pointer - pointer */
+ 	if (lclass & rclass & TYPE_PTR && expr->op == '-')
+@@ -1118,7 +1125,8 @@ static int evaluate_assign_op(struct expression *expr)
+ 	}
+ 	if (tclass & TYPE_PTR && is_int(sclass)) {
+ 		if (op == SPECIAL_ADD_ASSIGN || op == SPECIAL_SUB_ASSIGN) {
+-			evaluate_ptr_add(expr, target, &expr->right);
++			unrestrict(expr->right, sclass, &s);
++			evaluate_ptr_add(expr, target, s);
+ 			return 1;
+ 		}
+ 		expression_error(expr, "invalid pointer assignment");
 -- 
 1.5.0-rc2.GIT
