@@ -1,39 +1,51 @@
-From: Segher Boessenkool <segher@kernel.crashing.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Sun, 24 Jun 2007 21:40:06 +0200
-Message-ID: <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org>
+Date: Sun, 24 Jun 2007 20:59:52 +0100
+Message-ID: <20070624195952.GD21478@ftp.linux.org.uk>
 References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org> <20070624183547.GA21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org>
-Mime-Version: 1.0 (Apple Message framework v623)
-Content-Type: text/plain; charset=US-ASCII; format=flowed
-Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-in-03.arcor-online.net ([151.189.21.43]:59011 "EHLO
-	mail-in-03.arcor-online.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751352AbXFXTka (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:52487 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754563AbXFXT7x (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 24 Jun 2007 15:40:30 -0400
+	Sun, 24 Jun 2007 15:59:53 -0400
+Content-Disposition: inline
 In-Reply-To: <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
->> Why?  I'd say it's not better than BUILD_BUG_ON_ZERO() use
->> instead of that ?:
->
-> Oh, _that_ part I have no problem with. It's more that it seems that 
-> the
+On Sun, Jun 24, 2007 at 12:04:44PM -0700, Linus Torvalds wrote:
+> 
+> 
+> On Sun, 24 Jun 2007, Al Viro wrote:
+> > 
+> > Why?  I'd say it's not better than BUILD_BUG_ON_ZERO() use
+> > instead of that ?:
+> 
+> Oh, _that_ part I have no problem with. It's more that it seems that the 
 > gcc optimization is ok at least as an extension.
 
-Sure, but it's not an extension (yet), but an implementation
-side-effect; it would have to be (semi-formally) defined in
-the manual to be an extension.  Until that happens, anyone
-using this "feature" risks haven his code broken at any time
-(or, rather, his code already was broken but he didn't know
-it).
+gcc logs:
+	* expressions of form <....> can be reduced to cheaper form
+	  by <....>.  Tested and merged.
 
-See gcc.gnu.org/PR456 for more discussion.  Yes it's an old
-bug...
+gcc logs a year later:
+	* revert commit <...>, it causes subtle problems (see PR<....>,
+	  <....> and <....>).  Proposed replacement is too intrusive
+	  for stable branch.
 
+gcc logs a month later:
+	* tested and merged the real fix for PR<....>; will go into the
+	  next release.
 
-Segher
+foobar logs a year later:
+	* gcc versions between <...> and <...> refuse to compile baz.c,
+	  complain about non-constant index in initializer.  Waded through
+	  the sewers of macros we have in barf.h and blah.h, found what
+	  had been causing that.  Fixed.
+
+Ain't fun...
