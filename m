@@ -1,61 +1,91 @@
-From: Segher Boessenkool <segher@kernel.crashing.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Sun, 24 Jun 2007 20:18:52 +0200
-Message-ID: <b739fb9ad6e68bfe5d2a4b839abc8ea4@kernel.crashing.org>
-References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk>
-Mime-Version: 1.0 (Apple Message framework v623)
-Content-Type: text/plain; charset=US-ASCII; format=flowed
-Content-Transfer-Encoding: 7bit
+Date: Sun, 24 Jun 2007 19:35:47 +0100
+Message-ID: <20070624183547.GA21478@ftp.linux.org.uk>
+References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-in-04.arcor-online.net ([151.189.21.44]:44224 "EHLO
-	mail-in-04.arcor-online.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751269AbXFXST7 (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:39256 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751440AbXFXSfs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 24 Jun 2007 14:19:59 -0400
-In-Reply-To: <20070624174732.GZ21478@ftp.linux.org.uk>
+	Sun, 24 Jun 2007 14:35:48 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
->> Hopefully correct handling of integer constant expressions.  Please, 
->> review.
->
-> Heh...  The first catches are lovely:
->                  struct fxsrAlignAssert {
->                          int _:!(offsetof(struct task_struct,
->                                          thread.i387.fxsave) & 15);
->                  };
+On Sun, Jun 24, 2007 at 11:04:57AM -0700, Linus Torvalds wrote:
+> 
+> 
+> On Sun, 24 Jun 2007, Al Viro wrote:
+> > 
+> > Heh...  The first catches are lovely:
+> >                  struct fxsrAlignAssert {
+> >                          int _:!(offsetof(struct task_struct,
+> >                                          thread.i387.fxsave) & 15);
+> 
+> Ok, that's a bit odd.
+> 
+> > as an idiotic way to do BUILD_BUG() and
+> > #define _IOC_TYPECHECK(t) \
+> >         ((sizeof(t) == sizeof(t[1]) && \
+> >           sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+> >           sizeof(t) : __invalid_size_argument_for_IOC)
+> > poisoning _IOW() et.al., so those who do something like
+> > 
+> > static const char *v4l1_ioctls[] = {
+> >         [_IOC_NR(VIDIOCGCAP)]       = "VIDIOCGCAP",
+> 
+> On the other hand, this one really does seem to be "nice".
 
-That's...  wow?
+Why?  I'd say it's not better than BUILD_BUG_ON_ZERO() use
+instead of that ?:.   This code would remain unchanged; the
+entire reason why we run into problems is that a way to
+force an error at build time had produced something that
+was not a constant expression.  It's not a matter of having
+to change something in the users of that sucker (or _IOC_NR(), or
+_IOR(), or _IO()).  The code in question is there for one thing -
+to give (constant) sizeof(t) or an error if t doesn't look good for
+us.  That's all.  And we have a perfectly good way to do that...
 
-> #define _IOC_TYPECHECK(t) \
->         ((sizeof(t) == sizeof(t[1]) && \
->           sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
->           sizeof(t) : __invalid_size_argument_for_IOC)
-> poisoning _IOW() et.al., so those who do something like
->
-> static const char *v4l1_ioctls[] = {
->         [_IOC_NR(VIDIOCGCAP)]       = "VIDIOCGCAP",
->
-> run into trouble.
+> I don't think it's a misfeature to be able to do "obvious compile-time 
+> constant optimizations" on initializer indexes. The bitfield size thing in 
+> some ways does do the same thing - it's clearly _odd_, but if I had my  
+> choice, I'd prefer a language that allows it over one that doesn't.
 
-> The only reason that doesn't break gcc to hell and back is
-> that gcc has unfixed bugs in that area.
+Er...  That's nice, assuming you don't suddenly run into "code with
+convoluted bunch of macros breaks on a different version of compiler
+and/or different CFLAGS".
 
-If I understand correctly what bugs you are talking about,
-most (all?) of those were solved in the dark ages already
-(i.e., the 3.x series).
+IOW, having the optimizer strength define the boundary between the programs
+that compile and ones that give an error is not a good idea, IMO.
 
-> It certainly is not a valid C
+Where do you place that boundary?  Is 0 && n good?  How about 0 & n?
+Or 0 * n?  Or n - n?  Or (n+1)-(n+1) from macro expansion?  Note that
+gcc does _not_ take the last one as integer constant expression, but
+happens to deal with the earlier ones.  OTOH, it does deal with n * m - n * m.
 
-Why not?  Nothing in the C standard says all your externs
-have to be defined in some other translation unit you link
-with AFAIK.
+And I would not bet a dime on gcc versions being consistent with each other
+in that area.
 
-> or even a remotely sane one.
+Now, there is one possible answer that makes some sense - allow removal
+of unevaluated parts in &&, || and ?:.  I can do that, but I'm not
+sure if it's actually worth doing.  The only case in the kernel tree
+become more readable with use of BUILD_BUG_ON_ZERO() anyway and I would
+be very surprised to find any real code where something of that kind
+would be a problem.
 
-It's unusual at least :-)
+> > Objections?  The only reason that doesn't break gcc to hell and back is
+> > that gcc has unfixed bugs in that area.  It certainly is not a valid C
+> > or even a remotely sane one.
+> 
+> I agree that it's obviously not "valid C", but I don't agree that it's not 
+> remotely sane. Why not allow that extension? 
 
-
-Segher
+Because it's not well-defined and because having "let me check if this
+version of compiler will eat that" as the only way to tell if construct
+would be OK is not a good thing...
