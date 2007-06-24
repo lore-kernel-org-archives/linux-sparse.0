@@ -1,48 +1,56 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Sun, 24 Jun 2007 18:47:32 +0100
-Message-ID: <20070624174732.GZ21478@ftp.linux.org.uk>
+Date: Sun, 24 Jun 2007 11:04:57 -0700 (PDT)
+Message-ID: <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org>
 References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk>
+ <20070624174732.GZ21478@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:43282 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751477AbXFXRrd (ORCPT
+Received: from smtp2.linux-foundation.org ([207.189.120.14]:49852 "EHLO
+	smtp2.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751505AbXFXSGC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 24 Jun 2007 13:47:33 -0400
-Content-Disposition: inline
-In-Reply-To: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk>
+	Sun, 24 Jun 2007 14:06:02 -0400
+In-Reply-To: <20070624174732.GZ21478@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
+To: Al Viro <viro@ftp.linux.org.uk>
 Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Sun, Jun 24, 2007 at 09:05:51AM +0100, Al Viro wrote:
+
+
+On Sun, 24 Jun 2007, Al Viro wrote:
 > 
-> Hopefully correct handling of integer constant expressions.  Please, review.
+> Heh...  The first catches are lovely:
+>                  struct fxsrAlignAssert {
+>                          int _:!(offsetof(struct task_struct,
+>                                          thread.i387.fxsave) & 15);
 
-Heh...  The first catches are lovely:
-                 struct fxsrAlignAssert {
-                         int _:!(offsetof(struct task_struct,
-                                         thread.i387.fxsave) & 15);
-                 };
-as an idiotic way to do BUILD_BUG() and
-#define _IOC_TYPECHECK(t) \
-        ((sizeof(t) == sizeof(t[1]) && \
-          sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
-          sizeof(t) : __invalid_size_argument_for_IOC)
-poisoning _IOW() et.al., so those who do something like
+Ok, that's a bit odd.
 
-static const char *v4l1_ioctls[] = {
-        [_IOC_NR(VIDIOCGCAP)]       = "VIDIOCGCAP",
+> as an idiotic way to do BUILD_BUG() and
+> #define _IOC_TYPECHECK(t) \
+>         ((sizeof(t) == sizeof(t[1]) && \
+>           sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+>           sizeof(t) : __invalid_size_argument_for_IOC)
+> poisoning _IOW() et.al., so those who do something like
+> 
+> static const char *v4l1_ioctls[] = {
+>         [_IOC_NR(VIDIOCGCAP)]       = "VIDIOCGCAP",
 
-run into trouble.  The former is "tell jbeulich to cut down on crack",
-but the latter...  Probably ought to be
-#define _IOC_TYPECHECK(t) \
-        (sizeof(t) + BUILD_BUG_ON_ZERO(sizeof(t) == sizeof(t[1]) && \
-          sizeof(t) < (1 << _IOC_SIZEBITS)))
+On the other hand, this one really does seem to be "nice".
 
-Objections?  The only reason that doesn't break gcc to hell and back is
-that gcc has unfixed bugs in that area.  It certainly is not a valid C
-or even a remotely sane one.
+I don't think it's a misfeature to be able to do "obvious compile-time 
+constant optimizations" on initializer indexes. The bitfield size thing in 
+some ways does do the same thing - it's clearly _odd_, but if I had my  
+choice, I'd prefer a language that allows it over one that doesn't.
+
+> Objections?  The only reason that doesn't break gcc to hell and back is
+> that gcc has unfixed bugs in that area.  It certainly is not a valid C
+> or even a remotely sane one.
+
+I agree that it's obviously not "valid C", but I don't agree that it's not 
+remotely sane. Why not allow that extension? 
+
+		Linus
