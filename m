@@ -1,35 +1,64 @@
-From: Mathieu Bouchard <matju@artengine.ca>
-Subject: support for C++ ?
-Date: Mon, 25 Jun 2007 22:20:51 -0400 (EDT)
-Message-ID: <Pine.LNX.4.64.0706252219310.12395@paik.artengine.ca>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
+Date: Mon, 25 Jun 2007 20:12:59 -0700
+Message-ID: <4680843B.5010503@freedesktop.org>
+References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org> <20070624183547.GA21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org> <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070625195511.GG21478@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="751927920-1476159782-1182824451=:12395"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig1B5BA729A899237316EB4FF1"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from artengine.ca ([209.44.112.130]:55594 "EHLO artengine.ca"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752035AbXFZCun (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jun 2007 22:50:43 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by artengine.ca (Postfix) with ESMTP id 2A4677DC99
-	for <linux-sparse@vger.kernel.org>; Mon, 25 Jun 2007 22:20:51 -0400 (EDT)
+Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:60104 "EHLO
+	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752473AbXFZDN4 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 25 Jun 2007 23:13:56 -0400
+In-Reply-To: <20070625195511.GG21478@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: Segher Boessenkool <segher@kernel.crashing.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig1B5BA729A899237316EB4FF1
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
---751927920-1476159782-1182824451=:12395
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Al Viro wrote:
+> On Sun, Jun 24, 2007 at 10:31:06PM -0700, Josh Triplett wrote:
+>> Al Viro wrote:
+>>> Joy.  OK, folks, disregard 16/16 in the current form; everything prio=
+r
+>>> to it stands on its own.
+>> Acknowledged.  The rest of the patches look good to me, so I'll merge =
+1-15
+>> soon, and ignore 16.
+>>
+>> Do you have those patches in public git somewhere, or would you like m=
+e to
+>> just apply the patches from mail?
+>=20
+> git://git.kernel.org/pub/scm/linux/kernel/git/viro/sparse.git/ misc
+
+No changes to validation output at any point in the series.  Merged.  Tha=
+nks!
+
+- Josh Triplett
 
 
-Are there any plans for supporting C++ or any subset thereof? (e.g.=20
-parsing G++4 syntax but perhaps skipping over some constructs that are=20
-difficult to handle if it's too much work for now)
 
-thanks.
+--------------enig1B5BA729A899237316EB4FF1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-  _ _ __ ___ _____ ________ _____________ _____________________ ...
-| Mathieu Bouchard - t=E9l:+1.514.383.3801, Montr=E9al QC Canada
---751927920-1476159782-1182824451=:12395--
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGgIQ7GJuZRtD+evsRAuCTAKCm8+NDg5I9ZI9CLnwA3CRHKc5U5wCeLCcF
+E9GtVfce5Evvt3YPmXYH2II=
+=jLNt
+-----END PGP SIGNATURE-----
+
+--------------enig1B5BA729A899237316EB4FF1--
