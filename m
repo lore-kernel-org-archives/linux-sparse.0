@@ -1,74 +1,58 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: support for C++ ?
-Date: Mon, 25 Jun 2007 22:11:47 -0700
-Message-ID: <4680A013.8030707@freedesktop.org>
-References: <Pine.LNX.4.64.0706252219310.12395@paik.artengine.ca>
+From: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Subject: Antwort: Re: Messing typedefs?
+Date: Tue, 26 Jun 2007 10:23:26 +0200
+Message-ID: <OF341CD9CB.28B48978-ONC1257306.002DC88B-C1257306.002E17BE@br-automation.com>
+References: <1181712122.22924.15.camel@dv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigB61598D2713FFB19D81E8CEE"
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:55419 "EHLO
-	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750897AbXFZFMl (ORCPT
+Received: from mail.automotion.info ([213.33.116.60]:52727 "EHLO
+	mail1.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751289AbXFZIXs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Jun 2007 01:12:41 -0400
-In-Reply-To: <Pine.LNX.4.64.0706252219310.12395@paik.artengine.ca>
+	Tue, 26 Jun 2007 04:23:48 -0400
+In-Reply-To: <1181712122.22924.15.camel@dv>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mathieu Bouchard <matju@artengine.ca>
+To: Pavel Roskin <proski@gnu.org>
 Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigB61598D2713FFB19D81E8CEE
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Hi,
 
-Mathieu Bouchard wrote:
-> Are there any plans for supporting C++ or any subset thereof? (e.g.=20
-> parsing G++4 syntax but perhaps skipping over some constructs that are =
+Pavel Roskin <proski@gnu.org> schrieb am 13.06.2007 07:22:02:
 
-> difficult to handle if it's too much work for now)
+> Hello Thomas,
+> 
+> On Mon, 2007-06-11 at 13:59 +0200, Thomas Schmid wrote:
+> > Following code
+> > 
+> >         typedef unsigned char  plcbit;
+> >         typedef unsigned char  USINT;
+> > 
+> >         USINT usVar1;
+> > 
+> > leads to a symbol "usVar1" with base_type->ident named "plcbit".
+> > Is this behaviour expected?
+> 
+> What happens is the base types like uchar_ctype, which are supposed to
+> be initialized once and never changed again, are actually initialized by
+> the first typedef, so they are sort of "imprinted" with the new name.
 
-To the best of my knowledge, nobody involved in the Sparse community has =
-any
-plans to attempt C++.  I also think that a subset of the language capable=
- of
-handling any significant number of common programs would end up containin=
-g
-most of the language.  Even basic support for C++ would require large cha=
-nges
-to the parser and to the Sparse data structures, and that doesn't even co=
-unt
-the huge can of worms that would open once you start running into interac=
-tions
-between Sparse-annotated types and inheritance or overloading.
+> And the code is:
+> 
+>         if (is_typedef) {
+>                 if (base_type && !base_type->ident)
+>                         base_type->ident = ident;
+>         } else if (base_type && base_type->type == SYM_FN) {
+> 
 
-I certainly won't rule the idea out; if someone wants to submit clean pat=
-ches
-adding C++ support to Sparse, I would take them.  At the lowest level, co=
-de
-should still end up looking much like the current Sparse bytecode format.=
+If I get it right, every typedef pointing to a base type should lead into 
+a new base type to get its right ident?
 
-However, such a project would require a monumental coding effort.
+> I don't know what base_type->ident needs to be updated at all.  At least
+> SYM_BASETYPE should be exempt from this retroactive update.
 
-The same thing applies to other C-like languages.
+Any idea how to fix this?
 
-- Josh Triplett
-
-
---------------enigB61598D2713FFB19D81E8CEE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGgKATGJuZRtD+evsRAlDuAKCEGdL6a46A5L2Yz/uVRUi2/ByDrQCeM3+e
-UGDPAxC6QtIt6IH/fZidsEM=
-=A0nj
------END PGP SIGNATURE-----
-
---------------enigB61598D2713FFB19D81E8CEE--
+Best regards,
+Thomas Schmid
