@@ -1,36 +1,86 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: declaration specifiers wooziness
-Date: Wed, 27 Jun 2007 17:00:50 +0100
-Message-ID: <20070627160050.GY21478@ftp.linux.org.uk>
-References: <20070627103320.GA11047@localhost.sw.ru> <1182956472.8970.35.camel@josh-work.beaverton.ibm.com> <46827F4D.7010305@knosof.co.uk> <20070627153133.GD11047@localhost.sw.ru> <4682836C.10201@knosof.co.uk> <468285D1.1020506@knosof.co.uk>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
+Date: Wed, 27 Jun 2007 09:19:17 -0700 (PDT)
+Message-ID: <alpine.LFD.0.98.0706270910000.8675@woody.linux-foundation.org>
+References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk>
+ <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org>
+ <20070624183547.GA21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org>
+ <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org>
+ <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org>
+ <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk>
+ <20070627121021.GQ7590@daikokuya.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:40748 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757043AbXF0QA6 (ORCPT
+Received: from smtp2.linux-foundation.org ([207.189.120.14]:41354 "EHLO
+	smtp2.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754750AbXF0QTe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 27 Jun 2007 12:00:58 -0400
-Content-Disposition: inline
-In-Reply-To: <468285D1.1020506@knosof.co.uk>
+	Wed, 27 Jun 2007 12:19:34 -0400
+In-Reply-To: <20070627121021.GQ7590@daikokuya.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Derek M Jones <derek@knosof.co.uk>
-Cc: Alexey Dobriyan <adobriyan@sw.ru>, Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org, adobriyan@gmail.com
+To: Neil Booth <neil@daikokuya.co.uk>
+Cc: Al Viro <viro@ftp.linux.org.uk>, Josh Triplett <josh@freedesktop.org>, Segher Boessenkool <segher@kernel.crashing.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Wed, Jun 27, 2007 at 04:44:17PM +0100, Derek M Jones wrote:
- 
-> The point I did not mention before sending the email
-> was the extent to which Sparse needs to check constructs
-> that are constraint violations and thus assumed to be checked
-> by the compiler.
+
+
+On Wed, 27 Jun 2007, Neil Booth wrote:
 > 
-> Ok, it is possible to get weird looking stuff through sparse
-> without complaint, but is it worth spending time flagging it?
+> Here are three independently invalid non-ICEs that sparse doesn't
+> diagnose.
+> 
+> extern int f(void);
+> enum { cast_to_ptr = (int) (void *) 0 };
+> enum { cast_to_float = (int) (double) 1 };
 
-Yes, if they turn into problems later on.  One practical reason
-is that we are short on MOD_... bits; carrying MOD_LONG et.al.
-might be a bad idea - we might want to choose the right integer
-type (as in, the right struct symbol out of small set) and be
-done with those; conversions can be done that way just fine, we
-don't need to look at MOD_LONG et.al. for those.
+Those two *really* shouldn't fail. I don't care if the C standard says so, 
+that is *fine*.
+
+In particular, "offsetof()" should be portably able to basically be the 
+standard #define, which involves an integer cast from a constant pointer. 
+That had *better* be a valid constant integer expression, because it's 
+very useful.
+
+And I think standards can go screw themselves, and you can make it an 
+error with some "--standard-pedantic" switch or similar.
+
+Standards are just random pieces of paper, for crying out loud! They have 
+zero relevance in the end. 
+
+> enum { fncall = 0 ? f(): 3 };
+
+Again, I think that's a deficiency of a standard that tries to be 
+acceptable to everybody rather than about a "really good language".
+
+So I personally think we should allow it too if at all possible, and 
+again, use some "--standard-pedantic" to flag it as an error.
+
+Why? Because things like that may not look sensible when written out, but 
+they are often _very_ sensible when they are the result of a macro that 
+does some error checking or other thing. 
+
+The classic example of this is "__builtin_constant_p()". It is a *great* 
+way to make a macro that does different things depending on whether 
+something is a compile-time constant or not, and no, it's not standard, 
+but dang, it's so useful that a standard that doesn't allow sane use of it 
+is basically bogus.
+
+So look at the "ntohl()" kind of thing, and realize that it's just "Good 
+Practice(tm)" to be able to make a ntohl() macro that can be used for 
+initializers, including very much enum initializers. Ie
+
+	enum { defaultport = htons(9418) };
+
+is actually nice code for something like the kernel, but it turns out that 
+in order to make this work, you have to do it as
+
+	#define htons(x) (__builtin_constant_p(x) ? constant_htons(x) : __htons(x))
+
+and that in turn generates *exactly* the kind of thing you talk of above.
+
+And when you give _your_ example, it looks insane. When I give _my_ 
+example, it generates exactly the same thing, but suddenly it has a great 
+reason for doing so, and it's no longer insane.
+
+			Linus
