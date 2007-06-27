@@ -1,49 +1,50 @@
-From: Neil Booth <neil@daikokuya.co.uk>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Wed, 27 Jun 2007 21:26:28 +0900
-Message-ID: <20070627122628.GR7590@daikokuya.co.uk>
-References: <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org> <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk> <20070626233226.GO7590@daikokuya.co.uk> <20070627001803.GJ21478@ftp.linux.org.uk> <20070627115245.GP7590@daikokuya.co.uk> <20070627121948.GN21478@ftp.linux.org.uk>
+Date: Wed, 27 Jun 2007 13:30:31 +0100
+Message-ID: <20070627123031.GO21478@ftp.linux.org.uk>
+References: <20070624174732.GZ21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org> <20070624183547.GA21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org> <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk> <20070627121021.GQ7590@daikokuya.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7516 "HELO
-	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S1756342AbXF0M0W (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:41049 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757028AbXF0Mae (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 27 Jun 2007 08:26:22 -0400
+	Wed, 27 Jun 2007 08:30:34 -0400
 Content-Disposition: inline
-In-Reply-To: <20070627121948.GN21478@ftp.linux.org.uk>
+In-Reply-To: <20070627121021.GQ7590@daikokuya.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
+To: Neil Booth <neil@daikokuya.co.uk>
 Cc: Josh Triplett <josh@freedesktop.org>, Segher Boessenkool <segher@kernel.crashing.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-Al Viro wrote:-
-
-> Egads...  After rereading that...  What a mess.
+On Wed, Jun 27, 2007 at 09:10:21PM +0900, Neil Booth wrote:
+> Al Viro wrote:-
 > 
-> int foo(void)
-> {
-> 	static int a[1][0,2];
-> }
+> > Hopefully correct handling of integer constant expressions.  Please, review.
 > 
-> is, AFAICS, allowed.  Reason:
-> 	int a[0,2]
-> is a VLA due to 6.7.5.2[4] (0,2 is not an ICE).  However, due to the language
-> in the same section,
-> 	int a[1][0,2]
-> is *not* a VLA, since (a) 2 is an ICE and (b) its element type "has a known
-> constant size" (it does - the value of 0,2 is certainly guaranteed to be 2).
-> I.e., it's VM type, but not a VLA.  I.e. only the first part of 6.7.5.2[2]
-> applies and we are actually fine.
+> Here are three independently invalid non-ICEs that sparse doesn't
+> diagnose.
 > 
-> 	So we can have a static single-element array of int [0,2], but
-> not a plain static int [0,2].  Lovely, that...
+> extern int f(void);
+> enum { cast_to_ptr = (int) (void *) 0 };
+> enum { cast_to_float = (int) (double) 1 };
+> enum { fncall = 0 ? f(): 3 };
+> 
+> Hey, I did warn you it was tricky :)
 
-DR 312 clarified the meaning of "known constant size"
+Nope.  They are recognized as non-ICE (try with struct { int n :<expr>;};
+for tester).  Again, no check for ICE in enums, and that one is for
+a good reason - we might very well want non-integer enums as an extension
+at some point.  We certainly need to check that they are constant, though.
 
-   http://www.open-std.org/jtc1/sc22/wg14/www/docs/dr_312.htm
+If you want to test ICE recognition, right now only the following places
+are checking for it:
+	* bitfield width
+	* __attribute__((aligned(<number>)))
+	* __attribute__((address_space(<number>)))
+	* [<index>] in designators within initializer list
+	* [<index> ... <index>] - ditto, gccism
 
-in the sensible way, thankfully, so your example is actually invalid.
-
-Neil.
+That's it.  We can use it elsewhere too, but that's a separate bunch of
+patches (trivial to do now).
