@@ -1,46 +1,63 @@
-From: Neil Booth <neil@daikokuya.co.uk>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Wed, 27 Jun 2007 22:35:46 +0900
-Message-ID: <20070627133546.GC16758@daikokuya.co.uk>
-References: <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org> <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk> <20070627121021.GQ7590@daikokuya.co.uk> <20070627123031.GO21478@ftp.linux.org.uk> <20070627125958.GA16758@daikokuya.co.uk> <20070627131823.GR21478@ftp.linux.org.uk>
+Date: Wed, 27 Jun 2007 15:06:36 +0100
+Message-ID: <20070627140636.GT21478@ftp.linux.org.uk>
+References: <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk> <20070627121021.GQ7590@daikokuya.co.uk> <20070627123031.GO21478@ftp.linux.org.uk> <20070627125958.GA16758@daikokuya.co.uk> <20070627131823.GR21478@ftp.linux.org.uk> <20070627133546.GC16758@daikokuya.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from v035086.ppp.asahi-net.or.jp ([124.155.35.86]:7429 "HELO
-	daikokuya.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with SMTP id S1751187AbXF0Nfi (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:50739 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754340AbXF0OGj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 27 Jun 2007 09:35:38 -0400
+	Wed, 27 Jun 2007 10:06:39 -0400
 Content-Disposition: inline
-In-Reply-To: <20070627131823.GR21478@ftp.linux.org.uk>
+In-Reply-To: <20070627133546.GC16758@daikokuya.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
+To: Neil Booth <neil@daikokuya.co.uk>
 Cc: Josh Triplett <josh@freedesktop.org>, Segher Boessenkool <segher@kernel.crashing.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-Al Viro wrote:-
-
+On Wed, Jun 27, 2007 at 10:35:46PM +0900, Neil Booth wrote:
+> Al Viro wrote:-
 > 
-> Son of a...  expand_comma() cannibalizes the node, should restore ->flags
-> to 0 (same as other similar suckers).
+> > 
+> > Son of a...  expand_comma() cannibalizes the node, should restore ->flags
+> > to 0 (same as other similar suckers).
+> > 
+> > > struct c { unsigned int c1: 1 ? 2: a++; };
+> > 
+> > Ditto for expand_conditional, but there we should preserve the original
+> > ->flags instead - might be non-zero and we ought to do that after
+> > expanding the taken branch...
+> > 
+> > From: Al Viro <viro@zeniv.linux.org.uk>
+> > Date: Wed, 27 Jun 2007 09:10:54 -0400
+> > Subject: [PATCH] fix the missed cannibalizing simplifications
+> > 
+> > Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 > 
-> > struct c { unsigned int c1: 1 ? 2: a++; };
+> Now I think I only see one class of issues; the following is valid
+> C99 (I believe that's what you intend to follow) but being rejected:
 > 
-> Ditto for expand_conditional, but there we should preserve the original
-> ->flags instead - might be non-zero and we ought to do that after
-> expanding the taken branch...
-> 
-> From: Al Viro <viro@zeniv.linux.org.uk>
-> Date: Wed, 27 Jun 2007 09:10:54 -0400
-> Subject: [PATCH] fix the missed cannibalizing simplifications
-> 
-> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+>    struct a { int comma: 1 ? 2: (2, 3); };
 
-Now I think I only see one class of issues; the following is valid
-C99 (I believe that's what you intend to follow) but being rejected:
+*unprintable*
 
-   struct a { int comma: 1 ? 2: (2, 3); };
+Yes, I see...  OK, null pointer constants handling (next patch in the
+queue) introduces is_zero_constant() (silent evaluation of integer
+constant expression, with division by 0/too large shift/- on lowest
+value of signed integer type leaving the branch as-is, so that later
+expand would generate a proper error on it; then checking if we'd
+reduced the sucker to EXPR_VALUE[0]).  I'll pull it into a separate
+patch, along with is_nonzero_constant(), and change rules for potential
+ICE on parser stage to
+	maybe-ICE && y => maybe-ICE
+	maybe-ICE || y => maybe-ICE
+	maybe-ICE ? x : y => maybe-ICE if at least one of x and y is maybe-ICE
+	maybe-ICE ? : y => maybe-ICE
+letting evaluate_expression() on such suckers use them if the first argument
+turns out to be ICE after its evaluate_expression()...
 
-It's invalid C90.
-
-Neil.
+It really stinks, especially since we can't say "oh, parent it known to
+be non-ICE, no need to bother" - subexpression might be shared.
