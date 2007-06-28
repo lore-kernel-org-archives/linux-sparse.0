@@ -1,57 +1,87 @@
-From: Segher Boessenkool <segher@kernel.crashing.org>
-Subject: Re: [PATCH 16/16] fix handling of integer constant expressions
-Date: Thu, 28 Jun 2007 11:08:25 +0200
-Message-ID: <f5dda736b43865bb40583992bafe7a6b@kernel.crashing.org>
-References: <E1I2N6V-0003g9-8H@ZenIV.linux.org.uk> <20070624174732.GZ21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241102160.3593@woody.linux-foundation.org> <20070624183547.GA21478@ftp.linux.org.uk> <alpine.LFD.0.98.0706241203530.3593@woody.linux-foundation.org> <1a25667a20e43a072f733a3ec2b8e79d@kernel.crashing.org> <20070624203837.GE21478@ftp.linux.org.uk> <467F531A.3030702@freedesktop.org> <20070626221040.GI21478@ftp.linux.org.uk> <20070626221134.GA21350@ftp.linux.org.uk> <20070627121021.GQ7590@daikokuya.co.uk> <alpine.LFD.0.98.0706270910000.8675@woody.linux-foundation.org>
-Mime-Version: 1.0 (Apple Message framework v623)
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+From: Rob Taylor <rob.taylor@codethink.co.uk>
+Subject: Re: [PATCH] c2xml
+Date: Thu, 28 Jun 2007 12:00:59 +0100
+Message-ID: <468394EB.5070608@codethink.co.uk>
+References: <46826B68.5040302@codethink.co.uk> <1182970187.8970.145.camel@josh-work.beaverton.ibm.com> <46834AE1.8010107@freedesktop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-in-08.arcor-online.net ([151.189.21.48]:46127 "EHLO
-	mail-in-08.arcor-online.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1760140AbXF1JIg (ORCPT
+Received: from 208-78-103-131.slicehost.net ([208.78.103.131]:58952 "EHLO
+	mail.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757641AbXF1K7d (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 28 Jun 2007 05:08:36 -0400
-In-Reply-To: <alpine.LFD.0.98.0706270910000.8675@woody.linux-foundation.org>
+	Thu, 28 Jun 2007 06:59:33 -0400
+In-Reply-To: <46834AE1.8010107@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Neil Booth <neil@daikokuya.co.uk>, linux-kernel@vger.kernel.org, Al Viro <viro@ftp.linux.org.uk>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org
 
->> Here are three independently invalid non-ICEs that sparse doesn't
->> diagnose.
->>
->> extern int f(void);
->> enum { cast_to_ptr = (int) (void *) 0 };
->> enum { cast_to_float = (int) (double) 1 };
->
-> Those two *really* shouldn't fail. I don't care if the C standard says 
-> so,
-> that is *fine*.
+Josh Triplett wrote:
+> Josh Triplett wrote:
+>> On Wed, 2007-06-27 at 14:51 +0100, Rob Taylor wrote:
+>>> Here's something I've hacked up for my work on gobject-introspection
+>>> [1]. It basically dumps the parse tree for a given file as simplistic
+>>> xml, suitable for further transformation by something else (in my case,
+>>> some python).
+>>>
+>>> I'd expect this to also be useful for code navigation in editors and c
+>>> refactoring tools, but I've really only focused on my needs for c api
+>>> description.
+>>>
+>>> There are 3 patches here. The first introduces a field in the symbol
+>>> struct for the end position of the symbol. I've added this in my case
+>>> for documentation generation, but again I think it'd be useful in other
+>>> cases. The next introduces a sparse_keep_tokens, which parses a file,
+>>> but doesn't free the tokens after parsing. The final one adds c2xml and
+>>> the DTD for the xml format. It builds conditionally on whether libxml2
+>>> is available.
+>>>
+>>> All feedback appreciated!
+>> Wow.  Very nice.  I can already think of several other uses for this.
+> [...]
+>>       * Please consider including information from the context and
+>>         address space attributes.
+> 
+> Actually, don't worry about that one; we can always add it later, and I'd love
+> to see this get merged as soon as possible.
 
-GCC doesn't guarantee you this, either.
+Yes, I was about to say I deliberately left this out as I don't need it
+for my use case, but it shouldn't be difficult to add if the need arises
+for it.
 
-> In particular, "offsetof()" should be portably able to basically be the
-> standard #define, which involves an integer cast from a constant 
-> pointer.
-> That had *better* be a valid constant integer expression, because it's
-> very useful.
+>>       * Rather than the current base-type and base-type-builtin
+>>         mechanism, you might consider having designated IDs for the base
+>>         types and using those in base-type.  You could even output the
+>>         builtin types if you want.  I don't know if this makes things
+>>         easier or harder for consumers of the output; what do you think?
+> 
+> On second thought, ignore this.  We can always change it later, but having a
+> special syntax for the base types makes sense to me.  Anything that cares
+> about types will need to understand the base types.
 
-Yes it's useful.  That's why GCC gives you __builtin_offsetof()
-for this purpose.
+Agreed.
 
-> And I think standards can go screw themselves, and you can make it an
-> error with some "--standard-pedantic" switch or similar.
->
-> Standards are just random pieces of paper, for crying out loud! They 
-> have
-> zero relevance in the end.
+>>       * I don't know if sparse_keep_symbols seems like the right API.
+>>         Sparse's approach to memory management (or lack thereof) bugs me
+>>         a bit.  More importantly, though, it makes the hierarchy of
+>>         functions sparse(), then __sparse(), then sparse_keep_symbols(),
+>>         which seems strange.  I don't know a better solution offhand,
+>>         though; don't worry too much about addressing this.
+> 
+> Ignore this too.  The API you propose will work fine for now, and I don't want
+> to hold up merging the patch on trying to think of the perfect API for
+> something not directly related to the point of your patch.
 
-Sure, as long as you don't care about compatibility across
-compilers, what matters is what the compilers you _do_ use
-actually implement.  And note that GCC doesn't guarantee
-you much over what the C standard does.  Almost everything
-it allows extra is just an implementation side effect.
+Heh, yeah, sorting out memory management is quite a scary prospect :) I
+think we'd basically need to go for some sort of reference counting
+scheme, but that'd need some very careful work to deal with potential
+cycles.
 
+>> Thanks again for this work; it looks great, and highly useful.
 
-Segher
+Thanks!
+
+Rob
+Rob
