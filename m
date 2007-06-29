@@ -1,343 +1,105 @@
-From: "Damien Lespiau" <damien.lespiau@gmail.com>
-Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results into test files
-Date: Fri, 29 Jun 2007 02:13:27 +0200
-Message-ID: <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
+From: Josh Triplett <josht@linux.vnet.ibm.com>
+Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results
+	into test files
+Date: Thu, 28 Jun 2007 17:29:09 -0700
+Message-ID: <1183076949.2621.196.camel@josh-work.beaverton.ibm.com>
 References: <20070628053954.30704.66440.stgit@dv.roinet.com>
 	 <20070628054019.30704.64375.stgit@dv.roinet.com>
 	 <46836129.7050407@freedesktop.org>
 	 <cbf3148c0706281159x7b252776nd08fd9bd9e36b92@mail.gmail.com>
 	 <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>
+	 <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_45129_25745067.1183076007344"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ug-out-1314.google.com ([66.249.92.169]:3113 "EHLO
-	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761952AbXF2AN3 (ORCPT
+Received: from e36.co.us.ibm.com ([32.97.110.154]:50845 "EHLO
+	e36.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761952AbXF2A3J (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 28 Jun 2007 20:13:29 -0400
-Received: by ug-out-1314.google.com with SMTP id j3so705039ugf
-        for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 17:13:27 -0700 (PDT)
-In-Reply-To: <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>
+	Thu, 28 Jun 2007 20:29:09 -0400
+Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
+	by e36.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id l5T0T97B020179
+	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 20:29:09 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v8.3) with ESMTP id l5T0T9Ca211986
+	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 18:29:09 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l5T0T8E8010751
+	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 18:29:08 -0600
+In-Reply-To: <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
+To: Damien Lespiau <damien.lespiau@gmail.com>
 Cc: Josh Triplett <josh@freedesktop.org>, Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
 
-------=_Part_45129_25745067.1183076007344
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+On Fri, 2007-06-29 at 02:13 +0200, Damien Lespiau wrote:
+> > Will review in more detail later, but at first glance this looks quite
+> > good, and very capable.
+> 
+> I rebased the series against current HEAD to make testing easier.
 
-> Will review in more detail later, but at first glance this looks quite
-> good, and very capable.
+Thanks.
 
-I rebased the series against current HEAD to make testing easier.
+> > Two minor things that jump out at me:
+> >       * The need to specify the command line as "../sparse args $file"
+> >         seems somewhat inelegant.
+> solved: no path in check-command now.
 
-> Two minor things that jump out at me:
->       * The need to specify the command line as "../sparse args $file"
->         seems somewhat inelegant.
-solved: no path in check-command now.
+Excellent.
 
->         Also, allowing an
->         alternate option "check-options" that just specifies sparse
->         flags seems useful, and the default command could do something
->         like "sparse $options $file"; that way, you can just say
->         "check-options: -E", or "check-options: -Wthingy".
-Humm, not sure if it's _that_ much useful to have
-         check-options: -E -Wthingy
-instead of
-         check-command: sparse -E -Wthingy $file
-for some reason I find the later less confusing, a matter of taste I guess.
+> >         Also, allowing an
+> >         alternate option "check-options" that just specifies sparse
+> >         flags seems useful, and the default command could do something
+> >         like "sparse $options $file"; that way, you can just say
+> >         "check-options: -E", or "check-options: -Wthingy".
+> Humm, not sure if it's _that_ much useful to have
+>          check-options: -E -Wthingy
+> instead of
+>          check-command: sparse -E -Wthingy $file
+> for some reason I find the later less confusing, a matter of taste I guess.
 
->       * The need to prefix every line of output, rather than delimiting
->         the start and end of the output, seems painful with large
->         amounts of output.
-Agreed. that's why ./test-suite format helps building such tags
+I don't mind going with the latter for now and considering the former
+for a later patch.
 
-However I still run into a behavior that I cannot explain:
+> >       * The need to prefix every line of output, rather than delimiting
+> >         the start and end of the output, seems painful with large
+> >         amounts of output.
+> Agreed. that's why ./test-suite format helps building such tags
 
-validation$ echo $SHELL
-/bin/bash
-----------
-validation$ ../sparse -E preprocessor/preprocessor19.c
+Yes, but I still prefer the delimited format for readability.
 
-preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-preprocessor/preprocessor19.c:3:9: this was the original definition
-y
-----------
-validation$ ../sparse -E preprocessor/preprocessor19.c 2> o 1> o && cat o
+> However I still run into a behavior that I cannot explain:
+> 
+> validation$ echo $SHELL
+> /bin/bash
+> ----------
+> validation$ ../sparse -E preprocessor/preprocessor19.c
+> 
+> preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
+> preprocessor/preprocessor19.c:3:9: this was the original definition
+> y
+> ----------
+> validation$ ../sparse -E preprocessor/preprocessor19.c 2> o 1> o && cat o
+> 
+> y
+> processor/preprocessor19.c:4:9: warning: preprocessor token A redefined
+> preprocessor/preprocessor19.c:3:9: this was the original definition
+> ----------
+> validation$ ../sparse -E preprocessor/preprocessor19.c &> o && cat o
+> preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
+> preprocessor/preprocessor19.c:3:9: this was the original definition
+> 
+> y
+> 
+> If you look carefully the 2> 1> redirections have eaten "pre" of the first
+> "preprocessor". Using &> show a more suitable behavior but it seems
+> that &> is not supported by every Bourne shell (for instance dash (the
+> default /bin/sh of Ubuntu 7.04 does not support &>) Any idea ?
 
-y
-processor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-preprocessor/preprocessor19.c:3:9: this was the original definition
-----------
-validation$ ../sparse -E preprocessor/preprocessor19.c &> o && cat o
-preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-preprocessor/preprocessor19.c:3:9: this was the original definition
+You can't redirect two things independently to the same file; that will
+open the file twice, and the writes will conflict, giving exactly the
+result you saw.  > o 2>&1 should work; it has exactly the same effect as
+&> .
 
-y
-
-If you look carefully the 2> 1> redirections have eaten "pre" of the first
-"preprocessor". Using &> show a more suitable behavior but it seems
-that &> is not supported by every Bourne shell (for instance dash (the
-default /bin/sh of Ubuntu 7.04 does not support &>) Any idea ?
-
--- 
-Damien
-
-------=_Part_45129_25745067.1183076007344
-Content-Type: text/x-patch;
-	name=0001-test-suite-a-tiny-test-automation-script.patch;
-	charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_f3hwq06k
-Content-Disposition: attachment; filename="0001-test-suite-a-tiny-test-automation-script.patch"
-
-RnJvbSAzMWNiMmYyZWFmYjllN2I4OGYzZmI0MDUwMDkwODg1M2JmYWQyNGJmIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3BpYXVAZ21haWwu
-Y29tPgpEYXRlOiBGcmksIDI5IEp1biAyMDA3IDAwOjU3OjM2ICswMjAwClN1YmplY3Q6IFtQQVRD
-SF0gdGVzdC1zdWl0ZTogYSB0aW55IHRlc3QgYXV0b21hdGlvbiBzY3JpcHQKClRoaXMgcGF0Y2gg
-aW50cm9kdWNlcyB0ZXN0LXN1aXRlLCBhIHNpbXBsZSBzY3JpcHQgdGhhdCBtYWtlcyB0ZXN0IGNh
-c2VzCnZlcmlmaWNhdGlvbiBlYXNpZXIuIFRlc3QgY2FzZXMgaW4gdGhlIHZhbGlkYXRpb24gZGly
-ZWN0b3J5IGFyZSBhbm5vdGF0ZWQKYW5kIHRoaXMgc2NyaXB0IHBhcnNlcyB0aGVtIHRvIGNoZWNr
-IGlmIHRoZSBhY3R1YWwgcmVzdWx0IGlzIHRoZSBvbmUKZXhwZWN0ZWQgYnkgdGhlIHRlc3Qgd3Jp
-dGVyLgoKU2lnbmVkLW9mZi1ieTogRGFtaWVuIExlc3BpYXUgPGRhbWllbi5sZXNwaWF1QGdtYWls
-LmNvbT4KLS0tCiAuZ2l0aWdub3JlICAgICAgICAgICAgfCAgICA1ICsKIE1ha2VmaWxlICAgICAg
-ICAgICAgICB8ICAgIDQgKwogdmFsaWRhdGlvbi90ZXN0LXN1aXRlIHwgIDI0MSArKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiAzIGZpbGVzIGNoYW5nZWQs
-IDI1MCBpbnNlcnRpb25zKCspLCAwIGRlbGV0aW9ucygtKQogY3JlYXRlIG1vZGUgMTAwNzU1IHZh
-bGlkYXRpb24vdGVzdC1zdWl0ZQoKZGlmZiAtLWdpdCBhLy5naXRpZ25vcmUgYi8uZ2l0aWdub3Jl
-CmluZGV4IGUyMmE4YzYuLmZhYTA0NmIgMTAwNjQ0Ci0tLSBhLy5naXRpZ25vcmUKKysrIGIvLmdp
-dGlnbm9yZQpAQCAtMzIsMyArMzIsOCBAQCBwYXRjaGVzLSoKIHBhdGNoZXMKIHNlcmllcwogCisj
-IHRlc3Qtc3VpdGUKKyouZGlmZgorKi5nb3QKKyouZXhwZWN0ZWQKKwpkaWZmIC0tZ2l0IGEvTWFr
-ZWZpbGUgYi9NYWtlZmlsZQppbmRleCAwMzlmZTM4Li43Y2U5OTY5IDEwMDY0NAotLS0gYS9NYWtl
-ZmlsZQorKysgYi9NYWtlZmlsZQpAQCAtMTY4LDMgKzE2OCw3IEBAIGRpc3Q6CiAJCWV4aXQgMSA7
-IFwKIAlmaQogCWdpdCBhcmNoaXZlIC0tZm9ybWF0PXRhciAtLXByZWZpeD1zcGFyc2UtJChWRVJT
-SU9OKS8gSEVBRF57dHJlZX0gfCBnemlwIC05ID4gc3BhcnNlLSQoVkVSU0lPTikudGFyLmd6CisK
-K2NoZWNrOiBhbGwKKwkkKFEpY2QgdmFsaWRhdGlvbiAmJiAuL3Rlc3Qtc3VpdGUKKwpkaWZmIC0t
-Z2l0IGEvdmFsaWRhdGlvbi90ZXN0LXN1aXRlIGIvdmFsaWRhdGlvbi90ZXN0LXN1aXRlCm5ldyBm
-aWxlIG1vZGUgMTAwNzU1CmluZGV4IDAwMDAwMDAuLmMyZTBjYmIKLS0tIC9kZXYvbnVsbAorKysg
-Yi92YWxpZGF0aW9uL3Rlc3Qtc3VpdGUKQEAgLTAsMCArMSwyNDEgQEAKKyMhL2Jpbi9zaAorCisj
-c2V0IC14CisKK2RlZmF1bHRfcGF0aD0iLi4iCitkZWZhdWx0X2NtZD0ic3BhcnNlIFwkZmlsZSIK
-K3Rlc3RzX2xpc3Q9YGZpbmQgLiAtbmFtZSAnKi5jJyB8IHNlZCAtZSAncyNeXC4vXCguKlwpI1wx
-IycgfCBzb3J0YAorcHJvZ19uYW1lPWBiYXNlbmFtZSAkMGAKKworIyBjb3VudHM6CisjCS0gdGVz
-dHMgdGhhdCBoYXZlIG5vdCBiZWVuIGNvbnZlcnRlZCB0byB0ZXN0LXN1aXRlIGZvcm1hdAorIwkt
-IHRlc3RzIHRoYXQgcGFzc2VkCisjCS0gdGVzdHMgdGhhdCBmYWlsZWQKKyMJLSB0ZXN0cyB0aGF0
-IGZhaWxlZCBidXQgYXJlIGtub3duIHRvIGZhaWwKK3VuaGFuZGxlZF90ZXN0cz0wCitva190ZXN0
-cz0wCitrb190ZXN0cz0wCitrbm93bl9rb190ZXN0cz0wCisKKyMgZGVmYXVsdHMgdG8gbm90IHZl
-cmJvc2UKK1sgLXogIiRWIiBdICYmIFY9MAorCisjIworIyBnZXRfdmFsdWUoa2V5LCBmaWxlKSAt
-IGdldHMgdGhlIHZhbHVlIG9mIGEgKGtleSwgdmFsdWUpIHBhaXIgaW4gZmlsZS4KKyMKKyMgcmV0
-dXJucyAwIG9uIHN1Y2Nlc3MsIDEgaWYgdGhlIGZpbGUgZG9lcyBub3QgaGF2ZSB0aGUga2V5Citn
-ZXRfdmFsdWUoKQoreworCWxhc3RfcmVzdWx0PWBncmVwICQxOiAkMiB8IHNlZCAtZSAicy9eLiok
-MTpcKC4qXCkkL1wxLyJgCisJWyAteiAiJGxhc3RfcmVzdWx0IiBdICYmIHJldHVybiAxCisJcmV0
-dXJuIDAKK30KKworIyMKKyMgZ2V0X3RhZyhrZXksIGZpbGUpIC0gZG9lcyBmaWxlIGhhcyB0aGUg
-dGFnIGtleSBpbiBpdCA/CisjCisjIHJldHVybnMgMCBpZiBwcmVzZW50LCAxIG90aGVyd2lzZQor
-Z2V0X3RhZygpCit7CisJbGFzdF9yZXN1bHQ9YGdyZXAgJDEgJDJgCisJcmV0dXJuICQ/Cit9CisK
-KyMjCisjIHZlcmJvc2Uoc3RyaW5nKSAtIHByaW50cyBzdHJpbmcgaWYgd2UgYXJlIGluIHZlcmJv
-c2UgbW9kZQordmVyYm9zZSgpCit7CisJWyAiJFYiIC1lcSAiMSIgXSAmJiBlY2hvICIgICAgICAg
-ICQxIgorCXJldHVybiAwCit9CisKKyMjCisjIGVycm9yKHN0cmluZ1ssIGRpZV0pIC0gcHJpbnRz
-IGFuIGVycm9yIGFuZCBleGl0cyB3aXRoIHZhbHVlIGRpZSBpZiBnaXZlbgorZXJyb3IoKQorewor
-CWVjaG8gImVycm9yOiAkMSIKKwlbIC1uICIkMiIgXSAmJiBleGl0ICQyCisJcmV0dXJuIDAKK30K
-KworZG9fdXNhZ2UoKQoreworZWNobyAiJHByb2dfbmFtZSAtIGEgdGlueSBhdXRvbWF0aWMgdGVz
-dGluZyBzY3JpcHQiCitlY2hvICJVc2FnZTogJHByb2dfbmFtZSBbY29tbWFuZF0gW2NvbW1hbmQg
-YXJndW1lbnRzXSIKK2VjaG8KK2VjaG8gImNvbW1hbmRzOiIKK2VjaG8gIiAgICBub25lICAgICAg
-ICAgICAgICAgICAgICAgICBydW5zIHRoZSB3aG9sZSB0ZXN0IHN1aXRlIgorZWNobyAiICAgIHNp
-bmdsZSBmaWxlICAgICAgICAgICAgICAgIHJ1bnMgdGhlIHRlc3QgaW4gJ2ZpbGUnIgorZWNobyAi
-ICAgIGZvcm1hdCBmaWxlIFtuYW1lIFtjbWRdXSAgIGhlbHBzIHdyaXRpbmcgYSBuZXcgdGVzdCBj
-YXNlIHVzaW5nIGNtZCIKK2VjaG8KK2VjaG8gIiAgICBoZWxwICAgICAgICAgICAgICAgICAgICAg
-ICBwcmludHMgdXNhZ2UiCit9CisKKyMjCisjIGRvX3Rlc3QoZmlsZSkgLSB0cmllcyB0byB2YWxp
-ZGF0ZSBhIHRlc3QgY2FzZQorIworIyBpdCAicGFyc2VzIiBmaWxlLCBsb29raW5nIGZvciBjaGVj
-ay0qIHRhZ3MgYW5kIHRyaWVzIHRvIHZhbGlkYXRlCisjIHRoZSB0ZXN0IGFnYWluc3QgYW4gZXhw
-ZWN0ZWQgcmVzdWx0CisjIHJldHVybnM6CisjCS0gMCBpZiB0aGUgdGVzdCBwYXNzZWQsCisjCS0g
-MSBpZiBpdCBmYWlsZWQsCisjCS0gMiBpZiBpdCBpcyBub3QgYSAidGVzdC1zdWl0ZSIgdGVzdC4K
-K2RvX3Rlc3QoKQoreworCXRlc3RfZmFpbGVkPTAKKwlmaWxlPSIkMSIKKworCSMgY2FuIHRoaXMg
-dGVzdCBiZSBoYW5kbGVkIGJ5IHRlc3Qtc3VpdGUgPworCSMgKGl0IGhhcyB0byBoYXZlIGEgY2hl
-Y2stbmFtZSBrZXkgaW4gaXQpCisJZ2V0X3ZhbHVlICJjaGVjay1uYW1lIiAkZmlsZQorCWlmIFsg
-IiQ/IiAtZXEgMSBdOyB0aGVuCisJCXVuaGFuZGxlZF90ZXN0cz1gZXhwciAkdW5oYW5kbGVkX3Rl
-c3RzICsgMWAKKwkJcmV0dXJuIDIKKwlmaQorCXRlc3RfbmFtZT0kbGFzdF9yZXN1bHQKKworCWVj
-aG8gIiAgICAgVEVTVCAgICAkdGVzdF9uYW1lICgkZmlsZSkiCisKKwkjIGRvZXMgdGhlIHRlc3Qg
-cHJvdmlkZSBhIHNwZWNpZmljIGNvbW1hbmQgPworCWNtZD1gZXZhbCBlY2hvICRkZWZhdWx0X3Bh
-dGgvJGRlZmF1bHRfY21kYAorCWdldF92YWx1ZSAiY2hlY2stY29tbWFuZCIgJGZpbGUKKwlpZiBb
-ICIkPyIgLWVxICIwIiBdOyB0aGVuCisJCWxhc3RfcmVzdWx0PWBlY2hvICRsYXN0X3Jlc3VsdCB8
-IHNlZCAtZSAncy9eICovLydgCisJCWNtZD1gZXZhbCBlY2hvICRkZWZhdWx0X3BhdGgvJGxhc3Rf
-cmVzdWx0YAorCWZpCisJdmVyYm9zZSAiVXNpbmcgY29tbWFuZCAgICAgICA6ICRjbWQiCisKKwkj
-IGdyYWIgdGhlIGV4cGVjdGVkIGV4aXQgdmFsdWUKKwlnZXRfdmFsdWUgImNoZWNrLWV4aXQtdmFs
-dWUiICRmaWxlCisJaWYgWyAiJD8iIC1lcSAiMCIgXTsgdGhlbgorCQlleHBlY3RlZF9leGl0X3Zh
-bHVlPWBlY2hvICRsYXN0X3Jlc3VsdCB8IHRyIC1kICcgJ2AKKwllbHNlCisJCWV4cGVjdGVkX2V4
-aXRfdmFsdWU9MAorCWZpCisJdmVyYm9zZSAiRXhwZWN0aW5nIGV4aXQgdmFsdWU6ICRleHBlY3Rl
-ZF9leGl0X3ZhbHVlIgorCisJIyBncmFiIHRoZSBleHBlY3RlZCBvdXRwdXQKKwlnZXRfdmFsdWUg
-ImNoZWNrLW91dHB1dCIgJGZpbGUKKwlpZiBbICIkPyIgLWVxICIwIiBdOyB0aGVuCisJCWVjaG8g
-IiRsYXN0X3Jlc3VsdCIgPiAiJGZpbGUiLmV4cGVjdGVkCisJZWxzZQorCQllY2hvIC1uICIiID4g
-IiRmaWxlIi5leHBlY3RlZAorCWZpCisKKwkjIGdyYWIgdGhlIGFjdHVhbCBvdXRwdXQgJiBleGl0
-IHZhbHVlCisJJGNtZCAxPiAkZmlsZS5nb3QgMj4gJGZpbGUuZ290CisJYWN0dWFsX2V4aXRfdmFs
-dWU9JD8KKworCWRpZmYgLXUgIiRmaWxlIi5leHBlY3RlZCAiJGZpbGUiLmdvdCA+ICIkZmlsZSIu
-ZGlmZgorCWlmIFsgIiQ/IiAtbmUgIjAiIF07IHRoZW4KKwkJZXJyb3IgImFjdHVhbCBvdXRwdXQg
-ZG9lcyBub3QgbWF0Y2ggdGhlIGV4cGVjdGVkIG9uZS4iCisJCWVycm9yICAic2VlICRmaWxlLiog
-Zm9yIGZ1cnRoZXIgaW52ZXN0aWdhdGlvbi4iCisJCXRlc3RfZmFpbGVkPTEKKwlmaQorCisJaWYg
-WyAiJGFjdHVhbF9leGl0X3ZhbHVlIiAtbmUgIiRleHBlY3RlZF9leGl0X3ZhbHVlIiBdOyB0aGVu
-CisJCWVycm9yICJBY3R1YWwgZXhpdCB2YWx1ZSBkb2VzIG5vdCBtYXRjaCB0aGUgZXhwZWN0ZWQg
-b25lLiIKKwkJZXJyb3IgImV4cGVjdGVkICRleHBlY3RlZF9leGl0X3ZhbHVlLCBnb3QgJGFjdHVh
-bF9leGl0X3ZhbHVlLiIKKwkJdGVzdF9mYWlsZWQ9MQorCWZpCisKKwlpZiBbICIkdGVzdF9mYWls
-ZWQiIC1lcSAiMSIgXTsgdGhlbgorCQlrb190ZXN0cz1gZXhwciAka29fdGVzdHMgKyAxYAorCQln
-ZXRfdGFnICJjaGVjay1rbm93bi10by1mYWlsIiAkZmlsZQorCQlbICIkPyIgLWVxICIwIiBdICYm
-IGtub3duX2tvX3Rlc3RzPWBleHByICRrbm93bl9rb190ZXN0cyArIDFgCisJCXJldHVybiAxCisJ
-ZWxzZQorCQlva190ZXN0cz1gZXhwciAkb2tfdGVzdHMgKyAxYAorCQlyZXR1cm4gMAorCWZpCit9
-CisKK2RvX3Rlc3Rfc3VpdGUoKQoreworCWZvciBpIGluICR0ZXN0c19saXN0OyBkbworCQlkb190
-ZXN0ICIkaSIKKwlkb25lCisKKwkjIHByaW50cyBzb21lIG51bWJlcnMKKwl0ZXN0c19ucj1gZXhw
-ciAkb2tfdGVzdHMgKyAka29fdGVzdHNgCisJZWNobyAtbiAiT3V0IG9mICR0ZXN0c19uciB0ZXN0
-cywgJG9rX3Rlc3RzIHBhc3NlZCwgJGtvX3Rlc3RzIGZhaWxlZCIKKwllY2hvICIgKCRrbm93bl9r
-b190ZXN0cyBvZiB0aGVtIGFyZSBrbm93biB0byBmYWlsKSIKKwlpZiBbICIkdW5oYW5kbGVkX3Rl
-c3RzIiAtbmUgIjAiIF07IHRoZW4KKwkJZWNobyAiJHVuaGFuZGxlZF90ZXN0cyB0ZXN0cyBjb3Vs
-ZCBub3QgYmUgaGFuZGxlZCBieSAkcHJvZ19uYW1lIgorCWZpCit9CisKKyMjCisjIGRvX2Zvcm1h
-dChmaWxlWywgbmFtZVssIGNtZF1dKSAtIGhlbHBzIGEgdGVzdCB3cml0ZXIgdG8gZm9ybWF0IHRl
-c3Qtc3VpdGUgdGFncworZG9fZm9ybWF0KCkKK3sKKwlpZiBbIC16ICIkMiIgXTsgdGhlbgorCQlm
-bmFtZT0iJDEiCisJCWZjbWQ9JGRlZmF1bHRfY21kCisJZWxpZiBbIC16ICIkMyIgXTsgdGhlbgor
-CQlmbmFtZT0iJDIiCisJCWZjbWQ9JGRlZmF1bHRfY21kCisJZWxzZQorCQlmbmFtZT0iJDIiCisJ
-CWZjbWQ9IiQzIgorCWZpCisJZmlsZT0iJDEiCisJY21kPWBldmFsIGVjaG8gJGRlZmF1bHRfcGF0
-aC8kZmNtZGAKKwkkY21kIDE+ICRmaWxlLmdvdCAyPiAkZmlsZS5nb3QKKwlmZXhpdF92YWx1ZT0k
-PworCWZvdXRwdXQ9YHNlZCAtZSAicy9eXCguKlwpLyAqIGNoZWNrLW91dHB1dDpcMS8iICRmaWxl
-LmdvdGAKKwlmb3JtYXQ9YGNhdCA8PF9FT0YKKy8qCisgKiBjaGVjay1uYW1lOiAkZm5hbWUKKyAq
-CisgKiBjaGVjay1jb21tYW5kOiAkZmNtZAorICogY2hlY2stZXhpdC12YWx1ZTogJGZleGl0X3Zh
-bHVlCisgKgorJGZvdXRwdXQKKyAqLworX0VPRgorYAorCWVjaG8gIiRmb3JtYXQiCisJcmV0dXJu
-IDAKK30KKworIyMKKyMgYXJnX2ZpbGUoZmlsZW5hbWUpIC0gY2hlY2tzIGlmIGZpbGVuYW1lIGV4
-aXN0cworYXJnX2ZpbGUoKQoreworCVsgLXogIiQxIiBdICYmIHsKKwkJZG9fdXNhZ2UKKwkJZXhp
-dCAxCisJfQorCVsgLWUgIiQxIiBdIHx8IHsKKwkJZXJyb3IgIkNhbid0IG9wZW4gZmlsZSAkMSIK
-KwkJZXhpdCAxCisJfQorCXJldHVybiAwCit9CisKK2Nhc2UgIiQxIiBpbgorCScnKQorCQlkb190
-ZXN0X3N1aXRlCisJCTs7CisJc2luZ2xlKQorCQlhcmdfZmlsZSAiJDIiCisJCWRvX3Rlc3QgIiQy
-IgorCQljYXNlICIkPyIgaW4KKwkJCTApIGVjaG8gIiQyIHBhc3NlZCAhIjs7CisJCQkxKSBlY2hv
-ICIkMiBmYWlsZWQgISI7OworCQkJMikgZWNobyAiJDIgY2FuJ3QgYmUgaGFuZGxlZCBieSAkcHJv
-Z19uYW1lIjs7CisJCWVzYWMKKwkJOzsKKwlmb3JtYXQpCisJCWFyZ19maWxlICIkMiIKKwkJZG9f
-Zm9ybWF0ICIkMiIgIiQzIiAiJDQiCisJCTs7CisJaGVscCB8ICopCisJCWRvX3VzYWdlCisJCWV4
-aXQgMQorCQk7OworZXNhYworCitleGl0IDAKKwotLSAKMS41LjIuMS4yODAuZzM4NTcwCgo=
-------=_Part_45129_25745067.1183076007344
-Content-Type: text/x-patch; name=0002-Sample-test-suite-test-cases.patch;
-	charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_f3hwq6wt
-Content-Disposition: attachment; filename="0002-Sample-test-suite-test-cases.patch"
-
-RnJvbSAzNWZiMjQ2M2JiNzFmZWZkZDY4NjVkYjM4Y2I3MGJkZDBmMjhkOWE0IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3BpYXVAZ21haWwu
-Y29tPgpEYXRlOiBGcmksIDI5IEp1biAyMDA3IDAwOjU3OjM4ICswMjAwClN1YmplY3Q6IFtQQVRD
-SF0gU2FtcGxlIHRlc3Qtc3VpdGUgdGVzdCBjYXNlcwoKQSBmZXcgZXhhbXBsZXMgbWVhbnQgdG8g
-c2hvdyB0aGUgdXNlIG9mIHRlc3Qtc3VpdGUKClNpZ25lZC1vZmYtYnk6IERhbWllbiBMZXNwaWF1
-IDxkYW1pZW4ubGVzcGlhdUBnbWFpbC5jb20+Ci0tLQogdmFsaWRhdGlvbi9iYWQtYXNzaWdubWVu
-dC5jICAgICAgICAgICAgIHwgICAxMSArKysrKysrKysrKwogdmFsaWRhdGlvbi9wcmVwcm9jZXNz
-b3IvcHJlcHJvY2Vzc29yMS5jIHwgICAgOSArKysrKysrKysKIHZhbGlkYXRpb24vcHJlcHJvY2Vz
-c29yL3ByZXByb2Nlc3NvcjIuYyB8ICAgIDkgKysrKysrKysrCiB2YWxpZGF0aW9uL3ByZXByb2Nl
-c3Nvci9wcmVwcm9jZXNzb3IzLmMgfCAgIDEyICsrKysrKysrKysrKwogdmFsaWRhdGlvbi9zdHJ1
-Y3QtYXMuYyAgICAgICAgICAgICAgICAgIHwgICAgOCArKysrKysrKwogNSBmaWxlcyBjaGFuZ2Vk
-LCA0OSBpbnNlcnRpb25zKCspLCAwIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL3ZhbGlkYXRp
-b24vYmFkLWFzc2lnbm1lbnQuYyBiL3ZhbGlkYXRpb24vYmFkLWFzc2lnbm1lbnQuYwppbmRleCAz
-YjY2YTExLi43MmI0MGQzIDEwMDY0NAotLS0gYS92YWxpZGF0aW9uL2JhZC1hc3NpZ25tZW50LmMK
-KysrIGIvdmFsaWRhdGlvbi9iYWQtYXNzaWdubWVudC5jCkBAIC00LDMgKzQsMTQgQEAgc3RhdGlj
-IGludCBmb28oaW50IGEpCiAKIAlyZXR1cm4gYTsKIH0KKy8qCisgKiBjaGVjay1uYW1lOiBiYWQg
-YXNzaWduZW1lbnQKKyAqCisgKiBjaGVjay1jb21tYW5kOiBzcGFyc2UgJGZpbGUKKyAqIGNoZWNr
-LWV4aXQtdmFsdWU6IDEKKyAqCisgKiBjaGVjay1vdXRwdXQ6YmFkLWFzc2lnbm1lbnQuYzozOjY6
-IGVycm9yOiBFeHBlY3RlZCA7IGF0IGVuZCBvZiBzdGF0ZW1lbnQKKyAqIGNoZWNrLW91dHB1dDpi
-YWQtYXNzaWdubWVudC5jOjM6NjogZXJyb3I6IGdvdCBcCisgKgorICogY2hlY2sta25vd24tdG8t
-ZmFpbAorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL3ByZXByb2Nlc3Nvci9wcmVwcm9jZXNz
-b3IxLmMgYi92YWxpZGF0aW9uL3ByZXByb2Nlc3Nvci9wcmVwcm9jZXNzb3IxLmMKaW5kZXggNWFl
-MjBhYS4uMGViODE0NyAxMDA2NDQKLS0tIGEvdmFsaWRhdGlvbi9wcmVwcm9jZXNzb3IvcHJlcHJv
-Y2Vzc29yMS5jCisrKyBiL3ZhbGlkYXRpb24vcHJlcHJvY2Vzc29yL3ByZXByb2Nlc3NvcjEuYwpA
-QCAtMTIsMyArMTIsMTIgQEAKICNkZWZpbmUgYmFyIGZ1bmMoCiAjZGVmaW5lIGZvbyBiYXIgZm9v
-CiBmb28gKQorLyoKKyAqIGNoZWNrLW5hbWU6IHByZXByb2Nlc3NvciAxCisgKgorICogY2hlY2st
-Y29tbWFuZDogc3BhcnNlIC1FICRmaWxlCisgKiBjaGVjay1leGl0LXZhbHVlOiAwCisgKgorICog
-Y2hlY2stb3V0cHV0OgorICogY2hlY2stb3V0cHV0OmZvbworICovCmRpZmYgLS1naXQgYS92YWxp
-ZGF0aW9uL3ByZXByb2Nlc3Nvci9wcmVwcm9jZXNzb3IyLmMgYi92YWxpZGF0aW9uL3ByZXByb2Nl
-c3Nvci9wcmVwcm9jZXNzb3IyLmMKaW5kZXggMzQwOTM4ZS4uMDk4ZmU4YyAxMDA2NDQKLS0tIGEv
-dmFsaWRhdGlvbi9wcmVwcm9jZXNzb3IvcHJlcHJvY2Vzc29yMi5jCisrKyBiL3ZhbGlkYXRpb24v
-cHJlcHJvY2Vzc29yL3ByZXByb2Nlc3NvcjIuYwpAQCAtMTMsMyArMTMsMTIgQEAKICNkZWZpbmUg
-QklOQVJZKHgsIHkpIHggKyB5CiAKIFVOQVJZKFRXTykKKy8qCisgKiBjaGVjay1uYW1lOiBwcmVw
-cm9jZXNzb3IgMgorICoKKyAqIGNoZWNrLWNvbW1hbmQ6IHNwYXJzZSAtRSAkZmlsZQorICogY2hl
-Y2stZXhpdC12YWx1ZTogMAorICoKKyAqIGNoZWNrLW91dHB1dDoKKyAqIGNoZWNrLW91dHB1dDph
-ICsgYgorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL3ByZXByb2Nlc3Nvci9wcmVwcm9jZXNz
-b3IzLmMgYi92YWxpZGF0aW9uL3ByZXByb2Nlc3Nvci9wcmVwcm9jZXNzb3IzLmMKaW5kZXggNzFi
-OWFjZC4uZDY4OWExYSAxMDA2NDQKLS0tIGEvdmFsaWRhdGlvbi9wcmVwcm9jZXNzb3IvcHJlcHJv
-Y2Vzc29yMy5jCisrKyBiL3ZhbGlkYXRpb24vcHJlcHJvY2Vzc29yL3ByZXByb2Nlc3NvcjMuYwpA
-QCAtMzUsMyArMzUsMTUgQEAgQSgpICAgICAgICAgICAgICAgICAgICAgLy8gQiAoICkKIFNDQU4o
-IEEoKSApICAgICAgICAgICAgIC8vIEEgKCApCiBTQ0FOKFNDQU4oIEEoKSApKSAgICAgICAvLyBC
-ICggKQogU0NBTihTQ0FOKFNDQU4oIEEoKSApKSkgLy8gQSAoICkKKy8qCisgKiBjaGVjay1uYW1l
-OiBwcmVwcm9jZXNzb3IgMworICoKKyAqIGNoZWNrLWNvbW1hbmQ6IHNwYXJzZSAtRSAkZmlsZQor
-ICogY2hlY2stZXhpdC12YWx1ZTogMAorICoKKyAqIGNoZWNrLW91dHB1dDoKKyAqIGNoZWNrLW91
-dHB1dDpCICggKQorICogY2hlY2stb3V0cHV0OkEgKCApCisgKiBjaGVjay1vdXRwdXQ6QiAoICkK
-KyAqIGNoZWNrLW91dHB1dDpBICggKQorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL3N0cnVj
-dC1hcy5jIGIvdmFsaWRhdGlvbi9zdHJ1Y3QtYXMuYwppbmRleCA4NmI5MGQzLi4yMWVlMjE4IDEw
-MDY0NAotLS0gYS92YWxpZGF0aW9uL3N0cnVjdC1hcy5jCisrKyBiL3ZhbGlkYXRpb24vc3RydWN0
-LWFzLmMKQEAgLTE0LDMgKzE0LDExIEBAIHN0YXRpYyBpbnQgYnJva2VuKHN0cnVjdCBoZWxsbyBf
-X3VzZXIgKnNwKQogewogCXRlc3QoJnNwLT5hKTsKIH0KKy8qCisgKiBjaGVjay1uYW1lOiBhZGRy
-ZXNzIHNwYWNlIG9mIHN0cnVjdHVyZSBtZW1iZXJzCisgKgorICogY2hlY2stY29tbWFuZDogc3Bh
-cnNlICRmaWxlCisgKiBjaGVjay1leGl0LXZhbHVlOiAwCisgKgorCisgKi8KLS0gCjEuNS4yLjEu
-MjgwLmczODU3MAoK
-------=_Part_45129_25745067.1183076007344
-Content-Type: text/x-patch; name=0003-test-suite-documentation.patch;
-	charset=ANSI_X3.4-1968
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_f3hwq9p0
-Content-Disposition: attachment; filename="0003-test-suite-documentation.patch"
-
-RnJvbSAyYjVhYTVlMjUyNWZlZjM2MzM1NTAyZWIzNzQ2MmMxY2ViOTNlNDNkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3BpYXVAZ21haWwu
-Y29tPgpEYXRlOiBGcmksIDI5IEp1biAyMDA3IDAxOjE4OjEyICswMjAwClN1YmplY3Q6IFtQQVRD
-SF0gdGVzdC1zdWl0ZSBkb2N1bWVudGF0aW9uCgpBIHF1aWNrIGRlc2NyaXB0aW9uIG9mIHRlc3Qt
-c3VpdGUgdXNhZ2UuCgpTaWduZWQtb2ZmLWJ5OiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3Bp
-YXVAZ21haWwuY29tPgotLS0KIERvY3VtZW50YXRpb24vdGVzdC1zdWl0ZSB8ICAxMTMgKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKwogMSBmaWxlcyBjaGFuZ2Vk
-LCAxMTMgaW5zZXJ0aW9ucygrKSwgMCBkZWxldGlvbnMoLSkKIGNyZWF0ZSBtb2RlIDEwMDY0NCBE
-b2N1bWVudGF0aW9uL3Rlc3Qtc3VpdGUKCmRpZmYgLS1naXQgYS9Eb2N1bWVudGF0aW9uL3Rlc3Qt
-c3VpdGUgYi9Eb2N1bWVudGF0aW9uL3Rlc3Qtc3VpdGUKbmV3IGZpbGUgbW9kZSAxMDA2NDQKaW5k
-ZXggMDAwMDAwMC4uYjZlZjIyYwotLS0gL2Rldi9udWxsCisrKyBiL0RvY3VtZW50YXRpb24vdGVz
-dC1zdWl0ZQpAQCAtMCwwICsxLDExMyBAQAorCisKKwlTcGFyc2UgdGVzdCBzdWl0ZQorCX5+fn5+
-fn5+fn5+fn5+fn5+CisKK1NwYXJzZSBoYXMgYSBudW1iZXIgb2YgdGVzdCBjYXNlcyBpbiBpdHMg
-dmFsaWRhdGlvbiBkaXJlY3RvcnkuIFRoZSB0ZXN0LXN1aXRlCitzY3JpcHQgYWltcyBhdCBtYWtp
-bmcgYXV0b21hdGVkIGNoZWNraW5nIG9mIHRoZXNlIHRlc3RzIHBvc3NpYmxlLiBJdCB3b3JrcyBi
-eQorZW1iZWRkaW5nIHRhZ3MgaW4gQyBjb21tZW50cyBpbiB0aGUgdGVzdCBjYXNlcy4KKworY2hl
-Y2stbmFtZTogKG1hbmRhdG9yeSkKKwlOYW1lIG9mIHRoZSB0ZXN0LgorCitjaGVjay1kZXNjcmlw
-dGlvbjogKG9wdGlvbmFsKQorCUEgZGVzY3JpcHRpb24gb2Ygd2hhdCBjaGVja3MgdGhlIHRlc3Qu
-CisKK2NoZWNrLWNvbW1hbmQ6IChvcHRpb25hbCkKKwlUaGVyZSBhcmUgZGlmZmVyZW50IGtpbmRz
-IG9mIHRlc3RzLiBTb21lIGNhbiB2YWxpZGF0ZSBzcGFyc2UKKwlwcmVwcm9jZXNzb3Igd2hpbGUg
-b3RoZXJzIHdpbGwgdXNlIHNwYXJzZSwgY2djYyBvZiBldmVuIG90aGVyIGJhY2tlbmRzCisJb2Yg
-dGhlIGxpYnJhcnkuIGNoZWNrLWNvbW1hbmQgYWxsb3dzIHlvdSB0byBnaXZlIGEgY3VzdG9tIGNv
-bW1hbmQgdG8KKwlydW4gdGhlIHRlc3QtY2FzZS4KKwlUaGUgJyRmaWxlJyBzdHJpbmcgaXMgc3Bl
-Y2lhbC4gSXQgd2lsbCBiZSBleHBhbmRlZCB0byB0aGUgZmlsZSBuYW1lIGF0CisJcnVuIHRpbWUu
-CisJSXQgZGVmYXVsdHMgdG8gInNwYXJzZSAkZmlsZSIuCisKK2NoZWNrLWV4aXQtdmFsdWU6IChv
-cHRpb25hbCkKKwlUaGUgZXhwZWN0ZWQgZXhpdCB2YWx1ZSBvZiBjaGVjay1jb21tYW5kLiBJdCBk
-ZWZhdWx0cyB0byAwLgorCitjaGVjay1vdXRwdXQ6IChvcHRpb25hbCkKKwlUaGUgZXhwZWN0ZWQg
-b3V0cHV0IChzdGRvdXQgYW5kIHN0ZGVycikgb2YgY2hlY2stY29tbWFuZC4gSXQgZGVmYXVsdHMK
-Kwl0byBubyBvdXRwdXQuCisKK2NoZWNrLWtub3duLXRvLWZhaWwgKG9wdGlvbmFsKQorCU1hcmsg
-dGhlIHRlc3QgYXMgYmVpbmcga25vd24gdG8gZmFpbC4KKworCisJVXNpbmcgdGVzdC1zdWl0ZQor
-CX5+fn5+fn5+fn5+fn5+fn4KKworVGhlIHRlc3Qtc3VpdGUgc2NyaXB0IGlzIGNhbGxlZCB0cm91
-Z2ggdGhlIGNoZWNrIHRhcmdldCBvZiB0aGUgTWFrZWZpbGUuIEl0Cit3aWxsIHRyeSB0byBjaGVj
-ayBldmVyeSB0ZXN0IGNhc2UgaXQgZmluZHMgKGZpbmQgdmFsaWRhdGlvbiAtbmFtZSAnKi5jJyku
-CitJdCBjYW4gYmUgY2FsbGVkIHRvIGNoZWNrIGEgc2luZ2xlIHRlc3Qgd2l0aDoKKworJCBjZCB2
-YWxpZGF0aW9uCiskIC4vdGVzdC1zdWl0ZSBzaW5nbGUgcHJlcHJvY2Vzc29yMS5jCisgICAgVEVT
-VCAgUHJlcHJvY2Vzc29yIDEgKHByZXByb2Nlc3NvcjEuYykKK3ByZXByb2Nlc3NvcjEuYyBwYXNz
-ZWQgIQorCisKKwlXcml0aW5nIGEgdGVzdAorCX5+fn5+fn5+fn5+fn5+CisKK3Rlc3Qtc3VpdGUg
-Y29tZXMgd2l0aCB0aGUgZm9ybWF0IGNvbW1hbmQgdG8gbWFrZSBhIHRlc3QgZWFzaWVyIHRvIHdy
-aXRlOgorCisJdGVzdC1zdWl0ZSBmb3JtYXQgZmlsZSBbbmFtZSBbY21kXV0KKworbmFtZToKKwlj
-aGVjay1uYW1lIHZhbHVlLiBJZiBubyBuYW1lIGlzIHByb3ZpZGVkLCBpdCBkZWZhdWx0cyB0byB0
-aGUgZmlsZSBuYW1lLgorY21kOgorCWNoZWNrLWNvbW1hbmQgdmFsdWUuIEl0IG5vIGNtZCBpZiBw
-cm92aWRlZCwgaXQgZGVmYXVsdHMgdG8KKwkic3BhcnNlICRmaWxlIi4KKworVGhlIG91dHB1dCBv
-ZiB0aGUgdGVzdC1zdWl0ZSBmb3JtYXQgY29tbWFuZCBjYW4gYmUgcmVkaXJlY3RlZCBpbnRvIHRo
-ZQordGVzdCBjYXNlIHRvIGNyZWF0ZSBhIHRlc3Qtc3VpdGUgZm9ybWF0ZWQgZmlsZS4KKworJCAu
-L3Rlc3Qtc3VpdGUgZm9ybWF0IGJhZC1hc3NpZ25tZW50LmMgQXNzaWduZW1lbnQgPj4gYmFkLWFz
-c2lnbm1lbnQuYworJCBjYXQgISQKK2NhdCBiYWQtYXNzaWdubWVudC5jCitzdGF0aWMgaW50IGZv
-byhpbnQgYSkKK3sKKyAgICAgICAgYSB8PVwxOworCisgICAgICAgIHJldHVybiBhOworfQorLyoK
-KyAqIGNoZWNrLW5hbWU6IEFzc2lnbmVtZW50CisgKgorICogY2hlY2stY29tbWFuZDogc3BhcnNl
-ICRmaWxlCisgKiBjaGVjay1leGl0LXZhbHVlOiAwCisgKgorICogY2hlY2stb3V0cHV0OmJhZC1h
-c3NpZ25tZW50LmM6Mzo2OiBlcnJvcjogRXhwZWN0ZWQgOyBhdCBlbmQgb2Ygc3RhdGVtZW50Cisg
-KiBjaGVjay1vdXRwdXQ6YmFkLWFzc2lnbm1lbnQuYzozOjY6IGVycm9yOiBnb3QgXAorICovCisK
-K1lvdSBjYW4gZGVmaW5lIHRoZSBjaGVjay1jb21tYW5kIHlvdSB3YW50IHRvIHVzZSBmb3IgdGhl
-IHRlc3QuICRmaWxlIHdpbGwgYmUKK2V4dGVuZGVkIHRvIHRoZSBmaWxlIG5hbWUgYXQgcnVuIHRp
-bWUuCisKKyQgLi90ZXN0LXN1aXRlIGZvcm1hdCBwcmVwcm9jZXNzb3IyLmMgIlByZXByb2Nlc3Nv
-ciAyIiBcCisJCSJzcGFyc2UgLUUgXCRmaWxlIiA+PiBwcmVwcm9jZXNzb3IyLmMKKyQgY2F0ICEk
-CisvKgorICogVGhpcyBvbmUgd2UgaGFwcGVuIHRvIGdldCByaWdodC4KKyAqCisgKiBJdCBzaG91
-bGQgcmVzdWx0IGluIGEgc2ltcGxlCisgKgorICogICAgICBhICsgYgorICoKKyAqIGZvciBhIHBy
-b3BlciBwcmVwcm9jZXNzb3IuCisgKi8KKyNkZWZpbmUgVFdPIGEsIGIKKworI2RlZmluZSBVTkFS
-WSh4KSBCSU5BUlkoeCkKKyNkZWZpbmUgQklOQVJZKHgsIHkpIHggKyB5CisKK1VOQVJZKFRXTykK
-Ky8qCisgKiBjaGVjay1uYW1lOiBQcmVwcm9jZXNzb3IgMgorICoKKyAqIGNoZWNrLWNvbW1hbmQ6
-IHNwYXJzZSAtRSAkZmlsZQorICogY2hlY2stZXhpdC12YWx1ZTogMAorICoKKyAqIGNoZWNrLW91
-dHB1dDoKKyAqIGNoZWNrLW91dHB1dDphICsgYgorICovCi0tIAoxLjUuMi4xLjI4MC5nMzg1NzAK
-Cg==
-------=_Part_45129_25745067.1183076007344--
+- Josh Triplett
