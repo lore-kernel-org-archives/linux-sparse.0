@@ -1,105 +1,63 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results
-	into test files
-Date: Thu, 28 Jun 2007 17:29:09 -0700
-Message-ID: <1183076949.2621.196.camel@josh-work.beaverton.ibm.com>
-References: <20070628053954.30704.66440.stgit@dv.roinet.com>
-	 <20070628054019.30704.64375.stgit@dv.roinet.com>
-	 <46836129.7050407@freedesktop.org>
-	 <cbf3148c0706281159x7b252776nd08fd9bd9e36b92@mail.gmail.com>
-	 <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>
-	 <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: Antwort: Re: Antwort: Re: Messing typedefs?
+Date: Fri, 29 Jun 2007 19:31:55 -0400
+Message-ID: <1183159915.13955.24.camel@dv>
+References: <OFC8B6B106.51212EE6-ONC1257307.00233A24-C1257307.0025B204@br-automation.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e36.co.us.ibm.com ([32.97.110.154]:50845 "EHLO
-	e36.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761952AbXF2A3J (ORCPT
+Received: from fencepost.gnu.org ([140.186.70.10]:51094 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751202AbXF2Xb7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 28 Jun 2007 20:29:09 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e36.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id l5T0T97B020179
-	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 20:29:09 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v8.3) with ESMTP id l5T0T9Ca211986
-	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 18:29:09 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l5T0T8E8010751
-	for <linux-sparse@vger.kernel.org>; Thu, 28 Jun 2007 18:29:08 -0600
-In-Reply-To: <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
+	Fri, 29 Jun 2007 19:31:59 -0400
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1I4PwT-0001zk-OZ
+	for linux-sparse@vger.kernel.org; Fri, 29 Jun 2007 19:31:57 -0400
+In-Reply-To: <OFC8B6B106.51212EE6-ONC1257307.00233A24-C1257307.0025B204@br-automation.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Damien Lespiau <damien.lespiau@gmail.com>
-Cc: Josh Triplett <josh@freedesktop.org>, Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
+To: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2007-06-29 at 02:13 +0200, Damien Lespiau wrote:
-> > Will review in more detail later, but at first glance this looks quite
-> > good, and very capable.
+On Wed, 2007-06-27 at 08:51 +0200, Thomas Schmid wrote:
+> > My interpretation of the code is following.  Types may have idents,
+> > which keep information where and how the type was defined.  Base types
+> > don't have idents.
 > 
-> I rebased the series against current HEAD to make testing easier.
+> But unfortunately they get one. 
 
-Thanks.
+I understand it better now.  Suppose we have:
 
-> > Two minor things that jump out at me:
-> >       * The need to specify the command line as "../sparse args $file"
-> >         seems somewhat inelegant.
-> solved: no path in check-command now.
+typedef struct {int a;} foo;
+int main(int argc, char **argv)
+{
+        foo bar;
+        bar.x = 1;
+}
 
-Excellent.
+The structure is indeed unnamed.  If the error message is going to call
+the _structure_ by name, it's correct to call it unnamed.
 
-> >         Also, allowing an
-> >         alternate option "check-options" that just specifies sparse
-> >         flags seems useful, and the default command could do something
-> >         like "sparse $options $file"; that way, you can just say
-> >         "check-options: -E", or "check-options: -Wthingy".
-> Humm, not sure if it's _that_ much useful to have
->          check-options: -E -Wthingy
-> instead of
->          check-command: sparse -E -Wthingy $file
-> for some reason I find the later less confusing, a matter of taste I guess.
+One possible fix would be to have an "inherited ident", which would be
+set only by that code in external_declaration().  This would leave basic
+types alone.
 
-I don't mind going with the latter for now and considering the former
-for a later patch.
+Then we need to come with a message that would be printed if only the
+inherited ident is present.  gcc prints:
 
-> >       * The need to prefix every line of output, rather than delimiting
-> >         the start and end of the output, seems painful with large
-> >         amounts of output.
-> Agreed. that's why ./test-suite format helps building such tags
+test.c:5: error: 'foo' has no member named 'x'
 
-Yes, but I still prefer the delimited format for readability.
+No "struct" is mentioned.  If we want to be more verbose, we could print
+something like:
 
-> However I still run into a behavior that I cannot explain:
-> 
-> validation$ echo $SHELL
-> /bin/bash
-> ----------
-> validation$ ../sparse -E preprocessor/preprocessor19.c
-> 
-> preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-> preprocessor/preprocessor19.c:3:9: this was the original definition
-> y
-> ----------
-> validation$ ../sparse -E preprocessor/preprocessor19.c 2> o 1> o && cat o
-> 
-> y
-> processor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-> preprocessor/preprocessor19.c:3:9: this was the original definition
-> ----------
-> validation$ ../sparse -E preprocessor/preprocessor19.c &> o && cat o
-> preprocessor/preprocessor19.c:4:9: warning: preprocessor token A redefined
-> preprocessor/preprocessor19.c:3:9: this was the original definition
-> 
-> y
-> 
-> If you look carefully the 2> 1> redirections have eaten "pre" of the first
-> "preprocessor". Using &> show a more suitable behavior but it seems
-> that &> is not supported by every Bourne shell (for instance dash (the
-> default /bin/sh of Ubuntu 7.04 does not support &>) Any idea ?
+test.c:5:5: error: no member 'x' in struct type foo
 
-You can't redirect two things independently to the same file; that will
-open the file twice, and the writes will conflict, giving exactly the
-result you saw.  > o 2>&1 should work; it has exactly the same effect as
-&> .
+Another solution would be to remove the ident setting code and try to
+find the typedef name directly in evaluate_member_dereference().
 
-- Josh Triplett
+-- 
+Regards,
+Pavel Roskin
