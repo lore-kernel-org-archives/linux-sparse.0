@@ -1,363 +1,537 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH] fix the comma handling in integer constant expressions
-Date: Sun, 1 Jul 2007 08:48:48 +0100
-Message-ID: <20070701074848.GA1101@ftp.linux.org.uk>
+Subject: [PATCH] first pass at null pointer constants
+Date: Sun, 1 Jul 2007 08:49:22 +0100
+Message-ID: <20070701074922.GB1101@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:33470 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:33474 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753475AbXGAHst (ORCPT
+	with ESMTP id S1753475AbXGAHtX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 1 Jul 2007 03:48:49 -0400
+	Sun, 1 Jul 2007 03:49:23 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1I4uAq-0000NX-3I
-	for linux-sparse@vger.kernel.org; Sun, 01 Jul 2007 08:48:48 +0100
+	id 1I4uBO-0000OP-1H
+	for linux-sparse@vger.kernel.org; Sun, 01 Jul 2007 08:49:22 +0100
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-[my apologies to the folks on Cc, original mails got the list address
-buggered in To:, thus the resend of the entire series just to the list]
+AFAICS, that should do null pointer constants right.  We assign
+special instance of void * (&null_ctype) to (void *)<zero integer
+constant expression> and replace it with normal void * when we
+don't want null pointer constant.  is_zero_constant() checks if
+we have an integer constant expression, does conservative expand
+(i.e. instead of generating an error on 1/0, etc. leaves the
+node unreplaced) and checks if we have reduced the sucker to
+EXPR_VALUE[0] without comma taint.
 
-On Wed, Jun 27, 2007 at 04:54:25PM +0100, Al Viro wrote:
-> ... or it could be done simpler, if we keep the current logics for
-> Int_const_expr flag at parse time and add a 'const expression' one
-> with rules as above.  Anyway, I'm going to get some sleep before
-> dealing with that crap.
+Implemented all (AFAICS) special cases involving null pointer
+constants; most changes in evaluate_compare() and evaluate_conditional().
+Both are still incomplete; handling of qualifiers is still missing,
+but that's a separate story.
 
-From: Al Viro <viro@zeniv.linux.org.uk>
-Date: Sun, 1 Jul 2007 02:28:10 -0400
-Subject: [PATCH] fix the comma handling in integer constant expressions
-
-Treat it as normal binary operation, taint the value, check the taint.
-We can do other kind of value tainting with the same infrastructure
-as well...
-
-Review and testing would be welcome; AFAICS, it works, but...
+Note that we get two new sets of warnings on the kernel build; one is
+due to wrong size_t (handled in the next patch; didn't show up until
+now since we didn't warn on comparison of pointers to incompatible
+types) and another is a pile of warnings about integer 0 used as NULL
+on
+	if (p == 0)
+where p is a pointer.  Additionally, there's an idiotic
+	(p>0)
+in one place (again, p is a pointer).  Bugger if I know how gcc doesn't
+warn on that one, it's certainly a standard violation and bloody pointless
+even as extension...
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- evaluate.c   |    6 ++++++
- expand.c     |   41 ++++++++++++++++++++++++++++++++++++++---
- expression.c |   14 +++-----------
- expression.h |    9 ++++++++-
- symbol.c     |    1 +
- 5 files changed, 56 insertions(+), 15 deletions(-)
+ evaluate.c   |  216 +++++++++++++++++++++++++++++++++++++++-------------------
+ expand.c     |   38 +++++++---
+ expression.h |    1 +
+ symbol.c     |    4 +-
+ symbol.h     |    3 +-
+ 5 files changed, 178 insertions(+), 84 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index bcac1d2..3156e9d 100644
+index 3156e9d..b97a4d7 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -956,6 +956,7 @@ static struct symbol *evaluate_binop(struct expression *expr)
- static struct symbol *evaluate_comma(struct expression *expr)
+@@ -274,7 +274,7 @@ static struct expression * cast_to(struct expression *old, struct symbol *type)
+ 
+ 	warn_for_different_enum_types (old->pos, old->ctype, type);
+ 
+-	if (is_same_type(old, type))
++	if (old->ctype != &null_ctype && is_same_type(old, type))
+ 		return old;
+ 
+ 	/*
+@@ -567,6 +567,9 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *c
+ 	int multiply;
+ 	int bit_size;
+ 
++	if (ctype == &null_ctype)
++		ctype = &ptr_ctype;
++
+ 	examine_symbol_type(ctype);
+ 
+ 	if (!ctype->ctype.base_type) {
+@@ -784,13 +787,10 @@ const char * type_difference(struct symbol *target, struct symbol *source,
+ 	return NULL;
+ }
+ 
+-static int is_null_ptr(struct expression *expr)
++static void bad_null(struct expression *expr)
  {
- 	expr->ctype = expr->right->ctype;
-+	expr->flags &= expr->left->flags & expr->right->flags;
- 	return expr->ctype;
+-	if (expr->type != EXPR_VALUE || expr->value)
+-		return 0;
+-	if (Wnon_pointer_null && !is_ptr_type(expr->ctype))
++	if (Wnon_pointer_null)
+ 		warning(expr->pos, "Using plain integer as NULL pointer");
+-	return 1;
  }
  
-@@ -1859,6 +1860,7 @@ static struct symbol *evaluate_sizeof(struct expression *expr)
- 		expression_error(expr, "cannot size expression");
- 	expr->type = EXPR_VALUE;
- 	expr->value = size >> 3;
-+	expr->taint = 0;
- 	expr->ctype = size_t_ctype;
- 	return size_t_ctype;
+ /*
+@@ -973,12 +973,23 @@ static int modify_for_unsigned(int op)
+ 	return op;
  }
-@@ -1892,6 +1894,7 @@ static struct symbol *evaluate_ptrsizeof(struct expression *expr)
- 		size = 0;
- 	expr->type = EXPR_VALUE;
- 	expr->value = size >> 3;
-+	expr->taint = 0;
- 	expr->ctype = size_t_ctype;
- 	return size_t_ctype;
- }
-@@ -1906,6 +1909,7 @@ static struct symbol *evaluate_alignof(struct expression *expr)
  
- 	expr->type = EXPR_VALUE;
- 	expr->value = type->ctype.alignment;
-+	expr->taint = 0;
- 	expr->ctype = size_t_ctype;
- 	return size_t_ctype;
- }
-@@ -2675,6 +2679,7 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
- 		expr->type = EXPR_VALUE;
- 		expr->flags = Int_const_expr;
- 		expr->value = offset;
-+		expr->taint = 0;
- 		expr->ctype = size_t_ctype;
- 	} else {
- 		if (!ctype) {
-@@ -2692,6 +2697,7 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
- 			expr->type = EXPR_VALUE;
- 			expr->flags = Int_const_expr;
- 			expr->value = 0;
-+			expr->taint = 0;
- 			expr->ctype = size_t_ctype;
++static inline int is_null_pointer_constant(struct expression *e)
++{
++	if (e->ctype == &null_ctype)
++		return 1;
++	if (!(e->flags & Int_const_expr))
++		return 0;
++	return is_zero_constant(e) ? 2 : 0;
++}
++
+ static struct symbol *evaluate_compare(struct expression *expr)
+ {
+ 	struct expression *left = expr->left, *right = expr->right;
+-	struct symbol *ltype = left->ctype, *rtype = right->ctype;
++	struct symbol *ltype, *rtype;
++	int lclass = classify_type(degenerate(left), &ltype);
++	int rclass = classify_type(degenerate(right), &rtype);
+ 	struct symbol *ctype;
+-	int lclass, rclass;
++	const char *typediff;
+ 
+ 	if (expr->flags) {
+ 		if (!(expr->left->flags & expr->right->flags & Int_const_expr))
+@@ -989,29 +1000,69 @@ static struct symbol *evaluate_compare(struct expression *expr)
+ 	if (is_type_type(ltype) && is_type_type(rtype))
+ 		goto OK;
+ 
+-	if (is_safe_type(ltype) || is_safe_type(rtype))
++	if (is_safe_type(left->ctype) || is_safe_type(right->ctype))
+ 		warning(expr->pos, "testing a 'safe expression'");
+ 
+-	lclass = classify_type(ltype, &ltype);
+-	rclass = classify_type(rtype, &rtype);
+-
+-	/* Pointer types? */
+-	if ((lclass | rclass) & TYPE_PTR) {
+-		// FIXME! Check the types for compatibility
+-		expr->op = modify_for_unsigned(expr->op);
++	/* number on number */
++	if (lclass & rclass & TYPE_NUM) {
++		ctype = usual_conversions(expr->op, expr->left, expr->right,
++					  lclass, rclass, ltype, rtype);
++		expr->left = cast_to(expr->left, ctype);
++		expr->right = cast_to(expr->right, ctype);
++		if (ctype->ctype.modifiers & MOD_UNSIGNED)
++			expr->op = modify_for_unsigned(expr->op);
+ 		goto OK;
+ 	}
+ 
+-	/* Both should be numbers */
+-	if (!(lclass & rclass & TYPE_NUM))
++	/* at least one must be a pointer */
++	if (!((lclass | rclass) & TYPE_PTR))
++		return bad_expr_type(expr);
++
++	/* equality comparisons can be with null pointer constants */
++	if (expr->op == SPECIAL_EQUAL || expr->op == SPECIAL_NOTEQUAL) {
++		int is_null1 = is_null_pointer_constant(left);
++		int is_null2 = is_null_pointer_constant(right);
++		if (is_null1 == 2)
++			bad_null(left);
++		if (is_null2 == 2)
++			bad_null(right);
++		if (is_null1 && is_null2) {
++			int positive = expr->op == SPECIAL_EQUAL;
++			expr->type = EXPR_VALUE;
++			expr->value = positive;
++			goto OK;
++		}
++		if (is_null1) {
++			left = cast_to(left, rtype);
++			goto OK;
++		}
++		if (is_null2) {
++			right = cast_to(right, ltype);
++			goto OK;
++		}
++		/* they also have special treatment for pointers to void */
++		if (lclass & rclass & TYPE_PTR) {
++			if (get_base_type(ltype) == &void_ctype) {
++				right = cast_to(right, ltype);
++				goto OK;
++			}
++			if (get_base_type(rtype) == &void_ctype) {
++				left = cast_to(left, rtype);
++				goto OK;
++			}
++		}
++	}
++	/* both should be pointers */
++	if (!(lclass & rclass & TYPE_PTR))
+ 		return bad_expr_type(expr);
+ 
+-	ctype = usual_conversions(expr->op, expr->left, expr->right,
+-				  lclass, rclass, ltype, rtype);
+-	expr->left = cast_to(expr->left, ctype);
+-	expr->right = cast_to(expr->right, ctype);
+-	if (ctype->ctype.modifiers & MOD_UNSIGNED)
+-		expr->op = modify_for_unsigned(expr->op);
++	expr->op = modify_for_unsigned(expr->op);
++	typediff = type_difference(ltype, rtype, MOD_IGN, MOD_IGN);
++	if (!typediff)
++		goto OK;
++
++	expression_error(expr, "incompatible types in comparison expression (%s)", typediff);
++	return NULL;
+ 
+ OK:
+ 	expr->ctype = &bool_ctype;
+@@ -1032,12 +1083,12 @@ static struct symbol *compatible_ptr_type(struct expression *left, struct expres
+ 		rtype = rtype->ctype.base_type;
+ 
+ 	if (ltype->type == SYM_PTR) {
+-		if (is_null_ptr(right) || rtype->ctype.base_type == &void_ctype)
++		if (rtype->ctype.base_type == &void_ctype)
+ 			return ltype;
+ 	}
+ 
+ 	if (rtype->type == SYM_PTR) {
+-		if (is_null_ptr(left) || ltype->ctype.base_type == &void_ctype)
++		if (ltype->ctype.base_type == &void_ctype)
+ 			return rtype;
+ 	}
+ 	return NULL;
+@@ -1090,13 +1141,45 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 		expr->cond_false = cast_to(expr->cond_false, ctype);
+ 		goto out;
+ 	}
+-	ctype = compatible_ptr_type(*true, expr->cond_false);
+-	if (ctype)
+-		goto out;
++	if ((lclass | rclass) & TYPE_PTR) {
++		int is_null1 = is_null_pointer_constant(*true);
++		int is_null2 = is_null_pointer_constant(expr->cond_false);
++		if (is_null1 && is_null2) {
++			*true = cast_to(*true, &ptr_ctype);
++			expr->cond_false = cast_to(expr->cond_false, &ptr_ctype);
++			ctype = &ptr_ctype;
++			goto out;
++		}
++		if (is_null1 && (rclass & TYPE_PTR)) {
++			if (is_null1 == 2)
++				bad_null(*true);
++			*true = cast_to(*true, rtype);
++			ctype = rtype;
++			goto out;
++		}
++		if (is_null2 && (lclass & TYPE_PTR)) {
++			if (is_null2 == 2)
++				bad_null(expr->cond_false);
++			expr->cond_false = cast_to(expr->cond_false, ltype);
++			ctype = ltype;
++			goto out;
++		}
++		if (!(lclass & rclass & TYPE_PTR)) {
++			typediff = "different types";
++			goto Err;
++		}
++		/* OK, it's pointer on pointer */
++		/* XXX - we need to handle qualifiers */
++		ctype = compatible_ptr_type(*true, expr->cond_false);
++		if (ctype)
++			goto out;
++	}
+ 	ctype = ltype;
+ 	typediff = type_difference(ltype, rtype, MOD_IGN, MOD_IGN);
+ 	if (!typediff)
+ 		goto out;
++
++Err:
+ 	expression_error(expr, "incompatible types in conditional expression (%s)", typediff);
+ 	return NULL;
+ 
+@@ -1185,6 +1268,16 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 			goto Cast;
+ 	}
+ 
++	if (tclass & TYPE_PTR) {
++		// NULL pointer is always OK
++		int is_null = is_null_pointer_constant(*rp);
++		if (is_null) {
++			if (is_null == 2)
++				bad_null(*rp);
++			goto Cast;
++		}
++	}
++
+ 	/* It's OK if the target is more volatile or const than the source */
+ 	typediff = type_difference(target, source, MOD_VOLATILE | MOD_CONST, 0);
+ 	if (!typediff)
+@@ -1192,14 +1285,9 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 
+ 	/* Pointer destination? */
+ 	if (tclass & TYPE_PTR) {
+-		struct expression *right = *rp;
+ 		int source_as;
+ 		int target_as;
+ 
+-		// NULL pointer is always OK
+-		if (is_null_ptr(right))
+-			goto Cast;
+-
+ 		/* "void *" matches anything as long as the address space is OK */
+ 		target_as = t->ctype.as | target->ctype.as;
+ 		source_as = s->ctype.as | source->ctype.as;
+@@ -1941,7 +2029,10 @@ static int evaluate_arguments(struct symbol *f, struct symbol *fn, struct expres
+ 				if (!(mod & (MOD_LONG|MOD_LONGLONG)))
+ 					*p = cast_to(expr, &double_ctype);
+ 			} else if (class & TYPE_PTR) {
+-				degenerate(expr);
++				if (expr->ctype == &null_ctype)
++					*p = cast_to(expr, &ptr_ctype);
++				else
++					degenerate(expr);
+ 			}
  		} else {
- 			struct expression *idx = expr->index, *m;
+ 			static char where[30];
+@@ -2438,31 +2529,6 @@ static int get_as(struct symbol *sym)
+ 	return as;
+ }
+ 
+-static void cast_to_as(struct expression *e, int as)
+-{
+-	struct expression *v = e->cast_expression;
+-	struct symbol *type = v->ctype;
+-
+-	if (!Wcast_to_address_space)
+-		return;
+-
+-	if (v->type != EXPR_VALUE || v->value)
+-		goto out;
+-
+-	/* cast from constant 0 to pointer is OK */
+-	if (is_int_type(type))
+-		return;
+-
+-	if (type->type == SYM_NODE)
+-		type = type->ctype.base_type;
+-
+-	if (type->type == SYM_PTR && type->ctype.base_type == &void_ctype)
+-		return;
+-
+-out:
+-	warning(e->pos, "cast adds address space to expression (<asn:%d>)", as);
+-}
+-
+ static struct symbol *evaluate_cast(struct expression *expr)
+ {
+ 	struct expression *target = expr->cast_expression;
+@@ -2557,17 +2623,23 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 		warning(expr->pos, "cast removes address space of expression");
+ 	if (as1 > 0 && as2 > 0 && as1 != as2)
+ 		warning(expr->pos, "cast between address spaces (<asn:%d>-><asn:%d>)", as2, as1);
+-	if (as1 > 0 && !as2)
+-		cast_to_as(expr, as1);
+-
+-	/*
+-	 * Casts of constant values are special: they
+-	 * can be NULL, and thus need to be simplified
+-	 * early.
+-	 */
+-	if (target->type == EXPR_VALUE)
+-		cast_value(expr, ctype, target, target->ctype);
+-
++	if (as1 > 0 && !as2 &&
++	    !is_null_pointer_constant(target) && Wcast_to_address_space)
++		warning(expr->pos,
++			"cast adds address space to expression (<asn:%d>)", as1);
++
++	if (!(ctype->ctype.modifiers & MOD_PTRINHERIT) && class1 == TYPE_PTR &&
++	    !as1 && (target->flags & Int_const_expr)) {
++		if (t1->ctype.base_type == &void_ctype) {
++			if (is_zero_constant(target)) {
++				/* NULL */
++				expr->type = EXPR_VALUE;
++				expr->ctype = &null_ctype;
++				expr->value = 0;
++				return ctype;
++			}
++		}
++	}
+ out:
+ 	return ctype;
+ }
+@@ -3153,6 +3225,8 @@ struct symbol *evaluate_statement(struct statement *stmt)
+ 	case STMT_EXPRESSION:
+ 		if (!evaluate_expression(stmt->expression))
+ 			return NULL;
++		if (stmt->expression->ctype == &null_ctype)
++			stmt->expression = cast_to(stmt->expression, &ptr_ctype);
+ 		return degenerate(stmt->expression);
+ 
+ 	case STMT_COMPOUND: {
 diff --git a/expand.c b/expand.c
-index f945518..780b643 100644
+index 780b643..b2eeef8 100644
 --- a/expand.c
 +++ b/expand.c
-@@ -44,6 +44,7 @@ static int expand_symbol_expression(struct expression *expr)
- 			warning(expr->pos, "undefined preprocessor identifier '%s'", show_ident(expr->symbol_name));
- 		expr->type = EXPR_VALUE;
- 		expr->value = 0;
-+		expr->taint = 0;
- 		return 0;
- 	}
- 	/* The cost of a symbol expression is lower for on-stack symbols */
-@@ -80,6 +81,7 @@ void cast_value(struct expression *expr, struct symbol *newtype,
+@@ -34,6 +34,7 @@
  
- 	// For pointers and integers, we can just move the value around
- 	expr->type = EXPR_VALUE;
-+	expr->taint = old->taint;
- 	if (old_size == new_size) {
- 		expr->value = old->value;
+ static int expand_expression(struct expression *);
+ static int expand_statement(struct statement *);
++static int conservative;
+ 
+ static int expand_symbol_expression(struct expression *expr)
+ {
+@@ -97,7 +98,7 @@ Int:
+ 	expr->value = value & mask;
+ 
+ 	// Stop here unless checking for truncation
+-	if (!Wcast_truncate)
++	if (!Wcast_truncate || conservative)
  		return;
-@@ -116,6 +118,7 @@ Float:
- 	if (newtype->ctype.base_type != &fp_type) {
- 		value = (long long)old->fvalue;
- 		expr->type = EXPR_VALUE;
-+		expr->taint = 0;
- 		goto Int;
- 	}
+ 	
+ 	// Check if we dropped any bits..
+@@ -138,10 +139,8 @@ Float:
  
-@@ -251,6 +254,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
- 	mask = mask | (mask-1);
- 	expr->value = v & mask;
- 	expr->type = EXPR_VALUE;
-+	expr->taint = left->taint | right->taint;
+ static int check_shift_count(struct expression *expr, struct symbol *ctype, unsigned int count)
+ {
+-	if (count >= ctype->bit_size) {
+-		warning(expr->pos, "shift too big (%u) for type %s", count, show_typename(ctype));
+-		count &= ctype->bit_size-1;
+-	}
++	warning(expr->pos, "shift too big (%u) for type %s", count, show_typename(ctype));
++	count &= ctype->bit_size-1;
+ 	return count;
+ }
+ 
+@@ -163,8 +162,12 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
+ 		return 0;
+ 	r = right->value;
+ 	if (expr->op == SPECIAL_LEFTSHIFT || expr->op == SPECIAL_RIGHTSHIFT) {
+-		r = check_shift_count(expr, ctype, r);
+-		right->value = r;
++		if (r >= ctype->bit_size) {
++			if (conservative)
++				return 0;
++			r = check_shift_count(expr, ctype, r);
++			right->value = r;
++		}
+ 	}
+ 	if (left->type != EXPR_VALUE)
+ 		return 0;
+@@ -257,10 +260,12 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
+ 	expr->taint = left->taint | right->taint;
  	return 1;
  Div:
- 	warning(expr->pos, "division by zero");
-@@ -288,6 +292,7 @@ static int simplify_cmp_binop(struct expression *expr, struct symbol *ctype)
- 	case SPECIAL_UNSIGNED_GTE:expr->value = l >= r; break;
- 	}
- 	expr->type = EXPR_VALUE;
-+	expr->taint = left->taint | right->taint;
+-	warning(expr->pos, "division by zero");
++	if (!conservative)
++		warning(expr->pos, "division by zero");
+ 	return 0;
+ Overflow:
+-	warning(expr->pos, "constant integer operation overflow");
++	if (!conservative)
++		warning(expr->pos, "constant integer operation overflow");
+ 	return 0;
+ }
+ 
+@@ -340,7 +345,8 @@ static int simplify_float_binop(struct expression *expr)
+ 	expr->fvalue = res;
  	return 1;
+ Div:
+-	warning(expr->pos, "division by zero");
++	if (!conservative)
++		warning(expr->pos, "division by zero");
+ 	return 0;
  }
  
-@@ -358,6 +363,7 @@ static int simplify_float_cmp(struct expression *expr, struct symbol *ctype)
- 	case SPECIAL_NOTEQUAL:	expr->value = l != r; break;
- 	}
- 	expr->type = EXPR_VALUE;
-+	expr->taint = 0;
- 	return 1;
- }
- 
-@@ -387,12 +393,14 @@ static int expand_logical(struct expression *expr)
- 			if (!left->value) {
- 				expr->type = EXPR_VALUE;
- 				expr->value = 0;
-+				expr->taint = left->taint;
- 				return 0;
- 			}
- 		} else {
- 			if (left->value) {
- 				expr->type = EXPR_VALUE;
- 				expr->value = 1;
-+				expr->taint = left->taint;
- 				return 0;
- 			}
- 		}
-@@ -407,6 +415,7 @@ static int expand_logical(struct expression *expr)
- 		 */
- 		expr->type = EXPR_VALUE;
- 		expr->value = right->value != 0;
-+		expr->taint = left->taint | right->taint;
- 		return 0;
- 	}
- 
-@@ -429,8 +438,15 @@ static int expand_comma(struct expression *expr)
- 
- 	cost = expand_expression(expr->left);
- 	cost += expand_expression(expr->right);
--	if (expr->left->type == EXPR_VALUE || expr->left->type == EXPR_FVALUE)
-+	if (expr->left->type == EXPR_VALUE || expr->left->type == EXPR_FVALUE) {
-+		unsigned flags = expr->flags;
-+		unsigned taint;
-+		taint = expr->left->type == EXPR_VALUE ? expr->left->taint : 0;
- 		*expr = *expr->right;
-+		expr->flags = flags;
-+		if (expr->type == EXPR_VALUE)
-+			expr->taint |= Taint_comma | taint;
-+	}
- 	return cost;
- }
- 
-@@ -469,6 +485,7 @@ static int expand_compare(struct expression *expr)
- 			int op = expr->op;
- 			expr->type = EXPR_VALUE;
- 			expr->value = compare_types(op, left->symbol, right->symbol);
-+			expr->taint = 0;
- 			return 0;
- 		}
- 		if (simplify_cmp_binop(expr, left->ctype))
-@@ -488,12 +505,17 @@ static int expand_conditional(struct expression *expr)
- 
- 	cond_cost = expand_expression(cond);
- 	if (cond->type == EXPR_VALUE) {
-+		unsigned flags = expr->flags;
- 		if (!cond->value)
- 			true = false;
- 		if (!true)
- 			true = cond;
-+		cost = expand_expression(true);
- 		*expr = *true;
--		return expand_expression(expr);
-+		expr->flags = flags;
-+		if (expr->type == EXPR_VALUE)
-+			expr->taint |= cond->taint;
-+		return cost;
- 	}
- 
- 	cost = expand_expression(true);
-@@ -594,6 +616,7 @@ static int expand_dereference(struct expression *expr)
- 			if (value->type == EXPR_VALUE) {
- 				expr->type = EXPR_VALUE;
- 				expr->value = value->value;
-+				expr->taint = 0;
- 				return 0;
- 			} else if (value->type == EXPR_FVALUE) {
- 				expr->type = EXPR_FVALUE;
-@@ -633,6 +656,7 @@ static int simplify_preop(struct expression *expr)
- 	mask = mask | (mask-1);
- 	expr->value = v & mask;
- 	expr->type = EXPR_VALUE;
-+	expr->taint = op->taint;
+@@ -660,7 +666,8 @@ static int simplify_preop(struct expression *expr)
  	return 1;
  
  Overflow:
-@@ -729,6 +753,7 @@ int expand_constant_p(struct expression *expr, int cost)
- {
- 	expr->type = EXPR_VALUE;
- 	expr->value = !cost;
-+	expr->taint = 0;
+-	warning(expr->pos, "constant integer operation overflow");
++	if (!conservative)
++		warning(expr->pos, "constant integer operation overflow");
  	return 0;
  }
  
-@@ -737,6 +762,7 @@ int expand_safe_p(struct expression *expr, int cost)
+@@ -1222,3 +1229,12 @@ long long const_expression_value(struct expression *expr)
  {
- 	expr->type = EXPR_VALUE;
- 	expr->value = (cost < SIDE_EFFECTS);
-+	expr->taint = 0;
- 	return 0;
+ 	return __get_expression_value(expr, 1);
  }
- 
-@@ -1144,6 +1170,15 @@ static int expand_statement(struct statement *stmt)
- 	return SIDE_EFFECTS;
- }
- 
-+static inline int bad_integer_constant_expression(struct expression *expr)
-+{
-+	if (!(expr->flags & Int_const_expr))
-+		return 1;
-+	if (expr->taint & Taint_comma)
-+		return 1;
-+	return 0;
-+}
 +
- static long long __get_expression_value(struct expression *expr, int strict)
- {
- 	long long value, mask;
-@@ -1161,7 +1196,7 @@ static long long __get_expression_value(struct expression *expr, int strict)
- 		expression_error(expr, "bad constant expression");
- 		return 0;
- 	}
--	if (strict && !(expr->flags & Int_const_expr)) {
-+	if (strict && bad_integer_constant_expression(expr)) {
- 		expression_error(expr, "bad integer constant expression");
- 		return 0;
- 	}
-diff --git a/expression.c b/expression.c
-index d36c3d2..65f959e 100644
---- a/expression.c
-+++ b/expression.c
-@@ -751,7 +751,7 @@ static struct token *cast_expression(struct token *token, struct expression **tr
-  * than create a data structure for it.
-  */
- 
--#define __LR_BINOP_EXPRESSION(__token, tree, type, inner, compare, is_const)	\
-+#define LR_BINOP_EXPRESSION(__token, tree, type, inner, compare)	\
- 	struct expression *left = NULL;					\
- 	struct token * next = inner(__token, &left);			\
- 									\
-@@ -768,8 +768,7 @@ static struct token *cast_expression(struct token *token, struct expression **tr
- 				sparse_error(next->pos, "No right hand side of '%s'-expression", show_special(op));	\
- 				break;					\
- 			}						\
--			if (is_const)					\
--				top->flags = left->flags & right->flags \
-+			top->flags = left->flags & right->flags		\
- 						& Int_const_expr;	\
- 			top->op = op;					\
- 			top->left = left;				\
-@@ -781,13 +780,6 @@ out:									\
- 	*tree = left;							\
- 	return next;							\
- 
--#define LR_BINOP_EXPRESSION(token, tree, type, inner, compare) \
--	__LR_BINOP_EXPRESSION((token), (tree), (type), (inner), (compare), 1)
--
--#define LR_BINOP_EXPRESSION_NONCONST(token, tree, type, inner, compare) \
--	__LR_BINOP_EXPRESSION((token), (tree), (type), (inner), (compare), 0)
--
--
- static struct token *multiplicative_expression(struct token *token, struct expression **tree)
- {
- 	LR_BINOP_EXPRESSION(
-@@ -918,7 +910,7 @@ struct token *assignment_expression(struct token *token, struct expression **tre
- 
- static struct token *comma_expression(struct token *token, struct expression **tree)
- {
--	LR_BINOP_EXPRESSION_NONCONST(
-+	LR_BINOP_EXPRESSION(
- 		token, tree, EXPR_COMMA, assignment_expression,
- 		(op == ',')
- 	);
++int is_zero_constant(struct expression *expr)
++{
++	int saved = conservative;
++	conservative = 1;
++	expand_expression(expr);
++	conservative = saved;
++	return expr->type == EXPR_VALUE && !expr->value;
++}
 diff --git a/expression.h b/expression.h
-index a913153..23ca408 100644
+index 23ca408..02eec02 100644
 --- a/expression.h
 +++ b/expression.h
-@@ -52,6 +52,10 @@ enum {
- 	Float_literal = 2,
- }; /* for expr->flags */
+@@ -154,6 +154,7 @@ struct expression {
+ };
  
-+enum {
-+	Taint_comma = 1,
-+};
-+
- struct expression {
- 	enum expression_type type:8;
- 	unsigned flags:8;
-@@ -60,7 +64,10 @@ struct expression {
- 	struct symbol *ctype;
- 	union {
- 		// EXPR_VALUE
--		unsigned long long value;
-+		struct {
-+			unsigned long long value;
-+			unsigned taint;
-+		};
+ /* Constant expression values */
++int is_zero_constant(struct expression *);
+ long long get_expression_value(struct expression *);
+ long long const_expression_value(struct expression *);
  
- 		// EXPR_FVALUE
- 		long double fvalue;
 diff --git a/symbol.c b/symbol.c
-index 329fed9..cec7e02 100644
+index cec7e02..9dfeb41 100644
 --- a/symbol.c
 +++ b/symbol.c
-@@ -652,6 +652,7 @@ static int expand_warning(struct expression *expr, int cost)
- out:
- 	expr->type = EXPR_VALUE;
- 	expr->value = 1;
-+	expr->taint = 0;
- 	return 0;
- }
+@@ -753,7 +753,8 @@ struct symbol	bool_ctype, void_ctype, type_ctype,
+ 		llong_ctype, sllong_ctype, ullong_ctype,
+ 		float_ctype, double_ctype, ldouble_ctype,
+ 		string_ctype, ptr_ctype, lazy_ptr_ctype,
+-		incomplete_ctype, label_ctype, bad_ctype;
++		incomplete_ctype, label_ctype, bad_ctype,
++		null_ctype;
  
+ struct symbol	zero_int;
+ 
+@@ -829,6 +830,7 @@ static const struct ctype_declare {
+ 
+ 	{ &string_ctype,    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &char_ctype },
+ 	{ &ptr_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
++	{ &null_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+ 	{ &label_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+ 	{ &lazy_ptr_ctype,  SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+ 	{ NULL, }
+diff --git a/symbol.h b/symbol.h
+index 2bde84d..a59feee 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -229,7 +229,8 @@ extern struct symbol	bool_ctype, void_ctype, type_ctype,
+ 			llong_ctype, sllong_ctype, ullong_ctype,
+ 			float_ctype, double_ctype, ldouble_ctype,
+ 			string_ctype, ptr_ctype, lazy_ptr_ctype,
+-			incomplete_ctype, label_ctype, bad_ctype;
++			incomplete_ctype, label_ctype, bad_ctype,
++			null_ctype;
+ 
+ /* Special internal symbols */
+ extern struct symbol	zero_int;
 -- 
 1.5.0-rc2.GIT
