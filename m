@@ -1,43 +1,48 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Chris Lattner <sabre@nondot.org>
 Subject: Re: [RFC] bloody mess with __attribute__() syntax
-Date: Thu, 5 Jul 2007 18:09:18 +0100
-Message-ID: <20070705170918.GO21478@ftp.linux.org.uk>
-References: <20070705093528.GK21478@ftp.linux.org.uk> <alpine.LFD.0.98.0707050930330.9434@woody.linux-foundation.org>
+Date: Thu, 5 Jul 2007 10:02:00 -0700 (PDT)
+Message-ID: <Pine.LNX.4.62.0707051000580.17173@nondot.org>
+References: <20070705093528.GK21478@ftp.linux.org.uk>
+ <alpine.LFD.0.98.0707050930330.9434@woody.linux-foundation.org>
+ <20070705165347.GN21478@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:38221 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755526AbXGERJT (ORCPT
+Received: from 70-91-206-189-BusName-SFBA.hfc.comcastbusiness.net ([70.91.206.189]:38390
+	"EHLO nondot.org" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
+	with ESMTP id S1756213AbXGERTM (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Jul 2007 13:09:19 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.LFD.0.98.0707050930330.9434@woody.linux-foundation.org>
+	Thu, 5 Jul 2007 13:19:12 -0400
+In-Reply-To: <20070705165347.GN21478@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Thu, Jul 05, 2007 at 09:41:55AM -0700, Linus Torvalds wrote:
-> IOW, as far as I can tell, there's really no reason to add a 
-> "__qualifier__" handler, because it's not going to help us. Anything we 
-> can do with __qualifier__, we can already do with our __attribute__ 
-> parsing: what you suggest would involve having a new place for parsing 
-> __attributes__, and making the *current* qualifier-like attribute parsing 
-> trigger on "__qualifier__" instead.
-> 
-> So what I'd suggest is to just have *both* cases trigger on __attribute__, 
-> but in the qualifier case we'd use NS_QUALIFIER to look up the attribute 
-> function, and in the non-qualifier case we'd use NS_ATTRIBUTE (right now 
-> we always use NS_KEYWORD, and that's probably bogus: we should put the 
-> attribute names in another namespace _anyway_).
+On Thu, 5 Jul 2007, Al Viro wrote:
+> On Thu, Jul 05, 2007 at 09:41:55AM -0700, Linus Torvalds wrote:
+>>> Note that gcc rules for __attribute__() (and that's the only source
+>>> of rules we _have_ for the damn thing) clearly say that
+>>> 	int __user *p;
+>>> is the same thing as
+>>> 	int *__user p;
+>>
+>> Quick question: is there some reason why we have to honor the crazy gcc
+>> rules, and cannot try to convince gcc people that they are insane?
+>
+> AFAICS, they started with storage-class-like attributes.  Consider e.g.
+> always_inline or section; these are not qualifiers at all and you want
+> to have
+> static __attribute__((always_inline)) int foo(int *p);
+> interpreted with attribute applied to foo, not to its return type.
 
-But that's the problem - we have places where *both* qualifiers and
-attributes are allowed and they apply to different parts of declaration.
+This is true, but I don't think this is related.  attributes in GCC can 
+apply either to types or two decls.  In this case, the always_inline 
+attribute is being applied to the decl, but other attributes could be 
+applied to the return type.
 
-Note that we mishandle __attribute__((mode())) right now in a way that
-makes no sense at all.  E.g. if it happens in the end of declaration,
-we still apply it to the root type.  gcc applies it to the entire
-declaration in that case, and that certainly makes much more sense.
+-Chris
 
-So I'm afraid that we need to change __attribute__ parsing anyway...
+-- 
+http://nondot.org/sabre/
+http://llvm.org/
