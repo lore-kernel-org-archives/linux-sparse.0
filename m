@@ -1,72 +1,47 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [RFC] bloody mess with __attribute__() syntax
-Date: Thu, 5 Jul 2007 09:41:55 -0700 (PDT)
-Message-ID: <alpine.LFD.0.98.0707050930330.9434@woody.linux-foundation.org>
-References: <20070705093528.GK21478@ftp.linux.org.uk>
+Date: Thu, 5 Jul 2007 17:43:34 +0100
+Message-ID: <20070705164334.GM21478@ftp.linux.org.uk>
+References: <20070705093528.GK21478@ftp.linux.org.uk> <468D1003.1050901@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp2.linux-foundation.org ([207.189.120.14]:39796 "EHLO
-	smtp2.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757909AbXGEQmK (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Jul 2007 12:42:10 -0400
-In-Reply-To: <20070705093528.GK21478@ftp.linux.org.uk>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1761307AbXGEQnt@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <468D1003.1050901@freedesktop.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
+On Thu, Jul 05, 2007 at 08:36:35AM -0700, Josh Triplett wrote:
+> Wow.  Insane.  So these all declare the same type:
+> __attribute__((foo)) T *v;
+> T __attribute__((foo)) *v;
+> T *__attribute__((foo)) v;
+> ?  Specifically, they point to a foo-T, for convenient shooting?
 
+They all give you foo-pointer-to-T.  
+	T (__attribute__((foo)) *v);
+would give pointer-to-foo-T.
 
-On Thu, 5 Jul 2007, Al Viro wrote:
+> context also represents a qualifier; the position of the qualifier should
+> determine things like whether you want to enforce the context when you access
+> a pointer or dereference a pointer.
+
+Since __context__ is (sparse-only) keyword, we are not constrained by
+anything anyway.
+ 
+> > Frankly, I would rather add a new primitive (__qualifier__) mirroring the
+> > __attribute__, but acting like real qualifiers do.  And switched the
+> > noderef et.al. to it.
 > 
-> Now, that idiocy would be none of our concern, if not for the fact
-> that noderef and address_space() are definitely supposed to imitate
-> qualifiers.
+> Something like that sounds vaguely reasonable.  It should allow the same set
+> of attributes, and just change what they apply to.  To use your example,
+> T __qualifier__((foo)) *v;
+> and
+> T (__attribute__((foo)) *v);
+> would mean the same thing.
 
-Absolutely.
-
-> Note that gcc rules for __attribute__() (and that's the only source
-> of rules we _have_ for the damn thing) clearly say that
-> 	int __user *p;
-> is the same thing as
-> 	int *__user p;
-
-Quick question: is there some reason why we have to honor the crazy gcc 
-rules, and cannot try to convince gcc people that they are insane?
-
-That said:
-
-> Frankly, I would rather add a new primitive (__qualifier__) mirroring the
-> __attribute__, but acting like real qualifiers do.
-
-I'd be ok with that, but I would in many ways just prefer to keep the 
-existing syntax, and just make the qualifiers be a separate _namespace_ 
-within the attribute setup.
-
-We already really should be able to handle that perfectly well, since we 
-look up the attribute names using the normal name lookup functions, which 
-already has the notion of different namespaces. 
-
-IOW, as far as I can tell, there's really no reason to add a 
-"__qualifier__" handler, because it's not going to help us. Anything we 
-can do with __qualifier__, we can already do with our __attribute__ 
-parsing: what you suggest would involve having a new place for parsing 
-__attributes__, and making the *current* qualifier-like attribute parsing 
-trigger on "__qualifier__" instead.
-
-So what I'd suggest is to just have *both* cases trigger on __attribute__, 
-but in the qualifier case we'd use NS_QUALIFIER to look up the attribute 
-function, and in the non-qualifier case we'd use NS_ATTRIBUTE (right now 
-we always use NS_KEYWORD, and that's probably bogus: we should put the 
-attribute names in another namespace _anyway_).
-
-That would effectively mean that "__attribute__()" is just a way to escape 
-into another set of namespaces. The advantage of that is that we could 
-possibly support attributes in other places more naturally (ie we could 
-have another namespace for attributes on statements or inline assembly, 
-and we wouldn't ever introduce yet another keyword - the *name* in the 
-attribute is the real keyword)
-
-		Linus
+Yup, except that it would not accept storage-class-like attributes (e.g.
+always_inline).  And yes, __qualifier__((context(...))) probably might
+be a replacement for __context__, to reduce the number of primitives.
