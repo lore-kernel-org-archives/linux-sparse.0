@@ -1,81 +1,84 @@
 From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [RFC] bloody mess with __attribute__() syntax
-Date: Thu, 05 Jul 2007 11:50:56 -0700
-Message-ID: <1183661456.2604.43.camel@josh-work.beaverton.ibm.com>
-References: <20070705093528.GK21478@ftp.linux.org.uk>
-	 <468D1003.1050901@freedesktop.org>
-	 <20070705164334.GM21478@ftp.linux.org.uk>
+Subject: Re: support of __restrict and __constructor__
+Date: Thu, 05 Jul 2007 12:04:46 -0700
+Message-ID: <1183662286.2604.50.camel@josh-work.beaverton.ibm.com>
+References: <1183657975.5958.46.camel@pc299.sam-solutions.net>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:36708 "EHLO
-	e33.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759838AbXGES6Z (ORCPT
+Received: from e32.co.us.ibm.com ([32.97.110.150]:41428 "EHLO
+	e32.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759113AbXGETEo (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Jul 2007 14:58:25 -0400
-In-Reply-To: <20070705164334.GM21478@ftp.linux.org.uk>
+	Thu, 5 Jul 2007 15:04:44 -0400
+Received: from d03relay02.boulder.ibm.com (d03relay02.boulder.ibm.com [9.17.195.227])
+	by e32.co.us.ibm.com (8.12.11.20060308/8.13.8) with ESMTP id l65IxQ9g008797
+	for <linux-sparse@vger.kernel.org>; Thu, 5 Jul 2007 14:59:26 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by d03relay02.boulder.ibm.com (8.13.8/8.13.8/NCO v8.3) with ESMTP id l65J4c7w266834
+	for <linux-sparse@vger.kernel.org>; Thu, 5 Jul 2007 13:04:39 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l65J4c5l013081
+	for <linux-sparse@vger.kernel.org>; Thu, 5 Jul 2007 13:04:38 -0600
+In-Reply-To: <1183657975.5958.46.camel@pc299.sam-solutions.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org
+To: Yura Pakhuchiy <pakhuchiy@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Thu, 2007-07-05 at 17:43 +0100, Al Viro wrote:
-> On Thu, Jul 05, 2007 at 08:36:35AM -0700, Josh Triplett wrote:
-> > Wow.  Insane.  So these all declare the same type:
-> > __attribute__((foo)) T *v;
-> > T __attribute__((foo)) *v;
-> > T *__attribute__((foo)) v;
-> > ?  Specifically, they point to a foo-T, for convenient shooting?
+On Thu, 2007-07-05 at 20:52 +0300, Yura Pakhuchiy wrote:
+> I updated libntfs/ntfsprogs to use sparse for checking endianness.
+> Thanks much for this feature, it very useful. Helped to find several
+> bugs in our project.
+
+Very glad to hear it!
+
+> The only problem is 2 annoying lines in glibc and gnupg headers that
+> sparse-0.3 do not like:
+>
+> 1. Sparse do not like __restrict_attr inside regexec() definition in
+>    regex.h. Relevant code:
 > 
-> They all give you foo-pointer-to-T.  
-> 	T (__attribute__((foo)) *v);
-> would give pointer-to-foo-T.
-
-Doesn't that do exactly what we want, then?  If we say
-T __attribute__((noderef)) *v;
-, we want a noderef-pointer-to-T, not a pointer-to-noderef-T.  noderef
-should modify a pointer.
-
-> > context also represents a qualifier; the position of the qualifier should
-> > determine things like whether you want to enforce the context when you access
-> > a pointer or dereference a pointer.
+>    extern int regexec (const regex_t *__restrict __preg,
+>                     const char *__restrict __string, size_t __nmatch,
+>                     regmatch_t __pmatch[__restrict_arr],
+>                     int __eflags);
 > 
-> Since __context__ is (sparse-only) keyword, we are not constrained by
-> anything anyway.
-
-No, I mean __attribute__((context(...))), which means something
-different.  __context__() works as a statement statement changing the
-context.  __attribute__((context(...))) works as an attribute modifying
-a type to say that it requires a given context, and that
-accessing/calling it changes the context.  Somewhat of an odd
-distinction, but sparse currently works that way.
-
-> > > Frankly, I would rather add a new primitive (__qualifier__) mirroring the
-> > > __attribute__, but acting like real qualifiers do.  And switched the
-> > > noderef et.al. to it.
-> > 
-> > Something like that sounds vaguely reasonable.  It should allow the same set
-> > of attributes, and just change what they apply to.  To use your example,
-> > T __qualifier__((foo)) *v;
-> > and
-> > T (__attribute__((foo)) *v);
-> > would mean the same thing.
+>    Produces following error: 
+>    /usr/include/regex.h:543:27: error: typename in expression
+>    /usr/include/regex.h:543:27: error: undefined identifier '__restrict'
+>    /usr/include/regex.h:543:27: error: bad constant expression type
 > 
-> Yup, except that it would not accept storage-class-like attributes (e.g.
-> always_inline).
+>    (Note: __restrict_arr is defined to __restrict)
 
-So, to clarify what you mean by storage-class-like: __qualifier__ would
-accept all attributes that modify a *type* rather than a *declaration*.
+Right.  I've run into the same error, and I have this on my todo list to
+fix.  Sparse just needs to parse and ignore restrict and __restrict in
+array declarations like that.
 
-> And yes, __qualifier__((context(...))) probably might
-> be a replacement for __context__, to reduce the number of primitives.
+> 2. And sparse do not know about attribute __constructor__ inside
+>    gpg-error.h. Relevant code:
+> 
+> #if _GPG_ERR_GCC_VERSION > 30100
+> #define _GPG_ERR_CONSTRUCTOR    __attribute__ ((__constructor__))
+> #define _GPG_ERR_HAVE_CONSTRUCTOR
+> #endif
+> #endif
+> 
+> #ifndef _GPG_ERR_CONSTRUCTOR
+> #define _GPG_ERR_CONSTRUCTOR
+> #endif
+> 
+> /* Initialization function.  */
+> 
+> /* Initialize the library.  This function should be run early.  */
+> gpg_error_t gpg_err_init (void) _GPG_ERR_CONSTRUCTOR;
 
-No, see above.  __context__ works as a statement, not as a way to modify
-a type.
+Latest sparse from git already parses and ignores the constructor and
+destructor attributes, and their double-underscore variants.
 
-That said, "calling this function requires this context or changes the
-context" and "accessing this variable requires this context or changes
-the context" may represent different types of attributes.  I don't know.
+> I would really happy if you will fix this. Thanks!
+
+No problem.  Thanks for using Sparse; glad to hear that it helped you!
 
 - Josh Triplett
