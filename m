@@ -1,128 +1,81 @@
-From: Josh Triplett <josh@freedesktop.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: [RFC] bloody mess with __attribute__() syntax
-Date: Thu, 05 Jul 2007 08:36:35 -0700
-Message-ID: <468D1003.1050901@freedesktop.org>
-References: <20070705093528.GK21478@ftp.linux.org.uk>
+Date: Thu, 5 Jul 2007 17:27:41 +0100
+Message-ID: <20070705162741.GL21478@ftp.linux.org.uk>
+References: <200707051403.16789.arnd@arndb.de> <OFC2AA6078.1DF7BE7E-ON4225730F.0044BE34-4225730F.0046B6F1@de.ibm.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig303224320AC2F992AED99646"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:46480 "EHLO
-	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757005AbXGEPgh (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:43566 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757171AbXGEQ1s (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Jul 2007 11:36:37 -0400
-In-Reply-To: <20070705093528.GK21478@ftp.linux.org.uk>
+	Thu, 5 Jul 2007 12:27:48 -0400
+Content-Disposition: inline
+In-Reply-To: <OFC2AA6078.1DF7BE7E-ON4225730F.0044BE34-4225730F.0046B6F1@de.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org
+To: Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Ben Elliston <elliston@au1.ibm.com>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig303224320AC2F992AED99646
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Thu, Jul 05, 2007 at 02:52:22PM +0200, Ulrich Weigand wrote:
+> The Named Address Space extension is documented in chapter 5 of
+> Technical Report 18037:
+>   ISO/IEC JTC1 SC22 WG14 N1169
+>   "Programming languages - C - Extensions to support embedded processors"
+>   http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1169.pdf
 
-Al Viro wrote:
-> 	We have a fun problem and for a change it's not sparse fault.
-> It's gcc folks' one.  Basically, __attribute__((...)) behaves in
-> an idiotic way and it's an intentional (and documented) behaviour.
-> In declaration of form
-> 	T __attribute__((foo)) **v;
-> the attribute applies to v, not to **v.  IOW, in that position it
-> behaves (regardless of the nature of attribute) as storage class,
-> not as a qualifier.  Even if the same attribute can be used in
-> 	T * __attribute__((foo)) *v;
-> where it will apply to *v.  Intended way to have it apply to **v is
-> 	T (__attribute__((foo)) **v);
->=20
-> To put it mildly, that blows.  Note that qualifiers can *not* behave
-> that way - direct declarator can not expand to (<qualifier> <something>=
-).
-> I.e. if you replace __attribute__((foo)) with qualifier in the
-> above, you'll get invalid syntax.
+Humm...  The only syntax for defining address spaces I see there is in
+appendix B and frankly, it doesn't look right.  BTW, they forgot to
+ban auto struct {<address_space> int x;} y - my preference would be
+to ban address_space on struct/union members, but the tastes differ.
+In any case, since they prohibit auto <address_space> int z, they'd
+better find some approach prohibiting that one.
 
-Wow.  Insane.  So these all declare the same type:
-__attribute__((foo)) T *v;
-T __attribute__((foo)) *v;
-T *__attribute__((foo)) v;
-?  Specifically, they point to a foo-T, for convenient shooting?
+> We've currently implemented support for one Cell-specific address
+> space qualifier according to that syntax.  Before submitting this
+> for inclusion in GCC, we're planning to make the implementation
+> more general to support arbitrary address space qualifiers;
+> something like the sparse "__user" attribute would appear to be
+> a natural use case for that syntax extension.
+> 
+> (CC'ing Ben Elliston, who is working on the GCC front-end
+> implementation.)
 
-> Now, that idiocy would be none of our concern, if not for the fact
-> that noderef and address_space() are definitely supposed to imitate
-> qualifiers.
-
-context also represents a qualifier; the position of the qualifier should=
-
-determine things like whether you want to enforce the context when you ac=
-cess
-a pointer or dereference a pointer.
-
-> If anybody seriously suggests switching to syntax
-> like
-> 	int (__user *p);
-> all over the place, well...
-
-Definitely not an option.
-
-> Note that gcc rules for __attribute__() (and that's the only source
-> of rules we _have_ for the damn thing) clearly say that
-> 	int __user *p;
-> is the same thing as
-> 	int *__user p;
->
-> Now, we could declare gcc people responsible for that turd rejects
-> of Vogon Construction Fleet and handle the damn thing sanely.
-> The first part is clearly the right thing to do, but the second one...
-> Can't do without breaking gccisms using __attribute__.  E.g.
-> 	int (__attribute__((mode(__pointer__))) *p);
-> is a gcc way to say "pointer to integer type equivalent to intptr_t" an=
-d
-> 	int __attribute__((mode(__pointer__))) *p;
-> is exactly the same thing as
-> 	int *p;
-> since the damn attribute applies to the entire type here (and is obviou=
-sly
-> a no-op).
->
-> Frankly, I would rather add a new primitive (__qualifier__) mirroring t=
-he
-> __attribute__, but acting like real qualifiers do.  And switched the
-> noderef et.al. to it.
-
-Something like that sounds vaguely reasonable.  It should allow the same =
-set
-of attributes, and just change what they apply to.  To use your example,
-T __qualifier__((foo)) *v;
-and
-T (__attribute__((foo)) *v);
-would mean the same thing.
-
-> The only real alternative is to have __attribute__
-> behaviour dependent on its guts and that's not feasible - remember that=
-
-> there can be more than one attribute in the list insider the damn thing=
-=2E
-> Besides, it's bloody disgusting.
-
-Agreed.  Not an option, even if we *could* implement it.
-
-- Josh Triplett
-
-
---------------enig303224320AC2F992AED99646
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGjRADGJuZRtD+evsRApgLAJwLNHMByiXMUrOn+8/ecHSaCuOY7wCgncDJ
-aAfhWE/bndDAY10MGdr1js0=
-=VhSc
------END PGP SIGNATURE-----
-
---------------enig303224320AC2F992AED99646--
+OK.  AFAICS,
+	a) __attribute__ is not an option since it doesn't act as
+a qualifier (i.e. won't satisfy the requirements of section 5 in
+there).  In constructs like int __attribute__((foo)) *p, attribite
+applies to int *, not to int, according to gcc documentation.
+	b) we still need noderef, unless implementation provides
+some way to tie that to address space itself.
+	c) we need some way to declare address spaces that would *not*
+be subsets of generic one; rules for pointer conversions allow conversion
+from nested address space on assignment and we definitely don't want
+that for __user -> generic or __iomem -> generic.
+	d) addressmod() doesn't look right for declaration of address space.
+Looks like it's a macro anyway (it accepts macros for accessors, so it
+can't live after preprocessing phase), so...  what syntax are you using
+for declarations?
+	e) [IMPORTANT] typeof() behaviour: at the very least, we want
+some way to strip __user on typeof().  Even if it turns into a new
+primitive (__unqualify__(type)).  gcc typeof leaves qualifiers in place.
+We very definitely want a way to have an auto variable declared with
+given type sans the address space; think of obvious uses in macros.
+If __user et.al. are based on some sparse-only mechanism, we can special-case
+them all we want, but if it becomes something gcc would understand...  We
+will need the same semantics.
+	So we either need gcc typeof() to remove address space qualifier
+(IMO unlikely to happen) *or* an independent primitive that would strip
+qualifiers from a type, so that with
+	typedef const int C;
+	typedef int A[2];
+we would have
+	__unqualify__(const int) => int
+	__unqualify__(const int *) => const int * // qualifier inside
+	__unqualify__(__user int) => int
+	__unqualify__(int __user *) => int __user * // qualifier inside
+	__unqualify__(int * __user) => int *
+	__unqualify__(C) => int
+	__unqualify__(const A) => int[2]
+	__unqualify__(const int [2]) => int[2] // same type as in previous
