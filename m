@@ -1,39 +1,70 @@
-From: Derek M Jones <derek@knosof.co.uk>
-Subject: Re: [RFC] explicitly signed and friends
-Date: Wed, 04 Jul 2007 01:51:13 +0100
-Message-ID: <468AEF01.2040603@knosof.co.uk>
-References: <20070702203008.GH21478@ftp.linux.org.uk> <468A6D89.3050800@knosof.co.uk> <20070703230141.GI21478@ftp.linux.org.uk>
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: [RFC] bloody mess with __attribute__() syntax
+Date: Thu, 5 Jul 2007 10:35:28 +0100
+Message-ID: <20070705093528.GK21478@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mtaout01-winn.ispmail.ntl.com ([81.103.221.47]:49059 "EHLO
-	mtaout01-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751529AbXGDAvc (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:55883 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757981AbXGEJf3 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Jul 2007 20:51:32 -0400
-In-Reply-To: <20070703230141.GI21478@ftp.linux.org.uk>
+	Thu, 5 Jul 2007 05:35:29 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org
 
-Al,
+	We have a fun problem and for a change it's not sparse fault.
+It's gcc folks' one.  Basically, __attribute__((...)) behaves in
+an idiotic way and it's an intentional (and documented) behaviour.
+In declaration of form
+	T __attribute__((foo)) **v;
+the attribute applies to v, not to **v.  IOW, in that position it
+behaves (regardless of the nature of attribute) as storage class,
+not as a qualifier.  Even if the same attribute can be used in
+	T * __attribute__((foo)) *v;
+where it will apply to *v.  Intended way to have it apply to **v is
+	T (__attribute__((foo)) **v);
 
->>> 4)
->>> gcc is kinda-sorta tolerant to mixing pointers to signed and unsigned,
->>> unless you explicitly ask to be strict.  However, it's nowhere near
->>> as lenient as sparse.
-> 
->> Having sparse complain about
->> constructs that gcc is rather lax about means that those involved in
->> kernel development might fix the underlying problem in their code.
-> 
-> Compare the last two sentences...
+To put it mildly, that blows.  Note that qualifiers can *not* behave
+that way - direct declarator can not expand to (<qualifier> <something>).
+I.e. if you replace __attribute__((foo)) with qualifier in the
+above, you'll get invalid syntax.
 
-I was running in Dr Who mode.
+Now, that idiocy would be none of our concern, if not for the fact
+that noderef and address_space() are definitely supposed to imitate
+qualifiers.  If anybody seriously suggests switching to syntax
+like
+	int (__user *p);
+all over the place, well...
 
--- 
-Derek M. Jones                              tel: +44 (0) 1252 520 667
-Knowledge Software Ltd                      mailto:derek@knosof.co.uk
-Applications Standards Conformance Testing    http://www.knosof.co.uk
+Note that gcc rules for __attribute__() (and that's the only source
+of rules we _have_ for the damn thing) clearly say that
+	int __user *p;
+is the same thing as
+	int *__user p;
+
+Now, we could declare gcc people responsible for that turd rejects
+of Vogon Construction Fleet and handle the damn thing sanely.
+The first part is clearly the right thing to do, but the second one...
+Can't do without breaking gccisms using __attribute__.  E.g.
+	int (__attribute__((mode(__pointer__))) *p);
+is a gcc way to say "pointer to integer type equivalent to intptr_t" and
+	int __attribute__((mode(__pointer__))) *p;
+is exactly the same thing as
+	int *p;
+since the damn attribute applies to the entire type here (and is obviously
+a no-op).
+
+Frankly, I would rather add a new primitive (__qualifier__) mirroring the
+__attribute__, but acting like real qualifiers do.  And switched the
+noderef et.al. to it.  The only real alternative is to have __attribute__
+behaviour dependent on its guts and that's not feasible - remember that
+there can be more than one attribute in the list insider the damn thing.
+Besides, it's bloody disgusting.
+
+And yes, I realize that it's an incompatible change, i.e. not a step
+to be taken lightly.  Better ways out of that mess are more than
+welcome; I don't see any ;-/
