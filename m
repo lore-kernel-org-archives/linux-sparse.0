@@ -1,77 +1,106 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
+From: Pavel Roskin <proski@gnu.org>
 Subject: Re: [patch 5/9] x86_64: arch_pick_mmap_layout() fixlet
-Date: Fri, 06 Jul 2007 12:53:46 -0700
-Message-ID: <1183751626.2613.54.camel@josh-work.beaverton.ibm.com>
+Date: Fri, 06 Jul 2007 17:39:48 -0400
+Message-ID: <1183757988.26511.60.camel@dv>
 References: <200707060939.l669drk2019988@imap1.linux-foundation.org>
 	 <alpine.LFD.0.98.0707061010060.21374@woody.linux-foundation.org>
+	 <1183751626.2613.54.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e35.co.us.ibm.com ([32.97.110.153]:58725 "EHLO
-	e35.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756279AbXGFTxj (ORCPT
+Received: from fencepost.gnu.org ([140.186.70.10]:44471 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760761AbXGFVj4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 6 Jul 2007 15:53:39 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e35.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id l66Jrcbs016229
-	for <linux-sparse@vger.kernel.org>; Fri, 6 Jul 2007 15:53:38 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v8.3) with ESMTP id l66Jrc8I205562
-	for <linux-sparse@vger.kernel.org>; Fri, 6 Jul 2007 13:53:38 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l66JrbdS004059
-	for <linux-sparse@vger.kernel.org>; Fri, 6 Jul 2007 13:53:38 -0600
-In-Reply-To: <alpine.LFD.0.98.0707061010060.21374@woody.linux-foundation.org>
+	Fri, 6 Jul 2007 17:39:56 -0400
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1I6vWv-0007Rm-2N
+	for linux-sparse@vger.kernel.org; Fri, 06 Jul 2007 17:39:57 -0400
+In-Reply-To: <1183751626.2613.54.camel@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: akpm@linux-foundation.org, Josh Triplett <josh@freedesktop.org>, Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org, adobriyan@sw.ru, ak@suse.de
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, akpm@linux-foundation.org, Josh Triplett <josh@freedesktop.org>, Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org, adobriyan@sw.ru, ak@suse.de
 
-On Fri, 2007-07-06 at 10:21 -0700, Linus Torvalds wrote:
-> This would be a sparse bug, I think.
+On Fri, 2007-07-06 at 12:53 -0700, Josh Triplett wrote:
+
+> I do think the sparse warning logic needs some work.  -Wall logically
+> should mean "all warnings", but gcc historically uses it to mean "some
+> reasonable set of warnings".  However, since Sparse exists solely to
+> give warnings, it defaults to "some reasonable set of warnings", and
+> uses -Wall for "all warnings".  Perhaps for gcc compatibility, that
+> should change.
+
+I agree in principle, but I'm yet to hear of a warning that sparse emits
+and that should not be enabled by -Wall.
+
+>   I'd love to hear suggestions for how Sparse should
+> behave.  A few options:
 > 
-> Returning a void-valued expression in a void-valued function is 
-> proper C99 (and gcc has allowed it for longer). And it often makes for 
-> nicer-looking code, with no real downsides.
-> 
-> This seems to be a new bug introduced by Al Viro in sparse: -Wall should 
-> _not_ enable -Wreturn-void, I think (and I don't think Al meant it to: his 
-> commit message says "Conditional on -Wreturn-void", and he probably didn't 
-> think about the fact that -Wall will force them all on.
-> 
-> Josh, Al and sparse mailing list added to participants list, and patch 
-> dropped. I think -Wreturn-void is fine, but it just shouldn't be part of 
-> -Wall, and thus shouldn't trigger for the kernl.
+>       * Leave the current behavior, and tell people annoyed by Sparse
+>         warnings they don't care about that they should either avoid
+>         -Wall or use -Wall -Wno-warning-i-do-not-care-about.
 
-The kernel does not seem to use sparse -Wall by default.  Did the patch
-submitter use CF=-Wall or CF=-Wreturn-void, or otherwise change the set
-of warnings emitted by Sparse?
+That's the best approach until sparse learns to report some ridiculously
+minor warnings.
 
-I do think the sparse warning logic needs some work.  -Wall logically
-should mean "all warnings", but gcc historically uses it to mean "some
-reasonable set of warnings".  However, since Sparse exists solely to
-give warnings, it defaults to "some reasonable set of warnings", and
-uses -Wall for "all warnings".  Perhaps for gcc compatibility, that
-should change.  I'd love to hear suggestions for how Sparse should
-behave.  A few options:
+>       * Ignore -Wall since we already give a reasonable default set of
+>         warnings, and possibly introduce a -Weverything or similar that
+>         really does mean "turn on every Sparse warning".
 
-      * Leave the current behavior, and tell people annoyed by Sparse
-        warnings they don't care about that they should either avoid
-        -Wall or use -Wall -Wno-warning-i-do-not-care-about.
-      * Ignore -Wall since we already give a reasonable default set of
-        warnings, and possibly introduce a -Weverything or similar that
-        really does mean "turn on every Sparse warning".
-      * Change -Wall to mean "turn on some additional warnings, but not
-        all of them".  We then have to decide which warnings -Wall
-        should enable, and again we might want to add a -Weverything.
-      * Turn off all warnings by default unless you give -Wall.  This
-        seems entirely broken, given the purpose of Sparse.
+gcc has -Wextra (formerly -W) to enable some (but still not all)
+warnings not enabled by -Wall.  The warnings not enabled by -Wall
+-Wextra include e.g. -Wlong-long and -Winline, which search so some
+specific conditions (long long used, function cannot be inlined etc).
 
-> On Fri, 6 Jul 2007, akpm@linux-foundation.org wrote:
-> > From: Alexey Dobriyan <adobriyan@sw.ru>
-> > 
-> > sparse now warns about
-> > arch/x86_64/mm/mmap.c:15:3: warning: returning void-valued expression
+I'm ignoring "-pedantic", "-ansi" and language standards for now, as
+they have more effect than just the set of warnings.
 
-- Josh Triplett
+If we want to be (sort of) gcc compatible, we would have following
+groups:
+
+1) Severe warnings - always enabled.  Such warnings should always be
+avoided by the programmers, as they are likely to break or they indicate
+some non-trivial assumptions that should be better expressed in the
+code.  Example - implicit cast from pointer to integer.
+
+2) Major warnings - enabled by -Wall.  They may be harder to find and
+trickier to avoid, but they should be avoided too.  They may indicate
+poorly written but correct code.  Example - missing prototype.
+
+3) Minor warnings - enabled by -Wextra.  Such warnings may be OK in some
+cases, although pedantic coders would want to avoid them.  Example -
+comparing signed and unsigned integers.
+
+4) Specific warnings - enabled by specific flags.  Those are not
+warnings in a usual sense.  They are used to look for some conditions
+that can affect e.g. performance retardation or portability to some
+unusual platforms.  Examples - use of long long, explicit cast from
+pointer to integer.
+
+Some of the groups can be are empty now.  If no warning can be
+classified as "major", then sparse will ignore -Wall.  Given that
+warnings is sparse's main product, I can imagine that to be the case,
+i.e. nothing is hard for sparse to find.
+
+>       * Change -Wall to mean "turn on some additional warnings, but not
+>         all of them".  We then have to decide which warnings -Wall
+>         should enable, and again we might want to add a -Weverything.
+
+As I said, whether sparse recognizes -Wall depends on classification of
+the warnings.  I'm not very enthusiastic about -Weverything, as it would
+(eventually) dump together "warnings" that are not actually warnings.
+(Oh horror, your program uses long long and casts pointers to integers
+explicitly!)
+
+>       * Turn off all warnings by default unless you give -Wall.  This
+>         seems entirely broken, given the purpose of Sparse.
+
+Indeed, that would be wrong, unless we decide that sparse cannot
+recognize any severe warnings.
+
+-- 
+Regards,
+Pavel Roskin
