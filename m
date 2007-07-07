@@ -1,106 +1,81 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [patch 5/9] x86_64: arch_pick_mmap_layout() fixlet
-Date: Fri, 06 Jul 2007 17:39:48 -0400
-Message-ID: <1183757988.26511.60.camel@dv>
-References: <200707060939.l669drk2019988@imap1.linux-foundation.org>
-	 <alpine.LFD.0.98.0707061010060.21374@woody.linux-foundation.org>
-	 <1183751626.2613.54.camel@josh-work.beaverton.ibm.com>
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: Re: [RFC] bloody mess with __attribute__() syntax
+Date: Sat, 7 Jul 2007 03:11:52 +0100
+Message-ID: <20070707021152.GA21668@ftp.linux.org.uk>
+References: <20070705093528.GK21478@ftp.linux.org.uk> <468D1003.1050901@freedesktop.org> <20070705164334.GM21478@ftp.linux.org.uk> <1183661456.2604.43.camel@josh-work.beaverton.ibm.com> <20070706074803.GV21478@ftp.linux.org.uk> <468DFE5A.8080602@freedesktop.org> <20070706155245.GX21478@ftp.linux.org.uk> <1183750167.2613.36.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fencepost.gnu.org ([140.186.70.10]:44471 "EHLO
-	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760761AbXGFVj4 (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:50753 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753371AbXGGCLz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 6 Jul 2007 17:39:56 -0400
-Received: from proski by fencepost.gnu.org with local (Exim 4.60)
-	(envelope-from <proski@gnu.org>)
-	id 1I6vWv-0007Rm-2N
-	for linux-sparse@vger.kernel.org; Fri, 06 Jul 2007 17:39:57 -0400
-In-Reply-To: <1183751626.2613.54.camel@josh-work.beaverton.ibm.com>
+	Fri, 6 Jul 2007 22:11:55 -0400
+Content-Disposition: inline
+In-Reply-To: <1183750167.2613.36.camel@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josht@linux.vnet.ibm.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, akpm@linux-foundation.org, Josh Triplett <josh@freedesktop.org>, Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org, adobriyan@sw.ru, ak@suse.de
+Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, 2007-07-06 at 12:53 -0700, Josh Triplett wrote:
-
-> I do think the sparse warning logic needs some work.  -Wall logically
-> should mean "all warnings", but gcc historically uses it to mean "some
-> reasonable set of warnings".  However, since Sparse exists solely to
-> give warnings, it defaults to "some reasonable set of warnings", and
-> uses -Wall for "all warnings".  Perhaps for gcc compatibility, that
-> should change.
-
-I agree in principle, but I'm yet to hear of a warning that sparse emits
-and that should not be enabled by -Wall.
-
->   I'd love to hear suggestions for how Sparse should
-> behave.  A few options:
+On Fri, Jul 06, 2007 at 12:29:27PM -0700, Josh Triplett wrote:
+> The existing context annotations should suffice for many cases.
+> compiler.h will need new wrappers for cases like requiring a lock.  For
+> a very simple example:
 > 
->       * Leave the current behavior, and tell people annoyed by Sparse
->         warnings they don't care about that they should either avoid
->         -Wall or use -Wall -Wno-warning-i-do-not-care-about.
+> compiler.h:
+> #define require_context(x) __attribute__((context(x,1,1))
+> 
+> magic_device.c:
+> DEFINE_SPINLOCK(device_lock);
+> struct the_device the_device require_context(device_lock);
 
-That's the best approach until sparse learns to report some ridiculously
-minor warnings.
+*ugh*
 
->       * Ignore -Wall since we already give a reasonable default set of
->         warnings, and possibly introduce a -Weverything or similar that
->         really does mean "turn on every Sparse warning".
+More ugly syntax...
 
-gcc has -Wextra (formerly -W) to enable some (but still not all)
-warnings not enabled by -Wall.  The warnings not enabled by -Wall
--Wextra include e.g. -Wlong-long and -Winline, which search so some
-specific conditions (long long used, function cannot be inlined etc).
+> compiler.h:
+> #ifdef __CHECKER__
+> #define fake_context(x) extern const int x
+> #else
+> #define fake_context(x)
+> #endif
+> 
+> preempt.h:
+> fake_context(preemption);
+> #define preempt_disable() ... __acquire(preemption)
+> #define preempt_enable() ... __release(preemption)
+> #define might_sleep_attr() ... /* something */
+ 
+Still not expressive enough...  Consider e.g.
 
-I'm ignoring "-pedantic", "-ansi" and language standards for now, as
-they have more effect than just the set of warnings.
+struct foo *lookup_foo(char *s); // lookup by name, return NULL if failed
+				 // or pointer to struct foo with ->mutex
+				 // held.  Caller should unlock.
 
-If we want to be (sort of) gcc compatible, we would have following
-groups:
+It's legitimate, not particulary rare and AFAICS can't be expressed.
 
-1) Severe warnings - always enabled.  Such warnings should always be
-avoided by the programmers, as they are likely to break or they indicate
-some non-trivial assumptions that should be better expressed in the
-code.  Example - implicit cast from pointer to integer.
+> Sparse does not yet enforce all of these conditions.  Also, the "at
+> least this value" semantic for the precondition makes it hard to use
+> contexts for things like "this blocks" and "may not block in this
+> context".  As I said, it needs work.  However, I intend for it to mean
+> *exactly* the same thing on functions or variables, except that in the
+> former case it means "when called", and in the latter case it means
+> "when accessed".  In both cases, you can require a context and change
+> the context.
 
-2) Major warnings - enabled by -Wall.  They may be harder to find and
-trickier to avoid, but they should be avoided too.  They may indicate
-poorly written but correct code.  Example - missing prototype.
+_What_ change in case of objects?
 
-3) Minor warnings - enabled by -Wextra.  Such warnings may be OK in some
-cases, although pedantic coders would want to avoid them.  Example -
-comparing signed and unsigned integers.
+> A fine question.  In the simple cases, "same symbol" will work fairly
+> well; certainly better than the current "always equal" comparison. :)
+> Ideally, however, you want "refers to the same value".  Alias analysis
+> could do a fairly good job of that, I think.
 
-4) Specific warnings - enabled by specific flags.  Those are not
-warnings in a usual sense.  They are used to look for some conditions
-that can affect e.g. performance retardation or portability to some
-unusual platforms.  Examples - use of long long, explicit cast from
-pointer to integer.
-
-Some of the groups can be are empty now.  If no warning can be
-classified as "major", then sparse will ignore -Wall.  Given that
-warnings is sparse's main product, I can imagine that to be the case,
-i.e. nothing is hard for sparse to find.
-
->       * Change -Wall to mean "turn on some additional warnings, but not
->         all of them".  We then have to decide which warnings -Wall
->         should enable, and again we might want to add a -Weverything.
-
-As I said, whether sparse recognizes -Wall depends on classification of
-the warnings.  I'm not very enthusiastic about -Weverything, as it would
-(eventually) dump together "warnings" that are not actually warnings.
-(Oh horror, your program uses long long and casts pointers to integers
-explicitly!)
-
->       * Turn off all warnings by default unless you give -Wall.  This
->         seems entirely broken, given the purpose of Sparse.
-
-Indeed, that would be wrong, unless we decide that sparse cannot
-recognize any severe warnings.
-
--- 
-Regards,
-Pavel Roskin
+Not particulary useful, since for
+	int foo(struct bar *p) __acquires(&p->lock);
+	int bar(struct bar *p) __acquires(&p->lock);
+you will get false negative in (n ? foo : bar) *and* it will persist even if
+you go for
+	int foo(struct bar *p) __acquires(p);
+	int bar(struct bar *p) __acquires(p);
+since you will have different symbols (same name, different scopes) here.
