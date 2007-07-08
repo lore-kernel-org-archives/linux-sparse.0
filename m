@@ -1,65 +1,46 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Structures from -include are "weak"
-Date: Sat, 07 Jul 2007 23:32:50 -0400
-Message-ID: <1183865570.12651.18.camel@gx>
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: Re: Structures from -include are "weak"
+Date: Sun, 8 Jul 2007 06:42:18 +0100
+Message-ID: <20070708054218.GD21668@ftp.linux.org.uk>
+References: <1183865570.12651.18.camel@gx>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:23549 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751791AbXGHDpd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 7 Jul 2007 23:45:33 -0400
-Received: from [192.168.1.100] (c-71-230-131-166.hsd1.pa.comcast.net [71.230.131.166])
-	by relay.cesmail.net (Postfix) with ESMTP id 905A8618FE1
-	for <linux-sparse@vger.kernel.org>; Sat,  7 Jul 2007 23:35:51 -0400 (EDT)
+Received: from zeniv.linux.org.uk ([195.92.253.2]:34382 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751536AbXGHFmV (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 8 Jul 2007 01:42:21 -0400
+Content-Disposition: inline
+In-Reply-To: <1183865570.12651.18.camel@gx>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
+On Sat, Jul 07, 2007 at 11:32:50PM -0400, Pavel Roskin wrote:
 
-I'm trying to use sparse on standalone kernel drivers that use -include
-to include compatibility code for slightly older kernels, so that it's
-possible to have exactly the same driver sources in the kernel and in
-the standalone project.
+> It looks like the definition of struct st is sort of "weak" when it's
+> read from the header included on the command line, so that the forward
+> declaration from test.c removes the original definition.
+> 
+> It's also possible to define struct st to something else, and sparse
+> won't warn about it.  But omitting "struct st;" fixes the error, so the
+> original definition is known to sparse.
 
-Support for multiple -include switches has been very helpful, and things
-have been working fine for some time, but now I'm seeing massive error
-messages about dereferencing members of incomplete structures.
+Looks like it gets a scope boundary between those.  There is one case
+when presense of struct st; changes things: struct st; in
 
-I've been able to reduce the problem to the following test case.
-
-test.h:
-
-struct st {
-        int len;
-};
-
-test.c:
-
-struct st;
-int test(struct st *s);
-int test(struct st *s)
+struct st {....};
+....
 {
-        return s->len;
+	struct st;
+	struct st *p;
+	...
+	struct st {....} x;
+	...
 }
 
-Commands to run:
-
-$ sparse -include test.h test.c
-test.c:5:10: error: using member 'len' in incomplete struct st
-$ gcc -c -include test.h test.c
-$
-
-It looks like the definition of struct st is sort of "weak" when it's
-read from the header included on the command line, so that the forward
-declaration from test.c removes the original definition.
-
-It's also possible to define struct st to something else, and sparse
-won't warn about it.  But omitting "struct st;" fixes the error, so the
-original definition is known to sparse.
-
--- 
-Regards,
-Pavel Roskin
+will make p a pointer to struct st from that scope.  If you omit it,
+p will be a pointer to struct st from the outer scope and x will have
+a different type.  Too late beginning of file scope, perhaps?
