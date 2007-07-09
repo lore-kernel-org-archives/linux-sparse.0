@@ -1,53 +1,67 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results
- into test files
-Date: Sun, 08 Jul 2007 14:52:30 -0700
-Message-ID: <46915C9E.503@freedesktop.org>
-References: <20070628053954.30704.66440.stgit@dv.roinet.com>	 <20070628054019.30704.64375.stgit@dv.roinet.com>	 <46836129.7050407@freedesktop.org>	 <cbf3148c0706281159x7b252776nd08fd9bd9e36b92@mail.gmail.com>	 <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>	 <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>	 <1183076949.2621.196.camel@josh-work.beaverton.ibm.com> <cbf3148c0707012159l65432435we10fd9370c282dc4@mail.gmail.com>
+Subject: Re: [PATCH] fix the comma handling in integer constant expressions
+Date: Sun, 08 Jul 2007 18:50:35 -0700
+Message-ID: <4691946B.8030709@freedesktop.org>
+References: <20070701074848.GA1101@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigCF2776401E45DC027D77103A"
+ boundary="------------enig78822365BFA67B8C73203CE3"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:48335 "EHLO
+Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:49923 "EHLO
 	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757265AbXGHVwo (ORCPT
+	with ESMTP id S1756754AbXGIBuu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 8 Jul 2007 17:52:44 -0400
-In-Reply-To: <cbf3148c0707012159l65432435we10fd9370c282dc4@mail.gmail.com>
+	Sun, 8 Jul 2007 21:50:50 -0400
+In-Reply-To: <20070701074848.GA1101@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Damien Lespiau <damien.lespiau@gmail.com>
-Cc: Josh Triplett <josht@linux.vnet.ibm.com>, Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigCF2776401E45DC027D77103A
-Content-Type: text/plain; charset=UTF-8
+--------------enig78822365BFA67B8C73203CE3
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-I've applied Damien's test-suite patches.  I've started making use of the=
- test
-suite, and adding the test-suite comments to more files in validation.  I=
- find
-it a pleasure to work with; thanks, Damien!
+Al Viro wrote:
+> [my apologies to the folks on Cc, original mails got the list address
+> buggered in To:, thus the resend of the entire series just to the list]=
 
-Thanks to Pavel as well, for pushing automated testing to begin with, and=
- for
-contributing to the final result.
+>=20
+> On Wed, Jun 27, 2007 at 04:54:25PM +0100, Al Viro wrote:
+>> ... or it could be done simpler, if we keep the current logics for
+>> Int_const_expr flag at parse time and add a 'const expression' one
+>> with rules as above.  Anyway, I'm going to get some sleep before
+>> dealing with that crap.
+>=20
+> From: Al Viro <viro@zeniv.linux.org.uk>
+> Date: Sun, 1 Jul 2007 02:28:10 -0400
+> Subject: [PATCH] fix the comma handling in integer constant expressions=
 
-Damien, I noticed one minor issue with test-suite: it seems to eat whites=
-pace
-in the Sparse output, making "test-suite format" for several of the
-preprocessor tests (such as preprocessor18.c) not match the actual output=
-=2E  I
-would guess some kind of quoting problem.  Here documents may not do what=
- you
-want.  Could you take a look at that, please?
+>=20
+> Treat it as normal binary operation, taint the value, check the taint.
+> We can do other kind of value tainting with the same infrastructure
+> as well...
+>=20
+> Review and testing would be welcome; AFAICS, it works, but...
+
+Seems to work for me.  Applied.
+
+I did notice one thing:
+
+$ ./sparse /dev/stdin <<<"int x; struct { unsigned int i:x; };"
+/dev/stdin:1:32: error: bad constant expression
+/dev/stdin:1:33: error: invalid named zero-width bitfield `i'
+
+That seems like double-warning for the same error.  Probably a pain to
+suppress the second error, though.
 
 - Josh Triplett
 
 
---------------enigCF2776401E45DC027D77103A
+
+--------------enig78822365BFA67B8C73203CE3
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -56,9 +70,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGkVyfGJuZRtD+evsRAr+QAJ9p+9NDzyIsEbvl15C02ih/MyjgSACeP0H+
-dPKP2hHQWPed9srrdmGm+R0=
-=+8oV
+iD8DBQFGkZRrGJuZRtD+evsRAme0AJ4o9p7ad2nIeg4ZouFLGwe8HoTASQCgiGOZ
+p8m2mAzupBB/OgL2HUR+qgA=
+=MIxx
 -----END PGP SIGNATURE-----
 
---------------enigCF2776401E45DC027D77103A--
+--------------enig78822365BFA67B8C73203CE3--
