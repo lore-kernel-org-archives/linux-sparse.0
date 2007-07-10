@@ -1,433 +1,195 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH] fix handling of address_space in casts and assignments
-Date: Mon, 9 Jul 2007 23:13:06 +0100
-Message-ID: <20070709221306.GP21668@ftp.linux.org.uk>
+Subject: [PATCH] fix handling of pointers in ?:
+Date: Tue, 10 Jul 2007 02:07:33 +0100
+Message-ID: <20070710010733.GQ21668@ftp.linux.org.uk>
+References: <20070709221306.GP21668@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:58554 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:54506 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753858AbXGIWNH (ORCPT
+	with ESMTP id S1757560AbXGJBHe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Jul 2007 18:13:07 -0400
+	Mon, 9 Jul 2007 21:07:34 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1I81Te-0005N5-6H
-	for linux-sparse@vger.kernel.org; Mon, 09 Jul 2007 23:13:06 +0100
+	id 1I84CT-0000eU-Nm
+	for linux-sparse@vger.kernel.org; Tue, 10 Jul 2007 02:07:33 +0100
 Content-Disposition: inline
+In-Reply-To: <20070709221306.GP21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Turn FORCE_MOD into storage class specifier (that's how it's
-actually used and that makes for much simpler logics).
+a) qualifiers are joined (const int * / volatile int * -> const volatile int *)
+b) pointer to void / pointer to T => pointer to void (with all qualifiers)
 
-Introduce explicit EXPR_FORCE_CAST for forced casts; handle it
-properly.
+testcase added
 
-Kill the idiocy in get_as() (we end up picking the oddest things
-for address space - e.g. if we have int __attribute__((address_space(1))) *p,
-we'll get warnings about removal of address space when we do things like
-(unsigned short)*p.  Fixed.  BTW, that had caught a bunch of very odd
-bogosities in the kernel and eliminated several false positives in there.
-
-As the result, get_as() is gone now and evaluate_cast() got simpler.
-
-Kill the similar idiocy in handling pointer assignments; while we are at it,
-fix the qualifiers check for assignments to/from void * (you can't assign
-const int * to void * - qualifiers on the left side should be no less than
-on the right one; for normal codepath we get that checked, but the special
-case of void * skips these checks).
+Still missing: T1 * / T2 * => pointer to composite type of T1 and T2
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- compile-i386.c |    1 +
- dissect.c      |    2 +-
- evaluate.c     |   91 +++++++++++++++++++++++---------------------------------
- expand.c       |    1 +
- expression.c   |   18 ++++++++---
- expression.h   |    3 +-
- inline.c       |    1 +
- linearize.c    |    1 +
- parse.c        |    7 +++-
- show-parse.c   |    1 +
- symbol.h       |    4 +-
- 11 files changed, 65 insertions(+), 65 deletions(-)
+ evaluate.c              |   82 ++++++++++++++++++++++++++++-------------------
+ validation/cond_expr2.c |   23 +++++++++++++
+ 2 files changed, 72 insertions(+), 33 deletions(-)
+ create mode 100644 validation/cond_expr2.c
 
-diff --git a/compile-i386.c b/compile-i386.c
-index 425a1bc..8526408 100644
---- a/compile-i386.c
-+++ b/compile-i386.c
-@@ -2351,6 +2351,7 @@ static struct storage *x86_expression(struct expression *expr)
- 		warning(expr->pos, "invalid expression after evaluation");
- 		return NULL;
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 		return emit_cast_expr(expr);
- 	case EXPR_VALUE:
-diff --git a/dissect.c b/dissect.c
-index 9dc3df9..61240d7 100644
---- a/dissect.c
-+++ b/dissect.c
-@@ -317,7 +317,7 @@ again:
- 		do_expression(U_VOID, expr->left);
- 		ret = do_expression(mode, expr->right);
- 
--	break; case EXPR_CAST: //case EXPR_IMPLIED_CAST:
-+	break; case EXPR_CAST: case EXPR_FORCE_CAST: //case EXPR_IMPLIED_CAST:
- 		ret = base_type(expr->cast_type);
- 		do_initializer(ret, expr->cast_expression);
- 
 diff --git a/evaluate.c b/evaluate.c
-index b97a4d7..d505007 100644
+index d505007..9f543fe 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -1276,6 +1276,22 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
- 				bad_null(*rp);
- 			goto Cast;
- 		}
-+		if (sclass & TYPE_PTR && t->ctype.as == s->ctype.as) {
-+			/* we should be more lazy here */
-+			int mod1 = t->ctype.modifiers;
-+			int mod2 = s->ctype.modifiers;
-+			s = get_base_type(s);
-+			t = get_base_type(t);
-+
-+			/*
-+			 * assignments to/from void * are OK, provided that
-+			 * we do not remove qualifiers from pointed to [C]
-+			 * or mix address spaces [sparse].
-+			 */
-+			if (!(mod2 & ~mod1 & (MOD_VOLATILE | MOD_CONST)))
-+				if (s == &void_ctype || t == &void_ctype)
-+					goto Cast;
-+		}
- 	}
- 
- 	/* It's OK if the target is more volatile or const than the source */
-@@ -1283,22 +1299,6 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
- 	if (!typediff)
- 		return 1;
- 
--	/* Pointer destination? */
--	if (tclass & TYPE_PTR) {
--		int source_as;
--		int target_as;
--
--		/* "void *" matches anything as long as the address space is OK */
--		target_as = t->ctype.as | target->ctype.as;
--		source_as = s->ctype.as | source->ctype.as;
--		if (source_as == target_as && (s->type == SYM_PTR || s->type == SYM_ARRAY)) {
--			s = get_base_type(s);
--			t = get_base_type(t);
--			if (s == &void_ctype || t == &void_ctype)
--				goto Cast;
--		}
--	}
--
- 	warning(expr->pos, "incorrect type in %s (%s)", where, typediff);
- 	info(expr->pos, "   expected %s", show_typename(target));
- 	info(expr->pos, "   got %s", show_typename(source));
-@@ -1330,6 +1330,7 @@ static void mark_assigned(struct expression *expr)
- 		mark_assigned(expr->right);
- 		return;
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 		mark_assigned(expr->cast_expression);
- 		return;
- 	case EXPR_SLICE:
-@@ -2496,46 +2497,13 @@ static void evaluate_initializer(struct symbol *ctype, struct expression **ep)
- 		expression_error(*ep, "invalid initializer");
+@@ -1070,31 +1070,6 @@ OK:
  }
  
--static int get_as(struct symbol *sym)
+ /*
+- * FIXME!! This should do casts, array degeneration etc..
+- */
+-static struct symbol *compatible_ptr_type(struct expression *left, struct expression *right)
 -{
--	int as;
--	unsigned long mod;
+-	struct symbol *ltype = left->ctype, *rtype = right->ctype;
 -
--	if (!sym)
--		return 0;
--	as = sym->ctype.as;
--	mod = sym->ctype.modifiers;
--	if (sym->type == SYM_NODE) {
--		sym = sym->ctype.base_type;
--		as |= sym->ctype.as;
--		mod |= sym->ctype.modifiers;
+-	if (ltype->type == SYM_NODE)
+-		ltype = ltype->ctype.base_type;
+-
+-	if (rtype->type == SYM_NODE)
+-		rtype = rtype->ctype.base_type;
+-
+-	if (ltype->type == SYM_PTR) {
+-		if (rtype->ctype.base_type == &void_ctype)
+-			return ltype;
 -	}
 -
--	/*
--	 * At least for now, allow casting to a "unsigned long".
--	 * That's how we do things like pointer arithmetic and
--	 * store pointers to registers.
--	 */
--	if (sym == &ulong_ctype)
--		return -1;
--
--	if (sym && sym->type == SYM_PTR) {
--		sym = get_base_type(sym);
--		as |= sym->ctype.as;
--		mod |= sym->ctype.modifiers;
+-	if (rtype->type == SYM_PTR) {
+-		if (ltype->ctype.base_type == &void_ctype)
+-			return rtype;
 -	}
--	if (mod & MOD_FORCE)
--		return -1;
--	return as;
+-	return NULL;
 -}
 -
- static struct symbol *evaluate_cast(struct expression *expr)
+-/*
+  * NOTE! The degenerate case of "x ? : y", where we don't
+  * have a true case, this will possibly promote "x" to the
+  * same type as "y", and thus _change_ the conditional
+@@ -1104,9 +1079,10 @@ static struct symbol *compatible_ptr_type(struct expression *left, struct expres
+ static struct symbol *evaluate_conditional_expression(struct expression *expr)
  {
- 	struct expression *target = expr->cast_expression;
- 	struct symbol *ctype;
- 	struct symbol *t1, *t2;
- 	int class1, class2;
--	int as1, as2;
-+	int as1 = 0, as2 = 0;
+ 	struct expression **true;
+-	struct symbol *ctype, *ltype, *rtype;
++	struct symbol *ctype, *ltype, *rtype, *lbase, *rbase;
+ 	int lclass, rclass;
+ 	const char * typediff;
++	int qual;
  
- 	if (!target)
+ 	if (!evaluate_conditional(expr->conditional, 0))
  		return NULL;
-@@ -2596,6 +2564,9 @@ static struct symbol *evaluate_cast(struct expression *expr)
- 	if (class1 & TYPE_COMPOUND)
- 		warning(expr->pos, "cast to non-scalar");
- 
-+	if (class1 == TYPE_PTR)
-+		get_base_type(t1);
-+
- 	t2 = target->ctype;
- 	if (!t2) {
- 		expression_error(expr, "cast from unknown type");
-@@ -2606,19 +2577,30 @@ static struct symbol *evaluate_cast(struct expression *expr)
- 	if (class2 & TYPE_COMPOUND)
- 		warning(expr->pos, "cast from non-scalar");
- 
-+	if (expr->type == EXPR_FORCE_CAST)
-+		goto out;
-+
- 	/* allowed cast unfouls */
- 	if (class2 & TYPE_FOULED)
- 		t2 = t2->ctype.base_type;
- 
--	if (!(ctype->ctype.modifiers & MOD_FORCE) && t1 != t2) {
-+	if (t1 != t2) {
- 		if (class1 & TYPE_RESTRICT)
- 			warning(expr->pos, "cast to restricted type");
- 		if (class2 & TYPE_RESTRICT)
- 			warning(expr->pos, "cast from restricted type");
+@@ -1141,9 +1117,11 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 		expr->cond_false = cast_to(expr->cond_false, ctype);
+ 		goto out;
  	}
- 
--	as1 = get_as(ctype);
--	as2 = get_as(target->ctype);
-+	if (t1 == &ulong_ctype)
-+		as1 = -1;
-+	else if (class1 == TYPE_PTR)
-+		as1 = t1->ctype.as;
 +
-+	if (t2 == &ulong_ctype)
-+		as2 = -1;
-+	else if (class2 == TYPE_PTR)
-+		as2 = t2->ctype.as;
+ 	if ((lclass | rclass) & TYPE_PTR) {
+ 		int is_null1 = is_null_pointer_constant(*true);
+ 		int is_null2 = is_null_pointer_constant(expr->cond_false);
 +
- 	if (!as1 && as2 > 0)
- 		warning(expr->pos, "cast removes address space of expression");
- 	if (as1 > 0 && as2 > 0 && as1 != as2)
-@@ -2628,7 +2610,7 @@ static struct symbol *evaluate_cast(struct expression *expr)
- 		warning(expr->pos,
- 			"cast adds address space to expression (<asn:%d>)", as1);
- 
--	if (!(ctype->ctype.modifiers & MOD_PTRINHERIT) && class1 == TYPE_PTR &&
-+	if (!(t1->ctype.modifiers & MOD_PTRINHERIT) && class1 == TYPE_PTR &&
- 	    !as1 && (target->flags & Int_const_expr)) {
- 		if (t1->ctype.base_type == &void_ctype) {
- 			if (is_zero_constant(target)) {
-@@ -2860,6 +2842,7 @@ struct symbol *evaluate_expression(struct expression *expr)
- 			return NULL;
- 		return evaluate_postop(expr);
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 		return evaluate_cast(expr);
- 	case EXPR_SIZEOF:
-diff --git a/expand.c b/expand.c
-index b2eeef8..06b8127 100644
---- a/expand.c
-+++ b/expand.c
-@@ -955,6 +955,7 @@ static int expand_expression(struct expression *expr)
- 		return expand_postop(expr);
- 
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 		return expand_cast(expr);
- 
-diff --git a/expression.c b/expression.c
-index 65f959e..77d665d 100644
---- a/expression.c
-+++ b/expression.c
-@@ -118,7 +118,7 @@ static struct token *parse_type(struct token *token, struct expression **tree)
- 	struct symbol *sym;
- 	*tree = alloc_expression(token->pos, EXPR_TYPE);
- 	(*tree)->flags = Int_const_expr; /* sic */
--	token = typename(token, &sym);
-+	token = typename(token, &sym, 0);
- 	if (sym->ident)
- 		sparse_error(token->pos,
- 			     "type expression should not include identifier "
-@@ -167,7 +167,7 @@ static struct token *builtin_offsetof_expr(struct token *token,
- 		return expect(token, '(', "after __builtin_offset");
- 
- 	token = token->next;
--	token = typename(token, &sym);
-+	token = typename(token, &sym, 0);
- 	if (sym->ident)
- 		sparse_error(token->pos,
- 			     "type expression should not include identifier "
-@@ -482,7 +482,7 @@ struct token *primary_expression(struct token *token, struct expression **tree)
- 		if (token->special == '[' && lookup_type(token->next)) {
- 			expr = alloc_expression(token->pos, EXPR_TYPE);
- 			expr->flags = Int_const_expr; /* sic */
--			token = typename(token->next, &expr->symbol);
-+			token = typename(token->next, &expr->symbol, 0);
- 			token = expect(token, ']', "in type expression");
- 			break;
+ 		if (is_null1 && is_null2) {
+ 			*true = cast_to(*true, &ptr_ctype);
+ 			expr->cond_false = cast_to(expr->cond_false, &ptr_ctype);
+@@ -1169,15 +1147,42 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 			goto Err;
  		}
-@@ -600,7 +600,7 @@ static struct token *type_info_expression(struct token *token,
- 	token = token->next;
- 	if (!match_op(token, '(') || !lookup_type(token->next))
- 		return unary_expression(token, &expr->cast_expression);
--	token = typename(token->next, &expr->cast_type);
-+	token = typename(token->next, &expr->cast_type, 0);
- 
- 	if (!match_op(token, ')')) {
- 		static const char * error[] = {
-@@ -715,15 +715,23 @@ static struct token *cast_expression(struct token *token, struct expression **tr
- 			struct expression *cast = alloc_expression(next->pos, EXPR_CAST);
- 			struct expression *v;
- 			struct symbol *sym;
-+			int is_force;
- 
--			token = typename(next, &sym);
-+			token = typename(next, &sym, MOD_FORCE);
- 			cast->cast_type = sym;
-+			is_force = sym->ctype.modifiers & MOD_FORCE;
-+			sym->ctype.modifiers &= ~MOD_FORCE;
- 			token = expect(token, ')', "at end of cast operator");
- 			if (match_op(token, '{')) {
-+				if (is_force)
-+					warning(sym->pos,
-+						"[force] in compound literal");
- 				token = initializer(&cast->cast_expression, token);
- 				return postfix_expression(token, tree, cast);
- 			}
- 			*tree = cast;
-+			if (is_force)
-+				cast->type = EXPR_FORCE_CAST;
- 			token = cast_expression(token, &v);
- 			if (!v)
- 				return token;
-diff --git a/expression.h b/expression.h
-index 02eec02..fa5039a 100644
---- a/expression.h
-+++ b/expression.h
-@@ -27,6 +27,7 @@ enum expression_type {
- 	EXPR_PREOP,
- 	EXPR_POSTOP,
- 	EXPR_CAST,
-+	EXPR_FORCE_CAST,
- 	EXPR_IMPLIED_CAST,
- 	EXPR_SIZEOF,
- 	EXPR_ALIGNOF,
-@@ -190,7 +191,7 @@ static inline struct expression *alloc_const_expression(struct position pos, int
- }
- 
- /* Type name parsing */
--struct token *typename(struct token *, struct symbol **);
-+struct token *typename(struct token *, struct symbol **, int);
- 
- static inline int lookup_type(struct token *token)
- {
-diff --git a/inline.c b/inline.c
-index 061261a..860c0ee 100644
---- a/inline.c
-+++ b/inline.c
-@@ -145,6 +145,7 @@ static struct expression * copy_expression(struct expression *expr)
- 			*expr->cast_type = *sym;
- 			break;
- 		}
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 	case EXPR_SIZEOF: 
- 	case EXPR_PTRSIZEOF:
-diff --git a/linearize.c b/linearize.c
-index 3a07823..8a68f05 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1581,6 +1581,7 @@ pseudo_t linearize_expression(struct entrypoint *ep, struct expression *expr)
- 		return linearize_postop(ep, expr);
- 
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 		return linearize_cast(ep, expr);
- 	
-diff --git a/parse.c b/parse.c
-index ab3a096..68f1dac 100644
---- a/parse.c
-+++ b/parse.c
-@@ -768,7 +768,7 @@ static struct token *typeof_specifier(struct token *token, struct ctype *ctype)
- 		return token;
+ 		/* OK, it's pointer on pointer */
+-		/* XXX - we need to handle qualifiers */
+-		ctype = compatible_ptr_type(*true, expr->cond_false);
+-		if (ctype)
+-			goto out;
++		if (ltype->ctype.as != rtype->ctype.as) {
++			typediff = "different address spaces";
++			goto Err;
++		}
++
++		/* need to be lazier here */
++		lbase = get_base_type(ltype);
++		rbase = get_base_type(rtype);
++		qual = ltype->ctype.modifiers | rtype->ctype.modifiers;
++		qual &= MOD_CONST | MOD_VOLATILE;
++
++		if (lbase == &void_ctype) {
++			/* XXX: pointers to function should warn here */
++			ctype = ltype;
++			goto Qual;
++
++		}
++		if (rbase == &void_ctype) {
++			/* XXX: pointers to function should warn here */
++			ctype = rtype;
++			goto Qual;
++		}
++		/* XXX: that should be pointer to composite */
++		ctype = ltype;
++		typediff = type_difference(lbase, rbase, MOD_IGN, MOD_IGN);
++		if (!typediff)
++			goto Qual;
++		goto Err;
  	}
- 	if (lookup_type(token->next)) {
--		token = typename(token->next, &sym);
-+		token = typename(token->next, &sym, 0);
- 		*ctype = sym->ctype;
- 	} else {
- 		struct symbol *typeof_sym = alloc_symbol(token->pos, SYM_TYPEOF);
-@@ -1343,13 +1343,16 @@ static struct token *parameter_declaration(struct token *token, struct symbol **
- 	return token;
+-	ctype = ltype;
+-	typediff = type_difference(ltype, rtype, MOD_IGN, MOD_IGN);
+-	if (!typediff)
++
++	/* void on void, struct on same struct, union on same union */
++	if (ltype == rtype) {
++		ctype = ltype;
+ 		goto out;
++	}
++	typediff = "different base types";
+ 
+ Err:
+ 	expression_error(expr, "incompatible types in conditional expression (%s)", typediff);
+@@ -1186,6 +1191,17 @@ Err:
+ out:
+ 	expr->ctype = ctype;
+ 	return ctype;
++
++Qual:
++	if (qual & ~ctype->ctype.modifiers) {
++		struct symbol *sym = alloc_symbol(ctype->pos, SYM_PTR);
++		*sym = *ctype;
++		sym->ctype.modifiers |= qual;
++		ctype = sym;
++	}
++	*true = cast_to(*true, ctype);
++	expr->cond_false = cast_to(expr->cond_false, ctype);
++	goto out;
  }
  
--struct token *typename(struct token *token, struct symbol **p)
-+struct token *typename(struct token *token, struct symbol **p, int mod)
- {
- 	struct symbol *sym = alloc_symbol(token->pos, SYM_NODE);
- 	*p = sym;
- 	token = declaration_specifiers(token, &sym->ctype, 0);
- 	token = declarator(token, sym, NULL);
- 	apply_modifiers(token->pos, &sym->ctype);
-+	if (sym->ctype.modifiers & MOD_STORAGE & ~mod)
-+		warning(sym->pos, "storage class in typename (%s)",
-+			show_typename(sym));
- 	return token;
- }
- 
-diff --git a/show-parse.c b/show-parse.c
-index 07ee763..aae8b74 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -1053,6 +1053,7 @@ int show_expression(struct expression *expr)
- 		warning(expr->pos, "invalid expression after evaluation");
- 		return 0;
- 	case EXPR_CAST:
-+	case EXPR_FORCE_CAST:
- 	case EXPR_IMPLIED_CAST:
- 		return show_cast_expr(expr);
- 	case EXPR_VALUE:
-diff --git a/symbol.h b/symbol.h
-index a59feee..4d8d328 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -204,12 +204,12 @@ struct symbol {
- #define MOD_BITWISE	0x80000000
- 
- #define MOD_NONLOCAL	(MOD_EXTERN | MOD_TOPLEVEL)
--#define MOD_STORAGE	(MOD_AUTO | MOD_REGISTER | MOD_STATIC | MOD_EXTERN | MOD_INLINE | MOD_TOPLEVEL)
-+#define MOD_STORAGE	(MOD_AUTO | MOD_REGISTER | MOD_STATIC | MOD_EXTERN | MOD_INLINE | MOD_TOPLEVEL | MOD_FORCE)
- #define MOD_SIGNEDNESS	(MOD_SIGNED | MOD_UNSIGNED | MOD_EXPLICITLY_SIGNED)
- #define MOD_SPECIFIER	(MOD_CHAR | MOD_SHORT | MOD_LONG | MOD_LONGLONG | MOD_SIGNEDNESS)
- #define MOD_SIZE	(MOD_CHAR | MOD_SHORT | MOD_LONG | MOD_LONGLONG)
- #define MOD_IGNORE (MOD_TOPLEVEL | MOD_STORAGE | MOD_ADDRESSABLE |	\
--	MOD_ASSIGNED | MOD_USERTYPE | MOD_FORCE | MOD_ACCESSED | MOD_EXPLICITLY_SIGNED)
-+	MOD_ASSIGNED | MOD_USERTYPE | MOD_ACCESSED | MOD_EXPLICITLY_SIGNED)
- #define MOD_PTRINHERIT (MOD_VOLATILE | MOD_CONST | MOD_NODEREF | MOD_STORAGE)
- 
- 
+ /* FP assignments can not do modulo or bit operations */
+diff --git a/validation/cond_expr2.c b/validation/cond_expr2.c
+new file mode 100644
+index 0000000..e53cd13
+--- /dev/null
++++ b/validation/cond_expr2.c
+@@ -0,0 +1,23 @@
++extern const int *p;
++extern volatile void *q;
++extern volatile int *r;
++static void f(void)
++{
++	q = 1 ? p : q;	// warn: const volatile void * -> const int *
++	r = 1 ? r : q;	// OK: volatile void * -> volatile int *
++	r = 1 ? r : p;	// warn: const volatile int * -> volatile int *
++}
++/*
++ * check-name: type of conditional expression
++ * check-description: Used to miss qualifier mixing and mishandle void *
++ * check-command: sparse $file
++ *
++ * check-output-start
++cond_expr2.c:6:4: warning: incorrect type in assignment (different modifiers)
++cond_expr2.c:6:4:    expected void volatile *extern [addressable] [toplevel] q
++cond_expr2.c:6:4:    got void const volatile *
++cond_expr2.c:8:4: warning: incorrect type in assignment (different modifiers)
++cond_expr2.c:8:4:    expected int volatile *extern [addressable] [toplevel] [assigned] r
++cond_expr2.c:8:4:    got int const volatile *
++ * check-output-end
++ */
 -- 
 1.5.0-rc2.GIT
