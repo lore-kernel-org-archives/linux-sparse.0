@@ -1,195 +1,62 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH] fix handling of pointers in ?:
-Date: Tue, 10 Jul 2007 02:07:33 +0100
-Message-ID: <20070710010733.GQ21668@ftp.linux.org.uk>
-References: <20070709221306.GP21668@ftp.linux.org.uk>
+From: "Anderson Lizardo" <anderson.lizardo@gmail.com>
+Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results into test files
+Date: Tue, 10 Jul 2007 20:48:12 -0400
+Message-ID: <5b5833aa0707101748x2a8cbc10ocaf44e92d19802fc@mail.gmail.com>
+References: <20070628053954.30704.66440.stgit@dv.roinet.com>
+	 <46836129.7050407@freedesktop.org>
+	 <cbf3148c0706281159x7b252776nd08fd9bd9e36b92@mail.gmail.com>
+	 <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>
+	 <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
+	 <1183076949.2621.196.camel@josh-work.beaverton.ibm.com>
+	 <cbf3148c0707012159l65432435we10fd9370c282dc4@mail.gmail.com>
+	 <46915C9E.503@freedesktop.org> <46919A4C.3090602@freedesktop.org>
+	 <cbf3148c0707091427x18e246cdy6cedb12fe284bab9@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:54506 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757560AbXGJBHe (ORCPT
+Received: from wa-out-1112.google.com ([209.85.146.182]:24599 "EHLO
+	wa-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752831AbXGKAsN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Jul 2007 21:07:34 -0400
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1I84CT-0000eU-Nm
-	for linux-sparse@vger.kernel.org; Tue, 10 Jul 2007 02:07:33 +0100
+	Tue, 10 Jul 2007 20:48:13 -0400
+Received: by wa-out-1112.google.com with SMTP id v27so2097407wah
+        for <linux-sparse@vger.kernel.org>; Tue, 10 Jul 2007 17:48:12 -0700 (PDT)
+In-Reply-To: <cbf3148c0707091427x18e246cdy6cedb12fe284bab9@mail.gmail.com>
 Content-Disposition: inline
-In-Reply-To: <20070709221306.GP21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Damien Lespiau <damien.lespiau@gmail.com>
+Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
 
-a) qualifiers are joined (const int * / volatile int * -> const volatile int *)
-b) pointer to void / pointer to T => pointer to void (with all qualifiers)
+On 7/9/07, Damien Lespiau <damien.lespiau@gmail.com> wrote:
+> However I bumped into another issue:
+> $ hexdump -C bar
+> 00000000  0a 0a 78 78 78 0a 0a 0a                       |..xxx...|
+> $ foo=`cat bar`
+> $ echo "$foo" | hexdump -C
+> 00000000  0a 0a 78 78 78 0a                                |..xxx.|
+>
+> it eats the last new lines but one and not the first '\n's !
+> I still have to sort this out...
 
-testcase added
+Actually, it eats both newlines... The trailing newline that still
+appears is from "echo" command, which appends a newline by default.
+Try:
 
-Still missing: T1 * / T2 * => pointer to composite type of T1 and T2
+echo -n "$foo" | hexdump -C
 
-Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
----
- evaluate.c              |   82 ++++++++++++++++++++++++++++-------------------
- validation/cond_expr2.c |   23 +++++++++++++
- 2 files changed, 72 insertions(+), 33 deletions(-)
- create mode 100644 validation/cond_expr2.c
+instead. Anyway, this is from "man bash":
 
-diff --git a/evaluate.c b/evaluate.c
-index d505007..9f543fe 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1070,31 +1070,6 @@ OK:
- }
- 
- /*
-- * FIXME!! This should do casts, array degeneration etc..
-- */
--static struct symbol *compatible_ptr_type(struct expression *left, struct expression *right)
--{
--	struct symbol *ltype = left->ctype, *rtype = right->ctype;
--
--	if (ltype->type == SYM_NODE)
--		ltype = ltype->ctype.base_type;
--
--	if (rtype->type == SYM_NODE)
--		rtype = rtype->ctype.base_type;
--
--	if (ltype->type == SYM_PTR) {
--		if (rtype->ctype.base_type == &void_ctype)
--			return ltype;
--	}
--
--	if (rtype->type == SYM_PTR) {
--		if (ltype->ctype.base_type == &void_ctype)
--			return rtype;
--	}
--	return NULL;
--}
--
--/*
-  * NOTE! The degenerate case of "x ? : y", where we don't
-  * have a true case, this will possibly promote "x" to the
-  * same type as "y", and thus _change_ the conditional
-@@ -1104,9 +1079,10 @@ static struct symbol *compatible_ptr_type(struct expression *left, struct expres
- static struct symbol *evaluate_conditional_expression(struct expression *expr)
- {
- 	struct expression **true;
--	struct symbol *ctype, *ltype, *rtype;
-+	struct symbol *ctype, *ltype, *rtype, *lbase, *rbase;
- 	int lclass, rclass;
- 	const char * typediff;
-+	int qual;
- 
- 	if (!evaluate_conditional(expr->conditional, 0))
- 		return NULL;
-@@ -1141,9 +1117,11 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
- 		expr->cond_false = cast_to(expr->cond_false, ctype);
- 		goto out;
- 	}
-+
- 	if ((lclass | rclass) & TYPE_PTR) {
- 		int is_null1 = is_null_pointer_constant(*true);
- 		int is_null2 = is_null_pointer_constant(expr->cond_false);
-+
- 		if (is_null1 && is_null2) {
- 			*true = cast_to(*true, &ptr_ctype);
- 			expr->cond_false = cast_to(expr->cond_false, &ptr_ctype);
-@@ -1169,15 +1147,42 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
- 			goto Err;
- 		}
- 		/* OK, it's pointer on pointer */
--		/* XXX - we need to handle qualifiers */
--		ctype = compatible_ptr_type(*true, expr->cond_false);
--		if (ctype)
--			goto out;
-+		if (ltype->ctype.as != rtype->ctype.as) {
-+			typediff = "different address spaces";
-+			goto Err;
-+		}
-+
-+		/* need to be lazier here */
-+		lbase = get_base_type(ltype);
-+		rbase = get_base_type(rtype);
-+		qual = ltype->ctype.modifiers | rtype->ctype.modifiers;
-+		qual &= MOD_CONST | MOD_VOLATILE;
-+
-+		if (lbase == &void_ctype) {
-+			/* XXX: pointers to function should warn here */
-+			ctype = ltype;
-+			goto Qual;
-+
-+		}
-+		if (rbase == &void_ctype) {
-+			/* XXX: pointers to function should warn here */
-+			ctype = rtype;
-+			goto Qual;
-+		}
-+		/* XXX: that should be pointer to composite */
-+		ctype = ltype;
-+		typediff = type_difference(lbase, rbase, MOD_IGN, MOD_IGN);
-+		if (!typediff)
-+			goto Qual;
-+		goto Err;
- 	}
--	ctype = ltype;
--	typediff = type_difference(ltype, rtype, MOD_IGN, MOD_IGN);
--	if (!typediff)
-+
-+	/* void on void, struct on same struct, union on same union */
-+	if (ltype == rtype) {
-+		ctype = ltype;
- 		goto out;
-+	}
-+	typediff = "different base types";
- 
- Err:
- 	expression_error(expr, "incompatible types in conditional expression (%s)", typediff);
-@@ -1186,6 +1191,17 @@ Err:
- out:
- 	expr->ctype = ctype;
- 	return ctype;
-+
-+Qual:
-+	if (qual & ~ctype->ctype.modifiers) {
-+		struct symbol *sym = alloc_symbol(ctype->pos, SYM_PTR);
-+		*sym = *ctype;
-+		sym->ctype.modifiers |= qual;
-+		ctype = sym;
-+	}
-+	*true = cast_to(*true, ctype);
-+	expr->cond_false = cast_to(expr->cond_false, ctype);
-+	goto out;
- }
- 
- /* FP assignments can not do modulo or bit operations */
-diff --git a/validation/cond_expr2.c b/validation/cond_expr2.c
-new file mode 100644
-index 0000000..e53cd13
---- /dev/null
-+++ b/validation/cond_expr2.c
-@@ -0,0 +1,23 @@
-+extern const int *p;
-+extern volatile void *q;
-+extern volatile int *r;
-+static void f(void)
-+{
-+	q = 1 ? p : q;	// warn: const volatile void * -> const int *
-+	r = 1 ? r : q;	// OK: volatile void * -> volatile int *
-+	r = 1 ? r : p;	// warn: const volatile int * -> volatile int *
-+}
-+/*
-+ * check-name: type of conditional expression
-+ * check-description: Used to miss qualifier mixing and mishandle void *
-+ * check-command: sparse $file
-+ *
-+ * check-output-start
-+cond_expr2.c:6:4: warning: incorrect type in assignment (different modifiers)
-+cond_expr2.c:6:4:    expected void volatile *extern [addressable] [toplevel] q
-+cond_expr2.c:6:4:    got void const volatile *
-+cond_expr2.c:8:4: warning: incorrect type in assignment (different modifiers)
-+cond_expr2.c:8:4:    expected int volatile *extern [addressable] [toplevel] [assigned] r
-+cond_expr2.c:8:4:    got int const volatile *
-+ * check-output-end
-+ */
+"Command Substitution
+[...]
+Bash performs the expansion by executing command and replacing the
+command substitution with the standard output of the command, with any
+trailing newlines  deleted. Embedded newlines are not deleted, but
+they may be removed during word splitting."
+
+So I suppose this is an expected behaviour.
+
+Regards,
 -- 
-1.5.0-rc2.GIT
+Anderson Lizardo
