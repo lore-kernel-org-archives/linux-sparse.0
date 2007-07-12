@@ -1,62 +1,75 @@
-From: "Anderson Lizardo" <anderson.lizardo@gmail.com>
-Subject: Re: [PATCH 6/6] Add a simple test script, embed expected results into test files
-Date: Tue, 10 Jul 2007 20:48:12 -0400
-Message-ID: <5b5833aa0707101748x2a8cbc10ocaf44e92d19802fc@mail.gmail.com>
-References: <20070628053954.30704.66440.stgit@dv.roinet.com>
-	 <46836129.7050407@freedesktop.org>
-	 <cbf3148c0706281159x7b252776nd08fd9bd9e36b92@mail.gmail.com>
-	 <1183066733.2621.127.camel@josh-work.beaverton.ibm.com>
-	 <cbf3148c0706281713l793c944fp372a2f91f6f9b18c@mail.gmail.com>
-	 <1183076949.2621.196.camel@josh-work.beaverton.ibm.com>
-	 <cbf3148c0707012159l65432435we10fd9370c282dc4@mail.gmail.com>
-	 <46915C9E.503@freedesktop.org> <46919A4C.3090602@freedesktop.org>
-	 <cbf3148c0707091427x18e246cdy6cedb12fe284bab9@mail.gmail.com>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] fix handling of address_space in casts and assignments
+Date: Wed, 11 Jul 2007 23:44:05 -0700
+Message-ID: <4695CDB5.5080605@freedesktop.org>
+References: <20070709221306.GP21668@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig0D4A85A1BCF35F7EFF0B437E"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wa-out-1112.google.com ([209.85.146.182]:24599 "EHLO
-	wa-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752831AbXGKAsN (ORCPT
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:33874 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751245AbXGLGoT (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 10 Jul 2007 20:48:13 -0400
-Received: by wa-out-1112.google.com with SMTP id v27so2097407wah
-        for <linux-sparse@vger.kernel.org>; Tue, 10 Jul 2007 17:48:12 -0700 (PDT)
-In-Reply-To: <cbf3148c0707091427x18e246cdy6cedb12fe284bab9@mail.gmail.com>
-Content-Disposition: inline
+	Thu, 12 Jul 2007 02:44:19 -0400
+In-Reply-To: <20070709221306.GP21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Damien Lespiau <damien.lespiau@gmail.com>
-Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
-On 7/9/07, Damien Lespiau <damien.lespiau@gmail.com> wrote:
-> However I bumped into another issue:
-> $ hexdump -C bar
-> 00000000  0a 0a 78 78 78 0a 0a 0a                       |..xxx...|
-> $ foo=`cat bar`
-> $ echo "$foo" | hexdump -C
-> 00000000  0a 0a 78 78 78 0a                                |..xxx.|
->
-> it eats the last new lines but one and not the first '\n's !
-> I still have to sort this out...
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig0D4A85A1BCF35F7EFF0B437E
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Actually, it eats both newlines... The trailing newline that still
-appears is from "echo" command, which appends a newline by default.
-Try:
+Al Viro wrote:
+> Turn FORCE_MOD into storage class specifier (that's how it's
+> actually used and that makes for much simpler logics).
+>=20
+> Introduce explicit EXPR_FORCE_CAST for forced casts; handle it
+> properly.
+>=20
+> Kill the idiocy in get_as() (we end up picking the oddest things
+> for address space - e.g. if we have int __attribute__((address_space(1)=
+)) *p,
+> we'll get warnings about removal of address space when we do things lik=
+e
+> (unsigned short)*p.  Fixed.  BTW, that had caught a bunch of very odd
+> bogosities in the kernel and eliminated several false positives in ther=
+e.
+>=20
+> As the result, get_as() is gone now and evaluate_cast() got simpler.
+>=20
+> Kill the similar idiocy in handling pointer assignments; while we are a=
+t it,
+> fix the qualifiers check for assignments to/from void * (you can't assi=
+gn
+> const int * to void * - qualifiers on the left side should be no less t=
+han
+> on the right one; for normal codepath we get that checked, but the spec=
+ial
+> case of void * skips these checks).
 
-echo -n "$foo" | hexdump -C
+Applied (yesterday); thanks!
 
-instead. Anyway, this is from "man bash":
+- Josh Triplett
 
-"Command Substitution
-[...]
-Bash performs the expansion by executing command and replacing the
-command substitution with the standard output of the command, with any
-trailing newlines  deleted. Embedded newlines are not deleted, but
-they may be removed during word splitting."
 
-So I suppose this is an expected behaviour.
 
-Regards,
--- 
-Anderson Lizardo
+--------------enig0D4A85A1BCF35F7EFF0B437E
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGlc3AGJuZRtD+evsRAlREAKC/aXcIo2mYNOb6nG6tfwhxHM+Z4QCgm3kO
+qXuoWeh3LGGJM8E/0wlnnZ0=
+=wCQp
+-----END PGP SIGNATURE-----
+
+--------------enig0D4A85A1BCF35F7EFF0B437E--
