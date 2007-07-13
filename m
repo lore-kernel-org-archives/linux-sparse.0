@@ -1,159 +1,78 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: [RFC] show_type() format problems
-Date: Thu, 12 Jul 2007 19:25:08 +0100
-Message-ID: <20070712182508.GZ21668@ftp.linux.org.uk>
-References: <20070712091453.GY21668@ftp.linux.org.uk> <1184257330.3000.7.camel@josh-work.beaverton.ibm.com>
+Subject: Re: [RFC] bloody mess with __attribute__() syntax
+Date: Fri, 13 Jul 2007 10:04:22 +0100
+Message-ID: <20070713090422.GA23203@ftp.linux.org.uk>
+References: <200707051403.16789.arnd@arndb.de> <OFC2AA6078.1DF7BE7E-ON4225730F.0044BE34-4225730F.0046B6F1@de.ibm.com> <20070705162741.GL21478@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:54707 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:45792 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757657AbXGLSZO (ORCPT
+	with ESMTP id S1751994AbXGMJE0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 12 Jul 2007 14:25:14 -0400
+	Fri, 13 Jul 2007 05:04:26 -0400
 Content-Disposition: inline
-In-Reply-To: <1184257330.3000.7.camel@josh-work.beaverton.ibm.com>
+In-Reply-To: <20070705162741.GL21478@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
-Cc: linux-sparse@vger.kernel.org
+To: Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-sparse@vger.kernel.org, Ben Elliston <elliston@au1.ibm.com>
 
-On Thu, Jul 12, 2007 at 09:22:10AM -0700, Josh Triplett wrote:
-> Please do go ahead and change the output.  I'd love for show_type to
-> output something as close to a parsable C type as possible.
+[l-k removed from Cc]
 
-How does below sound?  At least it makes output unambiguous and much
-closer to normal C syntax.  We could do better (e.g. lift the things
-like "extern", etc. in front of everything else), but that's a separate
-problem...
+	FWIW, I have several problems with that TR.  All of them have the
+same root cause: arrays vs. qualifiers.
 
-diff --git a/show-parse.c b/show-parse.c
-index aae8b74..9a1f796 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -226,11 +226,28 @@ const char *builtin_ctypename(struct ctype *ctype)
- 	return NULL;
- }
- 
--static void do_show_type(struct symbol *sym, struct type_name *name)
-+static void do_show_type(struct symbol *sym, struct type_name *name,
-+			 unsigned long mod, int as, int was_ptr)
- {
--	int modlen;
--	const char *mod;
- 	const char *typename;
-+	int is_ptr = was_ptr;
-+
-+	if (!sym || (sym->type != SYM_NODE && sym->type != SYM_ARRAY &&
-+		     sym->type != SYM_BITFIELD)) {
-+		const char *s;
-+		size_t len;
-+
-+		if (as)
-+			prepend(name, "<asn:%d>", as);
-+
-+		s = modifier_string(mod);
-+		len = strlen(s);
-+		name->start -= len;    
-+		memcpy(name->start, s, len);  
-+		mod = 0;
-+		as = 0;
-+	}
-+
- 	if (!sym)
- 		return;
- 
-@@ -246,9 +263,14 @@ static void do_show_type(struct symbol *sym, struct type_name *name)
- 	switch (sym->type) {
- 	case SYM_PTR:
- 		prepend(name, "*");
-+		mod = sym->ctype.modifiers;
-+		as = sym->ctype.as;
-+		is_ptr = 1;
- 		break;
- 	case SYM_FN:
--		prepend(name, "( ");
-+		if (was_ptr)
-+			prepend(name, "( ");
-+		is_ptr = 0;
- 		break;
- 	case SYM_STRUCT:
- 		prepend(name, "struct %s ", show_ident(sym->ident));
-@@ -264,9 +286,13 @@ static void do_show_type(struct symbol *sym, struct type_name *name)
- 
- 	case SYM_NODE:
- 		append(name, "%s", show_ident(sym->ident));
-+		mod |= sym->ctype.modifiers;
-+		as |= sym->ctype.as;
- 		break;
- 
- 	case SYM_BITFIELD:
-+		mod |= sym->ctype.modifiers;
-+		as |= sym->ctype.as;
- 		append(name, ":%d", sym->bit_size);
- 		break;
- 
-@@ -275,6 +301,11 @@ static void do_show_type(struct symbol *sym, struct type_name *name)
- 		break;
- 
- 	case SYM_ARRAY:
-+		mod |= sym->ctype.modifiers;
-+		as |= sym->ctype.as;
-+		if (was_ptr)
-+			prepend(name, "( ");
-+		is_ptr = 0;
- 		break;
- 
- 	case SYM_RESTRICT:
-@@ -288,26 +319,21 @@ static void do_show_type(struct symbol *sym, struct type_name *name)
- 		return;
- 	}
- 
--	mod = modifier_string(sym->ctype.modifiers);
--	modlen = strlen(mod);
--	name->start -= modlen;    
--	memcpy(name->start, mod, modlen);  
--
--	do_show_type(sym->ctype.base_type, name);
--
--	/* Postpend */
--	if (sym->ctype.as)
--		append(name, "<asn:%d>", sym->ctype.as);
-+	do_show_type(sym->ctype.base_type, name, mod, as, is_ptr);
- 
- 	switch (sym->type) {
- 	case SYM_PTR:
--		return; 
-+		return;
- 
- 	case SYM_FN:
--		append(name, " )( ... )");
-+		if (was_ptr)
-+			append(name, " )");
-+		append(name, "( ... )");
- 		return;
- 
- 	case SYM_ARRAY:
-+		if (was_ptr)
-+			append(name, " )");
- 		append(name, "[%lld]", get_expression_value(sym->array_size));
- 		return;
- 
-@@ -330,7 +356,7 @@ void show_type(struct symbol *sym)
- 	struct type_name name;
- 
- 	name.start = name.end = array+100;
--	do_show_type(sym, &name);
-+	do_show_type(sym, &name, 0, 0, 0);
- 	*name.end = 0;
- 	printf("%s", name.start);
- }
-@@ -341,7 +367,7 @@ const char *show_typename(struct symbol *sym)
- 	struct type_name name;
- 
- 	name.start = name.end = array+100;
--	do_show_type(sym, &name);
-+	do_show_type(sym, &name, 0, 0, 0);
- 	*name.end = 0;
- 	return name.start;
- }
+1) unless 6.7.3[8] is explicitly changed, qualifiers apply to element type
+of array; when you manage to apply qualifier to an array (possible via
+creative use of typedef), it still applies to the element (i.e. trickles
+down until it hits non-array).
+
+2) consequently, changes to 6.2.5 are broken.  They require _any_ array
+type T to be in generic address space; of course, this is a nonsense.
+
+3) in changes to 6.7.2.1 (saying that struct or union member types should
+not carry an address space qualifier) we have a variant of the same problem -
+arrays escape that requirement, but they clearly should not.
+
+4) in places where some attempt to dance around that problem is made,
+results are clumsy and actually still wrong.  A typical example:
+
+"The pointer into enclosed address space is first converted to a pointer
+to the same reference type except with any address-space qualifier
+removed and any address-space qualifer of the other pointer's reference
+type added".
+
+We clearly should not replace such qualifiers deep in type derivation.
+
+
+Now, AFAICS a clean solution would be to leave 6.7.3[8] alone, but
+* define 'type T belongs to address space A' by
+	if T1 is a type and _A is an address-space qualifier, then 
+the type '_A-qualified T1' belongs to corresponding address space.
+	if a type T is an array of T1, T belongs to address space A
+if and only if T1 belongs to address space A.
+* in 6.7.2.1 change the requirement to 'the type of a member shall
+not belong to non-generic address space' or equivalent.
+* in places dealing with conversion of pointers between address spaces
+for comparisons, etc., speak of address-space qualifiers on the outermost
+non-array in derivation of reference type.  Might be worth a definition
+('counterpart of type T in enclosing address space').
+
+Note that this is very easy to get wrong; similar questions about
+const and volatile lead to a subtle difference between C and C++ type
+systems and in that particular case C++ one is actually saner.
+
+In C you can assign a pointer to array of const int to object of type
+pointer to void, exactly because the constraints refer to qualifiers
+on reference type and do not take into account the case when qualifier
+sits on array element.  C++ prohibits that - you can assign to const void *,
+but not to void *.  I.e. the 'constness' is inherited by arrays there
+as far as this kind of implicit conversions is concerned.
+
+For address spaces we definitely want the same kind of semantics;
+array elements obviously belong to the same address space as the
+array itself.  I have not checked the C++98 (or drafts of C++0x), but
+if the construction they are using to describe that part of C++
+semantics of const and volatile is not too atrocious it might make
+sense to borrow it...
