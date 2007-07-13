@@ -1,96 +1,120 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 4/8] start cleaning type_difference()
-Date: Fri, 13 Jul 2007 18:44:57 +0100
-Message-ID: <E1I9PCL-0000EV-5G@ZenIV.linux.org.uk>
+Subject: [PATCH 5/8] get compatible_assignment_types() deal with all cases
+Date: Fri, 13 Jul 2007 18:45:07 +0100
+Message-ID: <E1I9PCV-0000Eq-5T@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:49728 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:49735 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754447AbXGMRo5 (ORCPT
+	with ESMTP id S1755291AbXGMRpH (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 13 Jul 2007 13:44:57 -0400
+	Fri, 13 Jul 2007 13:45:07 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.52 #1 (Red Hat Linux))
-	id 1I9PCL-0000EV-5G
-	for linux-sparse@vger.kernel.org; Fri, 13 Jul 2007 18:44:57 +0100
+	id 1I9PCV-0000Eq-5T
+	for linux-sparse@vger.kernel.org; Fri, 13 Jul 2007 18:45:07 +0100
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 
-a) examine_fn_arguments() when comparing SYM_FN nodes; then
-we won't need to try implementing argument adjustment as
-part of the main loop.  SYM_ARRAY->SYM_PTR and SYM_FN/SYM_PTR
-interactions go away (and we stop getting nonsense results
-like "int * and int [1] are the same thing").  All callers
-are already happy with that.
-
-b) different structs or unions are incompatible.
+a) pointer to _Bool is OK
+b) struct to same struct or union to same union is OK; void to void etc. are not
+c) to/from void * with loss of qualifiers or with different address space
+   should give the right warning itself instead of "different base types"
+   it would get from fallback to type_difference()
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- evaluate.c |   34 +++++++++-------------------------
- 1 files changed, 9 insertions(+), 25 deletions(-)
+ evaluate.c |   57 +++++++++++++++++++++++++++++++++++++++++++--------------
+ 1 files changed, 43 insertions(+), 14 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index 88435da..91c7f74 100644
+index 91c7f74..44a4da4 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -619,6 +619,8 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *c
- 	return ctype;
- }
+@@ -1259,11 +1259,17 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 				goto Cast;
+ 			if (!restricted_value(*rp, target))
+ 				return 1;
++			if (s == t)
++				return 1;
+ 		} else if (!(sclass & TYPE_RESTRICT))
+ 			goto Cast;
++		typediff = "different base types";
++		goto Err;
+ 	}
  
-+static void examine_fn_arguments(struct symbol *fn);
+-	if (tclass & TYPE_PTR) {
++	if (tclass == TYPE_PTR) {
++		unsigned long mod1, mod2;
++		struct symbol *b1, *b2;
+ 		// NULL pointer is always OK
+ 		int is_null = is_null_pointer_constant(*rp);
+ 		if (is_null) {
+@@ -1271,29 +1277,52 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 				bad_null(*rp);
+ 			goto Cast;
+ 		}
+-		if (sclass & TYPE_PTR && t->ctype.as == s->ctype.as) {
+-			/* we should be more lazy here */
+-			int mod1 = t->ctype.modifiers;
+-			int mod2 = s->ctype.modifiers;
+-			s = get_base_type(s);
+-			t = get_base_type(t);
+-
++		if (!(sclass & TYPE_PTR)) {
++			typediff = "different base types";
++			goto Err;
++		}
++		/* we should be more lazy here */
++		mod1 = t->ctype.modifiers;
++		mod2 = s->ctype.modifiers;
++		b1 = get_base_type(t);
++		b2 = get_base_type(s);
++		if (b1 == &void_ctype || b2 == &void_ctype) {
+ 			/*
+ 			 * assignments to/from void * are OK, provided that
+ 			 * we do not remove qualifiers from pointed to [C]
+ 			 * or mix address spaces [sparse].
+ 			 */
+-			if (!(mod2 & ~mod1 & (MOD_VOLATILE | MOD_CONST)))
+-				if (s == &void_ctype || t == &void_ctype)
+-					goto Cast;
++			if (t->ctype.as != s->ctype.as) {
++				typediff = "different address spaces";
++				goto Err;
++			}
++			if (mod2 & ~mod1 & MOD_IGN) {
++				typediff = "different modifiers";
++				goto Err;
++			}
++			goto Cast;
+ 		}
++		/* It's OK if the target is more volatile or const than the source */
++		typediff = type_difference(target, source,
++					   MOD_VOLATILE | MOD_CONST, 0);
++		if (typediff)
++			goto Err;
++		return 1;
+ 	}
+ 
+-	/* It's OK if the target is more volatile or const than the source */
+-	typediff = type_difference(target, source, MOD_VOLATILE | MOD_CONST, 0);
+-	if (!typediff)
++	if ((tclass & TYPE_COMPOUND) && s == t)
+ 		return 1;
+ 
++	if (tclass & TYPE_NUM) {
++		/* XXX: need to turn into comparison with NULL */
++		if (t == &bool_ctype && (sclass & TYPE_PTR))
++			goto Cast;
++		typediff = "different base types";
++		goto Err;
++	}
++	typediff = "invalid types";
 +
- const char * type_difference(struct symbol *target, struct symbol *source,
- 	unsigned long target_mod_ignore, unsigned long source_mod_ignore)
- {
-@@ -687,34 +689,14 @@ const char * type_difference(struct symbol *target, struct symbol *source,
- 		/*
- 		 * Pointers to functions compare as the function itself
- 		 */
--		if (type1 == SYM_PTR && base1) {
-+		if (type1 == SYM_PTR && base1)
- 			base1 = examine_symbol_type(base1);
--			switch (base1->type) {
--			case SYM_FN:
--				type1 = SYM_FN;
--				target = base1;
--				base1 = base1->ctype.base_type;
--			default:
--				/* nothing */;
--			}
--		}
--		if (type2 == SYM_PTR && base2) {
--			base2 = examine_symbol_type(base2);
--			switch (base2->type) {
--			case SYM_FN:
--				type2 = SYM_FN;
--				source = base2;
--				base2 = base2->ctype.base_type;
--			default:
--				/* nothing */;
--			}
--		}
- 
--		/* Arrays degenerate to pointers for type comparisons */
--		type1 = (type1 == SYM_ARRAY) ? SYM_PTR : type1;
--		type2 = (type2 == SYM_ARRAY) ? SYM_PTR : type2;
-+		if (type2 == SYM_PTR && base2)
-+			base2 = examine_symbol_type(base2);
- 
--		if (type1 != type2 || type1 == SYM_RESTRICT)
-+		if (type1 != type2 || type1 == SYM_RESTRICT ||
-+		    type1 == SYM_UNION || type1 == SYM_STRUCT)
- 			return "different base types";
- 
- 		/* Must be same address space to be comparable */
-@@ -755,6 +737,8 @@ const char * type_difference(struct symbol *target, struct symbol *source,
- 			struct symbol *arg1, *arg2;
- 			if (base1->variadic != base2->variadic)
- 				return "incompatible variadic arguments";
-+			examine_fn_arguments(target);
-+			examine_fn_arguments(source);
- 			PREPARE_PTR_LIST(target->arguments, arg1);
- 			PREPARE_PTR_LIST(source->arguments, arg2);
- 			i = 1;
++Err:
+ 	warning(expr->pos, "incorrect type in %s (%s)", where, typediff);
+ 	info(expr->pos, "   expected %s", show_typename(target));
+ 	info(expr->pos, "   got %s", show_typename(source));
 -- 
 1.5.0-rc2.GIT
