@@ -1,66 +1,80 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [PATCH 7/8] rewrite type_difference()
-Date: Fri, 13 Jul 2007 11:30:31 -0700
-Message-ID: <1184351431.2616.50.camel@josh-work.beaverton.ibm.com>
-References: <E1I9PCp-0000FJ-5s@ZenIV.linux.org.uk>
-	 <1184350603.2616.47.camel@josh-work.beaverton.ibm.com>
-	 <20070713181904.GC21668@ftp.linux.org.uk>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] c2xml
+Date: Fri, 13 Jul 2007 23:24:38 -0700
+Message-ID: <46986C26.9040804@freedesktop.org>
+References: <46826B68.5040302@codethink.co.uk>	 <1182970187.8970.145.camel@josh-work.beaverton.ibm.com>	 <4688F05A.5010801@codethink.co.uk>  <46979F4B.9050307@codethink.co.uk> <1184349348.2616.34.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig6A9A10F414CFE08261A09E44"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e34.co.us.ibm.com ([32.97.110.152]:45145 "EHLO
-	e34.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756455AbXGMSaS (ORCPT
+Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:32789 "EHLO
+	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751772AbXGNGZJ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 13 Jul 2007 14:30:18 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e34.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id l6DIUIot006128
-	for <linux-sparse@vger.kernel.org>; Fri, 13 Jul 2007 14:30:18 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v8.4) with ESMTP id l6DIUHjW175428
-	for <linux-sparse@vger.kernel.org>; Fri, 13 Jul 2007 12:30:17 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l6DIUGd2003570
-	for <linux-sparse@vger.kernel.org>; Fri, 13 Jul 2007 12:30:17 -0600
-In-Reply-To: <20070713181904.GC21668@ftp.linux.org.uk>
+	Sat, 14 Jul 2007 02:25:09 -0400
+In-Reply-To: <1184349348.2616.34.camel@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: Rob Taylor <rob.taylor@codethink.co.uk>, linux-sparse@vger.kernel.org
 
-On Fri, 2007-07-13 at 19:19 +0100, Al Viro wrote:
-> On Fri, Jul 13, 2007 at 11:16:43AM -0700, Josh Triplett wrote:
-> > On Fri, 2007-07-13 at 18:45 +0100, Al Viro wrote:
-> > > --- a/evaluate.c
-> > > +++ b/evaluate.c
-> > > @@ -621,92 +621,145 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *c
-> > > 
-> > >  static void examine_fn_arguments(struct symbol *fn);
-> > > 
-> > > -const char * type_difference(struct symbol *target, struct symbol *source,
-> > > -	unsigned long target_mod_ignore, unsigned long source_mod_ignore)
-> > > +#define MOD_IGN (MOD_VOLATILE | MOD_CONST)
-> > > +
-> > > +const char *type_difference(struct ctype *c1, struct ctype *c2,
-> > > +	unsigned long mod1, unsigned long mod2)
-> > [...]
-> > > --- a/symbol.h
-> > > +++ b/symbol.h
-> > > @@ -245,7 +245,7 @@ extern struct symbol_list *translation_unit_used_list;
-> > > 
-> > >  extern void access_symbol(struct symbol *);
-> > > 
-> > > -extern const char * type_difference(struct symbol *target, struct symbol *source,
-> > > +extern const char * type_difference(struct ctype *c1, struct ctype *c2,
-> > >  	unsigned long target_mod_ignore, unsigned long source_mod_ignore);
-> > 
-> > You didn't update the third and fourth arguments in this prototype.
-> 
-> Do you want their renaming as a followup patch or as a resend?  (Or just
-> rename them in the patch or upon commit - it won't clash with any later
-> changes).
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig6A9A10F414CFE08261A09E44
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-I'll fix them manually as part of that commit.
+Josh Triplett wrote:
+> On Fri, 2007-07-13 at 16:50 +0100, Rob Taylor wrote:
+>> Any followups on this?
+>=20
+> I actually committed the first three patches this morning, before you
+> sent this.  I would like to commit the fourth patch this evening.  I
+> want to think a bit about how to address one issue: I'd really love to
+> avoid constructs specific to GNU make, such as ifeq and $(shell).  I
+> managed to find a way to do that for the patch adding clean kernel-styl=
+e
+> build output, by using the text substitution feature of make variable
+> expansion.  However, I haven't yet figured out a way to avoid $(shell)
+> with this patch.  The c2xml target can just always exist, so no
+> conditionals needed there.  However, without $(shell), I don't see any
+> way to handle adding c2xml to PROGRAMS and INST_PROGRAMS without
+> $(shell); backquotes will only work in the commands of a target, not th=
+e
+> prerequisites.  (Obviously, just leaving c2xml out of the all and
+> install targets would solve the problem, but that seems quite
+> suboptimal.)  I want to think about this problem for a bit, and if I
+> don't come up with anything and don't get any good suggestions, I may
+> just go ahead and require GNU make.
+
+OK, forget it.  Anyone who wants Sparse to work with non-GNU make gets to=
+ rack
+*their* brain thinking about how to do without useful GNU make features.
+Patch applied...
+
+> Also, you didn't update the dtd for the changes to the position
+> handling; it doesn't have end-file, and it still has start and end
+> rather than {start,end}-{line,col}.
+
+=2E.. and I fixed this myself.
+
+Thanks again for some most impressive work.
 
 - Josh Triplett
+
+
+--------------enig6A9A10F414CFE08261A09E44
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGmGw1GJuZRtD+evsRAoRPAKC6hRtewg992uo/RRt7iWpETU2cGwCggf7w
+shdw/kpRJ2bVVRkjzTvXDS4=
+=Pz4E
+-----END PGP SIGNATURE-----
+
+--------------enig6A9A10F414CFE08261A09E44--
