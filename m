@@ -1,163 +1,63 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: [RFC PATCH] Make sparse return 1 if errors occurred
-Date: Sat, 14 Jul 2007 13:51:24 -0700
-Message-ID: <4699374C.1030303@freedesktop.org>
+From: Rob Taylor <rob.taylor@codethink.co.uk>
+Subject: Re: [PATCH] c2xml
+Date: Sun, 15 Jul 2007 00:54:01 +0100
+Message-ID: <46996219.8030602@codethink.co.uk>
+References: <46826B68.5040302@codethink.co.uk>	 <1182970187.8970.145.camel@josh-work.beaverton.ibm.com>	 <4688F05A.5010801@codethink.co.uk>  <46979F4B.9050307@codethink.co.uk> <1184349348.2616.34.camel@josh-work.beaverton.ibm.com> <46986C26.9040804@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig453E37CBA0683056BF9284C7"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:50513 "EHLO
-	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1762119AbXGNUvd (ORCPT
+Received: from 208-78-103-131.slicehost.net ([208.78.103.131]:57258 "EHLO
+	mail.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759858AbXGNXwI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 14 Jul 2007 16:51:33 -0400
-Received: from dsl093-040-092.pdx1.dsl.speakeasy.net (HELO [192.168.0.122]) (josh@[66.93.40.92])
-          (envelope-sender <josh@freedesktop.org>)
-          by mail5.sea5.speakeasy.net (qmail-ldap-1.03) with AES256-SHA encrypted SMTP
-          for <linux-sparse@vger.kernel.org>; 14 Jul 2007 20:51:32 -0000
+	Sat, 14 Jul 2007 19:52:08 -0400
+In-Reply-To: <46986C26.9040804@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig453E37CBA0683056BF9284C7
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Josh Triplett wrote:
+> Josh Triplett wrote:
+>> On Fri, 2007-07-13 at 16:50 +0100, Rob Taylor wrote:
+>>> Any followups on this?
+>> I actually committed the first three patches this morning, before you
+>> sent this.  I would like to commit the fourth patch this evening.  I
+>> want to think a bit about how to address one issue: I'd really love to
+>> avoid constructs specific to GNU make, such as ifeq and $(shell).  I
+>> managed to find a way to do that for the patch adding clean kernel-style
+>> build output, by using the text substitution feature of make variable
+>> expansion.  However, I haven't yet figured out a way to avoid $(shell)
+>> with this patch.  The c2xml target can just always exist, so no
+>> conditionals needed there.  However, without $(shell), I don't see any
+>> way to handle adding c2xml to PROGRAMS and INST_PROGRAMS without
+>> $(shell); backquotes will only work in the commands of a target, not the
+>> prerequisites.  (Obviously, just leaving c2xml out of the all and
+>> install targets would solve the problem, but that seems quite
+>> suboptimal.)  I want to think about this problem for a bit, and if I
+>> don't come up with anything and don't get any good suggestions, I may
+>> just go ahead and require GNU make.
+> 
+> OK, forget it.  Anyone who wants Sparse to work with non-GNU make gets to rack
+> *their* brain thinking about how to do without useful GNU make features.
+> Patch applied...
 
-Sparse always returned 0.  Change it to return 1 if errors occurred, and
-remove check-known-to-fail from tests that expected that behavior.
+Heh, I think that's a fair enough stance now-a-days :)
 
-Also rename the misleadingly named global die_if_error to had_errors.
+>> Also, you didn't update the dtd for the changes to the position
+>> handling; it doesn't have end-file, and it still has start and end
+>> rather than {start,end}-{line,col}.
+> 
+> ... and I fixed this myself.
 
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
----
- lib.c                                         |    4 ++--
- lib.h                                         |    2 +-
- sparse.c                                      |    2 +-
- validation/bad-array-designated-initializer.c |    2 --
- validation/bad-assignment.c                   |    2 --
- validation/preprocessor/preprocessor18.c      |    2 --
- validation/preprocessor/preprocessor21.c      |    2 --
- 7 files changed, 4 insertions(+), 12 deletions(-)
+Brilliant!
 
-diff --git a/lib.c b/lib.c
-index a1442a2..be1aca4 100644
---- a/lib.c
-+++ b/lib.c
-@@ -29,7 +29,7 @@
- #include "target.h"
-=20
- int verbose, optimize, optimize_size, preprocessing;
--int die_if_error =3D 0;
-+int had_errors =3D 0;
-=20
- #ifndef __GNUC__
- # define __GNUC__ 2
-@@ -129,7 +129,7 @@ void warning(struct position pos, const char * fmt, .=
-=2E.)
- static void do_error(struct position pos, const char * fmt, va_list args=
-)
- {
- 	static int errors =3D 0;
--        die_if_error =3D 1;
-+	had_errors =3D 1;
- 	show_info =3D 1;
- 	/* Shut up warnings after an error */
- 	max_warnings =3D 0;
-diff --git a/lib.h b/lib.h
-index aacafea..a5e9f8e 100644
---- a/lib.h
-+++ b/lib.h
-@@ -18,7 +18,7 @@
- #include "ptrlist.h"
-=20
- extern int verbose, optimize, optimize_size, preprocessing;
--extern int die_if_error;
-+extern int had_errors;
- extern int repeat_phase, merge_phi_sources;
- extern int gcc_major, gcc_minor, gcc_patchlevel;
-=20
-diff --git a/sparse.c b/sparse.c
-index 4026ba7..2f74194 100644
---- a/sparse.c
-+++ b/sparse.c
-@@ -283,5 +283,5 @@ int main(int argc, char **argv)
- 	FOR_EACH_PTR_NOTAG(filelist, file) {
- 		check_symbols(sparse(file));
- 	} END_FOR_EACH_PTR_NOTAG(file);
--	return 0;
-+	return had_errors;
- }
-diff --git a/validation/bad-array-designated-initializer.c b/validation/b=
-ad-array-designated-initializer.c
-index ecc5bd3..75e8a10 100644
---- a/validation/bad-array-designated-initializer.c
-+++ b/validation/bad-array-designated-initializer.c
-@@ -12,6 +12,4 @@ bad-array-designated-initializer.c:3:3: error: Expected=
- constant expression
- bad-array-designated-initializer.c:3:3: error: Expected } at end of init=
-ializer
- bad-array-designated-initializer.c:3:3: error: got \
-  * check-output-end
-- *
-- * check-known-to-fail
-  */
-diff --git a/validation/bad-assignment.c b/validation/bad-assignment.c
-index 66f6fe8..f876076 100644
---- a/validation/bad-assignment.c
-+++ b/validation/bad-assignment.c
-@@ -13,6 +13,4 @@ static int foo(int a)
- bad-assignment.c:3:6: error: Expected ; at end of statement
- bad-assignment.c:3:6: error: got \
-  * check-output-end
-- *
-- * check-known-to-fail
-  */
-diff --git a/validation/preprocessor/preprocessor18.c b/validation/prepro=
-cessor/preprocessor18.c
-index b4de1e6..b864010 100644
---- a/validation/preprocessor/preprocessor18.c
-+++ b/validation/preprocessor/preprocessor18.c
-@@ -12,6 +12,4 @@ preprocessor/preprocessor18.c:2:2: error: expected iden=
-tifier to 'define'
- preprocessor/preprocessor18.c:3:2: error: expected identifier to 'undef'=
+> Thanks again for some most impressive work.
 
-=20
-  * check-output-end
-- *
-- * check-known-to-fail
-  */
-diff --git a/validation/preprocessor/preprocessor21.c b/validation/prepro=
-cessor/preprocessor21.c
-index 1719fc0..ce62dbb 100644
---- a/validation/preprocessor/preprocessor21.c
-+++ b/validation/preprocessor/preprocessor21.c
-@@ -11,6 +11,4 @@ preprocessor/preprocessor21.c:2:2: error: unterminated =
-preprocessor conditional
-=20
-=20
-  * check-output-end
-- *
-- * check-known-to-fail
-  */
---=20
-1.5.2.3
+Thanks for putting the time in on it yourself!
 
+Now to go and write interesting things using c2xml :)
 
-
---------------enig453E37CBA0683056BF9284C7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGmTdMGJuZRtD+evsRAqgbAJ0RqNfRreKGNLXiHsd+9Clbf/ovbgCgsdLL
-bizdbHa8aYkkxVUKBXnXDi8=
-=2Tct
------END PGP SIGNATURE-----
-
---------------enig453E37CBA0683056BF9284C7--
+Thanks,
+Rob
