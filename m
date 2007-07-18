@@ -1,36 +1,33 @@
-From: Al Viro <viro@ftp.linux.org.uk>
+From: Brett Nash <nash@fst.net>
 Subject: Re: Booleans, what a wonderful type!
-Date: Wed, 18 Jul 2007 03:25:19 +0100
-Message-ID: <20070718022519.GT21668@ftp.linux.org.uk>
+Date: Wed, 18 Jul 2007 12:40:21 +1000
+Message-ID: <1184726421.29594.4.camel@baboon.fluffyspider.com.au>
 References: <1184723019.469d704b6111b@portal.student.luth.se>
+	 <20070718021907.GS21668@ftp.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:33062 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757482AbXGRCZU (ORCPT
+Received: from 218-214-60-232.people.net.au ([218.214.60.232]:39355 "EHLO
+	sealpup.fluffyspider.com.au" rhost-flags-OK-OK-OK-FAIL)
+	by vger.kernel.org with ESMTP id S1752289AbXGRDIY (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jul 2007 22:25:20 -0400
-Content-Disposition: inline
-In-Reply-To: <1184723019.469d704b6111b@portal.student.luth.se>
+	Tue, 17 Jul 2007 23:08:24 -0400
+In-Reply-To: <20070718021907.GS21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ricknu-0@student.ltu.se
-Cc: linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: ricknu-0@student.ltu.se, linux-sparse@vger.kernel.org
 
-On Wed, Jul 18, 2007 at 03:43:39AM +0200, ricknu-0@student.ltu.se wrote:
-> Good morning to you all!
-> 
-> As most of you do not know, I am on Google's SoC
-> <http://code.google.com/soc/2007/sparse/appinfo.html?csaid=CB0974F67B64AD0C> to
-> add the ability to suggestions when booleans could/should be used.
+On Wed, 2007-07-18 at 03:19 +0100, Al Viro wrote:
 
-Er...  Of _course_ booleans are values.  And yes, you can say true + false.
-Guaranteed to evaluate to int, value of expression being 1.  It's perfectly
-correct C99.  Same as true + true is guaranteed to be 2 (int, again); assigning
-that to _Bool variable is guaranteed to give 1, aka true (see the rules
-for conversion to _Bool).
+> Yes, and AFAICS uses of va_start()/va_end() in sparse are correct.  If you
+> see any broken one - yell.
 
-Now, sparse handling of _Bool sucks in quite a few places (e.g. conversion
-to it is not reduction modulo 2, it's comparison with 0), but I wonder if
-that's what you have in mind...
+As an aside; how hard is to get sparse to check for this?
+
+Would the general lock structure do enough with the right declaration of
+va_start/va_end?   
+
+	Regards,
+	nash
