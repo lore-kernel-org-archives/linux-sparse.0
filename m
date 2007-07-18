@@ -1,16 +1,16 @@
 From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: Booleans, what a wonderful type!
-Date: Wed, 18 Jul 2007 03:19:08 +0100
-Message-ID: <20070718021907.GS21668@ftp.linux.org.uk>
+Date: Wed, 18 Jul 2007 03:25:19 +0100
+Message-ID: <20070718022519.GT21668@ftp.linux.org.uk>
 References: <1184723019.469d704b6111b@portal.student.luth.se>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:47145 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:33062 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757408AbXGRCTK (ORCPT
+	with ESMTP id S1757482AbXGRCZU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jul 2007 22:19:10 -0400
+	Tue, 17 Jul 2007 22:25:20 -0400
 Content-Disposition: inline
 In-Reply-To: <1184723019.469d704b6111b@portal.student.luth.se>
 Sender: linux-sparse-owner@vger.kernel.org
@@ -19,45 +19,18 @@ To: ricknu-0@student.ltu.se
 Cc: linux-sparse@vger.kernel.org
 
 On Wed, Jul 18, 2007 at 03:43:39AM +0200, ricknu-0@student.ltu.se wrote:
- 
-> * Most likly a _really_ stupid newbie question, but I have seen several of this
-> form:
-> <function>
-> {
->         <variable> a;
->         <doing something useful (no sign of 'a')>
->         a = <some value/variable>;
->         <exit>
-> }
-> How is this variable useful?
+> Good morning to you all!
+> 
+> As most of you do not know, I am on Google's SoC
+> <http://code.google.com/soc/2007/sparse/appinfo.html?csaid=CB0974F67B64AD0C> to
+> add the ability to suggestions when booleans could/should be used.
 
-Explain, please.  If you mean moving the declaration down - it's not
-idiomatic in C and frankly, C++ style tends to make declarations harder
-to find when you read the code.
- 
-> * Why is there no va_end() after va_start()?
+Er...  Of _course_ booleans are values.  And yes, you can say true + false.
+Guaranteed to evaluate to int, value of expression being 1.  It's perfectly
+correct C99.  Same as true + true is guaranteed to be 2 (int, again); assigning
+that to _Bool variable is guaranteed to give 1, aka true (see the rules
+for conversion to _Bool).
 
-Where?
-
-> According to the manual (STDARG(3)):
-> va_end
->        Each invocation of va_start() must be matched by a corresponding  invo-
->        cation  of va_end() in the same function. After the call va_end(ap) the
->        variable ap is undefined.  Multiple  transversals  of  the  list,  each
->        bracketed  by  va_start() and va_end() are possible.  va_end() may be a
->        macro or a function.
-
-Yes, and AFAICS uses of va_start()/va_end() in sparse are correct.  If you
-see any broken one - yell.
-
-> * Is there any advantage of "for (;;)" instead of ex "while (true)"?
-
-It's more idiomatic and faster recognized by readers.  while (1) is also
-quite common; while (true) will be understood, but will distract since it
-will take more conscious effort to recognize.
- 
-> * Why is it written in C and not C++. Easier access to kernel-developers? (just
-> curious)
-
-Generally saner language?  Turn the question around - what in sparse would
-be inherently cleaner in C++?
+Now, sparse handling of _Bool sucks in quite a few places (e.g. conversion
+to it is not reduction modulo 2, it's comparison with 0), but I wonder if
+that's what you have in mind...
