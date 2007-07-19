@@ -1,51 +1,52 @@
 From: ricknu-0@student.ltu.se
 Subject: Re: Booleans, what a wonderful type!
-Date: Thu, 19 Jul 2007 02:23:07 +0200
-Message-ID: <1184804587.469eaeebb670c@portal.student.luth.se>
-References: <1184723019.469d704b6111b@portal.student.luth.se>  <20070718021907.GS21668@ftp.linux.org.uk> <1184776398.2640.8.camel@josh-work.beaverton.ibm.com>
+Date: Thu, 19 Jul 2007 02:38:23 +0200
+Message-ID: <1184805503.469eb27f82f96@portal.student.luth.se>
+References: <1184723019.469d704b6111b@portal.student.luth.se> <20070718022519.GT21668@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from gepetto.dc.ltu.se ([130.240.42.40]:43852 "EHLO
+Received: from gepetto.dc.ltu.se ([130.240.42.40]:44911 "EHLO
 	gepetto.dc.ltu.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760545AbXGSAXU (ORCPT
+	with ESMTP id S1759333AbXGSAia (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 18 Jul 2007 20:23:20 -0400
-In-Reply-To: <1184776398.2640.8.camel@josh-work.beaverton.ibm.com>
+	Wed, 18 Jul 2007 20:38:30 -0400
+In-Reply-To: <20070718022519.GT21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
-Citerar Josh Triplett <josht@linux.vnet.ibm.com>:
+Citerar Al Viro <viro@ftp.linux.org.uk>:
 
-> On Wed, 2007-07-18 at 03:19 +0100, Al Viro wrote:
-> > On Wed, Jul 18, 2007 at 03:43:39AM +0200, ricknu-0@student.ltu.se wrote:
+> On Wed, Jul 18, 2007 at 03:43:39AM +0200, ricknu-0@student.ltu.se wrote:
+> > Good morning to you all!
 > > 
-> > > * Most likly a _really_ stupid newbie question, but I have seen several
-> of this
-> > > form:
-> > > <function>
-> > > {
-> > >         <variable> a;
-> > >         <doing something useful (no sign of 'a')>
-> > >         a = <some value/variable>;
-> > >         <exit>
-> > > }
-> > > How is this variable useful?
-> > 
-> > Explain, please.  If you mean moving the declaration down - it's not
-> > idiomatic in C and frankly, C++ style tends to make declarations harder
-> > to find when you read the code.
+> > As most of you do not know, I am on Google's SoC
+> >
+> <http://code.google.com/soc/2007/sparse/appinfo.html?csaid=CB0974F67B64AD0C>
+> to
+> > add the ability to suggestions when booleans could/should be used.
 > 
-> Judging by that pseudocode, I would guess that he means the function
-> never uses the value of a after assigning to it.  That would generally
-> represent a bug.
+> Er...  Of _course_ booleans are values.  And yes, you can say true + false.
+> Guaranteed to evaluate to int, value of expression being 1.  It's perfectly
+> correct C99.  Same as true + true is guaranteed to be 2 (int, again);
+> assigning
+> that to _Bool variable is guaranteed to give 1, aka true (see the rules
+> for conversion to _Bool).
+Can you really say it really is a value? With C definition: ex an positiv
+integer value => 'true' => value not zero, if converted from integer to boolean
+and back. A value would return a specific value on the secound step, right?
 > 
-Yes exactly :)
+> Now, sparse handling of _Bool sucks in quite a few places (e.g. conversion
+> to it is not reduction modulo 2, it's comparison with 0), but I wonder if
+> that's what you have in mind...
+My main goal is to make it able to find possible places where an integer is used
+as an boolean.
 
-Ok, then I know. Worrid it was some magic I could not get my mind around.
+Richard Knutsson
 
-Thanks
-Richard
+PS
+Believe I used "Reply" instead of "Reply all" when I answeared your other mail.
+So if you won't reply to any, could you please forward a copy to the list? Thanks.
