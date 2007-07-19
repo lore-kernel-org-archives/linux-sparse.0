@@ -1,53 +1,51 @@
 From: ricknu-0@student.ltu.se
-Subject: [PATCH] expression.c: Adding va_end().
-Date: Thu, 19 Jul 2007 02:02:55 +0200
-Message-ID: <1184803375.469eaa2f8bff0@portal.student.luth.se>
+Subject: [PATCH] tokenize.c: Replacing handmade rutin with existing function.
+Date: Thu, 19 Jul 2007 02:04:36 +0200
+Message-ID: <1184803476.469eaa94bd1a8@portal.student.luth.se>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from gepetto.dc.ltu.se ([130.240.42.40]:42510 "EHLO
+Received: from gepetto.dc.ltu.se ([130.240.42.40]:42585 "EHLO
 	gepetto.dc.ltu.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S937144AbXGSAC5 (ORCPT
+	with ESMTP id S1759893AbXGSAEi (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 18 Jul 2007 20:02:57 -0400
+	Wed, 18 Jul 2007 20:04:38 -0400
 Received: from localhost (wc-special5.dc.ltu.se [130.240.42.175])
-	by gepetto.dc.ltu.se (8.12.5/8.12.5) with ESMTP id l6J02tmn001908
-	for <linux-sparse@vger.kernel.org>; Thu, 19 Jul 2007 02:02:55 +0200 (MEST)
+	by gepetto.dc.ltu.se (8.12.5/8.12.5) with ESMTP id l6J04amn002071
+	for <linux-sparse@vger.kernel.org>; Thu, 19 Jul 2007 02:04:36 +0200 (MEST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Adding va_end().
+Replace handwritten with existing function.
 
 Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
 ---
-According to the manual, it needs a va_end() in the same function.
+Equal, right?
 
-diff --git a/expression.c b/expression.c
-index 77d665d..857ec08 100644
---- a/expression.c
-+++ b/expression.c
-@@ -30,15 +30,15 @@
- static int match_oplist(int op, ...)
- {
- 	va_list args;
-+	int nextop;
- 
- 	va_start(args, op);
--	for (;;) {
--		int nextop = va_arg(args, int);
--		if (!nextop)
--			return 0;
--		if (op == nextop)
--			return 1;
--	}
-+	do {
-+		nextop = va_arg(args, int);
-+	} while (nextop != 0 && nextop != op);
-+	va_end(args);
+diff --git a/tokenize.c b/tokenize.c
+index fbe4c5a..e72c56e 100644
+--- a/tokenize.c
++++ b/tokenize.c
+@@ -792,16 +792,9 @@ static struct ident *create_hashed_ident(const char *name,
+int len, unsigned lon
+ 	p = &hash_table[hash];
+ 	while ((ident = *p) != NULL) {
+ 		if (ident->len == (unsigned char) len) {
+-			const char *n = name;
+-			const char *m = ident->name;
+-			int l = len;
+-			do {
+-				if (*n != *m)
+-					goto next;
+-				n++;
+-				m++;
+-			} while (--l);
+-				
++			if (strncmp(name, ident->name, len) != 0)
++				goto next;
 +
-+	return nextop != 0;
- }
- 
- static struct token *comma_expression(struct token *, struct expression **);
+ 			ident_hit++;
+ 			return ident;
+ 		}
