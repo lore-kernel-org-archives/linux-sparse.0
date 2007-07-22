@@ -1,47 +1,65 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: Booleans, what a wonderful type!
-Date: Thu, 19 Jul 2007 08:30:52 +0100
-Message-ID: <20070719073052.GU21668@ftp.linux.org.uk>
-References: <1184723019.469d704b6111b@portal.student.luth.se> <20070718022519.GT21668@ftp.linux.org.uk> <1184805503.469eb27f82f96@portal.student.luth.se>
+Subject: Re: sparse breakage (x86_64: Add vDSO for x86-64 with gettimeofday/clock_gettime/getcpu)
+Date: Sun, 22 Jul 2007 18:28:56 +0100
+Message-ID: <20070722172856.GC21668@ftp.linux.org.uk>
+References: <20070722160809.GA5803@martell.zuzino.mipt.ru> <20070722170657.GB21668@ftp.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:55454 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:46589 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750727AbXGSHax (ORCPT
+	with ESMTP id S1756548AbXGVR26 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Jul 2007 03:30:53 -0400
+	Sun, 22 Jul 2007 13:28:58 -0400
 Content-Disposition: inline
-In-Reply-To: <1184805503.469eb27f82f96@portal.student.luth.se>
+In-Reply-To: <20070722170657.GB21668@ftp.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ricknu-0@student.ltu.se
-Cc: linux-sparse@vger.kernel.org
+To: Alexey Dobriyan <adobriyan@gmail.com>
+Cc: ak@suse.de, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Thu, Jul 19, 2007 at 02:38:23AM +0200, ricknu-0@student.ltu.se wrote:
-> > Er...  Of _course_ booleans are values.  And yes, you can say true + false.
-> > Guaranteed to evaluate to int, value of expression being 1.  It's perfectly
-> > correct C99.  Same as true + true is guaranteed to be 2 (int, again);
-> > assigning
-> > that to _Bool variable is guaranteed to give 1, aka true (see the rules
-> > for conversion to _Bool).
-> Can you really say it really is a value? With C definition: ex an positiv
-> integer value => 'true' => value not zero, if converted from integer to boolean
-> and back. A value would return a specific value on the secound step, right?
+On Sun, Jul 22, 2007 at 06:06:57PM +0100, Al Viro wrote:
+> On Sun, Jul 22, 2007 at 08:08:09PM +0400, Alexey Dobriyan wrote:
+> > Andi, with new vDSO code sparse fails to check with usual invocation here:
+> 
+> Fucks with CF and not in a good way...
+> 
+> CF := $(PROFILING) -mcmodel=small -fPIC -g0 -O2 -fasynchronous-unwind-tables -m64
+> 
+> $(obj)/vclock_gettime.o: CFLAGS = $(CF)
+> $(obj)/vgetcpu.o: CFLAGS = $(CF)
+> 
+> s/CF/CCF/ in there (arch/x86_64/vdso/Makefile) fixes gcc problems; sparse
+> ones remain and I'll look into that when I get some sleep (26 hours uptime
+> right now).  I think I have a good idea of what's going on there, but
+> I'd rather not touch that code until tonight.
+> 
+> For now just rename the variable in makefile (obviously the right thing
+> to do) and that will give you sparse runs not aborted at that point.
 
-Yes.  RTFStandard, please.
- 
-> > Now, sparse handling of _Bool sucks in quite a few places (e.g. conversion
-> > to it is not reduction modulo 2, it's comparison with 0), but I wonder if
-> > that's what you have in mind...
-> My main goal is to make it able to find possible places where an integer is used
-> as an boolean.
+Actually,
 
-I'm afraid that you are confused; what exactly do you mean by "boolean"?
-Note that type of 1 == 1 is *not* _Bool; it's defined as int.  You can
-convert it to _Bool, but that's it.
+ed evaluate.c <<EOF
+/evaluate_member_dereference
+/examine_symbol_type/m/ctype =
+w
+q
+EOF
 
-Please, read through the relevant sections of standard, starting with
-6.3.1.2 and 6.3.1.1[2].  See also 6.5.3.4[5], 6.5.8, 6.5.9, 6.5.13 and
-6.5.14 for operations resulting in int 0 or 1.  See 7.16 for stdbool
-stuff.
+ought to take care of sparse, AFAICS.  IOW, in evaluate_member_dereference()
+we need to do examine_symbol_type(ctype) before checking ctype->type, etc.
+As it is, we end up with SYM_TYPEOF node there and it's not expanded until
+we'd checked if we have SYM_STRUCT.  We would, after expansion, but we don't
+do it until too late.
+
+I haven't checked if that's causes any regressions, but it looks
+straightforward enough to be a plausible fix.  I won't test it until
+tonight, though (see above).  Minimal testcase is
+struct foo {int x;} v;
+typeof(v) *p;
+void bar(void)
+{
+        p->x = 0;
+}
+and any serious regression testing should get both the sparse tests and
+comparing kernel builds with and without that fix...
