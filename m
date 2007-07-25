@@ -1,65 +1,54 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: Re: sparse breakage (x86_64: Add vDSO for x86-64 with gettimeofday/clock_gettime/getcpu)
-Date: Sun, 22 Jul 2007 18:28:56 +0100
-Message-ID: <20070722172856.GC21668@ftp.linux.org.uk>
-References: <20070722160809.GA5803@martell.zuzino.mipt.ru> <20070722170657.GB21668@ftp.linux.org.uk>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] tokenize.c: Replacing handmade rutin with existing function.
+Date: Tue, 24 Jul 2007 21:36:19 -0700
+Message-ID: <46A6D343.7000002@freedesktop.org>
+References: <1184803476.469eaa94bd1a8@portal.student.luth.se>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig47549B874B48C8EA2241F595"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:46589 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756548AbXGVR26 (ORCPT
+Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:49946 "EHLO
+	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751362AbXGYEgV (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 22 Jul 2007 13:28:58 -0400
-Content-Disposition: inline
-In-Reply-To: <20070722170657.GB21668@ftp.linux.org.uk>
+	Wed, 25 Jul 2007 00:36:21 -0400
+In-Reply-To: <1184803476.469eaa94bd1a8@portal.student.luth.se>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexey Dobriyan <adobriyan@gmail.com>
-Cc: ak@suse.de, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: ricknu-0@student.ltu.se
+Cc: linux-sparse@vger.kernel.org
 
-On Sun, Jul 22, 2007 at 06:06:57PM +0100, Al Viro wrote:
-> On Sun, Jul 22, 2007 at 08:08:09PM +0400, Alexey Dobriyan wrote:
-> > Andi, with new vDSO code sparse fails to check with usual invocation here:
-> 
-> Fucks with CF and not in a good way...
-> 
-> CF := $(PROFILING) -mcmodel=small -fPIC -g0 -O2 -fasynchronous-unwind-tables -m64
-> 
-> $(obj)/vclock_gettime.o: CFLAGS = $(CF)
-> $(obj)/vgetcpu.o: CFLAGS = $(CF)
-> 
-> s/CF/CCF/ in there (arch/x86_64/vdso/Makefile) fixes gcc problems; sparse
-> ones remain and I'll look into that when I get some sleep (26 hours uptime
-> right now).  I think I have a good idea of what's going on there, but
-> I'd rather not touch that code until tonight.
-> 
-> For now just rename the variable in makefile (obviously the right thing
-> to do) and that will give you sparse runs not aborted at that point.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig47549B874B48C8EA2241F595
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Actually,
+ricknu-0@student.ltu.se wrote:
+> Replace handwritten with existing function.
+>=20
+> Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
+> ---
+> Equal, right?
 
-ed evaluate.c <<EOF
-/evaluate_member_dereference
-/examine_symbol_type/m/ctype =
-w
-q
-EOF
+Good catch; applied.
 
-ought to take care of sparse, AFAICS.  IOW, in evaluate_member_dereference()
-we need to do examine_symbol_type(ctype) before checking ctype->type, etc.
-As it is, we end up with SYM_TYPEOF node there and it's not expanded until
-we'd checked if we have SYM_STRUCT.  We would, after expansion, but we don't
-do it until too late.
+- Josh Triplett
 
-I haven't checked if that's causes any regressions, but it looks
-straightforward enough to be a plausible fix.  I won't test it until
-tonight, though (see above).  Minimal testcase is
-struct foo {int x;} v;
-typeof(v) *p;
-void bar(void)
-{
-        p->x = 0;
-}
-and any serious regression testing should get both the sparse tests and
-comparing kernel builds with and without that fix...
+
+
+--------------enig47549B874B48C8EA2241F595
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFGptNDGJuZRtD+evsRAqKCAJ9c8wf1I+ZBJej6c9GOuFRUtcUodgCgujOI
+yQb4ogUEJ4gUvikJq0ZPcOc=
+=ueb5
+-----END PGP SIGNATURE-----
+
+--------------enig47549B874B48C8EA2241F595--
