@@ -1,52 +1,53 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] expression.c: Adding va_end().
-Date: Tue, 24 Jul 2007 21:48:29 -0700
-Message-ID: <46A6D61D.70503@freedesktop.org>
-References: <1184803375.469eaa2f8bff0@portal.student.luth.se>
+From: Josh Triplett <josht@linux.vnet.ibm.com>
+Subject: [PATCH] CodingStyle: proscribe do-while without braces.
+Date: Thu, 26 Jul 2007 14:37:02 -0700
+Message-ID: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig25851DC81387F38BF684729A"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:58154 "EHLO
-	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750794AbXGYEsb (ORCPT
+Received: from e31.co.us.ibm.com ([32.97.110.149]:41460 "EHLO
+	e31.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1764507AbXGZVgj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 25 Jul 2007 00:48:31 -0400
-In-Reply-To: <1184803375.469eaa2f8bff0@portal.student.luth.se>
+	Thu, 26 Jul 2007 17:36:39 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ricknu-0@student.ltu.se
-Cc: linux-sparse@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig25851DC81387F38BF684729A
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Sparse warns about do-while loops without braces; Linus's rationale from the
+Sparse Git changelog:
+> Add warning message for naked do-while
+>
+> Does it necessarily make sense? Dunno, but it does tend to be bad
+> practice, or at least result in code that can be hard to mentally parse.
+>
+> Maybe that mental parsing is just me.	 Or maybe it should be warned
+> about. You decide.
 
-ricknu-0@student.ltu.se wrote:
-> Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
-> ---
-> According to the manual, it needs a va_end() in the same function.
+Signed-off-by: Josh Triplett <josh@kernel.org>
+---
+ Documentation/CodingStyle |    7 +++++++
+ 1 files changed, 7 insertions(+), 0 deletions(-)
 
-It does indeed; good catch.  Applied.
-
-- Josh Triplett
-
-
-
---------------enig25851DC81387F38BF684729A
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGptYdGJuZRtD+evsRAmKVAJ9WYmVAKvwPn98j7tfv3G5pU/qQwQCdFhZy
-ldnz5es8Yk/TvixNSbA50/Y=
-=mhdB
------END PGP SIGNATURE-----
-
---------------enig25851DC81387F38BF684729A--
+diff --git a/Documentation/CodingStyle b/Documentation/CodingStyle
+index 7f1730f..f12e4b8 100644
+--- a/Documentation/CodingStyle
++++ b/Documentation/CodingStyle
+@@ -175,6 +175,13 @@ if (condition) {
+ 	otherwise();
+ }
+ 
++This also does not apply to a do-while loop; always use braces with a do-while,
++even if it contains a single statement:
++
++do {
++	this();
++} while(condition);
++
+ 		3.1:  Spaces
+ 
+ Linux kernel style for use of spaces depends (mostly) on
+-- 
+1.5.2.1
