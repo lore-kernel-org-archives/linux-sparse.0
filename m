@@ -1,60 +1,57 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [PATCH] CodingStyle: proscribe do-while without braces.
-Date: Thu, 26 Jul 2007 14:54:55 -0700
-Message-ID: <1185486895.4459.3.camel@josh-work.beaverton.ibm.com>
-References: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>
-	 <20070726144406.63c07909.akpm@linux-foundation.org>
+From: ricknu-0@student.ltu.se
+Subject: [PATCH] parse.c: Adding va_end().
+Date: Fri, 27 Jul 2007 01:28:22 +0200
+Message-ID: <1185492502.46a92e16f26bf@portal.student.luth.se>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:45320 "EHLO
-	e33.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751474AbXGZVyc (ORCPT
+Received: from gepetto.dc.ltu.se ([130.240.42.40]:61129 "EHLO
+	gepetto.dc.ltu.se" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752129AbXGZX2Y (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Jul 2007 17:54:32 -0400
-In-Reply-To: <20070726144406.63c07909.akpm@linux-foundation.org>
+	Thu, 26 Jul 2007 19:28:24 -0400
+Received: from localhost (wc-special5.dc.ltu.se [130.240.42.175])
+	by gepetto.dc.ltu.se (8.12.5/8.12.5) with ESMTP id l6QNSNmn009186
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jul 2007 01:28:23 +0200 (MEST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Thu, 2007-07-26 at 14:44 -0700, Andrew Morton wrote:
-> On Thu, 26 Jul 2007 14:37:02 -0700 Josh Triplett <josht@linux.vnet.ibm.com> wrote:
-> 
-> > Sparse warns about do-while loops without braces; Linus's rationale from the
-> > Sparse Git changelog:
-> > > Add warning message for naked do-while
-> > >
-> > > Does it necessarily make sense? Dunno, but it does tend to be bad
-> > > practice, or at least result in code that can be hard to mentally parse.
-> > >
-> > > Maybe that mental parsing is just me.	 Or maybe it should be warned
-> > > about. You decide.
-> > 
-> > Signed-off-by: Josh Triplett <josh@kernel.org>
-> > ---
-> >  Documentation/CodingStyle |    7 +++++++
-> >  1 files changed, 7 insertions(+), 0 deletions(-)
-> > 
-> > diff --git a/Documentation/CodingStyle b/Documentation/CodingStyle
-> > index 7f1730f..f12e4b8 100644
-> > --- a/Documentation/CodingStyle
-> > +++ b/Documentation/CodingStyle
-> > @@ -175,6 +175,13 @@ if (condition) {
-> >  	otherwise();
-> >  }
-> >  
-> > +This also does not apply to a do-while loop; always use braces with a do-while,
-> > +even if it contains a single statement:
-> > +
-> > +do {
-> > +	this();
-> > +} while(condition);
-> > +
-> 
-> err, your example has broken coding style.
+Adding va_end().
 
-Oops; thanks for catching that. :)
+Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
+---
+According to the manual, it needs a va_end() in the same function.
+Now it seems to be as many of va_end() as va_start().
 
-- Josh Triplett
+diff --git a/parse.c b/parse.c
+index bae12ec..dfb922f 100644
+--- a/parse.c
++++ b/parse.c
+@@ -366,18 +366,18 @@ static void fn_local_symbol(struct symbol *sym)
+ static int SENTINEL_ATTR match_idents(struct token *token, ...)
+ {
+ 	va_list args;
++	struct ident * next;
+ 
+ 	if (token_type(token) != TOKEN_IDENT)
+ 		return 0;
+ 
+ 	va_start(args, token);
+-	for (;;) {
+-		struct ident * next = va_arg(args, struct ident *);
+-		if (!next)
+-			return 0;
+-		if (token->ident == next)
+-			return 1;
+-	}
++	do {
++		next = va_arg(args, struct ident *);
++	} while (next && token->ident != next);
++	va_end(args);
++
++	return next && token->ident == next;
+ }
+ 
+ 
