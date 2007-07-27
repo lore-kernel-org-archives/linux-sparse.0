@@ -1,50 +1,40 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
+From: Stefan Richter <stefanr@s5r6.in-berlin.de>
 Subject: Re: [PATCH] CodingStyle: proscribe do-while without braces.
-Date: Fri, 27 Jul 2007 10:05:16 -0700
-Message-ID: <1185555916.2642.8.camel@josh-work.beaverton.ibm.com>
-References: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>
-	 <m3abtir95x.fsf@maximus.localdomain>
-	 <20070726173501.9ba466ba.akpm@linux-foundation.org>
-	 <m3bqdx6dlq.fsf@maximus.localdomain>
+Date: Fri, 27 Jul 2007 19:13:28 +0200
+Message-ID: <46AA27B8.8060701@s5r6.in-berlin.de>
+References: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>	<m3abtir95x.fsf@maximus.localdomain>	<46A93F92.6050708@s5r6.in-berlin.de>	<20070726175929.730fc0be.akpm@linux-foundation.org>	<46A9A18D.2050401@s5r6.in-berlin.de> <20070727005349.512c2f8d.akpm@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:39604 "EHLO
-	e33.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758929AbXG0REx (ORCPT
+Received: from hp3.statik.tu-cottbus.de ([141.43.120.68]:54160 "EHLO
+	hp3.statik.tu-cottbus.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756857AbXG0ROO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jul 2007 13:04:53 -0400
-In-Reply-To: <m3bqdx6dlq.fsf@maximus.localdomain>
+	Fri, 27 Jul 2007 13:14:14 -0400
+In-Reply-To: <20070727005349.512c2f8d.akpm@linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Krzysztof Halasa <khc@pm.waw.pl>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Krzysztof Halasa <khc@pm.waw.pl>, Josh Triplett <josht@linux.vnet.ibm.com>, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 
-On Fri, 2007-07-27 at 18:00 +0200, Krzysztof Halasa wrote:
-> Andrew Morton <akpm@linux-foundation.org> writes:
+Andrew Morton wrote:
+> On Fri, 27 Jul 2007 09:41:01 +0200 Stefan Richter <stefanr@s5r6.in-berlin.de> wrote:
+...
+>> SubmitChecklist already tells us to check with sparse before submission.
 > 
-> > it's better that we all do things the same way.  What that way _is_ is
-> > actually less important, unless it's something stupid, of course.
-> 
-> It's certainly true WRT things like indentation but IMHO it shouldn't
-> go that far, and if it goes, it should be non-braced version.
-> 
-> If we prefer non-braced versions of "if" and "while", it would be
-> a bit strange to require braces with "do while", wouldn't it?
+> rofl.  First we have to talk everyone into checking their stuff with gcc.
 
-Perhaps, but
-     1. Existing kernel style uses braces with single-statement
-        do-while.
-     2. Linus prefers (or at least preferred in October of 2006) braces
-        with single-statement do-while.
+Ah, I forgot --- Real Submitters don't compile their code before
+submission.  But wait, they also don't track CodingStyle.
 
-> Sparse warnings... I think it shouldn't complain either, unless
-> called with extra parameter.
-
-Good point; Sparse shouldn't warn about this by default.  I've turned
-that off in latest Sparse from Git, so you need to give -Wdo-while or
--Wall to get warnings about that.  However, the kernel gives -Wall, so
-you'll still see the warnings there.
-
-- Josh Triplett
+Seriously though:  Precise rules are a priori welcome.  But the more
+rules there are, the less of them we (authors, reviewers) can memorize.
+If we go for having many rules, then we need to rely more on checkpatch
+and sparse.  When growing into a catch-all rule book, the utility of
+CodingStyle will shift from an author's guide to a specification for
+code checking tools.
+-- 
+Stefan Richter
+-=====-=-=== -=== ==-==
+http://arcgraph.de/sr/
