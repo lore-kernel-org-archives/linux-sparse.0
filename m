@@ -1,40 +1,36 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [PATCH] parse.c: Adding va_end().
-Date: Fri, 27 Jul 2007 10:22:01 -0700
-Message-ID: <1185556921.2642.9.camel@josh-work.beaverton.ibm.com>
-References: <1185492502.46a92e16f26bf@portal.student.luth.se>
+From: Krzysztof Halasa <khc@pm.waw.pl>
+Subject: Re: [PATCH] CodingStyle: proscribe do-while without braces.
+Date: Fri, 27 Jul 2007 19:44:41 +0200
+Message-ID: <m3r6mt4u7q.fsf@maximus.localdomain>
+References: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>
+	<m3abtir95x.fsf@maximus.localdomain>
+	<20070726173501.9ba466ba.akpm@linux-foundation.org>
+	<m3bqdx6dlq.fsf@maximus.localdomain>
+	<1185555916.2642.8.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e32.co.us.ibm.com ([32.97.110.150]:54848 "EHLO
-	e32.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755022AbXG0RVh (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jul 2007 13:21:37 -0400
-Received: from d03relay02.boulder.ibm.com (d03relay02.boulder.ibm.com [9.17.195.227])
-	by e32.co.us.ibm.com (8.12.11.20060308/8.13.8) with ESMTP id l6RGFYtO015671
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jul 2007 12:15:34 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay02.boulder.ibm.com (8.13.8/8.13.8/NCO v8.4) with ESMTP id l6RHLaxE259048
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jul 2007 11:21:36 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l6RHLZN6023857
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jul 2007 11:21:36 -0600
-In-Reply-To: <1185492502.46a92e16f26bf@portal.student.luth.se>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S937469AbXG0Ro6@vger.kernel.org>
+In-Reply-To: <1185555916.2642.8.camel@josh-work.beaverton.ibm.com> (Josh Triplett's message of "Fri, 27 Jul 2007 10:05:16 -0700")
+Sender: linux-kernel-owner@vger.kernel.org
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ricknu-0@student.ltu.se
-Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2007-07-27 at 01:28 +0200, ricknu-0@student.ltu.se wrote:
-> Adding va_end().
-> 
-> Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
-> ---
-> According to the manual, it needs a va_end() in the same function.
-> Now it seems to be as many of va_end() as va_start().
+Josh Triplett <josht@linux.vnet.ibm.com> writes:
 
-Applied; thanks.
+> Perhaps, but
+>      1. Existing kernel style uses braces with single-statement
+>         do-while.
+>      2. Linus prefers (or at least preferred in October of 2006) braces
+>         with single-statement do-while.
 
-- Josh Triplett
+Fine with me, but it should IMHO be maintainer's call.
+
+Things which a) are clearly better, and/or b) would require massive
+reformatting when new maintainer steps in, should be documented
+in CodingStyle and perhaps checked for by scripts and sparse.
+
+Other things... sometimes there are multiple ways to do something
+well, and humans aren't, and shouldn't be that deterministic.
+-- 
+Krzysztof Halasa
