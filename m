@@ -1,51 +1,53 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: [PATCH] CodingStyle: proscribe do-while without braces.
-Date: Fri, 27 Jul 2007 11:52:10 -0700
-Message-ID: <1185562330.2642.13.camel@josh-work.beaverton.ibm.com>
-References: <1185485822.4459.1.camel@josh-work.beaverton.ibm.com>
-	 <m3abtir95x.fsf@maximus.localdomain>
-	 <20070726173501.9ba466ba.akpm@linux-foundation.org>
-	 <m3bqdx6dlq.fsf@maximus.localdomain>
-	 <1185555916.2642.8.camel@josh-work.beaverton.ibm.com>
-	 <20070727112723.131753f9.akpm@linux-foundation.org>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Finding all typedefs
+Date: Fri, 27 Jul 2007 18:08:31 -0400
+Message-ID: <1185574111.2029.10.camel@dv>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e31.co.us.ibm.com ([32.97.110.149]:59930 "EHLO
-	e31.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757348AbXG0Svr (ORCPT
+Received: from fencepost.gnu.org ([140.186.70.10]:51845 "EHLO
+	fencepost.gnu.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1763634AbXG0WId (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jul 2007 14:51:47 -0400
-In-Reply-To: <20070727112723.131753f9.akpm@linux-foundation.org>
+	Fri, 27 Jul 2007 18:08:33 -0400
+Received: from proski by fencepost.gnu.org with local (Exim 4.60)
+	(envelope-from <proski@gnu.org>)
+	id 1IEY0x-00010z-Ra
+	for linux-sparse@vger.kernel.org; Fri, 27 Jul 2007 18:10:27 -0400
+Received: from proski by gnu.org with local (Exim 4.66)
+	(envelope-from <proski@gnu.org>)
+	id 1IEXz5-0001SE-IL
+	for linux-sparse@vger.kernel.org; Fri, 27 Jul 2007 18:08:31 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Krzysztof Halasa <khc@pm.waw.pl>, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Fri, 2007-07-27 at 11:27 -0700, Andrew Morton wrote:
-> On Fri, 27 Jul 2007 10:05:16 -0700
-> Josh Triplett <josht@linux.vnet.ibm.com> wrote:
-> 
-> > > Sparse warnings... I think it shouldn't complain either, unless
-> > > called with extra parameter.
-> > 
-> > Good point; Sparse shouldn't warn about this by default.  I've turned
-> > that off in latest Sparse from Git, so you need to give -Wdo-while or
-> > -Wall to get warnings about that.  However, the kernel gives -Wall, so
-> > you'll still see the warnings there.
-> 
-> I believe reeducating sparse was the best fix here.  I think I'll now
-> have a quiet accident with codingstyle-proscribe-do-while-without-braces.patch
+Hello!
 
-I didn't just submit the patch because Sparse warns about it.  I
-submitted the patch because of the coding style preference that led to
-the Sparse warning.
+I'm trying to write a wrapper around GNU indent to make the output
+result satisfy checkpatch.pl.  Unfortunately, GNU indent is bad at
+recognizing types if they are just bare words defined by typedef.  Such
+types should be supplied using the "-T" option to indent.
 
-Also, if this really *shouldn't* form part of the kernel style, then the
-kernel should use -Wno-do-while with -Wall, or should stop using -Wall.
+I would prefer to rely on sparse for finding all typedefs, since it's
+better at parsing C code than any script I could write.
 
-That said, I don't care all that much about the patch, so I won't push
-further for it one way or another.
+Is there any way to make sparse dump all type names declared with a
+typedef?  I don't see any of the programs in sparse sources do anything
+like that.  I think c2xml could be a good candidate, as it outputs the
+symbol, but it doesn't give any indication that it's a typedef-defined
+type:
 
-- Josh Triplett
+$ make C=2 CHECK=/home/proski/src/sparse/c2xml |grep foo_t
+  <symbol type="node" id="_29" ident="foo_t"
+file="/home/proski/src/at76/at76_usb.c" start-line="41" start-col="13"
+end-line="41" end-col="18" bit-size="32" alignment="4" offset="0"
+base-type-builtin="int"/>
+
+Another nice thing would be to have a list of labels.  Although they are
+easier to find by scripts, I would prefer to find them in the same run.
+
+-- 
+Regards,
+Pavel Roskin
