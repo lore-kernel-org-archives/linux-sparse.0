@@ -1,56 +1,36 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] tokenize.c: Simplify drop_stream_eoln().
-Date: Sun, 29 Jul 2007 01:13:55 -0700
-Message-ID: <46AC4C43.8090202@freedesktop.org>
-References: <1184803288.469ea9d82a143@portal.student.luth.se>
+From: Alexey Dobriyan <adobriyan@gmail.com>
+Subject: random line shuffling test
+Date: Sun, 29 Jul 2007 15:33:20 +0400
+Message-ID: <20070729113320.GA5784@martell.zuzino.mipt.ru>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigA9EC5D2A036F47DDDD25B960"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:40437 "EHLO
-	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760788AbXG2IN5 (ORCPT
+Received: from nf-out-0910.google.com ([64.233.182.191]:38880 "EHLO
+	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761416AbXG2LdZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 29 Jul 2007 04:13:57 -0400
-In-Reply-To: <1184803288.469ea9d82a143@portal.student.luth.se>
+	Sun, 29 Jul 2007 07:33:25 -0400
+Received: by nf-out-0910.google.com with SMTP id g13so113065nfb
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Jul 2007 04:33:23 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ricknu-0@student.ltu.se
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigA9EC5D2A036F47DDDD25B960
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+I'm currently running random line shuffling test taking, ha-ha, advansys.i
+as input.
 
-ricknu-0@student.ltu.se wrote:
-> Simplifying function drop_stream_eoln().
->=20
-> Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
-> ---
-> Is there a reason to call nextchar() before drop_token()?
+Here is first trimmed testcase on which valgrind says stack overflow and
+sparse segfaults.
 
-None that I know of, and your patch doesn't break the test suite.  Applie=
-d;
-thanks!
 
-- Josh Triplett
+int a, struct b c);
+typedef void (elevator_activate_req_fn)(foo *);
+typedef void (elevator_activate_req_fn)(struct foo *);
+struct sigaction {
+static struct lock_class_key __key;
 
 
 
---------------enigA9EC5D2A036F47DDDD25B960
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGrExDGJuZRtD+evsRAhEQAKCJ504HYm2eyxLoGutvNcmcj0JxVACguAh3
-vrZWz0CxRiDJvnUGVAbolK4=
-=Dg8c
------END PGP SIGNATURE-----
-
---------------enigA9EC5D2A036F47DDDD25B960--
+So far the joy is spoiled by many infinite loops sparse gets into and
+automatic testing is still semi-automatic, but stay tuned.
