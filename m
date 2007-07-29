@@ -1,58 +1,45 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [git pull] misc fixes
-Date: Sun, 29 Jul 2007 01:11:26 -0700
-Message-ID: <46AC4BAE.3070300@freedesktop.org>
-References: <20070728235741.GB21089@ftp.linux.org.uk>
+Subject: Re: [PATCH] tokenize.c: Simplify drop_stream_eoln().
+Date: Sun, 29 Jul 2007 01:13:55 -0700
+Message-ID: <46AC4C43.8090202@freedesktop.org>
+References: <1184803288.469ea9d82a143@portal.student.luth.se>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig83808B4E9EDA274659E1CF4D"
+ boundary="------------enigA9EC5D2A036F47DDDD25B960"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:43579 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751691AbXG2ILa (ORCPT
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:40437 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760788AbXG2IN5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 29 Jul 2007 04:11:30 -0400
-In-Reply-To: <20070728235741.GB21089@ftp.linux.org.uk>
+	Sun, 29 Jul 2007 04:13:57 -0400
+In-Reply-To: <1184803288.469ea9d82a143@portal.student.luth.se>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
+To: ricknu-0@student.ltu.se
 Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig83808B4E9EDA274659E1CF4D
+--------------enigA9EC5D2A036F47DDDD25B960
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Al Viro wrote:
-> Please pull from git://git.kernel.org/pub/scm/linux/kernel/git/viro/spa=
-rse.git
-> local15.
+ricknu-0@student.ltu.se wrote:
+> Simplifying function drop_stream_eoln().
 >=20
-> A bunch of bug fixes + more typechecking sanitized.
->=20
-> Contents:
->       add __builtin_strlen()
->       no such thing as array of functions
->       new helper: unfoul()
->       handling of typeof in evaluate_member_dereference()
->       file and global scopes are the same for purposes of struct redefi=
-ning
->       ...,array should degenerate
->       sanitize evaluate_ptr_add(), start checking for pointers to funct=
-ions
->       fix evaluate_compare()
->       sanitize evaluate_postop()
->       saner -Wtypesign
->       braino in conditional_expression()
+> Signed-off-by: Richard Knutsson <ricknu-0@student.ltu.se>
+> ---
+> Is there a reason to call nextchar() before drop_token()?
 
-Merged; thanks!
+None that I know of, and your patch doesn't break the test suite.  Applie=
+d;
+thanks!
 
 - Josh Triplett
 
 
 
---------------enig83808B4E9EDA274659E1CF4D
+--------------enigA9EC5D2A036F47DDDD25B960
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -61,9 +48,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGrEuvGJuZRtD+evsRApbZAJ4/qqB8Qq2tW3MIRY+nkV3CN/dqVgCfTr4B
-KpvmIstTJj+PsKiVwUYOm3w=
-=YkOD
+iD8DBQFGrExDGJuZRtD+evsRAhEQAKCJ504HYm2eyxLoGutvNcmcj0JxVACguAh3
+vrZWz0CxRiDJvnUGVAbolK4=
+=Dg8c
 -----END PGP SIGNATURE-----
 
---------------enig83808B4E9EDA274659E1CF4D--
+--------------enigA9EC5D2A036F47DDDD25B960--
