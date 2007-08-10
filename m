@@ -1,61 +1,52 @@
-From: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
-Subject: [PATCH] libxml compile fix on Cygwin
-Date: Wed, 08 Aug 2007 22:34:39 +0200
-Message-ID: <f9d9d1$m7o$1@sea.gmane.org>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] libxml compile fix on Cygwin
+Date: Thu, 09 Aug 2007 22:53:12 -0700
+Message-ID: <46BBFD48.3030805@freedesktop.org>
+References: <f9d9d1$m7o$1@sea.gmane.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------010405000209000009060906"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig3A97802D4B0C25CDB7D346E2"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from main.gmane.org ([80.91.229.2]:47783 "EHLO ciao.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754362AbXHHUkL (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 8 Aug 2007 16:40:11 -0400
-Received: from root by ciao.gmane.org with local (Exim 4.43)
-	id 1IIsK2-0004IY-2j
-	for linux-sparse@vger.kernel.org; Wed, 08 Aug 2007 22:40:02 +0200
-Received: from 0x5551d1e2.adsl.cybercity.dk ([85.81.209.226])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Aug 2007 22:40:02 +0200
-Received: from krj by 0x5551d1e2.adsl.cybercity.dk with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Aug 2007 22:40:02 +0200
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:50993 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753292AbXHJFx0 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 10 Aug 2007 01:53:26 -0400
+In-Reply-To: <f9d9d1$m7o$1@sea.gmane.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
+Cc: linux-sparse@vger.kernel.org
 
-This is a multi-part message in MIME format.
---------------010405000209000009060906
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig3A97802D4B0C25CDB7D346E2
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
 
-Hello,
+Kovarththanan Rajaratnam wrote:
+> I needed to re-arrange the libxml-2.0 library order to make sparse=20
+> compile on Cygwin. Patch attached.
+>=20
+> Signed-off-by: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
 
-I needed to re-arrange the libxml-2.0 library order to make sparse 
-compile on Cygwin. Patch attached.
+Applied; thanks!
 
-Signed-off-by: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
+- Josh Triplett
 
 
---------------010405000209000009060906
-Content-Type: text/x-patch;
- name="libxml_cygwin_fix.patch"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline;
- filename="libxml_cygwin_fix.patch"
+--------------enig3A97802D4B0C25CDB7D346E2
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-diff --git a/Makefile b/Makefile
-index 1e06794..f07290e 100644
---- a/Makefile
-+++ b/Makefile
-@@ -124,7 +124,7 @@ ctags: ctags.o $(LIBS)
- 	$(QUIET_LINK)$(CC) $(LDFLAGS) -o $@ $< $(LIBS)
- 
- c2xml: c2xml.o $(LIBS)
--	$(QUIET_LINK)$(CC) $(LDFLAGS) `pkg-config --libs libxml-2.0` -o $@ $< $(LIBS)
-+	$(QUIET_LINK)$(CC) $(LDFLAGS)  -o $@ $< $(LIBS) `pkg-config --libs libxml-2.0`
- 
- $(LIB_FILE): $(LIB_OBJS)
- 	$(QUIET_AR)$(AR) rcs $@ $(LIB_OBJS)
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
---------------010405000209000009060906--
+iD8DBQFGu/1IGJuZRtD+evsRAgfXAKCOd2XCA4RrehGEnv9am2iwl5RAYQCcDybO
+BEGejT6zHqdVQvcHaEQWFfU=
+=gdqK
+-----END PGP SIGNATURE-----
+
+--------------enig3A97802D4B0C25CDB7D346E2--
