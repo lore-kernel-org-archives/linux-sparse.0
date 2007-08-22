@@ -1,52 +1,39 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] libxml compile fix on Cygwin
-Date: Thu, 09 Aug 2007 22:53:12 -0700
-Message-ID: <46BBFD48.3030805@freedesktop.org>
-References: <f9d9d1$m7o$1@sea.gmane.org>
+From: Yura Pakhuchiy <pakhuchiy@gmail.com>
+Subject: [PATCH] Make cgcc filter out all sparse warning related options
+Date: Wed, 22 Aug 2007 12:48:47 +0300
+Message-ID: <1187776127.7605.14.camel@chaos.malinovka7.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig3A97802D4B0C25CDB7D346E2"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:50993 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753292AbXHJFx0 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 10 Aug 2007 01:53:26 -0400
-In-Reply-To: <f9d9d1$m7o$1@sea.gmane.org>
+Received: from iptel.by ([80.94.225.5]:43896 "EHLO iptel.by"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752691AbXHVKz5 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 22 Aug 2007 06:55:57 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
+To: Josh Triplett <josh@freedesktop.org>
 Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig3A97802D4B0C25CDB7D346E2
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+Make cgcc filter out all sparse warning related options.
 
-Kovarththanan Rajaratnam wrote:
-> I needed to re-arrange the libxml-2.0 library order to make sparse=20
-> compile on Cygwin. Patch attached.
->=20
-> Signed-off-by: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
+Signed-off-by: Yura Pakhuchiy <pakhuchiy@gmail.com>
 
-Applied; thanks!
+diff --git a/cgcc b/cgcc
+index 2b9f89c..51fbd86 100755
+--- a/cgcc
++++ b/cgcc
+@@ -69,7 +69,7 @@ exit 0;
+ 
+ sub check_only_option {
+     my ($arg) = @_;
+-    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sig|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undefined-preprocessor|ptr-subtraction-blows|cast-to-address-space|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null)$/;
++    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sign|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undefined-preprocessor|ptr-subtraction-blows|cast-to-address-space|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null|paren-string|return-void)$/;
+     return 1 if $arg =~ /^-v(no-?)?(entry|dead)$/;
+     return 0;
+ }
 
-- Josh Triplett
 
-
---------------enig3A97802D4B0C25CDB7D346E2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFGu/1IGJuZRtD+evsRAgfXAKCOd2XCA4RrehGEnv9am2iwl5RAYQCcDybO
-BEGejT6zHqdVQvcHaEQWFfU=
-=gdqK
------END PGP SIGNATURE-----
-
---------------enig3A97802D4B0C25CDB7D346E2--
+-- 
+Best regards,
+        Yura
