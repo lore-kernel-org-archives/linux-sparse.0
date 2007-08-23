@@ -1,41 +1,48 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Make cgcc filter out all sparse warning related options
-Date: Wed, 22 Aug 2007 19:17:36 -0700
-Message-ID: <46CCEE40.4090007@freedesktop.org>
-References: <1187776127.7605.14.camel@chaos.malinovka7.net>
+Subject: Re: [PATCH] add __builtin_labs()
+Date: Wed, 22 Aug 2007 19:19:44 -0700
+Message-ID: <46CCEEC0.5040606@freedesktop.org>
+References: <20070822154300.c46c1fd0.randy.dunlap@oracle.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig13070D0A51F7032A7AA8903F"
+ boundary="------------enigC2FDBA43673B91AE2C4E567D"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:34260 "EHLO
+Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:49705 "EHLO
 	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987AbXHWCRp (ORCPT
+	with ESMTP id S1752184AbXHWCTr (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 Aug 2007 22:17:45 -0400
-In-Reply-To: <1187776127.7605.14.camel@chaos.malinovka7.net>
+	Wed, 22 Aug 2007 22:19:47 -0400
+In-Reply-To: <20070822154300.c46c1fd0.randy.dunlap@oracle.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Yura Pakhuchiy <pakhuchiy@gmail.com>
+To: Randy Dunlap <randy.dunlap@oracle.com>
 Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig13070D0A51F7032A7AA8903F
-Content-Type: text/plain; charset=UTF-8
+--------------enigC2FDBA43673B91AE2C4E567D
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: quoted-printable
 
-Yura Pakhuchiy wrote:
-> Make cgcc filter out all sparse warning related options.
+Randy Dunlap wrote:
+> From: Randy Dunlap <randy.dunlap@oracle.com>
 >=20
-> Signed-off-by: Yura Pakhuchiy <pakhuchiy@gmail.com>
+> 2.6.23-rc3-mm1 has added a user of __builtin_labs(), so add this functi=
+on
+> to sparse lib.c to avoid the error messages.
+>=20
+>   CHECK   kernel/unwind.c
+> kernel/unwind.c:1016:31: error: undefined identifier '__builtin_labs'
+> kernel/unwind.c:1232:25: error: undefined identifier '__builtin_labs'
+>=20
+> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
 
 Applied, thanks.
 
 - Josh Triplett
 
 
-
---------------enig13070D0A51F7032A7AA8903F
+--------------enigC2FDBA43673B91AE2C4E567D
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -44,9 +51,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFGzO5HGJuZRtD+evsRAnCGAJ9TFzI2dMYk3je+HBRf+QAC7AkP6gCfU7Vn
-wiBF8kwVllC0YT+mTIbOGEo=
-=Fkb1
+iD8DBQFGzO7BGJuZRtD+evsRAuC0AJwPxry+Aw9O9UhXsPGqQ4NecNeYUgCfR4Yo
+oHf79ukhTMlqF41qA4JSjU8=
+=2ozB
 -----END PGP SIGNATURE-----
 
---------------enig13070D0A51F7032A7AA8903F--
+--------------enigC2FDBA43673B91AE2C4E567D--
