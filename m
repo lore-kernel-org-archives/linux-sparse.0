@@ -1,59 +1,31 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] add __builtin_labs()
-Date: Wed, 22 Aug 2007 19:19:44 -0700
-Message-ID: <46CCEEC0.5040606@freedesktop.org>
-References: <20070822154300.c46c1fd0.randy.dunlap@oracle.com>
+From: "Randy.Dunlap" <rdunlap@xenotime.net>
+Subject: what's with "symbol blah was not declared"
+Date: Thu, 30 Aug 2007 21:05:34 -0700 (PDT)
+Message-ID: <Pine.LNX.4.64.0708302100090.26586@shark.he.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigC2FDBA43673B91AE2C4E567D"
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:49705 "EHLO
-	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752184AbXHWCTr (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 Aug 2007 22:19:47 -0400
-In-Reply-To: <20070822154300.c46c1fd0.randy.dunlap@oracle.com>
+Received: from xenotime.net ([66.160.160.81]:45784 "HELO xenotime.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1751035AbXHaEFg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 31 Aug 2007 00:05:36 -0400
+Received: from shark.he.net ([66.160.160.2]) by xenotime.net for <linux-sparse@vger.kernel.org>; Thu, 30 Aug 2007 21:05:34 -0700
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <randy.dunlap@oracle.com>
-Cc: linux-sparse@vger.kernel.org
-
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigC2FDBA43673B91AE2C4E567D
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-Randy Dunlap wrote:
-> From: Randy Dunlap <randy.dunlap@oracle.com>
->=20
-> 2.6.23-rc3-mm1 has added a user of __builtin_labs(), so add this functi=
-on
-> to sparse lib.c to avoid the error messages.
->=20
->   CHECK   kernel/unwind.c
-> kernel/unwind.c:1016:31: error: undefined identifier '__builtin_labs'
-> kernel/unwind.c:1232:25: error: undefined identifier '__builtin_labs'
->=20
-> Signed-off-by: Randy Dunlap <randy.dunlap@oracle.com>
-
-Applied, thanks.
-
-- Josh Triplett
+To: linux-sparse@vger.kernel.org
 
 
---------------enigC2FDBA43673B91AE2C4E567D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+e.g., linux kernel source code: init/do_mounts.c, line 23 is:
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+int __initdata rd_doload;
 
-iD8DBQFGzO7BGJuZRtD+evsRAuC0AJwPxry+Aw9O9UhXsPGqQ4NecNeYUgCfR4Yo
-oHf79ukhTMlqF41qA4JSjU8=
-=2ozB
------END PGP SIGNATURE-----
 
---------------enigC2FDBA43673B91AE2C4E567D--
+and sparse (snapshot of 2007-08-31) says:
+
+init/do_mounts.c:23:16: warning: symbol 'rd_doload' was not declared. Should it be static?
+
+
+
+thanks,
+-- 
+~Randy
