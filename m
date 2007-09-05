@@ -1,130 +1,370 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
+From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
 Subject: Re: GObject introspection patches
-Date: Wed, 05 Sep 2007 13:36:51 -0700
-Message-ID: <1189024611.16411.11.camel@josh-work.beaverton.ibm.com>
+Date: Thu, 06 Sep 2007 00:42:04 +0200
+Message-ID: <1189032124.6389.20.camel@localhost>
 References: <1188940117.10888.17.camel@localhost>
 	 <46DF01CF.1090600@codethink.co.uk>
+	 <1189024611.16411.11.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-INOy/WHbpq8Wnnte7e8t"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e3.ny.us.ibm.com ([32.97.182.143]:43494 "EHLO e3.ny.us.ibm.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756097AbXIEUhP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 5 Sep 2007 16:37:15 -0400
-Received: from d01relay02.pok.ibm.com (d01relay02.pok.ibm.com [9.56.227.234])
-	by e3.ny.us.ibm.com (8.13.8/8.13.8) with ESMTP id l85KbElO020517
-	for <linux-sparse@vger.kernel.org>; Wed, 5 Sep 2007 16:37:14 -0400
-Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
-	by d01relay02.pok.ibm.com (8.13.8/8.13.8/NCO v8.5) with ESMTP id l85KbEUX667144
-	for <linux-sparse@vger.kernel.org>; Wed, 5 Sep 2007 16:37:14 -0400
-Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
-	by d01av04.pok.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l85KbDYG025764
-	for <linux-sparse@vger.kernel.org>; Wed, 5 Sep 2007 16:37:14 -0400
-In-Reply-To: <46DF01CF.1090600@codethink.co.uk>
+Received: from mail.gmx.net ([213.165.64.20]:52573 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1756249AbXIEWmT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 5 Sep 2007 18:42:19 -0400
+In-Reply-To: <1189024611.16411.11.camel@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Rob Taylor <rob.taylor@codethink.co.uk>
-Cc: Mathias Hasselmann <mathias.hasselmann@gmx.de>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: Rob Taylor <rob.taylor@codethink.co.uk>, linux-sparse@vger.kernel.org
 
-Thanks for reviewing these, Rob.  Further comments below.
 
-On Wed, 2007-09-05 at 20:21 +0100, Rob Taylor wrote:
-> Mathias Hasselmann wrote:
-> > Hello,
-> > 
-> > For GObject introspection c2xml has to be extended to output information
-> > about custom attributes like this:
-> > 
-> >           GList* create_list() __attribute__((element_type(char*)))
-> > 
-> > Attached patch set adds support for custom attributes to c2xml. It also
-> > changes c2xml to provide command line options and to output initializer
-> > expressions. The patchset also is available via git:
-> > 
-> > http://taschenorakel.de/gitweb/?p=sparse;a=shortlog;h=gobject-introspection
-> > 
-> > Ciao,
-> > Mathias
-> 
-> > From 98fae4f8d2d1f375a18aeaf1e0a0c71107fbeba8 Mon Sep 17 00:00:00 2001
-> > From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> > Date: Tue, 4 Sep 2007 22:26:47 +0200
-> > Subject: [PATCH] Introduce attribute structure for storing custom attributes in symbol nodes.
-> > 
-> > Signed-off-by: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> 
-> This patch looks good to me, from my (albeit limited) knowledge of
-> sparse internals. It would be good to have someone with deeper
-> understanding comment.
+--=-INOy/WHbpq8Wnnte7e8t
+Content-Type: multipart/mixed; boundary="=-Do/uqRvcQuztT5MVAAiL"
 
-Looks reasonable to me too; I wonder if this generalization could cover
-some other things like contexts, particularly with appropriate
-factored-out functions to combine attributes from symbols.
 
-I'd like to hear any comments from others as well.
+--=-Do/uqRvcQuztT5MVAAiL
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-> From 124215ffb5ba8ae28028588e1f12d2a586d21e20 Mon Sep 17 00:00:00 2001
-> From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> Date: Tue, 4 Sep 2007 22:30:14 +0200
-> Subject: [PATCH] Extract init_keyword_table from init_parser for usage
-> in c2xml.
-> 
-> Signed-off-by: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> 
-> Again, this looks fine to me.
+Rob and Josh, thank you for review. Attaching more patches.
 
-Goes with the next change; seems OK, though I'd also like to hear
-further comments from other people.
+Am Mittwoch, den 05.09.2007, 13:36 -0700 schrieb Josh Triplett:
+> Thanks for reviewing these, Rob.  Further comments below.
+>=20
+> > > From 98fae4f8d2d1f375a18aeaf1e0a0c71107fbeba8 Mon Sep 17 00:00:00 200=
+1
+> > > From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
+> > > Date: Tue, 4 Sep 2007 22:26:47 +0200
+> > > Subject: [PATCH] Introduce attribute structure for storing custom att=
+ributes in symbol nodes.
+>
+> Looks reasonable to me too; I wonder if this generalization could cover
+> some other things like contexts, particularly with appropriate
+> factored-out functions to combine attributes from symbols.
 
-> > From 42a4d680b17d6ed4d0cc1108cef5d1b299495f01 Mon Sep 17 00:00:00 2001
-> > From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> > Date: Tue, 4 Sep 2007 22:34:15 +0200
-> > Subject: [PATCH] c2xml: Add support for custom attributes and omit end position information when
-> > equal to start position. Custom attributes are needed for GObject introspection
-> > to express details like this:
-> > 
-> >       GList* create_list() __attribute__((element_type(char*)))
-> > 
-> > Signed-off-by: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> 
-> This looks mostly fine, though I'm not sure about defining
-> attribute_table inside c2xml. Either these are generally useful and so
-> should be in (say) sparse.c, or they're specific to
-> Gobject-introspection, and so there should be a way of providing them as
-> input to c2xml, perhaps defined in an input xml document, and
-> namespacing them in the output appropriately?
+Seems that I do not know Sparse well enough yet to understand
+which chance for refactoring you see.
 
-At a minimum, Sparse should know about these attributes in order to
-ignore them.  In theory, Sparse should ignore any attributes it doesn't
-know about, like GCC's -Wno-attributes, but that seems error-prone.
-Alternatively, we could introduce some new builtin for testing for
-available attributes; feature testing seems better than version testing,
-and Sparse does develop new features over time, so that might help for
-new Sparse features as well.  That would allow something like
-conditional compilation based on individual attributes:
-#if defined(__CHECKER__) && __attribute_exists__(element_type)
-#define element_type(x) __attribute__((element_type(x)))
-#endif
+> > > Subject: [PATCH] c2xml: Add support for custom attributes and omit en=
+d position information when
+> > > equal to start position. Custom attributes are needed for GObject int=
+rospection
+> > > to express details like this:
+> > >=20
+> > This looks mostly fine, though I'm not sure about defining
+> > attribute_table inside c2xml. Either these are generally useful and so
+> > should be in (say) sparse.c, or they're specific to
+> > Gobject-introspection, and so there should be a way of providing them a=
+s
+> > input to c2xml, perhaps defined in an input xml document, and
+> > namespacing them in the output appropriately?
 
-> > From be96d3c60e9e52e6448bf90444eb1e8bb3a48d5c Mon Sep 17 00:00:00 2001
-> > From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> > Date: Tue, 4 Sep 2007 22:44:58 +0200
-> > Subject: [PATCH] c2xml: Implement command line options:
-> > 
-> >     -d           include document type declaration
-> >     -p           output position information for symbols
-> >     -o FILENAME  write the document to FILENAME
-> >     -h           display usage information - this page
-> > 
-> > Signed-off-by: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-> 
-> This looks like it breaks commandline parsing, Mathias has already told
-> me on irc it needs fixing :) The options it gives could be useful
-> though, if refactored to work correctly with the sparse commandline parsing.
+Having definitions for GObject specific attributes within an external
+file seems reasonable for me: No need to patch sparse everytime we GNOME
+guys invent a new attribute for our code. But instead of using XML for
+that external definition I feel like using Sparse's builtin tokenizer.=20
 
-Just to clarify something: feel free to refactor Sparse's command-line
-handling itself, which I think needs some work to make it usable by
-anything other than the sparse backend.
+> At a minimum, Sparse should know about these attributes in order to
+> ignore them.  In theory, Sparse should ignore any attributes it doesn't
+> know about, like GCC's -Wno-attributes, but that seems error-prone.
+> Alternatively, we could introduce some new builtin for testing for
+> available attributes; feature testing seems better than version testing,
+> and Sparse does develop new features over time, so that might help for
+> new Sparse features as well.  That would allow something like
+> conditional compilation based on individual attributes:
+> #if defined(__CHECKER__) && __attribute_exists__(element_type)
+> #define element_type(x) __attribute__((element_type(x)))
+> #endif
 
-- Josh Triplett
+Agreed. This __attribute_exists__ builtin looks like a pretty idea.
+Guess we also should convince the gcc hackers to introduce it.
+
+> > > Subject: [PATCH] c2xml: Implement command line options:
+>
+> Just to clarify something: feel free to refactor Sparse's command-line
+> handling itself, which I think needs some work to make it usable by
+> anything other than the sparse backend.
+
+Attached there is a new variant of the patch, playing nice with Sparse's
+command-line parse. Concept is borrowed from glib's GOptionContext. Upon
+approval I'll modify Sparse's command line parser to use this extensible
+infrastructure.
+
+Ciao,
+Mathias
+--=20
+Mathias Hasselmann <mathias.hasselmann@gmx.de>
+http://taschenorakel.de/
+
+--=-Do/uqRvcQuztT5MVAAiL
+Content-Disposition: inline;
+	filename*0=0001-parse.dtd-Fix-errors-in-definition-of-the-symbol-el.patc;
+	filename*1=h
+Content-Type: application/mbox;
+	name=0001-parse.dtd-Fix-errors-in-definition-of-the-symbol-el.patch
+Content-Transfer-Encoding: base64
+
+RnJvbSAzYTA1ZGZmMzJmNmNmMTJiNjY0OTZjMjI1ZjA2M2FkMTU2YTE4YjNiIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBNYXRoaWFzIEhhc3NlbG1hbm4gPG1hdGhpYXMuaGFzc2VsbWFu
+bkBnbXguZGU+CkRhdGU6IFdlZCwgNSBTZXAgMjAwNyAyMTozODo0NyArMDIwMApTdWJqZWN0OiBb
+UEFUQ0hdIHBhcnNlLmR0ZDogRml4IGVycm9ycyBpbiBkZWZpbml0aW9uIG9mIHRoZSBzeW1ib2wg
+ZWxlbWVudC4KRGVzY3JpYmUgZXhwcmVzc2lvbiBhbmQgdHlwZS1yZWZlcmVuY2UgZWxlbWVudHMu
+CgpTaWduZWQtb2ZmLWJ5OiBNYXRoaWFzIEhhc3NlbG1hbm4gPG1hdGhpYXMuaGFzc2VsbWFubkBn
+bXguZGU+Ci0tLQogcGFyc2UuZHRkIHwgICAyMiArKysrKysrKysrKysrKysrKy0tLS0tCiAxIGZp
+bGVzIGNoYW5nZWQsIDE3IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0
+IGEvcGFyc2UuZHRkIGIvcGFyc2UuZHRkCmluZGV4IGNiZjk1ZWMuLmY3MTJmZGEgMTAwNjQ0Ci0t
+LSBhL3BhcnNlLmR0ZAorKysgYi9wYXJzZS5kdGQKQEAgLTEsOSArMSw5IEBACiA8IUVMRU1FTlQg
+cGFyc2UgKHN5bWJvbCspID4KIAotPCFFTEVNRU5UIHN5bWJvbCAoc3ltYm9sKikgPgorPCFFTEVN
+RU5UIHN5bWJvbCAoKHN5bWJvbHxleHByZXNzaW9uKSopID4KIAotPCFBVFRMSVNUIHN5bWJvbCB0
+eXBlICh1bmluaXRpYWxpemVkfHByZXByb2Nlc3NvcnxiYXNldHlwZXxub2RlfHBvaW50ZXJ8ZnVu
+Y3Rpb258YXJyYXl8c3RydWN0fHVuaW9ufGVudW18dHlwZWRlZnx0eXBlb2Z8bWVtYmVyfGJpdGZp
+ZWxkfGxhYmVsfHJlc3RyaWN0fGZvdWxlZHxrZXl3b3JkfGJhZCkgI1JFUVVJUkVECi0gICAgICAg
+ICAgICAgICAgIGlkIElEICNSRVFVSVJFRAorPCFBVFRMSVNUIHN5bWJvbCB0eXBlICh1bmluaXRp
+YWxpemVkfHByZXByb2Nlc3NvcnxiYXNldHlwZXxub2RlfHBvaW50ZXJ8ZnVuY3Rpb258YXJyYXl8
+c3RydWN0fHVuaW9ufGVudW18dHlwZWRlZnx0eXBlb2Z8bWVtYmVyfGJpdGZpZWxkfGxhYmVsfHJl
+c3RyaWN0fGZvdWxlZHxrZXl3b3JkfGJhZHxtYWNybykgI1JFUVVJUkVECisJCSBpZCBJRCAjUkVR
+VUlSRUQKIAkJIGZpbGUgQ0RBVEEgI1JFUVVJUkVECiAJCSBzdGFydC1saW5lIENEQVRBICNSRVFV
+SVJFRAogCQkgc3RhcnQtY29sIENEQVRBICNSRVFVSVJFRApAQCAtMTMsNyArMTMsNyBAQAogCiAJ
+CSBpZGVudCBDREFUQSAjSU1QTElFRAogCQkgYmFzZS10eXBlIElEUkVGICNJTVBMSUVECi0JCSBi
+YXNlLXR5cGUtYnVpbHRpbiAoY2hhcnxzaWduZWQgY2hhcnx1bnNpZ25lZCBjaGFyfHNob3J0fHNp
+Z25lZCBzaG9ydHx1bnNpZ25lZCBzaG9ydHxpbnR8c2lnbmVkIGludHx1bnNpZ25lZCBpbnR8c2ln
+bmVkIGxvbmd8bG9uZ3x1bnNpZ25lZCBsb25nfGxvbmcgbG9uZ3xzaWduZWQgbG9uZyBsb25nfHVu
+c2lnbmVkIGxvbmcgbG9uZ3x2b2lkfGJvb2x8c3RyaW5nfGZsb2F0fGRvdWJsZXxsb25nIGRvdWJs
+ZXxpbmNvbXBsZXRlIHR5cGV8YWJzdHJhY3QgaW50fGFic3RyYWN0IGZwfGxhYmVsIHR5cGV8YmFk
+IHR5cGUpICNJTVBMSUVECisJCSBiYXNlLXR5cGUtYnVpbHRpbiBDREFUQSAjSU1QTElFRAogCiAJ
+CSBhcnJheS1zaXplIENEQVRBICNJTVBMSUVECiAKQEAgLTQ4LDQgKzQ4LDE2IEBACiAJCSB1c2Vy
+dHlwZSAoMHwxKSAjSU1QTElFRAogCQkgZm9yY2UgKDB8MSkgI0lNUExJRUQKIAkJIGV4cGxpY2l0
+bHktc2lnbmVkICgwfDEpICNJTVBMSUVECi0JCSBiaXR3aXNlICgwfDEpICNJTVBMSUVEID4KKwkJ
+IGJpdHdpc2UgKDB8MSkgI0lNUExJRUQgCisJCSB1c2VyLXR5cGUgKDB8MSkgI0lNUExJRUQ+CisK
+KzwhRUxFTUVOVCBleHByZXNzaW9uIEVNUFRZID4KKzwhQVRUTElTVCBleHByZXNzaW9uIHR5cGUg
+KHZhbHVlfHN0cmluZykgI1JFUVVJUkVECisJCSAgICAgdmFsdWUgQ0RBVEEgI1JFUVVJUkVECisJ
+CSAgICAgZmlsZSBDREFUQSAjUkVRVUlSRUQKKwkJICAgICBzdGFydC1saW5lIENEQVRBICNSRVFV
+SVJFRAorCQkgICAgIHN0YXJ0LWNvbCBDREFUQSAjUkVRVUlSRUQKKwkJICAgICBlbmQtbGluZSBD
+REFUQSAjSU1QTElFRAorCQkgICAgIGVuZC1jb2wgQ0RBVEEgI0lNUExJRUQKKwkJICAgICBlbmQt
+ZmlsZSBDREFUQSAjSU1QTElFRD4KKwotLSAKMS41LjIuMwoK
+
+
+--=-Do/uqRvcQuztT5MVAAiL
+Content-Disposition: inline;
+	filename*0=0002-c2xml-Output-argument-and-expansion-nodes-for-macro.patc;
+	filename*1=h
+Content-Type: application/mbox;
+	name=0002-c2xml-Output-argument-and-expansion-nodes-for-macro.patch
+Content-Transfer-Encoding: base64
+
+RnJvbSBkMWY3NjhmYmEzNDllMDBhZjFkMzBmNGI2MzYyZjZlNjQxY2EyZmUxIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBNYXRoaWFzIEhhc3NlbG1hbm4gPG1hdGhpYXMuaGFzc2VsbWFu
+bkBnbXguZGU+CkRhdGU6IFdlZCwgNSBTZXAgMjAwNyAyMTo0MjozOCArMDIwMApTdWJqZWN0OiBb
+UEFUQ0hdIGMyeG1sOiBPdXRwdXQgYXJndW1lbnQgYW5kIGV4cGFuc2lvbiBub2RlcyBmb3IgbWFj
+cm9zLgoKU2lnbmVkLW9mZi1ieTogTWF0aGlhcyBIYXNzZWxtYW5uIDxtYXRoaWFzLmhhc3NlbG1h
+bm5AZ214LmRlPgotLS0KIGMyeG1sLmMgICB8ICAgNDIgKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrLS0tLS0tLS0tLS0tCiBwYXJzZS5kdGQgfCAgIDExICsrKysrKysrLS0tCiAyIGZpbGVz
+IGNoYW5nZWQsIDM4IGluc2VydGlvbnMoKyksIDE1IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBh
+L2MyeG1sLmMgYi9jMnhtbC5jCmluZGV4IDIxMGE2NzkuLjA4MzNiMmMgMTAwNjQ0Ci0tLSBhL2My
+eG1sLmMKKysrIGIvYzJ4bWwuYwpAQCAtNjQsMTMgKzY0LDEzIEBAIHN0YXRpYyB2b2lkIG5ld1Bv
+c2l0aW9uUHJvcHMoeG1sTm9kZVB0ciBub2RlLCBzdHJ1Y3QgcG9zaXRpb24gcG9zLCBzdHJ1Y3Qg
+cG9zaXRpCiAgICAgICAgIH0KIH0KIAotc3RhdGljIHhtbE5vZGVQdHIgbmV3X3N5bV9ub2RlKHN0
+cnVjdCBzeW1ib2wgKnN5bSwgY29uc3QgY2hhciAqdHlwZSwgeG1sTm9kZVB0ciBwYXJlbnQpCitz
+dGF0aWMgeG1sTm9kZVB0ciBuZXdfc3ltX25vZGUoc3RydWN0IGlkZW50ICppZGVudCwgY29uc3Qg
+Y2hhciAqdHlwZSwKKwkJCSAgICAgICBzdHJ1Y3QgcG9zaXRpb24gcG9zLCBzdHJ1Y3QgcG9zaXRp
+b24gZW5kcG9zLAorCQkJICAgICAgIHhtbE5vZGVQdHIgcGFyZW50KQogewotCWNvbnN0IGNoYXIg
+KmlkZW50ID0gTlVMTDsKIAl4bWxOb2RlUHRyIG5vZGU7CiAKIAlhc3NlcnQodHlwZSAhPSBOVUxM
+KTsKLQlhc3NlcnQoc3ltICE9IE5VTEwpOwogCWFzc2VydChwYXJlbnQgIT0gTlVMTCk7CiAKIAlu
+b2RlID0geG1sTmV3Q2hpbGQocGFyZW50LCBOVUxMLCBCQURfQ0FTVCAic3ltYm9sIiwgTlVMTCk7
+CkBAIC03OCwxNiArNzgsMTQgQEAgc3RhdGljIHhtbE5vZGVQdHIgbmV3X3N5bV9ub2RlKHN0cnVj
+dCBzeW1ib2wgKnN5bSwgY29uc3QgY2hhciAqdHlwZSwgeG1sTm9kZVB0cgogCW5ld1Byb3Aobm9k
+ZSwgInR5cGUiLCB0eXBlKTsKIAluZXdJZFByb3Aobm9kZSwgImlkIiwgaWRjb3VudCk7CiAKLQlp
+ZiAoc3ltLT5pZGVudCkKLQkJaWRlbnQgPSBzaG93X2lkZW50KHN5bS0+aWRlbnQpOwogCWlmIChp
+ZGVudCkKLQkJbmV3UHJvcChub2RlLCAiaWRlbnQiLCBpZGVudCk7CisJCW5ld1Byb3Aobm9kZSwg
+ImlkZW50Iiwgc2hvd19pZGVudChpZGVudCkpOwogCi0JbmV3UG9zaXRpb25Qcm9wcyAobm9kZSwg
+c3ltLT5wb3MsIHN5bS0+ZW5kcG9zKTsKKwluZXdQb3NpdGlvblByb3BzIChub2RlLCBwb3MsIGVu
+ZHBvcyk7CiAKIAlpZGNvdW50Kys7CiAKLQlyZXR1cm4gKHN5bS0+YXV4ID0gbm9kZSk7CisJcmV0
+dXJuIG5vZGU7CiB9CiAKIHN0YXRpYyBpbmxpbmUgdm9pZCBleGFtaW5lX21lbWJlcnMoc3RydWN0
+IHN5bWJvbF9saXN0ICpsaXN0LCB4bWxOb2RlUHRyIG5vZGUpCkBAIC0yNzAsNyArMjY4LDEwIEBA
+IHN0YXRpYyB2b2lkIGV4YW1pbmVfc3ltYm9sKHN0cnVjdCBzeW1ib2wgKnN5bSwgeG1sTm9kZVB0
+ciBub2RlKQogCWlmIChzeW0tPmlkZW50ICYmIHN5bS0+aWRlbnQtPnJlc2VydmVkKQogCQlyZXR1
+cm47CiAKLQljaGlsZCA9IG5ld19zeW1fbm9kZShzeW0sIGdldF90eXBlX25hbWUoc3ltLT50eXBl
+KSwgbm9kZSk7CisJY2hpbGQgPSBuZXdfc3ltX25vZGUoc3ltLT5pZGVudCwgZ2V0X3R5cGVfbmFt
+ZShzeW0tPnR5cGUpLAorCQkJICAgICBzeW0tPnBvcywgc3ltLT5lbmRwb3MsIG5vZGUpOworCXN5
+bS0+YXV4ID0gY2hpbGQ7CisKIAlleGFtaW5lX21vZGlmaWVycyhzeW0sIGNoaWxkKTsKIAlleGFt
+aW5lX2xheW91dChzeW0sIGNoaWxkKTsKIAlleGFtaW5lX2N0eXBlICgmc3ltLT5jdHlwZSwgY2hp
+bGQpOwpAQCAtMzE2LDggKzMxNywxMCBAQCBzdGF0aWMgc3RydWN0IHBvc2l0aW9uICpnZXRfZXhw
+YW5zaW9uX2VuZCAoc3RydWN0IHRva2VuICp0b2tlbikKIAogc3RhdGljIHZvaWQgZXhhbWluZV9t
+YWNybyhzdHJ1Y3Qgc3ltYm9sICpzeW0sIHhtbE5vZGVQdHIgbm9kZSkKIHsKLQl4bWxOb2RlUHRy
+IGNoaWxkOwogCXN0cnVjdCBwb3NpdGlvbiAqcG9zOworCXN0cnVjdCB0b2tlbiAqYXJnOworCXht
+bE5vZGVQdHIgY2hpbGQ7CisJaW50IGk7CiAKIAkvKiB0aGlzIHNob3VsZCBwcm9iYWJseSBnbyBp
+biB0aGUgbWFpbiBjb2RlYmFzZSovCiAJcG9zID0gZ2V0X2V4cGFuc2lvbl9lbmQoc3ltLT5leHBh
+bnNpb24pOwpAQCAtMzI2LDcgKzMyOSwyMiBAQCBzdGF0aWMgdm9pZCBleGFtaW5lX21hY3JvKHN0
+cnVjdCBzeW1ib2wgKnN5bSwgeG1sTm9kZVB0ciBub2RlKQogCWVsc2UKIAkJc3ltLT5lbmRwb3Mg
+PSBzeW0tPnBvczsKIAotCWNoaWxkID0gbmV3X3N5bV9ub2RlKHN5bSwgIm1hY3JvIiwgbm9kZSk7
+CisJbm9kZSA9IG5ld19zeW1fbm9kZShzeW0tPmlkZW50LCAibWFjcm8iLCBzeW0tPnBvcywgc3lt
+LT5lbmRwb3MsIG5vZGUpOworCisJaWYgKHN5bS0+YXJnbGlzdCkgeworCQluZXdQcm9wKG5vZGUs
+ICJoYXMtYXJndW1lbnRzIiwgIjEiKTsKKwkJYXJnID0gc3ltLT5hcmdsaXN0LT5uZXh0OworCisJ
+CWZvciAoaSA9IDA7IGkgPCBzeW0tPmFyZ2xpc3QtPmNvdW50Lm5vcm1hbDsgKytpKSB7CisJCQlj
+aGlsZCA9IG5ld19zeW1fbm9kZSAoYXJnLT5pZGVudCwgIm5vZGUiLCBhcmctPnBvcywgYXJnLT5w
+b3MsIG5vZGUpOworCQkJeG1sTmV3UHJvcCAoY2hpbGQsIEJBRF9DQVNUICJiYXNlLXR5cGUiLCB4
+bWxHZXRQcm9wKG5vZGUsIEJBRF9DQVNUICJpZCIpKTsKKwkJfQorCX0KKworCWNoaWxkID0geG1s
+TmV3Q2hpbGQobm9kZSwgTlVMTCwgQkFEX0NBU1QgImV4cHJlc3Npb24iLCBOVUxMKTsKKworCW5l
+d1Byb3AoY2hpbGQsICJ0eXBlIiwgInN0cmluZyIpOworCW5ld1Byb3AoY2hpbGQsICJ2YWx1ZSIs
+IHNob3dfdG9rZW4oc3ltLT5leHBhbnNpb24pKTsKIH0KIAogc3RhdGljIHZvaWQgZXhhbWluZV9u
+YW1lc3BhY2Uoc3RydWN0IHN5bWJvbCAqc3ltKQpAQCAtNDM1LDcgKzQ1Myw3IEBAIHN0YXRpYyBz
+dHJ1Y3QgaW5pdF9rZXl3b3JkIGF0dHJpYnV0ZV90YWJsZVtdID0gewogCXsgImVsZW1lbnRfdHlw
+ZSIsCU5TX0tFWVdPUkQsIC5vcCA9ICZzdG9yZV90eXBlbmFtZV9hdHRyaWJ1dGVfb3AgfSwKIH07
+CiAKLXN0YXRpYyB2b2lkIGluaXRpYWxpemVfYXR0cmlidXRlcygpCitzdGF0aWMgdm9pZCBpbml0
+aWFsaXplX2F0dHJpYnV0ZXModm9pZCkKIHsKIAlzdHJ1Y3Qgc3ltYm9sICprZXl3b3JkOwogCmRp
+ZmYgLS1naXQgYS9wYXJzZS5kdGQgYi9wYXJzZS5kdGQKaW5kZXggZjcxMmZkYS4uYjQ2MDhkMiAx
+MDA2NDQKLS0tIGEvcGFyc2UuZHRkCisrKyBiL3BhcnNlLmR0ZApAQCAtMSw2ICsxLDYgQEAKIDwh
+RUxFTUVOVCBwYXJzZSAoc3ltYm9sKykgPgogCi08IUVMRU1FTlQgc3ltYm9sICgoc3ltYm9sfGV4
+cHJlc3Npb24pKikgPgorPCFFTEVNRU5UIHN5bWJvbCAoKHN5bWJvbHxleHByZXNzaW9ufHR5cGUt
+cmVmZXJlbmNlKSopID4KIAogPCFBVFRMSVNUIHN5bWJvbCB0eXBlICh1bmluaXRpYWxpemVkfHBy
+ZXByb2Nlc3NvcnxiYXNldHlwZXxub2RlfHBvaW50ZXJ8ZnVuY3Rpb258YXJyYXl8c3RydWN0fHVu
+aW9ufGVudW18dHlwZWRlZnx0eXBlb2Z8bWVtYmVyfGJpdGZpZWxkfGxhYmVsfHJlc3RyaWN0fGZv
+dWxlZHxrZXl3b3JkfGJhZHxtYWNybykgI1JFUVVJUkVECiAJCSBpZCBJRCAjUkVRVUlSRUQKQEAg
+LTQ5LDkgKzQ5LDEwIEBACiAJCSBmb3JjZSAoMHwxKSAjSU1QTElFRAogCQkgZXhwbGljaXRseS1z
+aWduZWQgKDB8MSkgI0lNUExJRUQKIAkJIGJpdHdpc2UgKDB8MSkgI0lNUExJRUQgCi0JCSB1c2Vy
+LXR5cGUgKDB8MSkgI0lNUExJRUQ+CisJCSB1c2VyLXR5cGUgKDB8MSkgI0lNUExJRUQKKwkJIGhh
+cy1hcmd1bWVudHMgKDB8MSkgI0lNUExJRUQ+CiAKLTwhRUxFTUVOVCBleHByZXNzaW9uIEVNUFRZ
+ID4KKzwhRUxFTUVOVCBleHByZXNzaW9uIEVNUFRZPgogPCFBVFRMSVNUIGV4cHJlc3Npb24gdHlw
+ZSAodmFsdWV8c3RyaW5nKSAjUkVRVUlSRUQKIAkJICAgICB2YWx1ZSBDREFUQSAjUkVRVUlSRUQK
+IAkJICAgICBmaWxlIENEQVRBICNSRVFVSVJFRApAQCAtNjEsMyArNjIsNyBAQAogCQkgICAgIGVu
+ZC1jb2wgQ0RBVEEgI0lNUExJRUQKIAkJICAgICBlbmQtZmlsZSBDREFUQSAjSU1QTElFRD4KIAor
+PCFFTEVNRU5UIHR5cGUtcmVmZXJlbmNlIEVNUFRZPgorPCFBVFRMSVNUIHR5cGUtcmVmZXJlbmNl
+IHR5cGUgQ0RBVEEgI0lNUExJRUQKKwkJCSB0eXBlLWJ1aWx0aW4gQ0RBVEEgI0lNUExJRUQ+CisK
+LS0gCjEuNS4yLjMKCg==
+
+
+--=-Do/uqRvcQuztT5MVAAiL
+Content-Disposition: inline;
+	filename=0003-c2xml-Implement-support-for-command-line-options-b.patch
+Content-Type: application/mbox;
+	name=0003-c2xml-Implement-support-for-command-line-options-b.patch
+Content-Transfer-Encoding: base64
+
+RnJvbSAzZjFiYWUyYWEzZDdhYzYxMjllMDNmZWM5Yjk4M2ZlMjI4NDI3YjdkIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBNYXRoaWFzIEhhc3NlbG1hbm4gPG1hdGhpYXMuaGFzc2VsbWFu
+bkBnbXguZGU+CkRhdGU6IFdlZCwgNSBTZXAgMjAwNyAyMzo1OTo0MCArMDIwMApTdWJqZWN0OiBb
+UEFUQ0hdIGMyeG1sOiBJbXBsZW1lbnQgc3VwcG9ydCBmb3IgY29tbWFuZCBsaW5lIG9wdGlvbnMs
+IGJ1dCB0aGlzIHRpbWUKCndpdGhvdXQgY29uZmxpY3Rpbmcgd2l0aCB0aGUgYnVpbHRpbiBvcHRp
+b25zIG9mIHNwYXJzZS4KClNpZ25lZC1vZmYtYnk6IE1hdGhpYXMgSGFzc2VsbWFubiA8bWF0aGlh
+cy5oYXNzZWxtYW5uQGdteC5kZT4KLS0tCiBjMnhtbC5jIHwgIDE4NiArKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKy0tLS0tLS0KIDEgZmlsZXMg
+Y2hhbmdlZCwgMTY2IGluc2VydGlvbnMoKyksIDIwIGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBh
+L2MyeG1sLmMgYi9jMnhtbC5jCmluZGV4IDA4MzNiMmMuLmY0NzczNjEgMTAwNjQ0Ci0tLSBhL2My
+eG1sLmMKKysrIGIvYzJ4bWwuYwpAQCAtMTEsNiArMTEsNyBAQAogI2luY2x1ZGUgPHN0ZGlvLmg+
+CiAjaW5jbHVkZSA8c3RyaW5nLmg+CiAjaW5jbHVkZSA8dW5pc3RkLmg+CisjaW5jbHVkZSA8bGli
+Z2VuLmg+CiAjaW5jbHVkZSA8ZmNudGwuaD4KICNpbmNsdWRlIDxhc3NlcnQuaD4KICNpbmNsdWRl
+IDxsaWJ4bWwvcGFyc2VyLmg+CkBAIC0yMSw2ICsyMiwxMiBAQAogI2luY2x1ZGUgInNjb3BlLmgi
+CiAjaW5jbHVkZSAic3ltYm9sLmgiCiAKKyNkZWZpbmUgRE9DVFlQRV9VUkkgImh0dHA6Ly93d3cu
+a2VybmVsLm9yZy9wdWIvc29mdHdhcmUvZGV2ZWwvc3BhcnNlL3BhcnNlLmR0ZCIKKworc3RhdGlj
+IGNvbnN0IGNoYXIgKnRhcmdldF9maWxlbmFtZSA9ICItIjsKK3N0YXRpYyBpbnQgaW5jbHVkZV9w
+b3NpdGlvbnMgPSAxOworc3RhdGljIGludCBpbmNsdWRlX2RvY3R5cGUgPSAwOworCiBzdGF0aWMg
+eG1sRG9jUHRyIGRvYyA9IE5VTEw7ICAgICAgIC8qIGRvY3VtZW50IHBvaW50ZXIgKi8KIHN0YXRp
+YyB4bWxOb2RlUHRyIHJvb3Rfbm9kZSA9IE5VTEw7Lyogcm9vdCBub2RlIHBvaW50ZXIgKi8KIHN0
+YXRpYyBpbnQgaWRjb3VudCA9IDA7CkBAIC01MCwxOCArNTcsMjAgQEAgc3RhdGljIHZvaWQgbmV3
+UG9zaXRpb25Qcm9wcyh4bWxOb2RlUHRyIG5vZGUsIHN0cnVjdCBwb3NpdGlvbiBwb3MsIHN0cnVj
+dCBwb3NpdGkKIHsKIAluZXdQcm9wKG5vZGUsICJmaWxlIiwgc3RyZWFtX25hbWUocG9zLnN0cmVh
+bSkpOwogCi0JbmV3TnVtUHJvcChub2RlLCAic3RhcnQtbGluZSIsIHBvcy5saW5lKTsKLQluZXdO
+dW1Qcm9wKG5vZGUsICJzdGFydC1jb2wiLCBwb3MucG9zKTsKLQotCWlmIChlbmRwb3MudHlwZQot
+ICAgICAgICAgICAgJiYgKHBvcy5saW5lICE9IGVuZHBvcy5saW5lCi0gICAgICAgICAgICB8fCAg
+cG9zLnBvcyAhPSBlbmRwb3MucG9zCi0gICAgICAgICAgICB8fCAgcG9zLnN0cmVhbSAhPSBlbmRw
+b3Muc3RyZWFtKSkgewotCQluZXdOdW1Qcm9wKG5vZGUsICJlbmQtbGluZSIsIGVuZHBvcy5saW5l
+KTsKLQkJbmV3TnVtUHJvcChub2RlLCAiZW5kLWNvbCIsIGVuZHBvcy5wb3MpOwotCQlpZiAocG9z
+LnN0cmVhbSAhPSBlbmRwb3Muc3RyZWFtKQotCQkJbmV3UHJvcChub2RlLCAiZW5kLWZpbGUiLCBz
+dHJlYW1fbmFtZShlbmRwb3Muc3RyZWFtKSk7Ci0gICAgICAgIH0KKwlpZiAoaW5jbHVkZV9wb3Np
+dGlvbnMpIHsKKwkJbmV3TnVtUHJvcChub2RlLCAic3RhcnQtbGluZSIsIHBvcy5saW5lKTsKKwkJ
+bmV3TnVtUHJvcChub2RlLCAic3RhcnQtY29sIiwgcG9zLnBvcyk7CisKKwkJaWYgKGVuZHBvcy50
+eXBlCisJCSAgICAmJiAocG9zLmxpbmUgIT0gZW5kcG9zLmxpbmUKKwkJICAgIHx8ICBwb3MucG9z
+ICE9IGVuZHBvcy5wb3MKKwkJICAgIHx8ICBwb3Muc3RyZWFtICE9IGVuZHBvcy5zdHJlYW0pKSB7
+CisJCQluZXdOdW1Qcm9wKG5vZGUsICJlbmQtbGluZSIsIGVuZHBvcy5saW5lKTsKKwkJCW5ld051
+bVByb3Aobm9kZSwgImVuZC1jb2wiLCBlbmRwb3MucG9zKTsKKwkJCWlmIChwb3Muc3RyZWFtICE9
+IGVuZHBvcy5zdHJlYW0pCisJCQkJbmV3UHJvcChub2RlLCAiZW5kLWZpbGUiLCBzdHJlYW1fbmFt
+ZShlbmRwb3Muc3RyZWFtKSk7CisJCX0KKwl9CiB9CiAKIHN0YXRpYyB4bWxOb2RlUHRyIG5ld19z
+eW1fbm9kZShzdHJ1Y3QgaWRlbnQgKmlkZW50LCBjb25zdCBjaGFyICp0eXBlLApAQCAtNDYzLDI0
+ICs0NzIsMTYwIEBAIHN0YXRpYyB2b2lkIGluaXRpYWxpemVfYXR0cmlidXRlcyh2b2lkKQogCWlu
+aXRfa2V5d29yZF90YWJsZSAoLTEsIGF0dHJpYnV0ZV90YWJsZSwgc2l6ZW9mIGF0dHJpYnV0ZV90
+YWJsZS9zaXplb2YgYXR0cmlidXRlX3RhYmxlWzBdKTsKIH0KIAorc3RhdGljIGludCBzZXRfZmls
+ZW5hbWUoY2hhciAqZmlsZW5hbWUpCit7CisJdGFyZ2V0X2ZpbGVuYW1lID0gZmlsZW5hbWU7CisJ
+cmV0dXJuIDE7Cit9CisKK3N0YXRpYyBpbnQgc2V0X29wdGlvbihjaGFyICpuYW1lKQoreworCWlu
+dCB2YWx1ZSA9IDE7CisKKwlpZiAoIXN0cm5jbXAobmFtZSwgIm5vLSIsIDMpKSB7CisJCW5hbWUg
+Kz0gMzsKKwkJdmFsdWUgPSAwOworCX0KKworCWlmICghc3RyY21wKG5hbWUsICJwb3NpdGlvbnMi
+KSkgeworCQlpbmNsdWRlX3Bvc2l0aW9ucyA9IHZhbHVlOworCX0gZWxzZSBpZiAoIXN0cmNtcChu
+YW1lLCAiZG9jdHlwZSIpKSB7CisJCWluY2x1ZGVfZG9jdHlwZSA9IHZhbHVlOworCX0gZWxzZSB7
+CisJCXJldHVybiAtMTsKKwl9CisKKwlyZXR1cm4gMDsKK30KKworc3RhdGljIGludCBwcmludF91
+c2FnZShjaGFyICphcmcwKTsKKworc3RhdGljIGNvbnN0IHN0cnVjdCB7CisJY29uc3QgY2hhciBu
+YW1lOworCWludCAoKnBhcnNlKShjaGFyICphcmcpOworCWNvbnN0IGNoYXIgKnZhbHVlX25hbWU7
+CisJY29uc3QgY2hhciAqZGVzY3JpcHRpb247Cit9IG9wdGlvbnNbXSA9IHsKKwl7ICdvJywgc2V0
+X2ZpbGVuYW1lLCAiRklMRU5BTUUiLCAid3JpdGUgdGhlIGRvY3VtZW50IHRvIEZJTEVOQU1FIiB9
+LAorCXsgJ2YnLCBzZXRfb3B0aW9uLCAgICJPUFRJT04iLCAgICJlbmFibGVzIGFuIG9wdGlvbiwg
+cHJlZml4IGBuby0nIGRpc2FibGVzIiB9LAorCXsgJ2gnLCBwcmludF91c2FnZSwgICBOVUxMLCAg
+ICAgICJkaXNwbGF5IHRoaXMgdXNhZ2UgaW5mb3JtYXRpb24iIH0sCisJeyAwLCBOVUxMIH0KK307
+CisKK3N0YXRpYyBpbnQgcHJpbnRfdXNhZ2UoY2hhciAqYXJnMCkKK3sKKwlzaXplX3QgbWF4bGVu
+OworCWludCBpOworCisJcHJpbnRmKCJVc2FnZTogJXMgW09QVElPTl0uLi4gW0ZJTEVdLi4uXG4i
+CisJICAgICAgICJQYXJzZXMgQyBjb2RlIGFuZCBvdXRwdXRzIHRoZSByZXN1bHRzIGFzIFhNTCBk
+b2N1bWVudC5cblxuIgorCSAgICAgICAiT3B0aW9uczpcbiIsIGJhc2VuYW1lKGFyZzApKTsKKwor
+CWZvciAoaSA9IDAsIG1heGxlbiA9IDA7IG9wdGlvbnNbaV0ubmFtZTsgKytpKSB7CisJCWlmIChv
+cHRpb25zW2ldLnZhbHVlX25hbWUpIHsKKwkJCXNpemVfdCBsZW4gPSBzdHJsZW4ob3B0aW9uc1tp
+XS52YWx1ZV9uYW1lKTsKKwkJCW1heGxlbiA9IChsZW4gPiBtYXhsZW4gPyBsZW4gOiBtYXhsZW4p
+OworCQl9CisJfQorCisJZm9yIChpID0gMDsgb3B0aW9uc1tpXS5uYW1lOyArK2kpIHsKKwkJcHJp
+bnRmKCIgIC0lYyAlKnMgICVzXG4iLCBvcHRpb25zW2ldLm5hbWUsIC1tYXhsZW4sCisJCSAgICAg
+ICBvcHRpb25zW2ldLnZhbHVlX25hbWUgPyBvcHRpb25zW2ldLnZhbHVlX25hbWUgOiAiIiwKKwkJ
+ICAgICAgIG9wdGlvbnNbaV0uZGVzY3JpcHRpb24pOworCX0KKworCXByaW50ZigiXG5SZXBvcnQg
+YnVncyB0byA8bGludXgtc3BhcnNlQHZnZXIua2VybmVsLm9yZz5cbiIpOworCisJZXhpdCgwKTsK
+K30KKworc3RhdGljIGludCBwYXJzZV9zd2l0Y2goY2hhciAqYXJnMCwgY2hhciAqKmFyZ3MpCit7
+CisJaW50IGk7CisKKwlmb3IgKGkgPSAwOyBvcHRpb25zW2ldLm5hbWU7ICsraSkgeworCQlpZiAo
+b3B0aW9uc1tpXS5uYW1lID09IGFyZ3NbMF1bMV0pCisJCQlicmVhazsKKwl9CisKKwlpZiAob3B0
+aW9uc1tpXS5uYW1lKSB7CisJCWNoYXIgKnZhbHVlID0gTlVMTDsKKwkJaW50IG9mZnNldCA9IDA7
+CisKKwkJaWYgKG9wdGlvbnNbaV0udmFsdWVfbmFtZSkgeworCQkJaWYgKGFyZ3NbMF1bMl0pIHsK
+KwkJCQl2YWx1ZSA9IGFyZ3NbMF0gKyAyOworCQkJCW9mZnNldCA9IDE7CisJCQl9IGVsc2UgaWYg
+KGFyZ3NbMV0pIHsKKwkJCQl2YWx1ZSA9IGFyZ3NbMV07CisJCQkJb2Zmc2V0ID0gMjsKKwkJCX0g
+ZWxzZSB7CisJCQkJcmV0dXJuIC0xOworCQkJfQorCQl9IGVsc2UgeworCQkJaWYgKGFyZ3NbMF1b
+Ml0pCisJCQkJcmV0dXJuIC0xOworCisJCQl2YWx1ZSA9IGFyZzA7CisJCQlvZmZzZXQgPSAxOwor
+CQl9CisKKwkJaWYgKCFvcHRpb25zW2ldLnBhcnNlKHZhbHVlKSkKKwkJCXJldHVybiBvZmZzZXQ7
+CisJfQorCisJcmV0dXJuIDA7Cit9CisKK3N0YXRpYyBpbnQgcGFyc2Vfb3B0aW9ucyhpbnQgKmFy
+Z2MsIGNoYXIgKioqYXJndikKK3sKKwljaGFyICoqYXJncyA9ICphcmd2ICsgMTsKKwljaGFyICph
+cmcwID0gKmFyZ3ZbMF07CisKKwl3aGlsZSAoKmFyZ3MpIHsKKwkJaWYgKCctJyA9PSBhcmdzWzBd
+WzBdICYmIGFyZ3NbMF1bMV0pIHsKKwkJCWludCBvZmZzZXQgPSBwYXJzZV9zd2l0Y2goYXJnMCwg
+YXJncyk7CisKKwkJCWlmICgtMSA9PSBvZmZzZXQpIHsKKwkJCQlmcHJpbnRmIChzdGRlcnIsICJJ
+bnZhbGlkIG9wdGlvbjogJWNcbiIsICphcmdzWzFdKTsKKwkJCQlyZXR1cm4gMjsKKwkJCX0gZWxz
+ZSBpZiAob2Zmc2V0ID4gMCkgIHsKKwkJCQljaGFyICoqbmV4dCA9IGFyZ3MgKyBvZmZzZXQ7CisJ
+CQkJaW50IGNvdW50ID0gKmFyZ2MgLSAobmV4dCAtICphcmd2KSArIDE7CisKKwkJCQltZW1tb3Zl
+KGFyZ3MsIG5leHQsIGNvdW50ICogc2l6ZW9mKGNoYXIqKSk7CisJCQkJKmFyZ2MgLT0gb2Zmc2V0
+OworCisJCQkJY29udGludWU7CisJCQl9CisJCX0KKworCQkrK2FyZ3M7CisJfQorCisJcmV0dXJu
+IDA7Cit9CisKIGludCBtYWluKGludCBhcmdjLCBjaGFyICoqYXJndikKIHsKIAlzdHJ1Y3Qgc3Ry
+aW5nX2xpc3QgKmZpbGVsaXN0ID0gTlVMTDsKIAlzdHJ1Y3Qgc3ltYm9sX2xpc3QgKnN5bWxpc3Qg
+PSBOVUxMOworCiAJY2hhciAqZmlsZTsKKwlpbnQgcmM7CisKKwlpZiAoMCAhPSAocmMgPSBwYXJz
+ZV9vcHRpb25zKCZhcmdjLCAmYXJndikpKQorCQlyZXR1cm4gcmM7CiAKIAlkb2MgPSB4bWxOZXdE
+b2MoQkFEX0NBU1QgIjEuMCIpOwogCXJvb3Rfbm9kZSA9IHhtbE5ld05vZGUoTlVMTCwgQkFEX0NB
+U1QgInBhcnNlIik7CiAJeG1sRG9jU2V0Um9vdEVsZW1lbnQoZG9jLCByb290X25vZGUpOwogCi0v
+KiAtIEEgRFREIGlzIHByb2JhYmx5IHVubmVjZXNzYXJ5IGZvciBzb21ldGhpbmcgbGlrZSB0aGlz
+Ci0KLQlkdGQgPSB4bWxDcmVhdGVJbnRTdWJzZXQoZG9jLCAicGFyc2UiLCAiaHR0cDovL3d3dy5r
+ZXJuZWwub3JnL3B1Yi9zb2Z0d2FyZS9kZXZlbC9zcGFyc2UvcGFyc2UuZHRkIiBOVUxMLCAicGFy
+c2UuZHRkIik7Ci0KLQlucyA9IHhtbE5ld05zIChyb290X25vZGUsICJodHRwOi8vd3d3Lmtlcm5l
+bC5vcmcvcHViL3NvZnR3YXJlL2RldmVsL3NwYXJzZS9wYXJzZS5kdGQiLCBOVUxMKTsKKwlpZiAo
+aW5jbHVkZV9kb2N0eXBlKSB7CisJCXhtbENyZWF0ZUludFN1YnNldChkb2MsIEJBRF9DQVNUICJw
+YXJzZSIsIEJBRF9DQVNUIERPQ1RZUEVfVVJJLCBCQURfQ0FTVCAicGFyc2UuZHRkIik7CisJCXht
+bFNldE5zKHJvb3Rfbm9kZSwgeG1sTmV3TnMgKHJvb3Rfbm9kZSwgQkFEX0NBU1QgRE9DVFlQRV9V
+UkksIE5VTEwpKTsKKwl9CiAKLQl4bWxTZXROcyhyb290X25vZGUsIG5zKTsKLSovCiAJc3ltbGlz
+dCA9IHNwYXJzZV9pbml0aWFsaXplKGFyZ2MsIGFyZ3YsICZmaWxlbGlzdCk7CiAJaW5pdGlhbGl6
+ZV9hdHRyaWJ1dGVzKCk7CiAKQEAgLTQ5Miw3ICs2MzcsOCBAQCBpbnQgbWFpbihpbnQgYXJnYywg
+Y2hhciAqKmFyZ3YpCiAJfSBFTkRfRk9SX0VBQ0hfUFRSX05PVEFHKGZpbGUpOwogCiAKLQl4bWxT
+YXZlRm9ybWF0RmlsZUVuYygiLSIsIGRvYywgIlVURi04IiwgMSk7CisJeG1sU2F2ZUZvcm1hdEZp
+bGVFbmModGFyZ2V0X2ZpbGVuYW1lLCBkb2MsICJVVEYtOCIsIDEpOworCiAJeG1sRnJlZURvYyhk
+b2MpOwogCXhtbENsZWFudXBQYXJzZXIoKTsKIAotLSAKMS41LjIuMwoK
+
+
+--=-Do/uqRvcQuztT5MVAAiL--
+
+--=-INOy/WHbpq8Wnnte7e8t
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: Dies ist ein digital signierter Nachrichtenteil
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQBG3zC873AS0G6kpDQRAujsAKCB/3p6Auoh71bgFvT8xxpIF2xdRwCfQ0E0
+gzWWc7koHjCmkGalEM/Mq4w=
+=YqBC
+-----END PGP SIGNATURE-----
+
+--=-INOy/WHbpq8Wnnte7e8t--
