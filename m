@@ -1,40 +1,64 @@
-From: Josh Triplett <josh@kernel.org>
-Subject: Re: strict aliasing warnings in Sparse; -fno-strict-aliasing
-Date: Thu, 06 Sep 2007 11:26:58 -0700
-Message-ID: <1189103218.23348.1.camel@josh-work.beaverton.ibm.com>
-References: <46DA522C.4010209@freedesktop.org>
-Reply-To: josh@kernel.org, josht@linux.vnet.ibm.com
+From: Mathias Hasselmann <mathias.hasselmann@gmx.de>
+Subject: License Questions
+Date: Fri, 07 Sep 2007 07:53:23 +0200
+Message-ID: <1189144403.7105.13.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-HEx89TIYr6fO5LID5BYT"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e6.ny.us.ibm.com ([32.97.182.146]:35174 "EHLO e6.ny.us.ibm.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755803AbXIFS1T (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 6 Sep 2007 14:27:19 -0400
-Received: from d01relay02.pok.ibm.com (d01relay02.pok.ibm.com [9.56.227.234])
-	by e6.ny.us.ibm.com (8.13.8/8.13.8) with ESMTP id l86IShqw001780
-	for <linux-sparse@vger.kernel.org>; Thu, 6 Sep 2007 14:28:43 -0400
-Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
-	by d01relay02.pok.ibm.com (8.13.8/8.13.8/NCO v8.5) with ESMTP id l86IRIFr650560
-	for <linux-sparse@vger.kernel.org>; Thu, 6 Sep 2007 14:27:18 -0400
-Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
-	by d01av04.pok.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id l86IRIZu023354
-	for <linux-sparse@vger.kernel.org>; Thu, 6 Sep 2007 14:27:18 -0400
-Received: from josh-work.beaverton.ibm.com (josh-work.beaverton.ibm.com [9.47.18.117])
-	by d01av04.pok.ibm.com (8.12.11.20060308/8.12.11) with ESMTP id l86IRH7E023327
-	for <linux-sparse@vger.kernel.org>; Thu, 6 Sep 2007 14:27:18 -0400
-In-Reply-To: <46DA522C.4010209@freedesktop.org>
+Received: from mail.gmx.net ([213.165.64.20]:35578 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1758265AbXIGFxd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 7 Sep 2007 01:53:33 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: torvalds@linux-foundation.org
 
-On Sat, 2007-09-01 at 23:03 -0700, Josh Triplett wrote:
-> In the absence of a better suggestion, I intend to make Sparse use
-> -fno-strict-aliasing.
 
-I've changed the Sparse Makefile to use -fno-strict-aliasing.  Patches
-welcome if someone wants to remove it and fix the warnings some other
-way.
+--=-HEx89TIYr6fO5LID5BYT
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-- Josh Triplett
+Hello,
+
+Sparse uses The Open Software License v. 1.1 which contains this clause:
+
+        9) Acceptance and Termination. If You distribute copies of the
+        Original Work or a Derivative Work, You must make a reasonable
+        effort under the circumstances to obtain the express and
+        volitional assent of recipients to the terms of this License.
+
+What does this mean for hosting a public git repository[1] to organize
+sparse patches? Do I have to put some "Accept License" page in front=20
+of it? How do I force git to show that "Accept License" page when
+downloading from that repository?=20
+
+What does this clause mean for sending patches to the mailing list.=20
+Shouldn't the patches be attached as password protected source archive
+and the message contain something like "By extracting that archive you
+declare to obey the terms of The Open Software License"?
+
+Maybe that password thing is a solution for making git repositories=20
+OSL compliant?
+
+Thank you,
+Mathias
+
+[1] http://taschenorakel.de/git/sparse
+--=20
+Mathias Hasselmann <mathias.hasselmann@gmx.de>
+http://taschenorakel.de/
+
+--=-HEx89TIYr6fO5LID5BYT
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: Dies ist ein digital signierter Nachrichtenteil
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQBG4OdT73AS0G6kpDQRAiKWAJ4jH1MPohO7rH4d07lBgrY2PhiwMACfVq5C
+SSLj2HM2TCjCDijtpKlF16w=
+=CnuG
+-----END PGP SIGNATURE-----
+
+--=-HEx89TIYr6fO5LID5BYT--
