@@ -1,73 +1,45 @@
-From: Rob Taylor <rob.taylor@codethink.co.uk>
-Subject: Re: License Questions
-Date: Fri, 07 Sep 2007 16:24:39 +0100
-Message-ID: <46E16D37.3020901@codethink.co.uk>
-References: <1189144403.7105.13.camel@localhost> <46E13EE8.5050508@codethink.co.uk>
+From: "Mathias Hasselmann" <Mathias.Hasselmann@gmx.de>
+Subject: Re: GObject introspection patches
+Date: Fri, 07 Sep 2007 22:48:37 +0200
+Message-ID: <20070907204837.273350@gmx.net>
+References: <1188940117.10888.17.camel@localhost>	
+ <46DF01CF.1090600@codethink.co.uk>	
+ <1189024611.16411.11.camel@josh-work.beaverton.ibm.com>
+ <1189032124.6389.20.camel@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 208-78-103-131.slicehost.net ([208.78.103.131]:56984 "EHLO
-	mail.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751118AbXIGPUs (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 7 Sep 2007 11:20:48 -0400
-In-Reply-To: <46E13EE8.5050508@codethink.co.uk>
+Received: from mail.gmx.net ([213.165.64.20]:33210 "HELO mail.gmx.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1751610AbXIGUsj (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 7 Sep 2007 16:48:39 -0400
+In-Reply-To: <1189032124.6389.20.camel@localhost>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mathias Hasselmann <mathias.hasselmann@gmx.de>
-Cc: linux-sparse@vger.kernel.org, torvalds@linux-foundation.org
-
-Rob Taylor wrote:
-> Mathias Hasselmann wrote:
->> Hello,
->>
->> Sparse uses The Open Software License v. 1.1 which contains this clause:
->>
->>         9) Acceptance and Termination. If You distribute copies of the
->>         Original Work or a Derivative Work, You must make a reasonable
->>         effort under the circumstances to obtain the express and
->>         volitional assent of recipients to the terms of this License.
->>
->> What does this mean for hosting a public git repository[1] to organize
->> sparse patches? Do I have to put some "Accept License" page in front 
->> of it? How do I force git to show that "Accept License" page when
->> downloading from that repository? 
->>
->> What does this clause mean for sending patches to the mailing list. 
->> Shouldn't the patches be attached as password protected source archive
->> and the message contain something like "By extracting that archive you
->> declare to obey the terms of The Open Software License"?
->>
->> Maybe that password thing is a solution for making git repositories 
->> OSL compliant?
-> 
-> Oh dear, I just found out that Debian considers OSL 1.1 non-free, though
-> not for this clause (which does seem particularly onerous), but for
-> clause 10.
-> 
-> That could be a problem for us GLib guys, as that would force gnome into
-> contrib!
-
-FWIW, OSL 3.0 [1] is a lot more sane, but I'd guess relicensing is not
-an option for sparse due to Transmeta holding some copyright.
-
-An option for us glib guys would be to mandate only using sparse at make
-dist time, I *think* that'd allow libraries using it to be considered
-for 'main'
-
-Thanks,
-Rob
-
-> Rob
-> 
->> Thank you,
->> Mathias
->>
->> [1] http://taschenorakel.de/git/sparse
-> 
-> 
+To: Mathias Hasselmann <mathias.hasselmann@gmx.de>, josht@linux.vnet.ibm.com
+Cc: linux-sparse@vger.kernel.org, rob.taylor@codethink.co.uk
 
 
--- 
-Rob Taylor, Codethink Ltd. -  http://codethink.co.uk
+> > > > Subject: [PATCH] Introduce attribute structure for storing cust=
+om
+> attributes in symbol nodes.
+> >
+> > Looks reasonable to me too; I wonder if this generalization could c=
+over
+> > some other things like contexts, particularly with appropriate
+> > factored-out functions to combine attributes from symbols.
+>=20
+> Seems that I do not know Sparse well enough yet to understand
+> which chance for refactoring you see.
+
+After some grepping (and googling) I see that sparse supports some cont=
+ext attribute for spin-lock tracking, and that the contexts list of str=
+uct ctype is for storing this attributes. So I agree, definitly a field=
+ for refactoring and unification. Started to work on that.
+--=20
+Mathias Hasselmann
+http://taschenorakel.de/mathias/
+
+Psssst! Schon vom neuen GMX MultiMessenger geh=F6rt?
+Der kanns mit allen: http://www.gmx.net/de/go/multimessenger
