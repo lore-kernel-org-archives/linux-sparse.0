@@ -1,54 +1,140 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [patch] fix install perms of manpages
-Date: Wed, 19 Sep 2007 13:49:36 -0700
-Message-ID: <46F18B60.4060309@freedesktop.org>
-References: <200709171530.18669.vapier@gentoo.org>
+From: Alexey Dobriyan <adobriyan@sw.ru>
+Subject: idio{,ma}tic typos (was Re: + fix-vm_can_nonlinear-check-in-sys_remap_file_pages.patch added to -mm tree)
+Date: Wed, 10 Oct 2007 14:45:40 +0400
+Message-ID: <20071010104540.GA6366@localhost.sw.ru>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig2EDC98EB4009B0B6F65E841D"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:47800 "EHLO
-	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751472AbXISUtj (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 19 Sep 2007 16:49:39 -0400
-In-Reply-To: <200709171530.18669.vapier@gentoo.org>
+Received: from mailhub.sw.ru ([195.214.233.200]:1785 "EHLO relay.sw.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753156AbXJJKqc (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 10 Oct 2007 06:46:32 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mike Frysinger <vapier@gentoo.org>
-Cc: linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-kernel@vger.kernel.org, davej@codemonkey.org.uk, Pierre Ossman <drzeus@drzeus.cx>, akpm@osdl.org, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig2EDC98EB4009B0B6F65E841D
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+["if (!x & y)" patch from yanzheng@]
+["if (!x & y)" patch from adobriyan@]
+["if (!x & y)" patches from viro@]
 
-Mike Frysinger wrote:
-> the install step for manpages currently does not use the -m option whic=
-h means
-> perms default to 755 which makes no sense for man pages
->=20
-> Signed-off-by: Mike Frysinger <vapier@gentoo.org>
+While we're at it, below is somewhat ugly sparse patch for detecting
+"&& 0x" typos.
 
-Applied; thanks.
+diff --git a/evaluate.c b/evaluate.c
+index c0e9d17..186756b 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -877,6 +877,13 @@ static struct symbol *evaluate_logical(struct expression *expr)
+ 	if (!evaluate_conditional(expr->right, 0))
+ 		return NULL;
+ 
++	if (expr->op == SPECIAL_LOGICAL_AND) {
++		if (expr->left->type == EXPR_VALUE && expr->left->orig_in_hex)
++			warning(expr->pos, "dubious && 0x");
++		if (expr->right->type == EXPR_VALUE && expr->right->orig_in_hex)
++			warning(expr->pos, "dubious && 0x");
++	}
++
+ 	expr->ctype = &bool_ctype;
+ 	if (expr->flags) {
+ 		if (!(expr->left->flags & expr->right->flags & Int_const_expr))
+diff --git a/expression.c b/expression.c
+index 289927a..9bcf586 100644
+--- a/expression.c
++++ b/expression.c
+@@ -361,6 +361,7 @@ got_it:
+ 	expr->flags = Int_const_expr;
+         expr->ctype = ctype_integer(modifiers);
+         expr->value = value;
++	expr->orig_in_hex = (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'));
+ 	return;
+ Eoverflow:
+ 	error_die(expr->pos, "constant %s is too big even for unsigned long long",
+@@ -70,6 +70,7 @@ struct expression {
+ 		struct {
+ 			unsigned long long value;
+ 			unsigned taint;
++			unsigned int orig_in_hex:1;
+ 		};
+ 
+ 		// EXPR_FVALUE
 
-- Josh Triplett
+
+Here are wonders that it found:
+
+drivers/media/video/se401.c:1283:13: warning: dubious && 0x
+
+	if (!cp[2] && SE401_FORMAT_BAYER) {
+		err("Bayer format not supported!");
+		return 1;
+	}
+
+	known issue, I sent a patch about it.
+
+
+drivers/mmc/host/tifm_sd.c:183:9: warning: dubious && 0x
+
+	if ((r_data->flags & MMC_DATA_WRITE)
+            && DATA_CARRY)
+		writel(host->bounce_buf_data[0],
+		host->dev->addr
+		+ SOCK_MMCSD_DATA);
+
+	given that DATA_CARRY is always used together with ->cmd_flags,
+	this place is asking for obvious fixlet:
+
+
+[PATCH] tifm_sd.c: fix DATA_CARRY check
+
+Signed-off-by: Alexey Dobriyan <adobriyan@sw.ru>
+---
+
+ drivers/mmc/host/tifm_sd.c |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/mmc/host/tifm_sd.c
++++ b/drivers/mmc/host/tifm_sd.c
+@@ -180,7 +180,7 @@ static void tifm_sd_transfer_data(struct tifm_sd *host)
+ 			host->sg_pos++;
+ 			if (host->sg_pos == host->sg_len) {
+ 				if ((r_data->flags & MMC_DATA_WRITE)
+-				    && DATA_CARRY)
++				    && (host->cmd_flags & DATA_CARRY))
+ 					writel(host->bounce_buf_data[0],
+ 					       host->dev->addr
+ 					       + SOCK_MMCSD_DATA);
 
 
 
---------------enig2EDC98EB4009B0B6F65E841D
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+drivers/net/wireless/arlan-main.c:439:3: warning: dubious && 0x
+drivers/net/wireless/arlan-main.c:439:3: warning: dubious && 0x
+drivers/net/wireless/arlan-main.c:439:3: warning: dubious && 0x
+drivers/net/wireless/arlan-main.c:439:3: warning: dubious && 0x
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+	#define setPowerOff(dev){\ 
+	   writeControlRegister(dev,readControlRegister(dev) |
+	   (ARLAN_POWER && ARLAN_ACCESS));
+	   		^^^
 
-iD8DBQFG8YthGJuZRtD+evsRAir5AJ4sHxfilSL4csjmGad9H+niW6a+hACfd0eb
-aXvAn2jxl+fXoO84HBv5laI=
-=E1Ic
------END PGP SIGNATURE-----
 
---------------enig2EDC98EB4009B0B6F65E841D--
+[PATCH] arlan: fix "x && y" typo
+
+Signed-off-by: Alexey Dobriyan <adobriyan@sw.ru>
+---
+
+ drivers/net/wireless/arlan.h |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+--- a/drivers/net/wireless/arlan.h
++++ b/drivers/net/wireless/arlan.h
+@@ -485,7 +485,7 @@ struct arlan_private {
+ #define clearClearInterrupt(dev){\
+    writeControlRegister(dev,readControlRegister(dev) & ~ARLAN_CLEAR_INTERRUPT);}
+ #define setPowerOff(dev){\
+-   writeControlRegister(dev,readControlRegister(dev) | (ARLAN_POWER && ARLAN_ACCESS));\
++   writeControlRegister(dev,readControlRegister(dev) | (ARLAN_POWER & ARLAN_ACCESS));\
+    writeControlRegister(dev,readControlRegister(dev) & ~ARLAN_ACCESS);}
+ #define setPowerOn(dev){\
+    writeControlRegister(dev,readControlRegister(dev) & ~(ARLAN_POWER));   }
