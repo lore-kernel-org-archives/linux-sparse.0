@@ -1,78 +1,43 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: idio{,ma}tic typos (was Re: + fix-vm_can_nonlinear-check-in-sys_remap_file_pages.patch
- added to -mm tree)
-Date: Thu, 11 Oct 2007 09:27:21 -0700
-Message-ID: <470E4EE9.1020102@freedesktop.org>
-References: <20071010104540.GA6366@localhost.sw.ru> <470CBB6A.7020305@freedesktop.org> <20071011073537.GA6697@localhost.sw.ru>
+From: Alexey Dobriyan <adobriyan@sw.ru>
+Subject: sparse breakage triggered by rcu_read_lock() lockdep annotations
+Date: Tue, 16 Oct 2007 14:55:21 +0400
+Message-ID: <20071016105521.GB6352@localhost.sw.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:33971 "EHLO
-	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753950AbXJKQ12 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 11 Oct 2007 12:27:28 -0400
-In-Reply-To: <20071011073537.GA6697@localhost.sw.ru>
+Received: from mailhub.sw.ru ([195.214.233.200]:21568 "EHLO relay.sw.ru"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932132AbXJPKz2 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 16 Oct 2007 06:55:28 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexey Dobriyan <adobriyan@sw.ru>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-kernel@vger.kernel.org, davej@codemonkey.org.uk, Pierre Ossman <drzeus@drzeus.cx>, akpm@osdl.org, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Alexey Dobriyan wrote:
-> On Wed, Oct 10, 2007 at 04:45:46AM -0700, Josh Triplett wrote:
->> Alexey Dobriyan wrote:
->>> ["if (!x & y)" patch from yanzheng@]
->>> ["if (!x & y)" patch from adobriyan@]
->>> ["if (!x & y)" patches from viro@]
->>>
->>> While we're at it, below is somewhat ugly sparse patch for detecting
->>> "&& 0x" typos.
->> Excellent idea!  I think it applies to || as well.
-> 
-> Sadly, yes.
-> 
-> [PATCH] smctr: fix "|| 0x" typo
-> 
-> IBM_PASS_SOURCE_ADDR is 1, so logically ORing it with status bits is
-> pretty useless. Do bitwise OR, instead.
-> 
-> Signed-off-by: Alexey Dobriyan <adobriyan@sw.ru>
-> ---
-> 
->  drivers/net/tokenring/smctr.c |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> --- a/drivers/net/tokenring/smctr.c
-> +++ b/drivers/net/tokenring/smctr.c
-> @@ -3413,7 +3413,7 @@ static int smctr_make_tx_status_code(struct net_device *dev,
->          tsv->svi = TRANSMIT_STATUS_CODE;
->          tsv->svl = S_TRANSMIT_STATUS_CODE;
->  
-> -        tsv->svv[0] = ((tx_fstatus & 0x0100 >> 6) || IBM_PASS_SOURCE_ADDR);
-> +        tsv->svv[0] = ((tx_fstatus & 0x0100 >> 6) | IBM_PASS_SOURCE_ADDR);
->  
->          /* Stripped frame status of Transmitted Frame */
->          tsv->svv[1] = tx_fstatus & 0xff;
+FWIW, commit 851a67b825540a8e00c0be3ee25e4627ba8b133b
+aka "lockdep: annotate rcu_read_{,un}lock{,_bh}"
+causes sparse to trigger internal assertion in quite a few places over
+allyesconfig run.
 
-Nice catch.  I agree with Kyle, though, that fixing it may require
-some care to make sure it doesn't break things relying on the bug.
+	sparse: flow.c:805: rewrite_parent_branch: Assertion `changed' failed.
 
->> I'll most likely
->> add a -Wboolean-logic-on-bit-constant to turn this warning on.
-> 
-> Ewww, more options. :-(
+Trimmed down testcase:
 
-With heuristic warnings like this, people need a way to turn them off.
+	void f(unsigned long ip);
+	static void g(void)
+	{
+	        if (1) {
+	              f(({ __label__ x; x: (unsigned long)&&x; }));
+	        }
+	        f(({ __label__ x; x: (unsigned long)&&x; }));
+	}
 
->> Any reason why this wouldn't apply to octal constants or to GCC's new
->> binary constants?  I can trivially modify this patch to handle those
->> as well, just by dropping the check for an 'x' or 'X', and renaming the
->> flag.
-> 
-> OK, let me try too.
-
-Go for it.  I look forward to your next patch.
-
-Thanks,
-Josh Triplett
+#0  0x4001c410 in __kernel_vsyscall ()
+(gdb) bt
+#0  0x4001c410 in __kernel_vsyscall ()
+#1  0x40050701 in raise () from /lib/libc.so.6
+#2  0x40051e38 in abort () from /lib/libc.so.6
+#3  0x40049fcc in __assert_fail () from /lib/libc.so.6
+#4  0x08064947 in pack_basic_blocks (ep=0x411a1c6c) at flow.c:812
+#5  0x0805ffbf in linearize_symbol (sym=0x4103ec8c) at linearize.c:2154
+#6  0x080492a3 in main (argc=Cannot access memory at address 0x274d) at sparse.c:266
