@@ -1,57 +1,75 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH] Re: sparse breakage triggered by rcu_read_lock() lockdep
- annotations
-Date: Sat, 20 Oct 2007 20:34:04 -0700
-Message-ID: <471AC8AC.7020701@freedesktop.org>
-References: <20071016105521.GB6352@localhost.sw.ru>	 <70318cbf0710191244v59bed9fekbef0ae1fcda22a6a@mail.gmail.com> <70318cbf0710191408mfb372bah292028f7bafb6eec@mail.gmail.com>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: [PATCH] allow ifdef in macro arguments
+Date: Sun, 21 Oct 2007 02:07:15 -0700
+Message-ID: <70318cbf0710210207t587f8d2enf024a56e1d10a5df@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigE744594351A95E063B70FA5E"
+Content-Type: multipart/mixed;
+	boundary="----=_Part_6650_21251426.1192957635261"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:52055 "EHLO
-	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750861AbXJUDe3 (ORCPT
+Received: from rv-out-0910.google.com ([209.85.198.188]:47488 "EHLO
+	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751272AbXJUJHP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 20 Oct 2007 23:34:29 -0400
-In-Reply-To: <70318cbf0710191408mfb372bah292028f7bafb6eec@mail.gmail.com>
+	Sun, 21 Oct 2007 05:07:15 -0400
+Received: by rv-out-0910.google.com with SMTP id k20so878496rvb
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Oct 2007 02:07:15 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Alexey Dobriyan <adobriyan@sw.ru>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE744594351A95E063B70FA5E
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+------=_Part_6650_21251426.1192957635261
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Christopher Li wrote:
-> OK, I get a trivial fix after all. The test case is fixed now.
-> I haven't done much test otherwise.
->=20
-> See the patch attached.
+I think some one report it long time ago.
 
-Nice work Chris!  Patch applied and pushed out.
+Chris
 
-I may roll an 0.4.1 release in the near future to fix kernel
-builds with Sparse.
+------=_Part_6650_21251426.1192957635261
+Content-Type: application/octet-stream; name=ifdef-macro-arg
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_f81bw7u2
+Content-Disposition: attachment; filename=ifdef-macro-arg
 
-- Josh Triplett
-
-
-
---------------enigE744594351A95E063B70FA5E
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFHGsisGJuZRtD+evsRAvRoAJ4pMW/OVO7I2SoWCSIlW11pNx5FqACgjG3m
-FdZN8gvX5eRftrcuMsjnTgk=
-=a/D+
------END PGP SIGNATURE-----
-
---------------enigE744594351A95E063B70FA5E--
+QWxsb3cgI2lmZGVmIGluIG1hY3JvIGFyZ3VtZW50cwoKQXMgdGhlIGNhc2Ugc2hvd3MuIFNwYXJz
+ZSBkb2VzIG5vdCBoYW5kbGUgcHJlLXByb2Nlc3MgaW4KbWFjcm8gYXJndW1lbnRzLgoKVGhpcyBw
+YXRjaCBhbGxvdyB0aGUgcHJlLXByb2Nlc3MgY2FuIGhhcHBlbiBpbiBtYWNybyBhcmd1bWVudHMu
+CgpTaWduZWQtT2ZmLUJ5OiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5k
+ZXg6IHNwYXJzZS9wcmUtcHJvY2Vzcy5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3ByZS1w
+cm9jZXNzLmMJMjAwNy0xMC0yMSAwMDo1NjozNy4wMDAwMDAwMDAgLTA3MDAKKysrIHNwYXJzZS9w
+cmUtcHJvY2Vzcy5jCTIwMDctMTAtMjEgMDE6NTc6MDEuMDAwMDAwMDAwIC0wNzAwCkBAIC04Myw2
+ICs4Myw3IEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKmFsbG9jX3Rva2VuKHN0cnVjdCAKIH0KIAog
+c3RhdGljIGNvbnN0IGNoYXIgKnNob3dfdG9rZW5fc2VxdWVuY2Uoc3RydWN0IHRva2VuICp0b2tl
+bik7CitzdGF0aWMgaW5saW5lIHN0cnVjdCB0b2tlbiAqbmV4dF9wcmVwcm9jZXNzX3Rva2VuKHN0
+cnVjdCB0b2tlbiAqKmxpc3QpOwogCiAvKiBFeHBhbmQgc3ltYm9sICdzeW0nIGF0ICcqbGlzdCcg
+Ki8KIHN0YXRpYyBpbnQgZXhwYW5kKHN0cnVjdCB0b2tlbiAqKiwgc3RydWN0IHN5bWJvbCAqKTsK
+QEAgLTE5OSw3ICsyMDAsNyBAQCBzdGF0aWMgc3RydWN0IHRva2VuICpjb2xsZWN0X2FyZyhzdHJ1
+Y3QgCiAJc3RydWN0IHRva2VuICpuZXh0OwogCWludCBuZXN0aW5nID0gMDsKIAotCXdoaWxlICgh
+ZW9mX3Rva2VuKG5leHQgPSBzY2FuX25leHQocCkpKSB7CisJd2hpbGUgKChuZXh0ID0gbmV4dF9w
+cmVwcm9jZXNzX3Rva2VuKHApKSkgewogCQlpZiAobWF0Y2hfb3AobmV4dCwgJygnKSkgewogCQkJ
+bmVzdGluZysrOwogCQl9IGVsc2UgaWYgKG1hdGNoX29wKG5leHQsICcpJykpIHsKQEAgLTE3MDIs
+NyArMTcwMyw3IEBAIHN0YXRpYyB2b2lkIHByZXByb2Nlc3Nvcl9saW5lKHN0cnVjdCBzdHIKIAlo
+YW5kbGVfcHJlcHJvY2Vzc29yX2xpbmUoc3RyZWFtLCBsaW5lLCBzdGFydCk7CiB9CiAKLXN0YXRp
+YyB2b2lkIGRvX3ByZXByb2Nlc3Moc3RydWN0IHRva2VuICoqbGlzdCkKK3N0YXRpYyBpbmxpbmUg
+c3RydWN0IHRva2VuICpuZXh0X3ByZXByb2Nlc3NfdG9rZW4oc3RydWN0IHRva2VuICoqbGlzdCkK
+IHsKIAlzdHJ1Y3QgdG9rZW4gKm5leHQ7CiAKQEAgLTE3NDAsMTEgKzE3NDEsMjIgQEAgc3RhdGlj
+IHZvaWQgZG9fcHJlcHJvY2VzcyhzdHJ1Y3QgdG9rZW4gKgogCQkJCV9fZnJlZV90b2tlbihuZXh0
+KTsKIAkJCQljb250aW51ZTsKIAkJCX0KLQotCQkJaWYgKHRva2VuX3R5cGUobmV4dCkgIT0gVE9L
+RU5fSURFTlQgfHwKLQkJCSAgICBleHBhbmRfb25lX3N5bWJvbChsaXN0KSkKLQkJCQlsaXN0ID0g
+Jm5leHQtPm5leHQ7CiAJCX0KKwkJcmV0dXJuIG5leHQ7CisJfQorCisJcmV0dXJuIE5VTEw7Cit9
+CisKKworc3RhdGljIHZvaWQgZG9fcHJlcHJvY2VzcyhzdHJ1Y3QgdG9rZW4gKipsaXN0KQorewor
+CXN0cnVjdCB0b2tlbiAqbmV4dDsKKworCXdoaWxlICgobmV4dCA9IG5leHRfcHJlcHJvY2Vzc190
+b2tlbihsaXN0KSkpIHsKKwkJaWYgKHRva2VuX3R5cGUobmV4dCkgIT0gVE9LRU5fSURFTlQgfHwK
+KwkJICAgIGV4cGFuZF9vbmVfc3ltYm9sKGxpc3QpKQorCQkJbGlzdCA9ICZuZXh0LT5uZXh0Owog
+CX0KIH0KIApJbmRleDogc3BhcnNlL3ZhbGlkYXRpb24vbWFjcm8tYXJndW1lbnQtaWZkZWYuYwo9
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09Ci0tLSBzcGFyc2Uub3JpZy92YWxpZGF0aW9uL21hY3JvLWFyZ3VtZW50LWlmZGVm
+LmMJMjAwNy0xMC0yMSAwMTo1NzowMS4wMDAwMDAwMDAgLTA3MDAKKysrIHNwYXJzZS92YWxpZGF0
+aW9uL21hY3JvLWFyZ3VtZW50LWlmZGVmLmMJMjAwNy0xMC0yMSAwMTo1NzowMS4wMDAwMDAwMDAg
+LTA3MDAKQEAgLTAsMCArMSwxNyBAQAorI2RlZmluZSBmb28oYSxiLGMpIGJhcihhLGIsYykKKwor
+c3RhdGljIHZvaWQgYmFyKGludCBhLCBpbnQgYiwgaW50IGMpCit7Cit9CisKK3N0YXRpYyB2b2lk
+IHRlc3Qodm9pZCkKK3sKKwlmb28oMSwKKyNpZmRlZiBOT1QKKwkyLAorI2Vsc2UKKwkzLAorI2Vu
+ZGlmCisJNCk7Cit9CisK
+------=_Part_6650_21251426.1192957635261--
