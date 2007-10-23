@@ -1,42 +1,37 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: segfaults in pathological cases from gcc testsuite
-Date: Mon, 22 Oct 2007 09:38:51 -0700
-Message-ID: <70318cbf0710220938l2ee6195cu85effcbc8f0e99c9@mail.gmail.com>
-References: <20071022152459.GE6271@localhost.sw.ru>
+From: Matthew Wilcox <matthew@wil.cx>
+Subject: Bogus 'not declared' warning
+Date: Tue, 23 Oct 2007 08:24:50 -0600
+Message-ID: <20071023142450.GP27248@parisc-linux.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0910.google.com ([209.85.198.191]:50110 "EHLO
-	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751547AbXJVQiw (ORCPT
+Received: from palinux.external.hp.com ([192.25.206.14]:41257 "EHLO
+	mail.parisc-linux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751862AbXJWOYv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Oct 2007 12:38:52 -0400
-Received: by rv-out-0910.google.com with SMTP id k20so1222599rvb
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Oct 2007 09:38:52 -0700 (PDT)
-In-Reply-To: <20071022152459.GE6271@localhost.sw.ru>
+	Tue, 23 Oct 2007 10:24:51 -0400
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexey Dobriyan <adobriyan@sw.ru>
-Cc: linux-sparse@vger.kernel.org, adobriyan@gmail.com
+To: linux-sparse@vger.kernel.org
 
-On 10/22/07, Alexey Dobriyan <adobriyan@sw.ru> wrote:
-> FWIW, I fed full gcc tree to sparse not only testsuite. Suprisingly it
-> crashed only in two places:
->
->
-> --------------------------------------------------------
-> gcc/testsuite/gcc.c-torture/compile/limits-exprparen.c
 
-I can't  reproduce it for me. What command line
-are you using?
+Seems to me that sparse ignores 'static' forward declarations, leading
+to false warnings like this:
 
-> --------------------------------------------------------
-> gcc/testsuite/gcc.c-torture/compile/limits-caselabels.c
->
+/home/willy/kernel/linux-2.6/drivers/scsi/sym53c8xx_2/sym_hipd.c:3786:5: warning: symbol 'sym_compute_residual' was not declared. Should it be static?
 
-This is cause by too deep recursive label statement chain.
-Let me see what I can do about it.
+$ grep -n sym_compute_residual drivers/scsi/sym53c8xx_2/*
+drivers/scsi/sym53c8xx_2/sym_hipd.c:61:static int sym_compute_residual(struct sym_hcb *np, struct sym_ccb *cp);
+drivers/scsi/sym53c8xx_2/sym_hipd.c:3033:               cp->sv_resid = sym_compute_residual(np, cp);
+drivers/scsi/sym53c8xx_2/sym_hipd.c:3786:int sym_compute_residual(struct sym_hcb *np, struct sym_ccb *cp)
 
-Chris
+This is a self-built sparse from commit
+fa7d792f66cf02b86dd834d06b267ec66ddfe700.  The two commits since don't
+appear relevant.
+
+-- 
+Intel are signing my paycheques ... these opinions are still mine
+"Bill, look, we understand that you're interested in selling us this
+operating system, but compare it to ours.  We can't possibly take such
+a retrograde step."
