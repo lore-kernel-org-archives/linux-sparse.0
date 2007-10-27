@@ -1,41 +1,35 @@
-From: Kovarththanan Rajaratnam <krj@rajaratnam.dk>
-Subject: Re: Cygwin compile error:  No rule to make target `compat-Windows_NT.o',
- needed by `libsparse.a
-Date: Fri, 26 Oct 2007 23:00:20 +0200
-Message-ID: <fftkhh$aag$1@ger.gmane.org>
-References: <zly6dqmj.fsf@blue.sea.net>
+From: Alexey Dobriyan <adobriyan@gmail.com>
+Subject: Re: segfaults in pathological cases from gcc testsuite
+Date: Sun, 28 Oct 2007 02:01:29 +0400
+Message-ID: <20071027220129.GG9816@martell.zuzino.mipt.ru>
+References: <20071022152459.GE6271@localhost.sw.ru> <70318cbf0710220938l2ee6195cu85effcbc8f0e99c9@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from main.gmane.org ([80.91.229.2]:50698 "EHLO ciao.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752650AbXJZVBM (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Oct 2007 17:01:12 -0400
-Received: from list by ciao.gmane.org with local (Exim 4.43)
-	id 1IlWIX-0004NI-7J
-	for linux-sparse@vger.kernel.org; Fri, 26 Oct 2007 21:00:53 +0000
-Received: from 0x5551d1e2.adsl.cybercity.dk ([85.81.209.226])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Fri, 26 Oct 2007 21:00:53 +0000
-Received: from krj by 0x5551d1e2.adsl.cybercity.dk with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Fri, 26 Oct 2007 21:00:53 +0000
-In-Reply-To: <zly6dqmj.fsf@blue.sea.net>
+Received: from mu-out-0910.google.com ([209.85.134.190]:6517 "EHLO
+	mu-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750849AbXJ0WBj (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 27 Oct 2007 18:01:39 -0400
+Received: by mu-out-0910.google.com with SMTP id i10so2021312mue
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Oct 2007 15:01:38 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <70318cbf0710220938l2ee6195cu85effcbc8f0e99c9@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Alexey Dobriyan <adobriyan@sw.ru>, linux-sparse@vger.kernel.org
 
-Hey,
+On Mon, Oct 22, 2007 at 09:38:51AM -0700, Christopher Li wrote:
+> On 10/22/07, Alexey Dobriyan <adobriyan@sw.ru> wrote:
+> > FWIW, I fed full gcc tree to sparse not only testsuite. Suprisingly it
+> > crashed only in two places:
+> >
+> >
+> > --------------------------------------------------------
+> > gcc/testsuite/gcc.c-torture/compile/limits-exprparen.c
+> 
+> I can't  reproduce it for me. What command line
+> are you using?
 
-Jari Aalto wrote:
-> git checkout and "make" gives following results in Cygwin. There is no
-> "INSTALL" file that would explain how the compilation should be
-> arranged. Please advice.
-
-You'll need to set OS=cygwin in makefile (line 3). That should do the trick.
-
--- 
-Best Regards
-Kovarththanan Rajaratnam
+ulimit -s 8192 actually. With 16384 it passes.
