@@ -1,35 +1,129 @@
-From: Alexey Dobriyan <adobriyan@gmail.com>
-Subject: Re: segfaults in pathological cases from gcc testsuite
-Date: Sun, 28 Oct 2007 02:01:29 +0400
-Message-ID: <20071027220129.GG9816@martell.zuzino.mipt.ru>
-References: <20071022152459.GE6271@localhost.sw.ru> <70318cbf0710220938l2ee6195cu85effcbc8f0e99c9@mail.gmail.com>
+From: "Chris Li" <christ.li@gmail.com>
+Subject: [PATCH] Re: segfaults in pathological cases from gcc testsuite
+Date: Tue, 30 Oct 2007 16:24:40 -0700
+Message-ID: <70318cbf0710301624n6759142as715f60493e886b98@mail.gmail.com>
+References: <20071022152459.GE6271@localhost.sw.ru>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed;
+	boundary="----=_Part_914_26085076.1193786680621"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mu-out-0910.google.com ([209.85.134.190]:6517 "EHLO
-	mu-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750849AbXJ0WBj (ORCPT
+Received: from rv-out-0910.google.com ([209.85.198.187]:33389 "EHLO
+	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752797AbXJ3XYl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Oct 2007 18:01:39 -0400
-Received: by mu-out-0910.google.com with SMTP id i10so2021312mue
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Oct 2007 15:01:38 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <70318cbf0710220938l2ee6195cu85effcbc8f0e99c9@mail.gmail.com>
+	Tue, 30 Oct 2007 19:24:41 -0400
+Received: by rv-out-0910.google.com with SMTP id k20so2017662rvb
+        for <linux-sparse@vger.kernel.org>; Tue, 30 Oct 2007 16:24:40 -0700 (PDT)
+In-Reply-To: <20071022152459.GE6271@localhost.sw.ru>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Alexey Dobriyan <adobriyan@sw.ru>, linux-sparse@vger.kernel.org
+To: Alexey Dobriyan <adobriyan@sw.ru>
+Cc: linux-sparse@vger.kernel.org, adobriyan@gmail.com
 
-On Mon, Oct 22, 2007 at 09:38:51AM -0700, Christopher Li wrote:
-> On 10/22/07, Alexey Dobriyan <adobriyan@sw.ru> wrote:
-> > FWIW, I fed full gcc tree to sparse not only testsuite. Suprisingly it
-> > crashed only in two places:
-> >
-> >
-> > --------------------------------------------------------
-> > gcc/testsuite/gcc.c-torture/compile/limits-exprparen.c
-> 
-> I can't  reproduce it for me. What command line
-> are you using?
+------=_Part_914_26085076.1193786680621
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-ulimit -s 8192 actually. With 16384 it passes.
+I fix the second one as it is easier to reproduce and makes
+more sense to fix.
+
+Please see the patch attached.
+
+A side note is that, I don't believe you can hit this using
+real life C code. Maybe some programing generated C code.
+There is not thing wrong in sparse except its recursion
+is very deep. The patch special handle this test case.
+
+The first one is even less interesting to fix.
+
+Chris
+
+On Oct 22, 2007 8:24 AM, Alexey Dobriyan <adobriyan@sw.ru> wrote:
+> FWIW, I fed full gcc tree to sparse not only testsuite. Suprisingly it
+> crashed only in two places:
+> void q19_func (long i)
+> {
+>   switch (i) {
+>     LIM5 (case 1)
+>       break;
+>   }
+> }
+
+------=_Part_914_26085076.1193786680621
+Content-Type: application/octet-stream; name=label-parsing-1
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_f8f1m5jf0
+Content-Disposition: attachment; filename=label-parsing-1
+
+QXZvaWQgZGVlcCByZWN1cnNpb24gaW4gZW1wdHkgY2FzZSBsYWJlbHMuCgpUaGlzIHBhdGNoIHRh
+a2UgdGhlIGVtcHR5IGNhc2UgbGFiZWwgYXMgc3BlY2lhbCBjYXNlLAphdm9pZCBkZWVwIHJlY3Vy
+c2lvbiBvbiBib3RoIHBhcnNpbmcgYW5kIGxpbmVhcml6aW9uLgoKU2lnbmVkLU9mZi1CeTogQ2hy
+aXN0b3BoZXIgTGk8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS9wYXJzZS5jCj09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3BhcnNlLmMJMjAwNy0xMC0zMCAxMzo0ODoyOC4wMDAw
+MDAwMDAgLTA3MDAKKysrIHNwYXJzZS9wYXJzZS5jCTIwMDctMTAtMzAgMTM6NDk6MTcuMDAwMDAw
+MDAwIC0wNzAwCkBAIC0xNjc4LDI1ICsxNjc4LDMwIEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnBh
+cnNlX2lmX3N0YXRlbWVudCgKIAlyZXR1cm4gc3RhdGVtZW50KHRva2VuLT5uZXh0LCAmc3RtdC0+
+aWZfZmFsc2UpOwogfQogCi1zdGF0aWMgaW5saW5lIHN0cnVjdCB0b2tlbiAqY2FzZV9zdGF0ZW1l
+bnQoc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKLXsKLQlzdG10
+LT50eXBlID0gU1RNVF9DQVNFOwotCXRva2VuID0gZXhwZWN0KHRva2VuLCAnOicsICJhZnRlciBk
+ZWZhdWx0L2Nhc2UiKTsKLQlhZGRfY2FzZV9zdGF0ZW1lbnQoc3RtdCk7Ci0JcmV0dXJuIHN0YXRl
+bWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50KTsKLX0KLQogc3RhdGljIHN0cnVjdCB0
+b2tlbiAqcGFyc2VfY2FzZV9zdGF0ZW1lbnQoc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IHN0
+YXRlbWVudCAqc3RtdCkKIHsKLQl0b2tlbiA9IHBhcnNlX2V4cHJlc3Npb24odG9rZW4tPm5leHQs
+ICZzdG10LT5jYXNlX2V4cHJlc3Npb24pOwotCWlmIChtYXRjaF9vcCh0b2tlbiwgU1BFQ0lBTF9F
+TExJUFNJUykpCi0JCXRva2VuID0gcGFyc2VfZXhwcmVzc2lvbih0b2tlbi0+bmV4dCwgJnN0bXQt
+PmNhc2VfdG8pOwotCXJldHVybiBjYXNlX3N0YXRlbWVudCh0b2tlbiwgc3RtdCk7CisJZm9yICg7
+OykgeworCQl0b2tlbiA9IHBhcnNlX2V4cHJlc3Npb24odG9rZW4tPm5leHQsICZzdG10LT5jYXNl
+X2V4cHJlc3Npb24pOworCQlpZiAobWF0Y2hfb3AodG9rZW4sIFNQRUNJQUxfRUxMSVBTSVMpKQor
+CQkJdG9rZW4gPSBwYXJzZV9leHByZXNzaW9uKHRva2VuLT5uZXh0LCAmc3RtdC0+Y2FzZV90byk7
+CisJCXN0bXQtPnR5cGUgPSBTVE1UX0NBU0U7CisJCXRva2VuID0gZXhwZWN0KHRva2VuLCAnOics
+ICJhZnRlciBjYXNlIik7CisJCWFkZF9jYXNlX3N0YXRlbWVudChzdG10KTsKKwkJaWYgKCFtYXRj
+aF9pZGVudCh0b2tlbiwgJmNhc2VfaWRlbnQpKQorCQkJYnJlYWs7CisJCXN0bXQtPmNhc2Vfc3Rh
+dGVtZW50ID0gYWxsb2Nfc3RhdGVtZW50KHRva2VuLT5wb3MsIFNUTVRfQ0FTRSk7CisJCXN0bXQg
+PSBzdG10LT5jYXNlX3N0YXRlbWVudDsKKwkJdG9rZW4gPSB0b2tlbi0+bmV4dDsKKwl9CisJcmV0
+dXJuIHN0YXRlbWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50KTsKIH0KIAogc3RhdGlj
+IHN0cnVjdCB0b2tlbiAqcGFyc2VfZGVmYXVsdF9zdGF0ZW1lbnQoc3RydWN0IHRva2VuICp0b2tl
+biwgc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKIHsKLQlyZXR1cm4gY2FzZV9zdGF0ZW1lbnQodG9r
+ZW4tPm5leHQsIHN0bXQpOworCXN0bXQtPnR5cGUgPSBTVE1UX0NBU0U7CisJdG9rZW4gPSBleHBl
+Y3QodG9rZW4tPm5leHQsICc6JywgImFmdGVyIGRlZmF1bHQiKTsKKwlhZGRfY2FzZV9zdGF0ZW1l
+bnQoc3RtdCk7CisJcmV0dXJuIHN0YXRlbWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50
+KTsKIH0KIAogc3RhdGljIHN0cnVjdCB0b2tlbiAqcGFyc2VfbG9vcF9pdGVyYXRvcihzdHJ1Y3Qg
+dG9rZW4gKnRva2VuLCBzdHJ1Y3Qgc3RhdGVtZW50ICpzdG10KQpJbmRleDogc3BhcnNlL2xpbmVh
+cml6ZS5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL2xpbmVhcml6ZS5jCTIwMDctMTAtMzAg
+MTM6NDg6MjguMDAwMDAwMDAwIC0wNzAwCisrKyBzcGFyc2UvbGluZWFyaXplLmMJMjAwNy0xMC0z
+MCAxMzo1NToyNi4wMDAwMDAwMDAgLTA3MDAKQEAgLTE4OTQsNyArMTg5NCwxMiBAQCBwc2V1ZG9f
+dCBsaW5lYXJpemVfc3RhdGVtZW50KHN0cnVjdCBlbnRyCiAJfQogCiAJY2FzZSBTVE1UX0NBU0U6
+IHsKLQkJYWRkX2xhYmVsKGVwLCBzdG10LT5jYXNlX2xhYmVsKTsKKwkJZm9yICg7OykgeworCQkJ
+YWRkX2xhYmVsKGVwLCBzdG10LT5jYXNlX2xhYmVsKTsKKwkJCWlmIChzdG10LT5jYXNlX3N0YXRl
+bWVudC0+dHlwZSAhPSBTVE1UX0NBU0UpCisJCQkJYnJlYWs7CisJCQlzdG10ID0gc3RtdC0+Y2Fz
+ZV9zdGF0ZW1lbnQ7CisJCX0KIAkJbGluZWFyaXplX3N0YXRlbWVudChlcCwgc3RtdC0+Y2FzZV9z
+dGF0ZW1lbnQpOwogCQlicmVhazsKIAl9CkluZGV4OiBzcGFyc2UvdmFsaWRhdGlvbi9saW1pdHMt
+Y2FzZWxhYmVscy5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3ZhbGlkYXRpb24vbGltaXRz
+LWNhc2VsYWJlbHMuYwkyMDA3LTEwLTMwIDEzOjUwOjE5LjAwMDAwMDAwMCAtMDcwMAorKysgc3Bh
+cnNlL3ZhbGlkYXRpb24vbGltaXRzLWNhc2VsYWJlbHMuYwkyMDA3LTEwLTMwIDEzOjU3OjAxLjAw
+MDAwMDAwMCAtMDcwMApAQCAtMCwwICsxLDI3IEBACisjZGVmaW5lIExJTTEoeCkgeCMjMDogeCMj
+MTogeCMjMjogeCMjMzogeCMjNDogeCMjNTogeCMjNjogeCMjNzogeCMjODogeCMjOToKKyNkZWZp
+bmUgTElNMih4KSBMSU0xKHgjIzApIExJTTEoeCMjMSkgTElNMSh4IyMyKSBMSU0xKHgjIzMpIExJ
+TTEoeCMjNCkgXAorICAgICAgICAgICAgICAgTElNMSh4IyM1KSBMSU0xKHgjIzYpIExJTTEoeCMj
+NykgTElNMSh4IyM4KSBMSU0xKHgjIzkpCisjZGVmaW5lIExJTTMoeCkgTElNMih4IyMwKSBMSU0y
+KHgjIzEpIExJTTIoeCMjMikgTElNMih4IyMzKSBMSU0yKHgjIzQpIFwKKyAgICAgICAgICAgICAg
+IExJTTIoeCMjNSkgTElNMih4IyM2KSBMSU0yKHgjIzcpIExJTTIoeCMjOCkgTElNMih4IyM5KQor
+I2RlZmluZSBMSU00KHgpIExJTTMoeCMjMCkgTElNMyh4IyMxKSBMSU0zKHgjIzIpIExJTTMoeCMj
+MykgTElNMyh4IyM0KSBcCisgICAgICAgICAgICAgICBMSU0zKHgjIzUpIExJTTMoeCMjNikgTElN
+Myh4IyM3KSBMSU0zKHgjIzgpIExJTTMoeCMjOSkKKyNkZWZpbmUgTElNNSh4KSBMSU00KHgjIzAp
+IExJTTQoeCMjMSkgTElNNCh4IyMyKSBMSU00KHgjIzMpIExJTTQoeCMjNCkgXAorICAgICAgICAg
+ICAgICAgTElNNCh4IyM1KSBMSU00KHgjIzYpIExJTTQoeCMjNykgTElNNCh4IyM4KSBMSU00KHgj
+IzkpCisjZGVmaW5lIExJTTYoeCkgTElNNSh4IyMwKSBMSU01KHgjIzEpIExJTTUoeCMjMikgTElN
+NSh4IyMzKSBMSU01KHgjIzQpIFwKKyAgICAgICAgICAgICAgIExJTTUoeCMjNSkgTElNNSh4IyM2
+KSBMSU01KHgjIzcpIExJTTUoeCMjOCkgTElNNSh4IyM5KQorI2RlZmluZSBMSU03KHgpIExJTTYo
+eCMjMCkgTElNNih4IyMxKSBMSU02KHgjIzIpIExJTTYoeCMjMykgTElNNih4IyM0KSBcCisgICAg
+ICAgICAgICAgICBMSU02KHgjIzUpIExJTTYoeCMjNikgTElNNih4IyM3KSBMSU02KHgjIzgpIExJ
+TTYoeCMjOSkKKwordm9pZCBxMTlfZnVuYyAobG9uZyBpKTsKK3ZvaWQgcTE5X2Z1bmMgKGxvbmcg
+aSkKK3sKKyBzd2l0Y2ggKGkpIHsKKyAgIExJTTUgKGNhc2UgMSkKKyAgICAgYnJlYWs7CisgfQor
+fQorCisvKgorICogY2hlY2stbmFtZTogRW1wdHkgY2FzZSBsYWJlbCBsaW1pdHMuCisgKi8KKwo=
+
+------=_Part_914_26085076.1193786680621--
