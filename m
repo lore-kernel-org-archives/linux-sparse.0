@@ -1,129 +1,56 @@
-From: "Chris Li" <christ.li@gmail.com>
-Subject: [PATCH] Re: segfaults in pathological cases from gcc testsuite
-Date: Tue, 30 Oct 2007 16:24:40 -0700
-Message-ID: <70318cbf0710301624n6759142as715f60493e886b98@mail.gmail.com>
-References: <20071022152459.GE6271@localhost.sw.ru>
+From: Dave Jones <davej@redhat.com>
+Subject: assertion when running sparse on current linux.git
+Date: Wed, 7 Nov 2007 12:58:47 -0500
+Message-ID: <20071107175847.GA19586@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_914_26085076.1193786680621"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0910.google.com ([209.85.198.187]:33389 "EHLO
-	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752797AbXJ3XYl (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 30 Oct 2007 19:24:41 -0400
-Received: by rv-out-0910.google.com with SMTP id k20so2017662rvb
-        for <linux-sparse@vger.kernel.org>; Tue, 30 Oct 2007 16:24:40 -0700 (PDT)
-In-Reply-To: <20071022152459.GE6271@localhost.sw.ru>
+Received: from mx1.redhat.com ([66.187.233.31]:48459 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755084AbXKGR6t (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 7 Nov 2007 12:58:49 -0500
+Received: from int-mx1.corp.redhat.com (int-mx1.corp.redhat.com [172.16.52.254])
+	by mx1.redhat.com (8.13.8/8.13.1) with ESMTP id lA7Hwnj4007060
+	for <linux-sparse@vger.kernel.org>; Wed, 7 Nov 2007 12:58:49 -0500
+Received: from gelk.kernelslacker.org (vpn-14-5.rdu.redhat.com [10.11.14.5])
+	by int-mx1.corp.redhat.com (8.13.1/8.13.1) with ESMTP id lA7Hwm6r022270
+	for <linux-sparse@vger.kernel.org>; Wed, 7 Nov 2007 12:58:48 -0500
+Received: from gelk.kernelslacker.org (localhost.localdomain [127.0.0.1])
+	by gelk.kernelslacker.org (8.14.1/8.13.8) with ESMTP id lA7HwmgH019921
+	for <linux-sparse@vger.kernel.org>; Wed, 7 Nov 2007 12:58:48 -0500
+Received: (from davej@localhost)
+	by gelk.kernelslacker.org (8.14.1/8.14.1/Submit) id lA7HwlZC019920
+	for linux-sparse@vger.kernel.org; Wed, 7 Nov 2007 12:58:47 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexey Dobriyan <adobriyan@sw.ru>
-Cc: linux-sparse@vger.kernel.org, adobriyan@gmail.com
+To: linux-sparse@vger.kernel.org
 
-------=_Part_914_26085076.1193786680621
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+$ make kernel/sched.o C=1
+  CHK     include/linux/version.h
+  CHK     include/linux/utsrelease.h
+  CALL    scripts/checksyscalls.sh
+  CHECK   kernel/sched.c
+kernel/sched_idletask.c:69:26: warning: symbol 'idle_sched_class' was not declared. Should it be static?
+kernel/sched_rt.c:239:26: warning: symbol 'rt_sched_class' was not declared. Should it be static?
+kernel/sched.c:1885:17: warning: symbol 'schedule_tail' was not declared. Should it be static?
+kernel/sched.c:3616:15: warning: incorrect type in assignment (different signedness)
+kernel/sched.c:3616:15:    expected long *switch_count
+kernel/sched.c:3616:15:    got unsigned long *<noident>
+kernel/sched.c:3638:16: warning: incorrect type in assignment (different signedness)
+kernel/sched.c:3638:16:    expected long *switch_count
+kernel/sched.c:3638:16:    got unsigned long *<noident>
+kernel/sched.c:5624:12: warning: symbol 'migration_init' was not declared. Should it be static?
+kernel/sched.c:5841:25: error: cannot size expression
+sparse: flow.c:805: rewrite_parent_branch: Assertion `changed' failed.
+/bin/sh: line 1: 19800 Aborted                 sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -D__x86_64__ -m64 -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/4.1.2/include -Wp,-MD,kernel/.sched.o.d -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/4.1.2/include -D__KERNEL__ -Iinclude -include include/linux/autoconf.h -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Os -mtune=generic -m64 -mno-red-zone -mcmodel=kernel -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -funit-at-a-time -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -maccumulate-outgoing-args -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -fstack-protector -fomit-frame-pointer -g -fno-stack-protector -Wdeclaration-after-statement
+  -Wno-pointer-sign -fno-omit-frame-pointer -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(sched)" -D"KBUILD_MODNAME=KBUILD_STR(sched)" kernel/sched.c
+make[1]: *** [kernel/sched.o] Error 134
+make: *** [kernel/sched.o] Error 2
 
-I fix the second one as it is easier to reproduce and makes
-more sense to fix.
 
-Please see the patch attached.
 
-A side note is that, I don't believe you can hit this using
-real life C code. Maybe some programing generated C code.
-There is not thing wrong in sparse except its recursion
-is very deep. The patch special handle this test case.
+	Dave
 
-The first one is even less interesting to fix.
-
-Chris
-
-On Oct 22, 2007 8:24 AM, Alexey Dobriyan <adobriyan@sw.ru> wrote:
-> FWIW, I fed full gcc tree to sparse not only testsuite. Suprisingly it
-> crashed only in two places:
-> void q19_func (long i)
-> {
->   switch (i) {
->     LIM5 (case 1)
->       break;
->   }
-> }
-
-------=_Part_914_26085076.1193786680621
-Content-Type: application/octet-stream; name=label-parsing-1
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_f8f1m5jf0
-Content-Disposition: attachment; filename=label-parsing-1
-
-QXZvaWQgZGVlcCByZWN1cnNpb24gaW4gZW1wdHkgY2FzZSBsYWJlbHMuCgpUaGlzIHBhdGNoIHRh
-a2UgdGhlIGVtcHR5IGNhc2UgbGFiZWwgYXMgc3BlY2lhbCBjYXNlLAphdm9pZCBkZWVwIHJlY3Vy
-c2lvbiBvbiBib3RoIHBhcnNpbmcgYW5kIGxpbmVhcml6aW9uLgoKU2lnbmVkLU9mZi1CeTogQ2hy
-aXN0b3BoZXIgTGk8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS9wYXJzZS5jCj09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3BhcnNlLmMJMjAwNy0xMC0zMCAxMzo0ODoyOC4wMDAw
-MDAwMDAgLTA3MDAKKysrIHNwYXJzZS9wYXJzZS5jCTIwMDctMTAtMzAgMTM6NDk6MTcuMDAwMDAw
-MDAwIC0wNzAwCkBAIC0xNjc4LDI1ICsxNjc4LDMwIEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnBh
-cnNlX2lmX3N0YXRlbWVudCgKIAlyZXR1cm4gc3RhdGVtZW50KHRva2VuLT5uZXh0LCAmc3RtdC0+
-aWZfZmFsc2UpOwogfQogCi1zdGF0aWMgaW5saW5lIHN0cnVjdCB0b2tlbiAqY2FzZV9zdGF0ZW1l
-bnQoc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKLXsKLQlzdG10
-LT50eXBlID0gU1RNVF9DQVNFOwotCXRva2VuID0gZXhwZWN0KHRva2VuLCAnOicsICJhZnRlciBk
-ZWZhdWx0L2Nhc2UiKTsKLQlhZGRfY2FzZV9zdGF0ZW1lbnQoc3RtdCk7Ci0JcmV0dXJuIHN0YXRl
-bWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50KTsKLX0KLQogc3RhdGljIHN0cnVjdCB0
-b2tlbiAqcGFyc2VfY2FzZV9zdGF0ZW1lbnQoc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IHN0
-YXRlbWVudCAqc3RtdCkKIHsKLQl0b2tlbiA9IHBhcnNlX2V4cHJlc3Npb24odG9rZW4tPm5leHQs
-ICZzdG10LT5jYXNlX2V4cHJlc3Npb24pOwotCWlmIChtYXRjaF9vcCh0b2tlbiwgU1BFQ0lBTF9F
-TExJUFNJUykpCi0JCXRva2VuID0gcGFyc2VfZXhwcmVzc2lvbih0b2tlbi0+bmV4dCwgJnN0bXQt
-PmNhc2VfdG8pOwotCXJldHVybiBjYXNlX3N0YXRlbWVudCh0b2tlbiwgc3RtdCk7CisJZm9yICg7
-OykgeworCQl0b2tlbiA9IHBhcnNlX2V4cHJlc3Npb24odG9rZW4tPm5leHQsICZzdG10LT5jYXNl
-X2V4cHJlc3Npb24pOworCQlpZiAobWF0Y2hfb3AodG9rZW4sIFNQRUNJQUxfRUxMSVBTSVMpKQor
-CQkJdG9rZW4gPSBwYXJzZV9leHByZXNzaW9uKHRva2VuLT5uZXh0LCAmc3RtdC0+Y2FzZV90byk7
-CisJCXN0bXQtPnR5cGUgPSBTVE1UX0NBU0U7CisJCXRva2VuID0gZXhwZWN0KHRva2VuLCAnOics
-ICJhZnRlciBjYXNlIik7CisJCWFkZF9jYXNlX3N0YXRlbWVudChzdG10KTsKKwkJaWYgKCFtYXRj
-aF9pZGVudCh0b2tlbiwgJmNhc2VfaWRlbnQpKQorCQkJYnJlYWs7CisJCXN0bXQtPmNhc2Vfc3Rh
-dGVtZW50ID0gYWxsb2Nfc3RhdGVtZW50KHRva2VuLT5wb3MsIFNUTVRfQ0FTRSk7CisJCXN0bXQg
-PSBzdG10LT5jYXNlX3N0YXRlbWVudDsKKwkJdG9rZW4gPSB0b2tlbi0+bmV4dDsKKwl9CisJcmV0
-dXJuIHN0YXRlbWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50KTsKIH0KIAogc3RhdGlj
-IHN0cnVjdCB0b2tlbiAqcGFyc2VfZGVmYXVsdF9zdGF0ZW1lbnQoc3RydWN0IHRva2VuICp0b2tl
-biwgc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKIHsKLQlyZXR1cm4gY2FzZV9zdGF0ZW1lbnQodG9r
-ZW4tPm5leHQsIHN0bXQpOworCXN0bXQtPnR5cGUgPSBTVE1UX0NBU0U7CisJdG9rZW4gPSBleHBl
-Y3QodG9rZW4tPm5leHQsICc6JywgImFmdGVyIGRlZmF1bHQiKTsKKwlhZGRfY2FzZV9zdGF0ZW1l
-bnQoc3RtdCk7CisJcmV0dXJuIHN0YXRlbWVudCh0b2tlbiwgJnN0bXQtPmNhc2Vfc3RhdGVtZW50
-KTsKIH0KIAogc3RhdGljIHN0cnVjdCB0b2tlbiAqcGFyc2VfbG9vcF9pdGVyYXRvcihzdHJ1Y3Qg
-dG9rZW4gKnRva2VuLCBzdHJ1Y3Qgc3RhdGVtZW50ICpzdG10KQpJbmRleDogc3BhcnNlL2xpbmVh
-cml6ZS5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL2xpbmVhcml6ZS5jCTIwMDctMTAtMzAg
-MTM6NDg6MjguMDAwMDAwMDAwIC0wNzAwCisrKyBzcGFyc2UvbGluZWFyaXplLmMJMjAwNy0xMC0z
-MCAxMzo1NToyNi4wMDAwMDAwMDAgLTA3MDAKQEAgLTE4OTQsNyArMTg5NCwxMiBAQCBwc2V1ZG9f
-dCBsaW5lYXJpemVfc3RhdGVtZW50KHN0cnVjdCBlbnRyCiAJfQogCiAJY2FzZSBTVE1UX0NBU0U6
-IHsKLQkJYWRkX2xhYmVsKGVwLCBzdG10LT5jYXNlX2xhYmVsKTsKKwkJZm9yICg7OykgeworCQkJ
-YWRkX2xhYmVsKGVwLCBzdG10LT5jYXNlX2xhYmVsKTsKKwkJCWlmIChzdG10LT5jYXNlX3N0YXRl
-bWVudC0+dHlwZSAhPSBTVE1UX0NBU0UpCisJCQkJYnJlYWs7CisJCQlzdG10ID0gc3RtdC0+Y2Fz
-ZV9zdGF0ZW1lbnQ7CisJCX0KIAkJbGluZWFyaXplX3N0YXRlbWVudChlcCwgc3RtdC0+Y2FzZV9z
-dGF0ZW1lbnQpOwogCQlicmVhazsKIAl9CkluZGV4OiBzcGFyc2UvdmFsaWRhdGlvbi9saW1pdHMt
-Y2FzZWxhYmVscy5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3ZhbGlkYXRpb24vbGltaXRz
-LWNhc2VsYWJlbHMuYwkyMDA3LTEwLTMwIDEzOjUwOjE5LjAwMDAwMDAwMCAtMDcwMAorKysgc3Bh
-cnNlL3ZhbGlkYXRpb24vbGltaXRzLWNhc2VsYWJlbHMuYwkyMDA3LTEwLTMwIDEzOjU3OjAxLjAw
-MDAwMDAwMCAtMDcwMApAQCAtMCwwICsxLDI3IEBACisjZGVmaW5lIExJTTEoeCkgeCMjMDogeCMj
-MTogeCMjMjogeCMjMzogeCMjNDogeCMjNTogeCMjNjogeCMjNzogeCMjODogeCMjOToKKyNkZWZp
-bmUgTElNMih4KSBMSU0xKHgjIzApIExJTTEoeCMjMSkgTElNMSh4IyMyKSBMSU0xKHgjIzMpIExJ
-TTEoeCMjNCkgXAorICAgICAgICAgICAgICAgTElNMSh4IyM1KSBMSU0xKHgjIzYpIExJTTEoeCMj
-NykgTElNMSh4IyM4KSBMSU0xKHgjIzkpCisjZGVmaW5lIExJTTMoeCkgTElNMih4IyMwKSBMSU0y
-KHgjIzEpIExJTTIoeCMjMikgTElNMih4IyMzKSBMSU0yKHgjIzQpIFwKKyAgICAgICAgICAgICAg
-IExJTTIoeCMjNSkgTElNMih4IyM2KSBMSU0yKHgjIzcpIExJTTIoeCMjOCkgTElNMih4IyM5KQor
-I2RlZmluZSBMSU00KHgpIExJTTMoeCMjMCkgTElNMyh4IyMxKSBMSU0zKHgjIzIpIExJTTMoeCMj
-MykgTElNMyh4IyM0KSBcCisgICAgICAgICAgICAgICBMSU0zKHgjIzUpIExJTTMoeCMjNikgTElN
-Myh4IyM3KSBMSU0zKHgjIzgpIExJTTMoeCMjOSkKKyNkZWZpbmUgTElNNSh4KSBMSU00KHgjIzAp
-IExJTTQoeCMjMSkgTElNNCh4IyMyKSBMSU00KHgjIzMpIExJTTQoeCMjNCkgXAorICAgICAgICAg
-ICAgICAgTElNNCh4IyM1KSBMSU00KHgjIzYpIExJTTQoeCMjNykgTElNNCh4IyM4KSBMSU00KHgj
-IzkpCisjZGVmaW5lIExJTTYoeCkgTElNNSh4IyMwKSBMSU01KHgjIzEpIExJTTUoeCMjMikgTElN
-NSh4IyMzKSBMSU01KHgjIzQpIFwKKyAgICAgICAgICAgICAgIExJTTUoeCMjNSkgTElNNSh4IyM2
-KSBMSU01KHgjIzcpIExJTTUoeCMjOCkgTElNNSh4IyM5KQorI2RlZmluZSBMSU03KHgpIExJTTYo
-eCMjMCkgTElNNih4IyMxKSBMSU02KHgjIzIpIExJTTYoeCMjMykgTElNNih4IyM0KSBcCisgICAg
-ICAgICAgICAgICBMSU02KHgjIzUpIExJTTYoeCMjNikgTElNNih4IyM3KSBMSU02KHgjIzgpIExJ
-TTYoeCMjOSkKKwordm9pZCBxMTlfZnVuYyAobG9uZyBpKTsKK3ZvaWQgcTE5X2Z1bmMgKGxvbmcg
-aSkKK3sKKyBzd2l0Y2ggKGkpIHsKKyAgIExJTTUgKGNhc2UgMSkKKyAgICAgYnJlYWs7CisgfQor
-fQorCisvKgorICogY2hlY2stbmFtZTogRW1wdHkgY2FzZSBsYWJlbCBsaW1pdHMuCisgKi8KKwo=
-
-------=_Part_914_26085076.1193786680621--
+-- 
+http://www.codemonkey.org.uk
