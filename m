@@ -1,74 +1,63 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Sparse 0.4.1 released
-Date: Tue, 13 Nov 2007 04:39:27 -0800
-Message-ID: <47399AFF.7040009@freedesktop.org>
+From: nkavv@physics.auth.gr
+Subject: Backend projects for Sparse
+Date: Wed, 28 Nov 2007 11:53:00 +0200
+Message-ID: <1196243580.474d3a7c9895b@mail.physics.auth.gr>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig282CC6C74F817FF5396D3740"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.sea5.speakeasy.net ([69.17.117.4]:35476 "EHLO
-	mail2.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752200AbXKMMjj (ORCPT
+Received: from sisifos.physics.auth.gr ([155.207.123.6]:64966 "EHLO
+	physics.auth.gr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756236AbXK1J7j (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 13 Nov 2007 07:39:39 -0500
+	Wed, 28 Nov 2007 04:59:39 -0500
+Received: from srv003.physics.auth.gr (HELO localhost) ([10.206.123.203])
+          (envelope-sender <nkavv@physics.auth.gr>)
+          by physics.auth.gr (qmail-ldap-1.03) with SMTP
+          for <linux-sparse@vger.kernel.org>; 28 Nov 2007 09:53:00 -0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig282CC6C74F817FF5396D3740
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+Hi all
 
-I have tagged and tarballed Sparse 0.4.1, now available from
-<http://kernel.org/pub/software/devel/sparse/dist/sparse-0.4.1.tar.gz>,
-with sha1sum `14085c5317cd7f2c8392fb762969906fa91888ef`.
+i came across Sparse a few months ago and looks really interesting. Now, I have
+a few questions regarding the sparse infrastructure:
 
-This bugfix release fixes a Sparse assertion which recent Linux kernels s=
-tarted
-triggering, along with a few other fixes.
+1) Regarding the intermediate representation dumps that can be generated (via
+"test-linearize" i think). Do you support canonical SSA form (as defined in the
+classical books/papers)?
 
-Several outstanding patches exist which need to go into the Sparse tree, =
-but
-this release does not contain those patches because people wouldn't have
-had the opportunity to test them enough.
+2) Is it possible to generate a self-contained IR dump, so that it could be
+possible to feed it to external (third-party) code selectors?
+In my mind a single C program file (actually read: translation unit) would be
+translated to something like the following structure:
 
-Full changelog:
+struct CTranslationUnit {
+  struct GlobalVars; // is a List of global variables (scalars, arrays etc)
+  struct ProcedureList;
+}
 
-Christopher Li (1):
-      Perform local label lookup
+struct ProcedureList
+{
+  struct LocalVars;  // local variable list
+  List   ThreeAddressCodeInstr; // three-address code operations (4-tuples)
+}
 
-Emil Medve (1):
-      Handle ignored attribute malloc
+There a couple of frontends that can do this (the proprietary/no cost for
+research only LANCE compiler frontend).
 
-Josh Triplett (4):
-      Add comment on taint flags enum referencing expr->taint
-      Add test-suite metadata to validation/local-label.c
-      Add known-to-fail test case for a static forward declaration
-      Makefile: VERSION=3D0.4.1
+3) What does the c2xml backend exactly do?
 
-Mike Frysinger (1):
-      fix install perms of manpages
+4) Is there anyone working on a RISC-like processor backend project. I feel that
+ if the entire backend can be contained in something like "compile-i386.c" then
+it could be even possible to automate the generation of such file from a more
+compact specification file. (plus some hand-written intrinsics probably).
 
-Tilman Sauerbeck (1):
-      Added a prototype for mempcpy().
+5) Is there any documentation covering the API and linked tools to the sparse
+library (something more than the man pages)?
 
--- Josh Triplett
+6) Sparse looks good. I like the IR dumps a lot. That's a comment ^_^
 
-
---------------enig282CC6C74F817FF5396D3740
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFHOZr/GJuZRtD+evsRAu4eAKCN2KkNVsuBs78U1urytpQVzWqCpwCePKe4
-0VrCtoW8cmV0yK/9BPNTSoc=
-=pqOj
------END PGP SIGNATURE-----
-
---------------enig282CC6C74F817FF5396D3740--
+Kind regards,
+Nikolaos Kavvadias
