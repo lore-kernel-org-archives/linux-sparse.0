@@ -1,45 +1,163 @@
-From: nkavv@physics.auth.gr
-Subject: Re: Backend projects for Sparse
-Date: Thu, 29 Nov 2007 11:09:20 +0200
-Message-ID: <1196327360.474e81c0546d7@mail.physics.auth.gr>
-References: <1196243580.474d3a7c9895b@mail.physics.auth.gr>  <70318cbf0711281053k6dc561c5ge540ccd99a6a922e@mail.gmail.com>  <474DBAB3.60400@physics.auth.gr> <70318cbf0711281125u6cc168dfv11d118741a535167@mail.gmail.com>
+From: Dave Jones <davej@redhat.com>
+Subject: annotating semaphores.
+Date: Wed, 12 Dec 2007 15:00:53 -0500
+Message-ID: <20071212200053.GA19747@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sisifos.physics.auth.gr ([155.207.123.6]:58005 "EHLO
-	physics.auth.gr" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751356AbXK2JJV (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 29 Nov 2007 04:09:21 -0500
-Received: from srv003.physics.auth.gr (HELO localhost) ([10.206.123.203])
-          (envelope-sender <nkavv@physics.auth.gr>)
-          by physics.auth.gr (qmail-ldap-1.03) with SMTP
-          for <linux-sparse@vger.kernel.org>; 29 Nov 2007 09:09:20 -0000
-In-Reply-To: <70318cbf0711281125u6cc168dfv11d118741a535167@mail.gmail.com>
+Received: from mx1.redhat.com ([66.187.233.31]:39616 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752550AbXLLUAz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 12 Dec 2007 15:00:55 -0500
+Received: from int-mx1.corp.redhat.com (int-mx1.corp.redhat.com [172.16.52.254])
+	by mx1.redhat.com (8.13.8/8.13.1) with ESMTP id lBCK0s6p027080
+	for <linux-sparse@vger.kernel.org>; Wed, 12 Dec 2007 15:00:54 -0500
+Received: from gelk.kernelslacker.org (vpn-14-2.rdu.redhat.com [10.11.14.2])
+	by int-mx1.corp.redhat.com (8.13.1/8.13.1) with ESMTP id lBCK0sp4028717
+	for <linux-sparse@vger.kernel.org>; Wed, 12 Dec 2007 15:00:54 -0500
+Received: from gelk.kernelslacker.org (localhost.localdomain [127.0.0.1])
+	by gelk.kernelslacker.org (8.14.2/8.13.8) with ESMTP id lBCK0rJd022808
+	for <linux-sparse@vger.kernel.org>; Wed, 12 Dec 2007 15:00:53 -0500
+Received: (from davej@localhost)
+	by gelk.kernelslacker.org (8.14.2/8.14.2/Submit) id lBCK0rfl022807
+	for linux-sparse@vger.kernel.org; Wed, 12 Dec 2007 15:00:53 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Quoting Christopher Li <sparse@chrisli.org>:
+Today I came across a bug in the kernel cpufreq code where
+we were missing a bunch of up_write() calls in error paths
+of a function.
 
-> On Nov 28, 2007 11:00 AM, Nikolaos Kavvadias <nkavv@physics.auth.gr> wrote:
-> > first of all, thanks for your specific answers. The SSA form that i
-> > think of uses only PHI functions. Guard variables (conditionals for
-> > selecting a specific usage) may or may not be explicit. Usually, most
-> > SSA forms just specify which uses are merged. The conditionals can be
-> > inferred by control-flow analysis.
->
-> We have PHI node embed in the instruction list as one of the fake
-> instruction.
-> Then we have the PHI source node to indicate the output edge of the PHI node.
->
-> It seems that should fit your need.
->
-> Chris
+I've been trying to get sparse's context checking to pick up
+on the errors and failing.  The kernel patch below is what I have
+so far, but it seems to report no output whatsoever.
+What am I missing ?
 
-OK, so it marks where the uses are merged.
+	Dave
 
-Jeff: thanks for clearing up the "linearize" issue.
-
-Nikolaos Kavvadias
+diff --git a/include/asm-x86/rwsem.h b/include/asm-x86/rwsem.h
+index 041906f..3111853 100644
+--- a/include/asm-x86/rwsem.h
++++ b/include/asm-x86/rwsem.h
+@@ -106,6 +106,7 @@ LOCK_PREFIX	"  incl      (%%eax)\n\t" /* adds 0x00000001, returns the old value
+ 		: "+m" (sem->count)
+ 		: "a" (sem)
+ 		: "memory", "cc");
++	__acquire(sem);
+ }
+ 
+ /*
+@@ -128,6 +129,7 @@ LOCK_PREFIX	"  cmpxchgl  %2,%0\n\t"
+ 		: "+m" (sem->count), "=&a" (result), "=&r" (tmp)
+ 		: "i" (RWSEM_ACTIVE_READ_BIAS)
+ 		: "memory", "cc");
++	__acquire(sem);
+ 	return result>=0 ? 1 : 0;
+ }
+ 
+@@ -167,6 +169,7 @@ static inline int __down_write_trylock(struct rw_semaphore *sem)
+ 				  RWSEM_ACTIVE_WRITE_BIAS);
+ 	if (ret == RWSEM_UNLOCKED_VALUE)
+ 		return 1;
++	__acquire(sem);
+ 	return 0;
+ }
+ 
+@@ -186,6 +189,7 @@ LOCK_PREFIX	"  xadd      %%edx,(%%eax)\n\t" /* subtracts 1, returns the old valu
+ 		: "+m" (sem->count), "=d" (tmp)
+ 		: "a" (sem), "1" (tmp)
+ 		: "memory", "cc");
++	__release(sem);
+ }
+ 
+ /*
+@@ -204,6 +208,7 @@ LOCK_PREFIX	"  xaddl     %%edx,(%%eax)\n\t" /* tries to transition 0xffff0001 ->
+ 		: "+m" (sem->count)
+ 		: "a" (sem), "i" (-RWSEM_ACTIVE_WRITE_BIAS)
+ 		: "memory", "cc", "edx");
++	__release(sem);
+ }
+ 
+ /*
+diff --git a/include/linux/cpuidle.h b/include/linux/cpuidle.h
+index c4e0016..cf110b0 100644
+diff --git a/include/linux/rwsem-spinlock.h b/include/linux/rwsem-spinlock.h
+index 813cee1..90a4b2b 100644
+--- a/include/linux/rwsem-spinlock.h
++++ b/include/linux/rwsem-spinlock.h
+@@ -60,13 +60,13 @@ do {								\
+ 	__init_rwsem((sem), #sem, &__key);			\
+ } while (0)
+ 
+-extern void FASTCALL(__down_read(struct rw_semaphore *sem));
+-extern int FASTCALL(__down_read_trylock(struct rw_semaphore *sem));
+-extern void FASTCALL(__down_write(struct rw_semaphore *sem));
++extern void FASTCALL(__down_read(struct rw_semaphore *sem)) __acquires(sem);
++extern int FASTCALL(__down_read_trylock(struct rw_semaphore *sem)) __acquires(sem);
++extern void FASTCALL(__down_write(struct rw_semaphore *sem)) __acquires(sem);
+ extern void FASTCALL(__down_write_nested(struct rw_semaphore *sem, int subclass));
+-extern int FASTCALL(__down_write_trylock(struct rw_semaphore *sem));
+-extern void FASTCALL(__up_read(struct rw_semaphore *sem));
+-extern void FASTCALL(__up_write(struct rw_semaphore *sem));
++extern int FASTCALL(__down_write_trylock(struct rw_semaphore *sem) __acquires(sem));
++extern void FASTCALL(__up_read(struct rw_semaphore *sem)) __releases(sem);
++extern void FASTCALL(__up_write(struct rw_semaphore *sem)) __releases(sem);
+ extern void FASTCALL(__downgrade_write(struct rw_semaphore *sem));
+ 
+ static inline int rwsem_is_locked(struct rw_semaphore *sem)
+diff --git a/lib/rwsem-spinlock.c b/lib/rwsem-spinlock.c
+index c4cfd6c..c13d112 100644
+--- a/lib/rwsem-spinlock.c
++++ b/lib/rwsem-spinlock.c
+@@ -162,6 +162,7 @@ void fastcall __sched __down_read(struct rw_semaphore *sem)
+ 
+ 	tsk->state = TASK_RUNNING;
+  out:
++	__acquire(sem);
+ 	;
+ }
+ 
+@@ -184,6 +185,7 @@ int fastcall __down_read_trylock(struct rw_semaphore *sem)
+ 
+ 	spin_unlock_irqrestore(&sem->wait_lock, flags);
+ 
++	__acquire(sem);
+ 	return ret;
+ }
+ 
+@@ -228,6 +230,7 @@ void fastcall __sched __down_write_nested(struct rw_semaphore *sem, int subclass
+ 
+ 	tsk->state = TASK_RUNNING;
+  out:
++	__acquire(sem);
+ 	;
+ }
+ 
+@@ -253,6 +256,7 @@ int fastcall __down_write_trylock(struct rw_semaphore *sem)
+ 	}
+ 
+ 	spin_unlock_irqrestore(&sem->wait_lock, flags);
++	__acquire(sem);
+ 
+ 	return ret;
+ }
+@@ -270,6 +274,7 @@ void fastcall __up_read(struct rw_semaphore *sem)
+ 		sem = __rwsem_wake_one_writer(sem);
+ 
+ 	spin_unlock_irqrestore(&sem->wait_lock, flags);
++	__release(sem);
+ }
+ 
+ /*
+@@ -286,6 +291,7 @@ void fastcall __up_write(struct rw_semaphore *sem)
+ 		sem = __rwsem_do_wake(sem, 1);
+ 
+ 	spin_unlock_irqrestore(&sem->wait_lock, flags);
++	__release(sem);
+ }
+ 
+ /*
+-- 
+http://www.codemonkey.org.uk
