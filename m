@@ -1,47 +1,58 @@
-From: "Ray Lee" <ray-lk@madrabbit.org>
+From: Al Viro <viro@ftp.linux.org.uk>
 Subject: Re: Signed divides vs shifts (Re: [Security] /dev/urandom uses uninit bytes, leaks user data)
-Date: Mon, 17 Dec 2007 10:12:47 -0800
-Message-ID: <2c0942db0712171012o613b2596x81f4a867e2b5c01@mail.gmail.com>
-References: <E1J3RD5-0006yU-00@gondolin.me.apana.org.au>
-	 <alpine.LFD.0.9999.0712170856050.21557@woody.linux-foundation.org>
-	 <20071217185557.0b501e23.dada1@cosmosbay.com>
-	 <2c0942db0712171005w65bbb512p71a4f9b1fc65c6a7@mail.gmail.com>
-	 <20071217191017.117c61ff.dada1@cosmosbay.com>
+Date: Mon, 17 Dec 2007 18:23:12 +0000
+Message-ID: <20071217182312.GD8181@ftp.linux.org.uk>
+References: <E1J3RD5-0006yU-00@gondolin.me.apana.org.au> <alpine.LFD.0.9999.0712170856050.21557@woody.linux-foundation.org> <20071217185557.0b501e23.dada1@cosmosbay.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.190]:47059 "EHLO
-	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753340AbXLQSMv (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:35424 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754314AbXLQSYD (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 17 Dec 2007 13:12:51 -0500
-Received: by nf-out-0910.google.com with SMTP id g13so1231289nfb.21
-        for <linux-sparse@vger.kernel.org>; Mon, 17 Dec 2007 10:12:49 -0800 (PST)
-In-Reply-To: <20071217191017.117c61ff.dada1@cosmosbay.com>
+	Mon, 17 Dec 2007 13:24:03 -0500
 Content-Disposition: inline
+In-Reply-To: <20071217185557.0b501e23.dada1@cosmosbay.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Eric Dumazet <dada1@cosmosbay.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Herbert Xu <herbert@gondor.apana.org.au>, John Reiser <jreiser@bitwagon.com>, Andrew Morton <akpm@linux-foundation.org>, security@kernel.org, tytso@mit.edu, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, mpm@selenic.com, linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Herbert Xu <herbert@gondor.apana.org.au>, John Reiser <jreiser@BitWagon.com>, Andrew Morton <akpm@linux-foundation.org>, security@kernel.org, tytso@mit.edu, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, mpm@selenic.com, linux-sparse@vger.kernel.org
 
-On Dec 17, 2007 10:10 AM, Eric Dumazet <dada1@cosmosbay.com> wrote:
-> On Mon, 17 Dec 2007 10:05:35 -0800
-> "Ray Lee" <ray-lk@madrabbit.org> wrote:
->
-> > On Dec 17, 2007 9:55 AM, Eric Dumazet <dada1@cosmosbay.com> wrote:
-> > > -               mid = (last - first) / 2 + first;
-> > > +       while (low <= high) {
-> > > +               mid = (low + high) / 2;
-> >
-> > I think you just introduced a bug. Think about what happens if
-> > low=high=MAX_LONG/2 + 1.
-> >
->
-> Fortunatly this is not possible :)
->
-> Hint : sizeof(struct exception_table_entry) is >= 8
->
-> so high is garanteed to be <= MAX_LONG/8
+On Mon, Dec 17, 2007 at 06:55:57PM +0100, Eric Dumazet wrote:
 
-Ah, my bad. One of these days I'll learn to not post before coffee.
+> long *mid(long *a, long *b)
+> {
+> 	return ((a - b) / 2 + a);
+> }
+
+... is not actually a middle (you'd want b-a, not a-b there), but anyway
+
+> It gave :
+> mid:
+>         movq    %rdi, %rdx
+>         subq    %rsi, %rdx
+>         sarq    $3, %rdx
+>         movq    %rdx, %rax
+>         shrq    $63, %rax
+>         addq    %rdx, %rax
+>         sarq    %rax
+>         leaq    (%rdi,%rax,8), %rax
+>         ret
+> 
+> while 
+> 
+> long *mid(long *a, long *b)
+> {
+> 	return ((a - b) / 2u + a);
+> }
+
+... undefined behaviour if a < b
+
+> and while :
+> 
+> long *mid(long *a, long *b)
+> {
+> 	return (((unsigned long)(a - b)) / 2 + a);
+> }
+
+undefined behaviour, again.
