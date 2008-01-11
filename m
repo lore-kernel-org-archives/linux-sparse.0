@@ -1,59 +1,41 @@
-From: "Marko Kreen" <markokr@gmail.com>
-Subject: [patch] Mac OS X specs for cgcc
-Date: Thu, 20 Dec 2007 15:50:00 +0200
-Message-ID: <e51f66da0712200550l620838f5h727b711a3abb85a@mail.gmail.com>
+From: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Subject: Behaviour of attribute "context" changed, sparse 0.3 vs. 0.4(.1)
+Date: Fri, 11 Jan 2008 12:09:56 +0100
+Message-ID: <OFDC7A2858.F24630BB-ONC12573CD.003D4A83-C12573CD.003D55EE@br-automation.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_19169_27260244.1198158600525"
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.189]:32994 "EHLO
-	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757973AbXLTNuC (ORCPT
+Received: from mail2.br-automation.com ([213.33.116.61]:39183 "EHLO
+	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756224AbYAKLKA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 20 Dec 2007 08:50:02 -0500
-Received: by nf-out-0910.google.com with SMTP id g13so1733681nfb.21
-        for <linux-sparse@vger.kernel.org>; Thu, 20 Dec 2007 05:50:01 -0800 (PST)
+	Fri, 11 Jan 2008 06:10:00 -0500
+Received: from brsmtp01.br-automation.com (unknown [192.168.1.60])
+	by mail2.br-automation.com (Symantec Mail Security) with ESMTP id EEC9C4DC002
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Jan 2008 12:09:57 +0100 (CET)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-------=_Part_19169_27260244.1198158600525
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Hello,
 
-This patch adds MacOS X (darwin) specific defines to cgcc.
+the declaration 
+int nArr1[5] __attribute__((context(0,1,2)));
+parsed with sparse 0.3 results in a symbol with one context in 
+symbol->ctype.contexts and symbol->ctype.base_type->ctype.contexts is 
+empty.
 
-Only suspicios aspect about it is that OSX system include
-files expect either __LITTLE_ENDIAN__ or __BIG_ENDIAN__ to be
-defined to show endianess.  I added a arch switch to darwin
-section to pick this up to avoid polluting general i86 and x86_64
-sections.  (note: i dont speak perl and i dont have any ppc32/64
-to test it on).
+If we do the same with sparse 0.4 (or also 0.4.1), we get a symbol with 
+one context in symbol->ctype.contexts, 
+but now  symbol->ctype.base_type->ctype.contexts also has the same 
+context.
 
-Somwhat simpler would be to put __LITTLE_ENDIAN__ unconditionally
-to darwin section on the grounds that ppc is unsupported anyway,
-but if the support appears it may be better to have the switch
-available already.
+Perhaps interesting: The result of declaration 
+int __attribute__((context(0,1,2))) nArr2[5];
+didn't change.
 
--- 
-marko
+Is this behaviour OK?
+Is this behaviour expected? 
 
-------=_Part_19169_27260244.1198158600525
-Content-Type: application/octet-stream; name=cgcc.macos.specs.diff
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fafcnrc3
-Content-Disposition: attachment; filename=cgcc.macos.specs.diff
-
-ZGlmZiAtLWdpdCBhL2NnY2MgYi9jZ2NjCmluZGV4IDlhY2Y0OTguLmQ0YzUwZjggMTAwNzU1Ci0t
-LSBhL2NnY2MKKysrIGIvY2djYwpAQCAtMjE0LDYgKzIxNCwxNCBAQCBzdWIgYWRkX3NwZWNzIHsK
-ICAgICB9IGVsc2lmICgkc3BlYyBlcSAnbGludXgnKSB7CiAJcmV0dXJuICZhZGRfc3BlY3MgKCd1
-bml4JykgLgogCSAgICAnIC1EX19saW51eF9fPTEgLURfX2xpbnV4PTEgLURsaW51eD1saW51eCc7
-CisgICAgfSBlbHNpZiAoJHNwZWMgZXEgJ2RhcndpbicpIHsKKwlteSAkb3N4ID0gJyAtRF9fTUFD
-SF9fPTEgLURfX0FQUExFX189MSAtRF9fQVBQTEVfQ0NfXz0xIC1EX19EWU5BTUlDX189MSc7CisJ
-bXkgJGFyY2ggPSBgdW5hbWUgLW1gOworCWlmICgkYXJjaCA9fiAvcHBjL2kpIHsKKwkgIHJldHVy
-biAoJG9zeCAuICIgLURfX0JJR19FTkRJQU5fXyIpOworCX0gZWxzZSB7CisJICByZXR1cm4gKCRv
-c3ggLiAiIC1EX19MSVRUTEVfRU5ESUFOX18iKTsKKwl9CiAgICAgfSBlbHNpZiAoJHNwZWMgZXEg
-J3VuaXgnKSB7CiAJcmV0dXJuICcgLUR1bml4PTEgLURfX3VuaXg9MSAtRF9fdW5peF9fPTEnOwog
-ICAgIH0gZWxzaWYgKCAkc3BlYyA9fiAvXmN5Z3dpbi8pIHsK
-------=_Part_19169_27260244.1198158600525--
+Greetings
+Thomas Schmid
