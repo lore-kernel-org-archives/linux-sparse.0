@@ -1,73 +1,42 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: label 'continue' already bound, unreplaced symbol 'return'
-Date: Wed, 13 Feb 2008 19:16:55 -0500
-Message-ID: <1202948215.8941.37.camel@dv>
+From: Reza Roboubi <reza@earthdetails.com>
+Subject: Re: preprocess(), external_declaration(),  writing a "smart" editor
+Date: Sun, 17 Feb 2008 02:25:33 -0800
+Message-ID: <47B80B9D.1000703@earthdetails.com>
+References: <20080211171600.GA1148@tv-sign.ru>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:11778 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1762466AbYBNAQ5 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Feb 2008 19:16:57 -0500
-Received: from [192.168.1.21] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
-	by relay.cesmail.net (Postfix) with ESMTP id 63C0C619058
-	for <linux-sparse@vger.kernel.org>; Wed, 13 Feb 2008 19:16:56 -0500 (EST)
+Received: from idcmail-mo1so.shaw.ca ([24.71.223.10]:5823 "EHLO
+	pd2mo1so.prod.shaw.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754782AbYBQKZb (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 17 Feb 2008 05:25:31 -0500
+Received: from pd2mr4so.prod.shaw.ca
+ (pd2mr4so-qfe3.prod.shaw.ca [10.0.141.107]) by l-daemon
+ (Sun ONE Messaging Server 6.0 HotFix 1.01 (built Mar 15 2004))
+ with ESMTP id <0JWD008DYOYIOOB0@l-daemon> for linux-sparse@vger.kernel.org;
+ Sun, 17 Feb 2008 03:25:30 -0700 (MST)
+Received: from pn2ml2so.prod.shaw.ca ([10.0.121.146])
+ by pd2mr4so.prod.shaw.ca (Sun Java System Messaging Server 6.2-7.05 (built Sep
+ 5 2006)) with ESMTP id <0JWD00DIOOYI3K30@pd2mr4so.prod.shaw.ca> for
+ linux-sparse@vger.kernel.org; Sun, 17 Feb 2008 03:25:30 -0700 (MST)
+Received: from [192.168.0.46] ([24.80.205.34])
+ by l-daemon (Sun Java System Messaging Server 6.2-7.05 (built Sep  5 2006))
+ with ESMTP id <0JWD006J1OYHBM10@l-daemon> for linux-sparse@vger.kernel.org;
+ Sun, 17 Feb 2008 03:25:29 -0700 (MST)
+In-reply-to: <20080211171600.GA1148@tv-sign.ru>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Oleg Nesterov <oleg@tv-sign.ru>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
+Oleg Nesterov wrote:
+> ->r_member() reports the usage of struct's members, see also test-dissect.c
 
-Here are some interesting testcases from the same hal.c from ndiswrapper
-that was triggering the crash.
+Oleg, this is wonderful!  Together with c2xml and some other tools
+it goes a long way to address my questions.
 
-static inline int foo(void)
-{
-    do {
-    } while (0);
-    return 0;
-}
-int bar(void);
-int bar(void)
-{
-    return foo();
-}
-typeof(bar) quux;
+Thank you.
 
-
-hal.c:12:13: warning: symbol 'quux' was not declared. Should it be
-static?
-hal.c:3:5: warning: label 'continue' already bound
-hal.c:3:5: warning: label 'break' already bound
-
-
-static inline int foo(void)
-{
-    return 0;
-}
-typeof(foo) quux;
-
-hal.c:3:5: warning: unreplaced symbol 'return'
-hal.c:1:19: warning: unreplaced symbol 'return'
-hal.c:5:13: warning: symbol 'quux' was not declared. Should it be
-static?
-
-
-static inline void foo(void)
-{
-    do {} while (0);
-}
-typeof(foo) quux;
-
-hal.c:3:5: warning: unreplaced symbol 'break'
-hal.c:3:5: warning: unreplaced symbol 'continue'
-hal.c:1:20: warning: unreplaced symbol 'return'
-hal.c:5:13: warning: symbol 'quux' was not declared. Should it be
-static?
-
-"extern" before "typeof" fixes all warnings.
-
--- 
-Regards,
-Pavel Roskin
+Reza.
