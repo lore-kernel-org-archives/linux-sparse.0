@@ -1,42 +1,72 @@
-From: Reza Roboubi <reza@earthdetails.com>
-Subject: Re: preprocess(), external_declaration(),  writing a "smart" editor
-Date: Sun, 17 Feb 2008 02:25:33 -0800
-Message-ID: <47B80B9D.1000703@earthdetails.com>
-References: <20080211171600.GA1148@tv-sign.ru>
+From: Pierre Habouzit <pierre.habouzit@m4x.org>
+Subject: for (int i = expr; ....)
+Date: Thu, 21 Feb 2008 16:05:27 +0100
+Message-ID: <20080221150527.GA7117@artemis.madism.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; boundary="3V7upXqbjpZ4EhLz";
+	protocol="application/pgp-signature"; micalg=SHA1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from idcmail-mo1so.shaw.ca ([24.71.223.10]:5823 "EHLO
-	pd2mo1so.prod.shaw.ca" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754782AbYBQKZb (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 17 Feb 2008 05:25:31 -0500
-Received: from pd2mr4so.prod.shaw.ca
- (pd2mr4so-qfe3.prod.shaw.ca [10.0.141.107]) by l-daemon
- (Sun ONE Messaging Server 6.0 HotFix 1.01 (built Mar 15 2004))
- with ESMTP id <0JWD008DYOYIOOB0@l-daemon> for linux-sparse@vger.kernel.org;
- Sun, 17 Feb 2008 03:25:30 -0700 (MST)
-Received: from pn2ml2so.prod.shaw.ca ([10.0.121.146])
- by pd2mr4so.prod.shaw.ca (Sun Java System Messaging Server 6.2-7.05 (built Sep
- 5 2006)) with ESMTP id <0JWD00DIOOYI3K30@pd2mr4so.prod.shaw.ca> for
- linux-sparse@vger.kernel.org; Sun, 17 Feb 2008 03:25:30 -0700 (MST)
-Received: from [192.168.0.46] ([24.80.205.34])
- by l-daemon (Sun Java System Messaging Server 6.2-7.05 (built Sep  5 2006))
- with ESMTP id <0JWD006J1OYHBM10@l-daemon> for linux-sparse@vger.kernel.org;
- Sun, 17 Feb 2008 03:25:29 -0700 (MST)
-In-reply-to: <20080211171600.GA1148@tv-sign.ru>
+Received: from pan.madism.org ([88.191.52.104]:60450 "EHLO hermes.madism.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754134AbYBUPF3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 21 Feb 2008 10:05:29 -0500
+Received: from madism.org (def92-2-81-57-219-236.fbx.proxad.net [81.57.219.236])
+	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
+	(Client CN "artemis.madism.org", Issuer "madism.org" (not verified))
+	by hermes.madism.org (Postfix) with ESMTP id 2AA6A300ED
+	for <linux-sparse@vger.kernel.org>; Thu, 21 Feb 2008 16:05:28 +0100 (CET)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@tv-sign.ru>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Oleg Nesterov wrote:
-> ->r_member() reports the usage of struct's members, see also test-dissect.c
 
-Oleg, this is wonderful!  Together with c2xml and some other tools
-it goes a long way to address my questions.
+--3V7upXqbjpZ4EhLz
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-Thank you.
+Sparse doesn't support the C99 construct `for (int i =3D expr; ....)` prope=
+rly.
+for example, the following C code:
 
-Reza.
+    #include <stdlib.h>
+
+    int main(void)
+    {
+        for (int i =3D atoi("12"); i < 10; i++);
+        return 0;
+    }
+
+make sparse spit:
+
+    $ sparse -Wall test.c
+    test.c:5:22: warning: call with no type!
+
+In fact sparse doesn't support 'expr' to be a complex enough expression
+(expressions that can be folded work, but not any other afaict).
+
+I assume something has to be done in parser.c, but I'm not really sure it's=
+ the
+sole place=E2=80=A6
+
+
+--=20
+=C2=B7O=C2=B7  Pierre Habouzit
+=C2=B7=C2=B7O                                                madcoder@debia=
+n.org
+OOO                                                http://www.madism.org
+
+--3V7upXqbjpZ4EhLz
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQBHvZM3vGr7W6HudhwRAj3eAJ4hZCudbEW+gEteveV0cpAAnrIQOwCggHXa
+LQLFHweeUn1jEMw413Vo5NI=
+=p+nO
+-----END PGP SIGNATURE-----
+
+--3V7upXqbjpZ4EhLz--
