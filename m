@@ -1,75 +1,156 @@
-From: "Chris Li" <christ.li@gmail.com>
-Subject: Re: for (int i = expr; ....)
-Date: Fri, 22 Feb 2008 12:26:30 -0800
-Message-ID: <70318cbf0802221226l7888c24auafbe2aabfa9774b9@mail.gmail.com>
-References: <20080221150527.GA7117@artemis.madism.org>
-Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_2208_26328.1203711990305"
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: [PATCH 1/3] saner warnings for restricted types
+Date: Fri, 22 Feb 2008 23:05:15 +0000
+Message-ID: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wr-out-0506.google.com ([64.233.184.224]:47098 "EHLO
-	wr-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751958AbYBVU0c (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:54748 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754744AbYBVXFR (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 22 Feb 2008 15:26:32 -0500
-Received: by wr-out-0506.google.com with SMTP id c48so838151wra.23
-        for <linux-sparse@vger.kernel.org>; Fri, 22 Feb 2008 12:26:31 -0800 (PST)
-In-Reply-To: <20080221150527.GA7117@artemis.madism.org>
+	Fri, 22 Feb 2008 18:05:17 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pierre Habouzit <pierre.habouzit@m4x.org>
+To: josh@freedesktop.org
 Cc: linux-sparse@vger.kernel.org
 
-------=_Part_2208_26328.1203711990305
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
 
-On Thu, Feb 21, 2008 at 7:05 AM, Pierre Habouzit
-<pierre.habouzit@m4x.org> wrote:
-> Sparse doesn't support the C99 construct `for (int i = expr; ....)` properly.
->  for example, the following C code:
->
->     #include <stdlib.h>
->
->     int main(void)
->     {
->         for (int i = atoi("12"); i < 10; i++);
->         return 0;
->     }
->
->  make sparse spit:
->
->     $ sparse -Wall test.c
->     test.c:5:22: warning: call with no type!
->
->  In fact sparse doesn't support 'expr' to be a complex enough expression
->  (expressions that can be folded work, but not any other afaict).
+* don't crap the type->ident for unsigned int just because somebody did
+	typedef unsigned int x;
+  only structs, unions, enums and restricted types need it.
+* generate saner warnings for restricted, include type name(s) into them.
 
-Nah, sparse supports expression in initializer all right.
-It just need to evaluate them to give it the correct ctype.
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+ evaluate.c   |   33 ++++++++++++++++++++-------------
+ parse.c      |   11 +++++++++--
+ show-parse.c |    4 ++++
+ 3 files changed, 33 insertions(+), 15 deletions(-)
 
-Please try the this one line patch I attached.
-
-Chris
-
-------=_Part_2208_26328.1203711990305
-Content-Type: application/octet-stream; name=init-notype
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fcz2erf90
-Content-Disposition: attachment; filename=init-notype
-
-ZXZhbHVhdGUgaXRlcmF0b3Igc3ltYm9scwoKZXZhbHVhdGUuYyBmb3JnZXRzIHRvIGV2YWx1YXRl
-IGl0ZXJhdG9yX3N5bXMsIHdoaWNoCm1pZ2h0IGhhdmUgc29tZSBleHByZXNzaW9uIGluIGluaXRp
-YWxpemVyLgoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3BoZXIgTGkgPHNwYXJzZUBjaHJpc2xpLm9y
-Zz4KCkluZGV4OiBzcGFyc2UvZXZhbHVhdGUuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2Uub3JpZy9l
-dmFsdWF0ZS5jCTIwMDgtMDItMTMgMDk6MjU6MjEuMDAwMDAwMDAwIC0wODAwCisrKyBzcGFyc2Uv
-ZXZhbHVhdGUuYwkyMDA4LTAyLTIyIDEwOjA3OjEwLjAwMDAwMDAwMCAtMDgwMApAQCAtMzA5Myw2
-ICszMDkzLDcgQEAgc3RhdGljIHZvaWQgZXZhbHVhdGVfaWZfc3RhdGVtZW50KHN0cnVjdAogCiBz
-dGF0aWMgdm9pZCBldmFsdWF0ZV9pdGVyYXRvcihzdHJ1Y3Qgc3RhdGVtZW50ICpzdG10KQogewor
-CWV2YWx1YXRlX3N5bWJvbF9saXN0KHN0bXQtPml0ZXJhdG9yX3N5bXMpOwogCWV2YWx1YXRlX2Nv
-bmRpdGlvbmFsKHN0bXQtPml0ZXJhdG9yX3ByZV9jb25kaXRpb24sIDEpOwogCWV2YWx1YXRlX2Nv
-bmRpdGlvbmFsKHN0bXQtPml0ZXJhdG9yX3Bvc3RfY29uZGl0aW9uLDEpOwogCWV2YWx1YXRlX3N0
-YXRlbWVudChzdG10LT5pdGVyYXRvcl9wcmVfc3RhdGVtZW50KTsK
-------=_Part_2208_26328.1203711990305--
+diff --git a/evaluate.c b/evaluate.c
+index 54fcd3f..777f603 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -500,9 +500,10 @@ static inline void unrestrict(struct expression *expr,
+ 			      int class, struct symbol **ctype)
+ {
+ 	if (class & TYPE_RESTRICT) {
+-		warning(expr->pos, "restricted degrades to integer");
+ 		if (class & TYPE_FOULED)
+ 			*ctype = unfoul(*ctype);
++		warning(expr->pos, "%sdegrades to integer",
++			show_typename(*ctype));
+ 		*ctype = (*ctype)->ctype.base_type; /* get to arithmetic type */
+ 	}
+ }
+@@ -1235,7 +1236,9 @@ static int evaluate_assign_op(struct expression *expr)
+ 		}
+ 		if (tclass & TYPE_RESTRICT) {
+ 			if (!restricted_binop(op, t)) {
+-				expression_error(expr, "bad restricted assignment");
++				warning(expr->pos, "bad assignment (%s) to %s",
++					show_special(op), show_typename(t));
++				expr->right = cast_to(expr->right, target);
+ 				return 0;
+ 			}
+ 			/* allowed assignments unfoul */
+@@ -1248,7 +1251,9 @@ static int evaluate_assign_op(struct expression *expr)
+ 		/* source and target would better be identical restricted */
+ 		if (t == s)
+ 			return 1;
+-		warning(expr->pos, "invalid restricted assignment");
++		warning(expr->pos, "invalid assignment: %s", show_special(op));
++		info(expr->pos, "   left side has type %s", show_typename(t));
++		info(expr->pos, "   right side has type %s", show_typename(s));
+ 		expr->right = cast_to(expr->right, target);
+ 		return 0;
+ 	}
+@@ -1707,10 +1712,8 @@ static struct symbol *evaluate_postop(struct expression *expr)
+ 		return NULL;
+ 	}
+ 
+-	if ((class & TYPE_RESTRICT) && restricted_unop(expr->op, &ctype)) {
+-		expression_error(expr, "bad operation on restricted");
+-		return NULL;
+-	}
++	if ((class & TYPE_RESTRICT) && restricted_unop(expr->op, &ctype))
++		return bad_expr_type(expr);
+ 
+ 	if (class & TYPE_NUM) {
+ 		multiply = 1;
+@@ -1799,7 +1802,8 @@ static struct symbol *evaluate_preop(struct expression *expr)
+ 			expr->right->ctype = ctype;
+ 			expr->right->fvalue = 0;
+ 		} else if (is_fouled_type(ctype)) {
+-			warning(expr->pos, "restricted degrades to integer");
++			warning(expr->pos, "%sdegrades to integer",
++				show_typename(ctype->ctype.base_type));
+ 		}
+ 		ctype = &bool_ctype;
+ 		break;
+@@ -2664,9 +2668,11 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 
+ 	if (t1 != t2) {
+ 		if (class1 & TYPE_RESTRICT)
+-			warning(expr->pos, "cast to restricted type");
++			warning(expr->pos, "cast to %s",
++				show_typename(t1));
+ 		if (class2 & TYPE_RESTRICT)
+-			warning(expr->pos, "cast from restricted type");
++			warning(expr->pos, "cast from %s",
++				show_typename(t2));
+ 	}
+ 
+ 	if (t1 == &ulong_ctype)
+@@ -3246,9 +3252,10 @@ static void check_case_type(struct expression *switch_expr,
+ 		return;
+ 
+ 	if (!restricted_binop_type(SPECIAL_EQUAL, case_expr, switch_expr,
+-				   cclass, sclass, case_type, switch_type))
+-		warning(case_expr->pos, "restricted degrades to integer");
+-
++				   cclass, sclass, case_type, switch_type)) {
++		unrestrict(case_expr, cclass, &case_type);
++		unrestrict(switch_expr, sclass, &switch_type);
++	}
+ 	return;
+ 
+ Bad:
+diff --git a/parse.c b/parse.c
+index a41939d..6255737 100644
+--- a/parse.c
++++ b/parse.c
+@@ -2158,8 +2158,15 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 	base_type = decl->ctype.base_type;
+ 
+ 	if (is_typedef) {
+-		if (base_type && !base_type->ident)
+-			base_type->ident = ident;
++		if (base_type && !base_type->ident) {
++			switch (base_type->type) {
++			case SYM_STRUCT:
++			case SYM_UNION:
++			case SYM_ENUM:
++			case SYM_RESTRICT:
++				base_type->ident = ident;
++			}
++		}
+ 	} else if (base_type && base_type->type == SYM_FN) {
+ 		/* K&R argument declaration? */
+ 		if (lookup_type(token))
+diff --git a/show-parse.c b/show-parse.c
+index 9a1f796..b9a2828 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -309,6 +309,10 @@ static void do_show_type(struct symbol *sym, struct type_name *name,
+ 		break;
+ 
+ 	case SYM_RESTRICT:
++		if (sym->ident) {
++			prepend(name, "restricted %s ", show_ident(sym->ident));
++			return;
++		}
+ 		break;
+ 
+ 	case SYM_FOULED:
+-- 
+1.5.3.GIT
