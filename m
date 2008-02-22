@@ -1,61 +1,75 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: label 'continue' already bound, unreplaced symbol 'return'
-Date: Fri, 22 Feb 2008 11:16:39 -0800
-Message-ID: <70318cbf0802221116i229152d1wafc15442cd0ab2d3@mail.gmail.com>
-References: <1202948215.8941.37.camel@dv>
+From: "Chris Li" <christ.li@gmail.com>
+Subject: Re: for (int i = expr; ....)
+Date: Fri, 22 Feb 2008 12:26:30 -0800
+Message-ID: <70318cbf0802221226l7888c24auafbe2aabfa9774b9@mail.gmail.com>
+References: <20080221150527.GA7117@artemis.madism.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_2208_26328.1203711990305"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0910.google.com ([209.85.198.189]:10453 "EHLO
-	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755370AbYBVTQl (ORCPT
+Received: from wr-out-0506.google.com ([64.233.184.224]:47098 "EHLO
+	wr-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751958AbYBVU0c (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 22 Feb 2008 14:16:41 -0500
-Received: by rv-out-0910.google.com with SMTP id k20so328277rvb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 22 Feb 2008 11:16:39 -0800 (PST)
-In-Reply-To: <1202948215.8941.37.camel@dv>
-Content-Disposition: inline
+	Fri, 22 Feb 2008 15:26:32 -0500
+Received: by wr-out-0506.google.com with SMTP id c48so838151wra.23
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Feb 2008 12:26:31 -0800 (PST)
+In-Reply-To: <20080221150527.GA7117@artemis.madism.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
+To: Pierre Habouzit <pierre.habouzit@m4x.org>
 Cc: linux-sparse@vger.kernel.org
 
->  static inline int foo(void)
->  {
->     do {
->     } while (0);
->     return 0;
->  }
->  int bar(void);
->  int bar(void)
->  {
->     return foo();
->  }
->  typeof(bar) quux;
+------=_Part_2208_26328.1203711990305
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+On Thu, Feb 21, 2008 at 7:05 AM, Pierre Habouzit
+<pierre.habouzit@m4x.org> wrote:
+> Sparse doesn't support the C99 construct `for (int i = expr; ....)` properly.
+>  for example, the following C code:
 >
+>     #include <stdlib.h>
 >
->  hal.c:12:13: warning: symbol 'quux' was not declared. Should it be
->  static?
->  hal.c:3:5: warning: label 'continue' already bound
->  hal.c:3:5: warning: label 'break' already bound
+>     int main(void)
+>     {
+>         for (int i = atoi("12"); i < 10; i++);
+>         return 0;
+>     }
+>
+>  make sparse spit:
+>
+>     $ sparse -Wall test.c
+>     test.c:5:22: warning: call with no type!
+>
+>  In fact sparse doesn't support 'expr' to be a complex enough expression
+>  (expressions that can be folded work, but not any other afaict).
 
-This happen because you try to make quux has type of *function*,
-not a function pointer. Sparse literary assign the base type of bar
-as base  type of quux. This result in body of bar get linearized twice.
+Nah, sparse supports expression in initializer all right.
+It just need to evaluate them to give it the correct ctype.
 
-I don't thing typeof(bar) quux is doing any thing useful.
-I am not sure what is the gcc rules here. I try gcc -S with the test
-case, it does not even generate any thing for quux.
-
-The rest of the test case is more or less the same thing.
-
->  "extern" before "typeof" fixes all warnings.
-
-That is because, once you declear it as "extern", it does not emit
-any code.
-
-I guess I can skip typeof(function) to fix it, like gcc does. Is there
-better suggestions?
+Please try the this one line patch I attached.
 
 Chris
+
+------=_Part_2208_26328.1203711990305
+Content-Type: application/octet-stream; name=init-notype
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fcz2erf90
+Content-Disposition: attachment; filename=init-notype
+
+ZXZhbHVhdGUgaXRlcmF0b3Igc3ltYm9scwoKZXZhbHVhdGUuYyBmb3JnZXRzIHRvIGV2YWx1YXRl
+IGl0ZXJhdG9yX3N5bXMsIHdoaWNoCm1pZ2h0IGhhdmUgc29tZSBleHByZXNzaW9uIGluIGluaXRp
+YWxpemVyLgoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3BoZXIgTGkgPHNwYXJzZUBjaHJpc2xpLm9y
+Zz4KCkluZGV4OiBzcGFyc2UvZXZhbHVhdGUuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2Uub3JpZy9l
+dmFsdWF0ZS5jCTIwMDgtMDItMTMgMDk6MjU6MjEuMDAwMDAwMDAwIC0wODAwCisrKyBzcGFyc2Uv
+ZXZhbHVhdGUuYwkyMDA4LTAyLTIyIDEwOjA3OjEwLjAwMDAwMDAwMCAtMDgwMApAQCAtMzA5Myw2
+ICszMDkzLDcgQEAgc3RhdGljIHZvaWQgZXZhbHVhdGVfaWZfc3RhdGVtZW50KHN0cnVjdAogCiBz
+dGF0aWMgdm9pZCBldmFsdWF0ZV9pdGVyYXRvcihzdHJ1Y3Qgc3RhdGVtZW50ICpzdG10KQogewor
+CWV2YWx1YXRlX3N5bWJvbF9saXN0KHN0bXQtPml0ZXJhdG9yX3N5bXMpOwogCWV2YWx1YXRlX2Nv
+bmRpdGlvbmFsKHN0bXQtPml0ZXJhdG9yX3ByZV9jb25kaXRpb24sIDEpOwogCWV2YWx1YXRlX2Nv
+bmRpdGlvbmFsKHN0bXQtPml0ZXJhdG9yX3Bvc3RfY29uZGl0aW9uLDEpOwogCWV2YWx1YXRlX3N0
+YXRlbWVudChzdG10LT5pdGVyYXRvcl9wcmVfc3RhdGVtZW50KTsK
+------=_Part_2208_26328.1203711990305--
