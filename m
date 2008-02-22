@@ -1,156 +1,233 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 1/3] saner warnings for restricted types
-Date: Fri, 22 Feb 2008 23:05:15 +0000
-Message-ID: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
+Subject: [PATCH 2/3] fix show_typename()
+Date: Fri, 22 Feb 2008 23:05:25 +0000
+Message-ID: <E1JSgxJ-0003m5-1z@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:54748 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:54753 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754744AbYBVXFR (ORCPT
+	with ESMTP id S1755714AbYBVXF0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 22 Feb 2008 18:05:17 -0500
+	Fri, 22 Feb 2008 18:05:26 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: josh@freedesktop.org
 Cc: linux-sparse@vger.kernel.org
 
 
-* don't crap the type->ident for unsigned int just because somebody did
-	typedef unsigned int x;
-  only structs, unions, enums and restricted types need it.
-* generate saner warnings for restricted, include type name(s) into them.
+* postfix stuff had been applied in wrong order (e.g. int a[2][3] generated
+int [addressable][toplevel] a[3][2])
+* after fixing that, we've no need for recursion anymore, a bunch of arguments
+go away and turn into local variables and we get an easy way to get rid of
+bogus space in the show_typename() result.
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- evaluate.c   |   33 ++++++++++++++++++++-------------
- parse.c      |   11 +++++++++--
- show-parse.c |    4 ++++
- 3 files changed, 33 insertions(+), 15 deletions(-)
+ evaluate.c   |    4 +-
+ show-parse.c |  100 +++++++++++++++++++++++++++++----------------------------
+ 2 files changed, 53 insertions(+), 51 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index 54fcd3f..777f603 100644
+index 777f603..2901c1b 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -500,9 +500,10 @@ static inline void unrestrict(struct expression *expr,
- 			      int class, struct symbol **ctype)
- {
+@@ -502,7 +502,7 @@ static inline void unrestrict(struct expression *expr,
  	if (class & TYPE_RESTRICT) {
--		warning(expr->pos, "restricted degrades to integer");
  		if (class & TYPE_FOULED)
  			*ctype = unfoul(*ctype);
-+		warning(expr->pos, "%sdegrades to integer",
-+			show_typename(*ctype));
+-		warning(expr->pos, "%sdegrades to integer",
++		warning(expr->pos, "%s degrades to integer",
+ 			show_typename(*ctype));
  		*ctype = (*ctype)->ctype.base_type; /* get to arithmetic type */
  	}
- }
-@@ -1235,7 +1236,9 @@ static int evaluate_assign_op(struct expression *expr)
- 		}
- 		if (tclass & TYPE_RESTRICT) {
- 			if (!restricted_binop(op, t)) {
--				expression_error(expr, "bad restricted assignment");
-+				warning(expr->pos, "bad assignment (%s) to %s",
-+					show_special(op), show_typename(t));
-+				expr->right = cast_to(expr->right, target);
- 				return 0;
- 			}
- 			/* allowed assignments unfoul */
-@@ -1248,7 +1251,9 @@ static int evaluate_assign_op(struct expression *expr)
- 		/* source and target would better be identical restricted */
- 		if (t == s)
- 			return 1;
--		warning(expr->pos, "invalid restricted assignment");
-+		warning(expr->pos, "invalid assignment: %s", show_special(op));
-+		info(expr->pos, "   left side has type %s", show_typename(t));
-+		info(expr->pos, "   right side has type %s", show_typename(s));
- 		expr->right = cast_to(expr->right, target);
- 		return 0;
- 	}
-@@ -1707,10 +1712,8 @@ static struct symbol *evaluate_postop(struct expression *expr)
- 		return NULL;
- 	}
- 
--	if ((class & TYPE_RESTRICT) && restricted_unop(expr->op, &ctype)) {
--		expression_error(expr, "bad operation on restricted");
--		return NULL;
--	}
-+	if ((class & TYPE_RESTRICT) && restricted_unop(expr->op, &ctype))
-+		return bad_expr_type(expr);
- 
- 	if (class & TYPE_NUM) {
- 		multiply = 1;
-@@ -1799,7 +1802,8 @@ static struct symbol *evaluate_preop(struct expression *expr)
+@@ -1802,7 +1802,7 @@ static struct symbol *evaluate_preop(struct expression *expr)
  			expr->right->ctype = ctype;
  			expr->right->fvalue = 0;
  		} else if (is_fouled_type(ctype)) {
--			warning(expr->pos, "restricted degrades to integer");
-+			warning(expr->pos, "%sdegrades to integer",
-+				show_typename(ctype->ctype.base_type));
+-			warning(expr->pos, "%sdegrades to integer",
++			warning(expr->pos, "%s degrades to integer",
+ 				show_typename(ctype->ctype.base_type));
  		}
  		ctype = &bool_ctype;
- 		break;
-@@ -2664,9 +2668,11 @@ static struct symbol *evaluate_cast(struct expression *expr)
- 
- 	if (t1 != t2) {
- 		if (class1 & TYPE_RESTRICT)
--			warning(expr->pos, "cast to restricted type");
-+			warning(expr->pos, "cast to %s",
-+				show_typename(t1));
- 		if (class2 & TYPE_RESTRICT)
--			warning(expr->pos, "cast from restricted type");
-+			warning(expr->pos, "cast from %s",
-+				show_typename(t2));
- 	}
- 
- 	if (t1 == &ulong_ctype)
-@@ -3246,9 +3252,10 @@ static void check_case_type(struct expression *switch_expr,
- 		return;
- 
- 	if (!restricted_binop_type(SPECIAL_EQUAL, case_expr, switch_expr,
--				   cclass, sclass, case_type, switch_type))
--		warning(case_expr->pos, "restricted degrades to integer");
--
-+				   cclass, sclass, case_type, switch_type)) {
-+		unrestrict(case_expr, cclass, &case_type);
-+		unrestrict(switch_expr, sclass, &switch_type);
-+	}
- 	return;
- 
- Bad:
-diff --git a/parse.c b/parse.c
-index a41939d..6255737 100644
---- a/parse.c
-+++ b/parse.c
-@@ -2158,8 +2158,15 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
- 	base_type = decl->ctype.base_type;
- 
- 	if (is_typedef) {
--		if (base_type && !base_type->ident)
--			base_type->ident = ident;
-+		if (base_type && !base_type->ident) {
-+			switch (base_type->type) {
-+			case SYM_STRUCT:
-+			case SYM_UNION:
-+			case SYM_ENUM:
-+			case SYM_RESTRICT:
-+				base_type->ident = ident;
-+			}
-+		}
- 	} else if (base_type && base_type->type == SYM_FN) {
- 		/* K&R argument declaration? */
- 		if (lookup_type(token))
 diff --git a/show-parse.c b/show-parse.c
-index 9a1f796..b9a2828 100644
+index b9a2828..064af32 100644
 --- a/show-parse.c
 +++ b/show-parse.c
-@@ -309,6 +309,10 @@ static void do_show_type(struct symbol *sym, struct type_name *name,
+@@ -226,12 +226,16 @@ const char *builtin_ctypename(struct ctype *ctype)
+ 	return NULL;
+ }
+ 
+-static void do_show_type(struct symbol *sym, struct type_name *name,
+-			 unsigned long mod, int as, int was_ptr)
++static void do_show_type(struct symbol *sym, struct type_name *name)
+ {
+ 	const char *typename;
+-	int is_ptr = was_ptr;
++	unsigned long mod = 0;
++	int as = 0;
++	int was_ptr = 0;
++	int restr = 0;
++	int fouled = 0;
+ 
++deeper:
+ 	if (!sym || (sym->type != SYM_NODE && sym->type != SYM_ARRAY &&
+ 		     sym->type != SYM_BITFIELD)) {
+ 		const char *s;
+@@ -249,14 +253,15 @@ static void do_show_type(struct symbol *sym, struct type_name *name,
+ 	}
+ 
+ 	if (!sym)
+-		return;
++		goto out;
+ 
+ 	if ((typename = builtin_typename(sym))) {
+ 		int len = strlen(typename);
+-		*--name->start = ' ';
++		if (name->start != name->end)
++			*--name->start = ' ';
+ 		name->start -= len;
+ 		memcpy(name->start, typename, len);
+-		return;
++		goto out;
+ 	}
+ 
+ 	/* Prepend */
+@@ -265,20 +270,29 @@ static void do_show_type(struct symbol *sym, struct type_name *name,
+ 		prepend(name, "*");
+ 		mod = sym->ctype.modifiers;
+ 		as = sym->ctype.as;
+-		is_ptr = 1;
++		was_ptr = 1;
+ 		break;
++
+ 	case SYM_FN:
+-		if (was_ptr)
++		if (was_ptr) {
+ 			prepend(name, "( ");
+-		is_ptr = 0;
++			append(name, " )");
++			was_ptr = 0;
++		}
++		append(name, "( ... )");
+ 		break;
++
+ 	case SYM_STRUCT:
+-		prepend(name, "struct %s ", show_ident(sym->ident));
+-		return;
++		if (name->start != name->end)
++			*--name->start = ' ';
++		prepend(name, "struct %s", show_ident(sym->ident));
++		goto out;
+ 
+ 	case SYM_UNION:
+-		prepend(name, "union %s ", show_ident(sym->ident));
+-		return;
++		if (name->start != name->end)
++			*--name->start = ' ';
++		prepend(name, "union %s", show_ident(sym->ident));
++		goto out;
+ 
+ 	case SYM_ENUM:
+ 		prepend(name, "enum %s ", show_ident(sym->ident));
+@@ -298,60 +312,48 @@ static void do_show_type(struct symbol *sym, struct type_name *name,
+ 
+ 	case SYM_LABEL:
+ 		append(name, "label(%s:%p)", show_ident(sym->ident), sym);
+-		break;
++		return;
+ 
+ 	case SYM_ARRAY:
+ 		mod |= sym->ctype.modifiers;
+ 		as |= sym->ctype.as;
+-		if (was_ptr)
++		if (was_ptr) {
+ 			prepend(name, "( ");
+-		is_ptr = 0;
++			append(name, " )");
++			was_ptr = 0;
++		}
++		append(name, "[%lld]", get_expression_value(sym->array_size));
  		break;
  
  	case SYM_RESTRICT:
-+		if (sym->ident) {
-+			prepend(name, "restricted %s ", show_ident(sym->ident));
-+			return;
-+		}
- 		break;
+-		if (sym->ident) {
+-			prepend(name, "restricted %s ", show_ident(sym->ident));
+-			return;
++		if (!sym->ident) {
++			restr = 1;
++			break;
+ 		}
+-		break;
++		if (name->start != name->end)
++			*--name->start = ' ';
++		prepend(name, "restricted %s", show_ident(sym->ident));
++		goto out;
  
  	case SYM_FOULED:
++		fouled = 1;
+ 		break;
+ 
+ 	default:
++		if (name->start != name->end)
++			*--name->start = ' ';
+ 		prepend(name, "unknown type %d", sym->type);
+-		return;
++		goto out;
+ 	}
+ 
+-	do_show_type(sym->ctype.base_type, name, mod, as, is_ptr);
+-
+-	switch (sym->type) {
+-	case SYM_PTR:
+-		return;
+-
+-	case SYM_FN:
+-		if (was_ptr)
+-			append(name, " )");
+-		append(name, "( ... )");
+-		return;
+-
+-	case SYM_ARRAY:
+-		if (was_ptr)
+-			append(name, " )");
+-		append(name, "[%lld]", get_expression_value(sym->array_size));
+-		return;
++	sym = sym->ctype.base_type;
++	goto deeper;
+ 
+-	case SYM_RESTRICT:
++out:
++	if (restr)
+ 		prepend(name, "restricted ");
+-		return;
+-
+-	case SYM_FOULED:
++	if (fouled)
+ 		prepend(name, "fouled ");
+-		return;
+-
+-	default:
+-		break;
+-	}
+ }
+ 
+ void show_type(struct symbol *sym)
+@@ -360,7 +362,7 @@ void show_type(struct symbol *sym)
+ 	struct type_name name;
+ 
+ 	name.start = name.end = array+100;
+-	do_show_type(sym, &name, 0, 0, 0);
++	do_show_type(sym, &name);
+ 	*name.end = 0;
+ 	printf("%s", name.start);
+ }
+@@ -371,7 +373,7 @@ const char *show_typename(struct symbol *sym)
+ 	struct type_name name;
+ 
+ 	name.start = name.end = array+100;
+-	do_show_type(sym, &name, 0, 0, 0);
++	do_show_type(sym, &name);
+ 	*name.end = 0;
+ 	return name.start;
+ }
 -- 
 1.5.3.GIT
