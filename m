@@ -1,72 +1,61 @@
-From: Pierre Habouzit <pierre.habouzit@m4x.org>
-Subject: for (int i = expr; ....)
-Date: Thu, 21 Feb 2008 16:05:27 +0100
-Message-ID: <20080221150527.GA7117@artemis.madism.org>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: label 'continue' already bound, unreplaced symbol 'return'
+Date: Fri, 22 Feb 2008 11:16:39 -0800
+Message-ID: <70318cbf0802221116i229152d1wafc15442cd0ab2d3@mail.gmail.com>
+References: <1202948215.8941.37.camel@dv>
 Mime-Version: 1.0
-Content-Type: multipart/signed; boundary="3V7upXqbjpZ4EhLz";
-	protocol="application/pgp-signature"; micalg=SHA1
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from pan.madism.org ([88.191.52.104]:60450 "EHLO hermes.madism.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754134AbYBUPF3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 21 Feb 2008 10:05:29 -0500
-Received: from madism.org (def92-2-81-57-219-236.fbx.proxad.net [81.57.219.236])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(Client CN "artemis.madism.org", Issuer "madism.org" (not verified))
-	by hermes.madism.org (Postfix) with ESMTP id 2AA6A300ED
-	for <linux-sparse@vger.kernel.org>; Thu, 21 Feb 2008 16:05:28 +0100 (CET)
+Received: from rv-out-0910.google.com ([209.85.198.189]:10453 "EHLO
+	rv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755370AbYBVTQl (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 22 Feb 2008 14:16:41 -0500
+Received: by rv-out-0910.google.com with SMTP id k20so328277rvb.1
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Feb 2008 11:16:39 -0800 (PST)
+In-Reply-To: <1202948215.8941.37.camel@dv>
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
+>  static inline int foo(void)
+>  {
+>     do {
+>     } while (0);
+>     return 0;
+>  }
+>  int bar(void);
+>  int bar(void)
+>  {
+>     return foo();
+>  }
+>  typeof(bar) quux;
+>
+>
+>  hal.c:12:13: warning: symbol 'quux' was not declared. Should it be
+>  static?
+>  hal.c:3:5: warning: label 'continue' already bound
+>  hal.c:3:5: warning: label 'break' already bound
 
---3V7upXqbjpZ4EhLz
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+This happen because you try to make quux has type of *function*,
+not a function pointer. Sparse literary assign the base type of bar
+as base  type of quux. This result in body of bar get linearized twice.
 
-Sparse doesn't support the C99 construct `for (int i =3D expr; ....)` prope=
-rly.
-for example, the following C code:
+I don't thing typeof(bar) quux is doing any thing useful.
+I am not sure what is the gcc rules here. I try gcc -S with the test
+case, it does not even generate any thing for quux.
 
-    #include <stdlib.h>
+The rest of the test case is more or less the same thing.
 
-    int main(void)
-    {
-        for (int i =3D atoi("12"); i < 10; i++);
-        return 0;
-    }
+>  "extern" before "typeof" fixes all warnings.
 
-make sparse spit:
+That is because, once you declear it as "extern", it does not emit
+any code.
 
-    $ sparse -Wall test.c
-    test.c:5:22: warning: call with no type!
+I guess I can skip typeof(function) to fix it, like gcc does. Is there
+better suggestions?
 
-In fact sparse doesn't support 'expr' to be a complex enough expression
-(expressions that can be folded work, but not any other afaict).
-
-I assume something has to be done in parser.c, but I'm not really sure it's=
- the
-sole place=E2=80=A6
-
-
---=20
-=C2=B7O=C2=B7  Pierre Habouzit
-=C2=B7=C2=B7O                                                madcoder@debia=
-n.org
-OOO                                                http://www.madism.org
-
---3V7upXqbjpZ4EhLz
-Content-Type: application/pgp-signature
-Content-Disposition: inline
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-
-iD8DBQBHvZM3vGr7W6HudhwRAj3eAJ4hZCudbEW+gEteveV0cpAAnrIQOwCggHXa
-LQLFHweeUn1jEMw413Vo5NI=
-=p+nO
------END PGP SIGNATURE-----
-
---3V7upXqbjpZ4EhLz--
+Chris
