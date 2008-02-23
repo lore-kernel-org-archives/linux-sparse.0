@@ -1,37 +1,76 @@
-From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 3/3] catch !x & y brainos
-Date: Fri, 22 Feb 2008 23:05:35 +0000
-Message-ID: <E1JSgxT-0003mf-2B@ZenIV.linux.org.uk>
+From: Pierre Habouzit <pierre.habouzit@m4x.org>
+Subject: Re: for (int i = expr; ....)
+Date: Sat, 23 Feb 2008 14:33:30 +0100
+Message-ID: <20080223133330.GA10967@artemis.madism.org>
+References: <20080221150527.GA7117@artemis.madism.org> <70318cbf0802221226l7888c24auafbe2aabfa9774b9@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; boundary="+QahgC5+KEYLbs62";
+	protocol="application/pgp-signature"; micalg=SHA1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:54765 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752129AbYBVXFg (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 22 Feb 2008 18:05:36 -0500
+Received: from pan.madism.org ([88.191.52.104]:44948 "EHLO hermes.madism.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753738AbYBWNdm (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 23 Feb 2008 08:33:42 -0500
+Content-Disposition: inline
+In-Reply-To: <70318cbf0802221226l7888c24auafbe2aabfa9774b9@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: josh@freedesktop.org
+To: Chris Li <christ.li@gmail.com>
 Cc: linux-sparse@vger.kernel.org
 
 
-Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
----
- evaluate.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+--+QahgC5+KEYLbs62
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-diff --git a/evaluate.c b/evaluate.c
-index 2901c1b..4928584 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -917,6 +917,9 @@ static struct symbol *evaluate_binop(struct expression *expr)
- 			rtype = integer_promotion(rtype);
- 		} else {
- 			// The rest do usual conversions
-+			if (op == '&' && expr->left->type == EXPR_PREOP &&
-+			    expr->left->op == '!')
-+				warning(expr->pos, "dubious: !x & y");
- 			ltype = usual_conversions(op, expr->left, expr->right,
- 						  lclass, rclass, ltype, rtype);
- 			ctype = rtype = ltype;
--- 
-1.5.3.GIT
+On Fri, Feb 22, 2008 at 08:26:30PM +0000, Chris Li wrote:
+> On Thu, Feb 21, 2008 at 7:05 AM, Pierre Habouzit
+> <pierre.habouzit@m4x.org> wrote:
+> > Sparse doesn't support the C99 construct `for (int i =3D expr; ....)` p=
+roperly.
+> >  for example, the following C code:
+> >
+> >     #include <stdlib.h>
+> >
+> >     int main(void)
+> >     {
+> >         for (int i =3D atoi("12"); i < 10; i++);
+> >         return 0;
+> >     }
+> >
+> >  make sparse spit:
+> >
+> >     $ sparse -Wall test.c
+> >     test.c:5:22: warning: call with no type!
+> >
+> >  In fact sparse doesn't support 'expr' to be a complex enough expression
+> >  (expressions that can be folded work, but not any other afaict).
+>=20
+> Nah, sparse supports expression in initializer all right.
+> It just need to evaluate them to give it the correct ctype.
+>=20
+> Please try the this one line patch I attached.
+
+  Works for me, thanks.
+
+
+--=20
+=C2=B7O=C2=B7  Pierre Habouzit
+=C2=B7=C2=B7O                                                madcoder@debia=
+n.org
+OOO                                                http://www.madism.org
+
+--+QahgC5+KEYLbs62
+Content-Type: application/pgp-signature
+Content-Disposition: inline
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+
+iD8DBQBHwCCqvGr7W6HudhwRAkr4AKCUly4QqE9lv6EIWzFvgg8NBlhAEwCeNip5
+Qw+gzhnPw2qHWc+gptUNn6A=
+=XhHj
+-----END PGP SIGNATURE-----
+
+--+QahgC5+KEYLbs62--
