@@ -1,40 +1,34 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: feature-request
-Date: Mon, 25 Feb 2008 09:22:49 -0500
-Message-ID: <1203949369.802.22.camel@dv>
-References: <20080223133945.GB10967@artemis.madism.org>
-	 <1203907725.25518.17.camel@dv>  <20080225085408.GA9390@artemis.madism.org>
+From: Roel Kluin <12o3l@tiscali.nl>
+Subject: assertion failure in flow.c:804 (changed) building kernel/sched.c
+Date: Mon, 03 Mar 2008 14:06:00 +0100
+Message-ID: <47CBF7B8.5060303@tiscali.nl>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:13667 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754026AbYBYOWv (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Feb 2008 09:22:51 -0500
-In-Reply-To: <20080225085408.GA9390@artemis.madism.org>
+Received: from smtp-out0.tiscali.nl ([195.241.79.175]:52091 "EHLO
+	smtp-out0.tiscali.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752298AbYCCNGE (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 3 Mar 2008 08:06:04 -0500
+Received: from [82.171.187.43] (helo=[192.168.1.2])
+	by smtp-out0.tiscali.nl with esmtp (Tiscali http://www.tiscali.nl)
+	id 1JWAMj-0007Td-VI
+	for <linux-sparse@vger.kernel.org>; Mon, 03 Mar 2008 14:06:02 +0100
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pierre Habouzit <madcoder@debian.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Mon, 2008-02-25 at 09:54 +0100, Pierre Habouzit wrote:
+Building the linux kernel (git, linus' tree) with sparse enabled I get the
+following assertion failure:
 
-> > Perhaps a simpler approach would be to turn off warnings in any files
-> > included using angle brackets.
-> 
->   Nope, that's not good, because I use angle brackets to #include files
-> from my projects when I use internally in-tree headers that will in the
-> end be public.
-> 
->   I'd rather like to ask to ignore warnings for example, for file under
-> /usr/include and /usr/lib/gcc/
-
-You are right.  I think sparse should try to follow gcc in this regard.
-There are three hardcoded directories in pre-process.c
-(/usr/include, /usr/local/include and the gcc include directory).  Maybe
-they should be considered system include directories.
-
--- 
-Regards,
-Pavel Roskin
+...
+/home/roel/dnld/src/kernel/git/linux-2.6/kernel/sched.c:6228:25: error: cannot size expression
+/home/roel/dnld/src/kernel/git/linux-2.6/kernel/sched.c:8255:43: error: cannot size expression
+sparse: flow.c:804: rewrite_parent_branch: Assertion `changed' failed.
+/bin/sh: line 1: 13021 Aborted                 sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -D__i386__ -nostdinc -isystem /usr/lib/gcc/i486-slackware-linux/4.1.2/include -Wp,-MD,kernel/.sched.o.d -nostdinc -isystem /usr/lib/gcc/i486-slackware-linux/4.1.2/include -D__KERNEL__ -Iinclude -Iinclude2 -I/home/roel/dnld/src/kernel/git/linux-2.6/include -include include/linux/autoconf.h -I/home/roel/dnld/src/kernel/git/linux-2.6/kernel -Ikernel -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Os -fno-stack-protector -m32 -msoft-float -mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2 -march=i686 -mtune=i686 -ffreestanding -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -f
+ no-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -I/home/roel/dnld/src/kernel/git/linux-2.6/include/asm-x86/mach-default -Iinclude/asm-x86/mach-default -fno-omit-frame-po
+inter -fno-optimize-sibling-calls -g -Wdeclaration-after-statement -Wno-pointer-sign -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(sched)" -D"KBUILD_MODNAME=KBUILD_STR(sched)" /home/roel/dnld/src/kernel/git/linux-2.6/kernel/sched.c
+make[2]: *** [kernel/sched.o] Error 134
+make[1]: *** [kernel] Error 2
+make: *** [sub-make] Error 2
