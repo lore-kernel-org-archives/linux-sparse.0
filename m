@@ -1,43 +1,32 @@
-From: Ingo Molnar <mingo-X9Un+BFzKDI@public.gmane.org>
-Subject: Re: [PATCH 6/9] drivers/net/wireless/iwlwifi/iwl-4965.c: Correct
-	use of ! and &
-Date: Wed, 5 Mar 2008 13:36:42 +0100
-Message-ID: <20080305123641.GA2365@elte.hu>
-References: <Pine.LNX.4.64.0802262143570.18200@ask.diku.dk> <20080305063842.GA24495@elte.hu> <70318cbf0803042249j57d7f3a3j7666961a9132b10b@mail.gmail.com> <20080305070201.GA32434@elte.hu> <Pine.LNX.4.64.0803050951550.28021@ask.diku.dk> <20080305122010.GA999@elte.hu> <e2e108260803050430o317d3e0dyed50e86cc4569746@mail.gmail.com>
+From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
+Subject: Sparse and the Google Summer of Code 2008
+Date: Tue, 11 Mar 2008 20:38:35 +0300
+Message-ID: <f19298770803111038o3655a216vfe5a4b46876e7218@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from el-out-1112.google.com ([209.85.162.182]:57494 "EHLO
+	el-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752554AbYCKRig (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 11 Mar 2008 13:38:36 -0400
+Received: by el-out-1112.google.com with SMTP id v27so1518563ele.17
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Mar 2008 10:38:36 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <e2e108260803050430o317d3e0dyed50e86cc4569746-JsoAwUIsXosN+BqQ9rBEUg@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Bart Van Assche <bart.vanassche-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>
-Cc: Julia Lawall <julia-dAYI7NvHqcQ@public.gmane.org>, Christopher Li <sparse-55XgFHCVCFZAfugRpC6u6w@public.gmane.org>, yi.zhu-ral2JQCrhuEAvxtiuMwx3w@public.gmane.org, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, ipw3945-devel-5NWGOfrQmneRv+LV9MX5uipxlwaOVQ5f@public.gmane.org, linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, kernel-janitors-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Harvey Harrison <harvey.harrison-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org>, Alexander Viro <viro-rfM+Q5joDG/XmaaqVzeoHQ@public.gmane.org>, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-CC+yJ3UmIYqDUpFQwHEjaQ@public.gmane.org>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Josh Triplett <josh@kernel.org>
 
+Hello.
 
-* Bart Van Assche <bart.vanassche-Re5JQEeQqe8AvxtiuMwx3w@public.gmane.org> wrote:
+Is sparse going to participate in this year's soc?
+I e-mailed Josh a day or two ago, but got no answer,
+and the org application deadline is May 12, 12:00 PDT.
 
-> If someone writes (!x & !y) instead of (!x && !y) because both x and y 
-> have to be evaluated, this means that both x and y have side effects.
-> Please keep in mind that the C language does not specify whether x or 
-> y has to be evaluated first, so if x and y have to be evaluated in 
-> that order, an expression like (!x & !y) can be the cause of very 
-> subtle bugs. I prefer readability above brevity.
-
-such expressions _must_ be written as:
-
-  ret1 = x();
-  ret2 = y();
-
-  if (ret1 && ret2)
-	...
-
-any side-effects are totally un-obvious when they are in expressions and 
-someone doing cleanups later on could easily change the '&' to '&&' and 
-introduce a bug.
-
-	Ingo
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I know, last year was not all that successful, but maybe
+there will be more applications this year. I've got some
+ideas about abstract interpretation for one. I can't promise
+that I'll choose sparse, there should be lots of interesting
+projects this year, but there are other people as well.
