@@ -1,39 +1,35 @@
-From: Barton C Massey <bart@cs.pdx.edu>
+From: rajika@cse.mrt.ac.lk
 Subject: Re: How to work on Sparse for Summer of Code 2008
-Date: Mon, 17 Mar 2008 21:21:12 -0700
-Message-ID: <200803180421.m2I4LCEQ005402@murzim.cs.pdx.edu>
+Date: Wed, 19 Mar 2008 07:34:13 +0530
+Message-ID: <1205892253.47e0749d8a4f4@webmail.mrt.ac.lk>
 References: <47DF41AD.4060701@freedesktop.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rcpt.cat.pdx.edu ([131.252.208.107]:47759 "EHLO
-	rcpt.cat.pdx.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751504AbYCREgH (ORCPT
+Received: from kitul.learn.ac.lk ([192.248.1.163]:62023 "EHLO
+	kitul.learn.ac.lk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761453AbYCSUln (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 18 Mar 2008 00:36:07 -0400
-In-reply-to: Your message of "Mon, 17 Mar 2008 21:14:37 PDT."
-	<47DF41AD.4060701@freedesktop.org>
+	Wed, 19 Mar 2008 16:41:43 -0400
+In-Reply-To: <47DF41AD.4060701@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@freedesktop.org>
 Cc: linux-sparse@vger.kernel.org
 
-Please see http://summer.cs.pdx.edu/propose for some more
-advice about how to write a strong application for us.
+hi,
+I was searching through the project list at PSU[1], but unable to locate the
+open project list for sparse. Is that same as 2007[2]?, Can you please guide me
+to the open project list of sparse at PSU?.
+Thanks in advance.
+Regards,
+Rajika
+[1]- http://summer.cs.pdx.edu/ideas 
+[2]- http://kernel.org/pub/software/devel/sparse/soc.html
 
-Looking forward to the chance to work with some of you as
-part of SoC 2008!
+Quoting Josh Triplett <josh@freedesktop.org>:
 
-    Bart Massey
-    Assoc. Prof. Computer Science
-    Portland State University
-    bart@cs.pdx.edu
-
-
-In message <47DF41AD.4060701@freedesktop.org> you wrote:
-> This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
-> --------------enig30C952DD71625AD84960AEE4
-> Content-Type: text/plain; charset=UTF-8
-> Content-Transfer-Encoding: quoted-printable
-> 
 > Sparse did not get accepted as a mentoring organization for Google
 > Summer of Code 2008.  However, Portland State University has
 > graciously agreed to accept applications for Sparse projects under the
@@ -85,18 +81,10 @@ In message <47DF41AD.4060701@freedesktop.org> you wrote:
 > - Josh Triplett
 > 
 > 
-> --------------enig30C952DD71625AD84960AEE4
-> Content-Type: application/pgp-signature; name="signature.asc"
-> Content-Description: OpenPGP digital signature
-> Content-Disposition: attachment; filename="signature.asc"
-> 
-> -----BEGIN PGP SIGNATURE-----
-> Version: GnuPG v1.4.6 (GNU/Linux)
-> Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-> 
-> iD8DBQFH30GtGJuZRtD+evsRAnbAAJ9SwXJb9pWAmFIxxswZncA3AqjnoACcCLyi
-> nXKJ+Fnm+GQCU/uPilDaPG4=
-> =g6t9
-> -----END PGP SIGNATURE-----
-> 
-> --------------enig30C952DD71625AD84960AEE4--
+
+
+
+
+----------------------------------------------------------------
+This message was sent using IMP, the Internet Messaging Program.
+
