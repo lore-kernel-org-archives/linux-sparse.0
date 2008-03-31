@@ -1,728 +1,262 @@
-From: Philipp Reisner <philipp.reisner@linbit.com>
-Subject: [PATCH] The require_context attribute
-Date: Mon, 31 Mar 2008 14:00:32 +0200
-Message-ID: <200803311400.32860.philipp.reisner@linbit.com>
+From: "Geoff Johnstone" <geoffsheep.johnstonefrog@googlemail.com>
+Subject: Re: four sparse patches
+Date: Mon, 31 Mar 2008 20:36:39 +0100
+Message-ID: <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
+References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>
+	 <47F07F78.5030405@kernel.org>
+	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_12976_22292513.1206992199941"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from aug.linbit.com ([212.69.162.22]:48561 "EHLO mail.linbit.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1755104AbYCaMak (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 31 Mar 2008 08:30:40 -0400
-Received: from mescal.linbit (unknown [81.16.158.130])
-	(using TLSv1 with cipher DHE-RSA-AES256-SHA (256/256 bits))
-	(No client certificate requested)
-	by mail.linbit.com (LINBIT Mail Daemon) with ESMTP id E88F12DEACD6
-	for <linux-sparse@vger.kernel.org>; Mon, 31 Mar 2008 14:00:33 +0200 (CEST)
-Content-Disposition: inline
+Received: from gv-out-0910.google.com ([216.239.58.186]:48912 "EHLO
+	gv-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750719AbYCaTgn (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 31 Mar 2008 15:36:43 -0400
+Received: by gv-out-0910.google.com with SMTP id s4so215184gve.37
+        for <linux-sparse@vger.kernel.org>; Mon, 31 Mar 2008 12:36:41 -0700 (PDT)
+In-Reply-To: <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: josh@kernel.org
+Cc: linux-sparse@vger.kernel.org
 
-Hi,
+------=_Part_12976_22292513.1206992199941
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-To make sparse more usefull for me, I extended sparse with a require_context 
-attribute. With that sparse can warn you if one accesses a variable outside of 
-the corresponding locking context.
+> > I've attached four patches that I've written for sparse to
+> > use it for a userland project. Please feel free to bin/
+> > change/apply them as you see fit.
+> >
+> > I made them individually against the vanilla 0.4.1 tree
+> > but they can be applied sequentially, albeit with a bit
+> > of fuzz. They apply against the 20080330 git tree too.
 
-A small example to illustrate the idea:
+> I need to get a "Signed-off-by" from you.
 
-static int to_protect __protected_by(the_lock);
+Attached. (The email address is real, but removing the
+animals will get a less spam-filtered one.)
 
-static int helper(void) __must_hold(the_lock)
-{
-	to_protect = 1;
-}
 
-static int valid1(void)
-{
-	lock(the_lock);
-	helper();
-	unlock(the_lock);
-}
+> Also, I'd prefer to let people on the linux-sparse mailing list
+> <linux-sparse@vger.kernel.org> review patches as well,
+> rather than relying solely on my own review. In the future,
+> please CC patches to that list.
 
-static int invalid1(void)
-{
-	helper();
-}
+Done.
 
-static int invalid2(void)
-{
-	to_protect = 1;
-}
+Thanks,
+Geoff.
 
-Sparse will warn you about the out of context access in invalid2().
+------=_Part_12976_22292513.1206992199941
+Content-Type: application/octet-stream; name=incomplete-struct.diff
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fehfx3in4
+Content-Disposition: attachment; filename=incomplete-struct.diff
 
-I realize that automatic propagation of the lock context from caller to
-callee seems to be desirable. On the other hand as it is now the
-programmer is forced to annotate each function that requires a lock
-with the appropriate __must_hold() macro. -- Which is high value
-documentations, and helps reviewers to understand the code quicker.
+SWYgSSBwdXQgdGhlIGZvbGxvd2luZyBpbiBhIHB1YmxpYyBoZWFkZXI6CiAKICAgc3RydWN0IGZv
+bzsKICAgdHlwZWRlZiBzdHJ1Y3QgZm9vICpGb287CiAKICAgdm9pZCBmdW5jIChGb28gZik7CiAK
+YW5kIHRoZSBkZWZpbml0aW9uIG9mIHN0cnVjdCBmb28gaW4gYSBwcml2YXRlIGhlYWRlcjoKIAog
+ICBzdHJ1Y3QgZm9vIHsgaW50IGJhcjsgfQogCnRoZW4gSSBnZXQgYSBzcGFyc2Ugd2FybmluZyAo
+ZGlmZmVyZW50IGJhc2UgdHlwZSBmb3IgYXJndW1lbnQgMSkgd2hlbgpJIGNvbXBpbGUgdGhlIGlt
+cGxlbWVudGF0aW9uIGZpbGU6CiAKICAgI2luY2x1ZGUgInB1YmxpYy5oIgogICAjaW5jbHVkZSAi
+cHJpdmF0ZS5oIgogCiAgIHZvaWQgZnVuYyAoRm9vIGYpIHsgLi4uIH0KIAppLmUuIHNwYXJzZSBk
+b2Vzbid0IHJlYWxpc2UgdGhhdCB0aGUgaW5jb21wbGV0ZSBzdHJ1Y3R1cmUgZGVmaW5pdGlvbgpp
+biB0aGUgZnVuY3Rpb24gIHByb3RvdHlwZSByZWZlcnMgdG8gdGhlIHNhbWUgdHlwZSBhcyB0aGUg
+Y29tcGxldGUKc3RydWN0dXJlIGRlZmluaXRpb24gaW4gdGhlIGZ1bmN0aW9uIGRlZmluaXRpb24u
+CiAKKkkgdGhpbmsqIHRoYXQgdGhlIHBhdGNoIGZpeGVzIHRoaXMgLSBpdCBzaWxlbmNlcyB0aGUg
+ZXJyb3IgLSBidXQgSQpkb24ndCBrbm93IGVub3VnaCBhYm91dCBzcGFyc2UgdG8ga25vdyB3aGV0
+aGVyIGl0J3MgY29ycmVjdCAob3IKd2hldGhlciBpdCBzaWxlbmNlcyBvdGhlciBsZWdpdGltYXRl
+IGVycm9ycywgZm9yIGV4YW1wbGUpLgogCgpTaWduZWQtb2ZmLWJ5OiBHZW9mZiBKb2huc3RvbmUg
+PGdlb2ZmU0hFRVAuam9obnN0b25lRlJPR0Bnb29nbGVtYWlsLmNvbT4KCmRpZmYgLXVyIHNwYXJz
+ZS0wLjQuMS12YW5pbGxhL2V2YWx1YXRlLmMgc3BhcnNlLTAuNC4xL2V2YWx1YXRlLmMKLS0tIHNw
+YXJzZS0wLjQuMS12YW5pbGxhL2V2YWx1YXRlLmMJMjAwNy0xMS0xMyAxMjoxNzo0OS4wMDAwMDAw
+MDAgKzAwMDAKKysrIHNwYXJzZS0wLjQuMS9ldmFsdWF0ZS5jCTIwMDgtMDMtMzAgMTQ6NTM6MzQu
+NjU2MzMxMDA1ICswMTAwCkBAIC02OTYsOCArNjk2LDEyIEBACiAJCQkJICAgICB0eXBlKTsKIAkJ
+CXJldHVybiAiYmFkIHR5cGVzIjsKIAkJY2FzZSBTWU1fUkVTVFJJQ1Q6CisJCQlyZXR1cm4gImRp
+ZmZlcmVudCBiYXNlIHR5cGVzIjsKIAkJY2FzZSBTWU1fVU5JT046CiAJCWNhc2UgU1lNX1NUUlVD
+VDoKKwkJCS8qIGFsbG93IGRlZmluaXRpb24gb2YgaW5jb21wbGV0ZSBzdHJ1Y3RzIGFuZCB1bmlv
+bnMgKi8KKwkJCWlmICh0MS0+aWRlbnQgPT0gdDItPmlkZW50KQorCQkJICByZXR1cm4gTlVMTDsK
+IAkJCXJldHVybiAiZGlmZmVyZW50IGJhc2UgdHlwZXMiOwogCQljYXNlIFNZTV9BUlJBWToKIAkJ
+CS8qIFhYWDogd2Ugb3VnaHQgdG8gY29tcGFyZSBzaXplcyAqLwo=
+------=_Part_12976_22292513.1206992199941
+Content-Type: application/octet-stream; name=Wmix-decl-code.diff
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fehfz0ny1
+Content-Disposition: attachment; filename=Wmix-decl-code.diff
 
-So far the burden to maintain these __must_hold() annotations was feasible 
-on the kernel code we develop and maintain here.
+VGhpcyBhZGRzIC1XW25vLV1taXgtZGVjbC1jb2RlLCB3aGljaCBtYWtlcyB3YXJuaW5ncyBhYm91
+dCBkZWNsYXJhdGlvbnMKYWZ0ZXIgc3RhdGVtZW50cyBhIGNvbW1hbmQtbGluZSBvcHRpb24uIChU
+aGUgY29kZSB0byBpbXBsZW1lbnQgdGhlCndhcm5pbmcgd2FzIGFscmVhZHkgaW4gdGhlcmUgdmlh
+IGEgI2RlZmluZTsgdGhlIHBhdGNoIGp1c3QgZXhwb3NlcyBpdAphdCBydW50aW1lLikgUmF0aW9u
+YWxlOiBDOTkgYWxsb3dzIHRoZW0sIEM4OSBkb2Vzbid0LgoKU2lnbmVkLW9mZi1ieTogR2VvZmYg
+Sm9obnN0b25lIDxnZW9mZlNIRUVQLmpvaG5zdG9uZUZST0dAZ29vZ2xlbWFpbC5jb20+CgoKZGlm
+ZiAtdXIgc3BhcnNlLTAuNC4xLXZhbmlsbGEvY2djYyBzcGFyc2UtMC40LjEvY2djYwotLS0gc3Bh
+cnNlLTAuNC4xLXZhbmlsbGEvY2djYwkyMDA3LTExLTEzIDEyOjE3OjQ5LjAwMDAwMDAwMCArMDAw
+MAorKysgc3BhcnNlLTAuNC4xL2NnY2MJMjAwOC0wMy0zMCAxNToxMjo0My43NTgwMjgzMzYgKzAx
+MDAKQEAgLTY5LDcgKzY5LDcgQEAKIAogc3ViIGNoZWNrX29ubHlfb3B0aW9uIHsKICAgICBteSAo
+JGFyZykgPSBAXzsKLSAgICByZXR1cm4gMSBpZiAkYXJnID1+IC9eLVcobm8tPyk/KGRlZmF1bHQt
+Yml0ZmllbGQtc2lnbnxvbmUtYml0LXNpZ25lZC1iaXRmaWVsZHxjYXN0LXRydW5jYXRlfGJpdHdp
+c2V8dHlwZXNpZ258Y29udGV4dHx1bmRlZnxwdHItc3VidHJhY3Rpb24tYmxvd3N8Y2FzdC10by1h
+c3xkZWNsfHRyYW5zcGFyZW50LXVuaW9ufGFkZHJlc3Mtc3BhY2V8ZW51bS1taXNtYXRjaHxkby13
+aGlsZXxvbGQtaW5pdGlhbGl6ZXJ8bm9uLXBvaW50ZXItbnVsbHxwYXJlbi1zdHJpbmd8cmV0dXJu
+LXZvaWQpJC87CisgICAgcmV0dXJuIDEgaWYgJGFyZyA9fiAvXi1XKG5vLT8pPyhkZWZhdWx0LWJp
+dGZpZWxkLXNpZ258b25lLWJpdC1zaWduZWQtYml0ZmllbGR8Y2FzdC10cnVuY2F0ZXxiaXR3aXNl
+fHR5cGVzaWdufGNvbnRleHR8dW5kZWZ8cHRyLXN1YnRyYWN0aW9uLWJsb3dzfGNhc3QtdG8tYXN8
+ZGVjbHx0cmFuc3BhcmVudC11bmlvbnxhZGRyZXNzLXNwYWNlfGVudW0tbWlzbWF0Y2h8ZG8td2hp
+bGV8b2xkLWluaXRpYWxpemVyfG5vbi1wb2ludGVyLW51bGx8cGFyZW4tc3RyaW5nfHJldHVybi12
+b2lkfG1peC1kZWNsLWNvZGUpJC87CiAgICAgcmV0dXJuIDEgaWYgJGFyZyA9fiAvXi12KG5vLT8p
+PyhlbnRyeXxkZWFkKSQvOwogICAgIHJldHVybiAwOwogfQpkaWZmIC11ciBzcGFyc2UtMC40LjEt
+dmFuaWxsYS9saWIuYyBzcGFyc2UtMC40LjEvbGliLmMKLS0tIHNwYXJzZS0wLjQuMS12YW5pbGxh
+L2xpYi5jCTIwMDctMTEtMTMgMTI6MTc6NDkuMDAwMDAwMDAwICswMDAwCisrKyBzcGFyc2UtMC40
+LjEvbGliLmMJMjAwOC0wMy0zMCAxNToxMjo0My43NTkwMjgxODQgKzAxMDAKQEAgLTIwOCw2ICsy
+MDgsNyBAQAogaW50IFd0eXBlc2lnbiA9IDA7CiBpbnQgV3VuZGVmID0gMDsKIGludCBXdW5pbml0
+aWFsaXplZCA9IDE7CitpbnQgV21peGRlY2xjb2RlID0gMTsKIAogaW50IGRiZ19lbnRyeSA9IDA7
+CiBpbnQgZGJnX2RlYWQgPSAwOwpAQCAtMzY2LDYgKzM2Nyw3IEBACiAJeyAidHlwZXNpZ24iLCAm
+V3R5cGVzaWduIH0sCiAJeyAidW5kZWYiLCAmV3VuZGVmIH0sCiAJeyAidW5pbml0aWFsaXplZCIs
+ICZXdW5pbml0aWFsaXplZCB9LAorCXsgIm1peC1kZWNsLWNvZGUiLCAmV21peGRlY2xjb2RlIH0s
+CiB9OwogCiBlbnVtIHsKZGlmZiAtdXIgc3BhcnNlLTAuNC4xLXZhbmlsbGEvbGliLmggc3BhcnNl
+LTAuNC4xL2xpYi5oCi0tLSBzcGFyc2UtMC40LjEtdmFuaWxsYS9saWIuaAkyMDA3LTExLTEzIDEy
+OjE3OjQ5LjAwMDAwMDAwMCArMDAwMAorKysgc3BhcnNlLTAuNC4xL2xpYi5oCTIwMDgtMDMtMzAg
+MTU6MTI6NDMuNzU5MDI4MTg0ICswMTAwCkBAIC0xMDgsNiArMTA4LDcgQEAKIGV4dGVybiBpbnQg
+V3R5cGVzaWduOwogZXh0ZXJuIGludCBXdW5kZWY7CiBleHRlcm4gaW50IFd1bmluaXRpYWxpemVk
+OworZXh0ZXJuIGludCBXbWl4ZGVjbGNvZGU7CiAKIGV4dGVybiBpbnQgZGJnX2VudHJ5OwogZXh0
+ZXJuIGludCBkYmdfZGVhZDsKZGlmZiAtdXIgc3BhcnNlLTAuNC4xLXZhbmlsbGEvcGFyc2UuYyBz
+cGFyc2UtMC40LjEvcGFyc2UuYwotLS0gc3BhcnNlLTAuNC4xLXZhbmlsbGEvcGFyc2UuYwkyMDA3
+LTExLTEzIDEyOjE3OjQ5LjAwMDAwMDAwMCArMDAwMAorKysgc3BhcnNlLTAuNC4xL3BhcnNlLmMJ
+MjAwOC0wMy0zMCAxNToxMjo0My43NjEwMjc4NzkgKzAxMDAKQEAgLTI4LDggKzI4LDYgQEAKICNp
+bmNsdWRlICJleHByZXNzaW9uLmgiCiAjaW5jbHVkZSAidGFyZ2V0LmgiCiAKLSNkZWZpbmUgd2Fy
+bl9vbl9taXhlZCAoMSkKLQogc3RhdGljIHN0cnVjdCBzeW1ib2xfbGlzdCAqKmZ1bmN0aW9uX3N5
+bWJvbF9saXN0Owogc3RydWN0IHN5bWJvbF9saXN0ICpmdW5jdGlvbl9jb21wdXRlZF90YXJnZXRf
+bGlzdDsKIHN0cnVjdCBzdGF0ZW1lbnRfbGlzdCAqZnVuY3Rpb25fY29tcHV0ZWRfZ290b19saXN0
+OwpAQCAtMTgxMCw3ICsxODA4LDcgQEAKIAkJCXN0bXQgPSBhbGxvY19zdGF0ZW1lbnQodG9rZW4t
+PnBvcywgU1RNVF9ERUNMQVJBVElPTik7CiAJCQl0b2tlbiA9IGV4dGVybmFsX2RlY2xhcmF0aW9u
+KHRva2VuLCAmc3RtdC0+ZGVjbGFyYXRpb24pOwogCQl9IGVsc2UgewotCQkJc2Vlbl9zdGF0ZW1l
+bnQgPSB3YXJuX29uX21peGVkOworCQkJc2Vlbl9zdGF0ZW1lbnQgPSBXbWl4ZGVjbGNvZGU7CiAJ
+CQl0b2tlbiA9IHN0YXRlbWVudCh0b2tlbiwgJnN0bXQpOwogCQl9CiAJCWFkZF9zdGF0ZW1lbnQo
+bGlzdCwgc3RtdCk7CmRpZmYgLXVyIHNwYXJzZS0wLjQuMS12YW5pbGxhL3NwYXJzZS4xIHNwYXJz
+ZS0wLjQuMS9zcGFyc2UuMQotLS0gc3BhcnNlLTAuNC4xLXZhbmlsbGEvc3BhcnNlLjEJMjAwNy0x
+MS0xMyAxMjoxNzo0OS4wMDAwMDAwMDAgKzAwMDAKKysrIHNwYXJzZS0wLjQuMS9zcGFyc2UuMQky
+MDA4LTAzLTMwIDE1OjEzOjEzLjYxNDQ3MzU0OCArMDEwMApAQCAtMTQ4LDYgKzE0OCwxNSBAQAog
+XGZCXC1Xbm9cLW5vblwtcG9pbnRlclwtbnVsbFxmUi4KIC4KIC5UUAorLkIgXC1XbWl4LWRlY2wt
+Y29kZQorV2FybiBhYm91dCBkZWNsYXJhdGlvbnMgdGhhdCBhcmUgbm90IGF0IHRoZSBzdGFydCBv
+ZiBhIGJsb2NrLgorCitUaGVzZSBkZWNsYXJhdGlvbnMgYXJlIHBlcm1pdHRlZCBpbiBDOTkgYnV0
+IG5vdCBpbiBDODkuCisKK1NwYXJzZSBpc3N1ZXMgdGhlc2Ugd2FybmluZ3MgYnkgZGVmYXVsdC4g
+IFRvIHR1cm4gdGhlbSBvZmYsIHVzZQorXGZCXC1Xbm9cLW1peFwtZGVjbFwtY29kZVxmUi4KKy4K
+Ky5UUAogLkIgXC1Xb2xkXC1pbml0aWFsaXplcgogV2FybiBhYm91dCB0aGUgdXNlIG9mIHRoZSBw
+cmUtQzk5IEdDQyBzeW50YXggZm9yIGRlc2lnbmF0ZWQgaW5pdGlhbGl6ZXJzLgogCg==
+------=_Part_12976_22292513.1206992199941
+Content-Type: application/octet-stream; name=standard-c.diff
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fehfz6fr2
+Content-Disposition: attachment; filename=standard-c.diff
 
-A complete example is included in the patch: validation/context_requirement.c
+VGhpcyBhZGRzIHN1cHBvcnQgZm9yIEdDQydzIC1zdGQ9Li4uIGFuZCAtYW5zaSBjb21tYW5kIGxp
+bmUgb3B0aW9ucywKaS5lLiBkZWZpbmluZyBfX1NURENfVkVSU0lPTl9fIGFuZCBfX1NUUklDVF9B
+TlNJX18gYXBwcm9wcmlhdGVseS4KIApUaGlzIG1lYW5zIHRoYXQgY29kZSB0aGF0IGludm9rZXMg
+I2Vycm9yIGlmIF9fU1REQ19WRVJTSU9OX18gPCAxOTk5MDFMCndpbGwgd29yay4gSXQgd2lsbCBw
+cm9iYWJseSBhbHNvIGFmZmVjdCB0aGUgdXNlcmxhbmQgaGVhZGVyIGZpbGVzIHRvby4KIAooV21p
+eC1kZWNsLWNvZGUncyBkZWZhdWx0IHNob3VsZCBwcm9iYWJseSBkZXBlbmQgb24gdGhpcywgYnV0
+IEkndmUKZGVmYXVsdGVkIHRoYXQgdG8gb24gZm9yIGNvbXBhdGliaWxpdHkgd2l0aCB2YW5pbGxh
+IDAuNC4xLikKClNpZ25lZC1vZmYtYnk6IEdlb2ZmIEpvaG5zdG9uZSA8Z2VvZmZTSEVFUC5qb2hu
+c3RvbmVGUk9HQGdvb2dsZW1haWwuY29tPgoKZGlmZiAtdXIgc3BhcnNlLTAuNC4xLXZhbmlsbGEv
+bGliLmMgc3BhcnNlLTAuNC4xL2xpYi5jCi0tLSBzcGFyc2UtMC40LjEtdmFuaWxsYS9saWIuYwky
+MDA3LTExLTEzIDEyOjE3OjQ5LjAwMDAwMDAwMCArMDAwMAorKysgc3BhcnNlLTAuNC4xL2xpYi5j
+CTIwMDgtMDMtMzAgMTU6MTk6MDkuNjk1MTUxMjA4ICswMTAwCkBAIC0yMTQsNiArMjE0LDEyIEBA
+CiAKIGludCBwcmVwcm9jZXNzX29ubHk7CiAKK3N0YXRpYyBlbnVtIHsgU1RBTkRBUkRfQzg5LAor
+ICAgICAgICAgICAgICBTVEFOREFSRF9DOTQsCisgICAgICAgICAgICAgIFNUQU5EQVJEX0M5OSwK
+KyAgICAgICAgICAgICAgU1RBTkRBUkRfR05VODksCisgICAgICAgICAgICAgIFNUQU5EQVJEX0dO
+VTk5LCB9IHN0YW5kYXJkID0gU1RBTkRBUkRfR05VODk7CisKICNkZWZpbmUgQ01ETElORV9JTkNM
+VURFIDIwCiBpbnQgY21kbGluZV9pbmNsdWRlX25yID0gMDsKIHN0cnVjdCBjbWRsaW5lX2luY2x1
+ZGUgY21kbGluZV9pbmNsdWRlW0NNRExJTkVfSU5DTFVERV07CkBAIC00OTUsNiArNTAxLDQ2IEBA
+CiAJCXJldHVybiBuZXh0OyAgICAgLy8gIi1HMCIgb3IgKGJvZ3VzKSB0ZXJtaW5hbCAiLUciCiB9
+CiAKK3N0YXRpYyBjaGFyICoqaGFuZGxlX3N3aXRjaF9hKGNoYXIgKmFyZywgY2hhciAqKm5leHQp
+Cit7CisJaWYgKCFzdHJjbXAgKGFyZywgImFuc2kiKSkKKwkJc3RhbmRhcmQgPSBTVEFOREFSRF9D
+ODk7CisKKwlyZXR1cm4gbmV4dDsKK30KKworc3RhdGljIGNoYXIgKipoYW5kbGVfc3dpdGNoX3Mo
+Y2hhciAqYXJnLCBjaGFyICoqbmV4dCkKK3sKKwlpZiAoIXN0cm5jbXAgKGFyZywgInN0ZD0iLCA0
+KSkKKwl7CisJCWFyZyArPSA0OworCisJCWlmICghc3RyY21wIChhcmcsICJjODkiKSB8fAorCQkg
+ICAgIXN0cmNtcCAoYXJnLCAiaXNvOTg5OToxOTkwIikpCisJCQlzdGFuZGFyZCA9IFNUQU5EQVJE
+X0M4OTsKKworCQllbHNlIGlmICghc3RyY21wIChhcmcsICJpc285ODk5OjE5OTQwOSIpKQorCQkJ
+c3RhbmRhcmQgPSBTVEFOREFSRF9DOTQ7CisKKwkJZWxzZSBpZiAoIXN0cmNtcCAoYXJnLCAiYzk5
+IikgfHwKKwkJCSAhc3RyY21wIChhcmcsICJjOXgiKSB8fAorCQkJICFzdHJjbXAgKGFyZywgImlz
+bzk4OTk6MTk5OSIpIHx8CisJCQkgIXN0cmNtcCAoYXJnLCAiaXNvOTg5OToxOTl4IikpCisJCQlz
+dGFuZGFyZCA9IFNUQU5EQVJEX0M5OTsKKworCQllbHNlIGlmICghc3RyY21wIChhcmcsICJnbnU4
+OSIpKQorCQkJc3RhbmRhcmQgPSBTVEFOREFSRF9HTlU4OTsKKworCQllbHNlIGlmICghc3RyY21w
+IChhcmcsICJnbnU5OSIpIHx8ICFzdHJjbXAgKGFyZywgImdudTl4IikpCisJCQlzdGFuZGFyZCA9
+IFNUQU5EQVJEX0dOVTk5OworCisJCWVsc2UKKwkJCWRpZSAoIlVuc3VwcG9ydGVkIEMgZGlhbGVj
+dCIpOworCX0KKworCXJldHVybiBuZXh0OworfQorCiBzdGF0aWMgY2hhciAqKmhhbmRsZV9ub3N0
+ZGluYyhjaGFyICphcmcsIGNoYXIgKipuZXh0KQogewogCWFkZF9wcmVfYnVmZmVyKCIjbm9zdGRp
+bmNcbiIpOwpAQCAtNTM4LDYgKzU4NCw4IEBACiAJY2FzZSAnTyc6IHJldHVybiBoYW5kbGVfc3dp
+dGNoX08oYXJnLCBuZXh0KTsKIAljYXNlICdmJzogcmV0dXJuIGhhbmRsZV9zd2l0Y2hfZihhcmcs
+IG5leHQpOwogCWNhc2UgJ0cnOiByZXR1cm4gaGFuZGxlX3N3aXRjaF9HKGFyZywgbmV4dCk7CisJ
+Y2FzZSAnYSc6IHJldHVybiBoYW5kbGVfc3dpdGNoX2EoYXJnLCBuZXh0KTsKKwljYXNlICdzJzog
+cmV0dXJuIGhhbmRsZV9zd2l0Y2hfcyhhcmcsIG5leHQpOwogCWRlZmF1bHQ6CiAJCWJyZWFrOwog
+CX0KQEAgLTYxMyw2ICs2NjEsMzMgQEAKIAkJYWRkX3ByZV9idWZmZXIoIiN3ZWFrX2RlZmluZSBf
+X1NJWkVfVFlQRV9fIHVuc2lnbmVkIGludFxuIik7CiAJYWRkX3ByZV9idWZmZXIoIiN3ZWFrX2Rl
+ZmluZSBfX1NURENfXyAxXG4iKTsKIAorCXN3aXRjaCAoc3RhbmRhcmQpCisJeworCQljYXNlIFNU
+QU5EQVJEX0M4OToKKwkJCWFkZF9wcmVfYnVmZmVyKCIjd2Vha19kZWZpbmUgX19TVFJJQ1RfQU5T
+SV9fXG4iKTsKKwkJCWJyZWFrOworCisJCWNhc2UgU1RBTkRBUkRfQzk0OgorCQkJYWRkX3ByZV9i
+dWZmZXIoIiN3ZWFrX2RlZmluZSBfX1NURENfVkVSU0lPTl9fIDE5OTQwOUxcbiIpOworCQkJYWRk
+X3ByZV9idWZmZXIoIiN3ZWFrX2RlZmluZSBfX1NUUklDVF9BTlNJX19cbiIpOworCQkJYnJlYWs7
+CisKKwkJY2FzZSBTVEFOREFSRF9DOTk6CisJCQlhZGRfcHJlX2J1ZmZlcigiI3dlYWtfZGVmaW5l
+IF9fU1REQ19WRVJTSU9OX18gMTk5OTAxTFxuIik7CisJCQlhZGRfcHJlX2J1ZmZlcigiI3dlYWtf
+ZGVmaW5lIF9fU1RSSUNUX0FOU0lfX1xuIik7CisJCQlicmVhazsKKworCQljYXNlIFNUQU5EQVJE
+X0dOVTg5OgorCQkJYnJlYWs7CisKKwkJY2FzZSBTVEFOREFSRF9HTlU5OToKKwkJCWFkZF9wcmVf
+YnVmZmVyKCIjd2Vha19kZWZpbmUgX19TVERDX1ZFUlNJT05fXyAxOTk5MDFMXG4iKTsKKwkJCWJy
+ZWFrOworCisJCWRlZmF1bHQ6CisJCQlhc3NlcnQgKDApOworCX0KKwogCWFkZF9wcmVfYnVmZmVy
+KCIjZGVmaW5lIF9fYnVpbHRpbl9zdGRhcmdfc3RhcnQoYSxiKSAoKGEpID0gKF9fYnVpbHRpbl92
+YV9saXN0KSgmKGIpKSlcbiIpOwogCWFkZF9wcmVfYnVmZmVyKCIjZGVmaW5lIF9fYnVpbHRpbl92
+YV9zdGFydChhLGIpICgoYSkgPSAoX19idWlsdGluX3ZhX2xpc3QpKCYoYikpKVxuIik7CiAJYWRk
+X3ByZV9idWZmZXIoIiNkZWZpbmUgX19idWlsdGluX3ZhX2FyZyhhcmcsdHlwZSkgICh7IHR5cGUg
+X192YV9hcmdfcmV0ID0gKih0eXBlICopKGFyZyk7IGFyZyArPSBzaXplb2YodHlwZSk7IF9fdmFf
+YXJnX3JldDsgfSlcbiIpOwo=
+------=_Part_12976_22292513.1206992199941
+Content-Type: application/octet-stream; name=fortify-builtins.diff
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fehfzbkx3
+Content-Disposition: attachment; filename=fortify-builtins.diff
 
--Phil
-
-commit 17978b26f051dcdbd4de498cd464a3acbc272c3c
-Author: Philipp Reisner <philipp.reisner@linbit.com>
-Date:   Mon Mar 31 13:21:02 2008 +0200
-
-    Implemented the require_context attribute
-    
-    The require_context attribute allowes you to annotate variables,
-    struct members or union members and functions with context requirements.
-    
-    This patch does not change the single pass nature of sparse, i.e.
-    sparse does not find out on its own that a function that accesses
-    an annotated variable is only called with the appropriate lock
-    held. One has to annotate the functions that get called with
-    a locks held as well.
-    
-    Signed-off-by: Philipp Reisner <philipp.reisner@linbit.com>
-
-diff --git a/allocate.c b/allocate.c
-index 5cc52a9..198297b 100644
---- a/allocate.c
-+++ b/allocate.c
-@@ -114,6 +114,7 @@ void show_allocations(struct allocator_struct *x)
- ALLOCATOR(ident, "identifiers");
- ALLOCATOR(token, "tokens");
- ALLOCATOR(context, "contexts");
-+ALLOCATOR(context_requirement, "context requirements");
- ALLOCATOR(symbol, "symbols");
- ALLOCATOR(expression, "expressions");
- ALLOCATOR(statement, "statements");
-diff --git a/allocate.h b/allocate.h
-index 9f1dc8c..8fa3efd 100644
---- a/allocate.h
-+++ b/allocate.h
-@@ -65,6 +65,7 @@ extern void show_allocations(struct allocator_struct *);
- DECLARE_ALLOCATOR(ident);
- DECLARE_ALLOCATOR(token);
- DECLARE_ALLOCATOR(context);
-+DECLARE_ALLOCATOR(context_requirement);
- DECLARE_ALLOCATOR(symbol);
- DECLARE_ALLOCATOR(expression);
- DECLARE_ALLOCATOR(statement);
-diff --git a/linearize.c b/linearize.c
-index 8a68f05..6d401df 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -239,6 +239,7 @@ static const char *opcodes[] = {
- 
- 	/* Sparse tagging (line numbers, context, whatever) */
- 	[OP_CONTEXT] = "context",
-+	[OP_CONTEXT_REQ] = "context req",
- 	[OP_RANGE] = "range-check",
- 
- 	[OP_COPY] = "copy",
-@@ -441,6 +442,9 @@ const char *show_instruction(struct instruction *insn)
- 	case OP_CONTEXT:
- 		buf += sprintf(buf, "%s%d", insn->check ? "check: " : "", insn->increment);
- 		break;
-+	case OP_CONTEXT_REQ:
-+		buf += sprintf(buf, "%d to %d, type %d", insn->ctx_req->min, insn->ctx_req->max, insn->access_type);
-+		break;
- 	case OP_RANGE:
- 		buf += sprintf(buf, "%s between %s..%s", show_pseudo(insn->src1), show_pseudo(insn->src2), show_pseudo(insn->src3));
- 		break;
-@@ -838,6 +842,7 @@ struct access_data {
- 	unsigned int offset, alignment;	// byte offset
- 	unsigned int bit_size, bit_offset; // which bits
- 	struct position pos;
-+	struct ctx_req_list *ctx_reqs;    // required contexts
- };
- 
- static void finish_address_gen(struct entrypoint *ep, struct access_data *ad)
-@@ -883,9 +888,14 @@ static int linearize_address_gen(struct entrypoint *ep,
- 	struct access_data *ad)
- {
- 	struct symbol *ctype = expr->ctype;
-+	struct ctype *ctc = NULL;
- 
- 	if (!ctype)
- 		return 0;
-+
-+	ctc = &ctype->ctype;
-+	if (ctc)
-+		ad->ctx_reqs = ctc->ctx_reqs;
- 	ad->pos = expr->pos;
- 	ad->result_type = ctype;
- 	ad->source_type = base_type(ctype);
-@@ -937,6 +947,7 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
- 		struct access_data *ad)
- {
- 	pseudo_t store = value;
-+	struct context_requirement *ctx_req;
- 
- 	if (type_size(ad->source_type) != type_size(ad->result_type)) {
- 		pseudo_t orig = add_load(ep, ad);
-@@ -950,6 +961,19 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
- 		orig = add_binary_op(ep, ad->source_type, OP_AND, orig, value_pseudo(~mask));
- 		store = add_binary_op(ep, ad->source_type, OP_OR, orig, store);
- 	}
-+	if (ad->ctx_reqs) {
-+		struct instruction *insn;
-+		FOR_EACH_PTR(ad->ctx_reqs, ctx_req) {
-+			if (ctx_req->access_type == WRITE ||
-+			    ctx_req->access_type == RDWR) {
-+				insn = alloc_instruction(OP_CONTEXT_REQ, 0);
-+				insn->ctx_req = ctx_req;
-+				insn->access_type = WRITE;
-+				add_one_insn(ep, insn);
-+			}
-+		} END_FOR_EACH_PTR(ctx_req);
-+
-+	}
- 	add_store(ep, ad, store);
- 	return value;
- }
-@@ -988,14 +1012,30 @@ static pseudo_t add_symbol_address(struct entrypoint *ep, struct symbol *sym)
- 
- static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad)
- {
--	pseudo_t new = add_load(ep, ad);
-+	pseudo_t new;
-+	struct context_requirement *ctx_req;
-+
-+	if (ad->ctx_reqs) {
-+		struct instruction *insn;
-+		FOR_EACH_PTR(ad->ctx_reqs, ctx_req) {
-+			if (ctx_req->access_type == READ ||
-+			    ctx_req->access_type == RDWR) {
-+				insn = alloc_instruction(OP_CONTEXT_REQ, 0);
-+				insn->ctx_req = ctx_req;
-+				insn->access_type = READ;
-+				add_one_insn(ep, insn);
-+			}
-+		} END_FOR_EACH_PTR(ctx_req);
-+
-+	}
-+	new = add_load(ep, ad);
- 
- 	if (ad->bit_offset) {
- 		pseudo_t shift = value_pseudo(ad->bit_offset);
- 		pseudo_t newval = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
- 		new = newval;
- 	}
--		
-+
- 	return new;
- }
- 
-@@ -1194,6 +1234,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
- 	pseudo_t retval, call;
- 	struct ctype *ctype = NULL;
- 	struct context *context;
-+	struct context_requirement *ctx_req;
- 
- 	if (!expr->ctype) {
- 		warning(expr->pos, "call with no type!");
-@@ -1210,6 +1251,17 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
- 	if (fn->ctype)
- 		ctype = &fn->ctype->ctype;
- 
-+	if (ctype) {
-+		FOR_EACH_PTR(ctype->ctx_reqs, ctx_req) {
-+			struct instruction *cinsn;
-+
-+			cinsn = alloc_instruction(OP_CONTEXT_REQ, 0);
-+			cinsn->ctx_req = ctx_req;
-+			cinsn->access_type = CALL;
-+			add_one_insn(ep, cinsn);
-+		} END_FOR_EACH_PTR(ctx_req);
-+	}
-+
- 	if (fn->type == EXPR_PREOP) {
- 		if (fn->unop->type == EXPR_SYMBOL) {
- 			struct symbol *sym = fn->unop->symbol;
-@@ -1235,6 +1287,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
- 			int out = context->out;
- 			int check = 0;
- 			int context_diff;
-+
- 			if (in < 0) {
- 				check = 1;
- 				in = 0;
-diff --git a/linearize.h b/linearize.h
-index 7b2961b..3a36338 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -124,6 +124,11 @@ struct instruction {
- 			const char *string;
- 			struct asm_rules *asm_rules;
- 		};
-+		struct /* context_req */ {
-+			int access_type;
-+			struct context_requirement* ctx_req;
-+		};
-+
- 	};
- };
- 
-@@ -212,6 +217,7 @@ enum opcode {
- 
- 	/* Sparse tagging (line numbers, context, whatever) */
- 	OP_CONTEXT,
-+	OP_CONTEXT_REQ,
- 	OP_RANGE,
- 
- 	/* Needed to translate SSA back to normal form */
-diff --git a/parse.c b/parse.c
-index a41939d..467dc49 100644
---- a/parse.c
-+++ b/parse.c
-@@ -66,6 +66,7 @@ static struct token *attribute_address_space(struct token *token, struct symbol
- static struct token *attribute_aligned(struct token *token, struct symbol *attr, struct ctype *ctype);
- static struct token *attribute_mode(struct token *token, struct symbol *attr, struct ctype *ctype);
- static struct token *attribute_context(struct token *token, struct symbol *attr, struct ctype *ctype);
-+static struct token *attribute_require_context(struct token *token, struct symbol *attr, struct ctype *ctype);
- static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct ctype *ctype);
- static struct token *ignore_attribute(struct token *token, struct symbol *attr, struct ctype *ctype);
- 
-@@ -184,6 +185,10 @@ static struct symbol_op context_op = {
- 	.attribute = attribute_context,
- };
- 
-+static struct symbol_op require_context_op = {
-+	.attribute = attribute_require_context,
-+};
-+
- static struct symbol_op transparent_union_op = {
- 	.attribute = attribute_transparent_union,
- };
-@@ -265,6 +270,7 @@ static struct init_keyword {
- 	{ "address_space",NS_KEYWORD,	.op = &address_space_op },
- 	{ "mode",	NS_KEYWORD,	.op = &mode_op },
- 	{ "context",	NS_KEYWORD,	.op = &context_op },
-+	{ "require_context",	NS_KEYWORD,	.op = &require_context_op },
- 	{ "__transparent_union__",	NS_KEYWORD,	.op = &transparent_union_op },
- 
- 	{ "__mode__",	NS_KEYWORD,	.op = &mode_op },
-@@ -907,6 +913,72 @@ static struct token *attribute_context(struct token *token, struct symbol *attr,
- 	return token;
- }
- 
-+static int token_to_accesstype(struct token *token)
-+{
-+	static const char *at_text[] = {
-+		[READ]  = "\"read\"",
-+		[WRITE] = "\"write\"",
-+		[RDWR]  = "\"rdwr\"",
-+		[CALL]  = "\"call\""
-+	};
-+	const char *ats;
-+	int i;
-+
-+	if (token_type(token) != TOKEN_STRING)
-+		goto err;
-+
-+	ats = show_token(token);
-+	for (i = 0; i < sizeof at_text/sizeof at_text[0]; i++) {
-+		if (!strcmp(ats,at_text[i]))
-+			return i;
-+	}
-+
-+err:
-+	sparse_error(token->pos, "Expected \"read\", \"write\", \"rdwr\" or \"call\""
-+		     " as 4th argument of require_context");
-+
-+	return RDWR;
-+}
-+
-+static struct token *attribute_require_context(struct token *token, struct symbol *attr, struct ctype *ctype)
-+{
-+	struct context_requirement *ctx_req = alloc_context_requirement();
-+	struct expression *args[3];
-+	int argc = 0;
-+
-+	token = expect(token, '(', "after require_context attribute");
-+	while (!match_op(token, ')')) {
-+		struct expression *expr = NULL;
-+		if (argc < 3) {
-+			token = conditional_expression(token, &expr);
-+			if (!expr)
-+				break;
-+		} else {
-+			ctx_req->access_type = token_to_accesstype(token);
-+			token = token->next;
-+			argc++;
-+		}
-+
-+		if (argc < 3)
-+			args[argc++] = expr;
-+		if (!match_op(token, ','))
-+			break;
-+		token = token->next;
-+	}
-+
-+	if (argc == 4) {
-+		ctx_req->context = args[0];
-+		ctx_req->min = get_expression_value(args[1]);
-+		ctx_req->max = get_expression_value(args[2]);
-+		add_ptr_list(&ctype->ctx_reqs, ctx_req);
-+	} else
-+		sparse_error(token->pos, "expected context name, min, max and type values");
-+
-+	token = expect(token, ')', "after context attribute");
-+	return token;
-+}
-+
-+
- static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct ctype *ctype)
- {
- 	if (Wtransparent_union)
-@@ -1039,6 +1111,8 @@ static void apply_ctype(struct position pos, struct ctype *thistype, struct ctyp
- 	/* Context */
- 	concat_ptr_list((struct ptr_list *)thistype->contexts,
- 	                (struct ptr_list **)&ctype->contexts);
-+	concat_ptr_list((struct ptr_list *)thistype->ctx_reqs,
-+	                (struct ptr_list **)&ctype->ctx_reqs);
- 
- 	/* Alignment */
- 	if (thistype->alignment & (thistype->alignment-1)) {
-@@ -1246,6 +1320,8 @@ static struct token *pointer(struct token *token, struct ctype *ctype)
- 		ptr->ctype.as = ctype->as;
- 		concat_ptr_list((struct ptr_list *)ctype->contexts,
- 				(struct ptr_list **)&ptr->ctype.contexts);
-+		concat_ptr_list((struct ptr_list *)ctype->ctx_reqs,
-+				(struct ptr_list **)&ptr->ctype.ctx_reqs);
- 		ptr->ctype.base_type = base_type;
- 
- 		base_type = ptr;
-@@ -1253,6 +1329,7 @@ static struct token *pointer(struct token *token, struct ctype *ctype)
- 		ctype->base_type = base_type;
- 		ctype->as = 0;
- 		free_ptr_list(&ctype->contexts);
-+		free_ptr_list(&ctype->ctx_reqs);
- 
- 		token = declaration_specifiers(token->next, ctype, 1);
- 		modifiers = ctype->modifiers;
-diff --git a/sparse.c b/sparse.c
-index 4026ba7..5cb4f11 100644
---- a/sparse.c
-+++ b/sparse.c
-@@ -24,6 +24,20 @@
- #include "expression.h"
- #include "linearize.h"
- 
-+static void out_of_context_access(struct basic_block *bb, struct instruction *insn, const char *why)
-+{
-+	static const char *at_text[] = {
-+		[READ] =  "read access",
-+		[WRITE] = "write access",
-+		[CALL]  = "call"
-+	};
-+
-+	if (Wcontext) {
-+		warning(insn->pos, "out of context %s in '%s' - context too %s",
-+			at_text[insn->access_type], show_ident(bb->ep->name->ident), why);
-+	}
-+}
-+
- static int context_increase(struct basic_block *bb, int entry)
- {
- 	int sum = 0;
-@@ -31,20 +45,28 @@ static int context_increase(struct basic_block *bb, int entry)
- 
- 	FOR_EACH_PTR(bb->insns, insn) {
- 		int val;
--		if (insn->opcode != OP_CONTEXT)
--			continue;
--		val = insn->increment;
--		if (insn->check) {
--			int current = sum + entry;
--			if (!val) {
--				if (!current)
-+		switch (insn->opcode) {
-+		case OP_CONTEXT:
-+			val = insn->increment;
-+			if (insn->check) {
-+				int current = sum + entry;
-+				if (!val) {
-+					if (!current)
-+						continue;
-+				} else if (current >= val)
- 					continue;
--			} else if (current >= val)
-+				warning(insn->pos, "context check failure");
- 				continue;
--			warning(insn->pos, "context check failure");
--			continue;
-+			}
-+			sum += val;
-+			break;
-+		case OP_CONTEXT_REQ:
-+			if (sum+entry < insn->ctx_req->min)
-+				out_of_context_access(bb, insn, "small");
-+			if (sum+entry > insn->ctx_req->max)
-+				out_of_context_access(bb, insn, "high");
-+			break;
- 		}
--		sum += val;
- 	} END_FOR_EACH_PTR(insn);
- 	return sum;
- }
-diff --git a/symbol.c b/symbol.c
-index 7539817..4564843 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -57,6 +57,11 @@ struct context *alloc_context(void)
- 	return __alloc_context(0);
- }
- 
-+struct context_requirement *alloc_context_requirement(void)
-+{
-+	return __alloc_context_requirement(0);
-+}
-+
- struct symbol *alloc_symbol(struct position pos, int type)
- {
- 	struct symbol *sym = __alloc_symbol(0);
-@@ -201,6 +206,8 @@ static struct symbol *examine_base_type(struct symbol *sym)
- 	sym->ctype.modifiers |= base_type->ctype.modifiers & MOD_PTRINHERIT;
- 	concat_ptr_list((struct ptr_list *)base_type->ctype.contexts,
- 			(struct ptr_list **)&sym->ctype.contexts);
-+	concat_ptr_list((struct ptr_list *)base_type->ctype.ctx_reqs,
-+			(struct ptr_list **)&sym->ctype.ctx_reqs);
- 	if (base_type->type == SYM_NODE) {
- 		base_type = base_type->ctype.base_type;
- 		sym->ctype.base_type = base_type;
-@@ -257,6 +264,8 @@ void merge_type(struct symbol *sym, struct symbol *base_type)
- 	sym->ctype.modifiers |= (base_type->ctype.modifiers & ~MOD_STORAGE);
- 	concat_ptr_list((struct ptr_list *)base_type->ctype.contexts,
- 	                (struct ptr_list **)&sym->ctype.contexts);
-+	concat_ptr_list((struct ptr_list *)base_type->ctype.ctx_reqs,
-+			(struct ptr_list **)&sym->ctype.ctx_reqs);
- 	sym->ctype.base_type = base_type->ctype.base_type;
- 	if (sym->ctype.base_type->type == SYM_NODE)
- 		merge_type(sym, sym->ctype.base_type);
-diff --git a/symbol.h b/symbol.h
-index 4362f9a..cdb2452 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -74,14 +74,23 @@ struct context {
- 	unsigned int in, out;
- };
- 
-+struct context_requirement {
-+	struct expression *context;
-+	unsigned int min, max;
-+	enum { READ, WRITE, RDWR, CALL } access_type;
-+};
-+
- extern struct context *alloc_context(void);
-+extern struct context_requirement *alloc_context_requirement(void);
- 
- DECLARE_PTR_LIST(context_list, struct context);
-+DECLARE_PTR_LIST(ctx_req_list, struct context_requirement);
- 
- struct ctype {
- 	unsigned long modifiers;
- 	unsigned long alignment;
- 	struct context_list *contexts;
-+	struct ctx_req_list *ctx_reqs;
- 	unsigned int as;
- 	struct symbol *base_type;
- };
-diff --git a/validation/context_requirement.c b/validation/context_requirement.c
-new file mode 100644
-index 0000000..24fe598
---- /dev/null
-+++ b/validation/context_requirement.c
-@@ -0,0 +1,185 @@
-+#ifdef __CHECKER__
-+# define __acquires(x)	__attribute__((context(x,0,1)))
-+# define __releases(x)	__attribute__((context(x,1,0)))
-+# define __acquire(x)	__context__(x,1)
-+# define __release(x)	__context__(x,-1)
-+# define __cond_lock(x,c)	((c) ? ({ __acquire(x); 1; }) : 0)
-+# define __protected_by(x)       __attribute__((require_context(x,1,1,"rdwr")))
-+# define __protected_read_by(x)  __attribute__((require_context(x,1,1,"read")))
-+# define __protected_write_by(x) __attribute__((require_context(x,1,1,"write")))
-+# define __must_hold(x)       __attribute__((context(x,1,1), require_context(x,1,1,"call")))
-+#else
-+# define __acquires(x)
-+# define __releases(x)
-+# define __acquire(x) (void)0
-+# define __release(x) (void)0
-+# define __cond_lock(x,c) (c)
-+# define __protected_by(x)
-+# define __protected_read_by(x)
-+# define __protected_write_by(x)
-+# define __must_hold(x)
-+#endif
-+
-+
-+#include <stdio.h>
-+#include <stdlib.h>
-+
-+static int to_protect __protected_by(local);
-+
-+static int local_cnt=0;
-+
-+static void inc_local(void) __acquires(local)
-+{
-+	__acquire(local);
-+	local_cnt++;
-+}
-+
-+
-+#define try_inc_local() __cond_lock(local, _try_inc_local())
-+static int _try_inc_local(void)
-+{
-+	if (random() > RAND_MAX/2) {
-+		local_cnt++;
-+		return 1;
-+	}
-+	return 0;
-+}
-+
-+#define dec_local(void) do { __release(local); _dec_local(); } while(0)
-+static void _dec_local(void)
-+{
-+	local_cnt--;
-+}
-+
-+static int valid1(void)
-+{
-+	inc_local();
-+	to_protect = 1;
-+	dec_local();
-+}
-+
-+static int valid2(void)
-+{
-+	inc_local();
-+	inc_local();
-+	dec_local();
-+	dec_local();
-+}
-+
-+static int valid3(void)
-+{
-+	if (try_inc_local()) {
-+		dec_local();
-+	}
-+}
-+
-+static int valid4(void)
-+{
-+	if ((random() > RAND_MAX/2) && try_inc_local()) {
-+		dec_local();
-+	}
-+}
-+
-+static int helper(void) __must_hold(local)
-+{
-+	to_protect = 1;
-+}
-+
-+static int valid5(void)
-+{
-+	inc_local();
-+	helper();
-+	dec_local();
-+}
-+
-+static int invalid0(void) __releases(local)
-+{
-+	if (random() > RAND_MAX/2)
-+		dec_local();
-+}
-+
-+static int invalid1(void)
-+{
-+	inc_local();
-+}
-+
-+static int invalid2(void)
-+{
-+	dec_local();
-+}
-+
-+static int invalid3(void)
-+{
-+	if (try_inc_local()) {
-+	}
-+	dec_local();
-+}
-+
-+static int invalid4(void)
-+{
-+	while (random() > RAND_MAX/2)
-+		inc_local();
-+
-+	dec_local();
-+}
-+
-+static int invalid5(void)
-+{
-+	try_inc_local();
-+	dec_local();
-+}
-+
-+static int invalid6(void)
-+{
-+	to_protect = 1;
-+	inc_local();
-+	dec_local();
-+}
-+
-+static int invalid7(void)
-+{
-+	inc_local();
-+	dec_local();
-+	to_protect = 1;
-+}
-+
-+static int invalid8(void)
-+{
-+	inc_local();
-+	inc_local();
-+	to_protect = 2;
-+	dec_local();
-+	dec_local();
-+}
-+
-+static int invalid9(void)
-+{
-+	int lv;
-+
-+	lv = to_protect;
-+	inc_local();
-+	dec_local();
-+}
-+
-+static int invalid10(void)
-+{
-+	helper();
-+}
-+
-+/*
-+ * check-name: Check -Wcontext
-+ *
-+ * check-error-start
-+context_requirement.c:97:2: warning: context imbalance in 'invalid0' - different lock contexts for basic block
-+context_requirement.c:101:12: warning: context imbalance in 'invalid1' - wrong count at exit
-+context_requirement.c:106:12: warning: context imbalance in 'invalid2' - unexpected unlock
-+context_requirement.c:113:6: warning: context imbalance in 'invalid3' - different lock contexts for basic block
-+context_requirement.c:120:2: warning: context imbalance in 'invalid4' - different lock contexts for basic block
-+context_requirement.c:129:2: warning: context imbalance in 'invalid5' - different lock contexts for basic block
-+context_requirement.c:134:15: warning: out of context write access in 'invalid6' - context too small
-+context_requirement.c:143:15: warning: out of context write access in 'invalid7' - context too small
-+context_requirement.c:150:15: warning: out of context write access in 'invalid8' - context too high
-+context_requirement.c:159:7: warning: out of context read access in 'invalid9' - context too small
-+context_requirement.c:166:8: warning: out of context call in 'invalid10' - context too small
-+ * check-error-end
-+ */
-
--- 
-: Dipl-Ing Philipp Reisner                      Tel +43-1-8178292-50 :
-: LINBIT Information Technologies GmbH          Fax +43-1-8178292-82 :
-: Vivenotgasse 48, 1120 Vienna, Austria        http://www.linbit.com :
+X19GT1JUSUZZX1NPVVJDRT0yIGNvbnZlcnRzIG1lbWNweSgpIGludG8gX19idWlsdGluX19fbWVt
+Y3B5X2NoaygpIGV0Yy4KVGhlIHBhdGNoIGFkZHMgc29tZS9hbGw/IG9mIHRoZSByZWxldmFudCBi
+dWlsdGluIHByb3RvdHlwZXMuCgpTaWduZWQtb2ZmLWJ5OiBHZW9mZiBKb2huc3RvbmUgPGdlb2Zm
+U0hFRVAuam9obnN0b25lRlJPR0Bnb29nbGVtYWlsLmNvbT4KCgpkaWZmIC11ciBzcGFyc2UtMC40
+LjEtdmFuaWxsYS9saWIuYyBzcGFyc2UtMC40LjEvbGliLmMKLS0tIHNwYXJzZS0wLjQuMS12YW5p
+bGxhL2xpYi5jCTIwMDctMTEtMTMgMTI6MTc6NDkuMDAwMDAwMDAwICswMDAwCisrKyBzcGFyc2Ut
+MC40LjEvbGliLmMJMjAwOC0wMy0zMCAxNToxMToxNS43MjI0NTg3MTQgKzAxMDAKQEAgLTU5Miw2
+ICs1OTIsMjIgQEAKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGxvbmcgX19idWlsdGluX2FscGhh
+X2luc2xoKGxvbmcsIGxvbmcpO1xuIik7CiAJYWRkX3ByZV9idWZmZXIoImV4dGVybiBsb25nIF9f
+YnVpbHRpbl9hbHBoYV9jbXBiZ2UobG9uZywgbG9uZyk7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigi
+ZXh0ZXJuIGxvbmcgX19idWlsdGluX2xhYnMobG9uZyk7XG4iKTsKKworCS8qIEFuZCBzb21lIF9f
+Rk9SVElGWV9TT1VSQ0Ugb25lcy4uICovCisJYWRkX3ByZV9idWZmZXIgKCJleHRlcm4gX19TSVpF
+X1RZUEVfXyBfX2J1aWx0aW5fb2JqZWN0X3NpemUodm9pZCAqLCBpbnQpO1xuIik7CisJYWRkX3By
+ZV9idWZmZXIgKCJleHRlcm4gdm9pZCAqIF9fYnVpbHRpbl9fX21lbWNweV9jaGsodm9pZCAqLCBj
+b25zdCB2b2lkICosIF9fU0laRV9UWVBFX18sIF9fU0laRV9UWVBFX18pO1xuIik7CisJYWRkX3By
+ZV9idWZmZXIgKCJleHRlcm4gdm9pZCAqIF9fYnVpbHRpbl9fX21lbW1vdmVfY2hrKHZvaWQgKiwg
+Y29uc3Qgdm9pZCAqLCBfX1NJWkVfVFlQRV9fLCBfX1NJWkVfVFlQRV9fKTtcbiIpOworCWFkZF9w
+cmVfYnVmZmVyICgiZXh0ZXJuIHZvaWQgKiBfX2J1aWx0aW5fX19tZW1wY3B5X2Noayh2b2lkICos
+IGNvbnN0IHZvaWQgKiwgX19TSVpFX1RZUEVfXywgX19TSVpFX1RZUEVfXyk7XG4iKTsKKwlhZGRf
+cHJlX2J1ZmZlciAoImV4dGVybiB2b2lkICogX19idWlsdGluX19fbWVtc2V0X2Noayh2b2lkICos
+IGludCwgX19TSVpFX1RZUEVfXywgX19TSVpFX1RZUEVfXyk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZl
+ciAoImV4dGVybiBpbnQgX19idWlsdGluX19fc3ByaW50Zl9jaGsoY2hhciAqLCBpbnQsIF9fU0la
+RV9UWVBFX18sIGNvbnN0IGNoYXIgKiwgLi4uKTtcbiIpOworCWFkZF9wcmVfYnVmZmVyICgiZXh0
+ZXJuIGludCBfX2J1aWx0aW5fX19zbnByaW50Zl9jaGsoY2hhciAqLCBfX1NJWkVfVFlQRV9fLCBp
+bnQgLCBfX1NJWkVfVFlQRV9fLCBjb25zdCBjaGFyICosIC4uLik7XG4iKTsKKwlhZGRfcHJlX2J1
+ZmZlciAoImV4dGVybiBjaGFyICogX19idWlsdGluX19fc3RwY3B5X2NoayhjaGFyICosIGNvbnN0
+IGNoYXIgKiwgX19TSVpFX1RZUEVfXyk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZlciAoImV4dGVybiBj
+aGFyICogX19idWlsdGluX19fc3RyY2F0X2NoayhjaGFyICosIGNvbnN0IGNoYXIgKiwgX19TSVpF
+X1RZUEVfXyk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZlciAoImV4dGVybiBjaGFyICogX19idWlsdGlu
+X19fc3RyY3B5X2NoayhjaGFyICosIGNvbnN0IGNoYXIgKiwgX19TSVpFX1RZUEVfXyk7XG4iKTsK
+KwlhZGRfcHJlX2J1ZmZlciAoImV4dGVybiBjaGFyICogX19idWlsdGluX19fc3RybmNhdF9jaGso
+Y2hhciAqLCBjb25zdCBjaGFyICosIF9fU0laRV9UWVBFX18sIF9fU0laRV9UWVBFX18pO1xuIik7
+CisJYWRkX3ByZV9idWZmZXIgKCJleHRlcm4gY2hhciAqIF9fYnVpbHRpbl9fX3N0cm5jcHlfY2hr
+KGNoYXIgKiwgY29uc3QgY2hhciAqLCBfX1NJWkVfVFlQRV9fLCBfX1NJWkVfVFlQRV9fKTtcbiIp
+OworCWFkZF9wcmVfYnVmZmVyICgiZXh0ZXJuIGludCBfX2J1aWx0aW5fX192c3ByaW50Zl9jaGso
+Y2hhciAqLCBpbnQsIF9fU0laRV9UWVBFX18sIGNvbnN0IGNoYXIgKiwgX19idWlsdGluX3ZhX2xp
+c3QpO1xuIik7CisJYWRkX3ByZV9idWZmZXIgKCJleHRlcm4gaW50IF9fYnVpbHRpbl9fX3ZzbnBy
+aW50Zl9jaGsoY2hhciAqLCBfX1NJWkVfVFlQRV9fLCBpbnQsIF9fU0laRV9UWVBFX18sIGNvbnN0
+IGNoYXIgKiwgX19idWlsdGluX3ZhX2xpc3QgYXApO1xuIik7CiB9CiAKIHZvaWQgY3JlYXRlX2J1
+aWx0aW5fc3RyZWFtKHZvaWQpCg==
+------=_Part_12976_22292513.1206992199941--
