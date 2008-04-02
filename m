@@ -1,35 +1,52 @@
-From: "Darren Jenkins" <darrenrjenkins@gmail.com>
-Subject: Re: [PATCH] The require_context attribute
-Date: Wed, 2 Apr 2008 19:13:40 +1100
-Message-ID: <82faac5b0804020113j762da44bjff07f8f529e802fb@mail.gmail.com>
-References: <200803311400.32860.philipp.reisner@linbit.com>
-	 <82faac5b0804010307k498a18d5t1d4142e7e95385e0@mail.gmail.com>
-	 <200804011600.05302.philipp.reisner@linbit.com>
-	 <e51f66da0804010710x13711acdy8862b5632db94012@mail.gmail.com>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: [PATCH] cgcc: handle ppc arch
+Date: Wed, 02 Apr 2008 18:00:34 +0200
+Message-ID: <1207152034.3957.15.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wf-out-1314.google.com ([209.85.200.173]:44653 "EHLO
-	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751792AbYDBINk (ORCPT
+Received: from crystal.sipsolutions.net ([195.210.38.204]:60159 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751309AbYDCKLq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 Apr 2008 04:13:40 -0400
-Received: by wf-out-1314.google.com with SMTP id 28so2504121wff.4
-        for <linux-sparse@vger.kernel.org>; Wed, 02 Apr 2008 01:13:40 -0700 (PDT)
-In-Reply-To: <e51f66da0804010710x13711acdy8862b5632db94012@mail.gmail.com>
-Content-Disposition: inline
+	Thu, 3 Apr 2008 06:11:46 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Marko Kreen <markokr@gmail.com>
-Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Apr 2, 2008 at 1:10 AM, Marko Kreen <markokr@gmail.com> wrote:
+I'm not sure this is exactly the right thing to do because I'm
+unfamiliar with the default CFLAGS, but it seems to at least make it
+mostly work on powerpc.
 
->
->  You take an address, how can it be NULL?
->
+Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
+---
+In particular, I don't know what that _STRING_ARCH_unaligned thing is
+and whether I should define it to 0 or 1 (and why I need it at all.)
 
-Yep, this could only happen if both the pointer was NULL and ctype was
-the first structure member of struct symbol.
-However neither of these things are true here.
+--- a/cgcc
++++ b/cgcc
+@@ -241,6 +241,11 @@ sub add_specs {
+ 		&integer_types (8, 16, 32, $m32 ? 32 : 64, 64) .
+ 		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
+ 		&define_size_t ($m32 ? "unsigned int" : "long unsigned int"));
++    } elsif ($spec eq 'ppc') {
++	return (' -D__powerpc__=1 -D_BIG_ENDIAN -D_STRING_ARCH_unaligned=1' .
++		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
++		&float_types (1, 1, 21, [24,8], [53,11], [113,15]) .
++		&define_size_t ($m64 ? "long unsigned int" : "unsigned int"));
+     } elsif ($spec eq 'host_os_specs') {
+ 	my $os = `uname -s`;
+ 	chomp $os;
+@@ -254,6 +259,8 @@ sub add_specs {
+ 	    return &add_specs ('sparc');
+ 	} elsif ($arch =~ /^(x86_64)$/i) {
+ 	    return &add_specs ('x86_64');
++	} elsif ($arch =~ /^(ppc)$/i) {
++	    return &add_specs ('ppc');
+ 	}
+     } else {
+ 	die "$0: invalid specs: $spec\n";
+
+
