@@ -1,52 +1,35 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Summer of Code student deadline extended to April 7th
-Date: Tue, 01 Apr 2008 14:06:18 -0700
-Message-ID: <47F2A3CA.1060902@freedesktop.org>
+From: "Darren Jenkins" <darrenrjenkins@gmail.com>
+Subject: Re: [PATCH] The require_context attribute
+Date: Wed, 2 Apr 2008 19:13:40 +1100
+Message-ID: <82faac5b0804020113j762da44bjff07f8f529e802fb@mail.gmail.com>
+References: <200803311400.32860.philipp.reisner@linbit.com>
+	 <82faac5b0804010307k498a18d5t1d4142e7e95385e0@mail.gmail.com>
+	 <200804011600.05302.philipp.reisner@linbit.com>
+	 <e51f66da0804010710x13711acdy8862b5632db94012@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enigE6A624D720954B20280AA618"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:45126 "EHLO
-	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1761939AbYDAVFd (ORCPT
+Received: from wf-out-1314.google.com ([209.85.200.173]:44653 "EHLO
+	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751792AbYDBINk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 Apr 2008 17:05:33 -0400
-Received: from dsl093-040-092.pdx1.dsl.speakeasy.net (HELO [192.168.0.121]) (josh@[66.93.40.92])
-          (envelope-sender <josh@freedesktop.org>)
-          by mail4.sea5.speakeasy.net (qmail-ldap-1.03) with AES256-SHA encrypted SMTP
-          for <linux-sparse@vger.kernel.org>; 1 Apr 2008 21:05:32 -0000
+	Wed, 2 Apr 2008 04:13:40 -0400
+Received: by wf-out-1314.google.com with SMTP id 28so2504121wff.4
+        for <linux-sparse@vger.kernel.org>; Wed, 02 Apr 2008 01:13:40 -0700 (PDT)
+In-Reply-To: <e51f66da0804010710x13711acdy8862b5632db94012@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Marko Kreen <markokr@gmail.com>
+Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE6A624D720954B20280AA618
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Wed, Apr 2, 2008 at 1:10 AM, Marko Kreen <markokr@gmail.com> wrote:
 
-To any students wishing to work on Sparse through Summer of Code,
-please note that Google recently extended the student proposal
-deadline to April 7th.  If you want to work on a Sparse-related
-project, please submit your proposal by that date.  Remember to
-specify Portland State University as the mentoring organization, and
-mention Sparse in the title of your proposal.
+>
+>  You take an address, how can it be NULL?
+>
 
-- Josh Triplett
-
-
---------------enigE6A624D720954B20280AA618
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFH8qPKGJuZRtD+evsRAvhGAJ9xZl/5VANhLeQ6bNf2pAuvbkQAygCffdp2
-MD+6HgBjhUJ8Fx+FD3KqwQA=
-=Sncg
------END PGP SIGNATURE-----
-
---------------enigE6A624D720954B20280AA618--
+Yep, this could only happen if both the pointer was NULL and ctype was
+the first structure member of struct symbol.
+However neither of these things are true here.
