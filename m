@@ -1,52 +1,62 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: [PATCH] cgcc: handle ppc arch
-Date: Wed, 02 Apr 2008 18:00:34 +0200
-Message-ID: <1207152034.3957.15.camel@johannes.berg>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 7/7] asm-generic: suppress sparse warning in ioctl.h
+Date: Thu, 03 Apr 2008 13:31:00 -0700
+Message-ID: <47F53E84.8080607@freedesktop.org>
+References: <1207182818.5740.26.camel@brick> <alpine.LFD.1.00.0804021752040.14670@woody.linux-foundation.org> <20080403013420.GV9785@ZenIV.linux.org.uk> <alpine.LFD.1.00.0804021848140.14670@woody.linux-foundation.org> <20080403024117.GZ9785@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:60159 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751309AbYDCKLq (ORCPT
+Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:33718 "EHLO
+	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755042AbYDCUbM (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Apr 2008 06:11:46 -0400
+	Thu, 3 Apr 2008 16:31:12 -0400
+In-Reply-To: <20080403024117.GZ9785@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse <linux-sparse@vger.kernel.org>
+To: Al Viro <viro@ZenIV.linux.org.uk>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Harvey Harrison <harvey.harrison@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org
 
-I'm not sure this is exactly the right thing to do because I'm
-unfamiliar with the default CFLAGS, but it seems to at least make it
-mostly work on powerpc.
+Al Viro wrote:
+> On Wed, Apr 02, 2008 at 06:50:20PM -0700, Linus Torvalds wrote:
+>>> BTW, what happened with sparse.git?
+>> Yeah, we do seem to have lost a maintainer.
+> 
+> Have we?  I've seen Josh on sparse list quite recently, IIRC...
+> Yes - http://marc.info/?l=linux-sparse&m=120716477203477 just
+> yesterday...
+> 
+> Josh, do you have any pending patches?  I can just start a branch in
+> my tree, of course, but I'd rather deal with merge headache earlier
+> than later...
 
-Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
----
-In particular, I don't know what that _STRING_ARCH_unaligned thing is
-and whether I should define it to 0 or 1 (and why I need it at all.)
+Starting around the beginning of this year, I got buried under
+research temporarily in the Winter term, along with a couple of other
+things.  I got caught up, and then proceeded to get sick for a week,
+and that and recovery time put me far enough behind on both email and
+research that I didn't catch up again until recently.
 
---- a/cgcc
-+++ b/cgcc
-@@ -241,6 +241,11 @@ sub add_specs {
- 		&integer_types (8, 16, 32, $m32 ? 32 : 64, 64) .
- 		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
- 		&define_size_t ($m32 ? "unsigned int" : "long unsigned int"));
-+    } elsif ($spec eq 'ppc') {
-+	return (' -D__powerpc__=1 -D_BIG_ENDIAN -D_STRING_ARCH_unaligned=1' .
-+		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
-+		&float_types (1, 1, 21, [24,8], [53,11], [113,15]) .
-+		&define_size_t ($m64 ? "long unsigned int" : "unsigned int"));
-     } elsif ($spec eq 'host_os_specs') {
- 	my $os = `uname -s`;
- 	chomp $os;
-@@ -254,6 +259,8 @@ sub add_specs {
- 	    return &add_specs ('sparc');
- 	} elsif ($arch =~ /^(x86_64)$/i) {
- 	    return &add_specs ('x86_64');
-+	} elsif ($arch =~ /^(ppc)$/i) {
-+	    return &add_specs ('ppc');
- 	}
-     } else {
- 	die "$0: invalid specs: $spec\n";
+I mostly kept up with Sparse email, hence the recent mails, but built
+up a backlog of patches to deal with.  (Sparse has a fairly low patch
+rate, so that backlog constitutes less than 10 patches, counting the
+ones that still need further work or discussion before they can
+merge.)  Also, in switching my email to an IMAP server, I managed to
+lose the read/unread status on some of my list mail, including
+linux-sparse, which slowed me down a fair bit when trying to process
+those mails.
 
+I have a small handful of pending patches to work through on
+linux-sparse, with yours at the top of that list; I also have some
+local patches that I need to test and push.  Apologies for the
+processing delay.
 
+I should have thought to send a "still alive" note with an explanation
+to linux-sparse.  I'll make sure to do so in the future.  (Some time
+in the next couple of years I have a thesis to write. :) )
+
+I'll catch the backlog up and then send out an "all patches merged"
+mail, so that anyone with additional patches or anyone who thinks
+their patch got lost can resend.
+
+- Josh Triplett
