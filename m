@@ -1,46 +1,47 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 1/3] saner warnings for restricted types
-Date: Thu, 03 Apr 2008 13:45:02 -0700
-Message-ID: <47F541CE.7020000@freedesktop.org>
-References: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
+Subject: Re: [PATCH 2/3] fix show_typename()
+Date: Thu, 03 Apr 2008 13:46:09 -0700
+Message-ID: <47F54211.5050600@freedesktop.org>
+References: <E1JSgxJ-0003m5-1z@ZenIV.linux.org.uk>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig71107FFF8D95813CE2AF01AA"
+ boundary="------------enigEB538CB24C15A0F9B1A0564D"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:56580 "EHLO
-	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755204AbYDCUpD (ORCPT
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:54616 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755548AbYDCUqL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Apr 2008 16:45:03 -0400
-In-Reply-To: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
+	Thu, 3 Apr 2008 16:46:11 -0400
+In-Reply-To: <E1JSgxJ-0003m5-1z@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Al Viro <viro@ftp.linux.org.uk>
 Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig71107FFF8D95813CE2AF01AA
+--------------enigEB538CB24C15A0F9B1A0564D
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
 Al Viro wrote:
-> * don't crap the type->ident for unsigned int just because somebody did=
-
-> 	typedef unsigned int x;
->   only structs, unions, enums and restricted types need it.
-> * generate saner warnings for restricted, include type name(s) into the=
-m.
+> * postfix stuff had been applied in wrong order (e.g. int a[2][3] gener=
+ated
+> int [addressable][toplevel] a[3][2])
+> * after fixing that, we've no need for recursion anymore, a bunch of ar=
+guments
+> go away and turn into local variables and we get an easy way to get rid=
+ of
+> bogus space in the show_typename() result.
 >=20
 > Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 
-Applied and pushed.
+Applied, along with corresponding changes to the test suite, and pushed.
 
 - Josh Triplett
 
 
-
---------------enig71107FFF8D95813CE2AF01AA
+--------------enigEB538CB24C15A0F9B1A0564D
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -49,9 +50,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFH9UHOGJuZRtD+evsRAlpYAJ91gTt1MpdIRfvNRtXgT0qA6hO3dACgsZSD
-+RXBA2IEeyqVsEh0LiUW2wU=
-=mtQA
+iD8DBQFH9UIRGJuZRtD+evsRAil1AJ9uFZOYY8XcU6kB150SWF991RXL3ACePxnF
+7KmexgN7+HQi7r+TV+k5zAo=
+=PFKQ
 -----END PGP SIGNATURE-----
 
---------------enig71107FFF8D95813CE2AF01AA--
+--------------enigEB538CB24C15A0F9B1A0564D--
