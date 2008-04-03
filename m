@@ -1,62 +1,57 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 7/7] asm-generic: suppress sparse warning in ioctl.h
-Date: Thu, 03 Apr 2008 13:31:00 -0700
-Message-ID: <47F53E84.8080607@freedesktop.org>
-References: <1207182818.5740.26.camel@brick> <alpine.LFD.1.00.0804021752040.14670@woody.linux-foundation.org> <20080403013420.GV9785@ZenIV.linux.org.uk> <alpine.LFD.1.00.0804021848140.14670@woody.linux-foundation.org> <20080403024117.GZ9785@ZenIV.linux.org.uk>
+Subject: Re: [PATCH 1/3] saner warnings for restricted types
+Date: Thu, 03 Apr 2008 13:45:02 -0700
+Message-ID: <47F541CE.7020000@freedesktop.org>
+References: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig71107FFF8D95813CE2AF01AA"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail5.sea5.speakeasy.net ([69.17.117.7]:33718 "EHLO
-	mail5.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755042AbYDCUbM (ORCPT
+Received: from mail1.sea5.speakeasy.net ([69.17.117.3]:56580 "EHLO
+	mail1.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755204AbYDCUpD (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Apr 2008 16:31:12 -0400
-In-Reply-To: <20080403024117.GZ9785@ZenIV.linux.org.uk>
+	Thu, 3 Apr 2008 16:45:03 -0400
+In-Reply-To: <E1JSgx9-0003lK-3Y@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Harvey Harrison <harvey.harrison@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@ftp.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
+
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig71107FFF8D95813CE2AF01AA
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
 Al Viro wrote:
-> On Wed, Apr 02, 2008 at 06:50:20PM -0700, Linus Torvalds wrote:
->>> BTW, what happened with sparse.git?
->> Yeah, we do seem to have lost a maintainer.
-> 
-> Have we?  I've seen Josh on sparse list quite recently, IIRC...
-> Yes - http://marc.info/?l=linux-sparse&m=120716477203477 just
-> yesterday...
-> 
-> Josh, do you have any pending patches?  I can just start a branch in
-> my tree, of course, but I'd rather deal with merge headache earlier
-> than later...
+> * don't crap the type->ident for unsigned int just because somebody did=
 
-Starting around the beginning of this year, I got buried under
-research temporarily in the Winter term, along with a couple of other
-things.  I got caught up, and then proceeded to get sick for a week,
-and that and recovery time put me far enough behind on both email and
-research that I didn't catch up again until recently.
+> 	typedef unsigned int x;
+>   only structs, unions, enums and restricted types need it.
+> * generate saner warnings for restricted, include type name(s) into the=
+m.
+>=20
+> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 
-I mostly kept up with Sparse email, hence the recent mails, but built
-up a backlog of patches to deal with.  (Sparse has a fairly low patch
-rate, so that backlog constitutes less than 10 patches, counting the
-ones that still need further work or discussion before they can
-merge.)  Also, in switching my email to an IMAP server, I managed to
-lose the read/unread status on some of my list mail, including
-linux-sparse, which slowed me down a fair bit when trying to process
-those mails.
-
-I have a small handful of pending patches to work through on
-linux-sparse, with yours at the top of that list; I also have some
-local patches that I need to test and push.  Apologies for the
-processing delay.
-
-I should have thought to send a "still alive" note with an explanation
-to linux-sparse.  I'll make sure to do so in the future.  (Some time
-in the next couple of years I have a thesis to write. :) )
-
-I'll catch the backlog up and then send out an "all patches merged"
-mail, so that anyone with additional patches or anyone who thinks
-their patch got lost can resend.
+Applied and pushed.
 
 - Josh Triplett
+
+
+
+--------------enig71107FFF8D95813CE2AF01AA
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFH9UHOGJuZRtD+evsRAlpYAJ91gTt1MpdIRfvNRtXgT0qA6hO3dACgsZSD
++RXBA2IEeyqVsEh0LiUW2wU=
+=mtQA
+-----END PGP SIGNATURE-----
+
+--------------enig71107FFF8D95813CE2AF01AA--
