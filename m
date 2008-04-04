@@ -1,130 +1,151 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 3/3] catch !x & y brainos
-Date: Thu, 03 Apr 2008 14:26:00 -0700
-Message-ID: <47F54B68.4090609@freedesktop.org>
-References: <E1JSgxT-0003mf-2B@ZenIV.linux.org.uk>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [PATCH 7/7] asm-generic: suppress sparse warning in ioctl.h
+Date: Fri, 4 Apr 2008 02:19:51 +0100
+Message-ID: <20080404011951.GC9785@ZenIV.linux.org.uk>
+References: <1207182818.5740.26.camel@brick> <alpine.LFD.1.00.0804021752040.14670@woody.linux-foundation.org> <20080403013420.GV9785@ZenIV.linux.org.uk> <alpine.LFD.1.00.0804021848140.14670@woody.linux-foundation.org> <20080403024117.GZ9785@ZenIV.linux.org.uk> <47F53E84.8080607@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig46B2D8D2698DCF140831D2C5"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:40836 "EHLO
-	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751711AbYDCV0D (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:41616 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751948AbYDDBT4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Apr 2008 17:26:03 -0400
-In-Reply-To: <E1JSgxT-0003mf-2B@ZenIV.linux.org.uk>
+	Thu, 3 Apr 2008 21:19:56 -0400
+Content-Disposition: inline
+In-Reply-To: <47F53E84.8080607@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Harvey Harrison <harvey.harrison@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig46B2D8D2698DCF140831D2C5
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Thu, Apr 03, 2008 at 01:31:00PM -0700, Josh Triplett wrote:
+> I mostly kept up with Sparse email, hence the recent mails, but built
+> up a backlog of patches to deal with.  (Sparse has a fairly low patch
+> rate, so that backlog constitutes less than 10 patches, counting the
+> ones that still need further work or discussion before they can
+> merge.)  Also, in switching my email to an IMAP server, I managed to
+> lose the read/unread status on some of my list mail, including
+> linux-sparse, which slowed me down a fair bit when trying to process
+> those mails.
+> 
+> I have a small handful of pending patches to work through on
+> linux-sparse, with yours at the top of that list; I also have some
+> local patches that I need to test and push.  Apologies for the
+> processing delay.
+> 
+> I should have thought to send a "still alive" note with an explanation
+> to linux-sparse.  I'll make sure to do so in the future.  (Some time
+> in the next couple of years I have a thesis to write. :) )
+> 
+> I'll catch the backlog up and then send out an "all patches merged"
+> mail, so that anyone with additional patches or anyone who thinks
+> their patch got lost can resend.
 
-Al Viro wrote:
-> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+OK...  FWIW, I'll probably do relaxed integer constant expressions on
+top of whatever shows up in your tree + patches I've sent to the list
+at some point in the next couple of weeks.  For now I'd say that we
+can keep ignoring the errors from _IO...() uses in context that expect
+an i-c-e (mostly - indices in array initializers); it's not widespread
+and we'd lived with that for quite a while.
 
-Applied and pushed, along with a new test case.
+As far as annoyances go, lack of VLA support is responsible for far more
+lost warnings.  I don't have anything in that direction beyond rather
+vague plans (*and* a monstrous backlog of my own, both kernel-side and
+sparse-side, so it's unlikely to drift up the list in the next couple
+of months).  Does anybody have any pending work in that direction?  It's
+not _that_ hard to do, but for pity sake, go with C99 standard when doing
+it; gcc is choke-full of broken and barely documented extensions in that
+area, so reverse-engineering them is going to result in utter mess.
 
-Per previous discussion on this change, any reason not to emit a
-similar warning for one or more of x & !y, !x | y, and x | !y, with
-something like the following patch?  The discussion seemed to suggest
-that some people might to use some of those variants intentionally,
-but that doing so still seemed really questionable, and such code
-could easily use a saner, less abbreviated style instead.
+C99 VLAs are fairly dumb and straightforward - the underlying idea is
+"for each variable of type that involves a VLA, compiler should be able
+to slap a shadow variable containing the array size in scope nearby".
+Thus
+	* no variably-modified members in structs or unions (not only
+no VLA, but no pointers to VLA, etc.); we would need shadow variables
+for each struct instance and that obviously wouldn't work in that model).
+	* no functions returning variably-modified type.
+	* no variably-modified objects in global scope.
+	* no VLA static in function.
+	* typedef *can* be variably-modified, but only in block scope.
+Warning: this can get sticky for us - all sizes are evaluated when
+typedef is reached.  IOW,
+	typedef int a[n];
+	a x;
+	if (n++ == 5) {
+		a y;
+		int z[n];
+	}
+will have size of y equal to that of x, but *not* equal to that of z.
+	* do *NOT* jump inside the scope of anything variably modified;
+not with goto, not with switch (again, you'll miss initialization of
+shadows).
 
-Also, I suspect that some people may want a -Wno-somethingorother for
-this.  Any suggestions on naming, anyone?  I called the test case
-"dubious bitwise with not", but I'd love to hear a better suggestion
-that sounds slightly more like reasonable English.
+Passing a VLA (let alone pointer to such, etc.) to a function is done
+exactly as we would for normal arrays; $DEITY help you if the function's
+idea of sizes doesn't match that of caller - shadow stuff is _NOT_ passed
+at all.  No match => undefined behaviour.
 
-=46rom 85581bf8ab9e2a103390c9dfff669b88f2c5e101 Mon Sep 17 00:00:00 2001
-From: Josh Triplett <josh@freedesktop.org>
-Date: Thu, 3 Apr 2008 14:12:30 -0700
-Subject: [PATCH] Expand "dubious !x & y" handling to other combinations o=
-f !, &, and |.
+Mixing VLA with normal arrays: compatible if the elements are compatible,
+but if you have actual sizes that do not match, you are in nasal daemon
+country.  So composite type of two VLA ones is *either*, and if actual
+sizes differ, well, too bad for you.
 
-Signed-off-by: Josh Triplett <josh@freedesktop.org>
----
- evaluate.c                            |   13 ++++++++++---
- validation/dubious-bitwise-with-not.c |   19 +++++++++++++++++--
- 2 files changed, 27 insertions(+), 5 deletions(-)
+Basically, everything works as if you had SYM_VLA(element, symbol) that
+behaved almost as SYM_ARRAY.  With initializers for symbols created at
+the point where we declare the object in question (or type, in case of
+typedef).  Passing such sucker to function converts to SYM_VLA with *new*
+symbol - one in function scope and initialized there.  Note that this
+is where the things get extremely ugly for gcc - there you can pass
+an object out of its scope and _that_ is what leads to lovely internal
+compiler errors for things like
+	sizeof *({int n = f(); int a[n]; &a;})
+since we get shadow symbol dead and gone with the scope while the type
+(SYM_PTR(SYM_VLA(int, n)) outlives the scope, leaving a landmine for
+sizeof.
 
-diff --git a/evaluate.c b/evaluate.c
-index 4928584..68211d3 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -917,9 +917,16 @@ static struct symbol *evaluate_binop(struct expressi=
-on *expr)
- 			rtype =3D integer_promotion(rtype);
- 		} else {
- 			// The rest do usual conversions
--			if (op =3D=3D '&' && expr->left->type =3D=3D EXPR_PREOP &&
--			    expr->left->op =3D=3D '!')
--				warning(expr->pos, "dubious: !x & y");
-+			const unsigned left_not  =3D expr->left->type =3D=3D EXPR_PREOP
-+			                           && expr->left->op =3D=3D '!';
-+			const unsigned right_not =3D expr->right->type =3D=3D EXPR_PREOP
-+			                           && expr->right->op =3D=3D '!';
-+			if ((op =3D=3D '&' || op =3D=3D '|') && (left_not || right_not))
-+				warning(expr->pos, "dubious: %sx %c %sy",
-+				        left_not ? "!" : "",
-+					op,
-+					right_not ? "!" : "");
-+
- 			ltype =3D usual_conversions(op, expr->left, expr->right,
- 						  lclass, rclass, ltype, rtype);
- 			ctype =3D rtype =3D ltype;
-diff --git a/validation/dubious-bitwise-with-not.c b/validation/dubious-b=
-itwise-with-not.c
-index e076899..c48bcae 100644
---- a/validation/dubious-bitwise-with-not.c
-+++ b/validation/dubious-bitwise-with-not.c
-@@ -1,9 +1,24 @@
--static unsigned int ok1 =3D !1 && 2;
--static unsigned int bad1 =3D !1 & 2;
-+static unsigned int ok1  =3D !1 &&  2;
-+static unsigned int bad1 =3D !1 &   2;
-+static unsigned int ok2  =3D !1 ||  2;
-+static unsigned int bad2 =3D !1 |   2;
-+static unsigned int ok3  =3D  1 && !2;
-+static unsigned int bad3 =3D  1 &  !2;
-+static unsigned int ok4  =3D  1 || !2;
-+static unsigned int bad4 =3D  1 |  !2;
-+static unsigned int ok5  =3D !1 && !2;
-+static unsigned int bad5 =3D !1 &  !2;
-+static unsigned int ok6  =3D !1 || !2;
-+static unsigned int bad6 =3D !1 |  !2;
- /*
-  * check-name: Dubious bitwise operation on !x
-  *
-  * check-error-start
- dubious-bitwise-with-not.c:2:31: warning: dubious: !x & y
-+dubious-bitwise-with-not.c:4:31: warning: dubious: !x | y
-+dubious-bitwise-with-not.c:6:31: warning: dubious: x & !y
-+dubious-bitwise-with-not.c:8:31: warning: dubious: x | !y
-+dubious-bitwise-with-not.c:10:31: warning: dubious: !x & !y
-+dubious-bitwise-with-not.c:12:31: warning: dubious: !x | !y
-  * check-error-end
-  */
+Another thing to keep in mind is that sizeof(VLA) is not a constant
+expression *and* that sizeof argument is evaluated.  IOW, not only
+	sizeof(int [n = f()])
+has side effects, but in
+	int (*p)[n];
+	...
+	sizeof(*(g(), p))
+will have g() evaluated.  Note that if p had been declared as
+	int (*p)[4];
+the same sizeof() would *NOT* have called anything.  This, BTW, is where
+the rules for what an integer constant expression is are getting bloody
+important: 
 
+int n = 1;
+int f(void)
+{
+	int (*p)[1 + (0 && n)];
+	return sizeof(*(g(), p));
+}
 
+_must_ call g() according to C99, while the same with
+enum {n = 1;} must not, even though n won't be even looked at in either
+case *and* any sane compiler will find return value of f() at compile
+time, turning it to
+inf f(void)
+{
+	g();
+	return sizeof(int);
+}
+in the first case and
+int f(void)
+{
+	return sizeof(int);
+}
+in the second.
 
---------------enig46B2D8D2698DCF140831D2C5
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFH9UtoGJuZRtD+evsRAuOeAJ414IQwmzJLRNBDGdFFnOxTPMPRYQCfW4Vz
-b2PmuuARHisUYQQHdW217KM=
-=LBIE
------END PGP SIGNATURE-----
-
---------------enig46B2D8D2698DCF140831D2C5--
+One more thing: use of sizeof(variably-modified type) may or may not
+evaluate size expressions in there if they do not affect the result.
+IOW, it's unspecified whether
+	sizeof(int (*)[n++])
+increments n; different compilers are broken in different ways and it
+might be worth generating a warning on such.  Note that
+	sizeof(int [n++])
+*is* guaranteed to increment n - the unspecified part is for size expressions
+in such sizeof(type) buried behind a pointer.
