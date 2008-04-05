@@ -1,84 +1,73 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [PATCH 7/7] asm-generic: suppress sparse warning in ioctl.h
-Date: Fri, 4 Apr 2008 19:42:21 +0100
-Message-ID: <20080404184221.GF9785@ZenIV.linux.org.uk>
-References: <1207182818.5740.26.camel@brick> <alpine.LFD.1.00.0804021752040.14670@woody.linux-foundation.org> <20080403013420.GV9785@ZenIV.linux.org.uk> <alpine.LFD.1.00.0804021848140.14670@woody.linux-foundation.org> <20080403024117.GZ9785@ZenIV.linux.org.uk> <47F53E84.8080607@freedesktop.org> <20080404011951.GC9785@ZenIV.linux.org.uk> <47F63641.4090103@knosof.co.uk>
+From: Josh Triplett <josh@kernel.org>
+Subject: Re: four sparse patches
+Date: Sat, 05 Apr 2008 03:13:30 -0700
+Message-ID: <47F750CA.1090307@kernel.org>
+References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>	 <47F07F78.5030405@kernel.org>	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com> <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig9AA6AB33AF9873DD839D65D4"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:44255 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751266AbYDDSnA (ORCPT
+Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:50562 "EHLO
+	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751385AbYDEKN1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 4 Apr 2008 14:43:00 -0400
-Content-Disposition: inline
-In-Reply-To: <47F63641.4090103@knosof.co.uk>
+	Sat, 5 Apr 2008 06:13:27 -0400
+In-Reply-To: <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Derek M Jones <derek@knosof.co.uk>
-Cc: Josh Triplett <josh@freedesktop.org>, Linus Torvalds <torvalds@linux-foundation.org>, Harvey Harrison <harvey.harrison@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org
+To: Geoff Johnstone <geoffsheep.johnstonefrog@googlemail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Fri, Apr 04, 2008 at 03:08:01PM +0100, Derek M Jones wrote:
-> >	* typedef *can* be variably-modified, but only in block scope.
-> >Warning: this can get sticky for us - all sizes are evaluated when
-> >typedef is reached.  IOW,
-> >	typedef int a[n];
-> >	a x;
-> >	if (n++ == 5) {
-> >		a y;
-> >		int z[n];
-> >	}
-> >will have size of y equal to that of x, but *not* equal to that of z.
-> 
-> An opportunity for Sparse to issue a warning :-)
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig9AA6AB33AF9873DD839D65D4
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Not without data flow analysis, and sparse really doesn't do that class
-of checks...
+Geoff Johnstone wrote:
+>>> I've attached four patches that I've written for sparse to
+>>> use it for a userland project.
 
-> Any side effect appearing in a sizeof operand ought to be flagged.
-> There are people out there who think that the side effects occur (even
-> in C90).
+Regarding Wmix-decl-code.diff, I agree that that warning definitely
+needs an option controlling it. but GCC already has that option and
+calls it "-Wdeclaration-after-statement", so matching GCC's name seems
+potentially useful.  (However, I can imagine corner cases where it
+might prove problematic, such as wanting to pass that option to GCC
+and not Sparse or vice versa.)  Also, I agree that the default should
+depend on the C standard in use, and I see no compatibility reason why
+the warning should remain for code that explicitly asks for C99.
+Thus, I haven't applied this version of the patch.  I'd love to apply
+an updated version with those two changes.
 
-Not by default it shouldn't; it's about the only way to do polymorphic
-typechecking a-la "this argument of macro is a function pointer and
-that argument could be legitimately passed to it", etc.
- 
-> Sentence 1122: http://c0x.coding-guidelines.com/6.5.3.4.html
-> "If the type of the operand is a variable length array type, the operand 
-> is evaluated;"
-> 
-> But watch out for sentence 1584: 
-> http://c0x.coding-guidelines.com/6.7.5.2.html
-> "Where a size expression is part of the operand of a sizeof operator and
-> changing the value of the size expression would not affect the result of
-> the operator, it is unspecified whether or not the size expression is
-> evaluated."
+Regarding incomplete structs, your patch seems reasonable as far as I
+know, and it doesn't break the test suite, so I've applied and pushed
+it.  Per your concerns, if this patch doesn't represent the correct
+fix, the code can change later when we have a test case that breaks
+with this patch.  Please do consider writing a patch for a new test
+case based on your example.
 
-Dealt with below, but note that the wording in 6.7.5.2 is lousy: as stated
-it covers not only intended sizeof(VM) with side effects in size expressions,
-but sizeof(sizeof(int [n++])) as well, which certainly should *not* be
-unspecified - the n++ is a part of operand of outer sizeof and it does not
-affect its value (it's sizeof(size_t)), but it certainly should _not_ be
-evaluated at all since the entire argument of the outer sizeof should not
-be evaluated.
+Your argument parsing for -ansi and -std=3D looks great to me.  Applied
+and pushed.
 
-AFAICS, intended rules are:
-	sizeof(expression of non-VLA type): constant, argument not evaluated
-	sizeof(expression of VLA type): constant, argument evaluated
-	sizeof(non-VM type): constant
-	sizeof(VM type): unspecified whether all size expressions are evaluated
+The new builtins for fortify handling seem fine.  Applied and pushed.
 
-> This language feature came about because at least one vendor on the
-> WG14 committee had a compiler that optimized away subexpressions
-> within a sizeof that did not contribute to the result of the
-> evaluation.  My attempt to stop the behavior being unspecified
-> did not succeed :-(
+Thanks for your patches.
 
-The really interesting question is what the hell did gcc folks intend for
-their ({ ... }) and typeof extensions...  Well, aside of "some cases
-when ({ ... }) would result in VM type are clearly undefined behaviour" ;-/
+- Josh Triplett
 
-BTW, I wish somebody would have come up with a sane set of type-surgery
-primitives...  Part of that can be emulated with typeof, but you don't get
-"turn qualified-type into type" and "give the type of Nth argument of
-function type" that way.
+
+--------------enig9AA6AB33AF9873DD839D65D4
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFH91DKGJuZRtD+evsRApxQAKCjI7iB7S5iCfr4daxAXTShpo6R9gCfa+hi
+1Ztyf/EUGxyqUgnwYu3CL5s=
+=xAnQ
+-----END PGP SIGNATURE-----
+
+--------------enig9AA6AB33AF9873DD839D65D4--
