@@ -1,66 +1,51 @@
 From: Pavel Roskin <proski@gnu.org>
-Subject: [RFC PATCH] Fix crash in linearize_compound_statement()
-Date: Mon, 07 Apr 2008 16:45:11 -0400
-Message-ID: <1207601111.22430.28.camel@dv>
+Subject: Re: rewrite_parent_branch: Assertion `changed' failed
+Date: Mon, 07 Apr 2008 17:22:19 -0400
+Message-ID: <1207603339.22430.48.camel@dv>
+References: <47FA6DAF.3030600@gmail.com>  <47FA708D.5080203@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-2
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:54946 "EHLO c60.cesmail.net"
+Received: from c60.cesmail.net ([216.154.195.49]:56818 "EHLO c60.cesmail.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751504AbYDGUpP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 7 Apr 2008 16:45:15 -0400
-Received: from [192.168.1.21] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
-	by relay.cesmail.net (Postfix) with ESMTP id 4EA2A619058
-	for <linux-sparse@vger.kernel.org>; Mon,  7 Apr 2008 16:45:13 -0400 (EDT)
+	id S1752719AbYDGVWW (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 7 Apr 2008 17:22:22 -0400
+In-Reply-To: <47FA708D.5080203@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Jiri Slaby <jirislaby@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
+On Mon, 2008-04-07 at 21:05 +0200, Jiri Slaby wrote:
+> On 04/07/2008 08:53 PM, Jiri Slaby wrote:
+> > Hi,
+> >=20
+> > I got this from sparse:
+> >  CHECK   /home/l/latest/xxx/net/mac80211/ieee80211.c
+> > sparse: flow.c:804: rewrite_parent_branch: Assertion `changed' fail=
+ed.
+> > /bin/sh: line 1:  8639 Ne=FAsp=EC=B9n=EC ukon=E8en (SIGABRT)       =
+ sparse
 
-The current sparse crashes on this program:
+That's "unsuccessful finish", for those less knowledgeable in Slavic
+languages :-)
 
+> It's 2.6.25-rc8-mm1 code. It's opensuse sparse-0.1-46, core from the
+> crash is here:
+> http://www.fi.muni.cz/~xslaby/sklad/core.sparse.bz2
 
-static int x;
-static inline void foo(void)
-{
-    if (x)
-	x = 1;
-}
-static void bar(void)
-{
-    foo();
-}
-static typeof(bar) quux;
+If it's indeed version 0.1, I strongly suggest that you test the curren=
+t
+git version, which is version 0.4.1 plus 10 or so patches.
 
+git://git.kernel.org/pub/scm/linux/kernel/git/josh/sparse.git
 
-The crash happens in linearize_compound_statement(), and I believe that
-the reason is incorrect access to phi_node->phi_list without making sure
-that phi_node->opcode is OP_PHI.  When processing the above program,
-phi_node->phi_list can be OP_INLINED_CALL.
-
-I understand very little in sparse code, and I have no idea what kind of
-fallback is needed when phi_node->opcode is not OP_PHI.
-
-But this patch fixes the crash:
-
-
-diff --git a/linearize.c b/linearize.c
-index 8a68f05..ff4f3b6 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1633,7 +1633,7 @@ static pseudo_t linearize_compound_statement(struct entrypoint *ep, struct state
- 		struct basic_block *bb = add_label(ep, ret);
- 		struct instruction *phi_node = first_instruction(bb->insns);
- 
--		if (!phi_node)
-+		if (!phi_node || phi_node->opcode != OP_PHI)
- 			return pseudo;
- 
- 		if (pseudo_list_size(phi_node->phi_list)==1) {
-
-
--- 
+--=20
 Regards,
 Pavel Roskin
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
