@@ -1,68 +1,75 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: [RFC PATCH] Fix crash in linearize_compound_statement()
-Date: Mon, 7 Apr 2008 23:05:09 -0700
-Message-ID: <70318cbf0804072305x9b1dacdrd25bca5094bb23d5@mail.gmail.com>
-References: <1207601111.22430.28.camel@dv>
-	 <70318cbf0804071455g2f15e136qab225063f7faa89f@mail.gmail.com>
-	 <1207631657.3209.13.camel@rd>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Using sparse to catch invalid RCU dereferences?
+Date: Tue, 08 Apr 2008 00:04:16 +0200
+Message-ID: <1207605856.12481.35.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-SjFz9EIODu9sYalA0+mv"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from py-out-1112.google.com ([64.233.166.177]:36719 "EHLO
-	py-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751170AbYDHGFN (ORCPT
+Received: from crystal.sipsolutions.net ([195.210.38.204]:41273 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752437AbYDHO1J (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 8 Apr 2008 02:05:13 -0400
-Received: by py-out-1112.google.com with SMTP id u52so2707487pyb.10
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Apr 2008 23:05:10 -0700 (PDT)
-In-Reply-To: <1207631657.3209.13.camel@rd>
-Content-Disposition: inline
+	Tue, 8 Apr 2008 10:27:09 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
-Cc: linux-sparse@vger.kernel.org
+To: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
+Cc: Linux Kernel list <linux-kernel@vger.kernel.org>, linux-sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Apr 7, 2008 at 10:14 PM, Pavel Roskin <proski@gnu.org> wrote:
->
->  I should have been more clear.  Last time I was carried away by some
->  strange messages about "return" and labels, which seemed really weird to
->  me, but less so after your explanation.
->
->  This example is made from the same original source, but this time I
->  concentrated on the crash, because that's the thing that cannot be
->  justified by any bad code.
 
-I understand that you have your source code which sparse choked on
-fixed. Good.
+--=-SjFz9EIODu9sYalA0+mv
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-I am actually complaining your fix to sparse itself. It is not good enough.
-You fix it in the linearize stage. That is already too late.
+Hi,
 
-You should fix it in the parse and type evaluate stage, before it even reach
-to the linearizer.
+Just a thought, I haven't tried this yet because I'm not entirely sure
+it's actually correct. I was just thinking it should be possible to
+introduce something like
 
->
->
->  > I agree sparse should not assert on it, but not like this.
->
->  I don't quite understand why sparse is getting in this situation, but
+	#define __rcu	__attribute__((address_space(3)))
 
-Exactly. That is because you try to linearize the exact same function
-twice due to the "typeof(bar)". Linearize the same function twice is just
-plain wrong. It should never happen. Your patch just covers up the real problem
-instead of fixing it.
+(for sparse only, of course) and then be able to say
 
->  That's fixed, of course.  And many other problems are fixed too, some of
->  which are user visible.  I really appreciate the usefulness of sparse.
+	struct myfoo *foo __rcu;
 
-I mean the fix in the sparse source code, not the source code which sparse
-is checking. You should change sparse, when it do "typeof(function) varname",
-give it a warning and skip this "varname" node all together. Later in the
-linearize stage, it will not linearize the same function twice.
+and sparse would warn on
 
-What your patch does is actually allowing sparse linearized a function twice.
-That is going to mess up the user-define chain very badly (e.g. the PHI node
-usage problem you are seeing.)
+	struct myfoo *bar =3D foo;
 
-Chris
+but not on
+
+	struct myfoo *bar =3D rcu_dereference(foo);
+
+by way of using __force inside rcu_dereference(), rcu_assign_pointer()
+etc.
+
+Would this be feasible? Or should one actually use __bitwise/__force to
+also get the warning when assigning between two variables both marked
+__rcu?
+
+johannes
+
+--=-SjFz9EIODu9sYalA0+mv
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iQIVAwUAR/qaX6Vg1VMiehFYAQL5Fg//caZ8XrG77rz5KrVMCHYB78RjnwktYNZv
+8FlTqSmxZymQMZ8IrEUsihj/d6ZyXSWqvQbAQTakGsIy4uk9s35svmJJWkE+WqJR
+yVjgOPATQc8dudxeZvyt8AeKfeCkKIfPq8jhEM+/wZ6SfuF0ji9C38vdGGclljMd
+2VyL1oj4QF8ttoBYRGMJmP+3HDuJn3QcczZ1tivxIw5B2kchyq3X1FEuGMlwo3QR
+AWaX1DF+VDcNgvWneJLBeEzcg1FK4vLSJr/jWaOO+ymMQ+T2eksQvlifZueO8imJ
+xKGic/sP3T6G5+6wh1IaBA9SZP31QVsSH9Dlu6GCkG1/mXscrseDw9c+kZgN8wNJ
+8JFUGUJTrIcqTMgZNZ4mjximeOAAVkLFKT49hhvOJYaw5forUoOs2sQ8IMEhzhMQ
+qNJd3Bf6nmULlEnr4er4XdgTFlZ48Vr83UYDvDbTJftWZfnE2GTHNr6v7m+Gj8r3
+uRodyK1MYkK+8LnPfM88H+GRhme6uJvT3Vbw7quJf/C1eOSZPs/kNjWnGeA6EYR/
+heTJnFcfHO5KTP/wiMhHbbMumCZq5pi5ARZRY7OQeX5D/mmbVaj5cgD544FPNhFT
+QGE1FTfCuyiCjhSqZmcOiHCZuk/DRRhB3npO5EzW5yZ36z0vYoVU1sQX8vu9eLug
+m4h3RBPHK3U=
+=ut7R
+-----END PGP SIGNATURE-----
+
+--=-SjFz9EIODu9sYalA0+mv--
+
