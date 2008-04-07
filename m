@@ -1,62 +1,47 @@
-From: Josh Triplett <josh@kernel.org>
-Subject: Re: four sparse patches
-Date: Sat, 05 Apr 2008 03:13:30 -0700
-Message-ID: <47F750CA.1090307@kernel.org>
-References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>	 <47F07F78.5030405@kernel.org>	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com> <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH] cgcc: handle ppc arch
+Date: Mon, 07 Apr 2008 05:11:26 -0700
+Message-ID: <47FA0F6E.1030001@freedesktop.org>
+References: <1207152034.3957.15.camel@johannes.berg>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig9AA6AB33AF9873DD839D65D4"
+ boundary="------------enigA42DC90CC654AB2D6EF0BA7F"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail4.sea5.speakeasy.net ([69.17.117.6]:50562 "EHLO
-	mail4.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751385AbYDEKN1 (ORCPT
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:37850 "EHLO
+	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753842AbYDGMLP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 5 Apr 2008 06:13:27 -0400
-In-Reply-To: <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
+	Mon, 7 Apr 2008 08:11:15 -0400
+In-Reply-To: <1207152034.3957.15.camel@johannes.berg>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Geoff Johnstone <geoffsheep.johnstonefrog@googlemail.com>
-Cc: linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig9AA6AB33AF9873DD839D65D4
+--------------enigA42DC90CC654AB2D6EF0BA7F
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Geoff Johnstone wrote:
->>> I've attached four patches that I've written for sparse to
->>> use it for a userland project.
+Johannes Berg wrote:
+> I'm not sure this is exactly the right thing to do because I'm
+> unfamiliar with the default CFLAGS, but it seems to at least make it
+> mostly work on powerpc.
+>=20
+> Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
+> ---
+> In particular, I don't know what that _STRING_ARCH_unaligned thing is
+> and whether I should define it to 0 or 1 (and why I need it at all.)
 
-Regarding Wmix-decl-code.diff, I agree that that warning definitely
-needs an option controlling it. but GCC already has that option and
-calls it "-Wdeclaration-after-statement", so matching GCC's name seems
-potentially useful.  (However, I can imagine corner cases where it
-might prove problematic, such as wanting to pass that option to GCC
-and not Sparse or vice versa.)  Also, I agree that the default should
-depend on the C standard in use, and I see no compatibility reason why
-the warning should remain for code that explicitly asks for C99.
-Thus, I haven't applied this version of the patch.  I'd love to apply
-an updated version with those two changes.
-
-Regarding incomplete structs, your patch seems reasonable as far as I
-know, and it doesn't break the test suite, so I've applied and pushed
-it.  Per your concerns, if this patch doesn't represent the correct
-fix, the code can change later when we have a test case that breaks
-with this patch.  Please do consider writing a patch for a new test
-case based on your example.
-
-Your argument parsing for -ansi and -std=3D looks great to me.  Applied
-and pushed.
-
-The new builtins for fortify handling seem fine.  Applied and pushed.
-
-Thanks for your patches.
+"mostly work" seems like an improvement on "doesn't work"; I can always
+apply another patch later to make it more correct.  Applied and pushed.
 
 - Josh Triplett
 
 
---------------enig9AA6AB33AF9873DD839D65D4
+
+--------------enigA42DC90CC654AB2D6EF0BA7F
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -65,9 +50,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFH91DKGJuZRtD+evsRApxQAKCjI7iB7S5iCfr4daxAXTShpo6R9gCfa+hi
-1Ztyf/EUGxyqUgnwYu3CL5s=
-=xAnQ
+iD8DBQFH+g9uGJuZRtD+evsRAlvPAJ40UrDUrpLk5UbzpeQISZl0wkX/MQCfY0ie
+Zc+Nt+FQiTASAQCS2keLaw4=
+=6258
 -----END PGP SIGNATURE-----
 
---------------enig9AA6AB33AF9873DD839D65D4--
+--------------enigA42DC90CC654AB2D6EF0BA7F--
