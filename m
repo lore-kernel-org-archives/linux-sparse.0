@@ -1,33 +1,60 @@
-From: Jiri Slaby <jirislaby@gmail.com>
-Subject: Re: rewrite_parent_branch: Assertion `changed' failed
-Date: Mon, 07 Apr 2008 23:29:31 +0200
-Message-ID: <47FA923B.1080109@gmail.com>
-References: <47FA6DAF.3030600@gmail.com>  <47FA708D.5080203@gmail.com> <1207603339.22430.48.camel@dv>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: [RFC PATCH] Fix crash in linearize_compound_statement()
+Date: Mon, 7 Apr 2008 14:55:02 -0700
+Message-ID: <70318cbf0804071455g2f15e136qab225063f7faa89f@mail.gmail.com>
+References: <1207601111.22430.28.camel@dv>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-2; format=flowed
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.187]:64498 "EHLO
-	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757284AbYDGV3f (ORCPT
+Received: from wr-out-0506.google.com ([64.233.184.224]:20755 "EHLO
+	wr-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751407AbYDGVzG (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 7 Apr 2008 17:29:35 -0400
-Received: by nf-out-0910.google.com with SMTP id g13so772559nfb.21
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Apr 2008 14:29:34 -0700 (PDT)
-In-Reply-To: <1207603339.22430.48.camel@dv>
+	Mon, 7 Apr 2008 17:55:06 -0400
+Received: by wr-out-0506.google.com with SMTP id c48so1309369wra.1
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Apr 2008 14:55:03 -0700 (PDT)
+In-Reply-To: <1207601111.22430.28.camel@dv>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Pavel Roskin <proski@gnu.org>
 Cc: linux-sparse@vger.kernel.org
 
-On 04/07/2008 11:22 PM, Pavel Roskin wrote:
-> On Mon, 2008-04-07 at 21:05 +0200, Jiri Slaby wrote:
->> It's 2.6.25-rc8-mm1 code. It's opensuse sparse-0.1-46, core from the
->> crash is here:
->> http://www.fi.muni.cz/~xslaby/sklad/core.sparse.bz2
-> 
-> If it's indeed version 0.1, I strongly suggest that you test the current
-> git version, which is version 0.4.1 plus 10 or so patches.
+On Mon, Apr 7, 2008 at 1:45 PM, Pavel Roskin <proski@gnu.org> wrote:
+>  static int x;
+>  static inline void foo(void)
+>  {
+>     if (x)
+>         x = 1;
+>  }
+>  static void bar(void)
+>  {
+>     foo();
+>  }
+>  static typeof(bar) quux;
+>
+>
+>  The crash happens in linearize_compound_statement(), and I believe that
+>  the reason is incorrect access to phi_node->phi_list without making sure
+>  that phi_node->opcode is OP_PHI.  When processing the above program,
+>  phi_node->phi_list can be OP_INLINED_CALL.
 
-Heh, what the hell, how old is it? A year and a half. I must admit I haven't 
-noticed the version in the haste... Filing a bug, thanks.
+No, that is not the root cause. The root cause is you feed sparse with
+bad input. typeof(bar) will give you a type of a function. Sparse just let
+quux have the base type of bar function body. That is just so wrong.
+
+>
+>  I understand very little in sparse code, and I have no idea what kind of
+>  fallback is needed when phi_node->opcode is not OP_PHI.
+>
+>  But this patch fixes the crash:
+
+As I said before, this is not the right fix. Wish it not get applied.
+
+I agree sparse should not assert on it, but not like this.
+You should at least fix it from the typeof(bar) side, instead of try
+to linearize
+the same function twice.
+
+Chris
