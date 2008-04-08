@@ -1,83 +1,68 @@
-From: Pavel Roskin <proski@gnu.org>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: [RFC PATCH] Fix crash in linearize_compound_statement()
-Date: Tue, 08 Apr 2008 01:14:17 -0400
-Message-ID: <1207631657.3209.13.camel@rd>
+Date: Mon, 7 Apr 2008 23:05:09 -0700
+Message-ID: <70318cbf0804072305x9b1dacdrd25bca5094bb23d5@mail.gmail.com>
 References: <1207601111.22430.28.camel@dv>
 	 <70318cbf0804071455g2f15e136qab225063f7faa89f@mail.gmail.com>
+	 <1207631657.3209.13.camel@rd>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:34065 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751092AbYDHFOV (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 8 Apr 2008 01:14:21 -0400
-In-Reply-To: <70318cbf0804071455g2f15e136qab225063f7faa89f@mail.gmail.com>
+Received: from py-out-1112.google.com ([64.233.166.177]:36719 "EHLO
+	py-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170AbYDHGFN (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 8 Apr 2008 02:05:13 -0400
+Received: by py-out-1112.google.com with SMTP id u52so2707487pyb.10
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Apr 2008 23:05:10 -0700 (PDT)
+In-Reply-To: <1207631657.3209.13.camel@rd>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Pavel Roskin <proski@gnu.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Mon, 2008-04-07 at 14:55 -0700, Christopher Li wrote:
-> On Mon, Apr 7, 2008 at 1:45 PM, Pavel Roskin <proski@gnu.org> wrote:
-> >  static int x;
-> >  static inline void foo(void)
-> >  {
-> >     if (x)
-> >         x = 1;
-> >  }
-> >  static void bar(void)
-> >  {
-> >     foo();
-> >  }
-> >  static typeof(bar) quux;
-> >
-> >
-> >  The crash happens in linearize_compound_statement(), and I believe that
-> >  the reason is incorrect access to phi_node->phi_list without making sure
-> >  that phi_node->opcode is OP_PHI.  When processing the above program,
-> >  phi_node->phi_list can be OP_INLINED_CALL.
-> 
-> No, that is not the root cause. The root cause is you feed sparse with
-> bad input. typeof(bar) will give you a type of a function. Sparse just let
-> quux have the base type of bar function body. That is just so wrong.
+On Mon, Apr 7, 2008 at 10:14 PM, Pavel Roskin <proski@gnu.org> wrote:
+>
+>  I should have been more clear.  Last time I was carried away by some
+>  strange messages about "return" and labels, which seemed really weird to
+>  me, but less so after your explanation.
+>
+>  This example is made from the same original source, but this time I
+>  concentrated on the crash, because that's the thing that cannot be
+>  justified by any bad code.
 
-I know.  And the source that was doing it is fixed long ago.
+I understand that you have your source code which sparse choked on
+fixed. Good.
 
-> >  I understand very little in sparse code, and I have no idea what kind of
-> >  fallback is needed when phi_node->opcode is not OP_PHI.
-> >
-> >  But this patch fixes the crash:
-> 
-> As I said before, this is not the right fix. Wish it not get applied.
+I am actually complaining your fix to sparse itself. It is not good enough.
+You fix it in the linearize stage. That is already too late.
 
-I should have been more clear.  Last time I was carried away by some
-strange messages about "return" and labels, which seemed really weird to
-me, but less so after your explanation.
+You should fix it in the parse and type evaluate stage, before it even reach
+to the linearizer.
 
-This example is made from the same original source, but this time I
-concentrated on the crash, because that's the thing that cannot be
-justified by any bad code.
+>
+>
+>  > I agree sparse should not assert on it, but not like this.
+>
+>  I don't quite understand why sparse is getting in this situation, but
 
-> I agree sparse should not assert on it, but not like this.
+Exactly. That is because you try to linearize the exact same function
+twice due to the "typeof(bar)". Linearize the same function twice is just
+plain wrong. It should never happen. Your patch just covers up the real problem
+instead of fixing it.
 
-I don't quite understand why sparse is getting in this situation, but
-I'm quite confident from seeing other code that phi_node->phi_list is
-invalid if phi_node->opcode is not OP_PHI, and should not be accessed.
-I'd rather see sparse tripping an assert and crashing before it happens
-rather than see it interpreting some other data as phi_list and crashing
-randomly while iterating over that bogus list.
+>  That's fixed, of course.  And many other problems are fixed too, some of
+>  which are user visible.  I really appreciate the usefulness of sparse.
 
-> You should at least fix it from the typeof(bar) side, instead of try
-> to linearize
-> the same function twice.
+I mean the fix in the sparse source code, not the source code which sparse
+is checking. You should change sparse, when it do "typeof(function) varname",
+give it a warning and skip this "varname" node all together. Later in the
+linearize stage, it will not linearize the same function twice.
 
-That's fixed, of course.  And many other problems are fixed too, some of
-which are user visible.  I really appreciate the usefulness of sparse.
+What your patch does is actually allowing sparse linearized a function twice.
+That is going to mess up the user-define chain very badly (e.g. the PHI node
+usage problem you are seeing.)
 
-All I'm trying to do now is to have that crash fixed, after which I
-would be glad to forget the ugly code that caused it.
-
--- 
-Regards,
-Pavel Roskin
+Chris
