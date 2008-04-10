@@ -1,68 +1,78 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Philipp Reisner <philipp.reisner@linbit.com>
 Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
-Date: Thu, 10 Apr 2008 17:54:49 +0200
-Message-ID: <1207842889.13354.15.camel@johannes.berg>
-References: <20080410132519.049821000@sipsolutions.net>
-	 <200804101724.27382.philipp.reisner@linbit.com>
-	 <1207841454.13354.7.camel@johannes.berg>
-	 <200804101746.14457.philipp.reisner@linbit.com>
+Date: Thu, 10 Apr 2008 18:05:31 +0200
+Message-ID: <200804101805.31854.philipp.reisner@linbit.com>
+References: <20080410132519.049821000@sipsolutions.net> <200804101746.14457.philipp.reisner@linbit.com> <1207842687.13354.12.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-QVF+I0oFPP7oba8YTSJi"
+Content-Type: text/plain;
+  charset="iso-8859-15"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:42922 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755556AbYDJPy5 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 10 Apr 2008 11:54:57 -0400
-In-Reply-To: <200804101746.14457.philipp.reisner@linbit.com>
+Received: from aug.linbit.com ([212.69.162.22]:42754 "EHLO mail.linbit.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758829AbYDJQFe (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 10 Apr 2008 12:05:34 -0400
+In-Reply-To: <1207842687.13354.12.camel@johannes.berg>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Philipp Reisner <philipp.reisner@linbit.com>
+To: Johannes Berg <johannes@sipsolutions.net>
 Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
 
+Am Donnerstag, 10. April 2008 17:51:27 schrieb Johannes Berg:
+> > I also worked on that part, although I have to admitt that I did not
+> > got that part of the manpage. Instead I invented the require_context
+> > attribute.
+>
+> Heh.
+>
+> > Here is the second patch. It applies on top of the first one...
+>
+> I don't really have time to look through it right now, sorry.
+>
+> > I hope that we get the good ideas of our two works combined and
+> > accepted into sparse...
+>
+> That would be good :)
+>
 
---=-QVF+I0oFPP7oba8YTSJi
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+>
+> What's this "rdwr" etc. for? And "call"? Also, how are you planning to
+> handle nested contexts, where 1,1 doesn't cut it any >0,>0 is really
+> more like what we need?
+>
 
-> +# define __cond_lock(x,c)	((c) ? ({ __acquire(x); 1; }) : 0)
+I also use it to check a recusive lock mechanism. 
 
-> +#define try_inc_local() __cond_lock(local, _try_inc_local())
-> +static int _try_inc_local(void)
-> +{
-> +	if (random() > RAND_MAX/2) {
-> +		local_cnt++;
-> +		return 1;
-> +	}
-> +	return 0;
-> +}
+The sematics of what I implemented is:
+You simply use the __attribute__((context(ctx,in,out))) to
+annotate the context changes of functions.
 
-That actually works? I guess it shows that I haven't slept enough while
-working on this.
+to annotate a variable, struct/union member or a function that
+a certain locking primitive is required for accessing it, you
+do it by 
 
-johannes
+__attribute__((require_context(ctx,min,max,"type")))
 
---=-QVF+I0oFPP7oba8YTSJi
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+ctx ... the expression that describes the locking primitive
+min ... the minimum of locks required of that locking primitive
+max ... the maximum allowed of locks of that locking primitive.
+type .. read, write, rdwr or call for the access type.
 
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
+So you can express you need to hold this and that locking 
+primitive to write to something. But an other locking
+primitive might be sufficient for reading that something.
 
-iQIVAwUAR/44SKVg1VMiehFYAQKhSg/7BErNaEn3qkhkalPE7bAZiFHm9Zn2AyNO
-kd5WwUeBqv7OD/D5Tbxye47na3im74D6TzhAnI5sjc0MHUxK9rxmpuuFw8Kg+rCx
-JQYbfBpJCLRePuqSRFtJiQ3LLFSDdqlEnPnOjXWy1zLm3XZ0gJ/b54z7BjcYgkjv
-SQE0ZkftWGxHmGV8zZXlyKJ2BjCMTDKtji5NvFRq3fas1rnB33n2f3raInY4qPBL
-SD7tKU6XPBAJP/rMGM0j0gFqDrHiy+O2IIroEzncg9BnK19RWetUl9VTtcVyv7hS
-cytEnNJj5YGYn4jAVmdW+OOOIY+Hh5yXauOliC/4Yj2WwW+baLCIjAKUDjbtJhj5
-w4yuYBsISD8vGV7ZE3WLSoH9+n39zYn/Bxar36CeVTTHM3LXer33ce6aC83v0NWH
-lobGXsmINGjMp4o1XfNyCIT/aPY3NuhK2qvfIdAgVqUCN1w1BP93OjhgDGe7XVpI
-XKsBRpMMzmf0j7JP49bW0AhBexXZRxMHsLVVqeGOIb4CM6nPlUVItEwavUQI0D68
-JBr4+CdQm8aCq+5/xAPYKdTHD4XsmQaQBy7XIrl5CCKgCOQAmO5YrrRUhdd5xEuz
-lQJUQHxpNQFBE7SrGfLiTFVwmflTkWW8VMFWsUdV3AZMAGhxPcjTqMZHlmuwPyAg
-q0dW9kBWdl8=
-=1pne
------END PGP SIGNATURE-----
+The annotation for a variable foo protected by a recursive lock
+bar would be:
 
---=-QVF+I0oFPP7oba8YTSJi--
+int foo __attribute__((require_context(bar,1,99999,"rdwr")))
 
+PS: I just realized that there my e-mail client introduced linebreakes
+    in the first patch I posted. I will repost on request of course.
+
+-Phil
+-- 
+: Dipl-Ing Philipp Reisner                      Tel +43-1-8178292-50 :
+: LINBIT Information Technologies GmbH          Fax +43-1-8178292-82 :
+: Vivenotgasse 48, 1120 Vienna, Austria        http://www.linbit.com :
