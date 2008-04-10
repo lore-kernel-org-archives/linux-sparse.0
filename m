@@ -1,62 +1,52 @@
-From: Stefan Richter <stefanr@s5r6.in-berlin.de>
-Subject: Re: [RFC 1/3] add macros for new sparse features
-Date: Thu, 10 Apr 2008 18:37:48 +0200
-Message-ID: <47FE425C.7060405@s5r6.in-berlin.de>
-References: <20080410134810.629048000@sipsolutions.net> <20080410134827.771251000@sipsolutions.net>
+From: Philipp Reisner <philipp.reisner@linbit.com>
+Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
+Date: Thu, 10 Apr 2008 23:21:31 +0200
+Message-ID: <200804102321.31681.philipp.reisner@linbit.com>
+References: <20080410132519.049821000@sipsolutions.net> <200804101805.31854.philipp.reisner@linbit.com> <1207843925.13354.20.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+  charset="iso-8859-15"
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1757191AbYDJQim@vger.kernel.org>
-In-Reply-To: <20080410134827.771251000@sipsolutions.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from aug.linbit.com ([212.69.162.22]:44407 "EHLO mail.linbit.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1756672AbYDJVVe (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 10 Apr 2008 17:21:34 -0400
+In-Reply-To: <1207843925.13354.20.camel@johannes.berg>
+Content-Disposition: inline
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org
 
-Johannes Berg wrote:
-> This patch adds kernel macros for a few new sparse features, namely
->  * checking try_lock functions and
->  * making a function or macro require a certain lock.
-> 
-> Still waiting to see what the sparse folks say to my patches.
-> 
-> Not-yet-signed-off-by: Johannes Berg <johannes@sipsolutions.net>
-> ---
->  include/linux/compiler.h |    6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> --- everything.orig/include/linux/compiler.h	2008-04-10 15:36:18.000000000 +0200
-> +++ everything/include/linux/compiler.h	2008-04-10 15:36:40.000000000 +0200
-> @@ -11,9 +11,12 @@
->  # define __nocast	__attribute__((nocast))
->  # define __iomem	__attribute__((noderef, address_space(2)))
->  # define __acquires(x)	__attribute__((context(x,0,1)))
-> +# define __try_acquires(x,t,f)	__attribute__((conditional_context(x,0,t,f)))
->  # define __releases(x)	__attribute__((context(x,1,0)))
->  # define __acquire(x)	__context__(x,1)
->  # define __release(x)	__context__(x,-1)
-> +# define __requires(x)	__attribute__((context(x,1,1)))
-> +# define __macro_requires(x)	__context__(x,0,1)
+> >
+> > int foo __attribute__((require_context(bar,1,99999,"rdwr")))
+>
+> Ah. Makes sense as well, though now you can't do something like "require
+> context count two and decrement by one", can you? Or do you just do that
+> by combining the various attributes?
 
+Right, by combining a context and a require_context attribute.
 
-So, instead of
+>
+> Anyhow, I don't really care which patch gets chosen.
+>
 
-  /* always call with host_lock held */
-  int foo(struct bar *b)
-  {
+Nor do I really care. I just hope that there is some reaction from Josh
+that indicates how he wishes to continue with that toppic...
+I am also ready to do further work in this area.
 
-we could write
+> Though, how can you actually track multiple contexts within a single
+> function if you have just a "struct expression *context_expr" for each
+> basic block? I guess I should just try your code :)
+>
 
-  int foo(struct bar *b) __requires(host_lock)
-  {
+In the check_context() I build a expression_list of all the context 
+expressions that are of interest for that entrypoint. Then check_bb_context()
+is called for each of these expressions that describe a locking primitive.
 
-and let sparse check the call chains... or how is it used?
-
-And what about dynamically allocated locks?
-E.g. b->lock
-Or struct host h* = container_of(b, struct host, m); with the necessity
-to hold h->lock...
+-Phil
 -- 
-Stefan Richter
--=====-==--- -=-- -=-=-
-http://arcgraph.de/sr/
+: Dipl-Ing Philipp Reisner                      Tel +43-1-8178292-50 :
+: LINBIT Information Technologies GmbH          Fax +43-1-8178292-82 :
+: Vivenotgasse 48, 1120 Vienna, Austria        http://www.linbit.com :
