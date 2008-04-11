@@ -1,73 +1,80 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [RFC 1/3] add macros for new sparse features
-Date: Fri, 11 Apr 2008 14:20:39 +0200
-Message-ID: <1207916439.13354.68.camel@johannes.berg>
-References: <20080410134810.629048000@sipsolutions.net>
-	 <20080410134827.771251000@sipsolutions.net>
-	 <47FE425C.7060405@s5r6.in-berlin.de>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: Using sparse to catch invalid RCU dereferences?
+Date: Fri, 11 Apr 2008 20:18:42 +0200
+Message-ID: <1207937922.7524.17.camel@twins>
+References: <1207605856.12481.35.camel@johannes.berg>
+	 <20080408155259.GA8381@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-8pjRjQXmdm/TnsTbuq52"
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S1759523AbYDKMVR@vger.kernel.org>
-In-Reply-To: <47FE425C.7060405@s5r6.in-berlin.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Stefan Richter <stefanr@s5r6.in-berlin.de>
-Cc: linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-
-
---=-8pjRjQXmdm/TnsTbuq52
 Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from pentafluge.infradead.org ([213.146.154.40]:40986 "EHLO
+	pentafluge.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759030AbYDKSTA (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 11 Apr 2008 14:19:00 -0400
+In-Reply-To: <20080408155259.GA8381@linux.vnet.ibm.com>
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: paulmck@linux.vnet.ibm.com
+Cc: Johannes Berg <johannes@sipsolutions.net>, Linux Kernel list <linux-kernel@vger.kernel.org>, linux-sparse <linux-sparse@vger.kernel.org>
 
+On Tue, 2008-04-08 at 08:52 -0700, Paul E. McKenney wrote:
+> On Tue, Apr 08, 2008 at 12:04:16AM +0200, Johannes Berg wrote:
+> > Hi,
+> > 
+> > Just a thought, I haven't tried this yet because I'm not entirely sure
+> > it's actually correct. I was just thinking it should be possible to
+> > introduce something like
+> > 
+> > 	#define __rcu	__attribute__((address_space(3)))
+> > 
+> > (for sparse only, of course) and then be able to say
+> > 
+> > 	struct myfoo *foo __rcu;
+> > 
+> > and sparse would warn on
+> > 
+> > 	struct myfoo *bar = foo;
+> > 
+> > but not on
+> > 
+> > 	struct myfoo *bar = rcu_dereference(foo);
+> 
+> Ah, "address_space" is a sparse-ism, no wonder I couldn't find it in
+> the gcc docs...
+> 
+> So the address_space attribute says what the pointer points to rather
+> than where the pointer resides, correct?
+> 
+> > by way of using __force inside rcu_dereference(), rcu_assign_pointer()
+> > etc.
+> > 
+> > Would this be feasible? Or should one actually use __bitwise/__force to
+> > also get the warning when assigning between two variables both marked
+> > __rcu?
+> 
+> It might be.  There are a number of places where it is legal to access
+> RCU-protected pointers directly, and all of these would need to be
+> changed.  For example, in the example above, one could do:
+> 
+> 	foo = NULL;
+> 
+> I recently tried to modify rcu_assign_pointer() to issue the memory
+> memory barrier only when the pointer was non-NULL, but this ended badly.
+> Probably because I am not the greatest gcc expert around...  We ended
+> up having to define an rcu_assign_index() to handle the possibility of
+> assigning a zero-value array index, but my attempts to do type-checking
+> backfired, and I eventually gave it up.  Again, someone a bit more clued
+> in to gcc than I am could probably pull it off.
+> 
+> In addition, it is legal to omit rcu_dereference() and rcu_assign_pointer()
+> when holding the update-side lock.
 
-> So, instead of
->=20
->   /* always call with host_lock held */
->   int foo(struct bar *b)
->   {
->=20
-> we could write
->=20
->   int foo(struct bar *b) __requires(host_lock)
->   {
->=20
-> and let sparse check the call chains... or how is it used?
+We could start by annotating those as well, for example:
 
-Yes.
+ __rcu spinlock_t tree_lock;
 
-> And what about dynamically allocated locks?
-> E.g. b->lock
-> Or struct host h* =3D container_of(b, struct host, m); with the necessity
-> to hold h->lock...
+Then we would know that when tree lock is held the data structure is
+stable and we can ommit the rcu_*() functions.
 
-I was looking at making sparse check that certain variable references
-are under rcu, but it's not as easy. Also, the lock context is just an
-arbitrary name, there's no way to actually link it to a certain variable
-or so to differentiate between them. I think that's not really solvable
-in sparse, look at the things lockdep has to do.
-
-johannes
-
---=-8pjRjQXmdm/TnsTbuq52
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUAR/9XlqVg1VMiehFYAQKk0w//fRspT04ACbb1HUS5P21pbENuirTgrIFv
-jYz/UomtBkbuJrqZwL1OFO70jrBK3jt1UwzZENub162DHI6pzFgiKFlU5c5uYs7c
-d9zzpqF6SnPG2Ox2f9BUgGdqBdulXBXAlrT9W8MBW8fwuKngS0iQE3zkGjYB+nY5
-x7br69bWMK01h+tqMcfHaI76E+BGqlLhaomCAJe4VDhIXZJkKS95oevnHm9fHh2a
-NrxV+f+DvFyR4MezX3mVRpOBd0obtdcbquws/etOCcLofAWJWNFMccY4UKpU5CWO
-QoemmQIsAYYNfu96y8nwZaBaYwN8RP0pChneK+hpqHs2eQuynT8bIBpQPhASCKvC
-mKvqx9ANT+UYsfHj3gj8XZms/m7XGuf5n8KR2HwiLsqCmle3Jwoy/2y3P7JA2Xwi
-Asa7UBJmHcOpkGFAZb4ilA3cgp5CmFwijeWIHIEKLjM67VYnpyoSMg77tY89A7dU
-z8v1+vDQJfaEjBMXQL0x0W6rsazR41orXhFilgOXEhvL7hBHbZC4S618eRur4mxY
-Y1oRoH2ABKRPCMgmH5ZRjaADzRDdLQ0oSy49yvDKu1yWp6oxvH5MquaJ1owOaKNg
-d89eWSG0BrdX/b/hbvfqTUxEiC1eXVHP4RjGUgm7143/4Cjn5ewspAzZVHBHJjmN
-DAUgK98qcAc=
-=4MWs
------END PGP SIGNATURE-----
-
---=-8pjRjQXmdm/TnsTbuq52--
