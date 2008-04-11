@@ -1,89 +1,57 @@
-From: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
-Subject: Re: Using sparse to catch invalid RCU dereferences?
-Date: Fri, 11 Apr 2008 11:43:27 -0700
-Message-ID: <20080411184327.GD29878@linux.vnet.ibm.com>
-References: <1207605856.12481.35.camel@johannes.berg> <20080408155259.GA8381@linux.vnet.ibm.com> <1207937922.7524.17.camel@twins>
-Reply-To: paulmck@linux.vnet.ibm.com
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
+Date: Fri, 11 Apr 2008 12:53:07 -0700
+Message-ID: <47FFC1A3.9090803@freedesktop.org>
+References: <20080410132519.049821000@sipsolutions.net> <200804101805.31854.philipp.reisner@linbit.com> <1207843925.13354.20.camel@johannes.berg> <200804102321.31681.philipp.reisner@linbit.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig7BBA488E938C32F89655F8FE"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e31.co.us.ibm.com ([32.97.110.149]:39054 "EHLO
-	e31.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760349AbYDKSn3 (ORCPT
+Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:54214 "EHLO
+	mail3.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757756AbYDKTxF (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Apr 2008 14:43:29 -0400
-Content-Disposition: inline
-In-Reply-To: <1207937922.7524.17.camel@twins>
+	Fri, 11 Apr 2008 15:53:05 -0400
+In-Reply-To: <200804102321.31681.philipp.reisner@linbit.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Linux Kernel list <linux-kernel@vger.kernel.org>, linux-sparse <linux-sparse@vger.kernel.org>
+To: Philipp Reisner <philipp.reisner@linbit.com>
+Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org
 
-On Fri, Apr 11, 2008 at 08:18:42PM +0200, Peter Zijlstra wrote:
-> On Tue, 2008-04-08 at 08:52 -0700, Paul E. McKenney wrote:
-> > On Tue, Apr 08, 2008 at 12:04:16AM +0200, Johannes Berg wrote:
-> > > Hi,
-> > > 
-> > > Just a thought, I haven't tried this yet because I'm not entirely sure
-> > > it's actually correct. I was just thinking it should be possible to
-> > > introduce something like
-> > > 
-> > > 	#define __rcu	__attribute__((address_space(3)))
-> > > 
-> > > (for sparse only, of course) and then be able to say
-> > > 
-> > > 	struct myfoo *foo __rcu;
-> > > 
-> > > and sparse would warn on
-> > > 
-> > > 	struct myfoo *bar = foo;
-> > > 
-> > > but not on
-> > > 
-> > > 	struct myfoo *bar = rcu_dereference(foo);
-> > 
-> > Ah, "address_space" is a sparse-ism, no wonder I couldn't find it in
-> > the gcc docs...
-> > 
-> > So the address_space attribute says what the pointer points to rather
-> > than where the pointer resides, correct?
-> > 
-> > > by way of using __force inside rcu_dereference(), rcu_assign_pointer()
-> > > etc.
-> > > 
-> > > Would this be feasible? Or should one actually use __bitwise/__force to
-> > > also get the warning when assigning between two variables both marked
-> > > __rcu?
-> > 
-> > It might be.  There are a number of places where it is legal to access
-> > RCU-protected pointers directly, and all of these would need to be
-> > changed.  For example, in the example above, one could do:
-> > 
-> > 	foo = NULL;
-> > 
-> > I recently tried to modify rcu_assign_pointer() to issue the memory
-> > memory barrier only when the pointer was non-NULL, but this ended badly.
-> > Probably because I am not the greatest gcc expert around...  We ended
-> > up having to define an rcu_assign_index() to handle the possibility of
-> > assigning a zero-value array index, but my attempts to do type-checking
-> > backfired, and I eventually gave it up.  Again, someone a bit more clued
-> > in to gcc than I am could probably pull it off.
-> > 
-> > In addition, it is legal to omit rcu_dereference() and rcu_assign_pointer()
-> > when holding the update-side lock.
-> 
-> We could start by annotating those as well, for example:
-> 
->  __rcu spinlock_t tree_lock;
-> 
-> Then we would know that when tree lock is held the data structure is
-> stable and we can ommit the rcu_*() functions.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig7BBA488E938C32F89655F8FE
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: quoted-printable
 
-Good point!  Though IIRC there are are cases where we are updating
-one RCU-protected data structure while in an RCU read-side critical
-section with respect to another RCU-protected data structure.
+Philipp Reisner wrote:
+>> Anyhow, I don't really care which patch gets chosen.
+>=20
+> Nor do I really care. I just hope that there is some reaction from Josh=
 
-But it would probably best to start as you say rather than trying
-to classify different RCU uses.  :-)
+> that indicates how he wishes to continue with that toppic...
+> I am also ready to do further work in this area.
 
-						Thanx, Paul
+Definitely interested in the patches, just spoiled for choice.
+However, having now reviewed the various proposals, I think I will
+accept Johannes Berg's patches to support his corresponding proposed
+changes in Linux's include/linux/compiler.h.
+
+- Josh Triplett
+
+
+--------------enig7BBA488E938C32F89655F8FE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFH/8GjGJuZRtD+evsRAjYPAJwIst3JmjPHdzR/jO/zu1tRR5Y/vQCgitq8
+O/OGBWS4HUiSYagfDaTLMhA=
+=5xbH
+-----END PGP SIGNATURE-----
+
+--------------enig7BBA488E938C32F89655F8FE--
