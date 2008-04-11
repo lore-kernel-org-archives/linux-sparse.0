@@ -1,57 +1,124 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
-Date: Fri, 11 Apr 2008 12:53:07 -0700
-Message-ID: <47FFC1A3.9090803@freedesktop.org>
-References: <20080410132519.049821000@sipsolutions.net> <200804101805.31854.philipp.reisner@linbit.com> <1207843925.13354.20.camel@johannes.berg> <200804102321.31681.philipp.reisner@linbit.com>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: Using sparse to catch invalid RCU dereferences?
+Date: Fri, 11 Apr 2008 22:54:03 +0200
+Message-ID: <1207947243.13354.88.camel@johannes.berg>
+References: <1207605856.12481.35.camel@johannes.berg>
+	 <20080408155259.GA8381@linux.vnet.ibm.com>
+	 <1207771787.7442.45.camel@johannes.berg>
+	 <20080410223206.GI8419@linux.vnet.ibm.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig7BBA488E938C32F89655F8FE"
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-oHNW+EEBViP18jY3fdR7"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:54214 "EHLO
-	mail3.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757756AbYDKTxF (ORCPT
+Received: from crystal.sipsolutions.net ([195.210.38.204]:40372 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760017AbYDKUyQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Apr 2008 15:53:05 -0400
-In-Reply-To: <200804102321.31681.philipp.reisner@linbit.com>
+	Fri, 11 Apr 2008 16:54:16 -0400
+In-Reply-To: <20080410223206.GI8419@linux.vnet.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Philipp Reisner <philipp.reisner@linbit.com>
-Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org
+To: paulmck@linux.vnet.ibm.com
+Cc: Linux Kernel list <linux-kernel@vger.kernel.org>, linux-sparse <linux-sparse@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig7BBA488E938C32F89655F8FE
-Content-Type: text/plain; charset=ISO-8859-15
+
+--=-oHNW+EEBViP18jY3fdR7
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-Philipp Reisner wrote:
->> Anyhow, I don't really care which patch gets chosen.
+On Thu, 2008-04-10 at 15:32 -0700, Paul E. McKenney wrote:
+> On Wed, Apr 09, 2008 at 10:09:46PM +0200, Johannes Berg wrote:
+> >=20
+> > > It might be.  There are a number of places where it is legal to acces=
+s
+> > > RCU-protected pointers directly, and all of these would need to be
+> > > changed.  For example, in the example above, one could do:
+> > >=20
+> > > 	foo =3D NULL;
+> >=20
+> > Ok, that I understand, but sparse always treats NULL specially anyway.
 >=20
-> Nor do I really care. I just hope that there is some reaction from Josh=
+> But "int foo =3D 0;" would need the memory barrier -- index 0 of some
+> RCU-protected array.
 
-> that indicates how he wishes to continue with that toppic...
-> I am also ready to do further work in this area.
+Oh. Hmm, I guess that wouldn't really be possible to find at least not
+with sparse right now. Though maybe we can add some sort of annotation
+that that special type can't even take zero directly.
 
-Definitely interested in the patches, just spoiled for choice.
-However, having now reviewed the various proposals, I think I will
-accept Johannes Berg's patches to support his corresponding proposed
-changes in Linux's include/linux/compiler.h.
+> You are right -- I was confused.  The case where you can omit the
+> rcu_assign_pointer() would be when building a multiple-element data
+> structure that is then published as a unit.  For example:
+>=20
+> 	p =3D kmalloc(sizeof(*p), GFP_KERNEL);
+> 	q =3D kmalloc(sizeof(*p), GFP_KERNEL);
+> 	p->next =3D q; /* don't need rcu_assign_pointer() here. */
+> 	q->next =3D NULL;  /* or here. */
+> 	/* initialize other fields of p and q. */
+> 	rcu_assign_pointer(global_pointer, p);
+>=20
+> The assignment to p->next doesn't have to be rcu_assign_pointer() because
+> other CPUs are unable to access the data structure -- only the final
+> assignment that publishes the whole group need be rcu_assign_pointer().
+> On the other hand, the cost of the extra memory barrier would be
+> insignificant in most cases.
 
-- Josh Triplett
+Ah. Yeah, but we probably need a "raw" accessor anyway if we're going to
+go this route, e.g. for any deref within the update-locked section.
 
+> > I've been playing a bit, see below for my play rcupdate.h and test.c
+> > test program.
+> >=20
+> > Unfortunately, sparse doesn't have the ability to declare
+> > "=EF=BB=BF__attribute__((force_bitwise)) typeof(p)" or even
+> > "=EF=BB=BF__attribute__((force)) typeof(p)" which makes this force more=
+ than
+> > necessary and causes it to not catch when incompatible pointers are
+> > used. gcc notices that because I only do a cast at all for sparse, but
+> > that doesn't help, since e.g. list_for_each_entry_rcu() requires that
+> > the correct type is returned. So without sparse supporting the latter
+> > notation, we don't stand a chance.
+>=20
+> "<feff>"???
 
---------------enig7BBA488E938C32F89655F8FE
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Hmm?
+
+> > Also, I wouldn't know how to declare that an array or so needs
+> > rcu-access to the members.
+>=20
+> Hmmm...  Can you apply the address-space attribute to the array itself?
+> I suppose one could convert the array to a pointer, but yecch!
+
+Not sure if applying that to an array would work, and I wouldn't want to
+convert it to pointers either. But I suppose you could declare the array
+like this:
+
+static struct foo * __attribute__((bitwise or address_space)) array[7];
+
+which should, as far as I understand, apply the attribute to the array
+members instead of the array.
+
+johannes
+
+--=-oHNW+EEBViP18jY3fdR7
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+Comment: Johannes Berg (powerbook)
 
-iD8DBQFH/8GjGJuZRtD+evsRAjYPAJwIst3JmjPHdzR/jO/zu1tRR5Y/vQCgitq8
-O/OGBWS4HUiSYagfDaTLMhA=
-=5xbH
+iQIVAwUAR//P6qVg1VMiehFYAQKomg/+LN9vLLI/V7DInn7pjY0liLFMEyvRuezR
+dK16VBvG8r0iGVWWl7+UM92EcXWJ5HCOJVXzEUTCj0S1+wMCV8l5b7qMss5FguMX
+qPXhVl/PvkD8WHZpRn+OSBsSmuIZ85bFnXr8cPeM8bwMJCp/94Ysk45Rg5dpuL7a
+iWM4nh4kUdRBb2LUEorSw/ZuuCPUdvTw/XQHNikymQcN6Kw1fK9UxcTQRnwLV58b
+LzmeRfcP+jLJ7kbuJcC7j99IFoT3WVKd6sYTJk5usOafLKK+Iylm8fqlIF17XyYK
+OeKjAGgrFj5hr6fWTszcSFfPwX09pWY8GZr76ML0z6QUsF4Ne1nMimfd2GXaayR6
+0muoyENiikxnHZ6MWuKEI9kyDPoI6/TGe65vtP3GzIPxeJsitFz1KUl4Xza498VU
+0qxCbG5Z+d2YuO8u1LUe2HNCzzcMwFTbNOyh3aacKxJhRkdirLStbPmkPMtXd0Tp
+gCF4r+ekHSKnUCWxQL/A12nPOO6mnUHiK4kNaCPmJTh857JabcqdMncsad9cclY1
+eStrXSVUiAmKwOQ4TCITBb4ZnCMYJN8Y5RgDKt9Wo2vHkDFeT6oMWA7UZuvrzPaY
+PyIM6H32otF3HEncC1EoFDiDcv5fEyI16p9hazydnrwUPaCpsAzR+j5+pfr8Sk6i
+x1j+sGnX5Y4=
+=RMWK
 -----END PGP SIGNATURE-----
 
---------------enig7BBA488E938C32F89655F8FE--
+--=-oHNW+EEBViP18jY3fdR7--
+
