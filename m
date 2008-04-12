@@ -1,70 +1,147 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [RFC 3/3] mac80211: annotate with __requires_rcu
-Date: Sat, 12 Apr 2008 10:56:29 +0200
-Message-ID: <1207990589.13354.123.camel@johannes.berg>
-References: <20080410134810.629048000@sipsolutions.net>
-	 <20080410134829.412424000@sipsolutions.net>
-	 <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
+From: "Geoff Johnstone" <geoffsheep.johnstonefrog@googlemail.com>
+Subject: Re: four sparse patches
+Date: Sat, 12 Apr 2008 11:57:23 +0100
+Message-ID: <32e600e90804120357k5923dd47xfcb253bf1c390225@mail.gmail.com>
+References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>
+	 <47F07F78.5030405@kernel.org>
+	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com>
+	 <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
+	 <47F750CA.1090307@kernel.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-eLdB7X2w7Ui/c5zhNN5e"
+Content-Type: multipart/mixed;
+	boundary="----=_Part_5454_6374912.1207997843121"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:41302 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757073AbYDLI4s (ORCPT
+Received: from wf-out-1314.google.com ([209.85.200.168]:27031 "EHLO
+	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757460AbYDLK5X (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 12 Apr 2008 04:56:48 -0400
-In-Reply-To: <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
+	Sat, 12 Apr 2008 06:57:23 -0400
+Received: by wf-out-1314.google.com with SMTP id 28so841762wff.4
+        for <linux-sparse@vger.kernel.org>; Sat, 12 Apr 2008 03:57:23 -0700 (PDT)
+In-Reply-To: <47F750CA.1090307@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
-Cc: linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
+------=_Part_5454_6374912.1207997843121
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
---=-eLdB7X2w7Ui/c5zhNN5e
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+>  Regarding Wmix-decl-code.diff, I agree that that warning definitely
+>  needs an option controlling it. but GCC already has that option and
+>  calls it "-Wdeclaration-after-statement", so matching GCC's name
+>  seems potentially useful. (However, I can imagine corner cases
+>  where it might prove problematic, such as wanting to pass that
+>  option to GCC and not Sparse or vice versa.) Also, I agree that the
+>  default should depend on the C standard in use, and I see no
+>  compatibility reason why the warning should remain for code that
+>  explicitly asks for C99.  Thus, I haven't applied this version of
+>  the patch.
 
-On Sat, 2008-04-12 at 10:50 +0200, Geert Uytterhoeven wrote:
-> On Thu, 10 Apr 2008, Johannes Berg wrote:
-> > --- everything.orig/net/mac80211/key.h	2008-04-10 15:36:20.000000000 +0=
-200
-> > +++ everything/net/mac80211/key.h	2008-04-10 15:36:45.000000000 +0200
-> > @@ -146,7 +146,7 @@ struct ieee80211_key *ieee80211_key_allo
-> >   */
-> >  void ieee80211_key_link(struct ieee80211_key *key,
-> >  			struct ieee80211_sub_if_data *sdata,
-> > -			struct sta_info *sta);
-> > +			struct sta_info *sta) __requires(RCU);
->                                               ^^^^^^^^^^^^^^^
-> 					      __requires_rcu? (for consistency)
+I've attached a revised version of the patch that:
+ - Renames the option to -Wdeclaration-after-statement, as per GCC
+   (wasn't hitherto aware of that gcc option).
+ - Defaults based on chosen C dialect.
+ - Adds a few tests. (I'll do a separate patch for tests for the
+   incomplete struct patch.)
+ - Was made wrt the git trunk at about 11:30 UTC on 12th April.
 
-Yeah, forgot to fix up this one, I had been playing with it locally
-without __requires_rcu first.
+Geoff.
 
-Thanks,
-johannes
+------=_Part_5454_6374912.1207997843121
+Content-Type: application/octet-stream;
+ name=Wdeclaration-after-statement.diff
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fey2grfx1
+Content-Disposition: attachment; filename=Wdeclaration-after-statement.diff
 
---=-eLdB7X2w7Ui/c5zhNN5e
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUASAB5PKVg1VMiehFYAQLMAw/+N7qQr2NIQ7Pq2n58zFhvPKFvyswwGy13
-PPh2Apm/0qg9eIDfoCUsghs/OkNyclzRitfEcBol/QJzm/8tBpnhhY9F1lF4DZr1
-SOeH8tdiM0Ncj+CE27CSVz/8yDbXUZRYPvpQB4z16IfEGW1gyQpQlmCpBy139VUl
-Sg48L8DBdX91g7V44UngZKlQmOI/zv99+47X+vXc7vEkQe74I5T+pLt8BHiQhjRg
-vmANxijyVFZO6C6WmeQgbZe8CkTyzldzsC+RBKnt51ldWqRMHZvzf9fFPicGUDI7
-6/Ugd0fEqW82Sheyvp74uloS+KsV+NoITcaPiS7MoYrdznfM7ggLEBhuxbz6aEeH
-a3brZWpTkIetV6OCMpsj/lZ6iXd/g4nWh/60YRwSv5CGZdkMhNR26TTghLK4OkEa
-c8OFGxRtvPajDXBnyCbUP9HN2+mZ0aMSTFDfUC/xkH9svZ96vSI64gxwxDXlZbq5
-3zyfsCml5YTzq1OYugVE4lSz1BgOr96Vizc6vTYoyvcWoIZPMBcc3xHc/lTyJij3
-SM+8KT3YeBsa0yWzAV29NjqOXfyLFNcrmB3BE3L7F4muDskdVu3SPGXOYfoqWaYG
-hK7EswuKckAKTDZBQ6tT3h+3kTmXED4zPVMhqvSsdYAVU+cnjbSF0HASsRTmcHZ0
-PayuD7eGgxQ=
-=wtII
------END PGP SIGNATURE-----
-
---=-eLdB7X2w7Ui/c5zhNN5e--
-
+VGhpcyBhZGRzIC1XW25vLV1kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQsIHdoaWNoIG1ha2Vz
+IHdhcm5pbmdzIGFib3V0CmRlY2xhcmF0aW9ucyBhZnRlciBzdGF0ZW1lbnRzIGEgY29tbWFuZC1s
+aW5lIG9wdGlvbi4gKFRoZSBjb2RlIHRvIGltcGxlbWVudAp0aGUgd2FybmluZyB3YXMgYWxyZWFk
+eSBpbiB0aGVyZSB2aWEgYSAjZGVmaW5lOyB0aGUgcGF0Y2gganVzdCBleHBvc2VzIGl0CmF0IHJ1
+bnRpbWUuKSBSYXRpb25hbGU6IEM5OSBhbGxvd3MgdGhlbSwgQzg5IGRvZXNuJ3QuCgpTaWduZWQt
+b2ZmLWJ5OiBHZW9mZiBKb2huc3RvbmUgPGdlb2ZmU0hFRVAuam9obnN0b25lRlJPR0Bnb29nbGVt
+YWlsLmNvbT4KCmRpZmYgLS1naXQgYS9saWIuYyBiL2xpYi5jCmluZGV4IDc1YWZkYjcuLjBhYmNj
+OWEgMTAwNjQ0Ci0tLSBhL2xpYi5jCisrKyBiL2xpYi5jCkBAIC0yMDgsNiArMjA4LDcgQEAgaW50
+IFd0cmFuc3BhcmVudF91bmlvbiA9IDE7CiBpbnQgV3R5cGVzaWduID0gMDsKIGludCBXdW5kZWYg
+PSAwOwogaW50IFd1bmluaXRpYWxpemVkID0gMTsKK2ludCBXZGVjbGFyYXRpb25hZnRlcnN0YXRl
+bWVudCA9IC0xOwogCiBpbnQgZGJnX2VudHJ5ID0gMDsKIGludCBkYmdfZGVhZCA9IDA7CkBAIC0z
+NzIsNiArMzczLDcgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCB3YXJuaW5nIHsKIAl7ICJ0eXBlc2ln
+biIsICZXdHlwZXNpZ24gfSwKIAl7ICJ1bmRlZiIsICZXdW5kZWYgfSwKIAl7ICJ1bmluaXRpYWxp
+emVkIiwgJld1bmluaXRpYWxpemVkIH0sCisJeyAiZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50
+IiwgJldkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50IH0sCiB9OwogCiBlbnVtIHsKQEAgLTQ1Niw2
+ICs0NTgsMjggQEAgc3RhdGljIHZvaWQgaGFuZGxlX29ub2ZmX3N3aXRjaF9maW5hbGl6ZShjb25z
+dCBzdHJ1Y3Qgd2FybmluZyB3YXJuaW5nc1tdLCBpbnQgbikKIHN0YXRpYyB2b2lkIGhhbmRsZV9z
+d2l0Y2hfV19maW5hbGl6ZSh2b2lkKQogewogCWhhbmRsZV9vbm9mZl9zd2l0Y2hfZmluYWxpemUo
+d2FybmluZ3MsIHNpemVvZih3YXJuaW5ncykgLyBzaXplb2Yod2FybmluZ3NbMF0pKTsKKworCS8q
+IGRlZmF1bHQgV2RlY2xhcmF0aW9uYWZ0ZXJzdGF0ZW1lbnQgYmFzZWQgb24gdGhlIEMgZGlhbGVj
+dCAqLworCWlmICgtMSA9PSBXZGVjbGFyYXRpb25hZnRlcnN0YXRlbWVudCkKKwl7CisJCXN3aXRj
+aCAoc3RhbmRhcmQpCisJCXsKKwkJCWNhc2UgU1RBTkRBUkRfQzg5OgorCQkJY2FzZSBTVEFOREFS
+RF9DOTQ6CisJCQkJV2RlY2xhcmF0aW9uYWZ0ZXJzdGF0ZW1lbnQgPSAxOworCQkJCWJyZWFrOwor
+CisJCQljYXNlIFNUQU5EQVJEX0M5OToKKwkJCWNhc2UgU1RBTkRBUkRfR05VODk6CisJCQljYXNl
+IFNUQU5EQVJEX0dOVTk5OgorCQkJCVdkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50ID0gMDsKKwkJ
+CQlicmVhazsKKworCQkJZGVmYXVsdDoKKwkJCQlhc3NlcnQgKDApOworCQl9CisKKwl9CiB9CiAK
+IHN0YXRpYyB2b2lkIGhhbmRsZV9zd2l0Y2hfdl9maW5hbGl6ZSh2b2lkKQpkaWZmIC0tZ2l0IGEv
+bGliLmggYi9saWIuaAppbmRleCBjZWY0YWI4Li40MmEzMzk2IDEwMDY0NAotLS0gYS9saWIuaAor
+KysgYi9saWIuaApAQCAtMTA4LDYgKzEwOCw3IEBAIGV4dGVybiBpbnQgV3RyYW5zcGFyZW50X3Vu
+aW9uOwogZXh0ZXJuIGludCBXdHlwZXNpZ247CiBleHRlcm4gaW50IFd1bmRlZjsKIGV4dGVybiBp
+bnQgV3VuaW5pdGlhbGl6ZWQ7CitleHRlcm4gaW50IFdkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50
+OwogCiBleHRlcm4gaW50IGRiZ19lbnRyeTsKIGV4dGVybiBpbnQgZGJnX2RlYWQ7CmRpZmYgLS1n
+aXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCA2MjU1NzM3Li44MzQ2ZmUyIDEwMDY0NAotLS0g
+YS9wYXJzZS5jCisrKyBiL3BhcnNlLmMKQEAgLTI4LDggKzI4LDYgQEAKICNpbmNsdWRlICJleHBy
+ZXNzaW9uLmgiCiAjaW5jbHVkZSAidGFyZ2V0LmgiCiAKLSNkZWZpbmUgd2Fybl9vbl9taXhlZCAo
+MSkKLQogc3RhdGljIHN0cnVjdCBzeW1ib2xfbGlzdCAqKmZ1bmN0aW9uX3N5bWJvbF9saXN0Owog
+c3RydWN0IHN5bWJvbF9saXN0ICpmdW5jdGlvbl9jb21wdXRlZF90YXJnZXRfbGlzdDsKIHN0cnVj
+dCBzdGF0ZW1lbnRfbGlzdCAqZnVuY3Rpb25fY29tcHV0ZWRfZ290b19saXN0OwpAQCAtMTgxMCw3
+ICsxODA4LDcgQEAgc3RhdGljIHN0cnVjdCB0b2tlbiAqIHN0YXRlbWVudF9saXN0KHN0cnVjdCB0
+b2tlbiAqdG9rZW4sIHN0cnVjdCBzdGF0ZW1lbnRfbGlzdAogCQkJc3RtdCA9IGFsbG9jX3N0YXRl
+bWVudCh0b2tlbi0+cG9zLCBTVE1UX0RFQ0xBUkFUSU9OKTsKIAkJCXRva2VuID0gZXh0ZXJuYWxf
+ZGVjbGFyYXRpb24odG9rZW4sICZzdG10LT5kZWNsYXJhdGlvbik7CiAJCX0gZWxzZSB7Ci0JCQlz
+ZWVuX3N0YXRlbWVudCA9IHdhcm5fb25fbWl4ZWQ7CisJCQlzZWVuX3N0YXRlbWVudCA9IFdkZWNs
+YXJhdGlvbmFmdGVyc3RhdGVtZW50OwogCQkJdG9rZW4gPSBzdGF0ZW1lbnQodG9rZW4sICZzdG10
+KTsKIAkJfQogCQlhZGRfc3RhdGVtZW50KGxpc3QsIHN0bXQpOwpkaWZmIC0tZ2l0IGEvc3BhcnNl
+LjEgYi9zcGFyc2UuMQppbmRleCA3YTM5ZDg1Li4wZjkxMzFkIDEwMDY0NAotLS0gYS9zcGFyc2Uu
+MQorKysgYi9zcGFyc2UuMQpAQCAtMTEyLDYgKzExMiwxNiBAQCBTcGFyc2UgaXNzdWVzIHRoZXNl
+IHdhcm5pbmdzIGJ5IGRlZmF1bHQuICBUbyB0dXJuIHRoZW0gb2ZmLCB1c2UKIFxmQlwtV25vXC1k
+ZWNsXGZSLgogLgogLlRQCisuQiBcLVdkZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQKK1dhcm4g
+YWJvdXQgZGVjbGFyYXRpb25zIHRoYXQgYXJlIG5vdCBhdCB0aGUgc3RhcnQgb2YgYSBibG9jay4K
+KworVGhlc2UgZGVjbGFyYXRpb25zIGFyZSBwZXJtaXR0ZWQgaW4gQzk5IGJ1dCBub3QgaW4gQzg5
+LgorCitTcGFyc2UgaXNzdWVzIHRoZXNlIHdhcm5pbmdzIGJ5IGRlZmF1bHQgb25seSB3aGVuIHRo
+ZSBDIGRpYWxlY3QgaXMKK0M4OSAoaS5lLiAtYW5zaSBvciAtc3RkPWM4OSkuICBUbyB0dXJuIHRo
+ZW0gb2ZmLCB1c2UKK1xmQlwtV25vXC1kZWNsYXJhdGlvblwtYWZ0ZXJcLXN0YXRlbWVudFxmUi4K
+Ky4KKy5UUAogLkIgXC1XZGVmYXVsdFwtYml0ZmllbGRcLXNpZ24KIFdhcm4gYWJvdXQgYW55IGJp
+dGZpZWxkIHdpdGggbm8gZXhwbGljaXQgc2lnbmVkbmVzcy4KIApkaWZmIC0tZ2l0IGEvdmFsaWRh
+dGlvbi9kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtYW5zaS5jIGIvdmFsaWRhdGlvbi9kZWNs
+YXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtYW5zaS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4
+IDAwMDAwMDAuLjMzMzQxMGIKLS0tIC9kZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0
+aW9uLWFmdGVyLXN0YXRlbWVudC1hbnNpLmMKQEAgLTAsMCArMSwxMiBAQAorc3RhdGljIHZvaWQg
+ZnVuYyAoaW50IGkpCit7CisJaTsKKwlpbnQgaiA9IGk7Cit9CisvKgorICogY2hlY2stbmFtZTog
+ZGVjbGFyYXRpb24gYWZ0ZXIgc3RhdGVtZW50IChBTlNJKQorICogY2hlY2stY29tbWFuZDogc3Bh
+cnNlIC1hbnNpICRmaWxlCisgKiBjaGVjay1lcnJvci1zdGFydAorZGVjbGFyYXRpb24tYWZ0ZXIt
+c3RhdGVtZW50LWFuc2kuYzo0OjI6IHdhcm5pbmc6IG1peGluZyBkZWNsYXJhdGlvbnMgYW5kIGNv
+ZGUKKyAqIGNoZWNrLWVycm9yLWVuZAorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2RlY2xh
+cmF0aW9uLWFmdGVyLXN0YXRlbWVudC1jODkuYyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0
+ZXItc3RhdGVtZW50LWM4OS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLjc4
+NjMyY2QKLS0tIC9kZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVyLXN0
+YXRlbWVudC1jODkuYwpAQCAtMCwwICsxLDEyIEBACitzdGF0aWMgdm9pZCBmdW5jIChpbnQgaSkK
+K3sKKwlpOworCWludCBqID0gaTsKK30KKy8qCisgKiBjaGVjay1uYW1lOiBkZWNsYXJhdGlvbiBh
+ZnRlciBzdGF0ZW1lbnQgKEM4OSkKKyAqIGNoZWNrLWNvbW1hbmQ6IHNwYXJzZSAtc3RkPWM4OSAk
+ZmlsZQorICogY2hlY2stZXJyb3Itc3RhcnQKK2RlY2xhcmF0aW9uLWFmdGVyLXN0YXRlbWVudC1j
+ODkuYzo0OjI6IHdhcm5pbmc6IG1peGluZyBkZWNsYXJhdGlvbnMgYW5kIGNvZGUKKyAqIGNoZWNr
+LWVycm9yLWVuZAorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVy
+LXN0YXRlbWVudC1jOTkuYyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50
+LWM5OS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLmRkMzZlNmUKLS0tIC9k
+ZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVyLXN0YXRlbWVudC1jOTku
+YwpAQCAtMCwwICsxLDkgQEAKK3N0YXRpYyB2b2lkIGZ1bmMgKGludCBpKQoreworCWk7CisJaW50
+IGogPSBpOworfQorLyoKKyAqIGNoZWNrLW5hbWU6IGRlY2xhcmF0aW9uIGFmdGVyIHN0YXRlbWVu
+dCAoQzk5KQorICogY2hlY2stY29tbWFuZDogc3BhcnNlIC1zdGQ9Yzk5ICRmaWxlCisgKi8KZGlm
+ZiAtLWdpdCBhL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50LWRlZmF1bHQu
+YyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50LWRlZmF1bHQuYwpuZXcg
+ZmlsZSBtb2RlIDEwMDY0NAppbmRleCAwMDAwMDAwLi5jM2ZlMmNkCi0tLSAvZGV2L251bGwKKysr
+IGIvdmFsaWRhdGlvbi9kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtZGVmYXVsdC5jCkBAIC0w
+LDAgKzEsOSBAQAorc3RhdGljIHZvaWQgZnVuYyAoaW50IGkpCit7CisJaTsKKwlpbnQgaiA9IGk7
+Cit9CisvKgorICogY2hlY2stbmFtZTogZGVjbGFyYXRpb24gYWZ0ZXIgc3RhdGVtZW50IChkZWZh
+dWx0KQorICogY2hlY2stY29tbWFuZDogc3BhcnNlICRmaWxlCisgKi8K
+------=_Part_5454_6374912.1207997843121--
