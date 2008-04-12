@@ -1,124 +1,57 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: Using sparse to catch invalid RCU dereferences?
-Date: Fri, 11 Apr 2008 22:54:03 +0200
-Message-ID: <1207947243.13354.88.camel@johannes.berg>
-References: <1207605856.12481.35.camel@johannes.berg>
-	 <20080408155259.GA8381@linux.vnet.ibm.com>
-	 <1207771787.7442.45.camel@johannes.berg>
-	 <20080410223206.GI8419@linux.vnet.ibm.com>
+From: Geert Uytterhoeven <Geert.Uytterhoeven-osDt5Q4Chk1BDgjK7y7TUQ@public.gmane.org>
+Subject: Re: [RFC 3/3] mac80211: annotate with __requires_rcu
+Date: Sat, 12 Apr 2008 10:50:51 +0200 (CEST)
+Message-ID: <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
+References: <20080410134810.629048000@sipsolutions.net>
+ <20080410134829.412424000@sipsolutions.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-oHNW+EEBViP18jY3fdR7"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:40372 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760017AbYDKUyQ (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Apr 2008 16:54:16 -0400
-In-Reply-To: <20080410223206.GI8419@linux.vnet.ibm.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1964633417-1207990251=:28120"
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+In-Reply-To: <20080410134829.412424000-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-CC+yJ3UmIYqDUpFQwHEjaQ@public.gmane.org>, "Paul E. McKenney" <paulmck-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-sparse@vger.kernel.org
-To: paulmck@linux.vnet.ibm.com
-Cc: Linux Kernel list <linux-kernel@vger.kernel.org>, linux-sparse <linux-sparse@vger.kernel.org>
 
+  This message is in MIME format.  The first part should be readable text,
+  while the remaining parts are likely unreadable without MIME-aware tools.
 
---=-oHNW+EEBViP18jY3fdR7
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
+---584349381-1964633417-1207990251=:28120
+Content-Type: TEXT/PLAIN; charset=UTF-8
+Content-Transfer-Encoding: 8BIT
 
-On Thu, 2008-04-10 at 15:32 -0700, Paul E. McKenney wrote:
-> On Wed, Apr 09, 2008 at 10:09:46PM +0200, Johannes Berg wrote:
-> >=20
-> > > It might be.  There are a number of places where it is legal to acces=
-s
-> > > RCU-protected pointers directly, and all of these would need to be
-> > > changed.  For example, in the example above, one could do:
-> > >=20
-> > > 	foo =3D NULL;
-> >=20
-> > Ok, that I understand, but sparse always treats NULL specially anyway.
->=20
-> But "int foo =3D 0;" would need the memory barrier -- index 0 of some
-> RCU-protected array.
+On Thu, 10 Apr 2008, Johannes Berg wrote:
+> --- everything.orig/net/mac80211/key.h	2008-04-10 15:36:20.000000000 +0200
+> +++ everything/net/mac80211/key.h	2008-04-10 15:36:45.000000000 +0200
+> @@ -146,7 +146,7 @@ struct ieee80211_key *ieee80211_key_allo
+>   */
+>  void ieee80211_key_link(struct ieee80211_key *key,
+>  			struct ieee80211_sub_if_data *sdata,
+> -			struct sta_info *sta);
+> +			struct sta_info *sta) __requires(RCU);
+                                              ^^^^^^^^^^^^^^^
+					      __requires_rcu? (for consistency)
 
-Oh. Hmm, I guess that wouldn't really be possible to find at least not
-with sparse right now. Though maybe we can add some sort of annotation
-that that special type can't even take zero directly.
+With kind regards,
 
-> You are right -- I was confused.  The case where you can omit the
-> rcu_assign_pointer() would be when building a multiple-element data
-> structure that is then published as a unit.  For example:
->=20
-> 	p =3D kmalloc(sizeof(*p), GFP_KERNEL);
-> 	q =3D kmalloc(sizeof(*p), GFP_KERNEL);
-> 	p->next =3D q; /* don't need rcu_assign_pointer() here. */
-> 	q->next =3D NULL;  /* or here. */
-> 	/* initialize other fields of p and q. */
-> 	rcu_assign_pointer(global_pointer, p);
->=20
-> The assignment to p->next doesn't have to be rcu_assign_pointer() because
-> other CPUs are unable to access the data structure -- only the final
-> assignment that publishes the whole group need be rcu_assign_pointer().
-> On the other hand, the cost of the extra memory barrier would be
-> insignificant in most cases.
+Geert Uytterhoeven
+Software Architect
 
-Ah. Yeah, but we probably need a "raw" accessor anyway if we're going to
-go this route, e.g. for any deref within the update-locked section.
+Sony Network and Software Technology Center Europe
+The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
 
-> > I've been playing a bit, see below for my play rcupdate.h and test.c
-> > test program.
-> >=20
-> > Unfortunately, sparse doesn't have the ability to declare
-> > "=EF=BB=BF__attribute__((force_bitwise)) typeof(p)" or even
-> > "=EF=BB=BF__attribute__((force)) typeof(p)" which makes this force more=
- than
-> > necessary and causes it to not catch when incompatible pointers are
-> > used. gcc notices that because I only do a cast at all for sparse, but
-> > that doesn't help, since e.g. list_for_each_entry_rcu() requires that
-> > the correct type is returned. So without sparse supporting the latter
-> > notation, we don't stand a chance.
->=20
-> "<feff>"???
+Phone:    +32 (0)2 700 8453
+Fax:      +32 (0)2 700 8622
+E-mail:   Geert.Uytterhoeven-osDt5Q4Chk1BDgjK7y7TUQ@public.gmane.org
+Internet: http://www.sony-europe.com/
 
-Hmm?
-
-> > Also, I wouldn't know how to declare that an array or so needs
-> > rcu-access to the members.
->=20
-> Hmmm...  Can you apply the address-space attribute to the array itself?
-> I suppose one could convert the array to a pointer, but yecch!
-
-Not sure if applying that to an array would work, and I wouldn't want to
-convert it to pointers either. But I suppose you could declare the array
-like this:
-
-static struct foo * __attribute__((bitwise or address_space)) array[7];
-
-which should, as far as I understand, apply the attribute to the array
-members instead of the array.
-
-johannes
-
---=-oHNW+EEBViP18jY3fdR7
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUAR//P6qVg1VMiehFYAQKomg/+LN9vLLI/V7DInn7pjY0liLFMEyvRuezR
-dK16VBvG8r0iGVWWl7+UM92EcXWJ5HCOJVXzEUTCj0S1+wMCV8l5b7qMss5FguMX
-qPXhVl/PvkD8WHZpRn+OSBsSmuIZ85bFnXr8cPeM8bwMJCp/94Ysk45Rg5dpuL7a
-iWM4nh4kUdRBb2LUEorSw/ZuuCPUdvTw/XQHNikymQcN6Kw1fK9UxcTQRnwLV58b
-LzmeRfcP+jLJ7kbuJcC7j99IFoT3WVKd6sYTJk5usOafLKK+Iylm8fqlIF17XyYK
-OeKjAGgrFj5hr6fWTszcSFfPwX09pWY8GZr76ML0z6QUsF4Ne1nMimfd2GXaayR6
-0muoyENiikxnHZ6MWuKEI9kyDPoI6/TGe65vtP3GzIPxeJsitFz1KUl4Xza498VU
-0qxCbG5Z+d2YuO8u1LUe2HNCzzcMwFTbNOyh3aacKxJhRkdirLStbPmkPMtXd0Tp
-gCF4r+ekHSKnUCWxQL/A12nPOO6mnUHiK4kNaCPmJTh857JabcqdMncsad9cclY1
-eStrXSVUiAmKwOQ4TCITBb4ZnCMYJN8Y5RgDKt9Wo2vHkDFeT6oMWA7UZuvrzPaY
-PyIM6H32otF3HEncC1EoFDiDcv5fEyI16p9hazydnrwUPaCpsAzR+j5+pfr8Sk6i
-x1j+sGnX5Y4=
-=RMWK
------END PGP SIGNATURE-----
-
---=-oHNW+EEBViP18jY3fdR7--
-
+Sony Network and Software Technology Center Europe
+A division of Sony Service Centre (Europe) N.V.
+Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
+VAT BE 0413.825.160 · RPR Brussels
+Fortis Bank Zaventem · Swift GEBABEBB08A · IBAN BE39001382358619
+---584349381-1964633417-1207990251=:28120--
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
