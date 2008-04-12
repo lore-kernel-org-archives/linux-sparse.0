@@ -1,57 +1,70 @@
-From: Geert Uytterhoeven <Geert.Uytterhoeven-osDt5Q4Chk1BDgjK7y7TUQ@public.gmane.org>
+From: Johannes Berg <johannes@sipsolutions.net>
 Subject: Re: [RFC 3/3] mac80211: annotate with __requires_rcu
-Date: Sat, 12 Apr 2008 10:50:51 +0200 (CEST)
-Message-ID: <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
+Date: Sat, 12 Apr 2008 10:56:29 +0200
+Message-ID: <1207990589.13354.123.camel@johannes.berg>
 References: <20080410134810.629048000@sipsolutions.net>
- <20080410134829.412424000@sipsolutions.net>
+	 <20080410134829.412424000@sipsolutions.net>
+	 <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="-584349381-1964633417-1207990251=:28120"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20080410134829.412424000-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-CC+yJ3UmIYqDUpFQwHEjaQ@public.gmane.org>, "Paul E. McKenney" <paulmck-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-eLdB7X2w7Ui/c5zhNN5e"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from crystal.sipsolutions.net ([195.210.38.204]:41302 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757073AbYDLI4s (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 12 Apr 2008 04:56:48 -0400
+In-Reply-To: <Pine.LNX.4.64.0804121050160.28120@vixen.sonytel.be>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Geert Uytterhoeven <Geert.Uytterhoeven@sonycom.com>
+Cc: linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, linux-wireless@vger.kernel.org, linux-sparse@vger.kernel.org
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
 
----584349381-1964633417-1207990251=:28120
-Content-Type: TEXT/PLAIN; charset=UTF-8
-Content-Transfer-Encoding: 8BIT
+--=-eLdB7X2w7Ui/c5zhNN5e
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-On Thu, 10 Apr 2008, Johannes Berg wrote:
-> --- everything.orig/net/mac80211/key.h	2008-04-10 15:36:20.000000000 +0200
-> +++ everything/net/mac80211/key.h	2008-04-10 15:36:45.000000000 +0200
-> @@ -146,7 +146,7 @@ struct ieee80211_key *ieee80211_key_allo
->   */
->  void ieee80211_key_link(struct ieee80211_key *key,
->  			struct ieee80211_sub_if_data *sdata,
-> -			struct sta_info *sta);
-> +			struct sta_info *sta) __requires(RCU);
-                                              ^^^^^^^^^^^^^^^
-					      __requires_rcu? (for consistency)
+On Sat, 2008-04-12 at 10:50 +0200, Geert Uytterhoeven wrote:
+> On Thu, 10 Apr 2008, Johannes Berg wrote:
+> > --- everything.orig/net/mac80211/key.h	2008-04-10 15:36:20.000000000 +0=
+200
+> > +++ everything/net/mac80211/key.h	2008-04-10 15:36:45.000000000 +0200
+> > @@ -146,7 +146,7 @@ struct ieee80211_key *ieee80211_key_allo
+> >   */
+> >  void ieee80211_key_link(struct ieee80211_key *key,
+> >  			struct ieee80211_sub_if_data *sdata,
+> > -			struct sta_info *sta);
+> > +			struct sta_info *sta) __requires(RCU);
+>                                               ^^^^^^^^^^^^^^^
+> 					      __requires_rcu? (for consistency)
 
-With kind regards,
+Yeah, forgot to fix up this one, I had been playing with it locally
+without __requires_rcu first.
 
-Geert Uytterhoeven
-Software Architect
+Thanks,
+johannes
 
-Sony Network and Software Technology Center Europe
-The Corporate Village · Da Vincilaan 7-D1 · B-1935 Zaventem · Belgium
+--=-eLdB7X2w7Ui/c5zhNN5e
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
 
-Phone:    +32 (0)2 700 8453
-Fax:      +32 (0)2 700 8622
-E-mail:   Geert.Uytterhoeven-osDt5Q4Chk1BDgjK7y7TUQ@public.gmane.org
-Internet: http://www.sony-europe.com/
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
 
-Sony Network and Software Technology Center Europe
-A division of Sony Service Centre (Europe) N.V.
-Registered office: Technologielaan 7 · B-1840 Londerzeel · Belgium
-VAT BE 0413.825.160 · RPR Brussels
-Fortis Bank Zaventem · Swift GEBABEBB08A · IBAN BE39001382358619
----584349381-1964633417-1207990251=:28120--
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+iQIVAwUASAB5PKVg1VMiehFYAQLMAw/+N7qQr2NIQ7Pq2n58zFhvPKFvyswwGy13
+PPh2Apm/0qg9eIDfoCUsghs/OkNyclzRitfEcBol/QJzm/8tBpnhhY9F1lF4DZr1
+SOeH8tdiM0Ncj+CE27CSVz/8yDbXUZRYPvpQB4z16IfEGW1gyQpQlmCpBy139VUl
+Sg48L8DBdX91g7V44UngZKlQmOI/zv99+47X+vXc7vEkQe74I5T+pLt8BHiQhjRg
+vmANxijyVFZO6C6WmeQgbZe8CkTyzldzsC+RBKnt51ldWqRMHZvzf9fFPicGUDI7
+6/Ugd0fEqW82Sheyvp74uloS+KsV+NoITcaPiS7MoYrdznfM7ggLEBhuxbz6aEeH
+a3brZWpTkIetV6OCMpsj/lZ6iXd/g4nWh/60YRwSv5CGZdkMhNR26TTghLK4OkEa
+c8OFGxRtvPajDXBnyCbUP9HN2+mZ0aMSTFDfUC/xkH9svZ96vSI64gxwxDXlZbq5
+3zyfsCml5YTzq1OYugVE4lSz1BgOr96Vizc6vTYoyvcWoIZPMBcc3xHc/lTyJij3
+SM+8KT3YeBsa0yWzAV29NjqOXfyLFNcrmB3BE3L7F4muDskdVu3SPGXOYfoqWaYG
+hK7EswuKckAKTDZBQ6tT3h+3kTmXED4zPVMhqvSsdYAVU+cnjbSF0HASsRTmcHZ0
+PayuD7eGgxQ=
+=wtII
+-----END PGP SIGNATURE-----
+
+--=-eLdB7X2w7Ui/c5zhNN5e--
+
