@@ -1,147 +1,70 @@
-From: "Geoff Johnstone" <geoffsheep.johnstonefrog@googlemail.com>
-Subject: Re: four sparse patches
-Date: Sat, 12 Apr 2008 11:57:23 +0100
-Message-ID: <32e600e90804120357k5923dd47xfcb253bf1c390225@mail.gmail.com>
-References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>
-	 <47F07F78.5030405@kernel.org>
-	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com>
-	 <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>
-	 <47F750CA.1090307@kernel.org>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
+Date: Fri, 18 Apr 2008 14:35:10 +0200
+Message-ID: <1208522110.4848.19.camel@johannes.berg>
+References: <20080410132519.049821000@sipsolutions.net>
+	 <200804101805.31854.philipp.reisner@linbit.com>
+	 <1207843925.13354.20.camel@johannes.berg>
+	 <200804102321.31681.philipp.reisner@linbit.com>
+	 <47FFC1A3.9090803@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_5454_6374912.1207997843121"
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-DBMktwqnn75NBF85Zsyh"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wf-out-1314.google.com ([209.85.200.168]:27031 "EHLO
-	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757460AbYDLK5X (ORCPT
+Received: from crystal.sipsolutions.net ([195.210.38.204]:54145 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756871AbYDRMf1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 12 Apr 2008 06:57:23 -0400
-Received: by wf-out-1314.google.com with SMTP id 28so841762wff.4
-        for <linux-sparse@vger.kernel.org>; Sat, 12 Apr 2008 03:57:23 -0700 (PDT)
-In-Reply-To: <47F750CA.1090307@kernel.org>
+	Fri, 18 Apr 2008 08:35:27 -0400
+In-Reply-To: <47FFC1A3.9090803@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
 
-------=_Part_5454_6374912.1207997843121
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
 
->  Regarding Wmix-decl-code.diff, I agree that that warning definitely
->  needs an option controlling it. but GCC already has that option and
->  calls it "-Wdeclaration-after-statement", so matching GCC's name
->  seems potentially useful. (However, I can imagine corner cases
->  where it might prove problematic, such as wanting to pass that
->  option to GCC and not Sparse or vice versa.) Also, I agree that the
->  default should depend on the C standard in use, and I see no
->  compatibility reason why the warning should remain for code that
->  explicitly asks for C99.  Thus, I haven't applied this version of
->  the patch.
+--=-DBMktwqnn75NBF85Zsyh
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-I've attached a revised version of the patch that:
- - Renames the option to -Wdeclaration-after-statement, as per GCC
-   (wasn't hitherto aware of that gcc option).
- - Defaults based on chosen C dialect.
- - Adds a few tests. (I'll do a separate patch for tests for the
-   incomplete struct patch.)
- - Was made wrt the git trunk at about 11:30 UTC on 12th April.
+On Fri, 2008-04-11 at 12:53 -0700, Josh Triplett wrote:
+> Philipp Reisner wrote:
+> >> Anyhow, I don't really care which patch gets chosen.
+> >=20
+> > Nor do I really care. I just hope that there is some reaction from Josh
+> > that indicates how he wishes to continue with that toppic...
+> > I am also ready to do further work in this area.
+>=20
+> Definitely interested in the patches, just spoiled for choice.
+> However, having now reviewed the various proposals, I think I will
+> accept Johannes Berg's patches to support his corresponding proposed
+> changes in Linux's include/linux/compiler.h.
 
-Geoff.
+Do you want me to fold the later cleanup patches into the first
+two/three?
 
-------=_Part_5454_6374912.1207997843121
-Content-Type: application/octet-stream;
- name=Wdeclaration-after-statement.diff
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fey2grfx1
-Content-Disposition: attachment; filename=Wdeclaration-after-statement.diff
+johannes
 
-VGhpcyBhZGRzIC1XW25vLV1kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQsIHdoaWNoIG1ha2Vz
-IHdhcm5pbmdzIGFib3V0CmRlY2xhcmF0aW9ucyBhZnRlciBzdGF0ZW1lbnRzIGEgY29tbWFuZC1s
-aW5lIG9wdGlvbi4gKFRoZSBjb2RlIHRvIGltcGxlbWVudAp0aGUgd2FybmluZyB3YXMgYWxyZWFk
-eSBpbiB0aGVyZSB2aWEgYSAjZGVmaW5lOyB0aGUgcGF0Y2gganVzdCBleHBvc2VzIGl0CmF0IHJ1
-bnRpbWUuKSBSYXRpb25hbGU6IEM5OSBhbGxvd3MgdGhlbSwgQzg5IGRvZXNuJ3QuCgpTaWduZWQt
-b2ZmLWJ5OiBHZW9mZiBKb2huc3RvbmUgPGdlb2ZmU0hFRVAuam9obnN0b25lRlJPR0Bnb29nbGVt
-YWlsLmNvbT4KCmRpZmYgLS1naXQgYS9saWIuYyBiL2xpYi5jCmluZGV4IDc1YWZkYjcuLjBhYmNj
-OWEgMTAwNjQ0Ci0tLSBhL2xpYi5jCisrKyBiL2xpYi5jCkBAIC0yMDgsNiArMjA4LDcgQEAgaW50
-IFd0cmFuc3BhcmVudF91bmlvbiA9IDE7CiBpbnQgV3R5cGVzaWduID0gMDsKIGludCBXdW5kZWYg
-PSAwOwogaW50IFd1bmluaXRpYWxpemVkID0gMTsKK2ludCBXZGVjbGFyYXRpb25hZnRlcnN0YXRl
-bWVudCA9IC0xOwogCiBpbnQgZGJnX2VudHJ5ID0gMDsKIGludCBkYmdfZGVhZCA9IDA7CkBAIC0z
-NzIsNiArMzczLDcgQEAgc3RhdGljIGNvbnN0IHN0cnVjdCB3YXJuaW5nIHsKIAl7ICJ0eXBlc2ln
-biIsICZXdHlwZXNpZ24gfSwKIAl7ICJ1bmRlZiIsICZXdW5kZWYgfSwKIAl7ICJ1bmluaXRpYWxp
-emVkIiwgJld1bmluaXRpYWxpemVkIH0sCisJeyAiZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50
-IiwgJldkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50IH0sCiB9OwogCiBlbnVtIHsKQEAgLTQ1Niw2
-ICs0NTgsMjggQEAgc3RhdGljIHZvaWQgaGFuZGxlX29ub2ZmX3N3aXRjaF9maW5hbGl6ZShjb25z
-dCBzdHJ1Y3Qgd2FybmluZyB3YXJuaW5nc1tdLCBpbnQgbikKIHN0YXRpYyB2b2lkIGhhbmRsZV9z
-d2l0Y2hfV19maW5hbGl6ZSh2b2lkKQogewogCWhhbmRsZV9vbm9mZl9zd2l0Y2hfZmluYWxpemUo
-d2FybmluZ3MsIHNpemVvZih3YXJuaW5ncykgLyBzaXplb2Yod2FybmluZ3NbMF0pKTsKKworCS8q
-IGRlZmF1bHQgV2RlY2xhcmF0aW9uYWZ0ZXJzdGF0ZW1lbnQgYmFzZWQgb24gdGhlIEMgZGlhbGVj
-dCAqLworCWlmICgtMSA9PSBXZGVjbGFyYXRpb25hZnRlcnN0YXRlbWVudCkKKwl7CisJCXN3aXRj
-aCAoc3RhbmRhcmQpCisJCXsKKwkJCWNhc2UgU1RBTkRBUkRfQzg5OgorCQkJY2FzZSBTVEFOREFS
-RF9DOTQ6CisJCQkJV2RlY2xhcmF0aW9uYWZ0ZXJzdGF0ZW1lbnQgPSAxOworCQkJCWJyZWFrOwor
-CisJCQljYXNlIFNUQU5EQVJEX0M5OToKKwkJCWNhc2UgU1RBTkRBUkRfR05VODk6CisJCQljYXNl
-IFNUQU5EQVJEX0dOVTk5OgorCQkJCVdkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50ID0gMDsKKwkJ
-CQlicmVhazsKKworCQkJZGVmYXVsdDoKKwkJCQlhc3NlcnQgKDApOworCQl9CisKKwl9CiB9CiAK
-IHN0YXRpYyB2b2lkIGhhbmRsZV9zd2l0Y2hfdl9maW5hbGl6ZSh2b2lkKQpkaWZmIC0tZ2l0IGEv
-bGliLmggYi9saWIuaAppbmRleCBjZWY0YWI4Li40MmEzMzk2IDEwMDY0NAotLS0gYS9saWIuaAor
-KysgYi9saWIuaApAQCAtMTA4LDYgKzEwOCw3IEBAIGV4dGVybiBpbnQgV3RyYW5zcGFyZW50X3Vu
-aW9uOwogZXh0ZXJuIGludCBXdHlwZXNpZ247CiBleHRlcm4gaW50IFd1bmRlZjsKIGV4dGVybiBp
-bnQgV3VuaW5pdGlhbGl6ZWQ7CitleHRlcm4gaW50IFdkZWNsYXJhdGlvbmFmdGVyc3RhdGVtZW50
-OwogCiBleHRlcm4gaW50IGRiZ19lbnRyeTsKIGV4dGVybiBpbnQgZGJnX2RlYWQ7CmRpZmYgLS1n
-aXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCA2MjU1NzM3Li44MzQ2ZmUyIDEwMDY0NAotLS0g
-YS9wYXJzZS5jCisrKyBiL3BhcnNlLmMKQEAgLTI4LDggKzI4LDYgQEAKICNpbmNsdWRlICJleHBy
-ZXNzaW9uLmgiCiAjaW5jbHVkZSAidGFyZ2V0LmgiCiAKLSNkZWZpbmUgd2Fybl9vbl9taXhlZCAo
-MSkKLQogc3RhdGljIHN0cnVjdCBzeW1ib2xfbGlzdCAqKmZ1bmN0aW9uX3N5bWJvbF9saXN0Owog
-c3RydWN0IHN5bWJvbF9saXN0ICpmdW5jdGlvbl9jb21wdXRlZF90YXJnZXRfbGlzdDsKIHN0cnVj
-dCBzdGF0ZW1lbnRfbGlzdCAqZnVuY3Rpb25fY29tcHV0ZWRfZ290b19saXN0OwpAQCAtMTgxMCw3
-ICsxODA4LDcgQEAgc3RhdGljIHN0cnVjdCB0b2tlbiAqIHN0YXRlbWVudF9saXN0KHN0cnVjdCB0
-b2tlbiAqdG9rZW4sIHN0cnVjdCBzdGF0ZW1lbnRfbGlzdAogCQkJc3RtdCA9IGFsbG9jX3N0YXRl
-bWVudCh0b2tlbi0+cG9zLCBTVE1UX0RFQ0xBUkFUSU9OKTsKIAkJCXRva2VuID0gZXh0ZXJuYWxf
-ZGVjbGFyYXRpb24odG9rZW4sICZzdG10LT5kZWNsYXJhdGlvbik7CiAJCX0gZWxzZSB7Ci0JCQlz
-ZWVuX3N0YXRlbWVudCA9IHdhcm5fb25fbWl4ZWQ7CisJCQlzZWVuX3N0YXRlbWVudCA9IFdkZWNs
-YXJhdGlvbmFmdGVyc3RhdGVtZW50OwogCQkJdG9rZW4gPSBzdGF0ZW1lbnQodG9rZW4sICZzdG10
-KTsKIAkJfQogCQlhZGRfc3RhdGVtZW50KGxpc3QsIHN0bXQpOwpkaWZmIC0tZ2l0IGEvc3BhcnNl
-LjEgYi9zcGFyc2UuMQppbmRleCA3YTM5ZDg1Li4wZjkxMzFkIDEwMDY0NAotLS0gYS9zcGFyc2Uu
-MQorKysgYi9zcGFyc2UuMQpAQCAtMTEyLDYgKzExMiwxNiBAQCBTcGFyc2UgaXNzdWVzIHRoZXNl
-IHdhcm5pbmdzIGJ5IGRlZmF1bHQuICBUbyB0dXJuIHRoZW0gb2ZmLCB1c2UKIFxmQlwtV25vXC1k
-ZWNsXGZSLgogLgogLlRQCisuQiBcLVdkZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQKK1dhcm4g
-YWJvdXQgZGVjbGFyYXRpb25zIHRoYXQgYXJlIG5vdCBhdCB0aGUgc3RhcnQgb2YgYSBibG9jay4K
-KworVGhlc2UgZGVjbGFyYXRpb25zIGFyZSBwZXJtaXR0ZWQgaW4gQzk5IGJ1dCBub3QgaW4gQzg5
-LgorCitTcGFyc2UgaXNzdWVzIHRoZXNlIHdhcm5pbmdzIGJ5IGRlZmF1bHQgb25seSB3aGVuIHRo
-ZSBDIGRpYWxlY3QgaXMKK0M4OSAoaS5lLiAtYW5zaSBvciAtc3RkPWM4OSkuICBUbyB0dXJuIHRo
-ZW0gb2ZmLCB1c2UKK1xmQlwtV25vXC1kZWNsYXJhdGlvblwtYWZ0ZXJcLXN0YXRlbWVudFxmUi4K
-Ky4KKy5UUAogLkIgXC1XZGVmYXVsdFwtYml0ZmllbGRcLXNpZ24KIFdhcm4gYWJvdXQgYW55IGJp
-dGZpZWxkIHdpdGggbm8gZXhwbGljaXQgc2lnbmVkbmVzcy4KIApkaWZmIC0tZ2l0IGEvdmFsaWRh
-dGlvbi9kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtYW5zaS5jIGIvdmFsaWRhdGlvbi9kZWNs
-YXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtYW5zaS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4
-IDAwMDAwMDAuLjMzMzQxMGIKLS0tIC9kZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0
-aW9uLWFmdGVyLXN0YXRlbWVudC1hbnNpLmMKQEAgLTAsMCArMSwxMiBAQAorc3RhdGljIHZvaWQg
-ZnVuYyAoaW50IGkpCit7CisJaTsKKwlpbnQgaiA9IGk7Cit9CisvKgorICogY2hlY2stbmFtZTog
-ZGVjbGFyYXRpb24gYWZ0ZXIgc3RhdGVtZW50IChBTlNJKQorICogY2hlY2stY29tbWFuZDogc3Bh
-cnNlIC1hbnNpICRmaWxlCisgKiBjaGVjay1lcnJvci1zdGFydAorZGVjbGFyYXRpb24tYWZ0ZXIt
-c3RhdGVtZW50LWFuc2kuYzo0OjI6IHdhcm5pbmc6IG1peGluZyBkZWNsYXJhdGlvbnMgYW5kIGNv
-ZGUKKyAqIGNoZWNrLWVycm9yLWVuZAorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2RlY2xh
-cmF0aW9uLWFmdGVyLXN0YXRlbWVudC1jODkuYyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0
-ZXItc3RhdGVtZW50LWM4OS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLjc4
-NjMyY2QKLS0tIC9kZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVyLXN0
-YXRlbWVudC1jODkuYwpAQCAtMCwwICsxLDEyIEBACitzdGF0aWMgdm9pZCBmdW5jIChpbnQgaSkK
-K3sKKwlpOworCWludCBqID0gaTsKK30KKy8qCisgKiBjaGVjay1uYW1lOiBkZWNsYXJhdGlvbiBh
-ZnRlciBzdGF0ZW1lbnQgKEM4OSkKKyAqIGNoZWNrLWNvbW1hbmQ6IHNwYXJzZSAtc3RkPWM4OSAk
-ZmlsZQorICogY2hlY2stZXJyb3Itc3RhcnQKK2RlY2xhcmF0aW9uLWFmdGVyLXN0YXRlbWVudC1j
-ODkuYzo0OjI6IHdhcm5pbmc6IG1peGluZyBkZWNsYXJhdGlvbnMgYW5kIGNvZGUKKyAqIGNoZWNr
-LWVycm9yLWVuZAorICovCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVy
-LXN0YXRlbWVudC1jOTkuYyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50
-LWM5OS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAuLmRkMzZlNmUKLS0tIC9k
-ZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2RlY2xhcmF0aW9uLWFmdGVyLXN0YXRlbWVudC1jOTku
-YwpAQCAtMCwwICsxLDkgQEAKK3N0YXRpYyB2b2lkIGZ1bmMgKGludCBpKQoreworCWk7CisJaW50
-IGogPSBpOworfQorLyoKKyAqIGNoZWNrLW5hbWU6IGRlY2xhcmF0aW9uIGFmdGVyIHN0YXRlbWVu
-dCAoQzk5KQorICogY2hlY2stY29tbWFuZDogc3BhcnNlIC1zdGQ9Yzk5ICRmaWxlCisgKi8KZGlm
-ZiAtLWdpdCBhL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50LWRlZmF1bHQu
-YyBiL3ZhbGlkYXRpb24vZGVjbGFyYXRpb24tYWZ0ZXItc3RhdGVtZW50LWRlZmF1bHQuYwpuZXcg
-ZmlsZSBtb2RlIDEwMDY0NAppbmRleCAwMDAwMDAwLi5jM2ZlMmNkCi0tLSAvZGV2L251bGwKKysr
-IGIvdmFsaWRhdGlvbi9kZWNsYXJhdGlvbi1hZnRlci1zdGF0ZW1lbnQtZGVmYXVsdC5jCkBAIC0w
-LDAgKzEsOSBAQAorc3RhdGljIHZvaWQgZnVuYyAoaW50IGkpCit7CisJaTsKKwlpbnQgaiA9IGk7
-Cit9CisvKgorICogY2hlY2stbmFtZTogZGVjbGFyYXRpb24gYWZ0ZXIgc3RhdGVtZW50IChkZWZh
-dWx0KQorICogY2hlY2stY29tbWFuZDogc3BhcnNlICRmaWxlCisgKi8K
-------=_Part_5454_6374912.1207997843121--
+--=-DBMktwqnn75NBF85Zsyh
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iQIVAwUASAiVfaVg1VMiehFYAQKhEA/9ETC47CQKioAZtoTc1QeuW6VjyCM20hDe
+oLgCOst1wYmb/dqZPo6LxGxdlDFdHicckTFZB9m41MHnT1HK2ZBWNLJpHNWBVm/F
+xac2ykpJafXOGRuHYLJEHt3eEs/aZI5527WNYKqfzruLJjGO32Nuol4Y/nV3tOh7
+MZCTeChpK4tSeLsD1ROMo/f3X4IJU3He4eMlu7Yq5P/KXsQMWF83wXyE55XOaCFJ
+R5p27B1Pk5tIV6rJ+3j+UD6S46QXjGjbX8PKotonE1RndZrlg6q8+9dkTBPj8Yjw
+khE7OXytAoXM60FQhKoFNfrlIwa4JaiFYHm2JTMlqD7gmR4Q5SMZJodh6Op3gMRx
+quvIH6LXQ25pnmo9xa50Ee4vvvYxyv/YIbmo+UZUeK8aN8NtNYt+OM07whGd/gfu
+LDNXF5sL+k9KF2ejgYwn4CozUTXYFQe6dtsEz53OU4WB2bBNoaYtHmfha7DW+w18
+SpL+cUUcMSraOvd8GyQ5wGkS5BycW2IM76CjGjJBek0Hoj2DII0K+FUauEyZQbSi
+D72MZ00hnRN2xBs7X4T6pLQm/nAKWRHpXZrBk55jEfmbLTeYeK3k8w1wcX6l/AO2
+0uWgwAjIv+SSdlkNnS4+BWdAPk6a/sw+PzlqCFmxfpkH7UbYe0eu8M+0mR2YOfR0
+nper2URk1Ck=
+=UH2S
+-----END PGP SIGNATURE-----
+
+--=-DBMktwqnn75NBF85Zsyh--
+
