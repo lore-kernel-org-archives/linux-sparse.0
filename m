@@ -1,70 +1,37 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
-Date: Fri, 18 Apr 2008 14:35:10 +0200
-Message-ID: <1208522110.4848.19.camel@johannes.berg>
-References: <20080410132519.049821000@sipsolutions.net>
-	 <200804101805.31854.philipp.reisner@linbit.com>
-	 <1207843925.13354.20.camel@johannes.berg>
-	 <200804102321.31681.philipp.reisner@linbit.com>
-	 <47FFC1A3.9090803@freedesktop.org>
+From: "Paul E. McKenney" <paulmck-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
+Subject: Re: [RFC 0/3] Examples for the new sparse context tracking functionality
+Date: Sat, 19 Apr 2008 16:33:38 -0700
+Message-ID: <20080419233338.GG20138@linux.vnet.ibm.com>
+References: <20080410134810.629048000@sipsolutions.net>
+Reply-To: paulmck-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-DBMktwqnn75NBF85Zsyh"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from crystal.sipsolutions.net ([195.210.38.204]:54145 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756871AbYDRMf1 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 18 Apr 2008 08:35:27 -0400
-In-Reply-To: <47FFC1A3.9090803@freedesktop.org>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
+Content-Disposition: inline
+In-Reply-To: <20080410134810.629048000-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+To: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
+Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-CC+yJ3UmIYqDUpFQwHEjaQ@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
 
+On Thu, Apr 10, 2008 at 03:48:10PM +0200, Johannes Berg wrote:
+> Here are some patches that show how the new sparse functionality  
+> could be used in the kernel if merged.
+> 
+> As mentioned before, I have actually found three bugs in mac80211
+> using these patches. If you apply them and the sparse patches I have
+> also just posted, you can find them too :)
 
---=-DBMktwqnn75NBF85Zsyh
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+I like this approach in general, deferring to Josh on specifics.
 
-On Fri, 2008-04-11 at 12:53 -0700, Josh Triplett wrote:
-> Philipp Reisner wrote:
-> >> Anyhow, I don't really care which patch gets chosen.
-> >=20
-> > Nor do I really care. I just hope that there is some reaction from Josh
-> > that indicates how he wishes to continue with that toppic...
-> > I am also ready to do further work in this area.
->=20
-> Definitely interested in the patches, just spoiled for choice.
-> However, having now reviewed the various proposals, I think I will
-> accept Johannes Berg's patches to support his corresponding proposed
-> changes in Linux's include/linux/compiler.h.
+At some point in the future, we might want to distinguish between
+the different flavors of RCU -- except that there is already common
+code that doesn't care which flavor of RCU is in use, as long as
+some sort of RCU is present.  So make that "some point in the distant
+future"...
 
-Do you want me to fold the later cleanup patches into the first
-two/three?
-
-johannes
-
---=-DBMktwqnn75NBF85Zsyh
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUASAiVfaVg1VMiehFYAQKhEA/9ETC47CQKioAZtoTc1QeuW6VjyCM20hDe
-oLgCOst1wYmb/dqZPo6LxGxdlDFdHicckTFZB9m41MHnT1HK2ZBWNLJpHNWBVm/F
-xac2ykpJafXOGRuHYLJEHt3eEs/aZI5527WNYKqfzruLJjGO32Nuol4Y/nV3tOh7
-MZCTeChpK4tSeLsD1ROMo/f3X4IJU3He4eMlu7Yq5P/KXsQMWF83wXyE55XOaCFJ
-R5p27B1Pk5tIV6rJ+3j+UD6S46QXjGjbX8PKotonE1RndZrlg6q8+9dkTBPj8Yjw
-khE7OXytAoXM60FQhKoFNfrlIwa4JaiFYHm2JTMlqD7gmR4Q5SMZJodh6Op3gMRx
-quvIH6LXQ25pnmo9xa50Ee4vvvYxyv/YIbmo+UZUeK8aN8NtNYt+OM07whGd/gfu
-LDNXF5sL+k9KF2ejgYwn4CozUTXYFQe6dtsEz53OU4WB2bBNoaYtHmfha7DW+w18
-SpL+cUUcMSraOvd8GyQ5wGkS5BycW2IM76CjGjJBek0Hoj2DII0K+FUauEyZQbSi
-D72MZ00hnRN2xBs7X4T6pLQm/nAKWRHpXZrBk55jEfmbLTeYeK3k8w1wcX6l/AO2
-0uWgwAjIv+SSdlkNnS4+BWdAPk6a/sw+PzlqCFmxfpkH7UbYe0eu8M+0mR2YOfR0
-nper2URk1Ck=
-=UH2S
------END PGP SIGNATURE-----
-
---=-DBMktwqnn75NBF85Zsyh--
-
+						Thanx, Paul
+--
+To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
+the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
