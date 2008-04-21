@@ -1,75 +1,56 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
-Date: Mon, 21 Apr 2008 11:51:18 -0700
-Message-ID: <480CE226.3060602@freedesktop.org>
-References: <20080410132519.049821000@sipsolutions.net>	 <20080410132617.720109000@sipsolutions.net> <480CD736.601@freedesktop.org>	 <1208801485.26186.131.camel@johannes.berg>	 <480CDC3C.4040808@freedesktop.org> <1208802634.26186.135.camel@johannes.berg>
+From: Josh Triplett <josh@kernel.org>
+Subject: Re: four sparse patches
+Date: Mon, 21 Apr 2008 12:12:30 -0700
+Message-ID: <480CE71E.5050608@kernel.org>
+References: <9356e4460803300752y6c1416bfh680b68fd3c42c19a@mail.gmail.com>	 <47F07F78.5030405@kernel.org>	 <9356e4460803311222v4b09df5fk76268fb5c7e71971@mail.gmail.com>	 <32e600e90803311236g4caf05c9t8dd3a3ab03dcd5bc@mail.gmail.com>	 <47F750CA.1090307@kernel.org> <32e600e90804120357k5923dd47xfcb253bf1c390225@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enigE8D14D036AF8899E77E07B29"
+ boundary="------------enig13257A6340ABC52EB09DAB01"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:57183 "EHLO
-	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751486AbYDUSvF (ORCPT
+Received: from mail7.sea5.speakeasy.net ([69.17.117.9]:55939 "EHLO
+	mail7.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758412AbYDUTMQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 21 Apr 2008 14:51:05 -0400
-In-Reply-To: <1208802634.26186.135.camel@johannes.berg>
+	Mon, 21 Apr 2008 15:12:16 -0400
+In-Reply-To: <32e600e90804120357k5923dd47xfcb253bf1c390225@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
+To: Geoff Johnstone <geoffsheep.johnstonefrog@googlemail.com>
 Cc: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enigE8D14D036AF8899E77E07B29
+--------------enig13257A6340ABC52EB09DAB01
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Johannes Berg wrote:
->> And as for how to solve it: I think alias analysis might work.
+Geoff Johnstone wrote:
+>>  Regarding Wmix-decl-code.diff, I agree that that warning definitely
+>>  needs an option controlling it. but GCC already has that option and
+>>  calls it "-Wdeclaration-after-statement", so matching GCC's name
+>>  seems potentially useful. (However, I can imagine corner cases
+>>  where it might prove problematic, such as wanting to pass that
+>>  option to GCC and not Sparse or vice versa.) Also, I agree that the
+>>  default should depend on the C standard in use, and I see no
+>>  compatibility reason why the warning should remain for code that
+>>  explicitly asks for C99.  Thus, I haven't applied this version of
+>>  the patch.
 >=20
-> How would I do that?
+> I've attached a revised version of the patch that:
+>  - Renames the option to -Wdeclaration-after-statement, as per GCC
+>    (wasn't hitherto aware of that gcc option).
+>  - Defaults based on chosen C dialect.
+>  - Adds a few tests. (I'll do a separate patch for tests for the
+>    incomplete struct patch.)
+>  - Was made wrt the git trunk at about 11:30 UTC on 12th April.
 
-Real compilers have alias analysis code, which builds up information
-on which variables and expressions may/must alias each other.  I think
-that that alias information might prove sufficient to compare
-contexts: if two contexts alias each other then they represent the
-same context.
-
-Basic type-based alias analysis should prove sufficient to handle
-cases like:
-
-spinlock_t s;
-struct something_with_a_spinlock st;
-
-spin_lock(&st.s);
-spin_unlock(&st.s); /* contexts match */
-
-spin_lock(&st.s);
-spin_unlock(&s); /* warn */
-
-Flow-based alias analysis may also handle cases like you mentioned,
-where you assign a lock to a variable and then use it through that
-variable.
-
-
-Alternatively, some simple dataflow analysis and symbolic execution
-might let you figure out the lock a variable points to in most cases.
-
-
-As a simpler solution, you could just do what lockdep does: make
-assumptions that handle the common cases, and allow explicit overrides
-for the uncommon cases.  I suspect that most code does not assign a
-lock to a variable and use the lock through that variable.
-
-In particular, you could perhaps make the assumption that any
-expression which resolves to the "foo" field of a "struct bar"
-represents the same context, rather than attempting to distinguish
-between them.
+Looks good; applied and pushed.  Thanks!
 
 - Josh Triplett
 
 
---------------enigE8D14D036AF8899E77E07B29
+
+--------------enig13257A6340ABC52EB09DAB01
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -78,9 +59,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFIDOInGJuZRtD+evsRAnknAJ9Ev/maHLFSSU9RfAmvj0sz0nQndwCghnZ6
-7ORyHn8kfnfjqJ8SAg1J2ws=
-=uCUC
+iD8DBQFIDOcfGJuZRtD+evsRAspDAJ9KAmTt/507p+ylqNFRrd0YfC8zAQCfbA4X
+Kh8dyA/ZMvLidVX/HG+rWFY=
+=IkIF
 -----END PGP SIGNATURE-----
 
---------------enigE8D14D036AF8899E77E07B29--
+--------------enig13257A6340ABC52EB09DAB01--
