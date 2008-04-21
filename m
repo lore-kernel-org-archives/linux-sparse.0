@@ -1,95 +1,101 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Josh Triplett <josh@freedesktop.org>
 Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
-Date: Mon, 21 Apr 2008 20:11:25 +0200
-Message-ID: <1208801485.26186.131.camel@johannes.berg>
-References: <20080410132519.049821000@sipsolutions.net>
-	 <20080410132617.720109000@sipsolutions.net>  <480CD736.601@freedesktop.org>
+Date: Mon, 21 Apr 2008 11:26:04 -0700
+Message-ID: <480CDC3C.4040808@freedesktop.org>
+References: <20080410132519.049821000@sipsolutions.net>	 <20080410132617.720109000@sipsolutions.net>  <480CD736.601@freedesktop.org> <1208801485.26186.131.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-9sSsGwdy1A5kVRtdk0/T"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig5624E8559F878735E98B2D46"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:54111 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753708AbYDUSL7 (ORCPT
+Received: from mail6.sea5.speakeasy.net ([69.17.117.8]:45481 "EHLO
+	mail6.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755197AbYDUSZu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 21 Apr 2008 14:11:59 -0400
-In-Reply-To: <480CD736.601@freedesktop.org>
+	Mon, 21 Apr 2008 14:25:50 -0400
+In-Reply-To: <1208801485.26186.131.camel@johannes.berg>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
+To: Johannes Berg <johannes@sipsolutions.net>
 Cc: linux-sparse@vger.kernel.org
 
-
---=-9sSsGwdy1A5kVRtdk0/T
-Content-Type: text/plain
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig5624E8559F878735E98B2D46
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
+Johannes Berg wrote:
+>>>     static void *dev_mc_seq_start(struct seq_file *seq, loff_t * pos)=
 
-> >     static void *dev_mc_seq_start(struct seq_file *seq, loff_t * pos)
-> >             __acquires(dev_base_lock)
-> >     {
-> >             [...]
-> >             __acquire__(dev_base_lock);
-> >             read_lock(&dev_base_lock);
-> >             [...]
-> >     }
+>>>             __acquires(dev_base_lock)
+>>>     {
+>>>             [...]
+>>>             __acquire__(dev_base_lock);
+>>>             read_lock(&dev_base_lock);
+>>>             [...]
+>>>     }
+>> I don't understand why you count this as wrong.  read_lock should
+>> handle acquiring the context itself, either via an __acquires
+>> annotation if written as a function, or via an __acquire__ statement
+>> if written as a macro.  Callers of read_lock shouldn't need to
+>> explicitly call __acquire__.
 >=20
-> I don't understand why you count this as wrong.  read_lock should
-> handle acquiring the context itself, either via an __acquires
-> annotation if written as a function, or via an __acquire__ statement
-> if written as a macro.  Callers of read_lock shouldn't need to
-> explicitly call __acquire__.
+> Well, the question is how you want to name things. What I did is that
+> the context identifier is just a name and bears no other relation to th=
+e
+> code. Hence, read_lock() can't say that it acquires 'dev_base_lock'
+> because it doesn't know what the name should be.
+>=20
+> With a slightly different sparse patch than mine you could declare
+> read_lock() something like this:
+>=20
+> #define read_lock(x) do { \
+> 	__acquire__(x); \
+> 	__read_lock((x)); \
+> } while (0)
+>=20
+> but then you'd have different names everywhere, say somebody passed
+> '&dev_base_lock' and somebody else used
+>=20
+> readlock_t *dbl =3D &dev_base_lock;
+> read_lock(dbl)
+>=20
+> and you'd end up with one context named "dbl" and another one named
+> "&dev_base_lock".
 
-Well, the question is how you want to name things. What I did is that
-the context identifier is just a name and bears no other relation to the
-code. Hence, read_lock() can't say that it acquires 'dev_base_lock'
-because it doesn't know what the name should be.
+That might still work, depending on how consistently kernel code uses
+the same argument.  If you suggest explicitly changing calls to
+read_lock to call __acquire__ with the appropriate context, it might
+prove equally easy to make the argument of read_lock that context.
 
-With a slightly different sparse patch than mine you could declare
-read_lock() something like this:
+> If you have suggestions on how to solve this I'm all ears, so far I
+> decided it wasn't worth it and opted for explicitly naming all the
+> contexts.
+>=20
+> (with my patch the above would just create a context called "x")
 
-#define read_lock(x) do { \
-	__acquire__(x); \
-	__read_lock((x)); \
-} while (0)
+That doesn't make sense to me; after preprocessing, x no longer
+exists, so I don't see how you could pick up the identifier "x".  I
+can understand that you might pick up two different expressions in
+place of x which you can't easily compare, though.
 
-but then you'd have different names everywhere, say somebody passed
-'&dev_base_lock' and somebody else used
+And as for how to solve it: I think alias analysis might work.
 
-readlock_t *dbl =3D &dev_base_lock;
-read_lock(dbl)
+- Josh Triplett
 
-and you'd end up with one context named "dbl" and another one named
-"&dev_base_lock".
 
-If you have suggestions on how to solve this I'm all ears, so far I
-decided it wasn't worth it and opted for explicitly naming all the
-contexts.
-
-(with my patch the above would just create a context called "x")
-
-johannes
-
---=-9sSsGwdy1A5kVRtdk0/T
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+--------------enig5624E8559F878735E98B2D46
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iQIVAwUASAzYzKVg1VMiehFYAQJCjA/+JrujuELoJCNPxj4CLIptdHKYNXIPb2/R
-SHFvDE/fVcMAXuHjNFjJ9k/y/KriILvoFy75WPNrToZcGT19QRR+5xL7cg0bWwLU
-erVsrVFYcPtsPScILpd2aQU1/PZ86MOPWkQQiJ9wG9dU1n79omuHC0oPdcSrZtV5
-mPt49QfiKLWiOZU5KDkyIAvd13G/413lo5QViKeHn++J8G33AqopT1DRep7QeOuG
-oKhDOR95+wwuVyI0TiiyFrrut6PHj0HBtmCSepihwS9bWa4z0ckwhQro3VKaNY3h
-2MPkLfZQTqRHQn7ij6BwXzHZKj/unvzNVRhQTLJaAIZDvKpGiN6a+jbEwAC8dQSD
-Z2eiuaXbkMcQltMKEJUUKQ2o/pctbWnkdioTxic3lG3ZfITFbqdPz/GkEYSC5zpP
-KLmGLNxfkhkF/Dyv1EMg2WeAbbdWXVefsZDuIWoR4W96kabzzvPW1NE/hjeXHx2p
-RZOD8OBiuT+ij4nN9d7JhYZGOKhJOty5Hdlqy/zXA6cyrM+3yIaAvTin80QY3tOg
-uJo/rWD1IdyggxjvHkfBdS/n5vAmIrVvy7einUTL6a9L/c/xbPn+yAN1XCRPsKYt
-EUoIw5lRmsZHJ3RYr5UKs9cVF0H6PCXuoSDwxb/Bx+mM5yPDkOzVB18tVQwbB3Py
-vbME/e5bf+o=
-=O+oa
+iD8DBQFIDNw8GJuZRtD+evsRApsIAKCUJ2JS0I4qG0G0BNPdGVMNrzs16QCghyKH
+7kX75tTGpoAcOBiwfo2WGHs=
+=9Fy9
 -----END PGP SIGNATURE-----
 
---=-9sSsGwdy1A5kVRtdk0/T--
-
+--------------enig5624E8559F878735E98B2D46--
