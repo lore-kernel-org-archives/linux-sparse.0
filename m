@@ -1,114 +1,75 @@
-From: Johannes Berg <johannes-cdvu00un1VgdHxzADdlk8Q@public.gmane.org>
-Subject: Re: [RFC 0/3] Examples for the new sparse context tracking
-	functionality
-Date: Mon, 21 Apr 2008 17:05:33 +0200
-Message-ID: <1208790333.26186.112.camel@johannes.berg>
-References: <20080410134810.629048000@sipsolutions.net>
-	 <20080419233338.GG20138@linux.vnet.ibm.com>
-	 <1208766355.26186.37.camel@johannes.berg>
-	 <20080421145525.GB9153@linux.vnet.ibm.com>
+From: Josh Triplett <josh@freedesktop.org>
+Subject: Re: [PATCH 1/3] make sparse keep its promise about context tracking
+Date: Mon, 21 Apr 2008 11:04:38 -0700
+Message-ID: <480CD736.601@freedesktop.org>
+References: <20080410132519.049821000@sipsolutions.net> <20080410132617.720109000@sipsolutions.net>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-CV94L+f4brYivCkDyoUt"
-Return-path: <linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org>
-In-Reply-To: <20080421145525.GB9153-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org>
-Sender: linux-wireless-owner-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-To: paulmck-23VcF4HTsmIX0ybBhKVfKdBPR1lH4CV8@public.gmane.org
-Cc: linux-kernel-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, Josh Triplett <josh-CC+yJ3UmIYqDUpFQwHEjaQ@public.gmane.org>, linux-wireless-u79uwXL29TY76Z2rM5mHXA@public.gmane.org, linux-sparse-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigC5153A41476CB17862798830"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:36740 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754688AbYDUSEY (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 21 Apr 2008 14:04:24 -0400
+In-Reply-To: <20080410132617.720109000@sipsolutions.net>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-sparse@vger.kernel.org
 
-
---=-CV94L+f4brYivCkDyoUt
-Content-Type: text/plain; charset=utf-8
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigC5153A41476CB17862798830
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
+One comment on your patch description, by the way:
 
-> > my_specific_rcu_get() __acquires(RCU) __acquires(specificRCU);
-> >=20
-> > and then annotate whatever needs the specific RCU type with
-> > __requires(specificRCU)
+Johannes Berg wrote:
+> However, the kernel use of __attribute__((context(...)) is actually
+> wrong, the kernel often does things like:
 >=20
-> Cute!!!  I didn't realize you could mark a single interface with
-> multiple __acquires() markings.
+>     static void *dev_mc_seq_start(struct seq_file *seq, loff_t * pos)
+>             __acquires(dev_base_lock)
+>     {
+>             [...]
+>             read_lock(&dev_base_lock);
+>             [...]
+>     }
 >=20
-> So if there is at least one match, sparse is happy?
+> rather than
+>=20
+>     static void *dev_mc_seq_start(struct seq_file *seq, loff_t * pos)
+>             __acquires(dev_base_lock)
+>     {
+>             [...]
+>             __acquire__(dev_base_lock);
+>             read_lock(&dev_base_lock);
+>             [...]
+>     }
 
-No, sparse requires all the given contexts to match. For example, say
-you have
+I don't understand why you count this as wrong.  read_lock should
+handle acquiring the context itself, either via an __acquires
+annotation if written as a function, or via an __acquire__ statement
+if written as a macro.  Callers of read_lock shouldn't need to
+explicitly call __acquire__.
 
-#define __requires_rcu __requires(RCU)
-
-#define __requires_special_rcu \
-	__requires(specificRCU)
-
-#define __acquires_special_rcu \
-	__acquires(RCU) __acquires(specificRCU)
-
-=EF=BB=BF#define __acquires_regular_rcu __acquires(RCU)
-
-Then a function marked "__acquires_special_rcu" with acquire *both*
-contexts, and a function marked __requires_special_rcu will require just
-the special one. And a function marked __requires_rcu just requires the
-regular one. So say you have
-
-rcu_special_lock __acquires_special_rcu
-=EF=BB=BFrcu_special_unlock __releases_special_rcu
-=EF=BB=BF
-rcu_regular_lock __acquires_rcu
-=EF=BB=BFrcu_regular_unlock __releases_rcu
-
-rcu_do_special __requires_special_rcu
-rcu_do_something __requires_rcu
+- Josh Triplett
 
 
-Then both this will be fine:
-
-
-rcu_special_lock()
-rcu_do_special()
-rcu_do_something()
-rcu_special_unlock()
-
-
-but this will result in a warning:
-
-
-rcu_regular_lock()
-rcu_do_special()
-rcu_regular_unlock()
-
-because the "specialRCU" context is missing.
-
-You could mark do_special with *both* __requires(RCU) and
-__requires(specialRCU) but as long as the acquires/releases parts have a
-strict dependency (=EF=BB=BFspecialRCU implies RCU) that isn't necessary.
-
-johannes
-
---=-CV94L+f4brYivCkDyoUt
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+--------------enigC5153A41476CB17862798830
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iQIVAwUASAytPKVg1VMiehFYAQIwTQ//QS8R7E3PBq027f4tO3NkphsHGilYCofv
-/4u4hq8B7DiyItML+ebNgPrl8xyozaxYOilnYMLsz36rQSJs5RYhVi6F1pAbwU8q
-Cv4RHJ6L3DNlxmR1B0G1HJcEcX6D8Y5ElXPN/HyU23tTATa1omTPJYBHfnzemzX3
-vz2xM+bwDEezCmsO8r7O1yOTo/GlERiOskdU2jKTgwAJkxHC/1Dbj0tTJ6pmWF9X
-aJtArFtCDEkoRZ5ySYIZq+cLpYNC+Yx9D1VwWT8+XEf4ybDTiuwbCVqiSKc/lXmW
-Lt35IiiPsvX1MNNl3m+BQAv2q0gLKlp2R8HR43llHSwsGfu33cHvqfjOQT+YD+KT
-AkQlVwm1cUtAu4DlI5qMqGPHXzBMhakxlY8sK1W5o12ffO09CiKL2MpJo3Ww++6X
-uwoUuc6i8OrDbcxkxYGCJeTf19BbWAWxA8j9YG0QRhYkqb4fqjbkiY5bMhPTRwdv
-ttvugB5GEj7Agml5Ch+d9WbN58eWsh81qTicjj9FSNFX66LfmPYuU6eONmLc4lto
-f804E/OtPdMLpRI4Ok5P8hk1wTXPzj1+goiF7DXAnNEiJW4kcCPPPOZR3Foi/TUV
-cs4vUjXW5KEflHze6RhWMgikhQHsTprQL0hJvCV6K547yYHdNcxf3D+HEP2rza0X
-0H5g9AjOsBM=
-=08Yo
+iD8DBQFIDNc3GJuZRtD+evsRAq6FAJ0UeK//uhA9EEygEj33qPHSDmWVbACfYVQq
+WpZ3Cdz9BQd3Tmp2/IZWTDs=
+=2fEz
 -----END PGP SIGNATURE-----
 
---=-CV94L+f4brYivCkDyoUt--
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-wireless" in
-the body of a message to majordomo-u79uwXL29TY76Z2rM5mHXA@public.gmane.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--------------enigC5153A41476CB17862798830--
