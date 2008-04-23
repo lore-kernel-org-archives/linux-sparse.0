@@ -1,259 +1,448 @@
 From: Johannes Berg <johannes@sipsolutions.net>
-Subject: [PATCH] add __exact_context__
-Date: Wed, 23 Apr 2008 14:50:38 +0200
-Message-ID: <1208955038.31429.77.camel@johannes.berg>
+Subject: [PATCH] allow context attribute on variables
+Date: Wed, 23 Apr 2008 14:55:51 +0200
+Message-ID: <1208955351.31429.81.camel@johannes.berg>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:44372 "EHLO
+Received: from xc.sipsolutions.net ([83.246.72.84]:42105 "EHLO
 	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752174AbYDWMvR (ORCPT
+	with ESMTP id S1752633AbYDWM43 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 23 Apr 2008 08:51:17 -0400
+	Wed, 23 Apr 2008 08:56:29 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse <linux-sparse@vger.kernel.org>
+Cc: linux-sparse <linux-sparse@vger.kernel.org>, Philipp Reisner <philipp.reisner@linbit.com>
 
-We also need a statement to indicate that an exact context is
-required, most notably the next patch will require it so that
-it can translate attributes on variables into statements.
+This patch makes it possible to add the context attribute on
+variables, to warn for example in this case:
+
+    struct something {
+        int x __attribute__((context(L,1,1)));
+    };
+
+    extern struct something *s;
+
+    static void warn_access13(void)
+    {
+        s->x = 7;
+    }
+
+This is achieved by translating the context attribute on
+variables that are loaded from/stored to into a context
+expression internally. A number of tests are included,
+including tests for a struct member (as above) and array
+accesses.
 
 Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
 ---
- ident-list.h               |    1 
- linearize.c                |    1 
- linearize.h                |    2 -
- parse.c                    |   20 ++++++++++++-
- parse.h                    |    1 
- sparse.1                   |    2 -
- sparse.c                   |   14 ++++++---
- validation/context-exact.c |   67 +++++++++++++++++++++++++++++++++++++++++++++
- 8 files changed, 101 insertions(+), 7 deletions(-)
+I didn't see any need for distinguishing between rd/wr nor
+for a new attribute, so I just used the one we already have.
 
---- sparse.orig/ident-list.h	2008-04-23 14:36:41.000000000 +0200
-+++ sparse/ident-list.h	2008-04-23 14:37:06.000000000 +0200
-@@ -96,6 +96,7 @@ __IDENT(__PRETTY_FUNCTION___ident, "__PR
- 
- /* Sparse commands */
- IDENT_RESERVED(__context__);
-+IDENT_RESERVED(__exact_context__);
- IDENT_RESERVED(__range__);
- 
- /* Magic function names we recognize */
---- sparse.orig/linearize.c	2008-04-23 14:37:06.000000000 +0200
-+++ sparse/linearize.c	2008-04-23 14:44:00.000000000 +0200
-@@ -1681,6 +1681,7 @@ static pseudo_t linearize_context(struct
- 		value = expr->value;
- 
- 	insn->required = value;
-+	insn->exact = stmt->exact;
- 
- 	insn->context_expr = stmt->context;
- 	add_one_insn(ep, insn);
---- sparse.orig/parse.c	2008-04-23 14:37:06.000000000 +0200
-+++ sparse/parse.c	2008-04-23 14:37:06.000000000 +0200
-@@ -52,6 +52,7 @@ static struct token *parse_while_stateme
- static struct token *parse_do_statement(struct token *token, struct statement *stmt);
- static struct token *parse_goto_statement(struct token *token, struct statement *stmt);
- static struct token *parse_context_statement(struct token *token, struct statement *stmt);
-+static struct token *parse_exact_context_statement(struct token *token, struct statement *stmt);
- static struct token *parse_range_statement(struct token *token, struct statement *stmt);
- static struct token *parse_asm_statement(struct token *token, struct statement *stmt);
- static struct token *toplevel_asm_declaration(struct token *token, struct symbol_list **list);
-@@ -149,6 +150,10 @@ static struct symbol_op __context___op =
- 	.statement = parse_context_statement,
- };
- 
-+static struct symbol_op __exact_context___op = {
-+	.statement = parse_exact_context_statement,
-+};
-+
- static struct symbol_op range_op = {
- 	.statement = parse_range_statement,
- };
-@@ -254,6 +259,7 @@ static struct init_keyword {
- 	{ "do",		NS_KEYWORD, .op = &do_op },
- 	{ "goto",	NS_KEYWORD, .op = &goto_op },
- 	{ "__context__",NS_KEYWORD, .op = &__context___op },
-+	{ "__exact_context__",NS_KEYWORD, .op = &__exact_context___op },
- 	{ "__range__",	NS_KEYWORD, .op = &range_op },
- 	{ "asm",	NS_KEYWORD, .op = &asm_op },
- 	{ "__asm",	NS_KEYWORD, .op = &asm_op },
-@@ -1810,7 +1816,7 @@ static struct token *parse_goto_statemen
- 	return expect(token, ';', "at end of statement");
+The exact_context() attribute is also allowed so we have the
+same max/no-max semantics as functions.
+
+If read/write is necessary to distinguish (I don't see a use
+case) then we can do that fairly easily later.
+
+ linearize.c                    |   74 +++++++++++++++
+ linearize.h                    |    1 
+ sparse.1                       |    3 
+ sparse.c                       |   18 +++
+ validation/context-exact.c     |    2 
+ validation/context-on-vars.c   |  190 +++++++++++++++++++++++++++++++++++++++++
+ validation/context-statement.c |    6 -
+ 7 files changed, 284 insertions(+), 10 deletions(-)
+
+--- sparse.orig/sparse.c	2008-04-23 14:37:08.000000000 +0200
++++ sparse/sparse.c	2008-04-23 14:37:41.000000000 +0200
+@@ -114,6 +114,7 @@ static struct context_check_list *checke
  }
  
--static struct token *parse_context_statement(struct token *token, struct statement *stmt)
-+static struct token *_parse_context_statement(struct token *token, struct statement *stmt, int exact)
- {
- 	struct expression *args[3];
- 	int argc = 0;
-@@ -1835,6 +1841,8 @@ static struct token *parse_context_state
- 	stmt->expression = args[0];
- 	stmt->context = NULL;
+ #define IMBALANCE_IN "context imbalance in '%s': "
++#define CONTEXT_PROB "context problem in '%s': "
+ #define DEFAULT_CONTEXT_DESCR "   default context: "
  
-+	stmt->exact = exact;
-+
- 	switch (argc) {
- 	case 0:
- 		sparse_error(token->pos, "__context__ statement needs argument(s)");
-@@ -1864,6 +1872,16 @@ static struct token *parse_context_state
- 	return expect(token, ')', "at end of __context__");
- }
- 
-+static struct token *parse_context_statement(struct token *token, struct statement *stmt)
-+{
-+	return _parse_context_statement(token, stmt, 0);
-+}
-+
-+static struct token *parse_exact_context_statement(struct token *token, struct statement *stmt)
-+{
-+	return _parse_context_statement(token, stmt, 1);
-+}
-+
- static struct token *parse_range_statement(struct token *token, struct statement *stmt)
- {
- 	stmt->type = STMT_RANGE;
---- sparse.orig/parse.h	2008-04-23 14:36:40.000000000 +0200
-+++ sparse/parse.h	2008-04-23 14:37:06.000000000 +0200
-@@ -43,6 +43,7 @@ struct statement {
- 			struct expression *expression;
- 			struct expression *context;
- 			struct expression *required;
-+			int exact;
- 		};
- 		struct /* return_statement */ {
- 			struct expression *ret_value;
---- sparse.orig/sparse.1	2008-04-23 14:36:40.000000000 +0200
-+++ sparse/sparse.1	2008-04-23 14:44:54.000000000 +0200
-@@ -90,7 +90,7 @@ To indicate that a function requires
- .BI exactly
- a certain lock context (not "at least" as above), use the form
- .BI __attribute__((exact_context( [expression ,] in_context , out_context ))
--There currently is no corresponding
-+There is also the corresponding
- .BI __exact_context__( [expression , ]adjust_value[ , required] )
- statement.
- 
---- sparse.orig/sparse.c	2008-04-23 14:37:06.000000000 +0200
-+++ sparse/sparse.c	2008-04-23 14:44:00.000000000 +0200
-@@ -239,7 +239,7 @@ static int handle_context(struct entrypo
- 			  struct context_check_list **combined)
- {
- 	struct context_check *c;
--	const char *name;
-+	const char *name, *cmp;
- 	char *buf;
- 	int val, ok;
- 
-@@ -256,7 +256,13 @@ static int handle_context(struct entrypo
- 		}
- 	} END_FOR_EACH_PTR(c);
- 
--	ok = insn->required <= val;
-+	if (insn->exact) {
-+		ok = insn->required == val;
-+		cmp = "";
-+	} else {
-+		ok = insn->required <= val;
-+		cmp = ">= ";
-+	}
- 
+ static void get_context_string(char **buf, const char **name)
+@@ -267,10 +268,19 @@ static int handle_context(struct entrypo
  	if (!ok && Wcontext) {
  		get_context_string(&buf, &name);
-@@ -266,8 +272,8 @@ static int handle_context(struct entrypo
- 			"__context__ statement expected different context",
- 			show_ident(ep->name->ident));
  
--		info(insn->pos, "%swanted >= %d, got %d",
--		     name, insn->required, val);
-+		info(insn->pos, "%swanted %s%d, got %d",
-+		     name, cmp, insn->required, val);
+-		warning(insn->pos,
+-			IMBALANCE_IN
+-			"__context__ statement expected different context",
+-			show_ident(ep->name->ident));
++		if (insn->access_var) {
++			char *symname = strdup(show_ident(insn->access_var->ident));
++			warning(insn->pos,
++				CONTEXT_PROB
++				"access to '%s' requires different context",
++				show_ident(ep->name->ident), symname);
++			free(symname);
++		} else {
++			warning(insn->pos,
++				CONTEXT_PROB
++				"__context__ statement expected different context",
++				show_ident(ep->name->ident));
++		}
  
- 		free(buf);
- 		return -1;
+ 		info(insn->pos, "%swanted %s%d, got %d",
+ 		     name, cmp, insn->required, val);
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ sparse/validation/context-exact.c	2008-04-23 14:44:00.000000000 +0200
-@@ -0,0 +1,67 @@
-+static void a(void) __attribute__((context(TEST,0,1)))
++++ sparse/validation/context-on-vars.c	2008-04-23 14:42:37.000000000 +0200
+@@ -0,0 +1,190 @@
++static void a(void) __attribute__((context(L,0,1)))
 +{
-+	__context__(TEST,1);
++	__context__(L,1);
 +}
 +
-+static void r(void) __attribute__((context(TEST,1,0)))
++static void r(void) __attribute__((context(L,1,0)))
 +{
-+	__context__(TEST,-1,1);
++	__context__(L,-1);
++}
++
++static int nl_int __attribute__((context(L,1,1)));
++static int nl_array[100] __attribute__((context(L,1,1)));
++extern int condition;
++
++static void warn_access1(void)
++{
++    nl_int = 7;
++}
++
++static void warn_access2(void)
++{
++    nl_int++;
++}
++
++static void warn_access3(void)
++{
++    if (condition)
++        nl_int++;
++}
++
++static void warn_access4(void)
++{
++    condition -= nl_int;
++}
++
++static void warn_access5(void)
++{
++    int x = condition ? nl_int : 0;
++}
++
++static void warn_access6(void)
++{
++    if (!nl_int) {
++        condition = 1;
++    }
++}
++
++static void warn_access7(void)
++{
++    if (nl_int) {
++        condition = 1;
++    }
++}
++
++static int *warn_access8(void)
++{
++    return &nl_int;
++}
++
++static void warn_access9(void)
++{
++    (void*)nl_int;
++}
++
++static void warn_access10(void)
++{
++    nl_array[7]++;
++}
++
++static void good_access1(void)
++{
++    a();
++    nl_int = 7;
++    r();
++}
++
++static void good_access1(void)
++{
++    if (condition) {
++        a();
++        nl_int = 7;
++        r();
++    }
++}
++
++static void good_access3(void)
++{
++    /* tests more our ability to optimise things out ... */
++    int x = 0 ? nl_int : 0;
++}
++
++static int *good_access4(void)
++{
++    return &nl_int;
++}
++
++struct something {
++    int a;
++    int b;
++};
++
++extern struct something *s __attribute__((context(L,1,1)));
++
++static void warn_access11(void)
++{
++    s->b = 7;
++}
++
++struct something2 {
++    int a;
++    int b __attribute__((context(L,1,1)));
++};
++
++extern struct something2 *s2;
++extern int lx __attribute__((context(L,1,1)));
++
++static void warn_access12(void)
++{
++    s2->b = lx;
++}
++
++static void warn_access13(void)
++{
++    s2->b = 7;
 +}
 +
 +static void good_1(void)
 +{
-+	a();
-+	r();
++    a();
++    s2->b = 7;
++    r();
 +}
 +
 +static void good_2(void)
 +{
-+	a();
-+	r();
-+	a();
-+	r();
++    a();
++    a();
++    s2->b = 8;
++    r();
++    r();
 +}
 +
-+static void good_3(void)
-+{
-+	a();
-+	a();
-+	r();
-+	r();
-+}
++struct something3 {
++    int a;
++    int b __attribute__((exact_context(L,1,1)));
++};
 +
-+static void good_4(void)
-+{
-+	a();
-+	a();
-+	__context__(TEST,0,1);
-+	r();
-+	r();
-+}
++extern struct something3 *s3;
 +
-+static void warn_1(void)
++static void warn_exact1(void)
 +{
-+	a();
-+	a();
-+	__exact_context__(TEST,0,1);
-+	r();
-+	r();
-+}
-+
-+static void good_5(void)
-+{
-+	a();
-+	a();
-+	__exact_context__(TEST,0,2);
-+	r();
-+	r();
++    a();
++    a();
++    s3->b = 8;
++    r();
++    r();
 +}
 +
 +/*
-+ * check-name: Check __exact_context__ statement with required context
++ * check-name: Check -Wcontext for variables
 + *
 + * check-error-start
-+context-exact.c:46:2: warning: context imbalance in 'warn_1': __context__ statement expected different context
-+context-exact.c:46:2:    context 'TEST': wanted 1, got 2
++context-on-vars.c:17:14: warning: context problem in 'warn_access1': access to 'nl_int' requires different context
++context-on-vars.c:17:14:    context 'L': wanted >= 1, got 0
++context-on-vars.c:22:11: warning: context problem in 'warn_access2': access to 'nl_int' requires different context
++context-on-vars.c:22:11:    context 'L': wanted >= 1, got 0
++context-on-vars.c:28:15: warning: context problem in 'warn_access3': access to 'nl_int' requires different context
++context-on-vars.c:28:15:    context 'L': wanted >= 1, got 0
++context-on-vars.c:33:18: warning: context problem in 'warn_access4': access to 'nl_int' requires different context
++context-on-vars.c:33:18:    context 'L': wanted >= 1, got 0
++context-on-vars.c:38:25: warning: context problem in 'warn_access5': access to 'nl_int' requires different context
++context-on-vars.c:38:25:    context 'L': wanted >= 1, got 0
++context-on-vars.c:43:10: warning: context problem in 'warn_access6': access to 'nl_int' requires different context
++context-on-vars.c:43:10:    context 'L': wanted >= 1, got 0
++context-on-vars.c:50:9: warning: context problem in 'warn_access7': access to 'nl_int' requires different context
++context-on-vars.c:50:9:    context 'L': wanted >= 1, got 0
++context-on-vars.c:62:12: warning: context problem in 'warn_access9': access to 'nl_int' requires different context
++context-on-vars.c:62:12:    context 'L': wanted >= 1, got 0
++context-on-vars.c:67:16: warning: context problem in 'warn_access10': access to 'nl_array' requires different context
++context-on-vars.c:67:16:    context 'L': wanted >= 1, got 0
++context-on-vars.c:106:5: warning: context problem in 'warn_access11': access to 's' requires different context
++context-on-vars.c:106:5:    context 'L': wanted >= 1, got 0
++context-on-vars.c:119:13: warning: context problem in 'warn_access12': access to 'lx' requires different context
++context-on-vars.c:119:13:    context 'L': wanted >= 1, got 0
++context-on-vars.c:124:5: warning: context problem in 'warn_access13': access to 'b' requires different context
++context-on-vars.c:124:5:    context 'L': wanted >= 1, got 0
++context-on-vars.c:154:5: warning: context problem in 'warn_exact1': access to 'b' requires different context
++context-on-vars.c:154:5:    context 'L': wanted 1, got 2
 + * check-error-end
 + */
---- sparse.orig/linearize.h	2008-04-23 14:37:12.000000000 +0200
-+++ sparse/linearize.h	2008-04-23 14:44:00.000000000 +0200
-@@ -116,7 +116,7 @@ struct instruction {
- 			struct pseudo_list *arguments;
- 		};
+--- sparse.orig/linearize.c	2008-04-23 14:37:08.000000000 +0200
++++ sparse/linearize.c	2008-04-23 14:40:54.000000000 +0200
+@@ -30,7 +30,6 @@ static pseudo_t add_setval(struct entryp
+ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
+ 
+ struct access_data;
+-static pseudo_t add_load(struct entrypoint *ep, struct access_data *);
+ static pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *);
+ 
+ struct pseudo void_pseudo = {};
+@@ -935,6 +934,8 @@ static pseudo_t linearize_store_gen(stru
+ 		pseudo_t value,
+ 		struct access_data *ad)
+ {
++	struct context *context;
++	struct instruction *insn;
+ 	pseudo_t store = value;
+ 
+ 	if (type_size(ad->source_type) != type_size(ad->result_type)) {
+@@ -950,6 +951,40 @@ static pseudo_t linearize_store_gen(stru
+ 		store = add_binary_op(ep, ad->source_type, OP_OR, orig, store);
+ 	}
+ 	add_store(ep, ad, store);
++
++	FOR_EACH_PTR(ad->source_type->ctype.contexts, context) {
++		insn = alloc_instruction(OP_CONTEXT, 0);
++		insn->required = context->in;
++		insn->increment = insn->inc_false = context->out - context->in;
++		insn->context_expr = context->context;
++		insn->access_var = ad->source_type;
++		insn->exact = context->exact;
++		add_one_insn(ep, insn);
++	} END_FOR_EACH_PTR(context);
++
++	FOR_EACH_PTR(ad->result_type->ctype.contexts, context) {
++		insn = alloc_instruction(OP_CONTEXT, 0);
++		insn->required = context->in;
++		insn->increment = insn->inc_false = context->out - context->in;
++		insn->context_expr = context->context;
++		insn->access_var = ad->result_type;
++		insn->exact = context->exact;
++		add_one_insn(ep, insn);
++	} END_FOR_EACH_PTR(context);
++
++	if (ad->address->type == PSEUDO_SYM &&
++	    ad->address->sym->namespace & NS_SYMBOL) {
++		FOR_EACH_PTR(ad->address->sym->ctype.contexts, context) {
++			insn = alloc_instruction(OP_CONTEXT, 0);
++			insn->required = context->in;
++			insn->increment = insn->inc_false = context->out - context->in;
++			insn->context_expr = context->context;
++			insn->access_var = ad->address->sym;
++			insn->exact = context->exact;
++			add_one_insn(ep, insn);
++		} END_FOR_EACH_PTR(context);
++	}
++
+ 	return value;
+ }
+ 
+@@ -987,6 +1022,8 @@ static pseudo_t add_symbol_address(struc
+ 
+ static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad)
+ {
++	struct context *context;
++	struct instruction *insn;
+ 	pseudo_t new = add_load(ep, ad);
+ 
+ 	if (ad->bit_offset) {
+@@ -994,7 +1031,40 @@ static pseudo_t linearize_load_gen(struc
+ 		pseudo_t newval = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
+ 		new = newval;
+ 	}
+-		
++
++	FOR_EACH_PTR(ad->source_type->ctype.contexts, context) {
++		insn = alloc_instruction(OP_CONTEXT, 0);
++		insn->required = context->in;
++		insn->increment = insn->inc_false = context->out - context->in;
++		insn->context_expr = context->context;
++		insn->access_var = ad->source_type;
++		insn->exact = context->exact;
++		add_one_insn(ep, insn);
++	} END_FOR_EACH_PTR(context);
++
++	FOR_EACH_PTR(ad->result_type->ctype.contexts, context) {
++		insn = alloc_instruction(OP_CONTEXT, 0);
++		insn->required = context->in;
++		insn->increment = insn->inc_false = context->out - context->in;
++		insn->context_expr = context->context;
++		insn->access_var = ad->result_type;
++		insn->exact = context->exact;
++		add_one_insn(ep, insn);
++	} END_FOR_EACH_PTR(context);
++
++	if (ad->address->type == PSEUDO_SYM &&
++	    ad->address->sym->namespace & NS_SYMBOL) {
++		FOR_EACH_PTR(ad->address->sym->ctype.contexts, context) {
++			insn = alloc_instruction(OP_CONTEXT, 0);
++			insn->required = context->in;
++			insn->increment = insn->inc_false = context->out - context->in;
++			insn->context_expr = context->context;
++			insn->access_var = ad->address->sym;
++			insn->exact = context->exact;
++			add_one_insn(ep, insn);
++		} END_FOR_EACH_PTR(context);
++	}
++
+ 	return new;
+ }
+ 
+--- sparse.orig/linearize.h	2008-04-23 14:37:16.000000000 +0200
++++ sparse/linearize.h	2008-04-23 14:37:41.000000000 +0200
+@@ -118,6 +118,7 @@ struct instruction {
  		struct /* context */ {
--			int increment, required, inc_false;
-+			int increment, required, inc_false, exact;
+ 			int increment, required, inc_false, exact;
  			struct expression *context_expr;
++			struct symbol *access_var;
  		};
  		struct /* asm */ {
+ 			const char *string;
+--- sparse.orig/validation/context-statement.c	2008-04-23 14:37:08.000000000 +0200
++++ sparse/validation/context-statement.c	2008-04-23 14:37:41.000000000 +0200
+@@ -59,11 +59,11 @@ static void bad_macro3(void)
+  * check-error-start
+ context-statement.c:16:8: warning: context imbalance in 'bad_arr': unexpected unlock
+ context-statement.c:16:8:    context 'LOCK': wanted 0, got -1
+-context-statement.c:38:5: warning: context imbalance in 'bad_macro1': __context__ statement expected different context
++context-statement.c:38:5: warning: context problem in 'bad_macro1': __context__ statement expected different context
+ context-statement.c:38:5:    context 'LOCK': wanted >= 1, got 0
+-context-statement.c:47:5: warning: context imbalance in 'bad_macro2': __context__ statement expected different context
++context-statement.c:47:5: warning: context problem in 'bad_macro2': __context__ statement expected different context
+ context-statement.c:47:5:    context 'LOCK': wanted >= 1, got 0
+-context-statement.c:53:5: warning: context imbalance in 'bad_macro3': __context__ statement expected different context
++context-statement.c:53:5: warning: context problem in 'bad_macro3': __context__ statement expected different context
+ context-statement.c:53:5:    context 'LOCK': wanted >= 0, got -1
+  * check-error-end
+  */
+--- sparse.orig/sparse.1	2008-04-23 14:37:08.000000000 +0200
++++ sparse/sparse.1	2008-04-23 14:42:59.000000000 +0200
+@@ -94,6 +94,9 @@ There is also the corresponding
+ .BI __exact_context__( [expression , ]adjust_value[ , required] )
+ statement.
+ 
++Both these can also be added to variable accesses but it is not recommended
++to make variable accesses modify the context.
++
+ To indicate that a certain function acquires a context depending on its
+ return value, use
+ .BI __attribute__((conditional_context( [expression ,] in_context , out_success , out_failure ))
+--- sparse.orig/validation/context-exact.c	2008-04-23 14:43:12.000000000 +0200
++++ sparse/validation/context-exact.c	2008-04-23 14:43:19.000000000 +0200
+@@ -61,7 +61,7 @@ static void good_5(void)
+  * check-name: Check __exact_context__ statement with required context
+  *
+  * check-error-start
+-context-exact.c:46:2: warning: context imbalance in 'warn_1': __context__ statement expected different context
++context-exact.c:46:2: warning: context problem in 'warn_1': __context__ statement expected different context
+ context-exact.c:46:2:    context 'TEST': wanted 1, got 2
+  * check-error-end
+  */
 
 
