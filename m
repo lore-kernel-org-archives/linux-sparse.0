@@ -1,57 +1,63 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: [PATCH] Ignore "cold" and "hot" attributes, which appeared in gcc 4.3
-Date: Fri, 25 Apr 2008 04:25:35 -0400
-Message-ID: <20080425082534.7034.76060.stgit@dv.roinet.com>
+From: "Marko Kreen" <markokr@gmail.com>
+Subject: Re: confusing shift warning
+Date: Fri, 25 Apr 2008 11:34:58 +0300
+Message-ID: <e51f66da0804250134g7f05cc8fp9011d508f49295e3@mail.gmail.com>
+References: <e51f66da0804250053x2ec991dbu9a5a54fdcbea2a2a@mail.gmail.com>
+	 <33544769883882222@unknownmsgid>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:64462 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751841AbYDYIZh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Apr 2008 04:25:37 -0400
-Received: from dv.roinet.com (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
-	by relay.cesmail.net (Postfix) with ESMTP id E56FB619058
-	for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 04:25:35 -0400 (EDT)
+Received: from nf-out-0910.google.com ([64.233.182.185]:10715 "EHLO
+	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756936AbYDYIfF (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 25 Apr 2008 04:35:05 -0400
+Received: by nf-out-0910.google.com with SMTP id g13so1405670nfb.21
+        for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 01:34:58 -0700 (PDT)
+In-Reply-To: <33544769883882222@unknownmsgid>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-They describe how likely the function is to be executed, which can
-affect optimization.  Also ignore attributes with underscores.
+On 4/25/08, Pavel Roskin <proski@gnu.org> wrote:
+> Quoting Marko Kreen <markokr@gmail.com>:
+>
+>
+> > Platform: x64_64 linux, uint64_t -> unsigned long
+> > Sparse: today's git (6dcc36a)
+> >
+>  ...
+>
+> > Guess - somewhere is hardwired that "long" == "32-bit"?
+> >
+>
+>  Of course not.  But -m64 should be specified to enable 64-bit type sizes.
+>
+>
+> > For reference:
+> > $ cgcc -v -c test.c
+> > sparse -v -c test.c -Dx86_64=1 -D__x86_64=1 -D__x86_64__=1
+> >
+>  ...
+>
+>  cgcc fails to add -m64.  It must be a bug in cgcc.  This would not produce
+> the warning:
+>
+>  cgcc -m64 -no-compile Test.c
 
-Signed-off-by: Pavel Roskin <proski@gnu.org>
----
+Ok, that somewhat explains it.  But:
 
- ident-list.h |    2 ++
- parse.c      |    4 ++++
- 2 files changed, 6 insertions(+), 0 deletions(-)
+    } elsif ($spec eq 'x86_64') {
+        return (' -Dx86_64=1 -D__x86_64=1 -D__x86_64__=1' .
+                &integer_types (8, 16, 32, $m32 ? 32 : 64, 64) .
+                &float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
+                &define_size_t ($m32 ? "unsigned int" : "long unsigned int"));
 
-diff --git a/ident-list.h b/ident-list.h
-index 8fcd7de..6104826 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -74,6 +74,8 @@ IDENT(__malloc__);
- IDENT(nonnull); IDENT(__nonnull); IDENT(__nonnull__);
- IDENT(constructor); IDENT(__constructor__);
- IDENT(destructor); IDENT(__destructor__);
-+IDENT(cold); IDENT(__cold__);
-+IDENT(hot); IDENT(__hot__);
- IDENT(cdecl); IDENT(__cdecl__);
- IDENT(stdcall); IDENT(__stdcall__);
- IDENT(fastcall); IDENT(__fastcall__);
-diff --git a/parse.c b/parse.c
-index 137ba77..877414c 100644
---- a/parse.c
-+++ b/parse.c
-@@ -353,6 +353,10 @@ static struct init_keyword {
- 	{ "__constructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
- 	{ "destructor",	NS_KEYWORD,	.op = &ignore_attr_op },
- 	{ "__destructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "cold",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
- };
- 
- void init_parser(int stream)
+It seems that cgcc defaults to 64-bit on x86_64, but sparse to 32-bit.
+Isn't it sparse bug then?  Shouldnt it follow platform defaults?
+
+-- 
+marko
