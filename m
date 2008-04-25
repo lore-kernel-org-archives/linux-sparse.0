@@ -1,42 +1,57 @@
-From: "Marko Kreen" <markokr@gmail.com>
-Subject: Re: confusing shift warning
-Date: Fri, 25 Apr 2008 11:03:09 +0300
-Message-ID: <e51f66da0804250103y4c5abbaby2c8a43db7ba5d04f@mail.gmail.com>
-References: <e51f66da0804250053x2ec991dbu9a5a54fdcbea2a2a@mail.gmail.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: [PATCH] Ignore "cold" and "hot" attributes, which appeared in gcc 4.3
+Date: Fri, 25 Apr 2008 04:25:35 -0400
+Message-ID: <20080425082534.7034.76060.stgit@dv.roinet.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fk-out-0910.google.com ([209.85.128.187]:5619 "EHLO
-	fk-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756923AbYDYIDN (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Apr 2008 04:03:13 -0400
-Received: by fk-out-0910.google.com with SMTP id 19so4798861fkr.5
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 01:03:11 -0700 (PDT)
-In-Reply-To: <e51f66da0804250053x2ec991dbu9a5a54fdcbea2a2a@mail.gmail.com>
-Content-Disposition: inline
+Received: from c60.cesmail.net ([216.154.195.49]:64462 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751841AbYDYIZh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 25 Apr 2008 04:25:37 -0400
+Received: from dv.roinet.com (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
+	by relay.cesmail.net (Postfix) with ESMTP id E56FB619058
+	for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 04:25:35 -0400 (EDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-On 4/25/08, Marko Kreen <markokr@gmail.com> wrote:
-> Platform: x64_64 linux, uint64_t -> unsigned long
->  Sparse: today's git (6dcc36a)
+They describe how likely the function is to be executed, which can
+affect optimization.  Also ignore attributes with underscores.
 
-Oh, and another warning:
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
 
-#include <sys/socket.h> gives:
+ ident-list.h |    2 ++
+ parse.c      |    4 ++++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
- /usr/include/bits/socket.h:159:5: warning: constant
-9223372036854775807L is so big it is long long
-
-I used to ignore it as it was not in my code, but its probably same thing.
-
-Ubuntu 8.04
-gcc 4:4.2.3-1ubuntu3
-glibc 2.7-10ubuntu3
-linux-headers - 2.6.24-16.30
-
--- 
-marko
+diff --git a/ident-list.h b/ident-list.h
+index 8fcd7de..6104826 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -74,6 +74,8 @@ IDENT(__malloc__);
+ IDENT(nonnull); IDENT(__nonnull); IDENT(__nonnull__);
+ IDENT(constructor); IDENT(__constructor__);
+ IDENT(destructor); IDENT(__destructor__);
++IDENT(cold); IDENT(__cold__);
++IDENT(hot); IDENT(__hot__);
+ IDENT(cdecl); IDENT(__cdecl__);
+ IDENT(stdcall); IDENT(__stdcall__);
+ IDENT(fastcall); IDENT(__fastcall__);
+diff --git a/parse.c b/parse.c
+index 137ba77..877414c 100644
+--- a/parse.c
++++ b/parse.c
+@@ -353,6 +353,10 @@ static struct init_keyword {
+ 	{ "__constructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
+ 	{ "destructor",	NS_KEYWORD,	.op = &ignore_attr_op },
+ 	{ "__destructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "cold",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
+ };
+ 
+ void init_parser(int stream)
