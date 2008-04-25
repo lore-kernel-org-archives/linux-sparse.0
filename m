@@ -1,78 +1,87 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Re: Re: Re: [PATCH 15/16] deal with enum members without excessive PITA
-Date: Fri, 25 Apr 2008 07:27:52 +0200
-Message-ID: <OF213DC17B.1BAFEFCE-ONC1257436.001C5DD3-C1257436.001E04D4@br-automation.com>
-References: <70318cbf0712141301s7bafda84ta7d7b087a0f13685@mail.gmail.com>
+From: "Marko Kreen" <markokr@gmail.com>
+Subject: confusing shift warning
+Date: Fri, 25 Apr 2008 10:53:08 +0300
+Message-ID: <e51f66da0804250053x2ec991dbu9a5a54fdcbea2a2a@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=_mixed 001E04D1C1257436_="
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.br-automation.com ([213.33.116.61]:55365 "EHLO
-	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754221AbYDYFoq (ORCPT
+Received: from mu-out-0910.google.com ([209.85.134.184]:12250 "EHLO
+	mu-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756554AbYDYHxL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Apr 2008 01:44:46 -0400
-In-Reply-To: <70318cbf0712141301s7bafda84ta7d7b087a0f13685@mail.gmail.com>
+	Fri, 25 Apr 2008 03:53:11 -0400
+Received: by mu-out-0910.google.com with SMTP id i10so3039427mue.1
+        for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 00:53:09 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org, linux-sparse-owner@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
 
---=_mixed 001E04D1C1257436_=
-Content-Type: text/plain; charset="US-ASCII"
+Platform: x64_64 linux, uint64_t -> unsigned long
+Sparse: today's git (6dcc36a)
 
-Hello Josh,
+Code:
+--------------------------------------------
+#include <stdint.h>
 
-Christopger Li sent this patch 4 month ago and i'd appreciate to see this 
-patch applied.
-I added an "Acked-by" to the patch.
+static void fn1(uint32_t val) { }
 
-Enum-members will now be stored in symbol->symbol_list.
+static void fn2(uint64_t val)
+{
+        fn1(val >> 32); // warning
+}
 
-Thanks,
-Tom
+static void fn3(unsigned int val) { }
 
-linux-sparse-owner@vger.kernel.org schrieb am 14.12.2007 22:01:03:
+static void fn4(unsigned long long val)
+{
+        fn3(val >> 32); // no warning
+}
+------------------------------
 
-> On Dec 14, 2007 4:09 AM, Thomas Schmid <Thomas.Schmid@br-automation.
-> com> wrote:
-> > How about the idea, looping over the syms within global_scope?
-> 
-> I think that will work too.
-> 
-> > > > It should be trivial make a patch to add members to the parent
-> > > symbol->symbol_list though.
-> > Would you possibly?
-> 
-> Can you try the attached patch?
-> 
-> Chris
->
---=_mixed 001E04D1C1257436_=
-Content-Type: application/octet-stream; name="enum-members"
-Content-Disposition: attachment; filename="enum-members"
-Content-Transfer-Encoding: base64
+$ cgcc -c test.c
+test.c:7:10: warning: shift too big (32) for type unsigned long
 
-QWRkIGVudW0gbWVtYmVyIGxpc3QgdG8gdGhlIHBhcmVudAoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0
-b3BoZXIgTGkgPHNwYXJzZUBjaHJpc2xpLm9yZz4KQWNrZWQtYnk6IFRob21hcyBTY2htaWQgPFRo
-b21hcy5TY2htaWRAYnItYXV0b21hdGlvbi5jb20+DQoKSW5kZXg6IHNwYXJzZS9wYXJzZS5jCj09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT0KLS0tIHNwYXJzZS5vcmlnL3BhcnNlLmMJMjAwNy0xMi0xNCAxMjozMzowNS4wMDAw
-MDAwMDAgLTA4MDAKKysrIHNwYXJzZS9wYXJzZS5jCTIwMDctMTItMTQgMTI6NDI6MzkuMDAwMDAw
-MDAwIC0wODAwCkBAIC02NTEsNyArNjUxLDYgQEAgc3RhdGljIHN0cnVjdCB0b2tlbiAqcGFyc2Vf
-ZW51bV9kZWNsYXJhdAogCXVuc2lnbmVkIGxvbmcgbG9uZyBsYXN0dmFsID0gMDsKIAlzdHJ1Y3Qg
-c3ltYm9sICpjdHlwZSA9IE5VTEwsICpiYXNlX3R5cGUgPSBOVUxMOwogCU51bSB1cHBlciA9IHst
-MSwgMH0sIGxvd2VyID0gezEsIDB9OwotCXN0cnVjdCBzeW1ib2xfbGlzdCAqZW50cmllcyA9IE5V
-TEw7CiAKIAlwYXJlbnQtPmV4YW1pbmVkID0gMTsKIAlwYXJlbnQtPmN0eXBlLmJhc2VfdHlwZSA9
-ICZpbnRfY3R5cGU7CkBAIC02ODcsNyArNjg2LDcgQEAgc3RhdGljIHN0cnVjdCB0b2tlbiAqcGFy
-c2VfZW51bV9kZWNsYXJhdAogCQlzeW0tPmluaXRpYWxpemVyID0gZXhwcjsKIAkJc3ltLT5lbnVt
-X21lbWJlciA9IDE7CiAJCXN5bS0+Y3R5cGUuYmFzZV90eXBlID0gcGFyZW50OwotCQlhZGRfcHRy
-X2xpc3QoJmVudHJpZXMsIHN5bSk7CisJCWFkZF9wdHJfbGlzdCgmcGFyZW50LT5zeW1ib2xfbGlz
-dCwgc3ltKTsKIAogCQlpZiAoYmFzZV90eXBlICE9ICZiYWRfY3R5cGUpIHsKIAkJCWlmIChjdHlw
-ZS0+dHlwZSA9PSBTWU1fTk9ERSkKQEAgLTc2Myw4ICs3NjIsNyBAQCBzdGF0aWMgc3RydWN0IHRv
-a2VuICpwYXJzZV9lbnVtX2RlY2xhcmF0CiAJcGFyZW50LT5jdHlwZS5tb2RpZmllcnMgfD0gKGJh
-c2VfdHlwZS0+Y3R5cGUubW9kaWZpZXJzICYgTU9EX1VOU0lHTkVEKTsKIAlwYXJlbnQtPmV4YW1p
-bmVkID0gMDsKIAotCWNhc3RfZW51bV9saXN0KGVudHJpZXMsIGJhc2VfdHlwZSk7Ci0JZnJlZV9w
-dHJfbGlzdCgmZW50cmllcyk7CisJY2FzdF9lbnVtX2xpc3QocGFyZW50LT5zeW1ib2xfbGlzdCwg
-YmFzZV90eXBlKTsKIAogCXJldHVybiB0b2tlbjsKIH0K
+-------------------------------
 
---=_mixed 001E04D1C1257436_=--
+The confusion raises from the fact that "unsigned long" _does_
+support 32-bit shift, and anyway I'm using "uint64_t", which
+I expect sparse to understand.
+
+Guess - somewhere is hardwired that "long" == "32-bit"?
+
+For reference:
+$ cgcc -v -c test.c
+sparse -v -c test.c -Dx86_64=1 -D__x86_64=1 -D__x86_64__=1
+-D__CHAR_BIT__=8 -D__SCHAR_MAX__=127 -D__SHRT_MAX__=32767
+-D__INT_MAX__=2147483647 -D__LONG_MAX__=9223372036854775807L
+-D__LONG_LONG_MAX__=9223372036854775807LL -D__FLT_RADIX__=2
+-D__FINITE_MATH_ONLY__=0 -D__DECIMAL_DIG__=33 -D__FLT_MANT_DIG__=24
+-D__FLT_DIG__=6 -D__FLT_MIN_EXP__='(-125)' -D__FLT_MAX_EXP__=128
+-D__FLT_MIN_10_EXP__='(-37)' -D__FLT_MAX_10_EXP__=38
+-D__FLT_HAS_INFINITY__=1 -D__FLT_HAS_QUIET_NAN__=1
+-D__FLT_DENORM_MIN__=1.40129846e-45F -D__FLT_EPSILON__=1.19209290e-7F
+-D__FLT_MAX__=3.40282347e+38F -D__FLT_MIN__=1.17549435e-38F
+-D__DBL_MANT_DIG__=53 -D__DBL_DIG__=15 -D__DBL_MIN_EXP__='(-1021)'
+-D__DBL_MAX_EXP__=1024 -D__DBL_MIN_10_EXP__='(-307)'
+-D__DBL_MAX_10_EXP__=308 -D__DBL_HAS_INFINITY__=1
+-D__DBL_HAS_QUIET_NAN__=1 -D__DBL_DENORM_MIN__=4.9406564584124654e-324
+-D__DBL_EPSILON__=2.2204460492503131e-16
+-D__DBL_MAX__=1.7976931348623157e+308
+-D__DBL_MIN__=2.2250738585072014e-308 -D__LDBL_MANT_DIG__=113
+-D__LDBL_DIG__=33 -D__LDBL_MIN_EXP__='(-16381)'
+-D__LDBL_MAX_EXP__=16384 -D__LDBL_MIN_10_EXP__='(-4931)'
+-D__LDBL_MAX_10_EXP__=4932 -D__LDBL_HAS_INFINITY__=1
+-D__LDBL_HAS_QUIET_NAN__=1
+-D__LDBL_DENORM_MIN__=6.47517511943802511092443895822764655e-4966L
+-D__LDBL_EPSILON__=1.92592994438723585305597794258492732e-34L
+-D__LDBL_MAX__=1.18973149535723176508575932662800702e+4932L
+-D__LDBL_MIN__=3.36210314311209350626267781732175260e-4932L
+-U__SIZE_TYPE__ -D__SIZE_TYPE__=long\ unsigned\ int -Dunix=1
+-D__unix=1 -D__unix__=1 -D__linux__=1 -D__linux=1 -Dlinux=linux
+test.c:7:10: warning: shift too big (32) for type unsigned long
+
+
+-- 
+marko
