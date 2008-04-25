@@ -1,84 +1,238 @@
-From: "Marko Kreen" <markokr@gmail.com>
-Subject: Re: confusing shift warning
-Date: Fri, 25 Apr 2008 20:26:07 +0300
-Message-ID: <e51f66da0804251026y4c6fbc25scedf04ab6c7dd6a0@mail.gmail.com>
-References: <e51f66da0804250053x2ec991dbu9a5a54fdcbea2a2a@mail.gmail.com>
-	 <33544769883882222@unknownmsgid>
-	 <e51f66da0804250134g7f05cc8fp9011d508f49295e3@mail.gmail.com>
-	 <e51f66da0804250158o333eb371nbc0f810076c274cb@mail.gmail.com>
-	 <-3423297637585954490@unknownmsgid>
-	 <e51f66da0804250637i4dff4c64p9d22a1162df14eb4@mail.gmail.com>
-	 <-8184754938437793631@unknownmsgid>
-	 <e51f66da0804250737r38582879s7dd41ee792756753@mail.gmail.com>
-	 <1209139485.11744.25.camel@dv>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: [PATCH] evaluate/expand context expressions
+Date: Fri, 25 Apr 2008 13:24:22 +0200
+Message-ID: <1209122662.10943.8.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.191]:35973 "EHLO
-	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754372AbYDYR0J (ORCPT
+Received: from xc.sipsolutions.net ([83.246.72.84]:49668 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753894AbYDZPwA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Apr 2008 13:26:09 -0400
-Received: by nf-out-0910.google.com with SMTP id g13so1494779nfb.21
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Apr 2008 10:26:07 -0700 (PDT)
-In-Reply-To: <1209139485.11744.25.camel@dv>
-Content-Disposition: inline
+	Sat, 26 Apr 2008 11:52:00 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <proski@gnu.org>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse <linux-sparse@vger.kernel.org>
 
-On 4/25/08, Pavel Roskin <proski@gnu.org> wrote:
-> On Fri, 2008-04-25 at 17:37 +0300, Marko Kreen wrote:
->  > >  I mean, they are both 0 unless -m32 or -m64 is specified.
->  >
->  > No, see other sections - they assume one of them is set unless overrided.
->
-> If you are fixing a bug, you cannot rely on the code being correct.  Try
->  printing those variables:
->
->  printf("m32=%d, m64=%d\n", $m32, $m64);
->
->  It will be two zeroes.
+But still allow having a standalone symbol as the context
+expression, also evaluate the context change/requirement
+directly in the parser and pass them up as integers. Also
+fixes a number of bugs e.g. in the expression copier and
+a segfault when the default context is used as such:
+   __context__(1,1);
 
-I think you have misunderstood the point of the variables - they
-only signify whether either argument was given on command line,
-nothing more.  Each arch defaults implicitly to either of them,
-so it needs to check if the other one was given, overriding the default.
+Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
+---
+ evaluate.c           |    9 ++++++++-
+ expand.c             |    2 +-
+ inline.c             |   19 ++++++++++++-------
+ linearize.c          |   17 +++--------------
+ parse.c              |   22 +++++++++++++---------
+ parse.h              |    7 +++++--
+ validation/context.c |   28 ++++++++++++++++++++++++++++
+ 7 files changed, 70 insertions(+), 34 deletions(-)
 
->  > > > Or do you mean I cannot assume one of them as set, unless
->  > > > overrided on command line?  But other sections (spact, i86, ppc)
->  > > > do exactly that?
->  > >
->  > >  You cannot assume either of them to be 1 until cgcc is fixed.
->  >
->  > But how should the fix look like if you don't like mine?
->
-> Well, it looks like cgcc is seriously broken.  In particular, it would
->  define x86_64 even if -m32 is specified, but it should define i386
->  instead.
+--- sparse.orig/evaluate.c	2008-04-25 02:15:15.000000000 +0200
++++ sparse/evaluate.c	2008-04-25 12:50:43.000000000 +0200
+@@ -3356,7 +3356,14 @@ struct symbol *evaluate_statement(struct
+ 		evaluate_asm_statement(stmt);
+ 		return NULL;
+ 	case STMT_CONTEXT:
+-		evaluate_expression(stmt->expression);
++		/*
++		 * If this is an unknown symbol accept it as-is
++		 * as a context name.
++		 */
++		if (stmt->context &&
++		    (stmt->context->type != EXPR_SYMBOL ||
++		     stmt->context->symbol))
++			evaluate_expression(stmt->context);
+ 		return NULL;
+ 	case STMT_RANGE:
+ 		evaluate_expression(stmt->range_expression);
+--- sparse.orig/expand.c	2008-04-25 02:15:34.000000000 +0200
++++ sparse/expand.c	2008-04-25 12:50:43.000000000 +0200
+@@ -1169,7 +1169,7 @@ static int expand_statement(struct state
+ 		/* FIXME! Do the asm parameter evaluation! */
+ 		break;
+ 	case STMT_CONTEXT:
+-		expand_expression(stmt->expression);
++		expand_expression(stmt->context);
+ 		break;
+ 	case STMT_RANGE:
+ 		expand_expression(stmt->range_expression);
+--- sparse.orig/inline.c	2008-04-25 12:50:08.000000000 +0200
++++ sparse/inline.c	2008-04-25 12:51:35.000000000 +0200
+@@ -328,7 +328,18 @@ static struct statement *copy_one_statem
+ 		stmt = newstmt;
+ 		break;
+ 	}
+-	case STMT_CONTEXT:
++	case STMT_CONTEXT: {
++		struct expression *expr = copy_expression(stmt->context);
++		struct statement *newstmt;
++		if (expr == stmt->context)
++			break;
++		newstmt = dup_statement(stmt);
++		newstmt->context = expr;
++		newstmt->change = stmt->change;
++		newstmt->required = stmt->required;
++		stmt = newstmt;
++		break;
++	}
+ 	case STMT_EXPRESSION: {
+ 		struct expression *expr = copy_expression(stmt->expression);
+ 		struct statement *newstmt;
+@@ -336,12 +347,6 @@ static struct statement *copy_one_statem
+ 			break;
+ 		newstmt = dup_statement(stmt);
+ 		newstmt->expression = expr;
+-		if (stmt->required) {
+-			expr = copy_expression(stmt->required);
+-			if (expr == stmt->required)
+-				break;
+-			newstmt->required = expr;
+-		}
+ 		stmt = newstmt;
+ 		break;
+ 	}
+--- sparse.orig/linearize.c	2008-04-25 12:50:09.000000000 +0200
++++ sparse/linearize.c	2008-04-25 12:56:35.000000000 +0200
+@@ -1735,22 +1735,11 @@ static pseudo_t linearize_inlined_call(s
+ static pseudo_t linearize_context(struct entrypoint *ep, struct statement *stmt)
+ {
+ 	struct instruction *insn = alloc_instruction(OP_CONTEXT, 0);
+-	struct expression *expr = stmt->expression;
+-	int value = 0;
+ 
+-	if (expr->type == EXPR_VALUE)
+-		value = expr->value;
++	insn->increment = stmt->change;
++	insn->inc_false = stmt->change;
+ 
+-	insn->increment = value;
+-	insn->inc_false = value;
+-
+-	expr = stmt->required;
+-	value = 0;
+-
+-	if (expr && expr->type == EXPR_VALUE)
+-		value = expr->value;
+-
+-	insn->required = value;
++	insn->required = stmt->required;
+ 	insn->exact = stmt->exact;
+ 
+ 	insn->context_expr = stmt->context;
+--- sparse.orig/parse.c	2008-04-25 12:50:12.000000000 +0200
++++ sparse/parse.c	2008-04-25 13:09:27.000000000 +0200
+@@ -1838,9 +1838,7 @@ static struct token *_parse_context_stat
+ 		token = token->next;
+ 	}
+ 
+-	stmt->expression = args[0];
+ 	stmt->context = NULL;
+-
+ 	stmt->exact = exact;
+ 
+ 	switch (argc) {
+@@ -1848,21 +1846,27 @@ static struct token *_parse_context_stat
+ 		sparse_error(token->pos, "__context__ statement needs argument(s)");
+ 		return token;
+ 	case 1:
+-		/* already done */
++		stmt->change = get_expression_value(args[0]);
+ 		break;
+ 	case 2:
+-		if (args[0]->type != STMT_EXPRESSION) {
++		/*
++		 * We should actually check whether we can evalulate
++		 * it as a constant expression and if so use as the
++		 * 'change' value. I hope nobody gives a calculation
++		 * for the number.
++		 */
++		if (args[0]->type != EXPR_VALUE) {
+ 			stmt->context = args[0];
+-			stmt->expression = args[1];
++			stmt->change = get_expression_value(args[1]);
+ 		} else {
+-			stmt->expression = args[0];
+-			stmt->required = args[1];
++			stmt->change = get_expression_value(args[0]);
++			stmt->required = get_expression_value(args[1]);
+ 		}
+ 		break;
+ 	case 3:
+ 		stmt->context = args[0];
+-		stmt->expression = args[1];
+-		stmt->required = args[2];
++		stmt->change = get_expression_value(args[1]);
++		stmt->required = get_expression_value(args[2]);
+ 		break;
+ 	default:
+ 		sparse_error(token->pos, "too many arguments for __context__ statement");
+--- sparse.orig/parse.h	2008-04-25 12:50:09.000000000 +0200
++++ sparse/parse.h	2008-04-25 12:50:43.000000000 +0200
+@@ -39,10 +39,13 @@ struct statement {
+ 			struct symbol *label;
+ 			struct statement *label_statement;
+ 		};
+-		struct { /* __context__ */
++		struct { /* expression */
+ 			struct expression *expression;
++		};
++		struct { /* __context__ */
+ 			struct expression *context;
+-			struct expression *required;
++			int change, required;
++			int exact;
+ 		};
+ 		struct /* return_statement */ {
+ 			struct expression *ret_value;
+--- sparse.orig/validation/context.c	2008-04-25 12:50:12.000000000 +0200
++++ sparse/validation/context.c	2008-04-25 13:10:09.000000000 +0200
+@@ -380,6 +380,32 @@ static int warn_conditional(void)
+     return 0;
+ }
+ 
++static void areq(void) __attribute__((context(1,2)))
++{
++	__context__(1,1);
++}
++
++static void good_reqlock(void)
++{
++	a();
++	areq();
++	r();
++	r();
++}
++
++static void warn_reqlock(void)
++{
++	areq();
++	r();
++}
++
++
++static void dummy1(void) __attribute__((context(p,0,1)))
++{
++        void *p;
++	__context__(p,1);
++}
++
+ /*
+  * check-name: Check -Wcontext
+  *
+@@ -418,5 +444,7 @@ context.c:360:10: warning: context probl
+ context.c:360:10:    default context: wanted >= 1, got 0
+ context.c:380:12: warning: context imbalance in 'warn_conditional': wrong count at exit
+ context.c:380:12:    default context: wanted 0, got 1
++context.c:398:6: warning: context problem in 'warn_reqlock': 'areq' expected different context
++context.c:398:6:    default context: wanted >= 1, got 0
+  * check-error-end
+  */
 
-You may be right here.  Seems like the x86_64 arch was tested only
-with kernel compiles with -m64 always given.
 
->  Also, cgcc looks at uname output to determine the target CPU.  That
->  would default to 64 bit if a 32-bit system runs on a 64-bit kernel.  I
->  think cgcc should be running gcc instead to dump the machine settings.
->  I realize that it might be slower, but correctness is important here.
->  On the other hand, I'm not sure if we can rely on having gcc installed.
->
->  I would probably introduce a variable that would hold the memory model.
->  It could be ILP32 or LP64, but we could eventually support LLP64 (win64)
->  and even LP32 (win16).  It could be determined based on -m32/-m64
->  switches and uname output, but be could switch to "gcc -dumpmachine"
->  later.
->
->  The architecture would be adjusted based on the selected memory model.
->  And then it would be passed to add_specs().
-
-Ok, this is somewhat of out my league.  But I think that having good
-default and forcing user to use -mX for non-default case is good enough.
-
--- 
-marko
