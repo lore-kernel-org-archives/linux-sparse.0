@@ -1,68 +1,62 @@
 From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: [PATCH 2/2] Simplify (and warn about) right shifts that result
- in zero
-Date: Thu, 24 Apr 2008 19:32:46 -0700
-Message-ID: <481142CE.5030801@freedesktop.org>
-References: <20080424193856.14737.16718.stgit@warthog.procyon.org.uk>  <alpine.LFD.1.10.0804241248290.2779@woody.linux-foundation.org>  <alpine.LFD.1.10.0804241443460.2779@woody.linux-foundation.org>  <alpine.LFD.1.10.0804241452250.2779@woody.linux-foundation.org> <1209081131.12561.45.camel@dv> <alpine.LFD.1.10.0804241658520.2779@woody.linux-foundation.org>
+Subject: Re: [PATCH] fix bug in context tracking code
+Date: Thu, 24 Apr 2008 19:34:39 -0700
+Message-ID: <4811433F.6010306@freedesktop.org>
+References: <1208946289.31429.66.camel@johannes.berg>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig099962893ABBA746D413FDC9"
+ boundary="------------enig92B770EF6F397098036D0F54"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail3.sea5.speakeasy.net ([69.17.117.5]:39688 "EHLO
-	mail3.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753180AbYDYCcn (ORCPT
+Received: from mail8.sea5.speakeasy.net ([69.17.117.10]:55432 "EHLO
+	mail8.sea5.speakeasy.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755825AbYDYCef (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 24 Apr 2008 22:32:43 -0400
-In-Reply-To: <alpine.LFD.1.10.0804241658520.2779@woody.linux-foundation.org>
+	Thu, 24 Apr 2008 22:34:35 -0400
+In-Reply-To: <1208946289.31429.66.camel@johannes.berg>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Pavel Roskin <proski@gnu.org>, David Howells <dhowells@redhat.com>, Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig099962893ABBA746D413FDC9
-Content-Type: text/plain; charset=ISO-8859-1
+--------------enig92B770EF6F397098036D0F54
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Linus Torvalds wrote:
-> On Thu, 24 Apr 2008, Pavel Roskin wrote:
->> So I would suggest a similar warning is this case.  Maybe "right shift=
-
->> too big (%u) for source type %s" (if the source type is readily
->> available) or "right shift count (%d) >=3D width of type (%d)"
+Johannes Berg wrote:
+> My optimisation to avoid recursion into BBs when checking contexts
+> lead to a failure in a case like this:
 >=20
-> That's fine, except we shouldn't talk about "type", since we're really =
-
-> doing some really stupid value analysis (the *type* will generally have=
-=20
-> been cast to a bigger one by the implicit C type evaluation rules).
-
-Pavel, it sounds like you agree with the semantic of the warning, and
-just want an different wording.  Thus, I've applied and pushed the patch;=
-
-feel free to propose a change to the wording in a subsequent patch.
-
->> By the way, your patch has caught something interesting in
->> net/mac80211/tkip.c:
->>
->>         iv32 =3D data[hdr_len + 4] +
->>                 (data[hdr_len + 5] >> 8) +
->>                 (data[hdr_len + 6] >> 16) +
->>                 (data[hdr_len + 7] >> 24);
->>
->> Wow!
+>     static int warn_conditional(void)
+>     {
+>         if (condition)
+>             return 0;
 >=20
-> Heh. That does look like somebody is shifting the wrong way, and=20
-> apparently the new warning was worth something ;)
+>         a();
+>         if (condition =3D=3D 0)
+>             return 1;
+>         r();
+>         return 0;
+>     }
+>=20
+> because some blocks are called with different contexts and thus
+> need to be checked multiple times.
+>=20
+> The obvious fix would be to decrease the recursion depth at the
+> end of the BB check function, but that, while correct, leads to
+> extremely long sparse runtimes on somewhat complex functions.
+> Thus, this patch also makes sparse cache which contexts it has
+> checked a block in and avoid the re-checking in that case.
+>=20
+> Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
 
-Nice.
+Applied and pushed; thanks!
 
 - Josh Triplett
 
 
-
---------------enig099962893ABBA746D413FDC9
+--------------enig92B770EF6F397098036D0F54
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -71,9 +65,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFIEULOGJuZRtD+evsRAi03AJ0diViUPSPMeudKYcEnKJE/k8GAPQCeJK2o
-xFrKnBFAll3vw6NFBxWS9kc=
-=wZqZ
+iD8DBQFIEUM/GJuZRtD+evsRAk7KAJ4soCYu9Udp1i7hnQJF4j3suCDJcgCgntzB
+JAlnlGYz4m4/aw7huV8Opuw=
+=thbr
 -----END PGP SIGNATURE-----
 
---------------enig099962893ABBA746D413FDC9--
+--------------enig92B770EF6F397098036D0F54--
