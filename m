@@ -1,80 +1,35 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: [PATCH v2 6/5] test conditional result locking
-Date: Sun, 27 Apr 2008 14:45:53 +0200
-Message-ID: <1209300353.29025.1.camel@johannes.berg>
-References: <20080427113128.237957000@sipsolutions.net>
-	 <20080427113350.901380000@sipsolutions.net>
-	 <1209299032.10943.71.camel@johannes.berg>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: [PATCH] bitops: simplify generic bit finding functions
+Date: Sun, 27 Apr 2008 21:36:38 +0100
+Message-ID: <20080427203638.GW5882@ZenIV.linux.org.uk>
+References: <1209327591.14173.74.camel@brick> <alpine.LFD.1.10.0804271325350.3119@woody.linux-foundation.org> <1209328161.14173.77.camel@brick>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:54901 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755356AbYD0MqF (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:50651 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750970AbYD0Ug5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 27 Apr 2008 08:46:05 -0400
-In-Reply-To: <1209299032.10943.71.camel@johannes.berg>
+	Sun, 27 Apr 2008 16:36:57 -0400
+Content-Disposition: inline
+In-Reply-To: <1209328161.14173.77.camel@brick>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse@vger.kernel.org, Philipp Reisner <philipp.reisner@linbit.com>
+To: Harvey Harrison <harvey.harrison@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Ingo Molnar <mingo@elte.hu>, Andrew Morton <akpm@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org
 
-To test a function that can return a locked struct or NULL,
-a macro has to be invented. Add a test case for that.
+On Sun, Apr 27, 2008 at 01:29:21PM -0700, Harvey Harrison wrote:
 
-Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
----
-The macro was a mess, this one's much better. The key is to pass in the
-result variable and use it in __context__.
+> Oh, I didn't realize, I only did this because sparse started spewing out
+> lots of:
+> include/linux/bitops.h:166:32: warning: shift too big (65536) for type unsigned long
+> 
+> due to shift by size there, and again on line 202...I just wanted something
+> that sparse wouldn't warn about and was a little easier to understand to boot.
 
- validation/context-vars.c |   29 +++++++++++++++++++++++++----
- 1 file changed, 25 insertions(+), 4 deletions(-)
+That's a sparse problem, really.  I wonder if we simply should introduce a
+new node type: EXPR_WARN.  So that expand would generate those from things
+like division by zero/overflow/bad shift *and* emitting an insn for those
+would generate a stored warning.
 
---- sparse.orig/validation/context-vars.c	2008-04-27 14:10:37.000000000 +0200
-+++ sparse/validation/context-vars.c	2008-04-27 14:41:41.000000000 +0200
-@@ -1,3 +1,5 @@
-+#include <stddef.h>
-+
- static void a(void *p) __attribute__((context(p,0,1)))
- {
-     __context__(p,1);
-@@ -159,13 +161,32 @@ static void good_locked_val(void)
-     ;
- }
- 
-+
-+extern struct test *_search(int key);
-+
-+#define search(res, key) do {	\
-+  (res) = _search((key));	\
-+  if (res)			\
-+      __context__(&(res)->lock,1);\
-+  } while (0)
-+
-+static void test(void)
-+{
-+    struct test **x;
-+
-+    search(*x, 32);
-+    if (*x)
-+      unlock(*x);
-+}
-+
-+
- /*
-  * check-name: Check -Wcontext with lock variables
-  *
-  * check-error-start
--context-vars.c:53:7: warning: context imbalance in 'warn_lock1': wrong count at exit
--context-vars.c:53:7:    context '**v+4': wanted 0, got 1
--context-vars.c:137:11: warning: context problem in 'warn_unlock': 'unlock' expected different context
--context-vars.c:137:11:    context '*t+0': wanted >= 1, got 0
-+context-vars.c:55:7: warning: context imbalance in 'warn_lock1': wrong count at exit
-+context-vars.c:55:7:    context '**v+4': wanted 0, got 1
-+context-vars.c:139:11: warning: context problem in 'warn_unlock': 'unlock' expected different context
-+context-vars.c:139:11:    context '*t+0': wanted >= 1, got 0
-  * check-error-end
-  */
-
-
+Objections?
