@@ -1,19 +1,20 @@
 From: Johannes Berg <johannes@sipsolutions.net>
-Subject: [PATCH 6/5] test conditional result locking
-Date: Sun, 27 Apr 2008 14:23:52 +0200
-Message-ID: <1209299032.10943.71.camel@johannes.berg>
+Subject: [PATCH v2 6/5] test conditional result locking
+Date: Sun, 27 Apr 2008 14:45:53 +0200
+Message-ID: <1209300353.29025.1.camel@johannes.berg>
 References: <20080427113128.237957000@sipsolutions.net>
 	 <20080427113350.901380000@sipsolutions.net>
+	 <1209299032.10943.71.camel@johannes.berg>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:38582 "EHLO
+Received: from xc.sipsolutions.net ([83.246.72.84]:54901 "EHLO
 	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754926AbYD0MYB (ORCPT
+	with ESMTP id S1755356AbYD0MqF (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 27 Apr 2008 08:24:01 -0400
-In-Reply-To: <20080427113350.901380000@sipsolutions.net>
+	Sun, 27 Apr 2008 08:46:05 -0400
+In-Reply-To: <1209299032.10943.71.camel@johannes.berg>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@freedesktop.org>
@@ -24,39 +25,40 @@ a macro has to be invented. Add a test case for that.
 
 Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
 ---
-This is a bit awkward but I don't see any good way to do it differently
-since otherwise we'd have to track the assignment.
+The macro was a mess, this one's much better. The key is to pass in the
+result variable and use it in __context__.
 
- validation/context-vars.c |   28 ++++++++++++++++++++++++----
- 1 file changed, 24 insertions(+), 4 deletions(-)
+ validation/context-vars.c |   29 +++++++++++++++++++++++++----
+ 1 file changed, 25 insertions(+), 4 deletions(-)
 
 --- sparse.orig/validation/context-vars.c	2008-04-27 14:10:37.000000000 +0200
-+++ sparse/validation/context-vars.c	2008-04-27 14:14:25.000000000 +0200
++++ sparse/validation/context-vars.c	2008-04-27 14:41:41.000000000 +0200
 @@ -1,3 +1,5 @@
 +#include <stddef.h>
 +
  static void a(void *p) __attribute__((context(p,0,1)))
  {
      __context__(p,1);
-@@ -159,13 +161,31 @@ static void good_locked_val(void)
+@@ -159,13 +161,32 @@ static void good_locked_val(void)
      ;
  }
  
 +
 +extern struct test *_search(int key);
 +
-+#define search(res, key) do {\
-+  res = _search((key)); \
-+  (res ? ({ __context__(&res->lock,1); res; }) : NULL); \
++#define search(res, key) do {	\
++  (res) = _search((key));	\
++  if (res)			\
++      __context__(&(res)->lock,1);\
 +  } while (0)
 +
 +static void test(void)
 +{
-+    struct test *x;
++    struct test **x;
 +
-+    search(x, 32);
-+    if (x)
-+      unlock(x);
++    search(*x, 32);
++    if (*x)
++      unlock(*x);
 +}
 +
 +
