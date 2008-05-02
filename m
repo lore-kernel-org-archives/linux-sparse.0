@@ -1,83 +1,74 @@
-From: "Geoff Johnstone" <geoffsheep.johnstonefrog@googlemail.com>
-Subject: Re: multiple source files [was four sparse patches]
-Date: Fri, 2 May 2008 19:58:06 +0100
-Message-ID: <32e600e90805021158vb6be3c9jbb75c3a61345448@mail.gmail.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: [PATCH] ignore __cold__ attribute
+Date: Fri, 02 May 2008 15:42:33 -0400
+Message-ID: <1209757353.25568.2.camel@dv>
+References: <1208860883.31429.8.camel@johannes.berg>
+	 <20080422090739.2izftuclwocs80o4-cebfxv@fcnzpbc.arg@webmail.spamcop.net>
+	 <1208870706.31429.23.camel@johannes.berg> <1208900131.22856.4.camel@dv>
+	 <4811413E.1080103@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from el-out-1112.google.com ([209.85.162.177]:45158 "EHLO
-	el-out-1112.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756097AbYEBS6I (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 2 May 2008 14:58:08 -0400
-Received: by el-out-1112.google.com with SMTP id n30so638011elf.21
-        for <linux-sparse@vger.kernel.org>; Fri, 02 May 2008 11:58:07 -0700 (PDT)
-Content-Disposition: inline
+Received: from c60.cesmail.net ([216.154.195.49]:37224 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932185AbYEBTmm (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 2 May 2008 15:42:42 -0400
+In-Reply-To: <4811413E.1080103@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse <linux-sparse@vger.kernel.org>
 
-> > I've attached four patches that I've written for sparse to use it
-> > for a userland project.
->
->  Regarding incomplete structs, your patch seems reasonable as far as
->  I know, and it doesn't break the test suite, so I've applied and
->  pushed it.  Per your concerns, if this patch doesn't represent the
->  correct fix, the code can change later when we have a test case
->  that breaks with this patch.  Please do consider writing a patch
->  for a new test case based on your example.
+On Thu, 2008-04-24 at 19:26 -0700, Josh Triplett wrote:
 
-OK - I sat down to write a test case and had trouble reproducing
-because it turns out that the problem has a different cause.
-Take three files:
+> Looks good to me.  Could I get a signoff and commit message please?
 
-/* test.h */
-typedef struct foo *Foo;
-
-void a (Foo foo);
-void b (Foo foo);
+I posted it already, but I think it was lost, so here it is again.
 
 
-/* test1.c */
-#include "test.h"
-void a (Foo foo) { }
+Ignore "cold" and "hot" attributes, which appeared in gcc 4.3
+
+They describe how likely the function is to be executed, which can
+affect optimization.  Also ignore the attributes with underscores.
+
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
+
+ ident-list.h |    2 ++
+ parse.c      |    4 ++++
+ 2 files changed, 6 insertions(+), 0 deletions(-)
 
 
-/* test2.c */
-#include "test.h"
-void b (Foo foo) { }
+diff --git a/ident-list.h b/ident-list.h
+index 8fcd7de..6104826 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -74,6 +74,8 @@ IDENT(__malloc__);
+ IDENT(nonnull); IDENT(__nonnull); IDENT(__nonnull__);
+ IDENT(constructor); IDENT(__constructor__);
+ IDENT(destructor); IDENT(__destructor__);
++IDENT(cold); IDENT(__cold__);
++IDENT(hot); IDENT(__hot__);
+ IDENT(cdecl); IDENT(__cdecl__);
+ IDENT(stdcall); IDENT(__stdcall__);
+ IDENT(fastcall); IDENT(__fastcall__);
+diff --git a/parse.c b/parse.c
+index 137ba77..877414c 100644
+--- a/parse.c
++++ b/parse.c
+@@ -353,6 +353,10 @@ static struct init_keyword {
+ 	{ "__constructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
+ 	{ "destructor",	NS_KEYWORD,	.op = &ignore_attr_op },
+ 	{ "__destructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "cold",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
++	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
+ };
+ 
+ void init_parser(int stream)
 
-
-With sparse 0.4.1:
-
-$ sparse test1.c
-$ sparse test2.c
-$ sparse test[12].c
-test2.c:3:6: error: symbol 'b' redeclared with different type
-(originally declared at test.h:4) - incompatible argument 1 (different
-base types)
-
-...i.e. the problem only occurs with multiple source files on the
-sparse command line. (The userland project mentioned above has a build
-system that invokes the compiler once, passing all necessary source
-files, because it also builds on Windows, where process creation is
-remarkably slow so invoking cl.exe once per source file is prohibitive).
-
-I think that the problem may be rooted in main():
-  // Expand, linearize and show it.
-  check_symbols(sparse_initialize(argc, argv, &filelist));
-  FOR_EACH_PTR_NOTAG(filelist, file) {
-    check_symbols(sparse(file));
-  } END_FOR_EACH_PTR_NOTAG(file);
-
-i.e. sparse doesn't reinitialize for each source file.
-
-My patch a few weeks ago silences the error, but in the light of this
-I think that it's working around rather than fixing the problem. The
-"correct" fix would seem to be to re-initialise sparse for each source
-file. However, sparse's data structures weren't written with this in
-mind, so a patch would be rather invasive. It might be simpler to say
-that sparse must only be invoked on one source file and to modify cgcc
-instead?
+-- 
+Regards,
+Pavel Roskin
