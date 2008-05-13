@@ -1,107 +1,106 @@
 From: Johannes Berg <johannes@sipsolutions.net>
 Subject: Re: sparse context warning problem ...
-Date: Sun, 11 May 2008 11:46:26 +0200
-Message-ID: <1210499186.3646.16.camel@johannes.berg>
+Date: Tue, 13 May 2008 23:52:48 +0200
+Message-ID: <1210715568.4279.35.camel@johannes.berg>
 References: <200805101724.04014.david-b@pacbell.net>
-	 <1210466447.3646.3.camel@johannes.berg>
-	 <200805102018.13358.david-b@pacbell.net>
+	 (sfid-20080511_023054_226815_6D0BCE82)  <1210466447.3646.3.camel@johannes.berg>
+	 (sfid-20080511_024133_180993_8E974B71)
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-E9zVpKqWXIyWVSk2l2p+"
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-gOdyOnYGXNi+XdZ6PbPT"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:41097 "EHLO
+Received: from xc.sipsolutions.net ([83.246.72.84]:52094 "EHLO
 	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750799AbYEKJqn (ORCPT
+	with ESMTP id S1751431AbYEMVxo (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 11 May 2008 05:46:43 -0400
-In-Reply-To: <200805102018.13358.david-b@pacbell.net>
+	Tue, 13 May 2008 17:53:44 -0400
+In-Reply-To: <1210466447.3646.3.camel@johannes.berg> (sfid-20080511_024133_180993_8E974B71)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: David Brownell <david-b@pacbell.net>
 Cc: linux-sparse@vger.kernel.org
 
 
---=-E9zVpKqWXIyWVSk2l2p+
-Content-Type: text/plain
+--=-gOdyOnYGXNi+XdZ6PbPT
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
-On Sat, 2008-05-10 at 20:18 -0700, David Brownell wrote:
-> On Saturday 10 May 2008, Johannes Berg wrote:
-> > This is probably my mistake.
+
+> >   static void
+> >   finish_urb(struct ohci_hcd *ohci, struct urb *urb, int status)
+> >   __releases(ohci->lock)
+> >   __acquires(ohci->lock)
+
+> > But current versions of "sparse" complain (wrongly):
 > >=20
-> > However, I took __releases and __acquires to mean that this function
-> > *changed* the context, doing both doesn't really make much sense. I
-> > think the function should actually be declared
-> >=20
-> > static void
-> > finish_urb(...)
-> > __requires(ohci->lock)
-> > {...}
-> >=20
-> > where __requires is (for sparse) defined as
-> >=20
-> > #define __requires(x) __attribute__((context(x,1,1)))
+> >   drivers/usb/host/ohci-q.c:66:2: warning: context imbalance in 'finish=
+_urb': __context__ statement expected different context
+> >   drivers/usb/host/ohci-q.c:66:2:    context '<noident>': wanted >=3D 0=
+, got -1
+
+
+> However, I took __releases and __acquires to mean that this function
+> *changed* the context, doing both doesn't really make much sense. I
+> think the function should actually be declared
 >=20
-> ISTR suggesting special syntax for this to Linus (this was way
-> back when "sparse" was just starting) and he wanted to just do
-> it by having those two attributes.
+> static void
+> finish_urb(...)
+> __requires(ohci->lock)
+> {...}
 >=20
-> So at this point, I'd want to see the regression fixed (and the
-> tests updated to avoid this in the future) before exploring any
-> alternative syntax for kernel annotations.
+> where __requires is (for sparse) defined as
+>=20
+> #define __requires(x) __attribute__((context(x,1,1)))
 
-Yeah, true, on the other hand, if/when Josh merges my other patches then
-most kernel annotations will have to be changed anyway because up to
-before the patch that is already in sparse wouldn't flag this:
+Actually, it turns out my analysis was completely wrong.
 
-spin_lock(&lock);
-rcu_read_unlock();
+This is exactly the issue I pointed out in my other mail. You have:
 
-because it didn't care *at all* about the expression inside __acquire()
-and thus a lot of usage crept in that isn't really usable.
+=EF=BB=BF__acquires(ohci->lock)
+           ^^^^^^^^^^
+but, on the other hand:
 
-With my future patches, I'm even binding the symbols, so that
+spin_unlock (&ohci->lock);
+             ^
 
-void spin_lock(spinlock_t l) __acquire(l);
+I think you can fix this particular case by adding the & in the
+__acquires(), but that will only work for UP, for actual spinlocks my
+other patches will be needed, because w/o my patches sparse will, on
+SMP, not be able to see that
 
-will flag errors with
+void __lockfunc _spin_lock(spinlock_t *lock)            __acquires(lock);
 
-spin_lock(&a);
-spin_unlock(&b);
+means to lock "&ohci->lock" when doing "spin_lock(&ohci->lock);" but
+will treat it as locking the abstractly-named "lock" context, while on
+UP/no-preempt the "spin_lock" macro is expanded by the preprocessor and
+you will get "&ohci->lock" as the expression.
 
-while right now it would just treat them both as the context "l".
-
-So I expect that it will not be possible to not "regress" in that sense
-because the current annotations are simply messed up since sparse didn't
-care about the name inside __acquire()/__release() at all!
-
-
-However, it's probably fairly easy right now to treat both of them as
-being merged together which seems the only sensible things to do anyway
-if such a situation is encountered. I'll look into it.
+Ultimately, this whole problem comes from the fact that sparse accepted
+adding an expression, documented it, but never complained if they
+slightly mismatched as above.
 
 johannes
 
---=-E9zVpKqWXIyWVSk2l2p+
+--=-gOdyOnYGXNi+XdZ6PbPT
 Content-Type: application/pgp-signature; name=signature.asc
 Content-Description: This is a digitally signed message part
 
 -----BEGIN PGP SIGNATURE-----
 Comment: Johannes Berg (powerbook)
 
-iQIVAwUASCbAcaVg1VMiehFYAQLlVhAAo2Ph7MNobSx+RBhe3NN2oTexwXK9jhpF
-AxM9re6pNu6Y1WW69KW909r1HpXKZIze/O1naj6+yr8ms+AZWHF8EmHMwp0fK/Wt
-8nAkESBk8uCP+uzdSWUIctY4hv3lVi6tHPMXDOe9xwb3balkQVC/6s7xs0WQHz7c
-s8l5MKP394Hybwm792BgrdJeJrK4WbWyiSr2fZMw3scH3lxUM9DjyZNsM4JlmPjd
-ZmM1VPGCBCkfoweiw9ipHwjuCu4esSCsMjGcwloWM1eVg27zTPDryQzOGmHgGPUO
-Fz6ZdnNprGIq8w+wEIoAGaOBkmkBvEehty9r8lUkjLd59HGMz8QgKEdfNnz1R1Bg
-Ug4xvYh+hGhezPRit3eh5fAjhl76GEjUnZTwdtmzctTPKw0+VblbRQ7DKl2YL0LO
-r9YXTIdzqs7vfLZuTDBiXuOPtZ51tS43aI78855iR866iNcpMjmf7AaO7ia/cjFi
-xjRwujxTHjD07wHrGn+kFmQhEScSXvUkhwTCIxwclVhQkmPl47Yuiv5zgq7c6tKx
-xkmw7vbTY8238RKdHgVYI69cJM40rlMqT6xru0pdkTVbDWM2eBlARVXV1dYR1ac5
-pmWr4FGGvCALkt0eVJzAIEM6SWoJNSDWqA+tRqCn6iI6NIKeYYtv/5/CyDFB+d5K
-b2JMtkNJ9ks=
-=L2O2
+iQIVAwUASCoNr6Vg1VMiehFYAQL9JQ//Yn8q3EsN49uvFWo8ByvPUHgwTX8TJk55
+IMCAfJhFpgZen0HAI5kC77SsuTlbSVHNWIuAjkViIS3yNBhnEXNGNQGa68k7be6X
+7iGVRaiKbRAGF/gpooi62dJOragyCZATdTeMj52jUc35ZiEyI0tKVeaaq37x4ZKP
+m7wwe7NKXZ7Ism7hnVMry5v1FTKoJ4do9DOKLUsz2h9x8e9fvtgwtytcwfIiOZG1
+Whnu0W78QtRfaGh9FvZ7Zic0TxStAjxr7C1AWpaXA88mmIjU/Xk7UC7imdTVhWbB
+wrN4GTc86WfYTOhJSch4Ok71yYEWtKiK8+EoUlZ+7Ld9iYHkSNsGEPc3C7fHWPHc
+zvxLEpqEfHEvo1KBeW6OS8oZkb4NVAXCK/0VdO0oX5ozifFQTpx2kuBoY7C//yH0
+qcf2Qo/U2Rdz2CkBYklDKo3KdWfYBqXEDwcwG9viSkXzzYoKnDZPqXuP58mzoAfY
+My3qqHteWF1h9VoXTI04vvulG8DN7xHjGgw7DbX01sBD0wpk/nXO/r7chD9iS80Z
+qos4Bf2MuPfW8Zblx2Il2+RL1Sauy5983bGWC9apa2dX0694B0lcP2Lko0/kMK3b
+wcxPgaUxGASJHaJjgMzql4QWCNAfuoAXuhn9tAx3SfsfG7FROx+3+VtusJOzQu7V
+2aAw9DL3VgU=
+=NTpO
 -----END PGP SIGNATURE-----
 
---=-E9zVpKqWXIyWVSk2l2p+--
+--=-gOdyOnYGXNi+XdZ6PbPT--
 
