@@ -1,78 +1,48 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Roland Dreier <rdreier@cisco.com>
 Subject: Re: Sparse annotation for "context imbalance" false positives?
-Date: Thu, 15 May 2008 10:54:23 +0200
-Message-ID: <1210841663.4282.9.camel@johannes.berg>
+Date: Thu, 15 May 2008 08:05:23 -0700
+Message-ID: <ada7idvfw0c.fsf@cisco.com>
 References: <adaod78fe94.fsf@cisco.com>
-	 (sfid-20080515_051646_455778_42A2EDF3)
+	<1210841663.4282.9.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-XHPX6qtXCJCj2Aog5uOA"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:44860 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751613AbYEOIzZ (ORCPT
+Received: from sj-iport-5.cisco.com ([171.68.10.87]:22453 "EHLO
+	sj-iport-5.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932742AbYEOPGY (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 15 May 2008 04:55:25 -0400
-In-Reply-To: <adaod78fe94.fsf@cisco.com> (sfid-20080515_051646_455778_42A2EDF3)
+	Thu, 15 May 2008 11:06:24 -0400
+In-Reply-To: <1210841663.4282.9.camel@johannes.berg> (Johannes Berg's message
+	of "Thu, 15 May 2008 10:54:23 +0200")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Roland Dreier <rdreier@cisco.com>
+To: Johannes Berg <johannes@sipsolutions.net>
 Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, David Brownell <david-b@pacbell.net>
 
+ > You could, for example, insert this:
+ > 
+ > > 	static void mlx4_ib_lock_cqs(struct mlx4_ib_cq *send_cq, struct mlx4_ib_cq *recv_cq)
+ > > 	{
+ > > 		if (send_cq == recv_cq)
+ > 		{
+ > > 			spin_lock_irq(&send_cq->lock);
+ > 			 /* pretend to have acquired both for sparse */	
+ > 			__acquire(&recv_cq->lock);
+ > 		}
 
---=-XHPX6qtXCJCj2Aog5uOA
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+but the problem sparse sees is not that some paths take only one lock
+and some take two -- sparse is complaining that this function is
+returning without unlocking the locks that it takes.  Even if I change
+the function to something as simple as:
 
-You could, for example, insert this:
+	static void mlx4_ib_lock_cqs(struct mlx4_ib_cq *send_cq, struct mlx4_ib_cq *recv_cq)
+	{
+		spin_lock_irq(&recv_cq->lock);
+	}
 
-> 	static void mlx4_ib_lock_cqs(struct mlx4_ib_cq *send_cq, struct mlx4_ib_=
-cq *recv_cq)
-> 	{
-> 		if (send_cq =3D=3D recv_cq)
-		{
-> 			spin_lock_irq(&send_cq->lock);
-			 /* pretend to have acquired both for sparse */=09
-			__acquire(&recv_cq->lock);
-		}
-> 		else if (send_cq->mcq.cqn < recv_cq->mcq.cqn) {
-> 			spin_lock_irq(&send_cq->lock);
-> 			spin_lock_nested(&recv_cq->lock, SINGLE_DEPTH_NESTING);
-> 		} else {
-> 			spin_lock_irq(&recv_cq->lock);
-> 			spin_lock_nested(&send_cq->lock, SINGLE_DEPTH_NESTING);
-> 		}
-> 	}
+I still get
 
-and then declare that you take "both" locks. Not sure if that will bite
-you in the callers again though.
+    drivers/infiniband/hw/mlx4/qp.c:603:13: warning: context imbalance in 'mlx4_ib_lock_cqs' - wrong count at exitn
 
-The exact syntax is still a bit under discussion though, whether to use
-&recv_cq->lock or leave out the "&" there, I'm favouring the approach
-with & but the kernel uses no & in some places.
-
-johannes
-
---=-XHPX6qtXCJCj2Aog5uOA
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUASCv6PqVg1VMiehFYAQIc0RAAmxfNytGFfQn0Uua2XpahBdoppI71mNUY
-7b25Cyq7aYpNGF3YSIWUhMHXFiz58XUvTZEzbb1a7CMP3e0nurmaY3SwATaDgUhD
-tl84WNryZeKdLIqoDlIZVXD7rLD04rQ+aDmKoBVFAMBCV8e/FNJ9n+h14LNBr0O2
-SKX9t+VmK5dc7TbfHHfeNZuyholdb1IVcAOCl7XdfmOPZ55Gz6ULilKPRRynvqUm
-AZct0AK+eOJytTKezDZKm7jbL82EeO6Uq/y+JVbZpWYSgK4tDc6CluvpGWssWDBZ
-DNNFDTl7YVVcazazRQ1cElrNJN0QmOvPk+t67MYAAvuq83jxvlhhS3MTrGfkvC3i
-gIpatqQsv7JETn/M+wdu9NW1Tsiavy7/MJl+WEqjJTCeuynPxuNxM2RjGLwnmO8D
-KTiK88VxuvQbK+knMtsGUzjq/ezpeZCgU0m0WCsHoKQ8krm3lv8tJRdz+vFuzMBw
-wcBSoLmH+nmBc7EZHl7MZLuFPM0LaRINAIYwKIItZhl3qfOHLUZH9roXX9VRY1UF
-eWYTATOwwTBeIKf+5v7wdSetQF+o5uCWW2pC3QFBfdlb1NVsq4cZ4a8NEkpN9PSN
-ZaGif9YmGx8H2q2MljaLvmKnV1SQg8WtYYHzp6PbsMNkK4jC8fqpVsRznTWCPXOB
-6sFtXUh5xtg=
-=bgZU
------END PGP SIGNATURE-----
-
---=-XHPX6qtXCJCj2Aog5uOA--
-
+thanks,
+  Roland
