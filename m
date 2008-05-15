@@ -1,98 +1,53 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: sparse context warning problem ...
-Date: Wed, 14 May 2008 16:06:16 +0200
-Message-ID: <1210773976.29705.4.camel@johannes.berg>
-References: <200805101724.04014.david-b@pacbell.net>
-	 <1210466447.3646.3.camel@johannes.berg>
-	 <1210715568.4279.35.camel@johannes.berg>
-	 <200805140658.04018.david-b@pacbell.net>
+From: Roland Dreier <rdreier@cisco.com>
+Subject: Sparse annotation for "context imbalance" false positives?
+Date: Wed, 14 May 2008 20:16:39 -0700
+Message-ID: <adaod78fe94.fsf@cisco.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-3zVv46mVq0qPjyqVP5w5"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:36560 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751413AbYENOHQ (ORCPT
+Received: from sj-iport-6.cisco.com ([171.71.176.117]:47151 "EHLO
+	sj-iport-6.cisco.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753940AbYEODQk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 14 May 2008 10:07:16 -0400
-In-Reply-To: <200805140658.04018.david-b@pacbell.net>
+	Wed, 14 May 2008 23:16:40 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Brownell <david-b@pacbell.net>
-Cc: linux-sparse@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
+Now that I've gotten the sparse noise in drivers/infiniband down to a
+fairly low level, I'm starting to look at some of the more recalcitrant
+false positive warnings.  One example is:
 
---=-3zVv46mVq0qPjyqVP5w5
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+    drivers/infiniband/hw/mlx4/qp.c:605:2: warning: context imbalance in 'mlx4_ib_lock_cqs' - wrong count at exit
 
+where the function being warned about is:
 
-> I used the OHCI example because it was a clear and readily
-> available/reproducible example of how this is a regression;
-> but I came across the problem with a different driver.  In
-> that driver, I just made sure that the strings were now
-> identical ... and the failures still came up with "sparse".
->=20
-> That's on a UP build.  (Albeit with PREEMPT and all the
-> debug options available ... since I'm debugging!)
+	static void mlx4_ib_lock_cqs(struct mlx4_ib_cq *send_cq, struct mlx4_ib_cq *recv_cq)
+	{
+		if (send_cq == recv_cq)
+			spin_lock_irq(&send_cq->lock);
+		else if (send_cq->mcq.cqn < recv_cq->mcq.cqn) {
+			spin_lock_irq(&send_cq->lock);
+			spin_lock_nested(&recv_cq->lock, SINGLE_DEPTH_NESTING);
+		} else {
+			spin_lock_irq(&recv_cq->lock);
+			spin_lock_nested(&send_cq->lock, SINGLE_DEPTH_NESTING);
+		}
+	}
 
-I guess you get the spinlock_api_up.h version when building w/o SMP and
-w/o CONFIG_DEBUG_SPINLOCK, but it doesn't really matter. The mismatch is
-there one way or another.
+this function wraps up the locking rules for aquiring the completion
+queue (CQ) locks associated with a queue pair (QP) -- the rule is that
+if both the send and receive CQs are the same object, we (obviously)
+only lock it once, otherwise we take the lock belonging to the CQ with a
+numerically lower ID first (to avoid AB-BA deadlocks).
 
-> Yeah, well the lock being acquired or released *IS* "ohci->lock",
-> but the spinlock calls don't take the lock, they take pointers
-> to it!
->=20
-> If you were to argue that understanding pointers like that is a
-> lot to demand of "sparse", I might agree.  But that won't change
-> the fact that locks themselves are not pointers to locks.  ;)
+So obviously is it correct and intended that this function return
+holding one or two locks, but I don't know how to tell sparse that.
+I've tried messing around with __acquires() etc but it doesn't seem to
+be exactly what I want.
 
-Well, yes, but for purposes of comparing the expression it would be a
-lot simpler to change the code since otherwise sparse would have to be
-aware of whether a function takes a pointer to a lock or not. I don't
-see why one couldn't use the context tracking stuff for something not
-passed via pointers when the callee doesn't need to take/modify the
-context.
+Is there any way to tell sparse what's going on here, or do I just live
+with the warnings?
 
-> > Ultimately, this whole problem comes from the fact that sparse accepted
-> > adding an expression, documented it, but never complained if they
-> > slightly mismatched as above.
->=20
-> This still doesn't quite add up, though...
-
-?
-
-Take this to an old sparse:
-
-__acquire(FOO);
-__release(BAR);
-
-and it will not complain about a context violation. My patches attempt
-to change that, with fallouts.
-
-johannes
-
---=-3zVv46mVq0qPjyqVP5w5
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
-
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
-
-iQIVAwUASCrx1qVg1VMiehFYAQJTKw//a2dw2+PIcR3T22eqoDXWOZfopHT2sHam
-eh8hTr0e0fAJOhRDA4MnET3w8EYsAOG5uzyVeX/nb/Dy0w4SsCH7vbgoBl4VsRgF
-7J6JlHY75/2Guq0KDe2NEdCbF8ima7jLbo3+JODQOcxSh+TQ04huwkvTYL74Nmnp
-PE1hqzXDQvklvxB997lE0juZV2/RWIoo+fto6tp9BmRdQz6lYFDRPZQmVnW6cP42
-s/A2n/11rImuLw3QljGIe7Ln9BXVLMkemAoesnTBWB5ueWPtgVwoWFgneck5uCRb
-7mw0dAemTaf2TwQs2Wm9o/sYaZkh66StuCDb4UAqjVbWyduIddAeSlQeVyL6qQTy
-KfLYrFr796zqv5/+UEl9955CVmX6lWLN9P+eKktU7xvYQ/BmmkTgMVabn5GG+xfQ
-FjYLZvpnmb7+u0bG/UzqA2An0OOfCUuXROXfPeyaX8DMEBc0M/aETHk/q5g24nDo
-VjPC4pz8GJITxKWRjHFgWdNxQFCiNNRRqAr2V64WYrgiH9+iu//jO8l/Ud5SxWRm
-vA3xU+4HdX07Cd+NPVHeAk4eGmc2g1rsV7ukGx3u+UPU9yTszDcs7BmnxKCLEuEv
-rIuc+7zd20ULNJ/fNtCYO8793dMo1fV9U4oPvWU7hrwafN9oHj81nLpxJfRHUD15
-updysthdiig=
-=umZm
------END PGP SIGNATURE-----
-
---=-3zVv46mVq0qPjyqVP5w5--
-
+Thanks,
+  Roland
