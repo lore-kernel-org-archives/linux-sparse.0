@@ -1,56 +1,48 @@
 From: Vegard Nossum <vegard.nossum@gmail.com>
-Subject: [PATCH] Set *tree to NULL on error
-Date: Sun, 25 May 2008 10:35:00 +0200
-Message-ID: <20080525083500.GA4158@damson.getinternet.no>
+Subject: Memory corruption with long filenames
+Date: Sun, 25 May 2008 13:21:21 +0200
+Message-ID: <20080525112121.GA15577@damson.getinternet.no>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nf-out-0910.google.com ([64.233.182.188]:41086 "EHLO
+Received: from nf-out-0910.google.com ([64.233.182.185]:47274 "EHLO
 	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752919AbYEYIfH (ORCPT
+	with ESMTP id S1752512AbYEYLV1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 25 May 2008 04:35:07 -0400
-Received: by nf-out-0910.google.com with SMTP id d3so683176nfc.21
-        for <linux-sparse@vger.kernel.org>; Sun, 25 May 2008 01:35:04 -0700 (PDT)
+	Sun, 25 May 2008 07:21:27 -0400
+Received: by nf-out-0910.google.com with SMTP id d3so696605nfc.21
+        for <linux-sparse@vger.kernel.org>; Sun, 25 May 2008 04:21:25 -0700 (PDT)
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-From: Vegard Nossum <vegardno@ifi.uio.no>
-Date: Sun, 25 May 2008 10:29:19 +0200
-Subject: [PATCH] Set *tree to NULL on error
+Hi,
 
-On "Syntax error in unary expression", the output parameter "tree" would be left
-uninitialized and subsequently used in unary_expression(), leading to segfault.
+Running sparse with this single line as the input file:
 
-Caught by valgrind and fixed by me ;-)
+#include "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 
-Signed-off-by: Vegard Nossum <vegardno@ifi.uio.no>
----
- expression.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+(yes, that's exactly 257 "x"es)
 
-diff --git a/expression.c b/expression.c
-index 289927a..f634b07 100644
---- a/expression.c
-+++ b/expression.c
-@@ -654,6 +654,7 @@ static struct token *unary_expression(struct token *token, struct expression **t
- 			next = cast_expression(token->next, &unop);
- 			if (!unop) {
- 				sparse_error(token->pos, "Syntax error in unary expression");
-+				*tree = NULL;
- 				return next;
- 			}
- 			unary = alloc_expression(token->pos, EXPR_PREOP);
-@@ -671,6 +672,7 @@ static struct token *unary_expression(struct token *token, struct expression **t
- 			next = cast_expression(token->next, &unop);
- 			if (!unop) {
- 				sparse_error(token->pos, "Syntax error in unary expression");
-+				*tree = NULL;
- 				return next;
- 			}
- 			unary = alloc_expression(token->pos, EXPR_PREOP);
--- 
-1.5.4.1
+gives me this peculiar message:
 
+crash.c:1:10: error: unable to open 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/usr/lib/gcc/i386-redhat-linux/4.1.2/include/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/'
+
+Running it under valgrind gives a bit more info:
+
+==15582== Source and destination overlap in memcpy(0x80A1BC0, 0x80A1AC0, 257)
+==15582==    at 0x4024116: memcpy (mc_replace_strmem.c:116)
+==15582==    by 0x8078E07: try_include (pre-process.c:713)
+==15582==    by 0x807B6F7: handle_include_path (pre-process.c:732)
+==15582==    by 0x807A476: preprocess (pre-process.c:1682)
+==15582==    by 0x804EB70: sparse_tokenstream (lib.c:751)
+==15582==    by 0x804FC1D: sparse (lib.c:878)
+==15582==    by 0x804A613: main (sparse.c:606)
+
+But I don't know how to best fix this, so I'm simply posting the report here.
+
+Thanks :-)
+
+
+Vegard
