@@ -1,55 +1,72 @@
-From: Pavel Roskin <proski@gnu.org>
+From: "Anderson Lizardo" <anderson.lizardo@gmail.com>
 Subject: Re: spyparse - sparse reimplemented in Python
-Date: Sun, 01 Jun 2008 16:33:34 -0400
-Message-ID: <1212352414.2727.16.camel@dv>
+Date: Sun, 1 Jun 2008 19:24:24 -0400
+Message-ID: <5b5833aa0806011624o6c08f241vd51020fd298dcbb2@mail.gmail.com>
 References: <5b5833aa0805301739o6ceb14a6ha84271b938ee70ed@mail.gmail.com>
+	 <1212352414.2727.16.camel@dv>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: base64
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:55762 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751494AbYFAUdg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 1 Jun 2008 16:33:36 -0400
-In-Reply-To: <5b5833aa0805301739o6ceb14a6ha84271b938ee70ed@mail.gmail.com>
+Received: from fg-out-1718.google.com ([72.14.220.153]:58860 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752487AbYFAXY2 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 1 Jun 2008 19:24:28 -0400
+Received: by fg-out-1718.google.com with SMTP id 19so596917fgg.17
+        for <linux-sparse@vger.kernel.org>; Sun, 01 Jun 2008 16:24:24 -0700 (PDT)
+In-Reply-To: <1212352414.2727.16.camel@dv>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Anderson Lizardo <anderson.lizardo@gmail.com>
+To: Pavel Roskin <proski@gnu.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2008-05-30 at 20:39 -0400, Anderson Lizardo wrote:
-
-> Some notes:
->=20
-> - I decided to take a more pragmatic approach and start implementing
-> only those functions necessary for writing a test-*.c like backend
-> - For now I'm just doing a plain manual translation of the sparse C
-> code to Python, thus forcing me to read the entire sparse code (which
-> IMHO is a good thing for achieving reason (2))
-
-=EF=BB=BFI'm surprised that you decided to relicense your work under GP=
-Lv2.
-Even though you are rewriting the code, it's still possible to argue
-that the original authors have rights to the code.
-
-It may be safer to use the original license, or you should make sure
-that the copyright holders are fine with what you are doing.
-
-> - Along the way I'm rewriting some code to become more OO-friendly
-> (with classes, methods etc.), therefore while the code is not finishe=
-d
-> you will see a lot of mixed procedural and OO code
-
-I think it's a good idea, because sparse should be flexible.  It should
-be possible to change it for different coding standards.  A python
-implementation would be good, but it would also help if you provide
-detailed comments in the code.
-
---=20
-Regards,
-Pavel Roskin
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+T24gU3VuLCBKdW4gMSwgMjAwOCBhdCA0OjMzIFBNLCBQYXZlbCBSb3NraW4gPHByb3NraUBnbnUu
+b3JnPiB3cm90ZToKPiBPbiBGcmksIDIwMDgtMDUtMzAgYXQgMjA6MzkgLTA0MDAsIEFuZGVyc29u
+IExpemFyZG8gd3JvdGU6Cj4KPj4gU29tZSBub3RlczoKPj4KPj4gLSBJIGRlY2lkZWQgdG8gdGFr
+ZSBhIG1vcmUgcHJhZ21hdGljIGFwcHJvYWNoIGFuZCBzdGFydCBpbXBsZW1lbnRpbmcKPj4gb25s
+eSB0aG9zZSBmdW5jdGlvbnMgbmVjZXNzYXJ5IGZvciB3cml0aW5nIGEgdGVzdC0qLmMgbGlrZSBi
+YWNrZW5kCj4+IC0gRm9yIG5vdyBJJ20ganVzdCBkb2luZyBhIHBsYWluIG1hbnVhbCB0cmFuc2xh
+dGlvbiBvZiB0aGUgc3BhcnNlIEMKPj4gY29kZSB0byBQeXRob24sIHRodXMgZm9yY2luZyBtZSB0
+byByZWFkIHRoZSBlbnRpcmUgc3BhcnNlIGNvZGUgKHdoaWNoCj4+IElNSE8gaXMgYSBnb29kIHRo
+aW5nIGZvciBhY2hpZXZpbmcgcmVhc29uICgyKSkKPgo+IO+7v0knbSBzdXJwcmlzZWQgdGhhdCB5
+b3UgZGVjaWRlZCB0byByZWxpY2Vuc2UgeW91ciB3b3JrIHVuZGVyIEdQTHYyLgo+IEV2ZW4gdGhv
+dWdoIHlvdSBhcmUgcmV3cml0aW5nIHRoZSBjb2RlLCBpdCdzIHN0aWxsIHBvc3NpYmxlIHRvIGFy
+Z3VlCj4gdGhhdCB0aGUgb3JpZ2luYWwgYXV0aG9ycyBoYXZlIHJpZ2h0cyB0byB0aGUgY29kZS4K
+Pgo+IEl0IG1heSBiZSBzYWZlciB0byB1c2UgdGhlIG9yaWdpbmFsIGxpY2Vuc2UsIG9yIHlvdSBz
+aG91bGQgbWFrZSBzdXJlCj4gdGhhdCB0aGUgY29weXJpZ2h0IGhvbGRlcnMgYXJlIGZpbmUgd2l0
+aCB3aGF0IHlvdSBhcmUgZG9pbmcuCgpJQU5BTCwgYnV0IEkgaGFkIHRoZSBpbXByZXNzaW9uIHRo
+YXQgYSBjb3B5cmlnaHQgaXMgYXBwbGllZCB0byB0aGUKc3BlY2lmaWMgaW1wbGVtZW50YXRpb24g
+b2YgdGhlIHdvcmsgKGFuZCBkZXJpdmF0aXZlIHdvcmtzLCBzdWNoIGFzCmV4dGVuc2lvbnMgb3Ig
+bW9kaWZpY2F0aW9ucyB0byB0aGUgb3JpZ2luYWwgY29kZSkgaXRzZWxmIGFuZCBub3QgdG8KdGhl
+IGFsZ29yaXRobS4gSSBwcmVzdW1lIG15IGNvZGUgaXMgbm90IGEgImRlcml2ZWQgd29yayIgZnJv
+bSB0aGUKc3BhcnNlIGNvZGUsIGV2ZW4gdGhvdWdoIEkgY2xhaW0gSSdtICJtYW51YWxseSB0cmFu
+c2xhdGluZyIgdG8gcHl0aG9uCnNvbWUgcGFydHMgb2YgaXQuIFVuZm9ydGFuZWx5IHRoZSAiVGhl
+IE9wZW4gU29mdHdhcmUgTGljZW5zZSIgZG9lcyBub3QKZXZlbiBkZXNjcmliZSB3aGF0IGNvbnNp
+c3RzIGEgImRlcml2YXRpdmUgd29yayIuCgpUaGF0IHNhaWQsIEknZCBsaWtlIHRvIGhlYXIgZnJv
+bSBzb21lIGNvcHlyaWdodCBob2xkZXJzIGFib3V0IHRoaXMKaXNzdWUuIEkgaGF2ZSBwbGFucyB0
+byB1c2UgbXkgY29kZSB3aXRoIGZ1dHVyZSBwcm9qZWN0cyB0aGF0IEknbSBzdXJlCkknbGwgbm90
+IHVzZSBPU0wsIGFuZCByZWFkaW5nIGZyb20KaHR0cDovL3d3dy5mc2Yub3JnL2xpY2Vuc2luZy9s
+aWNlbnNlcy8gSSBjYW4gc2VlIHRoZSBPU0wgbGljZW5zZSBpcwpHUEwtaW1jb21wYXRpYmxlLgoK
+Pj4gLSBBbG9uZyB0aGUgd2F5IEknbSByZXdyaXRpbmcgc29tZSBjb2RlIHRvIGJlY29tZSBtb3Jl
+IE9PLWZyaWVuZGx5Cj4+ICh3aXRoIGNsYXNzZXMsIG1ldGhvZHMgZXRjLiksIHRoZXJlZm9yZSB3
+aGlsZSB0aGUgY29kZSBpcyBub3QgZmluaXNoZWQKPj4geW91IHdpbGwgc2VlIGEgbG90IG9mIG1p
+eGVkIHByb2NlZHVyYWwgYW5kIE9PIGNvZGUKPgo+IEkgdGhpbmsgaXQncyBhIGdvb2QgaWRlYSwg
+YmVjYXVzZSBzcGFyc2Ugc2hvdWxkIGJlIGZsZXhpYmxlLiAgSXQgc2hvdWxkCj4gYmUgcG9zc2li
+bGUgdG8gY2hhbmdlIGl0IGZvciBkaWZmZXJlbnQgY29kaW5nIHN0YW5kYXJkcy4gIEEgcHl0aG9u
+Cj4gaW1wbGVtZW50YXRpb24gd291bGQgYmUgZ29vZCwgYnV0IGl0IHdvdWxkIGFsc28gaGVscCBp
+ZiB5b3UgcHJvdmlkZQo+IGRldGFpbGVkIGNvbW1lbnRzIGluIHRoZSBjb2RlLgoKV2lsbCBkby4g
+QnV0IGFzIEkgc2FpZCwgSSBqdXN0IHN0YXJ0ZWQgY29kaW5nIGl0IHRocmVlIGRheXMgYWdvLCBz
+bwpjb25zaWRlciB0aGUgY29kZSBpbiB2ZXJ5IGJhZCBzaGFwZSByaWdodCBub3cuIElmIEkgaGFk
+IGRlY2lkZWQgdG8KcHVibGlzaCB0aGUgY29kZSBvbmx5IGxhdGVyLCBmb3Igc3VyZSBpdCB3b3Vs
+ZCBiZSBiZXR0ZXIgY29tbWVudGVkLApidXQgdGhlbiBJJ2QgbG9zZSBlYXJseSBjb21tZW50cyBh
+cyB5b3VycyAod2hpY2gsIHNwZWNpYWxseSBmb3IgdGhlCmxpY2Vuc2UgaXNzdWUsIGlzIHZlcnkg
+aW1wb3J0YW50KS4KCkJUVyBzb21lIGNvbW1lbnRzIGFyZSBiZWluZyBwdXJwb3NlZGx5IG9tbWl0
+ZWQgZnJvbSB0aGUgcHl0aG9uIGNvZGUKYmVjYXVzZSBpdCBmaXRzIGJldHRlciBhcyBhIGRlc2Ny
+aXB0aW9uIGFib3ZlIHRoZSBmdW5jdGlvbiBkZWZpbml0aW9uCmFuZCBub3Qgb24gdGhlIGNhbGxz
+LiBFLmcuOgoKCS8vIFRva2VuaXplIHRoZSBpbnB1dCBzdHJlYW0KCXRva2VuID0gdG9rZW5pemUo
+ZmlsZW5hbWUsIGZkLCBOVUxMLCBpbmNsdWRlcGF0aCk7CgpCdXQgSSdkIGxpa2UgdG8gZmlyc3Qg
+Z2V0IG1vcmUgZmFtaWxpYXIgd2l0aCB0aGUgc3BhcnNlIGNvZGUgYW5kIHRoZW4Kc3RhcnQgYWRk
+aW5nIGRldGFpbGVkIGNvbW1lbnRzIHRvIHRoZSBmdW5jdGlvbiBkZWZpbml0aW9ucy4KClRoYW5r
+cyBmb3IgdGhlIGNvbW1lbnRzLiBSZWdhcmRzLAotLSAKQW5kZXJzb24gTGl6YXJkbwo=
