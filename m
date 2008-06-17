@@ -1,66 +1,101 @@
-From: "Christopher Li" <sparse@chrisli.org>
+From: David Given <dg@cowlark.com>
 Subject: Re: Writing compilers, and example.c vs compile-i386.c
-Date: Mon, 16 Jun 2008 17:49:24 -0700
-Message-ID: <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>
-References: <4856F196.8020403@cowlark.com>
+Date: Wed, 18 Jun 2008 00:35:15 +0100
+Message-ID: <48584A33.7080602@cowlark.com>
+References: <4856F196.8020403@cowlark.com> <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig5D0C2A86F796072433AC381B"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from yw-out-2324.google.com ([74.125.46.31]:59717 "EHLO
-	yw-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750956AbYFQAtZ (ORCPT
+Received: from a.painless.aaisp.net.uk ([81.187.30.51]:54970 "EHLO
+	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755052AbYFQXf0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Jun 2008 20:49:25 -0400
-Received: by yw-out-2324.google.com with SMTP id 9so3273693ywe.1
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Jun 2008 17:49:24 -0700 (PDT)
-In-Reply-To: <4856F196.8020403@cowlark.com>
-Content-Disposition: inline
+	Tue, 17 Jun 2008 19:35:26 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1K8kiP-0001FM-KG
+	for linux-sparse@vger.kernel.org; Wed, 18 Jun 2008 00:35:53 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id C73352008D
+	for <linux-sparse@vger.kernel.org>; Wed, 18 Jun 2008 00:35:21 +0100 (BST)
+In-Reply-To: <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Given <dg@cowlark.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Mon, Jun 16, 2008 at 4:04 PM, David Given <dg@cowlark.com> wrote:
-> Some basic testing with show_statement() and show_insn() reveals that
-> both approaches seem to yield similar but *different* pseudocode... with
-> different SSA phi functions. What's the difference between the two, and
-> do you have any suggestions as to which approach I should look at?
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig5D0C2A86F796072433AC381B
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-I would strongly recommend using the example.c rather than compile-i386.c.
-If you want to do any thing interesting with the back end at all, using
-the linearize byte code is the way to go.
+Mike Frysinger wrote:
+> this may be worth investigating as well:
+> http://pcc.ludd.ltu.se/
 
-> In addition, I'm afraid I'm going to have to use the D word... has
-> anyone written down anything about how all this stuff works? I'm afraid
-> it's rather a large mass of code to try and absorb in one go, and any
-> overview information would help me considerably. For example: if I put
-> together a noddy program that enumerates basic blocks (the example.c
-> approach) I see phi functions. Calling unssa() doesn't seem to help.
-> However, inserting instrumentation into example.c indicates that it
-> *doesn't* see phi functions (as far as I can tell). There's something
-> I'm simply not getting here --- does the removal of phis actually happen
-> inside the register allocator (which seems like the intuitive place for
-> it), and if so, what does unssa() actually do?
+That was actually where I started; it works pretty well, though after a
+couple of hours of examining the code I realised that there was a good
+reason why it looked like code that had been written 25 years ago and
+then randomly hacked ever since. It's a little opaque, which is why I
+ended up here.
 
-I haven't use the unssa() myself. It seems unssa() just replace the
-phisrc instruction to a copy instruction. Let the source copy to a
-temp register. Then on phi instruction it just copy that temp register
-back to the phi node register.
+Christopher Li wrote:
+[...]
+> I would strongly recommend using the example.c rather than compile-i386=
+=2Ec.
+> If you want to do any thing interesting with the back end at all, using=
 
-The phi node is replaces with copy instruction inside unssa().
-In the real machine code, the copy instruction can emit as "mov"
-instruction.
+> the linearize byte code is the way to go.
 
-As for linearize instructions. They are the internal representation
-of the compiled program. In this representation, there is unlimited
-pseudo register. Each pseudo is define in only one instruction. except
-"OP_COPY" in the unssa().
+Yes, that's what I suspected --- being the more complicated file! Oh,
+well, I've been examining it, and it's slow beginning to make sense.
 
-Each function entry point has a list of basic blocks and each basic block
-has a list of instructions. Most instruction is pretty straight for what
-it does.
+However: I notice that the code seems to make use of OP_DEATHNOTE
+instructions to mark hardregs as being dead. However, these are only
+generated if track_pseudo_death(ep) is called --- and example.c never
+calls this. It *is*, however, called if -vdead is specified on the
+command line. Is this a bug in example.c or am I just misunderstanding
+things?
 
-BTW, if you don't mind coding in C++, you can take a look at LLVM.
+(Also, the OP_DEATHNOTE instructions appear to occur *before* the
+instruction that uses them last --- is this so that the instruction can
+reuse the register is the code generator sees fit to do so?)
 
-Chris
+(In addition, I notice that once liveness tracking has been done phisrc
+nodes get annotated with the desired shared register that the phi should
+occupy; suddenly, the phi stuff all makes sense.)
+
+
+
+(PS. Please don't cc me if you're also mailing the list --- I only need
+one copy!)
+
+--=20
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
+=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
+cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82 "I have always wished for my computer to be as easy to use as m=
+y
+=E2=94=82 telephone; my wish has come true because I can no longer figure=
+ out
+=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
+
+
+--------------enig5D0C2A86F796072433AC381B
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFIWEo1f9E0noFvlzgRAi5ZAKCr1QyY71KAZiEf7TaR82tKyVt+YwCgt7Cu
+s2/QORrMkFdwOry3vX3AGEc=
+=kufV
+-----END PGP SIGNATURE-----
+
+--------------enig5D0C2A86F796072433AC381B--
