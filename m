@@ -1,67 +1,70 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: Writing compilers, and example.c vs compile-i386.c
-Date: Tue, 17 Jun 2008 17:41:40 -0700
-Message-ID: <70318cbf0806171741g4d099e92vf0c0e9d7588fd7d6@mail.gmail.com>
-References: <4856F196.8020403@cowlark.com>
-	 <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>
-	 <48584A33.7080602@cowlark.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Re: [PATCH] ignore __cold__ attribute
+Date: Thu, 19 Jun 2008 01:04:55 -0400
+Message-ID: <1213851895.2405.2.camel@dv>
+References: <1208860883.31429.8.camel@johannes.berg>
+	 <20080422090739.2izftuclwocs80o4-cebfxv@fcnzpbc.arg@webmail.spamcop.net>
+	 <1208870706.31429.23.camel@johannes.berg> <1208900131.22856.4.camel@dv>
+	 <4811413E.1080103@freedesktop.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from yw-out-2324.google.com ([74.125.46.29]:18816 "EHLO
-	yw-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757480AbYFRAll (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jun 2008 20:41:41 -0400
-Received: by yw-out-2324.google.com with SMTP id 9so7546ywe.1
-        for <linux-sparse@vger.kernel.org>; Tue, 17 Jun 2008 17:41:40 -0700 (PDT)
-In-Reply-To: <48584A33.7080602@cowlark.com>
-Content-Disposition: inline
+Received: from c60.cesmail.net ([216.154.195.49]:64567 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751251AbYFSFE6 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 19 Jun 2008 01:04:58 -0400
+In-Reply-To: <4811413E.1080103@freedesktop.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@freedesktop.org>
+Cc: linux-sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jun 17, 2008 at 4:35 PM, David Given <dg@cowlark.com> wrote:
+On Thu, 2008-04-24 at 19:26 -0700, Josh Triplett wrote:
+> Pavel Roskin wrote:
+> > On Tue, 2008-04-22 at 15:25 +0200, Johannes Berg wrote:
+> >> *Shrug*. I just wanted the kernel to work again and failed (in about 20
+> >> minutes of searching) to find a changelog for gcc mentioning this so
+> >> gave up and just added the one that the kernel uses. Want to amend the
+> >> patch?
+> > 
+> > I think this would be better.  Now sparse would ignore both "cold" and
+> > "hot", both with and without underscores.  They are also added to
+> > ident-list.h.
+> > 
+> > diff --git a/ident-list.h b/ident-list.h
+> > index 8fcd7de..6104826 100644
+> > --- a/ident-list.h
+> > +++ b/ident-list.h
+> > @@ -74,6 +74,8 @@ IDENT(__malloc__);
+> >  IDENT(nonnull); IDENT(__nonnull); IDENT(__nonnull__);
+> >  IDENT(constructor); IDENT(__constructor__);
+> >  IDENT(destructor); IDENT(__destructor__);
+> > +IDENT(cold); IDENT(__cold__);
+> > +IDENT(hot); IDENT(__hot__);
+> >  IDENT(cdecl); IDENT(__cdecl__);
+> >  IDENT(stdcall); IDENT(__stdcall__);
+> >  IDENT(fastcall); IDENT(__fastcall__);
+> > diff --git a/parse.c b/parse.c
+> > index 137ba77..877414c 100644
+> > --- a/parse.c
+> > +++ b/parse.c
+> > @@ -353,6 +353,10 @@ static struct init_keyword {
+> >  	{ "__constructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
+> >  	{ "destructor",	NS_KEYWORD,	.op = &ignore_attr_op },
+> >  	{ "__destructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
+> > +	{ "cold",	NS_KEYWORD,	.op = &ignore_attr_op },
+> > +	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
+> > +	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
+> > +	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
+> >  };
+> 
+> Looks good to me.  Could I get a signoff and commit message please?
 
-> Christopher Li wrote:
-> However: I notice that the code seems to make use of OP_DEATHNOTE
-> instructions to mark hardregs as being dead. However, these are only
-> generated if track_pseudo_death(ep) is called --- and example.c never
-> calls this. It *is*, however, called if -vdead is specified on the
-> command line. Is this a bug in example.c or am I just misunderstanding
-> things?
+Signed-off-by: Pavel Roskin <proski@gnu.org>
 
-You understands it correctly. The example.c should call track_pseudo_death(ep).
-It is a bug that I disable the dead node by default and forget to enable it for
-example.c. For normal checking, death node is not needed, and if it is needed,
-you can always generates it.
+Sorry for delay.  I thought I answered it already.
 
-We should add the death node back for example.c. Patches are welcome
-as well.
-
-BTW, you shouldn't take example.c too seriously per Linus' suggestion.
-
-> (Also, the OP_DEATHNOTE instructions appear to occur *before* the
-> instruction that uses them last --- is this so that the instruction can
-> reuse the register is the code generator sees fit to do so?)
-
-I think so, it just let the code generator know that they don't need to preserve
-that register any more for the next instruction they emit. It is a very naive
-register allocations any way. Feel free to roll your own if you see fits.
-
-> (In addition, I notice that once liveness tracking has been done phisrc
-> nodes get annotated with the desired shared register that the phi should
-> occupy; suddenly, the phi stuff all makes sense.)
-
-Glad to hear that.
-
-
-> (PS. Please don't cc me if you're also mailing the list --- I only need
-> one copy!)
-
-You mean your email client is not smart enough to realize that is the
-same email :-)  I prefer to get CC directly to get a sense of being part of
-the discussion. My email will filter differently if I am directly addressed.
-
-Chris
+-- 
+Regards,
+Pavel Roskin
