@@ -1,69 +1,61 @@
 From: Pavel Roskin <proski@gnu.org>
-Subject: Re: [PATCH] ignore __cold__ attribute
-Date: Thu, 19 Jun 2008 01:04:55 -0400
-Message-ID: <1213851895.2405.2.camel@dv>
-References: <1208860883.31429.8.camel@johannes.berg>
-	 <20080422090739.2izftuclwocs80o4-cebfxv@fcnzpbc.arg@webmail.spamcop.net>
-	 <1208870706.31429.23.camel@johannes.berg> <1208900131.22856.4.camel@dv>
-	 <4811413E.1080103@freedesktop.org>
+Subject: [RFC PATCH] Make "bad constant expression" a warning, not an error
+Date: Fri, 20 Jun 2008 11:08:28 -0400
+Message-ID: <1213974508.18379.2.camel@dv>
 Mime-Version: 1.0
 Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:64567 "EHLO c60.cesmail.net"
+Received: from c60.cesmail.net ([216.154.195.49]:55031 "EHLO c60.cesmail.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751251AbYFSFE6 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Jun 2008 01:04:58 -0400
-In-Reply-To: <4811413E.1080103@freedesktop.org>
+	id S1755812AbYFTPIb (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 20 Jun 2008 11:08:31 -0400
+Received: from [192.168.0.21] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
+	by relay.cesmail.net (Postfix) with ESMTP id E80CC618F22
+	for <linux-sparse@vger.kernel.org>; Fri, 20 Jun 2008 11:08:29 -0400 (EDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: linux-sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Thu, 2008-04-24 at 19:26 -0700, Josh Triplett wrote:
-> Pavel Roskin wrote:
-> > On Tue, 2008-04-22 at 15:25 +0200, Johannes Berg wrote:
-> >> *Shrug*. I just wanted the kernel to work again and failed (in about 20
-> >> minutes of searching) to find a changelog for gcc mentioning this so
-> >> gave up and just added the one that the kernel uses. Want to amend the
-> >> patch?
-> > 
-> > I think this would be better.  Now sparse would ignore both "cold" and
-> > "hot", both with and without underscores.  They are also added to
-> > ident-list.h.
-> > 
-> > diff --git a/ident-list.h b/ident-list.h
-> > index 8fcd7de..6104826 100644
-> > --- a/ident-list.h
-> > +++ b/ident-list.h
-> > @@ -74,6 +74,8 @@ IDENT(__malloc__);
-> >  IDENT(nonnull); IDENT(__nonnull); IDENT(__nonnull__);
-> >  IDENT(constructor); IDENT(__constructor__);
-> >  IDENT(destructor); IDENT(__destructor__);
-> > +IDENT(cold); IDENT(__cold__);
-> > +IDENT(hot); IDENT(__hot__);
-> >  IDENT(cdecl); IDENT(__cdecl__);
-> >  IDENT(stdcall); IDENT(__stdcall__);
-> >  IDENT(fastcall); IDENT(__fastcall__);
-> > diff --git a/parse.c b/parse.c
-> > index 137ba77..877414c 100644
-> > --- a/parse.c
-> > +++ b/parse.c
-> > @@ -353,6 +353,10 @@ static struct init_keyword {
-> >  	{ "__constructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
-> >  	{ "destructor",	NS_KEYWORD,	.op = &ignore_attr_op },
-> >  	{ "__destructor__",	NS_KEYWORD,	.op = &ignore_attr_op },
-> > +	{ "cold",	NS_KEYWORD,	.op = &ignore_attr_op },
-> > +	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
-> > +	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
-> > +	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
-> >  };
-> 
-> Looks good to me.  Could I get a signoff and commit message please?
+Do the same to "bad integer constant expression".  It's still possible
+to continue parsing the code if those are not constant.  To be on the
+safe side, assume the actual value to be the largest value for the
+type.
+---
 
-Signed-off-by: Pavel Roskin <proski@gnu.org>
+ expand.c |   12 +++++++-----
+ 1 files changed, 7 insertions(+), 5 deletions(-)
 
-Sorry for delay.  I thought I answered it already.
+diff --git a/expand.c b/expand.c
+index 032f0c5..12a8989 100644
+--- a/expand.c
++++ b/expand.c
+@@ -1201,18 +1201,20 @@ static long long __get_expression_value(struct expression *expr, int strict)
+ 		expression_error(expr, "bad constant expression type");
+ 		return 0;
+ 	}
++
++	mask = 1ULL << (ctype->bit_size-1);
++
+ 	expand_expression(expr);
+ 	if (expr->type != EXPR_VALUE) {
+-		expression_error(expr, "bad constant expression");
+-		return 0;
++		warning(expr->pos, "bad constant expression");
++		return mask;
+ 	}
+ 	if (strict && bad_integer_constant_expression(expr)) {
+-		expression_error(expr, "bad integer constant expression");
+-		return 0;
++		warning(expr->pos, "bad integer constant expression");
++		return mask;
+ 	}
+ 
+ 	value = expr->value;
+-	mask = 1ULL << (ctype->bit_size-1);
+ 
+ 	if (value & mask) {
+ 		while (ctype->type != SYM_BASETYPE)
 
 -- 
 Regards,
