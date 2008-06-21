@@ -1,99 +1,76 @@
-From: David Given <dg@cowlark.com>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: Writing compilers, and example.c vs compile-i386.c
-Date: Sat, 21 Jun 2008 00:46:24 +0100
-Message-ID: <485C4150.2080508@cowlark.com>
-References: <4856F196.8020403@cowlark.com>	 <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>	 <48584A33.7080602@cowlark.com> <70318cbf0806171741g4d099e92vf0c0e9d7588fd7d6@mail.gmail.com>
+Date: Fri, 20 Jun 2008 18:40:14 -0700
+Message-ID: <70318cbf0806201840k18a51f94rcaa413b36fcfbbea@mail.gmail.com>
+References: <4856F196.8020403@cowlark.com>
+	 <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>
+	 <48584A33.7080602@cowlark.com>
+	 <70318cbf0806171741g4d099e92vf0c0e9d7588fd7d6@mail.gmail.com>
+	 <485C4150.2080508@cowlark.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig13F7119DF9D69868419A5705"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c.painless.aaisp.net.uk ([81.187.30.53]:36510 "EHLO
-	c.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756289AbYFTXqd (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.247]:55164 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752339AbYFUBkS (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Jun 2008 19:46:33 -0400
-Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by c.painless.aaisp.net.uk with esmtp (Exim 4.69)
-	(envelope-from <dg@cowlark.com>)
-	id 1K9qJK-0002FI-7u
-	for linux-sparse@vger.kernel.org; Sat, 21 Jun 2008 00:46:30 +0100
-Received: from [10.0.0.5] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id 311062008D
-	for <linux-sparse@vger.kernel.org>; Sat, 21 Jun 2008 00:46:29 +0100 (BST)
-In-Reply-To: <70318cbf0806171741g4d099e92vf0c0e9d7588fd7d6@mail.gmail.com>
+	Fri, 20 Jun 2008 21:40:18 -0400
+Received: by an-out-0708.google.com with SMTP id d40so342923and.103
+        for <linux-sparse@vger.kernel.org>; Fri, 20 Jun 2008 18:40:15 -0700 (PDT)
+In-Reply-To: <485C4150.2080508@cowlark.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: David Given <dg@cowlark.com>
+Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig13F7119DF9D69868419A5705
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Fri, Jun 20, 2008 at 4:46 PM, David Given <dg@cowlark.com> wrote:
+> - how do you determine the scalar type of a pseudo?
 
-Christopher Li wrote:
-[...]
-> BTW, you shouldn't take example.c too seriously per Linus' suggestion.
+Depend on the pseudo type. If pseudo from a symbol,
+pseudo->sym->ctype has the full type information.
 
-It does show the telltale signs of being hacked together on an
-experimental basis, but it's proving invaluable as a source for getting
-my own stuff working --- and it *is* working, I can actually generate
-more or less correct code! (Assuming you like adding numbers together,
-of course.) The register allocation algorithm example.c uses is
-extremely noddy but seems to be reasonably effective; as my
-'architecture' has a large but finite number of 'registers', all I
-really need is something to cause dead registers to be reused, for which
-this is perfectly adequate.
+If pseudo is from constant expression, pseduo->def->val
+is the constant expression. using expr->ctype to get to the ctype.
 
-(I suspect that bolting on a real register allocator ought to be very
-easy given that the code's already in SSA form. Maybe at some stage I'll
-have a look, but register allocators really aren't my strong point.)
+If pseudo is from normal instruction result, the target type is
+the same as any source type. The special case the OP_CAST
+instruction, the type is in insn->cast_type.
 
-I do, however, still have a few other queries...
+I agree we should probability make the ctype into instruction so
+make the back end easier.
 
-- how do you determine the scalar type of a pseudo?
+> - if I wish to rewrite a basic block's instruction list --- for example,
+> to decompose instructions that use a non-register pseudo into two
+> instructions --- do I need to do anything other than iterate through the
+> bb's list and insert instruction nodes? Is there any additional
+> housekeeping to do? Naturally, I'd do this *before* calling
+> track_pseudo_death()...
 
-For example, I haven't found any way yet of distinguishing between an
-int and a float. I need to generate different code for these, but there
-don't seem to be any relevant fields in pseudo_t. There isn't even
-anything in the pseudo's storage structure. The instruction sometimes
-has a size field, but these aren't unique. I may need this for other
-things than float support; for example, I may need to generate special
-pointer arithmetic code.
+If you modify instructions in a existing instruction list. Make sure you
+keep the pseudo in SSA form, including proper user list.
 
-- if I wish to rewrite a basic block's instruction list --- for example,
-to decompose instructions that use a non-register pseudo into two
-instructions --- do I need to do anything other than iterate through the
-bb's list and insert instruction nodes? Is there any additional
-housekeeping to do? Naturally, I'd do this *before* calling
-track_pseudo_death()...
+If you add basic block, you need to update the parent and child list.
 
-- what does expand_symbol() do?
+> - what does expand_symbol() do?
 
---=20
-=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
-=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
-=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
-cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
-=E2=94=82 "I have always wished for my computer to be as easy to use as m=
-y
-=E2=94=82 telephone; my wish has come true because I can no longer figure=
- out
-=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
+Well, it expand symbols. That does help does it?
 
+Sparse parsing have a few stage.
 
---------------enig13F7119DF9D69868419A5705
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+The tokenizer parse the source code and convert it into token list.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+Pre-process stage expand the macro and handle include files etc.
 
-iD8DBQFIXEFTf9E0noFvlzgRAptpAKDJYAlUTW8R5iNBBMBomm7t69xoSQCgxYX0
-Y2ItKK3FvSVWXpp4XJxPQIg=
-=dzqe
------END PGP SIGNATURE-----
+Parsing stage consume the token list and parse into AST tree.
 
---------------enig13F7119DF9D69868419A5705--
+Evaluate stage does the type propagation, pointer degenerate etc.
+
+Expand stage is mostly for some fix up. E.g. remove obvious dead code
+like "#if 0".
+The inline function get expanded in this stage.
+
+Hope that helps.
+
+Chris
