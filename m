@@ -1,59 +1,73 @@
 From: David Given <dg@cowlark.com>
-Subject: Re: Writing compilers, and example.c vs compile-i386.c
-Date: Tue, 24 Jun 2008 14:29:05 +0100
-Message-ID: <4860F6A1.7050701@cowlark.com>
-References: <4856F196.8020403@cowlark.com>	 <70318cbf0806161749u543fa338sf43a2ab787297eaa@mail.gmail.com>	 <48584A33.7080602@cowlark.com>	 <70318cbf0806171741g4d099e92vf0c0e9d7588fd7d6@mail.gmail.com>	 <485C4150.2080508@cowlark.com> <70318cbf0806201840k18a51f94rcaa413b36fcfbbea@mail.gmail.com>
+Subject: Pointer arithmetic error
+Date: Fri, 27 Jun 2008 00:40:07 +0100
+Message-ID: <486428D7.8080603@cowlark.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enig52139C2B8048953F500DCC2F"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from a.painless.aaisp.net.uk ([81.187.30.51]:48896 "EHLO
+Received: from a.painless.aaisp.net.uk ([81.187.30.51]:39143 "EHLO
 	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751254AbYFXN3W (ORCPT
+	with ESMTP id S1754638AbYFZXkO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 24 Jun 2008 09:29:22 -0400
+	Thu, 26 Jun 2008 19:40:14 -0400
 Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
 	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
 	(envelope-from <dg@cowlark.com>)
-	id 1KB8an-000675-EK
-	for linux-sparse@vger.kernel.org; Tue, 24 Jun 2008 14:29:53 +0100
-Received: from [172.22.67.145] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id 76EDB2008D
-	for <linux-sparse@vger.kernel.org>; Tue, 24 Jun 2008 14:29:17 +0100 (BST)
-In-Reply-To: <70318cbf0806201840k18a51f94rcaa413b36fcfbbea@mail.gmail.com>
+	id 1KC155-0002GD-Cx
+	for linux-sparse@vger.kernel.org; Fri, 27 Jun 2008 00:40:47 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id 1287E2008D
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 00:40:10 +0100 (BST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-[...]
-> I agree we should probability make the ctype into instruction so
-> make the back end easier.
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enig52139C2B8048953F500DCC2F
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-That would be nice; in order to find the type of a pseudo that resulted 
-from an instruction, I have to recurse back through *that* instructions' 
-operands. This seems rather heavyweight.
+I've just found what I think is a bug. In evaluate_ptr_add(), in
+evaluate.c, are the following lines:
 
-In fact, because I need to associate a fair bit of data with each 
-pseudo, I then cache the type information in the pseudo's user data 
-structure, which for now is stored in an AVL tree keyed of the pseudo's 
-address (there is no overkill; there is only 'open fire!' and 
-'reload!'). May I put in a request for a user field on every sparse data 
-structure, for doing this sort of thing, please?
+	/* Get the size of whatever the pointer points to */
+	multiply =3D base->bit_size >> 3;
 
-Which brings me to my next question: while I'm now successfully 
-compiling some code, including loops, I'm having trouble with other 
-code. In particular, it would appear that now and again a bb will export 
-a pseudo using one storage, and another bb will import the same pseudo 
-but using a *different* storage. This is making it rather hard for me to 
-correctly wire up the interconnects between basic blocks. Currently I'm 
-working around this using data stored in my user data structure 
-described above, but I suspect there's another thing here I'm not 
-getting. What's the recommended strategy here?
+This divides the bit size by 8 to get the size in bytes. However, this
+doesn't take into account that bits_in_char might not be 8. I think this
+should actually be:
 
-(Incidentally, thanks for the help you've been giving me; it's been 
-aiding me substantially.)
+	/* Get the size of whatever the pointer points to */
+	multiply =3D base->bit_size / bits_in_char;
 
--- 
-David Given
-dg@cowlark.com
+(This now produces the right result on my non-8-bit-char 'platform'.)
+
+--=20
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
+=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
+cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82 "I have always wished for my computer to be as easy to use as m=
+y
+=E2=94=82 telephone; my wish has come true because I can no longer figure=
+ out
+=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
+
+
+--------------enig52139C2B8048953F500DCC2F
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFIZCjXf9E0noFvlzgRAhLHAJ0U8EEwtfMqBdnUnmq0IttZlogL8wCgih1p
+x+2+lcgMrBo12XI9fYIlIXM=
+=12Uc
+-----END PGP SIGNATURE-----
+
+--------------enig52139C2B8048953F500DCC2F--
