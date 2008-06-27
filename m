@@ -1,80 +1,98 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: Pointer arithmetic error
-Date: Fri, 27 Jun 2008 11:01:08 -0700
-Message-ID: <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>
-References: <486428D7.8080603@cowlark.com>
-	 <70318cbf0806261651u7a163d54m4d100012bce5db49@mail.gmail.com>
-	 <48643191.307@cowlark.com> <1214560196.20755.73.camel@tara.firmix.at>
-	 <4864C710.8000208@cowlark.com>
-	 <1214565644.20755.80.camel@tara.firmix.at>
-	 <4864F31C.3090606@cowlark.com>
-	 <1214577926.20755.98.camel@tara.firmix.at>
-	 <48650B35.5040505@cowlark.com>
+From: Josh Triplett <josht@linux.vnet.ibm.com>
+Subject: Re: multiple source files [was four sparse patches]
+Date: Fri, 27 Jun 2008 11:47:57 -0700
+Message-ID: <1214592477.5189.7.camel@josh-work.beaverton.ibm.com>
+References: <32e600e90805021158vb6be3c9jbb75c3a61345448@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from yx-out-2324.google.com ([74.125.44.28]:18890 "EHLO
-	yx-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759921AbYF0SBJ (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jun 2008 14:01:09 -0400
-Received: by yx-out-2324.google.com with SMTP id 31so210743yxl.1
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 11:01:08 -0700 (PDT)
-In-Reply-To: <48650B35.5040505@cowlark.com>
-Content-Disposition: inline
+Received: from e2.ny.us.ibm.com ([32.97.182.142]:44192 "EHLO e2.ny.us.ibm.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753609AbYF0SsC (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 27 Jun 2008 14:48:02 -0400
+Received: from d01relay04.pok.ibm.com (d01relay04.pok.ibm.com [9.56.227.236])
+	by e2.ny.us.ibm.com (8.13.8/8.13.8) with ESMTP id m5RIlxGd029300
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 14:47:59 -0400
+Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
+	by d01relay04.pok.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m5RIlxSe234310
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 14:47:59 -0400
+Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
+	by d01av04.pok.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m5RIlwQN013446
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 14:47:59 -0400
+In-Reply-To: <32e600e90805021158vb6be3c9jbb75c3a61345448@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Given <dg@cowlark.com>
-Cc: linux-sparse@vger.kernel.org, Bernd Petrovitsch <bernd@firmix.at>
+To: Geoff Johnstone <geoffsheep.johnstonefrog@googlemail.com>
+Cc: Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
-> In C, there is no type "byte" (unless you typedef oder #define it).
-> "byte" is usually (but not necessarily) meant as "unsigned char".
+On Fri, 2008-05-02 at 19:58 +0100, Geoff Johnstone wrote:
+> Take three files:
+> 
+> /* test.h */
+> typedef struct foo *Foo;
+> 
+> void a (Foo foo);
+> void b (Foo foo);
+> 
+> 
+> /* test1.c */
+> #include "test.h"
+> void a (Foo foo) { }
+> 
+> 
+> /* test2.c */
+> #include "test.h"
+> void b (Foo foo) { }
+> 
+> 
+> With sparse 0.4.1:
+> 
+> $ sparse test1.c
+> $ sparse test2.c
+> $ sparse test[12].c
+> test2.c:3:6: error: symbol 'b' redeclared with different type
+> (originally declared at test.h:4) - incompatible argument 1 (different
+> base types)
+> 
+> ...i.e. the problem only occurs with multiple source files on the
+> sparse command line. (The userland project mentioned above has a build
+> system that invokes the compiler once, passing all necessary source
+> files, because it also builds on Windows, where process creation is
+> remarkably slow so invoking cl.exe once per source file is prohibitive).
 
-In C spec, there is a concept of "byte". The union return by sizeof()
-is byte. Char must fit in a byte. But char does not necessary have the
-same bits as byte. Char can have more.
+I've observed this problem as well, and I would like to see it fixed.
+Many other legitimate reasons exist to run the compiler on many files at
+once.  For example, consider GCC's --combine and -fwhole-program
+options.
 
-C99: 3.6, 3.7.1
+> I think that the problem may be rooted in main():
+>   // Expand, linearize and show it.
+>   check_symbols(sparse_initialize(argc, argv, &filelist));
+>   FOR_EACH_PTR_NOTAG(filelist, file) {
+>     check_symbols(sparse(file));
+>   } END_FOR_EACH_PTR_NOTAG(file);
+> 
+> i.e. sparse doesn't reinitialize for each source file.
+> 
+> My patch a few weeks ago silences the error, but in the light of this
+> I think that it's working around rather than fixing the problem. The
+> "correct" fix would seem to be to re-initialise sparse for each source
+> file. However, sparse's data structures weren't written with this in
+> mind, so a patch would be rather invasive. It might be simpler to say
+> that sparse must only be invoked on one source file and to modify cgcc
+> instead?
 
-Because char can always fit in byte, sizeof(char) == 1.
+I'd like Sparse to handle multiple files on the same command line.  I
+don't mind invasive patches, though as always I'd like to see them
+broken up into incremental patches when possible.
 
-> IIRC C specifies that sizeof() returns values measured in chars, but I don't believe it specifies any mapping between the size of chars and the underlying addressing units --- it should be
-> possible to use 16-bit chars, for example, on an 8-bit byte system. Using 32-bit ints, sizeof(int) would then return 2; but you wouldn't be able to access individual bytes from C.
+I don't necessarily want Sparse fully re-initialized to the point where
+it forgets what it learned from the previous source files.  Remembering
+the contents of previous files can only help with cross-module analysis.
+However, Sparse needs to isolate symbols by file, and avoid carrying
+over the visible symbols from one file to the next.
 
-sizeof() return value measure in _byte_.
-C99: 6.5.3.4
-
-On Fri, Jun 27, 2008 at 8:45 AM, David Given <dg@cowlark.com> wrote:
-> Bernd Petrovitsch wrote:
-> [...]
->>
->> That's the bug. there is no difference between "byte" and "char". Tell
->> it that a char has 32 bits too *if* it's the case.
-
-No, there is a different between "byte" and "char". See above.
+- Josh Triplett
 
 
->
-> Having checked the standard it turns out that we've been talking at cross
-> purposes as I've been using the wrong terminology --- it actually defines
-> (unhelpfully) that byte and char are the same size. Sorry for the confusion.
->
-> What I was referring to when I previously said (erroneously) 'byte' was 'an
-> address delta of 1', as understood by the assembler. Let's just call this a
-> 'unit' for clarity. This is not necessarily the same size as a char.
-
-In C's term, that is call a "byte" :-)
-
-> I'm proposing adding a bits_in_unit (or something) setting and then going
-> through and tracking down these places and changing them to use it. That way
-> it should still work fine on exotic architectures like mine.
-
-You are right that point out a bug (assumption) of sparse which byte is 8 bits.
-Using bits_in_byte is instead of 8 is better there.
-Using bits_in_char assumes char has same bits as byte. That is my read
-of the C spec.
-
-Thanks
-
-Chris
