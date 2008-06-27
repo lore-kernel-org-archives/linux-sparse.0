@@ -1,55 +1,71 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
+From: David Given <dg@cowlark.com>
 Subject: Re: Pointer arithmetic error
-Date: Fri, 27 Jun 2008 11:49:56 +0200
-Message-ID: <1214560196.20755.73.camel@tara.firmix.at>
-References: <486428D7.8080603@cowlark.com>
-	 <70318cbf0806261651u7a163d54m4d100012bce5db49@mail.gmail.com>
-	 <48643191.307@cowlark.com>
+Date: Fri, 27 Jun 2008 11:55:12 +0100
+Message-ID: <4864C710.8000208@cowlark.com>
+References: <486428D7.8080603@cowlark.com>	 <70318cbf0806261651u7a163d54m4d100012bce5db49@mail.gmail.com>	 <48643191.307@cowlark.com> <1214560196.20755.73.camel@tara.firmix.at>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ns.firmix.at ([62.141.48.66]:1336 "EHLO ns.firmix.at"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750882AbYF0KT7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jun 2008 06:19:59 -0400
-Received: from ns.firmix.at (localhost [127.0.0.1])
-	by ns.firmix.at (8.14.1/8.14.1) with ESMTP id m5R9nxlx023488
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 11:49:59 +0200
-Received: (from defang@localhost)
-	by ns.firmix.at (8.14.1/8.14.1/Submit) id m5R9nwE5023486
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 11:49:58 +0200
-In-Reply-To: <48643191.307@cowlark.com>
-Content-Disposition: inline
+Received: from c.painless.aaisp.net.uk ([81.187.30.53]:43568 "EHLO
+	c.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753046AbYF0KzZ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 27 Jun 2008 06:55:25 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by c.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1KCBbu-00029r-37
+	for linux-sparse@vger.kernel.org; Fri, 27 Jun 2008 11:55:22 +0100
+Received: from [172.22.67.145] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id 1E5B82008D
+	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 11:55:21 +0100 (BST)
+In-Reply-To: <1214560196.20755.73.camel@tara.firmix.at>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Given <dg@cowlark.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Fre, 2008-06-27 at 01:17 +0100, David Given wrote:
-> Chris Li wrote:
-> [...]
-> > I don't think so. The offset part of the ptr_add op is mean to be the
-> > absolute offset, not how many element of the pointer index. In other
-> > words, it is how many address number it need to add.
-> 
-> Hmm. True. But even so, it's still not right on my system, which doesn't
-> use 8-bit bytes. (It's word addressable where each word can contain any
-> value, so sizeof(int) == sizeof(double) == sizeof(char) == 1.)
+Bernd Petrovitsch wrote:
+[...]
+> In C, there is no type "byte" (unless you typedef oder #define it).
+> "byte" is usually (but not necessarily) meant as "unsigned char".
 
-/usr/include/limits.h should have a correct #define CHAR_BIT.
+The issue here is that sparse is helpful and converts pointer offsets 
+into byte offsets when generating code for pointer arithmetic. So:
 
-> Should there, then, be another symbol to define the number of bits in a
-> byte, distinct from the number of bits in a char?
+const int* p = (const char*) 1234;
+p += 10;
 
-In C, there is no type "byte" (unless you typedef oder #define it).
-"byte" is usually (but not necessarily) meant as "unsigned char".
+-->
 
-	Bernd
+set.32 %p0 <- 1234
+add.32 %p1 <- %p0, 40
+(In fact, in this example it'd collapse these together and use 1274 
+instead.)
+
+This appears to be done using hard-coded knowledge that a byte (one unit 
+of addressingness) is 8 bits wide.
+
+Chris Li wrote:
+> Byte need to big enough to hold the char. Using bits_in_byte is better.
+> There might be other place in sparse assume byte is 8 bits.
+
+IIRC C specifies that sizeof() returns values measured in chars, but I 
+don't believe it specifies any mapping between the size of chars and the 
+underlying addressing units --- it should be possible to use 16-bit 
+chars, for example, on an 8-bit byte system. Using 32-bit ints, 
+sizeof(int) would then return 2; but you wouldn't be able to access 
+individual bytes from C.
+
+That's assuming I've remembered the spec correctly, of course --- this 
+stuff is annoying subtle.
+
+If you like I'll go and have a look to see if this can be easily fixed 
+--- I need to do it anyway. In fact, I have vague recollections that 
+load and store were actually using offsets like 0, 1, 2, etc (the 
+'right' values), which means they must have been using bits_per_char to 
+do their calculations; I need to check up on this.
+
 -- 
-Firmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
-
-
+David Given
+dg@cowlark.com
