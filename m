@@ -1,443 +1,722 @@
-From: David Given <dg@cowlark.com>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: Pointer arithmetic error
-Date: Sat, 28 Jun 2008 00:32:57 +0100
-Message-ID: <486578A9.7000900@cowlark.com>
-References: <486428D7.8080603@cowlark.com>	 <70318cbf0806261651u7a163d54m4d100012bce5db49@mail.gmail.com>	 <48643191.307@cowlark.com> <1214560196.20755.73.camel@tara.firmix.at>	 <4864C710.8000208@cowlark.com>	 <1214565644.20755.80.camel@tara.firmix.at>	 <4864F31C.3090606@cowlark.com>	 <1214577926.20755.98.camel@tara.firmix.at>	 <48650B35.5040505@cowlark.com> <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>
+Date: Fri, 27 Jun 2008 17:17:43 -0700
+Message-ID: <70318cbf0806271717v42f4b1e0ocbdf9498b1417878@mail.gmail.com>
+References: <486428D7.8080603@cowlark.com> <48643191.307@cowlark.com>
+	 <1214560196.20755.73.camel@tara.firmix.at>
+	 <4864C710.8000208@cowlark.com>
+	 <1214565644.20755.80.camel@tara.firmix.at>
+	 <4864F31C.3090606@cowlark.com>
+	 <1214577926.20755.98.camel@tara.firmix.at>
+	 <48650B35.5040505@cowlark.com>
+	 <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>
+	 <486578A9.7000900@cowlark.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig87D352A3E9EA1421B5CCE263"
+Content-Type: text/plain; charset=ISO-2022-JP
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from a.painless.aaisp.net.uk ([81.187.30.51]:40309 "EHLO
-	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759771AbYF0XdJ (ORCPT
+Received: from yw-out-2324.google.com ([74.125.46.29]:25021 "EHLO
+	yw-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751921AbYF1ARs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jun 2008 19:33:09 -0400
-Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
-	(envelope-from <dg@cowlark.com>)
-	id 1KCNRk-0006sh-Mq
-	for linux-sparse@vger.kernel.org; Sat, 28 Jun 2008 00:33:41 +0100
-Received: from [10.0.0.5] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id A81D22008D
-	for <linux-sparse@vger.kernel.org>; Sat, 28 Jun 2008 00:33:02 +0100 (BST)
-In-Reply-To: <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>
+	Fri, 27 Jun 2008 20:17:48 -0400
+Received: by yw-out-2324.google.com with SMTP id 9so306217ywe.1
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 17:17:43 -0700 (PDT)
+In-Reply-To: <486578A9.7000900@cowlark.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: David Given <dg@cowlark.com>
+Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig87D352A3E9EA1421B5CCE263
-Content-Type: multipart/mixed;
- boundary="------------070305050603040608050108"
+Your patch is white space damaged.
 
-This is a multi-part message in MIME format.
---------------070305050603040608050108
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+While you are there, you might want to consider macro
 
-Christopher Li wrote:
-[...]
-> You are right that point out a bug (assumption) of sparse which byte is=
- 8 bits.
-> Using bits_in_byte is instead of 8 is better there.
-> Using bits_in_char assumes char has same bits as byte. That is my read
-> of the C spec.
+bits_to_byte(x)
+byte_to_bits(x)
 
-Yes, indeed, I'd managed to get my terminology muddled to the confusion
-of everyone.
+To isolate out the conversion. It should generate the same code.
+Marginally more readable.
 
-Okay, I've gone and looked at the implementation of this stuff; it would
-appear that modifying the code to supply the back end with units scaled
-in something other than C chars is actually quite complicated, so I
-haven't tried to do that. However, I'm enclosing a patch that should,
-hopefully, fix the cases where it's assuming 8 bit bytes. Hopefully I've
- managed to catch all the cases, without breaking the octal parse code...=
+Chris
 
-
-(I haven't used git before; is this the right format?)
-
---=20
-=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
-=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
-=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
-cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
-=E2=94=82 "I have always wished for my computer to be as easy to use as m=
-y
-=E2=94=82 telephone; my wish has come true because I can no longer figure=
- out
-=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
-
---------------070305050603040608050108
-Content-Type: text/plain;
- name="diff"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline;
- filename="diff"
-
-Y29tbWl0IDA3NTJlMDJkMmM3YzNmNjdiN2MxODM1Yzg2YmY3N2YxMWM4Mzg0ZGQKQXV0aG9y
-OiBkZyA8ZGdAY293bGFyay5jb20+CkRhdGU6ICAgU2F0IEp1biAyOCAwMDoyNDozNiAyMDA4
-ICswMTAwCgogICAgQ2hhbmdlZCB1c2Ugb2YgaGFyZGNvZGVkIDhzIHdoZW4gY29udmVydGlu
-ZyBiaXRzIHRvIGJ5dGVzIHRvIHVzZSBiaXRzX2luX2NoYXIgaW5zdGVhZC4KCmRpZmYgLS1n
-aXQgYS9jb21waWxlLWkzODYuYyBiL2NvbXBpbGUtaTM4Ni5jCmluZGV4IDg1MjY0MDguLjNi
-YmM5YzcgMTAwNjQ0Ci0tLSBhL2NvbXBpbGUtaTM4Ni5jCisrKyBiL2NvbXBpbGUtaTM4Ni5j
-CkBAIC0xNTg0LDcgKzE1ODQsNyBAQCBzdGF0aWMgc3RydWN0IHN0b3JhZ2UgKmVtaXRfc2Vs
-ZWN0X2V4cHIoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIpCiAJLyoKIAkgKiBEbyB0aGUgYWN0
-dWFsIHNlbGVjdDogY2hlY2sgdGhlIGNvbmRpdGlvbmFsIGZvciB6ZXJvLAogCSAqIG1vdmUg
-ZmFsc2Ugb3ZlciB0cnVlIGlmIHplcm8KLQkgKi8gCisJICovCiAJaW5zbigidGVzdCIsIHJl
-Z19jb25kLCByZWdfY29uZCwgTlVMTCk7CiAJaW5zbigiY21vdnoiLCByZWdfZmFsc2UsIHJl
-Z190cnVlLCBOVUxMKTsKIApAQCAtMjA4MSw3ICsyMDgxLDcgQEAgc3RhdGljIHN0cnVjdCBz
-dG9yYWdlICp4ODZfY2FsbF9leHByZXNzaW9uKHN0cnVjdCBleHByZXNzaW9uICpleHByKQog
-CQlpbnNuKCJwdXNobCIsIG5ldywgTlVMTCwKIAkJICAgICAhZnJhbWVzaXplID8gImJlZ2lu
-IGZ1bmN0aW9uIGNhbGwiIDogTlVMTCk7CiAKLQkJZnJhbWVzaXplICs9IHNpemUgPj4gMzsK
-KwkJZnJhbWVzaXplICs9IHNpemUgLyBiaXRzX2luX2NoYXI7CiAJfSBFTkRfRk9SX0VBQ0hf
-UFRSX1JFVkVSU0UoYXJnKTsKIAogCWZuID0gZXhwci0+Zm47CmRpZmYgLS1naXQgYS9ldmFs
-dWF0ZS5jIGIvZXZhbHVhdGUuYwppbmRleCAyYTEyNmRkLi42MDE4ZTBjIDEwMDY0NAotLS0g
-YS9ldmFsdWF0ZS5jCisrKyBiL2V2YWx1YXRlLmMKQEAgLTg3LDEzICs4NywxMyBAQCBzdGF0
-aWMgc3RydWN0IHN5bWJvbCAqZXZhbHVhdGVfc3RyaW5nKHN0cnVjdCBleHByZXNzaW9uICpl
-eHByKQogCWFycmF5LT5jdHlwZS5hbGlnbm1lbnQgPSAxOwogCWFycmF5LT5jdHlwZS5tb2Rp
-ZmllcnMgPSBNT0RfU1RBVElDOwogCWFycmF5LT5jdHlwZS5iYXNlX3R5cGUgPSAmY2hhcl9j
-dHlwZTsKLQkKKwogCWFkZHItPnN5bWJvbCA9IHN5bTsKIAlhZGRyLT5jdHlwZSA9ICZsYXp5
-X3B0cl9jdHlwZTsKIAogCWV4cHItPnR5cGUgPSBFWFBSX1BSRU9QOwogCWV4cHItPm9wID0g
-JyonOwotCWV4cHItPnVub3AgPSBhZGRyOyAgCisJZXhwci0+dW5vcCA9IGFkZHI7CiAJZXhw
-ci0+Y3R5cGUgPSBzeW07CiAJcmV0dXJuIHN5bTsKIH0KQEAgLTU3OSw3ICs1NzksNyBAQCBz
-dGF0aWMgc3RydWN0IHN5bWJvbCAqZXZhbHVhdGVfcHRyX2FkZChzdHJ1Y3QgZXhwcmVzc2lv
-biAqZXhwciwgc3RydWN0IHN5bWJvbCAqaQogCX0KIAogCS8qIEdldCB0aGUgc2l6ZSBvZiB3
-aGF0ZXZlciB0aGUgcG9pbnRlciBwb2ludHMgdG8gKi8KLQltdWx0aXBseSA9IGJhc2UtPmJp
-dF9zaXplID4+IDM7CisJbXVsdGlwbHkgPSBiYXNlLT5iaXRfc2l6ZSAvIGJpdHNfaW5fY2hh
-cjsKIAogCWlmIChjdHlwZSA9PSAmbnVsbF9jdHlwZSkKIAkJY3R5cGUgPSAmcHRyX2N0eXBl
-OwpAQCAtODMxLDcgKzgzMSw3IEBAIHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpldmFsdWF0ZV9w
-dHJfc3ViKHN0cnVjdCBleHByZXNzaW9uICpleHByKQogCQlzdHJ1Y3QgZXhwcmVzc2lvbiAq
-c3ViID0gYWxsb2NfZXhwcmVzc2lvbihleHByLT5wb3MsIEVYUFJfQklOT1ApOwogCQlzdHJ1
-Y3QgZXhwcmVzc2lvbiAqZGl2ID0gZXhwcjsKIAkJc3RydWN0IGV4cHJlc3Npb24gKnZhbCA9
-IGFsbG9jX2V4cHJlc3Npb24oZXhwci0+cG9zLCBFWFBSX1ZBTFVFKTsKLQkJdW5zaWduZWQg
-bG9uZyB2YWx1ZSA9IGxiYXNlLT5iaXRfc2l6ZSA+PiAzOworCQl1bnNpZ25lZCBsb25nIHZh
-bHVlID0gbGJhc2UtPmJpdF9zaXplIC8gYml0c19pbl9jaGFyOwogCiAJCXZhbC0+Y3R5cGUg
-PSBzaXplX3RfY3R5cGU7CiAJCXZhbC0+dmFsdWUgPSB2YWx1ZTsKQEAgLTg1MCw3ICs4NTAs
-NyBAQCBzdGF0aWMgc3RydWN0IHN5bWJvbCAqZXZhbHVhdGVfcHRyX3N1YihzdHJ1Y3QgZXhw
-cmVzc2lvbiAqZXhwcikKIAkJZGl2LT5sZWZ0ID0gc3ViOwogCQlkaXYtPnJpZ2h0ID0gdmFs
-OwogCX0KLQkJCisKIAlyZXR1cm4gc3NpemVfdF9jdHlwZTsKIH0KIApAQCAtMTU5MSw3ICsx
-NTkxLDcgQEAgc3RhdGljIHN0cnVjdCBzeW1ib2wgKmRlZ2VuZXJhdGUoc3RydWN0IGV4cHJl
-c3Npb24gKmV4cHIpCiAJCQkJZTMtPm9wID0gJysnOwogCQkJCWUzLT5sZWZ0ID0gZTA7CiAJ
-CQkJZTMtPnJpZ2h0ID0gYWxsb2NfY29uc3RfZXhwcmVzc2lvbihleHByLT5wb3MsCi0JCQkJ
-CQkJZXhwci0+cl9iaXRwb3MgPj4gMyk7CisJCQkJCQkJZXhwci0+cl9iaXRwb3MgLyBiaXRz
-X2luX2NoYXIpOwogCQkJCWUzLT5jdHlwZSA9ICZsYXp5X3B0cl9jdHlwZTsKIAkJCX0gZWxz
-ZSB7CiAJCQkJZTMgPSBlMDsKQEAgLTE3MjcsNyArMTcyNyw3IEBAIHN0YXRpYyBzdHJ1Y3Qg
-c3ltYm9sICpldmFsdWF0ZV9wb3N0b3Aoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIpCiAJfSBl
-bHNlIGlmIChjbGFzcyA9PSBUWVBFX1BUUikgewogCQlzdHJ1Y3Qgc3ltYm9sICp0YXJnZXQg
-PSBleGFtaW5lX3BvaW50ZXJfdGFyZ2V0KGN0eXBlKTsKIAkJaWYgKCFpc19mdW5jdGlvbih0
-YXJnZXQpKQotCQkJbXVsdGlwbHkgPSB0YXJnZXQtPmJpdF9zaXplID4+IDM7CisJCQltdWx0
-aXBseSA9IHRhcmdldC0+Yml0X3NpemUgLyBiaXRzX2luX2NoYXI7CiAJfQogCiAJaWYgKG11
-bHRpcGx5KSB7CkBAIC0xODUwLDcgKzE4NTAsNyBAQCBzdGF0aWMgc3RydWN0IHN5bWJvbCAq
-ZmluZF9pZGVudGlmaWVyKHN0cnVjdCBpZGVudCAqaWRlbnQsIHN0cnVjdCBzeW1ib2xfbGlz
-dCAqXwogCQkJCQljb250aW51ZTsKIAkJCQkqb2Zmc2V0ICs9IHN5bS0+b2Zmc2V0OwogCQkJ
-CXJldHVybiBzdWI7Ci0JCQl9CQorCQkJfQogCQl9CiAJfSB3aGlsZSAoKGxpc3QgPSBsaXN0
-LT5uZXh0KSAhPSBoZWFkKTsKIAlyZXR1cm4gTlVMTDsKQEAgLTE5NDksNyArMTk0OSw3IEBA
-IHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpldmFsdWF0ZV9tZW1iZXJfZGVyZWZlcmVuY2Uoc3Ry
-dWN0IGV4cHJlc3Npb24gKmV4cHIpCiAJCQlleHByLT5iYXNlID0gZGVyZWYtPmJhc2U7CiAJ
-CQlleHByLT5yX2JpdHBvcyA9IGRlcmVmLT5yX2JpdHBvczsKIAkJfQotCQlleHByLT5yX2Jp
-dHBvcyArPSBvZmZzZXQgPDwgMzsKKwkJZXhwci0+cl9iaXRwb3MgKz0gb2Zmc2V0ICogYml0
-c19pbl9jaGFyOwogCQlleHByLT50eXBlID0gRVhQUl9TTElDRTsKIAkJZXhwci0+cl9ucmJp
-dHMgPSBtZW1iZXItPmJpdF9zaXplOwogCQlleHByLT5yX2JpdHBvcyArPSBtZW1iZXItPmJp
-dF9vZmZzZXQ7CkBAIC0yMDQwLDcgKzIwNDAsNyBAQCBzdGF0aWMgc3RydWN0IHN5bWJvbCAq
-ZXZhbHVhdGVfc2l6ZW9mKHN0cnVjdCBleHByZXNzaW9uICpleHByKQogCWlmICgoc2l6ZSA8
-IDApIHx8IChzaXplICYgNykpCiAJCWV4cHJlc3Npb25fZXJyb3IoZXhwciwgImNhbm5vdCBz
-aXplIGV4cHJlc3Npb24iKTsKIAlleHByLT50eXBlID0gRVhQUl9WQUxVRTsKLQlleHByLT52
-YWx1ZSA9IHNpemUgPj4gMzsKKwlleHByLT52YWx1ZSA9IHNpemUgLyBiaXRzX2luX2NoYXI7
-CiAJZXhwci0+dGFpbnQgPSAwOwogCWV4cHItPmN0eXBlID0gc2l6ZV90X2N0eXBlOwogCXJl
-dHVybiBzaXplX3RfY3R5cGU7CkBAIC0yMDc0LDcgKzIwNzQsNyBAQCBzdGF0aWMgc3RydWN0
-IHN5bWJvbCAqZXZhbHVhdGVfcHRyc2l6ZW9mKHN0cnVjdCBleHByZXNzaW9uICpleHByKQog
-CWlmIChzaXplICYgNykKIAkJc2l6ZSA9IDA7CiAJZXhwci0+dHlwZSA9IEVYUFJfVkFMVUU7
-Ci0JZXhwci0+dmFsdWUgPSBzaXplID4+IDM7CisJZXhwci0+dmFsdWUgPSBzaXplIC8gYml0
-c19pbl9jaGFyOwogCWV4cHItPnRhaW50ID0gMDsKIAlleHByLT5jdHlwZSA9IHNpemVfdF9j
-dHlwZTsKIAlyZXR1cm4gc2l6ZV90X2N0eXBlOwpAQCAtMjg2NSw3ICsyODY1LDcgQEAgc3Rh
-dGljIHN0cnVjdCBzeW1ib2wgKmV2YWx1YXRlX29mZnNldG9mKHN0cnVjdCBleHByZXNzaW9u
-ICpleHByKQogCQkJdW5yZXN0cmljdChpZHgsIGlfY2xhc3MsICZpX3R5cGUpOwogCQkJaWR4
-ID0gY2FzdF90byhpZHgsIHNpemVfdF9jdHlwZSk7CiAJCQltID0gYWxsb2NfY29uc3RfZXhw
-cmVzc2lvbihleHByLT5wb3MsCi0JCQkJCQkgICBjdHlwZS0+Yml0X3NpemUgPj4gMyk7CisJ
-CQkJCQkgICBjdHlwZS0+Yml0X3NpemUgLyBiaXRzX2luX2NoYXIpOwogCQkJbS0+Y3R5cGUg
-PSBzaXplX3RfY3R5cGU7CiAJCQltLT5mbGFncyA9IEludF9jb25zdF9leHByOwogCQkJZXhw
-ci0+dHlwZSA9IEVYUFJfQklOT1A7CmRpZmYgLS1naXQgYS9leGFtcGxlLmMgYi9leGFtcGxl
-LmMKaW5kZXggYWU4OTdkYy4uYjg0NGQ0ZiAxMDA2NDQKLS0tIGEvZXhhbXBsZS5jCisrKyBi
-L2V4YW1wbGUuYwpAQCAtMjcsNyArMjcsNyBAQCBzdGF0aWMgY29uc3QgY2hhciAqb3Bjb2Rl
-c1tdID0gewogCVtPUF9JTlZPS0VdID0gImludm9rZSIsCiAJW09QX0NPTVBVVEVER09UT10g
-PSAiam1wICoiLAogCVtPUF9VTldJTkRdID0gInVud2luZCIsCi0JCisKIAkvKiBCaW5hcnkg
-Ki8KIAlbT1BfQUREXSA9ICJhZGQiLAogCVtPUF9TVUJdID0gInN1YiIsCkBAIC00MCw3ICs0
-MCw3IEBAIHN0YXRpYyBjb25zdCBjaGFyICpvcGNvZGVzW10gPSB7CiAJW09QX1NITF0gPSAi
-c2hsIiwKIAlbT1BfTFNSXSA9ICJsc3IiLAogCVtPUF9BU1JdID0gImFzciIsCi0JCisKIAkv
-KiBMb2dpY2FsICovCiAJW09QX0FORF0gPSAiYW5kIiwKIAlbT1BfT1JdID0gIm9yIiwKQEAg
-LTY2LDcgKzY2LDcgQEAgc3RhdGljIGNvbnN0IGNoYXIgKm9wY29kZXNbXSA9IHsKIAogCS8q
-IFNwZWNpYWwgdGhyZWUtaW5wdXQgKi8KIAlbT1BfU0VMXSA9ICJzZWxlY3QiLAotCQorCiAJ
-LyogTWVtb3J5ICovCiAJW09QX01BTExPQ10gPSAibWFsbG9jIiwKIAlbT1BfRlJFRV0gPSAi
-ZnJlZSIsCkBAIC04MTgsNyArODE4LDcgQEAgc3RhdGljIGNvbnN0IGNoYXIgKmdlbmVyaWMo
-c3RydWN0IGJiX3N0YXRlICpzdGF0ZSwgcHNldWRvX3QgcHNldWRvKQogCQlwdXRfb3BlcmFu
-ZChzdGF0ZSwgb3ApOwogCQlyZWcgPSB0YXJnZXRfcmVnKHN0YXRlLCBwc2V1ZG8sIE5VTEwp
-OwogCQlvdXRwdXRfaW5zbihzdGF0ZSwgImxlYSAlcywlcyIsIHNob3dfb3Aoc3RhdGUsIG9w
-KSwgcmVnLT5uYW1lKTsKLQkJcmV0dXJuIHJlZy0+bmFtZTsJCQorCQlyZXR1cm4gcmVnLT5u
-YW1lOwogCiAJZGVmYXVsdDoKIAkJc3RyID0gc2hvd19vcChzdGF0ZSwgb3ApOwpAQCAtODcw
-LDcgKzg3MCw3IEBAIHN0YXRpYyB2b2lkIGtpbGxfZGVhZF9yZWcoc3RydWN0IGhhcmRyZWcg
-KnJlZykKIHsKIAlpZiAocmVnLT5kZWFkKSB7CiAJCXBzZXVkb190IHA7Ci0JCQorCiAJCUZP
-Ul9FQUNIX1BUUihyZWctPmNvbnRhaW5zLCBwKSB7CiAJCQlpZiAoQ1VSUkVOVF9UQUcocCkg
-JiBUQUdfREVBRCkgewogCQkJCURFTEVURV9DVVJSRU5UX1BUUihwKTsKQEAgLTEwMTEsNyAr
-MTAxMSw3IEBAIHN0YXRpYyB2b2lkIGtpbGxfcHNldWRvKHN0cnVjdCBiYl9zdGF0ZSAqc3Rh
-dGUsIHBzZXVkb190IHBzZXVkbykKIAkJCQljb250aW51ZTsKIAkJCWlmIChDVVJSRU5UX1RB
-RyhwKSAmIFRBR19ERUFEKQogCQkJCXJlZy0+ZGVhZC0tOwotCQkJb3V0cHV0X2NvbW1lbnQo
-c3RhdGUsICJyZW1vdmluZyBwc2V1ZG8gJXMgZnJvbSByZWcgJXMiLCAKKwkJCW91dHB1dF9j
-b21tZW50KHN0YXRlLCAicmVtb3ZpbmcgcHNldWRvICVzIGZyb20gcmVnICVzIiwKIAkJCQlz
-aG93X3BzZXVkbyhwc2V1ZG8pLCByZWctPm5hbWUpOwogCQkJREVMRVRFX0NVUlJFTlRfUFRS
-KHApOwogCQl9IEVORF9GT1JfRUFDSF9QVFIocCk7CkBAIC0xMDY5LDcgKzEwNjksNyBAQCBz
-dGF0aWMgY29uc3QgY2hhciAqY29uZGl0aW9uYWxbXSA9IHsKIAlbT1BfU0VUX0JFXSA9ICJi
-ZSIsCiAJW09QX1NFVF9BRV0gPSAiYWUiCiB9OwotCQorCiAKIHN0YXRpYyB2b2lkIGdlbmVy
-YXRlX2JyYW5jaChzdHJ1Y3QgYmJfc3RhdGUgKnN0YXRlLCBzdHJ1Y3QgaW5zdHJ1Y3Rpb24g
-KmJyKQogewpAQCAtMTE4Nyw3ICsxMTg3LDcgQEAgc3RhdGljIHZvaWQgcmVwbGFjZV9hc21f
-cGVyY2VudChjb25zdCBjaGFyICoqc3JjX3AsIGNoYXIgKipkc3RfcCwgc3RydWN0IGFzbV9h
-cmcKIAkJaWYgKGluZGV4IDwgbnIpCiAJCQlyZXBsYWNlX2FzbV9hcmcoZHN0X3AsIGFyZ3Mr
-aW5kZXgpOwogCQlicmVhazsKLQl9CQorCX0KIAkqc3JjX3AgPSBzcmM7CiAJcmV0dXJuOwog
-fQpAQCAtMTU4Myw3ICsxNTgzLDcgQEAgc3RhdGljIGludCBmaW5hbF9wc2V1ZG9fZmx1c2go
-c3RydWN0IGJiX3N0YXRlICpzdGF0ZSwgcHNldWRvX3QgcHNldWRvLCBzdHJ1Y3QgaGEKIAlz
-dHJ1Y3QgaGFyZHJlZyAqZHN0OwogCiAJLyoKLQkgKiBTaW5jZSB0aGlzIHBzZXVkbyBpcyBs
-aXZlIGF0IGV4aXQsIHdlJ2QgYmV0dGVyIGhhdmUgb3V0cHV0IAorCSAqIFNpbmNlIHRoaXMg
-cHNldWRvIGlzIGxpdmUgYXQgZXhpdCwgd2UnZCBiZXR0ZXIgaGF2ZSBvdXRwdXQKIAkgKiBz
-dG9yYWdlIGZvciBpdC4uCiAJICovCiAJaGFzaCA9IGZpbmRfc3RvcmFnZV9oYXNoKHBzZXVk
-bywgc3RhdGUtPm91dHB1dHMpOwpAQCAtMTgyOSw4ICsxODI5LDggQEAgc3RhdGljIHZvaWQg
-c2V0X3VwX2FyY2hfZW50cnkoc3RydWN0IGVudHJ5cG9pbnQgKmVwLCBzdHJ1Y3QgaW5zdHJ1
-Y3Rpb24gKmVudHJ5KQogCiAJCQlpbi0+dHlwZSA9IFJFR19GUkFNRTsKIAkJCWluLT5vZmZz
-ZXQgPSBvZmZzZXQ7Ci0JCQkKLQkJCW9mZnNldCArPSBiaXRzID4+IDM7CisKKwkJCW9mZnNl
-dCArPSBiaXRzIC8gYml0c19pbl9jaGFyOwogCQl9CiAJCWkrKzsKIAkJTkVYVF9QVFJfTElT
-VChhcmd0eXBlKTsKQEAgLTE5MzYsNyArMTkzNiw3IEBAIHN0YXRpYyBpbnQgY29tcGlsZShz
-dHJ1Y3Qgc3ltYm9sX2xpc3QgKmxpc3QpCiAJCWlmIChlcCkKIAkJCW91dHB1dChlcCk7CiAJ
-fSBFTkRfRk9SX0VBQ0hfUFRSKHN5bSk7Ci0JCisKIAlyZXR1cm4gMDsKIH0KIApkaWZmIC0t
-Z2l0IGEvZXhwYW5kLmMgYi9leHBhbmQuYwppbmRleCAwMzJmMGM1Li5kMWFhMDE5IDEwMDY0
-NAotLS0gYS9leHBhbmQuYworKysgYi9leHBhbmQuYwpAQCAtMTAwLDcgKzEwMCw3IEBAIElu
-dDoKIAkvLyBTdG9wIGhlcmUgdW5sZXNzIGNoZWNraW5nIGZvciB0cnVuY2F0aW9uCiAJaWYg
-KCFXY2FzdF90cnVuY2F0ZSB8fCBjb25zZXJ2YXRpdmUpCiAJCXJldHVybjsKLQkKKwogCS8v
-IENoZWNrIGlmIHdlIGRyb3BwZWQgYW55IGJpdHMuLgogCW9sZHNpZ25tYXNrID0gMVVMTCA8
-PCAob2xkX3NpemUtMSk7CiAJb2xkbWFzayA9IG9sZHNpZ25tYXNrIHwgKG9sZHNpZ25tYXNr
-LTEpOwpAQCAtMTc5LDcgKzE3OSw3IEBAIHN0YXRpYyBpbnQgc2ltcGxpZnlfaW50X2Jpbm9w
-KHN0cnVjdCBleHByZXNzaW9uICpleHByLCBzdHJ1Y3Qgc3ltYm9sICpjdHlwZSkKIAkJc2wg
-fD0gfihtYXNrLTEpOwogCWlmIChpc19zaWduZWQgJiYgKHNyICYgbWFzaykpCiAJCXNyIHw9
-IH4obWFzay0xKTsKLQkKKwogCXN3aXRjaCAoQ09OVkVSVChleHByLT5vcCxpc19zaWduZWQp
-KSB7CiAJY2FzZSBTSUdORUQoJysnKToKIAljYXNlIFVOU0lHTkVEKCcrJyk6CkBAIC0yMjQs
-NyArMjI0LDcgQEAgc3RhdGljIGludCBzaW1wbGlmeV9pbnRfYmlub3Aoc3RydWN0IGV4cHJl
-c3Npb24gKmV4cHIsIHN0cnVjdCBzeW1ib2wgKmN0eXBlKQogCiAJY2FzZSBVTlNJR05FRCgn
-LycpOgogCQlpZiAoIXIpIGdvdG8gRGl2OwotCQl2ID0gbCAvIHI7IAorCQl2ID0gbCAvIHI7
-CiAJCWJyZWFrOwogCiAJY2FzZSBTSUdORUQoJyUnKToKQEAgLTI0MSw3ICsyNDEsNyBAQCBz
-dGF0aWMgaW50IHNpbXBsaWZ5X2ludF9iaW5vcChzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhwciwg
-c3RydWN0IHN5bWJvbCAqY3R5cGUpCiAJY2FzZSBTSUdORUQoU1BFQ0lBTF9MRUZUU0hJRlQp
-OgogCWNhc2UgVU5TSUdORUQoU1BFQ0lBTF9MRUZUU0hJRlQpOgogCQl2ID0gbCA8PCByOwot
-CQlicmVhazsgCisJCWJyZWFrOwogCiAJY2FzZSBTSUdORUQoU1BFQ0lBTF9SSUdIVFNISUZU
-KToKIAkJdiA9IHNsID4+IHI7CkBAIC01MzYsNyArNTM2LDcgQEAgc3RhdGljIGludCBleHBh
-bmRfY29uZGl0aW9uYWwoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIpCiAKIAlyZXR1cm4gY29z
-dCArIGNvbmRfY29zdCArIEJSQU5DSF9DT1NUOwogfQotCQkKKwogc3RhdGljIGludCBleHBh
-bmRfYXNzaWdubWVudChzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhwcikKIHsKIAlleHBhbmRfZXhw
-cmVzc2lvbihleHByLT5sZWZ0KTsKQEAgLTgyMiw3ICs4MjIsNyBAQCBzdGF0aWMgaW50IGV4
-cGFuZF9leHByZXNzaW9uX2xpc3Qoc3RydWN0IGV4cHJlc3Npb25fbGlzdCAqbGlzdCkKIAly
-ZXR1cm4gY29zdDsKIH0KIAotLyogCisvKgogICogV2UgY2FuIHNpbXBsaWZ5IG5lc3RlZCBw
-b3NpdGlvbiBleHByZXNzaW9ucyBpZgogICogdGhpcyBpcyBhIHNpbXBsZSAoc2luZ2xlKSBw
-b3NpdGlvbmFsIGV4cHJlc3Npb24uCiAgKi8KQEAgLTg4MCw3ICs4ODAsNyBAQCBzdGF0aWMg
-dW5zaWduZWQgbG9uZyBiaXRfb2Zmc2V0KGNvbnN0IHN0cnVjdCBleHByZXNzaW9uICpleHBy
-KQogewogCXVuc2lnbmVkIGxvbmcgb2Zmc2V0ID0gMDsKIAl3aGlsZSAoZXhwci0+dHlwZSA9
-PSBFWFBSX1BPUykgewotCQlvZmZzZXQgKz0gZXhwci0+aW5pdF9vZmZzZXQgPDwgMzsKKwkJ
-b2Zmc2V0ICs9IGV4cHItPmluaXRfb2Zmc2V0ICogYml0c19pbl9jaGFyOwogCQlleHByID0g
-ZXhwci0+aW5pdF9leHByOwogCX0KIAlpZiAoZXhwciAmJiBleHByLT5jdHlwZSkKZGlmZiAt
-LWdpdCBhL2Zsb3cuYyBiL2Zsb3cuYwppbmRleCA4MmZiMjNhLi5iZGIyYzI1IDEwMDY0NAot
-LS0gYS9mbG93LmMKKysrIGIvZmxvdy5jCkBAIC0xNiw2ICsxNiw3IEBACiAjaW5jbHVkZSAi
-ZXhwcmVzc2lvbi5oIgogI2luY2x1ZGUgImxpbmVhcml6ZS5oIgogI2luY2x1ZGUgImZsb3cu
-aCIKKyNpbmNsdWRlICJ0YXJnZXQuaCIKIAogdW5zaWduZWQgbG9uZyBiYl9nZW5lcmF0aW9u
-OwogCkBAIC0yNjUsOCArMjY2LDggQEAgdm9pZCBjb252ZXJ0X2xvYWRfaW5zdHJ1Y3Rpb24o
-c3RydWN0IGluc3RydWN0aW9uICppbnNuLCBwc2V1ZG9fdCBzcmMpCiAKIHN0YXRpYyBpbnQg
-b3ZlcmxhcHBpbmdfbWVtb3Aoc3RydWN0IGluc3RydWN0aW9uICphLCBzdHJ1Y3QgaW5zdHJ1
-Y3Rpb24gKmIpCiB7Ci0JdW5zaWduZWQgaW50IGFfc3RhcnQgPSBhLT5vZmZzZXQgPDwgMzsK
-LQl1bnNpZ25lZCBpbnQgYl9zdGFydCA9IGItPm9mZnNldCA8PCAzOworCXVuc2lnbmVkIGlu
-dCBhX3N0YXJ0ID0gYS0+b2Zmc2V0ICogYml0c19pbl9jaGFyOworCXVuc2lnbmVkIGludCBi
-X3N0YXJ0ID0gYi0+b2Zmc2V0ICogYml0c19pbl9jaGFyOwogCXVuc2lnbmVkIGludCBhX3Np
-emUgPSBhLT5zaXplOwogCXVuc2lnbmVkIGludCBiX3NpemUgPSBiLT5zaXplOwogCkBAIC0z
-NjQsMTEgKzM2NSwxMSBAQCBmb3VuZF9kb21pbmF0b3I6CiAJCXVzZV9wc2V1ZG8oaW5zbiwg
-cGhpLCBhZGRfcHNldWRvKGRvbWluYXRvcnMsIHBoaSkpOwogCX0gRU5EX0ZPUl9FQUNIX1BU
-UihwYXJlbnQpOwogCXJldHVybiAxOwotfQkJCit9CiAKIC8qCiAgKiBXZSBzaG91bGQgcHJv
-YmFibHkgc29ydCB0aGUgcGhpIGxpc3QganVzdCB0byBtYWtlIGl0IGVhc2llciB0byBjb21w
-YXJlCi0gKiBsYXRlciBmb3IgZXF1YWxpdHkuIAorICogbGF0ZXIgZm9yIGVxdWFsaXR5Lgog
-ICovCiB2b2lkIHJld3JpdGVfbG9hZF9pbnN0cnVjdGlvbihzdHJ1Y3QgaW5zdHJ1Y3Rpb24g
-Kmluc24sIHN0cnVjdCBwc2V1ZG9fbGlzdCAqZG9taW5hdG9ycykKIHsKQEAgLTUyOSw3ICs1
-MzAsNyBAQCBzdGF0aWMgdm9pZCBraWxsX2RlYWRfc3RvcmVzKHBzZXVkb190IHBzZXVkbywg
-dW5zaWduZWQgbG9uZyBnZW5lcmF0aW9uLCBzdHJ1Y3QgYgogICogVGhpcyBzaG91bGQgc2Vl
-IGlmIHRoZSAiaW5zbiIgdHJpdmlhbGx5IGRvbWluYXRlcyBzb21lIHByZXZpb3VzIHN0b3Jl
-LCBhbmQga2lsbCB0aGUKICAqIHN0b3JlIGlmIHVubmVjZXNzYXJ5LgogICovCi1zdGF0aWMg
-dm9pZCBraWxsX2RvbWluYXRlZF9zdG9yZXMocHNldWRvX3QgcHNldWRvLCBzdHJ1Y3QgaW5z
-dHJ1Y3Rpb24gKmluc24sIAorc3RhdGljIHZvaWQga2lsbF9kb21pbmF0ZWRfc3RvcmVzKHBz
-ZXVkb190IHBzZXVkbywgc3RydWN0IGluc3RydWN0aW9uICppbnNuLAogCXVuc2lnbmVkIGxv
-bmcgZ2VuZXJhdGlvbiwgc3RydWN0IGJhc2ljX2Jsb2NrICpiYiwgaW50IGxvY2FsLCBpbnQg
-Zm91bmQpCiB7CiAJc3RydWN0IGluc3RydWN0aW9uICpvbmU7CkBAIC01ODEsMTMgKzU4Miwx
-NCBAQCB2b2lkIGNoZWNrX2FjY2VzcyhzdHJ1Y3QgaW5zdHJ1Y3Rpb24gKmluc24pCiAJcHNl
-dWRvX3QgcHNldWRvID0gaW5zbi0+c3JjOwogCiAJaWYgKGluc24tPmJiICYmIHBzZXVkby0+
-dHlwZSA9PSBQU0VVRE9fU1lNKSB7Ci0JCWludCBvZmZzZXQgPSBpbnNuLT5vZmZzZXQsIGJp
-dCA9IChvZmZzZXQgPDwgMykgKyBpbnNuLT5zaXplOworCQlpbnQgb2Zmc2V0ID0gaW5zbi0+
-b2Zmc2V0LCBiaXQgPSAob2Zmc2V0ICogYml0c19pbl9jaGFyKSArIGluc24tPnNpemU7CiAJ
-CXN0cnVjdCBzeW1ib2wgKnN5bSA9IHBzZXVkby0+c3ltOwogCiAJCWlmIChzeW0tPmJpdF9z
-aXplID4gMCAmJiAob2Zmc2V0IDwgMCB8fCBiaXQgPiBzeW0tPmJpdF9zaXplKSkKIAkJCXdh
-cm5pbmcoaW5zbi0+cG9zLCAiaW52YWxpZCBhY2Nlc3MgJXMgJyVzJyAoJWQgJWQpIiwKIAkJ
-CQlvZmZzZXQgPCAwID8gImJlbG93IiA6ICJwYXN0IHRoZSBlbmQgb2YiLAotCQkJCXNob3df
-aWRlbnQoc3ltLT5pZGVudCksIG9mZnNldCwgc3ltLT5iaXRfc2l6ZSA+PiAzKTsKKwkJCQlz
-aG93X2lkZW50KHN5bS0+aWRlbnQpLCBvZmZzZXQsCisJCQkJc3ltLT5iaXRfc2l6ZSAvIGJp
-dHNfaW5fY2hhcik7CiAJfQogfQogCkBAIC03MDUsNyArNzA3LDcgQEAgZXh0ZXJuYWxfdmlz
-aWJpbGl0eToKIAkJCX0gRU5EX0ZPUl9FQUNIX1BUUihiYik7CiAJCX0KIAl9Ci0JCQkKKwog
-CXJldHVybjsKIH0KIApAQCAtODg3LDcgKzg4OSw3IEBAIHN0YXRpYyB2b2lkIHZyZnlfY2hp
-bGRyZW4oc3RydWN0IGJhc2ljX2Jsb2NrICpiYikKIAlkZWZhdWx0OgogCQlicmVhazsKIAl9
-Ci0JCQorCiAJRk9SX0VBQ0hfUFRSKGJiLT5jaGlsZHJlbiwgdG1wKSB7CiAJCXZyZnlfYmJf
-aW5fbGlzdChiYiwgdG1wLT5wYXJlbnRzKTsKIAl9IEVORF9GT1JfRUFDSF9QVFIodG1wKTsK
-ZGlmZiAtLWdpdCBhL3Nob3ctcGFyc2UuYyBiL3Nob3ctcGFyc2UuYwppbmRleCAwNjRhZjMy
-Li42M2Q5MTQ0IDEwMDY0NAotLS0gYS9zaG93LXBhcnNlLmMKKysrIGIvc2hvdy1wYXJzZS5j
-CkBAIC0yNDYsOCArMjQ2LDggQEAgZGVlcGVyOgogCiAJCXMgPSBtb2RpZmllcl9zdHJpbmco
-bW9kKTsKIAkJbGVuID0gc3RybGVuKHMpOwotCQluYW1lLT5zdGFydCAtPSBsZW47ICAgIAot
-CQltZW1jcHkobmFtZS0+c3RhcnQsIHMsIGxlbik7ICAKKwkJbmFtZS0+c3RhcnQgLT0gbGVu
-OworCQltZW1jcHkobmFtZS0+c3RhcnQsIHMsIGxlbik7CiAJCW1vZCA9IDA7CiAJCWFzID0g
-MDsKIAl9CkBAIC00MTIsNyArNDEyLDcgQEAgdm9pZCBzaG93X3N5bWJvbChzdHJ1Y3Qgc3lt
-Ym9sICpzeW0pCiAJCXN0cnVjdCBzdGF0ZW1lbnQgKnN0bXQgPSB0eXBlLT5zdG10OwogCQlp
-ZiAoc3RtdCkgewogCQkJaW50IHZhbDsKLQkJCXByaW50ZigiXG4iKTsJCQorCQkJcHJpbnRm
-KCJcbiIpOwogCQkJdmFsID0gc2hvd19zdGF0ZW1lbnQoc3RtdCk7CiAJCQlpZiAodmFsKQog
-CQkJCXByaW50ZigiXHRtb3YuJWRcdFx0cmV0dmFsLCVkXG4iLCBzdG10LT5yZXQtPmJpdF9z
-aXplLCB2YWwpOwpAQCAtNTg5LDcgKzU4OSw3IEBAIGludCBzaG93X3N0YXRlbWVudChzdHJ1
-Y3Qgc3RhdGVtZW50ICpzdG10KQogCQlpZiAocHJlX2NvbmRpdGlvbikgewogCQkJaWYgKHBy
-ZV9jb25kaXRpb24tPnR5cGUgPT0gRVhQUl9WQUxVRSkgewogCQkJCWlmICghcHJlX2NvbmRp
-dGlvbi0+dmFsdWUpIHsKLQkJCQkJbG9vcF9ib3R0b20gPSBuZXdfbGFiZWwoKTsgICAKKwkJ
-CQkJbG9vcF9ib3R0b20gPSBuZXdfbGFiZWwoKTsKIAkJCQkJcHJpbnRmKCJcdGptcFx0XHQu
-TCVkXG4iLCBsb29wX2JvdHRvbSk7CiAJCQkJfQogCQkJfSBlbHNlIHsKQEAgLTYyMyw3ICs2
-MjMsNyBAQCBpbnQgc2hvd19zdGF0ZW1lbnQoc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKIAl9
-CiAJY2FzZSBTVE1UX05PTkU6CiAJCWJyZWFrOwotCQorCiAJY2FzZSBTVE1UX0xBQkVMOgog
-CQlwcmludGYoIi5MJXA6XG4iLCBzdG10LT5sYWJlbF9pZGVudGlmaWVyKTsKIAkJc2hvd19z
-dGF0ZW1lbnQoc3RtdC0+bGFiZWxfc3RhdGVtZW50KTsKQEAgLTY0OSw5ICs2NDksOSBAQCBp
-bnQgc2hvd19zdGF0ZW1lbnQoc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKIAkJaW50IHZhbCA9
-IHNob3dfZXhwcmVzc2lvbihzdG10LT5yYW5nZV9leHByZXNzaW9uKTsKIAkJaW50IGxvdyA9
-IHNob3dfZXhwcmVzc2lvbihzdG10LT5yYW5nZV9sb3cpOwogCQlpbnQgaGlnaCA9IHNob3df
-ZXhwcmVzc2lvbihzdG10LT5yYW5nZV9oaWdoKTsKLQkJcHJpbnRmKCJcdHJhbmdlKCAlZCAl
-ZC0lZClcbiIsIHZhbCwgbG93LCBoaWdoKTsgCisJCXByaW50ZigiXHRyYW5nZSggJWQgJWQt
-JWQpXG4iLCB2YWwsIGxvdywgaGlnaCk7CiAJCWJyZWFrOwotCX0JCisJfQogCX0KIAlyZXR1
-cm4gMDsKIH0KQEAgLTY3Myw3ICs2NzMsNyBAQCBzdGF0aWMgaW50IHNob3dfY2FsbF9leHBy
-ZXNzaW9uKHN0cnVjdCBleHByZXNzaW9uICpleHByKQogCQlpbnQgbmV3ID0gc2hvd19leHBy
-ZXNzaW9uKGFyZyk7CiAJCWludCBzaXplID0gYXJnLT5jdHlwZS0+Yml0X3NpemU7CiAJCXBy
-aW50ZigiXHRwdXNoLiVkXHRcdHYlZFxuIiwgc2l6ZSwgbmV3KTsKLQkJZnJhbWVzaXplICs9
-IHNpemUgPj4gMzsKKwkJZnJhbWVzaXplICs9IHNpemUgLyBiaXRzX2luX2NoYXI7CiAJfSBF
-TkRfRk9SX0VBQ0hfUFRSX1JFVkVSU0UoYXJnKTsKIAogCWZuID0gZXhwci0+Zm47CkBAIC04
-NDUsNyArODQ1LDcgQEAgc3RhdGljIGludCBzaG93X2luY19kZWMoc3RydWN0IGV4cHJlc3Np
-b24gKmV4cHIsIGludCBwb3N0b3ApCiAJcHJpbnRmKCJcdCVzLiVkXHRcdHYlZCx2JWQsJDFc
-biIsIG9wbmFtZSwgYml0cywgbmV3LCByZXR2YWwpOwogCXNob3dfc3RvcmVfZ2VuKGJpdHMs
-IG5ldywgZXhwci0+dW5vcCwgYWRkcik7CiAJcmV0dXJuIHJldHZhbDsKLX0JCit9CiAKIHN0
-YXRpYyBpbnQgc2hvd19wcmVvcChzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhwcikKIHsKQEAgLTg2
-NCw3ICs4NjQsNyBAQCBzdGF0aWMgaW50IHNob3dfcHJlb3Aoc3RydWN0IGV4cHJlc3Npb24g
-KmV4cHIpCiBzdGF0aWMgaW50IHNob3dfcG9zdG9wKHN0cnVjdCBleHByZXNzaW9uICpleHBy
-KQogewogCXJldHVybiBzaG93X2luY19kZWMoZXhwciwgMSk7Ci19CQorfQogCiBzdGF0aWMg
-aW50IHNob3dfc3ltYm9sX2V4cHIoc3RydWN0IHN5bWJvbCAqc3ltKQogewpAQCAtOTE4LDcg
-KzkxOCw3IEBAIHN0YXRpYyBpbnQgc2hvd19jYXN0X2V4cHIoc3RydWN0IGV4cHJlc3Npb24g
-KmV4cHIpCiAKIAlvbGRfdHlwZSA9IGV4cHItPmNhc3RfZXhwcmVzc2lvbi0+Y3R5cGU7CiAJ
-bmV3X3R5cGUgPSBleHByLT5jYXN0X3R5cGU7Ci0JCisKIAlvbGRiaXRzID0gb2xkX3R5cGUt
-PmJpdF9zaXplOwogCW5ld2JpdHMgPSBuZXdfdHlwZS0+Yml0X3NpemU7CiAJaWYgKG9sZGJp
-dHMgPj0gbmV3Yml0cykKQEAgLTEwMTcsNyArMTAxNyw3IEBAIGFnYWluOgogCQkJZW50cnkg
-PSBlbnRyeS0+aWRlbnRfZXhwcmVzc2lvbjsKIAkJCWdvdG8gYWdhaW47CiAJCX0KLQkJCQor
-CiAJCWlmIChlbnRyeS0+dHlwZSA9PSBFWFBSX0lOREVYKSB7CiAJCQlwcmludGYoIiBBVCAn
-JWQuLiVkOlxuIiwgZW50cnktPmlkeF9mcm9tLCBlbnRyeS0+aWR4X3RvKTsKIAkJCWVudHJ5
-ID0gZW50cnktPmlkeF9leHByZXNzaW9uOwpAQCAtMTA1NywxMSArMTA1NywxMSBAQCBpbnQg
-c2hvd19leHByZXNzaW9uKHN0cnVjdCBleHByZXNzaW9uICpleHByKQogCQkJcG9zLT5saW5l
-LCBwb3MtPnBvcyk7CiAJCXJldHVybiAwOwogCX0KLQkJCisKIAlzd2l0Y2ggKGV4cHItPnR5
-cGUpIHsKIAljYXNlIEVYUFJfQ0FMTDoKIAkJcmV0dXJuIHNob3dfY2FsbF9leHByZXNzaW9u
-KGV4cHIpOwotCQkKKwogCWNhc2UgRVhQUl9BU1NJR05NRU5UOgogCQlyZXR1cm4gc2hvd19h
-c3NpZ25tZW50KGV4cHIpOwogCmRpZmYgLS1naXQgYS9zeW1ib2wuYyBiL3N5bWJvbC5jCmlu
-ZGV4IDMyOTI5MDcuLmEyMjczMWYgMTAwNjQ0Ci0tLSBhL3N5bWJvbC5jCisrKyBiL3N5bWJv
-bC5jCkBAIC0yMiw3ICsyMiw3IEBACiAKIC8qCiAgKiBTZWNvbmRhcnkgc3ltYm9sIGxpc3Qg
-Zm9yIHN0dWZmIHRoYXQgbmVlZHMgdG8gYmUgb3V0cHV0IGJlY2F1c2UgaXQKLSAqIHdhcyB1
-c2VkLiAKKyAqIHdhcyB1c2VkLgogICovCiBzdHJ1Y3Qgc3ltYm9sX2xpc3QgKnRyYW5zbGF0
-aW9uX3VuaXRfdXNlZF9saXN0ID0gTlVMTDsKIApAQCAtMTE3LDcgKzExNyw3IEBAIHN0YXRp
-YyB2b2lkIGxheV9vdXRfc3RydWN0KHN0cnVjdCBzeW1ib2wgKnN5bSwgc3RydWN0IHN0cnVj
-dF91bmlvbl9pbmZvICppbmZvKQogCX0KIAogCWJpdF9zaXplID0gaW5mby0+Yml0X3NpemU7
-Ci0JYmFzZV9zaXplID0gc3ltLT5iaXRfc2l6ZTsgCisJYmFzZV9zaXplID0gc3ltLT5iaXRf
-c2l6ZTsKIAogCS8qCiAJICogVW5zaXplZCBhcnJheXMgY2F1c2UgdXMgdG8gbm90IGFsaWdu
-IHRoZSByZXN1bHRpbmcKQEAgLTEyOCw3ICsxMjgsNyBAQCBzdGF0aWMgdm9pZCBsYXlfb3V0
-X3N0cnVjdChzdHJ1Y3Qgc3ltYm9sICpzeW0sIHN0cnVjdCBzdHJ1Y3RfdW5pb25faW5mbyAq
-aW5mbykKIAkJYmFzZV9zaXplID0gMDsKIAl9CiAKLQlhbGlnbl9iaXRfbWFzayA9IChzeW0t
-PmN0eXBlLmFsaWdubWVudCA8PCAzKSAtIDE7CisJYWxpZ25fYml0X21hc2sgPSAoc3ltLT5j
-dHlwZS5hbGlnbm1lbnQgKiBiaXRzX2luX2NoYXIpIC0gMTsKIAogCS8qCiAJICogQml0Zmll
-bGRzIGhhdmUgc29tZSB2ZXJ5IHNwZWNpYWwgcnVsZXMuLgpAQCAtMTQzLDcgKzE0Myw3IEBA
-IHN0YXRpYyB2b2lkIGxheV9vdXRfc3RydWN0KHN0cnVjdCBzeW1ib2wgKnN5bSwgc3RydWN0
-IHN0cnVjdF91bmlvbl9pbmZvICppbmZvKQogCQkJYml0X3NpemUgPSAoYml0X3NpemUgKyBh
-bGlnbl9iaXRfbWFzaykgJiB+YWxpZ25fYml0X21hc2s7CiAJCQliaXRfb2Zmc2V0ID0gMDsK
-IAkJfQotCQlzeW0tPm9mZnNldCA9IChiaXRfc2l6ZSAtIGJpdF9vZmZzZXQpID4+IDM7CisJ
-CXN5bS0+b2Zmc2V0ID0gKGJpdF9zaXplIC0gYml0X29mZnNldCkgLyBiaXRzX2luX2NoYXI7
-CiAJCXN5bS0+Yml0X29mZnNldCA9IGJpdF9vZmZzZXQ7CiAJCXN5bS0+Y3R5cGUuYmFzZV90
-eXBlLT5iaXRfb2Zmc2V0ID0gYml0X29mZnNldDsKIAkJaW5mby0+Yml0X3NpemUgPSBiaXRf
-c2l6ZSArIHdpZHRoOwpAQCAtMTU2LDcgKzE1Niw3IEBAIHN0YXRpYyB2b2lkIGxheV9vdXRf
-c3RydWN0KHN0cnVjdCBzeW1ib2wgKnN5bSwgc3RydWN0IHN0cnVjdF91bmlvbl9pbmZvICpp
-bmZvKQogCSAqIE90aGVyd2lzZSwganVzdCBhbGlnbiBpdCByaWdodCBhbmQgYWRkIGl0IHVw
-Li4KIAkgKi8KIAliaXRfc2l6ZSA9IChiaXRfc2l6ZSArIGFsaWduX2JpdF9tYXNrKSAmIH5h
-bGlnbl9iaXRfbWFzazsKLQlzeW0tPm9mZnNldCA9IGJpdF9zaXplID4+IDM7CisJc3ltLT5v
-ZmZzZXQgPSBiaXRfc2l6ZSAvIGJpdHNfaW5fY2hhcjsKIAogCWluZm8tPmJpdF9zaXplID0g
-Yml0X3NpemUgKyBiYXNlX3NpemU7CiAJLy8gd2FybmluZyAoc3ltLT5wb3MsICJyZWd1bGFy
-OiBvZmZzZXQ9JWQiLCBzeW0tPm9mZnNldCk7CkBAIC0xODIsNyArMTgyLDcgQEAgc3RhdGlj
-IHN0cnVjdCBzeW1ib2wgKiBleGFtaW5lX3N0cnVjdF91bmlvbl90eXBlKHN0cnVjdCBzeW1i
-b2wgKnN5bSwgaW50IGFkdmFuY2UKIAkJc3ltLT5jdHlwZS5hbGlnbm1lbnQgPSBpbmZvLm1h
-eF9hbGlnbjsKIAliaXRfc2l6ZSA9IGluZm8uYml0X3NpemU7CiAJaWYgKGluZm8uYWxpZ25f
-c2l6ZSkgewotCQliaXRfYWxpZ24gPSAoc3ltLT5jdHlwZS5hbGlnbm1lbnQgPDwgMyktMTsK
-KwkJYml0X2FsaWduID0gKHN5bS0+Y3R5cGUuYWxpZ25tZW50ICogYml0c19pbl9jaGFyKS0x
-OwogCQliaXRfc2l6ZSA9IChiaXRfc2l6ZSArIGJpdF9hbGlnbikgJiB+Yml0X2FsaWduOwog
-CX0KIAlzeW0tPmJpdF9zaXplID0gYml0X3NpemU7CkBAIC0zNDAsNyArMzQwLDcgQEAgc3Rh
-dGljIHN0cnVjdCBzeW1ib2wgKiBleGFtaW5lX25vZGVfdHlwZShzdHJ1Y3Qgc3ltYm9sICpz
-eW0pCiAJCWlmIChub2RlX3R5cGUgJiYgbm9kZV90eXBlLT5iaXRfc2l6ZSA+PSAwKQogCQkJ
-Yml0X3NpemUgPSBub2RlX3R5cGUtPmJpdF9zaXplICogY291bnQ7CiAJfQotCQorCiAJc3lt
-LT5iaXRfc2l6ZSA9IGJpdF9zaXplOwogCXJldHVybiBzeW07CiB9CkBAIC02NTQsNyArNjU0
-LDcgQEAgc3RhdGljIGludCBleHBhbmRfd2FybmluZyhzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhw
-ciwgaW50IGNvc3QpCiAJRk9SX0VBQ0hfUFRSIChhcmdsaXN0LCBhcmcpIHsKIAkJLyoKIAkJ
-ICogQ29uc3RhbnQgc3RyaW5ncyBnZXQgcHJpbnRlZCBvdXQgYXMgYSB3YXJuaW5nLiBCeSB0
-aGUKLQkJICogdGltZSB3ZSBnZXQgaGVyZSwgdGhlIEVYUFJfU1RSSU5HIGhhcyBiZWVuIGZ1
-bGx5IAorCQkgKiB0aW1lIHdlIGdldCBoZXJlLCB0aGUgRVhQUl9TVFJJTkcgaGFzIGJlZW4g
-ZnVsbHkKIAkJICogZXZhbHVhdGVkLCBzbyBieSBub3cgaXQncyBhbiBhbm9ueW1vdXMgc3lt
-Ym9sIHdpdGggYQogCQkgKiBzdHJpbmcgaW5pdGlhbGl6ZXIuCiAJCSAqCkBAIC04NzcsNyAr
-ODc3LDcgQEAgdm9pZCBpbml0X2N0eXBlKHZvaWQpCiAJCXN0cnVjdCBzeW1ib2wgKnN5bSA9
-IGN0eXBlLT5wdHI7CiAJCXVuc2lnbmVkIGxvbmcgYml0X3NpemUgPSBjdHlwZS0+Yml0X3Np
-emUgPyAqY3R5cGUtPmJpdF9zaXplIDogLTE7CiAJCXVuc2lnbmVkIGxvbmcgbWF4YWxpZ24g
-PSBjdHlwZS0+bWF4YWxpZ24gPyAqY3R5cGUtPm1heGFsaWduIDogMDsKLQkJdW5zaWduZWQg
-bG9uZyBhbGlnbm1lbnQgPSAoYml0X3NpemUgKyA3KSA+PiAzOworCQl1bnNpZ25lZCBsb25n
-IGFsaWdubWVudCA9IChiaXRfc2l6ZSArIGJpdHNfaW5fY2hhciAtIDEpIC8gYml0c19pbl9j
-aGFyOwogCiAJCWlmIChhbGlnbm1lbnQgPiBtYXhhbGlnbikKIAkJCWFsaWdubWVudCA9IG1h
-eGFsaWduOwpkaWZmIC0tZ2l0IGEvdGFyZ2V0LmMgYi90YXJnZXQuYwppbmRleCBiZjFiYjhm
-Li5hMGVlMDEwIDEwMDY0NAotLS0gYS90YXJnZXQuYworKysgYi90YXJnZXQuYwpAQCAtMTEs
-NiArMTEsOCBAQCBzdHJ1Y3Qgc3ltYm9sICpzc2l6ZV90X2N0eXBlID0gJmludF9jdHlwZTsK
-ICAqLwogaW50IG1heF9hbGlnbm1lbnQgPSAxNjsKIAoraW50IGJpdHNfaW5fdW5pdCA9IDg7
-CisKIC8qCiAgKiBJbnRlZ2VyIGRhdGEgdHlwZXMKICAqLwpkaWZmIC0tZ2l0IGEvdG9rZW5p
-emUuYyBiL3Rva2VuaXplLmMKaW5kZXggZTcyYzU2ZS4uNjdkYWE5NyAxMDA2NDQKLS0tIGEv
-dG9rZW5pemUuYworKysgYi90b2tlbml6ZS5jCkBAIC05Niw3ICs5Niw3IEBAIHN0YXRpYyBj
-aGFyICpjaGFyc3RyKGNoYXIgKnB0ciwgdW5zaWduZWQgY2hhciBjLCB1bnNpZ25lZCBjaGFy
-IGVzY2FwZSwgdW5zaWduZWQKIAl9CiAJaWYgKCFpc2RpZ2l0KG5leHQpKQogCQlyZXR1cm4g
-cHRyICsgc3ByaW50ZihwdHIsICIlbyIsIGMpOwotCQkKKwogCXJldHVybiBwdHIgKyBzcHJp
-bnRmKHB0ciwgIiUwM28iLCBjKTsKIH0KIApAQCAtMTYxLDcgKzE2MSw3IEBAIGNvbnN0IGNo
-YXIgKnNob3dfdG9rZW4oY29uc3Qgc3RydWN0IHRva2VuICp0b2tlbikKIAljYXNlIFRPS0VO
-X1NUUkVBTUVORDoKIAkJc3ByaW50ZihidWZmZXIsICI8ZW5kIG9mICclcyc+Iiwgc3RyZWFt
-X25hbWUodG9rZW4tPnBvcy5zdHJlYW0pKTsKIAkJcmV0dXJuIGJ1ZmZlcjsKLQkKKwogCWRl
-ZmF1bHQ6CiAJCXJldHVybiAiV1RGPz8/IjsKIAl9CkBAIC00ODMsNyArNDgzLDcgQEAgc3Rh
-dGljIGludCBlc2NhcGVjaGFyKGludCBmaXJzdCwgaW50IHR5cGUsIHN0cmVhbV90ICpzdHJl
-YW0sIGludCAqdmFscCkKIAkJCQlpbnQgbnIgPSAyOwogCQkJCXZhbHVlIC09ICcwJzsKIAkJ
-CQl3aGlsZSAobmV4dCA+PSAnMCcgJiYgbmV4dCA8PSAnOScpIHsKLQkJCQkJdmFsdWUgPSAo
-dmFsdWUgPDwgMykgKyAobmV4dC0nMCcpOworCQkJCQl2YWx1ZSA9ICh2YWx1ZSo4KSArIChu
-ZXh0LScwJyk7CiAJCQkJCW5leHQgPSBuZXh0Y2hhcihzdHJlYW0pOwogCQkJCQlpZiAoIS0t
-bnIpCiAJCQkJCQlicmVhazsKQEAgLTU3Miw3ICs1NzIsNyBAQCBzdGF0aWMgaW50IGdldF9z
-dHJpbmdfdG9rZW4oaW50IG5leHQsIHN0cmVhbV90ICpzdHJlYW0pCiAJdG9rZW5fdHlwZSh0
-b2tlbikgPSBUT0tFTl9TVFJJTkc7CiAJdG9rZW4tPnN0cmluZyA9IHN0cmluZzsKIAlhZGRf
-dG9rZW4oc3RyZWFtKTsKLQkKKwogCXJldHVybiBuZXh0OwogfQogCkBAIC04NzUsNyArODc1
-LDcgQEAgc3RhdGljIGludCBnZXRfb25lX2lkZW50aWZpZXIoaW50IGMsIHN0cmVhbV90ICpz
-dHJlYW0pCiAJdG9rZW4tPmlkZW50ID0gaWRlbnQ7CiAJYWRkX3Rva2VuKHN0cmVhbSk7CiAJ
-cmV0dXJuIG5leHQ7Ci19CQkKK30KIAogc3RhdGljIGludCBnZXRfb25lX3Rva2VuKGludCBj
-LCBzdHJlYW1fdCAqc3RyZWFtKQogewo=
---------------070305050603040608050108--
-
---------------enig87D352A3E9EA1421B5CCE263
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFIZXisf9E0noFvlzgRAjvIAJwPZAhv7nP5dtc5zLnMwqPblrs8AQCgxMu7
-EZzbDf2JwXyEtXgE8G8p18Y=
-=qzTk
------END PGP SIGNATURE-----
-
---------------enig87D352A3E9EA1421B5CCE263--
+On Fri, Jun 27, 2008 at 4:32 PM, David Given <dg@cowlark.com> wrote:
+> Christopher Li wrote:
+> [...]
+>> You are right that point out a bug (assumption) of sparse which byte is 8 bits.
+>> Using bits_in_byte is instead of 8 is better there.
+>> Using bits_in_char assumes char has same bits as byte. That is my read
+>> of the C spec.
+>
+> Yes, indeed, I'd managed to get my terminology muddled to the confusion
+> of everyone.
+>
+> Okay, I've gone and looked at the implementation of this stuff; it would
+> appear that modifying the code to supply the back end with units scaled
+> in something other than C chars is actually quite complicated, so I
+> haven't tried to do that. However, I'm enclosing a patch that should,
+> hopefully, fix the cases where it's assuming 8 bit bytes. Hopefully I've
+>  managed to catch all the cases, without breaking the octal parse code...
+>
+> (I haven't used git before; is this the right format?)
+>
+> --
+> ┌─── ｄｇ＠ｃｏｗｌａｒｋ．ｃｏｍ ───── http://www.cowlark.com ─────
+> │ "I have always wished for my computer to be as easy to use as my
+> │ telephone; my wish has come true because I can no longer figure out
+> │ how to use my telephone." --- Bjarne Stroustrup
+>
+> commit 0752e02d2c7c3f67b7c1835c86bf77f11c8384dd
+> Author: dg <dg@cowlark.com>
+> Date:   Sat Jun 28 00:24:36 2008 +0100
+>
+>    Changed use of hardcoded 8s when converting bits to bytes to use bits_in_char instead.
+>
+> diff --git a/compile-i386.c b/compile-i386.c
+> index 8526408..3bbc9c7 100644
+> --- a/compile-i386.c
+> +++ b/compile-i386.c
+> @@ -1584,7 +1584,7 @@ static struct storage *emit_select_expr(struct expression *expr)
+>        /*
+>         * Do the actual select: check the conditional for zero,
+>         * move false over true if zero
+> -        */
+> +        */
+>        insn("test", reg_cond, reg_cond, NULL);
+>        insn("cmovz", reg_false, reg_true, NULL);
+>
+> @@ -2081,7 +2081,7 @@ static struct storage *x86_call_expression(struct expression *expr)
+>                insn("pushl", new, NULL,
+>                     !framesize ? "begin function call" : NULL);
+>
+> -               framesize += size >> 3;
+> +               framesize += size / bits_in_char;
+>        } END_FOR_EACH_PTR_REVERSE(arg);
+>
+>        fn = expr->fn;
+> diff --git a/evaluate.c b/evaluate.c
+> index 2a126dd..6018e0c 100644
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -87,13 +87,13 @@ static struct symbol *evaluate_string(struct expression *expr)
+>        array->ctype.alignment = 1;
+>        array->ctype.modifiers = MOD_STATIC;
+>        array->ctype.base_type = &char_ctype;
+> -
+> +
+>        addr->symbol = sym;
+>        addr->ctype = &lazy_ptr_ctype;
+>
+>        expr->type = EXPR_PREOP;
+>        expr->op = '*';
+> -       expr->unop = addr;
+> +       expr->unop = addr;
+>        expr->ctype = sym;
+>        return sym;
+>  }
+> @@ -579,7 +579,7 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *i
+>        }
+>
+>        /* Get the size of whatever the pointer points to */
+> -       multiply = base->bit_size >> 3;
+> +       multiply = base->bit_size / bits_in_char;
+>
+>        if (ctype == &null_ctype)
+>                ctype = &ptr_ctype;
+> @@ -831,7 +831,7 @@ static struct symbol *evaluate_ptr_sub(struct expression *expr)
+>                struct expression *sub = alloc_expression(expr->pos, EXPR_BINOP);
+>                struct expression *div = expr;
+>                struct expression *val = alloc_expression(expr->pos, EXPR_VALUE);
+> -               unsigned long value = lbase->bit_size >> 3;
+> +               unsigned long value = lbase->bit_size / bits_in_char;
+>
+>                val->ctype = size_t_ctype;
+>                val->value = value;
+> @@ -850,7 +850,7 @@ static struct symbol *evaluate_ptr_sub(struct expression *expr)
+>                div->left = sub;
+>                div->right = val;
+>        }
+> -
+> +
+>        return ssize_t_ctype;
+>  }
+>
+> @@ -1591,7 +1591,7 @@ static struct symbol *degenerate(struct expression *expr)
+>                                e3->op = '+';
+>                                e3->left = e0;
+>                                e3->right = alloc_const_expression(expr->pos,
+> -                                                       expr->r_bitpos >> 3);
+> +                                                       expr->r_bitpos / bits_in_char);
+>                                e3->ctype = &lazy_ptr_ctype;
+>                        } else {
+>                                e3 = e0;
+> @@ -1727,7 +1727,7 @@ static struct symbol *evaluate_postop(struct expression *expr)
+>        } else if (class == TYPE_PTR) {
+>                struct symbol *target = examine_pointer_target(ctype);
+>                if (!is_function(target))
+> -                       multiply = target->bit_size >> 3;
+> +                       multiply = target->bit_size / bits_in_char;
+>        }
+>
+>        if (multiply) {
+> @@ -1850,7 +1850,7 @@ static struct symbol *find_identifier(struct ident *ident, struct symbol_list *_
+>                                        continue;
+>                                *offset += sym->offset;
+>                                return sub;
+> -                       }
+> +                       }
+>                }
+>        } while ((list = list->next) != head);
+>        return NULL;
+> @@ -1949,7 +1949,7 @@ static struct symbol *evaluate_member_dereference(struct expression *expr)
+>                        expr->base = deref->base;
+>                        expr->r_bitpos = deref->r_bitpos;
+>                }
+> -               expr->r_bitpos += offset << 3;
+> +               expr->r_bitpos += offset * bits_in_char;
+>                expr->type = EXPR_SLICE;
+>                expr->r_nrbits = member->bit_size;
+>                expr->r_bitpos += member->bit_offset;
+> @@ -2040,7 +2040,7 @@ static struct symbol *evaluate_sizeof(struct expression *expr)
+>        if ((size < 0) || (size & 7))
+>                expression_error(expr, "cannot size expression");
+>        expr->type = EXPR_VALUE;
+> -       expr->value = size >> 3;
+> +       expr->value = size / bits_in_char;
+>        expr->taint = 0;
+>        expr->ctype = size_t_ctype;
+>        return size_t_ctype;
+> @@ -2074,7 +2074,7 @@ static struct symbol *evaluate_ptrsizeof(struct expression *expr)
+>        if (size & 7)
+>                size = 0;
+>        expr->type = EXPR_VALUE;
+> -       expr->value = size >> 3;
+> +       expr->value = size / bits_in_char;
+>        expr->taint = 0;
+>        expr->ctype = size_t_ctype;
+>        return size_t_ctype;
+> @@ -2865,7 +2865,7 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+>                        unrestrict(idx, i_class, &i_type);
+>                        idx = cast_to(idx, size_t_ctype);
+>                        m = alloc_const_expression(expr->pos,
+> -                                                  ctype->bit_size >> 3);
+> +                                                  ctype->bit_size / bits_in_char);
+>                        m->ctype = size_t_ctype;
+>                        m->flags = Int_const_expr;
+>                        expr->type = EXPR_BINOP;
+> diff --git a/example.c b/example.c
+> index ae897dc..b844d4f 100644
+> --- a/example.c
+> +++ b/example.c
+> @@ -27,7 +27,7 @@ static const char *opcodes[] = {
+>        [OP_INVOKE] = "invoke",
+>        [OP_COMPUTEDGOTO] = "jmp *",
+>        [OP_UNWIND] = "unwind",
+> -
+> +
+>        /* Binary */
+>        [OP_ADD] = "add",
+>        [OP_SUB] = "sub",
+> @@ -40,7 +40,7 @@ static const char *opcodes[] = {
+>        [OP_SHL] = "shl",
+>        [OP_LSR] = "lsr",
+>        [OP_ASR] = "asr",
+> -
+> +
+>        /* Logical */
+>        [OP_AND] = "and",
+>        [OP_OR] = "or",
+> @@ -66,7 +66,7 @@ static const char *opcodes[] = {
+>
+>        /* Special three-input */
+>        [OP_SEL] = "select",
+> -
+> +
+>        /* Memory */
+>        [OP_MALLOC] = "malloc",
+>        [OP_FREE] = "free",
+> @@ -818,7 +818,7 @@ static const char *generic(struct bb_state *state, pseudo_t pseudo)
+>                put_operand(state, op);
+>                reg = target_reg(state, pseudo, NULL);
+>                output_insn(state, "lea %s,%s", show_op(state, op), reg->name);
+> -               return reg->name;
+> +               return reg->name;
+>
+>        default:
+>                str = show_op(state, op);
+> @@ -870,7 +870,7 @@ static void kill_dead_reg(struct hardreg *reg)
+>  {
+>        if (reg->dead) {
+>                pseudo_t p;
+> -
+> +
+>                FOR_EACH_PTR(reg->contains, p) {
+>                        if (CURRENT_TAG(p) & TAG_DEAD) {
+>                                DELETE_CURRENT_PTR(p);
+> @@ -1011,7 +1011,7 @@ static void kill_pseudo(struct bb_state *state, pseudo_t pseudo)
+>                                continue;
+>                        if (CURRENT_TAG(p) & TAG_DEAD)
+>                                reg->dead--;
+> -                       output_comment(state, "removing pseudo %s from reg %s",
+> +                       output_comment(state, "removing pseudo %s from reg %s",
+>                                show_pseudo(pseudo), reg->name);
+>                        DELETE_CURRENT_PTR(p);
+>                } END_FOR_EACH_PTR(p);
+> @@ -1069,7 +1069,7 @@ static const char *conditional[] = {
+>        [OP_SET_BE] = "be",
+>        [OP_SET_AE] = "ae"
+>  };
+> -
+> +
+>
+>  static void generate_branch(struct bb_state *state, struct instruction *br)
+>  {
+> @@ -1187,7 +1187,7 @@ static void replace_asm_percent(const char **src_p, char **dst_p, struct asm_arg
+>                if (index < nr)
+>                        replace_asm_arg(dst_p, args+index);
+>                break;
+> -       }
+> +       }
+>        *src_p = src;
+>        return;
+>  }
+> @@ -1583,7 +1583,7 @@ static int final_pseudo_flush(struct bb_state *state, pseudo_t pseudo, struct ha
+>        struct hardreg *dst;
+>
+>        /*
+> -        * Since this pseudo is live at exit, we'd better have output
+> +        * Since this pseudo is live at exit, we'd better have output
+>         * storage for it..
+>         */
+>        hash = find_storage_hash(pseudo, state->outputs);
+> @@ -1829,8 +1829,8 @@ static void set_up_arch_entry(struct entrypoint *ep, struct instruction *entry)
+>
+>                        in->type = REG_FRAME;
+>                        in->offset = offset;
+> -
+> -                       offset += bits >> 3;
+> +
+> +                       offset += bits / bits_in_char;
+>                }
+>                i++;
+>                NEXT_PTR_LIST(argtype);
+> @@ -1936,7 +1936,7 @@ static int compile(struct symbol_list *list)
+>                if (ep)
+>                        output(ep);
+>        } END_FOR_EACH_PTR(sym);
+> -
+> +
+>        return 0;
+>  }
+>
+> diff --git a/expand.c b/expand.c
+> index 032f0c5..d1aa019 100644
+> --- a/expand.c
+> +++ b/expand.c
+> @@ -100,7 +100,7 @@ Int:
+>        // Stop here unless checking for truncation
+>        if (!Wcast_truncate || conservative)
+>                return;
+> -
+> +
+>        // Check if we dropped any bits..
+>        oldsignmask = 1ULL << (old_size-1);
+>        oldmask = oldsignmask | (oldsignmask-1);
+> @@ -179,7 +179,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
+>                sl |= ~(mask-1);
+>        if (is_signed && (sr & mask))
+>                sr |= ~(mask-1);
+> -
+> +
+>        switch (CONVERT(expr->op,is_signed)) {
+>        case SIGNED('+'):
+>        case UNSIGNED('+'):
+> @@ -224,7 +224,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
+>
+>        case UNSIGNED('/'):
+>                if (!r) goto Div;
+> -               v = l / r;
+> +               v = l / r;
+>                break;
+>
+>        case SIGNED('%'):
+> @@ -241,7 +241,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
+>        case SIGNED(SPECIAL_LEFTSHIFT):
+>        case UNSIGNED(SPECIAL_LEFTSHIFT):
+>                v = l << r;
+> -               break;
+> +               break;
+>
+>        case SIGNED(SPECIAL_RIGHTSHIFT):
+>                v = sl >> r;
+> @@ -536,7 +536,7 @@ static int expand_conditional(struct expression *expr)
+>
+>        return cost + cond_cost + BRANCH_COST;
+>  }
+> -
+> +
+>  static int expand_assignment(struct expression *expr)
+>  {
+>        expand_expression(expr->left);
+> @@ -822,7 +822,7 @@ static int expand_expression_list(struct expression_list *list)
+>        return cost;
+>  }
+>
+> -/*
+> +/*
+>  * We can simplify nested position expressions if
+>  * this is a simple (single) positional expression.
+>  */
+> @@ -880,7 +880,7 @@ static unsigned long bit_offset(const struct expression *expr)
+>  {
+>        unsigned long offset = 0;
+>        while (expr->type == EXPR_POS) {
+> -               offset += expr->init_offset << 3;
+> +               offset += expr->init_offset * bits_in_char;
+>                expr = expr->init_expr;
+>        }
+>        if (expr && expr->ctype)
+> diff --git a/flow.c b/flow.c
+> index 82fb23a..bdb2c25 100644
+> --- a/flow.c
+> +++ b/flow.c
+> @@ -16,6 +16,7 @@
+>  #include "expression.h"
+>  #include "linearize.h"
+>  #include "flow.h"
+> +#include "target.h"
+>
+>  unsigned long bb_generation;
+>
+> @@ -265,8 +266,8 @@ void convert_load_instruction(struct instruction *insn, pseudo_t src)
+>
+>  static int overlapping_memop(struct instruction *a, struct instruction *b)
+>  {
+> -       unsigned int a_start = a->offset << 3;
+> -       unsigned int b_start = b->offset << 3;
+> +       unsigned int a_start = a->offset * bits_in_char;
+> +       unsigned int b_start = b->offset * bits_in_char;
+>        unsigned int a_size = a->size;
+>        unsigned int b_size = b->size;
+>
+> @@ -364,11 +365,11 @@ found_dominator:
+>                use_pseudo(insn, phi, add_pseudo(dominators, phi));
+>        } END_FOR_EACH_PTR(parent);
+>        return 1;
+> -}
+> +}
+>
+>  /*
+>  * We should probably sort the phi list just to make it easier to compare
+> - * later for equality.
+> + * later for equality.
+>  */
+>  void rewrite_load_instruction(struct instruction *insn, struct pseudo_list *dominators)
+>  {
+> @@ -529,7 +530,7 @@ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct b
+>  * This should see if the "insn" trivially dominates some previous store, and kill the
+>  * store if unnecessary.
+>  */
+> -static void kill_dominated_stores(pseudo_t pseudo, struct instruction *insn,
+> +static void kill_dominated_stores(pseudo_t pseudo, struct instruction *insn,
+>        unsigned long generation, struct basic_block *bb, int local, int found)
+>  {
+>        struct instruction *one;
+> @@ -581,13 +582,14 @@ void check_access(struct instruction *insn)
+>        pseudo_t pseudo = insn->src;
+>
+>        if (insn->bb && pseudo->type == PSEUDO_SYM) {
+> -               int offset = insn->offset, bit = (offset << 3) + insn->size;
+> +               int offset = insn->offset, bit = (offset * bits_in_char) + insn->size;
+>                struct symbol *sym = pseudo->sym;
+>
+>                if (sym->bit_size > 0 && (offset < 0 || bit > sym->bit_size))
+>                        warning(insn->pos, "invalid access %s '%s' (%d %d)",
+>                                offset < 0 ? "below" : "past the end of",
+> -                               show_ident(sym->ident), offset, sym->bit_size >> 3);
+> +                               show_ident(sym->ident), offset,
+> +                               sym->bit_size / bits_in_char);
+>        }
+>  }
+>
+> @@ -705,7 +707,7 @@ external_visibility:
+>                        } END_FOR_EACH_PTR(bb);
+>                }
+>        }
+> -
+> +
+>        return;
+>  }
+>
+> @@ -887,7 +889,7 @@ static void vrfy_children(struct basic_block *bb)
+>        default:
+>                break;
+>        }
+> -
+> +
+>        FOR_EACH_PTR(bb->children, tmp) {
+>                vrfy_bb_in_list(bb, tmp->parents);
+>        } END_FOR_EACH_PTR(tmp);
+> diff --git a/show-parse.c b/show-parse.c
+> index 064af32..63d9144 100644
+> --- a/show-parse.c
+> +++ b/show-parse.c
+> @@ -246,8 +246,8 @@ deeper:
+>
+>                s = modifier_string(mod);
+>                len = strlen(s);
+> -               name->start -= len;
+> -               memcpy(name->start, s, len);
+> +               name->start -= len;
+> +               memcpy(name->start, s, len);
+>                mod = 0;
+>                as = 0;
+>        }
+> @@ -412,7 +412,7 @@ void show_symbol(struct symbol *sym)
+>                struct statement *stmt = type->stmt;
+>                if (stmt) {
+>                        int val;
+> -                       printf("\n");
+> +                       printf("\n");
+>                        val = show_statement(stmt);
+>                        if (val)
+>                                printf("\tmov.%d\t\tretval,%d\n", stmt->ret->bit_size, val);
+> @@ -589,7 +589,7 @@ int show_statement(struct statement *stmt)
+>                if (pre_condition) {
+>                        if (pre_condition->type == EXPR_VALUE) {
+>                                if (!pre_condition->value) {
+> -                                       loop_bottom = new_label();
+> +                                       loop_bottom = new_label();
+>                                        printf("\tjmp\t\t.L%d\n", loop_bottom);
+>                                }
+>                        } else {
+> @@ -623,7 +623,7 @@ int show_statement(struct statement *stmt)
+>        }
+>        case STMT_NONE:
+>                break;
+> -
+> +
+>        case STMT_LABEL:
+>                printf(".L%p:\n", stmt->label_identifier);
+>                show_statement(stmt->label_statement);
+> @@ -649,9 +649,9 @@ int show_statement(struct statement *stmt)
+>                int val = show_expression(stmt->range_expression);
+>                int low = show_expression(stmt->range_low);
+>                int high = show_expression(stmt->range_high);
+> -               printf("\trange( %d %d-%d)\n", val, low, high);
+> +               printf("\trange( %d %d-%d)\n", val, low, high);
+>                break;
+> -       }
+> +       }
+>        }
+>        return 0;
+>  }
+> @@ -673,7 +673,7 @@ static int show_call_expression(struct expression *expr)
+>                int new = show_expression(arg);
+>                int size = arg->ctype->bit_size;
+>                printf("\tpush.%d\t\tv%d\n", size, new);
+> -               framesize += size >> 3;
+> +               framesize += size / bits_in_char;
+>        } END_FOR_EACH_PTR_REVERSE(arg);
+>
+>        fn = expr->fn;
+> @@ -845,7 +845,7 @@ static int show_inc_dec(struct expression *expr, int postop)
+>        printf("\t%s.%d\t\tv%d,v%d,$1\n", opname, bits, new, retval);
+>        show_store_gen(bits, new, expr->unop, addr);
+>        return retval;
+> -}
+> +}
+>
+>  static int show_preop(struct expression *expr)
+>  {
+> @@ -864,7 +864,7 @@ static int show_preop(struct expression *expr)
+>  static int show_postop(struct expression *expr)
+>  {
+>        return show_inc_dec(expr, 1);
+> -}
+> +}
+>
+>  static int show_symbol_expr(struct symbol *sym)
+>  {
+> @@ -918,7 +918,7 @@ static int show_cast_expr(struct expression *expr)
+>
+>        old_type = expr->cast_expression->ctype;
+>        new_type = expr->cast_type;
+> -
+> +
+>        oldbits = old_type->bit_size;
+>        newbits = new_type->bit_size;
+>        if (oldbits >= newbits)
+> @@ -1017,7 +1017,7 @@ again:
+>                        entry = entry->ident_expression;
+>                        goto again;
+>                }
+> -
+> +
+>                if (entry->type == EXPR_INDEX) {
+>                        printf(" AT '%d..%d:\n", entry->idx_from, entry->idx_to);
+>                        entry = entry->idx_expression;
+> @@ -1057,11 +1057,11 @@ int show_expression(struct expression *expr)
+>                        pos->line, pos->pos);
+>                return 0;
+>        }
+> -
+> +
+>        switch (expr->type) {
+>        case EXPR_CALL:
+>                return show_call_expression(expr);
+> -
+> +
+>        case EXPR_ASSIGNMENT:
+>                return show_assignment(expr);
+>
+> diff --git a/symbol.c b/symbol.c
+> index 3292907..a22731f 100644
+> --- a/symbol.c
+> +++ b/symbol.c
+> @@ -22,7 +22,7 @@
+>
+>  /*
+>  * Secondary symbol list for stuff that needs to be output because it
+> - * was used.
+> + * was used.
+>  */
+>  struct symbol_list *translation_unit_used_list = NULL;
+>
+> @@ -117,7 +117,7 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
+>        }
+>
+>        bit_size = info->bit_size;
+> -       base_size = sym->bit_size;
+> +       base_size = sym->bit_size;
+>
+>        /*
+>         * Unsized arrays cause us to not align the resulting
+> @@ -128,7 +128,7 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
+>                base_size = 0;
+>        }
+>
+> -       align_bit_mask = (sym->ctype.alignment << 3) - 1;
+> +       align_bit_mask = (sym->ctype.alignment * bits_in_char) - 1;
+>
+>        /*
+>         * Bitfields have some very special rules..
+> @@ -143,7 +143,7 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
+>                        bit_size = (bit_size + align_bit_mask) & ~align_bit_mask;
+>                        bit_offset = 0;
+>                }
+> -               sym->offset = (bit_size - bit_offset) >> 3;
+> +               sym->offset = (bit_size - bit_offset) / bits_in_char;
+>                sym->bit_offset = bit_offset;
+>                sym->ctype.base_type->bit_offset = bit_offset;
+>                info->bit_size = bit_size + width;
+> @@ -156,7 +156,7 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
+>         * Otherwise, just align it right and add it up..
+>         */
+>        bit_size = (bit_size + align_bit_mask) & ~align_bit_mask;
+> -       sym->offset = bit_size >> 3;
+> +       sym->offset = bit_size / bits_in_char;
+>
+>        info->bit_size = bit_size + base_size;
+>        // warning (sym->pos, "regular: offset=%d", sym->offset);
+> @@ -182,7 +182,7 @@ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance
+>                sym->ctype.alignment = info.max_align;
+>        bit_size = info.bit_size;
+>        if (info.align_size) {
+> -               bit_align = (sym->ctype.alignment << 3)-1;
+> +               bit_align = (sym->ctype.alignment * bits_in_char)-1;
+>                bit_size = (bit_size + bit_align) & ~bit_align;
+>        }
+>        sym->bit_size = bit_size;
+> @@ -340,7 +340,7 @@ static struct symbol * examine_node_type(struct symbol *sym)
+>                if (node_type && node_type->bit_size >= 0)
+>                        bit_size = node_type->bit_size * count;
+>        }
+> -
+> +
+>        sym->bit_size = bit_size;
+>        return sym;
+>  }
+> @@ -654,7 +654,7 @@ static int expand_warning(struct expression *expr, int cost)
+>        FOR_EACH_PTR (arglist, arg) {
+>                /*
+>                 * Constant strings get printed out as a warning. By the
+> -                * time we get here, the EXPR_STRING has been fully
+> +                * time we get here, the EXPR_STRING has been fully
+>                 * evaluated, so by now it's an anonymous symbol with a
+>                 * string initializer.
+>                 *
+> @@ -877,7 +877,7 @@ void init_ctype(void)
+>                struct symbol *sym = ctype->ptr;
+>                unsigned long bit_size = ctype->bit_size ? *ctype->bit_size : -1;
+>                unsigned long maxalign = ctype->maxalign ? *ctype->maxalign : 0;
+> -               unsigned long alignment = (bit_size + 7) >> 3;
+> +               unsigned long alignment = (bit_size + bits_in_char - 1) / bits_in_char;
+>
+>                if (alignment > maxalign)
+>                        alignment = maxalign;
+> diff --git a/target.c b/target.c
+> index bf1bb8f..a0ee010 100644
+> --- a/target.c
+> +++ b/target.c
+> @@ -11,6 +11,8 @@ struct symbol *ssize_t_ctype = &int_ctype;
+>  */
+>  int max_alignment = 16;
+>
+> +int bits_in_unit = 8;
+> +
+>  /*
+>  * Integer data types
+>  */
+> diff --git a/tokenize.c b/tokenize.c
+> index e72c56e..67daa97 100644
+> --- a/tokenize.c
+> +++ b/tokenize.c
+> @@ -96,7 +96,7 @@ static char *charstr(char *ptr, unsigned char c, unsigned char escape, unsigned
+>        }
+>        if (!isdigit(next))
+>                return ptr + sprintf(ptr, "%o", c);
+> -
+> +
+>        return ptr + sprintf(ptr, "%03o", c);
+>  }
+>
+> @@ -161,7 +161,7 @@ const char *show_token(const struct token *token)
+>        case TOKEN_STREAMEND:
+>                sprintf(buffer, "<end of '%s'>", stream_name(token->pos.stream));
+>                return buffer;
+> -
+> +
+>        default:
+>                return "WTF???";
+>        }
+> @@ -483,7 +483,7 @@ static int escapechar(int first, int type, stream_t *stream, int *valp)
+>                                int nr = 2;
+>                                value -= '0';
+>                                while (next >= '0' && next <= '9') {
+> -                                       value = (value << 3) + (next-'0');
+> +                                       value = (value*8) + (next-'0');
+>                                        next = nextchar(stream);
+>                                        if (!--nr)
+>                                                break;
+> @@ -572,7 +572,7 @@ static int get_string_token(int next, stream_t *stream)
+>        token_type(token) = TOKEN_STRING;
+>        token->string = string;
+>        add_token(stream);
+> -
+> +
+>        return next;
+>  }
+>
+> @@ -875,7 +875,7 @@ static int get_one_identifier(int c, stream_t *stream)
+>        token->ident = ident;
+>        add_token(stream);
+>        return next;
+> -}
+> +}
+>
+>  static int get_one_token(int c, stream_t *stream)
+>  {
+>
+>
