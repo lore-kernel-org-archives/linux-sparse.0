@@ -1,113 +1,227 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
+From: David Given <dg@cowlark.com>
 Subject: Re: Pointer arithmetic error
-Date: Fri, 27 Jun 2008 17:29:37 -0700
-Message-ID: <1214612977.25532.14.camel@josh-work.beaverton.ibm.com>
-References: <486428D7.8080603@cowlark.com>
-	 <70318cbf0806261651u7a163d54m4d100012bce5db49@mail.gmail.com>
-	 <48643191.307@cowlark.com> <1214560196.20755.73.camel@tara.firmix.at>
-	 <4864C710.8000208@cowlark.com>	 <1214565644.20755.80.camel@tara.firmix.at>
-	 <4864F31C.3090606@cowlark.com>	 <1214577926.20755.98.camel@tara.firmix.at>
-	 <48650B35.5040505@cowlark.com>
-	 <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>
-	 <486578A9.7000900@cowlark.com>
+Date: Sun, 29 Jun 2008 01:10:28 +0100
+Message-ID: <4866D2F4.8090109@cowlark.com>
+References: <486428D7.8080603@cowlark.com> <48643191.307@cowlark.com>	 <1214560196.20755.73.camel@tara.firmix.at>	 <4864C710.8000208@cowlark.com>	 <1214565644.20755.80.camel@tara.firmix.at>	 <4864F31C.3090606@cowlark.com>	 <1214577926.20755.98.camel@tara.firmix.at>	 <48650B35.5040505@cowlark.com>	 <70318cbf0806271101n2f9a65buc72764ee97f9ced9@mail.gmail.com>	 <486578A9.7000900@cowlark.com> <70318cbf0806271717v42f4b1e0ocbdf9498b1417878@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigCCB25230A7A6E38FA02A60F7"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e33.co.us.ibm.com ([32.97.110.151]:42910 "EHLO
-	e33.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754914AbYF1A3l (ORCPT
+Received: from b.painless.aaisp.net.uk ([81.187.30.52]:58857 "EHLO
+	b.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751682AbYF2AKq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jun 2008 20:29:41 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e33.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id m5S0TeXb007185
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 20:29:40 -0400
-Received: from d03av02.boulder.ibm.com (d03av02.boulder.ibm.com [9.17.195.168])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m5S0Tdwe172832
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 18:29:39 -0600
-Received: from d03av02.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av02.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m5S0TcF4005619
-	for <linux-sparse@vger.kernel.org>; Fri, 27 Jun 2008 18:29:39 -0600
-In-Reply-To: <486578A9.7000900@cowlark.com>
+	Sat, 28 Jun 2008 20:10:46 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by b.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1KCkV9-0003An-TY
+	for linux-sparse@vger.kernel.org; Sun, 29 Jun 2008 01:10:44 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id 2B1802008D
+	for <linux-sparse@vger.kernel.org>; Sun, 29 Jun 2008 01:10:40 +0100 (BST)
+In-Reply-To: <70318cbf0806271717v42f4b1e0ocbdf9498b1417878@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Given <dg@cowlark.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sat, 2008-06-28 at 00:32 +0100, David Given wrote:
-> diff --git a/compile-i386.c b/compile-i386.c
-> index 8526408..3bbc9c7 100644
-> --- a/compile-i386.c
-> +++ b/compile-i386.c
-> @@ -1584,7 +1584,7 @@ static struct storage *emit_select_expr(struct
-> expression *expr)
->  	/*
->  	 * Do the actual select: check the conditional for zero,
->  	 * move false over true if zero
-> -	 */=20
-> +	 */
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigCCB25230A7A6E38FA02A60F7
+Content-Type: multipart/mixed;
+ boundary="------------080305050302090507030908"
 
-Don't include whitespace changes in unrelated patches.  You have many
-whitespace changes in this patch; I haven't commented on all of them.
+This is a multi-part message in MIME format.
+--------------080305050302090507030908
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-> @@ -2040,7 +2040,7 @@ static struct symbol *evaluate_sizeof(struct
-> expression *expr)
->  	if ((size < 0) || (size & 7))
->  		expression_error(expr, "cannot size expression");
+Christopher Li wrote:
+> Your patch is white space damaged.
+>=20
+> While you are there, you might want to consider macro
+>=20
+> bits_to_byte(x)
+> byte_to_bits(x)
+>=20
+> To isolate out the conversion. It should generate the same code.
+> Marginally more readable.
 
-This "size & 7" represents an assumption about bits_in_char as well; it
-checks if the size represents an integral number of chars.  You'll need
-to look for other instances of 7 as well, to catch cases like this.
+Yes, good idea. Updated patch enclosed. I've also applied Josh
+Triplett's fixes.
 
-> @@ -2074,7 +2074,7 @@ static struct symbol *evaluate_ptrsizeof(struct
-> expression *expr)
->  	if (size & 7)
->  		size =3D 0;
+(This one's generated manually because I've been totally unable to make
+git behave for me. Can anyone suggest a decent getting-started guide?)
 
-Same problem here.
+--=20
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
+=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
+cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82 "I have always wished for my computer to be as easy to use as m=
+y
+=E2=94=82 telephone; my wish has come true because I can no longer figure=
+ out
+=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
 
->  	 * storage for it..
->  	 */
->  	hash =3D find_storage_hash(pseudo, state->outputs);
-> @@ -1829,8 +1829,8 @@ static void set_up_arch_entry(struct entrypoint
-> *ep, struct instruction *entry)
-> =20
->  			in->type =3D REG_FRAME;
->  			in->offset =3D offset;
-> -		=09
-> -			offset +=3D bits >> 3;
-> +
-> +			offset +=3D bits / bits_in_char;
+--------------080305050302090507030908
+Content-Type: text/plain;
+ name="diff"
+Content-Transfer-Encoding: base64
+Content-Disposition: inline;
+ filename="diff"
 
-=EF=BB=BF=EF=BB=BF=EF=BB=BFThe first line represents a whitespace-only =
-change.
+ZGlmZiAtcnd1IC4vY29tcGlsZS1pMzg2LmMgLi4vc3BhcnNlL2NvbXBpbGUtaTM4Ni5jCi0t
+LSAuL2NvbXBpbGUtaTM4Ni5jCTIwMDgtMDYtMjggMjI6NDQ6MjEuNzA2NTU0OTk4ICswMTAw
+CisrKyAuLi9zcGFyc2UvY29tcGlsZS1pMzg2LmMJMjAwOC0wNi0yOCAyMzo0NToyMS4yNDY1
+NTQ2MjcgKzAxMDAKQEAgLTIwODEsNyArMjA4MSw3IEBACiAJCWluc24oInB1c2hsIiwgbmV3
+LCBOVUxMLAogCQkgICAgICFmcmFtZXNpemUgPyAiYmVnaW4gZnVuY3Rpb24gY2FsbCIgOiBO
+VUxMKTsKIAotCQlmcmFtZXNpemUgKz0gc2l6ZSA+PiAzOworCQlmcmFtZXNpemUgKz0gYml0
+c190b19ieXRlcyhzaXplKTsKIAl9IEVORF9GT1JfRUFDSF9QVFJfUkVWRVJTRShhcmcpOwog
+CiAJZm4gPSBleHByLT5mbjsKT25seSBpbiAuOiBkaWZmCmRpZmYgLXJ3dSAuL2V2YWx1YXRl
+LmMgLi4vc3BhcnNlL2V2YWx1YXRlLmMKLS0tIC4vZXZhbHVhdGUuYwkyMDA4LTA2LTI4IDIy
+OjQ0OjIxLjcwNjU1NDk5OCArMDEwMAorKysgLi4vc3BhcnNlL2V2YWx1YXRlLmMJMjAwOC0w
+Ni0yOCAyMzo1MDo0Mi4zMDY1NTU0NDAgKzAxMDAKQEAgLTU3OSw3ICs1NzksNyBAQAogCX0K
+IAogCS8qIEdldCB0aGUgc2l6ZSBvZiB3aGF0ZXZlciB0aGUgcG9pbnRlciBwb2ludHMgdG8g
+Ki8KLQltdWx0aXBseSA9IGJhc2UtPmJpdF9zaXplID4+IDM7CisJbXVsdGlwbHkgPSBiaXRz
+X3RvX2J5dGVzKGJhc2UtPmJpdF9zaXplKTsKIAogCWlmIChjdHlwZSA9PSAmbnVsbF9jdHlw
+ZSkKIAkJY3R5cGUgPSAmcHRyX2N0eXBlOwpAQCAtODMxLDcgKzgzMSw3IEBACiAJCXN0cnVj
+dCBleHByZXNzaW9uICpzdWIgPSBhbGxvY19leHByZXNzaW9uKGV4cHItPnBvcywgRVhQUl9C
+SU5PUCk7CiAJCXN0cnVjdCBleHByZXNzaW9uICpkaXYgPSBleHByOwogCQlzdHJ1Y3QgZXhw
+cmVzc2lvbiAqdmFsID0gYWxsb2NfZXhwcmVzc2lvbihleHByLT5wb3MsIEVYUFJfVkFMVUUp
+OwotCQl1bnNpZ25lZCBsb25nIHZhbHVlID0gbGJhc2UtPmJpdF9zaXplID4+IDM7CisJCXVu
+c2lnbmVkIGxvbmcgdmFsdWUgPSBiaXRzX3RvX2J5dGVzKGxiYXNlLT5iaXRfc2l6ZSk7CiAK
+IAkJdmFsLT5jdHlwZSA9IHNpemVfdF9jdHlwZTsKIAkJdmFsLT52YWx1ZSA9IHZhbHVlOwpA
+QCAtMTU5MSw3ICsxNTkxLDcgQEAKIAkJCQllMy0+b3AgPSAnKyc7CiAJCQkJZTMtPmxlZnQg
+PSBlMDsKIAkJCQllMy0+cmlnaHQgPSBhbGxvY19jb25zdF9leHByZXNzaW9uKGV4cHItPnBv
+cywKLQkJCQkJCQlleHByLT5yX2JpdHBvcyA+PiAzKTsKKwkJCQkJCQliaXRzX3RvX2J5dGVz
+KGV4cHItPnJfYml0cG9zKSk7CiAJCQkJZTMtPmN0eXBlID0gJmxhenlfcHRyX2N0eXBlOwog
+CQkJfSBlbHNlIHsKIAkJCQllMyA9IGUwOwpAQCAtMTcyNyw3ICsxNzI3LDcgQEAKIAl9IGVs
+c2UgaWYgKGNsYXNzID09IFRZUEVfUFRSKSB7CiAJCXN0cnVjdCBzeW1ib2wgKnRhcmdldCA9
+IGV4YW1pbmVfcG9pbnRlcl90YXJnZXQoY3R5cGUpOwogCQlpZiAoIWlzX2Z1bmN0aW9uKHRh
+cmdldCkpCi0JCQltdWx0aXBseSA9IHRhcmdldC0+Yml0X3NpemUgPj4gMzsKKwkJCW11bHRp
+cGx5ID0gYml0c190b19ieXRlcyh0YXJnZXQtPmJpdF9zaXplKTsKIAl9CiAKIAlpZiAobXVs
+dGlwbHkpIHsKQEAgLTE5NDksNyArMTk0OSw3IEBACiAJCQlleHByLT5iYXNlID0gZGVyZWYt
+PmJhc2U7CiAJCQlleHByLT5yX2JpdHBvcyA9IGRlcmVmLT5yX2JpdHBvczsKIAkJfQotCQll
+eHByLT5yX2JpdHBvcyArPSBvZmZzZXQgPDwgMzsKKwkJZXhwci0+cl9iaXRwb3MgKz0gYnl0
+ZXNfdG9fYml0cyhvZmZzZXQpOwogCQlleHByLT50eXBlID0gRVhQUl9TTElDRTsKIAkJZXhw
+ci0+cl9ucmJpdHMgPSBtZW1iZXItPmJpdF9zaXplOwogCQlleHByLT5yX2JpdHBvcyArPSBt
+ZW1iZXItPmJpdF9vZmZzZXQ7CkBAIC0yMDM3LDEwICsyMDM3LDEwIEBACiAJCXJldHVybiBO
+VUxMOwogCiAJc2l6ZSA9IHR5cGUtPmJpdF9zaXplOwotCWlmICgoc2l6ZSA8IDApIHx8IChz
+aXplICYgNykpCisJaWYgKChzaXplIDwgMCkgfHwgKHNpemUgJiAoYml0c19pbl9jaGFyIC0g
+MSkpKQogCQlleHByZXNzaW9uX2Vycm9yKGV4cHIsICJjYW5ub3Qgc2l6ZSBleHByZXNzaW9u
+Iik7CiAJZXhwci0+dHlwZSA9IEVYUFJfVkFMVUU7Ci0JZXhwci0+dmFsdWUgPSBzaXplID4+
+IDM7CisJZXhwci0+dmFsdWUgPSBiaXRzX3RvX2J5dGVzKHNpemUpOwogCWV4cHItPnRhaW50
+ID0gMDsKIAlleHByLT5jdHlwZSA9IHNpemVfdF9jdHlwZTsKIAlyZXR1cm4gc2l6ZV90X2N0
+eXBlOwpAQCAtMjA3MSwxMCArMjA3MSwxMCBAQAogCQlyZXR1cm4gTlVMTDsKIAl9CiAJc2l6
+ZSA9IHR5cGUtPmJpdF9zaXplOwotCWlmIChzaXplICYgNykKKwlpZiAoc2l6ZSAmIChiaXRz
+X2luX2NoYXItMSkpCiAJCXNpemUgPSAwOwogCWV4cHItPnR5cGUgPSBFWFBSX1ZBTFVFOwot
+CWV4cHItPnZhbHVlID0gc2l6ZSA+PiAzOworCWV4cHItPnZhbHVlID0gYml0c190b19ieXRl
+cyhzaXplKTsKIAlleHByLT50YWludCA9IDA7CiAJZXhwci0+Y3R5cGUgPSBzaXplX3RfY3R5
+cGU7CiAJcmV0dXJuIHNpemVfdF9jdHlwZTsKQEAgLTI4NjUsNyArMjg2NSw3IEBACiAJCQl1
+bnJlc3RyaWN0KGlkeCwgaV9jbGFzcywgJmlfdHlwZSk7CiAJCQlpZHggPSBjYXN0X3RvKGlk
+eCwgc2l6ZV90X2N0eXBlKTsKIAkJCW0gPSBhbGxvY19jb25zdF9leHByZXNzaW9uKGV4cHIt
+PnBvcywKLQkJCQkJCSAgIGN0eXBlLT5iaXRfc2l6ZSA+PiAzKTsKKwkJCQkJCSAgIGJpdHNf
+dG9fYnl0ZXMoY3R5cGUtPmJpdF9zaXplKSk7CiAJCQltLT5jdHlwZSA9IHNpemVfdF9jdHlw
+ZTsKIAkJCW0tPmZsYWdzID0gSW50X2NvbnN0X2V4cHI7CiAJCQlleHByLT50eXBlID0gRVhQ
+Ul9CSU5PUDsKZGlmZiAtcnd1IC4vZXhhbXBsZS5jIC4uL3NwYXJzZS9leGFtcGxlLmMKLS0t
+IC4vZXhhbXBsZS5jCTIwMDgtMDYtMjggMjI6NDQ6MjEuNzA2NTU0OTk4ICswMTAwCisrKyAu
+Li9zcGFyc2UvZXhhbXBsZS5jCTIwMDgtMDYtMjggMjM6NDc6MzguNzUwNTU4MzQ2ICswMTAw
+CkBAIC0xODMwLDcgKzE4MzAsNyBAQAogCQkJaW4tPnR5cGUgPSBSRUdfRlJBTUU7CiAJCQlp
+bi0+b2Zmc2V0ID0gb2Zmc2V0OwogCQkJCi0JCQlvZmZzZXQgKz0gYml0cyA+PiAzOworCQkJ
+b2Zmc2V0ICs9IGJpdHNfdG9fYnl0ZXMoYml0cyk7CiAJCX0KIAkJaSsrOwogCQlORVhUX1BU
+Ul9MSVNUKGFyZ3R5cGUpOwpkaWZmIC1yd3UgLi9leHBhbmQuYyAuLi9zcGFyc2UvZXhwYW5k
+LmMKLS0tIC4vZXhwYW5kLmMJMjAwOC0wNi0yOCAyMjo0NDoyMS43MTA1NTU0MTUgKzAxMDAK
+KysrIC4uL3NwYXJzZS9leHBhbmQuYwkyMDA4LTA2LTI4IDIzOjQ5OjQ2LjUyMzMwOTU1OSAr
+MDEwMApAQCAtODgwLDcgKzg4MCw3IEBACiB7CiAJdW5zaWduZWQgbG9uZyBvZmZzZXQgPSAw
+OwogCXdoaWxlIChleHByLT50eXBlID09IEVYUFJfUE9TKSB7Ci0JCW9mZnNldCArPSBleHBy
+LT5pbml0X29mZnNldCA8PCAzOworCQlvZmZzZXQgKz0gYnl0ZXNfdG9fYml0cyhleHByLT5p
+bml0X29mZnNldCk7CiAJCWV4cHIgPSBleHByLT5pbml0X2V4cHI7CiAJfQogCWlmIChleHBy
+ICYmIGV4cHItPmN0eXBlKQpkaWZmIC1yd3UgLi9mbG93LmMgLi4vc3BhcnNlL2Zsb3cuYwot
+LS0gLi9mbG93LmMJMjAwOC0wNi0yOCAyMjo0NDoyMS43MTA1NTU0MTUgKzAxMDAKKysrIC4u
+L3NwYXJzZS9mbG93LmMJMjAwOC0wNi0yOCAyMzo0OTo0NS4wMTQ1NTQ1MTggKzAxMDAKQEAg
+LTE2LDYgKzE2LDcgQEAKICNpbmNsdWRlICJleHByZXNzaW9uLmgiCiAjaW5jbHVkZSAibGlu
+ZWFyaXplLmgiCiAjaW5jbHVkZSAiZmxvdy5oIgorI2luY2x1ZGUgInRhcmdldC5oIgogCiB1
+bnNpZ25lZCBsb25nIGJiX2dlbmVyYXRpb247CiAKQEAgLTI2NSw4ICsyNjYsOCBAQAogCiBz
+dGF0aWMgaW50IG92ZXJsYXBwaW5nX21lbW9wKHN0cnVjdCBpbnN0cnVjdGlvbiAqYSwgc3Ry
+dWN0IGluc3RydWN0aW9uICpiKQogewotCXVuc2lnbmVkIGludCBhX3N0YXJ0ID0gYS0+b2Zm
+c2V0IDw8IDM7Ci0JdW5zaWduZWQgaW50IGJfc3RhcnQgPSBiLT5vZmZzZXQgPDwgMzsKKwl1
+bnNpZ25lZCBpbnQgYV9zdGFydCA9IGJ5dGVzX3RvX2JpdHMoYS0+b2Zmc2V0KTsKKwl1bnNp
+Z25lZCBpbnQgYl9zdGFydCA9IGJ5dGVzX3RvX2JpdHMoYi0+b2Zmc2V0KTsKIAl1bnNpZ25l
+ZCBpbnQgYV9zaXplID0gYS0+c2l6ZTsKIAl1bnNpZ25lZCBpbnQgYl9zaXplID0gYi0+c2l6
+ZTsKIApAQCAtNTgxLDEzICs1ODIsMTQgQEAKIAlwc2V1ZG9fdCBwc2V1ZG8gPSBpbnNuLT5z
+cmM7CiAKIAlpZiAoaW5zbi0+YmIgJiYgcHNldWRvLT50eXBlID09IFBTRVVET19TWU0pIHsK
+LQkJaW50IG9mZnNldCA9IGluc24tPm9mZnNldCwgYml0ID0gKG9mZnNldCA8PCAzKSArIGlu
+c24tPnNpemU7CisJCWludCBvZmZzZXQgPSBpbnNuLT5vZmZzZXQsIGJpdCA9IGJ5dGVzX3Rv
+X2JpdHMob2Zmc2V0KSArIGluc24tPnNpemU7CiAJCXN0cnVjdCBzeW1ib2wgKnN5bSA9IHBz
+ZXVkby0+c3ltOwogCiAJCWlmIChzeW0tPmJpdF9zaXplID4gMCAmJiAob2Zmc2V0IDwgMCB8
+fCBiaXQgPiBzeW0tPmJpdF9zaXplKSkKIAkJCXdhcm5pbmcoaW5zbi0+cG9zLCAiaW52YWxp
+ZCBhY2Nlc3MgJXMgJyVzJyAoJWQgJWQpIiwKIAkJCQlvZmZzZXQgPCAwID8gImJlbG93IiA6
+ICJwYXN0IHRoZSBlbmQgb2YiLAotCQkJCXNob3dfaWRlbnQoc3ltLT5pZGVudCksIG9mZnNl
+dCwgc3ltLT5iaXRfc2l6ZSA+PiAzKTsKKwkJCQlzaG93X2lkZW50KHN5bS0+aWRlbnQpLCBv
+ZmZzZXQsCisJCQkJYml0c190b19ieXRlcyhzeW0tPmJpdF9zaXplKSk7CiAJfQogfQogCmRp
+ZmYgLXJ3dSAuL3Nob3ctcGFyc2UuYyAuLi9zcGFyc2Uvc2hvdy1wYXJzZS5jCi0tLSAuL3No
+b3ctcGFyc2UuYwkyMDA4LTA2LTI4IDIyOjQ0OjIxLjcxODU1NTkyNiArMDEwMAorKysgLi4v
+c3BhcnNlL3Nob3ctcGFyc2UuYwkyMDA4LTA2LTI4IDIzOjQ3OjQwLjAxMDU1MzYxNyArMDEw
+MApAQCAtNjczLDcgKzY3Myw3IEBACiAJCWludCBuZXcgPSBzaG93X2V4cHJlc3Npb24oYXJn
+KTsKIAkJaW50IHNpemUgPSBhcmctPmN0eXBlLT5iaXRfc2l6ZTsKIAkJcHJpbnRmKCJcdHB1
+c2guJWRcdFx0diVkXG4iLCBzaXplLCBuZXcpOwotCQlmcmFtZXNpemUgKz0gc2l6ZSA+PiAz
+OworCQlmcmFtZXNpemUgKz0gYml0c190b19ieXRlcyhzaXplKTsKIAl9IEVORF9GT1JfRUFD
+SF9QVFJfUkVWRVJTRShhcmcpOwogCiAJZm4gPSBleHByLT5mbjsKZGlmZiAtcnd1IC4vc3lt
+Ym9sLmMgLi4vc3BhcnNlL3N5bWJvbC5jCi0tLSAuL3N5bWJvbC5jCTIwMDgtMDYtMjggMjI6
+NDQ6MjEuNzIyNTU1MTc4ICswMTAwCisrKyAuLi9zcGFyc2Uvc3ltYm9sLmMJMjAwOC0wNi0y
+OCAyMzo0OTo0NS43NTg1NTUzODUgKzAxMDAKQEAgLTEyOCw3ICsxMjgsNyBAQAogCQliYXNl
+X3NpemUgPSAwOwogCX0KIAotCWFsaWduX2JpdF9tYXNrID0gKHN5bS0+Y3R5cGUuYWxpZ25t
+ZW50IDw8IDMpIC0gMTsKKwlhbGlnbl9iaXRfbWFzayA9IGJ5dGVzX3RvX2JpdHMoc3ltLT5j
+dHlwZS5hbGlnbm1lbnQpIC0gMTsKIAogCS8qCiAJICogQml0ZmllbGRzIGhhdmUgc29tZSB2
+ZXJ5IHNwZWNpYWwgcnVsZXMuLgpAQCAtMTQzLDcgKzE0Myw3IEBACiAJCQliaXRfc2l6ZSA9
+IChiaXRfc2l6ZSArIGFsaWduX2JpdF9tYXNrKSAmIH5hbGlnbl9iaXRfbWFzazsKIAkJCWJp
+dF9vZmZzZXQgPSAwOwogCQl9Ci0JCXN5bS0+b2Zmc2V0ID0gKGJpdF9zaXplIC0gYml0X29m
+ZnNldCkgPj4gMzsKKwkJc3ltLT5vZmZzZXQgPSBiaXRzX3RvX2J5dGVzKGJpdF9zaXplIC0g
+Yml0X29mZnNldCk7CiAJCXN5bS0+Yml0X29mZnNldCA9IGJpdF9vZmZzZXQ7CiAJCXN5bS0+
+Y3R5cGUuYmFzZV90eXBlLT5iaXRfb2Zmc2V0ID0gYml0X29mZnNldDsKIAkJaW5mby0+Yml0
+X3NpemUgPSBiaXRfc2l6ZSArIHdpZHRoOwpAQCAtMTU2LDcgKzE1Niw3IEBACiAJICogT3Ro
+ZXJ3aXNlLCBqdXN0IGFsaWduIGl0IHJpZ2h0IGFuZCBhZGQgaXQgdXAuLgogCSAqLwogCWJp
+dF9zaXplID0gKGJpdF9zaXplICsgYWxpZ25fYml0X21hc2spICYgfmFsaWduX2JpdF9tYXNr
+OwotCXN5bS0+b2Zmc2V0ID0gYml0X3NpemUgPj4gMzsKKwlzeW0tPm9mZnNldCA9IGJpdHNf
+dG9fYnl0ZXMoYml0X3NpemUpOwogCiAJaW5mby0+Yml0X3NpemUgPSBiaXRfc2l6ZSArIGJh
+c2Vfc2l6ZTsKIAkvLyB3YXJuaW5nIChzeW0tPnBvcywgInJlZ3VsYXI6IG9mZnNldD0lZCIs
+IHN5bS0+b2Zmc2V0KTsKQEAgLTE4Miw3ICsxODIsNyBAQAogCQlzeW0tPmN0eXBlLmFsaWdu
+bWVudCA9IGluZm8ubWF4X2FsaWduOwogCWJpdF9zaXplID0gaW5mby5iaXRfc2l6ZTsKIAlp
+ZiAoaW5mby5hbGlnbl9zaXplKSB7Ci0JCWJpdF9hbGlnbiA9IChzeW0tPmN0eXBlLmFsaWdu
+bWVudCA8PCAzKS0xOworCQliaXRfYWxpZ24gPSBieXRlc190b19iaXRzKHN5bS0+Y3R5cGUu
+YWxpZ25tZW50KS0xOwogCQliaXRfc2l6ZSA9IChiaXRfc2l6ZSArIGJpdF9hbGlnbikgJiB+
+Yml0X2FsaWduOwogCX0KIAlzeW0tPmJpdF9zaXplID0gYml0X3NpemU7CkBAIC04NzcsNyAr
+ODc3LDcgQEAKIAkJc3RydWN0IHN5bWJvbCAqc3ltID0gY3R5cGUtPnB0cjsKIAkJdW5zaWdu
+ZWQgbG9uZyBiaXRfc2l6ZSA9IGN0eXBlLT5iaXRfc2l6ZSA/ICpjdHlwZS0+Yml0X3NpemUg
+OiAtMTsKIAkJdW5zaWduZWQgbG9uZyBtYXhhbGlnbiA9IGN0eXBlLT5tYXhhbGlnbiA/ICpj
+dHlwZS0+bWF4YWxpZ24gOiAwOwotCQl1bnNpZ25lZCBsb25nIGFsaWdubWVudCA9IChiaXRf
+c2l6ZSArIDcpID4+IDM7CisJCXVuc2lnbmVkIGxvbmcgYWxpZ25tZW50ID0gYml0c190b19i
+eXRlcyhiaXRfc2l6ZSArIGJpdHNfaW5fY2hhciAtIDEpOwogCiAJCWlmIChhbGlnbm1lbnQg
+PiBtYXhhbGlnbikKIAkJCWFsaWdubWVudCA9IG1heGFsaWduOwpkaWZmIC1yd3UgLi90YXJn
+ZXQuaCAuLi9zcGFyc2UvdGFyZ2V0LmgKLS0tIC4vdGFyZ2V0LmgJMjAwOC0wNi0yOCAyMjo0
+NDoyMS43MjI1NTUxNzggKzAxMDAKKysrIC4uL3NwYXJzZS90YXJnZXQuaAkyMDA4LTA2LTI4
+IDIzOjQ0OjUwLjc2NjU1NDc4NyArMDEwMApAQCAtNDIsNCArNDIsMTQgQEAKIGV4dGVybiBp
+bnQgYml0c19pbl9lbnVtOwogZXh0ZXJuIGludCBlbnVtX2FsaWdubWVudDsKIAorLyoKKyAq
+IEhlbHBlciBmdW5jdGlvbnMgZm9yIGNvbnZlcnRpbmcgYml0cyB0byBieXRlcyBhbmQgdmlj
+ZSB2ZXJzYS4KKyAqLworCitzdGF0aWMgaW5saW5lIGludCBiaXRzX3RvX2J5dGVzKGludCBi
+aXRzKQoreyByZXR1cm4gYml0cyAvIGJpdHNfaW5fY2hhcjsgfQorCitzdGF0aWMgaW5saW5l
+IGludCBieXRlc190b19iaXRzKGludCBieXRlcykKK3sgcmV0dXJuIGJ5dGVzICogYml0c19p
+bl9jaGFyOyB9CisKICNlbmRpZgo=
+--------------080305050302090507030908--
 
-> --- a/target.c
-> +++ b/target.c
-> @@ -11,6 +11,8 @@ struct symbol *ssize_t_ctype =3D &int_ctype;
->   */
->  int max_alignment =3D 16;
-> =20
-> +int bits_in_unit =3D 8;
-> +
+--------------enigCCB25230A7A6E38FA02A60F7
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Unused.
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-> @@ -483,7 +483,7 @@ static int escapechar(int first, int type,
-> stream_t *stream, int *valp)
->  				int nr =3D 2;
->  				value -=3D '0';
->  				while (next >=3D '0' && next <=3D '9') {
-> -					value =3D (value << 3) + (next-'0');
-> +					value =3D (value*8) + (next-'0');
+iD8DBQFIZtL7f9E0noFvlzgRAo0YAKC6eQ9uiwDTZKO1fVH6esYRe73LuQCfT1Zj
+6c9OM9RzktuRuZBfuVrToPY=
+=8SuM
+-----END PGP SIGNATURE-----
 
-This does not relate to bits_per_char, and should not change.
-
-- Josh Triplett
-
-
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--------------enigCCB25230A7A6E38FA02A60F7--
