@@ -1,58 +1,118 @@
-From: Chris Lattner <clattner@apple.com>
-Subject: Re: Feature request - a macro defined for GCC
-Date: Thu, 3 Jul 2008 14:24:28 -0700
-Message-ID: <23A4CFBC-4157-4B08-BA99-FBBCA6DDFEA4@apple.com>
-References: <BLU125-W17EAD8591F0443962FC5E5A09E0@phx.gbl> <BLU125-W344BFBA01CF733DBD08F3FA09E0@phx.gbl> <486AC5A2.4070103@tuliptree.org> <BLU125-W495B0DAC339F02DDE29479A0990@phx.gbl> <486AE891.4020805@tuliptree.org> <BLU125-W23C2C0C257AF9E56E1B886A0990@phx.gbl> <486CF7C9.60001@tuliptree.org> <49C57313-8636-400D-8121-1EE7B78CAB26@apple.com> <1215119546.11853.10.camel@josh-work.beaverton.ibm.com>
-Mime-Version: 1.0 (Apple Message framework v924)
-Content-Type: text/plain; charset=US-ASCII; format=flowed; delsp=yes
-Content-Transfer-Encoding: 7bit
-Return-path: <gcc-return-147738-gcc=m.gmane.org@gcc.gnu.org>
-In-Reply-To: <1215119546.11853.10.camel@josh-work.beaverton.ibm.com>
-List-Unsubscribe: <mailto:gcc-unsubscribe-gcc=m.gmane.org@gcc.gnu.org>
-List-Archive: <http://gcc.gnu.org/ml/gcc/>
-List-Post: <mailto:gcc@gcc.gnu.org>
-List-Help: <http://gcc.gnu.org/ml/>
-Sender: gcc-owner@gcc.gnu.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
-Cc: Jim Wilson <wilson@tuliptree.org>, x z <hzmonte@hotmail.com>, gcc@gnu.org, linux-sparse@vger.kernel.org
+From: David Given <dg@cowlark.com>
+Subject: Adding type information to instructions
+Date: Sat, 05 Jul 2008 00:43:24 +0100
+Message-ID: <486EB59C.100@cowlark.com>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigFD63256230295195B38DE98A"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from c.painless.aaisp.net.uk ([81.187.30.53]:55691 "EHLO
+	c.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751523AbYGDXne (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 4 Jul 2008 19:43:34 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by c.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1KEuw8-00029V-CG
+	for linux-sparse@vger.kernel.org; Sat, 05 Jul 2008 00:43:32 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id AEC7220134
+	for <linux-sparse@vger.kernel.org>; Sat,  5 Jul 2008 00:43:29 +0100 (BST)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Jul 3, 2008, at 2:12 PM, Josh Triplett wrote:
-> I'd suggest defining exactly one new preprocessor symbol, to advertise
-> the support for the feature-testing mechanism.  For instance,
-> __HAVE_EXTENSION_SUPPORTED__, or __FEATURE_SUPPORTED_SUPPORTED__. :)
-> The rest could use syntax like you suggest above.  For instance:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigFD63256230295195B38DE98A
+Content-Type: multipart/mixed;
+ boundary="------------070509020402010206020203"
 
+This is a multi-part message in MIME format.
+--------------070509020402010206020203
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Sure.  The idea was that you'd do something like:
+I've been having trouble finding the types of pseudos; the approach I've
+been using, which is to follow the chain of pseudo's definers until I
+find an instruction with enough type information to use, turns out to
+fail utterly on OP_LOAD instructions; I can't find any way of getting
+enough information from the opcode's arguments to determine the type of
+the target.
 
-#ifndef __FEATURE_SUPPORTED_SUPPORTED__  /* or whatever :) */
-#define has_extension(x) 0
-#else
-#define has_extension(x) __has_extension__(x)
-#endif
+As a result, I've had to make a minor patch to the lineariser code.
+Given that the lineariser knows the information I need at the point
+where it generates the instruction, it would seem to make sense to tag
+the instruction with the type. This is made quite easy by the way that
+the lineariser has a allocate-typed-instruction function.
 
-which allows you to use "#if has_extension(typeof)" in your code  
-portably.
+Patch enclosed; it's very simple.
 
-In fact, it would be easy to make __has_extension__ actually be a  
-macro itself, allowing one to say:
+Does this seem like a reasonable approach? Is it something that would be
+useful to have in the base builds? Are there any ramifications I should
+be aware of?
 
-#ifdef __has_extension__
-...
+--=20
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
+=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
+cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82 "I have always wished for my computer to be as easy to use as m=
+y
+=E2=94=82 telephone; my wish has come true because I can no longer figure=
+ out
+=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
 
-which is even more clear.
+--------------070509020402010206020203
+Content-Type: text/x-diff;
+ name="type.patch"
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline;
+ filename="type.patch"
 
-> The only problem then becomes maintaining the canonical list of
-> extension names.  We could use the ugly approach of names like
-> "org.gnu.gcc.extension.sentinel" and  
-> "org.kernel.sparse.address_space",
-> but that seems entirely too ugly.  The other alternative seems like a
-> central registry of extension names; I'd happily help maintain such a
-> registry.
+diff -rwu sparse.orig/linearize.c sparse/linearize.c
+--- sparse.orig/linearize.c	2008-06-28 22:44:21.714555764 +0100
++++ sparse/linearize.c	2008-06-30 23:20:30.777932755 +0100
+@@ -55,7 +55,9 @@
+=20
+ static struct instruction *alloc_typed_instruction(int opcode, struct sy=
+mbol *type)
+ {
+-	return alloc_instruction(opcode, type_size(type));
++	struct instruction *insn =3D alloc_instruction(opcode, type_size(type))=
+;
++	insn->type =3D type;
++	return insn;
+ }
+=20
+ static struct entrypoint *alloc_entrypoint(void)
+diff -rwu sparse.orig/linearize.h sparse/linearize.h
+--- sparse.orig/linearize.h	2008-06-28 22:44:21.714555764 +0100
++++ sparse/linearize.h	2008-06-30 23:20:04.425933822 +0100
+@@ -71,6 +71,7 @@
+ 		 size:24;
+ 	struct basic_block *bb;
+ 	struct position pos;
++	struct symbol *type;
+ 	union {
+ 		pseudo_t target;
+ 		pseudo_t cond;		/* for branch and switch */
 
-I have no opinion on an approach, but I agree that it would be good to  
-have a centralized list.  I would definitely add support for this to  
-Clang.
+--------------070509020402010206020203--
 
--Chris
+--------------enigFD63256230295195B38DE98A
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFIbrWff9E0noFvlzgRAoIzAKDLDKc+fed+4dxRnmQvUFy5enyqRgCgrEKr
+QYkD00fHl09iSKiiLouv/io=
+=3Bx9
+-----END PGP SIGNATURE-----
+
+--------------enigFD63256230295195B38DE98A--
