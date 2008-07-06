@@ -1,41 +1,92 @@
 From: David Given <dg@cowlark.com>
-Subject: Updated byte size patch
-Date: Sun, 06 Jul 2008 02:03:27 +0100
-Message-ID: <487019DF.10907@cowlark.com>
+Subject: Odd sparse behaviour
+Date: Sun, 06 Jul 2008 22:33:12 +0100
+Message-ID: <48713A18.7050103@cowlark.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha1;
  protocol="application/pgp-signature";
- boundary="------------enig6DD22DB3B7FE553CA7FF5CA1"
+ boundary="------------enigFBA6914E3A805B6058BFAFF6"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from b.painless.aaisp.net.uk ([81.187.30.52]:37378 "EHLO
-	b.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753129AbYGFBDo (ORCPT
+Received: from c.painless.aaisp.net.uk ([81.187.30.53]:47527 "EHLO
+	c.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757627AbYGFVdX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 5 Jul 2008 21:03:44 -0400
+	Sun, 6 Jul 2008 17:33:23 -0400
 Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by b.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	by c.painless.aaisp.net.uk with esmtp (Exim 4.69)
 	(envelope-from <dg@cowlark.com>)
-	id 1KFIfF-0005yq-2g
-	for linux-sparse@vger.kernel.org; Sun, 06 Jul 2008 02:03:41 +0100
+	id 1KFbrF-00056H-DC
+	for linux-sparse@vger.kernel.org; Sun, 06 Jul 2008 22:33:21 +0100
 Received: from [10.0.0.5] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id 823B31D012
-	for <linux-sparse@vger.kernel.org>; Sun,  6 Jul 2008 02:03:37 +0100 (BST)
+	by gate.cowlark.com (Postfix) with ESMTP id C533920134
+	for <linux-sparse@vger.kernel.org>; Sun,  6 Jul 2008 22:33:18 +0100 (BST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig6DD22DB3B7FE553CA7FF5CA1
-Content-Type: multipart/mixed;
- boundary="------------010609080402000901090104"
-
-This is a multi-part message in MIME format.
---------------010609080402000901090104
+--------------enigFBA6914E3A805B6058BFAFF6
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: quoted-printable
 
-Turns out that I'd missed one place where there was a hardcoded 8 in the
-last patch, so here's an updated version.
+I've found a couple of places where sparse behaves rather oddly.
+
+Firstly, if you declare something static, and then try to define it
+later, sparse appears to get confused:
+
+---snip---
+static int i;
+int i =3D 0;
+---snip---
+
+$ ./test-parsing test.c
+test.c:2:5: warning: symbol 'i' was not declared. Should it be static?
+
+=2Ealign 4
+int static [signed] [toplevel] i,
+=2Ealign 4
+int [signed] [addressable] [toplevel] i =3D
+	movi.32		v1,$0
+
+Enumeration of the list of defined symbols shows two different symbols
+with the name 'i'. This isn't entirely obvious when using the test tools
+as, of course, two strings with the same value look the same! This is
+causing me issues with forward declarations of static functions:
+
+static void foo();
+{ ... foo(); ... }  // calls static foo
+
+foo() {}            // defines extern foo
+{ ... foo(); ... }  // calls extern foo
+
+This then leads to link errors as static foo hasn't been found.
+
+
+The second issue is with the following piece of C99 code:
+
+---snip---
+extern void nop(void)
+void bar(void)
+{ for (int i=3D0; i<10; i++) nop(); }
+---snip---
+
+$ ./test-linearise test.c
+test.c:3:6: warning: symbol 'bar' was not declared. Should it be static?
+bar:
+=2EL0xb7d7600c:
+	<entry-point>
+	br          .L0xb7d76038
+
+=2EL0xb7d76038:
+	call        nop
+	br          .L0xb7d76038
+
+The for loop seems to silently turn into an infinite loop. Which did
+cause one of my benchmarks to, um, produce rather poor results...
+
+(You may be interested to know that my compiler is now producing
+working, running code for non-trivial apps. Big chunks of it do need
+throwing away and rewriting, but it's actually *working*!)
 
 --=20
 =E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
@@ -48,170 +99,8 @@ y
  out
 =E2=94=82 how to use my telephone." --- Bjarne Stroustrup
 
---------------010609080402000901090104
-Content-Type: text/plain;
- name="byte.diff"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline;
- filename="byte.diff"
 
-ZGlmZiAtdXJ3IC4uL3NwYXJzZS5vcmlnL2NvbXBpbGUtaTM4Ni5jIC4vY29tcGlsZS1pMzg2
-LmMKLS0tIC4uL3NwYXJzZS5vcmlnL2NvbXBpbGUtaTM4Ni5jCTIwMDgtMDYtMjggMjI6NDQ6
-MjEuNzA2NTU0OTk4ICswMTAwCisrKyAuL2NvbXBpbGUtaTM4Ni5jCTIwMDgtMDYtMjggMjM6
-NDU6MjEuMjQ2NTU0NjI3ICswMTAwCkBAIC0yMDgxLDcgKzIwODEsNyBAQAogCQlpbnNuKCJw
-dXNobCIsIG5ldywgTlVMTCwKIAkJICAgICAhZnJhbWVzaXplID8gImJlZ2luIGZ1bmN0aW9u
-IGNhbGwiIDogTlVMTCk7CiAKLQkJZnJhbWVzaXplICs9IHNpemUgPj4gMzsKKwkJZnJhbWVz
-aXplICs9IGJpdHNfdG9fYnl0ZXMoc2l6ZSk7CiAJfSBFTkRfRk9SX0VBQ0hfUFRSX1JFVkVS
-U0UoYXJnKTsKIAogCWZuID0gZXhwci0+Zm47CmRpZmYgLXVydyAuLi9zcGFyc2Uub3JpZy9l
-dmFsdWF0ZS5jIC4vZXZhbHVhdGUuYwotLS0gLi4vc3BhcnNlLm9yaWcvZXZhbHVhdGUuYwky
-MDA4LTA2LTI4IDIyOjQ0OjIxLjcwNjU1NDk5OCArMDEwMAorKysgLi9ldmFsdWF0ZS5jCTIw
-MDgtMDctMDUgMTU6Mzg6NTMuNzg2OTMxNDkxICswMTAwCkBAIC03Miw3ICs3Miw3IEBACiAJ
-dW5zaWduZWQgaW50IGxlbmd0aCA9IGV4cHItPnN0cmluZy0+bGVuZ3RoOwogCiAJc3ltLT5h
-cnJheV9zaXplID0gYWxsb2NfY29uc3RfZXhwcmVzc2lvbihleHByLT5wb3MsIGxlbmd0aCk7
-Ci0Jc3ltLT5iaXRfc2l6ZSA9IGJpdHNfaW5fY2hhciAqIGxlbmd0aDsKKwlzeW0tPmJpdF9z
-aXplID0gYnl0ZXNfdG9fYml0cyhsZW5ndGgpOwogCXN5bS0+Y3R5cGUuYWxpZ25tZW50ID0g
-MTsKIAlzeW0tPnN0cmluZyA9IDE7CiAJc3ltLT5jdHlwZS5tb2RpZmllcnMgPSBNT0RfU1RB
-VElDOwpAQCAtODMsNyArODMsNyBAQAogCWluaXRzdHItPnN0cmluZyA9IGV4cHItPnN0cmlu
-ZzsKIAogCWFycmF5LT5hcnJheV9zaXplID0gc3ltLT5hcnJheV9zaXplOwotCWFycmF5LT5i
-aXRfc2l6ZSA9IGJpdHNfaW5fY2hhciAqIGxlbmd0aDsKKwlhcnJheS0+Yml0X3NpemUgPSBi
-eXRlc190b19iaXRzKGxlbmd0aCk7CiAJYXJyYXktPmN0eXBlLmFsaWdubWVudCA9IDE7CiAJ
-YXJyYXktPmN0eXBlLm1vZGlmaWVycyA9IE1PRF9TVEFUSUM7CiAJYXJyYXktPmN0eXBlLmJh
-c2VfdHlwZSA9ICZjaGFyX2N0eXBlOwpAQCAtNTc5LDcgKzU3OSw3IEBACiAJfQogCiAJLyog
-R2V0IHRoZSBzaXplIG9mIHdoYXRldmVyIHRoZSBwb2ludGVyIHBvaW50cyB0byAqLwotCW11
-bHRpcGx5ID0gYmFzZS0+Yml0X3NpemUgPj4gMzsKKwltdWx0aXBseSA9IGJpdHNfdG9fYnl0
-ZXMoYmFzZS0+Yml0X3NpemUpOwogCiAJaWYgKGN0eXBlID09ICZudWxsX2N0eXBlKQogCQlj
-dHlwZSA9ICZwdHJfY3R5cGU7CkBAIC04MzEsNyArODMxLDcgQEAKIAkJc3RydWN0IGV4cHJl
-c3Npb24gKnN1YiA9IGFsbG9jX2V4cHJlc3Npb24oZXhwci0+cG9zLCBFWFBSX0JJTk9QKTsK
-IAkJc3RydWN0IGV4cHJlc3Npb24gKmRpdiA9IGV4cHI7CiAJCXN0cnVjdCBleHByZXNzaW9u
-ICp2YWwgPSBhbGxvY19leHByZXNzaW9uKGV4cHItPnBvcywgRVhQUl9WQUxVRSk7Ci0JCXVu
-c2lnbmVkIGxvbmcgdmFsdWUgPSBsYmFzZS0+Yml0X3NpemUgPj4gMzsKKwkJdW5zaWduZWQg
-bG9uZyB2YWx1ZSA9IGJpdHNfdG9fYnl0ZXMobGJhc2UtPmJpdF9zaXplKTsKIAogCQl2YWwt
-PmN0eXBlID0gc2l6ZV90X2N0eXBlOwogCQl2YWwtPnZhbHVlID0gdmFsdWU7CkBAIC0xNTkx
-LDcgKzE1OTEsNyBAQAogCQkJCWUzLT5vcCA9ICcrJzsKIAkJCQllMy0+bGVmdCA9IGUwOwog
-CQkJCWUzLT5yaWdodCA9IGFsbG9jX2NvbnN0X2V4cHJlc3Npb24oZXhwci0+cG9zLAotCQkJ
-CQkJCWV4cHItPnJfYml0cG9zID4+IDMpOworCQkJCQkJCWJpdHNfdG9fYnl0ZXMoZXhwci0+
-cl9iaXRwb3MpKTsKIAkJCQllMy0+Y3R5cGUgPSAmbGF6eV9wdHJfY3R5cGU7CiAJCQl9IGVs
-c2UgewogCQkJCWUzID0gZTA7CkBAIC0xNzI3LDcgKzE3MjcsNyBAQAogCX0gZWxzZSBpZiAo
-Y2xhc3MgPT0gVFlQRV9QVFIpIHsKIAkJc3RydWN0IHN5bWJvbCAqdGFyZ2V0ID0gZXhhbWlu
-ZV9wb2ludGVyX3RhcmdldChjdHlwZSk7CiAJCWlmICghaXNfZnVuY3Rpb24odGFyZ2V0KSkK
-LQkJCW11bHRpcGx5ID0gdGFyZ2V0LT5iaXRfc2l6ZSA+PiAzOworCQkJbXVsdGlwbHkgPSBi
-aXRzX3RvX2J5dGVzKHRhcmdldC0+Yml0X3NpemUpOwogCX0KIAogCWlmIChtdWx0aXBseSkg
-ewpAQCAtMTk0OSw3ICsxOTQ5LDcgQEAKIAkJCWV4cHItPmJhc2UgPSBkZXJlZi0+YmFzZTsK
-IAkJCWV4cHItPnJfYml0cG9zID0gZGVyZWYtPnJfYml0cG9zOwogCQl9Ci0JCWV4cHItPnJf
-Yml0cG9zICs9IG9mZnNldCA8PCAzOworCQlleHByLT5yX2JpdHBvcyArPSBieXRlc190b19i
-aXRzKG9mZnNldCk7CiAJCWV4cHItPnR5cGUgPSBFWFBSX1NMSUNFOwogCQlleHByLT5yX25y
-Yml0cyA9IG1lbWJlci0+Yml0X3NpemU7CiAJCWV4cHItPnJfYml0cG9zICs9IG1lbWJlci0+
-Yml0X29mZnNldDsKQEAgLTIwMzcsMTAgKzIwMzcsMTAgQEAKIAkJcmV0dXJuIE5VTEw7CiAK
-IAlzaXplID0gdHlwZS0+Yml0X3NpemU7Ci0JaWYgKChzaXplIDwgMCkgfHwgKHNpemUgJiA3
-KSkKKwlpZiAoKHNpemUgPCAwKSB8fCAoc2l6ZSAmIChiaXRzX2luX2NoYXIgLSAxKSkpCiAJ
-CWV4cHJlc3Npb25fZXJyb3IoZXhwciwgImNhbm5vdCBzaXplIGV4cHJlc3Npb24iKTsKIAll
-eHByLT50eXBlID0gRVhQUl9WQUxVRTsKLQlleHByLT52YWx1ZSA9IHNpemUgPj4gMzsKKwll
-eHByLT52YWx1ZSA9IGJpdHNfdG9fYnl0ZXMoc2l6ZSk7CiAJZXhwci0+dGFpbnQgPSAwOwog
-CWV4cHItPmN0eXBlID0gc2l6ZV90X2N0eXBlOwogCXJldHVybiBzaXplX3RfY3R5cGU7CkBA
-IC0yMDcxLDEwICsyMDcxLDEwIEBACiAJCXJldHVybiBOVUxMOwogCX0KIAlzaXplID0gdHlw
-ZS0+Yml0X3NpemU7Ci0JaWYgKHNpemUgJiA3KQorCWlmIChzaXplICYgKGJpdHNfaW5fY2hh
-ci0xKSkKIAkJc2l6ZSA9IDA7CiAJZXhwci0+dHlwZSA9IEVYUFJfVkFMVUU7Ci0JZXhwci0+
-dmFsdWUgPSBzaXplID4+IDM7CisJZXhwci0+dmFsdWUgPSBiaXRzX3RvX2J5dGVzKHNpemUp
-OwogCWV4cHItPnRhaW50ID0gMDsKIAlleHByLT5jdHlwZSA9IHNpemVfdF9jdHlwZTsKIAly
-ZXR1cm4gc2l6ZV90X2N0eXBlOwpAQCAtMjE1OCw3ICsyMTU4LDcgQEAKIAl1bnNpZ25lZCBm
-cm9tID0gZS0+aWR4X2Zyb207CiAJdW5zaWduZWQgdG8gPSBlLT5pZHhfdG8gKyAxOwogCWUt
-PnR5cGUgPSBFWFBSX1BPUzsKLQllLT5pbml0X29mZnNldCA9IGZyb20gKiAoZS0+Y3R5cGUt
-PmJpdF9zaXplPj4zKTsKKwllLT5pbml0X29mZnNldCA9IGZyb20gKiBiaXRzX3RvX2J5dGVz
-KGUtPmN0eXBlLT5iaXRfc2l6ZSk7CiAJZS0+aW5pdF9uciA9IHRvIC0gZnJvbTsKIAllLT5p
-bml0X2V4cHIgPSBjaGlsZDsKIH0KQEAgLTI4NjUsNyArMjg2NSw3IEBACiAJCQl1bnJlc3Ry
-aWN0KGlkeCwgaV9jbGFzcywgJmlfdHlwZSk7CiAJCQlpZHggPSBjYXN0X3RvKGlkeCwgc2l6
-ZV90X2N0eXBlKTsKIAkJCW0gPSBhbGxvY19jb25zdF9leHByZXNzaW9uKGV4cHItPnBvcywK
-LQkJCQkJCSAgIGN0eXBlLT5iaXRfc2l6ZSA+PiAzKTsKKwkJCQkJCSAgIGJpdHNfdG9fYnl0
-ZXMoY3R5cGUtPmJpdF9zaXplKSk7CiAJCQltLT5jdHlwZSA9IHNpemVfdF9jdHlwZTsKIAkJ
-CW0tPmZsYWdzID0gSW50X2NvbnN0X2V4cHI7CiAJCQlleHByLT50eXBlID0gRVhQUl9CSU5P
-UDsKZGlmZiAtdXJ3IC4uL3NwYXJzZS5vcmlnL2V4YW1wbGUuYyAuL2V4YW1wbGUuYwotLS0g
-Li4vc3BhcnNlLm9yaWcvZXhhbXBsZS5jCTIwMDgtMDYtMjggMjI6NDQ6MjEuNzA2NTU0OTk4
-ICswMTAwCisrKyAuL2V4YW1wbGUuYwkyMDA4LTA2LTI4IDIzOjQ3OjM4Ljc1MDU1ODM0NiAr
-MDEwMApAQCAtMTgzMCw3ICsxODMwLDcgQEAKIAkJCWluLT50eXBlID0gUkVHX0ZSQU1FOwog
-CQkJaW4tPm9mZnNldCA9IG9mZnNldDsKIAkJCQotCQkJb2Zmc2V0ICs9IGJpdHMgPj4gMzsK
-KwkJCW9mZnNldCArPSBiaXRzX3RvX2J5dGVzKGJpdHMpOwogCQl9CiAJCWkrKzsKIAkJTkVY
-VF9QVFJfTElTVChhcmd0eXBlKTsKZGlmZiAtdXJ3IC4uL3NwYXJzZS5vcmlnL2V4cGFuZC5j
-IC4vZXhwYW5kLmMKLS0tIC4uL3NwYXJzZS5vcmlnL2V4cGFuZC5jCTIwMDgtMDYtMjggMjI6
-NDQ6MjEuNzEwNTU1NDE1ICswMTAwCisrKyAuL2V4cGFuZC5jCTIwMDgtMDYtMjggMjM6NDk6
-NDYuNTIzMzA5NTU5ICswMTAwCkBAIC04ODAsNyArODgwLDcgQEAKIHsKIAl1bnNpZ25lZCBs
-b25nIG9mZnNldCA9IDA7CiAJd2hpbGUgKGV4cHItPnR5cGUgPT0gRVhQUl9QT1MpIHsKLQkJ
-b2Zmc2V0ICs9IGV4cHItPmluaXRfb2Zmc2V0IDw8IDM7CisJCW9mZnNldCArPSBieXRlc190
-b19iaXRzKGV4cHItPmluaXRfb2Zmc2V0KTsKIAkJZXhwciA9IGV4cHItPmluaXRfZXhwcjsK
-IAl9CiAJaWYgKGV4cHIgJiYgZXhwci0+Y3R5cGUpCmRpZmYgLXVydyAuLi9zcGFyc2Uub3Jp
-Zy9mbG93LmMgLi9mbG93LmMKLS0tIC4uL3NwYXJzZS5vcmlnL2Zsb3cuYwkyMDA4LTA2LTI4
-IDIyOjQ0OjIxLjcxMDU1NTQxNSArMDEwMAorKysgLi9mbG93LmMJMjAwOC0wNi0yOCAyMzo0
-OTo0NS4wMTQ1NTQ1MTggKzAxMDAKQEAgLTE2LDYgKzE2LDcgQEAKICNpbmNsdWRlICJleHBy
-ZXNzaW9uLmgiCiAjaW5jbHVkZSAibGluZWFyaXplLmgiCiAjaW5jbHVkZSAiZmxvdy5oIgor
-I2luY2x1ZGUgInRhcmdldC5oIgogCiB1bnNpZ25lZCBsb25nIGJiX2dlbmVyYXRpb247CiAK
-QEAgLTI2NSw4ICsyNjYsOCBAQAogCiBzdGF0aWMgaW50IG92ZXJsYXBwaW5nX21lbW9wKHN0
-cnVjdCBpbnN0cnVjdGlvbiAqYSwgc3RydWN0IGluc3RydWN0aW9uICpiKQogewotCXVuc2ln
-bmVkIGludCBhX3N0YXJ0ID0gYS0+b2Zmc2V0IDw8IDM7Ci0JdW5zaWduZWQgaW50IGJfc3Rh
-cnQgPSBiLT5vZmZzZXQgPDwgMzsKKwl1bnNpZ25lZCBpbnQgYV9zdGFydCA9IGJ5dGVzX3Rv
-X2JpdHMoYS0+b2Zmc2V0KTsKKwl1bnNpZ25lZCBpbnQgYl9zdGFydCA9IGJ5dGVzX3RvX2Jp
-dHMoYi0+b2Zmc2V0KTsKIAl1bnNpZ25lZCBpbnQgYV9zaXplID0gYS0+c2l6ZTsKIAl1bnNp
-Z25lZCBpbnQgYl9zaXplID0gYi0+c2l6ZTsKIApAQCAtNTgxLDEzICs1ODIsMTQgQEAKIAlw
-c2V1ZG9fdCBwc2V1ZG8gPSBpbnNuLT5zcmM7CiAKIAlpZiAoaW5zbi0+YmIgJiYgcHNldWRv
-LT50eXBlID09IFBTRVVET19TWU0pIHsKLQkJaW50IG9mZnNldCA9IGluc24tPm9mZnNldCwg
-Yml0ID0gKG9mZnNldCA8PCAzKSArIGluc24tPnNpemU7CisJCWludCBvZmZzZXQgPSBpbnNu
-LT5vZmZzZXQsIGJpdCA9IGJ5dGVzX3RvX2JpdHMob2Zmc2V0KSArIGluc24tPnNpemU7CiAJ
-CXN0cnVjdCBzeW1ib2wgKnN5bSA9IHBzZXVkby0+c3ltOwogCiAJCWlmIChzeW0tPmJpdF9z
-aXplID4gMCAmJiAob2Zmc2V0IDwgMCB8fCBiaXQgPiBzeW0tPmJpdF9zaXplKSkKIAkJCXdh
-cm5pbmcoaW5zbi0+cG9zLCAiaW52YWxpZCBhY2Nlc3MgJXMgJyVzJyAoJWQgJWQpIiwKIAkJ
-CQlvZmZzZXQgPCAwID8gImJlbG93IiA6ICJwYXN0IHRoZSBlbmQgb2YiLAotCQkJCXNob3df
-aWRlbnQoc3ltLT5pZGVudCksIG9mZnNldCwgc3ltLT5iaXRfc2l6ZSA+PiAzKTsKKwkJCQlz
-aG93X2lkZW50KHN5bS0+aWRlbnQpLCBvZmZzZXQsCisJCQkJYml0c190b19ieXRlcyhzeW0t
-PmJpdF9zaXplKSk7CiAJfQogfQogCmRpZmYgLXVydyAuLi9zcGFyc2Uub3JpZy9zaG93LXBh
-cnNlLmMgLi9zaG93LXBhcnNlLmMKLS0tIC4uL3NwYXJzZS5vcmlnL3Nob3ctcGFyc2UuYwky
-MDA4LTA2LTI4IDIyOjQ0OjIxLjcxODU1NTkyNiArMDEwMAorKysgLi9zaG93LXBhcnNlLmMJ
-MjAwOC0wNi0yOCAyMzo0Nzo0MC4wMTA1NTM2MTcgKzAxMDAKQEAgLTY3Myw3ICs2NzMsNyBA
-QAogCQlpbnQgbmV3ID0gc2hvd19leHByZXNzaW9uKGFyZyk7CiAJCWludCBzaXplID0gYXJn
-LT5jdHlwZS0+Yml0X3NpemU7CiAJCXByaW50ZigiXHRwdXNoLiVkXHRcdHYlZFxuIiwgc2l6
-ZSwgbmV3KTsKLQkJZnJhbWVzaXplICs9IHNpemUgPj4gMzsKKwkJZnJhbWVzaXplICs9IGJp
-dHNfdG9fYnl0ZXMoc2l6ZSk7CiAJfSBFTkRfRk9SX0VBQ0hfUFRSX1JFVkVSU0UoYXJnKTsK
-IAogCWZuID0gZXhwci0+Zm47CmRpZmYgLXVydyAuLi9zcGFyc2Uub3JpZy9zeW1ib2wuYyAu
-L3N5bWJvbC5jCi0tLSAuLi9zcGFyc2Uub3JpZy9zeW1ib2wuYwkyMDA4LTA2LTI4IDIyOjQ0
-OjIxLjcyMjU1NTE3OCArMDEwMAorKysgLi9zeW1ib2wuYwkyMDA4LTA2LTI4IDIzOjQ5OjQ1
-Ljc1ODU1NTM4NSArMDEwMApAQCAtMTI4LDcgKzEyOCw3IEBACiAJCWJhc2Vfc2l6ZSA9IDA7
-CiAJfQogCi0JYWxpZ25fYml0X21hc2sgPSAoc3ltLT5jdHlwZS5hbGlnbm1lbnQgPDwgMykg
-LSAxOworCWFsaWduX2JpdF9tYXNrID0gYnl0ZXNfdG9fYml0cyhzeW0tPmN0eXBlLmFsaWdu
-bWVudCkgLSAxOwogCiAJLyoKIAkgKiBCaXRmaWVsZHMgaGF2ZSBzb21lIHZlcnkgc3BlY2lh
-bCBydWxlcy4uCkBAIC0xNDMsNyArMTQzLDcgQEAKIAkJCWJpdF9zaXplID0gKGJpdF9zaXpl
-ICsgYWxpZ25fYml0X21hc2spICYgfmFsaWduX2JpdF9tYXNrOwogCQkJYml0X29mZnNldCA9
-IDA7CiAJCX0KLQkJc3ltLT5vZmZzZXQgPSAoYml0X3NpemUgLSBiaXRfb2Zmc2V0KSA+PiAz
-OworCQlzeW0tPm9mZnNldCA9IGJpdHNfdG9fYnl0ZXMoYml0X3NpemUgLSBiaXRfb2Zmc2V0
-KTsKIAkJc3ltLT5iaXRfb2Zmc2V0ID0gYml0X29mZnNldDsKIAkJc3ltLT5jdHlwZS5iYXNl
-X3R5cGUtPmJpdF9vZmZzZXQgPSBiaXRfb2Zmc2V0OwogCQlpbmZvLT5iaXRfc2l6ZSA9IGJp
-dF9zaXplICsgd2lkdGg7CkBAIC0xNTYsNyArMTU2LDcgQEAKIAkgKiBPdGhlcndpc2UsIGp1
-c3QgYWxpZ24gaXQgcmlnaHQgYW5kIGFkZCBpdCB1cC4uCiAJICovCiAJYml0X3NpemUgPSAo
-Yml0X3NpemUgKyBhbGlnbl9iaXRfbWFzaykgJiB+YWxpZ25fYml0X21hc2s7Ci0Jc3ltLT5v
-ZmZzZXQgPSBiaXRfc2l6ZSA+PiAzOworCXN5bS0+b2Zmc2V0ID0gYml0c190b19ieXRlcyhi
-aXRfc2l6ZSk7CiAKIAlpbmZvLT5iaXRfc2l6ZSA9IGJpdF9zaXplICsgYmFzZV9zaXplOwog
-CS8vIHdhcm5pbmcgKHN5bS0+cG9zLCAicmVndWxhcjogb2Zmc2V0PSVkIiwgc3ltLT5vZmZz
-ZXQpOwpAQCAtMTgyLDcgKzE4Miw3IEBACiAJCXN5bS0+Y3R5cGUuYWxpZ25tZW50ID0gaW5m
-by5tYXhfYWxpZ247CiAJYml0X3NpemUgPSBpbmZvLmJpdF9zaXplOwogCWlmIChpbmZvLmFs
-aWduX3NpemUpIHsKLQkJYml0X2FsaWduID0gKHN5bS0+Y3R5cGUuYWxpZ25tZW50IDw8IDMp
-LTE7CisJCWJpdF9hbGlnbiA9IGJ5dGVzX3RvX2JpdHMoc3ltLT5jdHlwZS5hbGlnbm1lbnQp
-LTE7CiAJCWJpdF9zaXplID0gKGJpdF9zaXplICsgYml0X2FsaWduKSAmIH5iaXRfYWxpZ247
-CiAJfQogCXN5bS0+Yml0X3NpemUgPSBiaXRfc2l6ZTsKQEAgLTg3Nyw3ICs4NzcsNyBAQAog
-CQlzdHJ1Y3Qgc3ltYm9sICpzeW0gPSBjdHlwZS0+cHRyOwogCQl1bnNpZ25lZCBsb25nIGJp
-dF9zaXplID0gY3R5cGUtPmJpdF9zaXplID8gKmN0eXBlLT5iaXRfc2l6ZSA6IC0xOwogCQl1
-bnNpZ25lZCBsb25nIG1heGFsaWduID0gY3R5cGUtPm1heGFsaWduID8gKmN0eXBlLT5tYXhh
-bGlnbiA6IDA7Ci0JCXVuc2lnbmVkIGxvbmcgYWxpZ25tZW50ID0gKGJpdF9zaXplICsgNykg
-Pj4gMzsKKwkJdW5zaWduZWQgbG9uZyBhbGlnbm1lbnQgPSBiaXRzX3RvX2J5dGVzKGJpdF9z
-aXplICsgYml0c19pbl9jaGFyIC0gMSk7CiAKIAkJaWYgKGFsaWdubWVudCA+IG1heGFsaWdu
-KQogCQkJYWxpZ25tZW50ID0gbWF4YWxpZ247CmRpZmYgLXVydyAuLi9zcGFyc2Uub3JpZy90
-YXJnZXQuaCAuL3RhcmdldC5oCi0tLSAuLi9zcGFyc2Uub3JpZy90YXJnZXQuaAkyMDA4LTA2
-LTI4IDIyOjQ0OjIxLjcyMjU1NTE3OCArMDEwMAorKysgLi90YXJnZXQuaAkyMDA4LTA2LTI5
-IDAwOjA0OjI1Ljk1MDU1Mzk2NSArMDEwMApAQCAtNDIsNCArNDIsMTQgQEAKIGV4dGVybiBp
-bnQgYml0c19pbl9lbnVtOwogZXh0ZXJuIGludCBlbnVtX2FsaWdubWVudDsKIAorLyoKKyAq
-IEhlbHBlciBmdW5jdGlvbnMgZm9yIGNvbnZlcnRpbmcgYml0cyB0byBieXRlcyBhbmQgdmlj
-ZSB2ZXJzYS4KKyAqLworCitzdGF0aWMgaW5saW5lIGludCBiaXRzX3RvX2J5dGVzKGludCBi
-aXRzKQoreyByZXR1cm4gYml0cyAvIGJpdHNfaW5fY2hhcjsgfQorCitzdGF0aWMgaW5saW5l
-IGludCBieXRlc190b19iaXRzKGludCBieXRlcykKK3sgcmV0dXJuIGJ5dGVzICogYml0c19p
-bl9jaGFyOyB9CisKICNlbmRpZgo=
---------------010609080402000901090104--
-
---------------enig6DD22DB3B7FE553CA7FF5CA1
+--------------enigFBA6914E3A805B6058BFAFF6
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
@@ -220,9 +109,9 @@ Content-Disposition: attachment; filename="signature.asc"
 Version: GnuPG v1.4.6 (GNU/Linux)
 Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-iD8DBQFIcBnjf9E0noFvlzgRAvHoAJ0QnLG1N1fB0c2G3qnnsdw6MbofmACfa+I1
-enDpVKtecQvSPQg+kBm6XHA=
-=To1c
+iD8DBQFIcTobf9E0noFvlzgRAgk8AJkBifAhh9q2IY7HVKwggR3gVghAKwCeJoYz
+bioBYWPS9hODRLq87S1/uf8=
+=5lkl
 -----END PGP SIGNATURE-----
 
---------------enig6DD22DB3B7FE553CA7FF5CA1--
+--------------enigFBA6914E3A805B6058BFAFF6--
