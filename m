@@ -1,50 +1,57 @@
-From: Sam Ravnborg <sam@ravnborg.org>
+From: Al Viro <viro@ZenIV.linux.org.uk>
 Subject: Re: [PATCH] sparse: Increase pre_buffer[] and check overflow
-Date: Wed, 9 Jul 2008 18:32:12 +0200
-Message-ID: <20080709163212.GA1227@uranus.ravnborg.org>
-References: <20080709.002805.128619748.anemo@mba.ocn.ne.jp> <20080708204547.GA16742@uranus.ravnborg.org> <20080710.011818.26096759.anemo@mba.ocn.ne.jp>
+Date: Thu, 10 Jul 2008 18:39:45 +0100
+Message-ID: <20080710173945.GE28946@ZenIV.linux.org.uk>
+References: <20080709.002805.128619748.anemo@mba.ocn.ne.jp> <20080708204547.GA16742@uranus.ravnborg.org> <20080710.011818.26096759.anemo@mba.ocn.ne.jp> <20080709163212.GA1227@uranus.ravnborg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from pasmtpb.tele.dk ([80.160.77.98]:45985 "EHLO pasmtpB.tele.dk"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750835AbYGIQbY (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 9 Jul 2008 12:31:24 -0400
+Received: from zeniv.linux.org.uk ([195.92.253.2]:43188 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752887AbYGJRjt (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 10 Jul 2008 13:39:49 -0400
 Content-Disposition: inline
-In-Reply-To: <20080710.011818.26096759.anemo@mba.ocn.ne.jp>
+In-Reply-To: <20080709163212.GA1227@uranus.ravnborg.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
-Cc: linux-sparse@vger.kernel.org, linux-mips@linux-mips.org
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Atsushi Nemoto <anemo@mba.ocn.ne.jp>, linux-sparse@vger.kernel.org, linux-mips@linux-mips.org
 
-On Thu, Jul 10, 2008 at 01:18:18AM +0900, Atsushi Nemoto wrote:
-> On Tue, 8 Jul 2008 22:45:47 +0200, Sam Ravnborg <sam@ravnborg.org> wrote:
-> > > The linus-mips kernel uses '$(CC) -dM -E' to generates arguments for
-> > > sparse.  With gcc 4.3, it generates lot of '-D' options and causes
-> > > pre_buffer overflow.
-> > 
-> > Why does mips have this need when all other archs does not?
-> > We should fix sparse so it is dynamically allocated - but
-> > that is not an excuse for mips to use odd stuff like this.
-> > 
-> > So please someone from mips land explain why this is needed.
+On Wed, Jul 09, 2008 at 06:32:12PM +0200, Sam Ravnborg wrote:
+> So the expalnation seems that gcc for mips define much more
+> than the usual gcc does.
+> My gcc define 76 symbols for i386.
 > 
-> This was introduced by commit 59b3e8e9aac69d2d02853acac7e2affdfbabca50.
-> ("[MIPS] Makefile crapectomy.")
-> 
-> Before the commit, CHECKFLAGS was adjusted like this:
-> 
-> CHECKFLAGS-y				+= -D__linux__ -D__mips__ \
-> 					   -D_MIPS_SZINT=32 \
-> 					   -D_ABIO32=1 \
-...
+> And we use this stuff in the kernel.
 
-So the expalnation seems that gcc for mips define much more
-than the usual gcc does.
-My gcc define 76 symbols for i386.
+How much of it do we really use?  Let's see - on i386 gcc-4.1.2 I see
+79 symbols.  64 simply never occur in the tree.  At all.  Out of remaining
+15, we have
 
-And we use this stuff in the kernel.
+__GNUC__, __GNUC_MAJOR__, __GNUC_PATCHLEVEL__ - provided by sparse.
+__STDC__: few users, provided by sparse.
+__SIZE_TYPE__: one odd user, defined by sparse anyway
+__PTRDIFF_TYPE__: one odd user, defined by sparse anyway
 
-OK - thanks for the details.
+__linux__ - few users, explicitly added in top-level Makefile
+linux - 3 users.  Defined in top-level Makefile.
+unix - no real users (some instances, of course, but none outside of comments,
+#include pathnames and string constants).  Defined in top-level Makefile,
+anyway.
 
-	Sam
+__USER_LABEL_PREFIX__, __REGISTER_PREFIX__ - arch/m68knommu/lib/*.S; not
+a sparse fodder anyway *and* defaults are given in files themselves.
+
+__ELF__: arch/alpha/boot/tools/objstrip.c (userland helper, actually, *and*
+misplaced there; it's used as a proxy for type of kernel image)
+
+__i386__: a bunch
+__i386: one user, redundant (__i386__ *and* i386 in the same #if)
+i386: 3 users besides the aforementioned one.
+
+So...  Only 3 symbols out of the entire bunch are arch-dependent *and* not
+provided by sparse itself.  Absolute majority of the rest is never ever
+used in the tree.
+
+I very much doubt that mips situation is seriously different...
