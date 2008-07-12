@@ -1,69 +1,77 @@
-From: David Given <dg@cowlark.com>
-Subject: sparse licensing query
-Date: Sat, 12 Jul 2008 00:02:19 +0100
-Message-ID: <4877E67B.9040106@cowlark.com>
+From: Josh Triplett <josht@linux.vnet.ibm.com>
+Subject: Re: sparse licensing query
+Date: Fri, 11 Jul 2008 17:00:14 -0700
+Message-ID: <1215820814.4584.23.camel@josh-work.beaverton.ibm.com>
+References: <4877E67B.9040106@cowlark.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="------------enig50B9B0039AEF0919B6D81DB2"
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from a.painless.aaisp.net.uk ([81.187.30.51]:35708 "EHLO
-	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755884AbYGKXCb (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Jul 2008 19:02:31 -0400
-Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
-	(envelope-from <dg@cowlark.com>)
-	id 1KHRdF-0006vF-To
-	for linux-sparse@vger.kernel.org; Sat, 12 Jul 2008 00:02:30 +0100
-Received: from [10.0.0.5] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id CD0C62010B
-	for <linux-sparse@vger.kernel.org>; Sat, 12 Jul 2008 00:02:24 +0100 (BST)
+Received: from e2.ny.us.ibm.com ([32.97.182.142]:51721 "EHLO e2.ny.us.ibm.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754876AbYGLAAS (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 11 Jul 2008 20:00:18 -0400
+Received: from d01relay02.pok.ibm.com (d01relay02.pok.ibm.com [9.56.227.234])
+	by e2.ny.us.ibm.com (8.13.8/8.13.8) with ESMTP id m6C00FK6011441
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
+Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
+	by d01relay02.pok.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m6C00FqL210742
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
+Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
+	by d01av04.pok.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m6C00FgG012815
+	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
+In-Reply-To: <4877E67B.9040106@cowlark.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: David Given <dg@cowlark.com>
+Cc: linux-sparse@vger.kernel.org
 
-This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
---------------enig50B9B0039AEF0919B6D81DB2
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On Sat, 2008-07-12 at 00:02 +0100, David Given wrote:
+> I'm just putting together some documentation in preparation for a proper
+> release of Clue, and have been doing some license paperwork (I want to
+> properly attribute sparse). I notice that the LICENSE documentation
+> refers to the OSL v1.1 (and provides a dead link to www.opensource.com).
+> 
+> Given that the OSL is now at v3.0, does sparse use OSL v1.1 on purpose
+> or simply that nobody got round to updating it?
 
-I'm just putting together some documentation in preparation for a proper
-release of Clue, and have been doing some license paperwork (I want to
-properly attribute sparse). I notice that the LICENSE documentation
-refers to the OSL v1.1 (and provides a dead link to www.opensource.com).
+For the same reason that most of Linux uses GPLv2 without the "or any
+later version" clause: because developers didn't want automatic upgrades
+to new licenses without the chance to read them or approve of them.
 
-Given that the OSL is now at v3.0, does sparse use OSL v1.1 on purpose
-or simply that nobody got round to updating it?
+> (I also note, purely for informational value, that no version of the OSL
+> is DSFG compatible.)
 
-(I also note, purely for informational value, that no version of the OSL
-is DSFG compatible.)
+And for that matter, all versions of the OSL have incompatibilities with
+the GPL.  The sparse FAQ notes that that occurred intentionally, and
+motivated the original choice of license.
 
---=20
-=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
-=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
-=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
-cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
-=E2=94=82 "I have always wished for my computer to be as easy to use as m=
-y
-=E2=94=82 telephone; my wish has come true because I can no longer figure=
- out
-=E2=94=82 how to use my telephone." --- Bjarne Stroustrup
+TTBOMK, newer versions of the OSL seem sufficiently less egregious that
+Debian has accepted them.  I think Debian primarily objects to clause
+10, which newer versions revise.
 
 
---------------enig50B9B0039AEF0919B6D81DB2
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Sparse's license has come up on the list several times.  At least one of
+those times, the question of relicensing it came up; it seems that none
+of the developers object to it.  However, quoting Linus from one of
+those discussions:
+> Yeah, the OSL wasn't the best choice. I tried to change it (look in the 
+> sparse email archives) a few years ago, but I never got in contact with 
+> anybody at Transmeta back then who could have the power to relicense, and 
+> while my work with Linux has always been unquestionably mine (ie my work 
+> contract explicitly stated such), with sparse it isn't as obvious..
+> 
+> So back then, I couldn't get anybody to look at it (not that I tried all 
+> that hard), and I don't think I even have any contacts left to people I 
+> know at Transmeta any more.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.6 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+If anyone wants to try to find the right people to talk to, and for that
+matter to get explicit assent from each of the developers, I would
+greatly appreciate it.
 
-iD8DBQFId+Z+f9E0noFvlzgRAkqGAJ9hhXlqVbKVs+vVDqDSqQ+DaZZpbgCg1klL
-Ar2csra9xr4lZa0hKg/IkrQ=
-=dj9p
------END PGP SIGNATURE-----
+Sparse's license has in at least one case made it difficult for a
+potential user of Sparse, namely the gobject-introspection work.
 
---------------enig50B9B0039AEF0919B6D81DB2--
+- Josh Triplett
+
+
