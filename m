@@ -1,77 +1,41 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: sparse licensing query
-Date: Fri, 11 Jul 2008 17:00:14 -0700
-Message-ID: <1215820814.4584.23.camel@josh-work.beaverton.ibm.com>
-References: <4877E67B.9040106@cowlark.com>
+From: Jaswinder Singh <jaswinder@infradead.org>
+Subject: =?UTF-8?Q?=EF=BB=BFwarning=3A?= cast adds address space to
+	expression
+Date: Sat, 12 Jul 2008 14:27:06 +0530
+Message-ID: <1215853026.19076.32.camel@jaswinder.satnam>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e2.ny.us.ibm.com ([32.97.182.142]:51721 "EHLO e2.ny.us.ibm.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754876AbYGLAAS (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Jul 2008 20:00:18 -0400
-Received: from d01relay02.pok.ibm.com (d01relay02.pok.ibm.com [9.56.227.234])
-	by e2.ny.us.ibm.com (8.13.8/8.13.8) with ESMTP id m6C00FK6011441
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
-Received: from d01av04.pok.ibm.com (d01av04.pok.ibm.com [9.56.224.64])
-	by d01relay02.pok.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m6C00FqL210742
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
-Received: from d01av04.pok.ibm.com (loopback [127.0.0.1])
-	by d01av04.pok.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m6C00FgG012815
-	for <linux-sparse@vger.kernel.org>; Fri, 11 Jul 2008 20:00:15 -0400
-In-Reply-To: <4877E67B.9040106@cowlark.com>
+Received: from casper.infradead.org ([85.118.1.10]:36370 "EHLO
+	casper.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751157AbYGLI5k (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 12 Jul 2008 04:57:40 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Given <dg@cowlark.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, davej@redhat.com
 
-On Sat, 2008-07-12 at 00:02 +0100, David Given wrote:
-> I'm just putting together some documentation in preparation for a proper
-> release of Clue, and have been doing some license paperwork (I want to
-> properly attribute sparse). I notice that the LICENSE documentation
-> refers to the OSL v1.1 (and provides a dead link to www.opensource.com).
-> 
-> Given that the OSL is now at v3.0, does sparse use OSL v1.1 on purpose
-> or simply that nobody got round to updating it?
+Hello all,
 
-For the same reason that most of Linux uses GPLv2 without the "or any
-later version" clause: because developers didn't want automatic upgrades
-to new licenses without the chance to read them or approve of them.
+I am trying to solve sparse warnings in kernel.
 
-> (I also note, purely for informational value, that no version of the OSL
-> is DSFG compatible.)
+=EF=BB=BFPlease let me know how can I solve following sparse warning :-
 
-And for that matter, all versions of the OSL have incompatibilities with
-the GPL.  The sparse FAQ notes that that occurred intentionally, and
-motivated the original choice of license.
+=EF=BB=BFwarning: cast adds address space to expression
 
-TTBOMK, newer versions of the OSL seem sufficiently less egregious that
-Debian has accepted them.  I think Debian primarily objects to clause
-10, which newer versions revise.
+Is this a warning or a Info.
 
+If any sparse documentation is available, please let me know.
 
-Sparse's license has come up on the list several times.  At least one of
-those times, the question of relicensing it came up; it seems that none
-of the developers object to it.  However, quoting Linus from one of
-those discussions:
-> Yeah, the OSL wasn't the best choice. I tried to change it (look in the 
-> sparse email archives) a few years ago, but I never got in contact with 
-> anybody at Transmeta back then who could have the power to relicense, and 
-> while my work with Linux has always been unquestionably mine (ie my work 
-> contract explicitly stated such), with sparse it isn't as obvious..
-> 
-> So back then, I couldn't get anybody to look at it (not that I tried all 
-> that hard), and I don't think I even have any contacts left to people I 
-> know at Transmeta any more.
+Thank you,
 
-If anyone wants to try to find the right people to talk to, and for that
-matter to get explicit assent from each of the developers, I would
-greatly appreciate it.
+Jaswinder Singh.
 
-Sparse's license has in at least one case made it difficult for a
-potential user of Sparse, namely the gobject-introspection work.
+=EF=BB=BF
 
-- Josh Triplett
-
-
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
