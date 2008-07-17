@@ -1,75 +1,51 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: =?utf-8?b?77u/d2FybmluZzo=?= cast adds address space to
-	expression
-Date: Sat, 12 Jul 2008 11:17:03 -0400
-Message-ID: <20080712111703.gjlzw6ns0k88844w-cebfxv@webmail.spamcop.net>
-References: <1215853026.19076.32.camel@jaswinder.satnam>
+From: Josh Triplett <josht@linux.vnet.ibm.com>
+Subject: Re: Sparse tool
+Date: Thu, 17 Jul 2008 14:58:48 -0700
+Message-ID: <1216331928.4870.7.camel@josh-work.beaverton.ibm.com>
+References: <68f510a70807111259l5d15f385pec54c099d3960423@mail.gmail.com>
+	 <20080711200829.GA26676@uranus.ravnborg.org>
+	 <20080711201140.GA26723@uranus.ravnborg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8;
-	DelSp=Yes	format=flowed
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:28131 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753115AbYGLPRE convert rfc822-to-8bit (ORCPT
+Received: from e34.co.us.ibm.com ([32.97.110.152]:40335 "EHLO
+	e34.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753222AbYGQV6s (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 12 Jul 2008 11:17:04 -0400
-In-Reply-To: <1215853026.19076.32.camel@jaswinder.satnam>
-Content-Disposition: inline
+	Thu, 17 Jul 2008 17:58:48 -0400
+Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
+	by e34.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id m6HLwlrp010930
+	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 17:58:47 -0400
+Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
+	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m6HLwkjv166726
+	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 15:58:46 -0600
+Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
+	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m6HLwkl8016925
+	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 15:58:46 -0600
+In-Reply-To: <20080711201140.GA26723@uranus.ravnborg.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jaswinder Singh <jaswinder@infradead.org>
-Cc: linux-sparse@vger.kernel.org, David Woodhouse <dwmw2@infradead.org>, davej@redhat.com
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Krishna Gopal <linuxkrishna@gmail.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
 
-Quoting Jaswinder Singh <jaswinder@infradead.org>:
+On Fri, 2008-07-11 at 22:11 +0200, Sam Ravnborg wrote:
+> On Fri, Jul 11, 2008 at 10:08:29PM +0200, Sam Ravnborg wrote:
+> > On Fri, Jul 11, 2008 at 02:59:46PM -0500, Krishna Gopal wrote:
+> > > Hi,
+> > > 
+> > >     I am running the sparse tool on my code and I see following error
+> > > 
+> > > error: too many arguments for function <noident>
+> > > 
+> > > Do any one know the reason behind this error ?
+> > 
+> > sparce mailing list added.
+> This time with the correct address.
 
-> Hello all,
->
-> I am trying to solve sparse warnings in kernel.
->
-> =EF=BB=BFPlease let me know how can I solve following sparse warning =
-:-
->
-> =EF=BB=BFwarning: cast adds address space to expression
->
-> Is this a warning or a Info.
+Can you please provide the code you used to trigger this error?  Or even
+better, can you provide a test case which reproduces the error?
 
-It's a warning.  The code must be doing something like this:
+- Josh Triplett
 
-void *addr1;
-void __iomem *addr2;
 
-addr2 =3D (void __iomem *) addr1;
-
-> If any sparse documentation is available, please let me know.
-
-I don't think you need sparse documentation to resolve it.  Sparse =20
-only detected a bad cast, but fixing it requires deeper understanding =20
-of the code, not of the warning.
-
-You should look at the expression and see if the value before cast =20
-needs the attribute, or the value after the cast doesn't need the =20
-attribute.
-
-The meanings of attributes in Linux are:
-
-__user - pointer to data that came from the userspace
-__iomem - pointer to a device I/O area (ports or I/O memory)
-
-There are functions that deal with such pointers.  The code you are =20
-dealing with may be trying to circumvent those functions.
-
-=46urther questions are better asked in Linux specific lists with more =
-=20
-details of the code.  Please note that you should understand the code =20
-to fix it.  Just fixing the warning without understanding the problem =20
-is defeating the whole purpose of sparse.
-
---=20
-Regards,
-Pavel Roskin
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
