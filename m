@@ -1,51 +1,82 @@
-From: Josh Triplett <josht@linux.vnet.ibm.com>
-Subject: Re: Sparse tool
-Date: Thu, 17 Jul 2008 14:58:48 -0700
-Message-ID: <1216331928.4870.7.camel@josh-work.beaverton.ibm.com>
-References: <68f510a70807111259l5d15f385pec54c099d3960423@mail.gmail.com>
-	 <20080711200829.GA26676@uranus.ravnborg.org>
-	 <20080711201140.GA26723@uranus.ravnborg.org>
+From: "Luis R. Rodriguez" <mcgrof@gmail.com>
+Subject: Context imbalance false positive
+Date: Thu, 17 Jul 2008 16:52:31 -0700
+Message-ID: <43e72e890807171652r133c973dh160ea28d361a4601@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e34.co.us.ibm.com ([32.97.110.152]:40335 "EHLO
-	e34.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753222AbYGQV6s (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.247]:22957 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760484AbYGQXwf (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 17 Jul 2008 17:58:48 -0400
-Received: from d03relay04.boulder.ibm.com (d03relay04.boulder.ibm.com [9.17.195.106])
-	by e34.co.us.ibm.com (8.13.8/8.13.8) with ESMTP id m6HLwlrp010930
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 17:58:47 -0400
-Received: from d03av01.boulder.ibm.com (d03av01.boulder.ibm.com [9.17.195.167])
-	by d03relay04.boulder.ibm.com (8.13.8/8.13.8/NCO v9.0) with ESMTP id m6HLwkjv166726
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 15:58:46 -0600
-Received: from d03av01.boulder.ibm.com (loopback [127.0.0.1])
-	by d03av01.boulder.ibm.com (8.12.11.20060308/8.13.3) with ESMTP id m6HLwkl8016925
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 15:58:46 -0600
-In-Reply-To: <20080711201140.GA26723@uranus.ravnborg.org>
+	Thu, 17 Jul 2008 19:52:35 -0400
+Received: by an-out-0708.google.com with SMTP id d40so196821and.103
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Jul 2008 16:52:32 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Krishna Gopal <linuxkrishna@gmail.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
+To: linux-sparse@vger.kernel.org
+Cc: Johannes Berg <johannes@sipsolutions.net>
 
-On Fri, 2008-07-11 at 22:11 +0200, Sam Ravnborg wrote:
-> On Fri, Jul 11, 2008 at 10:08:29PM +0200, Sam Ravnborg wrote:
-> > On Fri, Jul 11, 2008 at 02:59:46PM -0500, Krishna Gopal wrote:
-> > > Hi,
-> > > 
-> > >     I am running the sparse tool on my code and I see following error
-> > > 
-> > > error: too many arguments for function <noident>
-> > > 
-> > > Do any one know the reason behind this error ?
-> > 
-> > sparce mailing list added.
-> This time with the correct address.
+I'm not sure how to resolve a situation like this:
 
-Can you please provide the code you used to trigger this error?  Or even
-better, can you provide a test case which reproduces the error?
+#include <linux/module.h>
+#include <linux/spinlock.h>
 
-- Josh Triplett
+MODULE_AUTHOR("Luis R. Rodriguez");
+MODULE_LICENSE("GPL");
 
+static spinlock_t some_lock;
 
+static void lock(int bh_flag)
+{
+        if (bh_flag)
+                spin_lock_bh(&some_lock);
+        else
+                spin_lock(&some_lock);
+}
+
+static void unlock(int bh_flag)
+{
+        if (bh_flag)
+                spin_unlock_bh(&some_lock);
+        else
+                spin_unlock(&some_lock);
+}
+
+static int hello_init(void)
+{
+        spin_lock_init(&some_lock);
+        lock(1);
+        printk("I am a module, cheers!\n");
+        unlock(1);
+        return 0;
+}
+
+static void goodbye_exit(void)
+{
+        printk("Goodbye cruel world!\n");
+}
+
+module_init(hello_init);
+module_exit(goodbye_exit);
+
+----
+
+Sparse complains with:
+/home/mcgrof/devel/spin_lock_sparse/sparse_spinlock.c:14:3: warning:
+context imbalance in 'lock': wrong count at exit
+/home/mcgrof/devel/spin_lock_sparse/sparse_spinlock.c:14:3:    context
+'lock': wanted 0, got 1
+/home/mcgrof/devel/spin_lock_sparse/sparse_spinlock.c:20:3: warning:
+context problem in 'unlock': '_spin_unlock_bh' expected different
+context
+/home/mcgrof/devel/spin_lock_sparse/sparse_spinlock.c:20:3:    context
+'lock': wanted >= 1, got 0
+
+You can test compile from files here:
+
+http://ruslug.rutgers.edu/~mcgrof/spin_lock_sparse/
+
+  Luis
