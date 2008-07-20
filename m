@@ -1,61 +1,67 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [PATCH 0/9] context tracking updates
-Date: Sun, 20 Jul 2008 14:30:12 +0200
-Message-ID: <1216557012.3681.2.camel@johannes.berg>
-References: <20080529085402.814224000@sipsolutions.net>
-	 (sfid-20080529_110138_277241_2C8216B8)
+From: Erik Mouw <mouw@nl.linux.org>
+Subject: Re: Sparse tool
+Date: Sun, 20 Jul 2008 16:27:28 +0200
+Message-ID: <20080720142727.GA4468@arthur.home>
+References: <68f510a70807111259l5d15f385pec54c099d3960423@mail.gmail.com> <20080711200829.GA26676@uranus.ravnborg.org> <20080711201140.GA26723@uranus.ravnborg.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-e2aARsB4KjI14dXlVbhs"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="Q68bSM7Ycu6FN28Q"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:44870 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756764AbYGTMaW (ORCPT
+Received: from smtp-vbr16.xs4all.nl ([194.109.24.36]:4852 "EHLO
+	smtp-vbr16.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753364AbYGTOiW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 20 Jul 2008 08:30:22 -0400
-In-Reply-To: <20080529085402.814224000@sipsolutions.net> (sfid-20080529_110138_277241_2C8216B8)
+	Sun, 20 Jul 2008 10:38:22 -0400
+Content-Disposition: inline
+In-Reply-To: <20080711201140.GA26723@uranus.ravnborg.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@freedesktop.org>
-Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Krishna Gopal <linuxkrishna@gmail.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.arm.linux.org.uk
 
 
---=-e2aARsB4KjI14dXlVbhs
-Content-Type: text/plain
+--Q68bSM7Ycu6FN28Q
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Thu, 2008-05-29 at 10:54 +0200, Johannes Berg wrote:
-> This updates the context tracking, I just explained most of it in the mai=
-l
-> "Re: sparse context warning problem ..."
-> (message ID <1212050823.16917.37.camel@johannes.berg>)
+On Fri, Jul 11, 2008 at 10:11:40PM +0200, Sam Ravnborg wrote:
+> On Fri, Jul 11, 2008 at 10:08:29PM +0200, Sam Ravnborg wrote:
+> > On Fri, Jul 11, 2008 at 02:59:46PM -0500, Krishna Gopal wrote:
+> > > Hi,
+> > >=20
+> > >     I am running the sparse tool on my code and I see following error
+> > >=20
+> > > error: too many arguments for function <noident>
+> > >=20
+> > > Do any one know the reason behind this error ?
+> >=20
+> > sparce mailing list added.
+> This time with the correct address.
 
-Ping? Josh, do you intend to merge this? I keep getting asked about the
-corresponding kernel patches. If you don't want it, please revert my
-previous patches and I'll stop bothering you either way.
+Please don't do that, linux-arm-kernel is a subscriber-only mailing
+list. Mailman will reject messages from people not subscribed to the
+linux-arm-kernel mailing list (i.e.: most subscribers to linux-sparse)
+anyway. It's better to point the OP to the linux-sparse mailing list.
 
-johannes
 
---=-e2aARsB4KjI14dXlVbhs
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+Erik
+[linux-arm-kernel-owner #2]
+
+--=20
+Erik Mouw -- mouw@nl.linux.org
+
+--Q68bSM7Ycu6FN28Q
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+Content-Disposition: inline
 
 -----BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
+Version: GnuPG v1.4.6 (GNU/Linux)
 
-iQIcBAABAgAGBQJIgy/QAAoJEKVg1VMiehFYYP8QALYqdRI9zmmUwpzKPIzF/DAj
-GVMmqIKtR0wCkKP8OqY+ui8FGU1ftmEpG8qzYSGUqEn0j6tP6+wRs57cma7kGgEx
-dy+sK9nQ3E0hz3MTvmjewdUJ9dAw+d34bLHP0iDIT0VltkonmTHK5cTH3bDXFcwm
-GqpkkwYqF+Htam7nPA2aDwbYV2XwCzKFVrmVV2ck4cbT2KDRcugdDyt7m7hR7tFI
-2z6ifMK6cRjkSXXrkMTF7rd8+mhnCrZ0EOv5Wt3JzYeKwiganEaFtqaJuDREzcS+
-LvjPZEAwj5Rbotvulw7mDS+fM7Ht3ICC7wLhypPRFU8OjTDvoA42emp8zcgSGG3P
-fREllJx66SLf4+/Utn3yaBHWIDSTHmGhKieG6Y/lxgZZVBq3Eyom7dUDjZG+/X9/
-t2R90CgQXaThN3uQl0rxUnOKq1mwPN5jFZ5VmAD2gdXXMijz0ray579sldkV4hm3
-y1G1LeG3CXMFeI5sIBsBOEqSoLf9UGR07Sw+aNGiX3/kZ1bTKgaQmLa/rvr5L7Xn
-U6A/z0WOciDvMRf1LsmZvD0A3NbqVi2v/vu3ZJFTe29RXD7H1BqAIAWcUKcx+km9
-eudUJN8hPpyst6MHKEyn99silz+pmcLmcTebNacpnBU40Dgy16FKNkyetXgSmM/i
-0ZcFmME8BzoSt++KyXMJ
-=IKD8
+iD8DBQFIg0tP/PlVHJtIto0RAhm7AJ9LlHSpdK4nSs1t1IkcjNjptiLtAACfVj6U
+xOrWUc9NQay7SZGHQpbmJWA=
+=LZGK
 -----END PGP SIGNATURE-----
 
---=-e2aARsB4KjI14dXlVbhs--
-
+--Q68bSM7Ycu6FN28Q--
