@@ -1,67 +1,61 @@
-From: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
-Subject: [PATCH] sparse: Make pre_buffer dynamically increasable
-Date: Sun, 20 Jul 2008 00:22:24 +0900 (JST)
-Message-ID: <20080720.002224.108306935.anemo@mba.ocn.ne.jp>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: [PATCH 0/9] context tracking updates
+Date: Sun, 20 Jul 2008 14:30:12 +0200
+Message-ID: <1216557012.3681.2.camel@johannes.berg>
+References: <20080529085402.814224000@sipsolutions.net>
+	 (sfid-20080529_110138_277241_2C8216B8)
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-e2aARsB4KjI14dXlVbhs"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mba.ocn.ne.jp ([122.1.235.107]:56107 "EHLO smtp.mba.ocn.ne.jp"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754553AbYGSPUh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 19 Jul 2008 11:20:37 -0400
+Received: from xc.sipsolutions.net ([83.246.72.84]:44870 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756764AbYGTMaW (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 20 Jul 2008 08:30:22 -0400
+In-Reply-To: <20080529085402.814224000@sipsolutions.net> (sfid-20080529_110138_277241_2C8216B8)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: linux-mips@linux-mips.org, sam@ravnborg.org, viro@ZenIV.linux.org.uk
+To: Josh Triplett <josh@freedesktop.org>
+Cc: Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org
 
-I got this error when running sparse on mips kernel with gcc 4.3:
 
-builtin:272:1: warning: Newline in string or character constant
+--=-e2aARsB4KjI14dXlVbhs
+Content-Type: text/plain
+Content-Transfer-Encoding: quoted-printable
 
-The linux-mips kernel uses '$(CC) -dM -E' to generates arguments for
-sparse.  With gcc 4.3, it generates lot of '-D' options and causes
-pre_buffer overflow.  The linux-mips kernel can filter unused symbols
-out to avoid overflow, but sparse should be fixed anyway.
+On Thu, 2008-05-29 at 10:54 +0200, Johannes Berg wrote:
+> This updates the context tracking, I just explained most of it in the mai=
+l
+> "Re: sparse context warning problem ..."
+> (message ID <1212050823.16917.37.camel@johannes.berg>)
 
-This patch make pre_buffer dynamically increasable and add extra
-checking for overflow instead of silently truncating.
+Ping? Josh, do you intend to merge this? I keep getting asked about the
+corresponding kernel patches. If you don't want it, please revert my
+previous patches and I'll stop bothering you either way.
 
-Signed-off-by: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
----
-diff --git a/lib.c b/lib.c
-index 0abcc9a..6e8d09b 100644
---- a/lib.c
-+++ b/lib.c
-@@ -186,7 +186,8 @@ void die(const char *fmt, ...)
- }
- 
- static unsigned int pre_buffer_size;
--static char pre_buffer[8192];
-+static unsigned int pre_buffer_alloc_size;
-+static char *pre_buffer;
- 
- int Waddress_space = 1;
- int Wbitwise = 0;
-@@ -232,12 +233,20 @@ void add_pre_buffer(const char *fmt, ...)
- 	unsigned int size;
- 
- 	va_start(args, fmt);
-+	if (pre_buffer_alloc_size < pre_buffer_size + getpagesize()) {
-+		pre_buffer_alloc_size += getpagesize();
-+		pre_buffer = realloc(pre_buffer, pre_buffer_alloc_size);
-+		if (!pre_buffer)
-+			die("Unable to allocate more pre_buffer space");
-+	}
- 	size = pre_buffer_size;
- 	size += vsnprintf(pre_buffer + size,
--		sizeof(pre_buffer) - size,
-+		pre_buffer_alloc_size - size,
- 		fmt, args);
- 	pre_buffer_size = size;
- 	va_end(args);
-+	if (pre_buffer_size >= pre_buffer_alloc_size - 1)
-+		die("pre_buffer overflow");
- }
- 
- static char **handle_switch_D(char *arg, char **next)
+johannes
+
+--=-e2aARsB4KjI14dXlVbhs
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
+
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iQIcBAABAgAGBQJIgy/QAAoJEKVg1VMiehFYYP8QALYqdRI9zmmUwpzKPIzF/DAj
+GVMmqIKtR0wCkKP8OqY+ui8FGU1ftmEpG8qzYSGUqEn0j6tP6+wRs57cma7kGgEx
+dy+sK9nQ3E0hz3MTvmjewdUJ9dAw+d34bLHP0iDIT0VltkonmTHK5cTH3bDXFcwm
+GqpkkwYqF+Htam7nPA2aDwbYV2XwCzKFVrmVV2ck4cbT2KDRcugdDyt7m7hR7tFI
+2z6ifMK6cRjkSXXrkMTF7rd8+mhnCrZ0EOv5Wt3JzYeKwiganEaFtqaJuDREzcS+
+LvjPZEAwj5Rbotvulw7mDS+fM7Ht3ICC7wLhypPRFU8OjTDvoA42emp8zcgSGG3P
+fREllJx66SLf4+/Utn3yaBHWIDSTHmGhKieG6Y/lxgZZVBq3Eyom7dUDjZG+/X9/
+t2R90CgQXaThN3uQl0rxUnOKq1mwPN5jFZ5VmAD2gdXXMijz0ray579sldkV4hm3
+y1G1LeG3CXMFeI5sIBsBOEqSoLf9UGR07Sw+aNGiX3/kZ1bTKgaQmLa/rvr5L7Xn
+U6A/z0WOciDvMRf1LsmZvD0A3NbqVi2v/vu3ZJFTe29RXD7H1BqAIAWcUKcx+km9
+eudUJN8hPpyst6MHKEyn99silz+pmcLmcTebNacpnBU40Dgy16FKNkyetXgSmM/i
+0ZcFmME8BzoSt++KyXMJ
+=IKD8
+-----END PGP SIGNATURE-----
+
+--=-e2aARsB4KjI14dXlVbhs--
+
