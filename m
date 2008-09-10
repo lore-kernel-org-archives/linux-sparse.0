@@ -1,90 +1,100 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: [PATCH 6/9 v2] check context expressions as expressions
-Date: Wed, 10 Sep 2008 12:21:30 -0700
-Message-ID: <70318cbf0809101221n53dd06c2x19c68a1df336cb35@mail.gmail.com>
-References: <20080529085402.814224000@sipsolutions.net>
-	 <20080529085516.930777000@sipsolutions.net>
-	 <1221032003.12266.4.camel@johannes.berg>
+From: David Given <dg@cowlark.com>
+Subject: Re: Odd behaviour with OP_SCAST
+Date: Wed, 10 Sep 2008 21:48:16 +0100
+Message-ID: <48C83290.9010206@cowlark.com>
+References: <48C2F2BC.9030606@cowlark.com> <70318cbf0809081402i7c7e80c4g9b45988b8cf2e0fc@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+ protocol="application/pgp-signature";
+ boundary="------------enigB252D7AD289AE7B2A6E898D5"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from an-out-0708.google.com ([209.85.132.251]:28103 "EHLO
-	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751563AbYIJTVc (ORCPT
+Received: from a.painless.aaisp.net.uk ([81.187.30.51]:38580 "EHLO
+	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751028AbYIJUs0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 10 Sep 2008 15:21:32 -0400
-Received: by an-out-0708.google.com with SMTP id d40so467661and.103
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Sep 2008 12:21:31 -0700 (PDT)
-In-Reply-To: <1221032003.12266.4.camel@johannes.berg>
-Content-Disposition: inline
+	Wed, 10 Sep 2008 16:48:26 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1KdWbw-00008l-9D
+	for linux-sparse@vger.kernel.org; Wed, 10 Sep 2008 21:48:24 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id E52172006F
+	for <linux-sparse@vger.kernel.org>; Wed, 10 Sep 2008 21:48:21 +0100 (BST)
+In-Reply-To: <70318cbf0809081402i7c7e80c4g9b45988b8cf2e0fc@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Josh Triplett <josh@freedesktop.org>, Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org, Harvey Harrison <harvey.harrison@gmail.com>
+To: linux-sparse@vger.kernel.org
 
-On Wed, Sep 10, 2008 at 12:33 AM, Johannes Berg
-<johannes@sipsolutions.net> wrote:
+This is an OpenPGP/MIME signed message (RFC 2440 and 3156)
+--------------enigB252D7AD289AE7B2A6E898D5
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-> +static int ident_equal(struct ident *ident1, struct ident *ident2)
-> +{
-> +       if (ident1 == ident2)
-> +               return 1;
-> +       if (!ident1 || !ident2)
-> +               return 0;
-> +
-> +       return ident1->len == ident2->len &&
-> +               !strncmp(ident1->name, ident2->name, ident1->len);
-> +}
+Chris Li wrote:
+[...]
+> Sparse assume that float and double have different size than int.
+> On the linearized instruction level, it does not have the full type
+> information any more. All it got is the size of the type. So it is
+> tricky to distinguish int vs float.
 
-Nah, you pretty should never need to do that.
-Ident equal should just need to compare ident1 == ident2.
+Here's another one; and this is with a stock unmodified sparse, too, so
+I know it's not my fault.
 
-All ident has been hashed. Same ident, should show up
-as same pointer. Doing strncmp again is unnecessary.
+extern double pow(double x, double y);
+double d(double p)
+{ return pow(2, p); }
 
-I feel that this patch  is adding too much hack to the
-sparse front end. At the very least, can you
-just change __context__ parsing to accept symbol expression
-and the let the checking back end to do the code motions
-stuff?
+-->
 
-I haven't study the new context checking very carefully.
-I actually prefer the Linus's  old simple context checking.
-Yes, that does not distinguish which symbols taking the lock.
-But other than that it is working and counting the number
-correctly. And, it is very simple.
+	call.64     %r2 <- pow, $2, %arg1
+	ret.64      %r2
 
-The new context checking seems able to do more features.
-But it has too many sore spots. I vote for back it out.
+(Again with test-unssa, which seems to be convenient for displaying
+intermediate code.)
 
-Instead of keep adding more hacks to fix up the problem. I
-think we should step back and ask ourselves what do we really
-want to achieve.
+[...]
+> The change require the instruction to have more type
+> information than size. I am tempting to just put a full
+> ctype pointer there.
 
-The fundamental problem I saw here is that, sparse does not
-support cross function checking. There is no good way to save
-some analyzed result for some function and used it later by other
-function. That is why we actually have to put __context__
-around so many functions. The __context__ describe what
-these functions in forms of source code annotation. There is
-only so much we can do with source code annotations.
-I am not saying that annotation is not useful. I agree source
-code annotation helps on the source code reading. But it
-shouldn't limit checker only use the annotations. The checker
-should be able to draw intelligent conclusions, by looking the
-the function source code itself.
+In fact, that's what I've got in the private patch I'm using for Clue,
+although I'm only using it for determining the types of pseudos; I just
+hacked alloc_typed_instruction() (which knows the type) to add it. No
+other changes.
 
-e.g. Why do we have to annotate foo_lock(&bar->lock) will take a lock
-on &bar->lock? The checker should be able to find out foo_lock() just
-callers some lower level locking functions. For example,  let say if we
-can force foo to be inlined into the caller even foo is not declared as
-inline. Then there is no need to annotate foo itself. The caller see
-exactly what foo does.
+(This, BTW, is for a Clue backend that targets C. Yes, I can now compile
+C into C, which I'm sure might be useful to *someone*... due to getting
+ints and doubles confused some of the benchmarks are producing the wrong
+results, but the Whetstone one appears to be reasonably intact and
+*claims* that C compiled via sparse and Clue into C gets about 90% of
+the performance of direct compilation. Even though the benchmark is
+known to be poor and unreliable anyway, that's still indicative of
+sparse doing a pretty decent job...)
 
-So, I think we should implement cross functions checking capability
-systematically rather than putting more hacks on source code
-annotation. The writer patch I send out earlier is one step towards it.
-I will write up more detail proposal.
+--=20
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=EF=
+=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http://www.=
+cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82
+=E2=94=82 "All power corrupts, but we need electricity." --- Diana Wynne =
+Jones,
+=E2=94=82 _Archer's Goon_
 
-Chris
+
+--------------enigB252D7AD289AE7B2A6E898D5
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.6 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+
+iD8DBQFIyDKTf9E0noFvlzgRAtnEAJsGm7wq/BcMmXCQBmB4wrWwHy+/PgCdGVEC
+S8L1GcKILefKNPqmrMiJ3VM=
+=JaLH
+-----END PGP SIGNATURE-----
+
+--------------enigB252D7AD289AE7B2A6E898D5--
