@@ -1,98 +1,90 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: context imbalance false positive sparse warnings
-Date: Wed, 10 Sep 2008 09:47:11 +0200
-Message-ID: <1221032831.12266.8.camel@johannes.berg>
-References: <524f69650808191447o62a421c3n65f3938c9fc28dd7@mail.gmail.com>
-	 <8cef9d540808191500n10fa910eo674c8b8f2dd5b612@mail.gmail.com>
-	 <524f69650808191522r21fc4babqaf173c9df558afc1@mail.gmail.com>
-	 <1219184769.17033.95.camel@brick> (sfid-20080820_002610_629541_77E70AA8)
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: [PATCH 6/9 v2] check context expressions as expressions
+Date: Wed, 10 Sep 2008 12:21:30 -0700
+Message-ID: <70318cbf0809101221n53dd06c2x19c68a1df336cb35@mail.gmail.com>
+References: <20080529085402.814224000@sipsolutions.net>
+	 <20080529085516.930777000@sipsolutions.net>
+	 <1221032003.12266.4.camel@johannes.berg>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-HeyPaPgrJcGGC+Eka914"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:47141 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751478AbYIJHrS (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.251]:28103 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751563AbYIJTVc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 10 Sep 2008 03:47:18 -0400
-In-Reply-To: <1219184769.17033.95.camel@brick> (sfid-20080820_002610_629541_77E70AA8)
+	Wed, 10 Sep 2008 15:21:32 -0400
+Received: by an-out-0708.google.com with SMTP id d40so467661and.103
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Sep 2008 12:21:31 -0700 (PDT)
+In-Reply-To: <1221032003.12266.4.camel@johannes.berg>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Harvey Harrison <harvey.harrison@gmail.com>
-Cc: Steve French <smfrench@gmail.com>, Stalin Kenny <stalinlinux@gmail.com>, linux-sparse@vger.kernel.org
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: Josh Triplett <josh@freedesktop.org>, Philipp Reisner <philipp.reisner@linbit.com>, linux-sparse@vger.kernel.org, Harvey Harrison <harvey.harrison@gmail.com>
 
+On Wed, Sep 10, 2008 at 12:33 AM, Johannes Berg
+<johannes@sipsolutions.net> wrote:
 
---=-HeyPaPgrJcGGC+Eka914
-Content-Type: text/plain
-Content-Transfer-Encoding: quoted-printable
+> +static int ident_equal(struct ident *ident1, struct ident *ident2)
+> +{
+> +       if (ident1 == ident2)
+> +               return 1;
+> +       if (!ident1 || !ident2)
+> +               return 0;
+> +
+> +       return ident1->len == ident2->len &&
+> +               !strncmp(ident1->name, ident2->name, ident1->len);
+> +}
 
-On Tue, 2008-08-19 at 15:26 -0700, Harvey Harrison wrote:
-> On Tue, 2008-08-19 at 17:22 -0500, Steve French wrote:
-> > On Tue, Aug 19, 2008 at 5:00 PM, Stalin Kenny <stalinlinux@gmail.com> w=
-rote:
-> > >> Even the simplest use cases throw this error e.g. fs/super.c line 16=
-2-164:
-> > >>
-> > >> static void put_super(struct super_block *sb)
-> > >> {
-> > >>       spin_lock(&sb_lock);
-> > >>       __put_super(sb);
-> > >>       spin_unlock(&sb_lock);
-> > >> }
-> > >
-> > > What is the sparse error when you call this function ?
-> > CHECK   fs/super.c
-> > fs/super.c:164:2: warning: context imbalance in 'put_super': wrong coun=
-t at exit
-> > fs/super.c:164:2:    context 'lock': wanted 0, got 1
-> >=20
-> >=20
->=20
-> Johannes Berg had a 9-patch series that improved this somewhat, but they =
-had
-> some bugs in them (crashes).  But I've been running with them anyway as t=
-hey
-> do improve cases like this significantly.
+Nah, you pretty should never need to do that.
+Ident equal should just need to compare ident1 == ident2.
 
-I've just sent out a fixed version and with it I get no errors on
-fs/super.c when I apply this small fixup:
+All ident has been hashed. Same ident, should show up
+as same pointer. Doing strncmp again is unnecessary.
 
-diff --git a/fs/super.c b/fs/super.c
-index e931ae9..6810845 100644
---- a/fs/super.c
-+++ b/fs/super.c
-@@ -201,7 +201,7 @@ EXPORT_SYMBOL(deactivate_super);
-  *	success, 0 if we had failed (superblock contents was already dead or
-  *	dying when grab_super() had been called).
-  */
--static int grab_super(struct super_block *s) __releases(sb_lock)
-+static int grab_super(struct super_block *s) __releases(&sb_lock)
- {
- 	s->s_count++;
- 	spin_unlock(&sb_lock);
+I feel that this patch  is adding too much hack to the
+sparse front end. At the very least, can you
+just change __context__ parsing to accept symbol expression
+and the let the checking back end to do the code motions
+stuff?
 
-johannes
+I haven't study the new context checking very carefully.
+I actually prefer the Linus's  old simple context checking.
+Yes, that does not distinguish which symbols taking the lock.
+But other than that it is working and counting the number
+correctly. And, it is very simple.
 
---=-HeyPaPgrJcGGC+Eka914
-Content-Type: application/pgp-signature; name=signature.asc
-Content-Description: This is a digitally signed message part
+The new context checking seems able to do more features.
+But it has too many sore spots. I vote for back it out.
 
------BEGIN PGP SIGNATURE-----
-Comment: Johannes Berg (powerbook)
+Instead of keep adding more hacks to fix up the problem. I
+think we should step back and ask ourselves what do we really
+want to achieve.
 
-iQIcBAABAgAGBQJIx3t7AAoJEKVg1VMiehFYSKMP/0I+EvSTYrmnC9beBQ4MFEn1
-F1LQttZ5AKuMPvjygJLlGeWj6XbVfWTMXeqcTpLutvgoZanmI7LP4Mnr4bdZ81sU
-ekApB4wqf8DTTb4tIHoRkoxPOzuesLAM6KNl9YI9lC85LvIEa/Sa4ShSfsB4Qnr8
-pnFU/lcegFXBHwfT60nJ4jkJpMdSXibYMIXhul5eJsP8LHYu7CscuUT9PFNsHTT0
-X/SG6FR0W5NEudwO3/6Atu9WI2yIGfhWqH/o9ThqQmHeb28e8YQHNNwTPQp+HFfx
-i4NiZW4ztNWGiLPxRgmS65FaW6VzL8ZoQEUSYJ2N8wAzz3/dvn+oLHV1ObqAXYNj
-uVoNn32x0cXOjf94GQnf9dyVTgazFgER5U2zNa0Gp9XJigN+j70k9a2oDWI+4QL5
-i5B9N+eeWi3qi5+XBg8s8XydTJeqck5mCWoKGHNTBu+c0QPZBxsmxgTWG5idOqXO
-stGXO/PUpQGo3pczKS5MCDwnu3NqIvM4M5ivMcWRrmewcQRr1aTn2xNoRk4tCPa4
-7JoYgwNNJ87vwe1qMpDAy9dKke1AuD72lOuIX+EuJkjJtcl9+VvXw4kZSWf7H7Vj
-taicUL+NuKydpkHZ3OAug2mxNFaU02ySZJmDtsmOa7o7eUZaH/KWByBfkZSaSEh5
-tsy4JuFBW5xxjOtBw+/P
-=6rRF
------END PGP SIGNATURE-----
+The fundamental problem I saw here is that, sparse does not
+support cross function checking. There is no good way to save
+some analyzed result for some function and used it later by other
+function. That is why we actually have to put __context__
+around so many functions. The __context__ describe what
+these functions in forms of source code annotation. There is
+only so much we can do with source code annotations.
+I am not saying that annotation is not useful. I agree source
+code annotation helps on the source code reading. But it
+shouldn't limit checker only use the annotations. The checker
+should be able to draw intelligent conclusions, by looking the
+the function source code itself.
 
---=-HeyPaPgrJcGGC+Eka914--
+e.g. Why do we have to annotate foo_lock(&bar->lock) will take a lock
+on &bar->lock? The checker should be able to find out foo_lock() just
+callers some lower level locking functions. For example,  let say if we
+can force foo to be inlined into the caller even foo is not declared as
+inline. Then there is no need to annotate foo itself. The caller see
+exactly what foo does.
 
+So, I think we should implement cross functions checking capability
+systematically rather than putting more hacks on source code
+annotation. The writer patch I send out earlier is one step towards it.
+I will write up more detail proposal.
+
+Chris
