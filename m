@@ -1,74 +1,125 @@
-From: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: [PATCH] sparse: Make pre_buffer dynamically increasable
-Date: Sun, 14 Sep 2008 00:49:51 +0900 (JST)
-Message-ID: <20080914.004951.41872502.anemo@mba.ocn.ne.jp>
+Date: Sat, 13 Sep 2008 10:59:45 -0700
+Message-ID: <70318cbf0809131059w70c47e4dkb324e0f198b22ba@mail.gmail.com>
 References: <20080720.002224.108306935.anemo@mba.ocn.ne.jp>
+	 <20080914.004951.41872502.anemo@mba.ocn.ne.jp>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_33116_12975714.1221328785085"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mba.ocn.ne.jp ([122.1.235.107]:56997 "EHLO smtp.mba.ocn.ne.jp"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751559AbYIMPtm (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 13 Sep 2008 11:49:42 -0400
-In-Reply-To: <20080720.002224.108306935.anemo@mba.ocn.ne.jp>
+Received: from nf-out-0910.google.com ([64.233.182.191]:51995 "EHLO
+	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752176AbYIMR7q (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 13 Sep 2008 13:59:46 -0400
+Received: by nf-out-0910.google.com with SMTP id d3so755447nfc.21
+        for <linux-sparse@vger.kernel.org>; Sat, 13 Sep 2008 10:59:45 -0700 (PDT)
+In-Reply-To: <20080914.004951.41872502.anemo@mba.ocn.ne.jp>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: linux-mips@linux-mips.org, sam@ravnborg.org, viro@ZenIV.linux.org.uk
+To: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
+Cc: linux-sparse@vger.kernel.org, linux-mips@linux-mips.org, sam@ravnborg.org, viro@zeniv.linux.org.uk
 
-On Sun, 20 Jul 2008 00:22:24 +0900 (JST), Atsushi Nemoto <anemo@mba.ocn.ne.jp> wrote:
-> I got this error when running sparse on mips kernel with gcc 4.3:
-> 
-> builtin:272:1: warning: Newline in string or character constant
-> 
-> The linux-mips kernel uses '$(CC) -dM -E' to generates arguments for
-> sparse.  With gcc 4.3, it generates lot of '-D' options and causes
-> pre_buffer overflow.  The linux-mips kernel can filter unused symbols
-> out to avoid overflow, but sparse should be fixed anyway.
-> 
-> This patch make pre_buffer dynamically increasable and add extra
-> checking for overflow instead of silently truncating.
-> 
-> Signed-off-by: Atsushi Nemoto <anemo@mba.ocn.ne.jp>
+------=_Part_33116_12975714.1221328785085
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Ping?
+On Sat, Sep 13, 2008 at 8:49 AM, Atsushi Nemoto <anemo@mba.ocn.ne.jp> wrote:
+>> This patch make pre_buffer dynamically increasable and add extra
+>> checking for overflow instead of silently truncating.
+>>
 
-> ---
-> diff --git a/lib.c b/lib.c
-> index 0abcc9a..6e8d09b 100644
-> --- a/lib.c
-> +++ b/lib.c
-> @@ -186,7 +186,8 @@ void die(const char *fmt, ...)
->  }
->  
->  static unsigned int pre_buffer_size;
-> -static char pre_buffer[8192];
-> +static unsigned int pre_buffer_alloc_size;
-> +static char *pre_buffer;
->  
->  int Waddress_space = 1;
->  int Wbitwise = 0;
-> @@ -232,12 +233,20 @@ void add_pre_buffer(const char *fmt, ...)
->  	unsigned int size;
->  
->  	va_start(args, fmt);
-> +	if (pre_buffer_alloc_size < pre_buffer_size + getpagesize()) {
-> +		pre_buffer_alloc_size += getpagesize();
-> +		pre_buffer = realloc(pre_buffer, pre_buffer_alloc_size);
-> +		if (!pre_buffer)
-> +			die("Unable to allocate more pre_buffer space");
-> +	}
->  	size = pre_buffer_size;
->  	size += vsnprintf(pre_buffer + size,
-> -		sizeof(pre_buffer) - size,
-> +		pre_buffer_alloc_size - size,
->  		fmt, args);
->  	pre_buffer_size = size;
->  	va_end(args);
-> +	if (pre_buffer_size >= pre_buffer_alloc_size - 1)
-> +		die("pre_buffer overflow");
->  }
->  
->  static char **handle_switch_D(char *arg, char **next)
+The better way is just remove the pre_buffer completely. Just tokenize
+the buffer
+and append the result token on the fly.
 
+Can you try out the patch I attached? It does just that.
+
+Chris
+
+------=_Part_33116_12975714.1221328785085
+Content-Type: application/octet-stream; name=pre-buffer-tokenize
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fl23vxyr0
+Content-Disposition: attachment; filename=pre-buffer-tokenize
+
+UmVtb3ZlIHByZV9idWZmZXIKClRoaXMgcGF0Y2ggcmVtb3ZlIHRoZSBwcmVfYnVmZmVyIGNvbXBs
+ZXRlbHkuIEluc3RlYWQsCml0IHdpbGwgdG9rZW5pemVkIHRoZSBidWZmZXIgZHVyaW5nIGFkZF9w
+cmVfYnVmZmVyKCkuCkl0IGp1c3Qga2VlcCB0cmFjayBvZiB0aGUgYmVnaW4gYW5kIGVuZCBvZiBw
+cmVfYnVmZmVyLgoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3BoZXIgTGkgPHNwYXNlQGNocmlzbGku
+b3JnPgoKSW5kZXg6IHNwYXJzZS9saWIuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2Uub3JpZy9saWIu
+YworKysgc3BhcnNlL2xpYi5jCkBAIC0xODUsOCArMTg1LDggQEAgdm9pZCBkaWUoY29uc3QgY2hh
+ciAqZm10LCAuLi4pCiAJZXhpdCgxKTsKIH0KIAotc3RhdGljIHVuc2lnbmVkIGludCBwcmVfYnVm
+ZmVyX3NpemU7Ci1zdGF0aWMgY2hhciBwcmVfYnVmZmVyWzgxOTJdOworc3RhdGljIHN0cnVjdCB0
+b2tlbiAqcHJlX2J1ZmZlcl9iZWdpbiA9IE5VTEw7CitzdGF0aWMgc3RydWN0IHRva2VuICpwcmVf
+YnVmZmVyX2VuZCA9IE5VTEw7CiAKIGludCBXYWRkcmVzc19zcGFjZSA9IDE7CiBpbnQgV2JpdHdp
+c2UgPSAwOwpAQCAtMjMwLDE0ICsyMzAsMTggQEAgdm9pZCBhZGRfcHJlX2J1ZmZlcihjb25zdCBj
+aGFyICpmbXQsIC4uLgogewogCXZhX2xpc3QgYXJnczsKIAl1bnNpZ25lZCBpbnQgc2l6ZTsKKwlz
+dHJ1Y3QgdG9rZW4gKmJlZ2luLCAqZW5kOworCWNoYXIgYnVmZmVyWzQwOTZdOwogCiAJdmFfc3Rh
+cnQoYXJncywgZm10KTsKLQlzaXplID0gcHJlX2J1ZmZlcl9zaXplOwotCXNpemUgKz0gdnNucHJp
+bnRmKHByZV9idWZmZXIgKyBzaXplLAotCQlzaXplb2YocHJlX2J1ZmZlcikgLSBzaXplLAotCQlm
+bXQsIGFyZ3MpOwotCXByZV9idWZmZXJfc2l6ZSA9IHNpemU7CisJc2l6ZSA9IHZzbnByaW50Zihi
+dWZmZXIsIHNpemVvZihidWZmZXIpLCBmbXQsIGFyZ3MpOwogCXZhX2VuZChhcmdzKTsKKwliZWdp
+biA9IHRva2VuaXplX2J1ZmZlcihidWZmZXIsIHNpemUsICZlbmQpOworCWlmICghcHJlX2J1ZmZl
+cl9iZWdpbikKKwkJcHJlX2J1ZmZlcl9iZWdpbiA9IGJlZ2luOworCWlmIChwcmVfYnVmZmVyX2Vu
+ZCkKKwkJcHJlX2J1ZmZlcl9lbmQtPm5leHQgPSBiZWdpbjsKKwlwcmVfYnVmZmVyX2VuZCA9IGVu
+ZDsKIH0KIAogc3RhdGljIGNoYXIgKipoYW5kbGVfc3dpdGNoX0QoY2hhciAqYXJnLCBjaGFyICoq
+bmV4dCkKQEAgLTgxOSw4ICs4MjMsOSBAQCBzdGF0aWMgc3RydWN0IHN5bWJvbF9saXN0ICpzcGFy
+c2VfaW5pdGlhCiAJCQkJIHRva2VuLCBpbmNsdWRlcGF0aCk7CiAKIAkvLyBQcmVwZW5kIHRoZSBp
+bml0aWFsIGJ1aWx0LWluIHN0cmVhbQotCXRva2VuID0gdG9rZW5pemVfYnVmZmVyKHByZV9idWZm
+ZXIsIHByZV9idWZmZXJfc2l6ZSwgdG9rZW4pOwotCXJldHVybiBzcGFyc2VfdG9rZW5zdHJlYW0o
+dG9rZW4pOworCWlmICh0b2tlbikKKwkJcHJlX2J1ZmZlcl9lbmQtPm5leHQgPSB0b2tlbjsKKwly
+ZXR1cm4gc3BhcnNlX3Rva2Vuc3RyZWFtKHByZV9idWZmZXJfYmVnaW4pOwogfQogCiBzdHJ1Y3Qg
+c3ltYm9sX2xpc3QgKnNwYXJzZV9pbml0aWFsaXplKGludCBhcmdjLCBjaGFyICoqYXJndiwgc3Ry
+dWN0IHN0cmluZ19saXN0ICoqZmlsZWxpc3QpCkluZGV4OiBzcGFyc2UvdG9rZW5pemUuYwo9PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09Ci0tLSBzcGFyc2Uub3JpZy90b2tlbml6ZS5jCisrKyBzcGFyc2UvdG9rZW5pemUuYwpA
+QCAtMzAyLDcgKzMwMiw3IEBAIHN0YXRpYyBpbmxpbmUgaW50IG5leHRjaGFyKHN0cmVhbV90ICpz
+dHIKIAogc3RydWN0IHRva2VuIGVvZl90b2tlbl9lbnRyeTsKIAotc3RhdGljIHZvaWQgbWFya19l
+b2Yoc3RyZWFtX3QgKnN0cmVhbSwgc3RydWN0IHRva2VuICplbmRfdG9rZW4pCitzdGF0aWMgc3Ry
+dWN0IHRva2VuICptYXJrX2VvZihzdHJlYW1fdCAqc3RyZWFtKQogewogCXN0cnVjdCB0b2tlbiAq
+ZW5kOwogCkBAIC0zMTMsMTEgKzMxMywxMCBAQCBzdGF0aWMgdm9pZCBtYXJrX2VvZihzdHJlYW1f
+dCAqc3RyZWFtLCBzCiAJZW9mX3Rva2VuX2VudHJ5Lm5leHQgPSAmZW9mX3Rva2VuX2VudHJ5Owog
+CWVvZl90b2tlbl9lbnRyeS5wb3MubmV3bGluZSA9IDE7CiAKLQlpZiAoIWVuZF90b2tlbikKLQkJ
+ZW5kX3Rva2VuID0gICZlb2ZfdG9rZW5fZW50cnk7Ci0JZW5kLT5uZXh0ID0gZW5kX3Rva2VuOwor
+CWVuZC0+bmV4dCA9ICAmZW9mX3Rva2VuX2VudHJ5OwogCSpzdHJlYW0tPnRva2VubGlzdCA9IGVu
+ZDsKIAlzdHJlYW0tPnRva2VubGlzdCA9IE5VTEw7CisJcmV0dXJuIGVuZDsKIH0KIAogc3RhdGlj
+IHZvaWQgYWRkX3Rva2VuKHN0cmVhbV90ICpzdHJlYW0pCkBAIC05MTAsNyArOTA5LDcgQEAgc3Rh
+dGljIHN0cnVjdCB0b2tlbiAqc2V0dXBfc3RyZWFtKHN0cmVhbQogCXJldHVybiBiZWdpbjsKIH0K
+IAotc3RhdGljIHZvaWQgdG9rZW5pemVfc3RyZWFtKHN0cmVhbV90ICpzdHJlYW0sIHN0cnVjdCB0
+b2tlbiAqZW5kdG9rZW4pCitzdGF0aWMgc3RydWN0IHRva2VuICp0b2tlbml6ZV9zdHJlYW0oc3Ry
+ZWFtX3QgKnN0cmVhbSkKIHsKIAlpbnQgYyA9IG5leHRjaGFyKHN0cmVhbSk7CiAJd2hpbGUgKGMg
+IT0gRU9GKSB7CkBAIC05MjUsMjIgKzkyNCwyMiBAQCBzdGF0aWMgdm9pZCB0b2tlbml6ZV9zdHJl
+YW0oc3RyZWFtX3QgKnN0CiAJCXN0cmVhbS0+d2hpdGVzcGFjZSA9IDE7CiAJCWMgPSBuZXh0Y2hh
+cihzdHJlYW0pOwogCX0KLQltYXJrX2VvZihzdHJlYW0sIGVuZHRva2VuKTsKKwlyZXR1cm4gbWFy
+a19lb2Yoc3RyZWFtKTsKIH0KIAotc3RydWN0IHRva2VuICogdG9rZW5pemVfYnVmZmVyKHZvaWQg
+KmJ1ZmZlciwgdW5zaWduZWQgbG9uZyBzaXplLCBzdHJ1Y3QgdG9rZW4gKmVuZHRva2VuKQorc3Ry
+dWN0IHRva2VuICogdG9rZW5pemVfYnVmZmVyKHZvaWQgKmJ1ZmZlciwgdW5zaWduZWQgbG9uZyBz
+aXplLCBzdHJ1Y3QgdG9rZW4gKiplbmR0b2tlbikKIHsKIAlzdHJlYW1fdCBzdHJlYW07CiAJc3Ry
+dWN0IHRva2VuICpiZWdpbjsKIAogCWJlZ2luID0gc2V0dXBfc3RyZWFtKCZzdHJlYW0sIDAsIC0x
+LCBidWZmZXIsIHNpemUpOwotCXRva2VuaXplX3N0cmVhbSgmc3RyZWFtLCBlbmR0b2tlbik7CisJ
+KmVuZHRva2VuID0gdG9rZW5pemVfc3RyZWFtKCZzdHJlYW0pOwogCXJldHVybiBiZWdpbjsKIH0K
+IAogc3RydWN0IHRva2VuICogdG9rZW5pemUoY29uc3QgY2hhciAqbmFtZSwgaW50IGZkLCBzdHJ1
+Y3QgdG9rZW4gKmVuZHRva2VuLCBjb25zdCBjaGFyICoqbmV4dF9wYXRoKQogewotCXN0cnVjdCB0
+b2tlbiAqYmVnaW47CisJc3RydWN0IHRva2VuICpiZWdpbiwgKmVuZDsKIAlzdHJlYW1fdCBzdHJl
+YW07CiAJdW5zaWduZWQgY2hhciBidWZmZXJbQlVGU0laRV07CiAJaW50IGlkeDsKQEAgLTk1Miw2
+ICs5NTEsOCBAQCBzdHJ1Y3QgdG9rZW4gKiB0b2tlbml6ZShjb25zdCBjaGFyICpuYW1lCiAJfQog
+CiAJYmVnaW4gPSBzZXR1cF9zdHJlYW0oJnN0cmVhbSwgaWR4LCBmZCwgYnVmZmVyLCAwKTsKLQl0
+b2tlbml6ZV9zdHJlYW0oJnN0cmVhbSwgZW5kdG9rZW4pOworCWVuZCA9IHRva2VuaXplX3N0cmVh
+bSgmc3RyZWFtKTsKKwlpZiAoZW5kdG9rZW4pCisJCWVuZC0+bmV4dCA9IGVuZHRva2VuOwogCXJl
+dHVybiBiZWdpbjsKIH0KSW5kZXg6IHNwYXJzZS90b2tlbi5oCj09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJz
+ZS5vcmlnL3Rva2VuLmgKKysrIHNwYXJzZS90b2tlbi5oCkBAIC0xOTUsNyArMTk1LDcgQEAgZXh0
+ZXJuIGNvbnN0IGNoYXIgKnNob3dfaWRlbnQoY29uc3Qgc3RydQogZXh0ZXJuIGNvbnN0IGNoYXIg
+KnNob3dfc3RyaW5nKGNvbnN0IHN0cnVjdCBzdHJpbmcgKnN0cmluZyk7CiBleHRlcm4gY29uc3Qg
+Y2hhciAqc2hvd190b2tlbihjb25zdCBzdHJ1Y3QgdG9rZW4gKik7CiBleHRlcm4gc3RydWN0IHRv
+a2VuICogdG9rZW5pemUoY29uc3QgY2hhciAqLCBpbnQsIHN0cnVjdCB0b2tlbiAqLCBjb25zdCBj
+aGFyICoqbmV4dF9wYXRoKTsKLWV4dGVybiBzdHJ1Y3QgdG9rZW4gKiB0b2tlbml6ZV9idWZmZXIo
+dm9pZCAqLCB1bnNpZ25lZCBsb25nLCBzdHJ1Y3QgdG9rZW4gKik7CitleHRlcm4gc3RydWN0IHRv
+a2VuICogdG9rZW5pemVfYnVmZmVyKHZvaWQgKiwgdW5zaWduZWQgbG9uZywgc3RydWN0IHRva2Vu
+ICoqKTsKIAogZXh0ZXJuIHZvaWQgc2hvd19pZGVudGlmaWVyX3N0YXRzKHZvaWQpOwogZXh0ZXJu
+IHN0cnVjdCB0b2tlbiAqcHJlcHJvY2VzcyhzdHJ1Y3QgdG9rZW4gKik7Cg==
+------=_Part_33116_12975714.1221328785085--
