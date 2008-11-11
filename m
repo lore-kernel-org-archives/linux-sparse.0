@@ -1,63 +1,63 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
-Subject: Re: Hard-coded gcc header path
-Date: Tue, 11 Nov 2008 15:41:39 +0100
-Message-ID: <1226414499.29562.35.camel@spike.firmix.at>
-References: <20081111135816.GA25986@logfs.org>
+From: Pierre Habouzit <madcoder@debian.org>
+Subject: Bug#505177: Hard-coded gcc header path
+Date: Tue, 11 Nov 2008 21:13:28 +0100
+Message-ID: <20081111201328.GA10073@artemis.corp>
+References: <20081111135816.GA25986@logfs.org> <1226412106.4478.5.camel@johannes.berg> <20081111141459.GB25986@logfs.org>
+Reply-To: Pierre Habouzit <madcoder@debian.org>, 505177@bugs.debian.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ns.firmix.at ([62.141.48.66]:4154 "EHLO ns.firmix.at"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755741AbYKKOm0 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Nov 2008 09:42:26 -0500
-Received: from ns.firmix.at (localhost [127.0.0.1])
-	by ns.firmix.at (8.14.1/8.14.1) with ESMTP id mABEgELk015289
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Tue, 11 Nov 2008 15:42:14 +0100
-Received: (from defang@localhost)
-	by ns.firmix.at (8.14.1/8.14.1/Submit) id mABEgDsw015285
-	for <linux-sparse@vger.kernel.org>; Tue, 11 Nov 2008 15:42:13 +0100
-In-Reply-To: <20081111135816.GA25986@logfs.org>
+Content-Type: multipart/signed; boundary="wac7ysb48OaltWcw";
+	protocol="application/pgp-signature"; micalg=SHA1
+Return-path: <bounce-debian-bugs-dist=glddb-debian-bugs-dist=m.gmane.org@lists.debian.org>
+Resent-To: debian-bugs-dist@lists.debian.org
+Resent-Message-ID: <handler.505177.B505177.122643441319616@bugs.debian.org>
 Content-Disposition: inline
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <20081111141459.GB25986@logfs.org>
+List-Post: <mailto:debian-bugs-dist@lists.debian.org>
+List-Help: <mailto:debian-bugs-dist-request@lists.debian.org?subject=help>
+List-Subscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=subscribe>
+List-Unsubscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=unsubscribe>
+To: =?UTF-8?Q?J=C3=B6rn?= Engel <joern@logfs.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org, 505177@bugs.debian.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>
-Cc: linux-sparse@vger.kernel.org, 505177@bugs.debian.org
 
-On Tue, 2008-11-11 at 14:58 +0100, J=C3=B6rn Engel wrote:
-[...]
-> So what is the right solution to this problem?  Call "gcc --version" =
-and
-> parse the (deliberately hard) output?  Or make a copy of the gcc head=
-ers
 
-There is `gcc -dumpversion`. But it doesn't help if your compiler is
-from e.g. /opt/gcc-4.1.2 (where mine usually are).
-And `which`, `type -all`, and similar also doesn't really help as the
-reported pathname can be actually the ccache binary ....
+--wac7ysb48OaltWcw
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-So you want to use the output of
-----  snip  ----
-gcc -v -E - </dev/null 2>&1 >/dev/null | sed -n -e '/^#include <\.\.\.>=
- search starts here:/,/^End of search list\./s/^ \(.*\)/\1/p'
-----  snip  ----
-which also seems to work with non-standard paths (like /opt) and ccache
-in between.
+On Tue, Nov 11, 2008 at 02:15:29PM +0000, J=C3=B6rn Engel wrote:
+> On Tue, 11 November 2008 15:01:46 +0100, Johannes Berg wrote:
+> >=20
+> > Well, sort of. The patch is actually determined at sparse build time, so
+> > right now sparse requires you to build it against the same compiler that
+> > you are currently using. If you rebuild sparse with your shiny new
+> > compiler you'll notice that it'll end up with a different path in
+> > pre-process.h.
+>=20
+> Then the short-term solution for debian is clear.  Simply rebuild the
+> package and add a dependency on a specific gcc version.
 
-	Bernd
-
-PS: The core of the above line is from
-    http://sourceware.org/ml/crossgcc/2006-12/msg00038.html. The quite
-    trivial `sed` filter is by me.
+Which sucks badly because the default gcc is not always the same on
+every arch, and more importantly, people may want to use different GCCs.
+It would look like a better idea to ask gcc for its include path
+properly.
 --=20
-=46irmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
+=C2=B7O=C2=B7  Pierre Habouzit
+=C2=B7=C2=B7O                                                madcoder@debia=
+n.org
+OOO                                                http://www.madism.org
 
+--wac7ysb48OaltWcw
+Content-Type: application/pgp-signature
+Content-Disposition: inline
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+
+iEYEABECAAYFAkkZ52cACgkQvGr7W6HudhyzzQCfamDR5WrI5db3QVcphs1aIQ8B
+4wkAoJG43+pK7G2zMzRNUHq3OeyUzE4x
+=RDv/
+-----END PGP SIGNATURE-----
+
+--wac7ysb48OaltWcw--
