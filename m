@@ -1,71 +1,66 @@
-From: =?utf-8?B?SsO2cm4=?= Engel <joern@logfs.org>
-Subject: Hard-coded gcc header path
-Date: Tue, 11 Nov 2008 14:58:17 +0100
-Message-ID: <20081111135816.GA25986@logfs.org>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: Hard-coded gcc header path
+Date: Tue, 11 Nov 2008 15:01:46 +0100
+Message-ID: <1226412106.4478.5.camel@johannes.berg>
+References: <20081111135816.GA25986@logfs.org>
+	 (sfid-20081111_145831_071332_94D76BE4)
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/signed; micalg=pgp-sha1; protocol="application/pgp-signature"; boundary="=-8LccJ1ysjvJ75Z+/3YKx"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lazybastard.de ([212.112.238.170]:47198 "EHLO
-	longford.logfs.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756022AbYKKN60 (ORCPT
+Received: from xc.sipsolutions.net ([83.246.72.84]:42991 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755837AbYKKOBu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Nov 2008 08:58:26 -0500
-Content-Disposition: inline
+	Tue, 11 Nov 2008 09:01:50 -0500
+In-Reply-To: <20081111135816.GA25986@logfs.org> (sfid-20081111_145831_071332_94D76BE4)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: 505177@bugs.debian.org
+To: =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>
+Cc: linux-sparse@vger.kernel.org, 505177@bugs.debian.org
 
-Sparse doesn't work for me when compiling userspace code.  Others have
-experienced the same, so I refer to someone else's description of the
-symptom:
-http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=3D505177
 
-On my system, sparse tries several headers in order, neither of which
-exists:
-open("/usr/include/stddef.h", O_RDONLY) =3D -1 ENOENT (No such file or =
-directory)
-open("/usr/local/include/stddef.h", O_RDONLY) =3D -1 ENOENT (No such fi=
-le or directory)
-open("/usr/lib/gcc/i486-linux-gnu/4.1.2/include/stddef.h", O_RDONLY) =3D=
- -1 ENOENT (No such file or directory)
+--=-8LccJ1ysjvJ75Z+/3YKx
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 
-Not a big surprise when looking at the headers that do exist:
-Galway:/usr/lib/gcc/i486-linux-gnu# ll
-total 20
-drwxr-xr-x 4 root root 4096 2008-07-01 08:42 3.4.6
-drwxr-xr-x 4 root root 4096 2007-09-23 17:59 4.0.4
-drwxr-xr-x 3 root root 4096 2008-06-26 00:20 4.1
-lrwxrwxrwx 1 root root    3 2007-09-23 20:57 4.1.3 -> 4.1
-drwxr-xr-x 3 root root 4096 2008-07-13 11:06 4.2
-lrwxrwxrwx 1 root root    3 2008-07-01 08:42 4.2.4 -> 4.2
-drwxr-xr-x 4 root root 4096 2008-09-30 16:27 4.3
-lrwxrwxrwx 1 root root    3 2008-07-01 08:42 4.3.1 -> 4.3
-lrwxrwxrwx 1 root root    3 2008-08-08 18:18 4.3.2 -> 4.3
+On Tue, 2008-11-11 at 14:58 +0100, J=C3=B6rn Engel wrote:
 
-So why does sparse try 4.1.2 and not 4.1.3 or 4.3.2 or any other
-variant?
-joern@Galway:/usr/src/kernel/sparse$ cat pre-process.h
-#define GCC_INTERNAL_INCLUDE "/usr/lib/gcc/i486-linux-gnu/4.1.2/include=
-"
+> So why does sparse try 4.1.2 and not 4.1.3 or 4.3.2 or any other
+> variant?
+> joern@Galway:/usr/src/kernel/sparse$ cat pre-process.h
+> #define GCC_INTERNAL_INCLUDE "/usr/lib/gcc/i486-linux-gnu/4.1.2/include"
+>=20
+> Ah, it is hard-coding the path.
 
-Ah, it is hard-coding the path.
+Well, sort of. The patch is actually determined at sparse build time, so
+right now sparse requires you to build it against the same compiler that
+you are currently using. If you rebuild sparse with your shiny new
+compiler you'll notice that it'll end up with a different path in
+pre-process.h.
 
-So what is the right solution to this problem?  Call "gcc --version" an=
-d
-parse the (deliberately hard) output?  Or make a copy of the gcc header=
-s
-and ship them as /usr/lib/sparse/0.4.1/...?
+johannes
 
-J=C3=B6rn
+--=-8LccJ1ysjvJ75Z+/3YKx
+Content-Type: application/pgp-signature; name=signature.asc
+Content-Description: This is a digitally signed message part
 
---=20
-But this is not to say that the main benefit of Linux and other GPL
-software is lower-cost. Control is the main benefit--cost is secondary.
--- Bruce Perens
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-----BEGIN PGP SIGNATURE-----
+Comment: Johannes Berg (powerbook)
+
+iQIcBAABAgAGBQJJGZBHAAoJEKVg1VMiehFYRKkQAJOTfLTKNR766ePFE50/CpiC
+L1K7hvhzvRJYmvhZ0nKOoAB5d4Xw1yrl1O1/3Nrh4LLui3pMFyMQx9A42QSVrhuI
+iXDfe9l6UIMlDQAmTlfhdRAnsTsWND0MW/4XcVkEHUGJ23iu0quvq0OsNr/jbDRA
+R6AW5RlH2dEmdOk0blTueg9yt6hPH34fl5Dn8zo2Qx3SUDCl1cbxIruGGj1aQYP8
+ZsXlAnyum9S305S5yNa8rE3NrnI8DJITtN/igtS/Hgc8pmVZWfYAlRvgyV6oL6OY
+zMYu4ixZHD7mAUUGlWNHQMFRU0+FXd+3gXUEqfWfdrQRia9Qo3oeHaTvIZiSVsvn
+otaFrAbWtgm52blaD/8jGm4rSCSnKpe8ZrWEy2cj2z6NQT4ir+yo/kvbEU5Owvlc
+BK5Bjf0u05SaLdTzbZreWmKBvB+pRzjl5Iie16rcouxYSyWJ6Dx36MCKWrfPWwWI
+6Y6d/WQ2zGVEiOvP0fxdBh3tjIYXcnJKIQkTyedR1/p2TywfYVGMEhQE2HKRC5JY
+TG4iTnFh6OMWTxLOemQOfIAXWqgGylYI0ZZDXqjay0UI9ZWcqYbmWFhAkyjmPxLn
+fBtcLRNHdR6Jb3AKU8JxRo37gDbRGQ59tQ2qDwvNb6JBwsctPFz157cUeEvIwMqj
+d6QqBtXHxJ5kqJTeYIPl
+=wAef
+-----END PGP SIGNATURE-----
+
+--=-8LccJ1ysjvJ75Z+/3YKx--
+
