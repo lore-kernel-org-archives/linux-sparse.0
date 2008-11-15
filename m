@@ -1,62 +1,102 @@
-From: Bernd Petrovitsch <bernd@firmix.at>
-Subject: Re: Hard-coded gcc header path
-Date: Wed, 12 Nov 2008 00:10:17 +0100
-Message-ID: <1226445017.3331.19.camel@gimli.at.home>
-References: <20081111135816.GA25986@logfs.org>
-	 <1226412106.4478.5.camel@johannes.berg> <20081111141459.GB25986@logfs.org>
-	 <20081111201328.GA10073@artemis.corp> <20081111202849.GD25986@logfs.org>
-	 <118833cc0811111300q4e7571f5o2a56a652f9a941e9@mail.gmail.com>
-	 <20081111223215.GA30224@logfs.org>
+From: "Dan Carpenter" <error27@gmail.com>
+Subject: Re: inline declaration and assignment
+Date: Sat, 15 Nov 2008 15:20:27 +0300
+Message-ID: <a63d67fe0811150420w55ff1c7arabe5e1a1083ea089@mail.gmail.com>
+References: <Pine.NEB.4.64.0811102205210.20411@cesium.clock.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ns.firmix.at ([62.141.48.66]:5511 "EHLO ns.firmix.at"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751472AbYKKXKf (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Nov 2008 18:10:35 -0500
-Received: from ns.firmix.at (localhost [127.0.0.1])
-	by ns.firmix.at (8.14.1/8.14.1) with ESMTP id mABNANex002886
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Wed, 12 Nov 2008 00:10:23 +0100
-Received: (from defang@localhost)
-	by ns.firmix.at (8.14.1/8.14.1/Submit) id mABNAMgI002881
-	for <linux-sparse@vger.kernel.org>; Wed, 12 Nov 2008 00:10:22 +0100
-In-Reply-To: <20081111223215.GA30224@logfs.org>
+Received: from yx-out-2324.google.com ([74.125.44.29]:28423 "EHLO
+	yx-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754547AbYKOMU2 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 15 Nov 2008 07:20:28 -0500
+Received: by yx-out-2324.google.com with SMTP id 8so777097yxm.1
+        for <linux-sparse@vger.kernel.org>; Sat, 15 Nov 2008 04:20:27 -0800 (PST)
+In-Reply-To: <Pine.NEB.4.64.0811102205210.20411@cesium.clock.org>
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?J=F6rn?= Engel <joern@logfs.org>
-Cc: Morten Welinder <mwelinder@gmail.com>, Pierre Habouzit <madcoder@debian.org>, Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org, 505177@bugs.debian.org
+To: Matt <matt@use.net>
+Cc: linux-sparse@vger.kernel.org
 
-On Die, 2008-11-11 at 23:32 +0100, J=C3=B6rn Engel wrote:
-[...]
-> Either sparse gets smart enough to find the headers [1] or it ships i=
-ts
-> own set.  Anything else will continue to fail on one machine or anoth=
-er.
+The thing is that smatch is pretty much abandon-ware until Christmas
+because I'm cycling through Africa and don't have a computer to work
+with...  :/
 
-I don't think that shipping a copy of .h files from one gcc version wil=
-l
-seriously help people using `pcc` (or any other compiler).
-But I'm probably missing something here.
+On Tue, Nov 11, 2008 at 9:24 AM, Matt <matt@use.net> wrote:
+> Hi,
+>
+> I'm playing with smatch and noticed that an inline assignment doesn't seem
+> to get parsed as such. There's a couple of examples, but this one in
+> sparse's own parse.c (line 1480) is probably the best:
+>  struct ident *ident = NULL;
+>
+>
+> sparse doesn't seem to identify this as an assignment, only a declaration.
+> as a result, smatch gives this false positive:
+> parse.c +1487 undefined param add_expression 1
+>
 
-> [1] Bernd Petrovitsch sent me this neat one-liner in a private mail:
-> gcc -v -E - </dev/null 2>&1 >/dev/null | sed -n -e '/^#include <\.\.\=
-=2E> search starts here:/,/^End of search list\./s/^ \(.*\)/\1/p
->=20
-> We could add that to cgcc to set additional include paths.
+I really wanted to polish smatch up and make it presentable before I left
+but I ran out of time.
 
-And there probably are similar ones for `pcc` or others.
+The message isn't an error message.  It's means that "ident" could either
+be null or non-null depending on the if statement.
 
-	Bernd
---=20
-=46irmix Software GmbH                   http://www.firmix.at/
-mobil: +43 664 4416156                 fax: +43 1 7890849-55
-          Embedded Linux Development and Services
+If add_expression() dereferenced the parameter without checking then
+a message gets printed out there too.
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+There was supposed to be a script that made a list of all the functions
+that were called with undefined parameters and a list of all the functions
+that don't check.  If a parameter shows up on both lists then it's
+possibly a bug.
+
+cat out.txt | grep "undefined param" | cut -d ' ' -f 5- | sort -u > undefined
+cat out.txt | grep unchecked | cut -d ' ' -f 5- | sort -u > unchecked
+cat undefined unchecked | sort | uniq -c
+
+As far as declarations go, in sparse the declaration expressions have an
+initializer member if the expression is initialized.
+
+The other thing is that you can use:
+make C=y CHECK="smatch --debug" foo/bar.o
+
+That will show you the states as they flow.
+
+I guess the last thing is that the test assumes it is probably a bug
+if you have:
+if (foo) { ... } foo->bar;
+But really there are too many macros and asserts that check this.
+There are a lot of false positives from this script...
+
+Maybe if we added two states arg_null and arg_non_null and
+then changed these lines:
+
+orig:
+if (!tmp || tmp == &undefined || tmp == &isnull || tmp == &argument)
+         set_true_false_states(name, my_id, sym, true_state, false_state);
+
+new:
+if (tmp == &undefined || tmp == &isnull)
+         set_true_false_states(name, my_id, sym, true_state, false_state);
+if (tmp == &argument)
+         set_true_false_states(name, my_id, sym, arg_true, arg_false);
+
+Then in merge_states():
+if (s1 == &arg_false && s2 == &arg_true)
+        return &argument;
+
+There are some other places in the script that are affected...
+
+Or you could just add some other allocator functions to the
+return_null array.
+
+Anyway.  Sorry again for the poor documentation and the rubbish
+check script.  I'm probably not going to have email again for 2
+weeks but if I can help let me know.
+
+regards,
+dan carpenter
+bikesafari.net
