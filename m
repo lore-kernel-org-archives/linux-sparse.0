@@ -1,67 +1,55 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: A question about sparse: how to use =?UTF-8?Q?=5F=5Facquires=28=29=20?=
- =?UTF-8?Q?and=20=5F=5Freleases=28=29=20correctly=20=3F?=
-Date: Thu, 04 Dec 2008 14:06:36 +0100
-Message-ID: <04bce30ee151e3f2638ef73388335cad@localhost>
-References: <e2e108260812021159r31eb86a1v95d2cbdf7cfdae2d@mail.gmail.com> <e2e108260812040412j1f3f353bv2834750dbe914c48@mail.gmail.com> (sfid-20081204_131259_634866_966B9D93)
+From: Alexey zaytsev <alexey.zaytsev@gmail.com>
+Subject: [PATCH 0/4] Proper gcc header dir handling in sparse.
+Date: Mon, 08 Dec 2008 12:20:32 +0300
+Message-ID: <20081208091817.15890.27981.stgit@xl0.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from xc.sipsolutions.net ([83.246.72.84]:38665 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756596AbYLDNGo (ORCPT
+Received: from qb-out-0506.google.com ([72.14.204.233]:26734 "EHLO
+	qb-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753015AbYLHJLZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 4 Dec 2008 08:06:44 -0500
-In-Reply-To: <e2e108260812040412j1f3f353bv2834750dbe914c48@mail.gmail.com> (sfid-20081204_131259_634866_966B9D93)
+	Mon, 8 Dec 2008 04:11:25 -0500
+Received: by qb-out-0506.google.com with SMTP id f11so1611560qba.17
+        for <linux-sparse@vger.kernel.org>; Mon, 08 Dec 2008 01:11:24 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Bart Van Assche <bart.vanassche@gmail.com>
-Cc: kernel list <linux-kernel@vger.kernel.org>, Vladislav Bolkhovitin <vst@vlnb.net>, Alexander Shishkin <alexander.shishckin@gmail.com>, Geert Uytterhoeven <geert@linux-m68k.org>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@kernel.org>
+Cc: Christoph Hellwig <hch@infradead.org>, linux-sparse@vger.kernel.org, Sam Ravnborg <sam@ravnborg.org>, Josh Triplett <josh@freedesktop.org>
+
+[Resending with correct ml address. Sorry.]
+
+Hello.
+
+People have convinced me that sparse should take
+gcc base directory as a run-time parameter, so it
+could be used with gcc versions differing from the
+one sparse was compiled with.
+So here it goes, along with some related fixes.
+
+The patches may also be pulled from
+
+       git://git.zaytsev.su/git/sparse.git git-base-dir
+
+Also, the first two patches should fix the Debian bug 505177:
+
+       http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=505177
+
+---
+
+Alexey zaytsev (4):
+      Set gcc include path at runtime.
+      Let cgcc pass -gcc-base-dir to sparse.
+      Document -gcc-base-dir in sparse.1
+      Rename dirafter to idirafter.
 
 
+ Makefile      |    7 ++--
+ cgcc          |   14 ++++++++
+ lib.c         |   30 ++++++++++++-----
+ pre-process.c |   98 +++++++++++++++++++++++++++++++++++++++++++++------------
+ sparse.1      |    5 +++
+ 5 files changed, 119 insertions(+), 35 deletions(-)
 
-
-On Thu, 4 Dec 2008 13:12:58 +0100, "Bart Van Assche"
-<bart.vanassche@gmail.com> wrote:
-> [ping]
-> 
-> Is there anyone who can help me with the question below ?
-
-
->> void dev_seq_stop(struct seq_file *seq, void *v)
->>        __releases(dev_base_lock)
->> {
->>        read_unlock(&dev_base_lock);
->> }
->>
->> The command "make C=2 M=net/core" produces the following output for
->> the above function (using a sparse binary built from the sparse git
->> repository, last updated on August 26, 2008):
->>
->> net/core/dev.c:2579:2: warning: context problem in 'dev_seq_stop':
->> '_read_unlock' expected different context
->> net/core/dev.c:2579:2:    context 'lock': wanted >= 1, got 0
-
-I don't think sparse can properly handle this yet, at least not in a way
-you'd expect it to. I've extended sparse to handle it, but the current git
-tree has only a partial set of my changes applied, and the remaining ones
-have been contested. (I still think my initial changes should be reverted
-in the meantime)
-
->> My questions are as follows:
->> * Which argument type should be passed to __releases() -- a pointer to
->> a lock structure or the lock strucure itself ? In the header file
->> include/linux/spinlock_api_smp.h a pointer is passed to __acquires()
->> and __releases(), while other code (like the above) passes the lock
->> structure itself to the __acquires() and __releases() annotations.
-
-sparse prett much ignores the first argument anyway, this isn't defined
-yet.
-
->> * If the __releases() annotation is used correctly in net/core/dev.c,
->> why does sparse complain about a context problem ?
-
-Maybe it is? I don't know off-hand.
-
-johannes
+-- 
