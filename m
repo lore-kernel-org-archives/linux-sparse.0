@@ -1,19 +1,19 @@
 From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Subject: [PATCH 10/15] Looks more evident this way.
-Date: Mon, 15 Dec 2008 03:27:11 +0300
-Message-ID: <20081215002711.16107.92359.stgit@zaytsev.su>
+Subject: [PATCH 09/15] Handle a terminal -o option properly.
+Date: Mon, 15 Dec 2008 03:27:02 +0300
+Message-ID: <20081215002702.16107.31316.stgit@zaytsev.su>
 References: <20081215000849.16107.74332.stgit@zaytsev.su>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:63676 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751463AbYLOASA (ORCPT
+Received: from fk-out-0910.google.com ([209.85.128.187]:24915 "EHLO
+	fk-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751579AbYLOARv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 14 Dec 2008 19:18:00 -0500
-Received: by mail-bw0-f21.google.com with SMTP id 14so1154922bwz.13
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Dec 2008 16:17:59 -0800 (PST)
+	Sun, 14 Dec 2008 19:17:51 -0500
+Received: by fk-out-0910.google.com with SMTP id 18so1361957fkq.5
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Dec 2008 16:17:50 -0800 (PST)
 In-Reply-To: <20081215000849.16107.74332.stgit@zaytsev.su>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -22,20 +22,29 @@ Cc: Blue Swirl <blauwirbel@gmail.com>, Christopher Li <sparse@chrisli.org>, linu
 
 Signed-off-by: Alexey Zaytsev <alexey.zaytsev@gmail.com>
 ---
- symbol.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+ lib.c |   11 +++++++----
+ 1 files changed, 7 insertions(+), 4 deletions(-)
 
-diff --git a/symbol.c b/symbol.c
-index 49560ee..4da253b 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -49,7 +49,7 @@ struct symbol *lookup_symbol(struct ident *ident, enum namespace ns)
- 			return sym;
- 		}
- 	}
--	return sym;
-+	return NULL;
+diff --git a/lib.c b/lib.c
+index ea40ce1..665a6b7 100644
+--- a/lib.c
++++ b/lib.c
+@@ -347,10 +347,13 @@ static char **handle_switch_m(char *arg, char **next)
+ 
+ static char **handle_switch_o(char *arg, char **next)
+ {
+-	if (!strcmp (arg, "o") && *next)
+-		return next + 1; // "-o foo"
+-	else
+-		return next;     // "-ofoo" or (bogus) terminal "-o"
++	if (!strcmp (arg, "o")) {       // "-o foo"
++		if (!*++next)
++			die("argument to '-o' is missing");
++	}
++	// else "-ofoo"
++
++	return next;
  }
  
- struct context *alloc_context(void)
+ static const struct warning {
 
