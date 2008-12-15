@@ -1,57 +1,63 @@
 From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Subject: [PATCH 06/15] Sparc64 (Sparc V9, LP64) support
-Date: Mon, 15 Dec 2008 03:26:37 +0300
-Message-ID: <20081215002637.16107.50800.stgit@zaytsev.su>
+Subject: [PATCH 08/15] Make show_symbol newline-consistent
+Date: Mon, 15 Dec 2008 03:26:54 +0300
+Message-ID: <20081215002654.16107.8841.stgit@zaytsev.su>
 References: <20081215000849.16107.74332.stgit@zaytsev.su>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:63676 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751736AbYLOARZ (ORCPT
+Received: from fk-out-0910.google.com ([209.85.128.187]:24915 "EHLO
+	fk-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751765AbYLOARn (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 14 Dec 2008 19:17:25 -0500
-Received: by mail-bw0-f21.google.com with SMTP id 14so1154922bwz.13
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Dec 2008 16:17:24 -0800 (PST)
+	Sun, 14 Dec 2008 19:17:43 -0500
+Received: by fk-out-0910.google.com with SMTP id 18so1361957fkq.5
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Dec 2008 16:17:41 -0800 (PST)
 In-Reply-To: <20081215000849.16107.74332.stgit@zaytsev.su>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@kernel.org>
 Cc: Blue Swirl <blauwirbel@gmail.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, David Given <dg@cowlark.com>
 
-From: Blue Swirl <blauwirbel@gmail.com>
-
-This patch adds support for Sparc64 (Sparc V9, LP64).
-
-Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+Signed-off-by: Alexey Zaytsev <alexey.zaytsev@gmail.com>
 ---
- cgcc |    7 +++++++
- 1 files changed, 7 insertions(+), 0 deletions(-)
+ show-parse.c |    7 +++++--
+ 1 files changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/cgcc b/cgcc
-index 31c219a..98686a7 100755
---- a/cgcc
-+++ b/cgcc
-@@ -243,6 +243,11 @@ sub add_specs {
- 		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
- 		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
- 		&define_size_t ($m64 ? "long unsigned int" : "unsigned int"));
-+    } elsif ($spec eq 'sparc64') {
-+	return (' -Dsparc=1 -D__sparc=1 -D__sparc__=1 -D__sparcv9__=1 -D__sparc64__=1 -D__arch64__=1 -D__LP64__=1' .
-+		&integer_types (8, 16, 32, 64, 64) .
-+		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
-+		&define_size_t ("long unsigned int"));
-     } elsif ($spec eq 'x86_64') {
- 	return (' -Dx86_64=1 -D__x86_64=1 -D__x86_64__=1' .
- 		&integer_types (8, 16, 32, $m32 ? 32 : 64, 64) .
-@@ -268,6 +273,8 @@ sub add_specs {
- 	    return &add_specs ('x86_64');
- 	} elsif ($arch =~ /^(ppc)$/i) {
- 	    return &add_specs ('ppc');
-+	} elsif ($arch =~ /^(sparc64)$/i) {
-+	    return &add_specs ('sparc64');
+diff --git a/show-parse.c b/show-parse.c
+index c79a288..99795e8 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -390,8 +390,10 @@ void show_symbol(struct symbol *sym)
+ 
+ 	show_type(sym);
+ 	type = sym->ctype.base_type;
+-	if (!type)
++	if (!type) {
++		printf("\n");
+ 		return;
++	}
+ 
+ 	/*
+ 	 * Show actual implementation information
+@@ -410,9 +412,9 @@ void show_symbol(struct symbol *sym)
+ 
+ 	case SYM_FN: {
+ 		struct statement *stmt = type->stmt;
++		printf("\n");
+ 		if (stmt) {
+ 			int val;
+-			printf("\n");		
+ 			val = show_statement(stmt);
+ 			if (val)
+ 				printf("\tmov.%d\t\tretval,%d\n", stmt->ret->bit_size, val);
+@@ -422,6 +424,7 @@ void show_symbol(struct symbol *sym)
  	}
-     } else {
- 	die "$0: invalid specs: $spec\n";
+ 
+ 	default:
++		printf("\n");
+ 		break;
+ 	}
+ 
 
