@@ -1,43 +1,32 @@
-From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Subject: [PATCH 12/15] Handle missing argument to -D.
-Date: Mon, 15 Dec 2008 03:27:29 +0300
-Message-ID: <20081215002729.16107.46489.stgit@zaytsev.su>
-References: <20081215000849.16107.74332.stgit@zaytsev.su>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [PATCH 4/4] Rename dirafter to idirafter.
+Date: Mon, 15 Dec 2008 22:07:54 +0100
+Message-ID: <20081215210754.GA14567@uranus.ravnborg.org>
+References: <20081208091817.15890.27981.stgit@xl0.local> <20081208092102.15890.51534.stgit@xl0.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:48930 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751543AbYLOAZD (ORCPT
+Received: from pfepa.post.tele.dk ([195.41.46.235]:50145 "EHLO
+	pfepa.post.tele.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755277AbYLOVG0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 14 Dec 2008 19:25:03 -0500
-Received: by mail-bw0-f21.google.com with SMTP id 14so1159553bwz.13
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Dec 2008 16:25:02 -0800 (PST)
-In-Reply-To: <20081215000849.16107.74332.stgit@zaytsev.su>
+	Mon, 15 Dec 2008 16:06:26 -0500
+Content-Disposition: inline
+In-Reply-To: <20081208092102.15890.51534.stgit@xl0.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: Blue Swirl <blauwirbel@gmail.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, David Given <dg@cowlark.com>
+To: Alexey zaytsev <alexey.zaytsev@gmail.com>
+Cc: Josh Triplett <josh@kernel.org>, Christoph Hellwig <hch@infradead.org>, linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
 
-Signed-off-by: Alexey Zaytsev <alexey.zaytsev@gmail.com>
----
- lib.c |    4 ++++
- 1 files changed, 4 insertions(+), 0 deletions(-)
+On Mon, Dec 08, 2008 at 12:21:02PM +0300, Alexey zaytsev wrote:
+> Dirafter was probably just a mistake.
+> Gcc uses -idirafter.
 
-diff --git a/lib.c b/lib.c
-index 965fbfb..8dadfa9 100644
---- a/lib.c
-+++ b/lib.c
-@@ -248,6 +248,10 @@ static char **handle_switch_D(char *arg, char **next)
- {
- 	const char *name = arg + 1;
- 	const char *value = "1";
-+
-+	if (!*name || isspace(*name))
-+		die("argument to `-D' is missing");
-+
- 	for (;;) {
- 		char c;
- 		c = *++arg;
+My mistake - thanks.
+
+> 
+> Signed-off-by: Alexey zaytsev <alexey.zaytsev@gmail.com>
+Acked-by: Sam Ravnborg <sam@ravnborg.org>
+
+	Sam
 
