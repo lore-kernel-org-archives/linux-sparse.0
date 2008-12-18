@@ -1,62 +1,87 @@
 From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Subject: [PATCH 01/16] Add enum member list to the parent
-Date: Fri, 19 Dec 2008 00:51:22 +0300
-Message-ID: <20081218215122.28136.63238.stgit@zaytsev.su>
+Subject: [PATCH 02/16] Expand "dubious !x & y" handling to other combinations
+	of !, &, and |.
+Date: Fri, 19 Dec 2008 00:51:30 +0300
+Message-ID: <20081218215130.28136.92813.stgit@zaytsev.su>
 References: <20081218181935.28136.60256.stgit@zaytsev.su>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ug-out-1314.google.com ([66.249.92.174]:3891 "EHLO
-	ug-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752136AbYLRVmJ (ORCPT
+Received: from ey-out-2122.google.com ([74.125.78.27]:19155 "EHLO
+	ey-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752097AbYLRVml (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 18 Dec 2008 16:42:09 -0500
-Received: by ug-out-1314.google.com with SMTP id 39so508415ugf.37
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Dec 2008 13:42:06 -0800 (PST)
+	Thu, 18 Dec 2008 16:42:41 -0500
+Received: by ey-out-2122.google.com with SMTP id 22so44093eye.37
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Dec 2008 13:42:36 -0800 (PST)
 In-Reply-To: <20081218181935.28136.60256.stgit@zaytsev.su>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@kernel.org>
 Cc: Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
 
-From: Christopher Li <sparse@chrisli.org>
+From: Josh Triplett <josh@freedesktop.org>
 
-Signed-Off-By: Christopher Li <sparse@chrisli.org>
-Acked-by: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Signed-off-by: Josh Triplett <josh@freedesktop.org>
 ---
- parse.c |    6 ++----
- 1 files changed, 2 insertions(+), 4 deletions(-)
+ evaluate.c                            |   13 ++++++++++---
+ validation/dubious-bitwise-with-not.c |   19 +++++++++++++++++--
+ 2 files changed, 27 insertions(+), 5 deletions(-)
 
-diff --git a/parse.c b/parse.c
-index 915ae20..eb31871 100644
---- a/parse.c
-+++ b/parse.c
-@@ -665,7 +665,6 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
- 	unsigned long long lastval = 0;
- 	struct symbol *ctype = NULL, *base_type = NULL;
- 	Num upper = {-1, 0}, lower = {1, 0};
--	struct symbol_list *entries = NULL;
- 
- 	parent->examined = 1;
- 	parent->ctype.base_type = &int_ctype;
-@@ -701,7 +700,7 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
- 		sym->initializer = expr;
- 		sym->enum_member = 1;
- 		sym->ctype.base_type = parent;
--		add_ptr_list(&entries, sym);
-+		add_ptr_list(&parent->symbol_list, sym);
- 
- 		if (base_type != &bad_ctype) {
- 			if (ctype->type == SYM_NODE)
-@@ -777,8 +776,7 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
- 	parent->ctype.modifiers |= (base_type->ctype.modifiers & MOD_UNSIGNED);
- 	parent->examined = 0;
- 
--	cast_enum_list(entries, base_type);
--	free_ptr_list(&entries);
-+	cast_enum_list(parent->symbol_list, base_type);
- 
- 	return token;
- }
+diff --git a/evaluate.c b/evaluate.c
+index c501323..f976645 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -921,9 +921,16 @@ static struct symbol *evaluate_binop(struct expression *expr)
+ 			rtype = integer_promotion(rtype);
+ 		} else {
+ 			// The rest do usual conversions
+-			if (op == '&' && expr->left->type == EXPR_PREOP &&
+-			    expr->left->op == '!')
+-				warning(expr->pos, "dubious: !x & y");
++			const unsigned left_not  = expr->left->type == EXPR_PREOP
++			                           && expr->left->op == '!';
++			const unsigned right_not = expr->right->type == EXPR_PREOP
++			                           && expr->right->op == '!';
++			if ((op == '&' || op == '|') && (left_not || right_not))
++				warning(expr->pos, "dubious: %sx %c %sy",
++				        left_not ? "!" : "",
++					op,
++					right_not ? "!" : "");
++
+ 			ltype = usual_conversions(op, expr->left, expr->right,
+ 						  lclass, rclass, ltype, rtype);
+ 			ctype = rtype = ltype;
+diff --git a/validation/dubious-bitwise-with-not.c b/validation/dubious-bitwise-with-not.c
+index e076899..c48bcae 100644
+--- a/validation/dubious-bitwise-with-not.c
++++ b/validation/dubious-bitwise-with-not.c
+@@ -1,9 +1,24 @@
+-static unsigned int ok1 = !1 && 2;
+-static unsigned int bad1 = !1 & 2;
++static unsigned int ok1  = !1 &&  2;
++static unsigned int bad1 = !1 &   2;
++static unsigned int ok2  = !1 ||  2;
++static unsigned int bad2 = !1 |   2;
++static unsigned int ok3  =  1 && !2;
++static unsigned int bad3 =  1 &  !2;
++static unsigned int ok4  =  1 || !2;
++static unsigned int bad4 =  1 |  !2;
++static unsigned int ok5  = !1 && !2;
++static unsigned int bad5 = !1 &  !2;
++static unsigned int ok6  = !1 || !2;
++static unsigned int bad6 = !1 |  !2;
+ /*
+  * check-name: Dubious bitwise operation on !x
+  *
+  * check-error-start
+ dubious-bitwise-with-not.c:2:31: warning: dubious: !x & y
++dubious-bitwise-with-not.c:4:31: warning: dubious: !x | y
++dubious-bitwise-with-not.c:6:31: warning: dubious: x & !y
++dubious-bitwise-with-not.c:8:31: warning: dubious: x | !y
++dubious-bitwise-with-not.c:10:31: warning: dubious: !x & !y
++dubious-bitwise-with-not.c:12:31: warning: dubious: !x | !y
+  * check-error-end
+  */
 
