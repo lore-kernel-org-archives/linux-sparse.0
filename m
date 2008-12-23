@@ -1,55 +1,52 @@
-From: "Christopher Li" <sparse@chrisli.org>
+From: Rusty Russell <rusty@rustcorp.com.au>
 Subject: Re: Casting away noderef and address spaces?
-Date: Mon, 22 Dec 2008 17:25:49 -0800
-Message-ID: <70318cbf0812221725p583010d6u2c4cafb9d3215546@mail.gmail.com>
-References: <200812221606.13910.rusty@rustcorp.com.au>
-	 <20081222205750.GK28946@ZenIV.linux.org.uk>
-	 <70318cbf0812221323s53119420qcdb2ee0542185667@mail.gmail.com>
-	 <20081222213953.GN28946@ZenIV.linux.org.uk>
-	 <70318cbf0812221433y62197ec7y851f00fa5775f150@mail.gmail.com>
-	 <20081222225708.GA4074@uranus.ravnborg.org>
-	 <f19298770812221553n5281505ex611e8e6f6fa1f0c2@mail.gmail.com>
-	 <1229990125.11628.0.camel@johannes>
-	 <f19298770812221620s7ef34b9co55f1650220750b38@mail.gmail.com>
-	 <1229992670.11628.4.camel@johannes>
+Date: Tue, 23 Dec 2008 12:44:22 +1030
+Message-ID: <200812231244.22614.rusty@rustcorp.com.au>
+References: <200812221606.13910.rusty@rustcorp.com.au> <70318cbf0812221206o1b5e2aech2a36f723afc63ffa@mail.gmail.com> <20081222205750.GK28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.234]:39402 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753292AbYLWBZv (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Dec 2008 20:25:51 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so2163779rvb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Dec 2008 17:25:50 -0800 (PST)
-In-Reply-To: <1229992670.11628.4.camel@johannes>
+Received: from ozlabs.org ([203.10.76.45]:52825 "EHLO ozlabs.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754423AbYLWCOZ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Dec 2008 21:14:25 -0500
+In-Reply-To: <20081222205750.GK28946@ZenIV.linux.org.uk>
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Alexey Zaytsev <alexey.zaytsev@gmail.com>, Sam Ravnborg <sam@ravnborg.org>, Al Viro <viro@zeniv.linux.org.uk>, Rusty Russell <rusty@rustcorp.com.au>, linux-sparse@vger.kernel.org, Josh Triplett <josh@kernel.org>
+To: Al Viro <viro@zeniv.linux.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-On Mon, Dec 22, 2008 at 4:37 PM, Johannes Berg
-<johannes@sipsolutions.net> wrote:
-> On Tue, 2008-12-23 at 03:20 +0300, Alexey Zaytsev wrote:
->
->> By the way, are you sure the latest series you have sent is correct? To me it
->> seems that it does not make any warnings go away, and adds quite some more:
->> http://zaytsev.su/tmp/build.diff.txt
->
-> include/net/sch_generic.h:225:2: warning: label 'continue' already bound
->
-> This, of course, shouldn't happen. I thought I'd fixed it, but who
-> knows. I think it should all just be reverted :)
+On Tuesday 23 December 2008 07:27:50 Al Viro wrote:
+> The right solution is
+> 	(*(typeof(v) __attribute__((address_space(0), force)) *)(&v))
+> 
+> Cast there will take a pointer to type of V and force-cast it to pointer to
+> unqualified type of V.  *(cast)&v will do the obvious thing.  Will trim
+> both the AS and noderef.
 
-Hi,
+Thanks Al, that worked, but seems to tickle another bug (sparse 0.4.1, Ubuntu).
 
-Do you want to resend your change which revert the context changes?
-Make it base on Josh's git's tree and I will merge your changes in my
-branch.
+rusty@vivaldi:/tmp$ sparse foo.c
+foo.c:11:20: warning: incorrect type in assignment (invalid types)
+foo.c:11:20:    expected unknown type 11<noident>
+foo.c:11:20:    got int
 
-It will take me a while to get up to speed with the git goodness.
-I will start with merging Alexey's resend patches.
+Here's my sample program now:
 
-Chris
+#define __percpu __attribute__((noderef, address_space(3)))
+
+/* Turn v back into a normal var. */
+#define convert(v) \
+        (*(typeof(v) __attribute__((address_space(0), force)) *)(&v))
+
+int main(int argc, char *argv)
+{
+        unsigned int __percpu x;
+
+        convert(x) = 0;
+        return 0;
+}
+
