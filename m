@@ -1,76 +1,88 @@
-From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
-Subject: Re: [PATCH 7/16] Let void have sizeof 1
-Date: Wed, 24 Dec 2008 05:39:40 +0300
-Message-ID: <f19298770812231839n1aaaf84fla96dda04b11e0944@mail.gmail.com>
-References: <20081218181935.28136.60256.stgit@zaytsev.su>
-	 <20081218223216.23692.711.stgit@zaytsev.su>
-	 <70318cbf0812221951m4f9ee42bqac419b1f0b800bfa@mail.gmail.com>
-	 <f19298770812222037l6dbe5b35t4803138e20bab04d@mail.gmail.com>
-	 <f19298770812222129n556390ebwb1f2253dfc5f3086@mail.gmail.com>
-	 <4950A8A2.5090702@knosof.co.uk>
-	 <f19298770812230705o2bdd87e2j8446b292dda5f495@mail.gmail.com>
-	 <495181C0.7070803@knosof.co.uk>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: [PATCH 03/15] Add type information to struct instruction.
+Date: Tue, 23 Dec 2008 19:09:44 -0800
+Message-ID: <70318cbf0812231909i812a363s353d26572c8fddd2@mail.gmail.com>
+References: <20081215000849.16107.74332.stgit@zaytsev.su>
+	 <20081215002610.16107.25437.stgit@zaytsev.su>
+	 <70318cbf0812221921q5e53a8edhad06369537dc3a6c@mail.gmail.com>
+	 <4950CA43.6090101@cowlark.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_80245_28740797.1230088185044"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:41208 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065AbYLXCjn (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.237]:26678 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751218AbYLXDJp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 23 Dec 2008 21:39:43 -0500
-Received: by bwz14 with SMTP id 14so10934510bwz.13
-        for <linux-sparse@vger.kernel.org>; Tue, 23 Dec 2008 18:39:40 -0800 (PST)
-In-Reply-To: <495181C0.7070803@knosof.co.uk>
-Content-Disposition: inline
+	Tue, 23 Dec 2008 22:09:45 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so2664250rvb.1
+        for <linux-sparse@vger.kernel.org>; Tue, 23 Dec 2008 19:09:45 -0800 (PST)
+In-Reply-To: <4950CA43.6090101@cowlark.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Derek M Jones <derek@knosof.co.uk>
-Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@kernel.org>, Johannes Berg <johannes@sipsolutions.net>, linux-sparse@vger.kernel.org
+To: David Given <dg@cowlark.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Wed, Dec 24, 2008 at 03:26, Derek M Jones <derek@knosof.co.uk> wrote:
-> Alexey,
->
-> I have been looking through the source to look at the contexts
-> in which arithmetic is performed on void pointers.
->
->>>  1) Are the arguments really chars of one sort or another and
->>> therefore the parameter ought to be declared as such?
->>
->> You mean, if address arithmetics is performed on a void * cast result,
->> check that the casted type too has sizeof 1?
->
-> I was thinking more along the lines of pointer to a character type being
-> converted to void * for no obvious reason, or a value being converted to
-> void * having an arithmetic operation performed and then converted to
-> a pointer to character type.
-> For an example see line 156 of arch/x86/kernel/module_64.
->
-> I would expect the void * to come from/go to a type that had a
-> size greater than 1.
->
->>>  4) Other possible fault issues, people?
->
-> I have found an instance (arch/x86/kernel/kprobes.c:834) that
-> effectively does:
->
-> (void *)long_val + an_int_calculation
->
-> when it should have done:
->
-> (void *)(long_val + an_int_calculation)
->
-> hardly an earth shattering misuse.
-There is nothing wrong here. Just depends on the way you think
-about it. In the first case you convert a long to a pointer, and add
-an int, the the second, you convert the sum. The result is of course
-the same. And this has nothing to do with void*, it would be the
-same with char*.
+------=_Part_80245_28740797.1230088185044
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-So far the only concern with void* is that not everyone knows
-the it is sizeof 1. So if you propose repulsing void* with char*
-when we don't really need a void*, that's probably fine. But don't
-you think there are more useful ways to spend your time?
-With open issues like the Global Warming, World Hunger and
-standing 2.6.28 regressions, I don't see anyone bothered with
-replacing unnecessary void* casts.
+On Tue, Dec 23, 2008 at 3:23 AM, David Given <dg@cowlark.com> wrote:
+> I'm sure there's a better way of doing it, but I just couldn't find one!
+> So if you can think of any way to clean all this up I'd be delighted.
+> The underlying issue, BTW, is that OP_LOAD doesn't carry enough
+> information in its arguments to determine the type of the instruction.
+
+OK, if it is just for OP_LOAD. Will this attached patch solve your problem?
+
+Instead of adding type to every instruction. It just add that for the OP_LOAD
+instruction in insn->orig_type. If that works for you. I am very glad to reclaim
+the space back on instruction structure.
+
+> Incidentally, speaking of distinguishing arguments, one of the issues I
+> have with Clue is that sparse can't distinguish between parameters of
+> the different types but the same size in some situations --- e.g.:
+>
+> extern void foo(float i);
+> ...
+> foo(5);
+>
+> ...will call foo() with an *integer* parameter rather than a float one.
+> This is preventing me doing certain optimisations (like being able to
+> store ints in ints rather than doubles!). Is this related?
+
+I think sparse should do the proper cast for you when you call
+the function call. If it does not, that is a bug and we can fix it.
+
+Please let me know if you can use the patch.
+
+Chris
+
+------=_Part_80245_28740797.1230088185044
+Content-Type: application/octet-stream; name=load_type
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fp38s13f0
+Content-Disposition: attachment; filename=load_type
+
+TWFrZSB0eXBlIGluZm9ybWF0aW9uIG9ubHkgZm9yIE9QX0xPQUQKCkluZGV4OiBzcGFyc2UvbGlu
+ZWFyaXplLmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLm9yaWcvbGluZWFyaXplLmMKKysrIHNwYXJz
+ZS9saW5lYXJpemUuYwpAQCAtNTUsOSArNTUsNyBAQCBzdGF0aWMgaW5saW5lIGludCB0eXBlX3Np
+emUoc3RydWN0IHN5bWJvCiAKIHN0YXRpYyBzdHJ1Y3QgaW5zdHJ1Y3Rpb24gKmFsbG9jX3R5cGVk
+X2luc3RydWN0aW9uKGludCBvcGNvZGUsIHN0cnVjdCBzeW1ib2wgKnR5cGUpCiB7Ci0Jc3RydWN0
+IGluc3RydWN0aW9uICppbnNuID0gYWxsb2NfaW5zdHJ1Y3Rpb24ob3Bjb2RlLCB0eXBlX3NpemUo
+dHlwZSkpOwotCWluc24tPnR5cGUgPSB0eXBlOwotCXJldHVybiBpbnNuOworCXJldHVybiBhbGxv
+Y19pbnN0cnVjdGlvbihvcGNvZGUsIHR5cGVfc2l6ZSh0eXBlKSk7CiB9CiAKIHN0YXRpYyBzdHJ1
+Y3QgZW50cnlwb2ludCAqYWxsb2NfZW50cnlwb2ludCh2b2lkKQpAQCAtOTE1LDYgKzkxMyw3IEBA
+IHN0YXRpYyBwc2V1ZG9fdCBhZGRfbG9hZChzdHJ1Y3QgZW50cnlwb2kKIAogCWluc24tPnRhcmdl
+dCA9IG5ldzsKIAlpbnNuLT5vZmZzZXQgPSBhZC0+b2Zmc2V0OworCWluc24tPm9yaWdfdHlwZSA9
+IGFkLT5zb3VyY2VfdHlwZTsKIAl1c2VfcHNldWRvKGluc24sIGFkLT5hZGRyZXNzLCAmaW5zbi0+
+c3JjKTsKIAlhZGRfb25lX2luc24oZXAsIGluc24pOwogCXJldHVybiBuZXc7CkluZGV4OiBzcGFy
+c2UvbGluZWFyaXplLmgKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLm9yaWcvbGluZWFyaXplLmgKKysr
+IHNwYXJzZS9saW5lYXJpemUuaApAQCAtNzEsNyArNzEsNiBAQCBzdHJ1Y3QgaW5zdHJ1Y3Rpb24g
+ewogCQkgc2l6ZToyNDsKIAlzdHJ1Y3QgYmFzaWNfYmxvY2sgKmJiOwogCXN0cnVjdCBwb3NpdGlv
+biBwb3M7Ci0Jc3RydWN0IHN5bWJvbCAqdHlwZTsKIAl1bmlvbiB7CiAJCXBzZXVkb190IHRhcmdl
+dDsKIAkJcHNldWRvX3QgY29uZDsJCS8qIGZvciBicmFuY2ggYW5kIHN3aXRjaCAqLwo=
+------=_Part_80245_28740797.1230088185044--
