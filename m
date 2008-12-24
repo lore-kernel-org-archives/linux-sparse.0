@@ -1,75 +1,64 @@
-From: David Given <dg@cowlark.com>
-Subject: Re: [PATCH 03/15] Add type information to struct instruction.
-Date: Wed, 24 Dec 2008 23:01:37 +0000
-Message-ID: <4952BF51.1040302@cowlark.com>
-References: <20081215000849.16107.74332.stgit@zaytsev.su>	 <20081215002610.16107.25437.stgit@zaytsev.su>	 <70318cbf0812221921q5e53a8edhad06369537dc3a6c@mail.gmail.com>	 <4950CA43.6090101@cowlark.com> <70318cbf0812231909i812a363s353d26572c8fddd2@mail.gmail.com>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: [PATCH 7/16] Let void have sizeof 1
+Date: Wed, 24 Dec 2008 15:10:31 -0800
+Message-ID: <70318cbf0812241510o2318f701w938840b9123fb9e4@mail.gmail.com>
+References: <20081218181935.28136.60256.stgit@zaytsev.su>
+	 <20081218223216.23692.711.stgit@zaytsev.su>
+	 <70318cbf0812221951m4f9ee42bqac419b1f0b800bfa@mail.gmail.com>
+	 <f19298770812222037l6dbe5b35t4803138e20bab04d@mail.gmail.com>
+	 <f19298770812222129n556390ebwb1f2253dfc5f3086@mail.gmail.com>
+	 <4950A8A2.5090702@knosof.co.uk>
+	 <f19298770812230705o2bdd87e2j8446b292dda5f495@mail.gmail.com>
+	 <495181C0.7070803@knosof.co.uk>
+	 <f19298770812231839n1aaaf84fla96dda04b11e0944@mail.gmail.com>
+	 <4952B0AD.7040007@cowlark.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c.painless.aaisp.net.uk ([81.187.30.53]:33204 "EHLO
-	c.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751188AbYLXXBu (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.237]:51744 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751188AbYLXXKb (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Dec 2008 18:01:50 -0500
-Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by c.painless.aaisp.net.uk with esmtp (Exim 4.69)
-	(envelope-from <dg@cowlark.com>)
-	id 1LFcjc-0001WA-KU
-	for linux-sparse@vger.kernel.org; Wed, 24 Dec 2008 23:01:48 +0000
-Received: from [192.168.1.144] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id B26372011B
-	for <linux-sparse@vger.kernel.org>; Wed, 24 Dec 2008 23:01:45 +0000 (GMT)
-In-Reply-To: <70318cbf0812231909i812a363s353d26572c8fddd2@mail.gmail.com>
+	Wed, 24 Dec 2008 18:10:31 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so3035597rvb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 24 Dec 2008 15:10:31 -0800 (PST)
+In-Reply-To: <4952B0AD.7040007@cowlark.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: David Given <dg@cowlark.com>
+Cc: linux-sparse@vger.kernel.org
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
+On Wed, Dec 24, 2008 at 1:59 PM, David Given <dg@cowlark.com> wrote:
+> The thing is, sizeof(void) is *not* 1. sizeof(void) is *illegal*. It
+> just happens that gcc, as a platform-specific extension, treats
+> sizeof(void) as 1 by default.
 
-Christopher Li wrote:
-[...]
-> OK, if it is just for OP_LOAD. Will this attached patch solve your problem?
-> 
-> Instead of adding type to every instruction. It just add that for the OP_LOAD
-> instruction in insn->orig_type. If that works for you. I am very glad to reclaim
-> the space back on instruction structure.
+Exactly. I am unhappy about that patch as well.
+Sparse internally use symbol->bit_size == 0 to determine uncompleted type.
+Thanks this change. Now is_byte_type() will return true for void type as well.
 
-Sorry, I'm not at home right now and can't test this (and probably won't
-until New Year, though I'll have a go).
+> As a linter, sparse really ought not to be encouraging non-portable
+> behaviour. Admittedly, there's so much stuff in the kernel source that's
+> gcc-specific that it's probably not going to be possible to make it
+> build on anything else, but it should still warn people about it unless
+> specifically told otherwise --- it's bad practice, and may be indicative
+> of further problems elsewhere, and as such is worth a diagnostic.
 
-Also, I don't know if it *is* just of OP_LOAD. That's just the one I
-remember from looking back at old email. I think the issue is that
-OP_LOAD breaks the chain of pseudo->definer->pseudo->definer that I was
-using to determine the intrinsic type of the pseudo, but there may be
-other instructions that do this as well.
+I don't see the kernel directly use sizeof(void). Most of the place is
+using (void*) pointer + offset. It is not portable. But it is probably not
+worthy while to fix. Convert the void* to char*, add offset, convert it back
+to void* is pretty annoying as well. If we really want to make it clean, maybe
+we can use a macro or inline functions. Again, probably not worth the effort.
 
-I'd imagine that nobody else has come across this yet because most
-people are happy using the size to distinguish between different types;
-but (assuming that I've remembered this correctly) this'll bite anyone
-who needs to distinguish floats from int32s of doubles from int64s.
+But legitimize sizeof(void) == 1 is a different story. That I feel is just
+plain wrong.
 
-If space is really an issue, would it make sense therefore to replace
-the insn->size (and symbol->size etc) field with a ->type field pointing
-at the defining symbol for the type? Anyone who needs the type can get
-it from the defining symbol, plus all the other information that people
-like me need would be available, and may also simplify other code. (I
-could throw away a complete source file!)
+Even gcc is self contradicting regarding the size of void.
+Compiling "void i;" will give you:
+/tmp/void.c:1: error: storage size of 'i' isn't known
 
-> I think sparse should do the proper cast for you when you call
-> the function call. If it does not, that is a bug and we can fix it.
+I saw Josh just merge the sizeof(void) patch. Oh well.
 
-Okay, at some point I'll try to come up with a proper use case.
-
-- --
-David Given
-dg@cowlark.com
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
-
-iD8DBQFJUr9Mf9E0noFvlzgRAmWCAJ4+Q+XPPn9stf8TWHUiIrAk3kwcTACgtJbd
-mVD5E9Cg6a2tOtiTI34Mcz8=
-=FrsN
------END PGP SIGNATURE-----
+Chris
