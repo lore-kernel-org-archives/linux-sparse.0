@@ -1,40 +1,78 @@
 From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: My sparse repository
-Date: Thu, 25 Dec 2008 17:16:22 -0800
-Message-ID: <70318cbf0812251716i34608594kaeb537537e28c82f@mail.gmail.com>
-References: <70318cbf0812240417pc39e0c7gef1fd9c7ab0e14e3@mail.gmail.com>
-	 <f19298770812251226i5a7dc027sc70ec25a9ea53a6f@mail.gmail.com>
+Subject: [PATCH]: clean up Makefile long lines
+Date: Thu, 25 Dec 2008 18:27:13 -0800
+Message-ID: <70318cbf0812251827p2a294b9ar3a64f1d1b418be80@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_96885_5264249.1230258433619"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.233]:30809 "EHLO
+Received: from rv-out-0506.google.com ([209.85.198.225]:36243 "EHLO
 	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752354AbYLZBQX (ORCPT
+	with ESMTP id S1752192AbYLZC1O (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Dec 2008 20:16:23 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so3344484rvb.1
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2008 17:16:22 -0800 (PST)
-In-Reply-To: <f19298770812251226i5a7dc027sc70ec25a9ea53a6f@mail.gmail.com>
-Content-Disposition: inline
+	Thu, 25 Dec 2008 21:27:14 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so3359651rvb.1
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2008 18:27:13 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexey Zaytsev <alexey.zaytsev@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>, Rusty Russell <rusty@rustcorp.com.au>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>, Alexey Zaytsev <alexey.zaytsev@gmail.com>
 
-On Thu, Dec 25, 2008 at 12:26 PM, Alexey Zaytsev
-<alexey.zaytsev@gmail.com> wrote:
-> Is there a way to look at it in the gitweb? And also, could you please
+------=_Part_96885_5264249.1230258433619
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-Good idea. I will ask the kernel.org administrators to add my tree.
+On Thu, Dec 25, 2008 at 1:30 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
+>
+> When you are patching the Makefile then I suggest breaking this line up somehow.
+> Should be a follow-up patch.
 
-> create an experimental branch, for stuff that is not broken and ugly, but
-> needs more discussion? Otherwise I could do this, just didn't want to
-> duplicate the effort.
-
-Sure, what patch do you have in mind?
-
-The context patch series is not quite ready yet. When it does,
-I am make it to an experiment branch.
+Here is the follow-up patch.
 
 Chris
+
+------=_Part_96885_5264249.1230258433619
+Content-Type: text/plain; name=makefile-cleanup.patch.txt
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fp67zchk0
+Content-Disposition: attachment; filename=makefile-cleanup.patch.txt
+
+Q2xlYW4gdXAgTWFrZWZpbGUgbG9uZyBsaW5lcwoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3BoZXIg
+TGk8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS5jaHJpc2wvTWFrZWZpbGUKPT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PQotLS0gc3BhcnNlLmNocmlzbC5vcmlnL01ha2VmaWxlCisrKyBzcGFyc2UuY2hyaXNs
+L01ha2VmaWxlCkBAIC03OCw2ICs3OCwxNyBAQCBRVUlFVF9MSU5LICAgID0gJChROkA9QGVjaG8g
+ICAgJyAgICAgTElOCiBRVUlFVF9JTlNUX1NIID0gJChROkA9ZWNobyAtbiAgJyAgICAgSU5TVEFM
+TCAgJzspCiBRVUlFVF9JTlNUICAgID0gJChROkA9QGVjaG8gLW4gJyAgICAgSU5TVEFMTCAgJzsp
+CiAKK2RlZmluZSBJTlNUQUxMX0NNRAorCSQoUSkkKFFVSUVUX0lOU1RfU0gpaW5zdGFsbCAtdiAk
+MSAkKERFU1RESVIpJDIvJDEgfHwgZXhpdCAxOworCitlbmRlZgorCitTRURfUENfQ01EID0gJ3N8
+QHZlcnNpb25AfCQoVkVSU0lPTil8ZzsJCVwKKwkgICAgICBzfEBwcmVmaXhAfCQoUFJFRklYKXxn
+OwkJXAorCSAgICAgIHN8QGxpYmRpckB8JChMSUJESVIpfGc7CQlcCisJICAgICAgc3xAaW5jbHVk
+ZWRpckB8JChJTkNMVURFRElSKXxnJworCisKIGFsbDogJChQUk9HUkFNUykgc3BhcnNlLnBjCiAK
+IGluc3RhbGw6ICQoSU5TVF9QUk9HUkFNUykgJChMSUJTKSAkKExJQl9IKSBzcGFyc2UucGMKQEAg
+LTg2LDIyICs5NywxNCBAQCBpbnN0YWxsOiAkKElOU1RfUFJPR1JBTVMpICQoTElCUykgJChMSUJf
+CiAJJChRKWluc3RhbGwgLWQgJChERVNURElSKSQoTUFOMURJUikKIAkkKFEpaW5zdGFsbCAtZCAk
+KERFU1RESVIpJChJTkNMVURFRElSKS9zcGFyc2UKIAkkKFEpaW5zdGFsbCAtZCAkKERFU1RESVIp
+JChQS0dDT05GSUdESVIpCi0JJChRKWZvciBmIGluICQoSU5TVF9QUk9HUkFNUyk7IGRvIFwKLQkJ
+JChRVUlFVF9JTlNUX1NIKWluc3RhbGwgLXYgJCRmICQoREVTVERJUikkKEJJTkRJUikvJCRmIHx8
+IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChJTlNUX01BTjEpOyBkbyBcCi0JCSQo
+UVVJRVRfSU5TVF9TSClpbnN0YWxsIC1tIDY0NCAtdiAkJGYgJChERVNURElSKSQoTUFOMURJUikv
+JCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChMSUJTKTsgZG8gXAotCQkk
+KFFVSUVUX0lOU1RfU0gpaW5zdGFsbCAtbSA2NDQgLXYgJCRmICQoREVTVERJUikkKExJQkRJUikv
+JCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChMSUJfSCk7IGRvIFwKLQkJ
+JChRVUlFVF9JTlNUX1NIKWluc3RhbGwgLW0gNjQ0IC12ICQkZiAkKERFU1RESVIpJChJTkNMVURF
+RElSKS9zcGFyc2UvJCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFFVSUVUX0lOU1QpaW5zdGFs
+bCAtbSA2NDQgLXYgc3BhcnNlLnBjICQoREVTVERJUikkKFBLR0NPTkZJR0RJUikvc3BhcnNlLnBj
+CisJJChmb3JlYWNoIGYsJChJTlNUX1BST0dSQU1TKSwkKGNhbGwgSU5TVEFMTF9DTUQsJGYsJChC
+SU5ESVIpKSkKKwkkKGZvcmVhY2ggZiwkKElOU1RfTUFOMSksJChjYWxsIElOU1RBTExfQ01ELCRm
+LCQoTUFOMURJUikpKQorCSQoZm9yZWFjaCBmLCQoTElCUyksJChjYWxsIElOU1RBTExfQ01ELCRm
+LCQoTElCRElSKSkpCisJJChmb3JlYWNoIGYsJChMSUJfSCksJChjYWxsIElOU1RBTExfQ01ELCRm
+LCQoSU5DTFVERURJUikvc3BhcnNlKSkKKwkkKGNhbGwgSU5TVEFMTF9DTUQsc3BhcnNlLnBjLCQo
+UEtHQ09ORklHRElSKSkKIAogc3BhcnNlLnBjOiBzcGFyc2UucGMuaW4KLQkkKFFVSUVUX0dFTilz
+ZWQgJ3N8QHZlcnNpb25AfCQoVkVSU0lPTil8ZztzfEBwcmVmaXhAfCQoUFJFRklYKXxnO3N8QGxp
+YmRpckB8JChMSUJESVIpfGc7c3xAaW5jbHVkZWRpckB8JChJTkNMVURFRElSKXxnJyBzcGFyc2Uu
+cGMuaW4gPiBzcGFyc2UucGMKKwkkKFFVSUVUX0dFTilzZWQgJChTRURfUENfQ01EKSBzcGFyc2Uu
+cGMuaW4gPiBzcGFyc2UucGMKIAogCiBjb21waWxlX0VYVFJBX0RFUFMgPSBjb21waWxlLWkzODYu
+bwo=
+------=_Part_96885_5264249.1230258433619--
