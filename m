@@ -1,176 +1,40 @@
 From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: [PATCH]: Makefile automatic header dependency
-Date: Thu, 25 Dec 2008 16:14:59 -0800
-Message-ID: <70318cbf0812251614y1c00fbe3ye85e3501803ef737@mail.gmail.com>
-References: <70318cbf0812242004v30a91d73x844eca15c2733b20@mail.gmail.com>
-	 <20081225093000.GA27896@uranus.ravnborg.org>
+Subject: Re: [PATCH] Also warn about sizeof(function)
+Date: Thu, 25 Dec 2008 16:48:19 -0800
+Message-ID: <70318cbf0812251648j115548e9u6409423382dec657@mail.gmail.com>
+References: <70318cbf0812251145k1fa1e3bbh58b33a1aadf277cc@mail.gmail.com>
+	 <20081225200613.15414.96407.stgit@zaytsev.su>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_96610_33470152.1230250500018"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.231]:27310 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752095AbYLZAPA (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Dec 2008 19:15:00 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so3332522rvb.1
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2008 16:15:00 -0800 (PST)
-In-Reply-To: <20081225093000.GA27896@uranus.ravnborg.org>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>, Alexey Zaytsev <alexey.zaytsev@gmail.com>
-
-------=_Part_96610_33470152.1230250500018
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from rv-out-0506.google.com ([209.85.198.231]:29478 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752077AbYLZAsT (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 25 Dec 2008 19:48:19 -0500
+Received: by rv-out-0506.google.com with SMTP id f9so4021677rvb.3
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2008 16:48:19 -0800 (PST)
+In-Reply-To: <20081225200613.15414.96407.stgit@zaytsev.su>
 Content-Disposition: inline
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Thu, Dec 25, 2008 at 1:30 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
-> Hi Chris.
+Thanks, apply and pushed.
+
+On Thu, Dec 25, 2008 at 12:10 PM, Alexey Zaytsev
+<alexey.zaytsev@gmail.com> wrote:
+> Signed-off-by: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+> ---
 >
-> I tried to apply your patch here.
-> It was word wrapped but that was easy to fix.
->
-> A few comments below.
+>> Hi Alexey,
+>>
+> Sure. Btw, your patches come demaged lately. Could you please use
+> git-send-email to send them in the future?
 
-Thanks, that is exactly what I am looking for.
-
->> +CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
->
-> This works well with gcc - but if we want to build sparse with a wider
-> set of tool chains then this may fail.
-
-Good point. I add a test run of the flags before we apply them.
-
->> 's|@version@|$(VERSION)|g;s|@prefix@|$(PREFIX)|g;s|@libdir@|$(LIBDIR)|g;s|@includedir@|$(INCLUDEDIR)|g'
->> sparse.pc.in > sparse.pc
->
-> When you are patching the Makefile then I suggest breaking this line up somehow.
-> Should be a follow-up patch.
-
-Will do.
-
-> Such a catch-all rule may likely give problems
-> in the future. But for now it looks good.
-
-I am trying to stay away from those scary double $$.
-I just convert them using macros. Have to use a few
-double $$, but it does not look too bad.
-
-> I tried with:
-> $(PROGRAMS): %.o: $(LIBS)
->
-> but that failed due to the special treatment of compile
-> in the rule above.
-
-You mean:
-
-$(PROGRAMS): % : %o  $(LIBS)
-
-The only exception is "compile" depend on compile.o and compile-i386.o.
-So I use a macro to solve that.
-
-> This gives a warning when there is no .*.o.d files.
-> You need to do something like:
-> $(if $(wildcard .*.o.d), include $(wildcard .*.o.d))
-
-It is fixed.
-
-Thank for the feed back. See the updated patch
+Sorry about that. I will use attachment to send them next time. I am
+still learning my way to use git properly.
 
 Chris
-
-------=_Part_96610_33470152.1230250500018
-Content-Type: text/plain; name=makefile.patch.txt
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fp637w0b0
-Content-Disposition: attachment; filename=makefile.patch.txt
-
-TWFrZWZpbGUgYXV0b21hdGljIGhlYWRlciBkZXBlbmRlbmN5CgpJdCB1c2UgdGhlIGdjYyBnZW5l
-cmF0ZWQgZGVwZW5kZW5jeSBmaWxlIHRvIHRyYWNrCmhlYWRlciBmaWxlIGNoYW5nZXMuCgpVc2Ug
-cGF0dGVybiBydWxlcyB0byBidWlsZCBwcm9ncmFtZXMuCk1ha2VmaWxlIGlzIG11Y2ggc2hvcnRl
-ciBub3cuIEVhc2llciB0byBhZGQKbmV3IG9ianMgb3IgbmV3IHByb2dyYW1zLgoKU2lnbmVkLU9m
-Zi1CeTogQ2hyaXN0b3BoZXIgTGk8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS5j
-aHJpc2wvTWFrZWZpbGUKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLmNocmlzbC5vcmlnL01ha2VmaWxl
-CisrKyBzcGFyc2UuY2hyaXNsL01ha2VmaWxlCkBAIC0xNSwxMCArMTUsMTYgQEAgQVIgPSBhcgog
-I0NGTEFHUyArPSAtTzAgLURERUJVRyAtZzMgLWdkd2FyZi0yCiAKIEhBVkVfTElCWE1MPSQoc2hl
-bGwgcGtnLWNvbmZpZyAtLWV4aXN0cyBsaWJ4bWwtMi4wICYmIGVjaG8gJ3llcycpCi0KK0hBVkVf
-R0NDX0RFUD0kKHNoZWxsIHRvdWNoIC5nY2MtdGVzdC5jICYmIAkJCQlcCisJCSQoQ0MpIC1jIC1X
-cCwtTUQsLmdjYy10ZXN0LmQgLmdjYy10ZXN0LmMgMj4vZGV2L251bGwgJiYgXAorCQllY2hvICd5
-ZXMnOyBybSAtZiAuZ2NjLXRlc3QuZCAuZ2NjLXRlc3QubyAuZ2NjLXRlc3QuYykKIAogQ0ZMQUdT
-ICs9IC1ER0NDX0JBU0U9XCIkKHNoZWxsICQoQ0MpIC0tcHJpbnQtZmlsZS1uYW1lPSlcIgogCitp
-ZmVxICgkKEhBVkVfR0NDX0RFUCkseWVzKQorQ0ZMQUdTICs9IC1XcCwtTUQsJChARCkvLiQoQEYp
-LmQKK2VuZGlmCisKIERFU1RESVI9CiBQUkVGSVg9JChIT01FKQogQklORElSPSQoUFJFRklYKS9i
-aW4KQEAgLTI4LDE2ICszNCwxNSBAQCBNQU4xRElSPSQoTUFORElSKS9tYW4xCiBJTkNMVURFRElS
-PSQoUFJFRklYKS9pbmNsdWRlCiBQS0dDT05GSUdESVI9JChMSUJESVIpL3BrZ2NvbmZpZwogCi1Q
-Uk9HUkFNUz10ZXN0LWxleGluZyB0ZXN0LXBhcnNpbmcgb2JmdXNjYXRlIGNvbXBpbGUgZ3JhcGgg
-c3BhcnNlIHRlc3QtbGluZWFyaXplIGV4YW1wbGUgXAotCSB0ZXN0LXVuc3NhIHRlc3QtZGlzc2Vj
-dCBjdGFncwotCi0KK1BST0dSQU1TPXRlc3QtbGV4aW5nIHRlc3QtcGFyc2luZyBvYmZ1c2NhdGUg
-Y29tcGlsZSBncmFwaCBzcGFyc2UgXAorCSB0ZXN0LWxpbmVhcml6ZSBleGFtcGxlIHRlc3QtdW5z
-c2EgdGVzdC1kaXNzZWN0IGN0YWdzCiBJTlNUX1BST0dSQU1TPXNwYXJzZSBjZ2NjCiBJTlNUX01B
-TjE9c3BhcnNlLjEgY2djYy4xCiAKIGlmZXEgKCQoSEFWRV9MSUJYTUwpLHllcykKIFBST0dSQU1T
-Kz1jMnhtbAogSU5TVF9QUk9HUkFNUys9YzJ4bWwKK2MyeG1sX0VYVFJBX09CSlMgPSBgcGtnLWNv
-bmZpZyAtLWxpYnMgbGlieG1sLTIuMGAKIGVuZGlmCiAKIExJQl9IPSAgICB0b2tlbi5oIHBhcnNl
-LmggbGliLmggc3ltYm9sLmggc2NvcGUuaCBleHByZXNzaW9uLmggdGFyZ2V0LmggXApAQCAtOTgs
-NDQgKzEwMywxNyBAQCBpbnN0YWxsOiAkKElOU1RfUFJPR1JBTVMpICQoTElCUykgJChMSUJfCiBz
-cGFyc2UucGM6IHNwYXJzZS5wYy5pbgogCSQoUVVJRVRfR0VOKXNlZCAnc3xAdmVyc2lvbkB8JChW
-RVJTSU9OKXxnO3N8QHByZWZpeEB8JChQUkVGSVgpfGc7c3xAbGliZGlyQHwkKExJQkRJUil8Zztz
-fEBpbmNsdWRlZGlyQHwkKElOQ0xVREVESVIpfGcnIHNwYXJzZS5wYy5pbiA+IHNwYXJzZS5wYwog
-Ci10ZXN0LWxleGluZzogdGVzdC1sZXhpbmcubyAkKExJQlMpCi0JJChRVUlFVF9MSU5LKSQoQ0Mp
-ICQoTERGTEFHUykgLW8gJEAgJDwgJChMSUJTKQotCi10ZXN0LXBhcnNpbmc6IHRlc3QtcGFyc2lu
-Zy5vICQoTElCUykKLQkkKFFVSUVUX0xJTkspJChDQykgJChMREZMQUdTKSAtbyAkQCAkPCAkKExJ
-QlMpCi0KLXRlc3QtbGluZWFyaXplOiB0ZXN0LWxpbmVhcml6ZS5vICQoTElCUykKLQkkKFFVSUVU
-X0xJTkspJChDQykgJChMREZMQUdTKSAtbyAkQCAkPCAkKExJQlMpCi0KLXRlc3Qtc29ydDogdGVz
-dC1zb3J0Lm8gJChMSUJTKQotCSQoUVVJRVRfTElOSykkKENDKSAkKExERkxBR1MpIC1vICRAICQ8
-ICQoTElCUykKLQotY29tcGlsZTogY29tcGlsZS5vIGNvbXBpbGUtaTM4Ni5vICQoTElCUykKLQkk
-KFFVSUVUX0xJTkspJChDQykgJChMREZMQUdTKSAtbyAkQCAkPCBjb21waWxlLWkzODYubyAkKExJ
-QlMpCi0KLW9iZnVzY2F0ZTogb2JmdXNjYXRlLm8gJChMSUJTKQotCSQoUVVJRVRfTElOSykkKEND
-KSAkKExERkxBR1MpIC1vICRAICQ8ICQoTElCUykKLQotc3BhcnNlOiBzcGFyc2UubyAkKExJQlMp
-Ci0JJChRVUlFVF9MSU5LKSQoQ0MpICQoTERGTEFHUykgLW8gJEAgJDwgJChMSUJTKQotCi1ncmFw
-aDogZ3JhcGgubyAkKExJQlMpCi0JJChRVUlFVF9MSU5LKSQoQ0MpICQoTERGTEFHUykgLW8gJEAg
-JDwgJChMSUJTKQotCi1leGFtcGxlOiBleGFtcGxlLm8gJChMSUJTKQotCSQoUVVJRVRfTElOSykk
-KENDKSAkKExERkxBR1MpIC1vICRAICQ8ICQoTElCUykKIAotdGVzdC11bnNzYTogdGVzdC11bnNz
-YS5vICQoTElCUykKLQkkKFFVSUVUX0xJTkspJChDQykgJChMREZMQUdTKSAtbyAkQCAkPCAkKExJ
-QlMpCitjb21waWxlX0VYVFJBX0RFUFMgPSBjb21waWxlLWkzODYubwogCi10ZXN0LWRpc3NlY3Q6
-IHRlc3QtZGlzc2VjdC5vICQoTElCUykKLQkkKFFVSUVUX0xJTkspJChDQykgJChMREZMQUdTKSAt
-byAkQCAkPCAkKExJQlMpCitQUk9HX0xJTktfQ01EID0gJChRVUlFVF9MSU5LKSQoQ0MpICQoTERG
-TEFHUykgLW8gJEAgJF4gJCgkQF9FWFRSQV9PQkpTKSAKIAotY3RhZ3M6IGN0YWdzLm8gJChMSUJT
-KQotCSQoUVVJRVRfTElOSykkKENDKSAkKExERkxBR1MpIC1vICRAICQ8ICQoTElCUykKK2RlZmlu
-ZSBCVUlMRF9QUk9HUkFNCiskKHByb2cpOiAkKHByb2cpLm8gJCQoJChwcm9nKV9FWFRSQV9ERVBT
-KSAkJChMSUJTKQorCSQkKFBST0dfTElOS19DTUQpCitlbmRlZgogCi1jMnhtbDogYzJ4bWwubyAk
-KExJQlMpCi0JJChRVUlFVF9MSU5LKSQoQ0MpICQoTERGTEFHUykgIC1vICRAICQ8ICQoTElCUykg
-YHBrZy1jb25maWcgLS1saWJzIGxpYnhtbC0yLjBgCiskKGZvcmVhY2ggcHJvZywkKFBST0dSQU1T
-KSwkKGV2YWwgJChCVUlMRF9QUk9HUkFNKSkpCiAKICQoTElCX0ZJTEUpOiAkKExJQl9PQkpTKQog
-CSQoUVVJRVRfQVIpJChBUikgcmNzICRAICQoTElCX09CSlMpCkBAIC0xNDMsNDcgKzEyMSwxMyBA
-QCAkKExJQl9GSUxFKTogJChMSUJfT0JKUykKICQoU0xJQl9GSUxFKTogJChMSUJfT0JKUykKIAkk
-KFFVSUVUX0xJTkspJChDQykgJChMREZMQUdTKSAtV2wsLXNvbmFtZSwkQCAtc2hhcmVkIC1vICRA
-ICQoTElCX09CSlMpCiAKLWV2YWx1YXRlLm86ICQoTElCX0gpCi1leHByZXNzaW9uLm86ICQoTElC
-X0gpCi1saWIubzogJChMSUJfSCkKLWFsbG9jYXRlLm86ICQoTElCX0gpCi1wdHJsaXN0Lm86ICQo
-TElCX0gpCi1wYXJzZS5vOiAkKExJQl9IKQotcHJlLXByb2Nlc3MubzogJChMSUJfSCkKLXNjb3Bl
-Lm86ICQoTElCX0gpCi1zaG93LXBhcnNlLm86ICQoTElCX0gpCi1zeW1ib2wubzogJChMSUJfSCkK
-LWV4cGFuZC5vOiAkKExJQl9IKQotbGluZWFyaXplLm86ICQoTElCX0gpCi1mbG93Lm86ICQoTElC
-X0gpCi1jc2UubzogJChMSUJfSCkKLXNpbXBsaWZ5Lm86ICQoTElCX0gpCi1tZW1vcHMubzogJChM
-SUJfSCkKLWxpdmVuZXNzLm86ICQoTElCX0gpCi1zb3J0Lm86ICQoTElCX0gpCi1pbmxpbmUubzog
-JChMSUJfSCkKLXRhcmdldC5vOiAkKExJQl9IKQotdGVzdC1sZXhpbmcubzogJChMSUJfSCkKLXRl
-c3QtcGFyc2luZy5vOiAkKExJQl9IKQotdGVzdC1saW5lYXJpemUubzogJChMSUJfSCkKLXRlc3Qt
-ZGlzc2VjdC5vOiAkKExJQl9IKQotdGVzdC11bnNzYS5vOiAkKExJQl9IKQotY3RhZ3MubzogJChM
-SUJfSCkKLWNvbXBpbGUubzogJChMSUJfSCkgY29tcGlsZS5oCi1jb21waWxlLWkzODYubzogJChM
-SUJfSCkgY29tcGlsZS5oCi10b2tlbml6ZS5vOiAkKExJQl9IKQotc3BhcnNlLm86ICQoTElCX0gp
-Ci1vYmZ1c2NhdGUubzogJChMSUJfSCkKLWV4YW1wbGUubzogJChMSUJfSCkKLXN0b3JhZ2Uubzog
-JChMSUJfSCkKLWRpc3NlY3QubzogJChMSUJfSCkKLWdyYXBoLm86ICQoTElCX0gpCitERVBfRklM
-RVMgOj0gJCh3aWxkY2FyZCAuKi5vLmQpCiskKGlmICQoREVQX0ZJTEVTKSwkKGV2YWwgaW5jbHVk
-ZSAkKERFUF9GSUxFUykpKQogCiBjMnhtbC5vOiBjMnhtbC5jICQoTElCX0gpCiAJJChRVUlFVF9D
-QykkKENDKSBgcGtnLWNvbmZpZyAtLWNmbGFncyBsaWJ4bWwtMi4wYCAtbyAkQCAtYyAkKENGTEFH
-UykgJDwKIAotY29tcGF0LWxpbnV4Lm86IGNvbXBhdC9zdHJ0b2xkLmMgY29tcGF0L21tYXAtYmxv
-Yi5jIFwKLQkkKExJQl9IKQorY29tcGF0LWxpbnV4Lm86IGNvbXBhdC9zdHJ0b2xkLmMgY29tcGF0
-L21tYXAtYmxvYi5jICQoTElCX0gpCiBjb21wYXQtc29sYXJpcy5vOiBjb21wYXQvbW1hcC1ibG9i
-LmMgJChMSUJfSCkKIGNvbXBhdC1taW5ndy5vOiAkKExJQl9IKQogY29tcGF0LWN5Z3dpbi5vOiAk
-KExJQl9IKQpAQCAtMTkyLDcgKzEzNiw3IEBAIGNvbXBhdC1jeWd3aW4ubzogJChMSUJfSCkKIAkk
-KFFVSUVUX0NDKSQoQ0MpIC1vICRAIC1jICQoQ0ZMQUdTKSAkPAogCiBjbGVhbjogY2xlYW4tY2hl
-Y2sKLQlybSAtZiAqLltvYV0gKi5zbyAkKFBST0dSQU1TKSAkKFNMSUJfRklMRSkgcHJlLXByb2Nl
-c3MuaCBzcGFyc2UucGMKKwlybSAtZiAqLltvYV0gLiouZCAqLnNvICQoUFJPR1JBTVMpICQoU0xJ
-Ql9GSUxFKSBwcmUtcHJvY2Vzcy5oIHNwYXJzZS5wYwogCiBkaXN0OgogCUBpZiB0ZXN0ICJgZ2l0
-IGRlc2NyaWJlYCIgIT0gIiQoVkVSU0lPTikiIDsgdGhlbiBcCg==
-------=_Part_96610_33470152.1230250500018--
