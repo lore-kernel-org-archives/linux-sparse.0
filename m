@@ -1,78 +1,137 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: [PATCH]: clean up Makefile long lines
-Date: Thu, 25 Dec 2008 18:27:13 -0800
-Message-ID: <70318cbf0812251827p2a294b9ar3a64f1d1b418be80@mail.gmail.com>
+From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+Subject: [PATCH] Null ctype should have ptr_ctype as its base type.
+Date: Sun, 28 Dec 2008 18:14:03 +0300
+Message-ID: <20081228151134.6062.83633.stgit@zaytsev.su>
+References: <20081225182817.26024.19045.stgit@zaytsev.su>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_96885_5264249.1230258433619"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.225]:36243 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752192AbYLZC1O (ORCPT
+Received: from nf-out-0910.google.com ([64.233.182.186]:45216 "EHLO
+	nf-out-0910.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754572AbYL1PEp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Dec 2008 21:27:14 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so3359651rvb.1
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2008 18:27:13 -0800 (PST)
+	Sun, 28 Dec 2008 10:04:45 -0500
+Received: by nf-out-0910.google.com with SMTP id d3so549948nfc.21
+        for <linux-sparse@vger.kernel.org>; Sun, 28 Dec 2008 07:04:43 -0800 (PST)
+In-Reply-To: <20081225182817.26024.19045.stgit@zaytsev.su>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@freedesktop.org>, Alexey Zaytsev <alexey.zaytsev@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Tommy Thorn <tommy@numba-tu.com>
 
-------=_Part_96885_5264249.1230258433619
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Content-Disposition: inline
+Amirite?
 
-On Thu, Dec 25, 2008 at 1:30 AM, Sam Ravnborg <sam@ravnborg.org> wrote:
+Signed-off-by: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+---
+
+On Thu, Dec 25, 2008 at 21:36, Alexey Zaytsev <alexey.zaytsev@gmail.com> wrote:
+> Tommy Thorn wrote:
+>> Christopher Li wrote:
+>>> So here is what I got. A patch address both of our need. It gives warning
+>>> of using sizeof(void) explicitly. void* + offset will continue to work without
+>>> warnings. It will also make is_byte_type() continue to work as it was
+>>> before.
+>>>
+>>> Here is my test script:
+>>>
+>>> void *p;
+>>>
+>>> int i = sizeof(void);
+>>> int j = sizeof(*p);
+>>>
 >
-> When you are patching the Makefile then I suggest breaking this line up somehow.
-> Should be a follow-up patch.
+>> I can't test it right now, but does it give a warning for both sizeof's
+>> above? If just first results in a warning, then I think that quite
+>> reasonable.
+>
+> Both trigger the warning. I'm not sure this is a problem, as there are
+> no such usage cases in the kernel.
+>
+> I added (hopefully the right way) handling of (sizeof(function)) to the
+> patch. function++ was already prohibited.
+>
+> Running the test on the kernel right now.
+>
 
-Here is the follow-up patch.
+And it found something.
 
-Chris
+2158a2159
+> fs/compat_ioctl.c:787:10: warning: expression using sizeof on a function
+9524a9526,9543
+> drivers/media/video/gspca/sonixb.c:494:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:494:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:494:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:495:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:495:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:495:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:496:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:498:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:498:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:498:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:500:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:500:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:502:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:502:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:502:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:504:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:504:1: warning: expression using sizeof(void)
+> drivers/media/video/gspca/sonixb.c:504:1: warning: expression using sizeof(void)
+15293a15313,15325
+> net/netfilter/nf_conntrack_sip.c:282:21: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:282:21: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:287:23: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:287:23: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:288:29: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:586:23: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:586:23: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:587:25: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:588:29: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:589:25: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:590:29: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:591:22: warning: expression using sizeof(void)
+> net/netfilter/nf_conntrack_sip.c:591:22: warning: expression using sizeof(void)
 
-------=_Part_96885_5264249.1230258433619
-Content-Type: text/plain; name=makefile-cleanup.patch.txt
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fp67zchk0
-Content-Disposition: attachment; filename=makefile-cleanup.patch.txt
+The first one is
 
-Q2xlYW4gdXAgTWFrZWZpbGUgbG9uZyBsaW5lcwoKU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3BoZXIg
-TGk8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS5jaHJpc2wvTWFrZWZpbGUKPT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PQotLS0gc3BhcnNlLmNocmlzbC5vcmlnL01ha2VmaWxlCisrKyBzcGFyc2UuY2hyaXNs
-L01ha2VmaWxlCkBAIC03OCw2ICs3OCwxNyBAQCBRVUlFVF9MSU5LICAgID0gJChROkA9QGVjaG8g
-ICAgJyAgICAgTElOCiBRVUlFVF9JTlNUX1NIID0gJChROkA9ZWNobyAtbiAgJyAgICAgSU5TVEFM
-TCAgJzspCiBRVUlFVF9JTlNUICAgID0gJChROkA9QGVjaG8gLW4gJyAgICAgSU5TVEFMTCAgJzsp
-CiAKK2RlZmluZSBJTlNUQUxMX0NNRAorCSQoUSkkKFFVSUVUX0lOU1RfU0gpaW5zdGFsbCAtdiAk
-MSAkKERFU1RESVIpJDIvJDEgfHwgZXhpdCAxOworCitlbmRlZgorCitTRURfUENfQ01EID0gJ3N8
-QHZlcnNpb25AfCQoVkVSU0lPTil8ZzsJCVwKKwkgICAgICBzfEBwcmVmaXhAfCQoUFJFRklYKXxn
-OwkJXAorCSAgICAgIHN8QGxpYmRpckB8JChMSUJESVIpfGc7CQlcCisJICAgICAgc3xAaW5jbHVk
-ZWRpckB8JChJTkNMVURFRElSKXxnJworCisKIGFsbDogJChQUk9HUkFNUykgc3BhcnNlLnBjCiAK
-IGluc3RhbGw6ICQoSU5TVF9QUk9HUkFNUykgJChMSUJTKSAkKExJQl9IKSBzcGFyc2UucGMKQEAg
-LTg2LDIyICs5NywxNCBAQCBpbnN0YWxsOiAkKElOU1RfUFJPR1JBTVMpICQoTElCUykgJChMSUJf
-CiAJJChRKWluc3RhbGwgLWQgJChERVNURElSKSQoTUFOMURJUikKIAkkKFEpaW5zdGFsbCAtZCAk
-KERFU1RESVIpJChJTkNMVURFRElSKS9zcGFyc2UKIAkkKFEpaW5zdGFsbCAtZCAkKERFU1RESVIp
-JChQS0dDT05GSUdESVIpCi0JJChRKWZvciBmIGluICQoSU5TVF9QUk9HUkFNUyk7IGRvIFwKLQkJ
-JChRVUlFVF9JTlNUX1NIKWluc3RhbGwgLXYgJCRmICQoREVTVERJUikkKEJJTkRJUikvJCRmIHx8
-IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChJTlNUX01BTjEpOyBkbyBcCi0JCSQo
-UVVJRVRfSU5TVF9TSClpbnN0YWxsIC1tIDY0NCAtdiAkJGYgJChERVNURElSKSQoTUFOMURJUikv
-JCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChMSUJTKTsgZG8gXAotCQkk
-KFFVSUVUX0lOU1RfU0gpaW5zdGFsbCAtbSA2NDQgLXYgJCRmICQoREVTVERJUikkKExJQkRJUikv
-JCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFEpZm9yIGYgaW4gJChMSUJfSCk7IGRvIFwKLQkJ
-JChRVUlFVF9JTlNUX1NIKWluc3RhbGwgLW0gNjQ0IC12ICQkZiAkKERFU1RESVIpJChJTkNMVURF
-RElSKS9zcGFyc2UvJCRmIHx8IGV4aXQgMTsgXAotCWRvbmUKLQkkKFFVSUVUX0lOU1QpaW5zdGFs
-bCAtbSA2NDQgLXYgc3BhcnNlLnBjICQoREVTVERJUikkKFBLR0NPTkZJR0RJUikvc3BhcnNlLnBj
-CisJJChmb3JlYWNoIGYsJChJTlNUX1BST0dSQU1TKSwkKGNhbGwgSU5TVEFMTF9DTUQsJGYsJChC
-SU5ESVIpKSkKKwkkKGZvcmVhY2ggZiwkKElOU1RfTUFOMSksJChjYWxsIElOU1RBTExfQ01ELCRm
-LCQoTUFOMURJUikpKQorCSQoZm9yZWFjaCBmLCQoTElCUyksJChjYWxsIElOU1RBTExfQ01ELCRm
-LCQoTElCRElSKSkpCisJJChmb3JlYWNoIGYsJChMSUJfSCksJChjYWxsIElOU1RBTExfQ01ELCRm
-LCQoSU5DTFVERURJUikvc3BhcnNlKSkKKwkkKGNhbGwgSU5TVEFMTF9DTUQsc3BhcnNlLnBjLCQo
-UEtHQ09ORklHRElSKSkKIAogc3BhcnNlLnBjOiBzcGFyc2UucGMuaW4KLQkkKFFVSUVUX0dFTilz
-ZWQgJ3N8QHZlcnNpb25AfCQoVkVSU0lPTil8ZztzfEBwcmVmaXhAfCQoUFJFRklYKXxnO3N8QGxp
-YmRpckB8JChMSUJESVIpfGc7c3xAaW5jbHVkZWRpckB8JChJTkNMVURFRElSKXxnJyBzcGFyc2Uu
-cGMuaW4gPiBzcGFyc2UucGMKKwkkKFFVSUVUX0dFTilzZWQgJChTRURfUENfQ01EKSBzcGFyc2Uu
-cGMuaW4gPiBzcGFyc2UucGMKIAogCiBjb21waWxlX0VYVFJBX0RFUFMgPSBjb21waWxlLWkzODYu
-bwo=
-------=_Part_96885_5264249.1230258433619--
+        if (copy_in_user(&sgio->status, sgio32->status,
+                         (4 * sizeof(unsigned char)) +
+                         (2 * sizeof(unsigned (short))) +       <------- oops
+                         (3 * sizeof(int))))
+                return -EFAULT;
+
+a bug. So, if anyone ever missed his sgio.info, now we know why.
+Patch sent.
+
+drivers/media/video/gspca/sonixb.c looks like
+
+SENS(initHv7131, NULL, hv7131_sensor_init, NULL, NULL, 0, NO_EXPO|NO_FREQ, 0),
+
+#define SENS(bridge_1, bridge_3, sensor, sensor_1, \
+        sensor_3, _flags, _ctrl_dis, _sensor_addr) \
+{ \
+        .bridge_init = { bridge_1, bridge_3 }, \
+        .bridge_init_size = { sizeof(bridge_1), sizeof(bridge_3) }, \
+
+So, we are getting a sizeof(NULL), or a sizeof((void *)0). It triggers here
+because we are getting a null_ctype, and it's base_type points to
+void_ctype. I'm not sure if this patch is correct, but it seems to do
+the trick, all void warnings are gone. Christopher?
+
+ symbol.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
+
+diff --git a/symbol.c b/symbol.c
+index 4da253b..df760d4 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -861,7 +861,7 @@ static const struct ctype_declare {
+ 
+ 	{ &string_ctype,    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &char_ctype },
+ 	{ &ptr_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+-	{ &null_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
++	{ &null_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &ptr_ctype  },
+ 	{ &label_ctype,	    SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+ 	{ &lazy_ptr_ctype,  SYM_PTR,	  0,			    &bits_in_pointer,        &pointer_alignment, &void_ctype },
+ 	{ NULL, }
+
