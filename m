@@ -1,33 +1,104 @@
-From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: [PATCH] Add -ftabstop=WIDTH
-Date: Wed, 31 Dec 2008 18:29:49 +0300
-Message-ID: <f19298770812310729k6dbe23b2vba2a79f0c86597c@mail.gmail.com>
+Date: Wed, 31 Dec 2008 12:26:58 -0800
+Message-ID: <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
 References: <20081231124108.10969.28189.stgit@vmbox.hanneseder.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+	boundary="----=_Part_165783_3866624.1230755218703"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:57897 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752265AbYLaP3w (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.233]:33579 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752370AbYLaU1A (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 31 Dec 2008 10:29:52 -0500
-Received: by bwz14 with SMTP id 14so18552924bwz.13
-        for <linux-sparse@vger.kernel.org>; Wed, 31 Dec 2008 07:29:49 -0800 (PST)
+	Wed, 31 Dec 2008 15:27:00 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so5410578rvb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 31 Dec 2008 12:26:58 -0800 (PST)
 In-Reply-To: <20081231124108.10969.28189.stgit@vmbox.hanneseder.net>
-Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Hannes Eder <hannes@hanneseder.net>
-Cc: linux-sparse@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>
 
-On Wed, Dec 31, 2008 at 15:41, Hannes Eder <hannes@hanneseder.net> wrote:
+------=_Part_165783_3866624.1230755218703
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+
+On Wed, Dec 31, 2008 at 4:41 AM, Hannes Eder <hannes@hanneseder.net> wrote:
 > Make tokenizer aware of tabstops and add the commandline option:
 >
 > -ftabstop=WIDTH
 >    Set the distance between tab stops.  This helps sparse report correct
 >    column numbers in warnings or errors.  If the value is less than 1 or
 >    greater than 100, the option is ignored.  The default is 8.
+>
 
-Handling tabs is probably a good idea, but making tabstop an option looks
-a bit like overkill. Maybe just hardcode it as 8?
+I took the liberty to simplify the patch a little bit. See the attachment.
+
+If there is no objections, I am going to apply the combined patch to
+my repository:
+
+git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
+
+Thanks,
+
+Chris
+
+------=_Part_165783_3866624.1230755218703
+Content-Type: application/octet-stream;
+ name=0001-Simplify-fstabstop-patch.patch
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fpefjxj80
+Content-Disposition: attachment;
+ filename=0001-Simplify-fstabstop-patch.patch
+
+RnJvbSAyNDdmZTFhYTlmZWM4ZTkxM2I1MzNmZmYyOGIxNDEyZmM2Y2JiOTQxIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
+YXRlOiBXZWQsIDMxIERlYyAyMDA4IDEyOjEzOjExIC0wODAwClN1YmplY3Q6IFtQQVRDSF0gU2lt
+cGxpZnkgLWZzdGFic3RvcCBwYXRjaAoKU2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZXIgTGkgPHNw
+YXJzZUBjaHJpc2xpLm9yZz4KLS0tCiBsaWIuYyAgICAgIHwgICAyOSArKysrKysrLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLQogdG9rZW4uaCAgICB8ICAgIDIgKy0KIHRva2VuaXplLmMgfCAgIDEwICsr
+KysrLS0tLS0KIDMgZmlsZXMgY2hhbmdlZCwgMTMgaW5zZXJ0aW9ucygrKSwgMjggZGVsZXRpb25z
+KC0pCgpkaWZmIC0tZ2l0IGEvbGliLmMgYi9saWIuYwppbmRleCA3YmFkNDUxLi5kZTBiMDlhIDEw
+MDY0NAotLS0gYS9saWIuYworKysgYi9saWIuYwpAQCAtNTMyLDMzICs1MzIsMTggQEAgc3RhdGlj
+IGNoYXIgKipoYW5kbGVfc3dpdGNoX2YoY2hhciAqYXJnLCBjaGFyICoqbmV4dCkKIAogCWlmICgh
+c3RybmNtcCAoYXJnLCAidGFic3RvcD0iLCA4KSkgewogCQljaGFyICplbmQ7Ci0JCWxvbmcgdmFs
+OworCQl1bnNpZ25lZCBsb25nIHZhbDsKIAkJYXJnICs9IDg7CiAKIAkJZXJybm8gPSAwOwotCQl2
+YWwgPSBzdHJ0b2woYXJnLCAmZW5kLCAxMCk7CisJCXZhbCA9IHN0cnRvdWwoYXJnLCAmZW5kLCAx
+MCk7CiAKLQkJaWYgKChlcnJubyA9PSBFUkFOR0UgJiYgKHZhbCA9PSBMT05HX01BWCB8fCB2YWwg
+PT0gTE9OR19NSU4pKQotCQkgICAgfHwgKGVycm5vICE9IDAgJiYgdmFsID09IDApKSB7Ci0JCQlk
+aWUoImludmFsaWQgYXJndW1lbnQgZm9yIHRoZSAtZnRhYnN0b3A9IG9wdGlvbjogJXMiLCBzdHJl
+cnJvcihlcnJubykpOwotCQl9Ci0KLQkJaWYgKGVuZCA9PSBhcmcpIHsKLQkJCWRpZSgibWlzc2lu
+ZyBhcmd1bWVudCBmb3IgdGhlIC1mdGFic3RvcD0gb3B0aW9uIik7Ci0JCX0KLQotCQlpZiAoKmVu
+ZCAhPSAnXDAnKSB7Ci0JCQkvKiBmdXJ0aGVyIGNoYXJhY3RlcnMgYWZ0ZXIgbnVtYmVyICovCi0J
+CQkvKiB3ZSBqdXN0IGlnbm9yZSB0aGVtICovCi0JCX0KLQotCQlpZiAoMSA8PSB2YWwgJiYgdmFs
+IDw9IDEwMCkKLQkJCXRhYnN0b3Bfd2lkdGggPSB2YWw7Ci0KLQkJcmV0dXJuIG5leHQ7Ci0JfQor
+CQlpZiAoIXZhbCB8fCB2YWwgPiAxMDApCisJCQlkaWUoImludmFsaWQgYXJndW1lbnQgZm9yIHRo
+ZSAtZnRhYnN0b3A9IG9wdGlvbjogJWxkIiwgdmFsKTsKKwkJcHJpbnRmKCJ0YWJzdG9wPSAlbGRc
+biIsIHZhbCk7CisJCXRhYnN0b3Bfd2lkdGggPSB2YWw7CiAKLQlpZiAoIXN0cm5jbXAoYXJnLCAi
+bm8tIiwgMykpIHsKKwl9IGVsc2UgaWYgKCFzdHJuY21wKGFyZywgIm5vLSIsIDMpKSB7CiAJCWZs
+YWcgPSAwOwogCQlhcmcgKz0gMzsKIAl9CmRpZmYgLS1naXQgYS90b2tlbi5oIGIvdG9rZW4uaApp
+bmRleCBkZjdhODBjLi40Yzk5ODg3IDEwMDY0NAotLS0gYS90b2tlbi5oCisrKyBiL3Rva2VuLmgK
+QEAgLTQ4LDcgKzQ4LDcgQEAgc3RydWN0IHN0cmVhbSB7CiAKIGV4dGVybiBpbnQgaW5wdXRfc3Ry
+ZWFtX25yOwogZXh0ZXJuIHN0cnVjdCBzdHJlYW0gKmlucHV0X3N0cmVhbXM7Ci1leHRlcm4gaW50
+IHRhYnN0b3Bfd2lkdGg7CitleHRlcm4gdW5zaWduZWQgaW50IHRhYnN0b3Bfd2lkdGg7CiAKIHN0
+cnVjdCBpZGVudCB7CiAJc3RydWN0IGlkZW50ICpuZXh0OwkvKiBIYXNoIGNoYWluIG9mIGlkZW50
+aWZpZXJzICovCmRpZmYgLS1naXQgYS90b2tlbml6ZS5jIGIvdG9rZW5pemUuYwppbmRleCA4YjNl
+YzJmLi5lNmY5ZDEzIDEwMDY0NAotLS0gYS90b2tlbml6ZS5jCisrKyBiL3Rva2VuaXplLmMKQEAg
+LTI1LDcgKzI1LDcgQEAKIGludCBpbnB1dF9zdHJlYW1fbnIgPSAwOwogc3RydWN0IHN0cmVhbSAq
+aW5wdXRfc3RyZWFtczsKIHN0YXRpYyBpbnQgaW5wdXRfc3RyZWFtc19hbGxvY2F0ZWQ7Ci1pbnQg
+dGFic3RvcF93aWR0aCA9IDg7Cit1bnNpZ25lZCBpbnQgdGFic3RvcF93aWR0aCA9IDg7CiAKICNk
+ZWZpbmUgQlVGU0laRSAoODE5MikKIApAQCAtMjA3LDcgKzIwNyw3IEBAIHN0YXRpYyBpbnQgbmV4
+dGNoYXJfc2xvdyhzdHJlYW1fdCAqc3RyZWFtKQogCWludCBvZmZzZXQgPSBzdHJlYW0tPm9mZnNl
+dDsKIAlpbnQgc2l6ZSA9IHN0cmVhbS0+c2l6ZTsKIAlpbnQgYzsKLQlpbnQgc3BsaWNlZCA9IDAs
+IGhhZF9jciwgaGFkX2JhY2tzbGFzaCwgY29tcGxhaW47CisJaW50IHNwbGljZWQgPSAwLCBoYWRf
+Y3IsIGhhZF9iYWNrc2xhc2gsIGNvbXBsYWluLCBkZWx0YTsKIAogcmVzdGFydDoKIAloYWRfY3Ig
+PSBoYWRfYmFja3NsYXNoID0gY29tcGxhaW4gPSAwOwpAQCAtMjMzLDEwICsyMzMsMTAgQEAgcmVw
+ZWF0OgogCQlnb3RvIHJlcGVhdDsKIAl9CiAKKwlkZWx0YSA9IDE7CiAJaWYgKGMgPT0gJ1x0JykK
+LQkJc3RyZWFtLT5wb3MgPSAoKHN0cmVhbS0+cG9zIC0gMSkgLyB0YWJzdG9wX3dpZHRoICsgMSkg
+KiB0YWJzdG9wX3dpZHRoOwotCWVsc2UKLQkJc3RyZWFtLT5wb3MrKzsKKwkJZGVsdGEgPSB0YWJz
+dG9wX3dpZHRoIC0gc3RyZWFtLT5wb3MgJSB0YWJzdG9wX3dpZHRoOworCXN0cmVhbS0+cG9zICs9
+IGRlbHRhOwogCiAJaWYgKGMgPT0gJ1xuJykgewogCQlzdHJlYW0tPmxpbmUrKzsKLS0gCjEuNi4w
+LjYKCg==
+------=_Part_165783_3866624.1230755218703--
