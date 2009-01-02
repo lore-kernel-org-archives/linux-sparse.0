@@ -1,104 +1,158 @@
-From: "Christopher Li" <sparse@chrisli.org>
-Subject: Re: [PATCH] Add -ftabstop=WIDTH
-Date: Wed, 31 Dec 2008 12:26:58 -0800
-Message-ID: <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
+From: "Hannes Eder" <hannes@hanneseder.net>
+Subject: Re: [PATCH v2] Add -ftabstop=WIDTH
+Date: Fri, 2 Jan 2009 15:22:28 +0100
+Message-ID: <154e089b0901020622u26848778q56d9510e6edc60ff@mail.gmail.com>
 References: <20081231124108.10969.28189.stgit@vmbox.hanneseder.net>
+	 <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
-	boundary="----=_Part_165783_3866624.1230755218703"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.233]:33579 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752370AbYLaU1A (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 31 Dec 2008 15:27:00 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so5410578rvb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 31 Dec 2008 12:26:58 -0800 (PST)
-In-Reply-To: <20081231124108.10969.28189.stgit@vmbox.hanneseder.net>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-To: Hannes Eder <hannes@hanneseder.net>
-Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>
-
-------=_Part_165783_3866624.1230755218703
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from fg-out-1718.google.com ([72.14.220.157]:28060 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752797AbZABOWb (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 2 Jan 2009 09:22:31 -0500
+Received: by fg-out-1718.google.com with SMTP id 19so2273976fgg.17
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Jan 2009 06:22:28 -0800 (PST)
+In-Reply-To: <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
 Content-Disposition: inline
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>
 
-On Wed, Dec 31, 2008 at 4:41 AM, Hannes Eder <hannes@hanneseder.net> wrote:
-> Make tokenizer aware of tabstops and add the commandline option:
->
-> -ftabstop=WIDTH
->    Set the distance between tab stops.  This helps sparse report correct
->    column numbers in warnings or errors.  If the value is less than 1 or
->    greater than 100, the option is ignored.  The default is 8.
->
+Make tokenizer aware of tabstops and add the commandline option:
 
-I took the liberty to simplify the patch a little bit. See the attachment.
+-ftabstop=WIDTH
+    Set the distance between tab stops.  This helps sparse report correct
+    column numbers in warnings or errors.  If the value is less than 1 or
+    greater than 100, the option is ignored.  The default is 8.
 
-If there is no objections, I am going to apply the combined patch to
-my repository:
+With simplifications suggested by Christopher Li.
 
-git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
+Signed-off-by: Hannes Eder <hannes@hanneseder.net>
+---
 
-Thanks,
+On Wed, Dec 31, 2008 at 9:26 PM, Christopher Li <sparse@chrisli.org> wrote:
+> I took the liberty to simplify the patch a little bit. See the attachment.
 
-Chris
+I like the part in tokenizer.c, I even simplified it a bit further, to
+use a ternary op, and
+do not use a variable.
 
-------=_Part_165783_3866624.1230755218703
-Content-Type: application/octet-stream;
- name=0001-Simplify-fstabstop-patch.patch
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fpefjxj80
-Content-Disposition: attachment;
- filename=0001-Simplify-fstabstop-patch.patch
+> If there is no objections, I am going to apply the combined patch to
+> my repository:
 
-RnJvbSAyNDdmZTFhYTlmZWM4ZTkxM2I1MzNmZmYyOGIxNDEyZmM2Y2JiOTQxIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
-YXRlOiBXZWQsIDMxIERlYyAyMDA4IDEyOjEzOjExIC0wODAwClN1YmplY3Q6IFtQQVRDSF0gU2lt
-cGxpZnkgLWZzdGFic3RvcCBwYXRjaAoKU2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZXIgTGkgPHNw
-YXJzZUBjaHJpc2xpLm9yZz4KLS0tCiBsaWIuYyAgICAgIHwgICAyOSArKysrKysrLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLQogdG9rZW4uaCAgICB8ICAgIDIgKy0KIHRva2VuaXplLmMgfCAgIDEwICsr
-KysrLS0tLS0KIDMgZmlsZXMgY2hhbmdlZCwgMTMgaW5zZXJ0aW9ucygrKSwgMjggZGVsZXRpb25z
-KC0pCgpkaWZmIC0tZ2l0IGEvbGliLmMgYi9saWIuYwppbmRleCA3YmFkNDUxLi5kZTBiMDlhIDEw
-MDY0NAotLS0gYS9saWIuYworKysgYi9saWIuYwpAQCAtNTMyLDMzICs1MzIsMTggQEAgc3RhdGlj
-IGNoYXIgKipoYW5kbGVfc3dpdGNoX2YoY2hhciAqYXJnLCBjaGFyICoqbmV4dCkKIAogCWlmICgh
-c3RybmNtcCAoYXJnLCAidGFic3RvcD0iLCA4KSkgewogCQljaGFyICplbmQ7Ci0JCWxvbmcgdmFs
-OworCQl1bnNpZ25lZCBsb25nIHZhbDsKIAkJYXJnICs9IDg7CiAKIAkJZXJybm8gPSAwOwotCQl2
-YWwgPSBzdHJ0b2woYXJnLCAmZW5kLCAxMCk7CisJCXZhbCA9IHN0cnRvdWwoYXJnLCAmZW5kLCAx
-MCk7CiAKLQkJaWYgKChlcnJubyA9PSBFUkFOR0UgJiYgKHZhbCA9PSBMT05HX01BWCB8fCB2YWwg
-PT0gTE9OR19NSU4pKQotCQkgICAgfHwgKGVycm5vICE9IDAgJiYgdmFsID09IDApKSB7Ci0JCQlk
-aWUoImludmFsaWQgYXJndW1lbnQgZm9yIHRoZSAtZnRhYnN0b3A9IG9wdGlvbjogJXMiLCBzdHJl
-cnJvcihlcnJubykpOwotCQl9Ci0KLQkJaWYgKGVuZCA9PSBhcmcpIHsKLQkJCWRpZSgibWlzc2lu
-ZyBhcmd1bWVudCBmb3IgdGhlIC1mdGFic3RvcD0gb3B0aW9uIik7Ci0JCX0KLQotCQlpZiAoKmVu
-ZCAhPSAnXDAnKSB7Ci0JCQkvKiBmdXJ0aGVyIGNoYXJhY3RlcnMgYWZ0ZXIgbnVtYmVyICovCi0J
-CQkvKiB3ZSBqdXN0IGlnbm9yZSB0aGVtICovCi0JCX0KLQotCQlpZiAoMSA8PSB2YWwgJiYgdmFs
-IDw9IDEwMCkKLQkJCXRhYnN0b3Bfd2lkdGggPSB2YWw7Ci0KLQkJcmV0dXJuIG5leHQ7Ci0JfQor
-CQlpZiAoIXZhbCB8fCB2YWwgPiAxMDApCisJCQlkaWUoImludmFsaWQgYXJndW1lbnQgZm9yIHRo
-ZSAtZnRhYnN0b3A9IG9wdGlvbjogJWxkIiwgdmFsKTsKKwkJcHJpbnRmKCJ0YWJzdG9wPSAlbGRc
-biIsIHZhbCk7CisJCXRhYnN0b3Bfd2lkdGggPSB2YWw7CiAKLQlpZiAoIXN0cm5jbXAoYXJnLCAi
-bm8tIiwgMykpIHsKKwl9IGVsc2UgaWYgKCFzdHJuY21wKGFyZywgIm5vLSIsIDMpKSB7CiAJCWZs
-YWcgPSAwOwogCQlhcmcgKz0gMzsKIAl9CmRpZmYgLS1naXQgYS90b2tlbi5oIGIvdG9rZW4uaApp
-bmRleCBkZjdhODBjLi40Yzk5ODg3IDEwMDY0NAotLS0gYS90b2tlbi5oCisrKyBiL3Rva2VuLmgK
-QEAgLTQ4LDcgKzQ4LDcgQEAgc3RydWN0IHN0cmVhbSB7CiAKIGV4dGVybiBpbnQgaW5wdXRfc3Ry
-ZWFtX25yOwogZXh0ZXJuIHN0cnVjdCBzdHJlYW0gKmlucHV0X3N0cmVhbXM7Ci1leHRlcm4gaW50
-IHRhYnN0b3Bfd2lkdGg7CitleHRlcm4gdW5zaWduZWQgaW50IHRhYnN0b3Bfd2lkdGg7CiAKIHN0
-cnVjdCBpZGVudCB7CiAJc3RydWN0IGlkZW50ICpuZXh0OwkvKiBIYXNoIGNoYWluIG9mIGlkZW50
-aWZpZXJzICovCmRpZmYgLS1naXQgYS90b2tlbml6ZS5jIGIvdG9rZW5pemUuYwppbmRleCA4YjNl
-YzJmLi5lNmY5ZDEzIDEwMDY0NAotLS0gYS90b2tlbml6ZS5jCisrKyBiL3Rva2VuaXplLmMKQEAg
-LTI1LDcgKzI1LDcgQEAKIGludCBpbnB1dF9zdHJlYW1fbnIgPSAwOwogc3RydWN0IHN0cmVhbSAq
-aW5wdXRfc3RyZWFtczsKIHN0YXRpYyBpbnQgaW5wdXRfc3RyZWFtc19hbGxvY2F0ZWQ7Ci1pbnQg
-dGFic3RvcF93aWR0aCA9IDg7Cit1bnNpZ25lZCBpbnQgdGFic3RvcF93aWR0aCA9IDg7CiAKICNk
-ZWZpbmUgQlVGU0laRSAoODE5MikKIApAQCAtMjA3LDcgKzIwNyw3IEBAIHN0YXRpYyBpbnQgbmV4
-dGNoYXJfc2xvdyhzdHJlYW1fdCAqc3RyZWFtKQogCWludCBvZmZzZXQgPSBzdHJlYW0tPm9mZnNl
-dDsKIAlpbnQgc2l6ZSA9IHN0cmVhbS0+c2l6ZTsKIAlpbnQgYzsKLQlpbnQgc3BsaWNlZCA9IDAs
-IGhhZF9jciwgaGFkX2JhY2tzbGFzaCwgY29tcGxhaW47CisJaW50IHNwbGljZWQgPSAwLCBoYWRf
-Y3IsIGhhZF9iYWNrc2xhc2gsIGNvbXBsYWluLCBkZWx0YTsKIAogcmVzdGFydDoKIAloYWRfY3Ig
-PSBoYWRfYmFja3NsYXNoID0gY29tcGxhaW4gPSAwOwpAQCAtMjMzLDEwICsyMzMsMTAgQEAgcmVw
-ZWF0OgogCQlnb3RvIHJlcGVhdDsKIAl9CiAKKwlkZWx0YSA9IDE7CiAJaWYgKGMgPT0gJ1x0JykK
-LQkJc3RyZWFtLT5wb3MgPSAoKHN0cmVhbS0+cG9zIC0gMSkgLyB0YWJzdG9wX3dpZHRoICsgMSkg
-KiB0YWJzdG9wX3dpZHRoOwotCWVsc2UKLQkJc3RyZWFtLT5wb3MrKzsKKwkJZGVsdGEgPSB0YWJz
-dG9wX3dpZHRoIC0gc3RyZWFtLT5wb3MgJSB0YWJzdG9wX3dpZHRoOworCXN0cmVhbS0+cG9zICs9
-IGRlbHRhOwogCiAJaWYgKGMgPT0gJ1xuJykgewogCQlzdHJlYW0tPmxpbmUrKzsKLS0gCjEuNi4w
-LjYKCg==
-------=_Part_165783_3866624.1230755218703--
+I slightly modified to option parsing part, to be at least as relaxed
+as GNU's CPP, where the option is from (see manpage), and to match the
+description in sparse.1.
+
+> With simplifications suggested by Christopher Li.
+
+How should I acknowledge your contribution? Is this Ok?
+
+Or shoul I send a patch relative to your patch?
+
+
+ lib.c      |   17 ++++++++++++++++-
+ sparse.1   |    7 +++++++
+ token.h    |    1 +
+ tokenize.c |    5 +++--
+ 4 files changed, 27 insertions(+), 3 deletions(-)
+
+diff --git a/lib.c b/lib.c
+index 059ba3b..221e7b8 100644
+--- a/lib.c
++++ b/lib.c
+@@ -15,6 +15,8 @@
+ #include <string.h>
+ #include <unistd.h>
+ #include <assert.h>
++#include <limits.h>
++#include <errno.h>
+
+ #include <sys/types.h>
+
+@@ -511,7 +513,20 @@ static char **handle_switch_f(char *arg, char **next)
+ 	int flag = 1;
+
+ 	arg++;
+-	if (!strncmp(arg, "no-", 3)) {
++
++	if (!strncmp(arg, "tabstop=", 8)) {
++		char *end;
++		unsigned long val;
++		arg += 8;
++
++		if (*arg == '\0')
++			die("error: missing argument to \"-ftabstop=\"");
++
++		/* we silently ignore silly values */
++		val = strtoul(arg, &end, 10);
++		if (*end == '\0' && 1 <= val && val <= 100)
++			tabstop = val;
++	} else if (!strncmp(arg, "no-", 3)) {
+ 		flag = 0;
+ 		arg += 3;
+ 	}
+diff --git a/sparse.1 b/sparse.1
+index d242dc7..a9e3397 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -287,6 +287,13 @@ However, this behavior can lead to subtle errors.
+
+ Sparse does not issue these warnings by default.
+ .
++.SH OTHER OPTIONS
++.TP
++.B \-ftabstop=WIDTH
++Set the distance between tab stops.  This helps sparse report correct
++column numbers in warnings or errors.  If the value is less than 1 or
++greater than 100, the option is ignored.  The default is 8.
++.
+ .SH SEE ALSO
+ .BR cgcc (1)
+ .
+diff --git a/token.h b/token.h
+index ba7866d..44128f2 100644
+--- a/token.h
++++ b/token.h
+@@ -48,6 +48,7 @@ struct stream {
+
+ extern int input_stream_nr;
+ extern struct stream *input_streams;
++extern unsigned int tabstop;
+
+ struct ident {
+ 	struct ident *next;	/* Hash chain of identifiers */
+diff --git a/tokenize.c b/tokenize.c
+index d154882..828a76f 100644
+--- a/tokenize.c
++++ b/tokenize.c
+@@ -25,6 +25,7 @@
+ int input_stream_nr = 0;
+ struct stream *input_streams;
+ static int input_streams_allocated;
++unsigned int tabstop = 8;
+
+ #define BUFSIZE (8192)
+
+@@ -232,7 +233,7 @@ repeat:
+ 		goto repeat;
+ 	}
+
+-	stream->pos++;
++	stream->pos += (c == '\t') ? (tabstop - stream->pos % tabstop) : 1;
+
+ 	if (c == '\n') {
+ 		stream->line++;
+@@ -291,7 +292,7 @@ static inline int nextchar(stream_t *stream)
+ 	if (offset < stream->size) {
+ 		int c = stream->buffer[offset++];
+ 		static const char special[256] = {
+-			['\r'] = 1, ['\n'] = 1, ['\\'] = 1
++			['\t'] = 1, ['\r'] = 1, ['\n'] = 1, ['\\'] = 1
+ 		};
+ 		if (!special[c]) {
+ 			stream->offset = offset;
