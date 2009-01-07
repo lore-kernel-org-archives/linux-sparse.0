@@ -1,58 +1,35 @@
-From: Christoph Hellwig <hch@lst.de>
-Subject: lock context warnings
-Date: Wed, 7 Jan 2009 09:45:40 +0100
-Message-ID: <20090107084539.GA15246@lst.de>
+From: "Alexey Zaytsev" <alexey.zaytsev@gmail.com>
+Subject: Re: lock context warnings
+Date: Wed, 7 Jan 2009 12:20:18 +0300
+Message-ID: <f19298770901070120v396222d9g1d0ea7b78cbc07c9@mail.gmail.com>
+References: <20090107084539.GA15246@lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.210]:35448 "EHLO verein.lst.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751265AbZAGIpl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 7 Jan 2009 03:45:41 -0500
-Received: from verein.lst.de (localhost [127.0.0.1])
-	by verein.lst.de (8.12.3/8.12.3/Debian-7.1) with ESMTP id n078jeIF015394
-	(version=TLSv1/SSLv3 cipher=EDH-RSA-DES-CBC3-SHA bits=168 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Wed, 7 Jan 2009 09:45:40 +0100
-Received: (from hch@localhost)
-	by verein.lst.de (8.12.3/8.12.3/Debian-6.6) id n078jeuM015392
-	for linux-sparse@vger.kernel.org; Wed, 7 Jan 2009 09:45:40 +0100
+Received: from mail-bw0-f21.google.com ([209.85.218.21]:48857 "EHLO
+	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752844AbZAGJUU (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 7 Jan 2009 04:20:20 -0500
+Received: by bwz14 with SMTP id 14so25197489bwz.13
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Jan 2009 01:20:18 -0800 (PST)
+In-Reply-To: <20090107084539.GA15246@lst.de>
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: linux-sparse@vger.kernel.org
 
-Since a few month sparse keeps spewing tons of wrong lock context
-warnings like:
+On Wed, Jan 7, 2009 at 11:45, Christoph Hellwig <hch@lst.de> wrote:
+> Since a few month sparse keeps spewing tons of wrong lock context
+> warnings like:
 
-/home/hch/work/linux-2.6/fs/xfs/quota/xfs_dquot.c:1341:24: warning:
-context problem in 'xfs_qm_dqflush_done': 'xfs_trans_ail_delete'
-expected different context
-/home/hch/work/linux-2.6/fs/xfs/quota/xfs_dquot.c:1341:24:    context
-'xa_lock': wanted >= 1, got 0
-/home/hch/work/linux-2.6/fs/xfs/quota/xfs_dquot_item.c:565:22: warning:
-context problem in 'xfs_qm_qoffend_logitem_committed':
-'xfs_trans_ail_delete' expected different context
-/home/hch/work/linux-2.6/fs/xfs/quota/xfs_dquot_item.c:565:22:
-context 'xa_lock': wanted >= 1, got 0
+Yes, the warnings are wrong, and the patches that were supposeed to
+fix them breoke other things, so they were never merged.
+Christopher reverted the patches that introduced the new warnings
+in his tree: git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
+until someone fixes or rewrites the context checking.
 
-which mean lock context annotations just don't seem to work, e.g. the
-fist one is:
-
-		/* xfs_trans_ail_delete() drops the AIL lock. */
-		spin_lock(&ailp->xa_lock);
-		if (qip->qli_item.li_lsn == qip->qli_flush_lsn)	
-			xfs_trans_ail_delete(ailp, (xfs_log_item_t*)qip);
-		else
-			spin_unlock(&ailp->xa_lock);
-
-
-where xfs_trans_ail_delete prototyped as:
-
-void                    xfs_trans_ail_delete(struct xfs_ail *ailp,
-                                        struct xfs_log_item *lip)
-					__releases(ailp->xa_lock);
-
-
-These messages are highly annoying in a kernel build, so if you can't
-fix them easily, please at least remove the lock context stuff from
-the default check flags.
+It looks like Christopher is serious about maintaining this tree, so
+people should probably switch to using it.
