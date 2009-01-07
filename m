@@ -1,178 +1,171 @@
-From: Junio C Hamano <junio@pobox.com>
+From: "Christopher Li" <sparse@chrisli.org>
 Subject: Re: [PATCH v2] Add -ftabstop=WIDTH
-Date: Sun, 04 Jan 2009 01:05:54 -0800
-Message-ID: <7v1vvj1lvx.fsf@gitster.siamese.dyndns.org>
+Date: Tue, 6 Jan 2009 16:37:12 -0800
+Message-ID: <70318cbf0901061637l29837d14nfaa8a3106652b7e5@mail.gmail.com>
 References: <20081231124108.10969.28189.stgit@vmbox.hanneseder.net>
- <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
- <154e089b0901020622u26848778q56d9510e6edc60ff@mail.gmail.com>
- <7v7i5c7g5b.fsf@gitster.siamese.dyndns.org>
- <70318cbf0901031519w15929f58p68ff62ace683a5b0@mail.gmail.com>
+	 <70318cbf0812311226gc18b63dld37072c3b7f41719@mail.gmail.com>
+	 <154e089b0901020622u26848778q56d9510e6edc60ff@mail.gmail.com>
+	 <7v7i5c7g5b.fsf@gitster.siamese.dyndns.org>
+	 <70318cbf0901031519w15929f58p68ff62ace683a5b0@mail.gmail.com>
+	 <7v1vvj1lvx.fsf@gitster.siamese.dyndns.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from a-sasl-quonix.sasl.smtp.pobox.com ([208.72.237.25]:61986 "EHLO
-	sasl.smtp.pobox.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750775AbZADJGF (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.224]:34171 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751094AbZAGAhN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 4 Jan 2009 04:06:05 -0500
-In-Reply-To: <70318cbf0901031519w15929f58p68ff62ace683a5b0@mail.gmail.com>
- (Christopher Li's message of "Sat, 3 Jan 2009 15:19:31 -0800")
+	Tue, 6 Jan 2009 19:37:13 -0500
+Received: by rv-out-0506.google.com with SMTP id f9so7178261rvb.7
+        for <linux-sparse@vger.kernel.org>; Tue, 06 Jan 2009 16:37:12 -0800 (PST)
+In-Reply-To: <7v1vvj1lvx.fsf@gitster.siamese.dyndns.org>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Junio C Hamano <junio@pobox.com>
 Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>
 
-"Christopher Li" <sparse@chrisli.org> writes:
+Thank you very much for the detail explain of how you manage the git
+release with
+different branches. That is very helpful to me.
 
-> While you are here. I have a question regarding how to publish patch series
-> with git.
+On Sun, Jan 4, 2009 at 1:05 AM, Junio C Hamano <junio@pobox.com> wrote:
 >
-> Take this patch as example. I want to have some repository to allow
-> others to pull the early version of the patch for testing. I also want
-> to incorporate
-> changes into the patch itself.
-
-A short answer is that git itself does not offer an official, integrated
-way to manage the life cycle of a patch series natively.  People seem to
-use additional Porcelains such as StGIT and guilt for these things, and
-they are good way to privately manage the evolution of a patch series, but
-I do not know how good they are about publishing and working with others.
-
-I however personally haven't felt much need for anything outside of what
-is natively supported by git.
-
-> If I am using patch series. That is easy, just republish a new series.
-
-How?
-
-> With git, I can:
-> 1) always submit incremental changes to master branch. Then the patch will
->     be fragmented. I want the clean up version of the history.
-> 2) Use rebase or cherry-pick to update the master branch. That will change
->     the history of the commit. it causes trouble for people who pull the earlier
->    version of the patch.
-> 3) Always use a new branch to publish a new patch series. Then people who
->    pull it need to know which branch to pull. It seems that I want an alias for
->    the branch. On the client side it can use the same alias to pull different
->    branch. I haven't figure out how to do that with git yet.
+>> If I am using patch series. That is easy, just republish a new series.
 >
-> Any suggestions?
+> How?
 
-I won't claim to have the magic bullet, but I'll try to describe how I
-have been managing the patches submitted to git.git tree for the last
-three years.
+This is how Andrew Morton manage his -mm series. The heavy lifting
+is done out side of git. As my understand,  Andrew using his own patch-series
+script to manage changes in a series of patches. There is a series
+file descriptor
+what patch files are going to apply in to the tree. The patches can be
+easily modify
+(using push/pop/refresh) or drop out from the series completely. When Andrew
+release a new "-mm" series. He just import the series into a git
+branch and publish
+that. The git repository is just a handy ftp replacement.
 
-First thing to realize is that a typical non-trivial patch series has
-three distinct phases in its lifecycle:
+So my question can be simplify as, can I do what Andrew Morton do with his "-mm"
+series using pure git?
 
- (1) A patch series is floated as "how about this" but it is still very
-     rough.  Its design may be suboptimal, and/or its implementation may
-     be too buggy even to be tried by somebody who is not very dedicated.
+> I won't claim to have the magic bullet, but I'll try to describe how I
+> have been managing the patches submitted to git.git tree for the last
+> three years.
+>
+> First thing to realize is that a typical non-trivial patch series has
+> three distinct phases in its lifecycle:
+>
+>  (1) A patch series is floated as "how about this" but it is still very
+>     rough.  Its design may be suboptimal, and/or its implementation may
+>     be too buggy even to be tried by somebody who is not very dedicated.
+>
+>     After such initial showing, people will suggest improvements, pick
+>     nits, and even a total re-design.
+>
+>  (2) After iterations, the series will start to solidify.  Its design
+>     becomes something that people can agree on, and the initial trivial
+>     mistakes in the implementation are corrected, even if neither the
+>     design nor the implementation is perfect.  In short, the series
+>     turns into a testable shape, and it becomes viable to have other
+>     people on board to further polish it.
+>
+>     People will continue improve, pick nits but a total re-design and
+>     re-implementation becomes less likely at this point.
+>
+>  (3) After further iterations, the series becomes worthy to be in the
+>     official release.  It would be feature complete and without an
+>     obvious cosmetic issues.
+>
+>     There may still be further enhancements, but at this point, they are
+>     just that: further enhancements and improvements, not fixes to a
+>     showstopper.
 
-     After such initial showing, people will suggest improvements, pick
-     nits, and even a total re-design.
+I totally agree with the 3 stage of the patch life cycle.
 
- (2) After iterations, the series will start to solidify.  Its design
-     becomes something that people can agree on, and the initial trivial
-     mistakes in the implementation are corrected, even if neither the
-     design nor the implementation is perfect.  In short, the series
-     turns into a testable shape, and it becomes viable to have other
-     people on board to further polish it.
+>
+> I personally consider that keeping track of the history of the patch
+> series in its infancy (i.e. phase #1) is not worth the trouble.  Early
 
-     People will continue improve, pick nits but a total re-design and
-     re-implementation becomes less likely at this point.
+I agree it is not worth while to keep the too early history. That is not
+the problem. This problem is if I publish those early changes, others might
+have pull from it. Then it come troublesome to modify the patch itself.
 
- (3) After further iterations, the series becomes worthy to be in the
-     official release.  It would be feature complete and without an
-     obvious cosmetic issues.
+I can have clean patch history and it cause conflict when others sync to it.
+Or I can have fragmented patch history(using incremental commit) but
+others can sync to it smoothly. I can't have both.
 
-     There may still be further enhancements, but at this point, they are
-     just that: further enhancements and improvements, not fixes to a
-     showstopper.
+> mistakes that need a total redoing from scratch are not something worthy
+> of being kept in the history in the longer term.  On the other hand, once
+> the series becomes more solid (i.e. phase #2), it becomes more worthwhile
+> to keep track of the incremental evolution of the series.  A series that
+> passed these phases (i.e. in phase #3) of course are worth keeping track
+> of the incremental evolution, too.
+>
+> For this reason, git.git has two development integration branches, 'next' and 'pu'.
 
-I personally consider that keeping track of the history of the patch
-series in its infancy (i.e. phase #1) is not worth the trouble.  Early
-mistakes that need a total redoing from scratch are not something worthy
-of being kept in the history in the longer term.  On the other hand, once
-the series becomes more solid (i.e. phase #2), it becomes more worthwhile
-to keep track of the incremental evolution of the series.  A series that
-passed these phases (i.e. in phase #3) of course are worth keeping track
-of the incremental evolution, too.
+So here is my understanding of what you described. The 'pu' branch is for
+highly experiment changes. The 'pu' branch can rewind and rewrite the
+history. Once the patch merge to 'next', the history will not change any more.
+All update will stay as incremental changes.
 
-For this reason, git.git has two development integration branches, 'next' and 'pu'.
+One question, does user suffer from conflict when then pull from the 'pu'
+branch?
 
-A new series is always applied to its own topic branch, that is forked
-from the oldest applicable release branch (not to be confused with the
-development integration branches), which is one of:
+> My suggestion, if you think keeping track of early mistakes is worth
+> doing, is to use a variant of the way 'pu' is managed.  Instead of
 
- - 'maint', which is forked from the last major release --- as of this
-   writing, it was forked from v1.6.1;
+I don't care that much about keeping track of early mistakes. I just want to:
+1) publish early.
+2) able to fix the early mistake and maintain the history clean.
 
- - 'maint-X.Y.Z', which is forked from the stable release that is worthy
-   of maintaining for the long term, and that is older than what 'maint'
-   was forked from --- as of this writing, I have such branches for v1.5.4,
-   v1.5.5, v1.5.6 and v1.6.0 release.
+I think I will just adopt the 'pu' branch approach and declare that
+'pu' branch might need rewind.
 
- - 'master', which builds on top of the last stable release to prepare for
-   the next majore release --- as of this writing, it is preparing for
-   v1.6.2;
+> declaring the topics in it subject to rewinding and rebuilding, you keep
+> track of the changes to them incrementally.  My gut feeling is that this
+> will probably make the development history unmanageably messy when a topic
+> leaves phase #1 and becomes worthy of bing in phase #2, and you may choose
+> to tidy up the history with "rebase -i", making sure that the end result
+> stays the same, immediately before merging the topic to 'next'.
+>
+> Although, as I said, I do not personally think it is worth the trouble.
 
-When the series is still in phase #1, it is not worth keeping track of its
-incremental development.  You _could_ do it, but when the series is so
-slushy that it can get a total rewriting any time, it is not really worth
-the trouble, as the history will not be incremental anyway at that point.
+Thanks again for the suggestion. A 'pu' branch make sense.
 
-I merge such a topic branch to the integration branch called 'pu' (stands
-for 'proposed updates'), and let the development community aware of the
-fact that 'pu' itself, and any topic branch that is only in 'pu', are
-subject to be rewound and rebuilt from scratch.  In other words, nobody is
-supposed to build on it.  'pu' is for highly motivated and interested
-parties to check new topics out and take a look at it.
+I have some thought about cleaning the history without using a different branch.
+When a patch come in, we often have pretty good idea how ready this patches
+is. However, it is kind of arbitrate which stage it is in as well. Because once
+it to to 'next' branch, there is no coming back. I might regret I
+merge a patch to
+'next' too early.
 
-When an update appears on the list for a topic that is only in 'pu', it is
-submitter's choice to make it incremental (in which case I'll simply apply
-them on top of the existing topic branch), or a complete replacement.
-However, the submitters are encouraged to send in a replacement patch for
-such a topic if the earlier mistakes their follow-up patch fixes are of
-trivial and stupid kind that is not worth keeping in the history.  I may
-even use an incremental patch to amend the existing commit (i.e. squash
-the fix in to erase early mistakes).
+Here is an idea, I am just thinking it out loud.
 
-A topic that was only in 'pu', with enough effort and luck, eventually may
-become solid enough and move to phase #2.  When that happens, the topic is
-merged to another integration branch called 'next' (it does *NOT* stand
-for 'will be in the next major release').  The promise between I and the
-development community is that topics that are merged to 'next' will get
-only incremental updates and never rewound.  From then on, the topic is
-refined incrementally until perfection.
+Given 'pu' branch like this, (each [ ] is a commit, A1 is a follow up change for
+A0).
 
-When the topic moves to phase #3, it is merged to the 'master' branch.
-It may further be merged down to older maintenance branches after it
-proves useful/correct in the field.
+'pu' branch: [A0] - [B0] - [A1] - [C0] -[B1] -[A2]
 
-Many trivially correct patches do not fully go through the above process
-and are applied directly to the oldest, relevant release branch, such as
-'maint' or 'master'.  To integrate these changes upward, periodically, the
-tip of 'maint' is merged to 'master', and the tip of 'master' is merged to
-'next'.
+We can have a temporary clean up branch fork from 'pu' looks like this:
 
-In other words, 'next' is where the real incremental development happens.
-It merges updates to topic branches that have passed phase #1 (iow, worthy
-of developing incrementally) and also updates to more stable release
-branches.
+'tmp_clean' branch: [A0 + A1 + A2] - [B0 + B1] - [C0]
 
-Each time 'next' is updated, 'pu' is first reset to the tip of it.  The
-topics that are still slushy and kept out of 'next' are updated by
-replacing the commits by replacement patches.  Then these topiocs are
-merged to 'pu', essentially rebuilding 'pu' branch from scratch.
+ 'tmp_clean' and 'pu' will generate exactly the same tree. The
+only different is the history path it take to get there.
 
-My suggestion, if you think keeping track of early mistakes is worth
-doing, is to use a variant of the way 'pu' is managed.  Instead of
-declaring the topics in it subject to rewinding and rebuilding, you keep
-track of the changes to them incrementally.  My gut feeling is that this
-will probably make the development history unmanageably messy when a topic
-leaves phase #1 and becomes worthy of bing in phase #2, and you may choose
-to tidy up the history with "rebase -i", making sure that the end result
-stays the same, immediately before merging the topic to 'next'.
+Then we can have 'pu' merge from 'tmp_clean', with zero text
+changes. The only change is the change log and we tell git
+that the merge is for history clean up. So when we launch
+"git log", by default it will follow the "tmp_clean" path rather
+than the original "pu" path.
 
-Although, as I said, I do not personally think it is worth the trouble.
+So it just provide "alternative" view of the history without introduce
+real changes. When user pull from 'pu', it can automatically get the
+cleanup version of the history without introduce conflicts.
+
+It seems it can have the best of both worlds. I am not sure weather
+it is doable or worth while to do though.
+
+Chris
