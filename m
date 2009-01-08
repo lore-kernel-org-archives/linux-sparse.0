@@ -1,104 +1,74 @@
-From: Hannes Eder <hannes@hanneseder.net>
-Subject: [PATCH] refactor handle_switch_f
-Date: Thu, 08 Jan 2009 21:50:56 +0100
-Message-ID: <20090108204937.6511.56533.stgit@vmbox.hanneseder.net>
-References: <70318cbf0901081213i22dc8054yda4230e8a6375e9a@mail.gmail.com>
+From: Yoann Padioleau <padator@wanadoo.fr>
+Subject: Re: source code transform
+Date: Thu, 08 Jan 2009 17:45:01 -0600
+Message-ID: <87skntqs5e.fsf@aryx.cs.uiuc.edu>
+References: <a15fe1ffe7f7a6faf8f79d4ac780b663@mail.smartmobili.com>
+	<1231354996.3545.80.camel@johannes>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f21.google.com ([209.85.218.21]:59377 "EHLO
-	mail-bw0-f21.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751474AbZAHUvC (ORCPT
+Received: from expredir4.cites.uiuc.edu ([128.174.5.187]:65032 "EHLO
+	expredir4.cites.uiuc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754277AbZAIADX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Jan 2009 15:51:02 -0500
-Received: by bwz14 with SMTP id 14so27986213bwz.13
-        for <linux-sparse@vger.kernel.org>; Thu, 08 Jan 2009 12:50:59 -0800 (PST)
-In-Reply-To: <70318cbf0901081213i22dc8054yda4230e8a6375e9a@mail.gmail.com>
+	Thu, 8 Jan 2009 19:03:23 -0500
+In-Reply-To: <1231354996.3545.80.camel@johannes> (Johannes Berg's message of "Wed\, 07 Jan 2009 20\:03\:16 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>, Junio C Hamano <junio@pobox.com>
+To: Johannes Berg <johannes@sipsolutions.net>
+Cc: mosfet <forumer@smartmobili.com>, linux-sparse@vger.kernel.org, Julia Lawall <julia@diku.dk>
 
-This also fixes a possible source of bugs in parsing other
--f<whatever> options, i.e. -ftabstop=foo would set the option -ffoo.
+Johannes Berg <johannes@sipsolutions.net> writes:
 
-Signed-off-by: Hannes Eder <hannes@hanneseder.net>
----
-
-On Thu, Jan 8, 2009 at 9:13 PM, Christopher Li <sparse@chrisli.org> wrote:
-> Is that the only portion that get changed between v2 and v3?
-> It took me a while to realized what really get changed here.
-
-Yes, only handle_switch_f has changed between v2 and v3.
-
-> I suggest a new function: handle_switch_ftabstop() here.
+> On Wed, 2009-01-07 at 19:48 +0100, mosfet wrote:
 >
-> Then we do:
+>> I would like to know if sparse would be able to parse GCC source file to
+>> add a comment in each function it encounters ?
+>> For instance let's say I want to trace every function in c-parser.c :
+>> 
+>> 
+>> static struct c_typespec
+>> c_parser_enum_specifier (c_parser *parser)
+>> {
+>> ...
+>> 
+>> }
+>> 
+>> in a first step I would like to modify source code like this :
+>> 
+>> static struct c_typespec
+>> c_parser_enum_specifier (c_parser *parser)
+>> {
+>>  fprintf(stderr, "c-parser.c: c_parser_enum_specifier()\n");
+>> ...
+>> 
+>> }
+>> 
+>> is it possible with sparse ?
 >
->       if (!strncmp(arg, "tabstop=", 8))
->           return handle_switch_ftabstop(arg+8, next);
+> Not sure, but spatch might be able to:
 >
-> It will make handle_switch_f cleaner.
+> http://www.emn.fr/x-info/coccinelle/
 
-Good idea.
+Yes it can. Just write this semantic patch: 
 
-> I already apply your V2 patch. Can you make this change
-> an incremental patch against my tree?
+@@
+identifier f;
+@@
 
-Here we go.
-
- lib.c |   31 ++++++++++++++++++++-----------
- 1 files changed, 20 insertions(+), 11 deletions(-)
-
-diff --git a/lib.c b/lib.c
-index be9e8d7..54d8cf5 100644
---- a/lib.c
-+++ b/lib.c
-@@ -524,25 +524,34 @@ static char **handle_switch_O(char *arg, char **next)
- 	return next;
+ f(...)
+ { 
++ fprintf(stderr, "%s: %s()\n", __FILE__, __FUNCTION__);
+ ...
  }
- 
-+static char **handle_switch_ftabstop(char *arg, char **next)
-+{
-+	char *end;
-+	unsigned long val;
-+
-+	if (*arg == '\0')
-+		die("error: missing argument to \"-ftabstop=\"");
-+
-+	/* we silently ignore silly values */
-+	val = strtoul(arg, &end, 10);
-+	if (*end == '\0' && 1 <= val && val <= 100)
-+		tabstop = val;
-+
-+	return next;
-+}
-+
- static char **handle_switch_f(char *arg, char **next)
- {
- 	int flag = 1;
- 
- 	arg++;
- 
--	if (!strncmp(arg, "tabstop=", 8)) {
--		char *end;
--		unsigned long val;
--		arg += 8;
-+	if (!strncmp(arg, "tabstop=", 8))
-+		return handle_switch_ftabstop(arg+8, next);
- 
--		if (*arg == '\0')
--			die("error: missing argument to \"-ftabstop=\"");
-+	/* handle switches w/ arguments above, boolean and only boolean below */
- 
--		/* we silently ignore silly values */
--		val = strtoul(arg, &end, 10);
--		if (*end == '\0' && 1 <= val && val <= 100)
--			tabstop = val;
--	} else if (!strncmp(arg, "no-", 3)) {
-+	if (!strncmp(arg, "no-", 3)) {
- 		flag = 0;
- 		arg += 3;
- 	}
 
+
+into a file such as instrument_tracing.cocci and then run spatch with 
+
+
+ $ ./spatch -c instrument_tracing.cocci c-parser.c -o c-parser-instrumented.c
+
+
+
+>
+> johannes
