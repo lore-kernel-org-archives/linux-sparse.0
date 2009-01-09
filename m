@@ -1,45 +1,33 @@
-From: Harvey Harrison <harvey.harrison@gmail.com>
-Subject: Re: source code transform
-Date: Thu, 08 Jan 2009 16:38:56 -0800
-Message-ID: <1231461536.5715.31.camel@brick>
-References: <a15fe1ffe7f7a6faf8f79d4ac780b663@mail.smartmobili.com>
-	 <1231354996.3545.80.camel@johannes>  <87skntqs5e.fsf@aryx.cs.uiuc.edu>
+From: "Christopher Li" <sparse@chrisli.org>
+Subject: Re: [PATCH] refactor handle_switch_f
+Date: Thu, 8 Jan 2009 20:25:39 -0800
+Message-ID: <70318cbf0901082025h1c0f97absf62c049f725df2ed@mail.gmail.com>
+References: <70318cbf0901081213i22dc8054yda4230e8a6375e9a@mail.gmail.com>
+	 <20090108204937.6511.56533.stgit@vmbox.hanneseder.net>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wf-out-1314.google.com ([209.85.200.175]:11903 "EHLO
-	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759734AbZAIAi6 (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.230]:37381 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752559AbZAIEZk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Jan 2009 19:38:58 -0500
-Received: by wf-out-1314.google.com with SMTP id 27so9555013wfd.4
-        for <linux-sparse@vger.kernel.org>; Thu, 08 Jan 2009 16:38:57 -0800 (PST)
-In-Reply-To: <87skntqs5e.fsf@aryx.cs.uiuc.edu>
+	Thu, 8 Jan 2009 23:25:40 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so8741894rvb.1
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Jan 2009 20:25:40 -0800 (PST)
+In-Reply-To: <20090108204937.6511.56533.stgit@vmbox.hanneseder.net>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Yoann Padioleau <padator@wanadoo.fr>
-Cc: Johannes Berg <johannes@sipsolutions.net>, mosfet <forumer@smartmobili.com>, linux-sparse@vger.kernel.org, Julia Lawall <julia@diku.dk>
+To: Hannes Eder <hannes@hanneseder.net>
+Cc: linux-sparse@vger.kernel.org, Alexey Zaytsev <alexey.zaytsev@gmail.com>, Junio C Hamano <junio@pobox.com>
 
-On Thu, 2009-01-08 at 17:45 -0600, Yoann Padioleau wrote:
-> Johannes Berg <johannes@sipsolutions.net> writes:
+On Thu, Jan 8, 2009 at 12:50 PM, Hannes Eder <hannes@hanneseder.net> wrote:
+> This also fixes a possible source of bugs in parsing other
+> -f<whatever> options, i.e. -ftabstop=foo would set the option -ffoo.
+>
+> Signed-off-by: Hannes Eder <hannes@hanneseder.net>
 
-> @@
-> identifier f;
-> @@
-> 
->  f(...)
->  { 
-> + fprintf(stderr, "%s: %s()\n", __FILE__, __FUNCTION__);
->  ...
->  }
-> 
+Applied.
 
-Personal pet-peeve, use __func__, not __FUNCTION__.
-
-__func__ is C, __FUNCTION__ is a gcc-extension.
-
-Cheers,
-
-Harvey
-
+Chris
