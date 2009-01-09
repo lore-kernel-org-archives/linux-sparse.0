@@ -1,74 +1,45 @@
-From: Yoann Padioleau <padator@wanadoo.fr>
+From: Harvey Harrison <harvey.harrison@gmail.com>
 Subject: Re: source code transform
-Date: Thu, 08 Jan 2009 17:45:01 -0600
-Message-ID: <87skntqs5e.fsf@aryx.cs.uiuc.edu>
+Date: Thu, 08 Jan 2009 16:38:56 -0800
+Message-ID: <1231461536.5715.31.camel@brick>
 References: <a15fe1ffe7f7a6faf8f79d4ac780b663@mail.smartmobili.com>
-	<1231354996.3545.80.camel@johannes>
+	 <1231354996.3545.80.camel@johannes>  <87skntqs5e.fsf@aryx.cs.uiuc.edu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from expredir4.cites.uiuc.edu ([128.174.5.187]:65032 "EHLO
-	expredir4.cites.uiuc.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754277AbZAIADX (ORCPT
+Received: from wf-out-1314.google.com ([209.85.200.175]:11903 "EHLO
+	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759734AbZAIAi6 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Jan 2009 19:03:23 -0500
-In-Reply-To: <1231354996.3545.80.camel@johannes> (Johannes Berg's message of "Wed\, 07 Jan 2009 20\:03\:16 +0100")
+	Thu, 8 Jan 2009 19:38:58 -0500
+Received: by wf-out-1314.google.com with SMTP id 27so9555013wfd.4
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Jan 2009 16:38:57 -0800 (PST)
+In-Reply-To: <87skntqs5e.fsf@aryx.cs.uiuc.edu>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: mosfet <forumer@smartmobili.com>, linux-sparse@vger.kernel.org, Julia Lawall <julia@diku.dk>
+To: Yoann Padioleau <padator@wanadoo.fr>
+Cc: Johannes Berg <johannes@sipsolutions.net>, mosfet <forumer@smartmobili.com>, linux-sparse@vger.kernel.org, Julia Lawall <julia@diku.dk>
 
-Johannes Berg <johannes@sipsolutions.net> writes:
+On Thu, 2009-01-08 at 17:45 -0600, Yoann Padioleau wrote:
+> Johannes Berg <johannes@sipsolutions.net> writes:
 
-> On Wed, 2009-01-07 at 19:48 +0100, mosfet wrote:
->
->> I would like to know if sparse would be able to parse GCC source file to
->> add a comment in each function it encounters ?
->> For instance let's say I want to trace every function in c-parser.c :
->> 
->> 
->> static struct c_typespec
->> c_parser_enum_specifier (c_parser *parser)
->> {
->> ...
->> 
->> }
->> 
->> in a first step I would like to modify source code like this :
->> 
->> static struct c_typespec
->> c_parser_enum_specifier (c_parser *parser)
->> {
->>  fprintf(stderr, "c-parser.c: c_parser_enum_specifier()\n");
->> ...
->> 
->> }
->> 
->> is it possible with sparse ?
->
-> Not sure, but spatch might be able to:
->
-> http://www.emn.fr/x-info/coccinelle/
+> @@
+> identifier f;
+> @@
+> 
+>  f(...)
+>  { 
+> + fprintf(stderr, "%s: %s()\n", __FILE__, __FUNCTION__);
+>  ...
+>  }
+> 
 
-Yes it can. Just write this semantic patch: 
+Personal pet-peeve, use __func__, not __FUNCTION__.
 
-@@
-identifier f;
-@@
+__func__ is C, __FUNCTION__ is a gcc-extension.
 
- f(...)
- { 
-+ fprintf(stderr, "%s: %s()\n", __FILE__, __FUNCTION__);
- ...
- }
+Cheers,
 
+Harvey
 
-into a file such as instrument_tracing.cocci and then run spatch with 
-
-
- $ ./spatch -c instrument_tracing.cocci c-parser.c -o c-parser-instrumented.c
-
-
-
->
-> johannes
