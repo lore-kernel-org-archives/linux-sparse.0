@@ -1,38 +1,46 @@
-From: Ralf Wildenhues <Ralf.Wildenhues@gmx.de>
-Subject: Re: fun with declarations and definitions
-Date: Tue, 3 Feb 2009 07:28:16 +0100
-Message-ID: <20090203062815.GA2099@ins.uni-bonn.de>
-References: <20090202073018.GB28946@ZenIV.linux.org.uk> <70318cbf0902021907w634ffc6dm693022b23a0eabfc@mail.gmail.com> <20090203044156.GI28946@ZenIV.linux.org.uk>
+From: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Subject: Initializing float variables without type suffix
+Date: Wed, 4 Feb 2009 15:57:59 +0100
+Message-ID: <OFC65EA87B.BAADFE01-ONC1257553.004CCDB9-C1257553.00522B4E@br-automation.com>
+References: <1216938210.5455.16.camel@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from merkur.ins.uni-bonn.de ([131.220.223.13]:53723 "EHLO
-	merkur.ins.uni-bonn.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751797AbZBCGyX (ORCPT
+Received: from mail2.br-automation.com ([213.33.116.61]:47663 "EHLO
+	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752064AbZBDPRy (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Feb 2009 01:54:23 -0500
-Content-Disposition: inline
-In-Reply-To: <20090203044156.GI28946@ZenIV.linux.org.uk>
+	Wed, 4 Feb 2009 10:17:54 -0500
+In-Reply-To: <1216938210.5455.16.camel@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: linux-sparse@vger.kernel.org
 
 Hello,
 
-* Al Viro wrote on Tue, Feb 03, 2009 at 05:41:56AM CET:
-> ObDeclarationParsing: I'm sorely (_very_ sorely) tempted to claim that
-> gcc folks are violating GPL.  Proof: gcc/c-parse.in, around productions
-> for declspecs_*.  Of course, they can say that this _is_ the preferred
-> form for making modifications, [...]
+i think i found an error, when float variables are initialized.
+Parsing the line
 
-FWIW, that has since been rewritten.  Quoting gcc/ChangeLog-2005:
+float var = 1.2345; 
 
-| 2005-02-25  Joseph S. Myers  <joseph@codesourcery.com>
-| 
-|         * c-parser.c: New file.
-|         * c-parse.in: Remove.
-[...]
+creates a symbol "var", but the initializer (struct expression) is from 
+type "EXPR_VALUE" - 
+not "EXPR_FVALUE".
+I think this happens, because the expression "1.2345" is interpreted as 
+double and, as result of this, 
+gets casted with the function cast_to(). It seems that cast_to() doesn't 
+make double to float casts.
 
-Cheers,
-Ralf
+The result of this is, that if you want to show the initvalue of this 
+symbol, "1" instead of "1.2345" is displayed.
+If the variable is initialized with an additional type suffix, like 
+
+float var = 1.2345F; 
+
+or datatype double is used, it works.
+
+Greetings,
+Thomas Schmid
+
+
