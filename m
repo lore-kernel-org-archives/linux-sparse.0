@@ -1,46 +1,42 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Initializing float variables without type suffix
-Date: Wed, 4 Feb 2009 15:57:59 +0100
-Message-ID: <OFC65EA87B.BAADFE01-ONC1257553.004CCDB9-C1257553.00522B4E@br-automation.com>
-References: <1216938210.5455.16.camel@josh-work.beaverton.ibm.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Fix type_info_expression()
+Date: Thu, 5 Feb 2009 10:29:19 -0800
+Message-ID: <70318cbf0902051029n11975b41l38f17a635dcf5fbd@mail.gmail.com>
+References: <20090202073151.GC28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.br-automation.com ([213.33.116.61]:47663 "EHLO
-	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752064AbZBDPRy (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.227]:19141 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752034AbZBES3V (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 4 Feb 2009 10:17:54 -0500
-In-Reply-To: <1216938210.5455.16.camel@josh-work.beaverton.ibm.com>
+	Thu, 5 Feb 2009 13:29:21 -0500
+Received: by rv-out-0506.google.com with SMTP id g9so2582542rvb.5
+        for <linux-sparse@vger.kernel.org>; Thu, 05 Feb 2009 10:29:20 -0800 (PST)
+In-Reply-To: <20090202073151.GC28946@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
+To: Al Viro <viro@zeniv.linux.org.uk>
 Cc: linux-sparse@vger.kernel.org
 
-Hello,
+On Sun, Feb 1, 2009 at 11:31 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
+> sizeof (typename){initializers}.foo is nice and valid C99 - it's parsed
+> as sizeof primary.foo <- sizeof postfix.foo <- sizeof postfix <- sizeof unary
+> <- unary.  Current type_info_expression() stops too early.
 
-i think i found an error, when float variables are initialized.
-Parsing the line
+Thanks for the patch. Looks great.
 
-float var = 1.2345; 
+> -       if (match_op(token, '{'))
+> -               token = initializer(&expr->cast_expression, token);
+> +       if (match_op(token, '{')) {
+> +               struct expression *cast = alloc_expression(p->pos, EXPR_CAST);
+> +               cast->cast_type = expr->cast_type;
+> +               expr->cast_type = NULL;
 
-creates a symbol "var", but the initializer (struct expression) is from 
-type "EXPR_VALUE" - 
-not "EXPR_FVALUE".
-I think this happens, because the expression "1.2345" is interpreted as 
-double and, as result of this, 
-gets casted with the function cast_to(). It seems that cast_to() doesn't 
-make double to float casts.
+Setting expr->cast_type = NULL here is not straightly necessary right?
+The expr is EXPR_SIZEOF type, the expr->cast_type is not used in
+evaluation_sizeof. Of course it doesn't hurt, I just want to get a confirm
+that I understand it correct.y.
 
-The result of this is, that if you want to show the initvalue of this 
-symbol, "1" instead of "1.2345" is displayed.
-If the variable is initialized with an additional type suffix, like 
-
-float var = 1.2345F; 
-
-or datatype double is used, it works.
-
-Greetings,
-Thomas Schmid
-
-
+Chris
