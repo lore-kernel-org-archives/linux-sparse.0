@@ -1,41 +1,76 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Fix type_info_expression()
-Date: Thu, 5 Feb 2009 12:21:24 -0800
-Message-ID: <70318cbf0902051221y7ec61944m3880bf52fbbbbb1a@mail.gmail.com>
-References: <20090202073151.GC28946@ZenIV.linux.org.uk>
-	 <70318cbf0902051029n11975b41l38f17a635dcf5fbd@mail.gmail.com>
-	 <20090205192322.GN28946@ZenIV.linux.org.uk>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: fun with declarations and definitions
+Date: Thu, 5 Feb 2009 20:28:11 +0000
+Message-ID: <20090205202811.GO28946@ZenIV.linux.org.uk>
+References: <20090202073018.GB28946@ZenIV.linux.org.uk> <70318cbf0902021907w634ffc6dm693022b23a0eabfc@mail.gmail.com> <20090203041317.GH28946@ZenIV.linux.org.uk> <70318cbf0902051040m7506a365s784a591667358f1f@mail.gmail.com> <498B3435.8010506@knosof.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.238]:25083 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755011AbZBEUVZ (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:51922 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753628AbZBEU2N (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Feb 2009 15:21:25 -0500
-Received: by rv-out-0506.google.com with SMTP id g9so2626956rvb.5
-        for <linux-sparse@vger.kernel.org>; Thu, 05 Feb 2009 12:21:24 -0800 (PST)
-In-Reply-To: <20090205192322.GN28946@ZenIV.linux.org.uk>
+	Thu, 5 Feb 2009 15:28:13 -0500
+Content-Disposition: inline
+In-Reply-To: <498B3435.8010506@knosof.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org
+To: Derek M Jones <derek@knosof.co.uk>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-On Thu, Feb 5, 2009 at 11:23 AM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> On Thu, Feb 05, 2009 at 10:29:19AM -0800, Christopher Li wrote:
-
-> Take a look at evaluate_type_information().  If ->cast_type is not NULL,
-> it won't even look at ->cast_expression.  For sizeof (struct foo){0,1} that's
-> fine (you end with with sizeof(struct foo), essentially), but for
-> sizeof(struct foo){0,1}.x that'll give you the wrong answer.
+On Thu, Feb 05, 2009 at 06:47:17PM +0000, Derek M Jones wrote:
+> Christopher,
 >
-> IOW, it is necessary.
+>> Right. I think currently sparse treat the subsequent declaration like a new
+>> one. It check the type is compatible with previous declaration. But it does
+>> not merge the previous declaration information.
+>
+> Sparse needs to generate composite types:
+> http://c0x.coding-guidelines.com/6.2.7.html
 
-That is the subtle detail I am looking for.
+Of course it does need that (and it's not C0X news, obviously).  We still
+have the type handling messed up in a lot of areas, so the plan is to
+sort out the declaration parsing, then get rid of the warts in type
+representation and handling, then deal with composites.
 
-I will apply your patch.
+IMO the right way to look at that crap is:
+	* any declaration gives a new struct symbol, with type being the
+composite of that given by declaration and that of previously seen one
+(which, in turn, has gathered all earlier stuff)
+	* type nodes should be treated as expressions, with on-demand
+evaluation and referential transparency (i.e. any rewrite replaces with
+equal).  We are not that far from such state.
+	* composite type is built by unifying two trees, with evaluation
+driven by comparisons.
+	* we should _NOT_ do update-in-place from e.g. int[] to int[3] -
+it's guaranteed to mess e.g. typedef handling, not to mention making the
+VLA implementation hard as hell.  We are not referentially transparent
+for e.g. struct expression and we'd paid a _lot_ for that.
 
-Thanks
+Note that even check for type compatibility is fscked up for function
+types - as it is, we treat void() and void(int) as incompatible types.
+So yes, the composite type handling is certainly needed.  We also have
+deeply fscked treatment of declarations, mostly thanks to fallout from
+trying to be compatible with gcc in attribute handling ;-/
 
-Chris
+BTW, typedef treatment in declarators is also b0rken: witness sparse barfing on
+
+typedef int T;
+extern void f(int);
+void g(int x)
+{
+        int (T);
+        T = x;
+        f(T);
+}
+
+which is a valid C (we have T redeclared in the function scope as int,
+with declarator -> direct-declarator -> ( declarator ) -> ( identifier )
+as derivation).  sparse mistakes int (T) for typename, does *NOT* notice
+that typename has no business whatsoever being there and silently proceeds
+to T = ..., without having redeclared T as object of type int.  It sees
+typedef-name <something>, decides that it's a beginning of external-definition
+and vomits on the following =.
+
+IOW, the rule in direct_declarator() for distinguishing between function
+and non-function is broken...
