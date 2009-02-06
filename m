@@ -1,52 +1,41 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: fun with declarations and definitions
-Date: Thu, 5 Feb 2009 23:22:49 +0000
-Message-ID: <20090205232249.GQ28946@ZenIV.linux.org.uk>
-References: <20090202073018.GB28946@ZenIV.linux.org.uk> <70318cbf0902021907w634ffc6dm693022b23a0eabfc@mail.gmail.com> <20090203041317.GH28946@ZenIV.linux.org.uk> <70318cbf0902051040m7506a365s784a591667358f1f@mail.gmail.com> <498B3435.8010506@knosof.co.uk> <20090205202811.GO28946@ZenIV.linux.org.uk> <70318cbf0902051441m3b015affvc33003ac6a733f18@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Initializing float variables without type suffix
+Date: Thu, 5 Feb 2009 20:15:37 -0800
+Message-ID: <70318cbf0902052015i387c5e18w475704b290904e61@mail.gmail.com>
+References: <1216938210.5455.16.camel@josh-work.beaverton.ibm.com>
+	 <OFC65EA87B.BAADFE01-ONC1257553.004CCDB9-C1257553.00522B4E@br-automation.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:60439 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752132AbZBEXWv (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.226]:62447 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751368AbZBFEPh (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 5 Feb 2009 18:22:51 -0500
-Content-Disposition: inline
-In-Reply-To: <70318cbf0902051441m3b015affvc33003ac6a733f18@mail.gmail.com>
+	Thu, 5 Feb 2009 23:15:37 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so600380rvb.1
+        for <linux-sparse@vger.kernel.org>; Thu, 05 Feb 2009 20:15:37 -0800 (PST)
+In-Reply-To: <OFC65EA87B.BAADFE01-ONC1257553.004CCDB9-C1257553.00522B4E@br-automation.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Derek M Jones <derek@knosof.co.uk>, linux-sparse@vger.kernel.org
+To: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Cc: Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org
 
-On Thu, Feb 05, 2009 at 02:41:00PM -0800, Christopher Li wrote:
+On Wed, Feb 4, 2009 at 6:57 AM, Thomas Schmid
+<Thomas.Schmid@br-automation.com> wrote:
+> Hello,
+>
+> i think i found an error, when float variables are initialized.
+> Parsing the line
+>
+> float var = 1.2345;
+>
+> gets casted with the function cast_to(). It seems that cast_to() doesn't
+> make double to float casts.
 
-> Can you elaborate the referential transparency? I currently have a vague
-> idea of what you are trying to do. Where should I start if I am going
-> to turn the idea into code. Should we delay the detail of type
-> information until evaluate stage?
+cast_to() seems fine.
 
-Basically, "replace equal with equal".  I.e. whatever we do with struct
-symbol that might be visible to somebody, we should not change the
-interpretation of type for *any* struct symbol, including ones that
-might refer to that one.
+In expanding stage, cast_value() did not cast the constant
+correctly.
 
-Take a look at uninlining for a nice example of the fallout you get
-when that property doesn't hold.  We cannibalize struct expression
-during evaluation a _lot_, so we have to be bloody careful about what
-we share and what we must copy.
-
-For struct expression we do that in a lot of places and it's probably
-worth to keep doing due to memory footprint concerns.  For types
-we can avoid that.
-
-As for the laziness - yes, that's what classify_type() et.al. is about.
-We want to do exactly as little as possible; basically, *all* type
-node evaluation (aka examining) should be demand-driven.  It mostly
-holds, but we definitely could be lazier, e.g. in qualifier-related
-stuff.
-
-I'll do a more complete braindump (ideally - along with the declaration-parsing
-patchset, so that this work could really start) once I dig myself from
-under the !@#!@#!@# patch and mail piles elsewhere a bit.
-
-			Al, terminally annoyed by the size of backlog ;-/
+Chris
