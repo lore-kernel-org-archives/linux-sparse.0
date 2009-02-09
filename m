@@ -1,122 +1,58 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Fix implicit cast to float (Was:Re: Initializing float
-	variables without type suffix)
-Date: Sun, 8 Feb 2009 23:37:50 -0800
-Message-ID: <70318cbf0902082337r250543c8ic94c0f8f6517565a@mail.gmail.com>
-References: <70318cbf0902052015i387c5e18w475704b290904e61@mail.gmail.com>
-	 <OFA9A147C1.624E6D79-ONC1257555.00437599-C1257555.00469A67@br-automation.com>
+Subject: Re: fun with declarations and definitions
+Date: Sun, 8 Feb 2009 23:52:23 -0800
+Message-ID: <70318cbf0902082352n32450ca2g87c847bb035baf15@mail.gmail.com>
+References: <20090202073018.GB28946@ZenIV.linux.org.uk>
+	 <70318cbf0902021907w634ffc6dm693022b23a0eabfc@mail.gmail.com>
+	 <20090203041317.GH28946@ZenIV.linux.org.uk>
+	 <70318cbf0902051040m7506a365s784a591667358f1f@mail.gmail.com>
+	 <498B3435.8010506@knosof.co.uk>
+	 <20090205202811.GO28946@ZenIV.linux.org.uk>
+	 <20090205211921.GP28946@ZenIV.linux.org.uk>
+	 <20090206053655.GS28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0cd20a32a0f3bf04627772f9
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.224]:2925 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754018AbZBIHhv (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Feb 2009 02:37:51 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so1689850rvb.1
-        for <linux-sparse@vger.kernel.org>; Sun, 08 Feb 2009 23:37:50 -0800 (PST)
-In-Reply-To: <OFA9A147C1.624E6D79-ONC1257555.00437599-C1257555.00469A67@br-automation.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-To: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Cc: Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org
-
---000e0cd20a32a0f3bf04627772f9
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from rv-out-0506.google.com ([209.85.198.228]:64037 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750741AbZBIHwY (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 9 Feb 2009 02:52:24 -0500
+Received: by rv-out-0506.google.com with SMTP id k40so1693756rvb.1
+        for <linux-sparse@vger.kernel.org>; Sun, 08 Feb 2009 23:52:23 -0800 (PST)
+In-Reply-To: <20090206053655.GS28946@ZenIV.linux.org.uk>
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: Al Viro <viro@zeniv.linux.org.uk>
+Cc: Derek M Jones <derek@knosof.co.uk>, linux-sparse@vger.kernel.org
 
-On Fri, Feb 6, 2009 at 4:51 AM, Thomas Schmid
-<Thomas.Schmid@br-automation.com> wrote:
-> christ.li@gmail.com schrieb am 06.02.2009 05:15:37:
-> -       if (newtype->ctype.base_type != &fp_type) {
-> +       if (is_int_type(newtype)) {
+On Thu, Feb 5, 2009 at 9:36 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
+> On Thu, Feb 05, 2009 at 09:19:21PM +0000, Al Viro wrote:
+>> IOW, direct_declarator() (which doubles for direct-abstract-declarator) should
+>> have more than one-bit indication of which case we've got.  Right now it's
+>> done by "have we passed a non-NULL ident ** to store the identifier being
+>> declared"; that's not enough.  What we need is explicit 'is that a part of
+>> parameter declaration' flag; then the rule turns into
+>>       if (p && *p)
+>>               fn = 1; /* we'd seen identifier already, can't be nested */
+>>       else if match_op(next, ')')
+>>               fn = 1; /* empty list can't be direct-declarator or
+>>                        * direct-abstract-declarator */
+>>       else
+>>               fn = (in_parameter && lookup_type(next));
+>
+> Umm...  It's a bit more subtle (p goes NULL after the nested one is
+> handled), so we need to keep track of "don't allow nested declarator from
+> that point on" explicitly.  Patch follows:
+>
+> Subject: [PATCH] Handle nested declarators vs. parameter lists correctly
+>
+> Seeing a typedef name after ( means that we have a parameter-type-list
+> only if we are parsing a parameter declaration or a typename; otherwise
+> it might very well be a redeclaration (e.g. int (T); when T had been a
+> typedef in outer scope).
 
-I change your patch a little bit. The old logic of testing against float
-type is better. The type can be a pointer for example. Then using
-the long long value is more correct.
-
-See the patch attached.
-
-If there is not objections. I am going to apply this one.
+The patch looks great. Applied.
 
 Chris
-
---000e0cd20a32a0f3bf04627772f9
-Content-Type: application/octet-stream;
-	name="Fix-implicit-cast-to-float-Was-Re-Initializing-float-variables-without-type-suffix.patch"
-Content-Disposition: attachment;
-	filename="Fix-implicit-cast-to-float-Was-Re-Initializing-float-variables-without-type-suffix.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fqycrjpo0
-
-RnJvbSBwYXRjaHdvcmsgRnJpIEZlYiAgNiAxMjo1MTozNCAyMDA5CkNvbnRlbnQtVHlwZTogdGV4
-dC9wbGFpbjsgY2hhcnNldD0idXRmLTgiCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHJhbnNm
-ZXItRW5jb2Rpbmc6IDdiaXQKU3ViamVjdDogRml4IGltcGxpY2l0IGNhc3QgdG8gZmxvYXQgKFdh
-czpSZTogSW5pdGlhbGl6aW5nIGZsb2F0IHZhcmlhYmxlcwoJd2l0aG91dCB0eXBlIHN1ZmZpeCkK
-RGF0ZTogRnJpLCAwNiBGZWIgMjAwOSAxMjo1MTozNCAtMDAwMApGcm9tOiBUaG9tYXMgU2NobWlk
-IDxUaG9tYXMuU2NobWlkQGJyLWF1dG9tYXRpb24uY29tPgpYLVBhdGNod29yay1JZDogNTg3NAoK
-Y2hyaXN0LmxpQGdtYWlsLmNvbSBzY2hyaWViIGFtIDA2LjAyLjIwMDkgMDU6MTU6Mzc6Cgo+IGNh
-c3RfdG8oKSBzZWVtcyBmaW5lLgo+IAo+IEluIGV4cGFuZGluZyBzdGFnZSwgY2FzdF92YWx1ZSgp
-IGRpZCBub3QgY2FzdCB0aGUgY29uc3RhbnQKPiBjb3JyZWN0bHkuCgpZb3UncmUgcmlnaHQsIEkg
-YWxzbyBub3RpY2VkIHRoaXMgaW4gdGhlIG1lYW50aW1lLgoKVGhlIGRlY2lzaW9uLCB3aGV0aGVy
-IG5ld3R5cGUgaXMgaW50X3R5cGUgb3IgZnBfdHlwZSBpcyBub3QgbWFkZSAKY29ycmVjdGx5LgoK
-VGhlIGZvbGxvd2luZyBwYXRjaCBzZWVtcyB0byB3b3JrOgoKRml4IGltcGxpY2l0IGNhc3QgdG8g
-ZmxvYXQKCk1vZGlmaWVkIGJ5IENocmlzLgoKU2lnbmVkLU9mZi1CeTogVGhvbWFzIFNjaG1pZCA8
-VGhvbWFzLlNjaG1pZEBici1hdXRvbWF0aW9uLmNvbT4KU2lnbmVkLU9mZi1CeTogQ2hyaXN0b3Bo
-ZXIgTGkgPHNwYXJzZUBjaHJpc2xpLm9yZz4KCi0tClRvIHVuc3Vic2NyaWJlIGZyb20gdGhpcyBs
-aXN0OiBzZW5kIHRoZSBsaW5lICJ1bnN1YnNjcmliZSBsaW51eC1zcGFyc2UiIGluCnRoZSBib2R5
-IG9mIGEgbWVzc2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnCk1vcmUgbWFqb3Jkb21v
-IGluZm8gYXQgIGh0dHA6Ly92Z2VyLmtlcm5lbC5vcmcvbWFqb3Jkb21vLWluZm8uaHRtbAoKSW5k
-ZXg6IHNwYXJzZS5jaHJpc2wvZXZhbHVhdGUuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2UuY2hyaXNs
-Lm9yaWcvZXZhbHVhdGUuYworKysgc3BhcnNlLmNocmlzbC9ldmFsdWF0ZS5jCkBAIC0zMTMsMzcg
-KzMxMyw2IEBAIHN0YXRpYyBzdHJ1Y3QgZXhwcmVzc2lvbiAqIGNhc3RfdG8oc3RydWMKIAlyZXR1
-cm4gZXhwcjsKIH0KIAotc3RhdGljIGludCBpc190eXBlX3R5cGUoc3RydWN0IHN5bWJvbCAqdHlw
-ZSkKLXsKLQlyZXR1cm4gKHR5cGUtPmN0eXBlLm1vZGlmaWVycyAmIE1PRF9UWVBFKSAhPSAwOwot
-fQotCi1pbnQgaXNfcHRyX3R5cGUoc3RydWN0IHN5bWJvbCAqdHlwZSkKLXsKLQlpZiAodHlwZS0+
-dHlwZSA9PSBTWU1fTk9ERSkKLQkJdHlwZSA9IHR5cGUtPmN0eXBlLmJhc2VfdHlwZTsKLQlyZXR1
-cm4gdHlwZS0+dHlwZSA9PSBTWU1fUFRSIHx8IHR5cGUtPnR5cGUgPT0gU1lNX0FSUkFZIHx8IHR5
-cGUtPnR5cGUgPT0gU1lNX0ZOOwotfQotCi1zdGF0aWMgaW5saW5lIGludCBpc19mbG9hdF90eXBl
-KHN0cnVjdCBzeW1ib2wgKnR5cGUpCi17Ci0JaWYgKHR5cGUtPnR5cGUgPT0gU1lNX05PREUpCi0J
-CXR5cGUgPSB0eXBlLT5jdHlwZS5iYXNlX3R5cGU7Ci0JcmV0dXJuIHR5cGUtPmN0eXBlLmJhc2Vf
-dHlwZSA9PSAmZnBfdHlwZTsKLX0KLQotc3RhdGljIGlubGluZSBpbnQgaXNfYnl0ZV90eXBlKHN0
-cnVjdCBzeW1ib2wgKnR5cGUpCi17Ci0JcmV0dXJuIHR5cGUtPmJpdF9zaXplID09IGJpdHNfaW5f
-Y2hhciAmJiB0eXBlLT50eXBlICE9IFNZTV9CSVRGSUVMRDsKLX0KLQotc3RhdGljIGlubGluZSBp
-bnQgaXNfdm9pZF90eXBlKHN0cnVjdCBzeW1ib2wgKnR5cGUpCi17Ci0JaWYgKHR5cGUtPnR5cGUg
-PT0gU1lNX05PREUpCi0JCXR5cGUgPSB0eXBlLT5jdHlwZS5iYXNlX3R5cGU7Ci0JcmV0dXJuIHR5
-cGUgPT0gJnZvaWRfY3R5cGU7Ci19Ci0KIGVudW0gewogCVRZUEVfTlVNID0gMSwKIAlUWVBFX0JJ
-VEZJRUxEID0gMiwKSW5kZXg6IHNwYXJzZS5jaHJpc2wvZXhwYW5kLmMKPT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0g
-c3BhcnNlLmNocmlzbC5vcmlnL2V4cGFuZC5jCisrKyBzcGFyc2UuY2hyaXNsL2V4cGFuZC5jCkBA
-IC0xMTYsMTcgKzExNiwxNyBAQCBJbnQ6CiAJcmV0dXJuOwogCiBGbG9hdDoKLQlpZiAobmV3dHlw
-ZS0+Y3R5cGUuYmFzZV90eXBlICE9ICZmcF90eXBlKSB7CisJaWYgKCFpc19mbG9hdF90eXBlKG5l
-d3R5cGUpKSB7CiAJCXZhbHVlID0gKGxvbmcgbG9uZylvbGQtPmZ2YWx1ZTsKIAkJZXhwci0+dHlw
-ZSA9IEVYUFJfVkFMVUU7CiAJCWV4cHItPnRhaW50ID0gMDsKIAkJZ290byBJbnQ7CiAJfQogCi0J
-aWYgKG9sZHR5cGUtPmN0eXBlLmJhc2VfdHlwZSAhPSAmZnBfdHlwZSkKKwlpZiAoIWlzX2Zsb2F0
-X3R5cGUob2xkdHlwZSkpCiAJCWV4cHItPmZ2YWx1ZSA9IChsb25nIGRvdWJsZSlnZXRfbG9uZ2xv
-bmcob2xkKTsKIAllbHNlCi0JCWV4cHItPmZ2YWx1ZSA9IG9sZC0+dmFsdWU7CisJCWV4cHItPmZ2
-YWx1ZSA9IG9sZC0+ZnZhbHVlOwogCiAJaWYgKCEobmV3dHlwZS0+Y3R5cGUubW9kaWZpZXJzICYg
-TU9EX0xPTkdMT05HKSkgewogCQlpZiAoKG5ld3R5cGUtPmN0eXBlLm1vZGlmaWVycyAmIE1PRF9M
-T05HKSkKSW5kZXg6IHNwYXJzZS5jaHJpc2wvc3ltYm9sLmgKPT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNl
-LmNocmlzbC5vcmlnL3N5bWJvbC5oCisrKyBzcGFyc2UuY2hyaXNsL3N5bWJvbC5oCkBAIC0xMCw2
-ICsxMCw3IEBACiAgKi8KIAogI2luY2x1ZGUgInRva2VuLmgiCisjaW5jbHVkZSAidGFyZ2V0Lmgi
-CiAKIC8qCiAgKiBBbiBpZGVudGlmaWVyIHdpdGggc2VtYW50aWMgbWVhbmluZyBpcyBhICJzeW1i
-b2wiLgpAQCAtMjk3LDYgKzI5OCwzNyBAQCBzdGF0aWMgaW5saW5lIGludCBpc19lbnVtX3R5cGUo
-Y29uc3Qgc3RyCiAJcmV0dXJuICh0eXBlLT50eXBlID09IFNZTV9FTlVNKTsKIH0KIAorc3RhdGlj
-IGlubGluZSBpbnQgaXNfdHlwZV90eXBlKHN0cnVjdCBzeW1ib2wgKnR5cGUpCit7CisJcmV0dXJu
-ICh0eXBlLT5jdHlwZS5tb2RpZmllcnMgJiBNT0RfVFlQRSkgIT0gMDsKK30KKworc3RhdGljIGlu
-bGluZSBpbnQgaXNfcHRyX3R5cGUoc3RydWN0IHN5bWJvbCAqdHlwZSkKK3sKKwlpZiAodHlwZS0+
-dHlwZSA9PSBTWU1fTk9ERSkKKwkJdHlwZSA9IHR5cGUtPmN0eXBlLmJhc2VfdHlwZTsKKwlyZXR1
-cm4gdHlwZS0+dHlwZSA9PSBTWU1fUFRSIHx8IHR5cGUtPnR5cGUgPT0gU1lNX0FSUkFZIHx8IHR5
-cGUtPnR5cGUgPT0gU1lNX0ZOOworfQorCitzdGF0aWMgaW5saW5lIGludCBpc19mbG9hdF90eXBl
-KHN0cnVjdCBzeW1ib2wgKnR5cGUpCit7CisJaWYgKHR5cGUtPnR5cGUgPT0gU1lNX05PREUpCisJ
-CXR5cGUgPSB0eXBlLT5jdHlwZS5iYXNlX3R5cGU7CisJcmV0dXJuIHR5cGUtPmN0eXBlLmJhc2Vf
-dHlwZSA9PSAmZnBfdHlwZTsKK30KKworc3RhdGljIGlubGluZSBpbnQgaXNfYnl0ZV90eXBlKHN0
-cnVjdCBzeW1ib2wgKnR5cGUpCit7CisJcmV0dXJuIHR5cGUtPmJpdF9zaXplID09IGJpdHNfaW5f
-Y2hhciAmJiB0eXBlLT50eXBlICE9IFNZTV9CSVRGSUVMRDsKK30KKworc3RhdGljIGlubGluZSBp
-bnQgaXNfdm9pZF90eXBlKHN0cnVjdCBzeW1ib2wgKnR5cGUpCit7CisJaWYgKHR5cGUtPnR5cGUg
-PT0gU1lNX05PREUpCisJCXR5cGUgPSB0eXBlLT5jdHlwZS5iYXNlX3R5cGU7CisJcmV0dXJuIHR5
-cGUgPT0gJnZvaWRfY3R5cGU7Cit9CisKIHN0YXRpYyBpbmxpbmUgaW50IGdldF9zeW1fdHlwZShz
-dHJ1Y3Qgc3ltYm9sICp0eXBlKQogewogCWlmICh0eXBlLT50eXBlID09IFNZTV9OT0RFKQo=
---000e0cd20a32a0f3bf04627772f9--
