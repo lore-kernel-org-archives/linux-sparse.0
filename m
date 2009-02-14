@@ -1,62 +1,98 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Re: [PATCH] Fix implicit cast to float (Was:Re: Initializing
-	float variables without type suffix)
-Date: Mon, 9 Feb 2009 11:15:58 -0800
-Message-ID: <70318cbf0902091115l338eb247x2d4f42d154ba0a43@mail.gmail.com>
-References: <70318cbf0902082337r250543c8ic94c0f8f6517565a@mail.gmail.com>
-	 <OF56CB73D3.5EA2DB0D-ONC1257558.00499FF2-C1257558.004AEC1A@br-automation.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Al Viro <viro@ftp.linux.org.uk>
+Subject: [PATCH 2/7] Separate parsing of identifier-list (in K&R-style declarations)
+Date: Sat, 14 Feb 2009 12:25:15 +0000
+Message-ID: <E1LYJa7-0001mV-KZ@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.226]:57990 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754076AbZBITQA (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:37432 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751526AbZBNMZQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Feb 2009 14:16:00 -0500
-Received: by rv-out-0506.google.com with SMTP id k40so1926004rvb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 09 Feb 2009 11:15:58 -0800 (PST)
-In-Reply-To: <OF56CB73D3.5EA2DB0D-ONC1257558.00499FF2-C1257558.004AEC1A@br-automation.com>
+	Sat, 14 Feb 2009 07:25:16 -0500
+Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
+	id 1LYJa7-0001mV-KZ
+	for linux-sparse@vger.kernel.org; Sat, 14 Feb 2009 12:25:15 +0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Cc: Josh Triplett <josht@linux.vnet.ibm.com>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-I guess you apply the patch on the official sparse's tree.
 
-The patch is base on my development tree here:
+Don't mix it with parameter-type-list, add saner checks.
 
-http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=summary
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+ parse.c                      |   28 ++++++++++++++++++++++++++--
+ validation/identifier_list.c |   18 ++++++++++++++++++
+ 2 files changed, 44 insertions(+), 2 deletions(-)
+ create mode 100644 validation/identifier_list.c
 
-is_type_void() is introduced at change 405cd6edfe2e88c808f0a45f0c2ef92a854dbe67,
-warn about explicit usage of sizeof(void).
+diff --git a/parse.c b/parse.c
+index 6100fc2..86e26aa 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1948,12 +1948,36 @@ static struct token *parameter_type_list(struct token *token, struct symbol *fn,
+ 		return token;
+ 	}
+ 
++	if (match_op(token, SPECIAL_ELLIPSIS)) {
++		warning(token->pos, "variadic functions must have one named argument");
++		fn->variadic = 1;
++		return token->next;
++	}
++
++	if (token_type(token) != TOKEN_IDENT)
++		return token;
++
++	if (!lookup_type(token)) {
++		/* K&R */
++		for (;;) {
++			struct symbol *sym = alloc_symbol(token->pos, SYM_NODE);
++			sym->ident = token->ident;
++			token = token->next;
++			sym->endpos = token->pos;
++			add_symbol(list, sym);
++			if (!match_op(token, ',') ||
++			    token_type(token->next) != TOKEN_IDENT ||
++			    lookup_type(token->next))
++				break;
++			token = token->next;
++		}
++		return token;
++	}
++
+ 	for (;;) {
+ 		struct symbol *sym;
+ 
+ 		if (match_op(token, SPECIAL_ELLIPSIS)) {
+-			if (!*list)
+-				warning(token->pos, "variadic functions must have one named argument");
+ 			fn->variadic = 1;
+ 			token = token->next;
+ 			break;
+diff --git a/validation/identifier_list.c b/validation/identifier_list.c
+new file mode 100644
+index 0000000..4691989
+--- /dev/null
++++ b/validation/identifier_list.c
+@@ -0,0 +1,18 @@
++typedef int T;
++void f(...);
++void g(*);
++void h(x,int);
++void i_OK(T);
++void j(x,T);
++/*
++ * check-name: identifier-list parsing
++ * check-error-start
++identifier_list.c:2:8: warning: variadic functions must have one named argument
++identifier_list.c:3:8: error: Expected ) in function declarator
++identifier_list.c:3:8: error: got *
++identifier_list.c:4:9: error: Expected ) in function declarator
++identifier_list.c:4:9: error: got ,
++identifier_list.c:6:9: error: Expected ) in function declarator
++identifier_list.c:6:9: error: got ,
++ * check-error-end
++ */
+-- 
+1.5.6.6
 
-Chris
 
-On Mon, Feb 9, 2009 at 5:38 AM, Thomas Schmid
-<Thomas.Schmid@br-automation.com> wrote:
-> christ.li@gmail.com schrieb am 09.02.2009 08:37:50:
->
->> On Fri, Feb 6, 2009 at 4:51 AM, Thomas Schmid
->> <Thomas.Schmid@br-automation.com> wrote:
->> > christ.li@gmail.com schrieb am 06.02.2009 05:15:37:
->> > -       if (newtype->ctype.base_type != &fp_type) {
->> > +       if (is_int_type(newtype)) {
->>
->> I change your patch a little bit. The old logic of testing against float
->> type is better. The type can be a pointer for example. Then using
->> the long long value is more correct.
->>
->> See the patch attached.
->>
->> If there is not objections. I am going to apply this one.
->
-> Thank you for correcting, your changes work fine for me.
->
-> There's only a little problem with the patch,
-> patch breaks off in evaluate.c, cause there's no function "is_void_type"
-> within...
->
-> Greetings
-> Thomas Schmid
->
