@@ -1,95 +1,91 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 2/7] Separate parsing of identifier-list (in K&R-style declarations)
-Date: Sat, 14 Feb 2009 12:25:15 +0000
-Message-ID: <E1LYJa7-0001mV-KZ@ZenIV.linux.org.uk>
+Subject: [PATCH 1/7] Fix handling of ident-less declarations
+Date: Sat, 14 Feb 2009 12:25:05 +0000
+Message-ID: <E1LYJZx-0001ls-Nn@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:37432 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:37431 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751526AbZBNMZQ (ORCPT
+	with ESMTP id S1751227AbZBNMZH (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 14 Feb 2009 07:25:16 -0500
+	Sat, 14 Feb 2009 07:25:07 -0500
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
-	id 1LYJa7-0001mV-KZ
-	for linux-sparse@vger.kernel.org; Sat, 14 Feb 2009 12:25:15 +0000
+	id 1LYJZx-0001ls-Nn
+	for linux-sparse@vger.kernel.org; Sat, 14 Feb 2009 12:25:05 +0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 
-Don't mix it with parameter-type-list, add saner checks.
+The rule for ident-less declaration is
+	declaration -> declaration-specifiers ;
+not
+	declaration -> declaration-specifiers abstract-declarator;
+
+IOW, struct foo; is OK and so's struct foo {int x; int y;} (and even
+simply int; is allowed by syntax - it's rejected by constraints, but
+that's a separate story), but not struct foo (void); and its ilk.
+
+See C99 6.7p1 for syntax; C90 is the same in that area and gcc also
+behaves the same way.  Unlike gcc I've made it a warning (gcc produces
+a hard error for those).
 
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- parse.c                      |   28 ++++++++++++++++++++++++++--
- validation/identifier_list.c |   18 ++++++++++++++++++
- 2 files changed, 44 insertions(+), 2 deletions(-)
- create mode 100644 validation/identifier_list.c
+ parse.c                    |   10 +++++++++-
+ validation/missing-ident.c |   18 ++++++++++++++++++
+ 2 files changed, 27 insertions(+), 1 deletions(-)
+ create mode 100644 validation/missing-ident.c
 
 diff --git a/parse.c b/parse.c
-index 6100fc2..86e26aa 100644
+index 73e7b65..6100fc2 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -1948,12 +1948,36 @@ static struct token *parameter_type_list(struct token *token, struct symbol *fn,
- 		return token;
- 	}
- 
-+	if (match_op(token, SPECIAL_ELLIPSIS)) {
-+		warning(token->pos, "variadic functions must have one named argument");
-+		fn->variadic = 1;
+@@ -2265,14 +2265,22 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 	token = declaration_specifiers(token, &ctype, 0);
+ 	decl = alloc_symbol(token->pos, SYM_NODE);
+ 	decl->ctype = ctype;
++	/* Just a type declaration? */
++	if (match_op(token, ';')) {
++		apply_modifiers(token->pos, &decl->ctype);
 +		return token->next;
 +	}
 +
-+	if (token_type(token) != TOKEN_IDENT)
-+		return token;
-+
-+	if (!lookup_type(token)) {
-+		/* K&R */
-+		for (;;) {
-+			struct symbol *sym = alloc_symbol(token->pos, SYM_NODE);
-+			sym->ident = token->ident;
-+			token = token->next;
-+			sym->endpos = token->pos;
-+			add_symbol(list, sym);
-+			if (!match_op(token, ',') ||
-+			    token_type(token->next) != TOKEN_IDENT ||
-+			    lookup_type(token->next))
-+				break;
-+			token = token->next;
-+		}
-+		return token;
-+	}
-+
- 	for (;;) {
- 		struct symbol *sym;
+ 	token = declarator(token, decl, &ident, 0);
+ 	apply_modifiers(token->pos, &decl->ctype);
  
- 		if (match_op(token, SPECIAL_ELLIPSIS)) {
--			if (!*list)
--				warning(token->pos, "variadic functions must have one named argument");
- 			fn->variadic = 1;
- 			token = token->next;
- 			break;
-diff --git a/validation/identifier_list.c b/validation/identifier_list.c
+ 	decl->endpos = token->pos;
+ 
+ 	/* Just a type declaration? */
+-	if (!ident)
++	if (!ident) {
++		warning(token->pos, "missing identifier in declaration");
+ 		return expect(token, ';', "end of type declaration");
++	}
+ 
+ 	/* type define declaration? */
+ 	is_typedef = (ctype.modifiers & MOD_TYPEDEF) != 0;
+diff --git a/validation/missing-ident.c b/validation/missing-ident.c
 new file mode 100644
-index 0000000..4691989
+index 0000000..ce73983
 --- /dev/null
-+++ b/validation/identifier_list.c
++++ b/validation/missing-ident.c
 @@ -0,0 +1,18 @@
-+typedef int T;
-+void f(...);
-+void g(*);
-+void h(x,int);
-+void i_OK(T);
-+void j(x,T);
++int [2];
++int *;
++int (*);
++int ();
++int;
++struct foo;
++union bar {int x; int y;};
++struct baz {int x, :3, y:2;};
 +/*
-+ * check-name: identifier-list parsing
++ * check-name: handling of identifier-less declarations
++ *
 + * check-error-start
-+identifier_list.c:2:8: warning: variadic functions must have one named argument
-+identifier_list.c:3:8: error: Expected ) in function declarator
-+identifier_list.c:3:8: error: got *
-+identifier_list.c:4:9: error: Expected ) in function declarator
-+identifier_list.c:4:9: error: got ,
-+identifier_list.c:6:9: error: Expected ) in function declarator
-+identifier_list.c:6:9: error: got ,
++missing-ident.c:1:8: warning: missing identifier in declaration
++missing-ident.c:2:6: warning: missing identifier in declaration
++missing-ident.c:3:8: warning: missing identifier in declaration
++missing-ident.c:4:7: warning: missing identifier in declaration
 + * check-error-end
 + */
 -- 
