@@ -1,53 +1,74 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [PATCH 1/7] Fix handling of ident-less declarations
-Date: Sat, 14 Feb 2009 21:30:32 +0000
-Message-ID: <20090214213032.GQ28946@ZenIV.linux.org.uk>
-References: <E1LYJZx-0001ls-Nn@ZenIV.linux.org.uk> <70318cbf0902141045q2552f1aetdd0ba0e462a21bad@mail.gmail.com> <20090214190836.GO28946@ZenIV.linux.org.uk> <20090214203154.GP28946@ZenIV.linux.org.uk>
+From: Dan Carpenter <error27@gmail.com>
+Subject: smatch_implied.c
+Date: Mon, 16 Feb 2009 13:43:17 +0300 (EAT)
+Message-ID: <alpine.DEB.2.00.0902161341500.3451@bikeee>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; format=flowed; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:55475 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752214AbZBNVae (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.251]:38067 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751271AbZBPKo1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 14 Feb 2009 16:30:34 -0500
-Content-Disposition: inline
-In-Reply-To: <20090214203154.GP28946@ZenIV.linux.org.uk>
+	Mon, 16 Feb 2009 05:44:27 -0500
+Received: by an-out-0708.google.com with SMTP id c2so991545anc.1
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Feb 2009 02:44:25 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-sparse@vger.kernel.org
+To: smatch-discuss@lists.sf.net
+Cc: tim@cyberelk.net, linux-sparse@vger.kernel.org
 
-On Sat, Feb 14, 2009 at 08:31:54PM +0000, Al Viro wrote:
-> On Sat, Feb 14, 2009 at 07:08:36PM +0000, Al Viro wrote:
-> > On Sat, Feb 14, 2009 at 10:45:41AM -0800, Christopher Li wrote:
-> > > On Sat, Feb 14, 2009 at 4:25 AM, Al Viro <viro@ftp.linux.org.uk> wrote:
-> > > >
-> > > > The rule for ident-less declaration is
-> > > 
-> > > wow, great.
-> > > 
-> > > The series applies to the tree fine. First impression of the series
-> > > looks fine. I am still working on it.
-> > > 
-> > > Thanks for the patches. BTW, this is not the "lazy type evaluation"
-> > > you are talking about right?
-> > 
-> > No, just the first batch of declaration parser fixes...  The next group is
-> > about separating ctype-as-part-of-symbol from ctype-as-parser-state uses.
-> > After that - getting declaration_specifiers() to sane shape, which, BTW,
-> > will relieve the situation with mode bits.  Then -  cleaning up the type
-> > handling...
-> 
-> BTW, I wonder whether if it would be better to just scan for the end
-> of attributes after ( when we are deciding whether it's a function or
-> nested declarator, leaving the actual handling of these guys to after
-> the decision.  The thing is, unlike gcc we have the token list anyway,
-> and it's easier to not bother with passing that crap to parameter_type_list(),
-> etc.
-> 
-> I'll try to do that and see what falls out; potentially that replaces
-> 7/7 in this series.
+I pushed some new code and it's pretty cool.
 
-... no, it doesn't ;-/  Too much PITA with error recovery, so the original
-version still stands.  Alas.
+This is some kernel code from drivers/char/ppdev.c
+    681          compat_negot = 0;
+    682          if (!(pp->flags & PP_CLAIMED) && pp->pdev &&
+    683              (pp->state.mode != IEEE1284_MODE_COMPAT)) {
+    684                  struct ieee1284_info *info;
+    685
+    686                  /* parport released, but not in compatibility mode */
+    687                  parport_claim_or_block (pp->pdev);
+    688                  pp->flags |= PP_CLAIMED;
+    689                  info = &pp->pdev->port->ieee1284;
+    690                  pp->saved_state.mode = info->mode;
+    691                  pp->saved_state.phase = info->phase;
+    692                  info->mode = pp->state.mode;
+    693                  info->phase = pp->state.phase;
+    694                  compat_negot = 1;
+    695          } else if ((pp->flags & PP_CLAIMED) && pp->pdev &&
+    696              (pp->pdev->port->ieee1284.mode != IEEE1284_MODE_COMPAT)) {
+    697                  compat_negot = 2;
+    698          }
+    699          if (compat_negot) {
+    700                  parport_negotiate (pp->pdev->port, IEEE1284_MODE_COMPAT);
+    701                  printk (KERN_DEBUG CHRDEV
+    702                          "%x: negotiated back to compatibility mode because "
+    703                          "user-space forgot\n", minor);
+    704          }
+    705
+    706          if (pp->flags & PP_CLAIMED) {
+    707                  struct ieee1284_info *info;
+    708
+    709                  info = &pp->pdev->port->ieee1284;
+
+The new smatch code recognizes that pp->pdev might be null when we 
+dereference it on line 709.  It used to do that before as well...  The 
+cool part is that it recognizes that dereferencing pp->dev on line 700 is 
+not a bug.
+
+The trick is that when code paths get merged, all the states that are 
+unique to one side get saved in an "implied pool".  The smatch_extra.c 
+code tracks very simple assignments like "compat_negot = 2".
+
+When there is an "if (compat_negot)" condition, we make a list of both the 
+implied pools where compat_negot is not zero.  All the states which are 
+two in both pools are true on line 700.  So if compat_negot isn't zero, 
+pp->dev isn't null.
+
+The sad part is that there are still way way too many false positives for 
+smatch to be practical...  I need to rewrite smatch_extra to track many 
+more things.  Also the checking scripts are pretty rubbish.
+
+Nevertheless progress is being made...
+
+regards,
+dan carpenter
