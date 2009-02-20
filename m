@@ -1,149 +1,39 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/7] Fix handling of ident-less declarations
-Date: Mon, 16 Feb 2009 03:14:21 -0800
-Message-ID: <70318cbf0902160314o175ff415s8486b5252ef2857c@mail.gmail.com>
-References: <E1LYJZx-0001ls-Nn@ZenIV.linux.org.uk>
-	 <70318cbf0902141045q2552f1aetdd0ba0e462a21bad@mail.gmail.com>
-	 <20090214190836.GO28946@ZenIV.linux.org.uk>
-	 <70318cbf0902151633w77dc151ek7a6205430d2a19b8@mail.gmail.com>
-	 <20090216014234.GS28946@ZenIV.linux.org.uk>
+From: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Subject: Declarations with typedef (Was: Re: Messing typedefs?)
+Date: Fri, 20 Feb 2009 11:00:16 +0100
+Message-ID: <OF43E68700.A0BC8190-ONC1257563.00349412-C1257563.0036E79A@br-automation.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0cd29d9cd5c4500463074984
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.236]:12979 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751310AbZBPLOW (ORCPT
+Received: from mail2.br-automation.com ([213.33.116.61]:49656 "EHLO
+	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752201AbZBTJ7z (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Feb 2009 06:14:22 -0500
-Received: by rv-out-0506.google.com with SMTP id g37so1515795rvb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Feb 2009 03:14:21 -0800 (PST)
-In-Reply-To: <20090216014234.GS28946@ZenIV.linux.org.uk>
+	Fri, 20 Feb 2009 04:59:55 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Josh Triplett <josht@linux.vnet.ibm.com>
+Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
 
---000e0cd29d9cd5c4500463074984
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+The old thread "Messing typedefs" 
+(http://marc.info/?l=linux-sparse&m=118156319806264) described strange 
+behaviour:
 
-On Sun, Feb 15, 2009 at 5:42 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> On Sun, Feb 15, 2009 at 04:33:16PM -0800, Christopher Li wrote:
->> All applied and pushed. I update some of the validations error because
->> of the tab width change.
->
-> BTW, I'm not sure that this messing with tabstops is a good idea.
-> Note that tokenizer is _still_ the hottest part of the entire
-> thing, so we need to be damn careful around it.  You are getting the
-> slow path of nextchar() on \t now, which can add up to a lot of
-> extra overhead...
+>         typedef unsigned char  plcbit;
+>         typedef unsigned char  USINT;
+> 
+>         USINT usVar1;
+> 
+> leads to a symbol "usVar1" with base_type->ident named "plcbit".
 
-How about the attached patch?
+This has changed, but now I can't find any information inside symbol "
+usVar1" that points to the used typedef .
 
-I move white space handling out side of the nextchar_slow().
-Let nextchar_slow() only handle two case: possible EOF and '\\'.
+How am I able to get the typedef a symbol is declared with - if it is 
+declared with one?
+Is there a way?
 
-Chris
+Greetings
+Thomas Schmid
 
---000e0cd29d9cd5c4500463074984
-Content-Type: application/octet-stream; name=hot-nextchar
-Content-Disposition: attachment; filename=hot-nextchar
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fr8knq0h0
 
-CgpJbmRleDogc3BhcnNlLmNocmlzbC90b2tlbml6ZS5jCj09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5j
-aHJpc2wub3JpZy90b2tlbml6ZS5jCisrKyBzcGFyc2UuY2hyaXNsL3Rva2VuaXplLmMKQEAgLTM4
-LDYgKzM4LDggQEAgdHlwZWRlZiBzdHJ1Y3QgewogCXVuc2lnbmVkIGNoYXIgKmJ1ZmZlcjsKIH0g
-c3RyZWFtX3Q7CiAKK3N0YXRpYyBpbmxpbmUgaW50IGRyb3Bfd2hpdGVzcGFjZShzdHJlYW1fdCAq
-c3RyZWFtLCBpbnQgYyk7CisKIGNvbnN0IGNoYXIgKnN0cmVhbV9uYW1lKGludCBzdHJlYW0pCiB7
-CiAJaWYgKHN0cmVhbSA8IDAgfHwgc3RyZWFtID4gaW5wdXRfc3RyZWFtX25yKQpAQCAtNjksNiAr
-NzEsMTMgQEAgY29uc3QgY2hhciAqc2hvd19zcGVjaWFsKGludCB2YWwpCiAJcmV0dXJuIGJ1ZmZl
-cjsKIH0KIAorc3RhdGljIGlubGluZSB2b2lkIHN0cmVhbV9uZXdsaW5lKHN0cmVhbV90ICpzdHJl
-YW0pCit7CisJc3RyZWFtLT5uZXdsaW5lID0gMTsKKwlzdHJlYW0tPnBvcyA9IDA7CisJc3RyZWFt
-LT5saW5lKys7Cit9CisKIGNvbnN0IGNoYXIgKnNob3dfaWRlbnQoY29uc3Qgc3RydWN0IGlkZW50
-ICppZGVudCkKIHsKIAlzdGF0aWMgY2hhciBidWZmZXJbMjU2XTsKQEAgLTE5OCwxOSArMjA3LDE1
-IEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKiBhbGxvY190b2tlbihzdHJlYW0KIAlyZXR1cm4gdG9r
-ZW47CiB9CiAKLS8qCi0gKiAgQXJnaC4uLiAgVGhhdCB3YXMgc3VycHJpc2luZ2x5IG1lc3N5IC0g
-aGFuZGxpbmcgJ1xyJyBjb21wbGljYXRlcyB0aGUKLSAqICB0aGluZ3MgYSBfbG90Xy4KLSAqLwog
-c3RhdGljIGludCBuZXh0Y2hhcl9zbG93KHN0cmVhbV90ICpzdHJlYW0pCiB7CiAJaW50IG9mZnNl
-dCA9IHN0cmVhbS0+b2Zmc2V0OwogCWludCBzaXplID0gc3RyZWFtLT5zaXplOwogCWludCBjOwot
-CWludCBzcGxpY2VkID0gMCwgaGFkX2NyLCBoYWRfYmFja3NsYXNoLCBjb21wbGFpbjsKKwlpbnQg
-c3BsaWNlZCA9IDAsIGhhZF9iYWNrc2xhc2g7CiAKIHJlc3RhcnQ6Ci0JaGFkX2NyID0gaGFkX2Jh
-Y2tzbGFzaCA9IGNvbXBsYWluID0gMDsKKwloYWRfYmFja3NsYXNoID0gMDsKIAogcmVwZWF0Ogog
-CWlmIChvZmZzZXQgPj0gc2l6ZSkgewpAQCAtMjI0LDMzICsyMjksMTUgQEAgcmVwZWF0OgogCX0K
-IAogCWMgPSBzdHJlYW0tPmJ1ZmZlcltvZmZzZXQrK107Ci0KLQlpZiAoaGFkX2NyICYmIGMgIT0g
-J1xuJykKLQkJY29tcGxhaW4gPSAxOwotCi0JaWYgKGMgPT0gJ1xyJykgewotCQloYWRfY3IgPSAx
-OwotCQlnb3RvIHJlcGVhdDsKLQl9Ci0KLQlzdHJlYW0tPnBvcyArPSAoYyA9PSAnXHQnKSA/ICh0
-YWJzdG9wIC0gc3RyZWFtLT5wb3MgJSB0YWJzdG9wKSA6IDE7Ci0KLQlpZiAoYyA9PSAnXG4nKSB7
-Ci0JCXN0cmVhbS0+bGluZSsrOwotCQlzdHJlYW0tPnBvcyA9IDA7Ci0JfQotCiAJaWYgKCFoYWRf
-YmFja3NsYXNoKSB7CiAJCWlmIChjID09ICdcXCcpIHsKIAkJCWhhZF9iYWNrc2xhc2ggPSAxOwog
-CQkJZ290byByZXBlYXQ7CiAJCX0KLQkJaWYgKGMgPT0gJ1xuJykKLQkJCXN0cmVhbS0+bmV3bGlu
-ZSA9IDE7CiAJfSBlbHNlIHsKIAkJaWYgKGMgPT0gJ1xuJykgewotCQkJaWYgKGNvbXBsYWluKQot
-CQkJCXdhcm5pbmcoc3RyZWFtX3BvcyhzdHJlYW0pLCAibm9uLUFTQ0lJIGRhdGEgc3RyZWFtIik7
-CisJCQlzdHJlYW0tPmxpbmUrKzsKKwkJCXN0cmVhbS0+cG9zID0gMDsKIAkJCXNwbGljZWQgPSAx
-OwogCQkJZ290byByZXN0YXJ0OwogCQl9CkBAIC0yNjEsOSArMjQ4LDYgQEAgcmVwZWF0OgogCiBv
-dXQ6CiAJc3RyZWFtLT5vZmZzZXQgPSBvZmZzZXQ7Ci0JaWYgKGNvbXBsYWluKQotCQl3YXJuaW5n
-KHN0cmVhbV9wb3Moc3RyZWFtKSwgIm5vbi1BU0NJSSBkYXRhIHN0cmVhbSIpOwotCiAJcmV0dXJu
-IGM7CiAKIGdvdF9lb2Y6CkBAIC0yNzMsOCArMjU3LDYgQEAgZ290X2VvZjoKIAl9CiAJaWYgKHN0
-cmVhbS0+cG9zKQogCQl3YXJuaW5nKHN0cmVhbV9wb3Moc3RyZWFtKSwgIm5vIG5ld2xpbmUgYXQg
-ZW5kIG9mIGZpbGUiKTsKLQllbHNlIGlmIChoYWRfY3IpCi0JCXdhcm5pbmcoc3RyZWFtX3Bvcyhz
-dHJlYW0pLCAibm9uLUFTQ0lJIGRhdGEgc3RyZWFtIik7CiAJZWxzZSBpZiAoc3BsaWNlZCkKIAkJ
-d2FybmluZyhzdHJlYW1fcG9zKHN0cmVhbSksICJiYWNrc2xhc2gtbmV3bGluZSBhdCBlbmQgb2Yg
-ZmlsZSIpOwogCXJldHVybiBFT0Y7CkBAIC0yOTEsMTAgKzI3Myw3IEBAIHN0YXRpYyBpbmxpbmUg
-aW50IG5leHRjaGFyKHN0cmVhbV90ICpzdHIKIAogCWlmIChvZmZzZXQgPCBzdHJlYW0tPnNpemUp
-IHsKIAkJaW50IGMgPSBzdHJlYW0tPmJ1ZmZlcltvZmZzZXQrK107Ci0JCXN0YXRpYyBjb25zdCBj
-aGFyIHNwZWNpYWxbMjU2XSA9IHsKLQkJCVsnXHQnXSA9IDEsIFsnXHInXSA9IDEsIFsnXG4nXSA9
-IDEsIFsnXFwnXSA9IDEKLQkJfTsKLQkJaWYgKCFzcGVjaWFsW2NdKSB7CisJCWlmIChjICE9ICdc
-XCcpIHsKIAkJCXN0cmVhbS0+b2Zmc2V0ID0gb2Zmc2V0OwogCQkJc3RyZWFtLT5wb3MrKzsKIAkJ
-CXJldHVybiBjOwpAQCAtMzQ2LDkgKzMyNSwxNCBAQCBlbnVtIHsKIAlFeHAgPSA4LAogCURvdCA9
-IDE2LAogCVZhbGlkU2Vjb25kID0gMzIsCisJU3BhY2UgPSA2NCwKIH07CiAKIHN0YXRpYyBjb25z
-dCBsb25nIGNjbGFzc1syNTddID0geworCVsnICcgKyAxXSA9IFNwYWNlLAorCVsnXHInICsgMV0g
-PSBTcGFjZSwKKwlbJ1xuJyArIDFdID0gU3BhY2UsCisJWydcdCcgKyAxXSA9IFNwYWNlLAogCVsn
-MCcgKyAxIC4uLiAnOScgKyAxXSA9IERpZ2l0IHwgSGV4LAogCVsnQScgKyAxIC4uLiAnRCcgKyAx
-XSA9IExldHRlciB8IEhleCwKIAlbJ0UnICsgMV0gPSBMZXR0ZXIgfCBIZXggfCBFeHAsCkBAIC0z
-NzQsNiArMzU4LDQyIEBAIHN0YXRpYyBjb25zdCBsb25nIGNjbGFzc1syNTddID0gewogCVsnIycg
-KyAxXSA9IFZhbGlkU2Vjb25kLAogfTsKIAorc3RhdGljIGlubGluZSBpbnQgZHJvcF93aGl0ZXNw
-YWNlKHN0cmVhbV90ICpzdHJlYW0sIGludCBjKQoreworCWludCBjb21wbGFpbiA9IDA7CisJZm9y
-ICg7OykgeworcmVwZWF0OgorCQlzd2l0Y2ggKGMpIHsKKwkJY2FzZSAnICc6CisJCQlicmVhazsK
-KwkJY2FzZSAnXG4nOgorCQkJc3RyZWFtX25ld2xpbmUoc3RyZWFtKTsKKwkJCWJyZWFrOworCQlj
-YXNlICdcdCc6IHsKKwkJCWludCByZW1haW4gPSBzdHJlYW0tPnBvcyAlIHRhYnN0b3A7CisJCQlp
-ZiAocmVtYWluKQorCQkJCXN0cmVhbS0+cG9zICs9IHRhYnN0b3AgLSByZW1haW47CisJCQlicmVh
-azsKKwkJfQorCQljYXNlICdccic6IHsKKwkJCWMgPSBuZXh0Y2hhcihzdHJlYW0pOworCQkJaWYg
-KGMgPT0gJ1xuJykKKwkJCQlicmVhazsKKworCQkJaWYgKCFjb21wbGFpbisrKQorCQkJCXdhcm5p
-bmcoc3RyZWFtX3BvcyhzdHJlYW0pLAorCQkJCQkibm9uLUFTQ0lJIGRhdGEgc3RyZWFtIik7CisJ
-CQlzdHJlYW0tPndoaXRlc3BhY2UgPSAxOworCQkJZ290byByZXBlYXQ7CisJCX0KKwkJZGVmYXVs
-dDoKKwkJCXJldHVybiBjOworCQl9CisJCWMgPSBuZXh0Y2hhcihzdHJlYW0pOworCX0KK30KKwor
-CiAvKgogICogcHAtbnVtYmVyOgogICoJZGlnaXQKQEAgLTQzOCw4ICs0NTgsMTAgQEAgc3RhdGlj
-IGludCBlc2NhcGVjaGFyKGludCBmaXJzdCwgaW50IHR5cAogCW5leHQgPSBuZXh0Y2hhcihzdHJl
-YW0pOwogCXZhbHVlID0gZmlyc3Q7CiAKLQlpZiAoZmlyc3QgPT0gJ1xuJykKKwlpZiAoZmlyc3Qg
-PT0gJ1xuJykgeworCQlzdHJlYW1fbmV3bGluZShzdHJlYW0pOwogCQl3YXJuaW5nKHN0cmVhbV9w
-b3Moc3RyZWFtKSwgIk5ld2xpbmUgaW4gc3RyaW5nIG9yIGNoYXJhY3RlciBjb25zdGFudCIpOwor
-CX0KIAogCWlmIChmaXJzdCA9PSAnXFwnICYmIG5leHQgIT0gRU9GKSB7CiAJCXZhbHVlID0gbmV4
-dDsKQEAgLTQ3OSw2ICs1MDEsNyBAQCBzdGF0aWMgaW50IGVzY2FwZWNoYXIoaW50IGZpcnN0LCBp
-bnQgdHlwCiAJCQljYXNlICciJzoKIAkJCQlicmVhazsKIAkJCWNhc2UgJ1xuJzoKKwkJCQlzdHJl
-YW1fbmV3bGluZShzdHJlYW0pOwogCQkJCXdhcm5pbmcoc3RyZWFtX3BvcyhzdHJlYW0pLCAiTmV3
-bGluZSBpbiBzdHJpbmcgb3IgY2hhcmFjdGVyIGNvbnN0YW50Iik7CiAJCQkJYnJlYWs7CiAJCQlj
-YXNlICcwJy4uLic3JzogewpAQCAtNTg2LDYgKzYwOSw3IEBAIHN0YXRpYyBpbnQgZHJvcF9zdHJl
-YW1fZW9sbihzdHJlYW1fdCAqc3QKIAkJY2FzZSBFT0Y6CiAJCQlyZXR1cm4gRU9GOwogCQljYXNl
-ICdcbic6CisJCQlzdHJlYW1fbmV3bGluZShzdHJlYW0pOwogCQkJcmV0dXJuIG5leHRjaGFyKHN0
-cmVhbSk7CiAJCX0KIAl9CkBAIC01OTgsMTUgKzYyMiwxNiBAQCBzdGF0aWMgaW50IGRyb3Bfc3Ry
-ZWFtX2NvbW1lbnQoc3RyZWFtX3QgCiAJZHJvcF90b2tlbihzdHJlYW0pOwogCW5ld2xpbmUgPSBz
-dHJlYW0tPm5ld2xpbmU7CiAKLQluZXh0ID0gbmV4dGNoYXIoc3RyZWFtKTsKKwluZXh0ID0gZHJv
-cF93aGl0ZXNwYWNlKHN0cmVhbSwgbmV4dGNoYXIoc3RyZWFtKSk7CiAJZm9yICg7OykgewogCQlp
-bnQgY3VyciA9IG5leHQ7CiAJCWlmIChjdXJyID09IEVPRikgewogCQkJd2FybmluZyhzdHJlYW1f
-cG9zKHN0cmVhbSksICJFbmQgb2YgZmlsZSBpbiB0aGUgbWlkZGxlIG9mIGEgY29tbWVudCIpOwog
-CQkJcmV0dXJuIGN1cnI7CiAJCX0KLQkJbmV4dCA9IG5leHRjaGFyKHN0cmVhbSk7Ci0JCWlmIChj
-dXJyID09ICcqJyAmJiBuZXh0ID09ICcvJykKKwkJc3RyZWFtLT53aGl0ZXNwYWNlID0gMDsKKwkJ
-bmV4dCA9IGRyb3Bfd2hpdGVzcGFjZShzdHJlYW0sIG5leHRjaGFyKHN0cmVhbSkpOworCQlpZiAo
-Y3VyciA9PSAnKicgJiYgIXN0cmVhbS0+d2hpdGVzcGFjZSAmJiBuZXh0ID09ICcvJykKIAkJCWJy
-ZWFrOwogCX0KIAlzdHJlYW0tPm5ld2xpbmUgPSBuZXdsaW5lOwpAQCAtOTE2LDcgKzk0MSw3IEBA
-IHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnRva2VuaXplX3N0cmVhbShzdHIKIHsKIAlpbnQgYyA9IG5l
-eHRjaGFyKHN0cmVhbSk7CiAJd2hpbGUgKGMgIT0gRU9GKSB7Ci0JCWlmICghaXNzcGFjZShjKSkg
-eworCQlpZiAoIShjY2xhc3NbYysxXSAmIFNwYWNlKSkgewogCQkJc3RydWN0IHRva2VuICp0b2tl
-biA9IGFsbG9jX3Rva2VuKHN0cmVhbSk7CiAJCQlzdHJlYW0tPnRva2VuID0gdG9rZW47CiAJCQlz
-dHJlYW0tPm5ld2xpbmUgPSAwOwpAQCAtOTI1LDcgKzk1MCw3IEBAIHN0YXRpYyBzdHJ1Y3QgdG9r
-ZW4gKnRva2VuaXplX3N0cmVhbShzdHIKIAkJCWNvbnRpbnVlOwogCQl9CiAJCXN0cmVhbS0+d2hp
-dGVzcGFjZSA9IDE7Ci0JCWMgPSBuZXh0Y2hhcihzdHJlYW0pOworCQljID0gZHJvcF93aGl0ZXNw
-YWNlKHN0cmVhbSwgYyk7CiAJfQogCXJldHVybiBtYXJrX2VvZihzdHJlYW0pOwogfQo=
---000e0cd29d9cd5c4500463074984--
