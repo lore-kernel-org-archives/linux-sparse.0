@@ -1,39 +1,22 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Declarations with typedef (Was: Re: Messing typedefs?)
-Date: Fri, 20 Feb 2009 11:00:16 +0100
-Message-ID: <OF43E68700.A0BC8190-ONC1257563.00349412-C1257563.0036E79A@br-automation.com>
+From: Erik de Castro Lopo <mle+tools@mega-nerd.com>
+Subject: (unknown)
+Date: Sat, 21 Feb 2009 08:53:44 +1100
+Message-ID: <20090221085344.53ccaa35.mle+tools@mega-nerd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.br-automation.com ([213.33.116.61]:49656 "EHLO
-	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752201AbZBTJ7z (ORCPT
+Received: from outbound.icp-qv1-irony-out2.iinet.net.au ([203.59.1.107]:40441
+	"EHLO outbound.icp-qv1-irony-out2.iinet.net.au" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753639AbZBTWDx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Feb 2009 04:59:55 -0500
+	Fri, 20 Feb 2009 17:03:53 -0500
+Received: from hendrix (hendrix [192.168.200.99])
+	by hendrix.mega-nerd.net (Postfix) with SMTP id 9CF41ACF63
+	for <linux-sparse@vger.kernel.org>; Sat, 21 Feb 2009 08:53:44 +1100 (EST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josht@linux.vnet.ibm.com>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
 
-The old thread "Messing typedefs" 
-(http://marc.info/?l=linux-sparse&m=118156319806264) described strange 
-behaviour:
-
->         typedef unsigned char  plcbit;
->         typedef unsigned char  USINT;
-> 
->         USINT usVar1;
-> 
-> leads to a symbol "usVar1" with base_type->ident named "plcbit".
-
-This has changed, but now I can't find any information inside symbol "
-usVar1" that points to the used typedef .
-
-How am I able to get the typedef a symbol is declared with - if it is 
-declared with one?
-Is there a way?
-
-Greetings
-Thomas Schmid
-
+subscribe linux-sparse
 
