@@ -1,168 +1,275 @@
 From: Al Viro <viro@ftp.linux.org.uk>
-Subject: [PATCH 17/18] Pass decl_state down to ->attribute()
-Date: Mon, 09 Mar 2009 07:12:58 +0000
-Message-ID: <E1LgZfW-0000zR-37@ZenIV.linux.org.uk>
+Subject: [PATCH 18/18] Restore __attribute__((mode)) handling
+Date: Mon, 09 Mar 2009 07:13:08 +0000
+Message-ID: <E1LgZfg-000100-3K@ZenIV.linux.org.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:43817 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:43823 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752252AbZCIHNA (ORCPT
+	with ESMTP id S1752587AbZCIHNK (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Mar 2009 03:13:00 -0400
+	Mon, 9 Mar 2009 03:13:10 -0400
 Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
-	id 1LgZfW-0000zR-37
-	for linux-sparse@vger.kernel.org; Mon, 09 Mar 2009 07:12:58 +0000
+	id 1LgZfg-000100-3K
+	for linux-sparse@vger.kernel.org; Mon, 09 Mar 2009 07:13:08 +0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 
+... at least to the extent we used to do it.  It still does _not_
+cover the perversions gcc can do with that, but at least it deals
+with regressions.  Full solution will have to wait for full-blown
+imitation of what gcc people call __attribute__ semantics, the
+bastards...
+
 Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
 ---
- parse.c  |   37 +++++++++++++++++++------------------
- symbol.h |    2 +-
- 2 files changed, 20 insertions(+), 19 deletions(-)
+ parse.c                         |  118 ++++++++++++++++++++++++++++++++-------
+ symbol.h                        |    4 +-
+ validation/nested-declarator2.c |    1 +
+ 3 files changed, 101 insertions(+), 22 deletions(-)
 
 diff --git a/parse.c b/parse.c
-index 6976070..8fa9ac1 100644
+index 8fa9ac1..bffb690 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -58,7 +58,8 @@ static struct token *parse_range_statement(struct token *token, struct statement
- static struct token *parse_asm_statement(struct token *token, struct statement *stmt);
- static struct token *toplevel_asm_declaration(struct token *token, struct symbol_list **list);
+@@ -67,6 +67,11 @@ static attr_t
+ 	attribute_transparent_union, ignore_attribute,
+ 	attribute_mode;
  
--typedef struct token *attr_t(struct token *, struct symbol *, struct ctype *);
-+typedef struct token *attr_t(struct token *, struct symbol *,
-+			     struct decl_state *);
++typedef struct symbol *to_mode_t(struct symbol *);
++
++static to_mode_t
++	to_QI_mode, to_HI_mode, to_SI_mode, to_DI_mode, to_word_mode;
++
+ enum {
+ 	Set_T = 1,
+ 	Set_S = 2,
+@@ -309,8 +314,29 @@ static struct symbol_op ignore_attr_op = {
+ 	.attribute = ignore_attribute,
+ };
  
- static attr_t
- 	attribute_packed, attribute_aligned, attribute_modifier,
-@@ -912,7 +913,7 @@ static struct token *typeof_specifier(struct token *token, struct decl_state *ct
- 	return expect(token, ')', "after typeof");
+-static struct symbol_op mode_spec_op = {
++static struct symbol_op mode_QI_op = {
++	.type = KW_MODE,
++	.to_mode = to_QI_mode
++};
++
++static struct symbol_op mode_HI_op = {
+ 	.type = KW_MODE,
++	.to_mode = to_HI_mode
++};
++
++static struct symbol_op mode_SI_op = {
++	.type = KW_MODE,
++	.to_mode = to_SI_mode
++};
++
++static struct symbol_op mode_DI_op = {
++	.type = KW_MODE,
++	.to_mode = to_DI_mode
++};
++
++static struct symbol_op mode_word_op = {
++	.type = KW_MODE,
++	.to_mode = to_word_mode
+ };
+ 
+ static struct init_keyword {
+@@ -411,16 +437,16 @@ static struct init_keyword {
+ 	{ "__transparent_union__",	NS_KEYWORD,	.op = &transparent_union_op },
+ 
+ 	{ "__mode__",	NS_KEYWORD,	.op = &mode_op },
+-	{ "QI",		NS_KEYWORD,	MOD_CHAR,	.op = &mode_spec_op },
+-	{ "__QI__",	NS_KEYWORD,	MOD_CHAR,	.op = &mode_spec_op },
+-	{ "HI",		NS_KEYWORD,	MOD_SHORT,	.op = &mode_spec_op },
+-	{ "__HI__",	NS_KEYWORD,	MOD_SHORT,	.op = &mode_spec_op },
+-	{ "SI",		NS_KEYWORD,			.op = &mode_spec_op },
+-	{ "__SI__",	NS_KEYWORD,			.op = &mode_spec_op },
+-	{ "DI",		NS_KEYWORD,	MOD_LONGLONG,	.op = &mode_spec_op },
+-	{ "__DI__",	NS_KEYWORD,	MOD_LONGLONG,	.op = &mode_spec_op },
+-	{ "word",	NS_KEYWORD,	MOD_LONG,	.op = &mode_spec_op },
+-	{ "__word__",	NS_KEYWORD,	MOD_LONG,	.op = &mode_spec_op },
++	{ "QI",		NS_KEYWORD,	MOD_CHAR,	.op = &mode_QI_op },
++	{ "__QI__",	NS_KEYWORD,	MOD_CHAR,	.op = &mode_QI_op },
++	{ "HI",		NS_KEYWORD,	MOD_SHORT,	.op = &mode_HI_op },
++	{ "__HI__",	NS_KEYWORD,	MOD_SHORT,	.op = &mode_HI_op },
++	{ "SI",		NS_KEYWORD,			.op = &mode_SI_op },
++	{ "__SI__",	NS_KEYWORD,			.op = &mode_SI_op },
++	{ "DI",		NS_KEYWORD,	MOD_LONGLONG,	.op = &mode_DI_op },
++	{ "__DI__",	NS_KEYWORD,	MOD_LONGLONG,	.op = &mode_DI_op },
++	{ "word",	NS_KEYWORD,	MOD_LONG,	.op = &mode_word_op },
++	{ "__word__",	NS_KEYWORD,	MOD_LONG,	.op = &mode_word_op },
+ 
+ 	/* Ignored attributes */
+ 	{ "nothrow",	NS_KEYWORD,	.op = &ignore_attr_op },
+@@ -542,10 +568,18 @@ struct statement *alloc_statement(struct position pos, int type)
+ 
+ static struct token *struct_declaration_list(struct token *token, struct symbol_list **list);
+ 
+-static int apply_modifiers(struct position pos, struct ctype *ctype)
++static void apply_modifiers(struct position pos, struct decl_state *ctx)
+ {
+-	/* not removing it; application of delayed attributes will be here */
+-	return 0;
++	struct symbol *ctype;
++	if (!ctx->mode)
++		return;
++	ctype = ctx->mode->to_mode(ctx->ctype.base_type);
++	if (!ctype)
++		sparse_error(pos, "don't know how to apply mode to %s",
++				show_typename(ctx->ctype.base_type));
++	else
++		ctx->ctype.base_type = ctype;
++	
  }
  
--static struct token *ignore_attribute(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *ignore_attribute(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	struct expression *expr = NULL;
- 	if (match_op(token, '('))
-@@ -920,14 +921,14 @@ static struct token *ignore_attribute(struct token *token, struct symbol *attr,
+ static struct symbol * alloc_indirect_symbol(struct position pos, struct ctype *ctype, int type)
+@@ -974,13 +1008,55 @@ static struct token *attribute_address_space(struct token *token, struct symbol
  	return token;
  }
  
--static struct token *attribute_packed(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_packed(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
--	if (!ctype->alignment)
--		ctype->alignment = 1;
-+	if (!&ctx->ctype.alignment)
-+		ctx->ctype.alignment = 1;
- 	return token;
- }
- 
--static struct token *attribute_aligned(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_aligned(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	int alignment = max_alignment;
- 	struct expression *expr = NULL;
-@@ -940,8 +941,8 @@ static struct token *attribute_aligned(struct token *token, struct symbol *attr,
- 	if (alignment & (alignment-1)) {
- 		warning(token->pos, "I don't like non-power-of-2 alignments");
- 		return token;
--	} else if (alignment > ctype->alignment)
--		ctype->alignment = alignment;
-+	} else if (alignment > ctx->ctype.alignment)
-+		ctx->ctype.alignment = alignment;
- 	return token;
- }
- 
-@@ -952,13 +953,13 @@ static void apply_qualifier(struct position *pos, struct ctype *ctx, unsigned lo
- 	ctx->modifiers |= qual;
- }
- 
--static struct token *attribute_modifier(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_modifier(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
--	apply_qualifier(&token->pos, ctype, attr->ctype.modifiers);
-+	apply_qualifier(&token->pos, &ctx->ctype, attr->ctype.modifiers);
- 	return token;
- }
- 
--static struct token *attribute_address_space(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_address_space(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	struct expression *expr = NULL;
- 	int as;
-@@ -967,19 +968,19 @@ static struct token *attribute_address_space(struct token *token, struct symbol
- 	if (expr) {
- 		as = const_expression_value(expr);
- 		if (as)
--			ctype->as = as;
-+			ctx->ctype.as = as;
- 	}
- 	token = expect(token, ')', "after address_space attribute");
- 	return token;
- }
- 
--static struct token *attribute_mode(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_mode(struct token *token, struct symbol *attr, struct decl_state *ctx)
++static struct symbol *to_QI_mode(struct symbol *ctype)
++{
++	if (ctype->ctype.base_type != &int_type)
++		return NULL;
++	if (ctype == &char_ctype)
++		return ctype;
++	return ctype->ctype.modifiers & MOD_UNSIGNED ? &uchar_ctype
++						     : &schar_ctype;
++}
++
++static struct symbol *to_HI_mode(struct symbol *ctype)
++{
++	if (ctype->ctype.base_type != &int_type)
++		return NULL;
++	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ushort_ctype
++						     : &sshort_ctype;
++}
++
++static struct symbol *to_SI_mode(struct symbol *ctype)
++{
++	if (ctype->ctype.base_type != &int_type)
++		return NULL;
++	return ctype->ctype.modifiers & MOD_UNSIGNED ? &uint_ctype
++						     : &sint_ctype;
++}
++
++static struct symbol *to_DI_mode(struct symbol *ctype)
++{
++	if (ctype->ctype.base_type != &int_type)
++		return NULL;
++	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ullong_ctype
++						     : &sllong_ctype;
++}
++
++static struct symbol *to_word_mode(struct symbol *ctype)
++{
++	if (ctype->ctype.base_type != &int_type)
++		return NULL;
++	return ctype->ctype.modifiers & MOD_UNSIGNED ? &ulong_ctype
++						     : &slong_ctype;
++}
++
+ static struct token *attribute_mode(struct token *token, struct symbol *attr, struct decl_state *ctx)
  {
  	token = expect(token, '(', "after mode attribute");
  	if (token_type(token) == TOKEN_IDENT) {
  		struct symbol *mode = lookup_keyword(token->ident, NS_KEYWORD);
  		if (mode && mode->op->type == KW_MODE)
--			ctype->modifiers |= mode->ctype.modifiers;
-+			ctx->ctype.modifiers |= mode->ctype.modifiers;
+-			ctx->ctype.modifiers |= mode->ctype.modifiers;
++			ctx->mode = mode->op;
  		else
  			sparse_error(token->pos, "unknown mode attribute %s\n", show_ident(token->ident));
  		token = token->next;
-@@ -989,7 +990,7 @@ static struct token *attribute_mode(struct token *token, struct symbol *attr, st
- 	return token;
- }
+@@ -1608,7 +1684,7 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
+ 			token = handle_bitfield(token, &ctx);
  
--static struct token *attribute_context(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_context(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	struct context *context = alloc_context();
- 	struct expression *args[3];
-@@ -1027,13 +1028,13 @@ static struct token *attribute_context(struct token *token, struct symbol *attr,
+ 		token = handle_attributes(token, &ctx, KW_ATTRIBUTE);
+-		apply_modifiers(token->pos, &ctx.ctype);
++		apply_modifiers(token->pos, &ctx);
+ 
+ 		decl->ctype = ctx.ctype;
+ 		decl->endpos = token->pos;
+@@ -1643,7 +1719,7 @@ static struct token *parameter_declaration(struct token *token, struct symbol *s
+ 	ctx.ident = &sym->ident;
+ 	token = declarator(token, &ctx);
+ 	token = handle_attributes(token, &ctx, KW_ATTRIBUTE);
+-	apply_modifiers(token->pos, &ctx.ctype);
++	apply_modifiers(token->pos, &ctx);
+ 	sym->ctype = ctx.ctype;
+ 	sym->endpos = token->pos;
+ 	return token;
+@@ -1656,7 +1732,7 @@ struct token *typename(struct token *token, struct symbol **p, int mod)
+ 	*p = sym;
+ 	token = declaration_specifiers(token, &ctx);
+ 	token = declarator(token, &ctx);
+-	apply_modifiers(token->pos, &ctx.ctype);
++	apply_modifiers(token->pos, &ctx);
+ 	if (ctx.ctype.modifiers & MOD_STORAGE & ~mod)
+ 		warning(sym->pos, "storage class in typename (%s)",
+ 			show_typename(sym));
+@@ -2435,14 +2511,14 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 	decl = alloc_symbol(token->pos, SYM_NODE);
+ 	/* Just a type declaration? */
+ 	if (match_op(token, ';')) {
+-		apply_modifiers(token->pos, &ctx.ctype);
++		apply_modifiers(token->pos, &ctx);
+ 		return token->next;
  	}
  
- 	if (argc)
--		add_ptr_list(&ctype->contexts, context);
-+		add_ptr_list(&ctx->ctype.contexts, context);
+ 	saved = ctx.ctype;
+ 	token = declarator(token, &ctx);
+ 	token = handle_attributes(token, &ctx, KW_ATTRIBUTE | KW_ASM);
+-	apply_modifiers(token->pos, &ctx.ctype);
++	apply_modifiers(token->pos, &ctx);
  
- 	token = expect(token, ')', "after context attribute");
- 	return token;
- }
- 
--static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct ctype *ctype)
-+static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	if (Wtransparent_union)
- 		warning(token->pos, "ignoring attribute __transparent_union__");
-@@ -1069,7 +1070,7 @@ static struct token *attribute_specifier(struct token *token, struct decl_state
- 		attribute_name = token->ident;
- 		attr = lookup_keyword(attribute_name, NS_KEYWORD);
- 		if (attr && attr->op->attribute)
--			token = attr->op->attribute(token->next, attr, &ctx->ctype);
-+			token = attr->op->attribute(token->next, attr, ctx);
- 		else
- 			token = recover_unknown_attribute(token);
- 
+ 	decl->ctype = ctx.ctype;
+ 	decl->endpos = token->pos;
+@@ -2518,7 +2594,7 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 		token = handle_attributes(token, &ctx, KW_ATTRIBUTE);
+ 		token = declarator(token, &ctx);
+ 		token = handle_attributes(token, &ctx, KW_ATTRIBUTE | KW_ASM);
+-		apply_modifiers(token->pos, &ctx.ctype);
++		apply_modifiers(token->pos, &ctx);
+ 		decl->ctype = ctx.ctype;
+ 		decl->endpos = token->pos;
+ 		if (!ident) {
 diff --git a/symbol.h b/symbol.h
-index fd75631..b74ab0c 100644
+index b74ab0c..f9944bf 100644
 --- a/symbol.h
 +++ b/symbol.h
-@@ -105,7 +105,7 @@ struct symbol_op {
- 	struct token *(*declarator)(struct token *token, struct decl_state *ctx);
+@@ -91,8 +91,9 @@ struct ctype {
+ 
+ struct decl_state {
+ 	struct ctype ctype;
+-	int prefer_abstract;
+ 	struct ident **ident;
++	int prefer_abstract;
++	struct symbol_op *mode;
+ };
+ 
+ struct symbol_op {
+@@ -106,6 +107,7 @@ struct symbol_op {
  	struct token *(*statement)(struct token *token, struct statement *stmt);
  	struct token *(*toplevel)(struct token *token, struct symbol_list **list);
--	struct token *(*attribute)(struct token *token, struct symbol *attr, struct ctype *ctype);
-+	struct token *(*attribute)(struct token *token, struct symbol *attr, struct decl_state *ctx);
+ 	struct token *(*attribute)(struct token *token, struct symbol *attr, struct decl_state *ctx);
++	struct symbol *(*to_mode)(struct symbol *);
  
  	int test, set, class;
  };
+diff --git a/validation/nested-declarator2.c b/validation/nested-declarator2.c
+index cd22853..345a04b 100644
+--- a/validation/nested-declarator2.c
++++ b/validation/nested-declarator2.c
+@@ -32,6 +32,7 @@ nested-declarator2.c:17:1: warning: non-ANSI definition of function 'w1'
+ nested-declarator2.c:21:21: warning: non-ANSI function declaration of function '<noident>'
+ nested-declarator2.c:22:16: warning: variadic functions must have one named argument
+ nested-declarator2.c:24:21: warning: identifier list not in definition
++nested-declarator2.c:25:45: error: don't know how to apply mode to incomplete type
+ nested-declarator2.c:26:13: error: Expected ) in nested declarator
+ nested-declarator2.c:26:13: error: got -
+ nested-declarator2.c:27:16: error: Expected ; at the end of type declaration
 -- 
 1.5.6.5
-
 
