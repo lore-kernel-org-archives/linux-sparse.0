@@ -1,44 +1,49 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
-Date: Thu, 19 Mar 2009 19:14:31 +0000
-Message-ID: <20090319191431.GD28946@ZenIV.linux.org.uk>
-References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com> <20090319144622.GA28946@ZenIV.linux.org.uk> <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com>
+From: Derek M Jones <derek@knosof.co.uk>
+Subject: Re: [PATCH] test-suite: new preprocessor test case
+Date: Thu, 19 Mar 2009 19:24:06 +0000
+Message-ID: <49C29BD6.7050005@knosof.co.uk>
+References: <20090319175544.13691.42362.stgit@f10box.hanneseder.net> <20090319182628.GB28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:40645 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752496AbZCSTOe (ORCPT
+Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:44139 "EHLO
+	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754818AbZCSTYU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Mar 2009 15:14:34 -0400
-Content-Disposition: inline
-In-Reply-To: <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com>
+	Thu, 19 Mar 2009 15:24:20 -0400
+In-Reply-To: <20090319182628.GB28946@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Hannes Eder <hannes@hanneseder.net>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
+To: Al Viro <viro@ZenIV.linux.org.uk>
+Cc: Hannes Eder <hannes@hanneseder.net>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-On Thu, Mar 19, 2009 at 07:38:51PM +0100, Hannes Eder wrote:
+Al,
 
-> http://hanneseder.net/sparse/kernel-cred-c.prep.tar.gz
+> It doesn't.  6.10.3p11: "If there are sequences of preprocessing tokens
+> within the list of arguments that would otherwise act as preprocessing
+> directives, the behavior is undefined."
 > 
-> $ sparse kernel-cred-c.prep.gcc
-> 
-> produces some warnings as usual.
-> 
-> $ sparse kernel-cred-c.prep.sparse
-> 
-> produces some warnings, a boatload of errors, and then segfaults.
+> You are asking for identical nasal demons from two implementations, when
+> it's not even promised that the same kind will fly on two invocations of
+> the same implementation...
 
-Oh, joy.
+So what you are saying is that this is a bug in the header.
+This is the approach I would favor.
 
-a) some <expletives> has #define if(x) ....... (check it out, I'm not kidding)
-b) ifdef that turd's conditional upon is present in your .config
-c) ... and now,
-	if (
-#ifdef .....
-		barf &&
-#endif
-		vomit)
+> Seriously, this is undefined behaviour *and* it's extermely hard to come
+> up with self-consistent semantics for it.  Standard doesn't even try and
+> implementations are doing whatever's more convenient at the moment.  Try
+> to think of it and you'll come up with really ugly corner cases very fast.
 
-steps into undefined behaviour.
+Unless gcc comes up with consistent behavior every time I would not
+expect this usage to hang around very long in the header.
+
+> What we probably ought to do is a warning when such stuff happens.
+
+You mean a more easy to understand message.
+
+-- 
+Derek M. Jones                         tel: +44 (0) 1252 520 667
+Knowledge Software Ltd                 mailto:derek@knosof.co.uk
+Source code analysis                   http://www.knosof.co.uk
