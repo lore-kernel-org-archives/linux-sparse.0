@@ -1,96 +1,82 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: [RFC] potential DR in handling of signed int and unholy mess in
-	our and gcc implementations
-Date: Thu, 19 Mar 2009 01:33:58 +0000
-Message-ID: <20090319013358.GZ28946@ZenIV.linux.org.uk>
+From: David Given <dg@cowlark.com>
+Subject: Re: [RFC] potential DR in handling of signed int and unholy mess
+ in	our and gcc implementations
+Date: Thu, 19 Mar 2009 02:33:00 +0000
+Message-ID: <49C1AEDC.9030809@cowlark.com>
+References: <20090319013358.GZ28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:34505 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754309AbZCSBeA (ORCPT
+Received: from b.painless.aaisp.net.uk ([81.187.30.52]:34198 "EHLO
+	b.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751391AbZCSCzM convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 18 Mar 2009 21:34:00 -0400
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
-	id 1Lk78w-00071w-GZ
-	for linux-sparse@vger.kernel.org; Thu, 19 Mar 2009 01:33:58 +0000
-Content-Disposition: inline
+	Wed, 18 Mar 2009 22:55:12 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by b.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1Lk84d-0006Y3-0i
+	for linux-sparse@vger.kernel.org; Thu, 19 Mar 2009 02:33:35 +0000
+Received: from [198.18.143.238] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id 66A7A2006F
+	for <linux-sparse@vger.kernel.org>; Thu, 19 Mar 2009 02:33:22 +0000 (GMT)
+In-Reply-To: <20090319013358.GZ28946@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-	First of all, C99 has rather unpleasant inconsistency between
-6.7.2p5 and footnote in 6.7.2.1p9.  According to the former,
-	typedef int T;
-	struct {
-		T x : 2;
-	} y;
-is equivalent to
-	typedef signed int T;
-	struct {
-		T x : 2;
-	} y;
-and in both y.x must be signed.  Indeed, since the first declaration does
-not declare a bitfield, int and signed int designate the same type in
-it, per 6.7.2p5.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-However, the footnote in 6.7.2.1p9 says
-  "As specified in 6.7.2 above, if the actual type specifier
-   used is int or a typedef-name defined as int, then it is
-   implementation-defined whether the bit-field is signed or unsigned."
+Al Viro wrote:
+[...]
+> I'll probably go for gcc-like behaviour in sparse for now, unless som=
+ebody
+> sees a good reason not to.  At least that one is consistent and doesn=
+'t
+> bring the shitloads of fun questions about behaviour of arithmetic co=
+nversions,
+> etc.
+>=20
+> Comments?
 
-According to that, y.x in the second case is signed, but in the first one
-it's implementation-defined whether it's signed or unsigned.
+All I can really say to that is: ew.
 
-But 6.7.2 specifies no such thing!  The only place in there that speaks of
-bit-fields is 6.7.2p5, which says
-  "Each of the comma-separated sets designates the same type, except
-   that for bit-fields, it is implementation-defined whether the specifier
-   int designates the same type as signed int or the same type as unsigned
-   int."
-and there's no mentioning whatsoever of typedef-name in such context.
+I like bitfields and use them frequently, particularly for flags and
+packing several small fields into a small space; luckily I've already
+been pretty anally retentive about declaring them explicitly as 'signed=
+'
+or 'unsigned'.
 
-Note that it's not like the situation with char; plain char *IS* a separate
-type, distinct from signed char and unsigned char alike.  There's no such
-type in case of int; C99 is very clear on that one.  IOW, "explicit signedness"
-for int is a property of declaration-specifiers interpretation, not of a type.
+- From the compiler perspective, Principle of Least Surprise would sugg=
+est
+doing the consistent thing, which as you say is gcc-like. OTOH from the
+linter perspective I'd be *strongly* in favour of a warning if sparse
+sees a problematic declaration. Bitfields are an area where signedness
+suddenly becomes really important. (int i : 1, anyone?)
 
-The only question is whether this property applies to bitfield declarations
-alone (as 6.7.2p5 says) or it applies to typedef-name as well (as the footnote
-in 6.7.2.1p9 says, with reference to hell knows what in 6.7.2).
+Are you submitting a bug report to the standards people?
 
-FWIW, gcc follows 6.7.2.1p9 footnote.  It looks if we had 'signed' specifier
-or a typedef-name marked explicitly signed; if either happens in typedef
-declaration, gcc marks the new typedef-name as explicitly signed; if we
-have a bitfield declaration that would result in a signed type *and* if
-there's no explicitly signed specifiers in the mix *and* if the target
-has unsigned bitfields, the type is replaced with unsigned counterpart.
+- --
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=
+=EF=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http:/=
+/www.cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82
+=E2=94=82 "All power corrupts, but we need electricity." --- Diana Wynn=
+e Jones,
+=E2=94=82 _Archer's Goon_
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-Note that gcc typeof is *NOT* treated as explicitly signed, no matter what
-it resolves to.  IOW, even
-	typeof(signed int) x:2;
-is treated as
-	int x:2;
-and if -funsigned-bitfields is present, unsigned it becomes.  How much of
-that behaviour is going to remain stable?  No idea.
-
-sparse walks even deeper into that shitpile; we really treat signed int
-and int as different types.  Results are not pretty - for stuff like
-	signed int *p;
-	typeof(*p) .....
-we get signed int, for stuff like
-	typeof(signed_int_var + 1) .....
-et.al. we get either int or signed int, depending on phase of the moon.
-Leads to no end of fun in compatible types recognition, etc.
-
-IMO it's a very real DR fodder; either the footnote in 6.7.2.1p9 should be
-modified, dropping mentioning of typedef-name (and then e.g. gcc becomes
-non-compliant) or 6.7.2 ought to grow some mentioning of 'typedef-name
-defined as int' (probably in 6.7.2p5).
-
-I'll probably go for gcc-like behaviour in sparse for now, unless somebody
-sees a good reason not to.  At least that one is consistent and doesn't
-bring the shitloads of fun questions about behaviour of arithmetic conversions,
-etc.
-
-Comments?
+iD8DBQFJwa7Zf9E0noFvlzgRAl6ZAKCb1Y9FNTkZRDQqvYH2URVZ7uw4uQCfeN8P
+0Tif41kFR7FmUshV5PI7ogA=3D
+=3DQHru
+-----END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
