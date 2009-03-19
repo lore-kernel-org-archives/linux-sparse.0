@@ -1,66 +1,96 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Braino in attribute_packed()
-Date: Wed, 11 Mar 2009 12:39:32 -0700
-Message-ID: <70318cbf0903111239x6c2cfed6ybc997c835500c3dc@mail.gmail.com>
-References: <E1LhQct-0006sH-5W@ZenIV.linux.org.uk>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: [RFC] potential DR in handling of signed int and unholy mess in
+	our and gcc implementations
+Date: Thu, 19 Mar 2009 01:33:58 +0000
+Message-ID: <20090319013358.GZ28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.235]:18758 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751217AbZCKTjf convert rfc822-to-8bit (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:34505 "EHLO
+	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754309AbZCSBeA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 11 Mar 2009 15:39:35 -0400
-Received: by rv-out-0506.google.com with SMTP id g37so146143rvb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 11 Mar 2009 12:39:32 -0700 (PDT)
-In-Reply-To: <E1LhQct-0006sH-5W@ZenIV.linux.org.uk>
+	Wed, 18 Mar 2009 21:34:00 -0400
+Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
+	id 1Lk78w-00071w-GZ
+	for linux-sparse@vger.kernel.org; Thu, 19 Mar 2009 01:33:58 +0000
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ftp.linux.org.uk>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-All applied.
+	First of all, C99 has rather unpleasant inconsistency between
+6.7.2p5 and footnote in 6.7.2.1p9.  According to the former,
+	typedef int T;
+	struct {
+		T x : 2;
+	} y;
+is equivalent to
+	typedef signed int T;
+	struct {
+		T x : 2;
+	} y;
+and in both y.x must be signed.  Indeed, since the first declaration does
+not declare a bitfield, int and signed int designate the same type in
+it, per 6.7.2p5.
 
-Thanks!
+However, the footnote in 6.7.2.1p9 says
+  "As specified in 6.7.2 above, if the actual type specifier
+   used is int or a typedef-name defined as int, then it is
+   implementation-defined whether the bit-field is signed or unsigned."
 
-Chris
+According to that, y.x in the second case is signed, but in the first one
+it's implementation-defined whether it's signed or unsigned.
 
-On Wed, Mar 11, 2009 at 8:45 AM, Al Viro <viro@ftp.linux.org.uk> wrote:
->
-> D'oh...
->
-> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
-> ---
-> =A0parse.c | =A0 =A02 +-
-> =A01 files changed, 1 insertions(+), 1 deletions(-)
->
-> diff --git a/parse.c b/parse.c
-> index f16d321..e2b47e3 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -943,7 +943,7 @@ static struct token *ignore_attribute(struct toke=
-n *token, struct symbol *attr,
->
-> =A0static struct token *attribute_packed(struct token *token, struct =
-symbol *attr, struct decl_state *ctx)
-> =A0{
-> - =A0 =A0 =A0 if (!&ctx->ctype.alignment)
-> + =A0 =A0 =A0 if (!ctx->ctype.alignment)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctx->ctype.alignment =3D 1;
-> =A0 =A0 =A0 =A0return token;
-> =A0}
-> --
-> 1.5.6.5
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-spars=
-e" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+But 6.7.2 specifies no such thing!  The only place in there that speaks of
+bit-fields is 6.7.2p5, which says
+  "Each of the comma-separated sets designates the same type, except
+   that for bit-fields, it is implementation-defined whether the specifier
+   int designates the same type as signed int or the same type as unsigned
+   int."
+and there's no mentioning whatsoever of typedef-name in such context.
+
+Note that it's not like the situation with char; plain char *IS* a separate
+type, distinct from signed char and unsigned char alike.  There's no such
+type in case of int; C99 is very clear on that one.  IOW, "explicit signedness"
+for int is a property of declaration-specifiers interpretation, not of a type.
+
+The only question is whether this property applies to bitfield declarations
+alone (as 6.7.2p5 says) or it applies to typedef-name as well (as the footnote
+in 6.7.2.1p9 says, with reference to hell knows what in 6.7.2).
+
+FWIW, gcc follows 6.7.2.1p9 footnote.  It looks if we had 'signed' specifier
+or a typedef-name marked explicitly signed; if either happens in typedef
+declaration, gcc marks the new typedef-name as explicitly signed; if we
+have a bitfield declaration that would result in a signed type *and* if
+there's no explicitly signed specifiers in the mix *and* if the target
+has unsigned bitfields, the type is replaced with unsigned counterpart.
+
+Note that gcc typeof is *NOT* treated as explicitly signed, no matter what
+it resolves to.  IOW, even
+	typeof(signed int) x:2;
+is treated as
+	int x:2;
+and if -funsigned-bitfields is present, unsigned it becomes.  How much of
+that behaviour is going to remain stable?  No idea.
+
+sparse walks even deeper into that shitpile; we really treat signed int
+and int as different types.  Results are not pretty - for stuff like
+	signed int *p;
+	typeof(*p) .....
+we get signed int, for stuff like
+	typeof(signed_int_var + 1) .....
+et.al. we get either int or signed int, depending on phase of the moon.
+Leads to no end of fun in compatible types recognition, etc.
+
+IMO it's a very real DR fodder; either the footnote in 6.7.2.1p9 should be
+modified, dropping mentioning of typedef-name (and then e.g. gcc becomes
+non-compliant) or 6.7.2 ought to grow some mentioning of 'typedef-name
+defined as int' (probably in 6.7.2p5).
+
+I'll probably go for gcc-like behaviour in sparse for now, unless somebody
+sees a good reason not to.  At least that one is consistent and doesn't
+bring the shitloads of fun questions about behaviour of arithmetic conversions,
+etc.
+
+Comments?
