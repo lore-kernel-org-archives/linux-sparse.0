@@ -1,51 +1,100 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
-Date: Thu, 19 Mar 2009 13:04:20 -0700
-Message-ID: <70318cbf0903191304k1fefe9afkb4be21550d8f9abe@mail.gmail.com>
-References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com>
-	 <20090319144622.GA28946@ZenIV.linux.org.uk>
-	 <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com>
-	 <20090319191431.GD28946@ZenIV.linux.org.uk>
+From: Vegard Nossum <vegard.nossum@gmail.com>
+Subject: Re: Nasal demons in preprocessor use (Re: [PATCH] test-suite: new
+	preprocessor test case)
+Date: Thu, 19 Mar 2009 21:20:51 +0100
+Message-ID: <19f34abd0903191320qdd73530ud85081d23e17b266@mail.gmail.com>
+References: <20090319175544.13691.42362.stgit@f10box.hanneseder.net>
+	 <20090319182628.GB28946@ZenIV.linux.org.uk>
+	 <154e089b0903191151q37ab7b20o43838845af12966f@mail.gmail.com>
+	 <20090319190730.GC28946@ZenIV.linux.org.uk>
+	 <20090319192758.GB24318@elte.hu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.228]:50255 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760705AbZCSUEW convert rfc822-to-8bit (ORCPT
+Received: from mail-fx0-f158.google.com ([209.85.220.158]:49634 "EHLO
+	mail-fx0-f158.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752493AbZCSUUz convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Mar 2009 16:04:22 -0400
-Received: by rv-out-0506.google.com with SMTP id f9so722849rvb.1
-        for <linux-sparse@vger.kernel.org>; Thu, 19 Mar 2009 13:04:20 -0700 (PDT)
-In-Reply-To: <20090319191431.GD28946@ZenIV.linux.org.uk>
+	Thu, 19 Mar 2009 16:20:55 -0400
+In-Reply-To: <20090319192758.GB24318@elte.hu>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
+To: Ingo Molnar <mingo@elte.hu>, Stephen Rothwell <sfr@canb.auug.org.au>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Hannes Eder <hannes@hanneseder.net>, linux-kernel@vger.kernel.org
 
-On Thu, Mar 19, 2009 at 12:14 PM, Al Viro <viro@zeniv.linux.org.uk> wro=
-te:
-> a) some <expletives> has #define if(x) ....... (check it out, I'm not=
- kidding)
-> b) ifdef that turd's conditional upon is present in your .config
-> c) ... and now,
-> =A0 =A0 =A0 =A0if (
-> #ifdef .....
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0barf &&
-> #endif
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0vomit)
+2009/3/19 Ingo Molnar <mingo@elte.hu>:
 >
-> steps into undefined behaviour.
+> * Al Viro <viro@ZenIV.linux.org.uk> wrote:
+>
+>> On Thu, Mar 19, 2009 at 07:51:22PM +0100, Hannes Eder wrote:
+>> > When currently running sparse agains the current linux-next tree, =
+a
+>> > lot of checks produce error messages like this:
+>> >
+>> > include/linux/skbuff.h:381:9: error: expected preprocessor identif=
+ier
+>>
+>> Cute. =C2=A0If anything, this kmemcheck_define_bitfield stuff needs =
+to be moved
+>> inside the ifdefs.
+>>
+>> Folks, this is not a valid C, period. =C2=A0And no, there's no promi=
+se
+>> that gcc won't change its behaviour on such constructs whenever
+>> they feel like that.
+>>
+>> Preprocessor directives do not belong in argument lists. =C2=A0Not
+>> #ifdef, not #define, not #include; this is undefined behaviour.
+>
+> Agreed.
+>
+> Vegard, it's this bit:
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0kmemcheck_define_bitfield(flags2, {
+> #ifdef CONFIG_IPV6_NDISC_NODETYPE
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0__u8 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0ndisc_nodety=
+pe:2;
+> #endif
+> #if defined(CONFIG_MAC80211) || defined(CONFIG_MAC80211_MODULE)
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0__u8 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0do_not_encry=
+pt:1;
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0__u8 =C2=A0 =C2=
+=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0requeue:1;
+> #endif
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0});
+>
+> =C2=A0 =C2=A0 =C2=A0 =C2=A0Ingo
+>
 
-We can complain about the bad C code.
+Hm.
 
-We should stop the segfault though. I take a look at it. It seems that
-there is a SYM_NODE with base_type is NULL. I guess in some of
-the error path we result in an invalid AST three.
+Is this really not valid C?
 
-Maybe we should abort sparse after "too many error" ?
+It worked with GCC, so I assumed it was. My mistake.
 
-Chris
+Okay, that puts us in a bit of a tight spot, with regards to kmemcheck,=
+ I mean.
+
+Maybe I should just take up GCC development instead, and implement a
+-fkmemcheck or something.
+
+(To get rid of the bitfield false positives, I mean.)
+
+I guess this means that kmemcheck branch should be withdrawn from
+linux-next, at least temporarily, as I have no immediate
+workarounds/alternatives. Stephen, can you drop it?
+
+
+Vegard
+
+--=20
+"The animistic metaphor of the bug that maliciously sneaked in while
+the programmer was not looking is intellectually dishonest as it
+disguises that the error is the programmer's own creation."
+	-- E. W. Dijkstra, EWD1036
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
