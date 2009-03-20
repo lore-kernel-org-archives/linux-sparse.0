@@ -1,102 +1,88 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
-Date: Thu, 19 Mar 2009 16:11:41 -0700
-Message-ID: <70318cbf0903191611i4ec1f5e5sa97ba53db3a7478c@mail.gmail.com>
-References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com>
-	 <20090319144622.GA28946@ZenIV.linux.org.uk>
-	 <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com>
-	 <20090319191431.GD28946@ZenIV.linux.org.uk>
-	 <70318cbf0903191304k1fefe9afkb4be21550d8f9abe@mail.gmail.com>
-	 <20090319215250.GF28946@ZenIV.linux.org.uk>
-	 <20090319220906.GG28946@ZenIV.linux.org.uk>
+Subject: [Patch] warning for preprocessor directive in macro Was: Segfault at
+	evaluate.c:341
+Date: Fri, 20 Mar 2009 00:18:11 -0700
+Message-ID: <70318cbf0903200018k65330948g86fe8445e4ad86f6@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=000e0cd21454250a7b046587b8c9
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.239]:13271 "EHLO
+Received: from rv-out-0506.google.com ([209.85.198.232]:56134 "EHLO
 	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754483AbZCSXLn convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1751689AbZCTHSN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Mar 2009 19:11:43 -0400
-Received: by rv-out-0506.google.com with SMTP id f9so791688rvb.1
-        for <linux-sparse@vger.kernel.org>; Thu, 19 Mar 2009 16:11:42 -0700 (PDT)
-In-Reply-To: <20090319220906.GG28946@ZenIV.linux.org.uk>
+	Fri, 20 Mar 2009 03:18:13 -0400
+Received: by rv-out-0506.google.com with SMTP id g37so233228rvb.5
+        for <linux-sparse@vger.kernel.org>; Fri, 20 Mar 2009 00:18:11 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Al Viro <viro@zeniv.linux.org.uk>
 Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
 
-Thanks Al,
+--000e0cd21454250a7b046587b8c9
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 
-I will apply it later tonight.
+On Thu, Mar 19, 2009 at 4:11 PM, Christopher Li <sparse@chrisli.org> wrote:
+> Thanks Al,
+>
+> I will apply it later tonight.
+>
+> If no one beats to me, I will try to add the warning for using preprocessor
+> directive inside macro expansion. It should be a better error message
+> than the current one.
 
-If no one beats to me, I will try to add the warning for using preproce=
-ssor
-directive inside macro expansion. It should be a better error message
-than the current one.
+OK, attached patch generate warning like this:
+
+macro-argument-ifdef.c:10:1: warning: invalid usage of "#ifdef" in
+macro argument
+
+The wording of the error message can be improved. Any suggestion?
 
 Chris
 
-On Thu, Mar 19, 2009 at 3:09 PM, Al Viro <viro@zeniv.linux.org.uk> wrot=
-e:
-> On Thu, Mar 19, 2009 at 09:52:50PM +0000, Al Viro wrote:
->> On Thu, Mar 19, 2009 at 01:04:20PM -0700, Christopher Li wrote:
->>
->> > We should stop the segfault though. I take a look at it. It seems =
-that
->> > there is a SYM_NODE with base_type is NULL. I guess in some of
->> > the error path we result in an invalid AST three.
->>
->> We are getting some mess with K&R declarations. =A0Which is bloody l=
-ikely
->> to be my fault; will check.
->
-> Yeah... =A0It's an old b0rken handling of calls for K&R + changes tha=
-t exposed
-> that even worse.
->
-> Status quo is restored by the patch below, but it's a stopgap - e.g.
-> void f();
-> void g(void)
-> {
-> =A0 =A0 =A0 =A0f(0, 0);
-> }
-> will warn about extra arguments as if we had void f(void); as sparse =
-had
-> been doing all along. =A0B0rken.
->
-> Testcase for the segfault is
-> void f(x, y);
-> void g(void)
-> {
-> =A0 =A0 =A0 =A0f(0, 0);
-> }
->
-> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
-> ---
-> diff --git a/parse.c b/parse.c
-> index b9b96ba..87f6264 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -2323,6 +2323,7 @@ static struct token *identifier_list(struct tok=
-en *token, struct symbol *fn)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sym->ident =3D token->ident;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0token =3D token->next;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0sym->endpos =3D token->pos;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 sym->ctype.base_type =3D &incomplete_ct=
-ype;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0add_symbol(list, sym);
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0if (!match_op(token, ',') ||
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0token_type(token->next) !=3D T=
-OKEN_IDENT ||
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-spars=
-e" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--000e0cd21454250a7b046587b8c9
+Content-Type: application/octet-stream; name=warn-macro-argument-ifdef
+Content-Disposition: attachment; filename=warn-macro-argument-ifdef
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fsi49n5g0
+
+V2FybiBhYm91dCB1c2luZyAjaWZkZWYgaW4gbWFjcm8gYXJndW1lbnRzCgo2LjEwLjNwMTE6ICJJ
+ZiB0aGVyZSBhcmUgc2VxdWVuY2VzIG9mIHByZXByb2Nlc3NpbmcgdG9rZW5zCndpdGhpbiB0aGUg
+bGlzdCBvZiBhcmd1bWVudHMgdGhhdCB3b3VsZCBvdGhlcndpc2UgYWN0IGFzIHByZXByb2Nlc3Np
+bmcKZGlyZWN0aXZlcywgdGhlIGJlaGF2aW9yIGlzIHVuZGVmaW5lZC4iCgpTaWduZWQtT2ZmLUJ5
+OiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS5jaHJp
+c2wvcHJlLXByb2Nlc3MuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2UuY2hyaXNsLm9yaWcvcHJlLXBy
+b2Nlc3MuYworKysgc3BhcnNlLmNocmlzbC9wcmUtcHJvY2Vzcy5jCkBAIC0xOTMsNiArMTkzLDE3
+IEBAIHN0YXRpYyB2b2lkIGV4cGFuZF9saXN0KHN0cnVjdCB0b2tlbiAqKmwKIAl9CiB9CiAKK3N0
+YXRpYyBpbmxpbmUgdm9pZCB3YXJuX3ByZXByb2Nlc3Nvcl9kaXJlY3RpdmUoc3RydWN0IHRva2Vu
+ICp0b2tlbikKK3sKKwlzdHJ1Y3QgdG9rZW4gKmNtZCA9IHRva2VuLT5uZXh0OworCWlmICh0b2tl
+bl90eXBlKGNtZCkgIT0gVE9LRU5fSURFTlQpCisJCXJldHVybjsKKwlpZiAoIWxvb2t1cF9zeW1i
+b2woY21kLT5pZGVudCwgTlNfUFJFUFJPQ0VTU09SKSkKKwkJcmV0dXJuOworCXdhcm5pbmcodG9r
+ZW4tPnBvcywgImludmFsaWQgdXNhZ2Ugb2YgXCIjJXNcIiBpbiBtYWNybyBhcmd1bWVudCIsCisJ
+CXNob3dfaWRlbnQoY21kLT5pZGVudCkpOworfQorCiBzdGF0aWMgc3RydWN0IHRva2VuICpjb2xs
+ZWN0X2FyZyhzdHJ1Y3QgdG9rZW4gKnByZXYsIGludCB2YXJhcmcsIHN0cnVjdCBwb3NpdGlvbiAq
+cG9zKQogewogCXN0cnVjdCB0b2tlbiAqKnAgPSAmcHJldi0+bmV4dDsKQEAgLTIwNyw2ICsyMTgs
+OCBAQCBzdGF0aWMgc3RydWN0IHRva2VuICpjb2xsZWN0X2FyZyhzdHJ1Y3QgCiAJCQkJYnJlYWs7
+CiAJCX0gZWxzZSBpZiAobWF0Y2hfb3AobmV4dCwgJywnKSAmJiAhbmVzdGluZyAmJiAhdmFyYXJn
+KSB7CiAJCQlicmVhazsKKwkJfSBlbHNlIGlmIChtYXRjaF9vcChuZXh0LCAnIycpICYmIG5leHQt
+PnBvcy5uZXdsaW5lKSB7CisJCQl3YXJuX3ByZXByb2Nlc3Nvcl9kaXJlY3RpdmUobmV4dCk7CiAJ
+CX0KIAkJbmV4dC0+cG9zLnN0cmVhbSA9IHBvcy0+c3RyZWFtOwogCQluZXh0LT5wb3MubGluZSA9
+IHBvcy0+bGluZTsKSW5kZXg6IHNwYXJzZS5jaHJpc2wvdmFsaWRhdGlvbi9tYWNyby1hcmd1bWVu
+dC1pZmRlZi5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5jaHJpc2wub3JpZy92YWxpZGF0aW9uL21h
+Y3JvLWFyZ3VtZW50LWlmZGVmLmMKKysrIHNwYXJzZS5jaHJpc2wvdmFsaWRhdGlvbi9tYWNyby1h
+cmd1bWVudC1pZmRlZi5jCkBAIC0wLDAgKzEsMjggQEAKKyNkZWZpbmUgZm9vKGEsYixjKSBiYXIo
+YSxiLGMpCisKK3N0YXRpYyB2b2lkIGJhcihpbnQgYSwgaW50IGIsIGludCBjKQoreworfQorCitz
+dGF0aWMgdm9pZCB0ZXN0KHZvaWQpCit7CisJZm9vKDEsCisjaWZkZWYgTk9UCisJMiwKKyNlbHNl
+CisJMywKKyNlbmRpZgorCTQpOworfQorCisvKgorICogY2hlY2stbmFtZTogaW52YWxpZCB1c2Fn
+ZSBvZiBpZmRlZiBpbnNpZGUgbWFjcm8gYXJndW1lbnRzCisgKiBjaGVjay1lcnJvci1zdGFydAor
+bWFjcm8tYXJndW1lbnQtaWZkZWYuYzoxMDoxOiB3YXJuaW5nOiBpbnZhbGlkIHVzYWdlIG9mICIj
+aWZkZWYiIGluIG1hY3JvIGFyZ3VtZW50CittYWNyby1hcmd1bWVudC1pZmRlZi5jOjEyOjE6IHdh
+cm5pbmc6IGludmFsaWQgdXNhZ2Ugb2YgIiNlbHNlIiBpbiBtYWNybyBhcmd1bWVudAorbWFjcm8t
+YXJndW1lbnQtaWZkZWYuYzoxNDoxOiB3YXJuaW5nOiBpbnZhbGlkIHVzYWdlIG9mICIjZW5kaWYi
+IGluIG1hY3JvIGFyZ3VtZW50CittYWNyby1hcmd1bWVudC1pZmRlZi5jOjk6OTogZXJyb3I6IG1h
+Y3JvICJmb28iIHBhc3NlZCA0IGFyZ3VtZW50cywgYnV0IHRha2VzIGp1c3QgMworbWFjcm8tYXJn
+dW1lbnQtaWZkZWYuYzo5Ojk6IGVycm9yOiB1bmRlZmluZWQgaWRlbnRpZmllciAnZm9vJworICog
+Y2hlY2stZXJyb3ItZW5kCisgKi8KKwo=
+--000e0cd21454250a7b046587b8c9--
