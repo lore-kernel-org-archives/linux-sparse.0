@@ -1,83 +1,69 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: bitfields treatment
-Date: Fri, 20 Mar 2009 21:37:27 +0000
-Message-ID: <20090320213727.GJ28946@ZenIV.linux.org.uk>
+From: Vegard Nossum <vegard.nossum@gmail.com>
+Subject: Re: Nasal demons in preprocessor use (Re: [PATCH] test-suite: new
+	preprocessor test case)
+Date: Sat, 21 Mar 2009 00:16:17 +0100
+Message-ID: <19f34abd0903201616v4175b5afn5630fcae02d7ff4f@mail.gmail.com>
+References: <20090319175544.13691.42362.stgit@f10box.hanneseder.net>
+	 <20090319182628.GB28946@ZenIV.linux.org.uk>
+	 <154e089b0903191151q37ab7b20o43838845af12966f@mail.gmail.com>
+	 <20090319190730.GC28946@ZenIV.linux.org.uk>
+	 <20090319192758.GB24318@elte.hu>
+	 <19f34abd0903191320qdd73530ud85081d23e17b266@mail.gmail.com>
+	 <20090320180853.GA24154@elte.hu>
+	 <20090320190409.GH28946@ZenIV.linux.org.uk>
+	 <20090320191407.GI28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:35625 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751060AbZCTVha (ORCPT
+Received: from mail-bw0-f169.google.com ([209.85.218.169]:34073 "EHLO
+	mail-bw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761554AbZCTXQU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Mar 2009 17:37:30 -0400
-Received: from viro by ZenIV.linux.org.uk with local (Exim 4.69 #1 (Red Hat Linux))
-	id 1LkmP9-0002N0-T0
-	for linux-sparse@vger.kernel.org; Fri, 20 Mar 2009 21:37:27 +0000
-Content-Disposition: inline
+	Fri, 20 Mar 2009 19:16:20 -0400
+In-Reply-To: <20090320191407.GI28946@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Al Viro <viro@zeniv.linux.org.uk>, Ingo Molnar <mingo@elte.hu>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Hannes Eder <hannes@hanneseder.net>, linux-kernel@vger.kernel.org
 
-	Aside of corner cases associated with signedness, there's another
-fun pile we are handling strangely.  Namely, treatment of integer promotions
-and conversions.
+[removed duplicate Al Viro from Cc]
 
-	What standard says:
-* there's a well-defined behaviour for bitfields based on _Bool, signed int
-and unsigned int (int-based is equivalent to one signed or unsigned).  We
-get it right, AFAICS, and so does gcc.
-* implementation can do bitfields based on other types.  Fair enough.  Both
-sparse and gcc allow those for any integer types.
-* standard wording is such that it does *NOT* have integer promotions applied
-to such bitfields, even if the size is smaller than int.  Arguably, that's
-a hole in standard; in any case, both gcc and sparse *do* integer promotions
-on those, with the same behaviour as usual (value-preserving promotion).
-* for all bitfields we are told that they act as (signed or unsigned)
-integer types of specified width.  That has interesting implications:
+2009/3/20 Al Viro <viro@zeniv.linux.org.uk>:
+> On Fri, Mar 20, 2009 at 07:04:09PM +0000, Al Viro wrote:
+>> On Fri, Mar 20, 2009 at 07:08:53PM +0100, Ingo Molnar wrote:
+>> >
+>> > * Vegard Nossum <vegard.nossum@gmail.com> wrote:
+>> >
+>> > > I guess this means that kmemcheck branch should be withdrawn from
+>> > > linux-next, at least temporarily, as I have no immediate
+>> > > workarounds/alternatives. Stephen, can you drop it?
+>> >
+>> > Al Viro, well done :-(
 
-unsigned long long f(unsigned long long n)
-{
-	struct {
-		unsigned long long n:33;
-	} x = {n};
-	return x.n + x.n;
-}
+[snip]
 
-*must* be equivalent to (n + n) & 0x1ffffffff on all implementations that
-allow such bitfields.  I.e. these suckers are not promoted to base type;
-they act as if we really head 33bit unsigned type, usual conversions in
-x.n + x.n left the result with that type and addition had been done within
-that type.
+> Ingo, care to explain what the hell had your reply above been about?
+> Especially since we both apparently agree that code in question did
+> need fixing, what with your immediate ACK upthread...
+>
 
-gcc does it that way, we do not (x.n gets promoted to unsigned long long).
+Hi,
 
-AFAICS, sparse is wrong here; nothing to do about that, C99 is really not
-ambiguous in that area.  HOWEVER, that's not the end of story.  It's nice
-to say "it's an integer type of this width"; however, it is really not enough.
+I think it is simply the frustration of discovering this rather
+serious flaw just when the dust has settled, and with no capacity to
+really fix it in a satisfactory way. But we should be thankful for the
+heads up and try again to remember the value of linux-next and those
+who test it!
 
-	What happens when we mix two such suckers with the same width?
-I.e. what about their ranks?  gcc seems to do the following: when the width
-is equal to that of base type, treat the bitfield as equivalent to the
-base type.  When the size is smaller, treat all bitfields with this width
-and this signedness as belonging to the same type.  It leaves a corner case,
-though - what if the width *is* equal to that of a smaller normal type?
-It *is* possible even on amd64 - there's a 128bit integer type (can't get
-to it for bitfield without typedef due to cretinous syntax, but
-	typedef unsigned __attribute__((mode(TI))) T;
-	....
-	T x : 64;
-will get it for you).  Apparently, that gets treated as equivalent of
-the lowest-rank standard type with that size, i.e. unsigned long in case
-of amd64.  Fsck knows how stable that assumption would be...  For now, it
-seems that they are careful of having such types only with the widths that
-do not overlap with those of standard types and having only one signed/unsigned
-pair for given size.
+(The solution you sketched is still quite an uglification of the
+original code, something we tried to minimize using the construct you
+saw.)
 
-	BTW, with typeof() we *can* get to some of those types.  We can't apply
-typeof to bitfield, but we can say
-	struct {unsigned long long x:33;} x;
-	typedef typeof(+x.x) __u33;
-and it will actually work as expected with gcc.  Can do pointers to them,
-etc.  Can't get smaller-than-int ones, but that's not particulary interesting
-due to integer promotions.  I really wonder how well would sparse cope with
-that (allocation size > bit_size rounded to byte).
+So, Ingo: There's no way this could have been merged in mainline with
+such a defect, and it would be a lot worse if it wasn't discovered at
+this point. We'll just have to be creative (again!) and I'm sure
+Stephen can revive the tree when it's been fixed.
+
+
+Vegard
