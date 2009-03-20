@@ -1,88 +1,30 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [Patch] warning for preprocessor directive in macro Was: Segfault at
-	evaluate.c:341
-Date: Fri, 20 Mar 2009 00:18:11 -0700
-Message-ID: <70318cbf0903200018k65330948g86fe8445e4ad86f6@mail.gmail.com>
+From: Ingo Molnar <mingo@elte.hu>
+Subject: Re: Nasal demons in preprocessor use (Re: [PATCH] test-suite: new
+	preprocessor test case)
+Date: Fri, 20 Mar 2009 19:08:53 +0100
+Message-ID: <20090320180853.GA24154@elte.hu>
+References: <20090319175544.13691.42362.stgit@f10box.hanneseder.net> <20090319182628.GB28946@ZenIV.linux.org.uk> <154e089b0903191151q37ab7b20o43838845af12966f@mail.gmail.com> <20090319190730.GC28946@ZenIV.linux.org.uk> <20090319192758.GB24318@elte.hu> <19f34abd0903191320qdd73530ud85081d23e17b266@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0cd21454250a7b046587b8c9
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.232]:56134 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751689AbZCTHSN (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Mar 2009 03:18:13 -0400
-Received: by rv-out-0506.google.com with SMTP id g37so233228rvb.5
-        for <linux-sparse@vger.kernel.org>; Fri, 20 Mar 2009 00:18:11 -0700 (PDT)
+Received: from mx2.mail.elte.hu ([157.181.151.9]:60990 "EHLO mx2.mail.elte.hu"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752732AbZCTSJP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 20 Mar 2009 14:09:15 -0400
+Content-Disposition: inline
+In-Reply-To: <19f34abd0903191320qdd73530ud85081d23e17b266@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
+To: Vegard Nossum <vegard.nossum@gmail.com>, Alexander Viro <viro@ftp.linux.org.uk>
+Cc: Stephen Rothwell <sfr@canb.auug.org.au>, Al Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Hannes Eder <hannes@hanneseder.net>, linux-kernel@vger.kernel.org
 
---000e0cd21454250a7b046587b8c9
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 
-On Thu, Mar 19, 2009 at 4:11 PM, Christopher Li <sparse@chrisli.org> wrote:
-> Thanks Al,
->
-> I will apply it later tonight.
->
-> If no one beats to me, I will try to add the warning for using preprocessor
-> directive inside macro expansion. It should be a better error message
-> than the current one.
+* Vegard Nossum <vegard.nossum@gmail.com> wrote:
 
-OK, attached patch generate warning like this:
+> I guess this means that kmemcheck branch should be withdrawn from 
+> linux-next, at least temporarily, as I have no immediate 
+> workarounds/alternatives. Stephen, can you drop it?
 
-macro-argument-ifdef.c:10:1: warning: invalid usage of "#ifdef" in
-macro argument
+Al Viro, well done :-(
 
-The wording of the error message can be improved. Any suggestion?
-
-Chris
-
---000e0cd21454250a7b046587b8c9
-Content-Type: application/octet-stream; name=warn-macro-argument-ifdef
-Content-Disposition: attachment; filename=warn-macro-argument-ifdef
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fsi49n5g0
-
-V2FybiBhYm91dCB1c2luZyAjaWZkZWYgaW4gbWFjcm8gYXJndW1lbnRzCgo2LjEwLjNwMTE6ICJJ
-ZiB0aGVyZSBhcmUgc2VxdWVuY2VzIG9mIHByZXByb2Nlc3NpbmcgdG9rZW5zCndpdGhpbiB0aGUg
-bGlzdCBvZiBhcmd1bWVudHMgdGhhdCB3b3VsZCBvdGhlcndpc2UgYWN0IGFzIHByZXByb2Nlc3Np
-bmcKZGlyZWN0aXZlcywgdGhlIGJlaGF2aW9yIGlzIHVuZGVmaW5lZC4iCgpTaWduZWQtT2ZmLUJ5
-OiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgoKSW5kZXg6IHNwYXJzZS5jaHJp
-c2wvcHJlLXByb2Nlc3MuYwo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2UuY2hyaXNsLm9yaWcvcHJlLXBy
-b2Nlc3MuYworKysgc3BhcnNlLmNocmlzbC9wcmUtcHJvY2Vzcy5jCkBAIC0xOTMsNiArMTkzLDE3
-IEBAIHN0YXRpYyB2b2lkIGV4cGFuZF9saXN0KHN0cnVjdCB0b2tlbiAqKmwKIAl9CiB9CiAKK3N0
-YXRpYyBpbmxpbmUgdm9pZCB3YXJuX3ByZXByb2Nlc3Nvcl9kaXJlY3RpdmUoc3RydWN0IHRva2Vu
-ICp0b2tlbikKK3sKKwlzdHJ1Y3QgdG9rZW4gKmNtZCA9IHRva2VuLT5uZXh0OworCWlmICh0b2tl
-bl90eXBlKGNtZCkgIT0gVE9LRU5fSURFTlQpCisJCXJldHVybjsKKwlpZiAoIWxvb2t1cF9zeW1i
-b2woY21kLT5pZGVudCwgTlNfUFJFUFJPQ0VTU09SKSkKKwkJcmV0dXJuOworCXdhcm5pbmcodG9r
-ZW4tPnBvcywgImludmFsaWQgdXNhZ2Ugb2YgXCIjJXNcIiBpbiBtYWNybyBhcmd1bWVudCIsCisJ
-CXNob3dfaWRlbnQoY21kLT5pZGVudCkpOworfQorCiBzdGF0aWMgc3RydWN0IHRva2VuICpjb2xs
-ZWN0X2FyZyhzdHJ1Y3QgdG9rZW4gKnByZXYsIGludCB2YXJhcmcsIHN0cnVjdCBwb3NpdGlvbiAq
-cG9zKQogewogCXN0cnVjdCB0b2tlbiAqKnAgPSAmcHJldi0+bmV4dDsKQEAgLTIwNyw2ICsyMTgs
-OCBAQCBzdGF0aWMgc3RydWN0IHRva2VuICpjb2xsZWN0X2FyZyhzdHJ1Y3QgCiAJCQkJYnJlYWs7
-CiAJCX0gZWxzZSBpZiAobWF0Y2hfb3AobmV4dCwgJywnKSAmJiAhbmVzdGluZyAmJiAhdmFyYXJn
-KSB7CiAJCQlicmVhazsKKwkJfSBlbHNlIGlmIChtYXRjaF9vcChuZXh0LCAnIycpICYmIG5leHQt
-PnBvcy5uZXdsaW5lKSB7CisJCQl3YXJuX3ByZXByb2Nlc3Nvcl9kaXJlY3RpdmUobmV4dCk7CiAJ
-CX0KIAkJbmV4dC0+cG9zLnN0cmVhbSA9IHBvcy0+c3RyZWFtOwogCQluZXh0LT5wb3MubGluZSA9
-IHBvcy0+bGluZTsKSW5kZXg6IHNwYXJzZS5jaHJpc2wvdmFsaWRhdGlvbi9tYWNyby1hcmd1bWVu
-dC1pZmRlZi5jCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
-PT09PT09PT09PT09PT09PT09PT0KLS0tIHNwYXJzZS5jaHJpc2wub3JpZy92YWxpZGF0aW9uL21h
-Y3JvLWFyZ3VtZW50LWlmZGVmLmMKKysrIHNwYXJzZS5jaHJpc2wvdmFsaWRhdGlvbi9tYWNyby1h
-cmd1bWVudC1pZmRlZi5jCkBAIC0wLDAgKzEsMjggQEAKKyNkZWZpbmUgZm9vKGEsYixjKSBiYXIo
-YSxiLGMpCisKK3N0YXRpYyB2b2lkIGJhcihpbnQgYSwgaW50IGIsIGludCBjKQoreworfQorCitz
-dGF0aWMgdm9pZCB0ZXN0KHZvaWQpCit7CisJZm9vKDEsCisjaWZkZWYgTk9UCisJMiwKKyNlbHNl
-CisJMywKKyNlbmRpZgorCTQpOworfQorCisvKgorICogY2hlY2stbmFtZTogaW52YWxpZCB1c2Fn
-ZSBvZiBpZmRlZiBpbnNpZGUgbWFjcm8gYXJndW1lbnRzCisgKiBjaGVjay1lcnJvci1zdGFydAor
-bWFjcm8tYXJndW1lbnQtaWZkZWYuYzoxMDoxOiB3YXJuaW5nOiBpbnZhbGlkIHVzYWdlIG9mICIj
-aWZkZWYiIGluIG1hY3JvIGFyZ3VtZW50CittYWNyby1hcmd1bWVudC1pZmRlZi5jOjEyOjE6IHdh
-cm5pbmc6IGludmFsaWQgdXNhZ2Ugb2YgIiNlbHNlIiBpbiBtYWNybyBhcmd1bWVudAorbWFjcm8t
-YXJndW1lbnQtaWZkZWYuYzoxNDoxOiB3YXJuaW5nOiBpbnZhbGlkIHVzYWdlIG9mICIjZW5kaWYi
-IGluIG1hY3JvIGFyZ3VtZW50CittYWNyby1hcmd1bWVudC1pZmRlZi5jOjk6OTogZXJyb3I6IG1h
-Y3JvICJmb28iIHBhc3NlZCA0IGFyZ3VtZW50cywgYnV0IHRha2VzIGp1c3QgMworbWFjcm8tYXJn
-dW1lbnQtaWZkZWYuYzo5Ojk6IGVycm9yOiB1bmRlZmluZWQgaWRlbnRpZmllciAnZm9vJworICog
-Y2hlY2stZXJyb3ItZW5kCisgKi8KKwo=
---000e0cd21454250a7b046587b8c9--
+	Ingo
