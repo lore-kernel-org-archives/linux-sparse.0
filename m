@@ -1,94 +1,67 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
-Date: Sat, 21 Mar 2009 17:28:23 +0000
-Message-ID: <20090321172823.GA5509@ZenIV.linux.org.uk>
-References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com> <20090319144622.GA28946@ZenIV.linux.org.uk> <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com> <20090319191431.GD28946@ZenIV.linux.org.uk> <70318cbf0903191304k1fefe9afkb4be21550d8f9abe@mail.gmail.com> <20090319215250.GF28946@ZenIV.linux.org.uk> <20090319220906.GG28946@ZenIV.linux.org.uk> <70318cbf0903191611i4ec1f5e5sa97ba53db3a7478c@mail.gmail.com> <20090321044020.GL28946@ZenIV.linux.org.uk>
+From: Derek M Jones <derek@knosof.co.uk>
+Subject: Re: bitfields treatment
+Date: Sat, 21 Mar 2009 21:57:41 +0000
+Message-ID: <49C562D5.40103@knosof.co.uk>
+References: <20090320213727.GJ28946@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:52526 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754495AbZCUR23 (ORCPT
+Received: from mtaout02-winn.ispmail.ntl.com ([81.103.221.48]:5281 "EHLO
+	mtaout02-winn.ispmail.ntl.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750716AbZCUV5q (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 21 Mar 2009 13:28:29 -0400
-Content-Disposition: inline
-In-Reply-To: <20090321044020.GL28946@ZenIV.linux.org.uk>
+	Sat, 21 Mar 2009 17:57:46 -0400
+In-Reply-To: <20090320213727.GJ28946@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
+To: Al Viro <viro@ZenIV.linux.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
-On Sat, Mar 21, 2009 at 04:40:20AM +0000, Al Viro wrote:
-> On Thu, Mar 19, 2009 at 04:11:41PM -0700, Christopher Li wrote:
-> > Thanks Al,
-> > 
-> > I will apply it later tonight.
-> > 
-> > If no one beats to me, I will try to add the warning for using preprocessor
-> > directive inside macro expansion. It should be a better error message
-> > than the current one.
+Al,
+
+> * standard wording is such that it does *NOT* have integer promotions applied
+> to such bitfields, even if the size is smaller than int.  Arguably, that's
+> a hole in standard; in any case, both gcc and sparse *do* integer promotions
+> on those, with the same behaviour as usual (value-preserving promotion).
+
+The usual arithmetic conversions (of which integer promotion is a
+subset) are performed where the standard says they are performed,
+bit-field involving an implementation defined type or not.
+
+> * for all bitfields we are told that they act as (signed or unsigned)
+> integer types of specified width.  That has interesting implications:
+
+See:
+http://www.open-std.org/jtc1/sc22/wg14/www/docs/dr_315.htm
+
+> unsigned long long f(unsigned long long n)
+> {
+> 	struct {
+> 		unsigned long long n:33;
+> 	} x = {n};
+> 	return x.n + x.n;
+> }
 > 
-> Well...  patch below would give more or less close approximation to the
-> current set of nasal demons produced by gcc in these situations + error
-> when that crap happens.
-> Warning: it might make things slower, and it needs testing.
+> *must* be equivalent to (n + n) & 0x1ffffffff on all implementations that
+> allow such bitfields.  I.e. these suckers are not promoted to base type;
+
+Sentence 1162 says otherwise:
+http://c0x.coding-guidelines.com/6.5.6.html
+
+> they act as if we really head 33bit unsigned type, usual conversions in
+> x.n + x.n left the result with that type and addition had been done within
+> that type.
 > 
-> Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
-> ---
+> gcc does it that way, we do not (x.n gets promoted to unsigned long long).
 
-It needed testing, all right - #elif handling got broken by the initial
-variant...  Hopefully fixed version follows:
+It has been argued at WG14 that gcc gets it wrong.
 
-diff --git a/pre-process.c b/pre-process.c
-index cf53893..34b21ff 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -193,13 +193,36 @@ static void expand_list(struct token **list)
- 	}
- }
- 
-+static void preprocessor_line(struct stream *stream, struct token **line);
-+
- static struct token *collect_arg(struct token *prev, int vararg, struct position *pos)
- {
-+	struct stream *stream = input_streams + prev->pos.stream;
- 	struct token **p = &prev->next;
- 	struct token *next;
- 	int nesting = 0;
- 
- 	while (!eof_token(next = scan_next(p))) {
-+		if (next->pos.newline && match_op(next, '#')) {
-+			if (!next->pos.noexpand) {
-+				sparse_error(next->pos,
-+					     "directive in argument list");
-+				preprocessor_line(stream, p);
-+				__free_token(next);	/* Free the '#' token */
-+				continue;
-+			}
-+		}
-+		switch (token_type(next)) {
-+		case TOKEN_STREAMEND:
-+		case TOKEN_STREAMBEGIN:
-+			*p = &eof_token_entry;
-+			return next;
-+		}
-+		if (false_nesting) {
-+			*p = next->next;
-+			__free_token(next);
-+			continue;
-+		}
- 		if (match_op(next, '(')) {
- 			nesting++;
- 		} else if (match_op(next, ')')) {
-@@ -1357,8 +1380,9 @@ static int handle_elif(struct stream * stream, struct token **line, struct token
- 	if (token_type(top_if) != TOKEN_IF)
- 		return 1;
- 	if (false_nesting) {
--		if (expression_value(&token->next))
--			false_nesting = 0;
-+		false_nesting = 0;
-+		if (!expression_value(&token->next))
-+			false_nesting = 1;
- 	} else {
- 		false_nesting = 1;
- 		token_type(top_if) = TOKEN_SKIP_GROUPS;
+> 	What happens when we mix two such suckers with the same width?
+
+At the very least sparse should generate a useful message.
+
+-- 
+Derek M. Jones                         tel: +44 (0) 1252 520 667
+Knowledge Software Ltd                 mailto:derek@knosof.co.uk
+Source code analysis                   http://www.knosof.co.uk
