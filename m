@@ -1,34 +1,77 @@
 From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: Nasal demons in preprocessor use (Re: [PATCH] test-suite: new
-	preprocessor test case)
-Date: Fri, 20 Mar 2009 23:44:12 +0000
-Message-ID: <20090320234412.GK28946@ZenIV.linux.org.uk>
-References: <20090319175544.13691.42362.stgit@f10box.hanneseder.net> <20090319182628.GB28946@ZenIV.linux.org.uk> <154e089b0903191151q37ab7b20o43838845af12966f@mail.gmail.com> <20090319190730.GC28946@ZenIV.linux.org.uk> <20090319192758.GB24318@elte.hu> <19f34abd0903191320qdd73530ud85081d23e17b266@mail.gmail.com> <20090320180853.GA24154@elte.hu> <20090320190409.GH28946@ZenIV.linux.org.uk> <20090320191407.GI28946@ZenIV.linux.org.uk> <19f34abd0903201616v4175b5afn5630fcae02d7ff4f@mail.gmail.com>
+Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
+Date: Sat, 21 Mar 2009 04:40:20 +0000
+Message-ID: <20090321044020.GL28946@ZenIV.linux.org.uk>
+References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com> <20090319144622.GA28946@ZenIV.linux.org.uk> <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com> <20090319191431.GD28946@ZenIV.linux.org.uk> <70318cbf0903191304k1fefe9afkb4be21550d8f9abe@mail.gmail.com> <20090319215250.GF28946@ZenIV.linux.org.uk> <20090319220906.GG28946@ZenIV.linux.org.uk> <70318cbf0903191611i4ec1f5e5sa97ba53db3a7478c@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:45295 "EHLO
+Received: from zeniv.linux.org.uk ([195.92.253.2]:48004 "EHLO
 	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751735AbZCTXo1 (ORCPT
+	with ESMTP id S1750785AbZCUEkZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Mar 2009 19:44:27 -0400
+	Sat, 21 Mar 2009 00:40:25 -0400
 Content-Disposition: inline
-In-Reply-To: <19f34abd0903201616v4175b5afn5630fcae02d7ff4f@mail.gmail.com>
+In-Reply-To: <70318cbf0903191611i4ec1f5e5sa97ba53db3a7478c@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Vegard Nossum <vegard.nossum@gmail.com>
-Cc: Ingo Molnar <mingo@elte.hu>, Stephen Rothwell <sfr@canb.auug.org.au>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Hannes Eder <hannes@hanneseder.net>, linux-kernel@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
 
-On Sat, Mar 21, 2009 at 12:16:17AM +0100, Vegard Nossum wrote:
+On Thu, Mar 19, 2009 at 04:11:41PM -0700, Christopher Li wrote:
+> Thanks Al,
+> 
+> I will apply it later tonight.
+> 
+> If no one beats to me, I will try to add the warning for using preprocessor
+> directive inside macro expansion. It should be a better error message
+> than the current one.
 
-> (The solution you sketched is still quite an uglification of the
-> original code, something we tried to minimize using the construct you
-> saw.)
+Well...  patch below would give more or less close approximation to the
+current set of nasal demons produced by gcc in these situations + error
+when that crap happens.
+Warning: it might make things slower, and it needs testing.
 
-Frankly, I'd suggest expanding that sucker and being done with that.
-However, more interesting question is whether you really need the
-named field to be a struct.  If not, something like
-bitfields_start(name)
-....
-bitfields_end
-would work just fine, without all that fun.
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+diff --git a/pre-process.c b/pre-process.c
+index cf53893..df6cca4 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -193,13 +193,36 @@ static void expand_list(struct token **list)
+ 	}
+ }
+ 
++static void preprocessor_line(struct stream *stream, struct token **line);
++
+ static struct token *collect_arg(struct token *prev, int vararg, struct position *pos)
+ {
++	struct stream *stream = input_streams + prev->pos.stream;
+ 	struct token **p = &prev->next;
+ 	struct token *next;
+ 	int nesting = 0;
+ 
+ 	while (!eof_token(next = scan_next(p))) {
++		if (next->pos.newline && match_op(next, '#')) {
++			if (!next->pos.noexpand) {
++				sparse_error(next->pos,
++					     "directive in argument list");
++				preprocessor_line(stream, p);
++				__free_token(next);	/* Free the '#' token */
++				continue;
++			}
++		}
++		switch (token_type(next)) {
++		case TOKEN_STREAMEND:
++		case TOKEN_STREAMBEGIN:
++			*p = &eof_token_entry;
++			return next;
++		}
++		if (false_nesting) {
++			*p = next->next;
++			__free_token(next);
++			continue;
++		}
+ 		if (match_op(next, '(')) {
+ 			nesting++;
+ 		} else if (match_op(next, ')')) {
