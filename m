@@ -1,95 +1,41 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: bitfields treatment
-Date: Sat, 21 Mar 2009 23:12:33 +0000
-Message-ID: <20090321231233.GM28946@ZenIV.linux.org.uk>
-References: <20090320213727.GJ28946@ZenIV.linux.org.uk> <49C562D5.40103@knosof.co.uk>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [bug, bisected, -chrisl] Segfault at evaluate.c:341
+Date: Mon, 23 Mar 2009 02:22:47 -0700
+Message-ID: <70318cbf0903230222q3546233cn39071f19ab956f2c@mail.gmail.com>
+References: <154e089b0903190649k7f099c93qedf6eb8e6a1c0a86@mail.gmail.com>
+	 <20090319144622.GA28946@ZenIV.linux.org.uk>
+	 <154e089b0903191138x15b66808v70bc862d7a13e3c2@mail.gmail.com>
+	 <20090319191431.GD28946@ZenIV.linux.org.uk>
+	 <70318cbf0903191304k1fefe9afkb4be21550d8f9abe@mail.gmail.com>
+	 <20090319215250.GF28946@ZenIV.linux.org.uk>
+	 <20090319220906.GG28946@ZenIV.linux.org.uk>
+	 <70318cbf0903191611i4ec1f5e5sa97ba53db3a7478c@mail.gmail.com>
+	 <20090321044020.GL28946@ZenIV.linux.org.uk>
+	 <20090321172823.GA5509@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:33226 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752144AbZCUXMf (ORCPT
+Received: from rv-out-0506.google.com ([209.85.198.239]:58271 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752964AbZCWJWu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 21 Mar 2009 19:12:35 -0400
-Content-Disposition: inline
-In-Reply-To: <49C562D5.40103@knosof.co.uk>
+	Mon, 23 Mar 2009 05:22:50 -0400
+Received: by rv-out-0506.google.com with SMTP id f9so1687969rvb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 23 Mar 2009 02:22:47 -0700 (PDT)
+In-Reply-To: <20090321172823.GA5509@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Derek M Jones <derek@knosof.co.uk>
-Cc: linux-sparse@vger.kernel.org
+To: Al Viro <viro@zeniv.linux.org.uk>
+Cc: Hannes Eder <hannes@hanneseder.net>, linux-sparse@vger.kernel.org, Nicholas Mc Guire <der.herr@hofr.at>
 
-On Sat, Mar 21, 2009 at 09:57:41PM +0000, Derek M Jones wrote:
->> to such bitfields, even if the size is smaller than int.  Arguably, that's
->> a hole in standard; in any case, both gcc and sparse *do* integer promotions
->> on those, with the same behaviour as usual (value-preserving promotion).
 >
-> The usual arithmetic conversions (of which integer promotion is a
-> subset) are performed where the standard says they are performed,
-> bit-field involving an implementation defined type or not.
+> It needed testing, all right - #elif handling got broken by the initial
+> variant...  Hopefully fixed version follows:
 
-The issue is whether integer promotion *do* anything for a type or happen
-to be a no-op.  6.3.1.1p2 lists only the bitfields based on _Bool, int,
-signed int and unsigned int, leaving the based on "some other implemention-
-defined type" case mentioned in 6.7.2.1p4 not covered.  Then it proceeds
-to say that everything not included in the lists is not affected by
-integer promotions.
+Looks good. BTW, it is simpler than my version which try to do
+the processor in argument list.
 
-I.e. 6.3.1.1p2 as written says that e.g.
-	unsigned long x : 2;
-on implementations allowing unsigned long-based bitfields is not affected
-by integer promotions.  All I can say is that in this case such reading
-of standard can get stuffed.  The sane behaviour is close to TC proposed
-in DR315, except that we should convert *all* bitfields that could be
-represented by int/unsigned int resp.  If we end up with that in standard -
-great, if not... I'm quite willing to go for deliberate non-compliance in
-this particular case.
+Applied, thanks.
 
->> * for all bitfields we are told that they act as (signed or unsigned)
->> integer types of specified width.  That has interesting implications:
->
-> See:
-> http://www.open-std.org/jtc1/sc22/wg14/www/docs/dr_315.htm
-
-Seen it...  AFAICS, the most recent part boils down to "since it's
-implementation-defined per 6.7.2.1p4, it's up to implementation to
-make up the rules".  Not particulary inspiring and Q2 there is a
-non-issue.  The interesting part is not sizeof, it's modulo by which
-the arithmetics is done...
-
->> unsigned long long f(unsigned long long n)
->> {
->> 	struct {
->> 		unsigned long long n:33;
->> 	} x = {n};
->> 	return x.n + x.n;
->> }
->>
->> *must* be equivalent to (n + n) & 0x1ffffffff on all implementations that
->> allow such bitfields.  I.e. these suckers are not promoted to base type;
->
-> Sentence 1162 says otherwise:
-> http://c0x.coding-guidelines.com/6.5.6.html
-
-And?  Of course usual arithmetic conversions are applied.  Integer promotions
-leave both arguments unaffected[1], left and right arguments have the same
-type, so we get the same type as the result.
-
-If you want to argue that type of either argument is simply unsigned long long,
-you'll need more relevant references than that.  In particular, I'd like to
-see how you propose to explain away 1407: "A bit-field is interpreted as a
-signed or unsigned integer type consisting of the specified number of bits."
-Unless you are talking about a target where the width of unsigned long long
-is 33 bits, I'd say that whatever it is, it's not unsigned long long.
-
-[1] they'd better - neither int nor unsigned int has to be wide enough to
-hold the possible value.
-
->> they act as if we really head 33bit unsigned type, usual conversions in
->> x.n + x.n left the result with that type and addition had been done within
->> that type.
->>
->> gcc does it that way, we do not (x.n gets promoted to unsigned long long).
->
-> It has been argued at WG14 that gcc gets it wrong.
-
-What was the outcome of that argument?
+Chris
