@@ -1,40 +1,48 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Novafora relicenses Transmeta sparse copyrights under the MIT license
-Date: Tue, 14 Apr 2009 15:49:52 -0700
-Message-ID: <49E51310.3050005@zytor.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Novafora relicenses Transmeta sparse copyrights under the MIT
+ license
+Date: Tue, 14 Apr 2009 17:06:15 -0700 (PDT)
+Message-ID: <alpine.LFD.2.00.0904141701110.4132@localhost.localdomain>
+References: <49E51310.3050005@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:60477 "EHLO
-	terminus.zytor.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751446AbZDNWue (ORCPT
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:54213 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751949AbZDOAIj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 14 Apr 2009 18:50:34 -0400
+	Tue, 14 Apr 2009 20:08:39 -0400
+In-Reply-To: <49E51310.3050005@zytor.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Robert Bedichek <rbedichek@novafora.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: linux-sparse@vger.kernel.org, Robert Bedichek <rbedichek@novafora.com>
 
-Hi all,
 
-I just received a git tree from Robert Bedichek, VP of Engineering at 
-Novafora Corporation, which bought Transmeta Corporation earlier this year.
 
-Novafora has agreed to relicense the copyrights in sparse that were 
-previously owned by Transmeta (i.e. the work Linus did before 
-2003-07-01) under the MIT license.
+On Tue, 14 Apr 2009, H. Peter Anvin wrote:
+> 
+> Novafora has agreed to relicense the copyrights in sparse that were previously
+> owned by Transmeta (i.e. the work Linus did before 2003-07-01) under the MIT
+> license.
+> 
+> Git repository:
+> 
+> http://git.kernel.org/?p=devel/sparse/novafora/sparse.git;a=summary
 
-Git repository:
+That commit is also merged into my copy of sparse at
 
-http://git.kernel.org/?p=devel/sparse/novafora/sparse.git;a=summary
+        http://git.kernel.org/?p=linux/kernel/git/torvalds/sparse.git;a=summary
 
-Specific commit:
+but it's mixed in with some of my other local changes (warnings for weak 
+functions being used in the same compilation unit - it triggers a bug in 
+some gcc versions), so if you want just the relicensing it's probably 
+better to pull the 'Novafora' branch from the repo Peter points to.
 
-http://git.kernel.org/?p=devel/sparse/novafora/sparse.git;a=commitdiff;h=23525c14bc263d70165fedf469d35cdb31b0ac35
+Now, to actually relicense all of git we need to get all other authors to 
+agree, but I think we pretty much had that agreement already several years 
+ago. I'm certainly personally ok with just going with the MIT license, but 
+if people want something else, then obviously that license is compatible 
+with a lot of other open-source licenses..
 
-Thanks to Novafora, and special thanks to Robert for putting up with a 
-couple of snafus over the course of this.  From start to finish, this 
-took over half a year to actually make happen.
-
-	-hpa
+		Linus
