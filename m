@@ -1,74 +1,46 @@
-From: David Given <dg@cowlark.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Novafora relicenses Transmeta sparse copyrights under the MIT
- 	license
-Date: Thu, 16 Apr 2009 06:32:30 +0100
-Message-ID: <49E6C2EE.5040201@cowlark.com>
-References: <49E51310.3050005@zytor.com>	 <alpine.LFD.2.00.0904141701110.4132@localhost.localdomain> <f19298770904150525w65e3b04cqe02afc9284eeb559@mail.gmail.com>
+	license
+Date: Fri, 17 Apr 2009 03:16:22 -0700
+Message-ID: <70318cbf0904170316v290edcfag2ac62a15a7254259@mail.gmail.com>
+References: <49E51310.3050005@zytor.com>
+	 <alpine.LFD.2.00.0904141701110.4132@localhost.localdomain>
+	 <f19298770904150525w65e3b04cqe02afc9284eeb559@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from b.painless.aaisp.net.uk ([81.187.30.52]:41929 "EHLO
-	b.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751671AbZDPFdM convert rfc822-to-8bit (ORCPT
+Received: from mail-fx0-f158.google.com ([209.85.220.158]:55175 "EHLO
+	mail-fx0-f158.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760185AbZDQKQX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 16 Apr 2009 01:33:12 -0400
-Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
-	by b.painless.aaisp.net.uk with esmtp (Exim 4.69)
-	(envelope-from <dg@cowlark.com>)
-	id 1LuKDi-000807-TJ
-	for linux-sparse@vger.kernel.org; Thu, 16 Apr 2009 06:33:07 +0100
-Received: from [12.51.3.3] (localhost [127.0.0.1])
-	by gate.cowlark.com (Postfix) with ESMTP id F14372C006
-	for <linux-sparse@vger.kernel.org>; Thu, 16 Apr 2009 06:32:53 +0100 (BST)
+	Fri, 17 Apr 2009 06:16:23 -0400
+Received: by mail-fx0-f158.google.com with SMTP id 2so821398fxm.37
+        for <linux-sparse@vger.kernel.org>; Fri, 17 Apr 2009 03:16:22 -0700 (PDT)
 In-Reply-To: <f19298770904150525w65e3b04cqe02afc9284eeb559@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, "H. Peter Anvin" <hpa@zytor.com>, linux-sparse@vger.kernel.org, Robert Bedichek <rbedichek@novafora.com>, Josh Triplett <josh@kernel.org>
 
------BEGIN PGP SIGNED MESSAGE-----
-Hash: SHA1
-
-Alexey Zaytsev wrote:
-[...]
+On Wed, Apr 15, 2009 at 5:25 AM, Alexey Zaytsev
+<alexey.zaytsev@gmail.com> wrote:
+> On Wed, Apr 15, 2009 at 04:06, Linus Torvalds
 > Excellent news. Congratulations to everyone and special thanks
 > to Peter and Robert.
-
-Hurray! Definitely. Nice work.
-
+>
 > Now, should all the contributors jump in and state their consent with
-> the relicensing? If so, for my modest contributions, you have it. Whi=
-le
+> the relicensing? If so, for my modest contributions, you have it. While
 > personally preferring LGPL, I'm also ok with MIT.
 
-Same here (for my tiny little patches).
+Great news. I am fine with LGPL or MIT license.
 
-I personally like MIT; I'm more interested in sparse as a *compiler*,
-not a linter, and right now the only MIT/BSD compilers are pcc (ancient=
-)
-and llvm (complex), and I think sparse would work very nicely as a thir=
-d
-alternative with a little work.
+> It probably should become the new official tree, if Josh and Christopher
+> do not mind.
 
-- --
-=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
-=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=
-=EF=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http:/=
-/www.cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
-=E2=94=82
-=E2=94=82 "All power corrupts, but we need electricity." --- Diana Wynn=
-e Jones,
-=E2=94=82 _Archer's Goon_
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.9 (GNU/Linux)
-Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
+I think probably best let Josh decide what to do with it. He can pull from
+my tree if he want. Either way I will keep doing what I am doing. There is not
+much traffic on sparse any way. Al Viro makes most of the heavy
+lifting now days.
 
-iD8DBQFJ5sLcf9E0noFvlzgRAmdxAJ4xgeAHtfwo14/P5fpMFJ7AFZ9WgQCeNvje
-w/pZ98yJklTev4GN0cjS/nw=3D
-=3D/8hF
------END PGP SIGNATURE-----
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Chris
