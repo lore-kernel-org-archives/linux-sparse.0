@@ -1,54 +1,50 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2] sparse: add LLVM code generation backend
-Date: Mon, 27 Apr 2009 16:27:01 -0700
-Message-ID: <70318cbf0904271627w25df616di12e5b1454e89764f@mail.gmail.com>
-References: <20090426205806.GA20933@havoc.gtf.org>
-	 <70318cbf0904271215o48ac3952ua0aca68a50cba16d@mail.gmail.com>
-	 <49F6342B.30605@garzik.org>
+Subject: Re: sparse: Why test-parse shows "+=" as a store?
+Date: Mon, 27 Apr 2009 16:39:55 -0700
+Message-ID: <70318cbf0904271639w20cc0300ge2e3ac0638c698dd@mail.gmail.com>
+References: <49F4C99A.7020208@garzik.org>
+	 <70318cbf0904262304j3d85f839o5fbd37d48f0e79e8@mail.gmail.com>
+	 <49F588BA.4060503@garzik.org>
+	 <70318cbf0904271045s6b2e300evad7f6ec05dd96b3f@mail.gmail.com>
+	 <49F6386D.5050809@garzik.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rv-out-0506.google.com ([209.85.198.227]:24940 "EHLO
-	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750997AbZD0X1C convert rfc822-to-8bit (ORCPT
+Received: from yw-out-2324.google.com ([74.125.46.29]:11450 "EHLO
+	yw-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752782AbZD0Xj4 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 Apr 2009 19:27:02 -0400
-Received: by rv-out-0506.google.com with SMTP id f6so1555384rvb.5
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Apr 2009 16:27:01 -0700 (PDT)
-In-Reply-To: <49F6342B.30605@garzik.org>
+	Mon, 27 Apr 2009 19:39:56 -0400
+Received: by yw-out-2324.google.com with SMTP id 5so139975ywb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Apr 2009 16:39:55 -0700 (PDT)
+In-Reply-To: <49F6386D.5050809@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Jeff Garzik <jeff@garzik.org>
-Cc: linux-sparse@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-On Mon, Apr 27, 2009 at 3:39 PM, Jeff Garzik <jeff@garzik.org> wrote:
-> You can see the above code was taken verbatim from show-parse.c, and =
-is
-> probably nothing more than a check the original author (Linus?) felt
-> appropriate at the time, for show-parse.c. =A0I wouldn't read too muc=
-h into
-> its presence in s2l-gen.c -- maybe those checks can simply be deleted=
-=2E
+On Mon, Apr 27, 2009 at 3:57 PM, Jeff Garzik <jeff@garzik.org> wrote:
+>
+> Well, I'll tell you what. =A0If you or somebody else wants to volunte=
+er to
+> make key sparse & linearize changes, then I will work on a linearize =
+LLVM
+> backend.
+>
+> Absent that, the motivation is lower, considering I have a current, w=
+orking
+> approach that does not require any upstream changes.
 
-I did not explain it clear it enough. It is not about the code is not
-used. My point is:
+Unless I am missing some thing. I don't see your back end generate
+GET_ELEMENT_PTR instruction in LLVM. So you should be able to use exist=
+ing
+linearize instruction to generate what your patch does, without up stre=
+am
+changes.
 
-1) linearize instruction does not lose the information you care about
-   generating better LLVM code. The evaluation does.
-
-2) By writing your own AST recursive code, it does not gain more
-   information than what you can already do with current linearize
-   instruction. The EXPR_DEREF is processed in evaluation stage.
-   The structure laid you care about is already gone by the time your
-   s2l-gen about to emit LLVM byte codes. You did not generate any
-   GET_ELEMENT_PTR in your LLVM byte code, right?
-
-I still think you should write your LLVM back end base on linearized
-instructions. Avoiding it right now does not gain your new features, bu=
-t
-duplicate a lot of complexity. I am not convinced those complexity is
-justifiable yet.
+To generate GET_ELEMENT_PTR properly require upstream changes, but
+your patch doesn't do that either.
 
 Chris
 --
