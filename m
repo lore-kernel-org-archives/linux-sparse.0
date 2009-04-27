@@ -1,78 +1,71 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Print an error if typeof() lacks an argument
-Date: Sun, 26 Apr 2009 23:38:51 -0700
-Message-ID: <70318cbf0904262338g698eb2g7265b472fb0efd46@mail.gmail.com>
-References: <20090425130343.3df87cbb@notas>
+Subject: Re: sparse: Why test-parse shows "+=" as a store?
+Date: Sun, 26 Apr 2009 23:04:19 -0700
+Message-ID: <70318cbf0904262304j3d85f839o5fbd37d48f0e79e8@mail.gmail.com>
+References: <49F4C99A.7020208@garzik.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gx0-f166.google.com ([209.85.217.166]:58425 "EHLO
+Received: from mail-gx0-f166.google.com ([209.85.217.166]:45720 "EHLO
 	mail-gx0-f166.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756735AbZD0Giw convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1754001AbZD0GEU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 Apr 2009 02:38:52 -0400
-Received: by gxk10 with SMTP id 10so4456402gxk.13
-        for <linux-sparse@vger.kernel.org>; Sun, 26 Apr 2009 23:38:51 -0700 (PDT)
-In-Reply-To: <20090425130343.3df87cbb@notas>
+	Mon, 27 Apr 2009 02:04:20 -0400
+Received: by gxk10 with SMTP id 10so4438224gxk.13
+        for <linux-sparse@vger.kernel.org>; Sun, 26 Apr 2009 23:04:19 -0700 (PDT)
+In-Reply-To: <49F4C99A.7020208@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Martin Nagy <mnagy@redhat.com>
-Cc: linux-sparse@vger.kernel.org
+To: Jeff Garzik <jeff@garzik.org>
+Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
 
-On Sat, Apr 25, 2009 at 4:03 AM, Martin Nagy <mnagy@redhat.com> wrote:
+On Sun, Apr 26, 2009 at 1:52 PM, Jeff Garzik <jeff@garzik.org> wrote:
 >
-> We weren't checking if the initializer isn't NULL, which caused spars=
-e
-> to segfault later on when performing lazy evaluation in classify_type=
-().
+> Consider this testcase:
 >
-> Signed-off-by: Martin Nagy <nagy.martin@gmail.com>
-> ---
-> =A0parse.c | =A0 17 +++++++++++------
-> =A01 files changed, 11 insertions(+), 6 deletions(-)
+> int bloo = 0;
 >
-> diff --git a/parse.c b/parse.c
-> index 9662122..18cfaef 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -924,12 +924,17 @@ static struct token *typeof_specifier(struct to=
-ken *token, struct decl_state *ct
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0ctx->ctype.base_type =3D sym->ctype.ba=
-se_type;
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0apply_ctype(token->pos, &sym->ctype, &=
-ctx->ctype);
-> =A0 =A0 =A0 =A0} else {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct symbol *typeof_sym =3D alloc_sym=
-bol(token->pos, SYM_TYPEOF);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 token =3D parse_expression(token->next,=
- &typeof_sym->initializer);
-> -
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 typeof_sym->endpos =3D token->pos;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 ctx->ctype.base_type =3D typeof_sym;
-> - =A0 =A0 =A0 }
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct expression *expr;
+> void inc_bloo(void)
+> {
+>        bloo += 2;
+> }
+>
 
-I think you want expr =3D NULL here. Otherwise if(expr) will pick up cr=
-ap.
+test-linearize show:
 
-I would just add two lines after "token =3D
-parse_expression(token->next, &typeof_sym->initializer);"
+inc_bloo:
+.L0x7fc013df7010:
+	<entry-point>
+	load.32     %r1 <- 0[bloo]
+	add.32      %r3 <- %r1, $2
+	store.32    %r3 -> 0[bloo]
+	ret
 
-if (!type->initializer)
-        sparse_error(token->pos, "expected expression after the '(' tok=
-en");
 
-If there is compile error, the sparse should not continue the later
-stage any way.
+get_bloo:
+.L0x7fc013df70a0:
+	<entry-point>
+	load.32     %r5 <- 0[bloo]
+	ret.32      %r5
 
-BTW, can you add a validation test case which will trigger the bug?
+> Any idea why?  I'm not sure if this is a tree-walker bug or something from
+> the parsing.  The test-parse output is below...
 
-Thanks
+So obvious the parser is correct and I will blame your code :-).
+
+This bring the points that you really should make your LLVM converter
+base on the linearized byte code. Being able to convert to LLVM
+byte code is actually one of my consideration when I hack on the linearized
+back end back then. Look, there is even reserved an opcode for
+GET_ELEMENT_PTR. If there is some thing need to change to the linearized
+back end to make this happen, I am glad to do it.
+
+But I don't want to have yet another linearized equivalent code base in
+sparse. This is duplicated effort. Bugs will need to fix in both place.
+I am pretty sure using the linearized back end will greatly simplify
+your LLVM byte code generation.
+
+Do you want to give it a try?
 
 Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
