@@ -1,66 +1,58 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: Re: sparse: Why test-parse shows "+=" as a store?
-Date: Mon, 27 Apr 2009 18:57:49 -0400
-Message-ID: <49F6386D.5050809@garzik.org>
-References: <49F4C99A.7020208@garzik.org>	 <70318cbf0904262304j3d85f839o5fbd37d48f0e79e8@mail.gmail.com>	 <49F588BA.4060503@garzik.org> <70318cbf0904271045s6b2e300evad7f6ec05dd96b3f@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v2] sparse: add LLVM code generation backend
+Date: Mon, 27 Apr 2009 16:27:01 -0700
+Message-ID: <70318cbf0904271627w25df616di12e5b1454e89764f@mail.gmail.com>
+References: <20090426205806.GA20933@havoc.gtf.org>
+	 <70318cbf0904271215o48ac3952ua0aca68a50cba16d@mail.gmail.com>
+	 <49F6342B.30605@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from srv5.dvmed.net ([207.36.208.214]:38714 "EHLO mail.dvmed.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752854AbZD0W5w (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 Apr 2009 18:57:52 -0400
-In-Reply-To: <70318cbf0904271045s6b2e300evad7f6ec05dd96b3f@mail.gmail.com>
+Received: from rv-out-0506.google.com ([209.85.198.227]:24940 "EHLO
+	rv-out-0506.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750997AbZD0X1C convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 27 Apr 2009 19:27:02 -0400
+Received: by rv-out-0506.google.com with SMTP id f6so1555384rvb.5
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Apr 2009 16:27:01 -0700 (PDT)
+In-Reply-To: <49F6342B.30605@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>
+To: Jeff Garzik <jeff@garzik.org>
+Cc: linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-> On Mon, Apr 27, 2009 at 3:28 AM, Jeff Garzik <jeff@garzik.org> wrote:
->> Use of test-parsing eliminates my code as a factor -- which was why I
->> mentioned it.
->>
->> Oh well, I will figure it out.
-> 
-> Let me take a look at your code as well. Maybe I can spot some thing.
-> 
->> linearized output is too low level for LLVM in several cases.  The shifts in
->> linearize_load_gen() and linearize_store_gen() get in the way, for example.
->>  Having sparse calculate struct offsets itself is also not desirable: in
->> order to use LLVM's getelementptr instruction, you should instead give LLVM
->> the type information and member indices, and let it figure out the address
->> calculation from there.
-> 
-> Right. I think GET_ELEMENT_PTR is the only part missing. I think it is
-> a relative small change to preserve the structure laid, comparing to rewriting
-> everything.
-> 
-> BTW, I don't think linearize lost that structure information. It
-> happens way before
-> linearize stage. Sparse converts the structure member access into void pointer
-> add very early on. If you want to preserve that information,
-> you need to change more than just linearize code. So linearize is not the
-> blocking factor here. It needs upstream change as well.
+On Mon, Apr 27, 2009 at 3:39 PM, Jeff Garzik <jeff@garzik.org> wrote:
+> You can see the above code was taken verbatim from show-parse.c, and =
+is
+> probably nothing more than a check the original author (Linus?) felt
+> appropriate at the time, for show-parse.c. =A0I wouldn't read too muc=
+h into
+> its presence in s2l-gen.c -- maybe those checks can simply be deleted=
+=2E
 
-I just managed to figure out how to locate, enumerate and declare sparse 
-SYM_STRUCT to LLVM backend, in s2l-gen.c, without any upstream changes.
+I did not explain it clear it enough. It is not about the code is not
+used. My point is:
 
+1) linearize instruction does not lose the information you care about
+   generating better LLVM code. The evaluation does.
 
->> Thus, use of linearize would imply having to work backwards and recreate
->> information lost during the linearization.
-> 
-> Or, we can teach sparse to preserve that information in the linearize level.
+2) By writing your own AST recursive code, it does not gain more
+   information than what you can already do with current linearize
+   instruction. The EXPR_DEREF is processed in evaluation stage.
+   The structure laid you care about is already gone by the time your
+   s2l-gen about to emit LLVM byte codes. You did not generate any
+   GET_ELEMENT_PTR in your LLVM byte code, right?
 
-Well, I'll tell you what.  If you or somebody else wants to volunteer to 
-make key sparse & linearize changes, then I will work on a linearize 
-LLVM backend.
+I still think you should write your LLVM back end base on linearized
+instructions. Avoiding it right now does not gain your new features, bu=
+t
+duplicate a lot of complexity. I am not convinced those complexity is
+justifiable yet.
 
-Absent that, the motivation is lower, considering I have a current, 
-working approach that does not require any upstream changes.
-
-	Jeff
-
-
-
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
