@@ -1,76 +1,142 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: sparse: Why test-parse shows "+=" as a store?
-Date: Sun, 26 Apr 2009 16:52:42 -0400
-Message-ID: <49F4C99A.7020208@garzik.org>
+From: Martin Nagy <mnagy@redhat.com>
+Subject: Re: [PATCH] Print an error if typeof() lacks an argument
+Date: Mon, 27 Apr 2009 11:15:37 +0200
+Message-ID: <20090427111537.17956e38@notas>
+References: <20090425130343.3df87cbb@notas>
+	<70318cbf0904262338g698eb2g7265b472fb0efd46@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="MP_/DjJAOzmV8uyxb1jDOCEXGoF"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from srv5.dvmed.net ([207.36.208.214]:49439 "EHLO mail.dvmed.net"
+Received: from mx2.redhat.com ([66.187.237.31]:60899 "EHLO mx2.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754097AbZDZUwp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 26 Apr 2009 16:52:45 -0400
+	id S1752596AbZD0JPn (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 27 Apr 2009 05:15:43 -0400
+In-Reply-To: <70318cbf0904262338g698eb2g7265b472fb0efd46@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Al Viro <viro@ZenIV.linux.org.uk>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
 
+--MP_/DjJAOzmV8uyxb1jDOCEXGoF
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: quoted-printable
+Content-Disposition: inline
 
-Consider this testcase:
+Christopher Li wrote:
+> On Sat, Apr 25, 2009 at 4:03 AM, Martin Nagy <mnagy@redhat.com> wrote:
+> > + =A0 =A0 =A0 =A0 =A0 =A0 =A0 struct expression *expr;
+>=20
+> I think you want expr =3D NULL here. Otherwise if(expr) will pick up crap.
 
-int bloo = 0;
+Right. I somehow assumed that parse_expression() will set it to NULL in
+case there is not any expression. I attached a new patch which fixes
+this.
 
-void inc_bloo(void)
-{
-	bloo += 2;
+> I would just add two lines after "token =3D
+> parse_expression(token->next, &typeof_sym->initializer);"
+>=20
+> if (!type->initializer)
+>         sparse_error(token->pos, "expected expression after the '(' token=
+");
+>=20
+> If there is compile error, the sparse should not continue the later
+> stage any way.
+
+That won't work. sparse_error() will not exit, and sparse will still
+segfault later, so we have to return from the function. You could
+instead do something like this:
+
+if (!typeof_sym->initializer) {
+	sparse_error(token->pos, "expected ...");
+	return expect(token, ')', "after typeof");
 }
 
-int get_bloo(void)
-{
-	return bloo;
-}
+Or use a goto to jump to the return statement. In any case, I didn't
+want to repeat the code and cause a memory leak. And I didn't want to
+use a goto. I guess that it's ultimately a matter of style. If you
+think the memory leak would be acceptable I can rework the patch again.
+The leak would only occur in this specific case, so I guess maybe it
+would be acceptable, but I wasn't sure so I rather went with this
+approach.
 
-test-parse (and its derivatives, compile-i386 and s2l-gen) parse the 
-above "bloo += 2" as a simple assignment "bloo = 2".
+> BTW, can you add a validation test case which will trigger the bug?
 
-Any idea why?  I'm not sure if this is a tree-walker bug or something 
-from the parsing.  The test-parse output is below...
+Yup, it's in the new patch.
 
-	Jeff
+Martin
+
+--MP_/DjJAOzmV8uyxb1jDOCEXGoF
+Content-Type: text/x-patch
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename=0001-Print-an-error-if-typeof-lacks-an-argument.patch
+
+From bbd2e88cdd9d36d47ce50204d18547e08f2e2bea Mon Sep 17 00:00:00 2001
+From: Martin Nagy <nagy.martin@gmail.com>
+Date: Mon, 27 Apr 2009 10:48:50 +0200
+Subject: [PATCH] Print an error if typeof() lacks an argument
+
+We weren't checking if the initializer isn't NULL, which caused sparse
+to segfault later on when performing lazy evaluation in classify_type().
+
+Signed-off-by: Martin Nagy <nagy.martin@gmail.com>
+---
+ parse.c                 |   17 +++++++++++------
+ validation/bad-typeof.c |   15 +++++++++++++++
+ 2 files changed, 26 insertions(+), 6 deletions(-)
+ create mode 100644 validation/bad-typeof.c
+
+diff --git a/parse.c b/parse.c
+index 9662122..604e528 100644
+--- a/parse.c
++++ b/parse.c
+@@ -924,12 +924,17 @@ static struct token *typeof_specifier(struct token *token, struct decl_state *ct
+ 		ctx->ctype.base_type = sym->ctype.base_type;
+ 		apply_ctype(token->pos, &sym->ctype, &ctx->ctype);
+ 	} else {
+-		struct symbol *typeof_sym = alloc_symbol(token->pos, SYM_TYPEOF);
+-		token = parse_expression(token->next, &typeof_sym->initializer);
+-
+-		typeof_sym->endpos = token->pos;
+-		ctx->ctype.base_type = typeof_sym;
+-	}		
++		struct expression *expr = NULL;
++		token = parse_expression(token->next, &expr);
++		if (expr) {
++			struct symbol *typeof_sym = alloc_symbol(token->pos, SYM_TYPEOF);
++			typeof_sym->endpos = token->pos;
++			typeof_sym->initializer = expr;
++			ctx->ctype.base_type = typeof_sym;
++		} else {
++			sparse_error(token->pos, "expected expression after the '(' token");
++		}
++	}
+ 	return expect(token, ')', "after typeof");
+ }
+ 
+diff --git a/validation/bad-typeof.c b/validation/bad-typeof.c
+new file mode 100644
+index 0000000..5c27de4
+--- /dev/null
++++ b/validation/bad-typeof.c
+@@ -0,0 +1,15 @@
++static int fun(void)
++{
++	typeof() a;
++	int b;
++
++	a = b;
++}
++/*
++ * check-name: Bad typeof syntax segfault
++ *
++ * check-error-start
++bad-typeof.c:3:16: error: expected expression after the '(' token
++bad-typeof.c:6:9: error: identifier 'a' has no type
++ * check-error-end
++ */
+-- 
+1.6.0.6
 
 
-
-
-> hello.c:2:5: warning: symbol 'bloo' was not declared. Should it be static?
-> hello.c:4:6: warning: symbol 'inc_bloo' was not declared. Should it be static?
-> hello.c:9:5: warning: symbol 'get_bloo' was not declared. Should it be static?
-> 
-> .align 4
-> int [signed] [addressable] [toplevel] [assigned] bloo
->  = 
-> 	movi.32		v1,$0
-> , 
-> void extern [addressable] [toplevel] inc_bloo( ... )
-> 	movi.32		v2,$2
-> 	movi.32		v3,$bloo
-> 	st.32		v2,[v3]
-> .L0x7f0b0b4a2030:
-> 	addi.32		v4,vFP,$offsetof(return:0x7f0b0b4a2030)
-> 	ld.-1		v5,[v4]
-> 	mov.-1		retval,5
-> 	ret
-> , 
-> .align 4
-> int extern [signed] [addressable] [toplevel] get_bloo( ... )
-> 	movi.32		v6,$bloo
-> 	ld.32		v7,[v6]
-> 	addi.32		v8,vFP,$offsetof(return:0x7f0b0b4a23b0)
-> 	st.32		v7,[v8]
-> 	ret		(0x7f0b0b4a23b0)
-> .L0x7f0b0b4a23b0:
-> 	addi.32		v9,vFP,$offsetof(return:0x7f0b0b4a23b0)
-> 	ld.32		v10,[v9]
-> 	mov.32		retval,10
-> 	ret
-> 
-
+--MP_/DjJAOzmV8uyxb1jDOCEXGoF--
