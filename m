@@ -1,150 +1,84 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: Re: [PATCH v2] sparse: add LLVM code generation backend
-Date: Wed, 29 Apr 2009 18:25:13 -0400
-Message-ID: <49F8D3C9.6060404@garzik.org>
-References: <20090426205806.GA20933@havoc.gtf.org>	 <70318cbf0904271215o48ac3952ua0aca68a50cba16d@mail.gmail.com>	 <49F6342B.30605@garzik.org>	 <70318cbf0904271627w25df616di12e5b1454e89764f@mail.gmail.com>	 <49F64E9A.2030009@garzik.org>	 <70318cbf0904271804i4b8a14cbqfa62f521dc7258a3@mail.gmail.com>	 <49F65A1A.50300@garzik.org> <70318cbf0904281559u1e8ea134r36282e1e0132fb7a@mail.gmail.com>
+From: David Given <dg@cowlark.com>
+Subject: Re: `char * s = "abc";' causes compile to crash with a segfault
+Date: Wed, 29 Apr 2009 23:43:15 +0100
+Message-ID: <49F8D803.6080000@cowlark.com>
+References: <op.us51m0w9ucb9g9@home-5db3af48a> <49F8C1EB.5010909@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from srv5.dvmed.net ([207.36.208.214]:57569 "EHLO mail.dvmed.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1761645AbZD2WZR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 29 Apr 2009 18:25:17 -0400
-In-Reply-To: <70318cbf0904281559u1e8ea134r36282e1e0132fb7a@mail.gmail.com>
+Received: from a.painless.aaisp.net.uk ([81.187.30.51]:41822 "EHLO
+	a.painless.aaisp.net.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752347AbZD2Wsv convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 29 Apr 2009 18:48:51 -0400
+Received: from tiar.cowlark.co.uk ([81.187.191.218] helo=gate.cowlark.com)
+	by a.painless.aaisp.net.uk with esmtp (Exim 4.69)
+	(envelope-from <dg@cowlark.com>)
+	id 1LzIa9-00057L-4C
+	for linux-sparse@vger.kernel.org; Wed, 29 Apr 2009 23:48:49 +0100
+Received: from [10.0.0.5] (localhost [127.0.0.1])
+	by gate.cowlark.com (Postfix) with ESMTP id 5372120081
+	for <linux-sparse@vger.kernel.org>; Wed, 29 Apr 2009 23:48:43 +0100 (BST)
+In-Reply-To: <49F8C1EB.5010909@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-> On Mon, Apr 27, 2009 at 6:21 PM, Jeff Garzik <jeff@garzik.org> wrote:
->> You mean, besides the reasons already listed?  Namely, no upstream changes
->> are required, and I already have something that works.
->>
->> Sure, the same trick can be applied.  But that requires a total backend
->> rewrite plus dealing with linearize obstacles already described (ref
->> linearize_load_gen, linearize_store_gen).  Thus it is obviously a lot more
->> work, with additional obstacles (patching upstream, which affects existing
->> users), just get back to achieving the same result :)
-> 
-> I take a look at the how LLVM handle bit fields. Please correct me if
-> I am wrong.
-> LLVM does not take bit field member as a type. Given the example:
-> 
-> struct s {
->    int a:3;
->    int b:3;
-> } foo;
-> 
-> void func (struct s *a)
-> {
->    a->a = 6;
-> }
-> 
-> The LLVM outputs:
-> 
-> target datalayout =
-> "e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32"
-> target triple = "i386-pc-linux-gnu"
-> 	%struct.s = type <{ i8, [3 x i8] }>
-> @foo = common global %struct.s zeroinitializer, align 4		;
-> <%struct.s*> [#uses=0]
-> 
-> define void @func(%struct.s* nocapture %a) nounwind {
-> entry:
-> 	%0 = getelementptr %struct.s* %a, i32 0, i32 0		; <i8*> [#uses=2]
-> 	%1 = load i8* %0, align 1		; <i8> [#uses=1]
-> 	%2 = or i8 %1, 6		; <i8> [#uses=1]
-> 	%3 = and i8 %2, -2		; <i8> [#uses=1]
-> 	store i8 %3, i8* %0, align 1
-> 	ret void
-> }
-> 
-> LLVM does not treat bit field as first class types. It apply bit mask
-> before/after
-> the load/store to fix things up. It actually is the same reason
-> linearize_load_gen
-> and linearize_store_gen exists in the first place. It does the same thing.
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
 
-LLVM treats all "i%u" types: i1, i11, i16, i32, i64, etc. as first class 
-types.  See http://www.llvm.org/docs/LangRef.html
+Jeff Garzik wrote:
+[...]
+>> Just out of curiosity, is sparse stable enough in general to be used
+>> as a full-fledged front-end for a C compiler?
+>=20
+> As long as you don't do super-weird, non-standard C:  sure.
 
-Therefore, the above is not a fundamental instrinsic of LLVM, but rather 
-  how one LLVM _emitter_ -- either llvm-gcc or clang, I assume -- chose 
-to handle bitfields.
+Well --- I did find a whole bunch of bugs when working on Clue. OTOH
+that was a while ago, so some of them might have been fixed by now. Loo=
+k
+back in the archives for 'Odd sparse behaviour' posted on 2008-07-06,
+and 'Odd behaviour with OP_SCAST' posted on 2008-09-08.
 
-Big, big difference!
+In addition, I found a number of places where minor tweaks to what data
+Sparse keeps around can make a compiler writer's life much easier; for
+example, keeping more type data makes finding the type of a pseudo much
+easier. There's a combined patch shipped with Clue that fixes and
+enhances a bunch of this stuff:
 
-Next, you can see from C99 6.7.2.1 P9, the layout of bit-fields may not 
-necessary correspond to ad->bit_offset as linearize_{load,store}_gen assume.
+http://cluecc.svn.sourceforge.net/viewvc/cluecc/clue/sparse.patch?revis=
+ion=3D34&view=3Dmarkup
 
-Run "info gcc" and do a search on "bitfield", after reviewing C99 again. 
-  linearize hardcodes behavior it should not.
+(In fact, if you're generating llvm assembly directly, you may find it
+easier just to add a backend to Clue rather than write your own, er,
+middle-end --- a lot of the simplifications Clue does for languages lik=
+e
+Javascript also apply to llvm bitcode.)
 
+<plug> Did I mention that Clue is now converting C into Java source tha=
+t
+runs at 40% of compiled C? </plug>
 
+- --
+=E2=94=8C=E2=94=80=E2=94=80=E2=94=80 =EF=BD=84=EF=BD=87=EF=BC=A0=EF=BD=83=
+=EF=BD=8F=EF=BD=97=EF=BD=8C=EF=BD=81=EF=BD=92=EF=BD=8B=EF=BC=8E=EF=BD=83=
+=EF=BD=8F=EF=BD=8D =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80 http:/=
+/www.cowlark.com =E2=94=80=E2=94=80=E2=94=80=E2=94=80=E2=94=80
+=E2=94=82
+=E2=94=82 "People who think they know everything really annoy those of =
+us who
+=E2=94=82 know we don't." --- Bjarne Stroustrup
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.9 (GNU/Linux)
+Comment: Using GnuPG with Mozilla - http://enigmail.mozdev.org
 
-> Let's review why you insist on duplicating the lineariztion effort.
-> 
-> 1) You have the code already working.
->     True. But a back end base on linearize instruction will be much
->     simpler to your existing code.
-
-This is what we call in the engineering business a "wild-assed guess."
-
-You have obviously not reviewed C99 on bitfields nor looked closely at 
-LLVM, so judgement of "will be much simpler" is easily questioned.
-
-
-> 2) Require up stream changes.
->     Let's compare apple to apple. Using linearize instruction to generate
->     a output exactly as your V2 does not require up stream changes.
->     It is not a reason to pick one over another.
-
-That is a silly comparison, because my LLVM backend is not static at V2. 
-It should be self-evident that one looks at future changes needed to 
-complete an LLVM backend.
-
-
-> 3) Obstacles in linearize_load_gen and linearize_store_gen.
->    It turns out those "obstacles" are exactly what you need to handle
->    bit fields. One more reason to use linearize instructions.
-
-False, as shown above.
-
-
-> 4) More work to get the same results.
->    It will be more work for *you* to write yet another back end.
-
-Yes, and I am doing the work.  For fun.  So this is supremely relevant.
-
-It's amusing how easily you hand-wave away my engineering time :) 
-Shades of the kernel...
-
-
->    But if you compare the end result. The one base on linearize instruction
->    will be much simpler.
-
-We have no end result to compare.
-
-
->    It will be less new code get check in to the sparse
->    tree, less code for people other than you to review. Less work to maintain
->    one implementation of linearization instead of two.
-
-Do you not see the difference between simple tree walking, and forced 
-generation of basic blocks and instructions chosen by sparse?  There are 
-multiple tree walkers in sparse -- not just linearize.c.
-
-
-Overall, I think linearized format is too limiting and low level for 
-LLVM, and thus chose a different starting point.
-
-
-I wouldn't mind seeing a single tree walker implementation in sparse, 
-but it would be incorrect to assume that linearize.c is a generic tree 
-walker.
-
-	Jeff
-
-
+iD8DBQFJ+Nf6f9E0noFvlzgRAvpIAKCcJG0/SZ0mbx5Iel0iR2GbfJpclACgiQuw
+/pkelbkI9I0FkdXqX/bTbQ0=3D
+=3D581X
+-----END PGP SIGNATURE-----
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
