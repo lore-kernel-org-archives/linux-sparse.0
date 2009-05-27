@@ -1,32 +1,45 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Support the __thread storage class
-Date: Tue, 19 May 2009 03:00:40 -0700
-Message-ID: <70318cbf0905190300o1b82f2aax433b08248ac08c3a@mail.gmail.com>
-References: <70318cbf0904270020v78c98b7awee9ef64a6d60e14b@mail.gmail.com>
-	 <1242488218-19811-1-git-send-email-albertito@blitiri.com.ar>
+From: Anderson Lizardo <anderson.lizardo@gmail.com>
+Subject: pysparse: Python bindings for sparse
+Date: Tue, 26 May 2009 21:38:25 -0400
+Message-ID: <5b5833aa0905261838r6ddfb0f4xa343f787c47e4f40@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from yx-out-2324.google.com ([74.125.44.30]:48277 "EHLO
-	yx-out-2324.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753366AbZESKAj (ORCPT
+Received: from mail-ew0-f176.google.com ([209.85.219.176]:62161 "EHLO
+	mail-ew0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751147AbZE0BiY (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 May 2009 06:00:39 -0400
-Received: by yx-out-2324.google.com with SMTP id 3so2335118yxj.1
-        for <linux-sparse@vger.kernel.org>; Tue, 19 May 2009 03:00:40 -0700 (PDT)
-In-Reply-To: <1242488218-19811-1-git-send-email-albertito@blitiri.com.ar>
+	Tue, 26 May 2009 21:38:24 -0400
+Received: by ewy24 with SMTP id 24so4193978ewy.37
+        for <linux-sparse@vger.kernel.org>; Tue, 26 May 2009 18:38:25 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alberto Bertogli <albertito@blitiri.com.ar>
-Cc: linux-sparse@vger.kernel.org, josh@kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sat, May 16, 2009 at 8:36 AM, Alberto Bertogli
-<albertito@blitiri.com.ar> wrote:
-> GCC supports a __thread storage class, used to indicate thread-local
-> storage. It may be used alone, or with extern or static.
->
+Hi,
 
-Thanks, I applied it to my tree already.
+I am proud to announce the availability of pysparse, that consists of
+Python bindings for sparse. It can be obtained from:
 
-Chris
+http://gitorious.org/pysparse/pysparse
+
+Please note it is the initial commit, and many things are missing (see
+the TODO section on the README). But I've already added enough support
+to port test-dissect, test-lexing and test-linearize to python, and
+they work just fine :)
+
+My plans are to add support for more functions incrementally as I
+become more familiar with the current public sparse API.
+
+Comments, suggestions and contributions are welcome. Note that I've
+intentionally licensed pysparse under the MIT license so that it can
+be added to a future sparse release licensed under it (if the sparse
+maintainers want so). But for now pysparse can live outside sparse
+tree just fine.
+
+Thanks,
+-- 
+Anderson Lizardo
+Instituto Nokia de Tecnologia (INdT)
+Manaus - Brazil
