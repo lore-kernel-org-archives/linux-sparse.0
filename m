@@ -1,67 +1,28 @@
 From: Samuel Bronson <naesten@gmail.com>
-Subject: [PATCH 3/3] Whitespace tweaks in symbol.h
-Date: Sun, 31 May 2009 11:44:12 -0400
-Message-ID: <1243784652-31802-3-git-send-email-naesten@gmail.com>
+Subject: Re: [PATCH 2/3] Replace SYM_ and MOD_ #defines with enums in
+	symbol.h.
+Date: Sun, 31 May 2009 12:03:04 -0400
+Message-ID: <db65a1cd0905310903i4e33c29fv81ac4d214b7d1752@mail.gmail.com>
 References: <1243784652-31802-1-git-send-email-naesten@gmail.com>
- <1243784652-31802-2-git-send-email-naesten@gmail.com>
+	 <1243784652-31802-2-git-send-email-naesten@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 170-23.widener.edu ([147.31.170.23]:33432 "EHLO
-	naruto.cs.widener.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756139AbZEaQBS (ORCPT
+Received: from an-out-0708.google.com ([209.85.132.246]:14952 "EHLO
+	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753466AbZEaQDD (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 31 May 2009 12:01:18 -0400
+	Sun, 31 May 2009 12:03:03 -0400
+Received: by an-out-0708.google.com with SMTP id d40so14893269and.1
+        for <linux-sparse@vger.kernel.org>; Sun, 31 May 2009 09:03:04 -0700 (PDT)
 In-Reply-To: <1243784652-31802-2-git-send-email-naesten@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Samuel Bronson <naesten@gmail.com>
 
-Changes-licensed-under: ISC license
-Signed-off-by: Samuel Bronson <naesten@gmail.com>
----
- symbol.h |   22 +++++++++++-----------
- 1 files changed, 11 insertions(+), 11 deletions(-)
+On Sun, May 31, 2009 at 11:44 AM, Samuel Bronson <naesten@gmail.com> wrote:
+> Adjust the associated fields to match.
 
-diff --git a/symbol.h b/symbol.h
-index 4a16f0d..3dd4531 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -24,16 +24,16 @@
-  * declared.
-  */
- enum namespace {
--	NS_NONE = 0,
--	NS_MACRO = 1,
--	NS_TYPEDEF = 2,
--	NS_STRUCT = 4,  // Also used for unions and enums.
--	NS_LABEL = 8,
--	NS_SYMBOL = 16,
--	NS_ITERATOR = 32,
--	NS_PREPROCESSOR = 64,
--	NS_UNDEF = 128,
--	NS_KEYWORD = 256,
-+	NS_NONE		= 0,
-+	NS_MACRO	= 1,
-+	NS_TYPEDEF	= 2,
-+	NS_STRUCT	= 4,  // Also used for unions and enums.
-+	NS_LABEL	= 8,
-+	NS_SYMBOL	= 16,
-+	NS_ITERATOR	= 32,
-+	NS_PREPROCESSOR	= 64,
-+	NS_UNDEF	= 128,
-+	NS_KEYWORD	= 256,
- };
- 
- enum type {
-@@ -59,7 +59,7 @@ enum type {
- };
- 
- enum keyword {
--	KW_SPECIFIER 	= 1 << 0,
-+	KW_SPECIFIER	= 1 << 0,
- 	KW_MODIFIER	= 1 << 1,
- 	KW_QUALIFIER	= 1 << 2,
- 	KW_ATTRIBUTE	= 1 << 3,
--- 
-1.6.3.1.169.g33fd.dirty
-
+Dang it, I seem to have somehow forgotten to test after this step ... whoops!
