@@ -1,28 +1,27 @@
-From: Samuel Bronson <naesten@gmail.com>
-Subject: Re: [PATCH 2/3] Replace SYM_ and MOD_ #defines with enums in
-	symbol.h.
-Date: Sun, 31 May 2009 12:03:04 -0400
-Message-ID: <db65a1cd0905310903i4e33c29fv81ac4d214b7d1752@mail.gmail.com>
+From: Alexey Zaytsev <alexey.zaytsev@gmail.com>
+Subject: Re: [PATCH 1/3] Add -*- gdb-script -*- to the top of gdbhelpers, for
+	Emacs
+Date: Mon, 1 Jun 2009 10:21:35 +0400
+Message-ID: <f19298770905312321q6eedf6e8ge7d5fe5ec46740da@mail.gmail.com>
 References: <1243784652-31802-1-git-send-email-naesten@gmail.com>
-	 <1243784652-31802-2-git-send-email-naesten@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from an-out-0708.google.com ([209.85.132.246]:14952 "EHLO
-	an-out-0708.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753466AbZEaQDD (ORCPT
+Received: from mail-fx0-f168.google.com ([209.85.220.168]:41251 "EHLO
+	mail-fx0-f168.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751610AbZFAGVe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 31 May 2009 12:03:03 -0400
-Received: by an-out-0708.google.com with SMTP id d40so14893269and.1
-        for <linux-sparse@vger.kernel.org>; Sun, 31 May 2009 09:03:04 -0700 (PDT)
-In-Reply-To: <1243784652-31802-2-git-send-email-naesten@gmail.com>
+	Mon, 1 Jun 2009 02:21:34 -0400
+Received: by fxm12 with SMTP id 12so5573112fxm.37
+        for <linux-sparse@vger.kernel.org>; Sun, 31 May 2009 23:21:35 -0700 (PDT)
+In-Reply-To: <1243784652-31802-1-git-send-email-naesten@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Samuel Bronson <naesten@gmail.com>
+To: Samuel Bronson <naesten@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Sun, May 31, 2009 at 11:44 AM, Samuel Bronson <naesten@gmail.com> wrote:
-> Adjust the associated fields to match.
+On Sun, May 31, 2009 at 19:44, Samuel Bronson <naesten@gmail.com> wrote:
+> Changes-licensed-under: ISC license
 
-Dang it, I seem to have somehow forgotten to test after this step ... whoops!
+I don't think it works that way.
