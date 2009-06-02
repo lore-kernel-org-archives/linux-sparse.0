@@ -1,59 +1,77 @@
-From: Samuel Bronson <naesten@gmail.com>
-Subject: [PATCH 4/4] Have Makefile import config.mak if it exists.
-Date: Mon,  1 Jun 2009 14:37:25 -0400
-Message-ID: <1243881445-30069-4-git-send-email-naesten@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 4/4] Have Makefile import config.mak if it exists.
+Date: Tue, 2 Jun 2009 13:30:48 -0700
+Message-ID: <70318cbf0906021330n7d0df47y5010dd158f731966@mail.gmail.com>
 References: <1243881445-30069-1-git-send-email-naesten@gmail.com>
- <1243881445-30069-2-git-send-email-naesten@gmail.com>
- <1243881445-30069-3-git-send-email-naesten@gmail.com>
+	 <1243881445-30069-2-git-send-email-naesten@gmail.com>
+	 <1243881445-30069-3-git-send-email-naesten@gmail.com>
+	 <1243881445-30069-4-git-send-email-naesten@gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=000e0cd3287207b7e2046b636b03
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from 170-23.widener.edu ([147.31.170.23]:42792 "EHLO
-	naruto.cs.widener.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751789AbZFASaj (ORCPT
+Received: from wf-out-1314.google.com ([209.85.200.168]:5687 "EHLO
+	wf-out-1314.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751237AbZFBUaq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 1 Jun 2009 14:30:39 -0400
-In-Reply-To: <1243881445-30069-3-git-send-email-naesten@gmail.com>
+	Tue, 2 Jun 2009 16:30:46 -0400
+Received: by wf-out-1314.google.com with SMTP id 26so2977887wfd.4
+        for <linux-sparse@vger.kernel.org>; Tue, 02 Jun 2009 13:30:48 -0700 (PDT)
+In-Reply-To: <1243881445-30069-4-git-send-email-naesten@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Samuel Bronson <naesten@gmail.com>
+To: Samuel Bronson <naesten@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-This will allow users to override build settings without dirtying their
-trees, making life with `git stash' a bit easier.
+--000e0cd3287207b7e2046b636b03
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 
-Signed-off-by: Samuel Bronson <naesten@gmail.com>
----
- Makefile |   10 ++++++++--
- 1 files changed, 8 insertions(+), 2 deletions(-)
+On Mon, Jun 1, 2009 at 11:37 AM, Samuel Bronson <naesten@gmail.com> wrote:
+> This will allow users to override build settings without dirtying their
+> trees, making life with `git stash' a bit easier.
+>
+I modify the patch to use "local.mk" and add it in .gitignore.
 
-diff --git a/Makefile b/Makefile
-index 18cec68..f45a74a 100644
---- a/Makefile
-+++ b/Makefile
-@@ -10,9 +10,10 @@ LDFLAGS += -g
- AR = ar
- 
- #
--# For debugging, uncomment the next one
-+# For debugging, put this in config.mak:
-+#
-+#     CFLAGS += -O0 -DDEBUG -g3 -gdwarf-2
- #
--#CFLAGS += -O0 -DDEBUG -g3 -gdwarf-2
- 
- HAVE_LIBXML=$(shell pkg-config --exists libxml-2.0 && echo 'yes')
- 
-@@ -73,6 +74,11 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
- QUIET_INST_SH = $(Q:@=echo -n  '     INSTALL  ';)
- QUIET_INST    = $(Q:@=@echo -n '     INSTALL  ';)
- 
-+
-+# Allow users to override build settings without dirtying their trees
-+-include config.mak
-+
-+
- all: $(PROGRAMS) sparse.pc
- 
- install: $(INST_PROGRAMS) $(LIBS) $(LIB_H) sparse.pc
--- 
-1.6.3.1.169.g33fd.dirty
+If that works for you, I am going to apply it as yours.
 
+Thanks
+
+Chris
+
+--000e0cd3287207b7e2046b636b03
+Content-Type: application/octet-stream;
+	name="4-4-Have-Makefile-import-config.mak-if-it-exists..patch"
+Content-Disposition: attachment;
+	filename="4-4-Have-Makefile-import-config.mak-if-it-exists..patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fvgl25le0
+
+RnJvbSBwYXRjaHdvcmsgTW9uIEp1biAgMSAxODozNzoyNSAyMDA5CkNvbnRlbnQtVHlwZTogdGV4
+dC9wbGFpbjsgY2hhcnNldD0idXRmLTgiCk1JTUUtVmVyc2lvbjogMS4wCkNvbnRlbnQtVHJhbnNm
+ZXItRW5jb2Rpbmc6IDdiaXQKU3ViamVjdDogWzQvNF0gSGF2ZSBNYWtlZmlsZSBpbXBvcnQgY29u
+ZmlnLm1hayBpZiBpdCBleGlzdHMuCkRhdGU6IE1vbiwgMDEgSnVuIDIwMDkgMTg6Mzc6MjUgLTAw
+MDAKRnJvbTogU2FtdWVsIEJyb25zb24gPG5hZXN0ZW5AZ21haWwuY29tPgpYLVBhdGNod29yay1J
+ZDogMjcyNjQKClRoaXMgd2lsbCBhbGxvdyB1c2VycyB0byBvdmVycmlkZSBidWlsZCBzZXR0aW5n
+cyB3aXRob3V0IGRpcnR5aW5nIHRoZWlyCnRyZWVzLCBtYWtpbmcgbGlmZSB3aXRoIGBnaXQgc3Rh
+c2gnIGEgYml0IGVhc2llci4KClNpZ25lZC1vZmYtYnk6IFNhbXVlbCBCcm9uc29uIDxuYWVzdGVu
+QGdtYWlsLmNvbT4KCi0tLQpNYWtlZmlsZSB8ICAgMTAgKysrKysrKystLQogMSBmaWxlcyBjaGFu
+Z2VkLCA4IGluc2VydGlvbnMoKyksIDIgZGVsZXRpb25zKC0pCgpJbmRleDogc3BhcnNlLmNocmlz
+bC9NYWtlZmlsZQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09Ci0tLSBzcGFyc2UuY2hyaXNsLm9yaWcvTWFrZWZpbGUKKysr
+IHNwYXJzZS5jaHJpc2wvTWFrZWZpbGUKQEAgLTEwLDkgKzEwLDEwIEBAIExERkxBR1MgKz0gLWcK
+IEFSID0gYXIKIAogIwotIyBGb3IgZGVidWdnaW5nLCB1bmNvbW1lbnQgdGhlIG5leHQgb25lCisj
+IEZvciBkZWJ1Z2dpbmcsIHB1dCB0aGlzIGluIGxvY2FsLm1rOgorIworIyAgICAgQ0ZMQUdTICs9
+IC1PMCAtRERFQlVHIC1nMyAtZ2R3YXJmLTIKICMKLSNDRkxBR1MgKz0gLU8wIC1EREVCVUcgLWcz
+IC1nZHdhcmYtMgogCiBIQVZFX0xJQlhNTD0kKHNoZWxsIHBrZy1jb25maWcgLS1leGlzdHMgbGli
+eG1sLTIuMCAmJiBlY2hvICd5ZXMnKQogSEFWRV9HQ0NfREVQPSQoc2hlbGwgdG91Y2ggLmdjYy10
+ZXN0LmMgJiYgCQkJCVwKQEAgLTg5LDYgKzkwLDExIEBAIFNFRF9QQ19DTUQgPSAnc3xAdmVyc2lv
+bkB8JChWRVJTSU9OKXxnOwkKIAkgICAgICBzfEBpbmNsdWRlZGlyQHwkKElOQ0xVREVESVIpfGcn
+CiAKIAorCisjIEFsbG93IHVzZXJzIHRvIG92ZXJyaWRlIGJ1aWxkIHNldHRpbmdzIHdpdGhvdXQg
+ZGlydHlpbmcgdGhlaXIgdHJlZXMKKy1pbmNsdWRlIGxvY2FsLm1rCisKKwogYWxsOiAkKFBST0dS
+QU1TKSBzcGFyc2UucGMKIAogaW5zdGFsbDogJChJTlNUX1BST0dSQU1TKSAkKExJQlMpICQoTElC
+X0gpIHNwYXJzZS5wYwpJbmRleDogc3BhcnNlLmNocmlzbC8uZ2l0aWdub3JlCj09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0K
+LS0tIHNwYXJzZS5jaHJpc2wub3JpZy8uZ2l0aWdub3JlCisrKyBzcGFyc2UuY2hyaXNsLy5naXRp
+Z25vcmUKQEAgLTMzLDMgKzMzLDcgQEAgcGF0Y2hlcy0qCiAjIHF1aWx0J3MgZmlsZXMKIHBhdGNo
+ZXMKIHNlcmllcworCisjIGxvY2FsIG1ha2VmaWxlCitsb2NhbC5taworCg==
+--000e0cd3287207b7e2046b636b03--
