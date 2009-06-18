@@ -1,39 +1,49 @@
-From: Randy Dunlap <randy.dunlap@oracle.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: RFC: Move sparse.git inside linux-kernel-2.6.git?
-Date: Thu, 18 Jun 2009 13:13:38 -0700
-Message-ID: <4A3A9FF2.1070607@oracle.com>
-References: <20090618192058.GB14086@uranus.ravnborg.org> <4A3A96E2.5080504@garzik.org> <4A3A9C2A.8030906@garzik.org>
+Date: Thu, 18 Jun 2009 13:40:15 -0700
+Message-ID: <70318cbf0906181340j3b04b2b4hb95f6c8648dea70b@mail.gmail.com>
+References: <20090618192058.GB14086@uranus.ravnborg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from acsinet12.oracle.com ([141.146.126.234]:40478 "EHLO
-	acsinet12.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751517AbZFRUSF (ORCPT
+Received: from mail-qy0-f195.google.com ([209.85.221.195]:44531 "EHLO
+	mail-qy0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753507AbZFRUkN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 18 Jun 2009 16:18:05 -0400
-In-Reply-To: <4A3A9C2A.8030906@garzik.org>
+	Thu, 18 Jun 2009 16:40:13 -0400
+Received: by qyk33 with SMTP id 33so504408qyk.33
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2009 13:40:15 -0700 (PDT)
+In-Reply-To: <20090618192058.GB14086@uranus.ravnborg.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jeff@garzik.org>
-Cc: Sam Ravnborg <sam@ravnborg.org>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-Jeff Garzik wrote:
-> Jeff Garzik wrote:
->> sparse -does- serve as "libsparse" to a few independent projects, and
->> the current sparse/kernel has clear benefits for those projects.  Being 
-> 
->         ^^^^
-> 
-> "current sparse/kernel separation"
+On Thu, Jun 18, 2009 at 12:20 PM, Sam Ravnborg <sam@ravnborg.org> wrote:
+>
+> The linux kernel is one of the major customers of
+> sparse and several sparse hackers are very
+> active on the kernel front too.
+>
+> How about combining forces and move sparse.git inside
+> the kernel.
 
-Yes, sparse is a general-purpose tool (can be used by lots of apps),
-unlike tools/perf/, which is strictly for Linux kernel use.
+I think it is better keep it separate. The main reason is to have
+a clean history.  Sparse has much lighter activity than kernel.
+The sparse history will become noise compare to the kernel
+one. So it is not easy to bisect sparse bugs. It will sync tons of kernel
+source with it.
 
-git is also a user of sparse, and there are plenty of git developers who
-are not kernel developers.
 
--- 
-~Randy
-LPC 2009, Sept. 23-25, Portland, Oregon
-http://linuxplumbersconf.org/2009/
+That being said, I think we still can make sparse friendly to kernel.
+For example, we can make a sparse tree sym link under tools of the kernel
+tree. The kernel makefile will use that tree if it is there, as if it is part
+of the kernel. So we can have the benefit you mention without mess up
+the sparse history.
+
+We can even make some build target in the kernel to check out a copy
+of the sparse tree in the tools/sparse directory. That should solve the
+problem that people need to know where to check out.
+
+Chris
