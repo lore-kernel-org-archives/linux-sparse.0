@@ -1,45 +1,52 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Avoid "attribute 'warning': unknown attribute" warning
-Date: Thu, 18 Jun 2009 10:41:29 -0700 (PDT)
-Message-ID: <alpine.LFD.2.01.0906181034590.16802@localhost.localdomain>
-References: <alpine.LFD.2.01.0906180940490.16802@localhost.localdomain> <alpine.LFD.2.01.0906180951570.16802@localhost.localdomain>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: RFC: Move sparse.git inside linux-kernel-2.6.git?
+Date: Thu, 18 Jun 2009 21:20:58 +0200
+Message-ID: <20090618192058.GB14086@uranus.ravnborg.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:35410 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751918AbZFRRld (ORCPT
+Received: from pfepb.post.tele.dk ([195.41.46.236]:51105 "EHLO
+	pfepb.post.tele.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754388AbZFRTSk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 18 Jun 2009 13:41:33 -0400
-In-Reply-To: <alpine.LFD.2.01.0906180951570.16802@localhost.localdomain>
+	Thu, 18 Jun 2009 15:18:40 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+
+The linux kernel is one of the major customers of
+sparse and several sparse hackers are very
+active on the kernel front too.
+
+How about combining forces and move sparse.git inside
+the kernel.
+
+I assume that we can work out something on the
+license side so sparse has the correct license??
+
+Benefits doing so:
+
+- Easy access to sparse from within the kernel.
+  Doing a make C=2 run is now trivial for everyone
+
+- We (the kernel hackers) has the source readily
+  avalibale when we need to hack it.
+
+Drawbacks:
+
+- We need to come up with a solution so it is
+  easy to distribute sparse binaries/source packages
+  without the need to distribute the full kernel source
 
 
-This avoids getting annoying warnings from <curl/typecheck-gcc.h> and from 
-<bits/string3.h>, which use the "__attribute__((__warning__ (msg)))" gcc 
-attribute.
+The idea has come up before, and now that the kernel
+has a tools/ directory we have a place where sparse can live.
 
-[ The attribute causes gcc to print out the supplied warning message if 
-  the function is used. We should some day support it, but this patch just 
-  makes us ignore it. ]
+And I think Linus can find a way to pull sparse.git
+with full history so we do not loose anything doing so.
 
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
----
- parse.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
+On the maintainer side of sparse one has to ask Linus to
+pull now and then - this is a doable task.
 
-diff --git a/parse.c b/parse.c
-index df696e5..e5ad867 100644
---- a/parse.c
-+++ b/parse.c
-@@ -528,6 +528,8 @@ static struct init_keyword {
- 	{ "__cold__",	NS_KEYWORD,	.op = &ignore_attr_op },
- 	{ "hot",	NS_KEYWORD,	.op = &ignore_attr_op },
- 	{ "__hot__",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "warning",	NS_KEYWORD,	.op = &ignore_attr_op },
-+	{ "__warning__",	NS_KEYWORD,	.op = &ignore_attr_op },
- };
- 
- void init_parser(int stream)
+	Sam
