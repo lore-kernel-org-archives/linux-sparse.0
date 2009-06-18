@@ -1,56 +1,54 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Allow array declarators to have 'restrict' in them
-Date: Thu, 18 Jun 2009 09:44:54 -0700 (PDT)
-Message-ID: <alpine.LFD.2.01.0906180940490.16802@localhost.localdomain>
+Subject: Turn off '-Wtransparent-union' by default
+Date: Thu, 18 Jun 2009 09:52:49 -0700 (PDT)
+Message-ID: <alpine.LFD.2.01.0906180951570.16802@localhost.localdomain>
+References: <alpine.LFD.2.01.0906180940490.16802@localhost.localdomain>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49686 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:40565 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751376AbZFRQoz (ORCPT
+	by vger.kernel.org with ESMTP id S1751089AbZFRQwt (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 18 Jun 2009 12:44:55 -0400
+	Thu, 18 Jun 2009 12:52:49 -0400
+In-Reply-To: <alpine.LFD.2.01.0906180940490.16802@localhost.localdomain>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
 
-Otherwise sparse is very unhappy about the current glibc header files 
-(aio.h, netdb.h. regex.h and spawn.h at a minimum).
+It's a very annoying warning, and it's about a sparse limitation rather
+than a real feature, so don't do it by default.
 
-It's a hack, and not a proper parsing with saving the information. It just 
-ignores any "restrict" keyword at the start of an abstract array 
-declaration, but it's better than what we have now.
+Sure, our lack of transparent union support will then make us warn about
+the magic calling convention hacks (eg you'll see warnings like
+
+	connect.c:240:39: warning: incorrect type in argument 2 (invalid types)
+	connect.c:240:39:    expected union __CONST_SOCKADDR_ARG [usertype] __addr
+	connect.c:240:39:    got struct sockaddr *ai_addr
+
+but it still doesn't mean that we have to be so noisy about just seeing
+those transparent unions.  One annoying warning is not an argument for
+doing _another_ annoying warning too (and the calling convention
+warnings at least only happen if you actually use them, unlike the
+transparent union warning that happens every time we see one, used or
+not).
 
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 ---
- ident-list.h |    1 +
- parse.c      |    2 ++
- 2 files changed, 3 insertions(+), 0 deletions(-)
+ lib.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/ident-list.h b/ident-list.h
-index 29ddeca..0ee81bc 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -83,6 +83,7 @@ IDENT(stdcall); IDENT(__stdcall__);
- IDENT(fastcall); IDENT(__fastcall__);
- IDENT(dllimport); IDENT(__dllimport__);
- IDENT(dllexport); IDENT(__dllexport__);
-+IDENT(restrict); IDENT(__restrict);
- 
- /* Preprocessor idents.  Direct use of __IDENT avoids mentioning the keyword
-  * itself by name, preventing these tokens from expanding when compiling
-diff --git a/parse.c b/parse.c
-index fbeebb0..df696e5 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1431,6 +1431,8 @@ static struct token *abstract_array_declarator(struct token *token, struct symbo
- {
- 	struct expression *expr = NULL;
- 
-+	if (match_idents(token, &restrict_ident, &__restrict_ident, NULL))
-+		token = token->next;
- 	token = parse_expression(token, &expr);
- 	sym->array_size = expr;
- 	return token;
-
+diff --git a/lib.c b/lib.c
+index 2b8d21e..42affcd 100644
+--- a/lib.c
++++ b/lib.c
+@@ -206,7 +206,7 @@ int Wparen_string = 0;
+ int Wptr_subtraction_blows = 0;
+ int Wreturn_void = 0;
+ int Wshadow = 0;
+-int Wtransparent_union = 1;
++int Wtransparent_union = 0;
+ int Wtypesign = 0;
+ int Wundef = 0;
+ int Wuninitialized = 1;
