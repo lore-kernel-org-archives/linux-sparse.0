@@ -1,51 +1,51 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: RFC: Move sparse.git inside linux-kernel-2.6.git?
-Date: Thu, 25 Jun 2009 07:48:00 -0700
-Message-ID: <4A438E20.5070704@zytor.com>
-References: <20090618192058.GB14086@uranus.ravnborg.org>	 <70318cbf0906181340j3b04b2b4hb95f6c8648dea70b@mail.gmail.com>	 <db65a1cd0906201237ya3e9bfbmf7a106b72a450f7f@mail.gmail.com>	 <70318cbf0906211133k55fda10exc14ca2fed4336105@mail.gmail.com> <db65a1cd0906211617s763522f4q62952323dcbfe9d8@mail.gmail.com>
+From: Josh Triplett <josh@kernel.org>
+Subject: Meet the new maintainer
+Date: Thu, 2 Jul 2009 14:43:50 -0700
+Message-ID: <20090702214349.GA19009@feather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:51305 "EHLO
-	terminus.zytor.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752210AbZFYSzj (ORCPT
+Received: from slow3-v.mail.gandi.net ([217.70.178.89]:52550 "EHLO
+	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754187AbZGBWQB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Jun 2009 14:55:39 -0400
-In-Reply-To: <db65a1cd0906211617s763522f4q62952323dcbfe9d8@mail.gmail.com>
+	Thu, 2 Jul 2009 18:16:01 -0400
+Received: from relay3-v.mail.gandi.net (relay3-v.mail.gandi.net [217.70.178.77])
+	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 9B36F83CED
+	for <linux-sparse@vger.kernel.org>; Thu,  2 Jul 2009 23:50:54 +0200 (CEST)
+Received: from feather (pool-173-50-250-234.ptldor.fios.verizon.net [173.50.250.234])
+	by relay3-v.mail.gandi.net (Postfix) with ESMTP id 2907CB9FF
+	for <linux-sparse@vger.kernel.org>; Thu,  2 Jul 2009 23:50:19 +0200 (CEST)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Samuel Bronson <naesten@gmail.com>
-Cc: Christopher Li <sparse@chrisli.org>, Sam Ravnborg <sam@ravnborg.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org
 
-Samuel Bronson wrote:
-> On Sun, Jun 21, 2009 at 2:33 PM, Christopher Li<sparse@chrisli.org> wrote:
->> On Sat, Jun 20, 2009 at 12:37 PM, Samuel Bronson <naesten@gmail.com> wrote:
->>> About that ... shouldn't the URL on the sparse web page be
->>> "git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git", not
->>> "git://git.kernel.org/pub/scm/devel/sparse/sparse.git"?
->> I don't have permission on the sparse web page. Josh is still
->> the official maintainer. But he has been very quietly on the project recently.
->> That is the main reason I created my tree. I don't want good patch get
->> lost.
->>
->> I did not mean to fork the sparse project. I don't know how to resolve
->> it either.
-> 
-> Nobody is going to hold having maybe accidentally become the
-> maintainer *against* you.
-> Not to say you won't suffer for it -- people will always be expecting
-> you to review patches and so forth -- but they won't hold it against
-> you.
+I originally started maintaining Sparse as a result of trying to merge =
+various
+patches related to my PhD research. =A0Now I don't have frequent Sparse=
+ patches
+of my own anymore, and due to my PhD studies and other projects, I've b=
+ecome
+significantly less responsive, while Sparse itself has enjoyed increase=
+d
+development interest.  Thus, it seems only fair that I should hand off
+maintainership to someone else who has a pile of patches they want to m=
+erge.
 
-If there is clear consensus within the Sparse devel community that Chris
-is the new maintainer, I will give him write access to the relevant
-directories.  That's better than having the chrisl/ directory become
-official.
+Christopher Li has done an excellent job hacking on Sparse, and has
+already demonstrated the ability to maintain a Sparse tree and merge
+other people's patches.  I believe Chris would make an excellent
+maintainer for Sparse.
 
-	-hpa
+I still plan to listen in on the Sparse community, and perhaps submit
+some future patches, but effective immediately^Wa while ago, Chris will
+start running the show and accepting your patches and contributions.
 
--- 
-H. Peter Anvin, Intel Open Source Technology Center
-I work for Intel.  I don't speak on their behalf.
-
+- Josh Triplett
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
