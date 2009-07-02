@@ -1,46 +1,50 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: Re: Meet the new maintainer
-Date: Thu, 02 Jul 2009 18:27:52 -0400
-Message-ID: <4A4D3468.1010202@garzik.org>
+From: Josh Triplett <josh@kernel.org>
+Subject: Sparse licensing
+Date: Thu, 2 Jul 2009 16:08:36 -0700
+Message-ID: <20090702230836.GI19009@feather>
 References: <20090702214349.GA19009@feather>
+ <4A4D3468.1010202@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from srv5.dvmed.net ([207.36.208.214]:57047 "EHLO mail.dvmed.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752006AbZGBW2x (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 2 Jul 2009 18:28:53 -0400
-In-Reply-To: <20090702214349.GA19009@feather>
+Received: from relay3-v.mail.gandi.net ([217.70.178.77]:38417 "EHLO
+	relay3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752246AbZGBXPH (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 2 Jul 2009 19:15:07 -0400
+Content-Disposition: inline
+In-Reply-To: <4A4D3468.1010202@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
+To: Jeff Garzik <jeff@garzik.org>
 Cc: linux-sparse@vger.kernel.org
 
-Josh Triplett wrote:
-> I originally started maintaining Sparse as a result of trying to merge various
-> patches related to my PhD research.  Now I don't have frequent Sparse patches
-> of my own anymore, and due to my PhD studies and other projects, I've become
-> significantly less responsive, while Sparse itself has enjoyed increased
-> development interest.  Thus, it seems only fair that I should hand off
-> maintainership to someone else who has a pile of patches they want to merge.
-> 
-> Christopher Li has done an excellent job hacking on Sparse, and has
-> already demonstrated the ability to maintain a Sparse tree and merge
-> other people's patches.  I believe Chris would make an excellent
-> maintainer for Sparse.
+On Thu, Jul 02, 2009 at 06:27:52PM -0400, Jeff Garzik wrote:
+> Can you weigh in on the licensing threads, pretty please?  That is
+> still blocked on you, AFAIK.
 
-Agreed!
+Sure.
 
+For my part, I'd *love* to see Sparse relicensed to something more
+palatable.  Ideally, I'd love to see Sparse become GPL-compatible.  I'd
+prefer a stronger copyleft over a weaker one.
 
-> I still plan to listen in on the Sparse community, and perhaps submit
-> some future patches, but effective immediately^Wa while ago, Chris will
-> start running the show and accepting your patches and contributions.
+I have no problem with relicensing Sparse to any of the following
+licenses, in rough order of preference:
 
-Can you weigh in on the licensing threads, pretty please?  That is still 
-blocked on you, AFAIK.
+- GPL (v2 or v3, with or without "or any later version")
+- LGPL (v2.1 or v3, with or without "or any later version")
+- Either of the above with some kind of additional exception similar to
+  those used for GCC and related libraries.
+- Any of the above dual-licensed with the OSL, if people care about
+  preserving that for some reason.  Seems unnecessarily complex to do
+  so, though.
 
-	Jeff
+I'd prefer not to see Sparse relicensed to something entirely
+non-copyleft like the MIT license, but if the rest of the Sparse
+community wants that for some reason, I won't stand in the way.
 
+If you need any more formal approval from me, please let me know.
 
-
+Thanks,
+Josh Triplett
