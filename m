@@ -1,71 +1,72 @@
-From: Josh Triplett <josh@freedesktop.org>
-Subject: Re: RFC: Move sparse.git inside linux-kernel-2.6.git?
-Date: Thu, 2 Jul 2009 16:21:10 -0700
-Message-ID: <20090702232109.GJ19009@feather>
-References: <20090618192058.GB14086@uranus.ravnborg.org>
+From: Chris Li <christ.li@gmail.com>
+Subject: Re: Meet the new maintainer
+Date: Thu, 2 Jul 2009 17:34:00 -0700
+Message-ID: <70318cbf0907021734t165d6881td00057ca8fc0ac26@mail.gmail.com>
+References: <20090702214349.GA19009@feather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:41343 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753262AbZGBXsk (ORCPT
+Received: from mail-pz0-f193.google.com ([209.85.222.193]:57332 "EHLO
+	mail-pz0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754799AbZGCAd5 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 2 Jul 2009 19:48:40 -0400
-Received: from relay2-v.mail.gandi.net (relay2-v.mail.gandi.net [217.70.178.76])
-	by slow3-v.mail.gandi.net (Postfix) with ESMTP id F2B55391FA
-	for <linux-sparse@vger.kernel.org>; Fri,  3 Jul 2009 01:28:04 +0200 (CEST)
-Content-Disposition: inline
-In-Reply-To: <20090618192058.GB14086@uranus.ravnborg.org>
+	Thu, 2 Jul 2009 20:33:57 -0400
+Received: by pzk31 with SMTP id 31so534584pzk.33
+        for <linux-sparse@vger.kernel.org>; Thu, 02 Jul 2009 17:34:00 -0700 (PDT)
+In-Reply-To: <20090702214349.GA19009@feather>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Josh Triplett <josh@kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Thu, Jun 18, 2009 at 09:20:58PM +0200, Sam Ravnborg wrote:
-> The linux kernel is one of the major customers of
-> sparse and several sparse hackers are very
-> active on the kernel front too.
-> 
-> How about combining forces and move sparse.git inside
-> the kernel.
-> 
-> Benefits doing so:
-> 
-> - Easy access to sparse from within the kernel.
->   Doing a make C=2 run is now trivial for everyone
-> 
-> - We (the kernel hackers) has the source readily
->   avalibale when we need to hack it.
-> 
-> Drawbacks:
-> 
-> - We need to come up with a solution so it is
->   easy to distribute sparse binaries/source packages
->   without the need to distribute the full kernel source
-> 
-> 
-> The idea has come up before, and now that the kernel
-> has a tools/ directory we have a place where sparse can live.
-> 
-> And I think Linus can find a way to pull sparse.git
-> with full history so we do not loose anything doing so.
+On Thu, Jul 2, 2009 at 2:43 PM, Josh Triplett<josh@kernel.org> wrote:
+> I originally started maintaining Sparse as a result of trying to merg=
+e various
+> patches related to my PhD research. =A0Now I don't have frequent Spar=
+se patches
+> of my own anymore, and due to my PhD studies and other projects, I've=
+ become
+> significantly less responsive, while Sparse itself has enjoyed increa=
+sed
+> development interest. =A0Thus, it seems only fair that I should hand =
+off
+> maintainership to someone else who has a pile of patches they want to=
+ merge.
+>
+> Christopher Li has done an excellent job hacking on Sparse, and has
+> already demonstrated the ability to maintain a Sparse tree and merge
+> other people's patches. =A0I believe Chris would make an excellent
+> maintainer for Sparse.
+>
+> I still plan to listen in on the Sparse community, and perhaps submit
+> some future patches, but effective immediately^Wa while ago, Chris wi=
+ll
+> start running the show and accepting your patches and contributions.
 
-I think that Sparse needs to exist as a separate project for the benefit
-of all the non-kernel users of Sparse, but at the same time I think
-having Sparse in the kernel tree would help kernel developers actually
-run Sparse as part of their build process.
+I want to thank Josh for his wonderful contribution for the sparse proj=
+ect.
+I still have a lot of to learn to maintain a project like sparse. I
+will try my best.
 
-Fortunately, Git offers a good solution to this problem: submodules.
-linux-2.6 could have Sparse as a submodule under the tools/sparse
-directory.  Anyone who checked out linux-2.6 via git could then
-near-automatically get a copy of Sparse via git, and release tarballs of
-Linux could fairly easily include Sparse.
+Let me share you with my view of the project. In my mind, sparse has
+two roles:
 
-The way submodules work, a commit in the linux-2.6 repository would refer to
-a specific commit in the sparse repostory, so linux-2.6 could always point
-to a version of Sparse known to more-or-less work with that version of
-Linux.
+1) A general purpose C compiler front end.
+2) A sanitize checker for the Linux kernel source.
 
-How does that sound?
+I like to see the project continue to evolve in this two directions. At=
+ the same
+time I want to maintain the current style of lean and fast.
 
-- Josh Triplett
+Now I like to heard your view of the project as well. Where you want to
+the project go. After all, this is a community project.
+
+Thanks for all your support.
+
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
