@@ -1,124 +1,83 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Multiple translation unit regression
-Date: Mon, 6 Jul 2009 02:32:47 -0700
-Message-ID: <70318cbf0907060232j7067f7fcra857b71ebdf62348@mail.gmail.com>
+Date: Mon, 6 Jul 2009 23:27:22 -0700
+Message-ID: <70318cbf0907062327u51a4253fub2c0f1b2f64c1a@mail.gmail.com>
 References: <4A5131F4.7070007@ramsay1.demon.co.uk>
+	 <70318cbf0907060232j7067f7fcra857b71ebdf62348@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=0016e64ec0642465fa046e17b7aa
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f202.google.com ([209.85.212.202]:48622 "EHLO
+Received: from mail-vw0-f202.google.com ([209.85.212.202]:58182 "EHLO
 	mail-vw0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751224AbZGFJcq convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1756944AbZGGG1U (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 6 Jul 2009 05:32:46 -0400
-Received: by vwj40 with SMTP id 40so3024950vwj.33
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Jul 2009 02:32:49 -0700 (PDT)
-In-Reply-To: <4A5131F4.7070007@ramsay1.demon.co.uk>
+	Tue, 7 Jul 2009 02:27:20 -0400
+Received: by vwj40 with SMTP id 40so3583927vwj.33
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Jul 2009 23:27:22 -0700 (PDT)
+In-Reply-To: <70318cbf0907060232j7067f7fcra857b71ebdf62348@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 Cc: Al Viro <viro@zeniv.linux.org.uk>, Junio C Hamano <gitster@pobox.com>, Andreas Ericsson <ae@op5.se>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sun, Jul 5, 2009 at 4:06 PM, Ramsay Jones<ramsay@ramsay1.demon.co.uk=
-> wrote:
->
-> pre-process.c:609 in function expand():
-> =A0 =A0 =A0 =A0struct arg args[nargs];
+--0016e64ec0642465fa046e17b7aa
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 
-That is a known limit of sparse. It does not handle dynamic sized array=
-=2E
-In kernel that is not a good thing because kernel stack is very limited=
-=2E
-
-> sparse:
-> =A0 =A0 =A0 =A0cgcc -no-compile $(ALL_CFLAGS) $(SPARSE_FLAGS) $(SRC_C=
-)
-
-I think libgit2 should make sparse to compile the file one by one.
-Do them all at once might overflow your memory.
-
->
-> this results in the follwing warnings (on cygwin):
->
-> .../byteorder.h:39:1: warning: multiple definitions for function '__n=
-tohl'
-> .../byteorder.h:39:1: =A0the previous one is here
-> .../byteorder.h:56:1: warning: multiple definitions for function '__n=
-tohs'
-> .../byteorder.h:56:1: =A0the previous one is here
-
-GNU C has special treatment for "extern inline". It does not generate
-the stand alone copy of the function. Sparse does not handle that very
-well yet. I think the easiest way to fix is just run those source file
-in sparse one by one.
-
-
->
-> The third hunk of the diff to parse.c actually triggers the problem,
-> but is not the real cause of the regression.
-
-I think that is the right thing to do. The problem is that sparse curre=
-ntly
-does not have way to mark a function as inline only without the standal=
-one
-copy.
-
-
->
-> I think the problem is mainly caused by bind_symbol() binding the
-> global_scope to some symbols. Indeed, the global_scope/file_scope
-> seems to be a bit confused and confusing. Note that the global_scope
-
-Global scope is for store global visible symbols.
-=46ile scopes is use for file local symbols like static functions.
-
-> is not changed at all once intialised. In particular, each translatio=
-n
-> unit keeps adding to the, one and only, global_scope; which is
-> effectively the same as the builtin_scope!
-
-What is wrong with only one global scope?
+Can you try the following patch? I move the extern inline function
+to file scope. Again, I still think it would be better let sparse
+check one file at a time.
 
 Chris
 
-> Hmm, the following diff shows a quick fix:
->
-> --->8---
-> diff --git a/scope.c b/scope.c
-> index 27e38bc..fb4c039 100644
-> --- a/scope.c
-> +++ b/scope.c
-> @@ -49,6 +49,7 @@ void start_file_scope(void)
-> =A0 =A0 =A0 =A0/* top-level stuff defaults to file scope, "extern" et=
-c will choose global scope */
-> =A0 =A0 =A0 =A0function_scope =3D scope;
-> =A0 =A0 =A0 =A0block_scope =3D scope;
-> + =A0 =A0 =A0 start_scope(&global_scope);
-> =A0}
->
-> =A0void start_symbol_scope(void)
-> @@ -87,6 +88,7 @@ static void end_scope(struct scope **s)
-> =A0void end_file_scope(void)
-> =A0{
-> =A0 =A0 =A0 =A0end_scope(&file_scope);
-> + =A0 =A0 =A0 end_scope(&global_scope);
-> =A0}
->
-> =A0void new_file_scope(void)
-> --->8---
->
-> But this is not the correct fix. In fact it may have broken c2xml
-> and ctags. I haven't checked, but look at the main() code in c2xml.c
-> and ctags.c; again the semantics of global_scope vs. file_scope
-> seems confused and confusing. At least to me. ;-)
+--0016e64ec0642465fa046e17b7aa
+Content-Type: application/octet-stream; name=extern-inline
+Content-Disposition: attachment; filename=extern-inline
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_fwsyh0vg0
 
-As you said, that is not the right fix. Ctags needs to use global scope
-to look for symbol has been define but does not used in the file.
-
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+bW92ZSBleHRlcm4gaW5saW5lIGZ1bmN0aW9uIHRvIGZpbGUgc2NvcGUKCkluIGdjYyBleHRlcm4g
+aW5saW5lIGZ1bmN0aW9uIGhhcyBzcGVjaWFsIG1lYW5pbmcuIFRoZSBpbmxpbmUKZnVuY3Rpb24g
+d2lsbCBuZXZlciBlbWl0IHN0YW5kIGFsb25lIGNvcHkgb2YgdGhlIGZ1bmN0aW9uLiBJdCBhbHNv
+CmFsbG93IG11bHRpcGxlIGltcGxlbWVudGF0aW9ucyBjcm9zcyBkaWZmZXJlbnQgZmlsZS4gVGhh
+dCBlZmZlY3RpdmVseQptYWtlcyB0aGUgZXh0ZXJuIGlubGluZSBoYXMgZmlsZSBzY29wZS4KCklu
+ZGV4OiBzcGFyc2UuY2hyaXNsL2V2YWx1YXRlLmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLmNocmlz
+bC5vcmlnL2V2YWx1YXRlLmMKKysrIHNwYXJzZS5jaHJpc2wvZXZhbHVhdGUuYwpAQCAtNTM2LDEx
+ICs1MzYsNiBAQCBzdGF0aWMgaW5saW5lIGludCBsdmFsdWVfZXhwcmVzc2lvbihzdHJ1CiAJcmV0
+dXJuIGV4cHItPnR5cGUgPT0gRVhQUl9QUkVPUCAmJiBleHByLT5vcCA9PSAnKic7CiB9CiAKLXN0
+YXRpYyBpbmxpbmUgaW50IGlzX2Z1bmN0aW9uKHN0cnVjdCBzeW1ib2wgKnR5cGUpCi17Ci0JcmV0
+dXJuIHR5cGUgJiYgdHlwZS0+dHlwZSA9PSBTWU1fRk47Ci19Ci0KIHN0YXRpYyBzdHJ1Y3Qgc3lt
+Ym9sICpldmFsdWF0ZV9wdHJfYWRkKHN0cnVjdCBleHByZXNzaW9uICpleHByLCBzdHJ1Y3Qgc3lt
+Ym9sICppdHlwZSkKIHsKIAlzdHJ1Y3QgZXhwcmVzc2lvbiAqaW5kZXggPSBleHByLT5yaWdodDsK
+SW5kZXg6IHNwYXJzZS5jaHJpc2wvc3ltYm9sLmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLmNocmlz
+bC5vcmlnL3N5bWJvbC5jCisrKyBzcGFyc2UuY2hyaXNsL3N5bWJvbC5jCkBAIC01NTgsOCArNTU4
+LDEwIEBAIHZvaWQgYmluZF9zeW1ib2woc3RydWN0IHN5bWJvbCAqc3ltLCBzdHIKIAlzY29wZSA9
+IGJsb2NrX3Njb3BlOwogCWlmIChucyA9PSBOU19TWU1CT0wgJiYgdG9wbGV2ZWwoc2NvcGUpKSB7
+CiAJCXVuc2lnbmVkIG1vZCA9IE1PRF9BRERSRVNTQUJMRSB8IE1PRF9UT1BMRVZFTDsKKwogCQlz
+Y29wZSA9IGdsb2JhbF9zY29wZTsKLQkJaWYgKHN5bS0+Y3R5cGUubW9kaWZpZXJzICYgTU9EX1NU
+QVRJQykgeworCQlpZiAoc3ltLT5jdHlwZS5tb2RpZmllcnMgJiBNT0RfU1RBVElDIHx8CisJCSAg
+ICBpc19leHRlcm5faW5saW5lKHN5bSkpIHsKIAkJCXNjb3BlID0gZmlsZV9zY29wZTsKIAkJCW1v
+ZCA9IE1PRF9UT1BMRVZFTDsKIAkJfQpJbmRleDogc3BhcnNlLmNocmlzbC9zeW1ib2wuaAo9PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09Ci0tLSBzcGFyc2UuY2hyaXNsLm9yaWcvc3ltYm9sLmgKKysrIHNwYXJzZS5jaHJpc2wv
+c3ltYm9sLmgKQEAgLTM0MCw2ICszNDAsMTggQEAgc3RhdGljIGlubGluZSBpbnQgaXNfdm9pZF90
+eXBlKHN0cnVjdCBzeQogCXJldHVybiB0eXBlID09ICZ2b2lkX2N0eXBlOwogfQogCitzdGF0aWMg
+aW5saW5lIGludCBpc19mdW5jdGlvbihzdHJ1Y3Qgc3ltYm9sICp0eXBlKQoreworCXJldHVybiB0
+eXBlICYmIHR5cGUtPnR5cGUgPT0gU1lNX0ZOOworfQorCitzdGF0aWMgaW5saW5lIGludCBpc19l
+eHRlcm5faW5saW5lKHN0cnVjdCBzeW1ib2wgKnN5bSkKK3sKKwlyZXR1cm4gKHN5bS0+Y3R5cGUu
+bW9kaWZpZXJzICYgTU9EX0VYVEVSTikgJiYKKwkJKHN5bS0+Y3R5cGUubW9kaWZpZXJzICYgTU9E
+X0lOTElORSkgJiYKKwkJaXNfZnVuY3Rpb24oc3ltLT5jdHlwZS5iYXNlX3R5cGUpOworfQorCiBz
+dGF0aWMgaW5saW5lIGludCBnZXRfc3ltX3R5cGUoc3RydWN0IHN5bWJvbCAqdHlwZSkKIHsKIAlp
+ZiAodHlwZS0+dHlwZSA9PSBTWU1fTk9ERSkKSW5kZXg6IHNwYXJzZS5jaHJpc2wvdmFsaWRhdGlv
+bi9leHRlcm4taW5saW5lLmMKPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09
+PT09PT09PT09PT09PT09PT09PT09PT09PT09PQotLS0gc3BhcnNlLmNocmlzbC5vcmlnL3ZhbGlk
+YXRpb24vZXh0ZXJuLWlubGluZS5jCisrKyBzcGFyc2UuY2hyaXNsL3ZhbGlkYXRpb24vZXh0ZXJu
+LWlubGluZS5jCkBAIC0wLDAgKzEsMTMgQEAKK2V4dGVybiBfX2lubGluZV9fIGludCBmKGludCk7
+CisKK2V4dGVybiBfX2lubGluZV9fIGludAorZihpbnQgeCkKK3sKKyAgICAgICAgcmV0dXJuIHg7
+Cit9CisKKy8qCisgKiBjaGVjay1uYW1lOiBleHRlcm4gaW5saW5lIGZ1bmN0aW9uCisgKiBjaGVj
+ay1kZXNjcmlwdGlvbjogRXh0ZXJuIGlubGluZSBmdW5jdGlvbiBuZXZlciBlbWl0cyBzdGFuZCBh
+bG9uZSBjb3B5CisgKiBvZiB0aGUgZnVuY3Rpb24uIEl0IGFsbG93cyBtdWx0aXBsZSBzdWNoIGRl
+ZmluaXRpb25zIGluIGRpZmZlcmVudCBmaWxlLgorICovCg==
+--0016e64ec0642465fa046e17b7aa--
