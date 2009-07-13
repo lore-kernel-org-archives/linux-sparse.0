@@ -1,68 +1,32 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: bitwise with memcpy and void*
-Date: Sun, 12 Jul 2009 10:37:17 -0700
-Message-ID: <70318cbf0907121037j6a64a565k726a389df3f034ed@mail.gmail.com>
-References: <AcoCR0k8a89nhOCfTzWiwUhqEVZAPg==>
-	 <DD2D1CDF962D7346A5B0E5EE9CA3612711422805@ZIPPY.Emea.Arm.com>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: Re: Multiple translation unit regression
+Date: Mon, 13 Jul 2009 18:43:51 +0100
+Message-ID: <4A5B7257.9090409@ramsay1.demon.co.uk>
+References: <4A5131F4.7070007@ramsay1.demon.co.uk>	 <70318cbf0907060232j7067f7fcra857b71ebdf62348@mail.gmail.com>	 <70318cbf0907062327u51a4253fub2c0f1b2f64c1a@mail.gmail.com>	 <4A54F452.8030601@ramsay1.demon.co.uk>	 <70318cbf0907081315w1e066a1fiac24b1b58ef146bb@mail.gmail.com>	 <4A57AA66.4080305@ramsay1.demon.co.uk> <70318cbf0907101627w1b9760a4oc7d13969751e3d00@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f199.google.com ([209.85.212.199]:61348 "EHLO
-	mail-vw0-f199.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754288AbZGLRhR (ORCPT
+Received: from lon1-post-2.mail.demon.net ([195.173.77.149]:33384 "EHLO
+	lon1-post-2.mail.demon.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755758AbZGMRpY (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 12 Jul 2009 13:37:17 -0400
-Received: by mail-vw0-f199.google.com with SMTP id 37so1529674vwj.33
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Jul 2009 10:37:17 -0700 (PDT)
-In-Reply-To: <DD2D1CDF962D7346A5B0E5EE9CA3612711422805@ZIPPY.Emea.Arm.com>
+	Mon, 13 Jul 2009 13:45:24 -0400
+In-Reply-To: <70318cbf0907101627w1b9760a4oc7d13969751e3d00@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Robert Catherall <Robert.Catherall@arm.com>
-Cc: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Junio C Hamano <gitster@pobox.com>, Andreas Ericsson <ae@op5.se>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Jul 11, 2009 at 9:47 AM, Robert
-Catherall<Robert.Catherall@arm.com> wrote:
-> 1. Specifically data was copied from a buffer in BE format to a buffer
-> in LE format using memcpy(). Using memcpy is kind of implying that the
-> programmer believes the types of the source and destination buffers are
-> compatible, so it would be nice if sparse could issue a warning when
-> they are not.
+Christopher Li wrote:
+> I attach the patch follows. Can you give it a try?
+> 
 
-I think what you want is:
+Yep, this works.
+Tested on cygwin and Linux.
 
-memcpy(pLE, pBE, len); // warning
-memcpy(pBE, pLE, len); // warning
-memcpy(pLE1, pLE2, len); // no warning
-memcpy(pBE1, pBE2, len); // no warning
+Thanks!
 
-That can no be done with stock sparse checking.
-Because you need correlation between the first and
-second argument.
+ATB,
+Ramsay Jones
 
-You can get that kind of feature by extending your own
-version of the checking. You just need to implement your
-own version of check_memcpy in sparse.c.
-
->
-> 2. Next I tried writing my own memcpy in the hope that I would then get
-> warnings in the normal way but got a warning implying that sparse knows
-> about memcpy
->
-> warning: conflicting types for built-in function "memcpy"
-> foo.c: In function "memcpy":
-
-Are you sure it is from sparse not gcc? Sparse has prototypes for
-the built-in function "__builtin_memcpy" that is about it.
-
->
-
-> Is this treatment of void* expected behaviour?
-
-Right. void* means you don't care about the type of the pointer.
-
-BTW, I just find out the Wbitwise is not used any where.
-Which means you can't turn Wbitwise off. Should be easy enough to
-fix though.
-
-Chris
