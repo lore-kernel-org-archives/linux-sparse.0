@@ -1,39 +1,63 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] test-suite: be more verbose on 'unhandled' and 'known to
-	fail' tests
-Date: Fri, 17 Jul 2009 02:01:02 -0700
-Message-ID: <70318cbf0907170201u30cc9b7dk7db8e84c8b6b994d@mail.gmail.com>
-References: <20090716215134.7792.46659.stgit@f10box.hanneseder.net>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: [PATCH 1/5] Fix an "'__sentinel__' attribute directive ignored" warning
+Date: Sat, 18 Jul 2009 21:37:47 +0100
+Message-ID: <4A62329B.9040107@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f200.google.com ([209.85.212.200]:59506 "EHLO
-	mail-vw0-f200.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934238AbZGQJBE convert rfc822-to-8bit (ORCPT
+Received: from anchor-post-3.mail.demon.net ([195.173.77.134]:41060 "EHLO
+	anchor-post-3.mail.demon.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753670AbZGRVJs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 17 Jul 2009 05:01:04 -0400
-Received: by vwj38 with SMTP id 38so701355vwj.33
-        for <linux-sparse@vger.kernel.org>; Fri, 17 Jul 2009 02:01:03 -0700 (PDT)
-In-Reply-To: <20090716215134.7792.46659.stgit@f10box.hanneseder.net>
+	Sat, 18 Jul 2009 17:09:48 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Hannes Eder <hannes@hanneseder.net>
-Cc: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Thu, Jul 16, 2009 at 2:51 PM, Hannes Eder<hannes@hanneseder.net> wro=
-te:
-> Impact:
-> =A0- On an 'unhandled' test issue a warning, and
-> =A0- in case of a 'known to fail' test a info message.
 
-Looks good. I will apply.
+This attribute was introduced in gcc 3.5. In order to avoid
+such warnings, add a gcc version check when defining the
+SENTINEL_ATTR macro. (This warning message, in particular,
+was issued by a gcc 3.4.4 compiler).
 
-Thanks
+Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+---
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Hi Chris,
+
+I had some, somewhat old, patches kicking around in my sparse
+repo which may be useful; so I'm sending them along for your
+consideration.
+
+For this patch, an alternative solution (which I haven't tried)
+would be to add -Wno-attributes to CFLAGS.
+
+ATB,
+Ramsay Jones
+
+ lib.h |    6 +++++-
+ 1 files changed, 5 insertions(+), 1 deletions(-)
+
+diff --git a/lib.h b/lib.h
+index b22fa93..919b5b1 100644
+--- a/lib.h
++++ b/lib.h
+@@ -70,7 +70,11 @@ struct token *expect(struct token *, int, const char *);
+ #ifdef __GNUC__
+ #define FORMAT_ATTR(pos) __attribute__ ((__format__ (__printf__, pos, pos+1)))
+ #define NORETURN_ATTR __attribute__ ((__noreturn__))
+-#define SENTINEL_ATTR __attribute__ ((__sentinel__))
++#if ((__GNUC__ * 100 + __GNUC__MINOR__) >= 305)  /* gcc version >= 3.5 */
++# define SENTINEL_ATTR __attribute__ ((__sentinel__))
++#else
++# define SENTINEL_ATTR
++#endif
+ #else
+ #define FORMAT_ATTR(pos)
+ #define NORETURN_ATTR
+-- 
+1.6.3.1
+
+
