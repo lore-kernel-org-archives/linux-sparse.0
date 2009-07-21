@@ -1,86 +1,92 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 4/5] Fix some "plain integer as NULL pointer" warnings on
-	cygwin
-Date: Mon, 20 Jul 2009 13:31:20 -0700
-Message-ID: <70318cbf0907201331v1c830779i89c9bef9d6706115@mail.gmail.com>
-References: <4A623766.5020002@ramsay1.demon.co.uk>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: Re: [PATCH 2/5] Fix some "enum value 'SYM_...' not handled in switch"
+ warnings
+Date: Tue, 21 Jul 2009 22:15:49 +0100
+Message-ID: <4A663005.5090009@ramsay1.demon.co.uk>
+References: <4A62338A.1060600@ramsay1.demon.co.uk> <20090719140125.GA25417@feather>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f202.google.com ([209.85.212.202]:63295 "EHLO
-	mail-vw0-f202.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754184AbZGTUbW convert rfc822-to-8bit (ORCPT
+Received: from lon1-post-3.mail.demon.net ([195.173.77.150]:63055 "EHLO
+	lon1-post-3.mail.demon.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756157AbZGUV4f (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 20 Jul 2009 16:31:22 -0400
-Received: by vwj40 with SMTP id 40so416225vwj.33
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Jul 2009 13:31:21 -0700 (PDT)
-In-Reply-To: <4A623766.5020002@ramsay1.demon.co.uk>
+	Tue, 21 Jul 2009 17:56:35 -0400
+In-Reply-To: <20090719140125.GA25417@feather>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Jul 18, 2009 at 1:58 PM, Ramsay Jones<ramsay@ramsay1.demon.co.u=
-k> wrote:
->
-> These sparse warnings are caused by broken new-lib headers,
-> which sometimes result in NULL being defined as 0, and at
-> other times defined as ((void *)0).
->
-> In essence, the only header which works correctly (by defining
-> NULL as ((void *)0)) is stddef.h. The stdio.h and time.h headers
-> also work, almost by accident, by indirectly including stddef.h.
-> The other standard headers which are required to define the NULL
-> macro, namely locale.h, stdlib.h, string.h and wchar.h, all
-> define the macro as the 0 token. (This is a slightly simplified
-> description of the problem).
->
-> In order to suppress these warnings, include the stddef.h header
-> at the start of ptrlist.c.
->
-> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-> ---
->
-> Hi Chris,
->
-> $ cat -n null-test.sh
-> =A0 =A0 1 =A0#!/bin/bash
-> =A0 =A0 2
-> =A0 =A0 3 =A0# The C99 standard says that the following headers defin=
-e NULL:
-> =A0 =A0 4 =A0# =A0 locale.h (7.11), stddef.h (7.17), stdio.h (7.19.1)=
-,
-> =A0 =A0 5 =A0# =A0 stdlib.h (7.20), string.h (7.21.1), time.h (7.23.1=
-),
-> =A0 =A0 6 =A0# =A0 wchar.h (7.24.1).
-> =A0 =A0 7
-> =A0 =A0 8 =A0for i in locale.h stddef.h stdio.h stdlib.h string.h tim=
-e.h wchar.h
-> =A0 =A0 9 =A0do
-> =A0 =A010 =A0 =A0 =A0 =A0 =A0printf "%10s: =A0" $i
-> =A0 =A011 =A0 =A0 =A0 =A0 =A0printf "#include<%s>\nchar *xyz_ptr =3D =
-NULL;\n" $i >t.c
-> =A0 =A012 =A0 =A0 =A0 =A0 =A0cgcc -E t.c | grep xyz_ptr
-> =A0 =A013 =A0done
-> =A0 =A014 =A0rm t.c
-> =A0 =A015
-> $ ./null-test.sh
+Josh Triplett wrote:
+> On Sat, Jul 18, 2009 at 09:41:46PM +0100, Ramsay Jones wrote:
+>> These warnings were issued by gcc v3.4.4, but not by gcc v4.1.2.
+>> So I guess gcc probably found these warnings to be too noisy ...
+> [...]
+>> --- a/parse.c
+>> +++ b/parse.c
+>> @@ -2616,6 +2616,8 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+>>  			case SYM_ENUM:
+>>  			case SYM_RESTRICT:
+>>  				base_type->ident = ident;
+>> +			default:
+>> +				break;
+>>  			}
+> 
+> I don't think you want to add defaults like this just to avoid warnings.
+> Warnings like that can help when adding a new item to an enum, to find
+> the places where you need to extend the code to hand the new item.  And
+> since current GCC doesn't even issue the warning by default, it seems
+> even more unnecessary to add that default case.
+> 
 
-That is what I get in FC11:
-  locale.h:  char *xyz_ptr =3D ((void *)0);
-  stddef.h:  char *xyz_ptr =3D ((void *)0);
-   stdio.h:  char *xyz_ptr =3D ((void *)0);
-  stdlib.h:  char *xyz_ptr =3D ((void *)0);
-  string.h:  char *xyz_ptr =3D ((void *)0);
-    time.h:  char *xyz_ptr =3D ((void *)0);
-   wchar.h:  char *xyz_ptr =3D ((void *)0);
+OK...
 
-Which system has this problem?
+So, if I understand your argument, in order to make the best use of these
+warnings, then the correct change would look like the diff given below,
+and (for more up-to-date gcc) add -Wswitch-enum to CFLAGS (at least
+occasionally).
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yes?
+
+[if no, then I obviously don't understand ;-)]
+
+Hmm, I have another idea; a new patch is brewing!
+
+ATB,
+Ramsay Jones
+
+-->8--
+diff --git a/parse.c b/parse.c
+index e5ad867..afe39c3 100644
+--- a/parse.c
++++ b/parse.c
+@@ -2616,6 +2616,23 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+ 			case SYM_ENUM:
+ 			case SYM_RESTRICT:
+ 				base_type->ident = ident;
++				break;
++			case SYM_UNINITIALIZED:
++			case SYM_PREPROCESSOR:
++			case SYM_BASETYPE:
++			case SYM_NODE:
++			case SYM_PTR:
++			case SYM_FN:
++			case SYM_ARRAY:
++			case SYM_TYPEDEF:
++			case SYM_TYPEOF:
++			case SYM_MEMBER:
++			case SYM_BITFIELD:
++			case SYM_LABEL:
++			case SYM_FOULED:
++			case SYM_KEYWORD:
++			case SYM_BAD:
++				break;
+ 			}
+ 		}
+ 	} else if (base_type && base_type->type == SYM_FN) {
+-->8--
+
+
+
