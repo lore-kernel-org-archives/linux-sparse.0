@@ -1,35 +1,31 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Jeff Garzik <jeff@garzik.org>
 Subject: Re: [PATCH] compile-i386: do not generate an infinite loop
-Date: Wed, 22 Jul 2009 09:39:42 -0700
-Message-ID: <70318cbf0907220939s48bcfd3fi20ae9fda1edd290@mail.gmail.com>
-References: <200907182334.10900.kdudka@redhat.com>
+Date: Wed, 22 Jul 2009 12:51:14 -0400
+Message-ID: <4A674382.9090807@garzik.org>
+References: <200907182334.10900.kdudka@redhat.com> <70318cbf0907220939s48bcfd3fi20ae9fda1edd290@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qy0-f173.google.com ([209.85.221.173]:39374 "EHLO
-	mail-qy0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753694AbZGVQjo (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 Jul 2009 12:39:44 -0400
-Received: by qyk3 with SMTP id 3so389298qyk.33
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Jul 2009 09:39:42 -0700 (PDT)
-In-Reply-To: <200907182334.10900.kdudka@redhat.com>
+Received: from srv5.dvmed.net ([207.36.208.214]:56960 "EHLO mail.dvmed.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751675AbZGVQvR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 22 Jul 2009 12:51:17 -0400
+In-Reply-To: <70318cbf0907220939s48bcfd3fi20ae9fda1edd290@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Kamil Dudka <kdudka@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Oh one last thing. I need a signed-off line from you.
+Christopher Li wrote:
+> Oh one last thing. I need a signed-off line from you.
 
-Chris
+I think sparse needs some text document, describing what Signed-off-by 
+means.  I did this in one of my own projects by copying the relevant 
+"DCO" from kernel tree's Documentation/SubmittingPatches.
 
-On Sat, Jul 18, 2009 at 2:34 PM, Kamil Dudka<kdudka@redhat.com> wrote:
-> Hello,
->
-> I've probably encountered a bug within compile-i386.c. It generates
-> an infinite loop for 'while' statement. My testing example and proposed
-> patch are enclosed.
->
-> Kamil
->
+	Jeff
+
+
+
+
