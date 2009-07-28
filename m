@@ -1,49 +1,52 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [PATCH 5/5] Add a --version option to sparse
-Date: Tue, 28 Jul 2009 18:46:59 +0100
-Message-ID: <4A6F3993.8000606@ramsay1.demon.co.uk>
-References: <4A62395D.9000207@ramsay1.demon.co.uk>	 <70318cbf0907211757w1e0e3436hcc8b679c6de60804@mail.gmail.com>	 <4A6A0BF2.7080509@ramsay1.demon.co.uk> <70318cbf0907251234o6028d0adh8a470f40f373578@mail.gmail.com>
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Detect unused header files?
+Date: Tue, 28 Jul 2009 20:18:04 +0200
+Message-ID: <20090728181803.GA20845@merkur.ravnborg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from anchor-post-2.mail.demon.net ([195.173.77.133]:44694 "EHLO
-	anchor-post-2.mail.demon.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753420AbZG1Rti (ORCPT
+Received: from pfepa.post.tele.dk ([195.41.46.235]:47735 "EHLO
+	pfepa.post.tele.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755364AbZG1SSE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 28 Jul 2009 13:49:38 -0400
-In-Reply-To: <70318cbf0907251234o6028d0adh8a470f40f373578@mail.gmail.com>
+	Tue, 28 Jul 2009 14:18:04 -0400
+Received: from merkur.ravnborg.org (x1-6-00-1e-2a-84-ae-3e.k225.webspeed.dk [80.163.61.94])
+	by pfepa.post.tele.dk (Postfix) with ESMTP id 16667A50035
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Jul 2009 20:18:03 +0200 (CEST)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: sparse <linux-sparse@vger.kernel.org>
 
-Christopher Li wrote:
-> On Fri, Jul 24, 2009 at 12:30 PM, Ramsay
-> Jones<ramsay@ramsay1.demon.co.uk> wrote:
->> $ git checkout master
->> $ git describe
->> 0.4.1-99-g37f041a
-> 
-> If works well if you are following the official branch. If you are working
-> on your own, you might have some private tag. Then that will mess up
-> the "git describe". My tag might not even look like a version number.
-> 
+In the kernel we would like to avoid all
+unused include files.
+Especially in the headers we export to userspace.
 
-True, but I don't see that as a problem. :)
+Are there any easy way we can use sparse to detect
+that a specific header file is not used?
 
->> However, you would not want sparse (the library) to force *all*
->> applications built with the library to handle the --version option
->> by printing the sparse (the program) version string and exiting!
-> 
-> That is what YOUR current patch do, no?
-> 
+I know this will depend on the configuration, but
+for the use I have in mind this does matter only a little.
 
-Exactly. ;-)
-I was describing what is wrong with the patch and how I intended to
-fix it. Indeed, I have fixed it. However, since there is no interest
-in it, I'll refrain from spaming the list. ;-)
+The header files I have in mind will be fully self-contained
+as they all include the header files they need to be used.
 
-ATB,
-Ramsay Jones
+Sample:
+
+cat foo.h:
+#include <linux/types.h>
+#include <linux/swab.h>
+
+struct foo {
+        __u32 bar;
+        __u32 baz;
+};
+
+EOF
+
+
+Here <linux/swab.h> is obviously not used.
+And I would like sparse to flag this...
+
+	Sam
 
