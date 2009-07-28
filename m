@@ -1,77 +1,52 @@
-From: "Robert P. J. Day" <rpjday@crashcourse.ca>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Detect unused header files?
-Date: Tue, 28 Jul 2009 16:36:38 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.0907281634400.3974@localhost>
-References: <20090728181803.GA20845@merkur.ravnborg.org> <70318cbf0907281336p47b68b5cg44a3e7206646cb80@mail.gmail.com>
+Date: Tue, 28 Jul 2009 13:49:57 -0700
+Message-ID: <70318cbf0907281349k72a71b8fyc10d80992e4b1db9@mail.gmail.com>
+References: <20090728181803.GA20845@merkur.ravnborg.org>
+	 <70318cbf0907281336p47b68b5cg44a3e7206646cb80@mail.gmail.com>
+	 <alpine.LFD.2.00.0907281634400.3974@localhost>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1543747825-1248813404=:3974"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from astoria.ccjclearline.com ([64.235.106.9]:50369 "EHLO
-	astoria.ccjclearline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752841AbZG1UjU (ORCPT
+Received: from mail-qy0-f179.google.com ([209.85.221.179]:62323 "EHLO
+	mail-qy0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750743AbZG1Ut6 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 28 Jul 2009 16:39:20 -0400
-In-Reply-To: <70318cbf0907281336p47b68b5cg44a3e7206646cb80@mail.gmail.com>
+	Tue, 28 Jul 2009 16:49:58 -0400
+Received: by qyk9 with SMTP id 9so246164qyk.33
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Jul 2009 13:49:58 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.00.0907281634400.3974@localhost>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: "Robert P. J. Day" <rpjday@crashcourse.ca>
 Cc: Sam Ravnborg <sam@ravnborg.org>, sparse <linux-sparse@vger.kernel.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Tue, Jul 28, 2009 at 1:36 PM, Robert P. J. Day<rpjday@crashcourse.ca=
+> wrote:
+> sure you can. =A0no one should be counting on the inclusion of header
+> files by other header files (except possibly in unusual situations,
+> which i can't even think of at the moment). =A0if your program needs =
+the
+> contents of a header file, it's your responsibility to include it.
 
---8323328-1543747825-1248813404=:3974
-Content-Type: TEXT/PLAIN; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+The case I have in mind is that, some API level header file include som=
+e
+internal header file for constant defines. For example:
 
-On Tue, 28 Jul 2009, Christopher Li wrote:
+drivers/ieee1394/host.h include drivers/ieee1394/csr.h.
 
-> But a lot of case we have the header file is used in *another*
-> file.
->
-> >
-> > Sample:
-> >
-> > cat foo.h:
-> > #include <linux/types.h>
-> > #include <linux/swab.h>
-> >
-> > struct foo {
-> > =A0 =A0 =A0 =A0__u32 bar;
-> > =A0 =A0 =A0 =A0__u32 baz;
-> > };
-> >
-> > EOF
-> >
-> >
-> > Here <linux/swab.h> is obviously not used.
-> > And I would like sparse to flag this...
->
-> I don't think it is can be turn on by default. What if some user
-> space program want to include foo.h and use the definitional inside
-> "swab.h"? In that case it will be OK. I don't think we can ban this
-> kind of the usage case.
+The "csr.h" is just the register define. It is not used in this header =
+file
+itself. I did not check very closely, for augments sake pretend those
+inline function are not there. It just have register defines.
 
-  sure you can.  no one should be counting on the inclusion of header
-files by other header files (except possibly in unusual situations,
-which i can't even think of at the moment).  if your program needs the
-contents of a header file, it's your responsibility to include it.
+Should the C program changed to include "csr.h" directly? I don't think=
+ so.
 
-rday
+Chris
 --
-
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-Robert P. J. Day                               Waterloo, Ontario, CANADA
-
-        Linux Consulting, Training and Annoying Kernel Pedantry.
-
-Web page:                                          http://crashcourse.ca
-Twitter:                                       http://twitter.com/rpjday
-"Kernel Newbie Corner" column @ linux.com:          http://cli.gs/WG6WYX
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
---8323328-1543747825-1248813404=:3974--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
