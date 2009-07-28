@@ -1,55 +1,49 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] test-suite: integrate unhandled proprocessor tests
-Date: Mon, 27 Jul 2009 14:04:00 -0700
-Message-ID: <70318cbf0907271404i34dac921ge2b3f4d4dcc7c596@mail.gmail.com>
-References: <20090727181048.18280.38099.stgit@f10box.hanneseder.net>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: Re: [PATCH 5/5] Add a --version option to sparse
+Date: Tue, 28 Jul 2009 18:46:59 +0100
+Message-ID: <4A6F3993.8000606@ramsay1.demon.co.uk>
+References: <4A62395D.9000207@ramsay1.demon.co.uk>	 <70318cbf0907211757w1e0e3436hcc8b679c6de60804@mail.gmail.com>	 <4A6A0BF2.7080509@ramsay1.demon.co.uk> <70318cbf0907251234o6028d0adh8a470f40f373578@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from qw-out-2122.google.com ([74.125.92.24]:53920 "EHLO
-	qw-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754557AbZG0VKc convert rfc822-to-8bit (ORCPT
+Received: from anchor-post-2.mail.demon.net ([195.173.77.133]:44694 "EHLO
+	anchor-post-2.mail.demon.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1753420AbZG1Rti (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 Jul 2009 17:10:32 -0400
-Received: by qw-out-2122.google.com with SMTP id 8so1804390qwh.37
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Jul 2009 14:10:32 -0700 (PDT)
-In-Reply-To: <20090727181048.18280.38099.stgit@f10box.hanneseder.net>
+	Tue, 28 Jul 2009 13:49:38 -0400
+In-Reply-To: <70318cbf0907251234o6028d0adh8a470f40f373578@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Hannes Eder <hannes@hanneseder.net>
-Cc: Al Viro <viro@ftp.linux.org.uk>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Mon, Jul 27, 2009 at 11:13 AM, Hannes Eder<hannes@hanneseder.net> wr=
-ote:
-> Instrument validate/preprocessor/preproprocessor*.c to be integrated
-> into the test-suite where missing and add an additional test case.
+Christopher Li wrote:
+> On Fri, Jul 24, 2009 at 12:30 PM, Ramsay
+> Jones<ramsay@ramsay1.demon.co.uk> wrote:
+>> $ git checkout master
+>> $ git describe
+>> 0.4.1-99-g37f041a
+> 
+> If works well if you are following the official branch. If you are working
+> on your own, you might have some private tag. Then that will mess up
+> the "git describe". My tag might not even look like a version number.
+> 
 
-Thanks, applied.
+True, but I don't see that as a problem. :)
 
-> Ok there is a difference in the number of empty lines, who cares, but
-> spares outputs a "," and cpp does not.
->
-> Could somebody with more insight comment on this? =A0Al? :)
->
-> Meanwhile I marked this test as "check-known-to-fail".
+>> However, you would not want sparse (the library) to force *all*
+>> applications built with the library to handle the --version option
+>> by printing the sparse (the program) version string and exiting!
+> 
+> That is what YOUR current patch do, no?
+> 
 
-Currently sparse did not handle ##__VA_ARGS__ the same ways
-as gcc. Take a look at parse_expansion(). It marks TOKEN_GNU_KLUDGE
-only if it saw "," right before "##__VA_ARGS__".  So ",##x##__VA_ARGS__=
-"
-will not get generate TOKEN_GNU_KLUDE.
+Exactly. ;-)
+I was describing what is wrong with the patch and how I intended to
+fix it. Indeed, I have fixed it. However, since there is no interest
+in it, I'll refrain from spaming the list. ;-)
 
-The fix is that ##__VA_ARGS__ should kick in *after* the argument
-list has been expanded. It literally delete the previous "," if __VA_AR=
-GS__ is
-empty.
+ATB,
+Ramsay Jones
 
-Am I missing any thing, AI?
-
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
