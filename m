@@ -1,49 +1,72 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Detect unused header files?
-Date: Tue, 28 Jul 2009 14:38:06 -0700
-Message-ID: <70318cbf0907281438i876e21fja037aed7169aa8bf@mail.gmail.com>
+Date: Thu, 30 Jul 2009 03:55:46 -0700
+Message-ID: <70318cbf0907300355h5cb34671ha452433c4e0b5324@mail.gmail.com>
 References: <20090728181803.GA20845@merkur.ravnborg.org>
 	 <70318cbf0907281336p47b68b5cg44a3e7206646cb80@mail.gmail.com>
 	 <alpine.LFD.2.00.0907281634400.3974@localhost>
 	 <70318cbf0907281349k72a71b8fyc10d80992e4b1db9@mail.gmail.com>
 	 <20090728210404.GA21187@merkur.ravnborg.org>
+	 <70318cbf0907281438i876e21fja037aed7169aa8bf@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qy0-f179.google.com ([209.85.221.179]:34785 "EHLO
-	mail-qy0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753453AbZG1ViH (ORCPT
+Received: from qw-out-2122.google.com ([74.125.92.24]:25149 "EHLO
+	qw-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751368AbZG3Kzq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 28 Jul 2009 17:38:07 -0400
-Received: by qyk9 with SMTP id 9so290470qyk.33
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Jul 2009 14:38:06 -0700 (PDT)
-In-Reply-To: <20090728210404.GA21187@merkur.ravnborg.org>
+	Thu, 30 Jul 2009 06:55:46 -0400
+Received: by qw-out-2122.google.com with SMTP id 8so748532qwh.37
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Jul 2009 03:55:46 -0700 (PDT)
+In-Reply-To: <70318cbf0907281438i876e21fja037aed7169aa8bf@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Sam Ravnborg <sam@ravnborg.org>
 Cc: "Robert P. J. Day" <rpjday@crashcourse.ca>, sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jul 28, 2009 at 2:04 PM, Sam Ravnborg<sam@ravnborg.org> wrote:
->
-> Agreed on this one.
->
-> So we should add some intelligence when we 'fix' these warnings.
-> This is sometimes causing us troubles.
->
-> I need to see the results before I can judge if this will
-> be a big issue.
+Hi Sam,
 
-I don't know. It is not trivial change and lookup_symbol is at the hot path.
-Most of the header file does not include unused headers. So I guess amount
-the warnings, over 50% will be false positives. We will see.
+I create a branch "unused-include-files" for some experiment patch.
+Some thing quick and dirty to find out what works and what doesn't.
+No where near submitting quality.
 
-> The first challenge will anyway to make all the header files self contained.
+http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=shortlog;h=unused-include-files
 
-It is much easier than find out what is not needed.
+Currently it just report all unused stream.
 
-Can you make a list of all the header files. Then using gcc -c to compile it?
-Not self contained header file will failed on compile. Assume you give the right
-kernel flags and header file include path.
+for your example foo.h:
+
+#include <linux/types.h>
+#include <linux/string.h>
+
+struct foo {
+       __u32 bar;
+       __u32 baz;
+};
+
+
+$ ./sparse foo.h
+unused stream preprocessor(1)
+unused stream foo.h(2)
+unused stream preprocessor(3)
+unused stream /usr/include/linux/stddef.h(6)
+unused stream /usr/include/asm/posix_types.h(7)
+unused stream /usr/include/asm/types.h(9)
+unused stream /usr/include/linux/string.h(11)
+unused stream /usr/include/string.h(12)
+unused stream /usr/include/features.h(13)
+unused stream /usr/include/sys/cdefs.h(14)
+unused stream /usr/include/bits/wordsize.h(15)
+unused stream /usr/include/gnu/stubs.h(16)
+unused stream /usr/include/bits/wordsize.h(17)
+unused stream /usr/include/gnu/stubs-32.h(18)
+unused stream /usr/lib/gcc/x86_64-redhat-linux/4.3.0//include/stddef.h(19)
+
+Just as I expected. Lost of noise :-)
+
+BTW, use "-vstream" to show the actual symbol usage detail.
+
+Comments?
 
 Chris
