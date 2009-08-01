@@ -1,31 +1,34 @@
-From: Blue Swirl <blauwirbel@gmail.com>
-Subject: [PATCH 0/2] builtins and __bounded__ attribute
-Date: Sat, 1 Aug 2009 12:28:34 +0300
-Message-ID: <f43fc5580908010228q6a2d7416l616816c3d104e181@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 2/2] Subject: Add a few GCC builtins
+Date: Sat, 1 Aug 2009 09:53:09 -0700
+Message-ID: <70318cbf0908010953n5ead2933g12b2213bf5901b83@mail.gmail.com>
+References: <f43fc5580908010228k6760baa7j506fd674a0510307@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.152]:40771 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751505AbZHAJ2y (ORCPT
+Received: from mail-pz0-f196.google.com ([209.85.222.196]:51785 "EHLO
+	mail-pz0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751769AbZHAQxJ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 1 Aug 2009 05:28:54 -0400
-Received: by fg-out-1718.google.com with SMTP id e21so733783fga.17
-        for <linux-sparse@vger.kernel.org>; Sat, 01 Aug 2009 02:28:54 -0700 (PDT)
+	Sat, 1 Aug 2009 12:53:09 -0400
+Received: by pzk34 with SMTP id 34so1807305pzk.4
+        for <linux-sparse@vger.kernel.org>; Sat, 01 Aug 2009 09:53:09 -0700 (PDT)
+In-Reply-To: <f43fc5580908010228k6760baa7j506fd674a0510307@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Blue Swirl <blauwirbel@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-1/2 is a resend of:
-http://marc.info/?l=linux-sparse&m=123642492815770&w=2
+On Sat, Aug 1, 2009 at 2:28 AM, Blue Swirl<blauwirbel@gmail.com> wrote:
+> Add c{l,t}z{,l,ll}, ffsl{,l}, popcountll and floating point comparison
+> builtins.
 
-Please CC me for any replies.
+Your two patches looks good. But the patch itself is white space damaged.
+Gmail does some strange thing to inlined patches.
 
-Blue Swirl (2):
-  Ignore attribute __bounded__, used by OpenBSD headers.
-  Add a few GCC builtins
+Can you resend this patch using "attach a file"?
 
- lib.c   |   25 ++++++++++++++++++++++---
- parse.c |    2 ++
- 2 files changed, 24 insertions(+), 3 deletions(-)
+Thanks
+
+Chris
