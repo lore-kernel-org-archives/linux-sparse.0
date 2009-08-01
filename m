@@ -1,69 +1,80 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: Detect unused header files?
-Date: Thu, 30 Jul 2009 22:36:33 +0200
-Message-ID: <20090730203633.GA28838@merkur.ravnborg.org>
-References: <20090728181803.GA20845@merkur.ravnborg.org> <70318cbf0907281336p47b68b5cg44a3e7206646cb80@mail.gmail.com> <alpine.LFD.2.00.0907281634400.3974@localhost> <70318cbf0907281349k72a71b8fyc10d80992e4b1db9@mail.gmail.com> <20090728210404.GA21187@merkur.ravnborg.org> <70318cbf0907281438i876e21fja037aed7169aa8bf@mail.gmail.com> <70318cbf0907300355h5cb34671ha452433c4e0b5324@mail.gmail.com>
+From: Blue Swirl <blauwirbel@gmail.com>
+Subject: [PATCH 2/2] Subject: Add a few GCC builtins
+Date: Sat, 1 Aug 2009 12:28:50 +0300
+Message-ID: <f43fc5580908010228k6760baa7j506fd674a0510307@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from pfepa.post.tele.dk ([195.41.46.235]:40235 "EHLO
-	pfepa.post.tele.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752014AbZG3Uge (ORCPT
+Received: from fg-out-1718.google.com ([72.14.220.157]:43934 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752631AbZHAJ3J (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 30 Jul 2009 16:36:34 -0400
-Content-Disposition: inline
-In-Reply-To: <70318cbf0907300355h5cb34671ha452433c4e0b5324@mail.gmail.com>
+	Sat, 1 Aug 2009 05:29:09 -0400
+Received: by fg-out-1718.google.com with SMTP id e12so210976fga.17
+        for <linux-sparse@vger.kernel.org>; Sat, 01 Aug 2009 02:29:10 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: "Robert P. J. Day" <rpjday@crashcourse.ca>, sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Thu, Jul 30, 2009 at 03:55:46AM -0700, Christopher Li wrote:
-> Hi Sam,
-> 
-> I create a branch "unused-include-files" for some experiment patch.
-> Some thing quick and dirty to find out what works and what doesn't.
-> No where near submitting quality.
-> 
-> http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=shortlog;h=unused-include-files
-> 
-> Currently it just report all unused stream.
-> 
-> for your example foo.h:
-> 
-> #include <linux/types.h>
-> #include <linux/string.h>
-> 
-> struct foo {
->        __u32 bar;
->        __u32 baz;
-> };
-> 
-> 
-> $ ./sparse foo.h
-> unused stream preprocessor(1)
-> unused stream foo.h(2)
-> unused stream preprocessor(3)
-> unused stream /usr/include/linux/stddef.h(6)
-> unused stream /usr/include/asm/posix_types.h(7)
-> unused stream /usr/include/asm/types.h(9)
-> unused stream /usr/include/linux/string.h(11)
-> unused stream /usr/include/string.h(12)
-> unused stream /usr/include/features.h(13)
-> unused stream /usr/include/sys/cdefs.h(14)
-> unused stream /usr/include/bits/wordsize.h(15)
-> unused stream /usr/include/gnu/stubs.h(16)
-> unused stream /usr/include/bits/wordsize.h(17)
-> unused stream /usr/include/gnu/stubs-32.h(18)
-> unused stream /usr/lib/gcc/x86_64-redhat-linux/4.3.0//include/stddef.h(19)
-> 
-> Just as I expected. Lost of noise :-)
-> 
-> BTW, use "-vstream" to show the actual symbol usage detail.
-> 
-> Comments?
-Thanks for hacking this up!
+Add c{l,t}z{,l,ll}, ffsl{,l}, popcountll and floating point comparison
+builtins.
 
-I will try it out during the weekend as work permits. Busy...
+Signed-off-by: Blue Swirl <blauwirbel@gmail.com>
+---
+ lib.c |   25 ++++++++++++++++++++++---
+ 1 files changed, 22 insertions(+), 3 deletions(-)
 
-	Sam
+diff --git a/lib.c b/lib.c
+index 42affcd..600939b 100644
+--- a/lib.c
++++ b/lib.c
+@@ -685,15 +685,26 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern char * __builtin_strpbrk(const char *, const
+char *);\n");
+ 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strlen(const char *);\n");
+
++	/* And bitwise operations.. */
++	add_pre_buffer("extern int __builtin_clz(int);\n");
++	add_pre_buffer("extern int __builtin_clzl(long);\n");
++	add_pre_buffer("extern int __builtin_clzll(long long);\n");
++	add_pre_buffer("extern int __builtin_ctz(int);\n");
++	add_pre_buffer("extern int __builtin_ctzl(long);\n");
++	add_pre_buffer("extern int __builtin_ctzll(long long);\n");
++	add_pre_buffer("extern int __builtin_ffs(int);\n");
++	add_pre_buffer("extern int __builtin_ffsl(long);\n");
++	add_pre_buffer("extern int __builtin_ffsll(long long);\n");
++	add_pre_buffer("extern int __builtin_popcount(unsigned int);\n");
++	add_pre_buffer("extern int __builtin_popcountl(unsigned long);\n");
++	add_pre_buffer("extern int __builtin_popcountll(unsigned long long);\n");
++
+ 	/* And some random ones.. */
+ 	add_pre_buffer("extern void *__builtin_return_address(unsigned int);\n");
+ 	add_pre_buffer("extern void *__builtin_extract_return_addr(void *);\n");
+ 	add_pre_buffer("extern void *__builtin_frame_address(unsigned int);\n");
+ 	add_pre_buffer("extern void __builtin_trap(void);\n");
+-	add_pre_buffer("extern int __builtin_ffs(int);\n");
+ 	add_pre_buffer("extern void *__builtin_alloca(__SIZE_TYPE__);\n");
+-	add_pre_buffer("extern int __builtin_popcount(unsigned int);\n");
+-	add_pre_buffer("extern int __builtin_popcountl(unsigned long);\n");
+ 	add_pre_buffer("extern void __builtin_prefetch (const void *, ...);\n");
+ 	add_pre_buffer("extern long __builtin_alpha_extbl(long, long);\n");
+ 	add_pre_buffer("extern long __builtin_alpha_extwl(long, long);\n");
+@@ -704,6 +715,14 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
+ 	add_pre_buffer("extern long __builtin_labs(long);\n");
+
++	/* And some floating point stuff.. */
++	add_pre_buffer("extern int __builtin_isgreater(float, float);\n");
++	add_pre_buffer("extern int __builtin_isgreaterequal(float, float);\n");
++	add_pre_buffer("extern int __builtin_isless(float, float);\n");
++	add_pre_buffer("extern int __builtin_islessequal(float, float);\n");
++	add_pre_buffer("extern int __builtin_islessgreater(float, float);\n");
++	add_pre_buffer("extern int __builtin_isunordered(float, float);\n");
++
+ 	/* And some __FORTIFY_SOURCE ones.. */
+ 	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(void *, int);\n");
+ 	add_pre_buffer ("extern void * __builtin___memcpy_chk(void *, const
+void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+-- 
+1.6.2.4
