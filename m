@@ -1,102 +1,30 @@
-From: Blue Swirl <blauwirbel@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 2/2] Subject: Add a few GCC builtins
-Date: Sat, 1 Aug 2009 20:23:12 +0300
-Message-ID: <f43fc5580908011023m73ec63b5rbc09862aeb31f847@mail.gmail.com>
+Date: Tue, 4 Aug 2009 14:35:06 -0700
+Message-ID: <70318cbf0908041435j59c33f64uc6f79b018884c8b2@mail.gmail.com>
 References: <f43fc5580908010228k6760baa7j506fd674a0510307@mail.gmail.com>
-	<70318cbf0908010953n5ead2933g12b2213bf5901b83@mail.gmail.com>
+	 <70318cbf0908010953n5ead2933g12b2213bf5901b83@mail.gmail.com>
+	 <f43fc5580908011023m73ec63b5rbc09862aeb31f847@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=000e0cd25b90c534b4047017cb8b
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.159]:21689 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750874AbZHARXc (ORCPT
+Received: from mail-vw0-f172.google.com ([209.85.212.172]:48918 "EHLO
+	mail-vw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932570AbZHDVfH (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 1 Aug 2009 13:23:32 -0400
-Received: by fg-out-1718.google.com with SMTP id e12so256960fga.17
-        for <linux-sparse@vger.kernel.org>; Sat, 01 Aug 2009 10:23:32 -0700 (PDT)
-In-Reply-To: <70318cbf0908010953n5ead2933g12b2213bf5901b83@mail.gmail.com>
+	Tue, 4 Aug 2009 17:35:07 -0400
+Received: by vws2 with SMTP id 2so1619052vws.4
+        for <linux-sparse@vger.kernel.org>; Tue, 04 Aug 2009 14:35:06 -0700 (PDT)
+In-Reply-To: <f43fc5580908011023m73ec63b5rbc09862aeb31f847@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Blue Swirl <blauwirbel@gmail.com>
 Cc: linux-sparse@vger.kernel.org
 
---000e0cd25b90c534b4047017cb8b
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+On Sat, Aug 1, 2009 at 10:23 AM, Blue Swirl<blauwirbel@gmail.com> wrote:
+> Sure. I removed the extra "Subject:" from the description.
 
-On Sat, Aug 1, 2009 at 7:53 PM, Christopher Li<sparse@chrisli.org> wrote:
-> On Sat, Aug 1, 2009 at 2:28 AM, Blue Swirl<blauwirbel@gmail.com> wrote:
->> Add c{l,t}z{,l,ll}, ffsl{,l}, popcountll and floating point comparison
->> builtins.
->
-> Your two patches looks good. But the patch itself is white space damaged.
-> Gmail does some strange thing to inlined patches.
->
-> Can you resend this patch using "attach a file"?
+Thanks, all two patches applied.
 
-Sure. I removed the extra "Subject:" from the description.
-
---000e0cd25b90c534b4047017cb8b
-Content-Type: application/x-patch; name="0002-Add-a-few-GCC-builtins.patch"
-Content-Disposition: attachment;
-	filename="0002-Add-a-few-GCC-builtins.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_fxum2ut01
-
-RnJvbSAxYjExYjRlOTNmY2VmNDQxMWMwMjhlNTA1YmJiM2M0MzgxNzk0ZDgxIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBCbHVlIFN3aXJsIDxibGF1d2lyYmVsQGdtYWlsLmNvbT4KRGF0
-ZTogU2F0LCAxIEF1ZyAyMDA5IDE3OjE5OjQ5ICswMDAwClN1YmplY3Q6IFtQQVRDSF0gQWRkIGEg
-ZmV3IEdDQyBidWlsdGlucwoKQWRkIGN7bCx0fXp7LGwsbGx9LCBmZnNseyxsfSwgcG9wY291bnRs
-bCBhbmQgZmxvYXRpbmcgcG9pbnQgY29tcGFyaXNvbgpidWlsdGlucy4KClNpZ25lZC1vZmYtYnk6
-IEJsdWUgU3dpcmwgPGJsYXV3aXJiZWxAZ21haWwuY29tPgotLS0KIGxpYi5jIHwgICAyNSArKysr
-KysrKysrKysrKysrKysrKysrLS0tCiAxIGZpbGVzIGNoYW5nZWQsIDIyIGluc2VydGlvbnMoKyks
-IDMgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvbGliLmMgYi9saWIuYwppbmRleCA0MmFmZmNk
-Li42MDA5MzliIDEwMDY0NAotLS0gYS9saWIuYworKysgYi9saWIuYwpAQCAtNjg1LDE1ICs2ODUs
-MjYgQEAgdm9pZCBkZWNsYXJlX2J1aWx0aW5fZnVuY3Rpb25zKHZvaWQpCiAJYWRkX3ByZV9idWZm
-ZXIoImV4dGVybiBjaGFyICogX19idWlsdGluX3N0cnBicmsoY29uc3QgY2hhciAqLCBjb25zdCBj
-aGFyICopO1xuIik7CiAJYWRkX3ByZV9idWZmZXIoImV4dGVybiBfX1NJWkVfVFlQRV9fIF9fYnVp
-bHRpbl9zdHJsZW4oY29uc3QgY2hhciAqKTtcbiIpOwogCisJLyogQW5kIGJpdHdpc2Ugb3BlcmF0
-aW9ucy4uICovCisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWlsdGluX2NseihpbnQp
-O1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWlsdGluX2NsemwobG9uZyk7
-XG4iKTsKKwlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGludCBfX2J1aWx0aW5fY2x6bGwobG9uZyBs
-b25nKTtcbiIpOworCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9jdHooaW50
-KTtcbiIpOworCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9jdHpsKGxvbmcp
-O1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWlsdGluX2N0emxsKGxvbmcg
-bG9uZyk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGludCBfX2J1aWx0aW5fZmZzKGlu
-dCk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGludCBfX2J1aWx0aW5fZmZzbChsb25n
-KTtcbiIpOworCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9mZnNsbChsb25n
-IGxvbmcpO1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWlsdGluX3BvcGNv
-dW50KHVuc2lnbmVkIGludCk7XG4iKTsKKwlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGludCBfX2J1
-aWx0aW5fcG9wY291bnRsKHVuc2lnbmVkIGxvbmcpO1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4
-dGVybiBpbnQgX19idWlsdGluX3BvcGNvdW50bGwodW5zaWduZWQgbG9uZyBsb25nKTtcbiIpOwor
-CiAJLyogQW5kIHNvbWUgcmFuZG9tIG9uZXMuLiAqLwogCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4g
-dm9pZCAqX19idWlsdGluX3JldHVybl9hZGRyZXNzKHVuc2lnbmVkIGludCk7XG4iKTsKIAlhZGRf
-cHJlX2J1ZmZlcigiZXh0ZXJuIHZvaWQgKl9fYnVpbHRpbl9leHRyYWN0X3JldHVybl9hZGRyKHZv
-aWQgKik7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIHZvaWQgKl9fYnVpbHRpbl9mcmFt
-ZV9hZGRyZXNzKHVuc2lnbmVkIGludCk7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIHZv
-aWQgX19idWlsdGluX3RyYXAodm9pZCk7XG4iKTsKLQlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGlu
-dCBfX2J1aWx0aW5fZmZzKGludCk7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIHZvaWQg
-Kl9fYnVpbHRpbl9hbGxvY2EoX19TSVpFX1RZUEVfXyk7XG4iKTsKLQlhZGRfcHJlX2J1ZmZlcigi
-ZXh0ZXJuIGludCBfX2J1aWx0aW5fcG9wY291bnQodW5zaWduZWQgaW50KTtcbiIpOwotCWFkZF9w
-cmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9wb3Bjb3VudGwodW5zaWduZWQgbG9uZyk7
-XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIHZvaWQgX19idWlsdGluX3ByZWZldGNoIChj
-b25zdCB2b2lkICosIC4uLik7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGxvbmcgX19i
-dWlsdGluX2FscGhhX2V4dGJsKGxvbmcsIGxvbmcpO1xuIik7CiAJYWRkX3ByZV9idWZmZXIoImV4
-dGVybiBsb25nIF9fYnVpbHRpbl9hbHBoYV9leHR3bChsb25nLCBsb25nKTtcbiIpOwpAQCAtNzA0
-LDYgKzcxNSwxNCBAQCB2b2lkIGRlY2xhcmVfYnVpbHRpbl9mdW5jdGlvbnModm9pZCkKIAlhZGRf
-cHJlX2J1ZmZlcigiZXh0ZXJuIGxvbmcgX19idWlsdGluX2FscGhhX2NtcGJnZShsb25nLCBsb25n
-KTtcbiIpOwogCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gbG9uZyBfX2J1aWx0aW5fbGFicyhsb25n
-KTtcbiIpOwogCisJLyogQW5kIHNvbWUgZmxvYXRpbmcgcG9pbnQgc3R1ZmYuLiAqLworCWFkZF9w
-cmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9pc2dyZWF0ZXIoZmxvYXQsIGZsb2F0KTtc
-biIpOworCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gaW50IF9fYnVpbHRpbl9pc2dyZWF0ZXJlcXVh
-bChmbG9hdCwgZmxvYXQpO1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWls
-dGluX2lzbGVzcyhmbG9hdCwgZmxvYXQpO1xuIik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBp
-bnQgX19idWlsdGluX2lzbGVzc2VxdWFsKGZsb2F0LCBmbG9hdCk7XG4iKTsKKwlhZGRfcHJlX2J1
-ZmZlcigiZXh0ZXJuIGludCBfX2J1aWx0aW5faXNsZXNzZ3JlYXRlcihmbG9hdCwgZmxvYXQpO1xu
-Iik7CisJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19idWlsdGluX2lzdW5vcmRlcmVkKGZs
-b2F0LCBmbG9hdCk7XG4iKTsKKwogCS8qIEFuZCBzb21lIF9fRk9SVElGWV9TT1VSQ0Ugb25lcy4u
-ICovCiAJYWRkX3ByZV9idWZmZXIgKCJleHRlcm4gX19TSVpFX1RZUEVfXyBfX2J1aWx0aW5fb2Jq
-ZWN0X3NpemUodm9pZCAqLCBpbnQpO1xuIik7CiAJYWRkX3ByZV9idWZmZXIgKCJleHRlcm4gdm9p
-ZCAqIF9fYnVpbHRpbl9fX21lbWNweV9jaGsodm9pZCAqLCBjb25zdCB2b2lkICosIF9fU0laRV9U
-WVBFX18sIF9fU0laRV9UWVBFX18pO1xuIik7Ci0tIAoxLjUuNi41Cgo=
---000e0cd25b90c534b4047017cb8b--
+Chris
