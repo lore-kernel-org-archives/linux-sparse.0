@@ -1,55 +1,56 @@
-From: "Robert P. J. Day" <rpjday@crashcourse.ca>
-Subject: Re: Detect unused header files?
-Date: Thu, 6 Aug 2009 10:09:55 -0400 (EDT)
-Message-ID: <alpine.LFD.2.00.0908061007240.10398@localhost>
-References: <20090728181803.GA20845@merkur.ravnborg.org> <alpine.LFD.2.00.0908060716010.7946@localhost> <200908061416.46210.kdudka@redhat.com> <200908061501.59386.kdudka@redhat.com> <4A7ADA01.6020402@redhat.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] linearize.h: sanitize header
+Date: Thu, 6 Aug 2009 10:10:30 -0700
+Message-ID: <70318cbf0908061010w737ac3d7j1feb1f9744217df7@mail.gmail.com>
+References: <200908061102.14935.kdudka@redhat.com>
+	 <200908061130.08387.kdudka@redhat.com>
+	 <154e089b0908060239g56261ecp916d7b937014a6fd@mail.gmail.com>
+	 <200908061151.11277.kdudka@redhat.com>
+	 <154e089b0908060409v4dff4785x456b5aad2460ed84@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from astoria.ccjclearline.com ([64.235.106.9]:60675 "EHLO
-	astoria.ccjclearline.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755325AbZHFOMn (ORCPT
+Received: from mail-vw0-f183.google.com ([209.85.212.183]:57986 "EHLO
+	mail-vw0-f183.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756343AbZHFRKc convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 6 Aug 2009 10:12:43 -0400
-In-Reply-To: <4A7ADA01.6020402@redhat.com>
+	Thu, 6 Aug 2009 13:10:32 -0400
+Received: by vws13 with SMTP id 13so936113vws.22
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Aug 2009 10:10:31 -0700 (PDT)
+In-Reply-To: <154e089b0908060409v4dff4785x456b5aad2460ed84@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Michael Stefaniuc <mstefani@redhat.com>
+To: Hannes Eder <hannes@hanneseder.net>
 Cc: Kamil Dudka <kdudka@redhat.com>, sparse <linux-sparse@vger.kernel.org>
 
-On Thu, 6 Aug 2009, Michael Stefaniuc wrote:
+On Thu, Aug 6, 2009 at 4:09 AM, Hannes Eder<hannes@hanneseder.net> wrot=
+e:
+>> $ grep --color '[^_]false[^_]' *.c
+>
+> $ grep --color '\bfalse\b\|\btrue\b' *.c | wc -l
+> 91
+>
+> some of them are just in comments, does not look to scary to me. =A0I=
+f
+> others agree that its a good idea to rename them, I can do it if you
+> don't want to.
 
-> Kamil Dudka wrote:
-> > On Thu August 6 2009 14:16:45 Kamil Dudka wrote:
-> >>>   has anyone tried cscout?
-> >>>
-> >>> http://www.spinellis.gr/cscout/
-> >> The homepage looks interesting, but where can I download its sources?
-> >
-> > FYI we figured out with rday off-list that there are no sources available.
-> >
-> > Please leave a note here if you find them.
+I would just apply the change to the header file and related variables.
+The linearize.h is consider an API header file for other sparse applica=
+tion
+to use. So we'd better not assume too much on the sparse caller side.
 
-> It is a proprietary application that is free as in beer to use for
-> checking open source code. But careful as the application phones
-> home (see the FAQ). I wanted to use it too on Wine but that stopped
-> me.
+I agree with Kamil that rename variable in linearize.c offer no real
+benefits. I consider it more of a personal preference thing. And it is
+internal to linearize.c. At this point renaming variable will mess up w=
+ith
+annotations. It is not good enough reason to do it just to make
+the editor happy.
 
-  while i understand the dislike OSS folks have for that sort of
-thing, is there anything fundamentally harmful with what cscout would
-be "sending home" WRT the linux kernel source tree?  i'm not arguing
-one way or the other -- i'm just wondering if the benefits of running
-cscout on the kernel would outweigh the annoyance of how it behaves.
-
-rday
+Chris
 --
-
-========================================================================
-Robert P. J. Day                               Waterloo, Ontario, CANADA
-
-        Linux Consulting, Training and Annoying Kernel Pedantry.
-
-Web page:                                          http://crashcourse.ca
-Twitter:                                       http://twitter.com/rpjday
-"Kernel Newbie Corner" column @ linux.com:          http://cli.gs/WG6WYX
-========================================================================
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
