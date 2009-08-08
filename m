@@ -1,55 +1,126 @@
 From: Kamil Dudka <kdudka@redhat.com>
-Subject: [PATCH] make sparse headers self-compilable...
-Date: Fri, 7 Aug 2009 22:27:08 +0200
-Message-ID: <200908072227.08652.kdudka@redhat.com>
+Subject: Re: [PATCH] make sparse headers self-compilable...
+Date: Sat, 8 Aug 2009 13:10:26 +0200
+Message-ID: <200908081310.27671.kdudka@redhat.com>
+References: <200908072227.08652.kdudka@redhat.com>
 Mime-Version: 1.0
 Content-Type: Multipart/Mixed;
-  boundary="Boundary-00=_c4IfKEAQe3HiagY"
+  boundary="Boundary-00=_j0VfKpaZYlFOp3b"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx2.redhat.com ([66.187.237.31]:38643 "EHLO mx2.redhat.com"
+Received: from mx2.redhat.com ([66.187.237.31]:57277 "EHLO mx2.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933755AbZHGU1h (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 7 Aug 2009 16:27:37 -0400
+	id S1756129AbZHHLK5 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 8 Aug 2009 07:10:57 -0400
 Received: from int-mx2.corp.redhat.com (int-mx2.corp.redhat.com [172.16.27.26])
-	by mx2.redhat.com (8.13.8/8.13.8) with ESMTP id n77KRcs5029832
-	for <linux-sparse@vger.kernel.org>; Fri, 7 Aug 2009 16:27:38 -0400
+	by mx2.redhat.com (8.13.8/8.13.8) with ESMTP id n78BAwI2008383
+	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:58 -0400
 Received: from ns3.rdu.redhat.com (ns3.rdu.redhat.com [10.11.255.199])
-	by int-mx2.corp.redhat.com (8.13.1/8.13.1) with ESMTP id n77KRbHV022144
-	for <linux-sparse@vger.kernel.org>; Fri, 7 Aug 2009 16:27:38 -0400
-Received: from vpn1-4-53.ams2.redhat.com (vpn1-4-53.ams2.redhat.com [10.36.4.53])
-	by ns3.rdu.redhat.com (8.13.8/8.13.8) with ESMTP id n77KRaRr003873
-	for <linux-sparse@vger.kernel.org>; Fri, 7 Aug 2009 16:27:37 -0400
+	by int-mx2.corp.redhat.com (8.13.1/8.13.1) with ESMTP id n78BAwmm030559
+	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:58 -0400
+Received: from vpn1-4-54.ams2.redhat.com (vpn1-4-54.ams2.redhat.com [10.36.4.54])
+	by ns3.rdu.redhat.com (8.13.8/8.13.8) with ESMTP id n78BAuUi017322
+	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:57 -0400
+In-Reply-To: <200908072227.08652.kdudka@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse <linux-sparse@vger.kernel.org>
 
---Boundary-00=_c4IfKEAQe3HiagY
+--Boundary-00=_j0VfKpaZYlFOp3b
 Content-Type: text/plain;
-  charset="us-ascii"
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: inline
 
-Hello,
+On Friday 07 of August 2009 22:27:08 Kamil Dudka wrote:
+> attached is another fix for SPARSE headers improving their sanity. I am
+> also attaching a simple test for the dependency tracking of headers. It's
+> not enough generic and portable and therefore not really useful. Maybe
+> someone skilled in writing makefiles might want to include something like
+> that to the SPARSE Makefile as part of the 'check' target.
 
-attached is another fix for SPARSE headers improving their sanity. I am
-also attaching a simple test for the dependency tracking of headers. It's
-not enough generic and portable and therefore not really useful. Maybe 
-someone skilled in writing makefiles might want to include something like
-that to the SPARSE Makefile as part of the 'check' target.
+Attached are amended versions of the patch and the test. I didn't spot
+some warnings before.
 
 Kamil
 
---Boundary-00=_c4IfKEAQe3HiagY
+diff --git a/storage.h b/storage.h
+index 0d3bbc5..e049e23 100644
+--- a/storage.h
++++ b/storage.h
+@@ -1,6 +1,7 @@
+ #ifndef STORAGE_H
+ #define STORAGE_H
+
++#include "allocate.h"
+ #include "lib.h"
+
+ /*
+diff -up Makefile.chk.orig Makefile.chk
+--- Makefile.chk.orig
++++ Makefile.chk
+@@ -19,9 +19,11 @@ HEADERS ?= \
+
+ SINK ?= /dev/null
+
++CFLAGS += -Wall -Werror
++
+ .PHONY: check $(HEADERS)
+
+ # check whether each header is self-compilable
+ check: $(HEADERS)
+ $(HEADERS):
+-   $(CC) -o $(SINK) -c $@
++   $(CC) $(CFLAGS) -o $(SINK) -c $@
+
+--Boundary-00=_j0VfKpaZYlFOp3b
+Content-Type: text/x-makefile;
+  charset="utf-8";
+  name="Makefile.chk"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="Makefile.chk"
+
+# all SPARSE headers (except ident-list.h which is not an ordinary header)
+HEADERS ?= \
+	allocate.h \
+	bitmap.h \
+	compat.h \
+	compile.h \
+	dissect.h \
+	expression.h \
+	flow.h \
+	lib.h \
+	linearize.h \
+	parse.h \
+	ptrlist.h \
+	scope.h \
+	storage.h \
+	symbol.h \
+	target.h \
+	token.h \
+
+SINK ?= /dev/null
+
+CFLAGS += -Wall -Werror
+
+.PHONY: check $(HEADERS)
+
+# check whether each header is self-compilable
+check: $(HEADERS)
+$(HEADERS):
+	$(CC) $(CFLAGS) -o $(SINK) -c $@
+
+--Boundary-00=_j0VfKpaZYlFOp3b
 Content-Type: text/x-diff;
-  charset="us-ascii";
+  charset="utf-8";
   name="0001-make-sparse-headers-self-compilable.patch"
 Content-Transfer-Encoding: quoted-printable
 Content-Disposition: attachment;
 	filename="0001-make-sparse-headers-self-compilable.patch"
 
-=46rom 8ffbb46652f69e662ce39c135f1867599c0f5477 Mon Sep 17 00:00:00 2001
+=46rom 619088669e2333a8c5921d99befa8d72b322004d Mon Sep 17 00:00:00 2001
 =46rom: Kamil Dudka <kdudka@redhat.com>
-Date: Fri, 7 Aug 2009 21:48:44 +0200
+Date: Sat, 8 Aug 2009 12:58:41 +0200
 Subject: [PATCH] make sparse headers self-compilable...
 
 =2E.. and thus possible to include them in arbitrary order and without any
@@ -61,8 +132,8 @@ Signed-off-by: Kamil Dudka <kdudka@redhat.com>
  flow.h    |    2 ++
  ptrlist.h |    2 ++
  scope.h   |    2 ++
- storage.h |    2 ++
- 5 files changed, 10 insertions(+), 0 deletions(-)
+ storage.h |    3 +++
+ 5 files changed, 11 insertions(+), 0 deletions(-)
 
 diff --git a/compile.h b/compile.h
 index 0db8fdb..6c5260d 100644
@@ -117,56 +188,21 @@ index 5f1f232..aff7b6b 100644
  	struct token *token;		/* Scope start information */
  	struct symbol_list *symbols;	/* List of symbols in this scope */
 diff --git a/storage.h b/storage.h
-index 610cbfd..0d3bbc5 100644
+index 610cbfd..e049e23 100644
 =2D-- a/storage.h
 +++ b/storage.h
-@@ -1,6 +1,8 @@
+@@ -1,6 +1,9 @@
  #ifndef STORAGE_H
  #define STORAGE_H
 =20
++#include "allocate.h"
 +#include "lib.h"
 +
  /*
   * The "storage" that underlies an incoming/outgoing pseudo. It's
   * basically the backing store for a pseudo, and may be a real hardware
 =2D-=20
-1.6.3.3
+1.6.4
 
 
---Boundary-00=_c4IfKEAQe3HiagY
-Content-Type: text/x-makefile;
-  charset="us-ascii";
-  name="Makefile.chk"
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment;
-	filename="Makefile.chk"
-
-# all SPARSE headers (except ident-list.h which is not an ordinary header)
-HEADERS ?= \
-	allocate.h \
-	bitmap.h \
-	compat.h \
-	compile.h \
-	dissect.h \
-	expression.h \
-	flow.h \
-	lib.h \
-	linearize.h \
-	parse.h \
-	ptrlist.h \
-	scope.h \
-	storage.h \
-	symbol.h \
-	target.h \
-	token.h \
-
-SINK ?= /dev/null
-
-.PHONY: check $(HEADERS)
-
-# check whether each header is self-compilable
-check: $(HEADERS)
-$(HEADERS):
-	$(CC) -o $(SINK) -c $@
-
---Boundary-00=_c4IfKEAQe3HiagY--
+--Boundary-00=_j0VfKpaZYlFOp3b--
