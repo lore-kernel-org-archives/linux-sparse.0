@@ -1,208 +1,191 @@
 From: Kamil Dudka <kdudka@redhat.com>
-Subject: Re: [PATCH] make sparse headers self-compilable...
-Date: Sat, 8 Aug 2009 13:10:26 +0200
-Message-ID: <200908081310.27671.kdudka@redhat.com>
-References: <200908072227.08652.kdudka@redhat.com>
+Subject: [PATCH] unssa: track uses when replacing a phi node
+Date: Sun, 9 Aug 2009 10:30:23 +0200
+Message-ID: <200908091030.24138.kdudka@redhat.com>
 Mime-Version: 1.0
 Content-Type: Multipart/Mixed;
-  boundary="Boundary-00=_j0VfKpaZYlFOp3b"
+  boundary="Boundary-00=_gkofK4DWwVS7Ocv"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx2.redhat.com ([66.187.237.31]:57277 "EHLO mx2.redhat.com"
+Received: from mx2.redhat.com ([66.187.237.31]:44987 "EHLO mx2.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1756129AbZHHLK5 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 8 Aug 2009 07:10:57 -0400
+	id S1751536AbZHIIaz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 9 Aug 2009 04:30:55 -0400
 Received: from int-mx2.corp.redhat.com (int-mx2.corp.redhat.com [172.16.27.26])
-	by mx2.redhat.com (8.13.8/8.13.8) with ESMTP id n78BAwI2008383
-	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:58 -0400
+	by mx2.redhat.com (8.13.8/8.13.8) with ESMTP id n798Uuuw028149
+	for <linux-sparse@vger.kernel.org>; Sun, 9 Aug 2009 04:30:56 -0400
 Received: from ns3.rdu.redhat.com (ns3.rdu.redhat.com [10.11.255.199])
-	by int-mx2.corp.redhat.com (8.13.1/8.13.1) with ESMTP id n78BAwmm030559
-	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:58 -0400
-Received: from vpn1-4-54.ams2.redhat.com (vpn1-4-54.ams2.redhat.com [10.36.4.54])
-	by ns3.rdu.redhat.com (8.13.8/8.13.8) with ESMTP id n78BAuUi017322
-	for <linux-sparse@vger.kernel.org>; Sat, 8 Aug 2009 07:10:57 -0400
-In-Reply-To: <200908072227.08652.kdudka@redhat.com>
+	by int-mx2.corp.redhat.com (8.13.1/8.13.1) with ESMTP id n798Utc2004825
+	for <linux-sparse@vger.kernel.org>; Sun, 9 Aug 2009 04:30:55 -0400
+Received: from vpn2-8-75.ams2.redhat.com (vpn2-8-75.ams2.redhat.com [10.36.8.75])
+	by ns3.rdu.redhat.com (8.13.8/8.13.8) with ESMTP id n798Us5i030383
+	for <linux-sparse@vger.kernel.org>; Sun, 9 Aug 2009 04:30:55 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse <linux-sparse@vger.kernel.org>
 
---Boundary-00=_j0VfKpaZYlFOp3b
+--Boundary-00=_gkofK4DWwVS7Ocv
 Content-Type: text/plain;
-  charset="utf-8"
+  charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: inline
 
-On Friday 07 of August 2009 22:27:08 Kamil Dudka wrote:
-> attached is another fix for SPARSE headers improving their sanity. I am
-> also attaching a simple test for the dependency tracking of headers. It's
-> not enough generic and portable and therefore not really useful. Maybe
-> someone skilled in writing makefiles might want to include something like
-> that to the SPARSE Makefile as part of the 'check' target.
+Hello,
 
-Attached are amended versions of the patch and the test. I didn't spot
-some warnings before.
+attached are patch, testing input for test-unssa and its outputs before patch 
+and after patch. Thanks in advance for considering the patch!
 
 Kamil
 
-diff --git a/storage.h b/storage.h
-index 0d3bbc5..e049e23 100644
---- a/storage.h
-+++ b/storage.h
-@@ -1,6 +1,7 @@
- #ifndef STORAGE_H
- #define STORAGE_H
-
-+#include "allocate.h"
- #include "lib.h"
-
- /*
-diff -up Makefile.chk.orig Makefile.chk
---- Makefile.chk.orig
-+++ Makefile.chk
-@@ -19,9 +19,11 @@ HEADERS ?= \
-
- SINK ?= /dev/null
-
-+CFLAGS += -Wall -Werror
-+
- .PHONY: check $(HEADERS)
-
- # check whether each header is self-compilable
- check: $(HEADERS)
- $(HEADERS):
--   $(CC) -o $(SINK) -c $@
-+   $(CC) $(CFLAGS) -o $(SINK) -c $@
-
---Boundary-00=_j0VfKpaZYlFOp3b
-Content-Type: text/x-makefile;
-  charset="utf-8";
-  name="Makefile.chk"
+--Boundary-00=_gkofK4DWwVS7Ocv
+Content-Type: text/plain;
+  charset="us-ascii";
+  name="unssa-bug-before_patch.out"
 Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment;
-	filename="Makefile.chk"
+	filename="unssa-bug-before_patch.out"
 
-# all SPARSE headers (except ident-list.h which is not an ordinary header)
-HEADERS ?= \
-	allocate.h \
-	bitmap.h \
-	compat.h \
-	compile.h \
-	dissect.h \
-	expression.h \
-	flow.h \
-	lib.h \
-	linearize.h \
-	parse.h \
-	ptrlist.h \
-	scope.h \
-	storage.h \
-	symbol.h \
-	target.h \
-	token.h \
 
-SINK ?= /dev/null
 
-CFLAGS += -Wall -Werror
+test:
+.L0x7f9fb2030010
+	<entry-point>
+	phisrc.32   %phi2(ptr) <- %arg1
+	br          .L0x7f9fb2030130
 
-.PHONY: check $(HEADERS)
+.L0x7f9fb2030130
+	copy.32     %r1(ptr) <- %r5(ptr)
+	br          %r1(ptr), .L0x7f9fb2030058, .L0x7f9fb20300e8
 
-# check whether each header is self-compilable
-check: $(HEADERS)
-$(HEADERS):
-	$(CC) $(CFLAGS) -o $(SINK) -c $@
+.L0x7f9fb2030058
+	load.32     %r3 <- 0[%r1(ptr)]
+	phisrc.32   %phi3(ptr) <- %r3
+	br          .L0x7f9fb2030130
 
---Boundary-00=_j0VfKpaZYlFOp3b
-Content-Type: text/x-diff;
-  charset="utf-8";
-  name="0001-make-sparse-headers-self-compilable.patch"
-Content-Transfer-Encoding: quoted-printable
+.L0x7f9fb20300e8
+	ret
+
+
+--Boundary-00=_gkofK4DWwVS7Ocv
+Content-Type: text/x-csrc;
+  charset="us-ascii";
+  name="unssa-bug-input.c"
+Content-Transfer-Encoding: 7bit
 Content-Disposition: attachment;
-	filename="0001-make-sparse-headers-self-compilable.patch"
+	filename="unssa-bug-input.c"
 
-=46rom 619088669e2333a8c5921d99befa8d72b322004d Mon Sep 17 00:00:00 2001
-=46rom: Kamil Dudka <kdudka@redhat.com>
-Date: Sat, 8 Aug 2009 12:58:41 +0200
-Subject: [PATCH] make sparse headers self-compilable...
+static void test(void **ptr)
+{
+    while (ptr) {
+        ptr = *ptr;
+    }
+}
 
-=2E.. and thus possible to include them in arbitrary order and without any
-external dependencies.
+--Boundary-00=_gkofK4DWwVS7Ocv
+Content-Type: text/plain;
+  charset="us-ascii";
+  name="unssa-bug-after_patch.out"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="unssa-bug-after_patch.out"
+
+
+
+test:
+.L0x7f4a7f7f1010
+	<entry-point>
+	copy.32     %r5(ptr) <- %arg1
+	br          .L0x7f4a7f7f1130
+
+.L0x7f4a7f7f1130
+	copy.32     %r1(ptr) <- %r5(ptr)
+	br          %r1(ptr), .L0x7f4a7f7f1058, .L0x7f4a7f7f10e8
+
+.L0x7f4a7f7f1058
+	load.32     %r3 <- 0[%r1(ptr)]
+	copy.32     %r5(ptr) <- %r3
+	br          .L0x7f4a7f7f1130
+
+.L0x7f4a7f7f10e8
+	ret
+
+
+--Boundary-00=_gkofK4DWwVS7Ocv
+Content-Type: text/x-diff;
+  charset="us-ascii";
+  name="0001-unssa-track-uses-when-replacing-a-phi-node.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+	filename="0001-unssa-track-uses-when-replacing-a-phi-node.patch"
+
+From 66a02fa7cec780fc88d6ef4cce7a1e704928808a Mon Sep 17 00:00:00 2001
+From: Kamil Dudka <kdudka@redhat.com>
+Date: Sun, 9 Aug 2009 10:22:11 +0200
+Subject: [PATCH] unssa: track uses when replacing a phi node
+
+The output of test-unssa is inconsistent for a simple test-case without
+this patch:
+
+static void test(void **ptr)
+{
+    while (ptr) {
+        ptr = *ptr;
+    }
+}
 
 Signed-off-by: Kamil Dudka <kdudka@redhat.com>
-=2D--
- compile.h |    2 ++
- flow.h    |    2 ++
- ptrlist.h |    2 ++
- scope.h   |    2 ++
- storage.h |    3 +++
- 5 files changed, 11 insertions(+), 0 deletions(-)
+---
+ flow.h     |    1 +
+ liveness.c |    2 +-
+ unssa.c    |    2 ++
+ 3 files changed, 4 insertions(+), 1 deletions(-)
 
-diff --git a/compile.h b/compile.h
-index 0db8fdb..6c5260d 100644
-=2D-- a/compile.h
-+++ b/compile.h
-@@ -1,6 +1,8 @@
- #ifndef COMPILE_H
- #define COMPILE_H
-=20
-+#include "symbol.h"
-+
- extern void emit_one_symbol(struct symbol *);
- extern void emit_unit_begin(const char *);
- extern void emit_unit_end(void);
 diff --git a/flow.h b/flow.h
-index 9f2e165..241f081 100644
-=2D-- a/flow.h
+index 9f2e165..fbc9505 100644
+--- a/flow.h
 +++ b/flow.h
-@@ -1,6 +1,8 @@
- #ifndef FLOW_H
- #define FLOW_H
-=20
-+#include "symbol.h"
-+
- extern unsigned long bb_generation;
-=20
- #define REPEAT_CSE		1
-diff --git a/ptrlist.h b/ptrlist.h
-index dae0906..85b23fc 100644
-=2D-- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -7,6 +7,8 @@
-  * (C) Copyright Linus Torvalds 2003-2005
-  */
-=20
-+#include <stdlib.h>
-+
- #define container(ptr, type, member) \
- 	(type *)((void *)(ptr) - offsetof(type, member))
-=20
-diff --git a/scope.h b/scope.h
-index 5f1f232..aff7b6b 100644
-=2D-- a/scope.h
-+++ b/scope.h
-@@ -9,6 +9,8 @@
-  *  Licensed under the Open Software License version 1.1
-  */
-=20
-+#include "symbol.h"
-+
- struct scope {
- 	struct token *token;		/* Scope start information */
- 	struct symbol_list *symbols;	/* List of symbols in this scope */
-diff --git a/storage.h b/storage.h
-index 610cbfd..e049e23 100644
-=2D-- a/storage.h
-+++ b/storage.h
-@@ -1,6 +1,9 @@
- #ifndef STORAGE_H
- #define STORAGE_H
-=20
-+#include "allocate.h"
-+#include "lib.h"
-+
- /*
-  * The "storage" that underlies an incoming/outgoing pseudo. It's
-  * basically the backing store for a pseudo, and may be a real hardware
-=2D-=20
+@@ -29,6 +29,7 @@ int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom
+ extern void clear_liveness(struct entrypoint *ep);
+ extern void track_pseudo_liveness(struct entrypoint *ep);
+ extern void track_pseudo_death(struct entrypoint *ep);
++extern void track_phi_uses(struct instruction *insn);
+ 
+ extern void vrfy_flow(struct entrypoint *ep);
+ extern int pseudo_in_list(struct pseudo_list *list, pseudo_t pseudo);
+diff --git a/liveness.c b/liveness.c
+index 8b0dfd8..eeff0f7 100644
+--- a/liveness.c
++++ b/liveness.c
+@@ -279,7 +279,7 @@ static void merge_pseudo_list(struct pseudo_list *src, struct pseudo_list **dest
+ 	} END_FOR_EACH_PTR(pseudo);
+ }
+ 
+-static void track_phi_uses(struct instruction *insn)
++void track_phi_uses(struct instruction *insn)
+ {
+ 	pseudo_t phi;
+ 	FOR_EACH_PTR(insn->phi_list, phi) {
+diff --git a/unssa.c b/unssa.c
+index cd18313..3eea9b2 100644
+--- a/unssa.c
++++ b/unssa.c
+@@ -26,6 +26,7 @@
+ #include "lib.h"
+ #include "linearize.h"
+ #include "allocate.h"
++#include "flow.h"
+ #include <assert.h>
+ 
+ 
+@@ -51,6 +52,7 @@ static void replace_phi_node(struct instruction *phi)
+ 	// update the current liveness
+ 	remove_pseudo(&phi->bb->needs, phi->target);
+ 	add_pseudo(&phi->bb->needs, tmp);
++	track_phi_uses(phi);
+ 
+ 	phi->opcode = OP_COPY;
+ 	phi->src = tmp;
+-- 
 1.6.4
 
 
---Boundary-00=_j0VfKpaZYlFOp3b--
+--Boundary-00=_gkofK4DWwVS7Ocv--
