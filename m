@@ -1,34 +1,56 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Kamil Dudka <kdudka@redhat.com>
 Subject: Re: [PATCH] make sparse headers self-compilable...
-Date: Tue, 11 Aug 2009 14:08:59 -0700
-Message-ID: <70318cbf0908111408y609dd2cex42c6b78d3e35d709@mail.gmail.com>
-References: <200908072227.08652.kdudka@redhat.com>
-	 <70318cbf0908110240w5067933dv92e92829c0bb2e8f@mail.gmail.com>
-	 <154e089b0908110548t33b9114ej4bf3a019ee6ab80e@mail.gmail.com>
-	 <200908111459.23341.kdudka@redhat.com>
+Date: Tue, 11 Aug 2009 23:25:48 +0200
+Message-ID: <200908112325.48345.kdudka@redhat.com>
+References: <200908072227.08652.kdudka@redhat.com> <200908111240.06529.kdudka@redhat.com> <70318cbf0908111408u238bd057vd3e4578baa0fe32c@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain;
+  charset="iso-8859-1"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f172.google.com ([209.85.212.172]:44173 "EHLO
-	mail-vw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753437AbZHKVI6 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Aug 2009 17:08:58 -0400
-Received: by vws2 with SMTP id 2so3642556vws.4
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2009 14:08:59 -0700 (PDT)
-In-Reply-To: <200908111459.23341.kdudka@redhat.com>
+Received: from mx2.redhat.com ([66.187.237.31]:52777 "EHLO mx2.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753556AbZHKV0d (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 11 Aug 2009 17:26:33 -0400
+In-Reply-To: <70318cbf0908111408u238bd057vd3e4578baa0fe32c@mail.gmail.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Hannes Eder <hannes@hanneseder.net>, sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Aug 11, 2009 at 5:59 AM, Kamil Dudka<kdudka@redhat.com> wrote:
-> Thanks for the hint! It's definitely better, though not sufficient in all
-> cases. The amended patch is attached.
+On Tuesday 11 of August 2009 23:08:24 Christopher Li wrote:
+> On Tue, Aug 11, 2009 at 3:40 AM, Kamil Dudka<kdudka@redhat.com> wrote:
+> > I agree processing of multiple-includes could be painful for the SPARSE
+> > preprocessor. But you don't solve it by avoiding multiple-includes in the
+> > SPARSE code itself. If you want to pass the SPARSE code through SPARSE,
+> > it's small enough to not bother us with performance.
+>
+> I am worry about adding too much duplicated include slow down the
+> gcc compile of sparse itself. I know I am paranoid :-)
 
-Will apply.
+Tested just now (ccache turned off)...
 
-Thanks
+With the original (not amended) patch:
+$ make clean && time make -j9
+real    0m0.966s
+user    0m4.654s
+sys     0m1.471s
 
-Chris
+With the amended patch:
+$ make clean && time make -j9
+real    0m0.989s
+user    0m4.580s
+sys     0m1.504s
+
+Without any of my patches applied:
+$ make clean && time make -j9
+real    0m0.980s
+user    0m4.596s
+sys     0m1.495s
+
+Note that the results fluctuated approx 10% during runs.
+
+My conclusion: absolutely no impact on gcc compile time.
+
+Kamil
