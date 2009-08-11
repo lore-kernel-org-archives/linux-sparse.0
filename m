@@ -1,63 +1,34 @@
-From: Reinhard Tartler <siretart@tauware.de>
-Subject: [PATCH] show_token: handle TOKEN_UNTAINT and TOKEN_ARG_COUNT types
-Date: Thu, 30 Apr 2009 23:08:53 +0200
-Message-ID: <87tz0ek0is.fsf@faui44a.informatik.uni-erlangen.de>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] unssa: track uses when replacing a phi node
+Date: Tue, 11 Aug 2009 02:16:02 -0700
+Message-ID: <70318cbf0908110216w363b7e2cnccc59075a21d1888@mail.gmail.com>
+References: <200908091030.24138.kdudka@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from main.gmane.org ([80.91.229.2]:44208 "EHLO ciao.gmane.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751857AbZHKMUF (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Aug 2009 08:20:05 -0400
-Received: from root by ciao.gmane.org with local (Exim 4.43)
-	id 1MaqKg-0005Dc-D3
-	for linux-sparse@vger.kernel.org; Tue, 11 Aug 2009 12:20:02 +0000
-Received: from faui44a.informatik.uni-erlangen.de ([131.188.34.129])
-        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2009 12:20:02 +0000
-Received: from siretart by faui44a.informatik.uni-erlangen.de with local (Gmexim 0.1 (Debian))
-        id 1AlnuQ-0007hv-00
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2009 12:20:02 +0000
+Received: from mail-vw0-f172.google.com ([209.85.212.172]:51375 "EHLO
+	mail-vw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753727AbZHKMZX (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 11 Aug 2009 08:25:23 -0400
+Received: by vws2 with SMTP id 2so3309138vws.4
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2009 05:25:24 -0700 (PDT)
+In-Reply-To: <200908091030.24138.kdudka@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Kamil Dudka <kdudka@redhat.com>
+Cc: sparse <linux-sparse@vger.kernel.org>
 
+On Sun, Aug 9, 2009 at 1:30 AM, Kamil Dudka<kdudka@redhat.com> wrote:
+> Hello,
+>
+> attached are patch, testing input for test-unssa and its outputs before patch
+> and after patch. Thanks in advance for considering the patch!
+>
+> Kamil
+>
 
-These cases are probably never hit with "regular" codepaths, but are
-useful when called in a gdb session to print token sequences.
+Looks good to me. Thanks for the patch.
 
-Signed-off-by: Reinhard Tartler <siretart@tauware.de>
----
- tokenize.c |   13 +++++++++++--
- 1 files changed, 11 insertions(+), 2 deletions(-)
-
-diff --git a/tokenize.c b/tokenize.c
-index 6b67b96..93dd007 100644
---- a/tokenize.c
-+++ b/tokenize.c
-@@ -162,9 +162,18 @@ const char *show_token(const struct token *token)
- 	case TOKEN_STREAMEND:
- 		sprintf(buffer, "<end of '%s'>", stream_name(token->pos.stream));
- 		return buffer;
--	
-+
-+	case TOKEN_UNTAINT:
-+		sprintf(buffer, "<untaint>");
-+		return buffer;
-+
-+	case TOKEN_ARG_COUNT:
-+		sprintf(buffer, "<argcnt>");
-+		return buffer;
-+
- 	default:
--		return "WTF???";
-+		sprintf(buffer, "unhandled token type '%d' ", token_type(token));
-+		return buffer;
- 	}
- }
-
--- 
-Gruesse/greetings,
-Reinhard Tartler, KeyID 945348A4
-
+Chris
