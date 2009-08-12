@@ -1,56 +1,49 @@
-From: Kamil Dudka <kdudka@redhat.com>
-Subject: Re: [PATCH] make sparse headers self-compilable...
-Date: Tue, 11 Aug 2009 23:25:48 +0200
-Message-ID: <200908112325.48345.kdudka@redhat.com>
-References: <200908072227.08652.kdudka@redhat.com> <200908111240.06529.kdudka@redhat.com> <70318cbf0908111408u238bd057vd3e4578baa0fe32c@mail.gmail.com>
+From: Blue Swirl <blauwirbel@gmail.com>
+Subject: Re: [PATCH 0/2] Fix sparc64 and x86_64 issues
+Date: Wed, 12 Aug 2009 21:42:00 +0300
+Message-ID: <f43fc5580908121142i207fd9di17c7070de1e74856@mail.gmail.com>
+References: <f43fc5580908051151o560e73bdw50c3d575f50f7096@mail.gmail.com>
+	<f43fc5580908061323s61bfaf23hcbc366a74ad4de09@mail.gmail.com>
+	<70318cbf0908061416o1956a2f6vce8f17d59e8b5f78@mail.gmail.com>
+	<70318cbf0908101049v5958c121s320a5528d8fae032@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-1"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx2.redhat.com ([66.187.237.31]:52777 "EHLO mx2.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753556AbZHKV0d (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Aug 2009 17:26:33 -0400
-In-Reply-To: <70318cbf0908111408u238bd057vd3e4578baa0fe32c@mail.gmail.com>
-Content-Disposition: inline
+Received: from fg-out-1718.google.com ([72.14.220.158]:1966 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754767AbZHLSmT (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 12 Aug 2009 14:42:19 -0400
+Received: by fg-out-1718.google.com with SMTP id e12so852505fga.17
+        for <linux-sparse@vger.kernel.org>; Wed, 12 Aug 2009 11:42:20 -0700 (PDT)
+In-Reply-To: <70318cbf0908101049v5958c121s320a5528d8fae032@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: sparse <linux-sparse@vger.kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Tuesday 11 of August 2009 23:08:24 Christopher Li wrote:
-> On Tue, Aug 11, 2009 at 3:40 AM, Kamil Dudka<kdudka@redhat.com> wrote:
-> > I agree processing of multiple-includes could be painful for the SPARSE
-> > preprocessor. But you don't solve it by avoiding multiple-includes in the
-> > SPARSE code itself. If you want to pass the SPARSE code through SPARSE,
-> > it's small enough to not bother us with performance.
+On Mon, Aug 10, 2009 at 8:49 PM, Christopher Li<sparse@chrisli.org> wrote:
+> On Thu, Aug 6, 2009 at 2:16 PM, Christopher Li<sparse@chrisli.org> wrote:
+>> On Thu, Aug 6, 2009 at 1:23 PM, Blue Swirl<blauwirbel@gmail.com> wrote:
+>>> On Wed, Aug 5, 2009 at 9:51 PM, Blue Swirl<blauwirbel@gmail.com> wrote:
+>>>> Hi,
+>>>>
+>>>> With these patches, I can run Sparse on OpenBIOS sources (which use
+>>>> libgcc) also when compiling for 64 bit targets. 64 bit targets use 128
+>>>> bit double cells, just like 64 bit double cells are used on 32 bit
+>>>> targets.
+>>>>
+>>>> I'm not sure if 'long long long' is actually used, libgcc uses
+>>>> __attribute__ ((mode (TI))).
+>>
+>> The change looks reasonable.
+>>
+>> I feel that we can use:
+>>
+>> #define MOD_ALL_LONG (MOD_LONG | MOD_LONGLONG | MOD_LONGLONGLONG)
+>>
 >
-> I am worry about adding too much duplicated include slow down the
-> gcc compile of sparse itself. I know I am paranoid :-)
+> I push the change does that. Please verify.
 
-Tested just now (ccache turned off)...
-
-With the original (not amended) patch:
-$ make clean && time make -j9
-real    0m0.966s
-user    0m4.654s
-sys     0m1.471s
-
-With the amended patch:
-$ make clean && time make -j9
-real    0m0.989s
-user    0m4.580s
-sys     0m1.504s
-
-Without any of my patches applied:
-$ make clean && time make -j9
-real    0m0.980s
-user    0m4.596s
-sys     0m1.495s
-
-Note that the results fluctuated approx 10% during runs.
-
-My conclusion: absolutely no impact on gcc compile time.
-
-Kamil
+Seems to work, thanks!
