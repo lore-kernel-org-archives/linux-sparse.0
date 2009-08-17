@@ -1,52 +1,76 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] sparse: Add GCC pre-defined macros for user-space
-Date: Sun, 16 Aug 2009 13:00:30 -0700
-Message-ID: <20090816200030.GB9586@feather>
-References: <70318cbf0908151236q2c691d73n5114ab21f3cbd819@mail.gmail.com>
- <1250367991.14751.1.camel@penberg-laptop>
- <20090815223602.GA4516@feather>
- <1250406233.32343.9.camel@penberg-laptop>
- <20090816105114.GA6489@feather>
- <1250420733.9535.1.camel@penberg-laptop>
- <20090816124157.GA6936@feather>
- <70318cbf0908161050w4b95c04cme5f30157cba684df@mail.gmail.com>
- <20090816185608.GA7806@feather>
- <1250451271.11216.0.camel@johannes.local>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Fixing "cast truncates bits from constant value"
+Date: Mon, 17 Aug 2009 17:02:02 -0400
+Message-ID: <1250542922.10511.38.camel@mj>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-v.mail.gandi.net ([217.70.178.78]:39406 "EHLO
-	relay4-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751836AbZHPUAh (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 16 Aug 2009 16:00:37 -0400
-Content-Disposition: inline
-In-Reply-To: <1250451271.11216.0.camel@johannes.local>
+Received: from c60.cesmail.net ([216.154.195.49]:32308 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750991AbZHQVCD (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 17 Aug 2009 17:02:03 -0400
+Received: from [192.168.0.22] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
+	by smtprelay2.cesmail.net (Postfix) with ESMTPSA id 0CB2834C6A
+	for <linux-sparse@vger.kernel.org>; Mon, 17 Aug 2009 17:16:27 -0400 (EDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@cs.helsinki.fi>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sun, Aug 16, 2009 at 09:34:31PM +0200, Johannes Berg wrote:
-> On Sun, 2009-08-16 at 11:56 -0700, Josh Triplett wrote:
-> 
-> > > The linux kernel has a STRING macro. I will rename to match
-> > > that if nobody objects.
-> > 
-> > Matching Linux seems sensible, but I don't see that macro in any general
-> > code, just a bunch of local defines with various names.  A few quick
-> > greps on current git master turned up at least:
-> 
-> > So, I don't see any particular consistency here that we can follow, other than
-> > that the macro should probably have "str" in it somewhere. :)  And if we have
-> > to choose, I think STRINGIFY seems more descriptive than just STRING.
-> 
-> There's include/linux/stringify.h that all those instances you found
-> could use.
+Hello!
 
-Interesting.  I don't know why my search missed that one.  Unfortunate
-that it settled on __stringify, though.
+There was a discussion in the linux-wireless mailing list about
+silencing a sparse warning in the b43 driver:
 
-Thanks fo the pointer.
+http://marc.info/?t=125020183400006&r=1&w=2
 
-- Josh Triplett
+It turns out the fixes for the warnings would make the code worse, not
+better.  It's not what sparse should try to do.
+
+Here's the simplest case:
+
+static unsigned short test(void)
+{
+        return (unsigned short)~0x8000;
+}
+
+test.c:3:32: warning: cast truncates bits from constant value (ffff7fff
+becomes 7fff)
+
+A side note - "0x" should be used with user visible output.
+
+0x8000 could be a constant defined in a header, so just using 0x7fff is
+not an option, if the code readability is to be preserved.
+
+In my opinion, an explicit cast should be enough to suppress the
+warning.  But it's not.  Moreover, it's a "superwarning" that cannot
+even be suppressed by the "force" attribute!  This source still
+generates a warning:
+
+static unsigned short test(void)
+{
+        return (__attribute__((force)) unsigned short)~0x8000;
+}
+
+There is also an inconsistency.  This source produces a warning:
+
+static unsigned short test(void)
+{
+        return 0x0ffff000U;
+}
+
+But this source doesn't:
+
+static unsigned short test(void)
+{
+        return 0xfffff000U;
+}
+
+In both cases bits are dropped and the value (a large positive number)
+is changed.
+
+I'm not currently subscribed to this list, please copy me.
+
+-- 
+Regards,
+Pavel Roskin
