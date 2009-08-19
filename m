@@ -1,76 +1,64 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Fixing "cast truncates bits from constant value"
-Date: Mon, 17 Aug 2009 17:02:02 -0400
-Message-ID: <1250542922.10511.38.camel@mj>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Fixing "cast truncates bits from constant value"
+Date: Tue, 18 Aug 2009 22:36:53 -0700
+Message-ID: <70318cbf0908182236h21c5d342o15bb658a445fc476@mail.gmail.com>
+References: <1250542922.10511.38.camel@mj>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:32308 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750991AbZHQVCD (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 17 Aug 2009 17:02:03 -0400
-Received: from [192.168.0.22] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
-	by smtprelay2.cesmail.net (Postfix) with ESMTPSA id 0CB2834C6A
-	for <linux-sparse@vger.kernel.org>; Mon, 17 Aug 2009 17:16:27 -0400 (EDT)
+Received: from mail-vw0-f172.google.com ([209.85.212.172]:55272 "EHLO
+	mail-vw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751146AbZHSFgw convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 19 Aug 2009 01:36:52 -0400
+Received: by vws2 with SMTP id 2so3567490vws.4
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Aug 2009 22:36:53 -0700 (PDT)
+In-Reply-To: <1250542922.10511.38.camel@mj>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hello!
+On Mon, Aug 17, 2009 at 2:02 PM, Pavel Roskin<proski@gnu.org> wrote:
+> static unsigned short test(void)
+> {
+> =A0 =A0 =A0 =A0return (unsigned short)~0x8000;
+> }
+>
+> test.c:3:32: warning: cast truncates bits from constant value (ffff7f=
+ff
+> becomes 7fff)
 
-There was a discussion in the linux-wireless mailing list about
-silencing a sparse warning in the b43 driver:
+That warning is legit because you ARE truncating constant value here.
 
-http://marc.info/?t=125020183400006&r=1&w=2
+> In my opinion, an explicit cast should be enough to suppress the
+> warning. =A0But it's not. =A0Moreover, it's a "superwarning" that can=
+not
+> even be suppressed by the "force" attribute! =A0This source still
+> generates a warning:
+>
+> static unsigned short test(void)
+> {
+> =A0 =A0 =A0 =A0return (__attribute__((force)) unsigned short)~0x8000;
 
-It turns out the fixes for the warnings would make the code worse, not
-better.  It's not what sparse should try to do.
+Sparse currently does not thing than just mark it as forced.
 
-Here's the simplest case:
 
-static unsigned short test(void)
-{
-        return (unsigned short)~0x8000;
-}
+>
+> But this source doesn't:
+>
+> static unsigned short test(void)
+> {
+> =A0 =A0 =A0 =A0return 0xfffff000U;
+> }
 
-test.c:3:32: warning: cast truncates bits from constant value (ffff7fff
-becomes 7fff)
+I think sparse consider it as signed extend.
+Truncating all 0xffff is consider OK for the negative case.
 
-A side note - "0x" should be used with user visible output.
-
-0x8000 could be a constant defined in a header, so just using 0x7fff is
-not an option, if the code readability is to be preserved.
-
-In my opinion, an explicit cast should be enough to suppress the
-warning.  But it's not.  Moreover, it's a "superwarning" that cannot
-even be suppressed by the "force" attribute!  This source still
-generates a warning:
-
-static unsigned short test(void)
-{
-        return (__attribute__((force)) unsigned short)~0x8000;
-}
-
-There is also an inconsistency.  This source produces a warning:
-
-static unsigned short test(void)
-{
-        return 0x0ffff000U;
-}
-
-But this source doesn't:
-
-static unsigned short test(void)
-{
-        return 0xfffff000U;
-}
-
-In both cases bits are dropped and the value (a large positive number)
-is changed.
-
-I'm not currently subscribed to this list, please copy me.
-
--- 
-Regards,
-Pavel Roskin
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
