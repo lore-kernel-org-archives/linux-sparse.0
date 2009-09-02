@@ -1,49 +1,51 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Daniel Barkalow <barkalow@iabervon.org>
 Subject: Re: [PATCH] add warnings enum-to-int and int-to-enum
-Date: Wed, 2 Sep 2009 09:38:46 -0700
-Message-ID: <70318cbf0909020938k54f4de2fm699c0af0f1b515a0@mail.gmail.com>
-References: <20090830153202.4dc5c58c@s6510>
-	 <200909021353.17091.kdudka@redhat.com> <20090902152146.GA7881@feather>
-	 <200909021823.36662.kdudka@redhat.com>
+Date: Wed, 2 Sep 2009 13:56:47 -0400 (EDT)
+Message-ID: <alpine.LNX.2.00.0909021313190.28290@iabervon.org>
+References: <20090830153202.4dc5c58c@s6510> <200908312104.54990.kdudka@redhat.com> <20090831205353.GA6239@josh-work.beaverton.ibm.com> <200909012359.09678.kdudka@redhat.com> <20090901232433.GC3947@josh-work.beaverton.ibm.com>
+ <20090901172708.286657ec@nehalam>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f195.google.com ([209.85.212.195]:34589 "EHLO
-	mail-vw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752445AbZIBQio convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 Sep 2009 12:38:44 -0400
-Received: by vws33 with SMTP id 33so73484vws.33
-        for <linux-sparse@vger.kernel.org>; Wed, 02 Sep 2009 09:38:47 -0700 (PDT)
-In-Reply-To: <200909021823.36662.kdudka@redhat.com>
+Received: from iabervon.org ([66.92.72.58]:60315 "EHLO iabervon.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752407AbZIBR4p (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 Sep 2009 13:56:45 -0400
+In-Reply-To: <20090901172708.286657ec@nehalam>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org
+To: Stephen Hemminger <shemminger@vyatta.com>
+Cc: Josh Triplett <josh@joshtriplett.org>, Kamil Dudka <kdudka@redhat.com>, linux-sparse@vger.kernel.org
 
-On Wed, Sep 2, 2009 at 9:23 AM, Kamil Dudka<kdudka@redhat.com> wrote:
->
-> No problem I think. We have generally two choices:
->
-> =A0 =A01) The whole current test-enum.c as a test-case running with a=
-ll three
-> =A0 =A0 =A0 warnings enabled.
->
-> =A0 =A02) Split the test to three parts, each for one separate -W opt=
-ion, and
-> =A0 =A0 =A0 then run it as three separate test-cases.
+On Tue, 1 Sep 2009, Stephen Hemminger wrote:
 
-I like option 2) better. Having three test file.
+> there is lots of code that does:
+> 
+> enum {
+>    my_register_1   = 0x001,
+>    my_register_2   = 0x002,
+> };
 
-I am playing with your patch right now. I will send out some feed back
-soon. Over all I like the patch.
+It feels to me like the explicit numeric values are what make these 
+constants sensible to use directly as ints, and that it's only sensible to 
+use a non-constant value of an enum type as an int (without an explicit 
+cast) if all of the enum values have explicit numeric values.
 
-Thanks
+I think:
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  enum {
+    my_register_zero
+    ...
+    my_register_twdr
+    my_register_twcr
+    ...
+  };
+
+  void () {
+    write_register(my_register_twdr, SETUP_TWDR);
+  }
+
+is asking for trouble in a way that this warning is about.
+
+	-Daniel
+*This .sig left intentionally blank*
