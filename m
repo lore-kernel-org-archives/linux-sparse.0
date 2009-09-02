@@ -1,87 +1,66 @@
-From: Daniel Barkalow <barkalow@iabervon.org>
+From: Kamil Dudka <kdudka@redhat.com>
 Subject: Re: [PATCH] add warnings enum-to-int and int-to-enum
-Date: Wed, 2 Sep 2009 15:19:46 -0400 (EDT)
-Message-ID: <alpine.LNX.2.00.0909021458180.28290@iabervon.org>
-References: <20090830153202.4dc5c58c@s6510> <20090901172708.286657ec@nehalam> <alpine.LNX.2.00.0909021313190.28290@iabervon.org> <200909022004.42548.kdudka@redhat.com> <alpine.LNX.2.00.0909021419500.28290@iabervon.org>
- <20090902185644.GA5148@josh-work.beaverton.ibm.com>
+Date: Wed, 2 Sep 2009 21:19:49 +0200
+Message-ID: <200909022119.50213.kdudka@redhat.com>
+References: <20090830153202.4dc5c58c@s6510> <200909021823.36662.kdudka@redhat.com> <20090902190337.GB5148@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from iabervon.org ([66.92.72.58]:47113 "EHLO iabervon.org"
+Received: from mx1.redhat.com ([209.132.183.28]:23620 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751695AbZIBTTp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 Sep 2009 15:19:45 -0400
-In-Reply-To: <20090902185644.GA5148@josh-work.beaverton.ibm.com>
+	id S1752248AbZIBTUt (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 Sep 2009 15:20:49 -0400
+In-Reply-To: <20090902190337.GB5148@josh-work.beaverton.ibm.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@joshtriplett.org>
-Cc: Kamil Dudka <kdudka@redhat.com>, Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org
+Cc: Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
 
-On Wed, 2 Sep 2009, Josh Triplett wrote:
+On Wednesday 02 of September 2009 21:03:41 Josh Triplett wrote:
+> Don't worry about this change.  I only suggested it as a potential
+> simplification, but it doesn't need to happen as part of this patch.
+> I'd rather see the patch get merged in its current form (plus the test
+> suite additions), rather than poking at simplifications like this that
+> don't immediately prove trivial.  Those can always happen later. :)
 
-> On Wed, Sep 02, 2009 at 02:43:52PM -0400, Daniel Barkalow wrote:
-> > On Wed, 2 Sep 2009, Kamil Dudka wrote:
-> > 
-> > > On Wednesday 02 of September 2009 19:56:47 Daniel Barkalow wrote:
-> > > > It feels to me like the explicit numeric values are what make these
-> > > > constants sensible to use directly as ints, and that it's only sensible to
-> > > > use a non-constant value of an enum type as an int (without an explicit
-> > > > cast) if all of the enum values have explicit numeric values.
-> > > >
-> > > > I think:
-> > > >
-> > > >   enum {
-> > > >     my_register_zero
-> > > >     ...
-> > > >     my_register_twdr
-> > > >     my_register_twcr
-> > > >     ...
-> > > >   };
-> > > >
-> > > >   void () {
-> > > >     write_register(my_register_twdr, SETUP_TWDR);
-> > > >   }
-> > > >
-> > > > is asking for trouble in a way that this warning is about.
-> > > 
-> > > Both examples are too abstract for me -- missing declaration
-> > > of write_register(), etc. Please attach a minimal example as a file which I 
-> > > can compile and test. I'll check if the "trouble" is covered by the warnings 
-> > > or not, and perhaps implement what's missing. Thanks in advance!
-> > 
-> > enum {
-> >   foo,
-> >   bar
-> > };
-> > 
-> > enum {
-> >   baz = 1,
-> >   qux = 2
-> > };
-> > 
-> > void test(void) {
-> >   int i = bar; // warn on this
-> >   int j = qux; // okay
-> > }
-> > 
-> > (Leaving aside the issue of whether the enum is anonymous)
-> > 
-> > In the "bar" case, an additional value added somewhere in the list 
-> > (particularly if the list were long) might change "i" in a way that 
-> > wouldn't necessarily be obvious to users of "i". In the "qux" case, "j" 
-> > would only change if the "qux = 2" line were changed.
-> 
-> I disagree with this.  In both cases, you've declared an anonymous enum,
-> and then used its values as constants.  In the former case, you might
-> just not care about the values except to compare against each other;
-> granted, you ought to use a named enum rather than an int in that case,
-> but nevertheless much code exists that uses int instead of enum types.
+Nope, I think we should fix it right now. And if possible ask the original 
+authors for review and/or comment at the patch I am currently preparing.
+I considered it pretty broken. Just try this example:
 
-I think anonymous vs named enums are one thing that should affect whether 
-you get a warning, and explicit values vs implicit values are another 
-factor, but I don't have an opinion on which way they should combine. 
-Probably either using an explicit value or an anonymous enum should be 
-okay by default, and the test above should use named enums.
+static void f(void) {
+    enum ENUM_TYPE_A { VALUE_A } var_a;
+    enum ENUM_TYPE_B { VALUE_B } var_b;
 
-	-Daniel
-*This .sig left intentionally blank*
+    switch (var_a) {
+        case VALUE_A:
+        case VALUE_B:
+        default:
+            break;
+    }
+}
+
+It seems like this was the original intention of the calling the 
+warn_for_different_enum_types() from check_case_type(). But it has been 
+either not tested, or broken in the meantime.
+
+> Either one seems fine; I don't think splitting the test case helps
+> coverage, and keeping it together lets you use the same declarations for
+> the entire test case as you did in the previously attached version.
+
+This is not necessarily dedicated to choice 1), unless you are scared from
+a construction like this:
+
+    #include "enum-common.c"
+
+> However, I wonder if it would make sense to have the same test case run
+> multiple times with different warning options and correspondingly
+> different output, to make sure the warnings stay associated with the
+> right flag?  Given the current test framework, that would unfortunately
+> involve some duplication, but it still seems worth doing.
+
+I think the choice 2) slightly wins (counting me and Chris for now)...
+
+Kamil
