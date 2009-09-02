@@ -1,98 +1,87 @@
-From: Josh Triplett <josh@joshtriplett.org>
+From: Daniel Barkalow <barkalow@iabervon.org>
 Subject: Re: [PATCH] add warnings enum-to-int and int-to-enum
-Date: Wed, 2 Sep 2009 12:03:41 -0700
-Message-ID: <20090902190337.GB5148@josh-work.beaverton.ibm.com>
-References: <20090830153202.4dc5c58c@s6510>
- <200909021353.17091.kdudka@redhat.com>
- <20090902152146.GA7881@feather>
- <200909021823.36662.kdudka@redhat.com>
+Date: Wed, 2 Sep 2009 15:19:46 -0400 (EDT)
+Message-ID: <alpine.LNX.2.00.0909021458180.28290@iabervon.org>
+References: <20090830153202.4dc5c58c@s6510> <20090901172708.286657ec@nehalam> <alpine.LNX.2.00.0909021313190.28290@iabervon.org> <200909022004.42548.kdudka@redhat.com> <alpine.LNX.2.00.0909021419500.28290@iabervon.org>
+ <20090902185644.GA5148@josh-work.beaverton.ibm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay1-v.mail.gandi.net ([217.70.178.75]:38760 "EHLO
-	relay1-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752156AbZIBTDM (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 Sep 2009 15:03:12 -0400
-Content-Disposition: inline
-In-Reply-To: <200909021823.36662.kdudka@redhat.com>
+Received: from iabervon.org ([66.92.72.58]:47113 "EHLO iabervon.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751695AbZIBTTp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 Sep 2009 15:19:45 -0400
+In-Reply-To: <20090902185644.GA5148@josh-work.beaverton.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Kamil Dudka <kdudka@redhat.com>, Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org
 
-On Wed, Sep 02, 2009 at 06:23:36PM +0200, Kamil Dudka wrote:
-> On Wednesday 02 of September 2009 17:21:46 Josh Triplett wrote:
-> > Typo.  I meant ENUM_TYPE_A:
-> >
-> >     var_a = (enum ENUM_TYPE_A) 0;
-> >
-> > Hopefully that makes more sense as an "always OK" test. :)
-> >
-> > Another crazy test for the "always OK" section:
-> >
-> >     anon_enum_var = (__typeof__(anon_enum_var)) 0;
-> >     anon_enum_var = (__typeof__(anon_enum_var)) VALUE_A;
+On Wed, 2 Sep 2009, Josh Triplett wrote:
+
+> On Wed, Sep 02, 2009 at 02:43:52PM -0400, Daniel Barkalow wrote:
+> > On Wed, 2 Sep 2009, Kamil Dudka wrote:
+> > 
+> > > On Wednesday 02 of September 2009 19:56:47 Daniel Barkalow wrote:
+> > > > It feels to me like the explicit numeric values are what make these
+> > > > constants sensible to use directly as ints, and that it's only sensible to
+> > > > use a non-constant value of an enum type as an int (without an explicit
+> > > > cast) if all of the enum values have explicit numeric values.
+> > > >
+> > > > I think:
+> > > >
+> > > >   enum {
+> > > >     my_register_zero
+> > > >     ...
+> > > >     my_register_twdr
+> > > >     my_register_twcr
+> > > >     ...
+> > > >   };
+> > > >
+> > > >   void () {
+> > > >     write_register(my_register_twdr, SETUP_TWDR);
+> > > >   }
+> > > >
+> > > > is asking for trouble in a way that this warning is about.
+> > > 
+> > > Both examples are too abstract for me -- missing declaration
+> > > of write_register(), etc. Please attach a minimal example as a file which I 
+> > > can compile and test. I'll check if the "trouble" is covered by the warnings 
+> > > or not, and perhaps implement what's missing. Thanks in advance!
+> > 
+> > enum {
+> >   foo,
+> >   bar
+> > };
+> > 
+> > enum {
+> >   baz = 1,
+> >   qux = 2
+> > };
+> > 
+> > void test(void) {
+> >   int i = bar; // warn on this
+> >   int j = qux; // okay
+> > }
+> > 
+> > (Leaving aside the issue of whether the enum is anonymous)
+> > 
+> > In the "bar" case, an additional value added somewhere in the list 
+> > (particularly if the list were long) might change "i" in a way that 
+> > wouldn't necessarily be obvious to users of "i". In the "qux" case, "j" 
+> > would only change if the "qux = 2" line were changed.
 > 
-> All three cases pass for me, even with -Wenum-to-int. No problem here.
+> I disagree with this.  In both cases, you've declared an anonymous enum,
+> and then used its values as constants.  In the former case, you might
+> just not care about the values except to compare against each other;
+> granted, you ought to use a named enum rather than an int in that case,
+> but nevertheless much code exists that uses int instead of enum types.
 
-Great.  I didn't expect any of them to fail with your patch; I primarily
-suggested them to cover strange corner cases that might occur in future
-regressions.
+I think anonymous vs named enums are one thing that should affect whether 
+you get a warning, and explicit values vs implicit values are another 
+factor, but I don't have an opinion on which way they should combine. 
+Probably either using an explicit value or an anonymous enum should be 
+okay by default, and the test above should use named enums.
 
-> > > -	warn_for_different_enum_types (old->pos, old->ctype, type);
-> > > +	warn_for_different_enum_types (old->pos, old->ctype, type,
-> > > +				       old->enum_type);
-> >
-> > At this point, it might make more sense to just pass old, rather than
-> > three of its fields.  Would that work for the other callers of this
-> > function?  In any case, that change can wait until after this patch.
-> 
-> At first glance the only change would be in usual_conversions() in reporting 
-> slightly different location in some rear cases -- no big deal I think.
-> 
-> But in fact I haven't investigated yet how to trigger all the particular 
-> possibilities of warn_for_different_enum_types() invocation to test this 
-> properly. I'll give it a try later today.
-
-Don't worry about this change.  I only suggested it as a potential
-simplification, but it doesn't need to happen as part of this patch.
-I'd rather see the patch get merged in its current form (plus the test
-suite additions), rather than poking at simplifications like this that
-don't immediately prove trivial.  Those can always happen later. :)
-
-> > > +	warn_for_enum_to_int_cast (old, type);
-> > > +	warn_for_int_to_enum_cast (old, type);
-> >
-> > I just realized that both of these functions need renaming as well:
-> > s/cast/conversion/ or similar.  As with the manpage changes before,
-> > "cast" describes the case it *doesn't* warn about.
-> 
-> My line of thinking was "implied vs. explicit cast" ... but I am fine with
-> the rename. It'll be more obvious.
-
-To me, "cast" always suggests "explicit cast".
-
-> > You could include this test case in the patch, as an addition to the
-> > test suite.
-> 
-> No problem I think. We have generally two choices:
-> 
->     1) The whole current test-enum.c as a test-case running with all three
->        warnings enabled.
-> 
->     2) Split the test to three parts, each for one separate -W option, and
->        then run it as three separate test-cases.
-> 
-> I think the second choice has better coverage. What's your opinion?
-
-Either one seems fine; I don't think splitting the test case helps
-coverage, and keeping it together lets you use the same declarations for
-the entire test case as you did in the previously attached version.
-However, I wonder if it would make sense to have the same test case run
-multiple times with different warning options and correspondingly
-different output, to make sure the warnings stay associated with the
-right flag?  Given the current test framework, that would unfortunately
-involve some duplication, but it still seems worth doing.
-
-- Josh Triplett
+	-Daniel
+*This .sig left intentionally blank*
