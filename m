@@ -1,48 +1,67 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] add warnings enum-to-int and int-to-enum
-Date: Thu, 3 Sep 2009 02:42:30 -0700
-Message-ID: <70318cbf0909030242o36c07ec6re52ebc030288ac35@mail.gmail.com>
-References: <20090830153202.4dc5c58c@s6510>
-	 <20090902190337.GB5148@josh-work.beaverton.ibm.com>
-	 <200909022119.50213.kdudka@redhat.com>
-	 <200909030035.55097.kdudka@redhat.com>
+From: Belisko Marek <marek.belisko@gmail.com>
+Subject: sparse: flow.c:804: rewrite_parent_branch: Asparse: flow.c:804:
+	rewrite_parent_branch: Assertion `changed' failed.
+Date: Thu, 3 Sep 2009 11:49:56 +0200
+Message-ID: <e7c6a05e0909030249qb5dac77u35293c4d857bba0f@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f195.google.com ([209.85.212.195]:35368 "EHLO
-	mail-vw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754116AbZICJm1 (ORCPT
+Received: from fg-out-1718.google.com ([72.14.220.157]:3279 "EHLO
+	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754820AbZICJt4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Sep 2009 05:42:27 -0400
-Received: by mail-vw0-f195.google.com with SMTP id 33so552317vws.33
-        for <linux-sparse@vger.kernel.org>; Thu, 03 Sep 2009 02:42:30 -0700 (PDT)
-In-Reply-To: <200909030035.55097.kdudka@redhat.com>
+	Thu, 3 Sep 2009 05:49:56 -0400
+Received: by fg-out-1718.google.com with SMTP id 22so683996fge.1
+        for <linux-sparse@vger.kernel.org>; Thu, 03 Sep 2009 02:49:58 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>, Morten Welinder <terra@gnome.org>
+To: linux-sparse@vger.kernel.org
 
-On Wed, Sep 2, 2009 at 3:35 PM, Kamil Dudka<kdudka@redhat.com> wrote:
-> On Wednesday 02 of September 2009 21:19:49 Kamil Dudka wrote:
->
-> The second holds. It's regression!
+Hi,
 
-I have some questions regarding your patch:
+current linux-next tree compiled with make C=1 all >build.out 2>&1
+produce following error.
 
-Can we just set the expression->ctype to the enum type
-instead of adding the *enum_type? I think the current expr->ctype
-can be reached from enum_type->ctype.base_type any way.
-In other words, we do care about expression is enum type vs int type
-in this patch.
+sparse: flow.c:804: rewrite_parent_branch: Assertion `changed' failed.
+/bin/sh: line 1: 19625 Aborted                 sparse -D__linux__
+-Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void
+-D__i386_
+_ -nostdinc -isystem /usr/lib/gcc/i586-suse-linux/4.3/include
+-Wp,-MD,kernel/trace/.ring_buffer_benchmark.o.d -nostdinc -isystem
+/usr/lib/g
+cc/i586-suse-linux/4.3/include -Iinclude
+-I/home/marek.nandra/kernel/linux-next/arch/x86/include -include
+include/linux/autoconf.h -D__KERN
+EL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs
+-fno-strict-aliasing -fno-common -Werror-implicit-function-declaration
+-Wno-format-se
+curity -fno-delete-null-pointer-checks -Os -m32 -msoft-float
+-mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2
+-march=i486 -Wa,-
+mtune=generic32 -ffreestanding -fstack-protector -fstack-protector-all
+-DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-com
+pare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2
+-mno-3dnow -fno-omit-frame-pointer -fno-optimize-sibling-calls -g
+-Wdeclar
+ation-after-statement -Wno-pointer-sign -fno-strict-overflow
+-fprofile-arcs -ftest-coverage -DMODULE -D"KBUILD_STR(s)=#s"
+-D"KBUILD_BASENAM
+E=KBUILD_STR(ring_buffer_benchmark)"
+-D"KBUILD_MODNAME=KBUILD_STR(ring_buffer_benchmark)" -D"DEBUG_HASH=55"
+-D"DEBUG_HASH2=35" kernel/trace
+/ring_buffer_benchmark.c
+make[2]: *** [kernel/trace/ring_buffer_benchmark.o] Error 134
+make[1]: *** [kernel/trace] Error 2
+make: *** [kernel] Error 2
 
-After the type evaluation(and possible warning), we can convert that
-enum type back to the base int type because the back end does not
-care about enum.
 
-I think fixing the regression should be a separate patch from
-the this patch which adding new feature. It is easier to review
-as well.
+-- 
+as simple as primitive as possible
+-------------------------------------------------
+Marek Belisko - OPEN-NANDRA
 
-Sorry the rest of the patch will take me more time to go over.
-
-Chris
+Ruska Nova Ves 219 | Presov, 08005 Slovak Republic
+Tel: +421 915 052 184
+skype: marekwhite
+icq: 290551086
+web: http://open-nandra.com
