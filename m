@@ -1,67 +1,51 @@
-From: Belisko Marek <marek.belisko@gmail.com>
-Subject: sparse: flow.c:804: rewrite_parent_branch: Asparse: flow.c:804:
-	rewrite_parent_branch: Assertion `changed' failed.
-Date: Thu, 3 Sep 2009 11:49:56 +0200
-Message-ID: <e7c6a05e0909030249qb5dac77u35293c4d857bba0f@mail.gmail.com>
+From: Kamil Dudka <kdudka@redhat.com>
+Subject: Re: [PATCH] add warnings enum-to-int and int-to-enum
+Date: Thu, 3 Sep 2009 13:47:35 +0200
+Message-ID: <200909031347.35371.kdudka@redhat.com>
+References: <20090830153202.4dc5c58c@s6510> <200909030035.55097.kdudka@redhat.com> <70318cbf0909030242o36c07ec6re52ebc030288ac35@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fg-out-1718.google.com ([72.14.220.157]:3279 "EHLO
-	fg-out-1718.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754820AbZICJt4 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Sep 2009 05:49:56 -0400
-Received: by fg-out-1718.google.com with SMTP id 22so683996fge.1
-        for <linux-sparse@vger.kernel.org>; Thu, 03 Sep 2009 02:49:58 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:6657 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755024AbZICLqe (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 3 Sep 2009 07:46:34 -0400
+In-Reply-To: <70318cbf0909030242o36c07ec6re52ebc030288ac35@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Stephen Hemminger <shemminger@vyatta.com>, linux-sparse@vger.kernel.org, Al Viro <viro@zeniv.linux.org.uk>, Morten Welinder <terra@gnome.org>
 
-Hi,
+On Thu September 3 2009 11:42:30 Christopher Li wrote:
+> Can we just set the expression->ctype to the enum type
+> instead of adding the *enum_type? I think the current expr->ctype
+> can be reached from enum_type->ctype.base_type any way.
+> In other words, we do care about expression is enum type vs int type
+> in this patch.
+>
+> After the type evaluation(and possible warning), we can convert that
+> enum type back to the base int type because the back end does not
+> care about enum.
 
-current linux-next tree compiled with make C=1 all >build.out 2>&1
-produce following error.
+Do you want to store the correct enum type to expression->ctype and overwrite 
+it later with some integral type? What's the advantage of this approach? 
+(instead of preserving ABI which is already changed to 0.4.1). I don't think 
+the information about type for enum constant is useful only for issuing 
+warnings like this. Some SPARSE clients might also need such information.
 
-sparse: flow.c:804: rewrite_parent_branch: Assertion `changed' failed.
-/bin/sh: line 1: 19625 Aborted                 sparse -D__linux__
--Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void
--D__i386_
-_ -nostdinc -isystem /usr/lib/gcc/i586-suse-linux/4.3/include
--Wp,-MD,kernel/trace/.ring_buffer_benchmark.o.d -nostdinc -isystem
-/usr/lib/g
-cc/i586-suse-linux/4.3/include -Iinclude
--I/home/marek.nandra/kernel/linux-next/arch/x86/include -include
-include/linux/autoconf.h -D__KERN
-EL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs
--fno-strict-aliasing -fno-common -Werror-implicit-function-declaration
--Wno-format-se
-curity -fno-delete-null-pointer-checks -Os -m32 -msoft-float
--mregparm=3 -freg-struct-return -mpreferred-stack-boundary=2
--march=i486 -Wa,-
-mtune=generic32 -ffreestanding -fstack-protector -fstack-protector-all
--DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-com
-pare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2
--mno-3dnow -fno-omit-frame-pointer -fno-optimize-sibling-calls -g
--Wdeclar
-ation-after-statement -Wno-pointer-sign -fno-strict-overflow
--fprofile-arcs -ftest-coverage -DMODULE -D"KBUILD_STR(s)=#s"
--D"KBUILD_BASENAM
-E=KBUILD_STR(ring_buffer_benchmark)"
--D"KBUILD_MODNAME=KBUILD_STR(ring_buffer_benchmark)" -D"DEBUG_HASH=55"
--D"DEBUG_HASH2=35" kernel/trace
-/ring_buffer_benchmark.c
-make[2]: *** [kernel/trace/ring_buffer_benchmark.o] Error 134
-make[1]: *** [kernel/trace] Error 2
-make: *** [kernel] Error 2
+> I think fixing the regression should be a separate patch from
+> the this patch which adding new feature. It is easier to review
+> as well.
 
+Sure if anybody is able to split it... Unfortunately we have no reference for 
+the "original" behavior of -Wmismatch-enum. I didn't found it documented 
+anywhere and the "test-case" from the referred commit is not really useful as 
+a test-case. I have not enough time for reverse engineering...
 
--- 
-as simple as primitive as possible
--------------------------------------------------
-Marek Belisko - OPEN-NANDRA
+I think the tests included in the patch have good enough coverage to prevent 
+you from a future regression and it sounds more important to me than 
+documenting previous regressions :-)
 
-Ruska Nova Ves 219 | Presov, 08005 Slovak Republic
-Tel: +421 915 052 184
-skype: marekwhite
-icq: 290551086
-web: http://open-nandra.com
+Kamil
