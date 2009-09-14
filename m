@@ -1,45 +1,49 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Warning from ring buffer code (Was: Re: linux-next: tip tree
-	build warning)
-Date: Mon, 14 Sep 2009 10:09:27 -0700
-Message-ID: <70318cbf0909141009v46581785m4c70edf31fcb79fa@mail.gmail.com>
-References: <20090804161640.70817ee6.sfr@canb.auug.org.au>
-	 <1249403089.4634.139.camel@localhost.localdomain>
-	 <20090912165300.9d257283.sfr@canb.auug.org.au>
-	 <20090912073906.GA3972@elte.hu> <1252753957.12217.10.camel@ht.satnam>
-	 <1252941416.2964.143.camel@localhost.localdomain>
+Subject: Re: [PATCH] do not ignore attribute 'noreturn'...
+Date: Mon, 14 Sep 2009 10:27:40 -0700
+Message-ID: <70318cbf0909141027y69ddecc2y591ffb6aca300fca@mail.gmail.com>
+References: <200908282330.08332.kdudka@redhat.com>
+	 <70318cbf0908281444q735b7b9fm73f0fcbdbaeefa7b@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S932075AbZINRJb@vger.kernel.org>
-In-Reply-To: <1252941416.2964.143.camel@localhost.localdomain>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Steven Rostedt <srostedt@redhat.com>
-Cc: Jaswinder Singh Rajput <jaswinder@kernel.org>, Ingo Molnar <mingo@elte.hu>, Stephen Rothwell <sfr@canb.auug.org.au>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-vw0-f195.google.com ([209.85.212.195]:34983 "EHLO
+	mail-vw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751250AbZINR1h (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 14 Sep 2009 13:27:37 -0400
+Received: by vws33 with SMTP id 33so530308vws.33
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Sep 2009 10:27:41 -0700 (PDT)
+In-Reply-To: <70318cbf0908281444q735b7b9fm73f0fcbdbaeefa7b@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Kamil Dudka <kdudka@redhat.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Mon, Sep 14, 2009 at 8:16 AM, Steven Rostedt <srostedt@redhat.com> w=
-rote:
-> static void func(int size_me) {
-> =A0 =A0 =A0 =A0char array[size_me];
+On Fri, Aug 28, 2009 at 2:44 PM, Christopher Li <sparse@chrisli.org> wrote:
+> Yes, no return is kind of useful. I think we need to do some thing about the
+> MOD_XXX eventually. It is very easy to run out of bits there.
 >
-> =A0 =A0 =A0 =A0memcpy(array, "hello", size);
-> };
->
-> and sparse failed on it as well. Note, you need to have something cal=
-l
-> func, or sparse will ignore it.
+Ah, the MOD_NORETURN is bigger than size of long in 32 bit systems.
+I just get a few warning from GCC.
 
-Gcc allows variable size. Sparse expects the size of an array is consta=
-nt.
-=46or the kernel using variable array size is consider bad. Because the=
- kernel
-has very limited stack size. (8K if I remember correctly). Using dynami=
-c array
-is very easy to overflow the stack without realizing it.
-
-It deserves a warning. I agree the warning message can use a better des=
-cription
-though.
+I just relocate the MOD_NORETURN bits.
 
 Chris
+
+diff --git a/symbol.h b/symbol.h
+index 80ef363..9f5a32f 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -214,10 +214,10 @@ struct symbol {
+ #define MOD_SAFE       0x8000000       // non-null/non-trapping pointer
+
+ #define MOD_USERTYPE   0x10000000
++#define MOD_NORETURN   0x20000000
+ #define MOD_EXPLICITLY_SIGNED  0x40000000
+ #define MOD_BITWISE    0x80000000
+
+-#define MOD_NORETURN   0x100000000
+
+ #define MOD_NONLOCAL   (MOD_EXTERN | MOD_TOPLEVEL)
+ #define MOD_STORAGE    (MOD_AUTO | MOD_REGISTER | MOD_STATIC | MOD_EXTERN | MOD
