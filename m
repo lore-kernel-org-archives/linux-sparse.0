@@ -1,44 +1,52 @@
-From: Kamil Dudka <kdudka@redhat.com>
-Subject: Re: [PATCH] do not ignore attribute 'noreturn'...
-Date: Mon, 14 Sep 2009 23:13:45 +0200
-Message-ID: <200909142313.46077.kdudka@redhat.com>
-References: <200908282330.08332.kdudka@redhat.com> <200909142144.37273.kdudka@redhat.com> <70318cbf0909141347p47c8a277ja6f9d18ae3c6fcbd@mail.gmail.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: Warning from ring buffer code (Was: Re: linux-next: tip tree
+ build warning)
+Date: Tue, 15 Sep 2009 09:16:34 +0200
+Message-ID: <1252998994.5506.0.camel@laptop>
+References: <20090804161640.70817ee6.sfr@canb.auug.org.au>
+	 <1249403089.4634.139.camel@localhost.localdomain>
+	 <20090912165300.9d257283.sfr@canb.auug.org.au>
+	 <20090912073906.GA3972@elte.hu> <1252753957.12217.10.camel@ht.satnam>
+	 <1252941416.2964.143.camel@localhost.localdomain>
+	 <70318cbf0909141009v46581785m4c70edf31fcb79fa@mail.gmail.com>
+	 <1252952238.2964.154.camel@localhost.localdomain>
+	 <1252952621.31964.0.camel@twins>
+	 <1252953076.2964.156.camel@localhost.localdomain>
+	 <20090914184123.GC6045@nowhere>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-1"
+Content-Type: text/plain
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:1026 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932280AbZINVNx (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 14 Sep 2009 17:13:53 -0400
-In-Reply-To: <70318cbf0909141347p47c8a277ja6f9d18ae3c6fcbd@mail.gmail.com>
-Content-Disposition: inline
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <linux-next-owner@vger.kernel.org>
+In-Reply-To: <20090914184123.GC6045@nowhere>
+Sender: linux-next-owner@vger.kernel.org
+To: Frederic Weisbecker <fweisbec@gmail.com>
+Cc: Steven Rostedt <srostedt@redhat.com>, Christopher Li <sparse@chrisli.org>, Jaswinder Singh Rajput <jaswinder@kernel.org>, Ingo Molnar <mingo@elte.hu>, Stephen Rothwell <sfr@canb.auug.org.au>, Thomas Gleixner <tglx@linutronix.de>, "H. Peter Anvin" <hpa@zytor.com>, linux-next@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Josh Triplett <josh@freedesktop.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Peringer Petr <peringer@fit.vutbr.cz>
 
-On Monday 14 of September 2009 22:47:40 Christopher Li wrote:
-> Can you clarify why do you need to use the UID instead of the pointer of
-> symbol? One reason I can see is that if you want to dump the AST tree
-> into objects on disk. Other application can read it back and load into
-> memory. If the symbol already exist in the memory, you should be able to
-> use pointer directly.
+On Mon, 2009-09-14 at 20:41 +0200, Frederic Weisbecker wrote:
+> On Mon, Sep 14, 2009 at 02:31:16PM -0400, Steven Rostedt wrote:
+> > On Mon, 2009-09-14 at 20:23 +0200, Peter Zijlstra wrote:
+> > > On Mon, 2009-09-14 at 14:17 -0400, Steven Rostedt wrote:
+> > > > Frederic, how big can one of those events get. The ring buffer (and
+> > > > TRACE_EVENT) allow up to almost a page size, which is very hefty for the
+> > > > stack. This code needs to either be rewritten or we need to set a limit
+> > > > to the size of a profile entry.
+> > > 
+> > > Yeah, that needs to get a re-write.. I've complained about this when it
+> > > went in.
+> > 
+> > One answer is to create a per cpu buffer that is big enough to hold the
+> > data needed. Then you can disable interrupts an use it without worry.
+> > 
+> > If you need to also handle NMIs, then create a per_cpu NMI buffer too,
+> > and use that if "in_nmi()" is true.
+> > 
+> > -- Steve
+> 
+> 
+> Looks like a nice idea.
+> 
+> Peter, does that sound acceptable to you to disable interrupts during a
+> profiled tracepoint event?
 
-The only reason (for now) is that I already use them with the gcc plug-in and 
-the code_listener interace is based on them. I don't think it *needs* to be 
-implemented in SPARSE since the workaround is easy. I've only raised the idea
-in hope such enumeration might be generally useful.
-
-Adding Petr Peringer to CC. He came with UID idea to our project and might be 
-able to give us better clarification for that approach.
-
-> BTW, I have code to dump most of the struct into disk already. I think
-> I send to the list before. Of course I can create a branch for it. Reading
-> is not completed yet.
-
-Thanks! Good to know something like that is available. But I don't think our 
-project can gain from this functionality right now.
-
-Kamil
+It does anyway, a little further down the line, so sure.
