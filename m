@@ -1,35 +1,47 @@
-From: Jeff Layton <jlayton@poochiereds.net>
-Subject: new sparse release?
-Date: Fri, 25 Sep 2009 08:31:09 -0400
-Message-ID: <20090925083109.18353a08@tlielax.poochiereds.net>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: new sparse release?
+Date: Fri, 25 Sep 2009 10:12:32 -0700
+Message-ID: <70318cbf0909251012q6e21a7b6g96c68351c19c772a@mail.gmail.com>
+References: <20090925083109.18353a08@tlielax.poochiereds.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from cdptpa-omtalb.mail.rr.com ([75.180.132.121]:32875 "EHLO
-	cdptpa-omtalb.mail.rr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752492AbZIYMbH (ORCPT
+Received: from mail-vw0-f203.google.com ([209.85.212.203]:37231 "EHLO
+	mail-vw0-f203.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750936AbZIYRM3 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Sep 2009 08:31:07 -0400
-Received: from mail.poochiereds.net ([71.70.153.3])
-          by cdptpa-omta01.mail.rr.com with ESMTP
-          id <20090925123109946.DUOF1442@cdptpa-omta01.mail.rr.com>
-          for <linux-sparse@vger.kernel.org>;
-          Fri, 25 Sep 2009 12:31:09 +0000
-Received: from tlielax.poochiereds.net (tlielax.poochiereds.net [192.168.1.3])
-	by mail.poochiereds.net (Postfix) with ESMTP id 9ED6458167
-	for <linux-sparse@vger.kernel.org>; Fri, 25 Sep 2009 08:31:09 -0400 (EDT)
+	Fri, 25 Sep 2009 13:12:29 -0400
+Received: by vws41 with SMTP id 41so1772407vws.4
+        for <linux-sparse@vger.kernel.org>; Fri, 25 Sep 2009 10:12:33 -0700 (PDT)
+In-Reply-To: <20090925083109.18353a08@tlielax.poochiereds.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Jeff Layton <jlayton@poochiereds.net>
+Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@kernel.org>
 
-The sparse package in Fedora is based on the latest release of sparse
-(0.4.1). That seems to be really old (from 2007) and is lacking
-important patches (like the one to ignore the __cold__ attribute).
+On Fri, Sep 25, 2009 at 5:31 AM, Jeff Layton <jlayton@poochiereds.net> wrote:
+> The sparse package in Fedora is based on the latest release of sparse
+> (0.4.1). That seems to be really old (from 2007) and is lacking
+> important patches (like the one to ignore the __cold__ attribute).
+>
+> Would it be possible to cut a newer release sometime in the near future
+> so that distros can pick up a new official version?
+>
 
-Would it be possible to cut a newer release sometime in the near future
-so that distros can pick up a new official version?
+Sure, I mean to do that. Currently the sparse wiki is up. I have been
+syncing bits from chrisl branch from time to time.
 
-Thanks,
--- 
-Jeff Layton <jlayton@poochiereds.net>
+I just need to:
+- Get a PGP key.
+- Sign the new release tag.
+- Run magic git command to generate stat of changes.
+- Add change log.
+- make dist.
+- Upload the tar package.
+- Announce the release to mailing list.
+
+I will cut 0.4.2.0-rc1 one over the week end.
+
+Thanks
+
+Chris
