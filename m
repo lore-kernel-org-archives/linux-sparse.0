@@ -1,47 +1,29 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: new sparse release?
-Date: Fri, 25 Sep 2009 10:12:32 -0700
-Message-ID: <70318cbf0909251012q6e21a7b6g96c68351c19c772a@mail.gmail.com>
-References: <20090925083109.18353a08@tlielax.poochiereds.net>
+Subject: Sparse 0.4.2-rc1
+Date: Mon, 28 Sep 2009 00:33:36 -0700
+Message-ID: <70318cbf0909280033p32c64e2fpbb563ac2b498fa8d@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f203.google.com ([209.85.212.203]:37231 "EHLO
+Received: from mail-vw0-f203.google.com ([209.85.212.203]:59383 "EHLO
 	mail-vw0-f203.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750936AbZIYRM3 (ORCPT
+	with ESMTP id S1750900AbZI1Hdc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Sep 2009 13:12:29 -0400
-Received: by vws41 with SMTP id 41so1772407vws.4
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Sep 2009 10:12:33 -0700 (PDT)
-In-Reply-To: <20090925083109.18353a08@tlielax.poochiereds.net>
+	Mon, 28 Sep 2009 03:33:32 -0400
+Received: by vws41 with SMTP id 41so2696079vws.4
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Sep 2009 00:33:36 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Layton <jlayton@poochiereds.net>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Sep 25, 2009 at 5:31 AM, Jeff Layton <jlayton@poochiereds.net> wrote:
-> The sparse package in Fedora is based on the latest release of sparse
-> (0.4.1). That seems to be really old (from 2007) and is lacking
-> important patches (like the one to ignore the __cold__ attribute).
->
-> Would it be possible to cut a newer release sometime in the near future
-> so that distros can pick up a new official version?
->
+I just tagged the sparse git tree with v0.4.2-rc1.
 
-Sure, I mean to do that. Currently the sparse wiki is up. I have been
-syncing bits from chrisl branch from time to time.
+It has been a long while since the last 0.4.1 release.
+Al made a big overhaul of the parser to support better
+type and attribute parsing. The rest of the changes are
+mostly small improvements.
 
-I just need to:
-- Get a PGP key.
-- Sign the new release tag.
-- Run magic git command to generate stat of changes.
-- Add change log.
-- make dist.
-- Upload the tar package.
-- Announce the release to mailing list.
-
-I will cut 0.4.2.0-rc1 one over the week end.
-
-Thanks
+Please give it some test and report back any regression
+you find.
 
 Chris
