@@ -1,46 +1,33 @@
-From: Michael Stefaniuc <mstefani@redhat.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Ignore the ms_abi/sysv_abi attributes.
-Date: Wed, 30 Sep 2009 22:21:30 +0200
-Message-ID: <4AC3BDCA.9090300@redhat.com>
-References: <20090929210106.GA3592@redhat.com> <70318cbf0909291630q73f92ab9ma980ca98564f366f@mail.gmail.com>
+Date: Wed, 30 Sep 2009 13:49:59 -0700
+Message-ID: <70318cbf0909301349n6a9a1beao9713fc6923ad9216@mail.gmail.com>
+References: <20090929210106.GA3592@redhat.com>
+	 <70318cbf0909291630q73f92ab9ma980ca98564f366f@mail.gmail.com>
+	 <4AC3BDCA.9090300@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:46084 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751899AbZI3UV3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 30 Sep 2009 16:21:29 -0400
-In-Reply-To: <70318cbf0909291630q73f92ab9ma980ca98564f366f@mail.gmail.com>
+Received: from mail-vw0-f192.google.com ([209.85.212.192]:54044 "EHLO
+	mail-vw0-f192.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754078AbZI3U51 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 30 Sep 2009 16:57:27 -0400
+Received: by vws30 with SMTP id 30so4412738vws.21
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2009 13:57:31 -0700 (PDT)
+In-Reply-To: <4AC3BDCA.9090300@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Michael Stefaniuc <mstefani@redhat.com>
 Cc: linux-sparse@vger.kernel.org
 
-On 09/30/2009 01:30 AM, Christopher Li wrote:
-> On Tue, Sep 29, 2009 at 2:01 PM, Michael Stefaniuc<mstefani@redhat.com>  wrote:
->> This is needed for getting a meaningful sparse run on a Wine 64-bit
->> compile. Else the basic Win32 headers will produce tons of
->> error: attribute 'ms_abi': unknown attribute
->> which end in
->> error: too many errors.
->>
->> The sysv_abi attribute was just added for symmetry.
->
-> Thanks for the patch. Ignoring the attribute has become so common now.
-> I decide stop the complicate way to adding ignored attributes.
->
-> I attach two patches to simplify things. I am I am going to push
-> them out to chrisl tree.
->
-> Can you change your patch base on my new patch?
-Done!
+On Wed, Sep 30, 2009 at 1:21 PM, Michael Stefaniuc <mstefani@redhat.com> wrote:
+> The nicest part about this is that the ignored attributes are now sorted
+> alphabetically and one doesn't have to figure out where exactly to add them.
 
-> It should be really simple, just add one string for each attribute
-> is good enough.
-The nicest part about this is that the ignored attributes are now sorted 
-alphabetically and one doesn't have to figure out where exactly to add them.
+Thanks, I like that too :-)
 
-thanks
-bye
-	michael
+I actually write a five lines python script to short them and make sure
+I did not drop some of the attributes.
+
+Chris
