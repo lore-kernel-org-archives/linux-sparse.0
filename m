@@ -1,54 +1,24 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Handle __builtin_ms_va_list.
-Date: Thu, 1 Oct 2009 11:41:57 -0700
-Message-ID: <70318cbf0910011141r78e02d78qbb7ab4f183253406@mail.gmail.com>
-References: <20090930213456.GA502@redhat.com>
+From: British Telecom Plc <fscoffice@midohio.twcbc.com>
+Subject: One Million Pounds
+Date: Tue, 6 Oct 2009 4:39:25 -0500
+Message-ID: <849jtg$em30ae@rrcs-agw-01b.hrndva.rr.com>
+Reply-To: telecomgroup@9.cn
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f192.google.com ([209.85.212.192]:45939 "EHLO
-	mail-vw0-f192.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751853AbZJASlx convert rfc822-to-8bit (ORCPT
+Received: from hrndva-commlb.mail.rr.com ([71.74.57.8]:51252 "EHLO
+	hrndva-commlb.mail.rr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754922AbZJFJk1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 1 Oct 2009 14:41:53 -0400
-Received: by vws30 with SMTP id 30so220258vws.21
-        for <linux-sparse@vger.kernel.org>; Thu, 01 Oct 2009 11:41:57 -0700 (PDT)
-In-Reply-To: <20090930213456.GA502@redhat.com>
+	Tue, 6 Oct 2009 05:40:27 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Michael Stefaniuc <mstefani@redhat.com>
-Cc: linux-sparse@vger.kernel.org
+To: info@bt.org
 
-On Wed, Sep 30, 2009 at 2:34 PM, Michael Stefaniuc <mstefani@redhat.com=
-> wrote:
-> For Win64 compiles Wine does
-> =A0#ifndef __ms_va_list
-> =A0# if defined(__x86_64__) && defined (__GNUC__)
-> =A0# =A0define __ms_va_list __builtin_ms_va_list
-> =A0# =A0define __ms_va_start(list,arg) __builtin_ms_va_start(list,arg=
-)
-> =A0# =A0define __ms_va_end(list) __builtin_ms_va_end(list)
-> =A0# else
->
-> Wouldn't be as bad if sparse cannot handle those but it trips over
-> WINBASEAPI DWORD WINAPI FormatMessageA(DWORD,LPCVOID,DWORD,DWORD,LPST=
-R,DWORD,__ms_va_list*);
-> WINBASEAPI DWORD WINAPI FormatMessageW(DWORD,LPCVOID,DWORD,DWORD,LPWS=
-TR,DWORD,__ms_va_list*);
-> producing this errors for basically every file:
-> wine/include/winbase.h:1546:96: error: Expected ) in function declara=
-tor
-> wine/include/winbase.h:1546:96: error: got *
-> wine/include/winbase.h:1547:97: error: Expected ) in function declara=
-tor
-> wine/include/winbase.h:1547:97: error: got *
-
-Applied.
-
-Thanks
-
-Chris
+ Your e-mail address has won the British Telecom Promotion. Therefore y=
+ou have been approve to claim the sum of =A31,000,000.00. Reply us with=
+ Your: Names: Address: Country: Phone No: Occupation:
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
