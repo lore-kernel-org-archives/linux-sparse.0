@@ -1,19 +1,19 @@
 From: Josh Triplett <josh@joshtriplett.org>
-Subject: [PATCH] Rename -Wall to Wsparse-all, so it doesn't get turned on
+Subject: [PATCHv2] Rename -Wall to Wsparse-all, so it doesn't get turned on
  unintentionally
-Date: Sun, 11 Oct 2009 14:59:49 -0700
-Message-ID: <20091011215943.GA2684@feather>
+Date: Sun, 11 Oct 2009 15:47:03 -0700
+Message-ID: <20091011224618.GA3963@feather>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:34620 "EHLO
+Received: from slow3-v.mail.gandi.net ([217.70.178.89]:53198 "EHLO
 	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750770AbZJKWUD (ORCPT
+	with ESMTP id S1752558AbZJKW7y (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 11 Oct 2009 18:20:03 -0400
-Received: from relay2-v.mail.gandi.net (relay2-v.mail.gandi.net [217.70.178.76])
-	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 96142421F8
-	for <linux-sparse@vger.kernel.org>; Mon, 12 Oct 2009 00:00:44 +0200 (CEST)
+	Sun, 11 Oct 2009 18:59:54 -0400
+Received: from relay4-v.mail.gandi.net (relay4-v.mail.gandi.net [217.70.178.78])
+	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 4B4D53AA51
+	for <linux-sparse@vger.kernel.org>; Mon, 12 Oct 2009 00:48:06 +0200 (CEST)
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -42,20 +42,30 @@ Projects almost certainly don't want to use the new -Wsparse-all option;
 they should choose the specific set of warnings they want, or just go
 with sparse's defaults.
 
+Also update cgcc to know about Wsparse-all and not pass it to GCC, and
+update a test case that unnecessarily used -Wall.
+
 Signed-off-by: Josh Triplett <josh@joshtriplett.org>
 ---
 
-This has come up for discussion numerous times before, and most people
-seem to approve of renaming -Wall, but the change hasn't actually gone
-into sparse yet.
+v2: Update cgcc and remove unnecessary (and now ignored) -Wall from a
+test case.
 
- cgcc     |   15 +--------------
- lib.c    |    2 +-
- sparse.1 |    4 ++++
- 3 files changed, 6 insertions(+), 15 deletions(-)
+My -Wdesignated-init patch also needs to include an update for cgcc, and
+thus it will conflict with this one.  I'll rebase the Wdesignated-init
+patch on this one, to avoid the conflict.  In the future, perhaps sparse
+could have some kind of --print-warning-options option, and the Makefile
+could generate cgcc from cgcc.in and that, avoiding the need to update
+cgcc when adding a new Sparse option.
+
+ cgcc                     |   17 ++---------------
+ lib.c                    |    2 +-
+ sparse.1                 |    4 ++++
+ validation/specifiers1.c |    2 +-
+ 4 files changed, 8 insertions(+), 17 deletions(-)
 
 diff --git a/cgcc b/cgcc
-index 995cc05..ff8c921 100755
+index 995cc05..8005c3c 100755
 --- a/cgcc
 +++ b/cgcc
 @@ -51,7 +51,7 @@ while (@ARGV) {
@@ -67,7 +77,14 @@ index 995cc05..ff8c921 100755
  }
  
  if ($gendeps) {
-@@ -94,19 +94,6 @@ sub check_only_option {
+@@ -88,25 +88,12 @@ exit 0;
+ 
+ sub check_only_option {
+     my ($arg) = @_;
+-    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sign|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undef|ptr-subtraction-blows|cast-to-as|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null|paren-string|return-void)$/;
++    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sign|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undef|ptr-subtraction-blows|cast-to-as|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null|paren-string|return-void|sparse-all)$/;
+     return 1 if $arg =~ /^-v(no-?)?(entry|dead)$/;
+     return 0;
  }
  
  # -----------------------------------------------------------------------------
@@ -115,6 +132,17 @@ index d7fe444..abc75a2 100644
  .B \-Waddress\-space
  Warn about code which mixes pointers to different address spaces.
  
+diff --git a/validation/specifiers1.c b/validation/specifiers1.c
+index 86db45d..1a4e1d5 100644
+--- a/validation/specifiers1.c
++++ b/validation/specifiers1.c
+@@ -97,5 +97,5 @@ TEST2(double, long)
+ }
+ /*
+  * check-name: valid specifier combinations
+- * check-command: sparse -Wall $file
++ * check-command: sparse $file
+  */
 -- 
 1.6.4.3
 
