@@ -1,431 +1,105 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: [PATCHv3] New attribute designated_init: mark a struct as
- requiring designated init
-Date: Sun, 11 Oct 2009 15:51:56 -0700
-Message-ID: <20091011225151.GA4212@feather>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] New attribute designated_init: mark a struct as requiring
+	designated init
+Date: Sun, 11 Oct 2009 22:18:24 -0700
+Message-ID: <70318cbf0910112218j50a63148t2e044bc5451dc0cb@mail.gmail.com>
+References: <20091010085732.GA10923@feather>
+	 <70318cbf0910100333m128e3500vb1659a55a9f49768@mail.gmail.com>
+	 <20091010160304.GA11876@feather>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:35503 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752697AbZJKXAB (ORCPT
+Received: from mail-vw0-f203.google.com ([209.85.212.203]:55582 "EHLO
+	mail-vw0-f203.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751685AbZJLFTC convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 11 Oct 2009 19:00:01 -0400
-Content-Disposition: inline
+	Mon, 12 Oct 2009 01:19:02 -0400
+In-Reply-To: <20091010160304.GA11876@feather>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: sparse@chrisli.org, linux-kernel@vger.kernel.org, paulmck@linux.vnet.ibm.com
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-Some structure types provide a set of fields of which most users will
-only initialize the subset they care about.  Users of these types should
-always use designated initializers, to avoid relying on the specific
-structure layout.  Examples of this type of structure include the many
-*_operations structures in Linux, which contain a set of function
-pointers; these structures occasionally gain a new field, lose an
-obsolete field, or change the function signature for a field.
+On Sat, Oct 10, 2009 at 9:03 AM, Josh Triplett <josh@joshtriplett.org> =
+wrote:
+> After getting this patch reviewed, I intended to add many such
+> annotations myself. =A0I have patches sitting in my local Linux tree.
+> (However, I don't plan to try to get the patches accepted into Linux
+> until this attribute shows up in a Sparse release, since I don't want=
+ to
+> make Linux require the latest Sparse from the git tree.)
 
-Add a new attribute designated_init; when used on a struct, it tells
-Sparse to warn on any positional initialization of a field in that
-struct.
+I apply your patch so you can have a fair chance to pitch to the
+kernel. If nobody use it, I can remove it later. I don't think you need
+to wait for the patch to go into sparse release to collect feed back
+from lkml.
 
-The new flag -Wdesignated-init controls these warnings.  Since these
-warnings only fire for structures explicitly tagged with the attribute,
-enable the warning by default.
 
-Includes documentation and test case.
+> You *hope* that positional initialization will fail. :) =A0Some of th=
+ese
+> types of structures contain many fields with the same or similar type=
+s,
+> and initializers don't inherently contain a lot of distinguishing typ=
+e
+> information that helps cause type errors rather than silent failures.
 
-Signed-off-by: Josh Triplett <josh@joshtriplett.org>
----
+I am very interested to know some precedence from the kernel commit his=
+tory.
+If we can find such a commit which changes the structure and breaks
+other initialization due to the position initialization, it will make y=
+our
+case stronger as well.
 
-v3: Add Wdesignated-init to cgcc's list of sparse warning options.  Note
-that because of this change, this patch depends on my Wsparse-all patch,
-to avoid conflicts.
+> Even if the positional initialization does fail, this failure will oc=
+cur
+> at the time of attempting to change the structure, and many such
+> failures may occur all over the tree, making such changes significant=
+ly
+> more difficult. =A0With the designated_init attribute, sparse will wa=
+rn
+> when attempting to create the structure initializer.
 
-v2: Fixed printing of ->ident to not rely on terminating NUL, as noticed
-by Chris Li.
+Without sparse, you can temporary  insert some unused strange type
+into the beginning of the struct. That should cause any position initia=
+lizer
+fail to compile. You can then find call the call site.
 
- cgcc                         |    2 +-
- evaluate.c                   |   10 ++
- lib.c                        |    2 +
- lib.h                        |    1 +
- parse.c                      |   15 +++
- sparse.1                     |   24 +++++
- symbol.h                     |    3 +-
- validation/designated-init.c |  195 ++++++++++++++++++++++++++++++++++++++++++
- 8 files changed, 250 insertions(+), 2 deletions(-)
- create mode 100644 validation/designated-init.c
+> With the designated_init attribute, someone making changes to a
+> structure can check that Sparse produces no warnings about positional
+> initializers and then know that certain types of changes can occur
+> without having to check every initializer. =A0For instance, removing =
+a
+> field will only require checking any initializer that initializes tha=
+t
+> field, and the compiler will find all of those. =A0Adding a field tha=
+t can
+> safely remain NULL does not require checking any initializers.
 
-diff --git a/cgcc b/cgcc
-index 8005c3c..d37cf88 100755
---- a/cgcc
-+++ b/cgcc
-@@ -88,7 +88,7 @@ exit 0;
- 
- sub check_only_option {
-     my ($arg) = @_;
--    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sign|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undef|ptr-subtraction-blows|cast-to-as|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null|paren-string|return-void|sparse-all)$/;
-+    return 1 if $arg =~ /^-W(no-?)?(default-bitfield-sign|one-bit-signed-bitfield|cast-truncate|bitwise|typesign|context|undef|ptr-subtraction-blows|cast-to-as|decl|transparent-union|address-space|enum-mismatch|do-while|old-initializer|non-pointer-null|paren-string|return-void|designated-init|sparse-all)$/;
-     return 1 if $arg =~ /^-v(no-?)?(entry|dead)$/;
-     return 0;
- }
-diff --git a/evaluate.c b/evaluate.c
-index 805ae90..28bfd7c 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -2366,6 +2366,7 @@ static void handle_list_initializer(struct expression *expr,
- 		int lclass;
- 
- 		if (e->type != EXPR_INDEX && e->type != EXPR_IDENTIFIER) {
-+			struct symbol *struct_sym;
- 			if (!top) {
- 				top = e;
- 				last = first_subobject(ctype, class, &top);
-@@ -2378,6 +2379,15 @@ static void handle_list_initializer(struct expression *expr,
- 				DELETE_CURRENT_PTR(e);
- 				continue;
- 			}
-+			struct_sym = ctype->type == SYM_NODE ? ctype->ctype.base_type : ctype;
-+			if (Wdesignated_init && struct_sym->designated_init)
-+				warning(e->pos, "%s%.*s%spositional init of field in %s %s, declared with attribute designated_init",
-+					ctype->ident ? "in initializer for " : "",
-+					ctype->ident ? ctype->ident->len : 0,
-+					ctype->ident ? ctype->ident->name : "",
-+					ctype->ident ? ": " : "",
-+					get_type_name(struct_sym->type),
-+					show_ident(struct_sym->ident));
- 			if (jumped) {
- 				warning(e->pos, "advancing past deep designator");
- 				jumped = 0;
-diff --git a/lib.c b/lib.c
-index 963be08..9777826 100644
---- a/lib.c
-+++ b/lib.c
-@@ -197,6 +197,7 @@ int Wcast_truncate = 1;
- int Wcontext = 1;
- int Wdecl = 1;
- int Wdefault_bitfield_sign = 0;
-+int Wdesignated_init = 1;
- int Wdo_while = 0;
- int Wenum_mismatch = 1;
- int Wnon_pointer_null = 1;
-@@ -378,6 +379,7 @@ static const struct warning {
- 	{ "context", &Wcontext },
- 	{ "decl", &Wdecl },
- 	{ "default-bitfield-sign", &Wdefault_bitfield_sign },
-+	{ "designated-init", &Wdesignated_init },
- 	{ "do-while", &Wdo_while },
- 	{ "enum-mismatch", &Wenum_mismatch },
- 	{ "non-pointer-null", &Wnon_pointer_null },
-diff --git a/lib.h b/lib.h
-index 25abb80..3ced1bf 100644
---- a/lib.h
-+++ b/lib.h
-@@ -97,6 +97,7 @@ extern int Wcast_truncate;
- extern int Wcontext;
- extern int Wdecl;
- extern int Wdefault_bitfield_sign;
-+extern int Wdesignated_init;
- extern int Wdo_while;
- extern int Wenum_mismatch;
- extern int Wnon_pointer_null;
-diff --git a/parse.c b/parse.c
-index 5e75242..03fa5d9 100644
---- a/parse.c
-+++ b/parse.c
-@@ -64,6 +64,7 @@ typedef struct token *attr_t(struct token *, struct symbol *,
- static attr_t
- 	attribute_packed, attribute_aligned, attribute_modifier,
- 	attribute_address_space, attribute_context,
-+	attribute_designated_init,
- 	attribute_transparent_union, ignore_attribute,
- 	attribute_mode, attribute_force;
- 
-@@ -319,6 +320,10 @@ static struct symbol_op context_op = {
- 	.attribute = attribute_context,
- };
- 
-+static struct symbol_op designated_init_op = {
-+	.attribute = attribute_designated_init,
-+};
-+
- static struct symbol_op transparent_union_op = {
- 	.attribute = attribute_transparent_union,
- };
-@@ -453,6 +458,7 @@ static struct init_keyword {
- 	{ "address_space",NS_KEYWORD,	.op = &address_space_op },
- 	{ "mode",	NS_KEYWORD,	.op = &mode_op },
- 	{ "context",	NS_KEYWORD,	.op = &context_op },
-+	{ "designated_init",	NS_KEYWORD,	.op = &designated_init_op },
- 	{ "__transparent_union__",	NS_KEYWORD,	.op = &transparent_union_op },
- 
- 	{ "__mode__",	NS_KEYWORD,	.op = &mode_op },
-@@ -1127,6 +1133,15 @@ static struct token *attribute_context(struct token *token, struct symbol *attr,
- 	return token;
- }
- 
-+static struct token *attribute_designated_init(struct token *token, struct symbol *attr, struct decl_state *ctx)
-+{
-+	if (ctx->ctype.base_type && ctx->ctype.base_type->type == SYM_STRUCT)
-+		ctx->ctype.base_type->designated_init = 1;
-+	else
-+		warning(token->pos, "attribute designated_init applied to non-structure type");
-+	return token;
-+}
-+
- static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	if (Wtransparent_union)
-diff --git a/sparse.1 b/sparse.1
-index abc75a2..bde6b6d 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -138,6 +138,30 @@ explicitly.
- Sparse does not issue these warnings by default.
- .
- .TP
-+.B \-Wdesignated\-init
-+Warn about positional initialization of structs marked as requiring designated
-+initializers.
-+
-+Sparse allows an attribute
-+.BI __attribute__((designated_init))
-+which marks a struct as requiring designated initializers.  Sparse will warn
-+about positional initialization of a struct variable or struct literal of a
-+type that has this attribute.
-+
-+Requiring designated initializers for a particular struct type will insulate
-+code using that struct type from changes to the layout of the type, avoiding
-+the need to change initializers for that type unless they initialize a removed
-+or incompatibly changed field.
-+
-+Common examples of this type of struct include collections of function pointers
-+for the implementations of a class of related operations, for which the default
-+NULL for an unmentioned field in a designated initializer will correctly
-+indicate the absence of that operation.
-+
-+Sparse issues these warnings by default.  To turn them off, use
-+\fB\-Wno\-designated\-init\fR.
-+.
-+.TP
- .B \-Wdo\-while
- Warn about do-while loops that do not delimit the loop body with braces.
- 
-diff --git a/symbol.h b/symbol.h
-index 60fdad0..83b3d4b 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -156,7 +156,8 @@ struct symbol {
- 					examined:1,
- 					expanding:1,
- 					evaluated:1,
--					string:1;
-+					string:1,
-+					designated_init:1;
- 			struct expression *array_size;
- 			struct ctype ctype;
- 			struct symbol_list *arguments;
-diff --git a/validation/designated-init.c b/validation/designated-init.c
-new file mode 100644
-index 0000000..23423e9
---- /dev/null
-+++ b/validation/designated-init.c
-@@ -0,0 +1,195 @@
-+struct s1 {
-+	int x;
-+	int y;
-+};
-+
-+struct s2 {
-+	int x;
-+	int y;
-+} __attribute__((designated_init));
-+
-+struct nest1 {
-+	struct s1 s1;
-+	struct s2 s2;
-+};
-+
-+struct nest2 {
-+	struct s1 s1;
-+	struct s2 s2;
-+} __attribute__((designated_init));
-+
-+static struct s1 s1_positional = { 5, 10 };
-+static struct s1 s1_designated = { .x = 5, .y = 10 };
-+static struct s2 s2_positional = { 5, 10 };
-+static struct s2 s2_designated = { .x = 5, .y = 10 };
-+static struct nest1 nest1_positional = {
-+	{ 5, 10 },
-+	{ 5, 10 },
-+};
-+static struct nest1 nest1_designated_outer = {
-+	.s1 = { 5, 10 },
-+	.s2 = { 5, 10 },
-+};
-+static struct nest1 nest1_designated_inner = {
-+	{ .x = 5, .y = 10 },
-+	{ .x = 5, .y = 10 },
-+};
-+static struct nest1 nest1_designated_both = {
-+	.s1 = { .x = 5, .y = 10 },
-+	.s2 = { .x = 5, .y = 10 },
-+};
-+static struct nest2 nest2_positional = {
-+	{ 5, 10 },
-+	{ 5, 10 },
-+};
-+static struct nest2 nest2_designated_outer = {
-+	.s1 = { 5, 10 },
-+	.s2 = { 5, 10 },
-+};
-+static struct nest2 nest2_designated_inner = {
-+	{ .x = 5, .y = 10 },
-+	{ .x = 5, .y = 10 },
-+};
-+static struct nest2 nest2_designated_both = {
-+	.s1 = { .x = 5, .y = 10 },
-+	.s2 = { .x = 5, .y = 10 },
-+};
-+
-+static struct {
-+	int x;
-+	int y;
-+} __attribute__((designated_init))
-+	anon_positional = { 5, 10 },
-+	anon_designated = { .x = 5, .y = 10};
-+
-+static struct s1 s1_array[] = {
-+	{ 5, 10 },
-+	{ .x = 5, .y = 10 },
-+};
-+
-+static struct s2 s2_array[] = {
-+	{ 5, 10 },
-+	{ .x = 5, .y = 10 },
-+};
-+
-+static struct s1 ret_s1_positional(void)
-+{
-+	return ((struct s1){ 5, 10 });
-+}
-+
-+static struct s1 ret_s1_designated(void)
-+{
-+	return ((struct s1){ .x = 5, .y = 10 });
-+}
-+
-+static struct s2 ret_s2_positional(void)
-+{
-+	return ((struct s2){ 5, 10 });
-+}
-+
-+static struct s2 ret_s2_designated(void)
-+{
-+	return ((struct s2){ .x = 5, .y = 10 });
-+}
-+
-+static struct nest1 ret_nest1_positional(void)
-+{
-+	return ((struct nest1){
-+			{ 5, 10 },
-+			{ 5, 10 },
-+		});
-+}
-+
-+static struct nest1 ret_nest1_designated_outer(void)
-+{
-+	return ((struct nest1){
-+			.s1 = { 5, 10 },
-+			.s2 = { 5, 10 },
-+		});
-+}
-+
-+static struct nest1 ret_nest1_designated_inner(void)
-+{
-+	return ((struct nest1){
-+			{ .x = 5, .y = 10 },
-+			{ .x = 5, .y = 10 },
-+		});
-+}
-+
-+static struct nest1 ret_nest1_designated_both(void)
-+{
-+	return ((struct nest1){
-+			.s1 = { .x = 5, .y = 10 },
-+			.s2 = { .x = 5, .y = 10 },
-+		});
-+}
-+
-+static struct nest2 ret_nest2_positional(void)
-+{
-+	return ((struct nest2){
-+			{ 5, 10 },
-+			{ 5, 10 },
-+		});
-+}
-+
-+static struct nest2 ret_nest2_designated_outer(void)
-+{
-+	return ((struct nest2){
-+			.s1 = { 5, 10 },
-+			.s2 = { 5, 10 },
-+		});
-+}
-+
-+static struct nest2 ret_nest2_designated_inner(void)
-+{
-+	return ((struct nest2){
-+			{ .x = 5, .y = 10 },
-+			{ .x = 5, .y = 10 },
-+		});
-+}
-+
-+static struct nest2 ret_nest2_designated_both(void)
-+{
-+	return ((struct nest2){
-+			.s1 = { .x = 5, .y = 10 },
-+			.s2 = { .x = 5, .y = 10 },
-+		});
-+}
-+/*
-+ * check-name: designated_init attribute
-+ *
-+ * check-error-start
-+designated-init.c:23:36: warning: in initializer for s2_positional: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:23:39: warning: in initializer for s2_positional: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:27:11: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:27:14: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:31:17: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:31:20: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:42:9: warning: in initializer for nest2_positional: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:43:9: warning: in initializer for nest2_positional: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:43:11: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:43:14: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:47:17: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:47:20: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:50:9: warning: in initializer for nest2_designated_inner: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:51:9: warning: in initializer for nest2_designated_inner: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:62:29: warning: in initializer for anon_positional: positional init of field in struct <noident>, declared with attribute designated_init
-+designated-init.c:62:32: warning: in initializer for anon_positional: positional init of field in struct <noident>, declared with attribute designated_init
-+designated-init.c:71:11: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:71:14: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:87:30: warning: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:87:33: warning: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:99:27: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:99:30: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:107:33: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:107:36: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:130:25: warning: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:131:25: warning: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:131:27: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:131:30: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:139:33: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:139:36: warning: in initializer for s2: positional init of field in struct s2, declared with attribute designated_init
-+designated-init.c:146:25: warning: positional init of field in struct nest2, declared with attribute designated_init
-+designated-init.c:147:25: warning: positional init of field in struct nest2, declared with attribute designated_init
-+ * check-error-end
-+ */
--- 
-1.6.4.3
+I think the initializer is just a small part of the work if you even ch=
+ange
+the structure. You need to make sure the *code* use these C struct
+actually works as expected.
 
+> (As an aside, though: any fundamental reason why we use that error-pr=
+one
+> approach rather than allocating one extra byte and NUL-terminating
+> idents? =A0Then we could drop the (larger) len field, and remove the
+> annoying restriction on calling show_ident multiple times in the same
+> statement.)
+
+When sparse does the hash table look up, if there is collision on the
+hash table entry, sparse will compare the size first before the memcmp(=
+).
+That will reduce the number of the memcmp call it makes. I would like t=
+o
+keep the size of struct ident. If any thing, we can NUL terminate the s=
+tring
+in ident to make printing easy.
+
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
