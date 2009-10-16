@@ -1,154 +1,278 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] New attribute designated_init: mark a struct as
- requiring designated init
-Date: Sun, 11 Oct 2009 23:42:33 -0700
-Message-ID: <20091012064233.GB6370@feather>
-References: <20091010085732.GA10923@feather>
- <70318cbf0910100333m128e3500vb1659a55a9f49768@mail.gmail.com>
- <20091010160304.GA11876@feather>
- <70318cbf0910112218j50a63148t2e044bc5451dc0cb@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Sparse 0.4.2 released
+Date: Fri, 16 Oct 2009 08:45:31 -0700
+Message-ID: <70318cbf0910160845g51baf4dbtff57b81cfb1c7538@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:34958 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751618AbZJLGqW (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 12 Oct 2009 02:46:22 -0400
-Content-Disposition: inline
-In-Reply-To: <70318cbf0910112218j50a63148t2e044bc5451dc0cb@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner+glk-linux-kernel-3=40m.gmane.org-S932727AbZJPPqO@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 
-On Sun, Oct 11, 2009 at 10:18:24PM -0700, Christopher Li wrote:
-> On Sat, Oct 10, 2009 at 9:03 AM, Josh Triplett <josh@joshtriplett.org=
-> wrote:
-> > After getting this patch reviewed, I intended to add many such
-> > annotations myself. =A0I have patches sitting in my local Linux tre=
-e.
-> > (However, I don't plan to try to get the patches accepted into Linu=
-x
-> > until this attribute shows up in a Sparse release, since I don't wa=
-nt to
-> > make Linux require the latest Sparse from the git tree.)
->=20
-> I apply your patch so you can have a fair chance to pitch to the
-> kernel. If nobody use it, I can remove it later. I don't think you ne=
-ed
-> to wait for the patch to go into sparse release to collect feed back
-> from lkml.
+Hi,
 
-Oh, definitely.  I just don't think the patches should actually get
-accepted into Linux before the next Sparse release.  I certainly plan t=
-o
-*submit* them. :)
+I have tagged and released the sparse version 0.4.2 at
+http://www.kernel.org/pub/software/devel/sparse/dist/sparse-0.4.2.tar.gz
 
-Thanks for accepting the patch.
+As previous discussions on the sparse mailing list, I am the new maintainer of
+the sparse project. This is my first release for sparse.
+Thanks Josh Triplett for the previously maintaining the project.
 
-> > You *hope* that positional initialization will fail. :) =A0Some of =
-these
-> > types of structures contain many fields with the same or similar ty=
-pes,
-> > and initializers don't inherently contain a lot of distinguishing t=
-ype
-> > information that helps cause type errors rather than silent failure=
-s.
->=20
-> I am very interested to know some precedence from the kernel commit h=
-istory.
-> If we can find such a commit which changes the structure and breaks
-> other initialization due to the position initialization, it will make=
- your
-> case stronger as well.
+I also created a new sparse wiki, it will replace the current sparse
+home page. http://sparse.wiki.kernel.org/index.php/Main_Page
 
-I don't know of any cases in the commit history off the top of my head.
-However, I do recall seeing this come up during LKML review comments on
-patch, where the patch used positional initializers and the comments
-suggested designated initializers.
+A lot of bug fixes and enhancements have gone into this release.
+Special thanks to Al Viro for overhauling the parser. Now sparse
+has  better ctype and attribute handling. The detailed changes follow.
 
-> > Even if the positional initialization does fail, this failure will =
-occur
-> > at the time of attempting to change the structure, and many such
-> > failures may occur all over the tree, making such changes significa=
-ntly
-> > more difficult. =A0With the designated_init attribute, sparse will =
-warn
-> > when attempting to create the structure initializer.
->=20
-> Without sparse, you can temporary  insert some unused strange type
-> into the beginning of the struct. That should cause any position init=
-ializer
-> fail to compile. You can then find call the call site.
+Chris
 
-Interesting idea!
 
-However, again, this doesn't trigger the warning as soon as someone add=
-s
-a positional initializer; the person who wants to change the structure
-will have to do this kind of work.  Warnings help ensure that those
-types of changes get made by the person submitting potentially
-problematic code, rather than the person who will trip over that code
-later.  Warnings also reduce the load on patch reviewers, by making
-certain types of issues less likely to make it to patch submission time=
-,
-and by letting reviewers suggest tools like sparse rather than having t=
-o
-point out each new issue.
+ .gitignore                                       |    6 +
+ Documentation/data-structures.txt                |   54 +
+ Makefile                                         |  162 +--
+ cgcc                                             |   47 +-
+ compat-bsd.c                                     |   20 +
+ compile-i386.c                                   |   10 +-
+ compile.h                                        |    2 +
+ evaluate.c                                       |  141 ++-
+ example.c                                        |    2 +-
+ expand.c                                         |   11 +-
+ expression.c                                     |   66 +-
+ expression.h                                     |    4 +-
+ flow.c                                           |   10 +-
+ flow.h                                           |    6 +
+ gdbhelpers                                       |  307 +++++
+ ident-list.h                                     |    5 +
+ lib.c                                            |  242 ++++-
+ lib.h                                            |    5 +-
+ linearize.c                                      |   16 +-
+ linearize.h                                      |    3 +-
+ liveness.c                                       |    2 +-
+ parse.c                                          | 1367 +++++++++++++++-------
+ parse.h                                          |    3 +-
+ pre-process.c                                    |  126 ++-
+ ptrlist.h                                        |    2 +
+ scope.c                                          |    2 +-
+ scope.h                                          |    2 +
+ show-parse.c                                     |  110 +-
+ simplify.c                                       |   57 +-
+ sparse.1                                         |   22 +
+ storage.h                                        |    3 +
+ symbol.c                                         |   84 +-
+ symbol.h                                         |   86 ++-
+ target.c                                         |    1 +
+ target.h                                         |   15 +
+ token.h                                          |    3 +-
+ tokenize.c                                       |   41 +-
+ unssa.c                                          |    2 +
+ validation/address_space.c                       |    6 +-
+ validation/attr-warning.c                        |    8 +
+ validation/attr_in_parameter.c                   |   12 +
+ validation/bad-array-designated-initializer.c    |    6 +-
+ validation/bad-assignment.c                      |    4 +-
+ validation/bad-cast.c                            |    6 +-
+ validation/bad-ternary-cond.c                    |    4 +-
+ validation/bad-typeof.c                          |   14 +
+ validation/badtype4.c                            |    4 +-
+ validation/check_byte_count-ice.c                |    4 +-
+ validation/compare-null-to-int.c                 |    2 +-
+ validation/cond_expr.c                           |    4 +-
+ validation/cond_expr2.c                          |   12 +-
+ validation/context.c                             |    6 +-
+ validation/declaration-after-statement-ansi.c    |   12 +
+ validation/declaration-after-statement-c89.c     |   12 +
+ validation/declaration-after-statement-c99.c     |    9 +
+ validation/declaration-after-statement-default.c |    9 +
+ validation/definitions.c                         |   12 +
+ validation/dubious-bitwise-with-not.c            |   24 +
+ validation/enum_scope.c                          |   11 +
+ validation/extern-inline.c                       |   23 +
+ validation/identifier_list.c                     |   18 +
+ validation/initializer-entry-defined-twice.c     |    8 +-
+ validation/label-scope.c                         |   12 +
+ validation/missing-ident.c                       |   18 +
+ validation/multi_typedef.c                       |   15 +
+ validation/nested-declarator.c                   |   29 +
+ validation/nested-declarator2.c                  |   41 +
+ validation/noderef.c                             |    6 +-
+ validation/preprocessor/preprocessor11.c         |   21 +
+ validation/preprocessor/preprocessor12.c         |   11 +
+ validation/preprocessor/preprocessor13.c         |   16 +
+ validation/preprocessor/preprocessor14.c         |   10 +
+ validation/preprocessor/preprocessor15.c         |    9 +
+ validation/preprocessor/preprocessor16.c         |    9 +
+ validation/preprocessor/preprocessor22.c         |   35 +
+ validation/preprocessor/preprocessor7.c          |    9 +
+ validation/preprocessor/preprocessor8.c          |   22 +
+ validation/reserved.c                            |   40 +
+ validation/restrict-array.c                      |   12 +
+ validation/sizeof-compound-postfix.c             |    8 +
+ validation/specifiers1.c                         |  101 ++
+ validation/specifiers2.c                         |  152 +++
+ validation/test-suite                            |    6 +-
+ validation/typedef_shadow.c                      |   12 +
+ validation/typeof-attribute.c                    |   16 +
+ validation/typesign.c                            |   36 +-
+ 86 files changed, 3011 insertions(+), 912 deletions(-)
 
-> > With the designated_init attribute, someone making changes to a
-> > structure can check that Sparse produces no warnings about position=
-al
-> > initializers and then know that certain types of changes can occur
-> > without having to check every initializer. =A0For instance, removin=
-g a
-> > field will only require checking any initializer that initializes t=
-hat
-> > field, and the compiler will find all of those. =A0Adding a field t=
-hat can
-> > safely remain NULL does not require checking any initializers.
->=20
-> I think the initializer is just a small part of the work if you even =
-change
-> the structure. You need to make sure the *code* use these C struct
-> actually works as expected.
 
-Very true.  However, the types of structs for which the designated_init
-attribute will prove useful often already follow semantics that avoid
-the need to check the code.  For instance, as long as you know that a
-field can safely remain 0 except in code that wants to use it, you can
-add a new field without checking every designated initializer.
+Al Viro (39):
+      saner warnings for restricted types
+      fix show_typename()
+      catch !x & y brainos
+      fun with declarations and definitions
+      Fix type_info_expression()
+      fun with declarations and definitions
+      Fix handling of ident-less declarations
+      Separate parsing of identifier-list (in K&R-style declarations)
+      More nested declarator fixes
+      Fix attribute/asm handling
+      more direct_declarator() sanitizing
+      Warn about non-empty identifier list outside of definition
+      Apply attributes after ( to the right place
+      Leave applying attributes until we know whether it's a nested declarator
+      Don't mess with passing symbol to declarator/direct_declarator
+      Fix braino in which_kind()
+      Sanitize direct_declarator logics
+      Separating ctype and parser state, part 1
+      Propagate decl_state to declaration_specifiers()
+      Fix regression created by commit af30c6df74f01db10fa78ac0cbdb5c3c40b5c73f
+      Take the rest of storage class keywords to parse.c
+      Fix handling of typedefs with several declarators
+      preparations to ->declarator() cleanup - separate typedef handling
+      Take the rest of specifiers to parse.c
+      Saner type for __builtin_va_list
+      Rewrite and fix specifiers handling
+      Have ->declarator() act directly on ctype being affected
+      Clean up and split declaration_specifiers()
+      Pass decl_state down to ->declarator() and handle_attributes()
+      Pass decl_state down to ->attribute()
+      Restore __attribute__((mode)) handling
+      Fix enumeration constants' scope beginning
+      Fix declaration_specifiers() handling of typedef name shadowed
+by NS_SYMBOL
+      Fix __label__ handling
+      Simplify get_number_value() and ctype_integer()
+      Don't mix storage class bits with ctype->modifiers while parsing type
+      Sanitize pointer()
+      Segfault at evaluate.c:341
+      warn directive in argument list
 
-> > (As an aside, though: any fundamental reason why we use that error-=
-prone
-> > approach rather than allocating one extra byte and NUL-terminating
-> > idents? =A0Then we could drop the (larger) len field, and remove th=
-e
-> > annoying restriction on calling show_ident multiple times in the sa=
-me
-> > statement.)
->=20
-> When sparse does the hash table look up, if there is collision on the
-> hash table entry, sparse will compare the size first before the memcm=
-p().
-> That will reduce the number of the memcmp call it makes. I would like=
- to
-> keep the size of struct ident. If any thing, we can NUL terminate the=
- string
-> in ident to make printing easy.
+Alberto Bertogli (1):
+      Support the __thread storage class
 
-=46air enough on the hash comparisons, though I do wonder how much valu=
-e
-we get from that compared to a highly optimized memcmp implementation;
-if the strings differ in the first 4 or 8 bytes, I'd expect memcmp to
-notice after one comparison.  But even if we keep the length, requiring
-NUL termination seems highly useful.
+Alexander Shishkin (1):
+      don't call sparse when called to generate dependencies
 
-- Josh Triplett
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Alexey Zaytsev (16):
+      Remove symbol.id_list
+      Replace the -specs cgcc option with -target
+      Make show_symbol newline-consistent
+      Handle a terminal -o option properly.
+      Looks more evident this way.
+      Mark handle_switch as static and don't export it from lib.h
+      Handle missing argument to -D.
+      Gdb macros to get a better look at some sparse data structures.
+      A slightly edited irc discussion with Josh Triplett.
+      Warning should be enough for an unhandled transparent union
+      Set gcc include path at runtime.
+      Let cgcc pass -gcc-base-dir to sparse.
+      Document -gcc-base-dir in sparse.1
+      Rename dirafter to idirafter.
+      Let void have sizeof 1
+      Also warn about sizeof(function)
+
+Blue Swirl (6):
+      Sparc64 (Sparc V9, LP64) support
+      OpenBSD support
+      Ignore attribute __bounded__, used by OpenBSD headers.
+      Add c{l,t}z{,l,ll}, ffsl{,l}, popcountll and floating point
+comparison builtins.
+      Add support for TImode type (__int128_t)
+      Define __LP64__ for x86_64 unless in 32 bit mode
+
+Christopher Li (11):
+      Evaluate iterator symbols
+      Remove pre_buffer
+      Add enum member list to the parent
+      Teach classify_type to handle typeof
+      Warn about explicit usage of sizeof(void)
+      Makefile automatic header dependency
+      Clean up Makefile long lines
+      Update the validation check for ftabstop=
+      Add validation for restrict and attribute warning
+      move extern inline function to file scope
+      Sparse 0.4.2
+
+David Given (2):
+      Unhardcode byte size being 8 bits.
+      Add type information to struct instruction.
+
+Geoff Johnstone (4):
+      Add support for GCC's -std=... and -ansi command line options.
+      Add builtin functions for use with __FORTIFY_SOURCE
+      Fix type mismatches with incomplete types
+      Add -Wno-declaration-after-statement
+
+Hannes Eder (4):
+      Add -ftabstop=WIDTH
+      refactor handle_switch_f
+      test-suite: be more verbose on 'unhandled' and 'known to fail' tests
+      test-suite: integrate unhandled proprocessor tests
+
+Johannes Berg (8):
+      cgcc: handle ppc arch
+      make sparse keep its promise about context tracking
+      sparse test suite: add test mixing __context__ and
+__attribute__((context(...)))
+      sparse: simple conditional context tracking
+      inlined call bugfix & test
+      improve -Wcontext code and messages
+      fix bug in context tracking code
+      Revert the context tracking code
+
+Josh Triplett (2):
+      Add test case for new warning about !x & y
+      Expand "dubious !x & y" handling to other combinations of !, &, and |.
+
+Kamil Dudka (4):
+      compile-i386: do not generate an infinite loop
+      linearize.h: sanitize header
+      unssa: track uses when replacing a phi node
+      make sparse headers self-compilable...
+
+Linus Torvalds (5):
+      Fix cast instruction generation
+      Simplify (and warn about) right shifts that result in zero
+      Allow array declarators to have 'restrict' in them
+      Turn off '-Wtransparent-union' by default
+      Avoid "attribute 'warning': unknown attribute" warning
+
+Martin Nagy (3):
+      .gitignore: Ignore dependencies and Vim swap files
+      Add missing checks for Waddress-space
+      Print an error if typeof() lacks an argument
+
+Pavel Roskin (1):
+      Ignore "cold" and "hot" attributes, which appeared in gcc 4.3
+
+Pekka Enberg (1):
+      sparse: Add GCC pre-defined macros for user-space
+
+Ramsay Jones (1):
+      Makefile: suppress error message from pkg-config
+
+Reinhard Tartler (1):
+      show_token: handle TOKEN_UNTAINT and TOKEN_ARG_COUNT types
+
+Samuel Bronson (1):
+      Have Makefile import local.mk if it exists.
+
+Thomas Schmid (1):
+      Fix implicit cast to float
+
+Vegard Nossum (2):
+      Fix use of invalid file descriptor
+      Set *tree to NULL on error
