@@ -1,74 +1,65 @@
 From: Dan McGee <dan@archlinux.org>
-Subject: 'make install' target issues
-Date: Tue, 27 Oct 2009 19:37:45 -0500
-Message-ID: <449c10960910271737s4acf67dfsf29daf25fed9b53b@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] Makefile: fix permissions mixup on install
+Date: Tue, 27 Oct 2009 19:46:08 -0500
+Message-ID: <1256690768-2577-1-git-send-email-dan@archlinux.org>
+References: <449c10960910271737s4acf67dfsf29daf25fed9b53b@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f187.google.com ([209.85.210.187]:50628 "EHLO
-	mail-yx0-f187.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757004AbZJ1Ahk (ORCPT
+Received: from mail-gx0-f212.google.com ([209.85.217.212]:39835 "EHLO
+	mail-gx0-f212.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756995AbZJ1AqJ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 27 Oct 2009 20:37:40 -0400
-Received: by yxe17 with SMTP id 17so250534yxe.33
-        for <linux-sparse@vger.kernel.org>; Tue, 27 Oct 2009 17:37:45 -0700 (PDT)
+	Tue, 27 Oct 2009 20:46:09 -0400
+Received: by gxk4 with SMTP id 4so334606gxk.8
+        for <linux-sparse@vger.kernel.org>; Tue, 27 Oct 2009 17:46:13 -0700 (PDT)
+In-Reply-To: <449c10960910271737s4acf67dfsf29daf25fed9b53b@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: Dan McGee <dan@archlinux.org>
 
-I was updating the PKGBUILD for sparse for Arch Linux in the AUR
-tonight (http://aur.archlinux.org/packages.php?ID=11999), and I
-noticed something odd- all files were getting installed with 755
-permissions, including headers, .a libraries, etc. It looks like the
-following commit is the offender:
+`install` by default uses 755 permissions; for everything but executables we
+want to use 644 permissions.
 
-commit bb54f9a83eaa7c683e292a90fdfeebb54381c313
-Author: Christopher Li <sparse@chrisli.org>
-Date:   Fri Dec 26 01:37:01 2008 -0800
-Subject: Clean up Makefile long lines
+Signed-off-by: Dan McGee <dan@archlinux.org>
+---
+ Makefile |   15 +++++++++------
+ 1 files changed, 9 insertions(+), 6 deletions(-)
 
-Is there something I am missing? By default, the install program
-installs all files with rwxr-xr-x. I'd be happy to submit a patch to
-fix this.
+diff --git a/Makefile b/Makefile
+index 571673e..f6b0d2c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -79,9 +79,12 @@ QUIET_LINK    = $(Q:@=@echo    '     LINK     '$@;)
+ QUIET_INST_SH = $(Q:@=echo -n  '     INSTALL  ';)
+ QUIET_INST    = $(Q:@=@echo -n '     INSTALL  ';)
+ 
+-define INSTALL_CMD
++define INSTALL_PROG
+ 	$(Q)$(QUIET_INST_SH)install -v $1 $(DESTDIR)$2/$1 || exit 1;
++endef
+ 
++define INSTALL_OTHER
++	$(Q)$(QUIET_INST_SH)install -v -m 644 $1 $(DESTDIR)$2/$1 || exit 1;
+ endef
+ 
+ SED_PC_CMD = 's|@version@|$(VERSION)|g;		\
+@@ -103,11 +106,11 @@ install: $(INST_PROGRAMS) $(LIBS) $(LIB_H) sparse.pc
+ 	$(Q)install -d $(DESTDIR)$(MAN1DIR)
+ 	$(Q)install -d $(DESTDIR)$(INCLUDEDIR)/sparse
+ 	$(Q)install -d $(DESTDIR)$(PKGCONFIGDIR)
+-	$(foreach f,$(INST_PROGRAMS),$(call INSTALL_CMD,$f,$(BINDIR)))
+-	$(foreach f,$(INST_MAN1),$(call INSTALL_CMD,$f,$(MAN1DIR)))
+-	$(foreach f,$(LIBS),$(call INSTALL_CMD,$f,$(LIBDIR)))
+-	$(foreach f,$(LIB_H),$(call INSTALL_CMD,$f,$(INCLUDEDIR)/sparse))
+-	$(call INSTALL_CMD,sparse.pc,$(PKGCONFIGDIR))
++	$(foreach f,$(INST_PROGRAMS),$(call INSTALL_PROG,$f,$(BINDIR)))
++	$(foreach f,$(INST_MAN1),$(call INSTALL_OTHER,$f,$(MAN1DIR)))
++	$(foreach f,$(LIBS),$(call INSTALL_OTHER,$f,$(LIBDIR)))
++	$(foreach f,$(LIB_H),$(call INSTALL_OTHER,$f,$(INCLUDEDIR)/sparse))
++	$(call INSTALL_OTHER,sparse.pc,$(PKGCONFIGDIR))
+ 
+ sparse.pc: sparse.pc.in
+ 	$(QUIET_GEN)sed $(SED_PC_CMD) sparse.pc.in > sparse.pc
+-- 
+1.6.5.1
 
--Dan
-
-
-$ tar tvf /home/makepkg/packages/sparse-0.4.2-1-x86_64.pkg.tar.gz
--rw-r--r-- root/root       477 2009-10-27 19:37 .PKGINFO
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/include/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/share/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/lib/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/bin/
--rwxr-xr-x root/root    279776 2009-10-27 19:37 usr/bin/sparse
--rwxr-xr-x root/root    217280 2009-10-27 19:37 usr/bin/c2xml
--rwxr-xr-x root/root      9475 2009-10-27 19:37 usr/bin/cgcc
--rwxr-xr-x root/root    584320 2009-10-27 19:37 usr/lib/libsparse.a
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/lib/pkgconfig/
--rwxr-xr-x root/root       167 2009-10-27 19:37 usr/lib/pkgconfig/sparse.pc
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/share/licenses/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/share/man/
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/share/man/man1/
--rwxr-xr-x root/root      3401 2009-10-27 19:37 usr/share/man/man1/sparse.1.gz
--rwxr-xr-x root/root       565 2009-10-27 19:37 usr/share/man/man1/cgcc.1.gz
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/share/licenses/sparse/
--rw-r--r-- root/root     11013 2009-10-27 19:37
-usr/share/licenses/sparse/LICENSE
-drwxr-xr-x root/root         0 2009-10-27 19:37 usr/include/sparse/
--rwxr-xr-x root/root       768 2009-10-27 19:37 usr/include/sparse/dissect.h
--rwxr-xr-x root/root      8771 2009-10-27 19:37 usr/include/sparse/ptrlist.h
--rwxr-xr-x root/root      1749 2009-10-27 19:37 usr/include/sparse/storage.h
--rwxr-xr-x root/root      2269 2009-10-27 19:37 usr/include/sparse/allocate.h
--rwxr-xr-x root/root      1392 2009-10-27 19:37 usr/include/sparse/flow.h
--rwxr-xr-x root/root       713 2009-10-27 19:37 usr/include/sparse/compat.h
--rwxr-xr-x root/root      3521 2009-10-27 19:37 usr/include/sparse/ident-list.h
--rwxr-xr-x root/root      1436 2009-10-27 19:37 usr/include/sparse/bitmap.h
--rwxr-xr-x root/root      7065 2009-10-27 19:37 usr/include/sparse/linearize.h
--rwxr-xr-x root/root       993 2009-10-27 19:37 usr/include/sparse/target.h
--rwxr-xr-x root/root      5273 2009-10-27 19:37 usr/include/sparse/expression.h
--rwxr-xr-x root/root       951 2009-10-27 19:37 usr/include/sparse/scope.h
--rwxr-xr-x root/root     10363 2009-10-27 19:37 usr/include/sparse/symbol.h
--rwxr-xr-x root/root      6005 2009-10-27 19:37 usr/include/sparse/lib.h
--rwxr-xr-x root/root      3555 2009-10-27 19:37 usr/include/sparse/parse.h
--rwxr-xr-x root/root      4934 2009-10-27 19:37 usr/include/sparse/token.h
