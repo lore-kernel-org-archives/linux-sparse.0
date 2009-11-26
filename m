@@ -1,45 +1,47 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Getting info from used typedef
-Date: Wed, 25 Nov 2009 15:15:50 +0100
-Message-ID: <OF00751164.A668C764-ONC1257679.004B0F96-C1257679.004E5AEF@br-automation.com>
-References: <70318cbf0910011141r78e02d78qbb7ab4f183253406@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] sparse: Add more ignored attributes
+Date: Wed, 25 Nov 2009 16:54:23 -0800
+Message-ID: <70318cbf0911251654k234b88f6we5872915a470a40a@mail.gmail.com>
+References: <200911251429.18554.mb@bu3sch.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.br-automation.com ([213.33.116.61]:64883 "EHLO
-	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964900AbZKYOat (ORCPT
+Received: from ey-out-2122.google.com ([74.125.78.24]:30434 "EHLO
+	ey-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754184AbZKZAyS convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 25 Nov 2009 09:30:49 -0500
-In-Reply-To: <70318cbf0910011141r78e02d78qbb7ab4f183253406@mail.gmail.com>
+	Wed, 25 Nov 2009 19:54:18 -0500
+Received: by ey-out-2122.google.com with SMTP id 4so89404eyf.19
+        for <linux-sparse@vger.kernel.org>; Wed, 25 Nov 2009 16:54:23 -0800 (PST)
+In-Reply-To: <200911251429.18554.mb@bu3sch.de>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, linux-sparse-owner@vger.kernel.org
+To: Michael Buesch <mb@bu3sch.de>
+Cc: Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
-Hello,
+On Wed, Nov 25, 2009 at 5:29 AM, Michael Buesch <mb@bu3sch.de> wrote:
+> + =A0 =A0 =A0 { "externally_visible", NS_KEYWORD, =A0 =A0 .op =3D &ig=
+nore_attr_op },
+> + =A0 =A0 =A0 { "__externally_visible__", =A0 =A0 NS_KEYWORD, =A0 =A0=
+ .op =3D &ignore_attr_op },
+> + =A0 =A0 =A0 { "signal", =A0 =A0 NS_KEYWORD, =A0 =A0 .op =3D &ignore=
+_attr_op },
+> + =A0 =A0 =A0 { "__signal__", NS_KEYWORD, =A0 =A0 .op =3D &ignore_att=
+r_op },
 
-I try to get information about a typedef, which was used in a declaration.
+Can you update your patch base on the chrisl branch?
+git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
 
-For example:
+In the new code you just need to add the attribute name to ignored_attr=
+ibutes
+array.
 
-typedef signed short INT;
-INT var1;
+Thanks
 
-When i iterate over the symbol_list which is returend by sparse(), I can 
-get the information,
-that "var1" was declared using a typedef, this information is held in 
-"symbol->ctype.modifiers".
-Can you tell me how I can examine the name of the typedef - "INT", which 
-was used in the declaration?
-I'm only able to get the name of the basic datatype, which is "signed 
-short" in this case.
-
-This behaviour has changed in 0.4.2, in former versions the name of a used 
-typedef was stored in the used datatypes ident
-(altough the behaviour was erroneous there).
-
-Thanks in advance,
-regards,
-Thomas
-
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
