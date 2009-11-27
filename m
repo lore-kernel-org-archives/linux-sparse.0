@@ -1,56 +1,25 @@
-From: Michael Buesch <mb@bu3sch.de>
-Subject: [PATCH] sparse: Add more ignored attributes
-Date: Thu, 26 Nov 2009 12:03:26 +0100
-Message-ID: <200911261203.27745.mb@bu3sch.de>
+From: aaa bbb <ilana90@013net.net>
+Subject: Hello
+Date: Fri, 27 Nov 2009 23:36:17 +0000 (GMT)
+Message-ID: <f709a0203712.4b106271__46940.8521581956$1259384577$gmane$org@netvision.net.il>
+Reply-To: missojita@rediffmail.com
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bu3sch.de ([62.75.166.246]:52117 "EHLO vs166246.vserver.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751944AbZKZLET (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Nov 2009 06:04:19 -0500
-Content-Disposition: inline
+Received: from mxout5.netvision.net.il ([194.90.9.29]:27763 "EHLO
+	mxout5.netvision.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750756AbZK1FCQ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 28 Nov 2009 00:02:16 -0500
+Content-language: en
+Content-disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
-
-This adds more ignored gcc-style attributes.
-
-externally_visible is a standard gcc attribute.
-signal is an AVR8 attribute used to define interrupt service routines.
-
-Ignore these attributes, as they are currently not useful for sparse checking.
-
-Signed-off-by: Michael Buesch <mb@bu3sch.de>
-
----
-
-Index: sparse-dev/parse.c
-===================================================================
---- sparse-dev.orig/parse.c	2009-11-26 12:02:13.000000000 +0100
-+++ sparse-dev/parse.c	2009-11-26 12:02:18.000000000 +0100
-@@ -505,6 +505,8 @@ const char *ignored_attributes[] = {
- 	"__dllexport__",
- 	"dllimport",
- 	"__dllimport__",
-+	"externally_visible",
-+	"__externally_visible__",
- 	"fastcall",
- 	"__fastcall__",
- 	"format",
-@@ -537,6 +539,8 @@ const char *ignored_attributes[] = {
- 	"__section__",
- 	"sentinel",
- 	"__sentinel__",
-+	"signal",
-+	"__signal__",
- 	"stdcall",
- 	"__stdcall__",
- 	"syscall_linkage",
 
 
--- 
-Greetings, Michael.
+
+Hello
+How are you today? I hope you are fine.If so thank be to God almighty.My name is Miss Ojita,26 years, single girl looking for honest and nice person. whom i can partner with. i have the sum of $7,000,000.00(Seven Million US Dollars) which i intend to use for business purpose.I would like to know you more,most especially what you like and what you dislike, I don't care about your colour or ethnicity, I'm sending you this beautiful mail, with a wish for much happiness.I am looking forward to hear from you,
+Love from,
+Ojita
