@@ -1,25 +1,29 @@
-From: aaa bbb <ilana90@013net.net>
-Subject: Hello
-Date: Fri, 27 Nov 2009 23:36:17 +0000 (GMT)
-Message-ID: <f709a0203712.4b106271__46940.8521581956$1259384577$gmane$org@netvision.net.il>
-Reply-To: missojita@rediffmail.com
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] sparse: Add more ignored attributes
+Date: Fri, 27 Nov 2009 23:09:39 -0800
+Message-ID: <70318cbf0911272309s361fe32eqcaaf865fc9946994@mail.gmail.com>
+References: <200911261203.27745.mb@bu3sch.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mxout5.netvision.net.il ([194.90.9.29]:27763 "EHLO
-	mxout5.netvision.net.il" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750756AbZK1FCQ (ORCPT
+Received: from ey-out-2122.google.com ([74.125.78.27]:59102 "EHLO
+	ey-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751096AbZK1HJd (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 28 Nov 2009 00:02:16 -0500
-Content-language: en
-Content-disposition: inline
+	Sat, 28 Nov 2009 02:09:33 -0500
+Received: by ey-out-2122.google.com with SMTP id 25so283340eya.5
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2009 23:09:39 -0800 (PST)
+In-Reply-To: <200911261203.27745.mb@bu3sch.de>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Michael Buesch <mb@bu3sch.de>
+Cc: Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
+On Thu, Nov 26, 2009 at 3:03 AM, Michael Buesch <mb@bu3sch.de> wrote:
+> This adds more ignored gcc-style attributes.
+>
+Applied with slightly modified title.
 
+Thanks!
 
-Hello
-How are you today? I hope you are fine.If so thank be to God almighty.My name is Miss Ojita,26 years, single girl looking for honest and nice person. whom i can partner with. i have the sum of $7,000,000.00(Seven Million US Dollars) which i intend to use for business purpose.I would like to know you more,most especially what you like and what you dislike, I don't care about your colour or ethnicity, I'm sending you this beautiful mail, with a wish for much happiness.I am looking forward to hear from you,
-Love from,
-Ojita
+Chris
