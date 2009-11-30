@@ -1,45 +1,31 @@
-From: Michael Buesch <mb@bu3sch.de>
-Subject: [PATCH] Ignore "naked" attribute
-Date: Sun, 29 Nov 2009 23:59:12 +0100
-Message-ID: <200911292359.13785.mb@bu3sch.de>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Ignore "naked" attribute
+Date: Mon, 30 Nov 2009 15:24:57 -0800
+Message-ID: <70318cbf0911301524p2cca13l3ee61bbf19d446bf@mail.gmail.com>
+References: <200911292359.13785.mb@bu3sch.de>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bu3sch.de ([62.75.166.246]:43188 "EHLO vs166246.vserver.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750956AbZK2W7s (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 29 Nov 2009 17:59:48 -0500
-Content-Disposition: inline
+Received: from ey-out-2122.google.com ([74.125.78.25]:56037 "EHLO
+	ey-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752753AbZK3XYw (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 30 Nov 2009 18:24:52 -0500
+Received: by ey-out-2122.google.com with SMTP id 4so1061356eyf.19
+        for <linux-sparse@vger.kernel.org>; Mon, 30 Nov 2009 15:24:57 -0800 (PST)
+In-Reply-To: <200911292359.13785.mb@bu3sch.de>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Michael Buesch <mb@bu3sch.de>
 Cc: linux-sparse@vger.kernel.org
 
-The GCC "naked" attribute is used on certain architectures to generate
-functions without a prologue/epilogue.
+On Sun, Nov 29, 2009 at 2:59 PM, Michael Buesch <mb@bu3sch.de> wrote:
+> The GCC "naked" attribute is used on certain architectures to generate
+> functions without a prologue/epilogue.
+>
+> Ignore it in sparse.
+Applied.
 
-Ignore it in sparse.
+Thanks,
 
-Signed-off-by: Michael Buesch <mb@bu3sch.de>
-
-
----
- parse.c |    2 ++
- 1 file changed, 2 insertions(+)
-
---- sparse-dev.orig/parse.c
-+++ sparse-dev/parse.c
-@@ -521,6 +521,8 @@ const char *ignored_attributes[] = {
- 	"__model__",
- 	"ms_abi",
- 	"__ms_abi__",
-+	"naked",
-+	"__naked__",
- 	"no_instrument_function",
- 	"__no_instrument_function__",
- 	"noinline",
-
--- 
-Greetings, Michael.
+Chris
