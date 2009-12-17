@@ -1,79 +1,47 @@
 From: rubisher <rubisher@scarlet.be>
-Subject: Re: sparse 0.4.2: cgcc issue
-Date: Tue, 08 Dec 2009 19:03:37 +0000
-Message-ID: <4B1EA309.7050106@scarlet.be>
-References: <4B1AE007.8000509@scarlet.be> <4B1B9D2A.6080804@scarlet.be>	 <70318cbf0912070110ic52222xbb7c7be5829129f9@mail.gmail.com>	 <f43fc5580912071004r1df4949p5ce0003017b82d5b@mail.gmail.com> <70318cbf0912071847s5dc57120v437ae6ea3131b143@mail.gmail.com>
+Subject: cgcc and REAL_CC help
+Date: Thu, 17 Dec 2009 09:15:46 +0000
+Message-ID: <4B29F6C2.7040800@scarlet.be>
 Mime-Version: 1.0
-Content-Type: multipart/mixed;
- boundary="------------040109030802000508010607"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from sif.is.scarlet.be ([193.74.71.28]:55450 "EHLO sif.is.scarlet.be"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965777AbZLHTDg (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 8 Dec 2009 14:03:36 -0500
-In-Reply-To: <70318cbf0912071847s5dc57120v437ae6ea3131b143@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Blue Swirl <blauwirbel@gmail.com>, linux-sparse@vger.kernel.org
-
-This is a multi-part message in MIME format.
---------------040109030802000508010607
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from hel.is.scarlet.be ([193.74.71.26]:34929 "EHLO hel.is.scarlet.be"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755885AbZLQJPv (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 17 Dec 2009 04:15:51 -0500
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-> On Mon, Dec 7, 2009 at 10:04 AM, Blue Swirl <blauwirbel@gmail.com> wrote:
->> My Perl skills are not very bright, but the suggested patch
->> (http://marc.info/?l=linux-sparse&m=126010091922942&w=2) looks
->> correct.
-> 
-> Same here.
-> 
-> Rubisher, can you please send me a Signed-Off-By: line for the patch
-> you submit?
-> 
-> Thanks
-> 
-> Chris
-> 
-if that could help you:
+Hello all,
 
-a possible fix to cgcc issue in sparse 0.4.2:
-	Use of uninitialized value $bits in exists at /usr/bin/cgcc line 139.
-	/usr/bin/cgcc: weird number of bits. at /usr/bin/cgcc line 139.
+May be can I ask you some more help.
 
-Signed-off-by: Joel Soete <rubisher@scarlet.be>
+I trying to sparse a bit grub2 code but at some moment make call a sript wich failled with following error:
+genkernsyms.sh: line 23: REAL_CC=gcc-4.4: command not found
 
---- cgcc.orig	2009-11-28 17:41:28.000000000 +0000
-+++ cgcc	2009-12-06 11:55:32.000000000 +0000
-@@ -133,7 +133,7 @@
-      my @types = (['SCHAR',''], ['SHRT',''], ['INT',''], ['LONG','L'], ['LONG_LONG','LL'], ['LONG_LONG_LONG','LLL']);
+this shell script is:
+### The configure script will replace these variables.
 
-      my $result = " -D__CHAR_BIT__=$char";
--    while (@types) {
-+    while (@types && @_) {
-  	my $bits = shift @_;
-  	my ($name,$suffix) = @{ shift @types };
-  	die "$0: weird number of bits." unless exists $pow2m1{$bits};
-=== <> ===
+: ${srcdir=/Sources/jso/Deb.grub2/exp-wrk1}
+: ${CC=REAL_CC=gcc-4.4 /usr/bin/cgcc}
 
-Also attached in case of mail client issue
+u=
+grep "^#define HAVE_ASM_USCORE" config.h >/dev/null 2>&1 && u="_"
 
-Tx a lot,
-     J.
+$CC -O0 -DGRUB_MACHINE_IEEE1275=1 -m32 -fno-stack-protector -Wbitwise -Wnon-pointer-null -DGRUB_SYMBOL_GENERATOR=1 -E -I. 
+-Iinclude
+-I"$srcdir/include" $* \
+   | grep -v '^#' \
+   | sed -n \
+         -e '/EXPORT_FUNC *([a-zA-Z0-9_]*)/{s/.*EXPORT_FUNC *(\([a-zA-Z0-9_]*\)).*/'"$u"'\1 kernel/;p;}' \
+         -e '/EXPORT_VAR *([a-zA-Z0-9_]*)/{s/.*EXPORT_VAR *(\([a-zA-Z0-9_]*\)).*/'"$u"'\1 kernel/;p;}' \
+   | sort -u
 
---------------040109030802000508010607
-Content-Type: application/x-gzip;
- name="CGCC.diff.gz"
-Content-Transfer-Encoding: base64
-Content-Disposition: inline;
- filename="CGCC.diff.gz"
+Any idea how should I fix it?
 
-H4sICHWiHksAA0NHQ0MuZGlmZgBlT11rwjAUfba/4lCKVdpI087pKkL2AVMQB863MYLWVANW
-pWlRkf33JXYqzPuQ3PNx70kIIUiWSdLa5nJZC4PgiVBKwi5oJ36gcdhtBZeCZ07L87zzxJ85
-JMEjKI3b7TgK78yMgdAo8jvwqosxC6ayI1hx3AmFPhpf7ufr4Hni+q777UOjwWR6BcPxrR99
-jN81GN0Qv1D/uZuglWbPwjXXyYUq14UOtkHeODfR/GU45bzvJKtZbvcsYqz7lVwLNKpnNnGy
-vDsW9ToYNxpqZvNcFuZDaiXTQgu9im44m1kmfEeVaSoPTW1gp4unWvNjnAspYDtBjL2Q+QKb
-MpuLHNsUZmvLRrlZC6UgDlLpFGe33YcZPZ0z9fwvyU/n38kBAAA=
---------------040109030802000508010607--
+Tia,
+	J.
+
+PS: I am runing a debian unstable with bash 4.0-7 dpkg as shell.
