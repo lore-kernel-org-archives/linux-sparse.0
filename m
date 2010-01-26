@@ -1,88 +1,50 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: Re: Sparse licensing
-Date: Thu, 21 Jan 2010 15:08:05 +0300
-Message-ID: <a63d67fe1001210408v34d47494m980e291df690319f@mail.gmail.com>
-References: <20090702214349.GA19009@feather> <4A4D3468.1010202@garzik.org>
-	 <20090702230836.GI19009@feather>
+From: Thomas Schmid <Thomas.Schmid@br-automation.com>
+Subject: Re: Re: Re: Re: Getting info from used typedef
+Date: Tue, 26 Jan 2010 16:28:07 +0100
+Message-ID: <OFCC691C46.FB86BED9-ONC12576B7.0053EA67-C12576B7.0054F94E@br-automation.com>
+References: <70318cbf0910011141r78e02d78qbb7ab4f183253406@mail.gmail.com>	 <OF00751164.A668C764-ONC1257679.004B0F96-C1257679.004E5AEF@br-automation.com>
+	 <70318cbf0911301541i478a4642k54423fd8ac5e83ec@mail.gmail.com>	 <OFBC143B24.B977DCC6-ONC125767F.0037DE90-C125767F.0044B96C@br-automation.com>
+	 <70318cbf0912011049w4cab5e4qa74a15371511c8a4@mail.gmail.com>	 <OF83C748CA.F60373EF-ONC1257680.004D070F-C1257680.004D7110@br-automation.com> <70318cbf1001201638g4b8708e0v94160b64ed2aa854@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="US-ASCII"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-px0-f182.google.com ([209.85.216.182]:55568 "EHLO
-	mail-px0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752297Ab0AUMIG (ORCPT
+Received: from mail2.br-automation.com ([213.33.116.61]:52203 "EHLO
+	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751984Ab0AZPnO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 21 Jan 2010 07:08:06 -0500
-Received: by pxi12 with SMTP id 12so6519980pxi.33
-        for <linux-sparse@vger.kernel.org>; Thu, 21 Jan 2010 04:08:05 -0800 (PST)
-In-Reply-To: <20090702230836.GI19009@feather>
+	Tue, 26 Jan 2010 10:43:14 -0500
+In-Reply-To: <70318cbf1001201638g4b8708e0v94160b64ed2aa854@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: Jeff Garzik <jeff@garzik.org>, linux-sparse@vger.kernel.org, madcoder@debian.org, lool@dooz.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, linux-sparse-owner@vger.kernel.org
 
-On 7/3/09, Josh Triplett <josh@kernel.org> wrote:
-> On Thu, Jul 02, 2009 at 06:27:52PM -0400, Jeff Garzik wrote:
->> Can you weigh in on the licensing threads, pretty please?  That is
->> still blocked on you, AFAIK.
->
-> Sure.
->
-> For my part, I'd *love* to see Sparse relicensed to something more
-> palatable.  Ideally, I'd love to see Sparse become GPL-compatible.  I'd
-> prefer a stronger copyleft over a weaker one.
->
-> I have no problem with relicensing Sparse to any of the following
-> licenses, in rough order of preference:
->
-> - GPL (v2 or v3, with or without "or any later version")
-> - LGPL (v2.1 or v3, with or without "or any later version")
-> - Either of the above with some kind of additional exception similar to
->   those used for GCC and related libraries.
-> - Any of the above dual-licensed with the OSL, if people care about
->   preserving that for some reason.  Seems unnecessarily complex to do
->   so, though.
->
-> I'd prefer not to see Sparse relicensed to something entirely
-> non-copyleft like the MIT license, but if the rest of the Sparse
-> community wants that for some reason, I won't stand in the way.
->
-> If you need any more formal approval from me, please let me know.
->
-> Thanks,
-> Josh Triplett
-> --
+linux-sparse-owner@vger.kernel.org schrieb am 21.01.2010 01:38:09:
 
-I'm not a lawyer or anything.  Does this mean we're done?  Can the
-Debian people move sparse out of non-free?  Can I re-license smatch?
+> I took another look into it. I think if you are just working on the
+> source code transform,
+> you should be able to skip the evaluation step which short cut the 
+typedef.
+> 
+> Can you try again with the same patch, but in your program, using
+> __sparse(filename)
+> instead of sparse(filename) to get the symbols? Using __sparse will skip 
+the
+> evaluation step. It should keep the typedef node unchanged.
 
-I used the following command to find who might have to sign off.
+Yes, that seems to help, thank you very much.
+I think because of the missing evaluation step, it is now a little bit 
+more tricky 
+to get out the elements of an struct or enum, but it will work.
+Do I lose anything else, skipping the evaluation step?
 
-git log 1bcc92138dcdf718dc3e0c694565f56e669d6ee3 master | grep Author
-| cut -d : -f 2- | cut -d '<' -f 1 | sort | uniq -c | sort -n | less
+Is it possible to commit your change (
+0001-hacking-preserve-typedef-name.patch) in source?
+- I didn't recognize any change in behaviour when using the function 
+sparse().
 
-Here are the list of people with other 5 commits.  Maybe you should
-need at least 10 to get a vote?
 
-      6  Blue Swirl
-      6  Kamil Dudka
-      6  Michael Stefaniuc
-      7  Alexey Dobriyan
-      7  Damien Lespiau
-      7  terra@gnome.org
-      8  Arnaldo Carvalho de Melo
-      8  Johannes Berg
-      9  Dave Olien
-     12  Pavel Roskin
-     16  Alexey Zaytsev
-     16  Oleg Nesterov
-     20  Luc Van Oostenryck
-     45  Alexander Viro
-     45  Jeff Garzik
-     69  Christopher Li
-     75  welinder@troll.com
-    124  Al Viro
-    195  Josh Triplett
-   1250  Linus Torvalds
+Regards
+Tom
 
-regards,
-dan carpenter
+
