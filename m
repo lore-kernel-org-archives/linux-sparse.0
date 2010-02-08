@@ -1,37 +1,45 @@
-From: Thomas Schmid <Thomas.Schmid@br-automation.com>
-Subject: Re: Re: Re: Re: Re: Getting info from used typedef
-Date: Tue, 2 Feb 2010 09:52:12 +0100
-Message-ID: <OFA331B5BF.6AEF491A-ONC12576BE.003038A0-C12576BE.0030B9D2@br-automation.com>
-References: <70318cbf0910011141r78e02d78qbb7ab4f183253406@mail.gmail.com>	 <OF00751164.A668C764-ONC1257679.004B0F96-C1257679.004E5AEF@br-automation.com>
-	 <70318cbf0911301541i478a4642k54423fd8ac5e83ec@mail.gmail.com>	 <OFBC143B24.B977DCC6-ONC125767F.0037DE90-C125767F.0044B96C@br-automation.com>
-	 <70318cbf0912011049w4cab5e4qa74a15371511c8a4@mail.gmail.com>	 <OF83C748CA.F60373EF-ONC1257680.004D070F-C1257680.004D7110@br-automation.com>
-	 <70318cbf1001201638g4b8708e0v94160b64ed2aa854@mail.gmail.com>	 <OFCC691C46.FB86BED9-ONC12576B7.0053EA67-C12576B7.0054F94E@br-automation.com> <70318cbf1001281721p1b0df85ey63e58062dd7d809@mail.gmail.com>
+From: Dan Carpenter <error27@gmail.com>
+Subject: typedefs and alignment
+Date: Mon, 8 Feb 2010 13:35:55 +0300
+Message-ID: <20100208103501.GA14210@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="US-ASCII"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail2.br-automation.com ([213.33.116.61]:45855 "EHLO
-	mail2.br-automation.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753341Ab0BBIwR (ORCPT
+Received: from mail-fx0-f211.google.com ([209.85.220.211]:33309 "EHLO
+	mail-fx0-f211.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755423Ab0BHKgJ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 2 Feb 2010 03:52:17 -0500
-In-Reply-To: <70318cbf1001281721p1b0df85ey63e58062dd7d809@mail.gmail.com>
+	Mon, 8 Feb 2010 05:36:09 -0500
+Received: by fxm3 with SMTP id 3so7410220fxm.39
+        for <linux-sparse@vger.kernel.org>; Mon, 08 Feb 2010 02:36:08 -0800 (PST)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, linux-sparse-owner@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-linux-sparse-owner@vger.kernel.org schrieb am 29.01.2010 02:21:18:
+I've found an issue handling typedefs and alignment.  In the appended 
+code sparse things 'ptr' has to be aligned so the size of 'bar' is 1024.
+I haven't looked at how to fix this at all, I thought I would ask the
+experts for hints first.
 
-> Christopher Li <sparse@chrisli.org> 
-> > Is it possible to commit your change (
-> > 0001-hacking-preserve-typedef-name.patch) in source?
-> > - I didn't recognize any change in behaviour when using the function
-> > sparse().
-> 
-> How about make it an hidden options? It does not make sense for compiler
-> to care about the typedef name. I will send out a review later.
-Sounds good to me.
+regards,
+dan carpenter
 
-Regards 
-Thomas
+#include <stdio.h>
 
+typedef struct aligned_struct {
+	int a;
+}  __attribute__ ((aligned(1024))) ali_t;
+
+struct foo {
+	int b;
+	ali_t *ptr;
+};
+
+int mainx(void)
+{
+	struct foo bar;
+
+	printf("%d\n", sizeof(bar));
+	return 0;
+}
