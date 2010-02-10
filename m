@@ -1,116 +1,87 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 01/14] ARM: LPC32XX: Initial architecture header files
-Date: Tue, 9 Feb 2010 10:22:12 -0800
-Message-ID: <20100209182210.GB23822@feather>
-References: <1265674295-23996-1-git-send-email-wellsk40@gmail.com>
- <1265674295-23996-2-git-send-email-wellsk40@gmail.com>
- <20100209093129.GA2284@pengutronix.de>
- <20100209095934.GA11534@n2100.arm.linux.org.uk>
- <20100209165223.GA11113@pengutronix.de>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: typedefs and alignment
+Date: Tue, 9 Feb 2010 17:36:27 -0800
+Message-ID: <70318cbf1002091736s3ca92377pfc97c2fcf9e15478@mail.gmail.com>
+References: <20100208103501.GA14210@bicker>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:44592 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751138Ab0BISrm (ORCPT
+Received: from mail-qy0-f190.google.com ([209.85.221.190]:38805 "EHLO
+	mail-qy0-f190.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755131Ab0BJBnJ convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Feb 2010 13:47:42 -0500
-Received: from relay1-d.mail.gandi.net (relay1-d.mail.gandi.net [217.70.183.193])
-	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 64E7E50C7B
-	for <linux-sparse@vger.kernel.org>; Tue,  9 Feb 2010 19:22:45 +0100 (CET)
-Content-Disposition: inline
-In-Reply-To: <20100209165223.GA11113@pengutronix.de>
+	Tue, 9 Feb 2010 20:43:09 -0500
+Received: by qyk28 with SMTP id 28so1030066qyk.25
+        for <linux-sparse@vger.kernel.org>; Tue, 09 Feb 2010 17:43:08 -0800 (PST)
+In-Reply-To: <20100208103501.GA14210@bicker>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <u.kleine-koenig@pengutronix.de>
-Cc: Russell King - ARM Linux <linux@arm.linux.org.uk>, linux-arm-kernel@lists.infradead.org, wellsk40@gmail.com, linux-sparse@vger.kernel.org
+To: Dan Carpenter <error27@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Tue, Feb 09, 2010 at 05:52:23PM +0100, Uwe Kleine-K=F6nig wrote:
-> [Added linux-sparse@vger.kernel.org to Cc:]
->=20
-> On Tue, Feb 09, 2010 at 09:59:34AM +0000, Russell King - ARM Linux wr=
-ote:
-> > On Tue, Feb 09, 2010 at 10:31:29AM +0100, Uwe Kleine-K=F6nig wrote:
-> > > > +#define io_p2v(x)	((void __iomem *) (unsigned long) IO_ADDRESS=
-(x))
-> > > Is this cast to unsigned long needed?  AFAIK IO_ADDRESS(x) has
-> > > type unsigned for x in { 0x0 ... 0xffffffff } (provided that int =
-uses a
-> > > 32 bit 2s-complement representation).  If unsigned long is really
-> > > needed, maybe put it into the IO_ADDRESS macro?
-> >=20
-> > int -> void __iomem * =3D sparse warning
-> > unsigned long -> void __iomem * =3D no sparse warning
-> Ah, OK, I see.  But IMHO it's a poor reason to add the cast.  Either
-> the cast is necessary/recommended or sparse is wrong.  In the first c=
-ase
-> the reasoning shouldn't have to do with sparse, in the latter sparse
-> should be fixed.
+On Mon, Feb 8, 2010 at 2:35 AM, Dan Carpenter <error27@gmail.com> wrote=
+:
+> I've found an issue handling typedefs and alignment. =A0In the append=
+ed
+> code sparse things 'ptr' has to be aligned so the size of 'bar' is 10=
+24.
+> I haven't looked at how to fix this at all, I thought I would ask the
+> experts for hints first.
+
+Hmm, there is a bug there.
+
+=46or the simplified code:
+
+typedef struct aligned_struct {
+       int a;
+}  __attribute__ ((aligned(1024))) ali_t;
+
+ali_t *ppr;
+
+running test-parsing will show:
+
+=2Ealign 1024
+struct aligned_struct [usertype] *[addressable] [toplevel] ppr
+
+I am looking at it right now.
+
+Chris
+
+
+
 >
-> I found the responsible code in sparse.  It reads:
->=20
-> 	static struct symbol *evaluate_cast(struct expression *expr)
-> 	{
-> 		int as1 =3D 0, as2 =3D 0;
-> 		...
-> 		ctype =3D examine_symbol_type(expr->cast_type);
-> 		...
-> 		class1 =3D classify_type(ctype, &t1);
-> 		...
-> 		if (t1 =3D=3D &ulong_ctype)
-> 			as1 =3D -1;
-> 		else if (class1 =3D=3D TYPE_PTR) {
-> 			examine_pointer_target(t1);
-> 			as1 =3D t1->ctype.as;
-> 		}
-> 	=09
-> 		if (t2 =3D=3D &ulong_ctype)
-> 			as2 =3D -1;
-> 		else if (class2 =3D=3D TYPE_PTR) {
-> 			examine_pointer_target(t2);
-> 			as2 =3D t2->ctype.as;
-> 		}
-> 		...
-> 		if (as1 > 0 && !as2 &&
-> 		    !is_null_pointer_constant(target) && Wcast_to_as)
-> 			warning(expr->pos,
-> 				"cast adds address space to expression (<asn:%d>)", as1);
->=20
-> so it seems to be explicitly allowed to make a pointer in any address
-> space from an unsigned long, but not from a (signed or unsigned) int.
-> Unfortunately there is no comment describing why unsigned long is
-> allowed.
->=20
-> Is this intended?  What is the preferred way to define iomem pointers=
-?
->=20
-> I found the following variants in the kernel[1]
->=20
-> 	#define ...	((void __iomem *)(unsigned long)0x12345678)
-> 	#define ...	((void __iomem __force *)0x12345678)
-> 	#define ...	((void __iomem *)0x12345678)
->=20
-> where __iomem is defined as __attribute__((noderef, address_space(2))=
-)
-> for sparse.
->=20
-> The first variant with the extra cast to unsigned long seems unnecess=
-ary
-> long, the third results in the "cast adds address space to expression=
-"
-> warning.
->=20
-> So what do you recommend?
+> regards,
+> dan carpenter
+>
+> #include <stdio.h>
+>
+> typedef struct aligned_struct {
+> =A0 =A0 =A0 =A0int a;
+> } =A0__attribute__ ((aligned(1024))) ali_t;
+>
+> struct foo {
+> =A0 =A0 =A0 =A0int b;
+> =A0 =A0 =A0 =A0ali_t *ptr;
+> };
 
-I don't know the reasoning behind allowing casts from unsigned long,
-except perhaps to allow creating pointer literals, but explicitly
-casting by way of unsigned long seems wrong.  In general, the couple of
-places that legitimately convert addresses between address spaces shoul=
-d
-use __force.
+It does look wrong. The easier way to expose it
 
-- Josh Triplett
+
+>
+> int mainx(void)
+> {
+> =A0 =A0 =A0 =A0struct foo bar;
+>
+> =A0 =A0 =A0 =A0printf("%d\n", sizeof(bar));
+> =A0 =A0 =A0 =A0return 0;
+> }
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-spars=
+e" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
+>
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
