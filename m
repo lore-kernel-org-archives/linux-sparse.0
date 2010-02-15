@@ -1,71 +1,51 @@
-From: Christopher Li <sparse@chrisli.org>
+From: =?UTF-8?B?SmFjZWsgxZpsaXdlcnNraQ==?= <sliwers@googlemail.com>
 Subject: Re: Defect in linearization of short circuit &&
-Date: Mon, 15 Feb 2010 11:41:11 -0800
-Message-ID: <70318cbf1002151141p35e49f92l73510d09452f56ee@mail.gmail.com>
-References: <4B77FD0F.50401@googlemail.com> <4B78655D.2080007@googlemail.com>
-	 <70318cbf1002141509u4ebc4ef5x51ec41f5f1452a7a@mail.gmail.com>
-	 <4B799CA6.70807@googlemail.com>
+Date: Mon, 15 Feb 2010 21:18:11 +0100
+Message-ID: <4B79AC03.4010608@googlemail.com>
+References: <4B77FD0F.50401@googlemail.com> <4B78655D.2080007@googlemail.com>	 <70318cbf1002141509u4ebc4ef5x51ec41f5f1452a7a@mail.gmail.com>	 <4B799CA6.70807@googlemail.com> <70318cbf1002151141p35e49f92l73510d09452f56ee@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from qw-out-2122.google.com ([74.125.92.25]:64250 "EHLO
-	qw-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756114Ab0BOTlM convert rfc822-to-8bit (ORCPT
+Received: from mail-ew0-f228.google.com ([209.85.219.228]:65368 "EHLO
+	mail-ew0-f228.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756220Ab0BOUSR (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 15 Feb 2010 14:41:12 -0500
-Received: by qw-out-2122.google.com with SMTP id 5so562923qwi.37
-        for <linux-sparse@vger.kernel.org>; Mon, 15 Feb 2010 11:41:12 -0800 (PST)
-In-Reply-To: <4B799CA6.70807@googlemail.com>
+	Mon, 15 Feb 2010 15:18:17 -0500
+Received: by ewy28 with SMTP id 28so661470ewy.28
+        for <linux-sparse@vger.kernel.org>; Mon, 15 Feb 2010 12:18:15 -0800 (PST)
+In-Reply-To: <70318cbf1002151141p35e49f92l73510d09452f56ee@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-2?Q?Jacek_=A6liwerski?= <sliwers@googlemail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org
 
-2010/2/15 Jacek =C5=9Aliwerski <sliwers@googlemail.com>:
-> Christopher Li pisze:
-> =C2=A0 =C2=A0 =C2=A0/*
-> =C2=A0 =C2=A0 =C2=A0 * If the right side is safe and cheaper than a b=
-ranch,
-> =C2=A0 =C2=A0 =C2=A0 * just avoid the branch and turn it into a regul=
-ar binop
-> =C2=A0 =C2=A0 =C2=A0 * style SAFELOGICAL.
-> =C2=A0 =C2=A0 =C2=A0 */
-> =C2=A0 =C2=A0 =C2=A0if (rcost < BRANCH_COST) {
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0expr->type =3D EXPR_B=
-INOP;
-> =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0rcost -=3D BRANCH_COS=
-T - 1;
-> =C2=A0 =C2=A0 =C2=A0}
->
-> After removing these lines, everything works fine.
->
-> But I guess that there must have been a reason to add them in the fir=
-st
-> place. =C2=A0I see it checking the cost of the operation, but I don't=
- know why
-> somebody assumes that it would be safe not to make a branch. Does any=
-body
-> know how to fix it without simply removing these lines?
+Christopher Li pisze:
+> 
+> That is an optimization from Linus. It basically find out the simple variable
+> case comparing variable and turn it into binary operations and avoiding the
+> branch. It is cheaper to use "setne" than "cmp; jne; mov;".
+> 
+> It is safe because all the unsafe operations, e.g. dereferencing memory,
+> should have set the cost high enough to avoid this optimization.
+> e.g. all local variable dereferencing should be safe, because the address
+> is in the stack.
+> 
+> Deferencing a pointer is not, so sparse will not optimize it.
 
-That is an optimization from Linus. It basically find out the simple va=
-riable
-case comparing variable and turn it into binary operations and avoiding=
- the
-branch. It is cheaper to use "setne" than "cmp; jne; mov;".
+Please, check my case.  The condition is:
 
-It is safe because all the unsafe operations, e.g. dereferencing memory=
-,
-should have set the cost high enough to avoid this optimization.
-e.g. all local variable dereferencing should be safe, because the addre=
-ss
-is in the stack.
+if (st && st->other && st->value > i && i > 0)...
 
-Deferencing a pointer is not, so sparse will not optimize it.
+Obviously, if st is NULL, then the execution should be transferred 
+immediately to the else branch.  But it does not.  It skips the second 
+test and goes directly to the third one: st->value > i.  If a compiler 
+was built with sparse as a frontend, execution of the generated code 
+would end up with a segmentation fault.  And this code is perfectly valid.
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So either it is an issue with the costs or it is an issue with the 
+linearization.
+
+Anyway, I believe that this case is worth fixing.
+Jacek
+
