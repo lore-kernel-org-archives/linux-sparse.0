@@ -1,54 +1,53 @@
-From: Christopher Li <sparse@chrisli.org>
+From: =?UTF-8?B?SmFjZWsgxZpsaXdlcnNraQ==?= <sliwers@googlemail.com>
 Subject: Re: Defect in linearization of short circuit &&
-Date: Sun, 14 Feb 2010 15:09:53 -0800
-Message-ID: <70318cbf1002141509u4ebc4ef5x51ec41f5f1452a7a@mail.gmail.com>
-References: <4B77FD0F.50401@googlemail.com> <4B78655D.2080007@googlemail.com>
+Date: Mon, 15 Feb 2010 20:12:38 +0100
+Message-ID: <4B799CA6.70807@googlemail.com>
+References: <4B77FD0F.50401@googlemail.com> <4B78655D.2080007@googlemail.com> <70318cbf1002141509u4ebc4ef5x51ec41f5f1452a7a@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from qw-out-2122.google.com ([74.125.92.26]:17018 "EHLO
-	qw-out-2122.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751654Ab0BNXJy convert rfc822-to-8bit (ORCPT
+Received: from mail-ew0-f228.google.com ([209.85.219.228]:36610 "EHLO
+	mail-ew0-f228.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755797Ab0BOTMq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 14 Feb 2010 18:09:54 -0500
-Received: by qw-out-2122.google.com with SMTP id 5so353081qwi.37
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Feb 2010 15:09:53 -0800 (PST)
-In-Reply-To: <4B78655D.2080007@googlemail.com>
+	Mon, 15 Feb 2010 14:12:46 -0500
+Received: by ewy28 with SMTP id 28so583409ewy.28
+        for <linux-sparse@vger.kernel.org>; Mon, 15 Feb 2010 11:12:42 -0800 (PST)
+In-Reply-To: <70318cbf1002141509u4ebc4ef5x51ec41f5f1452a7a@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-2?Q?Jacek_=A6liwerski?= <sliwers@googlemail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org
 
-2010/2/14 Jacek =C5=9Aliwerski <sliwers@googlemail.com>:
-> Apparently, the issue is not with the linearization. =C2=A0I noticed =
-that the
-> condition has been parsed as:
->
-> EXPR_BINOP
-> =C2=A0* EXPR_LOGICAL
-> =C2=A0 =C2=A0* EXPR_LOGICAL
-> =C2=A0 =C2=A0 =C2=A0 * EXPR_PREOP
-> =C2=A0 =C2=A0 =C2=A0 * EXPR_PREOP
-> =C2=A0 =C2=A0* EXPR_COMPARE
-> =C2=A0* EXPR_COMPARE
->
-> After replacing EXPR_BINOP with EXPR_LOGICAL in the top node of the t=
-ree,
-> the linearization works just fine. =C2=A0Could someone explain me the=
- difference
-> between EXPR_BINOP and EXPR_LOGICAL in this context?
+Christopher Li pisze:
+> 
+> EXPR_BINOP used in normal operation require two operands.
+> e.g.  a + b, a | b
+> Both operands will get evaluated.
+> 
+> EXPR_LOGICAL using for condition branching and it has the short curcit
+> behavior in mind. e.g. a || b
 
-EXPR_BINOP used in normal operation require two operands.
-e.g.  a + b, a | b
-Both operands will get evaluated.
+I found the offending block of code.  It is in expand.c, in function 
+expand_logical:
 
-EXPR_LOGICAL using for condition branching and it has the short curcit
-behavior in mind. e.g. a || b
+       /*
+        * If the right side is safe and cheaper than a branch,
+        * just avoid the branch and turn it into a regular binop
+        * style SAFELOGICAL.
+        */
+       if (rcost < BRANCH_COST) {
+               expr->type = EXPR_BINOP;
+               rcost -= BRANCH_COST - 1;
+       }
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+After removing these lines, everything works fine.
+
+But I guess that there must have been a reason to add them in the first 
+place.  I see it checking the cost of the operation, but I don't know 
+why somebody assumes that it would be safe not to make a branch. Does 
+anybody know how to fix it without simply removing these lines?
+
+Thanks!
+Jacek
