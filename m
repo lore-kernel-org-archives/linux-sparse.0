@@ -1,58 +1,76 @@
-From: Pavel Roskin <proski@gnu.org>
+From: Kamil Dudka <kdudka@redhat.com>
 Subject: Re: Sparse crash when mixing int and enum in ternary operator
-Date: Tue, 09 Mar 2010 15:11:57 -0500
-Message-ID: <1268165517.23196.22.camel@mj>
-References: <1268097872.16227.10.camel@mj>
-	 <201003091446.50092.kdudka@redhat.com> <1268159719.23196.12.camel@mj>
-	 <201003092006.23686.kdudka@redhat.com>  <20100309191551.GB4586@feather>
+Date: Tue, 9 Mar 2010 21:29:15 +0100
+Message-ID: <201003092129.16118.kdudka@redhat.com>
+References: <1268097872.16227.10.camel@mj> <20100309191551.GB4586@feather> <1268165517.23196.22.camel@mj>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain;
+  charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:26922 "EHLO c60.cesmail.net"
+Received: from mx1.redhat.com ([209.132.183.28]:47505 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754484Ab0CIUL6 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Mar 2010 15:11:58 -0500
-In-Reply-To: <20100309191551.GB4586@feather>
+	id S1751494Ab0CIUbs (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 9 Mar 2010 15:31:48 -0500
+In-Reply-To: <1268165517.23196.22.camel@mj>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Kamil Dudka <kdudka@redhat.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Pavel Roskin <proski@gnu.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-On Tue, 2010-03-09 at 11:15 -0800, Josh Triplett wrote:
-> On Tue, Mar 09, 2010 at 08:06:23PM +0100, Kamil Dudka wrote:
-> > On Tuesday 09 of March 2010 19:35:19 Pavel Roskin wrote:
-> > > I removed the outside conditional, and sparse would still crash on this:
-> > >
-> > > crypto_has_alg(alg, type, mask ?: CRYPTO_ALG_TYPE_MASK);
-> > >
-> > > but not on this:
-> > >
-> > > crypto_has_alg(alg, type, mask ? mask: CRYPTO_ALG_TYPE_MASK);
-> > >
-> > > Apparently, the "?:" notation is confusing sparse now.
-> > 
-> > To be frank, I've never seen that notation before.  From what I understand, 
-> > the variants above should be equivalent with each other, right?
-> 
-> Yes, except that the first variant would not evaluate "mask" twice, even
-> if it consisted of an expression with side effects.  See
-> http://gcc.gnu.org/onlinedocs/gcc/Conditionals.html .
-> 
-> (When I go to look up something in the GCC manual, more often than not I
-> end up in Chapter 6, "Extensions to the C Language Family". :) )
+On Tuesday 09 of March 2010 21:11:57 Pavel Roskin wrote:
+> Ironically, the fix for :? may benefit from that operator:
+>
+> do_warn_for_enum_conversions(expr->cond_true ?: expr->conditional, type);
 
-Ironically, the fix for :? may benefit from that operator:
+Yeah, that's exactly what I've tried ;-)
 
-do_warn_for_enum_conversions(expr->cond_true ?: expr->conditional, type);
-do_warn_for_enum_conversions(expr->cond_false ?: expr->conditional, type);
+> do_warn_for_enum_conversions(expr->cond_false ?: expr->conditional, type);
 
-At least I was able to run sparse on the whole kernel (wireless-testing,
-which is based on 2.6.34-rc1) without crashing or reporting anything
-strange.
+Does it mean the cond_false may be also omitted?  I can't image how the enum 
+conversion analysis can be useful in that case.  I've ensured the optional 
+analysis would no more crash on another corner case in the first place:
 
-Actually, omitting the false conditional appears to be invalid.
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -327,13 +327,35 @@ warn_for_int_to_enum_conversion (struct expression 
+*expr, struct symbol *typeb)
+ }
 
--- 
-Regards,
-Pavel Roskin
+ static void
+-warn_for_enum_conversions(struct expression *expr, struct symbol *type)
++do_warn_for_enum_conversions(struct expression *expr, struct symbol *type)
+ {
++       if (!expr || !type)
++               /* do not crash when there is nothing to check */
++               return;
++
+        warn_for_different_enum_types (expr, type);
+        warn_for_enum_to_int_conversion (expr, type);
+        warn_for_int_to_enum_conversion (expr, type);
+ }
+
+> At least I was able to run sparse on the whole kernel (wireless-testing,
+> which is based on 2.6.34-rc1) without crashing or reporting anything
+> strange.
+>
+> Actually, omitting the false conditional appears to be invalid.
+
+Unfortunately it's not that easy.  I am still getting a non-sense warning for:
+
+static void foo(void)
+{
+    enum { VAL } y, x = VAL;
+    y = x ?: VAL;
+}
+
+$ ./sparse enum.c
+enum.c:4:9: warning: conversion of
+enum.c:4:9:     int to
+enum.c:4:9:     int enum <noident>
+
+I need to somehow get over the EXPR_IMPLIED_CAST to dig the original enum_type 
+from there...
+
+Kamil
