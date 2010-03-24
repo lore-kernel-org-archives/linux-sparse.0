@@ -1,66 +1,40 @@
-From: Kamil Dudka <kdudka@redhat.com>
-Subject: Re: Sparse crash when mixing int and enum in ternary operator
-Date: Wed, 24 Mar 2010 11:51:00 +0100
-Message-ID: <201003241151.00318.kdudka@redhat.com>
-References: <1268097872.16227.10.camel@mj> <201003211627.14164.kdudka@redhat.com> <70318cbf1003240307m6be38384l3524923484e493ce@mail.gmail.com>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: segfault in sparse snapshot 2010-02-13
+Date: Wed, 24 Mar 2010 10:41:44 -0700
+Message-ID: <20100324104144.0817c22b.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: Text/Plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:1540 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752488Ab0CXKvc convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Mar 2010 06:51:32 -0400
-In-Reply-To: <70318cbf1003240307m6be38384l3524923484e493ce@mail.gmail.com>
+Received: from xenotime.net ([72.52.64.118]:59789 "HELO xenotime.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S932336Ab0CXRlq (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 24 Mar 2010 13:41:46 -0400
+Received: from chimera.site ([71.245.98.113]) by xenotime.net for <linux-sparse@vger.kernel.org>; Wed, 24 Mar 2010 10:41:44 -0700
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Pavel Roskin <proski@gnu.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Hi Chris,
+(snapshot from Dave Jones:
+  http://www.codemonkey.org.uk/projects/git-snapshots/sparse/ )
 
-On Wed March 24 2010 11:07:04 Christopher Li wrote:
-> That is just too much. Most of the warning is coming from enum or
-> operation. e.g.
-> .type = KW_SPECIFIER | KW_SHORT,
-> lookup_keyword(token->ident, NS_KEYWORD | NS_TYPEDEF);
-> 
-> I think those source are fine. Force enum cast there make the source code
 
-I completely agree on that.
+In the linux-next-20100324 or akpm's kernel patchset (mmotm-2010-03-23),
+sparse segfaults when checking net/bridge/br_fdb.c. (does not happen in
+Linus's mainline kernel tree)
 
-> lworse. We can add special case for enum OR enum, more special cases.
-> But where is the end?
 
-Let's handle the bitwise operators and we'll see.
+The last messages are:
 
-> It comes down to we try to treat enum as a different type than int. It
+net/bridge/br_fdb.c:225:9: error: no member 'hash' in struct net_bridge
+net/bridge/br_fdb.c:225:9: error: incompatible types for operation (+)
+net/bridge/br_fdb.c:225:9:    left side has type bad type
+net/bridge/br_fdb.c:225:9:    right side has type int
+net/bridge/br_fdb.c:225:9: error: cannot dereference this type
+/bin/sh: line 1: 28041 Segmentation fault      sparse -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void -D__x86_64__ -m64 -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/4.4.1/include -Wp,-MD,net/bridge/.br_fdb.o.d -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/4.4.1/include -I/lnx/src/NEXT/linux-next-20100324/arch/x86/include -Iinclude -I/lnx/src/NEXT/linux-next-20100324/include -include include/generated/autoconf.h -I/lnx/src/NEXT/linux-next-20100324/net/bridge -Inet/bridge -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args 
+ -fstack-protector -fno-builtin-memcpy -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -Wframe-larger-than=2048 -fno-omit-frame-pointer -fno-optimize-sibling-calls -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -fprofile-arcs -ftest-coverage -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(br_fdb)" -D"KBUILD_MODNAME=KBUILD_STR(bridge)" -D"DEBUG_HASH=21" -D"DEBUG_HASH2=11" /lnx/src/NEXT/linux-next-20100324/net/bridge/br_fdb.c
+make[3]: *** [net/bridge/br_fdb.o] Error 139
 
-From my point of view it _is_ different type than int.  At least gcc 
-distinguishes among enum and int on the level I grab the type-info.
 
-> seems works for the simple case. But in real world, people do use enum as
-> int type and expect enum can mix with int.
-
-What about just changing the default?  We can keep the current -Wenum-mismatch 
-(in its working variant) and those two new warnings provide only as option.
-
-> At this point I am leaning towards moving this enum warning to a topic
-> branch. Let the people who want to use it play with it first. It currently
-> give too many warning.
-
-Sure.
-
-> If people do feel that warning is useful, even bette, it catch some real
-> bugs. I will consider merge it again.
-
-Yes, it makes sense to me.
-
-> You obvious spend a lot of time on this. I feel bad about pushing it back
-> too.
-
-Spent time should be definitely not considered as a criterion
-for inclusion ;-)
-
-Kamil
+---
+~Randy
