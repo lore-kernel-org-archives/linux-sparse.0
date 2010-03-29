@@ -1,59 +1,46 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] eliminate insane conversions from int to enum
-Date: Mon, 29 Mar 2010 11:11:45 -0700
-Message-ID: <70318cbf1003291111t125ecc6cpa3f84987d6e4659b@mail.gmail.com>
-References: <1268097872.16227.10.camel@mj>
-	 <201003271016.39291.kdudka@redhat.com> <20100327092949.GB9548@feather>
-	 <201003271053.47206.kdudka@redhat.com>
+From: Kamil Dudka <kdudka@redhat.com>
+Subject: Re: Sparse crash when mixing int and enum in ternary operator
+Date: Mon, 29 Mar 2010 20:17:16 +0200
+Message-ID: <201003292017.16866.kdudka@redhat.com>
+References: <1268097872.16227.10.camel@mj> <20100327092949.GB9548@feather> <70318cbf1003291105v44334f0et82575f62a8c187f8@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: Text/Plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:47983 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753438Ab0C2SLr convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Mar 2010 14:11:47 -0400
-Received: by vws20 with SMTP id 20so135835vws.19
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Mar 2010 11:11:45 -0700 (PDT)
-In-Reply-To: <201003271053.47206.kdudka@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39887 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754704Ab0C2SRP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 29 Mar 2010 14:17:15 -0400
+In-Reply-To: <70318cbf1003291105v44334f0et82575f62a8c187f8@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Josh Triplett <josh@joshtriplett.org>, Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
 
-On Sat, Mar 27, 2010 at 2:53 AM, Kamil Dudka <kdudka@redhat.com> wrote:
-> On Saturday 27 of March 2010 10:29:50 Josh Triplett wrote:
->> > Here is what sparse gives:
->> > $ ./sparse enum.c
->> > enum.c:1:10: warning: non-ANSI function declaration of function 'm=
-ain'
->> > enum.c:6:15: warning: conversion of
->> > enum.c:6:15: =A0 =A0 int to
->> > enum.c:6:15: =A0 =A0 int enum <noident>
->> >
->> >
->> > Here is what g++ gives:
->> > $ g++ enum.c
->> > enum.c: In function =91int main()=92:
->> > enum.c:6: error: invalid conversion from =91int=92 to =91main()::<=
-anonymous
->> > enum>=92
->>
->> Yup, both of these warnings seem correct. =A0Don't fix them by casti=
-ng,
->> fix them by declaring "val" with an appropriate integral type.
->
-> patch attached
+On Mon March 29 2010 20:05:08 Christopher Li wrote:
+> Using enum namespace for member "namespace" has benefit here. It is clear
+> that which set of value it belongs to. E.g. if you assign SYM_NODE into
+> "namespace" member it *looks* is obvious wrong.
 
-I mention that in my other email. I don't agree this is a better change=
-=2E
-It is just for the sake of making the enum warning happy and make code
-harder to understand.
+We are able to catch assignment of SYM_NODE to 'enum namespace'.  But we are 
+not able to catch (SYM_NODE | SYM_ENUM) to 'enum namespace', so that the patch 
+makes no difference.  Or am I missing anything?
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> It also helps people understand which set of value belongs to
+> "namespace" member.
+> Make "namespace" a plain int, that message is lost. It become very
+> confusing for new comer
+> what value was allowed in this int type.
+
+The identifier ns_mask sounds clear to me, maybe namespace_mask would be 
+better.  But yes ... I am not a new comer here :-)
+
+> So back to my point. It seems making the enum more strict is just make up
+> rules and gain nothing in real life. It makes code looks worse just to
+> make strict enum type
+> happy.
+
+I don't think the code looks worse, nevertheless respect your attitude.
+
+Kamil
