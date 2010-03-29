@@ -1,175 +1,83 @@
-From: Kamil Dudka <kdudka@redhat.com>
-Subject: [PATCH] eliminate insane conversions from int to enum
-Date: Sat, 27 Mar 2010 10:53:46 +0100
-Message-ID: <201003271053.47206.kdudka@redhat.com>
-References: <1268097872.16227.10.camel@mj> <201003271016.39291.kdudka@redhat.com> <20100327092949.GB9548@feather>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: segfault in sparse snapshot 2010-02-13
+Date: Mon, 29 Mar 2010 00:50:31 -0700
+Message-ID: <70318cbf1003290050x7f15655ra07edba3668eb4a3@mail.gmail.com>
+References: <20100324104144.0817c22b.rdunlap@xenotime.net>
+	 <20100324193622.GC4331@feather> <4BAA6C4C.8010103@xenotime.net>
+	 <20100324203427.GA3015@feather> <20100325104947.GC5069@bicker>
+	 <20100325154614.GD30147@feather> <4BAB8F36.2090600@xenotime.net>
+	 <70318cbf1003251020j11ad7dd9m5e22b52699265526@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: Multipart/Mixed;
-  boundary="Boundary-00=_rWdrLJTd/Cu0I5l"
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:24105 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750850Ab0C0J4C (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Mar 2010 05:56:02 -0400
-In-Reply-To: <20100327092949.GB9548@feather>
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:44128 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754740Ab0C2Hue convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 29 Mar 2010 03:50:34 -0400
+Received: by vws8 with SMTP id 8so2375917vws.19
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Mar 2010 00:50:33 -0700 (PDT)
+In-Reply-To: <70318cbf1003251020j11ad7dd9m5e22b52699265526@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Christopher Li <sparse@chrisli.org>, Pavel Roskin <proski@gnu.org>, linux-sparse@vger.kernel.org
+To: Randy Dunlap <rdunlap@xenotime.net>
+Cc: Josh Triplett <josh@joshtriplett.org>, Dan Carpenter <error27@gmail.com>, linux-sparse@vger.kernel.org
 
---Boundary-00=_rWdrLJTd/Cu0I5l
-Content-Type: text/plain;
-  charset="utf-8"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: inline
-
-On Saturday 27 of March 2010 10:29:50 Josh Triplett wrote:
-> > Here is what sparse gives:
-> > $ ./sparse enum.c
-> > enum.c:1:10: warning: non-ANSI function declaration of function 'main'
-> > enum.c:6:15: warning: conversion of
-> > enum.c:6:15:     int to
-> > enum.c:6:15:     int enum <noident>
-> >
-> >
-> > Here is what g++ gives:
-> > $ g++ enum.c
-> > enum.c: In function =E2=80=98int main()=E2=80=99:
-> > enum.c:6: error: invalid conversion from =E2=80=98int=E2=80=99 to =E2=
-=80=98main()::<anonymous
-> > enum>=E2=80=99
+On Thu, Mar 25, 2010 at 10:20 AM, Christopher Li <sparse@chrisli.org> w=
+rote:
+> On Thu, Mar 25, 2010 at 9:28 AM, Randy Dunlap <rdunlap@xenotime.net> =
+wrote:
+>>
+>> OK, I emailed that file, but it's huge -- it probably won't be on th=
+e
+>> mailing list, so I also uploaded it to here:
+>> =A0http://www.xenotime.net/linux/doc/br_fdb.i
 >
-> Yup, both of these warnings seem correct.  Don't fix them by casting,
-> fix them by declaring "val" with an appropriate integral type.
+> Thanks, I can duplicate the segfault now.
+>
+> Looking at it.
 
-patch attached
+Hi,
 
-Kamil
+I check in a change at.
 
---Boundary-00=_rWdrLJTd/Cu0I5l
-Content-Type: text/x-diff;
-  charset="iso 8859-15";
-  name="0001-eliminate-insane-conversions-from-int-to-enum.patch"
-Content-Transfer-Encoding: quoted-printable
-Content-Disposition: attachment;
-	filename="0001-eliminate-insane-conversions-from-int-to-enum.patch"
+commit 703499e552b45542a328e3016868419d65143f2b
+Author: Christopher <sparse@chrisli.org>
+Date:   Sun Mar 28 22:41:49 2010 -0700
 
-=46rom 44d964b9479affff31ad5690bedfe580ee3b50fa Mon Sep 17 00:00:00 2001
-=46rom: Kamil Dudka <kdudka@redhat.com>
-Date: Sat, 27 Mar 2010 10:48:34 +0100
-Subject: [PATCH] eliminate insane conversions from int to enum
+    evaluate: check for NULL type inside typeof
 
+    This should fix the segfault report by Randy.
+    It still doesn't parse the struct attribute correctly though.
 
-Signed-off-by: Kamil Dudka <kdudka@redhat.com>
-=2D--
- expression.h |    1 -
- parse.c      |    2 +-
- parse.h      |    2 ++
- symbol.c     |    4 ++--
- symbol.h     |    8 ++++----
- 5 files changed, 9 insertions(+), 8 deletions(-)
+    Signed-off-by: Christopher <sparse@chrisli.org>
 
-diff --git a/expression.h b/expression.h
-index 81f70ad..fe08a5f 100644
-=2D-- a/expression.h
-+++ b/expression.h
-@@ -206,7 +206,6 @@ static inline int lookup_type(struct token *token)
- }
-=20
- /* Statement parsing */
-=2Dstruct statement *alloc_statement(struct position pos, int type);
- struct token *initializer(struct expression **tree, struct token *token);
- struct token *compound_statement(struct token *, struct statement *);
-=20
-diff --git a/parse.c b/parse.c
-index 7c6dce7..adaa132 100644
-=2D-- a/parse.c
-+++ b/parse.c
-@@ -613,7 +613,7 @@ static int SENTINEL_ATTR match_idents(struct token *tok=
-en, ...)
- }
-=20
-=20
-=2Dstruct statement *alloc_statement(struct position pos, int type)
-+struct statement *alloc_statement(struct position pos, enum statement_type=
- type)
- {
- 	struct statement *stmt =3D __alloc_statement(0);
- 	stmt->type =3D type;
-diff --git a/parse.h b/parse.h
-index 02b8585..6d51726 100644
-=2D-- a/parse.h
-+++ b/parse.h
-@@ -115,6 +115,8 @@ struct statement {
- 	};
- };
-=20
-+struct statement *alloc_statement(struct position pos, enum statement_type=
- type);
-+
- extern struct symbol_list *function_computed_target_list;
- extern struct statement_list *function_computed_goto_list;
-=20
-diff --git a/symbol.c b/symbol.c
-index 96dfbfa..8c46e20 100644
-=2D-- a/symbol.c
-+++ b/symbol.c
-@@ -39,12 +39,12 @@ void access_symbol(struct symbol *sym)
- 	}
- }
-=20
-=2Dstruct symbol *lookup_symbol(struct ident *ident, enum namespace ns)
-+struct symbol *lookup_symbol(struct ident *ident, int ns_mask)
- {
- 	struct symbol *sym;
-=20
- 	for (sym =3D ident->symbols; sym; sym =3D sym->next_id) {
-=2D		if (sym->namespace & ns) {
-+		if (sym->namespace & ns_mask) {
- 			sym->used =3D 1;
- 			return sym;
- 		}
-diff --git a/symbol.h b/symbol.h
-index e567305..7921aa1 100644
-=2D-- a/symbol.h
-+++ b/symbol.h
-@@ -97,7 +97,7 @@ struct decl_state {
- };
-=20
- struct symbol_op {
-=2D	enum keyword type;
-+	int type;
- 	int (*evaluate)(struct expression *);
- 	int (*expand)(struct expression *, int);
- 	int (*args)(struct expression *);
-@@ -267,7 +267,7 @@ extern void access_symbol(struct symbol *);
- extern const char * type_difference(struct ctype *c1, struct ctype *c2,
- 	unsigned long mod1, unsigned long mod2);
-=20
-=2Dextern struct symbol *lookup_symbol(struct ident *, enum namespace);
-+extern struct symbol *lookup_symbol(struct ident *, int ns_mask);
- extern struct symbol *create_symbol(int stream, const char *name, int type=
-, int namespace);
- extern void init_symbols(void);
- extern void init_ctype(void);
-@@ -367,11 +367,11 @@ static inline int get_sym_type(struct symbol *type)
- 	return type->type;
- }
-=20
-=2Dstatic inline struct symbol *lookup_keyword(struct ident *ident, enum na=
-mespace ns)
-+static inline struct symbol *lookup_keyword(struct ident *ident, int ns_ma=
-sk)
- {
- 	if (!ident->keyword)
- 		return NULL;
-=2D	return lookup_symbol(ident, ns);
-+	return lookup_symbol(ident, ns_mask);
- }
-=20
- #define is_restricted_type(type) (get_sym_type(type) =3D=3D SYM_RESTRICT)
-=2D-=20
-1.7.0.2
+diff --git a/evaluate.c b/evaluate.c
+index 28bfd7c..cdbd064 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -340,7 +340,9 @@ static inline int classify_type(struct symbol
+*type, struct sy
+                type =3D type->ctype.base_type;
+        if (type->type =3D=3D SYM_TYPEOF) {
+                type =3D evaluate_expression(type->initializer);
+-               if (type->type =3D=3D SYM_NODE)
++               if (!type)
++                       type =3D &bad_ctype;
++               else if (type->type =3D=3D SYM_NODE)
+                        type =3D type->ctype.base_type;
+        }
+        if (type->type =3D=3D SYM_ENUM)
 
 
---Boundary-00=_rWdrLJTd/Cu0I5l--
+That should stop the segfault. Please verify. More work needs to be don=
+e
+to parse the struct attribute correctly.
+
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
