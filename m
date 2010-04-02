@@ -1,40 +1,35 @@
-From: Pavel Roskin <proski@gnu.org>
-Subject: Re: Sparse crash when mixing int and enum in ternary operator
-Date: Tue, 30 Mar 2010 01:29:59 -0400
-Message-ID: <1269926999.6838.177.camel@mj>
-References: <1268097872.16227.10.camel@mj>
-	 <201003292017.16866.kdudka@redhat.com>
-	 <70318cbf1003291148w6b338b25v6801c3ec146af0f9@mail.gmail.com>
-	 <201003292123.40443.kdudka@redhat.com>
+From: Sergey Lapin <slapinid@gmail.com>
+Subject: building of call tree
+Date: Fri, 2 Apr 2010 20:16:59 +0400
+Message-ID: <k2u48239d391004020916w712535dala168de2a6d2b2bf7@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from c60.cesmail.net ([216.154.195.49]:20717 "EHLO c60.cesmail.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752242Ab0C3FaB (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 30 Mar 2010 01:30:01 -0400
-In-Reply-To: <201003292123.40443.kdudka@redhat.com>
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:48322 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751591Ab0DBQRB (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 2 Apr 2010 12:17:01 -0400
+Received: by wyb39 with SMTP id 39so974810wyb.19
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Apr 2010 09:16:59 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Mon, 2010-03-29 at 21:23 +0200, Kamil Dudka wrote:
+Hi, all!
 
-> Sure, I don't object it anyhow.  As a C++ programmer I've certainly different 
-> attitude to type safety, thus biased.  I believe kernel developers would more 
-> likely agree with your point of view.
+I'd like to make call-tree builder using libsparse.
+I need to build symbol-hierarchy and feed dot with it.
+I use test-dissect.c as an example.
 
-If you run patched sparse on the kernel and fix the first ten warnings
-in a nice, unobtrusive way, and there is no warning that you cannot fix,
-chances are that the kernel developers will like your changes, even if
-it makes the code look more like C++ or even Java :-)
+I understand how to extract the symbols and find if it is definition
+or reference,
+but I fail with scoping. I need to detect which function that
+particular reference belongs to,
+and how to detect if that reference is really a function.
+sym->type isn't what I need, sym->ctype.base_type is used to print base type,
+but I'd like to print type as is, and detect if that is a function a proper way.
+Or is there any better way to get this information?
 
-If the fixes involve casts or conversion of enum types to integers or a
-serious code reorganization, then perhaps the kernel developers won't
-like your changes.
-
--- 
-Regards,
-Pavel Roskin
+Thanks a lot,
+S.
