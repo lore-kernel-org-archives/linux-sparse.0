@@ -1,52 +1,110 @@
-From: Michael Stefaniuc <mstefani@redhat.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: L'\0' handling
-Date: Thu, 08 Apr 2010 17:54:16 +0200
-Message-ID: <4BBDFC28.4080304@redhat.com>
-References: <1270738799.2167.7.camel@yura-tl>  <4BBDF4C0.8020305@redhat.com> <1270741172.2167.9.camel@yura-tl>
+Date: Thu, 8 Apr 2010 13:19:56 -0700
+Message-ID: <r2q70318cbf1004081319yc4bf61ccw252798cb98bc760b@mail.gmail.com>
+References: <1270738799.2167.7.camel@yura-tl> <4BBDF4C0.8020305@redhat.com>
+	 <1270741172.2167.9.camel@yura-tl> <4BBDFC28.4080304@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=00151757748401806d0483bf67c0
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41776 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753954Ab0DHPyT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 8 Apr 2010 11:54:19 -0400
-In-Reply-To: <1270741172.2167.9.camel@yura-tl>
+Received: from mail-qy0-f179.google.com ([209.85.221.179]:43571 "EHLO
+	mail-qy0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753253Ab0DHUT6 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 8 Apr 2010 16:19:58 -0400
+Received: by qyk9 with SMTP id 9so577848qyk.1
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Apr 2010 13:19:57 -0700 (PDT)
+In-Reply-To: <4BBDFC28.4080304@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Yura Pakhuchiy <pakhuchiy@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: Michael Stefaniuc <mstefani@redhat.com>
+Cc: Yura Pakhuchiy <pakhuchiy@gmail.com>, linux-sparse@vger.kernel.org
 
-Yura Pakhuchiy wrote:
-> =D0=A3 =D0=A7=D1=86=D0=B2, 08/04/2010 =D1=83 17:22 +0200, Michael Ste=
-faniuc =D0=BF=D1=96=D1=88=D0=B0:
->> Yura Pakhuchiy wrote:
->>> It looks like sparse do not understand constructions like L'\0'.
->> yepp, it doesn't. I have run into that problem 2 years ago. But for =
-Wine
->> that is actually a "feature" as wide char/string literals are forbid=
-den
->> aka cannot be used. Thus my interest in adding support for that in
->> sparse died.
->=20
-> Wine is not the only project which uses sparse. Sparse is broken for =
-any
-I'm a Wine developer and not a sparse developer. I was just saying that
-I run into this problem in sparse, thought about fixing it but dumped
-the idea and submitted instead patches to Wine to remove the wide
-char/string literals.
+--00151757748401806d0483bf67c0
+Content-Type: text/plain; charset=ISO-8859-1
 
-> userspace program which includes wchar.h in Ubuntu with out supportin=
-g
-> this.
-I didn't assert that the feature shouldn't be implemented, just that it
-is a known missing feature that the normal sparse consumer didn't need
-until now.
+On Thu, Apr 8, 2010 at 8:54 AM, Michael Stefaniuc <mstefani@redhat.com> wrote:
+> I didn't assert that the feature shouldn't be implemented, just that it
+> is a known missing feature that the normal sparse consumer didn't need
+> until now.
 
-bye
-	michael
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Yura, do you want to give this patch a try?
+
+It is nasty that L'\0' start from an identifier letter. I try my best
+not to slow down the
+hot path. The test is done inside get_one_identifier() after the ident
+hash is built.
+It look a little bit out of palace but faster than testing 'L' before hand.
+
+Chris
+
+--00151757748401806d0483bf67c0
+Content-Type: application/octet-stream; name="0005-Allow-parsing-L-0.patch"
+Content-Disposition: attachment; filename="0005-Allow-parsing-L-0.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g7s2g73s0
+
+RnJvbSA2YzhkOTE2OWViZTgxOThkOGI5OTQ4MjVjZTlkNGViMWI3MzM5MTI5IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
+YXRlOiBUaHUsIDggQXByIDIwMTAgMTQ6MDU6MjkgLTA3MDAKU3ViamVjdDogW1BBVENIIDUvNV0g
+QWxsb3cgcGFyc2luZyBMJ1wwJwoKU2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZXIgTGkgPHNwYXJz
+ZUBjaHJpc2xpLm9yZz4KLS0tCiBleHByZXNzaW9uLmMgIHwgICAgMyArKy0KIGlkZW50LWxpc3Qu
+aCAgfCAgICAzICsrKwogcHJlLXByb2Nlc3MuYyB8ICAgIDEgKwogdG9rZW4uaCAgICAgICB8ICAg
+IDEgKwogdG9rZW5pemUuYyAgICB8ICAgMTIgKysrKysrKystLS0tCiA1IGZpbGVzIGNoYW5nZWQs
+IDE1IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvZXhwcmVzc2lv
+bi5jIGIvZXhwcmVzc2lvbi5jCmluZGV4IGM5Mjc3ZGEuLjY3ZTA1ZTcgMTAwNjQ0Ci0tLSBhL2V4
+cHJlc3Npb24uYworKysgYi9leHByZXNzaW9uLmMKQEAgLTM5Nyw5ICszOTcsMTAgQEAgc3RydWN0
+IHRva2VuICpwcmltYXJ5X2V4cHJlc3Npb24oc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IGV4
+cHJlc3Npb24gKip0cmVlKQogCiAJc3dpdGNoICh0b2tlbl90eXBlKHRva2VuKSkgewogCWNhc2Ug
+VE9LRU5fQ0hBUjoKKwljYXNlIFRPS0VOX0xPTkdfQ0hBUjoKIAkJZXhwciA9IGFsbG9jX2V4cHJl
+c3Npb24odG9rZW4tPnBvcywgRVhQUl9WQUxVRSk7ICAgCiAJCWV4cHItPmZsYWdzID0gSW50X2Nv
+bnN0X2V4cHI7Ci0JCWV4cHItPmN0eXBlID0gJmludF9jdHlwZTsgCisJCWV4cHItPmN0eXBlID0g
+dG9rZW5fdHlwZSh0b2tlbikgPT0gVE9LRU5fQ0hBUiA/ICZpbnRfY3R5cGUgOiAmbG9uZ19jdHlw
+ZTsKIAkJZXhwci0+dmFsdWUgPSAodW5zaWduZWQgY2hhcikgdG9rZW4tPmNoYXJhY3RlcjsKIAkJ
+dG9rZW4gPSB0b2tlbi0+bmV4dDsKIAkJYnJlYWs7CmRpZmYgLS1naXQgYS9pZGVudC1saXN0Lmgg
+Yi9pZGVudC1saXN0LmgKaW5kZXggMGVlODFiYy4uYjk0YWVjZSAxMDA2NDQKLS0tIGEvaWRlbnQt
+bGlzdC5oCisrKyBiL2lkZW50LWxpc3QuaApAQCAtMjUsNiArMjUsOSBAQCBJREVOVChfX2F0dHJp
+YnV0ZSk7IElERU5UKF9fYXR0cmlidXRlX18pOwogSURFTlQodm9sYXRpbGUpOyBJREVOVChfX3Zv
+bGF0aWxlKTsgSURFTlQoX192b2xhdGlsZV9fKTsKIElERU5UKGRvdWJsZSk7CiAKKy8qIFNwZWNp
+YWwgY2FzZSBmb3IgTCdcdCcgKi8KK0lERU5UKEwpOworCiAvKiBFeHRlbmRlZCBnY2MgaWRlbnRp
+ZmllcnMgKi8KIElERU5UKGFzbSk7IElERU5UX1JFU0VSVkVEKF9fYXNtKTsgSURFTlRfUkVTRVJW
+RUQoX19hc21fXyk7CiBJREVOVChhbGlnbm9mKTsgSURFTlRfUkVTRVJWRUQoX19hbGlnbm9mKTsg
+SURFTlRfUkVTRVJWRUQoX19hbGlnbm9mX18pOyAKZGlmZiAtLWdpdCBhL3ByZS1wcm9jZXNzLmMg
+Yi9wcmUtcHJvY2Vzcy5jCmluZGV4IDM0YjIxZmYuLjA1OGYyNGIgMTAwNjQ0Ci0tLSBhL3ByZS1w
+cm9jZXNzLmMKKysrIGIvcHJlLXByb2Nlc3MuYwpAQCAtODY0LDYgKzg2NCw3IEBAIHN0YXRpYyBp
+bnQgdG9rZW5fZGlmZmVyZW50KHN0cnVjdCB0b2tlbiAqdDEsIHN0cnVjdCB0b2tlbiAqdDIpCiAJ
+CWRpZmZlcmVudCA9IHQxLT5hcmdudW0gIT0gdDItPmFyZ251bTsKIAkJYnJlYWs7CiAJY2FzZSBU
+T0tFTl9DSEFSOgorCWNhc2UgVE9LRU5fTE9OR19DSEFSOgogCQlkaWZmZXJlbnQgPSB0MS0+Y2hh
+cmFjdGVyICE9IHQyLT5jaGFyYWN0ZXI7CiAJCWJyZWFrOwogCWNhc2UgVE9LRU5fU1RSSU5HOiB7
+CmRpZmYgLS1naXQgYS90b2tlbi5oIGIvdG9rZW4uaAppbmRleCBlYmM5NGI0Li5jNTI3ZTc4IDEw
+MDY0NAotLS0gYS90b2tlbi5oCisrKyBiL3Rva2VuLmgKQEAgLTY3LDYgKzY3LDcgQEAgZW51bSB0
+b2tlbl90eXBlIHsKIAlUT0tFTl9aRVJPX0lERU5ULAogCVRPS0VOX05VTUJFUiwKIAlUT0tFTl9D
+SEFSLAorCVRPS0VOX0xPTkdfQ0hBUiwKIAlUT0tFTl9TVFJJTkcsCiAJVE9LRU5fU1BFQ0lBTCwK
+IAlUT0tFTl9TVFJFQU1CRUdJTiwKZGlmZiAtLWdpdCBhL3Rva2VuaXplLmMgYi90b2tlbml6ZS5j
+CmluZGV4IDkzZGQwMDcuLmNmMDU4MjYgMTAwNjQ0Ci0tLSBhL3Rva2VuaXplLmMKKysrIGIvdG9r
+ZW5pemUuYwpAQCAtMTQ1LDcgKzE0NSw4IEBAIGNvbnN0IGNoYXIgKnNob3dfdG9rZW4oY29uc3Qg
+c3RydWN0IHRva2VuICp0b2tlbikKIAljYXNlIFRPS0VOX1NQRUNJQUw6CiAJCXJldHVybiBzaG93
+X3NwZWNpYWwodG9rZW4tPnNwZWNpYWwpOwogCi0JY2FzZSBUT0tFTl9DSEFSOiB7CisJY2FzZSBU
+T0tFTl9DSEFSOiAKKwljYXNlIFRPS0VOX0xPTkdfQ0hBUjogewogCQljaGFyICpwdHIgPSBidWZm
+ZXI7CiAJCWludCBjID0gdG9rZW4tPmNoYXJhY3RlcjsKIAkJKnB0cisrID0gJ1wnJzsKQEAgLTUy
+Nyw3ICs1MjgsNyBAQCBzdGF0aWMgaW50IGVzY2FwZWNoYXIoaW50IGZpcnN0LCBpbnQgdHlwZSwg
+c3RyZWFtX3QgKnN0cmVhbSwgaW50ICp2YWxwKQogCXJldHVybiBuZXh0OwogfQogCi1zdGF0aWMg
+aW50IGdldF9jaGFyX3Rva2VuKGludCBuZXh0LCBzdHJlYW1fdCAqc3RyZWFtKQorc3RhdGljIGlu
+dCBnZXRfY2hhcl90b2tlbihpbnQgbmV4dCwgc3RyZWFtX3QgKnN0cmVhbSwgZW51bSB0b2tlbl90
+eXBlIHR5cGUpCiB7CiAJaW50IHZhbHVlOwogCXN0cnVjdCB0b2tlbiAqdG9rZW47CkBAIC01NDAs
+NyArNTQxLDcgQEAgc3RhdGljIGludCBnZXRfY2hhcl90b2tlbihpbnQgbmV4dCwgc3RyZWFtX3Qg
+KnN0cmVhbSkKIAl9CiAKIAl0b2tlbiA9IHN0cmVhbS0+dG9rZW47Ci0JdG9rZW5fdHlwZSh0b2tl
+bikgPSBUT0tFTl9DSEFSOworCXRva2VuX3R5cGUodG9rZW4pID0gdHlwZTsKIAl0b2tlbi0+Y2hh
+cmFjdGVyID0gdmFsdWUgJiAweGZmOwogCiAJYWRkX3Rva2VuKHN0cmVhbSk7CkBAIC03MDIsNyAr
+NzAzLDcgQEAgc3RhdGljIGludCBnZXRfb25lX3NwZWNpYWwoaW50IGMsIHN0cmVhbV90ICpzdHJl
+YW0pCiAJY2FzZSAnIic6CiAJCXJldHVybiBnZXRfc3RyaW5nX3Rva2VuKG5leHQsIHN0cmVhbSk7
+CiAJY2FzZSAnXCcnOgotCQlyZXR1cm4gZ2V0X2NoYXJfdG9rZW4obmV4dCwgc3RyZWFtKTsKKwkJ
+cmV0dXJuIGdldF9jaGFyX3Rva2VuKG5leHQsIHN0cmVhbSwgVE9LRU5fQ0hBUik7CiAJY2FzZSAn
+Lyc6CiAJCWlmIChuZXh0ID09ICcvJykKIAkJCXJldHVybiBkcm9wX3N0cmVhbV9lb2xuKHN0cmVh
+bSk7CkBAIC04ODAsNiArODgxLDkgQEAgc3RhdGljIGludCBnZXRfb25lX2lkZW50aWZpZXIoaW50
+IGMsIHN0cmVhbV90ICpzdHJlYW0pCiAKIAlpZGVudCA9IGNyZWF0ZV9oYXNoZWRfaWRlbnQoYnVm
+LCBsZW4sIGhhc2gpOwogCisJaWYgKGlkZW50ID09ICZMX2lkZW50ICYmIG5leHQgPT0gJ1wnJykK
+KwkJcmV0dXJuIGdldF9jaGFyX3Rva2VuKG5leHRjaGFyKHN0cmVhbSksIHN0cmVhbSwgVE9LRU5f
+TE9OR19DSEFSKTsKKwogCS8qIFBhc3MgaXQgb24uLiAqLwogCXRva2VuID0gc3RyZWFtLT50b2tl
+bjsKIAl0b2tlbl90eXBlKHRva2VuKSA9IFRPS0VOX0lERU5UOwotLSAKMS42LjYuMQoK
+--00151757748401806d0483bf67c0--
