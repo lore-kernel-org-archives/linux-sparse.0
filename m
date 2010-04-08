@@ -1,96 +1,72 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [0/4] inspector for sparse
-Date: Fri, 2 Apr 2010 11:59:39 -0700
-Message-ID: <w2j70318cbf1004021159y2fa50d58y62bd878c6355a972@mail.gmail.com>
-References: <u2n70318cbf1004021136t65b4d8acmf8bfd7e18b410dfe@mail.gmail.com>
+From: Yura Pakhuchiy <pakhuchiy@gmail.com>
+Subject: L'\0' handling
+Date: Thu, 08 Apr 2010 17:59:59 +0300
+Message-ID: <1270738799.2167.7.camel@yura-tl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f173.google.com ([209.85.210.173]:58019 "EHLO
-	mail-yx0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753593Ab0DBS7l convert rfc822-to-8bit (ORCPT
+Received: from mail-bw0-f209.google.com ([209.85.218.209]:36736 "EHLO
+	mail-bw0-f209.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932465Ab0DHPAC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 2 Apr 2010 14:59:41 -0400
-Received: by yxe3 with SMTP id 3so918685yxe.1
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Apr 2010 11:59:39 -0700 (PDT)
-In-Reply-To: <u2n70318cbf1004021136t65b4d8acmf8bfd7e18b410dfe@mail.gmail.com>
+	Thu, 8 Apr 2010 11:00:02 -0400
+Received: by bwz1 with SMTP id 1so1855916bwz.21
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Apr 2010 08:00:00 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-I add a treeview branch on sparse/chrisl so you can pull from it.
+Hi,
 
-http://git.kernel.org/?p=3Ddevel/sparse/chrisl/sparse.git;a=3Dshortlog;=
-h=3Drefs/heads/treeview
+It looks like sparse do not understand constructions like L'\0'.
 
-In fedora, you need to install gtk2-devel package to enable it.
+.-(~)------------------------------------------------------------(yura@yura-tl)-
+`--> cat b.c
+int main(void)
+{
+	L'\0';
+	return 0;
+}
+.-(~)------------------------------------------------------------(yura@yura-tl)-
+`--> gcc b.c
+.-(~)------------------------------------------------------------(yura@yura-tl)-
+`--> cgcc b.c
+b.c:3:10: error: Expected ; at end of statement
+b.c:3:10: error: got `\0'
+b.c:3:9: error: undefined identifier `L'
 
-Chris
+This causes problems with /usr/include/wchar.h
+and  /usr/include/bits/wchar.h includes from ubuntu.
 
-On Fri, Apr 2, 2010 at 11:36 AM, Christopher Li <sparse@chrisli.org> wr=
-ote:
-> Hi,
->
-> When I debug the enum int patch, some times I wish I have a better to=
-ols
-> to help me understand what is going on with the internal sprase data =
-structure.
-> There is debug_symbol() to help in some degree, but it does not show =
-anything
-> other than symbol type. E.g. expression and statments.
->
-> test-parsing's output is more like assembly rather than a syntax tree=
-=2E
-> There is debug_symbol() but it only print out the symbol type. It doe=
-s not
-> go into expression. So the interesting stuff like expression =A0is ha=
-rd to see.
->
-> I want some thing it can display different types of C structure with =
-expandable
-> sub node for its member. Some thing like a file folder you can expand=
- it see its
-> content.
->
-> I first look at the GtkTreeView. It seems capable of doing what I wan=
-t.
-> The interface is cumbersome to use and I am really not a GUI person.
-> So I build some custom tree model to simplify the interaction with GT=
-K.
-> That is the first patch in the series.
->
-> The second patch of the series try to inspect C structure one at time=
-=2E
-> It is driven by the gtk tree model. It use a some glib function but i=
-t does
-> not have any GTK knowledge.
->
-> The interface is generic enough that you should be able to do a curso=
-r
-> version from it without changing the code.
->
-> The third patch adds the test-inspect program which launch a gtk wind=
-ow.
-> Oh, I did not bother to make the first two patches compile itself
-> until this one.
->
-> Please play with it. As always, feed back are welcome.
->
-> The C structure inspection is rather incomplete currently. It is very=
- easy to
-> expand it to show additional types and members. The last patch is an =
-example.
-> It is going to be very rewarding to extend the inspector. It does not
-> require you have deep understanding of the sparse AST tree, it helps
-> *you* to understand how sparse internal AST works.
->
-> So patches are very welcome as well. Any one want to help?
->
-> Chris
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+/usr/include/bits/wchar.h:38:8: error: garbage at end: `\0' - 1 > 0
+
+/usr/include/wchar.h:393:51: error: Expected ) in expression
+/usr/include/wchar.h:393:51: error: got `\0'
+
+Relevant lines from these headers:
+
+extern int __wctob_alias (wint_t __c) __asm ("wctob");
+__extern_inline int
+__NTH (wctob (wint_t __wc))
+{ return (__builtin_constant_p (__wc) && __wc >= L'\0' && __wc <= L'\x7f'
+	  ? (int) __wc : __wctob_alias (__wc)); }
+
+and
+
+#ifdef __WCHAR_UNSIGNED__
+#define __WCHAR_MIN       L'\0'
+
+/* Failing that, rely on the preprocessor's knowledge of the
+   signedness of wchar_t.  */
+#elif L'\0' - 1 > 0
+#define __WCHAR_MIN       L'\0'
+#else
+#define __WCHAR_MIN       (-__WCHAR_MAX - 1)
+#endif
+
+
+-- 
+Best regards,
+        Yura
+
