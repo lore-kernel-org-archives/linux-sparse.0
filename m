@@ -1,75 +1,54 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: packed struct sizeof wrong
-Date: Fri, 28 May 2010 14:45:11 +0200
-Message-ID: <1275050711.3909.102.camel@jlt3.sipsolutions.net>
+From: Damien Lespiau <damien.lespiau@gmail.com>
+Subject: [PATCH] Ignore the may_alias GCC attribute
+Date: Tue, 1 Jun 2010 17:35:52 +0100
+Message-ID: <AANLkTikvGsi4Ju25yduhlszVP3BOiCEEHrlO6hNoGKFV@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=0016e64982ec1074d60487fa91ea
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from he.sipsolutions.net ([78.46.109.217]:59056 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754171Ab0E1MpM (ORCPT
+Received: from mail-ww0-f46.google.com ([74.125.82.46]:63705 "EHLO
+	mail-ww0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752882Ab0FAQmX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 28 May 2010 08:45:12 -0400
-Received: by sipsolutions.net with esmtpsa (TLS1.0:DHE_RSA_AES_256_CBC_SHA1:32)
-	(Exim 4.71)
-	(envelope-from <johannes@sipsolutions.net>)
-	id 1OHyw3-00076B-MB
-	for linux-sparse@vger.kernel.org; Fri, 28 May 2010 14:45:11 +0200
+	Tue, 1 Jun 2010 12:42:23 -0400
+Received: by wwb28 with SMTP id 28so2171923wwb.19
+        for <linux-sparse@vger.kernel.org>; Tue, 01 Jun 2010 09:42:20 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-Hi all,
+--0016e64982ec1074d60487fa91ea
+Content-Type: text/plain; charset=ISO-8859-1
 
-I ran across this in some of my kernel code, and isolated it into a few
-test cases, below. sparse should not report errors on this file, but
-does regardless, somehow the structs appear larger to it than they are.
+Unfortunately, linux-sparse seems to reject my git send-emails with
+GMail's SMTP server, so I'm attaching the git format-patch instead.
 
-johannes
+may_alias is used in the wild (glib) and makes sparse spew a lot of
+unhelpful warning messages. Ignore it (for now?).
 
-This is suitable for dropping into the validation directory:
---- begin file ---
-struct A {
-	unsigned char a, b, c, d;
-} __attribute__((packed));
+Signed-off-by: Damien Lespiau <damien.lespiau@gmail.com>
 
-struct B {
-	struct A A;
-	unsigned char e, f;
-	unsigned short g;
-	unsigned char h;
-} __attribute__((packed));
+-- 
+Damien
 
-struct C {
-	unsigned char a, b, c, d;
-	unsigned char e, f;
-	unsigned short g;
-	unsigned char h;
-} __attribute__((packed));
+--0016e64982ec1074d60487fa91ea
+Content-Type: application/octet-stream;
+	name="0001-Ignore-the-may_alias-GCC-attribute.patch"
+Content-Disposition: attachment;
+	filename="0001-Ignore-the-may_alias-GCC-attribute.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_g9wy8udb0
 
-struct D {
-	unsigned char h;
-} __attribute__((packed));
-
-struct E {
-	unsigned short g;
-	unsigned char h;
-} __attribute__((packed));
-
-#define BUILD_BUG_ON(expr) ((void)(sizeof(struct { int:-!!(expr); })))
-
-static inline void foo(void)
-{
-	BUILD_BUG_ON(sizeof(struct A) != 4);
-	BUILD_BUG_ON(sizeof(struct B) != 9);
-	BUILD_BUG_ON(sizeof(struct C) != 9);
-	BUILD_BUG_ON(sizeof(struct D) != 1);
-	BUILD_BUG_ON(sizeof(struct E) != 3);
-}
-
-/*
- * check-name: packed struct sizeof
- */
-
-
+RnJvbSAxZGZjYmJjNzE2MDg3N2Y0OWMxOWFjMDY0NDdmMDMzYmFlZWMxZWJmIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3BpYXVAZ21haWwu
+Y29tPgpEYXRlOiBXZWQsIDI2IE1heSAyMDEwIDExOjUyOjU3ICswMTAwClN1YmplY3Q6IFtQQVRD
+SF0gSWdub3JlIHRoZSBtYXlfYWxpYXMgR0NDIGF0dHJpYnV0ZQoKbWF5X2FsaWFzIGlzIHVzZWQg
+aW4gdGhlIHdpbGQgKGdsaWIpIGFuZCBtYWtlcyBzcGFyc2Ugc3BldyBhIGxvdCBvZgp1bmhlbHBm
+dWwgd2FybmluZyBtZXNzYWdlcy4gSWdub3JlIGl0IChmb3Igbm93PykuCgpTaWduZWQtb2ZmLWJ5
+OiBEYW1pZW4gTGVzcGlhdSA8ZGFtaWVuLmxlc3BpYXVAZ21haWwuY29tPgotLS0KIHBhcnNlLmMg
+fCAgICAyICsrCiAxIGZpbGVzIGNoYW5nZWQsIDIgaW5zZXJ0aW9ucygrKSwgMCBkZWxldGlvbnMo
+LSkKCmRpZmYgLS1naXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCBmODFiMTlmLi5mNWM1NDk3
+IDEwMDY0NAotLS0gYS9wYXJzZS5jCisrKyBiL3BhcnNlLmMKQEAgLTUxNyw2ICs1MTcsOCBAQCBj
+b25zdCBjaGFyICppZ25vcmVkX2F0dHJpYnV0ZXNbXSA9IHsKIAkiX19ob3RfXyIsCiAJIm1hbGxv
+YyIsCiAJIl9fbWFsbG9jX18iLAorCSJtYXlfYWxpYXMiLAorCSJfX21heV9hbGlhc19fIiwKIAki
+bW9kZWwiLAogCSJfX21vZGVsX18iLAogCSJtc19hYmkiLAotLSAKMS43LjAuMQoK
+--0016e64982ec1074d60487fa91ea--
