@@ -1,48 +1,39 @@
-From: bonneta <bonneta@ensimag.fr>
-Subject: help for using sparse
-Date: Wed, 09 Jun 2010 17:09:54 +0200
-Message-ID: <cd2a19702bb05b6f27255cd697b0ea12@ensimag.fr>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: help for using sparse
+Date: Wed, 9 Jun 2010 09:00:38 -0700
+Message-ID: <AANLkTim1Gr-k3BZ-hsdPdZQ8j1QPCEeWycwFGdqKwbxj@mail.gmail.com>
+References: <cd2a19702bb05b6f27255cd697b0ea12@ensimag.fr>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx2.imag.fr ([129.88.30.17]:51188 "EHLO rominette.imag.fr"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752222Ab0FIPeP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 9 Jun 2010 11:34:15 -0400
-Received: from ensikerberos.imag.fr (ensimag.imag.fr [195.221.228.12])
-	by rominette.imag.fr (8.13.8/8.13.8) with ESMTP id o59F29PV028710
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Wed, 9 Jun 2010 17:02:09 +0200
-Received: from ensicom.imag.fr (web-ensimag [195.221.228.24])
-	by ensikerberos.imag.fr (8.13.8/8.13.8/ImagV2.1.r_ens) with ESMTP id o59F9s5b011810
-	for <linux-sparse@vger.kernel.org>; Wed, 9 Jun 2010 17:09:54 +0200
-Received: from webmail.ensimag.fr (localhost [127.0.0.1])
-	by ensicom.imag.fr (8.13.8/8.13.8/ImagV2.1.sb_ens) with ESMTP id o59F9s0C001411
-	for <linux-sparse@vger.kernel.org>; Wed, 9 Jun 2010 17:09:54 +0200
+Received: from mail-gw0-f46.google.com ([74.125.83.46]:60436 "EHLO
+	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751594Ab0FIQAj (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 9 Jun 2010 12:00:39 -0400
+Received: by gwj15 with SMTP id 15so162759gwj.19
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Jun 2010 09:00:38 -0700 (PDT)
+In-Reply-To: <cd2a19702bb05b6f27255cd697b0ea12@ensimag.fr>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: bonneta <bonneta@ensimag.fr>
+Cc: linux-sparse@vger.kernel.org
 
-Hello,
+On Wed, Jun 9, 2010 at 8:09 AM, bonneta <bonneta@ensimag.fr> wrote:
+> I've basically tried "sparse file.c", but it always returns with an error
+> like :
+> "git-compat-util.h:140:11: error: unable to open 'openssl/ssl.h'"
+> or
+> "builtin/blame.c:7:10: error: unable to open 'cache.h'"
+>
+> I don't know how to resolve it...
 
-I am working on git, and i would like to apply sparse on its source code.
+You need to tell sparse where is your openssl/ssl.h.
 
-I've downloaded the source of sparse from its git repository, and compiled
-it successfully.
+BTW, can you compile file.c using git's make system?
+You can try to copy the file searching path to sparse.
 
-I've read the little documentation furnished with the code, but i didn't
-manage to apply sparse on the sources of git.
+Another thing to try is using the cgcc. Cgcc is a wrapper
+script that try to behave like gcc + sparse check.
 
-I've basically tried "sparse file.c", but it always returns with an error
-like :
-"git-compat-util.h:140:11: error: unable to open 'openssl/ssl.h'"
-or
-"builtin/blame.c:7:10: error: unable to open 'cache.h'"
-
-I don't know how to resolve it...
-
-Axel
-
-
-
+Chris
