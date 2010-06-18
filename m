@@ -1,66 +1,162 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/1] parser: add support for asm goto
-Date: Fri, 11 Jun 2010 13:21:26 -0700
-Message-ID: <AANLkTikFcgP9fOlzepBbrX4GM0ESJaMiHlT1v2bMUVBw@mail.gmail.com>
-References: <1276158810-21313-1-git-send-email-jslaby@suse.cz>
-	<AANLkTikFMmCaTyACFgGGU84XxPUtpbfz0b3U67ZHj-jJ@mail.gmail.com>
-	<4C1250D3.10003@suse.cz>
+Subject: Re: L'\0' handling
+Date: Thu, 17 Jun 2010 17:30:40 -0700
+Message-ID: <AANLkTikeLwjc-OKk-tVGqRoz2uaf0MVzWJJSFWMinETM@mail.gmail.com>
+References: <1270738799.2167.7.camel@yura-tl>
+	<4BBDF4C0.8020305@redhat.com>
+	<1270741172.2167.9.camel@yura-tl>
+	<4BBDFC28.4080304@redhat.com>
+	<r2q70318cbf1004081319yc4bf61ccw252798cb98bc760b@mail.gmail.com>
+	<1270758815.2167.13.camel@yura-tl>
+	<g2p70318cbf1004081346t11dc0507u28f148c8b0706513@mail.gmail.com>
+	<4BBE4368.4080105@redhat.com>
+	<i2q70318cbf1004081618j1d677d34q438c89f715515520@mail.gmail.com>
+	<4BBEEBE9.7030009@redhat.com>
+	<s2m70318cbf1004091307q1f1ec7a6h679452199c9cbf06@mail.gmail.com>
+	<4BBF8E07.5030306@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed; boundary=0016363b916492cc6a0489431002
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gw0-f46.google.com ([74.125.83.46]:57928 "EHLO
-	mail-gw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756917Ab0FKUV1 convert rfc822-to-8bit (ORCPT
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:62311 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751953Ab0FRAal (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 11 Jun 2010 16:21:27 -0400
-Received: by gwj15 with SMTP id 15so1060175gwj.19
-        for <linux-sparse@vger.kernel.org>; Fri, 11 Jun 2010 13:21:26 -0700 (PDT)
-In-Reply-To: <4C1250D3.10003@suse.cz>
+	Thu, 17 Jun 2010 20:30:41 -0400
+Received: by vws18 with SMTP id 18so115133vws.19
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Jun 2010 17:30:40 -0700 (PDT)
+In-Reply-To: <4BBF8E07.5030306@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>
+To: Michael Stefaniuc <mstefani@redhat.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Jun 11, 2010 at 8:05 AM, Jiri Slaby <jslaby@suse.cz> wrote:
-> On 06/10/2010 09:18 PM, Christopher Li wrote:
->> Hi Jirl,
->
-> Hi, (the last letter in my name should be small I :))
+--0016363b916492cc6a0489431002
+Content-Type: text/plain; charset=ISO-8859-1
 
-Ah, sorry about that.
-
+On Fri, Apr 9, 2010 at 1:28 PM, Michael Stefaniuc <mstefani@redhat.com> wrote:
+>> Ah, silly me. I did not realized the nature of this change is to support
+>> wide
+>> char literals. Just look up what wide char string literals is, now I
+>> have a better
+>> idea. You are right. We should support both. My previous patch is wrong
+>> to set the type of wide char string as "long" type.
+>>
+>> So L"hello word\n" pointer are incompatible with char * pointer right?
 >
-> static inline int __static_cpu_has(unsigned char bit)
-> {
-> =A0 =A0 =A0 =A0asm goto("1: jmp %l[t_no]\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "2:\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ".section .altinstructions,\"a\"\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "1b\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "0\n" =A0 =A0 =A0 =A0 /* no replaceme=
-nt */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte %P0\n" =A0 =A0 =A0 =A0 /* fea=
-ture bit */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 2b - 1b\n" =A0 =A0 /* source =
-len */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 0\n" =A0 =A0 =A0 =A0 =A0 /* r=
-eplacement len */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 0xff + 0 - (2b-1b)\n" =A0/* p=
-adding */
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ".previous\n"
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 : : "i" (bit) : : t_no, ble);
-> =A0 =A0 =A0 =A0return 1;
-> t_no:
-> =A0 =A0 =A0 =A0return 0;
-> }
->
+> Yes, they are incompatible.
 
-I will add that as test case.
+A blast from the past. I found this patch while I am cleaning up my
+tree. Totally forget about it already.
+
+At least it should parse the L"hello world" now.
+Make the base type correct is more work though.
 
 Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--0016363b916492cc6a0489431002
+Content-Type: application/octet-stream;
+	name="0001-Parsing-wide-char-string.patch"
+Content-Disposition: attachment;
+	filename="0001-Parsing-wide-char-string.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gaka73zw0
+
+RnJvbSA0OWFkZjExYjk5Y2ZjZTA0ZGRjYWU3YmUwYTI3MmNjMmRmMzE0MzZkIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
+YXRlOiBUaHUsIDE3IEp1biAyMDEwIDE3OjA4OjA5IC0wNzAwClN1YmplY3Q6IFtQQVRDSCAxLzRd
+IFBhcnNpbmcgd2lkZSBjaGFyIHN0cmluZwoKQSBmb2xsb3cgdXAgY2hhbmdlIHRvIHBhcnNlIHRo
+ZSB3aWRlIGNoYXIgc3RyaW5nLgpJdCBjdXJyZW50bHkgb25seSBwYXJzZSBhbmQgc3RvcmUgaXQg
+bGlrZSBub3JtYWwgc3RyaW5ncy4KTmVlZCBtb3JlIGNoYW5nZSB0byByZWZsZWN0IHRoZSBiYXNl
+IHR5cGUgYW5kIHNpemUgZXRjLgoKU2lnbmVkLW9mZi1ieTogQ2hyaXN0b3BoZXIgTGkgPHNwYXJz
+ZUBjaHJpc2xpLm9yZz4KLS0tCiBleHByZXNzaW9uLmMgIHwgICAxMyArKysrKysrKy0tLS0tCiBl
+eHByZXNzaW9uLmggIHwgICAgNSArKysrLQogcHJlLXByb2Nlc3MuYyB8ICAgIDUgKysrLS0KIHRv
+a2VuLmggICAgICAgfCAgICAzICsrLQogdG9rZW5pemUuYyAgICB8ICAgMTcgKysrKysrKysrKyst
+LS0tLS0KIDUgZmlsZXMgY2hhbmdlZCwgMjggaW5zZXJ0aW9ucygrKSwgMTUgZGVsZXRpb25zKC0p
+CgpkaWZmIC0tZ2l0IGEvZXhwcmVzc2lvbi5jIGIvZXhwcmVzc2lvbi5jCmluZGV4IDY3ZTA1ZTcu
+LjdlMDZlNjAgMTAwNjQ0Ci0tLSBhL2V4cHJlc3Npb24uYworKysgYi9leHByZXNzaW9uLmMKQEAg
+LTIyNCwxNyArMjI0LDE4IEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnN0cmluZ19leHByZXNzaW9u
+KHN0cnVjdCB0b2tlbiAqdG9rZW4sIHN0cnVjdCBleHByZXNzaW9uICplCiB7CiAJc3RydWN0IHN0
+cmluZyAqc3RyaW5nID0gdG9rZW4tPnN0cmluZzsKIAlzdHJ1Y3QgdG9rZW4gKm5leHQgPSB0b2tl
+bi0+bmV4dDsKKwlpbnQgc3RyaW5ndHlwZSA9IHRva2VuX3R5cGUodG9rZW4pOwogCiAJY29udmVy
+dF9mdW5jdGlvbih0b2tlbik7CiAKLQlpZiAodG9rZW5fdHlwZShuZXh0KSA9PSBUT0tFTl9TVFJJ
+TkcpIHsKKwlpZiAodG9rZW5fdHlwZShuZXh0KSA9PSBzdHJpbmd0eXBlKSB7CiAJCWludCB0b3Rs
+ZW4gPSBzdHJpbmctPmxlbmd0aC0xOwogCQljaGFyICpkYXRhOwogCiAJCWRvIHsKIAkJCXRvdGxl
+biArPSBuZXh0LT5zdHJpbmctPmxlbmd0aC0xOwogCQkJbmV4dCA9IG5leHQtPm5leHQ7Ci0JCX0g
+d2hpbGUgKHRva2VuX3R5cGUobmV4dCkgPT0gVE9LRU5fU1RSSU5HKTsKKwkJfSB3aGlsZSAodG9r
+ZW5fdHlwZShuZXh0KSA9PSBzdHJpbmd0eXBlKTsKIAogCQlpZiAodG90bGVuID4gTUFYX1NUUklO
+RykgewogCQkJd2FybmluZyh0b2tlbi0+cG9zLCAidHJ5aW5nIHRvIGNvbmNhdGVuYXRlICVkLWNo
+YXJhY3RlciBzdHJpbmcgKCVkIGJ5dGVzIG1heCkiLCB0b3RsZW4sIE1BWF9TVFJJTkcpOwpAQCAt
+MjU2LDcgKzI1Nyw3IEBAIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnN0cmluZ19leHByZXNzaW9uKHN0
+cnVjdCB0b2tlbiAqdG9rZW4sIHN0cnVjdCBleHByZXNzaW9uICplCiAJCQluZXh0ID0gbmV4dC0+
+bmV4dDsKIAkJCW1lbWNweShkYXRhLCBzLT5kYXRhLCBsZW4pOwogCQkJZGF0YSArPSBsZW47Ci0J
+CX0gd2hpbGUgKHRva2VuX3R5cGUobmV4dCkgPT0gVE9LRU5fU1RSSU5HKTsKKwkJfSB3aGlsZSAo
+dG9rZW5fdHlwZShuZXh0KSA9PSBzdHJpbmd0eXBlKTsKIAkJKmRhdGEgPSAnXDAnOwogCX0KIAll
+eHByLT5zdHJpbmcgPSBzdHJpbmc7CkBAIC0zOTcsNyArMzk4LDcgQEAgc3RydWN0IHRva2VuICpw
+cmltYXJ5X2V4cHJlc3Npb24oc3RydWN0IHRva2VuICp0b2tlbiwgc3RydWN0IGV4cHJlc3Npb24g
+Kip0cmVlKQogCiAJc3dpdGNoICh0b2tlbl90eXBlKHRva2VuKSkgewogCWNhc2UgVE9LRU5fQ0hB
+UjoKLQljYXNlIFRPS0VOX0xPTkdfQ0hBUjoKKwljYXNlIFRPS0VOX1dJREVfQ0hBUjoKIAkJZXhw
+ciA9IGFsbG9jX2V4cHJlc3Npb24odG9rZW4tPnBvcywgRVhQUl9WQUxVRSk7ICAgCiAJCWV4cHIt
+PmZsYWdzID0gSW50X2NvbnN0X2V4cHI7CiAJCWV4cHItPmN0eXBlID0gdG9rZW5fdHlwZSh0b2tl
+bikgPT0gVE9LRU5fQ0hBUiA/ICZpbnRfY3R5cGUgOiAmbG9uZ19jdHlwZTsKQEAgLTQ2NCw5ICs0
+NjUsMTEgQEAgc3RydWN0IHRva2VuICpwcmltYXJ5X2V4cHJlc3Npb24oc3RydWN0IHRva2VuICp0
+b2tlbiwgc3RydWN0IGV4cHJlc3Npb24gKip0cmVlKQogCQlicmVhazsKIAl9CiAKLQljYXNlIFRP
+S0VOX1NUUklORzogeworCWNhc2UgVE9LRU5fU1RSSU5HOgorCWNhc2UgVE9LRU5fV0lERV9TVFJJ
+Tkc6IHsKIAloYW5kbGVfc3RyaW5nOgogCQlleHByID0gYWxsb2NfZXhwcmVzc2lvbih0b2tlbi0+
+cG9zLCBFWFBSX1NUUklORyk7CisJCWV4cHItPndpZGUgPSB0b2tlbl90eXBlKHRva2VuKSA9PSBU
+T0tFTl9XSURFX1NUUklORzsKIAkJdG9rZW4gPSBzdHJpbmdfZXhwcmVzc2lvbih0b2tlbiwgZXhw
+cik7CiAJCWJyZWFrOwogCX0KZGlmZiAtLWdpdCBhL2V4cHJlc3Npb24uaCBiL2V4cHJlc3Npb24u
+aAppbmRleCA2MzEyMjRmLi45Nzc4ZGU4IDEwMDY0NAotLS0gYS9leHByZXNzaW9uLmgKKysrIGIv
+ZXhwcmVzc2lvbi5oCkBAIC03Niw3ICs3NiwxMCBAQCBzdHJ1Y3QgZXhwcmVzc2lvbiB7CiAJCWxv
+bmcgZG91YmxlIGZ2YWx1ZTsKIAogCQkvLyBFWFBSX1NUUklORwotCQlzdHJ1Y3Qgc3RyaW5nICpz
+dHJpbmc7CisJCXN0cnVjdCB7CisJCQlpbnQgd2lkZTsKKwkJCXN0cnVjdCBzdHJpbmcgKnN0cmlu
+ZzsKKwkJfTsKIAogCQkvLyBFWFBSX1VOT1AsIEVYUFJfUFJFT1AgYW5kIEVYUFJfUE9TVE9QCiAJ
+CXN0cnVjdCAvKiB1bm9wICovIHsKZGlmZiAtLWdpdCBhL3ByZS1wcm9jZXNzLmMgYi9wcmUtcHJv
+Y2Vzcy5jCmluZGV4IDA1OGYyNGIuLjY1NmFjYWEgMTAwNjQ0Ci0tLSBhL3ByZS1wcm9jZXNzLmMK
+KysrIGIvcHJlLXByb2Nlc3MuYwpAQCAtODY0LDEwICs4NjQsMTEgQEAgc3RhdGljIGludCB0b2tl
+bl9kaWZmZXJlbnQoc3RydWN0IHRva2VuICp0MSwgc3RydWN0IHRva2VuICp0MikKIAkJZGlmZmVy
+ZW50ID0gdDEtPmFyZ251bSAhPSB0Mi0+YXJnbnVtOwogCQlicmVhazsKIAljYXNlIFRPS0VOX0NI
+QVI6Ci0JY2FzZSBUT0tFTl9MT05HX0NIQVI6CisJY2FzZSBUT0tFTl9XSURFX0NIQVI6CiAJCWRp
+ZmZlcmVudCA9IHQxLT5jaGFyYWN0ZXIgIT0gdDItPmNoYXJhY3RlcjsKIAkJYnJlYWs7Ci0JY2Fz
+ZSBUT0tFTl9TVFJJTkc6IHsKKwljYXNlIFRPS0VOX1NUUklORzoKKwljYXNlIFRPS0VOX1dJREVf
+U1RSSU5HOiB7CiAJCXN0cnVjdCBzdHJpbmcgKnMxLCAqczI7CiAKIAkJczEgPSB0MS0+c3RyaW5n
+OwpkaWZmIC0tZ2l0IGEvdG9rZW4uaCBiL3Rva2VuLmgKaW5kZXggYzUyN2U3OC4uYTdlYzc3ZSAx
+MDA2NDQKLS0tIGEvdG9rZW4uaAorKysgYi90b2tlbi5oCkBAIC02Nyw4ICs2Nyw5IEBAIGVudW0g
+dG9rZW5fdHlwZSB7CiAJVE9LRU5fWkVST19JREVOVCwKIAlUT0tFTl9OVU1CRVIsCiAJVE9LRU5f
+Q0hBUiwKLQlUT0tFTl9MT05HX0NIQVIsCisJVE9LRU5fV0lERV9DSEFSLAogCVRPS0VOX1NUUklO
+RywKKwlUT0tFTl9XSURFX1NUUklORywKIAlUT0tFTl9TUEVDSUFMLAogCVRPS0VOX1NUUkVBTUJF
+R0lOLAogCVRPS0VOX1NUUkVBTUVORCwKZGlmZiAtLWdpdCBhL3Rva2VuaXplLmMgYi90b2tlbml6
+ZS5jCmluZGV4IGNmMDU4MjYuLjRjOTc1MTcgMTAwNjQ0Ci0tLSBhL3Rva2VuaXplLmMKKysrIGIv
+dG9rZW5pemUuYwpAQCAtMTM3LDYgKzEzNyw3IEBAIGNvbnN0IGNoYXIgKnNob3dfdG9rZW4oY29u
+c3Qgc3RydWN0IHRva2VuICp0b2tlbikKIAkJcmV0dXJuIHNob3dfaWRlbnQodG9rZW4tPmlkZW50
+KTsKIAogCWNhc2UgVE9LRU5fU1RSSU5HOgorCWNhc2UgVE9LRU5fV0lERV9TVFJJTkc6CiAJCXJl
+dHVybiBzaG93X3N0cmluZyh0b2tlbi0+c3RyaW5nKTsKIAogCWNhc2UgVE9LRU5fTlVNQkVSOgpA
+QCAtMTQ2LDcgKzE0Nyw3IEBAIGNvbnN0IGNoYXIgKnNob3dfdG9rZW4oY29uc3Qgc3RydWN0IHRv
+a2VuICp0b2tlbikKIAkJcmV0dXJuIHNob3dfc3BlY2lhbCh0b2tlbi0+c3BlY2lhbCk7CiAKIAlj
+YXNlIFRPS0VOX0NIQVI6IAotCWNhc2UgVE9LRU5fTE9OR19DSEFSOiB7CisJY2FzZSBUT0tFTl9X
+SURFX0NIQVI6IHsKIAkJY2hhciAqcHRyID0gYnVmZmVyOwogCQlpbnQgYyA9IHRva2VuLT5jaGFy
+YWN0ZXI7CiAJCSpwdHIrKyA9ICdcJyc7CkBAIC01NDgsNyArNTQ5LDcgQEAgc3RhdGljIGludCBn
+ZXRfY2hhcl90b2tlbihpbnQgbmV4dCwgc3RyZWFtX3QgKnN0cmVhbSwgZW51bSB0b2tlbl90eXBl
+IHR5cGUpCiAJcmV0dXJuIG5leHRjaGFyKHN0cmVhbSk7CiB9CiAKLXN0YXRpYyBpbnQgZ2V0X3N0
+cmluZ190b2tlbihpbnQgbmV4dCwgc3RyZWFtX3QgKnN0cmVhbSkKK3N0YXRpYyBpbnQgZ2V0X3N0
+cmluZ190b2tlbihpbnQgbmV4dCwgc3RyZWFtX3QgKnN0cmVhbSwgZW51bSB0b2tlbl90eXBlIHR5
+cGUpCiB7CiAJc3RhdGljIGNoYXIgYnVmZmVyW01BWF9TVFJJTkddOwogCXN0cnVjdCBzdHJpbmcg
+KnN0cmluZzsKQEAgLTU4MSw3ICs1ODIsNyBAQCBzdGF0aWMgaW50IGdldF9zdHJpbmdfdG9rZW4o
+aW50IG5leHQsIHN0cmVhbV90ICpzdHJlYW0pCiAKIAkvKiBQYXNzIGl0IG9uLi4gKi8KIAl0b2tl
+biA9IHN0cmVhbS0+dG9rZW47Ci0JdG9rZW5fdHlwZSh0b2tlbikgPSBUT0tFTl9TVFJJTkc7CisJ
+dG9rZW5fdHlwZSh0b2tlbikgPSB0eXBlOwogCXRva2VuLT5zdHJpbmcgPSBzdHJpbmc7CiAJYWRk
+X3Rva2VuKHN0cmVhbSk7CiAJCkBAIC03MDEsNyArNzAyLDcgQEAgc3RhdGljIGludCBnZXRfb25l
+X3NwZWNpYWwoaW50IGMsIHN0cmVhbV90ICpzdHJlYW0pCiAJCQlyZXR1cm4gZ2V0X29uZV9udW1i
+ZXIoYywgbmV4dCwgc3RyZWFtKTsKIAkJYnJlYWs7CiAJY2FzZSAnIic6Ci0JCXJldHVybiBnZXRf
+c3RyaW5nX3Rva2VuKG5leHQsIHN0cmVhbSk7CisJCXJldHVybiBnZXRfc3RyaW5nX3Rva2VuKG5l
+eHQsIHN0cmVhbSwgVE9LRU5fU1RSSU5HKTsKIAljYXNlICdcJyc6CiAJCXJldHVybiBnZXRfY2hh
+cl90b2tlbihuZXh0LCBzdHJlYW0sIFRPS0VOX0NIQVIpOwogCWNhc2UgJy8nOgpAQCAtODgxLDgg
+Kzg4MiwxMiBAQCBzdGF0aWMgaW50IGdldF9vbmVfaWRlbnRpZmllcihpbnQgYywgc3RyZWFtX3Qg
+KnN0cmVhbSkKIAogCWlkZW50ID0gY3JlYXRlX2hhc2hlZF9pZGVudChidWYsIGxlbiwgaGFzaCk7
+CiAKLQlpZiAoaWRlbnQgPT0gJkxfaWRlbnQgJiYgbmV4dCA9PSAnXCcnKQotCQlyZXR1cm4gZ2V0
+X2NoYXJfdG9rZW4obmV4dGNoYXIoc3RyZWFtKSwgc3RyZWFtLCBUT0tFTl9MT05HX0NIQVIpOwor
+CWlmIChpZGVudCA9PSAmTF9pZGVudCkgeworCQlpZiAobmV4dCA9PSAnXCcnKQorCQkJcmV0dXJu
+IGdldF9jaGFyX3Rva2VuKG5leHRjaGFyKHN0cmVhbSksIHN0cmVhbSwgVE9LRU5fV0lERV9DSEFS
+KTsKKwkJaWYgKG5leHQgPT0gJ1wiJykKKwkJCXJldHVybiBnZXRfc3RyaW5nX3Rva2VuKG5leHRj
+aGFyKHN0cmVhbSksIHN0cmVhbSwgVE9LRU5fV0lERV9TVFJJTkcpOworCX0KIAogCS8qIFBhc3Mg
+aXQgb24uLiAqLwogCXRva2VuID0gc3RyZWFtLT50b2tlbjsKLS0gCjEuNi42LjEKCg==
+--0016363b916492cc6a0489431002--
