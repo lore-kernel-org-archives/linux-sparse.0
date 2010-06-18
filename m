@@ -1,65 +1,22 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/1] parser: add support for asm goto
-Date: Thu, 17 Jun 2010 17:35:56 -0700
-Message-ID: <AANLkTimGxxcjL74Yxshk3ybzQld3uf3Yhuk6VNAvQZWA@mail.gmail.com>
-References: <1276158810-21313-1-git-send-email-jslaby@suse.cz>
-	<AANLkTikFMmCaTyACFgGGU84XxPUtpbfz0b3U67ZHj-jJ@mail.gmail.com>
-	<4C1250D3.10003@suse.cz>
-	<AANLkTikFcgP9fOlzepBbrX4GM0ESJaMiHlT1v2bMUVBw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: "Maxine acyclic" <adam@smtp.hq.iskhus.co.za>
+Subject: Manufacturers Database - 1,057,119 records with 476,509 emails
+Date: Thu, 17 Jun 2010 20:36:48 -0400
+Message-ID: <BABE7BF0-0916-4421-8A19-8FEF1810ED9A@smtp.hq.iskhus.co.za>
+Reply-To: adam@smtp.hq.iskhus.co.za
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:33812 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757262Ab0FRAf5 convert rfc822-to-8bit (ORCPT
+Received: from smtp.hq.iskhus.co.za ([196.211.151.194]:53126 "HELO
+	smtp.hq.iskhus.co.za" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1755166Ab0FRAgs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 17 Jun 2010 20:35:57 -0400
-Received: by vws18 with SMTP id 18so120499vws.19
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Jun 2010 17:35:56 -0700 (PDT)
-In-Reply-To: <AANLkTikFcgP9fOlzepBbrX4GM0ESJaMiHlT1v2bMUVBw@mail.gmail.com>
+	Thu, 17 Jun 2010 20:36:48 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jiri Slaby <jslaby@suse.cz>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: bmullen@vuse.vanderbilt.edu, ceffe@paju.oulu.fi, barefootdoctor@barefootdoctorworld.com, neil.henry@gmail.com, tickets@klpac.org, scientificengineeing@manpower.ie, lgonzalez2@nybloodc
 
-On Fri, Jun 11, 2010 at 1:21 PM, Christopher Li <sparse@chrisli.org> wr=
-ote:
->> static inline int __static_cpu_has(unsigned char bit)
->> {
->> =A0 =A0 =A0 =A0asm goto("1: jmp %l[t_no]\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "2:\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ".section .altinstructions,\"a\"\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "1b\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 "0\n" =A0 =A0 =A0 =A0 /* no replacem=
-ent */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte %P0\n" =A0 =A0 =A0 =A0 /* fe=
-ature bit */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 2b - 1b\n" =A0 =A0 /* source=
- len */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 0\n" =A0 =A0 =A0 =A0 =A0 /* =
-replacement len */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 " .byte 0xff + 0 - (2b-1b)\n" =A0/* =
-padding */
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 ".previous\n"
->> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 : : "i" (bit) : : t_no, ble);
->> =A0 =A0 =A0 =A0return 1;
->> t_no:
->> =A0 =A0 =A0 =A0return 0;
->> }
->>
+I have many different good quality lists from various sources. The prices are relatively low as well. Drop me a line here:  Andrea.Fischer@listgenius.info
+I'll get you all the details and samples. 
+  
 
-Hi, I update the chrisl branch with your change and the test case.
 
-Please verify it. I hope I did not do some thing stupid there.
+to get off please email disappear@listgenius.info
 
-It just hit me, is "asm volatile goto" or "asm goto volatile" valid?
-If so, the asm goto code needs some change.
-
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
