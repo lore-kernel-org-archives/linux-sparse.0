@@ -1,46 +1,54 @@
-From: Morten Welinder <mortenw@gnome.org>
-Subject: Small patch for __builtin_fabs and an attribute
-Date: Fri, 9 Jul 2010 23:15:04 -0400
-Message-ID: <AANLkTilLz1Tgfnf8nwvocJeX5B2bpBG5ZzObHdNKF_ee@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Jiri Slaby <jslaby@suse.cz>
+Subject: [PATCH 1/2] parser: fix and simplify support of asm goto
+Date: Sat, 10 Jul 2010 10:39:21 +0200
+Message-ID: <1278751162-10053-1-git-send-email-jslaby@suse.cz>
+References: <AANLkTikFmeXz9og4t98jm6QcAdRa6rIeCAv3oeFnTgd8@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:36204 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753004Ab0GJDPH (ORCPT
+Received: from mail.pripojeni.net ([217.66.174.14]:48443 "EHLO
+	mail.pripojeni.net" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751309Ab0GJIja (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 9 Jul 2010 23:15:07 -0400
-Received: by gxk23 with SMTP id 23so1698147gxk.19
-        for <linux-sparse@vger.kernel.org>; Fri, 09 Jul 2010 20:15:06 -0700 (PDT)
+	Sat, 10 Jul 2010 04:39:30 -0400
+In-Reply-To: <AANLkTikFmeXz9og4t98jm6QcAdRa6rIeCAv3oeFnTgd8@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: christ.li@gmail.com
+Cc: jirislaby@gmail.com, Larry Finger <Larry.Finger@lwfinger.net>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Jiri Slaby <jslaby@suse.cz>
 
-FYI.
+Christopher Li wrote:
+> Yes, you caught me slacking off. It is time to cut a new release
+> and flush all the bits into the official tree.
 
+But include the patch below first, please. And maybe the second
+one...
 
-diff --git a/lib.c b/lib.c
-index a218bfc..7f0b524 100644
---- a/lib.c
-+++ b/lib.c
-@@ -716,6 +716,7 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern long __builtin_alpha_inslh(long, long);\n");
- 	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
- 	add_pre_buffer("extern long __builtin_labs(long);\n");
-+	add_pre_buffer("extern double __builtin_fabs(double);\n");
+---
 
- 	/* And some floating point stuff.. */
- 	add_pre_buffer("extern int __builtin_isgreater(float, float);\n");
+1) We now handle only "asm (volatile|goto)?", whereas
+   "asm volatile? goto?" is correct.
+2) We need to match only goto_ident, so do it explicitly against
+   token->ident without match_idents.
+
+Signed-off-by: Jiri Slaby <jslaby@suse.cz>
+---
+ parse.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
 diff --git a/parse.c b/parse.c
-index f81b19f..0645538 100644
+index caf10b9..dd7b1a4 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -515,6 +515,8 @@ const char *ignored_attributes[] = {
- 	"__format_arg__",
- 	"hot",
- 	"__hot__",
-+	"may_alias",
-+	"__may_alias__",
- 	"malloc",
- 	"__malloc__",
- 	"model",
+@@ -1915,7 +1915,8 @@ static struct token *parse_asm_statement(struct token *token, struct statement *
+ 	stmt->type = STMT_ASM;
+ 	if (match_idents(token, &__volatile___ident, &__volatile_ident, &volatile_ident, NULL)) {
+ 		token = token->next;
+-	} else if (match_idents(token, &goto_ident, NULL)) {
++	}
++	if (token->ident == &goto_ident) {
+ 		is_goto = 1;
+ 		token = token->next;
+ 	}
+-- 
+1.7.1
+
+
