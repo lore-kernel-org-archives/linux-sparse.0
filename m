@@ -1,54 +1,35 @@
 From: Jiri Slaby <jslaby@suse.cz>
-Subject: [PATCH 1/2] parser: fix and simplify support of asm goto
-Date: Sat, 10 Jul 2010 10:39:21 +0200
-Message-ID: <1278751162-10053-1-git-send-email-jslaby@suse.cz>
+Subject: [PATCH 2/2] parser: define __builtin_unreachable
+Date: Sat, 10 Jul 2010 10:39:22 +0200
+Message-ID: <1278751162-10053-2-git-send-email-jslaby@suse.cz>
 References: <AANLkTikFmeXz9og4t98jm6QcAdRa6rIeCAv3oeFnTgd8@mail.gmail.com>
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.pripojeni.net ([217.66.174.14]:48443 "EHLO
-	mail.pripojeni.net" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751309Ab0GJIja (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 10 Jul 2010 04:39:30 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <AANLkTikFmeXz9og4t98jm6QcAdRa6rIeCAv3oeFnTgd8@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: christ.li@gmail.com
 Cc: jirislaby@gmail.com, Larry Finger <Larry.Finger@lwfinger.net>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Jiri Slaby <jslaby@suse.cz>
+List-Id: linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-> Yes, you caught me slacking off. It is time to cut a new release
-> and flush all the bits into the official tree.
-
-But include the patch below first, please. And maybe the second
-one...
-
----
-
-1) We now handle only "asm (volatile|goto)?", whereas
-   "asm volatile? goto?" is correct.
-2) We need to match only goto_ident, so do it explicitly against
-   token->ident without match_idents.
+Gcc 4.5 defines
+extern void __builtin_unreachable(void);
+so, add it also to sparse.
 
 Signed-off-by: Jiri Slaby <jslaby@suse.cz>
 ---
- parse.c |    3 ++-
- 1 files changed, 2 insertions(+), 1 deletions(-)
+ lib.c |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-diff --git a/parse.c b/parse.c
-index caf10b9..dd7b1a4 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1915,7 +1915,8 @@ static struct token *parse_asm_statement(struct token *token, struct statement *
- 	stmt->type = STMT_ASM;
- 	if (match_idents(token, &__volatile___ident, &__volatile_ident, &volatile_ident, NULL)) {
- 		token = token->next;
--	} else if (match_idents(token, &goto_ident, NULL)) {
-+	}
-+	if (token->ident == &goto_ident) {
- 		is_goto = 1;
- 		token = token->next;
- 	}
+diff --git a/lib.c b/lib.c
+index a218bfc..ae6a20c 100644
+--- a/lib.c
++++ b/lib.c
+@@ -740,6 +740,7 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer ("extern char * __builtin___strncpy_chk(char *, const char *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+ 	add_pre_buffer ("extern int __builtin___vsprintf_chk(char *, int, __SIZE_TYPE__, const char *, __builtin_va_list);\n");
+ 	add_pre_buffer ("extern int __builtin___vsnprintf_chk(char *, __SIZE_TYPE__, int, __SIZE_TYPE__, const char *, __builtin_va_list ap);\n");
++	add_pre_buffer ("extern void __builtin_unreachable(void);\n");
+ }
+ 
+ void create_builtin_stream(void)
 -- 
 1.7.1
-
-
