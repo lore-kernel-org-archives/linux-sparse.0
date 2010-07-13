@@ -1,65 +1,49 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Small patch for __builtin_fabs and an attribute
-Date: Tue, 13 Jul 2010 00:33:36 -0700
-Message-ID: <AANLkTilt83WWkm4wJnfLZucaKbHF8AZj-aoU2aMDZehY@mail.gmail.com>
-References: <AANLkTilLz1Tgfnf8nwvocJeX5B2bpBG5ZzObHdNKF_ee@mail.gmail.com>
+From: Chris Li <christ.li@gmail.com>
+Subject: Re: [PATCH 2/2] parser: define __builtin_unreachable
+Date: Tue, 13 Jul 2010 00:52:48 -0700
+Message-ID: <AANLkTimf821jhfhU-Rsj7xa2S4EzuP23weoUSZVWsD2u@mail.gmail.com>
+References: <AANLkTikFmeXz9og4t98jm6QcAdRa6rIeCAv3oeFnTgd8@mail.gmail.com>
+	<1278751162-10053-2-git-send-email-jslaby@suse.cz>
+	<20100710090705.GA14881@feather>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qy0-f181.google.com ([209.85.216.181]:41968 "EHLO
-	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751542Ab0GMHdh convert rfc822-to-8bit (ORCPT
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:61581 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752256Ab0GMHwt convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 13 Jul 2010 03:33:37 -0400
-Received: by qyk38 with SMTP id 38so4733676qyk.19
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Jul 2010 00:33:36 -0700 (PDT)
-In-Reply-To: <AANLkTilLz1Tgfnf8nwvocJeX5B2bpBG5ZzObHdNKF_ee@mail.gmail.com>
+	Tue, 13 Jul 2010 03:52:49 -0400
+In-Reply-To: <20100710090705.GA14881@feather>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Morten Welinder <mortenw@gnome.org>
-Cc: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Jiri Slaby <jslaby@suse.cz>, jirislaby@gmail.com, Larry Finger <Larry.Finger@lwfinger.net>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Fri, Jul 9, 2010 at 8:15 PM, Morten Welinder <mortenw@gnome.org> wro=
-te:
-> FYI.
+On Sat, Jul 10, 2010 at 2:07 AM, Josh Triplett <josh@joshtriplett.org> =
+wrote:
+> __builtin_unreachable has special semantics beyond just a function.
+> This definition will suffice to allow compilation, but
+> __builtin_unreachable should have the same effect in sparse that it d=
+oes
+> in GCC: mark the point (and the remainder of the basic block) as
+> unreachable. =A0Something like the mechanism used for handling noretu=
+rn
+> would work here as well; declaring the function to have attribute
+> noreturn would probably have almost the right semantics.
 >
->
-> diff --git a/lib.c b/lib.c
-> index a218bfc..7f0b524 100644
-> --- a/lib.c
-> +++ b/lib.c
-> @@ -716,6 +716,7 @@ void declare_builtin_functions(void)
-> =A0 =A0 =A0 =A0add_pre_buffer("extern long __builtin_alpha_inslh(long=
-, long);\n");
-> =A0 =A0 =A0 =A0add_pre_buffer("extern long __builtin_alpha_cmpbge(lon=
-g, long);\n");
-> =A0 =A0 =A0 =A0add_pre_buffer("extern long __builtin_labs(long);\n");
-> + =A0 =A0 =A0 add_pre_buffer("extern double __builtin_fabs(double);\n=
-");
->
-> =A0 =A0 =A0 =A0/* And some floating point stuff.. */
-> =A0 =A0 =A0 =A0add_pre_buffer("extern int __builtin_isgreater(float, =
-float);\n");
-> diff --git a/parse.c b/parse.c
-> index f81b19f..0645538 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -515,6 +515,8 @@ const char *ignored_attributes[] =3D {
-> =A0 =A0 =A0 =A0"__format_arg__",
-> =A0 =A0 =A0 =A0"hot",
-> =A0 =A0 =A0 =A0"__hot__",
-> + =A0 =A0 =A0 "may_alias",
-> + =A0 =A0 =A0 "__may_alias__",
-> =A0 =A0 =A0 =A0"malloc",
-> =A0 =A0 =A0 =A0"__malloc__",
-> =A0 =A0 =A0 =A0"model",
 
-Hi Morten,
+The attribute noreturn will apply to the whole function. The function
+NEVER returns.
+__builtin_unreachable only apply to current basic block. e.g. some
+error handling path like panic. The function can still return a value o=
+n the
+normal path. It has different meaning than attribute noreturn. So I don=
+'t think
+automatically give the function noreturn attribute is the right thing t=
+o do.
 
-I forget one thing. Can you signed off your patch?
-
-Thanks
+I will apply the patch until we got better way to handle this.
 
 Chris
 --
