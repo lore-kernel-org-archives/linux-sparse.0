@@ -1,50 +1,58 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: Spurious symbol 'foo' was not declared
-Date: Sun, 18 Jul 2010 13:35:43 -0700
-Message-ID: <20100718203542.GA3665@feather>
-References: <AANLkTikqtMvb3fdg4aKR1KStEBhg1yDM-0YpR0VGHtiT@mail.gmail.com>
+From: Pavel Roskin <proski@gnu.org>
+Subject: Bogus warning when comparing nocast short variables
+Date: Wed, 21 Jul 2010 12:51:02 -0400
+Message-ID: <1279731062.9003.15.camel@mj>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:54192 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757252Ab0GRUj3 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 18 Jul 2010 16:39:29 -0400
-Received: from mrelay2-v.mgt.gandi.net (relay2-v.mail.gandi.net [217.70.178.76])
-	by slow3-v.mail.gandi.net (Postfix) with ESMTP id C7AEE84142
-	for <linux-sparse@vger.kernel.org>; Sun, 18 Jul 2010 22:36:15 +0200 (CEST)
-Content-Disposition: inline
-In-Reply-To: <AANLkTikqtMvb3fdg4aKR1KStEBhg1yDM-0YpR0VGHtiT@mail.gmail.com>
+Received: from c60.cesmail.net ([216.154.195.49]:56285 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750986Ab0GUQvJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 21 Jul 2010 12:51:09 -0400
+Received: from [192.168.0.22] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
+	by smtprelay2.cesmail.net (Postfix) with ESMTPSA id 6D1FC34C6D
+	for <linux-sparse@vger.kernel.org>; Wed, 21 Jul 2010 13:11:08 -0400 (EDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Morten Welinder <mortenw@gnome.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sun, Jul 18, 2010 at 04:16:37PM -0400, Morten Welinder wrote:
-> I think sparse issues a spurious warning about "static" for this prog=
-ram.
-> Right?
->=20
-> Morten
->=20
-> static void foo (int);
-> void foo (int a) { }
->=20
-> welinder@anemone:~> cgcc -Wall -c sss.c
-> sss.c:2:6: warning: symbol 'foo' was not declared. Should it be stati=
-c?
-> sss.c:2: warning: =E2=80=98foo=E2=80=99 defined but not used
+Hello!
 
-The second warning comes from gcc, I think.  But yes, the first warning
-represents a long-standing sparse bug; "static" in the prototype doesn'=
-t
-propagate to the definition.
+This test file causes a warning:
 
-- Josh Triplett
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+typedef short __attribute__((nocast)) u16;
+int main(int argc, char **argv)
+{
+        u16 i = (u16)argc;
+        u16 j = (u16)2;
+        return (i == j);
+}
+
+$ sparse test1.c 
+test1.c:6:17: warning: implicit cast from nocast type
+test1.c:6:22: warning: implicit cast from nocast type
+
+But this file doesn't cause any warning:
+
+typedef short __attribute__((nocast)) u16;
+int main(int argc, char **argv)
+{
+        u16 i = (u16)argc;
+        u16 j = (u16)2;
+        switch (i) {
+                case j: return 1;;
+                default: return 0;;
+        }
+}
+
+I think the warnings are bogus.  No cast should be needed to compare
+variables of the same type.
+
+The warning was actually found in the current Linux kernel, driver
+zd1121rw.  A fix was proposed, but I thing the fix belongs to the sparse
+code.
+
+-- 
+Regards,
+Pavel Roskin
