@@ -1,45 +1,34 @@
-From: Bart Van Assche <bvanassche@acm.org>
-Subject: sparse ignores __attribute__((packed))
-Date: Sun, 15 Aug 2010 18:15:22 +0200
-Message-ID: <AANLkTi=1-hMnZGHix_DC_7_7TcOCo6OrGJx3JYFppN86@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: sparse ignores __attribute__((packed))
+Date: Mon, 16 Aug 2010 17:20:16 -0700
+Message-ID: <AANLkTi=M4E5ecu_d_w8aZV_270k7Xc6w6BtXD8w2A-zX@mail.gmail.com>
+References: <AANLkTi=1-hMnZGHix_DC_7_7TcOCo6OrGJx3JYFppN86@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:41323 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932070Ab0HOQPX convert rfc822-to-8bit (ORCPT
+Received: from mail-ey0-f174.google.com ([209.85.215.174]:43752 "EHLO
+	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753957Ab0HQAUR (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 15 Aug 2010 12:15:23 -0400
-Received: by vws3 with SMTP id 3so2661487vws.19
-        for <linux-sparse@vger.kernel.org>; Sun, 15 Aug 2010 09:15:22 -0700 (PDT)
+	Mon, 16 Aug 2010 20:20:17 -0400
+Received: by eyg5 with SMTP id 5so1675992eyg.19
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Aug 2010 17:20:16 -0700 (PDT)
+In-Reply-To: <AANLkTi=1-hMnZGHix_DC_7_7TcOCo6OrGJx3JYFppN86@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Bart Van Assche <bvanassche@acm.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hello,
+On Sun, Aug 15, 2010 at 9:15 AM, Bart Van Assche <bvanassche@acm.org> wrote:
+> Hello,
+>
+> The test program below compiles fine with gcc 4.5.0 but triggers a
+> build error with sparse (git repository last updated on July 11). This
+> seems like a sparse bug to me. Is this a known issue ?
 
-The test program below compiles fine with gcc 4.5.0 but triggers a
-build error with sparse (git repository last updated on July 11). This
-seems like a sparse bug to me. Is this a known issue ?
+Yes, it is a known issue. Sparse hasn't pay attention to the packed
+attribute at all.
 
-#define BUILD_BUG_ON(e) (void)(sizeof(struct { int:-!!(e); }))
+Patches are welcome :-)
 
-struct s {
-=A0=A0=A0 char c;
-=A0=A0=A0 int i;
-} __attribute__((packed));
-
-int main(int argc, char** argv)
-{
-=A0=A0=A0 BUILD_BUG_ON(sizeof(struct s) !=3D sizeof(char) + sizeof(int)=
-);
-=A0=A0=A0 return 0;
-}
-
-Bart.
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Chris
