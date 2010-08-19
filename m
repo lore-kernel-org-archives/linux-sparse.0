@@ -1,34 +1,46 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse ignores __attribute__((packed))
-Date: Mon, 16 Aug 2010 17:20:16 -0700
-Message-ID: <AANLkTi=M4E5ecu_d_w8aZV_270k7Xc6w6BtXD8w2A-zX@mail.gmail.com>
-References: <AANLkTi=1-hMnZGHix_DC_7_7TcOCo6OrGJx3JYFppN86@mail.gmail.com>
+From: Bernd Petrovitsch <bernd@sysprog.at>
+Subject: Lots of "error: multiple storage classes" warnings on the Linux
+ kernel
+Date: Thu, 19 Aug 2010 14:53:12 +0200
+Message-ID: <1282222392.10440.60.camel@thorin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:43752 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753957Ab0HQAUR (ORCPT
+Received: from esgaroth.petrovitsch.at ([78.47.184.11]:2335 "EHLO
+	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752886Ab0HSMxO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Aug 2010 20:20:17 -0400
-Received: by eyg5 with SMTP id 5so1675992eyg.19
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Aug 2010 17:20:16 -0700 (PDT)
-In-Reply-To: <AANLkTi=1-hMnZGHix_DC_7_7TcOCo6OrGJx3JYFppN86@mail.gmail.com>
+	Thu, 19 Aug 2010 08:53:14 -0400
+Received: from [172.16.0.10] (chello062178036229.13.11.wu-wien.teleweb.at [62.178.36.229])
+	(authenticated bits=0)
+	by esgaroth.petrovitsch.priv.at (8.14.1/8.14.1) with ESMTP id o7JCrCHE013960
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Thu, 19 Aug 2010 14:53:13 +0200
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Bart Van Assche <bvanassche@acm.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sun, Aug 15, 2010 at 9:15 AM, Bart Van Assche <bvanassche@acm.org> wrote:
-> Hello,
->
-> The test program below compiles fine with gcc 4.5.0 but triggers a
-> build error with sparse (git repository last updated on July 11). This
-> seems like a sparse bug to me. Is this a known issue ?
+Hi all!
 
-Yes, it is a known issue. Sparse hasn't pay attention to the packed
-attribute at all.
+While investigating something completely different, I noticed lots of 
+"error: multiple storage classes" warnings, e.g.
+----  snip  ----
+  CHECK   security/keys/keyring.c
+include/linux/sched.h:831:12: error: multiple storage classes: extern weak
+security/keys/keyring.c:75:1: error: multiple storage classes: extern weak
+security/keys/keyring.c:471:1: error: multiple storage classes: extern weak
+security/keys/keyring.c:899:1: error: multiple storage classes: extern weak
+security/keys/keyring.c:974:1: error: multiple storage classes: extern weak
+security/keys/keyring.c:1033:1: error: multiple storage classes: extern weak
+----  snip  ---- 
+[ The ": extern weak" is from me to see which are actually set. ]
 
-Patches are welcome :-)
+Is this warning correct that way (and the source should be fixed) or is
+the warning in that wrong?
 
-Chris
+	Bernd 
+-- 
+mobile: +43 664 4416156              http://www.sysprog.at/
+    Linux Software Development, Consulting and Services
+
