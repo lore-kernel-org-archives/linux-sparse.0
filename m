@@ -1,59 +1,92 @@
-From: Bernd Petrovitsch <bernd@petrovitsch.priv.at>
-Subject: Re: Lots of "error: multiple storage classes" warnings on the
- Linux kernel
-Date: Fri, 20 Aug 2010 10:37:39 +0200
-Message-ID: <1282293459.10440.223.camel@thorin>
-References: <1282222392.10440.60.camel@thorin>
-	 <20100819192656.GA19303@merkur.ravnborg.org>
+From: Bernd Petrovitsch <bernd@sysprog.at>
+Subject: modifier_string() inconsistency with modifiers
+Date: Fri, 20 Aug 2010 12:33:48 +0200
+Message-ID: <1282300429.10440.230.camel@thorin>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from esgaroth.petrovitsch.at ([78.47.184.11]:6060 "EHLO
+Received: from esgaroth.petrovitsch.at ([78.47.184.11]:4719 "EHLO
 	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751620Ab0HTIhr (ORCPT
+	by vger.kernel.org with ESMTP id S1752423Ab0HTKdw (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Aug 2010 04:37:47 -0400
-In-Reply-To: <20100819192656.GA19303@merkur.ravnborg.org>
+	Fri, 20 Aug 2010 06:33:52 -0400
+Received: from [172.16.0.10] (chello062178036229.13.11.wu-wien.teleweb.at [62.178.36.229])
+	(authenticated bits=0)
+	by esgaroth.petrovitsch.priv.at (8.14.1/8.14.1) with ESMTP id o7KAXn0L022822
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Fri, 20 Aug 2010 12:33:50 +0200
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Don, 2010-08-19 at 21:26 +0200, Sam Ravnborg wrote:
-> On Thu, Aug 19, 2010 at 02:53:12PM +0200, Bernd Petrovitsch wrote:
-[...]
-> > While investigating something completely different, I noticed lots of 
-> > "error: multiple storage classes" warnings, e.g.
-> > ----  snip  ----
-> >   CHECK   security/keys/keyring.c
-> > include/linux/sched.h:831:12: error: multiple storage classes: extern weak
-> > security/keys/keyring.c:75:1: error: multiple storage classes: extern weak
-> > security/keys/keyring.c:471:1: error: multiple storage classes: extern weak
-> > security/keys/keyring.c:899:1: error: multiple storage classes: extern weak
-> > security/keys/keyring.c:974:1: error: multiple storage classes: extern weak
-> > security/keys/keyring.c:1033:1: error: multiple storage classes: extern weak
-> > ----  snip  ---- 
-> > [ The ": extern weak" is from me to see which are actually set. ]
-> > 
-> > Is this warning correct that way (and the source should be fixed) or is
-> > the warning in that wrong?
-> 
-> Can you cook up a small code snippet that
-> exhibit this without all the kernel macros etc?
+Hi all!
 
-Of course.
+To dump/print the modifiers, I just found the
+modifier_string() function (in show-parse.c).
 
-> This would make it easier for the sparse folks to understand.
-
+To the best of my understanding
 ----  snip  ----
-{341}echo 'extern int __attribute__((weak)) foobar(void);' | sparse -f -
--:1:12: error: multiple storage classes: extern weak
+	const char *res,**ptr, *names[] = {
+		"auto", "register", "static", "extern",
+		"const", "volatile", "[signed]", "[unsigned]",
+		"[char]", "[short]", "[long]", "[long long]",
+		"[typdef]", "[structof]", "[unionof]", "[enum]",
+		"[typeof]", "[attribute]", "inline", "[addressable]",
+		"[nocast]", "[noderef]", "[accessed]", "[toplevel]",
+		"[label]", "[assigned]", "[type]", "[safe]",
+		"[usertype]", "[force]", "[explicitly-signed]",
+		NULL
+	};
 ----  snip  ----
-is a minimal example shows that.
+lists printable strings for the modifiers. The modifiers are bits
+defined in symbol.h.
+----  snip  ----
+/* Modifiers */
+#define MOD_AUTO	0x0001
+#define MOD_REGISTER	0x0002
+#define MOD_STATIC	0x0004
+#define MOD_EXTERN	0x0008
+
+#define MOD_CONST	0x0010
+#define MOD_VOLATILE	0x0020
+#define MOD_SIGNED	0x0040
+#define MOD_UNSIGNED	0x0080
+
+#define MOD_CHAR	0x0100
+#define MOD_SHORT	0x0200
+#define MOD_LONG	0x0400
+#define MOD_LONGLONG	0x0800
+
+#define MOD_TYPEDEF	0x1000
+#define MOD_WEAK	0x2000
+
+#define MOD_INLINE	0x40000
+#define MOD_ADDRESSABLE	0x80000
+
+#define MOD_NOCAST	0x100000
+#define MOD_NODEREF	0x200000
+#define MOD_ACCESSED	0x400000
+#define MOD_TOPLEVEL	0x800000	// scoping..
+
+#define MOD_LABEL	0x1000000
+#define MOD_ASSIGNED	0x2000000
+#define MOD_TYPE	0x4000000
+#define MOD_SAFE	0x8000000	// non-null/non-trapping pointer
+
+#define MOD_USERTYPE	0x10000000
+#define MOD_FORCE	0x20000000
+#define MOD_EXPLICITLY_SIGNED	0x40000000
+#define MOD_BITWISE	0x80000000
+----  snip  ----
+Well, the equivalent for "MOD_WEAK" is "[structof]" - which seems wrong
+to me.
+And the parts for "inline" also doesn't fit AFAICS.
+
+What did I actually miss?
 
 	Bernd
 -- 
-Bernd Petrovitsch                  Email : bernd@petrovitsch.priv.at
-                     LUGA : http://www.luga.at
+mobile: +43 664 4416156              http://www.sysprog.at/
+    Linux Software Development, Consulting and Services
 
