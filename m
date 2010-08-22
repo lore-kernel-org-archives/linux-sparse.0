@@ -1,43 +1,30 @@
-From: Bernd Petrovitsch <bernd@sysprog.at>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: modifier_string() inconsistency with modifiers
-Date: Sun, 22 Aug 2010 10:42:19 +0200
-Message-ID: <1282466539.5200.1.camel@thorin>
+Date: Sun, 22 Aug 2010 10:25:30 -0700
+Message-ID: <AANLkTinT5xhr+C4H71CWx3R9EqHy6ycp8gskjUqjts2Q@mail.gmail.com>
 References: <1282300429.10440.230.camel@thorin>
-	 <AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
+	<AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
+	<1282466539.5200.1.camel@thorin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from esgaroth.petrovitsch.at ([78.47.184.11]:1905 "EHLO
-	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751605Ab0HVImZ (ORCPT
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:52260 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751708Ab0HVRZc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 22 Aug 2010 04:42:25 -0400
-In-Reply-To: <AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
+	Sun, 22 Aug 2010 13:25:32 -0400
+Received: by ewy23 with SMTP id 23so2924700ewy.19
+        for <linux-sparse@vger.kernel.org>; Sun, 22 Aug 2010 10:25:30 -0700 (PDT)
+In-Reply-To: <1282466539.5200.1.camel@thorin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Bernd Petrovitsch <bernd@sysprog.at>
 Cc: linux-sparse@vger.kernel.org
 
-On Fre, 2010-08-20 at 16:03 -0700, Christopher Li wrote:
-> On Fri, Aug 20, 2010 at 3:33 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
-> >
-> > Well, the equivalent for "MOD_WEAK" is "[structof]" - which seems wrong
-> > to me.
-> > And the parts for "inline" also doesn't fit AFAICS.
-> >
-> > What did I actually miss?
-> 
-> Nothing. We remove some bits from the modifier but forget to update
-> the modifier_string function.
-> 
-> Care for a patch?
+On Sun, Aug 22, 2010 at 1:42 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
+> Not a big problem.
+> Hmm, is it prudent to use c99, e.g. for named initializers und array?
+>
+Not at all. Sparse use c99 extensively.
 
-Not a big problem.
-Hmm, is it prudent to use c99, e.g. for named initializers und array?
-
-	Bernd
--- 
-mobile: +43 664 4416156              http://www.sysprog.at/
-    Linux Software Development, Consulting and Services
-
+Chris
