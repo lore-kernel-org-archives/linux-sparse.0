@@ -1,104 +1,102 @@
-From: Bernd Petrovitsch <bernd@sysprog.at>
-Subject: [PATCH] removed an unused parameter for show_symbol_list()
-Date: Thu, 26 Aug 2010 12:31:38 +0200
-Message-ID: <1282818698.12802.23.camel@thorin>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Fixup and cleanup of the modifier_string() function (was
+ Re: modifier_string() inconsistency with modifiers)
+Date: Fri, 3 Sep 2010 02:13:38 -0700
+Message-ID: <AANLkTikOGhqVu8+A_kT=95AX=10H_pxhwqLmQr+08zzm@mail.gmail.com>
+References: <1282300429.10440.230.camel@thorin>
+	<AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
+	<1282466539.5200.1.camel@thorin>
+	<AANLkTinT5xhr+C4H71CWx3R9EqHy6ycp8gskjUqjts2Q@mail.gmail.com>
+	<1282574577.5200.18.camel@thorin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=0015174c17b49e9f9f048f5758e3
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from esgaroth.petrovitsch.at ([78.47.184.11]:5857 "EHLO
-	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753511Ab0HZKbk (ORCPT
+Received: from mail-ew0-f46.google.com ([209.85.215.46]:39440 "EHLO
+	mail-ew0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752537Ab0ICJNk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Aug 2010 06:31:40 -0400
-Received: from [172.16.0.10] (chello062178036229.13.11.wu-wien.teleweb.at [62.178.36.229])
-	(authenticated bits=0)
-	by esgaroth.petrovitsch.priv.at (8.14.1/8.14.1) with ESMTP id o7QAVdmk029493
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Thu, 26 Aug 2010 12:31:39 +0200
+	Fri, 3 Sep 2010 05:13:40 -0400
+Received: by ewy23 with SMTP id 23so892837ewy.19
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Sep 2010 02:13:38 -0700 (PDT)
+In-Reply-To: <1282574577.5200.18.camel@thorin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Bernd Petrovitsch <bernd@sysprog.at>
+Cc: linux-sparse@vger.kernel.org
 
-Hi all!
+--0015174c17b49e9f9f048f5758e3
+Content-Type: text/plain; charset=ISO-8859-1
 
-A trivial patch to remove an unused parameter.
-
-Is there some interest in patches to to be able to add -Wextra to gcc's
-flags?
-
-The main parts are
-- lots of (other) unused parameters which can't be deleted. So they
-  should be marked __attribute__((unused)) - either explicitely or
-  with a "__unused" (or similar) macro.
-- And largest thing is "signed vs unsigned" AFAICS. So is the strategy
-  to use/convert to "unsigned" if it makes sense (like bits_in_*
-  variables) or use "signed" everywhere?
-
-	Bernd
----
-
- show-parse.c   |    2 +-
- symbol.h       |    2 +-
- test-parsing.c |    4 ++--
- 3 files changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/show-parse.c b/show-parse.c
-index eab07c7..de3fea0 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -127,7 +127,7 @@ static void show_struct_member(const struct symbol
-*sym)
- 	printf("\n");
- }
- 
--void show_symbol_list(const struct symbol_list *list, const char *sep)
-+void show_symbol_list(const struct symbol_list *list)
- {
- 	struct symbol *sym;
- 	const char *prepend = "";
-diff --git a/symbol.h b/symbol.h
-index 720ad10..9a6af9d 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -277,7 +277,7 @@ extern const char *modifier_string(unsigned long
-mod);
- extern void show_symbol(const struct symbol *);
- extern int show_symbol_expr_init(const struct symbol *sym);
- extern void show_type_list(struct symbol *);
--extern void show_symbol_list(const struct symbol_list *, const char *);
-+extern void show_symbol_list(const struct symbol_list *);
- extern void add_symbol(struct symbol_list **, struct symbol *);
- extern void bind_symbol(struct symbol *, struct ident *, enum
-namespace);
- 
-diff --git a/test-parsing.c b/test-parsing.c
-index 0a0b1d4..dc1b083 100644
---- a/test-parsing.c
-+++ b/test-parsing.c
-@@ -44,7 +44,7 @@ int main(int argc, char **argv)
- 	clean_up_symbols(list);
- 
- #if 1
--	show_symbol_list(list, "\n\n");
-+	show_symbol_list(list);
- 	printf("\n\n");
- #endif
- 
-@@ -56,7 +56,7 @@ int main(int argc, char **argv)
- 
- #if 1
- 		// Show the end result.
--		show_symbol_list(list, "\n\n");
-+		show_symbol_list(list);
- 		printf("\n\n");
- #endif
- 	} END_FOR_EACH_PTR_NOTAG(file);
--- 
-1.7.2.1
+On Mon, Aug 23, 2010 at 7:42 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
+> Fixup and cleanup of the modifier_string() function
+>
+> This patch does:
+> - it fixes the modifier_string() function
+> - The array with the names is made "static".
 
 
--- 
-mobile: +43 664 4416156              http://www.sysprog.at/
-    Linux Software Development, Consulting and Services
+Sorry for the late reply.
 
+Your patch does not apply to the chrisl repository. I also notice that
+if modifier
+is zero, it will return buffer without initialized. Well the modifier
+is not supposed
+to be zero, but still.
+
+Another thing in the patch is that I don't want to move the modifier
+bits for just the debug
+function. It is expected to have more change in the modifier bits. How about
+this patch? I start with your patch and end up like this.
+
+If that works for you, please sign it off and I will check it in.
+
+Thanks,
+
+Chris
+
+--0015174c17b49e9f9f048f5758e3
+Content-Type: application/octet-stream; name="mod-string.patch"
+Content-Disposition: attachment; filename="mod-string.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gdmtpfr80
+
+ZGlmZiAtLWdpdCBhL3Nob3ctcGFyc2UuYyBiL3Nob3ctcGFyc2UuYwppbmRleCBkN2I1MDJkLi5j
+OTdkZWJlIDEwMDY0NAotLS0gYS9zaG93LXBhcnNlLmMKKysrIGIvc2hvdy1wYXJzZS5jCkBAIC05
+NSwyOSArOTUsNTUgQEAgdm9pZCBkZWJ1Z19zeW1ib2woc3RydWN0IHN5bWJvbCAqc3ltKQogY29u
+c3QgY2hhciAqbW9kaWZpZXJfc3RyaW5nKHVuc2lnbmVkIGxvbmcgbW9kKQogewogCXN0YXRpYyBj
+aGFyIGJ1ZmZlclsxMDBdOwotCWNoYXIgKnAgPSBidWZmZXI7Ci0JY29uc3QgY2hhciAqcmVzLCoq
+cHRyLCAqbmFtZXNbXSA9IHsKLQkJImF1dG8iLCAicmVnaXN0ZXIiLCAic3RhdGljIiwgImV4dGVy
+biIsCi0JCSJjb25zdCIsICJ2b2xhdGlsZSIsICJbc2lnbmVkXSIsICJbdW5zaWduZWRdIiwKLQkJ
+IltjaGFyXSIsICJbc2hvcnRdIiwgIltsb25nXSIsICJbbG9uZyBsb25nXSIsCi0JCSJbdHlwZWRl
+Zl0iLCAiW3N0cnVjdG9mXSIsICJbdW5pb25vZl0iLCAiW2VudW1dIiwKLQkJIlt0eXBlb2ZdIiwg
+IlthdHRyaWJ1dGVdIiwgImlubGluZSIsICJbYWRkcmVzc2FibGVdIiwKLQkJIltub2Nhc3RdIiwg
+Iltub2RlcmVmXSIsICJbYWNjZXNzZWRdIiwgIlt0b3BsZXZlbF0iLAotCQkiW2xhYmVsXSIsICJb
+YXNzaWduZWRdIiwgIlt0eXBlXSIsICJbc2FmZV0iLAotCQkiW3VzZXJ0eXBlXSIsICJbZm9yY2Vd
+IiwgIltleHBsaWNpdGx5LXNpZ25lZF0iLAotCQlOVUxMCisJaW50IGxlbiA9IDA7CisJaW50IGk7
+CisJc3RydWN0IG1vZF9uYW1lIHsKKwkJdW5zaWduZWQgbG9uZyBtb2Q7CisJCWNvbnN0IGNoYXIg
+Km5hbWU7CisJfSAqbTsKKworCXN0YXRpYyBzdHJ1Y3QgbW9kX25hbWUgbW9kX25hbWVzW10gPSB7
+CisJCXtNT0RfQVVUTywJCSJhdXRvIn0sCisJCXtNT0RfUkVHSVNURVIsCQkicmVnaXN0ZXIifSwK
+KwkJe01PRF9TVEFUSUMsCQkic3RhdGljIn0sCisJCXtNT0RfRVhURVJOLAkJImV4dGVybiJ9LAor
+CQl7TU9EX0NPTlNULAkJImNvbnN0In0sCisJCXtNT0RfVk9MQVRJTEUsCQkidm9sYXRpbGUifSwK
+KwkJe01PRF9TSUdORUQsCQkiW3NpZ25lZF0ifSwKKwkJe01PRF9VTlNJR05FRCwJCSJbdW5zaWdu
+ZWRdIn0sCisJCXtNT0RfQ0hBUiwJCSJbY2hhcl0ifSwKKwkJe01PRF9TSE9SVCwJCSJbc2hvcnRd
+In0sCisJCXtNT0RfTE9ORywJCSJbbG9uZ10ifSwKKwkJe01PRF9MT05HTE9ORywJCSJbbG9uZyBs
+b25nXSJ9LAorCQl7TU9EX0xPTkdMT05HTE9ORywJIltsb25nIGxvbmcgbG9uZ10ifSwKKwkJe01P
+RF9UWVBFREVGLAkJIlt0eXBlZGVmXSJ9LAorCQl7TU9EX1RMUywJCSJbdGxzXSJ9LAorCQl7TU9E
+X0lOTElORSwJCSJpbmxpbmUifSwKKwkJe01PRF9BRERSRVNTQUJMRSwJIlthZGRyZXNzYWJsZV0i
+fSwKKwkJe01PRF9OT0NBU1QsCQkiW25vY2FzdF0ifSwKKwkJe01PRF9OT0RFUkVGLAkJIltub2Rl
+cmVmXSJ9LAorCQl7TU9EX0FDQ0VTU0VELAkJIlthY2Nlc3NlZF0ifSwKKwkJe01PRF9UT1BMRVZF
+TCwJCSJbdG9wbGV2ZWxdIn0sCisJCXtNT0RfQVNTSUdORUQsCQkiW2Fzc2lnbmVkXSJ9LAorCQl7
+TU9EX1RZUEUsCQkiW3R5cGVdIn0sCisJCXtNT0RfU0FGRSwJCSJbc2FmZV0ifSwKKwkJe01PRF9V
+U0VSVFlQRSwJCSJbdXNlcnR5cGVdIn0sCisJCXtNT0RfTk9SRVRVUk4sCQkiW25vcmV0dXJuXSJ9
+LAorCQl7TU9EX0VYUExJQ0lUTFlfU0lHTkVELAkiW2V4cGxpY2l0bHktc2lnbmVkXSJ9LAorCQl7
+TU9EX0JJVFdJU0UsCQkiW2JpdHdpc2VdIn0sCiAJfTsKLQlwdHIgPSBuYW1lczsKLQl3aGlsZSAo
+KHJlcyA9ICpwdHIrKykgIT0gTlVMTCkgewotCQlpZiAobW9kICYgMSkgeworCisJZm9yIChpID0g
+MDsgaSA8IEFSUkFZX1NJWkUobW9kX25hbWVzKTsgaSsrKSB7CisJCW0gPSBtb2RfbmFtZXMgKyBp
+OworCQlpZiAobW9kICYgbS0+bW9kKSB7CiAJCQljaGFyIGM7Ci0JCQl3aGlsZSAoKGMgPSAqcmVz
+KyspICE9ICdcMCcpCi0JCQkJKnArKyA9IGM7Ci0JCQkqcCsrID0gJyAnOworCQkJY29uc3QgY2hh
+ciAqbmFtZSA9IG0tPm5hbWU7CisJCQl3aGlsZSAoKGMgPSAqbmFtZSsrKSAhPSAnXDAnICYmIGxl
+biArIDIgPCBzaXplb2YgYnVmZmVyKQorCQkJCWJ1ZmZlcltsZW4rK10gPSBjOworCQkJYnVmZmVy
+W2xlbisrXSA9ICcgJzsKIAkJfQotCQltb2QgPj49IDE7CiAJfQotCSpwID0gMDsKKwlidWZmZXJb
+bGVuXSA9IDA7CiAJcmV0dXJuIGJ1ZmZlcjsKIH0KIAo=
+--0015174c17b49e9f9f048f5758e3--
