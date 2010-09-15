@@ -1,77 +1,73 @@
-From: Bernd Petrovitsch <bernd@sysprog.at>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH] Fixup and cleanup of the modifier_string() function
-Date: Tue, 14 Sep 2010 16:37:23 +0200
-Message-ID: <1284475043.6699.152.camel@thorin>
+Date: Wed, 15 Sep 2010 15:52:58 -0700
+Message-ID: <AANLkTi==qDaoGs41HL_v0Mi59ubjux5EQeRMALcG582+@mail.gmail.com>
 References: <1282300429.10440.230.camel@thorin>
-	 <AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
-	 <1282466539.5200.1.camel@thorin>
-	 <AANLkTinT5xhr+C4H71CWx3R9EqHy6ycp8gskjUqjts2Q@mail.gmail.com>
-	 <1282574577.5200.18.camel@thorin>
-	 <AANLkTikOGhqVu8+A_kT=95AX=10H_pxhwqLmQr+08zzm@mail.gmail.com>
+	<AANLkTikugbBQ1gYVAdFRxWVmEX-odjq+Y5wA4mnN7Vnj@mail.gmail.com>
+	<1282466539.5200.1.camel@thorin>
+	<AANLkTinT5xhr+C4H71CWx3R9EqHy6ycp8gskjUqjts2Q@mail.gmail.com>
+	<1282574577.5200.18.camel@thorin>
+	<AANLkTikOGhqVu8+A_kT=95AX=10H_pxhwqLmQr+08zzm@mail.gmail.com>
+	<1284475043.6699.152.camel@thorin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from esgaroth.petrovitsch.at ([78.47.184.11]:2100 "EHLO
-	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751950Ab0INOhb (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:44071 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754475Ab0IOWxA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 14 Sep 2010 10:37:31 -0400
-In-Reply-To: <AANLkTikOGhqVu8+A_kT=95AX=10H_pxhwqLmQr+08zzm@mail.gmail.com>
+	Wed, 15 Sep 2010 18:53:00 -0400
+Received: by bwz11 with SMTP id 11so1038013bwz.19
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2010 15:52:58 -0700 (PDT)
+In-Reply-To: <1284475043.6699.152.camel@thorin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Bernd Petrovitsch <bernd@sysprog.at>
 Cc: linux-sparse@vger.kernel.org
 
-On Fre, 2010-09-03 at 02:13 -0700, Christopher Li wrote:
-> On Mon, Aug 23, 2010 at 7:42 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
-> > Fixup and cleanup of the modifier_string() function
-> >
-> > This patch does:
-> > - it fixes the modifier_string() function
-> > - The array with the names is made "static".
-> 
-> Sorry for the late reply.
+On Tue, Sep 14, 2010 at 7:37 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
+> They were against git://git.kernel.org/pub/scm/devel/sparse/sparse.git
+> which is listed on https://sparse.wiki.kernel.org/index.php/Main_Page.
+> But your patch doesn't apply against it. And it doesn't apply against
+> git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git - which
+> looks at the first glance identical to the above.
+>
 
-No problem - August is holiday time (at least hereover) and if there are
-more pressing issues.
+I think there is some thing wrong in your git setup. May be you did not
+checkout the right branch? You can always visit the web link to see
+if that match your local "git log".
 
-> Your patch does not apply to the chrisl repository. I also notice that
+http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=summary
 
-They were against git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-which is listed on https://sparse.wiki.kernel.org/index.php/Main_Page.
-But your patch doesn't apply against it. And it doesn't apply against
-git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git - which
-looks at the first glance identical to the above.
+> I found http://marc.info/?l=linux-sparse&m=126634898432123 but there is
+> no "chrisl" branch - at least not in the output of `git branch -a`.
+> What I'm doing wrong?
 
-I found http://marc.info/?l=linux-sparse&m=126634898432123 but there is
-no "chrisl" branch - at least not in the output of `git branch -a`.
-What I'm doing wrong?
+Have your try to clone a clean repository in a new directory?
 
-> if modifier
-> is zero, it will return buffer without initialized. Well the modifier
+git clone git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
 
-Ooops, ACK.
-Grrml, not the first time in my life that I forgot that.
+That should give you a clean local copy of "chrisl" repository.
 
-> is not supposed
-> to be zero, but still.
-> 
-> Another thing in the patch is that I don't want to move the modifier
-> bits for just the debug
-> function. It is expected to have more change in the modifier bits. How about
-> this patch? I start with your patch and end up like this.
+There is a better way to deal with remote branch in one git repository.
+If you add those to your .git/config:
 
-Yes, the associative array is the better solution.
-And the buffer overflow is also fixed.
+[remote "chrisl"]
+        fetch = +refs/heads/*:refs/remotes/origin/*
+        url = git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git
+[branch "chrisl"]
+        remote = chrisl
+        merge = refs/heads/master
 
-> If that works for you, please sign it off and I will check it in.
+You should be able to do:
 
-It works for me.
-Signed-off-by: Bernd Petrovitsch <bernd@sysprog.at>
+git fetch chrisl
+git checkout chrisl
 
-	Bernd
--- 
-mobile: +43 664 4416156              http://www.sysprog.at/
-    Linux Software Development, Consulting and Services
+To get the chrisl branch.
 
+> Signed-off-by: Bernd Petrovitsch <bernd@sysprog.at>
+
+Thanks. The change is pushed.
+
+Chris
