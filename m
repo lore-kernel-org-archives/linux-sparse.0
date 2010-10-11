@@ -1,58 +1,116 @@
 From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [patch 1/2] OSS: soundcard: locking bug in sound_ioctl()
-Date: Mon, 11 Oct 2010 11:54:56 -0700
-Message-ID: <20101011185455.GB8537@feather>
-References: <20101010173352.GB5851@bicker>
- <201010111013.28952.arnd@arndb.de>
- <1286787000.3634.1.camel@jlt3.sipsolutions.net>
- <201010111250.16299.arnd@arndb.de>
- <1286794326.3634.13.camel@jlt3.sipsolutions.net>
+Subject: Re: including sparse headers in C++ code
+Date: Mon, 11 Oct 2010 12:12:20 -0700
+Message-ID: <20101011191219.GD8537@feather>
+References: <AANLkTinGSRQYqR2h+V0nAB+vn4xWCGxgbmGHuMm-xHyB@mail.gmail.com>
+ <AANLkTinaDZZmyeaK+rAvLCdZ-90n17WhABRsZGUBBcSH@mail.gmail.com>
+ <1286710919.24953.2.camel@thorin>
+ <201010101352.10864.kdudka@redhat.com>
+ <1286790249.24953.14.camel@thorin>
+ <AANLkTin00gg79Zdg1JJgaaK+2wzgu9Xpr719MYOebQ+J@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay2-v.mail.gandi.net ([217.70.178.76]:44342 "EHLO
-	relay2-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750757Ab0JKSzN (ORCPT
+Received: from relay1-d.mail.gandi.net ([217.70.183.193]:57535 "EHLO
+	relay1-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755113Ab0JKTMa (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 11 Oct 2010 14:55:13 -0400
+	Mon, 11 Oct 2010 15:12:30 -0400
 Content-Disposition: inline
-In-Reply-To: <1286794326.3634.13.camel@jlt3.sipsolutions.net>
+In-Reply-To: <AANLkTin00gg79Zdg1JJgaaK+2wzgu9Xpr719MYOebQ+J@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Arnd Bergmann <arnd@arndb.de>, Dan Carpenter <error27@gmail.com>, Jaroslav Kysela <perex@perex.cz>, Takashi Iwai <tiwai@suse.de>, alsa-devel@alsa-project.org, kernel-janitors@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Bernd Petrovitsch <bernd@sysprog.at>, Kamil Dudka <kdudka@redhat.com>, Tomas Klacko <tomas.klacko@gmail.com>, linux-sparse@vger.kernel.org
 
-On Mon, Oct 11, 2010 at 12:52:06PM +0200, Johannes Berg wrote:
-> On Mon, 2010-10-11 at 12:50 +0200, Arnd Bergmann wrote:
-> > On Monday 11 October 2010, Johannes Berg wrote:
-> > > On Mon, 2010-10-11 at 10:13 +0200, Arnd Bergmann wrote:
-> > > 
-> > > > Hmm, actually sparse does not warn about sound_ioctl returning in
-> > > > different lock contexts. Sparse developers: is there a known limitation
-> > > > in sparse for this? I expected to see context warnings because
-> > > > sound_ioctl normally releases soundcard_mutex (previously lock_kernel)
-> > > > in some cases returns while holding the lock.
-> > > 
-> > > Arnd, mutexes aren't annotated in the kernel source to make use of
-> > > sparse's context checking.
-> > 
-> > D'oh. I never realized this was only done for some types of locks.
-> > Is there a reason why we don't want mutexes to be annotated or do
-> > we just need someone to do it?
-> 
-> I don't know. Could be related to trylock issues, could be just historic
-> since semaphores can't really be annotated, or could be something else
-> entirely... I would expect a huge amount of warnings from sparse though
-> if you "just" annotate them since there are things like rtnl_lock()
-> which would have to propagate context.
+On Mon, Oct 11, 2010 at 09:04:18AM -0700, Christopher Li wrote:
+> On Mon, Oct 11, 2010 at 2:44 AM, Bernd Petrovitsch <bernd@sysprog.at>=
+ wrote:
+> > ---- =C2=A0snip =C2=A0----
+> > {102}egrep -wc 'false|true' *.[ch] | grep -v :0
+> > compile-i386.c:19
+> > evaluate.c:13
+> > expand.c:10
+> > flow.c:10
+> > inline.c:13
+> > linearize.c:6
+> > pre-process.c:3
+> > show-parse.c:3
+> > simplify.c:9
+> > symbol.c:1
+> > tokenize.c:1
+> > ---- =C2=A0snip =C2=A0----
+> > There are perhaps false positives in there - but not all.
+> >
+> > Perhaps 'sparse' should warn if one names variables, functions, and
+> > similar "true", "false" or with any other C99 keyword.
+> > For C++ keywords, a different option is probably best.
+>=20
+> Those are not used in header files they should be fine. Sparse uses
+> C99 extensively
+> so it is likely it can't compile as C++ any way. I see no reason to
+> compile sparse
+> with C++.
 
-As far as I know, no reason exists to not just annotate mutexes; I think
-mutexes just came along later and nobody happened to add the appropriate
-annotations.  (Also, sparse does handle trylock.)
+Actually, Sparse seems to use "true" and "false" as variable names in
+several cases; for instance:
 
-But yes, annotating mutexes will then introduce a giant pile of lock
-warnings that need further annotation propagation.  It will also
-introduce lock warnings that represent actual bugs, making it important
-to not just blindly propagate annotations to make warnings go away.
+static struct symbol *evaluate_conditional_expression(struct expression=
+ *expr)
+{
+        struct expression **true;
+[...]
+        true =3D &expr->conditional;
+
+
+I think this only works because evaluate.c doesn't include stdbool.h.
+And sure enough, if I include stdbool.h from evaluate.c:
+
+     CC       evaluate.o
+evaluate.c: In function =E2=80=98evaluate_conditional_expression=E2=80=99=
+:
+evaluate.c:1081: error: expected identifier or =E2=80=98(=E2=80=99 befo=
+re numeric constant
+evaluate.c:1095: error: lvalue required as left operand of assignment
+evaluate.c:1101: error: lvalue required as left operand of assignment
+evaluate.c:1106: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1114: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1116: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1116: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1122: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1126: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1126: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1133: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1134: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1134: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1202: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+evaluate.c:1202: error: invalid type argument of =E2=80=98unary *=E2=80=
+=99 (have =E2=80=98int=E2=80=99)
+
+
+I agree with Bernd: I think Sparse should have a warning for using
+"true", "false", or "bool" as an identifier of any kind.  That would
+necessitate some way to avoid such warnings for the actual definitions
+in stdbool.h.  Alternatively, Sparse could warn about using "true" or
+"false" as anything other than values, and about using "bool" as
+anything other than a type; that would allow for projects that define
+their own bool in a compatible way.
 
 - Josh Triplett
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
