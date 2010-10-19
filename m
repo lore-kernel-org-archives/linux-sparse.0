@@ -1,7 +1,7 @@
-From: Tomas Klacko <tomas.klacko@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: including sparse headers in C++ code
-Date: Wed, 20 Oct 2010 00:49:33 +0200
-Message-ID: <AANLkTi=QryvTC=Q3xsNh4fyhT3V-WZ1VSaE4=JPntz=n@mail.gmail.com>
+Date: Tue, 19 Oct 2010 16:07:42 -0700
+Message-ID: <AANLkTin1VwzZ=nwEpfxD4WBXjo=Pyn0a+s=DnsSvQOg8@mail.gmail.com>
 References: <20101011224656.GN19804@ZenIV.linux.org.uk>
 	<AANLkTinWYFf0CqBt9FJ9QyeGCU6754GotQM06U4vMqRa@mail.gmail.com>
 	<AANLkTimdy9TwwSJM=rwTjXdRsnove6A2b0=d4M_dOin0@mail.gmail.com>
@@ -17,35 +17,41 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:57542 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755777Ab0JSWte convert rfc822-to-8bit (ORCPT
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:51523 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755819Ab0JSXHn convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Oct 2010 18:49:34 -0400
-Received: by gyg13 with SMTP id 13so214584gyg.19
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Oct 2010 15:49:33 -0700 (PDT)
+	Tue, 19 Oct 2010 19:07:43 -0400
+Received: by iwn7 with SMTP id 7so1433899iwn.19
+        for <linux-sparse@vger.kernel.org>; Tue, 19 Oct 2010 16:07:42 -0700 (PDT)
 In-Reply-To: <20101019213109.GV19804@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+Cc: Tomas Klacko <tomas.klacko@gmail.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
 
-On Tue, Oct 19, 2010 at 11:31 PM, Al Viro <viro@zeniv.linux.org.uk> wro=
-te:
+On Tue, Oct 19, 2010 at 2:31 PM, Al Viro <viro@zeniv.linux.org.uk> wrot=
+e:
 > On Tue, Oct 19, 2010 at 10:03:42PM +0200, Tomas Klacko wrote:
-
->> =A0static inline int match_op(struct token *token, int op)
->> =A0{
->> - =A0 =A0 return token->pos.type =3D=3D TOKEN_SPECIAL && token->spec=
-ial =3D=3D op;
->> + =A0 =A0 return token->pos.type =3D=3D TOKEN_SPECIAL && token->spec=
-ial =3D=3D (unsigned int)op;
+>> @@ -188,7 +188,7 @@ static struct symbol_op char_op =3D {
+>> =A0 =A0 =A0 .type =3D KW_SPECIFIER,
+>> =A0 =A0 =A0 .test =3D Set_T|Set_Long|Set_Short,
+>> =A0 =A0 =A0 .set =3D Set_T|Set_Char,
+>> - =A0 =A0 .class =3D CChar,
+>> + =A0 =A0 .klass =3D CChar,
+>> =A0};
 >
-> What was that one for?
+> Egads... =A0Why not "kC1455", while you are at it? =A0Seriously, if y=
+ou feel the
+> need to rename that, at least use something more palatable. =A0Hell, =
+even
+> adjust_type would be better...
 
-"warning: comparison between signed and unsigned integer expressions"
+I suggested the "klass", my bad. How about your suggest a perfect name
+and we will use it. Is "adjust_type" good enough?
 
-Tomas Klacko
+
+Chris
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
