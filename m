@@ -1,51 +1,53 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
+From: Bernd Petrovitsch <bernd@sysprog.at>
 Subject: Re: including sparse headers in C++ code
-Date: Wed, 20 Oct 2010 08:40:34 +0100
-Message-ID: <20101020074034.GY19804@ZenIV.linux.org.uk>
-References: <AANLkTimdy9TwwSJM=rwTjXdRsnove6A2b0=d4M_dOin0@mail.gmail.com>
- <AANLkTimhh3zj8kgvaSQq9_CS711mLw8skrWL4yUgvJzT@mail.gmail.com>
- <AANLkTimZb1PsnKcMQ_Ka6dkk7fNwXiJb6_U4GcckLsF4@mail.gmail.com>
- <20101016191153.GA19324@feather>
- <AANLkTi=tpKLvWh6VKsizpZaxYMBntaGU1gC5uRu1_bND@mail.gmail.com>
- <20101018053955.GA1628@feather>
- <AANLkTim2ti8+aht_f=Mv=0iLZCvF65CFF6GNP2gHF=Kq@mail.gmail.com>
- <AANLkTinuRiaMZExudng5ECeunmF4s2ptnfaE=fYBft=i@mail.gmail.com>
- <20101019213109.GV19804@ZenIV.linux.org.uk>
- <AANLkTin1VwzZ=nwEpfxD4WBXjo=Pyn0a+s=DnsSvQOg8@mail.gmail.com>
+Date: Wed, 20 Oct 2010 11:39:04 +0200
+Message-ID: <1287567544.7542.7.camel@thorin>
+References: <AANLkTinGSRQYqR2h+V0nAB+vn4xWCGxgbmGHuMm-xHyB@mail.gmail.com>
+	 <AANLkTinaDZZmyeaK+rAvLCdZ-90n17WhABRsZGUBBcSH@mail.gmail.com>
+	 <1286710919.24953.2.camel@thorin> <201010101352.10864.kdudka@redhat.com>
+	 <1286790249.24953.14.camel@thorin>
+	 <AANLkTin00gg79Zdg1JJgaaK+2wzgu9Xpr719MYOebQ+J@mail.gmail.com>
+	 <20101011191219.GD8537@feather> <1286981110.14103.86.camel@thorin>
+	 <20101020072945.GA3232@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:56202 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932162Ab0JTHkh (ORCPT
+Received: from esgaroth.petrovitsch.at ([78.47.184.11]:2692 "EHLO
+	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751003Ab0JTJj2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 20 Oct 2010 03:40:37 -0400
-Content-Disposition: inline
-In-Reply-To: <AANLkTin1VwzZ=nwEpfxD4WBXjo=Pyn0a+s=DnsSvQOg8@mail.gmail.com>
+	Wed, 20 Oct 2010 05:39:28 -0400
+In-Reply-To: <20101020072945.GA3232@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Tomas Klacko <tomas.klacko@gmail.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>, Al Viro <viro@ZenIV.linux.org.uk>
+Cc: Kamil Dudka <kdudka@redhat.com>, Tomas Klacko <tomas.klacko@gmail.com>, linux-sparse@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>
 
-On Tue, Oct 19, 2010 at 04:07:42PM -0700, Christopher Li wrote:
-> On Tue, Oct 19, 2010 at 2:31 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> > On Tue, Oct 19, 2010 at 10:03:42PM +0200, Tomas Klacko wrote:
-> >> @@ -188,7 +188,7 @@ static struct symbol_op char_op = {
-> >> ? ? ? .type = KW_SPECIFIER,
-> >> ? ? ? .test = Set_T|Set_Long|Set_Short,
-> >> ? ? ? .set = Set_T|Set_Char,
-> >> - ? ? .class = CChar,
-> >> + ? ? .klass = CChar,
-> >> ?};
-> >
-> > Egads... ?Why not "kC1455", while you are at it? ?Seriously, if you feel the
-> > need to rename that, at least use something more palatable. ?Hell, even
-> > adjust_type would be better...
+On Mit, 2010-10-20 at 08:29 +0100, Al Viro wrote: 
+> On Wed, Oct 13, 2010 at 04:45:10PM +0200, Bernd Petrovitsch wrote:
 > 
-> I suggested the "klass", my bad. How about your suggest a perfect name
-> and we will use it. Is "adjust_type" good enough?
+> > rename the local variables "true" and "false" to "if_true" and "if_false",
+> > respectively to not clash with the well-known "keywords" defined by C99.
+> > This is similar to commit 0be55c9.
+> 
+> These are not keywords...  Said that, things like
 
-type_group, probably...  FWIW, I'd probably spell that enum in parse.c as
-	CInt = 0, CSInt = 1, CUInt = 2, CReal = 3, CChar = 4,
-	CSChar = CChar + CSInt, CUChar = CChar + CUInt
-while we are at it.
+ACK, that's why "keywords" is quoted above.
+
+> if (!cond->value)
+>                         true = false;
+>                 if (!true)
+>                         true = cond;
+> certainly reek of IOCCC.  I'd rather avoid "if_true" as replacement, though.
+> If anything, true_expr and false_expr would make more sense.
+
+I have no strong feelings about the replacement and just followed the
+change in the referenced commit.
+Chris, should I respin the patch with *_expr?
+
+Bernd
+-- 
+mobile: +43 664 4416156              http://www.sysprog.at/
+    Linux Software Development, Consulting and Services
+
