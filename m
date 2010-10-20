@@ -1,60 +1,49 @@
-From: Bernd Petrovitsch <bernd@sysprog.at>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: including sparse headers in C++ code
-Date: Wed, 20 Oct 2010 12:19:02 +0200
-Message-ID: <1287569942.7542.8.camel@thorin>
-References: <20101011224656.GN19804@ZenIV.linux.org.uk>
-	 <AANLkTinWYFf0CqBt9FJ9QyeGCU6754GotQM06U4vMqRa@mail.gmail.com>
-	 <AANLkTimdy9TwwSJM=rwTjXdRsnove6A2b0=d4M_dOin0@mail.gmail.com>
-	 <AANLkTimhh3zj8kgvaSQq9_CS711mLw8skrWL4yUgvJzT@mail.gmail.com>
-	 <AANLkTimZb1PsnKcMQ_Ka6dkk7fNwXiJb6_U4GcckLsF4@mail.gmail.com>
-	 <20101016191153.GA19324@feather>
-	 <AANLkTi=tpKLvWh6VKsizpZaxYMBntaGU1gC5uRu1_bND@mail.gmail.com>
-	 <20101018053955.GA1628@feather>
-	 <AANLkTim2ti8+aht_f=Mv=0iLZCvF65CFF6GNP2gHF=Kq@mail.gmail.com>
-	 <AANLkTinuRiaMZExudng5ECeunmF4s2ptnfaE=fYBft=i@mail.gmail.com>
-	 <20101019213109.GV19804@ZenIV.linux.org.uk>
-	 <AANLkTi=QryvTC=Q3xsNh4fyhT3V-WZ1VSaE4=JPntz=n@mail.gmail.com>
+Date: Wed, 20 Oct 2010 08:34:59 -0700
+Message-ID: <AANLkTikBMpuwHZpAsSmcP_5MC3GJQNZE3SrRT6VQ8boS@mail.gmail.com>
+References: <AANLkTinGSRQYqR2h+V0nAB+vn4xWCGxgbmGHuMm-xHyB@mail.gmail.com>
+	<AANLkTinaDZZmyeaK+rAvLCdZ-90n17WhABRsZGUBBcSH@mail.gmail.com>
+	<1286710919.24953.2.camel@thorin>
+	<201010101352.10864.kdudka@redhat.com>
+	<1286790249.24953.14.camel@thorin>
+	<AANLkTin00gg79Zdg1JJgaaK+2wzgu9Xpr719MYOebQ+J@mail.gmail.com>
+	<20101011191219.GD8537@feather>
+	<1286981110.14103.86.camel@thorin>
+	<20101020072945.GA3232@ZenIV.linux.org.uk>
+	<1287567544.7542.7.camel@thorin>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from esgaroth.petrovitsch.at ([78.47.184.11]:2226 "EHLO
-	esgaroth.petrovitsch.priv.at" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751251Ab0JTKTL (ORCPT
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:63327 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753816Ab0JTPfE convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 20 Oct 2010 06:19:11 -0400
-In-Reply-To: <AANLkTi=QryvTC=Q3xsNh4fyhT3V-WZ1VSaE4=JPntz=n@mail.gmail.com>
+	Wed, 20 Oct 2010 11:35:04 -0400
+Received: by gxk21 with SMTP id 21so1640971gxk.19
+        for <linux-sparse@vger.kernel.org>; Wed, 20 Oct 2010 08:35:01 -0700 (PDT)
+In-Reply-To: <1287567544.7542.7.camel@thorin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Tomas Klacko <tomas.klacko@gmail.com>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+To: Bernd Petrovitsch <bernd@sysprog.at>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Kamil Dudka <kdudka@redhat.com>, Tomas Klacko <tomas.klacko@gmail.com>, linux-sparse@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>
 
-On Mit, 2010-10-20 at 00:49 +0200, Tomas Klacko wrote: 
-> On Tue, Oct 19, 2010 at 11:31 PM, Al Viro <viro@zeniv.linux.org.uk> wrote:
-> > On Tue, Oct 19, 2010 at 10:03:42PM +0200, Tomas Klacko wrote:
-> 
-> >>  static inline int match_op(struct token *token, int op)
-> >>  {
-> >> -     return token->pos.type == TOKEN_SPECIAL && token->special == op;
-> >> +     return token->pos.type == TOKEN_SPECIAL && token->special == (unsigned int)op;
-> >
-> > What was that one for?
-> 
-> "warning: comparison between signed and unsigned integer expressions"
+On Wed, Oct 20, 2010 at 2:39 AM, Bernd Petrovitsch <bernd@sysprog.at> w=
+rote:
+>> certainly reek of IOCCC. =A0I'd rather avoid "if_true" as replacemen=
+t, though.
+>> If anything, true_expr and false_expr would make more sense.
+>
+> I have no strong feelings about the replacement and just followed the
+> change in the referenced commit.
+> Chris, should I respin the patch with *_expr?
 
-Add "-Wsign-compare" to the CFLAGS (for a pure C compile) and you will
-find many more of them.
-IMHO it needs a decision if the goal is to prefer signed or unsigned int
-(where no negative values ever used/assigned) and convert struct members
-and/or global variables. Most of them TTBOMK are never negative anyways.
+Please do. As far as I can remember, Al is always right.
 
-For the "C vs C++" issue: if you have an enum, the rules (or at least
-the reality defined by gcc) are subtly different if it's a signed int or
-an unsigned int and the values of their members.
-
-Bernd
--- 
-mobile: +43 664 4416156              http://www.sysprog.at/
-    Linux Software Development, Consulting and Services
-
-
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
