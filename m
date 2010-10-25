@@ -1,45 +1,38 @@
-From: Dave Jones <davej@redhat.com>
-Subject: bad asm goto ?
-Date: Mon, 25 Oct 2010 17:31:45 -0400
-Message-ID: <20101025213145.GA1822@redhat.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: bad asm goto ?
+Date: Mon, 25 Oct 2010 15:10:29 -0700
+Message-ID: <AANLkTikVt5BJ+2W3P+wYUR3DLzhTatXhAW45wdc0eoOe@mail.gmail.com>
+References: <20101025213145.GA1822@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:10066 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751995Ab0JYVbs (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Oct 2010 17:31:48 -0400
-Received: from int-mx02.intmail.prod.int.phx2.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-	by mx1.redhat.com (8.13.8/8.13.8) with ESMTP id o9PLVmZC018256
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
-	for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 17:31:48 -0400
-Received: from localhost6.localdomain6 (ovpn-113-32.phx2.redhat.com [10.3.113.32])
-	by int-mx02.intmail.prod.int.phx2.redhat.com (8.13.8/8.13.8) with ESMTP id o9PLVkLg020597
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 17:31:47 -0400
-Received: from localhost6.localdomain6 (localhost.localdomain [127.0.0.1])
-	by localhost6.localdomain6 (8.14.4/8.14.3) with ESMTP id o9PLVjPZ002923
-	for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 17:31:45 -0400
-Received: (from davej@localhost)
-	by localhost6.localdomain6 (8.14.4/8.14.4/Submit) id o9PLVjnx002921
-	for linux-sparse@vger.kernel.org; Mon, 25 Oct 2010 17:31:45 -0400
-Content-Disposition: inline
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:36941 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756836Ab0JYWKa (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 25 Oct 2010 18:10:30 -0400
+Received: by iwn10 with SMTP id 10so1321167iwn.19
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 15:10:29 -0700 (PDT)
+In-Reply-To: <20101025213145.GA1822@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Dave Jones <davej@redhat.com>
+Cc: linux-sparse@vger.kernel.org
 
-I just ran sparse on a kernel tree for the first time in ages, and got
-hundreds of warnings, many of which related to the tracepoint macros
-in the kernel, which use the new asm goto feature.
+On Mon, Oct 25, 2010 at 2:31 PM, Dave Jones <davej@redhat.com> wrote:
+> I just ran sparse on a kernel tree for the first time in ages, and got
+> hundreds of warnings, many of which related to the tracepoint macros
+> in the kernel, which use the new asm goto feature.
+>
+> Looking at the git log of sparse, I see there was some support added
+> for asm goto, but it seems to choke every time, printing ..
+>
+> include/trace/events/kmem.h:45:1: error: bad asm output
+> include/trace/events/kmem.h:45:1: error: incompatible types in comparison expression (different address spaces)
+>
+>
+> (this is with a sparse built from git head from a few minutes ago)
 
-Looking at the git log of sparse, I see there was some support added
-for asm goto, but it seems to choke every time, printing ..
+Do you have a smaller test case to reproduce the error?
 
-include/trace/events/kmem.h:45:1: error: bad asm output
-include/trace/events/kmem.h:45:1: error: incompatible types in comparison expression (different address spaces)
-
-
-(this is with a sparse built from git head from a few minutes ago)
-
-	Dave
-
+Chris
