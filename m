@@ -1,68 +1,65 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: bad asm goto ?
-Date: Mon, 25 Oct 2010 16:44:32 -0700
-Message-ID: <AANLkTi=r6U3CVS5Br5ZTVVyNEfKzhqTcKkEk5+itwNe1@mail.gmail.com>
+Date: Mon, 25 Oct 2010 20:10:02 -0700
+Message-ID: <AANLkTik3OLbW=sM1PFi8uazBHiJbPD06d0ns2z0DQzzN@mail.gmail.com>
 References: <20101025213145.GA1822@redhat.com>
 	<AANLkTikVt5BJ+2W3P+wYUR3DLzhTatXhAW45wdc0eoOe@mail.gmail.com>
 	<20101025223957.GA5561@redhat.com>
+	<AANLkTi=r6U3CVS5Br5ZTVVyNEfKzhqTcKkEk5+itwNe1@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:44942 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751305Ab0JYXod convert rfc822-to-8bit (ORCPT
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:35037 "EHLO
+	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753989Ab0JZDKD (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Oct 2010 19:44:33 -0400
-Received: by ywk9 with SMTP id 9so2545215ywk.19
-        for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 16:44:32 -0700 (PDT)
-In-Reply-To: <20101025223957.GA5561@redhat.com>
+	Mon, 25 Oct 2010 23:10:03 -0400
+Received: by iwn10 with SMTP id 10so1568911iwn.19
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Oct 2010 20:10:02 -0700 (PDT)
+In-Reply-To: <AANLkTi=r6U3CVS5Br5ZTVVyNEfKzhqTcKkEk5+itwNe1@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dave Jones <davej@redhat.com>
 Cc: linux-sparse@vger.kernel.org
 
-On Mon, Oct 25, 2010 at 3:39 PM, Dave Jones <davej@redhat.com> wrote:
-> I tried unwinding some of the nested macros, and came up with ..
->
-> # define __ASM_FORM(x) =A0" " #x " "
-> # define JUMP_LABEL_INITIAL_NOP ".byte 0xe9 \n\t .long 0\n\t"
-> # define __ASM_SEL(a,b) __ASM_FORM(b)
-> #define _ASM_PTR =A0 =A0 =A0 =A0__ASM_SEL(.long, .quad)
->
-> # define JUMP_LABEL(key, label) =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 \
-> =A0 =A0 =A0 =A0do { =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0asm goto("1:" =A0 =A0 =A0 =A0 =A0 =A0 =
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 \
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0JUMP_LABEL_INITIAL_NOP=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0".pushsection __jump_t=
-able, =A0\"a\" \n\t"\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0_ASM_PTR "1b, %l[" #la=
-bel "], %c0 \n\t" \
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0".popsection \n\t" =A0=
- =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0\
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0: : =A0"i" (key) : =A0=
-: label); =A0 =A0 =A0 =A0 =A0 =A0 \
-> =A0 =A0 =A0 =A0} while (0)
->
-> int main(int argc, char *argv[])
-> {
-> =A0 =A0 =A0 =A0JUMP_LABEL("1", do_trace );
-> =A0 =A0 =A0 =A0return 1;
-> do_trace:
-> =A0 =A0 =A0 =A0return 0;
-> }
->
+It seems that the error is not from the goto. It is from the malformed
+asm_clobber.
+For empty asm_clobber list, sparse currently add nil expr into the
+list. Evaluate will
+complain about the nil pointer thinking it has a bad type.
 
-Thanks, I got this example working for me too. You are right, sparse is
-choking on it. Let me take a look tonight.
+Any way, this patch should fix it.
+
+Please let me know that help you or not. I am going to apply it after
+the 0.4.3 release.
 
 Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+diff --git a/evaluate.c b/evaluate.c
+index f8343c2..1fb03ed 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3221,7 +3221,7 @@ static void evaluate_asm_statement(struct statement *stmt)
+
+ 	FOR_EACH_PTR(stmt->asm_clobbers, expr) {
+ 		if (!expr) {
+-			sparse_error(stmt->pos, "bad asm output");
++			sparse_error(stmt->pos, "bad asm clobbers");
+ 			return;
+ 		}
+ 		if (expr->type == EXPR_STRING)
+diff --git a/parse.c b/parse.c
+index 537055f..6b7d656 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1894,7 +1894,8 @@ static struct token *parse_asm_clobbers(struct
+token *token, struct statement *s
+
+ 	do {
+ 		token = primary_expression(token->next, &expr);
+-		add_expression(clobbers, expr);
++		if (expr)
++			add_expression(clobbers, expr);
+ 	} while (match_op(token, ','));
+ 	return token;
+ }
