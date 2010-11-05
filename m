@@ -1,100 +1,52 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: sparse 0.4.3
-Date: Tue, 2 Nov 2010 21:16:28 -0700
-Message-ID: <AANLkTikifud_O4moqrqi7zuvH-77tyGtBFeZBAFjdXy_@mail.gmail.com>
+Subject: Re: including sparse headers in C++ code
+Date: Thu, 4 Nov 2010 17:57:47 -0700
+Message-ID: <AANLkTinmmLf9dMvLfWk09kGV6RbEo9HMV8ds=yGEQyMw@mail.gmail.com>
+References: <AANLkTinGSRQYqR2h+V0nAB+vn4xWCGxgbmGHuMm-xHyB@mail.gmail.com>
+	<AANLkTinaDZZmyeaK+rAvLCdZ-90n17WhABRsZGUBBcSH@mail.gmail.com>
+	<1286710919.24953.2.camel@thorin>
+	<201010101352.10864.kdudka@redhat.com>
+	<1286790249.24953.14.camel@thorin>
+	<AANLkTin00gg79Zdg1JJgaaK+2wzgu9Xpr719MYOebQ+J@mail.gmail.com>
+	<20101011191219.GD8537@feather>
+	<1286981110.14103.86.camel@thorin>
+	<20101020072945.GA3232@ZenIV.linux.org.uk>
+	<1287567544.7542.7.camel@thorin>
+	<AANLkTikBMpuwHZpAsSmcP_5MC3GJQNZE3SrRT6VQ8boS@mail.gmail.com>
+	<1288358560.7795.34.camel@thorin>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iw0-f174.google.com ([209.85.214.174]:33672 "EHLO
+Received: from mail-iw0-f174.google.com ([209.85.214.174]:47882 "EHLO
 	mail-iw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750747Ab0KCEQ3 (ORCPT
+	with ESMTP id S1751770Ab0KEA5s (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 3 Nov 2010 00:16:29 -0400
-Received: by iwn10 with SMTP id 10so262252iwn.19
-        for <linux-sparse@vger.kernel.org>; Tue, 02 Nov 2010 21:16:28 -0700 (PDT)
+	Thu, 4 Nov 2010 20:57:48 -0400
+Received: by iwn41 with SMTP id 41so187802iwn.19
+        for <linux-sparse@vger.kernel.org>; Thu, 04 Nov 2010 17:57:47 -0700 (PDT)
+In-Reply-To: <1288358560.7795.34.camel@thorin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Bernd Petrovitsch <bernd@sysprog.at>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Kamil Dudka <kdudka@redhat.com>, Tomas Klacko <tomas.klacko@gmail.com>, linux-sparse@vger.kernel.org, Josh Triplett <josh@joshtriplett.org>
 
-Hi,
+On Fri, Oct 29, 2010 at 6:22 AM, Bernd Petrovitsch <bernd@sysprog.at> wrote:
+>
+> Voila.
 
-It is finial there. The sparse version 0.4.3 is released.
+-               struct basic_block *true = br->bb_true;
+-               struct basic_block *false = br->bb_false;
+-               br->bb_false = true;
+-               br->bb_true = false;
++               struct basic_block *true_expr = br->bb_true;
++               struct basic_block *false_expr = br->bb_false;
++               br->bb_false = true_expr;
++               br->bb_true = false_expr;
 
-Mostly small fix up. It can parse the recent kernel better, less noise.
+Hmm, not very "true" symbol is an expression type. You end up calling
+basicl_block pointer as true_expr, that is misleading.
+Same thing happen to pseudo_t pointers.
 
-For people interested in the sparse internals, there is a sparse inspecting
-tools now. Currently it has limited knowledge of AST. It is very easy to
-extent though.
-
-Thanks every one for the contribution.
+Looks fine otherwise.
 
 Chris
-
---
-
-Bernd Petrovitsch (1):
-      Fix a typo - "typdef" is neither C nor plain English
-
-Christopher (3):
-      evaluate: check for NULL type inside typeof
-      Add test case for builtin_unreachable()
-      inspect: add some expression inspection
-
-Christopher Li (15):
-      Make MOD_NORETURN fits into 32 bit
-      Move noreturn attribute out of ignore attr area
-      Declare ignored attributres into a list of string.
-      Simplify Makefile using static pattern rules
-      Adding test case for "x && y && z" .
-      Pointer don't inherent the alignment from base type
-      Allow parsing L'\0'
-      Parsing wide char string
-      Adding asm goto label test case
-      inspect: add custom ast treeview model
-      inspect: add some example inspect for symbol and statement
-      inspect: Add test-inspect program
-      inspect: cast expression
-      Fixup and cleanup modifier_string() function.
-      sparse 0.4.3 finial
-
-Damien Lespiau (1):
-      Ignore the may_alias GCC attribute
-
-Dan Carpenter (1):
-      add test-inspect to .gitignore
-
-Dan McGee (1):
-      Makefile: fix permissions mixup on install
-
-Daniel De Graaf (1):
-      Fix incorrect linearization of "x && y && z"
-
-Jiri Slaby (3):
-      parser: add support for asm goto
-      parser: fix and simplify support of asm goto
-      parser: define __builtin_unreachable
-
-Joel Soete (1):
-      possible fix to cgcc issue in sparse 0.4.2:
-
-Josh Triplett (2):
-      Rename -Wall to Wsparse-all, so it doesn't get turned on unintentionally
-      New attribute designated_init: mark a struct as requiring designated init
-
-Kamil Dudka (1):
-      do not ignore attribute 'noreturn'...
-
-Michael Buesch (2):
-      ignore attributes "externally_visible" and "signal"
-      Ignore "naked" attribute
-
-Michael Stefaniuc (3):
-      Ignore the ms_abi/sysv_abi attributes.
-      Ignore the alloc_size attribute.
-      Handle __builtin_ms_va_list.
-
-Mike Frysinger (1):
-      parser: add Blackfin gcc info
-
-Morten Welinder (1):
-      skip may_alias and declare builtin_fabs
