@@ -1,38 +1,55 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] use ARRAY_SIZE() when possible
-Date: Fri, 10 Dec 2010 00:56:00 -0800
-Message-ID: <AANLkTi=2AoU3uHgvUtv=RHUurUbuAQexSHBsRs_NC8Cv@mail.gmail.com>
-References: <1291894020-3388-1-git-send-email-namhyung@gmail.com>
-	<20101209123602.GB5470@opentech.at>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Namhyung Kim <namhyung@gmail.com>
+Subject: [PATCH 2/2] Update the validation check for escape sequences
+Date: Thu, 16 Dec 2010 18:14:46 +0900
+Message-ID: <1292490886-6238-2-git-send-email-namhyung@gmail.com>
+References: <1292490886-6238-1-git-send-email-namhyung@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iw0-f172.google.com ([209.85.214.172]:62973 "EHLO
-	mail-iw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753151Ab0LJI4B (ORCPT
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:49433 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752989Ab0LPJPO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 10 Dec 2010 03:56:01 -0500
-Received: by iwn40 with SMTP id 40so4948308iwn.3
-        for <linux-sparse@vger.kernel.org>; Fri, 10 Dec 2010 00:56:01 -0800 (PST)
-In-Reply-To: <20101209123602.GB5470@opentech.at>
+	Thu, 16 Dec 2010 04:15:14 -0500
+Received: by mail-pv0-f174.google.com with SMTP id 4so463141pva.19
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Dec 2010 01:15:13 -0800 (PST)
+In-Reply-To: <1292490886-6238-1-git-send-email-namhyung@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: Namhyung Kim <namhyung@gmail.com>, linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Thu, Dec 9, 2010 at 4:36 AM, Nicholas Mc Guire <der.herr@hofr.at> wrote:
-> On Thu, 09 Dec 2010, Namhyung Kim wrote:
->
->> Convert (sizeof arr / sizeof arr[0]) to ARRAY_SIZE(arr).
->>
-> would that not be a cadidate for coccinelle/spatch rather than a potentially
-> error prone and repetitive manual patch?
-> array.cocci from the current 0.4.2 coccinelle distribution below should du
-> the job.
-> Might make sense to add a coccinelle directory in sparse to handle such cases ?
->
+Signed-off-by: Namhyung Kim <namhyung@gmail.com>
+---
+ validation/escapes.c |   19 +++++++++++++++++--
+ 1 files changed, 17 insertions(+), 2 deletions(-)
 
-Interesting. How do I use the provided script? I assume I need to invoke
-coccinelle some how.
+diff --git a/validation/escapes.c b/validation/escapes.c
+index b0d2b4b742c2..13f8f9c87e21 100644
+--- a/validation/escapes.c
++++ b/validation/escapes.c
+@@ -1,6 +1,21 @@
+ static int e[] = { '\'', '\"', '\?', '\\',
+-                   '\a', '\b', '\f', '\n', '\r', '\t', '\v', };
+-static char *s = "\'\"\?\\ \a\b\f\n\r\t\v";
++                   '\a', '\b', '\f', '\n', '\r', '\t', '\v',
++		   '\0', '\012', '\x7890', '\xabcd' };
++static char *s = "\'\"\?\\ \a\b\f\n\r\t\v \377\xcafe";
++
++static int bad_e[] = { '\c', '\0123', '\789', '\xdefg' };
+ /*
+  * check-name: Character escape sequences
++ *
++ * check-error-start
++escapes.c:6:27: warning: Unknown escape 'c'
++escapes.c:6:35: error: Bad character constant
++escapes.c:6:38: error: Bad character constant
++escapes.c:6:42: error: Bad character constant
++escapes.c:6:46: error: Bad character constant
++escapes.c:6:53: error: Bad character constant
++escapes.c:6:56: error: Bad character constant
++escapes.c:6:42: error: Expected } at end of initializer
++escapes.c:6:42: error: got 89
++ * check-error-end
+  */
+-- 
+1.7.3.3.400.g93cef
 
-Chris
