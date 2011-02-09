@@ -1,24 +1,24 @@
 From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: Novafora relicenses Transmeta sparse copyrights under the MIT license
-Date: Wed, 09 Feb 2011 12:05:19 -0800
-Message-ID: <c00d7ac4-b44b-48b1-a844-31357a2b70ba@email.android.com>
+Date: Wed, 09 Feb 2011 12:06:22 -0800
+Message-ID: <d1d2510a-b610-4d7d-a171-35a52d57acfc@email.android.com>
 References: <49E51310.3050005@zytor.com> <alpine.LFD.2.00.0904141701110.4132@localhost.localdomain> <f19298770904150525w65e3b04cqe02afc9284eeb559@mail.gmail.com> <70318cbf0904170316v290edcfag2ac62a15a7254259@mail.gmail.com> <AANLkTim3MRfHFRWqx2NuvpXrZ2MCoWwkyzX58tF-Paq6@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain;
  charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:50338 "EHLO mail.zytor.com"
+Received: from terminus.zytor.com ([198.137.202.10]:50346 "EHLO mail.zytor.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751075Ab1BIUG7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 9 Feb 2011 15:06:59 -0500
+	id S1750946Ab1BIUHv (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 9 Feb 2011 15:07:51 -0500
 In-Reply-To: <AANLkTim3MRfHFRWqx2NuvpXrZ2MCoWwkyzX58tF-Paq6@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dan Carpenter <error27@gmail.com>, Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@kernel.org>
 
-It happened years ago.
+Oh, you mean other contributors...
 
 "Dan Carpenter" <error27@gmail.com> wrote:
 
