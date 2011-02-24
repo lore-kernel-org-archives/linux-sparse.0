@@ -1,34 +1,41 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: Re: Novafora relicenses Transmeta sparse copyrights under the MIT license
-Date: Wed, 09 Feb 2011 12:06:22 -0800
-Message-ID: <d1d2510a-b610-4d7d-a171-35a52d57acfc@email.android.com>
-References: <49E51310.3050005@zytor.com> <alpine.LFD.2.00.0904141701110.4132@localhost.localdomain> <f19298770904150525w65e3b04cqe02afc9284eeb559@mail.gmail.com> <70318cbf0904170316v290edcfag2ac62a15a7254259@mail.gmail.com> <AANLkTim3MRfHFRWqx2NuvpXrZ2MCoWwkyzX58tF-Paq6@mail.gmail.com>
+From: UNITED NATIONS <tecnologias@ideay.net.ni>
+Subject: PICKUP YOUR $5000 USD VIA WESTERN UNION
+Date: Thu, 24 Feb 2011 10:15:27 -0600 (CST)
+Message-ID: <1767946122.64261.1298564127130.JavaMail.root@mailbox.ideay.net.ni>
+Reply-To: UNITED NATIONS <unitednations_organization03@rocketmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:50346 "EHLO mail.zytor.com"
+Received: from mail.ideay.net.ni ([186.1.31.6]:40685 "EHLO mail.ideay.net.ni"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750946Ab1BIUHv (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 9 Feb 2011 15:07:51 -0500
-In-Reply-To: <AANLkTim3MRfHFRWqx2NuvpXrZ2MCoWwkyzX58tF-Paq6@mail.gmail.com>
+	id S1752529Ab1BXQPe (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 24 Feb 2011 11:15:34 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <error27@gmail.com>, Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Josh Triplett <josh@kernel.org>
 
-Oh, you mean other contributors...
 
-"Dan Carpenter" <error27@gmail.com> wrote:
 
->I really would like to relicense Smatch.  Probably to GPL v2 or
->higher.  What's the status of the Sparse relicensing?  Is anyone
->working on this?  Should I start emailing people to get individual
->sign-offs on using the MIT license?
->
->regards,
->dan carpenter
+How are you?
 
--- 
-Sent from my mobile phone.  Please pardon any lack of formatting.
+We happily announce to you the draw of the United Nations programs held on the 30th January, 2011 in Nigeria. Your e-mail address attached to ticket number: 564 75600545 188. You have been compensated with the sum of  $500,000.00 USD and payment will be remitted to you via western union money transfer.
+
+
+USD$5,000 has already be send to you since last week but we were unable to give you the information on phone for the past days but due to bad network here, So we decided to send you the details via email today.
+
+Here is the western union information to pick up the USD5000.00.
+
+MTCN : 782 543 4236 
+SENDER'S NAME: MARYLIN JOHNSON 
+TEXT QUESTION: IN GOD
+ANSWER:WE TRUST 
+AMOUNT SENT: $5000.00 USD
+COUNTRY:NIGERIA
+
+Thanks
+Mrs. Linda Hall
+
+
+
+
+
