@@ -1,37 +1,40 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH] remove unused "container" macro
-Date: Fri, 08 Apr 2011 00:39:37 +0200
-Message-ID: <4D9E3D29.2000402@seznam.cz>
+Subject: [PATCH] flow.c: make comment for `dominates' reflect code
+Date: Fri, 08 Apr 2011 00:42:47 +0200
+Message-ID: <4D9E3DE7.3080003@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep20.mx.upcmail.net ([62.179.121.40]:62707 "EHLO
-	fep20.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755893Ab1DGWjm (ORCPT
+Received: from fep19.mx.upcmail.net ([62.179.121.39]:53259 "EHLO
+	fep19.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756280Ab1DGWmw (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 7 Apr 2011 18:39:42 -0400
+	Thu, 7 Apr 2011 18:42:52 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-This macro seems to be unused since commit e7fb6e0 (4 years ago).
-But my estimation that it does not currently have any practical usage for
-navigating through the sparse structures may be wrong.
-
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- ptrlist.h |    3 ---
- 1 files changed, 0 insertions(+), 3 deletions(-)
+ flow.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/ptrlist.h b/ptrlist.h
-index fbfc080..58d3bda 100644
---- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -9,9 +9,6 @@
-  * (C) Copyright Linus Torvalds 2003-2005
-  */
+diff --git a/flow.c b/flow.c
+index 5bd9a1d..7db9548 100644
+--- a/flow.c
++++ b/flow.c
+@@ -284,8 +284,8 @@ static inline int same_memop(struct instruction *a, struct instruction *b)
+ }
  
--#define container(ptr, type, member) \
--	(type *)((void *)(ptr) - offsetof(type, member))
+ /*
+- * Return 1 if "one" dominates the access to 'pseudo'
+- * in insn.
++ * Return 1 if "dom" dominates the access to "pseudo"
++ * in "insn".
+  *
+  * Return 0 if it doesn't, and -1 if you don't know.
+  */
+-- 
+1.7.1
