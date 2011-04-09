@@ -1,114 +1,56 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH 1/2] better dealing with OP_PHISOURCE insn
-Date: Sat, 09 Apr 2011 13:53:38 +0200
-Message-ID: <4DA048C2.8060501@seznam.cz>
+Subject: [PATCH 2/2] better dealing with OP_PHISOURCE insn
+Date: Sat, 09 Apr 2011 14:07:04 +0200
+Message-ID: <4DA04BE8.9060706@seznam.cz>
+References: <4DA048C2.8060501@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep12.mx.upcmail.net ([62.179.121.32]:38323 "EHLO
-	fep12.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753502Ab1DILxp (ORCPT
+Received: from fep14.mx.upcmail.net ([62.179.121.34]:42973 "EHLO
+	fep14.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754294Ab1DIMHI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Apr 2011 07:53:45 -0400
+	Sat, 9 Apr 2011 08:07:08 -0400
+In-Reply-To: <4DA048C2.8060501@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-When (sure that) we are dealing with OP_PHISOURCE instruction, we should
-use `phi_src' rather then `src1', which is dedicated to "binops and sel"
-(linearize.h) and, by chance/intention, aliases with the former one.
+Remove checking for a case that (most probably) never happens as the
+only expected instruction is OP_PHISOURCE.
 
-On changed places, I used asserts to ensure the only type of
-instructions involved in these changes are OP_PHISOURCE and proceeded
-sparse itself and linux-2.6.35.12 sources with no assertion violation
-encountered.  I'll provide a cumulative patch for this patch series
-including these asserts, mainly for testing purposes.
+For the sake of assurance, assert added with a comment easing the fix if
+the assumption of OP_PHISOURCE is wrong (better then masking a problem).
+
+Also, use `def' as existing shortcut for `phi->def'.
+
+Tested the same way as the previous patch (together).
 
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- cse.c       |    6 +++---
- flow.c      |    2 +-
- linearize.c |    2 +-
- simplify.c  |    6 +++---
- 4 files changed, 8 insertions(+), 8 deletions(-)
+ liveness.c |    8 +++-----
+ 1 files changed, 3 insertions(+), 5 deletions(-)
 
-diff --git a/cse.c b/cse.c
-index 2a15745..dc4d53c 100644
---- a/cse.c
-+++ b/cse.c
-@@ -27,8 +27,8 @@ static int phi_compare(pseudo_t phi1, pseudo_t phi2)
- 	const struct instruction *def1 = phi1->def;
- 	const struct instruction *def2 = phi2->def;
- 
--	if (def1->src1 != def2->src1)
--		return def1->src1 < def2->src1 ? -1 : 1;
-+	if (def1->phi_src != def2->phi_src)
-+		return def1->phi_src < def2->phi_src ? -1 : 1;
- 	if (def1->bb != def2->bb)
- 		return def1->bb < def2->bb ? -1 : 1;
- 	return 0;
-@@ -105,7 +105,7 @@ static void clean_up_one_instruction(struct basic_block *bb, struct instruction
- 			if (phi == VOID || !phi->def)
- 				continue;
- 			def = phi->def;
--			hash += hashval(def->src1);
-+			hash += hashval(def->phi_src);
- 			hash += hashval(def->bb);
- 		} END_FOR_EACH_PTR(phi);
- 		break;
-diff --git a/flow.c b/flow.c
-index 5bd9a1d..b6e46c7 100644
---- a/flow.c
-+++ b/flow.c
-@@ -105,7 +105,7 @@ static int try_to_simplify_bb(struct basic_block *bb, struct instruction *first,
- 		if (!def)
- 			continue;
- 		source = def->bb;
--		pseudo = def->src1;
-+		pseudo = def->phi_src;
- 		if (!pseudo || !source)
- 			continue;
- 		br = last_instruction(source->insns);
-diff --git a/linearize.c b/linearize.c
-index f2034ce..f940862 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1643,7 +1643,7 @@ static pseudo_t linearize_compound_statement(struct entrypoint *ep, struct state
- 		if (pseudo_list_size(phi_node->phi_list)==1) {
- 			pseudo = first_pseudo(phi_node->phi_list);
- 			assert(pseudo->type == PSEUDO_PHI);
--			return pseudo->def->src1;
-+			return pseudo->def->phi_src;
- 		}
- 		return phi_node->target;
- 	}
-diff --git a/simplify.c b/simplify.c
-index 8200584..2d3c19d 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -126,10 +126,10 @@ static int clean_up_phi(struct instruction *insn)
- 		if (phi == VOID)
- 			continue;
+diff --git a/liveness.c b/liveness.c
+index eeff0f7..02ceed9 100644
+--- a/liveness.c
++++ b/liveness.c
+@@ -23,11 +23,9 @@ static void phi_defines(struct instruction * phi_node, pseudo_t target,
  		def = phi->def;
--		if (def->src1 == VOID || !def->bb)
-+		if (def->phi_src == VOID || !def->bb)
+ 		if (!def || !def->bb)
  			continue;
- 		if (last) {
--			if (last->src1 != def->src1)
-+			if (last->phi_src != def->phi_src)
- 				same = 0;
- 			continue;
- 		}
-@@ -137,7 +137,7 @@ static int clean_up_phi(struct instruction *insn)
+-		if (def->opcode == OP_PHI) {
+-			phi_defines(def, target, defines);
+-			continue;
+-		}
+-		defines(def->bb, phi->def, target);
++		/* if this ever fails (very unlikely), it's a sign of a regression */
++		assert(def->opcode == OP_PHISOURCE);
++		defines(def->bb, def, target);
  	} END_FOR_EACH_PTR(phi);
+ }
  
- 	if (same) {
--		pseudo_t pseudo = last ? last->src1 : VOID;
-+		pseudo_t pseudo = last ? last->phi_src : VOID;
- 		convert_instruction_target(insn, pseudo);
- 		clear_phi(insn);
- 		return REPEAT_CSE;
 -- 
 1.7.1
