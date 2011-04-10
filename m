@@ -1,137 +1,43 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: Re: [PATCH 2/2] better dealing with OP_PHISOURCE insn
-Date: Sat, 09 Apr 2011 14:12:43 +0200
-Message-ID: <4DA04D3B.1010309@seznam.cz>
-References: <4DA048C2.8060501@seznam.cz> <4DA04BE8.9060706@seznam.cz>
+Subject: Re: [PATCH] memops.c: fix load instruction simplification
+Date: Sun, 10 Apr 2011 17:36:10 +0200
+Message-ID: <4DA1CE6A.9000202@seznam.cz>
+References: <4D9E37A4.8040902@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep15.mx.upcmail.net ([62.179.121.35]:50813 "EHLO
-	fep15.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754415Ab1DIMMq (ORCPT
+Received: from fep20.mx.upcmail.net ([62.179.121.40]:59762 "EHLO
+	fep20.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754111Ab1DJPgP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Apr 2011 08:12:46 -0400
-In-Reply-To: <4DA04BE8.9060706@seznam.cz>
+	Sun, 10 Apr 2011 11:36:15 -0400
+In-Reply-To: <4D9E37A4.8040902@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-This is promised cummulative patch of the two plus added assertions,
-mainly intended for convenient testing.
+Semantically same as previous, I should have noticed that I can use pseudo
+directly.  Also, may the assert denote the original intention?
 
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- cse.c       |    9 ++++++---
- flow.c      |    3 ++-
- linearize.c |    3 ++-
- liveness.c  |    8 +++-----
- simplify.c  |    7 ++++---
- 5 files changed, 17 insertions(+), 13 deletions(-)
+ memops.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-diff --git a/cse.c b/cse.c
-index 2a15745..b96d5ae 100644
---- a/cse.c
-+++ b/cse.c
-@@ -26,9 +26,11 @@ static int phi_compare(pseudo_t phi1, pseudo_t phi2)
- {
- 	const struct instruction *def1 = phi1->def;
- 	const struct instruction *def2 = phi2->def;
-+	assert(def1->opcode == OP_PHISOURCE);
-+	assert(def2->opcode == OP_PHISOURCE);
- 
--	if (def1->src1 != def2->src1)
--		return def1->src1 < def2->src1 ? -1 : 1;
-+	if (def1->phi_src != def2->phi_src)
-+		return def1->phi_src < def2->phi_src ? -1 : 1;
- 	if (def1->bb != def2->bb)
- 		return def1->bb < def2->bb ? -1 : 1;
- 	return 0;
-@@ -105,7 +107,8 @@ static void clean_up_one_instruction(struct basic_block *bb, struct instruction
- 			if (phi == VOID || !phi->def)
- 				continue;
- 			def = phi->def;
--			hash += hashval(def->src1);
-+			assert(def->opcode == OP_PHISOURCE);
-+			hash += hashval(def->phi_src);
- 			hash += hashval(def->bb);
- 		} END_FOR_EACH_PTR(phi);
- 		break;
-diff --git a/flow.c b/flow.c
-index 5bd9a1d..9af105b 100644
---- a/flow.c
-+++ b/flow.c
-@@ -104,8 +104,9 @@ static int try_to_simplify_bb(struct basic_block *bb, struct instruction *first,
- 
- 		if (!def)
- 			continue;
-+		assert(def->opcode == OP_PHISOURCE);
- 		source = def->bb;
--		pseudo = def->src1;
-+		pseudo = def->phi_src;
- 		if (!pseudo || !source)
- 			continue;
- 		br = last_instruction(source->insns);
-diff --git a/linearize.c b/linearize.c
-index f2034ce..9c13011 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1643,7 +1643,8 @@ static pseudo_t linearize_compound_statement(struct entrypoint *ep, struct state
- 		if (pseudo_list_size(phi_node->phi_list)==1) {
- 			pseudo = first_pseudo(phi_node->phi_list);
- 			assert(pseudo->type == PSEUDO_PHI);
--			return pseudo->def->src1;
-+			assert(pseudo->def->opcode == OP_PHISOURCE);
-+			return pseudo->def->phi_src;
- 		}
- 		return phi_node->target;
- 	}
-diff --git a/liveness.c b/liveness.c
-index eeff0f7..02ceed9 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -23,11 +23,9 @@ static void phi_defines(struct instruction * phi_node, pseudo_t target,
- 		def = phi->def;
- 		if (!def || !def->bb)
- 			continue;
--		if (def->opcode == OP_PHI) {
--			phi_defines(def, target, defines);
--			continue;
--		}
--		defines(def->bb, phi->def, target);
-+		/* if this ever fails (very unlikely), it's a sign of a regression */
-+		assert(def->opcode == OP_PHISOURCE);
-+		defines(def->bb, def, target);
- 	} END_FOR_EACH_PTR(phi);
- }
- 
-diff --git a/simplify.c b/simplify.c
-index 8200584..b18610a 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -126,10 +126,11 @@ static int clean_up_phi(struct instruction *insn)
- 		if (phi == VOID)
- 			continue;
- 		def = phi->def;
--		if (def->src1 == VOID || !def->bb)
-+		assert(def->opcode == OP_PHISOURCE);
-+		if (def->phi_src == VOID || !def->bb)
- 			continue;
- 		if (last) {
--			if (last->src1 != def->src1)
-+			if (last->phi_src != def->phi_src)
- 				same = 0;
- 			continue;
- 		}
-@@ -137,7 +138,7 @@ static int clean_up_phi(struct instruction *insn)
- 	} END_FOR_EACH_PTR(phi);
- 
- 	if (same) {
--		pseudo_t pseudo = last ? last->src1 : VOID;
-+		pseudo_t pseudo = last ? last->phi_src : VOID;
- 		convert_instruction_target(insn, pseudo);
- 		clear_phi(insn);
- 		return REPEAT_CSE;
+diff --git a/memops.c b/memops.c
+index 45bd340..3178af9 100644
+--- a/memops.c
++++ b/memops.c
+@@ -126,7 +126,7 @@ static void simplify_loads(struct basic_block *bb)
+ 				if (!dominators) {
+ 					if (local) {
+ 						assert(pseudo->type != PSEUDO_ARG);
+-						convert_load_instruction(insn, value_pseudo(0));
++						convert_load_instruction(insn, pseudo);
+ 					}
+ 					goto next_load;
+ 				}
 -- 
 1.7.1
