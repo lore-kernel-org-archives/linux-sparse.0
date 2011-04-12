@@ -1,83 +1,57 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH 4/4] more transparent dealing with tokens/position
-Date: Tue, 12 Apr 2011 13:23:59 +0200
-Message-ID: <4DA4364F.9080402@seznam.cz>
-References: <4DA430F9.3070709@seznam.cz> <4DA4352D.6040602@seznam.cz> <4DA435D8.5000900@seznam.cz>
+Subject: Re: [PATCH 2/4] more transparent dealing with tokens/position
+Date: Tue, 12 Apr 2011 13:25:55 +0200
+Message-ID: <4DA436C3.8060602@seznam.cz>
+References: <4DA430F9.3070709@seznam.cz> <4DA4352D.6040602@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep15.mx.upcmail.net ([62.179.121.35]:61765 "EHLO
-	fep15.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750881Ab1DLLYC (ORCPT
+Received: from fep18.mx.upcmail.net ([62.179.121.38]:63086 "EHLO
+	fep18.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750881Ab1DLL0A (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Apr 2011 07:24:02 -0400
-In-Reply-To: <4DA435D8.5000900@seznam.cz>
+	Tue, 12 Apr 2011 07:26:00 -0400
+In-Reply-To: <4DA4352D.6040602@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-Unify usage of `token_type' and `eof_token' also with gdbhelpers.
-When 3/4 is applied, no need to do explicit cast to `enum token_type'.
-
-Tested to work as it used to*).
-
-*) testing commands sequence:
-$ gdb --args ./sparse compat/mmap-blob.c
-(gdb) source gdbhelpers
-(gdb) b lib.c:882
-(gdb) r
-(gdb) gdb_show_tokens token
+Unify usage of `eof_token', version with respective asserts,
+mainly intended for convenient testing.
 
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- gdbhelpers |   10 +++++-----
- 1 files changed, 5 insertions(+), 5 deletions(-)
+ pre-process.c |    5 ++++-
+ 1 files changed, 4 insertions(+), 1 deletions(-)
 
-diff --git a/gdbhelpers b/gdbhelpers
-index 8634786..9a3630d 100644
---- a/gdbhelpers
-+++ b/gdbhelpers
-@@ -259,7 +259,7 @@ end
+diff --git a/pre-process.c b/pre-process.c
+index 603cc00..cee3d29 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -19,6 +19,7 @@
+ #include <fcntl.h>
+ #include <limits.h>
+ #include <time.h>
++#include <assert.h>
  
- define gdb_show_token
- 	printf "%p: '%s', type = ", $arg0, show_token($arg0)
--	output (enum token_type) ($arg0)->pos.type
-+	output token_type($arg0)
- 	printf "\n"
+ #include "lib.h"
+ #include "allocate.h"
+@@ -794,11 +795,13 @@ out:
  
- 	if (! $showing_token)
-@@ -268,18 +268,18 @@ define gdb_show_token
+ static int free_preprocessor_line(struct token *token)
+ {
+-	while (token_type(token) != TOKEN_EOF) {
++	while (!eof_token(token)) {
++		assert(token_type(token) != TOKEN_EOF);
+ 		struct token *free = token;
+ 		token = token->next;
+ 		__free_token(free);
+ 	};
++	assert(token_type(token) == TOKEN_EOF);
+ 	return 1;
+ }
  
- 		set $token = $arg0
- 
--		if ($token->pos.type == TOKEN_IDENT)
-+		if (token_type($token) == TOKEN_IDENT)
- 			gdb_tabs
- 			printf "ident = "
- 			gdb_show_ident $token.ident
- 		end
- 
--		if ($token->pos.type == TOKEN_MACRO_ARGUMENT)
-+		if (token_type($token) == TOKEN_MACRO_ARGUMENT)
- 			gdb_tabs
- 			printf "argnum = %d\n", $token->argnum
- 		end
- 
--		if ($token->pos.type == TOKEN_SPECIAL)
-+		if (token_type($token) == TOKEN_SPECIAL)
- 			gdb_tabs
- 			printf "special = \"%s\"\n", show_special($token.special)
- 		end
-@@ -294,7 +294,7 @@ define gdb_show_tokens
- 	set $t = $arg0
- 	printf "{\n"
- 	set $ntabs++
--	while ($t != &eof_token_entry)
-+	while (!eof_token($t))
- 		gdb_tabs
- 		printf "token = "
- 		gdb_show_token($t)
 -- 
 1.7.1
