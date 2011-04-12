@@ -1,181 +1,83 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH 3/4] more transparent dealing with tokens/position
-Date: Tue, 12 Apr 2011 13:22:00 +0200
-Message-ID: <4DA435D8.5000900@seznam.cz>
-References: <4DA430F9.3070709@seznam.cz> <4DA4352D.6040602@seznam.cz>
+Subject: [PATCH 4/4] more transparent dealing with tokens/position
+Date: Tue, 12 Apr 2011 13:23:59 +0200
+Message-ID: <4DA4364F.9080402@seznam.cz>
+References: <4DA430F9.3070709@seznam.cz> <4DA4352D.6040602@seznam.cz> <4DA435D8.5000900@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep23.mx.upcmail.net ([62.179.121.43]:58848 "EHLO
-	fep23.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752248Ab1DLLW1 (ORCPT
+Received: from fep15.mx.upcmail.net ([62.179.121.35]:61765 "EHLO
+	fep15.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750881Ab1DLLYC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 12 Apr 2011 07:22:27 -0400
-In-Reply-To: <4DA4352D.6040602@seznam.cz>
+	Tue, 12 Apr 2011 07:24:02 -0400
+In-Reply-To: <4DA435D8.5000900@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-Treat `enum token_type' as enumeration type rather than int.
-For instance, avoid (a bit magical) zero assignments.
+Unify usage of `token_type' and `eof_token' also with gdbhelpers.
+When 3/4 is applied, no need to do explicit cast to `enum token_type'.
 
-I admit this is quite a wild change, especially wrt the move of
-`struct position'.  This was probably the easiest way to compile
-sparse without additional dependecies mangling.  Still, another
-solution can be found.
+Tested to work as it used to*).
 
-Note that after applying patch 2/4 (i.e., if `eof_token' and
-`eof_token_entry' are used consistently), TOKEN_EOF should no longer
-be necessary (this patch also modifies `show_token' to accommodate this).
-But it might be a good idea to keep it for backward compatibility (it's
-usage/meaning stays untouched with this patch series), only add
-a comment that it should not be used (for maintainability reasons).
-
-Another solution for TOKEN_EOF then making it "deprecated" would be to
-make `eof_token_entry' initialized with ".pos.type = TOKEN_EOF" to make
-this correspondence explicit (so far, this has silently applied because
-of implicit zero initialization of `eof_token_entry' global).
-This would kept duality of how to test the single case, though,
-and I consider the only and consistent way better.
-
-Also, add `POSITION_NOT_FROM_TOKEN' to the `enum token_type' to avoid
-magical zero assignments and add some explaining comments.
-It is the best name I was able to come up with, so that it still
-describes the meaning quite clearly.  Another suggestions welcome.
+*) testing commands sequence:
+$ gdb --args ./sparse compat/mmap-blob.c
+(gdb) source gdbhelpers
+(gdb) b lib.c:882
+(gdb) r
+(gdb) gdb_show_tokens token
 
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- c2xml.c      |    2 +-
- expression.c |    2 +-
- lib.h        |   10 +---------
- symbol.c     |    2 +-
- token.h      |   19 ++++++++++++++++++-
- tokenize.c   |    8 ++++----
- 6 files changed, 26 insertions(+), 17 deletions(-)
+ gdbhelpers |   10 +++++-----
+ 1 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/c2xml.c b/c2xml.c
-index 37f29cf..2f76865 100644
---- a/c2xml.c
-+++ b/c2xml.c
-@@ -68,7 +68,7 @@ static xmlNodePtr new_sym_node(struct symbol *sym, const char *name, xmlNodePtr
- 	newNumProp(node, "start-line", sym->pos.line);
- 	newNumProp(node, "start-col", sym->pos.pos);
+diff --git a/gdbhelpers b/gdbhelpers
+index 8634786..9a3630d 100644
+--- a/gdbhelpers
++++ b/gdbhelpers
+@@ -259,7 +259,7 @@ end
  
--	if (sym->endpos.type) {
-+	if (sym->endpos.type != POSITION_NOT_FROM_TOKEN) {
- 		newNumProp(node, "end-line", sym->endpos.line);
- 		newNumProp(node, "end-col", sym->endpos.pos);
- 		if (sym->pos.stream != sym->endpos.stream)
-diff --git a/expression.c b/expression.c
-index 7e06e60..43a3606 100644
---- a/expression.c
-+++ b/expression.c
-@@ -224,7 +224,7 @@ static struct token *string_expression(struct token *token, struct expression *e
- {
- 	struct string *string = token->string;
- 	struct token *next = token->next;
--	int stringtype = token_type(token);
-+	enum token_type stringtype = token_type(token);
+ define gdb_show_token
+ 	printf "%p: '%s', type = ", $arg0, show_token($arg0)
+-	output (enum token_type) ($arg0)->pos.type
++	output token_type($arg0)
+ 	printf "\n"
  
- 	convert_function(token);
+ 	if (! $showing_token)
+@@ -268,18 +268,18 @@ define gdb_show_token
  
-diff --git a/lib.h b/lib.h
-index 2cea252..6b17280 100644
---- a/lib.h
-+++ b/lib.h
-@@ -31,15 +31,7 @@ extern int gcc_major, gcc_minor, gcc_patchlevel;
+ 		set $token = $arg0
  
- extern unsigned int hexval(unsigned int c);
+-		if ($token->pos.type == TOKEN_IDENT)
++		if (token_type($token) == TOKEN_IDENT)
+ 			gdb_tabs
+ 			printf "ident = "
+ 			gdb_show_ident $token.ident
+ 		end
  
--struct position {
--	unsigned int type:6,
--		     stream:14,
--		     newline:1,
--		     whitespace:1,
--		     pos:10;
--	unsigned int line:31,
--		     noexpand:1;
--};
-+struct position;
+-		if ($token->pos.type == TOKEN_MACRO_ARGUMENT)
++		if (token_type($token) == TOKEN_MACRO_ARGUMENT)
+ 			gdb_tabs
+ 			printf "argnum = %d\n", $token->argnum
+ 		end
  
- struct cmdline_include {
- 	char *filename;
-diff --git a/symbol.c b/symbol.c
-index 96dfbfa..34d4f06 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -62,7 +62,7 @@ struct symbol *alloc_symbol(struct position pos, int type)
- 	struct symbol *sym = __alloc_symbol(0);
- 	sym->type = type;
- 	sym->pos = pos;
--	sym->endpos.type = 0;
-+	sym->endpos.type = POSITION_NOT_FROM_TOKEN;
- 	return sym;
- }
- 
-diff --git a/token.h b/token.h
-index a3c194d..057b40a 100644
---- a/token.h
-+++ b/token.h
-@@ -60,8 +60,15 @@ struct ident {
- 	char name[];		/* Actual identifier */
- };
- 
-+/*
-+ * Tightly connected with "struct token", but used also outside them as a part
-+ * of symbol etc. position, which is in turn borrowed from underlying tokens.
-+ */
- enum token_type {
--	TOKEN_EOF,
-+	/* Used outside tokens to mark a position not initialized from a token */
-+	POSITION_NOT_FROM_TOKEN,
-+	/* Token type (outside them, ~particular position was initialized from) */
-+	TOKEN_EOF = POSITION_NOT_FROM_TOKEN,	/* use "eof_token()" instead */
- 	TOKEN_ERROR,
- 	TOKEN_IDENT,
- 	TOKEN_ZERO_IDENT,
-@@ -85,6 +92,16 @@ enum token_type {
- 	TOKEN_ELSE,
- };
- 
-+struct position {
-+	enum token_type	type:6;
-+	unsigned int stream:14,
-+			newline:1,
-+			whitespace:1,
-+			pos:10;
-+	unsigned int line:31,
-+			noexpand:1;
-+};
-+
- /* Combination tokens */
- #define COMBINATION_STRINGS {	\
- 	"+=", "++",		\
-diff --git a/tokenize.c b/tokenize.c
-index 272974b..6fa8714 100644
---- a/tokenize.c
-+++ b/tokenize.c
-@@ -48,7 +48,7 @@ const char *stream_name(int stream)
- static struct position stream_pos(stream_t *stream)
- {
- 	struct position pos;
--	pos.type = 0;
-+	pos.type = POSITION_NOT_FROM_TOKEN;
- 	pos.stream = stream->nr;
- 	pos.newline = stream->newline;
- 	pos.whitespace = stream->whitespace;
-@@ -126,13 +126,13 @@ const char *show_token(const struct token *token)
- 
- 	if (!token)
- 		return "<no token>";
-+	if (eof_token(token))
-+		return "end-of-input";
-+
- 	switch (token_type(token)) {
- 	case TOKEN_ERROR:
- 		return "syntax error";
- 
--	case TOKEN_EOF:
--		return "end-of-input";
+-		if ($token->pos.type == TOKEN_SPECIAL)
++		if (token_type($token) == TOKEN_SPECIAL)
+ 			gdb_tabs
+ 			printf "special = \"%s\"\n", show_special($token.special)
+ 		end
+@@ -294,7 +294,7 @@ define gdb_show_tokens
+ 	set $t = $arg0
+ 	printf "{\n"
+ 	set $ntabs++
+-	while ($t != &eof_token_entry)
++	while (!eof_token($t))
+ 		gdb_tabs
+ 		printf "token = "
+ 		gdb_show_token($t)
+-- 
+1.7.1
