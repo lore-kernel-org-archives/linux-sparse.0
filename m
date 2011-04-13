@@ -1,69 +1,59 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse, gcc 4.6 and a few build changes
-Date: Wed, 13 Apr 2011 01:53:59 -0700
-Message-ID: <BANLkTinOwWW0T6D+oFiNakXrc8SbpgqcpQ@mail.gmail.com>
-References: <1302226355.2407.7.camel@raven.home.flameeyes.eu>
+Subject: Re: [PATCH] remove unused "container" macro
+Date: Wed, 13 Apr 2011 02:05:03 -0700
+Message-ID: <BANLkTiktRmUDCjysa7qx3WYBzy5dKDVK9Q@mail.gmail.com>
+References: <4D9E3D29.2000402@seznam.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:51435 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757885Ab1DMIyA convert rfc822-to-8bit (ORCPT
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:54649 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757894Ab1DMJFF convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Apr 2011 04:54:00 -0400
-Received: by vws1 with SMTP id 1so274792vws.19
-        for <linux-sparse@vger.kernel.org>; Wed, 13 Apr 2011 01:53:59 -0700 (PDT)
-In-Reply-To: <1302226355.2407.7.camel@raven.home.flameeyes.eu>
+	Wed, 13 Apr 2011 05:05:05 -0400
+Received: by vxi39 with SMTP id 39so276069vxi.19
+        for <linux-sparse@vger.kernel.org>; Wed, 13 Apr 2011 02:05:03 -0700 (PDT)
+In-Reply-To: <4D9E3D29.2000402@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?Diego_Elio_Petten=F2?= <flameeyes@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
+Cc: linux-sparse@vger.kernel.org
 
-Hi Diego,
-
-
-The series looks good except the CFLAGS over ride change.
-
-The CFLAGS obvious have two parts. Some of it can be savely
-overwrite. Some of shouldn't be overwrite otherwise sparse can't
-compile correctly.
-
-I think it'd better seperate out the overwrite part of CFLAGS with
-the rest of CFLAGS, just like the git makefile.
-
-Some thing like the patch I attached. You might need to make some
-changes to merge with your branch.
-
-Can you rebase your series on the sparse chrisl branch?
-http://git.kernel.org/?p=3Ddevel/sparse/chrisl/sparse.git;a=3Dsummary
-
-Thanks
+Applied.
 
 Chris
 
-
-On Thu, Apr 7, 2011 at 6:32 PM, Diego Elio Petten=F2 <flameeyes@gmail.c=
-om> wrote:
-> Hello Christopher,
+On Thu, Apr 7, 2011 at 3:39 PM, Jan Pokorn=FD <pokorny_jan@seznam.cz> w=
+rote:
+> This macro seems to be unused since commit e7fb6e0 (4 years ago).
+> But my estimation that it does not currently have any practical usage=
+ for
+> navigating through the sparse structures may be wrong.
 >
-> I'm a Gentoo developer and I went to look at sparse today since it
-> failed to build with the new GCC 4.6 version. I've fixed the build
-> issue, but since I was looking at it I also made a number of changes
-> that makes it much easier to build in Gentoo.
+> Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
+> ---
+> =A0ptrlist.h | =A0 =A03 ---
+> =A01 files changed, 0 insertions(+), 3 deletions(-)
 >
-> If you could look at the patches and merge those that makes sense, it=
-'d
-> be lovely:
+> diff --git a/ptrlist.h b/ptrlist.h
+> index fbfc080..58d3bda 100644
+> --- a/ptrlist.h
+> +++ b/ptrlist.h
+> @@ -9,9 +9,6 @@
+> =A0* (C) Copyright Linus Torvalds 2003-2005
+> =A0*/
 >
-> http://git.overlays.gentoo.org/gitweb/?p=3Dproj/sparse.git;a=3Dsummar=
-y
->
-> Thanks in advance,
+> -#define container(ptr, type, member) \
+> - =A0 =A0 =A0 (type *)((void *)(ptr) - offsetof(type, member))
+> -
+> =A0/* Silly type-safety check ;) */
+> =A0#define DECLARE_PTR_LIST(listname,type) =A0 =A0 =A0 =A0struct list=
+name { type *list[1]; }
+> =A0#define CHECK_TYPE(head,ptr) =A0 =A0 =A0 =A0 =A0 (void)(&(ptr) =3D=
+=3D &(head)->list[0])
 > --
-> Diego Elio Petten=F2 =97 Flameeyes
-> http://blog.flameeyes.eu/
->
+> 1.7.1
 >
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
