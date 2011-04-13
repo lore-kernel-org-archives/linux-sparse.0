@@ -1,411 +1,106 @@
-From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH] treat `enum opcode' as enumeration rather than int
-Date: Wed, 13 Apr 2011 16:38:36 +0200
-Message-ID: <4DA5B56C.8060606@seznam.cz>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: sparse, gcc 4.6 and a few build changes
+Date: Wed, 13 Apr 2011 09:58:35 -0700
+Message-ID: <BANLkTikS9NPWmaqt2JZHVLEcMarxznq97g@mail.gmail.com>
+References: <1302226355.2407.7.camel@raven.home.flameeyes.eu>
+	<BANLkTinOwWW0T6D+oFiNakXrc8SbpgqcpQ@mail.gmail.com>
+	<1302692762.15959.50.camel@raven.home.flameeyes.eu>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary=bcaec51ba1f52c4fee04a0cfb8a2
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep13.mx.upcmail.net ([62.179.121.33]:44359 "EHLO
-	fep13.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756363Ab1DMOil (ORCPT
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:54621 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757502Ab1DMQ6g (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Apr 2011 10:38:41 -0400
+	Wed, 13 Apr 2011 12:58:36 -0400
+Received: by vws1 with SMTP id 1so603923vws.19
+        for <linux-sparse@vger.kernel.org>; Wed, 13 Apr 2011 09:58:35 -0700 (PDT)
+In-Reply-To: <1302692762.15959.50.camel@raven.home.flameeyes.eu>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org
-Cc: linux-sparse@vger.kernel.org
+To: =?ISO-8859-1?Q?Diego_Elio_Petten=F2?= <flameeyes@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-This change also required a move of `struct instruction' below
-`enum opcode' due to new dependency and a default case to the switch
-in `opcode_sign' to suppress compiler warnings about unhandled enumeration
-values.
+--bcaec51ba1f52c4fee04a0cfb8a2
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
----
- example.c   |   13 +++---
- flow.c      |    4 +-
- linearize.c |   31 ++++++++-------
- linearize.h |  124 +++++++++++++++++++++++++++++-----------------------------
- simplify.c  |    4 +-
- 5 files changed, 90 insertions(+), 86 deletions(-)
+On Wed, Apr 13, 2011 at 4:06 AM, Diego Elio Petten=F2 <flameeyes@gmail.com>=
+ wrote:
 
-diff --git a/example.c b/example.c
-index 24444c6..b38e1e7 100644
---- a/example.c
-+++ b/example.c
-@@ -142,7 +142,8 @@ struct bb_state {
- 	struct storage_hash_list *internal;
- 
- 	/* CC cache.. */
--	int cc_opcode, cc_dead;
-+	enum opcode cc_opcode;
-+	int cc_dead;
- 	pseudo_t cc_target;
- };
- 
-@@ -552,9 +553,9 @@ static void flush_pseudo(struct bb_state *state, pseudo_t pseudo, struct storage
- 
- static void flush_cc_cache_to_reg(struct bb_state *state, pseudo_t pseudo, struct hardreg *reg)
- {
--	int opcode = state->cc_opcode;
-+	enum opcode opcode = state->cc_opcode;
- 
--	state->cc_opcode = 0;
-+	state->cc_opcode = OP_BADOP;
- 	state->cc_target = NULL;
- 	output_insn(state, "%s %s", opcodes[opcode], reg->name);
- }
-@@ -575,7 +576,7 @@ static void flush_cc_cache(struct bb_state *state)
- 	}
- }
- 
--static void add_cc_cache(struct bb_state *state, int opcode, pseudo_t pseudo)
-+static void add_cc_cache(struct bb_state *state, enum opcode opcode, pseudo_t pseudo)
- {
- 	assert(!state->cc_target);
- 	state->cc_target = pseudo;
-@@ -1346,7 +1347,7 @@ static void generate_compare(struct bb_state *state, struct instruction *insn)
- {
- 	struct hardreg *src;
- 	const char *src2;
--	int opcode;
-+	enum opcode opcode;
- 
- 	flush_cc_cache(state);
- 	opcode = insn->opcode;
-@@ -1772,7 +1773,7 @@ static void output_bb(struct basic_block *bb, unsigned long generation)
- 	state.inputs = gather_storage(bb, STOR_IN);
- 	state.outputs = gather_storage(bb, STOR_OUT);
- 	state.internal = NULL;
--	state.cc_opcode = 0;
-+	state.cc_opcode = OP_BADOP;
- 	state.cc_target = NULL;
- 
- 	/* Mark incoming registers used */
-diff --git a/flow.c b/flow.c
-index 5bd9a1d..3687207 100644
---- a/flow.c
-+++ b/flow.c
-@@ -291,7 +291,7 @@ static inline int same_memop(struct instruction *a, struct instruction *b)
-  */
- int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom, int local)
- {
--	int opcode = dom->opcode;
-+	enum opcode opcode = dom->opcode;
- 
- 	if (opcode == OP_CALL || opcode == OP_ENTRY)
- 		return local ? 0 : -1;
-@@ -495,7 +495,7 @@ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct b
- 		return;
- 	bb->generation = generation;
- 	FOR_EACH_PTR_REVERSE(bb->insns, insn) {
--		int opcode = insn->opcode;
-+		enum opcode opcode = insn->opcode;
- 
- 		if (opcode != OP_LOAD && opcode != OP_STORE) {
- 			if (local)
-diff --git a/linearize.c b/linearize.c
-index f2034ce..5819862 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -25,7 +25,7 @@
- pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt);
- pseudo_t linearize_expression(struct entrypoint *ep, struct expression *expr);
- 
--static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right);
-+static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, enum opcode op, pseudo_t left, pseudo_t right);
- static pseudo_t add_setval(struct entrypoint *ep, struct symbol *ctype, struct expression *val);
- static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
- 
-@@ -39,7 +39,7 @@ static struct position current_pos;
- 
- ALLOCATOR(pseudo_user, "pseudo_user");
- 
--static struct instruction *alloc_instruction(int opcode, int size)
-+static struct instruction *alloc_instruction(enum opcode opcode, int size)
- {
- 	struct instruction * insn = __alloc_instruction(0);
- 	insn->opcode = opcode;
-@@ -53,7 +53,7 @@ static inline int type_size(struct symbol *type)
- 	return type ? type->bit_size > 0 ? type->bit_size : 0 : 0;
- }
- 
--static struct instruction *alloc_typed_instruction(int opcode, struct symbol *type)
-+static struct instruction *alloc_typed_instruction(enum opcode opcode, struct symbol *type)
- {
- 	struct instruction *insn = alloc_instruction(opcode, type_size(type));
- 	insn->type = type;
-@@ -274,7 +274,7 @@ static char *show_asm(char *buf, struct instruction *insn)
- 
- const char *show_instruction(struct instruction *insn)
- {
--	int opcode = insn->opcode;
-+	enum opcode opcode = insn->opcode;
- 	static char buffer[4096];
- 	char *buf;
- 
-@@ -956,7 +956,7 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
- 	return value;
- }
- 
--static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right)
-+static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, enum opcode op, pseudo_t left, pseudo_t right)
- {
- 	struct instruction *insn = alloc_typed_instruction(op, ctype);
- 	pseudo_t target = alloc_pseudo(insn);
-@@ -1018,7 +1018,7 @@ static pseudo_t linearize_inc_dec(struct entrypoint *ep, struct expression *expr
- {
- 	struct access_data ad = { NULL, };
- 		pseudo_t old, new, one;
--	int op = expr->op == SPECIAL_INCREMENT ? OP_ADD : OP_SUB;
-+	enum opcode op = expr->op == SPECIAL_INCREMENT ? OP_ADD : OP_SUB;
- 
- 	if (!linearize_address_gen(ep, expr->unop, &ad))
- 		return VOID;
-@@ -1031,7 +1031,7 @@ static pseudo_t linearize_inc_dec(struct entrypoint *ep, struct expression *expr
- 	return postop ? old : new;
- }
- 
--static pseudo_t add_uniop(struct entrypoint *ep, struct expression *expr, int op, pseudo_t src)
-+static pseudo_t add_uniop(struct entrypoint *ep, struct expression *expr, enum opcode op, pseudo_t src)
- {
- 	struct instruction *insn = alloc_typed_instruction(op, expr->ctype);
- 	pseudo_t new = alloc_pseudo(insn);
-@@ -1101,7 +1101,7 @@ static pseudo_t linearize_postop(struct entrypoint *ep, struct expression *expr)
-  */
- static struct instruction *alloc_cast_instruction(struct symbol *src, struct symbol *ctype)
- {
--	int opcode = OP_CAST;
-+	enum opcode opcode = OP_CAST;
- 	struct symbol *base = src;
- 
- 	if (base->ctype.modifiers & MOD_SIGNED)
-@@ -1138,12 +1138,15 @@ static pseudo_t cast_pseudo(struct entrypoint *ep, pseudo_t src, struct symbol *
- 	return result;
- }
- 
--static int opcode_sign(int opcode, struct symbol *ctype)
-+static enum opcode opcode_sign(enum opcode opcode, struct symbol *ctype)
- {
- 	if (ctype && (ctype->ctype.modifiers & MOD_SIGNED)) {
- 		switch(opcode) {
- 		case OP_MULU: case OP_DIVU: case OP_MODU: case OP_LSR:
- 			opcode++;
-+			break;
-+		default:
-+			break;
- 		}
- 	}
- 	return opcode;
-@@ -1162,7 +1165,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 	if (expr->op != '=') {
- 		pseudo_t oldvalue = linearize_load_gen(ep, &ad);
- 		pseudo_t dst;
--		static const int op_trans[] = {
-+		static const enum opcode op_trans[] = {
- 			[SPECIAL_ADD_ASSIGN - SPECIAL_BASE] = OP_ADD,
- 			[SPECIAL_SUB_ASSIGN - SPECIAL_BASE] = OP_SUB,
- 			[SPECIAL_MUL_ASSIGN - SPECIAL_BASE] = OP_MULU,
-@@ -1174,7 +1177,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 			[SPECIAL_OR_ASSIGN  - SPECIAL_BASE] = OP_OR,
- 			[SPECIAL_XOR_ASSIGN - SPECIAL_BASE] = OP_XOR
- 		};
--		int opcode;
-+		enum opcode opcode;
- 
- 		if (!src)
- 			return VOID;
-@@ -1262,7 +1265,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
- static pseudo_t linearize_binop(struct entrypoint *ep, struct expression *expr)
- {
- 	pseudo_t src1, src2, dst;
--	static const int opcode[] = {
-+	static const enum opcode opcode[] = {
- 		['+'] = OP_ADD, ['-'] = OP_SUB,
- 		['*'] = OP_MULU, ['/'] = OP_DIVU,
- 		['%'] = OP_MODU, ['&'] = OP_AND,
-@@ -1272,7 +1275,7 @@ static pseudo_t linearize_binop(struct entrypoint *ep, struct expression *expr)
- 		[SPECIAL_LOGICAL_AND] = OP_AND_BOOL,
- 		[SPECIAL_LOGICAL_OR] = OP_OR_BOOL,
- 	};
--	int op;
-+	enum opcode op;
- 
- 	src1 = linearize_expression(ep, expr->left);
- 	src2 = linearize_expression(ep, expr->right);
-@@ -1396,7 +1399,7 @@ static pseudo_t linearize_logical(struct entrypoint *ep, struct expression *expr
- 
- static pseudo_t linearize_compare(struct entrypoint *ep, struct expression *expr)
- {
--	static const int cmpop[] = {
-+	static const enum opcode cmpop[] = {
- 		['>'] = OP_SET_GT, ['<'] = OP_SET_LT,
- 		[SPECIAL_EQUAL] = OP_SET_EQ,
- 		[SPECIAL_NOTEQUAL] = OP_SET_NE,
-diff --git a/linearize.h b/linearize.h
-index 50b3601..cd3376d 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -66,68 +66,6 @@ struct asm_rules {
- 
- DECLARE_ALLOCATOR(asm_rules);
- 
--struct instruction {
--	unsigned opcode:8,
--		 size:24;
--	struct basic_block *bb;
--	struct position pos;
--	struct symbol *type;
--	union {
--		pseudo_t target;
--		pseudo_t cond;		/* for branch and switch */
--	};
--	union {
--		struct /* entrypoint */ {
--			struct pseudo_list *arg_list;
--		};
--		struct /* branch */ {
--			struct basic_block *bb_true, *bb_false;
--		};
--		struct /* switch */ {
--			struct multijmp_list *multijmp_list;
--		};
--		struct /* phi_node */ {
--			struct pseudo_list *phi_list;
--		};
--		struct /* phi source */ {
--			pseudo_t phi_src;
--			struct instruction_list *phi_users;
--		};
--		struct /* unops */ {
--			pseudo_t src;
--			struct symbol *orig_type;	/* casts */
--			unsigned int offset;		/* memops */
--		};
--		struct /* binops and sel */ {
--			pseudo_t src1, src2, src3;
--		};
--		struct /* slice */ {
--			pseudo_t base;
--			unsigned from, len;
--		};
--		struct /* multijump */ {
--			int begin, end;
--		};
--		struct /* setval */ {
--			pseudo_t symbol;		/* Subtle: same offset as "src" !! */
--			struct expression *val;
--		};
--		struct /* call */ {
--			pseudo_t func;
--			struct pseudo_list *arguments;
--		};
--		struct /* context */ {
--			int increment;
--			int check;
--			struct expression *context_expr;
--		};
--		struct /* asm */ {
--			const char *string;
--			struct asm_rules *asm_rules;
--		};
--	};
--};
--
- enum opcode {
- 	OP_BADOP,
- 
-@@ -219,6 +157,68 @@ enum opcode {
- 	OP_COPY,
- };
- 
-+struct instruction {
-+	enum opcode opcode:8;
-+	unsigned size:24;
-+	struct basic_block *bb;
-+	struct position pos;
-+	struct symbol *type;
-+	union {
-+		pseudo_t target;
-+		pseudo_t cond;		/* for branch and switch */
-+	};
-+	union {
-+		struct /* entrypoint */ {
-+			struct pseudo_list *arg_list;
-+		};
-+		struct /* branch */ {
-+			struct basic_block *bb_true, *bb_false;
-+		};
-+		struct /* switch */ {
-+			struct multijmp_list *multijmp_list;
-+		};
-+		struct /* phi_node */ {
-+			struct pseudo_list *phi_list;
-+		};
-+		struct /* phi source */ {
-+			pseudo_t phi_src;
-+			struct instruction_list *phi_users;
-+		};
-+		struct /* unops */ {
-+			pseudo_t src;
-+			struct symbol *orig_type;	/* casts */
-+			unsigned int offset;		/* memops */
-+		};
-+		struct /* binops and sel */ {
-+			pseudo_t src1, src2, src3;
-+		};
-+		struct /* slice */ {
-+			pseudo_t base;
-+			unsigned from, len;
-+		};
-+		struct /* multijump */ {
-+			int begin, end;
-+		};
-+		struct /* setval */ {
-+			pseudo_t symbol;		/* Subtle: same offset as "src" !! */
-+			struct expression *val;
-+		};
-+		struct /* call */ {
-+			pseudo_t func;
-+			struct pseudo_list *arguments;
-+		};
-+		struct /* context */ {
-+			int increment;
-+			int check;
-+			struct expression *context_expr;
-+		};
-+		struct /* asm */ {
-+			const char *string;
-+			struct asm_rules *asm_rules;
-+		};
-+	};
-+};
-+
- struct basic_block_list;
- struct instruction_list;
- 
-diff --git a/simplify.c b/simplify.c
-index 8200584..9e9c893 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -693,7 +693,7 @@ static int simplify_cast(struct instruction *insn)
- 	}
- 
- 	if (size == orig_size) {
--		int op = (orig_type->ctype.modifiers & MOD_SIGNED) ? OP_SCAST : OP_CAST;
-+		enum opcode op = (orig_type->ctype.modifiers & MOD_SIGNED) ? OP_SCAST : OP_CAST;
- 		if (insn->opcode == op)
- 			goto simplify;
- 	}
-@@ -729,7 +729,7 @@ static int simplify_select(struct instruction *insn)
- 
- 		/* The pair 0/1 is special - replace with SETNE/SETEQ */
- 		if ((val1 | val2) == 1) {
--			int opcode = OP_SET_EQ;
-+			enum opcode opcode = OP_SET_EQ;
- 			if (val1) {
- 				src1 = src2;
- 				opcode = OP_SET_NE;
--- 
-1.7.1
+> Yes I know =97 that's why I used the "?=3D" setter: if CFLAGS is set in t=
+he
+> environment, it'll be used instead of the "CFLAGS ?=3D" line; all the +=
+=3D
+> lines will be maintained instead. This does obviously not work if you
+> use "make CFLAGS=3D$something".
+
+That is my point. It force the user set CFLAGS in enviroment
+but not work the same way if you do "make CFLAGS=3D$something".
+I want "make CFLAGS=3D$something" works the same way as
+you set it in environment.
+
+>
+> Attachment is missing ;)
+
+Oops, I forget to attach. Here we go again.
+
+> It looks like no changes are needed for that at least, I'll send the
+> remaining three patches for now then.
+
+Ha, I am hoping that is my learning case to pull from some one else's
+git tree. Using git tree or patches are  both fine.
+
+Thanks
+
+Chris
+
+--bcaec51ba1f52c4fee04a0cfb8a2
+Content-Type: application/octet-stream; name="cflags.patch"
+Content-Disposition: attachment; filename="cflags.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_gmgi40n80
+
+ZGlmZiAtLWdpdCBhL01ha2VmaWxlIGIvTWFrZWZpbGUKaW5kZXggNzAxY2RjOS4uZWVjNWRhYSAx
+MDA2NDQKLS0tIGEvTWFrZWZpbGUKKysrIGIvTWFrZWZpbGUKQEAgLTksNiArOSw3IEBAIENGTEFH
+UyArPSAtV2FsbCAtV3dyaXRlLXN0cmluZ3MKIExERkxBR1MgKz0gLWcKIEFSID0gYXIKIAorQUxM
+X0NGTEFHUyA9ICQoQ0ZMQUdTKSAkKEJBU0lDX0NGTEFHUykKICMKICMgRm9yIGRlYnVnZ2luZywg
+cHV0IHRoaXMgaW4gbG9jYWwubWs6CiAjCkBAIC0yMSwxMCArMjIsMTAgQEAgSEFWRV9HQ0NfREVQ
+Oj0kKHNoZWxsIHRvdWNoIC5nY2MtdGVzdC5jICYmIAkJCQlcCiAJCWVjaG8gJ3llcyc7IHJtIC1m
+IC5nY2MtdGVzdC5kIC5nY2MtdGVzdC5vIC5nY2MtdGVzdC5jKQogSEFWRV9HVEsyOj0kKHNoZWxs
+IHBrZy1jb25maWcgLS1leGlzdHMgZ3RrKy0yLjAgMj4vZGV2L251bGwgJiYgZWNobyAneWVzJykK
+IAotQ0ZMQUdTICs9IC1ER0NDX0JBU0U9XCIkKHNoZWxsICQoQ0MpIC0tcHJpbnQtZmlsZS1uYW1l
+PSlcIgorQkFTSUNfQ0ZMQUdTID0gLURHQ0NfQkFTRT1cIiQoc2hlbGwgJChDQykgLS1wcmludC1m
+aWxlLW5hbWU9KVwiCiAKIGlmZXEgKCQoSEFWRV9HQ0NfREVQKSx5ZXMpCi1DRkxBR1MgKz0gLVdw
+LC1NRCwkKEBEKS8uJChARikuZAorQkFTSUNfQ0ZMQUdTICs9IC1XcCwtTUQsJChARCkvLiQoQEYp
+LmQKIGVuZGlmCiAKIERFU1RESVI9CkBAIC01NSw3ICs1Niw3IEBAIEdUSzJfTElCUyA6PSAkKHNo
+ZWxsIHBrZy1jb25maWcgLS1saWJzIGd0aystMi4wKQogUFJPR1JBTVMgKz0gdGVzdC1pbnNwZWN0
+CiBJTlNUX1BST0dSQU1TICs9IHRlc3QtaW5zcGVjdAogdGVzdC1pbnNwZWN0X0VYVFJBX0RFUFMg
+Oj0gYXN0LW1vZGVsLm8gYXN0LXZpZXcubyBhc3QtaW5zcGVjdC5vCi10ZXN0LWluc3BlY3QubyAk
+KHRlc3QtaW5zcGVjdF9FWFRSQV9ERVBTKTogQ0ZMQUdTICs9ICQoR1RLMl9DRkxBR1MpCit0ZXN0
+LWluc3BlY3QubyAkKHRlc3QtaW5zcGVjdF9FWFRSQV9ERVBTKTogQkFTSUNfQ0ZMQUdTICs9ICQo
+R1RLMl9DRkxBR1MpCiB0ZXN0LWluc3BlY3RfRVhUUkFfT0JKUyA6PSAkKEdUSzJfTElCUykKIGVs
+c2UKICQod2FybmluZyBZb3VyIHN5c3RlbSBkb2VzIG5vdCBoYXZlIGxpYmd0azIsIGRpc2FibGlu
+ZyB0ZXN0LWluc3BlY3QpCkBAIC03Myw3ICs3NCw3IEBAIExJQl9PQkpTPSB0YXJnZXQubyBwYXJz
+ZS5vIHRva2VuaXplLm8gcHJlLXByb2Nlc3MubyBzeW1ib2wubyBsaWIubyBzY29wZS5vIFwKIExJ
+Ql9GSUxFPSBsaWJzcGFyc2UuYQogU0xJQl9GSUxFPSBsaWJzcGFyc2Uuc28KIAotIyBJZiB5b3Ug
+YWRkICQoU0xJQl9GSUxFKSB0byB0aGlzLCB5b3UgYWxzbyBuZWVkIHRvIGFkZCAtZnBpYyB0byBD
+RkxBR1MgYWJvdmUuCisjIElmIHlvdSBhZGQgJChTTElCX0ZJTEUpIHRvIHRoaXMsIHlvdSBhbHNv
+IG5lZWQgdG8gYWRkIC1mcGljIHRvIEJBU0lDX0NGTEFHUyBhYm92ZS4KICMgRG9pbmcgc28gaW5j
+dXJzIGEgbm90aWNlYWJsZSBwZXJmb3JtYW5jZSBoaXQsIGFuZCBTcGFyc2UgZG9lcyBub3QgaGF2
+ZSBhCiAjIHN0YWJsZSBzaGFyZWQgbGlicmFyeSBpbnRlcmZhY2UsIHNvIHRoaXMgZG9lcyBub3Qg
+b2NjdXIgYnkgZGVmYXVsdC4gIElmIHlvdQogIyByZWFsbHkgd2FudCBhIHNoYXJlZCBsaWJyYXJ5
+LCB5b3UgbWF5IHdhbnQgdG8gYnVpbGQgU3BhcnNlIHR3aWNlOiBvbmNlCkBAIC0xNDksNyArMTUw
+LDcgQEAgREVQX0ZJTEVTIDo9ICQod2lsZGNhcmQgLiouby5kKQogJChpZiAkKERFUF9GSUxFUyks
+JChldmFsIGluY2x1ZGUgJChERVBfRklMRVMpKSkKIAogYzJ4bWwubzogYzJ4bWwuYyAkKExJQl9I
+KQotCSQoUVVJRVRfQ0MpJChDQykgYHBrZy1jb25maWcgLS1jZmxhZ3MgbGlieG1sLTIuMGAgLW8g
+JEAgLWMgJChDRkxBR1MpICQ8CisJJChRVUlFVF9DQykkKENDKSBgcGtnLWNvbmZpZyAtLWNmbGFn
+cyBsaWJ4bWwtMi4wYCAtbyAkQCAtYyAkKEFMTF9DRkxBR1MpICQ8CiAKIGNvbXBhdC1saW51eC5v
+OiBjb21wYXQvc3RydG9sZC5jIGNvbXBhdC9tbWFwLWJsb2IuYyAkKExJQl9IKQogY29tcGF0LXNv
+bGFyaXMubzogY29tcGF0L21tYXAtYmxvYi5jICQoTElCX0gpCkBAIC0xNTcsNyArMTU4LDcgQEAg
+Y29tcGF0LW1pbmd3Lm86ICQoTElCX0gpCiBjb21wYXQtY3lnd2luLm86ICQoTElCX0gpCiAKICUu
+bzogJS5jCi0JJChRVUlFVF9DQykkKENDKSAtbyAkQCAtYyAkKENGTEFHUykgJDwKKwkkKFFVSUVU
+X0NDKSQoQ0MpIC1vICRAIC1jICQoQUxMX0NGTEFHUykgJDwKIAogY2xlYW46IGNsZWFuLWNoZWNr
+CiAJcm0gLWYgKi5bb2FdIC4qLmQgKi5zbyAkKFBST0dSQU1TKSAkKFNMSUJfRklMRSkgcHJlLXBy
+b2Nlc3MuaCBzcGFyc2UucGMK
+--bcaec51ba1f52c4fee04a0cfb8a2--
