@@ -1,107 +1,411 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: [PATCH] use ARRAY_SIZE() when possible (continued)
-Date: Wed, 13 Apr 2011 16:24:34 +0200
-Message-ID: <4DA5B222.2080501@seznam.cz>
+Subject: [PATCH] treat `enum opcode' as enumeration rather than int
+Date: Wed, 13 Apr 2011 16:38:36 +0200
+Message-ID: <4DA5B56C.8060606@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep32.mx.upcmail.net ([62.179.121.50]:37179 "EHLO
-	fep32.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756198Ab1DMOZe (ORCPT
+Received: from fep13.mx.upcmail.net ([62.179.121.33]:44359 "EHLO
+	fep13.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756363Ab1DMOil (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Apr 2011 10:25:34 -0400
+	Wed, 13 Apr 2011 10:38:41 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org
 
-Some cases were omitted with the patch from Namhyung Kim
-(commit c5e425e in Chris Li's repo).
-
-My curiosity led me to try out coccinelle/spatch as suggested by
-Nicholas Mc Guire in reply to Kim's patch, but it*) only discovered
-occurrences in show-parse.c, probably because of "const vs. non-const"
-differences of array item types and the expression given to sizeof.
-
-*) sequence to try coccinelle out on this case (when coccinelle installed):
-$ wget http://coccinelle.lip6.fr/rules/array.cocci
-$ sed 's/<linux\/kernel.h>/"lib.h"/' array.cocci > array-sparse.cocci
-$ for i in $(find . -path ./validation -prune -o -name "*.c" -print); \
-> do spatch -sp_file array-sparse.cocci $i; done
-
-Beside proceeding messages, this will print out any "real" patch
-generated according to the semantic patch in `array-sparse.cocci'
-(it can also reflect these changes directly etc.).
+This change also required a move of `struct instruction' below
+`enum opcode' due to new dependency and a default case to the switch
+in `opcode_sign' to suppress compiler warnings about unhandled enumeration
+values.
 
 Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- expression.c |    2 +-
- linearize.c  |    2 +-
- show-parse.c |    4 ++--
- sparse.c     |    2 +-
- 4 files changed, 5 insertions(+), 5 deletions(-)
+ example.c   |   13 +++---
+ flow.c      |    4 +-
+ linearize.c |   31 ++++++++-------
+ linearize.h |  124 +++++++++++++++++++++++++++++-----------------------------
+ simplify.c  |    4 +-
+ 5 files changed, 90 insertions(+), 86 deletions(-)
 
-diff --git a/expression.c b/expression.c
-index 7e06e60..d9cdfd3 100644
---- a/expression.c
-+++ b/expression.c
-@@ -916,7 +916,7 @@ struct token *assignment_expression(struct token *token, struct expression **tre
- 			SPECIAL_SHR_ASSIGN, SPECIAL_AND_ASSIGN,
- 			SPECIAL_OR_ASSIGN,  SPECIAL_XOR_ASSIGN };
- 		int i, op = token->special;
--		for (i = 0; i < sizeof(assignments)/sizeof(int); i++)
-+		for (i = 0; i < ARRAY_SIZE(assignments); i++)
- 			if (assignments[i] == op) {
- 				struct expression * expr = alloc_expression(token->pos, EXPR_ASSIGNMENT);
- 				expr->left = *tree;
+diff --git a/example.c b/example.c
+index 24444c6..b38e1e7 100644
+--- a/example.c
++++ b/example.c
+@@ -142,7 +142,8 @@ struct bb_state {
+ 	struct storage_hash_list *internal;
+ 
+ 	/* CC cache.. */
+-	int cc_opcode, cc_dead;
++	enum opcode cc_opcode;
++	int cc_dead;
+ 	pseudo_t cc_target;
+ };
+ 
+@@ -552,9 +553,9 @@ static void flush_pseudo(struct bb_state *state, pseudo_t pseudo, struct storage
+ 
+ static void flush_cc_cache_to_reg(struct bb_state *state, pseudo_t pseudo, struct hardreg *reg)
+ {
+-	int opcode = state->cc_opcode;
++	enum opcode opcode = state->cc_opcode;
+ 
+-	state->cc_opcode = 0;
++	state->cc_opcode = OP_BADOP;
+ 	state->cc_target = NULL;
+ 	output_insn(state, "%s %s", opcodes[opcode], reg->name);
+ }
+@@ -575,7 +576,7 @@ static void flush_cc_cache(struct bb_state *state)
+ 	}
+ }
+ 
+-static void add_cc_cache(struct bb_state *state, int opcode, pseudo_t pseudo)
++static void add_cc_cache(struct bb_state *state, enum opcode opcode, pseudo_t pseudo)
+ {
+ 	assert(!state->cc_target);
+ 	state->cc_target = pseudo;
+@@ -1346,7 +1347,7 @@ static void generate_compare(struct bb_state *state, struct instruction *insn)
+ {
+ 	struct hardreg *src;
+ 	const char *src2;
+-	int opcode;
++	enum opcode opcode;
+ 
+ 	flush_cc_cache(state);
+ 	opcode = insn->opcode;
+@@ -1772,7 +1773,7 @@ static void output_bb(struct basic_block *bb, unsigned long generation)
+ 	state.inputs = gather_storage(bb, STOR_IN);
+ 	state.outputs = gather_storage(bb, STOR_OUT);
+ 	state.internal = NULL;
+-	state.cc_opcode = 0;
++	state.cc_opcode = OP_BADOP;
+ 	state.cc_target = NULL;
+ 
+ 	/* Mark incoming registers used */
+diff --git a/flow.c b/flow.c
+index 5bd9a1d..3687207 100644
+--- a/flow.c
++++ b/flow.c
+@@ -291,7 +291,7 @@ static inline int same_memop(struct instruction *a, struct instruction *b)
+  */
+ int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom, int local)
+ {
+-	int opcode = dom->opcode;
++	enum opcode opcode = dom->opcode;
+ 
+ 	if (opcode == OP_CALL || opcode == OP_ENTRY)
+ 		return local ? 0 : -1;
+@@ -495,7 +495,7 @@ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct b
+ 		return;
+ 	bb->generation = generation;
+ 	FOR_EACH_PTR_REVERSE(bb->insns, insn) {
+-		int opcode = insn->opcode;
++		enum opcode opcode = insn->opcode;
+ 
+ 		if (opcode != OP_LOAD && opcode != OP_STORE) {
+ 			if (local)
 diff --git a/linearize.c b/linearize.c
-index 5819862..6f3fa40 100644
+index f2034ce..5819862 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -282,7 +282,7 @@ const char *show_instruction(struct instruction *insn)
- 	if (!insn->bb)
- 		buf += sprintf(buf, "# ");
+@@ -25,7 +25,7 @@
+ pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt);
+ pseudo_t linearize_expression(struct entrypoint *ep, struct expression *expr);
  
--	if (opcode < sizeof(opcodes)/sizeof(char *)) {
-+	if (opcode < ARRAY_SIZE(opcodes)) {
- 		const char *op = opcodes[opcode];
- 		if (!op)
- 			buf += sprintf(buf, "opcode:%d", opcode);
-diff --git a/show-parse.c b/show-parse.c
-index 73cc86a..a5beafe 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -754,7 +754,7 @@ static int show_binop(struct expression *expr)
- 	unsigned int op = expr->op;
+-static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right);
++static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, enum opcode op, pseudo_t left, pseudo_t right);
+ static pseudo_t add_setval(struct entrypoint *ep, struct symbol *ctype, struct expression *val);
+ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
  
- 	opname = show_special(op);
--	if (op < sizeof(name)/sizeof(*name))
-+	if (op < ARRAY_SIZE(name))
- 		opname = name[op];
- 	printf("\t%s.%d\t\tv%d,v%d,v%d\n", opname,
- 		expr->ctype->bit_size,
-@@ -782,7 +782,7 @@ static int show_regular_preop(struct expression *expr)
- 	const char *opname;
+@@ -39,7 +39,7 @@ static struct position current_pos;
  
- 	opname = show_special(op);
--	if (op < sizeof(name)/sizeof(*name))
-+	if (op < ARRAY_SIZE(name))
- 		opname = name[op];
- 	printf("\t%s.%d\t\tv%d,v%d\n", opname, expr->ctype->bit_size, new, target);
- 	return new;
-diff --git a/sparse.c b/sparse.c
-index 4026ba7..67b7d9e 100644
---- a/sparse.c
-+++ b/sparse.c
-@@ -187,7 +187,7 @@ static void check_call_instruction(struct instruction *insn)
- 	ident = fn->sym->ident;
- 	if (!ident)
- 		return;
--	for (i = 0; i < sizeof(check_fn)/sizeof(struct checkfn) ; i++) {
-+	for (i = 0; i < ARRAY_SIZE(check_fn); i++) {
- 		if (check_fn[i].id != ident)
- 			continue;
- 		check_fn[i].check(insn);
+ ALLOCATOR(pseudo_user, "pseudo_user");
+ 
+-static struct instruction *alloc_instruction(int opcode, int size)
++static struct instruction *alloc_instruction(enum opcode opcode, int size)
+ {
+ 	struct instruction * insn = __alloc_instruction(0);
+ 	insn->opcode = opcode;
+@@ -53,7 +53,7 @@ static inline int type_size(struct symbol *type)
+ 	return type ? type->bit_size > 0 ? type->bit_size : 0 : 0;
+ }
+ 
+-static struct instruction *alloc_typed_instruction(int opcode, struct symbol *type)
++static struct instruction *alloc_typed_instruction(enum opcode opcode, struct symbol *type)
+ {
+ 	struct instruction *insn = alloc_instruction(opcode, type_size(type));
+ 	insn->type = type;
+@@ -274,7 +274,7 @@ static char *show_asm(char *buf, struct instruction *insn)
+ 
+ const char *show_instruction(struct instruction *insn)
+ {
+-	int opcode = insn->opcode;
++	enum opcode opcode = insn->opcode;
+ 	static char buffer[4096];
+ 	char *buf;
+ 
+@@ -956,7 +956,7 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
+ 	return value;
+ }
+ 
+-static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right)
++static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, enum opcode op, pseudo_t left, pseudo_t right)
+ {
+ 	struct instruction *insn = alloc_typed_instruction(op, ctype);
+ 	pseudo_t target = alloc_pseudo(insn);
+@@ -1018,7 +1018,7 @@ static pseudo_t linearize_inc_dec(struct entrypoint *ep, struct expression *expr
+ {
+ 	struct access_data ad = { NULL, };
+ 		pseudo_t old, new, one;
+-	int op = expr->op == SPECIAL_INCREMENT ? OP_ADD : OP_SUB;
++	enum opcode op = expr->op == SPECIAL_INCREMENT ? OP_ADD : OP_SUB;
+ 
+ 	if (!linearize_address_gen(ep, expr->unop, &ad))
+ 		return VOID;
+@@ -1031,7 +1031,7 @@ static pseudo_t linearize_inc_dec(struct entrypoint *ep, struct expression *expr
+ 	return postop ? old : new;
+ }
+ 
+-static pseudo_t add_uniop(struct entrypoint *ep, struct expression *expr, int op, pseudo_t src)
++static pseudo_t add_uniop(struct entrypoint *ep, struct expression *expr, enum opcode op, pseudo_t src)
+ {
+ 	struct instruction *insn = alloc_typed_instruction(op, expr->ctype);
+ 	pseudo_t new = alloc_pseudo(insn);
+@@ -1101,7 +1101,7 @@ static pseudo_t linearize_postop(struct entrypoint *ep, struct expression *expr)
+  */
+ static struct instruction *alloc_cast_instruction(struct symbol *src, struct symbol *ctype)
+ {
+-	int opcode = OP_CAST;
++	enum opcode opcode = OP_CAST;
+ 	struct symbol *base = src;
+ 
+ 	if (base->ctype.modifiers & MOD_SIGNED)
+@@ -1138,12 +1138,15 @@ static pseudo_t cast_pseudo(struct entrypoint *ep, pseudo_t src, struct symbol *
+ 	return result;
+ }
+ 
+-static int opcode_sign(int opcode, struct symbol *ctype)
++static enum opcode opcode_sign(enum opcode opcode, struct symbol *ctype)
+ {
+ 	if (ctype && (ctype->ctype.modifiers & MOD_SIGNED)) {
+ 		switch(opcode) {
+ 		case OP_MULU: case OP_DIVU: case OP_MODU: case OP_LSR:
+ 			opcode++;
++			break;
++		default:
++			break;
+ 		}
+ 	}
+ 	return opcode;
+@@ -1162,7 +1165,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+ 	if (expr->op != '=') {
+ 		pseudo_t oldvalue = linearize_load_gen(ep, &ad);
+ 		pseudo_t dst;
+-		static const int op_trans[] = {
++		static const enum opcode op_trans[] = {
+ 			[SPECIAL_ADD_ASSIGN - SPECIAL_BASE] = OP_ADD,
+ 			[SPECIAL_SUB_ASSIGN - SPECIAL_BASE] = OP_SUB,
+ 			[SPECIAL_MUL_ASSIGN - SPECIAL_BASE] = OP_MULU,
+@@ -1174,7 +1177,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+ 			[SPECIAL_OR_ASSIGN  - SPECIAL_BASE] = OP_OR,
+ 			[SPECIAL_XOR_ASSIGN - SPECIAL_BASE] = OP_XOR
+ 		};
+-		int opcode;
++		enum opcode opcode;
+ 
+ 		if (!src)
+ 			return VOID;
+@@ -1262,7 +1265,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
+ static pseudo_t linearize_binop(struct entrypoint *ep, struct expression *expr)
+ {
+ 	pseudo_t src1, src2, dst;
+-	static const int opcode[] = {
++	static const enum opcode opcode[] = {
+ 		['+'] = OP_ADD, ['-'] = OP_SUB,
+ 		['*'] = OP_MULU, ['/'] = OP_DIVU,
+ 		['%'] = OP_MODU, ['&'] = OP_AND,
+@@ -1272,7 +1275,7 @@ static pseudo_t linearize_binop(struct entrypoint *ep, struct expression *expr)
+ 		[SPECIAL_LOGICAL_AND] = OP_AND_BOOL,
+ 		[SPECIAL_LOGICAL_OR] = OP_OR_BOOL,
+ 	};
+-	int op;
++	enum opcode op;
+ 
+ 	src1 = linearize_expression(ep, expr->left);
+ 	src2 = linearize_expression(ep, expr->right);
+@@ -1396,7 +1399,7 @@ static pseudo_t linearize_logical(struct entrypoint *ep, struct expression *expr
+ 
+ static pseudo_t linearize_compare(struct entrypoint *ep, struct expression *expr)
+ {
+-	static const int cmpop[] = {
++	static const enum opcode cmpop[] = {
+ 		['>'] = OP_SET_GT, ['<'] = OP_SET_LT,
+ 		[SPECIAL_EQUAL] = OP_SET_EQ,
+ 		[SPECIAL_NOTEQUAL] = OP_SET_NE,
+diff --git a/linearize.h b/linearize.h
+index 50b3601..cd3376d 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -66,68 +66,6 @@ struct asm_rules {
+ 
+ DECLARE_ALLOCATOR(asm_rules);
+ 
+-struct instruction {
+-	unsigned opcode:8,
+-		 size:24;
+-	struct basic_block *bb;
+-	struct position pos;
+-	struct symbol *type;
+-	union {
+-		pseudo_t target;
+-		pseudo_t cond;		/* for branch and switch */
+-	};
+-	union {
+-		struct /* entrypoint */ {
+-			struct pseudo_list *arg_list;
+-		};
+-		struct /* branch */ {
+-			struct basic_block *bb_true, *bb_false;
+-		};
+-		struct /* switch */ {
+-			struct multijmp_list *multijmp_list;
+-		};
+-		struct /* phi_node */ {
+-			struct pseudo_list *phi_list;
+-		};
+-		struct /* phi source */ {
+-			pseudo_t phi_src;
+-			struct instruction_list *phi_users;
+-		};
+-		struct /* unops */ {
+-			pseudo_t src;
+-			struct symbol *orig_type;	/* casts */
+-			unsigned int offset;		/* memops */
+-		};
+-		struct /* binops and sel */ {
+-			pseudo_t src1, src2, src3;
+-		};
+-		struct /* slice */ {
+-			pseudo_t base;
+-			unsigned from, len;
+-		};
+-		struct /* multijump */ {
+-			int begin, end;
+-		};
+-		struct /* setval */ {
+-			pseudo_t symbol;		/* Subtle: same offset as "src" !! */
+-			struct expression *val;
+-		};
+-		struct /* call */ {
+-			pseudo_t func;
+-			struct pseudo_list *arguments;
+-		};
+-		struct /* context */ {
+-			int increment;
+-			int check;
+-			struct expression *context_expr;
+-		};
+-		struct /* asm */ {
+-			const char *string;
+-			struct asm_rules *asm_rules;
+-		};
+-	};
+-};
+-
+ enum opcode {
+ 	OP_BADOP,
+ 
+@@ -219,6 +157,68 @@ enum opcode {
+ 	OP_COPY,
+ };
+ 
++struct instruction {
++	enum opcode opcode:8;
++	unsigned size:24;
++	struct basic_block *bb;
++	struct position pos;
++	struct symbol *type;
++	union {
++		pseudo_t target;
++		pseudo_t cond;		/* for branch and switch */
++	};
++	union {
++		struct /* entrypoint */ {
++			struct pseudo_list *arg_list;
++		};
++		struct /* branch */ {
++			struct basic_block *bb_true, *bb_false;
++		};
++		struct /* switch */ {
++			struct multijmp_list *multijmp_list;
++		};
++		struct /* phi_node */ {
++			struct pseudo_list *phi_list;
++		};
++		struct /* phi source */ {
++			pseudo_t phi_src;
++			struct instruction_list *phi_users;
++		};
++		struct /* unops */ {
++			pseudo_t src;
++			struct symbol *orig_type;	/* casts */
++			unsigned int offset;		/* memops */
++		};
++		struct /* binops and sel */ {
++			pseudo_t src1, src2, src3;
++		};
++		struct /* slice */ {
++			pseudo_t base;
++			unsigned from, len;
++		};
++		struct /* multijump */ {
++			int begin, end;
++		};
++		struct /* setval */ {
++			pseudo_t symbol;		/* Subtle: same offset as "src" !! */
++			struct expression *val;
++		};
++		struct /* call */ {
++			pseudo_t func;
++			struct pseudo_list *arguments;
++		};
++		struct /* context */ {
++			int increment;
++			int check;
++			struct expression *context_expr;
++		};
++		struct /* asm */ {
++			const char *string;
++			struct asm_rules *asm_rules;
++		};
++	};
++};
++
+ struct basic_block_list;
+ struct instruction_list;
+ 
+diff --git a/simplify.c b/simplify.c
+index 8200584..9e9c893 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -693,7 +693,7 @@ static int simplify_cast(struct instruction *insn)
+ 	}
+ 
+ 	if (size == orig_size) {
+-		int op = (orig_type->ctype.modifiers & MOD_SIGNED) ? OP_SCAST : OP_CAST;
++		enum opcode op = (orig_type->ctype.modifiers & MOD_SIGNED) ? OP_SCAST : OP_CAST;
+ 		if (insn->opcode == op)
+ 			goto simplify;
+ 	}
+@@ -729,7 +729,7 @@ static int simplify_select(struct instruction *insn)
+ 
+ 		/* The pair 0/1 is special - replace with SETNE/SETEQ */
+ 		if ((val1 | val2) == 1) {
+-			int opcode = OP_SET_EQ;
++			enum opcode opcode = OP_SET_EQ;
+ 			if (val1) {
+ 				src1 = src2;
+ 				opcode = OP_SET_NE;
 -- 
 1.7.1
