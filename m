@@ -1,45 +1,107 @@
-From: =?UTF-8?q?Diego=20Elio=20Petten=C3=B2?= <flameeyes@gmail.com>
-Subject: [PATCH 3/3] Fix build with GCC 4.6 series.
-Date: Wed, 13 Apr 2011 13:06:06 +0200
-Message-ID: <1302692766-30217-3-git-send-email-flameeyes@gmail.com>
-References: <1302692766-30217-1-git-send-email-flameeyes@gmail.com>
+From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
+Subject: [PATCH] use ARRAY_SIZE() when possible (continued)
+Date: Wed, 13 Apr 2011 16:24:34 +0200
+Message-ID: <4DA5B222.2080501@seznam.cz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:44327 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758436Ab1DMLJk (ORCPT
+Received: from fep32.mx.upcmail.net ([62.179.121.50]:37179 "EHLO
+	fep32.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756198Ab1DMOZe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 13 Apr 2011 07:09:40 -0400
-Received: by wya21 with SMTP id 21so385797wya.19
-        for <linux-sparse@vger.kernel.org>; Wed, 13 Apr 2011 04:09:39 -0700 (PDT)
-In-Reply-To: <1302692766-30217-1-git-send-email-flameeyes@gmail.com>
+	Wed, 13 Apr 2011 10:25:34 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: =?UTF-8?q?Diego=20Elio=20Petten=C3=B2?= <flameeyes@gmail.com>
+To: sparse@chrisli.org
+Cc: linux-sparse@vger.kernel.org
 
-The label_statement attribute in the anonymous structures' union was
-duplicated for label_arg and labeled_struct alises, which were
-identical. Since the former is never used, delete it and leave the other as
-the only copy.
+Some cases were omitted with the patch from Namhyung Kim
+(commit c5e425e in Chris Li's repo).
+
+My curiosity led me to try out coccinelle/spatch as suggested by
+Nicholas Mc Guire in reply to Kim's patch, but it*) only discovered
+occurrences in show-parse.c, probably because of "const vs. non-const"
+differences of array item types and the expression given to sizeof.
+
+*) sequence to try coccinelle out on this case (when coccinelle installed):
+$ wget http://coccinelle.lip6.fr/rules/array.cocci
+$ sed 's/<linux\/kernel.h>/"lib.h"/' array.cocci > array-sparse.cocci
+$ for i in $(find . -path ./validation -prune -o -name "*.c" -print); \
+> do spatch -sp_file array-sparse.cocci $i; done
+
+Beside proceeding messages, this will print out any "real" patch
+generated according to the semantic patch in `array-sparse.cocci'
+(it can also reflect these changes directly etc.).
+
+Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
 ---
- parse.h |    4 ----
- 1 files changed, 0 insertions(+), 4 deletions(-)
+ expression.c |    2 +-
+ linearize.c  |    2 +-
+ show-parse.c |    4 ++--
+ sparse.c     |    2 +-
+ 4 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/parse.h b/parse.h
-index 6b21e23..b26bd03 100644
---- a/parse.h
-+++ b/parse.h
-@@ -35,10 +35,6 @@ struct statement {
- 		struct /* declaration */ {
- 			struct symbol_list *declaration;
- 		};
--		struct /* label_arg */ {
--			struct symbol *label;
--			struct statement *label_statement;
--		};
- 		struct {
- 			struct expression *expression;
- 			struct expression *context;
+diff --git a/expression.c b/expression.c
+index 7e06e60..d9cdfd3 100644
+--- a/expression.c
++++ b/expression.c
+@@ -916,7 +916,7 @@ struct token *assignment_expression(struct token *token, struct expression **tre
+ 			SPECIAL_SHR_ASSIGN, SPECIAL_AND_ASSIGN,
+ 			SPECIAL_OR_ASSIGN,  SPECIAL_XOR_ASSIGN };
+ 		int i, op = token->special;
+-		for (i = 0; i < sizeof(assignments)/sizeof(int); i++)
++		for (i = 0; i < ARRAY_SIZE(assignments); i++)
+ 			if (assignments[i] == op) {
+ 				struct expression * expr = alloc_expression(token->pos, EXPR_ASSIGNMENT);
+ 				expr->left = *tree;
+diff --git a/linearize.c b/linearize.c
+index 5819862..6f3fa40 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -282,7 +282,7 @@ const char *show_instruction(struct instruction *insn)
+ 	if (!insn->bb)
+ 		buf += sprintf(buf, "# ");
+ 
+-	if (opcode < sizeof(opcodes)/sizeof(char *)) {
++	if (opcode < ARRAY_SIZE(opcodes)) {
+ 		const char *op = opcodes[opcode];
+ 		if (!op)
+ 			buf += sprintf(buf, "opcode:%d", opcode);
+diff --git a/show-parse.c b/show-parse.c
+index 73cc86a..a5beafe 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -754,7 +754,7 @@ static int show_binop(struct expression *expr)
+ 	unsigned int op = expr->op;
+ 
+ 	opname = show_special(op);
+-	if (op < sizeof(name)/sizeof(*name))
++	if (op < ARRAY_SIZE(name))
+ 		opname = name[op];
+ 	printf("\t%s.%d\t\tv%d,v%d,v%d\n", opname,
+ 		expr->ctype->bit_size,
+@@ -782,7 +782,7 @@ static int show_regular_preop(struct expression *expr)
+ 	const char *opname;
+ 
+ 	opname = show_special(op);
+-	if (op < sizeof(name)/sizeof(*name))
++	if (op < ARRAY_SIZE(name))
+ 		opname = name[op];
+ 	printf("\t%s.%d\t\tv%d,v%d\n", opname, expr->ctype->bit_size, new, target);
+ 	return new;
+diff --git a/sparse.c b/sparse.c
+index 4026ba7..67b7d9e 100644
+--- a/sparse.c
++++ b/sparse.c
+@@ -187,7 +187,7 @@ static void check_call_instruction(struct instruction *insn)
+ 	ident = fn->sym->ident;
+ 	if (!ident)
+ 		return;
+-	for (i = 0; i < sizeof(check_fn)/sizeof(struct checkfn) ; i++) {
++	for (i = 0; i < ARRAY_SIZE(check_fn); i++) {
+ 		if (check_fn[i].id != ident)
+ 			continue;
+ 		check_fn[i].check(insn);
 -- 
-1.7.5.rc1
-
+1.7.1
