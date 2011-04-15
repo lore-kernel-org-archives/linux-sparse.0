@@ -1,55 +1,58 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/2] better dealing with OP_PHISOURCE insn
-Date: Thu, 14 Apr 2011 03:10:15 -0700
-Message-ID: <BANLkTimoNvYiGCaBo7N4+j=B_WJ4dUNrug@mail.gmail.com>
-References: <4DA048C2.8060501@seznam.cz>
-	<4DA04BE8.9060706@seznam.cz>
-	<4DA04D3B.1010309@seznam.cz>
+From: Dave Hansen <dave@linux.vnet.ibm.com>
+Subject: Re: [PATCH] fix sparse happy borkage when including gfp.h
+Date: Fri, 15 Apr 2011 07:27:54 -0700
+Message-ID: <1302877674.16562.3089.camel@nimitz>
+References: <20110415121424.F7A6.A69D9226@jp.fujitsu.com>
+	 <1302844066.16562.1953.camel@nimitz>
+	 <20110415143259.F7BD.A69D9226@jp.fujitsu.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vw0-f46.google.com ([209.85.212.46]:33417 "EHLO
-	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758683Ab1DNKKQ convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 14 Apr 2011 06:10:16 -0400
-Received: by vws1 with SMTP id 1so1152329vws.19
-        for <linux-sparse@vger.kernel.org>; Thu, 14 Apr 2011 03:10:15 -0700 (PDT)
-In-Reply-To: <4DA04D3B.1010309@seznam.cz>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+Return-path: <owner-linux-mm@kvack.org>
+In-Reply-To: <20110415143259.F7BD.A69D9226@jp.fujitsu.com>
+Sender: owner-linux-mm@kvack.org
+To: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
+Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Cc: linux-sparse@vger.kernel.org
 
-On Sat, Apr 9, 2011 at 5:12 AM, Jan Pokorn=FD <pokorny_jan@seznam.cz> w=
-rote:
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (def->opcode =3D=3D OP_PHI) {
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 phi_defines(def, target=
-, defines);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 continue;
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 }
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 defines(def->bb, phi->def, target);
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* if this ever fails (very unlikely), =
-it's a sign of a regression */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 assert(def->opcode =3D=3D OP_PHISOURCE)=
-;
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 defines(def->bb, def, target);
-> =A0 =A0 =A0 =A0} END_FOR_EACH_PTR(phi);
+On Fri, 2011-04-15 at 14:33 +0900, KOSAKI Motohiro wrote:
+> Hello,
+> > On Fri, 2011-04-15 at 12:14 +0900, KOSAKI Motohiro wrote:
+> > > >  #ifdef CONFIG_DEBUG_VM
+> > > > -             BUG_ON((GFP_ZONE_BAD >> bit) & 1);
+> > > > +     BUG_ON((GFP_ZONE_BAD >> bit) & 1);
+> > > >  #endif
+> > > > -     }
+> > > >       return z;
+> > > 
+> > > Why don't you use VM_BUG_ON?
+> > 
+> > I was just trying to make a minimal patch that did a single thing.
+> > 
+> > Feel free to submit another one that does that.  I'm sure there are a
+> > couple more places that could use similar love.
+> 
+> I posted another approach patches a second ago. Could you please see it?
 
-That comment usually means there is some thing fishy going on there.
-I think you are on to some thing. The original code mean to recursively
-define all the phi source, if the phi source is come from another phi n=
-ode.
-But the original code seems wrong. It should lookat def->phi_src->def->=
-opcode
-instead of def->opcode. I don't think we should remove the phi_defines =
-there.
-I need to double check this as well.
+Those both look sane to me.  Those weren't biting me in particular, and
+they don't fix the issue I was seeing.  But, they do seem necessary to
+reduce some of the noise.
 
-Chris
+CC'ing the sparse mailing list.  We're seeing a couple of cases where
+some gcc-isms are either stopping sparse from finding real bugs:
+
+	http://marc.info/?l=linux-mm&m=130282454732689&w=2
+
+or creating a lot of noise on some builds:
+
+	http://marc.info/?l=linux-mm&m=130284428614058&w=2
+	http://marc.info/?l=linux-mm&m=130284431014077&w=2
+
+-- Dave
+
 --
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
