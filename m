@@ -1,58 +1,109 @@
-From: Dave Hansen <dave@linux.vnet.ibm.com>
-Subject: Re: [PATCH] fix sparse happy borkage when including gfp.h
-Date: Fri, 15 Apr 2011 07:27:54 -0700
-Message-ID: <1302877674.16562.3089.camel@nimitz>
-References: <20110415121424.F7A6.A69D9226@jp.fujitsu.com>
-	 <1302844066.16562.1953.camel@nimitz>
-	 <20110415143259.F7BD.A69D9226@jp.fujitsu.com>
+From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
+Subject: Re: [PATCH 2/2] better dealing with OP_PHISOURCE insn
+Date: Sat, 16 Apr 2011 00:52:35 +0200
+Message-ID: <4DA8CC33.1050307@seznam.cz>
+References: <4DA048C2.8060501@seznam.cz> <4DA04BE8.9060706@seznam.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <owner-linux-mm@kvack.org>
-In-Reply-To: <20110415143259.F7BD.A69D9226@jp.fujitsu.com>
-Sender: owner-linux-mm@kvack.org
-To: KOSAKI Motohiro <kosaki.motohiro@jp.fujitsu.com>
-Cc: linux-mm@kvack.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-sparse@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from fep13.mx.upcmail.net ([62.179.121.33]:46051 "EHLO
+	fep13.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752420Ab1DOWwj (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 15 Apr 2011 18:52:39 -0400
+In-Reply-To: <4DA04BE8.9060706@seznam.cz>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: sparse@chrisli.org
+Cc: linux-sparse@vger.kernel.org
 
-On Fri, 2011-04-15 at 14:33 +0900, KOSAKI Motohiro wrote:
-> Hello,
-> > On Fri, 2011-04-15 at 12:14 +0900, KOSAKI Motohiro wrote:
-> > > >  #ifdef CONFIG_DEBUG_VM
-> > > > -             BUG_ON((GFP_ZONE_BAD >> bit) & 1);
-> > > > +     BUG_ON((GFP_ZONE_BAD >> bit) & 1);
-> > > >  #endif
-> > > > -     }
-> > > >       return z;
-> > > 
-> > > Why don't you use VM_BUG_ON?
-> > 
-> > I was just trying to make a minimal patch that did a single thing.
-> > 
-> > Feel free to submit another one that does that.  I'm sure there are a
-> > couple more places that could use similar love.
-> 
-> I posted another approach patches a second ago. Could you please see it?
+This is my proposal of how to fix incorrect handling of a recursive
+"(PHISOURCE->PHI->)+ PHISOURCE->PHI" chain in `phi_defines'.
 
-Those both look sane to me.  Those weren't biting me in particular, and
-they don't fix the issue I was seeing.  But, they do seem necessary to
-reduce some of the noise.
+It should be applied instead of my previous 2/2 patch posted on
+2011-04-09 which treated this case unwisely as spotted by Chris Li
+who also outlined respective correction in his reply from 2011-04-14.
 
-CC'ing the sparse mailing list.  We're seeing a couple of cases where
-some gcc-isms are either stopping sparse from finding real bugs:
+The fix required to move `trackable_pseudo' (if we want to avoid
+a forward declaration).
 
-	http://marc.info/?l=linux-mm&m=130282454732689&w=2
+I also added `src_pseudo' in the role of a shortcut and removed `def' to
+reduce the number of levels of such shortcuts (to keep it more readable).
 
-or creating a lot of noise on some builds:
+I tried few comparisons (some of them in very carefully) and it seems to
+do the job (as explained in included comment) right.
 
-	http://marc.info/?l=linux-mm&m=130284428614058&w=2
-	http://marc.info/?l=linux-mm&m=130284431014077&w=2
+Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
+---
+ liveness.c |   39 +++++++++++++++++++++++++--------------
+ 1 files changed, 25 insertions(+), 14 deletions(-)
 
--- Dave
-
---
-To unsubscribe, send a message with 'unsubscribe linux-mm' in
-the body to majordomo@kvack.org.  For more info on Linux MM,
-see: http://www.linux-mm.org/ .
-Fight unfair telecom internet charges in Canada: sign http://stopthemeter.ca/
-Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
+diff --git a/liveness.c b/liveness.c
+index eeff0f7..c9460de 100644
+--- a/liveness.c
++++ b/liveness.c
+@@ -12,22 +12,38 @@
+ #include "linearize.h"
+ #include "flow.h"
+ 
++
++static inline int trackable_pseudo(pseudo_t pseudo)
++{
++	return pseudo && (pseudo->type == PSEUDO_REG || pseudo->type == PSEUDO_ARG);
++}
++
+ static void phi_defines(struct instruction * phi_node, pseudo_t target,
+-	void (*defines)(struct basic_block *, struct instruction *, pseudo_t))
++	void (*defines)(struct basic_block *, struct instruction *, pseudo_t),
++	unsigned long generation)
+ {
+ 	pseudo_t phi;
+ 	FOR_EACH_PTR(phi_node->phi_list, phi) {
+-		struct instruction *def;
+ 		if (phi == VOID)
+ 			continue;
+-		def = phi->def;
+-		if (!def || !def->bb)
+-			continue;
+-		if (def->opcode == OP_PHI) {
+-			phi_defines(def, target, defines);
++		if (!phi->def || !phi->def->bb)
+ 			continue;
++
++		/*
++		 * In case of "(PHISOURCE->PHI->)+ PHISOURCE->PHI" chain, move
++		 * "defines" information upstream to the BB of a very first PHISOURCE
++		 * (recursion guarded using "generation" marking of PHI insn BBs).
++		 */
++		pseudo_t src_pseudo = phi->def->phi_src;
++		if (trackable_pseudo(src_pseudo) && src_pseudo->def->opcode == OP_PHI) {
++			phi_node->bb->generation = generation;
++			if (src_pseudo->def->bb->generation != generation) {
++				phi_defines(src_pseudo->def, target, defines, generation);
++				continue;
++			}
+ 		}
+-		defines(def->bb, phi->def, target);
++
++		defines(phi->def->bb, phi->def, target);
+ 	} END_FOR_EACH_PTR(phi);
+ }
+ 
+@@ -103,7 +119,7 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
+ 	/* Other */
+ 	case OP_PHI:
+ 		/* Phi-nodes are "backwards" nodes. Their def doesn't matter */
+-		phi_defines(insn, insn->target, def);
++		phi_defines(insn, insn->target, def, ++bb_generation);
+ 		break;
+ 
+ 	case OP_PHISOURCE:
+@@ -179,11 +195,6 @@ static void add_pseudo_exclusive(struct pseudo_list **list, pseudo_t pseudo)
+ 	}
+ }
+ 
+-static inline int trackable_pseudo(pseudo_t pseudo)
+-{
+-	return pseudo && (pseudo->type == PSEUDO_REG || pseudo->type == PSEUDO_ARG);
+-}
