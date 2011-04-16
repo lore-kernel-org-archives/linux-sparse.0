@@ -1,18 +1,18 @@
 From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: Re: [PATCH 2/2] better dealing with OP_PHISOURCE insn
-Date: Sat, 16 Apr 2011 16:49:05 +0200
-Message-ID: <4DA9AC61.4050202@seznam.cz>
-References: <4DA048C2.8060501@seznam.cz> <4DA04BE8.9060706@seznam.cz> <4DA8CC33.1050307@seznam.cz> <4DA975DD.2050908@seznam.cz> <4DA97A9E.5050508@seznam.cz>
+Subject: Re: [PATCH] memops.c: fix load instruction simplification
+Date: Sat, 16 Apr 2011 16:50:50 +0200
+Message-ID: <4DA9ACCA.2090000@seznam.cz>
+References: <4D9E37A4.8040902@seznam.cz> <4DA1CE6A.9000202@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep18.mx.upcmail.net ([62.179.121.38]:62017 "EHLO
-	fep18.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751411Ab1DPOtN (ORCPT
+Received: from fep12.mx.upcmail.net ([62.179.121.32]:49242 "EHLO
+	fep12.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755703Ab1DPOu4 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 16 Apr 2011 10:49:13 -0400
-In-Reply-To: <4DA97A9E.5050508@seznam.cz>
+	Sat, 16 Apr 2011 10:50:56 -0400
+In-Reply-To: <4DA1CE6A.9000202@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
