@@ -1,85 +1,41 @@
-From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Subject: Re: [PATCH 2/2] better dealing with OP_PHISOURCE insn
-Date: Sat, 16 Apr 2011 18:21:39 +0200
-Message-ID: <4DA9C213.4070707@seznam.cz>
-References: <4DA048C2.8060501@seznam.cz> <4DA04BE8.9060706@seznam.cz> <4DA8CC33.1050307@seznam.cz> <4DA975DD.2050908@seznam.cz> <4DA97A9E.5050508@seznam.cz>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: [PATCH 0/2] Fix 'already_tokenized()' performance problem
+Date: Tue, 19 Apr 2011 11:12:45 -0700 (PDT)
+Message-ID: <alpine.LFD.2.02.1104191108330.21972@i5.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from fep17.mx.upcmail.net ([62.179.121.37]:46291 "EHLO
-	fep17.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755793Ab1DPQVp (ORCPT
+Received: from mail-pv0-f174.google.com ([74.125.83.174]:50083 "EHLO
+	mail-pv0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752121Ab1DSSMv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 16 Apr 2011 12:21:45 -0400
-In-Reply-To: <4DA97A9E.5050508@seznam.cz>
+	Tue, 19 Apr 2011 14:12:51 -0400
+Received: by pvg12 with SMTP id 12so2749533pvg.19
+        for <linux-sparse@vger.kernel.org>; Tue, 19 Apr 2011 11:12:50 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org
-Cc: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-Reformulated comment to better describe what it does.
 
-(Sorry for inconvenience)
+This series of two trivial patches makes 'already_tokenized()' go away 
+from profiles of a kernel build with C=2, shaving about 3-4% off the time 
+for me.
 
-Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
----
- liveness.c |   29 ++++++++++++++++++++---------
- 1 files changed, 20 insertions(+), 9 deletions(-)
+This came up in a discussion on another tech board, and people were 
+complaining that I hadn't optimized the pre-processor sufficiently.
 
-diff --git a/liveness.c b/liveness.c
-index eeff0f7..8c15645 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -13,21 +13,32 @@
- #include "flow.h"
- 
- static void phi_defines(struct instruction * phi_node, pseudo_t target,
--	void (*defines)(struct basic_block *, struct instruction *, pseudo_t))
-+	void (*defines)(struct basic_block *, struct instruction *, pseudo_t),
-+	unsigned long generation)
- {
- 	pseudo_t phi;
- 	FOR_EACH_PTR(phi_node->phi_list, phi) {
--		struct instruction *def;
- 		if (phi == VOID)
- 			continue;
--		def = phi->def;
--		if (!def || !def->bb)
--			continue;
--		if (def->opcode == OP_PHI) {
--			phi_defines(def, target, defines);
-+		if (!phi->def || !phi->def->bb)
- 			continue;
-+
-+		/*
-+		 * In case of "(PHISOURCE->PHI->)+ PHISOURCE->PHI" chain, move
-+		 * "defines" information upstream to BBs of very initial PHISOURCEs;
-+		 * recursion guarded by generation marking of PHI instructions BBs.
-+		 */
-+		pseudo_t src_pseudo = phi->def->phi_src;
-+		if (src_pseudo->type == PSEUDO_REG
-+		    && src_pseudo->def->opcode == OP_PHI) {
-+			phi_node->bb->generation = generation;
-+			if (src_pseudo->def->bb->generation != generation) {
-+				phi_defines(src_pseudo->def, target, defines, generation);
-+				continue;
-+			}
- 		}
--		defines(def->bb, phi->def, target);
-+
-+		defines(phi->def->bb, phi->def, target);
- 	} END_FOR_EACH_PTR(phi);
- }
- 
-@@ -103,7 +114,7 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 	/* Other */
- 	case OP_PHI:
- 		/* Phi-nodes are "backwards" nodes. Their def doesn't matter */
--		phi_defines(insn, insn->target, def);
-+		phi_defines(insn, insn->target, def, ++bb_generation);
- 		break;
- 
- 	case OP_PHISOURCE:
+(Depending on compiler, usually the profile will show 'strcmp()' taking 
+all the time - it depends on whether the strcmp gets inlined or not)
+
+Linus Torvalds (2):
+  Add new streams to a hash-list based on their names
+  Teach 'already_tokenized()' to use the stream name hash table
+
+ pre-process.c |    8 +++++---
+ token.h       |    3 ++-
+ tokenize.c    |   25 ++++++++++++++++++++++++-
+ 3 files changed, 31 insertions(+), 5 deletions(-)
+
 -- 
-1.7.1
+1.7.5.rc1.1.gc3f61.dirty
+
