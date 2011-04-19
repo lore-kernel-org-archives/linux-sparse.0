@@ -1,120 +1,62 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH 1/2] Add new streams to a hash-list based on their names
-Date: Tue, 19 Apr 2011 11:17:13 -0700 (PDT)
-Message-ID: <alpine.LFD.2.02.1104191113010.22048@i5.linux-foundation.org>
+Subject: PATCH 2/2] Teach 'already_tokenized()' to use the stream name hash
+ table
+Date: Tue, 19 Apr 2011 11:19:40 -0700 (PDT)
+Message-ID: <alpine.LFD.2.02.1104191117290.22119@i5.linux-foundation.org>
 References: <alpine.LFD.2.02.1104191108330.21972@i5.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:62481 "EHLO
+Received: from mail-pz0-f46.google.com ([209.85.210.46]:59364 "EHLO
 	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753297Ab1DSSRS (ORCPT
+	with ESMTP id S1752608Ab1DSSTq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Apr 2011 14:17:18 -0400
-Received: by pzk9 with SMTP id 9so2772431pzk.19
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Apr 2011 11:17:18 -0700 (PDT)
+	Tue, 19 Apr 2011 14:19:46 -0400
+Received: by pzk9 with SMTP id 9so2773638pzk.19
+        for <linux-sparse@vger.kernel.org>; Tue, 19 Apr 2011 11:19:46 -0700 (PDT)
 In-Reply-To: <alpine.LFD.2.02.1104191108330.21972@i5.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
 
-This trivially creates a small (currently 64-entry) hash table for
-stream numbers, so that you can look up a stream by its name.
-
-Nothing currently uses it, but the next commit will teach
-"already_tokenized()" to look up the stream by name, allowing us to
-avoid the "walk over each stream we've seen" loop.  The silly string
-compare in that loop can take a lot of CPU time.
+This replaces the "loop over all streams" with a simple hash lookup.  It
+makes the cost of checking for already tokenized streams basically go
+away (it could be up to 5% of CPU time, almost entirely due to the
+"strcmp()" of the name).
 
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 ---
 
-The hash itself is soem random thing made up to look something like the 
-Linux kernel path component hash. It seems "good enough".
+That "up to 5%" is probably debatable, and will depend on just how many 
+includes you have etc etc. And on the CPU and library issues. But 3-4% is 
+definitely the case for my kernel C=2 build on my current machine.
 
-NOTE! The linked list of "struct stream" is based on indexes, since that's 
-the only way to look up a stream - they move around when we re-allocate 
-them using realloc(), and you can't actually use a regular linked list of 
-"struct stream *". 
+So it's real, and worth it.
 
- token.h    |    3 ++-
- tokenize.c |   25 ++++++++++++++++++++++++-
- 2 files changed, 26 insertions(+), 2 deletions(-)
+ pre-process.c |    8 +++++---
+ 1 files changed, 5 insertions(+), 3 deletions(-)
 
-diff --git a/token.h b/token.h
-index a7ec77e05b15..cd2923318446 100644
---- a/token.h
-+++ b/token.h
-@@ -40,7 +40,7 @@ struct stream {
+diff --git a/pre-process.c b/pre-process.c
+index 603cc00c999f..6d12f173146d 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -655,10 +655,12 @@ static const char *token_name_sequence(struct token *token, int endop, struct to
  
- 	/* Use these to check for "already parsed" */
- 	enum constantfile constant;
--	int dirty;
-+	int dirty, next_stream;
- 	struct ident *protect;
- 	struct token *ifndef;
- 	struct token *top_if;
-@@ -49,6 +49,7 @@ struct stream {
- extern int input_stream_nr;
- extern struct stream *input_streams;
- extern unsigned int tabstop;
-+extern int *hash_stream(const char *name);
- 
- struct ident {
- 	struct ident *next;	/* Hash chain of identifiers */
-diff --git a/tokenize.c b/tokenize.c
-index 272974b3b844..d4f05e563770 100644
---- a/tokenize.c
-+++ b/tokenize.c
-@@ -14,6 +14,7 @@
- #include <string.h>
- #include <ctype.h>
- #include <unistd.h>
-+#include <stdint.h>
- 
- #include "lib.h"
- #include "allocate.h"
-@@ -179,9 +180,28 @@ const char *show_token(const struct token *token)
- 	}
- }
- 
-+#define HASHED_INPUT_BITS (6)
-+#define HASHED_INPUT (1 << HASHED_INPUT_BITS)
-+#define HASH_PRIME 0x9e370001UL
-+
-+static int input_stream_hashes[HASHED_INPUT] = { [0 ... HASHED_INPUT-1] = -1 };
-+
-+int *hash_stream(const char *name)
-+{
-+	uint32_t hash = 0;
-+	unsigned char c;
-+
-+	while ((c = *name++) != 0)
-+		hash = (hash + (c << 4) + (c >> 4)) * 11;
-+
-+	hash *= HASH_PRIME;
-+	hash >>= 32 - HASHED_INPUT_BITS;
-+	return input_stream_hashes + hash;
-+}
-+
- int init_stream(const char *name, int fd, const char **next_path)
+ static int already_tokenized(const char *path)
  {
--	int stream = input_stream_nr;
-+	int stream = input_stream_nr, *hash;
- 	struct stream *current;
+-	int i;
+-	struct stream *s = input_streams;
++	int stream, next;
++
++	for (stream = *hash_stream(path); stream >= 0 ; stream = next) {
++		struct stream *s = input_streams + stream;
  
- 	if (stream >= input_streams_allocated) {
-@@ -199,6 +219,9 @@ int init_stream(const char *name, int fd, const char **next_path)
- 	current->path = NULL;
- 	current->constant = CONSTANT_FILE_MAYBE;
- 	input_stream_nr = stream+1;
-+	hash = hash_stream(name);
-+	current->next_stream = *hash;
-+	*hash = stream;
- 	return stream;
- }
- 
+-	for (i = input_stream_nr; --i >= 0; s++) {
++		next = s->next_stream;
+ 		if (s->constant != CONSTANT_FILE_YES)
+ 			continue;
+ 		if (strcmp(path, s->name))
 -- 
 1.7.5.rc1.1.gc3f61.dirty
 
