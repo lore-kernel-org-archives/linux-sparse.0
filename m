@@ -1,62 +1,43 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: PATCH 2/2] Teach 'already_tokenized()' to use the stream name hash
- table
-Date: Tue, 19 Apr 2011 11:19:40 -0700 (PDT)
-Message-ID: <alpine.LFD.2.02.1104191117290.22119@i5.linux-foundation.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] Fix 'already_tokenized()' performance problem
+Date: Tue, 19 Apr 2011 14:52:47 -0700
+Message-ID: <BANLkTi=5mCuOWYZ_7Cav2jbLZ1DVUyyjag@mail.gmail.com>
 References: <alpine.LFD.2.02.1104191108330.21972@i5.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pz0-f46.google.com ([209.85.210.46]:59364 "EHLO
-	mail-pz0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752608Ab1DSSTq (ORCPT
+Received: from mail-vx0-f174.google.com ([209.85.220.174]:57056 "EHLO
+	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753569Ab1DSVwr (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Apr 2011 14:19:46 -0400
-Received: by pzk9 with SMTP id 9so2773638pzk.19
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Apr 2011 11:19:46 -0700 (PDT)
+	Tue, 19 Apr 2011 17:52:47 -0400
+Received: by vxi39 with SMTP id 39so118002vxi.19
+        for <linux-sparse@vger.kernel.org>; Tue, 19 Apr 2011 14:52:47 -0700 (PDT)
 In-Reply-To: <alpine.LFD.2.02.1104191108330.21972@i5.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-sparse@vger.kernel.org
+
+Very nice patch. Simple and clean.
+
+Applied and pushed.
 
 
-This replaces the "loop over all streams" with a simple hash lookup.  It
-makes the cost of checking for already tokenized streams basically go
-away (it could be up to 5% of CPU time, almost entirely due to the
-"strcmp()" of the name).
+On Tue, Apr 19, 2011 at 11:12 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> This series of two trivial patches makes 'already_tokenized()' go away
+> from profiles of a kernel build with C=2, shaving about 3-4% off the time
+> for me.
 
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
----
+I am suppressed that you can get 3-4% from just comparing the stream names.
+Last time I try to optimized that nextchar() and nextchar_slow()
+because Al complains
+the tab character force the slow path, I haven't seen some thing like
+1% difference.
+So I leave it alone.
 
-That "up to 5%" is probably debatable, and will depend on just how many 
-includes you have etc etc. And on the CPU and library issues. But 3-4% is 
-definitely the case for my kernel C=2 build on my current machine.
+Thanks for the patch.
 
-So it's real, and worth it.
-
- pre-process.c |    8 +++++---
- 1 files changed, 5 insertions(+), 3 deletions(-)
-
-diff --git a/pre-process.c b/pre-process.c
-index 603cc00c999f..6d12f173146d 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -655,10 +655,12 @@ static const char *token_name_sequence(struct token *token, int endop, struct to
- 
- static int already_tokenized(const char *path)
- {
--	int i;
--	struct stream *s = input_streams;
-+	int stream, next;
-+
-+	for (stream = *hash_stream(path); stream >= 0 ; stream = next) {
-+		struct stream *s = input_streams + stream;
- 
--	for (i = input_stream_nr; --i >= 0; s++) {
-+		next = s->next_stream;
- 		if (s->constant != CONSTANT_FILE_YES)
- 			continue;
- 		if (strcmp(path, s->name))
--- 
-1.7.5.rc1.1.gc3f61.dirty
-
+Chris
