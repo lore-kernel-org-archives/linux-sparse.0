@@ -1,37 +1,72 @@
-From: Avi Kivity <avi@redhat.com>
-Subject: Re: vector_size attribute?
-Date: Sun, 29 May 2011 19:26:24 +0300
-Message-ID: <4DE273B0.7000800@redhat.com>
-References: <20110529085726.c0234647.rdunlap@xenotime.net>
+From: Randy Dunlap <rdunlap@xenotime.net>
+Subject: "advancing past deep designator" warnings
+Date: Sun, 29 May 2011 14:57:12 -0700
+Message-ID: <20110529145712.eefa4d52.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:24882 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751936Ab1E2Q02 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 29 May 2011 12:26:28 -0400
-In-Reply-To: <20110529085726.c0234647.rdunlap@xenotime.net>
+Received: from oproxy2-pub.bluehost.com ([67.222.39.60]:54359 "HELO
+	oproxy2-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752799Ab1E2V5O (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 29 May 2011 17:57:14 -0400
+Received: from static-50-53-38-135.bvtn.or.frontiernet.net ([50.53.38.135] helo=chimera.site)
+	by box742.bluehost.com with esmtpa (Exim 4.69)
+	(envelope-from <rdunlap@xenotime.net>)
+	id 1QQnyz-0001DE-6K
+	for linux-sparse@vger.kernel.org; Sun, 29 May 2011 15:57:13 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@xenotime.net>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On 05/29/2011 06:57 PM, Randy Dunlap wrote:
-> Current Linux mainline generates a ton of sparse warnings like
->
-> arch/x86/include/asm/kvm_emulate.h:194:28: error: attribute 'vector_size': unknown attribute
->
-> from this source line:
->
-> typedef u32 __attribute__((vector_size(16))) sse128_t;
+Hi,
 
-I guess sparse should be taught about it.  It's needed so that gcc asm 
-constraints are aware of what memory is touched when running an sse 
-instruction.
+Can you give me an idea about what this warning means and what to do about it?
+Thanks.
 
-(probably ignoring it for now should be sufficient)
 
--- 
-error compiling committee.c: too many arguments to function
+(x86_64 allmodconfig, linux-2.6.39-git18)
 
+
+drivers/usb/gadget/f_audio.c:229:9: warning: advancing past deep designator
+drivers/usb/gadget/f_acm.c:261:9: warning: advancing past deep designator
+drivers/usb/gadget/f_ecm.c:283:9: warning: advancing past deep designator
+drivers/usb/gadget/cdc2.c:112:9: warning: advancing past deep designator
+drivers/usb/gadget/f_ecm.c:283:9: warning: advancing past deep designator
+drivers/usb/gadget/f_subset.c:217:9: warning: advancing past deep designator
+drivers/usb/gadget/f_rndis.c:294:9: warning: advancing past deep designator
+drivers/usb/gadget/f_eem.c:130:9: warning: advancing past deep designator
+drivers/usb/gadget/ether.c:218:9: warning: advancing past deep designator
+drivers/usb/gadget/f_hid.c:577:9: warning: advancing past deep designator
+drivers/usb/gadget/hid.c:113:9: warning: advancing past deep designator
+drivers/usb/gadget/f_acm.c:261:9: warning: advancing past deep designator
+drivers/usb/gadget/f_ecm.c:283:9: warning: advancing past deep designator
+drivers/usb/gadget/f_subset.c:217:9: warning: advancing past deep designator
+drivers/usb/gadget/f_rndis.c:294:9: warning: advancing past deep designator
+drivers/usb/gadget/multi.c:139:9: warning: advancing past deep designator
+drivers/usb/gadget/f_ncm.c:346:9: warning: advancing past deep designator
+drivers/usb/gadget/ncm.c:120:9: warning: advancing past deep designator
+drivers/usb/gadget/f_acm.c:261:9: warning: advancing past deep designator
+drivers/usb/gadget/f_ecm.c:283:9: warning: advancing past deep designator
+drivers/usb/gadget/f_obex.c:76:9: warning: advancing past deep designator
+drivers/usb/gadget/f_serial.c:114:9: warning: advancing past deep designator
+drivers/usb/gadget/nokia.c:73:9: warning: advancing past deep designator
+drivers/usb/gadget/f_acm.c:261:9: warning: advancing past deep designator
+drivers/usb/gadget/f_obex.c:76:9: warning: advancing past deep designator
+drivers/usb/gadget/f_serial.c:114:9: warning: advancing past deep designator
+drivers/usb/gadget/serial.c:74:9: warning: advancing past deep designator
+drivers/usb/gadget/f_uvc.c:47:9: warning: advancing past deep designator
+drivers/usb/gadget/webcam.c:58:9: warning: advancing past deep designator
+drivers/usb/gadget/f_sourcesink.c:138:9: warning: advancing past deep designator
+drivers/usb/gadget/f_loopback.c:125:9: warning: advancing past deep designator
+drivers/usb/gadget/zero.c:167:9: warning: advancing past deep designator
+drivers/net/wan/x25_asy.c:527:17: error: return with no return value
+drivers/usb/gadget/f_ecm.c:283:9: warning: advancing past deep designator
+drivers/usb/gadget/f_subset.c:217:9: warning: advancing past deep designator
+drivers/usb/gadget/f_rndis.c:294:9: warning: advancing past deep designator
+
+
+---
+~Randy
+*** Remember to use Documentation/SubmitChecklist when testing your code ***
