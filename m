@@ -1,203 +1,40 @@
-From: Randy Dunlap <rdunlap@xenotime.net>
-Subject: more "unreplaced symbol" warnings
-Date: Sun, 29 May 2011 14:54:50 -0700
-Message-ID: <20110529145450.8c042971.rdunlap@xenotime.net>
+From: Dan Carpenter <error27@gmail.com>
+Subject: Re: "advancing past deep designator" warnings
+Date: Mon, 30 May 2011 09:21:41 +0300
+Message-ID: <20110530062141.GH3099@shale.localdomain>
+References: <20110529145712.eefa4d52.rdunlap@xenotime.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from oproxy1-pub.bluehost.com ([66.147.249.253]:59364 "HELO
-	oproxy1-pub.bluehost.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1753421Ab1E2V55 (ORCPT
+Received: from mail-ww0-f44.google.com ([74.125.82.44]:64874 "EHLO
+	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752484Ab1E3GV7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 29 May 2011 17:57:57 -0400
-Received: from static-50-53-38-135.bvtn.or.frontiernet.net ([50.53.38.135] helo=chimera.site)
-	by box742.bluehost.com with esmtpa (Exim 4.69)
-	(envelope-from <rdunlap@xenotime.net>)
-	id 1QQnzg-0001Vc-2W
-	for linux-sparse@vger.kernel.org; Sun, 29 May 2011 15:57:56 -0600
+	Mon, 30 May 2011 02:21:59 -0400
+Received: by wwa36 with SMTP id 36so3581430wwa.1
+        for <linux-sparse@vger.kernel.org>; Sun, 29 May 2011 23:21:57 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20110529145712.eefa4d52.rdunlap@xenotime.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Randy Dunlap <rdunlap@xenotime.net>
+Cc: linux-sparse@vger.kernel.org
 
-I see that there was a short thread in Feb. 2008 about unreplaced symbols.
-Here are more warnings from Linux 2.6.39-git18 mainline.
-Obviously lots of them are just repeats, but this is what I get from x86_64
-allmodconfig.
+On Sun, May 29, 2011 at 02:57:12PM -0700, Randy Dunlap wrote:
+> Hi,
+> 
+> Can you give me an idea about what this warning means and what to do about it?
+> Thanks.
+>
 
-Any suggestions about how to eliminate them?
-Thanks.
+It means that you have an array declared like:
+	int x[] = {
+		[4] = 5,  <-- designator.
+		6         <-- advance one step.
+	};
 
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'val'
-include/linux/netfilter_bridge.h:62:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/linux/netfilter_bridge.h:64:14: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:53:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:53:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:56:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:56:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:80:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'val'
-net/bridge/br_multicast.c:83:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:126:14: warning: unreplaced symbol 'return'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:16: warning: unreplaced symbol 'val'
-include/linux/swab.h:51:9: warning: unreplaced symbol 'return'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'val'
-include/net/inet_ecn.h:131:14: warning: unreplaced symbol 'return'
+GCC handles these correctly, so I don't think we'd want to change
+anything in the kernel because of them.
 
----
-~Randy
-*** Remember to use Documentation/SubmitChecklist when testing your code ***
+regards,
+dan carpenter
