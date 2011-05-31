@@ -1,49 +1,38 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: more "unreplaced symbol" warnings
-Date: Tue, 31 May 2011 19:58:31 +0100
-Message-ID: <20110531185831.GN11521@ZenIV.linux.org.uk>
+Date: Tue, 31 May 2011 12:05:44 -0700
+Message-ID: <BANLkTimVYAOub_EaUkYcudSVk-dgowvLhg@mail.gmail.com>
 References: <20110529145450.8c042971.rdunlap@xenotime.net>
- <BANLkTi=_0Xe8Fuq9aJ69Zqx3iQYq6E9N5w@mail.gmail.com>
+	<BANLkTi=_0Xe8Fuq9aJ69Zqx3iQYq6E9N5w@mail.gmail.com>
+	<20110531185831.GN11521@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:58206 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754200Ab1EaS6g (ORCPT
+Received: from mail-ww0-f42.google.com ([74.125.82.42]:58640 "EHLO
+	mail-ww0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754971Ab1EaTFp convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 31 May 2011 14:58:36 -0400
-Content-Disposition: inline
-In-Reply-To: <BANLkTi=_0Xe8Fuq9aJ69Zqx3iQYq6E9N5w@mail.gmail.com>
+	Tue, 31 May 2011 15:05:45 -0400
+Received: by wwk4 with SMTP id 4so2746981wwk.1
+        for <linux-sparse@vger.kernel.org>; Tue, 31 May 2011 12:05:44 -0700 (PDT)
+In-Reply-To: <20110531185831.GN11521@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Al Viro <viro@zeniv.linux.org.uk>
 Cc: Randy Dunlap <rdunlap@xenotime.net>, linux-sparse@vger.kernel.org
 
-Here's what is actually triggering that crap.  Have fun...
+On Tue, May 31, 2011 at 11:58 AM, Al Viro <viro@zeniv.linux.org.uk> wro=
+te:
+> Here's what is actually triggering that crap. =A0Have fun...
 
-#define __u16 unsigned short
-static inline __attribute__((__const__)) __u16 f(__u16 val)
-{
-         return val;
-}
+Thanks,
 
-static inline void barf(unsigned int len)
-{
-}
+I will take a look.
 
-static inline unsigned int bar(__u16 n)
-{
-        switch (n) {
-        case (__builtin_constant_p(1) ? 1 : f(1)):
-                return 4;
-        default:
-                return 0;
-        }
-}
-
-int foo(__u16 n)
-{
-        unsigned int x = bar(n);
-        barf(bar(n));
-        return 0;
-}
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
