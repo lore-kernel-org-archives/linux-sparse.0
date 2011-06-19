@@ -1,30 +1,56 @@
-From: Emil Langrock <emil.langrock@gmx.de>
-Subject: Missing bitwise warnings
-Date: Sun, 5 Jun 2011 01:50:45 +0200
-Message-ID: <201106050150.46039.emil.langrock@gmx.de>
-Mime-Version: 1.0
-Content-Type: Text/Plain;
-  charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [PATCH] sparse: Add 'artifical' to ignore attributes
+Date: Sun, 19 Jun 2011 19:20:51 +0300
+Message-ID: <1308500451-22637-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:34091 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1754307Ab1FDXus (ORCPT
+Received: from filtteri6.pp.htv.fi ([213.243.153.189]:57758 "EHLO
+	filtteri6.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751564Ab1FSQaE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 4 Jun 2011 19:50:48 -0400
+	Sun, 19 Jun 2011 12:30:04 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: sparse@chrisli.org
+Cc: linux-sparse@vger.kernel.org, Pekka Enberg <penberg@kernel.org>
 
-Hi,
+This patch adds the 'artifical' GCC attribute to list of ignore attributes.
+It's an attribute that's used by glibc which causes the following bogus sparse
+warnings when using it for userspace projects:
 
-I am currently trying to use sparse and found the interesting looking
--Wbitwise. I pasted the sum code from 
-http://www.gelato.unsw.edu.au/IA64wiki/SparseAnnotations to check how that 
-warning looks like, but are unable to create that warning. I added this code 
-to random places in the kernel (2.6.39) and compiled it with
-`make CC="cgcc -Wbitwise"`.
+  /usr/include/bits/stdlib.h:37:1: error: attribute '__artificial__': unknown attribute
+  /usr/include/bits/stdlib.h:64:1: error: attribute '__artificial__': unknown attribute
 
-My sparse version is v0.4.3-13-g87f4a7f
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ ident-list.h |    1 +
+ parse.c      |    2 ++
+ 2 files changed, 3 insertions(+), 0 deletions(-)
+
+diff --git a/ident-list.h b/ident-list.h
+index b94aece..b12d172 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -87,6 +87,7 @@ IDENT(fastcall); IDENT(__fastcall__);
+ IDENT(dllimport); IDENT(__dllimport__);
+ IDENT(dllexport); IDENT(__dllexport__);
+ IDENT(restrict); IDENT(__restrict);
++IDENT(artificial); IDENT(__artificial__);
+ 
+ /* Preprocessor idents.  Direct use of __IDENT avoids mentioning the keyword
+  * itself by name, preventing these tokens from expanding when compiling
+diff --git a/parse.c b/parse.c
+index 537055f..bcee794 100644
+--- a/parse.c
++++ b/parse.c
+@@ -486,6 +486,8 @@ const char *ignored_attributes[] = {
+ 	"__alloc_size__",
+ 	"always_inline",
+ 	"__always_inline__",
++	"artificial",
++	"__artificial__",
+ 	"bounded",
+ 	"__bounded__",
+ 	"cdecl",
 -- 
-Emil Langrock
+1.7.4.1
+
