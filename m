@@ -1,29 +1,80 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] sparse: Add 'artifical' to ignore attributes
-Date: Mon, 20 Jun 2011 10:36:00 -0700
-Message-ID: <BANLkTim8ZSN2=CHfidFhRC0G4OkkWi-dbA@mail.gmail.com>
-References: <1308500451-22637-1-git-send-email-penberg@kernel.org>
+From: Pavel Roskin <proski@gnu.org>
+Subject: [PATCH] Recognize and ignore _Complex, artificial and vector_size
+Date: Thu, 04 Aug 2011 17:38:11 -0400
+Message-ID: <20110804213811.27256.73386.stgit@mj>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ww0-f44.google.com ([74.125.82.44]:50245 "EHLO
-	mail-ww0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755244Ab1FTRgB (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 20 Jun 2011 13:36:01 -0400
-Received: by wwe5 with SMTP id 5so2788658wwe.1
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Jun 2011 10:36:00 -0700 (PDT)
-In-Reply-To: <1308500451-22637-1-git-send-email-penberg@kernel.org>
+Received: from c60.cesmail.net ([216.154.195.49]:26583 "EHLO c60.cesmail.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1754426Ab1HDViO (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 4 Aug 2011 17:38:14 -0400
+Received: from [127.0.0.1] (static-72-92-88-10.phlapa.fios.verizon.net [72.92.88.10])
+	by smtprelay1.cesmail.net (Postfix) with ESMTPSA id CD1A534C8A
+	for <linux-sparse@vger.kernel.org>; Thu,  4 Aug 2011 17:43:34 -0400 (EDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Sun, Jun 19, 2011 at 9:20 AM, Pekka Enberg <penberg@kernel.org> wrote:
-> This patch adds the 'artifical' GCC attribute to list of ignore attributes.
-> It's an attribute that's used by glibc which causes the following bogus sparse
-> warnings when using it for userspace projects:
+Signed-off-by: Pavel Roskin <proski@gnu.org>
+---
 
-Thanks for the patch. It  looks good. Will apply.
+ ident-list.h |    2 ++
+ parse.c      |    9 +++++++++
+ 2 files changed, 11 insertions(+), 0 deletions(-)
 
-Chris
+diff --git a/ident-list.h b/ident-list.h
+index b94aece..973bf57 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -87,6 +87,8 @@ IDENT(fastcall); IDENT(__fastcall__);
+ IDENT(dllimport); IDENT(__dllimport__);
+ IDENT(dllexport); IDENT(__dllexport__);
+ IDENT(restrict); IDENT(__restrict);
++IDENT(artificial); IDENT(__artificial__);
++IDENT(vector_size); IDENT(__vector_size__);
+ 
+ /* Preprocessor idents.  Direct use of __IDENT avoids mentioning the keyword
+  * itself by name, preventing these tokens from expanding when compiling
+diff --git a/parse.c b/parse.c
+index 537055f..1c3e305 100644
+--- a/parse.c
++++ b/parse.c
+@@ -145,6 +145,10 @@ static struct symbol_op restrict_op = {
+ 	.type = KW_QUALIFIER,
+ };
+ 
++static struct symbol_op complex_op = {
++	.type = KW_QUALIFIER,
++};
++
+ static struct symbol_op typeof_op = {
+ 	.type = KW_SPECIFIER,
+ 	.declarator = typeof_specifier,
+@@ -419,6 +423,7 @@ static struct init_keyword {
+ 	/* Ignored for now.. */
+ 	{ "restrict",	NS_TYPEDEF, .op = &restrict_op},
+ 	{ "__restrict",	NS_TYPEDEF, .op = &restrict_op},
++	{ "_Complex",	NS_TYPEDEF, .op = &complex_op},
+ 
+ 	/* Storage class */
+ 	{ "auto",	NS_TYPEDEF, .op = &auto_op },
+@@ -486,6 +491,8 @@ const char *ignored_attributes[] = {
+ 	"__alloc_size__",
+ 	"always_inline",
+ 	"__always_inline__",
++	"artificial",
++	"__artificial__",
+ 	"bounded",
+ 	"__bounded__",
+ 	"cdecl",
+@@ -563,6 +570,8 @@ const char *ignored_attributes[] = {
+ 	"__unused__",
+ 	"used",
+ 	"__used__",
++	"vector_size",
++	"__vector_size__",
+ 	"visibility",
+ 	"__visibility__",
+ 	"warn_unused_result",
