@@ -1,45 +1,32 @@
-From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: [PATCH] fix a memory leak in compile-i386.c
-Date: Tue,  9 Aug 2011 14:20:23 +0200
-Message-ID: <1312892423-5178-1-git-send-email-j.neuschaefer@gmx.net>
-References: <20110809115554.GH7659@shale.localdomain>
+From: Jeff Garzik <jeff@garzik.org>
+Subject: Re: [PATCH] fix a memory leak in compile-i386.c
+Date: Wed, 10 Aug 2011 01:41:49 -0400
+Message-ID: <4E421A1D.1090008@garzik.org>
+References: <20110809115554.GH7659@shale.localdomain> <1312892423-5178-1-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=UTF-8;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:46602 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1752970Ab1HIMUn (ORCPT
+Received: from mail-vw0-f46.google.com ([209.85.212.46]:61631 "EHLO
+	mail-vw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752204Ab1HJFlz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Aug 2011 08:20:43 -0400
-In-Reply-To: <20110809115554.GH7659@shale.localdomain>
+	Wed, 10 Aug 2011 01:41:55 -0400
+Received: by vws1 with SMTP id 1so588805vws.19
+        for <linux-sparse@vger.kernel.org>; Tue, 09 Aug 2011 22:41:54 -0700 (PDT)
+In-Reply-To: <1312892423-5178-1-git-send-email-j.neuschaefer@gmx.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Dan Carpenter <error27@gmail.com>, =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+To: =?UTF-8?B?Sm9uYXRoYW4gTmV1c2Now6RmZXI=?= <j.neuschaefer@gmx.net>
+Cc: linux-sparse@vger.kernel.org, Dan Carpenter <error27@gmail.com>
 
-Don't allocate val twice in emit_divide.
+On 08/09/2011 08:20 AM, Jonathan Neusch=C3=A4fer wrote:
+> Don't allocate val twice in emit_divide.
+>
+> Signed-off-by: Jonathan Neusch=C3=A4fer<j.neuschaefer@gmx.net>
 
-Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
----
- compile-i386.c |    1 -
- 1 files changed, 0 insertions(+), 1 deletions(-)
-
-diff --git a/compile-i386.c b/compile-i386.c
-index abe9313..da3ee49 100644
---- a/compile-i386.c
-+++ b/compile-i386.c
-@@ -1302,7 +1302,6 @@ static struct storage *emit_divide(struct express=
-ion *expr, struct storage *left
- 	eax_edx =3D get_hardreg(hardreg_storage_table + EAX_EDX, 1);
-=20
- 	/* init EDX to 0 */
--	val =3D new_storage(STOR_VALUE);
- 	val->flags =3D STOR_WANTS_FREE;
- 	emit_move(val, REG_EDX, NULL, NULL);
-=20
---=20
-1.7.5.4
+Acked-by: Jeff Garzik <jgarzik@redhat.com>
 
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
