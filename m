@@ -1,98 +1,58 @@
-From: Chris Forbes <chrisf@ijw.co.nz>
-Subject: [PATCH 2/2] initial work on check for identical exprs on both sides of '&&'; needs more
-Date: Wed, 10 Aug 2011 21:07:15 +1200
-Message-ID: <1312967235-23817-3-git-send-email-chrisf@ijw.co.nz>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [RFC PATCH 0/2] check for identical exprs on LHS and RHS of '&&'
+Date: Wed, 10 Aug 2011 10:44:23 -0700
+Message-ID: <20110810174423.GA6677@leaf>
 References: <1312967235-23817-1-git-send-email-chrisf@ijw.co.nz>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iy0-f170.google.com ([209.85.210.170]:64086 "EHLO
-	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750978Ab1HJJHx (ORCPT
+Received: from slow3-v.mail.gandi.net ([217.70.178.89]:54469 "EHLO
+	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753606Ab1HJRpD (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 10 Aug 2011 05:07:53 -0400
-Received: by iye16 with SMTP id 16so813465iye.1
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2011 02:07:52 -0700 (PDT)
+	Wed, 10 Aug 2011 13:45:03 -0400
+Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
+	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 031ED3AA80
+	for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2011 19:44:31 +0200 (CEST)
+Content-Disposition: inline
 In-Reply-To: <1312967235-23817-1-git-send-email-chrisf@ijw.co.nz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Chris Forbes <chrisf@ijw.co.nz>
+To: Chris Forbes <chrisf@ijw.co.nz>
+Cc: linux-sparse@vger.kernel.org
 
----
- evaluate.c |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 59 insertions(+), 0 deletions(-)
+On Wed, Aug 10, 2011 at 09:07:13PM +1200, Chris Forbes wrote:
+> Hi, I've started working on a new check for sparse to pick up a common 
+> error -- identical expressions appearing on both sides of some binary
+> operators.
+> 
+> This initially supports '&&', and incompletely -- but the plan is to
+> check instances of '!=', '==' and '||' the same way.
+> 
+> The check relies on recursively walking the ->left and ->right expressions, 
+> looking for differences. The implementation is a little verbose, but can 
+> be shared between all the operators.
+> 
+> What I'd like to know is:
+> 
+> * Do people consider this a worthwhile check to make?
 
-diff --git a/evaluate.c b/evaluate.c
-index f8343c2..af0be59 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -853,8 +853,67 @@ static struct symbol *evaluate_conditional(struct expression *expr, int iterator
- 	return ctype;
- }
- 
-+static int are_equivalent_expr(struct expression *lhs, struct expression *rhs)
-+{
-+	/* recursively determine if lhs ~ rhs. */
-+	if (!lhs ^ !rhs) return 0;
-+
-+	if (lhs->type != rhs->type) return 0;
-+	if (lhs->flags != rhs->flags) return 0;
-+	if (lhs->op != rhs->op) return 0;
-+	if (lhs->ctype != rhs->ctype) return 0;
-+
-+	switch( lhs->type ) {
-+	case EXPR_VALUE:
-+		if (lhs->value != rhs->value) return 0;
-+		if (lhs->taint != rhs->taint) return 0;
-+		break;
-+	case EXPR_FVALUE:
-+		if (lhs->fvalue != rhs->fvalue) return 0;
-+		break;
-+	case EXPR_STRING:
-+		if (lhs->wide != rhs->wide) return 0;
-+		if (lhs->string->length != rhs->string->length) return 0;
-+		if (memcmp(lhs->string->data, rhs->string->data,
-+			lhs->string->length)) return 0;
-+		break;
-+/*	case EXPR_UNOP:	*/	/* this is mentioned in the union, but doesn't
-+				actually exist */
-+	case EXPR_PREOP:
-+	case EXPR_POSTOP:
-+		if (!are_equivalent_expr(lhs->unop, rhs->unop)) return 0;
-+		if (lhs->op_value != rhs->op_value) return 0;
-+		break;
-+	case EXPR_SYMBOL:
-+	case EXPR_TYPE:
-+		if (lhs->symbol != rhs->symbol) return 0;
-+		break;
-+	case EXPR_BINOP:
-+	case EXPR_COMMA:
-+	case EXPR_COMPARE:
-+	case EXPR_LOGICAL:
-+	case EXPR_ASSIGNMENT:
-+		if (!are_equivalent_expr(lhs->left, rhs->left)) return 0;
-+		if (!are_equivalent_expr(lhs->right, rhs->right)) return 0;
-+		break;
-+
-+		/* blah, more... */
-+
-+	default:
-+		return 0;
-+	}
-+
-+	return 1;
-+}
-+
- static struct symbol *evaluate_logical(struct expression *expr)
- {
-+	if (expr->op == SPECIAL_LOGICAL_AND &&
-+		are_equivalent_expr(expr->left, expr->right)) {
-+		warning(expr->pos, "identical expressions on both "
-+			"sides of '&&'");
-+	}
-+
- 	if (!evaluate_conditional(expr->left, 0))
- 		return NULL;
- 	if (!evaluate_conditional(expr->right, 0))
--- 
-1.7.4.1
+I'd definitely love to see this check.  I saw an example of the kinds of
+bugs it can find in a recent article
+(http://software.intel.com/en-us/blogs/2011/08/08/pvs-studio-vs-clang/),
+and immediately wished Sparse and/or GCC would include that check.
 
+> * Am I "doing it right" with the expression walking?
+
+Seems OK at first glance, with one exception: you need to handle
+expressions with side-effects specially, since you could legitimately
+write something like (x == func() && x == func()), or (x == *p++ && x ==
+*p++).
+
+> * Are there other cases which people would be interested in?
+
+How about checking for the same expression multiple times in a single
+block of | or & expressions?  (flag1 | flag2 | flag2) seems like a
+likely copy/paste error.
+
+- Josh Triplett
