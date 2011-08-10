@@ -1,28 +1,37 @@
-From: Al Viro <viro@ZenIV.linux.org.uk>
-Subject: Re: [RFC PATCH 0/2] check for identical exprs on LHS and RHS of '&&'
-Date: Wed, 10 Aug 2011 18:46:15 +0100
-Message-ID: <20110810174615.GO2203@ZenIV.linux.org.uk>
-References: <1312967235-23817-1-git-send-email-chrisf@ijw.co.nz>
- <20110810174423.GA6677@leaf>
+From: Dan Carpenter <error27@gmail.com>
+Subject: relicensing Sparse
+Date: Thu, 11 Aug 2011 01:08:06 +0300
+Message-ID: <20110810220806.GD3777@shale.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from zeniv.linux.org.uk ([195.92.253.2]:47288 "EHLO
-	ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754409Ab1HJRqT (ORCPT
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:57591 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751616Ab1HJWKN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 10 Aug 2011 13:46:19 -0400
+	Wed, 10 Aug 2011 18:10:13 -0400
+Received: by pzk37 with SMTP id 37so2541674pzk.1
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Aug 2011 15:10:13 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <20110810174423.GA6677@leaf>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Chris Forbes <chrisf@ijw.co.nz>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Wed, Aug 10, 2011 at 10:44:23AM -0700, Josh Triplett wrote:
+All of you probably know that I've been contacting people to try get
+permission to relicense Sparse to the MIT license.  The Transmeta
+code was relicensed some years ago but we needed to collect all
+the copyright holders to do a full relicense.  I basically did a git
+blame and if you have over 10 lines of Sparse code, then I sent you
+an email.
 
-> How about checking for the same expression multiple times in a single
-> block of | or & expressions?  (flag1 | flag2 | flag2) seems like a
-> likely copy/paste error.
+I havent' been able to reach these two people:
+Luc Van Oostenryck <luc.vanoostenryck@looxix.net> (279 lines)
+Richard Knutsson <ricknu-0@student.ltu.se>        (21 lines)
 
-... or result of macro expansion.
+Does anyone know how I can reach them?  Are they on this list?
+
+I'm also waiting to hear back from two people, but hopefully we
+should be able to finish relicensing fairly soon.
+
+regards,
+dan carpenter
