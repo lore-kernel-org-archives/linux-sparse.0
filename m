@@ -1,31 +1,54 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] fix a memory leak in compile-i386.c
-Date: Thu, 11 Aug 2011 03:05:04 -0700
-Message-ID: <CANeU7Q=RpOcerFA3d1sH5HX0wPXBbW-Env3FMF0D=RP+DtRUGA@mail.gmail.com>
-References: <20110809115554.GH7659@shale.localdomain>
-	<1312892423-5178-1-git-send-email-j.neuschaefer@gmx.net>
-	<4E421A1D.1090008@garzik.org>
+From: Dan Carpenter <error27@gmail.com>
+Subject: Re: relicensing Sparse
+Date: Thu, 11 Aug 2011 13:39:08 +0300
+Message-ID: <20110811103908.GI3777@shale.localdomain>
+References: <20110810220806.GD3777@shale.localdomain>
+ <20110810230939.GA9423@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:63471 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754966Ab1HKKFF (ORCPT
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:42660 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755062Ab1HKKlZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 11 Aug 2011 06:05:05 -0400
-Received: by wyg24 with SMTP id 24so1297012wyg.19
-        for <linux-sparse@vger.kernel.org>; Thu, 11 Aug 2011 03:05:04 -0700 (PDT)
-In-Reply-To: <4E421A1D.1090008@garzik.org>
+	Thu, 11 Aug 2011 06:41:25 -0400
+Received: by pzk37 with SMTP id 37so3463912pzk.1
+        for <linux-sparse@vger.kernel.org>; Thu, 11 Aug 2011 03:41:24 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20110810230939.GA9423@leaf>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jeff@garzik.org>
-Cc: =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>, linux-sparse@vger.kernel.org, Dan Carpenter <error27@gmail.com>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Tue, Aug 9, 2011 at 10:41 PM, Jeff Garzik <jeff@garzik.org> wrote:
->
-> Acked-by: Jeff Garzik <jgarzik@redhat.com>
->
+On Wed, Aug 10, 2011 at 04:09:39PM -0700, Josh Triplett wrote:
+> On Thu, Aug 11, 2011 at 01:08:06AM +0300, Dan Carpenter wrote:
+> > All of you probably know that I've been contacting people to try get
+> > permission to relicense Sparse to the MIT license.  The Transmeta
+> > code was relicensed some years ago but we needed to collect all
+> > the copyright holders to do a full relicense.  I basically did a git
+> > blame and if you have over 10 lines of Sparse code, then I sent you
+> > an email.
+> 
+> Thank you very much for your continued effort on this.  I'd wondered
+> what still blocked that effort.
+> 
+> Checking "git blame" doesn't seem sufficient; I think you really want to
+> contact anyone who has a commit in the git log. Try "git shortlog -se".
+> Who appears on the latter list and not your list from "git blame"?
 
-Applied.
+Most of the people who I missed would have been filtered out anyway
+by my ten lines of code minimum contribution requirement.  Perhaps I
+should just contact everyone.
 
-Chris
+I looked at how Mozilla did the relicensing and they pretty much went
+by who had their name in a copyright notice at the top of the file.
+For files without a copyright notice they looked at the history.  So
+it seems like tiny contributions were ignored.
+
+I'm obviously not a lawyer.  Contacting everyone is probably doable
+if that's what you think is best.
+
+regards,
+dan carpenter
+
