@@ -1,50 +1,83 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: Re: [RFC PATCH 0/2] check for identical exprs on LHS and RHS of '&&'
-Date: Fri, 12 Aug 2011 22:34:32 +0300
-Message-ID: <20110812193432.GR3777@shale.localdomain>
-References: <1312967235-23817-1-git-send-email-chrisf@ijw.co.nz>
- <20110810174423.GA6677@leaf>
- <20110810174615.GO2203@ZenIV.linux.org.uk>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: more "unreplaced symbol" warnings
+Date: Mon, 15 Aug 2011 12:34:38 -0700
+Message-ID: <CANeU7QnUQdV4G5zNQ6QwHtGj1e=+fy5P7SmhyUeRTMvujaRMVQ@mail.gmail.com>
+References: <20110529145450.8c042971.rdunlap@xenotime.net>
+	<BANLkTi=_0Xe8Fuq9aJ69Zqx3iQYq6E9N5w@mail.gmail.com>
+	<20110531185831.GN11521@ZenIV.linux.org.uk>
+	<BANLkTingWZfcrf3iKZw8_vMwECm4jYnNgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iy0-f170.google.com ([209.85.210.170]:64022 "EHLO
-	mail-iy0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753430Ab1HLTgl (ORCPT
+Received: from mail-qy0-f181.google.com ([209.85.216.181]:65374 "EHLO
+	mail-qy0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751113Ab1HOTej convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 12 Aug 2011 15:36:41 -0400
-Received: by iye16 with SMTP id 16so2109189iye.1
-        for <linux-sparse@vger.kernel.org>; Fri, 12 Aug 2011 12:36:40 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20110810174615.GO2203@ZenIV.linux.org.uk>
+	Mon, 15 Aug 2011 15:34:39 -0400
+Received: by qyk34 with SMTP id 34so2977201qyk.19
+        for <linux-sparse@vger.kernel.org>; Mon, 15 Aug 2011 12:34:38 -0700 (PDT)
+In-Reply-To: <BANLkTingWZfcrf3iKZw8_vMwECm4jYnNgQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Al Viro <viro@ZenIV.linux.org.uk>
-Cc: Josh Triplett <josh@joshtriplett.org>, Chris Forbes <chrisf@ijw.co.nz>, linux-sparse@vger.kernel.org
+To: Al Viro <viro@zeniv.linux.org.uk>
+Cc: Randy Dunlap <rdunlap@xenotime.net>, linux-sparse@vger.kernel.org
 
-On Wed, Aug 10, 2011 at 06:46:15PM +0100, Al Viro wrote:
-> On Wed, Aug 10, 2011 at 10:44:23AM -0700, Josh Triplett wrote:
-> 
-> > How about checking for the same expression multiple times in a single
-> > block of | or & expressions?  (flag1 | flag2 | flag2) seems like a
-> > likely copy/paste error.
-> 
-> ... or result of macro expansion.
+On Wed, Jun 1, 2011 at 12:41 AM, Christopher Li <sparse@chrisli.org> wr=
+ote:
+> #define __u16 unsigned short
+> int foo(__u16 n);
+> static inline __u16 f(__u16 val)
+> {
+> =A0 =A0 =A0 =A0return val;
+> }
+>
+> static inline unsigned int bar(__u16 n)
+> {
+> =A0 =A0 =A0 switch (n) {
+> =A0 =A0 =A0 case (1 ? 1 : f(1)):
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 return 4;
+> =A0 =A0 =A0 }
+> }
+>
+> int foo(__u16 n)
+> {
+> =A0 =A0 =A0 =A0bar(n);
+> =A0 =A0 =A0 =A0bar(n);
+> =A0 =A0 =A0 =A0return 0;
+> }
 
-In Smatch, we store where all the macros are when we run the
-preprocessor.  Then for some checks we check if there was a macro at
-&expr->pos to see if it's inside a macro, and if so then the error is
-suppressed.
+I just submit a fix for this bug. It took me a few days staring at the
+inlining code to figure out what is going on. I am glad this is bug is
+resolved now.
 
-For example, Smatch prints an error if you dereference a variable and
-then later check it for NULL.  But if the check is inside a macro the
-error gets suppressed.
+The example above is actually the minimal setup to trigger this
+bug. The root cause is in one of the member during copying case stateme=
+nt
+did not replace to the new statement. e.g. when inlining f(), it actual=
+ly
+change the original copy of function definition in bar().
 
-    foo->bar;
-    if (foo) { ...  <-- most likely an error.
+The warning is triggered during the second time bar() get inlined.
 
-    foo->bar;
-    some_macro_that_checks_for_null(foo);  <-- not an error.
+The fix is just one line. Finding it is the hard part.
 
-regards,
-dan carpenter
+Chris
+
+@@ -381,6 +381,7 @@ static struct statement *copy_one_statement(struct
+statement *stmt)
+        case STMT_CASE: {
+                stmt =3D dup_statement(stmt);
+                stmt->case_label =3D copy_symbol(stmt->pos, stmt->case_=
+label);
++               stmt->case_label->stmt =3D stmt;
+                stmt->case_expression =3D copy_expression(stmt->case_ex=
+pression);
+                stmt->case_to =3D copy_expression(stmt->case_to);
+                stmt->case_statement =3D copy_one_statement(stmt->case_=
+statement);
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
