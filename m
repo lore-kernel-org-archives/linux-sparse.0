@@ -1,92 +1,44 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Sparse 0.4.4-rc1
-Date: Sat, 20 Aug 2011 15:59:36 -0700
-Message-ID: <CANeU7QkxKZeaEDi_ZTOLDuSx+bP9xhOkmzbkOfvrGg1wZdWeFA@mail.gmail.com>
-References: <CFCF4B72-0876-4248-908A-77F4BF367814@chrisli.org>
+From: Michael Stefaniuc <mstefani@redhat.com>
+Subject: [PATCH] Ignore the ms_hook_prologue attribute.
+Date: Mon, 22 Aug 2011 00:28:45 +0200
+Message-ID: <20110821222845.GA20646@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:53987 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751634Ab1HTW7h convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 20 Aug 2011 18:59:37 -0400
-Received: by qwk3 with SMTP id 3so2499112qwk.19
-        for <linux-sparse@vger.kernel.org>; Sat, 20 Aug 2011 15:59:36 -0700 (PDT)
-In-Reply-To: <CFCF4B72-0876-4248-908A-77F4BF367814@chrisli.org>
+Received: from mx1.redhat.com ([209.132.183.28]:1027 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755968Ab1HUW2r (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 21 Aug 2011 18:28:47 -0400
+Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id p7LMSlRD006401
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Sun, 21 Aug 2011 18:28:47 -0400
+Received: from brasov.str.redhat.com (brasov.str.redhat.com [10.32.0.1])
+	by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id p7LMSktw002833
+	for <linux-sparse@vger.kernel.org>; Sun, 21 Aug 2011 18:28:46 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, Dan Carpenter <error27@gmail.com>
+To: linux-sparse@vger.kernel.org
 
-It seems that my previous email get truncated.
 
-It has been a long while since the last release. Mostly small
-improvements. Noticeably the new gcc  build happier with
-the new code.
+Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
+---
+ parse.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-The sparse project is the process of moving to the MIT license.
-Thanks Dan for collecting the approvals.
-
-So far we get most of the people sign off on the new license,
-nobody objects yet. If you are the few people haven't reply
-to the new license proposal, now it is a good time to do so.
-Please reply to Dan off the list and Dan will aggregate the results.
-
-Now, lets give the sparse code some test.
-
-Chris
-
---
-
-Ben Pfaff (1):
-     evaluate: Allow sizeof(_Bool) to succeed.
-
-Christopher Li (8):
-     inspect: adding function arugument list
-     Allow overwrite CFLAGS from command line
-     Ignore attribute vector_size
-     Remove set but not used variable
-     inspect: Add switch statement and more
-     validation: inline switch statement
-     Fix inlining switch statement.
-     Sparse 0.4.4-rc1
-
-Diego Elio Petten=F2 (3):
-     build: allow easy override of GCC_BASE
-     build: add an all-installable target that builds the targets to in=
-stall.
-     Fix build with GCC 4.6 series.
-
-=46lorian Fainelli (1):
-     Makefile: warn user when libxml and/or libgtk2 are not available
-
-Jan Pokorn=FD (4):
-     remove unused "container" macro
-     flow.c: make comment for `dominates' reflect code
-     use ARRAY_SIZE() when possible (continued)
-     parse.c: "if(" -> "if (" adjustment
-
-Jonathan Neusch=E4fer (1):
-     fix a memory leak in compile-i386.c
-
-Linus Torvalds (2):
-     Add new streams to a hash-list based on their names
-     Teach 'already_tokenized()' to use the stream name hash table
-
-Namhyung Kim (3):
-     use ARRAY_SIZE() when possible
-     Fix tokenizer for octal escape sequences
-     Update the validation check for escape sequences
-
-Nicolas Kaiser (1):
-     memops.c: always true expression
-
-Pekka Enberg (1):
-     sparse: Add 'artifical' to ignore attributes
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/parse.c b/parse.c
+index 082c2c4..5435f6d 100644
+--- a/parse.c
++++ b/parse.c
+@@ -533,6 +533,8 @@ const char *ignored_attributes[] = {
+ 	"__model__",
+ 	"ms_abi",
+ 	"__ms_abi__",
++	"ms_hook_prologue",
++	"__ms_hook_prologue__",
+ 	"naked",
+ 	"__naked__",
+ 	"no_instrument_function",
+-- 
+1.7.6
