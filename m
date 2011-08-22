@@ -1,53 +1,46 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 2/5] sparse: Enable unhandled validation tests
-Date: Mon, 22 Aug 2011 08:24:01 -0700
-Message-ID: <20110822152401.GB21442@leaf>
-References: <1314021451-24808-1-git-send-email-penberg@kernel.org>
- <1314021451-24808-2-git-send-email-penberg@kernel.org>
+From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: [PATCH] FAQ: update the website address and call it Wiki
+Date: Mon, 22 Aug 2011 22:18:14 +0200
+Message-ID: <1314044294-27704-1-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from slow3-v.mail.gandi.net ([217.70.178.89]:52175 "EHLO
-	slow3-v.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751987Ab1HVPbh (ORCPT
+Received: from mailout-de.gmx.net ([213.165.64.23]:32829 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1753754Ab1HVUSu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Aug 2011 11:31:37 -0400
-Received: from relay4-d.mail.gandi.net (relay4-d.mail.gandi.net [217.70.183.196])
-	by slow3-v.mail.gandi.net (Postfix) with ESMTP id 803E686F4D
-	for <linux-sparse@vger.kernel.org>; Mon, 22 Aug 2011 17:24:11 +0200 (CEST)
-Content-Disposition: inline
-In-Reply-To: <1314021451-24808-2-git-send-email-penberg@kernel.org>
+	Mon, 22 Aug 2011 16:18:50 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org
+Cc: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
 
-On Mon, Aug 22, 2011 at 04:57:28PM +0300, Pekka Enberg wrote:
-> This patch enables unhandled tests that did not have "check-name" specified.
-> It's pointless not to run them.
-[...]
-> --- a/validation/badtype1.c
-> +++ b/validation/badtype1.c
-> @@ -1 +1,6 @@
->  static void foo(enum bar baz);
-> +
-> +/*
-> + * check-name: enum not in scope
-> + * check-known-to-fail
-> + */
-[...]
-> --- a/validation/struct-ns2.c
-> +++ b/validation/struct-ns2.c
-> @@ -12,3 +12,8 @@ h (void)
->    struct Bar y;
->    y.i = 1;
->  }
-> +
-> +/*
-> + * check-name: struct not in scope
-> + * check-known-to-fail
-> + */
+Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+---
+ FAQ |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Ouch, case in point; I didn't know these two tests had broken.
+diff --git a/FAQ b/FAQ
+index 4cad826..290de0e 100644
+--- a/FAQ
++++ b/FAQ
+@@ -88,7 +88,7 @@ A.  Yeah, well...  It parses a fairly complete subset=
+ of "extended C" as
+=20
+ Q.  What other sparse resources are available?
+=20
+-A.  Website: http://www.kernel.org/pub/software/devel/sparse/
++A.  Wiki: http://sparse.wiki.kernel.org/index.php/Main_Page
+=20
+     Mailing list: linux-sparse@vger.kernel.org
+     See http://vger.kernel.org/vger-lists.html#linux-sparse for subscr=
+iption
+--=20
+1.7.5.4
 
-- Josh Triplett
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
