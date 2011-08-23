@@ -1,46 +1,70 @@
-From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: [PATCH] FAQ: update the website address and call it Wiki
-Date: Mon, 22 Aug 2011 22:18:14 +0200
-Message-ID: <1314044294-27704-1-git-send-email-j.neuschaefer@gmx.net>
+From: Chris Ball <cjb@laptop.org>
+Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
+Date: Tue, 23 Aug 2011 12:31:55 -0400
+Message-ID: <m27h643x8k.fsf@bob.laptop.org>
+References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
+	<1314114363-6767-3-git-send-email-svenkatr@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:32829 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1753754Ab1HVUSu (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Aug 2011 16:18:50 -0400
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain
+Return-path: <linux-mmc-owner@vger.kernel.org>
+In-Reply-To: <1314114363-6767-3-git-send-email-svenkatr@ti.com> (Venkatraman
+	S.'s message of "Tue, 23 Aug 2011 21:16:03 +0530")
+Sender: linux-mmc-owner@vger.kernel.org
+To: Venkatraman S <svenkatr@ti.com>
+Cc: linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
 
-Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
----
- FAQ |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
+Hi,
 
-diff --git a/FAQ b/FAQ
-index 4cad826..290de0e 100644
---- a/FAQ
-+++ b/FAQ
-@@ -88,7 +88,7 @@ A.  Yeah, well...  It parses a fairly complete subset=
- of "extended C" as
-=20
- Q.  What other sparse resources are available?
-=20
--A.  Website: http://www.kernel.org/pub/software/devel/sparse/
-+A.  Wiki: http://sparse.wiki.kernel.org/index.php/Main_Page
-=20
-     Mailing list: linux-sparse@vger.kernel.org
-     See http://vger.kernel.org/vger-lists.html#linux-sparse for subscr=
-iption
---=20
-1.7.5.4
+[Adding linux-sparse@ to CC]
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Tue, Aug 23 2011, Venkatraman S wrote:
+> Fix the sparse warning output
+> "warning: Using plain integer as NULL pointer"
+>
+> Signed-off-by: Venkatraman S <svenkatr@ti.com>
+> ---
+>  drivers/mmc/card/block.c    |    4 ++--
+>  drivers/mmc/core/core.c     |    2 +-
+>  drivers/mmc/core/mmc_ops.c  |    4 ++--
+>  drivers/mmc/core/sdio_ops.c |    2 +-
+>  4 files changed, 6 insertions(+), 6 deletions(-)
+>
+> diff --git a/drivers/mmc/card/block.c b/drivers/mmc/card/block.c
+> index 1ff5486..e702c61 100644
+> --- a/drivers/mmc/card/block.c
+> +++ b/drivers/mmc/card/block.c
+> @@ -291,7 +291,7 @@ static int mmc_blk_ioctl_cmd(struct block_device *bdev,
+>  	struct mmc_card *card;
+>  	struct mmc_command cmd = {0};
+>  	struct mmc_data data = {0};
+> -	struct mmc_request mrq = {0};
+> +	struct mmc_request mrq = {NULL};
+>  	struct scatterlist sg;
+>  	int err;
+> [...]
+
+The sparse warning is mistaken.  Or I'm mistaken.  But I suspect it's
+the sparse warning.
+
+The {0} syntax is covered by:
+
+   [6.7.8.21] If there are fewer initializers in a brace-enclosed list
+   than there are elements or members of an aggregate, or fewer
+   characters in a string literal used to initialize an array of known
+   size than there are elements in the array, the remainder of the
+   aggregate shall be initialized implicitly the same as objects that
+   have static storage duration.
+
+So we're not assigning 0 to a pointer, or whatever sparse thinks we're
+doing -- we're initializing every member of the struct with 0, which is
+a good and safe way to initialize it.
+
+Sparse folks, any comment?
+
+Thanks,
+
+- Chris.
+-- 
+Chris Ball   <cjb@laptop.org>   <http://printf.net/>
+One Laptop Per Child
