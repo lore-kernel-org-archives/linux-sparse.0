@@ -1,63 +1,30 @@
-From: Ben Pfaff <blp@cs.stanford.edu>
-Subject: Re: [PATCH 2/2] mmc: fix integer assignments to pointer
-Date: Tue, 23 Aug 2011 13:43:57 -0700
-Message-ID: <87wre3luya.fsf@blp.benpfaff.org>
-References: <1314114363-6767-1-git-send-email-svenkatr@ti.com>
-	<1314114363-6767-3-git-send-email-svenkatr@ti.com>
-	<m27h643x8k.fsf@bob.laptop.org> <20110823172851.GB1784@leaf>
-	<874o18m2cn.fsf@blp.benpfaff.org> <20110823181359.GB3418@leaf>
-Reply-To: Ben Pfaff <blp@cs.stanford.edu>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Ignore the ms_hook_prologue attribute.
+Date: Tue, 23 Aug 2011 14:23:41 -0700
+Message-ID: <CANeU7QnJ53EVQnBno6KR=Vr_DoYspaEH25y2K4-Zx+HatNvHUA@mail.gmail.com>
+References: <20110821222845.GA20646@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from outmail149120.authsmtp.net ([62.13.149.120]:65033 "EHLO
-	outmail149120.authsmtp.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751534Ab1HWU7s (ORCPT
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:53569 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755630Ab1HWVXm (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 23 Aug 2011 16:59:48 -0400
-In-Reply-To: <20110823181359.GB3418@leaf> (Josh Triplett's message of "Tue, 23
-	Aug 2011 11:13:59 -0700")
+	Tue, 23 Aug 2011 17:23:42 -0400
+Received: by qwk3 with SMTP id 3so375203qwk.19
+        for <linux-sparse@vger.kernel.org>; Tue, 23 Aug 2011 14:23:41 -0700 (PDT)
+In-Reply-To: <20110821222845.GA20646@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Chris Ball <cjb@laptop.org>, Venkatraman S <svenkatr@ti.com>, linux-mmc@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Michael Stefaniuc <mstefani@redhat.com>
+Cc: linux-sparse@vger.kernel.org
 
-Josh Triplett <josh@joshtriplett.org> writes:
-
-> On Tue, Aug 23, 2011 at 11:04:08AM -0700, Ben Pfaff wrote:
->> Josh Triplett <josh@joshtriplett.org> writes:
->> 
->> > On Tue, Aug 23, 2011 at 12:31:55PM -0400, Chris Ball wrote:
->> >> On Tue, Aug 23 2011, Venkatraman S wrote:
->> >> > -	struct mmc_request mrq = {0};
->> >> > +	struct mmc_request mrq = {NULL};
->> >> 
->> >> The sparse warning is mistaken.  Or I'm mistaken.  But I suspect it's
->> >> the sparse warning.
->> >
->> > Notice that it says "the remainder of the aggregate".  The first field
->> > still gets initialized with the 0 you supplied, and the first field of
->> > struct mmc_request has a pointer type.
->> 
->> That's an understandable position, but I think it would also be
->> reasonable for sparse to special case using {0} as an
->> initializer.  {0} is a valid initializer for every type and so
->> it's sometimes used as an initializer for a local variable to get
->> the same effect that one would have for a static variable without
->> specifying an initializer.
+On Sun, Aug 21, 2011 at 3:28 PM, Michael Stefaniuc <mstefani@redhat.com> wrote:
 >
-> {} produces the same effect, as far as I know.
+> Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
 
-{} is not a valid initializer for every type in the same way as
-{0}, e.g.:
+Applied.
 
-    blp@hardrock:~/db$ cat > tmp.c
-    int x = {};
-    int y = {0};
-    blp@hardrock:~/db$ gcc tmp.c
-    tmp.c:1:1: error: empty scalar initializer
-    tmp.c:1:1: error: (near initialization for 'x')
+Can you add a test case for that as well?
 
--- 
-Ben Pfaff 
-http://benpfaff.org
+Chris
