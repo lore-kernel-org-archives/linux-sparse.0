@@ -1,29 +1,38 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/5] sparse: Enable unhandled validation tests
-Date: Wed, 24 Aug 2011 14:05:51 -0700
-Message-ID: <CANeU7Q=xwx6TNA9PE_30=9i+KrCF0gRfXm2UPAXBpCg-7uncPg@mail.gmail.com>
-References: <1314021451-24808-1-git-send-email-penberg@kernel.org>
-	<1314021451-24808-2-git-send-email-penberg@kernel.org>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: sparse and multiarch include paths
+Date: Wed, 24 Aug 2011 14:42:46 -0700
+Message-ID: <20110824214244.GA12248@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:42247 "EHLO
-	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751826Ab1HXVFw (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:45948 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750915Ab1HXVmz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Aug 2011 17:05:52 -0400
-Received: by qwk3 with SMTP id 3so1050459qwk.19
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Aug 2011 14:05:51 -0700 (PDT)
-In-Reply-To: <1314021451-24808-2-git-send-email-penberg@kernel.org>
+	Wed, 24 Aug 2011 17:42:55 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org
+Cc: debian-gcc@lists.debian.org, multiarch-devel@lists.alioth.debian.org
 
-On Mon, Aug 22, 2011 at 6:57 AM, Pekka Enberg <penberg@kernel.org> wrote:
-> This patch enables unhandled tests that did not have "check-name" specified.
-> It's pointless not to run them.
+When trying to use sparse on some low-level userspace code, I ran into
+the following error:
 
-Good catch. Applied.
+/usr/include/bits/socket.h:381:11: error: unable to open 'asm/socket.h'
 
-Chris
+It looks like that file lives in
+/usr/include/x86_64-linux-gnu/asm/socket.h , and gcc has
+/usr/include/x86_64-linux-gnu in its default include path.  This relates
+to Debian's multiarch efforts, moving such headers to paths which
+include the architecture to allow simultaneous installation of the
+headers for multiple architectures.  I don't know how gcc ends up with
+that directory in its include path, but sparse needs to follow suit to
+compile any code which includes these architecture-specific
+headers.
+
+I've CCed the Debian GCC maintainers and multiarch developers, in the
+hopes of getting some additional details that might help resolve this
+problem.
+
+- Josh Triplett
