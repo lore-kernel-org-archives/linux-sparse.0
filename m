@@ -1,74 +1,87 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [PATCH 1/5] sparse: Show expected vs. actual output on test failure
-Date: Fri, 26 Aug 2011 12:10:24 +0300
-Message-ID: <4E576300.2070609@kernel.org>
-References: <1314021451-24808-1-git-send-email-penberg@kernel.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH] sparse: Reduce 'test-suite' run output
+Date: Fri, 26 Aug 2011 16:50:21 +0300
+Message-ID: <1314366621-29361-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wy0-f174.google.com ([74.125.82.174]:38888 "EHLO
-	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754022Ab1HZJKa (ORCPT
+Received: from filtteri5.pp.htv.fi ([213.243.153.188]:47337 "EHLO
+	filtteri5.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752883Ab1HZNuZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Aug 2011 05:10:30 -0400
-Received: by wyg24 with SMTP id 24so2284585wyg.19
-        for <linux-sparse@vger.kernel.org>; Fri, 26 Aug 2011 02:10:29 -0700 (PDT)
-In-Reply-To: <1314021451-24808-1-git-send-email-penberg@kernel.org>
+	Fri, 26 Aug 2011 09:50:25 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On 8/22/11 4:57 PM, Pekka Enberg wrote:
-> This patch changes 'make check' output to show sparse output compared to
-> expected results upon unexpected test failure. For example,
-> static-forward-decl.c output would look like this if it would not be tagged as
-> "known to fail":
->
->         TEST     static forward declaration (static-forward-decl.c)
->    error: actual error text does not match expected error text.
->    --- static-forward-decl.c.error.expected	2011-08-22 06:29:40.000000000 +0000
->    +++ static-forward-decl.c.error.got	2011-08-22 06:29:40.000000000 +0000
->    @@ -0,0 +1 @@
->    +static-forward-decl.c:3:5: warning: symbol 'f' was not declared. Should it be static?
->    error: see static-forward-decl.c.error.* for further investigation.
->    info: test 'static-forward-decl.c' is known to fail
->
-> This makes it easier to detect and analyze test breakage.
->
-> Cc: Christopher Li<sparse@chrisli.org>
-> Cc: Linus Torvalds<torvalds@linux-foundation.org>
-> Signed-off-by: Pekka Enberg<penberg@kernel.org>
-> ---
->   validation/test-suite |    2 ++
->   1 files changed, 2 insertions(+), 0 deletions(-)
->
-> diff --git a/validation/test-suite b/validation/test-suite
-> index 42f7bd7..7549fd2 100755
-> --- a/validation/test-suite
-> +++ b/validation/test-suite
-> @@ -146,6 +146,8 @@ do_test()
->   		if [ "$?" -eq "0" ]; then
->   			echo "info: test '$file' is known to fail"
->   			known_ko_tests=`expr $known_ko_tests + 1`
-> +		else
-> +			cat "$file".$stream.diff
->   		fi
->   		return 1
->   	else
+There's more than 100 tests in the validation test suite. That makes it
+cumbersome to notice test breakage in because the results don't fit on single
+page.
 
-Chris, the patch you committed is different from mine:
+We don't expect to see most tests to pass so it's much more convenient to
+only be verbose for failing test cases. This patch changes the
+'test-suite' output to report progress on a single line unless a test case
+fails.
 
-http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=commitdiff;h=a7a00d5108c36b8baaf54814aa1f42583dabc754
+Current master 'make check' output looks as follows:
 
-Your patch now makes the runner verbose for "known to fail" tests
-which is definitely not something we should do. If someone tagged
-the test as "known to fail", we should treat it just like we treat
-passed test cases.
+  Makefile:53: Your system does not have libxml, disabling c2xml
+       TEST    preprocessor/preprocessor14.c ( Preprocessor #14)
+  error: actual output text does not match expected output text.
+  error: see preprocessor/preprocessor14.c.output.* for further investigation.
+  --- preprocessor/preprocessor14.c.output.expected	2011-08-26 05:47:22.000000000 +0000
+  +++ preprocessor/preprocessor14.c.output.got	2011-08-26 05:47:22.000000000 +0000
+  @@ -1,2 +1,2 @@
 
-The whole point of my patch was to make "make check" pinpoint
-*unexpected* breakage so that anyone who bothers to do "make check"
-on their patches can never cause regressions.
+  -
+  +,
+  info: test 'preprocessor/preprocessor14.c' is known to fail
+       TEST    static-forward-decl.c ( static forward declaration)
+  error: actual error text does not match expected error text.
+  error: see static-forward-decl.c.error.* for further investigation.
+  --- static-forward-decl.c.error.expected	2011-08-26 05:47:22.000000000 +0000
+  +++ static-forward-decl.c.error.got	2011-08-26 05:47:22.000000000 +0000
+  @@ -0,0 +1 @@
+  +static-forward-decl.c:3:5: warning: symbol 'f' was not declared. Should it be static?
+  info: test 'static-forward-decl.c' is known to fail
+       TEST    varargs1.c ( Varargs bogus warning regression test #1)
+  Out of 102 tests, 100 passed, 2 failed (2 of them are known to fail)
 
-                         Pekka
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ validation/test-suite |    4 +++-
+ 1 files changed, 3 insertions(+), 1 deletions(-)
+
+diff --git a/validation/test-suite b/validation/test-suite
+index 3c011c6..513d785 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -95,7 +95,7 @@ do_test()
+ 	fi
+ 	test_name=$last_result
+ 
+-	echo "     TEST    $test_name ($file)"
++	printf "\r     TEST    %-80s" "$file ($test_name)"
+ 
+ 	# does the test provide a specific command ?
+ 	cmd=`eval echo $default_path/$default_cmd`
+@@ -128,6 +128,7 @@ do_test()
+ 	for stream in output error; do
+ 		diff -u "$file".$stream.expected "$file".$stream.got > "$file".$stream.diff
+ 		if [ "$?" -ne "0" ]; then
++			echo ""
+ 			error "actual $stream text does not match expected $stream text."
+ 			error  "see $file.$stream.* for further investigation."
+ 			cat "$file".$stream.diff
+@@ -163,6 +164,7 @@ do_test_suite()
+ 
+ 	# prints some numbers
+ 	tests_nr=`expr $ok_tests + $ko_tests`
++	echo ""
+ 	echo -n "Out of $tests_nr tests, $ok_tests passed, $ko_tests failed"
+ 	echo " ($known_ko_tests of them are known to fail)"
+ 	if [ "$unhandled_tests" -ne "0" ]; then
+-- 
+1.7.4.1
+
