@@ -1,63 +1,88 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/5] sparse: Enable unhandled validation tests
-Date: Thu, 25 Aug 2011 20:42:54 -0700
-Message-ID: <CANeU7QkykP-5cfgtQvQ5Sa69uxSu9QBMkCxbLLytY7mK0h8dRg@mail.gmail.com>
+Subject: Re: [PATCH 4/5] sparse, i386: Fix boolean bit size
+Date: Thu, 25 Aug 2011 20:59:49 -0700
+Message-ID: <CANeU7QktGkA-u9x7FzDUosVjNfhYeNv0C9o0G9n=SmuivWeNpQ@mail.gmail.com>
 References: <1314021451-24808-1-git-send-email-penberg@kernel.org>
-	<1314021451-24808-2-git-send-email-penberg@kernel.org>
-	<CANeU7Q=xwx6TNA9PE_30=9i+KrCF0gRfXm2UPAXBpCg-7uncPg@mail.gmail.com>
-	<4E56243C.1070906@kernel.org>
+	<1314021451-24808-4-git-send-email-penberg@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:44599 "EHLO
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:55109 "EHLO
 	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751243Ab1HZDmy (ORCPT
+	with ESMTP id S1752059Ab1HZD7u convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Aug 2011 23:42:54 -0400
-Received: by qwk3 with SMTP id 3so1749788qwk.19
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Aug 2011 20:42:54 -0700 (PDT)
-In-Reply-To: <4E56243C.1070906@kernel.org>
+	Thu, 25 Aug 2011 23:59:50 -0400
+Received: by qwk3 with SMTP id 3so1753396qwk.19
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Aug 2011 20:59:49 -0700 (PDT)
+In-Reply-To: <1314021451-24808-4-git-send-email-penberg@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Thu, Aug 25, 2011 at 3:30 AM, Pekka Enberg <penberg@kernel.org> wrote:
-> [PATCH 3/5] sparse: Fix __builtin_safe_p for pure and const functions
+On Mon, Aug 22, 2011 at 6:57 AM, Pekka Enberg <penberg@kernel.org> wrot=
+e:
+> The value of 'ctype->bit_size' is set to 1 for booleans which confuse=
+s the i386
+> backend:
+>
+> =A0./compile allocate.c
+> =A0compile: compile-i386.c:1406: emit_binop: Assertion `0' failed.
+> =A0Aborted
+>
+> Looking at the code, we assume that "bit_size / 8" gives a sane resul=
+t on
+> various places. This patch fixes the problem by bumping bit_size to 8=
+ for
+> booleans. This also makes sizeof(_Bool) return 1 which is consistent =
+with what
+> GCC 4.4.3, for example, does.
+>
+> diff --git a/target.c b/target.c
+> index 17b228a..6a535bc 100644
+> --- a/target.c
+> +++ b/target.c
+> @@ -14,7 +14,7 @@ int max_alignment =3D 16;
+> =A0/*
+> =A0* Integer data types
+> =A0*/
+> -int bits_in_bool =3D 1;
+> +int bits_in_bool =3D 8;
 
-My fault. I have been travelling with limited Internet access.
+I object this part. I consider the sizeof(_Bool) =3D=3D 1 as external b=
+ehaviour.
+But internally we should know that the real useful part of bool is in j=
+ust one
+bit, not any bit of that  1 byte storage.
 
-Nothing serious wrong in this patch. This patch is much harder than the
-other minor fix ups. So good progress on your sparse hacking.
+Allowing _Bool to be addressable is a separate issue. I consider those
+rest of 7 bit as paddings. Not the useful part of _Bool.
 
-There are two things I am considering and I am try some simple modifications,
-which did not go very far yet.
-1) It would be better not adding the attribute bits into the modifiers.
-   We have been moving the attribute bits out of the modifiers.
-   For very simple reason, it the modifier has very limited number of bits.
-   We need better infrastructure support from storing attribute in general
-   any way.
+> =A0int bits_in_char =3D 8;
+> =A0int bits_in_short =3D 16;
+> =A0int bits_in_int =3D 32;
+> diff --git a/validation/sizeof-bool.c b/validation/sizeof-bool.c
+> index 6c68748..31b0585 100644
+> --- a/validation/sizeof-bool.c
+> +++ b/validation/sizeof-bool.c
+> @@ -4,9 +4,6 @@ static int a(void)
+> =A0}
+> =A0/*
+> =A0* check-name: sizeof(_Bool) is valid
+> - * check-description: sizeof(_Bool) was rejected because _Bool is no=
+t an even
+> - * number of bytes
+> =A0* check-error-start
+> -sizeof-bool.c:3:16: warning: expression using sizeof bool
+> =A0* check-error-end
+> =A0*/
 
-   On the other hand, there are a few other attribute bits are done it the
-   same way so that is not your fault. Not adding to the modifier bits is
-   a much bigger change.
-
-2) The expand_symbol_call(), it return early if the pure bit is set.
-    That might have unwanted side effect if the pure attribute is combine
-    with the symbol that require expand. e.g. If some one apply pure attribute
-    to symbol __builtin_const_p (I agree it is silly BTW), then
-__buildin_const_p
-    will not expand properly. I would move the return statement a few
-lines below
-
-Over all I am tempting to just apply it and fix the rest when we clean up
-the attribute bits.
-
-Actually, I just did that. Push to the chrisl repository, you can check if that
-works for you or not.
-
-> [PATCH 4/5] sparse, i386: Fix boolean bit size
-
-I will reply in the original email.
+We should just fix the validation.
 
 Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
