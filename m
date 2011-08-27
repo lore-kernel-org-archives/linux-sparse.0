@@ -1,18 +1,18 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH 2/3] Make 'linearize_switch()' helper function
-Date: Sat, 27 Aug 2011 14:27:45 -0700 (PDT)
-Message-ID: <alpine.LFD.2.02.1108271427260.18733@i5.linux-foundation.org>
+Subject: [PATCH 3/3] Make 'linearize_return()' helper function
+Date: Sat, 27 Aug 2011 14:28:51 -0700 (PDT)
+Message-ID: <alpine.LFD.2.02.1108271427540.18733@i5.linux-foundation.org>
 References: <alpine.LFD.2.02.1108271424400.18733@i5.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:60269 "EHLO
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:64681 "EHLO
 	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751554Ab1H0V1t (ORCPT
+	with ESMTP id S1751554Ab1H0V2y (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 17:27:49 -0400
-Received: by mail-pz0-f42.google.com with SMTP id 37so6219152pzk.1
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 14:27:49 -0700 (PDT)
+	Sat, 27 Aug 2011 17:28:54 -0400
+Received: by pzk37 with SMTP id 37so6220437pzk.1
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 14:28:54 -0700 (PDT)
 In-Reply-To: <alpine.LFD.2.02.1108271424400.18733@i5.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -21,151 +21,88 @@ Cc: Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
 
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sat, 27 Aug 2011 11:41:35 -0700
-Subject: [PATCH 2/3] Make 'linearize_switch()' helper function
+Date: Sat, 27 Aug 2011 11:43:24 -0700
+Subject: [PATCH 3/3] Make 'linearize_return()' helper function
 
 Rather than do it in that huge 'linearize_statement()' function, split
-out the switch generation case.  Avoids one level of indentation, and
+out the return generation case.  Avoids one level of indentation, and
 makes for simpler and more straightforward functions.
 
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 ---
- linearize.c |  126 ++++++++++++++++++++++++++++++----------------------------
- 1 files changed, 65 insertions(+), 61 deletions(-)
+
+You'd think "return" is easily linearized, but it's actually not at all 
+trivial. Inline functions and all that..
+
+ linearize.c |   48 ++++++++++++++++++++++++++----------------------
+ 1 files changed, 26 insertions(+), 22 deletions(-)
 
 diff --git a/linearize.c b/linearize.c
-index 2decd5300859..e48854755b1e 100644
+index e48854755b1e..320972745d6d 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -1843,6 +1843,69 @@ static pseudo_t linearize_declaration(struct entrypoint *ep, struct statement *s
+@@ -1843,6 +1843,30 @@ static pseudo_t linearize_declaration(struct entrypoint *ep, struct statement *s
  	return VOID;
  }
  
-+static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
++static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
 +{
-+	struct symbol *sym;
-+	struct instruction *switch_ins;
-+	struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
-+	struct basic_block *active, *default_case;
-+	struct multijmp *jmp;
-+	pseudo_t pseudo;
-+
-+	pseudo = linearize_expression(ep, stmt->switch_expression);
-+
++	struct expression *expr = stmt->expression;
++	struct basic_block *bb_return = get_bound_block(ep, stmt->ret_target);
++	struct basic_block *active;
++	pseudo_t src = linearize_expression(ep, expr);
 +	active = ep->active;
-+	if (!bb_reachable(active))
-+		return VOID;
-+
-+	switch_ins = alloc_instruction(OP_SWITCH, 0);
-+	use_pseudo(switch_ins, pseudo, &switch_ins->cond);
-+	add_one_insn(ep, switch_ins);
-+	finish_block(ep);
-+
-+	default_case = NULL;
-+	FOR_EACH_PTR(stmt->switch_case->symbol_list, sym) {
-+		struct statement *case_stmt = sym->stmt;
-+		struct basic_block *bb_case = get_bound_block(ep, sym);
-+
-+		if (!case_stmt->case_expression) {
-+			default_case = bb_case;
-+			continue;
-+		} else {
-+			int begin, end;
-+
-+			begin = end = case_stmt->case_expression->value;
-+			if (case_stmt->case_to)
-+				end = case_stmt->case_to->value;
-+			if (begin > end)
-+				jmp = alloc_multijmp(bb_case, end, begin);
-+			else
-+				jmp = alloc_multijmp(bb_case, begin, end);
-+
++	if (active && src != &void_pseudo) {
++		struct instruction *phi_node = first_instruction(bb_return->insns);
++		pseudo_t phi;
++		if (!phi_node) {
++			phi_node = alloc_typed_instruction(OP_PHI, expr->ctype);
++			phi_node->target = alloc_pseudo(phi_node);
++			phi_node->bb = bb_return;
++			add_instruction(&bb_return->insns, phi_node);
 +		}
-+		add_multijmp(&switch_ins->multijmp_list, jmp);
-+		add_bb(&bb_case->parents, active);
-+		add_bb(&active->children, bb_case);
-+	} END_FOR_EACH_PTR(sym);
-+
-+	bind_label(stmt->switch_break, switch_end, stmt->pos);
-+
-+	/* And linearize the actual statement */
-+	linearize_statement(ep, stmt->switch_statement);
-+	set_activeblock(ep, switch_end);
-+
-+	if (!default_case)
-+		default_case = switch_end;
-+
-+	jmp = alloc_multijmp(default_case, 1, 0);
-+	add_multijmp(&switch_ins->multijmp_list, jmp);
-+	add_bb(&default_case->parents, active);
-+	add_bb(&active->children, default_case);
-+	sort_switch_cases(switch_ins);
-+
++		phi = alloc_phi(active, src, type_size(expr->ctype));
++		phi->ident = &return_ident;
++		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
++	}
++	add_goto(ep, bb_return);
 +	return VOID;
 +}
 +
- static pseudo_t linearize_iterator(struct entrypoint *ep, struct statement *stmt)
+ static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
  {
- 	struct statement  *pre_statement = stmt->iterator_pre_statement;
-@@ -2030,67 +2093,8 @@ pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt)
- 		break;
- 	}
+ 	struct symbol *sym;
+@@ -1980,28 +2004,8 @@ pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt)
+ 	case STMT_ASM:
+ 		return linearize_asm_statement(ep, stmt);
  
--	case STMT_SWITCH: {
--		struct symbol *sym;
--		struct instruction *switch_ins;
--		struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
--		struct basic_block *active, *default_case;
--		struct multijmp *jmp;
--		pseudo_t pseudo;
--
--		pseudo = linearize_expression(ep, stmt->switch_expression);
--
+-	case STMT_RETURN: {
+-		struct expression *expr = stmt->expression;
+-		struct basic_block *bb_return = get_bound_block(ep, stmt->ret_target);
+-		struct basic_block *active;
+-		pseudo_t src = linearize_expression(ep, expr);
 -		active = ep->active;
--		if (!bb_reachable(active))
--			break;
--
--		switch_ins = alloc_instruction(OP_SWITCH, 0);
--		use_pseudo(switch_ins, pseudo, &switch_ins->cond);
--		add_one_insn(ep, switch_ins);
--		finish_block(ep);
--
--		default_case = NULL;
--		FOR_EACH_PTR(stmt->switch_case->symbol_list, sym) {
--			struct statement *case_stmt = sym->stmt;
--			struct basic_block *bb_case = get_bound_block(ep, sym);
--
--			if (!case_stmt->case_expression) {
--				default_case = bb_case;
--				continue;
--			} else {
--				int begin, end;
--
--				begin = end = case_stmt->case_expression->value;
--				if (case_stmt->case_to)
--					end = case_stmt->case_to->value;
--				if (begin > end)
--					jmp = alloc_multijmp(bb_case, end, begin);
--				else
--					jmp = alloc_multijmp(bb_case, begin, end);
--
+-		if (active && src != &void_pseudo) {
+-			struct instruction *phi_node = first_instruction(bb_return->insns);
+-			pseudo_t phi;
+-			if (!phi_node) {
+-				phi_node = alloc_typed_instruction(OP_PHI, expr->ctype);
+-				phi_node->target = alloc_pseudo(phi_node);
+-				phi_node->bb = bb_return;
+-				add_instruction(&bb_return->insns, phi_node);
 -			}
--			add_multijmp(&switch_ins->multijmp_list, jmp);
--			add_bb(&bb_case->parents, active);
--			add_bb(&active->children, bb_case);
--		} END_FOR_EACH_PTR(sym);
--
--		bind_label(stmt->switch_break, switch_end, stmt->pos);
--
--		/* And linearize the actual statement */
--		linearize_statement(ep, stmt->switch_statement);
--		set_activeblock(ep, switch_end);
--
--		if (!default_case)
--			default_case = switch_end;
--
--		jmp = alloc_multijmp(default_case, 1, 0);
--		add_multijmp(&switch_ins->multijmp_list, jmp);
--		add_bb(&default_case->parents, active);
--		add_bb(&active->children, default_case);
--		sort_switch_cases(switch_ins);
+-			phi = alloc_phi(active, src, type_size(expr->ctype));
+-			phi->ident = &return_ident;
+-			use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
+-		}
+-		add_goto(ep, bb_return);
+-		return VOID;
+-	}
++	case STMT_RETURN:
++		return linearize_return(ep, stmt);
+ 
+ 	case STMT_CASE: {
+ 		add_label(ep, stmt->case_label);
+-- 
+1.7.6.409.ge7a85.dirty
+
