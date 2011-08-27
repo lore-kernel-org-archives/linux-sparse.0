@@ -1,101 +1,41 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: linearize bug?
-Date: Sat, 27 Aug 2011 10:13:37 -0700
-Message-ID: <CA+55aFyD7d3hNP4JJL+0yE3ZB-M-65iYT_ay0uH_i-wrBR49Ww@mail.gmail.com>
-References: <4E588EB8.80808@garzik.org> <4E590F22.6030800@garzik.org>
- <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com> <201108271854.40694.kdudka@redhat.com>
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: Re: [PATCH] sparse: Reduce 'test-suite' run output
+Date: Sat, 27 Aug 2011 20:17:59 +0200
+Message-ID: <20110827181759.GC15022@debian.debian>
+References: <1314366621-29361-1-git-send-email-penberg@kernel.org>
+ <CANeU7Q=xTrKKCkuB4_RcA7L=99=psZAWQiawqSLMMyOUK6E-jQ@mail.gmail.com>
+ <alpine.DEB.2.00.1108271112110.2570@localhost6.localdomain6>
+ <87sjomlwbj.fsf@blp.benpfaff.org>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=0016e648ad425451e604ab805f37
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:46446 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750939Ab1H0Rzx (ORCPT
+Received: from mailout-de.gmx.net ([213.165.64.22]:48356 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752206Ab1H0SSE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 13:55:53 -0400
-Received: from mail-ww0-f44.google.com (mail-ww0-f44.google.com [74.125.82.44])
-	(authenticated bits=0)
-	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7RHtpiT025882
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 10:55:52 -0700
-Received: by wwf5 with SMTP id 5so4489697wwf.1
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 10:55:50 -0700 (PDT)
-In-Reply-To: <201108271854.40694.kdudka@redhat.com>
+	Sat, 27 Aug 2011 14:18:04 -0400
+Content-Disposition: inline
+In-Reply-To: <87sjomlwbj.fsf@blp.benpfaff.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Jeff Garzik <jeff@garzik.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>
+To: blp@cs.stanford.edu
+Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
---0016e648ad425451e604ab805f37
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
+On Sat, Aug 27, 2011 at 08:15:44AM -0700, Ben Pfaff wrote:
+> Pekka Enberg <penberg@kernel.org> writes:
+> 
+> > On Fri, 26 Aug 2011, Christopher Li wrote:
+> >
+> >> On Fri, Aug 26, 2011 at 6:50 AM, Pekka Enberg <penberg@kernel.org> wrote:
+> >>> There's more than 100 tests in the validation test suite. That makes it
+> >>> cumbersome to notice test breakage in because the results don't fit on single
+> >>> page.
+> >>
+> >> Looks good in a terminal. But if the output is piped to a file, it will be hard
+> >> to read that file. We shouldn't do it for a non-terminal output.
+> >
+> > Right. How can I check if we're outputting to non-terminal?
+> 
+> test -t 1
 
-On Sat, Aug 27, 2011 at 9:54 AM, Kamil Dudka <kdudka@redhat.com> wrote:
->
-> It seems to break loops with no conditions. =A0The following piece of cod=
-e:
-
-Yeah, good catch.
-
-I think it would be nicer to just teach "linearize_cond_branch()" that
-an empty condition is the same thing as an unconditional branch, that
-seems to be the most straightforward approach.
-
-But your patch is fine too.
-
-                        Linus
-
---0016e648ad425451e604ab805f37
-Content-Type: text/x-patch; charset=US-ASCII; name="patch.diff"
-Content-Disposition: attachment; filename="patch.diff"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_gruumszl1
-
-IGNzZS5jICAgICAgIHwgICAgNyAtLS0tLS0tCiBsaW5lYXJpemUuYyB8ICAgMjMgKysrKysrKysr
-KysrLS0tLS0tLS0tLS0KIDIgZmlsZXMgY2hhbmdlZCwgMTIgaW5zZXJ0aW9ucygrKSwgMTggZGVs
-ZXRpb25zKC0pCgpkaWZmIC0tZ2l0IGEvY3NlLmMgYi9jc2UuYwppbmRleCAyYTE1NzQ1MzE5OTMu
-LjJhYWJiNjU3ODVmMCAxMDA2NDQKLS0tIGEvY3NlLmMKKysrIGIvY3NlLmMKQEAgLTMxNywxMyAr
-MzE3LDYgQEAgc3RhdGljIHN0cnVjdCBpbnN0cnVjdGlvbiAqIHRyeV90b19jc2Uoc3RydWN0IGVu
-dHJ5cG9pbnQgKmVwLCBzdHJ1Y3QgaW5zdHJ1Y3Rpb24KIAliMiA9IGkyLT5iYjsKIAogCS8qCi0J
-ICogUEhJLW5vZGVzIGRvIG5vdCBjYXJlIHdoZXJlIHRoZXkgYXJlIC0gdGhlIG9ubHkgdGhpbmcg
-dGhhdCBtYXR0ZXJzCi0JICogYXJlIHRoZSBQSEkgX3NvdXJjZXNfLgotCSAqLwotCWlmIChpMS0+
-b3Bjb2RlID09IE9QX1BISSkKLQkJcmV0dXJuIGNzZV9vbmVfaW5zdHJ1Y3Rpb24oaTEsIGkyKTsK
-LQotCS8qCiAJICogQ3VycmVudGx5IHdlIG9ubHkgaGFuZGxlIHRoZSB1bmludGVyZXN0aW5nIGRl
-Z2VuZXJhdGUgY2FzZSB3aGVyZQogCSAqIHRoZSBDU0UgaXMgaW5zaWRlIG9uZSBiYXNpYy1ibG9j
-ay4KIAkgKi8KZGlmZiAtLWdpdCBhL2xpbmVhcml6ZS5jIGIvbGluZWFyaXplLmMKaW5kZXggZjIw
-MzRjZTkzNTcyLi40YjQ5MTYzNDA4NTkgMTAwNjQ0Ci0tLSBhL2xpbmVhcml6ZS5jCisrKyBiL2xp
-bmVhcml6ZS5jCkBAIC0xNDE5LDkgKzE0MTksMTQgQEAgcHNldWRvX3QgbGluZWFyaXplX2NvbmRf
-YnJhbmNoKHN0cnVjdCBlbnRyeXBvaW50ICplcCwgc3RydWN0IGV4cHJlc3Npb24gKmV4cHIsIHMK
-IHsKIAlwc2V1ZG9fdCBjb25kOwogCi0JaWYgKCFleHByIHx8ICFiYl9yZWFjaGFibGUoZXAtPmFj
-dGl2ZSkpCisJaWYgKCFiYl9yZWFjaGFibGUoZXAtPmFjdGl2ZSkpCiAJCXJldHVybiBWT0lEOwog
-CisJaWYgKCFleHByKSB7CisJCWFkZF9nb3RvKGVwLCBiYl90cnVlKTsKKwkJcmV0dXJuIFZPSUQ7
-CisJfQorCiAJc3dpdGNoIChleHByLT50eXBlKSB7CiAKIAljYXNlIEVYUFJfU1RSSU5HOgpAQCAt
-MjA1NSwyMSArMjA2MCwxNSBAQCBwc2V1ZG9fdCBsaW5lYXJpemVfc3RhdGVtZW50KHN0cnVjdCBl
-bnRyeXBvaW50ICplcCwgc3RydWN0IHN0YXRlbWVudCAqc3RtdCkKIAkJc3RydWN0IHN0YXRlbWVu
-dCAgKnN0YXRlbWVudCA9IHN0bXQtPml0ZXJhdG9yX3N0YXRlbWVudDsKIAkJc3RydWN0IHN0YXRl
-bWVudCAgKnBvc3Rfc3RhdGVtZW50ID0gc3RtdC0+aXRlcmF0b3JfcG9zdF9zdGF0ZW1lbnQ7CiAJ
-CXN0cnVjdCBleHByZXNzaW9uICpwb3N0X2NvbmRpdGlvbiA9IHN0bXQtPml0ZXJhdG9yX3Bvc3Rf
-Y29uZGl0aW9uOwotCQlzdHJ1Y3QgYmFzaWNfYmxvY2sgKmxvb3BfdG9wLCAqbG9vcF9ib2R5LCAq
-bG9vcF9jb250aW51ZSwgKmxvb3BfZW5kOworCQlzdHJ1Y3QgYmFzaWNfYmxvY2sgKmxvb3BfYm9k
-eSwgKmxvb3BfY29udGludWUsICpsb29wX2VuZDsKIAogCQljb25jYXRfc3ltYm9sX2xpc3Qoc3Rt
-dC0+aXRlcmF0b3Jfc3ltcywgJmVwLT5zeW1zKTsKIAkJbGluZWFyaXplX3N0YXRlbWVudChlcCwg
-cHJlX3N0YXRlbWVudCk7CiAKLSAJCWxvb3BfYm9keSA9IGxvb3BfdG9wID0gYWxsb2NfYmFzaWNf
-YmxvY2soZXAsIHN0bXQtPnBvcyk7CisJCWxvb3BfYm9keSA9IGFsbG9jX2Jhc2ljX2Jsb2NrKGVw
-LCBzdG10LT5wb3MpOwogIAkJbG9vcF9jb250aW51ZSA9IGFsbG9jX2Jhc2ljX2Jsb2NrKGVwLCBz
-dG10LT5wb3MpOwogIAkJbG9vcF9lbmQgPSBhbGxvY19iYXNpY19ibG9jayhlcCwgc3RtdC0+cG9z
-KTsKICAKLQkJLyogQW4gZW1wdHkgcG9zdC1jb25kaXRpb24gbWVhbnMgdGhhdCBpdCdzIHRoZSBz
-YW1lIGFzIHRoZSBwcmUtY29uZGl0aW9uICovCi0JCWlmICghcG9zdF9jb25kaXRpb24pIHsKLQkJ
-CWxvb3BfdG9wID0gYWxsb2NfYmFzaWNfYmxvY2soZXAsIHN0bXQtPnBvcyk7Ci0JCQlzZXRfYWN0
-aXZlYmxvY2soZXAsIGxvb3BfdG9wKTsKLQkJfQotCiAJCWlmIChwcmVfY29uZGl0aW9uKSAKICAJ
-CQlsaW5lYXJpemVfY29uZF9icmFuY2goZXAsIHByZV9jb25kaXRpb24sIGxvb3BfYm9keSwgbG9v
-cF9lbmQpOwogCkBAIC0yMDgyLDEwICsyMDgxLDEyIEBAIHBzZXVkb190IGxpbmVhcml6ZV9zdGF0
-ZW1lbnQoc3RydWN0IGVudHJ5cG9pbnQgKmVwLCBzdHJ1Y3Qgc3RhdGVtZW50ICpzdG10KQogCiAJ
-CXNldF9hY3RpdmVibG9jayhlcCwgbG9vcF9jb250aW51ZSk7CiAJCWxpbmVhcml6ZV9zdGF0ZW1l
-bnQoZXAsIHBvc3Rfc3RhdGVtZW50KTsKKworCQkvKiBObyBwb3N0LWNvbmRpdGlvbiBtZWFucyB0
-aGF0IGl0J3MgdGhlIHNhbWUgYXMgdGhlIHByZS1jb25kaXRpb24gKi8KIAkJaWYgKCFwb3N0X2Nv
-bmRpdGlvbikKLQkJCWFkZF9nb3RvKGVwLCBsb29wX3RvcCk7CisJCQlsaW5lYXJpemVfY29uZF9i
-cmFuY2goZXAsIHByZV9jb25kaXRpb24sIGxvb3BfYm9keSwgbG9vcF9lbmQpOwogCQllbHNlCi0g
-CQkJbGluZWFyaXplX2NvbmRfYnJhbmNoKGVwLCBwb3N0X2NvbmRpdGlvbiwgbG9vcF90b3AsIGxv
-b3BfZW5kKTsKKwkJCWxpbmVhcml6ZV9jb25kX2JyYW5jaChlcCwgcG9zdF9jb25kaXRpb24sIGxv
-b3BfYm9keSwgbG9vcF9lbmQpOwogCQlzZXRfYWN0aXZlYmxvY2soZXAsIGxvb3BfZW5kKTsKIAkJ
-YnJlYWs7CiAJfQo=
---0016e648ad425451e604ab805f37--
+Okay, that's way better than my approach.
