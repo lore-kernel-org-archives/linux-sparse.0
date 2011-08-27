@@ -1,70 +1,77 @@
-From: Kamil Dudka <kdudka@redhat.com>
-Subject: Re: linearize bug?
-Date: Sat, 27 Aug 2011 13:34:17 +0200
-Message-ID: <201108271334.17659.kdudka@redhat.com>
-References: <4E588EB8.80808@garzik.org>
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: Re: [PATCH] sparse: Reduce 'test-suite' run output
+Date: Sat, 27 Aug 2011 13:39:59 +0200
+Message-ID: <20110827113959.GA15022@debian.debian>
+References: <1314366621-29361-1-git-send-email-penberg@kernel.org>
+ <CANeU7Q=xTrKKCkuB4_RcA7L=99=psZAWQiawqSLMMyOUK6E-jQ@mail.gmail.com>
+ <alpine.DEB.2.00.1108271112110.2570@localhost6.localdomain6>
 Mime-Version: 1.0
-Content-Type: text/plain;
-  charset="iso-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:1029 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751114Ab1H0Lhw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 07:37:52 -0400
-In-Reply-To: <4E588EB8.80808@garzik.org>
+Received: from mailout-de.gmx.net ([213.165.64.22]:40001 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751114Ab1H0LkD (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 27 Aug 2011 07:40:03 -0400
 Content-Disposition: inline
+In-Reply-To: <alpine.DEB.2.00.1108271112110.2570@localhost6.localdomain6>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jeff@garzik.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Saturday 27 August 2011 08:29:12 Jeff Garzik wrote:
-> While trying to implement loops in LLVM, the following testcase appears
-> to have some strange behavior:
->
-> int foo(int x)
-> {
-> 	int i;
->
-> 	for (i = 0; i < 10; i++)
-> 		x += 42;
->
-> 	return x;
-> }
->
-> when run through test-linearize produces
->
-> foo.c:1:5: warning: symbol 'foo' was not declared. Should it be static?
-> foo:
-> .L0x7f4c095ae010:
-> 	<entry-point>
-> 	phisrc.32   %phi2(x) <- %arg1
-> 	phisrc.32   %phi4(x) <- %arg1
-> 	phisrc.32   %phi7(i) <- $0
-> 	br          .L0x7f4c095ae150
->
-> .L0x7f4c095ae150:
-> 	phi.32      %r1(i) <- %phi7(i), %phi8(i)
-> 	setlt.32    %r2 <- %r1(i), $10
-> 	br          %r2, .L0x7f4c095ae060, .L0x7f4c095ae100
->
-> .L0x7f4c095ae060:
-> 	add.32      %r5 <- %r9, $42
-> 	phisrc.32   %phi3(x) <- %r5
-> 	phisrc.32   %phi5(x) <- %r5
-> 	add.32      %r8 <- %r1(i), $1
-> 	phisrc.32   %phi8(i) <- %r8
-> 	br          .L0x7f4c095ae150
->
-> .L0x7f4c095ae100:
-> 	phi.32      %r9 <- %phi2(x), %phi3(x)
-> 	ret.32      %r9
->
-> So...  WTF did %r9 come from, in the third basic block?
+On Sat, Aug 27, 2011 at 11:13:17AM +0300, Pekka Enberg wrote:
+> On Fri, 26 Aug 2011, Christopher Li wrote:
+>=20
+> >On Fri, Aug 26, 2011 at 6:50 AM, Pekka Enberg <penberg@kernel.org> w=
+rote:
+> >>There's more than 100 tests in the validation test suite. That make=
+s it
+> >>cumbersome to notice test breakage in because the results don't fit=
+ on single
+> >>page.
+> >
+> >Looks good in a terminal. But if the output is piped to a file, it w=
+ill be hard
+> >to read that file. We shouldn't do it for a non-terminal output.
+>=20
+> Right. How can I check if we're outputting to non-terminal?
 
-Two years ago I proposed a patch that I believe would solve your problem:
+You probably need a C helper, like this:
 
-https://patchwork.kernel.org/patch/40307/
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <errno.h>
 
-Kamil
+int main(int argc, char **argv)
+{
+	int fd, tmp;
+
+	if (argc < 2) {
+		printf("usage: %s fd\n", argv[0]);
+		return EXIT_FAILURE;
+	}
+
+	errno =3D 0;
+	fd =3D (int) strtol(argv[1], NULL, 10);
+	if (errno =3D=3D ERANGE) {
+		perror("bad fd");
+		return EXIT_FAILURE;
+	}
+
+	tmp =3D isatty(fd);
+	if (!tmp && errno =3D=3D EBADF)
+		perror("");
+
+	return tmp ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+HTH,
+	Jonathan Neusch=C3=A4fer
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
