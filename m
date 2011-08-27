@@ -1,18 +1,18 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH 1/3] Make 'linearize_iterator()' helper function
-Date: Sat, 27 Aug 2011 14:27:19 -0700 (PDT)
-Message-ID: <alpine.LFD.2.02.1108271426450.18733@i5.linux-foundation.org>
+Subject: [PATCH 2/3] Make 'linearize_switch()' helper function
+Date: Sat, 27 Aug 2011 14:27:45 -0700 (PDT)
+Message-ID: <alpine.LFD.2.02.1108271427260.18733@i5.linux-foundation.org>
 References: <alpine.LFD.2.02.1108271424400.18733@i5.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
 Received: from mail-pz0-f42.google.com ([209.85.210.42]:60269 "EHLO
 	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751608Ab1H0V1W (ORCPT
+	with ESMTP id S1751554Ab1H0V1t (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 17:27:22 -0400
-Received: by pzk37 with SMTP id 37so6219152pzk.1
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 14:27:22 -0700 (PDT)
+	Sat, 27 Aug 2011 17:27:49 -0400
+Received: by mail-pz0-f42.google.com with SMTP id 37so6219152pzk.1
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 14:27:49 -0700 (PDT)
 In-Reply-To: <alpine.LFD.2.02.1108271424400.18733@i5.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -21,103 +21,151 @@ Cc: Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
 
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sat, 27 Aug 2011 11:30:31 -0700
-Subject: [PATCH 1/3] Make 'linearize_iterator()' helper function
+Date: Sat, 27 Aug 2011 11:41:35 -0700
+Subject: [PATCH 2/3] Make 'linearize_switch()' helper function
 
 Rather than do it in that huge 'linearize_statement()' function, split
-out the iterator case.  Avoids one level of indentation, and makes for
-simpler and more straightforward functions.
+out the switch generation case.  Avoids one level of indentation, and
+makes for simpler and more straightforward functions.
 
 Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 ---
- linearize.c |   85 +++++++++++++++++++++++++++++++---------------------------
- 1 files changed, 45 insertions(+), 40 deletions(-)
+ linearize.c |  126 ++++++++++++++++++++++++++++++----------------------------
+ 1 files changed, 65 insertions(+), 61 deletions(-)
 
 diff --git a/linearize.c b/linearize.c
-index 1899978c1d08..2decd5300859 100644
+index 2decd5300859..e48854755b1e 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -1843,6 +1843,49 @@ static pseudo_t linearize_declaration(struct entrypoint *ep, struct statement *s
+@@ -1843,6 +1843,69 @@ static pseudo_t linearize_declaration(struct entrypoint *ep, struct statement *s
  	return VOID;
  }
  
-+static pseudo_t linearize_iterator(struct entrypoint *ep, struct statement *stmt)
++static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
 +{
-+	struct statement  *pre_statement = stmt->iterator_pre_statement;
-+	struct expression *pre_condition = stmt->iterator_pre_condition;
-+	struct statement  *statement = stmt->iterator_statement;
-+	struct statement  *post_statement = stmt->iterator_post_statement;
-+	struct expression *post_condition = stmt->iterator_post_condition;
-+	struct basic_block *loop_top, *loop_body, *loop_continue, *loop_end;
++	struct symbol *sym;
++	struct instruction *switch_ins;
++	struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
++	struct basic_block *active, *default_case;
++	struct multijmp *jmp;
++	pseudo_t pseudo;
 +
-+	concat_symbol_list(stmt->iterator_syms, &ep->syms);
-+	linearize_statement(ep, pre_statement);
++	pseudo = linearize_expression(ep, stmt->switch_expression);
 +
-+	loop_body = loop_top = alloc_basic_block(ep, stmt->pos);
-+	loop_continue = alloc_basic_block(ep, stmt->pos);
-+	loop_end = alloc_basic_block(ep, stmt->pos);
++	active = ep->active;
++	if (!bb_reachable(active))
++		return VOID;
 +
-+	/* An empty post-condition means that it's the same as the pre-condition */
-+	if (!post_condition) {
-+		loop_top = alloc_basic_block(ep, stmt->pos);
-+		set_activeblock(ep, loop_top);
-+	}
++	switch_ins = alloc_instruction(OP_SWITCH, 0);
++	use_pseudo(switch_ins, pseudo, &switch_ins->cond);
++	add_one_insn(ep, switch_ins);
++	finish_block(ep);
 +
-+	if (pre_condition)
-+			linearize_cond_branch(ep, pre_condition, loop_body, loop_end);
++	default_case = NULL;
++	FOR_EACH_PTR(stmt->switch_case->symbol_list, sym) {
++		struct statement *case_stmt = sym->stmt;
++		struct basic_block *bb_case = get_bound_block(ep, sym);
 +
-+	bind_label(stmt->iterator_continue, loop_continue, stmt->pos);
-+	bind_label(stmt->iterator_break, loop_end, stmt->pos);
++		if (!case_stmt->case_expression) {
++			default_case = bb_case;
++			continue;
++		} else {
++			int begin, end;
 +
-+	set_activeblock(ep, loop_body);
-+	linearize_statement(ep, statement);
-+	add_goto(ep, loop_continue);
++			begin = end = case_stmt->case_expression->value;
++			if (case_stmt->case_to)
++				end = case_stmt->case_to->value;
++			if (begin > end)
++				jmp = alloc_multijmp(bb_case, end, begin);
++			else
++				jmp = alloc_multijmp(bb_case, begin, end);
 +
-+	set_activeblock(ep, loop_continue);
-+	linearize_statement(ep, post_statement);
-+	if (!post_condition)
-+		add_goto(ep, loop_top);
-+	else
-+		linearize_cond_branch(ep, post_condition, loop_top, loop_end);
-+	set_activeblock(ep, loop_end);
++		}
++		add_multijmp(&switch_ins->multijmp_list, jmp);
++		add_bb(&bb_case->parents, active);
++		add_bb(&active->children, bb_case);
++	} END_FOR_EACH_PTR(sym);
++
++	bind_label(stmt->switch_break, switch_end, stmt->pos);
++
++	/* And linearize the actual statement */
++	linearize_statement(ep, stmt->switch_statement);
++	set_activeblock(ep, switch_end);
++
++	if (!default_case)
++		default_case = switch_end;
++
++	jmp = alloc_multijmp(default_case, 1, 0);
++	add_multijmp(&switch_ins->multijmp_list, jmp);
++	add_bb(&default_case->parents, active);
++	add_bb(&active->children, default_case);
++	sort_switch_cases(switch_ins);
 +
 +	return VOID;
 +}
 +
- pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt)
+ static pseudo_t linearize_iterator(struct entrypoint *ep, struct statement *stmt)
  {
- 	struct basic_block *bb;
-@@ -2049,46 +2092,8 @@ pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt)
+ 	struct statement  *pre_statement = stmt->iterator_pre_statement;
+@@ -2030,67 +2093,8 @@ pseudo_t linearize_statement(struct entrypoint *ep, struct statement *stmt)
  		break;
  	}
  
--	case STMT_ITERATOR: {
--		struct statement  *pre_statement = stmt->iterator_pre_statement;
--		struct expression *pre_condition = stmt->iterator_pre_condition;
--		struct statement  *statement = stmt->iterator_statement;
--		struct statement  *post_statement = stmt->iterator_post_statement;
--		struct expression *post_condition = stmt->iterator_post_condition;
--		struct basic_block *loop_top, *loop_body, *loop_continue, *loop_end;
+-	case STMT_SWITCH: {
+-		struct symbol *sym;
+-		struct instruction *switch_ins;
+-		struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
+-		struct basic_block *active, *default_case;
+-		struct multijmp *jmp;
+-		pseudo_t pseudo;
 -
--		concat_symbol_list(stmt->iterator_syms, &ep->syms);
--		linearize_statement(ep, pre_statement);
+-		pseudo = linearize_expression(ep, stmt->switch_expression);
 -
-- 		loop_body = loop_top = alloc_basic_block(ep, stmt->pos);
-- 		loop_continue = alloc_basic_block(ep, stmt->pos);
-- 		loop_end = alloc_basic_block(ep, stmt->pos);
-- 
--		/* An empty post-condition means that it's the same as the pre-condition */
--		if (!post_condition) {
--			loop_top = alloc_basic_block(ep, stmt->pos);
--			set_activeblock(ep, loop_top);
--		}
+-		active = ep->active;
+-		if (!bb_reachable(active))
+-			break;
 -
--		if (pre_condition) 
-- 			linearize_cond_branch(ep, pre_condition, loop_body, loop_end);
+-		switch_ins = alloc_instruction(OP_SWITCH, 0);
+-		use_pseudo(switch_ins, pseudo, &switch_ins->cond);
+-		add_one_insn(ep, switch_ins);
+-		finish_block(ep);
 -
--		bind_label(stmt->iterator_continue, loop_continue, stmt->pos);
--		bind_label(stmt->iterator_break, loop_end, stmt->pos);
+-		default_case = NULL;
+-		FOR_EACH_PTR(stmt->switch_case->symbol_list, sym) {
+-			struct statement *case_stmt = sym->stmt;
+-			struct basic_block *bb_case = get_bound_block(ep, sym);
 -
--		set_activeblock(ep, loop_body);
--		linearize_statement(ep, statement);
--		add_goto(ep, loop_continue);
+-			if (!case_stmt->case_expression) {
+-				default_case = bb_case;
+-				continue;
+-			} else {
+-				int begin, end;
+-
+-				begin = end = case_stmt->case_expression->value;
+-				if (case_stmt->case_to)
+-					end = case_stmt->case_to->value;
+-				if (begin > end)
+-					jmp = alloc_multijmp(bb_case, end, begin);
+-				else
+-					jmp = alloc_multijmp(bb_case, begin, end);
+-
+-			}
+-			add_multijmp(&switch_ins->multijmp_list, jmp);
+-			add_bb(&bb_case->parents, active);
+-			add_bb(&active->children, bb_case);
+-		} END_FOR_EACH_PTR(sym);
+-
+-		bind_label(stmt->switch_break, switch_end, stmt->pos);
+-
+-		/* And linearize the actual statement */
+-		linearize_statement(ep, stmt->switch_statement);
+-		set_activeblock(ep, switch_end);
+-
+-		if (!default_case)
+-			default_case = switch_end;
+-
+-		jmp = alloc_multijmp(default_case, 1, 0);
+-		add_multijmp(&switch_ins->multijmp_list, jmp);
+-		add_bb(&default_case->parents, active);
+-		add_bb(&active->children, default_case);
+-		sort_switch_cases(switch_ins);
