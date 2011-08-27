@@ -1,69 +1,70 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [PATCH 1/5] sparse: Show expected vs. actual output on test
- failure
-Date: Sat, 27 Aug 2011 11:24:48 +0300 (EEST)
-Message-ID: <alpine.DEB.2.00.1108271120160.2570@localhost6.localdomain6>
-References: <1314021451-24808-1-git-send-email-penberg@kernel.org> <4E576300.2070609@kernel.org> <CANeU7QmRy+M92U-eTjrgtJRuR9M5fUZUgHofQDm8GjwMMbQong@mail.gmail.com>
+From: Kamil Dudka <kdudka@redhat.com>
+Subject: Re: linearize bug?
+Date: Sat, 27 Aug 2011 13:34:17 +0200
+Message-ID: <201108271334.17659.kdudka@redhat.com>
+References: <4E588EB8.80808@garzik.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
+Content-Type: text/plain;
+  charset="iso-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:61333 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065Ab1H0IYw (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 04:24:52 -0400
-Received: by bke11 with SMTP id 11so3057128bke.19
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 01:24:51 -0700 (PDT)
-In-Reply-To: <CANeU7QmRy+M92U-eTjrgtJRuR9M5fUZUgHofQDm8GjwMMbQong@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:1029 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751114Ab1H0Lhw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 27 Aug 2011 07:37:52 -0400
+In-Reply-To: <4E588EB8.80808@garzik.org>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Jeff Garzik <jeff@garzik.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, 26 Aug 2011, Christopher Li wrote:
->> Your patch now makes the runner verbose for "known to fail" tests
->> which is definitely not something we should do. If someone tagged
->> the test as "known to fail", we should treat it just like we treat
->> passed test cases.
+On Saturday 27 August 2011 08:29:12 Jeff Garzik wrote:
+> While trying to implement loops in LLVM, the following testcase appears
+> to have some strange behavior:
 >
-> That is intentional. I haven't seen you reply on my comment so I take
-> the liberty to change it. I do want to see the "known to fail" test
-> case.
-
-Sorry about that. I somehow missed the email.
-
->> The whole point of my patch was to make "make check" pinpoint
->> *unexpected* breakage so that anyone who bothers to do "make check"
->> on their patches can never cause regressions.
+> int foo(int x)
+> {
+> 	int i;
 >
-> How to you know your new patch did not break "known to fail" test
-> case in a different way than originally? It could be regression as well.
+> 	for (i = 0; i < 10; i++)
+> 		x += 42;
+>
+> 	return x;
+> }
+>
+> when run through test-linearize produces
+>
+> foo.c:1:5: warning: symbol 'foo' was not declared. Should it be static?
+> foo:
+> .L0x7f4c095ae010:
+> 	<entry-point>
+> 	phisrc.32   %phi2(x) <- %arg1
+> 	phisrc.32   %phi4(x) <- %arg1
+> 	phisrc.32   %phi7(i) <- $0
+> 	br          .L0x7f4c095ae150
+>
+> .L0x7f4c095ae150:
+> 	phi.32      %r1(i) <- %phi7(i), %phi8(i)
+> 	setlt.32    %r2 <- %r1(i), $10
+> 	br          %r2, .L0x7f4c095ae060, .L0x7f4c095ae100
+>
+> .L0x7f4c095ae060:
+> 	add.32      %r5 <- %r9, $42
+> 	phisrc.32   %phi3(x) <- %r5
+> 	phisrc.32   %phi5(x) <- %r5
+> 	add.32      %r8 <- %r1(i), $1
+> 	phisrc.32   %phi8(i) <- %r8
+> 	br          .L0x7f4c095ae150
+>
+> .L0x7f4c095ae100:
+> 	phi.32      %r9 <- %phi2(x), %phi3(x)
+> 	ret.32      %r9
+>
+> So...  WTF did %r9 come from, in the third basic block?
 
-I think that's irrelevant, really. I happen to think it's completely 
-pointless to even run test cases that are "known to fail" because it 
-creates confusion and adds little value.
+Two years ago I proposed a patch that I believe would solve your problem:
 
-And if we really care that a "known to fail" test case fails in a certain 
-way, we can turn it into a "known _not_ to fail" and assert the exact 
-failure case.
+https://patchwork.kernel.org/patch/40307/
 
-> You can diff the aggregate output of "make check" before and after
-> the new patch to see if the new patch affect any test case at all.
-> That is better than blindly skip the "known to fail" test case.
-
-No, that doesn't scale at all if you run "make check" every few minutes 
-like I do.
-
-> Yes, I have a different usage case in mind. I want to look at what currently
-> breaks. In the long run, hopefully we fix all the known issues so this
-> wouldn't be any issue at all.
-
-Agreed.
-
-> You can submit a patch to add a config for it if you are so insist on
-> the "I don't care about already broken test cases" usage case.
-> To me, diff the "make check" output is straightly better.
-
-OK, a flag would definitely work for me.
-
- 			Pekka
+Kamil
