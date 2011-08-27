@@ -1,87 +1,57 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: [PATCH] sparse: Reduce 'test-suite' run output
-Date: Fri, 26 Aug 2011 16:50:21 +0300
-Message-ID: <1314366621-29361-1-git-send-email-penberg@kernel.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/5] sparse: Show expected vs. actual output on test failure
+Date: Fri, 26 Aug 2011 18:58:30 -0700
+Message-ID: <CANeU7QmRy+M92U-eTjrgtJRuR9M5fUZUgHofQDm8GjwMMbQong@mail.gmail.com>
+References: <1314021451-24808-1-git-send-email-penberg@kernel.org>
+	<4E576300.2070609@kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from filtteri5.pp.htv.fi ([213.243.153.188]:47337 "EHLO
-	filtteri5.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752883Ab1HZNuZ (ORCPT
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:59234 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750919Ab1H0B6b (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Aug 2011 09:50:25 -0400
+	Fri, 26 Aug 2011 21:58:31 -0400
+Received: by qwk3 with SMTP id 3so2375954qwk.19
+        for <linux-sparse@vger.kernel.org>; Fri, 26 Aug 2011 18:58:31 -0700 (PDT)
+In-Reply-To: <4E576300.2070609@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-There's more than 100 tests in the validation test suite. That makes it
-cumbersome to notice test breakage in because the results don't fit on single
-page.
+On Fri, Aug 26, 2011 at 2:10 AM, Pekka Enberg <penberg@kernel.org> wrote:
+> Chris, the patch you committed is different from mine:
+>
+> http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=commitdiff;h=a7a00d5108c36b8baaf54814aa1f42583dabc754
+>
+> Your patch now makes the runner verbose for "known to fail" tests
+> which is definitely not something we should do. If someone tagged
+> the test as "known to fail", we should treat it just like we treat
+> passed test cases.
 
-We don't expect to see most tests to pass so it's much more convenient to
-only be verbose for failing test cases. This patch changes the
-'test-suite' output to report progress on a single line unless a test case
-fails.
+That is intentional. I haven't seen you reply on my comment so I take
+the liberty to change it. I do want to see the "known to fail" test
+case.
 
-Current master 'make check' output looks as follows:
+>
+> The whole point of my patch was to make "make check" pinpoint
+> *unexpected* breakage so that anyone who bothers to do "make check"
+> on their patches can never cause regressions.
 
-  Makefile:53: Your system does not have libxml, disabling c2xml
-       TEST    preprocessor/preprocessor14.c ( Preprocessor #14)
-  error: actual output text does not match expected output text.
-  error: see preprocessor/preprocessor14.c.output.* for further investigation.
-  --- preprocessor/preprocessor14.c.output.expected	2011-08-26 05:47:22.000000000 +0000
-  +++ preprocessor/preprocessor14.c.output.got	2011-08-26 05:47:22.000000000 +0000
-  @@ -1,2 +1,2 @@
+How to you know your new patch did not break "known to fail" test
+case in a different way than originally? It could be regression as well.
 
-  -
-  +,
-  info: test 'preprocessor/preprocessor14.c' is known to fail
-       TEST    static-forward-decl.c ( static forward declaration)
-  error: actual error text does not match expected error text.
-  error: see static-forward-decl.c.error.* for further investigation.
-  --- static-forward-decl.c.error.expected	2011-08-26 05:47:22.000000000 +0000
-  +++ static-forward-decl.c.error.got	2011-08-26 05:47:22.000000000 +0000
-  @@ -0,0 +1 @@
-  +static-forward-decl.c:3:5: warning: symbol 'f' was not declared. Should it be static?
-  info: test 'static-forward-decl.c' is known to fail
-       TEST    varargs1.c ( Varargs bogus warning regression test #1)
-  Out of 102 tests, 100 passed, 2 failed (2 of them are known to fail)
+You can diff the aggregate output of "make check" before and after
+the new patch to see if the new patch affect any test case at all.
+That is better than blindly skip the "known to fail" test case.
 
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Pekka Enberg <penberg@kernel.org>
----
- validation/test-suite |    4 +++-
- 1 files changed, 3 insertions(+), 1 deletions(-)
+Yes, I have a different usage case in mind. I want to look at what currently
+breaks. In the long run, hopefully we fix all the known issues so this
+wouldn't be any issue at all.
 
-diff --git a/validation/test-suite b/validation/test-suite
-index 3c011c6..513d785 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -95,7 +95,7 @@ do_test()
- 	fi
- 	test_name=$last_result
- 
--	echo "     TEST    $test_name ($file)"
-+	printf "\r     TEST    %-80s" "$file ($test_name)"
- 
- 	# does the test provide a specific command ?
- 	cmd=`eval echo $default_path/$default_cmd`
-@@ -128,6 +128,7 @@ do_test()
- 	for stream in output error; do
- 		diff -u "$file".$stream.expected "$file".$stream.got > "$file".$stream.diff
- 		if [ "$?" -ne "0" ]; then
-+			echo ""
- 			error "actual $stream text does not match expected $stream text."
- 			error  "see $file.$stream.* for further investigation."
- 			cat "$file".$stream.diff
-@@ -163,6 +164,7 @@ do_test_suite()
- 
- 	# prints some numbers
- 	tests_nr=`expr $ok_tests + $ko_tests`
-+	echo ""
- 	echo -n "Out of $tests_nr tests, $ok_tests passed, $ko_tests failed"
- 	echo " ($known_ko_tests of them are known to fail)"
- 	if [ "$unhandled_tests" -ne "0" ]; then
--- 
-1.7.4.1
+You can submit a patch to add a config for it if you are so insist on
+the "I don't care about already broken test cases" usage case.
+To me, diff the "make check" output is straightly better.
 
+Chris
