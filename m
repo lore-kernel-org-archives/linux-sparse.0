@@ -1,55 +1,56 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Jeff Garzik <jeff@garzik.org>
 Subject: Re: linearize bug?
-Date: Sat, 27 Aug 2011 12:26:17 -0700
-Message-ID: <CA+55aFyBvAOVXevPhRC2+LgFJR4SNxqYZ2X36kW+Z0rpb=s1mQ@mail.gmail.com>
-References: <4E588EB8.80808@garzik.org> <4E590F22.6030800@garzik.org>
- <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com>
- <201108271854.40694.kdudka@redhat.com> <CA+55aFyD7d3hNP4JJL+0yE3ZB-M-65iYT_ay0uH_i-wrBR49Ww@mail.gmail.com>
- <CA+55aFxK95i6AaDhgEteFsL8W_jRkxY93FQ-Z6FVJXix1g5DkA@mail.gmail.com>
+Date: Sat, 27 Aug 2011 16:03:54 -0400
+Message-ID: <4E594DAA.8060401@garzik.org>
+References: <4E588EB8.80808@garzik.org> <201108271334.17659.kdudka@redhat.com> <CA+55aFzGViNgNO8rkv1kT8TZBXNWoJ8kMDHFormT_EzK3LGvZQ@mail.gmail.com> <4E590F22.6030800@garzik.org> <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:42186 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751216Ab1H0T0j (ORCPT
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:41487 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751511Ab1H0UD5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 15:26:39 -0400
-Received: from mail-wy0-f174.google.com (mail-wy0-f174.google.com [74.125.82.174])
-	(authenticated bits=0)
-	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7RJQbGH032157
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 12:26:38 -0700
-Received: by wyg24 with SMTP id 24so3199572wyg.19
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 12:26:37 -0700 (PDT)
-In-Reply-To: <CA+55aFxK95i6AaDhgEteFsL8W_jRkxY93FQ-Z6FVJXix1g5DkA@mail.gmail.com>
+	Sat, 27 Aug 2011 16:03:57 -0400
+Received: by qwk3 with SMTP id 3so2613194qwk.19
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 13:03:57 -0700 (PDT)
+In-Reply-To: <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Jeff Garzik <jeff@garzik.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Kamil Dudka <kdudka@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>
 
-On Sat, Aug 27, 2011 at 10:27 AM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
+On 08/27/2011 11:53 AM, Linus Torvalds wrote:
+> On Sat, Aug 27, 2011 at 8:37 AM, Jeff Garzik<jeff@garzik.org>  wrote:
+>>
+>> On our point of view, we probably prefer to simply turn off as many
+>> transformations as possible.  They just waste time, when an optimizing LLVM
+>> backend is going to perform the same transformations anyway.
 >
-> Which *should* have been semantically no difference what-so-ever. But
-> it's been so long, I can't recall all the rules. It may be that trying
-> to linearize the same expression twice (once for the entry condition,
-> once for the loop end) was just something invalid.
+> I disagree - mainly because I don't think we're interested in the back
+> end, are we?
 >
-> So the patch is just broken. Never mind.
+> If we were doing LLVM hacking, then I'd agree. But as it is, we're
+> supposed to improve sparse, not LLVM, so we should make sure that the
+> _sparse_ output makes sense, and LLVM is just a code generator, no?
 
-Yes indeed.
+No idea Pekka's interest...
 
-The reason we cannot linearize the same expression twice is that we
-associate some state with the expression. For example, label symbols
-in statement expressions are associated with the basic block they get
-linearized to. If you linearize the same expression twice, that kind
-of thing will completely screw things up..
+In general, my own decade-long goal has been to be able to play with a 
+kernel compiler other than gcc.  That's why I wrote compile-i386 so long 
+ago, that's why the kernel got a bunch of LLVM-related bug fixes and C 
+cleanups, that's why I wrote the original sparse LLVM backend[1], and 
+why I'm working on Pekka's now.
 
-So throw away my patch to linearize.c. It was fundamentally broken. I
-suspect we don't want to duplicate the conditional for anything but
-simple expressions anyway, so if I get a big spurt of energy, I might
-add some logic to say "if it's a really simple conditional, then
-duplicate it", since then we won't have issues with statement
-expressions etc anyway.
+So I'm definitely more interested in the backend side of things, and 
+tend to see simplifications and optimizations performed on the 
+linearized form as wasted work.  sparse makes a great C front-end to a 
+compiler.
 
-                    Linus
+Obviously that's not the only PoV or use case of sparse, and is arguably 
+a crazy, unattainable goal in general... :)
+
+	Jeff
+
+
+[1] https://patchwork.kernel.org/patch/19923/
