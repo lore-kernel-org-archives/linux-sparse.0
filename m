@@ -1,43 +1,49 @@
-From: blp@cs.stanford.edu (Ben Pfaff)
-Subject: Re: [PATCH] sparse: Reduce 'test-suite' run output
-Date: Sat, 27 Aug 2011 08:15:44 -0700
-Message-ID: <87sjomlwbj.fsf@blp.benpfaff.org>
-References: <1314366621-29361-1-git-send-email-penberg@kernel.org>
-	<CANeU7Q=xTrKKCkuB4_RcA7L=99=psZAWQiawqSLMMyOUK6E-jQ@mail.gmail.com>
-	<alpine.DEB.2.00.1108271112110.2570@localhost6.localdomain6>
-Reply-To: blp@cs.stanford.edu
+From: Jeff Garzik <jeff@garzik.org>
+Subject: Re: linearize bug?
+Date: Sat, 27 Aug 2011 11:37:06 -0400
+Message-ID: <4E590F22.6030800@garzik.org>
+References: <4E588EB8.80808@garzik.org> <201108271334.17659.kdudka@redhat.com> <CA+55aFzGViNgNO8rkv1kT8TZBXNWoJ8kMDHFormT_EzK3LGvZQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from outmail148154.authsmtp.co.uk ([62.13.148.154]:56821 "EHLO
-	outmail148154.authsmtp.co.uk" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750971Ab1H0PfT (ORCPT
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:59420 "EHLO
+	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750908Ab1H0PhI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 11:35:19 -0400
-Reply-to: blp@cs.stanford.edu
-In-Reply-To: <alpine.DEB.2.00.1108271112110.2570@localhost6.localdomain6>
-	(Pekka Enberg's message of "Sat, 27 Aug 2011 11:13:17 +0300 (EEST)")
+	Sat, 27 Aug 2011 11:37:08 -0400
+Received: by qwk3 with SMTP id 3so2548748qwk.19
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 08:37:07 -0700 (PDT)
+In-Reply-To: <CA+55aFzGViNgNO8rkv1kT8TZBXNWoJ8kMDHFormT_EzK3LGvZQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Kamil Dudka <kdudka@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>
 
-Pekka Enberg <penberg@kernel.org> writes:
-
-> On Fri, 26 Aug 2011, Christopher Li wrote:
->
->> On Fri, Aug 26, 2011 at 6:50 AM, Pekka Enberg <penberg@kernel.org> wrote:
->>> There's more than 100 tests in the validation test suite. That makes it
->>> cumbersome to notice test breakage in because the results don't fit on single
->>> page.
+On 08/27/2011 11:29 AM, Linus Torvalds wrote:
+> On Sat, Aug 27, 2011 at 4:34 AM, Kamil Dudka<kdudka@redhat.com>  wrote:
 >>
->> Looks good in a terminal. But if the output is piped to a file, it will be hard
->> to read that file. We shouldn't do it for a non-terminal output.
+>> Two years ago I proposed a patch that I believe would solve your problem:
+>>
+>> https://patchwork.kernel.org/patch/40307/
 >
-> Right. How can I check if we're outputting to non-terminal?
+> Ack.
+>
+> The sparse output still looks like sh*t, because when linearizing
+> loops sparse doesn't treat the first conditional specially, so instead
+> of noticing that "0<  10" and getting rid of the first jump, it will
+> generate the loop with the (general) conditional at the end, which
+> will then result in lots of phi-nodes etc.
+>
+> I guess some trivial loop optimizations might be a good idea. But
+> Kamil's patch looks correct, and the PHI-node cross-bb optimization
+> does look bogus.
 
-test -t 1
--- 
-"To the engineer, the world is a toy box full of sub-optimized and
- feature-poor toys."
---Scott Adams
+
+On our point of view, we probably prefer to simply turn off as many 
+transformations as possible.  They just waste time, when an optimizing 
+LLVM backend is going to perform the same transformations anyway.
+
+	Jeff
+
+
