@@ -1,46 +1,64 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] sparse: Reduce 'test-suite' run output
-Date: Fri, 26 Aug 2011 19:11:04 -0700
-Message-ID: <CANeU7Q=xTrKKCkuB4_RcA7L=99=psZAWQiawqSLMMyOUK6E-jQ@mail.gmail.com>
-References: <1314366621-29361-1-git-send-email-penberg@kernel.org>
+From: Jeff Garzik <jeff@garzik.org>
+Subject: linearize bug?
+Date: Sat, 27 Aug 2011 02:29:12 -0400
+Message-ID: <4E588EB8.80808@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qy0-f174.google.com ([209.85.216.174]:36375 "EHLO
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:44060 "EHLO
 	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750710Ab1H0CLG convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1750865Ab1H0G3P (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Aug 2011 22:11:06 -0400
-Received: by qyk38 with SMTP id 38so779844qyk.19
-        for <linux-sparse@vger.kernel.org>; Fri, 26 Aug 2011 19:11:05 -0700 (PDT)
-In-Reply-To: <1314366621-29361-1-git-send-email-penberg@kernel.org>
+	Sat, 27 Aug 2011 02:29:15 -0400
+Received: by qyk38 with SMTP id 38so833593qyk.19
+        for <linux-sparse@vger.kernel.org>; Fri, 26 Aug 2011 23:29:14 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Pekka J Enberg <penberg@cs.helsinki.fi>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, Aug 26, 2011 at 6:50 AM, Pekka Enberg <penberg@kernel.org> wrot=
-e:
-> There's more than 100 tests in the validation test suite. That makes =
-it
-> cumbersome to notice test breakage in because the results don't fit o=
-n single
-> page.
+While trying to implement loops in LLVM, the following testcase appears 
+to have some strange behavior:
 
-Looks good in a terminal. But if the output is piped to a file, it will=
- be hard
-to read that file. We shouldn't do it for a non-terminal output.
+int foo(int x)
+{
+	int i;
+
+	for (i = 0; i < 10; i++)
+		x += 42;
+	
+	return x;
+}
+
+when run through test-linearize produces
+
+foo.c:1:5: warning: symbol 'foo' was not declared. Should it be static?
+foo:
+.L0x7f4c095ae010:
+	<entry-point>
+	phisrc.32   %phi2(x) <- %arg1
+	phisrc.32   %phi4(x) <- %arg1
+	phisrc.32   %phi7(i) <- $0
+	br          .L0x7f4c095ae150
+
+.L0x7f4c095ae150:
+	phi.32      %r1(i) <- %phi7(i), %phi8(i)
+	setlt.32    %r2 <- %r1(i), $10
+	br          %r2, .L0x7f4c095ae060, .L0x7f4c095ae100
+
+.L0x7f4c095ae060:
+	add.32      %r5 <- %r9, $42
+	phisrc.32   %phi3(x) <- %r5
+	phisrc.32   %phi5(x) <- %r5
+	add.32      %r8 <- %r1(i), $1
+	phisrc.32   %phi8(i) <- %r8
+	br          .L0x7f4c095ae150
+
+.L0x7f4c095ae100:
+	phi.32      %r9 <- %phi2(x), %phi3(x)
+	ret.32      %r9
+
+So...  WTF did %r9 come from, in the third basic block?
 
 
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 echo ""
-
-Why not just "echo" instead. Without any argument, echo will just outpu=
-t "\n".
-
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
