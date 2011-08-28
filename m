@@ -1,61 +1,49 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: [ANNOUNCE] LLVM backend for Sparse
-Date: Sun, 28 Aug 2011 09:08:40 +0300 (EEST)
-Message-ID: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
+Subject: Re: linearize bug?
+Date: Sun, 28 Aug 2011 09:26:44 +0300
+Message-ID: <CAOJsxLERqAvGkJPdwSqw-MA9yvaGACVzPGMSmY51cH5v9cho+Q@mail.gmail.com>
+References: <4E588EB8.80808@garzik.org>
+	<201108271334.17659.kdudka@redhat.com>
+	<CA+55aFzGViNgNO8rkv1kT8TZBXNWoJ8kMDHFormT_EzK3LGvZQ@mail.gmail.com>
+	<4E590F22.6030800@garzik.org>
+	<CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com>
+	<4E594DAA.8060401@garzik.org>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; format=flowed; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:49025 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750778Ab1H1GJF (ORCPT
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:57780 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750922Ab1H1G0p (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 28 Aug 2011 02:09:05 -0400
-Received: by bke11 with SMTP id 11so3437456bke.19
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 23:09:03 -0700 (PDT)
+	Sun, 28 Aug 2011 02:26:45 -0400
+Received: by gxk21 with SMTP id 21so3985336gxk.19
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 23:26:45 -0700 (PDT)
+In-Reply-To: <4E594DAA.8060401@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
+To: Jeff Garzik <jeff@garzik.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Kamil Dudka <kdudka@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Hi everyone,
+On Sat, Aug 27, 2011 at 11:03 PM, Jeff Garzik <jeff@garzik.org> wrote:
+>> I disagree - mainly because I don't think we're interested in the back
+>> end, are we?
+>>
+>> If we were doing LLVM hacking, then I'd agree. But as it is, we're
+>> supposed to improve sparse, not LLVM, so we should make sure that the
+>> _sparse_ output makes sense, and LLVM is just a code generator, no?
+>
+> No idea Pekka's interest...
+>
+> In general, my own decade-long goal has been to be able to play with a
+> kernel compiler other than gcc.
 
-Jeff Garzik and myself have been hacking on LLVM backed for Sparse. The sources
-are available on Github:
+[snip]
 
-   git clone git://github.com/penberg/sparse-llvm.git
+I'm also interested in hopefully being able to eventually compile the
+kernel with sparse.
 
-You can use sparse-llvm with the 'sparsec' shells script provided in the source
-tree. It has a GCC compatible command line interface and uses GCC for linking.
-For example, you can try to build sparse with sparse-llvm like this:
+I'm not that interested in LLVM and really only picked it because it
+seems to be simplest solution for now. I do agree with Linus that we
+should improve sparse rather than rely on LLVM for everything.
 
-   make CC=sparsec
-
-Developers who are interested in looking at the LLVM output can use the
-'sparse-llvm' command as follows:
-
-   sparse-llvm foo.c | llvm-dis
-
-The backend is already capable of generating code for simple C code on various
-platforms. Supported C features include:
-
-   * Function calls
-
-   * Switch statements
-
-   * if-else statements
-
-   * Arithmetic operations
-
-   * Bitwise operations
-
-   * Floating point arithmetic
-
-There's many features that are not supported so if you see an error message
-such as this while compiling a C file:
-
-   sparse-llvm: sparse-llvm.c:165: pseudo_type: Assertion `0' failed.
-
-don't panic because it simply means you're attempting to use an unsupported
-feature. Help implementing them is more than welcome!
-
- 			Pekka
+                        Pekka
