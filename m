@@ -1,46 +1,37 @@
 From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 3/3] evaluate: warn on identical exprs on ?:
-Date: Sat, 27 Aug 2011 19:46:19 -0700
-Message-ID: <20110828024618.GA20823@leaf>
+Subject: Re: [PATCH 1/3] evaluate: warn on identical exprs around '&&'
+Date: Sat, 27 Aug 2011 19:50:10 -0700
+Message-ID: <20110828025010.GB20823@leaf>
 References: <1314484015-7694-1-git-send-email-chrisf@ijw.co.nz>
- <1314484015-7694-3-git-send-email-chrisf@ijw.co.nz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:59521 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750996Ab1H1Cq1 (ORCPT
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:56652 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751011Ab1H1CuQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 22:46:27 -0400
+	Sat, 27 Aug 2011 22:50:16 -0400
 Content-Disposition: inline
-In-Reply-To: <1314484015-7694-3-git-send-email-chrisf@ijw.co.nz>
+In-Reply-To: <1314484015-7694-1-git-send-email-chrisf@ijw.co.nz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Chris Forbes <chrisf@ijw.co.nz>
 Cc: linux-sparse@vger.kernel.org
 
-On Sun, Aug 28, 2011 at 10:26:55AM +1200, Chris Forbes wrote:
-> Adds a warning when identical expressions are found on both the true and false branches of ?:. This is another common copy-paste error.
+On Sun, Aug 28, 2011 at 10:26:53AM +1200, Chris Forbes wrote:
+> Adds a warning when identical expressions are found on both sides of the '&&' operator. This is a common error resulting from copy & paste.
+> 
+> Excludes identical expressions found while preprocessing, so we don't get upset about #if defined(FOO) && defined(BAR), which happens all the time, and is perfectly valid.
 > 
 > Signed-off-by: Chris Forbes <chrisf@ijw.co.nz>
-> ---
->  evaluate.c                                 |    8 +++++++-
->  validation/check_identical_exprs_on_cond.c |   13 +++++++++++++
->  2 files changed, 20 insertions(+), 1 deletions(-)
->  create mode 100644 validation/check_identical_exprs_on_cond.c
-> 
-> diff --git a/evaluate.c b/evaluate.c
-> index 11de7aa..c339e63 100644
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -898,7 +898,7 @@ static int expr_list_equiv(struct expression_list *lhs,
->  int expr_equiv(struct expression *lhs, struct expression *rhs)
->  {
->  	/* recursively determine if lhs ~ rhs. */
-> -	if (!lhs ^ !rhs) return 0;
-> +	if (!lhs || !rhs) return 0;
 
-You introduced this earlier in the same patch series.  This looks like
-it needs some patch cleanup.
+Very nice patch series!  I replied to patch 3 about a bit of patch cleanup, but otherwise this looks fine, and I've wanted to see this check for a while.
+
+Would you consider also checking for identical expresions on both sides
+of an &, |, or ^?  The former two seem like likely cases when composing
+flags, and the latter seems like a likely error as well.
+
+Also, how does your patch handle expressions like this: *x++ && *x++
+Or this: f() && f()
 
 - Josh Triplett
