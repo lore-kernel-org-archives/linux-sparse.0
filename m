@@ -1,47 +1,68 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [PATCH] cse: update PHI users when throwing away an instruction
-Date: Sun, 28 Aug 2011 09:33:14 +0300
-Message-ID: <CAOJsxLGWGL-zn-WxArEDRBKjB-DGmpztsugi176o3JiRC5fnXw@mail.gmail.com>
-References: <4E588EB8.80808@garzik.org>
-	<4E590F22.6030800@garzik.org>
-	<CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com>
-	<201108280139.59217.kdudka@redhat.com>
-	<CA+55aFwPLDZZAEfP8xdFwqG2MG_79mbN_TjNTGRvyRq=WPWcSQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 2/3] Make 'linearize_switch()' helper function
+Date: Sun, 28 Aug 2011 00:31:35 -0700
+Message-ID: <CANeU7Q=23KfP6LmdKFaM4yjobAsD-gx287BAnJu9JM-z_HL+Ag@mail.gmail.com>
+References: <alpine.LFD.2.02.1108271424400.18733@i5.linux-foundation.org>
+	<alpine.LFD.2.02.1108271427260.18733@i5.linux-foundation.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gx0-f174.google.com ([209.85.161.174]:46790 "EHLO
-	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751239Ab1H1GdP convert rfc822-to-8bit (ORCPT
+Received: from mail-qy0-f174.google.com ([209.85.216.174]:38624 "EHLO
+	mail-qy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750926Ab1H1Hbg convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 28 Aug 2011 02:33:15 -0400
-Received: by gxk21 with SMTP id 21so3986987gxk.19
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 23:33:15 -0700 (PDT)
-In-Reply-To: <CA+55aFwPLDZZAEfP8xdFwqG2MG_79mbN_TjNTGRvyRq=WPWcSQ@mail.gmail.com>
+	Sun, 28 Aug 2011 03:31:36 -0400
+Received: by qyk15 with SMTP id 15so305894qyk.19
+        for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 00:31:35 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.02.1108271427260.18733@i5.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Kamil Dudka <kdudka@redhat.com>, Jeff Garzik <jeff@garzik.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
-On Sat, Aug 27, 2011 at 4:39 PM, Kamil Dudka <kdudka@redhat.com> wrote:
->> The attached patch solves the dangling PHI nodes and does not seem t=
-o break
->> anything at first glance. =A0It is probably not the most efficient s=
-olution,
->> but it might at least show where to look for the problem.
-
-On Sun, Aug 28, 2011 at 3:34 AM, Linus Torvalds
+On Sat, Aug 27, 2011 at 2:27 PM, Linus Torvalds
 <torvalds@linux-foundation.org> wrote:
-> Hmm. From a quick look, looks fine to me. And checks the kernel, and
-> does indeed get rid of the extraneous phi nodes in the test-case.
 >
-> Ack.
+> From: Linus Torvalds <torvalds@linux-foundation.org>
+> Date: Sat, 27 Aug 2011 11:41:35 -0700
+> Subject: [PATCH 2/3] Make 'linearize_switch()' helper function
+>
+> Rather than do it in that huge 'linearize_statement()' function, spli=
+t
+> out the switch generation case. =A0Avoids one level of indentation, a=
+nd
+> makes for simpler and more straightforward functions.
 
-I applied both patches to sparse-llvm.git. Jeff, do they cure all loop
-related issues?
+I apply the series already.
 
-                        Pekka
+BTW, I want to mention this, the current implementation of linearize sw=
+itch
+statement is wrong. This is not about this patch. It is there at the ve=
+ry first
+linearization of switch statement.
+
+The current implementation works fine if the case statement does not ov=
+erlap.
+If the case statement overlap like "Duff's device", the linearization
+will generate
+repeated code.
+
+The better way to do it should be linearize from "stmt->switch_statemen=
+t"
+instead of "switch_case->symbol_list". In other words, "stmt->switch_st=
+atement"
+contain the full body of the switch statement.
+"switch_case->symbol_list" is just
+a list of case statement in the switch statement, like a list of
+labels. Some of those
+case statement can be embedded in other case statement. Linearization
+will emit the
+inner case statement twice. The code it emit will function currently,
+but it is not
+optimal because it has duplicate blocks.
+
+Chris
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
