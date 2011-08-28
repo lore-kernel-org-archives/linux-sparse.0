@@ -1,39 +1,61 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 1/3] evaluate: warn on identical exprs around '&&'
-Date: Sat, 27 Aug 2011 20:36:32 -0700
-Message-ID: <20110828033632.GD20823@leaf>
-References: <1314484015-7694-1-git-send-email-chrisf@ijw.co.nz>
- <20110828025010.GB20823@leaf>
- <CAH3ygc01LpeDEY3tmy+ntGH_EC=S7f9AOackWo8dL=5YP6GKkg@mail.gmail.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [ANNOUNCE] LLVM backend for Sparse
+Date: Sun, 28 Aug 2011 09:08:40 +0300 (EEST)
+Message-ID: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; format=flowed; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:36130 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751278Ab1H1Dgr (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:49025 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750778Ab1H1GJF (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 23:36:47 -0400
-Content-Disposition: inline
-In-Reply-To: <CAH3ygc01LpeDEY3tmy+ntGH_EC=S7f9AOackWo8dL=5YP6GKkg@mail.gmail.com>
+	Sun, 28 Aug 2011 02:09:05 -0400
+Received: by bke11 with SMTP id 11so3437456bke.19
+        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 23:09:03 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Chris Forbes <chrisf@ijw.co.nz>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Sun, Aug 28, 2011 at 02:57:36PM +1200, Chris Forbes wrote:
-> > Also, how does your patch handle expressions like this: *x++ && *x++
-> > Or this: f() && f()
-> 
-> Those cases will both warn. Do I need to be looking for potential side
-> effects, and considering these expressions "probably correct" in those
-> cases?
+Hi everyone,
 
-Those expressions can certainly make sense in correct code, unlike cases
-with identical side-effect-free expressions; that doesn't make such
-expressions a good idea, though.  You might want to check for
-side-effect-free code (I think Sparse already has a mechanism to test
-for that), and split that into a separate warning option.  Whether that
-option should stay on by default or not, I don't know; that will take
-running it over some real codebases and evaluating the benefit.
+Jeff Garzik and myself have been hacking on LLVM backed for Sparse. The sources
+are available on Github:
 
-- Josh Triplett
+   git clone git://github.com/penberg/sparse-llvm.git
+
+You can use sparse-llvm with the 'sparsec' shells script provided in the source
+tree. It has a GCC compatible command line interface and uses GCC for linking.
+For example, you can try to build sparse with sparse-llvm like this:
+
+   make CC=sparsec
+
+Developers who are interested in looking at the LLVM output can use the
+'sparse-llvm' command as follows:
+
+   sparse-llvm foo.c | llvm-dis
+
+The backend is already capable of generating code for simple C code on various
+platforms. Supported C features include:
+
+   * Function calls
+
+   * Switch statements
+
+   * if-else statements
+
+   * Arithmetic operations
+
+   * Bitwise operations
+
+   * Floating point arithmetic
+
+There's many features that are not supported so if you see an error message
+such as this while compiling a C file:
+
+   sparse-llvm: sparse-llvm.c:165: pseudo_type: Assertion `0' failed.
+
+don't panic because it simply means you're attempting to use an unsupported
+feature. Help implementing them is more than welcome!
+
+ 			Pekka
