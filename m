@@ -1,70 +1,93 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [ANNOUNCE] LLVM backend for Sparse
-Date: Sun, 28 Aug 2011 09:54:03 -0700
-Message-ID: <CA+55aFymNRxwWMVPwhWKGB7T2UXduGccjW1FgKYGCb8QH9QAhg@mail.gmail.com>
-References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
- <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com> <alpine.DEB.2.00.1108281700030.7991@localhost6.localdomain6>
+Subject: Re: [PATCH] Re: LLVM and PSEUDO_REG/PSEUDO_PHI
+Date: Sun, 28 Aug 2011 10:04:54 -0700
+Message-ID: <CA+55aFw5VYSXduhXrtQx5CM4ubvOoHtrbyF74Y_wOQpBxE6Vmw@mail.gmail.com>
+References: <4E5495C9.6050207@kernel.org> <CA+55aFwLLn30qohqJeBZLVUYWLKUnbBxnL9u+v=4Fx8TpxDQUQ@mail.gmail.com>
+ <4E55F33C.50203@kernel.org> <CAOJsxLF-=mPSdKLwmc61ZRTQrLGjPTUwVw+PqabYvGKVRwh9sQ@mail.gmail.com>
+ <CAOJsxLFMz7fs4ySkizHk43a0fz9VKS5ReWXoJa8cy2AQ6iwRng@mail.gmail.com>
+ <CA+55aFywG3vBA87W2h1f=-H144MTZesEwp5jVu8ndyBfLX7Sbg@mail.gmail.com>
+ <alpine.DEB.2.00.1108252046090.6272@localhost6.localdomain6>
+ <CA+55aFxRkS4HLeW18-q+4Co7kRdiQBv4wnD=GX5ymAGigXR3MQ@mail.gmail.com>
+ <alpine.DEB.2.00.1108252107210.6272@localhost6.localdomain6>
+ <4E58731A.7010708@garzik.org> <alpine.DEB.2.00.1108271104440.2570@localhost6.localdomain6>
+ <4E58AE9E.1090601@garzik.org> <4E59478C.9000504@garzik.org>
+ <alpine.DEB.2.00.1108280815530.2734@localhost6.localdomain6> <4E5A129F.1090801@garzik.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:58174 "EHLO
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:36607 "EHLO
 	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751818Ab1H1Qy7 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 28 Aug 2011 12:54:59 -0400
-Received: from mail-ww0-f42.google.com (mail-ww0-f42.google.com [74.125.82.42])
+	by vger.kernel.org with ESMTP id S1751075Ab1H1RFr convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 28 Aug 2011 13:05:47 -0400
+Received: from mail-wy0-f174.google.com (mail-wy0-f174.google.com [74.125.82.174])
 	(authenticated bits=0)
-	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7SGsO9T013391
+	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7SH5Gwe014025
 	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 09:54:25 -0700
-Received: by wwe5 with SMTP id 5so1787673wwe.1
-        for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 09:54:23 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1108281700030.7991@localhost6.localdomain6>
+	for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 10:05:18 -0700
+Received: by wyg24 with SMTP id 24so3543388wyg.19
+        for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 10:05:15 -0700 (PDT)
+In-Reply-To: <4E5A129F.1090801@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Josh Triplett <josh@joshtriplett.org>
+To: Jeff Garzik <jeff@garzik.org>
+Cc: Pekka Enberg <penberg@kernel.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sun, Aug 28, 2011 at 7:01 AM, Pekka Enberg <penberg@kernel.org> wrote:
+On Sun, Aug 28, 2011 at 3:04 AM, Jeff Garzik <jeff@garzik.org> wrote:
 >
-> It's lack of PSEUDO_SYM support. I haven't quite figured out what kind of
-> code to generate for that because, frankly, I'm not completely sure what
-> it's all about. ;-)
+> * need to start integrating struct support. =A0LLVM has a type system=
+ where
+> one defines data structures in the IR, then uses 'getelementptr' LLVM
+> instruction to build addresses for complex load/store operations. The=
+ Linux
+> kernel uses a lot of function calls (indirect branches) from values b=
+uried
+> deep within a struct.
 
-So "PSEUDO_SYM" is just a "link-time constant".
+You really shouldn't need to do that.
 
-IOW, it's nothing but a pointer to an in-memory variable, and from a
-code generation standpoint generating the symbol should be just about
-the same as generating a constant, except rather than an actual value,
-it's now a linker reference.
+You should consider all types to be just "blocks of memory", and
+sparse has already calculated all offsets etc for you. As far as LLVM
+is concerned, the memory has no structure, it's just a blob.
 
-Of course, what complicates them is that you also need to generate the
-symbol definition itself (somewhere else). In particular, the
-sym->initializer points to the initializer of a symbol, and they can
-be *complicated*. Generating the output for some symbols can be a
-major pain in the *ss, just think about a complex structure array
-initializer.
+Sometimes you cannot even get the "element" name. Look at
+=2E/test-linearize output of something like this:
 
-The PSEUDO_SYM you hit for the "hello world" program is trivial,
-though. It's an unnamed symbol of type "char []", and it has a trivial
-initializer (the string itself). So symbols can be hard to generate,
-but there are simple cases.
+  struct hello {
+    int a,b,c;
+  };
 
-So for a PSUEDO_SYM, you need to look up "struct symbol" for it
-(pseudo->sym), which then has:
+  int bar(struct hello *arg)
+  {
+	return ((char *)&arg->b)[1] + arg->c;
+  }
 
- - name of the symbol (sym->ident). Of course, some symbols don't have
-names, like the constant string example.
+and realize that that byte access isn't accessing an element at all -
+it's just accessing a *part* of an element. The more complicated cases
+is actually when you access multiple elements in one go.
 
- - type/size/alignment information (sym->ctype)
+And sparse has figured all that out for you already, done the alias
+analysis (ok, just stupid overlap analysis) etc.
 
- - initializer information (sym->initializer - which can be a really
-complex expression). Of course, for external symbols - or symbols with
-no initializer - this is just empty.
+Btw, if you look at test-linearize output for that, you'll see the
+"ptrcast" thing. We don't simplify that away, so you will see
+something like
 
-There's way more to symbol types in sparse than that, but apart from
-the initializer expression, most of the symbol complexity has been
-handled by earlier stages (ie a *lot* of the front-end of sparse is
-about symbols and their types).
+	add.32      %r2 <- %arg1, $4
+	ptrcast.32  %r3 <- (32) %r2
+	load.8      %r4 <- 1[%r3]
 
-                          Linus
+instead of just
+
+	load.8      %r4 <- 5[%arg1]
+
+but that's just a small "I left all pointer casts around, even if they
+don't do anything" detail.
+
+                           Linus
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
