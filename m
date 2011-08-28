@@ -1,47 +1,46 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH] cse: update PHI users when throwing away an instruction
-Date: Sat, 27 Aug 2011 17:34:21 -0700
-Message-ID: <CA+55aFwPLDZZAEfP8xdFwqG2MG_79mbN_TjNTGRvyRq=WPWcSQ@mail.gmail.com>
-References: <4E588EB8.80808@garzik.org> <4E590F22.6030800@garzik.org>
- <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com> <201108280139.59217.kdudka@redhat.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 3/3] evaluate: warn on identical exprs on ?:
+Date: Sat, 27 Aug 2011 19:46:19 -0700
+Message-ID: <20110828024618.GA20823@leaf>
+References: <1314484015-7694-1-git-send-email-chrisf@ijw.co.nz>
+ <1314484015-7694-3-git-send-email-chrisf@ijw.co.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp1.linux-foundation.org ([140.211.169.13]:49065 "EHLO
-	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751249Ab1H1AmS convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 27 Aug 2011 20:42:18 -0400
-Received: from mail-ww0-f44.google.com (mail-ww0-f44.google.com [74.125.82.44])
-	(authenticated bits=0)
-	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7S0gGrK012005
-	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 17:42:17 -0700
-Received: by wwf5 with SMTP id 5so4631635wwf.1
-        for <linux-sparse@vger.kernel.org>; Sat, 27 Aug 2011 17:42:16 -0700 (PDT)
-In-Reply-To: <201108280139.59217.kdudka@redhat.com>
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:59521 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750996Ab1H1Cq1 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 27 Aug 2011 22:46:27 -0400
+Content-Disposition: inline
+In-Reply-To: <1314484015-7694-3-git-send-email-chrisf@ijw.co.nz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kamil Dudka <kdudka@redhat.com>
-Cc: Jeff Garzik <jeff@garzik.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka J Enberg <penberg@cs.helsinki.fi>
+To: Chris Forbes <chrisf@ijw.co.nz>
+Cc: linux-sparse@vger.kernel.org
 
-On Sat, Aug 27, 2011 at 4:39 PM, Kamil Dudka <kdudka@redhat.com> wrote:
->
-> The attached patch solves the dangling PHI nodes and does not seem to=
- break
-> anything at first glance. =A0It is probably not the most efficient so=
-lution,
-> but it might at least show where to look for the problem.
+On Sun, Aug 28, 2011 at 10:26:55AM +1200, Chris Forbes wrote:
+> Adds a warning when identical expressions are found on both the true and false branches of ?:. This is another common copy-paste error.
+> 
+> Signed-off-by: Chris Forbes <chrisf@ijw.co.nz>
+> ---
+>  evaluate.c                                 |    8 +++++++-
+>  validation/check_identical_exprs_on_cond.c |   13 +++++++++++++
+>  2 files changed, 20 insertions(+), 1 deletions(-)
+>  create mode 100644 validation/check_identical_exprs_on_cond.c
+> 
+> diff --git a/evaluate.c b/evaluate.c
+> index 11de7aa..c339e63 100644
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -898,7 +898,7 @@ static int expr_list_equiv(struct expression_list *lhs,
+>  int expr_equiv(struct expression *lhs, struct expression *rhs)
+>  {
+>  	/* recursively determine if lhs ~ rhs. */
+> -	if (!lhs ^ !rhs) return 0;
+> +	if (!lhs || !rhs) return 0;
 
-Hmm. From a quick look, looks fine to me. And checks the kernel, and
-does indeed get rid of the extraneous phi nodes in the test-case.
+You introduced this earlier in the same patch series.  This looks like
+it needs some patch cleanup.
 
-Ack.
-
-                       Linus
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+- Josh Triplett
