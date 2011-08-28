@@ -1,73 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [ANNOUNCE] LLVM backend for Sparse
-Date: Sun, 28 Aug 2011 01:51:47 -0700
-Message-ID: <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
-References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
+From: Jeff Garzik <jeff@garzik.org>
+Subject: Re: [PATCH] cse: update PHI users when throwing away an instruction
+Date: Sun, 28 Aug 2011 04:53:48 -0400
+Message-ID: <4E5A021C.4000406@garzik.org>
+References: <4E588EB8.80808@garzik.org> <4E590F22.6030800@garzik.org> <CA+55aFxGwAXRWVcv_Qx6C4B_PKqzVVbc8O_znwUt_D6g1iDJvQ@mail.gmail.com> <201108280139.59217.kdudka@redhat.com> <CA+55aFwPLDZZAEfP8xdFwqG2MG_79mbN_TjNTGRvyRq=WPWcSQ@mail.gmail.com> <CAOJsxLGWGL-zn-WxArEDRBKjB-DGmpztsugi176o3JiRC5fnXw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001636831d56833f8b04ab8ce3ba
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qw0-f46.google.com ([209.85.216.46]:46883 "EHLO
+Received: from mail-qw0-f46.google.com ([209.85.216.46]:59841 "EHLO
 	mail-qw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751502Ab1H1Ivs (ORCPT
+	with ESMTP id S1751444Ab1H1Ixv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 28 Aug 2011 04:51:48 -0400
-Received: by qwk3 with SMTP id 3so2751641qwk.19
-        for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 01:51:47 -0700 (PDT)
-In-Reply-To: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
+	Sun, 28 Aug 2011 04:53:51 -0400
+Received: by qwk3 with SMTP id 3so2752047qwk.19
+        for <linux-sparse@vger.kernel.org>; Sun, 28 Aug 2011 01:53:50 -0700 (PDT)
+In-Reply-To: <CAOJsxLGWGL-zn-WxArEDRBKjB-DGmpztsugi176o3JiRC5fnXw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Kamil Dudka <kdudka@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
---001636831d56833f8b04ab8ce3ba
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: quoted-printable
-
-On Sat, Aug 27, 2011 at 11:08 PM, Pekka Enberg <penberg@kernel.org> wrote:
-> Hi everyone,
+On 08/28/2011 02:33 AM, Pekka Enberg wrote:
+> On Sat, Aug 27, 2011 at 4:39 PM, Kamil Dudka<kdudka@redhat.com>  wrote:
+>>> The attached patch solves the dangling PHI nodes and does not seem to break
+>>> anything at first glance.  It is probably not the most efficient solution,
+>>> but it might at least show where to look for the problem.
 >
-> Jeff Garzik and myself have been hacking on LLVM backed for Sparse. The
-> sources
-> are available on Github:
+> On Sun, Aug 28, 2011 at 3:34 AM, Linus Torvalds
+> <torvalds@linux-foundation.org>  wrote:
+>> Hmm. From a quick look, looks fine to me. And checks the kernel, and
+>> does indeed get rid of the extraneous phi nodes in the test-case.
+>>
+>> Ack.
 >
-> =A0git clone git://github.com/penberg/sparse-llvm.git
->
+> I applied both patches to sparse-llvm.git. Jeff, do they cure all loop
+> related issues?
 
-Very impressive. That is some sparse 0.5 material.
-I will start merging it as soon as I release 0.4.4
+They look promising...  Currently loops are stuck due to issues 
+unrelated to core sparse:  OP_PHI does not show successor phi's due to 
+->priv==NULL.  Loops definitely will not work without both predecessors 
+and successors both having a correct ->priv pointing to LLVM data.
 
-I play around with it a little bit, It seems choke on the hello
-world program. Shouldn't be hard to fix though.
+	Jeff
 
-I attach a patch to limit g++ usage only to llvm related programs.
-Currently it use g++ to link other sparse programs.
 
-Chris
 
---001636831d56833f8b04ab8ce3ba
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-Limit-usage-of-g-to-llvm-related-programs.patch"
-Content-Disposition: attachment;
-	filename="0001-Limit-usage-of-g-to-llvm-related-programs.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_grvs2i0p0
 
-RnJvbSBjMDBkMTAyMGFiZjUyNDA1NzgzZmE5NzNkYTZmMjhmZTcwMGZhYzNiIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
-YXRlOiBTdW4sIDI4IEF1ZyAyMDExIDAxOjA0OjQxIC0wNzAwClN1YmplY3Q6IFtQQVRDSF0gTGlt
-aXQgdXNhZ2Ugb2YgZysrIHRvIGxsdm0gcmVsYXRlZCBwcm9ncmFtcy4KClNpZ25lZC1vZmYtYnk6
-IENocmlzdG9waGVyIExpIDxzcGFyc2VAY2hyaXNsaS5vcmc+Ci0tLQogTWFrZWZpbGUgfCAgICA1
-ICsrKy0tCiAxIGZpbGVzIGNoYW5nZWQsIDMgaW5zZXJ0aW9ucygrKSwgMiBkZWxldGlvbnMoLSkK
-CmRpZmYgLS1naXQgYS9NYWtlZmlsZSBiL01ha2VmaWxlCmluZGV4IGE5ZjliMzUuLmFiMGIxODYg
-MTAwNjQ0Ci0tLSBhL01ha2VmaWxlCisrKyBiL01ha2VmaWxlCkBAIC02NiwxMSArNjYsMTIgQEAg
-JCh3YXJuaW5nIFlvdXIgc3lzdGVtIGRvZXMgbm90IGhhdmUgbGliZ3RrMiwgZGlzYWJsaW5nIHRl
-c3QtaW5zcGVjdCkKIGVuZGlmCiAKIGlmZXEgKCQoSEFWRV9MTFZNKSx5ZXMpCi1MRCA9IGcrKwor
-TExWTV9QUk9HUyA6PSBzcGFyc2UtbGx2bSAKKyQoTExWTV9QUk9HUyk6IExEIDo9IGcrKwogTERG
-TEFHUyArPSAkKHNoZWxsIGxsdm0tY29uZmlnIC0tbGRmbGFncykKIExMVk1fQ0ZMQUdTIDo9ICQo
-c2hlbGwgbGx2bS1jb25maWcgLS1jZmxhZ3MgfCBzZWQgLWUgInMvLUROREVCVUcvL2ciKQogTExW
-TV9MSUJTIDo9ICQoc2hlbGwgbGx2bS1jb25maWcgLS1saWJzKQotUFJPR1JBTVMgKz0gc3BhcnNl
-LWxsdm0KK1BST0dSQU1TICs9ICQoTExWTV9QUk9HUykKIElOU1RfUFJPR1JBTVMgKz0gc3BhcnNl
-LWxsdm0gc3BhcnNlYwogc3BhcnNlLWxsdm1fRVhUUkFfREVQUyA6PSBzcGFyc2UtbGx2bS5vCiBz
-cGFyc2UtbGx2bS5vICQoc3BhcnNlLWxsdm1fRVhUUkFfREVQUyk6IEJBU0lDX0NGTEFHUyArPSAk
-KExMVk1fQ0ZMQUdTKQotLSAKMS43LjYKCg==
---001636831d56833f8b04ab8ce3ba--
