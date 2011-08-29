@@ -1,58 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [ANNOUNCE] LLVM backend for Sparse
-Date: Mon, 29 Aug 2011 02:19:27 -0700
-Message-ID: <4E5B599F.4090205@chrisli.org>
-References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6> <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com> <alpine.DEB.2.00.1108281700030.7991@localhost6.localdomain6> <CA+55aFymNRxwWMVPwhWKGB7T2UXduGccjW1FgKYGCb8QH9QAhg@mail.gmail.com> <CAOJsxLE-3CLPrLhphaVLs6CoWi0JYA02=Ny_fRrn8wqS2o0NcQ@mail.gmail.com>
-Reply-To: sparse@chrisli.org
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: Re: [PATCH 1/3] evaluate: warn on identical exprs around '&&'
+Date: Mon, 29 Aug 2011 12:01:06 +0200
+Message-ID: <20110829100106.GE15022@debian.debian>
+References: <1314501260-27254-1-git-send-email-chrisf@ijw.co.nz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:65412 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753260Ab1H2JTl (ORCPT
+Received: from mailout-de.gmx.net ([213.165.64.22]:36884 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751115Ab1H2KBL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 05:19:41 -0400
-Received: by pzk37 with SMTP id 37so8141983pzk.1
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 02:19:41 -0700 (PDT)
-In-Reply-To: <CAOJsxLE-3CLPrLhphaVLs6CoWi0JYA02=Ny_fRrn8wqS2o0NcQ@mail.gmail.com>
+	Mon, 29 Aug 2011 06:01:11 -0400
+Content-Disposition: inline
+In-Reply-To: <1314501260-27254-1-git-send-email-chrisf@ijw.co.nz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Josh Triplett <josh@joshtriplett.org>
+To: Chris Forbes <chrisf@ijw.co.nz>
+Cc: linux-sparse@vger.kernel.org
 
-On 08/29/2011 12:41 AM, Pekka Enberg wrote:
-> Right. Will the "link time constant" 'struct symbol' be part of the 
-> symbol_list? If it is, then we already do LLVMAddGlobal in 
-> output_data() on it and could probably just stash that into a ->priv 
-> member in 'struct symbol' and use that in pseudo_to_value(). 
+On Sun, Aug 28, 2011 at 03:14:18PM +1200, Chris Forbes wrote:
+> +	case EXPR_BINOP:
+> +	case EXPR_COMMA:
+> +	case EXPR_COMPARE:
+> +	case EXPR_LOGICAL:
+> +	case EXPR_ASSIGNMENT:
+> +		return expr_equiv(lhs->left, rhs->left) &&
+> +			expr_equiv(lhs->right, rhs->right);
+[...]
+> +	if ((a =3D=3D b) && (a =3D=3D b))	/* should warn */
+> +		bar();
+> +
+> +	if ((a =3D=3D b) && (b =3D=3D c))	/* should not warn */
+> +		bar();
 
-The link time constant is a LLVMValueRef, it is just the address of the 
-symbol.
-Yes, it will belong to the function scope's symbol_list but not 
-necessary the global one.
-Here is some tips that help me a lot on my own llvm branch, which lost 
-due to a hard
-drive crash. It was able to do hello world back then.
+Should it maybe also handle cases like this?
 
-LLVM can output c++ source code that construct the llvm byte code.
+if ((a =3D=3D b) && (b =3D=3D a))
+	bar();
 
-# this will emit hello.s as the llvm asm code
-$ clang -S -emit-llvm hello.c
-
-# this will generate hello.s.cpp which is the c++ source code to construct
-# the llvm byte code above
-
-$ llc -march=cpp hello.s
-
-The hello.s.cpp is a very good reference to build the llvm byte code in C.
-It is in C++, but convert to llvm C binding should be easy.
-BTW, "-march=c" does not generate C bindings, it generate the
-equivalent IR in C code instead.
-
-Hope that helps.
-
-Chris
-
-
-
+Thanks,
+	Jonathan Neusch=C3=A4fer
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
