@@ -1,71 +1,36 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [ANNOUNCE] LLVM backend for Sparse
-Date: Mon, 29 Aug 2011 17:22:47 +0300
-Message-ID: <CAOJsxLEMvZMX9x0s4VGx9KMPdPbcHqtg0Q=o6ivSCamC3aHUrg@mail.gmail.com>
-References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
-	<CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
+Subject: Re: [PATCH] Re: LLVM and PSEUDO_REG/PSEUDO_PHI
+Date: Mon, 29 Aug 2011 17:42:49 +0300 (EEST)
+Message-ID: <alpine.DEB.2.00.1108291741350.12047@localhost6.localdomain6>
+References: <4E5495C9.6050207@kernel.org> <CA+55aFwLLn30qohqJeBZLVUYWLKUnbBxnL9u+v=4Fx8TpxDQUQ@mail.gmail.com> <4E55F33C.50203@kernel.org> <CAOJsxLF-=mPSdKLwmc61ZRTQrLGjPTUwVw+PqabYvGKVRwh9sQ@mail.gmail.com> <CAOJsxLFMz7fs4ySkizHk43a0fz9VKS5ReWXoJa8cy2AQ6iwRng@mail.gmail.com>
+ <CA+55aFywG3vBA87W2h1f=-H144MTZesEwp5jVu8ndyBfLX7Sbg@mail.gmail.com> <alpine.DEB.2.00.1108252046090.6272@localhost6.localdomain6> <CA+55aFxRkS4HLeW18-q+4Co7kRdiQBv4wnD=GX5ymAGigXR3MQ@mail.gmail.com> <alpine.DEB.2.00.1108252107210.6272@localhost6.localdomain6>
+ <4E58731A.7010708@garzik.org> <alpine.DEB.2.00.1108271104440.2570@localhost6.localdomain6> <4E58AE9E.1090601@garzik.org> <4E59478C.9000504@garzik.org> <alpine.DEB.2.00.1108280815530.2734@localhost6.localdomain6> <4E5A129F.1090801@garzik.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII; format=flowed
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:65474 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753372Ab1H2OWs convert rfc822-to-8bit (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:34578 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753594Ab1H2Om5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 10:22:48 -0400
-Received: by iabu26 with SMTP id u26so528481iab.19
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 07:22:47 -0700 (PDT)
-In-Reply-To: <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
+	Mon, 29 Aug 2011 10:42:57 -0400
+Received: by bke11 with SMTP id 11so4213883bke.19
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 07:42:56 -0700 (PDT)
+In-Reply-To: <4E5A129F.1090801@garzik.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
+To: Jeff Garzik <jeff@garzik.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Aug 27, 2011 at 11:08 PM, Pekka Enberg <penberg@kernel.org> wro=
-te:
->> Jeff Garzik and myself have been hacking on LLVM backed for Sparse. =
-The
->> sources
->> are available on Github:
->>
->> =A0git clone git://github.com/penberg/sparse-llvm.git
+On Sun, 28 Aug 2011, Jeff Garzik wrote:
+> * it will soon be necessary to pay more attention to target-specific details. 
+> we need some mechanism for specifying i386, x86-64, etc. so that we may fill 
+> in bits_in_pointer and similar values properly.  This may involve some sparse 
+> hacking IIRC, because sparse (used to be?) largely hardcoded to use i386 
+> target values when checking.  Or maybe this is already done, and I just am 
+> ignorant of that area of the code.
 
-On Sun, Aug 28, 2011 at 11:51 AM, Christopher Li <sparse@chrisli.org> w=
-rote:
-> Very impressive. That is some sparse 0.5 material.
-> I will start merging it as soon as I release 0.4.4
->
-> I play around with it a little bit, It seems choke on the hello
-> world program. Shouldn't be hard to fix though.
 
-It's alive!
+Can you think of anything else except target.c that needs to be fixed in 
+sparse?
 
-$ cat validation/backend/hello.c
-#include <stdio.h>
-
-int main(int argc, char *argv[])
-{
-	puts("hello, world");
-
-	return 0;
-}
-
-/*
- * check-name: 'hello, world' code generation
- * check-command: ./sparsec -c $file -o tmp.o
- */
-$ ./sparsec -c validation/backend/hello.c -o tmp.o && gcc tmp.o && ./a.=
-out
-hello, world
-
-You can find details in this commit:
-
-https://github.com/penberg/sparse-llvm/commit/deb11bd4ee6ed46bce6a5e35a=
-69ada519d81a0a8
-
-                        Pekka
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ 			Pekka
