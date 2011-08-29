@@ -1,46 +1,65 @@
-From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: Re: [PATCH 1/3] evaluate: warn on identical exprs around '&&'
-Date: Mon, 29 Aug 2011 12:01:06 +0200
-Message-ID: <20110829100106.GE15022@debian.debian>
-References: <1314501260-27254-1-git-send-email-chrisf@ijw.co.nz>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Sparse 0.4.4-rc2
+Date: Mon, 29 Aug 2011 03:20:17 -0700
+Message-ID: <4E5B67E1.80902@chrisli.org>
+Reply-To: sparse@chrisli.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1;
+	format=flowed
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:36884 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751115Ab1H2KBL (ORCPT
+Received: from mail-pz0-f42.google.com ([209.85.210.42]:40441 "EHLO
+	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753459Ab1H2KUd (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 06:01:11 -0400
-Content-Disposition: inline
-In-Reply-To: <1314501260-27254-1-git-send-email-chrisf@ijw.co.nz>
+	Mon, 29 Aug 2011 06:20:33 -0400
+Received: by pzk37 with SMTP id 37so8221251pzk.1
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 03:20:33 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Chris Forbes <chrisf@ijw.co.nz>
-Cc: linux-sparse@vger.kernel.org
+To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sun, Aug 28, 2011 at 03:14:18PM +1200, Chris Forbes wrote:
-> +	case EXPR_BINOP:
-> +	case EXPR_COMMA:
-> +	case EXPR_COMPARE:
-> +	case EXPR_LOGICAL:
-> +	case EXPR_ASSIGNMENT:
-> +		return expr_equiv(lhs->left, rhs->left) &&
-> +			expr_equiv(lhs->right, rhs->right);
-[...]
-> +	if ((a =3D=3D b) && (a =3D=3D b))	/* should warn */
-> +		bar();
-> +
-> +	if ((a =3D=3D b) && (b =3D=3D c))	/* should not warn */
-> +		bar();
+Another week, another -rc.
 
-Should it maybe also handle cases like this?
+It only has a small number of bug fix and enhancement
+since the last rc, just the way I like it.
+The finial release should be pretty close now.
 
-if ((a =3D=3D b) && (b =3D=3D a))
-	bar();
+Pekka Engerg announced an effort of adding llvm
+to sparse back end. I am looking forward to merge
+it after the finial release.
 
-Thanks,
-	Jonathan Neusch=C3=A4fer
+Chris
+
+--
+
+Christopher Li (3):
+       Add test case for empty asm clobbers
+       Fix parsing empty asm clobber
+       Sparse 0.4.4-rc2
+
+Jonathan Neusch=E4fer (2):
+       FAQ: fix a typo ("because or")
+       fix common misspellings with codespell
+
+Kamil Dudka (2):
+       cse: treat PHI-nodes as other instructions
+       cse: update PHI users when throwing away an instruction
+
+Linus Torvalds (3):
+       Make 'linearize_iterator()' helper function
+       Make 'linearize_switch()' helper function
+       Make 'linearize_return()' helper function
+
+Michael Stefaniuc (1):
+       Ignore the ms_hook_prologue attribute.
+
+Pekka Enberg (3):
+       sparse: Enable unhandled validation tests
+       Show expected vs. actual output on test failure
+       sparse: Fix __builtin_safe_p for pure and const functions
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
