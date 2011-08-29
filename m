@@ -1,46 +1,63 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] Re: LLVM and PSEUDO_REG/PSEUDO_PHI
-Date: Mon, 29 Aug 2011 09:16:40 -0700
-Message-ID: <20110829161640.GA23515@leaf>
-References: <alpine.DEB.2.00.1108252046090.6272@localhost6.localdomain6>
- <CA+55aFxRkS4HLeW18-q+4Co7kRdiQBv4wnD=GX5ymAGigXR3MQ@mail.gmail.com>
- <alpine.DEB.2.00.1108252107210.6272@localhost6.localdomain6>
- <4E58731A.7010708@garzik.org>
- <alpine.DEB.2.00.1108271104440.2570@localhost6.localdomain6>
- <4E58AE9E.1090601@garzik.org>
- <4E59478C.9000504@garzik.org>
- <alpine.DEB.2.00.1108280815530.2734@localhost6.localdomain6>
- <4E5A129F.1090801@garzik.org>
- <alpine.DEB.2.00.1108291741350.12047@localhost6.localdomain6>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [ANNOUNCE] LLVM backend for Sparse
+Date: Mon, 29 Aug 2011 09:58:36 -0700
+Message-ID: <CA+55aFwmtOQgksqdWH=PrsPcDaG44kKBu+3knz9h4zJLGD4X8g@mail.gmail.com>
+References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
+ <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
+ <CAOJsxLEMvZMX9x0s4VGx9KMPdPbcHqtg0Q=o6ivSCamC3aHUrg@mail.gmail.com> <4E5BACEB.7020502@knosof.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:60234 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753973Ab1H2QQs (ORCPT
+Received: from smtp1.linux-foundation.org ([140.211.169.13]:34699 "EHLO
+	smtp1.linux-foundation.org" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754361Ab1H2Q73 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 12:16:48 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.00.1108291741350.12047@localhost6.localdomain6>
+	Mon, 29 Aug 2011 12:59:29 -0400
+Received: from mail-wy0-f174.google.com (mail-wy0-f174.google.com [74.125.82.174])
+	(authenticated bits=0)
+	by smtp1.linux-foundation.org (8.14.2/8.13.5/Debian-3ubuntu1.1) with ESMTP id p7TGwupo000691
+	(version=TLSv1/SSLv3 cipher=RC4-SHA bits=128 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 09:58:57 -0700
+Received: by wyg24 with SMTP id 24so4231766wyg.19
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 09:58:56 -0700 (PDT)
+In-Reply-To: <4E5BACEB.7020502@knosof.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Derek M Jones <derek@knosof.co.uk>
+Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Mon, Aug 29, 2011 at 05:42:49PM +0300, Pekka Enberg wrote:
-> On Sun, 28 Aug 2011, Jeff Garzik wrote:
-> >* it will soon be necessary to pay more attention to
-> >target-specific details. we need some mechanism for specifying
-> >i386, x86-64, etc. so that we may fill in bits_in_pointer and
-> >similar values properly.  This may involve some sparse hacking
-> >IIRC, because sparse (used to be?) largely hardcoded to use i386
-> >target values when checking.  Or maybe this is already done, and I
-> >just am ignorant of that area of the code.
-> 
-> Can you think of anything else except target.c that needs to be
-> fixed in sparse?
+On Mon, Aug 29, 2011 at 8:14 AM, Derek M Jones <derek@knosof.co.uk> wrote:
+>
+> Can people allay my concern that this work is not on the slippery
+> slope leading to sparse becoming the recommended compiler for
+> building the kernel?
 
-Take a look at the cgcc script.  Most of what it does to handle
-target-specific information should occur in sparse instead.
+That was never really a goal.
 
-- Josh Triplett
+What *was* a goal for me a long time ago was to make sparse be a
+"preprocessor" in front of gcc, because the standard C pre-processor
+has always been weak and we've always abused it in nasty ways (look at
+all the games we play with "sizeof" and "typeof" to make our
+"kernel-C" have a kind of generic programming).
+
+Having a semantically aware preprocessor would allow kernel-specific
+type extensions (like the "__user" attribute we already use purely for
+checking runs), and allow debug facilities like "trace accesses to
+this variable" without having to have ugly and unreadable wrappers
+etc.
+
+But even that got put on the back-burner when gcc improved the
+pre-processor performance. It used to be a separate phase, and quite
+slow, and having a quick semantic analysis in front of cc1 that
+replaced the gcc preprocessor wouldn't have been a big slow-down. But
+with the new (well, no longer new) built-in pre-processor, a sparse
+front-end would slow down kernel compiles noticeably.
+
+The main reason I used to want to have a back-end was that without a
+back-end you cannot really verify the front-end. You can read
+"test-linearize" output all day long, you'll never really get very
+far. Once you generate code, and can use the thing to actually compile
+real programs, that gives you *way* more confidence that you're doing
+things right.
+
+                          Linus
