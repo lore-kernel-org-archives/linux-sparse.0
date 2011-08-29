@@ -1,59 +1,71 @@
 From: Pekka Enberg <penberg@kernel.org>
 Subject: Re: [ANNOUNCE] LLVM backend for Sparse
-Date: Mon, 29 Aug 2011 14:05:41 +0300
-Message-ID: <CAOJsxLHDHZyR--qo-V_22bn_V_btiXnLt6nNxid-Zj0Wj1DpVw@mail.gmail.com>
+Date: Mon, 29 Aug 2011 17:22:47 +0300
+Message-ID: <CAOJsxLEMvZMX9x0s4VGx9KMPdPbcHqtg0Q=o6ivSCamC3aHUrg@mail.gmail.com>
 References: <alpine.DEB.2.00.1108280904070.7603@localhost6.localdomain6>
 	<CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
-	<alpine.DEB.2.00.1108281700030.7991@localhost6.localdomain6>
-	<CA+55aFymNRxwWMVPwhWKGB7T2UXduGccjW1FgKYGCb8QH9QAhg@mail.gmail.com>
-	<CAOJsxLE-3CLPrLhphaVLs6CoWi0JYA02=Ny_fRrn8wqS2o0NcQ@mail.gmail.com>
-	<4E5B599F.4090205@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:48079 "EHLO
+Received: from mail-iy0-f174.google.com ([209.85.210.174]:65474 "EHLO
 	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753097Ab1H2LFl (ORCPT
+	with ESMTP id S1753372Ab1H2OWs convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 07:05:41 -0400
-Received: by iabu26 with SMTP id u26so429348iab.19
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 04:05:41 -0700 (PDT)
-In-Reply-To: <4E5B599F.4090205@chrisli.org>
+	Mon, 29 Aug 2011 10:22:48 -0400
+Received: by iabu26 with SMTP id u26so528481iab.19
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 07:22:47 -0700 (PDT)
+In-Reply-To: <CANeU7Q=PUDGGm9G6PnXvW3QeBnnMP39mfEE=HvszvBeAvrA4yQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Josh Triplett <josh@joshtriplett.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
 
-On 08/29/2011 12:41 AM, Pekka Enberg wrote:
->> Right. Will the "link time constant" 'struct symbol' be part of the
->> symbol_list? If it is, then we already do LLVMAddGlobal in output_data() on
->> it and could probably just stash that into a ->priv member in 'struct
->> symbol' and use that in pseudo_to_value().
+On Sat, Aug 27, 2011 at 11:08 PM, Pekka Enberg <penberg@kernel.org> wro=
+te:
+>> Jeff Garzik and myself have been hacking on LLVM backed for Sparse. =
+The
+>> sources
+>> are available on Github:
+>>
+>> =A0git clone git://github.com/penberg/sparse-llvm.git
 
-On Mon, Aug 29, 2011 at 12:19 PM, Christopher Li <sparse@chrisli.org> wrote:
-> The link time constant is a LLVMValueRef, it is just the address of the
-> symbol.
-> Yes, it will belong to the function scope's symbol_list but not necessary
-> the global one.
-> Here is some tips that help me a lot on my own llvm branch, which lost due
-> to a hard
-> drive crash. It was able to do hello world back then.
+On Sun, Aug 28, 2011 at 11:51 AM, Christopher Li <sparse@chrisli.org> w=
+rote:
+> Very impressive. That is some sparse 0.5 material.
+> I will start merging it as soon as I release 0.4.4
 >
-> LLVM can output c++ source code that construct the llvm byte code.
->
-> # this will emit hello.s as the llvm asm code
-> $ clang -S -emit-llvm hello.c
->
-> # this will generate hello.s.cpp which is the c++ source code to construct
-> # the llvm byte code above
->
-> $ llc -march=cpp hello.s
->
-> The hello.s.cpp is a very good reference to build the llvm byte code in C.
-> It is in C++, but convert to llvm C binding should be easy.
-> BTW, "-march=c" does not generate C bindings, it generate the
-> equivalent IR in C code instead.
+> I play around with it a little bit, It seems choke on the hello
+> world program. Shouldn't be hard to fix though.
 
-Yup, I've been doing that online here:
+It's alive!
 
-http://llvm.org/demo/test.cgi
+$ cat validation/backend/hello.c
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+	puts("hello, world");
+
+	return 0;
+}
+
+/*
+ * check-name: 'hello, world' code generation
+ * check-command: ./sparsec -c $file -o tmp.o
+ */
+$ ./sparsec -c validation/backend/hello.c -o tmp.o && gcc tmp.o && ./a.=
+out
+hello, world
+
+You can find details in this commit:
+
+https://github.com/penberg/sparse-llvm/commit/deb11bd4ee6ed46bce6a5e35a=
+69ada519d81a0a8
+
+                        Pekka
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
