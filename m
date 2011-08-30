@@ -1,73 +1,114 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: LLVM and PSEUDO_REG/PSEUDO_PHI
-Date: Mon, 29 Aug 2011 23:42:37 +0300
-Message-ID: <CAOJsxLFciLwdu1cBd9LO77U-9P+3e7agYYd8tV1qCf_4HeWGVg@mail.gmail.com>
-References: <4E5495C9.6050207@kernel.org>
-	<CA+55aFwLLn30qohqJeBZLVUYWLKUnbBxnL9u+v=4Fx8TpxDQUQ@mail.gmail.com>
-	<4E55F33C.50203@kernel.org>
-	<CAOJsxLF-=mPSdKLwmc61ZRTQrLGjPTUwVw+PqabYvGKVRwh9sQ@mail.gmail.com>
-	<CAOJsxLFMz7fs4ySkizHk43a0fz9VKS5ReWXoJa8cy2AQ6iwRng@mail.gmail.com>
-	<CA+55aFywG3vBA87W2h1f=-H144MTZesEwp5jVu8ndyBfLX7Sbg@mail.gmail.com>
-	<alpine.DEB.2.00.1108252046090.6272@localhost6.localdomain6>
-	<CA+55aFxRkS4HLeW18-q+4Co7kRdiQBv4wnD=GX5ymAGigXR3MQ@mail.gmail.com>
-	<alpine.DEB.2.00.1108252107210.6272@localhost6.localdomain6>
-	<alpine.DEB.2.00.1108252310490.22479@localhost6.localdomain6>
-	<CA+55aFy3TUT=BFD+Nb9H6uDBhz427kC4tBc+ehQDs6JBggTuHQ@mail.gmail.com>
-	<4E573A3E.6060104@kernel.org>
-	<CA+55aFzbV0OvrtkzbjxvL1tkfF=+6xbBsyWb8XtAcK-YNeKjZw@mail.gmail.com>
-	<alpine.DEB.2.00.1108271214410.14365@localhost6.localdomain6>
-	<CA+55aFzbfD4RDe52HCL9mfSYMzFdvP96OiK5ifkfUKNkzjJNrg@mail.gmail.com>
-	<alpine.DEB.2.00.1108292242110.24020@localhost6.localdomain6>
-	<CA+55aFw1rzBG42oDz8PajG78CeuKyRBZW+vFwmE5e2XEtcFDfw@mail.gmail.com>
+Subject: [PATCH v2] sparse: Reduce 'test-suite' run output
+Date: Tue, 30 Aug 2011 22:24:16 +0300
+Message-ID: <1314732256-6113-1-git-send-email-penberg@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-iy0-f174.google.com ([209.85.210.174]:37783 "EHLO
-	mail-iy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754038Ab1H2Umi (ORCPT
+Received: from filtteri5.pp.htv.fi ([213.243.153.188]:56535 "EHLO
+	filtteri5.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756191Ab1H3TYU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Aug 2011 16:42:38 -0400
-Received: by iabu26 with SMTP id u26so820848iab.19
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Aug 2011 13:42:38 -0700 (PDT)
-In-Reply-To: <CA+55aFw1rzBG42oDz8PajG78CeuKyRBZW+vFwmE5e2XEtcFDfw@mail.gmail.com>
+	Tue, 30 Aug 2011 15:24:20 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Jeff Garzik <jeff@garzik.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Ben Pfaff <blp@cs.stanford.edu>, =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Mon, Aug 29, 2011 at 12:45 PM, Pekka Enberg <penberg@kernel.org> wrote:
->> However, i'm not 100% sure that's sufficient. Is OP_CAST always zero-extend
->> or do we need to check for something specific here?
+There's more than 100 tests in the validation test suite. That makes it
+cumbersome to notice test breakage in because the results don't fit on =
+single
+page.
 
-On Mon, Aug 29, 2011 at 11:32 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> OP_CAST is always a zero-extend, OP_SCAST is a sign-extending one.
->
-> (Of course, they may be *truncating* casts too, which don't need to
-> generate any code on most architectures).
->
-> OP_PTRCAST should act as OP_CAST.
+We don't expect to see most tests to pass so it's much more convenient =
+to
+only be verbose for failing test cases. This patch changes the
+'test-suite' output to report progress on a single line unless a test c=
+ase
+fails.
 
-OK, makes perfect sense. We don't support OP_SCAST or OP_PTRCAST yet
-so those should be fine. I fixed OP_CAST like this:
+Current master 'make check' output looks as follows:
 
-https://github.com/penberg/sparse-llvm/commit/2dea6f7fb07cd18255cf1d73079638dc96bdd08b
+  Makefile:53: Your system does not have libxml, disabling c2xml
+       TEST    preprocessor/preprocessor14.c ( Preprocessor #14)
+  error: actual output text does not match expected output text.
+  error: see preprocessor/preprocessor14.c.output.* for further investi=
+gation.
+  --- preprocessor/preprocessor14.c.output.expected	2011-08-26 05:47:22=
+=2E000000000 +0000
+  +++ preprocessor/preprocessor14.c.output.got	2011-08-26 05:47:22.0000=
+00000 +0000
+  @@ -1,2 +1,2 @@
 
-So comparison operators should be OK now.
+  -
+  +,
+  info: test 'preprocessor/preprocessor14.c' is known to fail
+       TEST    static-forward-decl.c ( static forward declaration)
+  error: actual error text does not match expected error text.
+  error: see static-forward-decl.c.error.* for further investigation.
+  --- static-forward-decl.c.error.expected	2011-08-26 05:47:22.00000000=
+0 +0000
+  +++ static-forward-decl.c.error.got	2011-08-26 05:47:22.000000000 +00=
+00
+  @@ -0,0 +1 @@
+  +static-forward-decl.c:3:5: warning: symbol 'f' was not declared. Sho=
+uld it be static?
+  info: test 'static-forward-decl.c' is known to fail
+       TEST    varargs1.c ( Varargs bogus warning regression test #1)
+  Out of 102 tests, 100 passed, 2 failed (2 of them are known to fail)
 
-On Mon, Aug 29, 2011 at 11:32 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> NOTE! The casting is dubious. We only have a single OP_FPCAST, for
-> example, and that's just broken. Right now "OP_FPCAST" means that the
-> *source* was a FP value. But if we cast *to* a FP value, it ends up
-> showing up as OP_[S]CAST, which is just bogus. The FPCAST should be
-> for any FP operation (to or from or both), and then the FPCAST logic
-> would have to decide how it handles it.
->
-> The FP support in general is pretty weak. The kernel doesn't do FP, I
-> never really cared about it.
+Cc: Ben Pfaff <blp@cs.stanford.edu>
+Cc: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+- v1 -> v2: Fix non-terminal output formatting
 
-Good to know. I've added support for simple FP ops though and they
-seem to be fine.
+ validation/test-suite |    9 +++++++--
+ 1 files changed, 7 insertions(+), 2 deletions(-)
 
-                        Pekka
+diff --git a/validation/test-suite b/validation/test-suite
+index 3c011c6..543a94a 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -94,8 +94,11 @@ do_test()
+ 		return 2
+ 	fi
+ 	test_name=3D$last_result
+-
+-	echo "     TEST    $test_name ($file)"
++	if test -t 1; then
++		printf "\r     TEST    %-80s" "$file ($test_name)"
++	else
++		echo "     TEST    $test_name ($file)"
++	fi
+=20
+ 	# does the test provide a specific command ?
+ 	cmd=3D`eval echo $default_path/$default_cmd`
+@@ -128,6 +131,7 @@ do_test()
+ 	for stream in output error; do
+ 		diff -u "$file".$stream.expected "$file".$stream.got > "$file".$stre=
+am.diff
+ 		if [ "$?" -ne "0" ]; then
++			echo ""
+ 			error "actual $stream text does not match expected $stream text."
+ 			error  "see $file.$stream.* for further investigation."
+ 			cat "$file".$stream.diff
+@@ -163,6 +167,7 @@ do_test_suite()
+=20
+ 	# prints some numbers
+ 	tests_nr=3D`expr $ok_tests + $ko_tests`
++	echo ""
+ 	echo -n "Out of $tests_nr tests, $ok_tests passed, $ko_tests failed"
+ 	echo " ($known_ko_tests of them are known to fail)"
+ 	if [ "$unhandled_tests" -ne "0" ]; then
+--=20
+1.7.4.1
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
