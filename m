@@ -1,36 +1,35 @@
-From: Dan Carpenter <error27@gmail.com>
-Subject: Re: improper sparse warnings in linux kernel build?
-Date: Fri, 9 Sep 2011 22:27:19 -0700
-Message-ID: <20110910052719.GC4807@mwanda>
-References: <201109091541.28395.hartleys@visionengravers.com>
+From: "Mr. Daniel Tsai" <danieltsai0@aol.com>
+Subject: Business transaction.
+Date: Sun, 11 Sep 2011 17:07:15 +0200
+Message-ID: <20110911150716.EDEEA4276C5_E6CCEA4F__32296.9725159512$1315796884$gmane$org@radon.cen.brad.ac.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain;
+	charset="Windows-1251"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pz0-f42.google.com ([209.85.210.42]:46073 "EHLO
-	mail-pz0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750986Ab1IJF14 (ORCPT
+Received: from hydrogen.cen.brad.ac.uk ([143.53.238.3]:38205 "EHLO
+	hydrogen.cen.brad.ac.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753416Ab1ILDHt (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 10 Sep 2011 01:27:56 -0400
-Content-Disposition: inline
-In-Reply-To: <201109091541.28395.hartleys@visionengravers.com>
+	Sun, 11 Sep 2011 23:07:49 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: H Hartley Sweeten <hartleys@visionengravers.com>
-Cc: linux-sparse@vger.kernel.org, Linux Kernel <linux-kernel@vger.kernel.org>
+To: danieltsai0@aol.com
 
-On Fri, Sep 09, 2011 at 03:41:28PM -0700, H Hartley Sweeten wrote:
-> I'm not really sure what the DEFINE_PER_CPU macro expands to so I'm not
-> sure if the 'static' in front is actually getting used or if sparse is just
-> confused.
-> 
-> Is this an actual problem in the linux kernel or is sparse just getting
-> tripped up by the DEFINE_PER_CPU macro?
-> 
+Hello my friend. My name is Daniel Tsai and
 
-I don't have a kernel git archive handy, but probably sparse is
-correct.  Do a "make arch/x86/kernel/cpu/mcheck/mce_intel.i" and run
-sparse on the .i file to find the line number that complains.
+I live in Hong Kong. I want you to be my
 
-regards,
-dan carpenter
+partner in a business transaction of 44.5Million USD.
 
+If you are interested for more details,
+
+you MUST reply me to my private email address:
+
+danieltsai11@yahoo.com.hk or danieltsai95@aol.com
+
+when I get your message, I will tell you what
+
+to do next. Thank you.
+
+Mr. Daniel Tsai
