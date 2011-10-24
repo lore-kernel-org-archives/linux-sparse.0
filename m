@@ -1,52 +1,31 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: [PATCH] sparse, llvm: Fix 'void *' pointer code generation
-Date: Mon, 24 Oct 2011 14:43:39 +0300
-Message-ID: <1319456619-11546-1-git-send-email-penberg@kernel.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH] sparse, llvm: Fix 'void *' pointer code generation
+Date: Mon, 24 Oct 2011 13:52:50 +0200
+Message-ID: <CA+55aFx1=9C_QDE2CfqLp1zg_t=x+VjKUPZgj2karJsS1FAZaA@mail.gmail.com>
+References: <1319456619-11546-1-git-send-email-penberg@kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:61220 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755331Ab1JXLnv (ORCPT
+Received: from mail-wy0-f174.google.com ([74.125.82.174]:45754 "EHLO
+	mail-wy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755628Ab1JXLxN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 24 Oct 2011 07:43:51 -0400
-Received: by bkbzt19 with SMTP id zt19so8090209bkb.19
-        for <linux-sparse@vger.kernel.org>; Mon, 24 Oct 2011 04:43:50 -0700 (PDT)
+	Mon, 24 Oct 2011 07:53:13 -0400
+Received: by wyg36 with SMTP id 36so6071036wyg.19
+        for <linux-sparse@vger.kernel.org>; Mon, 24 Oct 2011 04:53:12 -0700 (PDT)
+In-Reply-To: <1319456619-11546-1-git-send-email-penberg@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>
 
-Sparse front-end generates SYM_PTR with SYM_BASETYPE with bit_size set to -1
-for "void *" pointers. We currently map that to LLVMVoidType() but that no
-longer works with LLVM Subversion trunk:
+On Mon, Oct 24, 2011 at 1:43 PM, Pekka Enberg <penberg@kernel.org> wrote:
+>
+> Fix the issue by switching to LLVMIntType(bits_per_pointer) in
+> sym_basetype_type().
 
-  $ ./sparse-llvm validation/backend/struct.c
-  sparse-llvm: Type.cpp:676: static llvm::PointerType* llvm::PointerType::get(llvm::Type*, unsigned int): Assertion `isValidElementType(EltTy) && "Invalid type for pointer element!"' failed.
-Aborted
+Why bits_per_pointer? Isn't this the "base type" of void *? A more
+logical choice would seem to be to make it equivalent to "char *", and
+just make it fall through to the "case 8" case?
 
-Fix the issue by switching to LLVMIntType(bits_per_pointer) in
-sym_basetype_type().
-
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Jeff Garzik <jgarzik@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Pekka Enberg <penberg@kernel.org>
----
- sparse-llvm.c |    2 +-
- 1 files changed, 1 insertions(+), 1 deletions(-)
-
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index a85dfea..ec46a04 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -80,7 +80,7 @@ static LLVMTypeRef sym_basetype_type(struct symbol *sym)
- 	} else {
- 		switch (sym->bit_size) {
- 		case -1:
--			ret = LLVMVoidType();
-+			ret = LLVMIntType(bits_in_pointer);
- 			break;
- 		case 8:
- 			ret = LLVMInt8Type();
--- 
-1.7.6.4
-
+       Linus
