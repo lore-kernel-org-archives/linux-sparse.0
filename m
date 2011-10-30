@@ -1,77 +1,87 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: [PATCH] sparse, llvm: Add support for array types
-Date: Tue, 25 Oct 2011 12:18:02 +0300
-Message-ID: <1319534282-7768-1-git-send-email-penberg@kernel.org>
+Subject: [PATCH] sparse, llvm: Add support for union types
+Date: Sun, 30 Oct 2011 09:26:05 +0200
+Message-ID: <1319959565-3009-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ey0-f174.google.com ([209.85.215.174]:40675 "EHLO
-	mail-ey0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751864Ab1JYJSL (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:59014 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751383Ab1J3H0P (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 25 Oct 2011 05:18:11 -0400
-Received: by eye27 with SMTP id 27so172784eye.19
-        for <linux-sparse@vger.kernel.org>; Tue, 25 Oct 2011 02:18:09 -0700 (PDT)
+	Sun, 30 Oct 2011 03:26:15 -0400
+Received: by bkbzt4 with SMTP id zt4so1385013bkb.19
+        for <linux-sparse@vger.kernel.org>; Sun, 30 Oct 2011 00:26:14 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-This patch adds support for SYM_ARRAY in symbol_type().
+This patch adds support for SYM_UNION in symbol_type(). The LLVM API does not
+provide support for unions so we treat them as opaque structs.
 
 Cc: Christopher Li <sparse@chrisli.org>
 Cc: Jeff Garzik <jgarzik@redhat.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Pekka Enberg <penberg@kernel.org>
 ---
- sparse-llvm.c              |   17 +++++++++++++++++
- validation/backend/array.c |    6 ++++++
- 2 files changed, 23 insertions(+), 0 deletions(-)
- create mode 100644 validation/backend/array.c
+ sparse-llvm.c              |   20 ++++++++++++++++++++
+ validation/backend/union.c |   12 ++++++++++++
+ 2 files changed, 32 insertions(+), 0 deletions(-)
+ create mode 100644 validation/backend/union.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 9f4586f..52a487b 100644
+index a678d9c..7f46c8a 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -34,6 +34,20 @@ static inline bool symbol_is_fp_type(struct symbol *sym)
+@@ -80,6 +80,23 @@ static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
+ 	return ret;
+ }
  
- static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym);
- 
-+static LLVMTypeRef sym_array_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_union_type(LLVMModuleRef module, struct symbol *sym)
 +{
-+	LLVMTypeRef elem_type, ret;
-+	struct symbol *base_type;
++	LLVMTypeRef elements;
++	unsigned union_size;
 +
-+	base_type = sym->ctype.base_type;
++	/*
++	 * There's no union support in the LLVM API so we treat unions as
++	 * opaque structs. The downside is that we lose type information on the
++	 * members but as LLVM doesn't care, neither do we.
++	 */
++	union_size = sym->bit_size / 8;
 +
-+	elem_type = symbol_type(module, base_type);
-+	if (!elem_type)
-+		return NULL;
++	elements = LLVMArrayType(LLVMInt8Type(), union_size);
 +
-+	return LLVMArrayType(elem_type, sym->bit_size / 8);
++	return LLVMStructType(&elements, 1, 0 /* packed? */);
 +}
 +
- #define MAX_STRUCT_MEMBERS 64
- 
- static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
-@@ -135,6 +149,9 @@ static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
+ static LLVMTypeRef sym_ptr_type(LLVMModuleRef module, struct symbol *sym)
+ {
+ 	LLVMTypeRef type = symbol_type(module, sym->ctype.base_type);
+@@ -146,6 +163,9 @@ static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
+ 	case SYM_PTR:
+ 		ret = sym_ptr_type(module, sym);
+ 		break;
++	case SYM_UNION:
++		ret = sym_union_type(module, sym);
++		break;
  	case SYM_STRUCT:
  		ret = sym_struct_type(module, sym);
  		break;
-+	case SYM_ARRAY:
-+		ret = sym_array_type(module, sym);
-+		break;
- 	default:
- 		assert(0);
- 	}
-diff --git a/validation/backend/array.c b/validation/backend/array.c
+diff --git a/validation/backend/union.c b/validation/backend/union.c
 new file mode 100644
-index 0000000..bd3ec59
+index 0000000..e155f6a
 --- /dev/null
-+++ b/validation/backend/array.c
-@@ -0,0 +1,6 @@
-+static char array[128];
++++ b/validation/backend/union.c
+@@ -0,0 +1,12 @@
++union foo {
++	unsigned long		x;
++	unsigned char		y;
++	char			buf[128];
++};
++
++static union foo foo;
 +
 +/*
-+ * check-name: Array code generation
++ * check-name: Union code generation
 + * check-command: ./sparsec -c $file -o tmp.o
 + */
 -- 
