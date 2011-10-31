@@ -1,89 +1,83 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: [PATCH] sparse, llvm: Add support for union types
-Date: Sun, 30 Oct 2011 09:26:05 +0200
-Message-ID: <1319959565-3009-1-git-send-email-penberg@kernel.org>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: variable size array declarations
+Date: Mon, 31 Oct 2011 17:08:29 +0300
+Message-ID: <20111031140829.GD15494@mwanda>
+Mime-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="vni90+aGYgRvsTuO"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bw0-f46.google.com ([209.85.214.46]:59014 "EHLO
-	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751383Ab1J3H0P (ORCPT
+Received: from acsinet15.oracle.com ([141.146.126.227]:27896 "EHLO
+	acsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753653Ab1JaOH7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Oct 2011 03:26:15 -0400
-Received: by bkbzt4 with SMTP id zt4so1385013bkb.19
-        for <linux-sparse@vger.kernel.org>; Sun, 30 Oct 2011 00:26:14 -0700 (PDT)
+	Mon, 31 Oct 2011 10:07:59 -0400
+Received: from acsinet22.oracle.com (acsinet22.oracle.com [141.146.126.238])
+	by acsinet15.oracle.com (Switch-3.4.4/Switch-3.4.4) with ESMTP id p9VE7wnI009964
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
+	for <linux-sparse@vger.kernel.org>; Mon, 31 Oct 2011 14:07:58 GMT
+Received: from acsmt356.oracle.com (acsmt356.oracle.com [141.146.40.156])
+	by acsinet22.oracle.com (8.14.4+Sun/8.14.4) with ESMTP id p9VE7v0v019514
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
+	for <linux-sparse@vger.kernel.org>; Mon, 31 Oct 2011 14:07:57 GMT
+Received: from abhmt119.oracle.com (abhmt119.oracle.com [141.146.116.71])
+	by acsmt356.oracle.com (8.12.11.20060308/8.12.11) with ESMTP id p9VE7qJ2031378
+	for <linux-sparse@vger.kernel.org>; Mon, 31 Oct 2011 09:07:52 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-This patch adds support for SYM_UNION in symbol_type(). The LLVM API does not
-provide support for unions so we treat them as opaque structs.
 
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Jeff Garzik <jgarzik@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Pekka Enberg <penberg@kernel.org>
----
- sparse-llvm.c              |   20 ++++++++++++++++++++
- validation/backend/union.c |   12 ++++++++++++
- 2 files changed, 32 insertions(+), 0 deletions(-)
- create mode 100644 validation/backend/union.c
+--vni90+aGYgRvsTuO
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index a678d9c..7f46c8a 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -80,6 +80,23 @@ static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
- 	return ret;
- }
- 
-+static LLVMTypeRef sym_union_type(LLVMModuleRef module, struct symbol *sym)
-+{
-+	LLVMTypeRef elements;
-+	unsigned union_size;
-+
-+	/*
-+	 * There's no union support in the LLVM API so we treat unions as
-+	 * opaque structs. The downside is that we lose type information on the
-+	 * members but as LLVM doesn't care, neither do we.
-+	 */
-+	union_size = sym->bit_size / 8;
-+
-+	elements = LLVMArrayType(LLVMInt8Type(), union_size);
-+
-+	return LLVMStructType(&elements, 1, 0 /* packed? */);
-+}
-+
- static LLVMTypeRef sym_ptr_type(LLVMModuleRef module, struct symbol *sym)
- {
- 	LLVMTypeRef type = symbol_type(module, sym->ctype.base_type);
-@@ -146,6 +163,9 @@ static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
- 	case SYM_PTR:
- 		ret = sym_ptr_type(module, sym);
- 		break;
-+	case SYM_UNION:
-+		ret = sym_union_type(module, sym);
-+		break;
- 	case SYM_STRUCT:
- 		ret = sym_struct_type(module, sym);
- 		break;
-diff --git a/validation/backend/union.c b/validation/backend/union.c
-new file mode 100644
-index 0000000..e155f6a
---- /dev/null
-+++ b/validation/backend/union.c
-@@ -0,0 +1,12 @@
-+union foo {
-+	unsigned long		x;
-+	unsigned char		y;
-+	char			buf[128];
-+};
-+
-+static union foo foo;
-+
-+/*
-+ * check-name: Union code generation
-+ * check-command: ./sparsec -c $file -o tmp.o
-+ */
--- 
-1.7.6.4
+I am trying to check something in Smatch with variable size arrays
+and I'm running into problems.  Here is the function I'm trying to
+parse.
 
+void func(int x)
+{
+	char buf[x];
+}
+
+Array symbols have an ->array_size.  It gets set correctly in parse.c
+to expression of type EXPR_SYMBOL.  But by the time I parse it in
+Smatch the ->array_size is now an EXPR_PREOP (a dereference).  In
+fact all the variables seem to get change to dereferences of the
+variables.
+
+So if I have:
+	char buf[a + b + *c + 4];
+Smatch gets:
+	char buf[*a + *b + **c + 4];
+
+I'm not sure where this is getting changed or why.
+
+regards,
+dan carpenter
+
+
+--vni90+aGYgRvsTuO
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1.4.11 (GNU/Linux)
+
+iQIcBAEBAgAGBQJOrqvdAAoJEOnZkXI/YHqRbTcQAIgZaTq15hQcjEhjDftczcac
+06XuLNT3vanZU5+/QusE2pEBj4lCioDK7nLk1fYZCynhsJ/hcIHHqnQ20bwa9b/K
+9YS5nolAzZtPiwGmKL6Dr9v9kowMW7S0htVHKUqrMVOo8pfQ2ykBRUdMddjAUm08
+GzHtwqCwcX/p+qLZ9a1ZsvKrNPNTxrBj8jUaDDoURIQEQ3GGTGay77zui5pSOAKb
+A1CgLzdMLjGC7tiAPK2ip/5je64We0+syJg9NfAzyf0CIkga/5T3dLPB8fiRi/AV
+U/nbneXDasJN2VOxmWyLxy1gx9r7hBRV/RebRQyXQig+q7wBqVonzhNeeIIR/aPM
+TSFg27xA5ay+21KVES+dsi6P8lTTw7HrqgPEb5ItyG9yHTK9eMV1PDvO/z+FwJc5
+Dc+1BbSug2uBUM+Boy80cQe/LodTPtqdOym2jBdNPHQLnvX3yxrrRB6VgeZ7QJA0
+E3KjrPQQ2041iYtZtNWTvOfwJu5vBuJu6AznajL0adoR7KhqjhWAbp1jhnSz9mzH
+Pa+OOIPoeRx3NkQqHAtErnTCNtqIujf8Bf/4wHCPtFiC3/JI726NabZxH+Nm67qV
+p47R7ZUdmxxWIDRLbAFQkIJo2Zi0r24orWSlTu1Burh4b47MWI55npf0SAvd5MwS
+6YwLvlgt1gY88fHPZyMr
+=qYhZ
+-----END PGP SIGNATURE-----
+
+--vni90+aGYgRvsTuO--
