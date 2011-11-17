@@ -1,96 +1,55 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: variable size array declarations
-Date: Thu, 17 Nov 2011 11:13:52 +0300
-Message-ID: <20111117081352.GF29436@mwanda>
-References: <20111031140829.GD15494@mwanda>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Reduced call graph
+Date: Thu, 17 Nov 2011 14:12:21 -0800
+Message-ID: <CANeU7Qns9GDx=XtiEzBph-3gq7WKX+uZMyVu7y3GETzAenFEVg@mail.gmail.com>
+References: <CACsJy8A2X0WukKXerJAN6pxARoGSh1O=8FM+iTZL-xzDCQ1W=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="4VrXvz3cwkc87Wze"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from rcsinet15.oracle.com ([148.87.113.117]:63100 "EHLO
-	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752732Ab1KQIMg (ORCPT
+Received: from mail-gx0-f174.google.com ([209.85.161.174]:59280 "EHLO
+	mail-gx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752144Ab1KQWMW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 17 Nov 2011 03:12:36 -0500
-Received: from acsinet21.oracle.com (acsinet21.oracle.com [141.146.126.237])
-	by rcsinet15.oracle.com (Switch-3.4.4/Switch-3.4.4) with ESMTP id pAH8CZau005185
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2011 08:12:36 GMT
-Received: from acsmt356.oracle.com (acsmt356.oracle.com [141.146.40.156])
-	by acsinet21.oracle.com (8.14.4+Sun/8.14.4) with ESMTP id pAH8CYrV011413
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=NO)
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2011 08:12:35 GMT
-Received: from abhmt106.oracle.com (abhmt106.oracle.com [141.146.116.58])
-	by acsmt356.oracle.com (8.12.11.20060308/8.12.11) with ESMTP id pAH8CTfZ005924
-	for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2011 02:12:29 -0600
-Content-Disposition: inline
-In-Reply-To: <20111031140829.GD15494@mwanda>
+	Thu, 17 Nov 2011 17:12:22 -0500
+Received: by ggnb2 with SMTP id b2so1713703ggn.19
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2011 14:12:21 -0800 (PST)
+In-Reply-To: <CACsJy8A2X0WukKXerJAN6pxARoGSh1O=8FM+iTZL-xzDCQ1W=w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Nguyen Thai Ngoc Duy <pclouds@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-
---4VrXvz3cwkc87Wze
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-
-On Mon, Oct 31, 2011 at 05:08:29PM +0300, Dan Carpenter wrote:
-> I am trying to check something in Smatch with variable size arrays
-> and I'm running into problems.  Here is the function I'm trying to
-> parse.
->=20
-> void func(int x)
-> {
-> 	char buf[x];
-> }
->=20
-> Array symbols have an ->array_size.  It gets set correctly in parse.c
-> to expression of type EXPR_SYMBOL.  But by the time I parse it in
-> Smatch the ->array_size is now an EXPR_PREOP (a dereference).  In
-> fact all the variables seem to get change to dereferences of the
-> variables.
+On Wed, Nov 16, 2011 at 5:23 AM, Nguyen Thai Ngoc Duy <pclouds@gmail.com> wrote:
+> Hi,
 >
+> Is it possible to ask "graph" to generate a call graph of all calls
+> from main() to specific function? If "graph" does not support it (I
+> suspect so after looking at graph.c), could you please give me a few
+> hints how to do it? I'm completely new to sparse.
 
-I tracked this down.  In smatch, how I use sparse is that I call
-sparse_keep_tokens() and then I parse the resulting symbol list
-myself.
+Hi Duy,
 
-In examine_array_type() we call get_expression_value() which changes
-the symbols from normal symbols to dereferences.  The call tree is:
-examine_array_type()
--> get_expression_value()
-   -> __get_expression_value()
-      -> evaluate_expression()
-         -> evaluate_symbol_expression() <- change happens here.
+In order to find out all the call graphs, you need to at least run
+very file in sparse. Then for each function, after linearization, you
+can find out all the "call" instruction. A easier but not so precise
+way is examine the "access" list in the entry point. That will
+include every symbol rather than just function called.
 
-The problem for me is that not all expressions have been evualated
-like this so it's not consistent.
+e.g.
 
-regards,
-dan carpenter
+		struct entrypoint *ep;
+		pseudo_t p;
 
+		expand_symbol(sym);
+		ep = linearize_symbol(sym);
 
---4VrXvz3cwkc87Wze
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+		FOR_EACH_PTR(ep->accesses, p) {
+			printf("   pseudo: %p type %d %s\n", p, p->type, show_pseudo(p));
+		} END_FOR_EACH_PTR(p);
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1.4.11 (GNU/Linux)
+You just filter out the non-function symbols. However you need to write
+some code to do that recursively.
 
-iQIcBAEBAgAGBQJOxMI/AAoJEOnZkXI/YHqR5B4QAIdpUf0BvapTqRWzCU1yHaHS
-zDNuAgWVsZcVChMhfiEV9ZOS1tW4eXBUHi3QsgSr/QYxd+WCmBZxqaAV4xMvngJP
-uQUXdLY0SFNiu815Zj/Rx1x16ILg7YX1ZZqAt5KnNQuB51/i0Uewr76og//bq1sw
-nMJc6OkCEYaCluVWTAanxXJIwyv3PrNJW4q5VFWV6RlopL9BMqxDUUCTwRzzAwGP
-Fj44oy5I41FyR0V717Ky/BtiuXOyF7boS4CJTOW+7xbu76pXnQPa+Ied+TZPVjoG
-B9+gKzuTdDY2udcEHH2U7vQe+HD/WZKhZe9luuDdJ8Iq3bWfxS+r1+4lC+s98zgQ
-ATQGQAFR6lpJr2K29NJsJMVUxEJCblR2NapE7NUuT75uVuLoeFsVZZSEE2r4uFoQ
-UkvCtkksEZDUOm2jvBSwyEYtwyXpzjohYKGbcFL9FrSJvyNzpVOfn5Yzt4+AILhM
-vFgYHYKyrLb8NgkRF3+XbrjIUX+s6F2hbun/iKjcZm8yfHZ2gh5r9SYghLdvIu0Z
-HjULTihYYdjcFn4WEfKjvZiAlPsppfJVsQ3qmKt6x/Cm0KvKOzfluZ5tYIozPsG7
-e1MiHi8vGj0bCW9Yd/RTxFzRFcCuabNUOuditBAvnLXWLPE/3o++/qQTjy5K/Dqv
-siBOfPZ+xXiI9pgYlIE8
-=PLzy
------END PGP SIGNATURE-----
+Hope that helps.
 
---4VrXvz3cwkc87Wze--
+Chris
