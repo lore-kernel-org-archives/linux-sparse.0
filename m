@@ -1,49 +1,64 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: OP_CALL and function pointers
-Date: Fri, 18 Nov 2011 14:42:17 +0200
-Message-ID: <CAOJsxLFsLJaYNc4Q87o7tfmdZ9GZVVrCYs3Lyfh1gMc19VhLYQ@mail.gmail.com>
-References: <CAOJsxLHB0V=RxPmhQiW=G-2VSno9tJm3GHE4YFsUybkQjHXNnA@mail.gmail.com>
-	<CA+55aFx56oV0cNvbDxE7g5fPfGrBST56SGqR9Wp7O+kBxGH+-g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH 1/2] sparse, llvm: Make 'sparsec' error handling more robust
+Date: Fri, 18 Nov 2011 17:30:58 +0200
+Message-ID: <1321630259-2213-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:47997 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753161Ab1KRMmS convert rfc822-to-8bit (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:56579 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757808Ab1KRPbU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 18 Nov 2011 07:42:18 -0500
-Received: by vcbfk1 with SMTP id fk1so3086900vcb.19
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Nov 2011 04:42:17 -0800 (PST)
-In-Reply-To: <CA+55aFx56oV0cNvbDxE7g5fPfGrBST56SGqR9Wp7O+kBxGH+-g@mail.gmail.com>
+	Fri, 18 Nov 2011 10:31:20 -0500
+Received: by bke11 with SMTP id 11so3557738bke.19
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Nov 2011 07:31:18 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Jeff Garzik <jeff@garzik.org>, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, Nov 18, 2011 at 9:41 AM, Pekka Enberg <penberg@kernel.org> wrot=
-e:
->> I'm implementing support for function pointer calls and I noticed th=
-at
->> ->func->sym in 'strut instruction' is not SYM_NODE for function
->> pointers like it is for normal functions. Why is that?
+Make 'sparsec' more robust against SIGSEGV in Sparse/LLVM code so that 'make
+check' detects test breakage.
 
-On Fri, Nov 18, 2011 at 2:24 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> There *is* no real symbol to work with. It's an expression. The
-> expression may not even be a symbol, it could easily be some real
-> expression like
->
-> =A0 =A0 =A0ret =3D (flag ? fn1 : fn2)(arg1, arg2);
->
-> so trying to make up some "symbol" for it is just lying and crazy.
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ sparsec |    9 ++++++++-
+ 1 files changed, 8 insertions(+), 1 deletions(-)
 
-Aah, the current code by Jeff for OP_CALL makes perfect sense now. Than=
-ks!
+diff --git a/sparsec b/sparsec
+index 1e5c8bd..33e1a2b 100755
+--- a/sparsec
++++ b/sparsec
+@@ -2,6 +2,8 @@
+ #
+ # GCC compatible C compiler based on Sparse LLVM
+ 
++set +e
++
+ SPARSEOPTS=""
+ DIRNAME=`dirname $0`
+ 
+@@ -27,9 +29,12 @@ while [ $# -gt 0 ]; do
+ 	shift
+ done
+ 
++TMPLLVM=`mktemp -t tmp.XXXXXX`".llvm"
+ TMPFILE=`mktemp -t tmp.XXXXXX`".o"
+ 
+-$DIRNAME/sparse-llvm $SPARSEOPTS | llc | as -o $TMPFILE
++$DIRNAME/sparse-llvm $SPARSEOPTS > $TMPLLVM
++
++llc $TMPLLVM | as -o $TMPFILE
+ 
+ if [ $NEED_LINK -eq 1 ]; then
+ 	if [ -z $OUTFILE ]; then
+@@ -43,3 +48,5 @@ else
+ 	fi
+ 	mv $TMPFILE $OUTFILE
+ fi
++
++rm -f $TMPLLVM
+-- 
+1.7.6.4
 
-                        Pekka
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
