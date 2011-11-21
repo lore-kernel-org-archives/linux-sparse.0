@@ -1,53 +1,67 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: cannot size expression - exported array in kernel
-Date: Mon, 21 Nov 2011 11:06:57 +0100
-Message-ID: <1321870017.3999.31.camel@jlt3.sipsolutions.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [PATCH 1/3] sparse, llvm: Fix symbol initializer code generation
+Date: Mon, 21 Nov 2011 22:03:28 +0200
+Message-ID: <1321905810-2253-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from he.sipsolutions.net ([78.46.109.217]:42159 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754619Ab1KUKHB (ORCPT
+Received: from mail-bw0-f46.google.com ([209.85.214.46]:54471 "EHLO
+	mail-bw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753055Ab1KUUDj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 21 Nov 2011 05:07:01 -0500
-Received: by sipsolutions.net with esmtpsa (TLS1.0:RSA_AES_256_CBC_SHA1:32)
-	(Exim 4.77)
-	(envelope-from <johannes@sipsolutions.net>)
-	id 1RSQmC-0003KK-FR
-	for linux-sparse@vger.kernel.org; Mon, 21 Nov 2011 11:07:00 +0100
+	Mon, 21 Nov 2011 15:03:39 -0500
+Received: by bke11 with SMTP id 11so7013808bke.19
+        for <linux-sparse@vger.kernel.org>; Mon, 21 Nov 2011 12:03:37 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Here's some code from net/wireless/util.c, expressed as a test case. I
-have no idea how to fix it. The actual output is:
+The output_data() function does not see right hand side symbols for expressions
+such as this in target.c:
 
-+sizeof-external.c:11:16: error: cannot size expression
+  struct symbol *size_t_ctype = &uint_ctype;
 
-while none is expected.
+Therefore, call output_data() recursively if LLVMGetNamedGlobal() returns NULL
+for a symbol.
 
-johannes
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ sparse-llvm.c |    6 ++++--
+ 1 files changed, 4 insertions(+), 2 deletions(-)
 
-/***** begin file validation/sizeof-external.c **** */
-/* #include file that declares it */
-extern const unsigned char bridge_tunnel_header[6];
-
-/* define it */
-const unsigned char bridge_tunnel_header[] = { 1, 2, 3, 4, 5, 6 };
-/* EXPORT_SYMBOL it */
-extern typeof(bridge_tunnel_header) bridge_tunnel_header; /* ... */
-
-static int bth_size(void)
-{
-	return sizeof(bridge_tunnel_header);
-}
-
-/*
- * check-name: Check sizeof(kernel_exported_external_variable)
- *
- * check-error-start
- * check-error-end
- */
-
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index c037e02..ca49a6e 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1055,7 +1055,7 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	END_FOR_EACH_PTR(bb);
+ }
+ 
+-static int output_data(LLVMModuleRef module, struct symbol *sym)
++static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ {
+ 	struct expression *initializer = sym->initializer;
+ 	LLVMValueRef initial_value;
+@@ -1071,6 +1071,8 @@ static int output_data(LLVMModuleRef module, struct symbol *sym)
+ 			struct symbol *sym = initializer->symbol;
+ 
+ 			initial_value = LLVMGetNamedGlobal(module, show_ident(sym->ident));
++			if (!initial_value)
++				initial_value = output_data(module, sym);
+ 			break;
+ 		}
+ 		default:
+@@ -1090,7 +1092,7 @@ static int output_data(LLVMModuleRef module, struct symbol *sym)
+ 
+ 	LLVMSetInitializer(data, initial_value);
+ 
+-	return 0;
++	return data;
+ }
+ 
+ static int compile(LLVMModuleRef module, struct symbol_list *list)
+-- 
+1.7.6.4
 
