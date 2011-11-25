@@ -1,63 +1,68 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: suggestion for Merging LLVM
-Date: Fri, 25 Nov 2011 08:43:01 +0200
-Message-ID: <CAOJsxLHyX9-v2JZcXp+otH+-54UJjURXY_XmG3ndEmXM56U=bw@mail.gmail.com>
-References: <CANeU7QkLTOaH7LNiyTEmUOrWb4Tb39+HKM0xPnowL5s0Qbbwyw@mail.gmail.com>
-	<4ECB38B1.8020803@garzik.org>
-	<1321941674.1428.124.camel@jaguar>
-	<CANeU7Q=4e_jtdE5OXpat9VFU_KpsLrGe4LYpmy=y9L3QyBQ3sg@mail.gmail.com>
-	<4ECEFC7E.5060905@garzik.org>
-	<1322200349.1428.127.camel@jaguar>
-	<CANeU7Qn9Psd39taY-fRAZ_AJs2JgToZUD5Kq+fo-=i5M90FDdg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH] sparse, llvm: Don't fail the build if LLVM is too old
+Date: Fri, 25 Nov 2011 09:06:44 +0200
+Message-ID: <1322204804-6627-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vx0-f174.google.com ([209.85.220.174]:56127 "EHLO
-	mail-vx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751177Ab1KYGnC convert rfc822-to-8bit (ORCPT
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:45658 "EHLO
+	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751052Ab1KYHHI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Nov 2011 01:43:02 -0500
-Received: by vcbfk14 with SMTP id fk14so1841023vcb.19
-        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2011 22:43:01 -0800 (PST)
-In-Reply-To: <CANeU7Qn9Psd39taY-fRAZ_AJs2JgToZUD5Kq+fo-=i5M90FDdg@mail.gmail.com>
+	Fri, 25 Nov 2011 02:07:08 -0500
+Received: by faas1 with SMTP id s1so1937379faa.19
+        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2011 23:07:07 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>
 
-On Thu, Nov 24, 2011 at 9:52 PM, Pekka Enberg <penberg@kernel.org> wrot=
-e:
->>> On 11/24/2011 08:45 PM, Christopher Li wrote:
->>> > I am using llvm 2.9, I guess my llvm is too new?
->>
->> On Thu, 2011-11-24 at 21:25 -0500, Jeff Garzik wrote:
->>> I would guess too-old. =A0I use a git checkout from the LLVM repo.
->>
->> We require LLVM 3.0 which hasn't been released because of this API:
+Disable sparse-llvm compilation if LLVM version is too old.
 
-On Fri, Nov 25, 2011 at 8:28 AM, Christopher Li <sparse@chrisli.org> wr=
-ote:
-> Hmm, how does older version of LLVM deal with structure refering them=
-self?
->
-> I hope there is a way so I can at least have an option to use the
-> released version of LLVM. =A0I don't mind using LLVM 3.0 if it is the=
-re,
-> but requiring unreleased version of LLVM seems too bleeding edge.
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ Makefile |   13 ++++++++++---
+ 1 files changed, 10 insertions(+), 3 deletions(-)
 
-I wasn't able to find out any C API for that and assume it was only
-possible with the C++ API. That said, I'd also be happy to use
-something else to be compatible with older versions if there is one.
-Any LLVM experts on the list?
+diff --git a/Makefile b/Makefile
+index e508cae..2b5976d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -23,6 +23,8 @@ HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
+ 		echo 'yes'; rm -f .gcc-test.d .gcc-test.o .gcc-test.c)
+ HAVE_GTK2:=$(shell pkg-config --exists gtk+-2.0 2>/dev/null && echo 'yes')
+ HAVE_LLVM:=$(shell llvm-config --version >/dev/null 2>&1 && echo 'yes')
++HAVE_LLVM_VERSION:=$(shell llvm-config --version | grep "^[3-9].*" >/dev/null 2>&1 && echo yes)
++LLVM_VERSION=$(shell llvm-config --version)
+ 
+ GCC_BASE = $(shell $(CC) --print-file-name=)
+ BASIC_CFLAGS = -DGCC_BASE=\"$(GCC_BASE)\"
+@@ -65,7 +67,13 @@ else
+ $(warning Your system does not have libgtk2, disabling test-inspect)
+ endif
+ 
+-ifeq ($(HAVE_LLVM),yes)
++ifneq ($(HAVE_LLVM),yes)
++$(warning Your system does not have llvm, disabling sparse-llvm)
++else
++ifneq ($(HAVE_LLVM_VERSION),yes)
++$(warning LLVM 3.0 or later required. Your system has version $(LLVM_VERSION) installed.)
++HAVE_LLVM=no
++else
+ LLVM_PROGS := sparse-llvm
+ $(LLVM_PROGS): LD := g++
+ LDFLAGS += $(shell llvm-config --ldflags)
+@@ -76,8 +84,7 @@ INST_PROGRAMS += sparse-llvm sparsec
+ sparse-llvm_EXTRA_DEPS := sparse-llvm.o
+ sparse-llvm.o $(sparse-llvm_EXTRA_DEPS): BASIC_CFLAGS += $(LLVM_CFLAGS)
+ sparse-llvm_EXTRA_OBJS := $(LLVM_LIBS)
+-else
+-$(warning Your system does not have llvm, disabling sparse-llvm)
++endif
+ endif
+ 
+ LIB_H=    token.h parse.h lib.h symbol.h scope.h expression.h target.h \
+-- 
+1.7.6.4
 
-LLVM 3.0 is going to be released "real soon now" so I don't think it's
-a problem in practice. We'd need to add a version check, though so we
-don't break build on machines that have older LLVM installed.
-
-                                 Pekka
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
