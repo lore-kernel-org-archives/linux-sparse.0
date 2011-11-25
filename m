@@ -1,59 +1,76 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: suggestion for Merging LLVM
-Date: Fri, 25 Nov 2011 11:13:57 -0800
-Message-ID: <CANeU7Qm6Q3hxeEUFKJieapfXrZ1PGSJ_4oGbZ4CG7s1ccbbPPQ@mail.gmail.com>
-References: <CANeU7QkLTOaH7LNiyTEmUOrWb4Tb39+HKM0xPnowL5s0Qbbwyw@mail.gmail.com>
-	<4ECB38B1.8020803@garzik.org>
-	<1321941674.1428.124.camel@jaguar>
-	<CANeU7Q=4e_jtdE5OXpat9VFU_KpsLrGe4LYpmy=y9L3QyBQ3sg@mail.gmail.com>
-	<4ECEFC7E.5060905@garzik.org>
-	<1322200349.1428.127.camel@jaguar>
-	<CANeU7Qn9Psd39taY-fRAZ_AJs2JgToZUD5Kq+fo-=i5M90FDdg@mail.gmail.com>
-	<CAOJsxLHyX9-v2JZcXp+otH+-54UJjURXY_XmG3ndEmXM56U=bw@mail.gmail.com>
-	<CANeU7QkiPcdzQYf9QBdSZ0UmOJGNE2ijk1Ys0dAVeS6tGaS+Zw@mail.gmail.com>
-	<4ECFD5C9.20702@garzik.org>
+Subject: Re: [PATCH] sparse, llvm: Don't fail the build if LLVM is too old
+Date: Fri, 25 Nov 2011 11:50:14 -0800
+Message-ID: <CANeU7Qkac78FrYJ4daC=Kq+gFnw67ih-Ho-RZe79P=8JoTqiYw@mail.gmail.com>
+References: <1322204804-6627-1-git-send-email-penberg@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:33675 "EHLO
+Received: from mail-fx0-f46.google.com ([209.85.161.46]:44392 "EHLO
 	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751548Ab1KYTN7 convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1751445Ab1KYTuQ convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Nov 2011 14:13:59 -0500
-Received: by faas1 with SMTP id s1so2352918faa.19
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Nov 2011 11:13:58 -0800 (PST)
-In-Reply-To: <4ECFD5C9.20702@garzik.org>
+	Fri, 25 Nov 2011 14:50:16 -0500
+Received: by faas1 with SMTP id s1so2361270faa.19
+        for <linux-sparse@vger.kernel.org>; Fri, 25 Nov 2011 11:50:15 -0800 (PST)
+In-Reply-To: <1322204804-6627-1-git-send-email-penberg@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jeff@garzik.org>
-Cc: Pekka Enberg <penberg@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Jeff Garzik <jgarzik@redhat.com>
 
-On Fri, Nov 25, 2011 at 9:52 AM, Jeff Garzik <jeff@garzik.org> wrote:
+=46irst of all, I want to make the sparse-llvm works on release version=
+ as well,
+if that is not too much trouble.
+
+
+On Thu, Nov 24, 2011 at 11:06 PM, Pekka Enberg <penberg@kernel.org> wro=
+te:
+> =A0HAVE_LLVM:=3D$(shell llvm-config --version >/dev/null 2>&1 && echo=
+ 'yes')
+> +HAVE_LLVM_VERSION:=3D$(shell llvm-config --version | grep "^[3-9].*"=
+ >/dev/null 2>&1 && echo yes)
+> +LLVM_VERSION=3D$(shell llvm-config --version)
 >
-> Pulling in bits of LLVM itself into sparse, to make older versions wo=
-rk,
-> seems like a mess of work and maintenance without a driving need. =A0=
- Just
-> note that 3.0 is required, and things will sort themselves out in tim=
-e.
+>  GCC_BASE =3D $(shell $(CC) --print-file-name=3D)
+>  BASIC_CFLAGS =3D -DGCC_BASE=3D\"$(GCC_BASE)\"
+> @@ -65,7 +67,13 @@ else
+>  $(warning Your system does not have libgtk2, disabling test-inspect)
+>  endif
+>
+> -ifeq ($(HAVE_LLVM),yes)
+> +ifneq ($(HAVE_LLVM),yes)
+> +$(warning Your system does not have llvm, disabling sparse-llvm)
 
-I hate big mess too. However I have a strong motivation to support the
-released version of LLVM (if it does make a big mess in the process).
+Notice you use recursive assign here. It will cause "shell llvm-config
+--version"
+being execute every time $(LLVM_VERSION) is expanded. That slow down
+the makefile. Because LLVM_VERSION don't change during the compile.
+Better make it non-recursive assign so the llvm-config only evaluate on=
+ce.
 
-I am not asking to back port the LLVM 3.0 code to the 2.x series.
-That is wrong.  If 2.x does not have not provide this features, I am fi=
-ne
-with not supporting 2.x LLVM and require 3.0 only.
+I also don't want to put the sparse-llvm rules section in nested if.
+That is  makes it harder to read.
 
-However if it is just C vs C++ API, I don't mind accessing the C++ API =
-in 2.x.
-I believe we need to have a mechanism to use the LLVM C++ API any way.
-The LLVM C API is only a subset of the C++ API. I draw the line at
-accessing the API vs backing the LLVM code.
+I am thinking some thing like this:
 
-In the long way, sparse will have to deal with different version of
-LLVM any way.
+LLVM_VERSION :=3D $(shell llvm-config --version 2>/dev/null)
+LLVM_VERSION_LIST :=3D $(subst ., ,$(LLVM_VERSION))
+LLVM_VERSION_MAJOR :=3D $(word 1, $(LLVM_VERSION_LIST))
+HAVE_LLVM_V3 :=3D $(shell [ "$(LLVM_VERSION_MAJOR)" -ge 3 ] > /dev/null
+2>&1 && echo yes)
+
+ifeq ($(HAVE_LLVM_V3),yes)
+
+# rules to compile sparse-llvm
+
+else
+
+# warning of LLVM don't exist or too old
+
+endif
+
 
 Chris
 --
