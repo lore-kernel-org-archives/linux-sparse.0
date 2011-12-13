@@ -1,113 +1,42 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Sparse 0.4.4 is released
-Date: Fri, 25 Nov 2011 13:13:33 -0800
-Message-ID: <CANeU7Qn9GcQhX8bB43ivpQFfYHvbuQ73XZhsTfoiq6MO=g3+vA@mail.gmail.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: Re: suggestion for Merging LLVM
+Date: Tue, 13 Dec 2011 22:29:42 +0200
+Message-ID: <1323808182.1428.309.camel@jaguar>
+References: <CANeU7QkLTOaH7LNiyTEmUOrWb4Tb39+HKM0xPnowL5s0Qbbwyw@mail.gmail.com>
+	 <4ECB38B1.8020803@garzik.org> <1321941674.1428.124.camel@jaguar>
+	 <CANeU7Q=4e_jtdE5OXpat9VFU_KpsLrGe4LYpmy=y9L3QyBQ3sg@mail.gmail.com>
+	 <4ECEFC7E.5060905@garzik.org> <1322200349.1428.127.camel@jaguar>
+	 <CANeU7Qn9Psd39taY-fRAZ_AJs2JgToZUD5Kq+fo-=i5M90FDdg@mail.gmail.com>
+	 <CAOJsxLHyX9-v2JZcXp+otH+-54UJjURXY_XmG3ndEmXM56U=bw@mail.gmail.com>
+	 <CANeU7QkiPcdzQYf9QBdSZ0UmOJGNE2ijk1Ys0dAVeS6tGaS+Zw@mail.gmail.com>
+	 <4ECFD5C9.20702@garzik.org>
+	 <CANeU7Qm6Q3hxeEUFKJieapfXrZ1PGSJ_4oGbZ4CG7s1ccbbPPQ@mail.gmail.com>
+	 <4ECFF825.2010906@garzik.org>
+	 <CANeU7QnXWEFFBsHs4V6Z_Mbpq4R+y=f_Ot5CL95WiE49ehDdOA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-fx0-f46.google.com ([209.85.161.46]:59083 "EHLO
-	mail-fx0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752151Ab1KYVNe convert rfc822-to-8bit (ORCPT
+Received: from filtteri2.pp.htv.fi ([213.243.153.185]:50934 "EHLO
+	filtteri2.pp.htv.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750786Ab1LMU3p (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 25 Nov 2011 16:13:34 -0500
-Received: by faas1 with SMTP id s1so2377170faa.19
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Nov 2011 13:13:33 -0800 (PST)
+	Tue, 13 Dec 2011 15:29:45 -0500
+In-Reply-To: <CANeU7QnXWEFFBsHs4V6Z_Mbpq4R+y=f_Ot5CL95WiE49ehDdOA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: lwn@lwn.net, Josh Triplett <josh@joshtriplett.org>, Dan Carpenter <error27@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-This is a long due release. The sparse 0.4.4 can be downloaded from:
+On Fri, Nov 25, 2011 at 12:18 PM, Jeff Garzik <jeff@garzik.org> wrote:
+> > According to http://llvm.org/ the release date for 3.0 is November 30,
+> > downgrading due to impatience.  If Pekka wants to get it going on 2.x I've
+> > no objection, but I am lazy and see no reason to do any extra work with 3.0
+> > release so close.
 
-http://www.kernel.org/pub/software/devel/sparse/dist/
+On Fri, 2011-11-25 at 12:30 -0800, Christopher Li wrote:
+> I will take a look how hard it is hard to support llvm 2.9. Don't know when the
+> 3.0 will be available in Fedora.
 
-The new sparse has a lot of bugs fixes. It will report less noise
-while checking the new kernel tree. It compiles better with the
-new gcc as well.
+Ping? LLVM 3.0 is out now officially.
 
-The sparse project is in the process of moving to the MIT license.
-Dan is coordinating the efforts. Most sparse developers sign off
-the MIT license already. If you haven't done so, please contact
-Dan off the list regarding the new license.
-
-Here is the short summery of the changes in this release.
-
-Have a nice long week end.
-
-Chris
-
-
-Ben Pfaff (1):
-      evaluate: Allow sizeof(_Bool) to succeed.
-
-Christopher Li (13):
-      inspect: adding function arugument list
-      Allow overwrite CFLAGS from command line
-      Ignore attribute vector_size
-      Remove set but not used variable
-      inspect: Add switch statement and more
-      validation: inline switch statement
-      Fix inlining switch statement.
-      Sparse 0.4.4-rc1
-      Add test case for empty asm clobbers
-      Fix parsing empty asm clobber
-      Sparse 0.4.4-rc2
-      Add test case for binary constants
-      sparse 0.4.4
-
-Dan Carpenter (1):
-      recognize binary constants
-
-Diego Elio Petten=F2 (3):
-      build: allow easy override of GCC_BASE
-      build: add an all-installable target that builds the targets to i=
-nstall.
-      Fix build with GCC 4.6 series.
-
-=46lorian Fainelli (1):
-      Makefile: warn user when libxml and/or libgtk2 are not available
-
-Jan Pokorn=FD (4):
-      remove unused "container" macro
-      flow.c: make comment for `dominates' reflect code
-      use ARRAY_SIZE() when possible (continued)
-      parse.c: "if(" -> "if (" adjustment
-
-Jonathan Neusch=E4fer (3):
-      fix a memory leak in compile-i386.c
-      FAQ: fix a typo ("because or")
-      fix common misspellings with codespell
-
-Kamil Dudka (2):
-      cse: treat PHI-nodes as other instructions
-      cse: update PHI users when throwing away an instruction
-
-Linus Torvalds (5):
-      Add new streams to a hash-list based on their names
-      Teach 'already_tokenized()' to use the stream name hash table
-      Make 'linearize_iterator()' helper function
-      Make 'linearize_switch()' helper function
-      Make 'linearize_return()' helper function
-
-Michael Stefaniuc (1):
-      Ignore the ms_hook_prologue attribute.
-
-Namhyung Kim (3):
-      use ARRAY_SIZE() when possible
-      Fix tokenizer for octal escape sequences
-      Update the validation check for escape sequences
-
-Nicolas Kaiser (1):
-      memops.c: always true expression
-
-Pekka Enberg (4):
-      sparse: Add 'artifical' to ignore attributes
-      sparse: Enable unhandled validation tests
-      Show expected vs. actual output on test failure
-      sparse: Fix __builtin_safe_p for pure and const functions
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
