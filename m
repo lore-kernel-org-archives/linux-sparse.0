@@ -1,65 +1,84 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: sparse-llvm has been merged
-Date: Wed, 18 Jan 2012 18:00:22 -0800
-Message-ID: <CANeU7Q=0U_47ZsKb6y6787S5mmiJnXjs_VK50u1OhXFiLamEYQ@mail.gmail.com>
+From: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
+Subject: [PATCH] evaluate: reject post-ops on void*
+Date: Mon, 23 Jan 2012 00:31:21 +0100
+Message-ID: <4F1C9C49.2050707@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gy0-f174.google.com ([209.85.160.174]:51338 "EHLO
-	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752707Ab2ASCAW (ORCPT
+Received: from fep21.mx.upcmail.net ([62.179.121.41]:41302 "EHLO
+	fep21.mx.upcmail.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752376Ab2AVXex (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 18 Jan 2012 21:00:22 -0500
-Received: by ghbg16 with SMTP id g16so3334282ghb.19
-        for <linux-sparse@vger.kernel.org>; Wed, 18 Jan 2012 18:00:22 -0800 (PST)
+	Sun, 22 Jan 2012 18:34:53 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>
 
- Pekka's sparse-llvm has been merged at sparse chrisl branch.
+Following example haven't been linearized correctly:
 
-http://git.kernel.org/?p=devel/sparse/chrisl/sparse.git;a=summary
+	static void *inc_ptr(void *a) {
+		return ++a;
+	}
 
-The new llvm back end require llvm 3.0.
+test-linearize:
 
-Chris
+	<entry-point>
+	add.32      %r2 <- %arg1, $-1
+	ret.32      %r2
 
-Merge branch 'sparse-llvm' of git://github.com/penberg/sparse-llvm.git
+Apparently, something went wrong with -1 value to be added to the original
+pointer.  When void* substituted for int*, the result is as expected
+(considering 32b int):
 
-    'master' branch of git://github.com/penberg/sparse-llvm.git
+	<entry-point>
+	add.32      %r2 <- %arg1, $4
+	ret.32      %r2
 
-        Revert "sparse: Bump up sizeof(_Bool) to 8 bits"
-        sparse, llvm: Add test case for <stdbool.h> type
-        sparse, llvm: Use LLVMInt1Type() in sym_basetype_type()
-        sparse, llvm: Don't fail the build if LLVM is too old
-        Merge pull request #6 from jgarzik/hacks
-        sparse, llvm: add loop testcase
-        sparse, llvm: Fix loops, by properly handling OP_PHI forward references
-        sparse, llvm: FP comparison op code generation
-        sparse, llvm: Simplify comparison op code generation
-        sparse, llvm: More comparison ops code generation
-        sparse, llvm: OP_SET_B and OP_SET_A code generation
-        sparse, llvm: Pointer cast code generation
-        sparse, llvm: Make llc output to stdout in sparsec
-        sparse, llvm: Fix 'extern' symbol code generation
-        sparse, llvm: Fix symbol initializer code generation
-        sparse, llvm: Function pointer code generation
-        sparse, llvm: Make 'sparsec' error handling more robust
-        sparse, llvm: Add support for union types
-        sparse, llvm: Add support for array types
-        sparse, llvm: Fix symbol_type() for bitfields and enums
-        sparse, llvm: Fix struct code generation
-        sparse, llvm: Use new LLVM type system API for structs
-        sparse, llvm: Fix 'void *' pointer code generation
-        sparse, llvm: Add support for logical ops
-        sparse: Bump up sizeof(_Bool) to 8 bits
-        sparse, llvm: Add support for symbol initializers
-        sparse, llvm: Add support for struct types
-        sparse, llvm: Fix code generation for 'long double' data type
-        Merge pull request #4 from jgarzik/hacks
-        sparse, llvm: support OP_STORE
-        sparse, llvm: move OP_COPY support to separate function.  Add
-FP support.
-        sparse, llvm: store module-local functions on function reference list
-        llvm, sparse: Fix symbol_is_fp_type() goof
-        Merge branch 'master' of github.com:penberg/sparse-llvm
+The proposed patch turns post-ops on void* operand into an error
+(taking the same route as with function operand).
+
+When running check with C=2 on my old linux-3.0.6 configuration,
+this detected a few occurencies:
+
+	drivers/scsi/scsi_proc.c:405:31: error: bad argument type for ++/--
+	drivers/scsi/scsi_proc.c:413:23: error: bad argument type for ++/--
+	net/bluetooth/hci_core.c:1545:29: error: bad argument type for ++/--
+	net/bluetooth/l2cap_core.c:1825:37: error: bad argument type for ++/--
+	net/bluetooth/bnep/core.c:239:13: error: bad argument type for ++/--
+	lib/sort.c:25:27: error: bad argument type for ++/--
+	lib/sort.c:26:27: error: bad argument type for ++/--
+	lib/check_signature.c:21:24: error: bad argument type for ++/--
+
+All of them seems trivially fixable.
+
+Alternatively, I can turn it to emit an warning only (should be
+configurable/default?).  To be noted that GCC will only emit an warning,
+and only if -pedantic or -Wpointer-arith specified, but I consider
+it rather a convenient exception.
+
+When this gets clear, I'll add also the respective test-case.
+
+Signed-off-by: Jan Pokorny <pokorny_jan@seznam.cz>
+---
+ evaluate.c |    3 ++-
+ 1 files changed, 2 insertions(+), 1 deletions(-)
+
+diff --git a/evaluate.c b/evaluate.c
+index bebe968..b6d706b 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1711,7 +1711,8 @@ static struct symbol *evaluate_postop(struct expression *expr)
+ 		multiply = 1;
+ 	} else if (class == TYPE_PTR) {
+ 		struct symbol *target = examine_pointer_target(ctype);
+-		if (!is_function(target))
++		/* beside function, reject also void* (due to sizeof(void)) */
++		if (target != &void_ctype && !is_function(target))
+ 			multiply = bits_to_bytes(target->bit_size);
+ 	}
+ 
+-- 
+1.7.3.4
+
