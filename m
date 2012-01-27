@@ -1,49 +1,69 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [RFC] evaluate: pointer arithmetics on plain void* (was: [PATCH]
- evaluate: reject post-ops on void*)
-Date: Tue, 24 Jan 2012 02:54:45 -0800
-Message-ID: <CANeU7Q=jtJ=cVcgKdidA_8Fds3qVX980M_-Q0OkiiOvvo-MRBA@mail.gmail.com>
+Subject: Re: [PATCH] evaluate: reject post-ops on void*
+Date: Fri, 27 Jan 2012 03:42:56 -0800
+Message-ID: <CANeU7Qnrjf9xAerY3azSUfSg1QBwrLSSVgXQLm_WVad5qnatnQ@mail.gmail.com>
 References: <4F1C9C49.2050707@seznam.cz>
-	<4F1D3741.2030604@seznam.cz>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:52127 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755327Ab2AXKyq convert rfc822-to-8bit (ORCPT
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:60575 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753753Ab2A0Lm5 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 24 Jan 2012 05:54:46 -0500
-Received: by yhoo21 with SMTP id o21so1724757yho.19
-        for <linux-sparse@vger.kernel.org>; Tue, 24 Jan 2012 02:54:45 -0800 (PST)
-In-Reply-To: <4F1D3741.2030604@seznam.cz>
+	Fri, 27 Jan 2012 06:42:57 -0500
+Received: by yenm6 with SMTP id m6so723296yen.19
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Jan 2012 03:42:56 -0800 (PST)
+In-Reply-To: <4F1C9C49.2050707@seznam.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Jan 23, 2012 at 2:32 AM, Jan Pokorn=FD <pokorny_jan@seznam.cz> =
+Sorry for the late reply.
+
+On Sun, Jan 22, 2012 at 3:31 PM, Jan Pokorn=FD <pokorny_jan@seznam.cz> =
 wrote:
-> Hm, I was talking about post-ops only, the example showed a failing p=
-re-op
-> ...both is a single case as evaluate_preop boils down to evaluate_pos=
-top.
+> Following example haven't been linearized correctly:
 >
-> I went through evaluate.c again and I think these cases should be som=
-ehow
-> unified (stating current state):
+> =A0 =A0 =A0 =A0static void *inc_ptr(void *a) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ++a;
+> =A0 =A0 =A0 =A0}
+>
+> test-linearize:
+>
+> =A0 =A0 =A0 =A0<entry-point>
+> =A0 =A0 =A0 =A0add.32 =A0 =A0 =A0%r2 <- %arg1, $-1
+> =A0 =A0 =A0 =A0ret.32 =A0 =A0 =A0%r2
 
-I am leaning towards make the explicit sizeof(void) as error.
-Implicate sizeof(void) used in the pointer arithmetic are (optional) wa=
-rnings.
-The question is we give warning or not. Hmm.
+Yes, you discover a bug in the area we did not treat
+type size consistently.
 
-However, forcing the type cast to get rid of the warning is very ugly.
-"(void*)(++(char*)a)" is harder to read than "++a".
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -1711,7 +1711,8 @@ static struct symbol *evaluate_postop(struct ex=
+pression *expr)
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0multiply =3D 1;
+> =A0 =A0 =A0 =A0} else if (class =3D=3D TYPE_PTR) {
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct symbol *target =3D examine_poin=
+ter_target(ctype);
+> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!is_function(target))
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* beside function, reject also void* (=
+due to sizeof(void)) */
+> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (target !=3D &void_ctype && !is_func=
+tion(target))
+> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0multiply =3D bits_to_b=
+ytes(target->bit_size);
+> =A0 =A0 =A0 =A0}
 
-It is too late tonight for me to look at the patch right now. I will
-take a closer look
-tomorrow.
+Good catch, but it does not cover all the special case yet.
+If you look at evaluate_sizeof(), there are 3 different types need spec=
+ial
+handling: void, bool, function.
+
+Same thing should be apply to implicit sizeof operations. They should
+share some code rather than enumerate the special case in two different
+places. Let me think about it more.
 
 Chris
 --
