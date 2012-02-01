@@ -1,71 +1,67 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] evaluate: reject post-ops on void*
-Date: Fri, 27 Jan 2012 03:42:56 -0800
-Message-ID: <CANeU7Qnrjf9xAerY3azSUfSg1QBwrLSSVgXQLm_WVad5qnatnQ@mail.gmail.com>
-References: <4F1C9C49.2050707@seznam.cz>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [RFC/PATCH 2/2] sparse, llvm: Fix varargs functions
+Date: Wed,  1 Feb 2012 11:55:52 +0200
+Message-ID: <1328090152-28299-2-git-send-email-penberg@kernel.org>
+References: <1328090152-28299-1-git-send-email-penberg@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:60575 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753753Ab2A0Lm5 convert rfc822-to-8bit (ORCPT
+Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:63424 "EHLO
+	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1756075Ab2BAJ4C (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Jan 2012 06:42:57 -0500
-Received: by yenm6 with SMTP id m6so723296yen.19
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Jan 2012 03:42:56 -0800 (PST)
-In-Reply-To: <4F1C9C49.2050707@seznam.cz>
+	Wed, 1 Feb 2012 04:56:02 -0500
+Received: by lagu2 with SMTP id u2so546473lag.19
+        for <linux-sparse@vger.kernel.org>; Wed, 01 Feb 2012 01:56:01 -0800 (PST)
+In-Reply-To: <1328090152-28299-1-git-send-email-penberg@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?ISO-8859-1?Q?Jan_Pokorn=FD?= <pokorny_jan@seznam.cz>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Pekka Enberg <penberg@kernel.org>
 
-Sorry for the late reply.
+=46rom: Benjamin Herrenschmidt <benh@kernel.crashing.org>
 
-On Sun, Jan 22, 2012 at 3:31 PM, Jan Pokorn=FD <pokorny_jan@seznam.cz> =
-wrote:
-> Following example haven't been linearized correctly:
->
-> =A0 =A0 =A0 =A0static void *inc_ptr(void *a) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0return ++a;
-> =A0 =A0 =A0 =A0}
->
-> test-linearize:
->
-> =A0 =A0 =A0 =A0<entry-point>
-> =A0 =A0 =A0 =A0add.32 =A0 =A0 =A0%r2 <- %arg1, $-1
-> =A0 =A0 =A0 =A0ret.32 =A0 =A0 =A0%r2
+We need to tell llvm about it or it won't generate the proper
+stack frame & argument list on some architectures.
 
-Yes, you discover a bug in the area we did not treat
-type size consistently.
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+[ penberg@kernel.org: Fix function pointer calls=C2=A0]
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ sparse-llvm.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
 
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -1711,7 +1711,8 @@ static struct symbol *evaluate_postop(struct ex=
-pression *expr)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0multiply =3D 1;
-> =A0 =A0 =A0 =A0} else if (class =3D=3D TYPE_PTR) {
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0struct symbol *target =3D examine_poin=
-ter_target(ctype);
-> - =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (!is_function(target))
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 /* beside function, reject also void* (=
-due to sizeof(void)) */
-> + =A0 =A0 =A0 =A0 =A0 =A0 =A0 if (target !=3D &void_ctype && !is_func=
-tion(target))
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0multiply =3D bits_to_b=
-ytes(target->bit_size);
-> =A0 =A0 =A0 =A0}
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index a291a0d..9226a21 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -79,7 +79,7 @@ static LLVMTypeRef sym_func_type(LLVMModuleRef module=
+, struct symbol *sym)
+ 		arg_type[idx++] =3D symbol_type(module, arg_sym);
+ 	} END_FOR_EACH_PTR(arg);
+ 	func_type =3D LLVMFunctionType(ret_type, arg_type, n_arg,
+-				     /* varargs? */ 0);
++				     sym->ctype.base_type->variadic);
+=20
+ 	return func_type;
+ }
+@@ -744,7 +744,7 @@ static LLVMTypeRef get_func_type(struct function *f=
+n, struct instruction *insn)
+ 	} END_FOR_EACH_PTR(arg);
+=20
+ 	func_type =3D LLVMFunctionType(ret_type, arg_type, n_arg,
+-				     /* varargs? */ 0);
++				     insn->fntype->variadic);
+=20
+ 	return func_type;
+ }
+--=20
+1.7.6.4
 
-Good catch, but it does not cover all the special case yet.
-If you look at evaluate_sizeof(), there are 3 different types need spec=
-ial
-handling: void, bool, function.
-
-Same thing should be apply to implicit sizeof operations. They should
-share some code rather than enumerate the special case in two different
-places. Let me think about it more.
-
-Chris
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
