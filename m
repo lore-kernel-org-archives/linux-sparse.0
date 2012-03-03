@@ -1,91 +1,87 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: sparse-llvm: pseudo_to_value: Assertion `sym->ident == ((void
- *)0)' failed
-Date: Mon, 13 Feb 2012 15:34:29 +0200
-Message-ID: <CAOJsxLFnSKkfaeTKkoN-RM5iRfunmktwDUwDOtTjKQ-U_65SXg@mail.gmail.com>
-References: <1329117459.2534.11.camel@pasglop>
+From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Subject: strings
+Date: Sat, 03 Mar 2012 21:46:12 +1100
+Message-ID: <1330771572.11728.76.camel@pasglop>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-tul01m020-f174.google.com ([209.85.214.174]:44064 "EHLO
-	mail-tul01m020-f174.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750835Ab2BMNea convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 13 Feb 2012 08:34:30 -0500
-Received: by obcva7 with SMTP id va7so6614517obc.19
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Feb 2012 05:34:29 -0800 (PST)
-In-Reply-To: <1329117459.2534.11.camel@pasglop>
+Received: from gate.crashing.org ([63.228.1.57]:47282 "EHLO gate.crashing.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752301Ab2CCKqT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 3 Mar 2012 05:46:19 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Mon, Feb 13, 2012 at 9:17 AM, Benjamin Herrenschmidt
-<benh@kernel.crashing.org> wrote:
-> Hi folks !
->
-> Haven't had a chance to investigate further today (and probably won't=
-)
-> so I'm shooting this here just in case ;-)
->
-> I was tracking down what looks like an LLVM bug with sign extension f=
-rom
-> 1-bit integers while playing with llvmpipe (gallium llvm backend) and
-> out of curiosity decided to look at what sparse generated when
-> sign-extending a bool :-)
->
-> So I added to my earlier hello.c some statements to that effect, and
-> trying to compile it results in:
->
-> sparse-llvm.c:311: pseudo_to_value: Assertion `sym->ident =3D=3D ((vo=
-id *)0)' failed.
->
-> The new hello.c is:
->
-> #include <stdio.h>
-> #include <stdbool.h>
->
-> int main(void)
-> {
-> =A0 =A0 =A0 =A0int i;
-> =A0 =A0 =A0 =A0double f1,f2;
-> =A0 =A0 =A0 =A0bool eq;
->
-> =A0 =A0 =A0 =A0printf("Hello World !\n");
->
-> =A0 =A0 =A0 =A0for (i =3D 0; i < 10; i ++)
-> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0printf("I can count to %d\n", i);
->
-> =A0 =A0 =A0 =A0printf("f1=3D");
-> =A0 =A0 =A0 =A0scanf("%f",&f1);
-> =A0 =A0 =A0 =A0printf("f2=3D");
-> =A0 =A0 =A0 =A0scanf("%f",&f2);
->
-> =A0 =A0 =A0 =A0eq =3D f1 =3D=3D f2;
->
-> =A0 =A0 =A0 =A0printf("f1=3D=3Df2: %d\n", (int)eq);
-> =A0 =A0 =A0 =A0return 0;
-> }
+Hi folks !
 
-I can reproduce the issue with this minimal test case:
+I just noticed, as I was digging into (yet another) unrelated llvm
+problem with my code, that sparse-llvm fails to compile something that
+has a statement such as:
 
-#include <stdio.h>
+static char *foo = "Foo !\n";
 
-int main(int argc, char *argv[])
-{
-	float f;
+It pukes in output_data(), where we have initializer non-NULL and
+initializer->type is EXPR_STRING. So we hit the default: case which is
+an assert(0);
 
-	scanf("%f", &f);
+Now a trivial "fix" below doesn't quite work:
 
-	return 0;
-}
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 9226a21..f151939 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1181,6 +1181,12 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 				initial_value = output_data(module, sym);
+ 			break;
+ 		}
++		case EXPR_STRING: {
++			const char *s = initializer->string->data;
++
++			initial_value = LLVMConstString(strdup(s), strlen(s) + 1, true);
++			break;
++		}
+ 		default:
+ 			assert(0);
+ 		}
 
-It looks like we need to teach pseudo_to_value() about ident symbols.
+That has two interesting effects. First, if llvm is compiled with asserts,
+it pukes claiming that the initializer is of the wrong type. Now that's
+odd because as far as I can tell, the type is an array of i8 ... and it
+works if you don't build the asserts in llvm.
 
-                        Pekka
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Mind you, I had that problem with a different program, which was using
+the various "InContext" variants of the various functions rather than
+the global context ones... because at one point I was using the global
+context for one of the LLVMInt8Type and that made it fail (again worked
+fine without asserts).
+
+Looks like the assert internally to LLVM is a pointer comparison of
+Type * so it has to resolve to -exactly- the same type object internally,
+pretty touchy. Maybe throwing a cast might help.
+
+The second effect however is that the result is not nice:
+
+  .../...
+
+@"<noident>" = private global [7 x i8] c"Foo !\0A\00"
+@foo = private global i8* @"<noident>"
+
+  .../...
+
+I haven't quite manage to coerce it to just have a single @foo = <something>
+so it looks like we need to separately define the storage (the string)
+and foo as a pointer to it, unless I missed something.
+
+I tried to use the same construct we use in pseudo_to_value() (I factored
+it out) but that results in worse output, where it now names the string
+(.str<N>) but then creates a <noident> ptr and then assigns that to foo...
+
+LLVM is harder than it seems :-)
+
+Cheers,
+Ben.
+
+
