@@ -1,87 +1,83 @@
-From: Benjamin Herrenschmidt <benh@kernel.crashing.org>
-Subject: strings
-Date: Sat, 03 Mar 2012 21:46:12 +1100
-Message-ID: <1330771572.11728.76.camel@pasglop>
+From: Frederic Crozat <fcrozat@suse.com>
+Subject: Patch: add __builtin_stpcpy and __sync_synchronize to builtin
+ functions
+Date: Thu, 15 Mar 2012 15:15:43 +0100
+Message-ID: <1331820943.2720.5.camel@par-r81vxc7.par.novell.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="=-YC7Er+jOG8IuPYDixjhK"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from gate.crashing.org ([63.228.1.57]:47282 "EHLO gate.crashing.org"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752301Ab2CCKqT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 3 Mar 2012 05:46:19 -0500
+Received: from charybdis-ext.suse.de ([195.135.221.2]:50065 "EHLO
+	nat.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754233Ab2COOPp (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 15 Mar 2012 10:15:45 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Hi folks !
 
-I just noticed, as I was digging into (yet another) unrelated llvm
-problem with my code, that sparse-llvm fails to compile something that
-has a statement such as:
+--=-YC7Er+jOG8IuPYDixjhK
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 
-static char *foo = "Foo !\n";
+Hi,
 
-It pukes in output_data(), where we have initializer non-NULL and
-initializer->type is EXPR_STRING. So we hit the default: case which is
-an assert(0);
+while working on integrating sparse checks in systemd, I noticed some
+builtin functions need to be added to sparse list. See attached patch
+for the fix.
 
-Now a trivial "fix" below doesn't quite work:
+I've also noted patch from Pekka Enberg
+(http://www.spinics.net/lists/linux-sparse/msg02520.html ) is still
+needed when running sparse on x86-64. It would be nice to merge it in
+git.
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 9226a21..f151939 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -1181,6 +1181,12 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
- 				initial_value = output_data(module, sym);
- 			break;
- 		}
-+		case EXPR_STRING: {
-+			const char *s = initializer->string->data;
-+
-+			initial_value = LLVMConstString(strdup(s), strlen(s) + 1, true);
-+			break;
-+		}
- 		default:
- 			assert(0);
- 		}
+-- 
+Frederic Crozat <fcrozat@suse.com>
+SUSE
 
-That has two interesting effects. First, if llvm is compiled with asserts,
-it pukes claiming that the initializer is of the wrong type. Now that's
-odd because as far as I can tell, the type is an array of i8 ... and it
-works if you don't build the asserts in llvm.
 
-Mind you, I had that problem with a different program, which was using
-the various "InContext" variants of the various functions rather than
-the global context ones... because at one point I was using the global
-context for one of the LLVMInt8Type and that made it fail (again worked
-fine without asserts).
+--=-YC7Er+jOG8IuPYDixjhK
+Content-Disposition: inline;
+	filename*0=0001-Add-__builtin_stpcpy-and-__sync_synchronize-to-decla.pat;
+	filename*1=ch
+Content-Type: text/x-patch;
+	name="0001-Add-__builtin_stpcpy-and-__sync_synchronize-to-decla.patch";
+	charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 
-Looks like the assert internally to LLVM is a pointer comparison of
-Type * so it has to resolve to -exactly- the same type object internally,
-pretty touchy. Maybe throwing a cast might help.
+From 1fc7c049236924a7ce1ccd0488d5f38b99763055 Mon Sep 17 00:00:00 2001
+From: Frederic Crozat <fcrozat@suse.com>
+Date: Wed, 29 Feb 2012 15:50:14 +0100
+Subject: [PATCH] Add __builtin_stpcpy and __sync_synchronize to
+ declare_builtin_functions
 
-The second effect however is that the result is not nice:
+---
+ lib.c |    2 ++
+ 1 files changed, 2 insertions(+), 0 deletions(-)
 
-  .../...
+diff --git a/lib.c b/lib.c
+index 396e9f1..be0fa8f 100644
+--- a/lib.c
++++ b/lib.c
+@@ -682,6 +682,7 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strspn(const char *, const char *);\n");
+ 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strcspn(const char *, const char *);\n");
+ 	add_pre_buffer("extern char * __builtin_strpbrk(const char *, const char *);\n");
++	add_pre_buffer("extern char* __builtin_stpcpy(const char *, const char*);\n");
+ 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strlen(const char *);\n");
+ 
+ 	/* And bitwise operations.. */
+@@ -714,6 +715,7 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
+ 	add_pre_buffer("extern long __builtin_labs(long);\n");
+ 	add_pre_buffer("extern double __builtin_fabs(double);\n");
++	add_pre_buffer("extern void __sync_synchronize();\n");
+ 
+ 	/* Add Blackfin-specific stuff */
+ 	add_pre_buffer(
+-- 
+1.7.7
 
-@"<noident>" = private global [7 x i8] c"Foo !\0A\00"
-@foo = private global i8* @"<noident>"
 
-  .../...
-
-I haven't quite manage to coerce it to just have a single @foo = <something>
-so it looks like we need to separately define the storage (the string)
-and foo as a pointer to it, unless I missed something.
-
-I tried to use the same construct we use in pseudo_to_value() (I factored
-it out) but that results in worse output, where it now names the string
-(.str<N>) but then creates a <noident> ptr and then assigns that to foo...
-
-LLVM is harder than it seems :-)
-
-Cheers,
-Ben.
-
+--=-YC7Er+jOG8IuPYDixjhK--
 
