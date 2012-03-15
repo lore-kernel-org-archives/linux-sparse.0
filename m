@@ -1,83 +1,41 @@
-From: Frederic Crozat <fcrozat@suse.com>
-Subject: Patch: add __builtin_stpcpy and __sync_synchronize to builtin
- functions
-Date: Thu, 15 Mar 2012 15:15:43 +0100
-Message-ID: <1331820943.2720.5.camel@par-r81vxc7.par.novell.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Patch: add __builtin_stpcpy and __sync_synchronize to builtin functions
+Date: Thu, 15 Mar 2012 13:02:21 -0700
+Message-ID: <CANeU7Qk8yxY_M_xDunYYV0D2h35AMFO4L2CrqXHCvp8iEWGcAg@mail.gmail.com>
+References: <1331820943.2720.5.camel@par-r81vxc7.par.novell.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-YC7Er+jOG8IuPYDixjhK"
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from charybdis-ext.suse.de ([195.135.221.2]:50065 "EHLO
-	nat.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754233Ab2COOPp (ORCPT
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:52298 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1032213Ab2COUCW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 15 Mar 2012 10:15:45 -0400
+	Thu, 15 Mar 2012 16:02:22 -0400
+Received: by ghrr11 with SMTP id r11so3465860ghr.19
+        for <linux-sparse@vger.kernel.org>; Thu, 15 Mar 2012 13:02:21 -0700 (PDT)
+In-Reply-To: <1331820943.2720.5.camel@par-r81vxc7.par.novell.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Frederic Crozat <fcrozat@suse.com>
+Cc: linux-sparse@vger.kernel.org
 
+On Thu, Mar 15, 2012 at 7:15 AM, Frederic Crozat <fcrozat@suse.com> wrote:
+> Hi,
+>
+> while working on integrating sparse checks in systemd, I noticed some
+> builtin functions need to be added to sparse list. See attached patch
+> for the fix.
 
---=-YC7Er+jOG8IuPYDixjhK
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+It looks fine. I will apply it.
 
-Hi,
+>
+> I've also noted patch from Pekka Enberg
+> (http://www.spinics.net/lists/linux-sparse/msg02520.html ) is still
+> needed when running sparse on x86-64. It would be nice to merge it in
+> git.
 
-while working on integrating sparse checks in systemd, I noticed some
-builtin functions need to be added to sparse list. See attached patch
-for the fix.
+This one looks fine too. Not sure why I miss it.
 
-I've also noted patch from Pekka Enberg
-(http://www.spinics.net/lists/linux-sparse/msg02520.html ) is still
-needed when running sparse on x86-64. It would be nice to merge it in
-git.
+Any way, I will apply it as well. Thanks for pointing it out.
 
--- 
-Frederic Crozat <fcrozat@suse.com>
-SUSE
-
-
---=-YC7Er+jOG8IuPYDixjhK
-Content-Disposition: inline;
-	filename*0=0001-Add-__builtin_stpcpy-and-__sync_synchronize-to-decla.pat;
-	filename*1=ch
-Content-Type: text/x-patch;
-	name="0001-Add-__builtin_stpcpy-and-__sync_synchronize-to-decla.patch";
-	charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-
-From 1fc7c049236924a7ce1ccd0488d5f38b99763055 Mon Sep 17 00:00:00 2001
-From: Frederic Crozat <fcrozat@suse.com>
-Date: Wed, 29 Feb 2012 15:50:14 +0100
-Subject: [PATCH] Add __builtin_stpcpy and __sync_synchronize to
- declare_builtin_functions
-
----
- lib.c |    2 ++
- 1 files changed, 2 insertions(+), 0 deletions(-)
-
-diff --git a/lib.c b/lib.c
-index 396e9f1..be0fa8f 100644
---- a/lib.c
-+++ b/lib.c
-@@ -682,6 +682,7 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strspn(const char *, const char *);\n");
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strcspn(const char *, const char *);\n");
- 	add_pre_buffer("extern char * __builtin_strpbrk(const char *, const char *);\n");
-+	add_pre_buffer("extern char* __builtin_stpcpy(const char *, const char*);\n");
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strlen(const char *);\n");
- 
- 	/* And bitwise operations.. */
-@@ -714,6 +715,7 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
- 	add_pre_buffer("extern long __builtin_labs(long);\n");
- 	add_pre_buffer("extern double __builtin_fabs(double);\n");
-+	add_pre_buffer("extern void __sync_synchronize();\n");
- 
- 	/* Add Blackfin-specific stuff */
- 	add_pre_buffer(
--- 
-1.7.7
-
-
---=-YC7Er+jOG8IuPYDixjhK--
-
+Chris
