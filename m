@@ -1,91 +1,92 @@
-From: Frederic Crozat <fcrozat@suse.com>
-Subject: Re: Patch: add __builtin_stpcpy and __sync_synchronize to builtin
- functions
-Date: Fri, 23 Mar 2012 10:32:58 +0100
-Message-ID: <1332495178.15662.4.camel@par-r81vxc7.par.novell.com>
-References: <1331820943.2720.5.camel@par-r81vxc7.par.novell.com>
-	 <CANeU7QmikoVWVuVo1nWdgADoKD30iTCSirM+S1c9-aRd7hEa0Q@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC/PATCH 1/2] sparse: Fix including glibc headers on x86-64
+Date: Fri, 23 Mar 2012 03:03:51 -0700
+Message-ID: <CANeU7QkzM-ZLZ_NgstAjpZdSe-eSgj+-SxEqUX-g5kXBTHrCvg@mail.gmail.com>
+References: <1319373420-8967-1-git-send-email-penberg@cs.helsinki.fi>
+	<CANeU7Q=h1egUD1cSpNwmAnemXPTa0k0OrKQOY6Rhow_5hb1hYA@mail.gmail.com>
+	<1332493309.2882.6.camel@pasglop>
+	<CANeU7Qnd23X+jpM6Byx12igAugv=-EyQ1hN8DtG4N32y1yp7pQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-J+k8viTxJt5JqCGVyafh"
+Content-Type: multipart/mixed; boundary=20cf305e287936e30604bbe62414
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nat.nue.novell.com ([195.135.221.2]:54110 "EHLO
-	nat.nue.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755413Ab2CWJdB (ORCPT
+Received: from mail-gy0-f174.google.com ([209.85.160.174]:42282 "EHLO
+	mail-gy0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752022Ab2CWKDv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 Mar 2012 05:33:01 -0400
-In-Reply-To: <CANeU7QmikoVWVuVo1nWdgADoKD30iTCSirM+S1c9-aRd7hEa0Q@mail.gmail.com>
+	Fri, 23 Mar 2012 06:03:51 -0400
+Received: by ghrr11 with SMTP id r11so2570771ghr.19
+        for <linux-sparse@vger.kernel.org>; Fri, 23 Mar 2012 03:03:51 -0700 (PDT)
+In-Reply-To: <CANeU7Qnd23X+jpM6Byx12igAugv=-EyQ1hN8DtG4N32y1yp7pQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: penberg@cs.helsinki.fi, linux-sparse@vger.kernel.org, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Frederic Crozat <fcrozat@suse.com>
 
+--20cf305e287936e30604bbe62414
+Content-Type: text/plain; charset=ISO-8859-1
 
---=-J+k8viTxJt5JqCGVyafh
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Here is the patch I am purposing.
 
-Le vendredi 23 mars 2012 à 01:26 -0700, Christopher Li a écrit :
-> On Thu, Mar 15, 2012 at 7:15 AM, Frederic Crozat <fcrozat@suse.com> wrote:
-> > while working on integrating sparse checks in systemd, I noticed some
-> > builtin functions need to be added to sparse list. See attached patch
-> > for the fix.
-> 
-> Catching up my backlogs. I just find out this patch does not have sign off.
-> 
-> Can you add a sign off line please?
+Please let me know if I handle the default size parsing wrong.
 
-Sorry, I didn't knew you needed this.
+Chris
 
-I've update the patch with adding yet another sync barrier which is now used in systemd.
+On Fri, Mar 23, 2012 at 2:13 AM, Christopher Li <sparse@chrisli.org> wrote:
+>
+> We can start from -m32 parsing and work our way through the arch parsing.
+>
 
--- 
-Frederic Crozat <fcrozat@suse.com>
-SUSE
+--20cf305e287936e30604bbe62414
+Content-Type: text/x-patch; charset=US-ASCII;
+	name="0001-Adding-default-for-m64-m32-handle.patch"
+Content-Disposition: attachment;
+	filename="0001-Adding-default-for-m64-m32-handle.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_h052gilp0
 
-
---=-J+k8viTxJt5JqCGVyafh
-Content-Disposition: inline;
-	filename*0=0001-Add-__builtin_stpcpy-__sync_synchronize-__sync_bool_.pat;
-	filename*1=ch
-Content-Type: text/x-patch;
-	name="0001-Add-__builtin_stpcpy-__sync_synchronize-__sync_bool_.patch";
-	charset="UTF-8"
-Content-Transfer-Encoding: 7bit
-
-From 60fe1c5011209ff8ea35ba76d3993d0b345f237b Mon Sep 17 00:00:00 2001
-From: Frederic Crozat <fcrozat@suse.com>
-Date: Fri, 23 Mar 2012 10:31:01 +0100
-Subject: [PATCH] Add __builtin_stpcpy, __sync_synchronize,
- __sync_bool_compare_and_swap to declare_builtin_functions
-
----
- lib.c |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/lib.c b/lib.c
-index 396e9f1..b61a79f 100644
---- a/lib.c
-+++ b/lib.c
-@@ -682,6 +682,7 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strspn(const char *, const char *);\n");
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strcspn(const char *, const char *);\n");
- 	add_pre_buffer("extern char * __builtin_strpbrk(const char *, const char *);\n");
-+	add_pre_buffer("extern char* __builtin_stpcpy(const char *, const char*);\n");
- 	add_pre_buffer("extern __SIZE_TYPE__ __builtin_strlen(const char *);\n");
- 
- 	/* And bitwise operations.. */
-@@ -714,6 +715,8 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern long __builtin_alpha_cmpbge(long, long);\n");
- 	add_pre_buffer("extern long __builtin_labs(long);\n");
- 	add_pre_buffer("extern double __builtin_fabs(double);\n");
-+	add_pre_buffer("extern void __sync_synchronize();\n");
-+	add_pre_buffer("extern int __sync_bool_compare_and_swap(void *, void, void);\n");
- 
- 	/* Add Blackfin-specific stuff */
- 	add_pre_buffer(
--- 
-1.7.7
-
-
---=-J+k8viTxJt5JqCGVyafh--
-
+RnJvbSA5NWU2MTRlMzgyYWFlZTRiNmQxMjI5YWE4ZTk5NTVlYWJiM2Y0NzU2IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
+YXRlOiBGcmksIDIzIE1hciAyMDEyIDAyOjU4OjIwIC0wNzAwClN1YmplY3Q6IFtQQVRDSF0gQWRk
+aW5nIGRlZmF1bHQgZm9yIG02NC9tMzIgaGFuZGxlCgpUaGlzIGlzIGltcHJvdmVkIHZlcnNpb24g
+b2YgUGVra2EgRW5iZXJnJ3MgcGF0Y2gKIkZpeCBpbmNsdWRpbmcgZ2xpYmMgaGVhZGVycyBvbiB4
+ODYtNjQiLgoKVG8gYXZvaWQgc2V0dGluZyA2NCBiaXQgZGVmaW5lIGluIHRoZSAtbTMyIGNhc2Us
+CnRoZSA2NCBiaXQgaW5pdGlhbGl6YXRpb24gbmVlZHMgdG8gZGVsYXkgdW50aWwgYWxsCmFyZ3Vt
+ZW50cyBhcmUgaGFuZGxlZC4KClNpZ25lZC1vZmYtYnk6IENocmlzdG9waGVyIExpIDxzcGFyc2VA
+Y2hyaXNsaS5vcmc+Ci0tLQogbGliLmMgfCAgIDQzICsrKysrKysrKysrKysrKysrKysrKysrKysr
+KysrKysrKysrKysrKysrLS0KIDEgZmlsZXMgY2hhbmdlZCwgNDEgaW5zZXJ0aW9ucygrKSwgMiBk
+ZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9saWIuYyBiL2xpYi5jCmluZGV4IDM5NmU5ZjEuLmZj
+MDYwMTggMTAwNjQ0Ci0tLSBhL2xpYi5jCisrKyBiL2xpYi5jCkBAIC0yMjQsNiArMjI0LDE1IEBA
+IHN0YXRpYyBlbnVtIHsgU1RBTkRBUkRfQzg5LAogICAgICAgICAgICAgICBTVEFOREFSRF9HTlU4
+OSwKICAgICAgICAgICAgICAgU1RBTkRBUkRfR05VOTksIH0gc3RhbmRhcmQgPSBTVEFOREFSRF9H
+TlU4OTsKIAorI2lmZGVmIF9feDg2XzY0X18KKyNkZWZpbmUgQVJDSF9NNjRfREVGQVVMVCAxCisj
+ZWxzZQorI2RlZmluZSBBUkNIX002NF9ERUZBVUxUIDAKKyNlbmRpZgorCitpbnQgYXJjaF9tNjQg
+PSBBUkNIX002NF9ERUZBVUxUOworaW50IGFyY2hfbXNpemVfbG9uZyA9IDA7CisKICNkZWZpbmUg
+Q01ETElORV9JTkNMVURFIDIwCiBpbnQgY21kbGluZV9pbmNsdWRlX25yID0gMDsKIHN0cnVjdCBj
+bWRsaW5lX2luY2x1ZGUgY21kbGluZV9pbmNsdWRlW0NNRExJTkVfSU5DTFVERV07CkBAIC0zNDQs
+MTkgKzM1Myw0NyBAQCBzdGF0aWMgY2hhciAqKmhhbmRsZV9zd2l0Y2hfTShjaGFyICphcmcsIGNo
+YXIgKipuZXh0KQogc3RhdGljIGNoYXIgKipoYW5kbGVfc3dpdGNoX20oY2hhciAqYXJnLCBjaGFy
+ICoqbmV4dCkKIHsKIAlpZiAoIXN0cmNtcChhcmcsICJtNjQiKSkgeworCQlhcmNoX202NCA9IDE7
+CisJfSBlbHNlIGlmICghc3RyY21wKGFyZywgIm0zMiIpKSB7CisJCWFyY2hfbTY0ID0gMDsKKwl9
+IGVsc2UgaWYgKCFzdHJjbXAoYXJnLCAibXNpemUtbG9uZyIpKSB7CisJCWFyY2hfbXNpemVfbG9u
+ZyA9IDE7CisJfQorCXJldHVybiBuZXh0OworfQorCitzdGF0aWMgdm9pZCBoYW5kbGVfYXJjaF9t
+NjRfZmluYWxpemUodm9pZCkKK3sKKwlpZiAoYXJjaF9tNjQpIHsKIAkJYml0c19pbl9sb25nID0g
+NjQ7CiAJCW1heF9pbnRfYWxpZ25tZW50ID0gODsKIAkJYml0c19pbl9wb2ludGVyID0gNjQ7CiAJ
+CXBvaW50ZXJfYWxpZ25tZW50ID0gODsKIAkJc2l6ZV90X2N0eXBlID0gJnVsb25nX2N0eXBlOwog
+CQlzc2l6ZV90X2N0eXBlID0gJmxvbmdfY3R5cGU7Ci0JfSBlbHNlIGlmICghc3RyY21wKGFyZywg
+Im1zaXplLWxvbmciKSkgeworI2lmZGVmIF9feDg2XzY0X18KKwkJYWRkX3ByZV9idWZmZXIoIiN3
+ZWFrX2RlZmluZSB4ODZfNjQgMVxuIik7CisJCWFkZF9wcmVfYnVmZmVyKCIjd2Vha19kZWZpbmUg
+X194ODZfNjQgMVxuIik7CisJCWFkZF9wcmVfYnVmZmVyKCIjd2Vha19kZWZpbmUgX194ODZfNjRf
+XyAxXG4iKTsKKyNlbmRpZgorCX0KK30KKworc3RhdGljIHZvaWQgaGFuZGxlX2FyY2hfbXNpemVf
+bG9uZ19maW5hbGl6ZSh2b2lkKQoreworCWlmIChhcmNoX21zaXplX2xvbmcpIHsKIAkJc2l6ZV90
+X2N0eXBlID0gJnVsb25nX2N0eXBlOwogCQlzc2l6ZV90X2N0eXBlID0gJmxvbmdfY3R5cGU7CiAJ
+fQotCXJldHVybiBuZXh0OwogfQogCitzdGF0aWMgdm9pZCBoYW5kbGVfYXJjaF9maW5hbGl6ZSh2
+b2lkKQoreworCWhhbmRsZV9hcmNoX202NF9maW5hbGl6ZSgpOworCWhhbmRsZV9hcmNoX21zaXpl
+X2xvbmdfZmluYWxpemUoKTsKK30KKworCiBzdGF0aWMgY2hhciAqKmhhbmRsZV9zd2l0Y2hfbyhj
+aGFyICphcmcsIGNoYXIgKipuZXh0KQogewogCWlmICghc3RyY21wIChhcmcsICJvIikpIHsgICAg
+ICAgLy8gIi1vIGZvbyIKQEAgLTkzMSw2ICs5NjgsOCBAQCBzdHJ1Y3Qgc3ltYm9sX2xpc3QgKnNw
+YXJzZV9pbml0aWFsaXplKGludCBhcmdjLCBjaGFyICoqYXJndiwgc3RydWN0IHN0cmluZ19saXN0
+CiAJaGFuZGxlX3N3aXRjaF9XX2ZpbmFsaXplKCk7CiAJaGFuZGxlX3N3aXRjaF92X2ZpbmFsaXpl
+KCk7CiAKKwloYW5kbGVfYXJjaF9maW5hbGl6ZSgpOworCiAJbGlzdCA9IE5VTEw7CiAJaWYgKCFw
+dHJfbGlzdF9lbXB0eShmaWxlbGlzdCkpIHsKIAkJLy8gSW5pdGlhbGl6ZSB0eXBlIHN5c3RlbQot
+LSAKMS43LjcuNgoK
+--20cf305e287936e30604bbe62414--
