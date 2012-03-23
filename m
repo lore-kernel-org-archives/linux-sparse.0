@@ -1,104 +1,65 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: help needed: document __nocast vs __bitwise (Was: [PATCH 00/16] mm:
- prepare for converting vm->vm_flags to 64-bit)
-Date: Fri, 23 Mar 2012 11:17:10 -0700
-Message-ID: <CANeU7Q=GAcLy121eKQhuSkgKo06wRkpmLQTWc5WQgPN3RcjMjw@mail.gmail.com>
+Subject: Re: [RFC/PATCH 1/2] sparse: Fix including glibc headers on x86-64
+Date: Fri, 23 Mar 2012 11:29:47 -0700
+Message-ID: <CANeU7Qmq+VMxPeRfY9wt9Jxb1NLHdWGAFONDpnk2th8Asqc4kQ@mail.gmail.com>
+References: <1319373420-8967-1-git-send-email-penberg@cs.helsinki.fi>
+	<CANeU7Q=h1egUD1cSpNwmAnemXPTa0k0OrKQOY6Rhow_5hb1hYA@mail.gmail.com>
+	<1332493309.2882.6.camel@pasglop>
+	<CANeU7Qnd23X+jpM6Byx12igAugv=-EyQ1hN8DtG4N32y1yp7pQ@mail.gmail.com>
+	<CANeU7QkzM-ZLZ_NgstAjpZdSe-eSgj+-SxEqUX-g5kXBTHrCvg@mail.gmail.com>
+	<20120323180320.GA17003@leaf>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-we0-f174.google.com ([74.125.82.174]:54852 "EHLO
+Received: from mail-we0-f174.google.com ([74.125.82.174]:36828 "EHLO
 	mail-we0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755170Ab2CWSRM convert rfc822-to-8bit (ORCPT
+	with ESMTP id S1756028Ab2CWS3t convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 Mar 2012 14:17:12 -0400
-Received: by wejx9 with SMTP id x9so2855830wej.19
-        for <linux-sparse@vger.kernel.org>; Fri, 23 Mar 2012 11:17:10 -0700 (PDT)
+	Fri, 23 Mar 2012 14:29:49 -0400
+Received: by wejx9 with SMTP id x9so2864646wej.19
+        for <linux-sparse@vger.kernel.org>; Fri, 23 Mar 2012 11:29:48 -0700 (PDT)
+In-Reply-To: <20120323180320.GA17003@leaf>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>, penberg@cs.helsinki.fi, linux-sparse@vger.kernel.org, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Frederic Crozat <fcrozat@suse.com>
 
-Linus has a very nice write up about __nocast vs __bitwise.
+On Fri, Mar 23, 2012 at 11:03 AM, Josh Triplett <josh@joshtriplett.org>=
+ wrote:
+> On Fri, Mar 23, 2012 at 03:03:51AM -0700, Christopher Li wrote:
+>> --- a/lib.c
+>> +++ b/lib.c
+>> @@ -224,6 +224,15 @@ static enum { STANDARD_C89,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0STANDARD_GNU89,
+>> =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0STANDARD_GNU99, } standard =3D STANDA=
+RD_GNU89;
+>>
+>> +#ifdef __x86_64__
+>> +#define ARCH_M64_DEFAULT 1
+>> +#else
+>> +#define ARCH_M64_DEFAULT 0
+>> +#endif
+>
+> Ideally this should work on other 64-bit architectures as well.
 
-Can any one help to integrate the write up to a patch
-against man page sparse.1?
 
-I would much rather hitting the apply button than hacking
-documents. But if nobody wants to do it, it would have to
-be me then.
+Thanks for the review.
 
-Yes, I am a lazy baster :-)
+I totally agree.  In the case it did not get it right,
+it is not worse than existing code so that is not too bad.
+I don't have other 64bit platform to test with though so
+I am afraid to change some thing I can't test.
 
-Thanks
+It would be a nice to have follow up patch adding different architectur=
+e
+handling using the handle_arch_finalize(). As it is, it will
+still be wrong if you use sparse as a cross compiler.
+We need proper arch handling for that.
+
+Patch are definitely welcome.
 
 Chris
-
----------- Forwarded message ----------
-=46rom: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Thu, Mar 22, 2012 at 3:08 PM
-Subject: Re: [PATCH 00/16] mm: prepare for converting vm->vm_flags to 6=
-4-bit
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, Konstantin Khlebnikov
-<khlebnikov@openvz.org>, Minchan Kim <minchan@kernel.org>,
-"linux-mm@kvack.org" <linux-mm@kvack.org>,
-"linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, Hugh
-Dickins <hughd@google.com>, KOSAKI Motohiro
-<kosaki.motohiro@jp.fujitsu.com>, Ben Herrenschmidt
-<benh@kernel.crashing.org>, "linux@arm.linux.org.uk"
-<linux@arm.linux.org.uk>
-
-
-On Thu, Mar 22, 2012 at 2:41 PM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
->>
->> Use __bitwise for that - check how gfp_t is handled.
->
-> So what does __nocast do?
-
-__nocast warns about explicit or implicit casting to different types.
-
-HOWEVER, it doesn't consider two 32-bit integers to be different
-types, so a __nocast 'int' type may be returned as a regular 'int'
-type and then the __nocast is lost.
-
-So "__nocast" on integer types is usually not that powerful. It just
-gets lost too easily. It's more useful for things like pointers. It
-also doesn't warn about the mixing: you can add integers to __nocast
-integer types, and it's not really considered anything wrong.
-
-__bitwise ends up being a "stronger integer separation". That one
-doesn't allow you to mix with non-bitwise integers, so now it's much
-harder to lose the type by mistake.
-
-So basic rules is:
-
-=A0- "__nocast" on its own tends to be more useful for *big* integers
-that still need to act like integers, but you want to make it much
-less likely that they get truncated by mistake. So a 64-bit integer
-that you don't want to mistakenly/silently be returned as "int", for
-example. But they mix well with random integer types, so you can add
-to them etc without using anything special. However, that mixing also
-means that the __nocast really gets lost fairly easily.
-
-=A0- "__bitwise" is for *unique types* that cannot be mixed with other
-types, and that you'd never want to just use as a random integer (the
-integer 0 is special, though, and gets silently accepted iirc - it's
-kind of like "NULL" for pointers). So "gfp_t" or the "safe endianness"
-types would be __bitwise: you can only operate on them by doing
-specific operations that know about *that* particular type.
-
-Generally, you want __bitwise if you are looking for type safety.
-"__nocast" really is pretty weak.
-
-=A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0 =A0Linus
---
-To unsubscribe from this list: send the line "unsubscribe linux-kernel"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at =A0http://vger.kernel.org/majordomo-info.html
-Please read the FAQ at =A0http://www.tux.org/lkml/
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
