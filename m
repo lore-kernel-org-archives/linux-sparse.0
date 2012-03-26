@@ -1,43 +1,27 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Josh Triplett <josh@freedesktop.org>
 Subject: Re: Killing off __cond_lock()
-Date: Mon, 26 Mar 2012 11:00:37 +0200
-Message-ID: <1332752437.7081.5.camel@jlt3.sipsolutions.net>
+Date: Mon, 26 Mar 2012 02:29:35 -0700
+Message-ID: <20120326092935.GB21202@leaf>
 References: <1332606216.16159.48.camel@twins>
-	 <1332665310.3840.8.camel@jlt3.sipsolutions.net>
-	 <1332749494.16159.74.camel@twins>
+ <1332665310.3840.8.camel@jlt3.sipsolutions.net>
+ <1332749494.16159.74.camel@twins>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from he.sipsolutions.net ([78.46.109.217]:53013 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753030Ab2CZJAq (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:41379 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755933Ab2CZJ3n (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 26 Mar 2012 05:00:46 -0400
+	Mon, 26 Mar 2012 05:29:43 -0400
+Content-Disposition: inline
 In-Reply-To: <1332749494.16159.74.camel@twins>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Peter Zijlstra <peterz@infradead.org>
-Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@freedesktop.org>, linux-sparse@vger.kernel.org, Anton Vorontsov <anton.vorontsov@linaro.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Anton Vorontsov <anton.vorontsov@linaro.org>
 
-On Mon, 2012-03-26 at 10:11 +0200, Peter Zijlstra wrote:
-
-> > However, note that today sparse doesn't evaluate anything in the
-> > context, it doesn't even look at the first argument. So another thing
-> > you can't really annotate well is things like this:
-> > 
-> > struct foo_object *get_locked_object(...);
-> > 
-> > This is why I used RETURN to give the return value a name, so you could
-> > write
-> > 	__acquires(&RETURN->lock)
-> 
-> 
-> Right, but if it doesn't actually evaluate the expression used in the
-> context this is going to be problematic.
-
-It probably could -- but the question is what context to evaluate it in.
-
+On Mon, Mar 26, 2012 at 10:11:34AM +0200, Peter Zijlstra wrote:
+> On Sun, 2012-03-25 at 10:48 +0200, Johannes Berg wrote:
 > > But I was also trying to make sparse actually evaluate the first
 > > argument so it could tell the difference between two locks, which you
 > > might not even care about ... (it would be nice though I think)
@@ -51,39 +35,24 @@ It probably could -- but the question is what context to evaluate it in.
 > 
 > This also makes the conditional thing quite simple to do.
 
-Indeed, but you'd need some sort of expression rewriting. Consider
+For the general case, this seems like roughly the right solution.  That
+will also handle slightly more complex conditionals, though
+significantly more complex ones will just get sparse complaining that
+you can reach later code with multiple contexts.
 
-void lock_obj(obj_t *o) __acquires(&o->lock);
+Similarly, require_context might work better as an expression executed
+beforehand, which would ideally have access to the arguments.
 
-void lock_obj(obj_t *obj)
-{
-	__acquire(&obj->lock);
+I don't know if it makes sense to put an __attribute__((__after_expr__,
+arbitrary_expression)) into sparse just to avoid doing the same thing
+with a macro or static inline, though.  A macro or static inline
+trivially has access to the arguments and return value, and can run
+arbitrary statements/expressions either before or after the underlying
+function call, including conditionals.
 
-	...
-}
+(Even better if sparse could just always do whole-program analysis, so
+that you could include the __context__ call inline in the normal
+function and have the caller see it, but that won't happen anytime
+soon.)
 
-
-void foo(void)
-{
-	...
-	lock_obj(&f);
-	...
-	unlock_obj(&f);
-	...
-}
-
-
-Now you suddenly need to replace "&o->lock" with "&(&f)->lock", when
-checking the function itself it really is called "obj", not "o". Not
-that sparse actually checks that the function behaviour matches the
-declaration today though.
-
-johannes
-
-
-PS: Something else I had wanted to remind you of: the cond_lock thing
-only works due to some sort of optimiser pass (is there such a thing?)
-in sparse, sometimes it fails mysteriously because the condition isn't
-the exact same condition or something.
-
-
+- Josh Triplett
