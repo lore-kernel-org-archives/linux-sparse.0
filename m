@@ -1,115 +1,111 @@
-From: Konrad Eisele <konrad@gaisler.com>
+From: Konrad Eisele <eiselekd@gmail.com>
 Subject: Re: dependency tee from c parser entities downto token
-Date: Fri, 04 May 2012 12:36:58 +0200
-Message-ID: <4FA3B14A.3070609@gaisler.com>
-References: <4F967865.60809@gaisler.com> <CANeU7Qku=Zk3OfY3h45M+ecu11A6eTH0Y0+9wwj9Fmu8TyWwRw@mail.gmail.com> <CAEjhO7+EKvFHmpcFHrweGQEa4SHf62AAy5_SyhSxD1bcguafyw@mail.gmail.com> <CANeU7QkWbvT-NN5vm=JXnmfDpbzNzTjNYxkB8GJsKCysiOe8tQ@mail.gmail.com> <4FA38635.5060300@gaisler.com> <CANeU7QnVjEmZC2SNX-arWP7ovRx1mgNRyQSe7N2STGa-5u=i7A@mail.gmail.com>
+Date: Fri, 04 May 2012 14:36:40 +0200
+Message-ID: <4FA3CD58.80809@gmail.com>
+References: <4F967865.60809@gaisler.com> <CANeU7Qku=Zk3OfY3h45M+ecu11A6eTH0Y0+9wwj9Fmu8TyWwRw@mail.gmail.com> <CAEjhO7+EKvFHmpcFHrweGQEa4SHf62AAy5_SyhSxD1bcguafyw@mail.gmail.com> <CANeU7QkWbvT-NN5vm=JXnmfDpbzNzTjNYxkB8GJsKCysiOe8tQ@mail.gmail.com> <4FA38635.5060300@gaisler.com> <CANeU7QnVjEmZC2SNX-arWP7ovRx1mgNRyQSe7N2STGa-5u=i7A@mail.gmail.com> <4FA3B14A.3070609@gaisler.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail201c2.megamailservers.com ([69.49.111.102]:39809 "EHLO
-	mail201c2.megamailservers.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1754238Ab2EDKrB (ORCPT
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:34213 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757796Ab2EDMdL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 4 May 2012 06:47:01 -0400
-In-Reply-To: <CANeU7QnVjEmZC2SNX-arWP7ovRx1mgNRyQSe7N2STGa-5u=i7A@mail.gmail.com>
+	Fri, 4 May 2012 08:33:11 -0400
+Received: by lbbgm6 with SMTP id gm6so1978351lbb.19
+        for <linux-sparse@vger.kernel.org>; Fri, 04 May 2012 05:33:09 -0700 (PDT)
+In-Reply-To: <4FA3B14A.3070609@gaisler.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Konrad Eisele <eiselekd@gmail.com>, linux-sparse@vger.kernel.org
+To: Konrad Eisele <konrad@gaisler.com>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 
-Christopher Li wrote:
-> On Fri, May 4, 2012 at 12:33 AM, Konrad Eisele<konrad@gaisler.com>  wrote:
->>> I agree this is useful. However I feel the original patch is a bit
->>> invasive.
->>> How about do it in a step by step way. Make a small patch to allow
->>> register
->>> call backs when the macro expands. That way the application using sparse
->>> get notify of the pre-processor macro expands. I can take a look at how to
->>> implement this small patch as well.
->>>
->>> If needed, we can make one option that pre-processor don't free the
->>> tokens.
->>> In this case, very few changes in the caller side. I feel it cleaner
->>> than changing
->>> the free function behavior.
 >>
->>
->> The minimum original-code-base change that I see would be:
->>   - "struct position<pos>" is removed in all structures except "struct
->> token" and
->>    replaced with "struct token *<tok>". When<pos>  is needed<tok>->pos is
->>    used instead. This implies that tokens are not freed by default.
+>> No, that would be a no go. I don't mind allow dependence program
+>> have the option to keep the token around. However, for other C back
+>> ends, the token serve no purpose. It just sit there waste memory. So
+>> I don't want the token become mandatory.
 >
-> No, that would be a no go. I don't mind allow dependence program
-> have the option to keep the token around. However, for other C back
-> ends, the token serve no purpose. It just sit there waste memory. So
-> I don't want the token become mandatory.
 
-If it is a no-go it is a no-go.
-If there is no need for the tool i proposed, there is no need. :-)
-Still I try: Tokens dont sit around, they are released when
-the program finishes. Treating the preprocessing stage
-like nonexisting doesnt reflect the way most people use
-a compiler. They always use the preprocessor even if
-there might be the possibility to use the compiler with only
-a preprocessed file. Therefore tokens should sit around.
+Ok, one more try:
+   Your question is: Why is is meaningful to
+   have tokens saved even in the parse stage.
+I tried to come up with some meaningful example.
 
->
->>   - struct statement *, struct expression *, struct *token
->>    all get a extra "void *custom" pointer. This pointer can be used for
->>    tools to save their own data.
->> I think this is not too far off: 4 bytes more for each struct and
->>   "<tok>->pos"
->> instead of "pos", that is not a massive change. the<tok>->pos would be
->> a boilerplate refactoring.
->
-> It is still too invasive. I don't want to keep<tok>->pos in the statements
-> and expression.
+Take the 2 files b.c and a.h.
 
-If this is invasive a little less than this would mean no change at
-all.
+vvvvvv b.c vvvvv
+#define d1
+#include "a.h"
+struct s0 { int x; };
+int main(int a, char **b) {
+   struct s0 v;
+   d2(m);
+};
+^^^^^^ b.c ^^^^^^
 
->
-> Instead, how about using the macro_expand I purposed in previous
-> email. Make dependence program a two step. The first step is pure
-> pre-processing, the dependants program using the macro_expand hook
-> to keep track of macro expand details. The end result is the pre-processed
-> file and the program remember how the file map into original file using the
-> macro expand history.
->
-> The the second step is just parsing on the pre-processed file. Using
-> the macro expand history to map the position back to the original file.
-> In this way, you can do your dependency analyse with minimal
-> impact to sparse internals. The macro_expand hook can use to
-> do other useful stuff as well. Will that address your need?
+vvvvvv a.h vvvvv
+#ifdef d2
+#define m v
+#else
+#define m n
+#endif
 
-Thats not what I want, but rather what you want. If you
-want a macro expand history, it would be faster, easier simpler
-if you would hack it yourself, I dont want a macro expand,
-i have my tool htmltag for that already. I want a macro dependency tree.
-With only macro_expand hook and only file-scope <pos> it is not
-possible.
-And: until I would have come up with something that would fit your requirements
-months would be gone. It seems that you know exactly how
-it should  be done, there is no way for me to know how
-you think a noninvasive solution would look like. The communication
-takes too long.
+#ifdef d1
+#define d2(a) while(a.x) { }
+#endif
+^^^^^^ a.h ^^^^^^
 
-If there is no need for the tool i proposed, there is no need.
-At least I tried :-)
+Now use sparse and you get:
+$./sparse b.c
+b.c:6:3: error: cannot dereference this type
 
--- Thanks Konrad
+The error was that you forgot in b.c:
++#define d2
+  #define d1
+  ...
 
->
-> BTW, have you take a look at the ctags program come with sparse?
-> It can find symbols created by macro expansion as well.
->
-> Chris
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+When you have a dependency tree what you can printout is:
+
+$./sparse b.c
+b.c:6:3: error: cannot dereference this type
+  +macro expansion of d2 defined in a.h:8
+    + defined because of #ifdef d1 in a.h:7
+     + dependent of d1 defined at b.c:1
+  +> argument 0 expansion at b.c:6
+    + macro expansion m defined in a.h:4
+      + defined because of else of #ifdef d2
+        + dependend of d2 (not defined)
+
+Or you can print it out human readable:
+
+$./sparse b.c
+b.c:6:3: error: cannot dereference this type
+#define d1
+#include "a.h"
+  #ifdef d2
+  #else
+  #define m n
+  #endif
+  #ifdef d1
+  #define d2(a) while(a.x) { }
+  #endif
+
+I've improviced a bit, the "human readable" ouput
+is the whole of a.h and b.c because there is
+no nondependent part to strip...
+
+Now tell me that this is not useful and this is the
+last post on this subject. Dont you think that gcc's
+...
+  In file included from ./b.c:3:0:
+  In file included from ./x.c13:0:
+...
+is useful? With macro dependency saved you can
+printout all.
+
+-- Konrad
+
+
+
 
