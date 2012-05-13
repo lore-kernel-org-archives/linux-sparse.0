@@ -1,25 +1,30 @@
 From: Konrad Eisele <eiselekd@gmail.com>
 Subject: Re: Fwd: dependency tee from c parser entities downto token
-Date: Sat, 12 May 2012 19:57:16 +0200
-Message-ID: <4FAEA47C.6080308@gmail.com>
+Date: Sun, 13 May 2012 10:52:21 +0200
+Message-ID: <4FAF7645.9040003@gmail.com>
 References: <4F967865.60809@gaisler.com> <CANeU7QkJJx6A8zfZY9YRJ3GP-msxb3yjQpEO08RbNKE9asPTPA@mail.gmail.com> <4FA5B9E8.7010208@gmail.com> <CANeU7Qm-M7u0h6MswEMw3KZ7wxaxiikpChXJAuhkV0EzcHkH9A@mail.gmail.com> <4FA767BD.8060703@gaisler.com> <CANeU7Q=nHs+f1wKVM0bGDc-uxubBztPxXjiMvDRpph4RJWPHYg@mail.gmail.com> <4FA8BF7D.60606@gaisler.com> <CANeU7QkLrr1p8-Bofx9fnZ82BA2pc7sOxSOa-zim5NhWHXTNQA@mail.gmail.com> <4FAA3D50.8080901@gaisler.com> <CANeU7Q=mq1FsGViTp7L-83Wns6uDLcRKi7usNRiO1D3Ox_Dmww@mail.gmail.com> <4FAB5DEA.5060009@gaisler.com> <4FAB6268.7070908@gaisler.com> <CANeU7Qk-DTs+WL=u2g5WQ1L2J++ZBkCHi8_85bmUWto7rq0-9Q@mail.gmail.com> <4FAB8F9E.8040205@gaisler.com> <CANeU7QnnXk26ybnayuRZ2ZGSArMt1Bne4KGXxt+0d7tBjN=6Kw@mail.gmail.com> <4FABB132.1070308@gmail.com> <4FABB467.7030703@gmail.com> <CANe
  U7Q=_uqwk+ePbErQ9gsX3x945_gATUZ_mJeYuTo2SoYhCpQ@mail.gmail.com> <4FAD892B.8070709@gmail.com> <CANeU7QnEyUExcxaoVEeamhu1m+Z_pg0TpKBP00hh+gyPgdq66w@mail.gmail.com> <4FAEA208.3090601@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed;
+ boundary="------------050302060508070800010804"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:49421 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751415Ab2ELRxl (ORCPT
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:53368 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751924Ab2EMIsq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 12 May 2012 13:53:41 -0400
-Received: by lahd3 with SMTP id d3so2554113lah.19
-        for <linux-sparse@vger.kernel.org>; Sat, 12 May 2012 10:53:39 -0700 (PDT)
+	Sun, 13 May 2012 04:48:46 -0400
+Received: by lbbgm6 with SMTP id gm6so2715090lbb.19
+        for <linux-sparse@vger.kernel.org>; Sun, 13 May 2012 01:48:45 -0700 (PDT)
 In-Reply-To: <4FAEA208.3090601@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Konrad Eisele <konrad@gaisler.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+
+This is a multi-part message in MIME format.
+--------------050302060508070800010804
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 
 On 05/12/2012 07:46 PM, Konrad Eisele wrote:
 > On 05/12/2012 01:02 PM, Christopher Li wrote:
@@ -70,25 +75,6 @@ On 05/12/2012 07:46 PM, Konrad Eisele wrote:
 > prints out the token trace through macros for each
 > token: @{ } is used to mark the active path.
 >
-
-To explain mdep.c: There are in fact only 3 lines that
-are of interest:
-
-...
-137:            n->from = list->pos;
-...
-
-...
-143:            list->pos.line = id;
-144:            list->pos.stream = pps;
-...
-
-Line 137 saves the last token.pos , (143+144) insert a new id
-into token.pos. This will generate the path for each token through
-the expansions.
-mdep_trace() traverses the path...
-
-
 > An example file is added: a.h
 > $test-mdep a.h
 > ...
@@ -106,6 +92,21 @@ mdep_trace() traverses the path...
 >
 > I still dont handle empty expansions. I'll see weather I can come up
 > with something here...
+
+I have thought about how to implement empty expansion tracing without
+introducing a new token type. I came up with a solution, however I need
+one callback, I called it substitute_arg(), see patch attached.
+What do you think, is it apply-able?
+
+I think I can use the address of the pointer to token (strict token
+**,  which is normally &tok->next) as a hashing to propagate the empty
+expansions...
+
+Im not 100% shure it works but I need the extra hook to be able
+to propagate the empty expansion from the arguments into the
+substitution body...
+
+
 >
 >
 >>
@@ -200,3 +201,50 @@ mdep_trace() traverses the path...
 >>
 >
 
+
+--------------050302060508070800010804
+Content-Type: text/plain; charset=ISO-8859-1;
+ name="hook.diff"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename="hook.diff"
+
+diff --git a/pre-process.c b/pre-process.c
+index fb3430a..73a58be 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -573,6 +573,9 @@ static struct token **substitute(struct token **list, struct token *body, struct
+ 		case TOKEN_MACRO_ARGUMENT:
+ 			arg = args[body->argnum].expanded;
+ 			count = &args[body->argnum].n_normal;
++			if (preprocess_hook) {
++				preprocess_hook->substitute_arg (&added, &args[body->argnum].expanded);
++			}
+ 			if (eof_token(arg)) {
+ 				state = Normal;
+ 				continue;
+@@ -650,7 +653,7 @@ static int expand(struct token **list, struct symbol *sym)
+ 		if (preprocess_hook && preprocess_hook->expand_arg) {
+ 			int i;
+ 			for (i = 0; i < nargs; i++) {
+-				preprocess_hook->expand_arg(token, sym, i, args[i].orig, args[i].expanded);
++				preprocess_hook->expand_arg(token, sym, i, args[i].orig, &args[i].expanded);
+ 				free_preprocessor_line(args[i].orig);
+ 			}
+ 		}
+diff --git a/token.h b/token.h
+index 985d1f5..c45d6be 100644
+--- a/token.h
++++ b/token.h
+@@ -175,7 +175,8 @@ struct preprocess_hook {
+ 	void (*expand_macro)(struct token *macro, struct symbol *sym, struct token *parent,
+ 			     struct token **replace, struct token **replace_tail);
+ 	void (*expand_arg)(struct token *macro, struct symbol *sym, int arg,
+-			   struct token *orig, struct token *expanded);
++			   struct token *orig, struct token **expanded);
++	void (*substitute_arg)(struct token **dest, struct token **argp);
+ };
+ 
+ #define MAX_STRING 4095
+
+--------------050302060508070800010804--
