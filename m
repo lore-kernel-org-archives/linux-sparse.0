@@ -1,7 +1,7 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Fwd: dependency tee from c parser entities downto token
-Date: Mon, 14 May 2012 03:53:35 -0700
-Message-ID: <CANeU7Q=dekYJXU-LKv0R6_ty-u23yJjV-gzE5Et+7u+SMkDSTg@mail.gmail.com>
+Date: Mon, 14 May 2012 23:30:20 -0700
+Message-ID: <CANeU7QnOtrWFvmd4Od1gU_uHccjSQdD7pNGC4ri4pTCU=GcwLg@mail.gmail.com>
 References: <4F967865.60809@gaisler.com>
 	<CANeU7QkJJx6A8zfZY9YRJ3GP-msxb3yjQpEO08RbNKE9asPTPA@mail.gmail.com>
 	<4FA5B9E8.7010208@gmail.com>
@@ -23,112 +23,67 @@ References: <4F967865.60809@gaisler.com>
 	<4FAD892B.8070709@gmail.com>
 	<CANeU7QnEyUExcxaoVEeamhu1m+Z_pg0TpKBP00hh+gyPgdq66w@mail.gmail.com>
 	<4FAEA208.3090601@gmail.com>
+	<4FAF7645.9040003@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:59505 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755880Ab2ENKxg (ORCPT
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:48938 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753808Ab2EOGaV (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 14 May 2012 06:53:36 -0400
-Received: by yhmm54 with SMTP id m54so4033209yhm.19
-        for <linux-sparse@vger.kernel.org>; Mon, 14 May 2012 03:53:35 -0700 (PDT)
-In-Reply-To: <4FAEA208.3090601@gmail.com>
+	Tue, 15 May 2012 02:30:21 -0400
+Received: by gglu4 with SMTP id u4so3896226ggl.19
+        for <linux-sparse@vger.kernel.org>; Mon, 14 May 2012 23:30:20 -0700 (PDT)
+In-Reply-To: <4FAF7645.9040003@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Konrad Eisele <eiselekd@gmail.com>
 Cc: Konrad Eisele <konrad@gaisler.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, May 12, 2012 at 10:46 AM, Konrad Eisele <eiselekd@gmail.com> wrote:
-> Appended is a test-patch that adds test-mdep testcase.
-> The file mdep.c is used to record that macro
-> expansion, each token will have a reference to its
-> source.
-> test-mdep.c does pre-process (as test-macro.c) then
-> prints out the token trace through macros for each
-> token: @{ } is used to mark the active path.
+On Sun, May 13, 2012 at 1:52 AM, Konrad Eisele <eiselekd@gmail.com> wrote:
+> I have thought about how to implement empty expansion tracing without
+> introducing a new token type. I came up with a solution, however I need
+> one callback, I called it substitute_arg(), see patch attached.
+> What do you think, is it apply-able?
+>
 
-Here is some feed back for the patch you send out:
+I am very sorry that my speed of absorbing patches is much slower than
+your speed of producing it :(
 
->diff --git a/a.h b/a.h
->new file mode 100644
+About propagating the empty expansions, may I ask a silly question?
+Is that the goal is you are able to track that, after the recursive expansion,
+you are able to tell in the result stream, there is an macro expand to nothing
+in the this location?
 
-The test file should be in validation/ directory. Please give a.h a
-name represent the test as well.
+Obviously, if the empty expansion is happen in the top level macro expand,
+you can always keep track of where is the original location of the expand using
+macro token->pos. The tricky part is the, if the empty expansion happen inside
+a multi-level macro expand. Then it is hard to keep track of where that empty
+macro should have been landed if it is not empty. Is that the problem you are
+trying to solve?
 
-+               if (!strncmp(arg, "buildin", 7)) {
-+                       fnobuildin = 1;
-+               }
+About the two example usage you give. The first one is using the html
+to show how macro expand recursively. I like that demo. It only need to remember
+at which level the macro expand to empty. It don't need to remember where
+the empty macro need to land in the result stream.
 
-Is there a stand gcc option to handle nobuildin? I haven't found one.
-If gcc has one, we can duplicate the gcc behavior. Otherwise,
-I don't see it is necessary to add one. The dependence program needs
-to able to handle the symbol from built in stream any way.
-If it is for easier to debug, your program can trivially skip out the builtin.
-stream.
+For the second usage example, the shrinking program. I think it only need to
+remember empty macro expand at the top level. Which is easy because you
+have the macro token->pos pointing to where this macro used in the source
+stream. For the empty macro expand inside another macro, you only need
+to remember it is a dependent of the the top level macro. Because when you
+trim the source code, you can't split a top level macro.
 
-+ * BSD-License
-+ * Redistribution and use in source and binary forms are permitted
+I think a lot of the complexity is introduced try to remember where that empty
+macro will land, if it is not being empty. However, exactly because the macro
+is being empty, it will not show up in the result token list. So where it should
+land is actually not very useful information, the parser never see it any way.
+We can relax the requirement a little bit, only need to remember where the
+empty macro will land in the top level case. That will greatly
+simplify the solution.
 
-Can you make it cover by the sparse license file as well? I don't mind you grant
-extra license to your code. But please at least make it cover by the
-license of the project itself otherwise I won't apply it. It is pure overhead
-to figure out what license is compatiable to spase and maintain different
-file at different license. Have all file under the project cover by the same
-license will keep it simple.
+Is my understanding correct?
 
-+void mdep_init(void) {
-+    preprocess_hook = &pp;
-+    pps = init_stream("<pp>", -1, 0);
-+}
-
-Please use the same coding standing as the other part of the project.
-It is actually the same as linux kernel. The "{" for the function should be
-on a new line. Indentation is tab and 8 char wide. There is a lot of those
-little one on this file. I am not going to repeat myself here.
-
-+struct hash {
-+    struct hash_v *f;
-+} h[HASH_LEN];
-
-+struct pp {
-+    enum pp_typ t;
-+    union {
-+        unsigned int argi;
-+    };
-+    struct pp_e *f;
-+    struct symbol *sym;
-+    struct token *tok;
-+    struct token *s, *d;
-+};
-+
-
-I hate those one letter member name. You have to guess what it is
-all the time. pp_dope_list() is full of those one letter variable name as
-well, make it very hard to read. The variable name need to be a little
-bit more meaningful.
-
-
-+       show_tokenstream(token, 0);
-Please don't use 0 for NULL pointer.
-
--void show_tokenstream(struct token *token)
-+void show_tokenstream(struct token *token, struct token *end)
--       while (!eof_token(token)) {
-+       while (token != end && !eof_token(token)) {
-
-I don't see you use the show_tokenstream with two arguments.
-You write your own show_tokenstream for mdep any way.
-You can leave it one unchanged.
-
-@@ -194,7 +196,7 @@ void show_tokenstream(struct token *token)
--               printf("%s%.*s", show_token(token), prec, separator);
-+               fprintf(stderr,"%s%.*s", show_token(token), prec, separator);
-
-Can't do that, the "-E" will use show_tokenstream() as well. You just
-change it to stderr for "-E".
-
-
-To be continue...
+Thanks
 
 Chris
