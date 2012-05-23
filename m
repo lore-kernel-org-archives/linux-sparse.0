@@ -1,123 +1,45 @@
-From: Konrad Eisele <eiselekd@gmail.com>
-Subject: Re: Fwd: dependency tee from c parser entities downto token
-Date: Tue, 15 May 2012 15:03:49 +0200
-Message-ID: <4FB25435.1030604@gmail.com>
-References: <4F967865.60809@gaisler.com> <CANeU7Q=nHs+f1wKVM0bGDc-uxubBztPxXjiMvDRpph4RJWPHYg@mail.gmail.com> <4FA8BF7D.60606@gaisler.com> <CANeU7QkLrr1p8-Bofx9fnZ82BA2pc7sOxSOa-zim5NhWHXTNQA@mail.gmail.com> <4FAA3D50.8080901@gaisler.com> <CANeU7Q=mq1FsGViTp7L-83Wns6uDLcRKi7usNRiO1D3Ox_Dmww@mail.gmail.com> <4FAB5DEA.5060009@gaisler.com> <4FAB6268.7070908@gaisler.com> <CANeU7Qk-DTs+WL=u2g5WQ1L2J++ZBkCHi8_85bmUWto7rq0-9Q@mail.gmail.com> <4FAB8F9E.8040205@gaisler.com> <CANeU7QnnXk26ybnayuRZ2ZGSArMt1Bne4KGXxt+0d7tBjN=6Kw@mail.gmail.com> <4FABB132.1070308@gmail.com> <4FABB467.7030703@gmail.com> <CANeU7Q=_uqwk+ePbErQ9gsX3x945_gATUZ_mJeYuTo2SoYhCpQ@mail.gmail.com> <4FAD892B.8070709@gmail.com> <CANeU7QnEyUExcxaoVEeamhu1m+Z_pg0TpKBP00hh+gyPgdq66w@mail.gmail.com> <4FAEA208.3090601@gmail.com> <4FAF76
- 45.9040003@gmail.com> <CANeU7QnOtrWFvmd4Od1gU_uHccjSQdD7pNGC4ri4pTCU=GcwLg@mail.gmail.com> <4FB20B37.8070308@gaisler.com> <CANeU7QmfxzQ8xXObV+PzLBZ62Amw13dY+-9OEa2K9QLGh4eKRg@mail.gmail.com>
+From: Shakthi Kannan <shakthimaan@gmail.com>
+Subject: Re: Using c2xml on kernel sources
+Date: Wed, 23 May 2012 15:29:03 +0530
+Message-ID: <CABG-yt2rCSESURVA4NOJe6Cwyxj0saTN1oJcMYE3kAgsNtULQA@mail.gmail.com>
+References: <CABG-yt06Kw2uFnmrshcHYjgf_cMgzKVdMPe6BXOP2nryhRjBpg@mail.gmail.com>
+	<20120320103702.GN3163@mwanda>
+	<CABG-yt2bs8wGUgTH9=dPgtD22vER8qd5JFZGXgPj9f+NS-OHmQ@mail.gmail.com>
+	<20120320154048.GA7848@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:35859 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932635Ab2EONAO (ORCPT
+Received: from mail-wg0-f44.google.com ([74.125.82.44]:36329 "EHLO
+	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750747Ab2EWJ7F (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 15 May 2012 09:00:14 -0400
-Received: by lahd3 with SMTP id d3so4108023lah.19
-        for <linux-sparse@vger.kernel.org>; Tue, 15 May 2012 06:00:12 -0700 (PDT)
-In-Reply-To: <CANeU7QmfxzQ8xXObV+PzLBZ62Amw13dY+-9OEa2K9QLGh4eKRg@mail.gmail.com>
+	Wed, 23 May 2012 05:59:05 -0400
+Received: by wgbdr13 with SMTP id dr13so6974149wgb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 23 May 2012 02:59:03 -0700 (PDT)
+In-Reply-To: <20120320154048.GA7848@mwanda>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Konrad Eisele <konrad@gaisler.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On 05/15/2012 11:44 AM, Christopher Li wrote:
-> On Tue, May 15, 2012 at 12:52 AM, Konrad Eisele<konrad@gaisler.com>  wrote:
->> The last patch with mdep.c and test-mdep.c was also nothing to
->> apply, only a work in progress to go further...
->
-> OK, I mistaken that as apply request. Never mind some of the
-> coding style comment then.
->
->> One thing you can see is how I propagate the token sources
->> using:
->>
->> 137:            n->from = list->pos;
->> ...
->> 143:            list->pos.line = id;
->> 144:            list->pos.stream = pps;
->>
->> here you get an argument why it is better to have a
->> (1) ->macro_begin(a)
->>     ->macro_end(b)
->> instead of only one
->> (2) expand_macro(a,b)
->> If you want to use the preprocessorhooks to output human readable macro
->> expansion history line similar to LLVM you probably want a pointer
->> to the "pre-expanded" token location, that is in (a). In (1) you can buildup
->> the token-source-paths going from post-expand buffer (b) through the
->> pre-expanded buffers (a)
->> in (2) you only have the paths going through the expanded buffers, can use
->> (a) to reason
->> about where (b) came from, but  not in a simple way...
->
-> At this point I think  1) is actually better for your requirement.
-> I start out as hoping the expand_macro() can abstract away the
-> internal implementation detail of macro expand and just give you the
-> text before and after the macro expand. But with all this extra
-> manipulations of the macro tokens, especially the substitute_argument()
-> is clear indicate tightening into the implementation details.
->
-> I would take 1) over substitute_arguments() if 1) don't need call back like
-> substitute_arguments().
+Hi,
 
-substitute_arguments() is because I am not allowed extra token
-TOKEN_M_EMPTY. it is unrelated to the upper cases...
+Replying to my own post (for future reference):
 
->
->
->> Kindof something like this:
->> #define E1
->> #define E2
->> #define S1(a) struct a { E1 int d1; };
->> #define S2(a) struct a { E2 int d2; };
->> #define xdef S1(sx) S2(sy)
->> xdef
->> main() {
->>         struct sx v;
->> }
->>
->> The xdef expands in one-line to "struct sx { int d1; }; struct sy { int d1;
->> };"
->> main() only uses "struct sx". Therefore the dependency analysis should not
->> have "E2 and S2" as dependencies. I think you need the location of empty
->
-> That is surprising to me. I previously have different assumptions.
-> I assume you want to back trace all the way back to the source macro.
-> I would just say main() depend on xdef, which depend one S1 and S2.
-> S1 also depend on E1 and S2 depend on E2.
+--- On Tue, Mar 20, 2012 at 08:55:48PM +0530, Shakthi Kannan wrote:
+| But, is it really required to generate eth.o? Is it possible to just
+| parse through the sources, produce the .xml output without having to
+| generate the object files?
+\--
 
-I'm not shure who is wrong here or weather maybe my example is not
-general enought, maybe you are right...
+I had to use:
 
->
-> If you bypass xdef and directly extract S1(sx). Why can't you do one
-> step further bypass S1() as well,  and say main depend on "struct sx {
-> E1 int d1;}?
->
-> This is even more complicated than I original though.
-> How about this case:
->
-> #define S1(a) struct a { E1 int d1; }; E3 struct
-> #define S2(a) a { E2 int d2; };
->
-> The rest is the same. Now xdef will expand to the same text.
-> What should main() depend on?  S1, E1 and E3?
-> Notice that without S2, macro expand by S1 can't compile at all.
->
->> Do you mean http://cfw.sourceforge.net/htmltag/init_32.c.pinfo.html ? This
->> is a gcc-based patch even there you need to trace empty expansion positions.
->
-> Yes. Did that patch submit to gcc? I can see trace empty expansion one level.
+MAKEFLAGS+="--dry-run" make C=2 CHECK="c2xml > foo.xml"
+net/ethernet/eth.o > output.txt
 
-Kind-of:-) http://gcc.gnu.org/ml/gcc/2012-03/msg00208.html
-It disapears in the gcc list noise however...
+eval `tail -2 output.txt | head -1`
 
-> You track empty macro pass that one multiple level macro expand as well?
+SK
 
-I dump everything, however I use a perl script to reconstruct...
-
->
-> Chris
->
-
+-- 
+Shakthi Kannan
+http://www.shakthimaan.com
