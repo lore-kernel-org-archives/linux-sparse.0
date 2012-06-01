@@ -1,38 +1,41 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Using c2xml on kernel sources
-Date: Wed, 23 May 2012 11:30:31 -0700
-Message-ID: <CANeU7Q=QCY4mWRhCJ14MyRh_nr3hyP4Yw9M0nYDs8cw2UaxHCA@mail.gmail.com>
-References: <CABG-yt06Kw2uFnmrshcHYjgf_cMgzKVdMPe6BXOP2nryhRjBpg@mail.gmail.com>
-	<20120320103702.GN3163@mwanda>
-	<CABG-yt2bs8wGUgTH9=dPgtD22vER8qd5JFZGXgPj9f+NS-OHmQ@mail.gmail.com>
-	<20120320154048.GA7848@mwanda>
-	<CABG-yt2rCSESURVA4NOJe6Cwyxj0saTN1oJcMYE3kAgsNtULQA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH] compile-i386: fix use-after-free in func_cleanup()
+Date: Fri,  1 Jun 2012 12:22:00 -0400
+Message-ID: <1338567720-23595-1-git-send-email-xi.wang@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:38273 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757259Ab2EWSac (ORCPT
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:54958 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965301Ab2FAQWW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 23 May 2012 14:30:32 -0400
-Received: by yhmm54 with SMTP id m54so6892868yhm.19
-        for <linux-sparse@vger.kernel.org>; Wed, 23 May 2012 11:30:31 -0700 (PDT)
-In-Reply-To: <CABG-yt2rCSESURVA4NOJe6Cwyxj0saTN1oJcMYE3kAgsNtULQA@mail.gmail.com>
+	Fri, 1 Jun 2012 12:22:22 -0400
+Received: by qcro28 with SMTP id o28so1217807qcr.19
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Jun 2012 09:22:21 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Shakthi Kannan <shakthimaan@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Xi Wang <xi.wang@gmail.com>
 
-On Wed, May 23, 2012 at 2:59 AM, Shakthi Kannan <shakthimaan@gmail.com> wrote:
->
-> MAKEFLAGS+="--dry-run" make C=2 CHECK="c2xml > foo.xml"
-> net/ethernet/eth.o > output.txt
->
-> eval `tail -2 output.txt | head -1`
->
+compile-i386 sometimes crashes due a use-after-free error.  Since
+f->pseudo_list is freed first, which invalidates some atom->op* in
+f->atom_list.  Further checks like `atom->op1->flags & STOR_WANTS_FREE'
+will read garbage, which may lead to a double free.
 
-That is a great tip.
+This patch switches the cleanup order and frees f->atom_list first.
+Those marked as STOR_WANTS_FREE won't appear in f->pseudo_list.
 
-Thanks.
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
+---
+ compile-i386.c |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-Chris
+diff --git a/compile-i386.c b/compile-i386.c
+index da3ee49..b470952 100644
+--- a/compile-i386.c
++++ b/compile-i386.c
+@@ -761,10 +761,6 @@ static void func_cleanup(struct function *f)
+ 	struct storage *stor;
+ 	struct atom *atom;
+ 
+-	FOR_EACH_PTR(f->pseudo_list, stor) {
+-		free(stor);
+-	} END_FOR_EACH_PTR(stor);
