@@ -1,39 +1,36 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Xi Wang <xi.wang@gmail.com>
 Subject: Re: [PATCH] check missing or duplicate goto labels
-Date: Mon, 4 Jun 2012 16:10:43 -0700
-Message-ID: <CANeU7QkToacKXoTUg60mbtvqoD0RzTHAUfp6zprD1BbZoiynxg@mail.gmail.com>
-References: <1338753706-24520-1-git-send-email-xi.wang@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Date: Mon, 4 Jun 2012 19:22:18 -0400
+Message-ID: <B037A82F-AA0F-4E2E-B9AF-C56E85D80D1D@gmail.com>
+References: <1338753706-24520-1-git-send-email-xi.wang@gmail.com> <CANeU7QkToacKXoTUg60mbtvqoD0RzTHAUfp6zprD1BbZoiynxg@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f178.google.com ([209.85.212.178]:45862 "EHLO
-	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757546Ab2FDXKo convert rfc822-to-8bit (ORCPT
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:60219 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756253Ab2FDXWW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Jun 2012 19:10:44 -0400
-Received: by wibhn6 with SMTP id hn6so3319735wib.1
-        for <linux-sparse@vger.kernel.org>; Mon, 04 Jun 2012 16:10:43 -0700 (PDT)
-In-Reply-To: <1338753706-24520-1-git-send-email-xi.wang@gmail.com>
+	Mon, 4 Jun 2012 19:22:22 -0400
+Received: by gglu4 with SMTP id u4so3529951ggl.19
+        for <linux-sparse@vger.kernel.org>; Mon, 04 Jun 2012 16:22:22 -0700 (PDT)
+In-Reply-To: <CANeU7QkToacKXoTUg60mbtvqoD0RzTHAUfp6zprD1BbZoiynxg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Xi Wang <xi.wang@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Sun, Jun 3, 2012 at 1:01 PM, Xi Wang <xi.wang@gmail.com> wrote:
-> This patch sets ->stmt of a SYM_LABEL to the corresponding label
-> statement. =A0If ->stmt was already set, it is a duplicate label.
->
-> On the other hand, if ->stmt of a goto label is not set during
-> evaluation, the label was never declared.
+On Jun 4, 2012, at 7:10 PM, Christopher Li wrote:
 
-Looks great! Can you please send me a signed off line?
+> On Sun, Jun 3, 2012 at 1:01 PM, Xi Wang <xi.wang@gmail.com> wrote:
+>> This patch sets ->stmt of a SYM_LABEL to the corresponding label
+>> statement.  If ->stmt was already set, it is a duplicate label.
+>> 
+>> On the other hand, if ->stmt of a goto label is not set during
+>> evaluation, the label was never declared.
+> 
+> Looks great! Can you please send me a signed off line?
 
-Thanks
+Oh sorry how did I miss that..
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
