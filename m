@@ -1,36 +1,60 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: Re: [PATCH] check missing or duplicate goto labels
-Date: Mon, 4 Jun 2012 19:22:18 -0400
-Message-ID: <B037A82F-AA0F-4E2E-B9AF-C56E85D80D1D@gmail.com>
-References: <1338753706-24520-1-git-send-email-xi.wang@gmail.com> <CANeU7QkToacKXoTUg60mbtvqoD0RzTHAUfp6zprD1BbZoiynxg@mail.gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Ethan Jackson <ethan@nicira.com>
+Subject: Re: [PATCH] sparse: Add 'leaf' to ignored attributes.
+Date: Thu, 7 Jun 2012 16:01:13 -0700
+Message-ID: <CAEruU60SVmewoByN8+oL1Tautf+R9t-zMUTGoN8bxPeAg-FWUA@mail.gmail.com>
+References: <1326840431-27368-1-git-send-email-ethan@nicira.com>
+ <CAOJsxLGNfSBZ9evmBaV6gN0rYorOUF85JJ9FNKXni01cvD1pVw@mail.gmail.com>
+ <CANeU7QmjxS_Orua5-a5AON9pZENn0sC5ZNL0mAQH6UQrJeFuNw@mail.gmail.com> <CAEruU62B_FHaiPg5L9jHHMh=Qi0_zQcCYyu_DxLUnSmtsNF5BA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:60219 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756253Ab2FDXWW (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Jun 2012 19:22:22 -0400
-Received: by gglu4 with SMTP id u4so3529951ggl.19
-        for <linux-sparse@vger.kernel.org>; Mon, 04 Jun 2012 16:22:22 -0700 (PDT)
-In-Reply-To: <CANeU7QkToacKXoTUg60mbtvqoD0RzTHAUfp6zprD1BbZoiynxg@mail.gmail.com>
+Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:38689 "HELO
+	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1755392Ab2FGXBf convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 7 Jun 2012 19:01:35 -0400
+Received: by mail-vc0-f178.google.com with SMTP id m8so806167vcd.37
+        for <linux-sparse@vger.kernel.org>; Thu, 07 Jun 2012 16:01:34 -0700 (PDT)
+In-Reply-To: <CAEruU62B_FHaiPg5L9jHHMh=Qi0_zQcCYyu_DxLUnSmtsNF5BA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, linux-sparse@vger.kernel.org
 
-On Jun 4, 2012, at 7:10 PM, Christopher Li wrote:
+Hello, sorry to have left this hanging so long.  Out of curiosity, is
+this still planned to be applied to the upstream tree?
 
-> On Sun, Jun 3, 2012 at 1:01 PM, Xi Wang <xi.wang@gmail.com> wrote:
->> This patch sets ->stmt of a SYM_LABEL to the corresponding label
->> statement.  If ->stmt was already set, it is a duplicate label.
->> 
->> On the other hand, if ->stmt of a goto label is not set during
->> evaluation, the label was never declared.
-> 
-> Looks great! Can you please send me a signed off line?
+Ethan
 
-Oh sorry how did I miss that..
-
-Signed-off-by: Xi Wang <xi.wang@gmail.com>
+On Wed, Jan 18, 2012 at 8:58 AM, Ethan Jackson <ethan@nicira.com> wrote=
+:
+> Thanks!
+>
+> Ethan
+>
+> On Wed, Jan 18, 2012 at 00:33, Christopher Li <sparse@chrisli.org> wr=
+ote:
+>> On Tue, Jan 17, 2012 at 11:20 PM, Pekka Enberg <penberg@kernel.org> =
+wrote:
+>>> On Wed, Jan 18, 2012 at 12:47 AM, Ethan Jackson <ethan@nicira.com> =
+wrote:
+>>>> This patch adds the 'leaf' GCC attribute to the list of ignored
+>>>> attributes. =A0Glibc uses this attribute causing the following
+>>>> warnings in userspace projects:
+>>>>
+>>>> =A0/usr/include/stdlib.h:514:26: error: attribute '__leaf__': unkn=
+own attribute
+>>>>
+>>>> Signed-off-by: Ethan Jackson <ethan@nicira.com>
+>>>
+>>> Acked-by: Pekka Enberg <penberg@kernel.org>
+>>
+>> Looks good to me too. Will apply.
+>>
+>> Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
