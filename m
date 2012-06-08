@@ -1,43 +1,94 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: Re: [PATCH] fix casts when linearizing compound assignments
-Date: Fri, 8 Jun 2012 11:45:22 -0400
-Message-ID: <56898225-DCA7-465E-BFD8-7D9D084A243B@gmail.com>
-References: <1339152460-17411-1-git-send-email-xi.wang@gmail.com>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
+From: Jeff Garzik <jeff@garzik.org>
+Subject: Re: [RFC/PATCH] sparse, llvm: Fix string globals access
+Date: Fri, 08 Jun 2012 14:13:54 -0400
+Message-ID: <4FD240E2.6040003@garzik.org>
+References: <1339160327-8534-1-git-send-email-penberg@kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gg0-f194.google.com ([209.85.161.194]:44633 "EHLO
-	mail-gg0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932296Ab2FHQ4D (ORCPT
+Received: from mail-yw0-f46.google.com ([209.85.213.46]:64068 "EHLO
+	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932400Ab2FHSN7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 8 Jun 2012 12:56:03 -0400
-Received: by ggdk5 with SMTP id k5so222350ggd.1
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 09:56:01 -0700 (PDT)
-In-Reply-To: <1339152460-17411-1-git-send-email-xi.wang@gmail.com>
+	Fri, 8 Jun 2012 14:13:59 -0400
+Received: by yhmm54 with SMTP id m54so1493146yhm.19
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 11:13:58 -0700 (PDT)
+In-Reply-To: <1339160327-8534-1-git-send-email-penberg@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Pekka Enberg <penberg@kernel.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>
 
-On Jun 8, 2012, at 6:47 AM, Xi Wang wrote:
-> -		oldvalue = cast_pseudo(ep, oldvalue, src->ctype, expr->ctype);
-> -		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], src->ctype);
-> -		dst = add_binary_op(ep, src->ctype, opcode, oldvalue, value);
-> -		value = cast_pseudo(ep, dst, expr->ctype, src->ctype);
-> +		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], expr->ctype);
-> +		value = cast_pseudo(ep, value, src->ctype, expr->ctype);
-> +		value = add_binary_op(ep, expr->ctype, opcode, oldvalue, value);
+On 06/08/2012 08:58 AM, Pekka Enberg wrote:
+> This patch attempts to fix code generation for global string access:
+>
+>    static char *foo = "Foo !\n";
+>
+>    extern int puts(const char *s);
+>
+>    int main(int argc, char *argv[])
+>    {
+>            puts(foo);
+>
+>            return 0;
+>    }
+>
+> Unfortunately the generated executable SIGSEGVs:
+>
+>    [penberg@tux sparse]$ ./sparsec foo.c&&  ./a.out
+>    Segmentation fault
+>
+> Looking at the IR, Sparse/LLVM generates this:
+>
+>    [penberg@tux sparse]$ ./sparse-llvm foo.c | llvm-dis
+>    ; ModuleID = '<stdin>'
+>
+>    @"<noident>" = private global [7 x i8] c"Foo !\0A\00"
+>    @foo = private global [7 x i8]* @"<noident>"
+>
+>    define i32 @main(i32, i8**) {
+>    L0:
+>      %load_target = load i64* bitcast ([7 x i8]* @"<noident>" to i64*)
+>      %2 = call i32 @puts(i64 %load_target)
+>      ret i32 0
+>    }
+>
+>    declare i32 @puts(i64)
+>
+> whereas Clang generates the following:
+>
+>    @.str = private unnamed_addr constant [7 x i8] c"Foo !\0A\00", align 1
+>
+>    define i32 @main(i32 %argc, i8** nocapture %argv) nounwind uwtable {
+>      %1 = tail call i32 @puts(i8* getelementptr inbounds ([7 x i8]* @.str, i64 0, i64 0)) nounwind
+>      ret i32 0
+>    }
+>
+>    declare i32 @puts(i8* nocapture) nounwind
+>
+> I'm not sure what the LLVM backend can do here. Sparse linearizes the code to
+> this which is why LLVM backend does the casting:
+>
+>    [penberg@tux sparse]$ ./test-linearize foo.c
+>    main:
+>    .L0x7f341f6f1010:
+>            <entry-point>
+>            load.64     %r1<- 0[foo]
+>            call.32     %r2<- puts, %r1
+>            ret.32      $0
+>
+> Comments?
+>
+> Cc: Benjamin Herrenschmidt<benh@kernel.crashing.org>
+> Cc: Christopher Li<sparse@chrisli.org>
+> Cc: Jeff Garzik<jgarzik@redhat.com>
+> NOT-Signed-off-by: Pekka Enberg<penberg@kernel.org>
+> ---
+>   sparse-llvm.c |    8 +++++++-
+>   1 files changed, 7 insertions(+), 1 deletions(-)
 
-For sparse-llvm, is it better to get rid of the cast_pseudo()
-at all?
+ACK
 
-For example, what to emit for p += 1:
 
-1) pointer p + integer 1,
 
-2) pointer + pointer [cast from integer], or
-
-3) (pointer)(integer [cast from pointer] + integer)?
-
-- xi
