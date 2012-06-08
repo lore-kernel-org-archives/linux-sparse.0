@@ -1,39 +1,43 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [RFC][PATCH 0/3] implement pseudo->ctype
-Date: Fri, 8 Jun 2012 14:50:11 +0300
-Message-ID: <CAOJsxLH2R+UtuEVt_uCkF+kSdk7XNzN-KCjekegUWM1dEzCh8Q@mail.gmail.com>
-References: <1338792878-25898-1-git-send-email-xi.wang@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Subject: [PATCH 1/2] sparse, llvm: Simplify output_data() type logic
+Date: Fri,  8 Jun 2012 15:34:36 +0300
+Message-ID: <1339158877-32024-1-git-send-email-penberg@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gh0-f174.google.com ([209.85.160.174]:58046 "EHLO
-	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754680Ab2FHLuM convert rfc822-to-8bit (ORCPT
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:44963 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756167Ab2FHMeq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 8 Jun 2012 07:50:12 -0400
-Received: by ghrr11 with SMTP id r11so1139510ghr.19
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 04:50:11 -0700 (PDT)
-In-Reply-To: <1338792878-25898-1-git-send-email-xi.wang@gmail.com>
+	Fri, 8 Jun 2012 08:34:46 -0400
+Received: by lbbgm6 with SMTP id gm6so1307827lbb.19
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 05:34:45 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Xi Wang <xi.wang@gmail.com>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
+Cc: Pekka Enberg <penberg@kernel.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>
 
-On Mon, Jun 4, 2012 at 9:54 AM, Xi Wang <xi.wang@gmail.com> wrote:
-> This patchset tries to implement Chris's `counter RFC': adding ->ctyp=
-e
-> to pseudo, while removing ->type and ->size from instruction. =A0In t=
-his
-> way, it provides easy access to type information for backend.
+Use LLVMTypeOf() in output_data() to simplify type handling logic.
 
-Could you please CC me on patches that touch Sparse/LLVM in the future?
+Cc: Benjamin Herrenschmidt <benh@kernel.crashing.org>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ sparse-llvm.c |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-The LLVM parts look good to me:
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 9226a21..a39bc02 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1192,7 +1192,7 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 
+ 	name = show_ident(sym->ident);
+ 
+-	data = LLVMAddGlobal(module, symbol_type(module, sym->ctype.base_type), name);
++	data = LLVMAddGlobal(module, LLVMTypeOf(initial_value), name);
+ 
+ 	LLVMSetLinkage(data, data_linkage(sym));
+ 
+-- 
+1.7.7.6
 
-Acked-by: Pekka Enberg <penberg@kernel.org>
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
