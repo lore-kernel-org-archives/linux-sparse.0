@@ -1,60 +1,71 @@
-From: Ethan Jackson <ethan@nicira.com>
-Subject: Re: [PATCH] sparse: Add 'leaf' to ignored attributes.
-Date: Thu, 7 Jun 2012 16:01:13 -0700
-Message-ID: <CAEruU60SVmewoByN8+oL1Tautf+R9t-zMUTGoN8bxPeAg-FWUA@mail.gmail.com>
-References: <1326840431-27368-1-git-send-email-ethan@nicira.com>
- <CAOJsxLGNfSBZ9evmBaV6gN0rYorOUF85JJ9FNKXni01cvD1pVw@mail.gmail.com>
- <CANeU7QmjxS_Orua5-a5AON9pZENn0sC5ZNL0mAQH6UQrJeFuNw@mail.gmail.com> <CAEruU62B_FHaiPg5L9jHHMh=Qi0_zQcCYyu_DxLUnSmtsNF5BA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+From: Xi Wang <xi.wang@gmail.com>
+Subject: [PATCH] fix casts when linearizing compound assignments
+Date: Fri,  8 Jun 2012 06:47:40 -0400
+Message-ID: <1339152460-17411-1-git-send-email-xi.wang@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from na3sys009aog126.obsmtp.com ([74.125.149.155]:38689 "HELO
-	na3sys009aog126.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1755392Ab2FGXBf convert rfc822-to-8bit
-	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 7 Jun 2012 19:01:35 -0400
-Received: by mail-vc0-f178.google.com with SMTP id m8so806167vcd.37
-        for <linux-sparse@vger.kernel.org>; Thu, 07 Jun 2012 16:01:34 -0700 (PDT)
-In-Reply-To: <CAEruU62B_FHaiPg5L9jHHMh=Qi0_zQcCYyu_DxLUnSmtsNF5BA@mail.gmail.com>
+Received: from mail-qc0-f174.google.com ([209.85.216.174]:39212 "EHLO
+	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751276Ab2FHKry (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 8 Jun 2012 06:47:54 -0400
+Received: by qcro28 with SMTP id o28so767918qcr.19
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 03:47:53 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Pekka Enberg <penberg@kernel.org>, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Xi Wang <xi.wang@gmail.com>
 
-Hello, sorry to have left this hanging so long.  Out of curiosity, is
-this still planned to be applied to the upstream tree?
+linearize_assignment() emits confusing casts for compound assignments.
+Consider p += 1, where p is a pointer.
 
-Ethan
+	oldvalue = cast_pseudo(ep, oldvalue, src->ctype, expr->ctype);
+	opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], src->ctype);
+	dst = add_binary_op(ep, src->ctype, opcode, oldvalue, value);
+	value = cast_pseudo(ep, dst, expr->ctype, src->ctype);
 
-On Wed, Jan 18, 2012 at 8:58 AM, Ethan Jackson <ethan@nicira.com> wrote=
-:
-> Thanks!
->
-> Ethan
->
-> On Wed, Jan 18, 2012 at 00:33, Christopher Li <sparse@chrisli.org> wr=
-ote:
->> On Tue, Jan 17, 2012 at 11:20 PM, Pekka Enberg <penberg@kernel.org> =
-wrote:
->>> On Wed, Jan 18, 2012 at 12:47 AM, Ethan Jackson <ethan@nicira.com> =
-wrote:
->>>> This patch adds the 'leaf' GCC attribute to the list of ignored
->>>> attributes. =A0Glibc uses this attribute causing the following
->>>> warnings in userspace projects:
->>>>
->>>> =A0/usr/include/stdlib.h:514:26: error: attribute '__leaf__': unkn=
-own attribute
->>>>
->>>> Signed-off-by: Ethan Jackson <ethan@nicira.com>
->>>
->>> Acked-by: Pekka Enberg <penberg@kernel.org>
->>
->> Looks good to me too. Will apply.
->>
->> Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It would make more sense to swap src->ctype and expr->ctype in both
+cast_pseudo(ep, pseudo, from, to) calls:
+
+In the first call, `oldvalue' is a pointer (expr->ctype), but it is
+converted from an integer (src->ctype) to a pointer (expr->ctype);
+
+In the second call, `dst' is an integer (src->ctype), but it is
+converted from a pointer (expr->ctype) to an integer (src->ctype).
+
+This patch instead converts `value' from an integer (src->ctype) to a
+pointer (expr->ctype) so as to emit fewer casts.
+
+Signed-off-by: Xi Wang <xi.wang@gmail.com>
+---
+ linearize.c |    8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/linearize.c b/linearize.c
+index 1d15cfd..d186387 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1161,7 +1161,6 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+ 		return value;
+ 	if (expr->op != '=') {
+ 		pseudo_t oldvalue = linearize_load_gen(ep, &ad);
+-		pseudo_t dst;
+ 		static const int op_trans[] = {
+ 			[SPECIAL_ADD_ASSIGN - SPECIAL_BASE] = OP_ADD,
+ 			[SPECIAL_SUB_ASSIGN - SPECIAL_BASE] = OP_SUB,
+@@ -1179,10 +1178,9 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+ 		if (!src)
+ 			return VOID;
+ 
+-		oldvalue = cast_pseudo(ep, oldvalue, src->ctype, expr->ctype);
+-		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], src->ctype);
+-		dst = add_binary_op(ep, src->ctype, opcode, oldvalue, value);
+-		value = cast_pseudo(ep, dst, expr->ctype, src->ctype);
++		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], expr->ctype);
++		value = cast_pseudo(ep, value, src->ctype, expr->ctype);
++		value = add_binary_op(ep, expr->ctype, opcode, oldvalue, value);
+ 	}
+ 	value = linearize_store_gen(ep, value, &ad);
+ 	finish_address_gen(ep, &ad);
+-- 
+1.7.9.5
+
