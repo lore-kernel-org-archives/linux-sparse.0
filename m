@@ -1,67 +1,83 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: Re: [PATCH 2/2] sparse, llvm: Fix string initializer code generation
-Date: Fri, 08 Jun 2012 14:15:33 -0400
-Message-ID: <4FD24145.9050209@garzik.org>
-References: <1339158877-32024-1-git-send-email-penberg@kernel.org> <1339158877-32024-2-git-send-email-penberg@kernel.org>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: Re: [PATCH] fix casts when linearizing compound assignments
+Date: Fri, 8 Jun 2012 22:10:42 +0300
+Message-ID: <CAOJsxLEQhzNe2RNKW3RkDNkLbu3cszJfW0KzRq4oNRVaRXoP5Q@mail.gmail.com>
+References: <1339152460-17411-1-git-send-email-xi.wang@gmail.com>
+	<56898225-DCA7-465E-BFD8-7D9D084A243B@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f46.google.com ([209.85.213.46]:57523 "EHLO
-	mail-yw0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758040Ab2FHSPg (ORCPT
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:45795 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755213Ab2FHTKn convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 8 Jun 2012 14:15:36 -0400
-Received: by yhmm54 with SMTP id m54so1494397yhm.19
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 11:15:35 -0700 (PDT)
-In-Reply-To: <1339158877-32024-2-git-send-email-penberg@kernel.org>
+	Fri, 8 Jun 2012 15:10:43 -0400
+Received: by yenm10 with SMTP id m10so1524334yen.19
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Jun 2012 12:10:42 -0700 (PDT)
+In-Reply-To: <56898225-DCA7-465E-BFD8-7D9D084A243B@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>
+To: Xi Wang <xi.wang@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Linus Torvalds <torvalds@linux-foundation.org>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>
 
-On 06/08/2012 08:34 AM, Pekka Enberg wrote:
-> This fixes code generation for string initializer such as:
+On Fri, Jun 8, 2012 at 6:45 PM, Xi Wang <xi.wang@gmail.com> wrote:
+> On Jun 8, 2012, at 6:47 AM, Xi Wang wrote:
+>> - =A0 =A0 =A0 =A0 =A0 =A0 oldvalue =3D cast_pseudo(ep, oldvalue, src=
+->ctype, expr->ctype);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 opcode =3D opcode_sign(op_trans[expr->op -=
+ SPECIAL_BASE], src->ctype);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 dst =3D add_binary_op(ep, src->ctype, opco=
+de, oldvalue, value);
+>> - =A0 =A0 =A0 =A0 =A0 =A0 value =3D cast_pseudo(ep, dst, expr->ctype=
+, src->ctype);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 opcode =3D opcode_sign(op_trans[expr->op -=
+ SPECIAL_BASE], expr->ctype);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 value =3D cast_pseudo(ep, value, src->ctyp=
+e, expr->ctype);
+>> + =A0 =A0 =A0 =A0 =A0 =A0 value =3D add_binary_op(ep, expr->ctype, o=
+pcode, oldvalue, value);
 >
->    static char *foo = "Foo !\n";
+> For sparse-llvm, is it better to get rid of the cast_pseudo()
+> at all?
 >
-> It's the same fix Ben proposed earlier with the small difference that we now
-> use LLVMTypeOf() instead of symbol_type() to resolve the type.
+> For example, what to emit for p +=3D 1:
 >
-> The generated LLVM IR looks as follows:
+> 1) pointer p + integer 1,
 >
->    [penberg@tux sparse]$ ./sparse-llvm foo.c |llvm-dis
->    ; ModuleID = '<stdin>'
+> 2) pointer + pointer [cast from integer], or
 >
->    @"<noident>" = private global [7 x i8] c"Foo !\0A\00"
->    @foo = private global [7 x i8]* @"<noident>"
->
-> Reported-by: Benjamin Herrenschmidt<benh@kernel.crashing.org>
-> Cc: Benjamin Herrenschmidt<benh@kernel.crashing.org>
-> Cc: Christopher Li<sparse@chrisli.org>
-> Cc: Jeff Garzik<jgarzik@redhat.com>
-> Signed-off-by: Pekka Enberg<penberg@kernel.org>
-> ---
->   sparse-llvm.c |    6 ++++++
->   1 files changed, 6 insertions(+), 0 deletions(-)
->
-> diff --git a/sparse-llvm.c b/sparse-llvm.c
-> index a39bc02..89c6a2e 100644
-> --- a/sparse-llvm.c
-> +++ b/sparse-llvm.c
-> @@ -1181,6 +1181,12 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
->   				initial_value = output_data(module, sym);
->   			break;
->   		}
-> +		case EXPR_STRING: {
-> +			const char *s = initializer->string->data;
-> +
-> +			initial_value = LLVMConstString(strdup(s), strlen(s) + 1, true);
-> +			break;
-> +		}
->   		default:
+> 3) (pointer)(integer [cast from pointer] + integer)?
 
-ACK 1-2
+Dunno.
 
+This:
 
+void *foo(void *p)
+{
+  p +=3D 1;
 
+  return p;
+}
+
+is converted as follows by clang:
+
+define i8* @foo(i8* %p) nounwind uwtable readnone {
+  %1 =3D getelementptr i8* %p, i64 1
+  ret i8* %1
+}
+
+[ You can try it out yourself here: http://llvm.org/demo/index.cgi ]
+
+So it seems that LLVM really wants to use the "getelementptr" thingy
+for these. I have no idea what makes the most sense from sparse IR
+point of view.
+
+Jeff, Linus, Chris, hmm?
+
+                        Pekka
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
