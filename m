@@ -1,83 +1,49 @@
 From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [RFC/PATCH] sparse, llvm: Fix string globals access
-Date: Sat, 9 Jun 2012 14:00:38 +0300
-Message-ID: <CAOJsxLFX-ZiDCQ84uKka4MYa_uUhLMPeR=XWAHMevTRFsfZBJA@mail.gmail.com>
-References: <1339160327-8534-1-git-send-email-penberg@kernel.org>
-	<4FD240E2.6040003@garzik.org>
-	<CAOJsxLH9N84YwLrHQXn+R1r4cOd7DUuM2SpFq828mSV6WmHjqg@mail.gmail.com>
-	<35CC6868-F462-4116-A143-81959DA38D5C@gmail.com>
+Subject: [GIT PULL] LLVM backend updates
+Date: Sat, 9 Jun 2012 14:11:04 +0300 (EEST)
+Message-ID: <alpine.LFD.2.02.1206091408320.4769@tux.localdomain>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ob0-f174.google.com ([209.85.214.174]:61842 "EHLO
-	mail-ob0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750852Ab2FILAj convert rfc822-to-8bit (ORCPT
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:36361 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753145Ab2FILLP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Jun 2012 07:00:39 -0400
-Received: by obbtb18 with SMTP id tb18so3751636obb.19
-        for <linux-sparse@vger.kernel.org>; Sat, 09 Jun 2012 04:00:38 -0700 (PDT)
-In-Reply-To: <35CC6868-F462-4116-A143-81959DA38D5C@gmail.com>
+	Sat, 9 Jun 2012 07:11:15 -0400
+Received: by lbbgm6 with SMTP id gm6so1926283lbb.19
+        for <linux-sparse@vger.kernel.org>; Sat, 09 Jun 2012 04:11:13 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Xi Wang <xi.wang@gmail.com>
-Cc: Jeff Garzik <jeff@garzik.org>, linux-sparse@vger.kernel.org, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jgarzik@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Xi Wang <xi.wang@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Sat, Jun 9, 2012 at 2:55 AM, Xi Wang <xi.wang@gmail.com> wrote:
-> On Jun 8, 2012, at 4:39 PM, Pekka Enberg wrote:
->>
->> Xi, so I guess your current work on linearize.c might fix the SIGSEG=
-V
->> I'm seeing?
->
-> I guess the problem is that sparse-llvm generates an incorrect type
-> `load i64*' in llvm from the sparse instruction load.64.
->
-> =A0 =A0 =A0 =A0load.64 =A0 =A0 %r2 <- 0[foo]
-> =A0 =A0 =A0 =A0call.32 =A0 =A0 %r1 <- puts, %r2
-> =A0 =A0 =A0 =A0ret.32 =A0 =A0 =A0$0
->
-> With the new ->ctype in pseudo sparse-llvm should be able to generate
-> the correct type. =A0I am playing with an LLVM backend with typed pse=
-udos;
-> it generates the following code, which seems okay.
->
-> @0 =3D internal global [7 x i8] c"Foo !\0A\00", align 1
-> @foo =3D internal global i8* getelementptr inbounds ([7 x i8]* @0, i6=
-4 0, i64 0), align 8
->
-> define i32 @main(i32 %argc, i8** %argv) {
-> entry:
-> =A0%0 =3D load i8** @foo
-> =A0%1 =3D call i32 @puts(i8* %0)
-> =A0ret i32 0
-> }
+Hi Chris,
 
-Right. Looking at your "splay" backend
+Please pull the latest sparse-llvm tree from:
 
-static value_t emit_gep(builder_t builder, struct pseudo *src,
-unsigned int offset, struct pseudo *dst)
-{
-	type_t charp =3D LLVMPointerType(LLVMInt8Type(), 0);
-	value_t base =3D LLVMBuildPointerCast(builder, emit_pseudo(src), charp=
-, "");
-	value_t idx =3D LLVMConstInt(LLVMIntType(bits_in_pointer), offset, 0);
-	value_t gep =3D LLVMBuildGEP(builder, base, &idx, 1, "");
-	type_t type =3D LLVMPointerType(emit_type(dst->ctype), 0);
+  git@github.com:penberg/sparse-llvm.git for-chris
 
-	return LLVMBuildPointerCast(builder, gep, type, "");
-}
+It has one new validation test case and fixes to handle strings properly 
+in the LLVM backend.
 
-after which OP_LOAD translation becomes as simple as
+			Pekka
+------------------>
 
-	case OP_LOAD:
-		return LLVMBuildLoad(builder, emit_gep(builder, insn->src,
-insn->offset, insn->target), "");
+The following changes since commit 970d7169d75068146152ba01a66381c800dbeb71:
 
-Jeff, I guess we should do this for output_load() and output_store()
-in sparse-llvm.c as well?
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  I have updated the sparse.1 man page including the __bitwise relevant 
+content, and created Documentation/sparse.txt with the complete comparison 
+between __nocast vs __bitwise. (2012-05-19 23:42:36 -0700)
+
+are available in the git repository at:
+  git@github.com:penberg/sparse-llvm.git for-chris
+
+Pekka Enberg (4):
+      sparse, llvm: Add _Bool to cast validation test
+      sparse, llvm: Simplify output_data() type logic
+      sparse, llvm: Fix string initializer code generation
+      sparse, llvm: Fix global string access code generation
+
+ sparse-llvm.c             |   16 ++++++++++++++--
+ validation/backend/cast.c |    3 +++
+ 2 files changed, 17 insertions(+), 2 deletions(-)
