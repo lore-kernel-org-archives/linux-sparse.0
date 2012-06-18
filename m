@@ -1,50 +1,33 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: [PATCH v2] fix casting constant to _Bool
-Date: Sun, 17 Jun 2012 14:45:05 -0400
-Message-ID: <1339958705-9881-1-git-send-email-xi.wang@gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: [PATCH 0/2] Add some more ignored attributes for glibc
+Date: Mon, 18 Jun 2012 14:06:59 +0300
+Message-ID: <cover.1340005296.git.dan.carpenter@oracle.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:41143 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1757473Ab2FQSpV (ORCPT
+Received: from rcsinet15.oracle.com ([148.87.113.117]:39112 "EHLO
+	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751136Ab2FRLHI (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 17 Jun 2012 14:45:21 -0400
-Received: by qcro28 with SMTP id o28so2513056qcr.19
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Jun 2012 11:45:20 -0700 (PDT)
+	Mon, 18 Jun 2012 07:07:08 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Xi Wang <xi.wang@gmail.com>, Pekka Enberg <penberg@kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Dan Carpenter <dan.carpenter@oracle.com>
+Cc: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
 
-Casting to _Bool requires a zero test rather than truncation.  Also add
-a new cast warning for _Bool since this is not about truncation.
+KOSAKI Motohiro sent these patches to Smatch and I'm pushing them
+upstream.
 
-Cc: Pekka Enberg <penberg@kernel.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>
-Signed-off-by: Xi Wang <xi.wang@gmail.com>
----
- expand.c |    8 ++++++++
- 1 file changed, 8 insertions(+)
+Smatch wasn't using the latest Sparse so I've tweaked them a bit.
 
-diff --git a/expand.c b/expand.c
-index 63a9075..fcdefcb 100644
---- a/expand.c
-+++ b/expand.c
-@@ -92,6 +92,14 @@ void cast_value(struct expression *expr, struct symbol *newtype,
- 	value = get_longlong(old);
- 
- Int:
-+	// _Bool requires a zero test rather than truncation.
-+	if (is_bool_type(newtype)) {
-+		expr->value = value ? 1 : 0;
-+		if (!conservative && value != 0 && value != 1)
-+			warning(old->pos, "odd constant _Bool cast (%llx becomes 1)", value);
-+		return;
-+	}
-+
- 	// Truncate it to the new size
- 	signmask = 1ULL << (new_size-1);
- 	mask = signmask | (signmask-1);
+KOSAKI Motohiro (2):
+  sparse: Add '__vector_size__' to ignored attributes
+  sparse: Add 'error' to ignored attributes
+
+ ident-list.h |    2 ++
+ parse.c      |    3 +++
+ 2 files changed, 5 insertions(+), 0 deletions(-)
+
 -- 
-1.7.9.5
-
+1.7.8.rc0.dirty
