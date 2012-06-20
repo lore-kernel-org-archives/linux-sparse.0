@@ -1,51 +1,48 @@
-From: Xi Wang <xi.wang@gmail.com>
-Subject: Re: buffer overflow check bug
-Date: Tue, 19 Jun 2012 16:37:20 -0400
-Message-ID: <EA6DE3B9-8977-4135-89F0-34812CCE9FF6@gmail.com>
-References: <4FDBA56F.8070106@gmail.com> <4FDEFCB1.7030800@gmail.com> <4FDF0AA5.6080905@gmail.com> <20120618113037.GI4400@mwanda> <4FDF1610.3000100@gmail.com> <20120618121726.GG13539@mwanda> <4FDF2036.4080908@gmail.com> <20120618134338.GJ4400@mwanda> <20120618181111.GH13539@mwanda> <CAHGf_=rNSUKPrV5yYyJ8KWbvHO4zAPU7Du4_9HbwW-HiLVbFiw@mail.gmail.com> <20120618195344.GM4400@mwanda>
-Mime-Version: 1.0 (Apple Message framework v1084)
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
+From: Mikulas Patocka <mikulas@artax.karlin.mff.cuni.cz>
+Subject: [PATCH] compile sparse with Intel C
+Date: Wed, 20 Jun 2012 02:24:15 +0200 (CEST)
+Message-ID: <alpine.DEB.2.00.1206200221060.7055@artax.karlin.mff.cuni.cz>
+Mime-Version: 1.0
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:47688 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753478Ab2FSUh1 (ORCPT
+Received: from artax.karlin.mff.cuni.cz ([195.113.26.195]:52814 "EHLO
+	artax.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751996Ab2FTAac (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Jun 2012 16:37:27 -0400
-In-Reply-To: <20120618195344.GM4400@mwanda>
+	Tue, 19 Jun 2012 20:30:32 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by artax.karlin.mff.cuni.cz (Postfix) with ESMTP id 066E5980A7
+	for <linux-sparse@vger.kernel.org>; Wed, 20 Jun 2012 02:24:15 +0200 (CEST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: KOSAKI Motohiro <kosaki.motohiro@gmail.com>, smatch@vger.kernel.org, linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Jun 18, 2012, at 3:53 PM, Dan Carpenter wrote:
+Hi
 
-> Gar...  I have no idea.  That seems like an issue in sparse.
-> 
-> Does anyone know why MOD_NORETURN gets set for:
-> extern void my_exit(const char*, ...) __attribute__ ((__noreturn__));
-> 
-> but not for:
-> extern __attribute__ ((__noreturn__)) void my_exit(const char*, ...);
-> 
-> GCC seems to accept both formats.
+This patch makes sparse compile with Intel C compiler.
 
-Which version of sparse are you using?  Everything looks good to me here.
+Intel C complains that it cannot initialize flexible arrays (defined at 
+the end of the structure with []).
 
-  extern void my_exit(const char*, ...) __attribute__ ((__noreturn__));
-  extern __attribute__ ((__noreturn__)) void another_exit(const char*, ...);
-  void foo(void) { my_exit(""); }
-  void bar(void) { another_exit(""); }
+Mikulas
 
-My backend "splay" emits:
-
-  declare void @my_exit(i8*, ...) noreturn
-  declare void @another_exit(i8*, ...) noreturn
-  ...
-
-The noreturn attribute is set simply by:
-
-  if (sym->ctype.modifiers & MOD_NORETURN)
-      LLVMAddFunctionAttr(func, LLVMNoReturnAttribute);
-
-- xi
+--- dissect.h_	2012-06-20 01:31:19.000000000 +0200
++++ dissect.h	2012-06-20 02:19:42.000000000 +0200
+@@ -2,6 +2,7 @@
+ #define	DISSECT_H
+ 
+ #include <stdio.h>
++#include <string.h>
+ #include "parse.h"
+ #include "expression.h"
+ 
+@@ -32,8 +33,8 @@
+ 		char __[sizeof(s)];			\
+ 	} ident = {{					\
+ 		.len  = sizeof(s)-1,			\
+-		.name = s,				\
+ 	}};						\
++	strcpy(ident.ident.name, s);			\
+ 	&ident.ident;					\
+ })
+ 
