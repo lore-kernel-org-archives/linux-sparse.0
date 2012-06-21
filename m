@@ -1,40 +1,42 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: My new gpg key and temporary sparse repository
-Date: Thu, 21 Jun 2012 02:35:51 -0700
-Message-ID: <CANeU7Qk9YOksLMAn_a9oZsVU0QbJg5k=+5QGkssTxJjNbgAyLw@mail.gmail.com>
+Subject: Re: [GIT PULL] LLVM backend updates
+Date: Thu, 21 Jun 2012 02:56:34 -0700
+Message-ID: <CANeU7QnW=kZJrkQFy34VCxrjOZTVNs5x19t6Bryxi-bLi4KqEg@mail.gmail.com>
+References: <alpine.LFD.2.02.1206091408320.4769@tux.localdomain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:37407 "EHLO
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:41734 "EHLO
 	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759159Ab2FUJfw (ORCPT
+	with ESMTP id S1759240Ab2FUJ4f convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 21 Jun 2012 05:35:52 -0400
-Received: by gglu4 with SMTP id u4so273396ggl.19
-        for <linux-sparse@vger.kernel.org>; Thu, 21 Jun 2012 02:35:52 -0700 (PDT)
+	Thu, 21 Jun 2012 05:56:35 -0400
+Received: by gglu4 with SMTP id u4so283733ggl.19
+        for <linux-sparse@vger.kernel.org>; Thu, 21 Jun 2012 02:56:34 -0700 (PDT)
+In-Reply-To: <alpine.LFD.2.02.1206091408320.4769@tux.localdomain>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Pekka Enberg <penberg@kernel.org>
+Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jgarzik@redhat.com>, Benjamin Herrenschmidt <benh@kernel.crashing.org>, Xi Wang <xi.wang@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi,
+On Sat, Jun 9, 2012 at 4:11 AM, Pekka Enberg <penberg@kernel.org> wrote=
+:
+> Hi Chris,
+>
+> Please pull the latest sparse-llvm tree from:
+>
+> =A0git@github.com:penberg/sparse-llvm.git for-chris
+>
+> It has one new validation test case and fixes to handle strings prope=
+rly
+> in the LLVM backend.
 
-I just come back from a vacation and I will start applying patches
-on the list.
-
-Unfortunately I wipe my home machine with the gpg key and access
-to korg. No, the key is not compromised, I just lost it during a re-install.
-
-I just create the new key EBBE4796 and upload it to the mit
-key server. I will need to redo the key signing process to regain
-access to korg.
-
-Meanwhile, I am using github to publish sparse development repository.
-Sorry for the inconvenient I caused.
-
-Here is the link for the temporary sparse repository:
-
-https://github.com/sparsecli/sparse
-
-Hopefully it will not take too long to regain access to korg.
+Merged and pushed on github.
 
 Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
