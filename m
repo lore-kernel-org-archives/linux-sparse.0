@@ -1,48 +1,40 @@
-From: Mikulas Patocka <mikulas@artax.karlin.mff.cuni.cz>
-Subject: [PATCH] compile sparse with Intel C
-Date: Wed, 20 Jun 2012 02:24:15 +0200 (CEST)
-Message-ID: <alpine.DEB.2.00.1206200221060.7055@artax.karlin.mff.cuni.cz>
+From: Christopher Li <sparse@chrisli.org>
+Subject: My new gpg key and temporary sparse repository
+Date: Thu, 21 Jun 2012 02:35:51 -0700
+Message-ID: <CANeU7Qk9YOksLMAn_a9oZsVU0QbJg5k=+5QGkssTxJjNbgAyLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from artax.karlin.mff.cuni.cz ([195.113.26.195]:52814 "EHLO
-	artax.karlin.mff.cuni.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751996Ab2FTAac (ORCPT
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:37407 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759159Ab2FUJfw (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Jun 2012 20:30:32 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by artax.karlin.mff.cuni.cz (Postfix) with ESMTP id 066E5980A7
-	for <linux-sparse@vger.kernel.org>; Wed, 20 Jun 2012 02:24:15 +0200 (CEST)
+	Thu, 21 Jun 2012 05:35:52 -0400
+Received: by gglu4 with SMTP id u4so273396ggl.19
+        for <linux-sparse@vger.kernel.org>; Thu, 21 Jun 2012 02:35:52 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi
+Hi,
 
-This patch makes sparse compile with Intel C compiler.
+I just come back from a vacation and I will start applying patches
+on the list.
 
-Intel C complains that it cannot initialize flexible arrays (defined at 
-the end of the structure with []).
+Unfortunately I wipe my home machine with the gpg key and access
+to korg. No, the key is not compromised, I just lost it during a re-install.
 
-Mikulas
+I just create the new key EBBE4796 and upload it to the mit
+key server. I will need to redo the key signing process to regain
+access to korg.
 
---- dissect.h_	2012-06-20 01:31:19.000000000 +0200
-+++ dissect.h	2012-06-20 02:19:42.000000000 +0200
-@@ -2,6 +2,7 @@
- #define	DISSECT_H
- 
- #include <stdio.h>
-+#include <string.h>
- #include "parse.h"
- #include "expression.h"
- 
-@@ -32,8 +33,8 @@
- 		char __[sizeof(s)];			\
- 	} ident = {{					\
- 		.len  = sizeof(s)-1,			\
--		.name = s,				\
- 	}};						\
-+	strcpy(ident.ident.name, s);			\
- 	&ident.ident;					\
- })
- 
+Meanwhile, I am using github to publish sparse development repository.
+Sorry for the inconvenient I caused.
+
+Here is the link for the temporary sparse repository:
+
+https://github.com/sparsecli/sparse
+
+Hopefully it will not take too long to regain access to korg.
+
+Chris
