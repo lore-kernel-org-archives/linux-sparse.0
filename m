@@ -1,39 +1,60 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Xi Wang <xi.wang@gmail.com>
 Subject: Re: [RFC][PATCH 0/3] implement pseudo->ctype
-Date: Thu, 21 Jun 2012 03:00:51 -0700
-Message-ID: <CANeU7Q=OHoLdD0O4o8tdcEoAjB83y+8G8mcZGuT2TduQooWkYA@mail.gmail.com>
-References: <1338792878-25898-1-git-send-email-xi.wang@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Date: Fri, 22 Jun 2012 10:08:26 +0800
+Message-ID: <BDDFC596-BA52-41EA-8C7D-D35E620F8E6B@gmail.com>
+References: <1338792878-25898-1-git-send-email-xi.wang@gmail.com> <CANeU7Q=OHoLdD0O4o8tdcEoAjB83y+8G8mcZGuT2TduQooWkYA@mail.gmail.com>
+Mime-Version: 1.0 (Apple Message framework v1084)
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gg0-f174.google.com ([209.85.161.174]:50063 "EHLO
-	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759271Ab2FUKHu convert rfc822-to-8bit (ORCPT
+Received: from mail-yw0-f51.google.com ([209.85.213.51]:44722 "EHLO
+	mail-yw0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1760973Ab2FVCIq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 21 Jun 2012 06:07:50 -0400
-Received: by gglu4 with SMTP id u4so289552ggl.19
-        for <linux-sparse@vger.kernel.org>; Thu, 21 Jun 2012 03:07:49 -0700 (PDT)
-In-Reply-To: <1338792878-25898-1-git-send-email-xi.wang@gmail.com>
+	Thu, 21 Jun 2012 22:08:46 -0400
+Received: by yhnn12 with SMTP id n12so1414408yhn.10
+        for <linux-sparse@vger.kernel.org>; Thu, 21 Jun 2012 19:08:46 -0700 (PDT)
+In-Reply-To: <CANeU7Q=OHoLdD0O4o8tdcEoAjB83y+8G8mcZGuT2TduQooWkYA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Xi Wang <xi.wang@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Sun, Jun 3, 2012 at 11:54 PM, Xi Wang <xi.wang@gmail.com> wrote:
-> This patchset tries to implement Chris's `counter RFC': adding ->ctyp=
-e
-> to pseudo, while removing ->type and ->size from instruction. =A0In t=
-his
-> way, it provides easy access to type information for backend.
+On Jun 21, 2012, at 6:00 PM, Christopher Li wrote:
+> 
+> I like this series a lot. Do you have an update version of the patch?
 
-I like this series a lot. Do you have an update version of the patch?
+I will resend a revised version of these patches.
 
-Thanks
+With ->ctype in pseudo, we might have to disable several simplifications
+in simplify.c and cse.c for type consistency.  One such example is:
 
-Chris
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+	unsigned int foo(unsigned long long x)
+	{
+		unsigned int tmp = x & 0x1fffffff;
+		return tmp;
+	}
+
+sparse emits:
+
+	and.64      %r2 <- %arg1, $0x1fffffff
+	ret.32      %r2
+
+%r2 seems to be interpreted as both 64 and 32 bits, which will also
+trouble backends.
+
+To fix the inconsistency, we may need to disable some simplification:
+
+https://github.com/xiw/sparse/commit/7072002
+
+Then we have:
+
+	and.64      %r2 <- %arg1, $0x1fffffff
+	cast.32     %r3 <- (64) %r2
+	ret.32      %r3
+
+Does this make sense?  Or should we just provide an option to turn
+off all sparse simplifications, since backends usually have their own
+optimization passes?
+
+- xi
