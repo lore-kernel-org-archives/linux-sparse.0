@@ -1,69 +1,56 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: buffer overflow check bug
-Date: Fri, 22 Jun 2012 15:31:54 +0300
-Message-ID: <20120622123154.GA5333@mwanda>
-References: <4FDF0AA5.6080905@gmail.com>
- <20120618113037.GI4400@mwanda>
- <4FDF1610.3000100@gmail.com>
- <20120618121726.GG13539@mwanda>
- <4FDF2036.4080908@gmail.com>
- <20120618134338.GJ4400@mwanda>
- <20120618181111.GH13539@mwanda>
- <CAHGf_=rNSUKPrV5yYyJ8KWbvHO4zAPU7Du4_9HbwW-HiLVbFiw@mail.gmail.com>
- <20120618195344.GM4400@mwanda>
- <EA6DE3B9-8977-4135-89F0-34812CCE9FF6@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC][PATCH 0/3] implement pseudo->ctype
+Date: Fri, 22 Jun 2012 10:59:51 -0700
+Message-ID: <CANeU7Q==MEahGWuUMFKybp4FQrUn4MBn=euhvF9wcFLTKHOvRw@mail.gmail.com>
+References: <1338792878-25898-1-git-send-email-xi.wang@gmail.com>
+	<CANeU7Q=OHoLdD0O4o8tdcEoAjB83y+8G8mcZGuT2TduQooWkYA@mail.gmail.com>
+	<BDDFC596-BA52-41EA-8C7D-D35E620F8E6B@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from acsinet15.oracle.com ([141.146.126.227]:18893 "EHLO
-	acsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932823Ab2FVMcS (ORCPT
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:49349 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755925Ab2FVR7w convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 22 Jun 2012 08:32:18 -0400
-Content-Disposition: inline
-In-Reply-To: <EA6DE3B9-8977-4135-89F0-34812CCE9FF6@gmail.com>
+	Fri, 22 Jun 2012 13:59:52 -0400
+Received: by gglu4 with SMTP id u4so1768581ggl.19
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Jun 2012 10:59:51 -0700 (PDT)
+In-Reply-To: <BDDFC596-BA52-41EA-8C7D-D35E620F8E6B@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Xi Wang <xi.wang@gmail.com>
-Cc: KOSAKI Motohiro <kosaki.motohiro@gmail.com>, smatch@vger.kernel.org, linux-sparse@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org
 
-On Tue, Jun 19, 2012 at 04:37:20PM -0400, Xi Wang wrote:
-> On Jun 18, 2012, at 3:53 PM, Dan Carpenter wrote:
-> 
-> > Gar...  I have no idea.  That seems like an issue in sparse.
-> > 
-> > Does anyone know why MOD_NORETURN gets set for:
-> > extern void my_exit(const char*, ...) __attribute__ ((__noreturn__));
-> > 
-> > but not for:
-> > extern __attribute__ ((__noreturn__)) void my_exit(const char*, ...);
-> > 
-> > GCC seems to accept both formats.
-> 
-> Which version of sparse are you using?  Everything looks good to me here.
+On Thu, Jun 21, 2012 at 7:08 PM, Xi Wang <xi.wang@gmail.com> wrote:
+> On Jun 21, 2012, at 6:00 PM, Christopher Li wrote:
+> https://github.com/xiw/sparse/commit/7072002
+>
+> Then we have:
+>
+> =A0 =A0 =A0 =A0and.64 =A0 =A0 =A0%r2 <- %arg1, $0x1fffffff
+> =A0 =A0 =A0 =A0cast.32 =A0 =A0 %r3 <- (64) %r2
+> =A0 =A0 =A0 =A0ret.32 =A0 =A0 =A0%r3
+>
+> Does this make sense? =A0Or should we just provide an option to turn
+> off all sparse simplifications, since backends usually have their own
+> optimization passes?
 
-I'm on sparse 0.4.4.  Which version are you on?
+Adding the cast from 64 to 32 bit make sense.
 
-> 
->   extern void my_exit(const char*, ...) __attribute__ ((__noreturn__));
->   extern __attribute__ ((__noreturn__)) void another_exit(const char*, ...);
->   void foo(void) { my_exit(""); }
->   void bar(void) { another_exit(""); }
-> 
-> My backend "splay" emits:
-> 
->   declare void @my_exit(i8*, ...) noreturn
->   declare void @another_exit(i8*, ...) noreturn
->   ...
-> 
-> The noreturn attribute is set simply by:
-> 
->   if (sym->ctype.modifiers & MOD_NORETURN)
->       LLVMAddFunctionAttr(func, LLVMNoReturnAttribute);
+The sparse checker can still benefit from the simplifications. I think
+it is OK we turn off those simplifications for sparse-llvm back end.
 
-Yep.  I use the same test, but sym->ctype.modifiers is not set for
-me. The debug printf I added in handle_attributes() should have
-printed.
+I want to have this module that, the back end can pick to chose
+what kind of simplification/optimization done to the linearized
+instructions.
 
-regards,
-dan carpenter
+I think the sparse-llvm back end need a different code path in the
+front end for things like GEP any way.
+
+Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
