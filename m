@@ -1,49 +1,57 @@
-From: Paul Gortmaker <paul.gortmaker@windriver.com>
+From: Daniel Santos <danielfsantos@att.net>
 Subject: Re: [PATCH v4 6/13] bug.h: Replace __linktime_error with __compiletime_error
-Date: Mon, 25 Jun 2012 14:16:28 -0400
-Message-ID: <4FE8AAFC.1080306@windriver.com>
-References: <1340424048-7759-1-git-send-email-daniel.santos@pobox.com> <1340424048-7759-7-git-send-email-daniel.santos@pobox.com>
+Date: Mon, 25 Jun 2012 14:30:49 -0500
+Message-ID: <4FE8BC69.7000104@att.net>
+References: <1340424048-7759-1-git-send-email-daniel.santos@pobox.com> <1340424048-7759-7-git-send-email-daniel.santos@pobox.com> <4FE8AAFC.1080306@windriver.com>
+Reply-To: daniel.santos@pobox.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.windriver.com ([147.11.1.11]:50230 "EHLO
-	mail.windriver.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754093Ab2FYSSu (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jun 2012 14:18:50 -0400
-In-Reply-To: <1340424048-7759-7-git-send-email-daniel.santos@pobox.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-doc-owner@vger.kernel.org>
+In-Reply-To: <4FE8AAFC.1080306@windriver.com>
+Sender: linux-doc-owner@vger.kernel.org
+To: Paul Gortmaker <paul.gortmaker@windriver.com>
+Cc: Daniel Santos <daniel.santos@pobox.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Turner <pjt@google.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Richard Weinberger <richard@nod.at>, Rob Landley <rob@landley.net>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Santos <daniel.santos@pobox.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Turner <pjt@google.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Richard Weinberger <richard@nod.at>, Rob Landley <rob@landley.net>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
 
-On 12-06-23 12:00 AM, Daniel Santos wrote:
-> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-> ---
->  include/linux/bug.h |    2 +-
->  1 files changed, 1 insertions(+), 1 deletions(-)
-> 
-> diff --git a/include/linux/bug.h b/include/linux/bug.h
-> index aaac4bb..298a916 100644
-> --- a/include/linux/bug.h
-> +++ b/include/linux/bug.h
-> @@ -73,7 +73,7 @@ extern int __build_bug_on_failed;
->  #define BUILD_BUG()						\
->  	do {							\
->  		extern void __build_bug_failed(void)		\
-> -			__linktime_error("BUILD_BUG failed");	\
-> +			__compiletime_error("BUILD_BUG failed");\
+On 06/25/2012 01:16 PM, Paul Gortmaker wrote:
+>
+> At a quick glance of the bug.h parts, I would think you need
+> this commit _before_ #5 (that deleted __linktime_error) otherwise
+> you'll have introduced a bisection build failure.  Or, alternatively
+> you could combine #5 and #6 since they are clearly related, and
+> their separation is more of a per-file CVS mentality than it is of
+> any existence of distinct and separate/unrelated changesets.
+>
+> P.
+Thanks, will do.
 
-At a quick glance of the bug.h parts, I would think you need
-this commit _before_ #5 (that deleted __linktime_error) otherwise
-you'll have introduced a bisection build failure.  Or, alternatively
-you could combine #5 and #6 since they are clearly related, and
-their separation is more of a per-file CVS mentality than it is of
-any existence of distinct and separate/unrelated changesets.
+And after I thought about this more, I realized that both
+__build_bug_failed and __build_bug_on_failed could just be declared
+globally rather than being part of the macro. It may not be that big of
+a deal, but it would reduce the size of pre-processed files at least
+(something I look at a lot working with this patch set). But I'll let
+you make the final call on that one
 
-P.
+Oh, and as it turns out, adding the string-ized condition in the
+BUILD_BUG_ON macro is useless (actually confusing) since gcc takes the
+attributes of the first occurrence of an externed function in a
+translation unit. Thus, the following code:
 
->  		__build_bug_failed();				\
->  	} while (0)
->  
+#include <linux/bug.h>
+void func(void)
+{
+const int a =3D 0;
+BUILD_BUG_ON(a =3D=3D 1);
+BUILD_BUG_ON(1) ;
+}
+
+would result in the error message:
+
+call to =91__build_bug_on_failed=92 declared with attribute error:
+BUILD_BUG_ON failed: a =3D=3D 1
+
+At least the line number is correct however. So my "declare a function
+multiple times with with differing attributes" turns out to not work ri=
+ght.
+
