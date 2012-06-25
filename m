@@ -1,39 +1,30 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v4 0/13] Generic Red-Black Trees
-Date: Mon, 25 Jun 2012 03:35:30 -0500
-Message-ID: <4FE822D2.7000407@att.net>
-References: <1340424048-7759-1-git-send-email-daniel.santos@pobox.com> <4FE661F8.3000109@att.net> <4FE69A14.6040904@landley.net> <201206240957.09136.pisa@cmp.felk.cvut.cz>
-Reply-To: daniel.santos@pobox.com
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/2] sparse: Add '__vector_size__' to ignored attributes
+Date: Mon, 25 Jun 2012 02:44:00 -0700
+Message-ID: <CANeU7Q=A77GBb2Lbu8MZd+p4qcqQH-uzyJBSL2Z63it-a4Jm9A@mail.gmail.com>
+References: <cover.1340005296.git.dan.carpenter@oracle.com>
+	<20120618110723.GA19915@elgon.mountain>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm19-vm0.bullet.mail.sp2.yahoo.com ([98.139.91.216]:33862 "HELO
-	nm19-vm0.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751275Ab2FYIfc (ORCPT
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:33519 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751539Ab2FYJoA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jun 2012 04:35:32 -0400
-In-Reply-To: <201206240957.09136.pisa@cmp.felk.cvut.cz>
+	Mon, 25 Jun 2012 05:44:00 -0400
+Received: by ghrr11 with SMTP id r11so2618872ghr.19
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Jun 2012 02:44:00 -0700 (PDT)
+In-Reply-To: <20120618110723.GA19915@elgon.mountain>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Pisa <pisa@cmp.felk.cvut.cz>
-Cc: Rob Landley <rob@landley.net>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Turner <pjt@google.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Richard Weinberger <richard@nod.at>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: linux-sparse@vger.kernel.org, KOSAKI Motohiro <kosaki.motohiro@gmail.com>
 
+On Mon, Jun 18, 2012 at 4:07 AM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> From: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
+>
+> We already had "vector_size" but we also need __vector_size__ to silence
 
-> It would worth to have even user space version of the
-> kernel RB tree code with Dainie's interface to run feasibility
-> and performance tests in more environments quickly
-> (as Daniel mentioned already). But it is not necessary
-> for me to be convinced that provided changes should go into
-> kernel because I am convinced  already and offer my
-> "Reviewed-by" confirmation.
-Thanks Pavel!
+Applied with some fix up on the patch.
 
-As far as user-space testing, I have a simple test program that
-compilers in user-space using a hacked-up system include directory and
-compiles the kernel code unmodified.  I'll be sure and write the test
-code to work both in-kernel and in user space, although working out the
-portability of the build will be a bit of a challenge.
-
-Daniel
-
+Chris
