@@ -1,57 +1,42 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v4 6/13] bug.h: Replace __linktime_error with __compiletime_error
-Date: Mon, 25 Jun 2012 14:30:49 -0500
-Message-ID: <4FE8BC69.7000104@att.net>
-References: <1340424048-7759-1-git-send-email-daniel.santos@pobox.com> <1340424048-7759-7-git-send-email-daniel.santos@pobox.com> <4FE8AAFC.1080306@windriver.com>
-Reply-To: daniel.santos@pobox.com
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH][RFC] handle -I and -include combination
+Date: Tue, 26 Jun 2012 00:52:35 -0700
+Message-ID: <CANeU7Qm=0cCqHRJpDxeRK=QmqpJRyXu9wo1tKzCQqSxsQ_dLqQ@mail.gmail.com>
+References: <1340023258-7069-1-git-send-email-kosaki.motohiro@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <4FE8AAFC.1080306@windriver.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Paul Gortmaker <paul.gortmaker@windriver.com>
-Cc: Daniel Santos <daniel.santos@pobox.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Turner <pjt@google.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Richard Weinberger <richard@nod.at>, Rob Landley <rob@landley.net>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:39806 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754696Ab2FZHwf (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 26 Jun 2012 03:52:35 -0400
+Received: by yenl2 with SMTP id l2so3524803yen.19
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jun 2012 00:52:35 -0700 (PDT)
+In-Reply-To: <1340023258-7069-1-git-send-email-kosaki.motohiro@gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: kosaki.motohiro@gmail.com
+Cc: linux-sparse@vger.kernel.org
 
-On 06/25/2012 01:16 PM, Paul Gortmaker wrote:
+On Mon, Jun 18, 2012 at 5:40 AM,  <kosaki.motohiro@gmail.com> wrote:
+> From: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
 >
-> At a quick glance of the bug.h parts, I would think you need
-> this commit _before_ #5 (that deleted __linktime_error) otherwise
-> you'll have introduced a bisection build failure.  Or, alternatively
-> you could combine #5 and #6 since they are clearly related, and
-> their separation is more of a per-file CVS mentality than it is of
-> any existence of distinct and separate/unrelated changesets.
+> Currently, "-include" behavior is far different between sparse
+> and gcc. gcc can compile following testcase. but sparse can't.
 >
-> P.
-Thanks, will do.
+> This patch fixes it.
+>
 
-And after I thought about this more, I realized that both
-__build_bug_failed and __build_bug_on_failed could just be declared
-globally rather than being part of the macro. It may not be that big of
-a deal, but it would reduce the size of pre-processed files at least
-(something I look at a lot working with this patch set). But I'll let
-you make the final call on that one
+Thanks for the patch. The patch has some small problem though:
+There are some other user of the cmdline_include array.
+Remove it will disable those options.
 
-Oh, and as it turns out, adding the string-ized condition in the
-BUILD_BUG_ON macro is useless (actually confusing) since gcc takes the
-attributes of the first occurrence of an externed function in a
-translation unit. Thus, the following code:
+Also the include order of the header file is now reversed:
 
-#include <linux/bug.h>
-void func(void)
-{
-const int a =3D 0;
-BUILD_BUG_ON(a =3D=3D 1);
-BUILD_BUG_ON(1) ;
-}
+$  gcc -include a.h -include b.h  foo.c
+will include a.h then b.h.
+Your patch will include b.h then a.h.
+Granted, the "isystem" has the same bug here too.
 
-would result in the error message:
-
-call to =91__build_bug_on_failed=92 declared with attribute error:
-BUILD_BUG_ON failed: a =3D=3D 1
-
-At least the line number is correct however. So my "declare a function
-multiple times with with differing attributes" turns out to not work ri=
-ght.
-
+Chris
