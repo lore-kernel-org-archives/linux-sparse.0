@@ -1,37 +1,40 @@
-From: Peter Zijlstra <a.p.zijlstra@chello.nl>
-Subject: Re: [PATCH v4 12/13] fair.c: Use generic rbtree impl in fair
- scheduler
-Date: Tue, 26 Jun 2012 14:15:49 +0200
-Message-ID: <1340712949.21991.57.camel@twins>
-References: <1340424048-7759-1-git-send-email-daniel.santos@pobox.com>
-	 <1340424048-7759-13-git-send-email-daniel.santos@pobox.com>
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: Re: [PATCH 2/2] ptrlist.c: fix a typo in a comment
+Date: Tue, 26 Jun 2012 21:59:34 +0200
+Message-ID: <20120626195934.GA4368@debian.debian>
+References: <1340055561-28496-1-git-send-email-j.neuschaefer@gmx.net>
+ <1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net>
+ <CANeU7QnOaUgk7LiKyWkHq82R5JxwP9Sh-2Hqz2odZX5yMqzH5A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <1340424048-7759-13-git-send-email-daniel.santos@pobox.com>
-Sender: linux-doc-owner@vger.kernel.org
-To: Daniel Santos <daniel.santos@pobox.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Turner <pjt@google.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Richard Weinberger <richard@nod.at>, Rob Landley <rob@landley.net>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mailout-de.gmx.net ([213.165.64.22]:48601 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752054Ab2FZT7g (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 26 Jun 2012 15:59:36 -0400
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnOaUgk7LiKyWkHq82R5JxwP9Sh-2Hqz2odZX5yMqzH5A@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, linux-sparse@vger.kernel.org
 
-On Fri, 2012-06-22 at 23:00 -0500, Daniel Santos wrote:
-> +static inline long compare_vruntime(u64 *a, u64 *b)
-> +{
-> +#if __BITS_PER_LONG >= 64
-> +       return (long)((s64)*a - (s64)*b);
-> +#else
-> +/* This is hacky, but is done to reduce instructions -- we wont use this for
-> + * rbtree lookups, only inserts, and since our relationship is defined as
-> + * non-unique, we only need to return positive if a > b and any other value
-> + * means less than.
-> + */
-> +       return (long)(*a > *b);
-> +#endif
-> +} 
+On Tue, Jun 26, 2012 at 12:55:40AM -0700, Christopher Li wrote:
+> On Mon, Jun 18, 2012 at 2:39 PM, Jonathan Neusch=C3=A4fer
+> <j.neuschaefer@gmx.net> wrote:
+> > Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+>=20
+> Both 1 and 2 applied.
+>=20
+> Chris
 
-That's wrong.. suppose: a = 10, b = ULLONG_MAX - 10
+Thanks!
 
-In that case (s64)(a - b) = 20, however a > b is false.
-
-And yes, vruntime wrap does happen.
+Jonathan
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
