@@ -1,42 +1,35 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH][RFC] handle -I and -include combination
-Date: Tue, 26 Jun 2012 00:52:35 -0700
-Message-ID: <CANeU7Qm=0cCqHRJpDxeRK=QmqpJRyXu9wo1tKzCQqSxsQ_dLqQ@mail.gmail.com>
-References: <1340023258-7069-1-git-send-email-kosaki.motohiro@gmail.com>
+Subject: Re: [PATCH 2/2] ptrlist.c: fix a typo in a comment
+Date: Tue, 26 Jun 2012 00:55:40 -0700
+Message-ID: <CANeU7QnOaUgk7LiKyWkHq82R5JxwP9Sh-2Hqz2odZX5yMqzH5A@mail.gmail.com>
+References: <1340055561-28496-1-git-send-email-j.neuschaefer@gmx.net>
+	<1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:39806 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754696Ab2FZHwf (ORCPT
+Received: from mail-gg0-f174.google.com ([209.85.161.174]:56922 "EHLO
+	mail-gg0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756180Ab2FZHzk convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Jun 2012 03:52:35 -0400
-Received: by yenl2 with SMTP id l2so3524803yen.19
-        for <linux-sparse@vger.kernel.org>; Tue, 26 Jun 2012 00:52:35 -0700 (PDT)
-In-Reply-To: <1340023258-7069-1-git-send-email-kosaki.motohiro@gmail.com>
+	Tue, 26 Jun 2012 03:55:40 -0400
+Received: by gglu4 with SMTP id u4so3527642ggl.19
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jun 2012 00:55:40 -0700 (PDT)
+In-Reply-To: <1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: kosaki.motohiro@gmail.com
+To: =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>
 Cc: linux-sparse@vger.kernel.org
 
-On Mon, Jun 18, 2012 at 5:40 AM,  <kosaki.motohiro@gmail.com> wrote:
-> From: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
->
-> Currently, "-include" behavior is far different between sparse
-> and gcc. gcc can compile following testcase. but sparse can't.
->
-> This patch fixes it.
->
+On Mon, Jun 18, 2012 at 2:39 PM, Jonathan Neusch=E4fer
+<j.neuschaefer@gmx.net> wrote:
+> Signed-off-by: Jonathan Neusch=E4fer <j.neuschaefer@gmx.net>
 
-Thanks for the patch. The patch has some small problem though:
-There are some other user of the cmdline_include array.
-Remove it will disable those options.
-
-Also the include order of the header file is now reversed:
-
-$  gcc -include a.h -include b.h  foo.c
-will include a.h then b.h.
-Your patch will include b.h then a.h.
-Granted, the "isystem" has the same bug here too.
+Both 1 and 2 applied.
 
 Chris
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
