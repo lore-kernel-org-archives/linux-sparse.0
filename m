@@ -1,194 +1,68 @@
-From: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
-Subject: Re: [PATCH][RFC] handle -I and -include combination
-Date: Sat, 30 Jun 2012 03:38:33 -0400
-Message-ID: <4FEEACF9.4060701@gmail.com>
-References: <1340023258-7069-1-git-send-email-kosaki.motohiro@gmail.com> <CANeU7Qm=0cCqHRJpDxeRK=QmqpJRyXu9wo1tKzCQqSxsQ_dLqQ@mail.gmail.com> <CAHGf_=oozZQZtyQow1GocS-=o8EiXctCP1HBa7Y7kMgCG58x6A@mail.gmail.com> <CANeU7QmVqaQVKEc-9O28J8Z5Hvy20DYffqVz7yHknoouHVC+fQ@mail.gmail.com>
+From: Daniel Santos <danielfsantos@att.net>
+Subject: Generic Red-Black Trees: preliminary performance results
+Date: Tue, 10 Jul 2012 04:58:01 -0500
+Message-ID: <4FFBFCA9.2060307@att.net>
+Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:44437 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751273Ab2F3Hij (ORCPT
+Received: from nm2.access.bullet.mail.sp2.yahoo.com ([98.139.44.129]:46282
+	"HELO nm2.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751874Ab2GJJ5t (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 30 Jun 2012 03:38:39 -0400
-Received: by qadb17 with SMTP id b17so1092020qad.19
-        for <linux-sparse@vger.kernel.org>; Sat, 30 Jun 2012 00:38:38 -0700 (PDT)
-In-Reply-To: <CANeU7QmVqaQVKEc-9O28J8Z5Hvy20DYffqVz7yHknoouHVC+fQ@mail.gmail.com>
+	Tue, 10 Jul 2012 05:57:49 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: KOSAKI Motohiro <kosaki.motohiro@gmail.com>, linux-sparse@vger.kernel.org
+To: Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@elte.hu>, Ingo Molnar <mingo@kernel.org>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, Paul Gortmaker <paul.gortmaker@windriver.com>, Paul Turner <pjt@google.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Richard Weinberger <richard@nod.at>, Rob Landley <rob@landley.net>, Steven Rostedt <rostedt@goodmis.org>, Suresh Siddha <suresh.b.siddha@intel.com>
 
-(6/29/12 8:27 PM), Christopher Li wrote:
-> On Wed, Jun 27, 2012 at 10:55 AM, KOSAKI Motohiro
-> <kosaki.motohiro@gmail.com> wrote:
->> If I understand correctly, cmdline_include is only used from -includ=
-e
->> and -imacro. and, -imacro is also needed to respect -I. Am I missing
->> something?
->=20
-> Actually, I misread your patch. You patch function fine.
-> The only thing I might change is the name of the "pre_buffer2".
-> If this buffer is only use by the include files, we might just all it
-> include_buffer or some thing like that. Let me know if you want to
-> resend one with a better name, or I can patch it for you.
->=20
-> Thanks for the patch. That will get rid of the static array as well.
-> Nice.
+I've completed some rudimentary test code.  It is designed to compile
+both in user & kernel space but only currently compiles in userland.  I
+ran this on 9 different versions of gcc, all on x86_64 with CFLAGS="-O2
+-g3 -pipe -march=k8".  The below summary data shows the % increase in
+time consumed (decrease in performance) using my generic red-black trees
+over hand-coded functions for insertion.
 
+gcc ver  % decrease in speed
+4.7.1       -5.39%
+4.6.2        2.60%
+4.5.3       18.07%
+4.4.6       20.52%
+4.3.6       13.53%
+4.2.4       11.84%
+4.1.2       16.36%
+4.0.4       35.70%
+3.4.6       47.28%
 
-Thanks. done.
+I don't understand why the generic code ran faster than hand-coded on
+gcc 4.7.1 as I haven't examined the assembly output yet.  However, I'm
+pretty certain I understand why it was 2% slower on 4.6.  This has to do
+with an optimization flaw.  In the hand-coded insert/find functions, I
+used  the "if (a->key > b->key) .. else if (a->key < b->key)" construct,
+where as the generic code calculates a diff and compares that against
+zero and 4.6.2 is adding an unnecessary cmp instruction:
 
+ 3f2:   8b 48 18                mov    0x18(%rax),%ecx
+ 3f5:   8b 7a 18                mov    0x18(%rdx),%edi
+ 3f8:   48 29 f9                sub    %rdi,%rcx
+ 3fb:   48 83 f9 00             cmp    $0x0,%rcx
+ 3ff:   7f df                   jg     3e0 <grbtest_insert+0xb0>
+ 401:   0f 84 c9 00 00 00       je     4d0 <grbtest_insert+0x1a0>
 
-=46rom e4f94099b1f01910cf2de10667c12cdf872a6522 Mon Sep 17 00:00:00 200=
-1
-=46rom: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
-Date: Mon, 18 Jun 2012 08:04:26 -0400
-Subject: [PATCH] handle -I and -include combination
+The test configuration was for a tree that tracks both leftmost,
+rightmost and count and uses unique keys where the insert function
+replaces an existing object. These tests weren't ideal.  While I
+allocated 4096 objects (32 bytes each) to stick in my tree, I used 0xff
+for a key mask, so only 256 object would be in the tree at once and I
+didn't notice this until I was most of the way through the tests.  My
+intention was to run the test with a data set small enough to fit into
+the L3 cache, so as to reduce overhead from memory access and isolate
+the actual differences in the algorithm.
 
-Currently, "-include" behavior is far different between sparse
-and gcc. gcc can compile following testcase. but sparse can't.
+When I get this all cleaned up, I'll release another patch set with the
+test code added.  (This also automates correctness tests for find,
+insert, find_near and insert_near). Also, I'm going to experiment with
+branch prediction to see if I can squeeze a little more performance out
+of the older compilers.
 
-This patch fixes it.
-
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
- Makefile
- --------------
- bar:
-    $(CC) -I./include-for-foo -include foo.h main.c -o bar
-
- main.c
- ------------------
- #include <stdio.h>
- int main(void)
- {
-     printf("foo =3D %d=A5n", FOO);
-     return 0;
- }
-
- include-for-foo/foo.h
- ----------------------
- #define FOO 42
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D
-
-Signed-off-by: KOSAKI Motohiro <kosaki.motohiro@gmail.com>
----
- lib.c |   52 ++++++++++++++++++++++++----------------------------
- lib.h |    9 ---------
- 2 files changed, 24 insertions(+), 37 deletions(-)
-
-diff --git a/lib.c b/lib.c
-index 396e9f1..c698fa1 100644
---- a/lib.c
-+++ b/lib.c
-@@ -189,6 +189,8 @@ void die(const char *fmt, ...)
-=20
- static struct token *pre_buffer_begin =3D NULL;
- static struct token *pre_buffer_end =3D NULL;
-+static struct token *include_buffer_begin =3D NULL;
-+static struct token *include_buffer_end =3D NULL;
-=20
- int Waddress_space =3D 1;
- int Wbitwise =3D 0;
-@@ -224,11 +226,6 @@ static enum { STANDARD_C89,
-               STANDARD_GNU89,
-               STANDARD_GNU99, } standard =3D STANDARD_GNU89;
-=20
--#define CMDLINE_INCLUDE 20
--int cmdline_include_nr =3D 0;
--struct cmdline_include cmdline_include[CMDLINE_INCLUDE];
--
--
- void add_pre_buffer(const char *fmt, ...)
- {
- 	va_list args;
-@@ -247,6 +244,24 @@ void add_pre_buffer(const char *fmt, ...)
- 	pre_buffer_end =3D end;
- }
-=20
-+void add_include_buffer(const char *fmt, ...)
-+{
-+	va_list args;
-+	unsigned int size;
-+	struct token *begin, *end;
-+	char buffer[4096];
-+
-+	va_start(args, fmt);
-+	size =3D vsnprintf(buffer, sizeof(buffer), fmt, args);
-+	va_end(args);
-+	begin =3D tokenize_buffer(buffer, size, &end);
-+	if (!include_buffer_begin)
-+		include_buffer_begin =3D begin;
-+	if (include_buffer_end)
-+		include_buffer_end->next =3D begin;
-+	include_buffer_end =3D end;
-+}
-+
- static char **handle_switch_D(char *arg, char **next)
- {
- 	const char *name =3D arg + 1;
-@@ -299,16 +314,7 @@ static char **handle_switch_I(char *arg, char **ne=
-xt)
-=20
- static void add_cmdline_include(char *filename)
- {
--	int fd =3D open(filename, O_RDONLY);
--	if (fd < 0) {
--		perror(filename);
--		return;
--	}
--	if (cmdline_include_nr >=3D CMDLINE_INCLUDE)
--		die("too many include files for %s=A5n", filename);
--	cmdline_include[cmdline_include_nr].filename =3D filename;
--	cmdline_include[cmdline_include_nr].fd =3D fd;
--	cmdline_include_nr++;
-+	add_include_buffer("#include =A5"%s=A5"=A5n", filename);
- }
-=20
- static char **handle_switch_i(char *arg, char **next)
-@@ -892,19 +898,9 @@ static struct symbol_list *sparse_file(const char =
-*filename)
-  */
- static struct symbol_list *sparse_initial(void)
- {
--	struct token *token;
--	int i;
--
--	// Prepend any "include" file to the stream.
--	// We're in global scope, it will affect all files!
--	token =3D NULL;
--	for (i =3D cmdline_include_nr - 1; i >=3D 0; i--)
--		token =3D tokenize(cmdline_include[i].filename, cmdline_include[i].f=
-d,
--				 token, includepath);
--
--	// Prepend the initial built-in stream
--	if (token)
--		pre_buffer_end->next =3D token;
-+	if (include_buffer_begin)
-+		pre_buffer_end->next =3D include_buffer_begin;
-+
- 	return sparse_tokenstream(pre_buffer_begin);
- }
-=20
-diff --git a/lib.h b/lib.h
-index 2cea252..ee954fe 100644
---- a/lib.h
-+++ b/lib.h
-@@ -41,15 +41,6 @@ struct position {
- 		     noexpand:1;
- };
-=20
--struct cmdline_include {
--	char *filename;
--	int fd;
--};
--
--extern struct cmdline_include cmdline_include[];
--extern int cmdline_include_nr;
--
+Daniel
