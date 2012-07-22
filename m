@@ -1,32 +1,44 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: sparse-llvm segfaults when passing a struct pointer
-Date: Fri, 20 Jul 2012 13:12:51 -0700
-Message-ID: <CA+55aFx9nhVkD7oEKR2SRjVomf4a-WV7tb69PfRJzWkMgfzhyg@mail.gmail.com>
-References: <20120719131725.GA2836@debian.debian> <CAOJsxLEuR5mfDr-1RrNXzL7S5stb-79Ez4dx2+7Qbr8fBL+WPg@mail.gmail.com>
+From: Larry Finger <Larry.Finger@lwfinger.net>
+Subject: False warning from Sparse
+Date: Sat, 21 Jul 2012 22:52:54 -0500
+Message-ID: <500B7916.6060804@lwfinger.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:53660 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751985Ab2GTUNN (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 20 Jul 2012 16:13:13 -0400
-Received: by wgbdr13 with SMTP id dr13so3988816wgb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 20 Jul 2012 13:13:12 -0700 (PDT)
-In-Reply-To: <CAOJsxLEuR5mfDr-1RrNXzL7S5stb-79Ez4dx2+7Qbr8fBL+WPg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>, linux-sparse@vger.kernel.org, Jeff Garzik <jeff@garzik.org>, Christopher Li <sparse@chrisli.org>
 
-On Fri, Jul 20, 2012 at 1:21 AM, Pekka Enberg <penberg@kernel.org> wrote:
->
-> Linus, Jeff, how does the sparse frontend deal with externs? Why isn't
-> "foop" visible after linearize_symbol()?
+Hi,
 
-'extern' symbols are just names with types. They don't have any value
-associated with them, they just have the type and the name.
+I am getting the following false warning from sparse:
 
-What else would you expect sparse to have?
+   CHECK   drivers/net/wireless/rtlwifi/rtl8192c/dm_common.c
+drivers/net/wireless/rtlwifi/rtl8192c/dm_common.c:1158:13: warning: context 
+imbalance in 'rtl92c_dm_refresh_rate_adaptive_mask' - different lock contexts 
+for basic block
 
-              Linus
+The only code in that routine that does any locking is the following:
+
+              /* Only the PCI card uses sta in the update rate table
+               * callback routine */
+              if (rtlhal->interface == INTF_PCI) {
+                      rcu_read_lock();
+                      sta = ieee80211_find_sta(mac->vif, mac->bssid);
+              }
+              rtlpriv->cfg->ops->update_rate_tbl(hw, sta,
+                                   p_ra->ratr_state);
+
+              p_ra->pre_ratr_state = p_ra->ratr_state;
+              if (rtlhal->interface == INTF_PCI)
+                      rcu_read_unlock();
+
+Does the warning get output because the code cannot assume that 
+rtlhal->interface is the same in both if statements? If that is the case, are 
+there any compiler directives that would tell sparse of the situation?
+
+Thanks,
+
+Larry
