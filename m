@@ -1,73 +1,31 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: False warning from Sparse
-Date: Sat, 21 Jul 2012 21:44:21 -0700
-Message-ID: <20120722044421.GA3934@leaf>
-References: <500B7916.6060804@lwfinger.net>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: re: Adding default for m64/m32 handle
+Date: Thu, 26 Jul 2012 10:45:54 +0300
+Message-ID: <20120726074554.GM4403@mwanda>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from rcsinet15.oracle.com ([148.87.113.117]:23356 "EHLO
+	rcsinet15.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750946Ab2GZHqI (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 26 Jul 2012 03:46:08 -0400
 Content-Disposition: inline
-In-Reply-To: <500B7916.6060804@lwfinger.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Larry Finger <Larry.Finger@lwfinger.net>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel@vger.kernel.org
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
 
-On Sat, Jul 21, 2012 at 10:52:54PM -0500, Larry Finger wrote:
-> I am getting the following false warning from sparse:
-> 
->   CHECK   drivers/net/wireless/rtlwifi/rtl8192c/dm_common.c
-> drivers/net/wireless/rtlwifi/rtl8192c/dm_common.c:1158:13: warning:
-> context imbalance in 'rtl92c_dm_refresh_rate_adaptive_mask' -
-> different lock contexts for basic block
-> 
-> The only code in that routine that does any locking is the following:
-> 
->              /* Only the PCI card uses sta in the update rate table
->               * callback routine */
->              if (rtlhal->interface == INTF_PCI) {
->                      rcu_read_lock();
->                      sta = ieee80211_find_sta(mac->vif, mac->bssid);
->              }
->              rtlpriv->cfg->ops->update_rate_tbl(hw, sta,
->                                   p_ra->ratr_state);
-> 
->              p_ra->pre_ratr_state = p_ra->ratr_state;
->              if (rtlhal->interface == INTF_PCI)
->                      rcu_read_unlock();
-> 
-> Does the warning get output because the code cannot assume that
-> rtlhal->interface is the same in both if statements?
+Hi Chris,
 
-Correct; sparse does not have enough dataflow analysis to connect the
-two if bodies, nor can it verify that nothing between the two changes
-rtlhal->interface.
+The patch 7aa79f8401f0 "Adding default for m64/m32 handle" causes
+a problem for variables called x86_64.
 
-> If that is the
-> case, are there any compiler directives that would tell sparse of
-> the situation?
+$ echo "unsigned char x86_64;" > test.c
+$ ./sparse test.c
+test.c:1:15: warning: missing identifier in declaration
+test.c:1:15: error: Expected ; at the end of type declaration
+test.c:1:15: error: got 1
 
-No, none of Sparse's directives will let you override this.  However,
-you could do something like the following:
-
-              /* Only the PCI card uses sta in the update rate table
-               * callback routine */
-              if (rtlhal->interface == INTF_PCI) {
-                      rcu_read_lock();
-                      sta = ieee80211_find_sta(mac->vif, mac->bssid);
-                      rtlpriv->cfg->ops->update_rate_tbl(hw, sta, p_ra->ratr_state);
-                      p_ra->pre_ratr_state = p_ra->ratr_state;
-                      rcu_read_unlock();
-              } else {
-                      rtlpriv->cfg->ops->update_rate_tbl(hw, sta, p_ra->ratr_state);
-                      p_ra->pre_ratr_state = p_ra->ratr_state;
-              }
-
-You could wrap those two lines in a function if you don't want to
-duplicate them.
-
-If that solution or a similar refactoring doesn't appeal to you, then
-you don't currently have any way of making that context warning go away,
-short of improving Sparse to handle this situation better.
-
-- Josh Triplett
+regards,
+dan carpenter
