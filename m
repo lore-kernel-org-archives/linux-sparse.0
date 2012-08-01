@@ -1,31 +1,40 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Adding default for m64/m32 handle
-Date: Thu, 26 Jul 2012 09:57:43 -0700
-Message-ID: <CANeU7QnLKv8MMGCkKq-8dsw=xoVExR7oAigvSLSuCFmYKsE9AQ@mail.gmail.com>
-References: <20120726074554.GM4403@mwanda>
-	<CANeU7Qk_V12Db0a2HD9nQEfMD-i-xE84kc1T4-H+xM2SBAMSyg@mail.gmail.com>
-	<20120726111425.GF4352@mwanda>
+From: Mauro Dreissig <mukadr@gmail.com>
+Subject: [PATCH] Fix wrong array size expression
+Date: Wed, 01 Aug 2012 13:07:35 -0300
+Message-ID: <50195447.2060407@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:55390 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752401Ab2GZQ5p (ORCPT
+Received: from mail-gh0-f174.google.com ([209.85.160.174]:41404 "EHLO
+	mail-gh0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752287Ab2HAQHk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 26 Jul 2012 12:57:45 -0400
-Received: by lbbgm6 with SMTP id gm6so1622341lbb.19
-        for <linux-sparse@vger.kernel.org>; Thu, 26 Jul 2012 09:57:43 -0700 (PDT)
-In-Reply-To: <20120726111425.GF4352@mwanda>
+	Wed, 1 Aug 2012 12:07:40 -0400
+Received: by ghrr11 with SMTP id r11so998418ghr.19
+        for <linux-sparse@vger.kernel.org>; Wed, 01 Aug 2012 09:07:39 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-On Thu, Jul 26, 2012 at 4:14 AM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> Thanks, that works.
+Signed-off-by: Mauro Dreissig <mukadr@gmail.com>
+---
+ expression.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-OK, no objects so far. I will apply it then.
+diff --git a/expression.c b/expression.c
+index 0ae3a60..9f45c79 100644
+--- a/expression.c
++++ b/expression.c
+@@ -655,7 +655,7 @@ static struct token *unary_expression(struct token *token, struct expression **t
+ 				{ &__sizeof_ptr___ident, EXPR_PTRSIZEOF },
+ 			};
+ 			int i;
+-			for (i = 0; i < 3; i++) {
++			for (i = 0; i < ARRAY_SIZE(type_information); i++) {
+ 				if (ident == type_information[i].id)
+ 					return type_info_expression(token, tree, type_information[i].type);
+ 			}
+-- 
+1.7.11.2
 
-Thanks
-
-Chris
