@@ -1,53 +1,58 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Fix wrong array size expression
-Date: Wed, 1 Aug 2012 09:35:15 -0700
-Message-ID: <CANeU7QmaMSAfNfX14=LjM9jpdWXmFjEyi-vRAQeeOpTdu3xatw@mail.gmail.com>
-References: <50195447.2060407@gmail.com>
+From: Mauro Dreissig <mukadr@gmail.com>
+Subject: Re: [PATCH 2/2] ptrlist.c: fix a typo in a comment
+Date: Wed, 01 Aug 2012 23:59:27 -0300
+Message-ID: <5019ED0F.6080507@gmail.com>
+References: <1340055561-28496-1-git-send-email-j.neuschaefer@gmx.net> <1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:43054 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751105Ab2HAQfT (ORCPT
+Received: from mail-yx0-f174.google.com ([209.85.213.174]:55493 "EHLO
+	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750915Ab2HBC7b (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 1 Aug 2012 12:35:19 -0400
-Received: by lbbgm6 with SMTP id gm6so452566lbb.19
-        for <linux-sparse@vger.kernel.org>; Wed, 01 Aug 2012 09:35:17 -0700 (PDT)
-In-Reply-To: <50195447.2060407@gmail.com>
+	Wed, 1 Aug 2012 22:59:31 -0400
+Received: by yenl2 with SMTP id l2so8142762yen.19
+        for <linux-sparse@vger.kernel.org>; Wed, 01 Aug 2012 19:59:30 -0700 (PDT)
+In-Reply-To: <1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mauro Dreissig <mukadr@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Thanks for the good catch. That is simple and obvious correct.
-
-Will apply.
-
-Chris
-
-On Wed, Aug 1, 2012 at 9:07 AM, Mauro Dreissig <mukadr@gmail.com> wrote:
-> Signed-off-by: Mauro Dreissig <mukadr@gmail.com>
+On 06/18/2012 06:39 PM, Jonathan Neusch=C3=A4fer wrote:
+> Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
 > ---
->  expression.c | 2 +-
+>  ptrlist.c |    2 +-
 >  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/expression.c b/expression.c
-> index 0ae3a60..9f45c79 100644
-> --- a/expression.c
-> +++ b/expression.c
-> @@ -655,7 +655,7 @@ static struct token *unary_expression(struct token *token, struct expression **t
->                                 { &__sizeof_ptr___ident, EXPR_PTRSIZEOF },
->                         };
->                         int i;
-> -                       for (i = 0; i < 3; i++) {
-> +                       for (i = 0; i < ARRAY_SIZE(type_information); i++) {
->                                 if (ident == type_information[i].id)
->                                         return type_info_expression(token, tree, type_information[i].type);
->                         }
-> --
-> 1.7.11.2
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+> diff --git a/ptrlist.c b/ptrlist.c
+> index 2620412..5dc1117 100644
+> --- a/ptrlist.c
+> +++ b/ptrlist.c
+> @@ -35,7 +35,7 @@ int ptr_list_size(struct ptr_list *head)
+>   *
+>   * The array to linearize into (second argument) should really
+>   * be "void *x[]", but we want to let people fill in any kind
+> - * of pointer array, so let's just call it "void *".
+> + * of pointer array, so let's just call it "void **".
+>   */
+>  int linearize_ptr_list(struct ptr_list *head, void **arr, int max)
+>  {
+>=20
+
+Hi!
+
+It looks like the comment was left there by mistake. I belive the idea
+was to call the second argument void * to avoid warnings when passing
+other_type ** to the function without having to cast it to void **.
+
+Reading the comment now only gives the idea that declaring the argument
+as void ** instead of void *[] gives different semantics, which is not =
+the case.=20
+
+Mauro
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
