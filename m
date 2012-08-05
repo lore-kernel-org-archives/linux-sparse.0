@@ -1,62 +1,96 @@
-From: Mauro Dreissig <mukadr@gmail.com>
-Subject: Re: [PATCH 2/2] ptrlist.c: fix a typo in a comment
-Date: Thu, 02 Aug 2012 11:56:34 -0300
-Message-ID: <501A9522.8030802@gmail.com>
-References: <1340055561-28496-1-git-send-email-j.neuschaefer@gmx.net> <1340055561-28496-2-git-send-email-j.neuschaefer@gmx.net> <5019ED0F.6080507@gmail.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [PATCH] sparse, llvm: Fix SIGSEGV for extern symbols
+Date: Sun,  5 Aug 2012 22:47:34 +0300
+Message-ID: <1344196054-17208-1-git-send-email-penberg@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yx0-f174.google.com ([209.85.213.174]:48800 "EHLO
-	mail-yx0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750737Ab2HBO4i (ORCPT
+Received: from mail-lb0-f174.google.com ([209.85.217.174]:48473 "EHLO
+	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751233Ab2HETrr (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 2 Aug 2012 10:56:38 -0400
-Received: by yenl2 with SMTP id l2so8799259yen.19
-        for <linux-sparse@vger.kernel.org>; Thu, 02 Aug 2012 07:56:38 -0700 (PDT)
-In-Reply-To: <5019ED0F.6080507@gmail.com>
+	Sun, 5 Aug 2012 15:47:47 -0400
+Received: by lbbgm6 with SMTP id gm6so2466765lbb.19
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Aug 2012 12:47:45 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: j.neuschaefer@gmx.net, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On 08/01/2012 11:59 PM, Mauro Dreissig wrote:
-> On 06/18/2012 06:39 PM, Jonathan Neusch=C3=A4fer wrote:
->> Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
->> ---
->>  ptrlist.c |    2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/ptrlist.c b/ptrlist.c
->> index 2620412..5dc1117 100644
->> --- a/ptrlist.c
->> +++ b/ptrlist.c
->> @@ -35,7 +35,7 @@ int ptr_list_size(struct ptr_list *head)
->>   *
->>   * The array to linearize into (second argument) should really
->>   * be "void *x[]", but we want to let people fill in any kind
->> - * of pointer array, so let's just call it "void *".
->> + * of pointer array, so let's just call it "void **".
->>   */
->>  int linearize_ptr_list(struct ptr_list *head, void **arr, int max)
->>  {
->>
->=20
-> Hi!
->=20
-> It looks like the comment was left there by mistake. I belive the ide=
-a
-> was to call the second argument void * to avoid warnings when passing
-> other_type ** to the function without having to cast it to void **.
->=20
-> Reading the comment now only gives the idea that declaring the argume=
-nt
-> as void ** instead of void *[] gives different semantics, which is no=
-t the case.=20
->=20
-> Mauro
->=20
+Jonathan Neusch=C3=A4fer writes:
 
-Ah, I think I get it.. You cant cast something to "void *[]". sry :P
+  compiling a little real-world program with sparse-llvm, it segfaulted=
+=2E
+  Using a tool called "delta"[1] and some bash scripting, I managed to
+  reduce the code to this test case:
+
+    extern struct foo *foop;
+    extern void func(struct foo *f);
+    int main(int argc, char **argv) {
+        func(foop);
+    }
+
+The problem is that pseudo_to_value() does not know abou the extern
+symbol because Sparse never calls output_data() on it which registers
+globals with LLVMAddGlobal().
+
+As explained by Linus, 'extern' symbols are just names with types. They
+don't have any value associated with them, they just have the type and
+the name. Therefore we need to explicitly call LLVMAddGlobal() for
+symbols we have not encountered in pseudo_to_value().
+
+Reported by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Pekka Enberg <penberg@kernel.org>
+---
+ sparse-llvm.c               |    8 ++++++++
+ validation/backend/extern.c |   11 +++++++++++
+ 2 files changed, 19 insertions(+), 0 deletions(-)
+ create mode 100644 validation/backend/extern.c
+
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 6b94205..5bcc758 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -335,6 +335,14 @@ static LLVMValueRef pseudo_to_value(struct functio=
+n *fn, struct instruction *ins
+ 			default:
+ 				assert(0);
+ 			}
++		} else {
++			const char *name =3D show_ident(sym->ident);
++
++			result =3D LLVMGetNamedGlobal(fn->module, name);
++			if (!result) {
++				LLVMTypeRef type =3D symbol_type(fn->module, sym);
++				result =3D LLVMAddGlobal(fn->module, type, name);
++			}
+ 		}
+ 		break;
+ 	}
+diff --git a/validation/backend/extern.c b/validation/backend/extern.c
+new file mode 100644
+index 0000000..24cbae5
+--- /dev/null
++++ b/validation/backend/extern.c
+@@ -0,0 +1,11 @@
++extern unsigned long foo;
++
++static unsigned long bar(void)
++{
++	return foo;
++}
++
++/*
++ * check-name: Extern symbol code generation
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
+--=20
+1.7.7.6
+
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
