@@ -1,119 +1,111 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: [PATCH] sparse, llvm: Fix 'void' return type code generation
-Date: Sun, 19 Aug 2012 12:28:00 +0300
-Message-ID: <1345368480-8431-1-git-send-email-penberg@kernel.org>
+From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: [PATCH] sparse, llvm: convert the condition of branch/select to bool
+Date: Sun, 19 Aug 2012 16:52:16 +0200
+Message-ID: <1345387936-25817-1-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lpp01m010-f46.google.com ([209.85.215.46]:36622 "EHLO
-	mail-lpp01m010-f46.google.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1751358Ab2HSJ2K (ORCPT
+Received: from mailout-de.gmx.net ([213.165.64.22]:37537 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1752747Ab2HSOy3 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 19 Aug 2012 05:28:10 -0400
-Received: by lagy9 with SMTP id y9so2844657lag.19
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Aug 2012 02:28:08 -0700 (PDT)
+	Sun, 19 Aug 2012 10:54:29 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: j.neuschaefer@gmx.net, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Jonathan Neusch=C3=A4fer reports:
+LLVM expects the first argument of "br" and "select" to be of type i1,
+so add an "icmp ne <srcty> %src, 0" for other types.
 
-  A simple function like this will compile to the following llvm
-  bitcode:
-
-        /* C */
-        void func(void) {
-                return;
-        }
-
-        /* LLVM */
-        define i8 @func() {
-        L0:
-          ret void
-        }
-
-  The return type of the function and the type in the return instructio=
-n
-  don't match.
-
-  I found this inconsistency by running LLVM's bitcode validation on th=
-e
-  bitcode produced by sparse-llvm.
-
-Move 'void *' special-casing from sym_basetype_type() to sym_ptr_type()
-to fix the issue.
-
-Reported by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+Cc: Pekka Enberg <penberg@kernel.org>
 Cc: Christopher Li <sparse@chrisli.org>
 Cc: Jeff Garzik <jgarzik@redhat.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Pekka Enberg <penberg@kernel.org>
+Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
 ---
- sparse-llvm.c                         |   12 ++++++++++--
- validation/backend/void-return-type.c |   13 +++++++++++++
- 2 files changed, 23 insertions(+), 2 deletions(-)
- create mode 100644 validation/backend/void-return-type.c
+ sparse-llvm.c                 |   13 +++++++++++--
+ validation/backend/int-cond.c |   30 ++++++++++++++++++++++++++++++
+ 2 files changed, 41 insertions(+), 2 deletions(-)
+ create mode 100644 validation/backend/int-cond.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index e02e212..213d42d 100644
+index 213d42d..e4929e9 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -150,7 +150,13 @@ static LLVMTypeRef sym_union_type(LLVMModuleRef mo=
-dule, struct symbol *sym)
-=20
- static LLVMTypeRef sym_ptr_type(LLVMModuleRef module, struct symbol *s=
-ym)
- {
--	LLVMTypeRef type =3D symbol_type(module, sym->ctype.base_type);
-+	LLVMTypeRef type;
-+
-+	/* 'void *' is treated like 'char *' */
-+	if (is_void_type(sym->ctype.base_type))
-+		type =3D LLVMInt8Type();
-+	else
-+		type =3D symbol_type(module, sym->ctype.base_type);
-=20
- 	return LLVMPointerType(type, 0);
+@@ -650,10 +650,19 @@ static void output_op_store(struct function *fn, =
+struct instruction *insn)
+ 	insn->target->priv =3D target;
  }
-@@ -176,10 +182,12 @@ static LLVMTypeRef sym_basetype_type(struct symbo=
-l *sym)
- 		}
- 	} else {
- 		switch (sym->bit_size) {
-+		case -1:
-+			ret =3D LLVMVoidType();
-+			break;
- 		case 1:
- 			ret =3D LLVMInt1Type();
- 			break;
--		case -1:	/* 'void *' is treated like 'char *' */
- 		case 8:
- 			ret =3D LLVMInt8Type();
- 			break;
-diff --git a/validation/backend/void-return-type.c b/validation/backend=
-/void-return-type.c
-new file mode 100644
-index 0000000..b282fde
---- /dev/null
-+++ b/validation/backend/void-return-type.c
-@@ -0,0 +1,13 @@
-+static void foo(void)
+=20
++static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value=
+)
 +{
++	if (LLVMTypeOf(value) !=3D LLVMInt1Type())
++		value =3D LLVMBuildIsNotNull(fn->builder, value, "cond");
++
++	return value;
 +}
 +
-+static void *bar(void *p)
+ static void output_op_br(struct function *fn, struct instruction *br)
+ {
+ 	if (br->cond) {
+-		LLVMValueRef cond =3D pseudo_to_value(fn, br, br->cond);
++		LLVMValueRef cond =3D bool_value(fn,
++				pseudo_to_value(fn, br, br->cond));
+=20
+ 		LLVMBuildCondBr(fn->builder, cond,
+ 				br->bb_true->priv,
+@@ -668,7 +677,7 @@ static void output_op_sel(struct function *fn, stru=
+ct instruction *insn)
+ {
+ 	LLVMValueRef target, src1, src2, src3;
+=20
+-	src1 =3D pseudo_to_value(fn, insn, insn->src1);
++	src1 =3D bool_value(fn, pseudo_to_value(fn, insn, insn->src1));
+ 	src2 =3D pseudo_to_value(fn, insn, insn->src2);
+ 	src3 =3D pseudo_to_value(fn, insn, insn->src3);
+=20
+diff --git a/validation/backend/int-cond.c b/validation/backend/int-con=
+d.c
+new file mode 100644
+index 0000000..48b25a7
+--- /dev/null
++++ b/validation/backend/int-cond.c
+@@ -0,0 +1,30 @@
++static long foo(long a, long b, long c)
 +{
-+	return p;
++	return a? b:c;
++}
++
++static long foo_bool(_Bool a, long b, long c)
++{
++	return a? b:c;
++}
++
++static long bar(long a, long b, long c)
++{
++	if (a)
++		return b;
++	else
++		return b + c;
++}
++
++static long bar_bool(_Bool a, long b, long c)
++{
++	if (a)
++		return b;
++	else
++		return b + c;
 +}
 +
 +/*
-+ * check-name: void return type code generation
++ * check-name: Non-bool condition values in branch/select
 + * check-command: ./sparsec -c $file -o tmp.o
 + */
 --=20
-1.7.7.6
+1.7.10.4
 
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
