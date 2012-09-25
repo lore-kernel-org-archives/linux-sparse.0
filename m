@@ -1,99 +1,37 @@
-From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: Re: Fwd: [problem] sparse llvm loop conditions
-Date: Sun, 19 Aug 2012 21:48:15 +0200
-Message-ID: <20120819194815.GA2952@debian.debian>
-References: <CAOJsxLF351XvYE6Av3hxMsqXeu2nT4vRjbLgwNAguNLEfgLQvQ@mail.gmail.com>
- <50312093.5050207@pobox.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Daniel Santos <daniel.santos@pobox.com>
+Subject: [PATCH v5 5/25] compiler{,-gcc4}.h: Remove duplicate macros
+Date: Tue, 25 Sep 2012 18:30:30 -0500
+Message-ID: <1348615830-10127-1-git-send-email-daniel.santos@pobox.com>
+References: <1348615467-9850-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.23]:44582 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1751549Ab2HSTsR (ORCPT
+Received: from nm13-vm0.bullet.mail.sp2.yahoo.com ([98.139.91.244]:43031 "HELO
+	nm13-vm0.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1752612Ab2IYXai (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 19 Aug 2012 15:48:17 -0400
-Content-Disposition: inline
-In-Reply-To: <50312093.5050207@pobox.com>
+	Tue, 25 Sep 2012 19:30:38 -0400
+In-Reply-To: <1348615467-9850-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jgarzik@pobox.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka Enberg <penberg@kernel.org>, Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+To: Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, Andrew Morton <akpm@linux-foundation.org>, David Howells <dhowells@redhat.com>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, linux-sparse@vger.kernel.org, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Richard Weinberger <richard@nod.at>, LKML <linux-kernel@vger.kernel.org>, Michel Lespinasse <walken@google.com>, Andrea Arcangeli <aarcange@redhat.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Rik van Riel <riel@redhat.com>
 
-On Sun, Aug 19, 2012 at 01:21:23PM -0400, Jeff Garzik wrote:
-> Hi Jeff,
-> 
-> Have you seen this already?
-> 
-> [penberg@tux sparse]$ cat loop.c
-> struct list_node {
-> 	struct list_node *next;
-> };
-> 
-> int foo(struct list_node *node)
-> {
-> 	int ret = 0;
-> 	while (node) {
-> 		node = node->next;
-> 		ret++;
-> 	}
-> 	return ret;
-> }
-> [penberg@tux sparse]$ ./sparse-llvm loop.c
-> loop.c:5:5: warning: symbol 'foo' was not declared. Should it be static?
-> sparse-llvm: Instructions.cpp:730: void llvm::BranchInst::AssertOK():
-> Assertion `getCondition()->getType()->isIntegerTy(1) && "May only
-> branch on boolean predicates!"' failed.
-> Aborted
+__linktime_error() does the same thing as __compiletime_error() and is
+only used in bug.h.  Since the macro defines a function attribute that
+will cause a failure at compile-time (not link-time), it makes more
+sense to keep __compiletime_error(), which is also neatly mated with
+__compiletime_warning().
 
-It doesn't print this particular message anymore, but the llvm
-verification detects some other things that could cause problems:
+Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+---
+ include/linux/compiler-gcc4.h |    2 --
+ include/linux/compiler.h      |    3 ---
+ 2 files changed, 0 insertions(+), 5 deletions(-)
 
-> jonathan@debian:~/dev/sparse/validation$ (../sparse-llvm backend/penberg-loop.c | llvm-dis) 2>&1
-> backend/penberg-loop.c:5:5: warning: symbol 'foo' was not declared. Should it be static?
-> PHI node operands are not the same type as the result!
->   %phi = phi %list_node* [ %0, %L0 ], [ %load_target, %L2 ]
-> Instruction does not dominate all uses!
->   %phi = phi %list_node* [ %0, %L0 ], [ %load_target, %L2 ]
->   %cond = icmp ne %list_node* %phi, null
-> Instruction does not dominate all uses!
->   %cond = icmp ne %list_node* %phi, null
->   br i1 %cond, label %L2, label %L3
-> Broken module found, verification continues.
-> PHI node operands are not the same type as the result!
->   %phi = phi %list_node* [ %0, %L0 ], [ %load_target, %L2 ]
-> Instruction does not dominate all uses!
->   %phi = phi %list_node* [ %0, %L0 ], [ %load_target, %L2 ]
->   %cond = icmp ne %list_node* %phi, null
-> Instruction does not dominate all uses!
->   %cond = icmp ne %list_node* %phi, null
->   br i1 %cond, label %L2, label %L3
-> Broken module found, verification continues.
-> Broken module found, verification continues.
-> ; ModuleID = '<stdin>'
-> 
-> %list_node = type { %list_node* }
-> 
-> define i32 @foo(%list_node*) {
-> L0:
->   br label %L1
-> 
-> L1:                                               ; preds = %L2, %L0
->   %phi = phi %list_node* [ %0, %L0 ], [ %load_target, %L2 ]
->   %phi1 = phi i32 [ 0, %L0 ], [ %R5, %L2 ]
->   %cond = icmp ne %list_node* %phi, null
->   br i1 %cond, label %L2, label %L3
-> 
-> L2:                                               ; preds = %L1
->   %src_i = ptrtoint %list_node* %phi to i32
->   %addr_i = add i32 %src_i, 0
->   %addr = inttoptr i32 %addr_i to i32*
->   %load_target = load i32* %addr
-This load instruction should use %list_node*.
->   %R5 = add i32 %phi1, 1
->   br label %L1
-> 
-> L3:                                               ; preds = %L1
->   ret i32 %phi1
-> }
-
-Jonathan
+diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+index 7ad60cd..5755e23 100644
+--- a/include/linux/compiler-gcc4.h
++++ b/include/linux/compiler-gcc4.h
+@@ -33,8 +33,6 @@
+    the kernel context */
+ #define __cold			__attribute__((__cold__))
+ 
+-#define __linktime_error(message) __attribute__((__error__(message)))
