@@ -1,57 +1,40 @@
 From: Daniel Santos <daniel.santos@pobox.com>
-Subject: [PATCH v6 3/25] compiler-gcc.h: Add gcc-recommended GCC_VERSION
- macro
-Date: Thu, 27 Sep 2012 20:54:19 -0500
-Message-ID: <1348797281-25021-4-git-send-email-daniel.santos@pobox.com>
-References: <1348797281-25021-1-git-send-email-daniel.santos@pobox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1348797281-25021-1-git-send-email-daniel.santos@pobox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, Akinobu Mita <akinobu.mita@gmail.com>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, David Woodhouse <David.Woodhouse@intel.com>, Don Zickus <dzickus@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>
-Cc: Daniel Santos <daniel.santos@pobox.com>
+Subject: [PATCH 0/10] Cleanup & new features for compiler*.h and bug.h
+Date: Fri, 28 Sep 2012 18:20:01 -0500
+Message-ID: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from nm10.bullet.mail.sp2.yahoo.com ([98.139.91.80]:25583 "HELO
+	nm10.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1758514Ab2I1XU2 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 28 Sep 2012 19:20:28 -0400
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-Throughout compiler*.h, many version checks are made.  These can be
-simplified by using the macro that gcc's documentation recommends.
-However, my primary reason for adding this is that I need bug-check
-macros that are enabled at certain gcc versions and it's cleaner to use
-this macro than the tradition method:
 
-if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ => 2)
+This patch set is a dependency of the generic red-black tree patch set, which
+I have now split up into three smaller sets.
 
-If you add patch level, it gets this ugly:
+The major aim of this patch set is to cleanup compiler-gcc*.h and improve the
+manageability of of compiler features at various versions (when they are
+broken, etc.), and to add some needed features to bug.h (again, that are
+compiler-version-dependent).
 
-if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 2 || \
-   __GNUC_MINOR__ == 2 __GNUC_PATCHLEVEL__ >= 1))
+compiler-gcc*.h
+o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701)
+o Reorder all features based upon the version introduced (readability)
+o Change all version checks to use GCC_VERSION
+o Remove redundant __linktime_error
+o Introduce __flatten function attribute
 
-As opposed to:
+bug.h
+o Improve BUILD_BUG_ON(expr) - now generates compile-time error post-gcc-4.4
+o Introduce BUILD_BUG_ON_NON_CONST(expr) macro, which simply wraps
+  __builtin_constant_p and BUILD_BUG_ON
+o Documented (in BUILD_BUG_ON_NON_CONST doc-comments) the extensive
+  discrepancies in the behavior of __builtin_constant_p throughout versions of
+  gcc.
+o Introduce BUILD_BUG_ON_NON_CONST42 macro for compile-time-constant checks
+  that are doomed to fail in older versions of gcc.
 
-if GCC_VERSION >= 40201
-
-While having separate headers for gcc 3 & 4 eliminates some of this
-verbosity, they can still be cleaned up by this.
-
-See also:
-http://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
-
-Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
----
- include/linux/compiler-gcc.h |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 6a6d7ae..24545cd 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -5,6 +5,9 @@
- /*
-  * Common definitions for all gcc versions go here.
-  */
-+#define GCC_VERSION (__GNUC__ * 10000 \
-+		   + __GNUC_MINOR__ * 100 \
-+		   + __GNUC_PATCHLEVEL__)
- 
- 
- /* Optimization barrier */
--- 
-1.7.3.4
