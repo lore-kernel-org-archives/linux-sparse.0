@@ -1,52 +1,38 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 7/10] compiler{,-gcc4}.h: Introduce __flatten function
- attribute
-Date: Fri, 28 Sep 2012 17:50:43 -0700
-Message-ID: <20120929005043.GD14293@jtriplet-mobl1>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
- <1348874411-28288-8-git-send-email-daniel.santos@pobox.com>
- <20120929002626.GD13907@jtriplet-mobl1>
- <50664308.6020601@att.net>
+From: Daniel Santos <danielfsantos@att.net>
+Subject: Re: [PATCH 8/10] bug.h: Make BUILD_BUG_ON generate compile-time error
+Date: Fri, 28 Sep 2012 19:51:51 -0500
+Message-ID: <50664627.6050302@att.net>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-9-git-send-email-daniel.santos@pobox.com> <20120929003239.GA14293@jtriplet-mobl1>
+Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:58258 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1759228Ab2I2Auv (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 28 Sep 2012 20:50:51 -0400
-Content-Disposition: inline
-In-Reply-To: <50664308.6020601@att.net>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20120929003239.GA14293@jtriplet-mobl1>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Daniel Santos <daniel.santos@pobox.com>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Santos <daniel.santos@pobox.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-On Fri, Sep 28, 2012 at 07:38:32PM -0500, Daniel Santos wrote:
-> On 09/28/2012 07:26 PM, Josh Triplett wrote:
-> > On Fri, Sep 28, 2012 at 06:20:08PM -0500, Daniel Santos wrote:
-> >> --- a/include/linux/compiler-gcc4.h
-> >> +++ b/include/linux/compiler-gcc4.h
-> >> @@ -15,7 +15,12 @@
-> >>  
-> >>  #if GCC_VERSION >= 40102
-> >>  # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
-> >> -#endif
-> >> +
-> >> +/* flatten introduced in 4.1, but broken in 4.6.0 (gcc bug #48731)*/
-> >> +# if GCC_VERSION != 40600
-> >> +#  define __flatten __attribute__((flatten))
-> >> +# endif
-> >> +#endif /* GCC_VERSION >= 40102 */
-> > Same comment as before: why 40102 rather than 40100?
-> Again, I'm presuming building with 4.1.0 or 4.1.1 will always have the
-> build broken earlier.  I don't have any objections to changing this, but
-> it would seem that the issue with the __weak attribute needs to be resolved.
+On 09/28/2012 07:32 PM, Josh Triplett wrote:
+> On Fri, Sep 28, 2012 at 06:20:09PM -0500, Daniel Santos wrote:
+>> Negative sized arrays wont create a compile-time error in some cases
+>> starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
+>> the error function attribute that will.  This patch modifies
+>> BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
+>> function attribute so that you don't have to build the entire kernel to
+>> discover that you have a problem, and then enjoy trying to track it down
+>> from a link-time error.
+> Rather than doing both, and potentially producing two errors for the
+> same issue, how about using __compiletime_error only, and only using the
+> negative-sized array when __compiletime_error has no useful definition?
+>
+> For instance, in compiler.h, when defining __compiletime_error as an
+> empty macro in the fallback case, you could define a
+> __compiletime_error_fallback() macro that declares a negative-sized
+> array; you could then define __compiletime_error_fallback() as an empty
+> macro when it doesn't exist.
+Oh, that's a great idea.  That will keep more of the compiler's details
+in compiler*.h.
 
-That issue doesn't relate to __flatten, though; it only relates to
-__weak.  Since __flatten (and __compiletime_object_size) will work fine
-on 4.1.0 and 4.1.1, don't exclude them just because the definition for
-__weak elsewhere in the file excludes them.  That just makes it harder
-for anyone who might want to work on the issue with __weak.
-
-- Josh Triplett
+Daniel
