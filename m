@@ -1,63 +1,41 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [Bulk] Re: [PATCH 4/10] compiler-gcc{3,4}.h: Use GCC_VERSION
- macro
-Date: Fri, 28 Sep 2012 19:31:53 -0500
-Message-ID: <50664179.5090608@att.net>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-5-git-send-email-daniel.santos@pobox.com> <20120929002029.GA13907@jtriplet-mobl1>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 8/10] bug.h: Make BUILD_BUG_ON generate compile-time error
+Date: Fri, 28 Sep 2012 17:32:39 -0700
+Message-ID: <20120929003239.GA14293@jtriplet-mobl1>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+ <1348874411-28288-9-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm10-vm0.bullet.mail.sp2.yahoo.com ([98.139.91.198]:37605 "HELO
-	nm10-vm0.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1758443Ab2I2Aby (ORCPT
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:44938 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759246Ab2I2Acr (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 28 Sep 2012 20:31:54 -0400
-In-Reply-To: <20120929002029.GA13907@jtriplet-mobl1>
+	Fri, 28 Sep 2012 20:32:47 -0400
+Content-Disposition: inline
+In-Reply-To: <1348874411-28288-9-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
+To: Daniel Santos <daniel.santos@pobox.com>
 Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-On 09/28/2012 07:20 PM, Josh Triplett wrote:
-> On Fri, Sep 28, 2012 at 06:20:05PM -0500, Daniel Santos wrote:
->> --- a/include/linux/compiler-gcc4.h
->> +++ b/include/linux/compiler-gcc4.h
->> @@ -13,11 +13,11 @@
->>  #define __must_check 		__attribute__((warn_unused_result))
->>  #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
->>  
->> -#if __GNUC_MINOR__ > 0
->> +#if GCC_VERSION >= 40102
->>  # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
->>  #endif
-> You've changed the semantics of this one; if literally translated, this
-> should have become #if GCC_VERSION >= 40100.  If you intended to change
-> that, could you please document why?  And in any case, could you make
-> that semantic change in a separate commit from the switch to
-> GCC_VERSION?
-hmm, it looks like somebody commented out the #error that would normally
-prevent that test from ever occurring on 4.1.0 or 4.1.1.
-When I had written this patch, it wasn't commented out and I had assumed
-that it was obvious from the context.
->  /* GCC 4.1.[01] miscompiles __weak */
->  #ifdef __KERNEL__
-> -# if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
-> +# if GCC_VERSION >= 40100 &&  GCC_VERSION <= 40101
->  //#  error Your version of gcc miscompiles the __weak directive
->  # endif
->  #endif
-> @@ -13,11 +13,11 @@
->  #define __must_check 		__attribute__((warn_unused_result))
->  #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
->  
-> -#if __GNUC_MINOR__ > 0
-> +#if GCC_VERSION >= 40102
->  # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
->  #endif
-I would say that commenting this out is bad if __weak is miscompiled. 
-If we don't want to break the build, should we at least be defining
-__weak to something else?
+On Fri, Sep 28, 2012 at 06:20:09PM -0500, Daniel Santos wrote:
+> Negative sized arrays wont create a compile-time error in some cases
+> starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
+> the error function attribute that will.  This patch modifies
+> BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
+> function attribute so that you don't have to build the entire kernel to
+> discover that you have a problem, and then enjoy trying to track it down
+> from a link-time error.
 
-Daniel
+Rather than doing both, and potentially producing two errors for the
+same issue, how about using __compiletime_error only, and only using the
+negative-sized array when __compiletime_error has no useful definition?
+
+For instance, in compiler.h, when defining __compiletime_error as an
+empty macro in the fallback case, you could define a
+__compiletime_error_fallback() macro that declares a negative-sized
+array; you could then define __compiletime_error_fallback() as an empty
+macro when it doesn't exist.
+
+- Josh Triplett
