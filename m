@@ -1,59 +1,49 @@
 From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH 6/10] bug.h: Replace __linktime_error with __compiletime_error
-Date: Sun, 30 Sep 2012 16:13:22 -0500
-Message-ID: <5068B5F2.7030800@att.net>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-7-git-send-email-daniel.santos@pobox.com> <20120929002353.GC13907@jtriplet-mobl1> <1348880675.22822.102.camel@gandalf.local.home> <20120930132233.GB15400@liondog.tnic>
+Subject: Re: [PATCH 3/10] compiler-gcc.h: Add gcc-recommended GCC_VERSION
+ macro
+Date: Sun, 30 Sep 2012 18:11:01 -0500
+Message-ID: <5068D185.9000802@att.net>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-4-git-send-email-daniel.santos@pobox.com>
 Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm35-vm7.bullet.mail.ne1.yahoo.com ([98.138.229.103]:47575 "HELO
-	nm35-vm7.bullet.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751487Ab2I3VNV (ORCPT
+Received: from nm14-vm0.bullet.mail.sp2.yahoo.com ([98.139.91.246]:22051 "HELO
+	nm14-vm0.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751197Ab2I3XLB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Sep 2012 17:13:21 -0400
-In-Reply-To: <20120930132233.GB15400@liondog.tnic>
+	Sun, 30 Sep 2012 19:11:01 -0400
+In-Reply-To: <1348874411-28288-4-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, Steven Rostedt <rostedt@goodmis.org>, Josh Triplett <josh@joshtriplett.org>, Daniel Santos <daniel.santos@pobox.com>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Borislav Petkov <bp@alien8.de>, Josh Triplett <josh@joshtriplett.org>
+
+So in light of feedback I've been getting on this patch set, it leaves
+me with
+this question.
+> +#define GCC_VERSION (__GNUC__ * 10000 \
+> +		   + __GNUC_MINOR__ * 100 \
+> +		   + __GNUC_PATCHLEVEL__)
+This macro presumes you are using gcc 3.0 or later, which introduced the
+__GNUC_PATCHLEVEL__ predefined macro.  Should you be using a version of gcc
+prior to 3.0 (where the macro is undefined), you would get an error that
+__GNUC_PATCHLEVEL__ is undefined prior to getting the error trying to
+include
+"linux/compiler-gcc2.h".  So it presumes the compiler is 3.0+, when another
+part of the code may allow it from a future change.  Should it be
+modified to
+do account for this or would that be overkill?
 
 
-
-On 09/30/2012 08:22 AM, Borislav Petkov wrote:
-> On Fri, Sep 28, 2012 at 09:04:35PM -0400, Steven Rostedt wrote:
->> On Fri, 2012-09-28 at 17:23 -0700, Josh Triplett wrote:
->>> On Fri, Sep 28, 2012 at 06:20:07PM -0500, Daniel Santos wrote:
->>>> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
->>>> ---
->>>>  include/linux/bug.h |    2 +-
->>>>  1 files changed, 1 insertions(+), 1 deletions(-)
->>>>
->>>> diff --git a/include/linux/bug.h b/include/linux/bug.h
->>>> index aaac4bb..298a916 100644
->>>> --- a/include/linux/bug.h
->>>> +++ b/include/linux/bug.h
->>>> @@ -73,7 +73,7 @@ extern int __build_bug_on_failed;
->>>>  #define BUILD_BUG()						\
->>>>  	do {							\
->>>>  		extern void __build_bug_failed(void)		\
->>>> -			__linktime_error("BUILD_BUG failed");	\
->>>> +			__compiletime_error("BUILD_BUG failed");\
->>>>  		__build_bug_failed();				\
->>>>  	} while (0)
->>> This change should either occur as part of patch 5 or before patch 5,
->>> not after.
->> I noticed the same thing and was about to comment on it.
->>
->> Please do not break bisectablity. All your patches should compile and
->> run at every step.
-> And while we're at it, every patch upstream should have a commit message
-> explaining why this is done. No matter how trivial it is, because after
-> a sufficient amount of time passes, everyone tends to forget why this
-> has been done.
->
-> Thanks.
->
-Ah, well thank you all for the guidance!
+#ifdef __GNUC_PATCHLEVEL__
+# define GCC_VERSION (__GNUC__ * 10000 \
+                    + __GNUC_MINOR__ * 100 \
+                    + __GNUC_PATCHLEVEL__)
+#else
+# define GCC_VERSION (__GNUC__ * 10000 \
+                    + __GNUC_MINOR__ * 100)
+#endif
 
 Daniel
