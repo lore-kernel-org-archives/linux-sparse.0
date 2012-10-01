@@ -1,90 +1,119 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 8/10] bug.h: Make BUILD_BUG_ON generate compile-time error
-Date: Sun, 30 Sep 2012 17:26:49 -0700
-Message-ID: <20121001002649.GB16784@leaf>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
- <1348874411-28288-9-git-send-email-daniel.santos@pobox.com>
- <20120929003239.GA14293@jtriplet-mobl1>
- <50664E30.7050809@att.net>
- <20120929025506.GA3183@leaf>
- <5068D5BD.1000802@att.net>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v6 4/25] compiler-gcc{3,4}.h: Use GCC_VERSION macro
+Date: Mon, 1 Oct 2012 12:39:44 -0700
+Message-ID: <20121001123944.e06379db.akpm@linux-foundation.org>
+References: <1348797281-25021-1-git-send-email-daniel.santos@pobox.com>
+	<1348797281-25021-5-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:37671 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751132Ab2JAA05 convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Sep 2012 20:26:57 -0400
-Content-Disposition: inline
-In-Reply-To: <5068D5BD.1000802@att.net>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1348797281-25021-5-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: Daniel Santos <daniel.santos@pobox.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+Cc: linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, Akinobu Mita <akinobu.mita@gmail.com>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, David Woodhouse <David.Woodhouse@intel.com>, Don Zickus <dzickus@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>
+List-Id: linux-sparse@vger.kernel.org
 
-On Sun, Sep 30, 2012 at 06:29:01PM -0500, Daniel Santos wrote:
-> On 09/28/2012 09:55 PM, Josh Triplett wrote:
-> > Assuming you don't call BUILD_BUG_ON_MSG more than once per line:
-> >
-> > /tmp$ cat test.c
-> > #define BUILD_BUG_ON_MSG_INTERNAL2(cond, msg, line) \
-> >     do { \
-> >         extern void __build_bug_on_failed_ ## line (void) __attribu=
-te__((error(msg))); \
-> >         if (cond) \
-> >             __build_bug_on_failed_ ## line(); \
-> >     } while (0)
-> >
-> > #define BUILD_BUG_ON_MSG_INTERNAL(cond, msg, line) BUILD_BUG_ON_MSG=
-_INTERNAL2(cond, msg, line)
-> > #define BUILD_BUG_ON_MSG(cond, msg) BUILD_BUG_ON_MSG_INTERNAL(cond,=
- msg, __LINE__)
-> >
-> > void f(void)
-> > {
-> >     BUILD_BUG_ON_MSG(0, "test 1");
-> >     BUILD_BUG_ON_MSG(1, "test 2");
-> >     BUILD_BUG_ON_MSG(0, "test 3");
-> >     BUILD_BUG_ON_MSG(1, "test 4");
-> > }
-> > /tmp$ gcc -c test.c
-> > test.c: In function =E2=80=98f=E2=80=99:
-> > test.c:14:119: error: call to =E2=80=98__build_bug_on_failed_14=E2=80=
-=99 declared with attribute error: test 2
-> > test.c:16:119: error: call to =E2=80=98__build_bug_on_failed_16=E2=80=
-=99 declared with attribute error: test 4
-> Thanks! This is very nice!  I've done a little more research and
-> discovered that there's also a __COUNTER__ macro that is available
-> in gcc 4.3+.  Before I realized that it was only available in gcc
-> 4.3, I wrote this little macro:
->=20
-> #define _CONCAT1(a, b) a##b
-> #define CONCAT(a, b) _CONCAT1(a, b)
->=20
-> #ifdef __COUNTER__
-> # define UNIQUIFY(prefix) CONCAT(prefix, __COUNTER__)
-> #else
-> # define UNIQUIFY(prefix) CONCAT(prefix, __LINE__)
-> #endif
->=20
-> However, this could lead to code might compile on gcc 4.3+, but
-> not compile prior, so this is bad, right?
+On Thu, 27 Sep 2012 20:54:20 -0500
+Daniel Santos <daniel.santos@pobox.com> wrote:
 
-Yes, as long as Linux continues to support prior GCC versions (currentl=
-y
-anything 3.2 or newer), I'd suggest sticking with __LINE__ so that it
-consistently breaks if you use more than one BUILD_BUG_ON_MSG per line.
+> Using GCC_VERSION reduces complexity, is easier to read and is GCC's
+> recommended mechanism for doing version checks. (Just don't ask me why
+> they didn't define it in the first place.)  This also makes it easy to
+> merge compiler-gcc{3,4}.h should somebody want to.
+> 
+> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+> ---
+>  include/linux/compiler-gcc3.h |    8 ++++----
+>  include/linux/compiler-gcc4.h |   14 +++++++-------
+>  2 files changed, 11 insertions(+), 11 deletions(-)
+> 
+> diff --git a/include/linux/compiler-gcc3.h b/include/linux/compiler-gcc3.h
+> index 37d4124..7d89feb 100644
+> --- a/include/linux/compiler-gcc3.h
+> +++ b/include/linux/compiler-gcc3.h
+> @@ -2,22 +2,22 @@
+>  #error "Please don't include <linux/compiler-gcc3.h> directly, include <linux/compiler.h> instead."
+>  #endif
+>  
+> -#if __GNUC_MINOR__ < 2
+> +#if GCC_VERSION < 30200
+>  # error Sorry, your compiler is too old - please upgrade it.
+>  #endif
+>  
+> -#if __GNUC_MINOR__ >= 3
+> +#if GCC_VERSION >= 30300
+>  # define __used			__attribute__((__used__))
+>  #else
+>  # define __used			__attribute__((__unused__))
+>  #endif
+>  
+> -#if __GNUC_MINOR__ >= 4
+> +#if GCC_VERSION >= 30400
+>  #define __must_check		__attribute__((warn_unused_result))
+>  #endif
+>  
+>  #ifdef CONFIG_GCOV_KERNEL
+> -# if __GNUC_MINOR__ < 4
+> +# if GCC_VERSION < 30400
+>  #   error "GCOV profiling support for gcc versions below 3.4 not included"
+>  # endif /* __GNUC_MINOR__ */
+>  #endif /* CONFIG_GCOV_KERNEL */
+> diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+> index 4506d65..b44307d 100644
+> --- a/include/linux/compiler-gcc4.h
+> +++ b/include/linux/compiler-gcc4.h
+> @@ -4,7 +4,7 @@
+>  
+>  /* GCC 4.1.[01] miscompiles __weak */
+>  #ifdef __KERNEL__
+> -# if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
+> +# if GCC_VERSION >= 40100 &&  GCC_VERSION <= 40101
+>  //#  error Your version of gcc miscompiles the __weak directive
+>  # endif
+>  #endif
+> @@ -13,11 +13,11 @@
+>  #define __must_check 		__attribute__((warn_unused_result))
+>  #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+>  
+> -#if __GNUC_MINOR__ > 0
+> +#if GCC_VERSION >= 40102
 
-Good to know that __COUNTER__ exists, though.
+Is this correct (and clear)?  I'd expect
 
-Also, the name BUILD_BUG_ON_MSG seems wrong to me somehow; I keep
-parsing it as though something about the message causes the build bug.
+	#if GCC_VERSION > 40000
 
-- Josh Triplett
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+>  #endif
+>  
+> -#if __GNUC_MINOR__ >= 3
+> +#if GCC_VERSION >= 40300
+>  /* Mark functions as cold. gcc will assume any path leading to a call
+>     to them will be unlikely.  This means a lot of manual unlikely()s
+>     are unnecessary now for any paths leading to the usual suspects
+> @@ -39,9 +39,9 @@
+>  # define __compiletime_warning(message) __attribute__((warning(message)))
+>  # define __compiletime_error(message) __attribute__((error(message)))
+>  #endif /* __CHECKER__ */
+> -#endif /* __GNUC_MINOR__ >= 3 */
+> +#endif /* GCC_VERSION >= 40300 */
+>  
+> -#if __GNUC_MINOR__ >= 5
+> +#if GCC_VERSION >= 40500
+>  /*
+>   * Mark a position in code as unreachable.  This can be used to
+>   * suppress control flow warnings after asm blocks that transfer
+> @@ -56,9 +56,9 @@
+>  /* Mark a function definition as prohibited from being cloned. */
+>  #define __noclone	__attribute__((__noclone__))
+>  
+> -#endif /* __GNUC_MINOR__ >= 5 */
+> +#endif /* GCC_VERSION >= 40500 */
+>  
+> -#if __GNUC_MINOR__ >= 6
+> +#if GCC_VERSION >= 40600
+>  /*
+>   * Tell the optimizer that something else uses this function or variable.
+>   */
+> -- 
+> 1.7.3.4
