@@ -1,28 +1,41 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v6 4/25] compiler-gcc{3,4}.h: Use GCC_VERSION macro
-Date: Mon, 01 Oct 2012 15:43:31 -0500
-Message-ID: <506A0073.9090605@att.net>
-References: <1348797281-25021-1-git-send-email-daniel.santos@pobox.com> <1348797281-25021-5-git-send-email-daniel.santos@pobox.com> <20121001123944.e06379db.akpm@linux-foundation.org> <20121001203224.GB8478@jtriplet-mobl1>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
+From: Michel Lespinasse <walken@google.com>
+Subject: Re: [PATCH 8/10] bug.h: Make BUILD_BUG_ON generate compile-time error
+Date: Mon, 1 Oct 2012 17:48:18 -0700
+Message-ID: <CANN689G9vurJj3+MUygn3gk6LCYr9E-eMFp+22Wf6Vgo22HRKA@mail.gmail.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+	<1348874411-28288-9-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-doc-owner@vger.kernel.org>
-In-Reply-To: <20121001203224.GB8478@jtriplet-mobl1>
-Sender: linux-doc-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Daniel Santos <daniel.santos@pobox.com>, linux-kernel@vger.kernel.org, linux-doc@vger.kernel.org, linux-sparse@vger.kernel.org, Akinobu Mita <akinobu.mita@gmail.com>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, David Woodhouse <David.Woodhouse@intel.com>, Don Zickus <dzickus@redhat.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Hidetoshi Seto <seto.hidetoshi@jp.fujitsu.com>, "H. Peter Anvin" <hpa@zytor.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1348874411-28288-9-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Daniel Santos <daniel.santos@pobox.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On 10/01/2012 03:32 PM, Josh Triplett wrote:
-> On Mon, Oct 01, 2012 at 12:39:44PM -0700, Andrew Morton wrote:
->> Is this correct (and clear)?  I'd expect
->>
->> 	#if GCC_VERSION > 40000
-> GCC_VERSION >= 40100, actually; __GNUC_MINOR__ > 0 implies
-> __GNUC_MINOR__ >= 1, whereas the version you wrote would accept 4.0.1.
->
-> - Josh Triplett
-Yeah, and now I have two threads for the same set of patches, sorry. :(
+On Fri, Sep 28, 2012 at 4:20 PM, Daniel Santos <daniel.santos@pobox.com> wrote:
+> Negative sized arrays wont create a compile-time error in some cases
+> starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
+> the error function attribute that will.  This patch modifies
+> BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
+> function attribute so that you don't have to build the entire kernel to
+> discover that you have a problem, and then enjoy trying to track it down
+> from a link-time error.
 
-Daniel
+Few other alternatives I've seen used in other projects (from memory,
+so I may have gotten the details wrong):
+
+1) if (condition) { __asm__(".error \"Some error message\""); }
+2) switch (0) {
+    case 0: break;
+    case !condition: break;
+    }
+    (fails to compile if !condition evaluates to 0)
+
+If you can get the first suggestion to work it'd be nice, as you could
+get some descriptive error message (you can add the line number there
+too).
+
+-- 
+Michel "Walken" Lespinasse
+A program is never fully debugged until the last user dies.
