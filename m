@@ -1,55 +1,90 @@
 From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH 8/10] bug.h: Make BUILD_BUG_ON generate compile-time error
-Date: Tue, 02 Oct 2012 09:57:47 -0500
-Message-ID: <506B00EB.400@att.net>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-9-git-send-email-daniel.santos@pobox.com> <CANN689G9vurJj3+MUygn3gk6LCYr9E-eMFp+22Wf6Vgo22HRKA@mail.gmail.com>
+Subject: Re: [PATCH 10/10] bug.h: Add gcc 4.2+ versions of BUILD_BUG_ON_*
+ macros
+Date: Tue, 02 Oct 2012 11:04:06 -0500
+Message-ID: <506B1076.8050100@att.net>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-11-git-send-email-daniel.santos@pobox.com> <CANN689EoTUakd89D4sAXLFHJ=JzFPaTpisMHFi4Yf_gQ58qngA@mail.gmail.com>
 Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm14.bullet.mail.sp2.yahoo.com ([98.139.91.84]:21516 "HELO
-	nm14.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1751247Ab2JBO5n (ORCPT
+Received: from nm31-vm5.bullet.mail.bf1.yahoo.com ([72.30.239.13]:30875 "HELO
+	nm31-vm5.bullet.mail.bf1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1754794Ab2JBQEF (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 2 Oct 2012 10:57:43 -0400
-In-Reply-To: <CANN689G9vurJj3+MUygn3gk6LCYr9E-eMFp+22Wf6Vgo22HRKA@mail.gmail.com>
+	Tue, 2 Oct 2012 12:04:05 -0400
+In-Reply-To: <CANN689EoTUakd89D4sAXLFHJ=JzFPaTpisMHFi4Yf_gQ58qngA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Michel Lespinasse <walken@google.com>
 Cc: Daniel Santos <daniel.santos@pobox.com>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-On 10/01/2012 07:48 PM, Michel Lespinasse wrote:
+On 10/01/2012 07:55 PM, Michel Lespinasse wrote:
 > On Fri, Sep 28, 2012 at 4:20 PM, Daniel Santos <daniel.santos@pobox.com> wrote:
->> Negative sized arrays wont create a compile-time error in some cases
->> starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
->> the error function attribute that will.  This patch modifies
->> BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
->> function attribute so that you don't have to build the entire kernel to
->> discover that you have a problem, and then enjoy trying to track it down
->> from a link-time error.
-> Few other alternatives I've seen used in other projects (from memory,
-> so I may have gotten the details wrong):
+>> BUILD_BUG_ON42(arg)
+>> BUILD_BUG_ON_CONST42(arg)
+>>
+>> Prior to gcc 4.2, the optimizer was unable to determine that many
+>> constant values stored in structs were indeed compile-time constants and
+>> optimize them out.  Sometimes, it will find an intergral value to be a
+>> compile-time constant, but fail to perform a bit-wise AND at
+>> compile-time.  These two macros provide a mechanism to perform these
+>> build-time checks, but not break on older compilers where we already
+>> know they can't be checked at compile time.
+>>
+>> For specific details, consult the doc comments for BUILD_BUG_ON_CONST.
+>> These macros are used in the generic rbtree code.
 >
-> 1) if (condition) { __asm__(".error \"Some error message\""); }
-> 2) switch (0) {
->     case 0: break;
->     case !condition: break;
->     }
->     (fails to compile if !condition evaluates to 0)
+> I think the names are quite confusing. BUILD_BUG_ON_NON_CONST42 sounds
+> like it's checking if 42 is a constant.
 >
-> If you can get the first suggestion to work it'd be nice, as you could
-> get some descriptive error message (you can add the line number there
-> too).
-Thanks for this info.  I'm still pretty noob-ish in modern assembly, but
-is the .error directive available on all supported assemblers?  It
-appears to have been added to GNU binutils in version 2.16 from what I
-can tell (http://sourceware.org/binutils/docs-2.16/as/Error.html).  If
-it is supported, I would definitely prefer that one as a fallback option.
+> The name probably shouldn't mention what compiler versions support
+> this check, but instead it should hint as to when you should use this
+> instead of BUILD_BUG_ON_CONST ? Maybe BUILD_BUG_ON_CONST_DEREF or
+> something (I'm pretty bad with names too :)
+I completely agree about the naming, but I'm also stumped. I choose
+version 4.2 after writing a test program & group of scripts and sifting
+through the results of 220k tests of __builtin_constant_p()!  In gcc
+4.2, there are still some tests that will fail, but I went with 4.2 as
+the "good version" mostly because:
 
-I did a search on sources for the regex \.error\s+\\?" and didn't turn
-up anything outside of arch/, so I'm guessing this may not be completely
-portable.  Note also that these BUILD_BUG* macros do emit an error
-message on gcc 4.3+ using __attribute__((error("msg"))).
+a. the broken tests didn't affect my generic red-black tree
+implementation, and
+b. broken cases in 4.2 were the slim minority.
+
+For instance calling __builtin_constant_p() on a dereferenced pointer in
+4.2 always fails, while dereferencing a global static array (of
+primitives) returns 1 in pretty much every case that it should
+(excepting global non-static const, which also fails in 4.7 and perhaps
+the compiler figures that somewhere else, const can be cast away and the
+data modified anyway?).
+
+Maybe it would be better in the long term to create multiple macros for
+testing various constructs.  Verbosity does really start to increase
+here, but I suppose we can work out some type of nomenclature to control
+that while still being clear about what the macro does (not that I have
+any ideas at the moment).
+
+BUILD_BUG_ON_NON_CONST_PTR_DEREF     - gcc 4.4
+BUILD_BUG_ON_NON_CONST_ARRAY_DEREF   - gcc 4.2
+BUILD_BUG_ON_NON_CONST_STRUCT_MEMBER - gcc 4.2 (unless it's a pointer or
+you use -O1)
+etc.
+
+To make it any more clear, I suppose I will have to clean up my test
+results and share them again (an 82k spreadsheet uncompressed).  Let me
+know if you want to see it.  So it's really for a sort of
+full-disclosure that I use the suffix "42" and not something more
+specific to what it should test.
+
+Alternately, we can just call it something like
+BUILD_BUG_ON_NON_CONST_MODERN and bump the version up gcc 4.4, which is
+just as functional as 4.7.
 
 Daniel
+
+
+
+
+
