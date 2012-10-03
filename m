@@ -1,90 +1,37 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH 10/10] bug.h: Add gcc 4.2+ versions of BUILD_BUG_ON_*
- macros
-Date: Tue, 02 Oct 2012 11:04:06 -0500
-Message-ID: <506B1076.8050100@att.net>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-11-git-send-email-daniel.santos@pobox.com> <CANN689EoTUakd89D4sAXLFHJ=JzFPaTpisMHFi4Yf_gQ58qngA@mail.gmail.com>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
+From: David Rientjes <rientjes@google.com>
+Subject: Re: [PATCH 1/10] compiler-gcc4.h: correct verion check for
+ __compiletime_error
+Date: Tue, 2 Oct 2012 23:25:12 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210022324430.12717@chino.kir.corp.google.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1348874411-28288-2-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm31-vm5.bullet.mail.bf1.yahoo.com ([72.30.239.13]:30875 "HELO
-	nm31-vm5.bullet.mail.bf1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1754794Ab2JBQEF (ORCPT
+Received: from mail-pb0-f46.google.com ([209.85.160.46]:42454 "EHLO
+	mail-pb0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751665Ab2JCGZP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 2 Oct 2012 12:04:05 -0400
-In-Reply-To: <CANN689EoTUakd89D4sAXLFHJ=JzFPaTpisMHFi4Yf_gQ58qngA@mail.gmail.com>
+	Wed, 3 Oct 2012 02:25:15 -0400
+Received: by pbbrr4 with SMTP id rr4so9527458pbb.19
+        for <linux-sparse@vger.kernel.org>; Tue, 02 Oct 2012 23:25:14 -0700 (PDT)
+In-Reply-To: <1348874411-28288-2-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Michel Lespinasse <walken@google.com>
-Cc: Daniel Santos <daniel.santos@pobox.com>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+To: Daniel Santos <daniel.santos@pobox.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Michal Marek <mmarek@suse.cz>
 
-On 10/01/2012 07:55 PM, Michel Lespinasse wrote:
-> On Fri, Sep 28, 2012 at 4:20 PM, Daniel Santos <daniel.santos@pobox.com> wrote:
->> BUILD_BUG_ON42(arg)
->> BUILD_BUG_ON_CONST42(arg)
->>
->> Prior to gcc 4.2, the optimizer was unable to determine that many
->> constant values stored in structs were indeed compile-time constants and
->> optimize them out.  Sometimes, it will find an intergral value to be a
->> compile-time constant, but fail to perform a bit-wise AND at
->> compile-time.  These two macros provide a mechanism to perform these
->> build-time checks, but not break on older compilers where we already
->> know they can't be checked at compile time.
->>
->> For specific details, consult the doc comments for BUILD_BUG_ON_CONST.
->> These macros are used in the generic rbtree code.
->
-> I think the names are quite confusing. BUILD_BUG_ON_NON_CONST42 sounds
-> like it's checking if 42 is a constant.
->
-> The name probably shouldn't mention what compiler versions support
-> this check, but instead it should hint as to when you should use this
-> instead of BUILD_BUG_ON_CONST ? Maybe BUILD_BUG_ON_CONST_DEREF or
-> something (I'm pretty bad with names too :)
-I completely agree about the naming, but I'm also stumped. I choose
-version 4.2 after writing a test program & group of scripts and sifting
-through the results of 220k tests of __builtin_constant_p()!  In gcc
-4.2, there are still some tests that will fail, but I went with 4.2 as
-the "good version" mostly because:
+On Fri, 28 Sep 2012, Daniel Santos wrote:
 
-a. the broken tests didn't affect my generic red-black tree
-implementation, and
-b. broken cases in 4.2 were the slim minority.
+> NOTE: this is has already been comitted to -mm
+> 
+> __attribute__((error(msg))) was introduced in gcc 4.3 (not 4.4) and as I
+> was unable to find any gcc bugs pertaining to it, I'm presuming that it
+> has functioned as advertised since 4.3.0.
+> 
+> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+> Cc: Michal Marek <mmarek@suse.cz>
+> Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
 
-For instance calling __builtin_constant_p() on a dereferenced pointer in
-4.2 always fails, while dereferencing a global static array (of
-primitives) returns 1 in pretty much every case that it should
-(excepting global non-static const, which also fails in 4.7 and perhaps
-the compiler figures that somewhere else, const can be cast away and the
-data modified anyway?).
+Tested-by: David Rientjes <rientjes@google.com>
 
-Maybe it would be better in the long term to create multiple macros for
-testing various constructs.  Verbosity does really start to increase
-here, but I suppose we can work out some type of nomenclature to control
-that while still being clear about what the macro does (not that I have
-any ideas at the moment).
-
-BUILD_BUG_ON_NON_CONST_PTR_DEREF     - gcc 4.4
-BUILD_BUG_ON_NON_CONST_ARRAY_DEREF   - gcc 4.2
-BUILD_BUG_ON_NON_CONST_STRUCT_MEMBER - gcc 4.2 (unless it's a pointer or
-you use -O1)
-etc.
-
-To make it any more clear, I suppose I will have to clean up my test
-results and share them again (an 82k spreadsheet uncompressed).  Let me
-know if you want to see it.  So it's really for a sort of
-full-disclosure that I use the suffix "42" and not something more
-specific to what it should test.
-
-Alternately, we can just call it something like
-BUILD_BUG_ON_NON_CONST_MODERN and bump the version up gcc 4.4, which is
-just as functional as 4.7.
-
-Daniel
-
-
-
-
-
+Works with 4.3.6.
