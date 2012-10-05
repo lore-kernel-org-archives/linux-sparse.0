@@ -1,27 +1,27 @@
-From: Josh Triplett <josh@joshtriplett.org>
+From: Steven Rostedt <rostedt@goodmis.org>
 Subject: Re: [PATCH v2 09/10] bug.h: Add BUILD_BUG_ON_MSG &
  BUILD_BUG_INTERNAL{,2}
-Date: Fri, 5 Oct 2012 14:02:59 -0700
-Message-ID: <20121005210258.GB7362@jtriplet-mobl1>
+Date: Fri, 05 Oct 2012 17:04:08 -0400
+Message-ID: <1349471048.6755.77.camel@gandalf.local.home>
 References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
- <1349466169-20637-9-git-send-email-daniel.santos@pobox.com>
- <20121005205858.GB28452@liondog.tnic>
+	 <1349466169-20637-9-git-send-email-daniel.santos@pobox.com>
+	 <20121005205858.GB28452@liondog.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:38872 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754118Ab2JEVDI convert rfc822-to-8bit (ORCPT
+Received: from hrndva-omtalb.mail.rr.com ([71.74.56.122]:12885 "EHLO
+	hrndva-omtalb.mail.rr.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932275Ab2JEVEL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 5 Oct 2012 17:03:08 -0400
-Content-Disposition: inline
+	Fri, 5 Oct 2012 17:04:11 -0400
 In-Reply-To: <20121005205858.GB28452@liondog.tnic>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, danielfsantos@att.net, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
+To: Borislav Petkov <bp@alien8.de>
+Cc: danielfsantos@att.net, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Daniel Santos <daniel.santos@pobox.com>
 
-On Fri, Oct 05, 2012 at 10:58:58PM +0200, Borislav Petkov wrote:
+On Fri, 2012-10-05 at 22:58 +0200, Borislav Petkov wrote:
 > On Fri, Oct 05, 2012 at 02:42:48PM -0500, danielfsantos@att.net wrote=
 :
 > > Add BUILD_BUG_ON_MSG which behaves like BUILD_BUG_ON (with optimiza=
@@ -60,6 +60,9 @@ ch
 > > +#define CONCAT(a, b) _CONCAT1(a, b)
 >=20
 > Let's call the indirection _CONCAT without the "1".
+
+You're stricter than I ;-)
+
 >=20
 > > +#define UNIQUIFY(prefix) CONCAT(prefix, __LINE__)
 > > +
@@ -77,12 +80,12 @@ ch
 > Ditto. BUILD_BUG_INTERNAL2 should be __BUILD_BUG_INTERNAL and the one
 > calling it _BUILD_BUG_INTERNAL (with one underscore).
 
-Also, you don't need both the BUILD_BUG_INTERNAL and CONCAT/UNIQUIFY
-macros.  My original implementation just used the BUILD_BUG_INTERNAL
-family of macros; if you'd rather rename them, by all means do so, but =
-I
-don't think you need two separate families of multiply-indirect macros.
+I thought about commenting about the '2' too, but figured it's only use=
+d
+internally by BUILD_BUG_INTERNAL and was really not too concerned about
+such a trivial thing. It could have been 42 for all I care ;-)
 
+>=20
 > > +
 > > +/**
 > > + * BUILD_BUG_ON_MSG - break compile if a condition is true & emit =
@@ -102,13 +105,21 @@ se.
 > macros.c: In function =E2=80=98main=E2=80=99:
 > macros.c:22:1: error: =E2=80=98__build_bug_on_failed_22=E2=80=99 unde=
 clared (first use in this function)
+> 	^^^^
+>=20
+> It is in front of the filename here.
+>=20
+> macros.c:22:1: note: each undeclared identifier is reported only once=
+ for each function it appears in
+> make: *** [macros] Error 1
 
-Because without that, you end up writing multiple prototypes for the
-same function (__build_bug_on_failed) with different error attributes,
-and GCC will ignore all but the last error attribute it sees, even with
-a scoped prototype.
+I was thinking that the number was added as a safety measure that the
+line number would be shown for all versions of the compiler. I'm not
+sure it is.
 
-- Josh Triplett
+-- Steve
+
+
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
