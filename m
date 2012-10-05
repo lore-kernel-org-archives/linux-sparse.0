@@ -1,7 +1,7 @@
 From: danielfsantos@att.net
-Subject: [PATCH v2 02/10] compiler-gcc.h: Add gcc-recommended GCC_VERSION macro
-Date: Fri,  5 Oct 2012 14:42:41 -0500
-Message-ID: <1349466169-20637-2-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v2 04/10] bug.h: directly include linux/compiler.h
+Date: Fri,  5 Oct 2012 14:42:43 -0500
+Message-ID: <1349466169-20637-4-git-send-email-daniel.santos@pobox.com>
 References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
@@ -10,49 +10,29 @@ To: LKML <linux-kernel@vger.kernel.org>
 Cc: Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Throughout compiler*.h, many version checks are made.  These can be
-simplified by using the macro that gcc's documentation recommends.
-However, my primary reason for adding this is that I need bug-check
-macros that are enabled at certain gcc versions and it's cleaner to use
-this macro than the tradition method:
-
-if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ => 2)
-
-If you add patch level, it gets this ugly:
-
-if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 2 || \
-   __GNUC_MINOR__ == 2 __GNUC_PATCHLEVEL__ >= 1))
-
-As opposed to:
-
-if GCC_VERSION >= 40201
-
-While having separate headers for gcc 3 & 4 eliminates some of this
-verbosity, they can still be cleaned up by this.
-
-See also:
-http://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
+We are just including asm/bug.h and expecting that linux/compiler.h will
+eventually be included to define __linktime_error (used in
+BUILD_BUG_ON). This patch includes it directly for clarity and to avoid
+the possibility of changes in <arch>/*/include/asm/bug.h being changed
+or not including linux/compiler.h for some reason. (Later patches will
+in this set use more macros defined in compiler*.h.)
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-Acked-by: Borislav Petkov <bp@alien8.de>
-Acked-by: David Rientjes <rientjes@google.com>
 ---
- include/linux/compiler-gcc.h |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+ include/linux/bug.h |    1 +
+ 1 files changed, 1 insertions(+), 0 deletions(-)
 
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 6a6d7ae..24545cd 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -5,6 +5,9 @@
- /*
-  * Common definitions for all gcc versions go here.
-  */
-+#define GCC_VERSION (__GNUC__ * 10000 \
-+		   + __GNUC_MINOR__ * 100 \
-+		   + __GNUC_PATCHLEVEL__)
+diff --git a/include/linux/bug.h b/include/linux/bug.h
+index aaac4bb..4bd74d8 100644
+--- a/include/linux/bug.h
++++ b/include/linux/bug.h
+@@ -2,6 +2,7 @@
+ #define _LINUX_BUG_H
  
+ #include <asm/bug.h>
++#include <linux/compiler.h>
  
- /* Optimization barrier */
+ enum bug_trap_type {
+ 	BUG_TRAP_TYPE_NONE = 0,
 -- 
 1.7.3.4
