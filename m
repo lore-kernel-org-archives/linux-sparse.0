@@ -1,7 +1,7 @@
 From: danielfsantos@att.net
-Subject: [PATCH v2 04/10] bug.h: directly include linux/compiler.h
-Date: Fri,  5 Oct 2012 14:42:43 -0500
-Message-ID: <1349466169-20637-4-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v2 06/10] bug.h: Make BUILD_BUG_ON generate compile-time error
+Date: Fri,  5 Oct 2012 14:42:45 -0500
+Message-ID: <1349466169-20637-6-git-send-email-daniel.santos@pobox.com>
 References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
@@ -10,29 +10,61 @@ To: LKML <linux-kernel@vger.kernel.org>
 Cc: Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
 
-We are just including asm/bug.h and expecting that linux/compiler.h will
-eventually be included to define __linktime_error (used in
-BUILD_BUG_ON). This patch includes it directly for clarity and to avoid
-the possibility of changes in <arch>/*/include/asm/bug.h being changed
-or not including linux/compiler.h for some reason. (Later patches will
-in this set use more macros defined in compiler*.h.)
+Negative sized arrays wont create a compile-time error in some cases
+starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
+the error function attribute that will.  This patch modifies
+BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
+function attribute so that you don't have to build the entire kernel to
+discover that you have a problem, and then enjoy trying to track it down
+from a link-time error.
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
 ---
- include/linux/bug.h |    1 +
- 1 files changed, 1 insertions(+), 0 deletions(-)
+ include/linux/bug.h |   24 ++++++++++++++----------
+ 1 files changed, 14 insertions(+), 10 deletions(-)
 
 diff --git a/include/linux/bug.h b/include/linux/bug.h
-index aaac4bb..4bd74d8 100644
+index a03c3ef..3d4b564 100644
 --- a/include/linux/bug.h
 +++ b/include/linux/bug.h
-@@ -2,6 +2,7 @@
- #define _LINUX_BUG_H
+@@ -43,24 +43,28 @@ struct pt_regs;
+  * @condition: the condition which the compiler should know is false.
+  *
+  * If you have some code which relies on certain constants being equal, or
+- * other compile-time-evaluated condition, you should use BUILD_BUG_ON to
++ * some other compile-time-evaluated condition, you should use BUILD_BUG_ON to
+  * detect if someone changes it.
+  *
+  * The implementation uses gcc's reluctance to create a negative array, but
+  * gcc (as of 4.4) only emits that error for obvious cases (eg. not arguments
+- * to inline functions).  So as a fallback we use the optimizer; if it can't
+- * prove the condition is false, it will cause a link error on the undefined
+- * "__build_bug_on_failed".  This error message can be harder to track down
+- * though, hence the two different methods.
++ * to inline functions).  Luckily, in 4.3 they added the "error" function
++ * attribute just for this type of case.  Thus, we use a negative sized array
++ * (should always create an error pre-gcc-4.4) and then call an undefined
++ * function with the error attribute (should always creates an error 4.3+).  If
++ * for some reason, neither creates a compile-time error, we'll still have a
++ * link-time error, which is harder to track down.
+  */
+ #ifndef __OPTIMIZE__
+ #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+ #else
+-extern int __build_bug_on_failed;
+-#define BUILD_BUG_ON(condition)					\
+-	do {							\
+-		((void)sizeof(char[1 - 2*!!(condition)]));	\
+-		if (condition) __build_bug_on_failed = 1;	\
++#define BUILD_BUG_ON(condition)						\
++	do {								\
++		extern void __build_bug_on_failed(void)			\
++			__compiletime_error("BUILD_BUG_ON failed");	\
++		((void)sizeof(char[1 - 2*!!(condition)]));		\
++		if (condition)						\
++			__build_bug_on_failed();			\
+ 	} while(0)
+ #endif
  
- #include <asm/bug.h>
-+#include <linux/compiler.h>
- 
- enum bug_trap_type {
- 	BUG_TRAP_TYPE_NONE = 0,
 -- 
 1.7.3.4
