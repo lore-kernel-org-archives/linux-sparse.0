@@ -1,84 +1,38 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: "unexpected unlock" when unlocking, conditional, lock in loop
-Date: Sat, 6 Oct 2012 13:21:02 -0700
-Message-ID: <20121006202102.GA28179@leaf>
-References: <1349552876.20963@cat.he.net>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v2 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
+Date: Sun, 7 Oct 2012 01:05:59 +0200
+Message-ID: <20121006230559.GA3278@liondog.tnic>
+References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
+ <1349466169-20637-3-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:55515 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932181Ab2JFUVJ (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 6 Oct 2012 16:21:09 -0400
+Received: from mail.skyhub.de ([78.46.96.112]:46556 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750749Ab2JFXGE (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 6 Oct 2012 19:06:04 -0400
 Content-Disposition: inline
-In-Reply-To: <1349552876.20963@cat.he.net>
+In-Reply-To: <1349466169-20637-3-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: ecashin@coraid.com
-Cc: linux-sparse@vger.kernel.org
+To: danielfsantos@att.net
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
 
-On Sat, Oct 06, 2012 at 12:47:56PM -0700, ecashin@coraid.com wrote:
-> Hi.  I have a function that enters with a lock held and does
-> an unlock inside a loop.
+On Fri, Oct 05, 2012 at 02:42:42PM -0500, danielfsantos@att.net wrote:
+> Using GCC_VERSION reduces complexity, is easier to read and is GCC's
+> recommended mechanism for doing version checks. (Just don't ask me why
+> they didn't define it in the first place.)  This also makes it easy to
+> merge compiler-gcc{,3,4}.h should somebody want to.
 > 
-> Sparse 0.4.4 is fine with this function until I introduce a conditional
-> between the unlock and the next lock.  In the minimal example below,
-> changing the "#if 1" to "#if 0" makes sparse generate the warning
-> below:
-> 
-> cd ~/git/linux && PATH=/opt/bin:$PATH make drivers/block/aoe/aoe.ko C=1
-> make[1]: Nothing to be done for `all'.
-> make[1]: Nothing to be done for `relocs'.
->   CHK     include/linux/version.h
->   CHK     include/generated/utsrelease.h
->   CALL    scripts/checksyscalls.sh
->   CHECK   drivers/block/aoe/demo.c
-> /build/ecashin/git/linux/arch/x86/include/asm/spinlock.h:81:9: warning: context imbalance in 'demofn' - unexpected unlock
->   CC [M]  drivers/block/aoe/demo.o
->   LD [M]  drivers/block/aoe/aoe.o
->   MODPOST 1 modules
->   CC      drivers/block/aoe/aoe.mod.o
->   LD [M]  drivers/block/aoe/aoe.ko
-> 
-> I'm using 3.6.0-rc7 kernel sources.
-> 
-> Granted, I'm unusually tired today, but I can't think of a way that
-> conditionally printing a warning has changed the locking, so I
-> could use some help in determining whether this is a sparse bug
-> that might be fixed, one that I have to work around, or some
-> confusion of mine.
-> 
-> /* demo.c */
-> #include <linux/netdevice.h>
-> 
-> static spinlock_t lk;
-> static struct sk_buff_head q;
-> int demofn(void);
-> 
-> /* enters and returns with lk held */
-> int demofn(void)
-> {
-> 	struct sk_buff *skb;
-> 
-> 	while ((skb = skb_dequeue(&q))) {
-> 		spin_unlock_irq(&lk);
-> #if 1
-> 		dev_queue_xmit(skb);
-> #else
-> 		if (dev_queue_xmit(skb) == NET_XMIT_DROP && net_ratelimit())
-> 			pr_warn("informative warning\n");
-> #endif
-> 		spin_lock_irq(&lk);
-> 	}
-> 	return 0;
-> }
+> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+> Acked-by: David Rientjes <rientjes@google.com>
 
-Sparse should *always* generate a context warning here; odd that it does
-not in both cases.
+Looks correct to me:
 
-The right fix: annotate the function to explicitly say it starts and
-stops with that lock held.  That should make the warning go away in
-both cases.
+Acked-by: Borislav Petkov <bp@alien8.de>
 
-- Josh Triplett
+Thanks.
+
+-- 
+Regards/Gruss,
+    Boris.
