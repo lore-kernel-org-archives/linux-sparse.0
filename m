@@ -1,43 +1,73 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v2 01/10] compiler-gcc4.h: Reorder macros based upon gcc
- ver
-Date: Sat, 06 Oct 2012 12:54:07 -0500
-Message-ID: <5070703F.8050004@att.net>
-References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com> <1349466169-20637-1-git-send-email-daniel.santos@pobox.com> <20121006174220.GB6110@liondog.tnic>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: ecashin@coraid.com
+Subject: "unexpected unlock" when unlocking, conditional, lock in loop
+Date: Sat, 6 Oct 2012 12:47:56 -0700
+Message-ID: <1349552876.20963@cat.he.net>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm17-vm0.bullet.mail.ac4.yahoo.com ([98.139.53.208]:30368 "HELO
-	nm17-vm0.bullet.mail.ac4.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1750841Ab2JFRyK (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 6 Oct 2012 13:54:10 -0400
-In-Reply-To: <20121006174220.GB6110@liondog.tnic>
+Received: from noserose.net ([66.220.18.76]:52295 "HELO noserose.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with SMTP
+	id S1753808Ab2JFTzM (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 6 Oct 2012 15:55:12 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
+To: linux-sparse@vger.kernel.org
+Cc: ecashin@coraid.com
 
-On 10/06/2012 12:42 PM, Borislav Petkov wrote:
->> @@ -56,10 +65,3 @@
->>  #define __visible __attribute__((externally_visible))
->>  #endif
->>  
->> -#if __GNUC_MINOR__ > 0
->> -#define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
->> -#endif
->> -#if __GNUC_MINOR__ >= 3 && !defined(__CHECKER__)
->
-> This last hunk doesn't apply since mainline has a "4" above instead of
-> "3". And it has had a "4" since it got added by 4a3127693001c so unless
-> I'm missing something, how did the 3 appear in your patches?
-These are based against -mm, where another commit is already in that
-changes it.  I was told that since that commit was already in -mm, to
-not include it in the patch set:
+Hi.  I have a function that enters with a lock held and does
+an unlock inside a loop.
 
-6c620cf1536a0ce6a83ecaaaf05298dcc0f7d440 (committed 2012-09-27)
+Sparse 0.4.4 is fine with this function until I introduce a conditional
+between the unlock and the next lock.  In the minimal example below,
+changing the "#if 1" to "#if 0" makes sparse generate the warning
+below:
 
-This was probably (at least partially) the result of the fiasco I had
-with my email.
+cd ~/git/linux && PATH=/opt/bin:$PATH make drivers/block/aoe/aoe.ko C=1
+make[1]: Nothing to be done for `all'.
+make[1]: Nothing to be done for `relocs'.
+  CHK     include/linux/version.h
+  CHK     include/generated/utsrelease.h
+  CALL    scripts/checksyscalls.sh
+  CHECK   drivers/block/aoe/demo.c
+/build/ecashin/git/linux/arch/x86/include/asm/spinlock.h:81:9: warning: context imbalance in 'demofn' - unexpected unlock
+  CC [M]  drivers/block/aoe/demo.o
+  LD [M]  drivers/block/aoe/aoe.o
+  MODPOST 1 modules
+  CC      drivers/block/aoe/aoe.mod.o
+  LD [M]  drivers/block/aoe/aoe.ko
 
+I'm using 3.6.0-rc7 kernel sources.
+
+Granted, I'm unusually tired today, but I can't think of a way that
+conditionally printing a warning has changed the locking, so I
+could use some help in determining whether this is a sparse bug
+that might be fixed, one that I have to work around, or some
+confusion of mine.
+
+/* demo.c */
+#include <linux/netdevice.h>
+
+static spinlock_t lk;
+static struct sk_buff_head q;
+int demofn(void);
+
+/* enters and returns with lk held */
+int demofn(void)
+{
+	struct sk_buff *skb;
+
+	while ((skb = skb_dequeue(&q))) {
+		spin_unlock_irq(&lk);
+#if 1
+		dev_queue_xmit(skb);
+#else
+		if (dev_queue_xmit(skb) == NET_XMIT_DROP && net_ratelimit())
+			pr_warn("informative warning\n");
+#endif
+		spin_lock_irq(&lk);
+	}
+	return 0;
+}
+
+-- 
+  Ed Cashin
+  ecashin@coraid.com	http://www.coraid.com/
+  ecashin@noserose.net	http://noserose.net/e/
