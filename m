@@ -1,76 +1,56 @@
 From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v2 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
-Date: Sun, 07 Oct 2012 13:27:58 -0500
-Message-ID: <5071C9AE.2010106@att.net>
-References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com> <1349466169-20637-3-git-send-email-daniel.santos@pobox.com> <20121006231041.GB3278@liondog.tnic>
+Subject: Re: [PATCH v2 0/10] Cleanup & new features for compiler*.h and bug.h
+Date: Sun, 07 Oct 2012 13:36:02 -0500
+Message-ID: <5071CB92.2040703@att.net>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com> <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
 Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20121006231041.GB3278@liondog.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from nm24-vm0.bullet.mail.sp2.yahoo.com ([98.139.91.226]:45645 "HELO
+	nm24-vm0.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1751211Ab2JGSgE (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 7 Oct 2012 14:36:04 -0400
+In-Reply-To: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: LKML <linux-kernel@vger.kernel.org>
+Cc: Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-On 10/06/2012 06:10 PM, Borislav Petkov wrote:
-> On Fri, Oct 05, 2012 at 02:42:42PM -0500, danielfsantos@att.net wrote=
-:
->> Using GCC_VERSION reduces complexity, is easier to read and is GCC's
->> recommended mechanism for doing version checks. (Just don't ask me w=
-hy
->> they didn't define it in the first place.)  This also makes it easy =
-to
->> merge compiler-gcc{,3,4}.h should somebody want to.
->>
->> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
->> Acked-by: David Rientjes <rientjes@google.com>
->> ---
+I just realized that in my patch set header I didn't specify that this
+version of the patches is based against -mm.  However, I did not test
+against -mm, I rebased them to mainline, merged some conflicts and made
+some changes and tested there and I'm running that kernel now (that is,
+with all of my patches, including fair scheduler using the generic
+red-black tree).
+
+This patch set builds fine against -mm & -next, but I just can't get
+either of those to run correctly on my machine, even without my
+patches.  (Sorry, that I don't have an actual test machine at the moment.)
+
+On 10/05/2012 02:35 PM, danielfsantos@att.net wrote:
+> This patch set is a dependency of the generic red-black tree patch set, which
+> I have now split up into three smaller sets.
 >
-> [ =E2=80=A6 ]
+> The major aim of this patch set is to cleanup compiler-gcc*.h and improve the
+> manageability of of compiler features at various versions (when they are
+> broken, etc.), and to cleanup & add some needed features to bug.h.
 >
->> diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-=
-gcc4.h
->> index 4506d65..bbfeb13 100644
->> --- a/include/linux/compiler-gcc4.h
->> +++ b/include/linux/compiler-gcc4.h
->> @@ -4,7 +4,7 @@
->> =20
->>  /* GCC 4.1.[01] miscompiles __weak */
->>  #ifdef __KERNEL__
->> -# if __GNUC_MINOR__ =3D=3D 1 && __GNUC_PATCHLEVEL__ <=3D 1
->> +# if GCC_VERSION >=3D 40100 &&  GCC_VERSION <=3D 40101
->>  //#  error Your version of gcc miscompiles the __weak directive
+> compiler-gcc*.h
+> o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701)
+> o Reorder all features based upon the version introduced (readability)
+> o Change all version checks to use GCC_VERSION
+> o Remove redundant __linktime_error
 >
-> Did I miss something again? This "error" preprocessor function is
-> commented out here? Why?
-We'll have to ask Andrew.  Maybe so he can test on those versions of gc=
-c?
+> bug.h
+> o Improve BUILD_BUG_ON(expr) - Will now generate a compile-time error and in
+>   gcc-4.4+, also emits an error message containing the expression that failed.
+> o Add BUILD_BUG_ON_MSG(expr, msg) - Like BUILD_BUG_ON, except that you can
+>   specify the error message that is emitted (again, gcc-4.4+).
+> o Add BUILD_BUG_ON_INTERNAL(expr, fn, msg) - contains a generic implementation
+>   of BUILG_BUG_ON{_MSG}.
+> o Finally, the implementations of BUILD_BUG{,_ON,_ON_MSG} is consolidated,
+>   eliminating duplicate code.
 
-commit d3ffe64a1dbcfe18b57f90f7c01c40c93d0a8b92
-Author: Andrew Morton <akpm@linux-foundation.org>
-Date:   Fri Sep 28 00:02:42 2012 +0000
-
-    a
-  =20
-    Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-
-diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc=
-4.h
-index 934bc34..997fd8a 100644
---- a/include/linux/compiler-gcc4.h
-+++ b/include/linux/compiler-gcc4.h
-@@ -5,7 +5,7 @@
- /* GCC 4.1.[01] miscompiles __weak */
- #ifdef __KERNEL__
- # if __GNUC_MINOR__ =3D=3D 1 && __GNUC_PATCHLEVEL__ <=3D 1
--#  error Your version of gcc miscompiles the __weak directive
-+//#  error Your version of gcc miscompiles the __weak directive
- # endif
- #endif
-
-
-I can provide you a version of these patches rebased against Linus if
-you like, which I am using to test since the -mm & -next trees aren't
-working on my machine (hardware, .config and/or LVM/RAID setup). I
-haven't put Walken's patches underneath them however.
