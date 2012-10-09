@@ -1,62 +1,53 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: =?ISO-8859-15?Q?=5BGIT_PULL=5D=A0Sparse=2FLLVM_updates?=
-Date: Tue, 9 Oct 2012 09:34:40 +0300 (EEST)
-Message-ID: <alpine.LFD.2.02.1210090934050.3891@tux.localdomain>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v2 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
+Date: Tue, 9 Oct 2012 11:41:58 -0700
+Message-ID: <20121009114158.9cdf1378.akpm@linux-foundation.org>
+References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
+	<1349466169-20637-3-git-send-email-daniel.santos@pobox.com>
+	<20121006231041.GB3278@liondog.tnic>
+	<5071C9AE.2010106@att.net>
 Mime-Version: 1.0
-Content-Type: MULTIPART/MIXED; BOUNDARY="8323328-1454618545-1349764484=:3891"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lb0-f174.google.com ([209.85.217.174]:48684 "EHLO
-	mail-lb0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751084Ab2JIGeq (ORCPT
+Received: from mail.linuxfoundation.org ([140.211.169.12]:54500 "EHLO
+	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752458Ab2JISl7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Oct 2012 02:34:46 -0400
-Received: by mail-lb0-f174.google.com with SMTP id n3so3488293lbo.19
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Oct 2012 23:34:45 -0700 (PDT)
+	Tue, 9 Oct 2012 14:41:59 -0400
+In-Reply-To: <5071C9AE.2010106@att.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Daniel Santos <daniel.santos@pobox.com>
+Cc: Daniel Santos <danielfsantos@att.net>, Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-  This message is in MIME format.  The first part should be readable text,
-  while the remaining parts are likely unreadable without MIME-aware tools.
+On Sun, 07 Oct 2012 13:27:58 -0500
+Daniel Santos <danielfsantos@att.net> wrote:
 
---8323328-1454618545-1349764484=:3891
-Content-Type: TEXT/PLAIN; charset=ISO-8859-15
-Content-Transfer-Encoding: 8BIT
+> We'll have to ask Andrew.  Maybe so he can test on those versions of gcc?
+> 
+> commit d3ffe64a1dbcfe18b57f90f7c01c40c93d0a8b92
+> Author: Andrew Morton <akpm@linux-foundation.org>
+> Date:   Fri Sep 28 00:02:42 2012 +0000
+> 
+>     a
+>    
+>     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+> 
+> diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+> index 934bc34..997fd8a 100644
+> --- a/include/linux/compiler-gcc4.h
+> +++ b/include/linux/compiler-gcc4.h
+> @@ -5,7 +5,7 @@
+>  /* GCC 4.1.[01] miscompiles __weak */
+>  #ifdef __KERNEL__
+>  # if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
+> -#  error Your version of gcc miscompiles the __weak directive
+> +//#  error Your version of gcc miscompiles the __weak directive
 
-Hi Chris,
+hm, yeah, sorry, I use various old crufty cross-compilers.
 
-Please pull the latest Sparse/LLVM tree from:
-
-  git@github.com:penberg/sparse-llvm.git llvm/core
-
-It contains few LLVM backend fixes from myself and Jonathan Neuschäfer.
-
-			Pekka
-
------------------->
-
-The following changes since commit 063236fd3f46bc83b49172f5ecb597e0a91cede8:
-
-  ptrlist.c: fix a typo in a comment (2012-06-26 00:54:24 -0700)
-
-are available in the git repository at:
-  git@github.com:penberg/sparse-llvm.git llvm/core
-
-Jonathan Neuschäfer (2):
-      sparse, llvm: 'Verify' the LLVM module before writing it
-      sparse, llvm: convert the condition of branch/select to bool
-
-Pekka Enberg (2):
-      sparse, llvm: Fix SIGSEGV for extern symbols
-      sparse, llvm: Fix 'void' return type code generation
-
- sparse-llvm.c                         |   36 +++++++++++++++++++++++++++++---
- validation/backend/extern.c           |   11 ++++++++++
- validation/backend/int-cond.c         |   30 +++++++++++++++++++++++++++
- validation/backend/void-return-type.c |   13 +++++++++++
- 4 files changed, 86 insertions(+), 4 deletions(-)
- create mode 100644 validation/backend/extern.c
- create mode 100644 validation/backend/int-cond.c
- create mode 100644 validation/backend/void-return-type.c
---8323328-1454618545-1349764484=:3891--
+There are quite a number of patches in -mm which aren't included in
+linux-next and that's one of them.  The
+NEXT_PATCHES_START/NEXT_PATCHES_END markers in the series file identify
+the patches which Stephen selects.
