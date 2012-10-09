@@ -1,53 +1,98 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] linux/compiler.h: Add __must_hold macro for functions
- called with a lock held
-Date: Tue, 9 Oct 2012 13:36:28 -0700
-Message-ID: <20121009203628.GB3616@jtriplet-mobl1>
-References: <20121008020610.GA9197@leaf>
- <20121009130637.5e61078f.akpm@linux-foundation.org>
+From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: [PATCH 1/2] sparse, llvm: group PHI nodes at the top of each BB
+Date: Wed, 10 Oct 2012 01:34:35 +0200
+Message-ID: <1349825676-1713-1-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:53525 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752962Ab2JIUgg (ORCPT
+Received: from mailout-de.gmx.net ([213.165.64.22]:59004 "HELO
+	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with SMTP id S1751335Ab2JIXfK (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Oct 2012 16:36:36 -0400
-Content-Disposition: inline
-In-Reply-To: <20121009130637.5e61078f.akpm@linux-foundation.org>
+	Tue, 9 Oct 2012 19:35:10 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Ed Cashin <ecashin@coraid.com>, Christopher Li <sparse@chrisli.org>, Andi Kleen <ak@linux.intel.com>
+To: linux-sparse@vger.kernel.org
+Cc: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Tue, Oct 09, 2012 at 01:06:37PM -0700, Andrew Morton wrote:
-> On Sun, 7 Oct 2012 19:06:10 -0700
-> Josh Triplett <josh@joshtriplett.org> wrote:
-> 
-> > linux/compiler.h has macros to denote functions that acquire or release
-> > locks, but not to denote functions called with a lock held that return
-> > with the lock still held.  Add a __must_hold macro to cover that case.
-> 
-> hum.  How does this work?  Any code examples and sample sparse output? 
-> Does it apply to all lock types, etc?
+This is required for producing valid LLVM bitcode.
 
-It applies to all the same lock types that __acquires and __releases
-apply to: currently everything since Sparse doesn't actually do anything
-with the parameter, just the context value.
+Cc: Pekka Enberg <penberg@kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jeff Garzik <jgarzik@redhat.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+---
+ sparse-llvm.c              |   17 ++++++++++++++++-
+ validation/backend/loop2.c |   13 +++++++++++++
+ 2 files changed, 29 insertions(+), 1 deletion(-)
+ create mode 100644 validation/backend/loop2.c
 
-Various code examples already exist in the kernel tree for __acquires
-and __releases, and the mailing list contains many reports of the Sparse
-context warnings.
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 0fc0dae..2048a1b 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1111,16 +1111,31 @@ static void output_insn(struct function *fn, st=
+ruct instruction *insn)
+ static void output_bb(struct function *fn, struct basic_block *bb, uns=
+igned long generation)
+ {
+ 	struct instruction *insn;
++	struct instruction_list *remaining =3D NULL;
+=20
+ 	bb->generation =3D generation;
+=20
++	/*
++	 * LLVM requires the phi instructions to be grouped at the top of eac=
+h
++	 * basic block.
++	 */
++
+ 	FOR_EACH_PTR(bb->insns, insn) {
+ 		if (!insn->bb)
+ 			continue;
+=20
+-		output_insn(fn, insn);
++		if (insn->opcode =3D=3D OP_PHI)
++			output_insn(fn, insn);
++		else
++			add_instruction(&remaining, insn);
+ 	}
+ 	END_FOR_EACH_PTR(insn);
++
++	FOR_EACH_PTR(remaining, insn) {
++		output_insn(fn, insn);
++	} END_FOR_EACH_PTR(insn);
++
++	free_ptr_list(&remaining);
+ }
+=20
+ #define MAX_ARGS	64
+diff --git a/validation/backend/loop2.c b/validation/backend/loop2.c
+new file mode 100644
+index 0000000..4e44a15
+--- /dev/null
++++ b/validation/backend/loop2.c
+@@ -0,0 +1,13 @@
++extern int op(void);
++
++static void test(void) {
++	int i;
++	for (i =3D 0; ; i++) {
++		op();
++	}
++}
++
++/*
++ * check-name: Loops with unused counter
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
+--=20
+1.7.10.4
 
-Just as __acquires and __release annotate functions that return with a
-lock acquired and get called with a lock that they drop (respectively),
-__must_hold annotates a function called with a lock acquired that return
-with that lock still acquired.
-
-> IOW, where is all this stuff documented?
-
-The Sparse manpage documents the context bits reasonably well.  Other
-than that, nowhere that I know of other than the Sparse testsuite and
-the source trees of projects like Linux that use Sparse.
-
-- Josh Triplett
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
