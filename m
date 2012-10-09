@@ -1,55 +1,33 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH v2 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
-Date: Tue, 9 Oct 2012 12:45:51 -0700
-Message-ID: <20121009194551.GA3616@jtriplet-mobl1>
-References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com>
- <1349466169-20637-3-git-send-email-daniel.santos@pobox.com>
- <20121006231041.GB3278@liondog.tnic>
- <5071C9AE.2010106@att.net>
- <20121009114158.9cdf1378.akpm@linux-foundation.org>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH] linux/compiler.h: Add __must_hold macro for functions
+ called with a lock held
+Date: Tue, 9 Oct 2012 13:06:37 -0700
+Message-ID: <20121009130637.5e61078f.akpm@linux-foundation.org>
+References: <20121008020610.GA9197@leaf>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:46179 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750810Ab2JITqC (ORCPT
+Received: from mail.linuxfoundation.org ([140.211.169.12]:55135 "EHLO
+	mail.linuxfoundation.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751183Ab2JIUGj (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Oct 2012 15:46:02 -0400
-Content-Disposition: inline
-In-Reply-To: <20121009114158.9cdf1378.akpm@linux-foundation.org>
+	Tue, 9 Oct 2012 16:06:39 -0400
+In-Reply-To: <20121008020610.GA9197@leaf>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Daniel Santos <daniel.santos@pobox.com>, Daniel Santos <danielfsantos@att.net>, Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Ed Cashin <ecashin@coraid.com>, Christopher Li <sparse@chrisli.org>, Andi Kleen <ak@linux.intel.com>
 
-On Tue, Oct 09, 2012 at 11:41:58AM -0700, Andrew Morton wrote:
-> On Sun, 07 Oct 2012 13:27:58 -0500
-> Daniel Santos <danielfsantos@att.net> wrote:
-> 
-> > We'll have to ask Andrew.  Maybe so he can test on those versions of gcc?
-> > 
-> > commit d3ffe64a1dbcfe18b57f90f7c01c40c93d0a8b92
-> > Author: Andrew Morton <akpm@linux-foundation.org>
-> > Date:   Fri Sep 28 00:02:42 2012 +0000
-> > 
-> >     a
-> >    
-> >     Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-> > 
-> > diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
-> > index 934bc34..997fd8a 100644
-> > --- a/include/linux/compiler-gcc4.h
-> > +++ b/include/linux/compiler-gcc4.h
-> > @@ -5,7 +5,7 @@
-> >  /* GCC 4.1.[01] miscompiles __weak */
-> >  #ifdef __KERNEL__
-> >  # if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
-> > -#  error Your version of gcc miscompiles the __weak directive
-> > +//#  error Your version of gcc miscompiles the __weak directive
-> 
-> hm, yeah, sorry, I use various old crufty cross-compilers.
+On Sun, 7 Oct 2012 19:06:10 -0700
+Josh Triplett <josh@joshtriplett.org> wrote:
 
-Ah, for build testing where you don't actually care if the resulting
-kernel runs?
+> linux/compiler.h has macros to denote functions that acquire or release
+> locks, but not to denote functions called with a lock held that return
+> with the lock still held.  Add a __must_hold macro to cover that case.
 
-- Josh Triplett
+hum.  How does this work?  Any code examples and sample sparse output? 
+Does it apply to all lock types, etc?
+
+IOW, where is all this stuff documented?
+
