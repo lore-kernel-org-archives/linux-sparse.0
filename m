@@ -1,83 +1,61 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [GIT PULL] Sparse/LLVM updates
-Date: Thu, 11 Oct 2012 19:34:04 -0700
-Message-ID: <CANeU7Q=O_2UGjo0eUF=r4tqPFey0wpX3ww_g+6SiB_PeejAF-g@mail.gmail.com>
-References: <CAOJsxLHYpiNPo7DUMrbfJGkw1ivB440ZMMAaYOmJT9uyTAbzTw@mail.gmail.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: Re: [PATCH 1/2] sparse, llvm: group PHI nodes at the top of each BB
+Date: Fri, 12 Oct 2012 21:25:42 +0300
+Message-ID: <CAOJsxLE=UsuonXVPuDxL9jPGQj_M5xdvCUrk5u+m3U-s4Ao-hA@mail.gmail.com>
+References: <1349825676-1713-1-git-send-email-j.neuschaefer@gmx.net>
+	<5074BD6B.2090501@pobox.com>
+	<CAOJsxLF2AqK2N_R876jOOVmkHXyhe_OjyP_xfULUF5PAfKogMw@mail.gmail.com>
+	<20121010163306.GA2846@debian.debian>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-la0-f46.google.com ([209.85.215.46]:57784 "EHLO
-	mail-la0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752121Ab2JLCeF convert rfc822-to-8bit (ORCPT
+Received: from mail-wi0-f172.google.com ([209.85.212.172]:41883 "EHLO
+	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752105Ab2JLSZo convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 11 Oct 2012 22:34:05 -0400
-Received: by mail-la0-f46.google.com with SMTP id h6so1698094lag.19
-        for <linux-sparse@vger.kernel.org>; Thu, 11 Oct 2012 19:34:04 -0700 (PDT)
-In-Reply-To: <CAOJsxLHYpiNPo7DUMrbfJGkw1ivB440ZMMAaYOmJT9uyTAbzTw@mail.gmail.com>
+	Fri, 12 Oct 2012 14:25:44 -0400
+Received: by mail-wi0-f172.google.com with SMTP id hq12so91893wib.1
+        for <linux-sparse@vger.kernel.org>; Fri, 12 Oct 2012 11:25:42 -0700 (PDT)
+In-Reply-To: <20121010163306.GA2846@debian.debian>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: linux-sparse@vger.kernel.org, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>
+Cc: Jeff Garzik <jgarzik@pobox.com>, linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-The change looks good.
+On Wed, Oct 10, 2012 at 7:33 PM, Jonathan Neusch=E4fer
+<j.neuschaefer@gmx.net> wrote:
+> I can't say with certainty that it's safe either, so I probably shoul=
+d
+> have marked the patch with "request for comments".
+>
+> AFAICT there are three reasons an instruction cannot be moved up or d=
+own
+> within a basic block:
+>  1. If it takes previous SSA values as arguments, it can't be moved
+>     above the corresponding intructions.
+>  2. If its value is used as an argument of an instruction further dow=
+n
+>     in the BB, it can't be moved below that instruction.
+>  3. Swapping two instructions that influence or are influenced by the
+>     "global state" (sorry for the loose wording), e.g. by doing memor=
+y
+>     accesses, performing I/O, or calling functions (which in turn can
+>     do about anything in general), is generally unsafe.
+>
+> Case 1 doesn't apply because PHI nodes don't use values computed in t=
+he
+> same invocation of their basic block. Case 2 doesn't apply as I'm not
+> moving the PHI nodes down. Case 3 doesn't seem to apply either.
+>
+> That's how I think this patch is safe.
 
-It is pull and updated on the github sparse repository.
+Sounds plausible but I'm still uneasy with the idea that LLVM backend
+needs to reshuffle instructions like this.
 
-Thanks
+Would it be possible to solve this in the frontend?
 
-Chris
-
-On Tue, Oct 9, 2012 at 11:35 PM, Pekka Enberg <penberg@kernel.org> wrot=
-e:
-> Hi Chris,
->
-> On Tue, Oct 9, 2012 at 9:34 AM, Pekka Enberg <penberg@kernel.org> wro=
-te:
->> Hi Chris,
->>
->> Please pull the latest Sparse/LLVM tree from:
->>
->>   git@github.com:penberg/sparse-llvm.git llvm/core
->>
->> It contains few LLVM backend fixes from myself and Jonathan Neusch=E4=
-fer.
->>
->>                         Pekka
->>
->> ------------------>
->
-> I have added one more LLVM backend fix from Jonathan to the branch:
->
-> The following changes since commit 063236fd3f46bc83b49172f5ecb597e0a9=
-1cede8:
->
->   ptrlist.c: fix a typo in a comment (2012-06-26 00:54:24 -0700)
->
-> are available in the git repository at:
->   git@github.com:penberg/sparse-llvm.git llvm/core
->
-> Jonathan Neusch=E4fer (3):
->       sparse, llvm: 'Verify' the LLVM module before writing it
->       sparse, llvm: convert the condition of branch/select to bool
->       sparse, llvm: Fix type of loaded values
->
-> Pekka Enberg (2):
->       sparse, llvm: Fix SIGSEGV for extern symbols
->       sparse, llvm: Fix 'void' return type code generation
->
->  sparse-llvm.c                         |   38 +++++++++++++++++++++++=
-+++++----
->  validation/backend/extern.c           |   11 +++++++++
->  validation/backend/int-cond.c         |   30 +++++++++++++++++++++++=
-+++
->  validation/backend/load-type.c        |   12 ++++++++++
->  validation/backend/void-return-type.c |   13 +++++++++++
->  5 files changed, 99 insertions(+), 5 deletions(-)
->  create mode 100644 validation/backend/extern.c
->  create mode 100644 validation/backend/int-cond.c
->  create mode 100644 validation/backend/load-type.c
->  create mode 100644 validation/backend/void-return-type.c
+                        Pekka
 --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
