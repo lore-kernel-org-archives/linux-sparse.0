@@ -1,61 +1,69 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH] linux/compiler.h: Add __must_hold macro for functions
-	called with a lock held
-Date: Sat, 13 Oct 2012 11:41:52 +0200
-Message-ID: <20121013094152.GA14763@merkur.ravnborg.org>
-References: <20121008020610.GA9197@leaf> <20121009130637.5e61078f.akpm@linux-foundation.org> <20121009203628.GB3616@jtriplet-mobl1>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: Re: [PATCH 1/2] sparse, llvm: group PHI nodes at the top of each BB
+Date: Tue, 16 Oct 2012 20:59:27 +0300
+Message-ID: <CAOJsxLEEBYMF4qcyBSpS7kaumzpQFm0McNexRtft3UJVwp==Xg@mail.gmail.com>
+References: <1349825676-1713-1-git-send-email-j.neuschaefer@gmx.net>
+	<5074BD6B.2090501@pobox.com>
+	<CAOJsxLF2AqK2N_R876jOOVmkHXyhe_OjyP_xfULUF5PAfKogMw@mail.gmail.com>
+	<20121010163306.GA2846@debian.debian>
+	<CAOJsxLE=UsuonXVPuDxL9jPGQj_M5xdvCUrk5u+m3U-s4Ao-hA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp.snhosting.dk ([87.238.248.203]:50221 "EHLO
-	smtp.domainteam.dk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752987Ab2JMJlz (ORCPT
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:54326 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755016Ab2JPR72 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 13 Oct 2012 05:41:55 -0400
-Content-Disposition: inline
-In-Reply-To: <20121009203628.GB3616@jtriplet-mobl1>
+	Tue, 16 Oct 2012 13:59:28 -0400
+Received: by mail-wi0-f170.google.com with SMTP id hm2so178688wib.1
+        for <linux-sparse@vger.kernel.org>; Tue, 16 Oct 2012 10:59:27 -0700 (PDT)
+In-Reply-To: <CAOJsxLE=UsuonXVPuDxL9jPGQj_M5xdvCUrk5u+m3U-s4Ao-hA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Ed Cashin <ecashin@coraid.com>, Christopher Li <sparse@chrisli.org>, Andi Kleen <ak@linux.intel.com>
+To: =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>
+Cc: Jeff Garzik <jgarzik@pobox.com>, linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Tue, Oct 09, 2012 at 01:36:28PM -0700, Josh Triplett wrote:
-> On Tue, Oct 09, 2012 at 01:06:37PM -0700, Andrew Morton wrote:
-> > On Sun, 7 Oct 2012 19:06:10 -0700
-> > Josh Triplett <josh@joshtriplett.org> wrote:
-> > 
-> > > linux/compiler.h has macros to denote functions that acquire or release
-> > > locks, but not to denote functions called with a lock held that return
-> > > with the lock still held.  Add a __must_hold macro to cover that case.
-> > 
-> > hum.  How does this work?  Any code examples and sample sparse output? 
-> > Does it apply to all lock types, etc?
-> 
-> It applies to all the same lock types that __acquires and __releases
-> apply to: currently everything since Sparse doesn't actually do anything
-> with the parameter, just the context value.
-> 
-> Various code examples already exist in the kernel tree for __acquires
-> and __releases, and the mailing list contains many reports of the Sparse
-> context warnings.
-> 
-> Just as __acquires and __release annotate functions that return with a
-> lock acquired and get called with a lock that they drop (respectively),
-> __must_hold annotates a function called with a lock acquired that return
-> with that lock still acquired.
-> 
-> > IOW, where is all this stuff documented?
-> 
-> The Sparse manpage documents the context bits reasonably well.  Other
-> than that, nowhere that I know of other than the Sparse testsuite and
-> the source trees of projects like Linux that use Sparse.
+On Fri, Oct 12, 2012 at 9:25 PM, Pekka Enberg <penberg@kernel.org> wrot=
+e:
+> On Wed, Oct 10, 2012 at 7:33 PM, Jonathan Neusch=E4fer
+> <j.neuschaefer@gmx.net> wrote:
+>> I can't say with certainty that it's safe either, so I probably shou=
+ld
+>> have marked the patch with "request for comments".
+>>
+>> AFAICT there are three reasons an instruction cannot be moved up or =
+down
+>> within a basic block:
+>>  1. If it takes previous SSA values as arguments, it can't be moved
+>>     above the corresponding intructions.
+>>  2. If its value is used as an argument of an instruction further do=
+wn
+>>     in the BB, it can't be moved below that instruction.
+>>  3. Swapping two instructions that influence or are influenced by th=
+e
+>>     "global state" (sorry for the loose wording), e.g. by doing memo=
+ry
+>>     accesses, performing I/O, or calling functions (which in turn ca=
+n
+>>     do about anything in general), is generally unsafe.
+>>
+>> Case 1 doesn't apply because PHI nodes don't use values computed in =
+the
+>> same invocation of their basic block. Case 2 doesn't apply as I'm no=
+t
+>> moving the PHI nodes down. Case 3 doesn't seem to apply either.
+>>
+>> That's how I think this patch is safe.
+>
+> Sounds plausible but I'm still uneasy with the idea that LLVM backend
+> needs to reshuffle instructions like this.
+>
+> Would it be possible to solve this in the frontend?
 
-The kernel specific macros should be documented in:
-
-    Documentation/sparse.txt
-
-For now only __bitwise is documentd, but when we introduce new
-sparse annotation macros in the kernel the documentation should
-be mandatory.
-
-	Sam
+Linus, Chris, any thoughts on this?
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
