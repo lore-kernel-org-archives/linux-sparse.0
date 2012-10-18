@@ -1,45 +1,36 @@
-From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: Re: [PATCH 1/2] sparse, llvm: group PHI nodes at the top of each BB
-Date: Wed, 17 Oct 2012 19:44:20 +0200
-Message-ID: <20121017174420.GA2922@debian.debian>
-References: <5074BD6B.2090501@pobox.com>
- <CAOJsxLF2AqK2N_R876jOOVmkHXyhe_OjyP_xfULUF5PAfKogMw@mail.gmail.com>
- <20121010163306.GA2846@debian.debian>
- <CAOJsxLE=UsuonXVPuDxL9jPGQj_M5xdvCUrk5u+m3U-s4Ao-hA@mail.gmail.com>
- <CAOJsxLEEBYMF4qcyBSpS7kaumzpQFm0McNexRtft3UJVwp==Xg@mail.gmail.com>
- <20121016201426.GD2932@debian.debian>
- <507DC95C.7010106@gmail.com>
- <CAOJsxLFXaWXcR8vF_DFPAaJZPJ_BTe47Q9GSkM-2MChaRBqkdw@mail.gmail.com>
- <507E55FC.5010202@gmail.com>
- <CAOJsxLGWCoskGTsKefWoCYPGuR_b5_QsMTnYkzTNX14t0HkKhg@mail.gmail.com>
+From: David Rientjes <rientjes@google.com>
+Subject: Re: [PATCH v2 01/10] compiler-gcc4.h: Reorder macros based upon gcc
+ ver
+Date: Wed, 17 Oct 2012 19:26:58 -0700 (PDT)
+Message-ID: <alpine.DEB.2.00.1210171926230.30443@chino.kir.corp.google.com>
+References: <1349465759-20524-1-git-send-email-daniel.santos@pobox.com> <1349466169-20637-1-git-send-email-daniel.santos@pobox.com> <20121006174220.GB6110@liondog.tnic> <5070703F.8050004@att.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mailout-de.gmx.net ([213.165.64.22]:43371 "HELO
-	mailout-de.gmx.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with SMTP id S1755984Ab2JQRpZ (ORCPT
+Received: from mail-pa0-f46.google.com ([209.85.220.46]:33854 "EHLO
+	mail-pa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753784Ab2JRC1A (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 17 Oct 2012 13:45:25 -0400
-Content-Disposition: inline
-In-Reply-To: <CAOJsxLGWCoskGTsKefWoCYPGuR_b5_QsMTnYkzTNX14t0HkKhg@mail.gmail.com>
+	Wed, 17 Oct 2012 22:27:00 -0400
+Received: by mail-pa0-f46.google.com with SMTP id hz1so7789990pad.19
+        for <linux-sparse@vger.kernel.org>; Wed, 17 Oct 2012 19:27:00 -0700 (PDT)
+In-Reply-To: <5070703F.8050004@att.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Xi Wang <xi.wang@gmail.com>, Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, Jeff Garzik <jgarzik@pobox.com>, linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Daniel Santos <daniel.santos@pobox.com>
+Cc: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-On Wed, Oct 17, 2012 at 07:41:52PM +0300, Pekka Enberg wrote:
-> On 10/17/12 2:48 AM, Pekka Enberg wrote:
-> >> Is LLVM able to optimize away the allocas and use registers instead in
-> >> the emitted code?
+On Sat, 6 Oct 2012, Daniel Santos wrote:
+
+> These are based against -mm, where another commit is already in that
+> changes it.  I was told that since that commit was already in -mm, to
+> not include it in the patch set:
 > 
-> On Wed, Oct 17, 2012 at 9:53 AM, Xi Wang <xi.wang@gmail.com> wrote:
-> > Yes.  See the last part of my previous email, no load/store/alloca after
-> > LLVM's -mem2reg pass.
+> 6c620cf1536a0ce6a83ecaaaf05298dcc0f7d440 (committed 2012-09-27)
 > 
-> Right. Jonathan, does Xi's suggestion sound reasonable to you? I'd
-> certainly prefer that over instruction reordering.
+> This was probably (at least partially) the result of the fiasco I had
+> with my email.
+> 
 
-It certainly does. Thanks, Xi!
-
-
-Jonathan
+Yeah, this patch applies fine on linux-next, which is the correct thing to 
+do if you're building upon already queued patches.
