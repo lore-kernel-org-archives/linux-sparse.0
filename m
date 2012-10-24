@@ -1,91 +1,49 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v3 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
-Date: Wed, 24 Oct 2012 21:05:46 +0200
-Message-ID: <20121024190546.GA17945@liondog.tnic>
+Subject: Re: [PATCH v3 04/10] bug.h: directly include linux/compiler.h
+Date: Wed, 24 Oct 2012 21:55:20 +0200
+Message-ID: <20121024195520.GD17945@liondog.tnic>
 References: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
- <1351096441-12388-3-git-send-email-daniel.santos@pobox.com>
+ <1351096441-12388-4-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:54488 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S965086Ab2JXTFv (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Oct 2012 15:05:51 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1351096441-12388-3-git-send-email-daniel.santos@pobox.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+In-Reply-To: <1351096441-12388-4-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: danielfsantos@att.net
 Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
+List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Oct 24, 2012 at 11:33:54AM -0500, danielfsantos@att.net wrote:
-> Using GCC_VERSION reduces complexity, is easier to read and is GCC's
-> recommended mechanism for doing version checks. (Just don't ask me why
-> they didn't define it in the first place.)  This also makes it easy to
-> merge compiler-gcc{,3,4}.h should somebody want to.
+On Wed, Oct 24, 2012 at 11:33:55AM -0500, danielfsantos@att.net wrote:
+> Currently, we are only including asm/bug.h and then expecting that
+> linux/compiler.h will eventually be included to define __linktime_error
+> (used in BUILD_BUG_ON). This patch includes it directly for clarity and
+> to avoid the possibility of changes in <arch>/*/include/asm/bug.h being
+> changed or not including linux/compiler.h for some reason. (Later
+> patches will in this set use more macros defined in compiler*.h.)
 > 
 > Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-> Acked-by: David Rientjes <rientjes@google.com>
 > ---
->  include/linux/compiler-gcc3.h |    8 ++++----
->  include/linux/compiler-gcc4.h |   14 +++++++-------
->  2 files changed, 11 insertions(+), 11 deletions(-)
+>  include/linux/bug.h |    1 +
+>  1 files changed, 1 insertions(+), 0 deletions(-)
 > 
-> diff --git a/include/linux/compiler-gcc3.h b/include/linux/compiler-gcc3.h
-> index 37d4124..7d89feb 100644
-> --- a/include/linux/compiler-gcc3.h
-> +++ b/include/linux/compiler-gcc3.h
-> @@ -2,22 +2,22 @@
->  #error "Please don't include <linux/compiler-gcc3.h> directly, include <linux/compiler.h> instead."
->  #endif
+> diff --git a/include/linux/bug.h b/include/linux/bug.h
+> index aaac4bb..4bd74d8 100644
+> --- a/include/linux/bug.h
+> +++ b/include/linux/bug.h
+> @@ -2,6 +2,7 @@
+>  #define _LINUX_BUG_H
 >  
-> -#if __GNUC_MINOR__ < 2
-> +#if GCC_VERSION < 30200
->  # error Sorry, your compiler is too old - please upgrade it.
->  #endif
+>  #include <asm/bug.h>
+> +#include <linux/compiler.h>
 >  
-> -#if __GNUC_MINOR__ >= 3
-> +#if GCC_VERSION >= 30300
->  # define __used			__attribute__((__used__))
->  #else
->  # define __used			__attribute__((__unused__))
->  #endif
->  
-> -#if __GNUC_MINOR__ >= 4
-> +#if GCC_VERSION >= 30400
->  #define __must_check		__attribute__((warn_unused_result))
->  #endif
->  
->  #ifdef CONFIG_GCOV_KERNEL
-> -# if __GNUC_MINOR__ < 4
-> +# if GCC_VERSION < 30400
->  #   error "GCOV profiling support for gcc versions below 3.4 not included"
->  # endif /* __GNUC_MINOR__ */
->  #endif /* CONFIG_GCOV_KERNEL */
-> diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
-> index 8914293..9755029 100644
-> --- a/include/linux/compiler-gcc4.h
-> +++ b/include/linux/compiler-gcc4.h
-> @@ -4,7 +4,7 @@
->  
->  /* GCC 4.1.[01] miscompiles __weak */
->  #ifdef __KERNEL__
-> -# if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
-> +# if GCC_VERSION >= 40100 &&  GCC_VERSION <= 40101
->  #  error Your version of gcc miscompiles the __weak directive
->  # endif
->  #endif
-> @@ -13,11 +13,11 @@
->  #define __must_check 		__attribute__((warn_unused_result))
->  #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
->  
-> -#if __GNUC_MINOR__ > 0
-> +#if GCC_VERSION >= 40100
+>  enum bug_trap_type {
+>  	BUG_TRAP_TYPE_NONE = 0,
+> -- 
+> 1.7.3.4
 
-I can't seem to recall so did we explain already why ">= 40100" instead
-of "> 40000"?
-
-I mean, it is the same, but still...
+Why is this a separate patch and why not add that single line in 6/10
+where you define BUILD_BUG_ON?
 
 Thanks.
 
