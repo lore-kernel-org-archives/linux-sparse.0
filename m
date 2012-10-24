@@ -1,37 +1,70 @@
 From: danielfsantos@att.net
-Subject: [PATCH v3 0/10] Cleanup & new features for compiler*.h and bug.h
-Date: Wed, 24 Oct 2012 11:28:42 -0500
-Message-ID: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v3 09/10] bug.h: Add BUILD_BUG_ON_MSG & _BUILD_BUG_INTERNAL
+Date: Wed, 24 Oct 2012 11:34:00 -0500
+Message-ID: <1351096441-12388-9-git-send-email-daniel.santos@pobox.com>
+References: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm14-vm0.access.bullet.mail.mud.yahoo.com ([66.94.236.15]:43380
-	"EHLO nm14-vm0.access.bullet.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S932324Ab2JXQeQ (ORCPT
+Received: from nm30-vm0.access.bullet.mail.sp2.yahoo.com ([98.139.44.194]:25202
+	"EHLO nm30-vm0.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S933556Ab2JXQjp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Oct 2012 12:34:16 -0400
-In-Reply-To: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+	Wed, 24 Oct 2012 12:39:45 -0400
+In-Reply-To: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Borislav Petkov <bp@alien8.de>, David Rientjes <rientjes@google.com>
 
+Add BUILD_BUG_ON_MSG which behaves like BUILD_BUG_ON (with optimizations
+enabled), except that it allows you to specify the error message you
+want emitted as the third parameter.  Under the hood, this relies on
+_BUILD_BUG_INTERNAL, which does the actual work and is pretty-much
+identical to BUILD_BUG_ON.
 
-This patch set is a dependency of the generic red-black tree patch set, which
-I have now split up into three smaller sets and is based off of linux-next.
+Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+---
+ include/linux/bug.h |   22 ++++++++++++++++++++++
+ 1 files changed, 22 insertions(+), 0 deletions(-)
 
-The major aim of this patch set is to cleanup compiler-gcc*.h and improve
-the manageability of of compiler features at various versions (when they
-are broken, etc.), add some needed features to bug.h and clean that up as
-well.
-
-compiler-gcc*.h
-o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701)
-o Reorder all features based upon the version introduced (readability)
-o Change all version checks to use GCC_VERSION
-o Remove redundant __linktime_error
-
-bug.h
-o Improve BUILD_BUG_ON(expr) - now generates compile-time error post-gcc-4.4
-o Remove duplicate error messages in some cases.
-o Introduce BUILD_BUG_ON_MSG and clean up the implementations of the
-  BUILD_BUG* macros.
+diff --git a/include/linux/bug.h b/include/linux/bug.h
+index 1b43ea2..f6f81f6 100644
+--- a/include/linux/bug.h
++++ b/include/linux/bug.h
+@@ -16,6 +16,7 @@ struct pt_regs;
+ #define BUILD_BUG_ON_NOT_POWER_OF_2(n)
+ #define BUILD_BUG_ON_ZERO(e) (0)
+ #define BUILD_BUG_ON_NULL(e) ((void*)0)
++#define BUILD_BUG_ON_MSG(cond, msg) (0)
+ #define BUILD_BUG_ON(condition) (0)
+ #define BUILD_BUG() (0)
+ #else /* __CHECKER__ */
+@@ -38,6 +39,27 @@ struct pt_regs;
+  */
+ #define BUILD_BUG_ON_INVALID(e) ((void)(sizeof((__force long)(e))))
+ 
++#define __BUILD_BUG_INTERNAL(condition, msg, line)		\
++	do {							\
++		extern void __build_bug_on_failed_ ## line	\
++			(void) __compiletime_error(msg);	\
++		__compiletime_error_fallback(condition);	\
++		if (condition)					\
++			__build_bug_on_failed_ ## line();	\
++	} while (0)
++
++#define _BUILD_BUG_INTERNAL(condition, msg, line) \
++	__BUILD_BUG_INTERNAL(condition, msg, line)
++
++/**
++ * BUILD_BUG_ON_MSG - break compile if a condition is true & emit supplied
++ * 		      error message.
++ * @condition: the condition which the compiler should know is false.
++ *
++ * See BUILD_BUG_ON for description.
++ */
++#define BUILD_BUG_ON_MSG(cond, msg) _BUILD_BUG_INTERNAL(cond, msg, __LINE__)
++
+ /**
+  * BUILD_BUG_ON - break compile if a condition is true.
+  * @condition: the condition which the compiler should know is false.
+-- 
+1.7.3.4
 
