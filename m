@@ -1,39 +1,31 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v3 03/10] compiler-gcc{3,4}.h: Use GCC_VERSION macro
-Date: Thu, 25 Oct 2012 00:34:13 +0200
-Message-ID: <20121024223413.GA8828@liondog.tnic>
+Subject: Re: [PATCH v3 05/10] compiler{,-gcc4}.h, bug.h: Remove duplicate
+ macros
+Date: Thu, 25 Oct 2012 11:26:16 +0200
+Message-ID: <20121025092616.GB16601@liondog.tnic>
 References: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
- <1351096441-12388-3-git-send-email-daniel.santos@pobox.com>
- <20121024190546.GA17945@liondog.tnic>
- <20121024214900.GA5925@jtriplet-mobl1>
+ <1351096441-12388-5-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:54734 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1422652Ab2JXWeQ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Oct 2012 18:34:16 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20121024214900.GA5925@jtriplet-mobl1>
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <1351096441-12388-5-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: danielfsantos@att.net
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: danielfsantos@att.net, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
 
-On Wed, Oct 24, 2012 at 02:49:00PM -0700, Josh Triplett wrote:
-> > I can't seem to recall so did we explain already why ">= 40100" instead
-> > of "> 40000"?
-> > 
-> > I mean, it is the same, but still...
+On Wed, Oct 24, 2012 at 11:33:56AM -0500, danielfsantos@att.net wrote:
+> __linktime_error() does the same thing as __compiletime_error() and is
+> only used in bug.h.  Since the macro defines a function attribute that
+> will cause a failure at compile-time (not link-time), it makes more
+> sense to keep __compiletime_error(), which is also neatly mated with
+> __compiletime_warning().
 > 
-> __GNUC_MINOR__ > 0 means __GNUC_MINOR__ >= 1, so that would allow 4.1 or
-> newer.  However, GCC_VERSION > 40000 would also allow 4.0.n for n > 0.
-
-Ah, sure. In that case
+> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+> Acked-by: David Rientjes <rientjes@google.com>
 
 Acked-by: Borislav Petkov <bp@alien8.de>
-
-Thanks.
 
 -- 
 Regards/Gruss,
