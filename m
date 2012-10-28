@@ -1,93 +1,56 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v3 06/10] bug.h: Make BUILD_BUG_ON generate compile-time
- error
-Date: Thu, 25 Oct 2012 11:33:36 +0200
-Message-ID: <20121025093336.GC16601@liondog.tnic>
-References: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com>
- <1351096441-12388-6-git-send-email-daniel.santos@pobox.com>
+From: Daniel Santos <danielfsantos@att.net>
+Subject: Re: [PATCH v3 04/10] bug.h: directly include linux/compiler.h
+Date: Sun, 28 Oct 2012 14:23:21 -0500
+Message-ID: <508D8629.4040208@att.net>
+References: <1351096132-12244-1-git-send-email-daniel.santos@pobox.com> <1351096441-12388-4-git-send-email-daniel.santos@pobox.com> <20121024195520.GD17945@liondog.tnic>
+Reply-To: Daniel Santos <daniel.santos@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:37510 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S935099Ab2JYJdi (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Oct 2012 05:33:38 -0400
-Content-Disposition: inline
-In-Reply-To: <1351096441-12388-6-git-send-email-daniel.santos@pobox.com>
+Received: from nm17.access.bullet.mail.mud.yahoo.com ([66.94.237.218]:21286
+	"EHLO nm17.access.bullet.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754713Ab2J1T2y (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 28 Oct 2012 15:28:54 -0400
+In-Reply-To: <20121024195520.GD17945@liondog.tnic>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: danielfsantos@att.net
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
+To: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
 
-On Wed, Oct 24, 2012 at 11:33:57AM -0500, danielfsantos@att.net wrote:
-> Negative sized arrays wont create a compile-time error in some cases
-> starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
-> the error function attribute that will.  This patch modifies
-> BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
-> function attribute so that you don't have to build the entire kernel to
-> discover that you have a problem, and then enjoy trying to track it down
-> from a link-time error.
-> 
-> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-> ---
->  include/linux/bug.h |   24 ++++++++++++++----------
->  1 files changed, 14 insertions(+), 10 deletions(-)
-> 
-> diff --git a/include/linux/bug.h b/include/linux/bug.h
-> index a03c3ef..3d4b564 100644
-> --- a/include/linux/bug.h
-> +++ b/include/linux/bug.h
-> @@ -43,24 +43,28 @@ struct pt_regs;
->   * @condition: the condition which the compiler should know is false.
->   *
->   * If you have some code which relies on certain constants being equal, or
-> - * other compile-time-evaluated condition, you should use BUILD_BUG_ON to
-> + * some other compile-time-evaluated condition, you should use BUILD_BUG_ON to
->   * detect if someone changes it.
->   *
->   * The implementation uses gcc's reluctance to create a negative array, but
->   * gcc (as of 4.4) only emits that error for obvious cases (eg. not arguments
-> - * to inline functions).  So as a fallback we use the optimizer; if it can't
-> - * prove the condition is false, it will cause a link error on the undefined
-> - * "__build_bug_on_failed".  This error message can be harder to track down
-> - * though, hence the two different methods.
-> + * to inline functions).  Luckily, in 4.3 they added the "error" function
-> + * attribute just for this type of case.  Thus, we use a negative sized array
-> + * (should always create an error pre-gcc-4.4) and then call an undefined
+On 10/24/2012 02:55 PM, Borislav Petkov wrote:
+> On Wed, Oct 24, 2012 at 11:33:55AM -0500, danielfsantos@att.net wrote:
+>> Currently, we are only including asm/bug.h and then expecting that
+>> linux/compiler.h will eventually be included to define __linktime_error
+>> (used in BUILD_BUG_ON). This patch includes it directly for clarity and
+>> to avoid the possibility of changes in <arch>/*/include/asm/bug.h being
+>> changed or not including linux/compiler.h for some reason. (Later
+>> patches will in this set use more macros defined in compiler*.h.)
+>>
+>> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+>> ---
+>>  include/linux/bug.h |    1 +
+>>  1 files changed, 1 insertions(+), 0 deletions(-)
+>>
+>> diff --git a/include/linux/bug.h b/include/linux/bug.h
+>> index aaac4bb..4bd74d8 100644
+>> --- a/include/linux/bug.h
+>> +++ b/include/linux/bug.h
+>> @@ -2,6 +2,7 @@
+>>  #define _LINUX_BUG_H
+>>  
+>>  #include <asm/bug.h>
+>> +#include <linux/compiler.h>
+>>  
+>>  enum bug_trap_type {
+>>  	BUG_TRAP_TYPE_NONE = 0,
+>> -- 
+>> 1.7.3.4
+> Why is this a separate patch and why not add that single line in 6/10
+> where you define BUILD_BUG_ON?
+>
+> Thanks.
+Sorry about that.  I think this was originally in another patch with
+something else that I moved to another patch set and it ended up by its
+self.  I'll squash it and resubmit.
 
-	.... always create an error on gcc versions older than 4.4)
-
-> + * function with the error attribute (should always creates an error 4.3+).  If
-
-					..... always create an error on gcc 4.3 and later)
-
-> + * for some reason, neither creates a compile-time error, we'll still have a
-> + * link-time error, which is harder to track down.
->   */
->  #ifndef __OPTIMIZE__
->  #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
->  #else
-> -extern int __build_bug_on_failed;
-> -#define BUILD_BUG_ON(condition)					\
-> -	do {							\
-> -		((void)sizeof(char[1 - 2*!!(condition)]));	\
-> -		if (condition) __build_bug_on_failed = 1;	\
-> +#define BUILD_BUG_ON(condition)						\
-> +	do {								\
-> +		extern void __build_bug_on_failed(void)			\
-> +			__compiletime_error("BUILD_BUG_ON failed");	\
-> +		((void)sizeof(char[1 - 2*!!(condition)]));		\
-> +		if (condition)						\
-> +			__build_bug_on_failed();			\
->  	} while(0)
->  #endif
-
-With the changes above:
-
-Acked-by: Borislav Petkov <bp@alien8.de>
-
-Thanks.
-
--- 
-Regards/Gruss,
-    Boris.
