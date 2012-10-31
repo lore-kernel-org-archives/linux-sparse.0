@@ -1,84 +1,109 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v4 9/9] bug.h: Convert BUILD_BUG{,_ON} to use BUILD_BUG_ON_MSG
-Date: Wed, 31 Oct 2012 00:48:38 -0500
-Message-ID: <5090BBB6.6080607@att.net>
-References: <1351457648-7453-1-git-send-email-daniel.santos@pobox.com> <1351457835-7553-9-git-send-email-daniel.santos@pobox.com> <20121030191905.GG28499@liondog.tnic> <20121031010232.GA18229@leaf>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH v4 6/9] compiler.h, bug.h: Prevent double error messages
+ with BUILD_BUG{,_ON}
+Date: Wed, 31 Oct 2012 12:06:10 +0100
+Message-ID: <20121031110609.GD16410@liondog.tnic>
+References: <1351457648-7453-1-git-send-email-daniel.santos@pobox.com>
+ <1351457835-7553-6-git-send-email-daniel.santos@pobox.com>
+ <20121030161933.GD28499@liondog.tnic>
+ <5090B875.7030902@att.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm15-vm0.access.bullet.mail.mud.yahoo.com ([66.94.236.17]:48332
-	"EHLO nm15-vm0.access.bullet.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752396Ab2JaFsV (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 31 Oct 2012 01:48:21 -0400
-In-Reply-To: <20121031010232.GA18229@leaf>
+Received: from mail.skyhub.de ([78.46.96.112]:35458 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S933580Ab2JaLGO (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 31 Oct 2012 07:06:14 -0400
+Content-Disposition: inline
+In-Reply-To: <5090B875.7030902@att.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Borislav Petkov <bp@alien8.de>, Daniel Santos <daniel.santos@pobox.com>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
+To: Daniel Santos <daniel.santos@pobox.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
 
-On 10/30/2012 08:02 PM, Josh Triplett wrote:
-> On Tue, Oct 30, 2012 at 08:19:05PM +0100, Borislav Petkov wrote:
->> On Sun, Oct 28, 2012 at 03:57:15PM -0500, danielfsantos@att.net wrote:
->>> Remove duplicate code by converting BUILD_BUG and BUILD_BUG_ON to just
->>> call BUILD_BUG_ON_MSG.  This not only reduces source code bloat, but
->>> also prevents the possibility of code being changed for one macro and
->>> not for the other (which was previously the case for BUILD_BUG and
->>> BUILD_BUG_ON).
->>>
->>> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
->>> ---
->>>  include/linux/bug.h |   17 +++--------------
->>>  1 files changed, 3 insertions(+), 14 deletions(-)
->>>
->>> diff --git a/include/linux/bug.h b/include/linux/bug.h
->>> index 3bc1ddf..b58ba51 100644
->>> --- a/include/linux/bug.h
->>> +++ b/include/linux/bug.h
->>> @@ -81,14 +81,8 @@ struct pt_regs;
->>>  #ifndef __OPTIMIZE__
->>>  #define BUILD_BUG_ON(condition) __compiletime_error_fallback(condition)
->>>  #else
->>> -#define BUILD_BUG_ON(condition)						\
->>> -	do {								\
->>> -		extern void __build_bug_on_failed(void)			\
->>> -			__compiletime_error("BUILD_BUG_ON failed");	\
->>> -		__compiletime_error_fallback(condition);		\
->>> -		if (condition)						\
->>> -			__build_bug_on_failed();			\
->>> -	} while(0)
->>> +#define BUILD_BUG_ON(condition) \
->>> +	BUILD_BUG_ON_MSG(condition, "BUILD_BUG_ON failed: " #condition)
->> Concatenating "condition" might not be very informative in all cases.
->> For example:
->>
->> BUILD_BUG_ON(1);
->>
->> Having __LINE__ is good enough IMHO.
+On Wed, Oct 31, 2012 at 12:34:45AM -0500, Daniel Santos wrote:
+> Yes, the __build_bug_on_failed message is much more informative.  Thi=
+s
+> will only increase with these patches.  For example, the line
+>=20
+> BUILD_BUG_ON(sizeof(*c) !=3D 4);
+>=20
+> emits this error:
+>=20
+> arch/x86/kernel/cpu/amd.c: In function =E2=80=98early_init_amd=E2=80=99=
+:
+> arch/x86/kernel/cpu/amd.c:486:2: error: call to
+> =E2=80=98__build_bug_on_failed_486=E2=80=99 declared with attribute e=
+rror: BUILD_BUG_ON
+> failed: sizeof(*c) !=3D 4
+> make[1]: *** [arch/x86/kernel/cpu/amd.o] Error 1
+> make: *** [arch/x86/kernel/cpu/amd.o] Error 2
+>=20
+> It's true that there is some redundancy in there as well as the
+> gibberish line number embedded in the function name, but the end of t=
+he
+> line spits out the exact statement that failed.
 
-Honestly, __LINE__ is only used to keep the function name unique.  If
-anything, I think that having it creates more confusion rather than adds
-clarity since the error message will indicate the file and line number
-anyway.  So in other words, it is redundant without it being apparent
-why.  Of course, it's a very simple and portable mechanism to keep the
-symbols unique.  IMO, using __COUNTER__would be better for clarity
-(since the number wouldn't relate to the anything real), but it is not
-portable across versions of gcc (introduced in 4.4 or some such), so we
-are using __LINE__.
+I guess that's as good as it gets. But it's fine IMO, it tells you
+exactly what you need to know.
 
-> While it doesn't always help, it may help sometimes.  Worst case,
-> BUILD_BUG_ON(1) gives you no less information than it did before; best
-> case, it gives you useful data.
+> But as far as rather the fallback is first or the __compiletime_error
+> function is a matter of asthetics, since it's really an either/or
+> situation.  Either the __build_bug_on_failedxxx function will be
+> declared with __attribute__((error(message))) and the fallback will
+> expand to a no-op, or the fallback will produce code that (presumably
+> always?) breaks the build.  For insurance, a link-time error will occ=
+ur
+> if the fallback code fails to break the build.
 
-Yeah, and depending upon what it's fed (and how much pre-processing had
-been done on that) it can actually prove helpful because stringifying
-condition can reveal pre-processing errors as well.  So if you passed
-some macro as the condition and it didn't expand the way you expected,
-this error message will print out exactly how it expanded, up to the
-point of having been passed to BUILD_BUG_ON.  I don't know how much that
-could potentially help, but for troubleshooting, I find extra
-information helpful, more often than harmful.
+Right, but my suggestion was to have the more informative message alway=
+s
+trigger first, if possible and if gcc supports it (practically, more
+and more systems will be upgrading gcc which has the error attribute
+with time) and have the less informative one be the more seldom one. Th=
+e
+"fallback" naming is just a minor issue.
 
-Daniel
+This way, the error message would be precise on most modern toolchains.
+Older toolchains will issue something about negative array size, which
+is not really helpful so one would have to fire up an editor and
+actually look at the code :).
+
+> Realistically, a single macro could be defined in compiler*.h that
+> encapsulates the entirety of this mechanism and only exposes a "black
+> box" macro, that will simply expand to something that breaks the buil=
+d
+> in the most appropriate fashion based upon the version of gcc.  In
+> essence, the new BUILD_BUG_ON_MSG macro attempts to fill that roll.
+
+Yes.
+
+> I guess I'll fix it up (and address the emails on the other patches)
+> and do a v5 then for the whole set? (is that the right way to resubmi=
+t
+> with these corrections?)
+
+Well, you could wait a couple of days first to gather feedback from
+other people and then resend. This way you give chance to people to tak=
+e
+a look without them seeing too many versions of the patchset and gettin=
+g
+confused.
+
+What I always do is send out the patchset, collect and discuss changes,
+add in the required changes and test it while the discussions go on.
+After they settle down (and they do in a couple of days, in most cases)
+I then send out the newly tested version out.
+
+That whole exercise takes more or less a week if you're doing other
+stuff in between :)
+
+--=20
+Regards/Gruss,
+    Boris.
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
