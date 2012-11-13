@@ -1,121 +1,51 @@
-From: Daniel Santos <danielfsantos@att.net>
-Subject: Re: [PATCH v4 6/9] compiler.h, bug.h: Prevent double error messages
- with BUILD_BUG{,_ON}
-Date: Sat, 03 Nov 2012 13:10:48 -0500
-Message-ID: <50955E28.5050609@att.net>
-References: <1351457648-7453-1-git-send-email-daniel.santos@pobox.com> <1351457835-7553-6-git-send-email-daniel.santos@pobox.com> <20121030161933.GD28499@liondog.tnic> <5090B875.7030902@att.net> <20121031110609.GD16410@liondog.tnic>
-Reply-To: Daniel Santos <daniel.santos@pobox.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+From: danielfsantos@att.net
+Subject: [PATCH v5 0/9] Cleanup & new features for compiler*.h and bug.h
+Date: Tue, 13 Nov 2012 16:09:19 -0600
+Message-ID: <1352844568-18826-1-git-send-email-daniel.santos@pobox.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20121031110609.GD16410@liondog.tnic>
+In-Reply-To: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>, LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, David Rientjes <rientjes@google.com>
-Cc: Daniel Santos <daniel.santos@pobox.com>
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On 10/31/2012 06:06 AM, Borislav Petkov wrote:
->> Realistically, a single macro could be defined in compiler*.h that
->> encapsulates the entirety of this mechanism and only exposes a "black
->> box" macro, that will simply expand to something that breaks the build
->> in the most appropriate fashion based upon the version of gcc.  In
->> essence, the new BUILD_BUG_ON_MSG macro attempts to fill that roll.
->
-> Yes.
 
-OK, so I have two solutions, one I like and one that I don't.  Both of
-these solutions will use the __compiletime_error_fallback macro, but
-cleaned up slightly and it will only be used from within compiler.h (so
-it becomes a private macro).
+ include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
+ include/linux/compiler-gcc.h  |    3 ++
+ include/linux/compiler-gcc3.h |    8 +++---
+ include/linux/compiler-gcc4.h |   28 ++++++++++++------------
+ include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
+ 5 files changed, 76 insertions(+), 42 deletions(-)
 
-#ifndef __compiletime_error
-# define __compiletime_error(message)
-# define __compiletime_error_fallback(condition) \
-        do { ((void)sizeof(char[1 - 2*!!(condition)])); } while (0)
-#else
-# define __compiletime_error_fallback(condition) do { } while (0)
-#endif
+Changes in v5:
+o Move BUILD_BUG* guts to a new compiletime_assert() macro in compiler.h.
+o Fix a double-evaluation problem.
+o Fix another bad macro definition when __CHECKER__ defined.
 
-And now let me present the solution that I do not like.
+Changes in v4:
+o Squash a minor commit (per Borislav Petkov)
+o Change some comment text (per Borislav Petkov)
+o Add some acks
 
-// compiler.h (after the above snippet)
+This patch set is a dependency of the generic red-black tree patch set, which
+I have now split up into three smaller sets and is based off of linux-next.
 
-#define __compiletime_error_invoke(condition, func)             \
-        do {                                                    \
-                bool __cond = !!(condition);                    \
-                if (__cond)                                     \
-                        func();                                 \
-                __compiletime_error_fallback(__cond);           \
-        } while (0)
-#endif
+The major aim of this patch set is to cleanup compiler-gcc*.h and improve
+the manageability of of compiler features at various versions (when they
+are broken, etc.), add some needed features to bug.h and clean that up as
+well.
 
+compiler-gcc*.h
+o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701).
+o Reorder all features based upon the version introduced (readability).
+o Change all version checks to use GCC_VERSION.
+o Remove redundant __linktime_error macro.
+o Introduce compiletime_assert() macro.
 
-// bug.h
-...
-#define __BUILD_BUG_INTERNAL(condition, msg, line)              \
-        do {                                                    \
-                extern void __build_bug_on_failed_ ## line(void)\
-                                __compiletime_error(msg);       \
-                __compiletime_error_invoke(condition,           \
-                                __build_bug_on_failed_ ## line) \
-        } while (0)
-
-#define _BUILD_BUG_INTERNAL(condition, msg, line) \
-        __BUILD_BUG_INTERNAL(condition, msg, line)
-
-Rather than using __compiletime_error_fallback externally anywhere, we
-just use it in another macro in compiler.h. Then, this
-__compiletime_error_invoke macro is actually called to invoke the
-error.  This problem is that this is highly disjointed; we end up with
-large parts of the implementation in both compiler.h and in bug.h.
-(also, I think we would need another macro to expand the concatenation
-of __build_bug_on_failed_ ## line, I didn't test the above).
-
-If we are going to move this level of detail out of bug.h, I think we
-should move *all* of it.
-
-// compiler.h
-...
-
-#define __compiletime_assert(condition, msg, __func)                    \
-        do {                                                            \
-                bool __cond = !!(condition);                            \
-                extern void __func(void) __compiletime_error(msg);      \
-                if (__cond)                                             \
-                        __func();                                       \
-                __compiletime_error_fallback(__cond);                   \
-        } while (0)
-
-#define _compiletime_assert(condition, msg, __func) \
-        __compiletime_assert(condition, msg, __func)
-
-/**
- * compiletime_assert - some documentation...
- */
-#define compiletime_assert(condition, msg) \
-        __compiletime_assert(condition, msg, __compiletime_assert_ ##
-__LINE__)
-
-
-// bug.h -- remove *BUILD_BUG_INTERNAL macros entirely and just chance this:
-
-#define BUILD_BUG_ON_MSG(cond, msg) compiletime_assert(cond, msg)
-
-To me, this is much cleaner. It will give all compile-time assertions
-the same base function name, but this shouldn't be much of a problem
-since the new error attribute will spit out a nice detailed error
-message at the point the error occurs and few people (if any?) should be
-having to track this down from the link-time error. Even if you are
-having to track it down just from a link-time error, it will tell you
-the object file that the function was called from and the line number is
-embedded in the function name, so it wouldn't be too hard. For example,
-it's possible that the link-time error may be the only thing that breaks
-on Intel or some other compilers (clang?). Having the full
-implementation in compiler*.h allows for easier tweaking to suit various
-compilers as well. (I may need to load up intel's latest compiler and
-see how it is there).
-
-Anyway, please let me know if you like it.
-
-Daniel
+bug.h
+o Improve BUILD_BUG_ON(expr) - now generates compile-time error post-gcc-4.4
+o Remove duplicate error messages in some cases.
+o Fix double-evaluation problem in BUILD_BUG_ON.
+o Fix bad macro definitions when using __CHECKER__.
+o Introduce BUILD_BUG_ON_MSG and clean up the implementations of the
+  BUILD_BUG* macros.
