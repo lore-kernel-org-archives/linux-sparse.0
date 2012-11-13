@@ -1,73 +1,95 @@
 From: danielfsantos@att.net
-Subject: [PATCH v5 1/9] compiler-gcc4.h: Reorder macros based upon gcc ver
-Date: Tue, 13 Nov 2012 16:13:33 -0600
-Message-ID: <1352844821-18952-1-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v5 7/9] bug.h: Make BUILD_BUG_ON generate compile-time error
+Date: Tue, 13 Nov 2012 16:13:39 -0600
+Message-ID: <1352844821-18952-7-git-send-email-daniel.santos@pobox.com>
 References: <1352844568-18826-1-git-send-email-daniel.santos@pobox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from nm24-vm0.access.bullet.mail.sp2.yahoo.com ([98.139.44.182]:32940
+	"EHLO nm24-vm0.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1754861Ab2KMWOA (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 13 Nov 2012 17:14:00 -0500
 In-Reply-To: <1352844568-18826-1-git-send-email-daniel.santos@pobox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, Daniel Santos <daniel.santos@pobox.com>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 
-This helps to keep the file from getting confusing, removes one
-duplicate version check and should encourage future editors to put new
-macros where they belong.
+Negative sized arrays wont create a compile-time error in some cases
+starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
+the error function attribute that will.  This patch modifies
+BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
+function attribute so that you don't have to build the entire kernel to
+discover that you have a problem, and then enjoy trying to track it down
+from a link-time error.
+
+Also, we are only including asm/bug.h and then expecting that
+linux/compiler.h will eventually be included to define __linktime_error
+(used in BUILD_BUG_ON). This patch includes it directly for clarity and
+to avoid the possibility of changes in <arch>/*/include/asm/bug.h being
+changed or not including linux/compiler.h for some reason.
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-Acked-by: David Rientjes <rientjes@google.com>
 Acked-by: Borislav Petkov <bp@alien8.de>
 ---
- include/linux/compiler-gcc4.h |   20 +++++++++++---------
- 1 files changed, 11 insertions(+), 9 deletions(-)
+ include/linux/bug.h |   32 +++++++++++++++++++-------------
+ 1 files changed, 19 insertions(+), 13 deletions(-)
 
-diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
-index 412bc6c..8914293 100644
---- a/include/linux/compiler-gcc4.h
-+++ b/include/linux/compiler-gcc4.h
-@@ -13,6 +13,10 @@
- #define __must_check 		__attribute__((warn_unused_result))
- #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+diff --git a/include/linux/bug.h b/include/linux/bug.h
+index ccd44ce..dd4f506 100644
+--- a/include/linux/bug.h
++++ b/include/linux/bug.h
+@@ -2,6 +2,7 @@
+ #define _LINUX_BUG_H
  
-+#if __GNUC_MINOR__ > 0
-+# define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
-+#endif
-+
- #if __GNUC_MINOR__ >= 3
- /* Mark functions as cold. gcc will assume any path leading to a call
-    to them will be unlikely.  This means a lot of manual unlikely()s
-@@ -31,6 +35,12 @@
+ #include <asm/bug.h>
++#include <linux/compiler.h>
  
- #define __linktime_error(message) __attribute__((__error__(message)))
- 
-+#ifndef __CHECKER__
-+# define __compiletime_warning(message) __attribute__((warning(message)))
-+# define __compiletime_error(message) __attribute__((error(message)))
-+#endif /* __CHECKER__ */
-+#endif /* __GNUC_MINOR__ >= 3 */
-+
- #if __GNUC_MINOR__ >= 5
- /*
-  * Mark a position in code as unreachable.  This can be used to
-@@ -46,8 +56,7 @@
- /* Mark a function definition as prohibited from being cloned. */
- #define __noclone	__attribute__((__noclone__))
- 
--#endif
--#endif
-+#endif /* __GNUC_MINOR__ >= 5 */
- 
- #if __GNUC_MINOR__ >= 6
- /*
-@@ -56,10 +65,3 @@
- #define __visible __attribute__((externally_visible))
+ enum bug_trap_type {
+ 	BUG_TRAP_TYPE_NONE = 0,
+@@ -42,25 +43,30 @@ struct pt_regs;
+  * @condition: the condition which the compiler should know is false.
+  *
+  * If you have some code which relies on certain constants being equal, or
+- * other compile-time-evaluated condition, you should use BUILD_BUG_ON to
++ * some other compile-time-evaluated condition, you should use BUILD_BUG_ON to
+  * detect if someone changes it.
+  *
+- * The implementation uses gcc's reluctance to create a negative array, but
+- * gcc (as of 4.4) only emits that error for obvious cases (eg. not arguments
+- * to inline functions).  So as a fallback we use the optimizer; if it can't
+- * prove the condition is false, it will cause a link error on the undefined
+- * "__build_bug_on_failed".  This error message can be harder to track down
+- * though, hence the two different methods.
++ * The implementation uses gcc's reluctance to create a negative array, but gcc
++ * (as of 4.4) only emits that error for obvious cases (e.g. not arguments to
++ * inline functions).  Luckily, in 4.3 they added the "error" function
++ * attribute just for this type of case.  Thus, we use a negative sized array
++ * (should always create an error on gcc versions older than 4.4) and then call
++ * an undefined function with the error attribute (should always create an
++ * error on gcc 4.3 and later).  If for some reason, neither creates a
++ * compile-time error, we'll still have a link-time error, which is harder to
++ * track down.
+  */
+ #ifndef __OPTIMIZE__
+ #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
+ #else
+-extern int __build_bug_on_failed;
+-#define BUILD_BUG_ON(condition)					\
+-	do {							\
+-		bool __cond = !!(condition);			\
+-		((void)sizeof(char[1 - 2*!!(__cond)]));		\
+-		if (__cond) __build_bug_on_failed = 1;		\
++#define BUILD_BUG_ON(condition)						\
++	do {								\
++		bool __cond = !!(condition);				\
++		extern void __build_bug_on_failed(void)			\
++			__compiletime_error("BUILD_BUG_ON failed");	\
++		if (__cond)						\
++			__build_bug_on_failed();			\
++		((void)sizeof(char[1 - 2*!!(__cond)]));			\
+ 	} while(0)
  #endif
  
--#if __GNUC_MINOR__ > 0
--#define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
--#endif
--#if __GNUC_MINOR__ >= 3 && !defined(__CHECKER__)
--#define __compiletime_warning(message) __attribute__((warning(message)))
--#define __compiletime_error(message) __attribute__((error(message)))
--#endif
 -- 
 1.7.3.4
+
