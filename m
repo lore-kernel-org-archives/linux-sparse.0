@@ -1,7 +1,7 @@
 From: danielfsantos@att.net
-Subject: [PATCH v6 2/9] compiler-gcc.h: Add gcc-recommended GCC_VERSION macro
-Date: Tue, 20 Nov 2012 15:05:00 -0600
-Message-ID: <1353445507-7233-2-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v6 6/9] bug.h: Prevent double evaulation of in BUILD_BUG_ON
+Date: Tue, 20 Nov 2012 15:05:04 -0600
+Message-ID: <1353445507-7233-6-git-send-email-daniel.santos@pobox.com>
 References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
@@ -10,49 +10,30 @@ To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea
 Cc: Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Throughout compiler*.h, many version checks are made.  These can be
-simplified by using the macro that gcc's documentation recommends.
-However, my primary reason for adding this is that I need bug-check
-macros that are enabled at certain gcc versions and it's cleaner to use
-this macro than the tradition method:
-
-if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ => 2)
-
-If you add patch level, it gets this ugly:
-
-if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 2 || \
-   __GNUC_MINOR__ == 2 __GNUC_PATCHLEVEL__ >= 1))
-
-As opposed to:
-
-if GCC_VERSION >= 40201
-
-While having separate headers for gcc 3 & 4 eliminates some of this
-verbosity, they can still be cleaned up by this.
-
-See also:
-http://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
+When calling BUILD_BUG_ON in an optimized build using gcc 4.3 and later,
+the condition will be evaulated twice, possibily with side-effects.
+This patch eliminates that error.
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-Acked-by: Borislav Petkov <bp@alien8.de>
-Acked-by: David Rientjes <rientjes@google.com>
 ---
- include/linux/compiler-gcc.h |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
+ include/linux/bug.h |    5 +++--
+ 1 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 6a6d7ae..24545cd 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -5,6 +5,9 @@
- /*
-  * Common definitions for all gcc versions go here.
-  */
-+#define GCC_VERSION (__GNUC__ * 10000 \
-+		   + __GNUC_MINOR__ * 100 \
-+		   + __GNUC_PATCHLEVEL__)
+diff --git a/include/linux/bug.h b/include/linux/bug.h
+index 1b2465d..98bdbb3d 100644
+--- a/include/linux/bug.h
++++ b/include/linux/bug.h
+@@ -58,8 +58,9 @@ struct pt_regs;
+ extern int __build_bug_on_failed;
+ #define BUILD_BUG_ON(condition)					\
+ 	do {							\
+-		((void)sizeof(char[1 - 2*!!(condition)]));	\
+-		if (condition) __build_bug_on_failed = 1;	\
++		bool __cond = !!(condition);			\
++		((void)sizeof(char[1 - 2 * __cond]));		\
++		if (__cond) __build_bug_on_failed = 1;		\
+ 	} while(0)
+ #endif
  
- 
- /* Optimization barrier */
 -- 
 1.7.3.4
