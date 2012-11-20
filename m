@@ -1,61 +1,80 @@
 From: danielfsantos@att.net
-Subject: [PATCH v6 0/9] Cleanup & new features for compiler*.h and bug.h
-Date: Tue, 20 Nov 2012 14:42:03 -0600
-Message-ID: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v6 1/9] compiler-gcc4.h: Reorder macros based upon gcc ver
+Date: Tue, 20 Nov 2012 15:04:59 -0600
+Message-ID: <1353445507-7233-1-git-send-email-daniel.santos@pobox.com>
+References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm3-vm0.access.bullet.mail.sp2.yahoo.com ([98.139.44.108]:44876
-	"EHLO nm3-vm0.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752144Ab2KTUmP (ORCPT
+Received: from nm27-vm0.access.bullet.mail.mud.yahoo.com ([66.94.236.227]:22418
+	"EHLO nm27-vm0.access.bullet.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752894Ab2KTVFM (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 20 Nov 2012 15:42:15 -0500
-In-Reply-To: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+	Tue, 20 Nov 2012 16:05:12 -0500
+In-Reply-To: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 Cc: Daniel Santos <daniel.santos@pobox.com>
 
+This helps to keep the file from getting confusing, removes one
+duplicate version check and should encourage future editors to put new
+macros where they belong.
 
- include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
- include/linux/compiler-gcc.h  |    3 ++
- include/linux/compiler-gcc3.h |    8 +++---
- include/linux/compiler-gcc4.h |   28 ++++++++++++------------
- include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
- 5 files changed, 76 insertions(+), 42 deletions(-)
+Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+Acked-by: David Rientjes <rientjes@google.com>
+Acked-by: Borislav Petkov <bp@alien8.de>
+---
+ include/linux/compiler-gcc4.h |   20 +++++++++++---------
+ 1 files changed, 11 insertions(+), 9 deletions(-)
 
-Changes in v6:
-o Remove extraneous double negation
-o Fixed faulty macro expansion in last patch
+diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+index 412bc6c..8914293 100644
+--- a/include/linux/compiler-gcc4.h
++++ b/include/linux/compiler-gcc4.h
+@@ -13,6 +13,10 @@
+ #define __must_check 		__attribute__((warn_unused_result))
+ #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+ 
++#if __GNUC_MINOR__ > 0
++# define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
++#endif
++
+ #if __GNUC_MINOR__ >= 3
+ /* Mark functions as cold. gcc will assume any path leading to a call
+    to them will be unlikely.  This means a lot of manual unlikely()s
+@@ -31,6 +35,12 @@
+ 
+ #define __linktime_error(message) __attribute__((__error__(message)))
+ 
++#ifndef __CHECKER__
++# define __compiletime_warning(message) __attribute__((warning(message)))
++# define __compiletime_error(message) __attribute__((error(message)))
++#endif /* __CHECKER__ */
++#endif /* __GNUC_MINOR__ >= 3 */
++
+ #if __GNUC_MINOR__ >= 5
+ /*
+  * Mark a position in code as unreachable.  This can be used to
+@@ -46,8 +56,7 @@
+ /* Mark a function definition as prohibited from being cloned. */
+ #define __noclone	__attribute__((__noclone__))
+ 
+-#endif
+-#endif
++#endif /* __GNUC_MINOR__ >= 5 */
+ 
+ #if __GNUC_MINOR__ >= 6
+ /*
+@@ -56,10 +65,3 @@
+ #define __visible __attribute__((externally_visible))
+ #endif
+ 
+-#if __GNUC_MINOR__ > 0
+-#define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+-#endif
+-#if __GNUC_MINOR__ >= 3 && !defined(__CHECKER__)
+-#define __compiletime_warning(message) __attribute__((warning(message)))
+-#define __compiletime_error(message) __attribute__((error(message)))
+-#endif
+-- 
+1.7.3.4
 
-Changes in v5:
-o Move BUILD_BUG* guts to a new compiletime_assert() macro in compiler.h.
-o Fix a double-evaluation problem.
-o Fix another bad macro definition when __CHECKER__ defined.
-
-Changes in v4:
-o Squash a minor commit (per Borislav Petkov)
-o Change some comment text (per Borislav Petkov)
-o Add some acks
-
-This patch set is a dependency of the generic red-black tree patch set, which
-I have now split up into three smaller sets and is based off of linux-next.
-
-The major aim of this patch set is to cleanup compiler-gcc*.h and improve
-the manageability of of compiler features at various versions (when they
-are broken, etc.), add some needed features to bug.h and clean that up as
-well.
-
-compiler-gcc*.h
-o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701).
-o Reorder all features based upon the version introduced (readability).
-o Change all version checks to use GCC_VERSION.
-o Remove redundant __linktime_error macro.
-o Introduce compiletime_assert() macro.
-
-bug.h
-o Improve BUILD_BUG_ON(expr) - now generates compile-time error post-gcc-4.4
-o Remove duplicate error messages in some cases.
-o Fix double-evaluation problem in BUILD_BUG_ON.
-o Fix bad macro definitions when using __CHECKER__.
-o Introduce BUILD_BUG_ON_MSG and clean up the implementations of the
-  BUILD_BUG* macros.
