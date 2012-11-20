@@ -1,75 +1,61 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v5 8/9] compiler.h, bug.h: Prevent double error messages
- with BUILD_BUG{,_ON}
-Date: Sat, 17 Nov 2012 15:39:18 +0100
-Message-ID: <20121117143918.GC16441@x1.osrc.amd.com>
-References: <1352844568-18826-1-git-send-email-daniel.santos@pobox.com>
- <1352844821-18952-8-git-send-email-daniel.santos@pobox.com>
- <20121115150804.GF4956@x1.osrc.amd.com>
- <50A5462D.4060809@att.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+From: danielfsantos@att.net
+Subject: [PATCH v6 0/9] Cleanup & new features for compiler*.h and bug.h
+Date: Tue, 20 Nov 2012 14:42:03 -0600
+Message-ID: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:37282 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751820Ab2KQOjC (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 17 Nov 2012 09:39:02 -0500
-Content-Disposition: inline
-In-Reply-To: <50A5462D.4060809@att.net>
+Received: from nm3-vm0.access.bullet.mail.sp2.yahoo.com ([98.139.44.108]:44876
+	"EHLO nm3-vm0.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752144Ab2KTUmP (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 20 Nov 2012 15:42:15 -0500
+In-Reply-To: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Daniel Santos <daniel.santos@pobox.com>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Howells <dhowells@redhat.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, Konstantin Khlebnikov <khlebnikov@openvz.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Pisa <pisa@cmp.felk.cvut.cz>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+Cc: Daniel Santos <daniel.santos@pobox.com>
 
-On Thu, Nov 15, 2012 at 01:44:45PM -0600, Daniel Santos wrote:
-> Yeah, I agree. Also, with the complexity, I think a few more comments
-> can be helpful in compiler.h to clarify what these macros are for more
-> specifically.
 
-From what I've read so far the comments are fine but if you want to be
-more descriptive then sure, by all means. Just don't let them grow out
-of proportion - keep them simple and succinct.
+ include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
+ include/linux/compiler-gcc.h  |    3 ++
+ include/linux/compiler-gcc3.h |    8 +++---
+ include/linux/compiler-gcc4.h |   28 ++++++++++++------------
+ include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
+ 5 files changed, 76 insertions(+), 42 deletions(-)
 
-> On another note, I have a "part two" set of patches for bug.h &
-> compiler*.h that does some other stuff (more cleanup & restructuring)
-> and this is making me think about that more.  My thought about
-> __compiletime_error_fallback is that it should be called only from
-> within compiler.h (as in the following patch) and basically just be a
-> private macro.  However, we still use the use the negative sized array
-> trick for the unoptimized version of BUILD_BUG_ON (which may have
-> limited meaning), and we also use a negative bit specifier on a bitfield
-> in BUILD_BUG_ON_ZERO and BUILD_BUG_ON_NULL (which I treat some in my
-> other patches as well).  But my thought is that it may be helpful to
-> encapsulate these tricks into (public) macros in compiler*.h, such as
-> "compiletime_assert_negarray" and "compiletime_assert_negbitfiled" and
-> then have __compiletime_error_fallback expand to
-> compiletime_assert_negarray when it's needed and no-op when it's not.
-> 
-> This doesn't have to be decided now, but it's just a thought you gave me.
+Changes in v6:
+o Remove extraneous double negation
+o Fixed faulty macro expansion in last patch
 
-I dunno. I'm thinking that maybe making them more unreadable for no
-apparent reason might be simply too much. They're fine the way they are
-now, if you ask me.
+Changes in v5:
+o Move BUILD_BUG* guts to a new compiletime_assert() macro in compiler.h.
+o Fix a double-evaluation problem.
+o Fix another bad macro definition when __CHECKER__ defined.
 
-> And in case you're wondering about the negative bit field,
-> BUILD_BUG_ON_{ZERO,NULL} can't call BUILD_BUG_ON in a complex expression
-> ({ exp; exp; }) because it is evaluated outside of a function body and
-> gcc doesn't like that.  Thus, the following macro would, sadly, result
-> in errors:
-> 
-> #define BUILD_BUG_ON_ZERO(exp) ({BUILD_BUG_ON(exp); 0;})
-> 
-> However, it would not be an error to call an __alwaysinline function
-> that uses BUILD_BUG_ON, so I still have to explore that and make sure it
-> works in all scenarios (and compilers).
+Changes in v4:
+o Squash a minor commit (per Borislav Petkov)
+o Change some comment text (per Borislav Petkov)
+o Add some acks
 
-Ok, I see your point. Think of it this way: if unifying those macros can
-only happen at the expense of readability or performance then maybe it
-is not worth the trouble. If, OTOH, you can think of something slick and
-pretty, then go ahead :).
+This patch set is a dependency of the generic red-black tree patch set, which
+I have now split up into three smaller sets and is based off of linux-next.
 
-HTH.
+The major aim of this patch set is to cleanup compiler-gcc*.h and improve
+the manageability of of compiler features at various versions (when they
+are broken, etc.), add some needed features to bug.h and clean that up as
+well.
 
--- 
-Regards/Gruss,
-Boris.
+compiler-gcc*.h
+o Introduce GCC_VERSION - (e.g., gcc 4.7.1 becomes 40701).
+o Reorder all features based upon the version introduced (readability).
+o Change all version checks to use GCC_VERSION.
+o Remove redundant __linktime_error macro.
+o Introduce compiletime_assert() macro.
+
+bug.h
+o Improve BUILD_BUG_ON(expr) - now generates compile-time error post-gcc-4.4
+o Remove duplicate error messages in some cases.
+o Fix double-evaluation problem in BUILD_BUG_ON.
+o Fix bad macro definitions when using __CHECKER__.
+o Introduce BUILD_BUG_ON_MSG and clean up the implementations of the
+  BUILD_BUG* macros.
