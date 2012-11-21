@@ -1,90 +1,33 @@
-From: danielfsantos@att.net
-Subject: [PATCH v6 7/9] bug.h: Make BUILD_BUG_ON generate compile-time error
-Date: Tue, 20 Nov 2012 15:05:05 -0600
-Message-ID: <1353445507-7233-7-git-send-email-daniel.santos@pobox.com>
-References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
+From: Michel Lespinasse <walken@google.com>
+Subject: Re: [PATCH v6 0/9] Cleanup & new features for compiler*.h and bug.h
+Date: Tue, 20 Nov 2012 18:35:26 -0800
+Message-ID: <CANN689EqSVGexh7PbrmBNofEPBQn9BZQ3s3ApvX7cBHso1jOXQ@mail.gmail.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+	<1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
-Cc: Daniel Santos <daniel.santos@pobox.com>
+To: danielfsantos@att.net
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Negative sized arrays wont create a compile-time error in some cases
-starting with gcc 4.4 (e.g., inlined functions), but gcc 4.3 introduced
-the error function attribute that will.  This patch modifies
-BUILD_BUG_ON to behave like BUILD_BUG already does, using the error
-function attribute so that you don't have to build the entire kernel to
-discover that you have a problem, and then enjoy trying to track it down
-from a link-time error.
+On Tue, Nov 20, 2012 at 12:42 PM,  <danielfsantos@att.net> wrote:
+>
+>  include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
+>  include/linux/compiler-gcc.h  |    3 ++
+>  include/linux/compiler-gcc3.h |    8 +++---
+>  include/linux/compiler-gcc4.h |   28 ++++++++++++------------
+>  include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
+>  5 files changed, 76 insertions(+), 42 deletions(-)
+>
+> Changes in v6:
+> o Remove extraneous double negation
+> o Fixed faulty macro expansion in last patch
 
-Also, we are only including asm/bug.h and then expecting that
-linux/compiler.h will eventually be included to define __linktime_error
-(used in BUILD_BUG_ON). This patch includes it directly for clarity and
-to avoid the possibility of changes in <arch>/*/include/asm/bug.h being
-changed or not including linux/compiler.h for some reason.
+Acked-by: Michel Lespinasse <walken@google.com> on the entire v6 series.
 
-Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-Acked-by: Borislav Petkov <bp@alien8.de>
----
- include/linux/bug.h |   32 +++++++++++++++++++-------------
- 1 files changed, 19 insertions(+), 13 deletions(-)
-
-diff --git a/include/linux/bug.h b/include/linux/bug.h
-index 98bdbb3d..eb6d715 100644
---- a/include/linux/bug.h
-+++ b/include/linux/bug.h
-@@ -2,6 +2,7 @@
- #define _LINUX_BUG_H
- 
- #include <asm/bug.h>
-+#include <linux/compiler.h>
- 
- enum bug_trap_type {
- 	BUG_TRAP_TYPE_NONE = 0,
-@@ -42,25 +43,30 @@ struct pt_regs;
-  * @condition: the condition which the compiler should know is false.
-  *
-  * If you have some code which relies on certain constants being equal, or
-- * other compile-time-evaluated condition, you should use BUILD_BUG_ON to
-+ * some other compile-time-evaluated condition, you should use BUILD_BUG_ON to
-  * detect if someone changes it.
-  *
-- * The implementation uses gcc's reluctance to create a negative array, but
-- * gcc (as of 4.4) only emits that error for obvious cases (eg. not arguments
-- * to inline functions).  So as a fallback we use the optimizer; if it can't
-- * prove the condition is false, it will cause a link error on the undefined
-- * "__build_bug_on_failed".  This error message can be harder to track down
-- * though, hence the two different methods.
-+ * The implementation uses gcc's reluctance to create a negative array, but gcc
-+ * (as of 4.4) only emits that error for obvious cases (e.g. not arguments to
-+ * inline functions).  Luckily, in 4.3 they added the "error" function
-+ * attribute just for this type of case.  Thus, we use a negative sized array
-+ * (should always create an error on gcc versions older than 4.4) and then call
-+ * an undefined function with the error attribute (should always create an
-+ * error on gcc 4.3 and later).  If for some reason, neither creates a
-+ * compile-time error, we'll still have a link-time error, which is harder to
-+ * track down.
-  */
- #ifndef __OPTIMIZE__
- #define BUILD_BUG_ON(condition) ((void)sizeof(char[1 - 2*!!(condition)]))
- #else
--extern int __build_bug_on_failed;
--#define BUILD_BUG_ON(condition)					\
--	do {							\
--		bool __cond = !!(condition);			\
--		((void)sizeof(char[1 - 2 * __cond]));		\
--		if (__cond) __build_bug_on_failed = 1;		\
-+#define BUILD_BUG_ON(condition)						\
-+	do {								\
-+		bool __cond = !!(condition);				\
-+		extern void __build_bug_on_failed(void)			\
-+			__compiletime_error("BUILD_BUG_ON failed");	\
-+		if (__cond)						\
-+			__build_bug_on_failed();			\
-+		((void)sizeof(char[1 - 2 * __cond]));			\
- 	} while(0)
- #endif
- 
 -- 
-1.7.3.4
+Michel "Walken" Lespinasse
+A program is never fully debugged until the last user dies.
