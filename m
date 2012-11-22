@@ -1,27 +1,44 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 6/9] bug.h: Prevent double evaulation of in
- BUILD_BUG_ON
-Date: Thu, 22 Nov 2012 14:42:50 +0100
-Message-ID: <20121122134250.GC17147@x1.alien8.de>
+Subject: Re: [PATCH v6 8/9] compiler.h, bug.h: Prevent double error messages
+ with BUILD_BUG{,_ON}
+Date: Thu, 22 Nov 2012 14:43:42 +0100
+Message-ID: <20121122134342.GD17147@x1.alien8.de>
 References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
- <1353445507-7233-6-git-send-email-daniel.santos@pobox.com>
+ <1353445507-7233-8-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:40172 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1755516Ab2KVTHZ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 22 Nov 2012 14:07:25 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <1353445507-7233-6-git-send-email-daniel.santos@pobox.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+In-Reply-To: <1353445507-7233-8-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
 Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
+List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Nov 20, 2012 at 03:05:04PM -0600, danielfsantos@att.net wrote:
-> When calling BUILD_BUG_ON in an optimized build using gcc 4.3 and later,
-> the condition will be evaulated twice, possibily with side-effects.
-> This patch eliminates that error.
+On Tue, Nov 20, 2012 at 03:05:06PM -0600, danielfsantos@att.net wrote:
+> Prior to the introduction of __attribute__((error("msg"))) in gcc 4.3,
+> creating compile-time errors required a little trickery.
+> BUILD_BUG{,_ON} uses this attribute when available to generate
+> compile-time errors, but also uses the negative-sized array trick for
+> older compilers, resulting in two error messages in some cases.  The
+> reason it's "some" cases is that as of gcc 4.4, the negative-sized array
+> will not create an error in some situations, like inline functions.
+> 
+> This patch replaces the negative-sized array code with the new
+> __compiletime_error_fallback() macro which expands to the same thing
+> unless the the error attribute is available, in which case it expands to
+> do{}while(0), resulting in exactly one compile-time error on all
+> versions of gcc.
+> 
+> Note that we are not changing the negative-sized array code for the
+> unoptimized version of BUILD_BUG_ON, since it has the potential to catch
+> problems that would be disabled in later versions of gcc were
+> __compiletime_error_fallback used.  The reason is that that an
+> unoptimized build can't always remove calls to an error-attributed
+> function call (like we are using) that should effectively become dead
+> code if it were optimized.  However, using a negative-sized array with a
+> similar value will not result in an false-positive (error). The only
+> caveat being that it will also fail to catch valid conditions, which we
+> should be expecting in an unoptimized build anyway.
 > 
 > Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
 
