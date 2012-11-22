@@ -1,37 +1,31 @@
 From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 0/9] Cleanup & new features for compiler*.h and bug.h
-Date: Thu, 22 Nov 2012 14:44:10 +0100
-Message-ID: <20121122134410.GE17147@x1.alien8.de>
-References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
- <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
+Subject: Re: [PATCH v6 6/9] bug.h: Prevent double evaulation of in
+ BUILD_BUG_ON
+Date: Thu, 22 Nov 2012 14:42:50 +0100
+Message-ID: <20121122134250.GC17147@x1.alien8.de>
+References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
+ <1353445507-7233-6-git-send-email-daniel.santos@pobox.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail.skyhub.de ([78.46.96.112]:40172 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1755516Ab2KVTHZ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 22 Nov 2012 14:07:25 -0500
 Content-Disposition: inline
-In-Reply-To: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Daniel Santos <daniel.santos@pobox.com>, Andrew Morton <akpm@linux-foundation.org>
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+In-Reply-To: <1353445507-7233-6-git-send-email-daniel.santos@pobox.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
 
-On Tue, Nov 20, 2012 at 02:42:03PM -0600, danielfsantos@att.net wrote:
+On Tue, Nov 20, 2012 at 03:05:04PM -0600, danielfsantos@att.net wrote:
+> When calling BUILD_BUG_ON in an optimized build using gcc 4.3 and later,
+> the condition will be evaulated twice, possibily with side-effects.
+> This patch eliminates that error.
 > 
->  include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
->  include/linux/compiler-gcc.h  |    3 ++
->  include/linux/compiler-gcc3.h |    8 +++---
->  include/linux/compiler-gcc4.h |   28 ++++++++++++------------
->  include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
->  5 files changed, 76 insertions(+), 42 deletions(-)
+> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
 
-Ok,
-
-this patchset is slowly but surely getting into a mergeable state and
-could probably use wider testing in linux-next right about now.
-
-Maybe akpm can pick it up into -mm so that it sees -next and then if all
-is fine maybe find its way upstream in the next merge window, AFAICT.
-
-Thanks.
+Acked-by: Borislav Petkov <bp@alien8.de>
 
 -- 
 Regards/Gruss,
