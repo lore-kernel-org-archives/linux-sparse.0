@@ -1,49 +1,39 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH v6 8/9] compiler.h, bug.h: Prevent double error messages
- with BUILD_BUG{,_ON}
-Date: Thu, 22 Nov 2012 14:43:42 +0100
-Message-ID: <20121122134342.GD17147@x1.alien8.de>
-References: <1353444132-6809-1-git-send-email-daniel.santos@pobox.com>
- <1353445507-7233-8-git-send-email-daniel.santos@pobox.com>
+From: Tom Schmid <scth2000@yahoo.de>
+Subject: Many warnings when building sparse with MinGW- format specifiers for "printf"
+Date: Fri, 7 Dec 2012 12:07:14 +0000 (GMT)
+Message-ID: <1354882034.95572.YahooMailNeo@web29702.mail.ird.yahoo.com>
+Reply-To: Tom Schmid <scth2000@yahoo.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1353445507-7233-8-git-send-email-daniel.santos@pobox.com>
-Sender: linux-kernel-owner@vger.kernel.org
-Cc: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>, Daniel Santos <daniel.santos@pobox.com>
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from nm21-vm6.bullet.mail.ird.yahoo.com ([212.82.109.246]:36503 "EHLO
+	nm21-vm6.bullet.mail.ird.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752775Ab2LGMHQ convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 7 Dec 2012 07:07:16 -0500
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 
-On Tue, Nov 20, 2012 at 03:05:06PM -0600, danielfsantos@att.net wrote:
-> Prior to the introduction of __attribute__((error("msg"))) in gcc 4.3,
-> creating compile-time errors required a little trickery.
-> BUILD_BUG{,_ON} uses this attribute when available to generate
-> compile-time errors, but also uses the negative-sized array trick for
-> older compilers, resulting in two error messages in some cases.  The
-> reason it's "some" cases is that as of gcc 4.4, the negative-sized array
-> will not create an error in some situations, like inline functions.
-> 
-> This patch replaces the negative-sized array code with the new
-> __compiletime_error_fallback() macro which expands to the same thing
-> unless the the error attribute is available, in which case it expands to
-> do{}while(0), resulting in exactly one compile-time error on all
-> versions of gcc.
-> 
-> Note that we are not changing the negative-sized array code for the
-> unoptimized version of BUILD_BUG_ON, since it has the potential to catch
-> problems that would be disabled in later versions of gcc were
-> __compiletime_error_fallback used.  The reason is that that an
-> unoptimized build can't always remove calls to an error-attributed
-> function call (like we are using) that should effectively become dead
-> code if it were optimized.  However, using a negative-sized array with a
-> similar value will not result in an false-positive (error). The only
-> caveat being that it will also fail to catch valid conditions, which we
-> should be expecting in an unoptimized build anyway.
-> 
-> Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+Hello, 
 
-Acked-by: Borislav Petkov <bp@alien8.de>
 
--- 
-Regards/Gruss,
-Boris.
+it was the first time, that i tried to build sparse on MinGW - I used cygwin in the past. 
+Now building sparse on MinGW (GCC 4.6.2) comes up with several of these warnings: 
+
+parse.c:1695:3: warning: unknown conversion type character 'l' in format [-Wformat] 
+parse.c:1695:3: warning: too many arguments for format [-Wformat-extra-args] 
+
+See also sourceforge.net/apps/trac/mingw-w64/wiki/gnu printf 
+
+It seems, that MinGW doesn't accept the "old style" format specifiers like "%llu". 
+That means, that functions like printf will not work as expected, if these "old style" format specifiers are used. 
+
+Is this a known problem? 
+Is there any hint or workaround? 
+
+
+Regards, 
+Thomas Schmid
+
