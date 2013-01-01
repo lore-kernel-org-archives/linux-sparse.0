@@ -1,82 +1,125 @@
 From: danielfsantos@att.net
-Subject: [PATCH v8 8/9] compiler.h, bug.h: Prevent double error messages with BUILD_BUG{,_ON}
-Date: Tue,  1 Jan 2013 16:54:10 -0600
-Message-ID: <1357080851-30938-9-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v8 3/9] compiler-gcc{3,4}.h: Use GCC_VERSION macro
+Date: Tue,  1 Jan 2013 16:54:05 -0600
+Message-ID: <1357080851-30938-4-git-send-email-daniel.santos@pobox.com>
 References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
  <1357080851-30938-1-git-send-email-daniel.santos@pobox.com>
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm8-vm0.access.bullet.mail.mud.yahoo.com ([66.94.237.191]:34185
-	"EHLO nm8-vm0.access.bullet.mail.mud.yahoo.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1752529Ab3AAWyd (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 1 Jan 2013 17:54:33 -0500
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1357080851-30938-1-git-send-email-daniel.santos@pobox.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 Cc: Daniel Santos <daniel.santos@pobox.com>
+List-Id: linux-sparse@vger.kernel.org
 
-Prior to the introduction of __attribute__((error("msg"))) in gcc 4.3,
-creating compile-time errors required a little trickery.
-BUILD_BUG{,_ON} uses this attribute when available to generate
-compile-time errors, but also uses the negative-sized array trick for
-older compilers, resulting in two error messages in some cases.  The
-reason it's "some" cases is that as of gcc 4.4, the negative-sized array
-will not create an error in some situations, like inline functions.
-
-This patch replaces the negative-sized array code with the new
-__compiletime_error_fallback() macro which expands to the same thing
-unless the the error attribute is available, in which case it expands to
-do{}while(0), resulting in exactly one compile-time error on all
-versions of gcc.
-
-Note that we are not changing the negative-sized array code for the
-unoptimized version of BUILD_BUG_ON, since it has the potential to catch
-problems that would be disabled in later versions of gcc were
-__compiletime_error_fallback used.  The reason is that that an
-unoptimized build can't always remove calls to an error-attributed
-function call (like we are using) that should effectively become dead
-code if it were optimized.  However, using a negative-sized array with a
-similar value will not result in an false-positive (error). The only
-caveat being that it will also fail to catch valid conditions, which we
-should be expecting in an unoptimized build anyway.
+Using GCC_VERSION reduces complexity, is easier to read and is GCC's
+recommended mechanism for doing version checks. (Just don't ask me why
+they didn't define it in the first place.)  This also makes it easy to
+merge compiler-gcc{,3,4}.h should somebody want to.
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+Acked-by: David Rientjes <rientjes@google.com>
+Acked-by: Borislav Petkov <bp@alien8.de>
 ---
- include/linux/bug.h      |    2 +-
- include/linux/compiler.h |    5 +++++
- 2 files changed, 6 insertions(+), 1 deletions(-)
+ include/linux/compiler-gcc3.h |    8 ++++----
+ include/linux/compiler-gcc4.h |   20 ++++++++++----------
+ 2 files changed, 14 insertions(+), 14 deletions(-)
 
-diff --git a/include/linux/bug.h b/include/linux/bug.h
-index 08d97e9..57c7688 100644
---- a/include/linux/bug.h
-+++ b/include/linux/bug.h
-@@ -67,7 +67,7 @@ struct pt_regs;
- 			__compiletime_error("BUILD_BUG_ON failed");	\
- 		if (__cond)						\
- 			__build_bug_on_failed();			\
--		((void)sizeof(char[1 - 2 * __cond]));			\
-+		__compiletime_error_fallback(__cond);			\
- 	} while(0)
+diff --git a/include/linux/compiler-gcc3.h b/include/linux/compiler-gcc3.h
+index 37d4124..7d89feb 100644
+--- a/include/linux/compiler-gcc3.h
++++ b/include/linux/compiler-gcc3.h
+@@ -2,22 +2,22 @@
+ #error "Please don't include <linux/compiler-gcc3.h> directly, include <linux/compiler.h> instead."
  #endif
  
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 4c638be..423bb6b 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -307,7 +307,12 @@ void ftrace_likely_update(struct ftrace_branch_data *f, int val, int expect);
+-#if __GNUC_MINOR__ < 2
++#if GCC_VERSION < 30200
+ # error Sorry, your compiler is too old - please upgrade it.
  #endif
- #ifndef __compiletime_error
- # define __compiletime_error(message)
-+# define __compiletime_error_fallback(condition) \
-+	do { ((void)sizeof(char[1 - 2*!!(condition)])); } while (0)
-+#else
-+# define __compiletime_error_fallback(condition) do { } while (0)
+ 
+-#if __GNUC_MINOR__ >= 3
++#if GCC_VERSION >= 30300
+ # define __used			__attribute__((__used__))
+ #else
+ # define __used			__attribute__((__unused__))
  #endif
-+
+ 
+-#if __GNUC_MINOR__ >= 4
++#if GCC_VERSION >= 30400
+ #define __must_check		__attribute__((warn_unused_result))
+ #endif
+ 
+ #ifdef CONFIG_GCOV_KERNEL
+-# if __GNUC_MINOR__ < 4
++# if GCC_VERSION < 30400
+ #   error "GCOV profiling support for gcc versions below 3.4 not included"
+ # endif /* __GNUC_MINOR__ */
+ #endif /* CONFIG_GCOV_KERNEL */
+diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+index c9785c2..a9ffdfe 100644
+--- a/include/linux/compiler-gcc4.h
++++ b/include/linux/compiler-gcc4.h
+@@ -4,7 +4,7 @@
+ 
+ /* GCC 4.1.[01] miscompiles __weak */
+ #ifdef __KERNEL__
+-# if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
++# if GCC_VERSION >= 40100 &&  GCC_VERSION <= 40101
+ #  error Your version of gcc miscompiles the __weak directive
+ # endif
+ #endif
+@@ -13,11 +13,11 @@
+ #define __must_check 		__attribute__((warn_unused_result))
+ #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+ 
+-#if __GNUC_MINOR__ > 0
++#if GCC_VERSION >= 40100
+ # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+ #endif
+ 
+-#if __GNUC_MINOR__ >= 3
++#if GCC_VERSION >= 40300
+ /* Mark functions as cold. gcc will assume any path leading to a call
+    to them will be unlikely.  This means a lot of manual unlikely()s
+    are unnecessary now for any paths leading to the usual suspects
+@@ -41,9 +41,9 @@
+ # define __compiletime_warning(message) __attribute__((warning(message)))
+ # define __compiletime_error(message) __attribute__((error(message)))
+ #endif /* __CHECKER__ */
+-#endif /* __GNUC_MINOR__ >= 3 */
++#endif /* GCC_VERSION >= 40300 */
+ 
+-#if __GNUC_MINOR__ >= 5
++#if GCC_VERSION >= 40500
  /*
-  * Prevent the compiler from merging or refetching accesses.  The compiler
-  * is also forbidden from reordering successive instances of ACCESS_ONCE(),
+  * Mark a position in code as unreachable.  This can be used to
+  * suppress control flow warnings after asm blocks that transfer
+@@ -58,9 +58,9 @@
+ /* Mark a function definition as prohibited from being cloned. */
+ #define __noclone	__attribute__((__noclone__))
+ 
+-#endif /* __GNUC_MINOR__ >= 5 */
++#endif /* GCC_VERSION >= 40500 */
+ 
+-#if __GNUC_MINOR__ >= 6
++#if GCC_VERSION >= 40600
+ /*
+  * Tell the optimizer that something else uses this function or variable.
+  */
+@@ -69,11 +69,11 @@
+ 
+ 
+ #ifdef CONFIG_ARCH_USE_BUILTIN_BSWAP
+-#if __GNUC_MINOR__ >= 4
++#if GCC_VERSION >= 40400
+ #define __HAVE_BUILTIN_BSWAP32__
+ #define __HAVE_BUILTIN_BSWAP64__
+ #endif
+-#if __GNUC_MINOR__ >= 8 || (defined(__powerpc__) && __GNUC_MINOR__ >= 6)
++#if GCC_VERSION >= 40800 || (defined(__powerpc__) && GCC_VERSION >= 40600)
+ #define __HAVE_BUILTIN_BSWAP16__
+ #endif
+-#endif
++#endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP */
 -- 
 1.7.8.6
-
