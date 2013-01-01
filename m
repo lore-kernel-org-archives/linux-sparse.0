@@ -1,9 +1,13 @@
-From: danielfsantos@att.net
-Subject: [PATCH v7 2/9] compiler-gcc.h: Add gcc-recommended GCC_VERSION macro
-Date: Tue,  1 Jan 2013 15:09:50 -0600
-Message-ID: <1357074597-21722-2-git-send-email-daniel.santos@pobox.com>
-References: <1357074491-21669-1-git-send-email-daniel.santos@pobox.com>
- <1357074597-21722-1-git-send-email-daniel.santos@pobox.com>
+From: Daniel Santos <danielfsantos@att.net>
+Subject: Re: [PATCH v7 1/9] compiler-gcc4.h: Reorder macros based upon gcc
+ ver
+Date: Tue, 01 Jan 2013 15:27:30 -0600
+Message-ID: <50E354C2.4060808@att.net>
+References: <1357074491-21669-1-git-send-email-daniel.santos@pobox.com> <1357074597-21722-1-git-send-email-daniel.santos@pobox.com>
+Reply-To: Daniel Santos <daniel.santos@pobox.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1357074597-21722-1-git-send-email-daniel.santos@pobox.com>
 Sender: linux-kernel-owner@vger.kernel.org
@@ -11,49 +15,18 @@ To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea
 Cc: Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Throughout compiler*.h, many version checks are made.  These can be
-simplified by using the macro that gcc's documentation recommends.
-However, my primary reason for adding this is that I need bug-check
-macros that are enabled at certain gcc versions and it's cleaner to use
-this macro than the tradition method:
+On 01/01/2013 03:09 PM, danielfsantos@att.net wrote:
 
-if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ => 2)
-
-If you add patch level, it gets this ugly:
-
-if __GNUC__ > 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ > 2 || \
-   __GNUC_MINOR__ == 2 __GNUC_PATCHLEVEL__ >= 1))
-
-As opposed to:
-
-if GCC_VERSION >= 40201
-
-While having separate headers for gcc 3 & 4 eliminates some of this
-verbosity, they can still be cleaned up by this.
-
-See also:
-http://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
-
-Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
-Acked-by: Borislav Petkov <bp@alien8.de>
-Acked-by: David Rientjes <rientjes@google.com>
----
- include/linux/compiler-gcc.h |    3 +++
- 1 files changed, 3 insertions(+), 0 deletions(-)
-
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 6a6d7ae..24545cd 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -5,6 +5,9 @@
- /*
-  * Common definitions for all gcc versions go here.
-  */
-+#define GCC_VERSION (__GNUC__ * 10000 \
-+		   + __GNUC_MINOR__ * 100 \
-+		   + __GNUC_PATCHLEVEL__)
- 
- 
- /* Optimization barrier */
--- 
-1.7.8.6
+>   #ifdef CONFIG_ARCH_USE_BUILTIN_BSWAP
+> -#if __GNUC_MINOR__>= 4
+> +#if GCC_VERSION>= 40400
+>   #define __HAVE_BUILTIN_BSWAP32__
+>   #define __HAVE_BUILTIN_BSWAP64__
+>   #endif
+> -#if __GNUC_MINOR__>= 8 || (defined(__powerpc__)&&  __GNUC_MINOR__>= 6)
+> +#if GCC_VERSION>= 40800 || (defined(__powerpc__)&&  GCC_VERSION>= 40600)
+>   #define __HAVE_BUILTIN_BSWAP16__
+>   #endif
+> -#endif
+> +#endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP */
+I'm terribly sorry, I appear to have broken bisectability here.
