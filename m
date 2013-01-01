@@ -1,40 +1,116 @@
 From: danielfsantos@att.net
-Subject: [PATCH v7 6/9] bug.h: Prevent double evaulation of in BUILD_BUG_ON
-Date: Tue,  1 Jan 2013 15:09:54 -0600
-Message-ID: <1357074597-21722-6-git-send-email-daniel.santos@pobox.com>
+Subject: [PATCH v7 3/9] compiler-gcc{3,4}.h: Use GCC_VERSION macro
+Date: Tue,  1 Jan 2013 15:09:51 -0600
+Message-ID: <1357074597-21722-3-git-send-email-daniel.santos@pobox.com>
 References: <1357074491-21669-1-git-send-email-daniel.santos@pobox.com>
  <1357074597-21722-1-git-send-email-daniel.santos@pobox.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from nm26.access.bullet.mail.sp2.yahoo.com ([98.139.44.153]:42843
+	"EHLO nm26.access.bullet.mail.sp2.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752448Ab3AAVQu (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 1 Jan 2013 16:16:50 -0500
 In-Reply-To: <1357074597-21722-1-git-send-email-daniel.santos@pobox.com>
-Sender: linux-kernel-owner@vger.kernel.org
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
 To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
 Cc: Daniel Santos <daniel.santos@pobox.com>
-List-Id: linux-sparse@vger.kernel.org
 
-When calling BUILD_BUG_ON in an optimized build using gcc 4.3 and later,
-the condition will be evaulated twice, possibily with side-effects.
-This patch eliminates that error.
+Using GCC_VERSION reduces complexity, is easier to read and is GCC's
+recommended mechanism for doing version checks. (Just don't ask me why
+they didn't define it in the first place.)  This also makes it easy to
+merge compiler-gcc{,3,4}.h should somebody want to.
 
 Signed-off-by: Daniel Santos <daniel.santos@pobox.com>
+Acked-by: David Rientjes <rientjes@google.com>
+Acked-by: Borislav Petkov <bp@alien8.de>
 ---
- include/linux/bug.h |    5 +++--
- 1 files changed, 3 insertions(+), 2 deletions(-)
+ include/linux/compiler-gcc3.h |    8 ++++----
+ include/linux/compiler-gcc4.h |   14 +++++++-------
+ 2 files changed, 11 insertions(+), 11 deletions(-)
 
-diff --git a/include/linux/bug.h b/include/linux/bug.h
-index 27d404f..0d75762 100644
---- a/include/linux/bug.h
-+++ b/include/linux/bug.h
-@@ -59,8 +59,9 @@ struct pt_regs;
- extern int __build_bug_on_failed;
- #define BUILD_BUG_ON(condition)					\
- 	do {							\
--		((void)sizeof(char[1 - 2*!!(condition)]));	\
--		if (condition) __build_bug_on_failed = 1;	\
-+		bool __cond = !!(condition);			\
-+		((void)sizeof(char[1 - 2 * __cond]));		\
-+		if (__cond) __build_bug_on_failed = 1;		\
- 	} while(0)
+diff --git a/include/linux/compiler-gcc3.h b/include/linux/compiler-gcc3.h
+index 37d4124..7d89feb 100644
+--- a/include/linux/compiler-gcc3.h
++++ b/include/linux/compiler-gcc3.h
+@@ -2,22 +2,22 @@
+ #error "Please don't include <linux/compiler-gcc3.h> directly, include <linux/compiler.h> instead."
  #endif
  
+-#if __GNUC_MINOR__ < 2
++#if GCC_VERSION < 30200
+ # error Sorry, your compiler is too old - please upgrade it.
+ #endif
+ 
+-#if __GNUC_MINOR__ >= 3
++#if GCC_VERSION >= 30300
+ # define __used			__attribute__((__used__))
+ #else
+ # define __used			__attribute__((__unused__))
+ #endif
+ 
+-#if __GNUC_MINOR__ >= 4
++#if GCC_VERSION >= 30400
+ #define __must_check		__attribute__((warn_unused_result))
+ #endif
+ 
+ #ifdef CONFIG_GCOV_KERNEL
+-# if __GNUC_MINOR__ < 4
++# if GCC_VERSION < 30400
+ #   error "GCOV profiling support for gcc versions below 3.4 not included"
+ # endif /* __GNUC_MINOR__ */
+ #endif /* CONFIG_GCOV_KERNEL */
+diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+index 78090c6..a9ffdfe 100644
+--- a/include/linux/compiler-gcc4.h
++++ b/include/linux/compiler-gcc4.h
+@@ -4,7 +4,7 @@
+ 
+ /* GCC 4.1.[01] miscompiles __weak */
+ #ifdef __KERNEL__
+-# if __GNUC_MINOR__ == 1 && __GNUC_PATCHLEVEL__ <= 1
++# if GCC_VERSION >= 40100 &&  GCC_VERSION <= 40101
+ #  error Your version of gcc miscompiles the __weak directive
+ # endif
+ #endif
+@@ -13,11 +13,11 @@
+ #define __must_check 		__attribute__((warn_unused_result))
+ #define __compiler_offsetof(a,b) __builtin_offsetof(a,b)
+ 
+-#if __GNUC_MINOR__ > 0
++#if GCC_VERSION >= 40100
+ # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+ #endif
+ 
+-#if __GNUC_MINOR__ >= 3
++#if GCC_VERSION >= 40300
+ /* Mark functions as cold. gcc will assume any path leading to a call
+    to them will be unlikely.  This means a lot of manual unlikely()s
+    are unnecessary now for any paths leading to the usual suspects
+@@ -41,9 +41,9 @@
+ # define __compiletime_warning(message) __attribute__((warning(message)))
+ # define __compiletime_error(message) __attribute__((error(message)))
+ #endif /* __CHECKER__ */
+-#endif /* __GNUC_MINOR__ >= 3 */
++#endif /* GCC_VERSION >= 40300 */
+ 
+-#if __GNUC_MINOR__ >= 5
++#if GCC_VERSION >= 40500
+ /*
+  * Mark a position in code as unreachable.  This can be used to
+  * suppress control flow warnings after asm blocks that transfer
+@@ -58,9 +58,9 @@
+ /* Mark a function definition as prohibited from being cloned. */
+ #define __noclone	__attribute__((__noclone__))
+ 
+-#endif /* __GNUC_MINOR__ >= 5 */
++#endif /* GCC_VERSION >= 40500 */
+ 
+-#if __GNUC_MINOR__ >= 6
++#if GCC_VERSION >= 40600
+ /*
+  * Tell the optimizer that something else uses this function or variable.
+  */
 -- 
 1.7.8.6
+
