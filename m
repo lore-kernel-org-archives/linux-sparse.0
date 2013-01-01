@@ -1,56 +1,22 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: Using smatch on Chrome OS kernel, cannot process "__restrict__"
-Date: Thu, 20 Dec 2012 10:22:13 +0300
-Message-ID: <20121220072212.GO5032@mwanda>
-References: <CANV8Hs2xfNo3cZ1Cp5T_F2U2vPr0ybGDrP4c=fMsNXDED7vj=g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:29938 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750933Ab2LTHWL (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 20 Dec 2012 02:22:11 -0500
-Content-Disposition: inline
-In-Reply-To: <CANV8Hs2xfNo3cZ1Cp5T_F2U2vPr0ybGDrP4c=fMsNXDED7vj=g@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+From: danielfsantos@att.net
+Subject: [PATCH v7 0/9] Cleanup & new features for compiler*.h and bug.h
+Date: Tue,  1 Jan 2013 15:08:02 -0600
+Message-ID: <1357074491-21669-1-git-send-email-daniel.santos@pobox.com>
+References: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <1348874411-28288-1-git-send-email-daniel.santos@pobox.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: LKML <linux-kernel@vger.kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrea Arcangeli <aarcange@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Borislav Petkov <bp@alien8.de>, Christopher Li <sparse@chrisli.org>, David Daney <david.daney@cavium.com>, David Rientjes <rientjes@google.com>, Joe Perches <joe@perches.com>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Michel Lespinasse <walken@google.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Steven Rostedt <rostedt@goodmis.org>
+Cc: Daniel Santos <daniel.santos@pobox.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Simon Que <sque@google.com>
-Cc: smatch@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Wed, Dec 19, 2012 at 06:06:43PM -0800, Simon Que wrote:
-> Hi,
-> 
-> I am trying to apply smatch to the Chrome OS kernel, which is a
-> modified Linux Kernel 3.4.  There is one "error" that smatch is having
-> trouble processing.  It is in drivers/md/dm-bht.c:
-> 
->     sprintf((char *__restrict__)hex, "%02hhx", (int)*binary);
-> 
-> The word "__restrict__" is throwing off smatch somehow and it causes
-> the build to fail.
-> 
-> When I run make without smatch, the build passes.
-> When remove the "__restrict__" and make CHECK=smatch, the build passes.
-> 
 
-Thanks for the report.  That's a Sparse thing.
+ include/linux/bug.h           |   47 ++++++++++++++++++++++------------------
+ include/linux/compiler-gcc.h  |    3 ++
+ include/linux/compiler-gcc3.h |    8 +++---
+ include/linux/compiler-gcc4.h |   36 +++++++++++++++---------------
+ include/linux/compiler.h      |   32 +++++++++++++++++++++++++--
+ 5 files changed, 80 insertions(+), 46 deletions(-)
 
-I'll commit this patch with a:
-Reported-by: Simon Que <sque@google.com>
-
-regards,
-dan carpenter
-
-diff --git a/parse.c b/parse.c
-index 5dd9a06..bf5894d 100644
---- a/parse.c
-+++ b/parse.c
-@@ -419,6 +419,7 @@ static struct init_keyword {
- 	/* Ignored for now.. */
- 	{ "restrict",	NS_TYPEDEF, .op = &restrict_op},
- 	{ "__restrict",	NS_TYPEDEF, .op = &restrict_op},
-+	{ "__restrict__",	NS_TYPEDEF, .op = &restrict_op},
- 
- 	/* Storage class */
- 	{ "auto",	NS_TYPEDEF, .op = &auto_op },
+This version just rebases against today's -next and with a slight modification
+to CONFIG_ARCH_USE_BUILTIN_BSWAP code in in compiler-gcc4.h.
