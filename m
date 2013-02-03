@@ -1,174 +1,84 @@
-From: Thierry Reding <thierry.reding@avionic-design.de>
-Subject: [PATCH 1/2 sparse] Support the force attribute for function parameters
-Date: Wed, 30 Jan 2013 20:32:56 +0100
-Message-ID: <1359574377-3402-1-git-send-email-thierry.reding@avionic-design.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org
+From: Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH 03/10 v3] ext4: add physical block and status member into
+ extent status tree
+Date: Sat, 2 Feb 2013 22:03:43 -0500
+Message-ID: <20130203030343.GB1359@thunk.org>
+References: <1358942640-2262-1-git-send-email-wenqing.lz@taobao.com>
+ <1358942640-2262-4-git-send-email-wenqing.lz@taobao.com>
+ <20130129030353.GK7003@thunk.org>
+ <20130129053415.GA27002@gmail.com>
+ <20130129172814.GC4261@thunk.org>
+ <20130130024332.GA12111@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-ext4-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20130130024332.GA12111@gmail.com>
+Sender: linux-ext4-owner@vger.kernel.org
+To: linux-ext4@vger.kernel.org, Zheng Liu <wenqing.lz@taobao.com>
+Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Functions such as IS_ERR() in the Linux kernel extract an error value
-encoded in a pointer. sparse warns when a pointer with an address space
-other than the default (i.e. annotated with __user, __iomem, __percpu or
-__rcu) is passed to these functions. However, checking whether the
-pointer represents an encoded error and extracting the value are purely
-arithmetic operations on the pointer and therefore not concerned with
-the pointer's address space at all.
+On Wed, Jan 30, 2013 at 10:43:33AM +0800, Zheng Liu wrote:
+> 
+> Clang is first coming in my mind.  I know that some one try to use it
+> to build a linux kernel and get a lot of problems that are about gcc
+> extension.  But for us it seems that things are not too bad. ;)
 
-This patch allows function parameters to be annotated with the force
-attribute which will cause any differences in the address space and the
-noderef attribute to be ignored.
+Clang accepts bitfields with "unsigned long long", but I've discovered
+something which does _not_ support unsigned long long --- the "sparse"
+tool.  :-(
 
-Signed-off-by: Thierry Reding <thierry.reding@avionic-design.de>
----
- evaluate.c | 22 +++++++++++++---------
- expand.c   |  4 ++--
- parse.c    |  2 ++
- symbol.h   |  5 ++++-
- 4 files changed, 21 insertions(+), 12 deletions(-)
+I discovered this when running "make C=1", i.e.:
 
-diff --git a/evaluate.c b/evaluate.c
-index bebe968..d5a00e1 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -609,8 +609,9 @@ static void examine_fn_arguments(struct symbol *fn);
- #define MOD_IGN (MOD_VOLATILE | MOD_CONST)
- 
- const char *type_difference(struct ctype *c1, struct ctype *c2,
--	unsigned long mod1, unsigned long mod2)
-+	unsigned long mod1, unsigned long mod2, unsigned long flags)
- {
-+	unsigned long mask = MOD_IGNORE | MOD_SIGNEDNESS;
- 	unsigned long as1 = c1->as, as2 = c2->as;
- 	struct symbol *t1 = c1->base_type;
- 	struct symbol *t2 = c2->base_type;
-@@ -727,7 +728,7 @@ const char *type_difference(struct ctype *c1, struct ctype *c2,
- 					return "different argument counts";
- 				diffstr = type_difference(&arg1->ctype,
- 							  &arg2->ctype,
--							  MOD_IGN, MOD_IGN);
-+							  MOD_IGN, MOD_IGN, 0);
- 				if (diffstr) {
- 					static char argdiff[80];
- 					sprintf(argdiff, "incompatible argument %d (%s)", i, diffstr);
-@@ -759,9 +760,11 @@ const char *type_difference(struct ctype *c1, struct ctype *c2,
- 		t1 = base1;
- 		t2 = base2;
- 	}
--	if (as1 != as2)
-+	if (as1 != as2 && (flags & FLAG_FORCE) == 0)
- 		return "different address spaces";
--	if ((mod1 ^ mod2) & ~MOD_IGNORE & ~MOD_SIGNEDNESS)
-+	if (flags & FLAG_FORCE)
-+		mask |= MOD_NODEREF;
-+	if ((mod1 ^ mod2) & ~mask)
- 		return "different modifiers";
- 	return NULL;
- }
-@@ -795,7 +798,7 @@ static struct symbol *evaluate_ptr_sub(struct expression *expr)
- 	examine_pointer_target(rtype);
- 	typediff = type_difference(&ltype->ctype, &rtype->ctype,
- 				   target_qualifiers(rtype),
--				   target_qualifiers(ltype));
-+				   target_qualifiers(ltype), 0);
- 	if (typediff)
- 		expression_error(expr, "subtraction of different types can't work (%s)", typediff);
- 
-@@ -1056,7 +1059,7 @@ static struct symbol *evaluate_compare(struct expression *expr)
- 
- 	typediff = type_difference(&ltype->ctype, &rtype->ctype,
- 				   target_qualifiers(rtype),
--				   target_qualifiers(ltype));
-+				   target_qualifiers(ltype), 0);
- 	if (!typediff)
- 		goto OK;
- 
-@@ -1170,7 +1173,7 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
- 		/* XXX: that should be pointer to composite */
- 		ctype = ltype;
- 		typediff = type_difference(&ltype->ctype, &rtype->ctype,
--					   qual, qual);
-+					   qual, qual, 0);
- 		if (!typediff)
- 			goto Qual;
- 		goto Err;
-@@ -1347,7 +1350,8 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
- 			goto Cast;
- 		}
- 		/* It's OK if the target is more volatile or const than the source */
--		typediff = type_difference(&t->ctype, &s->ctype, 0, mod1);
-+		typediff = type_difference(&t->ctype, &s->ctype, 0, mod1,
-+					   target->ctype.flags);
- 		if (typediff)
- 			goto Err;
- 		return 1;
-@@ -3016,7 +3020,7 @@ static void check_duplicates(struct symbol *sym)
- 		const char *typediff;
- 		evaluate_symbol(next);
- 		declared++;
--		typediff = type_difference(&sym->ctype, &next->ctype, 0, 0);
-+		typediff = type_difference(&sym->ctype, &next->ctype, 0, 0, 0);
- 		if (typediff) {
- 			sparse_error(sym->pos, "symbol '%s' redeclared with different type (originally declared at %s:%d) - %s",
- 				show_ident(sym->ident),
-diff --git a/expand.c b/expand.c
-index 63a9075..b76d951 100644
---- a/expand.c
-+++ b/expand.c
-@@ -465,9 +465,9 @@ static int compare_types(int op, struct symbol *left, struct symbol *right)
- 	struct ctype c2 = {.base_type = right};
- 	switch (op) {
- 	case SPECIAL_EQUAL:
--		return !type_difference(&c1, &c2, MOD_IGN, MOD_IGN);
-+		return !type_difference(&c1, &c2, MOD_IGN, MOD_IGN, 0);
- 	case SPECIAL_NOTEQUAL:
--		return type_difference(&c1, &c2, MOD_IGN, MOD_IGN) != NULL;
-+		return type_difference(&c1, &c2, MOD_IGN, MOD_IGN, 0) != NULL;
- 	case '<':
- 		return left->bit_size < right->bit_size;
- 	case '>':
-diff --git a/parse.c b/parse.c
-index bd42180..a553570 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1832,6 +1832,8 @@ static struct token *parameter_declaration(struct token *token, struct symbol *s
- 	apply_modifiers(token->pos, &ctx);
- 	sym->ctype = ctx.ctype;
- 	sym->ctype.modifiers |= storage_modifiers(&ctx);
-+	if (ctx.storage_class == SForced)
-+		sym->ctype.flags |= FLAG_FORCE;
- 	sym->endpos = token->pos;
- 	return token;
- }
-diff --git a/symbol.h b/symbol.h
-index 1e74579..2417496 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -81,12 +81,15 @@ extern struct context *alloc_context(void);
- 
- DECLARE_PTR_LIST(context_list, struct context);
- 
-+#define FLAG_FORCE 1
-+
- struct ctype {
- 	unsigned long modifiers;
- 	unsigned long alignment;
- 	struct context_list *contexts;
- 	unsigned int as;
- 	struct symbol *base_type;
-+	unsigned long flags;
- };
- 
- struct decl_state {
-@@ -266,7 +269,7 @@ extern struct symbol_list *translation_unit_used_list;
- extern void access_symbol(struct symbol *);
- 
- extern const char * type_difference(struct ctype *c1, struct ctype *c2,
--	unsigned long mod1, unsigned long mod2);
-+	unsigned long mod1, unsigned long mod2, unsigned long flags);
- 
- extern struct symbol *lookup_symbol(struct ident *, enum namespace);
- extern struct symbol *create_symbol(int stream, const char *name, int type, int namespace);
--- 
-1.8.1.1
+  rm -f fs/ext4/extents_status.o
+  make C=1 fs/ext4/extents_status.o
+
+Here's a simple test case which demo's that sparse doesn't deal well
+with unsigned long long.  If we change the last two fields in struct
+extents_status to:
+
+	unsigned long es_pblk : 30;	/* first physical block */
+	unsigned long es_status : 2;	/* record the status of extent */
+
+sparse doesn't complain.  But as shown below, sparse complains bitterly:
+
+/tmp/foo.c:22:24: warning: invalid access past the end of 'es' (24 28)
+
+I'm not sure Chris will consider this a bug, since bitfields
+with "unsigned long long" isn't standards complaint, even if gcc and
+clang supports it.   Chris, what do you think?
+
+              	       		      	       - Ted
+   	
+
+#!/bin/sh
+cat > /tmp/foo.c << EOF
+#include <unistd.h>
+#include <stdio.h>
+
+struct rb_node {
+	unsigned long  __rb_parent_color;
+	struct rb_node *rb_right;
+	struct rb_node *rb_left;
+} __attribute__((aligned(sizeof(long))));
+
+struct extent_status {
+	struct rb_node rb_node;
+	unsigned long es_lblk;		/* first logical block extent covers */
+	unsigned long es_len;		/* length of extent in block */
+	unsigned long long es_pblk : 62;	/* first physical block */
+	unsigned long long es_status : 2;	/* record the status of extent */
+};
+
+int main(int argc, char **argv)
+{
+	struct extent_status es;
+
+	es.es_status = 3;
+
+	printf("%d\n", es.es_status);
+	printf("size %u\n", sizeof(es));
+}
+EOF
+sparse /tmp/foo.c
