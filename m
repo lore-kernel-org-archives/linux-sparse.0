@@ -1,35 +1,33 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2] sparse: add built-in byte swap identifiers
-Date: Tue, 19 Feb 2013 11:13:09 -0800
-Message-ID: <CANeU7QmfNK8tT2R3vKN95A7YSnJZvbVo+UkAd87sx8S2hX5jog@mail.gmail.com>
-References: <20130218183629.d2a9238ac848758359582e28@freescale.com>
-	<CANeU7Q=W8zZEngeweCGDkEpPGJMrADFgnibQVUFvGBwsppVq=A@mail.gmail.com>
-	<20130219114103.4630a9053ef81cd4e0e1a7b8@freescale.com>
+Subject: Re: sparse: add noclone as an ignored attribute
+Date: Thu, 21 Feb 2013 15:35:58 -0800
+Message-ID: <CANeU7Qk+5RMN--w_BQpUoX5yh_fkdfme7AxVpm3HXVyZX_inJQ@mail.gmail.com>
+References: <51184E28.40909@infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ob0-f169.google.com ([209.85.214.169]:54509 "EHLO
-	mail-ob0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934043Ab3BSTNK (ORCPT
+Received: from mail-oa0-f43.google.com ([209.85.219.43]:42004 "EHLO
+	mail-oa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753004Ab3BUXgC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 19 Feb 2013 14:13:10 -0500
-Received: by mail-ob0-f169.google.com with SMTP id ta14so6918575obb.28
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Feb 2013 11:13:09 -0800 (PST)
-In-Reply-To: <20130219114103.4630a9053ef81cd4e0e1a7b8@freescale.com>
+	Thu, 21 Feb 2013 18:36:02 -0500
+Received: by mail-oa0-f43.google.com with SMTP id l10so81130oag.16
+        for <linux-sparse@vger.kernel.org>; Thu, 21 Feb 2013 15:35:59 -0800 (PST)
+In-Reply-To: <51184E28.40909@infradead.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kim Phillips <kim.phillips@freescale.com>
+To: Randy Dunlap <rdunlap@infradead.org>
 Cc: linux-sparse@vger.kernel.org
 
-On Tue, Feb 19, 2013 at 9:41 AM, Kim Phillips
-<kim.phillips@freescale.com> wrote:
-> this patch stops sparse from complaining about them not being
-> defined:
+On Sun, Feb 10, 2013 at 5:49 PM, Randy Dunlap <rdunlap@infradead.org> wrote:
+> From: Randy Dunlap <rdunlap@infradead.org>
+>
+> Add attribute "noclone" or "__noclone" or "__noclone__" as an
+> ignored attribute. Fixes this sparse warning:
+>
+> arch/x86/kvm/vmx.c:6268:13: error: attribute '__noclone__': unknown attribute
 
-> v2: add a test for builtin_bswap{16,32,64}
-
-Looks good to me. I will apply that.
-
-Thanks
+The change looks good. Can you add a test case for the noclone attribute
+in the validations directory? I am happy to apply it.
 
 Chris
