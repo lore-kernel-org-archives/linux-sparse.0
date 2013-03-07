@@ -1,67 +1,46 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Suggestion for fixing the variable length array used in the kernel.
-Date: Wed, 6 Mar 2013 20:46:35 -0800
-Message-ID: <CANeU7Qn-5b5U_64QzFt-beP-PyAJgzz=z1100F0v5WbWqZwZOQ@mail.gmail.com>
+Subject: Re: [RFC PATCH] sparse: Add cmd line --version option
+Date: Wed, 6 Mar 2013 21:10:45 -0800
+Message-ID: <CANeU7QksQ5rnxNF1p5=MxHkWtPCOykeLWewy6m-gkNpOg_obGg@mail.gmail.com>
+References: <1362590578.1759.48.camel@joe-AO722>
+	<20130306214550.GA8486@jtriplet-mobl1>
+	<1362607043.2093.19.camel@joe-AO722>
+	<CANeU7Q=vsxomdNSjy+84eTAnRq1OVXynpfkKqfkFGkYhF-FEmw@mail.gmail.com>
+	<1362630786.5290.7.camel@joe-AO722>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:63538 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754718Ab3CGEqg (ORCPT
+Received: from mail-ob0-f181.google.com ([209.85.214.181]:57989 "EHLO
+	mail-ob0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750757Ab3CGFKq (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 6 Mar 2013 23:46:36 -0500
+	Thu, 7 Mar 2013 00:10:46 -0500
+Received: by mail-ob0-f181.google.com with SMTP id ni5so51849obc.40
+        for <linux-sparse@vger.kernel.org>; Wed, 06 Mar 2013 21:10:46 -0800 (PST)
+In-Reply-To: <1362630786.5290.7.camel@joe-AO722>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-kernel <linux-kernel@vger.kernel.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Joe Perches <joe@perches.com>
+Cc: Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
 
-Hi,
+On Wed, Mar 6, 2013 at 8:33 PM, Joe Perches <joe@perches.com> wrote:
+> On Wed, 2013-03-06 at 20:18 -0800, Chris Li wrote:
 
-I am looking at the current sparse warning on the kernel source.
-One category of those warning are produce by the variable length array.
-We all know that the kernel stack has a limit so we don't want to allocate
-too much stack to the variable size array.
+> It's your patch now, I was just maybe an instigator.
+> Looks good though.
 
-Is there a recommended way to fix those warnings? Is it worth while to
-fix it at all? I am looking forward to some kind of guideline how to handle
-this.
+Thanks. I start from your patch. I will just keep you
+as the author for patch.
 
+> Reviewed-by: Joe Perches <joe@perches.com>
+>
+> Maybe something like:
+>
+> git describe | cut -f1 -d"-"
 
-Some of them has estimated size limited, like the one fournd in decode_rs.c
-
-	/* Err+Eras Locator poly and syndrome poly The maximum value
-	 * of nroots is 8. So the necessary stack size will be about
-	 * 220 bytes max.
-	 */
-	uint16_t lambda[nroots + 1], syn[nroots];
-	uint16_t b[nroots + 1], t[nroots + 1], omega[nroots + 1];
-	uint16_t root[nroots], reg[nroots + 1], loc[nroots];
-
-Some of them did not said the size estimation but you kind of know
-they are not likely to blow up the stack:
-In xen_flush_tlb_others
-
-	struct {
-		struct mmuext_op op;
-#ifdef CONFIG_SMP
-		DECLARE_BITMAP(mask, num_processors);
-#else
-		DECLARE_BITMAP(mask, NR_CPUS);
-#endif
-	} *args;
-
-And also some of them are harder to tell from the context if
-there will be a size limit:
-
-int snd_pcm_hw_refine(struct snd_pcm_substream *substream,
-		      struct snd_pcm_hw_params *params)
-{
-	unsigned int k;
-	struct snd_pcm_hardware *hw;
-	struct snd_interval *i = NULL;
-	struct snd_mask *m = NULL;
-	struct snd_pcm_hw_constraints *constrs = &substream->runtime->hw_constraints;
-	unsigned int rstamps[constrs->rules_num]; <---------------------------------
-
+You mean the first VERSION in the Makefile?
+I want it to be there because sparse also release as
+tar.gz package without the git tree. It is useful to keep a
+version string outside of the git repository.
 
 Chris
