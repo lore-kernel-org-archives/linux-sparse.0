@@ -1,70 +1,63 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: Suggestion for fixing the variable length array used in the
- kernel.
-Date: Sun, 10 Mar 2013 01:34:03 +0300
-Message-ID: <20130309223403.GZ9138@mwanda>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Suggestion for fixing the variable length array used in the kernel.
+Date: Sat, 9 Mar 2013 15:00:54 -0800
+Message-ID: <CANeU7Qk2axG8wUFt9JgHt3UpJZTiF50Ug9Udt3BAv99cBR9HPw@mail.gmail.com>
 References: <CANeU7Qn-5b5U_64QzFt-beP-PyAJgzz=z1100F0v5WbWqZwZOQ@mail.gmail.com>
- <20130308162922.88ad40997d01099949008452@linux-foundation.org>
- <20130309053859.GY9138@mwanda>
- <CANeU7QnhB566ZJqjcaLkn7o701EeVbJcB=8VHW_33nwK=FZRhg@mail.gmail.com>
+	<20130308162922.88ad40997d01099949008452@linux-foundation.org>
+	<20130309053859.GY9138@mwanda>
+	<CANeU7QnhB566ZJqjcaLkn7o701EeVbJcB=8VHW_33nwK=FZRhg@mail.gmail.com>
+	<20130309223403.GZ9138@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:38302 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751843Ab3CIWeU (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Mar 2013 17:34:20 -0500
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnhB566ZJqjcaLkn7o701EeVbJcB=8VHW_33nwK=FZRhg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20130309223403.GZ9138@mwanda>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+List-Id: linux-sparse@vger.kernel.org
 
-On Sat, Mar 09, 2013 at 10:10:08AM -0800, Christopher Li wrote:
-> On Fri, Mar 8, 2013 at 9:39 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> > On Fri, Mar 08, 2013 at 04:29:22PM -0800, Andrew Morton wrote:
-> >> Roughly how many instances of this are there kernel-wide?
-> >>
-> >
-> > Around 150 on x86 allmodconfig.  They are pretty well audited.
-> 
-> I saw 207 on x86-64 allmodconfig. See the list that I attached.
-> 
+On Sat, Mar 9, 2013 at 2:34 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
+> The problems is if we go over the 8k stack.  So big arrays are bad.
+> Also if the dynamically sized array is inside a loop then normally
+> GCC frees it after each iteration, but on some arches it didn't free
+> it until after the last iteration.
 
-Ah.  Sorry, I'm on my laptop and my sparse output was old.
+So it seems that you agree those variable array usage should be
+better change to use kmalloc or some thing.
 
-> Can you elaborate the well audited part? How it was audited?
-> 
+> Btw, I've Smatch has cross function analysis, and I'd like to use
+> it here to figure out if the max size for dynamically sized arrays.
+> I ran into a problem:
+>
+> The code looks like this:
+>         char buf[a];
+> The size expression should be an EXPR_SYMBOL, but smatch gets:
+>         char buf[*a];
 
-The problems is if we go over the 8k stack.  So big arrays are bad.
-Also if the dynamically sized array is inside a loop then normally
-GCC frees it after each iteration, but on some arches it didn't free
-it until after the last iteration.
+Sparse currently does not deal with the dynamic array size right now.
+It only want to get constant value from the array size.
 
-Btw, I've Smatch has cross function analysis, and I'd like to use
-it here to figure out if the max size for dynamically sized arrays.
-I ran into a problem:
+The part that evaluate the array size is actually correct. Remember
+the EXPR_SYMBOL
+actually contain the *address* of symbol "a". So the proper
+sizeof(buf) is actually
+the content of "*a". That part is fine.
+The more complicated case of dynamic array size is using the dynamic array in
+a struct:
 
-The code looks like this:
-	char buf[a];
-The size expression should be an EXPR_SYMBOL, but smatch gets:
-	char buf[*a];
-Where the size expression is an EXPR_PREOP.
+struct {
+    char descriptor1[length+1];
+    char descriptor2[length+1];
+} *d;
 
-In smatch, how I use sparse is that I call sparse_keep_tokens() and
-then I parse the resulting symbol list myself.  The problem is in
-examine_array_type() we call get_expression_value() which changes
-the symbols from normal symbols to dereferences. The call tree is:
-examine_array_type()
-  -> get_expression_value()
-     -> __get_expression_value()
-        -> evaluate_expression()
-	   -> evaluate_symbol_expression() <- change happens here.
+Then the sizeof(*d) need to be ((*length) + 1 + (*length) + 1), assume
+"length" is a
+symbol address. The sizeof (struct foo) can be pretty complicate expression.
 
-I'm not sure what to do.
+Some USB code use this kind of the dynamic array. However, it does not allocate
+the struct in the stack, the struct is allocated via kmalloc using pointer.
+Sparse still complain the variable length array though.
 
-regards,
-dan carpenter
+Let me see if I can make the sparse handle dynamic array better.
 
+Chris
