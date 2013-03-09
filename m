@@ -1,50 +1,44 @@
-From: Andrew Morton <akpm@linux-foundation.org>
+From: Dan Carpenter <dan.carpenter@oracle.com>
 Subject: Re: Suggestion for fixing the variable length array used in the
  kernel.
-Date: Fri, 8 Mar 2013 16:29:22 -0800
-Message-ID: <20130308162922.88ad40997d01099949008452@linux-foundation.org>
+Date: Sat, 9 Mar 2013 08:39:00 +0300
+Message-ID: <20130309053859.GY9138@mwanda>
 References: <CANeU7Qn-5b5U_64QzFt-beP-PyAJgzz=z1100F0v5WbWqZwZOQ@mail.gmail.com>
+ <20130308162922.88ad40997d01099949008452@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [140.211.169.12] ([140.211.169.12]:51554 "EHLO
-	mail.linuxfoundation.org" rhost-flags-FAIL-FAIL-OK-OK)
-	by vger.kernel.org with ESMTP id S1754898Ab3CIA3Y (ORCPT
+Received: from userp1040.oracle.com ([156.151.31.81]:38883 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751756Ab3CIFjO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 8 Mar 2013 19:29:24 -0500
-In-Reply-To: <CANeU7Qn-5b5U_64QzFt-beP-PyAJgzz=z1100F0v5WbWqZwZOQ@mail.gmail.com>
+	Sat, 9 Mar 2013 00:39:14 -0500
+Content-Disposition: inline
+In-Reply-To: <20130308162922.88ad40997d01099949008452@linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Christopher Li <sparse@chrisli.org>, linux-kernel <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, 6 Mar 2013 20:46:35 -0800 Christopher Li <sparse@chrisli.org> wrote:
-
-> Hi,
+On Fri, Mar 08, 2013 at 04:29:22PM -0800, Andrew Morton wrote:
+> On Wed, 6 Mar 2013 20:46:35 -0800 Christopher Li <sparse@chrisli.org> wrote:
 > 
-> I am looking at the current sparse warning on the kernel source.
-> One category of those warning are produce by the variable length array.
-> We all know that the kernel stack has a limit so we don't want to allocate
-> too much stack to the variable size array.
+> > Hi,
+> > 
+> > I am looking at the current sparse warning on the kernel source.
+> > One category of those warning are produce by the variable length array.
+> > We all know that the kernel stack has a limit so we don't want to allocate
+> > too much stack to the variable size array.
+> > 
+> > Is there a recommended way to fix those warnings? Is it worth while to
+> > fix it at all? I am looking forward to some kind of guideline how to handle
+> > this.
 > 
-> Is there a recommended way to fix those warnings? Is it worth while to
-> fix it at all? I am looking forward to some kind of guideline how to handle
-> this.
+> Roughly how many instances of this are there kernel-wide?
+> 
 
-Roughly how many instances of this are there kernel-wide?
+Around 150 on x86 allmodconfig.  They are pretty well audited.
 
-I don't think it's good practice in the kernel - it's somewhat
-dangerous and the effects of errors will be catastrophic.  And as
-you've seen, those sites are difficult to review for safety.
-
-We could just outright ban the thing and convert those sites to
-kmalloc() or whatever.  If people howl about the performance impact
-(unlikely) then perhaps we can put something together using
-__builtin_alloca() which includes runtime checking for "excessive"
-allocations.  If an excessive allocation is detected we'd warn and
-return NULL.
-
-Anyway, yes, variable-length arrays are problematic so for now, let's
-leave the sparse warnings in place?
+regards,
+dan carpenter
 
