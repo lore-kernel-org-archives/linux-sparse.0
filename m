@@ -1,62 +1,46 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: Suggestion for fixing the variable length array used in the
- kernel.
-Date: Sun, 10 Mar 2013 14:38:42 +0300
-Message-ID: <20130310113842.GA9138@mwanda>
-References: <CANeU7Qn-5b5U_64QzFt-beP-PyAJgzz=z1100F0v5WbWqZwZOQ@mail.gmail.com>
- <20130308162922.88ad40997d01099949008452@linux-foundation.org>
- <20130309053859.GY9138@mwanda>
- <CANeU7QnhB566ZJqjcaLkn7o701EeVbJcB=8VHW_33nwK=FZRhg@mail.gmail.com>
- <20130309223403.GZ9138@mwanda>
- <CANeU7Qk2axG8wUFt9JgHt3UpJZTiF50Ug9Udt3BAv99cBR9HPw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Masatake YAMATO <yamato@redhat.com>
+Subject: [PATCH 2/3] Test case for -Winit-cstring option
+Date: Sun,  7 Apr 2013 01:58:56 +0900
+Message-ID: <1365267537-3787-2-git-send-email-yamato@redhat.com>
+References: <1365267537-3787-1-git-send-email-yamato@redhat.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:17570 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751768Ab3CJLjG (ORCPT
+Received: from h219-110-095-248.catv01.itscom.jp ([219.110.95.248]:53280 "EHLO
+	localhost.localdomain" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751780Ab3DFRLE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 10 Mar 2013 07:39:06 -0400
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qk2axG8wUFt9JgHt3UpJZTiF50Ug9Udt3BAv99cBR9HPw@mail.gmail.com>
+	Sat, 6 Apr 2013 13:11:04 -0400
+In-Reply-To: <1365267537-3787-1-git-send-email-yamato@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org
+Cc: yamato@redhat.com
 
-On Sat, Mar 09, 2013 at 03:00:54PM -0800, Christopher Li wrote:
-> On Sat, Mar 9, 2013 at 2:34 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
-> > The problems is if we go over the 8k stack.  So big arrays are bad.
-> > Also if the dynamically sized array is inside a loop then normally
-> > GCC frees it after each iteration, but on some arches it didn't free
-> > it until after the last iteration.
-> 
-> So it seems that you agree those variable array usage should be
-> better change to use kmalloc or some thing.
-> 
-> > Btw, I've Smatch has cross function analysis, and I'd like to use
-> > it here to figure out if the max size for dynamically sized arrays.
-> > I ran into a problem:
-> >
-> > The code looks like this:
-> >         char buf[a];
-> > The size expression should be an EXPR_SYMBOL, but smatch gets:
-> >         char buf[*a];
-> 
-> Sparse currently does not deal with the dynamic array size right now.
-> It only want to get constant value from the array size.
-> 
-> The part that evaluate the array size is actually correct. Remember
-> the EXPR_SYMBOL
-> actually contain the *address* of symbol "a". So the proper
-> sizeof(buf) is actually
-> the content of "*a". That part is fine.
+This patch added a test case for -Winit-cstring option
+to validation directory.
 
-It's evaluating it correctly, but Smatch normally expects
-expressions which haven't been evaluated yet.
+Signed-off-by: Masatake YAMATO <yamato@redhat.com>
+---
+ validation/init_cstring.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+ create mode 100644 validation/init_cstring.c
 
-I can probably hack my own Sparse tree for what I need.  It's not a
-big deal.
+diff --git a/validation/init_cstring.c b/validation/init_cstring.c
+new file mode 100644
+index 0000000..00eca20
+--- /dev/null
++++ b/validation/init_cstring.c
+@@ -0,0 +1,11 @@
++static struct alpha {
++  char a[2];
++} x = { .a = "ab" };
++/*
++ * check-name: -Winit-cstring option
++ *
++ * check-command: sparse -Winit-cstring $file
++ * check-error-start
++init_cstring.c:3:14: warning: too long initializer-string for array of char(no space for nul char)
++ * check-error-end
++ */
+-- 
+1.7.11.7
 
-regards,
-dan carpenter
