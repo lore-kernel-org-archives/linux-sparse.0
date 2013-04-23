@@ -1,63 +1,102 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Dan Carpenter <dan.carpenter@oracle.com>
 Subject: Re: [next:akpm 798/1000] drivers/rtc/rtc-ds1286.c:343:24: sparse:
  incorrect type in argument 1 (different address spaces)
-Date: Mon, 22 Apr 2013 19:56:19 -0700
-Message-ID: <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
+Date: Tue, 23 Apr 2013 09:16:00 +0300
+Message-ID: <20130423061600.GN6638@mwanda>
 References: <5171d93a.0NZAGYYKNj8hjsAs%fengguang.wu@intel.com>
-	<20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org>
+ <20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org>
+ <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:35620 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754056Ab3DWC4T (ORCPT
+Received: from userp1040.oracle.com ([156.151.31.81]:28470 "EHLO
+	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754655Ab3DWGVP (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Apr 2013 22:56:19 -0400
-In-Reply-To: <20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org>
+	Tue, 23 Apr 2013 02:21:15 -0400
+Content-Disposition: inline
+In-Reply-To: <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: kbuild test robot <fengguang.wu@intel.com>, Jingoo Han <jg1.han@samsung.com>, kbuild-all@01.org, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Andrew Morton <akpm@linux-foundation.org>, kbuild test robot <fengguang.wu@intel.com>, Jingoo Han <jg1.han@samsung.com>, kbuild-all@01.org, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-On Mon, Apr 22, 2013 at 4:56 PM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> I think doing IS_ERR() and PTR_ERR() on __iomem pointers is a natural
-> thing, and we should be able to do this without adding call-site
-> trickery to make sparse happy.
->
-> Is there some sort of annotation which we can add to the
-> IS_ERR()/PTR_ERR() definitions so that sparse will stop warning about
-> this usage?
+On Mon, Apr 22, 2013 at 07:56:19PM -0700, Christopher Li wrote:
+> On Mon, Apr 22, 2013 at 4:56 PM, Andrew Morton
+> <akpm@linux-foundation.org> wrote:
+> > I think doing IS_ERR() and PTR_ERR() on __iomem pointers is a natural
+> > thing, and we should be able to do this without adding call-site
+> > trickery to make sparse happy.
+> >
+> > Is there some sort of annotation which we can add to the
+> > IS_ERR()/PTR_ERR() definitions so that sparse will stop warning about
+> > this usage?
+> 
+> Yes, the force attribute should silent the address check on conversion.
+> 
+> Can some one try this patch (totally untested).
+> 
 
-Yes, the force attribute should silent the address check on conversion.
+That didn't work.  It's the the void * in the parameter list that's
+the problem.  We'd need to do something like the patch below:
 
-Can some one try this patch (totally untested).
+Otherwise we could add "__ok_to_cast" thing to Sparse maybe?
 
-Chris
-
+regards,
+dan carpenter
 
 diff --git a/include/linux/err.h b/include/linux/err.h
-index f2edce2..d226a3c 100644
+index f2edce2..2cbe8fb 100644
 --- a/include/linux/err.h
 +++ b/include/linux/err.h
-@@ -26,17 +26,17 @@ static inline void * __must_check ERR_PTR(long error)
-
- static inline long __must_check PTR_ERR(const void *ptr)
- {
--       return (long) ptr;
-+       return (__force long) ptr;
+@@ -24,20 +24,23 @@ static inline void * __must_check ERR_PTR(long error)
+ 	return (void *) error;
  }
-
- static inline long __must_check IS_ERR(const void *ptr)
+ 
+-static inline long __must_check PTR_ERR(const void *ptr)
++static inline long __must_check _PTR_ERR(const void *ptr)
  {
--       return IS_ERR_VALUE((unsigned long)ptr);
-+       return IS_ERR_VALUE((__force unsigned long)ptr);
+ 	return (long) ptr;
  }
-
- static inline long __must_check IS_ERR_OR_NULL(const void *ptr)
++#define PTR_ERR(x) _PTR_ERR((const void __force *)(x))
+ 
+-static inline long __must_check IS_ERR(const void *ptr)
++static inline long __must_check _IS_ERR(const void *ptr)
  {
--       return !ptr || IS_ERR_VALUE((unsigned long)ptr);
-+       return !ptr || IS_ERR_VALUE((__force unsigned long)ptr);
+ 	return IS_ERR_VALUE((unsigned long)ptr);
  }
-
++#define IS_ERR(x) _IS_ERR((const void __force *)(x))
+ 
+-static inline long __must_check IS_ERR_OR_NULL(const void *ptr)
++static inline long __must_check _IS_ERR_OR_NULL(const void *ptr)
+ {
+ 	return !ptr || IS_ERR_VALUE((unsigned long)ptr);
+ }
++#define IS_ERR_OR_NULL(x) _IS_ERR_OR_NULL((const void __force *)(x))
+ 
  /**
+  * ERR_CAST - Explicitly cast an error-valued pointer to another pointer type
+@@ -46,19 +49,21 @@ static inline long __must_check IS_ERR_OR_NULL(const void *ptr)
+  * Explicitly cast an error-valued pointer to another pointer type in such a
+  * way as to make it clear that's what's going on.
+  */
+-static inline void * __must_check ERR_CAST(const void *ptr)
++static inline void * __must_check _ERR_CAST(const void *ptr)
+ {
+ 	/* cast away the const */
+ 	return (void *) ptr;
+ }
++#define ERR_CAST(x) _ERR_CAST((const void __force *)(x))
+ 
+-static inline int __must_check PTR_RET(const void *ptr)
++static inline int __must_check _PTR_RET(const void *ptr)
+ {
+ 	if (IS_ERR(ptr))
+ 		return PTR_ERR(ptr);
+ 	else
+ 		return 0;
+ }
++#define PTR_RET(x) _PTR_RET((const void __force *)(x))
+ 
+ #endif
+ 
