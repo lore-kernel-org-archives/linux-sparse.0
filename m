@@ -1,102 +1,139 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [next:akpm 798/1000] drivers/rtc/rtc-ds1286.c:343:24: sparse:
- incorrect type in argument 1 (different address spaces)
-Date: Tue, 23 Apr 2013 09:16:00 +0300
-Message-ID: <20130423061600.GN6638@mwanda>
-References: <5171d93a.0NZAGYYKNj8hjsAs%fengguang.wu@intel.com>
- <20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org>
- <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: [PATCH] forced argument Was Re: sparse: incorrect type in argument
+ 1 (different address spaces)
+Date: Thu, 25 Apr 2013 19:09:37 -0700
+Message-ID: <5179E1E1.4050304@chrisli.org>
+References: <5171d93a.0NZAGYYKNj8hjsAs%fengguang.wu@intel.com> <20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org> <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com> <20130423061600.GN6638@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed;
+ boundary="------------050208040901030504040708"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:28470 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754655Ab3DWGVP (ORCPT
+Received: from mail-da0-f41.google.com ([209.85.210.41]:50527 "EHLO
+	mail-da0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1758781Ab3DZCJs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 23 Apr 2013 02:21:15 -0400
-Content-Disposition: inline
-In-Reply-To: <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
+	Thu, 25 Apr 2013 22:09:48 -0400
+In-Reply-To: <20130423061600.GN6638@mwanda>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>, kbuild test robot <fengguang.wu@intel.com>, Jingoo Han <jg1.han@samsung.com>, kbuild-all@01.org, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-On Mon, Apr 22, 2013 at 07:56:19PM -0700, Christopher Li wrote:
-> On Mon, Apr 22, 2013 at 4:56 PM, Andrew Morton
-> <akpm@linux-foundation.org> wrote:
-> > I think doing IS_ERR() and PTR_ERR() on __iomem pointers is a natural
-> > thing, and we should be able to do this without adding call-site
-> > trickery to make sparse happy.
-> >
-> > Is there some sort of annotation which we can add to the
-> > IS_ERR()/PTR_ERR() definitions so that sparse will stop warning about
-> > this usage?
+This is a multi-part message in MIME format.
+--------------050208040901030504040708
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+
+On 04/22/2013 11:16 PM, Dan Carpenter wrote:
+> That didn't work.  It's the the void * in the parameter list that's
+> the problem.  We'd need to do something like the patch below:
 > 
-> Yes, the force attribute should silent the address check on conversion.
-> 
-> Can some one try this patch (totally untested).
-> 
+> Otherwise we could add "__ok_to_cast" thing to Sparse maybe?
 
-That didn't work.  It's the the void * in the parameter list that's
-the problem.  We'd need to do something like the patch below:
+Thanks for the insight. I make a small patch to test the __ok_to_cast
+feature. The syntax is adding the force attribute to the argument
+declaration.
 
-Otherwise we could add "__ok_to_cast" thing to Sparse maybe?
+it will look like this:
+static inline long __must_check PTR_ERR( __force const void *ptr)
 
-regards,
-dan carpenter
+That means the "ptr" argument will perform a forced cast when receiving
+the argument. It is OK to pass __iomem pointer to "ptr".
 
-diff --git a/include/linux/err.h b/include/linux/err.h
-index f2edce2..2cbe8fb 100644
---- a/include/linux/err.h
-+++ b/include/linux/err.h
-@@ -24,20 +24,23 @@ static inline void * __must_check ERR_PTR(long error)
- 	return (void *) error;
+The example are in the patch. It need to patch both sparse and the
+Linux tree.
+
+What do you say?
+
+Chris
+
+
+--------------050208040901030504040708
+Content-Type: text/x-patch;
+ name="0001-Allow-forced-attribute-in-function-argument.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0001-Allow-forced-attribute-in-function-argument.patch"
+
+From a0974ed0fc1e67c41608c780b748c205622956b8 Mon Sep 17 00:00:00 2001
+From: Christopher Li <sparse@chrisli.org>
+Date: Thu, 25 Apr 2013 18:09:43 -0700
+Subject: [PATCH] Allow forced attribute in function argument
+
+It will indicate this argument will skip the compatible check.
+---
+ evaluate.c             |  2 +-
+ parse.c                |  1 +
+ symbol.h               |  3 ++-
+ validation/fored_arg.c | 18 ++++++++++++++++++
+ 4 files changed, 22 insertions(+), 2 deletions(-)
+ create mode 100644 validation/fored_arg.c
+
+diff --git a/evaluate.c b/evaluate.c
+index 9f2c4ac..0dfa519 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -2137,7 +2137,7 @@ static int evaluate_arguments(struct symbol *f, struct symbol *fn, struct expres
+ 				else
+ 					degenerate(expr);
+ 			}
+-		} else {
++		} else if (!target->forced_arg){
+ 			static char where[30];
+ 			examine_symbol_type(target);
+ 			sprintf(where, "argument %d", i);
+diff --git a/parse.c b/parse.c
+index 45ffc10..890e56b 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1841,6 +1841,7 @@ static struct token *parameter_declaration(struct token *token, struct symbol *s
+ 	sym->ctype = ctx.ctype;
+ 	sym->ctype.modifiers |= storage_modifiers(&ctx);
+ 	sym->endpos = token->pos;
++	sym->forced_arg = ctx.storage_class == SForced;
+ 	return token;
  }
  
--static inline long __must_check PTR_ERR(const void *ptr)
-+static inline long __must_check _PTR_ERR(const void *ptr)
- {
- 	return (long) ptr;
- }
-+#define PTR_ERR(x) _PTR_ERR((const void __force *)(x))
- 
--static inline long __must_check IS_ERR(const void *ptr)
-+static inline long __must_check _IS_ERR(const void *ptr)
- {
- 	return IS_ERR_VALUE((unsigned long)ptr);
- }
-+#define IS_ERR(x) _IS_ERR((const void __force *)(x))
- 
--static inline long __must_check IS_ERR_OR_NULL(const void *ptr)
-+static inline long __must_check _IS_ERR_OR_NULL(const void *ptr)
- {
- 	return !ptr || IS_ERR_VALUE((unsigned long)ptr);
- }
-+#define IS_ERR_OR_NULL(x) _IS_ERR_OR_NULL((const void __force *)(x))
- 
- /**
-  * ERR_CAST - Explicitly cast an error-valued pointer to another pointer type
-@@ -46,19 +49,21 @@ static inline long __must_check IS_ERR_OR_NULL(const void *ptr)
-  * Explicitly cast an error-valued pointer to another pointer type in such a
-  * way as to make it clear that's what's going on.
-  */
--static inline void * __must_check ERR_CAST(const void *ptr)
-+static inline void * __must_check _ERR_CAST(const void *ptr)
- {
- 	/* cast away the const */
- 	return (void *) ptr;
- }
-+#define ERR_CAST(x) _ERR_CAST((const void __force *)(x))
- 
--static inline int __must_check PTR_RET(const void *ptr)
-+static inline int __must_check _PTR_RET(const void *ptr)
- {
- 	if (IS_ERR(ptr))
- 		return PTR_ERR(ptr);
- 	else
- 		return 0;
- }
-+#define PTR_RET(x) _PTR_RET((const void __force *)(x))
- 
- #endif
- 
+diff --git a/symbol.h b/symbol.h
+index 1e74579..1c6ad66 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -157,7 +157,8 @@ struct symbol {
+ 					expanding:1,
+ 					evaluated:1,
+ 					string:1,
+-					designated_init:1;
++					designated_init:1,
++					forced_arg:1;
+ 			struct expression *array_size;
+ 			struct ctype ctype;
+ 			struct symbol_list *arguments;
+diff --git a/validation/fored_arg.c b/validation/fored_arg.c
+new file mode 100644
+index 0000000..4ab7141
+--- /dev/null
++++ b/validation/fored_arg.c
+@@ -0,0 +1,18 @@
++/*
++ * check-name: Forced function argument type.
++ */
++
++#define __iomem	__attribute__((noderef, address_space(2)))
++#define __force __attribute__((force))
++
++static void foo(__force void * addr)
++{
++}
++
++
++static void bar(void)
++{
++	void __iomem  *a;
++	foo(a);
++}
++
+-- 
+1.8.1.4
+
+
+--------------050208040901030504040708--
