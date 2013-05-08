@@ -1,55 +1,47 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH] forced argument Was Re: sparse: incorrect type in
- argument 1 (different address spaces)
-Date: Fri, 26 Apr 2013 09:35:38 +0300
-Message-ID: <20130426063538.GA5072@mwanda>
-References: <5171d93a.0NZAGYYKNj8hjsAs%fengguang.wu@intel.com>
- <20130422165629.bae79e6c5251bf148a3bae73@linux-foundation.org>
- <CANeU7QmDXRj-rNWvb0qhXCmzyJBFv=1URzzjEZN6ARaAf15-hw@mail.gmail.com>
- <20130423061600.GN6638@mwanda>
- <5179E1E1.4050304@chrisli.org>
+From: "John P. Goldman" <gliceaga@mendoza-conicet.gob.ar>
+Subject: dringender Vorschlag
+Date: Wed, 8 May 2013 05:46:28 -0300 (ART)
+Message-ID: <351326728.69416.1368002788604.JavaMail.root__23145.3267661438$1368004084$gmane$org@correo.mendoza-conicet.gob.ar>
+Reply-To: "John P. Goldman" <johnp.goldman@yahoo.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:42477 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752907Ab3DZGf4 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Apr 2013 02:35:56 -0400
-Content-Disposition: inline
-In-Reply-To: <5179E1E1.4050304@chrisli.org>
+Received: from mx2.mendoza-conicet.gob.ar ([200.69.149.90]:40948 "EHLO
+	mx2.mendoza-conicet.gob.ar" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751190Ab3EHJG6 convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 8 May 2013 05:06:58 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Andrew Morton <akpm@linux-foundation.org>, kbuild test robot <fengguang.wu@intel.com>, Jingoo Han <jg1.han@samsung.com>, kbuild-all@01.org, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-On Thu, Apr 25, 2013 at 07:09:37PM -0700, Christopher Li wrote:
-> On 04/22/2013 11:16 PM, Dan Carpenter wrote:
-> > That didn't work.  It's the the void * in the parameter list that's
-> > the problem.  We'd need to do something like the patch below:
-> > 
-> > Otherwise we could add "__ok_to_cast" thing to Sparse maybe?
-> 
-> Thanks for the insight. I make a small patch to test the __ok_to_cast
-> feature. The syntax is adding the force attribute to the argument
-> declaration.
-> 
-> it will look like this:
-> static inline long __must_check PTR_ERR( __force const void *ptr)
-> 
-> That means the "ptr" argument will perform a forced cast when receiving
-> the argument. It is OK to pass __iomem pointer to "ptr".
-> 
-> The example are in the patch. It need to patch both sparse and the
-> Linux tree.
-> 
-> What do you say?
 
-That's looks great.  :)
 
-I tested a patched kernel with an unpatched kernel as well and that
-doesn't cause any new problems.
+Entschuldigungen f=C3=BCr kommen in Ihre Privatsph=C3=A4re! Ich bin Rec=
+htsanwalt
+Werner Erich Zeller; Ich habe einen meiner einflussreichen und
+wohlhabenden Kunden zum Tode; und er hatte eine sehr geheime und privat=
+e
+Investitionen von =E2=82=AC15,000,000.00 bei einer privaten Bank in Gro=
+=C3=9Fbritannien
+hier zu Lebzeiten. Diese Investition wurde ohne einen deklarierten
+n=C3=A4chsten Angeh=C3=B6rigen und beg=C3=BCnstigte. Jetzt brauche ich =
+Sie arbeiten mit
+mir als mein Partner zu erholen und zu je 50 % Aktienfonds. Alle Dokume=
+nte
+werden rechtlich beantragt und beschafft, und in 5 Werktage, wird diese
+Transaktion auftreten. Aber ich brauche einen ernsten, treuen und
+glaubw=C3=BCrdigen Partner.
 
-regards,
-dan carpenter
+Bitte senden Sie mir eine vertrauliche Antwort, wenn Sie denken, Sie
+vertraut werden k=C3=B6nnen und sind von den Qualit=C3=A4ten! Ich warte=
+ auf Ihre
+schnelle Antwort.
 
+Werner Erich Zeller (Rechtsanwalt)
+Rufen Sie + 44-702-409-0820 (Office)
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
