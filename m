@@ -1,53 +1,27 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/3] Makefile: Fix some macro redefinition warnings
-Date: Fri, 17 May 2013 11:30:10 -0700
-Message-ID: <51967732.40302@chrisli.org>
-References: <519536B5.7020603@ramsay1.demon.co.uk>
+From: Xi Wang <xi.wang@gmail.com>
+Subject: Re: [PATCH] fix floating point ! type
+Date: Fri, 17 May 2013 17:52:47 -0400
+Message-ID: <CAKU6vybHWHHfQF8HgHnp8Qd5tpBGMRozrbt6actvbXmANXeLKA@mail.gmail.com>
+References: <1368737773-6559-1-git-send-email-xi.wang@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pa0-f43.google.com ([209.85.220.43]:55392 "EHLO
-	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755628Ab3EQSaR (ORCPT
+Received: from mail-ob0-f176.google.com ([209.85.214.176]:49824 "EHLO
+	mail-ob0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1757402Ab3EQVx2 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 17 May 2013 14:30:17 -0400
-Received: by mail-pa0-f43.google.com with SMTP id hz10so3834667pad.2
-        for <linux-sparse@vger.kernel.org>; Fri, 17 May 2013 11:30:16 -0700 (PDT)
-In-Reply-To: <519536B5.7020603@ramsay1.demon.co.uk>
+	Fri, 17 May 2013 17:53:28 -0400
+Received: by mail-ob0-f176.google.com with SMTP id wp18so5209291obc.21
+        for <linux-sparse@vger.kernel.org>; Fri, 17 May 2013 14:53:27 -0700 (PDT)
+In-Reply-To: <1368737773-6559-1-git-send-email-xi.wang@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, Xi Wang <xi.wang@gmail.com>
 
-On 05/16/2013 12:42 PM, Ramsay Jones wrote:
-> 
-> In particular, gcc complains as follows:
-> 
->        CC       sparse-llvm.o
->   <command line>:1:1: warning: "__STDC_CONSTANT_MACROS" redefined
->   <command line>:1:1: warning: this is the location of the previous definition
->   <command line>:1:1: warning: "__STDC_FORMAT_MACROS" redefined
->   <command line>:1:1: warning: this is the location of the previous definition
->   <command line>:1:1: warning: "__STDC_LIMIT_MACROS" redefined
->   <command line>:1:1: warning: this is the location of the previous definition
-> 
-> The warnings are caused by the macros being defined twice on the
-> gcc command line. These command line -D macro definitions come
-> originally from the output of 'llvm-config --cflags', which is
-> recorded in the $(LLVM_CFLAGS) variable. This variable is then
-> included in the $(BASIC_CFLAGS) variable twice due to duplication
-> of the target-specific additions to the BASIC_CFLAGS, viz:
-> 
->   sparse-llvm_EXTRA_DEPS := sparse-llvm.o
->   sparse-llvm.o $(sparse-llvm_EXTRA_DEPS): BASIC_CFLAGS += $(LLVM_CFLAGS)
-> 
-> In order to suppress the warnings, we remove the duplication of
-> the sparse-llvm.o target in the above rule.
-> 
-> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+On Thu, May 16, 2013 at 4:56 PM, Xi Wang <xi.wang@gmail.com> wrote:
+> The expression type of zero testing should be EXPR_COMPARE, rather
+> than EXPR_BINOP.
 
-I already commit a similar fix to remove the duplication.
-I did not realize it can generate warning though.
-
-Chris
+There might be a bigger problem.  The C standard says the result type
+of comparisons, !, &&, || should be int, rather than bool.
