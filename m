@@ -1,47 +1,53 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/3] char.c: Fix parsing of escapes
-Date: Fri, 17 May 2013 11:27:49 -0700
-Message-ID: <519676A5.4000706@chrisli.org>
-References: <51953664.1040300@ramsay1.demon.co.uk>
+Subject: Re: [PATCH 2/3] Makefile: Fix some macro redefinition warnings
+Date: Fri, 17 May 2013 11:30:10 -0700
+Message-ID: <51967732.40302@chrisli.org>
+References: <519536B5.7020603@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pd0-f171.google.com ([209.85.192.171]:37718 "EHLO
-	mail-pd0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755198Ab3EQS1x (ORCPT
+Received: from mail-pa0-f43.google.com ([209.85.220.43]:55392 "EHLO
+	mail-pa0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755628Ab3EQSaR (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 17 May 2013 14:27:53 -0400
-Received: by mail-pd0-f171.google.com with SMTP id t12so1854031pdi.2
-        for <linux-sparse@vger.kernel.org>; Fri, 17 May 2013 11:27:53 -0700 (PDT)
-In-Reply-To: <51953664.1040300@ramsay1.demon.co.uk>
+	Fri, 17 May 2013 14:30:17 -0400
+Received: by mail-pa0-f43.google.com with SMTP id hz10so3834667pad.2
+        for <linux-sparse@vger.kernel.org>; Fri, 17 May 2013 11:30:16 -0700 (PDT)
+In-Reply-To: <519536B5.7020603@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On 05/16/2013 12:41 PM, Ramsay Jones wrote:
+On 05/16/2013 12:42 PM, Ramsay Jones wrote:
 > 
-> When parsing a string or character constant, the parse_escape()
-> function returns a pointer to the character at which to resume
-> parsing. However, in the case of an hex or octal escape, it was
-> returning a one-past-the-end pointer. Thus, a string like:
+> In particular, gcc complains as follows:
 > 
->     char str[3] = "\x61\x62\x63";
+>        CC       sparse-llvm.o
+>   <command line>:1:1: warning: "__STDC_CONSTANT_MACROS" redefined
+>   <command line>:1:1: warning: this is the location of the previous definition
+>   <command line>:1:1: warning: "__STDC_FORMAT_MACROS" redefined
+>   <command line>:1:1: warning: this is the location of the previous definition
+>   <command line>:1:1: warning: "__STDC_LIMIT_MACROS" redefined
+>   <command line>:1:1: warning: this is the location of the previous definition
 > 
-> was being parsed as:
+> The warnings are caused by the macros being defined twice on the
+> gcc command line. These command line -D macro definitions come
+> originally from the output of 'llvm-config --cflags', which is
+> recorded in the $(LLVM_CFLAGS) variable. This variable is then
+> included in the $(BASIC_CFLAGS) variable twice due to duplication
+> of the target-specific additions to the BASIC_CFLAGS, viz:
 > 
->     '\x61', 'x', '6', '2', '\x63'
+>   sparse-llvm_EXTRA_DEPS := sparse-llvm.o
+>   sparse-llvm.o $(sparse-llvm_EXTRA_DEPS): BASIC_CFLAGS += $(LLVM_CFLAGS)
 > 
-> which, in turn, provokes an 'too long initializer' warning.
+> In order to suppress the warnings, we remove the duplication of
+> the sparse-llvm.o target in the above rule.
 > 
-> Also, fix an off-by-one error in get_char_constant() when setting
-> the 'end' pointer for a TOKEN_CHAR or TOKEN_WIDE_CHAR. Despite the
-> name, the string->length of the token is actually the size of the
-> allocated memory (ie len+1), so we need to compensate by using
-> 'token->string->length - 1'.
+> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 
-Great patch. Applied.
+I already commit a similar fix to remove the duplication.
+I did not realize it can generate warning though.
 
 Chris
-
