@@ -1,74 +1,194 @@
-From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: Re: Fwd: [problem] sparse llvm loop conditions
-Date: Sat, 18 May 2013 20:42:03 +0200
-Message-ID: <20130518184203.GE3154@debian.debian>
-References: <CAOJsxLF351XvYE6Av3hxMsqXeu2nT4vRjbLgwNAguNLEfgLQvQ@mail.gmail.com>
- <50312093.5050207@pobox.com>
+From: Xi Wang <xi.wang@gmail.com>
+Subject: Re: [PATCH 3/4] sparse, llvm: base load/store address type on insn_symbol_type()
+Date: Sat, 18 May 2013 18:45:18 -0400
+Message-ID: <5198047E.5000806@gmail.com>
+References: <1368899527-2350-1-git-send-email-j.neuschaefer@gmx.net> <1368899527-2350-3-git-send-email-j.neuschaefer@gmx.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.17.20]:62812 "EHLO mout.gmx.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752721Ab3ERSmI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 18 May 2013 14:42:08 -0400
-Received: from mailout-de.gmx.net ([10.1.76.20]) by mrigmx.server.lan
- (mrigmx001) with ESMTP (Nemesis) id 0M06gE-1UN46c2W1U-00uKsx for
- <linux-sparse@vger.kernel.org>; Sat, 18 May 2013 20:42:06 +0200
-Content-Disposition: inline
-In-Reply-To: <50312093.5050207@pobox.com>
+Received: from mail-gh0-f178.google.com ([209.85.160.178]:32916 "EHLO
+	mail-gh0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753347Ab3ERWpV (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 18 May 2013 18:45:21 -0400
+Received: by mail-gh0-f178.google.com with SMTP id g15so311588ghb.37
+        for <linux-sparse@vger.kernel.org>; Sat, 18 May 2013 15:45:20 -0700 (PDT)
+In-Reply-To: <1368899527-2350-3-git-send-email-j.neuschaefer@gmx.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Garzik <jgarzik@pobox.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka Enberg <penberg@kernel.org>, Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+To: =?UTF-8?B?Sm9uYXRoYW4gTmV1c2Now6RmZXI=?= <j.neuschaefer@gmx.net>
+Cc: linux-sparse@vger.kernel.org, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@pobox.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi Jeff, Pekka,
+On 05/18/2013 01:52 PM, Jonathan Neusch=C3=A4fer wrote:
+>   	/* convert address back to pointer */
+> -	addr =3D LLVMBuildIntToPtr(fn->builder, addr_i,
+> -				 LLVMTypeOf(src_p), "addr");
+> +	addr =3D LLVMBuildIntToPtr(fn->builder, addr_i, addr_type, "addr");
 
-On Sun, Aug 19, 2012 at 01:21:23PM -0400, Jeff Garzik wrote:
-> Here is a testcase that should get into the mailing list archives...
-> 
-> 	Jeff
-> 
-> 
-> 
-> 
-> -------- Original Message --------
-> Subject: [problem] sparse llvm loop conditions
-> Date: Wed, 23 Nov 2011 08:56:25 +0200
-> From: Pekka Enberg <penberg@kernel.org>
-> To: Jeff Garzik <jeff@garzik.org>
-> 
-> Hi Jeff,
-> 
-> Have you seen this already?
-> 
-> [penberg@tux sparse]$ cat loop.c
-> struct list_node {
-> 	struct list_node *next;
-> };
-> 
-> int foo(struct list_node *node)
-> {
-> 	int ret = 0;
-> 	while (node) {
-> 		node = node->next;
-> 		ret++;
-> 	}
-> 	return ret;
-> }
-> [penberg@tux sparse]$ ./sparse-llvm loop.c
-> loop.c:5:5: warning: symbol 'foo' was not declared. Should it be static?
-> sparse-llvm: Instructions.cpp:730: void llvm::BranchInst::AssertOK():
-> Assertion `getCondition()->getType()->isIntegerTy(1) && "May only
-> branch on boolean predicates!"' failed.
-> Aborted
-> 
->                                 Pekka
+Actually, we shouldn't convert pointers to integers in the first place.
+This effectively disables pointer analysis and future optimizations.
 
-With my patchset of today, sparse-llvm compiles this code. It turned out
-that struct accesses didn't work, because the address computed for
-load/store instructions didn't have the right LLVM type.
+A better way is to use LLVM's GEP for pointer arithmetic, by converting
+pointers to `char *', rather than integers.
 
-[ On a side note, array access doesn't work yet. ]
+See more examples here:
+http://www.spinics.net/lists/linux-sparse/msg02768.html
 
-regards,
-Jonathan
+Jonathan, how about this version using `char *' based on your patchset?
+
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 00ace6e..a01c4b7 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -541,24 +541,47 @@ static void output_op_ret(struct function *fn, st=
+ruct instruction *insn)
+ 		LLVMBuildRetVoid(fn->builder);
+ }
+=20
+-static void output_op_load(struct function *fn, struct instruction *in=
+sn)
++static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base=
+, LLVMValueRef off)
++{
++	LLVMTypeRef type =3D LLVMTypeOf(base);
++	unsigned int as =3D LLVMGetPointerAddressSpace(type);
++	LLVMTypeRef bytep =3D LLVMPointerType(LLVMInt8Type(), as);
++	LLVMValueRef addr;
++
++	/* convert base to char* type */
++	base =3D LLVMBuildPointerCast(builder, base, bytep, "");
++	/* addr =3D base + off */
++	addr =3D LLVMBuildInBoundsGEP(builder, base, &off, 1, "");
++	/* convert base back to the actual pointer type */
++	addr =3D LLVMBuildPointerCast(builder, addr, type, "");
++	return addr;
++}
++
++static LLVMValueRef calc_memop_addr(struct function *fn, struct instru=
+ction *insn)
+ {
+-	LLVMTypeRef int_type;
+-	LLVMValueRef src_p, src_i, ofs_i, addr_i, addr, target;
++	LLVMTypeRef addr_type, int_type;
++	LLVMValueRef src, base, off, addr;
++	unsigned int as;
++
++	src =3D pseudo_to_value(fn, insn, insn->src);
++	as =3D LLVMGetPointerAddressSpace(LLVMTypeOf(src));
++	addr_type =3D LLVMPointerType(insn_symbol_type(fn->module, insn), as)=
+;
++	base =3D LLVMBuildPointerCast(fn->builder, src, addr_type, "");
+=20
+ 	/* int type large enough to hold a pointer */
+ 	int_type =3D LLVMIntType(bits_in_pointer);
++	off =3D LLVMConstInt(int_type, insn->offset, 0);
++
++	addr =3D calc_gep(fn->builder, base, off);
++	return addr;
++}
+=20
+-	/* convert to integer, add src + offset */
+-	src_p =3D pseudo_to_value(fn, insn, insn->src);
+-	src_i =3D LLVMBuildPtrToInt(fn->builder, src_p, int_type, "src_i");
+=20
+-	ofs_i =3D LLVMConstInt(int_type, insn->offset, 0);
+-	addr_i =3D LLVMBuildAdd(fn->builder, src_i, ofs_i, "addr_i");
++static void output_op_load(struct function *fn, struct instruction *in=
+sn)
++{
++	LLVMValueRef addr, target;
+=20
+-	/* convert address back to pointer */
+-	addr =3D LLVMBuildIntToPtr(fn->builder, addr_i,
+-				 LLVMTypeOf(src_p), "addr");
++	addr =3D calc_memop_addr(fn, insn);
+=20
+ 	/* perform load */
+ 	target =3D LLVMBuildLoad(fn->builder, addr, "load_target");
+@@ -568,22 +591,9 @@ static void output_op_load(struct function *fn, st=
+ruct instruction *insn)
+=20
+ static void output_op_store(struct function *fn, struct instruction *i=
+nsn)
+ {
+-	LLVMTypeRef int_type;
+-	LLVMValueRef src_p, src_i, ofs_i, addr_i, addr, target, target_in;
+-
+-	/* int type large enough to hold a pointer */
+-	int_type =3D LLVMIntType(bits_in_pointer);
+-
+-	/* convert to integer, add src + offset */
+-	src_p =3D pseudo_to_value(fn, insn, insn->src);
+-	src_i =3D LLVMBuildPtrToInt(fn->builder, src_p, int_type, "src_i");
+-
+-	ofs_i =3D LLVMConstInt(int_type, insn->offset, 0);
+-	addr_i =3D LLVMBuildAdd(fn->builder, src_i, ofs_i, "addr_i");
++	LLVMValueRef addr, target, target_in;
+=20
+-	/* convert address back to pointer */
+-	addr =3D LLVMBuildIntToPtr(fn->builder, addr_i,
+-				 LLVMPointerType(int_type, 0), "addr");
++	addr =3D calc_memop_addr(fn, insn);
+=20
+ 	target_in =3D pseudo_to_value(fn, insn, insn->target);
+=20
+diff --git a/validation/backend/store-type.c b/validation/backend/store=
+-type.c
+new file mode 100644
+index 0000000..9e2ce73
+--- /dev/null
++++ b/validation/backend/store-type.c
+@@ -0,0 +1,12 @@
++struct foo;
++static struct foo *var;
++
++static void set(struct foo *f)
++{
++       var =3D f;
++}
++
++/*
++ * check-name: Type of stored objects
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
+diff --git a/validation/backend/struct-access.c b/validation/backend/st=
+ruct-access.c
+new file mode 100644
+index 0000000..884b470
+--- /dev/null
++++ b/validation/backend/struct-access.c
+@@ -0,0 +1,28 @@
++struct st {
++	int i, *d;
++};
++
++static int load_i(struct st *st)
++{
++	return st->i;
++}
++
++static void store_i(struct st *st, int i)
++{
++	st->i =3D i;
++}
++
++static int *load_d(struct st *st)
++{
++	return st->d;
++}
++
++static void store_d(struct st *st, int *d)
++{
++	st->d =3D d;
++}
++
++/*
++ * check-name: struct access code generation
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
