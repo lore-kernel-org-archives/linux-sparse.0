@@ -1,76 +1,74 @@
-From: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
-Subject: [PATCH 4/4] sparse, llvm: add a struct access test case
-Date: Sat, 18 May 2013 19:52:07 +0200
-Message-ID: <1368899527-2350-4-git-send-email-j.neuschaefer@gmx.net>
-References: <1368899527-2350-1-git-send-email-j.neuschaefer@gmx.net>
+From: Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
+Subject: Re: Fwd: [problem] sparse llvm loop conditions
+Date: Sat, 18 May 2013 20:42:03 +0200
+Message-ID: <20130518184203.GE3154@debian.debian>
+References: <CAOJsxLF351XvYE6Av3hxMsqXeu2nT4vRjbLgwNAguNLEfgLQvQ@mail.gmail.com>
+ <50312093.5050207@pobox.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mout.gmx.net ([212.227.15.18]:64688 "EHLO mout.gmx.net"
+Received: from mout.gmx.net ([212.227.17.20]:62812 "EHLO mout.gmx.net"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751718Ab3ERRwq (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 18 May 2013 13:52:46 -0400
-Received: from mailout-de.gmx.net ([10.1.76.10]) by mrigmx.server.lan
- (mrigmx001) with ESMTP (Nemesis) id 0M3PXK-1UM5rp0Qoy-00r1wY for
- <linux-sparse@vger.kernel.org>; Sat, 18 May 2013 19:52:45 +0200
-In-Reply-To: <1368899527-2350-1-git-send-email-j.neuschaefer@gmx.net>
+	id S1752721Ab3ERSmI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 18 May 2013 14:42:08 -0400
+Received: from mailout-de.gmx.net ([10.1.76.20]) by mrigmx.server.lan
+ (mrigmx001) with ESMTP (Nemesis) id 0M06gE-1UN46c2W1U-00uKsx for
+ <linux-sparse@vger.kernel.org>; Sat, 18 May 2013 20:42:06 +0200
+Content-Disposition: inline
+In-Reply-To: <50312093.5050207@pobox.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>, Pekka Enberg <penberg@kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jgarzik@redhat.com>, Linus Torvalds <torvalds@linux-foundation.org>, Xi Wang <xi.wang@gmail.com>
+To: Jeff Garzik <jgarzik@pobox.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Pekka Enberg <penberg@kernel.org>, Jonathan =?utf-8?Q?Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
 
-Cc: Pekka Enberg <penberg@kernel.org>
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Jeff Garzik <jgarzik@redhat.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Xi Wang <xi.wang@gmail.com>
-Signed-off-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
----
- validation/backend/struct-access.c |   28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
- create mode 100644 validation/backend/struct-access.c
+Hi Jeff, Pekka,
 
-diff --git a/validation/backend/struct-access.c b/validation/backend/st=
-ruct-access.c
-new file mode 100644
-index 0000000..884b470
---- /dev/null
-+++ b/validation/backend/struct-access.c
-@@ -0,0 +1,28 @@
-+struct st {
-+	int i, *d;
-+};
-+
-+static int load_i(struct st *st)
-+{
-+	return st->i;
-+}
-+
-+static void store_i(struct st *st, int i)
-+{
-+	st->i =3D i;
-+}
-+
-+static int *load_d(struct st *st)
-+{
-+	return st->d;
-+}
-+
-+static void store_d(struct st *st, int *d)
-+{
-+	st->d =3D d;
-+}
-+
-+/*
-+ * check-name: struct access code generation
-+ * check-command: ./sparsec -c $file -o tmp.o
-+ */
---=20
-1.7.10.4
+On Sun, Aug 19, 2012 at 01:21:23PM -0400, Jeff Garzik wrote:
+> Here is a testcase that should get into the mailing list archives...
+> 
+> 	Jeff
+> 
+> 
+> 
+> 
+> -------- Original Message --------
+> Subject: [problem] sparse llvm loop conditions
+> Date: Wed, 23 Nov 2011 08:56:25 +0200
+> From: Pekka Enberg <penberg@kernel.org>
+> To: Jeff Garzik <jeff@garzik.org>
+> 
+> Hi Jeff,
+> 
+> Have you seen this already?
+> 
+> [penberg@tux sparse]$ cat loop.c
+> struct list_node {
+> 	struct list_node *next;
+> };
+> 
+> int foo(struct list_node *node)
+> {
+> 	int ret = 0;
+> 	while (node) {
+> 		node = node->next;
+> 		ret++;
+> 	}
+> 	return ret;
+> }
+> [penberg@tux sparse]$ ./sparse-llvm loop.c
+> loop.c:5:5: warning: symbol 'foo' was not declared. Should it be static?
+> sparse-llvm: Instructions.cpp:730: void llvm::BranchInst::AssertOK():
+> Assertion `getCondition()->getType()->isIntegerTy(1) && "May only
+> branch on boolean predicates!"' failed.
+> Aborted
+> 
+>                                 Pekka
 
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+With my patchset of today, sparse-llvm compiles this code. It turned out
+that struct accesses didn't work, because the address computed for
+load/store instructions didn't have the right LLVM type.
+
+[ On a side note, array access doesn't work yet. ]
+
+regards,
+Jonathan
