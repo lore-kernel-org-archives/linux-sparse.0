@@ -1,85 +1,162 @@
 From: Xi Wang <xi.wang@gmail.com>
-Subject: [PATCH 1/2] sparse, llvm: improve pointer arithmetic handling
-Date: Sun, 19 May 2013 08:13:09 -0400
-Message-ID: <1368965590-6714-1-git-send-email-xi.wang@gmail.com>
+Subject: [PATCH 2/2] sparse, llvm: set target specification
+Date: Sun, 19 May 2013 08:13:10 -0400
+Message-ID: <1368965590-6714-2-git-send-email-xi.wang@gmail.com>
+References: <1368965590-6714-1-git-send-email-xi.wang@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-gh0-f181.google.com ([209.85.160.181]:46317 "EHLO
-	mail-gh0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751380Ab3ESMOk (ORCPT
+Received: from mail-gg0-f177.google.com ([209.85.161.177]:61891 "EHLO
+	mail-gg0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751380Ab3ESMOl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 19 May 2013 08:14:40 -0400
-Received: by mail-gh0-f181.google.com with SMTP id z12so1277096ghb.26
+	Sun, 19 May 2013 08:14:41 -0400
+Received: by mail-gg0-f177.google.com with SMTP id r4so1104111ggn.22
         for <linux-sparse@vger.kernel.org>; Sun, 19 May 2013 05:14:40 -0700 (PDT)
+In-Reply-To: <1368965590-6714-1-git-send-email-xi.wang@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Xi Wang <xi.wang@gmail.com>, Pekka Enberg <penberg@kernel.org>
+Cc: Xi Wang <xi.wang@gmail.com>, Pekka Enberg <penberg@kernel.org>, =?UTF-8?q?Jonathan=20Neusch=C3=A4fer?= <j.neuschaefer@gmx.net>
 
-Converting pointers to integers for pointer arithmetic effectively
-disables pointer analysis and future optimizations.  A better way is to
-use LLVM's GEP, by converting pointers to `char *' rather than integers=
+Set target triple and data layout, which are required by LLVM's backend=
 =2E
 
+Also export arch_m64 for choosing the target architecture.
+
 Cc: Pekka Enberg <penberg@kernel.org>
-Acked-by: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
+Cc: Jonathan Neusch=C3=A4fer <j.neuschaefer@gmx.net>
 Signed-off-by: Xi Wang <xi.wang@gmail.com>
 ---
-calc_gep() may be useful for fixing array access as well.
----
- sparse-llvm.c | 38 ++++++++++++++++++++++++++------------
- 1 file changed, 26 insertions(+), 12 deletions(-)
+With the two patches, we will be able to recover struct access.
 
+Consider t.c:
+
+	struct A { int x, y; };
+
+	void foo(struct A *a)
+	{
+		a->x =3D 123;
+		a->y =3D 456;
+	}
+
+$ ./sparse-llvm t.c | opt -S -O2
+=2E..
+define void @foo(%A* nocapture) #0 {
+L0:
+  %1 =3D getelementptr inbounds %A* %0, i64 0, i32 0
+  store i32 123, i32* %1, align 4
+  %2 =3D getelementptr inbounds %A* %0, i64 0, i32 1
+  store i32 456, i32* %2, align 4
+  ret void
+}
+---
+ lib.h         |  2 ++
+ sparse-llvm.c | 56 +++++++++++++++++++++++++++++++++++++++++++++++++++=
+++---
+ 2 files changed, 55 insertions(+), 3 deletions(-)
+
+diff --git a/lib.h b/lib.h
+index 680ad8f..5ab2bd9 100644
+--- a/lib.h
++++ b/lib.h
+@@ -113,6 +113,8 @@ extern int Wvla;
+ extern int dbg_entry;
+ extern int dbg_dead;
+=20
++extern int arch_m64;
++
+ extern void declare_builtin_functions(void);
+ extern void create_builtin_stream(void);
+ extern struct symbol_list *sparse_initialize(int argc, char **argv, st=
+ruct string_list **files);
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 41e0ab7..02f43f7 100644
+index 02f43f7..09eedb8 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -370,6 +370,22 @@ static LLVMValueRef pseudo_to_value(struct functio=
-n *fn, struct instruction *ins
- 	return result;
+@@ -6,6 +6,7 @@
+ #include <llvm-c/Core.h>
+ #include <llvm-c/BitWriter.h>
+ #include <llvm-c/Analysis.h>
++#include <llvm-c/Target.h>
+=20
+ #include <stdbool.h>
+ #include <stdio.h>
+@@ -1066,14 +1067,63 @@ static int compile(LLVMModuleRef module, struct=
+ symbol_list *list)
+ 	return 0;
  }
 =20
-+static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base=
-, LLVMValueRef off)
-+{
-+	LLVMTypeRef type =3D LLVMTypeOf(base);
-+	unsigned int as =3D LLVMGetPointerAddressSpace(type);
-+	LLVMTypeRef bytep =3D LLVMPointerType(LLVMInt8Type(), as);
-+	LLVMValueRef addr;
++#define X86_LINUX_LAYOUT \
++	"e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-" \
++	"i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-" \
++	"a0:0:64-f80:32:32-n8:16:32-S128"
 +
-+	/* convert base to char* type */
-+	base =3D LLVMBuildPointerCast(builder, base, bytep, "");
-+	/* addr =3D base + off */
-+	addr =3D LLVMBuildInBoundsGEP(builder, base, &off, 1, "");
-+	/* convert back to the actual pointer type */
-+	addr =3D LLVMBuildPointerCast(builder, addr, type, "");
-+	return addr;
++#define X86_64_LINUX_LAYOUT \
++	"e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-" \
++	"i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-" \
++	"a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128"
++
++static void set_target(LLVMModuleRef module)
++{
++	char target[] =3D LLVM_DEFAULT_TARGET_TRIPLE;
++	const char *arch, *vendor, *os, *env, *layout =3D NULL;
++	char triple[256];
++
++	arch =3D strtok(target, "-");
++	vendor =3D strtok(NULL, "-");
++	os =3D strtok(NULL, "-");
++	env =3D strtok(NULL, "-");
++
++	if (!os)
++		return;
++	if (!env)
++		env =3D "unknown";
++
++	if (!strcmp(arch, "x86_64") && !strcmp(os, "linux")) {
++		if (arch_m64) {
++			layout =3D X86_64_LINUX_LAYOUT;
++		} else {
++			arch =3D "i386";
++			layout =3D X86_LINUX_LAYOUT;
++		}
++	}
++
++	/* unsupported target */
++	if (!layout)
++		return;
++
++	snprintf(triple, sizeof(triple), "%s-%s-%s-%s", arch, vendor, os, env=
+);
++	LLVMSetTarget(module, triple);
++	LLVMSetDataLayout(module, layout);
 +}
 +
- static LLVMRealPredicate translate_fop(int opcode)
+ int main(int argc, char **argv)
  {
- 	static const LLVMRealPredicate trans_tbl[] =3D {
-@@ -544,23 +560,21 @@ static void output_op_ret(struct function *fn, st=
-ruct instruction *insn)
- static LLVMValueRef calc_memop_addr(struct function *fn, struct instru=
-ction *insn)
- {
- 	LLVMTypeRef int_type, addr_type;
--	LLVMValueRef src_p, src_i, ofs_i, addr_i, addr;
-+	LLVMValueRef src, off, addr;
-+	unsigned int as;
+-	struct string_list * filelist =3D NULL;
++	struct string_list *filelist =3D NULL;
++	struct symbol_list *symlist;
++	LLVMModuleRef module;
+ 	char *file;
 =20
- 	/* int type large enough to hold a pointer */
- 	int_type =3D LLVMIntType(bits_in_pointer);
-+	off =3D LLVMConstInt(int_type, insn->offset, 0);
+-	LLVMModuleRef module =3D LLVMModuleCreateWithName("sparse");
++	symlist =3D sparse_initialize(argc, argv, &filelist);
++
++	module =3D LLVMModuleCreateWithName("sparse");
++	set_target(module);
 =20
--	/* convert to integer, add src + offset */
--	src_p =3D pseudo_to_value(fn, insn, insn->src);
--	src_i =3D LLVMBuildPtrToInt(fn->builder, src_p, int_type, "src_i");
--
--	ofs_i =3D LLVMConstInt(int_type, insn->offset, 0);
--	addr_i =3D LLVMBuildAdd(fn->builder, src_i, ofs_i, "addr_i");
--
--	addr_type =3D LLVMPointerType(insn_symbol_type(fn->module, insn), 0);
+-	compile(module, sparse_initialize(argc, argv, &filelist));
++	compile(module, symlist);
+=20
+ 	/* need ->phi_users */
+ 	dbg_dead =3D 1;
+--=20
+1.8.1.2
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
