@@ -1,39 +1,68 @@
-From: Pekka Enberg <penberg@kernel.org>
-Subject: Re: [PATCH 1/2] sparse, llvm: improve pointer arithmetic handling
-Date: Sun, 19 May 2013 15:49:58 +0300
-Message-ID: <CAOJsxLErGy=US5DoegZWVHupHjCA=83MXXY2WOTmH0-wrJccmA@mail.gmail.com>
-References: <1368965590-6714-1-git-send-email-xi.wang@gmail.com>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: Re: [PATCH 3/3] symbol.c: Set correct size of array from parenthesized
+ string initializer
+Date: Mon, 20 May 2013 19:37:14 +0100
+Message-ID: <519A6D5A.8030808@ramsay1.demon.co.uk>
+References: <5195370B.9080702@ramsay1.demon.co.uk> <51972FDB.6060201@chrisli.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:64720 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751515Ab3ESMt7 convert rfc822-to-8bit (ORCPT
+Received: from mdfmta005.mxout.tch.inty.net ([91.221.169.46]:50988 "EHLO
+	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1756068Ab3ETSof (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 19 May 2013 08:49:59 -0400
-Received: by mail-wi0-f179.google.com with SMTP id hq7so1396666wib.6
-        for <linux-sparse@vger.kernel.org>; Sun, 19 May 2013 05:49:58 -0700 (PDT)
-In-Reply-To: <1368965590-6714-1-git-send-email-xi.wang@gmail.com>
+	Mon, 20 May 2013 14:44:35 -0400
+In-Reply-To: <51972FDB.6060201@chrisli.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Xi Wang <xi.wang@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sun, May 19, 2013 at 3:13 PM, Xi Wang <xi.wang@gmail.com> wrote:
-> Converting pointers to integers for pointer arithmetic effectively
-> disables pointer analysis and future optimizations.  A better way is =
-to
-> use LLVM's GEP, by converting pointers to `char *' rather than intege=
-rs.
->
-> Cc: Pekka Enberg <penberg@kernel.org>
-> Acked-by: Jonathan Neusch=E4fer <j.neuschaefer@gmx.net>
-> Signed-off-by: Xi Wang <xi.wang@gmail.com>
+Christopher Li wrote:
+> On 05/16/2013 12:44 PM, Ramsay Jones wrote:
+> 
+>> diff --git a/validation/init-char-array1.c b/validation/init-char-array1.c
+>> new file mode 100644
+>> index 0000000..7427702
+>> --- /dev/null
+>> +++ b/validation/init-char-array1.c
+>> @@ -0,0 +1,25 @@
+>> +/*
+>> + * for array of char, ("...") as the initializer is an gcc language
+>> + * extension. check that a parenthesized string initializer is handled
+>> + * correctly and that -Wparen-string warns about it's use.
+>> + */
+>> +static const char u[] = ("hello");
+>> +static const char v[] = {"hello"};
+>> +static const char w[] = "hello";
+>> +static const char x[5] = "hello";
+> 
+> That seems not complete. I haven't found the official gcc rules
+> about parenthesized string. I just try the following forms and
+> gcc takes it.
+> 
+> char x1[] = { ("hello") };
+> char x2[] = { (("hello")) };
+> 
+> I guess the rules is that parenthesized string can appear in
+> any place where string was allowed.
 
-Applied both patches, thanks a lot Xi!
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Until i18n work started on git, I didn't know this was a gcc
+extension at all! ;-) I looked at the gcc documentation available
+to me at the time, and could not find it mentioned at all, let
+alone as a gcc language extension. However, if it wasn't for the
+-Wparen-string sparse warning, I wouldn't have suspected that
+sparse was supposed to support it.
+
+Also, I was slightly surprised that MSVC supported this syntax.
+So, I looked at fixing sparse and came up with my patch. I then
+found that tcc didn't support this syntax, which is not standard
+C after all, so I submitted a patch to fix the git gettext 'N_'
+macro which was the cause of the problem.
+
+ATB,
+Ramsay Jones
+
+
+
