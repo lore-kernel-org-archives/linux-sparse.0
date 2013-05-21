@@ -1,76 +1,53 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: [PATCH 1/5] Add the __restrict__ keyword
-Date: Tue, 21 May 2013 20:15:44 +0100
-Message-ID: <519BC7E0.7030403@ramsay1.demon.co.uk>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 4/5] test-suite: Add -b option to ignore CR at eol on
+ MinGW
+Date: Tue, 21 May 2013 14:16:50 -0700
+Message-ID: <20130521211650.GA11463@jtriplet-mobl1>
+References: <519BC87D.5080002@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta005.mxout.tbr.inty.net ([91.221.168.46]:33954 "EHLO
-	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752887Ab3EUT2M (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:38774 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751953Ab3EUVRC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 21 May 2013 15:28:12 -0400
+	Tue, 21 May 2013 17:17:02 -0400
+Content-Disposition: inline
+In-Reply-To: <519BC87D.5080002@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Tue, May 21, 2013 at 08:18:21PM +0100, Ramsay Jones wrote:
+> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 
+-b doesn't just ignore CR at end of line; it would also ignore changes
+in the amount of whitespace elsewhere on the line.  You might consider
+piping the input that has CRs through sed before storing it, to delete
+the CR at end of line before comparing, instead.
 
-Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
----
- ident-list.h          | 2 +-
- parse.c               | 3 ++-
- validation/reserved.c | 1 +
- 3 files changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/ident-list.h b/ident-list.h
-index e93aae7..78b4890 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -86,7 +86,7 @@ IDENT(stdcall); IDENT(__stdcall__);
- IDENT(fastcall); IDENT(__fastcall__);
- IDENT(dllimport); IDENT(__dllimport__);
- IDENT(dllexport); IDENT(__dllexport__);
--IDENT(restrict); IDENT(__restrict);
-+IDENT(restrict); IDENT(__restrict); IDENT(__restrict__);
- IDENT(artificial); IDENT(__artificial__);
- IDENT(leaf); IDENT(__leaf__);
- IDENT(vector_size); IDENT(__vector_size__);
-diff --git a/parse.c b/parse.c
-index 890e56b..7b89cc3 100644
---- a/parse.c
-+++ b/parse.c
-@@ -419,6 +419,7 @@ static struct init_keyword {
- 	/* Ignored for now.. */
- 	{ "restrict",	NS_TYPEDEF, .op = &restrict_op},
- 	{ "__restrict",	NS_TYPEDEF, .op = &restrict_op},
-+	{ "__restrict__",	NS_TYPEDEF, .op = &restrict_op},
- 
- 	/* Storage class */
- 	{ "auto",	NS_TYPEDEF, .op = &auto_op },
-@@ -1516,7 +1517,7 @@ static struct token *abstract_array_declarator(struct token *token, struct symbo
- {
- 	struct expression *expr = NULL;
- 
--	if (match_idents(token, &restrict_ident, &__restrict_ident, NULL))
-+	if (match_idents(token, &restrict_ident, &__restrict_ident, &__restrict___ident, NULL))
- 		token = token->next;
- 	token = parse_expression(token, &expr);
- 	sym->array_size = expr;
-diff --git a/validation/reserved.c b/validation/reserved.c
-index caacd21..e5d7af8 100644
---- a/validation/reserved.c
-+++ b/validation/reserved.c
-@@ -30,6 +30,7 @@ reserved.c:8:12: error: Trying to use reserved word '__const' as identifier
- reserved.c:9:12: error: Trying to use reserved word '__const__' as identifier
- reserved.c:10:12: error: Trying to use reserved word 'restrict' as identifier
- reserved.c:11:12: error: Trying to use reserved word '__restrict' as identifier
-+reserved.c:12:12: error: Trying to use reserved word '__restrict__' as identifier
- reserved.c:13:12: error: Trying to use reserved word 'typedef' as identifier
- reserved.c:14:12: error: Trying to use reserved word '__typeof' as identifier
- reserved.c:15:12: error: Trying to use reserved word '__typeof__' as identifier
--- 
-1.8.2
-
+> ---
+>  validation/test-suite | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/validation/test-suite b/validation/test-suite
+> index 3c011c6..ded93fc 100755
+> --- a/validation/test-suite
+> +++ b/validation/test-suite
+> @@ -126,7 +126,7 @@ do_test()
+>  	actual_exit_value=$?
+>  
+>  	for stream in output error; do
+> -		diff -u "$file".$stream.expected "$file".$stream.got > "$file".$stream.diff
+> +		diff -ub "$file".$stream.expected "$file".$stream.got > "$file".$stream.diff
+>  		if [ "$?" -ne "0" ]; then
+>  			error "actual $stream text does not match expected $stream text."
+>  			error  "see $file.$stream.* for further investigation."
+> -- 
+> 1.8.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
