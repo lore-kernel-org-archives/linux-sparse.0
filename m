@@ -1,58 +1,34 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 2/5] Add support for the MinGW platform
-Date: Wed, 22 May 2013 17:46:53 -0700
-Message-ID: <20130523004653.GB12285@jtriplet-mobl1>
-References: <519BC816.3000304@ramsay1.demon.co.uk>
- <20130521220907.GE11463@jtriplet-mobl1>
- <519D419F.8090000@ramsay1.demon.co.uk>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 5/5] lib.c: Add __sync_lock_test_and_set as a builtin function
+Date: Wed, 22 May 2013 20:15:44 -0700
+Message-ID: <CANeU7Qkv7UkmFnQ__6q5zRkM8CTAUhwWhronFh-c70GLz-Q7QA@mail.gmail.com>
+References: <519BC8AF.8060804@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:41760 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754052Ab3EWArD (ORCPT
+Received: from mail-oa0-f44.google.com ([209.85.219.44]:56662 "EHLO
+	mail-oa0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756346Ab3EWDPp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 May 2013 20:47:03 -0400
-Content-Disposition: inline
-In-Reply-To: <519D419F.8090000@ramsay1.demon.co.uk>
+	Wed, 22 May 2013 23:15:45 -0400
+Received: by mail-oa0-f44.google.com with SMTP id n12so3764798oag.17
+        for <linux-sparse@vger.kernel.org>; Wed, 22 May 2013 20:15:45 -0700 (PDT)
+In-Reply-To: <519BC8AF.8060804@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Wed, May 22, 2013 at 11:07:27PM +0100, Ramsay Jones wrote:
-> Josh Triplett wrote:
-> > On Tue, May 21, 2013 at 08:16:38PM +0100, Ramsay Jones wrote:
-> >> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-> > 
-> > I believe this will match both 32-bit and 64-bit MinGW, which seems
-> > wrong.  Please do check the architecture strings for 32-bit and 64-bit
-> > MinGW, and handle them separately.
-> 
-> Yes, given that, for me:
-> 
->   $ uname -a
->   MINGW32_NT-5.1 TOSHIBA 1.0.12(0.46/3/2) 2010-02-05 01:08 i686 unknown
->   $
-> 
-> I'm hoping that the following change will be sufficient (I don't have
-> access to a 64-bit MinGW, so I don't know what 'uname -a' returns, but
-> I think this will work ... ;-):
-> 
->   $ git diff
->   diff --git a/cgcc b/cgcc
->   index e94a965..68f96b9 100755
->   --- a/cgcc
->   +++ b/cgcc
->   @@ -226,7 +226,7 @@ sub add_specs {
->               ' -D__OpenBSD__=1';
->        } elsif ($spec eq 'unix') {
->           return ' -Dunix=1 -D__unix=1 -D__unix__=1';
->   -    } elsif ($spec =~ /^mingw/) {
->   +    } elsif ($spec =~ /^mingw32/) {
+On Tue, May 21, 2013 at 12:19 PM, Ramsay Jones
+<ramsay@ramsay1.demon.co.uk> wrote:
+> +       add_pre_buffer("extern int __sync_lock_test_and_set(volatile long *const, const long);\n");
 
-Unfortunately, I don't think that suffices; I've seen a few different
-architecture triples used for 64-bit MinGW, some of which include
-"mingw32".  I *think* it might work to match i[3-6]86-.*-mingw.
+Looking at the gcc documents about atomic builtins.  quote:
+"and further that they are overloaded such that they work on multiple types"
 
-- Josh Triplett
+Sparse does not do type overload. Which means sparse can't properly support this
+function right now. If some one try to use this function on an int
+type, sparse will
+complain about type mismatch.
+
+Chris
