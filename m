@@ -1,34 +1,32 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/2] fix result type of relational and logical operators
-Date: Mon, 27 May 2013 01:07:55 -0700
-Message-ID: <20130527080701.GA2872@gmail.com>
+Subject: Re: [PATCH 2/2] fix expression type for floating point !
+Date: Mon, 27 May 2013 01:09:04 -0700
+Message-ID: <20130527080903.GB2872@gmail.com>
 References: <1369402236-16871-1-git-send-email-xi.wang@gmail.com>
- <CAOJsxLE9AEcAJwnPvPozpMDpzkgAgJex9qAYGPUT5XiwyWfr9A@mail.gmail.com>
+ <1369402236-16871-2-git-send-email-xi.wang@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pa0-f41.google.com ([209.85.220.41]:65529 "EHLO
-	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756862Ab3E0IIN (ORCPT
+Received: from mail-pb0-f50.google.com ([209.85.160.50]:44872 "EHLO
+	mail-pb0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756769Ab3E0IJQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 May 2013 04:08:13 -0400
-Received: by mail-pa0-f41.google.com with SMTP id rl6so6634704pac.14
-        for <linux-sparse@vger.kernel.org>; Mon, 27 May 2013 01:08:13 -0700 (PDT)
+	Mon, 27 May 2013 04:09:16 -0400
+Received: by mail-pb0-f50.google.com with SMTP id wy17so6539381pbc.37
+        for <linux-sparse@vger.kernel.org>; Mon, 27 May 2013 01:09:16 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CAOJsxLE9AEcAJwnPvPozpMDpzkgAgJex9qAYGPUT5XiwyWfr9A@mail.gmail.com>
+In-Reply-To: <1369402236-16871-2-git-send-email-xi.wang@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Xi Wang <xi.wang@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Jeff Garzik <jgarzik@pobox.com>
+To: Xi Wang <xi.wang@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Mon, May 27, 2013 at 09:33:42AM +0300, Pekka Enberg wrote:
-> On Fri, May 24, 2013 at 4:30 PM, Xi Wang <xi.wang@gmail.com> wrote:
-> > The result type of relational operators (e.g., x < y) and logical
-> > operators (e.g., x && y) in C should be int, rather than bool.
+On Fri, May 24, 2013 at 09:30:36AM -0400, Xi Wang wrote:
 > 
-> Looks good to me. Chris, are you OK with me picking this up in the llvm tree?
+> The expression type of zero testing should be EXPR_COMPARE, rather than
+> EXPR_BINOP, which causes bad_op.
+> 
+> Signed-off-by: Xi Wang <xi.wang@gmail.com>
 
 Acked-By: Christopher Li <sparse@chrisli.org>
-
-Chris
 
