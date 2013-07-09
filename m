@@ -1,245 +1,97 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [PATCH 3/3] symbol.c: Set correct size of array from parenthesized
- string initializer
-Date: Sat, 01 Jun 2013 18:42:39 +0100
-Message-ID: <51AA328F.3040603@ramsay1.demon.co.uk>
-References: <5195370B.9080702@ramsay1.demon.co.uk> <51972FDB.6060201@chrisli.org> <5197387E.5030000@gmail.com> <519A6EAD.8070700@ramsay1.demon.co.uk> <519E3582.7060704@gmail.com> <51A1189A.1010404@ramsay1.demon.co.uk> <20130529100207.GA3005@gmail.com>
+From: Pekka Enberg <penberg@kernel.org>
+Subject: [GIT PULL] Sparse/LLVM updates
+Date: Tue, 9 Jul 2013 15:21:21 +0300
+Message-ID: <CAOJsxLGSp7oPm8-qHEZvS4Oj=nfA2ZgnQAHwT762QxWSUj_JuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta005.mxout.tch.inty.net ([91.221.169.46]:34946 "EHLO
-	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751289Ab3FARsT (ORCPT
+Received: from mail-wi0-f170.google.com ([209.85.212.170]:35010 "EHLO
+	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753581Ab3GIMVW convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 1 Jun 2013 13:48:19 -0400
-In-Reply-To: <20130529100207.GA3005@gmail.com>
+	Tue, 9 Jul 2013 08:21:22 -0400
+Received: by mail-wi0-f170.google.com with SMTP id ey16so11106315wid.5
+        for <linux-sparse@vger.kernel.org>; Tue, 09 Jul 2013 05:21:21 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Chris Li <sparse@chrisli.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Xi Wang <xi.wang@gmail.com>, =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>
 
-Chris Li wrote:
-> On Sat, May 25, 2013 at 09:01:30PM +0100, Ramsay Jones wrote:
->> +static struct expression *paren_string(struct expression *expr)
-> 
-> Paren sounds very much like "parent". I would make the function name
-> "parenthesized_string" or "extract_parenthesized_string".
+Hi Chris,
 
-OK, see below.
+Please consider pulling the latest Sparse/LLVM tree:
 
-> 
->>  
->> +	/* check for a parenthesized string: char x[] = ("string"); */
->> +	if (is_char && (p = paren_string(expr)))
->> +		expr = p;
->> +
-> 
-> I want to move this test to inside the switch statement.
-> The parenthesized string is a very rare case. Adding the test
-> here make the common case pay a price.
+  git@github.com:penberg/sparse-llvm.git llvm/core
 
-OK
+It has various LLVM backend fixes from Jonathan and Xi.
 
-> 
->>  	switch (expr->type) {
->>  	case EXPR_INITIALIZER: {
->>  		struct expression *entry;
->> @@ -296,6 +313,10 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
->>  				if (entry->idx_to >= nr)
->>  					nr = entry->idx_to+1;
->>  				break;
->> +			case EXPR_PREOP:
->> +				/* check for char x[] = {("string")}; */
->> +				if (is_char && (p = paren_string(entry)))
->> +					entry = p;
->>  			case EXPR_STRING:
->>  				if (is_char)
->>  					str_len = entry->string->length;
-> 
-> OK, here is the subtle bug. Consider the case expr->type ==  EXPR_PREOP
-> and is_char == 1 and paren_string(entry) return false.
+                        Pekka
 
-Heh, indeed.
+------------------>
 
-> 
-> If you have better way to write it I am open to it.
-> 
+The following changes since commit 5449cfbfe55eea2a602a40122c122b5040d6=
+7243:
 
-Well, I don't know that it's better; but the following patch (with or
-without the diff applied) *reads* better to me. :-D
+  Allow forced attribute in function argument (2013-04-26 08:27:41 -070=
+0)
 
-Note that the patch given below, after the scissors mark, keeps the
-"fall through" into the string case, but I actually prefer not to do
-so, and would add this (at least) on top:
+are available in the git repository at:
 
-  diff --git a/symbol.c b/symbol.c
-  index 4e7b6e2..06e9596 100644
-  --- a/symbol.c
-  +++ b/symbol.c
-  @@ -312,12 +312,12 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
-   			case EXPR_PREOP:
-   				/* check for: char x[] = {("string")}; */
-   				p = parenthesized_string(entry);
-  -				if (!(is_char && p)) {
-  -					nr++;
-  -					break;
-  +				if (is_char && p) {
-  +					entry = p;
-  +					str_len = entry->string->length;
-   				}
-  -				entry = p;
-  -				/* fall through to string */
-  +				nr++;
-  +				break;
-   			case EXPR_STRING:
-   				if (is_char)
-   					str_len = entry->string->length;
-  @@ -332,10 +332,11 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
-   	case EXPR_PREOP:
-   		/* check for parenthesized string: char x[] = ("string"); */
-   		p = parenthesized_string(expr);
-  -		if (!(is_char && p))
-  -			break;
-  -		expr = p;
-  -		/* fall through to string */
-  +		if (is_char && p) {
-  +			expr = p;
-  +			nr = expr->string->length;
-  +		}
-  +		break;
-   	case EXPR_STRING:
-   		if (is_char)
-   			nr = expr->string->length;
-  
-Actually, I've just noticed that the last hunk above can be simplified
-even further (there is no need to assign p to expr, just use p directly
-in the assignment to nr).
+  git@github.com:penberg/sparse-llvm.git llvm/core
 
-[I would also consider making the string case self contained and not
-falling through to the default case; i.e. add the "nr++;" and "break;"
-statements.]
+for you to fetch changes up to c0296d71405a97349d82e9909cad82a2af3271c2=
+:
 
-I have tested the patch below as-is, *and* with the above squashed in, on
-Linux, cygwin and MinGW. Note, also, that the test has been fixed up.
+  Fix expression type for floating point negation ('!') (2013-05-27
+14:15:56 +0300)
 
-Anyway, I will leave to choice of solution to you. ;-)
+----------------------------------------------------------------
+Jonathan Neusch=E4fer (4):
+      sparse, llvm: Fix resulting type of store address calculations
+      sparse, llvm: de-duplicate load/store address calculation code
+      sparse, llvm: base load/store address type on insn_symbol_type()
+      sparse, llvm: add a struct access test case
 
-HTH
+Pekka Enberg (1):
+      sparse, llvm: Use LLVM_HOSTTRIPLE
 
-ATB,
-Ramsay Jones
+Xi Wang (12):
+      sparse, llvm: fix phi generation
+      sparse, llvm: simplify function generation
+      sparse, llvm: improve pointer arithmetic handling
+      sparse, llvm: set target specification
+      sparse, llvm: use LLVM_DEFAULT_TARGET_TRIPLE
+      sparse, llvm: fix array size
+      sparse, llvm: cache symbol_type() result
+      sparse, llvm: fix struct name generation
+      sparse, llvm: set more data attributes
+      sparse, llvm: die if error
+      Fix result type of relational and logical operators
+      Fix expression type for floating point negation ('!')
 
-
--- >8 --
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Date: Thu, 16 May 2013 20:44:11 +0100
-Subject: [PATCH] symbol.c: Set correct size of array from parenthesized string initializer
-
-Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Signed-off-by: Christopher Li <sparse@chrisli.org>
----
- symbol.c                      | 30 ++++++++++++++++++++++++++++++
- validation/init-char-array1.c | 28 ++++++++++++++++++++++++++++
- 2 files changed, 58 insertions(+)
- create mode 100644 validation/init-char-array1.c
-
-diff --git a/symbol.c b/symbol.c
-index 80a2f23..4e7b6e2 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -269,8 +269,21 @@ void merge_type(struct symbol *sym, struct symbol *base_type)
- 		merge_type(sym, sym->ctype.base_type);
- }
- 
-+static struct expression *parenthesized_string(struct expression *expr)
-+{
-+	if (expr && expr->type == EXPR_PREOP && expr->op == '(') {
-+		struct expression *e = expr;
-+		while (e && e->type == EXPR_PREOP && e->op == '(')
-+			e = e->unop;
-+		if (e && e->type == EXPR_STRING)
-+			return e;
-+	}
-+	return NULL;
-+}
-+
- static int count_array_initializer(struct symbol *t, struct expression *expr)
- {
-+	struct expression *p;
- 	int nr = 0;
- 	int is_char = 0;
- 
-@@ -296,6 +309,15 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
- 				if (entry->idx_to >= nr)
- 					nr = entry->idx_to+1;
- 				break;
-+			case EXPR_PREOP:
-+				/* check for: char x[] = {("string")}; */
-+				p = parenthesized_string(entry);
-+				if (!(is_char && p)) {
-+					nr++;
-+					break;
-+				}
-+				entry = p;
-+				/* fall through to string */
- 			case EXPR_STRING:
- 				if (is_char)
- 					str_len = entry->string->length;
-@@ -307,9 +329,17 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
- 			nr = str_len;
- 		break;
- 	}
-+	case EXPR_PREOP:
-+		/* check for parenthesized string: char x[] = ("string"); */
-+		p = parenthesized_string(expr);
-+		if (!(is_char && p))
-+			break;
-+		expr = p;
-+		/* fall through to string */
- 	case EXPR_STRING:
- 		if (is_char)
- 			nr = expr->string->length;
-+		break;
- 	default:
- 		break;
- 	}
-diff --git a/validation/init-char-array1.c b/validation/init-char-array1.c
-new file mode 100644
-index 0000000..923741f
---- /dev/null
-+++ b/validation/init-char-array1.c
-@@ -0,0 +1,28 @@
-+/*
-+ * for array of char, ("...") as the initializer is an gcc language
-+ * extension. check that a parenthesized string initializer is handled
-+ * correctly and that -Wparen-string warns about it's use.
-+ */
-+static const char u[] = ("hello");
-+static const char v[] = {"hello"};
-+static const char w[] = {("hello")};
-+static const char x[] = "hello";
-+static const char y[5] = "hello";
-+
-+static void f(void)
-+{
-+	char a[1/(sizeof(u) == 6)];
-+	char b[1/(sizeof(v) == 6)];
-+	char c[1/(sizeof(w) == 6)];
-+	char d[1/(sizeof(x) == 6)];
-+	char e[1/(sizeof(y) == 5)];
-+}
-+/*
-+ * check-name: parenthesized string initializer
-+ * check-command: sparse -Wparen-string $file
-+ *
-+ * check-error-start
-+init-char-array1.c:6:26: warning: array initialized from parenthesized string constant
-+init-char-array1.c:8:27: warning: array initialized from parenthesized string constant
-+ * check-error-end
-+ */
--- 
-1.8.3
-
-
-
+ evaluate.c                         |  17 ++--
+ lib.h                              |   2 +
+ linearize.c                        |   4 +-
+ sparse-llvm.c                      | 488
+++++++++++++++++++++++++++++++++++++-----------------------------------=
+---------------------
+ sparsei                            |  13 +++
+ validation/backend/loop2.c         |  14 +++
+ validation/backend/store-type.c    |  12 +++
+ validation/backend/struct-access.c |  28 ++++++
+ validation/backend/struct.c        |   6 ++
+ validation/backend/sum.c           |  28 ++++++
+ validation/cond_expr3.c            |  17 ++++
+ 11 files changed, 320 insertions(+), 309 deletions(-)
+ create mode 100755 sparsei
+ create mode 100644 validation/backend/loop2.c
+ create mode 100644 validation/backend/store-type.c
+ create mode 100644 validation/backend/struct-access.c
+ create mode 100644 validation/backend/sum.c
+ create mode 100644 validation/cond_expr3.c
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
