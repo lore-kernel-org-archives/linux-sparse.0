@@ -1,35 +1,30 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [GIT PULL] Sparse/LLVM updates
-Date: Thu, 25 Jul 2013 09:43:22 -0700
-Message-ID: <CANeU7Q=GuZZH8B_wpvUXG4o7TnyC_EZdevcWPq0TYJ2boiC=nw@mail.gmail.com>
-References: <CAOJsxLGSp7oPm8-qHEZvS4Oj=nfA2ZgnQAHwT762QxWSUj_JuQ@mail.gmail.com>
+From: Jean Sacren <sakiwit@gmail.com>
+Subject: Build setting for sparse
+Date: Fri, 2 Aug 2013 22:13:43 -0600
+Message-ID: <20130803041343.GA3620@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:46100 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756080Ab3GYQnX (ORCPT
+Received: from mail-pa0-f41.google.com ([209.85.220.41]:49997 "EHLO
+	mail-pa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750818Ab3HCEPt (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Jul 2013 12:43:23 -0400
-Received: by mail-oa0-f46.google.com with SMTP id h1so4849440oag.5
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Jul 2013 09:43:22 -0700 (PDT)
-In-Reply-To: <CAOJsxLGSp7oPm8-qHEZvS4Oj=nfA2ZgnQAHwT762QxWSUj_JuQ@mail.gmail.com>
+	Sat, 3 Aug 2013 00:15:49 -0400
+Received: by mail-pa0-f41.google.com with SMTP id bj1so1346974pad.14
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Aug 2013 21:15:49 -0700 (PDT)
+Received: from localhost ([76.8.208.182])
+        by mx.google.com with ESMTPSA id xe9sm14044064pab.0.2013.08.02.21.15.47
+        for <linux-sparse@vger.kernel.org>
+        (version=TLSv1.2 cipher=RC4-SHA bits=128/128);
+        Fri, 02 Aug 2013 21:15:48 -0700 (PDT)
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pekka Enberg <penberg@kernel.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Xi Wang <xi.wang@gmail.com>, =?ISO-8859-1?Q?Jonathan_Neusch=E4fer?= <j.neuschaefer@gmx.net>
+To: linux-sparse@vger.kernel.org
 
-On Tue, Jul 9, 2013 at 5:21 AM, Pekka Enberg <penberg@kernel.org> wrote:
-> Hi Chris,
->
-> Please consider pulling the latest Sparse/LLVM tree:
->
->   git@github.com:penberg/sparse-llvm.git llvm/core
->
-> It has various LLVM backend fixes from Jonathan and Xi.
->
+What are the simplest build settings to be put in local.mk so that all
+the output files of sparse could be located in <DIRECTORY> other than
+the source directory? Thanks in advance.
 
-I merge the branch and push at the chrisl repository. Please check if I make it
-right. I will make it to the official repository soon.
-
-Chris
+-- 
+Jean Sacren
