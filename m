@@ -1,91 +1,42 @@
-From: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
-Subject: Re: [PATCH] rcu: Make rcu_assign_pointer's assignment volatile and
- type-safe
-Date: Sun, 1 Sep 2013 19:01:37 -0700
-Message-ID: <20130902020137.GI3871@linux.vnet.ibm.com>
-References: <20130823164637.GB3871@linux.vnet.ibm.com>
- <20130823171653.GA16558@Krystal>
- <20130823210822.GD3871@linux.vnet.ibm.com>
- <20130830005733.GA20664@linux.vnet.ibm.com>
- <20130830021637.GA21862@leaf>
- <20130831213228.GF3871@linux.vnet.ibm.com>
- <20130901204209.GA20802@leaf>
- <20130901222619.GH3871@linux.vnet.ibm.com>
- <20130901224317.GA25057@leaf>
- <20130901234251.GB25057@leaf>
-Reply-To: paulmck@linux.vnet.ibm.com
+From: Wang Shilong <wangshilong1991@gmail.com>
+Subject: Re: rcu: Make rcu_assign_pointer's assignment volatile
+	and type-safe
+Date: Mon, 02 Sep 2013 07:50:09 +0800
+Message-ID: <5223d2b1.W0Uf1KjUIaBOcCMH%wangshilong1991@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20130901234251.GB25057@leaf>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <lttng-dev-bounces@lists.lttng.org>
+List-Unsubscribe: <http://lists.lttng.org/cgi-bin/mailman/options/lttng-dev>,
+	<mailto:lttng-dev-request@lists.lttng.org?subject=unsubscribe>
+List-Archive: <http://lists.lttng.org/pipermail/lttng-dev>
+List-Post: <mailto:lttng-dev@lists.lttng.org>
+List-Help: <mailto:lttng-dev-request@lists.lttng.org?subject=help>
+List-Subscribe: <http://lists.lttng.org/cgi-bin/mailman/listinfo/lttng-dev>,
+	<mailto:lttng-dev-request@lists.lttng.org?subject=subscribe>
+Errors-To: lttng-dev-bounces@lists.lttng.org
 To: Josh Triplett <josh@joshtriplett.org>
-Cc: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Stephen Hemminger <stephen@networkplumber.org>, lttng-dev@lists.lttng.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, Wang Shilong <wangshilong1991@gmail.com>, Stephen Hemminger <stephen@networkplumber.org>, lttng-dev@lists.lttng.org, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Sun, Sep 01, 2013 at 04:42:52PM -0700, Josh Triplett wrote:
-> rcu_assign_pointer needs to use ACCESS_ONCE to make the assignment to
-> the destination pointer volatile, to protect against compilers too
-> clever for their own good.
-> 
-> In addition, since rcu_assign_pointer force-casts the source pointer to
-> add the __rcu address space (overriding any existing address space), add
-> an explicit check that the source pointer has the __kernel address space
-> to start with.
-> 
-> This new check produces warnings like this, when attempting to assign
-> from a __user pointer:
-> 
-> test.c:25:9: warning: incorrect type in argument 2 (different address spaces)
-> test.c:25:9:    expected struct foo *<noident>
-> test.c:25:9:    got struct foo [noderef] <asn:1>*badsrc
-> 
-> Signed-off-by: Josh Triplett <josh@joshtriplett.org>
+Hello, Using checkpatch.pl, i get the following warnings(errors):
+WARNING: line over 80 characters
+#57: FILE: include/linux/rcupdate.h:518:
++		extern void __rcu_assign_pointer_typecheck(int, typeof(*(v)) __kernel *); \
 
-Queued for 3.13, thank you very much!
+ERROR: need consistent spacing around '*' (ctx:WxB)
+#72: FILE: include/linux/rcupdate.h:568:
++		ACCESS_ONCE(p) = (typeof(*(v)) __force space *)(v); \
+ 		                                             ^
 
-							Thanx, Paul
+total: 1 errors, 1 warnings, 26 lines checked
 
-> ---
->  include/linux/rcupdate.h | 12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
-> 
-> diff --git a/include/linux/rcupdate.h b/include/linux/rcupdate.h
-> index 4b14bdc..3f62def 100644
-> --- a/include/linux/rcupdate.h
-> +++ b/include/linux/rcupdate.h
-> @@ -510,8 +510,17 @@ static inline void rcu_preempt_sleep_check(void)
->  #ifdef __CHECKER__
->  #define rcu_dereference_sparse(p, space) \
->  	((void)(((typeof(*p) space *)p) == p))
-> +/* The dummy first argument in __rcu_assign_pointer_typecheck makes the
-> + * typechecked pointer the second argument, matching rcu_assign_pointer itself;
-> + * this avoids confusion about argument numbers in warning messages. */
-> +#define __rcu_assign_pointer_check_kernel(v) \
-> +	do { \
-> +		extern void __rcu_assign_pointer_typecheck(int, typeof(*(v)) __kernel *); \
-> +		__rcu_assign_pointer_typecheck(0, v); \
-> +	} while (0)
->  #else /* #ifdef __CHECKER__ */
->  #define rcu_dereference_sparse(p, space)
-> +#define __rcu_assign_pointer_check_kernel(v) do { } while (0)
->  #endif /* #else #ifdef __CHECKER__ */
-> 
->  #define __rcu_access_pointer(p, space) \
-> @@ -555,7 +564,8 @@ static inline void rcu_preempt_sleep_check(void)
->  #define __rcu_assign_pointer(p, v, space) \
->  	do { \
->  		smp_wmb(); \
-> -		(p) = (typeof(*v) __force space *)(v); \
-> +		__rcu_assign_pointer_check_kernel(v); \
-> +		ACCESS_ONCE(p) = (typeof(*(v)) __force space *)(v); \
->  	} while (0)
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-kernel" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> Please read the FAQ at  http://www.tux.org/lkml/
-> 
+patch has style problems, please review.
+
+If any of these errors are false positives, please report
+them to the maintainer, see CHECKPATCH in MAINTAINERS.
+
+Thanks, Wang
+
+Notice: this is an automatically generated by shell script
+Any problems please contact: wangshilong1991@gmail.com
