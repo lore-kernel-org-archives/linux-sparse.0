@@ -1,78 +1,33 @@
 From: Josh Triplett <josh@joshtriplett.org>
-Subject: [PATCH] rcu: Make rcu_assign_pointer's assignment volatile and
- type-safe
-Date: Sun, 1 Sep 2013 16:42:52 -0700
-Message-ID: <20130901234251.GB25057@leaf>
-References: <20130822213318.49a57fa2@nehalam.linuxnetplumber.net>
- <20130823164637.GB3871@linux.vnet.ibm.com>
- <20130823171653.GA16558@Krystal>
- <20130823210822.GD3871@linux.vnet.ibm.com>
- <20130830005733.GA20664@linux.vnet.ibm.com>
- <20130830021637.GA21862@leaf>
- <20130831213228.GF3871@linux.vnet.ibm.com>
- <20130901204209.GA20802@leaf>
- <20130901222619.GH3871@linux.vnet.ibm.com>
- <20130901224317.GA25057@leaf>
+Subject: Re: rcu: Make rcu_assign_pointer's assignment volatile and type-safe
+Date: Sun, 1 Sep 2013 17:06:26 -0700
+Message-ID: <20130902000626.GA22111@leaf>
+References: <5223d2b1.W0Uf1KjUIaBOcCMH%wangshilong1991@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20130901224317.GA25057@leaf>
+In-Reply-To: <5223d2b1.W0Uf1KjUIaBOcCMH%wangshilong1991@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
-Cc: Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Stephen Hemminger <stephen@networkplumber.org>, lttng-dev@lists.lttng.org, sparse@chrisli.org, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Wang Shilong <wangshilong1991@gmail.com>
+Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, sparse@chrisli.org, lttng-dev@lists.lttng.org, Stephen Hemminger <stephen@networkplumber.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Andy Whitcroft <apw@canonical.com>, Joe Perches <joe@perches.com>
 List-Id: linux-sparse@vger.kernel.org
 
-rcu_assign_pointer needs to use ACCESS_ONCE to make the assignment to
-the destination pointer volatile, to protect against compilers too
-clever for their own good.
+On Mon, Sep 02, 2013 at 07:50:09AM +0800, Wang Shilong wrote:
+> Hello, Using checkpatch.pl, i get the following warnings(errors):
+> WARNING: line over 80 characters
+> #57: FILE: include/linux/rcupdate.h:518:
+> +		extern void __rcu_assign_pointer_typecheck(int, typeof(*(v)) __kernel *); \
 
-In addition, since rcu_assign_pointer force-casts the source pointer to
-add the __rcu address space (overriding any existing address space), add
-an explicit check that the source pointer has the __kernel address space
-to start with.
+It'd get much uglier if wrapped, and the function name needs to stay
+unique to avoid conflicts with the macro context.  I don't plan to
+change this.
 
-This new check produces warnings like this, when attempting to assign
-from a __user pointer:
+> ERROR: need consistent spacing around '*' (ctx:WxB)
+> #72: FILE: include/linux/rcupdate.h:568:
+> +		ACCESS_ONCE(p) = (typeof(*(v)) __force space *)(v); \
 
-test.c:25:9: warning: incorrect type in argument 2 (different address spaces)
-test.c:25:9:    expected struct foo *<noident>
-test.c:25:9:    got struct foo [noderef] <asn:1>*badsrc
+False positive; checkpatch.pl seems to parse this as multiplication
+rather than a cast.
 
-Signed-off-by: Josh Triplett <josh@joshtriplett.org>
----
- include/linux/rcupdate.h | 12 +++++++++++-
- 1 file changed, 11 insertions(+), 1 deletion(-)
-
-diff --git a/include/linux/rcupdate.h b/include/linux/rcupdate.h
-index 4b14bdc..3f62def 100644
---- a/include/linux/rcupdate.h
-+++ b/include/linux/rcupdate.h
-@@ -510,8 +510,17 @@ static inline void rcu_preempt_sleep_check(void)
- #ifdef __CHECKER__
- #define rcu_dereference_sparse(p, space) \
- 	((void)(((typeof(*p) space *)p) == p))
-+/* The dummy first argument in __rcu_assign_pointer_typecheck makes the
-+ * typechecked pointer the second argument, matching rcu_assign_pointer itself;
-+ * this avoids confusion about argument numbers in warning messages. */
-+#define __rcu_assign_pointer_check_kernel(v) \
-+	do { \
-+		extern void __rcu_assign_pointer_typecheck(int, typeof(*(v)) __kernel *); \
-+		__rcu_assign_pointer_typecheck(0, v); \
-+	} while (0)
- #else /* #ifdef __CHECKER__ */
- #define rcu_dereference_sparse(p, space)
-+#define __rcu_assign_pointer_check_kernel(v) do { } while (0)
- #endif /* #else #ifdef __CHECKER__ */
- 
- #define __rcu_access_pointer(p, space) \
-@@ -555,7 +564,8 @@ static inline void rcu_preempt_sleep_check(void)
- #define __rcu_assign_pointer(p, v, space) \
- 	do { \
- 		smp_wmb(); \
--		(p) = (typeof(*v) __force space *)(v); \
-+		__rcu_assign_pointer_check_kernel(v); \
-+		ACCESS_ONCE(p) = (typeof(*(v)) __force space *)(v); \
- 	} while (0)
- 
- 
+- Josh Triplett
