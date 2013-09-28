@@ -1,37 +1,26 @@
-From: "Emilio G. Cota" <cota@braap.org>
-Subject: [PATCH] gitignore: add 'version.h'
-Date: Fri, 27 Sep 2013 19:57:41 -0400
-Message-ID: <1380326261-13229-1-git-send-email-cota@braap.org>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH] gitignore: add 'version.h'
+Date: Fri, 27 Sep 2013 17:54:51 -0700
+Message-ID: <20130928005451.GA16682@leaf>
+References: <1380326261-13229-1-git-send-email-cota@braap.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out1-smtp.messagingengine.com ([66.111.4.25]:33777 "EHLO
-	out1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1753224Ab3I0X6q (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:44365 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753478Ab3I1Ay6 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 27 Sep 2013 19:58:46 -0400
+	Fri, 27 Sep 2013 20:54:58 -0400
+Content-Disposition: inline
+In-Reply-To: <1380326261-13229-1-git-send-email-cota@braap.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org
-Cc: linux-sparse@vger.kernel.org, "Emilio G. Cota" <cota@braap.org>
+To: "Emilio G. Cota" <cota@braap.org>
+Cc: sparse@chrisli.org, linux-sparse@vger.kernel.org
 
-From: "Emilio G. Cota" <cota@braap.org>
+On Fri, Sep 27, 2013 at 07:57:41PM -0400, Emilio G. Cota wrote:
+> From: "Emilio G. Cota" <cota@braap.org>
+> 
+> Signed-off-by: Emilio G. Cota <cota@braap.org>
 
-Signed-off-by: Emilio G. Cota <cota@braap.org>
----
- .gitignore | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/.gitignore b/.gitignore
-index bb33508..d32d063 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -8,6 +8,7 @@
- # generated
- pre-process.h
- sparse.pc
-+version.h
- 
- # programs
- test-inspect
--- 
-1.8.3
-
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
