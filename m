@@ -1,50 +1,44 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [patch] allow char to be unsigned
-Date: Wed, 16 Oct 2013 14:22:34 +0300
-Message-ID: <20131016112234.GA18544@longonot.mountain>
+From: Larry Finger <Larry.Finger@lwfinger.net>
+Subject: sparse: possible false report of context imbalance
+Date: Wed, 16 Oct 2013 22:23:56 -0500
+Message-ID: <525F584C.5010106@lwfinger.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from aserp1040.oracle.com ([141.146.126.69]:45871 "EHLO
-	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1760586Ab3JPLZh (ORCPT
+Received: from mail-oa0-f54.google.com ([209.85.219.54]:49107 "EHLO
+	mail-oa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1761432Ab3JQDX6 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 16 Oct 2013 07:25:37 -0400
-Content-Disposition: inline
+	Wed, 16 Oct 2013 23:23:58 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: smatch@vger.kernel.org, Peter Oberparleiter <oberpar@linux.vnet.ibm.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
 
-On s390x machines the char type is unsigned.  We can detect these at
-build time using the GCC __CHAR_UNSIGNED__ macro.
+Hi,
 
-Reported-by: Peter Oberparleiter <oberpar@linux.vnet.ibm.com>
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
+Sparse reports the following:
 
-diff --git a/symbol.c b/symbol.c
-index 86aef1c..9e0a27a 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -784,6 +784,12 @@ void init_symbols(void)
- 	}
- }
- 
-+#ifdef __CHAR_UNSIGNED__
-+#define CHAR_SIGNEDNESS MOD_UNSIGNED
-+#else
-+#define CHAR_SIGNEDNESS MOD_SIGNED
-+#endif
-+
- #define MOD_ESIGNED (MOD_SIGNED | MOD_EXPLICITLY_SIGNED)
- #define MOD_LL (MOD_LONG | MOD_LONGLONG)
- #define MOD_LLL MOD_LONGLONGLONG
-@@ -801,7 +807,7 @@ static const struct ctype_declare {
- 	{ &incomplete_ctype,SYM_BASETYPE, 0,			    NULL,		     NULL,		 NULL },
- 	{ &bad_ctype,	    SYM_BASETYPE, 0,			    NULL,		     NULL,		 NULL },
- 
--	{ &char_ctype,	    SYM_BASETYPE, MOD_SIGNED | MOD_CHAR,    &bits_in_char,	     &max_int_alignment, &int_type },
-+	{ &char_ctype,	    SYM_BASETYPE, CHAR_SIGNEDNESS | MOD_CHAR,    &bits_in_char,	     &max_int_alignment, &int_type },
- 	{ &schar_ctype,	    SYM_BASETYPE, MOD_ESIGNED | MOD_CHAR,   &bits_in_char,	     &max_int_alignment, &int_type },
- 	{ &uchar_ctype,	    SYM_BASETYPE, MOD_UNSIGNED | MOD_CHAR,  &bits_in_char,	     &max_int_alignment, &int_type },
- 	{ &short_ctype,	    SYM_BASETYPE, MOD_SIGNED | MOD_SHORT,   &bits_in_short,	     &max_int_alignment, &int_type },
+   CHECK   drivers/staging/rtl8188eu/core/rtw_mlme.c
+drivers/staging/rtl8188eu/core/rtw_mlme.c:1003:9: warning: context imbalance in 
+'rtw_free_assoc_resources' - different lock contexts for basic block
+
+The code in question is as follows:
+
+         if (lock_scanned_queue)
+                 spin_lock_bh(&(pmlmepriv->scanned_queue.lock));
+
+         pwlan = rtw_find_network(&pmlmepriv->scanned_queue, 
+tgt_network->network.MacAddress);
+
+         if (lock_scanned_queue)
+                 spin_unlock_bh(&(pmlmepriv->scanned_queue.lock));
+
+As this fragment uses the identical test to unlock that is used to lock, and the 
+test variable is not touched, I think this is a false indication. I am using 
+version 0.4.4 of sparse.
+
+Thanks,
+
+Larry
