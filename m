@@ -1,68 +1,34 @@
-From: Larry Finger <Larry.Finger@lwfinger.net>
-Subject: Re: sparse: possible false report of context imbalance
-Date: Thu, 17 Oct 2013 12:41:01 -0500
-Message-ID: <5260212D.2090905@lwfinger.net>
-References: <525F584C.5010106@lwfinger.net> <20131017162551.GA4123@jtriplet-mobl1>
+From: "Mrs. Mary Saleh Saville" <pattersonjwilliam@yahoo.com>
+Subject: Donation Project
+Date: Wed, 6 Nov 2013 01:42:15 +0800
+Message-ID: <201311050334.rA53YJuP021289__16803.9802847945$1383673627$gmane$org@tx.cpta.com.cn>
+Reply-To: <mary_saleh@europemail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Type: text/plain;
+	charset="Windows-1251"
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oa0-f46.google.com ([209.85.219.46]:53516 "EHLO
-	mail-oa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756076Ab3JQRlD (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 17 Oct 2013 13:41:03 -0400
-In-Reply-To: <20131017162551.GA4123@jtriplet-mobl1>
+Received: from [114.255.29.133] ([114.255.29.133]:53428 "EHLO tx.cpta.com.cn"
+	rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1754482Ab3KERqw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 5 Nov 2013 12:46:52 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>
+To: linuxdicas@yahoogroups.com.br, linxlunx@yahoogroups.com, linuxvadapav@yahoogroups.com, linuxtechbiz@yahoogroups.com, linuxindo@yahoogroups.com, linuxhubli@yahoogroups.com, lioc_farrerab@yahoo.es, linux-sparse@vger.kernel.org, linux-securitymodule@vger.kernel.org, linux-scsi@vger.kernel.org, linux-rtusers@vger.kernel.org, linux-raid@vger.kernel.org, linuxnewbie@vger.kernel.org, linux-net@vger.kernel.org, linux-msdos@vger.kernel.org, linux-m68k@vger.kernel.org, linuxkernel@vger.kernel.org, linux-ide@vger.kernel.org, linux-ia64@vger.kernel.org, linuxhams@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-ext4@vger.kernel.org, linuxcrypto@vger.kernel.org, linux-btrace@vger.kernel.org, linux-fai-devel@rrz.unikoeln.de, linux-fai@rrz.uni-koeln.de, lio@pd.jaring.my, linuxppc-embedded@ozlabs.org, linux-streams@openss7.org, linuxutf8@nl.linux.org, linuxers@mm.glug-bom.org, linuxwacom-discuss@lists.sourceforge.net, linux-usbusers@lists.sourceforge.net, linux-usb-devel@lists.sourceforge.net, linux-karma-devel@lists.sourceforge.net, linux-india-help@lists.sourceforge.net, linux-indiageneral@lists.sourceforge.net, linuxr3000@lists.pcxperience.com, linux-ha-dev@lists.linux-ha.org, linux-pcmcia@lists.infradead.org, linux-uvc-devel@lists.berlios.de, linux-nantes@listes.univ-nantes.fr, linuxchix@linuxchix.org.br, linux-plug@linux.org.pe, linux-programming@linux.or.id, lio@kecegroup.com, linux-users@it.canterbury.ac.nz, linux-il@cs.huji.ac.il, linviawin@bellpac.po.my, linviani@aneka-infokom.co.id
 
-On 10/17/2013 11:25 AM, Josh Triplett wrote:
-> On Wed, Oct 16, 2013 at 10:23:56PM -0500, Larry Finger wrote:
->> Sparse reports the following:
->>
->>    CHECK   drivers/staging/rtl8188eu/core/rtw_mlme.c
->> drivers/staging/rtl8188eu/core/rtw_mlme.c:1003:9: warning: context
->> imbalance in 'rtw_free_assoc_resources' - different lock contexts
->> for basic block
->>
->> The code in question is as follows:
->>
->>          if (lock_scanned_queue)
->>                  spin_lock_bh(&(pmlmepriv->scanned_queue.lock));
->>
->>          pwlan = rtw_find_network(&pmlmepriv->scanned_queue,
->> tgt_network->network.MacAddress);
->>
->>          if (lock_scanned_queue)
->>                  spin_unlock_bh(&(pmlmepriv->scanned_queue.lock));
->>
->> As this fragment uses the identical test to unlock that is used to
->> lock, and the test variable is not touched, I think this is a false
->> indication. I am using version 0.4.4 of sparse.
->
-> Sparse can't track conditional contexts like this; sparse intentionally
-> complains here that you're running the same basic block (the
-> rtw_find_network call) with and without a lock held.
->
-> The following workaround works when this is legitimate, though it isn't
-> ideal:
->
-> if (condition) {
-> 	lock
-> 	do_thing
-> 	unlock
-> } else {
-> 	do_thing
-> }
->
-> Ideally, Sparse should be able to track conditional contexts, but that
-> would require some form of abstract evaluation, or as a simplistic hack,
-> looking for identical side-effect-free conditional expressions.
+Hello,
 
-Thanks for the answer, which is about what I expected. Sparse is a great tool, 
-particularly for endian-related issues.
+I am Mrs. Mary Saleh Saville an ageing widow suffering from long time illness. I have some funds I inherited from my late husband, the sum of US$3,500,000.00 and I am in need of a very honest and God fearing person that will use the fund for God's work to help the less privileged out there.
 
-Larry
+I have mapped out$1,200.000.00 for your personal use in this work. While the rest will be for the work.Please if you would be able to use the funds for the Lord's work kindly reply for further details.
 
+Your full name:
+Your full address:
+Your telephone/mobile number:
+Your fax Number:
+Your full company name:
+Your age:
+
+Thanks and God bless.
+
+Mrs. Mary Saleh Saville
