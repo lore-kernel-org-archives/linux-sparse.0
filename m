@@ -1,94 +1,63 @@
 From: Erico Nunes <nunes.erico@gmail.com>
-Subject: Re: [PATCH] jffs2: fix sparse errors: directive in argument list
-Date: Sun, 17 Nov 2013 20:34:37 -0200
-Message-ID: <CAK4VdL2nKEE+xb=HtMGNsMGNR_ivUn_WnLi7X-rrXT0fpGbSTw@mail.gmail.com>
-References: <1384719513-27386-1-git-send-email-nunes.erico@gmail.com>
-	<1384724403.2727.22.camel@joe-AO722>
+Subject: [PATCH] jffs2: fix sparse errors: directive in argument list
+Date: Sun, 17 Nov 2013 20:43:21 -0200
+Message-ID: <1384728201-13509-1-git-send-email-nunes.erico@gmail.com>
+References: <CAK4VdL2nKEE+xb=HtMGNsMGNR_ivUn_WnLi7X-rrXT0fpGbSTw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f44.google.com ([74.125.82.44]:38529 "EHLO
-	mail-wg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751377Ab3KQWei convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 17 Nov 2013 17:34:38 -0500
-In-Reply-To: <1384724403.2727.22.camel@joe-AO722>
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAK4VdL2nKEE+xb=HtMGNsMGNR_ivUn_WnLi7X-rrXT0fpGbSTw@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: joe@perches.com
+Cc: linux-sparse@vger.kernel.org, dwmw2@infradead.org, linux-mtd@lists.infradead.org, linux-kernel@vger.kernel.org, Erico Nunes <nunes.erico@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Joe Perches <joe@perches.com>
-Cc: linux-sparse@vger.kernel.org, dwmw2 <dwmw2@infradead.org>, linux-mtd <linux-mtd@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-Thanks for your reply.
+This patch fixes the following errors reported when running sparse:
+fs/jffs2/super.c:378:1: error: directive in argument list
+fs/jffs2/super.c:380:1: error: directive in argument list
+fs/jffs2/super.c:381:1: error: directive in argument list
+fs/jffs2/super.c:383:1: error: directive in argument list
 
-I'll resubmit shortly.
+Signed-off-by: Erico Nunes <nunes.erico@gmail.com>
+---
+ fs/jffs2/super.c | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
-Do you mean it as an error in the sparse tool?
-I don't think so, I took a look and it seems to be designed to output
-an error for that case.
-
-
-On Sun, Nov 17, 2013 at 7:40 PM, Joe Perches <joe@perches.com> wrote:
-> On Sun, 2013-11-17 at 18:18 -0200, Erico Nunes wrote:
->> This patch fixes the following errors reported when running sparse:
->> fs/jffs2/super.c:378:1: error: directive in argument list
->> fs/jffs2/super.c:380:1: error: directive in argument list
->> fs/jffs2/super.c:381:1: error: directive in argument list
->> fs/jffs2/super.c:383:1: error: directive in argument list
->
-> Seems like a sparse error more than anything else.
-> (adding sparse mailing list)
->
-> Also you need to add a "Signed-off-by:" line
-> with your email address.
->
-> see: Documentation/SubmittingPatches
->
->> ---
->>  fs/jffs2/super.c | 17 +++++++++--------
->>  1 file changed, 9 insertions(+), 8 deletions(-)
->>
->> diff --git a/fs/jffs2/super.c b/fs/jffs2/super.c
->> index 0defb1c..ec9e16f 100644
->> --- a/fs/jffs2/super.c
->> +++ b/fs/jffs2/super.c
->> @@ -361,6 +361,14 @@ MODULE_ALIAS_FS("jffs2");
->>  static int __init init_jffs2_fs(void)
->>  {
->>       int ret;
->> +     const char desc[] =3D "version 2.2."
->> +#ifdef CONFIG_JFFS2_FS_WRITEBUFFER
->> +             " (NAND)"
->> +#endif
->> +#ifdef CONFIG_JFFS2_SUMMARY
->> +             " (SUMMARY) "
->> +#endif
->> +             " =A9 2001-2006 Red Hat, Inc.";
->>
->>       /* Paranoia checks for on-medium structures. If we ask GCC
->>          to pack them with __attribute__((packed)) then it _also_
->> @@ -374,14 +382,7 @@ static int __init init_jffs2_fs(void)
->>       BUILD_BUG_ON(sizeof(struct jffs2_raw_inode) !=3D 68);
->>       BUILD_BUG_ON(sizeof(struct jffs2_raw_summary) !=3D 32);
->>
->> -     pr_info("version 2.2."
->> -#ifdef CONFIG_JFFS2_FS_WRITEBUFFER
->> -            " (NAND)"
->> -#endif
->> -#ifdef CONFIG_JFFS2_SUMMARY
->> -            " (SUMMARY) "
->> -#endif
->> -            " =A9 2001-2006 Red Hat, Inc.\n");
->> +     pr_info("%s\n", desc);
->>
->>       jffs2_inode_cachep =3D kmem_cache_create("jffs2_i",
->>                                            sizeof(struct jffs2_inode=
-_info),
->
->
->
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/fs/jffs2/super.c b/fs/jffs2/super.c
+index 0defb1c..ec9e16f 100644
+--- a/fs/jffs2/super.c
++++ b/fs/jffs2/super.c
+@@ -361,6 +361,14 @@ MODULE_ALIAS_FS("jffs2");
+ static int __init init_jffs2_fs(void)
+ {
+ 	int ret;
++	const char desc[] =3D "version 2.2."
++#ifdef CONFIG_JFFS2_FS_WRITEBUFFER
++		" (NAND)"
++#endif
++#ifdef CONFIG_JFFS2_SUMMARY
++		" (SUMMARY) "
++#endif
++		" =C2=A9 2001-2006 Red Hat, Inc.";
+=20
+ 	/* Paranoia checks for on-medium structures. If we ask GCC
+ 	   to pack them with __attribute__((packed)) then it _also_
+@@ -374,14 +382,7 @@ static int __init init_jffs2_fs(void)
+ 	BUILD_BUG_ON(sizeof(struct jffs2_raw_inode) !=3D 68);
+ 	BUILD_BUG_ON(sizeof(struct jffs2_raw_summary) !=3D 32);
+=20
+-	pr_info("version 2.2."
+-#ifdef CONFIG_JFFS2_FS_WRITEBUFFER
+-	       " (NAND)"
+-#endif
+-#ifdef CONFIG_JFFS2_SUMMARY
+-	       " (SUMMARY) "
+-#endif
+-	       " =C2=A9 2001-2006 Red Hat, Inc.\n");
++	pr_info("%s\n", desc);
+=20
+ 	jffs2_inode_cachep =3D kmem_cache_create("jffs2_i",
+ 					     sizeof(struct jffs2_inode_info),
+--=20
+1.8.4.2
