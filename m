@@ -1,33 +1,46 @@
-From: Erico Nunes <nunes.erico@gmail.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
 Subject: Re: [PATCH] Clarify error on directive in macro arguments (Re:
  [PATCH] jffs2: fix sparse errors: directive in argument list)
-Date: Mon, 18 Nov 2013 00:23:33 -0200
-Message-ID: <CAK4VdL0cnqCS6w8ad8ohidwVzjRc4ytokvA7a8jSo0HhDPef8Q@mail.gmail.com>
+Date: Mon, 18 Nov 2013 02:34:43 +0000
+Message-ID: <20131118023443.GN13318@ZenIV.linux.org.uk>
 References: <20131118020746.GX16018@ringworld.MIT.EDU>
-	<1384740932.5814.4.camel@joe-AO722>
+ <1384740932.5814.4.camel@joe-AO722>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f48.google.com ([74.125.82.48]:41641 "EHLO
-	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750877Ab3KRCXf (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 17 Nov 2013 21:23:35 -0500
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org>
+Content-Disposition: inline
 In-Reply-To: <1384740932.5814.4.camel@joe-AO722>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-mtd/>
+List-Post: <mailto:linux-mtd@lists.infradead.org>
+List-Help: <mailto:linux-mtd-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-mtd>,
+ <mailto:linux-mtd-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-mtd" <linux-mtd-bounces@lists.infradead.org>
+Errors-To: linux-mtd-bounces+gldm-linux-mtd-36=gmane.org@lists.infradead.org
 To: Joe Perches <joe@perches.com>
-Cc: Greg Price <price@mit.edu>, Al Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, dwmw2 <dwmw2@infradead.org>, linux-mtd <linux-mtd@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, linux-kernel <linux-kernel@vger.kernel.org>, Greg Price <price@MIT.EDU>, linux-sparse@vger.kernel.org, linux-mtd <linux-mtd@lists.infradead.org>, dwmw2 <dwmw2@infradead.org>, Erico Nunes <nunes.erico@gmail.com>
+List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Nov 18, 2013 at 12:15 AM, Joe Perches <joe@perches.com> wrote:
-> On Sun, 2013-11-17 at 21:07 -0500, Greg Price wrote:
->
+On Sun, Nov 17, 2013 at 06:15:32PM -0800, Joe Perches wrote:
+> > > sparse matches gcc behaviour (I hope), but it warns about such abuses.
+> > > It's a defect, all right - one being reported by sparse.
+> > 
+> > Perhaps the following tweak to the error message would make this
+> > subtlety clearer?
+> 
 > Maybe, but this case isn't a macro.  It's a function.
 > Dunno if differentiating when it's a macro or a
 > function is difficult though.
->
->
 
-The case which was initially reported by sparse at
-http://www.spinics.net/lists/kernel/msg1636974.html was using pr_info
-(which is a macro) and not printk.
+In which case?  With printk() it's perfectly fine and sparse
+will not complain at all.  With pr_info(), OTOH, we have
+#define pr_info(fmt, ...) \
+        printk(KERN_INFO pr_fmt(fmt), ##__VA_ARGS__)
+and when you start playing that kind of games with it, you get warnings.
+
+______________________________________________________
+Linux MTD discussion mailing list
+http://lists.infradead.org/mailman/listinfo/linux-mtd/
