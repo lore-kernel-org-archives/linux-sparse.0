@@ -1,66 +1,49 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] Clarify error on directive in macro arguments (Re:
- [PATCH] jffs2: fix sparse errors: directive in argument list)
-Date: Wed, 20 Nov 2013 15:53:16 -0800
-Message-ID: <20131120235316.GB25026@jtriplet-mobl1>
-References: <20131118013349.GM13318@ZenIV.linux.org.uk>
- <20131118020746.GX16018@ringworld.MIT.EDU>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: [BUG] sparse warning EXPORT_SYMBOL()'d symbol non-static
+Date: Sun, 24 Nov 2013 20:49:41 +0100
+Message-ID: <1385322581.23961.5.camel@jlt4.sipsolutions.net>
+References: <CAPgLHd9hwKRQMr1dnzJon-nVkkgKxcL5M2jEY8AF6Sv8OZ+aOg@mail.gmail.com>
+	 (sfid-20131115_074628_306752_07E6E031)
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:43117 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754975Ab3KTXx1 (ORCPT
+Received: from s3.sipsolutions.net ([144.76.43.152]:35036 "EHLO
+	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752407Ab3KXTto (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 20 Nov 2013 18:53:27 -0500
-Content-Disposition: inline
-In-Reply-To: <20131118020746.GX16018@ringworld.MIT.EDU>
+	Sun, 24 Nov 2013 14:49:44 -0500
+In-Reply-To: <CAPgLHd9hwKRQMr1dnzJon-nVkkgKxcL5M2jEY8AF6Sv8OZ+aOg@mail.gmail.com> (sfid-20131115_074628_306752_07E6E031)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Greg Price <price@MIT.EDU>
-Cc: Al Viro <viro@ZenIV.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Joe Perches <joe@perches.com>, Erico Nunes <nunes.erico@gmail.com>, linux-sparse@vger.kernel.org, dwmw2 <dwmw2@infradead.org>, linux-mtd <linux-mtd@lists.infradead.org>, linux-kernel <linux-kernel@vger.kernel.org>
+To: Wei Yongjun <weiyj.lk@gmail.com>, Andi Kleen <ak@linux.intel.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Sun, Nov 17, 2013 at 09:07:46PM -0500, Greg Price wrote:
-> From: Greg Price <price@mit.edu>
-> Date: Sun, 17 Nov 2013 17:57:41 -0800
-> Subject: [PATCH] Clarify error on directive in macro arguments
+On Fri, 2013-11-15 at 14:46 +0800, Wei Yongjun wrote:
+> After the following kernel commit, sparse warning lot of
+> EXPORT_SYMBOL()'d symbol non-static like this:
 > 
-> Preprocessor directives in the arguments of a real function
-> are innocuous and in some contexts common.  If a developer
-> doesn't realize that a "function" is implemented as a macro,
-> they may mistake this error for a false alarm.
-> 
-> See http://www.spinics.net/lists/kernel/msg1636974.html
-> and http://www.spinics.net/lists/kernel/msg1636976.html
-> for an example.
-> 
-> Easy enough to clarify that this is a macro, so do it.
-> 
-> Signed-off-by: Greg Price <price@mit.edu>
+>   CHECK   net/sctp/socket.c
+> net/sctp/socket.c:4292:1: warning:
+>  symbol '__ksymtab_sctp_do_peeloff' was not declared. Should it be static?
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-
-Good call.
-
->  pre-process.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> Author: Andi Kleen <ak@linux.intel.com>
+> Date:   Wed Oct 23 10:57:58 2013 +1030
 > 
-> diff --git a/pre-process.c b/pre-process.c
-> index d521318..db58a97 100644
-> --- a/pre-process.c
-> +++ b/pre-process.c
-> @@ -204,7 +204,7 @@ static struct token *collect_arg(struct token *prev, int vararg, struct position
->  		if (next->pos.newline && match_op(next, '#')) {
->  			if (!next->pos.noexpand) {
->  				sparse_error(next->pos,
-> -					     "directive in argument list");
-> +					     "directive in macro argument list");
->  				preprocessor_line(stream, p);
->  				__free_token(next);	/* Free the '#' token */
->  				continue;
-> -- 
-> 1.8.3.2
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>     asmlinkage, module: Make ksymtab and kcrctab symbols and __this_module __visible
+>     
+>     Make the ksymtab symbols for EXPORT_SYMBOL visible.
+>     This prevents the LTO compiler from adding a .NUMBER prefix,
+>     which avoids various problems in later export processing.
+
+> Any idea?
+
+Well, sparse is clearly "right", for all it cares it might very well be
+static, but it seems this is necessary for something in the kernel and
+we clearly can't forward-declare it in a header file. Perhaps we can add
+some annotation to say
+"__attribute__((yes_I_know_but_really_dont_want_this_to_be_static))" to
+suppress this warning? This is getting annoying to me as well :-)
+
+johannes
+
