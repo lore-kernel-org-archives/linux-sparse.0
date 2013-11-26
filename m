@@ -1,71 +1,66 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [BUG] sparse warning EXPORT_SYMBOL()'d symbol non-static
-Date: Sun, 24 Nov 2013 14:34:20 -0800
-Message-ID: <20131124223420.GA15608@leaf>
-References: <CAPgLHd9hwKRQMr1dnzJon-nVkkgKxcL5M2jEY8AF6Sv8OZ+aOg@mail.gmail.com>
- <1385322581.23961.5.camel@jlt4.sipsolutions.net>
- <20131124202851.GF19762@tassilo.jf.intel.com>
- <20131124204555.GA13012@leaf>
- <1385326137.23961.8.camel@jlt4.sipsolutions.net>
- <1385326370.23961.9.camel@jlt4.sipsolutions.net>
+From: Wanlong Gao <gaowanlong@cn.fujitsu.com>
+Subject: [BUG report] sparse warnings about "__ksymtab_*" symbols
+Date: Tue, 26 Nov 2013 09:51:34 +0800
+Message-ID: <5293FEA6.2080101@cn.fujitsu.com>
+Reply-To: gaowanlong@cn.fujitsu.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:41433 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751088Ab3KXWe3 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 24 Nov 2013 17:34:29 -0500
-Content-Disposition: inline
-In-Reply-To: <1385326370.23961.9.camel@jlt4.sipsolutions.net>
+Received: from cn.fujitsu.com ([222.73.24.84]:11641 "EHLO song.cn.fujitsu.com"
+	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+	id S1751081Ab3KZBwo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 25 Nov 2013 20:52:44 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: Andi Kleen <ak@linux.intel.com>, Wei Yongjun <weiyj.lk@gmail.com>, linux-sparse@vger.kernel.org
+To: josh@kernel.org, linux-sparse@vger.kernel.org
+Cc: Rusty Russell <rusty@rustcorp.com.au>, ak@linux.intel.com, Wu Fengguang <fengguang.wu@intel.com>, kbuild-all@01.org, Wanlong Gao <gaowanlong@cn.fujitsu.com>
 
-On Sun, Nov 24, 2013 at 09:52:50PM +0100, Johannes Berg wrote:
-> On Sun, 2013-11-24 at 21:48 +0100, Johannes Berg wrote:
-> > On Sun, 2013-11-24 at 12:45 -0800, Josh Triplett wrote:
-> > > On Sun, Nov 24, 2013 at 12:28:51PM -0800, Andi Kleen wrote:
-> > > > > Well, sparse is clearly "right", for all it cares it might very well be
-> > > > > static, but it seems this is necessary for something in the kernel and
-> > > > > we clearly can't forward-declare it in a header file. Perhaps we can add
-> > > > > some annotation to say
-> > > > > "__attribute__((yes_I_know_but_really_dont_want_this_to_be_static))" to
-> > > > > suppress this warning? This is getting annoying to me as well :-)
-> > > > 
-> > > > We could do something like
-> > > > 
-> > > > typeof(foo); 
-> > > > 
-> > > > in the macro. Not sure if that would make sparse happy.
-> > > 
-> > > If you're just looking to mollify sparse,
-> > 
-> > I am, pretty much, since now I get a ton of output and have to either
-> > grep it or dig through it... :)
-> > 
-> > > the easiest way is to
-> > > put a prototype of the symbol right before the symbol itself.
-> > 
-> > Oh, right, good point, thanks Josh. Andi, do you want to do that?
-> > Otherwise I can post a patch.
-> 
-> The below seems to mollify sparse, but all the attributes make my head
-> spin so I'm not sure it's really what we need.
-> 
-> --- a/include/linux/export.h
-> +++ b/include/linux/export.h
-> @@ -59,6 +59,7 @@ extern struct module __this_module;
->  	static const char __kstrtab_##sym[]			\
->  	__attribute__((section("__ksymtab_strings"), aligned(1))) \
->  	= VMLINUX_SYMBOL_STR(sym);				\
-> +	extern const struct kernel_symbol __ksymtab_##sym;	\
->  	__visible const struct kernel_symbol __ksymtab_##sym	\
->  	__used							\
->  	__attribute__((section("___ksymtab" sec "+" #sym), unused))	\
+Hi folks,
 
-Yes, that should work as a workaround, though I still think making it
-possible for the symbol to be static would be preferable.
+After following kernel commit[1](find through bisect), We can see many sparse warnings like:
+"
+/git/linux/kernel/time/timekeeping.c:229:1: warning: symbol '__ksymtab_pvclock_gtod_register_notifier' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:246:1: warning: symbol '__ksymtab_pvclock_gtod_unregister_notifier' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:323:1: warning: symbol '__ksymtab___getnstimeofday' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:335:1: warning: symbol '__ksymtab_getnstimeofday' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:357:1: warning: symbol '__ksymtab_ktime_get' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:388:1: warning: symbol '__ksymtab_ktime_get_ts' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:417:1: warning: symbol '__ksymtab_timekeeping_clocktai' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:432:1: warning: symbol '__ksymtab_ktime_get_clocktai' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:486:1: warning: symbol '__ksymtab_do_gettimeofday' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:526:1: warning: symbol '__ksymtab_do_settimeofday' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:570:1: warning: symbol '__ksymtab_timekeeping_inject_offset' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:689:1: warning: symbol '__ksymtab_ktime_get_real' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:712:1: warning: symbol '__ksymtab_getrawmonotonic' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1467:1: warning: symbol '__ksymtab_getboottime' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1500:1: warning: symbol '__ksymtab_get_monotonic_boottime' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1517:1: warning: symbol '__ksymtab_ktime_get_boottime' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1529:1: warning: symbol '__ksymtab_monotonic_to_bootbased' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1537:1: warning: symbol '__ksymtab_get_seconds' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1560:1: warning: symbol '__ksymtab_current_kernel_time' was not declared. Should it be static?
+/git/linux/kernel/time/timekeeping.c:1662:1: warning: symbol '__ksymtab_ktime_get_monotonic_offset' was not declared. Should it be static?
+"
 
-- Josh Triplett
+Any thoughts?
+
+
+Thanks,
+Wanlong Gao
+
+
+
+[1]
+commit e0f244c63fc9d192dfd399cc2677bbdca61994b1
+Author: Andi Kleen <ak@linux.intel.com>
+Date:   Wed Oct 23 10:57:58 2013 +1030
+
+    asmlinkage, module: Make ksymtab and kcrctab symbols and __this_module __visible
+    
+    Make the ksymtab symbols for EXPORT_SYMBOL visible.
+    This prevents the LTO compiler from adding a .NUMBER prefix,
+    which avoids various problems in later export processing.
+    
+    Cc: rusty@rustcorp.com.au
+    Signed-off-by: Andi Kleen <ak@linux.intel.com>
+    Signed-off-by: Rusty Russell <rusty@rustcorp.com.au>
