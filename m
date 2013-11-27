@@ -1,58 +1,66 @@
-From: Joe Perches <joe@perches.com>
+From: Josh Triplett <josh@joshtriplett.org>
 Subject: Re: PCI: mvebu: return NULL instead of ERR_PTR(ret)
-Date: Tue, 26 Nov 2013 18:26:36 -0800
-Message-ID: <1385519196.18487.25.camel@joe-AO722>
+Date: Tue, 26 Nov 2013 18:35:27 -0800
+Message-ID: <20131127023526.GA14732@leaf>
 References: <001001ceb816$5d1aecc0$1750c640$%han@samsung.com>
-	 <20131125200256.GA7316@obsidianresearch.com>
-	 <001101ceea68$cb486220$61d92660$%han@samsung.com>
-	 <20131126180930.GC19852@obsidianresearch.com>
-	 <000101ceeb14$480fee80$d82fcb80$%han@samsung.com>
+ <20131125200256.GA7316@obsidianresearch.com>
+ <001101ceea68$cb486220$61d92660$%han@samsung.com>
+ <20131126180930.GC19852@obsidianresearch.com>
+ <000101ceeb14$480fee80$d82fcb80$%han@samsung.com>
+ <1385519196.18487.25.camel@joe-AO722>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtprelay0218.hostedemail.com ([216.40.44.218]:46125 "EHLO
-	smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1752467Ab3K0C0m (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:38978 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752448Ab3K0Cfh (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Nov 2013 21:26:42 -0500
-In-Reply-To: <000101ceeb14$480fee80$d82fcb80$%han@samsung.com>
+	Tue, 26 Nov 2013 21:35:37 -0500
+Content-Disposition: inline
+In-Reply-To: <1385519196.18487.25.camel@joe-AO722>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jingoo Han <jg1.han@samsung.com>
-Cc: 'Christopher Li' <sparse@chrisli.org>, linux-sparse@vger.kernel.org, 'Dan Carpenter' <dan.carpenter@oracle.com>, 'Jason Gunthorpe' <jgunthorpe@obsidianresearch.com>, 'Jason Cooper' <jason@lakedaemon.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, linux-pci@vger.kernel.org, 'Ezequiel Garcia' <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, 'Axel Lin' <axel.lin@ingics.com>, 'Julia Lawall' <julia.lawall@lip6.fr>
+To: Joe Perches <joe@perches.com>
+Cc: Jingoo Han <jg1.han@samsung.com>, 'Christopher Li' <sparse@chrisli.org>, linux-sparse@vger.kernel.org, 'Dan Carpenter' <dan.carpenter@oracle.com>, 'Jason Gunthorpe' <jgunthorpe@obsidianresearch.com>, 'Jason Cooper' <jason@lakedaemon.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, linux-pci@vger.kernel.org, 'Ezequiel Garcia' <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, 'Axel Lin' <axel.lin@ingics.com>, 'Julia Lawall' <julia.lawall@lip6.fr>
 
-On Wed, 2013-11-27 at 10:59 +0900, Jingoo Han wrote:
-[]
-> ./drivers/pci/host/pci-mvebu.c
-> static void __iomem *mvebu_pcie_map_registers(struct platform_device *pdev,
-> 		struct device_node *np, struct mvebu_pcie_port *port)
-> {
-> 	.....
+On Tue, Nov 26, 2013 at 06:26:36PM -0800, Joe Perches wrote:
+> On Wed, 2013-11-27 at 10:59 +0900, Jingoo Han wrote:
+> []
+> > ./drivers/pci/host/pci-mvebu.c
+> > static void __iomem *mvebu_pcie_map_registers(struct platform_device *pdev,
+> > 		struct device_node *np, struct mvebu_pcie_port *port)
+> > {
+> > 	.....
+> > 
+> > 	ret = of_address_to_resource(np, 0, &regs);
+> > 	if (ret)
+> > -		return ERR_PTR(ret);
+> > +		return (void __iomem *)ERR_PTR(ret);
+> > 
+> > However, other engineers said that "(void __iomem *)ERR_PTR(ret)"
+> > is not a general pattern. I cannot find the proper method to resolve
+> > this sparse warning.
+> > 
+> > In this case, how can I resolve this sparse warning?
 > 
-> 	ret = of_address_to_resource(np, 0, &regs);
-> 	if (ret)
-> -		return ERR_PTR(ret);
-> +		return (void __iomem *)ERR_PTR(ret);
+> I think there's no problem using the cast.  It's not a
+> pattern because it's not been required before as function
+> returns have not previously been declared __iomem.
 > 
-> However, other engineers said that "(void __iomem *)ERR_PTR(ret)"
-> is not a general pattern. I cannot find the proper method to resolve
-> this sparse warning.
+> Or, perhaps the arm|hexagon specific #define below could
+> be made generic so it could be used.
 > 
-> In this case, how can I resolve this sparse warning?
+> arch/arm/include/asm/io.h:#define IOMEM(x)	((void __force __iomem *)(x))
+> 
+> 	return IOMEM(ERR_PTR(ret));
+> 
+> There aren't any current uses of return IOMEM(foo) either
+> though so the direct cast is probably more appropriate.
 
-I think there's no problem using the cast.  It's not a
-pattern because it's not been required before as function
-returns have not previously been declared __iomem.
+I don't think that #define is appropriate for any non-constant value;
+almost any instance of that __force cast applied to a variable would be
+better written by fixing types more appropriately.  I'd suggest
+updating that #define for both architectures to use BUILD_BUG_ON to
+assert __builtin_constant_p on its argument.
 
-Or, perhaps the arm|hexagon specific #define below could
-be made generic so it could be used.
-
-arch/arm/include/asm/io.h:#define IOMEM(x)	((void __force __iomem *)(x))
-
-	return IOMEM(ERR_PTR(ret));
-
-There aren't any current uses of return IOMEM(foo) either
-though so the direct cast is probably more appropriate.
-
-
+- Josh Triplett
