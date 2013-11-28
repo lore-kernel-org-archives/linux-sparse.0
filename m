@@ -1,78 +1,49 @@
-From: Joe Perches <joe@perches.com>
-Subject: Re: PCI: mvebu: return NULL instead of ERR_PTR(ret)
-Date: Tue, 26 Nov 2013 18:48:23 -0800
-Message-ID: <1385520503.18487.32.camel@joe-AO722>
-References: <001001ceb816$5d1aecc0$1750c640$%han@samsung.com>
-	 <20131125200256.GA7316@obsidianresearch.com>
-	 <001101ceea68$cb486220$61d92660$%han@samsung.com>
-	 <20131126180930.GC19852@obsidianresearch.com>
-	 <000101ceeb14$480fee80$d82fcb80$%han@samsung.com>
-	 <1385519196.18487.25.camel@joe-AO722> <20131127023526.GA14732@leaf>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
+From: Franz Schrober <franzschrober@gmail.com>
+Subject: [PATCHv2 0/5] sparse: Relicense from non-dfsg-free OSL 1.1 to MIT license
+Date: Thu, 28 Nov 2013 11:16:17 +0100
+Message-ID: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtprelay0086.hostedemail.com ([216.40.44.86]:60223 "EHLO
-	smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751810Ab3K0Cs3 (ORCPT
+Received: from mail-bk0-f42.google.com ([209.85.214.42]:44902 "EHLO
+	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752667Ab3K1KQu (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Nov 2013 21:48:29 -0500
-In-Reply-To: <20131127023526.GA14732@leaf>
+	Thu, 28 Nov 2013 05:16:50 -0500
+Received: by mail-bk0-f42.google.com with SMTP id w11so3763022bkz.29
+        for <linux-sparse@vger.kernel.org>; Thu, 28 Nov 2013 02:16:49 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Jingoo Han <jg1.han@samsung.com>, 'Christopher Li' <sparse@chrisli.org>, linux-sparse@vger.kernel.org, 'Dan Carpenter' <dan.carpenter@oracle.com>, 'Jason Gunthorpe' <jgunthorpe@obsidianresearch.com>, 'Jason Cooper' <jason@lakedaemon.net>, 'Thomas Petazzoni' <thomas.petazzoni@free-electrons.com>, 'Bjorn Helgaas' <bhelgaas@google.com>, linux-pci@vger.kernel.org, 'Ezequiel Garcia' <ezequiel.garcia@free-electrons.com>, linux-arm-kernel@lists.infradead.org, 'Axel Lin' <axel.lin@ingics.com>, 'Julia Lawall' <julia.lawall@lip6.fr>
+To: linux-sparse@vger.kernel.org
+Cc: jw+debian@jameswestby.net, sparse@chrisli.org, franzschrober@gmail.com
 
-On Tue, 2013-11-26 at 18:35 -0800, Josh Triplett wrote:
-> On Tue, Nov 26, 2013 at 06:26:36PM -0800, Joe Perches wrote:
-> > On Wed, 2013-11-27 at 10:59 +0900, Jingoo Han wrote:
-> > []
-> > > ./drivers/pci/host/pci-mvebu.c
-> > > static void __iomem *mvebu_pcie_map_registers(struct platform_device *pdev,
-> > > 		struct device_node *np, struct mvebu_pcie_port *port)
-> > > {
-> > > 	.....
-> > > 
-> > > 	ret = of_address_to_resource(np, 0, &regs);
-> > > 	if (ret)
-> > > -		return ERR_PTR(ret);
-> > > +		return (void __iomem *)ERR_PTR(ret);
-> > > 
-> > > However, other engineers said that "(void __iomem *)ERR_PTR(ret)"
-> > > is not a general pattern. I cannot find the proper method to resolve
-> > > this sparse warning.
-> > > 
-> > > In this case, how can I resolve this sparse warning?
-> > 
-> > I think there's no problem using the cast.  It's not a
-> > pattern because it's not been required before as function
-> > returns have not previously been declared __iomem.
-> > 
-> > Or, perhaps the arm|hexagon specific #define below could
-> > be made generic so it could be used.
-> > 
-> > arch/arm/include/asm/io.h:#define IOMEM(x)	((void __force __iomem *)(x))
-> > 
-> > 	return IOMEM(ERR_PTR(ret));
-> > 
-> > There aren't any current uses of return IOMEM(foo) either
-> > though so the direct cast is probably more appropriate.
-> 
-> I don't think that #define is appropriate for any non-constant value;
-> almost any instance of that __force cast applied to a variable would be
-> better written by fixing types more appropriately.  I'd suggest
-> updating that #define for both architectures to use BUILD_BUG_ON to
-> assert __builtin_constant_p on its argument.
+Hi,
 
-That's probably a good idea.
+many different people (especially Dan Carpenter) worked quite hard to contact
+all people with significant contributions. The two changes are the ones which
+should change the license from the problematic OSL[1] to the more liberal MIT
+license. The initial agreement was reached when Novafora (successor in
+interest to Transmeta Corporation) accepted such a license [2]. The commit
+provided by them is attached as "relicense.bundle" [3] and has to be 
+unbundled+merged in the sparse repository before the following patches can be
+applied.
 
-There are at least a couple things would likely need to be
-fixed up if the #define were changed.
+The changes can also be pulled from
 
-arch/arm/plat-omap/sram.c
-drivers/clocksource/bcm_kona_timer.c
+        git pull https://github.com/franzschrober/sparse.git master
 
-I've no issue with either a direct cast or your idea of
-a new static inline like ERR_PTR_IO or IOMEM_ERR_PTR or
-any other appropriate name.
+Btw. when somebody has to ask me in the future about a license change of these
+two patches: do whatever you want. They can be considered public domain.
+
+The change of this patchset compared to the first version are:
+
+ * Benjamin Herrenschmidt and Chris Wedgwood were added to the Acked-by list
+   because they've also agreed to the license change
+ * Reverts for James Westby's contributions were added because it seems that he
+   is the only person not agreeing to the license change (he was not reachable
+   over social media or any of his email accounts)
+ * An alternative patch for the implicit casting bug found James Westby was
+   added
+
+[1] https://wiki.debian.org/DFSGLicenses#Open_Software_License_.28OSL.29_v1.1
+[2] http://lwn.net/Articles/328560/
+[3] http://marc.info/?l=linux-sparse&m=138548610116314&w=2
 
