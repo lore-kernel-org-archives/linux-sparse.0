@@ -1,49 +1,86 @@
 From: Franz Schrober <franzschrober@gmail.com>
-Subject: [PATCHv2 0/5] sparse: Relicense from non-dfsg-free OSL 1.1 to MIT license
-Date: Thu, 28 Nov 2013 11:16:17 +0100
-Message-ID: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
+Subject: [PATCHv2 1/5] Revert "Update the information in README about using the library."
+Date: Thu, 28 Nov 2013 11:16:18 +0100
+Message-ID: <1385633782-775-2-git-send-email-franzschrober@gmail.com>
+References: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bk0-f42.google.com ([209.85.214.42]:44902 "EHLO
-	mail-bk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752667Ab3K1KQu (ORCPT
+Received: from mail-bk0-f52.google.com ([209.85.214.52]:50105 "EHLO
+	mail-bk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752667Ab3K1KQx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 28 Nov 2013 05:16:50 -0500
-Received: by mail-bk0-f42.google.com with SMTP id w11so3763022bkz.29
-        for <linux-sparse@vger.kernel.org>; Thu, 28 Nov 2013 02:16:49 -0800 (PST)
+	Thu, 28 Nov 2013 05:16:53 -0500
+Received: by mail-bk0-f52.google.com with SMTP id u14so3680206bkz.39
+        for <linux-sparse@vger.kernel.org>; Thu, 28 Nov 2013 02:16:52 -0800 (PST)
+In-Reply-To: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: jw+debian@jameswestby.net, sparse@chrisli.org, franzschrober@gmail.com
+Cc: jw+debian@jameswestby.net, sparse@chrisli.org, franzschrober@gmail.com, Franz Schrober <franzschrober@yahoo.de>
 
-Hi,
+From: Franz Schrober <franzschrober@yahoo.de>
 
-many different people (especially Dan Carpenter) worked quite hard to contact
-all people with significant contributions. The two changes are the ones which
-should change the license from the problematic OSL[1] to the more liberal MIT
-license. The initial agreement was reached when Novafora (successor in
-interest to Transmeta Corporation) accepted such a license [2]. The commit
-provided by them is attached as "relicense.bundle" [3] and has to be 
-unbundled+merged in the sparse repository before the following patches can be
-applied.
+James Westby is the only person not reacting when asking him about the MIT
+license change over email or social media. So he has to count as not accepting
+and reverting his contributions is the only way to to avoid possible legal
+problems. The contributions can be re-added later when they are rewritten from
+scratch.
 
-The changes can also be pulled from
+This reverts commit 34ac7df96dd9609d684b0c949a52bc07ab1fd8b5.
 
-        git pull https://github.com/franzschrober/sparse.git master
+Cc: James Westby <jw+debian@jameswestby.net>
+Signed-off-by: Franz Schrober <franzschrober@yahoo.de>
+---
+ README | 29 +++++++++++++++++++++--------
+ 1 file changed, 21 insertions(+), 8 deletions(-)
 
-Btw. when somebody has to ask me in the future about a license change of these
-two patches: do whatever you want. They can be considered public domain.
-
-The change of this patchset compared to the first version are:
-
- * Benjamin Herrenschmidt and Chris Wedgwood were added to the Acked-by list
-   because they've also agreed to the license change
- * Reverts for James Westby's contributions were added because it seems that he
-   is the only person not agreeing to the license change (he was not reachable
-   over social media or any of his email accounts)
- * An alternative patch for the implicit casting bug found James Westby was
-   added
-
-[1] https://wiki.debian.org/DFSGLicenses#Open_Software_License_.28OSL.29_v1.1
-[2] http://lwn.net/Articles/328560/
-[3] http://marc.info/?l=linux-sparse&m=138548610116314&w=2
+diff --git a/README b/README
+index 63f752b..a731a82 100644
+--- a/README
++++ b/README
+@@ -47,22 +47,35 @@ requires the information.
+ 
+ This means that a user of the library will literally just need to do
+ 
+-  struct string_list *filelist = NULL;
+-  char *file;
++	struct token *token;
++	int fd = open(filename, O_RDONLY);
++	struct symbol_list *list = NULL;
+ 
+-  action(sparse_initialize(argc, argv, filelist));
++	if (fd < 0)
++		exit_with_complaint();
+ 
+-  FOR_EACH_PTR_NOTAG(filelist, file) {
+-    action(sparse(file));
+-  } END_FOR_EACH_PTR_NOTAG(file);
++	// Initialize parse symbols
++	init_symbols();
++
++	// Tokenize the input stream
++	token = tokenize(filename, fd, NULL);
++
++	// Pre-process the stream
++	token = preprocess(token);
++
++	// Parse the resulting C code
++	translation_unit(token, &list);
++
++	// Evaluate the types now if we want to
++	// Or leave it until later.
++	symbol_iterate(list, evaluate_symbol, NULL);
+ 
+ and he is now done - having a full C parse of the file he opened.  The
+ library doesn't need any more setup, and once done does not impose any
+ more requirements.  The user is free to do whatever he wants with the
+ parse tree that got built up, and needs not worry about the library ever
+ again.  There is no extra state, there are no parser callbacks, there is
+-only the parse tree that is described by the header files. The action
+-function takes a pointer to a symbol_list and does whatever it likes with it.
++only the parse tree that is described by the header files. 
+ 
+ The library also contains (as an example user) a few clients that do the
+ preprocessing, parsing and type evaluation and just print out the
+-- 
+1.8.4.4
 
