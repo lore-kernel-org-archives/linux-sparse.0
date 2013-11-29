@@ -1,63 +1,59 @@
-From: Franz Schrober <franzschrober@gmail.com>
-Subject: [PATCHv3 4/5] FAQ: Remove outdated sections about the license
-Date: Fri, 29 Nov 2013 13:30:09 +0100
-Message-ID: <1385728209-23222-1-git-send-email-franzschrober@gmx.de>
-References: <1385633782-775-5-git-send-email-franzschrober@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Fwd: [PATCHv2 0/5] sparse: Relicense from non-dfsg-free OSL 1.1 to
+ MIT license
+Date: Fri, 29 Nov 2013 15:18:23 -0800
+Message-ID: <CANeU7QkgPs0FdfCFoMAkB45=CGtBgAFhwUQ3Pp+ydCaRd-FW2Q@mail.gmail.com>
+References: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
+	<CANeU7Qkjvh4OeCWANFbV6COU4NvjB1pUGXwry7CNCrQz8WG0zw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bk0-f41.google.com ([209.85.214.41]:43565 "EHLO
-	mail-bk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755320Ab3K2Mad (ORCPT
+Received: from mail-oa0-f47.google.com ([209.85.219.47]:58809 "EHLO
+	mail-oa0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750953Ab3K2XSX (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 29 Nov 2013 07:30:33 -0500
-Received: by mail-bk0-f41.google.com with SMTP id v15so4355038bkz.0
-        for <linux-sparse@vger.kernel.org>; Fri, 29 Nov 2013 04:30:32 -0800 (PST)
-In-Reply-To: <1385633782-775-5-git-send-email-franzschrober@gmail.com>
+	Fri, 29 Nov 2013 18:18:23 -0500
+Received: by mail-oa0-f47.google.com with SMTP id k1so11009712oag.34
+        for <linux-sparse@vger.kernel.org>; Fri, 29 Nov 2013 15:18:23 -0800 (PST)
+In-Reply-To: <CANeU7Qkjvh4OeCWANFbV6COU4NvjB1pUGXwry7CNCrQz8WG0zw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: jw+debian@jameswestby.net, sparse@chrisli.org, Franz Schrober <franzschrober@yahoo.de>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-From: Franz Schrober <franzschrober@yahoo.de>
+Forget to turn on plain text mode, the previous email get bounce off
+vger.
 
-Reported-by: Josh Triplett <josh@joshtriplett.org>
-Signed-off-by: Franz Schrober <franzschrober@yahoo.de>
----
-Changes since v2
+---------- Forwarded message ----------
+From: Christopher Li <sparse@chrisli.org>
+Date: Fri, Nov 29, 2013 at 3:13 PM
+Subject: Re: [PATCHv2 0/5] sparse: Relicense from non-dfsg-free OSL
+1.1 to MIT license
+To: Franz Schrober <franzschrober@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, jw+debian@jameswestby.net
 
- * Removed paragraph in "Why not GPL?" about "give-back" parts of the license
-   which no longer applies
 
- FAQ | 24 ------------------------
- 1 file changed, 24 deletions(-)
 
-diff --git a/FAQ b/FAQ
-index 290de0e..8ef6e84 100644
---- a/FAQ
-+++ b/FAQ
-@@ -42,30 +42,6 @@ A.  See the previous question: I personally think that the front end
-     they want to have a proprietary back-end, that's ok by me too. It's
-     their loss, not mine.
- 
--    At the same time, I'm a big believer in "quid pro quo". I wrote the
--    front-end, and if you make improvements to the semantic parsing part
--    (as opposed to just using the resulting parse tree), you'd better
--    cough up.  The front-end is intended to be an open-source project in
--    its own right, and if you improve the front end, you must give those
--    improvements back. That's your "quid" to my "quo".
--
--
--Q.  So what _is_ the license?
--
--A.  I don't know yet.  I originally thought it would be LGPL, but I'm
--    possibly going for a license that is _not_ subsumable by the GPL. 
--    In other words, I don't want to see a GPL'd project suck in the
--    LGPL'd front-end, and then make changes to the front end under the
--    GPL (this is something that the LGPL expressly allows, and see the
--    previous question for why I think it's the _only_ thing that I will
--    not allow). 
--
--    The current front-runner is the OSL ("Open Software License", see
--    http://www.opensource.org/licenses/osl.php), together with a note on
--    what makes source derivative and what does not to make it clear that
--    people can write back-ends for it without having to make those
--    back-ends available under the OSL. 
+
+
+On Thu, Nov 28, 2013 at 2:16 AM, Franz Schrober <franzschrober@gmail.com> wrote:
+>
+> Hi,
+>
+> many different people (especially Dan Carpenter) worked quite hard to contact
+> all people with significant contributions. The two changes are the ones which
+> should change the license from the problematic OSL[1] to the more liberal MIT
+> license. The initial agreement was reached when Novafora (successor in
+> interest to Transmeta Corporation) accepted such a license [2]. The commit
+> provided by them is attached as "relicense.bundle" [3] and has to be
+> unbundled+merged in the sparse repository before the following patches can be
+> applied.
+>
+
+Thanks for the hard work.
+
+I just apply your 5 patches on top of the merge of the Novofora branch.
+
+I push the result on the chrisl repository. Please check if I did any thing
+wrong. I will shortly push it to the official repository and cut a new release.
+
+Chris
