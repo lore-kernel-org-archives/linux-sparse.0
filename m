@@ -1,66 +1,36 @@
-From: Franz Schrober <franzschrober@gmail.com>
-Subject: [PATCH] Update the information in README about using the library.
-Date: Tue,  3 Dec 2013 09:26:05 +0100
-Message-ID: <1386059165-3812-1-git-send-email-franzschrober@gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCHv2 0/5] sparse: Relicense from non-dfsg-free OSL 1.1 to
+ MIT license
+Date: Tue, 3 Dec 2013 13:37:00 +0300
+Message-ID: <20131203103700.GM28413@mwanda>
+References: <1385633782-775-1-git-send-email-franzschrober@gmail.com>
+ <CAJUvQwP2gGYCcMxEs81=Eh_AnKCOQ3sng24aKNbUaAi_-2Gd3Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ee0-f45.google.com ([74.125.83.45]:46155 "EHLO
-	mail-ee0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751252Ab3LCI0T (ORCPT
+Received: from aserp1040.oracle.com ([141.146.126.69]:21116 "EHLO
+	aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752503Ab3LCKhV (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Dec 2013 03:26:19 -0500
-Received: by mail-ee0-f45.google.com with SMTP id d49so1247642eek.18
-        for <linux-sparse@vger.kernel.org>; Tue, 03 Dec 2013 00:26:18 -0800 (PST)
+	Tue, 3 Dec 2013 05:37:21 -0500
+Content-Disposition: inline
+In-Reply-To: <CAJUvQwP2gGYCcMxEs81=Eh_AnKCOQ3sng24aKNbUaAi_-2Gd3Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: sparse@chrisli.org, James Westby <james@jameswestby.net>, Franz Schrober <franzschrober@gmail.com>
+To: Franz Schrober <franzschrober@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Chris Li <sparse@chrisli.org>
 
-From: James Westby <james@jameswestby.net>
+On Tue, Dec 03, 2013 at 09:17:59AM +0100, Franz Schrober wrote:
+> >  * Reverts for James Westby's contributions were added because it seems that he
+> >    is the only person not agreeing to the license change (he was not reachable
+> >    over social media or any of his email accounts)
+> 
+> It seems James Westby detected that his changes were removed (at least it is my
+> personal explanation) and now started to respond. I've attached his response and
+> will resubmit his README patch in some minutes.
 
-Changes in the library have left the README giving out of date information
-on how to intialise the library and get the symbols out of it. Update the
-documentation to match the latest functions.
+Actually I kept on harrassing him via his co-workers.  :P
 
-Signed-off-by: James Westby <james@jameswestby.net>
-Signed-off-by: Franz Schrober <franzschrober@gmail.com>
----
-This patch was already submitted by James Westby and had to be reverted again
-after he didn't responded in the 4 year relicense process. Now he accepted the
-change to MIT license and I just resubmit it for him. So it is a revert for the
-revert 01b00f59f2a6aba6b623c0a68827938c1f570877 ('Revert "Update the
-information in README about using the library."')
+regards,
+dan carpenter
 
-Sorry for the inconveniences.
-
- README | 29 ++++++++---------------------
- 1 file changed, 8 insertions(+), 21 deletions(-)
-
-diff --git a/README b/README
-index a731a82..033ae15 100644
---- a/README
-+++ b/README
-@@ -47,35 +47,22 @@ requires the information.
- 
- This means that a user of the library will literally just need to do
- 
--	struct token *token;
--	int fd = open(filename, O_RDONLY);
--	struct symbol_list *list = NULL;
-+  struct string_list *filelist = NULL;
-+  char *file;
- 
--	if (fd < 0)
--		exit_with_complaint();
-+  action(sparse_initialize(argc, argv, filelist));
- 
--	// Initialize parse symbols
--	init_symbols();
--
--	// Tokenize the input stream
--	token = tokenize(filename, fd, NULL);
--
--	// Pre-process the stream
--	token = preprocess(token);
--
--	// Parse the resulting C code
--	translation_unit(token, &list);
