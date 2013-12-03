@@ -1,111 +1,67 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Update the information in README about using the library.
-Date: Tue, 3 Dec 2013 15:17:37 -0800
-Message-ID: <CANeU7Qkh-bTrED7HeV-64Ngoi3ZhLZBo96v0mq-wMpCPJkHghA@mail.gmail.com>
-References: <1386059165-3812-1-git-send-email-franzschrober@gmail.com>
+From: Josh Triplett <josh@kernel.org>
+Subject: Re: [BUG report]sparse warnings on DEFINE_PER_CPU() symbols
+ non-static
+Date: Tue, 3 Dec 2013 15:43:20 -0800
+Message-ID: <20131203234320.GA15141@jtriplet-mobl1>
+References: <5294175F.2080407@cn.fujitsu.com>
+ <20131203222543.GQ8277@htj.dyndns.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oa0-f41.google.com ([209.85.219.41]:59404 "EHLO
-	mail-oa0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753816Ab3LCXRh (ORCPT
+Received: from relay5-d.mail.gandi.net ([217.70.183.197]:54151 "EHLO
+	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753201Ab3LCXnc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Dec 2013 18:17:37 -0500
-Received: by mail-oa0-f41.google.com with SMTP id j17so15994777oag.28
-        for <linux-sparse@vger.kernel.org>; Tue, 03 Dec 2013 15:17:37 -0800 (PST)
-In-Reply-To: <1386059165-3812-1-git-send-email-franzschrober@gmail.com>
+	Tue, 3 Dec 2013 18:43:32 -0500
+Content-Disposition: inline
+In-Reply-To: <20131203222543.GQ8277@htj.dyndns.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Franz Schrober <franzschrober@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, James Westby <james@jameswestby.net>
+To: Tejun Heo <tj@kernel.org>
+Cc: Wanlong Gao <gaowanlong@cn.fujitsu.com>, linux-sparse@vger.kernel.org, Wu Fengguang <fengguang.wu@intel.com>, kbuild-all@01.org, Rusty Russell <rusty@rustcorp.com.au>, Christoph Lameter <cl@linux-foundation.org>
 
-That will make you as the author of this commit.
-I think not much people have pull from the sparse repository yet.
+On Tue, Dec 03, 2013 at 05:25:43PM -0500, Tejun Heo wrote:
+> Hello,
+> 
+> On Tue, Nov 26, 2013 at 11:37:03AM +0800, Wanlong Gao wrote:
+> > If kernel config CONFIG_DEBUG_FORCE_WEAK_PER_CPU=y, then the sparse will report non-static
+> > warnings like following:
+> > 
+> > > /git/linux/fs/inode.c:74:8: warning: symbol 'nr_inodes' was not declared. Should it be static?
+> > > /git/linux/fs/inode.c:75:8: warning: symbol 'nr_unused' was not declared. Should it be static?
+> > >
+> > > $ vi +74 fs/inode.c
+> > >   73 
+> > >   74 static DEFINE_PER_CPU(unsigned long, nr_inodes);
+> > >   75 static DEFINE_PER_CPU(unsigned long, nr_unused);
+> > >   76 
+> 
+> Hmmm, so, if FORCE_WEAK_PER_CPU is set or the arch needs WEAK_PER_CPU,
+> DEFINE_PER_CPU() explodes into mind-bending series of definitions to
+> ensure that the symbol is globally unique to avoid breaking weak decl
+> requirements on a few archs.  In the process static is dropped from
+> the actual declaration and it's apparently missing extern decl in
+> front of it.
+> 
+> Does the following patch make it go away?
 
-How about I just roll back and reapply your patch without
-the undo part? Of course you need to regenerate a patch with
-James' ACK.
+It should, but is there some reason why you couldn't make the definition
+on the line immediately below that static?
 
-The problem is that the next pull from sparse repository
-will be a bit messy if you have the abandoned branch already.
-Nothing "git reset" can't fix. Hopefully that will not affect a lot of
-people.
-
-
-Chris
-
-On Tue, Dec 3, 2013 at 12:26 AM, Franz Schrober <franzschrober@gmail.com> wrote:
-> From: James Westby <james@jameswestby.net>
->
-> Changes in the library have left the README giving out of date information
-> on how to intialise the library and get the symbols out of it. Update the
-> documentation to match the latest functions.
->
-> Signed-off-by: James Westby <james@jameswestby.net>
-> Signed-off-by: Franz Schrober <franzschrober@gmail.com>
-> ---
-> This patch was already submitted by James Westby and had to be reverted again
-> after he didn't responded in the 4 year relicense process. Now he accepted the
-> change to MIT license and I just resubmit it for him. So it is a revert for the
-> revert 01b00f59f2a6aba6b623c0a68827938c1f570877 ('Revert "Update the
-> information in README about using the library."')
->
-> Sorry for the inconveniences.
->
->  README | 29 ++++++++---------------------
->  1 file changed, 8 insertions(+), 21 deletions(-)
->
-> diff --git a/README b/README
-> index a731a82..033ae15 100644
-> --- a/README
-> +++ b/README
-> @@ -47,35 +47,22 @@ requires the information.
->
->  This means that a user of the library will literally just need to do
->
-> -       struct token *token;
-> -       int fd = open(filename, O_RDONLY);
-> -       struct symbol_list *list = NULL;
-> +  struct string_list *filelist = NULL;
-> +  char *file;
->
-> -       if (fd < 0)
-> -               exit_with_complaint();
-> +  action(sparse_initialize(argc, argv, filelist));
->
-> -       // Initialize parse symbols
-> -       init_symbols();
-> -
-> -       // Tokenize the input stream
-> -       token = tokenize(filename, fd, NULL);
-> -
-> -       // Pre-process the stream
-> -       token = preprocess(token);
-> -
-> -       // Parse the resulting C code
-> -       translation_unit(token, &list);
-> -
-> -       // Evaluate the types now if we want to
-> -       // Or leave it until later.
-> -       symbol_iterate(list, evaluate_symbol, NULL);
-> +  FOR_EACH_PTR_NOTAG(filelist, file) {
-> +    action(sparse(file));
-> +  } END_FOR_EACH_PTR_NOTAG(file);
->
->  and he is now done - having a full C parse of the file he opened.  The
->  library doesn't need any more setup, and once done does not impose any
->  more requirements.  The user is free to do whatever he wants with the
->  parse tree that got built up, and needs not worry about the library ever
->  again.  There is no extra state, there are no parser callbacks, there is
-> -only the parse tree that is described by the header files.
-> +only the parse tree that is described by the header files. The action
-> +funtion takes a pointer to a symbol_list and does whatever it likes with it.
->
->  The library also contains (as an example user) a few clients that do the
->  preprocessing, parsing and type evaluation and just print out the
-> --
-> 1.8.5
->
+> Thanks.
+> 
+> diff --git a/include/linux/percpu-defs.h b/include/linux/percpu-defs.h
+> index 57e890a..8c490cc 100644
+> --- a/include/linux/percpu-defs.h
+> +++ b/include/linux/percpu-defs.h
+> @@ -69,6 +69,7 @@
+>  	__PCPU_DUMMY_ATTRS char __pcpu_scope_##name;			\
+>  	extern __PCPU_DUMMY_ATTRS char __pcpu_unique_##name;		\
+>  	__PCPU_DUMMY_ATTRS char __pcpu_unique_##name;			\
+> +	extern __typeof__(type) name;					\
+>  	__PCPU_ATTRS(sec) PER_CPU_DEF_ATTRIBUTES __weak			\
+>  	__typeof__(type) name
+>  #else
 > --
 > To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
 > the body of a message to majordomo@vger.kernel.org
