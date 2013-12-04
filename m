@@ -1,72 +1,37 @@
-From: Wanlong Gao <gaowanlong@cn.fujitsu.com>
-Subject: Re: [BUG report]sparse warnings on DEFINE_PER_CPU() symbols non-static
-Date: Wed, 04 Dec 2013 11:26:44 +0800
-Message-ID: <529EA0F4.5070205@cn.fujitsu.com>
-References: <5294175F.2080407@cn.fujitsu.com> <20131203222543.GQ8277@htj.dyndns.org>
-Reply-To: gaowanlong@cn.fujitsu.com
+From: Tejun Heo <tj@kernel.org>
+Subject: Re: [BUG report]sparse warnings on DEFINE_PER_CPU() symbols
+ non-static
+Date: Wed, 4 Dec 2013 10:10:51 -0500
+Message-ID: <20131204151051.GN3158@htj.dyndns.org>
+References: <5294175F.2080407@cn.fujitsu.com>
+ <20131203222543.GQ8277@htj.dyndns.org>
+ <20131203234320.GA15141@jtriplet-mobl1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from cn.fujitsu.com ([222.73.24.84]:37781 "EHLO song.cn.fujitsu.com"
-	rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
-	id S1752417Ab3LDD2N (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Dec 2013 22:28:13 -0500
-In-Reply-To: <20131203222543.GQ8277@htj.dyndns.org>
+Received: from mail-yh0-f42.google.com ([209.85.213.42]:44125 "EHLO
+	mail-yh0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753488Ab3LDPKz (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 4 Dec 2013 10:10:55 -0500
+Received: by mail-yh0-f42.google.com with SMTP id z6so11537230yhz.15
+        for <linux-sparse@vger.kernel.org>; Wed, 04 Dec 2013 07:10:55 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20131203234320.GA15141@jtriplet-mobl1>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Tejun Heo <tj@kernel.org>
-Cc: josh@kernel.org, linux-sparse@vger.kernel.org, Wu Fengguang <fengguang.wu@intel.com>, kbuild-all@01.org, Rusty Russell <rusty@rustcorp.com.au>, Christoph Lameter <cl@linux-foundation.org>, Wanlong Gao <gaowanlong@cn.fujitsu.com>
+To: Josh Triplett <josh@kernel.org>
+Cc: Wanlong Gao <gaowanlong@cn.fujitsu.com>, linux-sparse@vger.kernel.org, Wu Fengguang <fengguang.wu@intel.com>, kbuild-all@01.org, Rusty Russell <rusty@rustcorp.com.au>, Christoph Lameter <cl@linux-foundation.org>
 
-On 12/04/2013 06:25 AM, Tejun Heo wrote:
-> Hello,
+On Tue, Dec 03, 2013 at 03:43:20PM -0800, Josh Triplett wrote:
+> > Does the following patch make it go away?
 > 
-> On Tue, Nov 26, 2013 at 11:37:03AM +0800, Wanlong Gao wrote:
->> If kernel config CONFIG_DEBUG_FORCE_WEAK_PER_CPU=y, then the sparse will report non-static
->> warnings like following:
->>
->>> /git/linux/fs/inode.c:74:8: warning: symbol 'nr_inodes' was not declared. Should it be static?
->>> /git/linux/fs/inode.c:75:8: warning: symbol 'nr_unused' was not declared. Should it be static?
->>>
->>> $ vi +74 fs/inode.c
->>>   73 
->>>   74 static DEFINE_PER_CPU(unsigned long, nr_inodes);
->>>   75 static DEFINE_PER_CPU(unsigned long, nr_unused);
->>>   76 
-> 
-> Hmmm, so, if FORCE_WEAK_PER_CPU is set or the arch needs WEAK_PER_CPU,
-> DEFINE_PER_CPU() explodes into mind-bending series of definitions to
-> ensure that the symbol is globally unique to avoid breaking weak decl
-> requirements on a few archs.  In the process static is dropped from
-> the actual declaration and it's apparently missing extern decl in
-> front of it.
-> 
-> Does the following patch make it go away?
+> It should, but is there some reason why you couldn't make the definition
+> on the line immediately below that static?
 
-Goes away but comes new error:
+Weak symbols can't be static.  That's the point of the whole thing.
 
-/git/linux/fs/inode.c:74:8: error: symbol 'nr_inodes' redeclared with different type (originally declared at /git/linux/fs/inode.c:74) - different address spaces
-/git/linux/fs/inode.c:75:8: error: symbol 'nr_unused' redeclared with different type (originally declared at /git/linux/fs/inode.c:75) - different address spaces
-/git/linux/fs/inode.c:835:8: error: symbol 'last_ino' redeclared with different type (originally declared at /git/linux/fs/inode.c:835) - different address spaces
+Thanks.
 
-
-Thanks,
-Wanlong Gao
-
-> 
-> Thanks.
-> 
-> diff --git a/include/linux/percpu-defs.h b/include/linux/percpu-defs.h
-> index 57e890a..8c490cc 100644
-> --- a/include/linux/percpu-defs.h
-> +++ b/include/linux/percpu-defs.h
-> @@ -69,6 +69,7 @@
->  	__PCPU_DUMMY_ATTRS char __pcpu_scope_##name;			\
->  	extern __PCPU_DUMMY_ATTRS char __pcpu_unique_##name;		\
->  	__PCPU_DUMMY_ATTRS char __pcpu_unique_##name;			\
-> +	extern __typeof__(type) name;					\
->  	__PCPU_ATTRS(sec) PER_CPU_DEF_ATTRIBUTES __weak			\
->  	__typeof__(type) name
->  #else
-> 
-
+-- 
+tejun
