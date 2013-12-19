@@ -1,42 +1,47 @@
 From: "Emilio G. Cota" <cota@braap.org>
-Subject: [PATCH] Define __CHAR_BIT__
-Date: Thu, 19 Dec 2013 00:46:27 -0500
-Message-ID: <1387431987-29219-1-git-send-email-cota@braap.org>
+Subject: Re: [PATCH] gitignore: add 'version.h'
+Date: Thu, 19 Dec 2013 00:46:39 -0500
+Message-ID: <20131219054639.GA22638@flamenco.cs.columbia.edu>
+References: <1380326261-13229-1-git-send-email-cota@braap.org>
+ <20130928005451.GA16682@leaf>
+ <CANeU7QnHWNK-tCwSgiv09tmDtvRP2YpkoiO+pMYeD18vkhoUKg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out2-smtp.messagingengine.com ([66.111.4.26]:42332 "EHLO
+Received: from out2-smtp.messagingengine.com ([66.111.4.26]:55616 "EHLO
 	out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750872Ab3LSFrO (ORCPT
+	by vger.kernel.org with ESMTP id S1750919Ab3LSFrZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Dec 2013 00:47:14 -0500
+	Thu, 19 Dec 2013 00:47:25 -0500
+Received: from compute5.internal (compute5.nyi.mail.srv.osa [10.202.2.45])
+	by gateway1.nyi.mail.srv.osa (Postfix) with ESMTP id 52A0120EA5
+	for <linux-sparse@vger.kernel.org>; Thu, 19 Dec 2013 00:47:25 -0500 (EST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnHWNK-tCwSgiv09tmDtvRP2YpkoiO+pMYeD18vkhoUKg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: "Emilio G. Cota" <cota@braap.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-From: "Emilio G. Cota" <cota@braap.org>
+On Sun, Sep 29, 2013 at 09:16:18 -0700, Christopher Li wrote:
+> On Fri, Sep 27, 2013 at 5:54 PM, Josh Triplett <josh@joshtriplett.org>wrote:
+> 
+> > On Fri, Sep 27, 2013 at 07:57:41PM -0400, Emilio G. Cota wrote:
+> > > From: "Emilio G. Cota" <cota@braap.org>
+> > >
+> > > Signed-off-by: Emilio G. Cota <cota@braap.org>
+> >
+> > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+> >
+> 
+> Looks good.
+> 
+> Will apply.
 
-gcc defines __CHAR_BIT__ as a pre-defined macro.
+This patch hasn't been applied yet.
 
-Define __CHAR_BIT__ in sparse so that code that needs it (e.g. code
-using CHAR_BIT from limits.h) does not generate false warnings.
+Did you drop it or it just got forgotten?
 
-Signed-off-by: Emilio G. Cota <cota@braap.org>
----
- lib.c | 1 +
- 1 file changed, 1 insertion(+)
+Thanks,
 
-diff --git a/lib.c b/lib.c
-index fe20f93..bbdb9b7 100644
---- a/lib.c
-+++ b/lib.c
-@@ -911,6 +911,7 @@ void create_builtin_stream(void)
- 	add_pre_buffer("#weak_define __LONG_LONG_MAX__ " STRINGIFY(__LONG_LONG_MAX__) "\n");
- 	add_pre_buffer("#weak_define __WCHAR_MAX__ " STRINGIFY(__WCHAR_MAX__) "\n");
- 	add_pre_buffer("#weak_define __SIZEOF_POINTER__ " STRINGIFY(__SIZEOF_POINTER__) "\n");
-+	add_pre_buffer("#weak_define __CHAR_BIT__ " STRINGIFY(__CHAR_BIT__) "\n");
- }
- 
- static struct symbol_list *sparse_tokenstream(struct token *token)
--- 
-1.8.3
-
+		Emilio
