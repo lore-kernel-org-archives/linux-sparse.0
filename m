@@ -1,47 +1,33 @@
-From: "Emilio G. Cota" <cota@braap.org>
-Subject: Re: [PATCH] gitignore: add 'version.h'
-Date: Thu, 19 Dec 2013 00:46:39 -0500
-Message-ID: <20131219054639.GA22638@flamenco.cs.columbia.edu>
-References: <1380326261-13229-1-git-send-email-cota@braap.org>
- <20130928005451.GA16682@leaf>
- <CANeU7QnHWNK-tCwSgiv09tmDtvRP2YpkoiO+pMYeD18vkhoUKg@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Define __CHAR_BIT__
+Date: Sat, 21 Dec 2013 09:20:15 -0800
+Message-ID: <CANeU7QnwK86w5TjboqjDm4xAPf0P9rw6bnp3jDWrF8j3C2vqQg@mail.gmail.com>
+References: <1387431987-29219-1-git-send-email-cota@braap.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out2-smtp.messagingengine.com ([66.111.4.26]:55616 "EHLO
-	out2-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750919Ab3LSFrZ (ORCPT
+Received: from mail-ob0-f182.google.com ([209.85.214.182]:44594 "EHLO
+	mail-ob0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754867Ab3LURUQ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 19 Dec 2013 00:47:25 -0500
-Received: from compute5.internal (compute5.nyi.mail.srv.osa [10.202.2.45])
-	by gateway1.nyi.mail.srv.osa (Postfix) with ESMTP id 52A0120EA5
-	for <linux-sparse@vger.kernel.org>; Thu, 19 Dec 2013 00:47:25 -0500 (EST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnHWNK-tCwSgiv09tmDtvRP2YpkoiO+pMYeD18vkhoUKg@mail.gmail.com>
+	Sat, 21 Dec 2013 12:20:16 -0500
+Received: by mail-ob0-f182.google.com with SMTP id wp4so3999928obc.41
+        for <linux-sparse@vger.kernel.org>; Sat, 21 Dec 2013 09:20:15 -0800 (PST)
+In-Reply-To: <1387431987-29219-1-git-send-email-cota@braap.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: "Emilio G. Cota" <cota@braap.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Sep 29, 2013 at 09:16:18 -0700, Christopher Li wrote:
-> On Fri, Sep 27, 2013 at 5:54 PM, Josh Triplett <josh@joshtriplett.org>wrote:
-> 
-> > On Fri, Sep 27, 2013 at 07:57:41PM -0400, Emilio G. Cota wrote:
-> > > From: "Emilio G. Cota" <cota@braap.org>
-> > >
-> > > Signed-off-by: Emilio G. Cota <cota@braap.org>
-> >
-> > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-> >
-> 
-> Looks good.
-> 
-> Will apply.
+On Wed, Dec 18, 2013 at 9:46 PM, Emilio G. Cota <cota@braap.org> wrote:
+> From: "Emilio G. Cota" <cota@braap.org>
+>
+> gcc defines __CHAR_BIT__ as a pre-defined macro.
+>
+> Define __CHAR_BIT__ in sparse so that code that needs it (e.g. code
+> using CHAR_BIT from limits.h) does not generate false warnings.
 
-This patch hasn't been applied yet.
+Please provide a test case with this change. The change looks good
+otherwise.
 
-Did you drop it or it just got forgotten?
-
-Thanks,
-
-		Emilio
+Chris
