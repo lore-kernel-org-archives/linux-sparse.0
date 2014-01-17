@@ -1,62 +1,31 @@
-From: "Emilio G. Cota" <cota@braap.org>
-Subject: [PATCH v2] Define __CHAR_BIT__
-Date: Wed,  8 Jan 2014 16:32:42 -0500
-Message-ID: <1389216762-10884-1-git-send-email-cota@braap.org>
-References: <CANeU7QnwK86w5TjboqjDm4xAPf0P9rw6bnp3jDWrF8j3C2vqQg@mail.gmail.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: gcc tickets for sparse attributes
+Date: Thu, 16 Jan 2014 21:27:08 -0800
+Message-ID: <52D8BF2C.9090604@zytor.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out3-smtp.messagingengine.com ([66.111.4.27]:60775 "EHLO
-	out3-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1757437AbaAHVeA (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 8 Jan 2014 16:34:00 -0500
-Received: from compute2.internal (compute2.nyi.mail.srv.osa [10.202.2.42])
-	by gateway1.nyi.mail.srv.osa (Postfix) with ESMTP id 59B97215B1
-	for <linux-sparse@vger.kernel.org>; Wed,  8 Jan 2014 16:33:59 -0500 (EST)
-In-Reply-To: <CANeU7QnwK86w5TjboqjDm4xAPf0P9rw6bnp3jDWrF8j3C2vqQg@mail.gmail.com>
+Received: from terminus.zytor.com ([198.137.202.10]:49440 "EHLO mail.zytor.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751064AbaAQF1Q (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 17 Jan 2014 00:27:16 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: "Emilio G. Cota" <cota@braap.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-From: "Emilio G. Cota" <cota@braap.org>
+Hi,
 
-gcc defines __CHAR_BIT__ as a pre-defined macro.
+I have filed gcc tickets asking for direct support in gcc for some
+sparse extensions that we use heavily in the kernel:
 
-Define __CHAR_BIT__ in sparse so that code that needs it (e.g. code
-using CHAR_BIT from limits.h) does not generate false warnings.
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59850
+http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59851
 
-Signed-off-by: Emilio G. Cota <cota@braap.org>
----
- lib.c                         | 1 +
- validation/builtin_char_bit.c | 7 +++++++
- 2 files changed, 8 insertions(+)
- create mode 100644 validation/builtin_char_bit.c
+However, I would also like support for the context extensions, but I'm
+not knowledgeable enough to describe the semantics accurately.  Would
+anyone be willing to file a ticket describing how the context extension
+works well enough that it could be implemented?
 
-diff --git a/lib.c b/lib.c
-index fe20f93..bbdb9b7 100644
---- a/lib.c
-+++ b/lib.c
-@@ -911,6 +911,7 @@ void create_builtin_stream(void)
- 	add_pre_buffer("#weak_define __LONG_LONG_MAX__ " STRINGIFY(__LONG_LONG_MAX__) "\n");
- 	add_pre_buffer("#weak_define __WCHAR_MAX__ " STRINGIFY(__WCHAR_MAX__) "\n");
- 	add_pre_buffer("#weak_define __SIZEOF_POINTER__ " STRINGIFY(__SIZEOF_POINTER__) "\n");
-+	add_pre_buffer("#weak_define __CHAR_BIT__ " STRINGIFY(__CHAR_BIT__) "\n");
- }
- 
- static struct symbol_list *sparse_tokenstream(struct token *token)
-diff --git a/validation/builtin_char_bit.c b/validation/builtin_char_bit.c
-new file mode 100644
-index 0000000..30e6bed
---- /dev/null
-+++ b/validation/builtin_char_bit.c
-@@ -0,0 +1,7 @@
-+#include <limits.h>
-+
-+static unsigned int word_bits = sizeof(unsigned int) * CHAR_BIT;
-+
-+/*
-+ * check-name: __CHAR_BIT__
-+ */
--- 
-1.8.3
-
+	-hpa
