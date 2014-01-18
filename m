@@ -1,52 +1,38 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: gcc tickets for sparse attributes
-Date: Fri, 17 Jan 2014 11:23:25 +0100
-Message-ID: <1389954205.10404.1.camel@jlt4.sipsolutions.net>
-References: <52D8BF2C.9090604@zytor.com>
-	 <1389947596.4354.2.camel@jlt4.sipsolutions.net> <20140117092223.GC577@leaf>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: cgcc: please support -iwithprefix
+Date: Fri, 17 Jan 2014 16:22:22 -0800
+Message-ID: <52D9C93E.80504@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from s3.sipsolutions.net ([144.76.43.152]:46608 "EHLO
-	sipsolutions.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751296AbaAQKX3 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 17 Jan 2014 05:23:29 -0500
-In-Reply-To: <20140117092223.GC577@leaf>
+Received: from terminus.zytor.com ([198.137.202.10]:36680 "EHLO mail.zytor.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752288AbaARAWa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 17 Jan 2014 19:22:30 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
+When doing embedded work, like kernels or other nonstandard
+environments, we want to exclude the standard library with -nostdinc,
+but that also excludes header files intrinsic to the *compiler* such as
+<stdarg.h>.
 
-> > IMHO the context extension doesn't work well enough in sparse to
-> > document and implement as is. It would be much better if it actually was
-> > able to differentiate between contexts, rather than treating each one
-> > the same.
-> 
-> That would certainly be nice, but that's something actually much more
-> easily done in GCC than in Sparse, given the types of information GCC
-> already has available to implement features like alias analysis.
+gcc uses the option -iwithprefix for that, in particular "-iwithprefix
+include" adds those compiler-specific header files back into the include
+path.  cgcc doesn't seem to understand that and instead interprets the
+option argument as an additional file.
 
-Right.
+It is unsual in gcc for an option argument to be separate, but it isn't
+unique:
 
-> In any case, the spec I wrote up assumes a distinction between contexts,
-> but allows for an initial implementation like Sparse's that ignores the
-> distinction.
-
-Ok cool. :)
-
-> > This would avoid the problem that locking one lock and
-> > unlocking another (in the kernel's __acquire/ __release mechanism) could
-> > still result in a warning.
-> 
-> That would actually *not* produce a warning, though it should.  In
-> general, I *think* an implementation like Sparse's that ignores the
-> distinction between locks should produce false negatives but not false
-> positives.
-
-Right, it doesn't report one now.
-
-johannes
-
+        -idirafter DIR
+        -include FILE  -imacros FILE
+        -iprefix FILE  -iwithprefix DIR
+        -iwithprefixbefore DIR  -isystem DIR
+        -imultilib DIR -isysroot DIR
+	-Xpreprocessor OPTION
+	-Xassembler OPTION
+	-T SCRIPT
+	-Xlinker OPTION
