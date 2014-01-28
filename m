@@ -1,38 +1,40 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
-Subject: cgcc: please support -iwithprefix
-Date: Fri, 17 Jan 2014 16:22:22 -0800
-Message-ID: <52D9C93E.80504@zytor.com>
+From: "Emilio G. Cota" <cota@braap.org>
+Subject: Re: [PATCH v2] Define __CHAR_BIT__
+Date: Tue, 28 Jan 2014 16:38:10 -0500
+Message-ID: <20140128213810.GA27471@flamenco.cs.columbia.edu>
+References: <CANeU7QnwK86w5TjboqjDm4xAPf0P9rw6bnp3jDWrF8j3C2vqQg@mail.gmail.com>
+ <1389216762-10884-1-git-send-email-cota@braap.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:36680 "EHLO mail.zytor.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752288AbaARAWa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 17 Jan 2014 19:22:30 -0500
+Received: from out4-smtp.messagingengine.com ([66.111.4.28]:44049 "EHLO
+	out4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1755475AbaA1Vj6 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 28 Jan 2014 16:39:58 -0500
+Received: from compute3.internal (compute3.nyi.mail.srv.osa [10.202.2.43])
+	by gateway1.nyi.mail.srv.osa (Postfix) with ESMTP id 995FF20C5A
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Jan 2014 16:39:57 -0500 (EST)
+Content-Disposition: inline
+In-Reply-To: <1389216762-10884-1-git-send-email-cota@braap.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-When doing embedded work, like kernels or other nonstandard
-environments, we want to exclude the standard library with -nostdinc,
-but that also excludes header files intrinsic to the *compiler* such as
-<stdarg.h>.
+On Wed, Jan 08, 2014 at 16:32:42 -0500, Emilio G. Cota wrote:
+> From: "Emilio G. Cota" <cota@braap.org>
+> 
+> gcc defines __CHAR_BIT__ as a pre-defined macro.
+> 
+> Define __CHAR_BIT__ in sparse so that code that needs it (e.g. code
+> using CHAR_BIT from limits.h) does not generate false warnings.
+> 
+> Signed-off-by: Emilio G. Cota <cota@braap.org>
 
-gcc uses the option -iwithprefix for that, in particular "-iwithprefix
-include" adds those compiler-specific header files back into the include
-path.  cgcc doesn't seem to understand that and instead interprets the
-option argument as an additional file.
+Haven't seen any activity for this v2 since it was sent on
+Jan 08--please take a look.
 
-It is unsual in gcc for an option argument to be separate, but it isn't
-unique:
+Thanks,
 
-        -idirafter DIR
-        -include FILE  -imacros FILE
-        -iprefix FILE  -iwithprefix DIR
-        -iwithprefixbefore DIR  -isystem DIR
-        -imultilib DIR -isysroot DIR
-	-Xpreprocessor OPTION
-	-Xassembler OPTION
-	-T SCRIPT
-	-Xlinker OPTION
+		Emilio
