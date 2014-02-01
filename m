@@ -1,40 +1,54 @@
-From: "Emilio G. Cota" <cota@braap.org>
-Subject: Re: [PATCH v2] Define __CHAR_BIT__
-Date: Tue, 28 Jan 2014 16:38:10 -0500
-Message-ID: <20140128213810.GA27471@flamenco.cs.columbia.edu>
-References: <CANeU7QnwK86w5TjboqjDm4xAPf0P9rw6bnp3jDWrF8j3C2vqQg@mail.gmail.com>
- <1389216762-10884-1-git-send-email-cota@braap.org>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: [PATCH] validation: In context test, make conditional acquire return
+ a status
+Date: Sat, 1 Feb 2014 10:33:40 -0800
+Message-ID: <20140201183335.GA9697@leaf>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out4-smtp.messagingengine.com ([66.111.4.28]:44049 "EHLO
-	out4-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1755475AbaA1Vj6 (ORCPT
+Received: from relay4-d.mail.gandi.net ([217.70.183.196]:51940 "EHLO
+	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751327AbaBASds (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 28 Jan 2014 16:39:58 -0500
-Received: from compute3.internal (compute3.nyi.mail.srv.osa [10.202.2.43])
-	by gateway1.nyi.mail.srv.osa (Postfix) with ESMTP id 995FF20C5A
-	for <linux-sparse@vger.kernel.org>; Tue, 28 Jan 2014 16:39:57 -0500 (EST)
+	Sat, 1 Feb 2014 13:33:48 -0500
+Received: from mfilter26-d.gandi.net (mfilter26-d.gandi.net [217.70.178.154])
+	by relay4-d.mail.gandi.net (Postfix) with ESMTP id 2C023172094
+	for <linux-sparse@vger.kernel.org>; Sat,  1 Feb 2014 19:33:45 +0100 (CET)
+Received: from relay4-d.mail.gandi.net ([217.70.183.196])
+	by mfilter26-d.gandi.net (mfilter26-d.gandi.net [10.0.15.180]) (amavisd-new, port 10024)
+	with ESMTP id Ie+RTUGJSs4S for <linux-sparse@vger.kernel.org>;
+	Sat,  1 Feb 2014 19:33:43 +0100 (CET)
+Received: from leaf (static-50-43-14-201.bvtn.or.frontiernet.net [50.43.14.201])
+	(Authenticated sender: josh@joshtriplett.org)
+	by relay4-d.mail.gandi.net (Postfix) with ESMTPSA id EC14F172055
+	for <linux-sparse@vger.kernel.org>; Sat,  1 Feb 2014 19:33:42 +0100 (CET)
 Content-Disposition: inline
-In-Reply-To: <1389216762-10884-1-git-send-email-cota@braap.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Wed, Jan 08, 2014 at 16:32:42 -0500, Emilio G. Cota wrote:
-> From: "Emilio G. Cota" <cota@braap.org>
-> 
-> gcc defines __CHAR_BIT__ as a pre-defined macro.
-> 
-> Define __CHAR_BIT__ in sparse so that code that needs it (e.g. code
-> using CHAR_BIT from limits.h) does not generate false warnings.
-> 
-> Signed-off-by: Emilio G. Cota <cota@braap.org>
+The context test defines and tests a __cond_lock mechanism similar to
+the kernel, but then applies it to a function that returns void.  Change
+that to int.
 
-Haven't seen any activity for this v2 since it was sent on
-Jan 08--please take a look.
+Signed-off-by: Josh Triplett <josh@joshtriplett.org>
+---
+ validation/context.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
+diff --git a/validation/context.c b/validation/context.c
+index 33b70b8..b9500dc 100644
+--- a/validation/context.c
++++ b/validation/context.c
+@@ -10,7 +10,7 @@ static void r(void) __attribute__((context(1,0)))
+ 	__context__(-1);
+ }
+ 
+-extern void _ca(int fail);
++extern int _ca(int fail);
+ #define ca(fail) __cond_lock(_ca(fail))
+ 
+ static void good_paired1(void)
+-- 
+1.9.rc1
 
-		Emilio
