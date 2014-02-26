@@ -1,64 +1,67 @@
 From: behanw@converseincode.com
-Subject: [PATCH 5/5] x86 kbuild: LLVMLinux: More cc-options added for clang
-Date: Tue, 25 Feb 2014 17:08:43 -0800
-Message-ID: <1393376923-21892-6-git-send-email-behanw@converseincode.com>
+Subject: [PATCH 4/5] LLVMLinux: Add support for clang to compiler.h and new compiler-clang.h
+Date: Tue, 25 Feb 2014 17:08:42 -0800
+Message-ID: <1393376923-21892-5-git-send-email-behanw@converseincode.com>
 References: <1393376923-21892-1-git-send-email-behanw@converseincode.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1393376923-21892-1-git-send-email-behanw@converseincode.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: mmarek@suse.cz, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, sparse@chrisli.org
-Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, torvalds@linux-foundation.org, dwmw2@infradead.org, pageexec@freemail.hu, =?UTF-8?q?Jan-Simon=20M=C3=B6ller?= <dl9pf@gmx.de>, Behan Webster <behanw@converseincode.com>, Mark Charlebois <charlebm@gmail.com>
+Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, torvalds@linux-foundation.org, dwmw2@infradead.org, pageexec@freemail.hu, Mark Charlebois <charlebm@gmail.com>, Behan Webster <behanw@converseincode.com>
 List-Id: linux-sparse@vger.kernel.org
 
-=46rom: Jan-Simon M=C3=B6ller <dl9pf@gmx.de>
+From: Mark Charlebois <charlebm@gmail.com>
 
-Protect more options for x86 with cc-option so that we don't get errors=
- when
-using clang instead of gcc.  Add more or different options when using c=
-lang as
-well. Also need to enforce that SSE is off for clang and the stack is 8=
--byte
-aligned.
+Add a compiler-clang.h file to add specific macros needed for compiling the
+kernel with clang.
 
-Signed-off-by: Jan-Simon M=C3=B6ller <dl9pf@gmx.de>
-Signed-off-by: Behan Webster <behanw@converseincode.com>
+Initially the only override required is the macro for silencing the
+compiler for a purposefully uninintialized variable.
+
+Author: Mark Charlebois <charlebm@gmail.com>
 Signed-off-by: Mark Charlebois <charlebm@gmail.com>
+Signed-off-by: Behan Webster <behanw@converseincode.com>
 ---
- arch/x86/Makefile | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ include/linux/compiler-clang.h | 12 ++++++++++++
+ include/linux/compiler.h       |  7 +++++++
+ 2 files changed, 19 insertions(+)
+ create mode 100644 include/linux/compiler-clang.h
 
-diff --git a/arch/x86/Makefile b/arch/x86/Makefile
-index eeda43a..852d8f0 100644
---- a/arch/x86/Makefile
-+++ b/arch/x86/Makefile
-@@ -108,7 +108,7 @@ else
-=20
-         # this works around some issues with generating unwind tables =
-in older gccs
-         # newer gccs do it by default
--        KBUILD_CFLAGS +=3D -maccumulate-outgoing-args
-+        KBUILD_CFLAGS +=3D $(call cc-option,-maccumulate-outgoing-args=
-)
- endif
-=20
- # Make sure compiler does not have buggy stack-protector support.
-@@ -144,6 +144,12 @@ endif
- sp-$(CONFIG_X86_32) :=3D esp
- sp-$(CONFIG_X86_64) :=3D rsp
-=20
-+# enforce no-sse for clang
-+ifneq ($(COMPILER),clang)
-+        KBUILD_CFLAGS +=3D $(call cc-option,-mno-sse)
-+        KBUILD_CFLAGS +=3D $(call cc-option,-mpreferred-stack-boundary=
-=3D3)
-+endif
+diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
+new file mode 100644
+index 0000000..d1e49d5
+--- /dev/null
++++ b/include/linux/compiler-clang.h
+@@ -0,0 +1,12 @@
++#ifndef __LINUX_COMPILER_H
++#error "Please don't include <linux/compiler-clang.h> directly, include <linux/compiler.h> instead."
++#endif
 +
- # do binutils support CFI?
- cfi :=3D $(call as-instr,.cfi_startproc\n.cfi_rel_offset $(sp-y)$(comm=
-a)0\n.cfi_endproc,-DCONFIG_AS_CFI=3D1)
- # is .cfi_signal_frame supported too?
---=20
++/* Some compiler specific definitions are overwritten here
++ * for Clang compiler
++ */
++
++#ifdef uninitialized_var
++#undef uninitialized_var
++#define uninitialized_var(x) x = *(&(x))
++#endif
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 2472740..ee7239e 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -63,6 +63,13 @@ extern void __chk_io_ptr(const volatile void __iomem *);
+ # include <linux/compiler-intel.h>
+ #endif
+ 
++/* Clang compiler defines __GNUC__. So we will overwrite implementations
++ * coming from above header files here
++ */
++#ifdef __clang__
++#include <linux/compiler-clang.h>
++#endif
++
+ /*
+  * Generic compiler-dependent macros required for kernel
+  * build go below this comment. Actual compiler/compiler version
+-- 
 1.8.3.2
