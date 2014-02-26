@@ -1,62 +1,57 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: __attribute__((force)) should not be a storage class
-Date: Sun, 2 Feb 2014 00:38:38 -0800
-Message-ID: <20140202083838.GA20284@leaf>
-References: <20140201184935.GA12321@leaf>
- <CANeU7Qm1=8ks=Fu6LzjuAYxRqLPS3gssmD+uxNzDfN568Xxodw@mail.gmail.com>
+From: behanw@converseincode.com
+Subject: [PATCH 0/5] kbuild: LLVMLinux: Initial updates to kbuild to enable the kernel to be compiled with clang/LLVM
+Date: Tue, 25 Feb 2014 17:08:38 -0800
+Message-ID: <1393376923-21892-1-git-send-email-behanw@converseincode.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:33368 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751253AbaBBIir (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 2 Feb 2014 03:38:47 -0500
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qm1=8ks=Fu6LzjuAYxRqLPS3gssmD+uxNzDfN568Xxodw@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kbuild-owner@vger.kernel.org>
+Sender: linux-kbuild-owner@vger.kernel.org
+To: mmarek@suse.cz, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, sparse@chrisli.org
+Cc: linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, torvalds@linux-foundation.org, dwmw2@infradead.org, pageexec@freemail.hu, Behan Webster <behanw@converseincode.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Al Viro <viro@ftp.linux.org.uk>
 
-On Sat, Feb 01, 2014 at 09:51:11PM -0800, Christopher Li wrote:
-> On Sat, Feb 1, 2014 at 10:49 AM, Josh Triplett <josh@joshtriplett.org> wrote:
-> > Commit 3829c4d8b097776e6b3472290a9fae08a705ab7a ("Don't mix storage
-> > class bits with ctype->modifiers while parsing type") in 2009 separated
-> > storage classes from modifiers; in the process, it changed
-> > __attribute__((force)) from a modifier to a storage class.  I don't
-> > think it makes sense to have force as a storage class, for one critical
-> > reason: storage classes are mutually exclusive.
-> 
-> I am not convinced yet.
-> 
-> The current usage case for attribute "force" is to silence the type
-> mismatch during the type conversion. For variable declaration, there is
-> not need to silence any mismatch because there is no type conversion.
-> 
-> What you are purposing here is a new usage case. Do you want
-> to silence every single type mismatch in every assignment to that
-> variable? How about assignment from that variable?
+=46rom: Behan Webster <behanw@converseincode.com>
 
-I'd suggest that either it should have exactly the same behavior as it does
-when applied to the type of a function argument (suppressing
-Sparse-specific pointer qualifier mismatches on input), or it should be
-prohibited entirely on standalone variable declarations.  I'd be fine
-with the latter, if you prefer.
+These patches add initial support for compiling the x86 kernel with cla=
+ng. More
+patches to the kernel code are required to actually compile the kernel =
+with
+clang. The intent of these patches are just to get things started with =
+kbuild.
 
-> > $ cat /tmp/test.c
-> > static __attribute__((force)) int *p;
-> > static int q = *p;
-> 
-> In this example, the attribute "force" is not needed.
-> I think it compiles fine without forcing it. The "force" don't
-> actually do any thing. So why do we want to support this?
+The LLVMLinux project aims to fully build the Linux kernel using both g=
+cc and
+clang (the C front end for the LLVM compiler infrastructure project).=20
 
-This particular case was simply an unrelated test case which happened to
-trigger the error about having multiple storage classes.  The original
-test case came from http://gcc.gnu.org/bugzilla/show_bug.cgi?id=59850#c3
-; I noticed the use of -Wno-decl, presumably to suppress the warnings
-about the two variables not being static, so I marked them as static and
-got the error that motivated this thread.
 
-- Josh Triplett
+Behan Webster (1):
+  kbuild: LLVMLinux: Add Kbuild support for building kernel with Clang
+
+Jan-Simon M=C3=B6ller (3):
+  kbuild: LLVMLinux: Adapt warnings for compilation with clang
+  kbuild: LLVMLinux: Fix LINUX_COMPILER definition script for
+    compilation with clang
+  x86 kbuild: LLVMLinux: More cc-options added for clang
+
+Mark Charlebois (1):
+  LLVMLinux: Add support for clang to compiler.h and new
+    compiler-clang.h
+
+ Makefile                       | 32 +++++++++++++++++++++++++++++++-
+ arch/x86/Makefile              |  8 +++++++-
+ include/linux/compiler-clang.h | 12 ++++++++++++
+ include/linux/compiler.h       |  7 +++++++
+ scripts/Makefile.build         | 13 ++++++++++++-
+ scripts/mkcompile_h            |  2 +-
+ 6 files changed, 70 insertions(+), 4 deletions(-)
+ create mode 100644 include/linux/compiler-clang.h
+
+--=20
+1.8.3.2
+
+--
+To unsubscribe from this list: send the line "unsubscribe linux-kbuild"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
