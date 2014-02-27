@@ -1,65 +1,61 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Ben Pfaff <blp@nicira.com>
 Subject: Re: [PATCH V2] sparse: Allow override of sizeof(bool) warning
-Date: Wed, 26 Feb 2014 19:42:37 -0800
-Message-ID: <60797a1a-1a83-468e-9629-abf4e8712d65@email.android.com>
-References: <530E6F76.1070605@zytor.com> <1393462087.24588.50.camel@joe-AO722> <530E8C2E.7080307@zytor.com> <1393466619.24588.65.camel@joe-AO722> <20140227022857.GC23659@thin> <1393469594.24588.71.camel@joe-AO722> <20140227025845.GA25145@thin> <530EB103.5070406@zytor.com> <1393472326.24588.82.camel@joe-AO722>
+Date: Wed, 26 Feb 2014 20:00:50 -0800
+Message-ID: <20140227040050.GA8449@nicira.com>
+References: <530E6F76.1070605@zytor.com>
+ <1393462087.24588.50.camel@joe-AO722>
+ <530E8C2E.7080307@zytor.com>
+ <1393466619.24588.65.camel@joe-AO722>
+ <20140227022857.GC23659@thin>
+ <1393469594.24588.71.camel@joe-AO722>
+ <20140227025845.GA25145@thin>
+ <530EB103.5070406@zytor.com>
+ <1393472326.24588.82.camel@joe-AO722>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:49049 "EHLO mail.zytor.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751700AbaB0Dn0 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 26 Feb 2014 22:43:26 -0500
+Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:39810 "HELO
+	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with SMTP id S1753269AbaB0EHO (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 26 Feb 2014 23:07:14 -0500
+Received: by mail-pb0-f44.google.com with SMTP id rp16so1950566pbb.17
+        for <linux-sparse@vger.kernel.org>; Wed, 26 Feb 2014 20:07:13 -0800 (PST)
+Content-Disposition: inline
 In-Reply-To: <1393472326.24588.82.camel@joe-AO722>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Joe Perches <joe@perches.com>, Ben Pfaff <blp@nicira.com>, Christopher Li <sparse@chrisli.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Joe Perches <joe@perches.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-sizeof(_Bool), like for many other types, is ABI-dependent, but that doesn't mean it is illegitimate.
+On Wed, Feb 26, 2014 at 07:38:46PM -0800, Joe Perches wrote:
+> (adding Ben Pfaff and Christopher Li)
+> 
+> On Wed, 2014-02-26 at 19:29 -0800, H. Peter Anvin wrote:
+> > On 02/26/2014 06:58 PM, Josh Triplett wrote:
+> > > On Wed, Feb 26, 2014 at 06:53:14PM -0800, Joe Perches wrote:
+> > >> Allow an override to emit or not the sizeof(bool) warning
+> > >> Add a description to the manpage.
+> > >>
+> > >> Signed-off-by: Joe Perches <joe@perches.com>
+> > > 
+> > > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+> > > 
+> > 
+> > I have to admit that this particular warning is a bit odd to me.  I'm
+> > wondering what kind of bugs it was intended to catch.
+> > 
+> > In particular, things that incorrectly assumes the size of bool to be
+> > anything in particular would seem unlikely to actually use sizeof().
+> 
+> Dunno, the commit log for the commit that added it doesn't quite
+> match the code and is seemingly unaware that the c99 spec doesn't
+> specify sizeof(bool).
 
-I don't think C99 says that it is invalid (which means C99 doesn't permit is to be a packed bitmap.)
+The commit *relaxed* sparse behavior: because previously sizeof(bool)
+was an error.  I'm not in favor of any diagnostic at all for
+sizeof(bool), but my recollection is that a sparse maintainer wanted it
+to yield one.
 
-On February 26, 2014 7:38:46 PM PST, Joe Perches <joe@perches.com> wrote:
->(adding Ben Pfaff and Christopher Li)
->
->On Wed, 2014-02-26 at 19:29 -0800, H. Peter Anvin wrote:
->> On 02/26/2014 06:58 PM, Josh Triplett wrote:
->> > On Wed, Feb 26, 2014 at 06:53:14PM -0800, Joe Perches wrote:
->> >> Allow an override to emit or not the sizeof(bool) warning
->> >> Add a description to the manpage.
->> >>
->> >> Signed-off-by: Joe Perches <joe@perches.com>
->> > 
->> > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
->> > 
->> 
->> I have to admit that this particular warning is a bit odd to me.  I'm
->> wondering what kind of bugs it was intended to catch.
->> 
->> In particular, things that incorrectly assumes the size of bool to be
->> anything in particular would seem unlikely to actually use sizeof().
->
->Dunno, the commit log for the commit that added it doesn't quite
->match the code and is seemingly unaware that the c99 spec doesn't
->specify sizeof(bool).
->
->Ben Pfaff <blp@nicira.com>
->Date:   Wed May 4 16:39:54 2011 -0700
->
->    evaluate: Allow sizeof(_Bool) to succeed.
->    
-> Without this commit, sizeof(_Bool) provokes an error with "cannot size
->expression" because _Bool is a 1-bit type and thus not a multiple of a
->full
->byte in size.  But sizeof(_Bool) is valid C that should evaluate to 1,
->so
->    this commit fixes the problem and adds a regression test.
->    
->    Signed-off-by: Ben Pfaff <blp@nicira.com>
->    Signed-off-by: Christopher Li <sparse@chrisli.org>
-
--- 
-Sent from my mobile phone.  Please pardon brevity and lack of formatting.
+I don't care about the particular result for sizeof(bool) as long as it
+matches the ABI.
