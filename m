@@ -1,64 +1,34 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: [PATCH V2] sparse: Allow override of sizeof(bool) warning
-Date: Thu, 27 Feb 2014 19:10:04 +0300
-Message-ID: <20140227161004.GT26722@mwanda>
-References: <20140227022857.GC23659@thin>
- <1393469594.24588.71.camel@joe-AO722>
- <20140227025845.GA25145@thin>
- <530EB103.5070406@zytor.com>
- <1393472326.24588.82.camel@joe-AO722>
- <60797a1a-1a83-468e-9629-abf4e8712d65@email.android.com>
- <20140227082529.GA18210@pd.tnic>
- <dbc47544-a6f6-4ab4-80b0-25d93a1666e2@email.android.com>
- <20140227152435.GA7982@thunk.org>
- <530F5E53.5070208@zytor.com>
+Date: Thu, 27 Feb 2014 08:52:19 -0800
+Message-ID: <530F6D43.5020006@zytor.com>
+References: <20140227022857.GC23659@thin> <1393469594.24588.71.camel@joe-AO722> <20140227025845.GA25145@thin> <530EB103.5070406@zytor.com> <1393472326.24588.82.camel@joe-AO722> <60797a1a-1a83-468e-9629-abf4e8712d65@email.android.com> <20140227082529.GA18210@pd.tnic> <dbc47544-a6f6-4ab4-80b0-25d93a1666e2@email.android.com> <20140227152435.GA7982@thunk.org> <530F5E53.5070208@zytor.com> <20140227161004.GT26722@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:28601 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751125AbaB0QLv (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 27 Feb 2014 11:11:51 -0500
-Content-Disposition: inline
-In-Reply-To: <530F5E53.5070208@zytor.com>
+Received: from terminus.zytor.com ([198.137.202.10]:57375 "EHLO mail.zytor.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751114AbaB0QxW (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 27 Feb 2014 11:53:22 -0500
+In-Reply-To: <20140227161004.GT26722@mwanda>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "H. Peter Anvin" <hpa@zytor.com>
+To: Dan Carpenter <dan.carpenter@oracle.com>
 Cc: Theodore Ts'o <tytso@mit.edu>, Borislav Petkov <bp@alien8.de>, Joe Perches <joe@perches.com>, Ben Pfaff <blp@nicira.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, James Hogan <james.hogan@imgtec.com>
 
-On Thu, Feb 27, 2014 at 07:48:35AM -0800, H. Peter Anvin wrote:
-> > Do we have a fairly comprehensive list of what these extrastandard
-> > requirements / assumptions are?  It might be a good idea to have one
-> > that we can point to, so that (a) people who are trying to define a
-> > new architecture knows what they need to handle, (b) and so we can
-> > give a list of things that static code analyzers like smatch and
-> > coverity and sparse should be able to suppress (perhaps in a Linux
-> > kernel-only mode).
-> > 
+On 02/27/2014 08:10 AM, Dan Carpenter wrote:
 > 
-> No, but I think we can certainly make a list... a lot of it right now
-> sits in various people's heads.
+> That last assumption has to change for the Meta architecture.
 > 
-> Here are a couple:
+> https://lwn.net/Articles/522188/
 > 
-> - Bytes are 8 bits
-> - Signed integers will be 2's complement
-> - sizeof char, short, int, long, and long long will be 1, 2, 4, 4, 8 or
->   1, 2, 4, 8, 8 on 32- and 64-bit processors, respectively.
-> - sizeof(long) == sizeof(void *)
-> - NULL is represented by all zero
-> - Structures will not add padding as long as all the members are
->   naturally aligned.
+> On meta, the structs and unions are padded to 4 bytes unless they are
+> explicitly marked as __packed.
 > 
 
-That last assumption has to change for the Meta architecture.
+One have to wonder how likely they are to have that not continually break...
 
-https://lwn.net/Articles/522188/
+	-hpa
 
-On meta, the structs and unions are padded to 4 bytes unless they are
-explicitly marked as __packed.
-
-regards,
-dan carpenter
 
