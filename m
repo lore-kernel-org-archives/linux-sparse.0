@@ -1,61 +1,26 @@
-From: Ben Pfaff <blp@nicira.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
 Subject: Re: [PATCH V2] sparse: Allow override of sizeof(bool) warning
-Date: Wed, 26 Feb 2014 20:00:50 -0800
-Message-ID: <20140227040050.GA8449@nicira.com>
-References: <530E6F76.1070605@zytor.com>
- <1393462087.24588.50.camel@joe-AO722>
- <530E8C2E.7080307@zytor.com>
- <1393466619.24588.65.camel@joe-AO722>
- <20140227022857.GC23659@thin>
- <1393469594.24588.71.camel@joe-AO722>
- <20140227025845.GA25145@thin>
- <530EB103.5070406@zytor.com>
- <1393472326.24588.82.camel@joe-AO722>
+Date: Wed, 26 Feb 2014 20:19:57 -0800
+Message-ID: <530EBCED.9020705@zytor.com>
+References: <530E6F76.1070605@zytor.com> <1393462087.24588.50.camel@joe-AO722> <530E8C2E.7080307@zytor.com> <1393466619.24588.65.camel@joe-AO722> <20140227022857.GC23659@thin> <1393469594.24588.71.camel@joe-AO722> <20140227025845.GA25145@thin> <530EB103.5070406@zytor.com> <1393472326.24588.82.camel@joe-AO722> <20140227040050.GA8449@nicira.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from na3sys009aog101.obsmtp.com ([74.125.149.67]:39810 "HELO
-	na3sys009aog101.obsmtp.com" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with SMTP id S1753269AbaB0EHO (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 26 Feb 2014 23:07:14 -0500
-Received: by mail-pb0-f44.google.com with SMTP id rp16so1950566pbb.17
-        for <linux-sparse@vger.kernel.org>; Wed, 26 Feb 2014 20:07:13 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <1393472326.24588.82.camel@joe-AO722>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140227040050.GA8449@nicira.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Ben Pfaff <blp@nicira.com>, Joe Perches <joe@perches.com>
+Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Joe Perches <joe@perches.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-On Wed, Feb 26, 2014 at 07:38:46PM -0800, Joe Perches wrote:
-> (adding Ben Pfaff and Christopher Li)
+On 02/26/2014 08:00 PM, Ben Pfaff wrote:
 > 
-> On Wed, 2014-02-26 at 19:29 -0800, H. Peter Anvin wrote:
-> > On 02/26/2014 06:58 PM, Josh Triplett wrote:
-> > > On Wed, Feb 26, 2014 at 06:53:14PM -0800, Joe Perches wrote:
-> > >> Allow an override to emit or not the sizeof(bool) warning
-> > >> Add a description to the manpage.
-> > >>
-> > >> Signed-off-by: Joe Perches <joe@perches.com>
-> > > 
-> > > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-> > > 
-> > 
-> > I have to admit that this particular warning is a bit odd to me.  I'm
-> > wondering what kind of bugs it was intended to catch.
-> > 
-> > In particular, things that incorrectly assumes the size of bool to be
-> > anything in particular would seem unlikely to actually use sizeof().
+> The commit *relaxed* sparse behavior: because previously sizeof(bool)
+> was an error.  I'm not in favor of any diagnostic at all for
+> sizeof(bool), but my recollection is that a sparse maintainer wanted it
+> to yield one.
 > 
-> Dunno, the commit log for the commit that added it doesn't quite
-> match the code and is seemingly unaware that the c99 spec doesn't
-> specify sizeof(bool).
 
-The commit *relaxed* sparse behavior: because previously sizeof(bool)
-was an error.  I'm not in favor of any diagnostic at all for
-sizeof(bool), but my recollection is that a sparse maintainer wanted it
-to yield one.
+Still not clear as to why.
 
-I don't care about the particular result for sizeof(bool) as long as it
-matches the ABI.
+	-hpa
