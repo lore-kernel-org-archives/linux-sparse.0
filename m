@@ -1,45 +1,43 @@
-From: "H. Peter Anvin" <hpa@zytor.com>
+From: Theodore Ts'o <tytso@mit.edu>
 Subject: Re: [PATCH V2] sparse: Allow override of sizeof(bool) warning
-Date: Thu, 27 Feb 2014 07:10:25 -0800
-Message-ID: <dbc47544-a6f6-4ab4-80b0-25d93a1666e2@email.android.com>
-References: <530E6F76.1070605@zytor.com> <1393462087.24588.50.camel@joe-AO722> <530E8C2E.7080307@zytor.com> <1393466619.24588.65.camel@joe-AO722> <20140227022857.GC23659@thin> <1393469594.24588.71.camel@joe-AO722> <20140227025845.GA25145@thin> <530EB103.5070406@zytor.com> <1393472326.24588.82.camel@joe-AO722> <60797a1a-1a83-468e-9629-abf4e8712d65@email.android.com> <20140227082529.GA18210@pd.tnic>
+Date: Thu, 27 Feb 2014 10:24:35 -0500
+Message-ID: <20140227152435.GA7982@thunk.org>
+References: <530E8C2E.7080307@zytor.com>
+ <1393466619.24588.65.camel@joe-AO722>
+ <20140227022857.GC23659@thin>
+ <1393469594.24588.71.camel@joe-AO722>
+ <20140227025845.GA25145@thin>
+ <530EB103.5070406@zytor.com>
+ <1393472326.24588.82.camel@joe-AO722>
+ <60797a1a-1a83-468e-9629-abf4e8712d65@email.android.com>
+ <20140227082529.GA18210@pd.tnic>
+ <dbc47544-a6f6-4ab4-80b0-25d93a1666e2@email.android.com>
 Mime-Version: 1.0
-Content-Type: text/plain;
- charset=UTF-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from terminus.zytor.com ([198.137.202.10]:55990 "EHLO mail.zytor.com"
+Received: from imap.thunk.org ([74.207.234.97]:34849 "EHLO imap.thunk.org"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751192AbaB0PL0 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 27 Feb 2014 10:11:26 -0500
-In-Reply-To: <20140227082529.GA18210@pd.tnic>
+	id S1751532AbaB0PY4 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 27 Feb 2014 10:24:56 -0500
+Content-Disposition: inline
+In-Reply-To: <dbc47544-a6f6-4ab4-80b0-25d93a1666e2@email.android.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Joe Perches <joe@perches.com>, Ben Pfaff <blp@nicira.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Borislav Petkov <bp@alien8.de>, Joe Perches <joe@perches.com>, Ben Pfaff <blp@nicira.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Keep in mind, too, that for the kernel we don't care about the full C standard but a subset.  We rely on extrastandard behavior all over the place.  For all ABIs supported by the kernel, sizeof(_Book) == 1 and so everything is sane.
+On Thu, Feb 27, 2014 at 07:10:25AM -0800, H. Peter Anvin wrote:
+> Keep in mind, too, that for the kernel we don't care about the full
+> C standard but a subset.  We rely on extrastandard behavior all over
+> the place.  For all ABIs supported by the kernel, sizeof(_Book) == 1
+> and so everything is sane.
 
+Do we have a fairly comprehensive list of what these extrastandard
+requirements / assumptions are?  It might be a good idea to have one
+that we can point to, so that (a) people who are trying to define a
+new architecture knows what they need to handle, (b) and so we can
+give a list of things that static code analyzers like smatch and
+coverity and sparse should be able to suppress (perhaps in a Linux
+kernel-only mode).
 
-On February 27, 2014 12:25:29 AM PST, Borislav Petkov <bp@alien8.de> wrote:
->On Wed, Feb 26, 2014 at 07:42:37PM -0800, H. Peter Anvin wrote:
->> sizeof(_Bool), like for many other types, is ABI-dependent, but that
->> doesn't mean it is illegitimate.
->>
->> I don't think C99 says that it is invalid (which means C99 doesn't
->> permit is to be a packed bitmap.)
->
->Ok, but what can be said about the __pcpu_size_call() use case where we
->do sizeof(bool)? We have there accessors for sizes 1,2,4 and 8. Can we
->simply assume that the ABI will give us a size of bool which is one of
->those?
->
->What if sizeof(bool) is 3?
->
->Or, are we saying that sizeof(bool) will always be of some natural,
->native size like byte, short, int or long so we're good there?
->
->Thanks.
-
--- 
-Sent from my mobile phone.  Please pardon brevity and lack of formatting.
+					- Ted
