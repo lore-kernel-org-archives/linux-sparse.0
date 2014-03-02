@@ -1,25 +1,23 @@
-From: Josh Triplett <josh@joshtriplett.org>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 Subject: Re: [PATCH 2/2] Support GCC's transparent unions
-Date: Sat, 1 Mar 2014 12:21:39 -0800
-Message-ID: <20140301202139.GC24871@thin>
-References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1393674078.git.john@keeping.me.uk>
- <303d3e76a8db47a65f2015289cfd5259611723bf.1393674078.git.john@keeping.me.uk>
+Date: Sun, 02 Mar 2014 12:11:58 +0000
+Message-ID: <5313200E.600@ramsay1.demon.co.uk>
+References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1393674078.git.john@keeping.me.uk> <303d3e76a8db47a65f2015289cfd5259611723bf.1393674078.git.john@keeping.me.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:46609 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753340AbaCAUVv (ORCPT
+Received: from mdfmta010.mxout.tbr.inty.net ([91.221.168.51]:58278 "EHLO
+	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1752248AbaCBMS6 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 1 Mar 2014 15:21:51 -0500
-Content-Disposition: inline
+	Sun, 2 Mar 2014 07:18:58 -0500
 In-Reply-To: <303d3e76a8db47a65f2015289cfd5259611723bf.1393674078.git.john@keeping.me.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: John Keeping <john@keeping.me.uk>
-Cc: linux-sparse@vger.kernel.org
+To: John Keeping <john@keeping.me.uk>, linux-sparse@vger.kernel.org
 
-On Sat, Mar 01, 2014 at 11:41:39AM +0000, John Keeping wrote:
+On 01/03/14 11:41, John Keeping wrote:
 > This stops warnings in code using socket operations with a modern glibc,
 > which otherwise result in warnings of the form:
 > 
@@ -32,9 +30,7 @@ On Sat, Mar 01, 2014 at 11:41:39AM +0000, John Keeping wrote:
 > specifically in this context.
 > 
 > Signed-off-by: John Keeping <john@keeping.me.uk>
-
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-
+> ---
 >  evaluate.c                     | 28 +++++++++++++++++++++++++++-
 >  lib.c                          |  2 --
 >  lib.h                          |  1 -
@@ -44,7 +40,29 @@ Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 >  validation/transparent-union.c | 25 +++++++++++++++++++++++++
 >  7 files changed, 58 insertions(+), 15 deletions(-)
 >  create mode 100644 validation/transparent-union.c
-> 
+
+
+I applied these patches to 'sparse 0.5.0' (there is a simple textual
+conflict with commit 2667c2d in chrisl repo) and tested them on the
+git.git repo on Linux. They worked just fine and sparse only issues
+a single warning on Linux now. Yay! :-D
+
+I haven't tested yet, but I expect this to also fix two similar
+warnings on Cygwin (relating to the wait() 'syscall').
+
+So, FWIW:
+
+    Tested-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+
+[I started to write a patch for this years ago, but just didn't finish
+it. Yours looks *much* better BTW]
+
+HTH
+
+ATB,
+Ramsay Jones
+
+
 > diff --git a/evaluate.c b/evaluate.c
 > index 2e6511b..f36c6c1 100644
 > --- a/evaluate.c
@@ -204,10 +222,5 @@ Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 > +/*
 > + * check-name: Transparent union attribute.
 > + */
-> -- 
-> 1.9.0.6.g037df60.dirty
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
