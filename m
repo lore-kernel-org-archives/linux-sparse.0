@@ -1,33 +1,50 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/2] evaluate: split out implementation of compatible_assignment_types
-Date: Mon, 3 Mar 2014 21:05:37 -0800
-Message-ID: <CANeU7QkAR2TNyrXGnTjSDuPFRseQ1ac_Wf9YSB+u9uFjOJM1ng@mail.gmail.com>
-References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1393674078.git.john@keeping.me.uk>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: sparse 0.5.0 release?
+Date: Tue, 4 Mar 2014 08:44:32 -0500
+Message-ID: <20140304084432.04393d21@tlielax.poochiereds.net>
+References: <20140227014236.GA15912@kroah.com>
+	<CANeU7Q=A00MvV==8c3MEZsXZeTJAg06zSKPrWfTgFFJ5+nXFiQ@mail.gmail.com>
+	<20140227203252.GA31091@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qa0-f46.google.com ([209.85.216.46]:64845 "EHLO
-	mail-qa0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751065AbaCDFLD (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 4 Mar 2014 00:11:03 -0500
-Received: by mail-qa0-f46.google.com with SMTP id i13so4330064qae.5
-        for <linux-sparse@vger.kernel.org>; Mon, 03 Mar 2014 21:11:02 -0800 (PST)
-In-Reply-To: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1393674078.git.john@keeping.me.uk>
+Received: from mx1.redhat.com ([209.132.183.28]:10499 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1757193AbaCDNoo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 4 Mar 2014 08:44:44 -0500
+In-Reply-To: <20140227203252.GA31091@kroah.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: John Keeping <john@keeping.me.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Greg KH <gregkh@linuxfoundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Mar 1, 2014 at 3:41 AM, John Keeping <john@keeping.me.uk> wrote:
-> This will allow us to reuse the logic when processing a transparent
-> union by checking each member in turn without printing a warning unless
-> none of the members match.
->
-> Signed-off-by: John Keeping <john@keeping.me.uk>
+On Thu, 27 Feb 2014 12:32:52 -0800
+Greg KH <gregkh@linuxfoundation.org> wrote:
 
-The series looks fine on my first casual look.
+> On Thu, Feb 27, 2014 at 12:06:39PM -0800, Christopher Li wrote:
+> > On Wed, Feb 26, 2014 at 5:42 PM, Greg KH <gregkh@linuxfoundation.org> wrote:
+> > >
+> > > I see that sparse 0.5.0 has been tagged in git, yet there is no tarballs
+> > > on kernel.org for it for distros to package up.  Any ideas when that
+> > > would happen?
+> > 
+> > As soon as I refresh my kup skills? I just put the sparse 0.5.0 tar file
+> > under:
+> > 
+> > https://www.kernel.org/pub/software/devel/sparse/dist/
+> > 
+> > It should be there by now.
+> 
+> Yes, I see it there now, thanks so much for this.
+> 
+> greg k-h
 
-Will get back to you on that.
+Yes, thanks!
 
-Chris
+It also might be nice to have an explicit announcement of the releases
+on the mailing list as well. I saw the announcement of 0.5.0-rc1, but
+missed the fact that the "official" 0.5.0 release had occurred.
+
+-- 
+Jeff Layton <jlayton@redhat.com>
