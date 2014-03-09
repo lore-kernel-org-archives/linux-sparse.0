@@ -1,37 +1,137 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/2] Support GCC's transparent unions
-Date: Sat, 8 Mar 2014 17:28:26 -0800
-Message-ID: <CANeU7QnQagpzFtiDpBQKihBYYixVvxkq7hVw-aQoDsOAftWsUA@mail.gmail.com>
-References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1393674078.git.john@keeping.me.uk>
-	<303d3e76a8db47a65f2015289cfd5259611723bf.1393674078.git.john@keeping.me.uk>
-	<CANeU7Q=ekL+ASkz-v9K14cP8GJox=O7f4C_YRpS0SmTBoy_02w@mail.gmail.com>
-	<20140304175252.GE18371@serenity.lan>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: John Keeping <john@keeping.me.uk>
+Subject: [PATCH v2 1/2] evaluate: split out implementation of compatible_assignment_types
+Date: Sun,  9 Mar 2014 11:32:50 +0000
+Message-ID: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1394364717.git.john@keeping.me.uk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qa0-f50.google.com ([209.85.216.50]:62056 "EHLO
-	mail-qa0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751938AbaCIB21 (ORCPT
+Received: from jackal.aluminati.org ([72.9.247.210]:44453 "EHLO
+	jackal.aluminati.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751741AbaCILdC (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 8 Mar 2014 20:28:27 -0500
-Received: by mail-qa0-f50.google.com with SMTP id o15so5522045qap.23
-        for <linux-sparse@vger.kernel.org>; Sat, 08 Mar 2014 17:28:26 -0800 (PST)
-In-Reply-To: <20140304175252.GE18371@serenity.lan>
+	Sun, 9 Mar 2014 07:33:02 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: John Keeping <john@keeping.me.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: John Keeping <john@keeping.me.uk>
 
-On Tue, Mar 4, 2014 at 9:52 AM, John Keeping <john@keeping.me.uk> wrote:
->> Can you please keep the option to warning about the transparent union?
->> You can change the default to off. While you are there, please make the second
->> patch base on the chrisl sparse repository.
->
-> Will do.
->
+This will allow us to reuse the logic when processing a transparent
+union by checking each member in turn without printing a warning unless
+none of the members match.
 
-Ping. Any update?
+Signed-off-by: John Keeping <john@keeping.me.uk>
+---
+ evaluate.c | 57 ++++++++++++++++++++++++++++++++++-----------------------
+ 1 file changed, 34 insertions(+), 23 deletions(-)
 
-I am still waiting on your patch.
+diff --git a/evaluate.c b/evaluate.c
+index 6655615..2e6511b 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1307,10 +1307,9 @@ static int whitelist_pointers(struct symbol *t1, struct symbol *t2)
+ 	return !Wtypesign;
+ }
+ 
+-static int compatible_assignment_types(struct expression *expr, struct symbol *target,
+-	struct expression **rp, const char *where)
++static int check_assignment_types(struct symbol *target, struct expression **rp,
++	const char **typediff)
+ {
+-	const char *typediff;
+ 	struct symbol *source = degenerate(*rp);
+ 	struct symbol *t, *s;
+ 	int tclass = classify_type(target, &t);
+@@ -1327,8 +1326,8 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 				return 1;
+ 		} else if (!(sclass & TYPE_RESTRICT))
+ 			goto Cast;
+-		typediff = "different base types";
+-		goto Err;
++		*typediff = "different base types";
++		return 0;
+ 	}
+ 
+ 	if (tclass == TYPE_PTR) {
+@@ -1342,8 +1341,8 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 			goto Cast;
+ 		}
+ 		if (!(sclass & TYPE_PTR)) {
+-			typediff = "different base types";
+-			goto Err;
++			*typediff = "different base types";
++			return 0;
+ 		}
+ 		b1 = examine_pointer_target(t);
+ 		b2 = examine_pointer_target(s);
+@@ -1356,19 +1355,19 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 			 * or mix address spaces [sparse].
+ 			 */
+ 			if (t->ctype.as != s->ctype.as) {
+-				typediff = "different address spaces";
+-				goto Err;
++				*typediff = "different address spaces";
++				return 0;
+ 			}
+ 			if (mod2 & ~mod1) {
+-				typediff = "different modifiers";
+-				goto Err;
++				*typediff = "different modifiers";
++				return 0;
+ 			}
+ 			goto Cast;
+ 		}
+ 		/* It's OK if the target is more volatile or const than the source */
+-		typediff = type_difference(&t->ctype, &s->ctype, 0, mod1);
+-		if (typediff)
+-			goto Err;
++		*typediff = type_difference(&t->ctype, &s->ctype, 0, mod1);
++		if (*typediff)
++			return 0;
+ 		return 1;
+ 	}
+ 
+@@ -1379,22 +1378,34 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
+ 		/* XXX: need to turn into comparison with NULL */
+ 		if (t == &bool_ctype && (sclass & TYPE_PTR))
+ 			goto Cast;
+-		typediff = "different base types";
+-		goto Err;
++		*typediff = "different base types";
++		return 0;
+ 	}
+-	typediff = "invalid types";
+-
+-Err:
+-	warning(expr->pos, "incorrect type in %s (%s)", where, typediff);
+-	info(expr->pos, "   expected %s", show_typename(target));
+-	info(expr->pos, "   got %s", show_typename(source));
+-	*rp = cast_to(*rp, target);
++	*typediff = "invalid types";
+ 	return 0;
++
+ Cast:
+ 	*rp = cast_to(*rp, target);
+ 	return 1;
+ }
+ 
++static int compatible_assignment_types(struct expression *expr, struct symbol *target,
++	struct expression **rp, const char *where)
++{
++	const char *typediff;
++	struct symbol *source = degenerate(*rp);
++
++	if (!check_assignment_types(target, rp, &typediff)) {
++		warning(expr->pos, "incorrect type in %s (%s)", where, typediff);
++		info(expr->pos, "   expected %s", show_typename(target));
++		info(expr->pos, "   got %s", show_typename(source));
++		*rp = cast_to(*rp, target);
++		return 0;
++	}
++
++	return 1;
++}
++
+ static void mark_assigned(struct expression *expr)
+ {
+ 	struct symbol *sym;
+-- 
+1.9.0.6.g037df60.dirty
 
-Chris
