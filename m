@@ -1,155 +1,136 @@
-From: John Keeping <john@keeping.me.uk>
-Subject: [PATCH v2 2/2] Support GCC's transparent unions
-Date: Sun,  9 Mar 2014 11:32:51 +0000
-Message-ID: <7ef88cd469ed05f83f40631f496869c558640c65.1394364717.git.john@keeping.me.uk>
-References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1394364717.git.john@keeping.me.uk>
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from hyena.aluminati.org ([64.22.123.221]:37391 "EHLO
-	hyena.aluminati.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751741AbaCILdH (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 9 Mar 2014 07:33:07 -0400
-In-Reply-To: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1394364717.git.john@keeping.me.uk>
-In-Reply-To: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1394364717.git.john@keeping.me.uk>
-References: <afd69e2697f3d3da96b74c06501fd2fb1fc5cba2.1394364717.git.john@keeping.me.uk>
-Sender: linux-sparse-owner@vger.kernel.org
+From: Sam Ravnborg <sam@ravnborg.org>
+Subject: Re: [PATCH 1/5] kbuild: LLVMLinux: Add Kbuild support for building
+ kernel with Clang
+Date: Sun, 9 Mar 2014 22:58:34 +0100
+Message-ID: <20140309215834.GA29655@ravnborg.org>
+References: <1393376923-21892-1-git-send-email-behanw@converseincode.com>
+ <1393376923-21892-2-git-send-email-behanw@converseincode.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: QUOTED-PRINTABLE
+Return-path: <linux-kbuild-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <1393376923-21892-2-git-send-email-behanw@converseincode.com>
+Sender: linux-kbuild-owner@vger.kernel.org
+To: behanw@converseincode.com
+Cc: mmarek@suse.cz, tglx@linutronix.de, mingo@redhat.com, hpa@zytor.com, x86@kernel.org, sparse@chrisli.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, torvalds@linux-foundation.org, dwmw2@infradead.org, pageexec@freemail.hu, Jan-Simon =?iso-8859-1?Q?M=F6ller?= <dl9pf@gmx.de>, Mark Charlebois <charlebm@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: John Keeping <john@keeping.me.uk>
 
-This stops warnings in code using socket operations with a modern glibc,
-which otherwise result in warnings of the form:
+On Tue, Feb 25, 2014 at 05:08:39PM -0800, behanw@converseincode.com wro=
+te:
+> From: Behan Webster <behanw@converseincode.com>
+>=20
+> Add support to toplevel Makefile for compiling with clang, both for
+> HOSTCC and CC. Use cc-option to prevent gcc option from breaking clan=
+g, and
+> from clang options from breaking gcc.
+>=20
+> Clang 3.4 semantics are the same as gcc semantics for unsupported fla=
+gs. For
+> unsupported warnings clang 3.4 returns true but shows a warning and g=
+cc shows
+> a warning and returns false.
+>=20
+> Signed-off-by: Behan Webster <behanw@converseincode.com>
+> Signed-off-by: Jan-Simon M=F6ller <dl9pf@gmx.de>
+> Signed-off-by: Mark Charlebois <charlebm@gmail.com>
+> Cc: PaX Team <pageexec@freemail.hu>
+> ---
+>  Makefile | 32 +++++++++++++++++++++++++++++++-
+>  1 file changed, 31 insertions(+), 1 deletion(-)
+>=20
+> diff --git a/Makefile b/Makefile
+> index 831b36a..c4ab30d 100644
+> --- a/Makefile
+> +++ b/Makefile
+> @@ -247,6 +247,15 @@ HOSTCXX      =3D g++
+>  HOSTCFLAGS   =3D -Wall -Wmissing-prototypes -Wstrict-prototypes -O2 =
+-fomit-frame-pointer
+>  HOSTCXXFLAGS =3D -O2
+> =20
+> +ifeq ($(shell $(HOSTCC) -v 2>&1 | grep -c "clang version"), 1)
+> +HOSTCOMPILER :=3D clang
+> +HOSTCFLAGS  +=3D -Wno-unused-value -Wno-unused-parameter \
+> +		-Wno-missing-field-initializers -fno-delete-null-pointer-checks
+> +else
+> +HOSTCOMPILER :=3D gcc
+> +endif
+> +export HOSTCOMPILER
+I see no use of HOSTCOMPLIER anywhere in this patchset not in the kerne=
+l. Can we drop this?
 
-	warning: incorrect type in argument 2 (invalid types)
-	   expected union __CONST_SOCKADDR_ARG [usertype] __addr
-	   got struct sockaddr *<noident>
+> +
+>  # Decide whether to build built-in, modular, or both.
+>  # Normally, just do built-in.
+> =20
+> @@ -323,6 +332,12 @@ endif
+> =20
+>  export quiet Q KBUILD_VERBOSE
+> =20
+> +ifeq ($(shell $(CC) -v 2>&1 | grep -c "clang version"), 1)
+> +COMPILER :=3D clang
+> +else
+> +COMPILER :=3D gcc
+> +endif
+> +export COMPILER
+Likewise - COMPILER seems unsued- can it be dropped?
 
-Since transparent unions are only applicable to function arguments, we
-create a new function to check that the types are compatible
-specifically in this context.
+> =20
+>  # Look for make include files relative to root of kernel src
+>  MAKEFLAGS +=3D --include-dir=3D$(srctree)
+> @@ -382,7 +397,7 @@ KBUILD_CFLAGS   :=3D -Wall -Wundef -Wstrict-proto=
+types -Wno-trigraphs \
+>  		   -fno-strict-aliasing -fno-common \
+>  		   -Werror-implicit-function-declaration \
+>  		   -Wno-format-security \
+> -		   -fno-delete-null-pointer-checks
+> +		   $(call cc-option,-fno-delete-null-pointer-checks,)
+>  KBUILD_AFLAGS_KERNEL :=3D
+>  KBUILD_CFLAGS_KERNEL :=3D
+>  KBUILD_AFLAGS   :=3D -D__ASSEMBLY__
+> @@ -620,9 +635,24 @@ else
+>  endif
+>  KBUILD_CFLAGS +=3D $(stackp-flag)
+> =20
+> +ifeq ($(COMPILER),clang)
+Except that COMPILER is used here. But this does not warrant the export=
+=2E
 
-Also change the wording of the existing warning slightly since sparse
-does now support them.  The warning is left in case people want to avoid
-using transparent unions.
+> +KBUILD_CPPFLAGS +=3D $(call cc-option,-Qunused-arguments,)
+Is this really needed today?
+https://bugzilla.mozilla.org/show_bug.cgi?id=3D717713 suggest that this=
+ is default.
 
-Signed-off-by: John Keeping <john@keeping.me.uk>
----
- evaluate.c                     | 28 +++++++++++++++++++++++++++-
- parse.c                        |  7 ++++++-
- symbol.h                       |  3 ++-
- validation/transparent-union.c | 25 +++++++++++++++++++++++++
- 4 files changed, 60 insertions(+), 3 deletions(-)
- create mode 100644 validation/transparent-union.c
+> +KBUILD_CPPFLAGS +=3D $(call cc-option,-Wno-unknown-warning-option,)
+https://bugzilla.mozilla.org/show_bug.cgi?id=3D731316 seems to suggest =
+this is default
 
-diff --git a/evaluate.c b/evaluate.c
-index 2e6511b..1def2af 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1406,6 +1406,32 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
- 	return 1;
- }
- 
-+static int compatible_transparent_union(struct symbol *target,
-+	struct expression **rp)
-+{
-+	struct symbol *t, *member;
-+	classify_type(target, &t);
-+	if (t->type != SYM_UNION || !t->transparent_union)
-+		return 0;
-+
-+	FOR_EACH_PTR(t->symbol_list, member) {
-+		const char *typediff;
-+		if (check_assignment_types(member, rp, &typediff))
-+			return 1;
-+	} END_FOR_EACH_PTR(member);
-+
-+	return 0;
-+}
-+
-+static int compatible_argument_type(struct expression *expr, struct symbol *target,
-+	struct expression **rp, const char *where)
-+{
-+	if (compatible_transparent_union(target, rp))
-+		return 1;
-+
-+	return compatible_assignment_types(expr, target, rp, where);
-+}
-+
- static void mark_assigned(struct expression *expr)
- {
- 	struct symbol *sym;
-@@ -2172,7 +2198,7 @@ static int evaluate_arguments(struct symbol *f, struct symbol *fn, struct expres
- 			static char where[30];
- 			examine_symbol_type(target);
- 			sprintf(where, "argument %d", i);
--			compatible_assignment_types(expr, target, p, where);
-+			compatible_argument_type(expr, target, p, where);
- 		}
- 
- 		i++;
-diff --git a/parse.c b/parse.c
-index 9cc5f65..785630a 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1208,7 +1208,12 @@ static struct token *attribute_designated_init(struct token *token, struct symbo
- static struct token *attribute_transparent_union(struct token *token, struct symbol *attr, struct decl_state *ctx)
- {
- 	if (Wtransparent_union)
--		warning(token->pos, "ignoring attribute __transparent_union__");
-+		warning(token->pos, "attribute __transparent_union__");
-+
-+	if (ctx->ctype.base_type && ctx->ctype.base_type->type == SYM_UNION)
-+		ctx->ctype.base_type->transparent_union = 1;
-+	else
-+		warning(token->pos, "attribute __transparent_union__ applied to non-union type");
- 	return token;
- }
- 
-diff --git a/symbol.h b/symbol.h
-index 43c165b..ccb5dcb 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -174,7 +174,8 @@ struct symbol {
- 					evaluated:1,
- 					string:1,
- 					designated_init:1,
--					forced_arg:1;
-+					forced_arg:1,
-+					transparent_union:1;
- 			struct expression *array_size;
- 			struct ctype ctype;
- 			struct symbol_list *arguments;
-diff --git a/validation/transparent-union.c b/validation/transparent-union.c
-new file mode 100644
-index 0000000..149c7d9
---- /dev/null
-+++ b/validation/transparent-union.c
-@@ -0,0 +1,25 @@
-+struct a {
-+	int field;
-+};
-+struct b {
-+	int field;
-+};
-+
-+typedef union {
-+	struct a *a;
-+	struct b *b;
-+} transparent_arg __attribute__((__transparent_union__));
-+
-+static void foo(transparent_arg arg)
-+{
-+}
-+
-+static void bar(void)
-+{
-+	struct b arg = { 0 };
-+	foo((struct a *) &arg);
-+}
-+
-+/*
-+ * check-name: Transparent union attribute.
-+ */
--- 
-1.9.0.6.g037df60.dirty
 
+> +KBUILD_CFLAGS +=3D $(call cc-disable-warning, unused-variable)
+> +KBUILD_CFLAGS +=3D $(call cc-disable-warning, format-invalid-specifi=
+er)
+> +KBUILD_CFLAGS +=3D $(call cc-disable-warning, gnu)
+Is it really justified to disable these warnings?
+# of warnign for a defconfig build would be a nice figure to judge from=
+=2E
+
+> +# Quiet clang warning: comparison of unsigned expression < 0 is alwa=
+ys false
+> +KBUILD_CFLAGS +=3D $(call cc-disable-warning, tautological-compare)
+Same with this.
+
+> +# CLANG uses a _MergedGlobals as optimization, but this breaks modpo=
+st, as the
+> +# source of a reference will be _MergedGlobals and not on of the whi=
+telisted names.
+> +# See modpost pattern 2
+> +KBUILD_CFLAGS +=3D $(call cc-option, -mno-global-merge,)
+Should we fix modpost?
+
+
+	Sam
+--
+To unsubscribe from this list: send the line "unsubscribe linux-kbuild"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
