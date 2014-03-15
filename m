@@ -1,48 +1,61 @@
 From: Hans Verkuil <hverkuil@xs4all.nl>
-Subject: sparse: ioctl defines and "error: bad integer constant expression"
-Date: Sat, 15 Mar 2014 12:59:14 +0100
-Message-ID: <53244092.6010906@xs4all.nl>
+Subject: sparse: ARRAY_SIZE and sparse array initialization
+Date: Sat, 15 Mar 2014 13:09:06 +0100
+Message-ID: <532442E2.7050206@xs4all.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
-Return-path: <linux-media-owner@vger.kernel.org>
-Sender: linux-media-owner@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from smtp-vbr2.xs4all.nl ([194.109.24.22]:1189 "EHLO
+	smtp-vbr2.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754099AbaCOMJT (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sat, 15 Mar 2014 08:09:19 -0400
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linux Media Mailing List <linux-media@vger.kernel.org>
-List-Id: linux-sparse@vger.kernel.org
 
-Hi!
+Hmm, interesting. Twice 'sparse' in the same subject line with different meanings :-)
 
-Here is another sparse error that I get when running sparse over
-drivers/media/v4l2-core/v4l2-ioctl.c:
+This is another sparse error I get with drivers/media/v4l2-core/v4l2-ioctl.c:
 
-drivers/media/v4l2-core/v4l2-ioctl.c:2043:9: error: bad integer constant expression
-drivers/media/v4l2-core/v4l2-ioctl.c:2044:9: error: bad integer constant expression
-drivers/media/v4l2-core/v4l2-ioctl.c:2045:9: error: bad integer constant expression
-drivers/media/v4l2-core/v4l2-ioctl.c:2046:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:424:9: error: cannot size expression
 
-etc.
+(there are more of those in drivers/media, all with the same cause).
 
-The root cause of that turns out to be in include/asm-generic/ioctl.h:
+This sparse (the tool) error occurs because of sparse (C language) array initialization
+in combination with ARRAY_SIZE:
 
-#include <uapi/asm-generic/ioctl.h>
+static const char *v4l2_memory_names[] = {
+        [V4L2_MEMORY_MMAP]    = "mmap",
+        [V4L2_MEMORY_USERPTR] = "userptr",
+        [V4L2_MEMORY_OVERLAY] = "overlay",
+        [V4L2_MEMORY_DMABUF] = "dmabuf",
+};
 
-/* provoke compile error for invalid uses of size argument */
-extern unsigned int __invalid_size_argument_for_IOC;
-#define _IOC_TYPECHECK(t) \
-        ((sizeof(t) == sizeof(t[1]) && \
-          sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
-          sizeof(t) : __invalid_size_argument_for_IOC)
+#define prt_names(a, arr) (((unsigned)(a)) < ARRAY_SIZE(arr) ? arr[a] : "unknown")
 
-If it is defined as this:
+static void v4l_print_requestbuffers(const void *arg, bool write_only)
+{
+        const struct v4l2_requestbuffers *p = arg;
 
-#define _IOC_TYPECHECK(t) (sizeof(t))
+        pr_cont("count=%d, type=%s, memory=%s\n",
+                p->count,
+                prt_names(p->type, v4l2_type_names),
+                prt_names(p->memory, v4l2_memory_names));
+}
 
-then all is well with the world.
+I could change v4l2_memory_names to:
 
-I can patch v4l2-ioctl.c to redefine _IOC_TYPECHECK if __CHECKER__ is defined, but
-shouldn't sparse understand this instead? There was a similar situation with
-ARRAY_SIZE in the past that sparse now understands.
+static const char *v4l2_memory_names[V4L2_MEMORY_DMABUF + 1] = {
+
+and the error goes away.
+
+I'm actually not sure if this is a sparse bug or a feature.
+
+If it is a feature then the error message is definitely wrong, since the size is
+perfectly well defined. As an aside: the error message is pretty vague IMHO.
 
 Regards,
 
