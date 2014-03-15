@@ -1,32 +1,74 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: How to run sparse tool?
-Date: Thu, 13 Mar 2014 22:23:49 +0100
-Message-ID: <20140313212349.GA6326@ravnborg.org>
-References: <CABMudhRd=YmZbPURf27cKiJKYLswZCGoMqoxvXqu3DeGT7k_7g@mail.gmail.com>
- <20140313180031.GA6144@ravnborg.org>
- <CABMudhQt1B6kanw+u7A1yPnux-wUYGYq07qwFs4hGYhgdbYLTA@mail.gmail.com>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: sparse and anonymous unions
+Date: Sat, 15 Mar 2014 11:26:15 +0100
+Message-ID: <53242AC7.9080301@xs4all.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from asavdk4.altibox.net ([109.247.116.15]:59181 "EHLO
-	asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753952AbaCMVYF (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 13 Mar 2014 17:24:05 -0400
-Content-Disposition: inline
-In-Reply-To: <CABMudhQt1B6kanw+u7A1yPnux-wUYGYq07qwFs4hGYhgdbYLTA@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-media-owner@vger.kernel.org>
+Sender: linux-media-owner@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linux Media Mailing List <linux-media@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: m silverstri <michael.j.silverstri@gmail.com>
-Cc: linux-sparse@vger.kernel.org
 
-On Thu, Mar 13, 2014 at 11:54:13AM -0700, m silverstri wrote:
-> Thanks. 'make allmodconfig' works.
-> But before your answer, I am able to build and there is a .config
-> file. But why 'make C=2 drivers/staging/wlan-ng/' decide to build
-> config again ?
-No idea.
-Maybe "make V=1" or "make V=2" can give a hint.
-Something triggers the re-run of the config which is usual because soem Kconfig files are touched, or .config.
+Hi!
 
-	Sam
+I'm trying to cut down the list of sparse warnings and errors I get when
+compiling drivers/media. Most of them are obviously our problem, but there
+is one that seems to be a sparse bug:
+
+drivers/media/v4l2-core/v4l2-dv-timings.c:30:9: error: unknown field name in initializer
+
+This uses the v4l2_dv_timings type which is defined here:
+
+include/uapi/linux/videodev2.h
+
+and which has an anonymous union:
+
+struct v4l2_dv_timings {
+        __u32 type;
+        union {
+                struct v4l2_bt_timings  bt;
+                __u32   reserved[32];
+        };
+} __attribute__ ((packed));
+
+The macro used in the source above comes from this header:
+
+include/uapi/linux/v4l2-dv-timings.h
+
+and is defined as follows:
+
+#if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
+/* Sadly gcc versions older than 4.6 have a bug in how they initialize
+   anonymous unions where they require additional curly brackets.
+   This violates the C1x standard. This workaround adds the curly brackets
+   if needed. */
+#define V4L2_INIT_BT_TIMINGS(_width, args...) \
+        { .bt = { _width , ## args } }
+#else
+#define V4L2_INIT_BT_TIMINGS(_width, args...) \
+        .bt = { _width , ## args }
+#endif
+
+/* CEA-861-E timings (i.e. standard HDTV timings) */
+        
+#define V4L2_DV_BT_CEA_640X480P59_94 { \
+        .type = V4L2_DV_BT_656_1120, \
+        V4L2_INIT_BT_TIMINGS(640, 480, 0, 0, \
+                25175000, 16, 96, 48, 10, 2, 33, 0, 0, 0, \
+                V4L2_DV_BT_STD_DMT | V4L2_DV_BT_STD_CEA861, 0) \
+}
+
+The problem is that it seems that sparse follows the old pre-4.6 rules for
+initializing anonymous unions instead of what is actually in the C standard.
+
+If I add ' || defined(__CHECKER__)' to the #if above it will pass without
+generating sparse errors.
+
+Is this something that can be fixed in sparse, or am I forced to add the
+'defined(__CHECKER__)' to the #if condition?
+
+Regards,
+
+	Hans
