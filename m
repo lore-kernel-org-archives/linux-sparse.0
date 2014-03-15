@@ -1,7 +1,7 @@
 From: Hans Verkuil <hverkuil@xs4all.nl>
-Subject: sparse and anonymous unions
-Date: Sat, 15 Mar 2014 11:26:15 +0100
-Message-ID: <53242AC7.9080301@xs4all.nl>
+Subject: sparse: ioctl defines and "error: bad integer constant expression"
+Date: Sat, 15 Mar 2014 12:59:14 +0100
+Message-ID: <53244092.6010906@xs4all.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
@@ -13,61 +13,36 @@ List-Id: linux-sparse@vger.kernel.org
 
 Hi!
 
-I'm trying to cut down the list of sparse warnings and errors I get when
-compiling drivers/media. Most of them are obviously our problem, but there
-is one that seems to be a sparse bug:
+Here is another sparse error that I get when running sparse over
+drivers/media/v4l2-core/v4l2-ioctl.c:
 
-drivers/media/v4l2-core/v4l2-dv-timings.c:30:9: error: unknown field name in initializer
+drivers/media/v4l2-core/v4l2-ioctl.c:2043:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2044:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2045:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2046:9: error: bad integer constant expression
 
-This uses the v4l2_dv_timings type which is defined here:
+etc.
 
-include/uapi/linux/videodev2.h
+The root cause of that turns out to be in include/asm-generic/ioctl.h:
 
-and which has an anonymous union:
+#include <uapi/asm-generic/ioctl.h>
 
-struct v4l2_dv_timings {
-        __u32 type;
-        union {
-                struct v4l2_bt_timings  bt;
-                __u32   reserved[32];
-        };
-} __attribute__ ((packed));
+/* provoke compile error for invalid uses of size argument */
+extern unsigned int __invalid_size_argument_for_IOC;
+#define _IOC_TYPECHECK(t) \
+        ((sizeof(t) == sizeof(t[1]) && \
+          sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+          sizeof(t) : __invalid_size_argument_for_IOC)
 
-The macro used in the source above comes from this header:
+If it is defined as this:
 
-include/uapi/linux/v4l2-dv-timings.h
+#define _IOC_TYPECHECK(t) (sizeof(t))
 
-and is defined as follows:
+then all is well with the world.
 
-#if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
-/* Sadly gcc versions older than 4.6 have a bug in how they initialize
-   anonymous unions where they require additional curly brackets.
-   This violates the C1x standard. This workaround adds the curly brackets
-   if needed. */
-#define V4L2_INIT_BT_TIMINGS(_width, args...) \
-        { .bt = { _width , ## args } }
-#else
-#define V4L2_INIT_BT_TIMINGS(_width, args...) \
-        .bt = { _width , ## args }
-#endif
-
-/* CEA-861-E timings (i.e. standard HDTV timings) */
-        
-#define V4L2_DV_BT_CEA_640X480P59_94 { \
-        .type = V4L2_DV_BT_656_1120, \
-        V4L2_INIT_BT_TIMINGS(640, 480, 0, 0, \
-                25175000, 16, 96, 48, 10, 2, 33, 0, 0, 0, \
-                V4L2_DV_BT_STD_DMT | V4L2_DV_BT_STD_CEA861, 0) \
-}
-
-The problem is that it seems that sparse follows the old pre-4.6 rules for
-initializing anonymous unions instead of what is actually in the C standard.
-
-If I add ' || defined(__CHECKER__)' to the #if above it will pass without
-generating sparse errors.
-
-Is this something that can be fixed in sparse, or am I forced to add the
-'defined(__CHECKER__)' to the #if condition?
+I can patch v4l2-ioctl.c to redefine _IOC_TYPECHECK if __CHECKER__ is defined, but
+shouldn't sparse understand this instead? There was a similar situation with
+ARRAY_SIZE in the past that sparse now understands.
 
 Regards,
 
