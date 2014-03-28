@@ -1,42 +1,92 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: preop expression and variable
-Date: Fri, 21 Mar 2014 11:13:13 -0700
-Message-ID: <CA+55aFxCVVdvrMRhOsmvAU-DqWQ8DRFBNohFWvn4HodHXA0U_A@mail.gmail.com>
-References: <22AE7E9E-932B-4E83-9DE1-CE82FD140CDF@ygg.tf>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: Re: sparse: ARRAY_SIZE and sparse array initialization
+Date: Fri, 28 Mar 2014 11:50:14 +0100
+Message-ID: <533553E6.3060508@xs4all.nl>
+References: <532442E2.7050206@xs4all.nl> <532443AB.9080105@xs4all.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ve0-f176.google.com ([209.85.128.176]:44329 "EHLO
-	mail-ve0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750807AbaCUSNO convert rfc822-to-8bit (ORCPT
+Received: from smtp-vbr2.xs4all.nl ([194.109.24.22]:2199 "EHLO
+	smtp-vbr2.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751721AbaC1KuU (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 21 Mar 2014 14:13:14 -0400
-Received: by mail-ve0-f176.google.com with SMTP id cz12so2883770veb.7
-        for <linux-sparse@vger.kernel.org>; Fri, 21 Mar 2014 11:13:13 -0700 (PDT)
-In-Reply-To: <22AE7E9E-932B-4E83-9DE1-CE82FD140CDF@ygg.tf>
+	Fri, 28 Mar 2014 06:50:20 -0400
+In-Reply-To: <532443AB.9080105@xs4all.nl>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?UTF-8?Q?Guillaume_Oberl=C3=A9?= <goberle@ygg.tf>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linux Media Mailing List <linux-media@vger.kernel.org>
 
-On Fri, Mar 21, 2014 at 4:02 AM, Guillaume Oberl=C3=A9 <goberle@ygg.tf>=
- wrote:
->
-> If you look at the output (l117 or l133), I have a PreopExpression be=
-fore every variable in an expression statement, even if I have no preop=
-erator.
+Is there any chance that the three issues I reported will be fixed? If not,
+then I'll work around it in the kernel code.
 
-You need to look at what the op is too, not just the type.
+Regards,
 
-I assume you're talking about EXPR_PREOP-'*'. That's a dereference
-("lvalue access").  And yes, it's required. A symbol on its own is
-just the address or the symbol. Actually *accessing* that symbol is
-that PREOP-*.
+	Hans
 
-            Lnus
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On 03/15/2014 01:12 PM, Hans Verkuil wrote:
+> For the record: all these tests were done with a 3.14-rc5 kernel and sparse
+> compiled from the git tree as of today (version v0.5.0). The gcc version is 4.8.2.
+> 
+> Regards,
+> 
+> 	Hans
+> 
+> On 03/15/2014 01:09 PM, Hans Verkuil wrote:
+>> Hmm, interesting. Twice 'sparse' in the same subject line with different meanings :-)
+>>
+>> This is another sparse error I get with drivers/media/v4l2-core/v4l2-ioctl.c:
+>>
+>> drivers/media/v4l2-core/v4l2-ioctl.c:424:9: error: cannot size expression
+>>
+>> (there are more of those in drivers/media, all with the same cause).
+>>
+>> This sparse (the tool) error occurs because of sparse (C language) array initialization
+>> in combination with ARRAY_SIZE:
+>>
+>> static const char *v4l2_memory_names[] = {
+>>         [V4L2_MEMORY_MMAP]    = "mmap",
+>>         [V4L2_MEMORY_USERPTR] = "userptr",
+>>         [V4L2_MEMORY_OVERLAY] = "overlay",
+>>         [V4L2_MEMORY_DMABUF] = "dmabuf",
+>> };
+>>
+>> #define prt_names(a, arr) (((unsigned)(a)) < ARRAY_SIZE(arr) ? arr[a] : "unknown")
+>>
+>> static void v4l_print_requestbuffers(const void *arg, bool write_only)
+>> {
+>>         const struct v4l2_requestbuffers *p = arg;
+>>
+>>         pr_cont("count=%d, type=%s, memory=%s\n",
+>>                 p->count,
+>>                 prt_names(p->type, v4l2_type_names),
+>>                 prt_names(p->memory, v4l2_memory_names));
+>> }
+>>
+>> I could change v4l2_memory_names to:
+>>
+>> static const char *v4l2_memory_names[V4L2_MEMORY_DMABUF + 1] = {
+>>
+>> and the error goes away.
+>>
+>> I'm actually not sure if this is a sparse bug or a feature.
+>>
+>> If it is a feature then the error message is definitely wrong, since the size is
+>> perfectly well defined. As an aside: the error message is pretty vague IMHO.
+>>
+>> Regards,
+>>
+>> 	Hans
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-media" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+
