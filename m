@@ -1,40 +1,62 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse: ARRAY_SIZE and sparse array initialization
-Date: Sun, 30 Mar 2014 10:16:22 -0700
-Message-ID: <CANeU7QkxSMEvyiA7ua52cRPinwcZ+gDbEuJiD7BE+oOmA_2bUw@mail.gmail.com>
-References: <532442E2.7050206@xs4all.nl>
-	<532443AB.9080105@xs4all.nl>
-	<533553E6.3060508@xs4all.nl>
-	<CANeU7Qksj-tq0fjsZya1otX75sV4JOsAdXHr5Kxu-WyvYrksSw@mail.gmail.com>
-	<533807FC.5050008@xs4all.nl>
-	<CA+55aFy8y6ctXcc8qcqVkRDAL=ZWU0DAfuZ4zQcP6uqzPmb-AA@mail.gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: [PATCH 1/2] Add warning about duplicate initializers
+Date: Sun, 30 Mar 2014 10:20:41 -0700 (PDT)
+Message-ID: <alpine.LFD.2.11.1403301018060.16237@i7.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-media-owner@vger.kernel.org>
-In-Reply-To: <CA+55aFy8y6ctXcc8qcqVkRDAL=ZWU0DAfuZ4zQcP6uqzPmb-AA@mail.gmail.com>
-Sender: linux-media-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Hans Verkuil <hverkuil@xs4all.nl>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
+Content-Type: TEXT/PLAIN; charset=US-ASCII
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-pb0-f44.google.com ([209.85.160.44]:35590 "EHLO
+	mail-pb0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752092AbaC3RUn (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 30 Mar 2014 13:20:43 -0400
+Received: by mail-pb0-f44.google.com with SMTP id rp16so7146965pbb.17
+        for <linux-sparse@vger.kernel.org>; Sun, 30 Mar 2014 10:20:43 -0700 (PDT)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>, Hans Verkuil <hverkuil@xs4all.nl>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 30, 2014 at 9:48 AM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> But then when we look up a symbol, we only look at the latest one, so
-> when we size the array, we look at that "extern" declaration, and
-> don't see the size that was created with the initializer.
 
-Exactly. Sparse need to handle merging of incremental type declare.
-This is a long known sparse bug.
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Date: Sun, 30 Mar 2014 09:49:13 -0700
+Subject: [PATCH 1/2] Add warning about duplicate initializers
 
->
-> I'll think about how to fix it cleanly. Expect a patch shortly.
+Noticed this while looking at an independent bug reported by Hans
+Verkuil.
 
-Wow, cool. I want to mention one special case of the type merging.
-It has some thing to do with scoping as well. When the scope ends,
-the incremental type added inside the scope will need to strip away
-as well. So it can not be blindly add to the original type without consider
-how to take that layer away later.
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+---
 
-This should be very exciting. Looking forward to the patch.
+This is not a big deal, but the next patch will make us take the array 
+size from any initializer, so let's warn on multiple initializers.
 
-Chris
+ evaluate.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/evaluate.c b/evaluate.c
+index 66556150ddac..8a53b3e884e0 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3043,10 +3043,18 @@ static void check_duplicates(struct symbol *sym)
+ {
+ 	int declared = 0;
+ 	struct symbol *next = sym;
++	int initialized = sym->initializer != NULL;
+ 
+ 	while ((next = next->same_symbol) != NULL) {
+ 		const char *typediff;
+ 		evaluate_symbol(next);
++		if (initialized && next->initializer) {
++			sparse_error(sym->pos, "symbol '%s' has multiple initializers (originally initialized at %s:%d)",
++				show_ident(sym->ident),
++				stream_name(next->pos.stream), next->pos.line);
++			/* Only warn once */
++			initialized = 0;
++		}
+ 		declared++;
+ 		typediff = type_difference(&sym->ctype, &next->ctype, 0, 0);
+ 		if (typediff) {
+-- 
+1.9.0
+
