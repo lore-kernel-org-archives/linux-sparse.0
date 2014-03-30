@@ -1,66 +1,34 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH 2/2] Use any previous initializer to size a symbol
-Date: Sun, 30 Mar 2014 10:22:35 -0700 (PDT)
-Message-ID: <alpine.LFD.2.11.1403301020530.16374@i7.linux-foundation.org>
+Subject: Re: sparse: ARRAY_SIZE and sparse array initialization
+Date: Sun, 30 Mar 2014 10:24:43 -0700
+Message-ID: <CA+55aFyKbV=Xg2q5Ci+QqPB22OnBu=aYs5kiBiaqnLGsP_4Zog@mail.gmail.com>
+References: <532442E2.7050206@xs4all.nl>
+	<532443AB.9080105@xs4all.nl>
+	<533553E6.3060508@xs4all.nl>
+	<CANeU7Qksj-tq0fjsZya1otX75sV4JOsAdXHr5Kxu-WyvYrksSw@mail.gmail.com>
+	<533807FC.5050008@xs4all.nl>
+	<CA+55aFy8y6ctXcc8qcqVkRDAL=ZWU0DAfuZ4zQcP6uqzPmb-AA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: TEXT/PLAIN; charset=US-ASCII
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pb0-f53.google.com ([209.85.160.53]:57760 "EHLO
-	mail-pb0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751982AbaC3RWh (ORCPT
+Received: from mail-vc0-f180.google.com ([209.85.220.180]:47299 "EHLO
+	mail-vc0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751507AbaC3RYo (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Mar 2014 13:22:37 -0400
-Received: by mail-pb0-f53.google.com with SMTP id rp16so7151005pbb.12
-        for <linux-sparse@vger.kernel.org>; Sun, 30 Mar 2014 10:22:37 -0700 (PDT)
+	Sun, 30 Mar 2014 13:24:44 -0400
+In-Reply-To: <CA+55aFy8y6ctXcc8qcqVkRDAL=ZWU0DAfuZ4zQcP6uqzPmb-AA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Hans Verkuil <hverkuil@xs4all.nl>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
 
+On Sun, Mar 30, 2014 at 9:48 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> I'll think about how to fix it cleanly. Expect a patch shortly.
 
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Date: Sun, 30 Mar 2014 10:13:54 -0700
-Subject: [PATCH 2/2] Use any previous initializer to size a symbol
+Ok, patch sent to linux-sparse mailing list. It fixes the particular
+cut-down test-case and seems pretty simple and straightforward, but is
+otherwise entirely untested, so who the hell knows..
 
-When we size a symbol, we only have one initializer per symbol, but we
-may have multiple symbol declarations for the same symbol.  So make sure
-to walk the "same_symbol" chain to find the initializer, rather than
-assuming it is attached to the current declaration.
-
-Reported-by: Hans Verkuil <hverkuil@xs4all.nl>
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
----
-
-This seems to be the simplest approach. Chris, what was your concern about 
-scoping? The "same_symbol" list should already take scoping into account.
-
- symbol.c | 24 ++++++++++++++++++------
- 1 file changed, 18 insertions(+), 6 deletions(-)
-
-diff --git a/symbol.c b/symbol.c
-index eb6e1215ee87..4b91abd8021e 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -354,6 +354,15 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
- 	return nr;
- }
- 
-+static struct expression *get_symbol_initializer(struct symbol *sym)
-+{
-+	do {
-+		if (sym->initializer)
-+			return sym->initializer;
-+	} while ((sym = sym->same_symbol) != NULL);
-+	return NULL;
-+}
-+
- static struct symbol * examine_node_type(struct symbol *sym)
- {
- 	struct symbol *base_type = examine_base_type(sym);
-@@ -376,12 +385,15 @@ static struct symbol * examine_node_type(struct symbol *sym)
- 		sym->ctype.alignment = alignment;
- 
- 	/* Unsized array? The size might come from the initializer.. */
--	if (bit_size < 0 && base_type->type == SYM_ARRAY && sym->initializer) {
--		struct symbol *node_type = base_type->ctype.base_type;
--		int count = count_array_initializer(node_type, sym->initializer);
+                  Linus
