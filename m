@@ -1,49 +1,70 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH 2/2] Use any previous initializer to size a symbol
-Date: Sun, 30 Mar 2014 13:21:35 -0700
-Message-ID: <CA+55aFz4mozGHRqV3YqkQEY5yqSrPSfVUbjPk7MNEt2ZBsvU_Q@mail.gmail.com>
-References: <alpine.LFD.2.11.1403301020530.16374@i7.linux-foundation.org>
-	<CA+55aFy=Y_xOBdQFdhgvadEpmSFp85FiPQZc8VTKBkDO=WLhgA@mail.gmail.com>
-	<CANeU7Q=tSY-CVCv=+CB80C7w4e5RjR=4ZWKNM92raWvKd_rz6g@mail.gmail.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 1/2] Add warning about duplicate initializers
+Date: Sun, 30 Mar 2014 13:37:40 -0700
+Message-ID: <20140330203740.GA27368@leaf>
+References: <alpine.LFD.2.11.1403301018060.16237@i7.linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ve0-f171.google.com ([209.85.128.171]:52039 "EHLO
-	mail-ve0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751746AbaC3UVg (ORCPT
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:40918 "EHLO
+	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752054AbaC3Uhs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 30 Mar 2014 16:21:36 -0400
-Received: by mail-ve0-f171.google.com with SMTP id jy13so4428378veb.16
-        for <linux-sparse@vger.kernel.org>; Sun, 30 Mar 2014 13:21:35 -0700 (PDT)
-In-Reply-To: <CANeU7Q=tSY-CVCv=+CB80C7w4e5RjR=4ZWKNM92raWvKd_rz6g@mail.gmail.com>
+	Sun, 30 Mar 2014 16:37:48 -0400
+Content-Disposition: inline
+In-Reply-To: <alpine.LFD.2.11.1403301018060.16237@i7.linux-foundation.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Hans Verkuil <hverkuil@xs4all.nl>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Christopher Li <sparse@chrisli.org>, Hans Verkuil <hverkuil@xs4all.nl>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 30, 2014 at 12:22 PM, Christopher Li <sparse@chrisli.org> wrote:
->
-> Possible. If I comment out that check, I will get this error in the
-> extern-inline.c
-> test case:
->
-> $ ./sparse validation/extern-inline.c validation/extern-inline.c
-> validation/extern-inline.c:12:1: warning: multiple definitions for function 'g'
-> validation/extern-inline.c:12:1:  the previous one is here
+On Sun, Mar 30, 2014 at 10:20:41AM -0700, Linus Torvalds wrote:
+> 
+> From: Linus Torvalds <torvalds@linux-foundation.org>
+> Date: Sun, 30 Mar 2014 09:49:13 -0700
+> Subject: [PATCH 1/2] Add warning about duplicate initializers
+> 
+> Noticed this while looking at an independent bug reported by Hans
+> Verkuil.
+> 
+> Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
 
-Ok, I think that is just us being too anal. We should allow multiple
-definitions for functions that are identical otherwise, but differ in
-the "inline".
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 
-So I think that MOD_INLINE check in check_declaration() is wrong, and
-makes us consider the definitions to be for different symbols. Yes,
-that ignores the warning, but they really *aren't* different symbols.
-
-So the correct thing to do is (I think) to remove that check, and then
-make the parse_function_body() warning go away by accepting the fact
-that we can have both an inline version and an out-of-line version of
-the same function.
-
-Hmm? I'm on my way out, so I'm not going to write that patch..
-
-              Linus
+> 
+> This is not a big deal, but the next patch will make us take the array 
+> size from any initializer, so let's warn on multiple initializers.
+> 
+>  evaluate.c | 8 ++++++++
+>  1 file changed, 8 insertions(+)
+> 
+> diff --git a/evaluate.c b/evaluate.c
+> index 66556150ddac..8a53b3e884e0 100644
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -3043,10 +3043,18 @@ static void check_duplicates(struct symbol *sym)
+>  {
+>  	int declared = 0;
+>  	struct symbol *next = sym;
+> +	int initialized = sym->initializer != NULL;
+>  
+>  	while ((next = next->same_symbol) != NULL) {
+>  		const char *typediff;
+>  		evaluate_symbol(next);
+> +		if (initialized && next->initializer) {
+> +			sparse_error(sym->pos, "symbol '%s' has multiple initializers (originally initialized at %s:%d)",
+> +				show_ident(sym->ident),
+> +				stream_name(next->pos.stream), next->pos.line);
+> +			/* Only warn once */
+> +			initialized = 0;
+> +		}
+>  		declared++;
+>  		typediff = type_difference(&sym->ctype, &next->ctype, 0, 0);
+>  		if (typediff) {
+> -- 
+> 1.9.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
