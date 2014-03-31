@@ -1,116 +1,83 @@
 From: Hans Verkuil <hverkuil@xs4all.nl>
-Subject: Re: sparse and anonymous unions
-Date: Mon, 31 Mar 2014 10:05:23 +0200
-Message-ID: <533921C3.80802@xs4all.nl>
-References: <53242AC7.9080301@xs4all.nl> <53391E67.2000306@xs4all.nl>
+Subject: Re: sparse: ioctl defines and "error: bad integer constant expression"
+Date: Mon, 31 Mar 2014 10:06:16 +0200
+Message-ID: <533921F8.1000508@xs4all.nl>
+References: <53244092.6010906@xs4all.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtp-vbr15.xs4all.nl ([194.109.24.35]:3716 "EHLO
-	smtp-vbr15.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751195AbaCaIFd (ORCPT
+Received: from smtp-vbr6.xs4all.nl ([194.109.24.26]:3980 "EHLO
+	smtp-vbr6.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752845AbaCaIG0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 31 Mar 2014 04:05:33 -0400
-In-Reply-To: <53391E67.2000306@xs4all.nl>
+	Mon, 31 Mar 2014 04:06:26 -0400
+In-Reply-To: <53244092.6010906@xs4all.nl>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linux Media Mailing List <linux-media@vger.kernel.org>
 
-On 03/31/2014 09:51 AM, Hans Verkuil wrote:
-> On 03/15/2014 11:26 AM, Hans Verkuil wrote:
->> Hi!
->>
->> I'm trying to cut down the list of sparse warnings and errors I get when
->> compiling drivers/media. Most of them are obviously our problem, but there
->> is one that seems to be a sparse bug:
->>
->> drivers/media/v4l2-core/v4l2-dv-timings.c:30:9: error: unknown field name in initializer
->>
->> This uses the v4l2_dv_timings type which is defined here:
->>
->> include/uapi/linux/videodev2.h
->>
->> and which has an anonymous union:
->>
->> struct v4l2_dv_timings {
->>         __u32 type;
->>         union {
->>                 struct v4l2_bt_timings  bt;
->>                 __u32   reserved[32];
->>         };
->> } __attribute__ ((packed));
->>
->> The macro used in the source above comes from this header:
->>
->> include/uapi/linux/v4l2-dv-timings.h
->>
->> and is defined as follows:
->>
->> #if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
->> /* Sadly gcc versions older than 4.6 have a bug in how they initialize
->>    anonymous unions where they require additional curly brackets.
->>    This violates the C1x standard. This workaround adds the curly brackets
->>    if needed. */
->> #define V4L2_INIT_BT_TIMINGS(_width, args...) \
->>         { .bt = { _width , ## args } }
->> #else
->> #define V4L2_INIT_BT_TIMINGS(_width, args...) \
->>         .bt = { _width , ## args }
->> #endif
->>
->> /* CEA-861-E timings (i.e. standard HDTV timings) */
->>         
->> #define V4L2_DV_BT_CEA_640X480P59_94 { \
->>         .type = V4L2_DV_BT_656_1120, \
->>         V4L2_INIT_BT_TIMINGS(640, 480, 0, 0, \
->>                 25175000, 16, 96, 48, 10, 2, 33, 0, 0, 0, \
->>                 V4L2_DV_BT_STD_DMT | V4L2_DV_BT_STD_CEA861, 0) \
->> }
->>
->> The problem is that it seems that sparse follows the old pre-4.6 rules for
->> initializing anonymous unions instead of what is actually in the C standard.
->>
->> If I add ' || defined(__CHECKER__)' to the #if above it will pass without
->> generating sparse errors.
->>
->> Is this something that can be fixed in sparse, or am I forced to add the
->> 'defined(__CHECKER__)' to the #if condition?
+On 03/15/2014 12:59 PM, Hans Verkuil wrote:
+> Hi!
 > 
-> Here is a simple test case for this problem:
+> Here is another sparse error that I get when running sparse over
+> drivers/media/v4l2-core/v4l2-ioctl.c:
 > 
-> ====== anon-union.c ======
-> struct s {
->         union {
->                 int val;
->         };
-> };
+> drivers/media/v4l2-core/v4l2-ioctl.c:2043:9: error: bad integer constant expression
+> drivers/media/v4l2-core/v4l2-ioctl.c:2044:9: error: bad integer constant expression
+> drivers/media/v4l2-core/v4l2-ioctl.c:2045:9: error: bad integer constant expression
+> drivers/media/v4l2-core/v4l2-ioctl.c:2046:9: error: bad integer constant expression
 > 
-> static struct s foo = { .val = 5, };
-> /*
->  * check-name: duplicate extern array
+> etc.
+> 
+> The root cause of that turns out to be in include/asm-generic/ioctl.h:
+> 
+> #include <uapi/asm-generic/ioctl.h>
+> 
+> /* provoke compile error for invalid uses of size argument */
+> extern unsigned int __invalid_size_argument_for_IOC;
+> #define _IOC_TYPECHECK(t) \
+>         ((sizeof(t) == sizeof(t[1]) && \
+>           sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+>           sizeof(t) : __invalid_size_argument_for_IOC)
+> 
+> If it is defined as this:
+> 
+> #define _IOC_TYPECHECK(t) (sizeof(t))
+> 
+> then all is well with the world.
+> 
+> I can patch v4l2-ioctl.c to redefine _IOC_TYPECHECK if __CHECKER__ is defined, but
+> shouldn't sparse understand this instead? There was a similar situation with
+> ARRAY_SIZE in the past that sparse now understands.
 
-Oops: that should be:
+Here is a small test case for this problem:
 
-check-name: test anonymous union initializer
+====== ioc-typecheck.c ======
+extern unsigned int __invalid_size_argument_for_IOC;
+#define _IOC_TYPECHECK(t) \
+                ((sizeof(t) == sizeof(t[1]) && \
+                    sizeof(t) < (1 << 14)) ? \
+                   sizeof(t) : __invalid_size_argument_for_IOC)
 
->  *
->  * check-error-start
->  * check-error-end
->  */
-> ====== anon-union.c ======
-> 
-> Running sparse gives:
-> 
-> anon-union.c:7:26: error: unknown field name in initializer
-> 
-> Regards,
-> 
-> 	Hans
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+#define TEST_IOCTL (50 | (_IOC_TYPECHECK(unsigned) << 8))
 
+static unsigned iocnrs[] = {
+        [TEST_IOCTL & 0xff] = 1,
+};
+/*
+ * check-name: correct handling of _IOC_TYPECHECK
+ *
+ * check-error-start
+ * check-error-end
+ */
+====== ioc-typecheck.c ======
+
+Running sparse over this gives:
+
+error: bad integer constant expression
+
+Regards,
+
+	Hans
