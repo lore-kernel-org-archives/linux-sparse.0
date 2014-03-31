@@ -1,71 +1,104 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/2] Use any previous initializer to size a symbol
-Date: Sun, 30 Mar 2014 22:59:39 -0700
-Message-ID: <CANeU7Q==Uw7KybSExx7G60tAi8gqOh+L-=TEZd=VKSM0=saw+g@mail.gmail.com>
-References: <alpine.LFD.2.11.1403301020530.16374@i7.linux-foundation.org>
-	<CA+55aFy=Y_xOBdQFdhgvadEpmSFp85FiPQZc8VTKBkDO=WLhgA@mail.gmail.com>
-	<CANeU7Q=tSY-CVCv=+CB80C7w4e5RjR=4ZWKNM92raWvKd_rz6g@mail.gmail.com>
-	<CA+55aFz4mozGHRqV3YqkQEY5yqSrPSfVUbjPk7MNEt2ZBsvU_Q@mail.gmail.com>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: Re: sparse and anonymous unions
+Date: Mon, 31 Mar 2014 09:51:03 +0200
+Message-ID: <53391E67.2000306@xs4all.nl>
+References: <53242AC7.9080301@xs4all.nl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:48657 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751182AbaCaF7k (ORCPT
+Received: from smtp-vbr9.xs4all.nl ([194.109.24.29]:1256 "EHLO
+	smtp-vbr9.xs4all.nl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753005AbaCaHvN (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 31 Mar 2014 01:59:40 -0400
-Received: by mail-qg0-f46.google.com with SMTP id 63so3376960qgz.33
-        for <linux-sparse@vger.kernel.org>; Sun, 30 Mar 2014 22:59:40 -0700 (PDT)
-In-Reply-To: <CA+55aFz4mozGHRqV3YqkQEY5yqSrPSfVUbjPk7MNEt2ZBsvU_Q@mail.gmail.com>
+	Mon, 31 Mar 2014 03:51:13 -0400
+In-Reply-To: <53242AC7.9080301@xs4all.nl>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Hans Verkuil <hverkuil@xs4all.nl>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linux Media Mailing List <linux-media@vger.kernel.org>
 
-On Sun, Mar 30, 2014 at 1:21 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> On Sun, Mar 30, 2014 at 12:22 PM, Christopher Li <sparse@chrisli.org> wrote:
->>
->> Possible. If I comment out that check, I will get this error in the
->> extern-inline.c
->> test case:
->>
->> $ ./sparse validation/extern-inline.c validation/extern-inline.c
->> validation/extern-inline.c:12:1: warning: multiple definitions for function 'g'
->> validation/extern-inline.c:12:1:  the previous one is here
->
-> Ok, I think that is just us being too anal. We should allow multiple
-> definitions for functions that are identical otherwise, but differ in
-> the "inline".
+On 03/15/2014 11:26 AM, Hans Verkuil wrote:
+> Hi!
+> 
+> I'm trying to cut down the list of sparse warnings and errors I get when
+> compiling drivers/media. Most of them are obviously our problem, but there
+> is one that seems to be a sparse bug:
+> 
+> drivers/media/v4l2-core/v4l2-dv-timings.c:30:9: error: unknown field name in initializer
+> 
+> This uses the v4l2_dv_timings type which is defined here:
+> 
+> include/uapi/linux/videodev2.h
+> 
+> and which has an anonymous union:
+> 
+> struct v4l2_dv_timings {
+>         __u32 type;
+>         union {
+>                 struct v4l2_bt_timings  bt;
+>                 __u32   reserved[32];
+>         };
+> } __attribute__ ((packed));
+> 
+> The macro used in the source above comes from this header:
+> 
+> include/uapi/linux/v4l2-dv-timings.h
+> 
+> and is defined as follows:
+> 
+> #if __GNUC__ < 4 || (__GNUC__ == 4 && (__GNUC_MINOR__ < 6))
+> /* Sadly gcc versions older than 4.6 have a bug in how they initialize
+>    anonymous unions where they require additional curly brackets.
+>    This violates the C1x standard. This workaround adds the curly brackets
+>    if needed. */
+> #define V4L2_INIT_BT_TIMINGS(_width, args...) \
+>         { .bt = { _width , ## args } }
+> #else
+> #define V4L2_INIT_BT_TIMINGS(_width, args...) \
+>         .bt = { _width , ## args }
+> #endif
+> 
+> /* CEA-861-E timings (i.e. standard HDTV timings) */
+>         
+> #define V4L2_DV_BT_CEA_640X480P59_94 { \
+>         .type = V4L2_DV_BT_656_1120, \
+>         V4L2_INIT_BT_TIMINGS(640, 480, 0, 0, \
+>                 25175000, 16, 96, 48, 10, 2, 33, 0, 0, 0, \
+>                 V4L2_DV_BT_STD_DMT | V4L2_DV_BT_STD_CEA861, 0) \
+> }
+> 
+> The problem is that it seems that sparse follows the old pre-4.6 rules for
+> initializing anonymous unions instead of what is actually in the C standard.
+> 
+> If I add ' || defined(__CHECKER__)' to the #if above it will pass without
+> generating sparse errors.
+> 
+> Is this something that can be fixed in sparse, or am I forced to add the
+> 'defined(__CHECKER__)' to the #if condition?
 
-The difference is not only in "inline", but also the different function body
-declared in two different files. The better example should be
-./sparse validations/extern-inlineA.c validations/extern-inlineB.c
+Here is a simple test case for this problem:
 
-where inlineA.c and inlineB.c has different implementation of function 'g'.
-Same function prototype of 'g', just different function body in different files.
+====== anon-union.c ======
+struct s {
+        union {
+                int val;
+        };
+};
 
-In other words, we should treat extern inline has the same file visibility
-as static inline. The only difference is that, when compiler can't inline
-the function, extern inline assume the function has external copy and
-don't generate the local copy. Static inline turn the function into
-a static function.
+static struct s foo = { .val = 5, };
+/*
+ * check-name: duplicate extern array
+ *
+ * check-error-start
+ * check-error-end
+ */
+====== anon-union.c ======
 
+Running sparse gives:
 
->
-> So the correct thing to do is (I think) to remove that check, and then
-> make the parse_function_body() warning go away by accepting the fact
-> that we can have both an inline version and an out-of-line version of
-> the same function.
+anon-union.c:7:26: error: unknown field name in initializer
 
-I agree we should remove that MOD_INLINE check and fix the warning else
-where. The warning is actually not about inline version vs out-of-line version.
-It is about two files have two different implementation of the inline version.
+Regards,
 
-Let me take a stab on that. My guess is that, I can fix it by treating
-extern inline
-like static inline, remove the symbol when the file scope ends. Then the
-second file will not see it and complain the duplicate symbol. Haven't verify
-that works or not yet.
-
-Chris
+	Hans
