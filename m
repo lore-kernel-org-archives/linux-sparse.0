@@ -1,42 +1,64 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: sparse: ioctl defines and "error: bad integer constant expression"
-Date: Mon, 31 Mar 2014 10:22:49 -0700
-Message-ID: <CA+55aFwpoVwyyUrCroFR1NWCGku=ath6Sxb8uertuBC=Pw0pLw@mail.gmail.com>
-References: <53244092.6010906@xs4all.nl>
-	<533921F8.1000508@xs4all.nl>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: [PATCH] Fix _IOC_TYPECHECK sparse error
+Date: Tue, 01 Apr 2014 09:04:12 +0200
+Message-ID: <533A64EC.2090106@xs4all.nl>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ve0-f179.google.com ([209.85.128.179]:49791 "EHLO
-	mail-ve0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752932AbaCaRWt (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 31 Mar 2014 13:22:49 -0400
-In-Reply-To: <533921F8.1000508@xs4all.nl>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
 
-On Mon, Mar 31, 2014 at 1:06 AM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
->
-> Running sparse over this gives:
->
-> error: bad integer constant expression
+When running sparse over drivers/media/v4l2-core/v4l2-ioctl.c I get these
+errors:
 
-So technically sparse is correct in this case. The kernel ends up
-doing some questionable things that gcc allows. The index in an
-assignment initializer is supposed to be a true constant expression,
-not "constant expression after simplification and optimization".
+drivers/media/v4l2-core/v4l2-ioctl.c:2043:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2044:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2045:9: error: bad integer constant expression
+drivers/media/v4l2-core/v4l2-ioctl.c:2046:9: error: bad integer constant expression
 
-So sparse warns about us playing games that just happen to work with
-gcc. I'm not sure we should fix sparse for this case.
+etc.
 
-I'll think about it, but not right now (I did the previous one because
-it was trivial, but now I'm in merge window mode, so I'd better go
-back and look at kernel pull requests)
+The root cause of that turns out to be in include/asm-generic/ioctl.h:
 
-Chris, can you please add this to the test cases since Hans did the
-work to create a nice small test-case?
+#include <uapi/asm-generic/ioctl.h>
 
-            Linus
+/* provoke compile error for invalid uses of size argument */
+extern unsigned int __invalid_size_argument_for_IOC;
+#define _IOC_TYPECHECK(t) \
+        ((sizeof(t) == sizeof(t[1]) && \
+          sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+          sizeof(t) : __invalid_size_argument_for_IOC)
+
+If it is defined as this (as is already done if __KERNEL__ is not defined):
+
+#define _IOC_TYPECHECK(t) (sizeof(t))
+
+then all is well with the world.
+
+This patch allows sparse to work correctly.
+
+Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
+
+diff --git a/include/asm-generic/ioctl.h b/include/asm-generic/ioctl.h
+index d17295b..297fb0d 100644
+--- a/include/asm-generic/ioctl.h
++++ b/include/asm-generic/ioctl.h
+@@ -3,10 +3,15 @@
+ 
+ #include <uapi/asm-generic/ioctl.h>
+ 
++#ifdef __CHECKER__
++#define _IOC_TYPECHECK(t) (sizeof(t))
++#else
+ /* provoke compile error for invalid uses of size argument */
+ extern unsigned int __invalid_size_argument_for_IOC;
+ #define _IOC_TYPECHECK(t) \
+ 	((sizeof(t) == sizeof(t[1]) && \
+ 	  sizeof(t) < (1 << _IOC_SIZEBITS)) ? \
+ 	  sizeof(t) : __invalid_size_argument_for_IOC)
++#endif
++
+ #endif /* _ASM_GENERIC_IOCTL_H */
