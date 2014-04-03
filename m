@@ -1,33 +1,30 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse: ioctl defines and "error: bad integer constant expression"
-Date: Thu, 3 Apr 2014 12:12:24 -0700
-Message-ID: <CANeU7QkX6+yy4JF6Btu+BVA-=CGE6fcYX_dNPOYdW-zzrg=PTg@mail.gmail.com>
-References: <53244092.6010906@xs4all.nl>
-	<533921F8.1000508@xs4all.nl>
-	<CA+55aFwpoVwyyUrCroFR1NWCGku=ath6Sxb8uertuBC=Pw0pLw@mail.gmail.com>
-	<CANeU7QkvBV8SbSyDiJKVavTb6E+yVCRXwisAvV+bPDiE5KVB7A@mail.gmail.com>
-	<533AF20E.5080006@xs4all.nl>
+Subject: Re: sparse and anonymous unions
+Date: Thu, 3 Apr 2014 12:15:16 -0700
+Message-ID: <CANeU7Qn4Kk7c9w2nkcknENJUuBGZALQjT44Yy-0vU+jYpAs=tA@mail.gmail.com>
+References: <53242AC7.9080301@xs4all.nl>
+	<53391E67.2000306@xs4all.nl>
+	<CA+55aFzs_O780hEowt9vg69-Kxfwzn5j1eL2F2Tzw4C56koeRg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f174.google.com ([209.85.216.174]:62365 "EHLO
-	mail-qc0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752264AbaDCTMY (ORCPT
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:48625 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752828AbaDCTPR (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 3 Apr 2014 15:12:24 -0400
-In-Reply-To: <533AF20E.5080006@xs4all.nl>
+	Thu, 3 Apr 2014 15:15:17 -0400
+In-Reply-To: <CA+55aFzs_O780hEowt9vg69-Kxfwzn5j1eL2F2Tzw4C56koeRg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Hans Verkuil <hverkuil@xs4all.nl>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Linux Media Mailing List <linux-media@vger.kernel.org>
 
-On Tue, Apr 1, 2014 at 10:06 AM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
->
-> For all my test cases:
->
-> Signed-off-by: Hans Verkuil <hans.verkuil@cisco.com>
->
+On Mon, Mar 31, 2014 at 10:17 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+> Chris, mind applying this one too? It removes more lines than it adds
+> while fixing things, by removing the helper function that isn't good
+> at anoymous unions, and using another one that does this all right..
 
-All 3 test cases added.
+The patch is applied. I add the signed off for you too, hope you don't mind.
 
 Chris
