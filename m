@@ -1,72 +1,75 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] build: allow use of LLVM_CONFIG to override llvm-config
- config script
-Date: Tue, 15 Apr 2014 11:00:45 -0700
-Message-ID: <20140415180045.GA2707@leaf>
-References: <1397582569-7043-1-git-send-email-cody@linux.vnet.ibm.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Cody P Schafer <cody@linux.vnet.ibm.com>
+Subject: [PATCH] sparse{i,c}: use LLVM_CONFIG to find llc and lli
+Date: Tue, 15 Apr 2014 12:51:29 -0700
+Message-ID: <1397591489-17411-1-git-send-email-cody@linux.vnet.ibm.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:43160 "EHLO
-	relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750920AbaDOSAx (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 15 Apr 2014 14:00:53 -0400
-Content-Disposition: inline
-In-Reply-To: <1397582569-7043-1-git-send-email-cody@linux.vnet.ibm.com>
+Received: from e9.ny.us.ibm.com ([32.97.182.139]:54789 "EHLO e9.ny.us.ibm.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751006AbaDOTwS (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 15 Apr 2014 15:52:18 -0400
+Received: from /spool/local
+	by e9.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <cody@linux.vnet.ibm.com>;
+	Tue, 15 Apr 2014 15:52:17 -0400
+Received: from b01cxnp23034.gho.pok.ibm.com (b01cxnp23034.gho.pok.ibm.com [9.57.198.29])
+	by d01dlp01.pok.ibm.com (Postfix) with ESMTP id 01CF438C801A
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 15:52:15 -0400 (EDT)
+Received: from d01av01.pok.ibm.com (d01av01.pok.ibm.com [9.56.224.215])
+	by b01cxnp23034.gho.pok.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id s3FJqEri64094212
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 19:52:14 GMT
+Received: from d01av01.pok.ibm.com (localhost [127.0.0.1])
+	by d01av01.pok.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id s3FJqE2Q026169
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 15:52:14 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Cody P Schafer <cody@linux.vnet.ibm.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Cody P Schafer <cody@linux.vnet.ibm.com>
 
-On Tue, Apr 15, 2014 at 10:22:49AM -0700, Cody P Schafer wrote:
-> On systems like ubuntu 12.04, llvm-config is llvm 2.9, but
-> llvm-config-3.0 and llvm-config-3.3 (for example) are versions 3.0 and
-> 3.3 respectively. Allow overriding the name/path of the llvm-config
-> script so people can use these versioned config scripts
-> 
-> Signed-off-by: Cody P Schafer <cody@linux.vnet.ibm.com>
+Some systems have multiple llvm versions installed, and have prefixed
+executables ("<exec>-<version>"). While we could require the user to
+specify a variable for each executable (LLC, LLI), using llvm-config
+--bindir to locate them and allowing them to override using LLVM_CONFIG
+makes much less work.
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+Signed-off-by: Cody P Schafer <cody@linux.vnet.ibm.com>
+---
+ sparsec | 6 +++++-
+ sparsei | 5 ++++-
+ 2 files changed, 9 insertions(+), 2 deletions(-)
 
->  Makefile | 13 +++++++------
->  1 file changed, 7 insertions(+), 6 deletions(-)
-> 
-> diff --git a/Makefile b/Makefile
-> index c3f3104..bbdc088 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -30,9 +30,10 @@ HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
->  		$(CC) -c -Wp,-MD,.gcc-test.d .gcc-test.c 2>/dev/null && \
->  		echo 'yes'; rm -f .gcc-test.d .gcc-test.o .gcc-test.c)
->  HAVE_GTK2:=$(shell pkg-config --exists gtk+-2.0 2>/dev/null && echo 'yes')
-> -HAVE_LLVM:=$(shell llvm-config --version >/dev/null 2>&1 && echo 'yes')
-> -HAVE_LLVM_VERSION:=$(shell llvm-config --version | grep "^[3-9].*" >/dev/null 2>&1 && echo yes)
-> -LLVM_VERSION=$(shell llvm-config --version)
-> +LLVM_CONFIG=llvm-config
-> +HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
-> +HAVE_LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version | grep "^[3-9].*" >/dev/null 2>&1 && echo yes)
-> +LLVM_VERSION=$(shell $(LLVM_CONFIG) --version)
->  
->  GCC_BASE = $(shell $(CC) --print-file-name=)
->  BASIC_CFLAGS = -DGCC_BASE=\"$(GCC_BASE)\"
-> @@ -84,9 +85,9 @@ HAVE_LLVM=no
->  else
->  LLVM_PROGS := sparse-llvm
->  $(LLVM_PROGS): LD := g++
-> -LLVM_LDFLAGS := $(shell llvm-config --ldflags)
-> -LLVM_CFLAGS := $(shell llvm-config --cflags | sed -e "s/-DNDEBUG//g")
-> -LLVM_LIBS := $(shell llvm-config --libs)
-> +LLVM_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
-> +LLVM_CFLAGS := $(shell $(LLVM_CONFIG) --cflags | sed -e "s/-DNDEBUG//g")
-> +LLVM_LIBS := $(shell $(LLVM_CONFIG) --libs)
->  PROGRAMS += $(LLVM_PROGS)
->  INST_PROGRAMS += sparse-llvm sparsec
->  sparse-llvm.o: BASIC_CFLAGS += $(LLVM_CFLAGS)
-> -- 
-> 1.9.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/sparsec b/sparsec
+index 9c90b30..f8e7256 100755
+--- a/sparsec
++++ b/sparsec
+@@ -34,7 +34,11 @@ TMPFILE=`mktemp -t tmp.XXXXXX`".o"
+ 
+ $DIRNAME/sparse-llvm $SPARSEOPTS > $TMPLLVM
+ 
+-llc -o - $TMPLLVM | as -o $TMPFILE
++if [ -z "$LLVM_CONFIG" ]; then
++  LLVM_CONFIG=llvm-config
++fi
++
++`"$LLVM_CONFIG" --bindir`/llc -o - $TMPLLVM | as -o $TMPFILE
+ 
+ if [ $NEED_LINK -eq 1 ]; then
+ 	if [ -z $OUTFILE ]; then
+diff --git a/sparsei b/sparsei
+index 4632154..7a2e0f1 100755
+--- a/sparsei
++++ b/sparsei
+@@ -3,7 +3,10 @@
+ set +e
+ 
+ DIRNAME=`dirname $0`
+-LLI=`llvm-config --bindir`/lli
++if [ -z "$LLVM_CONFIG" ]; then
++    LLVM_CONFIG=llvm-config
++fi
++LLI=`"$LLVM_CONFIG" --bindir`/lli
+ 
+ if [ $# -eq 0 ]; then
+   echo "`basename $0`: no input files"
+-- 
+1.9.2
+
