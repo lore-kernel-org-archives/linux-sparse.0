@@ -1,68 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Cody P Schafer <cody@linux.vnet.ibm.com>
 Subject: Re: [PATCH] sparse{i,c}: use LLVM_CONFIG to find llc and lli
-Date: Tue, 15 Apr 2014 15:28:38 -0700
-Message-ID: <CANeU7Q=Vma64-WO8yCHueU71EewOMCDUrCDmB8iuQ4XaagS8aw@mail.gmail.com>
-References: <1397591489-17411-1-git-send-email-cody@linux.vnet.ibm.com>
+Date: Tue, 15 Apr 2014 15:53:30 -0700
+Message-ID: <534DB86A.5090506@linux.vnet.ibm.com>
+References: <1397591489-17411-1-git-send-email-cody@linux.vnet.ibm.com> <CANeU7Q=Vma64-WO8yCHueU71EewOMCDUrCDmB8iuQ4XaagS8aw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=ISO-8859-1; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f171.google.com ([209.85.216.171]:53679 "EHLO
-	mail-qc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751744AbaDOW2i (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 15 Apr 2014 18:28:38 -0400
-Received: by mail-qc0-f171.google.com with SMTP id c9so11137715qcz.2
-        for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 15:28:38 -0700 (PDT)
-In-Reply-To: <1397591489-17411-1-git-send-email-cody@linux.vnet.ibm.com>
+Received: from e8.ny.us.ibm.com ([32.97.182.138]:54976 "EHLO e8.ny.us.ibm.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751733AbaDOWxi (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 15 Apr 2014 18:53:38 -0400
+Received: from /spool/local
+	by e8.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <cody@linux.vnet.ibm.com>;
+	Tue, 15 Apr 2014 18:53:36 -0400
+Received: from b01cxnp22036.gho.pok.ibm.com (b01cxnp22036.gho.pok.ibm.com [9.57.198.26])
+	by d01dlp02.pok.ibm.com (Postfix) with ESMTP id 6E3556E801C
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 18:53:28 -0400 (EDT)
+Received: from d01av01.pok.ibm.com (d01av01.pok.ibm.com [9.56.224.215])
+	by b01cxnp22036.gho.pok.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id s3FMrY8U39125112
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 22:53:34 GMT
+Received: from d01av01.pok.ibm.com (localhost [127.0.0.1])
+	by d01av01.pok.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id s3FMrVrB031702
+	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 18:53:31 -0400
+In-Reply-To: <CANeU7Q=Vma64-WO8yCHueU71EewOMCDUrCDmB8iuQ4XaagS8aw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Cody P Schafer <cody@linux.vnet.ibm.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Apr 15, 2014 at 12:51 PM, Cody P Schafer
-<cody@linux.vnet.ibm.com> wrote:
-> Some systems have multiple llvm versions installed, and have prefixed
-> executables ("<exec>-<version>"). While we could require the user to
-> specify a variable for each executable (LLC, LLI), using llvm-config
-> --bindir to locate them and allowing them to override using LLVM_CONFIG
-> makes much less work.
+On 04/15/2014 03:28 PM, Christopher Li wrote:
+> On Tue, Apr 15, 2014 at 12:51 PM, Cody P Schafer
+> <cody@linux.vnet.ibm.com> wrote:
+>> Some systems have multiple llvm versions installed, and have prefixed
+>> executables ("<exec>-<version>"). While we could require the user to
+>> specify a variable for each executable (LLC, LLI), using llvm-config
+>> --bindir to locate them and allowing them to override using LLVM_CONFIG
+>> makes much less work.
+>
+> How about this minor incremental patch? It will use the default variable
+> to make the change smaller.
+>
 
-How about this minor incremental patch? It will use the default variable
-to make the change smaller.
+Yep, should have remembered that I could just use a default value for 
+the variable. Looks good.
 
-Chris
-
-diff --git a/sparsec b/sparsec
-index f8e7256..9dc96c9 100755
---- a/sparsec
-+++ b/sparsec
-@@ -34,11 +34,9 @@ TMPFILE=`mktemp -t tmp.XXXXXX`".o"
-
- $DIRNAME/sparse-llvm $SPARSEOPTS > $TMPLLVM
-
--if [ -z "$LLVM_CONFIG" ]; then
--  LLVM_CONFIG=llvm-config
--fi
-+LLC=`"${LLVM_CONFIG:-llvm-config}" --bindir`/llc
-
--`"$LLVM_CONFIG" --bindir`/llc -o - $TMPLLVM | as -o $TMPFILE
-+$LLC -o - $TMPLLVM | as -o $TMPFILE
-
- if [ $NEED_LINK -eq 1 ]; then
-        if [ -z $OUTFILE ]; then
-diff --git a/sparsei b/sparsei
-index 7a2e0f1..3431a9f 100755
---- a/sparsei
-+++ b/sparsei
-@@ -3,10 +3,7 @@
- set +e
-
- DIRNAME=`dirname $0`
--if [ -z "$LLVM_CONFIG" ]; then
--    LLVM_CONFIG=llvm-config
--fi
--LLI=`"$LLVM_CONFIG" --bindir`/lli
-+LLI=`"${LLVM_CONFIG:-llvm-config}" --bindir`/lli
-
- if [ $# -eq 0 ]; then
-   echo "`basename $0`: no input files"
