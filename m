@@ -1,83 +1,39 @@
-From: Cody P Schafer <cody@linux.vnet.ibm.com>
-Subject: [PATCH] parse: support c99 [static ...] in abstract array declarators
-Date: Tue, 15 Apr 2014 16:08:57 -0700
-Message-ID: <1397603337-28016-1-git-send-email-cody@linux.vnet.ibm.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH] parse: support c99 [static ...] in abstract array
+ declarators
+Date: Wed, 16 Apr 2014 17:12:34 -0700
+Message-ID: <20140417001234.GA18426@leaf>
+References: <1397603337-28016-1-git-send-email-cody@linux.vnet.ibm.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e7.ny.us.ibm.com ([32.97.182.137]:55855 "EHLO e7.ny.us.ibm.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751217AbaDOXJF (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 15 Apr 2014 19:09:05 -0400
-Received: from /spool/local
-	by e7.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <linux-sparse@vger.kernel.org> from <cody@linux.vnet.ibm.com>;
-	Tue, 15 Apr 2014 19:09:04 -0400
-Received: from b01cxnp22035.gho.pok.ibm.com (b01cxnp22035.gho.pok.ibm.com [9.57.198.25])
-	by d01dlp02.pok.ibm.com (Postfix) with ESMTP id 0EAE86E801F
-	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 19:08:55 -0400 (EDT)
-Received: from d01av01.pok.ibm.com (d01av01.pok.ibm.com [9.56.224.215])
-	by b01cxnp22035.gho.pok.ibm.com (8.13.8/8.13.8/NCO v10.0) with ESMTP id s3FN910K1769764
-	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 23:09:01 GMT
-Received: from d01av01.pok.ibm.com (localhost [127.0.0.1])
-	by d01av01.pok.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id s3FN90A5023426
-	for <linux-sparse@vger.kernel.org>; Tue, 15 Apr 2014 19:09:01 -0400
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:53448 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755009AbaDQAMl (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 16 Apr 2014 20:12:41 -0400
+Content-Disposition: inline
+In-Reply-To: <1397603337-28016-1-git-send-email-cody@linux.vnet.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Cody P Schafer <cody@linux.vnet.ibm.com>
+To: Cody P Schafer <cody@linux.vnet.ibm.com>
+Cc: linux-sparse@vger.kernel.org
 
-Makes sparse a little more accepting than the standard: we accept any
-number of ["static", "restrict"] repeated in any order, while the n1570
-specifies (in 6.7.6.2.3) that either type-qualifiers (ie: "restrict")
-come first and are followed by "static" or the opposite ("static" then
-type-qualifiers).
+On Tue, Apr 15, 2014 at 04:08:57PM -0700, Cody P Schafer wrote:
+> Makes sparse a little more accepting than the standard: we accept any
+> number of ["static", "restrict"] repeated in any order, while the n1570
+> specifies (in 6.7.6.2.3) that either type-qualifiers (ie: "restrict")
+> come first and are followed by "static" or the opposite ("static" then
+> type-qualifiers).
+> 
+> Also add a test.
+> 
+> Signed-off-by: Cody P Schafer <cody@linux.vnet.ibm.com>
 
-Also add a test.
+What's the rationale for this?  Why should sparse accept more than the
+standard allows?  What real-world code do you have that requires this?
 
-Signed-off-by: Cody P Schafer <cody@linux.vnet.ibm.com>
----
- ident-list.h                                  | 1 +
- parse.c                                       | 2 +-
- validation/abstract-array-declarator-static.c | 6 ++++++
- 3 files changed, 8 insertions(+), 1 deletion(-)
- create mode 100644 validation/abstract-array-declarator-static.c
+And would it be worth adding a warning for this non-standards-compliant
+code, even if that warning isn't on by default?
 
-diff --git a/ident-list.h b/ident-list.h
-index e93aae7..c0fc18f 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -91,6 +91,7 @@ IDENT(artificial); IDENT(__artificial__);
- IDENT(leaf); IDENT(__leaf__);
- IDENT(vector_size); IDENT(__vector_size__);
- IDENT(error); IDENT(__error__);
-+IDENT(static);
- 
- 
- /* Preprocessor idents.  Direct use of __IDENT avoids mentioning the keyword
-diff --git a/parse.c b/parse.c
-index 9cc5f65..cbe3af4 100644
---- a/parse.c
-+++ b/parse.c
-@@ -1532,7 +1532,7 @@ static struct token *abstract_array_declarator(struct token *token, struct symbo
- {
- 	struct expression *expr = NULL;
- 
--	if (match_idents(token, &restrict_ident, &__restrict_ident, NULL))
-+	while (match_idents(token, &restrict_ident, &__restrict_ident, &static_ident, NULL))
- 		token = token->next;
- 	token = parse_expression(token, &expr);
- 	sym->array_size = expr;
-diff --git a/validation/abstract-array-declarator-static.c b/validation/abstract-array-declarator-static.c
-new file mode 100644
-index 0000000..23cbae0
---- /dev/null
-+++ b/validation/abstract-array-declarator-static.c
-@@ -0,0 +1,6 @@
-+
-+extern void f(int g[static 1]);
-+
-+/*
-+ * check-name: abstract array declarator static
-+ */
--- 
-1.9.2
-
+- Josh Triplett
