@@ -1,74 +1,40 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: How to fix: asm output is not an lvalue
-Date: Sat, 26 Apr 2014 23:57:05 +0200
-Message-ID: <20140426215705.GA20867@ravnborg.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: How to fix: asm output is not an lvalue
+Date: Sat, 26 Apr 2014 16:44:13 -0700
+Message-ID: <CA+55aFx0QAPEDBEyb+fDsb+Asb-q_6tb7K=KMLP4o4DxncxSpg@mail.gmail.com>
+References: <20140426215705.GA20867@ravnborg.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from asavdk3.altibox.net ([109.247.116.14]:57784 "EHLO
-	asavdk3.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751243AbaDZWEY (ORCPT
+Received: from mail-ve0-f175.google.com ([209.85.128.175]:48583 "EHLO
+	mail-ve0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751716AbaDZXoO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 26 Apr 2014 18:04:24 -0400
-Received: from localhost (localhost [127.0.0.1])
-	by asavdk3.altibox.net (Postfix) with ESMTP id 6EA4B20027
-	for <linux-sparse@vger.kernel.org>; Sat, 26 Apr 2014 23:57:07 +0200 (CEST)
-Received: from asavdk3.altibox.net ([127.0.0.1])
-	by localhost (asavdk3.lysetele.net [127.0.0.1]) (amavisd-new, port 10024)
-	with LMTP id U8WhYVwpkmj1 for <linux-sparse@vger.kernel.org>;
-	Sat, 26 Apr 2014 23:57:07 +0200 (CEST)
-Received: from ravnborg.org (unknown [188.228.89.252])
-	(using TLSv1.2 with cipher AES128-SHA (128/128 bits))
-	(No client certificate requested)
-	by asavdk3.altibox.net (Postfix) with ESMTPS id 16E2520022
-	for <linux-sparse@vger.kernel.org>; Sat, 26 Apr 2014 23:57:06 +0200 (CEST)
-Content-Disposition: inline
+	Sat, 26 Apr 2014 19:44:14 -0400
+Received: by mail-ve0-f175.google.com with SMTP id oz11so6362889veb.6
+        for <linux-sparse@vger.kernel.org>; Sat, 26 Apr 2014 16:44:13 -0700 (PDT)
+In-Reply-To: <20140426215705.GA20867@ravnborg.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Sam Ravnborg <sam@ravnborg.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi all.
+On Sat, Apr 26, 2014 at 2:57 PM, Sam Ravnborg <sam@ravnborg.org> wrote:
+>
+> Following code snippet generate these warnings:
+> t.c:9:9: warning: asm output is not an lvalue
 
-Following code snippet generate these warnings:
-t.c:9:9: warning: asm output is not an lvalue
-t.c:10:10: warning: asm output is not an lvalue
-t.c:9:9: warning: generating address of non-lvalue (11)
-t.c:10:10: warning: generating address of non-lvalue (11)
+Yeah. That code snippet is pure and utter garbage.
 
-The code snippet is part of the math emu in the kernel.
-For sparc32 I get a lot of the "asm output is not an lvalue"
-warnings.
+Gcc has this totally insane extension that makes casts be lvalues.
+It's stupid and horrid, and pointless to boot. So apparently gcc
+accepts that crap.
 
-For sparc32 I do not get the "generating address of non-lvalue".
+But it is very much total crap.
 
-Can you help me gettitng rid of these warnings?
+Those casts to (USItype) are all pointless to begin with (since the
+values are of that type already!) and they mean that the expression
+isn't something you can assign to (lvalue). The fact that gcc accepts
+code like that is an embarrassment.
 
-Thanks in advance,
-
-	Sam
-
-
-
-$ cat t.c
-static void todo(void)
-{
-        typedef unsigned int USItype __attribute__((mode(SI)));
-        USItype l1;
-
-        USItype DR_f0, DA_f1, DB_f1, DA_f0, DB_f0;
-
- __asm__ ("subcc %r4,%5,%1\n\t" "subx %r2,%3,%0\n" :
- "=r" ((USItype)(l1)),
- "=&r" ((USItype)(DR_f0)) :
- "rJ" ((USItype)(DA_f1)),
- "rI" ((USItype)(DB_f1)),
- "rJ" ((USItype)(DA_f0)),
- "rI" ((USItype)(DB_f0)) :
- "cc");
-}
-
-
-
-
-
-
+            Linus
