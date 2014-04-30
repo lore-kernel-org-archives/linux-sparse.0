@@ -1,78 +1,52 @@
 From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: How to fix: asm output is not an lvalue
-Date: Sun, 27 Apr 2014 10:41:29 +0200
-Message-ID: <20140427084129.GA10056@ravnborg.org>
-References: <20140426215705.GA20867@ravnborg.org>
- <CA+55aFx0QAPEDBEyb+fDsb+Asb-q_6tb7K=KMLP4o4DxncxSpg@mail.gmail.com>
- <20140427064803.GA31264@ravnborg.org>
- <20140427065734.GA19585@thin>
+Subject: Warn for extern prototypes
+Date: Wed, 30 Apr 2014 22:07:30 +0200
+Message-ID: <20140430200730.GA11100@ravnborg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from asavdk3.altibox.net ([109.247.116.14]:34621 "EHLO
-	asavdk3.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753157AbaD0Ilp (ORCPT
+Received: from asavdk4.altibox.net ([109.247.116.15]:40367 "EHLO
+	asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1759308AbaD3UHe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 27 Apr 2014 04:41:45 -0400
+	Wed, 30 Apr 2014 16:07:34 -0400
+Received: from localhost (localhost [127.0.0.1])
+	by asavdk4.altibox.net (Postfix) with ESMTP id 3E3FD80094
+	for <linux-sparse@vger.kernel.org>; Wed, 30 Apr 2014 22:07:32 +0200 (CEST)
+Received: from asavdk4.altibox.net ([127.0.0.1])
+	by localhost (asavdk4.lysetele.net [127.0.0.1]) (amavisd-new, port 10024)
+	with LMTP id vnQ2SgmRXzHu for <linux-sparse@vger.kernel.org>;
+	Wed, 30 Apr 2014 22:07:32 +0200 (CEST)
+Received: from ravnborg.org (unknown [188.228.89.252])
+	(using TLSv1.2 with cipher AES128-SHA (128/128 bits))
+	(No client certificate requested)
+	by asavdk4.altibox.net (Postfix) with ESMTPS id DF00A8008D
+	for <linux-sparse@vger.kernel.org>; Wed, 30 Apr 2014 22:07:31 +0200 (CEST)
 Content-Disposition: inline
-In-Reply-To: <20140427065734.GA19585@thin>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Apr 26, 2014 at 11:57:34PM -0700, Josh Triplett wrote:
-> On Sun, Apr 27, 2014 at 08:48:04AM +0200, Sam Ravnborg wrote:
-> > On Sat, Apr 26, 2014 at 04:44:13PM -0700, Linus Torvalds wrote:
-> > > On Sat, Apr 26, 2014 at 2:57 PM, Sam Ravnborg <sam@ravnborg.org> wrote:
-> > > >
-> > > > Following code snippet generate these warnings:
-> > > > t.c:9:9: warning: asm output is not an lvalue
-> > > 
-> > > Yeah. That code snippet is pure and utter garbage.
-> > > 
-> > > Gcc has this totally insane extension that makes casts be lvalues.
-> > > It's stupid and horrid, and pointless to boot. So apparently gcc
-> > > accepts that crap.
-> > > 
-> > > But it is very much total crap.
-> > > 
-> > > Those casts to (USItype) are all pointless to begin with (since the
-> > > values are of that type already!) and they mean that the expression
-> > > isn't something you can assign to (lvalue). The fact that gcc accepts
-> > > code like that is an embarrassment.
-> > 
-> > Thanks.
-> > When I dropped the casts to the output values the warnings were gone.
-> > 
-> > Now the code is down to ~30 warnings - looks like this.
-> > math_32.c:371:17: warning: shift too big (4294967267) for type unsigned long
-> 
-> That one looks like a bug; that's just below 2**32 (4294967296), which
-> makes no sense as a shift.  Perhaps there's a precedence issue?
+Hi all.
 
-Deep down in some macro expansion I found the following:
+Is it possible to get a warning when sparse encounter a
+function prototype declared using "extern"?
 
-$ cat t.c
-void foo(void);
-int x;
-int y;
+So the following code:
 
-static void todo(void)
-{
+extern void foo(void);
+void bar(int x);
 
-        if (3 < 32)
-                foo();
-        else
-                x = y << (3 - 32);
-}
+Would generate warnings because the declaration of foo()
+uses extern.
 
 
-This produces the same warning.
-But the if expression is always true so the else part could be ignored.
+I took a very short peek at evaluate.c - but decided to ask as maybe
+there is already something that I overlooked or it is maybe trivial.
 
-This is line 52 in include/math/op-2.h in the kernel if someone
-wants to take a look...
-I have no test-suite for the softfloat stuff, so I am not going to touch this code...
+The rationale behind this is that at least in some areas of the kernel,
+the use of "extern" for prototypes are no longer accepted.
+A sparse warnings would be good to tell me all the cases I missed
+in the conversion.
 
 	Sam
