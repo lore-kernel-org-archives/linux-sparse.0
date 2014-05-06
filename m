@@ -1,41 +1,47 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: Warn for extern prototypes
-Date: Wed, 30 Apr 2014 22:48:16 +0200
-Message-ID: <20140430204816.GA14951@ravnborg.org>
-References: <20140430200730.GA11100@ravnborg.org>
- <20140430203056.GJ26890@mwanda>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH] staging: rtl8192u: initialize array in C compliant way
+Date: Tue, 6 May 2014 11:47:49 +0300
+Message-ID: <20140506084749.GT26890@mwanda>
+References: <1399364528-3727-1-git-send-email-martink@posteo.de>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from asavdk4.altibox.net ([109.247.116.15]:41446 "EHLO
-	asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752334AbaD3UsU (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 30 Apr 2014 16:48:20 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140430203056.GJ26890@mwanda>
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <1399364528-3727-1-git-send-email-martink@posteo.de>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Martin Kepplinger <martink@posteo.de>
+Cc: gregkh@linuxfoundation.org, devel@driverdev.osuosl.org, linux-kernel@vger.kernel.org, burzalodowa@gmail.com, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Apr 30, 2014 at 11:30:57PM +0300, Dan Carpenter wrote:
-> On Wed, Apr 30, 2014 at 10:07:30PM +0200, Sam Ravnborg wrote:
-> > The rationale behind this is that at least in some areas of the kernel,
-> > the use of "extern" for prototypes are no longer accepted.
-> > A sparse warnings would be good to tell me all the cases I missed
-> > in the conversion.
+On Tue, May 06, 2014 at 10:22:08AM +0200, Martin Kepplinger wrote:
+> Don't list elements to initialize. Remaining elements of a partly
+> initialized array are set to zero. Sparse complained here.
 > 
-> Doesn't checkpatch.pl already check for this?
-checkpatch --strict -f foo.h will include this check.
+> Signed-off-by: Martin Kepplinger <martink@posteo.de>
+> ---
+>  drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c b/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
+> index 426f223..c96dbab 100644
+> --- a/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
+> +++ b/drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c
+> @@ -241,7 +241,7 @@ static PTS_COMMON_INFO SearchAdmitTRStream(struct ieee80211_device *ieee,
+>  {
+>  	//DIRECTION_VALUE	dir;
+>  	u8	dir;
+> -	bool				search_dir[4] = {0, 0, 0, 0};
+> +	bool				search_dir[4] = {0};
 
-But then there are so much other noise...
+That's weird.  The original code is valid but it generates a sparse
+warning.
 
-It is much simpler to do:
+drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c:244:58: warning: Initializer entry defined twice
+drivers/staging/rtl8192u/ieee80211/rtl819x_TSProc.c:244:61:   also defined here
 
-   make C=2 arch/sparc/
+It has something to do with "_Bool" types.  Changing it to "int" will
+also make the warning disappear.  I've CC'd the sparse list to see if
+anyone knows what's happening.
 
-and the process the sparse warnings.
-
-	Sam
-
+regards,
+dan carpenter
