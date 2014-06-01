@@ -1,18 +1,18 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH] Fix offsets in anonymous unions
-Date: Fri, 23 May 2014 11:40:27 -0700
-Message-ID: <CANeU7QkiLLT2vC+iRFxhPZpf6tYmuiSUf2LSsPM0acHcy-iZQw@mail.gmail.com>
+Date: Sun, 1 Jun 2014 00:55:44 -0700
+Message-ID: <CANeU7Qn067TkgFsfHJkd30Q3mEtCvgjwMUt=a3Yfo7Zfcq10fg@mail.gmail.com>
 References: <f6d65cc35d3627885e7a1c89e70a48c3368d4f66.1400764815.git.john@keeping.me.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f50.google.com ([209.85.192.50]:43680 "EHLO
-	mail-qg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751256AbaEWSk2 (ORCPT
+Received: from mail-qg0-f41.google.com ([209.85.192.41]:44916 "EHLO
+	mail-qg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750998AbaFAHzp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 May 2014 14:40:28 -0400
-Received: by mail-qg0-f50.google.com with SMTP id z60so8547197qgd.37
-        for <linux-sparse@vger.kernel.org>; Fri, 23 May 2014 11:40:27 -0700 (PDT)
+	Sun, 1 Jun 2014 03:55:45 -0400
+Received: by mail-qg0-f41.google.com with SMTP id j5so8968536qga.28
+        for <linux-sparse@vger.kernel.org>; Sun, 01 Jun 2014 00:55:44 -0700 (PDT)
 In-Reply-To: <f6d65cc35d3627885e7a1c89e70a48c3368d4f66.1400764815.git.john@keeping.me.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -20,27 +20,20 @@ To: John Keeping <john@keeping.me.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 On Thu, May 22, 2014 at 6:22 AM, John Keeping <john@keeping.me.uk> wrote:
-> This is because in evaluate.c::convert_ident() the offset of a member of
-> the inner union is set to the offset within the union, not the overall
-> offset.
->
-> Earlier, the correct offset has been calculated for check_designators()
-> by find_identifier() so by setting the offset there we end up using the
-> correct offset later on.
+> Commit 38d1124 (Fix error at anoymous unions, 2014-04-03) says:
+> @@ -2328,6 +2326,7 @@ static struct expression *check_designators(struct expression *e,
+>                                 break;
+>                         }
+>                         e->field = e->ctype = ctype;
+> +                       e->init_offset = offset;
+>                         last = e;
+>                         if (!e->ident_expression) {
 
-Thanks for the investigation. That does look like what happened.
+OK, this is actually wrong. The member "init_offset" is only
+valid for EXPR_POS type. The current e->type is EXPR_IDENTIFIER,
+the e->init_offset member actually share the same memory location as
+e->expr_ident. In order words, writing to init_offset will corrupt the
+e->expr_ident. We did not use e->expr_ident afterwards though.
 
->
-> Signed-off-by: John Keeping <john@keeping.me.uk>
-> ---
-> I'm pretty sure this is the wrong fix and I suspect it breaks some other
-> scenarios like mixing designators and plain initializers, but I've run
-> out of time to investigate this further and hopefully the correct patch
-> will be obvious to someone who knows the code better...
-
-I will take a look to see if there is better way to pass the offset to
-the initializers.
-
-Thanks for the patch.
 
 Chris
