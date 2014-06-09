@@ -1,74 +1,33 @@
 From: Phil Carmody <phil@dovecot.fi>
-Subject: [PATCH 2/3] sparse: detect non-sign-extended masks created by '~'
-Date: Mon,  9 Jun 2014 14:58:01 +0300
-Message-ID: <1402315082-14102-3-git-send-email-phil@dovecot.fi>
-References: <1402315082-14102-1-git-send-email-phil@dovecot.fi>
- <1402315082-14102-2-git-send-email-phil@dovecot.fi>
+Subject: [PATCH 0/3] catch non-sign-extended '~' brainos
+Date: Mon,  9 Jun 2014 14:57:59 +0300
+Message-ID: <1402315082-14102-1-git-send-email-phil@dovecot.fi>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wursti.dovecot.fi ([87.106.245.223]:41353 "EHLO
+Received: from wursti.dovecot.fi ([87.106.245.223]:41384 "EHLO
 	wursti.dovecot.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754217AbaFIMFj (ORCPT
+	with ESMTP id S1753037AbaFIMHz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 9 Jun 2014 08:05:39 -0400
-In-Reply-To: <1402315082-14102-2-git-send-email-phil@dovecot.fi>
+	Mon, 9 Jun 2014 08:07:55 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: sparse@chrisli.org
 Cc: linux-sparse@vger.kernel.org, phil@dovecot.fi
 
-Consider the operation of rounding up to the nearest multiple of a power of 2.
-e.g.  #define ALLOC_SIZE(t) ((sizeof(t) + ASIZE - 1) & ~(ASIZE - 1))
+Chris, fellow sparsers,
 
-If ASIZE is unfortunately defined as an unsigned type smaller than size_t,
-then the ~ will not undergo sign-bit extension, and the incorrect mask will
-be used. If used in a memory allocation context this could be fatal.
+Bitwise-not is often used to create masks. Unfortunately implicit conversions
+to longer types may leave the recipient with fewer set bit than he expected,
+if he started with an unsigned type. It's nice to warn that such constructs
+are dubious.
 
-Warn about such dubious 'large op ~short' usage.
+The guts for the fix are in patch 2. I'm not sure this is the right location
+for the fix, but the prior logical-not checks are quite closely related, so
+I bundled them in together.
 
-Signed-off-by: Phil Carmody <phil@dovecot.fi>
----
- evaluate.c | 21 +++++++++++++++++++++
- 1 file changed, 21 insertions(+)
+As an aside - while sniffing around that file, I came across a lot of helpers
+who could have their pointer parameters made const - is there any interest in
+some const clean-up, or is that unwanted comma-fudging?
 
-diff --git a/evaluate.c b/evaluate.c
-index 9052962..c0f3c91 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -189,6 +189,14 @@ left:
- 	return left;
- }
- 
-+static int is_bigger_int_type(struct symbol *left, struct symbol *right)
-+{
-+	left = integer_promotion(left);
-+	right = integer_promotion(right);
-+
-+	return (left->bit_size > right->bit_size);
-+}
-+
- static int same_cast_type(struct symbol *orig, struct symbol *new)
- {
- 	return orig->bit_size == new->bit_size &&
-@@ -927,6 +935,19 @@ static struct symbol *evaluate_binop(struct expression *expr)
- 					op,
- 					right_not ? "!" : "");
- 
-+			left_not  = expr->left->type == EXPR_PREOP
-+					&& expr->left->op == '~';
-+			right_not = expr->right->type == EXPR_PREOP
-+			                && expr->right->op == '~';
-+			if ((left_not && is_bigger_int_type(rtype, ltype)
-+			     && (ltype->ctype.modifiers & MOD_UNSIGNED)) ||
-+			    (right_not && is_bigger_int_type(ltype, rtype)
-+			     && (rtype->ctype.modifiers & MOD_UNSIGNED)))
-+				warning(expr->pos, "dubious: %sx %c %sy",
-+				        left_not ? "~" : "",
-+					op,
-+					right_not ? "~" : "");
-+
- 			ltype = usual_conversions(op, expr->left, expr->right,
- 						  lclass, rclass, ltype, rtype);
- 			ctype = rtype = ltype;
--- 
-2.0.0
+Cheers,
+Phil
 
