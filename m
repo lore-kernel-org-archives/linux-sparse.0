@@ -1,88 +1,25 @@
-From: Phil Carmody <phil@dovecot.fi>
-Subject: [PATCHv2 3/3] validation: dubious bitwise operations with bitwise nots
-Date: Tue, 10 Jun 2014 10:54:07 +0300
-Message-ID: <1402386847-23477-4-git-send-email-phil@dovecot.fi>
-References: <1402315082-14102-1-git-send-email-phil@dovecot.fi>
- <1402386847-23477-1-git-send-email-phil@dovecot.fi>
- <1402386847-23477-2-git-send-email-phil@dovecot.fi>
- <1402386847-23477-3-git-send-email-phil@dovecot.fi>
+From: Birgit Kruse <bojono@arcor.de>
+Subject: P/s Get back to me on this email: mrs.florenceevans3@gmail.com
+Date: Tue, 10 Jun 2014 13:10:13 +0200 (CEST)
+Message-ID: <1634700411.132626.1402398613629.JavaMail.ngmail__49762.352256994$1402398639$gmane$org@webmail20.arcor-online.net>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from wursti.dovecot.fi ([87.106.245.223]:39525 "EHLO
-	wursti.dovecot.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S934317AbaFJHyA (ORCPT
+Received: from mail-in-04.arcor-online.net ([151.189.21.44]:58681 "EHLO
+	mail-in-04.arcor-online.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1750923AbaFJLKS (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 10 Jun 2014 03:54:00 -0400
-In-Reply-To: <1402386847-23477-3-git-send-email-phil@dovecot.fi>
+	Tue, 10 Jun 2014 07:10:18 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org
-Cc: josh@joshtriplett.org, linux-sparse@vger.kernel.org, phil@dovecot.fi
+To: florenceevans@safrica.com
 
-Add some bitwise not tests.
+Hello my beloved in the Lord.
 
-v2: add the double-twiddle case, and made less cryptic.
+I am MRS. FLORENCE EVANS, from republic of Ireland, I am legally married to MR. JOHN EVANS, a South Africa citizen born brought up in Switzerland, I live in Switzerland with my husband for 32 years before we move down to south Africa in 1985 after my husband retirement in 1974, I am 71 years old by the grace of god, I am a new Christian convert, suffering from long time cancer of the breast. All indication from my doctor that my condition is really deteriorating and it is quite obvious that i wouldn't live more than two months. My dear husband was involved with the January 2000 Kenya airways plane crashed as you can see on the news line web site.
+http://news.bbc.co.uk/2/hi/africa/6627485.stm
+I have confident in you because i have prayed. I am willing to donate the sum of $20.5m U.S dollars, to the less privileged. May the grace of our lord be with you, P/s Get back to me on this email: mrs.florenceevans3@gmail.com
 
-Signed-off-by: Phil Carmody <phil@dovecot.fi>
----
- validation/dubious-bitwise-with-not.c | 38 ++++++++++++++++++++++++++++++++++-
- 1 file changed, 37 insertions(+), 1 deletion(-)
-
-diff --git a/validation/dubious-bitwise-with-not.c b/validation/dubious-bitwise-with-not.c
-index c48bcae..5e232b8 100644
---- a/validation/dubious-bitwise-with-not.c
-+++ b/validation/dubious-bitwise-with-not.c
-@@ -10,8 +10,34 @@ static unsigned int ok5  = !1 && !2;
- static unsigned int bad5 = !1 &  !2;
- static unsigned int ok6  = !1 || !2;
- static unsigned int bad6 = !1 |  !2;
-+static unsigned long long ok7a  = 0x100000001ull & ~1;
-+static unsigned long long ok7b  = 0x100000001ull & ~1ull;
-+static unsigned long long bad7  = 0x100000001ull & ~1u;
-+static unsigned long long ok8a  = ~1    & 0x100000001ull;
-+static unsigned long long ok8b  = ~1ull & 0x100000001ull;
-+static unsigned long long bad8  = ~1u   & 0x100000001ull;
-+static unsigned long long ok9a  = 0x100000001ull | ~1;
-+static unsigned long long ok9b  = 0x100000001ull | ~1ull;
-+static unsigned long long bad9  = 0x100000001ull | ~1u;
-+static unsigned long long ok10a = ~1    | 0x100000001ull;
-+static unsigned long long ok10b = ~1ull | 0x100000001ull;
-+static unsigned long long bad10 = ~1u   | 0x100000001ull;
-+static unsigned long long ok11a = 0x100000001ull + ~1;
-+static unsigned long long ok11b = 0x100000001ull + ~1ull;
-+static unsigned long long bad11 = 0x100000001ull + ~1u;
-+static unsigned long long ok12a = ~1    + 0x100000001ull;
-+static unsigned long long ok12b = ~1ull + 0x100000001ull;
-+static unsigned long long bad12 = ~1u   + 0x100000001ull;
-+static unsigned long long ok13a = 0x100000001ull - ~1;
-+static unsigned long long ok13b = 0x100000001ull - ~1ull;
-+static unsigned long long bad13 = 0x100000001ull - ~1u;
-+static unsigned long long ok14a = ~1    - 0x100000001ull;
-+static unsigned long long ok14b = ~1ull - 0x100000001ull;
-+static unsigned long long bad14 = ~1u   - 0x100000001ull;
-+static unsigned long long bad15 = ~0x100000001ull ^ ~1u;
-+static unsigned long long bad16 = ~1u   ^ ~0x100000001ull;
- /*
-- * check-name: Dubious bitwise operation on !x
-+ * check-name: Dubious bitwise operations with !x or ~x
-  *
-  * check-error-start
- dubious-bitwise-with-not.c:2:31: warning: dubious: !x & y
-@@ -20,5 +46,15 @@ dubious-bitwise-with-not.c:6:31: warning: dubious: x & !y
- dubious-bitwise-with-not.c:8:31: warning: dubious: x | !y
- dubious-bitwise-with-not.c:10:31: warning: dubious: !x & !y
- dubious-bitwise-with-not.c:12:31: warning: dubious: !x | !y
-+dubious-bitwise-with-not.c:15:50: warning: dubious zero-extended '~': x & ~y
-+dubious-bitwise-with-not.c:18:41: warning: dubious zero-extended '~': ~x & y
-+dubious-bitwise-with-not.c:21:50: warning: dubious zero-extended '~': x | ~y
-+dubious-bitwise-with-not.c:24:41: warning: dubious zero-extended '~': ~x | y
-+dubious-bitwise-with-not.c:27:50: warning: dubious zero-extended '~': x + ~y
-+dubious-bitwise-with-not.c:30:41: warning: dubious zero-extended '~': ~x + y
-+dubious-bitwise-with-not.c:33:50: warning: dubious zero-extended '~': x - ~y
-+dubious-bitwise-with-not.c:36:41: warning: dubious zero-extended '~': ~x - y
-+dubious-bitwise-with-not.c:37:51: warning: dubious zero-extended '~': x ^ ~y
-+dubious-bitwise-with-not.c:38:41: warning: dubious zero-extended '~': ~x ^ y
-  * check-error-end
-  */
--- 
-2.0.0
-
+Remain blessed,
+MRS. FLORENCE EVANS
