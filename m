@@ -1,25 +1,91 @@
-From: Birgit Kruse <bojono@arcor.de>
-Subject: P/s Get back to me on this email: mrs.florenceevans3@gmail.com
-Date: Tue, 10 Jun 2014 13:10:13 +0200 (CEST)
-Message-ID: <1634700411.132626.1402398613629.JavaMail.ngmail__49762.352256994$1402398639$gmane$org@webmail20.arcor-online.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Content-Transfer-Encoding: 7bit
+From: Jeff Layton <jlayton@poochiereds.net>
+Subject: [PATCH][RFC] err.h: silence sparse warning: dereference of noderef expression
+Date: Tue, 10 Jun 2014 17:38:49 -0400
+Message-ID: <1402436329-24750-1-git-send-email-jlayton@poochiereds.net>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-in-04.arcor-online.net ([151.189.21.44]:58681 "EHLO
-	mail-in-04.arcor-online.net" rhost-flags-OK-OK-OK-OK)
-	by vger.kernel.org with ESMTP id S1750923AbaFJLKS (ORCPT
+Received: from mail-ig0-f176.google.com ([209.85.213.176]:50347 "EHLO
+	mail-ig0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753119AbaFJVjB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 10 Jun 2014 07:10:18 -0400
+	Tue, 10 Jun 2014 17:39:01 -0400
+Received: by mail-ig0-f176.google.com with SMTP id a13so5666428igq.15
+        for <linux-sparse@vger.kernel.org>; Tue, 10 Jun 2014 14:39:00 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: florenceevans@safrica.com
+To: linux-kernel@vger.kernel.org
+Cc: dan.carpenter@oracle.com, linux-sparse@vger.kernel.org, Jeff Layton <jlayton@primarydata.com>
 
-Hello my beloved in the Lord.
+From: Jeff Layton <jlayton@primarydata.com>
 
-I am MRS. FLORENCE EVANS, from republic of Ireland, I am legally married to MR. JOHN EVANS, a South Africa citizen born brought up in Switzerland, I live in Switzerland with my husband for 32 years before we move down to south Africa in 1985 after my husband retirement in 1974, I am 71 years old by the grace of god, I am a new Christian convert, suffering from long time cancer of the breast. All indication from my doctor that my condition is really deteriorating and it is quite obvious that i wouldn't live more than two months. My dear husband was involved with the January 2000 Kenya airways plane crashed as you can see on the news line web site.
-http://news.bbc.co.uk/2/hi/africa/6627485.stm
-I have confident in you because i have prayed. I am willing to donate the sum of $20.5m U.S dollars, to the less privileged. May the grace of our lord be with you, P/s Get back to me on this email: mrs.florenceevans3@gmail.com
+Lately, when I do a make with C=1, I get *tons* of these warnings:
 
-Remain blessed,
-MRS. FLORENCE EVANS
+    include/linux/err.h:35:16: warning: dereference of noderef expression
+    include/linux/err.h:30:23: warning: dereference of noderef expression
+
+...so many that it's really driven down the signal to noise ratio. I've
+taken a look at what's driving these warnings and I really just don't
+get it. The pointers being passed in aren't being dereferenced as far
+as I can tell, so what is sparse complaining about?
+
+Even odder, just in playing around I've noticed that removing the
+__force directives seems to silence these warnings. This is really
+strange since all of the docs I see indicate that __force is supposed to
+help silence sparse warnings, not cause them.
+
+This patch just removes the __force directives on the err.h inlines and
+that silences the warnings for me. Dan originally added those in commit
+e7152b97f38f1 (err.h: IS_ERR() can accept __user pointers).
+
+I don't really consider this a serious proposal for inclusion, but
+rather just a starting point for discussion. What's the right way to fix
+this problem? Is this a bug in sparse?
+
+Signed-off-by: Jeff Layton <jlayton@primarydata.com>
+---
+ include/linux/err.h | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/include/linux/err.h b/include/linux/err.h
+index a729120644d5..284897f403b3 100644
+--- a/include/linux/err.h
++++ b/include/linux/err.h
+@@ -25,17 +25,17 @@ static inline void * __must_check ERR_PTR(long error)
+ 	return (void *) error;
+ }
+ 
+-static inline long __must_check PTR_ERR(__force const void *ptr)
++static inline long __must_check PTR_ERR(const void *ptr)
+ {
+ 	return (long) ptr;
+ }
+ 
+-static inline bool __must_check IS_ERR(__force const void *ptr)
++static inline bool __must_check IS_ERR(const void *ptr)
+ {
+ 	return IS_ERR_VALUE((unsigned long)ptr);
+ }
+ 
+-static inline bool __must_check IS_ERR_OR_NULL(__force const void *ptr)
++static inline bool __must_check IS_ERR_OR_NULL(const void *ptr)
+ {
+ 	return !ptr || IS_ERR_VALUE((unsigned long)ptr);
+ }
+@@ -47,13 +47,13 @@ static inline bool __must_check IS_ERR_OR_NULL(__force const void *ptr)
+  * Explicitly cast an error-valued pointer to another pointer type in such a
+  * way as to make it clear that's what's going on.
+  */
+-static inline void * __must_check ERR_CAST(__force const void *ptr)
++static inline void * __must_check ERR_CAST(const void *ptr)
+ {
+ 	/* cast away the const */
+ 	return (void *) ptr;
+ }
+ 
+-static inline int __must_check PTR_ERR_OR_ZERO(__force const void *ptr)
++static inline int __must_check PTR_ERR_OR_ZERO(const void *ptr)
+ {
+ 	if (IS_ERR(ptr))
+ 		return PTR_ERR(ptr);
+-- 
+1.9.3
+
