@@ -1,157 +1,72 @@
-From: josh@joshtriplett.org
-Subject: Re: [PATCH] sparse: fix bogus shift too big warning when rhs is a
- variable
-Date: Mon, 16 Jun 2014 12:25:34 -0700
-Message-ID: <20140616192534.GA26134@cloud>
-References: <20140616171006.GA20387@ravnborg.org>
+From: David Rientjes <rientjes@google.com>
+Subject: Re: [PATCH] lib.c: skip --param parameters
+Date: Mon, 16 Jun 2014 16:48:51 -0700 (PDT)
+Message-ID: <alpine.DEB.2.02.1406161647510.21018@chino.kir.corp.google.com>
+References: <1402915386-28210-1-git-send-email-andriy.shevchenko@linux.intel.com> <20140616160238.GA2746@jtriplet-mobl1>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:47140 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753256AbaFPTZk (ORCPT
+Received: from mail-ie0-f177.google.com ([209.85.223.177]:40503 "EHLO
+	mail-ie0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751678AbaFPXsx (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Jun 2014 15:25:40 -0400
-Content-Disposition: inline
-In-Reply-To: <20140616171006.GA20387@ravnborg.org>
+	Mon, 16 Jun 2014 19:48:53 -0400
+Received: by mail-ie0-f177.google.com with SMTP id tp5so5680665ieb.22
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Jun 2014 16:48:53 -0700 (PDT)
+In-Reply-To: <20140616160238.GA2746@jtriplet-mobl1>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Sam Ravnborg <sam@ravnborg.org>
-Cc: sparse <linux-sparse@vger.kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Mon, Jun 16, 2014 at 07:10:06PM +0200, Sam Ravnborg wrote:
-> From 3e742071e931669108f55b4aae2fb074d1c029cc Mon Sep 17 00:00:00 2001
-> From: Sam Ravnborg <sam@ravnborg.org>
-> Date: Mon, 16 Jun 2014 19:02:05 +0200
-> Subject: [PATCH] sparse: fix bogus shift too big warning when rhs is a
->  variable
-> 
-> sparse warned about "shift too big" if the rhs was a variable.
-> As sparse usually cannot deduct the value of a variable
-> silence these warnings.
-> 
-> Before this patch following code snippet would generate a warning:
-> 
-> static int doshift(int foo)
-> {
-> 	return 1 << foo;
-> }
-> 
-> sparse did not know the value of 'foo' so reported a warning.
-> Ignore the warning expect in the cases where the rhs of the shift
+On Mon, 16 Jun 2014, Josh Triplett wrote:
 
-s/expect/except/
-
-> is a constant.
+> On Mon, Jun 16, 2014 at 01:43:06PM +0300, Andy Shevchenko wrote:
+> > Very dumb patch to just skip --param allow-store-data-races=0 introduced in
+> > newest Linux kernel buildsystem.
+> > 
+> > Actually the option is present in few GCC versions and probably should be
+> > handled properly.
+> > 
+> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 > 
-> Include a few simple tests for left-shift and right-shift.
+> As far as I can tell, this seems to only handle "--param arg"; however,
+> according to the thread on LKML, GCC handles --param=arg as well.  Could
+> you please handle that variant too?
 > 
-> Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
-> Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+This is only from linux-next and not Linus's tree, correct?
 
-Thanks for fixing this!
+Is this still necessary since the "./Makefile: tell gcc optimizer to never 
+introduce new data races" patch has been removed from -mm due to failures?
 
-> ---
->  expand.c                 |  2 +-
->  validation/left-shift.c  | 31 +++++++++++++++++++++++++++++++
->  validation/right-shift.c | 31 +++++++++++++++++++++++++++++++
->  3 files changed, 63 insertions(+), 1 deletion(-)
->  create mode 100644 validation/left-shift.c
->  create mode 100644 validation/right-shift.c
-> 
-> diff --git a/expand.c b/expand.c
-> index 0f6720c..ce955d3 100644
-> --- a/expand.c
-> +++ b/expand.c
-> @@ -187,7 +187,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
->  		return 0;
->  	r = right->value;
->  	if (expr->op == SPECIAL_LEFTSHIFT || expr->op == SPECIAL_RIGHTSHIFT) {
-> -		if (r >= ctype->bit_size) {
-> +		if (right->flags & Int_const_expr && r >= ctype->bit_size) {
->  			if (conservative)
->  				return 0;
->  			r = check_shift_count(expr, ctype, r);
-> diff --git a/validation/left-shift.c b/validation/left-shift.c
-> new file mode 100644
-> index 0000000..e8d929b
-> --- /dev/null
-> +++ b/validation/left-shift.c
-> @@ -0,0 +1,31 @@
-> +static unsigned int leftshift1(unsigned int value, unsigned int shift)
-> +{
-> +        return 1 << 1000;
-> +}
-> +
-> +static unsigned int leftshift2(unsigned int value, unsigned int shift)
-> +{
-> +        return value << 1000;
-> +}
-> +
-> +static unsigned int leftshift3(unsigned int value, unsigned int shift)
-> +{
-> +
-> +        return 1 << value;
-> +}
-> +
-> +static unsigned int leftshift4(unsigned int value, unsigned int shift)
-> +{
-> +
-> +        return value << shift;
-> +}
-> +
-> +/*
-> + * check-name: Left shift - shift too big
-> + *
-> + * check-error-start
-> +left-shift.c:3:18: warning: shift too big (1000) for type int
-> +left-shift.c:8:22: warning: shift too big (1000) for type unsigned int
-> + * check-error-end
-> + */
-> +
-> diff --git a/validation/right-shift.c b/validation/right-shift.c
-> new file mode 100644
-> index 0000000..9be6006
-> --- /dev/null
-> +++ b/validation/right-shift.c
-> @@ -0,0 +1,31 @@
-> +static unsigned int rightshift1(unsigned int value, unsigned int shift)
-> +{
-> +        return 1 >> 1000;
-> +}
-> +
-> +static unsigned int rightshift2(unsigned int value, unsigned int shift)
-> +{
-> +        return value >> 1000;
-> +}
-> +
-> +static unsigned int rightshift3(unsigned int value, unsigned int shift)
-> +{
-> +
-> +        return 1 >> value;
-> +}
-> +
-> +static unsigned int rightshift4(unsigned int value, unsigned int shift)
-> +{
-> +
-> +        return value >> shift;
-> +}
-> +
-> +/*
-> + * check-name: Right shift - shift too big
-> + *
-> + * check-error-start
-> +right-shift.c:3:18: warning: shift too big (1000) for type int
-> +right-shift.c:8:22: warning: shift too big (1000) for type unsigned int
-> + * check-error-end
-> + */
-> +
-> -- 
-> 1.9.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+See http://marc.info/?l=linux-mm-commits&m=140295825623471
+
+> >  lib.c | 7 +++++++
+> >  1 file changed, 7 insertions(+)
+> > 
+> > diff --git a/lib.c b/lib.c
+> > index bf3e91c..e56037b 100644
+> > --- a/lib.c
+> > +++ b/lib.c
+> > @@ -673,6 +673,12 @@ static char **handle_version(char *arg, char **next)
+> >  	exit(0);
+> >  }
+> >  
+> > +static char **handle_param(char *arg, char **next)
+> > +{
+> > +	++next;
+> > +	return ++next;
+> > +}
+> > +
+> >  struct switches {
+> >  	const char *name;
+> >  	char **(*fn)(char *, char **);
+> > @@ -681,6 +687,7 @@ struct switches {
+> >  static char **handle_long_options(char *arg, char **next)
+> >  {
+> >  	static struct switches cmd[] = {
+> > +		{ "param", handle_param },
+> >  		{ "version", handle_version },
+> >  		{ NULL, NULL }
+> >  	};
