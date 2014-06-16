@@ -1,55 +1,40 @@
-From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH] Staging/comedi: Fixes static analysis warning raised by
- sparse
-Date: Mon, 16 Jun 2014 10:06:54 +0200
-Message-ID: <20140616080654.GA2782@ravnborg.org>
-References: <53965E53.5080504@gmail.com> <20140610054741.GE5500@mwanda>
- <DC148C5AA1CEBA4E87973D432B1C2D8825E9AE6A@P3PWEX4MB008.ex4.secureserver.net>
- <20140611065612.GQ5015@mwanda>
- <DC148C5AA1CEBA4E87973D432B1C2D8825E9CBD6@P3PWEX4MB008.ex4.secureserver.net>
- <20140611212425.GW5015@mwanda> <20140611214529.GB16940@cloud>
- <20140615193227.GA24515@ravnborg.org>
- <20140616074019.GL5015@mwanda>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH] tell gcc optimizer to never introduce new data races
+Date: Mon, 16 Jun 2014 13:29:27 +0300
+Message-ID: <20140616102927.GA2994@mwanda>
+References: <alpine.LNX.2.00.1406101517300.9378@pobox.suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <gcc-return-183751-gcg-devel-2=m.gmane.org@gcc.gnu.org>
+List-Unsubscribe: <mailto:gcc-unsubscribe-gcg-devel-2=m.gmane.org@gcc.gnu.org>
+List-Archive: <http://gcc.gnu.org/ml/gcc/>
+List-Post: <mailto:gcc@gcc.gnu.org>
+List-Help: <http://gcc.gnu.org/ml/>
+Sender: gcc-owner@gcc.gnu.org
 Content-Disposition: inline
-In-Reply-To: <20140616074019.GL5015@mwanda>
-List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
-List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
-List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
-List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
-List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
- <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
-Errors-To: driverdev-devel-bounces@linuxdriverproject.org
-Sender: driverdev-devel-bounces@linuxdriverproject.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, linux-sparse@vger.kernel.org, josh@joshtriplett.org, "Marcos A. Di Pietro" <marcosadp@gmail.com>
+In-Reply-To: <alpine.LNX.2.00.1406101517300.9378@pobox.suse.cz>
+To: Jiri Kosina <jkosina@suse.cz>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Peter Zijlstra <peterz@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, Martin Jambor <mjambor@suse.cz>, Petr Mladek <pmladek@suse.cz>, linux-kernel@vger.kernel.org, gcc@gcc.gnu.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Jun 16, 2014 at 10:40:19AM +0300, Dan Carpenter wrote:
-> On Sun, Jun 15, 2014 at 09:32:27PM +0200, Sam Ravnborg wrote:
-> > diff --git a/expand.c b/expand.c
-> > index 0f6720c..4a96de4 100644
-> > --- a/expand.c
-> > +++ b/expand.c
-> > @@ -187,7 +187,7 @@ static int simplify_int_binop(struct expression *expr, struct symbol *ctype)
-> >  		return 0;
-> >  	r = right->value;
-> >  	if (expr->op == SPECIAL_LEFTSHIFT || expr->op == SPECIAL_RIGHTSHIFT) {
-> > -		if (r >= ctype->bit_size) {
-> > +		if (expr->flags & Int_const_expr && r >= ctype->bit_size) {
-> 
-> Thanks!  I had no idea how to start writing a fix for this, but the test
-> should be:
-> 		if (expr->right->flags & Int_const_expr
-> 
-> Otherwise both sides of the shift have to be const.
-Thanks - will fix.
+Adding "--param allow-store-data-races=0" to the GCC options for the
+kernel breaks C=1 because Sparse isn't expecting a GCC option with that
+format.
 
-I will update the test case to check for this, and
-then send a proper patch.
+It thinks allow-store-data-races=0 is the name of the file we are trying
+to test.  Try use Sparse on linux-next to see the problem.
 
-	Sam
+$ make C=2 mm/slab_common.o
+  CHK     include/config/kernel.release
+  CHK     include/generated/uapi/linux/version.h
+  CHK     include/generated/utsrelease.h
+  CALL    scripts/checksyscalls.sh
+  CHECK   scripts/mod/empty.c
+No such file: allow-store-data-races=0
+make[2]: *** [scripts/mod/empty.o] Error 1
+make[1]: *** [scripts/mod] Error 2
+make: *** [scripts] Error 2
+$
+
+regards,
+dan carpenter
