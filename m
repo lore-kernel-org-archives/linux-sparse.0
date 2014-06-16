@@ -1,48 +1,34 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH] lib.c: skip --param parameters
-Date: Mon, 16 Jun 2014 13:43:06 +0300
-Message-ID: <1402915386-28210-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+From: Andreas Schwab <schwab@suse.de>
+Subject: Re: [PATCH] tell gcc optimizer to never introduce new data races
+Date: Mon, 16 Jun 2014 12:52:10 +0200
+Message-ID: <mvmsin51605.fsf@hawking.suse.de>
+References: <alpine.LNX.2.00.1406101517300.9378@pobox.suse.cz>
+	<20140616102927.GA2994@mwanda>
+Mime-Version: 1.0
+Content-Type: text/plain
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from cantor2.suse.de ([195.135.220.15]:55471 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751017AbaFPKwN (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 16 Jun 2014 06:52:13 -0400
+In-Reply-To: <20140616102927.GA2994@mwanda> (Dan Carpenter's message of "Mon,
+	16 Jun 2014 13:29:27 +0300")
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Jiri Kosina <jkosina@suse.cz>, Linus Torvalds <torvalds@linux-foundation.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Peter Zijlstra <peterz@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, Martin Jambor <mjambor@suse.cz>, Petr Mladek <pmladek@suse.cz>, linux-kernel@vger.kernel.org, gcc@gcc.gnu.org, linux-sparse@vger.kernel.org
 
-Very dumb patch to just skip --param allow-store-data-races=0 introduced in
-newest Linux kernel buildsystem.
+Dan Carpenter <dan.carpenter@oracle.com> writes:
 
-Actually the option is present in few GCC versions and probably should be
-handled properly.
+> Adding "--param allow-store-data-races=0" to the GCC options for the
+> kernel breaks C=1 because Sparse isn't expecting a GCC option with that
+> format.
 
-Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
----
- lib.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+Please try --param=allow-store-data-races=0 instead.
 
-diff --git a/lib.c b/lib.c
-index bf3e91c..e56037b 100644
---- a/lib.c
-+++ b/lib.c
-@@ -673,6 +673,12 @@ static char **handle_version(char *arg, char **next)
- 	exit(0);
- }
- 
-+static char **handle_param(char *arg, char **next)
-+{
-+	++next;
-+	return ++next;
-+}
-+
- struct switches {
- 	const char *name;
- 	char **(*fn)(char *, char **);
-@@ -681,6 +687,7 @@ struct switches {
- static char **handle_long_options(char *arg, char **next)
- {
- 	static struct switches cmd[] = {
-+		{ "param", handle_param },
- 		{ "version", handle_version },
- 		{ NULL, NULL }
- 	};
+Andreas.
+
 -- 
-2.0.0
+Andreas Schwab, SUSE Labs, schwab@suse.de
+GPG Key fingerprint = 0196 BAD8 1CE9 1970 F4BE  1748 E4D4 88E3 0EEA B9D7
+"And now for something completely different."
