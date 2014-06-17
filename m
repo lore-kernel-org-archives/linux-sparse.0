@@ -1,50 +1,214 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] lib.c: skip --param parameters
-Date: Mon, 16 Jun 2014 19:36:48 -0700
-Message-ID: <20140617023648.GA5961@thin>
-References: <1402915386-28210-1-git-send-email-andriy.shevchenko@linux.intel.com>
- <20140616160238.GA2746@jtriplet-mobl1>
- <alpine.DEB.2.02.1406161647510.21018@chino.kir.corp.google.com>
+From: Jiri Kosina <jkosina@suse.cz>
+Subject: Re: [PATCH] tell gcc optimizer to never introduce new data races
+Date: Tue, 17 Jun 2014 09:58:07 +0200 (CEST)
+Message-ID: <alpine.LNX.2.00.1406170954390.1321@pobox.suse.cz>
+References: <alpine.LNX.2.00.1406101517300.9378@pobox.suse.cz> <20140616102927.GA2994@mwanda>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:35043 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753719AbaFQCg4 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 16 Jun 2014 22:36:56 -0400
-Content-Disposition: inline
-In-Reply-To: <alpine.DEB.2.02.1406161647510.21018@chino.kir.corp.google.com>
+Received: from cantor2.suse.de ([195.135.220.15]:44379 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752550AbaFQH6K (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 17 Jun 2014 03:58:10 -0400
+In-Reply-To: <20140616102927.GA2994@mwanda>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Rientjes <rientjes@google.com>
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Peter Zijlstra <peterz@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, Martin Jambor <mjambor@suse.cz>, Petr Mladek <pmladek@suse.cz>, linux-kernel@vger.kernel.org, gcc@gcc.gnu.org, linux-sparse@vger.kernel.org
 
-On Mon, Jun 16, 2014 at 04:48:51PM -0700, David Rientjes wrote:
-> On Mon, 16 Jun 2014, Josh Triplett wrote:
-> 
-> > On Mon, Jun 16, 2014 at 01:43:06PM +0300, Andy Shevchenko wrote:
-> > > Very dumb patch to just skip --param allow-store-data-races=0 introduced in
-> > > newest Linux kernel buildsystem.
-> > > 
-> > > Actually the option is present in few GCC versions and probably should be
-> > > handled properly.
-> > > 
-> > > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> > 
-> > As far as I can tell, this seems to only handle "--param arg"; however,
-> > according to the thread on LKML, GCC handles --param=arg as well.  Could
-> > you please handle that variant too?
-> > 
-> 
-> This is only from linux-next and not Linus's tree, correct?
-> 
-> Is this still necessary since the "./Makefile: tell gcc optimizer to never 
-> introduce new data races" patch has been removed from -mm due to failures?
-> 
-> See http://marc.info/?l=linux-mm-commits&m=140295825623471
+On Mon, 16 Jun 2014, Dan Carpenter wrote:
 
-I'd still like to see Sparse not choke on the option, in either form,
-whether the kernel ends up using it or not.
+> Adding "--param allow-store-data-races=0" to the GCC options for the
+> kernel breaks C=1 because Sparse isn't expecting a GCC option with that
+> format.
+> 
+> It thinks allow-store-data-races=0 is the name of the file we are trying
+> to test.  Try use Sparse on linux-next to see the problem.
 
-- Josh Triplett
+Alright, no word from gcc folks, so let's hope the undocumented format of 
+the parameter works better ... sigh.
+
+Andrew, please use the updated one below.
+
+
+
+From: Jiri Kosina <jkosina@suse.cz>
+Subject: [PATCH] ./Makefile: tell gcc optimizer to never introduce new data races
+
+We have been chasing a memory corruption bug, which turned out to be
+caused by very old gcc (4.3.4), which happily turned conditional load into
+a non-conditional one, and that broke correctness (the condition was met
+only if lock was held) and corrupted memory.
+
+This particular problem with that particular code did not happen when
+never gccs were used. I've brought this up with our gcc folks, as I wanted
+to make sure that this can't really happen again, and it turns out it
+actually can.
+
+Quoting Martin Jambor <mjambor@suse.cz>:
+
+====
+More current GCCs are more careful when it comes to replacing a
+conditional load with a non-conditional one, most notably they check
+that a store happens in each iteration of _a_ loop but they assume
+loops are executed.  They also perform a simple check whether the
+store cannot trap which currently passes only for non-const
+variables.  A simple testcase demonstrating it on an x86_64 is for
+example the following:
+
+$ cat cond_store.c
+
+int g_1 = 1;
+
+int g_2[1024] __attribute__((section ("safe_section"), aligned (4096)));
+
+int c = 4;
+
+int __attribute__ ((noinline))
+foo (void)
+{
+  int l;
+  for (l = 0; (l != 4); l++) {
+    if (g_1)
+      return l;
+    for (g_2[0] = 0; (g_2[0] >= 26); ++g_2[0])
+      ;
+  }
+  return 2;
+}
+
+int main (int argc, char* argv[])
+{
+  if (mprotect (g_2, sizeof(g_2), PROT_READ) == -1)
+    {
+      int e = errno;
+      error (e, e, "mprotect error %i", e);
+    }
+  foo ();
+  __builtin_printf("OK\n");
+  return 0;
+}
+/* EOF */
+$ ~/gcc/trunk/inst/bin/gcc cond_store.c -O2 --param allow-store-data-races=0
+$ ./a.out
+OK
+$ ~/gcc/trunk/inst/bin/gcc cond_store.c -O2 --param allow-store-data-races=1
+$ ./a.out
+Segmentation fault
+
+The testcase fails the same at least with 4.9, 4.8 and 4.7.  Therefore
+I would suggest building kernels with this parameter set to zero. I
+also agree with Jikos that the default should be changed for -O2.  I
+have run most of the SPEC 2k6 CPU benchmarks (gamess and dealII
+failed, at -O2, not sure why) compiled with and without this option
+and did not see any real difference between respective run-times.
+====
+
+Hopefully the default will be changed in newer gccs, but let's force
+it for kernel builds so that we are on a safe side even when older
+gcc are used.
+
+The code in question was out-of-tree printk-in-NMI (yeah, surprise
+suprise, once again) patch written by Petr Mladek, let me quote his
+comment from our internal bugzilla:
+
+===
+I have spent few days investigating inconsistent state of kernel ring buffer.
+It went out that it was caused by speculative store generated by
+gcc-4.3.4.
+
+The problem is in assembly generated for make_free_space(). The functions is
+called the following way:
+
++ vprintk_emit();
+    + log = MAIN_LOG; // with logbuf_lock
+       or
+       log = NMI_LOG; // with nmi_logbuf_lock
+       cont_add(log, ...);
+        + cont_flush(log, ...);
+            + log_store(log, ...);
+                  + log_make_free_space(log, ...);
+
+If called with log = NMI_LOG then only nmi_log_* global variables are safe to
+modify but the generated code does store also into (main_)log_* global
+variables:
+
+<log_make_free_space>:
+       55                      push   %rbp
+       89 f6                   mov    %esi,%esi
+
+       48 8b 05 03 99 51 01    mov    0x1519903(%rip),%rax       # ffffffff82620868 <nmi_log_next_id>
+       44 8b 1d ec 98 51 01    mov    0x15198ec(%rip),%r11d      # ffffffff82620858 <log_next_idx>
+       8b 35 36 60 14 01       mov    0x1146036(%rip),%esi       # ffffffff8224cfa8 <log_buf_len>
+       44 8b 35 33 60 14 01    mov    0x1146033(%rip),%r14d      # ffffffff8224cfac <nmi_log_buf_len>
+       4c 8b 2d d0 98 51 01    mov    0x15198d0(%rip),%r13       # ffffffff82620850 <log_next_seq>
+       4c 8b 25 11 61 14 01    mov    0x1146111(%rip),%r12       # ffffffff8224d098 <log_buf>
+       49 89 c2                mov    %rax,%r10
+       48 21 c2                and    %rax,%rdx
+       48 8b 1d 0c 99 55 01    mov    0x155990c(%rip),%rbx       # ffffffff826608a0 <nmi_log_buf>
+       49 c1 ea 20             shr    $0x20,%r10
+       48 89 55 d0             mov    %rdx,-0x30(%rbp)
+       44 29 de                sub    %r11d,%esi
+       45 29 d6                sub    %r10d,%r14d
+       4c 8b 0d 97 98 51 01    mov    0x1519897(%rip),%r9	# ffffffff82620840 <log_first_seq>
+       eb 7e                   jmp    ffffffff81107029	<log_make_free_space+0xe9>
+[...]
+       85 ff                   test   %edi,%edi                  # edi = 1 for NMI_LOG
+       4c 89 e8                mov    %r13,%rax
+       4c 89 ca                mov    %r9,%rdx
+       74 0a                   je     ffffffff8110703d	<log_make_free_space+0xfd>
+       8b 15 27 98 51 01       mov    0x1519827(%rip),%edx       # ffffffff82620860 <nmi_log_first_id>
+       48 8b 45 d0             mov    -0x30(%rbp),%rax
+       48 39 c2                cmp    %rax,%rdx                  # end of loop
+       0f 84 da 00 00 00       je     ffffffff81107120 <log_make_free_space+0x1e0>
+[...]
+       85 ff                   test   %edi,%edi                  # edi = 1 for NMI_LOG
+       4c 89 0d 17 97 51 01    mov    %r9,0x1519717(%rip)        # ffffffff82620840 <log_first_seq>
+                               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+                               KABOOOM
+       74 35                   je     ffffffff81107160		 <log_make_free_space+0x220>
+
+It stores log_first_seq when edi == NMI_LOG. This instructions are used also
+when edi == MAIN_LOG but the store is done speculatively before the condition
+is decided.  It is unsafe because we do not have "logbuf_lock" in NMI context
+and some other process migh modify "log_first_seq" in parallel.
+===
+
+I believe that the best course of action is both
+
+- building kernel (and anything multi-threaded, I guess) with that
+  optimization turned off
+- persuade gcc folks to change the default for future releases
+
+Signed-off-by: Jiri Kosina <jkosina@suse.cz>
+Cc: Martin Jambor <mjambor@suse.cz>
+Cc: Petr Mladek <pmladek@suse.cz>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Marek Polacek <polacek@redhat.com>
+Cc: Jakub Jelinek <jakub@redhat.com>
+Cc: Steven Noonan <steven@uplinklabs.net>
+Cc: Richard Biener <richard.guenther@gmail.com>
+---
+ Makefile | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 00a933b..255e56d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -587,6 +587,9 @@ endif
+ 
+ include $(srctree)/arch/$(SRCARCH)/Makefile
+ 
++# Tell gcc to never replace conditional load with a non-conditional one
++KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
++
+ ifdef CONFIG_READABLE_ASM
+ # Disable optimizations that make assembler listings hard to read.
+ # reorder blocks reorders the control in the function
+
+-- 
+Jiri Kosina
+SUSE Labs
