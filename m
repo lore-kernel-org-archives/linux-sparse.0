@@ -1,73 +1,68 @@
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v2 2/2] lib.c: skip --param parameters
-Date: Tue, 17 Jun 2014 12:11:46 +0300
-Message-ID: <1402996306-6811-3-git-send-email-andriy.shevchenko@linux.intel.com>
+Subject: [PATCH v2 1/2] lib.c: introduce split_value_from_arg helper
+Date: Tue, 17 Jun 2014 12:11:45 +0300
+Message-ID: <1402996306-6811-2-git-send-email-andriy.shevchenko@linux.intel.com>
 References: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:42546 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932199AbaFQJLw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jun 2014 05:11:52 -0400
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
 To: Josh Triplett <josh@joshtriplett.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+List-Id: linux-sparse@vger.kernel.org
 
-Very dumb patch to just skip --param allow-store-data-races=0 introduced in
-newer GCC versions.
+The function tries to split a key / value from the given argument where
+delimiter can be either ' ' (space) or '=' (equal sign).
 
-Without this patch sparse recognizes parameter of the --param option as a file
-name which obviously couldn't be found.
-
-The patch for easy implementation's sake slightly changed behaviour of
---version. Instead of exact keyword it will recognize anything starting with
---version as a correct option.
+It will be useful later as well.
 
 Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 ---
- lib.c | 15 ++++++++++++++-
- 1 file changed, 14 insertions(+), 1 deletion(-)
+ lib.c | 23 ++++++++++++++---------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
 
 diff --git a/lib.c b/lib.c
-index 4e5a846..d5b94c3 100644
+index bf3e91c..4e5a846 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -678,6 +678,18 @@ static char **handle_version(char *arg, char **next)
- 	exit(0);
+@@ -275,14 +275,8 @@ void add_pre_buffer(const char *fmt, ...)
+ 	pre_buffer_end = end;
  }
  
-+static char **handle_param(char *arg, char **next)
-+{
-+	const char *value = NULL;
-+
-+	/* For now just skip any '--param=*' or '--param *' */
-+	value = split_value_from_arg(arg, value);
-+	if (!value)
-+		++next;
-+
-+	return ++next;
+-static char **handle_switch_D(char *arg, char **next)
++static const char *split_value_from_arg(char *arg, const char *def)
+ {
+-	const char *name = arg + 1;
+-	const char *value = "1";
+-
+-	if (!*name || isspace(*name))
+-		die("argument to `-D' is missing");
+-
+ 	for (;;) {
+ 		char c;
+ 		c = *++arg;
+@@ -290,10 +284,21 @@ static char **handle_switch_D(char *arg, char **next)
+ 			break;
+ 		if (isspace((unsigned char)c) || c == '=') {
+ 			*arg = '\0';
+-			value = arg + 1;
+-			break;
++			return arg + 1;
+ 		}
+ 	}
++	return def;
 +}
 +
- struct switches {
- 	const char *name;
- 	char **(*fn)(char *, char **);
-@@ -686,13 +698,14 @@ struct switches {
- static char **handle_long_options(char *arg, char **next)
- {
- 	static struct switches cmd[] = {
-+		{ "param", handle_param },
- 		{ "version", handle_version },
- 		{ NULL, NULL }
- 	};
- 	struct switches *s = cmd;
- 
- 	while (s->name) {
--		if (!strcmp(s->name, arg))
-+		if (!strncmp(arg, s->name, strlen(s->name)))
- 			return s->fn(arg, next);
- 		s++;
- 	}
++static char **handle_switch_D(char *arg, char **next)
++{
++	const char *name = arg + 1;
++	const char *value = "1";
++
++	if (!*name || isspace(*name))
++		die("argument to `-D' is missing");
++
++	value = split_value_from_arg(arg, value);
+ 	add_pre_buffer("#define %s %s\n", name, value);
+ 	return next;
+ }
 -- 
 2.0.0
-
