@@ -1,78 +1,73 @@
 From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: Re: [PATCH] lib.c: skip --param parameters
-Date: Tue, 17 Jun 2014 11:15:58 +0300
-Message-ID: <1402992958.3796.69.camel@smile.fi.intel.com>
-References: <1402915386-28210-1-git-send-email-andriy.shevchenko@linux.intel.com>
-	 <20140616160238.GA2746@jtriplet-mobl1>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v2 2/2] lib.c: skip --param parameters
+Date: Tue, 17 Jun 2014 12:11:46 +0300
+Message-ID: <1402996306-6811-3-git-send-email-andriy.shevchenko@linux.intel.com>
+References: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:36218 "EHLO mga09.intel.com"
+Received: from mga11.intel.com ([192.55.52.93]:42546 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752845AbaFQIQl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jun 2014 04:16:41 -0400
-In-Reply-To: <20140616160238.GA2746@jtriplet-mobl1>
+	id S932199AbaFQJLw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 17 Jun 2014 05:11:52 -0400
+In-Reply-To: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
 
-On Mon, 2014-06-16 at 09:02 -0700, Josh Triplett wrote:
-> On Mon, Jun 16, 2014 at 01:43:06PM +0300, Andy Shevchenko wrote:
-> > Very dumb patch to just skip --param allow-store-data-races=0 introduced in
-> > newest Linux kernel buildsystem.
-> > 
-> > Actually the option is present in few GCC versions and probably should be
-> > handled properly.
-> > 
-> > Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-> 
-> As far as I can tell, this seems to only handle "--param arg"; however,
-> according to the thread on LKML, GCC handles --param=arg as well.  Could
-> you please handle that variant too?
+Very dumb patch to just skip --param allow-store-data-races=0 introduced in
+newer GCC versions.
 
-Yes, I will in v2.
+Without this patch sparse recognizes parameter of the --param option as a file
+name which obviously couldn't be found.
 
-> 
-> >  lib.c | 7 +++++++
-> >  1 file changed, 7 insertions(+)
-> > 
-> > diff --git a/lib.c b/lib.c
-> > index bf3e91c..e56037b 100644
-> > --- a/lib.c
-> > +++ b/lib.c
-> > @@ -673,6 +673,12 @@ static char **handle_version(char *arg, char **next)
-> >  	exit(0);
-> >  }
-> >  
-> > +static char **handle_param(char *arg, char **next)
-> > +{
-> > +	++next;
-> > +	return ++next;
-> > +}
-> > +
-> >  struct switches {
-> >  	const char *name;
-> >  	char **(*fn)(char *, char **);
-> > @@ -681,6 +687,7 @@ struct switches {
-> >  static char **handle_long_options(char *arg, char **next)
-> >  {
-> >  	static struct switches cmd[] = {
-> > +		{ "param", handle_param },
-> >  		{ "version", handle_version },
-> >  		{ NULL, NULL }
-> >  	};
-> > -- 
-> > 2.0.0
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The patch for easy implementation's sake slightly changed behaviour of
+--version. Instead of exact keyword it will recognize anything starting with
+--version as a correct option.
 
+Signed-off-by: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+---
+ lib.c | 15 ++++++++++++++-
+ 1 file changed, 14 insertions(+), 1 deletion(-)
 
+diff --git a/lib.c b/lib.c
+index 4e5a846..d5b94c3 100644
+--- a/lib.c
++++ b/lib.c
+@@ -678,6 +678,18 @@ static char **handle_version(char *arg, char **next)
+ 	exit(0);
+ }
+ 
++static char **handle_param(char *arg, char **next)
++{
++	const char *value = NULL;
++
++	/* For now just skip any '--param=*' or '--param *' */
++	value = split_value_from_arg(arg, value);
++	if (!value)
++		++next;
++
++	return ++next;
++}
++
+ struct switches {
+ 	const char *name;
+ 	char **(*fn)(char *, char **);
+@@ -686,13 +698,14 @@ struct switches {
+ static char **handle_long_options(char *arg, char **next)
+ {
+ 	static struct switches cmd[] = {
++		{ "param", handle_param },
+ 		{ "version", handle_version },
+ 		{ NULL, NULL }
+ 	};
+ 	struct switches *s = cmd;
+ 
+ 	while (s->name) {
+-		if (!strcmp(s->name, arg))
++		if (!strncmp(arg, s->name, strlen(s->name)))
+ 			return s->fn(arg, next);
+ 		s++;
+ 	}
 -- 
-Andy Shevchenko <andriy.shevchenko@intel.com>
-Intel Finland Oy
+2.0.0
 
