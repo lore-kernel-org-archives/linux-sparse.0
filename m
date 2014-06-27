@@ -1,30 +1,33 @@
-From: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
-Subject: [PATCH v2 0/2] fix for --param GCC's command line option
-Date: Tue, 17 Jun 2014 12:11:44 +0300
-Message-ID: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
+From: Phil Carmody <phil@dovecot.fi>
+Subject: Re: [PATCHv2 0/3] catch non-sign-extended '~' brainos
+Date: Fri, 27 Jun 2014 14:19:00 +0300
+Message-ID: <20140627111900.GA19158@phil.dovecot.net>
+References: <1402315082-14102-1-git-send-email-phil@dovecot.fi>
+ <1402386847-23477-1-git-send-email-phil@dovecot.fi>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:1279 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932459AbaFQJL7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 17 Jun 2014 05:11:59 -0400
+Received: from wursti.dovecot.fi ([87.106.245.223]:41580 "EHLO
+	wursti.dovecot.fi" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753386AbaF0LS1 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 27 Jun 2014 07:18:27 -0400
+Content-Disposition: inline
+In-Reply-To: <1402386847-23477-1-git-send-email-phil@dovecot.fi>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
-Cc: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+To: sparse@chrisli.org
+Cc: josh@joshtriplett.org, linux-sparse@vger.kernel.org
 
-There is a dumb fix to avoid --param option and make sparse survive.
+On Tue, Jun 10, 2014 at 10:54:04AM +0300, Phil Carmody wrote:
+> Bitwise-not is often used to create masks. Unfortunately implicit conversions
+> to longer types may leave the recipient with fewer set bit than he expected,
+> if he started with an unsigned type. It's nice to warn that such constructs
+> are dubious.
+> 
+> v2: cleaned up as per recommendations from Josh Triplett.
 
-Since v1:
- - added patch 1/2
- - handle both --param=* and --param *
+Any comments on these? 
 
-Andy Shevchenko (2):
-  lib.c: introduce split_value_from_arg helper
-  lib.c: skip --param parameters
-
- lib.c | 38 ++++++++++++++++++++++++++++----------
- 1 file changed, 28 insertions(+), 10 deletions(-)
-
--- 
-2.0.0
-
+Cheers,
+Phil 
