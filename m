@@ -1,66 +1,79 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Staging/comedi: Fixes static analysis warning raised by sparse
-Date: Sat, 28 Jun 2014 20:09:25 -0700
-Message-ID: <CANeU7QkKnh-Xq4CVAkNFs54KieNrDqD93uuWijCOYwj0iorHvg@mail.gmail.com>
-References: <53965E53.5080504@gmail.com>
-	<20140610054741.GE5500@mwanda>
-	<DC148C5AA1CEBA4E87973D432B1C2D8825E9AE6A@P3PWEX4MB008.ex4.secureserver.net>
-	<20140611065612.GQ5015@mwanda>
-	<DC148C5AA1CEBA4E87973D432B1C2D8825E9CBD6@P3PWEX4MB008.ex4.secureserver.net>
-	<20140611212425.GW5015@mwanda>
-	<20140611214529.GB16940@cloud>
-	<CANeU7Qki9Fg=Vz8gryT1bL+BMnjuvWZTH7uNvyk-HjdSPsiiyg@mail.gmail.com>
-	<20140628192020.GA2501@thin>
+Subject: Re: [PATCH v2 2/2] lib.c: skip --param parameters
+Date: Sun, 29 Jun 2014 00:19:10 -0700
+Message-ID: <CANeU7Q=FUTd4XTrQeeFGaSqp7eriZS3egAOqDK--OC-kaWyZuw@mail.gmail.com>
+References: <1402996306-6811-1-git-send-email-andriy.shevchenko@linux.intel.com>
+	<1402996306-6811-3-git-send-email-andriy.shevchenko@linux.intel.com>
+	<CANeU7QnLad1f4KkLpTGSWB8eD8_La-tACim6rR7DLQ=hggwhOQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: multipart/mixed; boundary=001a1132f770dd479904fcf45b40
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f169.google.com ([209.85.216.169]:48823 "EHLO
-	mail-qc0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751106AbaF2DJ0 (ORCPT
+Received: from mail-qc0-f179.google.com ([209.85.216.179]:41907 "EHLO
+	mail-qc0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752487AbaF2HTL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 28 Jun 2014 23:09:26 -0400
-Received: by mail-qc0-f169.google.com with SMTP id c9so5915079qcz.28
-        for <linux-sparse@vger.kernel.org>; Sat, 28 Jun 2014 20:09:25 -0700 (PDT)
-In-Reply-To: <20140628192020.GA2501@thin>
+	Sun, 29 Jun 2014 03:19:11 -0400
+In-Reply-To: <CANeU7QnLad1f4KkLpTGSWB8eD8_La-tACim6rR7DLQ=hggwhOQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Hartley Sweeten <HartleyS@visionengravers.com>, "Marcos A. Di Pietro" <marcosadp@gmail.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Andy Shevchenko <andriy.shevchenko@linux.intel.com>
+Cc: Josh Triplett <josh@joshtriplett.org>, linux-kernel <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Jun 28, 2014 at 12:20 PM, Josh Triplett <josh@joshtriplett.org> wrote:
-> Except that "filter" has an "int channel" (signed), so it can
-> successfully test "channel < 0" and return early; it'll never call
-> ni_stc_dma_channel_select_bitfield(channel) with a negative number.
->
-> I do agree that this code should sort out the signedness of its types,
-> but in this case I don't think the bad shift can actually happen, making
-> this a false positive.
+--001a1132f770dd479904fcf45b40
+Content-Type: text/plain; charset=ISO-8859-1
 
-Ah, I see. I agree that the warning happen on the dead code.
+Hi Andy,
 
-However, the root cause for the warning is not because sparse can not
-figure out the value of "channel". Sparse actually correctly does the
-inline and figure out "channel" is 4294967295. The root cause
-of your complain against sparse is that it happen on the dead code.
+On Sat, Jun 28, 2014 at 9:59 AM, Christopher Li <sparse@chrisli.org> wrote:
+> I think this is problematic.There are three possible input
+> from args:
+> 1) "--parm", you need to ++next skip to next arg, which is the value for parm.
+> 2) "--parm=x",  you don't need to skip to next arg.
+> 3) "--parm-with-crap", invalid argument. You don't need to skip next arg.
 
-I don' think the patch is the right fix for this problem though.
-This patch try to silence a warning purely because it can happen
-on dead code, otherwise perfectly valid warning.
 
-My point is that, it can happen on dead code is not a valid reason
-to weaken the warning. Sparse can give any possible warning on
-dead code. e.g. On the dead code path, you can construct an address
-space warning. Do we weakling the address space warning purely
-because it can happen on the dead code as well? Of course not.
-The same apply to any other sparse warnings.
+How about this patch, I modify from your patch.
+It fix the problem I mention earlier.
 
-So if there is a bug, It is sparse did not know exactly which part
-of the code is dead on AST level. If you enable the "#if 0" inside
-expand_if_statement(), sparse can actually correctly expand
-"if (channel < 0)" into "return". Of course, it still can't handle jump
-into dead code situation, which is the reason that piece of code
-is not enabled in the first place. It needs more work. I think that is
-a better approach than just random weakening some warnings
-on dead code path.
+If no objections, I will push the change.
 
 Chris
+
+--001a1132f770dd479904fcf45b40
+Content-Type: text/x-patch; charset=US-ASCII; name="0001-lib.c-skip-param-parameters.patch"
+Content-Disposition: attachment;
+	filename="0001-lib.c-skip-param-parameters.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hx00yvwn0
+
+RnJvbSBkOTE3NjYyZDU0YmE2OGQwYzNiMDNlOTk0Y2IxZmE2NmQ3YjE5YzMwIE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBBbmR5IFNoZXZjaGVua28gPGFuZHJpeS5zaGV2Y2hlbmtvQGxp
+bnV4LmludGVsLmNvbT4KRGF0ZTogVHVlLCAxNyBKdW4gMjAxNCAxMjoxMTo0NSArMDMwMApTdWJq
+ZWN0OiBbUEFUQ0hdIGxpYi5jOiBza2lwIC0tcGFyYW0gcGFyYW1ldGVycwoKVmVyeSBkdW1iIHBh
+dGNoIHRvIGp1c3Qgc2tpcCAtLXBhcmFtIGFsbG93LXN0b3JlLWRhdGEtcmFjZXM9MCBpbnRyb2R1
+Y2VkIGluCm5ld2VyIEdDQyB2ZXJzaW9ucy4KCldpdGhvdXQgdGhpcyBwYXRjaCBzcGFyc2UgcmVj
+b2duaXplcyBwYXJhbWV0ZXIgb2YgdGhlIC0tcGFyYW0gb3B0aW9uIGFzIGEgZmlsZQpuYW1lIHdo
+aWNoIG9idmlvdXNseSBjb3VsZG4ndCBiZSBmb3VuZC4KClNpZ25lZC1vZmYtYnk6IEFuZHkgU2hl
+dmNoZW5rbyA8YW5kcml5LnNoZXZjaGVua29AbGludXguaW50ZWwuY29tPgpTaWduZWQtb2ZmLWJ5
+OiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgotLS0KIGxpYi5jIHwgMjQgKysr
+KysrKysrKysrKysrKysrKysrKy0tCiAxIGZpbGUgY2hhbmdlZCwgMjIgaW5zZXJ0aW9ucygrKSwg
+MiBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9saWIuYyBiL2xpYi5jCmluZGV4IDg0NDc5N2Qu
+LjBiYzRiMmIgMTAwNjQ0Ci0tLSBhL2xpYi5jCisrKyBiL2xpYi5jCkBAIC02NzUsMjIgKzY3NSw0
+MiBAQCBzdGF0aWMgY2hhciAqKmhhbmRsZV92ZXJzaW9uKGNoYXIgKmFyZywgY2hhciAqKm5leHQp
+CiAJZXhpdCgwKTsKIH0KIAorc3RhdGljIGNoYXIgKipoYW5kbGVfcGFyYW0oY2hhciAqYXJnLCBj
+aGFyICoqbmV4dCkKK3sKKwljaGFyICp2YWx1ZSA9IE5VTEw7CisKKwkvKiBGb3Igbm93IGp1c3Qg
+c2tpcCBhbnkgJy0tcGFyYW09Kicgb3IgJy0tcGFyYW0gKicgKi8KKwlpZiAoKmFyZyA9PSAnXDAn
+KSB7CisJCXZhbHVlID0gKisrbmV4dDsKKwl9IGVsc2UgaWYgKGlzc3BhY2UoKmFyZykgfHwgKmFy
+ZyA9PSAnPScpIHsKKwkJdmFsdWUgPSArK2FyZzsKKwl9CisKKwlpZiAoIXZhbHVlKQorCQlkaWUo
+Im1pc3NpbmcgYXJndW1lbnQgZm9yIC0tcGFyYW0gb3B0aW9uIik7CisKKwlyZXR1cm4gbmV4dDsK
+K30KKwogc3RydWN0IHN3aXRjaGVzIHsKIAljb25zdCBjaGFyICpuYW1lOwogCWNoYXIgKiooKmZu
+KShjaGFyICosIGNoYXIgKiopOworCXVuc2lnbmVkIGludCBwcmVmaXg6MTsKIH07CiAKIHN0YXRp
+YyBjaGFyICoqaGFuZGxlX2xvbmdfb3B0aW9ucyhjaGFyICphcmcsIGNoYXIgKipuZXh0KQogewog
+CXN0YXRpYyBzdHJ1Y3Qgc3dpdGNoZXMgY21kW10gPSB7CisJCXsgInBhcmFtIiwgaGFuZGxlX3Bh
+cmFtLCAxIH0sCiAJCXsgInZlcnNpb24iLCBoYW5kbGVfdmVyc2lvbiB9LAogCQl7IE5VTEwsIE5V
+TEwgfQogCX07CiAJc3RydWN0IHN3aXRjaGVzICpzID0gY21kOwogCiAJd2hpbGUgKHMtPm5hbWUp
+IHsKLQkJaWYgKCFzdHJjbXAocy0+bmFtZSwgYXJnKSkKLQkJCXJldHVybiBzLT5mbihhcmcsIG5l
+eHQpOworCQlpbnQgb3B0bGVuID0gc3RybGVuKHMtPm5hbWUpOworCQlpZiAoIXN0cm5jbXAocy0+
+bmFtZSwgYXJnLCBvcHRsZW4gKyAhcy0+cHJlZml4KSkKKwkJCXJldHVybiBzLT5mbihhcmcgKyBv
+cHRsZW4sIG5leHQpOwogCQlzKys7CiAJfQogCXJldHVybiBuZXh0OwotLSAKMS45LjMKCg==
+--001a1132f770dd479904fcf45b40--
