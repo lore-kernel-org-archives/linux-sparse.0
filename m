@@ -1,101 +1,37 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH] sparse: Add CLOG option for saving warning
-Date: Mon, 30 Jun 2014 01:57:13 -0700
-Message-ID: <CANeU7Q=a82YmUE49uZ1sOxZn0KGLuktSXuj7YsmUb=wXQEpPXA@mail.gmail.com>
+Subject: Re: [PATCHv2 0/3] catch non-sign-extended '~' brainos
+Date: Mon, 30 Jun 2014 10:27:27 -0700
+Message-ID: <CANeU7Q=Tjexvw6LY3ZKiO8B3PvYiFo405DHYpuySJkevwxXeFA@mail.gmail.com>
+References: <1402315082-14102-1-git-send-email-phil@dovecot.fi>
+	<1402386847-23477-1-git-send-email-phil@dovecot.fi>
+	<20140627111900.GA19158@phil.dovecot.net>
+	<CANeU7QkVj1gm3wQ6r1=akKX9W1cQvE3Un32CD=1UBecFCaq18Q@mail.gmail.com>
+	<20140630085603.GB19158@phil.dovecot.net>
+	<CANeU7Q=Z=Xac_T3JRAyqo_fF4LAKD-MM41NYz+nDstDutcVUfA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a113a76ca62b5ba04fd09d8a3
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel <linux-kernel@vger.kernel.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Sam Ravnborg <sam@ravnborg.org>, Andrew Morton <akpm@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>
-List-Id: linux-sparse@vger.kernel.org
-
---001a113a76ca62b5ba04fd09d8a3
 Content-Type: text/plain; charset=ISO-8859-1
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-qg0-f47.google.com ([209.85.192.47]:52769 "EHLO
+	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754697AbaF3R12 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 30 Jun 2014 13:27:28 -0400
+Received: by mail-qg0-f47.google.com with SMTP id q108so2245635qgd.20
+        for <linux-sparse@vger.kernel.org>; Mon, 30 Jun 2014 10:27:27 -0700 (PDT)
+In-Reply-To: <CANeU7Q=Z=Xac_T3JRAyqo_fF4LAKD-MM41NYz+nDstDutcVUfA@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: Phil Carmody <phil@dovecot.fi>
+Cc: Josh Triplett <josh@joshtriplett.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Currently sparse warning only output to stderr.
-In the parallel build process, different source
-file output is fixed together. It is hard to keep
-track of the warning.
+On Mon, Jun 30, 2014 at 9:44 AM, Christopher Li <sparse@chrisli.org> wrote:
+> That give me 565 new warning. I attach the file here.
+>
+> I sample some, all the one I saw are false positive.
 
-Add the CLOG=<logname> option in command line to
-save the sparse warning into individual log file.
-
-Typical usage:
-
-make -j8 C=2 CLOG=<logname>
-
-The log file is saved in the target directory as
-.xxx.o.<logname>.sparse
-
-By diffing between different log file, it is much
-easier to analyze how the sparse change impact
-the whole kernel build.
-
-Signed-off-by: Christopher Li <sparse@chrisli.org>
-
+The real interesting question is, how many real kernel bug in that
+565 warnings? It take some human effort to determine the warning
+is false positive or not. If most of the warning are false positive, then
+the warning is not usable.
 
 Chris
-
---001a113a76ca62b5ba04fd09d8a3
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-sparse-Add-CLOG-option-for-saving-warning.patch"
-Content-Disposition: attachment;
-	filename="0001-sparse-Add-CLOG-option-for-saving-warning.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hx1jvqmh0
-
-RnJvbSAzYjJmZjIwNGNiZGE2ODRhZGY5ZGJhMmFkZjU2ODA2MjUzM2FlMzRkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
-YXRlOiBNb24sIDMwIEp1biAyMDE0IDAxOjMzOjIyIC0wNzAwClN1YmplY3Q6IFtQQVRDSF0gc3Bh
-cnNlOiBBZGQgQ0xPRyBvcHRpb24gZm9yIHNhdmluZyB3YXJuaW5nCgpDdXJyZW50bHkgc3BhcnNl
-IHdhcm5pbmcgb25seSBvdXRwdXQgdG8gc3RkZXJyLgpJbiB0aGUgcGFyYWxsZWwgYnVpbGQgcHJv
-Y2VzcywgZGlmZmVyZW50IHNvdXJjZQpmaWxlIG91dHB1dCBpcyBmaXhlZCB0b2dldGhlci4gSXQg
-aXMgaGFyZCB0byBrZWVwCnRyYWNrIG9mIHRoZSB3YXJuaW5nLgoKQWRkIHRoZSBDTE9HPTxsb2du
-YW1lPiBvcHRpb24gaW4gY29tbWFuZCBsaW5lIHRvCnNhdmUgdGhlIHNwYXJzZSB3YXJuaW5nIGlu
-dG8gaW5kaXZpZHVhbCBsb2cgZmlsZS4KClR5cGljYWwgdXNhZ2U6CgptYWtlIC1qOCBDPTIgQ0xP
-Rz08bG9nbmFtZT4KClRoZSBsb2cgZmlsZSBpcyBzYXZlZCBpbiB0aGUgdGFyZ2V0IGRpcmVjdG9y
-eSBhcwoueHh4Lm8uPGxvZ25hbWU+LnNwYXJzZQoKQnkgZGlmZmluZyBiZXR3ZWVuIGRpZmZlcmVu
-dCBsb2cgZmlsZSwgaXQgaXMgbXVjaAplYXNpZXIgdG8gYW5hbHl6ZSBob3cgdGhlIHNwYXJzZSBj
-aGFuZ2UgaW1wYWN0CnRoZSB3aG9sZSBrZXJuZWwgYnVpbGQuCgpTaWduZWQtb2ZmLWJ5OiBDaHJp
-c3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgotLS0KIE1ha2VmaWxlICAgICAgICAgICAg
-ICAgfCAxMyArKysrKysrKysrKystCiBzY3JpcHRzL01ha2VmaWxlLmJ1aWxkIHwgMTEgKysrKysr
-KysrLS0KIDIgZmlsZXMgY2hhbmdlZCwgMjEgaW5zZXJ0aW9ucygrKSwgMyBkZWxldGlvbnMoLSkK
-CmRpZmYgLS1naXQgYS9NYWtlZmlsZSBiL01ha2VmaWxlCmluZGV4IGIxMWUyZDUuLjU2YzM1MDIg
-MTAwNjQ0Ci0tLSBhL01ha2VmaWxlCisrKyBiL01ha2VmaWxlCkBAIC02OCw2ICs2OCwxNiBAQCBp
-Zm5kZWYgS0JVSUxEX0NIRUNLU1JDCiAgIEtCVUlMRF9DSEVDS1NSQyA9IDAKIGVuZGlmCiAKK2lm
-ZXEgKCIkKG9yaWdpbiBDTE9HKSIsICJjb21tYW5kIGxpbmUiKQorICBLQlVJTERfQ0hFQ0tMT0cg
-PSAkKENMT0cpCitlbmRpZgoraWZuZGVmIEtCVUlMRF9DSEVDS0xPRworICBLQlVJTERfQ0hFQ0tM
-T0cgPQorZW5kaWYKKworCisKKwogIyBVc2UgbWFrZSBNPWRpciB0byBzcGVjaWZ5IGRpcmVjdG9y
-eSBvZiBleHRlcm5hbCBtb2R1bGUgdG8gYnVpbGQKICMgT2xkIHN5bnRheCBtYWtlIC4uLiBTVUJE
-SVJTPSRQV0QgaXMgc3RpbGwgc3VwcG9ydGVkCiAjIFNldHRpbmcgdGhlIGVudmlyb25tZW50IHZh
-cmlhYmxlIEtCVUlMRF9FWFRNT0QgdGFrZSBwcmVjZWRlbmNlCkBAIC0yODcsNyArMjk3LDcgQEAg
-aWZlcSAoJChNQUtFQ01ER09BTFMpLCkKIGVuZGlmCiAKIGV4cG9ydCBLQlVJTERfTU9EVUxFUyBL
-QlVJTERfQlVJTFRJTgotZXhwb3J0IEtCVUlMRF9DSEVDS1NSQyBLQlVJTERfU1JDIEtCVUlMRF9F
-WFRNT0QKK2V4cG9ydCBLQlVJTERfQ0hFQ0tTUkMgS0JVSUxEX0NIRUNLTE9HIEtCVUlMRF9TUkMg
-S0JVSUxEX0VYVE1PRAogCiAjIEJlYXV0aWZ5IG91dHB1dAogIyAtLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0K
-QEAgLTEzNzAsNiArMTM4MCw3IEBAIGNsZWFuOiAkKGNsZWFuLWRpcnMpCiAJJChjYWxsIGNtZCxy
-bWZpbGVzKQogCUBmaW5kICQoaWYgJChLQlVJTERfRVhUTU9EKSwgJChLQlVJTERfRVhUTU9EKSwg
-LikgJChSQ1NfRklORF9JR05PUkUpIFwKIAkJXCggLW5hbWUgJyouW29hc10nIC1vIC1uYW1lICcq
-LmtvJyAtbyAtbmFtZSAnLiouY21kJyBcCisJCS1vIC1uYW1lICcuKi5zcGFyc2UnIFwKIAkJLW8g
-LW5hbWUgJyoua28uKicgXAogCQktbyAtbmFtZSAnLiouZCcgLW8gLW5hbWUgJy4qLnRtcCcgLW8g
-LW5hbWUgJyoubW9kLmMnIFwKIAkJLW8gLW5hbWUgJyouc3ltdHlwZXMnIC1vIC1uYW1lICdtb2R1
-bGVzLm9yZGVyJyBcCmRpZmYgLS1naXQgYS9zY3JpcHRzL01ha2VmaWxlLmJ1aWxkIGIvc2NyaXB0
-cy9NYWtlZmlsZS5idWlsZAppbmRleCBiZjNlNjc3Li40NWM2MDA0IDEwMDY0NAotLS0gYS9zY3Jp
-cHRzL01ha2VmaWxlLmJ1aWxkCisrKyBiL3NjcmlwdHMvTWFrZWZpbGUuYnVpbGQKQEAgLTk2LDE0
-ICs5NiwyMSBAQCBfX2J1aWxkOiAkKGlmICQoS0JVSUxEX0JVSUxUSU4pLCQoYnVpbHRpbi10YXJn
-ZXQpICQobGliLXRhcmdldCkgJChleHRyYS15KSkgXAogCSAkKHN1YmRpci15bSkgJChhbHdheXMp
-CiAJQDoKIAorY2hlY2tfbG9nX2ZpbGUgPSAkKGRvdC10YXJnZXQpLiQoS0JVSUxEX0NIRUNLTE9H
-KS5zcGFyc2UKKworaWZuZXEgKCQoS0JVSUxEX0NIRUNLTE9HKSwpCisgIGNoZWNrX2xvZ2dpbmcg
-PSAyPiAkKGNoZWNrX2xvZ19maWxlKQorZW5kaWYKKworY21kX2NoZWNrID0gJChDSEVDSykgJChD
-SEVDS0ZMQUdTKSAkKGNfZmxhZ3MpICQ8ICQoY2hlY2tfbG9nZ2luZykgOwogIyBMaW51cycga2Vy
-bmVsIHNhbml0eSBjaGVja2luZyB0b29sCiBpZm5lcSAoJChLQlVJTERfQ0hFQ0tTUkMpLDApCiAg
-IGlmZXEgKCQoS0JVSUxEX0NIRUNLU1JDKSwyKQogICAgIHF1aWV0X2NtZF9mb3JjZV9jaGVja3Ny
-YyA9IENIRUNLICAgJDwKLSAgICAgICAgICBjbWRfZm9yY2VfY2hlY2tzcmMgPSAkKENIRUNLKSAk
-KENIRUNLRkxBR1MpICQoY19mbGFncykgJDwgOworICAgICAgICAgIGNtZF9mb3JjZV9jaGVja3Ny
-YyA9ICQoY21kX2NoZWNrKQogICBlbHNlCiAgICAgICBxdWlldF9jbWRfY2hlY2tzcmMgICAgID0g
-Q0hFQ0sgICAkPAotICAgICAgICAgICAgY21kX2NoZWNrc3JjICAgICA9ICQoQ0hFQ0spICQoQ0hF
-Q0tGTEFHUykgJChjX2ZsYWdzKSAkPCA7CisgICAgICAgICAgICBjbWRfY2hlY2tzcmMgICAgID0g
-JChjbWRfY2hlY2spCiAgIGVuZGlmCiBlbmRpZgogCi0tIAoxLjkuMwoK
---001a113a76ca62b5ba04fd09d8a3--
