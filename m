@@ -1,62 +1,49 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Staging/comedi: Fixes static analysis warning raised by sparse
-Date: Mon, 30 Jun 2014 10:49:18 -0700
-Message-ID: <CANeU7QmOq7iqy8--A3srr0yMQ4f92BRi9wrLT1pYAHYstwsToA@mail.gmail.com>
-References: <53965E53.5080504@gmail.com>
-	<20140610054741.GE5500@mwanda>
-	<DC148C5AA1CEBA4E87973D432B1C2D8825E9AE6A@P3PWEX4MB008.ex4.secureserver.net>
-	<20140611065612.GQ5015@mwanda>
-	<DC148C5AA1CEBA4E87973D432B1C2D8825E9CBD6@P3PWEX4MB008.ex4.secureserver.net>
-	<20140611212425.GW5015@mwanda>
-	<20140611214529.GB16940@cloud>
-	<CANeU7Qki9Fg=Vz8gryT1bL+BMnjuvWZTH7uNvyk-HjdSPsiiyg@mail.gmail.com>
-	<20140628192020.GA2501@thin>
-	<CANeU7QkKnh-Xq4CVAkNFs54KieNrDqD93uuWijCOYwj0iorHvg@mail.gmail.com>
+Subject: Re: [PATCH] Staging/comedi: Fixes static analysis warning raised by
+ sparse
+Date: Mon, 30 Jun 2014 11:32:21 -0700
+Message-ID: <CANeU7QmdB0Ec0ytBiLqW+QRMr_2_Eq-6hnraCb0nQtuY8-0N2w@mail.gmail.com>
+References: <53965E53.5080504@gmail.com> <20140610054741.GE5500@mwanda>
+ <DC148C5AA1CEBA4E87973D432B1C2D8825E9AE6A@P3PWEX4MB008.ex4.secureserver.net>
+ <20140611065612.GQ5015@mwanda>
+ <DC148C5AA1CEBA4E87973D432B1C2D8825E9CBD6@P3PWEX4MB008.ex4.secureserver.net>
+ <20140611212425.GW5015@mwanda> <20140611214529.GB16940@cloud>
+ <CANeU7Qki9Fg=Vz8gryT1bL+BMnjuvWZTH7uNvyk-HjdSPsiiyg@mail.gmail.com>
+ <20140628192020.GA2501@thin>
+ <CANeU7QkKnh-Xq4CVAkNFs54KieNrDqD93uuWijCOYwj0iorHvg@mail.gmail.com>
+ <CANeU7QmOq7iqy8--A3srr0yMQ4f92BRi9wrLT1pYAHYstwsToA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f44.google.com ([209.85.192.44]:37314 "EHLO
-	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753256AbaF3RtS (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 30 Jun 2014 13:49:18 -0400
-Received: by mail-qg0-f44.google.com with SMTP id j107so2327626qga.17
-        for <linux-sparse@vger.kernel.org>; Mon, 30 Jun 2014 10:49:18 -0700 (PDT)
-In-Reply-To: <CANeU7QkKnh-Xq4CVAkNFs54KieNrDqD93uuWijCOYwj0iorHvg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <driverdev-devel-bounces@linuxdriverproject.org>
+In-Reply-To: <CANeU7QmOq7iqy8--A3srr0yMQ4f92BRi9wrLT1pYAHYstwsToA@mail.gmail.com>
+List-Unsubscribe: <http://driverdev.linuxdriverproject.org/mailman/options/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=unsubscribe>
+List-Archive: <http://driverdev.linuxdriverproject.org/pipermail/driverdev-devel>
+List-Post: <mailto:driverdev-devel@linuxdriverproject.org>
+List-Help: <mailto:driverdev-devel-request@linuxdriverproject.org?subject=help>
+List-Subscribe: <http://driverdev.linuxdriverproject.org/mailman/listinfo/driverdev-devel>,
+ <mailto:driverdev-devel-request@linuxdriverproject.org?subject=subscribe>
+Errors-To: driverdev-devel-bounces@linuxdriverproject.org
+Sender: driverdev-devel-bounces@linuxdriverproject.org
 To: Josh Triplett <josh@joshtriplett.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Hartley Sweeten <HartleyS@visionengravers.com>, "Marcos A. Di Pietro" <marcosadp@gmail.com>, "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: "devel@driverdev.osuosl.org" <devel@driverdev.osuosl.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "Marcos A. Di Pietro" <marcosadp@gmail.com>, Dan Carpenter <dan.carpenter@oracle.com>
+List-Id: linux-sparse@vger.kernel.org
 
-On Sat, Jun 28, 2014 at 8:09 PM, Christopher Li <sparse@chrisli.org> wrote:
-> So if there is a bug, It is sparse did not know exactly which part
-> of the code is dead on AST level. If you enable the "#if 0" inside
+On Mon, Jun 30, 2014 at 10:49 AM, Christopher Li <sparse@chrisli.org> wrote:
+> The warning should be trivial in instruction level. We are looking
+> for an instruction has larger than type size constant shift
+> value.
 
-I am thinking about how to fix the dead code issue. Try to do more
-than trivial dead code analyses is really not the right place for AST.
+Actually, just try it. Not as trivial as I thought.
 
-Actually, there is a simple way out. We can just move the warning
-to the linearize instruction level.
+The problem is that, in the instruction level, sparse will optimize away
+the shift instruction when it see a larger than type size shift.
+The finial instruction level don't see the big constant shift any way.
+Need to catch it before the instruction get optimized away.
 
- $ ./test-linearize /tmp/test_shift.c
-/tmp/test_shift.c:8:26: warning: shift too big (4294967295) for type int
-main:
-.L0x7f8f490e5010:
-    <entry-point>
-    # call      %r1 <- filter, $0xffffffff
-    ret.32      $0
-
-You see, once drop into the instruction level, sparse already
-know that code is dead.
-
-Since the sparse is already linearizing instruction to perform
-the context check. We just need to move the warning from AST
-to instruction level.
-
-The warning should be trivial in instruction level. We are looking
-for an instruction has larger than type size constant shift
-value.
-
-Comments and feed backs, even patches?
+That is unfortunate. If we check it too early, we can't tell it is in the
+dead code. If we check it too late, the instruction itself get optimized
+away.
 
 Chris
