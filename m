@@ -1,42 +1,33 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Possible bug with _Static_assert & sparse
-Date: Wed, 30 Jul 2014 11:40:37 -0700
-Message-ID: <CANeU7QnAH-ctgLL-4k1LdMy6SN4hG0nvtsLCzUaQ=NVv8GZajA@mail.gmail.com>
-References: <CADz3at1Hz5oiWT2MZvK2zOrtu7=1QYvny8RNE+QnoTOSJWHqWQ@mail.gmail.com>
+From: Fabian Morision <fmorision4@gmail.com>
+Subject: Re: Very Urgent............
+Date: Thu, 31 Jul 2014 01:18:20 +0200
+Message-ID: <CAPnz-Ta_o==1nJhS330wQOG9PpNNjnWsUp-E5Nd2JTWv-23tTA__12232.404042925$1406763859$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f54.google.com ([209.85.192.54]:52577 "EHLO
-	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755410AbaG3Ski (ORCPT
+Received: from mail-qg0-f65.google.com ([209.85.192.65]:46346 "EHLO
+	mail-qg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751643AbaG3XoM (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 30 Jul 2014 14:40:38 -0400
-Received: by mail-qg0-f54.google.com with SMTP id z60so2375526qgd.27
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Jul 2014 11:40:37 -0700 (PDT)
-In-Reply-To: <CADz3at1Hz5oiWT2MZvK2zOrtu7=1QYvny8RNE+QnoTOSJWHqWQ@mail.gmail.com>
+	Wed, 30 Jul 2014 19:44:12 -0400
+Received: by mail-qg0-f65.google.com with SMTP id z60so807619qgd.0
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Jul 2014 16:44:11 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mike Holmes <mike.holmes@linaro.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Jul 30, 2014 at 10:32 AM, Mike Holmes <mike.holmes@linaro.org> wrote:
-> Hi
->
-> I wondered if the following sparse error indication was expected
-> behaviour or if it is a bug,
-> I would not expect sparse to error with "got 9"
->
->
-> $ cat static.c
-> #include <stdio.h>
->
-> #define fake 9
-> _Static_assert( fake > 8, "test message");
+Greetings from gulf region
 
-_Static_assert is a C11 thing?
-The current sparse know nothing about _Static_assert().
-So it treat it as a function declare.
+Thanks for the e-mail. I am very interested on funding lucrative
+business partnership with you acting as the manager and sole
+controller of the investment while i remain a silent investor for a
+period of ten yrs , though I am only looking at investment
+opportunities within the range you specified for a start. You can
+reply me here (fmorision@yahoo.com)
 
-Patch are welcome if any one want to give it a try.
+Let me know your thought asap
 
-Chris
+Regards
+
+Financial Consultant
+
+Mr.Fabian Morision
