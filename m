@@ -1,50 +1,92 @@
-From: josh@joshtriplett.org
-Subject: Re: Designated initializers for fields in anonymous structs and
- unions
-Date: Thu, 31 Jul 2014 13:55:01 -0700
-Message-ID: <20140731205501.GA13837@cloud>
-References: <20140731181006.GA13180@cloud>
- <CA+55aFxptOTqCR9b0o8sEKwzyQOU0rfKTptRY5s=j5R_X=UdUg@mail.gmail.com>
- <CA+55aFwg=yuR6Ro1O3g50Y1QR-hPeW5y_BLQ18go_DoX9SZe6Q@mail.gmail.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: [PATCH 1/5] Add __designated_init, wrapping
+ __attribute__((designated_init))
+Date: Thu, 31 Jul 2014 16:47:23 -0700
+Message-ID: <3130b0553b15518e3bef6d14c80280beed0f5ff9.1406850006.git.josh@joshtriplett.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:41188 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751268AbaGaUzG (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 31 Jul 2014 16:55:06 -0400
+Return-path: <linux-fsdevel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CA+55aFwg=yuR6Ro1O3g50Y1QR-hPeW5y_BLQ18go_DoX9SZe6Q@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Sender: linux-fsdevel-owner@vger.kernel.org
+To: akpm@linux-foundation.org, "J. Bruce Fields" <bfields@fieldses.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Ingo Molnar <mingo@redhat.com>, Jeff Layton <jlayton@poochiereds.net>, Michal Marek <mmarek@suse.cz>, Neil Brown <neilb@suse.de>, Steven Rostedt <rostedt@goodmis.org>, linux-api@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-raid@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Chris Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, John Keeping <john@keeping.me.uk>
 
-On Thu, Jul 31, 2014 at 11:50:30AM -0700, Linus Torvalds wrote:
-> On Thu, Jul 31, 2014 at 11:39 AM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
-> >
-> > but not in the "official" sparse tree, which hasn't seen any work
-> > since January afaik.
-> 
-> Ugh, I looked at the old "sparse/sparse.git" tree (and badly at that,
-> it stopped updating in April, not January). It's
-> "sparse/chrisl/sparse.git" these days. No wonder I didn't see any
-> recent work.
-> 
-> The sparse.wiki.kernel.org main page is the first google hit for
-> "sparse git tree" and mentions that old git repo, not Chris' new one.
-> 
-> That leaves just my last patch ("Fix scoping of extern") as being not
-> in the sparse tree, and that's irrelevant for the union initializer
-> thing.
-> 
-> Chris, any particular reason why the url changed?
+GCC 4.10 and newer, and Sparse, supports
+__attribute__((designated_init)), which marks a structure as requiring
+a designated initializer rather than a positional one.  This helps
+reduce churn and errors when used with _ops structures and similar
+structures designed for future extension.
 
-I think Chris has been trying to use chrisl as a staging tree to let
-things cook a while, and then moving them over to the sparse tree.
-However, I think it'd make more sense to do that as a branch rather than
-a separate repo.
+Add a wrapper __designated_init, which turns into
+__attribute__((designated_init)) for Sparse or sufficiently new GCC.
+Enable the corresponding warning as an error.
 
-- Josh Triplett
+The following semantic patch can help mark structures containing
+function pointers as requiring designated initializers:
+
+@@
+identifier I, f;
+type T;
+@@
+
+struct I {
+	...
+	T (*f)(...);
+	...
+}
++ __designated_init
+;
+
+Signed-off-by: Josh Triplett <josh@joshtriplett.org>
+---
+ Makefile                      | 3 +++
+ include/linux/compiler-gcc4.h | 4 ++++
+ include/linux/compiler.h      | 5 +++++
+ 3 files changed, 12 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index f6a7794..83773c2 100644
+--- a/Makefile
++++ b/Makefile
+@@ -744,6 +744,9 @@ KBUILD_CFLAGS   += $(call cc-option,-Werror=strict-prototypes)
+ # Prohibit date/time macros, which would make the build non-deterministic
+ KBUILD_CFLAGS   += $(call cc-option,-Werror=date-time)
+ 
++# Disallow positional initialization of designated structs
++KBUILD_CFLAGS += $(call cc-option,-Werror=designated-init)
++
+ # use the deterministic mode of AR if available
+ KBUILD_ARFLAGS := $(call ar-option,D)
+ 
+diff --git a/include/linux/compiler-gcc4.h b/include/linux/compiler-gcc4.h
+index 2507fd2..5cd3c26 100644
+--- a/include/linux/compiler-gcc4.h
++++ b/include/linux/compiler-gcc4.h
+@@ -85,4 +85,8 @@
+ #if GCC_VERSION >= 40800 || (defined(__powerpc__) && GCC_VERSION >= 40600)
+ #define __HAVE_BUILTIN_BSWAP16__
+ #endif
++
++#if GCC_VERSION >= 41000 || defined(__CHECKER__)
++#define __designated_init __attribute__((designated_init))
++#endif
+ #endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP */
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index d5ad7b1..c2334b2 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -266,6 +266,11 @@ void ftrace_likely_update(struct ftrace_branch_data *f, int val, int expect);
+ #define __always_inline inline
+ #endif
+ 
++/* Marks a struct as requiring designated initializers, never positional. */
++#ifndef __designated_init
++#define __designated_init
++#endif
++
+ #endif /* __KERNEL__ */
+ 
+ /*
+-- 
+2.0.1
+
