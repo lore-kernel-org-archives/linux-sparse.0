@@ -1,198 +1,43 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: Designated initializers for fields in anonymous structs and unions
-Date: Thu, 31 Jul 2014 11:39:02 -0700
-Message-ID: <CA+55aFxptOTqCR9b0o8sEKwzyQOU0rfKTptRY5s=j5R_X=UdUg@mail.gmail.com>
+Date: Thu, 31 Jul 2014 11:50:30 -0700
+Message-ID: <CA+55aFwg=yuR6Ro1O3g50Y1QR-hPeW5y_BLQ18go_DoX9SZe6Q@mail.gmail.com>
 References: <20140731181006.GA13180@cloud>
+	<CA+55aFxptOTqCR9b0o8sEKwzyQOU0rfKTptRY5s=j5R_X=UdUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec529a00741195c04ff819650
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vc0-f177.google.com ([209.85.220.177]:53031 "EHLO
-	mail-vc0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751997AbaGaSjL (ORCPT
+Received: from mail-vc0-f171.google.com ([209.85.220.171]:51354 "EHLO
+	mail-vc0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751316AbaGaSub (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 31 Jul 2014 14:39:11 -0400
-Received: by mail-vc0-f177.google.com with SMTP id hy4so4801225vcb.36
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Jul 2014 11:39:03 -0700 (PDT)
-In-Reply-To: <20140731181006.GA13180@cloud>
+	Thu, 31 Jul 2014 14:50:31 -0400
+Received: by mail-vc0-f171.google.com with SMTP id hq11so4980483vcb.30
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Jul 2014 11:50:30 -0700 (PDT)
+In-Reply-To: <CA+55aFxptOTqCR9b0o8sEKwzyQOU0rfKTptRY5s=j5R_X=UdUg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
+To: Josh Triplett <josh@joshtriplett.org>, Chris Li <sparse@chrisli.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, John Keeping <john@keeping.me.uk>
 
---bcaec529a00741195c04ff819650
-Content-Type: text/plain; charset=UTF-8
+On Thu, Jul 31, 2014 at 11:39 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> but not in the "official" sparse tree, which hasn't seen any work
+> since January afaik.
 
-On Thu, Jul 31, 2014 at 11:10 AM,  <josh@joshtriplett.org> wrote:
-> GCC 4.6 and newer support initializing designated initializers for fields in
-> anonymous structs and unions.  However, sparse does not.
+Ugh, I looked at the old "sparse/sparse.git" tree (and badly at that,
+it stopped updating in April, not January). It's
+"sparse/chrisl/sparse.git" these days. No wonder I didn't see any
+recent work.
 
-I sent patches for this back in April, based on a report from Hans
-Verkuil. My patches fixed the parsing part, but had a (known) bug with
-getting the offsets right, so your test-case actually retulrs in
+The sparse.wiki.kernel.org main page is the first google hit for
+"sparse git tree" and mentions that old git repo, not Chris' new one.
 
-  t.c:23:6: warning: Initializer entry defined twice
-  t.c:24:6:   also defined here
+That leaves just my last patch ("Fix scoping of extern") as being not
+in the sparse tree, and that's irrelevant for the union initializer
+thing.
 
-because the offset calculation for "b" was wrong, and as a result
-sparse thinks "a" and "b" overlap. John Keeping had a patch that tried
-to fix that too.
+Chris, any particular reason why the url changed?
 
-I think they are all in
-
-   https://github.com/johnkeeping/sparse/
-
-but not in the "official" sparse tree, which hasn't seen any work
-since January afaik. Maybe there are other trees than John's..
-
-I'm attaching my set of sparse patches from early April in case
-anybody wants to look at them. No guarantees, and as mentioned there's
-t least an offset bug, but they should be an improvement, at least.
-
-                    Linus
-
---bcaec529a00741195c04ff819650
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-Add-warning-about-duplicate-initializers.patch"
-Content-Disposition: attachment;
-	filename="0001-Add-warning-about-duplicate-initializers.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyafc7ug0
-
-RnJvbSBkMjQ1NzA5YjA3NGM4ZDA3ZGJhNjFiNGE0NzUxNDhkNDU0OWUzNjk3IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRh
-dGlvbi5vcmc+CkRhdGU6IFN1biwgMzAgTWFyIDIwMTQgMDk6NDk6MTMgLTA3MDAKU3ViamVjdDog
-W1BBVENIIDEvNF0gQWRkIHdhcm5pbmcgYWJvdXQgZHVwbGljYXRlIGluaXRpYWxpemVycwoKTm90
-aWNlZCB0aGlzIHdoaWxlIGxvb2tpbmcgYXQgYW4gaW5kZXBlbmRlbnQgYnVnIHJlcG9ydGVkIGJ5
-IEhhbnMKVmVya3VpbC4KClNpZ25lZC1vZmYtYnk6IExpbnVzIFRvcnZhbGRzIDx0b3J2YWxkc0Bs
-aW51eC1mb3VuZGF0aW9uLm9yZz4KLS0tCiBldmFsdWF0ZS5jIHwgOCArKysrKysrKwogMSBmaWxl
-IGNoYW5nZWQsIDggaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBhL2V2YWx1YXRlLmMgYi9ldmFs
-dWF0ZS5jCmluZGV4IDY2NTU2MTUwZGRhYy4uOGE1M2IzZTg4NGUwIDEwMDY0NAotLS0gYS9ldmFs
-dWF0ZS5jCisrKyBiL2V2YWx1YXRlLmMKQEAgLTMwNDMsMTAgKzMwNDMsMTggQEAgc3RhdGljIHZv
-aWQgY2hlY2tfZHVwbGljYXRlcyhzdHJ1Y3Qgc3ltYm9sICpzeW0pCiB7CiAJaW50IGRlY2xhcmVk
-ID0gMDsKIAlzdHJ1Y3Qgc3ltYm9sICpuZXh0ID0gc3ltOworCWludCBpbml0aWFsaXplZCA9IHN5
-bS0+aW5pdGlhbGl6ZXIgIT0gTlVMTDsKIAogCXdoaWxlICgobmV4dCA9IG5leHQtPnNhbWVfc3lt
-Ym9sKSAhPSBOVUxMKSB7CiAJCWNvbnN0IGNoYXIgKnR5cGVkaWZmOwogCQlldmFsdWF0ZV9zeW1i
-b2wobmV4dCk7CisJCWlmIChpbml0aWFsaXplZCAmJiBuZXh0LT5pbml0aWFsaXplcikgeworCQkJ
-c3BhcnNlX2Vycm9yKHN5bS0+cG9zLCAic3ltYm9sICclcycgaGFzIG11bHRpcGxlIGluaXRpYWxp
-emVycyAob3JpZ2luYWxseSBpbml0aWFsaXplZCBhdCAlczolZCkiLAorCQkJCXNob3dfaWRlbnQo
-c3ltLT5pZGVudCksCisJCQkJc3RyZWFtX25hbWUobmV4dC0+cG9zLnN0cmVhbSksIG5leHQtPnBv
-cy5saW5lKTsKKwkJCS8qIE9ubHkgd2FybiBvbmNlICovCisJCQlpbml0aWFsaXplZCA9IDA7CisJ
-CX0KIAkJZGVjbGFyZWQrKzsKIAkJdHlwZWRpZmYgPSB0eXBlX2RpZmZlcmVuY2UoJnN5bS0+Y3R5
-cGUsICZuZXh0LT5jdHlwZSwgMCwgMCk7CiAJCWlmICh0eXBlZGlmZikgewotLSAKMi4wLjEuNDI3
-LmdjNDczNzJkCgo=
---bcaec529a00741195c04ff819650
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0002-Use-any-previous-initializer-to-size-a-symbol.patch"
-Content-Disposition: attachment;
-	filename="0002-Use-any-previous-initializer-to-size-a-symbol.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyafc7us1
-
-RnJvbSAxNzEzOWU1ZDdhMzVjNGIxNzkzMjIxZjA3M2E0ZjU0M2YwMGIxY2ZhIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRh
-dGlvbi5vcmc+CkRhdGU6IFN1biwgMzAgTWFyIDIwMTQgMTA6MTM6NTQgLTA3MDAKU3ViamVjdDog
-W1BBVENIIDIvNF0gVXNlIGFueSBwcmV2aW91cyBpbml0aWFsaXplciB0byBzaXplIGEgc3ltYm9s
-CgpXaGVuIHdlIHNpemUgYSBzeW1ib2wsIHdlIG9ubHkgaGF2ZSBvbmUgaW5pdGlhbGl6ZXIgcGVy
-IHN5bWJvbCwgYnV0IHdlCm1heSBoYXZlIG11bHRpcGxlIHN5bWJvbCBkZWNsYXJhdGlvbnMgZm9y
-IHRoZSBzYW1lIHN5bWJvbC4gIFNvIG1ha2Ugc3VyZQp0byB3YWxrIHRoZSAic2FtZV9zeW1ib2wi
-IGNoYWluIHRvIGZpbmQgdGhlIGluaXRpYWxpemVyLCByYXRoZXIgdGhhbgphc3N1bWluZyBpdCBp
-cyBhdHRhY2hlZCB0byB0aGUgY3VycmVudCBkZWNsYXJhdGlvbi4KClJlcG9ydGVkLWJ5OiBIYW5z
-IFZlcmt1aWwgPGh2ZXJrdWlsQHhzNGFsbC5ubD4KU2lnbmVkLW9mZi1ieTogTGludXMgVG9ydmFs
-ZHMgPHRvcnZhbGRzQGxpbnV4LWZvdW5kYXRpb24ub3JnPgotLS0KIHN5bWJvbC5jIHwgMjQgKysr
-KysrKysrKysrKysrKysrLS0tLS0tCiAxIGZpbGUgY2hhbmdlZCwgMTggaW5zZXJ0aW9ucygrKSwg
-NiBkZWxldGlvbnMoLSkKCmRpZmYgLS1naXQgYS9zeW1ib2wuYyBiL3N5bWJvbC5jCmluZGV4IGVi
-NmUxMjE1ZWU4Ny4uNGI5MWFiZDgwMjFlIDEwMDY0NAotLS0gYS9zeW1ib2wuYworKysgYi9zeW1i
-b2wuYwpAQCAtMzU0LDYgKzM1NCwxNSBAQCBzdGF0aWMgaW50IGNvdW50X2FycmF5X2luaXRpYWxp
-emVyKHN0cnVjdCBzeW1ib2wgKnQsIHN0cnVjdCBleHByZXNzaW9uICpleHByKQogCXJldHVybiBu
-cjsKIH0KIAorc3RhdGljIHN0cnVjdCBleHByZXNzaW9uICpnZXRfc3ltYm9sX2luaXRpYWxpemVy
-KHN0cnVjdCBzeW1ib2wgKnN5bSkKK3sKKwlkbyB7CisJCWlmIChzeW0tPmluaXRpYWxpemVyKQor
-CQkJcmV0dXJuIHN5bS0+aW5pdGlhbGl6ZXI7CisJfSB3aGlsZSAoKHN5bSA9IHN5bS0+c2FtZV9z
-eW1ib2wpICE9IE5VTEwpOworCXJldHVybiBOVUxMOworfQorCiBzdGF0aWMgc3RydWN0IHN5bWJv
-bCAqIGV4YW1pbmVfbm9kZV90eXBlKHN0cnVjdCBzeW1ib2wgKnN5bSkKIHsKIAlzdHJ1Y3Qgc3lt
-Ym9sICpiYXNlX3R5cGUgPSBleGFtaW5lX2Jhc2VfdHlwZShzeW0pOwpAQCAtMzc2LDEyICszODUs
-MTUgQEAgc3RhdGljIHN0cnVjdCBzeW1ib2wgKiBleGFtaW5lX25vZGVfdHlwZShzdHJ1Y3Qgc3lt
-Ym9sICpzeW0pCiAJCXN5bS0+Y3R5cGUuYWxpZ25tZW50ID0gYWxpZ25tZW50OwogCiAJLyogVW5z
-aXplZCBhcnJheT8gVGhlIHNpemUgbWlnaHQgY29tZSBmcm9tIHRoZSBpbml0aWFsaXplci4uICov
-Ci0JaWYgKGJpdF9zaXplIDwgMCAmJiBiYXNlX3R5cGUtPnR5cGUgPT0gU1lNX0FSUkFZICYmIHN5
-bS0+aW5pdGlhbGl6ZXIpIHsKLQkJc3RydWN0IHN5bWJvbCAqbm9kZV90eXBlID0gYmFzZV90eXBl
-LT5jdHlwZS5iYXNlX3R5cGU7Ci0JCWludCBjb3VudCA9IGNvdW50X2FycmF5X2luaXRpYWxpemVy
-KG5vZGVfdHlwZSwgc3ltLT5pbml0aWFsaXplcik7Ci0KLQkJaWYgKG5vZGVfdHlwZSAmJiBub2Rl
-X3R5cGUtPmJpdF9zaXplID49IDApCi0JCQliaXRfc2l6ZSA9IG5vZGVfdHlwZS0+Yml0X3NpemUg
-KiBjb3VudDsKKwlpZiAoYml0X3NpemUgPCAwICYmIGJhc2VfdHlwZS0+dHlwZSA9PSBTWU1fQVJS
-QVkpIHsKKwkJc3RydWN0IGV4cHJlc3Npb24gKmluaXRpYWxpemVyID0gZ2V0X3N5bWJvbF9pbml0
-aWFsaXplcihzeW0pOworCQlpZiAoaW5pdGlhbGl6ZXIpIHsKKwkJCXN0cnVjdCBzeW1ib2wgKm5v
-ZGVfdHlwZSA9IGJhc2VfdHlwZS0+Y3R5cGUuYmFzZV90eXBlOworCQkJaW50IGNvdW50ID0gY291
-bnRfYXJyYXlfaW5pdGlhbGl6ZXIobm9kZV90eXBlLCBpbml0aWFsaXplcik7CisKKwkJCWlmIChu
-b2RlX3R5cGUgJiYgbm9kZV90eXBlLT5iaXRfc2l6ZSA+PSAwKQorCQkJCWJpdF9zaXplID0gbm9k
-ZV90eXBlLT5iaXRfc2l6ZSAqIGNvdW50OworCQl9CiAJfQogCQogCXN5bS0+Yml0X3NpemUgPSBi
-aXRfc2l6ZTsKLS0gCjIuMC4xLjQyNy5nYzQ3MzcyZAoK
---bcaec529a00741195c04ff819650
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0003-Allow-named-initializers-for-anonymous-union-members.patch"
-Content-Disposition: attachment;
-	filename="0003-Allow-named-initializers-for-anonymous-union-members.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyafc7ux2
-
-RnJvbSA1ZTg3MGY3ZmE1MzVjMDNhYzJjMWFlNzg0NzkzMjdkMTEyYzI1NjRlIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRh
-dGlvbi5vcmc+CkRhdGU6IFR1ZSwgMSBBcHIgMjAxNCAxMDoxODo1OSAtMDcwMApTdWJqZWN0OiBb
-UEFUQ0ggMy80XSBBbGxvdyBuYW1lZCBpbml0aWFsaXplcnMgZm9yIGFub255bW91cyB1bmlvbiBt
-ZW1iZXJzCgpUaGUgaW5pdGlhbGl6ZXIgdHlwZSBldmFsdWF0aW9uIGRpZG4ndCB1c2UgdGhlIGZ1
-bmN0aW9uIHRoYXQga25ldyBhYm91dApyZWN1cnNpdmVseSBsb29raW5nIGZvciBtZW1iZXIgbmFt
-ZXMgaW4gYW5vbnltb3VzIHVuaW9ucyBhbmQgc3RydWN0cy4KClNpZ25lZC1vZmYtYnk6IExpbnVz
-IFRvcnZhbGRzIDx0b3J2YWxkc0BsaW51eC1mb3VuZGF0aW9uLm9yZz4KLS0tCiBldmFsdWF0ZS5j
-IHwgMTQgKystLS0tLS0tLS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDEy
-IGRlbGV0aW9ucygtKQoKZGlmZiAtLWdpdCBhL2V2YWx1YXRlLmMgYi9ldmFsdWF0ZS5jCmluZGV4
-IDhhNTNiM2U4ODRlMC4uNWFkZmMxZTNmZjI2IDEwMDY0NAotLS0gYS9ldmFsdWF0ZS5jCisrKyBi
-L2V2YWx1YXRlLmMKQEAgLTIxNzEsMTcgKzIxNzEsNiBAQCBzdGF0aWMgaW50IGV2YWx1YXRlX2Fy
-Z3VtZW50cyhzdHJ1Y3Qgc3ltYm9sICpmLCBzdHJ1Y3Qgc3ltYm9sICpmbiwgc3RydWN0IGV4cHJl
-cwogCXJldHVybiAxOwogfQogCi1zdGF0aWMgc3RydWN0IHN5bWJvbCAqZmluZF9zdHJ1Y3RfaWRl
-bnQoc3RydWN0IHN5bWJvbCAqY3R5cGUsIHN0cnVjdCBpZGVudCAqaWRlbnQpCi17Ci0Jc3RydWN0
-IHN5bWJvbCAqc3ltOwotCi0JRk9SX0VBQ0hfUFRSKGN0eXBlLT5zeW1ib2xfbGlzdCwgc3ltKSB7
-Ci0JCWlmIChzeW0tPmlkZW50ID09IGlkZW50KQotCQkJcmV0dXJuIHN5bTsKLQl9IEVORF9GT1Jf
-RUFDSF9QVFIoc3ltKTsKLQlyZXR1cm4gTlVMTDsKLX0KLQogc3RhdGljIHZvaWQgY29udmVydF9p
-bmRleChzdHJ1Y3QgZXhwcmVzc2lvbiAqZSkKIHsKIAlzdHJ1Y3QgZXhwcmVzc2lvbiAqY2hpbGQg
-PSBlLT5pZHhfZXhwcmVzc2lvbjsKQEAgLTIyOTAsMTEgKzIyNzksMTIgQEAgc3RhdGljIHN0cnVj
-dCBleHByZXNzaW9uICpjaGVja19kZXNpZ25hdG9ycyhzdHJ1Y3QgZXhwcmVzc2lvbiAqZSwKIAkJ
-CX0KIAkJCWUgPSBlLT5pZHhfZXhwcmVzc2lvbjsKIAkJfSBlbHNlIGlmIChlLT50eXBlID09IEVY
-UFJfSURFTlRJRklFUikgeworCQkJaW50IG9mZnNldCA9IDA7CiAJCQlpZiAoY3R5cGUtPnR5cGUg
-IT0gU1lNX1NUUlVDVCAmJiBjdHlwZS0+dHlwZSAhPSBTWU1fVU5JT04pIHsKIAkJCQllcnIgPSAi
-ZmllbGQgbmFtZSBub3QgaW4gc3RydWN0IG9yIHVuaW9uIjsKIAkJCQlicmVhazsKIAkJCX0KLQkJ
-CWN0eXBlID0gZmluZF9zdHJ1Y3RfaWRlbnQoY3R5cGUsIGUtPmV4cHJfaWRlbnQpOworCQkJY3R5
-cGUgPSBmaW5kX2lkZW50aWZpZXIoZS0+ZXhwcl9pZGVudCwgY3R5cGUtPnN5bWJvbF9saXN0LCAm
-b2Zmc2V0KTsKIAkJCWlmICghY3R5cGUpIHsKIAkJCQllcnIgPSAidW5rbm93biBmaWVsZCBuYW1l
-IGluIjsKIAkJCQlicmVhazsKLS0gCjIuMC4xLjQyNy5nYzQ3MzcyZAoK
---bcaec529a00741195c04ff819650
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0004-Fix-scoping-of-extern-symbols-in-block-scope.patch"
-Content-Disposition: attachment;
-	filename="0004-Fix-scoping-of-extern-symbols-in-block-scope.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyafc7v03
-
-RnJvbSBjMDExNTk3ZmY2Nzc2NWRhNWRhY2I0NzJkZGJkNjlkYzRiNTE0MTZkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRh
-dGlvbi5vcmc+CkRhdGU6IFR1ZSwgMSBBcHIgMjAxNCAxMDoyMDozNCAtMDcwMApTdWJqZWN0OiBb
-UEFUQ0ggNC80XSBGaXggc2NvcGluZyBvZiBleHRlcm4gc3ltYm9scyBpbiBibG9jayBzY29wZQoK
-V2UnZCBvbmx5IG1hdGNoIHRoZW0gd2l0aCBvdGhlciBzeW1ib2xzIG1hcmtlZCAnZXh0ZXJuJywg
-YnV0IHJlYWxseSwgd2UKc2hvdWxkIG1hdGNoIHRoZW0gd2l0aCBhbnkgdG9wLWxldmVsIG5vbi1z
-dGF0aWMgc3ltYm9sLgoKU2lnbmVkLW9mZi1ieTogTGludXMgVG9ydmFsZHMgPHRvcnZhbGRzQGxp
-bnV4LWZvdW5kYXRpb24ub3JnPgotLS0KIHN5bWJvbC5jIHwgMTQgKysrKysrKysrLS0tLS0KIDEg
-ZmlsZSBjaGFuZ2VkLCA5IGluc2VydGlvbnMoKyksIDUgZGVsZXRpb25zKC0pCgpkaWZmIC0tZ2l0
-IGEvc3ltYm9sLmMgYi9zeW1ib2wuYwppbmRleCA0YjkxYWJkODAyMWUuLmM1ZTQ3ODQ3MzRhOCAx
-MDA2NDQKLS0tIGEvc3ltYm9sLmMKKysrIGIvc3ltYm9sLmMKQEAgLTU3NiwxMSArNTc2LDE1IEBA
-IHZvaWQgY2hlY2tfZGVjbGFyYXRpb24oc3RydWN0IHN5bWJvbCAqc3ltKQogCQkJc3ltLT5zYW1l
-X3N5bWJvbCA9IG5leHQ7CiAJCQlyZXR1cm47CiAJCX0KLQkJaWYgKHN5bS0+Y3R5cGUubW9kaWZp
-ZXJzICYgbmV4dC0+Y3R5cGUubW9kaWZpZXJzICYgTU9EX0VYVEVSTikgewotCQkJaWYgKChzeW0t
-PmN0eXBlLm1vZGlmaWVycyBeIG5leHQtPmN0eXBlLm1vZGlmaWVycykgJiBNT0RfSU5MSU5FKQot
-CQkJCWNvbnRpbnVlOwotCQkJc3ltLT5zYW1lX3N5bWJvbCA9IG5leHQ7Ci0JCQlyZXR1cm47CisJ
-CS8qIEV4dGVybiBpbiBibG9jayBsZXZlbCBtYXRjaGVzIGEgVE9QTEVWRUwgbm9uLXN0YXRpYyBz
-eW1ib2wgKi8KKwkJaWYgKHN5bS0+Y3R5cGUubW9kaWZpZXJzICYgTU9EX0VYVEVSTikgeworCQkJ
-aWYgKChuZXh0LT5jdHlwZS5tb2RpZmllcnMgJiAoTU9EX1RPUExFVkVMfE1PRF9TVEFUSUMpKSA9
-PSBNT0RfVE9QTEVWRUwpIHsKKwkJCQkvKiBGSVhNRT8gRGlmZmVycyBpbiAnaW5saW5lJyBvbmx5
-PyBXaHkgZG9lcyB0aGF0IG1hdHRlcj8gKi8KKwkJCQlpZiAoKHN5bS0+Y3R5cGUubW9kaWZpZXJz
-IF4gbmV4dC0+Y3R5cGUubW9kaWZpZXJzKSAmIE1PRF9JTkxJTkUpCisJCQkJCWNvbnRpbnVlOwor
-CQkJCXN5bS0+c2FtZV9zeW1ib2wgPSBuZXh0OworCQkJCXJldHVybjsKKwkJCX0KIAkJfQogCiAJ
-CWlmICghV3NoYWRvdyB8fCB3YXJuZWQpCi0tIAoyLjAuMS40MjcuZ2M0NzM3MmQKCg==
---bcaec529a00741195c04ff819650--
+            Linus
