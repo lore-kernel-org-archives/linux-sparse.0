@@ -1,168 +1,54 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: Designated initializers for fields in anonymous structs and unions
-Date: Thu, 31 Jul 2014 19:19:20 -0700
-Message-ID: <CA+55aFwinxO5H=5Rtgz37AuOCTHBDWJ6mVRU0HX+fiGP9JRa1Q@mail.gmail.com>
+Date: Thu, 31 Jul 2014 19:41:06 -0700
+Message-ID: <CA+55aFwhz6aHV145jLGJx9MH6Nb67TdHwE=Zz_0Vu4u6L8A7Dw@mail.gmail.com>
 References: <20140731181006.GA13180@cloud>
+	<CA+55aFwinxO5H=5Rtgz37AuOCTHBDWJ6mVRU0HX+fiGP9JRa1Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=bcaec529a00759c72304ff8804e1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:57058 "EHLO
+Received: from mail-vc0-f182.google.com ([209.85.220.182]:51248 "EHLO
 	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751553AbaHACTV (ORCPT
+	with ESMTP id S1751553AbaHAClH (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 31 Jul 2014 22:19:21 -0400
-Received: by mail-vc0-f182.google.com with SMTP id hy4so5810664vcb.27
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Jul 2014 19:19:20 -0700 (PDT)
-In-Reply-To: <20140731181006.GA13180@cloud>
+	Thu, 31 Jul 2014 22:41:07 -0400
+Received: by mail-vc0-f182.google.com with SMTP id hy4so5792843vcb.13
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Jul 2014 19:41:06 -0700 (PDT)
+In-Reply-To: <CA+55aFwinxO5H=5Rtgz37AuOCTHBDWJ6mVRU0HX+fiGP9JRa1Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Josh Triplett <josh@joshtriplett.org>, Chris Li <sparse@chrisli.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
---bcaec529a00759c72304ff8804e1
-Content-Type: text/plain; charset=UTF-8
-
-On Thu, Jul 31, 2014 at 11:10 AM,  <josh@joshtriplett.org> wrote:
-> Test case:
+On Thu, Jul 31, 2014 at 7:19 PM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
 >
-> struct S {
->     int a;
->     union {
->         int b;
->         int c;
->     };
-> };
->
-> static struct S s = {
->     .a = 0,
->     .b = 0,
-> };
+> I'm quite sure we still screw complex intiializers up . But this makes
+> at least Josh's test-case pass, and looks superficially sane.
 
-So sparse fails on this test-case (differently from what Josh
-reported, because apparently Josh is running 0.5.0) with:
+Hmm. It exposes other problems.
 
-  t.c:10:6: warning: Initializer entry defined twice
-  t.c:11:6:   also defined here
+For example, the fact that we look up the identifier now exposes the
+fact that "first_subobject()" creates this dummy "EXPR_IDENTIFIER"
+expression that has no identifier. That will then cause
+"find_identifier()" to fail, which in turn causes convert_ident() to
+fail. Resulting in the parse tree having remaining EXPR_IDENTIFIER
+nodes, which will later result in "unknown expression (25,0)" errors.
 
-because the offsets are miscomputed. The conversion from
-EXPR_IDENTIFIER (an initializer entry with a named identifier) to
-EXPR_POS (an initializer entry with a byte offset) got this wrong.
+That's easy enough to fix with just adding the proper initializer, ie
 
-We need to use "find_identifier()" that does the proper recursive
-lookup and updates the offset, but the required structure type wasn't
-passed down to convert_designators() and convert_ident(), so the patch
-is a bit bigger than just changing a couple of lines.
+    new->expr_ident = field->ident;
 
-I'm quite sure we still screw complex intiializers up . But this makes
-at least Josh's test-case pass, and looks superficially sane.
+to first_subobject().
 
-Hmm?
+But the change apparently also exposes some problems with nested
+EXPR_POS cases, so now we mis-parse initializers that have multiple
+levels of naming, of the type
 
-                  Linus
+   struct S a = { .a.b = 1 };
 
---bcaec529a00759c72304ff8804e1
-Content-Type: text/x-patch; charset=US-ASCII;
-	name="0001-Make-convert_ident-use-find_identifier-to-get-the-pr.patch"
-Content-Disposition: attachment;
-	filename="0001-Make-convert_ident-use-find_identifier-to-get-the-pr.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyavnslf0
+I haven't had the energy to figure out what went wrong with that one,
+and I'm getting rather fed up with this for today, so I'm hoping
+somebody else finds this at all interesting.
 
-RnJvbSA3NjcwZDkzM2U4MjkxN2VhMjhhN2U1YTVkZjA5YmNjOTc0NGRiYTM0IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBMaW51cyBUb3J2YWxkcyA8dG9ydmFsZHNAbGludXgtZm91bmRh
-dGlvbi5vcmc+CkRhdGU6IFRodSwgMzEgSnVsIDIwMTQgMTk6MDE6MzYgLTA3MDAKU3ViamVjdDog
-W1BBVENIXSBNYWtlICdjb252ZXJ0X2lkZW50KCknIHVzZSAnZmluZF9pZGVudGlmaWVyKCknIHRv
-IGdldCB0aGUKIHByb3BlciBtZW1iZXIgb2Zmc2V0CgpUaGUgY29udmVydF9pZGVudCgpIGZ1bmN0
-aW9uIHVzZWQgdG8gZG8KCglzdHJ1Y3Qgc3ltYm9sICpzeW0gPSBlLT5maWVsZDsKCWUtPmluaXRf
-b2Zmc2V0ID0gc3ltLT5vZmZzZXQ7Cgp3aGljaCBpcyB3cm9uZyBmb3IgZW1iZWRkZWQgdW5uYW1l
-ZCB1bmlvbnMuICBJdCByZWFsbHkgd2FudHMgdG8gZG8KImZpbmRfaWRlbnRpZmllcigpIiwgd2hp
-Y2ggbG9va3MgdXAgdGhlIGZpZWxkIG5hbWUgaW4gdGhlIHN0cnVjdHVyZSBvcgp1bmlvbiB0eXBl
-LCBhbmQgcHJvcGVybHkgYWRkcyB0aGUgb2Zmc2V0cyB3aGVuIGl0IGxvb2tzIHRoaW5ncyB1cCBp
-biBhbgphbm9ueW1vdXMgc3RydWN0dXJlIG9yIHVuaW9uLgoKSG93ZXZlciwgd2UgZGlkbid0IHBh
-c3MgaW4gdGhlIHJpZ2h0IHN5bWJvbCB0eXBlLCBzbyBjb252ZXJ0X2lkZW50KCkKY291bGRuJ3Qg
-YmUganVzdCB0cml2aWFsbHkgY29udmVydGVkIHdpdGggYSBjb3VwbGUgb2YgbGluZXMuCgpUaGlz
-IGNoYW5nZXMgdGhlIGNvZGUgdG8gcGFzcyBpbiB0aGUgc3RydWN0L3VuaW9uIHR5cGUsIGFuZCBh
-bHNvCnJlLW9yZ2FuaXplcyBmaW5kX2lkZW50aWZpZXIoKSB0byBoYXZlIGEgbmljZXIgY2FsbGlu
-ZyBjb252ZW50aW9uLiAgV2UKbm93IHBhc3MgaW4gdGhlIHR5cGUsIG5vdCB0aGUgbmFtZS1saXN0
-LCB3aGljaCBtYWtlcyBpdCBwb3NzaWJsZSBmb3IKZmluZF9pZGVudGlmaWVyKCkgdG8gZG8gdGhl
-IHBlZWxpbmcgb2YgdGhlIFNZTV9OT0RFIGlmIHJlcXVpcmVkLApzaW1wbGlmeWluZyB0aGUgY2Fs
-bGVycyAoaW5jbHVkaW5nIHRoZSByZWN1cnNpdmUgY2FsbCBmb3IgdGhlIGFub255bW91cwpjYXNl
-KS4KClJlcG9ydGVkLWJ5OiBKdXN0IFRyaXBsZXR0IDxqb3NoQGpvc2h0cmlwbGV0dC5vcmc+ClNp
-Z25lZC1vZmYtYnk6IExpbnVzIFRvcnZhbGRzIDx0b3J2YWxkc0BsaW51eC1mb3VuZGF0aW9uLm9y
-Zz4KLS0tCiBldmFsdWF0ZS5jIHwgNDcgKysrKysrKysrKysrKysrKysrKysrKysrKystLS0tLS0t
-LS0tLS0tLS0tLS0tLS0KIDEgZmlsZSBjaGFuZ2VkLCAyNiBpbnNlcnRpb25zKCspLCAyMSBkZWxl
-dGlvbnMoLSkKCmRpZmYgLS1naXQgYS9ldmFsdWF0ZS5jIGIvZXZhbHVhdGUuYwppbmRleCAwMzk5
-MmQwM2FlMWQuLjUxOTVkZWNkMWIyZSAxMDA2NDQKLS0tIGEvZXZhbHVhdGUuYworKysgYi9ldmFs
-dWF0ZS5jCkBAIC0xODcyLDEzICsxODcyLDE5IEBAIHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpldmFs
-dWF0ZV9wcmVvcChzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhwcikKIAlyZXR1cm4gY3R5cGU7CiB9CiAK
-LXN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpmaW5kX2lkZW50aWZpZXIoc3RydWN0IGlkZW50ICppZGVu
-dCwgc3RydWN0IHN5bWJvbF9saXN0ICpfbGlzdCwgaW50ICpvZmZzZXQpCitzdGF0aWMgc3RydWN0
-IHN5bWJvbCAqZmluZF9pZGVudGlmaWVyKHN0cnVjdCBpZGVudCAqaWRlbnQsIHN0cnVjdCBzeW1i
-b2wgKmN0eXBlLCBpbnQgKm9mZnNldCkKIHsKLQlzdHJ1Y3QgcHRyX2xpc3QgKmhlYWQgPSAoc3Ry
-dWN0IHB0cl9saXN0ICopX2xpc3Q7Ci0Jc3RydWN0IHB0cl9saXN0ICpsaXN0ID0gaGVhZDsKKwlz
-dHJ1Y3QgcHRyX2xpc3QgKmhlYWQsICpsaXN0OwogCisJaWYgKGN0eXBlLT50eXBlID09IFNZTV9O
-T0RFKQorCQljdHlwZSA9IGN0eXBlLT5jdHlwZS5iYXNlX3R5cGU7CisJaWYgKGN0eXBlLT50eXBl
-ICE9IFNZTV9VTklPTiAmJiBjdHlwZS0+dHlwZSAhPSBTWU1fU1RSVUNUKQorCQlyZXR1cm4gTlVM
-TDsKKworCWhlYWQgPSAoc3RydWN0IHB0cl9saXN0ICopY3R5cGUtPnN5bWJvbF9saXN0OwogCWlm
-ICghaGVhZCkKIAkJcmV0dXJuIE5VTEw7CisJbGlzdCA9IGhlYWQ7CiAJZG8gewogCQlpbnQgaTsK
-IAkJZm9yIChpID0gMDsgaSA8IGxpc3QtPm5yOyBpKyspIHsKQEAgLTE4ODksMTMgKzE4OTUsOCBA
-QCBzdGF0aWMgc3RydWN0IHN5bWJvbCAqZmluZF9pZGVudGlmaWVyKHN0cnVjdCBpZGVudCAqaWRl
-bnQsIHN0cnVjdCBzeW1ib2xfbGlzdCAqXwogCQkJCSpvZmZzZXQgPSBzeW0tPm9mZnNldDsKIAkJ
-CQlyZXR1cm4gc3ltOwogCQkJfSBlbHNlIHsKLQkJCQlzdHJ1Y3Qgc3ltYm9sICpjdHlwZSA9IHN5
-bS0+Y3R5cGUuYmFzZV90eXBlOwogCQkJCXN0cnVjdCBzeW1ib2wgKnN1YjsKLQkJCQlpZiAoIWN0
-eXBlKQotCQkJCQljb250aW51ZTsKLQkJCQlpZiAoY3R5cGUtPnR5cGUgIT0gU1lNX1VOSU9OICYm
-IGN0eXBlLT50eXBlICE9IFNZTV9TVFJVQ1QpCi0JCQkJCWNvbnRpbnVlOwotCQkJCXN1YiA9IGZp
-bmRfaWRlbnRpZmllcihpZGVudCwgY3R5cGUtPnN5bWJvbF9saXN0LCBvZmZzZXQpOworCQkJCXN1
-YiA9IGZpbmRfaWRlbnRpZmllcihpZGVudCwgc3ltLCBvZmZzZXQpOwogCQkJCWlmICghc3ViKQog
-CQkJCQljb250aW51ZTsKIAkJCQkqb2Zmc2V0ICs9IHN5bS0+b2Zmc2V0OwpAQCAtMTk2NSw3ICsx
-OTY2LDcgQEAgc3RhdGljIHN0cnVjdCBzeW1ib2wgKmV2YWx1YXRlX21lbWJlcl9kZXJlZmVyZW5j
-ZShzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhwcikKIAkJcmV0dXJuIE5VTEw7CiAJfQogCW9mZnNldCA9
-IDA7Ci0JbWVtYmVyID0gZmluZF9pZGVudGlmaWVyKGlkZW50LCBjdHlwZS0+c3ltYm9sX2xpc3Qs
-ICZvZmZzZXQpOworCW1lbWJlciA9IGZpbmRfaWRlbnRpZmllcihpZGVudCwgY3R5cGUsICZvZmZz
-ZXQpOwogCWlmICghbWVtYmVyKSB7CiAJCWNvbnN0IGNoYXIgKnR5cGUgPSBjdHlwZS0+dHlwZSA9
-PSBTWU1fU1RSVUNUID8gInN0cnVjdCIgOiAidW5pb24iOwogCQljb25zdCBjaGFyICpuYW1lID0g
-Ijx1bm5hbWVkPiI7CkBAIC0yMjIwLDIzICsyMjIxLDI3IEBAIHN0YXRpYyB2b2lkIGNvbnZlcnRf
-aW5kZXgoc3RydWN0IGV4cHJlc3Npb24gKmUpCiAJZS0+aW5pdF9leHByID0gY2hpbGQ7CiB9CiAK
-LXN0YXRpYyB2b2lkIGNvbnZlcnRfaWRlbnQoc3RydWN0IGV4cHJlc3Npb24gKmUpCitzdGF0aWMg
-dm9pZCBjb252ZXJ0X2lkZW50KHN0cnVjdCBleHByZXNzaW9uICplLCBzdHJ1Y3Qgc3ltYm9sICpj
-dHlwZSkKIHsKKwlpbnQgb2Zmc2V0OwogCXN0cnVjdCBleHByZXNzaW9uICpjaGlsZCA9IGUtPmlk
-ZW50X2V4cHJlc3Npb247Ci0Jc3RydWN0IHN5bWJvbCAqc3ltID0gZS0+ZmllbGQ7CisKKwljdHlw
-ZSA9IGZpbmRfaWRlbnRpZmllcihlLT5leHByX2lkZW50LCBjdHlwZSwgJm9mZnNldCk7CisJaWYg
-KCFjdHlwZSkKKwkJcmV0dXJuOwogCWUtPnR5cGUgPSBFWFBSX1BPUzsKLQllLT5pbml0X29mZnNl
-dCA9IHN5bS0+b2Zmc2V0OworCWUtPmluaXRfb2Zmc2V0ID0gb2Zmc2V0OwogCWUtPmluaXRfbnIg
-PSAxOwogCWUtPmluaXRfZXhwciA9IGNoaWxkOwogfQogCi1zdGF0aWMgdm9pZCBjb252ZXJ0X2Rl
-c2lnbmF0b3JzKHN0cnVjdCBleHByZXNzaW9uICplKQorc3RhdGljIHZvaWQgY29udmVydF9kZXNp
-Z25hdG9ycyhzdHJ1Y3QgZXhwcmVzc2lvbiAqZSwgc3RydWN0IHN5bWJvbCAqY3R5cGUpCiB7CiAJ
-d2hpbGUgKGUpIHsKIAkJaWYgKGUtPnR5cGUgPT0gRVhQUl9JTkRFWCkKIAkJCWNvbnZlcnRfaW5k
-ZXgoZSk7CiAJCWVsc2UgaWYgKGUtPnR5cGUgPT0gRVhQUl9JREVOVElGSUVSKQotCQkJY29udmVy
-dF9pZGVudChlKTsKKwkJCWNvbnZlcnRfaWRlbnQoZSwgY3R5cGUpOwogCQllbHNlCiAJCQlicmVh
-azsKIAkJZSA9IGUtPmluaXRfZXhwcjsKQEAgLTIzMjIsNyArMjMyNyw3IEBAIHN0YXRpYyBzdHJ1
-Y3QgZXhwcmVzc2lvbiAqY2hlY2tfZGVzaWduYXRvcnMoc3RydWN0IGV4cHJlc3Npb24gKmUsCiAJ
-CQkJZXJyID0gImZpZWxkIG5hbWUgbm90IGluIHN0cnVjdCBvciB1bmlvbiI7CiAJCQkJYnJlYWs7
-CiAJCQl9Ci0JCQljdHlwZSA9IGZpbmRfaWRlbnRpZmllcihlLT5leHByX2lkZW50LCBjdHlwZS0+
-c3ltYm9sX2xpc3QsICZvZmZzZXQpOworCQkJY3R5cGUgPSBmaW5kX2lkZW50aWZpZXIoZS0+ZXhw
-cl9pZGVudCwgY3R5cGUsICZvZmZzZXQpOwogCQkJaWYgKCFjdHlwZSkgewogCQkJCWVyciA9ICJ1
-bmtub3duIGZpZWxkIG5hbWUgaW4iOwogCQkJCWJyZWFrOwpAQCAtMjM5Miw3ICsyMzk3LDcgQEAg
-c3RhdGljIHN0cnVjdCBleHByZXNzaW9uICpuZXh0X2Rlc2lnbmF0b3JzKHN0cnVjdCBleHByZXNz
-aW9uICpvbGQsCiAJCWlmICghY29weSkgewogCQkJZmllbGQgPSBvbGQtPmZpZWxkLT5uZXh0X3N1
-Ym9iamVjdDsKIAkJCWlmICghZmllbGQpIHsKLQkJCQljb252ZXJ0X2lkZW50KG9sZCk7CisJCQkJ
-Y29udmVydF9pZGVudChvbGQsIGN0eXBlKTsKIAkJCQlyZXR1cm4gTlVMTDsKIAkJCX0KIAkJCWNv
-cHkgPSBlOwpAQCAtMjQwNiw3ICsyNDExLDcgQEAgc3RhdGljIHN0cnVjdCBleHByZXNzaW9uICpu
-ZXh0X2Rlc2lnbmF0b3JzKHN0cnVjdCBleHByZXNzaW9uICpvbGQsCiAJCW5ldy0+ZXhwcl9pZGVu
-dCA9IGZpZWxkLT5pZGVudDsKIAkJbmV3LT5pZGVudF9leHByZXNzaW9uID0gY29weTsKIAkJbmV3
-LT5jdHlwZSA9IGZpZWxkOwotCQljb252ZXJ0X2lkZW50KG9sZCk7CisJCWNvbnZlcnRfaWRlbnQo
-b2xkLCBjdHlwZSk7CiAJfQogCXJldHVybiBuZXc7CiB9CkBAIC0yNDY1LDcgKzI0NzAsNyBAQCBz
-dGF0aWMgdm9pZCBoYW5kbGVfbGlzdF9pbml0aWFsaXplcihzdHJ1Y3QgZXhwcmVzc2lvbiAqZXhw
-ciwKIAkJCXRvcCA9IG5leHQ7CiAJCQkvKiBkZWVwZXIgdGhhbiBvbmUgZGVzaWduYXRvcj8gKi8K
-IAkJCWp1bXBlZCA9IHRvcCAhPSBlOwotCQkJY29udmVydF9kZXNpZ25hdG9ycyhsYXN0KTsKKwkJ
-CWNvbnZlcnRfZGVzaWduYXRvcnMobGFzdCwgY3R5cGUpOwogCQkJbGFzdCA9IGU7CiAJCX0KIApA
-QCAtMjQ5Nyw3ICsyNTAyLDcgQEAgZm91bmQ6CiAKIAl9IEVORF9GT1JfRUFDSF9QVFIoZSk7CiAK
-LQljb252ZXJ0X2Rlc2lnbmF0b3JzKGxhc3QpOworCWNvbnZlcnRfZGVzaWduYXRvcnMobGFzdCwg
-Y3R5cGUpOwogCWV4cHItPmN0eXBlID0gY3R5cGU7CiB9CiAKQEAgLTI5MDEsNyArMjkwNiw3IEBA
-IHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpldmFsdWF0ZV9vZmZzZXRvZihzdHJ1Y3QgZXhwcmVzc2lv
-biAqZXhwcikKIAkJCXJldHVybiBOVUxMOwogCQl9CiAKLQkJZmllbGQgPSBmaW5kX2lkZW50aWZp
-ZXIoZXhwci0+aWRlbnQsIGN0eXBlLT5zeW1ib2xfbGlzdCwgJm9mZnNldCk7CisJCWZpZWxkID0g
-ZmluZF9pZGVudGlmaWVyKGV4cHItPmlkZW50LCBjdHlwZSwgJm9mZnNldCk7CiAJCWlmICghZmll
-bGQpIHsKIAkJCWV4cHJlc3Npb25fZXJyb3IoZXhwciwgInVua25vd24gbWVtYmVyIik7CiAJCQly
-ZXR1cm4gTlVMTDsKLS0gCjIuMS4wLnJjMC41Mi5nYWE1NDRiZgoK
---bcaec529a00759c72304ff8804e1--
+              Linus
