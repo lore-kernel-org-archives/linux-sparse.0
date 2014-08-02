@@ -1,100 +1,35 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Possible bug with _Static_assert & sparse
-Date: Fri, 1 Aug 2014 22:29:04 -0700
-Message-ID: <CANeU7QkfSiU6WX_TND++E=zWNBeWWPTj7F722Kij1q=tKqmzgQ@mail.gmail.com>
-References: <CADz3at1Hz5oiWT2MZvK2zOrtu7=1QYvny8RNE+QnoTOSJWHqWQ@mail.gmail.com>
+Subject: Re: Designated initializers for fields in anonymous structs and unions
+Date: Sat, 2 Aug 2014 01:27:23 -0700
+Message-ID: <CANeU7Q=11kDQdW7=2m6UwCzf6pcQU05stuSp+ysPus5d1oneJA@mail.gmail.com>
+References: <20140731181006.GA13180@cloud>
+	<CA+55aFxptOTqCR9b0o8sEKwzyQOU0rfKTptRY5s=j5R_X=UdUg@mail.gmail.com>
+	<CA+55aFwg=yuR6Ro1O3g50Y1QR-hPeW5y_BLQ18go_DoX9SZe6Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=089e0158b2ccc4407804ff9ec8cf
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f53.google.com ([209.85.192.53]:53183 "EHLO
-	mail-qg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750734AbaHBF3G (ORCPT
+Received: from mail-qg0-f44.google.com ([209.85.192.44]:55204 "EHLO
+	mail-qg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750938AbaHBI1Y (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 2 Aug 2014 01:29:06 -0400
-Received: by mail-qg0-f53.google.com with SMTP id q107so6736400qgd.40
-        for <linux-sparse@vger.kernel.org>; Fri, 01 Aug 2014 22:29:05 -0700 (PDT)
-In-Reply-To: <CADz3at1Hz5oiWT2MZvK2zOrtu7=1QYvny8RNE+QnoTOSJWHqWQ@mail.gmail.com>
+	Sat, 2 Aug 2014 04:27:24 -0400
+Received: by mail-qg0-f44.google.com with SMTP id e89so6910137qgf.17
+        for <linux-sparse@vger.kernel.org>; Sat, 02 Aug 2014 01:27:23 -0700 (PDT)
+In-Reply-To: <CA+55aFwg=yuR6Ro1O3g50Y1QR-hPeW5y_BLQ18go_DoX9SZe6Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Mike Holmes <mike.holmes@linaro.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, John Keeping <john@keeping.me.uk>
 
---089e0158b2ccc4407804ff9ec8cf
-Content-Type: text/plain; charset=ISO-8859-1
+On Thu, Jul 31, 2014 at 11:50 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+> That leaves just my last patch ("Fix scoping of extern") as being not
+> in the sparse tree, and that's irrelevant for the union initializer
+> thing.
 
-On Wed, Jul 30, 2014 at 10:32 AM, Mike Holmes <mike.holmes@linaro.org> wrote:
-> Hi
->
-> I wondered if the following sparse error indication was expected
-> behaviour or if it is a bug,
-> I would not expect sparse to error with "got 9"
->
->
-> $ cat static.c
-> #include <stdio.h>
->
-> #define fake 9
-> _Static_assert( fake > 8, "test message");
->
-
-
-I create a patch to parse the _Static_assert and static_assert.
-Because _Static_assert can happen on the top level declare. It is
-not really a statement. My patch is not complete because
-parse_static_assert() does not save the parsing result for later
-evaluation. I need to figure out where to store it because it is
-not a statement and it has no effect on back ends. Suggestions
-are welcome.
+I just apply that without the "FIXME" part. That two lines are from an incorrect
+fix for the external inline bug. I just remove it for now. Currently
+sparse will fail
+at the external inline test. I will fix that in a separate patch.
 
 Chris
-
---089e0158b2ccc4407804ff9ec8cf
-Content-Type: text/x-patch; charset=US-ASCII; name="static-assert.patch"
-Content-Disposition: attachment; filename="static-assert.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_hyci1lzx0
-
-ZGlmZiAtLWdpdCBhL3BhcnNlLmMgYi9wYXJzZS5jCmluZGV4IDU1YTU3YTcuLjU5ZmM5MzQgMTAw
-NjQ0Ci0tLSBhL3BhcnNlLmMKKysrIGIvcGFyc2UuYwpAQCAtNzMsNiArNzMsOCBAQCBzdGF0aWMg
-c3RydWN0IHRva2VuICpwYXJzZV9jb250ZXh0X3N0YXRlbWVudChzdHJ1Y3QgdG9rZW4gKnRva2Vu
-LCBzdHJ1Y3Qgc3RhdGVtZQogc3RhdGljIHN0cnVjdCB0b2tlbiAqcGFyc2VfcmFuZ2Vfc3RhdGVt
-ZW50KHN0cnVjdCB0b2tlbiAqdG9rZW4sIHN0cnVjdCBzdGF0ZW1lbnQgKnN0bXQpOwogc3RhdGlj
-IHN0cnVjdCB0b2tlbiAqcGFyc2VfYXNtX3N0YXRlbWVudChzdHJ1Y3QgdG9rZW4gKnRva2VuLCBz
-dHJ1Y3Qgc3RhdGVtZW50ICpzdG10KTsKIHN0YXRpYyBzdHJ1Y3QgdG9rZW4gKnRvcGxldmVsX2Fz
-bV9kZWNsYXJhdGlvbihzdHJ1Y3QgdG9rZW4gKnRva2VuLCBzdHJ1Y3Qgc3ltYm9sX2xpc3QgKips
-aXN0KTsKK3N0YXRpYyBzdHJ1Y3QgdG9rZW4gKnBhcnNlX3N0YXRpY19hc3NlcnRfc3RhdGVtZW50
-KHN0cnVjdCB0b2tlbiAqdG9rZW4sIHN0cnVjdCBzdGF0ZW1lbnQgKnN0bXQpOworc3RhdGljIHN0
-cnVjdCB0b2tlbiAqdG9wbGV2ZWxfc3RhdGljX2Fzc2VydF9kZWNsYXJhdGlvbihzdHJ1Y3QgdG9r
-ZW4gKnRva2VuLCBzdHJ1Y3Qgc3ltYm9sX2xpc3QgKipsaXN0KTsKIAogdHlwZWRlZiBzdHJ1Y3Qg
-dG9rZW4gKmF0dHJfdChzdHJ1Y3QgdG9rZW4gKiwgc3RydWN0IHN5bWJvbCAqLAogCQkJICAgICBz
-dHJ1Y3QgZGVjbF9zdGF0ZSAqKTsKQEAgLTMwOCw2ICszMTAsMTEgQEAgc3RhdGljIHN0cnVjdCBz
-eW1ib2xfb3AgYXNtX29wID0gewogCS50b3BsZXZlbCA9IHRvcGxldmVsX2FzbV9kZWNsYXJhdGlv
-biwKIH07CiAKK3N0YXRpYyBzdHJ1Y3Qgc3ltYm9sX29wIHN0YXRpY19hc3NlcnRfb3AgPSB7CisJ
-LnN0YXRlbWVudCA9IHBhcnNlX3N0YXRpY19hc3NlcnRfc3RhdGVtZW50LAorCS50b3BsZXZlbCA9
-IHRvcGxldmVsX3N0YXRpY19hc3NlcnRfZGVjbGFyYXRpb24sCit9OworCiBzdGF0aWMgc3RydWN0
-IHN5bWJvbF9vcCBwYWNrZWRfb3AgPSB7CiAJLmF0dHJpYnV0ZSA9IGF0dHJpYnV0ZV9wYWNrZWQs
-CiB9OwpAQCAtNDYwLDYgKzQ2Nyw4IEBAIHN0YXRpYyBzdHJ1Y3QgaW5pdF9rZXl3b3JkIHsKIAl7
-ICJhc20iLAlOU19LRVlXT1JELCAub3AgPSAmYXNtX29wIH0sCiAJeyAiX19hc20iLAlOU19LRVlX
-T1JELCAub3AgPSAmYXNtX29wIH0sCiAJeyAiX19hc21fXyIsCU5TX0tFWVdPUkQsIC5vcCA9ICZh
-c21fb3AgfSwKKwl7ICJzdGF0aWNfYXNzZXJ0IiwgTlNfS0VZV09SRCwgLm9wID0gJnN0YXRpY19h
-c3NlcnRfb3AgfSwKKwl7ICJfU3RhdGljX2Fzc2VydCIsIE5TX0tFWVdPUkQsIC5vcCA9ICZzdGF0
-aWNfYXNzZXJ0X29wIH0sCiAKIAkvKiBBdHRyaWJ1dGUgKi8KIAl7ICJwYWNrZWQiLAlOU19LRVlX
-T1JELCAub3AgPSAmcGFja2VkX29wIH0sCkBAIC0yMDAzLDYgKzIwMTIsMjkgQEAgc3RhdGljIHN0
-cnVjdCB0b2tlbiAqcGFyc2VfYXNtX2RlY2xhcmF0b3Ioc3RydWN0IHRva2VuICp0b2tlbiwgc3Ry
-dWN0IGRlY2xfc3RhdGUKIAlyZXR1cm4gdG9rZW47CiB9CiAKK3N0YXRpYyBzdHJ1Y3QgdG9rZW4g
-KnBhcnNlX3N0YXRpY19hc3NlcnQoc3RydWN0IHRva2VuICogdG9rZW4pCit7CisJc3RydWN0IGV4
-cHJlc3Npb24gKmV4cHIgPSBOVUxMOworCisJdG9rZW4gPSBleHBlY3QodG9rZW4tPm5leHQsICco
-JywgImFmdGVyIHN0YXRpYyBhc3NlcnQiKTsKKwl0b2tlbiA9IGNvbmRpdGlvbmFsX2V4cHJlc3Np
-b24odG9rZW4sICZleHByKTsKKwl0b2tlbiA9IGV4cGVjdCh0b2tlbiwgJywnLCAiYWZ0ZXIgY29u
-c3RhbnQgZXhwcmVzc2lvbiBvZiBzdGF0aWMgYXNzZXJ0Iik7CisJdG9rZW4gPSBwYXJzZV9leHBy
-ZXNzaW9uKHRva2VuLCAmZXhwcik7CisJdG9rZW4gPSBleHBlY3QodG9rZW4sICcpJywgImFmdGVy
-IHN0YXRpYyBhc3NlcnQiKTsKKwlyZXR1cm4gZXhwZWN0KHRva2VuLCAnOycsICJhdCBlbmQgb2Yg
-c3RhdGljIGFzc2VydCIpOworfQorCitzdGF0aWMgc3RydWN0IHRva2VuICpwYXJzZV9zdGF0aWNf
-YXNzZXJ0X3N0YXRlbWVudChzdHJ1Y3QgdG9rZW4gKnRva2VuLCBzdHJ1Y3Qgc3RhdGVtZW50ICpz
-dG10KQoreworCXJldHVybiBwYXJzZV9zdGF0aWNfYXNzZXJ0KHRva2VuKTsKK30KKworc3RhdGlj
-IHN0cnVjdCB0b2tlbiAqdG9wbGV2ZWxfc3RhdGljX2Fzc2VydF9kZWNsYXJhdGlvbihzdHJ1Y3Qg
-dG9rZW4gKnRva2VuLCBzdHJ1Y3Qgc3ltYm9sX2xpc3QgKipsaXN0KQoreworCXJldHVybiBwYXJz
-ZV9zdGF0aWNfYXNzZXJ0KHRva2VuKTsKK30KKworCiAvKiBNYWtlIGEgc3RhdGVtZW50IG91dCBv
-ZiBhbiBleHByZXNzaW9uICovCiBzdGF0aWMgc3RydWN0IHN0YXRlbWVudCAqbWFrZV9zdGF0ZW1l
-bnQoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIpCiB7Cg==
---089e0158b2ccc4407804ff9ec8cf--
