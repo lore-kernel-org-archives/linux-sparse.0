@@ -1,104 +1,101 @@
-From: josh@joshtriplett.org
-Subject: Re: [PATCH 1/5] Add __designated_init, wrapping
- __attribute__((designated_init))
-Date: Fri, 1 Aug 2014 14:36:17 -0700
-Message-ID: <20140801213617.GB20310@cloud>
-References: <3130b0553b15518e3bef6d14c80280beed0f5ff9.1406850006.git.josh@joshtriplett.org>
- <20140801134529.40b46e92a48d9bf0c0abc139@linux-foundation.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Designated initializers for fields in anonymous structs and unions
+Date: Fri, 1 Aug 2014 18:16:08 -0700
+Message-ID: <CA+55aFwfN1L6U=6+_a-Ue_Z6tPNfphKkpidtdD06zs+tHLPyJQ@mail.gmail.com>
+References: <20140731181006.GA13180@cloud>
+	<CA+55aFwinxO5H=5Rtgz37AuOCTHBDWJ6mVRU0HX+fiGP9JRa1Q@mail.gmail.com>
+	<CA+55aFwhz6aHV145jLGJx9MH6Nb67TdHwE=Zz_0Vu4u6L8A7Dw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kbuild-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140801134529.40b46e92a48d9bf0c0abc139@linux-foundation.org>
-Sender: linux-kbuild-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: "J. Bruce Fields" <bfields@fieldses.org>, Alexander Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Ingo Molnar <mingo@redhat.com>, Jeff Layton <jlayton@poochiereds.net>, Michal Marek <mmarek@suse.cz>, Neil Brown <neilb@suse.de>, Steven Rostedt <rostedt@goodmis.org>, linux-api@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-raid@vger.kernel.org, linux-sparse@vger.kernel.org
+Content-Type: multipart/mixed; boundary=001a1133614e2683ab04ff9b40e6
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-vc0-f170.google.com ([209.85.220.170]:42025 "EHLO
+	mail-vc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751334AbaHBBQJ (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 1 Aug 2014 21:16:09 -0400
+Received: by mail-vc0-f170.google.com with SMTP id lf12so7979573vcb.1
+        for <linux-sparse@vger.kernel.org>; Fri, 01 Aug 2014 18:16:08 -0700 (PDT)
+In-Reply-To: <CA+55aFwhz6aHV145jLGJx9MH6Nb67TdHwE=Zz_0Vu4u6L8A7Dw@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>, Chris Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 01, 2014 at 01:45:29PM -0700, Andrew Morton wrote:
-> On Thu, 31 Jul 2014 16:47:23 -0700 Josh Triplett <josh@joshtriplett.org> wrote:
-> 
-> > GCC 4.10 and newer, and Sparse, supports
-> > __attribute__((designated_init)), which marks a structure as requiring
-> > a designated initializer rather than a positional one.  This helps
-> > reduce churn and errors when used with _ops structures and similar
-> > structures designed for future extension.
-> > 
-> > Add a wrapper __designated_init, which turns into
-> > __attribute__((designated_init)) for Sparse or sufficiently new GCC.
-> > Enable the corresponding warning as an error.
-> > 
-> > The following semantic patch can help mark structures containing
-> > function pointers as requiring designated initializers:
-> > 
-> > @@
-> > identifier I, f;
-> > type T;
-> > @@
-> > 
-> > struct I {
-> > 	...
-> > 	T (*f)(...);
-> > 	...
-> > }
-> > + __designated_init
-> 
-> hm, dunno about this.
-> 
-> I think that the kernel should always use designated initializers
-> everywhere.  Perhaps there are a few special cases where positional
-> initializers provide a superior result but I'm not sure where those
-> might be.
-> 
-> In which case what we should do is to teach sparse to warn about
-> positional initializers then go fix them all up (lol).  After that
-> process is complete, this __designated_init tag would be just noise.
-> 
-> To support this perhaps a sparse tag would be needed which says
-> "positional initializers are OK here".  This way we're adding the
-> annotation to the exceptional cases, not to the common cases.
+--001a1133614e2683ab04ff9b40e6
+Content-Type: text/plain; charset=UTF-8
 
-Before submitting this series, I actually used coccinelle to
-automatically add __designated_init to nearly a thousand structures
-(just in include/linux/ alone), and did a build with that.  Even just
-adding it to structures with function pointers, some cases produce a
-*huge* number of warnings.  I think it might make sense to work our way
-through those warnings, but "go fix them all up" would be a gargantuan
-effort.  (For an idea of scale: there were more warnings about
-positional initialization than everything other warning combined, by a
-substantial factor, and that's just from changing a few hundred
-structures.)
+On Thu, Jul 31, 2014 at 7:41 PM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> Hmm. It exposes other problems.
+>
+> For example, the fact that we look up the identifier now exposes the
+> fact that "first_subobject()" creates this dummy "EXPR_IDENTIFIER"
+> expression that has no identifier. That will then cause
+> "find_identifier()" to fail, which in turn causes convert_ident() to
+> fail. Resulting in the parse tree having remaining EXPR_IDENTIFIER
+> nodes, which will later result in "unknown expression (25,0)" errors.
+>
+> That's easy enough to fix with just adding the proper initializer, ie
+>
+>     new->expr_ident = field->ident;
+>
+> to first_subobject().
 
-I'm not at all convinced that we want to universally enforce designated
-initializers *yet*.  They make sense for _ops structures and other
-structures that contain function pointers (which is a small subset), but
-for many other structures they just add a large amount of noise to
-initialization.  If we could say "automatically add __designated_init to
-structures matching these criteria", that could work, but "all
-structures" not so much.  (For instance, a structure with a single
-field, or two fields of incompatible types with an intuitive ordering,
-doesn't gain much value from designated initialization.)
+Actually, sadly, while that worked for my test-cases (and for Josh's
+case), it turns out to really *not* work in general: the dummy
+EXPR_IDENTIFIER that we create may end up referring to a unnamed
+union, which doesn't *have* an ident associated with it.
 
-Now, some cases may make sense to fix despite the large volume.  For
-instance, many users of dmi_system_id initialize it positionally, and
-shouldn't; I've already written patches for quite a few of them, with
-many more to go.  But, for instance, obs_kernel_param seems much less
-worthwhile to fix, because we shouldn't add any new instances of it, and
-we likely won't ever extend it.  The value in fixing this issue mostly
-comes not with the current code, but with future changes to the
-structure.  (And, as always happens with this kind of change, we'll end
-up with a few holdouts who don't want to change their code, which will
-stop us from eliminating the warning completely.)
+This only really triggers when you mix named initializers with then
+relying on the whole "initialize the next one without a name", but
+that does happen. And it fundamentally breaks that whole "use
+find_identifier()" approach.
 
-In the course of introducing this change, we'll end up fixing a large
-number of positional init warnings.  If in the course of doing so, it
-starts making sense to enforce it everywhere, it seems easy enough to
-sed away all the __designated_init tags.  But in terms of noise, the
-actual additions of __designated_init will pale in comparison to the
-patches fixing positional initializers.
+So convert_ident() really cannot use find_indent(), and really does
+have to use "sym->offset". But that doesn't work for anonymous union
+members, because that offset was the offset within the anonymous
+union, not the parent structure.
 
-Finally, by migrating over to this incrementally, structure by
-structure, we can safely make the warning an error, which we could not
-do if we applied it to every struct immediately.
+However, the fix is "simple". We can just say that anonymous
+union/structure member offsets have to be the offsets within the
+parent union instead, and fix things up. So how about a patch like
+this *instead* of the previous patch..
 
-- Josh Triplett
+                 Linus
+
+--001a1133614e2683ab04ff9b40e6
+Content-Type: text/plain; charset=US-ASCII; name="patch.diff"
+Content-Disposition: attachment; filename="patch.diff"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hyc91eyk0
+
+IGV2YWx1YXRlLmMgfCAgMiArLQogc3ltYm9sLmMgICB8IDE2ICsrKysrKysrKysrKysrKysKIDIg
+ZmlsZXMgY2hhbmdlZCwgMTcgaW5zZXJ0aW9ucygrKSwgMSBkZWxldGlvbigtKQoKZGlmZiAtLWdp
+dCBhL2V2YWx1YXRlLmMgYi9ldmFsdWF0ZS5jCmluZGV4IDAzOTkyZDAzYWUxZC4uNzgxNTBmODNh
+MTlmIDEwMDY0NAotLS0gYS9ldmFsdWF0ZS5jCisrKyBiL2V2YWx1YXRlLmMKQEAgLTE4OTgsNyAr
+MTg5OCw3IEBAIHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sICpmaW5kX2lkZW50aWZpZXIoc3RydWN0IGlk
+ZW50ICppZGVudCwgc3RydWN0IHN5bWJvbF9saXN0ICpfCiAJCQkJc3ViID0gZmluZF9pZGVudGlm
+aWVyKGlkZW50LCBjdHlwZS0+c3ltYm9sX2xpc3QsIG9mZnNldCk7CiAJCQkJaWYgKCFzdWIpCiAJ
+CQkJCWNvbnRpbnVlOwotCQkJCSpvZmZzZXQgKz0gc3ltLT5vZmZzZXQ7CisJCQkJKm9mZnNldCA9
+IHN5bS0+b2Zmc2V0OwogCQkJCXJldHVybiBzdWI7CiAJCQl9CQogCQl9CmRpZmYgLS1naXQgYS9z
+eW1ib2wuYyBiL3N5bWJvbC5jCmluZGV4IGEyNzMxMzQ4YTAxMS4uMzJhZjY0MDUwYTY0IDEwMDY0
+NAotLS0gYS9zeW1ib2wuYworKysgYi9zeW1ib2wuYwpAQCAtMTE2LDYgKzExNiwxOCBAQCBzdGF0
+aWMgaW50IGJpdGZpZWxkX2Jhc2Vfc2l6ZShzdHJ1Y3Qgc3ltYm9sICpzeW0pCiAJcmV0dXJuIHN5
+bS0+Yml0X3NpemU7CiB9CiAKK3N0YXRpYyB2b2lkIHVwZGF0ZV9zeW1ib2xfb2Zmc2V0cyhzdHJ1
+Y3Qgc3ltYm9sICpzeW0sIHVuc2lnbmVkIGludCBvZmZzZXQpCit7CisJc3RydWN0IHN5bWJvbCAq
+ZmllbGQ7CisKKwlpZiAoc3ltLT50eXBlICE9IFNZTV9TVFJVQ1QgJiYgc3ltLT50eXBlICE9IFNZ
+TV9VTklPTikKKwkJcmV0dXJuOworCUZPUl9FQUNIX1BUUihzeW0tPnN5bWJvbF9saXN0LCBmaWVs
+ZCkgeworCQlmaWVsZC0+b2Zmc2V0ICs9IG9mZnNldDsKKwkJdXBkYXRlX3N5bWJvbF9vZmZzZXRz
+KGZpZWxkLCBvZmZzZXQpOworCX0gRU5EX0ZPUl9FQUNIX1BUUihmaWVsZCk7Cit9CisKIC8qCiAg
+KiBTdHJ1Y3R1cmVzIGFyZSBhIGJpdCBtb3JlIGludGVyZXN0aW5nIHRvIGxheSBvdXQKICAqLwpA
+QCAtMTc0LDYgKzE4NiwxMCBAQCBzdGF0aWMgdm9pZCBsYXlfb3V0X3N0cnVjdChzdHJ1Y3Qgc3lt
+Ym9sICpzeW0sIHN0cnVjdCBzdHJ1Y3RfdW5pb25faW5mbyAqaW5mbykKIAliaXRfc2l6ZSA9IChi
+aXRfc2l6ZSArIGFsaWduX2JpdF9tYXNrKSAmIH5hbGlnbl9iaXRfbWFzazsKIAlzeW0tPm9mZnNl
+dCA9IGJpdHNfdG9fYnl0ZXMoYml0X3NpemUpOwogCisJLyogSWYgaXQncyBhbiB1bm5hbWVkIHN0
+cnVjdCBvciB1bmlvbiwgdXBkYXRlIHRoZSBvZmZzZXRzIG9mIHRoZSBzdWItbWVtYmVycyAqLwor
+CWlmIChzeW0tPm9mZnNldCAmJiAhc3ltLT5pZGVudCkKKwkJdXBkYXRlX3N5bWJvbF9vZmZzZXRz
+KHN5bSwgc3ltLT5vZmZzZXQpOworCiAJaW5mby0+Yml0X3NpemUgPSBiaXRfc2l6ZSArIGJhc2Vf
+c2l6ZTsKIAkvLyB3YXJuaW5nIChzeW0tPnBvcywgInJlZ3VsYXI6IG9mZnNldD0lZCIsIHN5bS0+
+b2Zmc2V0KTsKIH0K
+--001a1133614e2683ab04ff9b40e6--
