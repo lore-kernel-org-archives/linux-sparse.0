@@ -1,83 +1,96 @@
 From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: [PATCH 05/10] Makefile: suppress error message from shell
-Date: Mon, 04 Aug 2014 19:37:31 +0100
-Message-ID: <53DFD2EB.3090204@ramsay1.demon.co.uk>
+Subject: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is disabled
+Date: Mon, 04 Aug 2014 19:38:24 +0100
+Message-ID: <53DFD320.2050903@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta009.mxout.tbr.inty.net ([91.221.168.50]:39253 "EHLO
+Received: from mdfmta009.mxout.tbr.inty.net ([91.221.168.50]:39340 "EHLO
 	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1752156AbaHDShe (ORCPT
+	with ESMTP id S1751046AbaHDSi1 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Aug 2014 14:37:34 -0400
+	Mon, 4 Aug 2014 14:38:27 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
 
-In particular, on systems which do not have 'llvm-config' installed,
-every invocation of make issues the following messages:
-
-    /bin/sh: llvm-config: command not found
-    make: llvm-config: Command not found
-
-A simple solution would be to suppress these messages by redirecting
-stderr to the bit-bucket within the definitions of HAVE_LLVM_VERSION
-and LLVM_VERSION.
-
-As an alternative, however, we move the definition of LLVM_VERSION
-down the file within the HAVE_LLVM conditional, which ensures that
-the 'llvm-config' command exists. In addition, the HAVE_LLVM_VERSION
-variable is replaced with an equivalent conditional expression.
-
 Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 ---
- Makefile | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ validation/test-suite | 25 +++++++++++++++++++++++--
+ 1 file changed, 23 insertions(+), 2 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index f453ded..1795905 100644
---- a/Makefile
-+++ b/Makefile
-@@ -32,8 +32,6 @@ HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
- HAVE_GTK2:=$(shell pkg-config --exists gtk+-2.0 2>/dev/null && echo 'yes')
- LLVM_CONFIG:=llvm-config
- HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
--HAVE_LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version | grep "^[3-9].*" >/dev/null 2>&1 && echo yes)
--LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version)
+diff --git a/validation/test-suite b/validation/test-suite
+index 3c011c6..0142701 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -7,12 +7,18 @@ default_cmd="sparse \$file"
+ tests_list=`find . -name '*.c' | sed -e 's#^\./\(.*\)#\1#' | sort`
+ prog_name=`basename $0`
  
- GCC_BASE = $(shell $(CC) --print-file-name=)
- BASIC_CFLAGS = -DGCC_BASE=\"$(GCC_BASE)\"
-@@ -76,13 +74,9 @@ else
- $(warning Your system does not have libgtk2, disabling test-inspect)
- endif
++if [ ! -x "$default_path/sparse-llvm" ]; then
++	disabled_cmds="sparsec sparsei sparse-llvm"
++fi
++
+ # counts:
+ #	- tests that have not been converted to test-suite format
++#	- tests that are disabled
+ #	- tests that passed
+ #	- tests that failed
+ #	- tests that failed but are known to fail
+ unhandled_tests=0
++disabled_tests=0
+ ok_tests=0
+ ko_tests=0
+ known_ko_tests=0
+@@ -80,6 +86,7 @@ echo "    help                       prints usage"
+ #	- 0 if the test passed,
+ #	- 1 if it failed,
+ #	- 2 if it is not a "test-suite" test.
++#	- 3 if the test is disabled.
+ do_test()
+ {
+ 	test_failed=0
+@@ -95,8 +102,6 @@ do_test()
+ 	fi
+ 	test_name=$last_result
  
--ifneq ($(HAVE_LLVM),yes)
--$(warning Your system does not have llvm, disabling sparse-llvm)
--else
--ifneq ($(HAVE_LLVM_VERSION),yes)
--$(warning LLVM 3.0 or later required. Your system has version $(LLVM_VERSION) installed.)
--HAVE_LLVM=no
--else
-+ifeq ($(HAVE_LLVM),yes)
-+LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version)
-+ifeq ($(shell expr "$(LLVM_VERSION)" : '[3-9]\.'),2)
- LLVM_PROGS := sparse-llvm
- $(LLVM_PROGS): LD := g++
- LLVM_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
-@@ -92,7 +86,11 @@ PROGRAMS += $(LLVM_PROGS)
- INST_PROGRAMS += sparse-llvm sparsec
- sparse-llvm.o: BASIC_CFLAGS += $(LLVM_CFLAGS)
- sparse-llvm_EXTRA_OBJS := $(LLVM_LIBS) $(LLVM_LDFLAGS)
-+else
-+$(warning LLVM 3.0 or later required. Your system has version $(LLVM_VERSION) installed.)
- endif
-+else
-+$(warning Your system does not have llvm, disabling sparse-llvm)
- endif
+-	echo "     TEST    $test_name ($file)"
+-
+ 	# does the test provide a specific command ?
+ 	cmd=`eval echo $default_path/$default_cmd`
+ 	get_value "check-command" $file
+@@ -104,6 +109,19 @@ do_test()
+ 		last_result=`echo $last_result | sed -e 's/^ *//'`
+ 		cmd=`eval echo $default_path/$last_result`
+ 	fi
++
++	# check for disabled commands
++	for i in $disabled_cmds; do
++		case "$cmd" in
++		*$i*)
++			disabled_tests=`expr $disabled_tests + 1`
++			return 3
++			;;
++		esac
++	done
++
++	echo "     TEST    $test_name ($file)"
++
+ 	verbose "Using command       : $cmd"
  
- LIB_H=    token.h parse.h lib.h symbol.h scope.h expression.h target.h \
+ 	# grab the expected exit value
+@@ -168,6 +186,9 @@ do_test_suite()
+ 	if [ "$unhandled_tests" -ne "0" ]; then
+ 		echo "$unhandled_tests tests could not be handled by $prog_name"
+ 	fi
++	if [ "$disabled_tests" -ne "0" ]; then
++		echo "$disabled_tests tests were disabled"
++	fi
+ }
+ 
+ ##
 -- 
 2.0.0
