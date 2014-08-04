@@ -1,16 +1,21 @@
 From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is disabled
-Date: Mon, 04 Aug 2014 19:38:24 +0100
-Message-ID: <53DFD320.2050903@ramsay1.demon.co.uk>
+Subject: [PATCH 01/10] Add the __restrict__ keyword
+Date: Mon, 04 Aug 2014 19:32:50 +0100
+Message-ID: <53DFD1D2.5050600@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta009.mxout.tbr.inty.net ([91.221.168.50]:39340 "EHLO
+Received: from mdfmta010.mxout.tbr.inty.net ([91.221.168.51]:36096 "EHLO
 	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751046AbaHDSi1 (ORCPT
+	with ESMTP id S1751125AbaHDSif (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Aug 2014 14:38:27 -0400
+	Mon, 4 Aug 2014 14:38:35 -0400
+Received: from smtp.demon.co.uk (unknown [127.0.0.1])
+	(using TLSv1 with cipher ADH-AES256-SHA (256/256 bits))
+	(No client certificate requested)
+	by mdfmta010.tbr.inty.net (Postfix) with ESMTP id 59C3C6F8CE8
+	for <linux-sparse@vger.kernel.org>; Mon,  4 Aug 2014 17:56:37 +0100 (BST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
@@ -19,78 +24,56 @@ Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
 Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 ---
- validation/test-suite | 25 +++++++++++++++++++++++--
- 1 file changed, 23 insertions(+), 2 deletions(-)
+ ident-list.h          | 2 +-
+ parse.c               | 3 ++-
+ validation/reserved.c | 1 +
+ 3 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/validation/test-suite b/validation/test-suite
-index 3c011c6..0142701 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -7,12 +7,18 @@ default_cmd="sparse \$file"
- tests_list=`find . -name '*.c' | sed -e 's#^\./\(.*\)#\1#' | sort`
- prog_name=`basename $0`
+diff --git a/ident-list.h b/ident-list.h
+index c0fc18f..d5a145f 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -86,7 +86,7 @@ IDENT(stdcall); IDENT(__stdcall__);
+ IDENT(fastcall); IDENT(__fastcall__);
+ IDENT(dllimport); IDENT(__dllimport__);
+ IDENT(dllexport); IDENT(__dllexport__);
+-IDENT(restrict); IDENT(__restrict);
++IDENT(restrict); IDENT(__restrict); IDENT(__restrict__);
+ IDENT(artificial); IDENT(__artificial__);
+ IDENT(leaf); IDENT(__leaf__);
+ IDENT(vector_size); IDENT(__vector_size__);
+diff --git a/parse.c b/parse.c
+index 55a57a7..9767e59 100644
+--- a/parse.c
++++ b/parse.c
+@@ -435,6 +435,7 @@ static struct init_keyword {
+ 	/* Ignored for now.. */
+ 	{ "restrict",	NS_TYPEDEF, .op = &restrict_op},
+ 	{ "__restrict",	NS_TYPEDEF, .op = &restrict_op},
++	{ "__restrict__",	NS_TYPEDEF, .op = &restrict_op},
  
-+if [ ! -x "$default_path/sparse-llvm" ]; then
-+	disabled_cmds="sparsec sparsei sparse-llvm"
-+fi
-+
- # counts:
- #	- tests that have not been converted to test-suite format
-+#	- tests that are disabled
- #	- tests that passed
- #	- tests that failed
- #	- tests that failed but are known to fail
- unhandled_tests=0
-+disabled_tests=0
- ok_tests=0
- ko_tests=0
- known_ko_tests=0
-@@ -80,6 +86,7 @@ echo "    help                       prints usage"
- #	- 0 if the test passed,
- #	- 1 if it failed,
- #	- 2 if it is not a "test-suite" test.
-+#	- 3 if the test is disabled.
- do_test()
- {
- 	test_failed=0
-@@ -95,8 +102,6 @@ do_test()
- 	fi
- 	test_name=$last_result
+ 	/* Storage class */
+ 	{ "auto",	NS_TYPEDEF, .op = &auto_op },
+@@ -1553,7 +1554,7 @@ static struct token *abstract_array_declarator(struct token *token, struct symbo
  
--	echo "     TEST    $test_name ($file)"
--
- 	# does the test provide a specific command ?
- 	cmd=`eval echo $default_path/$default_cmd`
- 	get_value "check-command" $file
-@@ -104,6 +109,19 @@ do_test()
- 		last_result=`echo $last_result | sed -e 's/^ *//'`
- 		cmd=`eval echo $default_path/$last_result`
- 	fi
-+
-+	# check for disabled commands
-+	for i in $disabled_cmds; do
-+		case "$cmd" in
-+		*$i*)
-+			disabled_tests=`expr $disabled_tests + 1`
-+			return 3
-+			;;
-+		esac
-+	done
-+
-+	echo "     TEST    $test_name ($file)"
-+
- 	verbose "Using command       : $cmd"
+ 	token = abstract_array_static_declarator(token, &has_static);
  
- 	# grab the expected exit value
-@@ -168,6 +186,9 @@ do_test_suite()
- 	if [ "$unhandled_tests" -ne "0" ]; then
- 		echo "$unhandled_tests tests could not be handled by $prog_name"
- 	fi
-+	if [ "$disabled_tests" -ne "0" ]; then
-+		echo "$disabled_tests tests were disabled"
-+	fi
- }
- 
- ##
+-	if (match_idents(token, &restrict_ident, &__restrict_ident, NULL))
++	if (match_idents(token, &restrict_ident, &__restrict_ident, &__restrict___ident, NULL))
+ 		token = abstract_array_static_declarator(token->next, &has_static);
+ 	token = parse_expression(token, &expr);
+ 	sym->array_size = expr;
+diff --git a/validation/reserved.c b/validation/reserved.c
+index caacd21..e5d7af8 100644
+--- a/validation/reserved.c
++++ b/validation/reserved.c
+@@ -30,6 +30,7 @@ reserved.c:8:12: error: Trying to use reserved word '__const' as identifier
+ reserved.c:9:12: error: Trying to use reserved word '__const__' as identifier
+ reserved.c:10:12: error: Trying to use reserved word 'restrict' as identifier
+ reserved.c:11:12: error: Trying to use reserved word '__restrict' as identifier
++reserved.c:12:12: error: Trying to use reserved word '__restrict__' as identifier
+ reserved.c:13:12: error: Trying to use reserved word 'typedef' as identifier
+ reserved.c:14:12: error: Trying to use reserved word '__typeof' as identifier
+ reserved.c:15:12: error: Trying to use reserved word '__typeof__' as identifier
 -- 
 2.0.0
