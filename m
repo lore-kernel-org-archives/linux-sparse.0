@@ -1,84 +1,48 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Designated initializers for fields in anonymous structs and unions
-Date: Wed, 6 Aug 2014 02:15:18 -0700
-Message-ID: <CANeU7QkJdCWZggG=XnsdD54+2FUvG9SKLKG7141s62jOesJ_nA@mail.gmail.com>
-References: <20140731181006.GA13180@cloud>
-	<CA+55aFwinxO5H=5Rtgz37AuOCTHBDWJ6mVRU0HX+fiGP9JRa1Q@mail.gmail.com>
-	<CA+55aFwhz6aHV145jLGJx9MH6Nb67TdHwE=Zz_0Vu4u6L8A7Dw@mail.gmail.com>
-	<CA+55aFwfN1L6U=6+_a-Ue_Z6tPNfphKkpidtdD06zs+tHLPyJQ@mail.gmail.com>
-	<CANeU7Qn4++T+GsL6pjnEem0SOWhGrvBN7TLC8p8Hjbw2xCmVbw@mail.gmail.com>
-	<CA+55aFzfdfh80o1-BUA4CqurZ_A94cbNwCxHJZi-aFdLc+hF+w@mail.gmail.com>
-	<CA+55aFzWAZ-ZQ6DSvnj6vQnwCHyDX11an1nOAo43UGaLcfshwg@mail.gmail.com>
+Subject: Re: [PATCH 01/10] Add the __restrict__ keyword
+Date: Wed, 6 Aug 2014 02:19:54 -0700
+Message-ID: <CANeU7Qkr5oX-_iLRXTt6DKD4pCwV3LoWPy9CuhQ0kk9NLz7s_Q@mail.gmail.com>
+References: <53DFD1D2.5050600@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f46.google.com ([209.85.192.46]:53634 "EHLO
-	mail-qg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750773AbaHFJPT (ORCPT
+Received: from mail-qg0-f42.google.com ([209.85.192.42]:60573 "EHLO
+	mail-qg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751792AbaHFJTz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 6 Aug 2014 05:15:19 -0400
-Received: by mail-qg0-f46.google.com with SMTP id z60so2352948qgd.33
-        for <linux-sparse@vger.kernel.org>; Wed, 06 Aug 2014 02:15:18 -0700 (PDT)
-In-Reply-To: <CA+55aFzWAZ-ZQ6DSvnj6vQnwCHyDX11an1nOAo43UGaLcfshwg@mail.gmail.com>
+	Wed, 6 Aug 2014 05:19:55 -0400
+Received: by mail-qg0-f42.google.com with SMTP id j5so2357249qga.29
+        for <linux-sparse@vger.kernel.org>; Wed, 06 Aug 2014 02:19:54 -0700 (PDT)
+In-Reply-To: <53DFD1D2.5050600@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Aug 2, 2014 at 12:53 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> On Sat, Aug 2, 2014 at 11:10 AM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
->>
->>> Actually, the "find_identifier" call inside function "check_designators" already
->>> calculate the correct offset. Only if we can pass that offset to
->>> "convert_ident()".
->>
->> I actu
-> My stupid test-case is this incredibly hacky thing:
+On Mon, Aug 4, 2014 at 11:32 AM, Ramsay Jones
+<ramsay@ramsay1.demon.co.uk> wrote:
 >
->     struct A {
->         int aa;
->         int bb;
->     };
->
->     struct S {
->         int a;
->         union {
->             int b;
->             int c;
->         } u[10];
->         int dummy;
->         union {
->             int d;
->             int e;
->         };
->     };
->
->     int fn(void)
->     {
->         struct S s = {
->             .a = 1,
->             .u[2].b = 2,
->             .dummy = 1,
->              { 3 }
->         };
->         return s.dummy*1000 + s.d*100 + s.u[2].b*10 + s.a; // 1321
->     }
->
-> where I use "./test-linearize" to verify that the initializer layout
-> matches the code generation layout (so that 'fn' function *should*
-> linearize to just a simple "ret.32 $1321", and with this patch it
-> does).
->
-> But I bet this misses some case. However, the current state wrt
-> initializer offsets really is very broken, so maybe it's ok.
->
-> Can anybody see anything wrong with it? It's reasonably simple. Every
-> place that initializes "expr->field" for an EXPR_IDENTIFIER now also
-> initializes "expr->offset".
+> -       if (match_idents(token, &restrict_ident, &__restrict_ident, NULL))
+> +       if (match_idents(token, &restrict_ident, &__restrict_ident, &__restrict___ident, NULL))
+>                 token = abstract_array_static_declarator(token->next, &has_static);
+>         token = parse_expression(token, &expr);
+>         sym->array_size = expr;
+> diff --git a/validation/reserved.c b/validation/reserved.c
+> index caacd21..e5d7af8 100644
+> --- a/validation/reserved.c
+> +++ b/validation/reserved.c
+> @@ -30,6 +30,7 @@ reserved.c:8:12: error: Trying to use reserved word '__const' as identifier
+>  reserved.c:9:12: error: Trying to use reserved word '__const__' as identifier
+>  reserved.c:10:12: error: Trying to use reserved word 'restrict' as identifier
+>  reserved.c:11:12: error: Trying to use reserved word '__restrict' as identifier
+> +reserved.c:12:12: error: Trying to use reserved word '__restrict__' as identifier
+>  reserved.c:13:12: error: Trying to use reserved word 'typedef' as identifier
+>  reserved.c:14:12: error: Trying to use reserved word '__typeof' as identifier
+>  reserved.c:15:12: error: Trying to use reserved word '__typeof__' as identifier
 
-I did not see any thing wrong with it. The only thing is it bump up the
-expression struct size. Definitely better than what we have right now.
+Can you give more test case for __restrict__? Your patch seems suggest that you
+hit some  code use "__restruct__" for abstract array declaration. Did
+that actually
+happen? I want to get some example.
 
 Chris
