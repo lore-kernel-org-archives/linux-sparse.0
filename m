@@ -1,33 +1,62 @@
-From: Thomas Graf <tgraf@suug.ch>
-Subject: Re: [PATCH] sparse: Make -Werror turn warnigns into errors
-Date: Wed, 3 Sep 2014 21:08:56 +0200
-Message-ID: <20140903190856.GC18161@pox.localdomain>
-References: <ddf8540942f71841dd90c5218da944cebef4a514.1409770383.git.tgraf@suug.ch>
- <20140903185939.GA24390@cloud>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Subject: [PATCH] sparse: treat function pointers as pointers to const data
+Date: Sun,  7 Sep 2014 13:37:39 +0200
+Message-ID: <1410089859-22957-1-git-send-email-ard.biesheuvel@linaro.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:57865 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753343AbaICTI6 (ORCPT
+Received: from mail-wg0-f51.google.com ([74.125.82.51]:44611 "EHLO
+	mail-wg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751151AbaIGLhp (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 3 Sep 2014 15:08:58 -0400
-Content-Disposition: inline
-In-Reply-To: <20140903185939.GA24390@cloud>
+	Sun, 7 Sep 2014 07:37:45 -0400
+Received: by mail-wg0-f51.google.com with SMTP id l18so13685434wgh.22
+        for <linux-sparse@vger.kernel.org>; Sun, 07 Sep 2014 04:37:43 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: josh@joshtriplett.org
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
-On 09/03/14 at 11:59am, josh@joshtriplett.org wrote:
-> This seems reasonable.  Sparse refrains from showing further warnings
-> after an error, but this turns warnings into errors, so they'll still
-> show up.
-> 
-> Not needed for this patch, but would you consider adding
-> -Werror=specific-warning support too?  (That'll need some careful
-> thought about the no-warnings-after-error logic, which may or may not
-> make sense.)
+This code snippet:
 
-Sure. I think that is definitely desirable. I wanted to collect
-feedback on the behavioural change first using a minimal patch.
+static void bar(void const *arg)
+{
+	int (*foo)(void) = arg;
+}
+
+produces the following warning:
+
+test.c:4:28: warning: incorrect type in initializer (different modifiers)
+test.c:4:28:    expected int ( *foo )( ... )
+test.c:4:28:    got void const *arg
+
+which is caused by the fact that the function pointer 'foo' is not annotated
+as being a pointer to const data. However, dereferencing a function pointer
+does not produce an lvalue, so a function pointer points to const data by
+definition, and we should treat it accordingly.
+
+Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+---
+ evaluate.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/evaluate.c b/evaluate.c
+index 66556150ddac..6428312f3e61 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -794,6 +794,14 @@ static unsigned long target_qualifiers(struct symbol *type)
+ 	unsigned long mod = type->ctype.modifiers & MOD_IGN;
+ 	if (type->ctype.base_type && type->ctype.base_type->type == SYM_ARRAY)
+ 		mod = 0;
++
++	/*
++	 * Dereferencing a function pointer does not produce an lvalue,
++	 * which means its target is implicitly 'const', and assigning
++	 * a pointer-to-const value to it is ok.
++	 */
++	if (type->ctype.base_type && type->ctype.base_type->type == SYM_FN)
++		mod |= MOD_CONST;
+ 	return mod;
+ }
+ 
+-- 
+1.8.3.2
+
