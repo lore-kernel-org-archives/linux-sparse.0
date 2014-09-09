@@ -1,80 +1,49 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: [PATCH v3] sparse: treat function pointers as pointers to const data
-Date: Mon,  8 Sep 2014 08:30:03 +0200
-Message-ID: <1410157803-3658-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Nash <nash@nash.id.au>
+Subject: Sparse doesn't seem to check __must_hold macros.
+Date: Wed, 10 Sep 2014 07:16:31 +1000
+Message-ID: <CADgd-zq55cvmV5bvXLEN8OaLaCNw4tGM2ZwS3Zufy543d_oK+w@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: multipart/mixed; boundary=047d7bf0e0a00d05940502a873d6
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f45.google.com ([74.125.82.45]:55794 "EHLO
-	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751404AbaIHGaH (ORCPT
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:37411 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751176AbaIIVQc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 8 Sep 2014 02:30:07 -0400
-Received: by mail-wg0-f45.google.com with SMTP id z12so588399wgg.28
-        for <linux-sparse@vger.kernel.org>; Sun, 07 Sep 2014 23:30:05 -0700 (PDT)
+	Tue, 9 Sep 2014 17:16:32 -0400
+Received: by mail-qc0-f170.google.com with SMTP id l6so135270qcy.15
+        for <linux-sparse@vger.kernel.org>; Tue, 09 Sep 2014 14:16:31 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org, linux-sparse@vger.kernel.org
-Cc: will.deacon@arm.com, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: linux-sparse@vger.kernel.org
 
-This code snippet:
+--047d7bf0e0a00d05940502a873d6
+Content-Type: text/plain; charset=UTF-8
 
-static void bar(void const *arg)
-{
-	int (*foo)(void) = arg;
-}
+Hello,
 
-produces the following warning:
+I was just testing sparse on a large (non-linux) code base using the
+__must_hold macro (eg __attribute__((context, 1, 1))).
 
-test.c:4:28: warning: incorrect type in initializer (different modifiers)
-test.c:4:28:    expected int ( *foo )( ... )
-test.c:4:28:    got void const *arg
+However I don't seem to be able to trigger a warning from it.
 
-which is caused by the fact that the function pointer 'foo' is not annotated
-as being a pointer to const data. However, dereferencing a function pointer
-does not produce an lvalue, so a function pointer points to const data by
-definition, and we should treat it accordingly.
+I've attached a test case below, is there some magic I need to do get sparse
+to trigger on this case.  I also note there are currently no tests in
+validation that check for this case.
 
-To avoid producing a warning on the inverse case, i.e.,
+Regards,
+nash
 
-static void bar(void)
-{
-	void *foo = bar;
-}
+--047d7bf0e0a00d05940502a873d6
+Content-Type: text/x-csrc; charset=US-ASCII; name="sparse_context.c"
+Content-Disposition: attachment; filename="sparse_context.c"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_hzvqnc7f0
 
-we only address the case where the function pointer is the target of
-an assignment.
-
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
----
-v3: add rationale for restriction to assignments to commit message
-    add R-b
-
-v2: only treat function pointers as pointers to const data when they are the
-    target of an assignment
-
- evaluate.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/evaluate.c b/evaluate.c
-index 66556150ddac..a5a830978bda 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1359,6 +1359,15 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
- 				typediff = "different address spaces";
- 				goto Err;
- 			}
-+			/*
-+			 * If this is a function pointer assignment, it is
-+			 * actually fine to assign a pointer to const data to
-+			 * it, as a function pointer points to const data
-+			 * implicitly, i.e., dereferencing it does not produce
-+			 * an lvalue.
-+			 */
-+			if (b1->type == SYM_FN)
-+				mod1 |= MOD_CONST;
- 			if (mod2 & ~mod1) {
- 				typediff = "different modifiers";
- 				goto Err;
--- 
-1.8.3.2
-
+CnN0YXRpYyBpbnQgbXVzdF9ob2xkKGludCB4KSBfX2F0dHJpYnV0ZV9fKChjb250ZXh0KDEsMSkp
+KSB7CglpbnQgejsKCglyZXR1cm4geCAqIDc7Cn0KCnN0YXRpYyBpbnQgcmVsZWFzZShpbnQgeCkg
+X19hdHRyaWJ1dGVfXygoY29udGV4dCgxLCAwKSkpIHsKCV9fY29udGV4dF9fKC0xKTsKCXJldHVy
+biAwOwp9CgpzdGF0aWMgaW50IGFjcXVpcmVzaWxlbnRseShpbnQgeCkgewoJX19jb250ZXh0X18o
+MSk7CgoJcmV0dXJuIDE7Cn0KCmludCBtYWluKGludCBhcmdjLCBjaGFyICoqYXJndikgewoJbXVz
+dF9ob2xkKDgpOwoJX19jb250ZXh0X18oMSk7CgltdXN0X2hvbGQoMCk7CglfX2NvbnRleHRfXygt
+MSk7CglyZXR1cm4gMDsKfQo=
+--047d7bf0e0a00d05940502a873d6--
