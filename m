@@ -1,76 +1,197 @@
-From: "Rustad, Mark D" <mark.d.rustad@intel.com>
-Subject: Re: [PATCH 7/7] sched: Silence nested-externs warnings
-Date: Fri, 19 Sep 2014 20:49:53 +0000
-Message-ID: <09D2323D-79B7-423A-9BA6-504112AFE104@intel.com>
+From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Subject: Re: [PATCH 3/7] atomic: Silence nested-externs warnings
+Date: Fri, 19 Sep 2014 13:53:53 -0700
+Message-ID: <1411160033.2513.28.camel@jtkirshe-mobl>
 References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
- <1411140580-20909-8-git-send-email-jeffrey.t.kirsher@intel.com>
- <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
- <11081C57-805A-44F8-9768-271DC6B27F76@intel.com> <541C94F1.9020206@nod.at>
+	 <1411140580-20909-4-git-send-email-jeffrey.t.kirsher@intel.com>
+	 <20140919204303.GF2832@worktop.localdomain>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-	boundary="Apple-Mail=_FC277461-5FEE-49C4-BFF3-B55576FF17A4";
-	protocol="application/pgp-signature"; micalg=pgp-sha1
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-zb3dReDmJd9HCh0K3LLP"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:8996 "EHLO mga09.intel.com"
+Received: from mga09.intel.com ([134.134.136.24]:58229 "EHLO mga09.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757894AbaISUuo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 19 Sep 2014 16:50:44 -0400
-In-Reply-To: <541C94F1.9020206@nod.at>
-Content-Language: en-US
+	id S932297AbaISUxz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 19 Sep 2014 16:53:55 -0400
+In-Reply-To: <20140919204303.GF2832@worktop.localdomain>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Richard Weinberger <richard@nod.at>
-Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Brian Norris <computersforpeace@gmail.com>
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Brian Norris <computersforpeace@gmail.com>
 
---Apple-Mail=_FC277461-5FEE-49C4-BFF3-B55576FF17A4
+
+--=-zb3dReDmJd9HCh0K3LLP
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=iso-8859-1
 
-On Sep 19, 2014, at 1:41 PM, Richard Weinberger <richard@nod.at> wrote:
-
-> Am 19.09.2014 22:34, schrieb Rustad, Mark D:
->> Excellent. I'll try adding an include of delayacct.h instead. My =
-patch was based on the assumption that the existing code was wanted in =
-that form for some reason, so the patch served a purpose in recognizing =
-that it isn't. So the macros have served a purpose before even being in =
-place. :-)
+On Fri, 2014-09-19 at 22:43 +0200, Peter Zijlstra wrote:
+> On Fri, Sep 19, 2014 at 08:29:36AM -0700, Jeff Kirsher wrote:
+> > From: Mark Rustad <mark.d.rustad@intel.com>
+> >=20
+> > Silence the nested-externs warnings for these, as they are
+> > truly wanted.
+> >=20
 >=20
-> I bet sched.h does not include delayacct.h for a good reason.
-> sched.h is included in a lot of files, maybe delayacct.h introduces =
-nasty dependency issues.
-> You'll find out. ;-)
+> You're patching an old tree.
 
-Right you are, but when I'm done, there will only be one extern =
-declaration for that global, which is better than more than one. I'll =
-think a little before settling on the best resolution.
+Sorry, I used Linus's latest tree (as of last night) because of number
+of the patches in the series went to various trees, so I used Linus's
+tree.
 
---=20
-Mark Rustad, Networking Division, Intel Corporation
+>=20
+> ---
+> commit 2e39465abc4b7856a0ea6fcf4f6b4668bb5db877
+> Author: Peter Zijlstra <peterz@infradead.org>
+> Date:   Mon Aug 4 12:07:15 2014 +0200
+>=20
+>     locking: Remove deprecated smp_mb__() barriers
+>    =20
+>     Its been a while and there are no in-tree users left, so remove the
+>     deprecated barriers.
+>    =20
+>     Signed-off-by: Peter Zijlstra <peterz@infradead.org>
+>     Cc: Chen, Gong <gong.chen@linux.intel.com>
+>     Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
+>     Cc: Joe Perches <joe@perches.com>
+>     Cc: John Sullivan <jsrhbz@kanargh.force9.co.uk>
+>     Cc: Linus Torvalds <torvalds@linux-foundation.org>
+>     Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+>     Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
+>     Cc: Theodore Ts'o <tytso@mit.edu>
+>     Signed-off-by: Ingo Molnar <mingo@kernel.org>
+>=20
+> diff --git a/include/linux/atomic.h b/include/linux/atomic.h
+> index fef3a80..5b08a85 100644
+> --- a/include/linux/atomic.h
+> +++ b/include/linux/atomic.h
+> @@ -3,42 +3,6 @@
+>  #define _LINUX_ATOMIC_H
+>  #include <asm/atomic.h>
+> =20
+> -/*
+> - * Provide __deprecated wrappers for the new interface, avoid flag day c=
+hanges.
+> - * We need the ugly external functions to break header recursion hell.
+> - */
+> -#ifndef smp_mb__before_atomic_inc
+> -static inline void __deprecated smp_mb__before_atomic_inc(void)
+> -{
+> -	extern void __smp_mb__before_atomic(void);
+> -	__smp_mb__before_atomic();
+> -}
+> -#endif
+> -
+> -#ifndef smp_mb__after_atomic_inc
+> -static inline void __deprecated smp_mb__after_atomic_inc(void)
+> -{
+> -	extern void __smp_mb__after_atomic(void);
+> -	__smp_mb__after_atomic();
+> -}
+> -#endif
+> -
+> -#ifndef smp_mb__before_atomic_dec
+> -static inline void __deprecated smp_mb__before_atomic_dec(void)
+> -{
+> -	extern void __smp_mb__before_atomic(void);
+> -	__smp_mb__before_atomic();
+> -}
+> -#endif
+> -
+> -#ifndef smp_mb__after_atomic_dec
+> -static inline void __deprecated smp_mb__after_atomic_dec(void)
+> -{
+> -	extern void __smp_mb__after_atomic(void);
+> -	__smp_mb__after_atomic();
+> -}
+> -#endif
+> -
+>  /**
+>   * atomic_add_unless - add unless the number is already a given value
+>   * @v: pointer of type atomic_t
+> diff --git a/include/linux/bitops.h b/include/linux/bitops.h
+> index cbc5833..be5fd38 100644
+> --- a/include/linux/bitops.h
+> +++ b/include/linux/bitops.h
+> @@ -32,26 +32,6 @@ extern unsigned long __sw_hweight64(__u64 w);
+>   */
+>  #include <asm/bitops.h>
+> =20
+> -/*
+> - * Provide __deprecated wrappers for the new interface, avoid flag day c=
+hanges.
+> - * We need the ugly external functions to break header recursion hell.
+> - */
+> -#ifndef smp_mb__before_clear_bit
+> -static inline void __deprecated smp_mb__before_clear_bit(void)
+> -{
+> -	extern void __smp_mb__before_atomic(void);
+> -	__smp_mb__before_atomic();
+> -}
+> -#endif
+> -
+> -#ifndef smp_mb__after_clear_bit
+> -static inline void __deprecated smp_mb__after_clear_bit(void)
+> -{
+> -	extern void __smp_mb__after_atomic(void);
+> -	__smp_mb__after_atomic();
+> -}
+> -#endif
+> -
+>  #define for_each_set_bit(bit, addr, size) \
+>  	for ((bit) =3D find_first_bit((addr), (size));		\
+>  	     (bit) < (size);					\
+> diff --git a/kernel/sched/core.c b/kernel/sched/core.c
+> index 1211575..76c518c 100644
+> --- a/kernel/sched/core.c
+> +++ b/kernel/sched/core.c
+> @@ -90,22 +90,6 @@
+>  #define CREATE_TRACE_POINTS
+>  #include <trace/events/sched.h>
+> =20
+> -#ifdef smp_mb__before_atomic
+> -void __smp_mb__before_atomic(void)
+> -{
+> -	smp_mb__before_atomic();
+> -}
+> -EXPORT_SYMBOL(__smp_mb__before_atomic);
+> -#endif
+> -
+> -#ifdef smp_mb__after_atomic
+> -void __smp_mb__after_atomic(void)
+> -{
+> -	smp_mb__after_atomic();
+> -}
+> -EXPORT_SYMBOL(__smp_mb__after_atomic);
+> -#endif
+> -
+>  void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
+>  {
+>  	unsigned long delta;
 
 
---Apple-Mail=_FC277461-5FEE-49C4-BFF3-B55576FF17A4
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="signature.asc"
+
+--=-zb3dReDmJd9HCh0K3LLP
 Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Message signed with OpenPGP using GPGMail
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
 
 -----BEGIN PGP SIGNATURE-----
-Comment: GPGTools - http://gpgtools.org
+Version: GnuPG v2
 
-iQIcBAEBAgAGBQJUHJbyAAoJEDwO/+eO4+5uPxQQAJVRXx4Od4WCkQCggtUxqkJN
-EDEnEqCSORD98TWjakQ/DRrdimzlnjZsK1gJLVHIp3kvB9iOs4Zq+Qto43UgtngR
-Uh4M4EFQ05OH4xou2s84i8vZ1H6T1m1z8sw8tpjYLpcPx9llQZX4/AdlmORDHyxt
-0YPBG4ivSHzywBe3eYA3DnUTfcVc64Akq5Bnau5+iKfaPsibSkNTGHWtbFH+CBRH
-GNZgrWWPQnSN5Sr3ApxQ/d1lRHChW6dmE49aRVHPEDkgJoHPD7cQAhkCGqk3y6qa
-/gd0heR7z6obzCfbWcz7PjsVoRdS2SdfpE1/Lo9Y/FPCrSXFr6QdB8fPeu8m0HBr
-RLVrcqy0+QVA7RUONQXp/hITMoBtrrFy47vD9Iy/A1NL2GY1UsZtizym+KAyKe8j
-gBiGUErhAoND9hHuMpwHSrMQ/WguEol16aPWAUTqWwx1oWBoJlQOcHcdyeHkwjer
-kub50MXstQO4lVeDo+OlgYmLHVBWbywrf03q7Rlr578y5FVW0d2FCxW0A/90zrX1
-T6gOIiZAD1iaNFFdFdrtwdkqTrW4yCHzAD5qUy2eaYfzDyuLjS3u4aNQDb4AI0RQ
-S7QA8m2Qatu4B4q8/33oc5HPrmaoLKxNuX4RYNonO9pnMI8hiv5ypKCbjBkixJu+
-mPkydO9WnYw4lWH8frnX
-=02gi
+iQIcBAABCgAGBQJUHJfhAAoJEOVv75VaS+3OeKEP/2yP2pTsozxo4bzqf+EAEoOT
+E8FE7UJwr0CU3G02DhR5+Kii1P10/VHXpl3uZAj3TE5TT1kqKvVsKzu0ca+awIzs
+nfSh9BWlYb2Loqv+/AC1lbEzQkjwcS+fgixK09vhgosQcn/UBNTKEn/fSjtzbF2v
+82VX2hSCQGhWHXLOrHgQfeWc9NT86us4MXbSUm6HWH7x0+RrdO4eVL+5+O+1Rzow
+LDCY8VR8DDgcmYpRHCeBQLed2QuvFEPfY7z6x6iyxJd908iEwsJNUIQ61aC4RsHD
+xBVy9Cp0y8edsK/MO5lW03dMBAuFW6h4hTxIyQzT42UX1s/nplrI+2a/QZIUS1AF
+qk2oR/tBe44z9JkOPJeCtfewccY2FU6p2P0aqJGuG3tV169XsZb1VS7UyFXuZ25r
+fiC24/3j9HtlHUjfilZaaij/9ug1ghV/7F+e/GrnM1bHXyJUTSQ3Ez2HWByxyboV
+nVCS9uh+fxadfknKlTXDdMIoC/4vmaNeMbpgfWB3uEGgawU0+Q5/WEFxQX7yYS/y
+bZtUDv3mhBE3A2lGdoK7F/9mf0l+5r5v4X5W2fQn1pbD8BeXh7AeCypB4099/Kon
+WqKe41qAhZRFOhkODIMxUdzJ8MFR0yaOdYgSa7vJOH0Y/LBA7v0PDvrU1WJRtLTM
+C+UIW/mf0OIZHXFTmnIj
+=I0eW
 -----END PGP SIGNATURE-----
 
---Apple-Mail=_FC277461-5FEE-49C4-BFF3-B55576FF17A4--
+--=-zb3dReDmJd9HCh0K3LLP--
+
