@@ -1,96 +1,92 @@
-From: Richard Weinberger <richard@nod.at>
+From: Oleg Nesterov <oleg@redhat.com>
 Subject: Re: [PATCH 5/7] signal: Silence nested-externs warnings
-Date: Fri, 19 Sep 2014 17:39:00 +0200
-Message-ID: <541C4E14.9010000@nod.at>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>	 <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com>	 <541C4D57.9050507@nod.at> <1411141042.2513.3.camel@jtkirshe-mobl>
+Date: Fri, 19 Sep 2014 19:20:30 +0200
+Message-ID: <20140919172030.GA22293@redhat.com>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com> <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com> <541C4D57.9050507@nod.at> <1411141042.2513.3.camel@jtkirshe-mobl> <541C4E14.9010000@nod.at>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
- protocol="application/pgp-signature";
- boundary="TOrcJmsDrISW6q1ooOcilVRpNO1IIObvi"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from a.ns.miles-group.at ([95.130.255.143]:65275 "EHLO radon.swed.at"
+Received: from mx1.redhat.com ([209.132.183.28]:20801 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1757285AbaISPjG (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 19 Sep 2014 11:39:06 -0400
-In-Reply-To: <1411141042.2513.3.camel@jtkirshe-mobl>
+	id S1757476AbaISRXW (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 19 Sep 2014 13:23:22 -0400
+Content-Disposition: inline
+In-Reply-To: <541C4E14.9010000@nod.at>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Cc: sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
+To: Richard Weinberger <richard@nod.at>
+Cc: Jeff Kirsher <jeffrey.t.kirsher@intel.com>, sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---TOrcJmsDrISW6q1ooOcilVRpNO1IIObvi
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
+On 09/19, Richard Weinberger wrote:
+>
+> Am 19.09.2014 17:37, schrieb Jeff Kirsher:
+> >
+> > See patch 1 of the series.
+>
+> I was not CC'ed...
 
-Am 19.09.2014 17:37, schrieb Jeff Kirsher:
-> On Fri, 2014-09-19 at 17:35 +0200, Richard Weinberger wrote:
->> Am 19.09.2014 17:29, schrieb Jeff Kirsher:
->>> From: Mark Rustad <mark.d.rustad@intel.com>
->>>
->>> Silence nested-externs warnings for these, as these nested
->>> externs are truly wanted.
->>>
->>> CC: Oleg Nesterov <oleg@redhat.com>
->>> CC: Andrew Morton <akpm@linux-foundation.org>
->>> CC: Geert Uytterhoeven <geert@linux-m68k.org>
->>> CC: Richard Weinberger <richard@nod.at>
->>> CC: Brian Norris <computersforpeace@gmail.com>
->>> Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
->>> Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
->>> ---
->>>  include/linux/signal.h | 6 ++++++
->>>  1 file changed, 6 insertions(+)
->>>
->>> diff --git a/include/linux/signal.h b/include/linux/signal.h
->>> index 750196f..e68ae6b 100644
->>> --- a/include/linux/signal.h
->>> +++ b/include/linux/signal.h
->>> @@ -67,7 +67,9 @@ static inline int sigismember(sigset_t *set, int _s=
-ig)
->>> =20
->>>  static inline int sigisemptyset(sigset_t *set)
->>>  {
->>> +	DIAG_PUSH DIAG_IGNORE(nested-externs)
->>
->> Do we really want to clutter the source with such tags?
->> Does this even build? i.e. how does gcc know to ignore that?
->>
->> rw@azrael:~/linux (ubi-wlcrash $)> git grep DIAG_PUSH | wc -l
->> 0
->>
->> Thanks,
->> //richard
->=20
-> See patch 1 of the series.
+Me too, and thus I don't understand this patch.
 
-I was not CC'ed...
+But I have to admit it looks a bit ugly to me anyway.
+Can't we simply kill _NSIG_WORDS_is_unsupported_size ?
 
-Thanks,
-//richard
+Oleg.
+---
 
+diff --git a/include/linux/signal.h b/include/linux/signal.h
+index 750196f..679c9b4 100644
+--- a/include/linux/signal.h
++++ b/include/linux/signal.h
+@@ -67,7 +67,6 @@ static inline int sigismember(sigset_t *set, int _sig)
+ 
+ static inline int sigisemptyset(sigset_t *set)
+ {
+-	extern void _NSIG_WORDS_is_unsupported_size(void);
+ 	switch (_NSIG_WORDS) {
+ 	case 4:
+ 		return (set->sig[3] | set->sig[2] |
+@@ -77,7 +76,7 @@ static inline int sigisemptyset(sigset_t *set)
+ 	case 1:
+ 		return set->sig[0] == 0;
+ 	default:
+-		_NSIG_WORDS_is_unsupported_size();
++		BUILD_BUG();
+ 		return 0;
+ 	}
+ }
+@@ -90,7 +89,6 @@ static inline int sigisemptyset(sigset_t *set)
+ #define _SIG_SET_BINOP(name, op)					\
+ static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
+ {									\
+-	extern void _NSIG_WORDS_is_unsupported_size(void);		\
+ 	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
+ 									\
+ 	switch (_NSIG_WORDS) {						\
+@@ -107,7 +105,7 @@ static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
+ 		r->sig[0] = op(a0, b0);					\
+ 		break;							\
+ 	    default:							\
+-		_NSIG_WORDS_is_unsupported_size();			\
++	    	BUILD_BUG();						\
+ 	}								\
+ }
+ 
+@@ -128,8 +126,6 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
+ #define _SIG_SET_OP(name, op)						\
+ static inline void name(sigset_t *set)					\
+ {									\
+-	extern void _NSIG_WORDS_is_unsupported_size(void);		\
+-									\
+ 	switch (_NSIG_WORDS) {						\
+ 	    case 4: set->sig[3] = op(set->sig[3]);			\
+ 		    set->sig[2] = op(set->sig[2]);			\
+@@ -137,7 +133,7 @@ static inline void name(sigset_t *set)					\
+ 	    case 1: set->sig[0] = op(set->sig[0]);			\
+ 		    break;						\
+ 	    default:							\
+-		_NSIG_WORDS_is_unsupported_size();			\
++		BUILD_BUG();						\
+ 	}								\
+ }
+ 
 
---TOrcJmsDrISW6q1ooOcilVRpNO1IIObvi
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2.0.22 (GNU/Linux)
-
-iQIcBAEBAgAGBQJUHE4YAAoJEPmeIjfg4Uaa61kP/AzwwgHhL7uWhU0TRrwlVZKT
-Vi/81lLaKUntIkpjbGLPkpR/vN5hGAVlYt/SpzyCw+hffRz51FZa0yWEgZ07g5tr
-x2guQfNX5dgfYjW9SRSjSCaHYcCTNb/fu7rWZCdvbmQ6e0zHHf4px2EzA/k6hEZs
-+f9/GxwB5nJaFBilIvGfppKTd+Mg+sVXgq8pl9Dxf1UWZae8AH5Nk92FvPprwsh4
-e5YMxj7HnbfDIpuGamMyWgi9rzTjcC8DEcbA0S4BYA/Jtn0paJ1CY++lg1FRtKus
-V73bNUtVDN6s28gLcCqyVjOH8YtYMr6ekUo75hsjgkaCw8gBuTyGIaovvQQhL/A+
-dNmBrHB3/rg/SHlADKW6tzEGi9bGqO1Ouhw8w2Eub4xaXmfS1Rib1DTZPVRUDKXa
-UC/OBghKXXxmC2IzljUDm4ineyjLpYN69i/maWyhI/IHdk64gm7f2ORGVSan5LrW
-mm08rbAHzV/GsPCBRyCSQ34VIXTrpKVxA4bHJrERMxij857Qqj7xds8WnPI1qe3n
-I3v8ra9O1gRsFXS7kbNyyXYOQayYOcie7NDnb0b3jQL18JOYCqY1nqcZ6XIkzST6
-6lFY8J4eQwiangCT8XxRUZbsn3Qvu69qS8uJ2KBC4mOReb0vfT+QOdab/tqq4RkX
-CPhcvxRYOwP4lRKzHzdW
-=Af+j
------END PGP SIGNATURE-----
-
---TOrcJmsDrISW6q1ooOcilVRpNO1IIObvi--
