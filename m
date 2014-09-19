@@ -1,47 +1,50 @@
-From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Subject: [PATCH 2/7] x86: Silence initializer-overrides warnings
-Date: Fri, 19 Sep 2014 08:29:35 -0700
-Message-ID: <1411140580-20909-3-git-send-email-jeffrey.t.kirsher@intel.com>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+From: Richard Weinberger <richard@nod.at>
+Subject: Re: [PATCH 5/7] signal: Silence nested-externs warnings
+Date: Fri, 19 Sep 2014 17:35:51 +0200
+Message-ID: <541C4D57.9050507@nod.at>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com> <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-15
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+In-Reply-To: <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: sparse@chrisli.org
-Cc: Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Brian Norris <computersforpeace@gmail.com>, Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>, sparse@chrisli.org
+Cc: Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>, Andrew Morton <akpm@linux-foundation.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
 
-From: Mark Rustad <mark.d.rustad@intel.com>
+Am 19.09.2014 17:29, schrieb Jeff Kirsher:
+> From: Mark Rustad <mark.d.rustad@intel.com>
+> 
+> Silence nested-externs warnings for these, as these nested
+> externs are truly wanted.
+> 
+> CC: Oleg Nesterov <oleg@redhat.com>
+> CC: Andrew Morton <akpm@linux-foundation.org>
+> CC: Geert Uytterhoeven <geert@linux-m68k.org>
+> CC: Richard Weinberger <richard@nod.at>
+> CC: Brian Norris <computersforpeace@gmail.com>
+> Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
+> Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+> ---
+>  include/linux/signal.h | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/include/linux/signal.h b/include/linux/signal.h
+> index 750196f..e68ae6b 100644
+> --- a/include/linux/signal.h
+> +++ b/include/linux/signal.h
+> @@ -67,7 +67,9 @@ static inline int sigismember(sigset_t *set, int _sig)
+>  
+>  static inline int sigisemptyset(sigset_t *set)
+>  {
+> +	DIAG_PUSH DIAG_IGNORE(nested-externs)
 
-Since the syscall table intentionally uses override initialization,
-simply silence those warnings.
+Do we really want to clutter the source with such tags?
+Does this even build? i.e. how does gcc know to ignore that?
 
-CC: Thomas Gleixner <tglx@linutronix.de>
-CC: Ingo Molnar <mingo@redhat.com>
-CC: "H. Peter Anvin" <hpa@zytor.com>
-CC: <x86@kernel.org>
-CC: Brian Norris <computersforpeace@gmail.com>
-Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
-Signed-off-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
----
- arch/x86/ia32/syscall_ia32.c | 2 ++
- 1 file changed, 2 insertions(+)
+rw@azrael:~/linux (ubi-wlcrash $)> git grep DIAG_PUSH | wc -l
+0
 
-diff --git a/arch/x86/ia32/syscall_ia32.c b/arch/x86/ia32/syscall_ia32.c
-index 4754ba0..7bc553b 100644
---- a/arch/x86/ia32/syscall_ia32.c
-+++ b/arch/x86/ia32/syscall_ia32.c
-@@ -15,6 +15,7 @@ typedef void (*sys_call_ptr_t)(void);
- 
- extern void compat_ni_syscall(void);
- 
-+DIAG_PUSH DIAG_CLANG_IGNORE(initializer-overrides)
- const sys_call_ptr_t ia32_sys_call_table[__NR_ia32_syscall_max+1] = {
- 	/*
- 	 * Smells like a compiler bug -- it doesn't work
-@@ -23,3 +24,4 @@ const sys_call_ptr_t ia32_sys_call_table[__NR_ia32_syscall_max+1] = {
- 	[0 ... __NR_ia32_syscall_max] = &compat_ni_syscall,
- #include <asm/syscalls_32.h>
- };
-+DIAG_POP
--- 
-1.9.3
+Thanks,
+//richard
