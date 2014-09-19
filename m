@@ -1,197 +1,105 @@
-From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Subject: Re: [PATCH 3/7] atomic: Silence nested-externs warnings
-Date: Fri, 19 Sep 2014 13:53:53 -0700
-Message-ID: <1411160033.2513.28.camel@jtkirshe-mobl>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 5/7] signal: Silence nested-externs warnings
+Date: Fri, 19 Sep 2014 14:21:28 -0700
+Message-ID: <20140919212128.GP26432@jtriplet-mobl1>
 References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <1411140580-20909-4-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <20140919204303.GF2832@worktop.localdomain>
+ <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com>
+ <541C4D57.9050507@nod.at>
+ <1411141042.2513.3.camel@jtkirshe-mobl>
+ <541C4E14.9010000@nod.at>
+ <20140919172030.GA22293@redhat.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-zb3dReDmJd9HCh0K3LLP"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga09.intel.com ([134.134.136.24]:58229 "EHLO mga09.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932297AbaISUxz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 19 Sep 2014 16:53:55 -0400
-In-Reply-To: <20140919204303.GF2832@worktop.localdomain>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:48250 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932200AbaISVVj (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 19 Sep 2014 17:21:39 -0400
+Content-Disposition: inline
+In-Reply-To: <20140919172030.GA22293@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Brian Norris <computersforpeace@gmail.com>
+To: Oleg Nesterov <oleg@redhat.com>
+Cc: Richard Weinberger <richard@nod.at>, Jeff Kirsher <jeffrey.t.kirsher@intel.com>, sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
 
+On Fri, Sep 19, 2014 at 07:20:30PM +0200, Oleg Nesterov wrote:
+> On 09/19, Richard Weinberger wrote:
+> >
+> > Am 19.09.2014 17:37, schrieb Jeff Kirsher:
+> > >
+> > > See patch 1 of the series.
+> >
+> > I was not CC'ed...
+> 
+> Me too, and thus I don't understand this patch.
+> 
+> But I have to admit it looks a bit ugly to me anyway.
+> Can't we simply kill _NSIG_WORDS_is_unsupported_size ?
 
---=-zb3dReDmJd9HCh0K3LLP
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+This looks quite preferable.  Can you post that with a commit message
+and signoff?  Also, the indentation on the second of the three BUILD_BUG
+calls has some spaces in it, which it shouldn't.  With those fixed:
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 
-On Fri, 2014-09-19 at 22:43 +0200, Peter Zijlstra wrote:
-> On Fri, Sep 19, 2014 at 08:29:36AM -0700, Jeff Kirsher wrote:
-> > From: Mark Rustad <mark.d.rustad@intel.com>
-> >=20
-> > Silence the nested-externs warnings for these, as they are
-> > truly wanted.
-> >=20
->=20
-> You're patching an old tree.
-
-Sorry, I used Linus's latest tree (as of last night) because of number
-of the patches in the series went to various trees, so I used Linus's
-tree.
-
->=20
-> ---
-> commit 2e39465abc4b7856a0ea6fcf4f6b4668bb5db877
-> Author: Peter Zijlstra <peterz@infradead.org>
-> Date:   Mon Aug 4 12:07:15 2014 +0200
->=20
->     locking: Remove deprecated smp_mb__() barriers
->    =20
->     Its been a while and there are no in-tree users left, so remove the
->     deprecated barriers.
->    =20
->     Signed-off-by: Peter Zijlstra <peterz@infradead.org>
->     Cc: Chen, Gong <gong.chen@linux.intel.com>
->     Cc: Jacob Pan <jacob.jun.pan@linux.intel.com>
->     Cc: Joe Perches <joe@perches.com>
->     Cc: John Sullivan <jsrhbz@kanargh.force9.co.uk>
->     Cc: Linus Torvalds <torvalds@linux-foundation.org>
->     Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
->     Cc: Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>
->     Cc: Theodore Ts'o <tytso@mit.edu>
->     Signed-off-by: Ingo Molnar <mingo@kernel.org>
->=20
-> diff --git a/include/linux/atomic.h b/include/linux/atomic.h
-> index fef3a80..5b08a85 100644
-> --- a/include/linux/atomic.h
-> +++ b/include/linux/atomic.h
-> @@ -3,42 +3,6 @@
->  #define _LINUX_ATOMIC_H
->  #include <asm/atomic.h>
-> =20
-> -/*
-> - * Provide __deprecated wrappers for the new interface, avoid flag day c=
-hanges.
-> - * We need the ugly external functions to break header recursion hell.
-> - */
-> -#ifndef smp_mb__before_atomic_inc
-> -static inline void __deprecated smp_mb__before_atomic_inc(void)
-> -{
-> -	extern void __smp_mb__before_atomic(void);
-> -	__smp_mb__before_atomic();
-> -}
-> -#endif
-> -
-> -#ifndef smp_mb__after_atomic_inc
-> -static inline void __deprecated smp_mb__after_atomic_inc(void)
-> -{
-> -	extern void __smp_mb__after_atomic(void);
-> -	__smp_mb__after_atomic();
-> -}
-> -#endif
-> -
-> -#ifndef smp_mb__before_atomic_dec
-> -static inline void __deprecated smp_mb__before_atomic_dec(void)
-> -{
-> -	extern void __smp_mb__before_atomic(void);
-> -	__smp_mb__before_atomic();
-> -}
-> -#endif
-> -
-> -#ifndef smp_mb__after_atomic_dec
-> -static inline void __deprecated smp_mb__after_atomic_dec(void)
-> -{
-> -	extern void __smp_mb__after_atomic(void);
-> -	__smp_mb__after_atomic();
-> -}
-> -#endif
-> -
->  /**
->   * atomic_add_unless - add unless the number is already a given value
->   * @v: pointer of type atomic_t
-> diff --git a/include/linux/bitops.h b/include/linux/bitops.h
-> index cbc5833..be5fd38 100644
-> --- a/include/linux/bitops.h
-> +++ b/include/linux/bitops.h
-> @@ -32,26 +32,6 @@ extern unsigned long __sw_hweight64(__u64 w);
->   */
->  #include <asm/bitops.h>
-> =20
-> -/*
-> - * Provide __deprecated wrappers for the new interface, avoid flag day c=
-hanges.
-> - * We need the ugly external functions to break header recursion hell.
-> - */
-> -#ifndef smp_mb__before_clear_bit
-> -static inline void __deprecated smp_mb__before_clear_bit(void)
-> -{
-> -	extern void __smp_mb__before_atomic(void);
-> -	__smp_mb__before_atomic();
-> -}
-> -#endif
-> -
-> -#ifndef smp_mb__after_clear_bit
-> -static inline void __deprecated smp_mb__after_clear_bit(void)
-> -{
-> -	extern void __smp_mb__after_atomic(void);
-> -	__smp_mb__after_atomic();
-> -}
-> -#endif
-> -
->  #define for_each_set_bit(bit, addr, size) \
->  	for ((bit) =3D find_first_bit((addr), (size));		\
->  	     (bit) < (size);					\
-> diff --git a/kernel/sched/core.c b/kernel/sched/core.c
-> index 1211575..76c518c 100644
-> --- a/kernel/sched/core.c
-> +++ b/kernel/sched/core.c
-> @@ -90,22 +90,6 @@
->  #define CREATE_TRACE_POINTS
->  #include <trace/events/sched.h>
-> =20
-> -#ifdef smp_mb__before_atomic
-> -void __smp_mb__before_atomic(void)
-> -{
-> -	smp_mb__before_atomic();
-> -}
-> -EXPORT_SYMBOL(__smp_mb__before_atomic);
-> -#endif
-> -
-> -#ifdef smp_mb__after_atomic
-> -void __smp_mb__after_atomic(void)
-> -{
-> -	smp_mb__after_atomic();
-> -}
-> -EXPORT_SYMBOL(__smp_mb__after_atomic);
-> -#endif
-> -
->  void start_bandwidth_timer(struct hrtimer *period_timer, ktime_t period)
+> diff --git a/include/linux/signal.h b/include/linux/signal.h
+> index 750196f..679c9b4 100644
+> --- a/include/linux/signal.h
+> +++ b/include/linux/signal.h
+> @@ -67,7 +67,6 @@ static inline int sigismember(sigset_t *set, int _sig)
+>  
+>  static inline int sigisemptyset(sigset_t *set)
 >  {
->  	unsigned long delta;
-
-
-
---=-zb3dReDmJd9HCh0K3LLP
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAABCgAGBQJUHJfhAAoJEOVv75VaS+3OeKEP/2yP2pTsozxo4bzqf+EAEoOT
-E8FE7UJwr0CU3G02DhR5+Kii1P10/VHXpl3uZAj3TE5TT1kqKvVsKzu0ca+awIzs
-nfSh9BWlYb2Loqv+/AC1lbEzQkjwcS+fgixK09vhgosQcn/UBNTKEn/fSjtzbF2v
-82VX2hSCQGhWHXLOrHgQfeWc9NT86us4MXbSUm6HWH7x0+RrdO4eVL+5+O+1Rzow
-LDCY8VR8DDgcmYpRHCeBQLed2QuvFEPfY7z6x6iyxJd908iEwsJNUIQ61aC4RsHD
-xBVy9Cp0y8edsK/MO5lW03dMBAuFW6h4hTxIyQzT42UX1s/nplrI+2a/QZIUS1AF
-qk2oR/tBe44z9JkOPJeCtfewccY2FU6p2P0aqJGuG3tV169XsZb1VS7UyFXuZ25r
-fiC24/3j9HtlHUjfilZaaij/9ug1ghV/7F+e/GrnM1bHXyJUTSQ3Ez2HWByxyboV
-nVCS9uh+fxadfknKlTXDdMIoC/4vmaNeMbpgfWB3uEGgawU0+Q5/WEFxQX7yYS/y
-bZtUDv3mhBE3A2lGdoK7F/9mf0l+5r5v4X5W2fQn1pbD8BeXh7AeCypB4099/Kon
-WqKe41qAhZRFOhkODIMxUdzJ8MFR0yaOdYgSa7vJOH0Y/LBA7v0PDvrU1WJRtLTM
-C+UIW/mf0OIZHXFTmnIj
-=I0eW
------END PGP SIGNATURE-----
-
---=-zb3dReDmJd9HCh0K3LLP--
-
+> -	extern void _NSIG_WORDS_is_unsupported_size(void);
+>  	switch (_NSIG_WORDS) {
+>  	case 4:
+>  		return (set->sig[3] | set->sig[2] |
+> @@ -77,7 +76,7 @@ static inline int sigisemptyset(sigset_t *set)
+>  	case 1:
+>  		return set->sig[0] == 0;
+>  	default:
+> -		_NSIG_WORDS_is_unsupported_size();
+> +		BUILD_BUG();
+>  		return 0;
+>  	}
+>  }
+> @@ -90,7 +89,6 @@ static inline int sigisemptyset(sigset_t *set)
+>  #define _SIG_SET_BINOP(name, op)					\
+>  static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
+>  {									\
+> -	extern void _NSIG_WORDS_is_unsupported_size(void);		\
+>  	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
+>  									\
+>  	switch (_NSIG_WORDS) {						\
+> @@ -107,7 +105,7 @@ static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
+>  		r->sig[0] = op(a0, b0);					\
+>  		break;							\
+>  	    default:							\
+> -		_NSIG_WORDS_is_unsupported_size();			\
+> +	    	BUILD_BUG();						\
+>  	}								\
+>  }
+>  
+> @@ -128,8 +126,6 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
+>  #define _SIG_SET_OP(name, op)						\
+>  static inline void name(sigset_t *set)					\
+>  {									\
+> -	extern void _NSIG_WORDS_is_unsupported_size(void);		\
+> -									\
+>  	switch (_NSIG_WORDS) {						\
+>  	    case 4: set->sig[3] = op(set->sig[3]);			\
+>  		    set->sig[2] = op(set->sig[2]);			\
+> @@ -137,7 +133,7 @@ static inline void name(sigset_t *set)					\
+>  	    case 1: set->sig[0] = op(set->sig[0]);			\
+>  		    break;						\
+>  	    default:							\
+> -		_NSIG_WORDS_is_unsupported_size();			\
+> +		BUILD_BUG();						\
+>  	}								\
+>  }
+>  
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
