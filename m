@@ -1,110 +1,50 @@
-From: Oleg Nesterov <oleg@redhat.com>
-Subject: [PATCH 1/1] signal: use BUILD_BUG() instead of
-	_NSIG_WORDS_is_unsupported_size()
-Date: Sun, 21 Sep 2014 18:43:06 +0200
-Message-ID: <20140921164306.GB16744@redhat.com>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com> <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com> <541C4D57.9050507@nod.at> <1411141042.2513.3.camel@jtkirshe-mobl> <541C4E14.9010000@nod.at> <20140919172030.GA22293@redhat.com> <20140919212128.GP26432@jtriplet-mobl1> <20140921164243.GA16744@redhat.com>
+From: Alain Kalker <a.c.kalker@gmail.com>
+Subject: sparse-llvm: link errors with LLVM 3.5.0
+Date: Sun, 21 Sep 2014 18:49:18 +0000 (UTC)
+Message-ID: <lvn6je$63j$1@ger.gmane.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20140921164243.GA16744@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Richard Weinberger <richard@nod.at>, Jeff Kirsher <jeffrey.t.kirsher@intel.com>, sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from plane.gmane.org ([80.91.229.3]:35278 "EHLO plane.gmane.org"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751358AbaIUSzI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 21 Sep 2014 14:55:08 -0400
+Received: from list by plane.gmane.org with local (Exim 4.69)
+	(envelope-from <gcps-linux-sparse@m.gmane.org>)
+	id 1XVmHo-00051X-Pj
+	for linux-sparse@vger.kernel.org; Sun, 21 Sep 2014 20:55:04 +0200
+Received: from 524b772b.cm-4-4b.dynamic.ziggo.nl ([82.75.119.43])
+        by main.gmane.org with esmtp (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Sep 2014 20:55:04 +0200
+Received: from a.c.kalker by 524b772b.cm-4-4b.dynamic.ziggo.nl with local (Gmexim 0.1 (Debian))
+        id 1AlnuQ-0007hv-00
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Sep 2014 20:55:04 +0200
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Kill _NSIG_WORDS_is_unsupported_size(), use BUILD_BUG() instead.
-This simplifies the code, avoids the nested-externs warnings, and
-this way we do not defer the problem to linker.
+Hi all,
 
-Also, fix the indentation in _SIG_SET_BINOP() and _SIG_SET_OP().
+I'm getting link errors building sparse on Arch Linux, which has LLVM 
+version 3.5.0.
 
-Note: this patch assumes that the code like "if (0) BUILD_BUG();"
-is valid. If not (say __compiletime_error() is not defined and thus
-__compiletime_error_fallback() uses a negative array) we should fix
-BUILD_BUG() and/or BUILD_BUG_ON_MSG(). This code should be fine by
-definition, this is the documented purpose of BUILD_BUG().
+An example:
+/usr/lib/libLLVMSupport.a(Mutex.o): In function 
+`llvm::sys::MutexImpl::MutexImpl(bool)':
+(.text._ZN4llvm3sys9MutexImplC2Eb+0x37): undefined reference to 
+`pthread_mutexattr_init'
 
-Reported-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Signed-off-by: Oleg Nesterov <oleg@redhat.com>
----
- include/linux/signal.h |   28 ++++++++++++----------------
- 1 files changed, 12 insertions(+), 16 deletions(-)
+From some discussion in [1], we found that this is most likely due to a 
+change in LLVM[2] which requires the new "--system-libs" option to llvm-
+config to get the list of link flags for correct linking of system 
+libraries (including "-lpthread") needed by the LLVM libraries.
 
-diff --git a/include/linux/signal.h b/include/linux/signal.h
-index 750196f..14acfd5 100644
---- a/include/linux/signal.h
-+++ b/include/linux/signal.h
-@@ -67,7 +67,6 @@ static inline int sigismember(sigset_t *set, int _sig)
- 
- static inline int sigisemptyset(sigset_t *set)
- {
--	extern void _NSIG_WORDS_is_unsupported_size(void);
- 	switch (_NSIG_WORDS) {
- 	case 4:
- 		return (set->sig[3] | set->sig[2] |
-@@ -77,7 +76,7 @@ static inline int sigisemptyset(sigset_t *set)
- 	case 1:
- 		return set->sig[0] == 0;
- 	default:
--		_NSIG_WORDS_is_unsupported_size();
-+		BUILD_BUG();
- 		return 0;
- 	}
- }
-@@ -90,24 +89,23 @@ static inline int sigisemptyset(sigset_t *set)
- #define _SIG_SET_BINOP(name, op)					\
- static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
- {									\
--	extern void _NSIG_WORDS_is_unsupported_size(void);		\
- 	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
- 									\
- 	switch (_NSIG_WORDS) {						\
--	    case 4:							\
-+	case 4:								\
- 		a3 = a->sig[3]; a2 = a->sig[2];				\
- 		b3 = b->sig[3]; b2 = b->sig[2];				\
- 		r->sig[3] = op(a3, b3);					\
- 		r->sig[2] = op(a2, b2);					\
--	    case 2:							\
-+	case 2:								\
- 		a1 = a->sig[1]; b1 = b->sig[1];				\
- 		r->sig[1] = op(a1, b1);					\
--	    case 1:							\
-+	case 1:								\
- 		a0 = a->sig[0]; b0 = b->sig[0];				\
- 		r->sig[0] = op(a0, b0);					\
- 		break;							\
--	    default:							\
--		_NSIG_WORDS_is_unsupported_size();			\
-+	default:							\
-+		BUILD_BUG();						\
- 	}								\
- }
- 
-@@ -128,16 +126,14 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
- #define _SIG_SET_OP(name, op)						\
- static inline void name(sigset_t *set)					\
- {									\
--	extern void _NSIG_WORDS_is_unsupported_size(void);		\
--									\
- 	switch (_NSIG_WORDS) {						\
--	    case 4: set->sig[3] = op(set->sig[3]);			\
--		    set->sig[2] = op(set->sig[2]);			\
--	    case 2: set->sig[1] = op(set->sig[1]);			\
--	    case 1: set->sig[0] = op(set->sig[0]);			\
-+	case 4:	set->sig[3] = op(set->sig[3]);				\
-+		set->sig[2] = op(set->sig[2]);				\
-+	case 2:	set->sig[1] = op(set->sig[1]);				\
-+	case 1:	set->sig[0] = op(set->sig[0]);				\
- 		    break;						\
--	    default:							\
--		_NSIG_WORDS_is_unsupported_size();			\
-+	default:							\
-+		BUILD_BUG();						\
- 	}								\
- }
- 
--- 
-1.5.5.1
+Kind regards,
+
+Alain
+
+[1]: https://bugs.archlinux.org/task/42053
+[2]: http://reviews.llvm.org/rL197664
+
