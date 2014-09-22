@@ -1,135 +1,111 @@
-From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+From: "Rustad, Mark D" <mark.d.rustad@intel.com>
 Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Mon, 22 Sep 2014 14:21:52 -0700
-Message-ID: <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
+Date: Mon, 22 Sep 2014 21:50:54 +0000
+Message-ID: <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
 References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <20140922153355.GB4510@pd.tnic>
-	 <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
-	 <20140922184049.GB4709@pd.tnic>
-	 <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
-	 <20140922192152.GD4709@pd.tnic>
-	 <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
-	 <20140922195737.GE4709@pd.tnic>
-	 <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
-	 <20140922203336.GF4709@pd.tnic>
+ <20140922153355.GB4510@pd.tnic>
+ <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+ <20140922184049.GB4709@pd.tnic>
+ <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+ <20140922192152.GD4709@pd.tnic>
+ <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922195737.GE4709@pd.tnic>
+ <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922203336.GF4709@pd.tnic>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-XjDgKU5LjOvXYdxCy1RG"
+Content-Type: multipart/signed;
+	boundary="Apple-Mail=_3071C6DD-CA50-46FD-B042-6C67EFE39B26";
+	protocol="application/pgp-signature"; micalg=pgp-sha1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:52217 "EHLO mga11.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:42904 "EHLO mga02.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754339AbaIVVWE (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 17:22:04 -0400
+	id S1753000AbaIVVu6 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Sep 2014 17:50:58 -0400
 In-Reply-To: <20140922203336.GF4709@pd.tnic>
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Borislav Petkov <bp@alien8.de>
-Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-
---=-XjDgKU5LjOvXYdxCy1RG
-Content-Type: text/plain; charset="UTF-8"
+--Apple-Mail=_3071C6DD-CA50-46FD-B042-6C67EFE39B26
 Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
 
-On Mon, 2014-09-22 at 22:33 +0200, Borislav Petkov wrote:
-> On Mon, Sep 22, 2014 at 01:09:33PM -0700, Jeff Kirsher wrote:
-> > Sorry I am very frustrated at your response.
->=20
-> You shouldn't be. Judging by your reply below it seems we do actually
-> agree... mostly :-)
->=20
-> > I am not saying that the proposed added MACRO is the best solution to
-> > this issue.  Several other maintainers have actually responded in a
-> > similar manner to the macros being added and came back that the better
-> > solution would be to fix the code so that the warnings do not occur in
-> > the first place.
->=20
-> Right, this would be optimal.
->=20
-> > So I guess I was hoping for more of the response, that "let's fix this
-> > the code so that the warnings do not appear in the first place".
-> >=20
-> > I agree with you completely that I do not like the idea of the MACROS
-> > being added to silence these warnings.  I just disagree that not doing
-> > anything to fix the warnings is far worse.
->=20
-> Ok, good, so we're on the same page here.
->=20
-> > Why grep through 100,000 warnings, when we should be fixing the code to
-> > prevent 100,000 warnings.  Not saying that the MACRO is the best
-> > solution, it is just a solution, in hopes that it spurs discussions lik=
-e
-> > this on how to properly fix the warnings.  Not a discussion on how to
-> > grep through the warnings and do nothing.
->=20
-> There's only one thing I don't understand: why is so bad to grep through
-> the warnings? I mean, sure, fixing them *without* jumping through hoops
-> to do so is the optimal thing. But what's wrong with grepping through
-> them?
+On Sep 22, 2014, at 1:33 PM, Borislav Petkov <bp@alien8.de> wrote:
 
-Nothing is wrong with grepping for an error, especially when you know
-the error your grepping for.  But then again, why grep when it can be
-fixed to begin with?  The fact that there are over 100,000
-warnings/errors to begin with is somewhat disconcerting.  It makes me
-wonder whether it was due to coding laziness.
-
->=20
 > Btw, out of curiosity, what is your use case for staring at those W=3D2
 > warnings?
 
-To make a better (more solid) network driver?  Mark has found it useful
-to do the W=3D builds.  For me personally, I do not bother because there
-are over 100,000 warnings and it takes forever to get through a build
-and then grep for our drivers to see if they are generating any
+I know no one cares about out-of-tree drivers, but I have a hack that
+allows building out-of-tree drivers without getting warnings from the
+kernel includes. We do an automated compile of every patch with W=3D12
+and expect clean compiles.
+
+It would be nice to compile drivers in-tree and have a similar =
+expectation.
+I guess a similar hack could be developed, but since we are contributing
+upstream, I would rather uncover any potential issues that may exist, =
+even
+if they aren't in the driver. The hack would tend to cover up such =
+issues.
+This is definitely NOT about covering up things that could be problems!
+
+> In thinking about it, what we could also do is simply move the =
+noisiest
+> ones to W=3D3 or so, or even add another W=3D level. It'll be =
+interesting to
+> hear your use case though. AFAICT, this is the first time I hear of a
+> more, let's say, serious use case of W=3D since we added the W=3D =
+things a
+> couple of years ago. :-)
+
+Well, I have W=3D1 in my environment, so I don't even have to ask for =
+it, I
+just get it. W=3D12 is just insane, or I would use that all the time. I =
+think
+it would be nice for new code, or at least new drivers, to compile clean =
+with
+W=3D12, but that isn't possible when the kernel includes throw so many =
 warnings.
 
->=20
-> In thinking about it, what we could also do is simply move the noisiest
-> ones to W=3D3 or so, or even add another W=3D level. It'll be interesting=
- to
-> hear your use case though. AFAICT, this is the first time I hear of a
-> more, let's say, serious use case of W=3D since we added the W=3D things =
-a
-> couple of years ago. :-)
->=20
-
-I could see this useful if there is no way to fix the issue that really
-is not an issue and the compiler just does not know any better, but this
-concerns me that we would get into a bad habit.  "Oh I really do not
-want to fix this, so I will just make it so that people we not have to
-see this warning/error"  Again, sounds lazy to me, of course I am just
-speaking in a generalization. I am sure that some of the warnings will
-fall into the category of, it needs to be silenced and not fixed because
-the fix is far more troublesome.  I just cannot believe that most or all
-the warnings would be that way.
+Nested-externs, for example, can catch people gratuitously providing a
+function prototype that could become a hazard, but some use of that may
+be justified. The macros provide a way to specifically allow certain
+instances while generally discouraging it. Of course if you never use
+W=3D2 you may never catch those gratuitous declarations.
 
 > Thanks.
->=20
+
+Hopefully the discussion is somewhat useful.
+
+--=20
+Mark Rustad, Networking Division, Intel Corporation
 
 
-
---=-XjDgKU5LjOvXYdxCy1RG
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
+--Apple-Mail=_3071C6DD-CA50-46FD-B042-6C67EFE39B26
 Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="signature.asc"
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Message signed with OpenPGP using GPGMail
 
 -----BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
+Comment: GPGTools - http://gpgtools.org
 
-iQIcBAABCgAGBQJUIJLwAAoJEOVv75VaS+3Of04QAJOFTQhrGnwEa+AqU9lxR1dt
-eIbN5JlIbtk80RMvIr/ydyOFELU5lys91JR6sCEC0XjFdTxWgVOi/7VkJAIzyn8L
-9Mt3thf43rua32C+m+az0rbloMPa+SkTMy+ZlUToru4OhBL/4gIrqQikVOsJfnOW
-JUHrK/KVzSUqgwwBigcFJbBozer2Bn8ppD5s3IEv+gDraF28QaZ7XZ9TL/Q27JVK
-S29imzZiTBHCMPhPqdfoK93AU1aIut9er+rJoY6ouWlaE5KHC0xecrS/kRYR4O+x
-czwqN1fqEYn51iEYLCAJQVJ4/m4aB0petecLt4hs2o6Os/crRPpujLoDnyocJmE1
-PERlUkuBoV6J37ScdmrqIOMnPAJORAhoFFB5OLZz9q+E0P4Cm2zpKM/+jB52yApz
-RcPcnQgktNPLt4xBoH54BloLFRlW7aKdoe60UnopuQRT+JWD8We3S8FIjw4YffA6
-FH26e4HfoIkKe8ZcPth5Qx3SvzlwGPxJXVFxc4dvYP/RJnPsPjyKIcFW76pZTUkE
-Tb91MLh+BOFl//2tLJVSkePlFrH04ihoDvXPVLSzZd2asHvXRdBLt8QQrebhwvKG
-0t32P6FNQjlnTAW/8u7fb2rg1WSbnMKaiAQ/7Fw8wCkyQPBt0L7+WOMVMRn9Jnhj
-0KH9Jucnjs2a75GOluOC
-=wqTf
+iQIcBAEBAgAGBQJUIJm+AAoJEDwO/+eO4+5um+YP+wYhTlHLtY/NXi0uCam2Ch1Q
+n47HupsSsbFQRRWMUFhzEWTrn8rcDTfro6CoH+HRE3Ht6aHkTt4bRk2mtZEGNiKG
+ZWd2wizys5FzwJy2mGC4uyZczeToyOfUXjVdYmH/f4ySPIWmzJ4Fu5ueOf8S0Szo
+pqeKmcspku3+fcgo/ECxad2WRL29FRgdes8k0XracyqG2Bn7Wep5M1wCoGeUZdF4
+r6JIlrxPMX3VDzPUZ6ISB02AJ3u56eoOWIh3y6Taq+cIl2uNdXzek5JCp7DRJJhY
+Zpr7+Z+w6DPBS50Qm0TTOwRQh7AkpzEk1Wp4Gq16k4hBmu2HCrG7saTjbTAwDS9n
+0/gDUwAAT2fEyfvU6bHOYaC9raPDWYriPCYGYQ9YZxhqIDb15BfmUqHVuCrEqc1C
+2oqzOyLoJkwqlRgZlq4f9AVRokcIMwUZzkK2LZeJstdVabm9cPYegWku3qzLTNdT
+XRyEoiwWNiDzUlU8lxvQGpkQ/EYS95Jwo7LchSoDxx0/yvx+7RPsDvjRQcCs8ou7
+SewicFui8sEF/lzDv3MabPsfyGC46j5/R+ivPFyXelv/jxRvDmDQS/ag+YPEiYOG
+b1vn4VVGI8hw+TGPIqjW/QsacjjMGCbxOD+fKXkDnfvkevVOy3bCfmtjlIUcdyM6
+AgS8nZ2nxpyebV+/DDe+
+=YA4e
 -----END PGP SIGNATURE-----
 
---=-XjDgKU5LjOvXYdxCy1RG--
-
+--Apple-Mail=_3071C6DD-CA50-46FD-B042-6C67EFE39B26--
