@@ -1,110 +1,78 @@
-From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Mon, 22 Sep 2014 13:09:33 -0700
-Message-ID: <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+Date: Mon, 22 Sep 2014 22:33:36 +0200
+Message-ID: <20140922203336.GF4709@pd.tnic>
 References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <20140922153355.GB4510@pd.tnic>
-	 <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
-	 <20140922184049.GB4709@pd.tnic>
-	 <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
-	 <20140922192152.GD4709@pd.tnic>
-	 <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
-	 <20140922195737.GE4709@pd.tnic>
+ <20140922153355.GB4510@pd.tnic>
+ <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+ <20140922184049.GB4709@pd.tnic>
+ <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+ <20140922192152.GD4709@pd.tnic>
+ <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922195737.GE4709@pd.tnic>
+ <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-UCeURwFdca7VR5mDEoka"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140922195737.GE4709@pd.tnic>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail.skyhub.de ([78.46.96.112]:33015 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753128AbaIVUdl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Sep 2014 16:33:41 -0400
+Content-Disposition: inline
+In-Reply-To: <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
+On Mon, Sep 22, 2014 at 01:09:33PM -0700, Jeff Kirsher wrote:
+> Sorry I am very frustrated at your response.
 
---=-UCeURwFdca7VR5mDEoka
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+You shouldn't be. Judging by your reply below it seems we do actually
+agree... mostly :-)
 
-On Mon, 2014-09-22 at 21:57 +0200, Borislav Petkov wrote:
-> On Mon, Sep 22, 2014 at 12:44:17PM -0700, Jeff Kirsher wrote:
-> > Not sure you showed us, since that is how everyone has had to do to
-> > actual find W=3D builds useful.  Just because that is how we HAVE to
-> do it
-> > now, does not make it the best way.  Here is a thought, we don't we
-> fix
-> > the potential issues, so that W=3D builds do not generate over 100,000
-> > errors/warnings.
-> >=20
-> > Mark did this approach because it would either spur the conversation
-> > that this is a good idea OR let's fix the root problem.  Instead it
-> > sounds like your response is "life sucks, get over it" and put your
-> head
-> > back in the sand to ignore the problem.
->=20
-> Hey hey, relax a little - no need to get offensive all of a sudden.
+> I am not saying that the proposed added MACRO is the best solution to
+> this issue.  Several other maintainers have actually responded in a
+> similar manner to the macros being added and came back that the better
+> solution would be to fix the code so that the warnings do not occur in
+> the first place.
 
-Sorry I am very frustrated at your response.
->=20
-> Having to grep through a log file full of gcc warnings is a much
-> better
-> thing to do IMNSVHO than adding code to the kernel just to shut up the
-> compiler. We had huge discussions even about something as silly as
-> uninitialized_var() which was supposed to shut up the compiler but
-> ended
-> up actively causing bugs.
+Right, this would be optimal.
 
-I am not saying that the proposed added MACRO is the best solution to
-this issue.  Several other maintainers have actually responded in a
-similar manner to the macros being added and came back that the better
-solution would be to fix the code so that the warnings do not occur in
-the first place.
+> So I guess I was hoping for more of the response, that "let's fix this
+> the code so that the warnings do not appear in the first place".
+> 
+> I agree with you completely that I do not like the idea of the MACROS
+> being added to silence these warnings.  I just disagree that not doing
+> anything to fix the warnings is far worse.
 
-So I guess I was hoping for more of the response, that "let's fix this
-the code so that the warnings do not appear in the first place".
+Ok, good, so we're on the same page here.
 
-I agree with you completely that I do not like the idea of the MACROS
-being added to silence these warnings.  I just disagree that not doing
-anything to fix the warnings is far worse.
+> Why grep through 100,000 warnings, when we should be fixing the code to
+> prevent 100,000 warnings.  Not saying that the MACRO is the best
+> solution, it is just a solution, in hopes that it spurs discussions like
+> this on how to properly fix the warnings.  Not a discussion on how to
+> grep through the warnings and do nothing.
 
-Why grep through 100,000 warnings, when we should be fixing the code to
-prevent 100,000 warnings.  Not saying that the MACRO is the best
-solution, it is just a solution, in hopes that it spurs discussions like
-this on how to properly fix the warnings.  Not a discussion on how to
-grep through the warnings and do nothing.
+There's only one thing I don't understand: why is so bad to grep through
+the warnings? I mean, sure, fixing them *without* jumping through hoops
+to do so is the optimal thing. But what's wrong with grepping through
+them?
 
->=20
-> Now, you're arguing for adding obscure macros to shut up warnings
-> which
-> are disabled in the first place because you don't want to grep through
-> log files.
->=20
-> If you can't see the absurdity of your proposal then maybe we should
-> agree to disagree and declare this back-and-forth for having run its
-> course. In any case, you get my NAK for it.
+Btw, out of curiosity, what is your use case for staring at those W=2
+warnings?
 
+In thinking about it, what we could also do is simply move the noisiest
+ones to W=3 or so, or even add another W= level. It'll be interesting to
+hear your use case though. AFAICT, this is the first time I hear of a
+more, let's say, serious use case of W= since we added the W= things a
+couple of years ago. :-)
 
+Thanks.
 
---=-UCeURwFdca7VR5mDEoka
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
+-- 
+Regards/Gruss,
+    Boris.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAABCgAGBQJUIIH9AAoJEOVv75VaS+3OOm8P/jWLkJFm1OO5uGtmfrq/OTXE
-HPxTs5jTgSV7SOqQgAgCknVQisleWguiJDEjN+O1nQQ3OVl6WbAD4OQnJa9Z0mcO
-6YK/7J34pHVXVBx1lEekY6Sg1GhI+IVwiH7ximLFYdHjMAF/0T96qrOVMxczpsv7
-HIiJmuF7w9am/8KVvQy6kVFsLrJc+SN1B/Z1LGBObPUamBNd5BU/hcbHbC14WBwr
-J1ce7hi3x9lojb9PUbf9Y2A/z4K97CSDLH4vUroUEQwHmlq8aYnu/17U9gQgSYmD
-1PrYiRzJbYILdaxYghDbbZhSXKE08uwY/NSVPH84g+I1Ty2r/KTIMfpJJmSvuCb2
-Uh4huaA9LtHKmKQyg6tPcI/AYOGTPwq+kCE/vWAyRZ3x9ax2rQBu+FIVKaXk3UdP
-cWRnCJIXpfnEhIpygUEmd9OipIUpMxxH9PpaHek7F89NKZoMGyTp6roRkligryde
-m7s7/ORHWYweEqUiBVfBFE23/xmBF9PMnblDlZT5u0SpeF1Ro5/HXw28QL8382Kv
-glT3Yd4zMsVN2Wa9S/wvRVep5Pby8mGB43X9aXcb+UzoYMnsePH9My/4JyhNOEzM
-ttmSglA9rluOBytzlQkMaY4P21MGvZBipGfd65TTMw5Q40a0HA5vBsbgDZ5sj/yW
-8rRWAtVdKxs0kctxzQzx
-=Jwrn
------END PGP SIGNATURE-----
-
---=-UCeURwFdca7VR5mDEoka--
+Sent from a fat crate under my desk. Formatting is fine.
+--
