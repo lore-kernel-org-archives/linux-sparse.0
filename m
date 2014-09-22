@@ -1,98 +1,59 @@
-From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Mon, 22 Sep 2014 12:44:17 -0700
-Message-ID: <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+Date: Mon, 22 Sep 2014 21:57:37 +0200
+Message-ID: <20140922195737.GE4709@pd.tnic>
 References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
-	 <20140922153355.GB4510@pd.tnic>
-	 <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
-	 <20140922184049.GB4709@pd.tnic>
-	 <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
-	 <20140922192152.GD4709@pd.tnic>
+ <20140922153355.GB4510@pd.tnic>
+ <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+ <20140922184049.GB4709@pd.tnic>
+ <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+ <20140922192152.GD4709@pd.tnic>
+ <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg="pgp-sha512";
-	protocol="application/pgp-signature"; boundary="=-V77hLcet7amYoKTqNwO1"
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga02.intel.com ([134.134.136.20]:36827 "EHLO mga02.intel.com"
+Received: from mail.skyhub.de ([78.46.96.112]:46805 "EHLO mail.skyhub.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750914AbaIVToz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 15:44:55 -0400
-In-Reply-To: <20140922192152.GD4709@pd.tnic>
+	id S1750914AbaIVT5n (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Sep 2014 15:57:43 -0400
+Content-Disposition: inline
+In-Reply-To: <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
+To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
 Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
+On Mon, Sep 22, 2014 at 12:44:17PM -0700, Jeff Kirsher wrote:
+> Not sure you showed us, since that is how everyone has had to do to
+> actual find W= builds useful.  Just because that is how we HAVE to do it
+> now, does not make it the best way.  Here is a thought, we don't we fix
+> the potential issues, so that W= builds do not generate over 100,000
+> errors/warnings.
+> 
+> Mark did this approach because it would either spur the conversation
+> that this is a good idea OR let's fix the root problem.  Instead it
+> sounds like your response is "life sucks, get over it" and put your head
+> back in the sand to ignore the problem.
 
---=-V77hLcet7amYoKTqNwO1
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Hey hey, relax a little - no need to get offensive all of a sudden.
 
-On Mon, 2014-09-22 at 21:21 +0200, Borislav Petkov wrote:
-> On Mon, Sep 22, 2014 at 06:59:23PM +0000, Rustad, Mark D wrote:
-> > It is helpful for using the warnings to look for problems or even
-> just risks.
->=20
-> That's what W=3D builds are for.
->=20
-> > Right now the number of warnings generated when using W=3D2 simply
-> tells
-> > people to never use W=3D2.
->=20
-> I showed you how to use W=3D2 and 3 for that matter - pipe the output
-> into
-> a file and grep away.
->=20
+Having to grep through a log file full of gcc warnings is a much better
+thing to do IMNSVHO than adding code to the kernel just to shut up the
+compiler. We had huge discussions even about something as silly as
+uninitialized_var() which was supposed to shut up the compiler but ended
+up actively causing bugs.
 
-Not sure you showed us, since that is how everyone has had to do to
-actual find W=3D builds useful.  Just because that is how we HAVE to do it
-now, does not make it the best way.  Here is a thought, we don't we fix
-the potential issues, so that W=3D builds do not generate over 100,000
-errors/warnings.
+Now, you're arguing for adding obscure macros to shut up warnings which
+are disabled in the first place because you don't want to grep through
+log files.
 
-Mark did this approach because it would either spur the conversation
-that this is a good idea OR let's fix the root problem.  Instead it
-sounds like your response is "life sucks, get over it" and put your head
-back in the sand to ignore the problem.
+If you can't see the absurdity of your proposal then maybe we should
+agree to disagree and declare this back-and-forth for having run its
+course. In any case, you get my NAK for it.
 
-> > That severely limits the value of a useful tool. A checkpatch
-> warning
-> > doesn't mean to never do that, just that it needs a critical look
-> and
-> > justification. That is certainly true of every patch I made that
-> uses
-> > those macros.
->=20
-> Sorry, if you need to shut up the compiler by adding code with the
-> sole
-> purpose to not issue a warning for otherwise perfectly fine code, then
-> something's wrong with the whole endeavor in the first place.
->=20
-> There's a reason W=3D warnings are disabled in the default build.
+-- 
+Regards/Gruss,
+    Boris.
 
-
-
---=-V77hLcet7amYoKTqNwO1
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: This is a digitally signed message part
-Content-Transfer-Encoding: 7bit
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v2
-
-iQIcBAABCgAGBQJUIHwRAAoJEOVv75VaS+3ORowP/i/4vQMARJxZikvYuDka9ZuO
-EdhJTQ8KBV8X0sw6Duse4Kpx8Kgp034tct7pVIYrliZ96J76m3QwRTGs2TX9kbuW
-mhYjtQRAhFzPe+eKRGxooWnazv6x5vmikGUN0z5Ypzn5CYNeAXYdAfwx+zIDhgiB
-mGitN0NTKqnrF9BVKZ59d0FciR8Rj0jYjprGZ7e+kEO0BsQceAAIWs7Jzg1mg4Gs
-siphna3tBzOmXdxWuFCvUzjpPdFaax82tr5Hev3WdGIEa4fNiNxi4T8ZBJpzrLmd
-8SRgW6QWyyyfq3TrPrM2B7ml8HeXKctjj6+mAea2MxnbtBp9IKM6xP9HU6Lh7UTq
-hhPRMUyxvDua8PCPQF2BsYfglxjis2/2wuGce+GzRIwc9k1WqlFVrXbkOf6as8ZZ
-7FnunUltpID3SDr1J+vPvOIJn5FSzYx2LrDPSlAza+XCKBkvQjqoCBaBp9kQINaw
-3Tq6OIP8WJMk3fRHIzMgsLHn77CucC/UPxNDGoTcOK7eH8Eb1zgPFTFDHZKxM732
-R03iDc2m4Cr3IHKmlt/+ijZHM4YffKzqkeRXtbGA/MBRfsdg+Ye1gVFclBnYoq4+
-EZ945Ag8itlaSlj4Rj1yGIDtHZQmU/YqkrIItEZrU5cCnTw/9RtucWCs5C/zlvsZ
-6/UvIxlGWV9hGwCFuScE
-=LTvi
------END PGP SIGNATURE-----
-
---=-V77hLcet7amYoKTqNwO1--
-
+Sent from a fat crate under my desk. Formatting is fine.
+--
