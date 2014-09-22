@@ -1,55 +1,110 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH] sched: Remove nested extern
-Date: Mon, 22 Sep 2014 22:05:27 +0200
-Message-ID: <20140922200527.GA3128@worktop.programming.kicks-ass.net>
-References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
- <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
- <20140922190128.GA2805@worktop.programming.kicks-ass.net>
- <D428C53D-F663-4846-ACAB-74922033B048@intel.com>
+From: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
+Date: Mon, 22 Sep 2014 13:09:33 -0700
+Message-ID: <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+	 <20140922153355.GB4510@pd.tnic>
+	 <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+	 <20140922184049.GB4709@pd.tnic>
+	 <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+	 <20140922192152.GD4709@pd.tnic>
+	 <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+	 <20140922195737.GE4709@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:54147 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753128AbaIVUFi (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 16:05:38 -0400
-Content-Disposition: inline
-In-Reply-To: <D428C53D-F663-4846-ACAB-74922033B048@intel.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: multipart/signed; micalg="pgp-sha512";
+	protocol="application/pgp-signature"; boundary="=-UCeURwFdca7VR5mDEoka"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20140922195737.GE4709@pd.tnic>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Borislav Petkov <bp@alien8.de>
+Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: "Rustad, Mark D" <mark.d.rustad@intel.com>
-Cc: "sparse@chrisli.org" <sparse@chrisli.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "richard.weinberger@gmail.com" <richard.weinberger@gmail.com>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "mingo@redhat.com" <mingo@redhat.com>, "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "computersforpeace@gmail.com" <computersforpeace@gmail.com>
 
-On Mon, Sep 22, 2014 at 07:32:04PM +0000, Rustad, Mark D wrote:
-> On Sep 22, 2014, at 12:01 PM, Peter Zijlstra <peterz@infradead.org> wrote:
-> 
-> > On Mon, Sep 22, 2014 at 10:55:11AM -0700, Mark D Rustad wrote:
-> >> Avoid W=2 nested-externs warning by moving the nested extern to
-> >> a normal extern. This eliminates that warning which is generated
-> >> for every inclusion of sched.h in a kernel build when W=2 is used.
-> >> This also removes a point of maintenance if the definition of
-> >> delayacct_on were ever to change.
-> > 
-> > Yeah, so why is that warning worth using? Just disable the warn if
-> > you're bothered by it.
-> 
-> I assume that nested-externs is included in W=2 because many uses of
-> them, especially with function prototypes, creates a risk of inconsistent
-> declarations. The kernel has a fair number of them that seem to have
-> been added to disentangle include files. If they are judged to be
-> worthwhile, then it would be good to silence the warnings so that
-> attention can be given to other instances of the warnings. If those
-> nested externs are not worth the risk, well that is a different conversation.
 
-So would using something like LTO not be way better at actually finding
-the problems, seeing how it can actually see the inconsistency in
-declarations.
+--=-UCeURwFdca7VR5mDEoka
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 
-It seems to me that banning the use of nested extern is misguided as
-they are a useful tool; they provide some means of keeping symbols from
-being globally visible even though they actually are. Its a really poor
-man's 'private', but its the best C provides.
+On Mon, 2014-09-22 at 21:57 +0200, Borislav Petkov wrote:
+> On Mon, Sep 22, 2014 at 12:44:17PM -0700, Jeff Kirsher wrote:
+> > Not sure you showed us, since that is how everyone has had to do to
+> > actual find W=3D builds useful.  Just because that is how we HAVE to
+> do it
+> > now, does not make it the best way.  Here is a thought, we don't we
+> fix
+> > the potential issues, so that W=3D builds do not generate over 100,000
+> > errors/warnings.
+> >=20
+> > Mark did this approach because it would either spur the conversation
+> > that this is a good idea OR let's fix the root problem.  Instead it
+> > sounds like your response is "life sucks, get over it" and put your
+> head
+> > back in the sand to ignore the problem.
+>=20
+> Hey hey, relax a little - no need to get offensive all of a sudden.
 
-Also, why do you care about W=2 nonsense anyhow? They're default
-disabled for a reason.
+Sorry I am very frustrated at your response.
+>=20
+> Having to grep through a log file full of gcc warnings is a much
+> better
+> thing to do IMNSVHO than adding code to the kernel just to shut up the
+> compiler. We had huge discussions even about something as silly as
+> uninitialized_var() which was supposed to shut up the compiler but
+> ended
+> up actively causing bugs.
+
+I am not saying that the proposed added MACRO is the best solution to
+this issue.  Several other maintainers have actually responded in a
+similar manner to the macros being added and came back that the better
+solution would be to fix the code so that the warnings do not occur in
+the first place.
+
+So I guess I was hoping for more of the response, that "let's fix this
+the code so that the warnings do not appear in the first place".
+
+I agree with you completely that I do not like the idea of the MACROS
+being added to silence these warnings.  I just disagree that not doing
+anything to fix the warnings is far worse.
+
+Why grep through 100,000 warnings, when we should be fixing the code to
+prevent 100,000 warnings.  Not saying that the MACRO is the best
+solution, it is just a solution, in hopes that it spurs discussions like
+this on how to properly fix the warnings.  Not a discussion on how to
+grep through the warnings and do nothing.
+
+>=20
+> Now, you're arguing for adding obscure macros to shut up warnings
+> which
+> are disabled in the first place because you don't want to grep through
+> log files.
+>=20
+> If you can't see the absurdity of your proposal then maybe we should
+> agree to disagree and declare this back-and-forth for having run its
+> course. In any case, you get my NAK for it.
+
+
+
+--=-UCeURwFdca7VR5mDEoka
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: This is a digitally signed message part
+Content-Transfer-Encoding: 7bit
+
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2
+
+iQIcBAABCgAGBQJUIIH9AAoJEOVv75VaS+3OOm8P/jWLkJFm1OO5uGtmfrq/OTXE
+HPxTs5jTgSV7SOqQgAgCknVQisleWguiJDEjN+O1nQQ3OVl6WbAD4OQnJa9Z0mcO
+6YK/7J34pHVXVBx1lEekY6Sg1GhI+IVwiH7ximLFYdHjMAF/0T96qrOVMxczpsv7
+HIiJmuF7w9am/8KVvQy6kVFsLrJc+SN1B/Z1LGBObPUamBNd5BU/hcbHbC14WBwr
+J1ce7hi3x9lojb9PUbf9Y2A/z4K97CSDLH4vUroUEQwHmlq8aYnu/17U9gQgSYmD
+1PrYiRzJbYILdaxYghDbbZhSXKE08uwY/NSVPH84g+I1Ty2r/KTIMfpJJmSvuCb2
+Uh4huaA9LtHKmKQyg6tPcI/AYOGTPwq+kCE/vWAyRZ3x9ax2rQBu+FIVKaXk3UdP
+cWRnCJIXpfnEhIpygUEmd9OipIUpMxxH9PpaHek7F89NKZoMGyTp6roRkligryde
+m7s7/ORHWYweEqUiBVfBFE23/xmBF9PMnblDlZT5u0SpeF1Ro5/HXw28QL8382Kv
+glT3Yd4zMsVN2Wa9S/wvRVep5Pby8mGB43X9aXcb+UzoYMnsePH9My/4JyhNOEzM
+ttmSglA9rluOBytzlQkMaY4P21MGvZBipGfd65TTMw5Q40a0HA5vBsbgDZ5sj/yW
+8rRWAtVdKxs0kctxzQzx
+=Jwrn
+-----END PGP SIGNATURE-----
+
+--=-UCeURwFdca7VR5mDEoka--
