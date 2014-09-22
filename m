@@ -1,86 +1,26 @@
-From: "Rustad, Mark D" <mark.d.rustad@intel.com>
-Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Mon, 22 Sep 2014 18:59:23 +0000
-Message-ID: <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
- <20140922153355.GB4510@pd.tnic>
- <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
- <20140922184049.GB4709@pd.tnic>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: [PATCH] sched: Remove nested extern
+Date: Mon, 22 Sep 2014 21:01:28 +0200
+Message-ID: <20140922190128.GA2805@worktop.programming.kicks-ass.net>
+References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
+ <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-	boundary="Apple-Mail=_EC97A2A1-4862-4B55-887E-4553185B9FD3";
-	protocol="application/pgp-signature"; micalg=pgp-sha1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:56085 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1754327AbaIVTAh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 15:00:37 -0400
-In-Reply-To: <20140922184049.GB4709@pd.tnic>
-Content-Language: en-US
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark D Rustad <mark.d.rustad@intel.com>
+Cc: sparse@chrisli.org, linux-kernel@vger.kernel.org, richard.weinberger@gmail.com, linux-sparse@vger.kernel.org, mingo@redhat.com, jeffrey.t.kirsher@intel.com, computersforpeace@gmail.com
 List-Id: linux-sparse@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
---Apple-Mail=_EC97A2A1-4862-4B55-887E-4553185B9FD3
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=us-ascii
+On Mon, Sep 22, 2014 at 10:55:11AM -0700, Mark D Rustad wrote:
+> Avoid W=2 nested-externs warning by moving the nested extern to
+> a normal extern. This eliminates that warning which is generated
+> for every inclusion of sched.h in a kernel build when W=2 is used.
+> This also removes a point of maintenance if the definition of
+> delayacct_on were ever to change.
+> 
 
-On Sep 22, 2014, at 11:40 AM, Borislav Petkov <bp@alien8.de> wrote:
-
-> On Mon, Sep 22, 2014 at 05:06:27PM +0000, Rustad, Mark D wrote:
->> Well, the whole series of patches that I made definitely went too far
->> - only the first 5 out of about 30 have been posted, but if we can
->> make some progress on generating fewer warnings out of the include
->> files, I think it would be helpful.
->=20
-> Helpful for what? Those are W=3D2 warnings which are disabled in the
-> default build.
-
-It is helpful for using the warnings to look for problems or even just =
-risks.
-
->> The macros can serve a useful purpose, but they should not be widely
->> used. When to use them is definitely a judgement call. If the macros
->> are accepted, it may be worth adding a checkpatch.pl warning for
->> adding a DIAG_*IGNORE macro.
->=20
-> Right, so add the macros and tell people *not* to use them. That won't
-> fly.
-
-Right now the number of warnings generated when using W=3D2 simply tells =
-people to never use W=3D2. That severely limits the value of a useful =
-tool. A checkpatch warning doesn't mean to never do that, just that it =
-needs a critical look and justification. That is certainly true of every =
-patch I made that uses those macros.
-
---=20
-Mark Rustad, Networking Division, Intel Corporation
-
-
---Apple-Mail=_EC97A2A1-4862-4B55-887E-4553185B9FD3
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="signature.asc"
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Message signed with OpenPGP using GPGMail
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - http://gpgtools.org
-
-iQIcBAEBAgAGBQJUIHGKAAoJEDwO/+eO4+5uQaIP/jK2YZ0dFaFP5FabWOHLwZ7H
-/HMvdLh/Hze6meVUJmzYIPaf1aj0fBEevR+xI9zPjCMxpPiq1y23FU6kHB3yK3ZU
-dK5sXjPpFKHGqCcb6YWDtaYCfstHAmdWzL8P+bEwRBCqwMqPYVKSzR2UPAspBD2h
-4gUq2lGTnyT+8qYNFbGKO6ppb+tTZvHs+IaX5Hdzajjh2s1YULT7NBx5jmFscSlg
-YHq+xtpMMZPxQW4Io0g8YtagfE8blCpwRs2CqZOICKEILYTbjyUaMDP/ctvmriI4
-7V3THtqEZevi0bottb93hpNbRGVO2hnLY1tQ2nTHDv7svP8yxJz2FM5Mz/ubMsGe
-jeD2rAy8h0XreiVBW6YvLPzTq9Q/PUhNSPa3LDZ94oeejhVqBACIwKytC/NNtqY1
-lg0vzxyyYSXtW5tE/6+g5pDntTK9q1B1/UEclZsBf1CQp/VuwX5nG6d/QrpyuZ7m
-HAZaJ7NJayd+N6pb61hHctnSrVXNZk30AQdM86U/OfQ8NujVNh9GecC200jgzlgo
-LG7vJf4QfSek+Gsbc4hDUIUOexPtkpfg/y2SEmhP4RkqDCsJE2hdhnIzhkTd+eAi
-/O15gY9EWkBNa2Nf3BZQkjWQb6nYCJ8oQQtiptQ2lk97SvssfldMuNpu7sElvV/D
-MwE+qZNuXfkH7tblbXGS
-=frbS
------END PGP SIGNATURE-----
-
---Apple-Mail=_EC97A2A1-4862-4B55-887E-4553185B9FD3--
+Yeah, so why is that warning worth using? Just disable the warn if
+you're bothered by it.
