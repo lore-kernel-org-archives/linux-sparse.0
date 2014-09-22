@@ -1,60 +1,64 @@
-From: Mark D Rustad <mark.d.rustad@intel.com>
-Subject: [PATCH] sched: Remove nested extern
-Date: Mon, 22 Sep 2014 10:55:11 -0700
-Message-ID: <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
-References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
+From: Brian Norris <computersforpeace@gmail.com>
+Subject: Re: [PATCH 1/1] jffs2: fix sparse warning: unexpected unlock
+Date: Mon, 22 Sep 2014 11:12:50 -0700
+Message-ID: <20140922181250.GN1193@ld-irv-0074>
+References: <1411065976-20386-1-git-send-email-fabf@skynet.be>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: sparse@chrisli.org
-Cc: peterz@infradead.org, linux-kernel@vger.kernel.org, richard.weinberger@gmail.com, linux-sparse@vger.kernel.org, mingo@redhat.com, jeffrey.t.kirsher@intel.com, mark.d.rustad@intel.com, computersforpeace@gmail.com
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-pd0-f177.google.com ([209.85.192.177]:49142 "EHLO
+	mail-pd0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753879AbaIVSMy (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Sep 2014 14:12:54 -0400
+Content-Disposition: inline
+In-Reply-To: <1411065976-20386-1-git-send-email-fabf@skynet.be>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Fabian Frederick <fabf@skynet.be>
+Cc: linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, linux-sparse@vger.kernel.org
 
-Avoid W=2 nested-externs warning by moving the nested extern to
-a normal extern. This eliminates that warning which is generated
-for every inclusion of sched.h in a kernel build when W=2 is used.
-This also removes a point of maintenance if the definition of
-delayacct_on were ever to change.
++ linux-sparse
 
-Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
----
- include/linux/delayacct.h |    1 -
- include/linux/sched.h     |    3 ++-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+On Thu, Sep 18, 2014 at 08:46:16PM +0200, Fabian Frederick wrote:
+> fs/jffs2/summary.c:846:5: warning: context imbalance in 'jffs2_sum_write_sumnode' - unexpected unlock
+> 
+> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> ---
+>  fs/jffs2/summary.c | 2 ++
+>  1 file changed, 2 insertions(+)
+> 
+> diff --git a/fs/jffs2/summary.c b/fs/jffs2/summary.c
+> index c522d09..a0bac7b 100644
+> --- a/fs/jffs2/summary.c
+> +++ b/fs/jffs2/summary.c
+> @@ -844,6 +844,8 @@ static int jffs2_sum_write_data(struct jffs2_sb_info *c, struct jffs2_eraseblock
+>  /* Write out summary information - called from jffs2_do_reserve_space */
+>  
+>  int jffs2_sum_write_sumnode(struct jffs2_sb_info *c)
+> +	__releases(&c->erase_completion_lock)
+> +	__acquires(&c->erase_completion_lock)
 
-diff --git a/include/linux/delayacct.h b/include/linux/delayacct.h
-index 6cee17c22313..51229790af00 100644
---- a/include/linux/delayacct.h
-+++ b/include/linux/delayacct.h
-@@ -30,7 +30,6 @@
- 
- #ifdef CONFIG_TASK_DELAY_ACCT
- 
--extern int delayacct_on;	/* Delay accounting turned on/off */
- extern struct kmem_cache *delayacct_cache;
- extern void delayacct_init(void);
- extern void __delayacct_tsk_init(struct task_struct *);
-diff --git a/include/linux/sched.h b/include/linux/sched.h
-index 5c2c885ee52b..1f1dcfdcd92c 100644
---- a/include/linux/sched.h
-+++ b/include/linux/sched.h
-@@ -825,6 +825,8 @@ struct task_delay_info {
- 	u64 freepages_delay;	/* wait for memory reclaim */
- 	u32 freepages_count;	/* total count of memory reclaim */
- };
-+
-+extern int delayacct_on;	/* Delay accounting turned on/off */
- #endif	/* CONFIG_TASK_DELAY_ACCT */
- 
- static inline int sched_info_on(void)
-@@ -832,7 +834,6 @@ static inline int sched_info_on(void)
- #ifdef CONFIG_SCHEDSTATS
- 	return 1;
- #elif defined(CONFIG_TASK_DELAY_ACCT)
--	extern int delayacct_on;
- 	return delayacct_on;
- #else
- 	return 0;
+I'm not too familiar with sparse notations, but Documentation/sparse.txt
+suggests the above is wrong, and the following is more accurate:
+
+	__must_hold(&c->erase_completion_lock)
+
+But it looks like there are several other examples which do this.
+Anyway, here's the relevant doc text, in case someone wants to clarify
+it for me, or else tell me the documentation is wrong:
+
+    __must_hold - The specified lock is held on function entry and exit.
+
+    __acquires - The specified lock is held on function exit, but not entry.
+
+    __releases - The specified lock is held on function entry, but not exit.
+
+So __acquires and __releases look mutually exclusive, but it's not clear
+if __must_hold will actually cover what we want. (I haven't tested it.)
+
+>  {
+>  	int datasize, infosize, padsize;
+>  	struct jffs2_eraseblock *jeb;
+
+Brian
