@@ -1,134 +1,60 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 1/1] signal: use BUILD_BUG() instead of
- _NSIG_WORDS_is_unsupported_size()
-Date: Mon, 22 Sep 2014 10:26:05 -0700
-Message-ID: <20140922172605.GF25352@thin>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
- <1411140580-20909-6-git-send-email-jeffrey.t.kirsher@intel.com>
- <541C4D57.9050507@nod.at>
- <1411141042.2513.3.camel@jtkirshe-mobl>
- <541C4E14.9010000@nod.at>
- <20140919172030.GA22293@redhat.com>
- <20140919212128.GP26432@jtriplet-mobl1>
- <20140921164243.GA16744@redhat.com>
- <20140921164306.GB16744@redhat.com>
+From: Mark D Rustad <mark.d.rustad@intel.com>
+Subject: [PATCH] sched: Remove nested extern
+Date: Mon, 22 Sep 2014 10:55:11 -0700
+Message-ID: <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
+References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:53865 "EHLO
-	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754230AbaIVR0T (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 13:26:19 -0400
-Content-Disposition: inline
-In-Reply-To: <20140921164306.GB16744@redhat.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: sparse@chrisli.org
+Cc: peterz@infradead.org, linux-kernel@vger.kernel.org, richard.weinberger@gmail.com, linux-sparse@vger.kernel.org, mingo@redhat.com, jeffrey.t.kirsher@intel.com, mark.d.rustad@intel.com, computersforpeace@gmail.com
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Richard Weinberger <richard@nod.at>, Jeff Kirsher <jeffrey.t.kirsher@intel.com>, sparse@chrisli.org, Mark Rustad <mark.d.rustad@intel.com>, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Brian Norris <computersforpeace@gmail.com>
 
-On Sun, Sep 21, 2014 at 06:43:06PM +0200, Oleg Nesterov wrote:
-> Kill _NSIG_WORDS_is_unsupported_size(), use BUILD_BUG() instead.
-> This simplifies the code, avoids the nested-externs warnings, and
-> this way we do not defer the problem to linker.
-> 
-> Also, fix the indentation in _SIG_SET_BINOP() and _SIG_SET_OP().
-> 
-> Note: this patch assumes that the code like "if (0) BUILD_BUG();"
-> is valid. If not (say __compiletime_error() is not defined and thus
-> __compiletime_error_fallback() uses a negative array) we should fix
-> BUILD_BUG() and/or BUILD_BUG_ON_MSG(). This code should be fine by
-> definition, this is the documented purpose of BUILD_BUG().
-> 
-> Reported-by: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+Avoid W=2 nested-externs warning by moving the nested extern to
+a normal extern. This eliminates that warning which is generated
+for every inclusion of sched.h in a kernel build when W=2 is used.
+This also removes a point of maintenance if the definition of
+delayacct_on were ever to change.
 
-Thanks for posting this.
+Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
+---
+ include/linux/delayacct.h |    1 -
+ include/linux/sched.h     |    3 ++-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-
->  include/linux/signal.h |   28 ++++++++++++----------------
->  1 files changed, 12 insertions(+), 16 deletions(-)
-> 
-> diff --git a/include/linux/signal.h b/include/linux/signal.h
-> index 750196f..14acfd5 100644
-> --- a/include/linux/signal.h
-> +++ b/include/linux/signal.h
-> @@ -67,7 +67,6 @@ static inline int sigismember(sigset_t *set, int _sig)
->  
->  static inline int sigisemptyset(sigset_t *set)
->  {
-> -	extern void _NSIG_WORDS_is_unsupported_size(void);
->  	switch (_NSIG_WORDS) {
->  	case 4:
->  		return (set->sig[3] | set->sig[2] |
-> @@ -77,7 +76,7 @@ static inline int sigisemptyset(sigset_t *set)
->  	case 1:
->  		return set->sig[0] == 0;
->  	default:
-> -		_NSIG_WORDS_is_unsupported_size();
-> +		BUILD_BUG();
->  		return 0;
->  	}
->  }
-> @@ -90,24 +89,23 @@ static inline int sigisemptyset(sigset_t *set)
->  #define _SIG_SET_BINOP(name, op)					\
->  static inline void name(sigset_t *r, const sigset_t *a, const sigset_t *b) \
->  {									\
-> -	extern void _NSIG_WORDS_is_unsupported_size(void);		\
->  	unsigned long a0, a1, a2, a3, b0, b1, b2, b3;			\
->  									\
->  	switch (_NSIG_WORDS) {						\
-> -	    case 4:							\
-> +	case 4:								\
->  		a3 = a->sig[3]; a2 = a->sig[2];				\
->  		b3 = b->sig[3]; b2 = b->sig[2];				\
->  		r->sig[3] = op(a3, b3);					\
->  		r->sig[2] = op(a2, b2);					\
-> -	    case 2:							\
-> +	case 2:								\
->  		a1 = a->sig[1]; b1 = b->sig[1];				\
->  		r->sig[1] = op(a1, b1);					\
-> -	    case 1:							\
-> +	case 1:								\
->  		a0 = a->sig[0]; b0 = b->sig[0];				\
->  		r->sig[0] = op(a0, b0);					\
->  		break;							\
-> -	    default:							\
-> -		_NSIG_WORDS_is_unsupported_size();			\
-> +	default:							\
-> +		BUILD_BUG();						\
->  	}								\
->  }
->  
-> @@ -128,16 +126,14 @@ _SIG_SET_BINOP(sigandnsets, _sig_andn)
->  #define _SIG_SET_OP(name, op)						\
->  static inline void name(sigset_t *set)					\
->  {									\
-> -	extern void _NSIG_WORDS_is_unsupported_size(void);		\
-> -									\
->  	switch (_NSIG_WORDS) {						\
-> -	    case 4: set->sig[3] = op(set->sig[3]);			\
-> -		    set->sig[2] = op(set->sig[2]);			\
-> -	    case 2: set->sig[1] = op(set->sig[1]);			\
-> -	    case 1: set->sig[0] = op(set->sig[0]);			\
-> +	case 4:	set->sig[3] = op(set->sig[3]);				\
-> +		set->sig[2] = op(set->sig[2]);				\
-> +	case 2:	set->sig[1] = op(set->sig[1]);				\
-> +	case 1:	set->sig[0] = op(set->sig[0]);				\
->  		    break;						\
-> -	    default:							\
-> -		_NSIG_WORDS_is_unsupported_size();			\
-> +	default:							\
-> +		BUILD_BUG();						\
->  	}								\
->  }
->  
-> -- 
-> 1.5.5.1
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/include/linux/delayacct.h b/include/linux/delayacct.h
+index 6cee17c22313..51229790af00 100644
+--- a/include/linux/delayacct.h
++++ b/include/linux/delayacct.h
+@@ -30,7 +30,6 @@
+ 
+ #ifdef CONFIG_TASK_DELAY_ACCT
+ 
+-extern int delayacct_on;	/* Delay accounting turned on/off */
+ extern struct kmem_cache *delayacct_cache;
+ extern void delayacct_init(void);
+ extern void __delayacct_tsk_init(struct task_struct *);
+diff --git a/include/linux/sched.h b/include/linux/sched.h
+index 5c2c885ee52b..1f1dcfdcd92c 100644
+--- a/include/linux/sched.h
++++ b/include/linux/sched.h
+@@ -825,6 +825,8 @@ struct task_delay_info {
+ 	u64 freepages_delay;	/* wait for memory reclaim */
+ 	u32 freepages_count;	/* total count of memory reclaim */
+ };
++
++extern int delayacct_on;	/* Delay accounting turned on/off */
+ #endif	/* CONFIG_TASK_DELAY_ACCT */
+ 
+ static inline int sched_info_on(void)
+@@ -832,7 +834,6 @@ static inline int sched_info_on(void)
+ #ifdef CONFIG_SCHEDSTATS
+ 	return 1;
+ #elif defined(CONFIG_TASK_DELAY_ACCT)
+-	extern int delayacct_on;
+ 	return delayacct_on;
+ #else
+ 	return 0;
