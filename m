@@ -1,77 +1,53 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] sched: Remove nested extern
-Date: Mon, 22 Sep 2014 11:25:44 -0700
-Message-ID: <20140922182544.GA27107@thin>
-References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
- <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
+Date: Mon, 22 Sep 2014 20:40:49 +0200
+Message-ID: <20140922184049.GB4709@pd.tnic>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+ <20140922153355.GB4510@pd.tnic>
+ <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:60006 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754495AbaIVSZ5 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 14:25:57 -0400
+Content-Type: text/plain; charset=utf-8
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Rustad, Mark D" <mark.d.rustad@intel.com>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Mark D Rustad <mark.d.rustad@intel.com>
-Cc: sparse@chrisli.org, peterz@infradead.org, linux-kernel@vger.kernel.org, richard.weinberger@gmail.com, linux-sparse@vger.kernel.org, mingo@redhat.com, jeffrey.t.kirsher@intel.com, computersforpeace@gmail.com
 
-On Mon, Sep 22, 2014 at 10:55:11AM -0700, Mark D Rustad wrote:
-> Avoid W=2 nested-externs warning by moving the nested extern to
-> a normal extern. This eliminates that warning which is generated
-> for every inclusion of sched.h in a kernel build when W=2 is used.
-> This also removes a point of maintenance if the definition of
-> delayacct_on were ever to change.
-> 
-> Signed-off-by: Mark Rustad <mark.d.rustad@intel.com>
+On Mon, Sep 22, 2014 at 05:06:27PM +0000, Rustad, Mark D wrote:
+> The problem is that the kernel include files throw so many warnings
+> that it really discourages anyone from ever going through them, even
+> for a single driver. The warnings are far more valuable and usable
+> when known acceptable usages are silenced.
 
-This seems sensible, and makes much more sense than wrapping the extern
-in a directive to disable warnings.
+You can always do one file only, for example:
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+make W=2 arch/x86/kernel/msr.o > w.log 2>&1
 
->  include/linux/delayacct.h |    1 -
->  include/linux/sched.h     |    3 ++-
->  2 files changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/include/linux/delayacct.h b/include/linux/delayacct.h
-> index 6cee17c22313..51229790af00 100644
-> --- a/include/linux/delayacct.h
-> +++ b/include/linux/delayacct.h
-> @@ -30,7 +30,6 @@
->  
->  #ifdef CONFIG_TASK_DELAY_ACCT
->  
-> -extern int delayacct_on;	/* Delay accounting turned on/off */
->  extern struct kmem_cache *delayacct_cache;
->  extern void delayacct_init(void);
->  extern void __delayacct_tsk_init(struct task_struct *);
-> diff --git a/include/linux/sched.h b/include/linux/sched.h
-> index 5c2c885ee52b..1f1dcfdcd92c 100644
-> --- a/include/linux/sched.h
-> +++ b/include/linux/sched.h
-> @@ -825,6 +825,8 @@ struct task_delay_info {
->  	u64 freepages_delay;	/* wait for memory reclaim */
->  	u32 freepages_count;	/* total count of memory reclaim */
->  };
-> +
-> +extern int delayacct_on;	/* Delay accounting turned on/off */
->  #endif	/* CONFIG_TASK_DELAY_ACCT */
->  
->  static inline int sched_info_on(void)
-> @@ -832,7 +834,6 @@ static inline int sched_info_on(void)
->  #ifdef CONFIG_SCHEDSTATS
->  	return 1;
->  #elif defined(CONFIG_TASK_DELAY_ACCT)
-> -	extern int delayacct_on;
->  	return delayacct_on;
->  #else
->  	return 0;
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Well, the whole series of patches that I made definitely went too far
+> - only the first 5 out of about 30 have been posted, but if we can
+> make some progress on generating fewer warnings out of the include
+> files, I think it would be helpful.
+
+Helpful for what? Those are W=2 warnings which are disabled in the
+default build.
+
+> Already the patches that use them have triggered some activity that
+> has resulted in resolving warnings without use of the macros, and I
+> see that as much better than simply using the macros.
+>
+> The macros can serve a useful purpose, but they should not be widely
+> used. When to use them is definitely a judgement call. If the macros
+> are accepted, it may be worth adding a checkpatch.pl warning for
+> adding a DIAG_*IGNORE macro.
+
+Right, so add the macros and tell people *not* to use them. That won't
+fly.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Sent from a fat crate under my desk. Formatting is fine.
+--
