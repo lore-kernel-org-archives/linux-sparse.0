@@ -1,78 +1,111 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Mon, 22 Sep 2014 22:33:36 +0200
-Message-ID: <20140922203336.GF4709@pd.tnic>
-References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
- <20140922153355.GB4510@pd.tnic>
- <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
- <20140922184049.GB4709@pd.tnic>
- <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
- <20140922192152.GD4709@pd.tnic>
- <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
- <20140922195737.GE4709@pd.tnic>
- <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+From: "Rustad, Mark D" <mark.d.rustad@intel.com>
+Subject: Re: [PATCH] sched: Remove nested extern
+Date: Mon, 22 Sep 2014 20:59:32 +0000
+Message-ID: <D3423D3A-814F-4E22-A84B-61D76D137A98@intel.com>
+References: <CAFLxGvwfuE-458duC9ARMLLMBCvZaBQnwDjPW6uJC4FAViBXjQ@mail.gmail.com>
+ <20140922175511.62229.98784.stgit@mdrustad-wks.jf.intel.com>
+ <20140922190128.GA2805@worktop.programming.kicks-ass.net>
+ <D428C53D-F663-4846-ACAB-74922033B048@intel.com>
+ <20140922200527.GA3128@worktop.programming.kicks-ass.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: multipart/signed;
+	boundary="Apple-Mail=_55C4654D-914A-40A7-AA3A-D0D0CB6FF672";
+	protocol="application/pgp-signature"; micalg=pgp-sha1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:33015 "EHLO mail.skyhub.de"
+Received: from mga11.intel.com ([192.55.52.93]:63260 "EHLO mga11.intel.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753128AbaIVUdl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 22 Sep 2014 16:33:41 -0400
-Content-Disposition: inline
-In-Reply-To: <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+	id S1753128AbaIVU7e (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 22 Sep 2014 16:59:34 -0400
+In-Reply-To: <20140922200527.GA3128@worktop.programming.kicks-ass.net>
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: "sparse@chrisli.org" <sparse@chrisli.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "richard.weinberger@gmail.com" <richard.weinberger@gmail.com>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "mingo@redhat.com" <mingo@redhat.com>, "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "computersforpeace@gmail.com" <computersforpeace@gmail.com>
 
-On Mon, Sep 22, 2014 at 01:09:33PM -0700, Jeff Kirsher wrote:
-> Sorry I am very frustrated at your response.
+--Apple-Mail=_55C4654D-914A-40A7-AA3A-D0D0CB6FF672
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
 
-You shouldn't be. Judging by your reply below it seems we do actually
-agree... mostly :-)
+On Sep 22, 2014, at 1:05 PM, Peter Zijlstra <peterz@infradead.org> =
+wrote:
 
-> I am not saying that the proposed added MACRO is the best solution to
-> this issue.  Several other maintainers have actually responded in a
-> similar manner to the macros being added and came back that the better
-> solution would be to fix the code so that the warnings do not occur in
-> the first place.
+> On Mon, Sep 22, 2014 at 07:32:04PM +0000, Rustad, Mark D wrote:
+>> I assume that nested-externs is included in W=3D2 because many uses =
+of
+>> them, especially with function prototypes, creates a risk of =
+inconsistent
+>> declarations. The kernel has a fair number of them that seem to have
+>> been added to disentangle include files. If they are judged to be
+>> worthwhile, then it would be good to silence the warnings so that
+>> attention can be given to other instances of the warnings. If those
+>> nested externs are not worth the risk, well that is a different =
+conversation.
+>=20
+> So would using something like LTO not be way better at actually =
+finding
+> the problems, seeing how it can actually see the inconsistency in
+> declarations.
+>=20
+> It seems to me that banning the use of nested extern is misguided as
+> they are a useful tool; they provide some means of keeping symbols =
+from
+> being globally visible even though they actually are. Its a really =
+poor
+> man's 'private', but its the best C provides.
 
-Right, this would be optimal.
+By using the macros the use of nested externs can be discouraged without
+being banned. Presence of a DIAG_IGNORE macro should mean that the =
+exception
+has been noted and accepted. And the macro remains as an indicator of =
+that.
+Or to be taken as a warning label: readers choice perhaps.
 
-> So I guess I was hoping for more of the response, that "let's fix this
-> the code so that the warnings do not appear in the first place".
-> 
-> I agree with you completely that I do not like the idea of the MACROS
-> being added to silence these warnings.  I just disagree that not doing
-> anything to fix the warnings is far worse.
+> Also, why do you care about W=3D2 nonsense anyhow? They're default
+> disabled for a reason.
 
-Ok, good, so we're on the same page here.
+Because I have found that enabling many warnings helps identify problems
+in code and it has been my standard practice since about 1999 to do so.
+The compiler warnings are really just another form of static analysis,
+and I use it routinely on every compile. Here is how routinely: I have
+W=3D1 in my environment, W=3D12 is just too painful. I would change that
+default to W=3D12 if it wasn't insane to do so.
 
-> Why grep through 100,000 warnings, when we should be fixing the code to
-> prevent 100,000 warnings.  Not saying that the MACRO is the best
-> solution, it is just a solution, in hopes that it spurs discussions like
-> this on how to properly fix the warnings.  Not a discussion on how to
-> grep through the warnings and do nothing.
+In my own code, I use way more warnings than even W=3D12 enables and in
+that code I just resolve them. I had never resorted to using the =
+attributes
+in my own code, but they are an available tool.
 
-There's only one thing I don't understand: why is so bad to grep through
-the warnings? I mean, sure, fixing them *without* jumping through hoops
-to do so is the optimal thing. But what's wrong with grepping through
-them?
+I just finally thought it might be time to consider opening up a new
+method to manage them for the kernel.
 
-Btw, out of curiosity, what is your use case for staring at those W=2
-warnings?
+--=20
+Mark Rustad, Networking Division, Intel Corporation
 
-In thinking about it, what we could also do is simply move the noisiest
-ones to W=3 or so, or even add another W= level. It'll be interesting to
-hear your use case though. AFAICT, this is the first time I hear of a
-more, let's say, serious use case of W= since we added the W= things a
-couple of years ago. :-)
 
-Thanks.
+--Apple-Mail=_55C4654D-914A-40A7-AA3A-D0D0CB6FF672
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="signature.asc"
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Message signed with OpenPGP using GPGMail
 
--- 
-Regards/Gruss,
-    Boris.
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
 
-Sent from a fat crate under my desk. Formatting is fine.
---
+iQIcBAEBAgAGBQJUII20AAoJEDwO/+eO4+5usBoQAIS8VsZExOmae1m1mEHxcu03
+ww7KWYbJ4vBTQBEjd+LDlEE7rjflSZaEWs9ibkVhDgrm2pyplnW8eqhKX8lR01Rl
+BPaO5643N1f28U8VzughgwXWoJ1a4ydyIswdTKf/v8pe4lW2mU4C9qEY/5W+Lxs2
+qIXWRNzAIZgrgXKs/rE4JsfPIYTMBwey8KviTu7EmzIDiujgShEwu5M0ti/uju2Y
+c/42NLUyqzKAkC2/WvKkTed9/h2um/SYm/Iuw24M3syByM6qy3dgygKcqz9Lp7Gf
+G4jHKyGC32txUnCYOYmMdvTWYOJlXSNcb0cmuoqxOipIXg6ZIrG3Ol/tu0pcLLTh
+8BPwDBXjqWiLPXkxsv4W1kz0vROnX73Rz5xxKDff9z2HsbQ//Hii3htEsndtwrz0
+Y2sPoEAK4LqB+91Ruy8vI6VqVYb8Cd0C5igljPzGui1lGE2CDQ+nB2Qg0RWaSm9O
+5f2+AKOE/5i+u5S3P8jlRPEzGmA4r9UTP6OyjHWaVbBRdPNCjLwcMnAPgJUt4QDZ
+67cZuterm8+/dIhrE6iiN7nUNdar9CCheRWnSYJUvd0oF7P8xhKFLgA0ZHEBPQ7h
+peWKMByFtAsK3Aeb+D/ACDK7hDPYrUVnTCbTv/KSU/PVFNy4f7LF3kpiVXq7nW7v
+plpY4VpMCxPkaIfwbYtx
+=bjvd
+-----END PGP SIGNATURE-----
+
+--Apple-Mail=_55C4654D-914A-40A7-AA3A-D0D0CB6FF672--
