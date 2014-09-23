@@ -1,7 +1,7 @@
 From: Borislav Petkov <bp@alien8.de>
 Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Tue, 23 Sep 2014 10:01:20 +0200
-Message-ID: <20140923080120.GA22072@pd.tnic>
+Date: Tue, 23 Sep 2014 10:22:09 +0200
+Message-ID: <20140923082209.GB22072@pd.tnic>
 References: <20140922153355.GB4510@pd.tnic>
  <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
  <20140922184049.GB4709@pd.tnic>
@@ -11,126 +11,87 @@ References: <20140922153355.GB4510@pd.tnic>
  <20140922195737.GE4709@pd.tnic>
  <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
  <20140922203336.GF4709@pd.tnic>
- <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
+ <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:54140 "EHLO mail.skyhub.de"
+Received: from mail.skyhub.de ([78.46.96.112]:43402 "EHLO mail.skyhub.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753073AbaIWIB1 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 23 Sep 2014 04:01:27 -0400
+	id S1753866AbaIWIWQ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 23 Sep 2014 04:22:16 -0400
 Content-Disposition: inline
-In-Reply-To: <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
+In-Reply-To: <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
-Cc: "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: "Rustad, Mark D" <mark.d.rustad@intel.com>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Mon, Sep 22, 2014 at 02:21:52PM -0700, Jeff Kirsher wrote:
-> Nothing is wrong with grepping for an error, especially when you know
-> the error your grepping for.  But then again, why grep when it can be
-> fixed to begin with?
+On Mon, Sep 22, 2014 at 09:50:54PM +0000, Rustad, Mark D wrote:
+> On Sep 22, 2014, at 1:33 PM, Borislav Petkov <bp@alien8.de> wrote:
+> 
+> > Btw, out of curiosity, what is your use case for staring at those W=2
+> > warnings?
+> 
+> I know no one cares about out-of-tree drivers, but I have a hack that
 
-Oh sure, but at what cost?
+Yah :-)
 
-But we're on the same page here - if it can be fixed cleanly, it should
-be fixed. I simply don't think that adding code just to shut up the
-compiler is a good idea.
+> allows building out-of-tree drivers without getting warnings from the
+> kernel includes. We do an automated compile of every patch with W=12
+> and expect clean compiles.
+> 
+> It would be nice to compile drivers in-tree and have a similar expectation.
+> I guess a similar hack could be developed, but since we are contributing
+> upstream, I would rather uncover any potential issues that may exist, even
+> if they aren't in the driver. The hack would tend to cover up such issues.
+> This is definitely NOT about covering up things that could be problems!
 
-> The fact that there are over 100,000 warnings/errors to begin with
-> is somewhat disconcerting. It makes me wonder whether it was due to
-> coding laziness.
+Yeah, as I said in the other mail to Jeff, I think there are a couple of
+things to be pointed out:
 
-Yeah, the reasons should be multiple and scattered over the years, I
-think. Maybe the warnings were added to gcc later than the code in the
-kernel, or simply some of them are just silly:
+* Fixing those is a good idea if the fixes are clean - I think we all
+agree by now that adding code just to shut up gcc is not nice.
 
-=2E/arch/x86/include/asm/io_apic.h: In function =E2=80=98io_apic_modify=
-=E2=80=99:
-=2E/arch/x86/include/asm/io_apic.h:223:48: warning: declaration of =E2=80=
-=98apic=E2=80=99 shadows a global declaration [-Wshadow]
- static inline void io_apic_modify(unsigned int apic, unsigned int reg,=
- unsigned int value)
-                                                ^
-In file included from ./arch/x86/include/asm/smp.h:12:0,
-                 from include/linux/smp.h:59,
-                 from include/linux/topology.h:33,
-                 from include/linux/gfp.h:8,
-                 from include/linux/kmod.h:22,
-                 from include/linux/module.h:13,
-                 from drivers/edac/amd64_edac.h:65,
-                 from drivers/edac/amd64_edac.c:1:
-=2E/arch/x86/include/asm/apic.h:366:21: warning: shadowed declaration i=
-s here [-Wshadow]
- extern struct apic *apic;
-                     ^
+* Then, even if all those warnings were fixed one fine day, the people
+who fix them would be fighting windmills because every new patch which
+adds new places causing those warnings would simply go in because the
+warnings are not visible in default builds.
 
-So gcc complains that an unsigned int shadows a struct apic pointer.
-Yeah, that might be a problem in a big function (and it has been a
-problem AFAIR) but here:
+So the question IMO turns into: are there some warnings which we should
+promote to default builds so that they get taken care of eventually...
 
-static inline void io_apic_modify(unsigned int apic, unsigned int reg, =
-unsigned int value)
-{
-        x86_io_apic_ops.modify(apic, reg, value);
-}
+> Well, I have W=1 in my environment, so I don't even have to ask for it, I
+> just get it.
 
-So yeah, it is debatable. Should it be fixed? Sure, the fix is very eas=
-y.
+I think this was the initial use case we had in mind for W= - use it
+during development in order to have the compiler do extra checks to your
+code. And it has caught a couple of issues, FWIW.
 
-But then fixing those could become a fighting windmills type of thing
-as people don't see those warnings in normal builds. And new code will
-get added which causes them again. And then the discussion would start
-whether we should see those warnings...
+> W=12 is just insane, or I would use that all the time. I think it
+> would be nice for new code, or at least new drivers, to compile clean
+> with W=12, but that isn't possible when the kernel includes throw so
+> many warnings.
 
-I think you get the picture.
+Right, see above.
 
-> To make a better (more solid) network driver?  Mark has found it usef=
-ul
-> to do the W=3D builds.  For me personally, I do not bother because th=
-ere
-> are over 100,000 warnings and it takes forever to get through a build
-> and then grep for our drivers to see if they are generating any
-> warnings.
+> Nested-externs, for example, can catch people gratuitously providing a
+> function prototype that could become a hazard, but some use of that may
+> be justified. The macros provide a way to specifically allow certain
+> instances while generally discouraging it. Of course if you never use
+> W=2 you may never catch those gratuitous declarations.
 
-Right.
+Sure, but the cost for fixing that is what bothers me. For that
+particular case, it probably would even be cleaner to add a
+nested-extern check to checkpatch instead of cluttering the code with
+those macros.
 
-> I could see this useful if there is no way to fix the issue that real=
-ly
-> is not an issue and the compiler just does not know any better, but t=
-his
-> concerns me that we would get into a bad habit.  "Oh I really do not
-> want to fix this, so I will just make it so that people we not have t=
-o
-> see this warning/error"  Again, sounds lazy to me, of course I am jus=
-t
-> speaking in a generalization.
+> Hopefully the discussion is somewhat useful.
 
-It doesn't have to be lazy - people simply don't see those warnings and
-making them visible might turn out to be a net loss in the end. I think
-it depends on the warning...
+Well, it has become already, as you can see. :-D
 
-> I am sure that some of the warnings will fall into the category of,
-> it needs to be silenced and not fixed because the fix is far more
-> troublesome. I just cannot believe that most or all the warnings woul=
-d
-> be that way.
-
-As I said above, I think it is a question of whether those should be
-visible/enabled (which would make people fix them, more or less) or not=
-=2E
-And I think if someone comes up with a strong case for why a warning
-should be enabled in the default build, then people wouldn't mind.
-
---=20
+-- 
 Regards/Gruss,
     Boris.
 
 Sent from a fat crate under my desk. Formatting is fine.
 --
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
