@@ -1,41 +1,53 @@
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH] sparse-llvm: Fix LLVM 3.5 linker errors
-Date: Wed, 24 Sep 2014 14:01:01 -0700
-Message-ID: <1411592461-22810-1-git-send-email-osandov@osandov.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] sparse: Make -Werror turn warnigns into errors
+Date: Thu, 25 Sep 2014 07:16:10 +0800
+Message-ID: <CANeU7QmMGAc9Y+VMhQbf9JyUBZAL5x=JGQKvMO=988S60wOwUg@mail.gmail.com>
+References: <ddf8540942f71841dd90c5218da944cebef4a514.1409770383.git.tgraf@suug.ch>
+	<CANeU7QnRFxZ+OV5G2W3tC+tBnYNNcQsH_YEB=cyHmAfmfYc1PQ@mail.gmail.com>
+	<20140924154207.GD4966@casper.infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pa0-f54.google.com ([209.85.220.54]:64852 "EHLO
-	mail-pa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753017AbaIXVAL (ORCPT
+Received: from mail-wi0-f178.google.com ([209.85.212.178]:38203 "EHLO
+	mail-wi0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751820AbaIXXQL (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Sep 2014 17:00:11 -0400
-Received: by mail-pa0-f54.google.com with SMTP id fb1so9481870pad.13
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 14:00:11 -0700 (PDT)
+	Wed, 24 Sep 2014 19:16:11 -0400
+Received: by mail-wi0-f178.google.com with SMTP id z2so8293582wiv.11
+        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 16:16:10 -0700 (PDT)
+In-Reply-To: <20140924154207.GD4966@casper.infradead.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
-Cc: Alain Kalker <a.c.kalker@gmail.com>
+To: Thomas Graf <tgraf@suug.ch>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-llvm-config 3.5 no longer lists the non-LLVM libraries needed for linkage when
-passed --libs. The --system-libs flag was added for this purpose. This adds
-these libraries while silently doing nothing for older versions of LLVM.
+On Wed, Sep 24, 2014 at 11:42 PM, Thomas Graf <tgraf@suug.ch> wrote:
+>
+> The return value of thest will only be non zero if an actual error
+> has been detected. It will remain zero if only warnings have been
+> found. So we would need to parse the text between "check-exit-start"
+> and "check-error-end" for the string "error:" or something a like
+> that. I found that to be fragile and the explicit declaration of an
+> expected failure to be superior as it also verifies whether an
+> expected warning is properly treated as a warning or not.
+>
 
-Signed-off-by: Omar Sandoval <osandov@osandov.com>
----
- Makefile | 1 +
- 1 file changed, 1 insertion(+)
+It does not conflict with what I said. My point is setting the *default*
+value of the test case. You can still set the expected return value
+explicitly using ""check-exit-value". There is nothing imprecise about it.
 
-diff --git a/Makefile b/Makefile
-index c3f3104..17bce6f 100644
---- a/Makefile
-+++ b/Makefile
-@@ -87,6 +87,7 @@ $(LLVM_PROGS): LD := g++
- LLVM_LDFLAGS := $(shell llvm-config --ldflags)
- LLVM_CFLAGS := $(shell llvm-config --cflags | sed -e "s/-DNDEBUG//g")
- LLVM_LIBS := $(shell llvm-config --libs)
-+LLVM_LIBS += $(shell llvm-config --system-libs 2>/dev/null)
- PROGRAMS += $(LLVM_PROGS)
- INST_PROGRAMS += sparse-llvm sparsec
- sparse-llvm.o: BASIC_CFLAGS += $(LLVM_CFLAGS)
--- 
-2.1.0
+It is just need a regular expression. In python that will be:
+r"(?m)^\S+?:\d+:\d+: error:".
+The test case is written in Perl, it will need some conversion in regular
+expression pattern.
 
+Otherwise, this change is very invasive in the sense that, patches
+apply after your patch will need to update the test case return value.
+Maybe I need to wait until I apply all other patches before yours?
+
+You are still testing the return value, just the *default* is inferred from
+error output. Which is pretty obvious.
+
+Thanks
+
+Chris
