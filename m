@@ -1,37 +1,70 @@
-From: Thomas Graf <tgraf@suug.ch>
-Subject: [PATCH] sparse: Fix ioc type check
-Date: Thu, 25 Sep 2014 10:20:39 +0200
-Message-ID: <8d1bffcadf496f52dc70063986684762344da771.1411633200.git.tgraf@suug.ch>
+From: Borislav Petkov <bp@alien8.de>
+Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
+Date: Thu, 25 Sep 2014 10:27:01 +0200
+Message-ID: <20140925082701.GC22317@nazgul.tnic>
+References: <20140922192152.GD4709@pd.tnic>
+ <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922195737.GE4709@pd.tnic>
+ <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922203336.GF4709@pd.tnic>
+ <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
+ <20140923082209.GB22072@pd.tnic>
+ <029E2CFB-C001-4E16-B1F7-A3FB193E3138@intel.com>
+ <20140923184456.GA16467@pd.tnic>
+ <E460C326-08DC-4E38-8E3B-9050F9E03A17@intel.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.9]:47028 "EHLO
-	bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752072AbaIYIUn (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Sep 2014 04:20:43 -0400
+Received: from mail.skyhub.de ([78.46.96.112]:49776 "EHLO mail.skyhub.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751368AbaIYI1I (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 25 Sep 2014 04:27:08 -0400
+Content-Disposition: inline
+In-Reply-To: <E460C326-08DC-4E38-8E3B-9050F9E03A17@intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: hans.verkuil@cisco.com, sparse@chrisli.org
+To: "Rustad, Mark D" <mark.d.rustad@intel.com>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-Add missing exepcted error output for the test to pass.
+On Tue, Sep 23, 2014 at 08:43:17PM +0000, Rustad, Mark D wrote:
+> Well, please consider the specifics. The entire syscall table is initialized
+> with a constant pattern to be sure that every item is initialized. Then each
+> syscall is initialized into its proper place. The compiler is complaining that
+> entries are being initialized twice.
+> 
+> Most of the time, that is not done, and so it may catch a patch foulup or
+> something. In this particular case, it is normal and intended. There is
+> nothing wrong, so there is no reason to throw a warning for every single
+> entry in the table. Which is what happens with clang today.
+> 
+> So the code is correct, but in general the warning can reveal certain issues.
+> Just not in this particular usage. This happens to be a warning specific to
+> clang at the moment.
 
-Fixes: 42ebe41 "Add test case for the ioc type check"
-Signed-off-by: Thomas Graf <tgraf@suug.ch>
----
- validation/ioc-typecheck.c | 1 +
- 1 file changed, 1 insertion(+)
+Well, I read this as clang is wrong. It looks like the compiler is
+unable to understand a perfectly valid usage so it throws a warning. If
+we go and fix it in the kernel, we'll be wagging the dog, so to speak.
+Which is a no-no obviously.
 
-diff --git a/validation/ioc-typecheck.c b/validation/ioc-typecheck.c
-index aa060f7..baa200a 100644
---- a/validation/ioc-typecheck.c
-+++ b/validation/ioc-typecheck.c
-@@ -13,5 +13,6 @@ static unsigned iocnrs[] = {
-  * check-name: correct handling of _IOC_TYPECHECK
-  *
-  * check-error-start
-+ioc-typecheck.c:10:21: error: bad integer constant expression
-  * check-error-end
-  */
+> That is why it would be more than reasonable for checkpatch to warn on the
+> macro introductions. It is certainly a more significant thing than a
+> line > 80 characters.
+
+No sorry - I don't agree here. So now you're proposing of adding the
+macros *and* checkpatch to warn about them. That's a really wrong thing
+to do on so many levels.
+
+...
+
+> Most of the time, it is new instances of warnings that are most likely to
+> reveal a problem. Hiding them in a flood of "normal" warnings prevents
+> them from ever being seen. And that is a shame.
+
+Sorry, I can only suggest grepping here and also using what Geert
+suggested. There's simply no justification IMO to add code to the kernel
+for solely silencing warnings.
+
 -- 
-1.9.3
-
+Regards/Gruss,
+    Boris.
+--
