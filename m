@@ -1,44 +1,35 @@
-From: Pranith Kumar <bobby.prani@gmail.com>
-Subject: Re: spurious warning for sizeof(bool)
-Date: Wed, 24 Sep 2014 21:14:15 -0400
-Message-ID: <CAJhHMCASJfwnmtju+npNCX=92_NFenv1B8N_pPOhpnUPxXTH+A@mail.gmail.com>
-References: <CAJhHMCAee+Q=P3oRdGhMcA_x0cbWShd+SkPyqzpDaT2=DjC=EQ@mail.gmail.com>
- <CAJhHMCDhai4WxRg5_1PQXq=MpO4a6Eyv9+Ep7hu09irnqJVHDg@mail.gmail.com>
- <CANeU7Q=qmxN_mKmxQ1NKGdC9rQnDVYOFP9AkAx-X2Qq4sbnfcA@mail.gmail.com>
- <CAJhHMCALfvu9SgRoVBXXvyxtq2KQoymLSRnxvSP095tz6rO2Ng@mail.gmail.com> <CANeU7Q=Dvhvm-=6rPyr4fV+Sd8ajWnGH39msYqjua3G=pKqNOA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] sparse: Make -Werror turn warnigns into errors
+Date: Thu, 25 Sep 2014 10:27:43 +0800
+Message-ID: <CANeU7QnkYXLGvFQbf_bER6LWa5VFcbmAn-d-guC89rNfqprecA@mail.gmail.com>
+References: <ddf8540942f71841dd90c5218da944cebef4a514.1409770383.git.tgraf@suug.ch>
+	<CANeU7QnRFxZ+OV5G2W3tC+tBnYNNcQsH_YEB=cyHmAfmfYc1PQ@mail.gmail.com>
+	<20140924154207.GD4966@casper.infradead.org>
+	<CANeU7QmMGAc9Y+VMhQbf9JyUBZAL5x=JGQKvMO=988S60wOwUg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vc0-f182.google.com ([209.85.220.182]:61636 "EHLO
-	mail-vc0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752072AbaIYBOq (ORCPT
+Received: from mail-wg0-f45.google.com ([74.125.82.45]:61499 "EHLO
+	mail-wg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751232AbaIYC1o (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Sep 2014 21:14:46 -0400
-Received: by mail-vc0-f182.google.com with SMTP id le20so7303336vcb.41
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 18:14:45 -0700 (PDT)
-In-Reply-To: <CANeU7Q=Dvhvm-=6rPyr4fV+Sd8ajWnGH39msYqjua3G=pKqNOA@mail.gmail.com>
+	Wed, 24 Sep 2014 22:27:44 -0400
+Received: by mail-wg0-f45.google.com with SMTP id x13so6553246wgg.4
+        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 19:27:43 -0700 (PDT)
+In-Reply-To: <CANeU7QmMGAc9Y+VMhQbf9JyUBZAL5x=JGQKvMO=988S60wOwUg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: "open list:SPARSE CHECKER" <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+To: Thomas Graf <tgraf@suug.ch>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Sep 24, 2014 at 9:02 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Thu, Sep 25, 2014 at 8:21 AM, Pranith Kumar <bobby.prani@gmail.com> wrote:
->> HI Chris,
->>
->> Could you please update the official sparse git repo?
->>
->> git://git.kernel.org/pub/scm/devel/sparse/sparse.git
->>
->
-> Right now it is at a relative clean stage since the anonymous union
-> warning is fixed.
->
-> I just pushed it to official repository.
->
-> Chris
+On Thu, Sep 25, 2014 at 7:16 AM, Christopher Li <sparse@chrisli.org> wrote:
 
-Verified that it works. Thank you.
+> It is just need a regular expression. In python that will be:
+> r"(?m)^\S+?:\d+:\d+: error:".
+> The test case is written in Perl, it will need some conversion in regular
+> expression pattern.
 
--- 
-Pranith
+Sorry the test case is in shell not Perl. Let me see if I can create one
+using grep syntax.
+
+Chris
