@@ -1,36 +1,67 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: spurious warning for sizeof(bool)
-Date: Thu, 25 Sep 2014 08:02:59 +0800
-Message-ID: <CANeU7Q=qmxN_mKmxQ1NKGdC9rQnDVYOFP9AkAx-X2Qq4sbnfcA@mail.gmail.com>
-References: <CAJhHMCAee+Q=P3oRdGhMcA_x0cbWShd+SkPyqzpDaT2=DjC=EQ@mail.gmail.com>
-	<CAJhHMCDhai4WxRg5_1PQXq=MpO4a6Eyv9+Ep7hu09irnqJVHDg@mail.gmail.com>
+From: "Rustad, Mark D" <mark.d.rustad@intel.com>
+Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
+Date: Thu, 25 Sep 2014 00:17:33 +0000
+Message-ID: <ACACCEEA-32F7-4296-B562-C83299BDFAD5@intel.com>
+References: <20140922184049.GB4709@pd.tnic>
+ <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+ <20140922192152.GD4709@pd.tnic>
+ <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922195737.GE4709@pd.tnic>
+ <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+ <20140922203336.GF4709@pd.tnic>
+ <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
+ <20140923082209.GB22072@pd.tnic>
+ <029E2CFB-C001-4E16-B1F7-A3FB193E3138@intel.com>
+ <20140923184456.GA16467@pd.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-we0-f175.google.com ([74.125.82.175]:56784 "EHLO
-	mail-we0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751601AbaIYADA (ORCPT
+Received: from mga11.intel.com ([192.55.52.93]:12740 "EHLO mga11.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751134AbaIYARg convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Sep 2014 20:03:00 -0400
-Received: by mail-we0-f175.google.com with SMTP id u57so6134491wes.6
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 17:02:59 -0700 (PDT)
-In-Reply-To: <CAJhHMCDhai4WxRg5_1PQXq=MpO4a6Eyv9+Ep7hu09irnqJVHDg@mail.gmail.com>
+	Wed, 24 Sep 2014 20:17:36 -0400
+In-Reply-To: <20140923184456.GA16467@pd.tnic>
+Content-Language: en-US
+Content-ID: <BCE49CFCCF9B4B4A82A23C069AC13E08@intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Pranith Kumar <bobby.prani@gmail.com>
-Cc: "open list:SPARSE CHECKER" <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+To: Borislav Petkov <bp@alien8.de>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, Sep 25, 2014 at 7:40 AM, Pranith Kumar <bobby.prani@gmail.com> wrote:
-> Is anyone reading these emails? :)
->>
->> I am getting these spurious warnings for a sizeof(bool) expression
->>
->> kernel/rcu/tree.c:202:14: warning: expression using sizeof bool
->>
->> Is this going to be fixed anytime soon?
->>
+On Sep 23, 2014, at 11:44 AM, Borislav Petkov <bp@alien8.de> wrote:
 
-Which sparse version are you using? In the git chrisl repository,
-sparse does not give that warning by default any more.
+> Again, we should take compiler warnings with a grain of salt and judge
+> them only by the quality of the generated code. IMO.
 
-Chris
+The more I thought about this, the more I think it argues for having some
+diagnostic control macros. Tools such as the compiler can be very thorough -
+that is their strength. The warnings that the compiler emits are things
+that humans should consider. There are times when the human can judge
+that nothing need be done about it, so why not use the macros to indicate
+that that judgement has been made and get it out of the way so more
+potentially interesting issues can be found? How many people need to
+make that judgement over and over? That is clearly a waste of time and
+is why these higher warning levels simply don't get looked at. So lets
+capture that judgement in the code. That judgement would continue to be
+open to reevaluation in any case.
+
+The syscall issue is not arising from an include file, but I think
+demonstrates the use nicely and I think is a fine example of a legitimate
+use in a C file.
+
+For me, it is about getting more value out of the evaluation that the compiler
+can do. When the output of W=2 is unusable because it is so voluminous - filled
+with things known to not cause problems - why not silence some of major
+sources so that more interesting issues might be seen? By not doing so, W=2
+has close to 0 value because no one looks at it.
+
+I guess I also trust the maintainers to not accept lots of patches that add
+uses of such macros. They have certainly demonstrated that up to this point.
+
+:-)
+
+-- 
+Mark Rustad, Networking Division, Intel Corporation
+
