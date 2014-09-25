@@ -1,90 +1,65 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] sparse: Make -Werror turn warnigns into errors
-Date: Thu, 25 Sep 2014 10:46:21 +0800
-Message-ID: <CANeU7QnOZ8bef1L_rn50DOuercW3k9Ra4A4gJp6MiR6zx0YQ7Q@mail.gmail.com>
-References: <ddf8540942f71841dd90c5218da944cebef4a514.1409770383.git.tgraf@suug.ch>
-	<CANeU7QnRFxZ+OV5G2W3tC+tBnYNNcQsH_YEB=cyHmAfmfYc1PQ@mail.gmail.com>
-	<20140924154207.GD4966@casper.infradead.org>
-	<CANeU7QmMGAc9Y+VMhQbf9JyUBZAL5x=JGQKvMO=988S60wOwUg@mail.gmail.com>
+From: Geert Uytterhoeven <geert@linux-m68k.org>
+Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
+Date: Thu, 25 Sep 2014 09:45:29 +0200
+Message-ID: <CAMuHMdU7VO01_qRGc0TV2K+nJJCu4sm0zbH773_zBWdaxSR1aQ@mail.gmail.com>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+	<20140922153355.GB4510@pd.tnic>
+	<AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+	<20140922184049.GB4709@pd.tnic>
+	<3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
+	<20140922192152.GD4709@pd.tnic>
+	<1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
+	<20140922195737.GE4709@pd.tnic>
+	<1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
+	<20140922203336.GF4709@pd.tnic>
+	<1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:46138 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751259AbaIYCqW (ORCPT
+Received: from mail-la0-f51.google.com ([209.85.215.51]:61217 "EHLO
+	mail-la0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750774AbaIYHpb (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 24 Sep 2014 22:46:22 -0400
-Received: by mail-wi0-f172.google.com with SMTP id em10so8036415wid.17
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Sep 2014 19:46:21 -0700 (PDT)
-In-Reply-To: <CANeU7QmMGAc9Y+VMhQbf9JyUBZAL5x=JGQKvMO=988S60wOwUg@mail.gmail.com>
+	Thu, 25 Sep 2014 03:45:31 -0400
+In-Reply-To: <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Thomas Graf <tgraf@suug.ch>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Jeff Kirsher <jeffrey.t.kirsher@intel.com>
+Cc: Borislav Petkov <bp@alien8.de>, "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, Sep 25, 2014 at 7:16 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Wed, Sep 24, 2014 at 11:42 PM, Thomas Graf <tgraf@suug.ch> wrote:
+On Mon, Sep 22, 2014 at 11:21 PM, Jeff Kirsher
+<jeffrey.t.kirsher@intel.com> wrote:
+>> > Why grep through 100,000 warnings, when we should be fixing the code to
+>> > prevent 100,000 warnings.  Not saying that the MACRO is the best
+>> > solution, it is just a solution, in hopes that it spurs discussions like
+>> > this on how to properly fix the warnings.  Not a discussion on how to
+>> > grep through the warnings and do nothing.
 >>
->> The return value of thest will only be non zero if an actual error
->> has been detected. It will remain zero if only warnings have been
->> found. So we would need to parse the text between "check-exit-start"
->> and "check-error-end" for the string "error:" or something a like
->> that. I found that to be fragile and the explicit declaration of an
->> expected failure to be superior as it also verifies whether an
->> expected warning is properly treated as a warning or not.
->>
+>> There's only one thing I don't understand: why is so bad to grep through
+>> the warnings? I mean, sure, fixing them *without* jumping through hoops
+>> to do so is the optimal thing. But what's wrong with grepping through
+>> them?
 >
-> It does not conflict with what I said. My point is setting the *default*
-> value of the test case. You can still set the expected return value
-> explicitly using ""check-exit-value". There is nothing imprecise about it.
->
-> It is just need a regular expression. In python that will be:
-> r"(?m)^\S+?:\d+:\d+: error:".
-> The test case is written in Perl, it will need some conversion in regular
-> expression pattern.
+> Nothing is wrong with grepping for an error, especially when you know
+> the error your grepping for.  But then again, why grep when it can be
+> fixed to begin with?  The fact that there are over 100,000
+> warnings/errors to begin with is somewhat disconcerting.  It makes me
+> wonder whether it was due to coding laziness.
 
-So the bash version will be look like this, I briefly test it
-seems pass all test cases.
+Instead of grepping, you can feed the build log to linux-log-summary.
+Or when changing a driver, feed the before and after build logs to
+linux-log-diff. That way you won't miss the single new warning you've
+just introduced.
 
-Any feed back?
+https://github.com/geertu/linux-scripts
 
-Chris
+Gr{oetje,eeting}s,
 
-diff --gidiff --git a/validation/test-suite b/validation/test-suite
-index 3c011c6..f9cb6fe 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-diff --git a/validation/test-suite b/validation/test-suite
-index 3c011c6..f9cb6fe 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -106,20 +106,26 @@ do_test()
-        fi
-        verbose "Using command       : $cmd"
+                        Geert
 
-+       # grab the expected output
-+       sed -n '/check-output-start/,/check-output-end/p' $file \
-+               | grep -v check-output > "$file".output.expected
-+       sed -n '/check-error-start/,/check-error-end/p' $file \
-+               | grep -v check-error > "$file".error.expected
-+
-        # grab the expected exit value
-        get_value "check-exit-value" $file
-        if [ "$?" -eq "0" ]; then
-                expected_exit_value=`echo $last_result | tr -d ' '`
-        else
--               expected_exit_value=0
-+               grep -q -E "^[^:]+:[[:digit:]]+:[[:digit:]]+: error:"
-"$file".error.expected
-+               if  [ "$?" -eq "0" ]; then
-+                       expected_exit_value=1
-+               else
-+                       expected_exit_value=0
-+               fi
-        fi
-        verbose "Expecting exit value: $expected_exit_value"
+--
+Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
--       # grab the expected output
--       sed -n '/check-output-start/,/check-output-end/p' $file \
--               | grep -v check-output > "$file".output.expected
--       sed -n '/check-error-start/,/check-error-end/p' $file \
+In personal conversations with technical people, I call myself a hacker. But
+when I'm talking to journalists I just say "programmer" or something like that.
+                                -- Linus Torvalds
