@@ -1,70 +1,34 @@
-From: Borislav Petkov <bp@alien8.de>
-Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Thu, 25 Sep 2014 10:27:01 +0200
-Message-ID: <20140925082701.GC22317@nazgul.tnic>
-References: <20140922192152.GD4709@pd.tnic>
- <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
- <20140922195737.GE4709@pd.tnic>
- <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
- <20140922203336.GF4709@pd.tnic>
- <A05C31E6-7AD2-482A-B590-A5ED57D028B3@intel.com>
- <20140923082209.GB22072@pd.tnic>
- <029E2CFB-C001-4E16-B1F7-A3FB193E3138@intel.com>
- <20140923184456.GA16467@pd.tnic>
- <E460C326-08DC-4E38-8E3B-9050F9E03A17@intel.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] sparse: Fix ioc type check
+Date: Thu, 25 Sep 2014 20:10:16 +0800
+Message-ID: <CANeU7Qkg9zBUoggGLBtFq6_-Svh9C2XHsFKdqvQ3TGaGNMZ79w@mail.gmail.com>
+References: <8d1bffcadf496f52dc70063986684762344da771.1411633200.git.tgraf@suug.ch>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.skyhub.de ([78.46.96.112]:49776 "EHLO mail.skyhub.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751368AbaIYI1I (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Sep 2014 04:27:08 -0400
-Content-Disposition: inline
-In-Reply-To: <E460C326-08DC-4E38-8E3B-9050F9E03A17@intel.com>
+Received: from mail-wg0-f41.google.com ([74.125.82.41]:49191 "EHLO
+	mail-wg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751284AbaIYMKR (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 25 Sep 2014 08:10:17 -0400
+Received: by mail-wg0-f41.google.com with SMTP id k14so7840777wgh.12
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Sep 2014 05:10:16 -0700 (PDT)
+In-Reply-To: <8d1bffcadf496f52dc70063986684762344da771.1411633200.git.tgraf@suug.ch>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Rustad, Mark D" <mark.d.rustad@intel.com>
-Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Thomas Graf <tgraf@suug.ch>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, hans.verkuil@cisco.com
 
-On Tue, Sep 23, 2014 at 08:43:17PM +0000, Rustad, Mark D wrote:
-> Well, please consider the specifics. The entire syscall table is initialized
-> with a constant pattern to be sure that every item is initialized. Then each
-> syscall is initialized into its proper place. The compiler is complaining that
-> entries are being initialized twice.
-> 
-> Most of the time, that is not done, and so it may catch a patch foulup or
-> something. In this particular case, it is normal and intended. There is
-> nothing wrong, so there is no reason to throw a warning for every single
-> entry in the table. Which is what happens with clang today.
-> 
-> So the code is correct, but in general the warning can reveal certain issues.
-> Just not in this particular usage. This happens to be a warning specific to
-> clang at the moment.
+On Thu, Sep 25, 2014 at 4:20 PM, Thomas Graf <tgraf@suug.ch> wrote:
+> Add missing exepcted error output for the test to pass.
+>
+> Fixes: 42ebe41 "Add test case for the ioc type check"
+> Signed-off-by: Thomas Graf <tgraf@suug.ch>
 
-Well, I read this as clang is wrong. It looks like the compiler is
-unable to understand a perfectly valid usage so it throws a warning. If
-we go and fix it in the kernel, we'll be wagging the dog, so to speak.
-Which is a no-no obviously.
+No, this test case is some thing gcc can handle and sparse
+can't. Instead of patching the test result, we need to fix sparse
+to handle it correctly.
 
-> That is why it would be more than reasonable for checkpatch to warn on the
-> macro introductions. It is certainly a more significant thing than a
-> line > 80 characters.
+It is an open bug of sparse.
 
-No sorry - I don't agree here. So now you're proposing of adding the
-macros *and* checkpatch to warn about them. That's a really wrong thing
-to do on so many levels.
-
-...
-
-> Most of the time, it is new instances of warnings that are most likely to
-> reveal a problem. Hiding them in a flood of "normal" warnings prevents
-> them from ever being seen. And that is a shame.
-
-Sorry, I can only suggest grepping here and also using what Geert
-suggested. There's simply no justification IMO to add code to the kernel
-for solely silencing warnings.
-
--- 
-Regards/Gruss,
-    Boris.
---
+Chris
