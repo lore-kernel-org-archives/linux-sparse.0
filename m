@@ -1,8 +1,10 @@
-From: Borislav Petkov <bp@alien8.de>
+From: "Rustad, Mark D" <mark.d.rustad@intel.com>
 Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Thu, 25 Sep 2014 18:44:46 +0200
-Message-ID: <20140925164446.GD28201@nazgul.tnic>
-References: <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
+Date: Fri, 26 Sep 2014 19:37:19 +0000
+Message-ID: <4C887554-FB5F-4634-ABE6-20F41583ABA2@intel.com>
+References: <1411140580-20909-1-git-send-email-jeffrey.t.kirsher@intel.com>
+ <20140922153355.GB4510@pd.tnic>
+ <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
  <20140922184049.GB4709@pd.tnic>
  <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
  <20140922192152.GD4709@pd.tnic>
@@ -13,17 +15,29 @@ References: <AEF1C0F7-239C-436B-97A5-6AFF49FD9359@intel.com>
  <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
  <CAMuHMdU7VO01_qRGc0TV2K+nJJCu4sm0zbH773_zBWdaxSR1aQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
+Content-Type: multipart/signed;
+	boundary="Apple-Mail=_11F927C8-ABB4-4835-BC68-6D8CAF34F31A";
+	protocol="application/pgp-signature"; micalg=pgp-sha1
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mga02.intel.com ([134.134.136.20]:45323 "EHLO mga02.intel.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1753803AbaIZThh (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 26 Sep 2014 15:37:37 -0400
 In-Reply-To: <CAMuHMdU7VO01_qRGc0TV2K+nJJCu4sm0zbH773_zBWdaxSR1aQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Jeff Kirsher <jeffrey.t.kirsher@intel.com>, "Rustad, Mark D" <mark.d.rustad@intel.com>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Language: en-US
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, Borislav Petkov <bp@alien8.de>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
 
-On Thu, Sep 25, 2014 at 09:45:29AM +0200, Geert Uytterhoeven wrote:
+--Apple-Mail=_11F927C8-ABB4-4835-BC68-6D8CAF34F31A
+Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain;
+	charset=us-ascii
+
+On Sep 25, 2014, at 12:45 AM, Geert Uytterhoeven <geert@linux-m68k.org> =
+wrote:
+
 > Instead of grepping, you can feed the build log to linux-log-summary.
 > Or when changing a driver, feed the before and after build logs to
 > linux-log-diff. That way you won't miss the single new warning you've
@@ -31,28 +45,61 @@ On Thu, Sep 25, 2014 at 09:45:29AM +0200, Geert Uytterhoeven wrote:
 >=20
 > https://github.com/geertu/linux-scripts
 
-Yep, nice stuff: linux-log-summary does nicely summarize it all like
-this here:
+Thanks for making me aware of these tools. linux-log-summary does reduce =
+the totally insane 125,000 warnings to the merely unreasonable 10,000 or =
+so. I'm not being sarcastic, they *are* very nice tools that I will use. =
+Thank you for pointing me to them.
 
-=2E..
-include/linux/kernel.h:120:19: warning: cast from function call of type=
- =E2=80=98void *=E2=80=99 to non-matching type =E2=80=98long unsigned i=
-nt=E2=80=99 [-Wbad-function-cast]: 40 warnings in 1 logs
-include/linux/kernel.h:67:27: warning: conversion to =E2=80=98int=E2=80=
-=99 from =E2=80=98long unsigned int=E2=80=99 may alter its value [-Wcon=
-version]: 2 warnings in 1 logs
-include/linux/kernel.h:67:33: warning: conversion to =E2=80=98long unsi=
-gned int=E2=80=99 from =E2=80=98int=E2=80=99 may change the sign of the=
- result [-Wsign-conversion]: 3 warnings in 1 logs
-=2E..
+I still observe that thousands of those unique warnings are emitted by =
+the syscall table and its override initializations. I still think they =
+should be silenced because they serve no purpose in that particular =
+case. That is, the warning is complaining about what it is designed to =
+complain about, but in this particular instance, the code is written as =
+it needs to be, so why not acknowledge and capture that exception in the =
+source?
 
-which I ran on a file built with W=3D123.
+A couple thousand more come from every use of compiletime_assert, for =
+which I do not have a solution yet. Even my macros don't help with that =
+one.
 
-So I'd say everything needed is there to massage those build logs.
+Most of the others come from null-entry table initializations, i.e. { 0 =
+}, which give missing field initializer warnings. I'd like to define a =
+macro something like:
 
-Thanks.
+#define ZERO_ENTRY DIAG_PUSH DIAG_IGNORE(missing-field-initializers) \
+	{ 0 } DIAG_POP
+
+Then simply using ZERO_ENTRY, a zero entry could be provided without a =
+complaint from the compiler. But of course that can't be done if the =
+DIAG_* macros aren't there. It also would keep the DIAG_* macros out of =
+the .c files and just in the header where ZERO_ENTRY is defined.
 
 --=20
-Regards/Gruss,
-    Boris.
---
+Mark Rustad, Networking Division, Intel Corporation
+
+
+--Apple-Mail=_11F927C8-ABB4-4835-BC68-6D8CAF34F31A
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment; filename="signature.asc"
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Message signed with OpenPGP using GPGMail
+
+-----BEGIN PGP SIGNATURE-----
+Comment: GPGTools - http://gpgtools.org
+
+iQIcBAEBAgAGBQJUJcBuAAoJEDwO/+eO4+5uNxEQAJ11N/SfFGELFDL0RMgSR1+P
+C3tJH5tGK5sEx0eBJNeDCnlNUxrY9y/8fkR/URDIinMVv09i+0N/sH8eclDkgVk/
+L8YYu9KxJdIqH7RSgfbwgGpYpRdaZJte1qqwlzTHru5dDXPYtVXKVgwdOs5k9eIT
+c9/KViuskr553MikSSDEJC26J5n5z583rZ6ZXK6pc3RWR8ZymTCnfF6sqVMLTH8t
+qcBWQqXY5bqXoCma9gFQkLG/KPOIpV+ONSkl0g7rGkeRdoBP+DQUXvT9NkdN/uwI
+hmd8PL7gKaVvVViftihMEgI3kPnM6G+nk5PsWUzXK2eKjL8n5QNaq+VmUsyrJ7dc
+Qemux10bEB0Ew7FRsyf8b3zkLKj9D5iePPd7nLSfxa4sdIPDFDK+s7030XhU/QYD
+ANhuGTR9xaUraaz+W0j0fzt/i75g74C1HqKLfAqBobyKQ3XjprISPf7T25ypch8g
+EZs2/LqROUWOuxghGEH1eEf0xcmnFd1WC0omtbDl97nkWfT0knA/eob8M01n5tYg
+KBG5wIdkwEk9agsfUITvFdwohnpz//cIyuE7C79JNhDBpVAF5iijo/CDotXwt+4+
+qnOJg6SqxPEbaM2hgPfwG7F7D1HJJhEyGONg7kD09xOMsGf4/1YTlqIl9COZtS8x
+MNF1qYP4skIVNZM/EFQU
+=zXpw
+-----END PGP SIGNATURE-----
+
+--Apple-Mail=_11F927C8-ABB4-4835-BC68-6D8CAF34F31A--
