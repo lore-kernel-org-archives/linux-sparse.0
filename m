@@ -1,82 +1,65 @@
-From: "Rustad, Mark D" <mark.d.rustad@intel.com>
-Subject: Re: [PATCH 0/7] Silence even more W=2 warnings
-Date: Fri, 26 Sep 2014 21:07:25 +0000
-Message-ID: <04133DCF-C237-45D2-8AEB-199A42EBCCDE@intel.com>
-References: <20140922184049.GB4709@pd.tnic>
- <3199350A-89CE-4BE7-8FE4-CA8CE4F87622@intel.com>
- <20140922192152.GD4709@pd.tnic>
- <1411415057.2513.8.camel@jtkirshe-mobl.jf.intel.com>
- <20140922195737.GE4709@pd.tnic>
- <1411416573.2513.19.camel@jtkirshe-mobl.jf.intel.com>
- <20140922203336.GF4709@pd.tnic>
- <1411420912.2513.32.camel@jtkirshe-mobl.jf.intel.com>
- <CAMuHMdU7VO01_qRGc0TV2K+nJJCu4sm0zbH773_zBWdaxSR1aQ@mail.gmail.com>
- <4C887554-FB5F-4634-ABE6-20F41583ABA2@intel.com>
- <20140926195803.GB19952@cloud>
+From: josh@joshtriplett.org
+Subject: Re: [PATCH 1/1] jffs2: fix sparse warning: unexpected unlock
+Date: Fri, 26 Sep 2014 16:17:27 -0700
+Message-ID: <20140926231727.GD20917@cloud>
+References: <1411065976-20386-1-git-send-email-fabf@skynet.be>
+ <20140922181250.GN1193@ld-irv-0074>
 Mime-Version: 1.0
-Content-Type: multipart/signed;
-	boundary="Apple-Mail=_4F337770-DF1B-4B20-888D-04A9682FB207";
-	protocol="application/pgp-signature"; micalg=pgp-sha1
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20140926195803.GB19952@cloud>
-Content-Language: en-US
-Sender: linux-kernel-owner@vger.kernel.org
-To: "josh@joshtriplett.org" <josh@joshtriplett.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>, "Kirsher, Jeffrey T" <jeffrey.t.kirsher@intel.com>, Borislav Petkov <bp@alien8.de>, "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from relay3-d.mail.gandi.net ([217.70.183.195]:50632 "EHLO
+	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1754819AbaIZXRd (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 26 Sep 2014 19:17:33 -0400
+Content-Disposition: inline
+In-Reply-To: <20140922181250.GN1193@ld-irv-0074>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Brian Norris <computersforpeace@gmail.com>
+Cc: Fabian Frederick <fabf@skynet.be>, linux-kernel@vger.kernel.org, linux-mtd@lists.infradead.org, David Woodhouse <dwmw2@infradead.org>, linux-sparse@vger.kernel.org
 
---Apple-Mail=_4F337770-DF1B-4B20-888D-04A9682FB207
-Content-Transfer-Encoding: quoted-printable
-Content-Type: text/plain;
-	charset=us-ascii
+On Mon, Sep 22, 2014 at 11:12:50AM -0700, Brian Norris wrote:
+> + linux-sparse
+> 
+> On Thu, Sep 18, 2014 at 08:46:16PM +0200, Fabian Frederick wrote:
+> > fs/jffs2/summary.c:846:5: warning: context imbalance in 'jffs2_sum_write_sumnode' - unexpected unlock
+> > 
+> > Signed-off-by: Fabian Frederick <fabf@skynet.be>
+> > ---
+> >  fs/jffs2/summary.c | 2 ++
+> >  1 file changed, 2 insertions(+)
+> > 
+> > diff --git a/fs/jffs2/summary.c b/fs/jffs2/summary.c
+> > index c522d09..a0bac7b 100644
+> > --- a/fs/jffs2/summary.c
+> > +++ b/fs/jffs2/summary.c
+> > @@ -844,6 +844,8 @@ static int jffs2_sum_write_data(struct jffs2_sb_info *c, struct jffs2_eraseblock
+> >  /* Write out summary information - called from jffs2_do_reserve_space */
+> >  
+> >  int jffs2_sum_write_sumnode(struct jffs2_sb_info *c)
+> > +	__releases(&c->erase_completion_lock)
+> > +	__acquires(&c->erase_completion_lock)
+> 
+> I'm not too familiar with sparse notations, but Documentation/sparse.txt
+> suggests the above is wrong, and the following is more accurate:
+> 
+> 	__must_hold(&c->erase_completion_lock)
+> 
+> But it looks like there are several other examples which do this.
+> Anyway, here's the relevant doc text, in case someone wants to clarify
+> it for me, or else tell me the documentation is wrong:
+> 
+>     __must_hold - The specified lock is held on function entry and exit.
+> 
+>     __acquires - The specified lock is held on function exit, but not entry.
+> 
+>     __releases - The specified lock is held on function entry, but not exit.
+> 
+> So __acquires and __releases look mutually exclusive, but it's not clear
+> if __must_hold will actually cover what we want. (I haven't tested it.)
 
-On Sep 26, 2014, at 12:58 PM, <josh@joshtriplett.org> =
-<josh@joshtriplett.org> wrote:
+__must_hold is indeed the correct annotation.  (There isn't currently
+anything enforcing that, though.)
 
-> On Fri, Sep 26, 2014 at 07:37:19PM +0000, Rustad, Mark D wrote:
->> Most of the others come from null-entry table initializations, i.e. {
->> 0 }, which give missing field initializer warnings.
->=20
-> I'd suggest that such initializers should just be {}, not { 0 }, and =
-we
-> should teach compilers to specifically *not* complain about empty
-> initializers even when otherwise complaining about missing fields.
-> Initializing a structure to 0 is completely sensible.
-
-I agree completely! But of course that isn't how it is now. I guess I =
-have spent too many years stuck on a single version of gcc that I tend =
-not to think of changing the compiler readily enough. At least now I can =
-upgrade the compiler freely.
-
-Made me go check to be sure. Indeed even { } still throws the =
-missing-initializers warning with gcc 4.8.3.
-
---=20
-Mark Rustad, Networking Division, Intel Corporation
-
-
---Apple-Mail=_4F337770-DF1B-4B20-888D-04A9682FB207
-Content-Transfer-Encoding: 7bit
-Content-Disposition: attachment; filename="signature.asc"
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Message signed with OpenPGP using GPGMail
-
------BEGIN PGP SIGNATURE-----
-Comment: GPGTools - http://gpgtools.org
-
-iQIcBAEBAgAGBQJUJdWMAAoJEDwO/+eO4+5utiMQAL6vhDQzEk2y5w1sPw5P4JZJ
-3TeYWasxVUZ/90gWdt9bI/oGtWuCmtNn0ZwCvhMW17C4tbhxge22b+yMFpBomvqX
-GE/U8ZzgmMY2I/rraoVWMkWKNc/XLOw5KJ2r1OjzY6x6XszhmnKRkHq5d6igogX8
-wD1BkGKcidPTjRvqPUeoj4ZkjPdgmP2uy0/cCB6eXYukorYQ1Nql/3G8QnC4vIeW
-09GeHOGPbhaunVohw7+vVGvJZUgPpqaf3B75tSeXxpvKoV2yNYcz0mwDhxzENCH7
-lxh7DQyrsGgwTAbyxYPwbS6RZ0C8HGlQzGBEhf+K9hoW4tVZLv36LNCGqXqT4Sd/
-xkH8+DXMYZgAyMIHD62JrgalLoAZpwYeJlTxkAnDxjeQhqImAAggjomjcQmEgrTr
-WlVfLRGe8VAUDfydmHWX6qaMXpNSLb8zQZWXe/HIEXFvi51hd9jPmKZ9eLv2Ky0I
-iFmPl+bmGGobgeA8xtVXcu62LVkPw4tChkXcQwZAbU3dPU0Qf+QjtfPBiOCFv53L
-j+Hf0HAAb2OWmwgBJEO5BXaBGUuR3uE3UCouZ+fzOzpptl+UE1jn5wWzWbl7PTk5
-OOt4U/VOXJY4xEeceJ3kbHWMjzEwRsQqoLOGFLH/4N6ZQ+tmEu5RyxMg2gIMi5n0
-iALiip1eyMYhGapLqdnA
-=VzCJ
------END PGP SIGNATURE-----
-
---Apple-Mail=_4F337770-DF1B-4B20-888D-04A9682FB207--
+- Josh Triplett
