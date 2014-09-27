@@ -1,40 +1,34 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 04/10] compile-i386.c: don't mix calls to write(2) with stdio
-Date: Sat, 27 Sep 2014 10:13:48 +0800
-Message-ID: <CANeU7Qk7sDezqhW2mPNxLMHvJHxffgvSix_q5wjQ2DgJJaFmEQ@mail.gmail.com>
-References: <53DFD2B7.7080801@ramsay1.demon.co.uk>
+Subject: Re: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is disabled
+Date: Sat, 27 Sep 2014 12:29:44 +0800
+Message-ID: <CANeU7QkFPTW04ECjrJKHO51g38R6r3Rt8jX74PsAnEgpxRqxYw@mail.gmail.com>
+References: <53DFD320.2050903@ramsay1.demon.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f179.google.com ([209.85.212.179]:49465 "EHLO
-	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751020AbaI0CNu (ORCPT
+Received: from mail-wg0-f48.google.com ([74.125.82.48]:65066 "EHLO
+	mail-wg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751156AbaI0E3q (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 26 Sep 2014 22:13:50 -0400
-Received: by mail-wi0-f179.google.com with SMTP id d1so486233wiv.6
-        for <linux-sparse@vger.kernel.org>; Fri, 26 Sep 2014 19:13:48 -0700 (PDT)
-In-Reply-To: <53DFD2B7.7080801@ramsay1.demon.co.uk>
+	Sat, 27 Sep 2014 00:29:46 -0400
+Received: by mail-wg0-f48.google.com with SMTP id x13so7435577wgg.19
+        for <linux-sparse@vger.kernel.org>; Fri, 26 Sep 2014 21:29:44 -0700 (PDT)
+In-Reply-To: <53DFD320.2050903@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Compile-i386 is pretty much not maintained any more.
+On Tue, Aug 5, 2014 at 2:38 AM, Ramsay Jones <ramsay@ramsay1.demon.co.uk> wrote:
+> +if [ ! -x "$default_path/sparse-llvm" ]; then
+> +       disabled_cmds="sparsec sparsei sparse-llvm"
+> +fi
 
-On Tue, Aug 5, 2014 at 2:36 AM, Ramsay Jones <ramsay@ramsay1.demon.co.uk> wrote:
->
-> -       write(STDOUT_FILENO, s, strlen(s));
-> +       printf("%s", s);
+I think this can  be simplified as if the test command was not found,
+then that test will be disabled. It doesn't need to be sparse llvm, it
+can be other
+test program.
 
-This change fix nothing. "printf" can return how many bytes it is written.
-In the case that "write" can fail, "printf" can fail as well. e.g. disk full.
-This patch did not check the return value from printf either.
-
-If we really care about return value of write, (we don't). We can do some thing
-like:
-if (write(...)< len)
-    die("....");
-
-That at least check the return value.
+We don't need to set an disable_cmds list then check against that list.
 
 Chris
