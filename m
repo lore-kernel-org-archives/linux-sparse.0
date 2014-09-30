@@ -1,55 +1,39 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH V2 linux-next] jffs2: fix sparse warning: unexpected
- unlock
-Date: Sun, 28 Sep 2014 17:02:44 -0700
-Message-ID: <20140929000243.GA1353@thin>
-References: <1411932392-7751-1-git-send-email-fabf@skynet.be>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v3 01/10] Add the __restrict__ keyword
+Date: Tue, 30 Sep 2014 10:26:22 +0800
+Message-ID: <CANeU7QmUSDByruX0CBe8L0kc7H=WrRfg2Qyx2A71_HCDP6eiWQ@mail.gmail.com>
+References: <5426B313.7050109@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:42802 "EHLO
-	relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752807AbaI2AC4 (ORCPT
+Received: from mail-yh0-f51.google.com ([209.85.213.51]:42308 "EHLO
+	mail-yh0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751946AbaI3C0X (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 28 Sep 2014 20:02:56 -0400
-Content-Disposition: inline
-In-Reply-To: <1411932392-7751-1-git-send-email-fabf@skynet.be>
+	Mon, 29 Sep 2014 22:26:23 -0400
+Received: by mail-yh0-f51.google.com with SMTP id c41so6111666yho.24
+        for <linux-sparse@vger.kernel.org>; Mon, 29 Sep 2014 19:26:22 -0700 (PDT)
+In-Reply-To: <5426B313.7050109@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Fabian Frederick <fabf@skynet.be>
-Cc: linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, Brian Norris <computersforpeace@gmail.com>, David Woodhouse <dwmw2@infradead.org>, linux-mtd@lists.infradead.org
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sun, Sep 28, 2014 at 09:26:32PM +0200, Fabian Frederick wrote:
-> fs/jffs2/summary.c:846:5: warning: context imbalance in 'jffs2_sum_write_sumnode' - unexpected unlock
-> 
-> Suggested-by: Brian Norris <computersforpeace@gmail.com>
-> Suggested-by: Josh Triplett <josh@joshtriplett.org>
-> Signed-off-by: Fabian Frederick <fabf@skynet.be>
+On Sat, Sep 27, 2014 at 8:52 PM, Ramsay Jones
+<ramsay@ramsay1.demon.co.uk> wrote:
+>
+> Signed-off-by: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+> ---
+>
+> Hi Chris,
+>
+> As promised, this adds tests for __restrict__ and restrict
+> keywords to validation/restrict-array.c.
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+Thanks, that looks good.
 
-> V2: use __must_hold instead of __releases / __acquires
-> (suggested by Brian Norris and Josh Triplett)
-> 
->  fs/jffs2/summary.c | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/fs/jffs2/summary.c b/fs/jffs2/summary.c
-> index c522d09..bc53854 100644
-> --- a/fs/jffs2/summary.c
-> +++ b/fs/jffs2/summary.c
-> @@ -844,6 +844,7 @@ static int jffs2_sum_write_data(struct jffs2_sb_info *c, struct jffs2_eraseblock
->  /* Write out summary information - called from jffs2_do_reserve_space */
->  
->  int jffs2_sum_write_sumnode(struct jffs2_sb_info *c)
-> +	__must_hold(&c->erase_completion_block)
->  {
->  	int datasize, infosize, padsize;
->  	struct jffs2_eraseblock *jeb;
-> -- 
-> 1.9.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I have applied your patch to a branch with your other patches.
+
+I will post the branch link for review shortly.
+
+Chris
