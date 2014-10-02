@@ -1,66 +1,66 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: fec_main: context imbalance in 'fec_set_features'
-Date: Wed, 1 Oct 2014 21:15:53 -0300
-Message-ID: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is disabled
+Date: Thu, 2 Oct 2014 11:44:56 +0800
+Message-ID: <CANeU7QnXWFad9Re0MtGkei6F6ZnUOH96et5_7aJQommFp2dLwQ@mail.gmail.com>
+References: <53DFD320.2050903@ramsay1.demon.co.uk>
+	<CANeU7QkFPTW04ECjrJKHO51g38R6r3Rt8jX74PsAnEgpxRqxYw@mail.gmail.com>
+	<5426BD97.2080700@ramsay1.demon.co.uk>
+	<CANeU7Q=vDAuBwWqy0=rbvkpgmzysCw=pfSEcwzyRRSZj3QrJbA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-la0-f42.google.com ([209.85.215.42]:33883 "EHLO
-	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753054AbaJBAPz (ORCPT
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:33356 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753667AbaJBDo5 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 1 Oct 2014 20:15:55 -0400
+	Wed, 1 Oct 2014 23:44:57 -0400
+Received: by mail-wi0-f179.google.com with SMTP id d1so2677571wiv.6
+        for <linux-sparse@vger.kernel.org>; Wed, 01 Oct 2014 20:44:56 -0700 (PDT)
+In-Reply-To: <CANeU7Q=vDAuBwWqy0=rbvkpgmzysCw=pfSEcwzyRRSZj3QrJbA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Frank Li <Frank.Li@freescale.com>, Duan Fugang-B38611 <B38611@freescale.com>
-Cc: "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, linux-sparse@vger.kernel.org
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Hi,
+On Tue, Sep 30, 2014 at 11:26 AM, Christopher Li <sparse@chrisli.org> wrote:
+> I am thinking some thing in the test-suite like:
+>
+> set_deps sparsec sparse-llvm
+> set_deps sparsei sparse-llvm
+>
+> ...
+> get_deps `basename cmd`
+> dep_cmd=$last_result
 
-sparse complains the following:
+Actually, I try that, it is a little bit too complicated.
 
-drivers/net/ethernet/freescale/fec_main.c:2835:12: warning: context
-imbalance in 'fec_set_features' - different lock contexts for basic
-block
+Your first approach is fine.
 
-The code looks like this:
+I end up using your V1 patch, with a small change to do exact match rather than
+a wild cast. The wild cast has danger that match a sub word of the command.
+e.g. if you try to disable command "sp", it will disable "sparse" as well.
 
-static int fec_set_features(struct net_device *netdev,
-    netdev_features_t features)
-{
-    struct fec_enet_private *fep = netdev_priv(netdev);
-    netdev_features_t changed = features ^ netdev->features;
+Chris
 
-    /* Quiesce the device if necessary */
-    if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
-        napi_disable(&fep->napi);
-        netif_tx_lock_bh(netdev);
-        fec_stop(netdev);
-    }
+diff --git a/validation/test-suite b/validation/test-suite
+index 1c94aa8..784ff6b 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -111,13 +111,13 @@ do_test()
+        fi
 
-    netdev->features = features;
+        # check for disabled commands
++       set -- $cmd
++       base_cmd=`basename $1`
+        for i in $disabled_cmds; do
+-               case "$cmd" in
+-               *$i*)
++               if [ "$i" == "$base_cmd" ] ; then
+                        disabled_tests=`expr $disabled_tests + 1`
+                        return 3
+-                       ;;
+-               esac
++               fi
+        done
 
-    /* Receive checksum has been changed */
-    if (changed & NETIF_F_RXCSUM) {
-        if (features & NETIF_F_RXCSUM)
-            fep->csum_flags |= FLAG_RX_CSUM_ENABLED;
-        else
-            fep->csum_flags &= ~FLAG_RX_CSUM_ENABLED;
-    }
-
-    /* Resume the device after updates */
-    if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
-        fec_restart(netdev);
-        netif_tx_wake_all_queues(netdev);
-        netif_tx_unlock_bh(netdev);
-        napi_enable(&fep->napi);
-    }
-
-    return 0;
-}
-
-What would be the proper way to fix this warning?
-
-Thanks,
-
-Fabio Estevam
+        echo "     TEST    $test_name ($file)"
