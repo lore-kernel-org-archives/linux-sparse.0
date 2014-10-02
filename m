@@ -1,57 +1,66 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is disabled
-Date: Tue, 30 Sep 2014 11:26:11 +0800
-Message-ID: <CANeU7Q=vDAuBwWqy0=rbvkpgmzysCw=pfSEcwzyRRSZj3QrJbA@mail.gmail.com>
-References: <53DFD320.2050903@ramsay1.demon.co.uk>
-	<CANeU7QkFPTW04ECjrJKHO51g38R6r3Rt8jX74PsAnEgpxRqxYw@mail.gmail.com>
-	<5426BD97.2080700@ramsay1.demon.co.uk>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: fec_main: context imbalance in 'fec_set_features'
+Date: Wed, 1 Oct 2014 21:15:53 -0300
+Message-ID: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yk0-f179.google.com ([209.85.160.179]:35412 "EHLO
-	mail-yk0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751165AbaI3D0M (ORCPT
+Received: from mail-la0-f42.google.com ([209.85.215.42]:33883 "EHLO
+	mail-la0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753054AbaJBAPz (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Sep 2014 23:26:12 -0400
-Received: by mail-yk0-f179.google.com with SMTP id 142so5718218ykq.38
-        for <linux-sparse@vger.kernel.org>; Mon, 29 Sep 2014 20:26:11 -0700 (PDT)
-In-Reply-To: <5426BD97.2080700@ramsay1.demon.co.uk>
+	Wed, 1 Oct 2014 20:15:55 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Frank Li <Frank.Li@freescale.com>, Duan Fugang-B38611 <B38611@freescale.com>
+Cc: "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, linux-sparse@vger.kernel.org
 
-On Sat, Sep 27, 2014 at 9:37 PM, Ramsay Jones
-<ramsay@ramsay1.demon.co.uk> wrote:
-> On 27/09/14 05:29, Christopher Li wrote:
->
-> Unfortunately, sparcec and sparsei are the commands that are
-> used by the tests (I included sparse-llvm in the list in case
-> any _future_ tests used it directly), and they do exist and
-> are executable. They simply will not work if sparse-llvm is
-> not built.
->
+Hi,
 
-I see. That make sense.
+sparse complains the following:
 
-We just need a way to specify the dependency of test commands.
-e.g. sparsec depends on sparse-llvm. So if sparsec does  not exist,
-or sparse-llvm does  not exist, the test will be skipped.
+drivers/net/ethernet/freescale/fec_main.c:2835:12: warning: context
+imbalance in 'fec_set_features' - different lock contexts for basic
+block
 
-I am thinking some thing in the test-suite like:
+The code looks like this:
 
-set_deps sparsec sparse-llvm
-set_deps sparsei sparse-llvm
+static int fec_set_features(struct net_device *netdev,
+    netdev_features_t features)
+{
+    struct fec_enet_private *fep = netdev_priv(netdev);
+    netdev_features_t changed = features ^ netdev->features;
 
-...
-get_deps `basename cmd`
-dep_cmd=$last_result
+    /* Quiesce the device if necessary */
+    if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
+        napi_disable(&fep->napi);
+        netif_tx_lock_bh(netdev);
+        fec_stop(netdev);
+    }
 
-> Note that I renamed sparse{c,i} to sparse{c,i}-in. It may have been
-> better to name then sparse{c,i}.sh, since they are not really templates
-> to be 'processed' to create a build product. dunno.
->
+    netdev->features = features;
 
-I prefer specify the dependency. Another copy is not necessary.
+    /* Receive checksum has been changed */
+    if (changed & NETIF_F_RXCSUM) {
+        if (features & NETIF_F_RXCSUM)
+            fep->csum_flags |= FLAG_RX_CSUM_ENABLED;
+        else
+            fep->csum_flags &= ~FLAG_RX_CSUM_ENABLED;
+    }
 
-Chris
+    /* Resume the device after updates */
+    if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
+        fec_restart(netdev);
+        netif_tx_wake_all_queues(netdev);
+        netif_tx_unlock_bh(netdev);
+        napi_enable(&fep->napi);
+    }
+
+    return 0;
+}
+
+What would be the proper way to fix this warning?
+
+Thanks,
+
+Fabio Estevam
