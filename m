@@ -1,45 +1,44 @@
 From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [PATCH 04/10] compile-i386.c: don't mix calls to write(2) with
- stdio
-Date: Thu, 02 Oct 2014 11:27:43 +0100
-Message-ID: <542D289F.9090701@ramsay1.demon.co.uk>
-References: <53DFD2B7.7080801@ramsay1.demon.co.uk>	<CANeU7Qk7sDezqhW2mPNxLMHvJHxffgvSix_q5wjQ2DgJJaFmEQ@mail.gmail.com>	<5426B508.9070005@ramsay1.demon.co.uk> <CANeU7QnARF7N3Yz1h+XF-zqjYnN+XA54QRENNfpbs2Ayq5LbAA@mail.gmail.com>
+Subject: Re: [PATCH 06/10] don't run sparse{c,i} tests when sparse-llvm is
+ disabled
+Date: Thu, 02 Oct 2014 11:31:48 +0100
+Message-ID: <542D2994.7020304@ramsay1.demon.co.uk>
+References: <53DFD320.2050903@ramsay1.demon.co.uk>	<CANeU7QkFPTW04ECjrJKHO51g38R6r3Rt8jX74PsAnEgpxRqxYw@mail.gmail.com>	<5426BD97.2080700@ramsay1.demon.co.uk>	<CANeU7Q=vDAuBwWqy0=rbvkpgmzysCw=pfSEcwzyRRSZj3QrJbA@mail.gmail.com> <CANeU7QnXWFad9Re0MtGkei6F6ZnUOH96et5_7aJQommFp2dLwQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=windows-1252
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta009.mxout.tch.inty.net ([91.221.169.50]:47277 "EHLO
+Received: from mdfmta010.mxout.tbr.inty.net ([91.221.168.51]:45600 "EHLO
 	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751219AbaJBK1x (ORCPT
+	with ESMTP id S1751176AbaJBKbv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 2 Oct 2014 06:27:53 -0400
-In-Reply-To: <CANeU7QnARF7N3Yz1h+XF-zqjYnN+XA54QRENNfpbs2Ayq5LbAA@mail.gmail.com>
+	Thu, 2 Oct 2014 06:31:51 -0400
+In-Reply-To: <CANeU7QnXWFad9Re0MtGkei6F6ZnUOH96et5_7aJQommFp2dLwQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On 30/09/14 03:34, Christopher Li wrote:
-> On Sat, Sep 27, 2014 at 9:00 PM, Ramsay Jones
-> <ramsay@ramsay1.demon.co.uk> wrote:
->>>> -       write(STDOUT_FILENO, s, strlen(s));
->>>> +       printf("%s", s);
->>>
+On 02/10/14 04:44, Christopher Li wrote:
+> On Tue, Sep 30, 2014 at 11:26 AM, Christopher Li <sparse@chrisli.org> wrote:
+>> I am thinking some thing in the test-suite like:
 >>
->> I was only really fixing the compiler warning (in an side-ways fashion).
->> (although I think it is an improvement).
+>> set_deps sparsec sparse-llvm
+>> set_deps sparsei sparse-llvm
+>>
+>> ...
+>> get_deps `basename cmd`
+>> dep_cmd=$last_result
 > 
-> I would just check the return value and "die" if there is an error to silence
-> the error.
+> Actually, I try that, it is a little bit too complicated.
+> 
+> Your first approach is fine.
+> 
+> I end up using your V1 patch, with a small change to do exact match rather than
+> a wild cast. The wild cast has danger that match a sub word of the command.
+> e.g. if you try to disable command "sp", it will disable "sparse" as well.
 
-Hmmm, I can change the patch to do that if you prefer.
-
-Having said that, given that this is not currently maintained, what
-do you think about a patch to remove it?
-
-[Are you hoping someone will pick it up again soon?]
-
-Let me know which patch you would like to see.
+Ah yes, good catch!
 
 ATB,
 Ramsay Jones
