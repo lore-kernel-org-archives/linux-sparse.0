@@ -1,87 +1,47 @@
-From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH v3] sparse: treat function pointers as pointers to const data
-Date: Mon, 6 Oct 2014 16:44:47 +0200
-Message-ID: <CAKv+Gu-jTrCnhuS0GEkifj1rA0gjh=cLLEXO9GLxNdw6ctn-Ug@mail.gmail.com>
-References: <1410157803-3658-1-git-send-email-ard.biesheuvel@linaro.org>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 07/10] Add support for multiarch system header files
+Date: Tue, 7 Oct 2014 11:55:57 +0800
+Message-ID: <CANeU7QmBc6Ogh-U-rfxfrvM+j8BS_HzTs6CaAQ7eGY4F+qDrZg@mail.gmail.com>
+References: <53DFD350.6080701@ramsay1.demon.co.uk>
+	<CANeU7QnuZucjgq2b972ZxBi0e1TZpz=mMjo6SCRvk5mngXaETg@mail.gmail.com>
+	<54326F8B.1050201@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-la0-f43.google.com ([209.85.215.43]:40498 "EHLO
-	mail-la0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752800AbaJFOot (ORCPT
+Received: from mail-wi0-f177.google.com ([209.85.212.177]:52754 "EHLO
+	mail-wi0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752212AbaJGDz7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 6 Oct 2014 10:44:49 -0400
-Received: by mail-la0-f43.google.com with SMTP id mc6so4512403lab.2
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Oct 2014 07:44:47 -0700 (PDT)
-In-Reply-To: <1410157803-3658-1-git-send-email-ard.biesheuvel@linaro.org>
+	Mon, 6 Oct 2014 23:55:59 -0400
+Received: by mail-wi0-f177.google.com with SMTP id fb4so6566231wid.10
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Oct 2014 20:55:57 -0700 (PDT)
+In-Reply-To: <54326F8B.1050201@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org, linux-sparse@vger.kernel.org
-Cc: Will Deacon <will.deacon@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>
+To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On 8 September 2014 08:30, Ard Biesheuvel <ard.biesheuvel@linaro.org> wrote:
-> This code snippet:
+On Mon, Oct 6, 2014 at 6:31 PM, Ramsay Jones <ramsay@ramsay1.demon.co.uk> wrote:
+> On 06/10/14 00:33, Christopher Li wrote:
+>> My gcc(4.8, FC20) does not support "-print-multiarch".
 >
-> static void bar(void const *arg)
-> {
->         int (*foo)(void) = arg;
-> }
->
-> produces the following warning:
->
-> test.c:4:28: warning: incorrect type in initializer (different modifiers)
-> test.c:4:28:    expected int ( *foo )( ... )
-> test.c:4:28:    got void const *arg
->
-> which is caused by the fact that the function pointer 'foo' is not annotated
-> as being a pointer to const data. However, dereferencing a function pointer
-> does not produce an lvalue, so a function pointer points to const data by
-> definition, and we should treat it accordingly.
->
-> To avoid producing a warning on the inverse case, i.e.,
->
-> static void bar(void)
-> {
->         void *foo = bar;
-> }
->
-> we only address the case where the function pointer is the target of
-> an assignment.
->
-> Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-> Signed-off-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-> ---
-> v3: add rationale for restriction to assignments to commit message
->     add R-b
->
-> v2: only treat function pointers as pointers to const data when they are the
->     target of an assignment
->
->  evaluate.c | 9 +++++++++
->  1 file changed, 9 insertions(+)
->
-> diff --git a/evaluate.c b/evaluate.c
-> index 66556150ddac..a5a830978bda 100644
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -1359,6 +1359,15 @@ static int compatible_assignment_types(struct expression *expr, struct symbol *t
->                                 typediff = "different address spaces";
->                                 goto Err;
->                         }
-> +                       /*
-> +                        * If this is a function pointer assignment, it is
-> +                        * actually fine to assign a pointer to const data to
-> +                        * it, as a function pointer points to const data
-> +                        * implicitly, i.e., dereferencing it does not produce
-> +                        * an lvalue.
-> +                        */
-> +                       if (b1->type == SYM_FN)
-> +                               mod1 |= MOD_CONST;
->                         if (mod2 & ~mod1) {
->                                 typediff = "different modifiers";
->                                 goto Err;
-> --
-> 1.8.3.2
->
+> Yep, same is true for cygwin.
 
-Ping?
+I see, I thought your patch is expecting some thing from gcc.
+Then how to you test this code path?
+
+>>
+>>> +       if (multiarch_dir && *multiarch_dir) {
+>>> +               add_pre_buffer("#add_system \"/usr/include/%s\"\n", multiarch_dir);
+>>> +               add_pre_buffer("#add_system \"/usr/local/include/%s\"\n", multiarch_dir);
+>>> +       }
+>>
+> Again, it works for me. :-D
+
+So I guess multiarch_dir can be empty here. I just did not expect
+that.
+
+Is it always prefix with "/usr/include/" and "/usr/local/include" for
+different distributions?
+
+Chris
