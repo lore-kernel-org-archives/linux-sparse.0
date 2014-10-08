@@ -1,44 +1,124 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH v2] sparse: Make -Werror turn warnigns into errors
-Date: Wed, 8 Oct 2014 18:26:23 +0800
-Message-ID: <CANeU7Q==hANeGNEK3f-_LnNa-msVQgPa=mnk4k0qkuz5s=_K+w@mail.gmail.com>
+Date: Thu, 9 Oct 2014 01:51:58 +0800
+Message-ID: <CANeU7Q=0VhRqKQqO0nKzUT3vN8AU6bcTMC6QKAm3H-Y2i-+4hA@mail.gmail.com>
 References: <795aaa7448d91bd59bcbea3d8e49b068a569409e.1411632579.git.tgraf@suug.ch>
 	<20141007094508.GN23154@mwanda>
+	<20141008093910.GB3181@casper.infradead.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yh0-f53.google.com ([209.85.213.53]:45690 "EHLO
-	mail-yh0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755288AbaJHK0Z (ORCPT
+Received: from mail-yh0-f49.google.com ([209.85.213.49]:41330 "EHLO
+	mail-yh0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752640AbaJHRv7 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 8 Oct 2014 06:26:25 -0400
-Received: by mail-yh0-f53.google.com with SMTP id b6so3782962yha.40
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Oct 2014 03:26:24 -0700 (PDT)
-In-Reply-To: <20141007094508.GN23154@mwanda>
+	Wed, 8 Oct 2014 13:51:59 -0400
+Received: by mail-yh0-f49.google.com with SMTP id a41so4126150yho.8
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Oct 2014 10:51:58 -0700 (PDT)
+In-Reply-To: <20141008093910.GB3181@casper.infradead.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Thomas Graf <tgraf@suug.ch>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Thomas Graf <tgraf@suug.ch>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Oct 7, 2014 at 5:45 PM, Dan Carpenter <dan.carpenter@oracle.com> wrote:
->> +     system ($check) == 0 or die;
+On Wed, Oct 8, 2014 at 5:39 PM, Thomas Graf <tgraf@suug.ch> wrote:
+>> This just enables -Werror for everyone so now I can't run Sparse on
+>> itself now because there are old errors from 2007.
 >
-> This just enables -Werror for everyone so now I can't run Sparse on
-> itself now because there are old errors from 2007.
->
-> lib.c:192:6: error: symbol 'error_die' redeclared with different type (originally declared at lib.h:97) - different modifiers
-> lib.c:201:6: error: symbol 'die' redeclared with different type (originally declared at lib.h:93) - different modifiers
+> The above change should merely have sparse fail upon an error and not
+> warnings unless you specifiy -Werror which I would consider expected
+> behaviour.
 
-It depend on how you invoke sparse.
-Do you invoke sparse by some thing like "make CC=./cgcc"?
+Actually I realized that this "-Werror" patch is wrong. As it is, we can't
+actually make the full kernel check without hitting sparse errors interrupting
+the build. That is pretty unacceptable.
 
->
-> Btw, these errors also disable warnings for the rest of the file...  I
-> don't think just because there are different modifiers it means that
-> we should give up looking for other warnings.  In the kernel we miss
-> some endian bugs because of this.
+We should reserve the "-Werror" for gcc. It means gcc should treat warning
+as error. We should have another option like "-Wsparse-error" for telling sparse
+to treat warning as error. Just like "-Wall" does not mean sparse should
+turn on all usual warnings. We have "-Wsparse-all" for that.
 
-Are you suggesting change that type different error into warnings so
-sparse can still check the rest of the file?
+I have the following patch renaming the option. BTW, I think sparse
+should only return error when "-Wsparse-error" was given.
+
+Any feed back?
 
 Chris
+
+diff --git a/lib.c b/lib.c
+index 8395662..b1b18aa 100644
+--- a/lib.c
++++ b/lib.c
+@@ -150,7 +150,7 @@ void warning(struct position pos, const char * fmt, ...)
+ {
+        va_list args;
+
+-       if (Werror) {
++       if (Wsparse_error) {
+                va_start(args, fmt);
+                do_error(pos, fmt, args);
+                va_end(args);
+@@ -226,7 +226,7 @@ int Wdesignated_init = 1;
+ int Wdo_while = 0;
+ int Winit_cstring = 0;
+ int Wenum_mismatch = 1;
+-int Werror = 0;
++int Wsparse_error = 0;
+ int Wnon_pointer_null = 1;
+ int Wold_initializer = 1;
+ int Wone_bit_signed_bitfield = 1;
+@@ -439,7 +439,7 @@ static const struct warning {
+        { "designated-init", &Wdesignated_init },
+        { "do-while", &Wdo_while },
+        { "enum-mismatch", &Wenum_mismatch },
+-       { "error", &Werror },
++       { "sparse-error", &Wsparse_error },
+        { "init-cstring", &Winit_cstring },
+        { "non-pointer-null", &Wnon_pointer_null },
+        { "old-initializer", &Wold_initializer },
+@@ -471,7 +471,7 @@ static char **handle_onoff_switch(char *arg, char **next, co
+
+        if (!strcmp(p, "sparse-all")) {
+                for (i = 0; i < n; i++) {
+-                       if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i
++                       if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i
+                                *warnings[i].flag = WARNING_ON;
+                }
+             }
+diff --git a/lib.h b/lib.h
+index dc01684..15b69fa 100644
+--- a/lib.h
++++ b/lib.h
+@@ -112,7 +112,7 @@ extern int Wdefault_bitfield_sign;
+ extern int Wdesignated_init;
+ extern int Wdo_while;
+ extern int Wenum_mismatch;
+-extern int Werror;
++extern int Wsparse_error;
+ extern int Winit_cstring;
+ extern int Wnon_pointer_null;
+ extern int Wold_initializer;
+diff --git a/sparse.1 b/sparse.1
+index acdce53..63fceb9 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -24,7 +24,7 @@ off those warnings, pass the negation of the associated warnin
+ Turn on all sparse warnings, except for those explicitly disabled via
+ \fB\-Wno\-something\fR.
+ .TP
+-.B \-Werror
++.B \-Wsparse\-error
+ Turn all sparse warnings into errors.
+ .TP
+ .B \-Waddress\-space
+diff --git a/sparse.c b/sparse.c
+index 7d389b1..6b3324c 100644
+--- a/sparse.c
++++ b/sparse.c
+@@ -288,7 +288,7 @@ static void check_symbols(struct symbol_list *list)
+                }
+        } END_FOR_EACH_PTR(sym);
+
+-       if (die_if_error)
++       if (Wsparse_error && die_if_error)
+                exit(1);
