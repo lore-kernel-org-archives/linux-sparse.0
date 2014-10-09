@@ -1,74 +1,35 @@
-From: "fugang.duan@freescale.com" <fugang.duan@freescale.com>
-Subject: RE: fec_main: context imbalance in 'fec_set_features'
-Date: Thu, 9 Oct 2014 09:55:38 +0000
-Message-ID: <f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: fec_main: context imbalance in 'fec_set_features'
+Date: Thu, 9 Oct 2014 08:20:20 -0300
+Message-ID: <CAOMZO5A_=o-J_ZhQPOaWcErc6ExUKk_-9MtSUY5MwGwm4Uc0-w@mail.gmail.com>
 References: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
+	<f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <netdev-owner@vger.kernel.org>
-In-Reply-To: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
-Content-Language: en-US
-Sender: netdev-owner@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>, "Frank.Li@freescale.com" <Frank.Li@freescale.com>
-Cc: "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-lb0-f179.google.com ([209.85.217.179]:37586 "EHLO
+	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751064AbaJILUW (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 9 Oct 2014 07:20:22 -0400
+In-Reply-To: <f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: "fugang.duan@freescale.com" <fugang.duan@freescale.com>
+Cc: "Frank.Li@freescale.com" <Frank.Li@freescale.com>, "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 
-RnJvbTogRmFiaW8gRXN0ZXZhbSA8ZmVzdGV2YW1AZ21haWwuY29tPiBTZW50OiBUaHVyc2RheSwg
-T2N0b2JlciAwMiwgMjAxNCA4OjE2IEFNDQo+VG86IExpIEZyYW5rLUIyMDU5NjsgRHVhbiBGdWdh
-bmctQjM4NjExDQo+Q2M6IERhdmlkIFMuIE1pbGxlcjsgbmV0ZGV2QHZnZXIua2VybmVsLm9yZzsg
-bGludXgtc3BhcnNlQHZnZXIua2VybmVsLm9yZw0KPlN1YmplY3Q6IGZlY19tYWluOiBjb250ZXh0
-IGltYmFsYW5jZSBpbiAnZmVjX3NldF9mZWF0dXJlcycNCj4NCj5IaSwNCj4NCj5zcGFyc2UgY29t
-cGxhaW5zIHRoZSBmb2xsb3dpbmc6DQo+DQo+ZHJpdmVycy9uZXQvZXRoZXJuZXQvZnJlZXNjYWxl
-L2ZlY19tYWluLmM6MjgzNToxMjogd2FybmluZzogY29udGV4dA0KPmltYmFsYW5jZSBpbiAnZmVj
-X3NldF9mZWF0dXJlcycgLSBkaWZmZXJlbnQgbG9jayBjb250ZXh0cyBmb3IgYmFzaWMgYmxvY2sN
-Cj4NCj5UaGUgY29kZSBsb29rcyBsaWtlIHRoaXM6DQo+DQo+c3RhdGljIGludCBmZWNfc2V0X2Zl
-YXR1cmVzKHN0cnVjdCBuZXRfZGV2aWNlICpuZXRkZXYsDQo+ICAgIG5ldGRldl9mZWF0dXJlc190
-IGZlYXR1cmVzKQ0KPnsNCj4gICAgc3RydWN0IGZlY19lbmV0X3ByaXZhdGUgKmZlcCA9IG5ldGRl
-dl9wcml2KG5ldGRldik7DQo+ICAgIG5ldGRldl9mZWF0dXJlc190IGNoYW5nZWQgPSBmZWF0dXJl
-cyBeIG5ldGRldi0+ZmVhdHVyZXM7DQo+DQo+ICAgIC8qIFF1aWVzY2UgdGhlIGRldmljZSBpZiBu
-ZWNlc3NhcnkgKi8NCj4gICAgaWYgKG5ldGlmX3J1bm5pbmcobmV0ZGV2KSAmJiBjaGFuZ2VkICYg
-RkVBVFVSRVNfTkVFRF9RVUlFU0NFKSB7DQo+ICAgICAgICBuYXBpX2Rpc2FibGUoJmZlcC0+bmFw
-aSk7DQo+ICAgICAgICBuZXRpZl90eF9sb2NrX2JoKG5ldGRldik7DQo+ICAgICAgICBmZWNfc3Rv
-cChuZXRkZXYpOw0KPiAgICB9DQo+DQo+ICAgIG5ldGRldi0+ZmVhdHVyZXMgPSBmZWF0dXJlczsN
-Cj4NCj4gICAgLyogUmVjZWl2ZSBjaGVja3N1bSBoYXMgYmVlbiBjaGFuZ2VkICovDQo+ICAgIGlm
-IChjaGFuZ2VkICYgTkVUSUZfRl9SWENTVU0pIHsNCj4gICAgICAgIGlmIChmZWF0dXJlcyAmIE5F
-VElGX0ZfUlhDU1VNKQ0KPiAgICAgICAgICAgIGZlcC0+Y3N1bV9mbGFncyB8PSBGTEFHX1JYX0NT
-VU1fRU5BQkxFRDsNCj4gICAgICAgIGVsc2UNCj4gICAgICAgICAgICBmZXAtPmNzdW1fZmxhZ3Mg
-Jj0gfkZMQUdfUlhfQ1NVTV9FTkFCTEVEOw0KPiAgICB9DQo+DQo+ICAgIC8qIFJlc3VtZSB0aGUg
-ZGV2aWNlIGFmdGVyIHVwZGF0ZXMgKi8NCj4gICAgaWYgKG5ldGlmX3J1bm5pbmcobmV0ZGV2KSAm
-JiBjaGFuZ2VkICYgRkVBVFVSRVNfTkVFRF9RVUlFU0NFKSB7DQo+ICAgICAgICBmZWNfcmVzdGFy
-dChuZXRkZXYpOw0KPiAgICAgICAgbmV0aWZfdHhfd2FrZV9hbGxfcXVldWVzKG5ldGRldik7DQo+
-ICAgICAgICBuZXRpZl90eF91bmxvY2tfYmgobmV0ZGV2KTsNCj4gICAgICAgIG5hcGlfZW5hYmxl
-KCZmZXAtPm5hcGkpOw0KPiAgICB9DQo+DQo+ICAgIHJldHVybiAwOw0KPn0NCj4NCj5XaGF0IHdv
-dWxkIGJlIHRoZSBwcm9wZXIgd2F5IHRvIGZpeCB0aGlzIHdhcm5pbmc/DQo+DQo+VGhhbmtzLA0K
-Pg0KPkZhYmlvIEVzdGV2YW0NCg0KSGksIEZhYmlvLA0KDQpJIHJ1biBzcGFyc2UgYW5kIGNhbm5v
-dCBnZXQgYW55IHdhcm5pbmcuDQoxLiBnaXQgY2xvbmUgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHVi
-L3NjbS9kZXZlbC9zcGFyc2Uvc3BhcnNlLmdpdA0KICAgbWFrZQ0KICAgbWFrZSBpbnN0YWxsDQoy
-LiBleHBvcnQgUEFUSD0kUEFUSDp+L2Jpbi8NCjMuIG1ha2Uga2VybmVsOiBtYWtlICAtajE2IEFS
-Q0g9YXJtIENST1NTX0NPTVBJTEU9YXJtLXBva3ktbGludXgtZ251ZWFiaS0gekltYWdlIEM9Mg0K
-DQpDb21taXQgSUQgb24gRGF2aWQgbmV0IHRyZWU6IDI4YjdkZWFlNzU2NDJjNTFmMDk3MzkxNzY1
-ZmQzOWZmMGRkNmNlOTUNCg0KVGhlIHJlc3VsdDoNCiAgQ0hFQ0sgICBmcy9sb2NrZC9zdmM0cHJv
-Yy5jDQogIENIRUNLICAgZHJpdmVycy9vZi9wbGF0Zm9ybS5jDQogIENIRUNLICAgZHJpdmVycy9p
-bnB1dC90b3VjaHNjcmVlbi90c2MyMDA3LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL210ZC9uYW5kL25h
-bmRfdGltaW5ncy5jDQogIENIRUNLICAgZHJpdmVycy9wY2kvcHJvYmUuYw0KICBDSEVDSyAgIGRy
-aXZlcnMvcGNpL2hvc3QtYnJpZGdlLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9yZW1vdmUuYw0K
-ZHJpdmVycy9tdGQvbmFuZC9uYW5kX3RpbWluZ3MuYzo0NToyOTogd2FybmluZzogY29uc3RhbnQg
-MjUwMDAwMDAwMDAwIGlzIHNvIGJpZyBpdCBpcyBsb25nIGxvbmcNCiAgQ0hFQ0sgICBkcml2ZXJz
-L210ZC9uYW5kL25hbmRfZWNjLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL210ZC9uYW5kL25hbmRfaWRz
-LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL25ldC9ldGhlcm5ldC9mcmVlc2NhbGUvZmVjX21haW4uYw0K
-ICBDSEVDSyAgIGRyaXZlcnMvb2YvZmR0LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL29mL2ZkdF9hZGRy
-ZXNzLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9wY2kuYw0KICBDSEVDSyAgIGRyaXZlcnMvbXRk
-L25hbmQvbXhjX25hbmQuYw0KICBDSEVDSyAgIGZzL25vdGlmeS9mc25vdGlmeS5jDQogIENIRUNL
-ICAgZnMvbm90aWZ5L25vdGlmaWNhdGlvbi5jDQogIENIRUNLICAgZnMvbm90aWZ5L2dyb3VwLmMN
-CiAgQ0hFQ0sgICBmcy9ub3RpZnkvaW5vZGVfbWFyay5jDQogIENIRUNLICAgZHJpdmVycy9uZXQv
-ZXRoZXJuZXQvZnJlZXNjYWxlL2ZlY19wdHAuYw0KICBDSEVDSyAgIGZzL25vdGlmeS9tYXJrLmMN
-CiAgQ0hFQ0sgICBmcy9ub3RpZnkvdmZzbW91bnRfbWFyay5jDQpkcml2ZXJzL3BjaS9wY2kuYzoz
-NTo1OiB3YXJuaW5nOiBzeW1ib2wgJ2lzYV9kbWFfYnJpZGdlX2J1Z2d5JyB3YXMgbm90IGRlY2xh
-cmVkLiBTaG91bGQgaXQgYmUgc3RhdGljPw0KZHJpdmVycy9wY2kvcGNpLmM6NDM5MjoxOiB3YXJu
-aW5nOiBzeW1ib2wgJ2J1c19hdHRyX3Jlc291cmNlX2FsaWdubWVudCcgd2FzIG5vdCBkZWNsYXJl
-ZC4gU2hvdWxkIGl0IGJlIHN0YXRpYz8NCiAgQ0hFQ0sgICBmcy9ub3RpZnkvZmRpbmZvLmMNCiAg
-Q0hFQ0sgICBkcml2ZXJzL3BjaS9wY2ktZHJpdmVyLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9z
-ZWFyY2guYw0KICBDSEVDSyAgIGRyaXZlcnMvcGNpL3BjaS1zeXNmcy5jDQogIENIRUNLICAgZHJp
-dmVycy9wY2kvcm9tLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9zZXR1cC1yZXMuYw0KDQoNClJl
-Z2FyZHMsDQpBbmR5DQo=
+Hi Fugang,
+
+On Thu, Oct 9, 2014 at 6:55 AM, fugang.duan@freescale.com
+<fugang.duan@freescale.com> wrote:
+
+> I run sparse and cannot get any warning.
+
+Try it on linux-next with the following command:
+
+make -j4 C=1  2>fect.txt drivers/net/ethernet/freescale/fec_main.o
+
+cat v6.txt
+drivers/net/ethernet/freescale/fec_main.c:2916:12: warning: context
+imbalance in 'fec_set_features' - different lock contexts for basic
+block
