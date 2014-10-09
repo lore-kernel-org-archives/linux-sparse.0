@@ -1,139 +1,74 @@
-From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Subject: Re: [PATCH v2] sparse: Make -Werror turn warnigns into errors
-Date: Thu, 09 Oct 2014 01:56:04 +0100
-Message-ID: <5435DD24.3070005@ramsay1.demon.co.uk>
-References: <795aaa7448d91bd59bcbea3d8e49b068a569409e.1411632579.git.tgraf@suug.ch>	<20141007094508.GN23154@mwanda>	<20141008093910.GB3181@casper.infradead.org> <CANeU7Q=0VhRqKQqO0nKzUT3vN8AU6bcTMC6QKAm3H-Y2i-+4hA@mail.gmail.com>
+From: "fugang.duan@freescale.com" <fugang.duan@freescale.com>
+Subject: RE: fec_main: context imbalance in 'fec_set_features'
+Date: Thu, 9 Oct 2014 09:55:38 +0000
+Message-ID: <f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
+References: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdfmta004.mxout.tbr.inty.net ([91.221.168.45]:41983 "EHLO
-	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-	with ESMTP id S1751370AbaJIA4K (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 8 Oct 2014 20:56:10 -0400
-In-Reply-To: <CANeU7Q=0VhRqKQqO0nKzUT3vN8AU6bcTMC6QKAm3H-Y2i-+4hA@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
+Content-Language: en-US
+Sender: netdev-owner@vger.kernel.org
+To: Fabio Estevam <festevam@gmail.com>, "Frank.Li@freescale.com" <Frank.Li@freescale.com>
+Cc: "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, Thomas Graf <tgraf@suug.ch>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 08/10/14 18:51, Christopher Li wrote:
-> On Wed, Oct 8, 2014 at 5:39 PM, Thomas Graf <tgraf@suug.ch> wrote:
->>> This just enables -Werror for everyone so now I can't run Sparse on
->>> itself now because there are old errors from 2007.
->>
->> The above change should merely have sparse fail upon an error and not
->> warnings unless you specifiy -Werror which I would consider expected
->> behaviour.
-> 
-> Actually I realized that this "-Werror" patch is wrong. As it is, we can't
-> actually make the full kernel check without hitting sparse errors interrupting
-> the build. That is pretty unacceptable.
-> 
-> We should reserve the "-Werror" for gcc. It means gcc should treat warning
-> as error. We should have another option like "-Wsparse-error" for telling sparse
-> to treat warning as error. Just like "-Wall" does not mean sparse should
-> turn on all usual warnings. We have "-Wsparse-all" for that.
-> 
-> I have the following patch renaming the option. BTW, I think sparse
-> should only return error when "-Wsparse-error" was given.
-> 
-> Any feed back?
-
-I haven't been following this discussion, but I would have
-expected to see a check for '-Wsparse-error' in the 
-'check_only_option' function in cgcc as part of this patch.
-
-HTH
-
-ATB,
-Ramsay Jones
-
-
-> Chris
-> 
-> diff --git a/lib.c b/lib.c
-> index 8395662..b1b18aa 100644
-> --- a/lib.c
-> +++ b/lib.c
-> @@ -150,7 +150,7 @@ void warning(struct position pos, const char * fmt, ...)
->  {
->         va_list args;
-> 
-> -       if (Werror) {
-> +       if (Wsparse_error) {
->                 va_start(args, fmt);
->                 do_error(pos, fmt, args);
->                 va_end(args);
-> @@ -226,7 +226,7 @@ int Wdesignated_init = 1;
->  int Wdo_while = 0;
->  int Winit_cstring = 0;
->  int Wenum_mismatch = 1;
-> -int Werror = 0;
-> +int Wsparse_error = 0;
->  int Wnon_pointer_null = 1;
->  int Wold_initializer = 1;
->  int Wone_bit_signed_bitfield = 1;
-> @@ -439,7 +439,7 @@ static const struct warning {
->         { "designated-init", &Wdesignated_init },
->         { "do-while", &Wdo_while },
->         { "enum-mismatch", &Wenum_mismatch },
-> -       { "error", &Werror },
-> +       { "sparse-error", &Wsparse_error },
->         { "init-cstring", &Winit_cstring },
->         { "non-pointer-null", &Wnon_pointer_null },
->         { "old-initializer", &Wold_initializer },
-> @@ -471,7 +471,7 @@ static char **handle_onoff_switch(char *arg, char **next, co
-> 
->         if (!strcmp(p, "sparse-all")) {
->                 for (i = 0; i < n; i++) {
-> -                       if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i
-> +                       if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i
->                                 *warnings[i].flag = WARNING_ON;
->                 }
->              }
-> diff --git a/lib.h b/lib.h
-> index dc01684..15b69fa 100644
-> --- a/lib.h
-> +++ b/lib.h
-> @@ -112,7 +112,7 @@ extern int Wdefault_bitfield_sign;
->  extern int Wdesignated_init;
->  extern int Wdo_while;
->  extern int Wenum_mismatch;
-> -extern int Werror;
-> +extern int Wsparse_error;
->  extern int Winit_cstring;
->  extern int Wnon_pointer_null;
->  extern int Wold_initializer;
-> diff --git a/sparse.1 b/sparse.1
-> index acdce53..63fceb9 100644
-> --- a/sparse.1
-> +++ b/sparse.1
-> @@ -24,7 +24,7 @@ off those warnings, pass the negation of the associated warnin
->  Turn on all sparse warnings, except for those explicitly disabled via
->  \fB\-Wno\-something\fR.
->  .TP
-> -.B \-Werror
-> +.B \-Wsparse\-error
->  Turn all sparse warnings into errors.
->  .TP
->  .B \-Waddress\-space
-> diff --git a/sparse.c b/sparse.c
-> index 7d389b1..6b3324c 100644
-> --- a/sparse.c
-> +++ b/sparse.c
-> @@ -288,7 +288,7 @@ static void check_symbols(struct symbol_list *list)
->                 }
->         } END_FOR_EACH_PTR(sym);
-> 
-> -       if (die_if_error)
-> +       if (Wsparse_error && die_if_error)
->                 exit(1);
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> .
-> 
-
+RnJvbTogRmFiaW8gRXN0ZXZhbSA8ZmVzdGV2YW1AZ21haWwuY29tPiBTZW50OiBUaHVyc2RheSwg
+T2N0b2JlciAwMiwgMjAxNCA4OjE2IEFNDQo+VG86IExpIEZyYW5rLUIyMDU5NjsgRHVhbiBGdWdh
+bmctQjM4NjExDQo+Q2M6IERhdmlkIFMuIE1pbGxlcjsgbmV0ZGV2QHZnZXIua2VybmVsLm9yZzsg
+bGludXgtc3BhcnNlQHZnZXIua2VybmVsLm9yZw0KPlN1YmplY3Q6IGZlY19tYWluOiBjb250ZXh0
+IGltYmFsYW5jZSBpbiAnZmVjX3NldF9mZWF0dXJlcycNCj4NCj5IaSwNCj4NCj5zcGFyc2UgY29t
+cGxhaW5zIHRoZSBmb2xsb3dpbmc6DQo+DQo+ZHJpdmVycy9uZXQvZXRoZXJuZXQvZnJlZXNjYWxl
+L2ZlY19tYWluLmM6MjgzNToxMjogd2FybmluZzogY29udGV4dA0KPmltYmFsYW5jZSBpbiAnZmVj
+X3NldF9mZWF0dXJlcycgLSBkaWZmZXJlbnQgbG9jayBjb250ZXh0cyBmb3IgYmFzaWMgYmxvY2sN
+Cj4NCj5UaGUgY29kZSBsb29rcyBsaWtlIHRoaXM6DQo+DQo+c3RhdGljIGludCBmZWNfc2V0X2Zl
+YXR1cmVzKHN0cnVjdCBuZXRfZGV2aWNlICpuZXRkZXYsDQo+ICAgIG5ldGRldl9mZWF0dXJlc190
+IGZlYXR1cmVzKQ0KPnsNCj4gICAgc3RydWN0IGZlY19lbmV0X3ByaXZhdGUgKmZlcCA9IG5ldGRl
+dl9wcml2KG5ldGRldik7DQo+ICAgIG5ldGRldl9mZWF0dXJlc190IGNoYW5nZWQgPSBmZWF0dXJl
+cyBeIG5ldGRldi0+ZmVhdHVyZXM7DQo+DQo+ICAgIC8qIFF1aWVzY2UgdGhlIGRldmljZSBpZiBu
+ZWNlc3NhcnkgKi8NCj4gICAgaWYgKG5ldGlmX3J1bm5pbmcobmV0ZGV2KSAmJiBjaGFuZ2VkICYg
+RkVBVFVSRVNfTkVFRF9RVUlFU0NFKSB7DQo+ICAgICAgICBuYXBpX2Rpc2FibGUoJmZlcC0+bmFw
+aSk7DQo+ICAgICAgICBuZXRpZl90eF9sb2NrX2JoKG5ldGRldik7DQo+ICAgICAgICBmZWNfc3Rv
+cChuZXRkZXYpOw0KPiAgICB9DQo+DQo+ICAgIG5ldGRldi0+ZmVhdHVyZXMgPSBmZWF0dXJlczsN
+Cj4NCj4gICAgLyogUmVjZWl2ZSBjaGVja3N1bSBoYXMgYmVlbiBjaGFuZ2VkICovDQo+ICAgIGlm
+IChjaGFuZ2VkICYgTkVUSUZfRl9SWENTVU0pIHsNCj4gICAgICAgIGlmIChmZWF0dXJlcyAmIE5F
+VElGX0ZfUlhDU1VNKQ0KPiAgICAgICAgICAgIGZlcC0+Y3N1bV9mbGFncyB8PSBGTEFHX1JYX0NT
+VU1fRU5BQkxFRDsNCj4gICAgICAgIGVsc2UNCj4gICAgICAgICAgICBmZXAtPmNzdW1fZmxhZ3Mg
+Jj0gfkZMQUdfUlhfQ1NVTV9FTkFCTEVEOw0KPiAgICB9DQo+DQo+ICAgIC8qIFJlc3VtZSB0aGUg
+ZGV2aWNlIGFmdGVyIHVwZGF0ZXMgKi8NCj4gICAgaWYgKG5ldGlmX3J1bm5pbmcobmV0ZGV2KSAm
+JiBjaGFuZ2VkICYgRkVBVFVSRVNfTkVFRF9RVUlFU0NFKSB7DQo+ICAgICAgICBmZWNfcmVzdGFy
+dChuZXRkZXYpOw0KPiAgICAgICAgbmV0aWZfdHhfd2FrZV9hbGxfcXVldWVzKG5ldGRldik7DQo+
+ICAgICAgICBuZXRpZl90eF91bmxvY2tfYmgobmV0ZGV2KTsNCj4gICAgICAgIG5hcGlfZW5hYmxl
+KCZmZXAtPm5hcGkpOw0KPiAgICB9DQo+DQo+ICAgIHJldHVybiAwOw0KPn0NCj4NCj5XaGF0IHdv
+dWxkIGJlIHRoZSBwcm9wZXIgd2F5IHRvIGZpeCB0aGlzIHdhcm5pbmc/DQo+DQo+VGhhbmtzLA0K
+Pg0KPkZhYmlvIEVzdGV2YW0NCg0KSGksIEZhYmlvLA0KDQpJIHJ1biBzcGFyc2UgYW5kIGNhbm5v
+dCBnZXQgYW55IHdhcm5pbmcuDQoxLiBnaXQgY2xvbmUgZ2l0Oi8vZ2l0Lmtlcm5lbC5vcmcvcHVi
+L3NjbS9kZXZlbC9zcGFyc2Uvc3BhcnNlLmdpdA0KICAgbWFrZQ0KICAgbWFrZSBpbnN0YWxsDQoy
+LiBleHBvcnQgUEFUSD0kUEFUSDp+L2Jpbi8NCjMuIG1ha2Uga2VybmVsOiBtYWtlICAtajE2IEFS
+Q0g9YXJtIENST1NTX0NPTVBJTEU9YXJtLXBva3ktbGludXgtZ251ZWFiaS0gekltYWdlIEM9Mg0K
+DQpDb21taXQgSUQgb24gRGF2aWQgbmV0IHRyZWU6IDI4YjdkZWFlNzU2NDJjNTFmMDk3MzkxNzY1
+ZmQzOWZmMGRkNmNlOTUNCg0KVGhlIHJlc3VsdDoNCiAgQ0hFQ0sgICBmcy9sb2NrZC9zdmM0cHJv
+Yy5jDQogIENIRUNLICAgZHJpdmVycy9vZi9wbGF0Zm9ybS5jDQogIENIRUNLICAgZHJpdmVycy9p
+bnB1dC90b3VjaHNjcmVlbi90c2MyMDA3LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL210ZC9uYW5kL25h
+bmRfdGltaW5ncy5jDQogIENIRUNLICAgZHJpdmVycy9wY2kvcHJvYmUuYw0KICBDSEVDSyAgIGRy
+aXZlcnMvcGNpL2hvc3QtYnJpZGdlLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9yZW1vdmUuYw0K
+ZHJpdmVycy9tdGQvbmFuZC9uYW5kX3RpbWluZ3MuYzo0NToyOTogd2FybmluZzogY29uc3RhbnQg
+MjUwMDAwMDAwMDAwIGlzIHNvIGJpZyBpdCBpcyBsb25nIGxvbmcNCiAgQ0hFQ0sgICBkcml2ZXJz
+L210ZC9uYW5kL25hbmRfZWNjLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL210ZC9uYW5kL25hbmRfaWRz
+LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL25ldC9ldGhlcm5ldC9mcmVlc2NhbGUvZmVjX21haW4uYw0K
+ICBDSEVDSyAgIGRyaXZlcnMvb2YvZmR0LmMNCiAgQ0hFQ0sgICBkcml2ZXJzL29mL2ZkdF9hZGRy
+ZXNzLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9wY2kuYw0KICBDSEVDSyAgIGRyaXZlcnMvbXRk
+L25hbmQvbXhjX25hbmQuYw0KICBDSEVDSyAgIGZzL25vdGlmeS9mc25vdGlmeS5jDQogIENIRUNL
+ICAgZnMvbm90aWZ5L25vdGlmaWNhdGlvbi5jDQogIENIRUNLICAgZnMvbm90aWZ5L2dyb3VwLmMN
+CiAgQ0hFQ0sgICBmcy9ub3RpZnkvaW5vZGVfbWFyay5jDQogIENIRUNLICAgZHJpdmVycy9uZXQv
+ZXRoZXJuZXQvZnJlZXNjYWxlL2ZlY19wdHAuYw0KICBDSEVDSyAgIGZzL25vdGlmeS9tYXJrLmMN
+CiAgQ0hFQ0sgICBmcy9ub3RpZnkvdmZzbW91bnRfbWFyay5jDQpkcml2ZXJzL3BjaS9wY2kuYzoz
+NTo1OiB3YXJuaW5nOiBzeW1ib2wgJ2lzYV9kbWFfYnJpZGdlX2J1Z2d5JyB3YXMgbm90IGRlY2xh
+cmVkLiBTaG91bGQgaXQgYmUgc3RhdGljPw0KZHJpdmVycy9wY2kvcGNpLmM6NDM5MjoxOiB3YXJu
+aW5nOiBzeW1ib2wgJ2J1c19hdHRyX3Jlc291cmNlX2FsaWdubWVudCcgd2FzIG5vdCBkZWNsYXJl
+ZC4gU2hvdWxkIGl0IGJlIHN0YXRpYz8NCiAgQ0hFQ0sgICBmcy9ub3RpZnkvZmRpbmZvLmMNCiAg
+Q0hFQ0sgICBkcml2ZXJzL3BjaS9wY2ktZHJpdmVyLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9z
+ZWFyY2guYw0KICBDSEVDSyAgIGRyaXZlcnMvcGNpL3BjaS1zeXNmcy5jDQogIENIRUNLICAgZHJp
+dmVycy9wY2kvcm9tLmMNCiAgQ0hFQ0sgICBkcml2ZXJzL3BjaS9zZXR1cC1yZXMuYw0KDQoNClJl
+Z2FyZHMsDQpBbmR5DQo=
