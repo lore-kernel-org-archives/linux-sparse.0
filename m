@@ -1,35 +1,53 @@
-From: Fabio Estevam <festevam@gmail.com>
-Subject: Re: fec_main: context imbalance in 'fec_set_features'
-Date: Thu, 9 Oct 2014 08:20:20 -0300
-Message-ID: <CAOMZO5A_=o-J_ZhQPOaWcErc6ExUKk_-9MtSUY5MwGwm4Uc0-w@mail.gmail.com>
-References: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
-	<f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
+From: "Franco, Scott" <Scott.Franco@caviumnetworks.com>
+Subject: Sparse context warning on 0.5.0
+Date: Fri, 10 Oct 2014 17:04:49 +0000
+Message-ID: <4801d85f4f4c4f97ba83a075fc9a80b4@BY1PR0701MB1240.namprd07.prod.outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lb0-f179.google.com ([209.85.217.179]:37586 "EHLO
-	mail-lb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751064AbaJILUW (ORCPT
+Received: from mail-by2on0059.outbound.protection.outlook.com ([207.46.100.59]:52160
+	"EHLO na01-by2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751796AbaJJRT2 convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 9 Oct 2014 07:20:22 -0400
-In-Reply-To: <f5e97105d948410d8346ea6f0bc0d79e@BY2PR03MB377.namprd03.prod.outlook.com>
+	Fri, 10 Oct 2014 13:19:28 -0400
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "fugang.duan@freescale.com" <fugang.duan@freescale.com>
-Cc: "Frank.Li@freescale.com" <Frank.Li@freescale.com>, "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
+To: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 
-Hi Fugang,
+Hi,
 
-On Thu, Oct 9, 2014 at 6:55 AM, fugang.duan@freescale.com
-<fugang.duan@freescale.com> wrote:
+I am using sparse 0.5.0 release. I am getting several context check errors on my code.
+I reduced a routine that was being flagged to the minimum, and I still get the error:
 
-> I run sparse and cannot get any warning.
+/nfs/causers2/sfranco/projects/cnnic70xx_rearch/host/driver/src/linux/cavium/octeon_poll.c:130:5: warning: context imbalance in 'octeon_register_poll_fn' - wrong count at exit
 
-Try it on linux-next with the following command:
+The routine now is:
 
-make -j4 C=1  2>fect.txt drivers/net/ethernet/freescale/fec_main.o
+static spinlock_t mylock = SPIN_LOCK_UNLOCKED;
 
-cat v6.txt
-drivers/net/ethernet/freescale/fec_main.c:2916:12: warning: context
-imbalance in 'fec_set_features' - different lock contexts for basic
-block
+int octeon_register_poll_fn(int oct_id, octeon_poll_ops_t * ops)
+
+{
+
+    spin_lock(&mylock);
+    spin_unlock(&mylock);
+
+    return 0;
+}
+
+Ie., stripped to the bare minimum. My understanding from reading the docs and mails on the
+subject is that a function that does not enter with the lock, acquires and releases it inside the
+function and exits with the lock unlocked, does not need annotation with __acquires or __releases.
+
+Any hints you can give me?
+
+Machine: x64, Scientific Linux (RHEL).
+
+Thanks,
+
+Scott Franco
+Cavium Networks
+
