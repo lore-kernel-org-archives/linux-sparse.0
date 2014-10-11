@@ -1,42 +1,67 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Sparse context warning on 0.5.0
-Date: Sat, 11 Oct 2014 10:14:00 +0800
-Message-ID: <CANeU7Qn68zSjRJ9oVmYJm4cw9qyRqyXWUr4gp2sCdKsZ-XrYyw@mail.gmail.com>
-References: <4801d85f4f4c4f97ba83a075fc9a80b4@BY1PR0701MB1240.namprd07.prod.outlook.com>
-	<CANeU7Qk8E2pGANy1f8fXCeTwC1u0tE9HPT1FZqf_DGoASXF0rw@mail.gmail.com>
-	<4f5fd314ec274d16816d5cf17dd2cdfd@BY1PR0701MB1240.namprd07.prod.outlook.com>
+From: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
+Subject: [PATCH 0/4] chrisl master branch patches
+Date: Sat, 11 Oct 2014 20:55:15 +0100
+Message-ID: <54398B23.8080501@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:36653 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750706AbaJKCOA (ORCPT
+Received: from mdfmta004.mxout.tch.inty.net ([91.221.169.45]:46108 "EHLO
+	smtp.demon.co.uk" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+	with ESMTP id S1751006AbaJKTz0 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 10 Oct 2014 22:14:00 -0400
-Received: by mail-qc0-f170.google.com with SMTP id m20so2904688qcx.1
-        for <linux-sparse@vger.kernel.org>; Fri, 10 Oct 2014 19:14:00 -0700 (PDT)
-In-Reply-To: <4f5fd314ec274d16816d5cf17dd2cdfd@BY1PR0701MB1240.namprd07.prod.outlook.com>
+	Sat, 11 Oct 2014 15:55:26 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Franco, Scott" <Scott.Franco@caviumnetworks.com>
-Cc: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Oct 11, 2014 at 9:52 AM, Franco, Scott
-<Scott.Franco@caviumnetworks.com> wrote:
-> Chistopher,
->
-> Thanks for looking at my issue. I've been running it via the kernel make (make c=1),
-> So I'll figure out how to strip it out of the make and get back to you (I suspect the
-> Easiest way is to make --dry it and use the output).
->
+Hi Chris,
 
-There should be a ".octeon_poll.o.cmd" inside the same directory where
-you generate
-the octeon_poll.o file. The first line of that file contain the build
-command of gcc.
+I noticed, this afternoon, that you have pushed new patches to your
+public repo on kernel.org (including most of the patches from my
+'misc sparse patches' series). After a quick test, I noticed a few
+minor problems (see first two patches).
 
-You can copy that to a new shell script and edit it a little bit to
-invoke gcc -E with
-the same command line argument, without using the kbuild.
+I don't know how you like to manage your public repo, but if you
+don't mind re-winding your master branch, then you could squash
+patch #1 into commit e23abfd and patch #2 into fe57afa.
 
-Chris
+The third patch is actually a re-send of one I sent separately
+after the 10 patch series.
+
+The final patch is a possible alternative to "[PATCH 04/10]
+compile-i386.c: don't mix calls to write(2) with stdio", which
+basically just removes the compile program. If you prefer
+another solution, just let me know.
+
+[Note: I have been living with the RFC patch #10 for quite a
+while now with no problems. However, it was just a quick hack
+to speed up cgcc/sparse on Cygwin and, on reflection, not a
+good reason to introduce a sparse configuration file! Also, the
+use of the perl language for the config file can be viewed as
+a bit cute (too cute for some people). I will probably keep it
+as a locally applied patch on cygwin (it is a noticeable speedup
+on cygwin), but remove it on Linux.]
+
+Ramsay Jones (4):
+  test-suite: remove bashism to avoid test failures
+  cgcc: avoid passing a sparse-only option to cc
+  parse.c: remove duplicate 'may_alias' ignored_attributes
+  compile: remove the unmaintained compile program
+
+ .gitignore            |    1 -
+ Makefile              |    4 +-
+ cgcc                  |    4 +-
+ compile-i386.c        | 2407 -------------------------------------------------
+ compile.c             |   84 --
+ compile.h             |   10 -
+ parse.c               |    2 -
+ validation/test-suite |    2 +-
+ 8 files changed, 4 insertions(+), 2510 deletions(-)
+ delete mode 100644 compile-i386.c
+ delete mode 100644 compile.c
+ delete mode 100644 compile.h
+
+-- 
+2.1.0
