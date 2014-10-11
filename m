@@ -1,85 +1,42 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: fec_main: context imbalance in 'fec_set_features'
-Date: Sat, 11 Oct 2014 10:07:13 +0800
-Message-ID: <CANeU7Qn2WX3CCN5YzFqcWngYu_Uy2wQ=mW1gBhGYMAaLhOkkZg@mail.gmail.com>
-References: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
+Subject: Re: Sparse context warning on 0.5.0
+Date: Sat, 11 Oct 2014 10:14:00 +0800
+Message-ID: <CANeU7Qn68zSjRJ9oVmYJm4cw9qyRqyXWUr4gp2sCdKsZ-XrYyw@mail.gmail.com>
+References: <4801d85f4f4c4f97ba83a075fc9a80b4@BY1PR0701MB1240.namprd07.prod.outlook.com>
+	<CANeU7Qk8E2pGANy1f8fXCeTwC1u0tE9HPT1FZqf_DGoASXF0rw@mail.gmail.com>
+	<4f5fd314ec274d16816d5cf17dd2cdfd@BY1PR0701MB1240.namprd07.prod.outlook.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f47.google.com ([209.85.192.47]:43425 "EHLO
-	mail-qg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750706AbaJKCHO (ORCPT
+Received: from mail-qc0-f170.google.com ([209.85.216.170]:36653 "EHLO
+	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750706AbaJKCOA (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 10 Oct 2014 22:07:14 -0400
-In-Reply-To: <CAOMZO5CJKp7+d8EPRZdr-3Bd9UxVU8fxLybFZ4uLn+cUQjPH8w@mail.gmail.com>
+	Fri, 10 Oct 2014 22:14:00 -0400
+Received: by mail-qc0-f170.google.com with SMTP id m20so2904688qcx.1
+        for <linux-sparse@vger.kernel.org>; Fri, 10 Oct 2014 19:14:00 -0700 (PDT)
+In-Reply-To: <4f5fd314ec274d16816d5cf17dd2cdfd@BY1PR0701MB1240.namprd07.prod.outlook.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Fabio Estevam <festevam@gmail.com>
-Cc: Frank Li <Frank.Li@freescale.com>, Duan Fugang-B38611 <B38611@freescale.com>, "David S. Miller" <davem@davemloft.net>, "netdev@vger.kernel.org" <netdev@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: "Franco, Scott" <Scott.Franco@caviumnetworks.com>
+Cc: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 
-On Thu, Oct 2, 2014 at 8:15 AM, Fabio Estevam <festevam@gmail.com> wrote:
-> Hi,
+On Sat, Oct 11, 2014 at 9:52 AM, Franco, Scott
+<Scott.Franco@caviumnetworks.com> wrote:
+> Chistopher,
 >
-> sparse complains the following:
+> Thanks for looking at my issue. I've been running it via the kernel make (make c=1),
+> So I'll figure out how to strip it out of the make and get back to you (I suspect the
+> Easiest way is to make --dry it and use the output).
 >
-> drivers/net/ethernet/freescale/fec_main.c:2835:12: warning: context
-> imbalance in 'fec_set_features' - different lock contexts for basic
-> block
 
-That is expected to receive warnings. Sparse can't really tell the lock
-and unlock are actually on the same condition and it never change.
+There should be a ".octeon_poll.o.cmd" inside the same directory where
+you generate
+the octeon_poll.o file. The first line of that file contain the build
+command of gcc.
 
->
-> The code looks like this:
->
-> static int fec_set_features(struct net_device *netdev,
->     netdev_features_t features)
-> {
->     struct fec_enet_private *fep = netdev_priv(netdev);
->     netdev_features_t changed = features ^ netdev->features;
->
->     /* Quiesce the device if necessary */
->     if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
-
-e.g. netdev is running here, you take the lock.
-
-
->         napi_disable(&fep->napi);
->         netif_tx_lock_bh(netdev);
->         fec_stop(netdev);
->     }
->
->     netdev->features = features;
->>
->     /* Resume the device after updates */
->     if (netif_running(netdev) && changed & FEATURES_NEED_QUIESCE) {
-
-Then there is race some one shutdown the netdev before the code hits
-here (is it possible? it is hard to tell from this source alone.)
-Then the unlock is skipped.
-
->         fec_restart(netdev);
->         netif_tx_wake_all_queues(netdev);
-
-Sparse is complaining, there exist a code path, from execution flow
-point of view, (without considering the data flow analyze), there exists a
-code path lock and unlock are not balanced.
-
-It is possible that warning code path is not actually executable
-due to data flow reason(e.g. "changed" never change during the same function).
-But sparse did not have data flow analyze to know that.
-
-If you move the code, e.g. the code inside the lock area into a function.
-You can write:
-
-if (need_lock) {
-       lock();
-       do_something_real();
-       unlock();
-} else {
-       do_something_real();
-}
-
-That way, sparse don't see such a code path can trigger lock unbalanced.
+You can copy that to a new shell script and edit it a little bit to
+invoke gcc -E with
+the same command line argument, without using the kbuild.
 
 Chris
