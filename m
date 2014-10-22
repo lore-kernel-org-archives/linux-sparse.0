@@ -1,85 +1,55 @@
-From: Mariusz Gorski <marius.gorski@gmail.com>
-Subject: Re: Sparse warning: "initializer entry defined twice" - sparse can't
- handle bool?
-Date: Mon, 20 Oct 2014 23:00:40 +0200
-Message-ID: <CABbAP1RzO-D+AC4qTY8RZmp4M0wBxupqmFj3Jz132=Lhw4kzoQ@mail.gmail.com>
-References: <CABbAP1QWTorBt+f-nCmw1Q_DPe1CLecXYGUJFAcQkuw0Rk6d2g@mail.gmail.com>
-	<5443F319.4000303@infradead.org>
-	<54442FE5.8080705@ramsay1.demon.co.uk>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 2/4] cgcc: avoid passing a sparse-only option to cc
+Date: Wed, 22 Oct 2014 08:23:39 +0800
+Message-ID: <CANeU7Qk_H8fV_soAbtGjHXwKBw3BWJgABhNM+KFLmM-rVY4N8w@mail.gmail.com>
+References: <54398BA5.6050005@ramsay1.demon.co.uk>
+	<CANeU7QnOJTKK___Vb3VpN=_x62wVpS=A57UkTQrSz0-GYBF5rQ@mail.gmail.com>
+	<543EAFFA.6070503@ramsay1.demon.co.uk>
+	<CANeU7Q=ruQhu19sY=mDyiBmyDCGRR+xmRE7SzN9BcGLRZWX8Bw@mail.gmail.com>
+	<5443C8F8.2000003@ramsay1.demon.co.uk>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ig0-f181.google.com ([209.85.213.181]:38491 "EHLO
-	mail-ig0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753018AbaJTVAl (ORCPT
+Received: from mail-qa0-f54.google.com ([209.85.216.54]:40578 "EHLO
+	mail-qa0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751023AbaJVAXl (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 20 Oct 2014 17:00:41 -0400
-In-Reply-To: <54442FE5.8080705@ramsay1.demon.co.uk>
+	Tue, 21 Oct 2014 20:23:41 -0400
+Received: by mail-qa0-f54.google.com with SMTP id i13so1673338qae.41
+        for <linux-sparse@vger.kernel.org>; Tue, 21 Oct 2014 17:23:40 -0700 (PDT)
+In-Reply-To: <5443C8F8.2000003@ramsay1.demon.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Ramsay Jones <ramsay@ramsay1.demon.co.uk>
-Cc: Randy Dunlap <rdunlap@infradead.org>, linux-kernel@vger.kernel.org, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Thomas Graf <tgraf@suug.ch>
 
-Yes, I've actually used outdated sparse in version 0.4.3. After
-updating to the latest one, built from master in git repo, the issue
-is gone. Thanks.
-
-On 19 October 2014 23:40, Ramsay Jones <ramsay@ramsay1.demon.co.uk> wrote:
-> On 19/10/14 18:21, Randy Dunlap wrote:
->> [adding linux-sparse mailing list]
+On Sun, Oct 19, 2014 at 10:21 PM, Ramsay Jones
+<ramsay@ramsay1.demon.co.uk> wrote:
+> Sorry for the late reply, it's been a busy few days. ;-)
+>
+> On 16/10/14 02:45, Christopher Li wrote:
+>> Hi,
 >>
->> On 10/19/14 02:46, Mariusz Gorski wrote:
->>> Sparse throws the following warning, which I can't really understand:
->>>
->>> $ make drivers/staging/vt6655/ C=2
->>> [...]
->>>   CHECK   drivers/staging/vt6655/datarate.c
->>> drivers/staging/vt6655/datarate.c:302:40: warning: Initializer entry
->>> defined twice
->>> drivers/staging/vt6655/datarate.c:302:46:   also defined here
->>>
->>> The code looks fine to me:
->>> bool bAutoRate[MAX_RATE]    = {true, true, true, true, false, false,
->>> true, true, true, true, true, true};
->>>
->>> I've googled it and found only this LKML discussion:
->>> https://lkml.org/lkml/2010/5/7/31
->>>
->>> I've tested the suggested code sample and here are the results:
->>> $ cat foo.c
->>> typedef _Bool bool;
->>> enum {
->>>      false = 0,
->>>      true = 1
->>> };
->>> static const bool foo[10] = {
->>>        true,
->>>        true,
->>>        false,
->>>        false,
->>> };
->>>
->>> $ sparse foo.c
->>> foo.c:7:8: warning: Initializer entry defined twice
->>> foo.c:8:8:   also defined here
->>>
->>> It this a sparse problem?
+>> I create a branch in the chrisl repo call "review-ramsay" for your new
+>> follow up patches.
+>> I plan to do incremental fix up if any on that branch. Then when we
+>> both happy about it,
+>> I will do rebase and smash the commit before push to master branch.
 >
-> Yes, I imagine you are using a sparse version of v0.5.0 or
-> earlier right?
+> Yes, I noticed the new branch - thanks!
 >
-> This was fixed by commit b3e9d87c6 ("sparse: make bits_to_bytes
-> round up instead of down", 16-07-2014), which describes to
-> v0.5.0-17-gb3e9d87, which has not been included in a released
-> version yet. (if you don't mind building from source, you could
-> build the master branch using a clone the git repository at
-> git://git.kernel.org/pub/scm/devel/sparse/sparse.git).
+> Did you have any thoughts regarding Josh Triplett's comments on the
+> "compile-i386.c: don't ignore return value of write(2)" patch?
+
+I am fine with either way. The current fix is fine. If you are up for
+a new xwrite function, that is of course fine as well. Using printf()
+is not much an improvement because printf() can still return
+bytes less than the amount you requested.
+
 >
-> I'm afraid that I don't know when the next release is due.
->
-> HTH
->
-> ATB,
-> Ramsay Jones
->
->
+> No, no, you don't want to do that even on Linux (let alone more
+> exotic platforms like Windows, MinGW and cygwin).
+
+In that case, I will leave the patch as it is. Thanks for the explain.
+
+Chris
