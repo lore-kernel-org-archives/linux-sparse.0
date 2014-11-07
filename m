@@ -1,40 +1,78 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Bogus 'Initializer entry defined twice' warnings
-Date: Wed, 5 Nov 2014 18:49:23 +0800
-Message-ID: <CANeU7QmfgPwOk0LMaUFxaH6UzA03NUizR6ybZ58NGkPEd3OkvQ@mail.gmail.com>
-References: <5400357A.5050705@xs4all.nl>
-	<5459D56E.3080704@xs4all.nl>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+From: Aaro Koskinen <aaro.koskinen@nsn.com>
+Subject: [PATCH RESEND] build: allow use of PKG_CONFIG to override pkg-config
+Date: Fri,  7 Nov 2014 14:44:47 +0200
+Message-ID: <1415364287-5427-1-git-send-email-aaro.koskinen@nsn.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f46.google.com ([74.125.82.46]:63286 "EHLO
-	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751477AbaKEKtZ (ORCPT
+Received: from demumfd002.nsn-inter.net ([93.183.12.31]:33654 "EHLO
+	demumfd002.nsn-inter.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751503AbaKGMrc (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 5 Nov 2014 05:49:25 -0500
-Received: by mail-wg0-f46.google.com with SMTP id x13so575634wgg.19
-        for <linux-sparse@vger.kernel.org>; Wed, 05 Nov 2014 02:49:23 -0800 (PST)
-In-Reply-To: <5459D56E.3080704@xs4all.nl>
+	Fri, 7 Nov 2014 07:47:32 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Hans Verkuil <hverkuil@xs4all.nl>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+Cc: Aaro Koskinen <aaro.koskinen@nsn.com>
 
-On Wed, Nov 5, 2014 at 3:44 PM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
-> Ping!
->
-> This is still failing (tested with the latest sparse v0.5.0-35-gc1c3f96
-> from git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git).
->
-> I'd really like to get rid of these spurious sparse warnings.
+Allow overriding pkg-config e.g. when cross-compiling.
 
-Sorry I did not know this warning still exist. There have been some
-fix for similar
-warnings. I just confirm that your example reproduce the warning in my sparse
-tree.
+Signed-off-by: Aaro Koskinen <aaro.koskinen@nsn.com>
+---
+ Makefile | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
 
-I will take a look.
+diff --git a/Makefile b/Makefile
+index 3f3c71a..c7031af 100644
+--- a/Makefile
++++ b/Makefile
+@@ -17,6 +17,7 @@ CFLAGS += -Wall -Wwrite-strings
+ LDFLAGS += -g
+ LD = gcc
+ AR = ar
++PKG_CONFIG = pkg-config
+ 
+ ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
+ #
+@@ -25,11 +26,11 @@ ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
+ #     CFLAGS += -O0 -DDEBUG -g3 -gdwarf-2
+ #
+ 
+-HAVE_LIBXML:=$(shell pkg-config --exists libxml-2.0 2>/dev/null && echo 'yes')
++HAVE_LIBXML:=$(shell $(PKG_CONFIG) --exists libxml-2.0 2>/dev/null && echo 'yes')
+ HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
+ 		$(CC) -c -Wp,-MD,.gcc-test.d .gcc-test.c 2>/dev/null && \
+ 		echo 'yes'; rm -f .gcc-test.d .gcc-test.o .gcc-test.c)
+-HAVE_GTK2:=$(shell pkg-config --exists gtk+-2.0 2>/dev/null && echo 'yes')
++HAVE_GTK2:=$(shell $(PKG_CONFIG) --exists gtk+-2.0 2>/dev/null && echo 'yes')
+ LLVM_CONFIG:=llvm-config
+ HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
+ 
+@@ -60,14 +61,14 @@ INST_MAN1=sparse.1 cgcc.1
+ ifeq ($(HAVE_LIBXML),yes)
+ PROGRAMS+=c2xml
+ INST_PROGRAMS+=c2xml
+-c2xml_EXTRA_OBJS = `pkg-config --libs libxml-2.0`
++c2xml_EXTRA_OBJS = `$(PKG_CONFIG) --libs libxml-2.0`
+ else
+ $(warning Your system does not have libxml, disabling c2xml)
+ endif
+ 
+ ifeq ($(HAVE_GTK2),yes)
+-GTK2_CFLAGS := $(shell pkg-config --cflags gtk+-2.0)
+-GTK2_LIBS := $(shell pkg-config --libs gtk+-2.0)
++GTK2_CFLAGS := $(shell $(PKG_CONFIG) --cflags gtk+-2.0)
++GTK2_LIBS := $(shell $(PKG_CONFIG) --libs gtk+-2.0)
+ PROGRAMS += test-inspect
+ INST_PROGRAMS += test-inspect
+ test-inspect_EXTRA_DEPS := ast-model.o ast-view.o ast-inspect.o
+@@ -187,7 +188,7 @@ DEP_FILES := $(wildcard .*.o.d)
+ $(if $(DEP_FILES),$(eval include $(DEP_FILES)))
+ 
+ c2xml.o: c2xml.c $(LIB_H)
+-	$(QUIET_CC)$(CC) `pkg-config --cflags libxml-2.0` -o $@ -c $(ALL_CFLAGS) $<
++	$(QUIET_CC)$(CC) `$(PKG_CONFIG) --cflags libxml-2.0` -o $@ -c $(ALL_CFLAGS) $<
+ 
+ compat-linux.o: compat/strtold.c compat/mmap-blob.c $(LIB_H)
+ compat-solaris.o: compat/mmap-blob.c $(LIB_H)
+-- 
+2.1.0
 
-Thanks
-
-Chris
