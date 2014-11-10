@@ -1,78 +1,31 @@
-From: Aaro Koskinen <aaro.koskinen@nsn.com>
-Subject: [PATCH RESEND] build: allow use of PKG_CONFIG to override pkg-config
-Date: Fri,  7 Nov 2014 14:44:47 +0200
-Message-ID: <1415364287-5427-1-git-send-email-aaro.koskinen@nsn.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH RESEND] build: allow use of PKG_CONFIG to override pkg-config
+Date: Mon, 10 Nov 2014 12:04:24 +0800
+Message-ID: <CANeU7QkFavtr+MeoyeyMB64g644GyYAOW64fVNqGvuBbf7_Rsw@mail.gmail.com>
+References: <1415364287-5427-1-git-send-email-aaro.koskinen@nsn.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from demumfd002.nsn-inter.net ([93.183.12.31]:33654 "EHLO
-	demumfd002.nsn-inter.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751503AbaKGMrc (ORCPT
+Received: from mail-wg0-f47.google.com ([74.125.82.47]:58531 "EHLO
+	mail-wg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752075AbaKJEEZ (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 7 Nov 2014 07:47:32 -0500
+	Sun, 9 Nov 2014 23:04:25 -0500
+Received: by mail-wg0-f47.google.com with SMTP id a1so7709683wgh.6
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Nov 2014 20:04:24 -0800 (PST)
+In-Reply-To: <1415364287-5427-1-git-send-email-aaro.koskinen@nsn.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
-Cc: Aaro Koskinen <aaro.koskinen@nsn.com>
+To: Aaro Koskinen <aaro.koskinen@nsn.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Allow overriding pkg-config e.g. when cross-compiling.
+On Fri, Nov 7, 2014 at 8:44 PM, Aaro Koskinen <aaro.koskinen@nsn.com> wrote:
+> Allow overriding pkg-config e.g. when cross-compiling.
+>
+> Signed-off-by: Aaro Koskinen <aaro.koskinen@nsn.com>
 
-Signed-off-by: Aaro Koskinen <aaro.koskinen@nsn.com>
----
- Makefile | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+Applied.
 
-diff --git a/Makefile b/Makefile
-index 3f3c71a..c7031af 100644
---- a/Makefile
-+++ b/Makefile
-@@ -17,6 +17,7 @@ CFLAGS += -Wall -Wwrite-strings
- LDFLAGS += -g
- LD = gcc
- AR = ar
-+PKG_CONFIG = pkg-config
- 
- ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
- #
-@@ -25,11 +26,11 @@ ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
- #     CFLAGS += -O0 -DDEBUG -g3 -gdwarf-2
- #
- 
--HAVE_LIBXML:=$(shell pkg-config --exists libxml-2.0 2>/dev/null && echo 'yes')
-+HAVE_LIBXML:=$(shell $(PKG_CONFIG) --exists libxml-2.0 2>/dev/null && echo 'yes')
- HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
- 		$(CC) -c -Wp,-MD,.gcc-test.d .gcc-test.c 2>/dev/null && \
- 		echo 'yes'; rm -f .gcc-test.d .gcc-test.o .gcc-test.c)
--HAVE_GTK2:=$(shell pkg-config --exists gtk+-2.0 2>/dev/null && echo 'yes')
-+HAVE_GTK2:=$(shell $(PKG_CONFIG) --exists gtk+-2.0 2>/dev/null && echo 'yes')
- LLVM_CONFIG:=llvm-config
- HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
- 
-@@ -60,14 +61,14 @@ INST_MAN1=sparse.1 cgcc.1
- ifeq ($(HAVE_LIBXML),yes)
- PROGRAMS+=c2xml
- INST_PROGRAMS+=c2xml
--c2xml_EXTRA_OBJS = `pkg-config --libs libxml-2.0`
-+c2xml_EXTRA_OBJS = `$(PKG_CONFIG) --libs libxml-2.0`
- else
- $(warning Your system does not have libxml, disabling c2xml)
- endif
- 
- ifeq ($(HAVE_GTK2),yes)
--GTK2_CFLAGS := $(shell pkg-config --cflags gtk+-2.0)
--GTK2_LIBS := $(shell pkg-config --libs gtk+-2.0)
-+GTK2_CFLAGS := $(shell $(PKG_CONFIG) --cflags gtk+-2.0)
-+GTK2_LIBS := $(shell $(PKG_CONFIG) --libs gtk+-2.0)
- PROGRAMS += test-inspect
- INST_PROGRAMS += test-inspect
- test-inspect_EXTRA_DEPS := ast-model.o ast-view.o ast-inspect.o
-@@ -187,7 +188,7 @@ DEP_FILES := $(wildcard .*.o.d)
- $(if $(DEP_FILES),$(eval include $(DEP_FILES)))
- 
- c2xml.o: c2xml.c $(LIB_H)
--	$(QUIET_CC)$(CC) `pkg-config --cflags libxml-2.0` -o $@ -c $(ALL_CFLAGS) $<
-+	$(QUIET_CC)$(CC) `$(PKG_CONFIG) --cflags libxml-2.0` -o $@ -c $(ALL_CFLAGS) $<
- 
- compat-linux.o: compat/strtold.c compat/mmap-blob.c $(LIB_H)
- compat-solaris.o: compat/mmap-blob.c $(LIB_H)
--- 
-2.1.0
+Thanks
 
+Chris
