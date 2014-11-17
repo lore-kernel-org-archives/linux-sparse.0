@@ -1,52 +1,45 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [efi:next 2/3] arch/x86/boot/compressed/eboot.c:26:16: sparse:
  incorrect type in return expression (different modifiers)
-Date: Mon, 17 Nov 2014 08:59:03 +0800
-Message-ID: <CANeU7Qnd=AoE1ty=4gTrQQh6nKYWdA2WNKwm8s+GNnU9E6XQRQ@mail.gmail.com>
+Date: Mon, 17 Nov 2014 23:35:46 +0800
+Message-ID: <CANeU7QkZKv+c1y-_9DsvV-EqKnmm+NjUEGxhZBqSF_5AJ+XT1g@mail.gmail.com>
 References: <201411120724.PdeIjimc%fengguang.wu@intel.com>
 	<CAKv+Gu8Jk4z6Q+8ZstNrA5e0ictYnzq9XOeq8zbr8ADo5DyWow@mail.gmail.com>
 	<1415799312.14686.332.camel@mfleming-mobl1.ger.corp.intel.com>
 	<CANeU7Qn8J2dn4V5Mx1WzUM9q+m=K66yUuEkN39bH_djRoBzqNA@mail.gmail.com>
 	<CAKv+Gu-L2EoqioZamh9arLSkXzQF4y=FDykk0YK1XvNkRGC-xg@mail.gmail.com>
 	<CANeU7Q=6mB2yoSy9PpnNjeYcvvzD8DEUyyeXQhW2YE2aSGq_gg@mail.gmail.com>
-	<20141116182205.GB5032@thin>
+	<CAKv+Gu8DB6tCrpTqiCSWDGU4cRO1u3hqO9-K-cON5ODDMgsx1Q@mail.gmail.com>
+	<CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wg0-f42.google.com ([74.125.82.42]:55905 "EHLO
-	mail-wg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751612AbaKQA7F (ORCPT
+Received: from mail-wi0-f171.google.com ([209.85.212.171]:62322 "EHLO
+	mail-wi0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750964AbaKQPfr (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 16 Nov 2014 19:59:05 -0500
-In-Reply-To: <20141116182205.GB5032@thin>
+	Mon, 17 Nov 2014 10:35:47 -0500
+In-Reply-To: <CANeU7Qmo4t42N6A7ktB9GL2Ho0K9RqkJq3g0jn7s-qb5V2Ly9Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Ard Biesheuvel <ard.biesheuvel@linaro.org>, Matt Fleming <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "fengguang.wu" <fengguang.wu@intel.com>
+To: Ard Biesheuvel <ard.biesheuvel@linaro.org>
+Cc: Matt Fleming <matt.fleming@intel.com>, "linux-efi@vger.kernel.org" <linux-efi@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, "fengguang.wu" <fengguang.wu@intel.com>
 
-On Mon, Nov 17, 2014 at 2:22 AM, Josh Triplett <josh@joshtriplett.org> wrote:
+On Mon, Nov 17, 2014 at 8:38 AM, Christopher Li <sparse@chrisli.org> wrote:
+> I see. Thanks for the review. So the above case should not raise
+> error. However, the following one should:
 >
-> Wait, is the above being parsed as applying the pure attribute to the
-> return value rather than to the function?  Or is that not the issue
-> here?
+> static __pure void *(*f3_err) = non_pure_func;
+>
+> I got it the other way around. I will add that to the test case
+> and send out the second round review.
 
-That seems to be the case here, e.g.  "__pure int pure1(long x);"
-Currently sparse parse it as:
-<node pure1>
-    <function>
-        <base type int>  [pure]
+I send push out the v2 version of the test case at
+https://git.kernel.org/cgit/devel/sparse/chrisl/sparse.git/log/?h=review-pure-attr2
 
-Ideally it should be:
-<node pure1>
-    <function> [pure]
-        <base type int>
+I haven't include the fix part yet. Do you see any thing wrong with the test
+case?
 
-There is reason sparse does that. Sparse parse "__pure int" as a base
-type to hold the __pure. The parse don't know if that is a function or
-a function
-pointer yet.
-
-I haven't look at move the [pure] to function node. That is likely
-a much bigger change.
+Thanks
 
 Chris
