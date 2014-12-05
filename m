@@ -1,67 +1,62 @@
-From: "Michael S. Tsirkin" <mst@redhat.com>
-Subject: sparse false positive in net/packet/af_packet.c
-Date: Wed, 26 Nov 2014 15:52:07 +0200
-Message-ID: <20141126135207.GA5480@redhat.com>
+From: Hans Verkuil <hverkuil@xs4all.nl>
+Subject: Re: Bogus 'Initializer entry defined twice' warnings
+Date: Fri, 05 Dec 2014 14:39:12 +0100
+Message-ID: <5481B580.3080100@xs4all.nl>
+References: <5400357A.5050705@xs4all.nl> <CANeU7Q=q7AL=nh2BGfHyAYqjHbMu9cu3NbR7Jkfw4wd+SPRWUA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42163 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1750967AbaKZNwL (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 26 Nov 2014 08:52:11 -0500
-Content-Disposition: inline
+Received: from lb3-smtp-cloud3.xs4all.net ([194.109.24.30]:50921 "EHLO
+	lb3-smtp-cloud3.xs4all.net" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1752038AbaLENjU (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 5 Dec 2014 08:39:20 -0500
+In-Reply-To: <CANeU7Q=q7AL=nh2BGfHyAYqjHbMu9cu3NbR7Jkfw4wd+SPRWUA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-sparse triggers warnings in net/packet/af_packet.c
-in upstream Linux.
-This is with sparse 0.5.0 in Fedora 20.
-See below for more info.
+Hi Chris,
 
-I worked around this in source, but I think it's
-a good idea to fix it in sparse as well, isn't it?
+On 11/12/2014 04:39 PM, Christopher Li wrote:
+> On Fri, Aug 29, 2014 at 4:10 PM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
+>> The following test source (based on drivers/media/pci/cx88/cx88-cards.c from
+>> the kernel) gives these sparse warnings:
+>>
+>> cards4.c:447:36: warning: Initializer entry defined twice
+>> cards4.c:449:19:   also defined here
+>>
+>> I am using the latest sparse code from
+>> git://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git.
+> 
+> Thanks for the bug report. It has been puzzling for me as well.
+> It seems there is some duplicate entry in the expression list
+> for the very long initializer. The duplicate entry first show up after
+> the expand_symbol phase. The bug will disappear if the list is
+> sorter.
+> 
+> I have narrow it down to the sort_list() function.
+> If we turn on " #define PARANOIA" in sort.c.
+> Sparse can trigger assert fail:
+> 
+> sparse: sort.c:89: verify_seq_sorted: Assertion `cmp (a, b) <= 0' failed.
+> Aborted (core dumped)
+> 
+> Still need more work to fix it.
 
------ Forwarded message from "Michael S. Tsirkin" <mst@redhat.com> -----
+Any updates on this?
 
-Date: Mon, 24 Nov 2014 13:32:16 +0200
-From: "Michael S. Tsirkin" <mst@redhat.com>
-To: linux-kernel@vger.kernel.org
-Cc: "David S. Miller" <davem@davemloft.net>, Daniel Borkmann <dborkman@redhat.com>, Eric Dumazet <edumazet@google.com>, Atzm Watanabe
-	<atzm@stratosphere.co.jp>, Hannes Frederic Sowa <hannes@stressinduktion.org>, Tom Herbert <therbert@google.com>, netdev@vger.kernel.org
-Subject: [PATCH] af_packet: fix sparse warning
-Message-ID: <1416828696-3989-1-git-send-email-mst@redhat.com>
+Thanks,
 
-af_packet produces lots of these:
-	net/packet/af_packet.c:384:39: warning: incorrect type in return expression (different modifiers)
-	net/packet/af_packet.c:384:39:    expected struct page [pure] *
-	net/packet/af_packet.c:384:39:    got struct page *
+	Hans
 
-this seems to be because sparse does not realize that _pure
-refers to function, not the returned pointer.
+> 
+> Chris
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Tweak code slightly to avoid the warning.
-
-Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
----
- net/packet/af_packet.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/net/packet/af_packet.c b/net/packet/af_packet.c
-index d4a877e..586229a 100644
---- a/net/packet/af_packet.c
-+++ b/net/packet/af_packet.c
-@@ -378,7 +378,7 @@ static void unregister_prot_hook(struct sock *sk, bool sync)
- 		__unregister_prot_hook(sk, sync);
- }
- 
--static inline __pure struct page *pgv_to_page(void *addr)
-+static inline struct page * __pure pgv_to_page(void *addr)
- {
- 	if (is_vmalloc_addr(addr))
- 		return vmalloc_to_page(addr);
--- 
-MST
-
------ End forwarded message -----
