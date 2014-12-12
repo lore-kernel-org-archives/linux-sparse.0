@@ -1,51 +1,53 @@
-From: Marcel Holtmann <marcel@holtmann.org>
-Subject: Re: default enable sparse __CHECK_ENDIAN__ (was: Re: [PATCH v7 2/3] net: Add Keystone NetCP ethernet driver)
-Date: Thu, 11 Dec 2014 12:18:44 +0100
-Message-ID: <479338B3-A0C0-4443-9C44-E03421F0679C@holtmann.org>
-References: <1417556503-22290-3-git-send-email-m-karicheri2@ti.com> <20141209.131053.2026868499542642866.davem@davemloft.net> <5488BB96.9070609@ti.com> <20141210.204110.618599360537141819.davem@davemloft.net> <1418267099.18092.28.camel@perches.com>
-Mime-Version: 1.0 (Mac OS X Mail 8.1 \(1993\))
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Bogus 'Initializer entry defined twice' warnings
+Date: Fri, 12 Dec 2014 12:32:47 +0800
+Message-ID: <CANeU7Qko4VY_hZbuuNVLbRjaiEeFAyb8VLDmew0zSz1SYrPA9w@mail.gmail.com>
+References: <5400357A.5050705@xs4all.nl>
+	<CANeU7Q=q7AL=nh2BGfHyAYqjHbMu9cu3NbR7Jkfw4wd+SPRWUA@mail.gmail.com>
+	<5481B580.3080100@xs4all.nl>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from senator.holtmann.net ([87.106.208.187]:46487 "EHLO
-	mail.holtmann.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932200AbaLKLSu convert rfc822-to-8bit (ORCPT
+Received: from mail-qc0-f172.google.com ([209.85.216.172]:50116 "EHLO
+	mail-qc0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965322AbaLLEcs (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 11 Dec 2014 06:18:50 -0500
-In-Reply-To: <1418267099.18092.28.camel@perches.com>
+	Thu, 11 Dec 2014 23:32:48 -0500
+Received: by mail-qc0-f172.google.com with SMTP id m20so5110400qcx.3
+        for <linux-sparse@vger.kernel.org>; Thu, 11 Dec 2014 20:32:47 -0800 (PST)
+In-Reply-To: <5481B580.3080100@xs4all.nl>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Joe Perches <joe@perches.com>
-Cc: "David S. Miller" <davem@davemloft.net>, Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Michal Marek <mmarek@suse.cz>, m-karicheri2@ti.com, Network Development <netdev@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, kernel list <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, Rob Herring <robh+dt@kernel.org>, grant.likely@linaro.org, linux-sparse@vger.kernel.org
+To: Hans Verkuil <hverkuil@xs4all.nl>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi Joe,
+On Fri, Dec 5, 2014 at 9:39 PM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
+>> Still need more work to fix it.
+>
+> Any updates on this?
+>
 
->>> Are you referring to the static code analyser sparse that is invoked
->>> through?
->> You have to explicitly enable endian checking, it's not on by
->> default.
-> 
-> There don't seem to be thousands of warnings anymore.
-> 
-> Maybe it's time to default enable it when using C=?
-> 
-> from: Documentation/sparse.txt:
-> 
-> The optional make variable CF can be used to pass arguments to sparse.  The
-> build system passes -Wbitwise to sparse automatically.  To perform endianness
-> checks, you may define __CHECK_ENDIAN__:
-> 
->        make C=2 CF="-D__CHECK_ENDIAN__"
-> 
-> These checks are disabled by default as they generate a host of warnings.
+The search is over.
 
-actually a few subsystems use this in their Makefile:
+    Ptr list sorting should use memmove instead of memcpy
 
-	subdir-ccflags-y += -D__CHECK_ENDIAN__
+    The target buffer is overlapped with source buffer.
+    This cause the duplicate entry warning reported by Hans.
 
-We could start with that to enable endian checks by default in various places.
+    Reported-by: Hans Verkuil <hverkuil@xs4all.nl>
+    Signed-off-by: Christopher Li <sparse@chrisli.org>
 
-Regards
+diff --git a/sort.c b/sort.c
+index afd7184..430ba44 100644
+--- a/sort.c
++++ b/sort.c
+@@ -99,7 +99,7 @@ static void verify_seq_sorted (struct ptr_list *l, int n,
+        assert (nbuf >= nr);                                    \
+        memcpy ((b)->list, buffer, nr * sizeof (void *));       \
+        nbuf -= nr;                                             \
+-       memcpy (buffer, buffer + nr, nbuf * sizeof (void *));   \
++       memmove (buffer, buffer + nr, nbuf * sizeof (void *));  \
+   } while (0)
 
-Marcel
 
+Chris
