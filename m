@@ -1,55 +1,44 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: Bogus 'Initializer entry defined twice' warnings
-Date: Fri, 12 Dec 2014 00:12:10 -0800
-Message-ID: <20141212081209.GA16645@thin>
-References: <5400357A.5050705@xs4all.nl>
- <CANeU7Q=q7AL=nh2BGfHyAYqjHbMu9cu3NbR7Jkfw4wd+SPRWUA@mail.gmail.com>
- <5481B580.3080100@xs4all.nl>
- <CANeU7Qko4VY_hZbuuNVLbRjaiEeFAyb8VLDmew0zSz1SYrPA9w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Rasmus Villemoes <rv@rasmusvillemoes.dk>
+Subject: [PATCH] sparse: Make struct token::special signed
+Date: Tue, 23 Dec 2014 14:16:46 +0100
+Message-ID: <1419340606-15606-1-git-send-email-rv@rasmusvillemoes.dk>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:41987 "EHLO
-	relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1758536AbaLLIMS (ORCPT
+Received: from mail-lb0-f175.google.com ([209.85.217.175]:56735 "EHLO
+	mail-lb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751186AbaLWNRd (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 12 Dec 2014 03:12:18 -0500
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qko4VY_hZbuuNVLbRjaiEeFAyb8VLDmew0zSz1SYrPA9w@mail.gmail.com>
+	Tue, 23 Dec 2014 08:17:33 -0500
+Received: by mail-lb0-f175.google.com with SMTP id u10so5433938lbd.34
+        for <linux-sparse@vger.kernel.org>; Tue, 23 Dec 2014 05:17:31 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Hans Verkuil <hverkuil@xs4all.nl>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+Cc: Rasmus Villemoes <rv@rasmusvillemoes.dk>
 
-On Fri, Dec 12, 2014 at 12:32:47PM +0800, Christopher Li wrote:
-> On Fri, Dec 5, 2014 at 9:39 PM, Hans Verkuil <hverkuil@xs4all.nl> wrote:
-> >> Still need more work to fix it.
-> >
-> > Any updates on this?
-> >
-> 
-> The search is over.
-> 
->     Ptr list sorting should use memmove instead of memcpy
-> 
->     The target buffer is overlapped with source buffer.
->     This cause the duplicate entry warning reported by Hans.
-> 
->     Reported-by: Hans Verkuil <hverkuil@xs4all.nl>
->     Signed-off-by: Christopher Li <sparse@chrisli.org>
-> 
-> diff --git a/sort.c b/sort.c
-> index afd7184..430ba44 100644
-> --- a/sort.c
-> +++ b/sort.c
-> @@ -99,7 +99,7 @@ static void verify_seq_sorted (struct ptr_list *l, int n,
->         assert (nbuf >= nr);                                    \
->         memcpy ((b)->list, buffer, nr * sizeof (void *));       \
->         nbuf -= nr;                                             \
-> -       memcpy (buffer, buffer + nr, nbuf * sizeof (void *));   \
-> +       memmove (buffer, buffer + nr, nbuf * sizeof (void *));  \
->    } while (0)
+There doesn't seem to be any reason for the special member of struct
+token to be unsigned; AFAICT it is only ever being directly compared
+to explicit characters and the SPECIAL_* enum constants using ==, !=
+and in a switch statement. Making it plain int avoids an annoying
+warning from match_op in token.h when compiling with -Wsign-compare.
 
-Great catch, Chris!
+Signed-off-by: Rasmus Villemoes <rv@rasmusvillemoes.dk>
+---
+ token.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-- Josh Triplett
+diff --git a/token.h b/token.h
+index 8dbd80f..69d95d7 100644
+--- a/token.h
++++ b/token.h
+@@ -187,7 +187,7 @@ struct token {
+ 	union {
+ 		const char *number;
+ 		struct ident *ident;
+-		unsigned int special;
++		int special;
+ 		struct string *string;
+ 		int argnum;
+ 		struct argcount count;
+-- 
+2.1.3
+
