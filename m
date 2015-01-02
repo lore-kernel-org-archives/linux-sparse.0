@@ -1,46 +1,53 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] sparse: Use memmove in sort.c
-Date: Fri, 26 Dec 2014 00:19:30 +0800
-Message-ID: <CANeU7QmRbDacRp00JHr8Eofs03snJtqye_qKwOCDTos-Zm=8XA@mail.gmail.com>
-References: <1419341933-17244-1-git-send-email-rv@rasmusvillemoes.dk>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: How to fix CHECK warning: testing a 'safe expression'
+Date: Fri, 2 Jan 2015 14:20:03 -0800
+Message-ID: <20150102222003.GB2645@thin>
+References: <54907884.2040502@ti.com>
+ <54A6B06D.50102@ti.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qc0-f170.google.com ([209.85.216.170]:64591 "EHLO
-	mail-qc0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752391AbaLYQTb (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 25 Dec 2014 11:19:31 -0500
-Received: by mail-qc0-f170.google.com with SMTP id x3so6835762qcv.29
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Dec 2014 08:19:30 -0800 (PST)
-In-Reply-To: <1419341933-17244-1-git-send-email-rv@rasmusvillemoes.dk>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <54A6B06D.50102@ti.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Murali Karicheri <m-karicheri2@ti.com>
+Cc: netdev@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Rasmus Villemoes <rv@rasmusvillemoes.dk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Dec 23, 2014 at 9:38 PM, Rasmus Villemoes <rv@rasmusvillemoes.dk> wrote:
-> Using valgrind on the example ctags program I get
->
-> ==16863== Source and destination overlap in memcpy(0x7ff000100, 0x7ff000108, 192)
-> ==16863==    at 0x4C2A690: memcpy (mc_replace_strmem.c:838)
-> ==16863==    by 0x412D86: merge_block_seqs (sort.c:207)
-> ==16863==    by 0x41303C: sort_list (sort.c:275)
-> ==16863==    by 0x401225: main (ctags.c:224)
->
-> Fix it by using memmove instead of memcpy.
++linux-sparse
 
-This bug has been fixed in the chrisl repository as commit:
-6c2d743d2f130a8bf9014410f928bae3647e3108
-
-The first memcpy is fine, one of the buffer is in the stack, the ptr
-pointer is allocated using mmap. So they will never overlap.
-
-The second memcpy is a real bug. It has been reported by Hans Verkuil.
-It took me a while to fix the real cause. Because the corrupted
-ptr list still contain valid ptr pointers. The symptoms has very odd
-duplicate entries. It took me a while to find out the real cause.
-
-If you send this patch earlier, it would have save me a lot of time.
-
-Chris
+On Fri, Jan 02, 2015 at 09:51:25AM -0500, Murali Karicheri wrote:
+> On 12/16/2014 01:23 PM, Murali Karicheri wrote:
+> >netdev maintainers,
+> >
+> >I got a comment to address CHECK warning and wondering how to address
+> >'warning: testing a 'safe expression' which appears when using
+> >IS_ERR_OR_NULL(foo)
+> >
+> >where foo is defined as
+> >
+> >struct foo_type *foo;
+> >
+> >The foo get assigned only NULL or ERR_PTR(error code). So I believe the
+> >usage is correct. But then how do I make the CHECK happy of its usage?
+> >
+> >I have tried doing a grep on the current usage of IS_ERR_OR_NULL() and
+> >found 276 of them causes this warning in the v3.18 version of the kernel
+> >that I am using
+> >
+> >$ grep -r "warning: testing a 'safe expression" * | wc -l
+> >276
+> >
+> >1) Can someone explain what this warning means?
+> >
+> >2) Is it acceptable to post patches to netdev list with this warning?
+> >
+> >3) if not, how this is expected to be fixed? Any example usage to fix
+> >this warning will be helpful.
+> >
+> >Thanks in advance for
+> 
+> 
+> -- 
+> Murali Karicheri
+> Linux Kernel, Texas Instruments
