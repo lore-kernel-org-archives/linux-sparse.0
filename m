@@ -1,32 +1,58 @@
-From: Tony Camuso <tcamuso@redhat.com>
-Subject: Re: sparse error: got __int128
-Date: Sun, 18 Jan 2015 07:29:59 -0500
-Message-ID: <54BBA747.1040204@redhat.com>
-References: <54BBA6E4.7020506@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Christian Borntraeger <borntraeger@de.ibm.com>
+Subject: [PATCH] s390x: add the proper defines for data types
+Date: Thu, 22 Jan 2015 10:51:50 +0100
+Message-ID: <1421920310-1499-1-git-send-email-borntraeger@de.ibm.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:48870 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751707AbbARMaA (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 18 Jan 2015 07:30:00 -0500
-Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
-	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t0ICTxCm013671
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Sun, 18 Jan 2015 07:29:59 -0500
-Received: from [10.10.52.144] (vpn-52-144.rdu2.redhat.com [10.10.52.144])
-	by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t0ICTxHZ021674
-	for <linux-sparse@vger.kernel.org>; Sun, 18 Jan 2015 07:29:59 -0500
-In-Reply-To: <54BBA6E4.7020506@redhat.com>
+Received: from e06smtp16.uk.ibm.com ([195.75.94.112]:60994 "EHLO
+	e06smtp16.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751582AbbAVJv6 (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 22 Jan 2015 04:51:58 -0500
+Received: from /spool/local
+	by e06smtp16.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <borntraeger@de.ibm.com>;
+	Thu, 22 Jan 2015 09:51:56 -0000
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: linux-s390@vger.kernel.org, Christian Borntraeger <borntraeger@de.ibm.com>
 
-On 01/18/2015 07:28 AM, Tony Camuso wrote:
->
-> Of course, disabling 64-bit kernel in .config removes the problem, but this is
->     an unacceptable solution.
-  ^^^
-  NOT
+This patch fixes several issues when compiling code under s390x
+(64bit) with cgcc, e.g.
+/usr/include/gnu/stubs.h:8:12: error: unable to open 'gnu/stubs-32.h'
+by providing the proper defines.
+
+Signed-off-by: Christian Borntraeger <borntraeger@de.ibm.com>
+---
+ cgcc |    8 ++++++++
+ 1 files changed, 8 insertions(+), 0 deletions(-)
+
+diff --git a/cgcc b/cgcc
+index 8e38174..d7b1c99 100755
+--- a/cgcc
++++ b/cgcc
+@@ -279,6 +279,12 @@ sub add_specs {
+ 		&float_types (1, 1, 21, [24,8], [53,11], [113,15]) .
+ 		&define_size_t ($m64 ? "long unsigned int" : "unsigned int") .
+ 		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
++    } elsif ($spec eq 's390x') {
++	return (' -D__s390x__ -D__s390__ -D_BIG_ENDIAN' .
++		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
++		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
++		&define_size_t ("long unsigned int") .
++		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
+     } elsif ($spec eq 'host_os_specs') {
+ 	my $os = `uname -s`;
+ 	chomp $os;
+@@ -294,6 +300,8 @@ sub add_specs {
+ 	    return &add_specs ('x86_64');
+ 	} elsif ($arch =~ /^(ppc)$/i) {
+ 	    return &add_specs ('ppc');
++	} elsif ($arch =~ /^(s390x)$/i) {
++	    return &add_specs ('s390x');
+ 	} elsif ($arch =~ /^(sparc64)$/i) {
+ 	    return &add_specs ('sparc64');
+ 	}
+-- 
+1.7.1
 
