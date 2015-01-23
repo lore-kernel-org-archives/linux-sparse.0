@@ -1,64 +1,92 @@
 From: Sam Ravnborg <sam@ravnborg.org>
-Subject: Re: [PATCH] Teach sparse about the __COUNTER__ predefined macro
-Date: Fri, 23 Jan 2015 23:28:16 +0100
-Message-ID: <20150123222816.GB691@ravnborg.org>
-References: <54C15E0E.4000008@de.ibm.com>
- <CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com>
- <20150123222332.GB42179@macpro.local>
+Subject: [PATCH] Support __COUNTER__ macro
+Date: Fri, 23 Jan 2015 23:26:44 +0100
+Message-ID: <20150123222644.GA691@ravnborg.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from asavdk3.altibox.net ([109.247.116.14]:40415 "EHLO
-	asavdk3.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752404AbbAWWdY (ORCPT
+Received: from asavdk4.altibox.net ([109.247.116.15]:43431 "EHLO
+	asavdk4.altibox.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752980AbbAWWed (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 23 Jan 2015 17:33:24 -0500
+	Fri, 23 Jan 2015 17:34:33 -0500
 Content-Disposition: inline
-In-Reply-To: <20150123222332.GB42179@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Christopher Li <sparse@chrisli.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Linus Torvalds <torvalds@linux-foundation.org>, "Jason J. Herne" <jjherne@linux.vnet.ibm.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christian Borntraeger <borntraeger@de.ibm.com>, Christopher Li <sparse@chrisli.org>
 
-On Fri, Jan 23, 2015 at 11:23:32PM +0100, Luc Van Oostenryck wrote:
-> On Fri, Jan 23, 2015 at 08:40:17AM -0800, Christopher Li wrote:
-> > On Thu, Jan 22, 2015 at 12:31 PM, Christian Borntraeger
-> > <borntraeger@de.ibm.com> wrote:
-> > > Linus, Christopher,
-> > >
-> > > Commit  0f25c6a78e08fdc15af5e599d836fa24349c042f ("Add warning about duplicate initializers") has a false positive on arch/s390/kvm/kvm-s390.c
-> > >
-> > >   CHECK   arch/s390/kvm/kvm-s390.c
-> > > arch/s390/kvm/kvm-s390.c:1823:1: error: symbol '__UNIQUE_ID_alias__COUNTER__' has multiple initializers (originally initialized at arch/s390/kvm/kvm-s390.c:1822)
-> > 
-> > Search the "__COUNTER__" macro shows that:
-> > https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
-> > 
-> > __COUNTER__This macro expands to sequential integral values starting
-> > from 0. In conjunction with the ## operator, this provides a
-> > convenient means to generate unique identifiers. Care must be taken to
-> > ensure that __COUNTER__ is not expanded prior to inclusion of
-> > precompiled headers which use it. Otherwise, the precompiled headers
-> > will not be used.
-> > 
-> > I think sparse haven't implement the __COUNTER__ macro. That is why it emit the
-> > error on duplicate entry.
-> > 
-> > Chris
-> > --
-> 
-> 
-> The following patch should fix that.
+OUNTER__ macro is expanded to a sequential number starting from 0.
+This is sometimes used to declare unique variable names.
 
-Seems we were working on this in parallel :-)
-> 
-> 
-> Luc
-> 
-> 
-> Subject: [PATCH] Teach sparse about the __COUNTER__ predefined macro.
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Acked-by: Sam Ravnborg <sam@ravnborg.org>
+Implement support for __COUNTER__ in sparse including a
+small test program for the test suite.
 
-	Sam
+Signed-off-by: Sam Ravnborg <sam@ravnborg.org>
+---
+
+I had hit this before - and then I saw a mil about it today.
+So took a quick look at it.
+It seems to work as expected.
+
+ ident-list.h                             |  1 +
+ pre-process.c                            |  3 +++
+ validation/preprocessor/preprocessor24.c | 20 ++++++++++++++++++++
+ 3 files changed, 24 insertions(+)
+ create mode 100644 validation/preprocessor/preprocessor24.c
+
+diff --git a/ident-list.h b/ident-list.h
+index d5a145f..98e1764 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -108,6 +108,7 @@ __IDENT(__TIME___ident, "__TIME__", 0);
+ __IDENT(__func___ident, "__func__", 0);
+ __IDENT(__FUNCTION___ident, "__FUNCTION__", 0);
+ __IDENT(__PRETTY_FUNCTION___ident, "__PRETTY_FUNCTION__", 0);
++__IDENT(__COUNTER__ident, "__COUNTER__", 0);
+ 
+ /* Sparse commands */
+ IDENT_RESERVED(__context__);
+diff --git a/pre-process.c b/pre-process.c
+index 1aa3d2c..67cc81f 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -181,6 +181,9 @@ static int expand_one_symbol(struct token **list)
+ 			time(&t);
+ 		strftime(buffer, 9, "%T", localtime(&t));
+ 		replace_with_string(token, buffer);
++	} else if (token->ident == &__COUNTER__ident) {
++		static int counter = 0;
++		replace_with_integer(token, counter++);
+ 	}
+ 	return 1;
+ }
+diff --git a/validation/preprocessor/preprocessor24.c b/validation/preprocessor/preprocessor24.c
+new file mode 100644
+index 0000000..381b823
+--- /dev/null
++++ b/validation/preprocessor/preprocessor24.c
+@@ -0,0 +1,20 @@
++#define DO_CONCAT(a, b) a##b
++#define CONCAT(a, b) DO_CONCAT(a, b)
++#define VARNAME(name) CONCAT(name, __COUNTER__)
++
++int VARNAME(x);
++int VARNAME(x);
++
++/*
++ * check-name: Preprocessor #24 __COUNTER__
++ * check-command: sparse -E $file
++ *
++ * check-output-start
++
++int x0;
++int x1;
++* check-output-end
++ *
++ * check-error-start
++ * check-error-end
++ */
+-- 
+1.9.3
+
