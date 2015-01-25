@@ -1,68 +1,173 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Christian Borntraeger <borntraeger@de.ibm.com>
 Subject: Re: [PATCH] Teach sparse about the __COUNTER__ predefined macro
-Date: Sat, 24 Jan 2015 21:39:23 +0100
-Message-ID: <20150124203922.GA52862@macpro.local>
-References: <54C15E0E.4000008@de.ibm.com>
- <CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com>
- <20150123222332.GB42179@macpro.local>
- <20150123223856.GB1489@cloud>
- <20150123235934.GA42931@macpro.local>
- <20150124012958.GB28468@thin>
- <20150124112705.GA47109@macpro.local>
- <20150124201949.GA1642@thin>
+Date: Sun, 25 Jan 2015 21:12:47 +0100
+Message-ID: <54C54E3F.4000108@de.ibm.com>
+References: <54C15E0E.4000008@de.ibm.com> <CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com> <20150123222332.GB42179@macpro.local> <20150123223856.GB1489@cloud> <20150123235934.GA42931@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f173.google.com ([209.85.212.173]:60796 "EHLO
-	mail-wi0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750898AbbAXUj2 (ORCPT
+Received: from e06smtp17.uk.ibm.com ([195.75.94.113]:57541 "EHLO
+	e06smtp17.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932135AbbAYUMy (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 24 Jan 2015 15:39:28 -0500
-Received: by mail-wi0-f173.google.com with SMTP id r20so3310006wiv.0
-        for <linux-sparse@vger.kernel.org>; Sat, 24 Jan 2015 12:39:27 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20150124201949.GA1642@thin>
+	Sun, 25 Jan 2015 15:12:54 -0500
+Received: from /spool/local
+	by e06smtp17.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <borntraeger@de.ibm.com>;
+	Sun, 25 Jan 2015 20:12:53 -0000
+Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
+	by d06dlp01.portsmouth.uk.ibm.com (Postfix) with ESMTP id C126917D8059
+	for <linux-sparse@vger.kernel.org>; Sun, 25 Jan 2015 20:12:53 +0000 (GMT)
+Received: from d06av07.portsmouth.uk.ibm.com (d06av07.portsmouth.uk.ibm.com [9.149.37.248])
+	by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id t0PKCmPc12124544
+	for <linux-sparse@vger.kernel.org>; Sun, 25 Jan 2015 20:12:49 GMT
+Received: from d06av07.portsmouth.uk.ibm.com (localhost [127.0.0.1])
+	by d06av07.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id t0PKClwM014783
+	for <linux-sparse@vger.kernel.org>; Sun, 25 Jan 2015 15:12:48 -0500
+In-Reply-To: <20150123235934.GA42931@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Christopher Li <sparse@chrisli.org>, Sam Ravnborg <sam@ravnborg.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, josh@joshtriplett.org
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, "Jason J. Herne" <jjherne@linux.vnet.ibm.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Jan 24, 2015 at 12:19:50PM -0800, Josh Triplett wrote:
-> On Sat, Jan 24, 2015 at 12:27:06PM +0100, Luc Van Oostenryck wrote:
-> > On Fri, Jan 23, 2015 at 05:29:58PM -0800, Josh Triplett wrote:
-> > > On Sat, Jan 24, 2015 at 12:59:35AM +0100, Luc Van Oostenryck wrote:
-> > > > Subject: [PATCH] Teach sparse about the __COUNTER__ predefined macro.
-> > > > 
-> > > > This macro expands to sequential integral values starting from 0,
-> > > > and this for each top-level source file.
-> > > > 
-> > > > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> > > 
-> > > counter3.c seems like a bit of an abuse of the test suite framework, but
-> > > I don't have a better suggestion.
-> > > 
-> > > Reviewed-by: Josh Triplett <josh@joshtriplett.org>
-> > 
-> > Yes, I know ...
-> > 
-> > Would the following change to the test-suite (introducing tags to separate input sections)
-> > and the corresponding test be more OK ?
+Am 24.01.2015 um 00:59 schrieb Luc Van Oostenryck:
+[...] 
+> Yes, indeed.
+> Thanks for bringing to my attention.
 > 
-> Interesting idea!  That would also allow consolidating tests that
-> require include files into a single test file, if it's possible to
-> #include "$file1"; for instance, pragma-once.c could avoid recursing if
-> the test fails.
+> Here is a new version of the patch taking care of that.
 > 
-> I'll leave it to others to decide if this seems like a direction the
-> test suite should expand to cover, or if for this single case counter3.c
-> should just include other tests as your previous patch did.
 > 
-> - Josh Triplett
-> --
+> Luc
+> 
+> ---
+> Subject: [PATCH] Teach sparse about the __COUNTER__ predefined macro.
+> 
+> This macro expands to sequential integral values starting from 0,
+> and this for each top-level source file.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Yes, it's fairly easy to add. In fact ... yesterday I had a version that
-did that but I removed it because I found it a bit hackish and it was
-not needed.
+Tested-by: Christian Borntraeger <borntraeger@de.ibm.com>
 
+> ---
+>  ident-list.h                       |  1 +
+>  pre-process.c                      |  4 ++++
+>  validation/preprocessor/counter1.c | 12 ++++++++++++
+>  validation/preprocessor/counter2.c | 14 ++++++++++++++
+>  validation/preprocessor/counter2.h |  1 +
+>  validation/preprocessor/counter3.c | 13 +++++++++++++
+>  6 files changed, 45 insertions(+)
+>  create mode 100644 validation/preprocessor/counter1.c
+>  create mode 100644 validation/preprocessor/counter2.c
+>  create mode 100644 validation/preprocessor/counter2.h
+>  create mode 100644 validation/preprocessor/counter3.c
+> 
+> diff --git a/ident-list.h b/ident-list.h
+> index d5a145f8..b65b667d 100644
+> --- a/ident-list.h
+> +++ b/ident-list.h
+> @@ -108,6 +108,7 @@ __IDENT(__TIME___ident, "__TIME__", 0);
+>  __IDENT(__func___ident, "__func__", 0);
+>  __IDENT(__FUNCTION___ident, "__FUNCTION__", 0);
+>  __IDENT(__PRETTY_FUNCTION___ident, "__PRETTY_FUNCTION__", 0);
+> +__IDENT(__COUNTER___ident, "__COUNTER__", 0);
+> 
+>  /* Sparse commands */
+>  IDENT_RESERVED(__context__);
+> diff --git a/pre-process.c b/pre-process.c
+> index 1aa3d2c4..601e0f26 100644
+> --- a/pre-process.c
+> +++ b/pre-process.c
+> @@ -45,6 +45,7 @@
+>  #include "scope.h"
+> 
+>  static int false_nesting = 0;
+> +static int counter_macro;		// __COUNTER__ expansion
+> 
+>  #define INCLUDEPATHS 300
+>  const char *includepath[INCLUDEPATHS+1] = {
+> @@ -181,6 +182,8 @@ static int expand_one_symbol(struct token **list)
+>  			time(&t);
+>  		strftime(buffer, 9, "%T", localtime(&t));
+>  		replace_with_string(token, buffer);
+> +	} else if (token->ident == &__COUNTER___ident) {
+> +		replace_with_integer(token, counter_macro++);
+>  	}
+>  	return 1;
+>  }
+> @@ -1882,6 +1885,7 @@ static void init_preprocessor(void)
+>  		sym->normal = 0;
+>  	}
+> 
+> +	counter_macro = 0;
+>  }
+> 
+>  static void handle_preprocessor_line(struct stream *stream, struct token **line, struct token *start)
+> diff --git a/validation/preprocessor/counter1.c b/validation/preprocessor/counter1.c
+> new file mode 100644
+> index 00000000..98187ee6
+> --- /dev/null
+> +++ b/validation/preprocessor/counter1.c
+> @@ -0,0 +1,12 @@
+> +__COUNTER__
+> +__COUNTER__
+> +/*
+> + * check-name: __COUNTER__ #1
+> + * check-command: sparse -E $file
+> + *
+> + * check-output-start
+> +
+> +0
+> +1
+> + * check-output-end
+> + */
+> diff --git a/validation/preprocessor/counter2.c b/validation/preprocessor/counter2.c
+> new file mode 100644
+> index 00000000..9883b682
+> --- /dev/null
+> +++ b/validation/preprocessor/counter2.c
+> @@ -0,0 +1,14 @@
+> +__FILE__ __COUNTER__
+> +#include <counter2.h>
+> +__FILE__ __COUNTER__
+> +/*
+> + * check-name: __COUNTER__ #2
+> + * check-command: sparse -Ipreprocessor -E $file
+> + *
+> + * check-output-start
+> +
+> +"preprocessor/counter2.c" 0
+> +"preprocessor/counter2.h" 1
+> +"preprocessor/counter2.c" 2
+> + * check-output-end
+> + */
+> diff --git a/validation/preprocessor/counter2.h b/validation/preprocessor/counter2.h
+> new file mode 100644
+> index 00000000..447b70ab
+> --- /dev/null
+> +++ b/validation/preprocessor/counter2.h
+> @@ -0,0 +1 @@
+> +__FILE__ __COUNTER__
+> diff --git a/validation/preprocessor/counter3.c b/validation/preprocessor/counter3.c
+> new file mode 100644
+> index 00000000..1449b2d1
+> --- /dev/null
+> +++ b/validation/preprocessor/counter3.c
+> @@ -0,0 +1,13 @@
+> +/*
+> + * check-name: __COUNTER__ #3
+> + * check-command: sparse -Ipreprocessor -E preprocessor/counter1.c preprocessor/counter2.c
+> + *
+> + * check-output-start
+> +
+> +0
+> +1
+> +"preprocessor/counter2.c" 0
+> +"preprocessor/counter2.h" 1
+> +"preprocessor/counter2.c" 2
+> + * check-output-end
+> + */
+> 
 
-Luc
