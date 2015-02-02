@@ -1,41 +1,44 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Teach sparse about the __COUNTER__ predefined macro
-Date: Sun, 1 Feb 2015 21:17:38 -0800
-Message-ID: <CANeU7Qn9ORJ=uH6szkW2FpTT8hFhdNETjxndBYa8347Z1iON0Q@mail.gmail.com>
-References: <54C15E0E.4000008@de.ibm.com>
-	<CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com>
-	<20150123222332.GB42179@macpro.local>
-	<20150123223856.GB1489@cloud>
-	<20150123235934.GA42931@macpro.local>
+Subject: Re: [PATCH 2/4] Add support for show_data()
+Date: Sun, 1 Feb 2015 21:30:44 -0800
+Message-ID: <CANeU7Qkp-6KbTFgxe1Rvrpud66dB+J+-2XpjVDCwqkNDg4H37Q@mail.gmail.com>
+References: <CANeU7QnQWRRB1kmt7KOjuJ4PFasefaX91yPZ-DEYxE2qUzxX3A@mail.gmail.com>
+	<1422757186-8007-1-git-send-email-luc.vanoostenryck@gmail.com>
+	<1422757186-8007-3-git-send-email-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=ISO-8859-1
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qa0-f45.google.com ([209.85.216.45]:38786 "EHLO
-	mail-qa0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752074AbbBBFRj (ORCPT
+Received: from mail-qg0-f54.google.com ([209.85.192.54]:44379 "EHLO
+	mail-qg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932512AbbBBFao (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 2 Feb 2015 00:17:39 -0500
-Received: by mail-qa0-f45.google.com with SMTP id n8so27689791qaq.4
-        for <linux-sparse@vger.kernel.org>; Sun, 01 Feb 2015 21:17:38 -0800 (PST)
-In-Reply-To: <20150123235934.GA42931@macpro.local>
+	Mon, 2 Feb 2015 00:30:44 -0500
+Received: by mail-qg0-f54.google.com with SMTP id q108so46097004qgd.13
+        for <linux-sparse@vger.kernel.org>; Sun, 01 Feb 2015 21:30:44 -0800 (PST)
+In-Reply-To: <1422757186-8007-3-git-send-email-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Christian Borntraeger <borntraeger@de.ibm.com>, Linus Torvalds <torvalds@linux-foundation.org>, "Jason J. Herne" <jjherne@linux.vnet.ibm.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Sam Ravnborg <sam@ravnborg.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>
 
-On Fri, Jan 23, 2015 at 3:59 PM, Luc Van Oostenryck
+On Sat, Jan 31, 2015 at 6:19 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> Thanks for bringing to my attention.
->
-> Here is a new version of the patch taking care of that.
->
+> The purpose of show_data() is to visualize data, more or less
 
-I like Sam's commit message better. So I merge a version using his
-commit message.
+I think show_data() is a bad name. Data is very generic term,
+it has not specific meaning what exactly is that data.
 
-The branch for review is here:
-https://git.kernel.org/cgit/devel/sparse/chrisl/sparse.git/log/?h=review-counter
+What you really want to show is the initializer expression.
+Make the function name reflect that.
 
-If there is no objects, I will merge it to master.
+> diff --git a/linearize.c b/linearize.c
+
+Why is this function belongs to linearize.c?
+It has nothing to do with linearization instruction. It has
+every thing to do with the AST structure.
+
+I suggest that move this code to show-parse.c.
+There are many functions showing internal of the AST
+there.
 
 Chris
