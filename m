@@ -1,76 +1,67 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2] Avoid reusing string buffer when doing string expansion
-Date: Wed, 4 Feb 2015 03:01:30 +0100
-Message-ID: <20150204020059.GA7069@macpro.local>
-References: <87y4ojhq2f.fsf@rasmusvillemoes.dk>
- <20150131012339.GA3460@macpro.local>
- <87386mvcxh.fsf@rasmusvillemoes.dk>
+Subject: Re: [PATCH] Teach sparse about the __COUNTER__ predefined macro
+Date: Wed, 4 Feb 2015 03:38:18 +0100
+Message-ID: <20150204023816.GA7731@macpro.local>
+References: <54C15E0E.4000008@de.ibm.com>
+ <CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com>
+ <20150123222332.GB42179@macpro.local>
+ <20150123223856.GB1489@cloud>
+ <20150123235934.GA42931@macpro.local>
+ <CANeU7Qn9ORJ=uH6szkW2FpTT8hFhdNETjxndBYa8347Z1iON0Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-we0-f169.google.com ([74.125.82.169]:45301 "EHLO
-	mail-we0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751288AbbBDCBf (ORCPT
+Received: from mail-wg0-f46.google.com ([74.125.82.46]:35071 "EHLO
+	mail-wg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753723AbbBDCiW (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 3 Feb 2015 21:01:35 -0500
-Received: by mail-we0-f169.google.com with SMTP id u56so48284122wes.0
-        for <linux-sparse@vger.kernel.org>; Tue, 03 Feb 2015 18:01:34 -0800 (PST)
+	Tue, 3 Feb 2015 21:38:22 -0500
+Received: by mail-wg0-f46.google.com with SMTP id l2so47935046wgh.5
+        for <linux-sparse@vger.kernel.org>; Tue, 03 Feb 2015 18:38:21 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <87386mvcxh.fsf@rasmusvillemoes.dk>
+In-Reply-To: <CANeU7Qn9ORJ=uH6szkW2FpTT8hFhdNETjxndBYa8347Z1iON0Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Christian Borntraeger <borntraeger@de.ibm.com>, "Jason J. Herne" <jjherne@linux.vnet.ibm.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Sam Ravnborg <sam@ravnborg.org>
+
+On Sun, Feb 01, 2015 at 09:17:38PM -0800, Christopher Li wrote:
+> On Fri, Jan 23, 2015 at 3:59 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > Thanks for bringing to my attention.
+> >
+> > Here is a new version of the patch taking care of that.
+> >
+> 
+> I like Sam's commit message better. So I merge a version using his
+> commit message.
+> 
+> The branch for review is here:
+> https://git.kernel.org/cgit/devel/sparse/chrisl/sparse.git/log/?h=review-counter
+> 
+> If there is no objects, I will merge it to master.
+> 
+> Chris
+> --
+
+Fine for me but Josh had a remark about the third test file (validation/preprocessor/counter3.c)
+abusing a bit the test framework and I shared his feeling.
+
+Here is a patch serie fixing this abuse by extending the test framework.
 
 
-In get_string_constant(), the code tried to reuse the storage for the string
-but only if the expansion of the string was not bigger than its unexpanded form.
-But this string can be shared with other expressions and reusing the buffer will
-result in later corruption
+1/3) test-suite: add support for tests case involving several input files
+2/3) test-suite: allow filename expansion of the input sections
+3/3) test-suite: consolidate tests that require include files into single test files
 
-A minimal exemple would be something like:
-const char a[] = BACKSLASH;
-const char b[] = BACKSLASH;
-
-The expansion for 'a' will correctly produce the two-char string consisting
-of a backslash char followed by a null char.
-But then the expansion of 'b' will expand this once more,
-producing the expansion of "\0": the two-char string: { '\0', '\0' }.
-
-The fix is to not reuse the storage for the string if any king of expansion
-have been done.
-
-Reported-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- char.c | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
-
-diff --git a/char.c b/char.c
-index 08ca2230..2e21bb77 100644
---- a/char.c
-+++ b/char.c
-@@ -123,11 +123,15 @@ struct token *get_string_constant(struct token *token, struct expression *expr)
- 		len = MAX_STRING;
- 	}
- 
--	if (len >= string->length)	/* can't cannibalize */
-+	/* The input string can be shared with other expression and so
-+	 * its storage can't be reused if any kind of expansion have been done on it.
-+	 */
-+	if ((len != string->length) || memcmp(buffer, string->data, len)) {
- 		string = __alloc_string(len+1);
--	string->length = len+1;
--	memcpy(string->data, buffer, len);
--	string->data[len] = '\0';
-+		string->length = len+1;
-+		memcpy(string->data, buffer, len);
-+		string->data[len] = '\0';
-+	}
- 	expr->string = string;
- 	expr->wide = is_wide;
- 	return token;
--- 
-2.2.0
-
-
+ Documentation/test-suite                 | 11 +++++++++++
+ validation/.gitignore                    |  1 +
+ validation/pragma-once.c                 | 13 ++++++++++++-
+ validation/preprocessor/counter2.c       | 16 +++++++++++-----
+ validation/preprocessor/counter2.h       |  1 -
+ validation/preprocessor/counter3.c       | 15 +++++++++++----
+ validation/preprocessor/preprocessor20.c | 18 +++++++++++++++---
+ validation/preprocessor/preprocessor20.h |  6 ------
+ validation/test-suite                    | 11 +++++++++++
+ validation/test-suite-file-expansion.c   | 22 ++++++++++++++++++++++
+ 10 files changed, 94 insertions(+), 20 deletions(-)
