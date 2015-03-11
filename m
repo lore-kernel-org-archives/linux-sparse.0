@@ -1,48 +1,55 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Teach sparse about the __COUNTER__ predefined macro
-Date: Thu, 12 Feb 2015 12:16:55 -0800
-Message-ID: <CANeU7Q=DevAJH5UAXGi+jzMbdn2M6XFqCioTRxYjqZyGXAtDhA@mail.gmail.com>
-References: <54C15E0E.4000008@de.ibm.com>
-	<CANeU7QmVQyRFHJ+YSDPkfDfXsNSLL4rJ-jA4v3UQH0tNqjEPOw@mail.gmail.com>
-	<20150123222332.GB42179@macpro.local>
-	<20150123223856.GB1489@cloud>
-	<20150123235934.GA42931@macpro.local>
-	<CANeU7Qn9ORJ=uH6szkW2FpTT8hFhdNETjxndBYa8347Z1iON0Q@mail.gmail.com>
-	<20150204023816.GA7731@macpro.local>
+From: Michael Stefaniuc <mstefani@redhat.com>
+Subject: [PATCH] Add the __builtin functions needed for INFINITY and nan().
+Date: Thu, 12 Mar 2015 00:19:19 +0100
+Message-ID: <20150311231919.GA14617@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=ISO-8859-1
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f43.google.com ([209.85.192.43]:48609 "EHLO
-	mail-qg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751099AbbBLUQ4 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 12 Feb 2015 15:16:56 -0500
-Received: by mail-qg0-f43.google.com with SMTP id i50so9985369qgf.2
-        for <linux-sparse@vger.kernel.org>; Thu, 12 Feb 2015 12:16:56 -0800 (PST)
-In-Reply-To: <20150204023816.GA7731@macpro.local>
+Received: from mx1.redhat.com ([209.132.183.28]:40925 "EHLO mx1.redhat.com"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752099AbbCKXTV (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 11 Mar 2015 19:19:21 -0400
+Received: from int-mx09.intmail.prod.int.phx2.redhat.com (int-mx09.intmail.prod.int.phx2.redhat.com [10.5.11.22])
+	by mx1.redhat.com (8.14.4/8.14.4) with ESMTP id t2BNJKSX021139
+	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL)
+	for <linux-sparse@vger.kernel.org>; Wed, 11 Mar 2015 19:19:20 -0400
+Received: from brasov.str.redhat.com (brasov.str.redhat.com [10.33.193.1])
+	by int-mx09.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t2BNJKIk029872
+	for <linux-sparse@vger.kernel.org>; Wed, 11 Mar 2015 19:19:20 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Christian Borntraeger <borntraeger@de.ibm.com>, "Jason J. Herne" <jjherne@linux.vnet.ibm.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Sam Ravnborg <sam@ravnborg.org>
+To: linux-sparse@vger.kernel.org
 
-On Tue, Feb 3, 2015 at 6:38 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> Fine for me but Josh had a remark about the third test file (validation/preprocessor/counter3.c)
-> abusing a bit the test framework and I shared his feeling.
->
-> Here is a patch serie fixing this abuse by extending the test framework.
->
+Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
+---
+Needed for Wine. Not all of those but have added them for completeness.
 
-I check in a version with very minor fix for the counter3.c hack.
-Counter3.c does a few things unclean, top of which is, it does not invoke
-counter3.c at all. It is invoking counter1.c and counter2.c.
 
-I modify coutner3.c to include the couter2.c, that will solve the problem that
-counter3.c not using its own source code.
+ lib.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-Any way, the change is pushed.
-
-Thanks
-
-Chris
+diff --git a/lib.c b/lib.c
+index 8dc5bcf..58a7f2e 100644
+--- a/lib.c
++++ b/lib.c
+@@ -876,6 +876,17 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern int __builtin_islessgreater(float, float);\n");
+ 	add_pre_buffer("extern int __builtin_isunordered(float, float);\n");
+ 
++	/* And some INFINITY / NAN stuff.. */
++	add_pre_buffer("extern double __builtin_huge_val(void);\n");
++	add_pre_buffer("extern float __builtin_huge_valf(void);\n");
++	add_pre_buffer("extern long double __builtin_huge_vall(void);\n");
++	add_pre_buffer("extern double __builtin_inf(void);\n");
++	add_pre_buffer("extern float __builtin_inff(void);\n");
++	add_pre_buffer("extern long double __builtin_infl(void);\n");
++	add_pre_buffer("extern double __builtin_nan(const char *);\n");
++	add_pre_buffer("extern float __builtin_nanf(const char *);\n");
++	add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
++
+ 	/* And some __FORTIFY_SOURCE ones.. */
+ 	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(void *, int);\n");
+ 	add_pre_buffer ("extern void * __builtin___memcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+-- 
+2.1.0
