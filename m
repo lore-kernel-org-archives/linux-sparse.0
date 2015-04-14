@@ -1,55 +1,73 @@
-From: Michael Stefaniuc <mstefani@redhat.com>
-Subject: [PATCH] Add tests for the builtin INF and nan() functions.
-Date: Wed, 8 Apr 2015 23:48:39 +0200
-Message-ID: <20150408214839.GA24502@redhat.com>
+From: =?windows-1252?Q?Martin_Li=9Aka?= <mliska@suse.cz>
+Subject: [PATCH 1/2] compiler/gcc5: Remove quirk for asm_volatile_goto()
+Date: Tue, 14 Apr 2015 11:25:04 +0200
+Message-ID: <552CDCF0.3050401@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=windows-1252; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41850 "EHLO mx1.redhat.com"
+Received: from cantor2.suse.de ([195.135.220.15]:40324 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753363AbbDHVsl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 8 Apr 2015 17:48:41 -0400
-Received: from int-mx14.intmail.prod.int.phx2.redhat.com (int-mx14.intmail.prod.int.phx2.redhat.com [10.5.11.27])
-	by mx1.redhat.com (Postfix) with ESMTPS id EEDCD8E686
-	for <linux-sparse@vger.kernel.org>; Wed,  8 Apr 2015 21:48:40 +0000 (UTC)
-Received: from brasov.str.redhat.com (brasov.str.redhat.com [10.33.193.1])
-	by int-mx14.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id t38Lmeds014245
-	for <linux-sparse@vger.kernel.org>; Wed, 8 Apr 2015 17:48:40 -0400
-Content-Disposition: inline
+	id S1752081AbbDNJZG (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 14 Apr 2015 05:25:06 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: sparse@chrisli.org
 
-Test file cross checked with
-gcc -c -Wall -Werror -Wno-unused-variable validation/builtin_inf.c
+Remove comments related to GCC 4.x branch and workaround for
+asm_volatile_goto which is fixed in GCC 5 release.
 
-Signed-off-by: Michael Stefaniuc <mstefani@redhat.com>
+Signed-off-by: Martin Liska  <mliska@suse.cz>
 ---
-Sorry for the delay.
+  include/linux/compiler-gcc5.h | 16 ++--------------
+  1 file changed, 2 insertions(+), 14 deletions(-)
 
-
- validation/builtin_inf.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
- create mode 100644 validation/builtin_inf.c
-
-diff --git a/validation/builtin_inf.c b/validation/builtin_inf.c
-new file mode 100644
-index 0000000..48546e4
---- /dev/null
-+++ b/validation/builtin_inf.c
-@@ -0,0 +1,13 @@
-+static double d = __builtin_huge_val();
-+static float f = __builtin_huge_valf();
-+static long double l = __builtin_huge_vall();
-+static double di = __builtin_inf();
-+static float fi = __builtin_inff();
-+static long double li = __builtin_infl();
-+static double dn = __builtin_nan("");
-+static float fn = __builtin_nanf("");
-+static long double ln = __builtin_nanl("");
-+
-+/*
-+ * check-name: __builtin INFINITY / nan()
-+ */
+diff --git a/include/linux/compiler-gcc5.h b/include/linux/compiler-gcc5.h
+index efee493..1ded0a0 100644
+--- a/include/linux/compiler-gcc5.h
++++ b/include/linux/compiler-gcc5.h
+@@ -12,10 +12,6 @@
+     like BUG(), printk(), panic() etc. [but let's keep them for now for
+     older compilers]
+  
+-   Early snapshots of gcc 4.3 don't support this and we can't detect this
+-   in the preprocessor, but we can live with this because they're unreleased.
+-   Maketime probing would be overkill here.
+-
+     gcc also has a __attribute__((__hot__)) to move hot functions into
+     a special section, but I don't see any sense in this right now in
+     the kernel context */
+@@ -32,10 +28,6 @@
+   * Mark a position in code as unreachable.  This can be used to
+   * suppress control flow warnings after asm blocks that transfer
+   * control elsewhere.
+- *
+- * Early snapshots of gcc 4.5 don't support this and we can't detect
+- * this in the preprocessor, but we can live with this because they're
+- * unreleased.  Really, we need to have autoconf for the kernel.
+   */
+  #define unreachable() __builtin_unreachable()
+  
+@@ -48,15 +40,11 @@
+  #define __visible __attribute__((externally_visible))
+  
+  /*
+- * GCC 'asm goto' miscompiles certain code sequences:
++ * 'asm goto' miscompilation is fixed in GCC 5.x version:
+   *
+   *   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58670
+- *
+- * Work it around via a compiler barrier quirk suggested by Jakub Jelinek.
+- *
+- * (asm goto is automatically volatile - the naming reflects this.)
+   */
+-#define asm_volatile_goto(x...)	do { asm goto(x); asm (""); } while (0)
++#define asm_volatile_goto(x...)	do { asm goto(x); } while (0)
+  
+  #ifdef CONFIG_ARCH_USE_BUILTIN_BSWAP
+  #define __HAVE_BUILTIN_BSWAP32__
 -- 
-2.1.0
+2.1.4
+
+
