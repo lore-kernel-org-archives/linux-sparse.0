@@ -1,92 +1,51 @@
-From: =?windows-1252?Q?Martin_Li=9Aka?= <mliska@suse.cz>
-Subject: [PATCH 2/2] compiler/gcc6: add support for GCC 6
-Date: Tue, 14 Apr 2015 11:25:09 +0200
-Message-ID: <552CDCF5.9000206@suse.cz>
-References: <18dfac4fefaed0816f50af5a410fad2d27ca9639.1429003432.git.mliska@suse.cz>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH 1/2] compiler/gcc5: Remove quirk for asm_volatile_goto()
+Date: Tue, 14 Apr 2015 10:58:52 -0700
+Message-ID: <CA+55aFzcyHJfP95EDZxOL7iCXg3HL42XqnMFoHFOSMhyGaKtMg@mail.gmail.com>
+References: <552CDCF0.3050401@suse.cz>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from cantor2.suse.de ([195.135.220.15]:40337 "EHLO mx2.suse.de"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753341AbbDNJZL (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 14 Apr 2015 05:25:11 -0400
-In-Reply-To: <18dfac4fefaed0816f50af5a410fad2d27ca9639.1429003432.git.mliska@suse.cz>
+Received: from mail-ig0-f178.google.com ([209.85.213.178]:34151 "EHLO
+	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751082AbbDNR6w convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 14 Apr 2015 13:58:52 -0400
+Received: by iget9 with SMTP id t9so80413545ige.1
+        for <linux-sparse@vger.kernel.org>; Tue, 14 Apr 2015 10:58:52 -0700 (PDT)
+In-Reply-To: <552CDCF0.3050401@suse.cz>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: sparse@chrisli.org
+To: =?UTF-8?Q?Martin_Li=C5=A1ka?= <mliska@suse.cz>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Chris Li <sparse@chrisli.org>
 
-Because GCC trunk version has switched to GCC 6.x, new header file
-is needed.
+On Tue, Apr 14, 2015 at 2:25 AM, Martin Li=C5=A1ka <mliska@suse.cz> wro=
+te:
+> Remove comments related to GCC 4.x branch and workaround for
+> asm_volatile_goto which is fixed in GCC 5 release.
 
-Signed-off-by: Martin Liska  <mliska@suse.cz>
----
-  include/linux/compiler-gcc6.h | 55 +++++++++++++++++++++++++++++++++++++++++++
-  1 file changed, 55 insertions(+)
-  create mode 100644 include/linux/compiler-gcc6.h
+How sure are you that it is *really* fixed? Because it wasn't, last we =
+saw.
 
-diff --git a/include/linux/compiler-gcc6.h b/include/linux/compiler-gcc6.h
-new file mode 100644
-index 0000000..208767a
---- /dev/null
-+++ b/include/linux/compiler-gcc6.h
-@@ -0,0 +1,55 @@
-+#ifndef __LINUX_COMPILER_H
-+#error "Please don't include <linux/compiler-gcc6.h> directly, include <linux/compiler.h> instead."
-+#endif
-+
-+#define __used				__attribute__((__used__))
-+#define __must_check			__attribute__((warn_unused_result))
-+#define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
-+
-+/* Mark functions as cold. gcc will assume any path leading to a call
-+   to them will be unlikely.  This means a lot of manual unlikely()s
-+   are unnecessary now for any paths leading to the usual suspects
-+   like BUG(), printk(), panic() etc. [but let's keep them for now for
-+   older compilers]
-+
-+   gcc also has a __attribute__((__hot__)) to move hot functions into
-+   a special section, but I don't see any sense in this right now in
-+   the kernel context */
-+#define __cold			__attribute__((__cold__))
-+
-+#define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
-+
-+#ifndef __CHECKER__
-+# define __compiletime_warning(message) __attribute__((warning(message)))
-+# define __compiletime_error(message) __attribute__((error(message)))
-+#endif /* __CHECKER__ */
-+
-+/*
-+ * Mark a position in code as unreachable.  This can be used to
-+ * suppress control flow warnings after asm blocks that transfer
-+ * control elsewhere.
-+ */
-+#define unreachable() __builtin_unreachable()
-+
-+/* Mark a function definition as prohibited from being cloned. */
-+#define __noclone	__attribute__((__noclone__))
-+
-+/*
-+ * Tell the optimizer that something else uses this function or variable.
-+ */
-+#define __visible __attribute__((externally_visible))
-+
-+/*
-+ * 'asm goto' miscompilation is fixed in GCC 5.x version:
-+ *
-+ *   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=58670
-+ */
-+#define asm_volatile_goto(x...)	do { asm goto(x); } while (0)
-+
-+#ifdef CONFIG_ARCH_USE_BUILTIN_BSWAP
-+#define __HAVE_BUILTIN_BSWAP32__
-+#define __HAVE_BUILTIN_BSWAP64__
-+#define __HAVE_BUILTIN_BSWAP16__
-+#endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP */
-+
-+#define KASAN_ABI_VERSION 4
--- 
-2.1.4
+It was originally claimed to be fixed in 4.8.2, but that turned out to
+be wrong. See commit 5631b8fba640 ("compiler/gcc4+: Remove inaccurate
+comment about 'asm goto' miscompiles"), and
 
+    https://lkml.org/lkml/2014/2/12/817
+
+which shows that the bugzilla you reference is at the very least
+unreliable. Apparently the gcc test-case didn't catch all the
+problems.
+
+IOW, just leave the workaround. It has no actual cost, and the gcc bug
+wasn't obviously fully fixed. There are apparently very few users of
+"asm goto" (probably partly because of the limitations of it,
+particularly the "no outputs").
+
+                           Linus
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
