@@ -1,51 +1,91 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: =?UTF-8?B?TWFydGluIExpxaFrYQ==?= <mliska@suse.cz>
 Subject: Re: [PATCH 1/2] compiler/gcc5: Remove quirk for asm_volatile_goto()
-Date: Tue, 14 Apr 2015 10:58:52 -0700
-Message-ID: <CA+55aFzcyHJfP95EDZxOL7iCXg3HL42XqnMFoHFOSMhyGaKtMg@mail.gmail.com>
-References: <552CDCF0.3050401@suse.cz>
+Date: Wed, 15 Apr 2015 11:08:43 +0200
+Message-ID: <552E2A9B.7030605@suse.cz>
+References: <552CDCF0.3050401@suse.cz> <CA+55aFzcyHJfP95EDZxOL7iCXg3HL42XqnMFoHFOSMhyGaKtMg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: multipart/mixed;
+ boundary="------------000902010403090201080709"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ig0-f178.google.com ([209.85.213.178]:34151 "EHLO
-	mail-ig0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751082AbbDNR6w convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 14 Apr 2015 13:58:52 -0400
-Received: by iget9 with SMTP id t9so80413545ige.1
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Apr 2015 10:58:52 -0700 (PDT)
-In-Reply-To: <552CDCF0.3050401@suse.cz>
+Received: from cantor2.suse.de ([195.135.220.15]:57649 "EHLO mx2.suse.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1751506AbbDOJIq (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 15 Apr 2015 05:08:46 -0400
+In-Reply-To: <CA+55aFzcyHJfP95EDZxOL7iCXg3HL42XqnMFoHFOSMhyGaKtMg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?UTF-8?Q?Martin_Li=C5=A1ka?= <mliska@suse.cz>
+To: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Chris Li <sparse@chrisli.org>
 
-On Tue, Apr 14, 2015 at 2:25 AM, Martin Li=C5=A1ka <mliska@suse.cz> wro=
-te:
-> Remove comments related to GCC 4.x branch and workaround for
-> asm_volatile_goto which is fixed in GCC 5 release.
+This is a multi-part message in MIME format.
+--------------000902010403090201080709
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 
-How sure are you that it is *really* fixed? Because it wasn't, last we =
-saw.
+On 04/14/2015 07:58 PM, Linus Torvalds wrote:
+> On Tue, Apr 14, 2015 at 2:25 AM, Martin Liška <mliska@suse.cz> wrote:
+>> Remove comments related to GCC 4.x branch and workaround for
+>> asm_volatile_goto which is fixed in GCC 5 release.
+>
+> How sure are you that it is *really* fixed? Because it wasn't, last we saw.
+>
+> It was originally claimed to be fixed in 4.8.2, but that turned out to
+> be wrong. See commit 5631b8fba640 ("compiler/gcc4+: Remove inaccurate
+> comment about 'asm goto' miscompiles"), and
+>
+>      https://lkml.org/lkml/2014/2/12/817
+>
+> which shows that the bugzilla you reference is at the very least
+> unreliable. Apparently the gcc test-case didn't catch all the
+> problems.
+>
+> IOW, just leave the workaround. It has no actual cost, and the gcc bug
+> wasn't obviously fully fixed. There are apparently very few users of
+> "asm goto" (probably partly because of the limitations of it,
+> particularly the "no outputs").
+>
+>                             Linus
+>
 
-It was originally claimed to be fixed in 4.8.2, but that turned out to
-be wrong. See commit 5631b8fba640 ("compiler/gcc4+: Remove inaccurate
-comment about 'asm goto' miscompiles"), and
+Hello Linus.
 
-    https://lkml.org/lkml/2014/2/12/817
+Agree with you that a bit more defensive approach is reasonable, mainly because
+of the actual cost.
 
-which shows that the bugzilla you reference is at the very least
-unreliable. Apparently the gcc test-case didn't catch all the
-problems.
+Thus, I send updated version of the patch which just removes unrelated GCC 4.x branch
+comments.
 
-IOW, just leave the workaround. It has no actual cost, and the gcc bug
-wasn't obviously fully fixed. There are apparently very few users of
-"asm goto" (probably partly because of the limitations of it,
-particularly the "no outputs").
+Thanks,
+Martin
 
-                           Linus
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+--------------000902010403090201080709
+Content-Type: text/x-patch;
+ name="0001-compiler-gcc5-Remove-comments-related-to-GCC-4.x-bra.patch"
+Content-Transfer-Encoding: 7bit
+Content-Disposition: attachment;
+ filename*0="0001-compiler-gcc5-Remove-comments-related-to-GCC-4.x-bra.pa";
+ filename*1="tch"
+
+From 9db00c78af98a26685d3e0034d26962167441070 Mon Sep 17 00:00:00 2001
+From: mliska <mliska@suse.cz>
+Date: Wed, 15 Apr 2015 10:55:14 +0200
+Subject: [PATCH 1/2] compiler/gcc5: Remove comments related to GCC 4.x branch.
+
+Signed-off-by: Martin Liska  <mliska@suse.cz>
+---
+ include/linux/compiler-gcc5.h | 8 --------
+ 1 file changed, 8 deletions(-)
+
+diff --git a/include/linux/compiler-gcc5.h b/include/linux/compiler-gcc5.h
+index efee493..abb03b8 100644
+--- a/include/linux/compiler-gcc5.h
++++ b/include/linux/compiler-gcc5.h
+@@ -12,10 +12,6 @@
+    like BUG(), printk(), panic() etc. [but let's keep them for now for
+    older compilers]
+ 
+-   Early snapshots of gcc 4.3 don't support this and we can't detect this
+-   in the preprocessor, but we can live with this because they're unreleased.
+-   Maketime probing would be overkill here.
+--------------000902010403090201080709--
