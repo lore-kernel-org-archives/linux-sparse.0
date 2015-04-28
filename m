@@ -1,47 +1,62 @@
-From: Fengguang Wu <fengguang.wu@intel.com>
-Subject: Re: [PATCH v3] dmaengine: xgene-dma: Fix sparse wannings and
- coccinelle warnings
-Date: Mon, 27 Apr 2015 13:20:45 +0800
-Message-ID: <20150427052045.GA5199@wfg-t540p.sh.intel.com>
-References: <1429212673-22254-1-git-send-email-rsahu@apm.com>
- <20150417182937.GN30624@intel.com>
- <CAFd313y-HfW_us0FVQFEkGAzf-ZCKpRtF6eYweaK0V94MBg4iQ@mail.gmail.com>
- <20150427031315.GG2738@intel.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Heiko Carstens <heiko.carstens@de.ibm.com>
+Subject: [PATCH] sparse/parse.c: ignore hotpatch attribute
+Date: Tue, 28 Apr 2015 12:48:39 +0200
+Message-ID: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga01.intel.com ([192.55.52.88]:38834 "EHLO mga01.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751258AbbD0FUu (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 27 Apr 2015 01:20:50 -0400
-Content-Disposition: inline
-In-Reply-To: <20150427031315.GG2738@intel.com>
+Received: from e06smtp11.uk.ibm.com ([195.75.94.107]:48186 "EHLO
+	e06smtp11.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933028AbbD1Ksq (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 28 Apr 2015 06:48:46 -0400
+Received: from /spool/local
+	by e06smtp11.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <heiko.carstens@de.ibm.com>;
+	Tue, 28 Apr 2015 11:48:44 +0100
+Received: from b06cxnps4075.portsmouth.uk.ibm.com (d06relay12.portsmouth.uk.ibm.com [9.149.109.197])
+	by d06dlp03.portsmouth.uk.ibm.com (Postfix) with ESMTP id D6F521B08067
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Apr 2015 11:49:21 +0100 (BST)
+Received: from d06av03.portsmouth.uk.ibm.com (d06av03.portsmouth.uk.ibm.com [9.149.37.213])
+	by b06cxnps4075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id t3SAmgOD7995736
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Apr 2015 10:48:42 GMT
+Received: from d06av03.portsmouth.uk.ibm.com (localhost [127.0.0.1])
+	by d06av03.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id t3SAmfAQ022382
+	for <linux-sparse@vger.kernel.org>; Tue, 28 Apr 2015 04:48:42 -0600
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Vinod Koul <vinod.koul@intel.com>
-Cc: Rameshwar Sahu <rsahu@apm.com>, dan.j.williams@intel.com, dmaengine@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jcm@redhat.com, patches@apm.com, Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Heiko Carstens <heiko.carstens@de.ibm.com>
 
-On Mon, Apr 27, 2015 at 08:43:15AM +0530, Vinod Koul wrote:
-> On Mon, Apr 20, 2015 at 08:38:18AM +0530, Rameshwar Sahu wrote:
-> > Hi Vinod,
-> >> >> @@ -2085,6 +2043,5 @@ module_platform_driver(xgene_dma_driver);
-> > >>
-> > >>  MODULE_DESCRIPTION("APM X-Gene SoC DMA driver");
-> > >>  MODULE_AUTHOR("Rameshwar Prasad Sahu <rsahu@apm.com>");
-> > >> -MODULE_AUTHOR("Loc Ho <lho@apm.com>");
-> > > And why this?
-> > 
-> > I saw below warning reported by the kbuild robot test
-> > 
-> > drivers/dma/xgene-dma.c:2088:1: sparse: symbol
-> > '__UNIQUE_ID_author__COUNTER__' has multiple initializers (originally
-> > initialized at drivers/dma/xgene-dma.c:2087)
-> > So, I kept only one author here.
-> No that is not right, sparse shouldn't have cribbed here.
-> 
-> Fengguang can we get the bot to ignore this please
+gcc knows about a new "hotpatch" attribute which sparse can safely ignore,
+since it modifies only which code will be generated just like the
+"no_instrument_function" attribute.
 
-OK, sorry for the noises! CC sparse maintainer btw.
+The gcc hotpatch feature patch:
+https://gcc.gnu.org/git/?p=gcc.git;a=commit;h=11762b8363737591bfb9c66093bc2edf289b917f
 
-Thanks,
-Fengguang
+Currently the Linux kernel makes use of this attribute:
+https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=61f552141c9c0e88b3fdc7046265781ffd8fa68a
+
+Without this patch sparse will emit warnings like
+"error: attribute 'hotpatch': unknown attribute"
+
+Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
+---
+ parse.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/parse.c b/parse.c
+index b43d6835528b..8afae73d5325 100644
+--- a/parse.c
++++ b/parse.c
+@@ -540,6 +540,8 @@ const char *ignored_attributes[] = {
+ 	"__gnu_inline__",
+ 	"hot",
+ 	"__hot__",
++	"hotpatch",
++	"__hotpatch__",
+         "leaf",
+         "__leaf__",
+ 	"l1_text",
+-- 
+2.1.4
+
