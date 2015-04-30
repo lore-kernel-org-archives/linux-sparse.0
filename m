@@ -1,116 +1,98 @@
-From: Heiko Carstens <heiko.carstens@de.ibm.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH] sparse/parse.c: ignore hotpatch attribute
-Date: Thu, 30 Apr 2015 13:47:45 +0200
-Message-ID: <20150430114745.GB4199@osiris>
+Date: Thu, 30 Apr 2015 08:45:33 -0700
+Message-ID: <CA+55aFzZtGyz3CLF5Hjyjr0GVkx3SYui8yE9JjO5tzzHZzk78g@mail.gmail.com>
 References: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
- <CANeU7QkyX+cPEpBm_rW1JUX64NAZ6YM0KR17r1rfPeDpYC1uGA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/mixed; boundary=001a11c1e532d2402f0514f2fc08
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e06smtp13.uk.ibm.com ([195.75.94.109]:37903 "EHLO
-	e06smtp13.uk.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750876AbbD3Lrx (ORCPT
+Received: from mail-ie0-f172.google.com ([209.85.223.172]:34194 "EHLO
+	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750809AbbD3Ppk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 30 Apr 2015 07:47:53 -0400
-Received: from /spool/local
-	by e06smtp13.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <linux-sparse@vger.kernel.org> from <heiko.carstens@de.ibm.com>;
-	Thu, 30 Apr 2015 12:47:51 +0100
-Received: from b06cxnps3075.portsmouth.uk.ibm.com (d06relay10.portsmouth.uk.ibm.com [9.149.109.195])
-	by d06dlp01.portsmouth.uk.ibm.com (Postfix) with ESMTP id B19A217D8063
-	for <linux-sparse@vger.kernel.org>; Thu, 30 Apr 2015 12:48:30 +0100 (BST)
-Received: from d06av03.portsmouth.uk.ibm.com (d06av03.portsmouth.uk.ibm.com [9.149.37.213])
-	by b06cxnps3075.portsmouth.uk.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id t3UBlk8e62455912
-	for <linux-sparse@vger.kernel.org>; Thu, 30 Apr 2015 11:47:48 GMT
-Received: from d06av03.portsmouth.uk.ibm.com (localhost [127.0.0.1])
-	by d06av03.portsmouth.uk.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id t3UBlkRE014300
-	for <linux-sparse@vger.kernel.org>; Thu, 30 Apr 2015 05:47:46 -0600
-Content-Disposition: inline
-In-Reply-To: <CANeU7QkyX+cPEpBm_rW1JUX64NAZ6YM0KR17r1rfPeDpYC1uGA@mail.gmail.com>
+	Thu, 30 Apr 2015 11:45:40 -0400
+Received: by iedfl3 with SMTP id fl3so79094391ied.1
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Apr 2015 08:45:39 -0700 (PDT)
+In-Reply-To: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Heiko Carstens <heiko.carstens@de.ibm.com>
+Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Wed, Apr 29, 2015 at 04:22:13PM -0700, Christopher Li wrote:
-> That patch looks fine.
-> 
-> Can you add some test case for the hot patch as well?
-> It need to cover the case you run into.
-> 
-> Preferably cover each of the variation of hot patch.
-> 
-> It will be useful when we parse these attributes properly.
-> 
-> Chris
+--001a11c1e532d2402f0514f2fc08
+Content-Type: text/plain; charset=UTF-8
 
-Something like below? I have to admit that I have not much of a clue
-of what I'm doing ;)
+On Tue, Apr 28, 2015 at 3:48 AM, Heiko Carstens
+<heiko.carstens@de.ibm.com> wrote:
+> gcc knows about a new "hotpatch" attribute which sparse can safely ignore,
+> since it modifies only which code will be generated just like the
+> "no_instrument_function" attribute.
 
-From 03da0b28318100cc9a1389c81920654b29405d73 Mon Sep 17 00:00:00 2001
-From: Heiko Carstens <heiko.carstens@de.ibm.com>
-Date: Thu, 30 Apr 2015 12:53:28 +0200
-Subject: [PATCH] sparse/parse.c: ignore hotpatch attribute
+I'm wondering if sparse should just ignore all attributes it doesn't
+recognize, so that we could just remove this ever-expanding list of
+things that don't actually matter for sparse..
 
-gcc knows about a new "hotpatch" attribute which sparse can safely ignore,
-since it modifies only which code will be generated just like the
-"no_instrument_function" attribute.
+The "unrecognized attribute" thing made more sense way back when -
+when I wanted to get he basic attributes handled. Now it's just
+noise...
 
-The gcc hotpatch feature patch:
-https://gcc.gnu.org/git/?p=gcc.git;a=commit;h=11762b8363737591bfb9c66093bc2edf289b917f
+Something like the attached (mostly untested) patch..
 
-Currently the Linux kernel makes use of this attribute:
-https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/commit/?id=61f552141c9c0e88b3fdc7046265781ffd8fa68a
+                         Linus
 
-Without this patch sparse will emit warnings like
-"error: attribute 'hotpatch': unknown attribute"
+--001a11c1e532d2402f0514f2fc08
+Content-Type: text/plain; charset=US-ASCII; name="patch.diff"
+Content-Disposition: attachment; filename="patch.diff"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_i94cecnn0
 
-Signed-off-by: Heiko Carstens <heiko.carstens@de.ibm.com>
----
- ident-list.h               | 1 +
- parse.c                    | 2 ++
- validation/attr-hotpatch.c | 7 +++++++
- 3 files changed, 10 insertions(+)
- create mode 100644 validation/attr-hotpatch.c
-
-diff --git a/ident-list.h b/ident-list.h
-index b65b667da720..1849ea613b47 100644
---- a/ident-list.h
-+++ b/ident-list.h
-@@ -81,6 +81,7 @@ IDENT(constructor); IDENT(__constructor__);
- IDENT(destructor); IDENT(__destructor__);
- IDENT(cold); IDENT(__cold__);
- IDENT(hot); IDENT(__hot__);
-+IDENT(hotpatch); IDENT(__hotpatch__);
- IDENT(cdecl); IDENT(__cdecl__);
- IDENT(stdcall); IDENT(__stdcall__);
- IDENT(fastcall); IDENT(__fastcall__);
-diff --git a/parse.c b/parse.c
-index b43d6835528b..8afae73d5325 100644
---- a/parse.c
-+++ b/parse.c
-@@ -540,6 +540,8 @@ const char *ignored_attributes[] = {
- 	"__gnu_inline__",
- 	"hot",
- 	"__hot__",
-+	"hotpatch",
-+	"__hotpatch__",
-         "leaf",
-         "__leaf__",
- 	"l1_text",
-diff --git a/validation/attr-hotpatch.c b/validation/attr-hotpatch.c
-new file mode 100644
-index 000000000000..205169389956
---- /dev/null
-+++ b/validation/attr-hotpatch.c
-@@ -0,0 +1,7 @@
-+static void __attribute__((hotpatch(0,3))) bar(void)
-+{
-+}
-+
-+/*
-+ * check-name: attribute hotpatch
-+ */
--- 
-2.1.4
-
+IHBhcnNlLmMgfCAxMTIgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogMSBmaWxlIGNoYW5nZWQsIDExMiBkZWxldGlvbnMoLSkK
+CmRpZmYgLS1naXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCBiNDNkNjgzNTUyOGIuLmJhYjBh
+OGUyZTkzMSAxMDA2NDQKLS0tIGEvcGFyc2UuYworKysgYi9wYXJzZS5jCkBAIC01MDEsMTA5ICs1
+MDEsNiBAQCBzdGF0aWMgc3RydWN0IGluaXRfa2V5d29yZCB7CiAJeyAiX193b3JkX18iLAlOU19L
+RVlXT1JELAlNT0RfTE9ORywJLm9wID0gJm1vZGVfd29yZF9vcCB9LAogfTsKIAotY29uc3QgY2hh
+ciAqaWdub3JlZF9hdHRyaWJ1dGVzW10gPSB7Ci0JImFsaWFzIiwKLQkiX19hbGlhc19fIiwKLQki
+YWxsb2Nfc2l6ZSIsCi0JIl9fYWxsb2Nfc2l6ZV9fIiwKLQkiYWx3YXlzX2lubGluZSIsCi0JIl9f
+YWx3YXlzX2lubGluZV9fIiwKLQkiYXJ0aWZpY2lhbCIsCi0JIl9fYXJ0aWZpY2lhbF9fIiwKLQki
+Ym91bmRlZCIsCi0JIl9fYm91bmRlZF9fIiwKLQkiY2RlY2wiLAotCSJfX2NkZWNsX18iLAotCSJj
+b2xkIiwKLQkiX19jb2xkX18iLAotCSJjb25zdHJ1Y3RvciIsCi0JIl9fY29uc3RydWN0b3JfXyIs
+Ci0JImRlcHJlY2F0ZWQiLAotCSJfX2RlcHJlY2F0ZWRfXyIsCi0JImRlc3RydWN0b3IiLAotCSJf
+X2Rlc3RydWN0b3JfXyIsCi0JImRsbGV4cG9ydCIsCi0JIl9fZGxsZXhwb3J0X18iLAotCSJkbGxp
+bXBvcnQiLAotCSJfX2RsbGltcG9ydF9fIiwKLQkiZXJyb3IiLAotCSJfX2Vycm9yX18iLAotCSJl
+eHRlcm5hbGx5X3Zpc2libGUiLAotCSJfX2V4dGVybmFsbHlfdmlzaWJsZV9fIiwKLQkiZmFzdGNh
+bGwiLAotCSJfX2Zhc3RjYWxsX18iLAotCSJmb3JtYXQiLAotCSJfX2Zvcm1hdF9fIiwKLQkiZm9y
+bWF0X2FyZyIsCi0JIl9fZm9ybWF0X2FyZ19fIiwKLQkiZ251X2lubGluZSIsCi0JIl9fZ251X2lu
+bGluZV9fIiwKLQkiaG90IiwKLQkiX19ob3RfXyIsCi0gICAgICAgICJsZWFmIiwKLSAgICAgICAg
+Il9fbGVhZl9fIiwKLQkibDFfdGV4dCIsCi0JIl9fbDFfdGV4dF9fIiwKLQkibDFfZGF0YSIsCi0J
+Il9fbDFfZGF0YV9fIiwKLQkibDIiLAotCSJfX2wyX18iLAotCSJtYWxsb2MiLAotCSJfX21hbGxv
+Y19fIiwKLQkibWF5X2FsaWFzIiwKLQkiX19tYXlfYWxpYXNfXyIsCi0JIm1vZGVsIiwKLQkiX19t
+b2RlbF9fIiwKLQkibXNfYWJpIiwKLQkiX19tc19hYmlfXyIsCi0JIm1zX2hvb2tfcHJvbG9ndWUi
+LAotCSJfX21zX2hvb2tfcHJvbG9ndWVfXyIsCi0JIm5ha2VkIiwKLQkiX19uYWtlZF9fIiwKLQki
+bm9faW5zdHJ1bWVudF9mdW5jdGlvbiIsCi0JIl9fbm9faW5zdHJ1bWVudF9mdW5jdGlvbl9fIiwK
+LQkibm9jbG9uZSIsCi0JIl9fbm9jbG9uZSIsCi0JIl9fbm9jbG9uZV9fIiwKLQkibm9pbmxpbmUi
+LAotCSJfX25vaW5saW5lX18iLAotCSJub25udWxsIiwKLQkiX19ub25udWxsIiwKLQkiX19ub25u
+dWxsX18iLAotCSJub3Rocm93IiwKLQkiX19ub3Rocm93IiwKLQkiX19ub3Rocm93X18iLAotCSJy
+ZWdwYXJtIiwKLQkiX19yZWdwYXJtX18iLAotCSJzZWN0aW9uIiwKLQkiX19zZWN0aW9uX18iLAot
+CSJzZW50aW5lbCIsCi0JIl9fc2VudGluZWxfXyIsCi0JInNpZ25hbCIsCi0JIl9fc2lnbmFsX18i
+LAotCSJzdGRjYWxsIiwKLQkiX19zdGRjYWxsX18iLAotCSJzeXNjYWxsX2xpbmthZ2UiLAotCSJf
+X3N5c2NhbGxfbGlua2FnZV9fIiwKLQkic3lzdl9hYmkiLAotCSJfX3N5c3ZfYWJpX18iLAotCSJ1
+bnVzZWQiLAotCSJfX3VudXNlZF9fIiwKLQkidXNlZCIsCi0JIl9fdXNlZF9fIiwKLQkidmVjdG9y
+X3NpemUiLAotCSJfX3ZlY3Rvcl9zaXplX18iLAotCSJ2aXNpYmlsaXR5IiwKLQkiX192aXNpYmls
+aXR5X18iLAotCSJ3YXJuX3VudXNlZF9yZXN1bHQiLAotCSJfX3dhcm5fdW51c2VkX3Jlc3VsdF9f
+IiwKLQkid2FybmluZyIsCi0JIl9fd2FybmluZ19fIiwKLQkid2VhayIsCi0JIl9fd2Vha19fIiwK
+LX07Ci0KLQogdm9pZCBpbml0X3BhcnNlcihpbnQgc3RyZWFtKQogewogCWludCBpOwpAQCAtNjE3
+LDE0ICs1MTQsNiBAQCB2b2lkIGluaXRfcGFyc2VyKGludCBzdHJlYW0pCiAJCXN5bS0+Y3R5cGUu
+YmFzZV90eXBlID0gcHRyLT50eXBlOwogCQlzeW0tPm9wID0gcHRyLT5vcDsKIAl9Ci0KLQlmb3Ig
+KGkgPSAwOyBpIDwgQVJSQVlfU0laRShpZ25vcmVkX2F0dHJpYnV0ZXMpOyBpKyspIHsKLQkJY29u
+c3QgY2hhciAqIG5hbWUgPSBpZ25vcmVkX2F0dHJpYnV0ZXNbaV07Ci0JCXN0cnVjdCBzeW1ib2wg
+KnN5bSA9IGNyZWF0ZV9zeW1ib2woc3RyZWFtLCBuYW1lLCBTWU1fS0VZV09SRCwKLQkJCQkJCSAg
+IE5TX0tFWVdPUkQpOwotCQlzeW0tPmlkZW50LT5rZXl3b3JkID0gMTsKLQkJc3ltLT5vcCA9ICZp
+Z25vcmVfYXR0cl9vcDsKLQl9CiB9CiAKIApAQCAtMTIyMiw3ICsxMTExLDYgQEAgc3RhdGljIHN0
+cnVjdCB0b2tlbiAqcmVjb3Zlcl91bmtub3duX2F0dHJpYnV0ZShzdHJ1Y3QgdG9rZW4gKnRva2Vu
+KQogewogCXN0cnVjdCBleHByZXNzaW9uICpleHByID0gTlVMTDsKIAotCXNwYXJzZV9lcnJvcih0
+b2tlbi0+cG9zLCAiYXR0cmlidXRlICclcyc6IHVua25vd24gYXR0cmlidXRlIiwgc2hvd19pZGVu
+dCh0b2tlbi0+aWRlbnQpKTsKIAl0b2tlbiA9IHRva2VuLT5uZXh0OwogCWlmIChtYXRjaF9vcCh0
+b2tlbiwgJygnKSkKIAkJdG9rZW4gPSBwYXJlbnNfZXhwcmVzc2lvbih0b2tlbiwgJmV4cHIsICJp
+biBhdHRyaWJ1dGUiKTsK
+--001a11c1e532d2402f0514f2fc08--
