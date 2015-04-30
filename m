@@ -1,98 +1,42 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
+From: Nicholas Mc Guire <der.herr@hofr.at>
 Subject: Re: [PATCH] sparse/parse.c: ignore hotpatch attribute
-Date: Thu, 30 Apr 2015 08:45:33 -0700
-Message-ID: <CA+55aFzZtGyz3CLF5Hjyjr0GVkx3SYui8yE9JjO5tzzHZzk78g@mail.gmail.com>
-References: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
+Date: Thu, 30 Apr 2015 17:50:22 +0200
+Message-ID: <20150430155022.GA1378@opentech.at>
+References: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com> <CA+55aFzZtGyz3CLF5Hjyjr0GVkx3SYui8yE9JjO5tzzHZzk78g@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a11c1e532d2402f0514f2fc08
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ie0-f172.google.com ([209.85.223.172]:34194 "EHLO
-	mail-ie0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750809AbbD3Ppk (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 30 Apr 2015 11:45:40 -0400
-Received: by iedfl3 with SMTP id fl3so79094391ied.1
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Apr 2015 08:45:39 -0700 (PDT)
-In-Reply-To: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
+Received: from hofr.at ([212.69.189.236]:41283 "EHLO mail.hofr.at"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1750809AbbD3PuY (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 30 Apr 2015 11:50:24 -0400
+Content-Disposition: inline
+In-Reply-To: <CA+55aFzZtGyz3CLF5Hjyjr0GVkx3SYui8yE9JjO5tzzHZzk78g@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Heiko Carstens <heiko.carstens@de.ibm.com>
-Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Heiko Carstens <heiko.carstens@de.ibm.com>, Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
---001a11c1e532d2402f0514f2fc08
-Content-Type: text/plain; charset=UTF-8
+On Thu, 30 Apr 2015, Linus Torvalds wrote:
 
-On Tue, Apr 28, 2015 at 3:48 AM, Heiko Carstens
-<heiko.carstens@de.ibm.com> wrote:
-> gcc knows about a new "hotpatch" attribute which sparse can safely ignore,
-> since it modifies only which code will be generated just like the
-> "no_instrument_function" attribute.
+> On Tue, Apr 28, 2015 at 3:48 AM, Heiko Carstens
+> <heiko.carstens@de.ibm.com> wrote:
+> > gcc knows about a new "hotpatch" attribute which sparse can safely ignore,
+> > since it modifies only which code will be generated just like the
+> > "no_instrument_function" attribute.
+> 
+> I'm wondering if sparse should just ignore all attributes it doesn't
+> recognize, so that we could just remove this ever-expanding list of
+> things that don't actually matter for sparse..
+> 
+> The "unrecognized attribute" thing made more sense way back when -
+> when I wanted to get he basic attributes handled. Now it's just
+> noise...
+>
+The list of attributes does not really exapand quickly so explicitly
+marking them to be ignored after a new "unrecognized attribute" triggers
+would have the advantage that it is actually looked at and not
+silently ignored.
 
-I'm wondering if sparse should just ignore all attributes it doesn't
-recognize, so that we could just remove this ever-expanding list of
-things that don't actually matter for sparse..
-
-The "unrecognized attribute" thing made more sense way back when -
-when I wanted to get he basic attributes handled. Now it's just
-noise...
-
-Something like the attached (mostly untested) patch..
-
-                         Linus
-
---001a11c1e532d2402f0514f2fc08
-Content-Type: text/plain; charset=US-ASCII; name="patch.diff"
-Content-Disposition: attachment; filename="patch.diff"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_i94cecnn0
-
-IHBhcnNlLmMgfCAxMTIgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t
-LS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogMSBmaWxlIGNoYW5nZWQsIDExMiBkZWxldGlvbnMoLSkK
-CmRpZmYgLS1naXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCBiNDNkNjgzNTUyOGIuLmJhYjBh
-OGUyZTkzMSAxMDA2NDQKLS0tIGEvcGFyc2UuYworKysgYi9wYXJzZS5jCkBAIC01MDEsMTA5ICs1
-MDEsNiBAQCBzdGF0aWMgc3RydWN0IGluaXRfa2V5d29yZCB7CiAJeyAiX193b3JkX18iLAlOU19L
-RVlXT1JELAlNT0RfTE9ORywJLm9wID0gJm1vZGVfd29yZF9vcCB9LAogfTsKIAotY29uc3QgY2hh
-ciAqaWdub3JlZF9hdHRyaWJ1dGVzW10gPSB7Ci0JImFsaWFzIiwKLQkiX19hbGlhc19fIiwKLQki
-YWxsb2Nfc2l6ZSIsCi0JIl9fYWxsb2Nfc2l6ZV9fIiwKLQkiYWx3YXlzX2lubGluZSIsCi0JIl9f
-YWx3YXlzX2lubGluZV9fIiwKLQkiYXJ0aWZpY2lhbCIsCi0JIl9fYXJ0aWZpY2lhbF9fIiwKLQki
-Ym91bmRlZCIsCi0JIl9fYm91bmRlZF9fIiwKLQkiY2RlY2wiLAotCSJfX2NkZWNsX18iLAotCSJj
-b2xkIiwKLQkiX19jb2xkX18iLAotCSJjb25zdHJ1Y3RvciIsCi0JIl9fY29uc3RydWN0b3JfXyIs
-Ci0JImRlcHJlY2F0ZWQiLAotCSJfX2RlcHJlY2F0ZWRfXyIsCi0JImRlc3RydWN0b3IiLAotCSJf
-X2Rlc3RydWN0b3JfXyIsCi0JImRsbGV4cG9ydCIsCi0JIl9fZGxsZXhwb3J0X18iLAotCSJkbGxp
-bXBvcnQiLAotCSJfX2RsbGltcG9ydF9fIiwKLQkiZXJyb3IiLAotCSJfX2Vycm9yX18iLAotCSJl
-eHRlcm5hbGx5X3Zpc2libGUiLAotCSJfX2V4dGVybmFsbHlfdmlzaWJsZV9fIiwKLQkiZmFzdGNh
-bGwiLAotCSJfX2Zhc3RjYWxsX18iLAotCSJmb3JtYXQiLAotCSJfX2Zvcm1hdF9fIiwKLQkiZm9y
-bWF0X2FyZyIsCi0JIl9fZm9ybWF0X2FyZ19fIiwKLQkiZ251X2lubGluZSIsCi0JIl9fZ251X2lu
-bGluZV9fIiwKLQkiaG90IiwKLQkiX19ob3RfXyIsCi0gICAgICAgICJsZWFmIiwKLSAgICAgICAg
-Il9fbGVhZl9fIiwKLQkibDFfdGV4dCIsCi0JIl9fbDFfdGV4dF9fIiwKLQkibDFfZGF0YSIsCi0J
-Il9fbDFfZGF0YV9fIiwKLQkibDIiLAotCSJfX2wyX18iLAotCSJtYWxsb2MiLAotCSJfX21hbGxv
-Y19fIiwKLQkibWF5X2FsaWFzIiwKLQkiX19tYXlfYWxpYXNfXyIsCi0JIm1vZGVsIiwKLQkiX19t
-b2RlbF9fIiwKLQkibXNfYWJpIiwKLQkiX19tc19hYmlfXyIsCi0JIm1zX2hvb2tfcHJvbG9ndWUi
-LAotCSJfX21zX2hvb2tfcHJvbG9ndWVfXyIsCi0JIm5ha2VkIiwKLQkiX19uYWtlZF9fIiwKLQki
-bm9faW5zdHJ1bWVudF9mdW5jdGlvbiIsCi0JIl9fbm9faW5zdHJ1bWVudF9mdW5jdGlvbl9fIiwK
-LQkibm9jbG9uZSIsCi0JIl9fbm9jbG9uZSIsCi0JIl9fbm9jbG9uZV9fIiwKLQkibm9pbmxpbmUi
-LAotCSJfX25vaW5saW5lX18iLAotCSJub25udWxsIiwKLQkiX19ub25udWxsIiwKLQkiX19ub25u
-dWxsX18iLAotCSJub3Rocm93IiwKLQkiX19ub3Rocm93IiwKLQkiX19ub3Rocm93X18iLAotCSJy
-ZWdwYXJtIiwKLQkiX19yZWdwYXJtX18iLAotCSJzZWN0aW9uIiwKLQkiX19zZWN0aW9uX18iLAot
-CSJzZW50aW5lbCIsCi0JIl9fc2VudGluZWxfXyIsCi0JInNpZ25hbCIsCi0JIl9fc2lnbmFsX18i
-LAotCSJzdGRjYWxsIiwKLQkiX19zdGRjYWxsX18iLAotCSJzeXNjYWxsX2xpbmthZ2UiLAotCSJf
-X3N5c2NhbGxfbGlua2FnZV9fIiwKLQkic3lzdl9hYmkiLAotCSJfX3N5c3ZfYWJpX18iLAotCSJ1
-bnVzZWQiLAotCSJfX3VudXNlZF9fIiwKLQkidXNlZCIsCi0JIl9fdXNlZF9fIiwKLQkidmVjdG9y
-X3NpemUiLAotCSJfX3ZlY3Rvcl9zaXplX18iLAotCSJ2aXNpYmlsaXR5IiwKLQkiX192aXNpYmls
-aXR5X18iLAotCSJ3YXJuX3VudXNlZF9yZXN1bHQiLAotCSJfX3dhcm5fdW51c2VkX3Jlc3VsdF9f
-IiwKLQkid2FybmluZyIsCi0JIl9fd2FybmluZ19fIiwKLQkid2VhayIsCi0JIl9fd2Vha19fIiwK
-LX07Ci0KLQogdm9pZCBpbml0X3BhcnNlcihpbnQgc3RyZWFtKQogewogCWludCBpOwpAQCAtNjE3
-LDE0ICs1MTQsNiBAQCB2b2lkIGluaXRfcGFyc2VyKGludCBzdHJlYW0pCiAJCXN5bS0+Y3R5cGUu
-YmFzZV90eXBlID0gcHRyLT50eXBlOwogCQlzeW0tPm9wID0gcHRyLT5vcDsKIAl9Ci0KLQlmb3Ig
-KGkgPSAwOyBpIDwgQVJSQVlfU0laRShpZ25vcmVkX2F0dHJpYnV0ZXMpOyBpKyspIHsKLQkJY29u
-c3QgY2hhciAqIG5hbWUgPSBpZ25vcmVkX2F0dHJpYnV0ZXNbaV07Ci0JCXN0cnVjdCBzeW1ib2wg
-KnN5bSA9IGNyZWF0ZV9zeW1ib2woc3RyZWFtLCBuYW1lLCBTWU1fS0VZV09SRCwKLQkJCQkJCSAg
-IE5TX0tFWVdPUkQpOwotCQlzeW0tPmlkZW50LT5rZXl3b3JkID0gMTsKLQkJc3ltLT5vcCA9ICZp
-Z25vcmVfYXR0cl9vcDsKLQl9CiB9CiAKIApAQCAtMTIyMiw3ICsxMTExLDYgQEAgc3RhdGljIHN0
-cnVjdCB0b2tlbiAqcmVjb3Zlcl91bmtub3duX2F0dHJpYnV0ZShzdHJ1Y3QgdG9rZW4gKnRva2Vu
-KQogewogCXN0cnVjdCBleHByZXNzaW9uICpleHByID0gTlVMTDsKIAotCXNwYXJzZV9lcnJvcih0
-b2tlbi0+cG9zLCAiYXR0cmlidXRlICclcyc6IHVua25vd24gYXR0cmlidXRlIiwgc2hvd19pZGVu
-dCh0b2tlbi0+aWRlbnQpKTsKIAl0b2tlbiA9IHRva2VuLT5uZXh0OwogCWlmIChtYXRjaF9vcCh0
-b2tlbiwgJygnKSkKIAkJdG9rZW4gPSBwYXJlbnNfZXhwcmVzc2lvbih0b2tlbiwgJmV4cHIsICJp
-biBhdHRyaWJ1dGUiKTsK
---001a11c1e532d2402f0514f2fc08--
+thx!
+hofrat
