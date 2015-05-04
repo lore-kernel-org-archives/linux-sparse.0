@@ -1,67 +1,72 @@
-From: josh@joshtriplett.org
-Subject: Re: [PATCH] sparse/parse.c: ignore hotpatch attribute
-Date: Thu, 30 Apr 2015 12:41:34 -0700
-Message-ID: <20150430194134.GC9971@cloud>
-References: <1430218119-58354-1-git-send-email-heiko.carstens@de.ibm.com>
- <CA+55aFzZtGyz3CLF5Hjyjr0GVkx3SYui8yE9JjO5tzzHZzk78g@mail.gmail.com>
- <20150430173823.GA9379@cloud>
- <CA+55aFxCTx32CPkHCJM1NNv67vKHo-6yuTiLOg2Ya-=pn=O36g@mail.gmail.com>
+From: Alexander Riesen <alexander.riesen@cetitec.com>
+Subject: Why sparse does not support context tracking?
+Date: Mon, 04 May 2015 13:05:22 +0200
+Message-ID: <55475272.90705@cetitec.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:59787 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751191AbbD3Tli (ORCPT
+Received: from mout.kundenserver.de ([212.227.126.187]:55472 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752003AbbEDLFb (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 30 Apr 2015 15:41:38 -0400
-Content-Disposition: inline
-In-Reply-To: <CA+55aFxCTx32CPkHCJM1NNv67vKHo-6yuTiLOg2Ya-=pn=O36g@mail.gmail.com>
+	Mon, 4 May 2015 07:05:31 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Heiko Carstens <heiko.carstens@de.ibm.com>, Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Josh Triplett <josh@freedesktop.org>, Christopher Li <sparse@chrisli.org>, Johannes Berg <johannes@sipsolutions.net>
 
-On Thu, Apr 30, 2015 at 10:51:42AM -0700, Linus Torvalds wrote:
-> On Thu, Apr 30, 2015 at 10:38 AM,  <josh@joshtriplett.org> wrote:
-> > I think part of the problem arises because sparse claims (via the
-> > preprocessor symbols we provide) to be whatever version of GCC it was
-> > compiled with.  I think that's a mistake.  We should pick a version of
-> > GCC for which we support all the attributes we actually need to do
-> > something with, and advertise ourselves specifically as that version.
-> 
-> Fair enough. Although there may then be headers that are unhappy.
+Hi,
 
-If you mean the GCC internal headers, I don't think those have version
-checks; after all, you'd only use them with the GCC they ship with,
-right? ;)
+I tried to instrument my code (a kernel driver) with __must_hold hints
+and noticed that they don't really work: a definitely broken code caused
+no errors from sparse.
 
-For any other headers, I think we'll get worse results by claiming to be
-a version of GCC that has features we don't actually support.
+A test in the "sparse" tree confirmed. Here is the test I used:
 
-> > I suspect that 3.2 is probably the version sparse should claim to be,
-> > for now.
-> 
-> That may be too old. You can't reliably compile the kernel with gcc
-> that old (some config options will complain).
-> 
-> At least CONFIG_GCOV_KERNEL wants 3.4 minimum.
+static int ctx;
 
-If we want to claim to be 3.4 instead, then there are some attributes
-we'll need to check for and warn if we find.  From a quick read of
-https://ohse.de/uwe/articles/gcc-attributes.html I think this is a
-complete list of attributes in 3.4 that sparse has to care about but
-doesn't currently support:
+static void must_hold(void) __attribute__((context(ctx,1,1)))
+{
+     if (ctx)
+         ;
+}
+static void bad_must_hold(void)
+{
+     must_hold();
+}
 
-cleanup
-gcc_struct
-ms_struct
+After a bit of looking I found a commit which removed context tracking
+from the "sparse":
 
-"cleanup" we'll need to handle because it affects control flow;
-gcc_struct and ms_struct affect structure layout, which we have warnings
-related to.
+Author: Johannes Berg <johannes@sipsolutions.net> 2008-12-23 10:59:22
 
-For the moment, we could just add an explicit warning if we see any of
-those three attributes, set our GCC version to 3.4, and then drop the
-"unknown attribute" warning.
+     Revert the context tracking code
 
-- Josh Triplett
+     > Do you want to resend your change which revert the context changes?
+     > Make it base on Josh's git's tree and I will merge your changes in my
+     > branch.
+
+     Below. Or I can give it to you in git if you prefer. I still think we
+     should redo this in some form so that annotations with different
+     contexts can work properly, but I don't have time to take care of it
+     right now.
+
+     johannes
+
+     >From ca95b62edf1600a2b55ed9ca0515d049807a84fc Mon Sep 17 00:00:00 2001
+     From: Johannes Berg <johannes@sipsolutions.net>
+     Date: Tue, 23 Dec 2008 10:53:19 +0100
+     Subject: [PATCH] Revert context tracking code
+
+So it seems that the code has problems with different contexts. Still, it seems
+a bit heavy-handed to remove it completely (assuming it worked, of course).
+The kernel even has a bit of use for it (not much, admittedly: DRBD and aoe).
+
+Is it be possible to reintroduce the code at least for the same context?
+So that it catches at least some locks not taken?
+
+Regards,
+Alex Riesen
+
+
