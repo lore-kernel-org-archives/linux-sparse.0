@@ -1,36 +1,34 @@
-From: Johannes Berg <johannes@sipsolutions.net>
+From: Alexander Riesen <alexander.riesen@cetitec.com>
 Subject: Re: Why sparse does not support context tracking?
-Date: Mon, 04 May 2015 15:38:57 +0200
-Message-ID: <1430746737.2013.22.camel@sipsolutions.net>
-References: <55475272.90705@cetitec.com>
+Date: Mon, 04 May 2015 16:05:59 +0200
+Message-ID: <55477CC7.4020807@cetitec.com>
+References: <55475272.90705@cetitec.com> <1430746737.2013.22.camel@sipsolutions.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from s3.sipsolutions.net ([5.9.151.49]:46056 "EHLO sipsolutions.net"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1752320AbbEDNjB (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 May 2015 09:39:01 -0400
-In-Reply-To: <55475272.90705@cetitec.com>
+Received: from mout.kundenserver.de ([212.227.126.130]:54271 "EHLO
+	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750707AbbEDOGM (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 4 May 2015 10:06:12 -0400
+In-Reply-To: <1430746737.2013.22.camel@sipsolutions.net>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Alexander Riesen <alexander.riesen@cetitec.com>
+To: Johannes Berg <johannes@sipsolutions.net>
 Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, Christopher Li <sparse@chrisli.org>
 
-On Mon, 2015-05-04 at 13:05 +0200, Alexander Riesen wrote:
-> Hi,
-> 
-> I tried to instrument my code (a kernel driver) with __must_hold hints
-> and noticed that they don't really work: a definitely broken code caused
-> no errors from sparse.
+On 05/04/2015 03:38 PM, Johannes Berg wrote:
+> On Mon, 2015-05-04 at 13:05  +0200, Alexander Riesen wrote:
+ >>
+ >>      Revert the context tracking code
+ >>
+ >> So it seems that the code has problems with different contexts. Still, it seems
+ >> a bit heavy-handed to remove it completely (assuming it worked, of course).
+ >
+ > It didn't really work. It had a lot of issues that were too big for my
+ > little wireless-focused brain :)
 
->      Revert the context tracking code
+Ah, pity. Wasn't there any hope for it?
 
-> So it seems that the code has problems with different contexts. Still, it seems
-> a bit heavy-handed to remove it completely (assuming it worked, of course).
-
-It didn't really work. It had a lot of issues that were too big for my
-little wireless-focused brain :)
-
-johannes
 
