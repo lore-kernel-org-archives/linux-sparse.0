@@ -1,34 +1,39 @@
-From: Alexander Riesen <alexander.riesen@cetitec.com>
-Subject: Re: Why sparse does not support context tracking?
-Date: Mon, 04 May 2015 16:05:59 +0200
-Message-ID: <55477CC7.4020807@cetitec.com>
-References: <55475272.90705@cetitec.com> <1430746737.2013.22.camel@sipsolutions.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: Azat Khuzhin <a3at.mail@gmail.com>
+Subject: [PATCH 2/2] validation/prototype: regression for skipping prototypes
+Date: Sun, 17 May 2015 01:32:25 +0300
+Message-ID: <1431815545-21250-3-git-send-email-a3at.mail@gmail.com>
+References: <1431815545-21250-1-git-send-email-a3at.mail@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mout.kundenserver.de ([212.227.126.130]:54271 "EHLO
-	mout.kundenserver.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750707AbbEDOGM (ORCPT
+Received: from mail-la0-f50.google.com ([209.85.215.50]:33255 "EHLO
+	mail-la0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750759AbbEPWci (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 May 2015 10:06:12 -0400
-In-Reply-To: <1430746737.2013.22.camel@sipsolutions.net>
+	Sat, 16 May 2015 18:32:38 -0400
+Received: by lagr1 with SMTP id r1so88894870lag.0
+        for <linux-sparse@vger.kernel.org>; Sat, 16 May 2015 15:32:37 -0700 (PDT)
+In-Reply-To: <1431815545-21250-1-git-send-email-a3at.mail@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Josh Triplett <josh@freedesktop.org>, Christopher Li <sparse@chrisli.org>
+To: Sparse ML <linux-sparse@vger.kernel.org>
+Cc: Azat Khuzhin <a3at.mail@gmail.com>
 
-On 05/04/2015 03:38 PM, Johannes Berg wrote:
-> On Mon, 2015-05-04 at 13:05  +0200, Alexander Riesen wrote:
- >>
- >>      Revert the context tracking code
- >>
- >> So it seems that the code has problems with different contexts. Still, it seems
- >> a bit heavy-handed to remove it completely (assuming it worked, of course).
- >
- > It didn't really work. It had a lot of issues that were too big for my
- > little wireless-focused brain :)
+---
+ validation/prototype.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+ create mode 100644 validation/prototype.c
 
-Ah, pity. Wasn't there any hope for it?
-
+diff --git a/validation/prototype.c b/validation/prototype.c
+new file mode 100644
+index 0000000..481cc93
+--- /dev/null
++++ b/validation/prototype.c
+@@ -0,0 +1,6 @@
++static int prototype(void);
++
++/*
++ * check-name: Compile skip function prototype
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
+-- 
+2.1.4
 
