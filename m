@@ -1,38 +1,45 @@
-From: Azat Khuzhin <a3at.mail@gmail.com>
-Subject: Re: [PATCH 2/2] validation/prototype: regression for skipping
- prototypes
-Date: Sun, 17 May 2015 21:53:54 +0300
-Message-ID: <20150517185354.GN11068@azat>
-References: <1431815545-21250-1-git-send-email-a3at.mail@gmail.com>
- <1431815545-21250-3-git-send-email-a3at.mail@gmail.com>
- <20150517184004.GK1804@latitude>
+From: David Binderman <dcb314@hotmail.com>
+Subject: linux-4.1-rc7 and dev versions of gcc
+Date: Tue, 9 Jun 2015 07:35:58 +0000
+Message-ID: <DUB128-W148850BD36B441B5C030639CBE0@phx.gbl>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=iso-8859-1
 Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-la0-f49.google.com ([209.85.215.49]:36034 "EHLO
-	mail-la0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1750907AbbEQSx6 (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 17 May 2015 14:53:58 -0400
-Received: by lagv1 with SMTP id v1so190026221lag.3
-        for <linux-sparse@vger.kernel.org>; Sun, 17 May 2015 11:53:56 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20150517184004.GK1804@latitude>
+Received: from dub004-omc2s17.hotmail.com ([157.55.1.156]:54454 "EHLO
+	DUB004-OMC2S17.hotmail.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751377AbbFIHlC convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 9 Jun 2015 03:41:02 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jonathan =?iso-8859-1?Q?Neusch=E4fer?= <j.neuschaefer@gmx.net>
-Cc: linux-sparse@vger.kernel.org
+To: "sparse@chrisli.org" <sparse@chrisli.org>
+Cc: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
 
-On Sun, May 17, 2015 at 08:40:05PM +0200, Jonathan Neusch=E4fer wrote:
-> > Subject: [PATCH 2/2] validation/prototype: regression for skipping =
-prototypes
->=20
-> This is not a regression, but a regression test.
+Hello there,
 
-Yep, it is a regression test, thanks!
-By some reason, I though that "validation" prefix will be enough.
---
+Recent development versions of gcc have started using the 6.0.0 version=
+ number.
+
+gcc version 6.0.0 20150607 (experimental) (GCC)=20
+
+Linux kernel doesn't understand any gcc version numbers beyond 5.
+
+include/linux/compiler-gcc3.h=A0=20
+include/linux/compiler-gcc4.h=20
+include/linux/compiler-gcc5.h
+
+Kernel build fails because no compiler-gcc6.h file.
+
+I have a temporary bodge to copy compiler-gcc5.h file into compiler-gcc=
+6.h
+
+
+Regards
+
+David Binderman
+
+ 		 	   		  --
 To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
  in
 the body of a message to majordomo@vger.kernel.org
