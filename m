@@ -1,53 +1,40 @@
-From: josh@joshtriplett.org
-Subject: Re: linux-4.1-rc7 and dev versions of gcc
-Date: Tue, 9 Jun 2015 08:33:42 -0700
-Message-ID: <20150609153341.GA2595@cloud>
-References: <DUB128-W148850BD36B441B5C030639CBE0@phx.gbl>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v3] dmaengine: xgene-dma: Fix sparse wannings and
+ coccinelle warnings
+Date: Thu, 11 Jun 2015 17:36:00 -0700
+Message-ID: <CANeU7Q=0VT5EOjKXEFJ4WgKQGcZhufEgksLoN4PDLEbc+q0pgQ@mail.gmail.com>
+References: <1429212673-22254-1-git-send-email-rsahu@apm.com>
+	<20150417182937.GN30624@intel.com>
+	<CAFd313y-HfW_us0FVQFEkGAzf-ZCKpRtF6eYweaK0V94MBg4iQ@mail.gmail.com>
+	<20150427031315.GG2738@intel.com>
+	<20150427052045.GA5199@wfg-t540p.sh.intel.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay4-d.mail.gandi.net ([217.70.183.196]:50865 "EHLO
-	relay4-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933128AbbFIPdr (ORCPT
+Received: from mail-yh0-f48.google.com ([209.85.213.48]:33784 "EHLO
+	mail-yh0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751170AbbFLAgB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 9 Jun 2015 11:33:47 -0400
-Content-Disposition: inline
-In-Reply-To: <DUB128-W148850BD36B441B5C030639CBE0@phx.gbl>
+	Thu, 11 Jun 2015 20:36:01 -0400
+In-Reply-To: <20150427052045.GA5199@wfg-t540p.sh.intel.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: David Binderman <dcb314@hotmail.com>
-Cc: "sparse@chrisli.org" <sparse@chrisli.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>
+To: Fengguang Wu <fengguang.wu@intel.com>
+Cc: Vinod Koul <vinod.koul@intel.com>, Rameshwar Sahu <rsahu@apm.com>, Dan Williams <dan.j.williams@intel.com>, dmaengine@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-kernel <linux-kernel@vger.kernel.org>, devicetree@vger.kernel.org, linux-arm-kernel@lists.infradead.org, jcm@redhat.com, patches@apm.com, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jun 09, 2015 at 07:35:58AM +0000, David Binderman wrote:
-> Hello there,
->=20
-> Recent development versions of gcc have started using the 6.0.0 versi=
-on number.
->=20
-> gcc version 6.0.0 20150607 (experimental) (GCC)=20
->=20
-> Linux kernel doesn't understand any gcc version numbers beyond 5.
->=20
-> include/linux/compiler-gcc3.h=A0=20
-> include/linux/compiler-gcc4.h=20
-> include/linux/compiler-gcc5.h
->=20
-> Kernel build fails because no compiler-gcc6.h file.
->=20
-> I have a temporary bodge to copy compiler-gcc5.h file into compiler-g=
-cc6.h
+On Sun, Apr 26, 2015 at 10:20 PM, Fengguang Wu <fengguang.wu@intel.com> wrote:
+>> >
+>> > drivers/dma/xgene-dma.c:2088:1: sparse: symbol
+>> > '__UNIQUE_ID_author__COUNTER__' has multiple initializers (originally
+>> > initialized at drivers/dma/xgene-dma.c:2087)
+>> > So, I kept only one author here.
+>> No that is not right, sparse shouldn't have cribbed here.
+>>
+>> Fengguang can we get the bot to ignore this please
 
-This shouldn't be a Sparse issue.  As discussed previously on this list
-and LKML, Sparse should probably declare a specific GCC version number,
-*not* the latest.  Apart from that, handling GCC 6 has been discussed o=
-n
-LKML previously, and I think there were some patches circulating
-already.
+Sorry for the late reply.
 
-- Josh Triplett
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+That looks like the __COUNTER__ macro feature. It has been implemented in
+sparse git tree already.
+
+Chris
