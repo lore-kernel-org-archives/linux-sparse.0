@@ -1,147 +1,134 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: [PATCH RFC 04/13] expression: examine constness of preops at evaluation only
-Date: Thu, 23 Jul 2015 01:15:40 +0200
-Message-ID: <87egjzkcmb.fsf@gmail.com>
+Subject: [PATCH RFC 05/13] expression: examine constness of conditionals at evaluation only
+Date: Thu, 23 Jul 2015 01:16:47 +0200
+Message-ID: <87a8unkckg.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f172.google.com ([209.85.212.172]:35145 "EHLO
-	mail-wi0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752704AbbGVXPo (ORCPT
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:34967 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752491AbbGVXQv (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 Jul 2015 19:15:44 -0400
-Received: by wibxm9 with SMTP id xm9so184201962wib.0
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Jul 2015 16:15:43 -0700 (PDT)
+	Wed, 22 Jul 2015 19:16:51 -0400
+Received: by wibxm9 with SMTP id xm9so184227226wib.0
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Jul 2015 16:16:50 -0700 (PDT)
 Received: from localhost.localdomain (x55b1cac6.dyn.telefonica.de. [85.177.202.198])
-        by smtp.gmail.com with ESMTPSA id e2sm4605873wjw.12.2015.07.22.16.15.41
+        by smtp.gmail.com with ESMTPSA id ft5sm24262149wib.4.2015.07.22.16.16.48
         for <linux-sparse@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 22 Jul 2015 16:15:42 -0700 (PDT)
+        Wed, 22 Jul 2015 16:16:49 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 Currently, the propagation of expressions' constness flags through
-prefix expressions is done in two steps:
+conditional expressions is done in two steps:
 - Several flags are speculatively set at expression parsing time
 - and possibly cleared again at evaluation time.
 
 Set aside this unfortunate split of code, the early propagation of
 constness flags is not able to recognize constant expressions such as
-  -__builtin_choose_expr(0, 0, 0)
-  ~__builtin_choose_expr(0, 0, 0)
-  !__builtin_choose_expr(0, 0, 0)
-since the final expression to be thrown into the prefix expression is
-known only after evaluation.
+  0 ? __builtin_choose_expr(0, 0, 0) : 0
+  0 ? 0 : __builtin_choose_expr(0, 0, 0)
+since the final expression to be thrown into the conditional
+expression is known only after evaluation.
 
-Move the whole calculation of prefix expressions' constness flags to
-the evaluation phase.
+Move the whole calculation of conditional expressions' constness flags
+to the evaluation phase.
 
 Introduce support for tracking arithmetic constness propagation through
-prefix expressions.
+conditional expressions.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 ---
- evaluate.c                   | 15 ++++++++++-----
- expression.c                 |  3 ---
- validation/constexpr-preop.c | 29 +++++++++++++++++++++++++++++
- 3 files changed, 39 insertions(+), 8 deletions(-)
- create mode 100644 validation/constexpr-preop.c
+ evaluate.c                         | 15 ++++++++-------
+ expression.c                       |  7 -------
+ validation/constexpr-conditional.c | 34 ++++++++++++++++++++++++++++++++++
+ 3 files changed, 42 insertions(+), 14 deletions(-)
+ create mode 100644 validation/constexpr-conditional.c
 
 diff --git a/evaluate.c b/evaluate.c
-index 637824c..e1d2f3d 100644
+index e1d2f3d..edd0fe1 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -1794,8 +1794,9 @@ static struct symbol *evaluate_sign(struct expression *expr)
- {
- 	struct symbol *ctype = expr->unop->ctype;
- 	int class = classify_type(ctype, &ctype);
--	if (expr->flags && !(expr->unop->flags & EXPR_FLAG_INT_CONST_EXPR))
--		expr->flags = EXPR_FLAG_NONE;
-+	enum expression_flags flags;
-+
-+	flags = expr->flags | expr_flags_decay_consts(expr->unop->flags);
- 	/* should be an arithmetic type */
- 	if (!(class & TYPE_NUM))
- 		return bad_expr_type(expr);
-@@ -1812,6 +1813,7 @@ Normal:
+@@ -1113,13 +1113,14 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 		true = &expr->cond_true;
  	}
- 	if (expr->op == '+')
- 		*expr = *expr->unop;
-+	expr->flags = flags;
- 	expr->ctype = ctype;
- 	return ctype;
- Restr:
-@@ -1849,9 +1851,12 @@ static struct symbol *evaluate_preop(struct expression *expr)
- 		return evaluate_postop(expr);
  
- 	case '!':
--		if (expr->flags && !(expr->unop->flags &
--					EXPR_FLAG_INT_CONST_EXPR))
+-	if (expr->flags) {
+-		int flags = (expr->conditional->flags &
+-			expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR));
+-		flags &= (*true)->flags & expr->cond_false->flags;
+-		if (!flags)
 -			expr->flags = EXPR_FLAG_NONE;
-+		expr->flags |= expr_flags_decay_consts(expr->unop->flags);
-+		/*
-+		 * A logical negation never yields an address constant
-+		 * [6.6(9)].
-+		 */
-+		expr->flags &= ~expr_clear_flag_mask(EXPR_FLAG_ADDR_CONST_EXPR);
- 		if (is_safe_type(ctype))
- 			warning(expr->pos, "testing a 'safe expression'");
- 		if (is_float_type(ctype)) {
+-	}
++	expr->flags |= expr_flags_decay_consts(expr->conditional->flags &
++					(*true)->flags &
++					expr->cond_false->flags);
++	/*
++	 * A conditional operator never yields an address constant
++	 * [6.6(9)].
++	 */
++	expr->flags &= ~expr_clear_flag_mask(EXPR_FLAG_ADDR_CONST_EXPR);
+ 
+ 	lclass = classify_type(ltype, &ltype);
+ 	rclass = classify_type(rtype, &rtype);
 diff --git a/expression.c b/expression.c
-index b52ae15..7759bd0 100644
+index 7759bd0..a18fcc6 100644
 --- a/expression.c
 +++ b/expression.c
-@@ -451,8 +451,6 @@ struct token *primary_expression(struct token *token, struct expression **tree)
- 			expr = alloc_expression(token->pos, EXPR_PREOP);
- 			expr->op = '(';
- 			token = parens_expression(token, &expr->unop, "in expression");
--			if (expr->unop)
--				expr->flags = expr->unop->flags;
- 			break;
- 		}
- 		if (token->special == '[' && lookup_type(token->next)) {
-@@ -665,7 +663,6 @@ static struct token *unary_expression(struct token *token, struct expression **t
- 			unary = alloc_expression(token->pos, EXPR_PREOP);
- 			unary->op = token->special;
- 			unary->unop = unop;
--			unary->flags = expr_flags_decay_consts(unop->flags);
- 			*tree = unary;
- 			return next;
- 		}
-diff --git a/validation/constexpr-preop.c b/validation/constexpr-preop.c
+@@ -858,13 +858,6 @@ struct token *conditional_expression(struct token *token, struct expression **tr
+ 		token = parse_expression(token->next, &expr->cond_true);
+ 		token = expect(token, ':', "in conditional expression");
+ 		token = conditional_expression(token, &expr->cond_false);
+-		if (expr->left && expr->cond_false) {
+-			enum expression_flags flags = expr->left->flags &
+-				expr->cond_false->flags;
+-			if (expr->cond_true)
+-				flags &= expr->cond_true->flags;
+-			expr->flags = expr_flags_decay_consts(flags);
+-		}
+ 	}
+ 	return token;
+ }
+diff --git a/validation/constexpr-conditional.c b/validation/constexpr-conditional.c
 new file mode 100644
-index 0000000..5d869da
+index 0000000..a3331b3
 --- /dev/null
-+++ b/validation/constexpr-preop.c
-@@ -0,0 +1,29 @@
++++ b/validation/constexpr-conditional.c
+@@ -0,0 +1,34 @@
 +static int a[] = {
-+  [+0] = 0,					// OK
-+  [+__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-+  [+0.] = 0,					// KO
-+  [+__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
-+  [-0] = 0,					// OK
-+  [-__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-+  [-0.] = 0,					// KO
-+  [-__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
-+  [~0] = 0,					// OK
-+  [~__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-+  [!0] = 0,					// OK
-+  [!__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-+  [!0.] = 0,					// KO
-+  [!__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
++	[0 ? : 0] = 0,						// OK
++	[1 ? : 0] = 0,						// OK
++	[0 ? 0 : 0] = 0,					// OK
++	[1 ? 0 : 0] = 0,					// OK
++	[0 ? 0 : __builtin_choose_expr(0, 0, 0)] = 0,		// OK
++	[1 ? __builtin_choose_expr(0, 0, 0) : 0] = 0,		// OK
++	[0 ? __builtin_choose_expr(0, 0, 0) : 0] = 0,		// OK
++	[1 ? 1 : __builtin_choose_expr(0, 0, 0)] = 0,		// OK
++	[__builtin_choose_expr(0, 0, 0) ? : 0] = 0,		// OK
++	[__builtin_choose_expr(0, 0, 1) ? : 0] = 0,		// OK
++	[0. ? : 0] = 0,					// KO
++	[0 ? 0. : 0] = 0,					// KO
++	[1 ? : 0.] = 0,					// KO
++	[__builtin_choose_expr(0, 0., 0) ? : 0] = 0,		// OK
++	[__builtin_choose_expr(0, 0, 0.) ? : 0] = 0,		// KO
++	[0 ? __builtin_choose_expr(0, 0., 0) : 0] = 0,		// OK
++	[0 ? __builtin_choose_expr(0, 0, 0.) : 0] = 0,		// KO
++	[1 ? 0 : __builtin_choose_expr(0, 0., 0)] = 0,		// OK
++	[1 ? 0 : __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
 +};
 +
 +/*
-+ * check-name: Expression constness propagation in preops
++ * check-name: Expression constness propagation in conditional expressions
 + *
 + * check-error-start
-+constexpr-preop.c:4:5: error: bad constant expression
-+constexpr-preop.c:5:33: error: bad constant expression
-+constexpr-preop.c:8:4: error: bad constant expression
-+constexpr-preop.c:9:4: error: bad constant expression
-+constexpr-preop.c:14:4: error: bad integer constant expression
-+constexpr-preop.c:15:4: error: bad integer constant expression
++constexpr-conditional.c:12:13: error: bad constant expression
++constexpr-conditional.c:13:19: error: bad constant expression
++constexpr-conditional.c:14:12: error: bad constant expression
++constexpr-conditional.c:16:42: error: bad constant expression
++constexpr-conditional.c:18:48: error: bad constant expression
++constexpr-conditional.c:20:14: error: bad constant expression
 + * check-error-end
 + */
 -- 
