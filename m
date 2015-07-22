@@ -1,420 +1,607 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: [PATCH RFC 00/13] improve constexpr handling
-Date: Thu, 23 Jul 2015 00:54:25 +0200
-Message-ID: <87y4i7kdlq.fsf@gmail.com>
+Subject: [PATCH RFC 01/13] expression: introduce additional expression constness tracking flags
+Date: Thu, 23 Jul 2015 01:11:36 +0200
+Message-ID: <87r3nzkct3.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="=-=-="
+Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wi0-f170.google.com ([209.85.212.170]:36877 "EHLO
-	mail-wi0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752763AbbGVWy3 (ORCPT
+Received: from mail-wi0-f174.google.com ([209.85.212.174]:33754 "EHLO
+	mail-wi0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752797AbbGVXLk (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 22 Jul 2015 18:54:29 -0400
-Received: by wibud3 with SMTP id ud3so193618309wib.0
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Jul 2015 15:54:28 -0700 (PDT)
+	Wed, 22 Jul 2015 19:11:40 -0400
+Received: by wicmv11 with SMTP id mv11so447363wic.0
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Jul 2015 16:11:39 -0700 (PDT)
 Received: from localhost.localdomain (x55b1cac6.dyn.telefonica.de. [85.177.202.198])
-        by smtp.gmail.com with ESMTPSA id z9sm24198783wiv.9.2015.07.22.15.54.26
+        by smtp.gmail.com with ESMTPSA id s5sm24262711wik.2.2015.07.22.16.11.37
         for <linux-sparse@vger.kernel.org>
         (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 22 Jul 2015 15:54:27 -0700 (PDT)
+        Wed, 22 Jul 2015 16:11:38 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
---=-=-=
-Content-Type: text/plain
-Content-Disposition: attachment; filename=linux-constexpr-fixes.diff
+Prepare for a more fine-grained tracking of expression constness in the
+sense of C99 [6.4.4, 6.6].
 
-diff --git a/include/linux/cpumask.h b/include/linux/cpumask.h
-index 59915ea..00eb776 100644
---- a/include/linux/cpumask.h
-+++ b/include/linux/cpumask.h
-@@ -736,7 +736,7 @@ void init_cpu_online(const struct cpumask *src);
-  */
- #define to_cpumask(bitmap)						\
- 	((struct cpumask *)(1 ? (bitmap)				\
--			    : (void *)sizeof(__check_is_bitmap(bitmap))))
-+			    : (void *)0 + sizeof(__check_is_bitmap(bitmap))))
+User-visible behaviour remains unchanged.
+
+The current implementation tags an expression with either combination
+of the flags Int_const_expr and Float_literal, the latter being only
+used to tell that
+  (int).0
+is indeed an integer constant expression.
+
+Even if sparse attempted to verify that initializers for static storage
+duration objects are constant expressions [6.7.8(4)] (which it
+currently does not), it could not tell reliably.
+Examples:
+1.)
+  static float a = { (float)0 }; /* allowed by C99 */
+  '(float)0' is not an integer constant expression, but an arithmetic
+  one.
+2.)
+  enum { b = 0 };
+  static void *c = { (void*)b }; /* disallowed by C99 */
+  References to enum members are not allowed in address constants
+  [6.6(9)] and thus, the initializer is not a constant expression at
+  all.
+
+Introduce a broader set of constness tracking flags, resembling the
+four types of constants [6.4.4] (integer, floating, enumeration,
+character) and the three types of constant expressions [6.6] (integer,
+arithmetic, address). Use helper functions to consistently set and
+clear these flags as they are not completely independent.
+
+Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+---
+ evaluate.c   |  69 ++++++++++++++++++-------------
+ expand.c     |   2 +-
+ expression.c |  66 ++++++++++++++++++-----------
+ expression.h | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++---
+ 4 files changed, 212 insertions(+), 58 deletions(-)
+
+diff --git a/evaluate.c b/evaluate.c
+index 035e448..7324fb4 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -400,7 +400,7 @@ static struct symbol *bad_expr_type(struct expression *expr)
+ 		break;
+ 	}
  
- static inline int __check_is_bitmap(const unsigned long *bitmap)
+-	expr->flags = 0;
++	expr->flags = EXPR_FLAG_NONE;
+ 	return expr->ctype = &bad_ctype;
+ }
+ 
+@@ -880,8 +880,9 @@ static struct symbol *evaluate_logical(struct expression *expr)
+ 	/* the result is int [6.5.13(3), 6.5.14(3)] */
+ 	expr->ctype = &int_ctype;
+ 	if (expr->flags) {
+-		if (!(expr->left->flags & expr->right->flags & Int_const_expr))
+-			expr->flags = 0;
++		if (!(expr->left->flags & expr->right->flags &
++				EXPR_FLAG_INT_CONST_EXPR))
++			expr->flags = EXPR_FLAG_NONE;
+ 	}
+ 	return &int_ctype;
+ }
+@@ -894,8 +895,9 @@ static struct symbol *evaluate_binop(struct expression *expr)
+ 	int op = expr->op;
+ 
+ 	if (expr->flags) {
+-		if (!(expr->left->flags & expr->right->flags & Int_const_expr))
+-			expr->flags = 0;
++		if (!(expr->left->flags & expr->right->flags &
++				EXPR_FLAG_INT_CONST_EXPR))
++			expr->flags = EXPR_FLAG_NONE;
+ 	}
+ 
+ 	/* number op number */
+@@ -986,7 +988,7 @@ static inline int is_null_pointer_constant(struct expression *e)
  {
-diff --git a/include/linux/log2.h b/include/linux/log2.h
-index fd7ff3d..384d6e5 100644
---- a/include/linux/log2.h
-+++ b/include/linux/log2.h
-@@ -82,80 +82,80 @@ unsigned long __rounddown_pow_of_two(unsigned long n)
-  *
-  * selects the appropriately-sized optimised version depending on sizeof(n)
-  */
--#define ilog2(n)				\
--(						\
--	__builtin_constant_p(n) ? (		\
--		(n) < 1 ? ____ilog2_NaN() :	\
--		(n) & (1ULL << 63) ? 63 :	\
--		(n) & (1ULL << 62) ? 62 :	\
--		(n) & (1ULL << 61) ? 61 :	\
--		(n) & (1ULL << 60) ? 60 :	\
--		(n) & (1ULL << 59) ? 59 :	\
--		(n) & (1ULL << 58) ? 58 :	\
--		(n) & (1ULL << 57) ? 57 :	\
--		(n) & (1ULL << 56) ? 56 :	\
--		(n) & (1ULL << 55) ? 55 :	\
--		(n) & (1ULL << 54) ? 54 :	\
--		(n) & (1ULL << 53) ? 53 :	\
--		(n) & (1ULL << 52) ? 52 :	\
--		(n) & (1ULL << 51) ? 51 :	\
--		(n) & (1ULL << 50) ? 50 :	\
--		(n) & (1ULL << 49) ? 49 :	\
--		(n) & (1ULL << 48) ? 48 :	\
--		(n) & (1ULL << 47) ? 47 :	\
--		(n) & (1ULL << 46) ? 46 :	\
--		(n) & (1ULL << 45) ? 45 :	\
--		(n) & (1ULL << 44) ? 44 :	\
--		(n) & (1ULL << 43) ? 43 :	\
--		(n) & (1ULL << 42) ? 42 :	\
--		(n) & (1ULL << 41) ? 41 :	\
--		(n) & (1ULL << 40) ? 40 :	\
--		(n) & (1ULL << 39) ? 39 :	\
--		(n) & (1ULL << 38) ? 38 :	\
--		(n) & (1ULL << 37) ? 37 :	\
--		(n) & (1ULL << 36) ? 36 :	\
--		(n) & (1ULL << 35) ? 35 :	\
--		(n) & (1ULL << 34) ? 34 :	\
--		(n) & (1ULL << 33) ? 33 :	\
--		(n) & (1ULL << 32) ? 32 :	\
--		(n) & (1ULL << 31) ? 31 :	\
--		(n) & (1ULL << 30) ? 30 :	\
--		(n) & (1ULL << 29) ? 29 :	\
--		(n) & (1ULL << 28) ? 28 :	\
--		(n) & (1ULL << 27) ? 27 :	\
--		(n) & (1ULL << 26) ? 26 :	\
--		(n) & (1ULL << 25) ? 25 :	\
--		(n) & (1ULL << 24) ? 24 :	\
--		(n) & (1ULL << 23) ? 23 :	\
--		(n) & (1ULL << 22) ? 22 :	\
--		(n) & (1ULL << 21) ? 21 :	\
--		(n) & (1ULL << 20) ? 20 :	\
--		(n) & (1ULL << 19) ? 19 :	\
--		(n) & (1ULL << 18) ? 18 :	\
--		(n) & (1ULL << 17) ? 17 :	\
--		(n) & (1ULL << 16) ? 16 :	\
--		(n) & (1ULL << 15) ? 15 :	\
--		(n) & (1ULL << 14) ? 14 :	\
--		(n) & (1ULL << 13) ? 13 :	\
--		(n) & (1ULL << 12) ? 12 :	\
--		(n) & (1ULL << 11) ? 11 :	\
--		(n) & (1ULL << 10) ? 10 :	\
--		(n) & (1ULL <<  9) ?  9 :	\
--		(n) & (1ULL <<  8) ?  8 :	\
--		(n) & (1ULL <<  7) ?  7 :	\
--		(n) & (1ULL <<  6) ?  6 :	\
--		(n) & (1ULL <<  5) ?  5 :	\
--		(n) & (1ULL <<  4) ?  4 :	\
--		(n) & (1ULL <<  3) ?  3 :	\
--		(n) & (1ULL <<  2) ?  2 :	\
--		(n) & (1ULL <<  1) ?  1 :	\
--		(n) & (1ULL <<  0) ?  0 :	\
--		____ilog2_NaN()			\
--				   ) :		\
--	(sizeof(n) <= 4) ?			\
--	__ilog2_u32(n) :			\
--	__ilog2_u64(n)				\
-- )
-+#define ilog2(n)							\
-+	__builtin_choose_expr(						\
-+		__builtin_constant_p(n),				\
-+		(							\
-+			(n) & (1ULL << 63) ? 63 :			\
-+			(n) & (1ULL << 62) ? 62 :			\
-+			(n) & (1ULL << 61) ? 61 :			\
-+			(n) & (1ULL << 60) ? 60 :			\
-+			(n) & (1ULL << 59) ? 59 :			\
-+			(n) & (1ULL << 58) ? 58 :			\
-+			(n) & (1ULL << 57) ? 57 :			\
-+			(n) & (1ULL << 56) ? 56 :			\
-+			(n) & (1ULL << 55) ? 55 :			\
-+			(n) & (1ULL << 54) ? 54 :			\
-+			(n) & (1ULL << 53) ? 53 :			\
-+			(n) & (1ULL << 52) ? 52 :			\
-+			(n) & (1ULL << 51) ? 51 :			\
-+			(n) & (1ULL << 50) ? 50 :			\
-+			(n) & (1ULL << 49) ? 49 :			\
-+			(n) & (1ULL << 48) ? 48 :			\
-+			(n) & (1ULL << 47) ? 47 :			\
-+			(n) & (1ULL << 46) ? 46 :			\
-+			(n) & (1ULL << 45) ? 45 :			\
-+			(n) & (1ULL << 44) ? 44 :			\
-+			(n) & (1ULL << 43) ? 43 :			\
-+			(n) & (1ULL << 42) ? 42 :			\
-+			(n) & (1ULL << 41) ? 41 :			\
-+			(n) & (1ULL << 40) ? 40 :			\
-+			(n) & (1ULL << 39) ? 39 :			\
-+			(n) & (1ULL << 38) ? 38 :			\
-+			(n) & (1ULL << 37) ? 37 :			\
-+			(n) & (1ULL << 36) ? 36 :			\
-+			(n) & (1ULL << 35) ? 35 :			\
-+			(n) & (1ULL << 34) ? 34 :			\
-+			(n) & (1ULL << 33) ? 33 :			\
-+			(n) & (1ULL << 32) ? 32 :			\
-+			(n) & (1ULL << 31) ? 31 :			\
-+			(n) & (1ULL << 30) ? 30 :			\
-+			(n) & (1ULL << 29) ? 29 :			\
-+			(n) & (1ULL << 28) ? 28 :			\
-+			(n) & (1ULL << 27) ? 27 :			\
-+			(n) & (1ULL << 26) ? 26 :			\
-+			(n) & (1ULL << 25) ? 25 :			\
-+			(n) & (1ULL << 24) ? 24 :			\
-+			(n) & (1ULL << 23) ? 23 :			\
-+			(n) & (1ULL << 22) ? 22 :			\
-+			(n) & (1ULL << 21) ? 21 :			\
-+			(n) & (1ULL << 20) ? 20 :			\
-+			(n) & (1ULL << 19) ? 19 :			\
-+			(n) & (1ULL << 18) ? 18 :			\
-+			(n) & (1ULL << 17) ? 17 :			\
-+			(n) & (1ULL << 16) ? 16 :			\
-+			(n) & (1ULL << 15) ? 15 :			\
-+			(n) & (1ULL << 14) ? 14 :			\
-+			(n) & (1ULL << 13) ? 13 :			\
-+			(n) & (1ULL << 12) ? 12 :			\
-+			(n) & (1ULL << 11) ? 11 :			\
-+			(n) & (1ULL << 10) ? 10 :			\
-+			(n) & (1ULL <<  9) ?  9 :			\
-+			(n) & (1ULL <<  8) ?  8 :			\
-+			(n) & (1ULL <<  7) ?  7 :			\
-+			(n) & (1ULL <<  6) ?  6 :			\
-+			(n) & (1ULL <<  5) ?  5 :			\
-+			(n) & (1ULL <<  4) ?  4 :			\
-+			(n) & (1ULL <<  3) ?  3 :			\
-+			(n) & (1ULL <<  2) ?  2 :			\
-+			(n) & (1ULL <<  1) ?  1 :			\
-+			(n) == 1 ? 0 :					\
-+			__builtin_warning(1, "log2 gives NaN") ? 0 : 0	\
-+			),						\
-+		(sizeof(n) <= 4) ?					\
-+		__ilog2_u32(n) :					\
-+		__ilog2_u64(n)						\
-+		)
+ 	if (e->ctype == &null_ctype)
+ 		return 1;
+-	if (!(e->flags & Int_const_expr))
++	if (!(e->flags & EXPR_FLAG_INT_CONST_EXPR))
+ 		return 0;
+ 	return is_zero_constant(e) ? 2 : 0;
+ }
+@@ -1001,8 +1003,9 @@ static struct symbol *evaluate_compare(struct expression *expr)
+ 	const char *typediff;
  
- /**
-  * roundup_pow_of_two - round the given value up to nearest power of two
-@@ -165,14 +165,14 @@ unsigned long __rounddown_pow_of_two(unsigned long n)
-  * - the result is undefined when n == 0
-  * - this can be used to initialise global variables from constant data
-  */
--#define roundup_pow_of_two(n)			\
--(						\
--	__builtin_constant_p(n) ? (		\
--		(n == 1) ? 1 :			\
--		(1UL << (ilog2((n) - 1) + 1))	\
--				   ) :		\
--	__roundup_pow_of_two(n)			\
-- )
-+#define roundup_pow_of_two(n)				\
-+	__builtin_choose_expr(				\
-+		__builtin_constant_p(n),		\
-+		(					\
-+			(n == 1) ? 1 :			\
-+			(1UL << (ilog2((n) - 1) + 1))	\
-+			),				\
-+		__roundup_pow_of_two(n))
+ 	if (expr->flags) {
+-		if (!(expr->left->flags & expr->right->flags & Int_const_expr))
+-			expr->flags = 0;
++		if (!(expr->left->flags & expr->right->flags &
++				EXPR_FLAG_INT_CONST_EXPR))
++			expr->flags = EXPR_FLAG_NONE;
+ 	}
  
- /**
-  * rounddown_pow_of_two - round the given value down to nearest power of two
-@@ -182,12 +182,8 @@ unsigned long __rounddown_pow_of_two(unsigned long n)
-  * - the result is undefined when n == 0
-  * - this can be used to initialise global variables from constant data
-  */
--#define rounddown_pow_of_two(n)			\
--(						\
--	__builtin_constant_p(n) ? (		\
--		(1UL << ilog2(n))) :		\
--	__rounddown_pow_of_two(n)		\
-- )
-+#define rounddown_pow_of_two(n)		\
-+	(1UL << ilog2(n))
+ 	/* Type types? */
+@@ -1120,10 +1123,11 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 	}
  
- /**
-  * order_base_2 - calculate the (rounded up) base 2 order of the argument
-diff --git a/include/uapi/linux/swab.h b/include/uapi/linux/swab.h
-index 0e011eb..d44773e 100644
---- a/include/uapi/linux/swab.h
-+++ b/include/uapi/linux/swab.h
-@@ -102,28 +102,28 @@ static inline __attribute_const__ __u32 __fswahb32(__u32 val)
-  * __swab16 - return a byteswapped 16-bit value
-  * @x: value to byteswap
-  */
--#define __swab16(x)				\
--	(__builtin_constant_p((__u16)(x)) ?	\
--	___constant_swab16(x) :			\
--	__fswab16(x))
-+#define __swab16(x)							\
-+	__builtin_choose_expr(__builtin_constant_p((__u16)(x)),	\
-+			___constant_swab16(x),				\
-+			__fswab16(x))
+ 	if (expr->flags) {
+-		int flags = expr->conditional->flags & Int_const_expr;
++		int flags = (expr->conditional->flags &
++			expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR));
+ 		flags &= (*true)->flags & expr->cond_false->flags;
+ 		if (!flags)
+-			expr->flags = 0;
++			expr->flags = EXPR_FLAG_NONE;
+ 	}
  
- /**
-  * __swab32 - return a byteswapped 32-bit value
-  * @x: value to byteswap
-  */
--#define __swab32(x)				\
--	(__builtin_constant_p((__u32)(x)) ?	\
--	___constant_swab32(x) :			\
--	__fswab32(x))
-+#define __swab32(x)							\
-+	__builtin_choose_expr(__builtin_constant_p((__u32)(x)),	\
-+			___constant_swab32(x),				\
-+			__fswab32(x))
+ 	lclass = classify_type(ltype, &ltype);
+@@ -1681,7 +1685,7 @@ static struct symbol *evaluate_addressof(struct expression *expr)
+ 	}
+ 	ctype = op->ctype;
+ 	*expr = *op->unop;
+-	expr->flags = 0;
++	expr->flags = EXPR_FLAG_NONE;
  
- /**
-  * __swab64 - return a byteswapped 64-bit value
-  * @x: value to byteswap
-  */
--#define __swab64(x)				\
--	(__builtin_constant_p((__u64)(x)) ?	\
--	___constant_swab64(x) :			\
--	__fswab64(x))
-+#define __swab64(x)							\
-+	__builtin_choose_expr(__builtin_constant_p((__u64)(x)),	\
-+			___constant_swab64(x),				\
-+			__fswab64(x))
+ 	if (expr->type == EXPR_SYMBOL) {
+ 		struct symbol *sym = expr->symbol;
+@@ -1709,7 +1713,7 @@ static struct symbol *evaluate_dereference(struct expression *expr)
+ 	/* Simplify: *&(expr) => (expr) */
+ 	if (op->type == EXPR_PREOP && op->op == '&') {
+ 		*expr = *op->unop;
+-		expr->flags = 0;
++		expr->flags = EXPR_FLAG_NONE;
+ 		return expr->ctype;
+ 	}
  
- /**
-  * __swahw32 - return a word-swapped 32-bit value
-
---=-=-=
-Content-Type: text/plain
-
-This patch series is split into four parts:
-- The first part deals with the refactorization of the current integer
-  constant expression handling and introduces some support for
-  recognizing arithmetic expressions. [1-5/13]
-- The second part introduces support for recognizing address constants.
-  [6/13]
-- The third part introduces a check for the constness of static storage
-  duration objects' initializers. [7/13]
-- The last part stems from my tests with the kernel. It contains things
-  I missed in the first [9-10/13] and second [8,12/13] parts and
-  relaxes some of the constraints on constant expressions [11/13].
-  For the last patch [13/13], please see below.
-
-My initial intent was to rework the current integer constant expression
-handling in order to allow for the recognition of constant subexpressions
-built up by means of __builtin_choose_expr(). Hence the first part.
-
-However, since I had to touch the whole constant expression handling
-code anyways, I decided to experimentally extend it to support
-arithmetic constant expressions and address constants as well. Hence
-the second part.
-
-Since the additional information on expressions obtained through the
-first two parts is rather pointless without making any use of it, I
-implemented part three, the checking of static storage duration
-objects' initializers for constness.
-This part is the reason why there is a 'RFC' tag in the subject.
-It is up to you to decide whether letting sparse check for C99
-conformity is a valuable thing to have or whether being stricter than
-GCC is counter-productive/completely idiotic.
-
-Although the patches of the fourth part, the fixup part, fit very well
-into the first two categories, their associated testcases, if any,
-depend on [7/13]. Thus, I dediced to keep the order as is.
-
-If you decide that you do not want to have the third part, I will
-resend a stripped version of the first one only, together with
-[9-10/13].
-
-
-Random notes:
-
-- [1/13] is basically a renaming patch only. It introduces additional
-  flags used in later patches. It should not alter any behaviour.
-
-- I am not very confident about [13/13]. It could introduce some
-  new issues as well as just fix symptoms, not the problem.
-  Please double check when reviewing.
-
-- This series introduces two new testsuite failers, namely
-  validation/choose_expr.c and validation/builtin_bswap.c.
-  These testcases really violate the constexpr constraints. However,
-  for the moment, I left them as is.
-
-
-Results from running sparse on the kernel:
-
-For testing, I ran sparse without and with this series applied on an
-allmodconfig kernel on x86_64.
-Beforehand, I fixed commonly used macros, namely log2- and
-swab-related ones and to_cpumask() to qualify as constexprs,
-if possible. See the attached diff (and blame me for attaching diffs).
-Especially log2() needs this fixing anyways since it is used all over
-the place where only integer constant expressions are allowed (in array
-designators).
-
-sparse now finds 519 occurences of non-const initializers of static
-storage duration objects, 474 of which are located in drivers/acpi
-and stem from this subsystem's custom offsetof macro implemented by
-means of taking pointer differences.
-
-The remaining hits are distributed as follows
-14 drivers/net/ethernet/sfc/
-13 drivers/isdn/hardware/mISDN/
- 8 drivers/usb/core/
- 2 drivers/net/wireless/libertas_tf/
- 1 drivers/infiniband/hw/qib/
- 1 drivers/misc/genwqe/
- 1 drivers/net/ethernet/qlogic/qlcnic/
- 1 drivers/net/wireless/ath/ath6kl/
- 1 drivers/scsi/snic/
- 1 drivers/staging/comedi/drivers/
- 1 drivers/tty/ipwireless/
- 1 net/wireless/
-
-OTOH, 40 errors due to non-integer constant expressions in array
-designators formerly spit out by sparse have vanished. This is because
-the attached diff on log2() relies on __builtin_warning() getting
-recognized as an integer constant, i.e. on [10/13].
-
-
-
-Nicolai Stange (13):
-  expression: introduce additional expression constness tracking flags
-  expression: examine constness of casts at evaluation only
-  expression: examine constness of binops and alike at evaluation only
-  expression: examine constness of preops at evaluation only
-  expression: examine constness of conditionals at evaluation only
-  expression, evaluate: add support for recognizing address constants
-  evaluate: check static storage duration objects' intializers'
-    constness
-  expression: recognize references to labels as address constants
-  expression: examine constness of __builtin_offsetof at evaluation only
-  symbol: flag builtins constant_p, safe_p and warning as constexprs
-  evaluate: relax some constant expression rules for pointer expressions
-  expression, evaluate: support compound literals as address constants
-  symbol: do not inherit storage modifiers from base types at
-    examination
-
- evaluate.c                              | 191 +++++++++++++++++++++++++-------
- expand.c                                |   2 +-
- expression.c                            |  54 +++++----
- expression.h                            | 133 +++++++++++++++++++++-
- symbol.c                                |  12 +-
- validation/constexpr-binop.c            |  33 ++++++
- validation/constexpr-cast.c             |  25 +++++
- validation/constexpr-compound-literal.c |  18 +++
- validation/constexpr-conditional.c      |  34 ++++++
- validation/constexpr-init.c             | 109 ++++++++++++++++++
- validation/constexpr-offsetof.c         |  21 ++++
- validation/constexpr-preop.c            |  29 +++++
- 12 files changed, 578 insertions(+), 83 deletions(-)
- create mode 100644 validation/constexpr-binop.c
- create mode 100644 validation/constexpr-cast.c
- create mode 100644 validation/constexpr-compound-literal.c
- create mode 100644 validation/constexpr-conditional.c
- create mode 100644 validation/constexpr-init.c
- create mode 100644 validation/constexpr-offsetof.c
- create mode 100644 validation/constexpr-preop.c
-
+@@ -1799,8 +1803,8 @@ static struct symbol *evaluate_sign(struct expression *expr)
+ {
+ 	struct symbol *ctype = expr->unop->ctype;
+ 	int class = classify_type(ctype, &ctype);
+-	if (expr->flags && !(expr->unop->flags & Int_const_expr))
+-		expr->flags = 0;
++	if (expr->flags && !(expr->unop->flags & EXPR_FLAG_INT_CONST_EXPR))
++		expr->flags = EXPR_FLAG_NONE;
+ 	/* should be an arithmetic type */
+ 	if (!(class & TYPE_NUM))
+ 		return bad_expr_type(expr);
+@@ -1854,8 +1858,9 @@ static struct symbol *evaluate_preop(struct expression *expr)
+ 		return evaluate_postop(expr);
+ 
+ 	case '!':
+-		if (expr->flags && !(expr->unop->flags & Int_const_expr))
+-			expr->flags = 0;
++		if (expr->flags && !(expr->unop->flags &
++					EXPR_FLAG_INT_CONST_EXPR))
++			expr->flags = EXPR_FLAG_NONE;
+ 		if (is_safe_type(ctype))
+ 			warning(expr->pos, "testing a 'safe expression'");
+ 		if (is_float_type(ctype)) {
+@@ -2734,14 +2739,19 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 
+ 	class1 = classify_type(ctype, &t1);
+ 
+-	/* cast to non-integer type -> not an integer constant expression */
+-	if (!is_int(class1))
+-		expr->flags = 0;
++	/* cast to non-numeric type -> not an arithmetic expression */
++	if (!(class1 & TYPE_NUM))
++		expr->flags &=
++			~expr_clear_flag_mask(EXPR_FLAG_ARITH_CONST_EXPR);
++	/* cast to float type -> not an integer constant expression */
++	else if (class1 & TYPE_FLOAT)
++		expr->flags &= ~expr_clear_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 	/* if argument turns out to be not an integer constant expression *and*
+ 	   it was not a floating literal to start with -> too bad */
+-	else if (expr->flags == Int_const_expr &&
+-		!(target->flags & Int_const_expr))
+-		expr->flags = 0;
++	else if (!(target->flags &
++			(EXPR_FLAG_INT_CONST_EXPR | EXPR_FLAG_FP_CONST)))
++		expr->flags &= ~expr_clear_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
++
+ 	/*
+ 	 * You can always throw a value away by casting to
+ 	 * "void" - that's an implicit "force". Note that
+@@ -2803,7 +2813,7 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 			"cast adds address space to expression (<asn:%d>)", as1);
+ 
+ 	if (!(t1->ctype.modifiers & MOD_PTRINHERIT) && class1 == TYPE_PTR &&
+-	    !as1 && (target->flags & Int_const_expr)) {
++	    !as1 && (target->flags & EXPR_FLAG_INT_CONST_EXPR)) {
+ 		if (t1->ctype.base_type == &void_ctype) {
+ 			if (is_zero_constant(target)) {
+ 				/* NULL */
+@@ -2933,7 +2943,7 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+ 		}
+ 		ctype = field;
+ 		expr->type = EXPR_VALUE;
+-		expr->flags = Int_const_expr;
++		expr->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 		expr->value = offset;
+ 		expr->taint = 0;
+ 		expr->ctype = size_t_ctype;
+@@ -2951,7 +2961,8 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+ 		ctype = ctype->ctype.base_type;
+ 		if (!expr->index) {
+ 			expr->type = EXPR_VALUE;
+-			expr->flags = Int_const_expr;
++			expr->flags
++				= expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			expr->value = 0;
+ 			expr->taint = 0;
+ 			expr->ctype = size_t_ctype;
+@@ -2968,13 +2979,14 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+ 			m = alloc_const_expression(expr->pos,
+ 						   bits_to_bytes(ctype->bit_size));
+ 			m->ctype = size_t_ctype;
+-			m->flags = Int_const_expr;
++			m->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			expr->type = EXPR_BINOP;
+ 			expr->left = idx;
+ 			expr->right = m;
+ 			expr->op = '*';
+ 			expr->ctype = size_t_ctype;
+-			expr->flags = m->flags & idx->flags & Int_const_expr;
++			expr->flags = m->flags & idx->flags &
++				expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 		}
+ 	}
+ 	if (e) {
+@@ -2985,7 +2997,8 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+ 		if (!evaluate_expression(e))
+ 			return NULL;
+ 		expr->type = EXPR_BINOP;
+-		expr->flags = e->flags & copy->flags & Int_const_expr;
++		expr->flags = e->flags & copy->flags &
++			expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 		expr->op = '+';
+ 		expr->ctype = size_t_ctype;
+ 		expr->left = copy;
+diff --git a/expand.c b/expand.c
+index 0f6720c..afca611 100644
+--- a/expand.c
++++ b/expand.c
+@@ -1212,7 +1212,7 @@ static int expand_statement(struct statement *stmt)
+ 
+ static inline int bad_integer_constant_expression(struct expression *expr)
+ {
+-	if (!(expr->flags & Int_const_expr))
++	if (!(expr->flags & EXPR_FLAG_INT_CONST_EXPR))
+ 		return 1;
+ 	if (expr->taint & Taint_comma)
+ 		return 1;
+diff --git a/expression.c b/expression.c
+index 7293d47..8582dc9 100644
+--- a/expression.c
++++ b/expression.c
+@@ -131,7 +131,8 @@ static struct token *parse_type(struct token *token, struct expression **tree)
+ {
+ 	struct symbol *sym;
+ 	*tree = alloc_expression(token->pos, EXPR_TYPE);
+-	(*tree)->flags = Int_const_expr; /* sic */
++	(*tree)->flags
++		= expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR); /* sic */
+ 	token = typename(token, &sym, NULL);
+ 	if (sym->ident)
+ 		sparse_error(token->pos,
+@@ -146,7 +147,7 @@ static struct token *builtin_types_compatible_p_expr(struct token *token,
+ {
+ 	struct expression *expr = alloc_expression(
+ 		token->pos, EXPR_COMPARE);
+-	expr->flags = Int_const_expr;
++	expr->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 	expr->op = SPECIAL_EQUAL;
+ 	token = token->next;
+ 	if (!match_op(token, '('))
+@@ -200,7 +201,7 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 			return expect(token, ')', "at end of __builtin_offset");
+ 		case SPECIAL_DEREFERENCE:
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = Int_const_expr;
++			e->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			e->op = '[';
+ 			*p = e;
+ 			p = &e->down;
+@@ -208,7 +209,7 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 		case '.':
+ 			token = token->next;
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = Int_const_expr;
++			e->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			e->op = '.';
+ 			if (token_type(token) != TOKEN_IDENT) {
+ 				sparse_error(token->pos, "Expected member name");
+@@ -220,7 +221,7 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 		case '[':
+ 			token = token->next;
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = Int_const_expr;
++			e->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			e->op = '[';
+ 			token = parse_expression(token, &e->index);
+ 			token = expect(token, ']',
+@@ -336,7 +337,7 @@ got_it:
+ 			"likely to produce unsigned long (and a warning) here",
+ 			show_token(token));
+         expr->type = EXPR_VALUE;
+-	expr->flags = Int_const_expr;
++	expr->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST);
+         expr->ctype = ctype_integer(size, want_unsigned);
+         expr->value = value;
+ 	return;
+@@ -361,7 +362,7 @@ Float:
+ 	else
+ 		goto Enoint;
+ 
+-	expr->flags = Float_literal;
++	expr->flags = expr_set_flag_mask(EXPR_FLAG_FP_CONST);
+ 	expr->type = EXPR_FVALUE;
+ 	return;
+ 
+@@ -376,7 +377,7 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 	switch (token_type(token)) {
+ 	case TOKEN_CHAR ... TOKEN_WIDE_CHAR_EMBEDDED_3:
+ 		expr = alloc_expression(token->pos, EXPR_VALUE);   
+-		expr->flags = Int_const_expr;
++		expr->flags = expr_set_flag_mask(EXPR_FLAG_CHAR_CONST);
+ 		expr->ctype = token_type(token) < TOKEN_WIDE_CHAR ? &int_ctype : &long_ctype;
+ 		get_char_constant(token, &expr->value);
+ 		token = token->next;
+@@ -390,7 +391,7 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 
+ 	case TOKEN_ZERO_IDENT: {
+ 		expr = alloc_expression(token->pos, EXPR_SYMBOL);
+-		expr->flags = Int_const_expr;
++		expr->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 		expr->ctype = &int_ctype;
+ 		expr->symbol = &zero_int;
+ 		expr->symbol_name = token->ident;
+@@ -417,7 +418,7 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 			*expr = *sym->initializer;
+ 			/* we want the right position reported, thus the copy */
+ 			expr->pos = token->pos;
+-			expr->flags = Int_const_expr;
++			expr->flags = expr_set_flag_mask(EXPR_FLAG_ENUM_CONST);
+ 			token = next;
+ 			break;
+ 		}
+@@ -457,7 +458,9 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 		}
+ 		if (token->special == '[' && lookup_type(token->next)) {
+ 			expr = alloc_expression(token->pos, EXPR_TYPE);
+-			expr->flags = Int_const_expr; /* sic */
++			/* sic */
++			expr->flags
++				= expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 			token = typename(token->next, &expr->symbol, NULL);
+ 			token = expect(token, ']', "in type expression");
+ 			break;
+@@ -573,7 +576,8 @@ static struct token *type_info_expression(struct token *token,
+ 	struct token *p;
+ 
+ 	*tree = expr;
+-	expr->flags = Int_const_expr; /* XXX: VLA support will need that changed */
++	/* XXX: VLA support will need that changed */
++	expr->flags = expr_set_flag_mask(EXPR_FLAG_INT_CONST_EXPR);
+ 	token = token->next;
+ 	if (!match_op(token, '(') || !lookup_type(token->next))
+ 		return unary_expression(token, &expr->cast_expression);
+@@ -662,7 +666,7 @@ static struct token *unary_expression(struct token *token, struct expression **t
+ 			unary = alloc_expression(token->pos, EXPR_PREOP);
+ 			unary->op = token->special;
+ 			unary->unop = unop;
+-			unary->flags = unop->flags & Int_const_expr;
++			unary->flags = expr_flags_decay_consts(unop->flags);
+ 			*tree = unary;
+ 			return next;
+ 		}
+@@ -720,10 +724,24 @@ static struct token *cast_expression(struct token *token, struct expression **tr
+ 			if (!v)
+ 				return token;
+ 			cast->cast_expression = v;
+-			if (v->flags & Int_const_expr)
+-				cast->flags = Int_const_expr;
+-			else if (v->flags & Float_literal) /* and _not_ int */
+-				cast->flags = Int_const_expr | Float_literal;
++
++			cast->flags = expr_flags_decay_consts(v->flags);
++			/*
++			 * Up to now, we missed the (int).0 case here
++			 * which should really get a
++			 * EXPR_FLAG_INT_CONST_EXPR marker. Also,
++			 * conversion to non-numeric types is not
++			 * properly reflected up to this point.
++			 * However, we do not know until evaluation.
++			 * For the moment, in order to preserve
++			 * semantics, speculatively set
++			 * EXPR_FLAG_INT_CONST_EXPR if
++			 * EXPR_FLAG_FP_CONST is set. evaluate_cast()
++			 * will unset inappropriate flags again after
++			 * examining type information.
++			 */
++			if (v->flags & EXPR_FLAG_FP_CONST)
++				cast->flags |= EXPR_FLAG_INT_CONST_EXPR;
+ 			return token;
+ 		}
+ 	}
+@@ -760,8 +778,9 @@ static struct token *cast_expression(struct token *token, struct expression **tr
+ 				sparse_error(next->pos, "No right hand side of '%s'-expression", show_special(op));	\
+ 				break;					\
+ 			}						\
+-			top->flags = left->flags & right->flags		\
+-						& Int_const_expr;	\
++			top->flags					\
++				= expr_flags_decay_consts(left->flags	\
++							& right->flags); \
+ 			top->op = op;					\
+ 			top->left = left;				\
+ 			top->right = right;				\
+@@ -865,12 +884,11 @@ struct token *conditional_expression(struct token *token, struct expression **tr
+ 		token = expect(token, ':', "in conditional expression");
+ 		token = conditional_expression(token, &expr->cond_false);
+ 		if (expr->left && expr->cond_false) {
+-			int is_const = expr->left->flags &
+-					expr->cond_false->flags &
+-					Int_const_expr;
++			enum expression_flags flags = expr->left->flags &
++				expr->cond_false->flags;
+ 			if (expr->cond_true)
+-				is_const &= expr->cond_true->flags;
+-			expr->flags = is_const;
++				flags &= expr->cond_true->flags;
++			expr->flags = expr_flags_decay_consts(flags);
+ 		}
+ 	}
+ 	return token;
+diff --git a/expression.h b/expression.h
+index 80b3be5..1c8a563 100644
+--- a/expression.h
++++ b/expression.h
+@@ -66,10 +66,133 @@ enum expression_type {
+ 	EXPR_OFFSETOF,
+ };
+ 
+-enum {
+-	Int_const_expr = 1,
+-	Float_literal = 2,
+-}; /* for expr->flags */
++
++/*
++ * Flags for tracking the promotion of various attributes from
++ * subexpressions to their parents.
++ *
++ * Currently, they only cope with an expression's constness as defined
++ * by C99.
++ *
++ * The flags are not independent as one might imply another. Use
++ * expr_set_flag_mask() and expr_clear_flag_mask() for setting and
++ * clearing a particular flag.
++ */
++enum expression_flags {
++	EXPR_FLAG_NONE = 0,
++	/*
++	 * A constant in the sense of [6.4.4]:
++	 * - Integer constant [6.4.4.1]
++	 * - Floating point constant [6.4.4.2]
++	 * - Enumeration constant [6.4.4.3]
++	 * - Character constant [6.4.4.4]
++	 */
++	EXPR_FLAG_INT_CONST = (1 << 0),
++	EXPR_FLAG_FP_CONST = (1 << 1),
++	EXPR_FLAG_ENUM_CONST = (1 << 2),
++	EXPR_FLAG_CHAR_CONST = (1 << 3),
++
++	/*
++	 * A constant expression in the sense of [6.6]:
++	 * - integer constant expression [6.6(6)]
++	 * - arithmetic constant expression [6.6(8)]
++	 * - address constanr [6.6(9)]
++	 */
++	EXPR_FLAG_INT_CONST_EXPR = (1 << 4),
++	EXPR_FLAG_ARITH_CONST_EXPR = (1 << 5),
++	EXPR_FLAG_ADDR_CONST_EXPR = (1 << 6),
++};
++
++/*
++ * Calculate a mask to be or'ed in in order to set a particular
++ * expression flag.
++ *
++ * Only one single flag from enum expression_flags is allowed at a
++ * time.
++ */
++static inline enum expression_flags expr_set_flag_mask
++	(const enum expression_flags flag)
++{
++	/* obey the implications */
++	enum expression_flags implied_flags = EXPR_FLAG_NONE;
++
++	switch (flag) {
++	case EXPR_FLAG_INT_CONST:
++	case EXPR_FLAG_ENUM_CONST:
++	case EXPR_FLAG_CHAR_CONST:
++		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
++	/* fallthrough */
++	case EXPR_FLAG_FP_CONST:
++	case EXPR_FLAG_INT_CONST_EXPR:
++		implied_flags |= EXPR_FLAG_ARITH_CONST_EXPR;
++	/* fallthrough */
++	case EXPR_FLAG_ARITH_CONST_EXPR:
++	case EXPR_FLAG_ADDR_CONST_EXPR:
++	case EXPR_FLAG_NONE:
++		break;
++	}
++
++	return (implied_flags | flag);
++}
++
++/*
++ * Calculate a mask to be negated and and'ed in in order to clear a
++ * particular expression flag.
++ *
++ * Only one single flag from enum expression_flags is allowed at a
++ * time.
++ */
++static inline enum expression_flags expr_clear_flag_mask
++	(const enum expression_flags flag)
++{
++	/* obey the implications */
++	enum expression_flags implied_flags = EXPR_FLAG_NONE;
++
++	switch (flag) {
++	case EXPR_FLAG_ARITH_CONST_EXPR:
++		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
++		implied_flags |= EXPR_FLAG_FP_CONST;
++	/* fallthrough */
++	case EXPR_FLAG_INT_CONST_EXPR:
++		implied_flags |= EXPR_FLAG_INT_CONST;
++		implied_flags |= EXPR_FLAG_ENUM_CONST;
++		implied_flags |= EXPR_FLAG_CHAR_CONST;
++	/* fallthrough */
++	case EXPR_FLAG_ADDR_CONST_EXPR:
++	case EXPR_FLAG_INT_CONST:
++	case EXPR_FLAG_FP_CONST:
++	case EXPR_FLAG_ENUM_CONST:
++	case EXPR_FLAG_CHAR_CONST:
++	case EXPR_FLAG_NONE:
++		break;
++	}
++
++	return (implied_flags | flag);
++}
++
++/*
++ *  Remove any "Constant" [6.4.4] flag, but retain the "constant
++ * expression" [6.6] flags.
++ * Used to merge the constantness flags of primary subexpressions
++ * into their parent expressions' ones.
++ */
++static inline enum expression_flags expr_flags_decay_consts
++	(enum expression_flags flags)
++{
++	return (flags & ~(expr_clear_flag_mask(EXPR_FLAG_INT_CONST)
++			  | expr_clear_flag_mask(EXPR_FLAG_FP_CONST)
++			  | expr_clear_flag_mask(EXPR_FLAG_ENUM_CONST)
++			  | expr_clear_flag_mask(EXPR_FLAG_CHAR_CONST)));
++}
++
++/* Purge any constantness related flag. */
++static inline enum expression_flags expr_flags_remove_consts
++	(enum expression_flags flags)
++{
++	return (flags &
++		~(expr_clear_flag_mask(EXPR_FLAG_ARITH_CONST_EXPR)
++		  | expr_clear_flag_mask(EXPR_FLAG_ADDR_CONST_EXPR)));
++}
+ 
+ enum {
+ 	Taint_comma = 1,
+@@ -77,7 +200,7 @@ enum {
+ 
+ struct expression {
+ 	enum expression_type type:8;
+-	unsigned flags:8;
++	enum expression_flags flags:8;
+ 	int op;
+ 	struct position pos;
+ 	struct symbol *ctype;
 -- 
 2.4.5
 
---=-=-=--
