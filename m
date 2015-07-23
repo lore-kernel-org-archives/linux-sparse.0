@@ -1,54 +1,69 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [PATCH] ptrlist: reading deleted items in NEXT_PTR_LIST()
-Date: Thu, 23 Jul 2015 11:24:14 +0300
-Message-ID: <20150723082414.GA30778@mwanda>
+From: Nicolai Stange <nicstange@gmail.com>
+Subject: Re: [PATCH RFC 00/13] improve constexpr handling
+Date: Thu, 23 Jul 2015 11:13:57 +0200
+Message-ID: <871tfzi6cq.fsf@gmail.com>
+References: <87y4i7kdlq.fsf@gmail.com> <20150723003757.GA28528@cloud>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:43222 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751325AbbGWIYX (ORCPT
+Received: from mail-wi0-f179.google.com ([209.85.212.179]:34155 "EHLO
+	mail-wi0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752574AbbGWJOB (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Thu, 23 Jul 2015 04:24:23 -0400
-Received: from userv0022.oracle.com (userv0022.oracle.com [156.151.31.74])
-	by userp1040.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id t6N8ONiR009776
-	(version=TLSv1 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2015 08:24:23 GMT
-Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
-	by userv0022.oracle.com (8.13.8/8.13.8) with ESMTP id t6N8OMQQ025208
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=FAIL)
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2015 08:24:23 GMT
-Received: from abhmp0001.oracle.com (abhmp0001.oracle.com [141.146.116.7])
-	by aserv0121.oracle.com (8.13.8/8.13.8) with ESMTP id t6N8OMYP022683
-	for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2015 08:24:22 GMT
-Content-Disposition: inline
+	Thu, 23 Jul 2015 05:14:01 -0400
+Received: by wibud3 with SMTP id ud3so14769813wib.1
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2015 02:13:59 -0700 (PDT)
+In-Reply-To: <20150723003757.GA28528@cloud> (josh@joshtriplett.org's message
+	of "Wed, 22 Jul 2015 17:37:57 -0700")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: josh@joshtriplett.org
+Cc: Nicolai Stange <nicstange@gmail.com>, linux-sparse@vger.kernel.org, viro@ZenIV.linux.org.uk
 
-If you call DELETE_CURRENT_PTR(), then you can sometimes end up with a
-__list->nr that is zero.  The FOR_EACH_PTR() macro can handle this but
-the NEXT_PTR_LIST() macro returns ptr = 0xf0f0f0f0 which leads to a
-segfault.
+josh@joshtriplett.org writes:
+> [Side note: for some reason, your mail had your message ordered *after*
+> your attached diff, so replies quote the diff before the message.]
+Yes, I messed it up for some reason. Sorry for that.
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
----
- ptrlist.h | 2 ++
- 1 file changed, 2 insertions(+)
+>> Since the additional information on expressions obtained through the
+>> first two parts is rather pointless without making any use of it, I
+>> implemented part three, the checking of static storage duration
+>> objects' initializers for constness.
+>> This part is the reason why there is a 'RFC' tag in the subject.
+>> It is up to you to decide whether letting sparse check for C99
+>> conformity is a valuable thing to have or whether being stricter than
+>> GCC is counter-productive/completely idiotic.
+>
+> I think it's absolutely a valuable thing to have.  It may or may not be
+> the right *default* behavior, but having an appropriate -W option to
+> enable it would be a good start.
 
-diff --git a/ptrlist.h b/ptrlist.h
-index 58d3bda..61e159f 100644
---- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -97,6 +97,8 @@ static inline void *last_ptr_list(struct ptr_list *list)
- 			} else {							\
- 				__list = __list->next;					\
- 				ptr = NULL;						\
-+				while (__list->nr == 0 && __list != __head)		\
-+					__list = __list->next;				\
- 				if (__list != __head) {					\
- 					__nr = 0;					\
- 					ptr = PTR_ENTRY(__list,0);			\
--- 
-2.1.4
+My next resend will contain such a -Wcheck-static-initializers then.
+However, I will delay that resend in order to be able to incorporate
+other reviews arriving in the meantime.
 
+
+> On Thu, Jul 23, 2015 at 12:54:25AM +0200, Nicolai Stange wrote:
+>> sparse now finds 519 occurences of non-const initializers of static
+>> storage duration objects, 474 of which are located in drivers/acpi
+>> and stem from this subsystem's custom offsetof macro implemented by
+>> means of taking pointer differences.
+>
+> Ideally, I'd suggest that ACPICA should add a translation from
+> ACPI_OFFSET to offsetof as part of its Linux-izing scripts.
+>
+> That said, I also can't think of an obvious reason why ACPI_OFFSET
+> *should* be considered non-constant.  Perhaps there's a detail in the
+> C99 spec that explains why what it does isn't OK, but it *seems* like it
+> should be a compile-time constant expression.  I've CCed Al Viro, who
+> knows the C99 constant expression rules very well; Al, could you provide
+> some clarity here?  The ACPI_OFFSET macro in question expands to this:
+>
+> (acpi_size) (((u8 *) (void *) ((&(((struct some_struct *) 0)->fieldname)))) - ((u8 *) (void *) (((void *) (void *) 0))))
+>
+> Does the -> make this non-constant?
+
+No, it is the pointer difference. At least to my interpretion of C99
+[6.6(9)] which might be arguable.
+Upon your request, I could relax these constraints as I have did already for
+some special cases of conditionals in [11/13].
