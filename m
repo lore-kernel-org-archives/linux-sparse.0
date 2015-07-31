@@ -1,37 +1,60 @@
 From: Tony Camuso <tcamuso@redhat.com>
-Subject: Re: [PATCH 3/3] Add NOWARN and NOERR compile conditions
-Date: Fri, 31 Jul 2015 13:07:43 -0400
-Message-ID: <55BBAB5F.3070005@redhat.com>
-References: <1438216001-8862-1-git-send-email-tcamuso@redhat.com>
- <1438216001-8862-4-git-send-email-tcamuso@redhat.com>
- <20150730025502.GA1692@x>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH 3/3 V2] lib.c: add Wall_off switch
+Date: Fri, 31 Jul 2015 13:12:14 -0400
+Message-ID: <1438362734-14505-1-git-send-email-tcamuso@redhat.com>
+References: <1438216001-8862-4-git-send-email-tcamuso@redhat.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:45484 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56086 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1753866AbbGaRHp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 31 Jul 2015 13:07:45 -0400
-In-Reply-To: <20150730025502.GA1692@x>
+	id S1753148AbbGaRMP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Fri, 31 Jul 2015 13:12:15 -0400
+In-Reply-To: <1438216001-8862-4-git-send-email-tcamuso@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: sparse@chrisli.org, linux-sparse@vger.kernel.org
+To: josh@joshtriplett.org, linux-sparse@vger.kernel.org
+Cc: tcamuso@redhat.com, sparse@chrisli.org
 
-On 07/29/2015 10:55 PM, Josh Triplett wrote:
-> On Wed, Jul 29, 2015 at 08:26:41PM -0400, Tony Camuso wrote:
->> Allows building sparse to avert reporting semantic problems, e.g.
->> using sparse as a tokenizer to create a graph of KABI symbols and
->> their dependencies.
->>
->> Signed-off-by: Tony Camuso <tcamuso@redhat.com>
->
-> This doesn't seem like something that should be determined at compile
-> time.  Ideally, this should be determined at runtime.
->
+Disables all warning and error reporting for using sparse as a
+tokenizer only.
 
-I will be sending the new patch as a reply to the original, though the
-subject line is different, because I'm using the input switches instead
-of build-time constants.
+Signed-off-by: Tony Camuso <tcamuso@redhat.com>
+---
+ lib.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/lib.c b/lib.c
+index 8dc5bcf..c274a68 100644
+--- a/lib.c
++++ b/lib.c
+@@ -241,6 +241,7 @@ int Wtypesign = 0;
+ int Wundef = 0;
+ int Wuninitialized = 1;
+ int Wvla = 1;
++int Wall_off = 0;
+ 
+ int dbg_entry = 0;
+ int dbg_dead = 0;
+@@ -464,6 +465,7 @@ static const struct warning {
+ 	{ "undef", &Wundef },
+ 	{ "uninitialized", &Wuninitialized },
+ 	{ "vla", &Wvla },
++	{ "all_off", &Wall_off },
+ };
+ 
+ enum {
+@@ -479,6 +481,12 @@ static char **handle_onoff_switch(char *arg, char **next, const struct warning w
+ 	char *p = arg + 1;
+ 	unsigned i;
+ 
++	if (!strcmp(p, "all_off")) {
++		for (i = 0; i < n; i++)
++			*warnings[i].flag = WARNING_FORCE_OFF;
++		return NULL;
++	}
++
+ 	if (!strcmp(p, "sparse-all")) {
+ 		for (i = 0; i < n; i++) {
+ 			if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i].flag != &Wsparse_error)
+-- 
+2.4.3
 
