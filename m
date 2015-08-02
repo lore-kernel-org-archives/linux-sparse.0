@@ -1,7 +1,7 @@
 From: Tony Camuso <tcamuso@redhat.com>
 Subject: Re: [PATCH 3/3] Add NOWARN and NOERR compile conditions
-Date: Sun, 2 Aug 2015 19:16:54 -0400
-Message-ID: <55BEA4E6.50702@redhat.com>
+Date: Sun, 2 Aug 2015 19:22:18 -0400
+Message-ID: <55BEA62A.6070604@redhat.com>
 References: <1438216001-8862-1-git-send-email-tcamuso@redhat.com>
  <1438216001-8862-4-git-send-email-tcamuso@redhat.com>
  <20150730025502.GA1692@x> <55BA0E4E.7000508@redhat.com>
@@ -12,10 +12,10 @@ Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44110 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44245 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751868AbbHBXQ4 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 2 Aug 2015 19:16:56 -0400
+	id S1751979AbbHBXWV (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Sun, 2 Aug 2015 19:22:21 -0400
 In-Reply-To: <CANeU7QkK5N8Jskcq9J1ODCeZEQYSAJTW-6PdKg1uuZeNXPYKTA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -51,59 +51,15 @@ On 08/01/2015 02:45 PM, Christopher Li wrote:
 > Chris
 >
 
-This doubt this is a sparse bug. It is an most likely caused by some RHEL
-specific macros with encapsulated anonymous unions devised to protect the
-Kernel Application Binary Interface while backporting upstream changes
-from point release to point release. I can try to convince the KABI macro
-maintainers to make their macros sparse-compliant, but I'm hoping you agree
-that it might not be a bad idea to provide an option to disable the sparse
-error reporting in the meantime.
+Here's one that might be a sparse bug.
 
-If you're interested in pursuing this further, these are the errors I'm
-seeing, followed by the source that generates them.
+/work/linux/fs/bio.i:5368:26: error: Expected ) at end of cast operator
+/work/linux/fs/bio.i:5368:26: error: got __int128
 
-/work/linux/fs/bio.i:9137:130: error: Expected ) in function declarator
-/work/linux/fs/bio.i:9137:130: error: got (
-builtin:0:0: error: expected ; at end of declaration
-builtin:0:0: error: expected ; at end of declaration
-builtin:0:0: error: expected ; at end of declaration
-/work/linux/fs/bio.i:9137:172: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:172: error: got }
-/work/linux/fs/bio.i:9137:209: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:209: error: got }
-/work/linux/fs/bio.i:9137:266: error: Expected ) in function declarator
-/work/linux/fs/bio.i:9137:266: error: got (
-/work/linux/fs/bio.i:9137:308: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:308: error: got }
-/work/linux/fs/bio.i:9137:350: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:350: error: got }
-/work/linux/fs/bio.i:9137:382: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:382: error: got }
-/work/linux/fs/bio.i:9137:385: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9137:385: error: got }
-/work/linux/fs/bio.i:9139:1: error: Expected ; at the end of type declaration
-/work/linux/fs/bio.i:9139:1: error: got }
+Here is the kernel source in include/linux/math64.h that causes the error.
 
-The anonymous unions giving us those error messages are encapsulated
-in a RHEL-specific macro.
-
-# define _RH_KABI_REPLACE(_orig, _new)                  \
-         union {                                         \
-                 _new;                                   \
-                 struct {                                \
-                         _orig;                          \
-                 } __UNIQUE_ID(rh_kabi_hide);            \
-                 __RH_KABI_CHECK_SIZE_ALIGN(_orig, _new);        \
-         }
-
-Here's an example of the macro invocation.
-
-         RH_KABI_REPLACE(void                    *spin_mlock,  /* Spinner MCS lock */
-                         struct optimistic_spin_queue  *osq)   /* Spinner MCS lock */
-
-
-The preprocessor expands it as follows.
-
-  union { struct optimistic_spin_queue *osq; struct { void *spin_mlock; } __UNIQUE_ID_rh_kabi_hide0; union { _Static_assert(sizeof(struct{struct optimistic_spin_queue *osq;}) <= sizeof(struct{void *   spin_mlock;}), "kabi sizeof test panic"); _Static_assert(__alignof__(struct{struct optimistic_spin_queue *osq;}) <= __alignof__(struct{void *spin_mlock;}), "kabi alignof test panic"); }; };
-
+static inline __attribute__((no_instrument_function)) u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
+{
+  return (u64)(((unsigned __int128)a * mul) >> shift);
+}
 
