@@ -1,83 +1,80 @@
-From: Tony Camuso <tcamuso@redhat.com>
-Subject: Re: [PATCH 2/3 v2] Handle all enum members in case statements
-Date: Tue, 4 Aug 2015 19:52:14 -0400
-Message-ID: <55C1502E.5050609@redhat.com>
-References: <1438216001-8862-3-git-send-email-tcamuso@redhat.com>
- <1438689994-30940-1-git-send-email-tcamuso@redhat.com>
- <CANeU7Qk7Xvs6RQuzDxq-9BrqCg-6VXnDUxmgwkREpWVX4Y2ynQ@mail.gmail.com>
+From: Nicolai Stange <nicstange@gmail.com>
+Subject: Re: [PATCH RFC 00/13] improve constexpr handling
+Date: Wed, 05 Aug 2015 09:24:39 +0200
+Message-ID: <878u9qci4o.fsf@gmail.com>
+References: <87y4i7kdlq.fsf@gmail.com> <20150723003757.GA28528@cloud>
+	<871tfzi6cq.fsf@gmail.com> <20150723184723.GA1605@cloud>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:42704 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751776AbbHDXwP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 4 Aug 2015 19:52:15 -0400
-In-Reply-To: <CANeU7Qk7Xvs6RQuzDxq-9BrqCg-6VXnDUxmgwkREpWVX4Y2ynQ@mail.gmail.com>
+Received: from mail-wi0-f175.google.com ([209.85.212.175]:33162 "EHLO
+	mail-wi0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751093AbbHEHYo (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 5 Aug 2015 03:24:44 -0400
+Received: by wijp15 with SMTP id p15so35814105wij.0
+        for <linux-sparse@vger.kernel.org>; Wed, 05 Aug 2015 00:24:43 -0700 (PDT)
+In-Reply-To: <20150723184723.GA1605@cloud> (josh@joshtriplett.org's message of
+	"Thu, 23 Jul 2015 11:47:23 -0700")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, nicstange@gmail.com
+To: linux-sparse@vger.kernel.org
+Cc: Nicolai Stange <nicstange@gmail.com>, viro@ZenIV.linux.org.uk, josh@joshtriplett.org
 
-
-On 08/04/2015 07:31 PM, Christopher Li wrote:
-> On Tue, Aug 4, 2015 at 8:06 AM, Tony Camuso <tcamuso@redhat.com> wrote:
->> Missing enum members in case statements in c2xml.c and parse.c were
->> causing compile time complaints by gcc 5.1.1. Better to explicitly
->> handle all enum members of the switch variable in case statements,
->> even if they just break.
->>                  break;
->> +       case SYM_PREPROCESSOR:
->> +       case SYM_BASETYPE:
->> +       case SYM_NODE:
->> +       case SYM_PTR:
->> +       case SYM_ARRAY:
->> +       case SYM_ENUM:
->> +       case SYM_TYPEDEF:
->> +       case SYM_TYPEOF:
->> +       case SYM_MEMBER:
->> +       case SYM_BITFIELD:
->> +       case SYM_LABEL:
->> +       case SYM_RESTRICT:
->> +       case SYM_FOULED:
->> +       case SYM_KEYWORD:
->> +       case SYM_BAD:
->> +               break;
+josh@joshtriplett.org writes:
+> On Thu, Jul 23, 2015 at 11:13:57AM +0200, Nicolai Stange wrote:
+>> josh@joshtriplett.org writes:
+>> >> Since the additional information on expressions obtained through the
+>> >> first two parts is rather pointless without making any use of it, I
+>> >> implemented part three, the checking of static storage duration
+>> >> objects' initializers for constness.
+>> >> This part is the reason why there is a 'RFC' tag in the subject.
+>> >> It is up to you to decide whether letting sparse check for C99
+>> >> conformity is a valuable thing to have or whether being stricter than
+>> >> GCC is counter-productive/completely idiotic.
+>> >
+>> > I think it's absolutely a valuable thing to have.  It may or may not be
+>> > the right *default* behavior, but having an appropriate -W option to
+>> > enable it would be a good start.
+>> 
+>> My next resend will contain such a -Wcheck-static-initializers then.
 >
-> I think adding a "default: break" should work. I like your previous patch
-> better, except maybe adding a line break after default.
+> <bikeshed>Shouldn't it be something like -Wnon-constant-initializer,
+> since that's what it checks for?</bikeshed>
 >
-
-It was mentioned to me that the new prevailing wisdom is to "Prefer
-compile time errors to runtime errors", such that each enum'd value
-of a switch variable should be explicitly handled.
-
-I seem to have violated the spirit of that paradigm by using fall through.
-
-I could add a new line and "break" statement after each case.
-
-Or, if you prefer, I can resubmit the original patch with a linefeed after
-the "default:" for good form. Either way, I believe the compiler optimize
-them the same.
-
+>> However, I will delay that resend in order to be able to incorporate
+>> other reviews arriving in the meantime.
 >
->>                          case SYM_ENUM:
->>                          case SYM_RESTRICT:
->>                                  base_type->ident = ident;
->> +                       case SYM_PREPROCESSOR:
->> +                       case SYM_BASETYPE:
+> Sounds reasonable.
 >
-> I notice this has the follow through behavior. It is not a bug.
-> But if some one append some new case there, it is easy to
-> cause unintended follow through. It is better add a break there.
+>> > On Thu, Jul 23, 2015 at 12:54:25AM +0200, Nicolai Stange wrote:
+>> >> sparse now finds 519 occurences of non-const initializers of static
+>> >> storage duration objects, 474 of which are located in drivers/acpi
+>> >> and stem from this subsystem's custom offsetof macro implemented by
+>> >> means of taking pointer differences.
+>> >
+>> > Ideally, I'd suggest that ACPICA should add a translation from
+>> > ACPI_OFFSET to offsetof as part of its Linux-izing scripts.
+>> >
+>> > That said, I also can't think of an obvious reason why ACPI_OFFSET
+>> > *should* be considered non-constant.  Perhaps there's a detail in the
+>> > C99 spec that explains why what it does isn't OK, but it *seems* like it
+>> > should be a compile-time constant expression.  I've CCed Al Viro, who
+>> > knows the C99 constant expression rules very well; Al, could you provide
+>> > some clarity here?  The ACPI_OFFSET macro in question expands to this:
+>> >
+>> > (acpi_size) (((u8 *) (void *) ((&(((struct some_struct *) 0)->fieldname)))) - ((u8 *) (void *) (((void *) (void *) 0))))
+>> >
+>> > Does the -> make this non-constant?
+>> 
+>> No, it is the pointer difference. At least to my interpretion of C99
+>> [6.6(9)] which might be arguable.
+>> Upon your request, I could relax these constraints as I have did already for
+>> some special cases of conditionals in [11/13].
+>
+> Ah, I see.  I don't know whether relaxing that makes sense or not; Al?
 
-It may not be a bug today, but without an explicit break for each,
-it's a potential bug.
-
-The whole reason for explicitly listing the existing enum members is so
-that new cases for which "break" may not be the correct solution can be
-easily identified at compile time.
-
-Tony
-
-
+Just a friendly ping to get some more reviews to consider in my next
+resend, especially on [13/13] and whether to relax the constant
+expression rules to treat pointer differences of address constants as
+(arithmetic or integer) constant expressions.
