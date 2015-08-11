@@ -1,45 +1,40 @@
 From: Tony Camuso <tcamuso@redhat.com>
-Subject: [PATCH 2/3 v3] Add default case to switches on enum variables
-Date: Mon, 10 Aug 2015 08:35:32 -0400
-Message-ID: <1439210132-19384-1-git-send-email-tcamuso@redhat.com>
-References: <1438216001-8862-3-git-send-email-tcamuso@redhat.com>
+Subject: sparse error on __int128
+Date: Tue, 11 Aug 2015 07:32:31 -0400
+Message-ID: <55C9DD4F.9050805@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:54676 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44512 "EHLO mx1.redhat.com"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751112AbbHJMfd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 10 Aug 2015 08:35:33 -0400
-In-Reply-To: <1438216001-8862-3-git-send-email-tcamuso@redhat.com>
+	id S933911AbbHKLcd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Tue, 11 Aug 2015 07:32:33 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: tcamuso@redhat.com, sparse@chrisli.org, nicstange@gmail.com
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>
 
-Missing enum members in case statements in c2xml.c and parse.c were
-causing compile time complaints by gcc 5.1.1. Adding a default case
-satisfies the compiler and notifies the reviewer that there are
-cases not explicitly mentioned being handled by the default case.
+I think I've raised this question before, but I don't think I
+got a response that indicated whether this is a sparse bug or
+if there was a source or compile issue.
 
-Signed-off-by: Tony Camuso <tcamuso@redhat.com>
+Here is the error:
+sparse /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i
+/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: impossible combination of type specifiers: unsigned __int128
+/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: Expected ) at end of cast operator
+/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: got __int128
 
----
- c2xml.c | 3 ++-
- parse.c | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+Here is the offending line in context:
 
-diff --git a/c2xml.c b/c2xml.c
-index 67486c7..c45d581 100644
---- a/c2xml.c
-+++ b/c2xml.c
-@@ -214,6 +214,8 @@ static void examine_symbol(struct symbol *sym, xmlNodePtr node)
- 	case SYM_UNINITIALIZED:
- 		newProp(child, "base-type-builtin", builtin_typename(sym));
- 		break;
-+	default:
-+		break;
- 	}
- 	return;
- }
-@@ -330,4 +332,3 @@ int main(int argc, char **argv)
- 
- 	return 0;
- }
+  5503 static inline __attribute__((no_instrument_function)) u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
+  5504 {
+  5505  return (u64)(((unsigned __int128)a * mul) >> shift);
+  5506 }
+
+Here is the compile command:
+
+$ gcc -E -Wp,-MD,/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/.fw_common.i.d  -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/work/rh7/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/work/rh7/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/work/rh7/include/uapi -Iinclude/generated/uapi -include /work/rh7/include/linux/kconfig.h -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -Wframe-larger-than=2048 -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=
+ 1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=2048!
+  -fstack-p
+rotector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -pg -mfentry -DCC_USING_FENTRY -fno-inline-functions-called-once -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO -D__CHECK_ENDIAN__  -DMODULE  -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(fw_common)"  -D"KBUILD_MODNAME=KBUILD_STR(rtl8723_common)" -o /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.c
