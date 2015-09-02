@@ -1,40 +1,43 @@
-From: Tony Camuso <tcamuso@redhat.com>
-Subject: sparse error on __int128
-Date: Tue, 11 Aug 2015 07:32:31 -0400
-Message-ID: <55C9DD4F.9050805@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+From: "Mitesh Shah" <mpshah@gmail.com>
+Subject: from: Mitesh Shah
+Date: Wed, 2 Sep 2015 13:29:58 +0200
+Message-ID: <2913269A-5948-473E-9927-7735D21A2792@casapellas.com.ni>
+Mime-Version: 1.0 (1.0)
+Content-Type: text/plain;
+	charset="us-ascii"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:44512 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S933911AbbHKLcd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 11 Aug 2015 07:32:33 -0400
+Received: from mail2.casapellas.com.ni ([186.1.47.106]:44800 "EHLO
+	mail2.casapellas.com.ni" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1750841AbbIBLmJ convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 2 Sep 2015 07:42:09 -0400
+Received: from mail.casapellas.com.ni ([192.168.1.137]:49665)
+	by mail2.casapellas.com.ni with esmtp (Exim 4.82_1-5b7a7c0-XX)
+	(envelope-from <mpshah@casapellas.com.ni>)
+	id 1ZX62e-00013x-0x
+	for linux-sparse@vger.kernel.org; Wed, 02 Sep 2015 05:17:24 -0600
+Received: from localhost (localhost [127.0.0.1])
+	by mail.casapellas.com.ni (Postfix) with ESMTP id 4B8EE9E644D2
+	for <linux-sparse@vger.kernel.org>; Wed,  2 Sep 2015 05:39:17 -0600 (CST)
+Received: from mail.casapellas.com.ni ([127.0.0.1])
+	by localhost (mail.casapellas.com.ni [127.0.0.1]) (amavisd-new, port 10024)
+	with ESMTP id 09JWCh1vww-5 for <linux-sparse@vger.kernel.org>;
+	Wed,  2 Sep 2015 05:39:17 -0600 (CST)
+Received: from casapellas.com.ni (cl198.210150099.technowave.ne.jp [210.150.99.198])
+	by mail.casapellas.com.ni (Postfix) with ESMTPA id 34BBB9E644DA
+	for <linux-sparse@vger.kernel.org>; Wed,  2 Sep 2015 05:39:14 -0600 (CST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Christopher Li <sparse@chrisli.org>
+To: Linux Sparse <linux-sparse@vger.kernel.org>
 
-I think I've raised this question before, but I don't think I
-got a response that indicated whether this is a sparse bug or
-if there was a source or compile issue.
+Hi Linux
 
-Here is the error:
-sparse /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i
-/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: impossible combination of type specifiers: unsigned __int128
-/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: Expected ) at end of cast operator
-/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: got __int128
+http://northalbanycarshow.com/sure.php?evening=nhpvr9h7r0s7
 
-Here is the offending line in context:
 
-  5503 static inline __attribute__((no_instrument_function)) u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
-  5504 {
-  5505  return (u64)(((unsigned __int128)a * mul) >> shift);
-  5506 }
 
-Here is the compile command:
 
-$ gcc -E -Wp,-MD,/work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/.fw_common.i.d  -nostdinc -isystem /usr/lib/gcc/x86_64-redhat-linux/5.1.1/include -I/work/rh7/arch/x86/include -Iarch/x86/include/generated  -Iinclude -I/work/rh7/arch/x86/include/uapi -Iarch/x86/include/generated/uapi -I/work/rh7/include/uapi -Iinclude/generated/uapi -include /work/rh7/include/linux/kconfig.h -D__KERNEL__ -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common -Werror-implicit-function-declaration -Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mno-sse -mpreferred-stack-boundary=3 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -Wframe-larger-than=2048 -DCONFIG_AS_CFI=1 -DCONFIG_AS_CFI_SIGNAL_FRAME=1 -DCONFIG_AS_CFI_SECTIONS=
- 1 -DCONFIG_AS_FXSAVEQ=1 -DCONFIG_AS_AVX=1 -DCONFIG_AS_AVX2=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -mno-sse2 -mno-3dnow -mno-avx -Wframe-larger-than=2048!
-  -fstack-p
-rotector-strong -Wno-unused-but-set-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -g -pg -mfentry -DCC_USING_FENTRY -fno-inline-functions-called-once -Wdeclaration-after-statement -Wno-pointer-sign -fno-strict-overflow -fconserve-stack -DCC_HAVE_ASM_GOTO -D__CHECK_ENDIAN__  -DMODULE  -D"KBUILD_STR(s)=#s" -D"KBUILD_BASENAME=KBUILD_STR(fw_common)"  -D"KBUILD_MODNAME=KBUILD_STR(rtl8723_common)" -o /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.c
+Linux
+mpshah@gmail.com
+
