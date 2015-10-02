@@ -1,58 +1,42 @@
-From: Fengguang Wu <fengguang.wu@intel.com>
-Subject: Re: [kbuild-all] [kvm:queue 27/38] arch/x86/kvm/hyperv.c:186:41:
- sparse: incorrect type in argument 2 (different modifiers)
-Date: Fri, 18 Sep 2015 23:06:44 +0800
-Message-ID: <20150918150644.GB20668@wfg-t540p.sh.intel.com>
-References: <201509182109.6ccgXDVp%fengguang.wu@intel.com>
- <55FC16F4.7060407@openvz.org>
- <55FC17B4.9060702@redhat.com>
- <20150918144026.GJ3317@rkaganb.sw.ru>
- <55FC22B4.9010301@redhat.com>
+From: Unknown <unknown@unknown.invalid>
+Subject: Re
+Date: Fri, 2 Oct 2015 07:53:36 +0530
+Message-ID: <SIXPR02MB0639F0B63A00C6929FB1B71BB84B0@SIXPR02MB0639.apcprd02.prod.outlook.com>
+Reply-To: <WilfredAssociateFinancialPartnersInc@outlook.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga11.intel.com ([192.55.52.93]:12711 "EHLO mga11.intel.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932108AbbIRPGz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 18 Sep 2015 11:06:55 -0400
-Content-Disposition: inline
-In-Reply-To: <55FC22B4.9010301@redhat.com>
+Received: from mail-sg2apc01hn0230.outbound.protection.outlook.com ([104.47.125.230]:23872
+	"EHLO APC01-SG2-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1751196AbbJBCYC convert rfc822-to-8bit (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 1 Oct 2015 22:24:02 -0400
+Content-Description: Mail message body
+From: <>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Paolo Bonzini <pbonzini@redhat.com>
-Cc: Roman Kagan <rkagan@virtuozzo.com>, "Denis V. Lunev" <den@openvz.org>, Andrey Smetanin <asmetanin@virtuozzo.com>, kbuild-all@01.org, kvm@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Recipients@vger.kernel.org
 
-[CC sparse people]
+ Contact us for both personal and business loans today at an interest rate of 2%, interested individual or company should Fill and return the loan application form below.
 
-On Fri, Sep 18, 2015 at 04:41:56PM +0200, Paolo Bonzini wrote:
-> 
-> 
-> On 18/09/2015 16:40, Roman Kagan wrote:
-> > typedef unsigned long __nocast cputime_t;
-> > 
-> > extern void task_cputime_adjusted(cputime_t *);
-> > extern void current_task_runtime_100ns(void);
-> > 
-> > void current_task_runtime_100ns(void)
-> > {
-> >         cputime_t utime;
-> > 
-> >         task_cputime_adjusted(&utime);
-> > }
-> > %%% gcc -c x.c -Wall -Werror -O2; echo $?
-> > 0
-> > %%% sparse x.c
-> > x.c:16:32: warning: incorrect type in argument 1 (different modifiers)
-> > x.c:16:32:    expected unsigned long [nocast] [usertype] *<noident>
-> > x.c:16:32:    got unsigned long *<noident>
-> > x.c:16:32: warning: implicit cast to nocast type
-> > 
-> > Looks like a sparse bug to me.
-> 
-> Indeed...
-> 
-> Paolo
-> _______________________________________________
-> kbuild-all mailing list
-> kbuild-all@lists.01.org
-> https://lists.01.org/mailman/listinfo/kbuild-all
+APPLICATION DETAILS
+
+1) FULL NAMES:
+2) CONTACT ADDRESS:
+3) COUNTRY:
+4) PHONE NUMBER:
+5) SEX:
+6) AGE:
+7) AMOUNT NEEDED AS LOAN:
+8) LOAN DURATION:
+9) OCCUPATION:
+10)MONTHLY INCOME:
+11)PURPOSE OF LOAN:
+
+
+Warm regard.
+Wilfred Davis.
+Phone: +91-7838915074
+(Chairman, Montage Global Pvt Ltd.)
