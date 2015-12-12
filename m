@@ -1,46 +1,52 @@
-From: Tony Camuso <tcamuso@redhat.com>
-Subject: Re: [PATCH 0/3] Minor enhancements and fixes
-Date: Wed, 2 Dec 2015 13:52:30 -0500
-Message-ID: <565F3DEE.7060506@redhat.com>
-References: <1438216001-8862-1-git-send-email-tcamuso@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:58487 "EHLO mx1.redhat.com"
-	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S1751209AbbLBSwb (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 2 Dec 2015 13:52:31 -0500
-In-Reply-To: <1438216001-8862-1-git-send-email-tcamuso@redhat.com>
-Sender: linux-sparse-owner@vger.kernel.org
+From: Boqun Feng <boqun.feng@gmail.com>
+Subject: [RFC 0/3] sparse: Introduce __private to privatize members of structs
+Date: Sat, 12 Dec 2015 10:55:59 +0800
+Message-ID: <1449888962-29348-1-git-send-email-boqun.feng@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, "Paul E . McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Steven Rostedt <rostedt@goodmis.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Lai Jiangshan <jiangshanlai@gmail.com>, Andy Whitcroft <apw@canonical.com>, Joe Perches <joe@perches.com>, Thomas Gleixner <tglx@linutronix.de>, Jiang Liu <jiang.liu@linux.intel.com>, Marc Zyngier <marc.zyngier@arm.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Brian Norris <computersforpeace@gmail.com>, Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
-To: sparse@chrisli.org, linux-sparse@vger.kernel.org
 
-On 07/29/2015 08:26 PM, Tony Camuso wrote:
-> [PATCH 1/3] .gitignore: add cscope and Qt project files
-> Useful if you're using cscope and Qt as an IDE
->
-> [PATCH 2/3] c2xml.c, parse.c: gcc 5+ stricter case statement parsing
-> The gcc 5.1.1 compiler complains if any of the possible values for the
-> switch variable are not covered by the case statement. Basically, it
-> forces the employment of the default case.
->
-> [PATCH 3/3] Add NOWARN and NOERR compile conditions
-> Provides compile conditionals to buid sparse without reporting
-> warnings and errors. This isn't quite reducing it to a tokenizer, but
-> it has the same effect for our application. Reports from the semantic
-> parser and the time they take are undesirable in our application.
->
->   .gitignore |  7 +++++++
->   c2xml.c    |  2 +-
->   lib.c      | 21 +++++++++++++++++++++
->   parse.c    | 13 +++++++++++++
->   4 files changed, 42 insertions(+), 1 deletion(-)
->
+Hi all,
 
-Any chance of this patchset being committed to sparse?
+As I proposed:
+
+http://marc.info/?l=linux-arm-kernel&m=144944469805753
+
+, we can define a __private modifier for sparse to detect misuses of private
+members of structs. This could make maintenace a little easier and prevent some
+potential bugs.
+
+This patchset serves as a POC and consists of three patches:
+
+1.	Introduce __private and related macro, also improve compiler.h a litte
+	bit
+
+2.	Privatize rcu_node::lock
+
+3.	Privatize irq_common_data::state_use_accessors
+
+This patchset is against
+
+	-rcu/rcu/next	5f343fc7f0ce7edfe344e7cc5afdfe145a18f802
+
+because this depends on commits:
+	
+	"rcu: Create transitive rnp->lock acquisition functions"
+
+and
+
+	"rcu: Add transitivity to remaining rcu_node ->lock acquisitions
+
+
+I tried to use 0day to test this, but seems the email transfer from 0day to my
+mail box is very slow recently, so I haven't received a recent result yet. But
+as one can see, this patchset doesn't have any functional modification, the 0day
+may not find anything interesting ;-)
+
+
+Looking forward to any suggestion, question and comment ;-)
 
 Regards,
-Tony
-
-
+Boqun
