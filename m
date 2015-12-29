@@ -1,45 +1,32 @@
-From: Nicolai Stange <nicstange@gmail.com>
-Subject: Re: [PATCH RFC 00/13] improve constexpr handling
-Date: Tue, 29 Dec 2015 09:34:44 +0100
-Message-ID: <874mf1r6u3.fsf@gmail.com>
-References: <87y4i7kdlq.fsf@gmail.com> <20150723003757.GA28528@cloud>
-	<871tfzi6cq.fsf@gmail.com> <20150723184723.GA1605@cloud>
-	<878u9qci4o.fsf@gmail.com>
-	<CANeU7Qmx3ttWHzwSprPDZ3YdoVcun9VWLmk2wHfzCf2FyiA5wQ@mail.gmail.com>
+From: Thomas Gleixner <tglx@linutronix.de>
+Subject: Re: [RFC v2 3/3] irq: Privatize
+ irq_common_data::state_use_accessors
+Date: Tue, 29 Dec 2015 10:46:39 +0100 (CET)
+Message-ID: <alpine.DEB.2.11.1512291046250.28591@nanos>
+References: <1451362728-18961-1-git-send-email-boqun.feng@gmail.com> <1451362728-18961-4-git-send-email-boqun.feng@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36378 "EHLO
-	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752744AbbL2Ier (ORCPT
+Received: from www.linutronix.de ([62.245.132.108]:42041 "EHLO
+	Galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751160AbbL2Jri (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 29 Dec 2015 03:34:47 -0500
-Received: by mail-wm0-f67.google.com with SMTP id l65so30988814wmf.3
-        for <linux-sparse@vger.kernel.org>; Tue, 29 Dec 2015 00:34:47 -0800 (PST)
-In-Reply-To: <CANeU7Qmx3ttWHzwSprPDZ3YdoVcun9VWLmk2wHfzCf2FyiA5wQ@mail.gmail.com>
-	(Christopher Li's message of "Sun, 9 Aug 2015 20:06:45 -0400")
+	Tue, 29 Dec 2015 04:47:38 -0500
+In-Reply-To: <1451362728-18961-4-git-send-email-boqun.feng@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Nicolai Stange <nicstange@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Al Viro <viro@zeniv.linux.org.uk>, Josh Triplett <josh@joshtriplett.org>
+To: Boqun Feng <boqun.feng@gmail.com>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Christopher Li <sparse@chrisli.org>, "Paul E . McKenney" <paulmck@linux.vnet.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Steven Rostedt <rostedt@goodmis.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Lai Jiangshan <jiangshanlai@gmail.com>, Andy Whitcroft <apw@canonical.com>, Joe Perches <joe@perches.com>, Jiang Liu <jiang.liu@linux.intel.com>, Marc Zyngier <marc.zyngier@arm.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Brian Norris <computersforpeace@gmail.com>, Peter Zijlstra <peterz@infradead.org>
 
-Christopher Li <sparse@chrisli.org> writes:
+On Tue, 29 Dec 2015, Boqun Feng wrote:
 
-> On Wed, Aug 5, 2015 at 3:24 AM, Nicolai Stange <nicstange@gmail.com> wrote:
->> Just a friendly ping to get some more reviews to consider in my next
->> resend, especially on [13/13] and whether to relax the constant
->> expression rules to treat pointer differences of address constants as
->> (arithmetic or integer) constant expressions.
->
-> Sorry for the late reply. I am working on it. It will take me a bit of time
-> to think about the change. I like the generate direction you are going.
->
-> Chris
+> irq_common_data::state_use_accessors is not designed for public use.
+> Therefore make it private so that people who write code accessing it
+> directly will get blamed by sparse. Also #undef the macro
+> __irqd_to_state after used in header files, so that the macro can't be
+> misused.
+> 
+> Signed-off-by: Boqun Feng <boqun.feng@gmail.com>
 
-Hi Chris,
+Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 
-do you see any way to get this one going again?
-
-Cheers,
-
-Nicolai
