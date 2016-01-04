@@ -1,40 +1,72 @@
-From: "Jeff Skoll" <s_w9gc9x@uni-kassel.de>
-Subject: Charity Donation
-Date: Sat, 02 Jan 2016 16:12:05 -0500
-Message-ID: <auto-000000438728@mailadmin.uni-kassel.de>
-Reply-To: jeff.skoll@skollcharity.org
+From: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
+Subject: Re: [RFC v2 0/3] sparse: Introduce __private to privatize members of
+ structs
+Date: Mon, 4 Jan 2016 14:21:53 -0800
+Message-ID: <20160104222153.GH32217@linux.vnet.ibm.com>
+References: <1451362728-18961-1-git-send-email-boqun.feng@gmail.com>
+Reply-To: paulmck@linux.vnet.ibm.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx4.its.uni-kassel.de ([141.51.12.63]:17071 "EHLO
-	mx4.its.uni-kassel.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751937AbcABWHc convert rfc822-to-8bit (ORCPT
+Received: from e31.co.us.ibm.com ([32.97.110.149]:44461 "EHLO
+	e31.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751990AbcADWWK (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 2 Jan 2016 17:07:32 -0500
-Content-Description: Mail message body
+	Mon, 4 Jan 2016 17:22:10 -0500
+Received: from localhost
+	by e31.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+	for <linux-sparse@vger.kernel.org> from <paulmck@linux.vnet.ibm.com>;
+	Mon, 4 Jan 2016 15:22:10 -0700
+Content-Disposition: inline
+In-Reply-To: <1451362728-18961-1-git-send-email-boqun.feng@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Me <s_w9gc9x@uni-kassel.de>
+To: Boqun Feng <boqun.feng@gmail.com>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, Steven Rostedt <rostedt@goodmis.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Lai Jiangshan <jiangshanlai@gmail.com>, Andy Whitcroft <apw@canonical.com>, Joe Perches <joe@perches.com>, Thomas Gleixner <tglx@linutronix.de>, Jiang Liu <jiang.liu@linux.intel.com>, Marc Zyngier <marc.zyngier@arm.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Brian Norris <computersforpeace@gmail.com>, Peter Zijlstra <peterz@infradead.org>
 
-Hi,
-My name is Jeffrey Skoll, a philanthropist and the founder of one of th=
-e largest private foundations in the world. I believe strongly in =E2=80=
-=98giving while living.=E2=80=99 I had one idea that never changed in m=
-y mind =E2=80=94 that you should use your wealth to help people and I h=
-ave decided to secretly give USD2.498 Million to a randomly selected in=
-dividual. On receipt of this email, you should count yourself as the in=
-dividual. Kindly get back to me at your earliest convenience, so I know=
- your email address is valid.
+On Tue, Dec 29, 2015 at 12:18:45PM +0800, Boqun Feng wrote:
+> Hi all,
+> 
+> This is v2 of __private.
+> 
+> Link for v1: http://marc.info/?l=linux-sparse&m=144988906932520&w=2
+> 
+> Change since v1:
+> 
+> *	#undef __irqd_to_state after used (Peter Zijlstra)
+> 
+> 
+> This patchset introduces a __private modifier for sparse to detect misuses of
+> private members of structs. This could make maintenace a little easier and
+> prevent some potential bugs.
+> 
+> 
+> This patchset consists of three patches:
+> 
+> 1.	Introduce __private and related macro, also improve compiler.h a litte
+> 	bit
+> 
+> 2.	Privatize rcu_node::lock
+> 
+> 3.	Privatize irq_common_data::state_use_accessors
+> 
+> This patchset is against
+> 
+> 	-rcu/rcu/next	c95a158356397844a5a6deb0bd58758084f891df
+> 
+> because it depends on commits:
+> 	
+> 	"rcu: Create transitive rnp->lock acquisition functions"
+> and
+> 	"rcu: Add transitivity to remaining rcu_node ->lock acquisitions
+> 
+> 
+> Tested by 0day.
+> 
+> Looking forward to any suggestion, question and comment ;-)
 
-Visit the web page to know more about me: http://www.theglobeandmail.co=
-m/news/national/meet-the-canadian-billionaire-whos-giving-it-all-away/a=
-rticle4209888/ or you can read an article of me on Wikipedia.
+Queued for review and testing, along with Thomas's Reviewed-by.  If all
+goes well, I expect to send them upstream in the 4.6 merge window.
 
-Regards,
-Jeffrey Skoll.
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+							Thanx, Paul
+
