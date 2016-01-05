@@ -1,61 +1,83 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse error on __int128
-Date: Tue, 5 Jan 2016 01:08:02 +0100
-Message-ID: <20160105000800.GA12116@macpro.local>
-References: <55C9DD4F.9050805@redhat.com>
+Subject: Re: [PATCH 3/3 v4] Add Wall_off switch to disable errors and warnings
+Date: Tue, 5 Jan 2016 02:19:59 +0100
+Message-ID: <20160105011958.GA12545@macpro.local>
+References: <1438216001-8862-4-git-send-email-tcamuso@redhat.com>
+ <1438619759-14879-1-git-send-email-tcamuso@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:37953 "EHLO
-	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753472AbcAEAIS (ORCPT
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:34370 "EHLO
+	mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753681AbcAEBUE (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Jan 2016 19:08:18 -0500
-Received: by mail-wm0-f54.google.com with SMTP id b14so5781131wmb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 04 Jan 2016 16:08:18 -0800 (PST)
+	Mon, 4 Jan 2016 20:20:04 -0500
+Received: by mail-wm0-f53.google.com with SMTP id u188so5823807wmu.1
+        for <linux-sparse@vger.kernel.org>; Mon, 04 Jan 2016 17:20:03 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <55C9DD4F.9050805@redhat.com>
+In-Reply-To: <1438619759-14879-1-git-send-email-tcamuso@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Tony Camuso <tcamuso@redhat.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+Cc: sam@ravnborg.org, linux-sparse@vger.kernel.org, josh@joshtriplett.org, sparse@chrisli.org
 
-On Tue, Aug 11, 2015 at 07:32:31AM -0400, Tony Camuso wrote:
-> I think I've raised this question before, but I don't think I
-> got a response that indicated whether this is a sparse bug or
-> if there was a source or compile issue.
+On Mon, Aug 03, 2015 at 12:35:59PM -0400, Tony Camuso wrote:
+> Disable all error reporting. Useful when semantic parsing checks are
+> being done elsewhere or all you need is a tokenizer.
 > 
-> Here is the error:
-> sparse /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i
-> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: impossible combination of type specifiers: unsigned __int128
-> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: Expected ) at end of cast operator
-> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: got __int128
+> Signed-off-by: Tony Camuso <tcamuso@redhat.com>
+> ---
+>  lib.c | 27 +++++++++++++++++++++++----
+>  lib.h |  1 +
+>  2 files changed, 24 insertions(+), 4 deletions(-)
 > 
-> Here is the offending line in context:
-> 
->  5503 static inline __attribute__((no_instrument_function)) u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
->  5504 {
->  5505  return (u64)(((unsigned __int128)a * mul) >> shift);
->  5506 }
-> 
+> diff --git a/lib.c b/lib.c
+> index 8dc5bcf..08f6a6b 100644
+> --- a/lib.c
+> +++ b/lib.c
+
+...
+
+> @@ -130,6 +135,12 @@ void info(struct position pos, const char * fmt, ...)
+>  static void do_error(struct position pos, const char * fmt, va_list args)
+>  {
+>  	static int errors = 0;
+> +
+> +	if (Wall_off) {
+> +		max_warnings = 0;
+> +		return;
+> +	}
+> +
+
+Is this really needed?
+The same check in do_warn should be enough to quiet all messages, isn't it?
 
 
-Hi,
+> @@ -479,6 +491,13 @@ static char **handle_onoff_switch(char *arg, char **next, const struct warning w
+>  	char *p = arg + 1;
+>  	unsigned i;
+>  
+> +	if (!strcmp(p, "all_off")) {
+> +		for (i = 0; i < n; i++)
+> +			*warnings[i].flag = WARNING_FORCE_OFF;
+> +		Wall_off = 1;
+> +		return NULL;
+> +	}
+> +
 
-There is no source or compile issue here.
-It's just that __int128 is only defined by gcc on x86_64
-but is not defined by sparse.
+Can't you simply set max_warnings to 0 already here
+instead of doing it in do_warn()?
 
-Now, __int128 is only used twice in the kernel:
-(mul_u64_u32_shr() & mul_u64_u64_shr()) and then only if
-supported by the platform and if __SIZEOF_INT128__ is defined.
-Since sparse doesn't define __SIZEOF_INT128__ there shouldn't be any problems
-but you have used sparse not on the code itself but on preprocessed code by gcc.
-If you run sparse directly on the C code or more simply by using "make C=1 ..."
-to build kernel code, no such problem occurs.
+> @@ -127,6 +127,7 @@ extern int Wtypesign;
+>  extern int Wundef;
+>  extern int Wuninitialized;
+>  extern int Wvla;
+> +extern int Wall_off;
 
-Now, of course, one could argue that sparse should also define __int128
-on platforms where gcc define it, on x86_64 thus.
+I think it should be better to use a much more explicit name,
+something like "ignore_all_warnings" for example.
+
+Also it would be nice to document this new option in the man page.
 
 
 Regards,
