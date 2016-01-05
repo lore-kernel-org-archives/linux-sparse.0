@@ -1,72 +1,62 @@
-From: "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>
-Subject: Re: [RFC v2 0/3] sparse: Introduce __private to privatize members of
- structs
-Date: Mon, 4 Jan 2016 14:21:53 -0800
-Message-ID: <20160104222153.GH32217@linux.vnet.ibm.com>
-References: <1451362728-18961-1-git-send-email-boqun.feng@gmail.com>
-Reply-To: paulmck@linux.vnet.ibm.com
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse error on __int128
+Date: Tue, 5 Jan 2016 01:08:02 +0100
+Message-ID: <20160105000800.GA12116@macpro.local>
+References: <55C9DD4F.9050805@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from e31.co.us.ibm.com ([32.97.110.149]:44461 "EHLO
-	e31.co.us.ibm.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751990AbcADWWK (ORCPT
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:37953 "EHLO
+	mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1753472AbcAEAIS (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 4 Jan 2016 17:22:10 -0500
-Received: from localhost
-	by e31.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-	for <linux-sparse@vger.kernel.org> from <paulmck@linux.vnet.ibm.com>;
-	Mon, 4 Jan 2016 15:22:10 -0700
+	Mon, 4 Jan 2016 19:08:18 -0500
+Received: by mail-wm0-f54.google.com with SMTP id b14so5781131wmb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 04 Jan 2016 16:08:18 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1451362728-18961-1-git-send-email-boqun.feng@gmail.com>
+In-Reply-To: <55C9DD4F.9050805@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Boqun Feng <boqun.feng@gmail.com>
-Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, Steven Rostedt <rostedt@goodmis.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Lai Jiangshan <jiangshanlai@gmail.com>, Andy Whitcroft <apw@canonical.com>, Joe Perches <joe@perches.com>, Thomas Gleixner <tglx@linutronix.de>, Jiang Liu <jiang.liu@linux.intel.com>, Marc Zyngier <marc.zyngier@arm.com>, Mika Westerberg <mika.westerberg@linux.intel.com>, Russell King <rmk+kernel@arm.linux.org.uk>, Brian Norris <computersforpeace@gmail.com>, Peter Zijlstra <peterz@infradead.org>
+To: Tony Camuso <tcamuso@redhat.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Tue, Dec 29, 2015 at 12:18:45PM +0800, Boqun Feng wrote:
-> Hi all,
+On Tue, Aug 11, 2015 at 07:32:31AM -0400, Tony Camuso wrote:
+> I think I've raised this question before, but I don't think I
+> got a response that indicated whether this is a sparse bug or
+> if there was a source or compile issue.
 > 
-> This is v2 of __private.
+> Here is the error:
+> sparse /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i
+> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: impossible combination of type specifiers: unsigned __int128
+> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: Expected ) at end of cast operator
+> /work/rh7/drivers/net/wireless/rtlwifi/rtl8723com/fw_common.i:5505:26: error: got __int128
 > 
-> Link for v1: http://marc.info/?l=linux-sparse&m=144988906932520&w=2
+> Here is the offending line in context:
 > 
-> Change since v1:
+>  5503 static inline __attribute__((no_instrument_function)) u64 mul_u64_u32_shr(u64 a, u32 mul, unsigned int shift)
+>  5504 {
+>  5505  return (u64)(((unsigned __int128)a * mul) >> shift);
+>  5506 }
 > 
-> *	#undef __irqd_to_state after used (Peter Zijlstra)
-> 
-> 
-> This patchset introduces a __private modifier for sparse to detect misuses of
-> private members of structs. This could make maintenace a little easier and
-> prevent some potential bugs.
-> 
-> 
-> This patchset consists of three patches:
-> 
-> 1.	Introduce __private and related macro, also improve compiler.h a litte
-> 	bit
-> 
-> 2.	Privatize rcu_node::lock
-> 
-> 3.	Privatize irq_common_data::state_use_accessors
-> 
-> This patchset is against
-> 
-> 	-rcu/rcu/next	c95a158356397844a5a6deb0bd58758084f891df
-> 
-> because it depends on commits:
-> 	
-> 	"rcu: Create transitive rnp->lock acquisition functions"
-> and
-> 	"rcu: Add transitivity to remaining rcu_node ->lock acquisitions
-> 
-> 
-> Tested by 0day.
-> 
-> Looking forward to any suggestion, question and comment ;-)
 
-Queued for review and testing, along with Thomas's Reviewed-by.  If all
-goes well, I expect to send them upstream in the 4.6 merge window.
 
-							Thanx, Paul
+Hi,
 
+There is no source or compile issue here.
+It's just that __int128 is only defined by gcc on x86_64
+but is not defined by sparse.
+
+Now, __int128 is only used twice in the kernel:
+(mul_u64_u32_shr() & mul_u64_u64_shr()) and then only if
+supported by the platform and if __SIZEOF_INT128__ is defined.
+Since sparse doesn't define __SIZEOF_INT128__ there shouldn't be any problems
+but you have used sparse not on the code itself but on preprocessed code by gcc.
+If you run sparse directly on the C code or more simply by using "make C=1 ..."
+to build kernel code, no such problem occurs.
+
+Now, of course, one could argue that sparse should also define __int128
+on platforms where gcc define it, on x86_64 thus.
+
+
+Regards,
+Luc
