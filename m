@@ -1,87 +1,213 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: Re: [PATCH RFC 00/13] improve constexpr handling
-Date: Sat, 09 Jan 2016 23:05:21 +0100
-Message-ID: <87lh7ywgri.fsf@gmail.com>
-References: <87y4i7kdlq.fsf@gmail.com> <20150723003757.GA28528@cloud>
-	<20160109182531.GB2718@macpro.local>
+Subject: Re: [PATCH RFC 01/13] expression: introduce additional expression constness tracking flags
+Date: Sat, 09 Jan 2016 23:20:27 +0100
+Message-ID: <87a8oewg2c.fsf@gmail.com>
+References: <87r3nzkct3.fsf@gmail.com> <20160109170328.GA8655@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33970 "EHLO
-	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756051AbcAIWFY (ORCPT
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:34218 "EHLO
+	mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756068AbcAIWUa (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Jan 2016 17:05:24 -0500
-Received: by mail-wm0-f65.google.com with SMTP id b14so20872684wmb.1
-        for <linux-sparse@vger.kernel.org>; Sat, 09 Jan 2016 14:05:24 -0800 (PST)
-In-Reply-To: <20160109182531.GB2718@macpro.local> (Luc Van Oostenryck's
-	message of "Sat, 9 Jan 2016 19:25:32 +0100")
+	Sat, 9 Jan 2016 17:20:30 -0500
+Received: by mail-lf0-f67.google.com with SMTP id n70so17946555lfn.1
+        for <linux-sparse@vger.kernel.org>; Sat, 09 Jan 2016 14:20:29 -0800 (PST)
+In-Reply-To: <20160109170328.GA8655@macpro.local> (Luc Van Oostenryck's
+	message of "Sat, 9 Jan 2016 18:03:29 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Nicolai Stange <nicstange@gmail.com>, linux-sparse@vger.kernel.org, viro@ZenIV.linux.org.uk, Josh Tripplet <josh@joshtriplett.org>
+Cc: Nicolai Stange <nicstange@gmail.com>, linux-sparse@vger.kernel.org
 
 Luc Van Oostenryck <luc.vanoostenryck@gmail.com> writes:
 
-> On Wed, Jul 22, 2015 at 05:37:57PM -0700, josh@joshtriplett.org wrote:
->> [Side note: for some reason, your mail had your message ordered *after*
->> your attached diff, so replies quote the diff before the message.]
+> On Thu, Jul 23, 2015 at 01:11:36AM +0200, Nicolai Stange wrote:
+>> Prepare for a more fine-grained tracking of expression constness in the
+>> sense of C99 [6.4.4, 6.6].
 >> 
->> On Thu, Jul 23, 2015 at 12:54:25AM +0200, Nicolai Stange wrote:
->> > My initial intent was to rework the current integer constant expression
->> > handling in order to allow for the recognition of constant subexpressions
->> > built up by means of __builtin_choose_expr(). Hence the first part.
->> > 
->> > However, since I had to touch the whole constant expression handling
->> > code anyways, I decided to experimentally extend it to support
->> > arithmetic constant expressions and address constants as well. Hence
->> > the second part.
->> > 
->> > Since the additional information on expressions obtained through the
->> > first two parts is rather pointless without making any use of it, I
->> > implemented part three, the checking of static storage duration
->> > objects' initializers for constness.
->> > This part is the reason why there is a 'RFC' tag in the subject.
->> > It is up to you to decide whether letting sparse check for C99
->> > conformity is a valuable thing to have or whether being stricter than
->> > GCC is counter-productive/completely idiotic.
->> 
->> I think it's absolutely a valuable thing to have.  It may or may not be
->> the right *default* behavior, but having an appropriate -W option to
->> enable it would be a good start.
->> 
->> I've seen kernel maintainers ask people to not rely on GCC's lax
->> enforcement of constant initializers.
 >
-> I also think it's a very valuable thing to have.
-> After all, it's the raison d'etre of sparse to make stricter checks
-> than the standard or GCC.
+> I have a few remarks/questions/suggestions here under.
+>
+>> +/*
+>> + * Flags for tracking the promotion of various attributes from
+>> + * subexpressions to their parents.
+>> + *
+>> + * Currently, they only cope with an expression's constness as defined
+>> + * by C99.
+>> + *
+>> + * The flags are not independent as one might imply another. Use
+>> + * expr_set_flag_mask() and expr_clear_flag_mask() for setting and
+>> + * clearing a particular flag.
+>> + */
+>> +enum expression_flags {
+>> +	EXPR_FLAG_NONE = 0,
+>> +	/*
+>> +	 * A constant in the sense of [6.4.4]:
+>> +	 * - Integer constant [6.4.4.1]
+>> +	 * - Floating point constant [6.4.4.2]
+>> +	 * - Enumeration constant [6.4.4.3]
+>> +	 * - Character constant [6.4.4.4]
+>> +	 */
+>> +	EXPR_FLAG_INT_CONST = (1 << 0),
+>> +	EXPR_FLAG_FP_CONST = (1 << 1),
+>> +	EXPR_FLAG_ENUM_CONST = (1 << 2),
+>> +	EXPR_FLAG_CHAR_CONST = (1 << 3),
+>> +
+>> +	/*
+>> +	 * A constant expression in the sense of [6.6]:
+>> +	 * - integer constant expression [6.6(6)]
+>> +	 * - arithmetic constant expression [6.6(8)]
+>> +	 * - address constanr [6.6(9)]
+>> +	 */
+>> +	EXPR_FLAG_INT_CONST_EXPR = (1 << 4),
+>> +	EXPR_FLAG_ARITH_CONST_EXPR = (1 << 5),
+>> +	EXPR_FLAG_ADDR_CONST_EXPR = (1 << 6),
+>> +};
+>> +
+>> +/*
+>> + * Calculate a mask to be or'ed in in order to set a particular
+>> + * expression flag.
+>> + *
+>> + * Only one single flag from enum expression_flags is allowed at a
+>> + * time.
+>> + */
+>> +static inline enum expression_flags expr_set_flag_mask
+>> +	(const enum expression_flags flag)
+>> +{
+>> +	/* obey the implications */
+>> +	enum expression_flags implied_flags = EXPR_FLAG_NONE;
+>> +
+>> +	switch (flag) {
+>> +	case EXPR_FLAG_INT_CONST:
+>> +	case EXPR_FLAG_ENUM_CONST:
+>> +	case EXPR_FLAG_CHAR_CONST:
+>> +		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
+>> +	/* fallthrough */
+>> +	case EXPR_FLAG_FP_CONST:
+>> +	case EXPR_FLAG_INT_CONST_EXPR:
+>> +		implied_flags |= EXPR_FLAG_ARITH_CONST_EXPR;
+>> +	/* fallthrough */
+>> +	case EXPR_FLAG_ARITH_CONST_EXPR:
+>> +	case EXPR_FLAG_ADDR_CONST_EXPR:
+>> +	case EXPR_FLAG_NONE:
+>> +		break;
+>> +	}
+>> +
+>> +	return (implied_flags | flag);
+>> +}
+>> +
+>> +/*
+>> + * Calculate a mask to be negated and and'ed in in order to clear a
+>> + * particular expression flag.
+>> + *
+>> + * Only one single flag from enum expression_flags is allowed at a
+>> + * time.
+>> + */
+>> +static inline enum expression_flags expr_clear_flag_mask
+>> +	(const enum expression_flags flag)
+>> +{
+>> +	/* obey the implications */
+>> +	enum expression_flags implied_flags = EXPR_FLAG_NONE;
+>> +
+>> +	switch (flag) {
+>> +	case EXPR_FLAG_ARITH_CONST_EXPR:
+>> +		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
+>> +		implied_flags |= EXPR_FLAG_FP_CONST;
+>> +	/* fallthrough */
+>> +	case EXPR_FLAG_INT_CONST_EXPR:
+>> +		implied_flags |= EXPR_FLAG_INT_CONST;
+>> +		implied_flags |= EXPR_FLAG_ENUM_CONST;
+>> +		implied_flags |= EXPR_FLAG_CHAR_CONST;
+>> +	/* fallthrough */
+>> +	case EXPR_FLAG_ADDR_CONST_EXPR:
+>> +	case EXPR_FLAG_INT_CONST:
+>> +	case EXPR_FLAG_FP_CONST:
+>> +	case EXPR_FLAG_ENUM_CONST:
+>> +	case EXPR_FLAG_CHAR_CONST:
+>> +	case EXPR_FLAG_NONE:
+>> +		break;
+>> +	}
+>> +
+>> +	return (implied_flags | flag);
+>> +}
+>
+> Shouldn't the following be more explicit?
+> 	flag = expr_set_flag_mask(0, ...);
+> 	flag = expr_set_flag_mask(in_flag, ...);
+> 	flag = expr_clear_flag_mask(in_flag, ...);
+> Yes, I know, it would need to duplicate the expr->flags at almost all calls.
 
-First of all, thank you very much for your review, Luc!
+Admittedly, this looks way better.
+
+I'll change that to
+  void expr_set_flag(unsigned *flag, ...);
+and likewise for the clearing guy.
 
 >
-> But then I wonder what's must be done for things like GCC's builtins?
-> Shouldn't, for example, __builtin_bswap32(..) always propagte the constantness
-> of it's argument or it specifically this sort of things that are the target of
-> this patch serie?
+> Couldn't we get rid of those two function by separating the exclusive "bits"
+> from the "sets"?
+> Something like:
+> 	#define	__EXPR_FLAG_INT_CONST	(1 << 0)
+> 	#define	__EXPR_FLAG_FP_CONST	(1 << 1)
+> 	...
+> 	#define	EXPR_FLAG_INT_CONST	(__EXPR_FLAG_INT_CONST |
+> 					 __EXPR_FLAG_INT_CONST_EXPR |
+> 					 __EXPR_FLAG_ARITH_CONST)
 
-Hmm. I guess it depends on the particular __builtin_*() thingie at hand.
-In general, unless explicitly documented, I personally would neither
-assume consistent constness rules nor that those are stable across GCC
-releases and architectures.
+No, this won't work since the "implied" bit masks are in general different for
+setting and clearing a flag.
 
-In the case of __builtin_bswap32(..), the kernel seems to follow that line
-of reasoning: for example in include/uapi/linux/swab.h, we have
-
-  #define __swab32(x)                             \
-          (__builtin_constant_p((__u32)(x)) ?     \
-          ___constant_swab32(x) :                 \
-          __fswab32(x))
-
-where __fswap32(..) is essentially just a wrapper around
-__builtin_bswap32(..).
+For example, "integer constant" (i.e. integer literal) implies "integer
+constant expression", but "not a integer constant" does not imply "not a
+integer constant expression".
 
 
-But of course, if one decides that some __builtin_foo(<constexpr>) is a
-constexpr again, we would have to teach it sparse explicitly. AFAICS,
-this is nothing new introduced by this patch series though.
+>
+>> +/*
+>> + *  Remove any "Constant" [6.4.4] flag, but retain the "constant
+>> + * expression" [6.6] flags.
+>> + * Used to merge the constantness flags of primary subexpressions
+>> + * into their parent expressions' ones.
+>> + */
+>> +static inline enum expression_flags expr_flags_decay_consts
+>> +	(enum expression_flags flags)
+>> +{
+>> +	return (flags & ~(expr_clear_flag_mask(EXPR_FLAG_INT_CONST)
+>> +			  | expr_clear_flag_mask(EXPR_FLAG_FP_CONST)
+>> +			  | expr_clear_flag_mask(EXPR_FLAG_ENUM_CONST)
+>> +			  | expr_clear_flag_mask(EXPR_FLAG_CHAR_CONST)));
+>> +}
+>
+> How is that different from:
+> 	return flags & ~(EXPR_FLAG_INT_CONST
+> 			|EXPR_FLAG_FP_CONST
+> 			|EXPR_FLAG_ENUM_CONST
+> 			|EXPR_FLAG_CHAR_CONST)?
+
+Not at all.
+
+> Shouldn't this more directly implement the desciption of the function:
+> 	"Remove any 'Constant' flag but retain ... ?
+
+Yes. I will change this.
+
+
+>> +/* Purge any constantness related flag. */
+>> +static inline enum expression_flags expr_flags_remove_consts
+>> +	(enum expression_flags flags)
+>> +{
+>> +	return (flags &
+>> +		~(expr_clear_flag_mask(EXPR_FLAG_ARITH_CONST_EXPR)
+>> +		  | expr_clear_flag_mask(EXPR_FLAG_ADDR_CONST_EXPR)));
+>> +}
+>
+> Same as above with the appropriate changes.
+>
+
+Ditto.
+
+> Yours,
+> Luc
+
+Again, thank you very much for your valuable review!
