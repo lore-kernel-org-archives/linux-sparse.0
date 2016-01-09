@@ -1,145 +1,185 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] sparse: add support for static assert
-Date: Sat, 9 Jan 2016 14:54:41 +0100
-Message-ID: <20160109135440.GA6833@macpro.local>
-References: <1452105317-5828-1-git-send-email-lrichard@redhat.com>
+Subject: Re: [PATCH RFC 01/13] expression: introduce additional expression
+ constness tracking flags
+Date: Sat, 9 Jan 2016 18:03:29 +0100
+Message-ID: <20160109170328.GA8655@macpro.local>
+References: <87r3nzkct3.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:33595 "EHLO
-	mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1752420AbcAINyq (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36221 "EHLO
+	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1755230AbcAIRDe (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Jan 2016 08:54:46 -0500
-Received: by mail-wm0-f47.google.com with SMTP id f206so165669650wmf.0
-        for <linux-sparse@vger.kernel.org>; Sat, 09 Jan 2016 05:54:46 -0800 (PST)
+	Sat, 9 Jan 2016 12:03:34 -0500
+Received: by mail-wm0-f65.google.com with SMTP id l65so20181163wmf.3
+        for <linux-sparse@vger.kernel.org>; Sat, 09 Jan 2016 09:03:33 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <1452105317-5828-1-git-send-email-lrichard@redhat.com>
+In-Reply-To: <87r3nzkct3.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Lance Richardson <lrichard@redhat.com>
+To: Nicolai Stange <nicstange@gmail.com>
 Cc: linux-sparse@vger.kernel.org
 
-On Wed, Jan 06, 2016 at 01:35:17PM -0500, Lance Richardson wrote:
-> This patch introduces support for _Static_assert() in global,
-> function, and struct/union declaration contexts (as currently supported
-> by gcc).
+On Thu, Jul 23, 2015 at 01:11:36AM +0200, Nicolai Stange wrote:
+> Prepare for a more fine-grained tracking of expression constness in the
+> sense of C99 [6.4.4, 6.6].
 > 
-> Tested via:
->    - kernel build with C=1 CF=-D__CHECK_ENDIAN__
->    - build/check large code base making heavy use of _Static_assert()
->    - "make check" with added test case for static assert support
 
-Nice, it was something that was indeed missing.
+I have a few remarks/questions/suggestions here under.
 
-I have a few remarks, mostly nitpicking, here under.
-
-
-Luc
-
-> @@ -437,6 +443,10 @@ static struct init_keyword {
->  	{ "__restrict",	NS_TYPEDEF, .op = &restrict_op},
->  	{ "__restrict__",	NS_TYPEDEF, .op = &restrict_op},
->  
+> +/*
+> + * Flags for tracking the promotion of various attributes from
+> + * subexpressions to their parents.
+> + *
+> + * Currently, they only cope with an expression's constness as defined
+> + * by C99.
+> + *
+> + * The flags are not independent as one might imply another. Use
+> + * expr_set_flag_mask() and expr_clear_flag_mask() for setting and
+> + * clearing a particular flag.
+> + */
+> +enum expression_flags {
+> +	EXPR_FLAG_NONE = 0,
+> +	/*
+> +	 * A constant in the sense of [6.4.4]:
+> +	 * - Integer constant [6.4.4.1]
+> +	 * - Floating point constant [6.4.4.2]
+> +	 * - Enumeration constant [6.4.4.3]
+> +	 * - Character constant [6.4.4.4]
+> +	 */
+> +	EXPR_FLAG_INT_CONST = (1 << 0),
+> +	EXPR_FLAG_FP_CONST = (1 << 1),
+> +	EXPR_FLAG_ENUM_CONST = (1 << 2),
+> +	EXPR_FLAG_CHAR_CONST = (1 << 3),
 > +
-> +	/* Static assertion */
-> +	{ "_Static_assert", NS_TYPEDEF, .op = &static_assert_op },
-> +
-
-It seems a bit strange to me to use NS_TYPEDEF, as this is unrelated types.
-OTOH, the other namespaces deosn't seems better suited,
-and yes C11 define this as sort of declaration, so ...
-
-> @@ -2004,6 +2014,27 @@ static struct token *parse_asm_declarator(struct token *token, struct decl_state
->  	return token;
->  }
->  
-> +
-> +static struct token *static_assert_specifier(struct token *token, struct decl_state *ctx)
-> +{
-> +	struct expression *expr = NULL;
-> +	int val;
-> +
-> +	token = constant_expression(token->next, &expr);
-> +	if (!expr)
-> +		sparse_error(token->pos, "Expected constant expression");
-> +	val = get_expression_value(expr);
-> +	token = expect(token, ',', "after first argument of _Static_assert");
-> +	token = parse_expression(token, &expr);
-> +	token = expect(token, ')', "after second argument of _Static_assert");
-> +
-> +	if (!val)
-> +		sparse_error(token->pos, "static assertion failed: %s",
-> +                             show_string(expr->string));
-
-By using token->pos here, the error message will indicate that the problem is
-situated at the very end of the assertion; more exactly, at the ending ";".
-This is a little annoying I find.
-It would be better to use the some position as the expression
-(expr->pos, or the same as for "Expected constant expression").
-
-I find also a bit strange to have this sort of semantic check inside the parser.
- 
-> diff --git a/validation/static_assert.c b/validation/static_assert.c
-> new file mode 100644
-> index 0000000..baab346
-> --- /dev/null
-> +++ b/validation/static_assert.c
-> @@ -0,0 +1,20 @@
-> +_Static_assert(1, "global ok");
-> +
-> +struct foo {
-> +	_Static_assert(1, "struct ok");
+> +	/*
+> +	 * A constant expression in the sense of [6.6]:
+> +	 * - integer constant expression [6.6(6)]
+> +	 * - arithmetic constant expression [6.6(8)]
+> +	 * - address constanr [6.6(9)]
+> +	 */
+> +	EXPR_FLAG_INT_CONST_EXPR = (1 << 4),
+> +	EXPR_FLAG_ARITH_CONST_EXPR = (1 << 5),
+> +	EXPR_FLAG_ADDR_CONST_EXPR = (1 << 6),
 > +};
 > +
-> +void bar(void)
+> +/*
+> + * Calculate a mask to be or'ed in in order to set a particular
+> + * expression flag.
+> + *
+> + * Only one single flag from enum expression_flags is allowed at a
+> + * time.
+> + */
+> +static inline enum expression_flags expr_set_flag_mask
+> +	(const enum expression_flags flag)
 > +{
-> +	_Static_assert(1, " func ok");
+> +	/* obey the implications */
+> +	enum expression_flags implied_flags = EXPR_FLAG_NONE;
+> +
+> +	switch (flag) {
+> +	case EXPR_FLAG_INT_CONST:
+> +	case EXPR_FLAG_ENUM_CONST:
+> +	case EXPR_FLAG_CHAR_CONST:
+> +		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
+> +	/* fallthrough */
+> +	case EXPR_FLAG_FP_CONST:
+> +	case EXPR_FLAG_INT_CONST_EXPR:
+> +		implied_flags |= EXPR_FLAG_ARITH_CONST_EXPR;
+> +	/* fallthrough */
+> +	case EXPR_FLAG_ARITH_CONST_EXPR:
+> +	case EXPR_FLAG_ADDR_CONST_EXPR:
+> +	case EXPR_FLAG_NONE:
+> +		break;
+> +	}
+> +
+> +	return (implied_flags | flag);
 > +}
 > +
-> +_Static_assert(0, "expected failure");
 > +/*
-> + * check-name: static assertion
+> + * Calculate a mask to be negated and and'ed in in order to clear a
+> + * particular expression flag.
 > + *
-> + * check-error-start
-> +static_assert.c:12:38: error: static assertion failed: "expected failure"
-> + * check-error-end
+> + * Only one single flag from enum expression_flags is allowed at a
+> + * time.
 > + */
+> +static inline enum expression_flags expr_clear_flag_mask
+> +	(const enum expression_flags flag)
+> +{
+> +	/* obey the implications */
+> +	enum expression_flags implied_flags = EXPR_FLAG_NONE;
+> +
+> +	switch (flag) {
+> +	case EXPR_FLAG_ARITH_CONST_EXPR:
+> +		implied_flags |= EXPR_FLAG_INT_CONST_EXPR;
+> +		implied_flags |= EXPR_FLAG_FP_CONST;
+> +	/* fallthrough */
+> +	case EXPR_FLAG_INT_CONST_EXPR:
+> +		implied_flags |= EXPR_FLAG_INT_CONST;
+> +		implied_flags |= EXPR_FLAG_ENUM_CONST;
+> +		implied_flags |= EXPR_FLAG_CHAR_CONST;
+> +	/* fallthrough */
+> +	case EXPR_FLAG_ADDR_CONST_EXPR:
+> +	case EXPR_FLAG_INT_CONST:
+> +	case EXPR_FLAG_FP_CONST:
+> +	case EXPR_FLAG_ENUM_CONST:
+> +	case EXPR_FLAG_CHAR_CONST:
+> +	case EXPR_FLAG_NONE:
+> +		break;
+> +	}
+> +
+> +	return (implied_flags | flag);
+> +}
 
-It would be nice to add a few more test cases,
-I'm thinbking to things like:
-	static int f;
-	_Static_assert(f, "non-constant expression");
-	static int *p;
-	_Static_assert(p, "non-integer expression");
-	_Static_assert(0.1, "float expression");
-	
-	_Static_assert(!0 == 1, "non-trivial expression");
-	
-	static int array[4];
-	_Static_assert(sizeof(array), "sizeof expression");
-	
-	static const char non_literal_string[] = "non literal string";
-	_Static_assert(0, non_literal_string);
+Shouldn't the following be more explicit?
+	flag = expr_set_flag_mask(0, ...);
+	flag = expr_set_flag_mask(in_flag, ...);
+	flag = expr_clear_flag_mask(in_flag, ...);
+Yes, I know, it would need to duplicate the expr->flags at almost all calls.
 
-Also, what should happen with:
-	_Static_assert(1 / 0, "invalid expression: should not show up?");
-(The C11 standard is not clear to me, GCC outputs an "invalid expression"
-message and ignore the assertion).
+Couldn't we get rid of those two function by separating the exclusive "bits"
+from the "sets"?
+Something like:
+	#define	__EXPR_FLAG_INT_CONST	(1 << 0)
+	#define	__EXPR_FLAG_FP_CONST	(1 << 1)
+	...
+	#define	EXPR_FLAG_INT_CONST	(__EXPR_FLAG_INT_CONST |
+					 __EXPR_FLAG_INT_CONST_EXPR |
+					 __EXPR_FLAG_ARITH_CONST)
 
-Finally, the standard also allow to place the assertion
-inside a struct or union declaration; like:
-	struct s {
-		char c;
-		_Static_assert(1, "inside struct");
-	};
-which is working fine.
-And also, I think:
-	struct s2 {
-		char c;
-		_Static_assert(sizeof(struct s) == 1, "own struct sizeof");
-	};
-which doesn't.
+> +/*
+> + *  Remove any "Constant" [6.4.4] flag, but retain the "constant
+> + * expression" [6.6] flags.
+> + * Used to merge the constantness flags of primary subexpressions
+> + * into their parent expressions' ones.
+> + */
+> +static inline enum expression_flags expr_flags_decay_consts
+> +	(enum expression_flags flags)
+> +{
+> +	return (flags & ~(expr_clear_flag_mask(EXPR_FLAG_INT_CONST)
+> +			  | expr_clear_flag_mask(EXPR_FLAG_FP_CONST)
+> +			  | expr_clear_flag_mask(EXPR_FLAG_ENUM_CONST)
+> +			  | expr_clear_flag_mask(EXPR_FLAG_CHAR_CONST)));
+> +}
+
+How is that different from:
+	return flags & ~(EXPR_FLAG_INT_CONST
+			|EXPR_FLAG_FP_CONST
+			|EXPR_FLAG_ENUM_CONST
+			|EXPR_FLAG_CHAR_CONST)?
+Shouldn't this more directly implement the desciption of the function:
+	"Remove any 'Constant' flag but retain ... ?
+
+> +/* Purge any constantness related flag. */
+> +static inline enum expression_flags expr_flags_remove_consts
+> +	(enum expression_flags flags)
+> +{
+> +	return (flags &
+> +		~(expr_clear_flag_mask(EXPR_FLAG_ARITH_CONST_EXPR)
+> +		  | expr_clear_flag_mask(EXPR_FLAG_ADDR_CONST_EXPR)));
+> +}
+
+Same as above with the appropriate changes.
 
 
 Yours,
