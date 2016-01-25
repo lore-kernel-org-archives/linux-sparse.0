@@ -1,18 +1,18 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: [PATCH v2 05/13] expression: examine constness of conditionals at evaluation only
-Date: Mon, 25 Jan 2016 15:55:09 +0100
-Message-ID: <878u3dg14i.fsf@gmail.com>
+Subject: [PATCH v2 06/13] expression, evaluate: add support for recognizing address constants
+Date: Mon, 25 Jan 2016 15:56:23 +0100
+Message-ID: <874me1g12g.fsf@gmail.com>
 References: <87twm1g1go.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35989 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35838 "EHLO
 	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932395AbcAYOzM (ORCPT
+	with ESMTP id S1755678AbcAYO40 (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jan 2016 09:55:12 -0500
-Received: by mail-wm0-f67.google.com with SMTP id l65so11750056wmf.3
-        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 06:55:11 -0800 (PST)
+	Mon, 25 Jan 2016 09:56:26 -0500
+Received: by mail-wm0-f67.google.com with SMTP id 123so11781409wmz.2
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 06:56:25 -0800 (PST)
 In-Reply-To: <87twm1g1go.fsf@gmail.com> (Nicolai Stange's message of "Mon, 25
 	Jan 2016 15:47:51 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
@@ -20,119 +20,120 @@ List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Nicolai Stange <nicstange@gmail.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, the propagation of expressions' constness flags through
-conditional expressions is done in two steps:
-- Several flags are speculatively set at expression parsing time
-- and possibly cleared again at evaluation time.
+Address constants [6.6(9)] constitute one of the types of constant
+expressions allowed in initializers [6.6(7)] for static storage
+duration objects [6.7.8(4)].
 
-Set aside this unfortunate split of code, the early propagation of
-constness flags is not able to recognize constant expressions such as
-  0 ? __builtin_choose_expr(0, 0, 0) : 0
-  0 ? 0 : __builtin_choose_expr(0, 0, 0)
-since the final expression to be thrown into the conditional
-expression is known only after evaluation.
+Introduce support for recognizing address constants created either
+- explicitly by referencing a static storage duration object by means
+  of the unary & operator
+- or implicitly by the use of an expression of array or function type.
 
-Move the whole calculation of conditional expressions' constness flags
-to the evaluation phase.
+Treat string literals as address constants.
 
-Introduce support for tracking arithmetic constness propagation through
-conditional expressions.
+Initially tag an expression as being an address constant at the
+primary expression level, i.e. upon encountering a symbol designating
+an object of static storage duration in primary_expression().
+
+Carry these flags over to the *-preop wrapped expression created by
+evaluate_symbol_expression().
+
+For the special case of string literals, tag them as address constants
+in evaluate_string().
+
+Take care in evaluate_ptr_add() and evaluate_offset()
+to properly propagate the address constness flags from
+subexpressions to their parent expressions, namely the array ([])
+or structure member dereference (->, .) expressions.
+
+Finally, do not strip away an *-preop wrapped expression's constness
+flags in evaluate_addressof().
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 ---
- evaluate.c                         | 18 ++++++++----------
- expression.c                       |  7 -------
- validation/constexpr-conditional.c | 34 ++++++++++++++++++++++++++++++++++
- 3 files changed, 42 insertions(+), 17 deletions(-)
- create mode 100644 validation/constexpr-conditional.c
+ evaluate.c   | 18 +++++++++++++++++-
+ expression.c |  8 ++++++++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index 5138d40..97da51d 100644
+index 97da51d..70f419f 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -1114,16 +1114,14 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
- 		true = &expr->cond_true;
- 	}
+@@ -70,9 +70,11 @@ static struct symbol *evaluate_symbol_expression(struct expression *expr)
+ 	addr->symbol = sym;
+ 	addr->symbol_name = expr->symbol_name;
+ 	addr->ctype = &lazy_ptr_ctype;	/* Lazy evaluation: we need to do a proper job if somebody does &sym */
++	addr->flags = expr->flags;
+ 	expr->type = EXPR_PREOP;
+ 	expr->op = '*';
+ 	expr->unop = addr;
++	expr->flags = EXPR_FLAG_NONE;
  
--	if (expr->flags) {
--		unsigned char flags_mask = 0;
--		unsigned char flags;
--
--		expr_set_flag(&flags_mask, EXPR_FLAG_INT_CONST_EXPR);
--		flags = (expr->conditional->flags & flags_mask);
--		flags &= (*true)->flags & expr->cond_false->flags;
--		if (!flags)
--			expr->flags = EXPR_FLAG_NONE;
--	}
-+	expr->flags = (expr->conditional->flags & (*true)->flags &
-+		expr->cond_false->flags);
-+	expr_flags_decay_consts(&expr->flags);
+ 	/* The type of a symbol is the symbol itself! */
+ 	expr->ctype = sym;
+@@ -106,6 +108,7 @@ static struct symbol *evaluate_string(struct expression *expr)
+ 	
+ 	addr->symbol = sym;
+ 	addr->ctype = &lazy_ptr_ctype;
++	expr_set_flag(&addr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
+ 
+ 	expr->type = EXPR_PREOP;
+ 	expr->op = '*';
+@@ -563,6 +566,14 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *i
+ 	classify_type(degenerate(expr->left), &ctype);
+ 	base = examine_pointer_target(ctype);
+ 
 +	/*
-+	 * A conditional operator never yields an address constant
-+	 * [6.6(9)].
++	 * An address constant +/- an integer constant expression
++	 * yields an address constant again [6.6(7)].
 +	 */
-+	expr_clear_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
++	if((expr->left->flags & EXPR_FLAG_ADDR_CONST_EXPR) &&
++		(expr->right->flags & EXPR_FLAG_INT_CONST_EXPR))
++		expr_set_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
++
+ 	if (!base) {
+ 		expression_error(expr, "missing type information");
+ 		return NULL;
+@@ -1678,7 +1689,6 @@ static struct symbol *evaluate_addressof(struct expression *expr)
+ 	}
+ 	ctype = op->ctype;
+ 	*expr = *op->unop;
+-	expr->flags = EXPR_FLAG_NONE;
  
- 	lclass = classify_type(ltype, &ltype);
- 	rclass = classify_type(rtype, &rtype);
+ 	if (expr->type == EXPR_SYMBOL) {
+ 		struct symbol *sym = expr->symbol;
+@@ -1945,6 +1955,12 @@ static struct expression *evaluate_offset(struct expression *expr, unsigned long
+ 	 * we ever take the address of this member dereference..
+ 	 */
+ 	add->ctype = &lazy_ptr_ctype;
++	/*
++	 * An address constant +/- an integer constant expression
++	 * yields an address constant again [6.6(7)].
++	 */
++	add->flags |= expr->flags;
++
+ 	return add;
+ }
+ 
 diff --git a/expression.c b/expression.c
-index 377834e..792c2a5 100644
+index 792c2a5..afc4f39 100644
 --- a/expression.c
 +++ b/expression.c
-@@ -858,13 +858,6 @@ struct token *conditional_expression(struct token *token, struct expression **tr
- 		token = parse_expression(token->next, &expr->cond_true);
- 		token = expect(token, ':', "in conditional expression");
- 		token = conditional_expression(token, &expr->cond_false);
--		if (expr->left && expr->cond_false) {
--			expr->flags = expr->left->flags &
--				expr->cond_false->flags;
--			if (expr->cond_true)
--				expr->flags &= expr->cond_true->flags;
--			expr_flags_decay_consts(&expr->flags);
--		}
- 	}
- 	return token;
- }
-diff --git a/validation/constexpr-conditional.c b/validation/constexpr-conditional.c
-new file mode 100644
-index 0000000..a3331b3
---- /dev/null
-+++ b/validation/constexpr-conditional.c
-@@ -0,0 +1,34 @@
-+static int a[] = {
-+	[0 ? : 0] = 0,						// OK
-+	[1 ? : 0] = 0,						// OK
-+	[0 ? 0 : 0] = 0,					// OK
-+	[1 ? 0 : 0] = 0,					// OK
-+	[0 ? 0 : __builtin_choose_expr(0, 0, 0)] = 0,		// OK
-+	[1 ? __builtin_choose_expr(0, 0, 0) : 0] = 0,		// OK
-+	[0 ? __builtin_choose_expr(0, 0, 0) : 0] = 0,		// OK
-+	[1 ? 1 : __builtin_choose_expr(0, 0, 0)] = 0,		// OK
-+	[__builtin_choose_expr(0, 0, 0) ? : 0] = 0,		// OK
-+	[__builtin_choose_expr(0, 0, 1) ? : 0] = 0,		// OK
-+	[0. ? : 0] = 0,					// KO
-+	[0 ? 0. : 0] = 0,					// KO
-+	[1 ? : 0.] = 0,					// KO
-+	[__builtin_choose_expr(0, 0., 0) ? : 0] = 0,		// OK
-+	[__builtin_choose_expr(0, 0, 0.) ? : 0] = 0,		// KO
-+	[0 ? __builtin_choose_expr(0, 0., 0) : 0] = 0,		// OK
-+	[0 ? __builtin_choose_expr(0, 0, 0.) : 0] = 0,		// KO
-+	[1 ? 0 : __builtin_choose_expr(0, 0., 0)] = 0,		// OK
-+	[1 ? 0 : __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
-+};
+@@ -437,6 +437,14 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 		}
+ 		expr->symbol_name = token->ident;
+ 		expr->symbol = sym;
 +
-+/*
-+ * check-name: Expression constness propagation in conditional expressions
-+ *
-+ * check-error-start
-+constexpr-conditional.c:12:13: error: bad constant expression
-+constexpr-conditional.c:13:19: error: bad constant expression
-+constexpr-conditional.c:14:12: error: bad constant expression
-+constexpr-conditional.c:16:42: error: bad constant expression
-+constexpr-conditional.c:18:48: error: bad constant expression
-+constexpr-conditional.c:20:14: error: bad constant expression
-+ * check-error-end
-+ */
++		/*
++		 * A pointer to an lvalue designating a static storage
++		 * duration object is an address constant [6.6(9)].
++		 */
++		if(sym && (sym->ctype.modifiers & (MOD_TOPLEVEL | MOD_STATIC)))
++			expr_set_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
++
+ 		token = next;
+ 		break;
+ 	}
 -- 
 2.7.0
 
