@@ -1,18 +1,18 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: [PATCH v2 11/13] evaluate: relax some constant expression rules for pointer expressions
-Date: Mon, 25 Jan 2016 16:03:26 +0100
-Message-ID: <87io2hem69.fsf@gmail.com>
+Subject: [PATCH v2 12/13] expression, evaluate: support compound literals as address constants
+Date: Mon, 25 Jan 2016 16:04:28 +0100
+Message-ID: <87egd5em4j.fsf@gmail.com>
 References: <87twm1g1go.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35755 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35347 "EHLO
 	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1756000AbcAYPD3 (ORCPT
+	with ESMTP id S1751092AbcAYPEb (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jan 2016 10:03:29 -0500
-Received: by mail-wm0-f67.google.com with SMTP id 123so11820042wmz.2
-        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 07:03:28 -0800 (PST)
+	Mon, 25 Jan 2016 10:04:31 -0500
+Received: by mail-wm0-f67.google.com with SMTP id 123so11825829wmz.2
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 07:04:30 -0800 (PST)
 In-Reply-To: <87twm1g1go.fsf@gmail.com> (Nicolai Stange's message of "Mon, 25
 	Jan 2016 15:47:51 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
@@ -20,90 +20,81 @@ List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Nicolai Stange <nicstange@gmail.com>, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The official constraints on constant expressions [6.6] are insanely
-strict in that they do not allow some constructs commonly used in the
-wild.
+Toplevel compound literals have got static storage duration
+[6.5.2.5(6)].
 
-Relax them by treating
-- address constants cast to different pointer type as address constants
-  again,
-- address constants cast to integer type as integer constant
-  expressions
-- conditional expressions whose true and false branches both yield
-  address constants as address constants,
-- and conditional expressions whose condition is an address constant
-  as an constant expression to the extent their true and false branches
-  allow.
+This implies that
+1. their addresses are address constants [6.6(9)] and
+2. their initializers must contain constant expressions only
+   [6.5.2.5(3), 6.7.8(4)] .
+
+Flag the anonymous symbol created at expression parsing time as having
+static storage duration if the compound literal occurs at top level
+scope.
+
+Flag the whole expression as being an address constant at evaluation
+time if its corresponding anonymous symbol had been previously marked
+as having static storage duration.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 ---
- evaluate.c | 35 ++++++++++++++++++++++++++++++-----
- 1 file changed, 30 insertions(+), 5 deletions(-)
+ evaluate.c                              |  2 ++
+ expression.c                            |  2 ++
+ validation/constexpr-compound-literal.c | 19 +++++++++++++++++++
+ 3 files changed, 23 insertions(+)
+ create mode 100644 validation/constexpr-compound-literal.c
 
 diff --git a/evaluate.c b/evaluate.c
-index d32f5a4..2b60294 100644
+index 2b60294..ec19fe4 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -1125,14 +1125,23 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
- 		true = &expr->cond_true;
- 	}
+@@ -2770,6 +2770,8 @@ static struct symbol *evaluate_cast(struct expression *expr)
  
--	expr->flags = (expr->conditional->flags & (*true)->flags &
--		expr->cond_false->flags);
--	expr_flags_decay_consts(&expr->flags);
- 	/*
-+	 * A conditional operator yields a particular constant
-+	 * expression type only if all of its three subexpressions are
-+	 * of that type [6.6(6), 6.6(8)].
-+	 * As an extension, relax this restriction by allowing any
-+	 * constant expression type for the condition expression.
-+	 *
- 	 * A conditional operator never yields an address constant
- 	 * [6.6(9)].
-+	 * However, as an extension, if the condition is any constant
-+	 * expression, and the true and false expressions are both
-+	 * address constants, mark the result as an address constant.
- 	 */
--	expr_clear_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
-+	if (expr->conditional->flags & (EXPR_FLAG_ARITH_CONST_EXPR |
-+						EXPR_FLAG_ADDR_CONST_EXPR))
-+		expr->flags = (*true)->flags &expr->cond_false->flags;
-+	expr_flags_decay_consts(&expr->flags);
+ 		addr->ctype = &lazy_ptr_ctype;	/* Lazy eval */
+ 		addr->symbol = sym;
++		if (sym->ctype.modifiers & MOD_TOPLEVEL)
++			expr_set_flag(&addr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
  
- 	lclass = classify_type(ltype, &ltype);
- 	rclass = classify_type(rtype, &rtype);
-@@ -2783,14 +2792,30 @@ static struct symbol *evaluate_cast(struct expression *expr)
- 		/*
- 		 * Casts of integer literals to pointer type yield
- 		 * address constants [6.6(9)].
-+		 *
-+		 * As an extension, treat address constants cast to a
-+		 * different pointer type as adress constants again.
-+		 *
-+		 * As another extension, treat integer constant
-+		 * expressions (in contrast to literals) cast to
-+		 * pointer type as address constants.
- 		 */
- 		if (class1 & TYPE_PTR &&
--			(target->flags & EXPR_FLAG_INT_CONST)) {
-+			((target->flags & EXPR_FLAG_INT_CONST_EXPR) ||
-+				(target->flags & EXPR_FLAG_ADDR_CONST_EXPR))) {
- 			expr_set_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
+ 		expr->type = EXPR_PREOP;
+ 		expr->op = '*';
+diff --git a/expression.c b/expression.c
+index 4ecc865..789353a 100644
+--- a/expression.c
++++ b/expression.c
+@@ -713,6 +713,8 @@ static struct token *cast_expression(struct token *token, struct expression **tr
+ 			cast->cast_type = sym;
+ 			token = expect(token, ')', "at end of cast operator");
+ 			if (match_op(token, '{')) {
++				if (toplevel(block_scope))
++					sym->ctype.modifiers |= MOD_TOPLEVEL;
+ 				if (is_force)
+ 					warning(sym->pos,
+ 						"[force] in compound literal");
+diff --git a/validation/constexpr-compound-literal.c b/validation/constexpr-compound-literal.c
+new file mode 100644
+index 0000000..0892183
+--- /dev/null
++++ b/validation/constexpr-compound-literal.c
+@@ -0,0 +1,19 @@
++static int *a = &(int){ 1 };	// OK
++static int *b = &(int){ *a };	// KO
 +
- 		}
- 	} else {
- 		expr->flags = target->flags;
- 		expr_flags_decay_consts(&expr->flags);
++static void foo(void)
++{
++	int *b = &(int){ 1 };		// OK
++	int *c = &(int){ *a };		// OK
++	static int *d = &(int){ 1 };	// KO
++}
 +
-+		/*
-+		 * As an extension, treat address constants cast to
-+		 * integer type as an arithmetic constant.
-+		 */
-+		if (expr->flags & EXPR_FLAG_ADDR_CONST_EXPR)
-+			expr_set_flag(&expr->flags, EXPR_FLAG_ARITH_CONST_EXPR);
- 		/*
- 		 * Casts to numeric types never result in address
- 		 * constants [6.6(9)].
++/*
++ * check-name: compound literal address constness verification
++ * check-command: sparse -Wstatic-initializer-not-const $file
++ *
++ * check-error-start
++constexpr-compound-literal.c:2:25: warning: initializer for static storage duration object is not a constant expression
++constexpr-compound-literal.c:8:27: warning: initializer for static storage duration object is not a constant expression
++ * check-error-end
++ */
 -- 
 2.7.0
 
