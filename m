@@ -1,205 +1,194 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 01/13] expression: introduce additional expression
- constness tracking flags
-Date: Mon, 25 Jan 2016 22:51:36 +0100
-Message-ID: <20160125215135.GC43341@macpro.local>
+Subject: Re: [PATCH v2 02/13] expression: examine constness of casts at
+ evaluation only
+Date: Mon, 25 Jan 2016 23:02:40 +0100
+Message-ID: <20160125220239.GD43341@macpro.local>
 References: <87twm1g1go.fsf@gmail.com>
- <87powpg1dz.fsf@gmail.com>
+ <87lh7dg1bc.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36614 "EHLO
-	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751259AbcAYVvk (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35426 "EHLO
+	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S932084AbcAYWCo (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jan 2016 16:51:40 -0500
-Received: by mail-wm0-f67.google.com with SMTP id l65so13822687wmf.3
-        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 13:51:40 -0800 (PST)
+	Mon, 25 Jan 2016 17:02:44 -0500
+Received: by mail-wm0-f68.google.com with SMTP id 123so13894849wmz.2
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 14:02:43 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <87powpg1dz.fsf@gmail.com>
+In-Reply-To: <87lh7dg1bc.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Nicolai Stange <nicstange@gmail.com>
 Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Mon, Jan 25, 2016 at 03:49:28PM +0100, Nicolai Stange wrote:
-> Prepare for a more fine-grained tracking of expression constness in the
-> sense of C99 [6.4.4, 6.6].
-
-This part could be moved at the end of the patch description
-> User-visible behaviour remains unchanged.
+On Mon, Jan 25, 2016 at 03:51:03PM +0100, Nicolai Stange wrote:
+> Currently, the propagation of expressions' constness flags through
+> cast expressions is done in two steps:
+> - Several flags are speculatively set at cast expression parsing time
+> - and possibly cleared again at evaluation time.
 > 
-> The current implementation tags an expression with either combination
-> of the flags Int_const_expr and Float_literal, the latter being only
-> used to tell that
->   (int).0
-> is indeed an integer constant expression.
-
-This part should be dropped, I think, and maybe moved to the cover letter.
-
-> Even if sparse attempted to verify that initializers for static storage
-> duration objects are constant expressions [6.7.8(4)] (which it
-> currently does not), it could not tell reliably.
-> Examples:
-> 1.)
->   static float a = { (float)0 }; /* allowed by C99 */
->   '(float)0' is not an integer constant expression, but an arithmetic
->   one.
-> 2.)
->   enum { b = 0 };
->   static void *c = { (void*)b }; /* disallowed by C99 */
->   References to enum members are not allowed in address constants
->   [6.6(9)] and thus, the initializer is not a constant expression at
->   all.
-
-This could be moved to the top of the patch description 
-> Introduce a broader set of constness tracking flags, resembling the
-> four types of constants [6.4.4] (integer, floating, enumeration,
-> character) and the three types of constant expressions [6.6] (integer,
-> arithmetic, address). Use helper functions to consistently set and
-> clear these flags as they are not completely independent.
-> Finally, make alloc_expression() and alloc_const_expression()
-> initialize the new expression's flags to zero.
-
-I think this patch should be split into 2-4 smaller patches:
-0) introduce the new flags, maybe first only NONE, INT_EXPR & FP_CONST
-1) replace the old use of 0, Int_const_expr, ... (can be folded with 0)
-2) initialize the flag in alloc_expression() (can be folded with 1)..
-3) introduce the the new flags if needed, the expr_..._flag() helpers
-   and begin them
+> Set aside this unfortunate split of code, the early propagation of
+> constness flags is not able to recognize constant expressions such as
+>   (int)__builtin_choose_expr(0, 0, 0)
+> since the final expression to be thrown into the cast is known only
+> after evaluation.
+> 
+> Move the whole calculation of cast expressions' constness flags to the
+> evaluation phase.
+> 
+> Introduce support for tracking arithmetic constness propagation through
+> cast expressions.
+> 
+> Introduce support for recognizing address constants created by casting
+> an integer constant to pointer type.
 
 
-> --- a/expression.c
-> +++ b/expression.c
-> @@ -131,7 +131,7 @@ static struct token *parse_type(struct token *token, struct expression **tree)
->  {
->  	struct symbol *sym;
->  	*tree = alloc_expression(token->pos, EXPR_TYPE);
-> -	(*tree)->flags = Int_const_expr; /* sic */
-> +	expr_set_flag(&(*tree)->flags, EXPR_FLAG_INT_CONST_EXPR); /* sic */
+The description show that 3 things are done in the patch.
+Can it be splitted in 3?
 
-Better to remove those 'sic'. To which text do they refer?
+Also, it describes the current situation and what is changed but the
+'why' part is not so clear.
 
-> @@ -457,7 +459,8 @@ struct token *primary_expression(struct token *token, struct expression **tree)
->  		}
->  		if (token->special == '[' && lookup_type(token->next)) {
->  			expr = alloc_expression(token->pos, EXPR_TYPE);
-> -			expr->flags = Int_const_expr; /* sic */
-> +			/* sic */
-> +			expr_set_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
 
-Ditto for the 'sic'
-
-> +
-> +/*
-> + * Set a particular flag among an expression's ones.
-> + *
-> + * The set of flags defined is not completely independent. Take care
-> + * that implications keep obeyed.
-> + *
-> + * Only one single flag from enum expression_flags is allowed for
-> + * the flag argument at a time.
-> + */
-> +static inline void expr_set_flag(unsigned char * const flags,
-> +				enum expression_flags flag)
-> +{
-> +	/* obey the implications */
-> +	switch (flag) {
-> +	case EXPR_FLAG_INT_CONST:
-> +	case EXPR_FLAG_ENUM_CONST:
-> +	case EXPR_FLAG_CHAR_CONST:
-> +		flag |= EXPR_FLAG_INT_CONST_EXPR;
-> +	/* fallthrough */
-> +	case EXPR_FLAG_FP_CONST:
-> +	case EXPR_FLAG_INT_CONST_EXPR:
-> +		flag |= EXPR_FLAG_ARITH_CONST_EXPR;
-> +	/* fallthrough */
-> +	case EXPR_FLAG_ARITH_CONST_EXPR:
-> +	case EXPR_FLAG_ADDR_CONST_EXPR:
-> +	case EXPR_FLAG_NONE:
-> +		break;
-> +	}
-> +
-> +	*flags |= flag;
-> +}
-> +
-> +/*
-> + * Clear a particular flag among an expression's ones.
-> + *
-> + * The set of flags defined is not completely independent. Take care
-> + * that implications keep obeyed.
-> + *
-> + * Only one single flag from enum expression_flags is allowed for
-> + * the flag argument at a time.
-> + */
-> +static inline void expr_clear_flag(unsigned char * const flags,
-> +				enum expression_flags flag)
-> +{
-> +	/* obey the implications */
-> +	switch (flag) {
-> +	case EXPR_FLAG_ARITH_CONST_EXPR:
-> +		flag |= EXPR_FLAG_INT_CONST_EXPR;
-> +		flag |= EXPR_FLAG_FP_CONST;
-> +	/* fallthrough */
-> +	case EXPR_FLAG_INT_CONST_EXPR:
-> +		flag |= EXPR_FLAG_INT_CONST;
-> +		flag |= EXPR_FLAG_ENUM_CONST;
-> +		flag |= EXPR_FLAG_CHAR_CONST;
-> +	/* fallthrough */
-> +	case EXPR_FLAG_ADDR_CONST_EXPR:
-> +	case EXPR_FLAG_INT_CONST:
-> +	case EXPR_FLAG_FP_CONST:
-> +	case EXPR_FLAG_ENUM_CONST:
-> +	case EXPR_FLAG_CHAR_CONST:
-> +	case EXPR_FLAG_NONE:
-> +		break;
-> +	}
-> +
-> +	*flags &= ~flag;
-> +}
-> +
-> +/*
-> + * Remove any "Constant" [6.4.4] flag, but retain the "constant
-> + * expression" [6.6] flags.
-> + * Used to merge the constantness flags of primary subexpressions
-> + * into their parent expressions' ones.
-> + */
-> +static inline void expr_flags_decay_consts(unsigned char * const flags)
-> +{
-> +	*flags &= ~(EXPR_FLAG_INT_CONST | EXPR_FLAG_FP_CONST |
-> +		EXPR_FLAG_ENUM_CONST | EXPR_FLAG_CHAR_CONST);
-> +}
-  
-
-I think it's already much better so!
-But honestly, I still think that it could be improved:
-- the fact that it need a pointer for the update, means that it can only be used
-  with a specific type, here unsigned char, and not arbitrary expressions
-- expr_flags_decay_consts(flags) could be simply be replaced by something like:
-	#define EXPR_FLAG_CONSTANTS (EXPR_FLAG_INT_CONST|EXPR_FLAG_FP_CONST|...)
-	flags &= ~EXPR_FLAG_CONSTANTS;
-- expr_clear_flag() is only used 5 times:
-  -) 4 times with ADDR_CONST_EXPR where it can be replaced by a simple &= ~
-  -) once with INT_CONST_EXPR 
- 
-So, with only a few defines for the set/union, one for the 'clear' and one
-one for the decay you can get rid of these helpers wich IMO improve readability
-and is consistent that elsewhere in the code there is anyway manipulations of
-expr->flags done simply with '|' and '&'.
-
->  enum {
->  	Taint_comma = 1,
-> @@ -77,7 +188,7 @@ enum {
->  
->  struct expression {
->  	enum expression_type type:8;
-> -	unsigned flags:8;
-> +	unsigned char flags;
-
-I suppose that initialy this 'flags' was foreseen for other things than
-'Int_const_expr' & 'Float_literal' but now I think it should be better
-to rename it with something more explicit, like 'constness' or something
-(same then for the EXPR_FLAG_... of course).
-
+The changes themselves are very fine.
+And the comments help :)
 
 Luc
+ 
+> Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+> ---
+>  evaluate.c                  | 42 ++++++++++++++++++++++++++++++------------
+>  expression.c                | 19 -------------------
+>  validation/constexpr-cast.c | 25 +++++++++++++++++++++++++
+>  3 files changed, 55 insertions(+), 31 deletions(-)
+>  create mode 100644 validation/constexpr-cast.c
+> 
+> diff --git a/evaluate.c b/evaluate.c
+> index 0cf85ae..11917ee 100644
+> --- a/evaluate.c
+> +++ b/evaluate.c
+> @@ -323,7 +323,6 @@ static struct expression * cast_to(struct expression *old, struct symbol *type)
+>  	}
+>  
+>  	expr = alloc_expression(old->pos, EXPR_IMPLIED_CAST);
+> -	expr->flags = old->flags;
+>  	expr->ctype = type;
+>  	expr->cast_type = type;
+>  	expr->cast_expression = old;
+> @@ -2742,17 +2741,36 @@ static struct symbol *evaluate_cast(struct expression *expr)
+>  
+>  	class1 = classify_type(ctype, &t1);
+>  
+> -	/* cast to non-numeric type -> not an arithmetic expression */
+> -	if (!(class1 & TYPE_NUM))
+> -		expr_clear_flag(&expr->flags, EXPR_FLAG_ARITH_CONST_EXPR);
+> -	/* cast to float type -> not an integer constant expression */
+> -	else if (class1 & TYPE_FLOAT)
+> -		expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
+> -	/* if argument turns out to be not an integer constant expression *and*
+> -	   it was not a floating literal to start with -> too bad */
+> -	else if (!(target->flags &
+> -			(EXPR_FLAG_INT_CONST_EXPR | EXPR_FLAG_FP_CONST)))
+> -		expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
+> +	if (!(class1 & TYPE_NUM)) {
+> +		/*
+> +		 * Casts of integer literals to pointer type yield
+> +		 * address constants [6.6(9)].
+> +		 */
+> +		if (class1 & TYPE_PTR &&
+> +			(target->flags & EXPR_FLAG_INT_CONST)) {
+> +			expr_set_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
+> +		}
+> +	} else {
+> +		expr->flags = target->flags;
+> +		expr_flags_decay_consts(&expr->flags);
+> +		/*
+> +		 * Casts to numeric types never result in address
+> +		 * constants [6.6(9)].
+> +		 */
+> +		expr_clear_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
+> +		/*
+> +		 * Cast to float type -> not an integer constant
+> +		 * expression [6.6(6)].
+> +		 */
+> +		if (class1 & TYPE_FLOAT)
+> +			expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
+> +		/*
+> +		 * Casts of float literals to integer type results in
+> +		 * a constant integer expression [6.6(6)].
+> +		 */
+> +		else if (target->flags & EXPR_FLAG_FP_CONST)
+> +			expr_set_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
+> +	}
+>  
+>  	/*
+>  	 * You can always throw a value away by casting to
+> diff --git a/expression.c b/expression.c
+> index eccdb5a..33f4581 100644
+> --- a/expression.c
+> +++ b/expression.c
+> @@ -725,25 +725,6 @@ static struct token *cast_expression(struct token *token, struct expression **tr
+>  			if (!v)
+>  				return token;
+>  			cast->cast_expression = v;
+> -
+> -			cast->flags = v->flags;
+> -			expr_flags_decay_consts(&cast->flags);
+> -			/*
+> -			 * Up to now, we missed the (int).0 case here
+> -			 * which should really get a
+> -			 * EXPR_FLAG_INT_CONST_EXPR marker. Also,
+> -			 * conversion to non-numeric types is not
+> -			 * properly reflected up to this point.
+> -			 * However, we do not know until evaluation.
+> -			 * For the moment, in order to preserve
+> -			 * semantics, speculatively set
+> -			 * EXPR_FLAG_INT_CONST_EXPR if
+> -			 * EXPR_FLAG_FP_CONST is set. evaluate_cast()
+> -			 * will unset inappropriate flags again after
+> -			 * examining type information.
+> -			 */
+> -			if (v->flags & EXPR_FLAG_FP_CONST)
+> -				cast->flags |= EXPR_FLAG_INT_CONST_EXPR;
+>  			return token;
+>  		}
+>  	}
+> diff --git a/validation/constexpr-cast.c b/validation/constexpr-cast.c
+> new file mode 100644
+> index 0000000..2706961
+> --- /dev/null
+> +++ b/validation/constexpr-cast.c
+> @@ -0,0 +1,25 @@
+> +static int a[] = {
+> +	[(int)0] = 0,		// OK
+> +	[(int)(int)0] = 0,	// OK
+> +	[(int)0.] = 0,		// OK
+> +	[(int)(int)0.] = 0,	// OK
+> +	[(int)__builtin_choose_expr(0, 0, 0)] = 0,	// OK
+> +	[(int)__builtin_choose_expr(0, 0, 0.)] = 0,	// OK
+> +
+> +	[(int)(float)0] = 0,	// KO
+> +	[(int)(float)0.] = 0,	// KO
+> +
+> +	[(int)(void*)0] = 0,	// KO
+> +	[(int)(void*)0.] = 0,	// KO
+> +
+> +};
+> +/*
+> + * check-name: Expression constness propagation in casts
+> + *
+> + * check-error-start
+> +constexpr-cast.c:9:11: error: bad integer constant expression
+> +constexpr-cast.c:10:11: error: bad integer constant expression
+> +constexpr-cast.c:12:11: error: bad integer constant expression
+> +constexpr-cast.c:13:11: error: bad integer constant expression
+> + * check-error-end
+> + */
+> -- 
+> 2.7.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
