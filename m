@@ -1,21 +1,21 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: Re: [PATCH v2 03/13] expression: examine constness of binops and alike at evaluation only
-Date: Tue, 26 Jan 2016 16:50:07 +0100
-Message-ID: <87r3h4bas0.fsf@gmail.com>
-References: <87twm1g1go.fsf@gmail.com> <87h9i1g19d.fsf@gmail.com>
-	<20160126001412.GA45368@macpro.local>
+Subject: Re: [PATCH v2 07/13] evaluate: check static storage duration objects' intializers' constness
+Date: Tue, 26 Jan 2016 17:08:16 +0100
+Message-ID: <87h9i0b9xr.fsf@gmail.com>
+References: <87twm1g1go.fsf@gmail.com> <87zivtemfq.fsf@gmail.com>
+	<20160126014227.GE46188@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33241 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36258 "EHLO
 	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1755000AbcAZPuL (ORCPT
+	with ESMTP id S964834AbcAZQIT (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Jan 2016 10:50:11 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u188so18107669wmu.0
-        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2016 07:50:10 -0800 (PST)
-In-Reply-To: <20160126001412.GA45368@macpro.local> (Luc Van Oostenryck's
-	message of "Tue, 26 Jan 2016 01:14:14 +0100")
+	Tue, 26 Jan 2016 11:08:19 -0500
+Received: by mail-wm0-f65.google.com with SMTP id l65so18174046wmf.3
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2016 08:08:19 -0800 (PST)
+In-Reply-To: <20160126014227.GE46188@macpro.local> (Luc Van Oostenryck's
+	message of "Tue, 26 Jan 2016 02:42:28 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
@@ -23,80 +23,154 @@ Cc: Nicolai Stange <nicstange@gmail.com>, linux-sparse@vger.kernel.org, Christop
 
 Luc Van Oostenryck <luc.vanoostenryck@gmail.com> writes:
 
-> On Mon, Jan 25, 2016 at 03:52:14PM +0100, Nicolai Stange wrote:
->> Currently, the propagation of expressions' constness flags through
->> binary operations, compare and logical expressions is done in two
->> steps:
->> - Several flags are speculatively set at expression parsing time
->> - and possibly cleared again at evaluation time.
+> On Mon, Jan 25, 2016 at 03:57:45PM +0100, Nicolai Stange wrote:
+>> Initializers of static storage duration objects shall be constant
+>> expressions [6.7.8(4)].
 >> 
->> Set aside this unfortunate split of code, the early propagation of
->> constness flags is not able to recognize constant expressions such as
->>   0 + __builtin_choose_expr(0, 0, 0)
->>   0 < __builtin_choose_expr(0, 0, 0)
->>   0 && __builtin_choose_expr(0, 0, 0)
->> since the final expression to be thrown into the binop-like expression
->> is known only after evaluation.
+>> Warn if that requirement is not met and the -Wstatic-initializer-not-const
+>> flag has been given on sparse's command line.
 >> 
->> Move the whole calculation of binary operations', compare and logical
->> expressions' constness flags to the evaluation phase.
+>> Identify static storage duration objects by having either of
+>> MOD_TOPLEVEL or MOD_STATIC set.
 >> 
->> Introduce support for tracking arithmetic constness propagation through
->> binop-like expressions.
+>> Check an initializer's constness at the lowest possible subobject
+>> level, i.e. at the level of the "assignment-expression" production
+>> in [6.7.8].
+>> 
+>> For compound objects, make handle_list_initializer() pass the
+>> surrounding object's storage duration modifiers down to
+>> handle_simple_initializer() at subobject initializer evaluation.
 >
-> Same as previous patch regarding the description and splitness of the
-> patch.
+> Better here also to split the patch in two:
+> one add the -W flag flag and another one which will use it.
 
-And again, tracking arithmetic constness is more or less an implication
-rather than an explicit change.
-I will reformulate.
+Introducing a flag without any functionality attached to it feels wrong
+for me. For example, where to update the manpage? Before or after actual
+functionality is introduced?
 
->  
->> @@ -893,14 +891,11 @@ static struct symbol *evaluate_binop(struct expression *expr)
->>  	int rclass = classify_type(expr->right->ctype, &rtype);
->>  	int op = expr->op;
+
+>
+> ch > Signed-off-by: Nicolai Stange <nicstange@gmail.com>
+>> ---
+>>  evaluate.c                  |  26 ++++++++++-
+>>  lib.c                       |   2 +
+>>  lib.h                       |   2 +-
+>>  sparse.1                    |   7 +++
+>>  validation/constexpr-init.c | 110 ++++++++++++++++++++++++++++++++++++++++++++
+>>  5 files changed, 145 insertions(+), 2 deletions(-)
+>>  create mode 100644 validation/constexpr-init.c
+>> 
+>> diff --git a/evaluate.c b/evaluate.c
+>> index 70f419f..e3b08e4 100644
+>> --- a/evaluate.c
+>> +++ b/evaluate.c
+>> @@ -2468,6 +2468,7 @@ static void handle_list_initializer(struct expression *expr,
+>>  {
+>>  	struct expression *e, *last = NULL, *top = NULL, *next;
+>>  	int jumped = 0;
+>> +	unsigned long old_modifiers;
 >>  
->> -	if (expr->flags) {
->> -		if (!(expr->left->flags & expr->right->flags &
->> -				EXPR_FLAG_INT_CONST_EXPR))
->> -			expr->flags = EXPR_FLAG_NONE;
->> -	}
+>>  	FOR_EACH_PTR(expr->expr_list, e) {
+>>  		struct expression **v;
+>> @@ -2522,8 +2523,21 @@ found:
+>>  		else
+>>  			v = &top->ident_expression;
+>>  
+>> -		if (handle_simple_initializer(v, 1, lclass, top->ctype))
+>> +		/*
+>> +		 * Temporarily copy storage modifiers down from
+>> +		 * surrounding type such that
+>> +		 * handle_simple_initializer() can check
+>> +		 * initializations of subobjects with static storage
+>> +		 * duration.
+>> +		 */
+>> +		old_modifiers = top->ctype->ctype.modifiers;
+>> +		top->ctype->ctype.modifiers =
+>> +			old_modifiers | (ctype->ctype.modifiers & MOD_STORAGE);
+>> +		if (handle_simple_initializer(v, 1, lclass, top->ctype)) {
+>> +			top->ctype->ctype.modifiers = old_modifiers;
+>>  			continue;
+>> +		}
+>> +		top->ctype->ctype.modifiers = old_modifiers;
+>
+> I don't understand why saving the mods is needed.
+> It feels hackish to me. Isn't it because something is done wrongly at another
+> level or maybe handle_simple_initializer() need an additional arg or so?
+
+It _is_ hackish and I will change to add an additional argument to
+handle_simple_initializer().
+
+>> @@ -2633,6 +2647,16 @@ static int handle_simple_initializer(struct expression **ep, int nested,
+> ...
+>> +			warning(e->pos, "initializer for static storage duration object is not a constant expression");
+>
+> This is quite longish message.
+> What about something like "non-constant initializer"?
+
+That could be misleading:
+
+  static const int a = 1;
+  static const int b = a;
+
+is forbidden, but obiously, 'a' is constant.
+
+I'd like to keep the C99 term "constant expression", as well as
+"initializer" and "static".
+
+I could s/storage duration//.
+
+
+>> diff --git a/lib.c b/lib.c
+>> --- a/lib.c
+>> +++ b/lib.c
+>> @@ -241,6 +241,7 @@ int Wtypesign = 0;
+>>  int Wundef = 0;
+>>  int Wuninitialized = 1;
+>>  int Wvla = 1;
+>> +int Wstatic_initializer_not_const = 0;
+>
+> Here also it's quite longish. Yes I'm a lazy typer :)
+> What about simply -Wconst-initializer ?
+
+Josh Triplett wrote in his replies to my RFC series:
+  Shouldn't it be something like -Wnon-constant-initializer,
+  since that's what it checks for?
+
+I conclude that we generally want to have -Wwhat-is-checked.
+Now, it is the *non*-constant initializers that are being checked for.
+
+Unfortunately, -WnoXXXXXXX seems to get misinterpreted as "switch
+XXXXXXX" off by sparse's command line parsing.
+In this case "switch n-constant-initializer off".
+(I did not verify that by reading code, just by trying it out and
+failing, so just a guess).
+
+The -Wstatic-initializer-not-const choice made in the current series is
+simply a workaround, any better suggestions welcome!
+
+I'm also fine with -Wstatic-initializer.
+
+Comments?
+
+>   
+> One thing that could be added (later and in another patch) is to 
+> set it by default when the C99 variant is selected.
+>
+>>  enum {
+>> diff --git a/lib.h b/lib.h
+>> index 15b69fa..1b38db2 100644
+>> --- a/lib.h
+>> +++ b/lib.h
+>> @@ -127,7 +127,7 @@ extern int Wtypesign;
+>>  extern int Wundef;
+>>  extern int Wuninitialized;
+>>  extern int Wvla;
 >> -
->>  	/* number op number */
->>  	if (lclass & rclass & TYPE_NUM) {
->> +		expr->flags = expr->left->flags & expr->right->flags;
->> +		expr_flags_decay_consts(&expr->flags);
->> +
+>> +extern int Wstatic_initializer_not_const;
 >
-> What about expr->flags now if not TYPE_NUM?
-> Are we sure it's always initialized to NONE by the alloctor?
->
->> diff --git a/validation/constexpr-binop.c b/validation/constexpr-binop.c
->> @@ -0,0 +1,33 @@
->> +static int a[] = {
->> +	[0 + 0] = 0,						// OK
->> +	[0 + 0.] = 0,						// KO
->> +	[(void*)0 + 0] = 0,					// KO
->> +	[0 + __builtin_choose_expr(0, 0, 0)] = 0,		// OK
->> +	[0 + __builtin_choose_expr(0, 0., 0)] = 0,		// OK
->> +	[0 + __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
->> +	[0 < 0] = 0,						// OK
->> +	[0 < 0.] = 0,						// KO
->
-> It's not clear to me what the standrad says about this case.
-> What about the constness of 'usual artihmetic conversions' ?
-> Also GCC don't complain on this one.
+> Better to leave the blank line where it was.
 
-Within the square brackets, an integer constant expression is needed.
+Yes, indeed :P.
 
-That's 6.6(6). "Floating constants that are immediate operands of casts"
-are allowed. Implicitly promoted types are not, at least to my
-interpretation.
-
->
->> +	[0 && 0.] = 0,						// KO
->
-> Same here.
->
 >
 > Luc
