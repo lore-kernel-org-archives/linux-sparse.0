@@ -1,194 +1,88 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 02/13] expression: examine constness of casts at
- evaluation only
-Date: Mon, 25 Jan 2016 23:02:40 +0100
-Message-ID: <20160125220239.GD43341@macpro.local>
+Subject: Re: [PATCH v2 03/13] expression: examine constness of binops and
+ alike at evaluation only
+Date: Tue, 26 Jan 2016 01:14:14 +0100
+Message-ID: <20160126001412.GA45368@macpro.local>
 References: <87twm1g1go.fsf@gmail.com>
- <87lh7dg1bc.fsf@gmail.com>
+ <87h9i1g19d.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35426 "EHLO
-	mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S932084AbcAYWCo (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33861 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756071AbcAZAOS (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 25 Jan 2016 17:02:44 -0500
-Received: by mail-wm0-f68.google.com with SMTP id 123so13894849wmz.2
-        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 14:02:43 -0800 (PST)
+	Mon, 25 Jan 2016 19:14:18 -0500
+Received: by mail-wm0-f66.google.com with SMTP id b14so14357281wmb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 25 Jan 2016 16:14:17 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <87lh7dg1bc.fsf@gmail.com>
+In-Reply-To: <87h9i1g19d.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Nicolai Stange <nicstange@gmail.com>
 Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Mon, Jan 25, 2016 at 03:51:03PM +0100, Nicolai Stange wrote:
+On Mon, Jan 25, 2016 at 03:52:14PM +0100, Nicolai Stange wrote:
 > Currently, the propagation of expressions' constness flags through
-> cast expressions is done in two steps:
-> - Several flags are speculatively set at cast expression parsing time
+> binary operations, compare and logical expressions is done in two
+> steps:
+> - Several flags are speculatively set at expression parsing time
 > - and possibly cleared again at evaluation time.
 > 
 > Set aside this unfortunate split of code, the early propagation of
 > constness flags is not able to recognize constant expressions such as
->   (int)__builtin_choose_expr(0, 0, 0)
-> since the final expression to be thrown into the cast is known only
-> after evaluation.
+>   0 + __builtin_choose_expr(0, 0, 0)
+>   0 < __builtin_choose_expr(0, 0, 0)
+>   0 && __builtin_choose_expr(0, 0, 0)
+> since the final expression to be thrown into the binop-like expression
+> is known only after evaluation.
 > 
-> Move the whole calculation of cast expressions' constness flags to the
-> evaluation phase.
+> Move the whole calculation of binary operations', compare and logical
+> expressions' constness flags to the evaluation phase.
 > 
 > Introduce support for tracking arithmetic constness propagation through
-> cast expressions.
-> 
-> Introduce support for recognizing address constants created by casting
-> an integer constant to pointer type.
+> binop-like expressions.
 
+Same as previous patch regarding the description and splitness of the patch.
+ 
+> @@ -893,14 +891,11 @@ static struct symbol *evaluate_binop(struct expression *expr)
+>  	int rclass = classify_type(expr->right->ctype, &rtype);
+>  	int op = expr->op;
+>  
+> -	if (expr->flags) {
+> -		if (!(expr->left->flags & expr->right->flags &
+> -				EXPR_FLAG_INT_CONST_EXPR))
+> -			expr->flags = EXPR_FLAG_NONE;
+> -	}
+> -
+>  	/* number op number */
+>  	if (lclass & rclass & TYPE_NUM) {
+> +		expr->flags = expr->left->flags & expr->right->flags;
+> +		expr_flags_decay_consts(&expr->flags);
+> +
 
-The description show that 3 things are done in the patch.
-Can it be splitted in 3?
+What about expr->flags now if not TYPE_NUM?
+Are we sure it's always initialized to NONE by the alloctor?
 
-Also, it describes the current situation and what is changed but the
-'why' part is not so clear.
+> diff --git a/validation/constexpr-binop.c b/validation/constexpr-binop.c
+> @@ -0,0 +1,33 @@
+> +static int a[] = {
+> +	[0 + 0] = 0,						// OK
+> +	[0 + 0.] = 0,						// KO
+> +	[(void*)0 + 0] = 0,					// KO
+> +	[0 + __builtin_choose_expr(0, 0, 0)] = 0,		// OK
+> +	[0 + __builtin_choose_expr(0, 0., 0)] = 0,		// OK
+> +	[0 + __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
+> +	[0 < 0] = 0,						// OK
+> +	[0 < 0.] = 0,						// KO
 
+It's not clear to me what the standrad says about this case.
+What about the constness of 'usual artihmetic conversions' ?
+Also GCC don't complain on this one.
 
-The changes themselves are very fine.
-And the comments help :)
+> +	[0 && 0.] = 0,						// KO
+
+Same here.
+
 
 Luc
- 
-> Signed-off-by: Nicolai Stange <nicstange@gmail.com>
-> ---
->  evaluate.c                  | 42 ++++++++++++++++++++++++++++++------------
->  expression.c                | 19 -------------------
->  validation/constexpr-cast.c | 25 +++++++++++++++++++++++++
->  3 files changed, 55 insertions(+), 31 deletions(-)
->  create mode 100644 validation/constexpr-cast.c
-> 
-> diff --git a/evaluate.c b/evaluate.c
-> index 0cf85ae..11917ee 100644
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -323,7 +323,6 @@ static struct expression * cast_to(struct expression *old, struct symbol *type)
->  	}
->  
->  	expr = alloc_expression(old->pos, EXPR_IMPLIED_CAST);
-> -	expr->flags = old->flags;
->  	expr->ctype = type;
->  	expr->cast_type = type;
->  	expr->cast_expression = old;
-> @@ -2742,17 +2741,36 @@ static struct symbol *evaluate_cast(struct expression *expr)
->  
->  	class1 = classify_type(ctype, &t1);
->  
-> -	/* cast to non-numeric type -> not an arithmetic expression */
-> -	if (!(class1 & TYPE_NUM))
-> -		expr_clear_flag(&expr->flags, EXPR_FLAG_ARITH_CONST_EXPR);
-> -	/* cast to float type -> not an integer constant expression */
-> -	else if (class1 & TYPE_FLOAT)
-> -		expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
-> -	/* if argument turns out to be not an integer constant expression *and*
-> -	   it was not a floating literal to start with -> too bad */
-> -	else if (!(target->flags &
-> -			(EXPR_FLAG_INT_CONST_EXPR | EXPR_FLAG_FP_CONST)))
-> -		expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
-> +	if (!(class1 & TYPE_NUM)) {
-> +		/*
-> +		 * Casts of integer literals to pointer type yield
-> +		 * address constants [6.6(9)].
-> +		 */
-> +		if (class1 & TYPE_PTR &&
-> +			(target->flags & EXPR_FLAG_INT_CONST)) {
-> +			expr_set_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
-> +		}
-> +	} else {
-> +		expr->flags = target->flags;
-> +		expr_flags_decay_consts(&expr->flags);
-> +		/*
-> +		 * Casts to numeric types never result in address
-> +		 * constants [6.6(9)].
-> +		 */
-> +		expr_clear_flag(&expr->flags, EXPR_FLAG_ADDR_CONST_EXPR);
-> +		/*
-> +		 * Cast to float type -> not an integer constant
-> +		 * expression [6.6(6)].
-> +		 */
-> +		if (class1 & TYPE_FLOAT)
-> +			expr_clear_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
-> +		/*
-> +		 * Casts of float literals to integer type results in
-> +		 * a constant integer expression [6.6(6)].
-> +		 */
-> +		else if (target->flags & EXPR_FLAG_FP_CONST)
-> +			expr_set_flag(&expr->flags, EXPR_FLAG_INT_CONST_EXPR);
-> +	}
->  
->  	/*
->  	 * You can always throw a value away by casting to
-> diff --git a/expression.c b/expression.c
-> index eccdb5a..33f4581 100644
-> --- a/expression.c
-> +++ b/expression.c
-> @@ -725,25 +725,6 @@ static struct token *cast_expression(struct token *token, struct expression **tr
->  			if (!v)
->  				return token;
->  			cast->cast_expression = v;
-> -
-> -			cast->flags = v->flags;
-> -			expr_flags_decay_consts(&cast->flags);
-> -			/*
-> -			 * Up to now, we missed the (int).0 case here
-> -			 * which should really get a
-> -			 * EXPR_FLAG_INT_CONST_EXPR marker. Also,
-> -			 * conversion to non-numeric types is not
-> -			 * properly reflected up to this point.
-> -			 * However, we do not know until evaluation.
-> -			 * For the moment, in order to preserve
-> -			 * semantics, speculatively set
-> -			 * EXPR_FLAG_INT_CONST_EXPR if
-> -			 * EXPR_FLAG_FP_CONST is set. evaluate_cast()
-> -			 * will unset inappropriate flags again after
-> -			 * examining type information.
-> -			 */
-> -			if (v->flags & EXPR_FLAG_FP_CONST)
-> -				cast->flags |= EXPR_FLAG_INT_CONST_EXPR;
->  			return token;
->  		}
->  	}
-> diff --git a/validation/constexpr-cast.c b/validation/constexpr-cast.c
-> new file mode 100644
-> index 0000000..2706961
-> --- /dev/null
-> +++ b/validation/constexpr-cast.c
-> @@ -0,0 +1,25 @@
-> +static int a[] = {
-> +	[(int)0] = 0,		// OK
-> +	[(int)(int)0] = 0,	// OK
-> +	[(int)0.] = 0,		// OK
-> +	[(int)(int)0.] = 0,	// OK
-> +	[(int)__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-> +	[(int)__builtin_choose_expr(0, 0, 0.)] = 0,	// OK
-> +
-> +	[(int)(float)0] = 0,	// KO
-> +	[(int)(float)0.] = 0,	// KO
-> +
-> +	[(int)(void*)0] = 0,	// KO
-> +	[(int)(void*)0.] = 0,	// KO
-> +
-> +};
-> +/*
-> + * check-name: Expression constness propagation in casts
-> + *
-> + * check-error-start
-> +constexpr-cast.c:9:11: error: bad integer constant expression
-> +constexpr-cast.c:10:11: error: bad integer constant expression
-> +constexpr-cast.c:12:11: error: bad integer constant expression
-> +constexpr-cast.c:13:11: error: bad integer constant expression
-> + * check-error-end
-> + */
-> -- 
-> 2.7.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
