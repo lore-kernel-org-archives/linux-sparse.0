@@ -1,75 +1,97 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 03/13] expression: examine constness of binops and
- alike at evaluation only
-Date: Tue, 26 Jan 2016 18:24:40 +0100
-Message-ID: <20160126172438.GA989@macpro.local>
+Subject: Re: [PATCH v2 07/13] evaluate: check static storage duration
+ objects' intializers' constness
+Date: Tue, 26 Jan 2016 18:56:39 +0100
+Message-ID: <20160126175637.GB989@macpro.local>
 References: <87twm1g1go.fsf@gmail.com>
- <87h9i1g19d.fsf@gmail.com>
- <20160126001412.GA45368@macpro.local>
- <87r3h4bas0.fsf@gmail.com>
+ <87zivtemfq.fsf@gmail.com>
+ <20160126014227.GE46188@macpro.local>
+ <87h9i0b9xr.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35994 "EHLO
-	mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S966811AbcAZRYn (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35458 "EHLO
+	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1756092AbcAZR4m (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Tue, 26 Jan 2016 12:24:43 -0500
-Received: by mail-wm0-f65.google.com with SMTP id l65so18573484wmf.3
-        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2016 09:24:43 -0800 (PST)
+	Tue, 26 Jan 2016 12:56:42 -0500
+Received: by mail-wm0-f67.google.com with SMTP id 123so18784417wmz.2
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2016 09:56:41 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <87r3h4bas0.fsf@gmail.com>
+In-Reply-To: <87h9i0b9xr.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Nicolai Stange <nicstange@gmail.com>
 Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Tue, Jan 26, 2016 at 04:50:07PM +0100, Nicolai Stange wrote:
+On Tue, Jan 26, 2016 at 05:08:16PM +0100, Nicolai Stange wrote:
 > Luc Van Oostenryck <luc.vanoostenryck@gmail.com> writes:
+> > Better here also to split the patch in two:
+> > one add the -W flag flag and another one which will use it.
 > 
-> > On Mon, Jan 25, 2016 at 03:52:14PM +0100, Nicolai Stange wrote:
-> >> +	[0 < 0.] = 0,						// KO
+> Introducing a flag without any functionality attached to it feels wrong
+> for me. For example, where to update the manpage? Before or after actual
+> functionality is introduced?
+
+For me it's fine when it's all part of the same serie.
+The update to the manpage should be done when adding the flag,
+before using it.
+ 
+
+> >> @@ -2633,6 +2647,16 @@ static int handle_simple_initializer(struct expression **ep, int nested,
+> > ...
+> >> +			warning(e->pos, "initializer for static storage duration object is not a constant expression");
 > >
-> > It's not clear to me what the standrad says about this case.
-> > What about the constness of 'usual artihmetic conversions' ?
-> > Also GCC don't complain on this one.
+> > This is quite longish message.
+> > What about something like "non-constant initializer"?
 > 
-> Within the square brackets, an integer constant expression is needed.
+> That could be misleading:
 > 
-> That's 6.6(6). "Floating constants that are immediate operands of casts"
-> are allowed. Implicitly promoted types are not, at least to my
-> interpretation.
+>   static const int a = 1;
+>   static const int b = a;
+> 
+> is forbidden, but obiously, 'a' is constant.
+> 
+> I'd like to keep the C99 term "constant expression", as well as
+> "initializer" and "static".
+> 
+> I could s/storage duration//.
 
-Yes, I saw that the standard isn't explicit about it.
-The way I see things is:
-- I don't see any reason why an explicit conversion would preserve
-  constness while an implicit one would not.
-- intuitively, when I read the code I see that the result of this
-  expression is can be known at compile time.
+Or "non-constant initializer for static object"?
 
-But well ... I have the same issue with [(int) (0 + 0.0)] which
-is clearly not allowed by the standard while [(int) 0.0] is.
+> >> +int Wstatic_initializer_not_const = 0;
+> >
+> > Here also it's quite longish. Yes I'm a lazy typer :)
+> > What about simply -Wconst-initializer ?
+> 
+> Josh Triplett wrote in his replies to my RFC series:
+>   Shouldn't it be something like -Wnon-constant-initializer,
+>   since that's what it checks for?
+> 
+> I conclude that we generally want to have -Wwhat-is-checked.
+> Now, it is the *non*-constant initializers that are being checked for.
+> 
+> Unfortunately, -WnoXXXXXXX seems to get misinterpreted as "switch
+> XXXXXXX" off by sparse's command line parsing.
+> In this case "switch n-constant-initializer off".
+> (I did not verify that by reading code, just by trying it out and
+> failing, so just a guess).
 
-Maybe those should be relaxed latter and we can invoke 6.6(10):
-	An implementation may accept other forms of constant expressions
+Yes the code disable warning flags that begin by 'no' or 'no-' .
 
-OTOH, who cares about floats ;)
+I see things a bit more loosely: -Wfoobar could means that we will check
+and warn something related to 'foobar' but yes it's certainly better
+to keep the logic in the direction "warn if 'foobar' is encountered".
 
+> The -Wstatic-initializer-not-const choice made in the current series is
+> simply a workaround, any better suggestions welcome!
+> 
+> I'm also fine with -Wstatic-initializer.
+> 
+> Comments?
 
-Reading a bit more about it ...
-
-For the designator in the array initializer (but also probably elsewhere)
-6.7.8(6) first uses 
-	 [ <i>constant-expression<\i> ]
-and then
-	and the expression shall be an integer constant expression.
-
-Can this last 'integer constant expression' be interpreted as 'constant
-expression of integer type'?
-This could be considered to be coherent with the footnote 99) in 6.6(6)
-followed by 6.6(7).
-
-I don't know, it's something for language lawyers.
+I dunno.
+Better to leave it so for now, I think.
 
 
 Luc
