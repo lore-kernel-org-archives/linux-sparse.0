@@ -1,81 +1,102 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 03/13] expression: examine constness of binops and
- alike at evaluation only
-Date: Wed, 27 Jan 2016 19:00:03 +0100
-Message-ID: <20160127180000.GA13556@macbook.lan>
-References: <87twm1g1go.fsf@gmail.com>
- <87h9i1g19d.fsf@gmail.com>
- <20160126001412.GA45368@macpro.local>
- <87r3h4bas0.fsf@gmail.com>
- <20160126172438.GA989@macpro.local>
- <87vb6f8fs7.fsf@gmail.com>
+From: Lance Richardson <lrichard@redhat.com>
+Subject: Re: [PATCH v2] sparse: add support for static assert
+Date: Thu, 28 Jan 2016 09:53:29 -0500 (EST)
+Message-ID: <67630678.27333596.1453992809485.JavaMail.zimbra@redhat.com>
+References: <1452551482-1250-1-git-send-email-lrichard@redhat.com> <20160125184804.GA43341@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35890 "EHLO
-	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933643AbcA0SAM (ORCPT
+Received: from mx3-phx2.redhat.com ([209.132.183.24]:52441 "EHLO
+	mx3-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S965230AbcA1Oxa (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 27 Jan 2016 13:00:12 -0500
-Received: by mail-wm0-f66.google.com with SMTP id l65so4755801wmf.3
-        for <linux-sparse@vger.kernel.org>; Wed, 27 Jan 2016 10:00:12 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <87vb6f8fs7.fsf@gmail.com>
+	Thu, 28 Jan 2016 09:53:30 -0500
+In-Reply-To: <20160125184804.GA43341@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Nicolai Stange <nicstange@gmail.com>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Wed, Jan 27, 2016 at 11:42:32AM +0100, Nicolai Stange wrote:
-> Luc Van Oostenryck <luc.vanoostenryck@gmail.com> writes:
-
-...
-
-> > Maybe those should be relaxed latter and we can invoke 6.6(10):
-> > 	An implementation may accept other forms of constant expressions
-> >
-> > OTOH, who cares about floats ;)
+----- Original Message -----
+> On Mon, Jan 11, 2016 at 05:31:22PM -0500, Lance Richardson wrote:
 > 
-> A true word. Thus, I suggest not to introduce any additional form of
-> constness at this moment. In the end, we wanted to be stricter than gcc.
 > 
-> If real world problems arise, we can easily return to that question.
-
-It's exactly what I meant.
- 
-...
-
-> I'm sure that if the standard authors' real intents had been to allow
-> arithmetic constant expressions of integer types at this place, they
-> would have said so and not used the well defined term "integer constant
-> expression" at this point.
-
-I would definitively appreciate the standard being less ambiguous.
-And I find the footnote 99) in 6.6 really confusing.
- 
-> > This could be considered to be coherent with the footnote 99) in 6.6(6)
-> > followed by 6.6(7).
-> >
-> > I don't know, it's something for language lawyers.
+> Hi,
 > 
-> If you don't agree with my interpretation, we could very well try to get
-> some language layer into our boat.
+> I don't understand why tha parsing part have changed so much since v1.
+> Is it because I said
+>    > It seems a bit strange to me to use NS_TYPEDEF, as this is unrelated
+>    > types.
+>    > OTOH, the other namespaces deosn't seems better suited,
+>    > and yes C11 define this as sort of declaration, so ...
+> or because something related to handling it inside structs and unions or
+> for some other reason?
 > 
-> OTOH, if you agree that we could safely leave the semantics as they
-> currently are, I could just go on and prepare v3...
+> If because of the NS_TYPEDEF thing, sorry if I wasn't clear but I really
+> think
+> it was fine, just that at first sight I found it strange.
+> If because the structs & unions, please explain why is it needed, what was
+> wrong
+> with v1 and is fine now.
 
-It's not that I really disagree with your interpretation, nor that I totally agree
-with it. It's more me playing devil's advocate, insuring that the reasonable cases
-are well covered.
-It's the fact that GCC and your code differ on this point that made me stop at it
-because it could make your changes less valuable which we don't want.
+I discovered as I was adding additional test cases that the NS_TYPEDEF
+approach was causing sizeof to report a zero size for structures with
+embedded _Static_assert(); as part of processing NS_TYPEDEF within
+a structure for _Static_assert(), a unnamed field with unknown size
+was being attached to the structure definition.
 
-My remark about a language lawyer was not a serious one, it was more a way to say
-	"let's not spend more time on it for now".
+So I decided to take a different approach, one that hopefully makes
+more sense than handling _Static_assert() via NS_TYPEDEF. 
 
-Please go on.
-And with what you have put in place for the expression constness it will be very easy
-to relax some of the rules when there will be some needs for it.
+Apologies for not providing these details in the v2 commit log. 
+> 
+> 
+> > diff --git a/validation/static_assert.c b/validation/static_assert.c
+> > new file mode 100644
+> > index 0000000..d3da954
+> > --- /dev/null
+> > +++ b/validation/static_assert.c
+> ...
+> > +struct s2 {
+> > +	char c;
+> > +	_Static_assert(sizeof(struct s2) == 1, "struct sizeof");
+> > +};
+> 
+> This succeed but
+> 	struct s2 {
+> 		char c;
+> 		_Static_assert(sizeof(struct s2) == 1, "struct sizeof");
+> 		char d;
+> 		_Static_assert(sizeof(struct s2) == 2, "struct sizeof");
+> 	};
+> succeed also wich seems certainly very odd.
+> 
 
+Yes, I believe they should both fail with something like "invalid use of
+sizeof on incomplete type".
 
-Luc
+> However it's not a problem with your patch but because of:
+> 1) sparse is fine with the evaluation of sizeof(struct ...) while the struct
+>    is not yet completed (which is maybe usefull but certainly can also be
+>    considered as a bug)
+
+I think it's a bug.
+
+> 2) those assertions are evaluated at parse time and not at some later time.
+>    My first thought was that we really should move the checking of those
+>    assertions at a later time, maybe after linearization and by introducing
+>    a new operation for it (like OP_ASSERT or so).
+>    But this is not a solution for the assertions inside structs & unions.
+>    I'll add a separate test case showing the problem and it's probably better
+>    to not put this test in your test cases.
+> 
+
+OK, I'll post a v3 with the invalid test case removed. Thanks for looking
+at this.
+
+   Lance
+
+> Regards,
+> Luc
+> 
