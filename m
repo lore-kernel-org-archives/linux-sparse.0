@@ -1,18 +1,18 @@
 From: Nicolai Stange <nicstange@gmail.com>
-Subject: [PATCH v3 03/21] expression: examine constness of casts at evaluation only
-Date: Mon, 01 Feb 2016 03:31:47 +0100
-Message-ID: <878u35jh4c.fsf@gmail.com>
+Subject: [PATCH v3 04/21] expression: examine constness of binops and alike at evaluation only
+Date: Mon, 01 Feb 2016 03:32:32 +0100
+Message-ID: <874mdtjh33.fsf@gmail.com>
 References: <87lh75jh9l.fsf@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33806 "EHLO
-	mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S933557AbcBACbu (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34110 "EHLO
+	mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S933536AbcBACcf (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Sun, 31 Jan 2016 21:31:50 -0500
-Received: by mail-wm0-f67.google.com with SMTP id p63so7013344wmp.1
-        for <linux-sparse@vger.kernel.org>; Sun, 31 Jan 2016 18:31:49 -0800 (PST)
+	Sun, 31 Jan 2016 21:32:35 -0500
+Received: by mail-wm0-f66.google.com with SMTP id p63so7015082wmp.1
+        for <linux-sparse@vger.kernel.org>; Sun, 31 Jan 2016 18:32:34 -0800 (PST)
 In-Reply-To: <87lh75jh9l.fsf@gmail.com> (Nicolai Stange's message of "Mon, 01
 	Feb 2016 03:28:38 +0100")
 Sender: linux-sparse-owner@vger.kernel.org
@@ -20,149 +20,139 @@ List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nicolai Stange <nicstange@gmail.com>
 
-Move the whole calculation of cast expressions' constness flags to the
-evaluation phase such that expressions like
+Move the whole calculation of binary operations', compare and logical
+expressions' constness flags to the evaluation phase such that expressions
+like
 
-  (int)__builtin_choose_expr(0, 0, 0)
+  0 + __builtin_choose_expr(0, 0, 0)
+  0 < __builtin_choose_expr(0, 0, 0)
+  0 && __builtin_choose_expr(0, 0, 0)
 
 can now be recognized as qualifying as integer constant expressions.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 ---
- evaluate.c                  | 27 ++++++++++++++++++---------
- expression.c                | 21 ---------------------
- expression.h                | 10 ++++++++++
- validation/constexpr-cast.c | 25 +++++++++++++++++++++++++
- 4 files changed, 53 insertions(+), 30 deletions(-)
- create mode 100644 validation/constexpr-cast.c
+ evaluate.c                   | 28 +++++++++-------------------
+ expression.c                 |  5 -----
+ validation/constexpr-binop.c | 33 +++++++++++++++++++++++++++++++++
+ 3 files changed, 42 insertions(+), 24 deletions(-)
+ create mode 100644 validation/constexpr-binop.c
 
 diff --git a/evaluate.c b/evaluate.c
-index 7bce4fb..24a7f2f 100644
+index 24a7f2f..32e5930 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -323,7 +323,6 @@ static struct expression * cast_to(struct expression *old, struct symbol *type)
- 	}
+@@ -878,12 +878,9 @@ static struct symbol *evaluate_logical(struct expression *expr)
  
- 	expr = alloc_expression(old->pos, EXPR_IMPLIED_CAST);
--	expr->constexpr_flags = old->constexpr_flags;
- 	expr->ctype = type;
- 	expr->cast_type = type;
- 	expr->cast_expression = old;
-@@ -2745,14 +2744,24 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 	/* the result is int [6.5.13(3), 6.5.14(3)] */
+ 	expr->ctype = &int_ctype;
+-	if (expr->constexpr_flags) {
+-		if (!(expr->left->constexpr_flags &
+-				expr->right->constexpr_flags &
+-				CONSTEXPR_FLAG_INT_CONST_EXPR))
+-			expr->constexpr_flags = CONSTEXPR_FLAG_NONE;
+-	}
++	expr->constexpr_flags = expr->left->constexpr_flags &
++		expr->right->constexpr_flags &
++		~CONSTEXPR_FLAG_DECAY_CONSTS_MASK;
+ 	return &int_ctype;
+ }
  
- 	class1 = classify_type(ctype, &t1);
+@@ -894,15 +891,12 @@ static struct symbol *evaluate_binop(struct expression *expr)
+ 	int rclass = classify_type(expr->right->ctype, &rtype);
+ 	int op = expr->op;
  
--	/* cast to non-integer type -> not an integer constant expression */
--	if (!is_int(class1))
--		expr->constexpr_flags = CONSTEXPR_FLAG_NONE;
--	/* if argument turns out to be not an integer constant expression *and*
--	   it was not a floating literal to start with -> too bad */
--	else if (expr->constexpr_flags & CONSTEXPR_FLAG_INT_CONST_EXPR &&
--		!(target->constexpr_flags & CONSTEXPR_FLAG_INT_CONST_EXPR))
--		expr->constexpr_flags = CONSTEXPR_FLAG_NONE;
-+	if (class1 & TYPE_NUM) {
-+		expr->constexpr_flags = target->constexpr_flags &
+-	if (expr->constexpr_flags) {
+-		if (!(expr->left->constexpr_flags &
+-				expr->right->constexpr_flags &
+-				CONSTEXPR_FLAG_INT_CONST_EXPR))
+-			expr->constexpr_flags = CONSTEXPR_FLAG_NONE;
+-	}
+-
+ 	/* number op number */
+ 	if (lclass & rclass & TYPE_NUM) {
++		expr->constexpr_flags = expr->left->constexpr_flags &
++			expr->right->constexpr_flags &
 +			~CONSTEXPR_FLAG_DECAY_CONSTS_MASK;
-+		/*
-+		 * Cast to float type -> not an integer constant
-+		 * expression [6.6(6)].
-+		 */
-+		if (class1 & TYPE_FLOAT)
-+			expr->constexpr_flags &=
-+				~CONSTEXPR_FLAG_INT_CONST_EXPR_CLEAR_MASK;
-+		/*
-+		 * Casts of float literals to integer type results in
-+		 * a constant integer expression [6.6(6)].
-+		 */
-+		else if (target->constexpr_flags & CONSTEXPR_FLAG_FP_CONST)
-+			expr->constexpr_flags =
-+				CONSTEXPR_FLAG_INT_CONST_EXPR_SET_MASK;
-+	}
++
+ 		if ((lclass | rclass) & TYPE_FLOAT) {
+ 			switch (op) {
+ 			case '+': case '-': case '*': case '/':
+@@ -1004,12 +998,8 @@ static struct symbol *evaluate_compare(struct expression *expr)
+ 	struct symbol *ctype;
+ 	const char *typediff;
  
- 	/*
- 	 * You can always throw a value away by casting to
+-	if (expr->constexpr_flags) {
+-		if (!(expr->left->constexpr_flags &
+-				expr->right->constexpr_flags &
+-				CONSTEXPR_FLAG_INT_CONST_EXPR))
+-			expr->constexpr_flags = CONSTEXPR_FLAG_NONE;
+-	}
++	expr->constexpr_flags = left->constexpr_flags &
++		right->constexpr_flags & ~CONSTEXPR_FLAG_DECAY_CONSTS_MASK;
+ 
+ 	/* Type types? */
+ 	if (is_type_type(ltype) && is_type_type(rtype))
 diff --git a/expression.c b/expression.c
-index f9adab6..759bee8 100644
+index 759bee8..5970b1b 100644
 --- a/expression.c
 +++ b/expression.c
-@@ -730,27 +730,6 @@ static struct token *cast_expression(struct token *token, struct expression **tr
- 			if (!v)
- 				return token;
- 			cast->cast_expression = v;
--
--			cast->constexpr_flags = v->constexpr_flags &
--				~CONSTEXPR_FLAG_DECAY_CONSTS_MASK;
--			/*
--			 * Up to now, we missed the (int).0 case here
--			 * which should really get a
--			 * CONSTEXPR_FLAG_INT_CONST_EXPR marker. Also,
--			 * conversion to non-numeric types is not
--			 * properly reflected up to this point.
--			 * However, we do not know until evaluation.
--			 * For the moment, in order to preserve
--			 * semantics, speculatively set
--			 * CONSTEXPR_FLAG_INT_CONST_EXPR if
--			 * CONSTEXPR_FLAG_FP_CONST is
--			 * set. evaluate_cast() will unset
--			 * inappropriate flags again after examining
--			 * type information.
--			 */
--			if (v->constexpr_flags & CONSTEXPR_FLAG_FP_CONST)
--				cast->constexpr_flags |=
--					CONSTEXPR_FLAG_INT_CONST_EXPR_SET_MASK;
- 			return token;
- 		}
- 	}
-diff --git a/expression.h b/expression.h
-index 8a943a4..408382e 100644
---- a/expression.h
-+++ b/expression.h
-@@ -119,6 +119,16 @@ enum constexpr_flag {
- 	(CONSTEXPR_FLAG_CHAR_CONST | CONSTEXPR_FLAG_INT_CONST_EXPR_SET_MASK)
- 
- /*
-+ * not an integer constant expression => neither of integer,
-+ * enumeration and character constant
-+*/
-+#define CONSTEXPR_FLAG_INT_CONST_EXPR_CLEAR_MASK \
-+	(CONSTEXPR_FLAG_INT_CONST_EXPR |	 \
-+		CONSTEXPR_FLAG_INT_CONST |	 \
-+		CONSTEXPR_FLAG_ENUM_CONST |	 \
-+		CONSTEXPR_FLAG_CHAR_CONST)
-+
-+/*
-  * Remove any "Constant" [6.4.4] flag, but retain the "constant
-  * expression" [6.6] flags.
-  */
-diff --git a/validation/constexpr-cast.c b/validation/constexpr-cast.c
+@@ -147,7 +147,6 @@ static struct token *builtin_types_compatible_p_expr(struct token *token,
+ {
+ 	struct expression *expr = alloc_expression(
+ 		token->pos, EXPR_COMPARE);
+-	expr->constexpr_flags = CONSTEXPR_FLAG_INT_CONST_EXPR_SET_MASK;
+ 	expr->op = SPECIAL_EQUAL;
+ 	token = token->next;
+ 	if (!match_op(token, '('))
+@@ -766,10 +765,6 @@ static struct token *cast_expression(struct token *token, struct expression **tr
+ 				sparse_error(next->pos, "No right hand side of '%s'-expression", show_special(op));	\
+ 				break;					\
+ 			}						\
+-			top->constexpr_flags =				\
+-				left->constexpr_flags &		\
+-				right->constexpr_flags &		\
+-				~CONSTEXPR_FLAG_DECAY_CONSTS_MASK;	\
+ 			top->op = op;					\
+ 			top->left = left;				\
+ 			top->right = right;				\
+diff --git a/validation/constexpr-binop.c b/validation/constexpr-binop.c
 new file mode 100644
-index 0000000..2706961
+index 0000000..85a88e3
 --- /dev/null
-+++ b/validation/constexpr-cast.c
-@@ -0,0 +1,25 @@
++++ b/validation/constexpr-binop.c
+@@ -0,0 +1,33 @@
 +static int a[] = {
-+	[(int)0] = 0,		// OK
-+	[(int)(int)0] = 0,	// OK
-+	[(int)0.] = 0,		// OK
-+	[(int)(int)0.] = 0,	// OK
-+	[(int)__builtin_choose_expr(0, 0, 0)] = 0,	// OK
-+	[(int)__builtin_choose_expr(0, 0, 0.)] = 0,	// OK
-+
-+	[(int)(float)0] = 0,	// KO
-+	[(int)(float)0.] = 0,	// KO
-+
-+	[(int)(void*)0] = 0,	// KO
-+	[(int)(void*)0.] = 0,	// KO
-+
++	[0 + 0] = 0,						// OK
++	[0 + 0.] = 0,						// KO
++	[(void*)0 + 0] = 0,					// KO
++	[0 + __builtin_choose_expr(0, 0, 0)] = 0,		// OK
++	[0 + __builtin_choose_expr(0, 0., 0)] = 0,		// OK
++	[0 + __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
++	[0 < 0] = 0,						// OK
++	[0 < 0.] = 0,						// KO
++	[0 < __builtin_choose_expr(0, 0, 0)] = 0,		// OK
++	[0 < __builtin_choose_expr(0, 0., 0)] = 0,		// OK
++	[0 < __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
++	[0 && 0] = 0,						// OK
++	[0 && 0.] = 0,						// KO
++	[0 && __builtin_choose_expr(0, 0, 0)] = 0,		// OK
++	[0 && __builtin_choose_expr(0, 0., 0)] = 0,		// OK
++	[0 && __builtin_choose_expr(0, 0, 0.)] = 0,		// KO
++	[0 + __builtin_types_compatible_p(int, float)] = 0,	// OK
 +};
++
 +/*
-+ * check-name: Expression constness propagation in casts
++ * check-name: Expression constness propagation in binops and alike
 + *
 + * check-error-start
-+constexpr-cast.c:9:11: error: bad integer constant expression
-+constexpr-cast.c:10:11: error: bad integer constant expression
-+constexpr-cast.c:12:11: error: bad integer constant expression
-+constexpr-cast.c:13:11: error: bad integer constant expression
++constexpr-binop.c:3:12: error: bad constant expression
++constexpr-binop.c:4:19: error: bad integer constant expression
++constexpr-binop.c:7:12: error: bad constant expression
++constexpr-binop.c:9:12: error: bad integer constant expression
++constexpr-binop.c:12:12: error: bad integer constant expression
++constexpr-binop.c:14:12: error: bad integer constant expression
++constexpr-binop.c:17:12: error: bad integer constant expression
 + * check-error-end
 + */
 -- 
