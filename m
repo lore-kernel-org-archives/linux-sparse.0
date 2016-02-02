@@ -1,75 +1,49 @@
 From: Bob Copeland <me@bobcopeland.com>
-Subject: error: ctype on uninitialized symbol
-Date: Mon, 1 Feb 2016 14:44:09 -0500
-Message-ID: <20160201194409.GA15047@localhost>
+Subject: Re: error: ctype on uninitialized symbol
+Date: Mon, 1 Feb 2016 21:53:27 -0500
+Message-ID: <20160202025327.GF24581@localhost>
+References: <20160201194409.GA15047@localhost>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qg0-f51.google.com ([209.85.192.51]:36467 "EHLO
-	mail-qg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1753086AbcBAToM (ORCPT
+Received: from mail-qg0-f48.google.com ([209.85.192.48]:33660 "EHLO
+	mail-qg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1751342AbcBBCxa (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 1 Feb 2016 14:44:12 -0500
-Received: by mail-qg0-f51.google.com with SMTP id e32so128727576qgf.3
-        for <linux-sparse@vger.kernel.org>; Mon, 01 Feb 2016 11:44:12 -0800 (PST)
+	Mon, 1 Feb 2016 21:53:30 -0500
+Received: by mail-qg0-f48.google.com with SMTP id b35so137301280qge.0
+        for <linux-sparse@vger.kernel.org>; Mon, 01 Feb 2016 18:53:30 -0800 (PST)
 Received: from hash ([2001:470:1d:6db:230:48ff:fe9d:9c89])
-        by smtp.gmail.com with ESMTPSA id s5sm11964296qks.31.2016.02.01.11.44.11
+        by smtp.gmail.com with ESMTPSA id r76sm7510175qkl.32.2016.02.01.18.53.29
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Mon, 01 Feb 2016 11:44:11 -0800 (PST)
+        Mon, 01 Feb 2016 18:53:29 -0800 (PST)
 Received: from bob by hash with local (Exim 4.84)
 	(envelope-from <me@bobcopeland.com>)
-	id 1aQKOP-00044G-WD
-	for linux-sparse@vger.kernel.org; Mon, 01 Feb 2016 14:44:09 -0500
+	id 1aQR5r-0002tH-6b
+	for linux-sparse@vger.kernel.org; Mon, 01 Feb 2016 21:53:27 -0500
 Content-Disposition: inline
+In-Reply-To: <20160201194409.GA15047@localhost>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
-Hi all,
+On Mon, Feb 01, 2016 at 02:44:09PM -0500, Bob Copeland wrote:
+> Hi all,
+> 
+> I'm seeing the following error when running sparse with latest HEAD,
+> against the small test case at the end:
+> 
+> $ sparse sparse-test.c
+> [garbage]:0:0: error: ctype on uninitialized symbol 0x696ec0
 
-I'm seeing the following error when running sparse with latest HEAD,
-against the small test case at the end:
+Nevermind, I fooled myself.  Turns out this "sparse" was an old version
+of smatch, not the freshly-built sparse that "sparse --version" was
+reporting.
 
-$ sparse sparse-test.c
-[garbage]:0:0: error: ctype on uninitialized symbol 0x696ec0
+It looks like this bug was fixed around 0.4.4.
 
-I am getting this with calls to time_after(..., msecs_to_jiffies()) in my
-kernel build.
-
-Below, the "1UL + 1L" is a stand-in for MAX_JIFFY_OFFSET, and the value
-has to be some operation on two different types to trigger for me (e.g.
-1UL + 1UL will run without error).  Taking out the typecheck macro will
-also remove the error.
-
-Any thoughts?
-
-$ sparse --version
-v0.5.0-44-g40791b9
-
-sparse-test.c:
-
-#define typecheck(type,x) \
-({	type __dummy; \
-	typeof(x) __dummy2; \
-	(void)(&__dummy == &__dummy2); \
-	1; \
-})
-
-#define time_after(a,b)		\
-	(typecheck(unsigned long, a) && \
-	 typecheck(unsigned long, b) && \
-	 ((long)((b) - (a)) < 0))
-
-static inline unsigned long y(void)
-{
-	return 1UL+1L;
-}
-
-static void x(void)
-{
-	int c = time_after(1UL, y());
-}
+Sorry for the noise!
 
 -- 
 Bob Copeland %% http://bobcopeland.com/
