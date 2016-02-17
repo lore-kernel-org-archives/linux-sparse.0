@@ -1,74 +1,27 @@
-From: Daniel Wagner <daniel.wagner@bmw-carit.de>
-Subject: [FAIL 2/5] inspect: Show context information
-Date: Wed, 17 Feb 2016 10:51:32 +0100
-Message-ID: <1455702695-6199-3-git-send-email-daniel.wagner@bmw-carit.de>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [FAIL 0/5] Static lock analysis
+Date: Wed, 17 Feb 2016 15:05:37 -0800
+Message-ID: <CANeU7QnTedKHNQM7MS3Q2YB-y6AxGRkmmzFOT1+8PKjY=Chn_w@mail.gmail.com>
 References: <1455702695-6199-1-git-send-email-daniel.wagner@bmw-carit.de>
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-io0-f177.google.com ([209.85.223.177]:33205 "EHLO
+	mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1423151AbcBQXFh (ORCPT
+	<rfc822;linux-sparse@vger.kernel.org>);
+	Wed, 17 Feb 2016 18:05:37 -0500
 In-Reply-To: <1455702695-6199-1-git-send-email-daniel.wagner@bmw-carit.de>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Daniel Wagner <daniel.wagner@bmw-carit.de>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Daniel Wagner <daniel.wagner@bmw-carit.de>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
 
-Add the function context attributes and the context instruction
-to the model.
+On Wed, Feb 17, 2016 at 1:51 AM, Daniel Wagner
+<daniel.wagner@bmw-carit.de> wrote:
+>
+> Maybe the first 3 patches might be okay to get merged.
 
-Signed-off-by: Daniel Wagner <daniel.wagner@bmw-carit.de>
----
- ast-inspect.c | 27 ++++++++++++++++++++++++++-
- 1 file changed, 26 insertions(+), 1 deletion(-)
+Yes, the first 3 looks simple and obvious correct.
 
-diff --git a/ast-inspect.c b/ast-inspect.c
-index 24d4a4a..4502575 100644
---- a/ast-inspect.c
-+++ b/ast-inspect.c
-@@ -83,7 +83,10 @@ void inspect_statement(AstNode *node)
- 			ast_append_child(node, "ret_value:", stmt->ret_value, inspect_expression);
- 			ast_append_child(node, "ret_target:", stmt->ret_target, inspect_symbol);
- 			break;
--
-+		case STMT_CONTEXT:
-+			ast_append_child(node, "expression:", stmt->expression, inspect_expression);
-+			ast_append_child(node, "context:", stmt->context, inspect_expression);
-+			break;
- 		default:
- 			break;
- 	}
-@@ -96,6 +99,27 @@ void inspect_statement_list(AstNode *node)
- }
- 
- 
-+static const char *unnamed_context = "<unnamed>";
-+
-+static const char *context_name(struct context *context)
-+{
-+	if (context->context && context->context->symbol_name)
-+		return show_ident(context->context->symbol_name);
-+	return unnamed_context;
-+}
-+
-+static void inspect_context(AstNode *node)
-+{
-+	struct context *context = node->ptr;
-+	node->text = g_strdup_printf("%s %s: in %d out %d", node->text,
-+				context_name(context), context->in, context->out);
-+}
-+
-+static void inspect_context_list(AstNode *node)
-+{
-+	inspect_ptr_list(node, "context_list", inspect_context);
-+}
-+
- static const char *symbol_type_name(enum type type)
- {
- 	static const char *type_name[] = {
-@@ -134,6 +158,7 @@ void inspect_symbol(AstNode *node)
- 		case NS_PREPROCESSOR:
- 			break;
- 		default:
-+			ast_append_child(node, "contexts:", sym->ctype.contexts, inspect_context_list);
- 			ast_append_child(node, "arguments:", sym->arguments, inspect_symbol_list);
- 			ast_append_child(node, "symbol_list:", sym->symbol_list, inspect_symbol_list);
- 			ast_append_child(node, "stmt:", sym->stmt, inspect_statement);
--- 
-2.5.0
+Chris
