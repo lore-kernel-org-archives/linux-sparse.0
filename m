@@ -1,49 +1,37 @@
-From: "Mr. DOUGLAS" <douglascontact6048@live.com>
-Subject: =?utf-8?q?INFORMA=C3=87=C3=83O_IMPORTANTE__RE=3A_Consultoria_de_Investime?=
- =?utf-8?q?nto_em_sua_Localidade=2E?=
-Date: Sun, 28 Feb 2016 04:38:32 -0800
-Message-ID: <20160228133730.167608FD61B@webmail.cefet-rj.br>
-Reply-To: johnsondouglas8738@gmail.com
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v3 00/21] improve constexpr handling
+Date: Tue, 15 Mar 2016 17:54:41 +0100
+Message-ID: <20160315165440.GA1283@macpro.local>
+References: <87lh75jh9l.fsf@gmail.com>
+ <87y4ahun1h.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: QUOTED-PRINTABLE
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from webmail.cefet-rj.br ([200.9.149.52]:48817 "EHLO
-	webmail.cefet-rj.br" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1754636AbcB2PxG convert rfc822-to-8bit (ORCPT
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:33622 "EHLO
+	mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S964950AbcCOQyt (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 29 Feb 2016 10:53:06 -0500
-Content-Description: Mail message body
+	Tue, 15 Mar 2016 12:54:49 -0400
+Received: by mail-wm0-f46.google.com with SMTP id l68so153875167wml.0
+        for <linux-sparse@vger.kernel.org>; Tue, 15 Mar 2016 09:54:48 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <87y4ahun1h.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipients <douglascontact6048@live.com>
+To: Nicolai Stange <nicstange@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@joshtriplett.org>
 
-Oi,
+On Fri, Feb 19, 2016 at 09:22:50AM +0100, Nicolai Stange wrote:
+> Nicolai Stange <nicstange@gmail.com> writes:
+> 
+> > Here comes the greatly enhanced v3 of this series.
+> 
+> Just a gently push to get some reviews on this...
+> 
 
-Temos planejado investir alguns fundos no seu pa=EDs.
+Sorry for haven't been able to comment on this earlier.
+I'm catching up.
 
-Responder se voc=EA estiver interessado.
 
-Sauda=E7=F5es,
-Sir Henry Neville Lindley Keswick
-Presidente da Jardine Matheson Holdings Ltd
-https://en.wikipedia.org/wiki/Keswick_family
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D
-
-Hi friend,
-
-Our family is interested in investing funds in your locality.
-
-More information for you interest .
-
-Greetings,
-Sir Henry Neville Lindley Keswick
-Chairman of Jardine Matheson Holdings Ltd
-https://en.wikipedia.org/wiki/Keswick_family
---
-To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
- in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Regards,
+Luc Van Oostenryck
