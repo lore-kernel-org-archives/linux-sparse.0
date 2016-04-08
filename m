@@ -1,90 +1,33 @@
-From: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: [PATCH 1/2] compiler.h: add support for malloc attribute
-Date: Thu, 24 Mar 2016 00:42:31 +0100
-Message-ID: <1458776553-9033-1-git-send-email-linux@rasmusvillemoes.dk>
+From: AKINWUMI <urr@adminnfo3.website.tk>
+Subject: FROM: MR. OLIVER SENO!!
+Date: Fri, 8 Apr 2016 11:53:28 -0700
+Message-ID: <SN1PR17MB04934ABD3155B1AA5223FC24D0910__15297.3491618924$1460143471$gmane$org@SN1PR17MB0493.namprd17.prod.outlook.com>
+Reply-To: <officeosenol@yahoo.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:37972 "EHLO
-	mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S1751649AbcCWXmt (ORCPT
+Received: from mail-bn1bhn0248.outbound.protection.outlook.com ([157.56.111.248]:58124
+	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
+	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+	id S1758841AbcDHTYN convert rfc822-to-8bit (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Wed, 23 Mar 2016 19:42:49 -0400
-Received: by mail-wm0-f44.google.com with SMTP id l68so44084616wml.1
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Mar 2016 16:42:48 -0700 (PDT)
+	Fri, 8 Apr 2016 15:24:13 -0400
+Content-Description: Mail message body
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>, Christopher Li <sparse@chrisli.org>
-Cc: Andi Kleen <ak@linux.intel.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Recipients <urr@adminnfo3.website.tk>
 
-gcc as far back as at least 3.04 documents the function attribute
-__malloc__. Add a shorthand for attaching that to a function
-declaration. This was also suggested by Andi Kleen way back in 2002
-[1], but didn't get applied, perhaps because gcc at that time
-generated the exact same code with and without this attribute.
+Dear Sir.
 
-This attribute tells the compiler that the return value (if non-NULL)
-can be assumed not to alias any other valid pointers at the time of
-the call.
+I bring you greetings. My name is Mr.Oliver Seno Lim, I am a staff of Abbey National Plc. London and heading our regional office in West Africa. Our late customer named Engr.Ben W.westland, made a fixed deposit amount of US$7Million.He did not declare any next of kin in any of his paper work, I want you as a foreigner to stand as the beneficiary to transfer this funds out of my bank into your account, after the successful transfer, we shall share in the ratio of 30% for you, 70%for me. Should you be interested please send me your information:
 
-Please note that the documentation for a range of gcc versions
-(starting from around 4.7) contained a somewhat confusing and
-self-contradicting text:
-
-  The malloc attribute is used to tell the compiler that a function
-  may be treated as if any non-NULL pointer it returns cannot alias
-  any other pointer valid when the function returns and *that the
-  memory has undefined content*. [...] Standard functions with this
-  property include malloc and *calloc*.
-
-(emphasis mine). The intended meaning has later been clarified [2]:
-
-  This tells the compiler that a function is malloc-like, i.e., that
-  the pointer P returned by the function cannot alias any other
-  pointer valid when the function returns, and moreover no pointers to
-  valid objects occur in any storage addressed by P.
-
-What this means is that we can apply the attribute to kmalloc and
-friends, and it is ok for the returned memory to have well-defined
-contents (__GFP_ZERO). But it is not ok to apply it to kmemdup(), nor
-to other functions which both allocate and possibly initialize the
-memory with existing pointers. So unless someone is doing something
-pretty perverted kstrdup() should also be a fine candidate.
-
-[1] http://thread.gmane.org/gmane.linux.kernel/57172
-[2] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56955
-
-Signed-off-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
----
- include/linux/compiler-gcc.h | 1 +
- include/linux/compiler.h     | 4 ++++
- 2 files changed, 5 insertions(+)
-
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 22ab246feed3..9004f153c5ab 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -142,6 +142,7 @@
+1,Full names.
+2,current residential address.
+3,Tele/Fax numbers./your work.
  
- #if GCC_VERSION >= 30400
- #define __must_check		__attribute__((warn_unused_result))
-+#define __malloc		__attribute__((__malloc__))
- #endif
- 
- #if GCC_VERSION >= 40000
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index b5ff9881bef8..793c0829e3a3 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -357,6 +357,10 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
- #define __deprecated_for_modules
- #endif
- 
-+#ifndef __malloc
-+#define __malloc
-+#endif
-+
- /*
-  * Allow us to avoid 'defined but not used' warnings on functions and data,
-  * as well as force them to be emitted to the assembly file.
--- 
-2.1.4
+   
+All I need from you is your readiness, trustworthiness and edication. Please email me directly on my private email address: officeosenol@yahoo.com) so we can begin arrangements and I would give you more information on how we would handle this venture and once i hear from you i will give you information of the bank for the transferring funds on your name.
 
+Regards,
+Mr.Oliver Seno Lim 
