@@ -1,33 +1,32 @@
-From: AKINWUMI <urr@adminnfo3.website.tk>
-Subject: FROM: MR. OLIVER SENO!!
-Date: Fri, 8 Apr 2016 11:53:28 -0700
-Message-ID: <SN1PR17MB04934ABD3155B1AA5223FC24D0910__15297.3491618924$1460143471$gmane$org@SN1PR17MB0493.namprd17.prod.outlook.com>
-Reply-To: <officeosenol@yahoo.com>
+From: andreas11@elisaandreas.biz
+Subject: Greetings!!!
+Date: Mon, 18 Apr 2016 18:43:38 +0100
+Message-ID: <962979.90403.qm__47679.1233326823$1461001473$gmane$org@smtp106.biz.mail.gq1.yahoo.com>
+Reply-To: J_ericdaniels111@outlook.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7BIT
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: QUOTED-PRINTABLE
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-bn1bhn0248.outbound.protection.outlook.com ([157.56.111.248]:58124
-	"EHLO na01-bn1-obe.outbound.protection.outlook.com"
-	rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-	id S1758841AbcDHTYN convert rfc822-to-8bit (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 8 Apr 2016 15:24:13 -0400
+Received: from smtp106.biz.mail.gq1.yahoo.com ([98.137.12.181]:29617 "EHLO
+	smtp106.biz.mail.gq1.yahoo.com" rhost-flags-OK-OK-OK-OK)
+	by vger.kernel.org with ESMTP id S1751149AbcDRRoO convert rfc822-to-8bit
+	(ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 18 Apr 2016 13:44:14 -0400
 Content-Description: Mail message body
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipients <urr@adminnfo3.website.tk>
+To: "Mr. Eric" <andreas11@elisaandreas.biz>
 
-Dear Sir.
-
-I bring you greetings. My name is Mr.Oliver Seno Lim, I am a staff of Abbey National Plc. London and heading our regional office in West Africa. Our late customer named Engr.Ben W.westland, made a fixed deposit amount of US$7Million.He did not declare any next of kin in any of his paper work, I want you as a foreigner to stand as the beneficiary to transfer this funds out of my bank into your account, after the successful transfer, we shall share in the ratio of 30% for you, 70%for me. Should you be interested please send me your information:
-
-1,Full names.
-2,current residential address.
-3,Tele/Fax numbers./your work.
- 
-   
-All I need from you is your readiness, trustworthiness and edication. Please email me directly on my private email address: officeosenol@yahoo.com) so we can begin arrangements and I would give you more information on how we would handle this venture and once i hear from you i will give you information of the bank for the transferring funds on your name.
-
-Regards,
-Mr.Oliver Seno Lim 
+Hi, how are you? My name is J Eric Denials, External Financial Auditor =
+at Lloyds Banking Group plc., London. It is a pleasure to contact you a=
+t this time through this medium. I have a cool and legitimate deal to d=
+o with you as you're a foreigner, it will be mutually beneficial to bot=
+h. If you=E2=80=99re interested, urgently, get back to me for more expl=
+anation about the deal.
+Regards
+Eric
+--
+To unsubscribe from this list: send the line "unsubscribe linux-sparse"=
+ in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
