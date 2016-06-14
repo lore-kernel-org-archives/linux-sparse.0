@@ -1,55 +1,64 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: [PATCH] ptrlist: use after free in last_ptr_list()
-Date: Mon, 13 Jun 2016 12:45:17 +0300
-Message-ID: <20160613094517.GA25301@mwanda>
+From: Lance Richardson <lrichard@redhat.com>
+Subject: Re: [PATCH v3] sparse: add support for static assert
+Date: Tue, 14 Jun 2016 10:49:12 -0400 (EDT)
+Message-ID: <481469876.53571906.1465915752753.JavaMail.zimbra@redhat.com>
+References: <1454989031-12240-1-git-send-email-lrichard@redhat.com> <20160315225203.GC2679@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from userp1040.oracle.com ([156.151.31.81]:44866 "EHLO
-	userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-	with ESMTP id S964840AbcFMJp0 (ORCPT
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:46423 "EHLO
+	mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+	with ESMTP id S1752205AbcFNOtO (ORCPT
 	<rfc822;linux-sparse@vger.kernel.org>);
-	Mon, 13 Jun 2016 05:45:26 -0400
-Received: from aserv0021.oracle.com (aserv0021.oracle.com [141.146.126.233])
-	by userp1040.oracle.com (Sentrion-MTA-4.3.2/Sentrion-MTA-4.3.2) with ESMTP id u5D9jOiR024436
-	(version=TLSv1 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
-	for <linux-sparse@vger.kernel.org>; Mon, 13 Jun 2016 09:45:24 GMT
-Received: from userv0122.oracle.com (userv0122.oracle.com [156.151.31.75])
-	by aserv0021.oracle.com (8.13.8/8.13.8) with ESMTP id u5D9jNLG026419
-	(version=TLSv1/SSLv3 cipher=DHE-RSA-AES256-SHA bits=256 verify=OK)
-	for <linux-sparse@vger.kernel.org>; Mon, 13 Jun 2016 09:45:24 GMT
-Received: from abhmp0016.oracle.com (abhmp0016.oracle.com [141.146.116.22])
-	by userv0122.oracle.com (8.14.4/8.14.4) with ESMTP id u5D9jNwK019526
-	for <linux-sparse@vger.kernel.org>; Mon, 13 Jun 2016 09:45:23 GMT
-Content-Disposition: inline
+	Tue, 14 Jun 2016 10:49:14 -0400
+In-Reply-To: <20160315225203.GC2679@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-This change is similar to 2e7dd34d11cb ('ptrlist: reading deleted items
-in NEXT_PTR_LIST()').  If we use DELETE_CURRENT_PTR() then we can end up
-with a list->nr that is zero meaning that we have to go back another
-list->prev to find what we want.  Otherwise we dereference 0xf0f0f0f0
-and crash.
+----- Original Message -----
+> From: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>
+> To: "Lance Richardson" <lrichard@redhat.com>
+> Cc: linux-sparse@vger.kernel.org
+> Sent: Tuesday, March 15, 2016 6:52:03 PM
+> Subject: Re: [PATCH v3] sparse: add support for static assert
+> 
+> On Mon, Feb 08, 2016 at 10:37:10PM -0500, Lance Richardson wrote:
+> > This patch introduces support for _Static_assert() in global,
+> > function, and struct/union declaration contexts (as currently supported
+> > by gcc).
+> > 
+> > Tested via:
+> >    - kernel build with C=1 CF=-D__CHECK_ENDIAN__
+> >    - build/check large code base making heavy use of _Static_assert()
+> >    - "make check" with added test cases for static assert support
+> > 
+> > Signed-off-by: Lance Richardson <lrichard@redhat.com>
+> 
+> 
+> Fine for me.
+> 
+> Feel free to add
+>   Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> 
+> 
+> Chris, I have already reviwed this in January and Richard have taken
+> my remarks in account.
+> Do you think you you will have some time soon to look at it?
+> 
+> 
+> Regards,
+> Luc
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Signed-off-by: Dan Carpenter <dan.carpenter@oracle.com>
----
- ptrlist.h | 2 ++
- 1 file changed, 2 insertions(+)
+Dusting this one off... "ping"?
 
-diff --git a/ptrlist.h b/ptrlist.h
-index 61e159f..6f90c8f 100644
---- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -78,6 +78,8 @@ static inline void *last_ptr_list(struct ptr_list *list)
- 	if (!list)
- 		return NULL;
- 	list = list->prev;
-+	while (list->nr == 0)
-+		list = list->prev;
- 	return PTR_ENTRY(list, list->nr-1);
- }
- 
--- 
-2.8.1
+Thanks and Regards,
 
+   Lance
