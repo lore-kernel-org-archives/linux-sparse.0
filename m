@@ -1,77 +1,77 @@
-From: Torsten Duwe <duwe@lst.de>
-Subject: Re: [PATCH v2 1/2] arm64: implement FTRACE_WITH_REGS
-Date: Sat, 9 Jul 2016 11:06:32 +0200
-Message-ID: <20160709090632.GA2598@lst.de>
-References: <20160627151500.2247A68D20@newverein.lst.de>
- <20160627151717.BD25468D26@newverein.lst.de>
- <20160708145800.GE3556@pathway.suse.cz>
- <20160708150709.GA8979@lst.de>
- <20160708152421.GG3556@pathway.suse.cz>
- <20160708154824.ikq45dgk2auigqn7@treble>
- <20160708115710.5c657b5f@gandalf.local.home>
- <20160708202455.GA4580@lst.de>
- <20160708170808.1ab70ce3@gandalf.local.home>
+From: Miroslav Benes <mbenes@suse.cz>
+Subject: Re: [PATCH v2 2/2] arm64: implement live patching
+Date: Mon, 11 Jul 2016 16:03:08 +0200 (CEST)
+Message-ID: <alpine.LNX.2.00.1607111556320.27989@pobox.suse.cz>
+References: <20160627151500.2247A68D20@newverein.lst.de> <20160627151722.B81C968D29@newverein.lst.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: TEXT/PLAIN; charset=US-ASCII
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from verein.lst.de ([213.95.11.211]:39425 "EHLO newverein.lst.de"
+Received: from mx2.suse.de ([195.135.220.15]:59185 "EHLO mx2.suse.de"
 	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-	id S932860AbcGIJGs (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-	Sat, 9 Jul 2016 05:06:48 -0400
-Content-Disposition: inline
-In-Reply-To: <20160708170808.1ab70ce3@gandalf.local.home>
+	id S1758357AbcGKODT (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Mon, 11 Jul 2016 10:03:19 -0400
+In-Reply-To: <20160627151722.B81C968D29@newverein.lst.de>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Steven Rostedt <rostedt@goodmis.org>
-Cc: Josh Poimboeuf <jpoimboe@redhat.com>, Petr Mladek <pmladek@suse.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, takahiro.akashi@linaro.org, Jungseok Lee <jungseoklee85@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Li Bin <huawei.libin@huawei.com>, Ingo Molnar <mingo@redhat.com>, Christopher Li <sparse@chrisli.org>, Jiri Kosina <jikos@kernel.org>, andrew.wafaa@arm.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, live-patching@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org
+To: Torsten Duwe <duwe@lst.de>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, takahiro.akashi@linaro.org, Jungseok Lee <jungseoklee85@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Li Bin <huawei.libin@huawei.com>, Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, Christopher Li <sparse@chrisli.org>, Jiri Kosina <jikos@kernel.org>, andrew.wafaa@arm.com, linux-arm-kernel@lists.infradead.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, live-patching@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org, jeyu@redhat.com
 
-On Fri, Jul 08, 2016 at 05:08:08PM -0400, Steven Rostedt wrote:
-> On Fri, 8 Jul 2016 22:24:55 +0200
-> Torsten Duwe <duwe@lst.de> wrote:
-> 
-> > On Fri, Jul 08, 2016 at 11:57:10AM -0400, Steven Rostedt wrote:
-> > > On Fri, 8 Jul 2016 10:48:24 -0500
-> > > Josh Poimboeuf <jpoimboe@redhat.com> wrote:  
-> > > > 
-> > > > Here, with -fprolog-pad, it's already a nop, so no change is needed.
-> > > >   
-> > 
-> > Yes, exactly.
-> > 
-> > > That's what I was thinking. But as I stated in another email (probably
-> > > in the air when you wrote this), the call to ftrace_modify_code() may be
-> > > completely circumvented by ftrace_make_nop() if the addr is MCOUNT_ADDR.  
-> > 
-> > Only on the _first_ invocation. Later on, tracing can be switched on and off,
-> > and then the instructions need to be changed just like with fentry (or
-> > profile-kernel ;-)
-> > 
-> 
-> Understood, but ftrace_modify_code() will only receive addr ==
-> MCOUNT_ADDR on boot up or when a module is loaded. In both cases, with
-> -fprolog-pad it will already be a nop, hence no need to call
-> ftrace_modify_code(), in those cases.
-> 
-> In all other cases, addr will point to a ftrace trampoline.
+On Mon, 27 Jun 2016, Torsten Duwe wrote:
 
-Maybe the code in question can be replaced with the change below, now that
-there is a preprocessor define in V2?
-(untested)
+> diff --git a/arch/arm64/include/asm/livepatch.h b/arch/arm64/include/asm/livepatch.h
+> new file mode 100644
+> index 0000000..6b9a3d1
+> --- /dev/null
+> +++ b/arch/arm64/include/asm/livepatch.h
+> @@ -0,0 +1,37 @@
+> +/*
+> + * livepatch.h - arm64-specific Kernel Live Patching Core
+> + *
+> + * Copyright (C) 2016 SUSE
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public License
+> + * as published by the Free Software Foundation; either version 2
+> + * of the License, or (at your option) any later version.
+> + *
+> + * This program is distributed in the hope that it will be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, see <http://www.gnu.org/licenses/>.
+> + */
+> +#ifndef _ASM_ARM64_LIVEPATCH_H
+> +#define _ASM_ARM64_LIVEPATCH_H
+> +
+> +#include <linux/module.h>
+> +#include <linux/ftrace.h>
+> +
+> +#ifdef CONFIG_LIVEPATCH
 
-diff --git a/kernel/trace/ftrace.c b/kernel/trace/ftrace.c
-index 3f743b1..695a646 100644
---- a/kernel/trace/ftrace.c
-+++ b/kernel/trace/ftrace.c
-@@ -2423,6 +2423,12 @@ ftrace_code_disable(struct module *mod, struct dyn_ftrace *rec)
- 	if (unlikely(ftrace_disabled))
- 		return 0;
- 
-+#ifdef CC_USING_PROLOG_PAD
-+	/* If the compiler already generated NOPs instead of
-+	 * calls to mcount, we're done here.
-+	*/
-+	return 1;
-+#endif
- 	ret = ftrace_make_nop(mod, rec, MCOUNT_ADDR);
- 	if (ret) {
- 		ftrace_bug(ret, rec);
+A nit but we removed such guards in the other header files.
+
+> +static inline int klp_check_compiler_support(void)
+> +{
+> +	return 0;
+> +}
+> +
+> +static inline void klp_arch_set_pc(struct pt_regs *regs, unsigned long ip)
+> +{
+> +	regs->pc = ip;
+> +}
+> +#endif /* CONFIG_LIVEPATCH */
+
+I also checked mod_arch_specific structure because of the way we deal 
+with relocations. It is defined only if CONFIG_ARM64_MODULE_PLTS is 
+enabled and there is a pointer to 'struct elf64_shdr' called plt. It is 
+used indirectly in apply_relocate_add() so we need it to stay. However it 
+points to an existing Elf section and SHF_ALLOC is added to its sh_flags 
+in module_frob_arch_sections() (arch/arm64/kernel/module-plts.c). 
+Therefore we should be ok.
+
+Jessica, could you check it as well, please?
+
+Thanks,
+Miroslav
