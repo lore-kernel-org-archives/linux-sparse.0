@@ -1,39 +1,63 @@
-From: Arnd Bergmann <arnd@arndb.de>
-Subject: Re: [PATCH] byteswap: don't use __builtin_bswap*() with sparse
-Date: Thu, 11 Aug 2016 13:55:48 +0200
-Message-ID: <2133648.lb1RCaYlXp@wuerfel>
-References: <1470914102-26389-1-git-send-email-johannes@sipsolutions.net>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7Bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1470914102-26389-1-git-send-email-johannes@sipsolutions.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Johannes Berg <johannes@sipsolutions.net>
-Cc: linux-kernel@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-sparse@vger.kernel.org, Johannes Berg <johannes.berg@intel.com>
+From: Torsten Duwe <duwe@lst.de>
+Subject: [PATCH v3 0/2] arm64 live patching
+Date: Thu, 11 Aug 2016 18:34:51 +0200 (CEST)
+Message-ID: <20160811163451.D455C68C43@newverein.lst.de>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from verein.lst.de ([213.95.11.211]:42362 "EHLO newverein.lst.de"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S932301AbcHKQey (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 11 Aug 2016 12:34:54 -0400
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, takahiro.akashi@linaro.org, Jungseok Lee <jungseoklee85@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Li Bin <huawei.libin@huawei.com>
+Cc: Steven Rostedt <rostedt@goodmis.org>, Ingo Molnar <mingo@redhat.com>, Christopher Li <sparse@chrisli.org>, Jiri Kosina <jikos@kernel.org>, andrew.wafaa@arm.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, live-patching@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Thursday, August 11, 2016 1:15:02 PM CEST Johannes Berg wrote:
-> From: Johannes Berg <johannes.berg@intel.com>
-> 
-> Although sparse declares __builtin_bswap*(), it can't actually
-> do constant folding inside them (yet). As such, things like
-> 
->   switch (protocol) {
->   case htons(ETH_P_IP):
->           break;
->   }
-> 
-> which we do all over the place cause sparse to warn that it
-> expects a constant instead of a function call.
-> 
-> Disable __HAVE_BUILTIN_BSWAP*__ if __CHECKER__ is defined to
-> avoid this.
-> 
-> Cc: Arnd Bergmann <arnd@arndb.de>
-> Fixes: 7322dd755e7d ("byteswap: try to avoid __builtin_constant_p gcc bug")
-> Signed-off-by: Johannes Berg <johannes.berg@intel.com>
 
-Looks good, thanks for addressing this!
+V3, including suggestions from the replies and 2 fixes.
 
-Acked-by: Arnd Bergmann <arnd@arndb.de>
+Reminder: make sure you have a prolog-pad gcc, and this in your
+top level Makefile:
+
+ifdef CONFIG_LIVEPATCH
+KBUILD_CFLAGS	+= $(call cc-option,-fno-ipa-ra)
+endif
+
+Tested with v4.8-rc1 + gcc-6.1
+
+Changes since v2:
+  * Do not skip initial NOP conversion for CC_USING_PROLOG_PAD,
+    in other words: don't introduce new #ifdefs into generic code.
+    (as requested by Steven Rostedt after my intermediate suggestion)
+    Instead, check in arm64 whether a call to mcount is to be NOPed,
+    and be strict again about the expected "old" instructions.
+  * issue a warning should the compiler not know about -fprolog-pad=
+    (as suggested by Josh Poimboeuf)
+    Only strip the compiler flag proper, not the cpp flag, for critical
+    files.
+  * fix thinko / bummer in live patch return address change detection.
+    Skip the graph caller if the addresses are _not_ equal!
+
+Changes since v1:
+  * instead of a comment "should be CC_USING_PROLOG_PAD":
+    do it. CC_FLAGS_FTRACE holds it now, and the IPA
+    disabler has become a separate issue (see above).
+
+Torsten Duwe (2):
+  arm64: implement FTRACE_WITH_REGS
+  arm64: implement live patching
+
+ arch/arm64/Kconfig                 |   4 ++
+ arch/arm64/Makefile                |   9 ++++
+ arch/arm64/include/asm/ftrace.h    |   8 +++
+ arch/arm64/include/asm/livepatch.h |  37 ++++++++++++++
+ arch/arm64/kernel/Makefile         |   6 +--
+ arch/arm64/kernel/entry-ftrace.S   | 102 +++++++++++++++++++++++++++++++++++++
+ arch/arm64/kernel/ftrace.c         |  45 ++++++++++++++--
+ include/asm-generic/vmlinux.lds.h  |   2 +-
+ include/linux/compiler.h           |   4 ++
+ 9 files changed, 209 insertions(+), 8 deletions(-)
+ create mode 100644 arch/arm64/include/asm/livepatch.h
+
+-- 
+2.6.2
+
