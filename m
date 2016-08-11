@@ -1,80 +1,66 @@
 From: Johannes Berg <johannes@sipsolutions.net>
-Subject: [PATCH] implement constant-folding in __builtin_bswap*()
-Date: Thu, 11 Aug 2016 12:39:39 +0200
-Message-ID: <1470911979-15068-1-git-send-email-johannes@sipsolutions.net>
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org
+Subject: [PATCH] byteswap: don't use __builtin_bswap*() with sparse
+Date: Thu, 11 Aug 2016 13:15:02 +0200
+Message-ID: <1470914102-26389-1-git-send-email-johannes@sipsolutions.net>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from s3.sipsolutions.net ([5.9.151.49]:52177 "EHLO sipsolutions.net"
+	rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+	id S1752011AbcHKLPM (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+	Thu, 11 Aug 2016 07:15:12 -0400
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, Arnd Bergmann <arnd@arndb.de>, linux-sparse@vger.kernel.org, Johannes Berg <johannes.berg@intel.com>
 
-Since gcc does this, it's apparently valid to write
+From: Johannes Berg <johannes.berg@intel.com>
 
- switch (x) {
- case __builtin_bswap16(12):
-   break;
- }
+Although sparse declares __builtin_bswap*(), it can't actually
+do constant folding inside them (yet). As such, things like
 
-but sparse will flag it as an error today.
+  switch (protocol) {
+  case htons(ETH_P_IP):
+          break;
+  }
 
-The constant folding used to be done in the kernel's htons() and
-friends, but due to gcc bugs that isn't done anymore since
-commit 7322dd755e7d ("byteswap: try to avoid __builtin_constant_p
-gcc bug").
+which we do all over the place cause sparse to warn that it
+expects a constant instead of a function call.
 
-To get rid of the sparse errors on every such instance now, just
-add constant folding to __builtin_bswap*() in sparse.
+Disable __HAVE_BUILTIN_BSWAP*__ if __CHECKER__ is defined to
+avoid this.
 
-Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Fixes: 7322dd755e7d ("byteswap: try to avoid __builtin_constant_p gcc bug")
+Signed-off-by: Johannes Berg <johannes.berg@intel.com>
 ---
- lib.c | 35 ++++++++++++++++++++++++++++++++---
- 1 file changed, 32 insertions(+), 3 deletions(-)
+ include/linux/compiler-gcc.h | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/lib.c b/lib.c
-index 8dc5bcf9dc18..7cab95ede318 100644
---- a/lib.c
-+++ b/lib.c
-@@ -818,9 +818,38 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern int __builtin_popcountll(unsigned long long);\n");
+diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+index e2949397c19b..8dbc8929a6a0 100644
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -242,7 +242,11 @@
+  */
+ #define asm_volatile_goto(x...)	do { asm goto(x); asm (""); } while (0)
  
- 	/* And byte swaps.. */
--	add_pre_buffer("extern unsigned short __builtin_bswap16(unsigned short);\n");
--	add_pre_buffer("extern unsigned int __builtin_bswap32(unsigned int);\n");
--	add_pre_buffer("extern unsigned long long __builtin_bswap64(unsigned long long);\n");
-+	add_pre_buffer("extern unsigned short ____builtin_bswap16(unsigned short);\n");
-+	add_pre_buffer("extern unsigned int ____builtin_bswap32(unsigned int);\n");
-+	add_pre_buffer("extern unsigned long long ____builtin_bswap64(unsigned long long);\n");
-+	add_pre_buffer("#define __sparse_constant_swab16(x) ((unsigned short)("
-+		       "	(((unsigned short)(x) & (unsigned short)0x00ffU) << 8) |"
-+		       "	(((unsigned short)(x) & (unsigned short)0xff00U) >> 8)))\n");
-+	add_pre_buffer("#define __sparse_constant_swab32(x) ((unsigned int)("
-+		       "	(((unsigned int)(x) & (unsigned int)0x000000ffUL) << 24) |"
-+		       "	(((unsigned int)(x) & (unsigned int)0x0000ff00UL) <<  8) |"
-+		       "	(((unsigned int)(x) & (unsigned int)0x00ff0000UL) >>  8) |"
-+		       "	(((unsigned int)(x) & (unsigned int)0xff000000UL) >> 24)))\n");
-+	add_pre_buffer("#define __sparse_constant_swab64(x) ((unsigned long long)("
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x00000000000000ffULL) << 56) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x000000000000ff00ULL) << 40) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x0000000000ff0000ULL) << 24) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x00000000ff000000ULL) <<  8) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x000000ff00000000ULL) >>  8) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x0000ff0000000000ULL) >> 24) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0x00ff000000000000ULL) >> 40) |"
-+		       "	(((unsigned long long)(x) & (unsigned long long)0xff00000000000000ULL) >> 56)))\n");
-+	add_pre_buffer("#define __builtin_bswap16(x)"
-+		       "	(__builtin_constant_p((unsigned short)(x)) ?"
-+		       "	__sparse_constant_swab16(x) :"
-+		       "	____builtin_bswap16(x))\n");
-+	add_pre_buffer("#define __builtin_bswap32(x)"
-+		       "	(__builtin_constant_p((unsigned int)(x)) ?"
-+		       "	__sparse_constant_swab32(x) :"
-+		       "	____builtin_bswap32(x))\n");
-+	add_pre_buffer("#define __builtin_bswap64(x)"
-+		       "	(__builtin_constant_p((unsigned long long)(x)) ?"
-+		       "	__sparse_constant_swab64(x) :"
-+		       "	____builtin_bswap64(x))\n");
+-#ifdef CONFIG_ARCH_USE_BUILTIN_BSWAP
++/*
++ * sparse (__CHECKER__) pretends to be gcc, but can't do constant
++ * folding in __builtin_bswap*() (yet), so don't set these for it.
++ */
++#if defined(CONFIG_ARCH_USE_BUILTIN_BSWAP) && !defined(__CHECKER__)
+ #if GCC_VERSION >= 40400
+ #define __HAVE_BUILTIN_BSWAP32__
+ #define __HAVE_BUILTIN_BSWAP64__
+@@ -250,7 +254,7 @@
+ #if GCC_VERSION >= 40800
+ #define __HAVE_BUILTIN_BSWAP16__
+ #endif
+-#endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP */
++#endif /* CONFIG_ARCH_USE_BUILTIN_BSWAP && !__CHECKER__ */
  
- 	/* And atomic memory access functions.. */
- 	add_pre_buffer("extern int __sync_fetch_and_add(void *, ...);\n");
+ #if GCC_VERSION >= 50000
+ #define KASAN_ABI_VERSION 4
 -- 
 2.8.1
+
