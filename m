@@ -1,62 +1,80 @@
-From: Steven Rostedt <rostedt@goodmis.org>
-Subject: Re: [PATCH v2 1/2] arm64: implement FTRACE_WITH_REGS
-Date: Fri, 15 Jul 2016 14:36:16 -0400
-Message-ID: <20160715143616.5b3d063e@gandalf.local.home>
-References: <20160627151500.2247A68D20@newverein.lst.de>
-	<20160627151717.BD25468D26@newverein.lst.de>
-	<20160708145800.GE3556@pathway.suse.cz>
-	<20160708150709.GA8979@lst.de>
-	<20160708152421.GG3556@pathway.suse.cz>
-	<20160708154824.ikq45dgk2auigqn7@treble>
-	<20160708115710.5c657b5f@gandalf.local.home>
-	<20160708202455.GA4580@lst.de>
-	<20160708170808.1ab70ce3@gandalf.local.home>
-	<20160709090632.GA2598@lst.de>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from smtprelay0172.hostedemail.com ([216.40.44.172]:52155 "EHLO
-	smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-	by vger.kernel.org with ESMTP id S1751423AbcGOSgV (ORCPT
-	<rfc822;linux-sparse@vger.kernel.org>);
-	Fri, 15 Jul 2016 14:36:21 -0400
-In-Reply-To: <20160709090632.GA2598@lst.de>
-Sender: linux-sparse-owner@vger.kernel.org
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: [PATCH] implement constant-folding in __builtin_bswap*()
+Date: Thu, 11 Aug 2016 12:39:39 +0200
+Message-ID: <1470911979-15068-1-git-send-email-johannes@sipsolutions.net>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Arnd Bergmann <arnd@arndb.de>, linux-kernel@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Torsten Duwe <duwe@lst.de>
-Cc: Josh Poimboeuf <jpoimboe@redhat.com>, Petr Mladek <pmladek@suse.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, takahiro.akashi@linaro.org, Jungseok Lee <jungseoklee85@gmail.com>, Arnd Bergmann <arnd@arndb.de>, Li Bin <huawei.libin@huawei.com>, Ingo Molnar <mingo@redhat.com>, Christopher Li <sparse@chrisli.org>, Jiri Kosina <jikos@kernel.org>, andrew.wafaa@arm.com, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, live-patching@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Sat, 9 Jul 2016 11:06:32 +0200
-Torsten Duwe <duwe@lst.de> wrote:
+Since gcc does this, it's apparently valid to write
 
+ switch (x) {
+ case __builtin_bswap16(12):
+   break;
+ }
 
-> Maybe the code in question can be replaced with the change below, now that
-> there is a preprocessor define in V2?
-> (untested)
-> 
-> diff --git a/kernel/trace/ftrace.c b/kernel/trace/ftrace.c
-> index 3f743b1..695a646 100644
-> --- a/kernel/trace/ftrace.c
-> +++ b/kernel/trace/ftrace.c
-> @@ -2423,6 +2423,12 @@ ftrace_code_disable(struct module *mod, struct dyn_ftrace *rec)
->  	if (unlikely(ftrace_disabled))
->  		return 0;
->  
-> +#ifdef CC_USING_PROLOG_PAD
-> +	/* If the compiler already generated NOPs instead of
-> +	 * calls to mcount, we're done here.
-> +	*/
-> +	return 1;
-> +#endif
+but sparse will flag it as an error today.
 
-I really hate adding #ifdef's like this in generic code if the arch can
-handle it with some other means.
+The constant folding used to be done in the kernel's htons() and
+friends, but due to gcc bugs that isn't done anymore since
+commit 7322dd755e7d ("byteswap: try to avoid __builtin_constant_p
+gcc bug").
 
--- Steve
+To get rid of the sparse errors on every such instance now, just
+add constant folding to __builtin_bswap*() in sparse.
 
+Signed-off-by: Johannes Berg <johannes@sipsolutions.net>
+---
+ lib.c | 35 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 32 insertions(+), 3 deletions(-)
 
->  	ret = ftrace_make_nop(mod, rec, MCOUNT_ADDR);
->  	if (ret) {
->  		ftrace_bug(ret, rec);
-
+diff --git a/lib.c b/lib.c
+index 8dc5bcf9dc18..7cab95ede318 100644
+--- a/lib.c
++++ b/lib.c
+@@ -818,9 +818,38 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern int __builtin_popcountll(unsigned long long);\n");
+ 
+ 	/* And byte swaps.. */
+-	add_pre_buffer("extern unsigned short __builtin_bswap16(unsigned short);\n");
+-	add_pre_buffer("extern unsigned int __builtin_bswap32(unsigned int);\n");
+-	add_pre_buffer("extern unsigned long long __builtin_bswap64(unsigned long long);\n");
++	add_pre_buffer("extern unsigned short ____builtin_bswap16(unsigned short);\n");
++	add_pre_buffer("extern unsigned int ____builtin_bswap32(unsigned int);\n");
++	add_pre_buffer("extern unsigned long long ____builtin_bswap64(unsigned long long);\n");
++	add_pre_buffer("#define __sparse_constant_swab16(x) ((unsigned short)("
++		       "	(((unsigned short)(x) & (unsigned short)0x00ffU) << 8) |"
++		       "	(((unsigned short)(x) & (unsigned short)0xff00U) >> 8)))\n");
++	add_pre_buffer("#define __sparse_constant_swab32(x) ((unsigned int)("
++		       "	(((unsigned int)(x) & (unsigned int)0x000000ffUL) << 24) |"
++		       "	(((unsigned int)(x) & (unsigned int)0x0000ff00UL) <<  8) |"
++		       "	(((unsigned int)(x) & (unsigned int)0x00ff0000UL) >>  8) |"
++		       "	(((unsigned int)(x) & (unsigned int)0xff000000UL) >> 24)))\n");
++	add_pre_buffer("#define __sparse_constant_swab64(x) ((unsigned long long)("
++		       "	(((unsigned long long)(x) & (unsigned long long)0x00000000000000ffULL) << 56) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x000000000000ff00ULL) << 40) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x0000000000ff0000ULL) << 24) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x00000000ff000000ULL) <<  8) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x000000ff00000000ULL) >>  8) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x0000ff0000000000ULL) >> 24) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0x00ff000000000000ULL) >> 40) |"
++		       "	(((unsigned long long)(x) & (unsigned long long)0xff00000000000000ULL) >> 56)))\n");
++	add_pre_buffer("#define __builtin_bswap16(x)"
++		       "	(__builtin_constant_p((unsigned short)(x)) ?"
++		       "	__sparse_constant_swab16(x) :"
++		       "	____builtin_bswap16(x))\n");
++	add_pre_buffer("#define __builtin_bswap32(x)"
++		       "	(__builtin_constant_p((unsigned int)(x)) ?"
++		       "	__sparse_constant_swab32(x) :"
++		       "	____builtin_bswap32(x))\n");
++	add_pre_buffer("#define __builtin_bswap64(x)"
++		       "	(__builtin_constant_p((unsigned long long)(x)) ?"
++		       "	__sparse_constant_swab64(x) :"
++		       "	____builtin_bswap64(x))\n");
+ 
+ 	/* And atomic memory access functions.. */
+ 	add_pre_buffer("extern int __sync_fetch_and_add(void *, ...);\n");
+-- 
+2.8.1
