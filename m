@@ -1,32 +1,29 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: Question regarding anotation
-Date: Mon, 22 Aug 2016 23:02:23 +0200
-Message-ID: <20160822210221.GA34545@macbook.home>
+Date: Mon, 22 Aug 2016 15:01:15 -0700
+Message-ID: <CA+55aFyJ7Xmfbe4MOVdq8OOq77y+iTZD9XHAPR0_K-fVOF2t=w@mail.gmail.com>
 References: <20160822172550.GA28401@osadl.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36693 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752443AbcHVVC7 (ORCPT
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:35806 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932497AbcHVWBV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 22 Aug 2016 17:02:59 -0400
-Received: by mail-wm0-f65.google.com with SMTP id i138so15179279wmf.3
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Aug 2016 14:02:30 -0700 (PDT)
-Content-Disposition: inline
+        Mon, 22 Aug 2016 18:01:21 -0400
+Received: by mail-oi0-f49.google.com with SMTP id 4so171977528oih.2
+        for <linux-sparse@vger.kernel.org>; Mon, 22 Aug 2016 15:01:21 -0700 (PDT)
 In-Reply-To: <20160822172550.GA28401@osadl.at>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Nicholas Mc Guire <der.herr@hofr.at>
-Cc: linux-sparse@vger.kernel.org
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Mon, Aug 22, 2016 at 05:25:50PM +0000, Nicholas Mc Guire wrote:
-> 
-> Hi !
-> 
+On Mon, Aug 22, 2016 at 10:25 AM, Nicholas Mc Guire <der.herr@hofr.at> wrote:
+>
 >  A probably very basic sparse question - but I could not figure out a
 >  satisfying answer. while compile testing a patch for ntb_transfer.c I got
-> 
+>
 >   CHECK   drivers/ntb/ntb_transport.c
 > drivers/ntb/ntb_transport.c:1583:43: warning: incorrect type in argument 1 (different address spaces)
 > drivers/ntb/ntb_transport.c:1583:43:    expected void *dst
@@ -34,47 +31,11 @@ On Mon, Aug 22, 2016 at 05:25:50PM +0000, Nicholas Mc Guire wrote:
 > drivers/ntb/ntb_transport.c:1583:56: warning: incorrect type in argument 2 (different address spaces)
 > drivers/ntb/ntb_transport.c:1583:56:    expected void const [noderef] <asn:1>*src
 > drivers/ntb/ntb_transport.c:1583:56:    got void *buf
-> 
->  looking at the offending line;
-> 
-> static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
-> {
-> #ifdef ARCH_HAS_NOCACHE_UACCESS
->         /*
->          * Using non-temporal mov to improve performance on non-cached
->          * writes, even though we aren't actually copying from user space.
->          */
->         __copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
-> 
->  the absence of a __user in the buf argument seems intentional and the
->  dst is not a kernel but __iomem address which triggers the second warning
->  So the first warning seems to be a false positive here, the second one
->  Im not clear about, but I guess its also a false positive. The question
->  is if there is a clean way to anotate this to make sparse happy without 
->  any unwanted sideffects ?
-> 
->  For the first warning using  (void __user *) entry->buf  should do
->  and be side-effect free, but how could the second warning be fixed ?
 
-So the original code, now in the #else part was:
-	memcpy_toio(offset, entry->buf, entry->len);
-which is correct regarding the annotation/extended typing:
-	- offset points to IO memory (annotated as void __iomem *)
-	- entry->buff is normal kernel memory (no annotation needed)
+Yes, sparse is correcy, and the ntb code is doing some really dodgy
+things that may or may not actually work. In fact, they are pretty
+much guaranteed to not work on some architectures.
 
-I have no idea if replacing this by __copy_from_user_inatomic_nocache()
-does indeed improve performance or not, but it's a complete abuse of this
-function's typing and intent and sparse rightfully complains about both case.
+Playing games with nontemporal stores is almost always a bug anyway. Ugly, ugly.
 
-So, I really think that these warnings don't need any fixing and that hiding
-them behind a cast is not a good idea at all.
-Independently of the validity of using __copy_from_user_inatomic_nocache()
-here it would be much better to have something like memcpy_toio_nocache().
-Doesn't something like this already exist?
-Why not make something using the primitives already used by 
-__copy_from_user_inatomic_nocache() (where, if really needed, using a cast
-to "adjust" the types is much more justified)?
-
-
-Regards,
-Luc Van Oostenryck
+             Linus
