@@ -1,41 +1,56 @@
-From: Robert David <clarkraymond377@gmail.com>
-Subject: Attention Beneficially
-Date: Sun, 21 Aug 2016 06:50:47 +0000 (UTC)
-Message-ID: <908285276.426230.1471762247322__44116.5440170609$1471762797$gmane$org@mail.yahoo.com>
-References: <908285276.426230.1471762247322.ref@mail.yahoo.com>
-Reply-To: Robert David <dhlservicesbenindhl@gmail.com>
+From: Nicholas Mc Guire <der.herr@hofr.at>
+Subject: Question regarding anotation
+Date: Mon, 22 Aug 2016 17:25:50 +0000
+Message-ID: <20160822172550.GA28401@osadl.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nm42.bullet.mail.ne1.yahoo.com ([98.138.120.49]:34834 "EHLO
-        nm42.bullet.mail.ne1.yahoo.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751800AbcHUG7r (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Aug 2016 02:59:47 -0400
+Received: from mail.osadl.at ([92.243.35.153]:43958 "EHLO mail.osadl.at"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754256AbcHVRdJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 22 Aug 2016 13:33:09 -0400
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
 
-Attention Beneficially
 
+Hi !
 
-WESTERN UNION
+ A probably very basic sparse question - but I could not figure out a
+ satisfying answer. while compile testing a patch for ntb_transfer.c I got
 
-This is very urgent Our Operation manager has sent your first payment of $5000.00 to you. Here is what we need from you to complete the
-transfer, Your Name, Your Address,A Copy Of Your ID and Your Telephone Number: Noted That Only Fee Request from You Is to
-Reactivate Transfer Files which is Sum Of $65Only, No More Fee again after that.
-Western Union Agent: Mr. Peterson Godwin
-Direct phone line is: + 229 98782817
-E-mail ::(westernunion8087@gmail.com)
+  CHECK   drivers/ntb/ntb_transport.c
+drivers/ntb/ntb_transport.c:1583:43: warning: incorrect type in argument 1 (different address spaces)
+drivers/ntb/ntb_transport.c:1583:43:    expected void *dst
+drivers/ntb/ntb_transport.c:1583:43:    got void [noderef] <asn:2>*offset
+drivers/ntb/ntb_transport.c:1583:56: warning: incorrect type in argument 2 (different address spaces)
+drivers/ntb/ntb_transport.c:1583:56:    expected void const [noderef] <asn:1>*src
+drivers/ntb/ntb_transport.c:1583:56:    got void *buf
 
-Bellow is your first payment for $5000usd sent today in your name.
-Sender Name: Mr. 
-MTCN: 
-Question
-Answer
-Amount Sent: $5000.00
+ looking at the offending line;
 
-You can use this link to confirm the payment,
+static void ntb_memcpy_tx(struct ntb_queue_entry *entry, void __iomem *offset)
+{
+#ifdef ARCH_HAS_NOCACHE_UACCESS
+        /*
+         * Using non-temporal mov to improve performance on non-cached
+         * writes, even though we aren't actually copying from user space.
+         */
+        __copy_from_user_inatomic_nocache(offset, entry->buf, entry->len);
 
-Best Regards,
-Mr.Joseph Ezo
+ the absence of a __user in the buf argument seems intentional and the
+ dst is not a kernel but __iomem address which triggers the second warning
+ So the first warning seems to be a false positive here, the second one
+ Im not clear about, but I guess its also a false positive. The question
+ is if there is a clean way to anotate this to make sparse happy without 
+ any unwanted sideffects ?
+
+ For the first warning using  (void __user *) entry->buf  should do
+ and be side-effect free, but how could the second warning be fixed ?
+
+ sparse message is from 4.8.0-rc2 (localversion-next is -next-20160822)
+ sparse version is v0.5.0-44
+
+thx!
+hofrat
