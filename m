@@ -1,45 +1,60 @@
 From: Lance Richardson <lrichard@redhat.com>
-Subject: [PATCH] sparse: ignore __assume_aligned__ attribute
-Date: Wed, 21 Sep 2016 10:44:48 -0400
-Message-ID: <1474469088-25429-1-git-send-email-lrichard@redhat.com>
+Subject: Re: [PATCH] dissect: s/mode_t/usage_t/ in report_member()
+Date: Fri, 23 Sep 2016 17:05:17 -0400 (EDT)
+Message-ID: <326478617.3496336.1474664717097.JavaMail.zimbra@redhat.com>
+References: <20160211224710.GA4989@redhat.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:41546 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932639AbcIUOot (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 21 Sep 2016 10:44:49 -0400
-Received: from int-mx10.intmail.prod.int.phx2.redhat.com (int-mx10.intmail.prod.int.phx2.redhat.com [10.5.11.23])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 3DE0E4E4E6
-        for <linux-sparse@vger.kernel.org>; Wed, 21 Sep 2016 14:44:49 +0000 (UTC)
-Received: from thinkcentre.nc.rr.com (vpn-54-57.rdu2.redhat.com [10.10.54.57])
-        by int-mx10.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id u8LEim0d002519
-        for <linux-sparse@vger.kernel.org>; Wed, 21 Sep 2016 10:44:48 -0400
+Received: from mx6-phx2.redhat.com ([209.132.183.39]:41205 "EHLO
+        mx6-phx2.redhat.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753235AbcIWVFU (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 23 Sep 2016 17:05:20 -0400
+In-Reply-To: <20160211224710.GA4989@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Oleg Nesterov <oleg@redhat.com>
+Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
-The __assume_aligned__ attribute can be safely ignored, add it
-to the list of ignored attributes.
+> From: "Oleg Nesterov" <oleg@redhat.com>
+> To: "Christopher Li" <sparse@chrisli.org>, "Josh Triplett" <josh@kernel.org>
+> Cc: linux-sparse@vger.kernel.org
+> Sent: Thursday, February 11, 2016 5:47:10 PM
+> Subject: [PATCH] dissect: s/mode_t/usage_t/ in report_member()
+> 
+> Cosmetic, fix the typo.
+> 
+> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+> ---
+>  dissect.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/dissect.c b/dissect.c
+> index 2d13d2a..67428ec 100644
+> --- a/dissect.c
+> +++ b/dissect.c
+> @@ -130,7 +130,7 @@ static inline struct symbol *no_member(struct ident
+> *name)
+>  	return &sym;
+>  }
+>  
+> -static struct symbol *report_member(mode_t mode, struct position *pos,
+> +static struct symbol *report_member(usage_t mode, struct position *pos,
+>  					struct symbol *type, struct symbol *mem)
+>  {
+>  	struct symbol *ret = mem->ctype.base_type;
+> --
+> 2.5.0
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 
-Signed-off-by: Lance Richardson <lrichard@redhat.com>
----
- parse.c | 2 ++
- 1 file changed, 2 insertions(+)
+Better late than never:
 
-diff --git a/parse.c b/parse.c
-index 98a31dc..2a1b57e 100644
---- a/parse.c
-+++ b/parse.c
-@@ -526,6 +526,8 @@ const char *ignored_attributes[] = {
- 	"__always_inline__",
- 	"artificial",
- 	"__artificial__",
-+	"assume_aligned",
-+	"__assume_aligned__",
- 	"bounded",
- 	"__bounded__",
- 	"cdecl",
--- 
-2.5.5
-
+Acked-by: Lance Richardson <lrichard@redhat.com>
