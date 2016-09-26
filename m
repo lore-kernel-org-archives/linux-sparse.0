@@ -1,31 +1,49 @@
-From: Oleg Nesterov <oleg@redhat.com>
-Subject: Re: [PATCH] dissect: s/mode_t/usage_t/ in report_member()
-Date: Mon, 26 Sep 2016 18:26:04 +0200
-Message-ID: <20160926162603.GA6782@redhat.com>
-References: <20160211224710.GA4989@redhat.com>
- <326478617.3496336.1474664717097.JavaMail.zimbra@redhat.com>
+From: Lance Richardson <lrichard@redhat.com>
+Subject: Re: dissect: teach do_expression() to handle EXPR_OFFSETOF
+Date: Mon, 26 Sep 2016 13:52:15 -0400
+Message-ID: <20160926175213.GA31182@thinkcentre>
+References: <20160208132657.GA19007@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=us-ascii; format=flowed
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx1.redhat.com ([209.132.183.28]:37184 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57852 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965962AbcIZQ0H (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 26 Sep 2016 12:26:07 -0400
+        id S1161186AbcIZRwR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 26 Sep 2016 13:52:17 -0400
 Content-Disposition: inline
-In-Reply-To: <326478617.3496336.1474664717097.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20160208132657.GA19007@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Lance Richardson <lrichard@redhat.com>
+To: Oleg Nesterov <oleg@redhat.com>
 Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
-On 09/23, Lance Richardson wrote:
++++ Oleg Nesterov [08/02/16 14:26 +0100]:
+>Starting from a194f3e0 "implement __builtin_offsetof()" sparse handles
+>offsetof() internally but dissect.c wasn't updated.
 >
-> Better late than never:
+>Test case:
 >
-> Acked-by: Lance Richardson <lrichard@redhat.com>
+>	struct S { int m; };
+>
+>	void func(void)
+>	{
+>		__builtin_offsetof(struct S, m);
+>	}
+>
+>before this patch:
+>
+>	3:6   g def  func                             void ( ... )
+>	T.c:5:38: warning: bad expr->type: 30
+>
+>after:
+>
+>	3:6   g def  func                             void ( ... )
+>	1:8   s def  S
+>	5:38  s ---  S.m                              int
+>
+>While at it, update my email.
+>
+>Signed-off-by: Oleg Nesterov <oleg@redhat.com>
 
-Thanks, perhaps you can also ack other patches I sent by that time ;)
-Although it seems that nobody cares anyway.
-
-Oleg.
-
+LGTM, builds and test case works as expected.
+Acked-by: Lance Richardson <lrichard@redhat.com>
