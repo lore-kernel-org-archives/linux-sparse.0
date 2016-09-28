@@ -1,35 +1,65 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] dissect: s/mode_t/usage_t/ in report_member()
-Date: Mon, 26 Sep 2016 14:21:16 -0700
-Message-ID: <CANeU7Qku=B+C8G=5yb4_pTOZMoob=_90ufErLj3wnDr_UV+FbQ@mail.gmail.com>
-References: <20160211224710.GA4989@redhat.com> <326478617.3496336.1474664717097.JavaMail.zimbra@redhat.com>
- <20160926162603.GA6782@redhat.com>
+Subject: Re: [PATCH] sparse: ignore __assume_aligned__ attribute
+Date: Wed, 28 Sep 2016 11:17:09 -0700
+Message-ID: <CANeU7QkqH3a8Mu6=vgL9AnDkSFJeqvhyzE6bE=pBY1OdpYMviA@mail.gmail.com>
+References: <1474469088-25429-1-git-send-email-lrichard@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36961 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751582AbcIZVVS (ORCPT
+Received: from mail-it0-f66.google.com ([209.85.214.66]:36585 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750714AbcI1SRL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 26 Sep 2016 17:21:18 -0400
-Received: by mail-it0-f51.google.com with SMTP id j69so57401445itb.0
-        for <linux-sparse@vger.kernel.org>; Mon, 26 Sep 2016 14:21:18 -0700 (PDT)
-In-Reply-To: <20160926162603.GA6782@redhat.com>
+        Wed, 28 Sep 2016 14:17:11 -0400
+Received: by mail-it0-f66.google.com with SMTP id n143so2274513ita.3
+        for <linux-sparse@vger.kernel.org>; Wed, 28 Sep 2016 11:17:11 -0700 (PDT)
+In-Reply-To: <1474469088-25429-1-git-send-email-lrichard@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Lance Richardson <lrichard@redhat.com>, Josh Triplett <josh@kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Lance Richardson <lrichard@redhat.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Sep 26, 2016 at 9:26 AM, Oleg Nesterov <oleg@redhat.com> wrote:
-> On 09/23, Lance Richardson wrote:
->>
->> Better late than never:
->>
->> Acked-by: Lance Richardson <lrichard@redhat.com>
->
-> Thanks, perhaps you can also ack other patches I sent by that time ;)
-> Although it seems that nobody cares anyway.
+On Wed, Sep 21, 2016 at 7:44 AM, Lance Richardson <lrichard@redhat.com> wrote:
+> The __assume_aligned__ attribute can be safely ignored, add it
+> to the list of ignored attributes.
 
-Err, better late than never. Let me pick this up again.
+Thanks for the patch. Sorry for the delay. The change looks fine.
+
+Can you add some test case of the  __assume_aligned__ attribute?
+I want to see how it was used in your source code which cause the problem
+for sparse.
+
+We need some basic test case just in case we parse the attributes in the
+future.
+
+Thanks
 
 Chris
+
+
+>
+> Signed-off-by: Lance Richardson <lrichard@redhat.com>
+> ---
+>  parse.c | 2 ++
+>  1 file changed, 2 insertions(+)
+>
+> diff --git a/parse.c b/parse.c
+> index 98a31dc..2a1b57e 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -526,6 +526,8 @@ const char *ignored_attributes[] = {
+>         "__always_inline__",
+>         "artificial",
+>         "__artificial__",
+> +       "assume_aligned",
+> +       "__assume_aligned__",
+>         "bounded",
+>         "__bounded__",
+>         "cdecl",
+> --
+> 2.5.5
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
