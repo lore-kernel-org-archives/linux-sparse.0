@@ -1,68 +1,50 @@
-From: Steven Moore <zgpt66p@cplonetie.me>
-Subject: Get A Part Time Job Today
-Date: Sat, 22 Oct 2016 04:54:36 -0700
-Message-ID: <BLUPR14MB03228939813B5A25667172D9D6D70@BLUPR14MB0322.namprd14.prod.outlook.com>
-Reply-To: <231101xyz@gmail.com>
+From: Thor Thayer <tthayer@opensource.altera.com>
+Subject: NiosII GCC Compiler Built-Ins Question
+Date: Fri, 28 Oct 2016 09:21:34 -0500
+Message-ID: <2a743451-2dda-a16c-6eec-a43e223c5c53@opensource.altera.com>
+Reply-To: <tthayer@opensource.altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-cys01nam02hn0222.outbound.protection.outlook.com ([104.47.37.222]:27036
-        "EHLO NAM02-CY1-obe.outbound.protection.outlook.com"
+Received: from mail-bl2nam02on0049.outbound.protection.outlook.com ([104.47.38.49]:63488
+        "EHLO NAM02-BL2-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S936453AbcJVMkJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 22 Oct 2016 08:40:09 -0400
-Content-Description: Mail message body
+        id S1754044AbcJ1OP3 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 28 Oct 2016 10:15:29 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipients <zgpt66p@cplonetie.me>
+To: linux-sparse@vger.kernel.org
 
-Hello
- =
+Hi,
 
- =
+When I'm running sparse on my NiosII Linux build, I'm seeing many errors 
+concerning an undefined identifier which is actually a GCC built-in for 
+the NiosII architecture [1].
 
-My Name is Steven Moore.We seek the service of a Secret Shopper in our apex=
--consult Organization. The assignment will pay  per duty .You can make $200=
- everyday , depends on how fast you able to take up your work. I am sure yo=
-u cannot spend more than 1-2 hours per day on your assignment . No Money or=
- Fee is required to become secret shopper.
- =
+./arch/nios2/include/asm/irqflags.h:25:16: error: undefined identifier 
+'__builtin_rdctl'
+./arch/nios2/include/asm/irqflags.h:25:16: error: not a function <noident>
+./arch/nios2/include/asm/irqflags.h:34:9: error: undefined identifier 
+'__builtin_wrctl'
+./arch/nios2/include/asm/irqflags.h:34:9: error: not a function <noident>
 
- =
+Googling this error led me to 2 possible solutions.
+1. Comment it out in the Linux source [2].
+2. Additions in the sparse lib.c file [3].
 
- =
+#2 was accepted but that built-in seems to be generic for all 
+architectures. In my case, this is only for the GCC compiler for NiosII.
 
-KINDLY SEND YOUR INFORMATION BELOW IF INTERESTED:
- =
+What is the best way to handle a built-in for a specific architecture?
 
- =
+Thanks,
 
- =
+Thor
 
-Your Name:
-Street Address: ( Not PO. BOX )
-Apartment Number:
-City: State:
-Zip Code:  =
+Links:
+[1] 
+https://gcc.gnu.org/onlinedocs/gcc/Altera-Nios-II-Built-in-Functions.html
+[2] https://lkml.org/lkml/2015/6/15/616
+[3] http://comments.gmane.org/gmane.comp.parsers.sparse/3402
 
-Country:
-Cell/Home phone number:
-Age:
-Present working Status:
- =
-
-You can also vist our website to Regrister online:
- =
-
- =
-
-http://www.apex-consult.net/
- =
-
- =
-
-Regards,
-Steven Moore
-231101xyz@gmail.com
-=20
