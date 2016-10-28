@@ -1,73 +1,64 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v3] sparse: add support for static assert
-Date: Fri, 28 Oct 2016 22:38:13 +0200
-Message-ID: <20161028203812.GA2221@macbook.local>
-References: <1454989031-12240-1-git-send-email-lrichard@redhat.com>
- <20160315225203.GC2679@macpro.local>
- <481469876.53571906.1465915752753.JavaMail.zimbra@redhat.com>
+From: Thor Thayer <tthayer@opensource.altera.com>
+Subject: Re: NiosII GCC Compiler Built-Ins Question
+Date: Fri, 28 Oct 2016 15:57:14 -0500
+Message-ID: <593696ca-67e3-6d71-befe-eac23bdca3b7@opensource.altera.com>
+References: <2a743451-2dda-a16c-6eec-a43e223c5c53@opensource.altera.com>
+ <CANeU7Q=8Dk_R_auTPpZ72OnfPJVsHGd92O+uXpO9phQWpV=BwA@mail.gmail.com>
+Reply-To: <tthayer@opensource.altera.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36246 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756124AbcJ1UiR (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 28 Oct 2016 16:38:17 -0400
-Received: by mail-wm0-f67.google.com with SMTP id c17so8924726wmc.3
-        for <linux-sparse@vger.kernel.org>; Fri, 28 Oct 2016 13:38:16 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <481469876.53571906.1465915752753.JavaMail.zimbra@redhat.com>
+Received: from mail-by2nam03on0073.outbound.protection.outlook.com ([104.47.42.73]:1088
+        "EHLO NAM03-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933956AbcJ1VYz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 28 Oct 2016 17:24:55 -0400
+In-Reply-To: <CANeU7Q=8Dk_R_auTPpZ72OnfPJVsHGd92O+uXpO9phQWpV=BwA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Lance Richardson <lrichard@redhat.com>
-Cc: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jun 14, 2016 at 10:49:12AM -0400, Lance Richardson wrote:
-> ----- Original Message -----
-> > From: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>
-> > To: "Lance Richardson" <lrichard@redhat.com>
-> > Cc: linux-sparse@vger.kernel.org
-> > Sent: Tuesday, March 15, 2016 6:52:03 PM
-> > Subject: Re: [PATCH v3] sparse: add support for static assert
-> > 
-> > On Mon, Feb 08, 2016 at 10:37:10PM -0500, Lance Richardson wrote:
-> > > This patch introduces support for _Static_assert() in global,
-> > > function, and struct/union declaration contexts (as currently supported
-> > > by gcc).
-> > > 
-> > > Tested via:
-> > >    - kernel build with C=1 CF=-D__CHECK_ENDIAN__
-> > >    - build/check large code base making heavy use of _Static_assert()
-> > >    - "make check" with added test cases for static assert support
-> > > 
-> > > Signed-off-by: Lance Richardson <lrichard@redhat.com>
-> > 
-> > 
-> > Fine for me.
-> > 
-> > Feel free to add
-> >   Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> > 
-> > 
-> > Chris, I have already reviwed this in January and Richard have taken
-> > my remarks in account.
-> > Do you think you you will have some time soon to look at it?
-> > 
-> > 
-> > Regards,
-> > Luc
-> > 
-> 
-> Dusting this one off... "ping"?
-> 
-> Thanks and Regards,
-> 
->    Lance
+Hi Chris,
 
-Chris, is is possible to have some feedback on this serie, please?
+On 10/28/2016 09:46 AM, Christopher Li wrote:
+> On Fri, Oct 28, 2016 at 10:21 PM, Thor Thayer
+> <tthayer@opensource.altera.com> wrote:
+>> Hi,
+>>
+>> When I'm running sparse on my NiosII Linux build, I'm seeing many errors
+>> concerning an undefined identifier which is actually a GCC built-in for the
+>> NiosII architecture [1].
+>>
+>> ./arch/nios2/include/asm/irqflags.h:34:9: error: not a function <noident>
+>>
+>> Googling this error led me to 2 possible solutions.
+>> 1. Comment it out in the Linux source [2].
+>
+> That is not the way to go.
+>
+>> 2. Additions in the sparse lib.c file [3].
+>
+> How about add the prototype in sparse and protect it by
+> #ifdef condition. Then sparse still need to have some way to
+> introduce the architecture flags. Maybe the default will pick the
+> host architecture and allow command options to overwrite the
+> architectures. If gcc has similar architecture options we should
+> reuse those in sparse.
+>
+> I am open to other suggestion as well.
+>
 
-Is there anything more I can do to help?
+I'm assuming this would look like the "#ifdef __bfin__\n" section of 
+lib.c (line 863).
 
+I'm having trouble finding what the arch define is for nios2 (the 
+obvious __nios2__ doesn't work for me) but I'll keep digging.
 
-Best regards,
-Luc
+Thanks for the response and guidance!
+
+Thor
+
+> Chris
+>
