@@ -1,40 +1,47 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 2/2] validation: Check C99 for loop variables
-Date: Wed, 2 Nov 2016 15:04:20 +0100
-Message-ID: <20161102140419.GB9029@macpro.local>
-References: <1462365584-20536-1-git-send-email-emily@emilymaier.net>
- <1462365584-20536-2-git-send-email-emily@emilymaier.net>
+Subject: Re: [PATCH] dissect: s/mode_t/usage_t/ in report_member()
+Date: Wed, 2 Nov 2016 15:17:09 +0100
+Message-ID: <20161102141708.GA9163@macpro.local>
+References: <20160211224710.GA4989@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:35368 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753021AbcKBOEY (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35981 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751075AbcKBORO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 2 Nov 2016 10:04:24 -0400
-Received: by mail-wm0-f67.google.com with SMTP id 68so3241614wmz.2
-        for <linux-sparse@vger.kernel.org>; Wed, 02 Nov 2016 07:04:23 -0700 (PDT)
+        Wed, 2 Nov 2016 10:17:14 -0400
+Received: by mail-wm0-f65.google.com with SMTP id c17so3273623wmc.3
+        for <linux-sparse@vger.kernel.org>; Wed, 02 Nov 2016 07:17:13 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <1462365584-20536-2-git-send-email-emily@emilymaier.net>
+In-Reply-To: <20160211224710.GA4989@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Emily Maier <emily@emilymaier.net>
-Cc: linux-sparse@vger.kernel.org
+To: Oleg Nesterov <oleg@redhat.com>
+Cc: Christopher Li <sparse@chrisli.org>, Josh Triplett <josh@kernel.org>, linux-sparse@vger.kernel.org
 
-On Wed, May 04, 2016 at 08:39:44AM -0400, Emily Maier wrote:
-> Previously, sparse would generate incorrect code in the presence of a
-> C99 variable declaration inside the for statement, completely dropping
-> the code after the end of the for loop. Check that it's now behaving
-> correctly by entering a context and not leaving it at the end of the
-> loop.
+On Thu, Feb 11, 2016 at 11:47:10PM +0100, Oleg Nesterov wrote:
+> Cosmetic, fix the typo.
 > 
-> Signed-off-by: Emily Maier <emily@emilymaier.net>
+> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
 > ---
+>  dissect.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/dissect.c b/dissect.c
+> index 2d13d2a..67428ec 100644
+> --- a/dissect.c
+> +++ b/dissect.c
+> @@ -130,7 +130,7 @@ static inline struct symbol *no_member(struct ident *name)
+>  	return &sym;
+>  }
+>  
+> -static struct symbol *report_member(mode_t mode, struct position *pos,
+> +static struct symbol *report_member(usage_t mode, struct position *pos,
+>  					struct symbol *type, struct symbol *mem)
+>  {
+>  	struct symbol *ret = mem->ctype.base_type;
+> -- 
 
-I think a simpler test case showing the generality of the problem
-would be even nicer but that would involve the output of
-test-linearize and as such this is not usable in the test suite.
-
-This test case has the decisive advantage to be testable.
-
-Revieved-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+For what it's worth:
+Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
