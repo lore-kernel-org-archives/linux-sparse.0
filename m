@@ -1,44 +1,50 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] Handle SForced in storage_modifiers
-Date: Mon, 14 Nov 2016 21:21:46 +0100
-Message-ID: <20161114202145.GB15866@macbook.local>
-References: <1479150736-28392-1-git-send-email-jlayton@redhat.com>
- <20161114200447.GA15866@macbook.local>
- <CA+55aFxbn+ZAyN9zzcEF60UPoRN2hq86LHk9v5ecqg-c+x3pNw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [RFC PATCH] bits_in_bool should be 8
+Date: Mon, 14 Nov 2016 15:50:43 -0500
+Message-ID: <1479156643-28563-1-git-send-email-jlayton@redhat.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36431 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932218AbcKNUVu (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Nov 2016 15:21:50 -0500
-Received: by mail-wm0-f67.google.com with SMTP id m203so18644994wma.3
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Nov 2016 12:21:49 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CA+55aFxbn+ZAyN9zzcEF60UPoRN2hq86LHk9v5ecqg-c+x3pNw@mail.gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34214 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932515AbcKNUup (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 14 Nov 2016 15:50:45 -0500
+Received: from int-mx13.intmail.prod.int.phx2.redhat.com (int-mx13.intmail.prod.int.phx2.redhat.com [10.5.11.26])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A0E313F755
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Nov 2016 20:50:44 +0000 (UTC)
+Received: from tleilax.poochiereds.net (ovpn-116-49.rdu2.redhat.com [10.10.116.49])
+        by int-mx13.intmail.prod.int.phx2.redhat.com (8.14.4/8.14.4) with ESMTP id uAEKoiIr029416
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Nov 2016 15:50:44 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Jeff Layton <jlayton@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Al Viro <viro@ftp.linux.org.uk>
+To: linux-sparse@vger.kernel.org
 
-On Mon, Nov 14, 2016 at 12:17:47PM -0800, Linus Torvalds wrote:
-> On Mon, Nov 14, 2016 at 12:04 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > The array is statically initialized and never modified,
-> > your patch shouldn't change anything, and this regardless of
-> > the memory layout or compiler options.
-> 
-> The problem is the _size_ of the array. Without that initializer for
-> SForced case, it is one entry too small, and you get a random access
-> past the end of the array.
-> 
-> The patch is definitely correct.
-> 
->               Linus
-> --
+Given that we're working with byte-addressable machines, each type must
+be at least one byte in size or you'd not be able to take a pointer to
+it.
 
-Ah yes, indeed.
+Noticed at random when I ran the sample "compile" program in the
+sparse source tree vs. a test C program that uses bools. It crashes
+without this patch.
 
-Thanks
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ target.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/target.c b/target.c
+index 17b228ae924c..6a535bc0b2d7 100644
+--- a/target.c
++++ b/target.c
+@@ -14,7 +14,7 @@ int max_alignment = 16;
+ /*
+  * Integer data types
+  */
+-int bits_in_bool = 1;
++int bits_in_bool = 8;
+ int bits_in_char = 8;
+ int bits_in_short = 16;
+ int bits_in_int = 32;
+-- 
+2.7.4
+
