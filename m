@@ -1,73 +1,56 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/3] testsuite: add tag to ignore the output/error
-Date: Thu, 10 Nov 2016 15:45:18 +0100
-Message-ID: <20161110144520.24965-2-luc.vanoostenryck@gmail.com>
-References: <20161110144520.24965-1-luc.vanoostenryck@gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: [PATCH] Handle SForced in storage_modifiers
+Date: Mon, 14 Nov 2016 14:12:16 -0500
+Message-ID: <1479150736-28392-1-git-send-email-jlayton@redhat.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36555 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933828AbcKJOpg (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 10 Nov 2016 09:45:36 -0500
-Received: by mail-wm0-f65.google.com with SMTP id m203so1952007wma.3
-        for <linux-sparse@vger.kernel.org>; Thu, 10 Nov 2016 06:45:35 -0800 (PST)
-In-Reply-To: <20161110144520.24965-1-luc.vanoostenryck@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:38558 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754187AbcKNTMR (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 14 Nov 2016 14:12:17 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
+Cc: Al Viro <viro@ftp.linux.org.uk>
 
-Currently the test suite always check the exit value and the output
-of the command used for the test. This is fine and allow use to catch
-the most common situations:
-- failure or crash (via the exit value)
-- (un)expected output (like when testing the result of the preprocessor)
-- (un)expected errors & warnings (like when testing sparse's warnings)
+We have been seeing errors like this for a while now in the sparse
+Fedora package, when doing kernel builds:
 
-But sometimes, we're not interested in the output or the output (as is)
-is simply not meaningful for the test or can't be compared textually
-to some reference.
+    ./include/linux/err.h:53:25: warning: dereference of noderef expression
+    ./include/linux/err.h:35:16: warning: dereference of noderef expression
 
-This patch add two new tags (check-output-ignore & check-error-ignore),
-telling to test suite to ignore the content of stdout or stderr when
-testing this file.
+This spews all over the build because this comes from IS_ERR(), which
+is called everywhere. Even odder, it turns out that if we build the
+package with -fpic turned off, then it works fine.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+With some brute-force debugging, I think I've finally found the cause.
+This array is missing the SForced element. When this is added then the
+problem goes away.
+
+As to why this goes away when -fpic is removed, I can only assume that
+we get lucky with the memory layout and have a zeroed out region just
+beyond the end of the array.
+
+Fixes: 3829c4d8b097776e6b3472290a9fae08a705ab7a
+Cc: Al Viro <viro@ftp.linux.org.uk>
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- Documentation/test-suite | 6 ++++++
- validation/test-suite    | 2 ++
- 2 files changed, 8 insertions(+)
+ parse.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/Documentation/test-suite b/Documentation/test-suite
-index 6c4f24f6..6936feeb 100644
---- a/Documentation/test-suite
-+++ b/Documentation/test-suite
-@@ -29,6 +29,12 @@ check-output-start / check-output-end (optional)
- 	The expected output (stdout and stderr) of check-command lies between
- 	those two tags. It defaults to no output.
- 
-+check-output-ignore / check-error-ignore (optional)
-+	Don't check the expected output (stdout or stderr) of check-command
-+	(usefull when this output is not comparable or if you're only interested
-+	in the exit value).
-+	By default this check is done.
-+
- check-known-to-fail (optional)
- 	Mark the test as being known to fail.
- 
-diff --git a/validation/test-suite b/validation/test-suite
-index df5a7c60..0d874e07 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -146,6 +146,8 @@ do_test()
- 	actual_exit_value=$?
- 
- 	for stream in output error; do
-+		grep -s -q "check-$stream-ignore" $file && continue
-+
- 		diff -u "$file".$stream.expected "$file".$stream.got > "$file".$stream.diff
- 		if [ "$?" -ne "0" ]; then
- 			error "actual $stream text does not match expected $stream text."
+diff --git a/parse.c b/parse.c
+index 205e12644a6c..b290ff2636f2 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1286,7 +1286,8 @@ static unsigned long storage_modifiers(struct decl_state *ctx)
+ 		[SAuto] = MOD_AUTO,
+ 		[SExtern] = MOD_EXTERN,
+ 		[SStatic] = MOD_STATIC,
+-		[SRegister] = MOD_REGISTER
++		[SRegister] = MOD_REGISTER,
++		[SForced] = 0
+ 	};
+ 	return mod[ctx->storage_class] | (ctx->is_inline ? MOD_INLINE : 0)
+ 		| (ctx->is_tls ? MOD_TLS : 0);
 -- 
-2.10.1
+2.7.4
 
