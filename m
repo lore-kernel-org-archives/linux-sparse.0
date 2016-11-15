@@ -1,71 +1,37 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] Handle SForced in storage_modifiers
-Date: Mon, 14 Nov 2016 20:30:08 -0800
-Message-ID: <20161115043007.x4363svjuid6e74d@x>
-References: <1479150736-28392-1-git-send-email-jlayton@redhat.com>
- <20161114200447.GA15866@macbook.local>
- <CA+55aFxbn+ZAyN9zzcEF60UPoRN2hq86LHk9v5ecqg-c+x3pNw@mail.gmail.com>
- <CANeU7Q=p=kcHCZ2uupc+7e_Gg5uYpe2b2aoS+8nAwyK+jxLtqw@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: sparse releases
+Date: Tue, 15 Nov 2016 09:21:27 -0500
+Message-ID: <1479219687.2547.20.camel@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:50758 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750766AbcKOEaS (ORCPT
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:36779 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755029AbcKOOVa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Nov 2016 23:30:18 -0500
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=p=kcHCZ2uupc+7e_Gg5uYpe2b2aoS+8nAwyK+jxLtqw@mail.gmail.com>
+        Tue, 15 Nov 2016 09:21:30 -0500
+Received: by mail-yw0-f174.google.com with SMTP id a10so96121586ywa.3
+        for <linux-sparse@vger.kernel.org>; Tue, 15 Nov 2016 06:21:30 -0800 (PST)
+Received: from cpe-2606-A000-1125-405B-DECE-A663-7B68-BD3E.dyn6.twc.com (cpe-2606-A000-1125-405B-DECE-A663-7B68-BD3E.dyn6.twc.com. [2606:a000:1125:405b:dece:a663:7b68:bd3e])
+        by smtp.gmail.com with ESMTPSA id x131sm6411266ywg.49.2016.11.15.06.21.28
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 15 Nov 2016 06:21:29 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Jeff Layton <jlayton@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Al Viro <viro@ftp.linux.org.uk>
+To: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Tue, Nov 15, 2016 at 09:00:30AM +0800, Christopher Li wrote:
-> On Tue, Nov 15, 2016 at 4:17 AM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
-> > The problem is the _size_ of the array. Without that initializer for
-> > SForced case, it is one entry too small, and you get a random access
-> > past the end of the array.
-> >
-> > The patch is definitely correct.
-> >
-> 
-> Yes, the patch is definitely correct. It is a good catch.
-> 
-> I purpose a slightly different way to fix it. I think it is better just give the
-> array of a size instead of using the designated initializer to determine the
-> array size. Sequential initializer to determine the array size is fine.
-> 
-> Jeff, how about some thing like this:
-> 
-> Chris
-> 
-> diff --git a/parse.c b/parse.c
-> index 66f9353..a01ba00 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -109,7 +109,7 @@ enum {
->  };
-> 
->  enum {
-> -       SNone = 0, STypedef, SAuto, SRegister, SExtern, SStatic, SForced
-> +       SNone = 0, STypedef, SAuto, SRegister, SExtern, SStatic, SForced, SMax
->  };
-> 
->  static struct symbol_op typedef_op = {
-> @@ -1279,7 +1279,7 @@ static const char *storage_class[] =
-> 
->  static unsigned long storage_modifiers(struct decl_state *ctx)
->  {
-> -       static unsigned long mod[] =
-> +       static unsigned long mod[SMax] =
->         {
->                 [SAuto] = MOD_AUTO,
->                 [SExtern] = MOD_EXTERN,
+I have been maintaining the fedora sparse package for a few years now
+and have been simply updating the package when there are releases. It
+looks though like there haven't been any releases in the last couple of
+years.
 
-I like this much better as well.
+Are sparse releases even "a thing" these days? Should I be revving the
+package from regular git pulls instead? I'd like to see the package get
+updates a little more regularly and am just trying to sort out how to do
+that.
 
-(Having "maximum" entries in enums does sadly break warning options like
--Wswitch-enum, but it makes cases like this much better.)
-
+Thanks,
+-- 
+Jeff Layton <jlayton@redhat.com>
