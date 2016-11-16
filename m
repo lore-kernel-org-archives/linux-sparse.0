@@ -1,65 +1,50 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] ptrlist: use after free in last_ptr_list()
-Date: Thu, 17 Nov 2016 00:22:55 +0100
-Message-ID: <20161116232254.GA21402@macpro.local>
-References: <20160613094517.GA25301@mwanda>
- <20161102124844.GA12544@macbook.home>
- <CANeU7Qk=Ta+QumF8BhSES9jTLDx+cdvvS8hfMQXg+B2H3Vfc-g@mail.gmail.com>
- <20161102152309.GA13632@macpro.local>
- <20161104104419.GA15485@macbook.local>
- <CANeU7QmO-7C+6JwxQDCaLotx0MZ=-HSgTc2thO8fSvxD5JR32Q@mail.gmail.com>
- <20161106084937.GA818@macpro.local>
- <20161107100036.GA443@macbook.home>
- <CANeU7QnyiJi3qGF9Wvz1BK6wUrEBehb94gc2JbsFkF=-d=NFVQ@mail.gmail.com>
+Subject: Re: [PATCH] sparse: update __builtin_object_size() prototype
+Date: Thu, 17 Nov 2016 00:28:50 +0100
+Message-ID: <20161116232850.GB21402@macpro.local>
+References: <1474467238-20939-1-git-send-email-lrichard@redhat.com>
+ <20161107100934.GB443@macbook.home>
+ <CANeU7Q=hA2T+dgdi7cz_RK1Xday0g5PWszZMoT_Dw0vx0K5CBQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34648 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36334 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751652AbcKPXXB (ORCPT
+        with ESMTP id S932347AbcKPX2y (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Nov 2016 18:23:01 -0500
-Received: by mail-wm0-f65.google.com with SMTP id g23so16130860wme.1
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Nov 2016 15:23:01 -0800 (PST)
+        Wed, 16 Nov 2016 18:28:54 -0500
+Received: by mail-wm0-f65.google.com with SMTP id m203so16050254wma.3
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Nov 2016 15:28:53 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7QnyiJi3qGF9Wvz1BK6wUrEBehb94gc2JbsFkF=-d=NFVQ@mail.gmail.com>
+In-Reply-To: <CANeU7Q=hA2T+dgdi7cz_RK1Xday0g5PWszZMoT_Dw0vx0K5CBQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Lance Richardson <lrichard@redhat.com>, Johannes Berg <johannes@sipsolutions.net>
 
-On Thu, Nov 17, 2016 at 06:46:44AM +0800, Christopher Li wrote:
-> On Mon, Nov 7, 2016 at 6:00 PM, Luc Van Oostenryck
+On Thu, Nov 17, 2016 at 06:52:51AM +0800, Christopher Li wrote:
+> On Mon, Nov 7, 2016 at 6:09 PM, Luc Van Oostenryck
 > <luc.vanoostenryck@gmail.com> wrote:
-> > OK, I've checked this on a more substantial amount of code
-> > than the testsuite: the kernel for x86-64 with allyesconfig
-> > and I confirm that there is not a single out-of-bounds access
-> > to any ->list[], wich is what matters.
 > >
-> > Nevertheless, there are two cases  (in cse.c and evaluate.c)
-> > where elements are deleted from a list which is not directly
-> > repacked at the end of the loop and it's not obvious in the code
-> > why it's OK to not repack them.
+> > Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> >
+> >
+> > Chris, can you please take this patch (or Johannes' one).
+> > When compiling the kernel, there is more than 2000 false warnings
+> > only for the uaccess.h case described here above.
 > 
-> Thanks for the extensive testing. As for the repacking, I think its
-> better to repack the list to after the delete of the entry. However,
-> we don't want to repack the list if there is not deletion at all.
+> Applied and pushed to "chrisl" repository.
 > 
-> How about this, we can introduce a bit field on "struct ptr_list" to
-> keep track of the list needs repack or not. On deletion the ptr_list will
-> be dirty. The other function which assuming the packed list will
-> check the dirty bit and complain if list is not packed.
-> 
-> We can even make keep the "struct ptr_list" the same size.
-> Just squeeze some bits from "int nr". However, that will break the
-> binary interface of sparse as a library. The application link with
-> sparse will need to be recompiled.
+> Thanks
 > 
 > Chris
 > --
 
-Sound good.
-I'll look at this, probably tomorrow.
+Thanks.
+
+BTW, how must we consider this "chrilsi" repository?
+A bit like a -next repository or more like a working one?
+Can we consider it as stable for git fetches & pulls?
 
 
 Luc
