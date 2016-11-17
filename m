@@ -1,45 +1,32 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/8] explicitely ignore killing OP_ENTRY
-Date: Thu, 17 Nov 2016 15:35:06 +0100
-Message-ID: <20161117143507.3598-8-luc.vanoostenryck@gmail.com>
-References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] Remove unneeded variable in integer_promotion()
+Date: Fri, 18 Nov 2016 00:56:05 +0800
+Message-ID: <CANeU7QnAndq6D4XcvKbp5fV5-P-A0pKL7WWtUmc04+Taxb3paQ@mail.gmail.com>
+References: <20161102221113.37124-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36247 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753425AbcKQQ5g (ORCPT
+Received: from mail-it0-f53.google.com ([209.85.214.53]:38397 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933133AbcKQRCT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 11:57:36 -0500
-Received: by mail-wm0-f67.google.com with SMTP id m203so22987089wma.3
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 08:57:36 -0800 (PST)
-In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
+        Thu, 17 Nov 2016 12:02:19 -0500
+Received: by mail-it0-f53.google.com with SMTP id j191so62774803ita.1
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 09:02:19 -0800 (PST)
+In-Reply-To: <20161102221113.37124-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-It doesn't change anything, it's more for documentation
-purpose.
+On Thu, Nov 3, 2016 at 6:11 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Following some previous simplification done on the function,
+> the variable 'orig_type' is now always the same as 'type'.
+>
+> To avoid possible confusion, only use 'type' and remove
+> the declaration of 'orig_type'.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c | 4 ++++
- 1 file changed, 4 insertions(+)
+Indeed. Applied.
 
-diff --git a/simplify.c b/simplify.c
-index 1be9b3d0..afbbb7b6 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -232,6 +232,10 @@ void kill_instruction(struct instruction *insn)
- 		if (insn->cond)
- 			kill_use(&insn->cond);
- 		return;
-+
-+	case OP_ENTRY:
-+		/* ignore */
-+		return;
- 	}
- }
- 
--- 
-2.10.2
-
+Chris
