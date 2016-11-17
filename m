@@ -1,66 +1,44 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] cleanup: remove evaluate_arguments()'s unused argument
-Date: Thu, 17 Nov 2016 12:13:37 +0100
-Message-ID: <20161117111336.GA499@macpro.local>
-References: <20161102171623.17883-1-luc.vanoostenryck@gmail.com>
- <CANeU7Q=SJXw41JNRLJtKGOCgEPSnWhKZyRfMicS=suJwH73LNg@mail.gmail.com>
+From: Jeff Layton <jlayton@redhat.com>
+Subject: Re: [PATCH] Handle SForced in storage_modifiers
+Date: Thu, 17 Nov 2016 07:43:57 -0500
+Message-ID: <1479386637.2527.0.camel@redhat.com>
+References: <1479150736-28392-1-git-send-email-jlayton@redhat.com>
+         <20161114200447.GA15866@macbook.local>
+         <CA+55aFxbn+ZAyN9zzcEF60UPoRN2hq86LHk9v5ecqg-c+x3pNw@mail.gmail.com>
+         <CANeU7Q=p=kcHCZ2uupc+7e_Gg5uYpe2b2aoS+8nAwyK+jxLtqw@mail.gmail.com>
+         <1479175640.7928.1.camel@redhat.com>
+         <CANeU7Qn_hebujogeF-HEaDsSWbEaPJTDpSUR5bXG1t1r7MihXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:36835 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964825AbcKQLNo (ORCPT
+Received: from mail-qk0-f174.google.com ([209.85.220.174]:34359 "EHLO
+        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752897AbcKQOcO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 06:13:44 -0500
-Received: by mail-wm0-f46.google.com with SMTP id g23so303664709wme.1
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 03:13:43 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=SJXw41JNRLJtKGOCgEPSnWhKZyRfMicS=suJwH73LNg@mail.gmail.com>
+        Thu, 17 Nov 2016 09:32:14 -0500
+Received: by mail-qk0-f174.google.com with SMTP id q130so221995348qke.1
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 06:32:13 -0800 (PST)
+In-Reply-To: <CANeU7Qn_hebujogeF-HEaDsSWbEaPJTDpSUR5bXG1t1r7MihXA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Al Viro <viro@ftp.linux.org.uk>
 
-On Thu, Nov 17, 2016 at 05:57:52PM +0800, Christopher Li wrote:
-> On Thu, Nov 3, 2016 at 1:16 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > Was slightly confusing when reading some code.
-> > Better to remove it.
-> >
-> > @@ -2885,7 +2885,7 @@ static struct symbol *evaluate_call(struct expression *expr)
-> >                 if (!sym->op->args(expr))
-> >                         return NULL;
-> >         } else {
-> > -               if (!evaluate_arguments(sym, ctype, arglist))
-> > +               if (!evaluate_arguments(ctype, arglist))
-> >                         return NULL;
+On Thu, 2016-11-17 at 06:28 +0800, Christopher Li wrote:
+> On Tue, Nov 15, 2016 at 10:07 AM, Jeff Layton <jlayton@redhat.com> wrote:
+> > 
+> > 
+> > That looks fine to me. If you want to merge that one, then:
+> > 
+> > Reviewed-by: Jeff Layton <jlayton@redhat.com>
 > 
-> I think this is more or less fine, even though sym is not currently
-> used in evaluate_arguments().
-> ctype contain the function declare which usually is in a line earlier
-> than the call expression.
-> The "sym" argument in the most common case contain the symbol node,
-> the ctype contain
-> the base function type.
+> The patches is applied on "chrisl" repo and pushed out.
 > 
-> One case might be useful for "exvaluate_arguments" to use symbol node
-> is to output
-> the beginning position of the call expression. The "fn" symbol point
-> to the previous line
-> and arglist in the later part of the expression.
+> Actually I want to merge the patch having you as the author.
 > 
-> As I said, the node argument is currently not used. If you feel
-> strongly about it
-> I am fine with removing it as well.
+> Chris
 
-Not much important to me, but said above, it's confusing: two args,
-one called 'f', the other one 'fn' and one of them is unused ...
-
-> Or maybe change it to "node" instead of "f", will that be better to understand?
-Not much I think, 'node' has even less meaning to me than 'f'or 'fn'.
-Better then to focus on the (potential) purpose of this arg.
-If it's for the position, maybe pass only sym->pos.
-
-But again, it's not important at all. Let not waste our time on it.
-
-Luc
+Looks good to me. Thanks!
+-- 
+Jeff Layton <jlayton@redhat.com>
