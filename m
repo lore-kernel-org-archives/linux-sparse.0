@@ -1,113 +1,162 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/8] fix killing OP_PHI instructions
-Date: Thu, 17 Nov 2016 15:35:02 +0100
-Message-ID: <20161117143507.3598-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/8] kill uses of replaced instructions
+Date: Thu, 17 Nov 2016 15:35:00 +0100
+Message-ID: <20161117143507.3598-2-luc.vanoostenryck@gmail.com>
 References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36221 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753107AbcKQSoX (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33619 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752673AbcKQSqY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 13:44:23 -0500
-Received: by mail-wm0-f67.google.com with SMTP id m203so23876046wma.3
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:44:22 -0800 (PST)
+        Thu, 17 Nov 2016 13:46:24 -0500
+Received: by mail-wm0-f65.google.com with SMTP id u144so23911803wmu.0
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:46:23 -0800 (PST)
 In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently kill_instruction() doesn't do anything with the
-sources of OP_PHI instructions. But when these instructions
-are removed the 'usage' of the associated sources must also
-be removed. This is not done and as result the instructions
-producing the phi-sources are not optimized away as expected.
+When an instruction is replaced by a pseudo, the 'usage' of its
+operands should be removed too but it's not the case.
 
-This patch fixes that by calling clear_phi() when killing a
-phi-instruction.
+The fix consists in calling kill_use() for each operands after
+the pseudo is replaced.
+Not all types of instruction are considered, only those which
+can be replaced by a pseudo.
 
-For example, when looking at the output of test-linearize,
-the following function:
-	void foo(int a, int *b, unsigned int g);
-	void foo(int a, int *b, unsigned int g)
+The following example illustrate the situation. When looking at
+the output of test-linearize, the following function:
+
+	static int kill_add(int a, int b)
 	{
-		int d = 0;
-
-		if ((!a || *b) && g)
-			d = 16;
-		else
-			d = 8;
+		return (a + b) && 0;
 	}
 
-gives this output without the patch:
-	foo:
-		br          %arg1, .L1, .L2
-	.L1:
-		phisrc.32   %phi1 <- $1
-		br          .L3
-	.L2:
-		load.32     %r3 <- 0[%arg2]
-		phisrc.32   %phi2 <- %r3
-		br          .L3
-	.L3:
-		ret
+without the patch, gives this output:
 
-The 'phisrc' instructions are obviously unneeded but nevertheless present.
+	kill_add:
+		add.32      %r3 <- %arg1, %arg2
+		ret.32      $0
 
-With the patch, the output is much closer to what's expected:
-	foo:
-		br          %arg1, .L3, .L2
-	.L2:
-		load.32     %r3 <- 0[%arg2]
-		br          .L3
-	.L3:
-		ret
+The 'add' instruction is obviously unneeded but nevertheless present.
 
-Note 1) The 'load' instruction is also dead and should have been removed
-but it's separate problem.
+Before any optimization the code was something like:
+
+	kill_add:
+		add.32      %r3 <- %arg1, %arg2
+		and_bool.32 %r4 <- %r3, $0
+		ret.32      %r4
+
+During the simplification phase, the result of the 'and' instruction (%r4)
+have been replaced by '0' and the instruction itself is discarded.
+But '%r3' usage has not been adjusted and the further phases are not
+aware that '%r3' is not needed anymore and so the 'add' instruction is kept
+while not needed by anything.
+
+With the patch the 'add' instruction is correctly discarded, giving the
+expected output:
+
+	kill_add:
+		ret.32      $0
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                 |  1 +
- validation/kill-phi-node.c | 18 ++++++++++++++++++
- 2 files changed, 19 insertions(+)
- create mode 100644 validation/kill-phi-node.c
+ simplify.c                      | 20 +++++++++++++++
+ validation/kill-replaced-insn.c | 54 +++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 74 insertions(+)
+ create mode 100644 validation/kill-replaced-insn.c
 
 diff --git a/simplify.c b/simplify.c
-index d07ca1b1..421b28f2 100644
+index b5cd0ea7..85da5bec 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -203,6 +203,7 @@ void kill_instruction(struct instruction *insn)
- 		return;
- 
- 	case OP_PHI:
-+		clear_phi(insn);
- 		insn->bb = NULL;
- 		repeat_phase |= REPEAT_CSE;
- 		return;
-diff --git a/validation/kill-phi-node.c b/validation/kill-phi-node.c
-new file mode 100644
-index 00000000..88de9f96
---- /dev/null
-+++ b/validation/kill-phi-node.c
-@@ -0,0 +1,18 @@
-+void foo(int a, int *b, unsigned int g);
-+void foo(int a, int *b, unsigned int g)
-+{
-+	int d = 0;
+@@ -253,6 +253,26 @@ static inline int constant(pseudo_t pseudo)
+ static int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
+ {
+ 	convert_instruction_target(insn, pseudo);
 +
-+	if ((!a || *b) && g)
-+		d = 16;
-+	else
-+		d = 8;
++	switch (insn->opcode) {
++	case OP_SEL:
++	case OP_RANGE:
++		kill_use(&insn->src3);
++	case OP_BINARY ... OP_BINCMP_END:
++		kill_use(&insn->src2);
++	case OP_NOT:
++	case OP_NEG:
++	case OP_SYMADDR:
++	case OP_CAST:
++	case OP_SCAST:
++	case OP_FPCAST:
++	case OP_PTRCAST:
++		kill_use(&insn->src1);
++		break;
++
++	default:
++		assert(0);
++	}
+ 	insn->bb = NULL;
+ 	return REPEAT_CSE;
+ }
+diff --git a/validation/kill-replaced-insn.c b/validation/kill-replaced-insn.c
+new file mode 100644
+index 00000000..be031b6c
+--- /dev/null
++++ b/validation/kill-replaced-insn.c
+@@ -0,0 +1,54 @@
++// See if the replaced operation is effectively killed or not
++
++static int kill_add(int a, int b)
++{
++	return (a + b) && 0;
++}
++
++static int kill_scast(short a)
++{
++	return ((int) a) && 0;
++}
++
++static int kill_ucast(unsigned char a)
++{
++	return ((int) a) && 0;
++}
++
++static int kill_pcast(int *a)
++{
++	return ((void*) a) && 0;
++}
++
++static int kill_fcast(double a)
++{
++	return ((int) a) && 0;
++}
++
++static int kill_select(int a)
++{
++	return (a ? 1 : 0) && 0;
++}
++
++static int kill_load(int *a)
++{
++	return *a && 0;
++}
++
++static int kill_store(int *a)
++{
++	return (*a = 1) && 0;
 +}
 +
 +/*
-+ * check-name: kill-phi-node
++ * check-name: kill-replaced-insn
 + * check-command: test-linearize $file
 + *
 + * check-output-ignore
-+ * check-output-excludes: phisrc\\.
++ * check-output-excludes: add\\.
++ * check-output-excludes: scast\\.
++ * check-output-excludes: \\<cast\\.
++ * check-output-excludes: ptrcast\\.
++ * check-output-excludes: fpcast\\.
++ * check-output-excludes: sel\\.
 + */
 -- 
 2.10.2
