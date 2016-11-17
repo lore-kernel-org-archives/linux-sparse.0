@@ -1,39 +1,98 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 0/2] be more generous with ptrlist repacking
-Date: Fri, 18 Nov 2016 02:17:14 +0800
-Message-ID: <CANeU7QnqhZfZtToAhQ8CPniS7DFNdhwYdCp=zZDzsqtpuD=pJQ@mail.gmail.com>
-References: <20161117172559.29417-1-luc.vanoostenryck@gmail.com> <CA+55aFwYGCD-+GhVLdHedu42cu1RyT+Ko9Dj6-pfTrPv0ZD5Jg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/8] fix killing OP_SELECT
+Date: Thu, 17 Nov 2016 15:35:04 +0100
+Message-ID: <20161117143507.3598-6-luc.vanoostenryck@gmail.com>
+References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f68.google.com ([209.85.214.68]:36468 "EHLO
-        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S941843AbcKQSRU (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36053 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753268AbcKQSoN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 13:17:20 -0500
-Received: by mail-it0-f68.google.com with SMTP id n68so16869108itn.3
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:17:15 -0800 (PST)
-In-Reply-To: <CA+55aFwYGCD-+GhVLdHedu42cu1RyT+Ko9Dj6-pfTrPv0ZD5Jg@mail.gmail.com>
+        Thu, 17 Nov 2016 13:44:13 -0500
+Received: by mail-wm0-f65.google.com with SMTP id m203so23874869wma.3
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:44:12 -0800 (PST)
+In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Nov 18, 2016 at 1:40 AM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> I suspect they should be fairly easy to update to just walk the list
-> until they hit a non-empty case (like DO_NEXT() already does, for
-> example).
+Currently kill_instruction() doesn't do anything with the
+operands of select instructions (OP_SELECT). But when these
+instructions are removed we must also remove the operands 'usage'.
+Without this the instructions which provides the select's
+operands are not optimized away as expected.
 
-I think you are right, as always. It just need to add four while loops
-into first_ptr_list/last_ptr_list/DO_PREPARE/DO_RESET.
+This patch fixes this by doing for OP_SELECTs the basic
+kill_instruction() for ternary instruction, like OP_RANGE.
 
-Amount those 3 of the place should be able to share a function
-(or macro) to find the next not empty entry from list head.
+As an example, when looking at the output of test-linearize,
+the following code:
 
-Ptrlist deletion happen so rare, it does not justify the complexity.
+	void foo(int x)
+	{
+		unsigned int ui;
 
-Luc, sorry about the bad suggestion.
+		ui = x + 1;
+		ui = ui ? 0 : 1;
+	}
 
-Chris
+gives this output:
+
+	foo:
+		add.32      %r2 <- %arg1, $1
+		ret
+
+Since the result of the ?: is never used, the whole code should be
+optimized away. The 'select' instruction itself is indeed discarded
+but the 'add' is not.
+
+With the patch, the output is much closer to what's expected:
+
+	foo:
+		ret
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c               |  1 +
+ validation/kill-select.c | 16 ++++++++++++++++
+ 2 files changed, 17 insertions(+)
+ create mode 100644 validation/kill-select.c
+
+diff --git a/simplify.c b/simplify.c
+index 939ba6af..1dd1bda6 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -217,6 +217,7 @@ void kill_instruction(struct instruction *insn)
+ 		repeat_phase |= REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
+ 		return;
+ 
++	case OP_SEL:
+ 	case OP_RANGE:
+ 		insn->bb = NULL;
+ 		repeat_phase |= REPEAT_CSE;
+diff --git a/validation/kill-select.c b/validation/kill-select.c
+new file mode 100644
+index 00000000..445472be
+--- /dev/null
++++ b/validation/kill-select.c
+@@ -0,0 +1,16 @@
++void foo(int x);
++void foo(int x)
++{
++	unsigned int ui;
++
++	ui = x + 1;
++	ui = ui ? 0 : 1;
++}
++
++/*
++ * check-name: kill-select
++ * check-command: test-linearize $file
++ *
++ * check-output-ignore
++ * check-output-excludes: add\\.
++ */
+-- 
+2.10.2
+
