@@ -1,73 +1,39 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 6/8] fix killing OP_COMPUTEDGOTO
-Date: Thu, 17 Nov 2016 15:35:05 +0100
-Message-ID: <20161117143507.3598-7-luc.vanoostenryck@gmail.com>
-References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] be more generous with ptrlist repacking
+Date: Fri, 18 Nov 2016 02:17:14 +0800
+Message-ID: <CANeU7QnqhZfZtToAhQ8CPniS7DFNdhwYdCp=zZDzsqtpuD=pJQ@mail.gmail.com>
+References: <20161117172559.29417-1-luc.vanoostenryck@gmail.com> <CA+55aFwYGCD-+GhVLdHedu42cu1RyT+Ko9Dj6-pfTrPv0ZD5Jg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34634 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933932AbcKQSLc (ORCPT
+Received: from mail-it0-f68.google.com ([209.85.214.68]:36468 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S941843AbcKQSRU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 13:11:32 -0500
-Received: by mail-wm0-f65.google.com with SMTP id g23so23763611wme.1
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:11:31 -0800 (PST)
-In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
+        Thu, 17 Nov 2016 13:17:20 -0500
+Received: by mail-it0-f68.google.com with SMTP id n68so16869108itn.3
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:17:15 -0800 (PST)
+In-Reply-To: <CA+55aFwYGCD-+GhVLdHedu42cu1RyT+Ko9Dj6-pfTrPv0ZD5Jg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Currently kill_instruction() doesn't do anything with the
-operands of computed gotos (OP_COMPUTEDGOTO). But when these
-instructions are removed we must also remove the operands 'usage'.
-Without this some instructions, which provides the select's
-operands, are not optimized away as expected.
+On Fri, Nov 18, 2016 at 1:40 AM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> I suspect they should be fairly easy to update to just walk the list
+> until they hit a non-empty case (like DO_NEXT() already does, for
+> example).
 
-The fix consists by killing it's operand much like what is done for
-conditional branches.
+I think you are right, as always. It just need to add four while loops
+into first_ptr_list/last_ptr_list/DO_PREPARE/DO_RESET.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c                     |  1 +
- validation/kill-computedgoto.c | 17 +++++++++++++++++
- 2 files changed, 18 insertions(+)
- create mode 100644 validation/kill-computedgoto.c
+Amount those 3 of the place should be able to share a function
+(or macro) to find the next not empty entry from list head.
 
-diff --git a/simplify.c b/simplify.c
-index 1dd1bda6..1be9b3d0 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -226,6 +226,7 @@ void kill_instruction(struct instruction *insn)
- 		kill_use(&insn->src3);
- 		return;
- 	case OP_BR:
-+	case OP_COMPUTEDGOTO:
- 		insn->bb = NULL;
- 		repeat_phase |= REPEAT_CSE;
- 		if (insn->cond)
-diff --git a/validation/kill-computedgoto.c b/validation/kill-computedgoto.c
-new file mode 100644
-index 00000000..3b3ed8ff
---- /dev/null
-+++ b/validation/kill-computedgoto.c
-@@ -0,0 +1,17 @@
-+void foo(int a);
-+void foo(int a)
-+{
-+	void *l = &&end + 3;
-+
-+end:
-+	if (a * 0)
-+		goto *l;
-+}
-+
-+/*
-+ * check-name: kill-computedgoto
-+ * check-command: test-linearize $file
-+ *
-+ * check-output-ignore
-+ * check-output-excludes: add\\.
-+ */
--- 
-2.10.2
+Ptrlist deletion happen so rare, it does not justify the complexity.
 
+Luc, sorry about the bad suggestion.
+
+Chris
