@@ -1,75 +1,73 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 3/3] By default disable '-Wunknown-attribute'
-Date: Thu, 17 Nov 2016 19:04:19 +0100
-Message-ID: <20161117180418.GB25228@macpro.local>
-References: <20161102215939.36765-1-luc.vanoostenryck@gmail.com>
- <20161102215939.36765-4-luc.vanoostenryck@gmail.com>
- <CANeU7QnpsYS-YwSgqw8tiKO7FUFxjrRbKUoA8bb-gTsjK-YVvA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 6/8] fix killing OP_COMPUTEDGOTO
+Date: Thu, 17 Nov 2016 15:35:05 +0100
+Message-ID: <20161117143507.3598-7-luc.vanoostenryck@gmail.com>
+References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33428 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34634 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932329AbcKQSEW (ORCPT
+        with ESMTP id S933932AbcKQSLc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 13:04:22 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u144so23577957wmu.0
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:04:22 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnpsYS-YwSgqw8tiKO7FUFxjrRbKUoA8bb-gTsjK-YVvA@mail.gmail.com>
+        Thu, 17 Nov 2016 13:11:32 -0500
+Received: by mail-wm0-f65.google.com with SMTP id g23so23763611wme.1
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 10:11:31 -0800 (PST)
+In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Nov 18, 2016 at 12:52:37AM +0800, Christopher Li wrote:
-> On Thu, Nov 3, 2016 at 5:59 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > Generally, we won't be interested by the warnings from this flag,
-> > but we can always explicitly ask for them if needed.
-> 
-> I don't want to disable it by default. I think default should be on so
-> that we can collect test case and prepare to add them later one.
-> 
-> I would much rather see a patch to make those attribute parsed
-> eventually. I think gcc or clang should have a collection of all
-> the attribute stash some where. I haven't take a closer look myself.
-> 
-> Most of the attribute are trivial to parse correctly. We should have
-> some thing like empty_int_attribute instead of blindly ignore them.
-> 
-> Also ideally the attribute should be a list instead of member in the
-> ctype structure. Most of the symbol has at most one attribute any
-> way. That is a much bigger change though.
+Currently kill_instruction() doesn't do anything with the
+operands of computed gotos (OP_COMPUTEDGOTO). But when these
+instructions are removed we must also remove the operands 'usage'.
+Without this some instructions, which provides the select's
+operands, are not optimized away as expected.
 
+The fix consists by killing it's operand much like what is done for
+conditional branches.
 
-I'm not surprised that you don't want to have it disabled by default.
-But leaving it on would, in my opinion, miss the point entirely.
-Why would sparses *users* be annoyed with warnings that doesn't
-concern them? What kind of useful information it gives to them that
-sparse doesn't know about this or this new attribute?
-Even worse, what the difference for sparse between having this option
-disabled by default and just adding yet another attribute to the lists
-of known ones (even if it is not in the format of a list)?
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c                     |  1 +
+ validation/kill-computedgoto.c | 17 +++++++++++++++++
+ 2 files changed, 18 insertions(+)
+ create mode 100644 validation/kill-computedgoto.c
 
-I have taken a look at such gcc list before I wrote this serie.
-There is a whole bunch of them for exotic uses on exotic architectures
-and a more limited number fo them for more common use. But
-don't forget that it's also not only the question of the existing
-attributes but the fact that each gcc version (and maybe clang) may
-add a few new ones and soon or later someone will use them.
+diff --git a/simplify.c b/simplify.c
+index 1dd1bda6..1be9b3d0 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -226,6 +226,7 @@ void kill_instruction(struct instruction *insn)
+ 		kill_use(&insn->src3);
+ 		return;
+ 	case OP_BR:
++	case OP_COMPUTEDGOTO:
+ 		insn->bb = NULL;
+ 		repeat_phase |= REPEAT_CSE;
+ 		if (insn->cond)
+diff --git a/validation/kill-computedgoto.c b/validation/kill-computedgoto.c
+new file mode 100644
+index 00000000..3b3ed8ff
+--- /dev/null
++++ b/validation/kill-computedgoto.c
+@@ -0,0 +1,17 @@
++void foo(int a);
++void foo(int a)
++{
++	void *l = &&end + 3;
++
++end:
++	if (a * 0)
++		goto *l;
++}
++
++/*
++ * check-name: kill-computedgoto
++ * check-command: test-linearize $file
++ *
++ * check-output-ignore
++ * check-output-excludes: add\\.
++ */
+-- 
+2.10.2
 
-Don't take me wrong, if it would make a visible semantic difference
-I would be the first to say that such or such attribute need to be
-handled correctly. And I think that patches doing the parsing of
-some more attributes should be welcomed.
-But given what sparse curently do and is used, leaving this option
-enabled by default is, in my opinion, useless and just annoyance for
-its users.
-
-Also, I don't exagerate too much by saying that during the last 2 years
-or so there has been almost as much patches for these new attributes
-than anything else. It's a bit ridiculous.
-
-
-Luc
