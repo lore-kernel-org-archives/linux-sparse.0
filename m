@@ -1,44 +1,45 @@
-From: Jeff Layton <jlayton@redhat.com>
-Subject: Re: [PATCH] Handle SForced in storage_modifiers
-Date: Thu, 17 Nov 2016 07:43:57 -0500
-Message-ID: <1479386637.2527.0.camel@redhat.com>
-References: <1479150736-28392-1-git-send-email-jlayton@redhat.com>
-         <20161114200447.GA15866@macbook.local>
-         <CA+55aFxbn+ZAyN9zzcEF60UPoRN2hq86LHk9v5ecqg-c+x3pNw@mail.gmail.com>
-         <CANeU7Q=p=kcHCZ2uupc+7e_Gg5uYpe2b2aoS+8nAwyK+jxLtqw@mail.gmail.com>
-         <1479175640.7928.1.camel@redhat.com>
-         <CANeU7Qn_hebujogeF-HEaDsSWbEaPJTDpSUR5bXG1t1r7MihXA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 7bit
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 7/8] explicitely ignore killing OP_ENTRY
+Date: Thu, 17 Nov 2016 15:35:06 +0100
+Message-ID: <20161117143507.3598-8-luc.vanoostenryck@gmail.com>
+References: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:34359 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752897AbcKQOcO (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36247 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753425AbcKQQ5g (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 09:32:14 -0500
-Received: by mail-qk0-f174.google.com with SMTP id q130so221995348qke.1
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 06:32:13 -0800 (PST)
-In-Reply-To: <CANeU7Qn_hebujogeF-HEaDsSWbEaPJTDpSUR5bXG1t1r7MihXA@mail.gmail.com>
+        Thu, 17 Nov 2016 11:57:36 -0500
+Received: by mail-wm0-f67.google.com with SMTP id m203so22987089wma.3
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 08:57:36 -0800 (PST)
+In-Reply-To: <20161117143507.3598-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Al Viro <viro@ftp.linux.org.uk>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, 2016-11-17 at 06:28 +0800, Christopher Li wrote:
-> On Tue, Nov 15, 2016 at 10:07 AM, Jeff Layton <jlayton@redhat.com> wrote:
-> > 
-> > 
-> > That looks fine to me. If you want to merge that one, then:
-> > 
-> > Reviewed-by: Jeff Layton <jlayton@redhat.com>
-> 
-> The patches is applied on "chrisl" repo and pushed out.
-> 
-> Actually I want to merge the patch having you as the author.
-> 
-> Chris
+It doesn't change anything, it's more for documentation
+purpose.
 
-Looks good to me. Thanks!
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/simplify.c b/simplify.c
+index 1be9b3d0..afbbb7b6 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -232,6 +232,10 @@ void kill_instruction(struct instruction *insn)
+ 		if (insn->cond)
+ 			kill_use(&insn->cond);
+ 		return;
++
++	case OP_ENTRY:
++		/* ignore */
++		return;
+ 	}
+ }
+ 
 -- 
-Jeff Layton <jlayton@redhat.com>
+2.10.2
+
