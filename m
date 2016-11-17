@@ -1,59 +1,92 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/2] be more generous with ptrlist repacking
-Date: Thu, 17 Nov 2016 18:25:57 +0100
-Message-ID: <20161117172559.29417-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/2] mark lists to be repacked as dirty
+Date: Thu, 17 Nov 2016 18:25:59 +0100
+Message-ID: <20161117172559.29417-3-luc.vanoostenryck@gmail.com>
+References: <20161117172559.29417-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35101 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934681AbcKQR0K (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33573 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934606AbcKQR0L (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Nov 2016 12:26:10 -0500
-Received: by mail-wm0-f66.google.com with SMTP id a20so23342548wme.2
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 09:26:09 -0800 (PST)
+        Thu, 17 Nov 2016 12:26:11 -0500
+Received: by mail-wm0-f67.google.com with SMTP id u144so23258027wmu.0
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Nov 2016 09:26:11 -0800 (PST)
+In-Reply-To: <20161117172559.29417-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The macros that do the ptrlist walking don't handle empty blocks.
-So, when some elements are removed from a list some list rapacking
-need to be done to remove the empty blocks. Failure to do this
-can result in crashes or data corruption.
+Use a bit in the head of a ptrlist and set it when
+DELETE_PTR() is called.
+Check the bit when repacking a list and do nothing if the
+bit is not set.
 
-This series aims to improve the situation by:
-- doing the repacking at the places where some elements are removed
-  but no repacking where done.
-- to compensate the added cost, mark ptrlists as dirty when some
-  element are removed from it and only do the repacking when the list
-  is marked as dirty.
+Note: delete_ptr_list_entry() & delete_ptr_list_last()
+don't need any handling because they either always call
+pack_ptr_list() or remove the last block when it becomes empty.
 
-Another thing that can be done would be to check the dirty bit at every
-list walking but I think this should be reserved for testing/debugging.
+Suggested-by: Christopher Li <sparse@chrisli.org>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ ptrlist.c | 7 +++++++
+ ptrlist.h | 4 +++-
+ 2 files changed, 10 insertions(+), 1 deletion(-)
 
-In fact, while at first agreeing with the idea of the second patch,
-I think less and less that it's the right approach.
-What are we looking after here?
-* Performance?
-  - Will this bit save us a lot of list repacking?
-* Robustness?
-  - What this bit bring us? Nothing without check at each list walking.
-    Is it a good idea to sprinkle some assert() on the macros?
-  - I would much prefer to have something that either:
-    - can do the list walking with empty blocks, or
-    - never leave any empty blocks.
-    and this without making the macros heavier :)
-
-
-I'll try later to propose something but for now ...
-
-Luc Van Oostenryck (2):
-  add missing PACK_PTR_LIST()
-  mark lists to be repacked as dirty
-
- cse.c      | 1 +
- evaluate.c | 1 +
- ptrlist.c  | 7 +++++++
- ptrlist.h  | 4 +++-
- 4 files changed, 12 insertions(+), 1 deletion(-)
-
+diff --git a/ptrlist.c b/ptrlist.c
+index 5dc1117c..e817bad1 100644
+--- a/ptrlist.c
++++ b/ptrlist.c
+@@ -70,6 +70,11 @@ void pack_ptr_list(struct ptr_list **listp)
+ 
+ 	if (head) {
+ 		struct ptr_list *entry = head;
++
++		if (!head->dirty)
++			return;
++		head->dirty = 0;
++
+ 		do {
+ 			struct ptr_list *next;
+ restart:
+@@ -138,6 +143,7 @@ void **__add_ptr_list(struct ptr_list **listp, void *ptr, unsigned long tag)
+ 			list->prev = newlist;
+ 			last->next = newlist;
+ 		}
++		newlist->dirty = 0;
+ 		last = newlist;
+ 		nr = 0;
+ 	}
+@@ -188,6 +194,7 @@ void * undo_ptr_list_last(struct ptr_list **head)
+ 
+ 	if (!first)
+ 		return NULL;
++	first->dirty = 1;
+ 	last = first;
+ 	do {
+ 		last = last->prev;
+diff --git a/ptrlist.h b/ptrlist.h
+index 61e159fd..c24bfb82 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -25,7 +25,8 @@
+ #define LIST_NODE_NR (29)
+ 
+ struct ptr_list {
+-	int nr;
++	int nr:31;
++	unsigned int dirty:1;		// will need to be repacked
+ 	struct ptr_list *prev;
+ 	struct ptr_list *next;
+ 	void *list[LIST_NODE_NR];
+@@ -254,6 +255,7 @@ extern void split_ptr_list_head(struct ptr_list *);
+ 		__this++;								\
+ 	}										\
+ 	*__this = (void *)0xf0f0f0f0;							\
++	__head->dirty = 1;								\
+ 	__list->nr--; __nr--;								\
+ } while (0)
+ 
 -- 
+2.10.2
+
