@@ -1,47 +1,59 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
-Date: Tue, 22 Nov 2016 14:15:44 +0100
-Message-ID: <20161122131543.GA8370@macbook.local>
-References: <20161117095503.8754-1-johannes@sipsolutions.net>
- <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
- <1479721551.8662.10.camel@sipsolutions.net>
- <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+Subject: Re: [PATCH 0/2] normalize bb's label names for testing
+Date: Tue, 22 Nov 2016 14:27:49 +0100
+Message-ID: <20161122132748.GB8370@macbook.local>
+References: <20161121041421.34576-1-luc.vanoostenryck@gmail.com>
+ <CANeU7Q=uNLQh=ynnWPeO0+ahu7qhJ2nxqxOrxbDraR1jo6xEAQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33453 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755131AbcKVNPr (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:33264 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755434AbcKVN2D (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Nov 2016 08:15:47 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u144so3733314wmu.0
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 05:15:47 -0800 (PST)
+        Tue, 22 Nov 2016 08:28:03 -0500
+Received: by mail-wm0-f67.google.com with SMTP id u144so3805247wmu.0
+        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 05:27:52 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+In-Reply-To: <CANeU7Q=uNLQh=ynnWPeO0+ahu7qhJ2nxqxOrxbDraR1jo6xEAQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Nov 22, 2016 at 07:13:11PM +0800, Christopher Li wrote:
+On Tue, Nov 22, 2016 at 06:02:04PM +0800, Christopher Li wrote:
+> On Mon, Nov 21, 2016 at 12:14 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > These two patches solves the testing problem of the label names
+> > as emitted by test-linearize and others being not comparable
+> > between runs.
 > 
-> Otherwise, expand_bswap should proceed to calculate the return
-> value of the bswap call and rewrite the call expression into a constant.
-> Some what similar to the "__builtin_constant_p".
-> 
-> I will see if I can hack up some thing very quick.
-> 
-> Chris
-> --
+> I think it is much easier just let test-linearize print out label in
+> a predictable way.
 
-I think it would be best to do any change related tos handling
-of constant expressions on to of Nicolai Stange's serie:
-	http://marc.info/?l=linux-sparse&m=145429372932235
+Absolutely. It's what I'm doing here on my working tree.
 
-Not only this serie fixes several issues but it handle the
-expression constantnes in a much more systematic way.
-Also, I wouldn't like that changes in this area make it
-more difficult to integrate this serie (which is already waiting
-since July or August 2015).
+> e.g. In the "struct basic_block", there is this
+> two fields "generation" and "priv". The "generation" is used by
+> flow analyze to store some state. Same as the "priv", which is
+> used by the back end to store some back end related state.
+> 
+> Since test-linearize can treat as a back end, it is perfectly safe
+> to store some allocation number into the "priv".
+
+The problem with this 'priv' is that it's, well ... private, if we
+reuse it to store labels IDs it possibly can't be used anymore for
+this private usage.
+I would be more tempted to reuse the 'generation' field which is a long
+and don't need much bits.
+Of course, the real question is if that's such important to not add a new
+field to struct bb.
+
+> Than we don't need to complicate the test-suit script to do the
+> label normalization.
+
+Sure.
+But it should be noted that this filtering stuff *could* be useful for other
+things to (but I have no such uses).
 
 Luc
