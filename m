@@ -1,36 +1,40 @@
-From: Johannes Berg <johannes@sipsolutions.net>
-Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
-Date: Mon, 21 Nov 2016 10:45:51 +0100
-Message-ID: <1479721551.8662.10.camel@sipsolutions.net>
-References: <20161117095503.8754-1-johannes@sipsolutions.net>
-         <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
-         (sfid-20161121_033848_063837_43B872B5)
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] normalize bb's label names for testing
+Date: Tue, 22 Nov 2016 18:02:04 +0800
+Message-ID: <CANeU7Q=uNLQh=ynnWPeO0+ahu7qhJ2nxqxOrxbDraR1jo6xEAQ@mail.gmail.com>
+References: <20161121041421.34576-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from s3.sipsolutions.net ([5.9.151.49]:33338 "EHLO sipsolutions.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752580AbcKUJp6 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 21 Nov 2016 04:45:58 -0500
-In-Reply-To: <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com> (sfid-20161121_033848_063837_43B872B5)
+Received: from mail-io0-f193.google.com ([209.85.223.193]:34858 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755700AbcKVKCG (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 22 Nov 2016 05:02:06 -0500
+Received: by mail-io0-f193.google.com with SMTP id h133so9374364ioe.2
+        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 02:02:05 -0800 (PST)
+In-Reply-To: <20161121041421.34576-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
+On Mon, Nov 21, 2016 at 12:14 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> These two patches solves the testing problem of the label names
+> as emitted by test-linearize and others being not comparable
+> between runs.
 
-> There is other possible __builtin_xxx() function gcc expected to get
-> a const result when the input arguments are constant.  Ideally, we
-> should be able to mark __builtin_bswap16 as a special constant "pass
-> through" function. So during the evaluation and constant propagation,
-> sparse can pass through the native __builtin_xxx() call to get the
-> const result. In other words, sparse shouldn't need to implement
-> "__builtin_bswap16()" by itself. It can just call to the gcc
-> one to get the result. Then we can treat all other similar
-> __builtin_xxx function the same way.
+I think it is much easier just let test-linearize print out label in
+a predictable way. e.g. In the "struct basic_block", there is this
+two fields "generation" and "priv". The "generation" is used by
+flow analyze to store some state. Same as the "priv", which is
+used by the back end to store some back end related state.
 
-Yes, that'd make some sense. I have no idea how to pull it off though
-:)
+Since test-linearize can treat as a back end, it is perfectly safe
+to store some allocation number into the "priv".
 
-johannes
+Than we don't need to complicate the test-suit script to do the
+label normalization.
+
+Chris
