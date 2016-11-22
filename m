@@ -1,54 +1,170 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 0/2] normalize bb's label names for testing
-Date: Wed, 23 Nov 2016 00:44:36 +0800
-Message-ID: <CANeU7Qk+_N7A+DMKrLxoNi1fq8twfpJ8jLeartsc+jsMQiXN0Q@mail.gmail.com>
-References: <20161121041421.34576-1-luc.vanoostenryck@gmail.com>
- <CANeU7Q=uNLQh=ynnWPeO0+ahu7qhJ2nxqxOrxbDraR1jo6xEAQ@mail.gmail.com> <20161122132748.GB8370@macbook.local>
+Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
+Date: Wed, 23 Nov 2016 00:32:52 +0800
+Message-ID: <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+References: <20161117095503.8754-1-johannes@sipsolutions.net>
+ <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
+ <1479721551.8662.10.camel@sipsolutions.net> <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+ <20161122131543.GA8370@macbook.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: multipart/mixed; boundary=001a1143e56aed0f9b0541e6520b
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:33010 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755432AbcKVQok (ORCPT
+Received: from mail-it0-f66.google.com ([209.85.214.66]:36389 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751487AbcKVQrV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Nov 2016 11:44:40 -0500
-Received: by mail-io0-f193.google.com with SMTP id j92so11581616ioi.0
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 08:44:37 -0800 (PST)
-In-Reply-To: <20161122132748.GB8370@macbook.local>
+        Tue, 22 Nov 2016 11:47:21 -0500
+Received: by mail-it0-f66.google.com with SMTP id n68so2451840itn.3
+        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 08:47:21 -0800 (PST)
+In-Reply-To: <20161122131543.GA8370@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
 
-On Tue, Nov 22, 2016 at 9:27 PM, Luc Van Oostenryck
+--001a1143e56aed0f9b0541e6520b
+Content-Type: text/plain; charset=UTF-8
+
+On Tue, Nov 22, 2016 at 9:15 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
+>>
+>> I will see if I can hack up some thing very quick.
+
+I get it working in the end. Not too far from what I thought.
+Patch attach here for review.
+
 >
-> Absolutely. It's what I'm doing here on my working tree.
->
+> I think it would be best to do any change related tos handling
+> of constant expressions on to of Nicolai Stange's serie:
+>         http://marc.info/?l=linux-sparse&m=145429372932235
 
-Great.
+Yes, it is on my patch list. That series can still apply clean.
+I just check it.
 
-> The problem with this 'priv' is that it's, well ... private, if we
-> reuse it to store labels IDs it possibly can't be used anymore for
-> this private usage.
-> I would be more tempted to reuse the 'generation' field which is a long
-> and don't need much bits.
-> Of course, the real question is if that's such important to not add a new
-> field to struct bb.
+My current strategy is apply other patches which have impact
+on the sparse warning first. Otherwise my anxiety level is too
+high, make me hard to pick up and hack sparse. That integer
+series needs a relative big chunk of time to review it. For me
+it is more important to keep on making progress rather than
+solve all problem in one blow.
 
-It is private to the back end. If you consider test-linearize as one of
-the back end, it compile the C code into readable text form. it is fine
-to use it. I assume the label ID is only make sense for test-linearize,
-not for other back end?
-
-I am also OK with just introduce one more field ID for basic blocks.
-There are far less basic blocks than instructions. So even size of basic
-block bump up by a integer is not a big deal.
-
-> Sure.
-> But it should be noted that this filtering stuff *could* be useful for other
-> things to (but I have no such uses).
-
-We can always deal with it when such usage actually come up.
+I think I have been catch up with most of the patches. Should be
+able to work on that soon.
 
 Chris
+
+--001a1143e56aed0f9b0541e6520b
+Content-Type: text/x-patch; charset=US-ASCII; name="implement-builtin-bswap.patch"
+Content-Disposition: attachment; filename="implement-builtin-bswap.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_ivtpz0pi0
+
+ZGlmZiAtLWdpdCBhL2V4cGFuZC5jIGIvZXhwYW5kLmMKaW5kZXggMGY2NzIwYy4uMWVmOTVlYSAx
+MDA2NDQKLS0tIGEvZXhwYW5kLmMKKysrIGIvZXhwYW5kLmMKQEAgLTgwMiw2ICs4MDIsNDQgQEAg
+aW50IGV4cGFuZF9zYWZlX3Aoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIsIGludCBjb3N0KQogCXJl
+dHVybiAwOwogfQogCisvKiBUaGUgYXJndW1lbnRzIGFyZSBjb25zdGFudCBpZiB0aGUgY29zdCBv
+ZiBhbGwgb2YgdGhlbSBpcyB6ZXJvICovCitpbnQgZXhwYW5kX2Jzd2FwKHN0cnVjdCBleHByZXNz
+aW9uICpleHByLCBpbnQgY29zdCkKK3sKKwlzdHJ1Y3Qgc3ltYm9sICpzeW07CisJc3RydWN0IGV4
+cHJlc3Npb25fbGlzdCAqYXJncyA9IGV4cHItPmFyZ3M7CisJbG9uZyBsb25nIGlucHV0OworCisJ
+aWYgKGNvc3QpCisJCXJldHVybiBjb3N0OworCisJc3ltID0gZXhwci0+Zm4tPmN0eXBlOworCWlm
+IChleHByZXNzaW9uX2xpc3Rfc2l6ZShhcmdzKSAhPSAxKSB7CisJCXNwYXJzZV9lcnJvcihleHBy
+LT5wb3MsICJub3QgZW5vdWdoIGFyZ3VtZW50cyBmb3IgZnVuY3Rpb24gJXMiLAorCQkJCXNob3df
+aWRlbnQoc3ltLT5pZGVudCkpOworCQlyZXR1cm4gU0lERV9FRkZFQ1RTOworCX0KKworCWlucHV0
+ID0gY29uc3RfZXhwcmVzc2lvbl92YWx1ZShmaXJzdF9leHByZXNzaW9uKGFyZ3MpKTsKKworCWlm
+IChzeW0tPmlkZW50ID09ICZfX2J1aWx0aW5fYnN3YXAxNl9pZGVudCkgeworCQlleHByLT52YWx1
+ZSA9IF9fYnVpbHRpbl9ic3dhcDE2KGlucHV0KTsKKwkJZXhwci0+Y3R5cGUgPSAmdXNob3J0X2N0
+eXBlOworCX0gZWxzZSBpZiAoc3ltLT5pZGVudCA9PSAmX19idWlsdGluX2Jzd2FwMzJfaWRlbnQp
+IHsKKwkJZXhwci0+dmFsdWUgPSBfX2J1aWx0aW5fYnN3YXAzMihpbnB1dCk7CisJCWV4cHItPmN0
+eXBlID0gJnVpbnRfY3R5cGU7CisJfSBlbHNlIGlmIChzeW0tPmlkZW50ID09ICZfX2J1aWx0aW5f
+YnN3YXA2NF9pZGVudCkgeworCQlleHByLT52YWx1ZSA9IF9fYnVpbHRpbl9ic3dhcDY0KGlucHV0
+KTsKKwkJZXhwci0+Y3R5cGUgPSAmdWxsb25nX2N0eXBlOworCX0gZWxzZSB7CisJCWRpZSgiVW5l
+eHBlY3RlZCBfX2J1aWx0aW5fYnN3YXAgc3ltYm9sICVzXG4iLCBzaG93X2lkZW50KHN5bS0+aWRl
+bnQpKTsKKwl9CisKKwlleHByLT50eXBlID0gRVhQUl9WQUxVRTsKKwlleHByLT50YWludCA9IDA7
+CisJcmV0dXJuIDA7Cit9CisKKwogLyoKICAqIGV4cGFuZCBhIGNhbGwgZXhwcmVzc2lvbiB3aXRo
+IGEgc3ltYm9sLiBUaGlzCiAgKiBzaG91bGQgZXhwYW5kIGJ1aWx0aW5zLgpkaWZmIC0tZ2l0IGEv
+aWRlbnQtbGlzdC5oIGIvaWRlbnQtbGlzdC5oCmluZGV4IGI2NWI2NjcuLmE2ODNmNmMgMTAwNjQ0
+Ci0tLSBhL2lkZW50LWxpc3QuaAorKysgYi9pZGVudC1saXN0LmgKQEAgLTM1LDYgKzM1LDkgQEAg
+SURFTlRfUkVTRVJWRUQoX19zaXplb2ZfcHRyX18pOwogSURFTlRfUkVTRVJWRUQoX19idWlsdGlu
+X3R5cGVzX2NvbXBhdGlibGVfcCk7CiBJREVOVF9SRVNFUlZFRChfX2J1aWx0aW5fb2Zmc2V0b2Yp
+OwogSURFTlRfUkVTRVJWRUQoX19sYWJlbF9fKTsKK0lERU5UKF9fYnVpbHRpbl9ic3dhcDE2KTsK
+K0lERU5UKF9fYnVpbHRpbl9ic3dhcDMyKTsKK0lERU5UKF9fYnVpbHRpbl9ic3dhcDY0KTsKIAog
+LyogQXR0cmlidXRlIG5hbWVzICovCiBJREVOVChwYWNrZWQpOyBJREVOVChfX3BhY2tlZF9fKTsK
+ZGlmZiAtLWdpdCBhL2xpYi5jIGIvbGliLmMKaW5kZXggMjY2MDU3NS4uN2UzNTA0OSAxMDA2NDQK
+LS0tIGEvbGliLmMKKysrIGIvbGliLmMKQEAgLTgxOSw0MCArODE5LDYgQEAgdm9pZCBkZWNsYXJl
+X2J1aWx0aW5fZnVuY3Rpb25zKHZvaWQpCiAJYWRkX3ByZV9idWZmZXIoImV4dGVybiBpbnQgX19i
+dWlsdGluX3BvcGNvdW50bCh1bnNpZ25lZCBsb25nKTtcbiIpOwogCWFkZF9wcmVfYnVmZmVyKCJl
+eHRlcm4gaW50IF9fYnVpbHRpbl9wb3Bjb3VudGxsKHVuc2lnbmVkIGxvbmcgbG9uZyk7XG4iKTsK
+IAotCS8qIEFuZCBieXRlIHN3YXBzLi4gKi8KLQlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIHVuc2ln
+bmVkIHNob3J0IF9fX19idWlsdGluX2Jzd2FwMTYodW5zaWduZWQgc2hvcnQpO1xuIik7Ci0JYWRk
+X3ByZV9idWZmZXIoImV4dGVybiB1bnNpZ25lZCBpbnQgX19fX2J1aWx0aW5fYnN3YXAzMih1bnNp
+Z25lZCBpbnQpO1xuIik7Ci0JYWRkX3ByZV9idWZmZXIoImV4dGVybiB1bnNpZ25lZCBsb25nIGxv
+bmcgX19fX2J1aWx0aW5fYnN3YXA2NCh1bnNpZ25lZCBsb25nIGxvbmcpO1xuIik7Ci0JYWRkX3By
+ZV9idWZmZXIoIiNkZWZpbmUgX19zcGFyc2VfY29uc3RhbnRfc3dhYjE2KHgpICgodW5zaWduZWQg
+c2hvcnQpKCIKLQkJICAgICAgICIJKCgodW5zaWduZWQgc2hvcnQpKHgpICYgKHVuc2lnbmVkIHNo
+b3J0KTB4MDBmZlUpIDw8IDgpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIHNob3J0KSh4KSAm
+ICh1bnNpZ25lZCBzaG9ydCkweGZmMDBVKSA+PiA4KSkpXG4iKTsKLQlhZGRfcHJlX2J1ZmZlcigi
+I2RlZmluZSBfX3NwYXJzZV9jb25zdGFudF9zd2FiMzIoeCkgKCh1bnNpZ25lZCBpbnQpKCIKLQkJ
+ICAgICAgICIJKCgodW5zaWduZWQgaW50KSh4KSAmICh1bnNpZ25lZCBpbnQpMHgwMDAwMDBmZlVM
+KSA8PCAyNCkgfCIKLQkJICAgICAgICIJKCgodW5zaWduZWQgaW50KSh4KSAmICh1bnNpZ25lZCBp
+bnQpMHgwMDAwZmYwMFVMKSA8PCAgOCkgfCIKLQkJICAgICAgICIJKCgodW5zaWduZWQgaW50KSh4
+KSAmICh1bnNpZ25lZCBpbnQpMHgwMGZmMDAwMFVMKSA+PiAgOCkgfCIKLQkJICAgICAgICIJKCgo
+dW5zaWduZWQgaW50KSh4KSAmICh1bnNpZ25lZCBpbnQpMHhmZjAwMDAwMFVMKSA+PiAyNCkpKVxu
+Iik7Ci0JYWRkX3ByZV9idWZmZXIoIiNkZWZpbmUgX19zcGFyc2VfY29uc3RhbnRfc3dhYjY0KHgp
+ICgodW5zaWduZWQgbG9uZyBsb25nKSgiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9u
+ZykoeCkgJiAodW5zaWduZWQgbG9uZyBsb25nKTB4MDAwMDAwMDAwMDAwMDBmZlVMTCkgPDwgNTYp
+IHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9uZykoeCkgJiAodW5zaWduZWQgbG9u
+ZyBsb25nKTB4MDAwMDAwMDAwMDAwZmYwMFVMTCkgPDwgNDApIHwiCi0JCSAgICAgICAiCSgoKHVu
+c2lnbmVkIGxvbmcgbG9uZykoeCkgJiAodW5zaWduZWQgbG9uZyBsb25nKTB4MDAwMDAwMDAwMGZm
+MDAwMFVMTCkgPDwgMjQpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9uZykoeCkg
+JiAodW5zaWduZWQgbG9uZyBsb25nKTB4MDAwMDAwMDBmZjAwMDAwMFVMTCkgPDwgIDgpIHwiCi0J
+CSAgICAgICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9uZykoeCkgJiAodW5zaWduZWQgbG9uZyBsb25n
+KTB4MDAwMDAwZmYwMDAwMDAwMFVMTCkgPj4gIDgpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVk
+IGxvbmcgbG9uZykoeCkgJiAodW5zaWduZWQgbG9uZyBsb25nKTB4MDAwMGZmMDAwMDAwMDAwMFVM
+TCkgPj4gMjQpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9uZykoeCkgJiAodW5z
+aWduZWQgbG9uZyBsb25nKTB4MDBmZjAwMDAwMDAwMDAwMFVMTCkgPj4gNDApIHwiCi0JCSAgICAg
+ICAiCSgoKHVuc2lnbmVkIGxvbmcgbG9uZykoeCkgJiAodW5zaWduZWQgbG9uZyBsb25nKTB4ZmYw
+MDAwMDAwMDAwMDAwMFVMTCkgPj4gNTYpKSlcbiIpOwotCWFkZF9wcmVfYnVmZmVyKCIjZGVmaW5l
+IF9fYnVpbHRpbl9ic3dhcDE2KHgpIgotCQkgICAgICAgIgkoX19idWlsdGluX2NvbnN0YW50X3Ao
+KHVuc2lnbmVkIHNob3J0KSh4KSkgPyIKLQkJICAgICAgICIJX19zcGFyc2VfY29uc3RhbnRfc3dh
+YjE2KHgpIDoiCi0JCSAgICAgICAiCV9fX19idWlsdGluX2Jzd2FwMTYoeCkpXG4iKTsKLQlhZGRf
+cHJlX2J1ZmZlcigiI2RlZmluZSBfX2J1aWx0aW5fYnN3YXAzMih4KSIKLQkJICAgICAgICIJKF9f
+YnVpbHRpbl9jb25zdGFudF9wKCh1bnNpZ25lZCBpbnQpKHgpKSA/IgotCQkgICAgICAgIglfX3Nw
+YXJzZV9jb25zdGFudF9zd2FiMzIoeCkgOiIKLQkJICAgICAgICIJX19fX2J1aWx0aW5fYnN3YXAz
+Mih4KSlcbiIpOwotCWFkZF9wcmVfYnVmZmVyKCIjZGVmaW5lIF9fYnVpbHRpbl9ic3dhcDY0KHgp
+IgotCQkgICAgICAgIgkoX19idWlsdGluX2NvbnN0YW50X3AoKHVuc2lnbmVkIGxvbmcgbG9uZyko
+eCkpID8iCi0JCSAgICAgICAiCV9fc3BhcnNlX2NvbnN0YW50X3N3YWI2NCh4KSA6IgotCQkgICAg
+ICAgIglfX19fYnVpbHRpbl9ic3dhcDY0KHgpKVxuIik7Ci0KIAkvKiBBbmQgYXRvbWljIG1lbW9y
+eSBhY2Nlc3MgZnVuY3Rpb25zLi4gKi8KIAlhZGRfcHJlX2J1ZmZlcigiZXh0ZXJuIGludCBfX3N5
+bmNfZmV0Y2hfYW5kX2FkZCh2b2lkICosIC4uLik7XG4iKTsKIAlhZGRfcHJlX2J1ZmZlcigiZXh0
+ZXJuIGludCBfX3N5bmNfZmV0Y2hfYW5kX3N1Yih2b2lkICosIC4uLik7XG4iKTsKZGlmZiAtLWdp
+dCBhL2xpYi5oIGIvbGliLmgKaW5kZXggYjc3OGJkYy4uMzA2ZWU0NSAxMDA2NDQKLS0tIGEvbGli
+LmgKKysrIGIvbGliLmgKQEAgLTIwMCw2ICsyMDAsMTEgQEAgc3RhdGljIGlubGluZSBzdHJ1Y3Qg
+aW5zdHJ1Y3Rpb24gKmZpcnN0X2luc3RydWN0aW9uKHN0cnVjdCBpbnN0cnVjdGlvbl9saXN0ICpo
+ZWEKIAlyZXR1cm4gZmlyc3RfcHRyX2xpc3QoKHN0cnVjdCBwdHJfbGlzdCAqKWhlYWQpOwogfQog
+CitzdGF0aWMgaW5saW5lIHN0cnVjdCBleHByZXNzaW9uICpmaXJzdF9leHByZXNzaW9uKHN0cnVj
+dCBleHByZXNzaW9uX2xpc3QgKmhlYWQpCit7CisJcmV0dXJuIGZpcnN0X3B0cl9saXN0KChzdHJ1
+Y3QgcHRyX2xpc3QgKiloZWFkKTsKK30KKwogc3RhdGljIGlubGluZSBwc2V1ZG9fdCBmaXJzdF9w
+c2V1ZG8oc3RydWN0IHBzZXVkb19saXN0ICpoZWFkKQogewogCXJldHVybiBmaXJzdF9wdHJfbGlz
+dCgoc3RydWN0IHB0cl9saXN0ICopaGVhZCk7CmRpZmYgLS1naXQgYS9zeW1ib2wuYyBiL3N5bWJv
+bC5jCmluZGV4IDkyYTdhNjIuLmU1N2YyMDcgMTAwNjQ0Ci0tLSBhL3N5bWJvbC5jCisrKyBiL3N5
+bWJvbC5jCkBAIC03NzMsNiArNzczLDExIEBAIHN0YXRpYyBzdHJ1Y3Qgc3ltYm9sX29wIGNob29z
+ZV9vcCA9IHsKIAkuYXJncyA9IGFyZ3VtZW50c19jaG9vc2UsCiB9OwogCitzdGF0aWMgc3RydWN0
+IHN5bWJvbF9vcCBic3dhcF9vcCA9IHsKKwkuZXZhbHVhdGUgPSBldmFsdWF0ZV90b19pbnRlZ2Vy
+LAorCS5leHBhbmQgPSBleHBhbmRfYnN3YXAKK307CisKIC8qCiAgKiBCdWlsdGluIGZ1bmN0aW9u
+cwogICovCkBAIC03ODgsNiArNzkzLDkgQEAgc3RhdGljIHN0cnVjdCBzeW1faW5pdCB7CiAJeyAi
+X19idWlsdGluX3dhcm5pbmciLCAmYnVpbHRpbl9mbl90eXBlLCBNT0RfVE9QTEVWRUwsICZ3YXJu
+aW5nX29wIH0sCiAJeyAiX19idWlsdGluX2V4cGVjdCIsICZidWlsdGluX2ZuX3R5cGUsIE1PRF9U
+T1BMRVZFTCwgJmV4cGVjdF9vcCB9LAogCXsgIl9fYnVpbHRpbl9jaG9vc2VfZXhwciIsICZidWls
+dGluX2ZuX3R5cGUsIE1PRF9UT1BMRVZFTCwgJmNob29zZV9vcCB9LAorCXsgIl9fYnVpbHRpbl9i
+c3dhcDE2IiwgJmJ1aWx0aW5fZm5fdHlwZSwgTU9EX1RPUExFVkVMLCAmYnN3YXBfb3AgfSwKKwl7
+ICJfX2J1aWx0aW5fYnN3YXAzMiIsICZidWlsdGluX2ZuX3R5cGUsIE1PRF9UT1BMRVZFTCwgJmJz
+d2FwX29wIH0sCisJeyAiX19idWlsdGluX2Jzd2FwNjQiLCAmYnVpbHRpbl9mbl90eXBlLCBNT0Rf
+VE9QTEVWRUwsICZic3dhcF9vcCB9LAogCXsgTlVMTCwJCU5VTEwsCQkwIH0KIH07CiAKZGlmZiAt
+LWdpdCBhL3N5bWJvbC5oIGIvc3ltYm9sLmgKaW5kZXggOWIzZjE2MC4uNDhiYmZjZSAxMDA2NDQK
+LS0tIGEvc3ltYm9sLmgKKysrIGIvc3ltYm9sLmgKQEAgLTEzMCw2ICsxMzAsNyBAQCBzdHJ1Y3Qg
+c3ltYm9sX29wIHsKIAogZXh0ZXJuIGludCBleHBhbmRfc2FmZV9wKHN0cnVjdCBleHByZXNzaW9u
+ICpleHByLCBpbnQgY29zdCk7CiBleHRlcm4gaW50IGV4cGFuZF9jb25zdGFudF9wKHN0cnVjdCBl
+eHByZXNzaW9uICpleHByLCBpbnQgY29zdCk7CitleHRlcm4gaW50IGV4cGFuZF9ic3dhcChzdHJ1
+Y3QgZXhwcmVzc2lvbiAqZXhwciwgaW50IGNvc3QpOwogCiAjZGVmaW5lIFNZTV9BVFRSX1dFQUsJ
+CTAKICNkZWZpbmUgU1lNX0FUVFJfTk9STUFMCQkxCg==
+--001a1143e56aed0f9b0541e6520b--
