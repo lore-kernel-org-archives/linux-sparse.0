@@ -1,61 +1,61 @@
-From: "Michael S. Tsirkin" <mst@redhat.com>
-Subject: [PATCH] lib: __builtin_object_size should accept void *
-Date: Wed, 23 Nov 2016 22:24:41 +0200
-Message-ID: <1479932572-12543-1-git-send-email-mst@redhat.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] add test case for builtin bswap with constant args
+Date: Wed, 23 Nov 2016 21:38:55 +0100
+Message-ID: <20161123203855.14957-1-luc.vanoostenryck@gmail.com>
+References: <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.136]:45456 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933402AbcKWUYp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 15:24:45 -0500
-Content-Disposition: inline
+Received: from mail-wj0-f196.google.com ([209.85.210.196]:36810 "EHLO
+        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933402AbcKWUjD (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 23 Nov 2016 15:39:03 -0500
+Received: by mail-wj0-f196.google.com with SMTP id jb2so1857726wjb.3
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 12:39:02 -0800 (PST)
+In-Reply-To: <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@kernel.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-I'm seeing these warnings with current Linux:
-./arch/x86/include/asm/uaccess.h:705:18: warning: incorrect type in argument 1 (different modifiers)
-./arch/x86/include/asm/uaccess.h:705:18:    expected void *<noident>
-./arch/x86/include/asm/uaccess.h:705:18:    got void const *from
-
-Because of this code:
-
-static __always_inline unsigned long __must_check
-copy_to_user(void __user *to, const void *from, unsigned long n)
-{
-        int sz = __compiletime_object_size(from);
-
-...
-}
-
-where we have
-
-# define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
-
-to fix, mark the argument as const void *.
-
-Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
 ---
+ validation/builtin-constant-eval.c | 28 ++++++++++++++++++++++++++++
+ 1 file changed, 28 insertions(+)
+ create mode 100644 validation/builtin-constant-eval.c
 
-Sorry if this has already been reported/fixed.
-
- lib.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/lib.c b/lib.c
-index d5b56b0..2d66aa0 100644
---- a/lib.c
-+++ b/lib.c
-@@ -888,7 +888,7 @@ void declare_builtin_functions(void)
- 	add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
- 
- 	/* And some __FORTIFY_SOURCE ones.. */
--	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(void *, int);\n");
-+	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(const void *, int);\n");
- 	add_pre_buffer ("extern void * __builtin___memcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
- 	add_pre_buffer ("extern void * __builtin___memmove_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
- 	add_pre_buffer ("extern void * __builtin___mempcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+diff --git a/validation/builtin-constant-eval.c b/validation/builtin-constant-eval.c
+new file mode 100644
+index 00000000..63e586e9
+--- /dev/null
++++ b/validation/builtin-constant-eval.c
+@@ -0,0 +1,28 @@
++unsigned short bswap16(void);
++unsigned short bswap16(void)
++{
++	return __builtin_bswap16(0x1234);
++}
++
++unsigned int bswap32(void);
++unsigned int bswap32(void)
++{
++	return __builtin_bswap32(0x12345678);
++}
++
++unsigned long long bswap64(void);
++unsigned long long bswap64(void)
++{
++	return __builtin_bswap64(0x123456789abcdef0ULL);
++}
++
++/*
++ * check-name: builtin-eval
++ * check-command: test-linearize $file
++ *
++ * check-output-ignore
++ * check-output-excludes: __builtin_bswap
++ * check-output-contains:ret.16 *.0x3412
++ * check-output-contains:ret.32 *.0x78563412
++ * check-output-contains:ret.64 *.0xf0debc9a78563412
++ */
 -- 
-MST
+2.10.2
+
