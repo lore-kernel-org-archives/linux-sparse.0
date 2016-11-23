@@ -1,40 +1,34 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
-Date: Tue, 22 Nov 2016 21:16:52 +0100
-Message-ID: <20161122201650.GA12172@macpro.local>
-References: <20161117095503.8754-1-johannes@sipsolutions.net>
- <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
- <1479721551.8662.10.camel@sipsolutions.net>
- <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
- <20161122131543.GA8370@macbook.local>
- <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] OP_SWITCH should use 'insn->cond' instead of 'insn->target'
+Date: Wed, 23 Nov 2016 09:16:57 +0800
+Message-ID: <CANeU7QmTuzPMY2+6yk2zjaxYWx6BXvq=MU-bv-+r48pRnkXhtw@mail.gmail.com>
+References: <20161122163233.3765-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36821 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755837AbcKVUQ4 (ORCPT
+Received: from mail-io0-f181.google.com ([209.85.223.181]:33833 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756435AbcKWBQ7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Nov 2016 15:16:56 -0500
-Received: by mail-wm0-f67.google.com with SMTP id m203so6373489wma.3
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 12:16:55 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+        Tue, 22 Nov 2016 20:16:59 -0500
+Received: by mail-io0-f181.google.com with SMTP id c21so90741285ioj.1
+        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 17:16:58 -0800 (PST)
+In-Reply-To: <20161122163233.3765-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@looxix.net>
 
-On Wed, Nov 23, 2016 at 12:32:52AM +0800, Christopher Li wrote:
-> On Tue, Nov 22, 2016 at 9:15 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >>
-> >> I will see if I can hack up some thing very quick.
-> 
-> I get it working in the end. Not too far from what I thought.
-> Patch attach here for review.
+On Wed, Nov 23, 2016 at 12:32 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> From: Luc Van Oostenryck <luc.vanoostenryck@looxix.net>
+>
+> show_instruction() uses the field 'target' to display OP_SWITCH
+> instruction instead of 'cond' like OP_BR does.
+> It doesn't change anything since these two fields use the same
+> storage inside struct instruction but better to use the right field
+> to keep consistent.
 
-Work great here.
- 
-If needed here is my
-Tested-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Looks good to me. Will apply.
+
+Chris
