@@ -1,72 +1,38 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v3 00/21] improve constexpr handling
-Date: Wed, 23 Nov 2016 05:05:29 +0100
-Message-ID: <20161123040528.GA74337@macpro.local>
-References: <87lh75jh9l.fsf@gmail.com>
- <CANeU7QnzjJ5g+nGik21qsFAZ_5La3GOKVcTAx6=NOhVrVmrEQA@mail.gmail.com>
+From: Johannes Berg <johannes@sipsolutions.net>
+Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
+Date: Wed, 23 Nov 2016 07:28:27 +0100
+Message-ID: <1479882507.4432.1.camel@sipsolutions.net>
+References: <20161117095503.8754-1-johannes@sipsolutions.net>
+         <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
+         <1479721551.8662.10.camel@sipsolutions.net>
+         <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+         <20161122131543.GA8370@macbook.local>
+         <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+         (sfid-20161122_174738_216238_D863CDDD)
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f196.google.com ([209.85.210.196]:36608 "EHLO
-        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756167AbcKWEFe (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Nov 2016 23:05:34 -0500
-Received: by mail-wj0-f196.google.com with SMTP id jb2so102589wjb.3
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Nov 2016 20:05:33 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnzjJ5g+nGik21qsFAZ_5La3GOKVcTAx6=NOhVrVmrEQA@mail.gmail.com>
+Received: from s3.sipsolutions.net ([5.9.151.49]:36110 "EHLO sipsolutions.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932417AbcKWG2a (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 23 Nov 2016 01:28:30 -0500
+In-Reply-To: <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com> (sfid-20161122_174738_216238_D863CDDD)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Nicolai Stange <nicstange@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
-
-On Wed, Nov 23, 2016 at 11:12:02AM +0800, Christopher Li wrote:
-> +static int a[] = {
-> +       [(int)0] = 0,           // OK
-> +       [(int)(int)0] = 0,      // OK
-> +       [(int)0.] = 0,          // OK
-> +       [(int)(int)0.] = 0,     // OK
-> +       [(int)__builtin_choose_expr(0, 0, 0)] = 0,      // OK
-> +       [(int)__builtin_choose_expr(0, 0, 0.)] = 0,     // OK
-> +
-> +       [(int)(float)0] = 0,    // KO
-> 
-> Why is this one KO? It seems perfectly fine to force a floating
-> type into a integer constant expression.
-> 
-> per [6.6.6]  quote: on integer constant expression:
->  " and floating constants that are the
-> immediate operands of casts. Cast operators in an integer constant
-> expression shall only
-> convert arithmetic types to integer types,"
-
-But, quoting the beginning of 6.6/6:
-    An integer constant expression shall have integer type and shall
-    only have operands that are integer constants, enumeration constants,
-    character constants, sizeof expressions whose results are integer
-    constants, and **floating constants** that are the immediate operands
-    of casts.
-
-and the part '(float) 0' is none of these.
-
-> +       [(int)(float)0.] = 0,   // KO
-> +
-> +       [(int)(void*)0] = 0,    // KO
-> Also this one should be fine?
-
-same for '(void *) 0'.
-
-It's obvious for me and you that those once casted to (int) should
-evaluate to '0' and thus are constant expression but the strict
-interpretation of the standard say something else.
-
-And to be honest, I find ridiculous that '(int) 0.0' is a integer
-constant expression and '(int)(float)0' is not.
-
-IIRC, Nicolai had foreseen to relax those if needed, possibly even
-in one of the later patch or to introduce a '-Wstrict' option or
-something like this.
+To: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
 
 
-Luc
+> I get it working in the end. Not too far from what I thought.
+> Patch attach here for review.
+
+Just a small comment:
+
+> +       if (expression_list_size(args) != 1) {
+> +               sparse_error(expr->pos, "not enough arguments for function %s",
+> +                               show_ident(sym->ident));
+
+Should that say "invalid number of arguments (expected 1)" or so?
+
+johannes
