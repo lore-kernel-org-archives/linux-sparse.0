@@ -1,141 +1,61 @@
-From: Nicolai Stange <nicstange@gmail.com>
-Subject: Re: [PATCH v3 00/21] improve constexpr handling
-Date: Wed, 23 Nov 2016 19:33:01 +0100
-Message-ID: <87lgwa59nm.fsf@gmail.com>
-References: <87lh75jh9l.fsf@gmail.com>
-        <CANeU7QnzjJ5g+nGik21qsFAZ_5La3GOKVcTAx6=NOhVrVmrEQA@mail.gmail.com>
-        <20161123040528.GA74337@macpro.local>
-        <CANeU7Qm9FLZUexqu92mUSEojzrbi9SpsYrDMCP7J8qmskHcBFA@mail.gmail.com>
-        <87a8cqlhcy.fsf@gmail.com>
-        <CANeU7QkzefYMpkNgemsJ8WPUsj7fg8zUgKN8kth-0x7c85bK3w@mail.gmail.com>
-        <87polm5eqq.fsf@gmail.com>
-        <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
+From: "Michael S. Tsirkin" <mst@redhat.com>
+Subject: [PATCH] lib: __builtin_object_size should accept void *
+Date: Wed, 23 Nov 2016 22:24:41 +0200
+Message-ID: <1479932572-12543-1-git-send-email-mst@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35790 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755459AbcKWSdF (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 13:33:05 -0500
-Received: by mail-wm0-f66.google.com with SMTP id a20so2812002wme.2
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 10:33:03 -0800 (PST)
-In-Reply-To: <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
-        (Christopher Li's message of "Thu, 24 Nov 2016 01:38:45 +0800")
+Received: from mail.kernel.org ([198.145.29.136]:45456 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933402AbcKWUYp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 23 Nov 2016 15:24:45 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Nicolai Stange <nicstange@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+To: Josh Triplett <josh@kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
-Christopher Li <sparse@chrisli.org> writes:
+I'm seeing these warnings with current Linux:
+./arch/x86/include/asm/uaccess.h:705:18: warning: incorrect type in argument 1 (different modifiers)
+./arch/x86/include/asm/uaccess.h:705:18:    expected void *<noident>
+./arch/x86/include/asm/uaccess.h:705:18:    got void const *from
 
-> On Thu, Nov 24, 2016 at 12:43 AM, Nicolai Stange <nicstange@gmail.com> wrote:
->>
->> I don't think that this would qualify as a constant expression of any
->> type.
->>
->>> How about (void*)(0 + 'a') and (void*)0 + 'a', are they address constant
->>> or not?
->>
->> Strictly speaking, neither of them is.
->>
->> Despite of this, we would (hopefully) mark the second case as an address
->> constant though.
->>
->> Reason: this series flags address constants as such because they may be
->> used as a "constant expression in an initializer", i.e. as initializers
->> for static storage duration variables.
->
-> That is good info. Thanks for the clarify.
->
-> BTW, gcc does not seem to complain about const integer issue on,
->          [(int)(float)0] = 0,    // KO
->          [(int)(void*)0] = 0,    // KO
-> gcc seems does what make snese rather than stick to the book.
+Because of this code:
 
-To give you some background: when I started this, my initial intent was
-to move the constness inspection from the expression building stage in
-expression.c to their evaluation in evaluation.c. This would be needed
-in order to decide whether the outcome of __builtin_choose_expr() is a
-constant expression, for example.
+static __always_inline unsigned long __must_check
+copy_to_user(void __user *to, const void *from, unsigned long n)
+{
+        int sz = __compiletime_object_size(from);
 
-While doing this, I recognized that sparse's current constant expression
-tagging scheme was quite limited and I had to touch everything related
-to it anyway. So I asked on this list on whether it would be a good
-thing to let sparse be more strict than gcc in this regard and the
-feedback was that it certainly would (at user option).
+...
+}
 
+where we have
 
-> In your patch:
+# define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
 
-Can you tell which one? If not, would resending this series help?
+to fix, mark the argument as const void *.
 
-> static struct token *builtin_types_compatible_p_expr(struct token *token,
->                                                      struct expression **tree)
->  {
->         struct expression *expr = alloc_expression(
->                 token->pos, EXPR_COMPARE);
-> -       expr->flags = Int_const_expr;
->         expr->op = SPECIAL_EQUAL;
->         token = token->next;
->         if (!match_op(token, '('))
->
-> I think __builtin_xxx function expand similar to the processor
-> macro. In that sense, we might want to the consider this expression
-> as integer constant express as if the __builtin_xxx call is either 0 or 1.
->
-> Again, gcc does not complain about:
->        [__builtin_types_compatible_p(typeof(1), int)] = 0,   // KO
->
-> This makes sense, but not according the "strict" rules.
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+---
 
-After [21/21] ("evaluation: treat comparsions between types as integer
-constexpr"), sparse should treat __builtin_types_compatible_p() as an
-integer constant expression, just as gcc does.
+Sorry if this has already been reported/fixed.
 
-After all, the standard doesn't say anything about
-__builtin_types_compatible_p()...
+ lib.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-So, if the above testcase really fails after this series, it's either a
-bug or an artifact of having this typeof() in there (or both), I
-think.
-
-
->>>
->>> Basically, there are six bits as basic element. One bit per element.
->>> Integer constant, enum constant, char constant, float constant,
->>> address constant,
->>> arithmetic constant.
->>
->> + integer constant *expression*
->>
->> Take 0 + 0, for example: this is not an integer constant, but an integer
->> constant *expression* (and an arithmetic constant expression as well).
->
-> Ah, I see. I change my plan according this. The six basic element define as:
-> Integer constant, enum constant, char constant, float constant,
-> address constant, composite op.
->
-> The composite op bit get set after binary operation or uniop.
-> The flags can have more than one bit set for the expression.
->
-> Integer constant expression can be tested as:
->
-> !(flags & ( Addr | Float) ) && flag
->
-> Arithmetic constant expression can be tested as:
->
-> !(flags & Addr) ) && flag
->
-> Do you see any problem with this internal representation?
-
-(int)0.0 is an integer constant expression.
-
-In your scheme, it would have "composite op" and "float" set?
-The integer constant expression test you proposed above would
-fail in this case.
-
-
-Thanks,
-
-Nicolai
+diff --git a/lib.c b/lib.c
+index d5b56b0..2d66aa0 100644
+--- a/lib.c
++++ b/lib.c
+@@ -888,7 +888,7 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
+ 
+ 	/* And some __FORTIFY_SOURCE ones.. */
+-	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(void *, int);\n");
++	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(const void *, int);\n");
+ 	add_pre_buffer ("extern void * __builtin___memcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+ 	add_pre_buffer ("extern void * __builtin___memmove_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+ 	add_pre_buffer ("extern void * __builtin___mempcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+-- 
+MST
