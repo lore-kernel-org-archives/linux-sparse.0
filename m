@@ -1,61 +1,47 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] add test case for builtin bswap with constant args
-Date: Wed, 23 Nov 2016 21:38:55 +0100
-Message-ID: <20161123203855.14957-1-luc.vanoostenryck@gmail.com>
-References: <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
+Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
+Date: Wed, 23 Nov 2016 21:48:39 +0100
+Message-ID: <20161123204838.GA14875@macpro.local>
+References: <20161117095503.8754-1-johannes@sipsolutions.net>
+ <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
+ <1479721551.8662.10.camel@sipsolutions.net>
+ <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+ <20161122131543.GA8370@macbook.local>
+ <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+ <20161122201650.GA12172@macpro.local>
+ <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f196.google.com ([209.85.210.196]:36810 "EHLO
-        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933402AbcKWUjD (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36579 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755533AbcKWUsv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 15:39:03 -0500
-Received: by mail-wj0-f196.google.com with SMTP id jb2so1857726wjb.3
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 12:39:02 -0800 (PST)
+        Wed, 23 Nov 2016 15:48:51 -0500
+Received: by mail-wm0-f68.google.com with SMTP id m203so3102639wma.3
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 12:48:42 -0800 (PST)
+Content-Disposition: inline
 In-Reply-To: <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
 
----
- validation/builtin-constant-eval.c | 28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
- create mode 100644 validation/builtin-constant-eval.c
+On Wed, Nov 23, 2016 at 09:25:18AM +0800, Christopher Li wrote:
+> On Wed, Nov 23, 2016 at 4:16 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > Work great here.
+> >
+> > If needed here is my
+> > Tested-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> 
 
-diff --git a/validation/builtin-constant-eval.c b/validation/builtin-constant-eval.c
-new file mode 100644
-index 00000000..63e586e9
---- /dev/null
-+++ b/validation/builtin-constant-eval.c
-@@ -0,0 +1,28 @@
-+unsigned short bswap16(void);
-+unsigned short bswap16(void)
-+{
-+	return __builtin_bswap16(0x1234);
-+}
-+
-+unsigned int bswap32(void);
-+unsigned int bswap32(void)
-+{
-+	return __builtin_bswap32(0x12345678);
-+}
-+
-+unsigned long long bswap64(void);
-+unsigned long long bswap64(void)
-+{
-+	return __builtin_bswap64(0x123456789abcdef0ULL);
-+}
-+
-+/*
-+ * check-name: builtin-eval
-+ * check-command: test-linearize $file
-+ *
-+ * check-output-ignore
-+ * check-output-excludes: __builtin_bswap
-+ * check-output-contains:ret.16 *.0x3412
-+ * check-output-contains:ret.32 *.0x78563412
-+ * check-output-contains:ret.64 *.0xf0debc9a78563412
-+ */
--- 
-2.10.2
+There is a problem though, with non-constant args.
+Now the predeclarations of the 3 __builtin_bswap16/32/64
+are gone, no more prototype and thus no more typing information.
 
+For example, if you call __builtin_bswap64() with an int argument,
+there is no way for the next steps to know the arg must first
+be 64 bit extended. Same for the result's type.
+
+Luc
