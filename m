@@ -1,78 +1,49 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v3 00/21] improve constexpr handling
-Date: Thu, 24 Nov 2016 09:18:20 +0800
-Message-ID: <CANeU7Qm21LCu2GgdTLbcDERBbgdYWoX_wp4DTKaFdi=G1ZcqAQ@mail.gmail.com>
-References: <87lh75jh9l.fsf@gmail.com> <CANeU7QnzjJ5g+nGik21qsFAZ_5La3GOKVcTAx6=NOhVrVmrEQA@mail.gmail.com>
- <20161123040528.GA74337@macpro.local> <CANeU7Qm9FLZUexqu92mUSEojzrbi9SpsYrDMCP7J8qmskHcBFA@mail.gmail.com>
- <87a8cqlhcy.fsf@gmail.com> <CANeU7QkzefYMpkNgemsJ8WPUsj7fg8zUgKN8kth-0x7c85bK3w@mail.gmail.com>
- <87polm5eqq.fsf@gmail.com> <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
- <87lgwa59nm.fsf@gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
+Date: Thu, 24 Nov 2016 02:36:14 +0100
+Message-ID: <20161124013613.GA18220@macpro.local>
+References: <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
+ <1479721551.8662.10.camel@sipsolutions.net>
+ <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
+ <20161122131543.GA8370@macbook.local>
+ <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
+ <20161122201650.GA12172@macpro.local>
+ <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
+ <20161123204838.GA14875@macpro.local>
+ <CANeU7Qm56E34mgRz0ntwQ74gmdmEgzd4jEPw6Uuw5UW8UFR85A@mail.gmail.com>
+ <CANeU7QmQ1pg=AjK++kG-RSX3z36qHNHPfkfi_DkeFpOLga_70w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f196.google.com ([209.85.223.196]:33828 "EHLO
-        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934630AbcKXBTA (ORCPT
+Received: from mail-wj0-f196.google.com ([209.85.210.196]:36482 "EHLO
+        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935138AbcKXBgR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 20:19:00 -0500
-Received: by mail-io0-f196.google.com with SMTP id r94so3505831ioe.1
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 17:18:21 -0800 (PST)
-In-Reply-To: <87lgwa59nm.fsf@gmail.com>
+        Wed, 23 Nov 2016 20:36:17 -0500
+Received: by mail-wj0-f196.google.com with SMTP id jb2so2233883wjb.3
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 17:36:16 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QmQ1pg=AjK++kG-RSX3z36qHNHPfkfi_DkeFpOLga_70w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Nicolai Stange <nicstange@gmail.com>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
 
-On Thu, Nov 24, 2016 at 2:33 AM, Nicolai Stange <nicstange@gmail.com> wrote:
->
-> While doing this, I recognized that sparse's current constant expression
-> tagging scheme was quite limited and I had to touch everything related
-> to it anyway. So I asked on this list on whether it would be a good
-> thing to let sparse be more strict than gcc in this regard and the
-> feedback was that it certainly would (at user option).
+On Thu, Nov 24, 2016 at 08:58:35AM +0800, Christopher Li wrote:
+> +/* The arguments are constant if the cost of all of them is zero */
+> +int expand_bswap(struct expression *expr, int cost)
+> +{
+> +	struct symbol *sym;
+> +	struct expression_list *args = expr->args;
+> +	long long input;
+> +	int count;
+> +
+> +	if (cost)
+> +		return cost;
+> +
+> +	sym = expr->fn->ctype;
+> +	count = expression_list_size(args);
+> +	if (count != 1) {
+> +		sparse_error(expr->pos, "Invaild number of arguments for function %s (expected 1 got %d)",
 
-Good. Thanks for reminding of that. So ideally this is under a more
-strict options.
-
->
-> Can you tell which one? If not, would resending this series help?
->
-Yes, I can. But never mind that point as I reply in previous email.
-I figure you do the same work in the evaluation stage now.
-
-No, please don't send the series again. I have a script system to
-process the patches now. So no patch will be missed from now on.
-
-
-> So, if the above testcase really fails after this series, it's either a
-> bug or an artifact of having this typeof() in there (or both), I
-> think.
-
-Never mind that.
-
->> Integer constant expression can be tested as:
->>
->> !(flags & ( Addr | Float) ) && flag
->>
->> Arithmetic constant expression can be tested as:
->>
->> !(flags & Addr) ) && flag
->>
->> Do you see any problem with this internal representation?
->
-> (int)0.0 is an integer constant expression.
->
-> In your scheme, it would have "composite op" and "float" set?
-> The integer constant expression test you proposed above would
-> fail in this case.
->
-
-(int) 0.0 will express as "Composite op" and "Int const" set.
-Cast is a special operation it will strip the "float" and convert it
-to "int". After all that is what cast does.
-
-It will not change your patch behavior and warning etc, it is just
-a internal representation difference. How the constant expression
-bits are store and interpreted.
-
-Chris
+Small typo here: "Invaild"
