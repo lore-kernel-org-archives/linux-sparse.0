@@ -1,42 +1,64 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] add test case for builtin bswap with constant args
-Date: Thu, 24 Nov 2016 14:00:09 +0100
-Message-ID: <20161124130007.GA12488@macbook.local>
-References: <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
- <20161123203855.14957-1-luc.vanoostenryck@gmail.com>
- <CANeU7QkY6Pztt3V3pEmT=BMfP_H=ckZ0o8KVZUnqK6oq2yj32g@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 0/6] modifiers inheritance by '&' and 'typeof()'
+Date: Thu, 24 Nov 2016 18:09:41 +0100
+Message-ID: <20161124170947.14379-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f170.google.com ([209.85.210.170]:34384 "EHLO
-        mail-wj0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756781AbcKXNAM (ORCPT
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:36894 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756694AbcKXRJ4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 24 Nov 2016 08:00:12 -0500
-Received: by mail-wj0-f170.google.com with SMTP id mp19so33054280wjc.1
-        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2016 05:00:11 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QkY6Pztt3V3pEmT=BMfP_H=ckZ0o8KVZUnqK6oq2yj32g@mail.gmail.com>
+        Thu, 24 Nov 2016 12:09:56 -0500
+Received: by mail-wm0-f51.google.com with SMTP id t79so67943661wmt.0
+        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2016 09:09:55 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Nov 24, 2016 at 01:30:14PM +0800, Christopher Li wrote:
-> On Thu, Nov 24, 2016 at 4:38 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > ---
-> >  validation/builtin-constant-eval.c | 28 ++++++++++++++++++++++++++++
-> >  1 file changed, 28 insertions(+)
-> >  create mode 100644 validation/builtin-constant-eval.c
-> 
-> Can you reply with a sign off line?
-> 
-> Thanks
-> 
-> Chris
-> --
+There is several issues regarding which modifiers is or must be
+preserved when using the '&' or 'typeof()' operators. There is
+also no explicit tests for these. This serie aims to improve this
+situation by:
+  - avoid to inherit storage modifiers by '&' (patch 1)
+  - simplify an existing test (patch 2 & 3)
+  - create a bunch of test cases (patch 4 & 5)
+  - partial fix for modifiers needing to be inherited by typeof
+    (patch 6)
 
-Oh yes, I forgot this. Sorry.
+The last patch is marked as '[RFC]' because it needs some clarification
+on the wanted semantics of some modifiers in some situations.
+In particular, MOD_NODEREF & MOD_SAFE are for the moment not addressed,
+like the address space.
+Lastly, especially for what concerns MOD_SAFE, some others changes are
+needed.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Luc Van Oostenryck (6):
+  storage should not be inherited by pointers
+  testsuite: simplify test function-pointer-inheritance
+  use a shorter name for function-pointer-modifier-inheritance.c
+  testsuite: test modifiers preserved by '&' operator
+  testsuite: test modifiers preserved by 'typeof()'
+  [RFC] some modifiers need to be preserved by 'typeof()'
+
+ symbol.c                                           |   8 +-
+ symbol.h                                           |   4 +-
+ validation/function-pointer-inheritance.c          |   9 ++
+ validation/function-pointer-modifier-inheritance.c |  18 ----
+ validation/nocast.c                                |   2 +-
+ validation/ptr-inherit.c                           |  80 +++++++++++++++
+ validation/typeof-addresspace.c                    |  20 ++++
+ validation/typeof-mods.c                           | 109 +++++++++++++++++++++
+ validation/typeof-noderef.c                        |  19 ++++
+ validation/typeof-safe.c                           |  23 +++++
+ 10 files changed, 270 insertions(+), 22 deletions(-)
+ create mode 100644 validation/function-pointer-inheritance.c
+ delete mode 100644 validation/function-pointer-modifier-inheritance.c
+ create mode 100644 validation/ptr-inherit.c
+ create mode 100644 validation/typeof-addresspace.c
+ create mode 100644 validation/typeof-mods.c
+ create mode 100644 validation/typeof-noderef.c
+ create mode 100644 validation/typeof-safe.c
+
+-- 
+2.10.2
+
