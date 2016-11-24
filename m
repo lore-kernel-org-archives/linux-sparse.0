@@ -1,179 +1,78 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
-Date: Thu, 24 Nov 2016 08:58:35 +0800
-Message-ID: <CANeU7QmQ1pg=AjK++kG-RSX3z36qHNHPfkfi_DkeFpOLga_70w@mail.gmail.com>
-References: <20161117095503.8754-1-johannes@sipsolutions.net>
- <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
- <1479721551.8662.10.camel@sipsolutions.net> <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
- <20161122131543.GA8370@macbook.local> <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
- <20161122201650.GA12172@macpro.local> <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
- <20161123204838.GA14875@macpro.local> <CANeU7Qm56E34mgRz0ntwQ74gmdmEgzd4jEPw6Uuw5UW8UFR85A@mail.gmail.com>
+Subject: Re: [PATCH v3 00/21] improve constexpr handling
+Date: Thu, 24 Nov 2016 09:18:20 +0800
+Message-ID: <CANeU7Qm21LCu2GgdTLbcDERBbgdYWoX_wp4DTKaFdi=G1ZcqAQ@mail.gmail.com>
+References: <87lh75jh9l.fsf@gmail.com> <CANeU7QnzjJ5g+nGik21qsFAZ_5La3GOKVcTAx6=NOhVrVmrEQA@mail.gmail.com>
+ <20161123040528.GA74337@macpro.local> <CANeU7Qm9FLZUexqu92mUSEojzrbi9SpsYrDMCP7J8qmskHcBFA@mail.gmail.com>
+ <87a8cqlhcy.fsf@gmail.com> <CANeU7QkzefYMpkNgemsJ8WPUsj7fg8zUgKN8kth-0x7c85bK3w@mail.gmail.com>
+ <87polm5eqq.fsf@gmail.com> <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
+ <87lgwa59nm.fsf@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary=001a1143e56a63ab71054201819d
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f194.google.com ([209.85.223.194]:33798 "EHLO
-        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935323AbcKXA6k (ORCPT
+Received: from mail-io0-f196.google.com ([209.85.223.196]:33828 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934630AbcKXBTA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 19:58:40 -0500
-Received: by mail-io0-f194.google.com with SMTP id r94so3468462ioe.1
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 16:58:37 -0800 (PST)
-In-Reply-To: <CANeU7Qm56E34mgRz0ntwQ74gmdmEgzd4jEPw6Uuw5UW8UFR85A@mail.gmail.com>
+        Wed, 23 Nov 2016 20:19:00 -0500
+Received: by mail-io0-f196.google.com with SMTP id r94so3505831ioe.1
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 17:18:21 -0800 (PST)
+In-Reply-To: <87lgwa59nm.fsf@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
+To: Nicolai Stange <nicstange@gmail.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
 
---001a1143e56a63ab71054201819d
-Content-Type: text/plain; charset=UTF-8
+On Thu, Nov 24, 2016 at 2:33 AM, Nicolai Stange <nicstange@gmail.com> wrote:
+>
+> While doing this, I recognized that sparse's current constant expression
+> tagging scheme was quite limited and I had to touch everything related
+> to it anyway. So I asked on this list on whether it would be a good
+> thing to let sparse be more strict than gcc in this regard and the
+> feedback was that it certainly would (at user option).
 
-Err, forget to attach. Here is the still buggy V2 patch.
+Good. Thanks for reminding of that. So ideally this is under a more
+strict options.
+
+>
+> Can you tell which one? If not, would resending this series help?
+>
+Yes, I can. But never mind that point as I reply in previous email.
+I figure you do the same work in the evaluation stage now.
+
+No, please don't send the series again. I have a script system to
+process the patches now. So no patch will be missed from now on.
+
+
+> So, if the above testcase really fails after this series, it's either a
+> bug or an artifact of having this typeof() in there (or both), I
+> think.
+
+Never mind that.
+
+>> Integer constant expression can be tested as:
+>>
+>> !(flags & ( Addr | Float) ) && flag
+>>
+>> Arithmetic constant expression can be tested as:
+>>
+>> !(flags & Addr) ) && flag
+>>
+>> Do you see any problem with this internal representation?
+>
+> (int)0.0 is an integer constant expression.
+>
+> In your scheme, it would have "composite op" and "float" set?
+> The integer constant expression test you proposed above would
+> fail in this case.
+>
+
+(int) 0.0 will express as "Composite op" and "Int const" set.
+Cast is a special operation it will strip the "float" and convert it
+to "int". After all that is what cast does.
+
+It will not change your patch behavior and warning etc, it is just
+a internal representation difference. How the constant expression
+bits are store and interpreted.
 
 Chris
-
-On Thu, Nov 24, 2016 at 8:56 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Thu, Nov 24, 2016 at 4:48 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> There is a problem though, with non-constant args.
->> Now the predeclarations of the 3 __builtin_bswap16/32/64
->> are gone, no more prototype and thus no more typing information.
->>
->> For example, if you call __builtin_bswap64() with an int argument,
->> there is no way for the next steps to know the arg must first
->> be 64 bit extended. Same for the result's type.
->
-> That is a very good point. Need more work on that.
->
-> The currently problem if I include the function prototype, the
-> function prototype symbol will over shadow the symbol contain
-> swap_op. We need to make sure the function prototype symbol
-> is the one loading with correct swap_op.
->
-> Ideally, all the "__builtin_xxx" related stuff should be move to a
-> separate builtin.c. Right now the function prototype is in lib.c
-> The implementation is sprinkle around symbol.c, evaluation.c
-> and expand.c.
->
-> Re-attach the V2 patch as last email I forget to CC sparse
-> mailing list. This V2 patch still have the missing prototype problem
-> you describe here.
->
->
-> Chris
-
---001a1143e56a63ab71054201819d
-Content-Type: text/x-patch; charset=US-ASCII; name="implement-builtin-bswap-v2.patch"
-Content-Disposition: attachment; filename="implement-builtin-bswap-v2.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_ivvngyhj0
-
-ZGlmZiAtLWdpdCBhL2V4cGFuZC5jIGIvZXhwYW5kLmMKaW5kZXggMGY2NzIwYy4uYjlhNDMwYiAx
-MDA2NDQKLS0tIGEvZXhwYW5kLmMKKysrIGIvZXhwYW5kLmMKQEAgLTgwMiw2ICs4MDIsNDYgQEAg
-aW50IGV4cGFuZF9zYWZlX3Aoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIsIGludCBjb3N0KQogCXJl
-dHVybiAwOwogfQogCisvKiBUaGUgYXJndW1lbnRzIGFyZSBjb25zdGFudCBpZiB0aGUgY29zdCBv
-ZiBhbGwgb2YgdGhlbSBpcyB6ZXJvICovCitpbnQgZXhwYW5kX2Jzd2FwKHN0cnVjdCBleHByZXNz
-aW9uICpleHByLCBpbnQgY29zdCkKK3sKKwlzdHJ1Y3Qgc3ltYm9sICpzeW07CisJc3RydWN0IGV4
-cHJlc3Npb25fbGlzdCAqYXJncyA9IGV4cHItPmFyZ3M7CisJbG9uZyBsb25nIGlucHV0OworCWlu
-dCBjb3VudDsKKworCWlmIChjb3N0KQorCQlyZXR1cm4gY29zdDsKKworCXN5bSA9IGV4cHItPmZu
-LT5jdHlwZTsKKwljb3VudCA9IGV4cHJlc3Npb25fbGlzdF9zaXplKGFyZ3MpOworCWlmIChjb3Vu
-dCAhPSAxKSB7CisJCXNwYXJzZV9lcnJvcihleHByLT5wb3MsICJJbnZhaWxkIG51bWJlciBvZiBh
-cmd1bWVudHMgZm9yIGZ1bmN0aW9uICVzIChleHBlY3RlZCAxIGdvdCAlZCkiLAorCQkJCXNob3df
-aWRlbnQoc3ltLT5pZGVudCksIGNvdW50KTsKKwkJcmV0dXJuIFNJREVfRUZGRUNUUzsKKwl9CisK
-KwlpbnB1dCA9IGNvbnN0X2V4cHJlc3Npb25fdmFsdWUoZmlyc3RfZXhwcmVzc2lvbihhcmdzKSk7
-CisKKwlpZiAoc3ltLT5pZGVudCA9PSAmX19idWlsdGluX2Jzd2FwMTZfaWRlbnQpIHsKKwkJZXhw
-ci0+dmFsdWUgPSBfX2J1aWx0aW5fYnN3YXAxNihpbnB1dCk7CisJCWV4cHItPmN0eXBlID0gJnVz
-aG9ydF9jdHlwZTsKKwl9IGVsc2UgaWYgKHN5bS0+aWRlbnQgPT0gJl9fYnVpbHRpbl9ic3dhcDMy
-X2lkZW50KSB7CisJCWV4cHItPnZhbHVlID0gX19idWlsdGluX2Jzd2FwMzIoaW5wdXQpOworCQll
-eHByLT5jdHlwZSA9ICZ1aW50X2N0eXBlOworCX0gZWxzZSBpZiAoc3ltLT5pZGVudCA9PSAmX19i
-dWlsdGluX2Jzd2FwNjRfaWRlbnQpIHsKKwkJZXhwci0+dmFsdWUgPSBfX2J1aWx0aW5fYnN3YXA2
-NChpbnB1dCk7CisJCWV4cHItPmN0eXBlID0gJnVsbG9uZ19jdHlwZTsKKwl9IGVsc2UgeworCQlk
-aWUoIlVuZXhwZWN0ZWQgX19idWlsdGluX2Jzd2FwIHN5bWJvbCAlc1xuIiwgc2hvd19pZGVudChz
-eW0tPmlkZW50KSk7CisJfQorCisJZXhwci0+dHlwZSA9IEVYUFJfVkFMVUU7CisJZXhwci0+dGFp
-bnQgPSAwOworCXJldHVybiAwOworfQorCisKIC8qCiAgKiBleHBhbmQgYSBjYWxsIGV4cHJlc3Np
-b24gd2l0aCBhIHN5bWJvbC4gVGhpcwogICogc2hvdWxkIGV4cGFuZCBidWlsdGlucy4KZGlmZiAt
-LWdpdCBhL2lkZW50LWxpc3QuaCBiL2lkZW50LWxpc3QuaAppbmRleCBiNjViNjY3Li5hNjgzZjZj
-IDEwMDY0NAotLS0gYS9pZGVudC1saXN0LmgKKysrIGIvaWRlbnQtbGlzdC5oCkBAIC0zNSw2ICsz
-NSw5IEBAIElERU5UX1JFU0VSVkVEKF9fc2l6ZW9mX3B0cl9fKTsKIElERU5UX1JFU0VSVkVEKF9f
-YnVpbHRpbl90eXBlc19jb21wYXRpYmxlX3ApOwogSURFTlRfUkVTRVJWRUQoX19idWlsdGluX29m
-ZnNldG9mKTsKIElERU5UX1JFU0VSVkVEKF9fbGFiZWxfXyk7CitJREVOVChfX2J1aWx0aW5fYnN3
-YXAxNik7CitJREVOVChfX2J1aWx0aW5fYnN3YXAzMik7CitJREVOVChfX2J1aWx0aW5fYnN3YXA2
-NCk7CiAKIC8qIEF0dHJpYnV0ZSBuYW1lcyAqLwogSURFTlQocGFja2VkKTsgSURFTlQoX19wYWNr
-ZWRfXyk7CmRpZmYgLS1naXQgYS9saWIuYyBiL2xpYi5jCmluZGV4IDI2NjA1NzUuLjdlMzUwNDkg
-MTAwNjQ0Ci0tLSBhL2xpYi5jCisrKyBiL2xpYi5jCkBAIC04MTksNDAgKzgxOSw2IEBAIHZvaWQg
-ZGVjbGFyZV9idWlsdGluX2Z1bmN0aW9ucyh2b2lkKQogCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4g
-aW50IF9fYnVpbHRpbl9wb3Bjb3VudGwodW5zaWduZWQgbG9uZyk7XG4iKTsKIAlhZGRfcHJlX2J1
-ZmZlcigiZXh0ZXJuIGludCBfX2J1aWx0aW5fcG9wY291bnRsbCh1bnNpZ25lZCBsb25nIGxvbmcp
-O1xuIik7CiAKLQkvKiBBbmQgYnl0ZSBzd2Fwcy4uICovCi0JYWRkX3ByZV9idWZmZXIoImV4dGVy
-biB1bnNpZ25lZCBzaG9ydCBfX19fYnVpbHRpbl9ic3dhcDE2KHVuc2lnbmVkIHNob3J0KTtcbiIp
-OwotCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gdW5zaWduZWQgaW50IF9fX19idWlsdGluX2Jzd2Fw
-MzIodW5zaWduZWQgaW50KTtcbiIpOwotCWFkZF9wcmVfYnVmZmVyKCJleHRlcm4gdW5zaWduZWQg
-bG9uZyBsb25nIF9fX19idWlsdGluX2Jzd2FwNjQodW5zaWduZWQgbG9uZyBsb25nKTtcbiIpOwot
-CWFkZF9wcmVfYnVmZmVyKCIjZGVmaW5lIF9fc3BhcnNlX2NvbnN0YW50X3N3YWIxNih4KSAoKHVu
-c2lnbmVkIHNob3J0KSgiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIHNob3J0KSh4KSAmICh1bnNp
-Z25lZCBzaG9ydCkweDAwZmZVKSA8PCA4KSB8IgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBzaG9y
-dCkoeCkgJiAodW5zaWduZWQgc2hvcnQpMHhmZjAwVSkgPj4gOCkpKVxuIik7Ci0JYWRkX3ByZV9i
-dWZmZXIoIiNkZWZpbmUgX19zcGFyc2VfY29uc3RhbnRfc3dhYjMyKHgpICgodW5zaWduZWQgaW50
-KSgiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGludCkoeCkgJiAodW5zaWduZWQgaW50KTB4MDAw
-MDAwZmZVTCkgPDwgMjQpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVkIGludCkoeCkgJiAodW5z
-aWduZWQgaW50KTB4MDAwMGZmMDBVTCkgPDwgIDgpIHwiCi0JCSAgICAgICAiCSgoKHVuc2lnbmVk
-IGludCkoeCkgJiAodW5zaWduZWQgaW50KTB4MDBmZjAwMDBVTCkgPj4gIDgpIHwiCi0JCSAgICAg
-ICAiCSgoKHVuc2lnbmVkIGludCkoeCkgJiAodW5zaWduZWQgaW50KTB4ZmYwMDAwMDBVTCkgPj4g
-MjQpKSlcbiIpOwotCWFkZF9wcmVfYnVmZmVyKCIjZGVmaW5lIF9fc3BhcnNlX2NvbnN0YW50X3N3
-YWI2NCh4KSAoKHVuc2lnbmVkIGxvbmcgbG9uZykoIgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBs
-b25nIGxvbmcpKHgpICYgKHVuc2lnbmVkIGxvbmcgbG9uZykweDAwMDAwMDAwMDAwMDAwZmZVTEwp
-IDw8IDU2KSB8IgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBsb25nIGxvbmcpKHgpICYgKHVuc2ln
-bmVkIGxvbmcgbG9uZykweDAwMDAwMDAwMDAwMGZmMDBVTEwpIDw8IDQwKSB8IgotCQkgICAgICAg
-IgkoKCh1bnNpZ25lZCBsb25nIGxvbmcpKHgpICYgKHVuc2lnbmVkIGxvbmcgbG9uZykweDAwMDAw
-MDAwMDBmZjAwMDBVTEwpIDw8IDI0KSB8IgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBsb25nIGxv
-bmcpKHgpICYgKHVuc2lnbmVkIGxvbmcgbG9uZykweDAwMDAwMDAwZmYwMDAwMDBVTEwpIDw8ICA4
-KSB8IgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBsb25nIGxvbmcpKHgpICYgKHVuc2lnbmVkIGxv
-bmcgbG9uZykweDAwMDAwMGZmMDAwMDAwMDBVTEwpID4+ICA4KSB8IgotCQkgICAgICAgIgkoKCh1
-bnNpZ25lZCBsb25nIGxvbmcpKHgpICYgKHVuc2lnbmVkIGxvbmcgbG9uZykweDAwMDBmZjAwMDAw
-MDAwMDBVTEwpID4+IDI0KSB8IgotCQkgICAgICAgIgkoKCh1bnNpZ25lZCBsb25nIGxvbmcpKHgp
-ICYgKHVuc2lnbmVkIGxvbmcgbG9uZykweDAwZmYwMDAwMDAwMDAwMDBVTEwpID4+IDQwKSB8Igot
-CQkgICAgICAgIgkoKCh1bnNpZ25lZCBsb25nIGxvbmcpKHgpICYgKHVuc2lnbmVkIGxvbmcgbG9u
-ZykweGZmMDAwMDAwMDAwMDAwMDBVTEwpID4+IDU2KSkpXG4iKTsKLQlhZGRfcHJlX2J1ZmZlcigi
-I2RlZmluZSBfX2J1aWx0aW5fYnN3YXAxNih4KSIKLQkJICAgICAgICIJKF9fYnVpbHRpbl9jb25z
-dGFudF9wKCh1bnNpZ25lZCBzaG9ydCkoeCkpID8iCi0JCSAgICAgICAiCV9fc3BhcnNlX2NvbnN0
-YW50X3N3YWIxNih4KSA6IgotCQkgICAgICAgIglfX19fYnVpbHRpbl9ic3dhcDE2KHgpKVxuIik7
-Ci0JYWRkX3ByZV9idWZmZXIoIiNkZWZpbmUgX19idWlsdGluX2Jzd2FwMzIoeCkiCi0JCSAgICAg
-ICAiCShfX2J1aWx0aW5fY29uc3RhbnRfcCgodW5zaWduZWQgaW50KSh4KSkgPyIKLQkJICAgICAg
-ICIJX19zcGFyc2VfY29uc3RhbnRfc3dhYjMyKHgpIDoiCi0JCSAgICAgICAiCV9fX19idWlsdGlu
-X2Jzd2FwMzIoeCkpXG4iKTsKLQlhZGRfcHJlX2J1ZmZlcigiI2RlZmluZSBfX2J1aWx0aW5fYnN3
-YXA2NCh4KSIKLQkJICAgICAgICIJKF9fYnVpbHRpbl9jb25zdGFudF9wKCh1bnNpZ25lZCBsb25n
-IGxvbmcpKHgpKSA/IgotCQkgICAgICAgIglfX3NwYXJzZV9jb25zdGFudF9zd2FiNjQoeCkgOiIK
-LQkJICAgICAgICIJX19fX2J1aWx0aW5fYnN3YXA2NCh4KSlcbiIpOwotCiAJLyogQW5kIGF0b21p
-YyBtZW1vcnkgYWNjZXNzIGZ1bmN0aW9ucy4uICovCiAJYWRkX3ByZV9idWZmZXIoImV4dGVybiBp
-bnQgX19zeW5jX2ZldGNoX2FuZF9hZGQodm9pZCAqLCAuLi4pO1xuIik7CiAJYWRkX3ByZV9idWZm
-ZXIoImV4dGVybiBpbnQgX19zeW5jX2ZldGNoX2FuZF9zdWIodm9pZCAqLCAuLi4pO1xuIik7CmRp
-ZmYgLS1naXQgYS9saWIuaCBiL2xpYi5oCmluZGV4IGI3NzhiZGMuLjMwNmVlNDUgMTAwNjQ0Ci0t
-LSBhL2xpYi5oCisrKyBiL2xpYi5oCkBAIC0yMDAsNiArMjAwLDExIEBAIHN0YXRpYyBpbmxpbmUg
-c3RydWN0IGluc3RydWN0aW9uICpmaXJzdF9pbnN0cnVjdGlvbihzdHJ1Y3QgaW5zdHJ1Y3Rpb25f
-bGlzdCAqaGVhCiAJcmV0dXJuIGZpcnN0X3B0cl9saXN0KChzdHJ1Y3QgcHRyX2xpc3QgKiloZWFk
-KTsKIH0KIAorc3RhdGljIGlubGluZSBzdHJ1Y3QgZXhwcmVzc2lvbiAqZmlyc3RfZXhwcmVzc2lv
-bihzdHJ1Y3QgZXhwcmVzc2lvbl9saXN0ICpoZWFkKQoreworCXJldHVybiBmaXJzdF9wdHJfbGlz
-dCgoc3RydWN0IHB0cl9saXN0ICopaGVhZCk7Cit9CisKIHN0YXRpYyBpbmxpbmUgcHNldWRvX3Qg
-Zmlyc3RfcHNldWRvKHN0cnVjdCBwc2V1ZG9fbGlzdCAqaGVhZCkKIHsKIAlyZXR1cm4gZmlyc3Rf
-cHRyX2xpc3QoKHN0cnVjdCBwdHJfbGlzdCAqKWhlYWQpOwpkaWZmIC0tZ2l0IGEvc3ltYm9sLmMg
-Yi9zeW1ib2wuYwppbmRleCA5MmE3YTYyLi5lNTdmMjA3IDEwMDY0NAotLS0gYS9zeW1ib2wuYwor
-KysgYi9zeW1ib2wuYwpAQCAtNzczLDYgKzc3MywxMSBAQCBzdGF0aWMgc3RydWN0IHN5bWJvbF9v
-cCBjaG9vc2Vfb3AgPSB7CiAJLmFyZ3MgPSBhcmd1bWVudHNfY2hvb3NlLAogfTsKIAorc3RhdGlj
-IHN0cnVjdCBzeW1ib2xfb3AgYnN3YXBfb3AgPSB7CisJLmV2YWx1YXRlID0gZXZhbHVhdGVfdG9f
-aW50ZWdlciwKKwkuZXhwYW5kID0gZXhwYW5kX2Jzd2FwCit9OworCiAvKgogICogQnVpbHRpbiBm
-dW5jdGlvbnMKICAqLwpAQCAtNzg4LDYgKzc5Myw5IEBAIHN0YXRpYyBzdHJ1Y3Qgc3ltX2luaXQg
-ewogCXsgIl9fYnVpbHRpbl93YXJuaW5nIiwgJmJ1aWx0aW5fZm5fdHlwZSwgTU9EX1RPUExFVkVM
-LCAmd2FybmluZ19vcCB9LAogCXsgIl9fYnVpbHRpbl9leHBlY3QiLCAmYnVpbHRpbl9mbl90eXBl
-LCBNT0RfVE9QTEVWRUwsICZleHBlY3Rfb3AgfSwKIAl7ICJfX2J1aWx0aW5fY2hvb3NlX2V4cHIi
-LCAmYnVpbHRpbl9mbl90eXBlLCBNT0RfVE9QTEVWRUwsICZjaG9vc2Vfb3AgfSwKKwl7ICJfX2J1
-aWx0aW5fYnN3YXAxNiIsICZidWlsdGluX2ZuX3R5cGUsIE1PRF9UT1BMRVZFTCwgJmJzd2FwX29w
-IH0sCisJeyAiX19idWlsdGluX2Jzd2FwMzIiLCAmYnVpbHRpbl9mbl90eXBlLCBNT0RfVE9QTEVW
-RUwsICZic3dhcF9vcCB9LAorCXsgIl9fYnVpbHRpbl9ic3dhcDY0IiwgJmJ1aWx0aW5fZm5fdHlw
-ZSwgTU9EX1RPUExFVkVMLCAmYnN3YXBfb3AgfSwKIAl7IE5VTEwsCQlOVUxMLAkJMCB9CiB9Owog
-CmRpZmYgLS1naXQgYS9zeW1ib2wuaCBiL3N5bWJvbC5oCmluZGV4IDliM2YxNjAuLjQ4YmJmY2Ug
-MTAwNjQ0Ci0tLSBhL3N5bWJvbC5oCisrKyBiL3N5bWJvbC5oCkBAIC0xMzAsNiArMTMwLDcgQEAg
-c3RydWN0IHN5bWJvbF9vcCB7CiAKIGV4dGVybiBpbnQgZXhwYW5kX3NhZmVfcChzdHJ1Y3QgZXhw
-cmVzc2lvbiAqZXhwciwgaW50IGNvc3QpOwogZXh0ZXJuIGludCBleHBhbmRfY29uc3RhbnRfcChz
-dHJ1Y3QgZXhwcmVzc2lvbiAqZXhwciwgaW50IGNvc3QpOworZXh0ZXJuIGludCBleHBhbmRfYnN3
-YXAoc3RydWN0IGV4cHJlc3Npb24gKmV4cHIsIGludCBjb3N0KTsKIAogI2RlZmluZSBTWU1fQVRU
-Ul9XRUFLCQkwCiAjZGVmaW5lIFNZTV9BVFRSX05PUk1BTAkJMQo=
---001a1143e56a63ab71054201819d--
