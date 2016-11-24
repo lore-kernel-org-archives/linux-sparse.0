@@ -1,56 +1,121 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2] implement constant-folding in __builtin_bswap*()
-Date: Thu, 24 Nov 2016 11:23:44 +0800
-Message-ID: <CANeU7Qn+XvWWhW69HjgoDejsex-qgJWRup2G2LLzDKp1TG238Q@mail.gmail.com>
-References: <20161117095503.8754-1-johannes@sipsolutions.net>
- <CANeU7Q=vFZ2CtMYjMEYSNcJmdEGbg+_f_wYCRwmKZh3Jc76jEA@mail.gmail.com>
- <1479721551.8662.10.camel@sipsolutions.net> <CANeU7QmSSPT9cq1fNqUxqk5DNWDn7RNLjKnFVdKUdJtCrqfBLg@mail.gmail.com>
- <20161122131543.GA8370@macbook.local> <CANeU7QmSd5Zd_H2jDQyTjUMg7C4_6wQOyCR73R=FTdJ=f4+ygg@mail.gmail.com>
- <20161122201650.GA12172@macpro.local> <CANeU7QkABOFTdUCdabWL1YwHb3Qf4huVL115AHqZBNcqUytmhg@mail.gmail.com>
- <20161123204838.GA14875@macpro.local> <CANeU7Qm56E34mgRz0ntwQ74gmdmEgzd4jEPw6Uuw5UW8UFR85A@mail.gmail.com>
- <20161124013125.GA18072@macpro.local>
+From: "Michael S. Tsirkin" <mst@redhat.com>
+Subject: Re: [PATCH] lib: __builtin_object_size should accept void *
+Date: Thu, 24 Nov 2016 05:28:34 +0200
+Message-ID: <20161124052744-mutt-send-email-mst@kernel.org>
+References: <1479932572-12543-1-git-send-email-mst@redhat.com>
+ <CANeU7Qm4Q7fawnTkGgsgQoiLJXwJLJng+4Y60+n5c_nbK-vRgQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f193.google.com ([209.85.223.193]:33753 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750749AbcKXDXp (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Nov 2016 22:23:45 -0500
-Received: by mail-io0-f193.google.com with SMTP id j92so3763144ioi.0
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Nov 2016 19:23:45 -0800 (PST)
-In-Reply-To: <20161124013125.GA18072@macpro.local>
+Received: from mx1.redhat.com ([209.132.183.28]:34720 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750749AbcKXDaF (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 23 Nov 2016 22:30:05 -0500
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qm4Q7fawnTkGgsgQoiLJXwJLJng+4Y60+n5c_nbK-vRgQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Johannes Berg <johannes@sipsolutions.net>, Linux-Sparse <linux-sparse@vger.kernel.org>, Nicolai Stange <nicstange@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Josh Triplett <josh@kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Nov 24, 2016 at 9:31 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Maybe another approach is possible:
-> - note the fact that "stuff" (I intentionally don't want to use
->   "function") like __builtin_bswap*() behave like an operator
->   or a function in the mathematical sense: they only depend on
->   their args, have no side-effect, ... in others word they are "pure"
->   like in MOD_PURE.
-> - because they're pure they necessarily return constant value if given
->   constant args. This may be used early, the value itself is only needed
->   in later phases.
+On Thu, Nov 24, 2016 at 08:16:24AM +0800, Christopher Li wrote:
+> A similar patch has been applied:
+> 
+> Chris
+> 
+> commit f2bf519e1da89779380fd781c0eb28aae415979d
+> Author: Lance Richardson <lrichard@redhat.com>
+> Date:   Wed Sep 21 10:13:58 2016 -0400
+> 
+>     sparse: update __builtin_object_size() prototype
+> 
+>     Sparse emits a large number of warnings for the linux kernel source
+>     tree of the form:
+>         ./arch/x86/include/asm/uaccess.h:735:18: \
+>             warning: incorrect type in argument 1 (different modifiers)
+>         ./arch/x86/include/asm/uaccess.h:735:18:    expected void *<noident>
+>         ./arch/x86/include/asm/uaccess.h:735:18:    got void const *from
+> 
+>     Fix by making the first parameter to __builtin_object_size()
+>     type "const void *" instead of "void *", which is consistent with GCC
+>     behavior (the prototype for this builtin in GCC documentation is evidently
+>     incorrect).
+> 
+>     Signed-off-by: Lance Richardson <lrichard@redhat.com>
+>     Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+>     Signed-off-by: Christopher Li <sparse@chrisli.org>
 
-I think that is exactly why __builtins_xxx exist. There is also pure
-function and inline function etc. I guess I will still call it a function
-rather than "stuff".
+Doesn't seem to be pushed yet - at least I don't see it in master
+on git://git.kernel.org/pub/scm/devel/sparse/sparse.git
 
-> It may also not be a bad idea to have a specific instructions for these
-> (like a few others, I'm thinking to rotate), after all it's not without
-> reasons that common CPU archs have these as real instructions
-> (but this won't directly help our present problem).
 
-If the function is expanded at compile time. It does not matter what
-instruction it was used. It only matter when it need to emit as real
-instruction in the back end. The black end still have the flexibility
-to inline asm it.
-
-Agree, it does not help our current problem though.
-
-Chris
+> diff --git a/lib.c b/lib.c
+> index d5b56b0..2d66aa0 100644
+> --- a/lib.c
+> +++ b/lib.c
+> @@ -888,7 +888,7 @@ void declare_builtin_functions(void)
+>         add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
+> 
+>         /* And some __FORTIFY_SOURCE ones.. */
+> -       add_pre_buffer ("extern __SIZE_TYPE__
+> __builtin_object_size(void *, int);\n");
+> +       add_pre_buffer ("extern __SIZE_TYPE__
+> __builtin_object_size(const void *, int);\n");
+>         add_pre_buffer ("extern void * __builtin___memcpy_chk(void *,
+> const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+>         add_pre_buffer ("extern void * __builtin___memmove_chk(void *,
+> const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+>         add_pre_buffer ("extern void * __builtin___mempcpy_chk(void *,
+> const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+> 
+> 
+> 
+> On Thu, Nov 24, 2016 at 4:24 AM, Michael S. Tsirkin <mst@redhat.com> wrote:
+> > I'm seeing these warnings with current Linux:
+> > ./arch/x86/include/asm/uaccess.h:705:18: warning: incorrect type in argument 1 (different modifiers)
+> > ./arch/x86/include/asm/uaccess.h:705:18:    expected void *<noident>
+> > ./arch/x86/include/asm/uaccess.h:705:18:    got void const *from
+> >
+> > Because of this code:
+> >
+> > static __always_inline unsigned long __must_check
+> > copy_to_user(void __user *to, const void *from, unsigned long n)
+> > {
+> >         int sz = __compiletime_object_size(from);
+> >
+> > ...
+> > }
+> >
+> > where we have
+> >
+> > # define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+> >
+> > to fix, mark the argument as const void *.
+> >
+> > Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+> > ---
+> >
+> > Sorry if this has already been reported/fixed.
+> >
+> >  lib.c | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> >
+> > diff --git a/lib.c b/lib.c
+> > index d5b56b0..2d66aa0 100644
+> > --- a/lib.c
+> > +++ b/lib.c
+> > @@ -888,7 +888,7 @@ void declare_builtin_functions(void)
+> >         add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
+> >
+> >         /* And some __FORTIFY_SOURCE ones.. */
+> > -       add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(void *, int);\n");
+> > +       add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(const void *, int);\n");
+> >         add_pre_buffer ("extern void * __builtin___memcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+> >         add_pre_buffer ("extern void * __builtin___memmove_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+> >         add_pre_buffer ("extern void * __builtin___mempcpy_chk(void *, const void *, __SIZE_TYPE__, __SIZE_TYPE__);\n");
+> > --
+> > MST
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
