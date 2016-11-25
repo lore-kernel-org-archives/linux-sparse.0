@@ -1,49 +1,59 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v3 00/21] improve constexpr handling
-Date: Thu, 24 Nov 2016 18:22:15 +0100
-Message-ID: <20161124172213.GA14515@macpro.local>
-References: <20161123040528.GA74337@macpro.local>
- <CANeU7Qm9FLZUexqu92mUSEojzrbi9SpsYrDMCP7J8qmskHcBFA@mail.gmail.com>
- <87a8cqlhcy.fsf@gmail.com>
- <CANeU7QkzefYMpkNgemsJ8WPUsj7fg8zUgKN8kth-0x7c85bK3w@mail.gmail.com>
- <87polm5eqq.fsf@gmail.com>
- <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
- <87lgwa59nm.fsf@gmail.com>
- <CANeU7Qm21LCu2GgdTLbcDERBbgdYWoX_wp4DTKaFdi=G1ZcqAQ@mail.gmail.com>
- <87h96x5hzv.fsf@gmail.com>
- <CANeU7Q=xDWBYSWsb8NXfWYy=LDLufp4QZ+qjdn3DHBpcVZh4oQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/6] storage should not be inherited by pointers
+Date: Fri, 25 Nov 2016 10:09:25 +0800
+Message-ID: <CANeU7QnGdG8x+1SzKP7e8f6Gan8VZh7MNMGpZ=E3JwSQ2xYkAw@mail.gmail.com>
+References: <20161124170947.14379-1-luc.vanoostenryck@gmail.com> <20161124170947.14379-2-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f178.google.com ([209.85.210.178]:36043 "EHLO
-        mail-wj0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754307AbcKXRWS (ORCPT
+Received: from mail-io0-f196.google.com ([209.85.223.196]:36066 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750909AbcKYCJ1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 24 Nov 2016 12:22:18 -0500
-Received: by mail-wj0-f178.google.com with SMTP id qp4so38532285wjc.3
-        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2016 09:22:18 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=xDWBYSWsb8NXfWYy=LDLufp4QZ+qjdn3DHBpcVZh4oQ@mail.gmail.com>
+        Thu, 24 Nov 2016 21:09:27 -0500
+Received: by mail-io0-f196.google.com with SMTP id k19so7318544iod.3
+        for <linux-sparse@vger.kernel.org>; Thu, 24 Nov 2016 18:09:26 -0800 (PST)
+In-Reply-To: <20161124170947.14379-2-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Nicolai Stange <nicstange@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Nov 24, 2016 at 07:24:51PM +0800, Christopher Li wrote:
-> On Thu, Nov 24, 2016 at 5:45 PM, Nicolai Stange <nicstange@gmail.com> wrote:
-> > Alright. May I further ask whether you've got all these precious
-> > Reviewed-by tags from Luc carried over? He did a great amount of review
-> > work on this series and it would be quite sad if these got lost.
-> > I still have them, so just tell me if you need a list. If not:
-> > nevermind.
-> 
-> Luc's review tag should be apply when it is accepted.The script does
-> not add review tags by itself.  I usually add it by hand.
-> 
-> If yo want to add the tags in the patch, you are welcome resend the patch
-> with the new review tags. I just said don't need to send they if they are
-> exactly the same.
+On Fri, Nov 25, 2016 at 1:09 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Information about storage is needed for objects but once
+> you take the address of an object, its storage should be
+> irrelevant for the resulting pointer.
+>
+> Trying to keep the storage into the pointer's modifiers
+> (while it will be available in the base type anyway) only
+> create corner cases later.
 
-I appreciate your concerns but, please, don't bother much with this.
+Either way it is going to be very tricky. If you make the pointer
+does not inherent the object storage modifier, you need to change
+all the place that assume the pointer will inherent the object storage.
 
-Luc
+Because C mostly deal with pointer, e.g. "a = b;", is actually
+"*(&a) = *(&b);". Pointer is all over the place.  Right now sparse
+make the pointer inherent the storage is convenient but not precise.
+Changing the underlining assumption will touch a lot of code.
+
+The extremely tricky one is the context and address space
+store in "struct ctype". It is not a modifier but act like one.
+Address space should belong to the storage object. But
+right now address space is propagate to pointer as well.
+Most of the test is done on pointer level.
+
+> An example of the problem it can create is when the pointer
+> is dereferenced in an inlined function.
+>
+> Better to simply not put have the storage informations
+> for the pointer, which is what this patch does.
+
+I think there will be other code changes associate with the assumption
+change.
+
+One thing to verify is if sparse issues different set of warning
+on the Linux kernel check.
+
+Chris
