@@ -1,54 +1,66 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 1/6] storage should not be inherited by pointers
-Date: Mon, 28 Nov 2016 03:02:53 +0100
-Message-ID: <20161128020252.GA744@macbook.local>
-References: <20161124170947.14379-1-luc.vanoostenryck@gmail.com>
- <20161124170947.14379-2-luc.vanoostenryck@gmail.com>
- <CANeU7QnGdG8x+1SzKP7e8f6Gan8VZh7MNMGpZ=E3JwSQ2xYkAw@mail.gmail.com>
- <20161125033817.GA14283@macbook.local>
- <CANeU7QkyTrCLZHbeVt+VFPL__DGbhBtGpK0hPsuFsPrzKaFL-Q@mail.gmail.com>
+Subject: Re: [PATCH 0/2] be more generous with ptrlist repacking
+Date: Mon, 28 Nov 2016 22:15:15 +0100
+Message-ID: <20161128211514.GA1077@macbook.local>
+References: <20161117172559.29417-1-luc.vanoostenryck@gmail.com>
+ <CA+55aFwYGCD-+GhVLdHedu42cu1RyT+Ko9Dj6-pfTrPv0ZD5Jg@mail.gmail.com>
+ <20161117202523.GA35194@macpro.local>
+ <CA+55aFwsQYAFO+hbSi3pxvkjVA6Jv=DpeZrVHyzj9-RmAuF=tQ@mail.gmail.com>
+ <20161118002918.GA35373@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33076 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753216AbcK1CDX (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34652 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754515AbcK1VPT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 27 Nov 2016 21:03:23 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u144so16547549wmu.0
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Nov 2016 18:02:56 -0800 (PST)
+        Mon, 28 Nov 2016 16:15:19 -0500
+Received: by mail-wm0-f68.google.com with SMTP id g23so21228292wme.1
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Nov 2016 13:15:19 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7QkyTrCLZHbeVt+VFPL__DGbhBtGpK0hPsuFsPrzKaFL-Q@mail.gmail.com>
+In-Reply-To: <20161118002918.GA35373@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Dan Carpenter <dan.carpenter@oracle.com>
 
-On Mon, Nov 28, 2016 at 09:04:56AM +0800, Christopher Li wrote:
-> Sorry I jump the conclusion. If it is only concern with MOD_STATIC,
->  MOD_EXTERN & MOD_TOPLEVEL, that is not a bug issue at all.
-> I thought you are going to extend that logic to other modifier bits as well.
+On Fri, Nov 18, 2016 at 01:29:19AM +0100, Luc Van Oostenryck wrote:
+> On Thu, Nov 17, 2016 at 02:03:05PM -0800, Linus Torvalds wrote:
+> > On Thu, Nov 17, 2016 at 12:25 PM, Luc Van Oostenryck
+> > <luc.vanoostenryck@gmail.com> wrote:
+> > >
+> > > Would something like the following be fine?
+> > 
+> > This looks good to me, although I didn't actually test it.  But it
+> > looks like what I would have expected.
+> > 
+> > Some of those inlines look large enough that I wonder how much sense
+> > they make as inlines any more, but I think that's a separate issue.
+> 
+> Oh, I absolutely agree.
+> What I would like is something more iterator oriented which keep track
+> of the head-list-nr state. I have a working prototype I made last week
+> but it still needs some more polishing.
+> 
 
-Well ... yes and no :)
-Like it can be seen in the other patches, I mostly just
-wrote some tests that, I think, clearly expose soem problems.
-Those problems can be considered as bugs or not, some clearly are,
-I think, some much less so but trigger questions.
+I've worked a bit more on this. I had a nice, clean & compact
+implementation where basically all ptr_list walking was done by
+something like:
+	struct ptr_iter iter;
+	ptr_iter_init(&iter, head);
+	while ((ptr = ptr_iter_next(&iter)))
+		...
 
-I think we should clearly define what is the desired behavior of
-modifiers like nocast, noderef, bitwise, ... when
-- taking the address of an object with such modifiers
-- using typeof() on such object or pointers
-- assignment with them (but this seems much better done/defined)
+Of course, still hidden under the macros which do the type checking.
+This had the advantage that all the logic was in a single place.
+It seemed to work well that is until I discovered that at a few places we're
+storing null pointers in ptr_lists. It's thus not possible to use the
+returned pointer to also check the end of list condition. The situation
+is even a bit more complex because the PREPARE/NEXT_PTR_LIST() also
+can't work with null pointers.
 
-The case with 'safe' is similar but its working is a bit different.
-
-And indeed, like I think you fear, any changes regarding the
-address_space will create problems in existing code and
-it's why I think it's better for now to first look at the situation
-with the modifiers.
-
-You certainly can see this seriemore  as the start of a reflexion
-than a try to solve anything.
+I've found a few alternative that work in all the cases but they aren't
+simple & compact enough to my taste so I'll let things like they are
+and maybe just sent a few cleanups later.
 
 Luc
