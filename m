@@ -1,15 +1,15 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/5] unssa: simplify rewrite of OP_PHISOURCE
-Date: Thu,  1 Dec 2016 16:07:02 +0100
-Message-ID: <20161201150705.31590-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/5] unssa: try to avoid some OP_PHI copies
+Date: Thu,  1 Dec 2016 16:07:03 +0100
+Message-ID: <20161201150705.31590-4-luc.vanoostenryck@gmail.com>
 References: <20161201150705.31590-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34705 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932836AbcLAPHW (ORCPT
+Received: from mail-wj0-f196.google.com ([209.85.210.196]:35855 "EHLO
+        mail-wj0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932322AbcLAPHX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Dec 2016 10:07:22 -0500
-Received: by mail-wm0-f68.google.com with SMTP id g23so34725185wme.1
+        Thu, 1 Dec 2016 10:07:23 -0500
+Received: by mail-wj0-f196.google.com with SMTP id jb2so26719867wjb.3
         for <linux-sparse@vger.kernel.org>; Thu, 01 Dec 2016 07:07:22 -0800 (PST)
 In-Reply-To: <20161201150705.31590-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
@@ -17,140 +17,80 @@ List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Using the fact that each OP_PHISOURCE is used by a single OP_PHI,
-it's easier to rewrite OP_PHISOURCE at the same time as their
-associated OP_PHI (because we have access to the new pseudo just created).
+OP_PHI's target can interfer with it's own source swhen defined
+in the same basic block. Such interference can create problem
+like the 'swap problem' (which only exist if the phi-node are
+'processed' sequentially if they're processed in parallel such
+problems don't exist) when phi-nodes are destructed. To avoid
+such problems OP_PHI are rewritten as OP_COPY.
+
+if an OP_PHI and it's OP_PHISOURCE are in different basic blocks
+no such interference is possible and the copy is not needed.
+
+This patch detect such situation and eliminate these unneeded copies.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- unssa.c | 89 ++++++++++++++++-------------------------------------------------
- 1 file changed, 21 insertions(+), 68 deletions(-)
+ unssa.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
 diff --git a/unssa.c b/unssa.c
-index 85b1388d..2660e94c 100644
+index 2660e94c..397130e3 100644
 --- a/unssa.c
 +++ b/unssa.c
-@@ -10,9 +10,9 @@
-  *
-  * This is similar to the "Sreedhar method I" except that the copies to the
-  * temporaries are not placed at the end of the predecessor basic blocks, but
-- * at the place where the phi-node operands are defined (the same place where the
-- * phisrc were present).
-- * Is this a problem? 
-+ * at the place where the phi-node operands are defined.
-+ * This is particulary easy since these copies are essentialy already present
-+ * as the corresponding OP_PHISOURCE.
-  *
-  * While very simple this method create a lot more copies that really necessary.
-  * Ideally, "Sreedhar method III" should be used:
-@@ -30,31 +30,35 @@
+@@ -30,6 +30,32 @@
  #include <assert.h>
  
  
--static void remove_phisrc_defines(struct instruction *phisrc)
--{
--	struct instruction *phi;
--	struct basic_block *bb = phisrc->bb;
--
--	FOR_EACH_PTR(phisrc->phi_users, phi) {
--		remove_pseudo(&bb->defines, phi->target);
--	} END_FOR_EACH_PTR(phi);
--}
--
++static int simplify_phi_node(struct instruction *phi, pseudo_t tmp)
++{
++	pseudo_t target = phi->target;
++	struct pseudo_user *pu;
++	pseudo_t src;
++
++	// verify if this phi can be simplified
++	FOR_EACH_PTR(phi->phi_list, src) {
++		struct instruction *def = src->def;
++
++		if (!def)
++			continue;
++		if (def->bb == phi->bb)
++			return 0;
++	} END_FOR_EACH_PTR(src);
++
++	// no need to make a copy of this one
++	// -> replace the target pseudo by the tmp
++	FOR_EACH_PTR(target->users, pu) {
++		use_pseudo(pu->insn, tmp, pu->userp);
++	} END_FOR_EACH_PTR(pu);
++
++	kill_instruction(phi);
++	return 1;
++}
++
  static void replace_phi_node(struct instruction *phi)
  {
  	pseudo_t tmp;
-+	pseudo_t p;
- 
- 	tmp = alloc_pseudo(NULL);
- 	tmp->type = phi->target->type;
+@@ -40,6 +66,9 @@ static void replace_phi_node(struct instruction *phi)
  	tmp->ident = phi->target->ident;
  	tmp->def = NULL;		// defined by all the phisrc
--	
--	track_phi_uses(phi);
  
-+	// rewrite all it's phi_src to copy to a new tmp
-+	FOR_EACH_PTR(phi->phi_list, p) {
-+		struct instruction *def = p->def;
++	// can we avoid to make of copy?
++	simplify_phi_node(phi, tmp);
 +
-+		if (p == VOID)
-+			continue;
-+
-+		assert(def->opcode == OP_PHISOURCE);
-+
-+		def->opcode = OP_COPY;
-+		def->target = tmp;
-+	} END_FOR_EACH_PTR(p);
-+
-+	// rewrite the phi node:
-+	//	phi	%rt, ...
-+	// to:
-+	//	copy	%rt, %tmp
- 	phi->opcode = OP_COPY;
- 	use_pseudo(phi, tmp, &phi->src);
--
--	// FIXME: free phi->phi_list;
- }
+ 	// rewrite all it's phi_src to copy to a new tmp
+ 	FOR_EACH_PTR(phi->phi_list, p) {
+ 		struct instruction *def = p->def;
+@@ -53,6 +82,9 @@ static void replace_phi_node(struct instruction *phi)
+ 		def->target = tmp;
+ 	} END_FOR_EACH_PTR(p);
  
- static void rewrite_phi_bb(struct basic_block *bb)
-@@ -73,53 +77,6 @@ static void rewrite_phi_bb(struct basic_block *bb)
- 	} END_FOR_EACH_PTR(insn);
- }
- 
--static void rewrite_phisrc_bb(struct basic_block *bb)
--{
--	struct instruction *insn;
--
--	// Replace all the phisrc by one or several copies to
--	// the temporaries associated to each phi-node it defines.
--	FOR_EACH_PTR_REVERSE(bb->insns, insn) {
--		struct instruction *phi;
--		int i;
--
--		if (!insn->bb)
--			continue;
--		if (insn->opcode != OP_PHISOURCE)
--			continue;
--
--		i = 0;
--		FOR_EACH_PTR(insn->phi_users, phi) {
--			pseudo_t tmp = phi->src;
--			pseudo_t src = insn->phi_src;
--
--			if (i == 0) {	// first phi: we overwrite the phisrc
--				insn->opcode = OP_COPY;
--				insn->target = tmp;
--				insn->src = src;
--			} else {
--				struct instruction *copy = __alloc_instruction(0);
--
--				copy->bb = bb;
--				copy->opcode = OP_COPY;
--				copy->size = insn->size;
--				copy->pos = insn->pos;
--				copy->target = tmp;
--				copy->src = src;
--
--				INSERT_CURRENT(copy, insn);
--			}
--			// update the liveness info
--			remove_phisrc_defines(insn);
--			// FIXME: should really something like add_pseudo_exclusive()
--			add_pseudo(&bb->defines, tmp);
--
--			i++;
--		} END_FOR_EACH_PTR(phi);
--
--	} END_FOR_EACH_PTR_REVERSE(insn);
--}
--
- int unssa(struct entrypoint *ep)
- {
- 	struct basic_block *bb;
-@@ -128,9 +85,5 @@ int unssa(struct entrypoint *ep)
- 		rewrite_phi_bb(bb);
- 	} END_FOR_EACH_PTR(bb);
- 
--	FOR_EACH_PTR(ep->bbs, bb) {
--		rewrite_phisrc_bb(bb);
--	} END_FOR_EACH_PTR(bb);
++	if (!phi->bb)
++		return;
++
+ 	// rewrite the phi node:
+ 	//	phi	%rt, ...
+ 	// to:
+-- 
+2.10.2
+
