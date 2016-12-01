@@ -1,39 +1,37 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: OP_PHISOURCE's phi_users
-Date: Wed, 30 Nov 2016 22:51:02 +0100
-Message-ID: <20161130215102.GA5604@macbook.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 0/5] unssa improvements
+Date: Thu,  1 Dec 2016 16:07:00 +0100
+Message-ID: <20161201150705.31590-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f179.google.com ([209.85.210.179]:36362 "EHLO
-        mail-wj0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751107AbcK3VvG (ORCPT
+Received: from mail-wj0-f174.google.com ([209.85.210.174]:34073 "EHLO
+        mail-wj0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932322AbcLAPHR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Nov 2016 16:51:06 -0500
-Received: by mail-wj0-f179.google.com with SMTP id qp4so188054968wjc.3
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Nov 2016 13:51:06 -0800 (PST)
-Received: from macbook.local (180.52-241-81.adsl-dyn.isp.belgacom.be. [81.241.52.180])
-        by smtp.gmail.com with ESMTPSA id f67sm9934550wmd.13.2016.11.30.13.51.04
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
-        Wed, 30 Nov 2016 13:51:04 -0800 (PST)
-Content-Disposition: inline
+        Thu, 1 Dec 2016 10:07:17 -0500
+Received: by mail-wj0-f174.google.com with SMTP id mp19so207599686wjc.1
+        for <linux-sparse@vger.kernel.org>; Thu, 01 Dec 2016 07:07:17 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi list,
+This serie improves the out-of-SSA step by:
+* simplify the conversion of the phi-nodes & phi-sources into copies
+* eliminate some copies which are trivially not needed.
 
-struct instruction has a field, 'phi_users', used for OP_PHISOURCE
-to store their users. In other words this field is used to store the
-OP_PHIs instruction that use a given OP_PHISOURCE.
+The elimination step is significant since on a small corpus which
+produced 267 copies, after the patch only 165 remain.
 
-I'm wondering if someone would have an example where an OP_PHISOURCE
-is used by more than one OP_PHI.
+Luc Van Oostenryck (5):
+  unssa: do not try to update liveness
+  unssa: simplify rewrite of OP_PHISOURCE
+  unssa: try to avoid some OP_PHI copies
+  unssa: eliminate trivial phisrc copies
+  unssa: update comment about the unneeded copies
 
-I've searched, not too hard but still and I didn't found any.
-To be honest, I don't think it can happen and if it does I'm wondering
-what would be the associated meaning.
+ unssa.c | 141 ++++++++++++++++++++++++++++++++++------------------------------
+ 1 file changed, 74 insertions(+), 67 deletions(-)
 
+-- 
+2.10.2
 
-Luc 
