@@ -1,141 +1,110 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix typing error in compound assignment
-Date: Wed,  7 Dec 2016 15:33:42 +0100
-Message-ID: <20161207143342.88825-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/5] move OP_MUL simplification in a separate function
+Date: Wed,  7 Dec 2016 16:46:51 +0100
+Message-ID: <20161207154655.98109-2-luc.vanoostenryck@gmail.com>
+References: <20161207154655.98109-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34338 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752945AbcLGOef (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35122 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932177AbcLGPrG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 7 Dec 2016 09:34:35 -0500
-Received: by mail-wm0-f68.google.com with SMTP id g23so28267988wme.1
-        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 06:33:58 -0800 (PST)
+        Wed, 7 Dec 2016 10:47:06 -0500
+Received: by mail-wm0-f66.google.com with SMTP id a20so28723355wme.2
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 07:47:05 -0800 (PST)
+In-Reply-To: <20161207154655.98109-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Al Viro <viro@zeniv.linux.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-A compound assignment like, for example:
-	x += a;
-should have the same effect as the operation followed by the
-assignment except that the left side should only be evaluated
-once. So the statement above (assuming 'x' free of side-effects)
-should have the same effect as:
-	x = x + a;
+This patch contains no functional changes.
+It just moves the code for simplification of OP_MUL{U,S} with
+constant operands in its own function in preparation for some
+additional simplifications coming in the same serie.
 
-In particular, the usual conversions should applied. So, if
-the type of 'x' and 'a' is, respectively, 'int' and 'long',
-the statement above should be equivalent to:
-	x = (int) ((long) x + a);
+Also add some test cases for the concerned simplifications.
 
-But what is really done currently is something like:
-	x = x + (typeof(x)) a;
-In other words, the left-hand side is casted to the same type as the
-rhs and the operation is always done with this type, neglecting the
-usual conversions and thus forcing the operation to always be done
-with the rhs type, here 'int' instead of 'long'.
-
-The patch fix this by first calculating the type corresponding to
-the usual conversion and then casting the right-hand side to this
-type, which is fine, since it's a rvalue anyway.
-Later steps will then use the rhs type when doing the operation.
-On the example above, the cast will be a no-op and the operation will
-be done with the correct type:
-	x = x + (long) a;
-which, at linearization, will become:
-	x = (int) ((long) x + (long) a);
-
-If the types where in the other order, the result will also be done
-with the correct type:
-	long a;
-	int x;
-	...
-	a += x;
-will become:
-	a = a + (long) x;
-and, at linearization:
-	a = (int) ((long) a + (long) x);
-
-Cc: Al Viro <viro@zeniv.linux.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                        |  5 ++++-
- linearize.c                       | 10 ++++++----
- validation/compound-assign-type.c | 15 +++++++++++++++
- 3 files changed, 25 insertions(+), 5 deletions(-)
- create mode 100644 validation/compound-assign-type.c
+ simplify.c                        | 17 +++++++++++++++++
+ validation/optim/muldiv-by-one.c  | 13 +++++++++++++
+ validation/optim/muldiv-by-zero.c | 13 +++++++++++++
+ 3 files changed, 43 insertions(+)
+ create mode 100644 validation/optim/muldiv-by-one.c
+ create mode 100644 validation/optim/muldiv-by-zero.c
 
-diff --git a/evaluate.c b/evaluate.c
-index e350c0c0..0ea3e866 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1258,7 +1258,7 @@ static int evaluate_assign_op(struct expression *expr)
- 			if (!restricted_value(expr->right, t))
- 				return 1;
- 		} else if (!(sclass & TYPE_RESTRICT))
--			goto Cast;
-+			goto usual;
- 		/* source and target would better be identical restricted */
- 		if (t == s)
- 			return 1;
-@@ -1281,6 +1281,9 @@ static int evaluate_assign_op(struct expression *expr)
- 	expression_error(expr, "invalid assignment");
+diff --git a/simplify.c b/simplify.c
+index b5cd0ea7..b242b64d 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -310,6 +310,21 @@ static int simplify_asr(struct instruction *insn, pseudo_t pseudo, long long val
  	return 0;
+ }
  
-+usual:
-+	target = usual_conversions(op, expr->left, expr->right,
-+				tclass, sclass, target, source);
- Cast:
- 	expr->right = cast_to(expr->right, target);
- 	return 1;
-diff --git a/linearize.c b/linearize.c
-index c6ada1e8..e0166128 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1154,6 +1154,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 	struct access_data ad = { NULL, };
- 	struct expression *target = expr->left;
- 	struct expression *src = expr->right;
-+	struct symbol *ctype;
- 	pseudo_t value;
- 
- 	value = linearize_expression(ep, src);
-@@ -1179,10 +1180,11 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 		if (!src)
- 			return VOID;
- 
--		oldvalue = cast_pseudo(ep, oldvalue, src->ctype, expr->ctype);
--		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], src->ctype);
--		dst = add_binary_op(ep, src->ctype, opcode, oldvalue, value);
--		value = cast_pseudo(ep, dst, expr->ctype, src->ctype);
-+		ctype = src->ctype;
-+		oldvalue = cast_pseudo(ep, oldvalue, target->ctype, ctype);
-+		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], ctype);
-+		dst = add_binary_op(ep, ctype, opcode, oldvalue, value);
-+		value = cast_pseudo(ep, dst, ctype, expr->ctype);
- 	}
- 	value = linearize_store_gen(ep, value, &ad);
- 	finish_address_gen(ep, &ad);
-diff --git a/validation/compound-assign-type.c b/validation/compound-assign-type.c
-new file mode 100644
-index 00000000..8e7efb4a
---- /dev/null
-+++ b/validation/compound-assign-type.c
-@@ -0,0 +1,15 @@
-+static int foo(int x, long a)
++static int simplify_mul_div(struct instruction *insn, long long value)
 +{
-+	x += a;
-+	return x;
++	if (value == 1)
++		return replace_with_pseudo(insn, insn->src1);
++
++	switch (insn->opcode) {
++	case OP_MULS:
++	case OP_MULU:
++		if (value == 0)
++			return replace_with_pseudo(insn, insn->src2);
++	}
++
++	return 0;
 +}
 +
+ static int simplify_constant_rightside(struct instruction *insn)
+ {
+ 	long long value = insn->src2->value;
+@@ -334,6 +349,8 @@ static int simplify_constant_rightside(struct instruction *insn)
+ 		return simplify_asr(insn, insn->src1, value);
+ 
+ 	case OP_MULU: case OP_MULS:
++		return simplify_mul_div(insn, value);
++
+ 	case OP_AND_BOOL:
+ 		if (value == 1)
+ 			return replace_with_pseudo(insn, insn->src1);
+diff --git a/validation/optim/muldiv-by-one.c b/validation/optim/muldiv-by-one.c
+new file mode 100644
+index 00000000..ac8ac95b
+--- /dev/null
++++ b/validation/optim/muldiv-by-one.c
+@@ -0,0 +1,13 @@
++typedef	unsigned int ui;
++typedef	         int si;
++
++si smul1(si a) {  return a * 1; }
++ui umul1(ui a) {  return a * 1; }
++
 +/*
-+ * check-name: compound-assign-type
-+ * check-command: test-linearize -m64 $file
++ * check-name: muldiv-by-one
++ * check-command: test-linearize -Wno-decl $file
 + * check-output-ignore
 + *
-+ * check-output-excludes: add\\.32
-+ * check-output-contains: add\\.64
-+ * check-output-contains: scast\\.64
++ * check-output-excludes: mul[us]\\.
++ */
+diff --git a/validation/optim/muldiv-by-zero.c b/validation/optim/muldiv-by-zero.c
+new file mode 100644
+index 00000000..07b7b1a7
+--- /dev/null
++++ b/validation/optim/muldiv-by-zero.c
+@@ -0,0 +1,13 @@
++typedef	unsigned int ui;
++typedef	         int si;
++
++si smul0(si a) {  return a * 0; }
++ui umul0(ui a) {  return a * 0; }
++
++/*
++ * check-name: muldiv-by-zero
++ * check-command: test-linearize -Wno-decl $file
++ * check-output-ignore
++ *
++ * check-output-excludes: mul[us]\\.
 + */
 -- 
 2.10.2
