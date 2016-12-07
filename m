@@ -1,74 +1,89 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/5] simplify '(x / -1)' to '-x' (but only for signed division)
-Date: Wed,  7 Dec 2016 16:46:54 +0100
-Message-ID: <20161207154655.98109-5-luc.vanoostenryck@gmail.com>
-References: <20161207154655.98109-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] simplify '~(~x)' and '-(-x)' to 'x'
+Date: Wed,  7 Dec 2016 17:05:47 +0100
+Message-ID: <20161207160547.9821-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:33762 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932336AbcLGPrJ (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35681 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752203AbcLGQGk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 7 Dec 2016 10:47:09 -0500
-Received: by mail-wj0-f195.google.com with SMTP id kp2so50544893wjc.0
-        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 07:47:08 -0800 (PST)
-In-Reply-To: <20161207154655.98109-1-luc.vanoostenryck@gmail.com>
+        Wed, 7 Dec 2016 11:06:40 -0500
+Received: by mail-wm0-f66.google.com with SMTP id a20so28829422wme.2
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 08:05:52 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-A previous patch added the simplification for multiply by -1
-but we can do the same for the signed divide.
+Currently those double operations are not simplified.
 
-This patch add this simplification
-Also add the corresponding test cases.
+This patch add those simplifications and some small test cases.
+
+Note: the 'boolean not': '!(!x)' is not handled by this patch
+because this operator is processed differently (it doesn't generate
+an unop instruction but directly generates 'seteq' operations).
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                          | 3 ++-
- validation/optim/muldiv-minus-one.c | 2 ++
- 2 files changed, 4 insertions(+), 1 deletion(-)
+
+WARNING: the test cases, to give the correct results, need the patches
+from the serie "fix uses of killed instructions" sent previously.
+
+
+ simplify.c                     | 17 +++++++++++++++++
+ validation/optim/double-unop.c | 15 +++++++++++++++
+ 2 files changed, 32 insertions(+)
+ create mode 100644 validation/optim/double-unop.c
 
 diff --git a/simplify.c b/simplify.c
-index 6c7c79e9..e3e5ff6e 100644
+index b5cd0ea7..7e4bce5b 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -324,6 +324,8 @@ static int simplify_mul_div(struct instruction *insn, long long value)
- 		if (value == 0)
- 			return replace_with_pseudo(insn, insn->src2);
+@@ -588,6 +588,23 @@ static int simplify_unop(struct instruction *insn)
+ 		return REPEAT_CSE;
+ 	if (constant(insn->src1))
+ 		return simplify_constant_unop(insn);
++
++	switch (insn->opcode) {
++		struct instruction *def;
++
++	case OP_NOT:
++		def = insn->src->def;
++		if (def && def->opcode == OP_NOT)
++			return replace_with_pseudo(insn, def->src);
++		break;
++	case OP_NEG:
++		def = insn->src->def;
++		if (def && def->opcode == OP_NEG)
++			return replace_with_pseudo(insn, def->src);
++		break;
++	default:
++		return 0;
++	}
+ 	return 0;
+ }
  
-+	/* Fall through */
-+	case OP_DIVS:
- 		if (!(value & sbit))	// positive
- 			break;
- 
-@@ -333,7 +335,6 @@ static int simplify_mul_div(struct instruction *insn, long long value)
- 			return REPEAT_CSE;
- 		}
- 	/* Fall through */
--	case OP_DIVS:
- 	case OP_DIVU:
- 		break;
- 	}
-diff --git a/validation/optim/muldiv-minus-one.c b/validation/optim/muldiv-minus-one.c
-index 729b7344..05a5f915 100644
---- a/validation/optim/muldiv-minus-one.c
-+++ b/validation/optim/muldiv-minus-one.c
-@@ -2,6 +2,7 @@ typedef	unsigned int u32;
- 
- int smulm1(int a) { return a * -1; }
- u32 umulm1(u32 a) { return a * (u32) -1; }
-+int sdivm1(int a) { return a * -1; }
- 
- /*
-  * check-name: muldiv-minus-one
-@@ -9,5 +10,6 @@ u32 umulm1(u32 a) { return a * (u32) -1; }
-  * check-output-ignore
-  *
-  * check-output-excludes: mul[us]\\.
-+ * check-output-excludes: divs\\.
-  * check-output-contains: neg\\.
-  */
+diff --git a/validation/optim/double-unop.c b/validation/optim/double-unop.c
+new file mode 100644
+index 00000000..f0e6d94f
+--- /dev/null
++++ b/validation/optim/double-unop.c
+@@ -0,0 +1,15 @@
++typedef unsigned int u32;
++
++u32 unotnot(u32 a) { return ~(~a); }
++int snotnot(int a) { return ~(~a); }
++u32 unegneg(int a) { return -(-a); }
++int snegneg(int a) { return -(-a); }
++
++/*
++ * check-name: double-unop
++ * check-command: test-linearize -Wno-decl $file
++ * check-output-ignore
++ *
++ * check-output-excludes: not\\.
++ * check-output-excludes: neg\\.
++ */
 -- 
 2.10.2
 
