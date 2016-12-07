@@ -1,88 +1,118 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] simplify '~(~x)' and '-(-x)' to 'x'
-Date: Wed,  7 Dec 2016 17:05:47 +0100
-Message-ID: <20161207160547.9821-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] simplify '(x || 1)' to '1'
+Date: Wed,  7 Dec 2016 17:13:24 +0100
+Message-ID: <20161207161324.15619-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35681 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752203AbcLGQGk (ORCPT
+Received: from mail-wj0-f193.google.com ([209.85.210.193]:33790 "EHLO
+        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753226AbcLGQNb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 7 Dec 2016 11:06:40 -0500
-Received: by mail-wm0-f66.google.com with SMTP id a20so28829422wme.2
-        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 08:05:52 -0800 (PST)
+        Wed, 7 Dec 2016 11:13:31 -0500
+Received: by mail-wj0-f193.google.com with SMTP id kp2so50667775wjc.0
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Dec 2016 08:13:30 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently those double operations are not simplified.
+There is simplifications for:
+	(x && 0) => 0
+	(x && 1) => x
+	(x || 0) => x
+but the fourth case '(x || 1)' is missing.
 
-This patch add those simplifications and some small test cases.
-
-Note: the 'boolean not': '!(!x)' is not handled by this patch
-because this operator is processed differently (it doesn't generate
-an unop instruction but directly generates 'seteq' operations).
+This patch add the missing simplification and a small test case.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
-
-WARNING: the test cases, to give the correct results, need the patches
-from the serie "fix uses of killed instructions" sent previously.
-
-
- simplify.c                     | 17 +++++++++++++++++
- validation/optim/double-unop.c | 15 +++++++++++++++
- 2 files changed, 32 insertions(+)
- create mode 100644 validation/optim/double-unop.c
+ simplify.c                       |  7 +++++-
+ validation/optim/bool-simplify.c | 51 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 57 insertions(+), 1 deletion(-)
+ create mode 100644 validation/optim/bool-simplify.c
 
 diff --git a/simplify.c b/simplify.c
-index b5cd0ea7..7e4bce5b 100644
+index b5cd0ea7..da12ebe8 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -588,6 +588,23 @@ static int simplify_unop(struct instruction *insn)
- 		return REPEAT_CSE;
- 	if (constant(insn->src1))
- 		return simplify_constant_unop(insn);
-+
-+	switch (insn->opcode) {
-+		struct instruction *def;
-+
-+	case OP_NOT:
-+		def = insn->src->def;
-+		if (def && def->opcode == OP_NOT)
-+			return replace_with_pseudo(insn, def->src);
-+		break;
-+	case OP_NEG:
-+		def = insn->src->def;
-+		if (def && def->opcode == OP_NEG)
-+			return replace_with_pseudo(insn, def->src);
-+		break;
-+	default:
-+		return 0;
-+	}
- 	return 0;
- }
+@@ -315,6 +315,11 @@ static int simplify_constant_rightside(struct instruction *insn)
+ 	long long value = insn->src2->value;
  
-diff --git a/validation/optim/double-unop.c b/validation/optim/double-unop.c
-new file mode 100644
-index 00000000..f0e6d94f
---- /dev/null
-+++ b/validation/optim/double-unop.c
-@@ -0,0 +1,15 @@
-+typedef unsigned int u32;
+ 	switch (insn->opcode) {
++	case OP_OR_BOOL:
++		if (value == 1)
++			return replace_with_pseudo(insn, insn->src2);
++		goto case_neutral_zero;
 +
-+u32 unotnot(u32 a) { return ~(~a); }
-+int snotnot(int a) { return ~(~a); }
-+u32 unegneg(int a) { return -(-a); }
-+int snegneg(int a) { return -(-a); }
+ 	case OP_SUB:
+ 		if (value) {
+ 			insn->opcode = OP_ADD;
+@@ -324,9 +329,9 @@ static int simplify_constant_rightside(struct instruction *insn)
+ 	/* Fall through */
+ 	case OP_ADD:
+ 	case OP_OR: case OP_XOR:
+-	case OP_OR_BOOL:
+ 	case OP_SHL:
+ 	case OP_LSR:
++	case_neutral_zero:
+ 		if (!value)
+ 			return replace_with_pseudo(insn, insn->src1);
+ 		return 0;
+diff --git a/validation/optim/bool-simplify.c b/validation/optim/bool-simplify.c
+new file mode 100644
+index 00000000..e0ff1c2d
+--- /dev/null
++++ b/validation/optim/bool-simplify.c
+@@ -0,0 +1,51 @@
++int and_0(int a)
++{
++	return a && 0;
++}
++
++int and_1(int a)
++{
++	return a && 1;
++}
++
++int or_0(int a)
++{
++	return a || 0;
++}
++
++int or_1(int a)
++{
++	return a || 1;
++}
 +
 +/*
-+ * check-name: double-unop
++ * check-name: bool-simplify
 + * check-command: test-linearize -Wno-decl $file
-+ * check-output-ignore
 + *
-+ * check-output-excludes: not\\.
-+ * check-output-excludes: neg\\.
++ * check-output-start
++and_0:
++.L0:
++	<entry-point>
++	ret.32      $0
++
++
++and_1:
++.L2:
++	<entry-point>
++	ret.32      %arg1
++
++
++or_0:
++.L4:
++	<entry-point>
++	ret.32      %arg1
++
++
++or_1:
++.L6:
++	<entry-point>
++	ret.32      $1
++
++
++ * check-output-end
 + */
 -- 
 2.10.2
