@@ -1,47 +1,35 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH] Update maintainers in the manpage
-Date: Wed, 7 Dec 2016 21:43:44 -0800
-Message-ID: <20161208054343.vvmc2nfruwy53dez@x>
-References: <20160111192813.GA27713@cloud>
- <20161208044856.14476-1-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/2] add support for __int128
+Date: Sat, 10 Dec 2016 00:03:09 +0100
+Message-ID: <20161209230311.36024-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:48262 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752029AbcLHFnv (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36254 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751987AbcLIXDV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 8 Dec 2016 00:43:51 -0500
-Content-Disposition: inline
-In-Reply-To: <20161208044856.14476-1-luc.vanoostenryck@gmail.com>
+        Fri, 9 Dec 2016 18:03:21 -0500
+Received: by mail-wm0-f65.google.com with SMTP id m203so61779wma.3
+        for <linux-sparse@vger.kernel.org>; Fri, 09 Dec 2016 15:03:21 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Dec 08, 2016 at 05:48:56AM +0100, Luc Van Oostenryck wrote:
-> The manpage still mentioned Josh Triplett as the maintainer
-> while Christopher is the maintainer since 2009.
-> 
-> CC: Christopher Li <sparse@chrisli.org>
-> CC: Josh Triplett <josh@joshtriplett.org>
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Add support for this type since there is a proposal to use it
+in the Linux kernel.
 
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+The first patch first fix a bug related to long long long int,
+the second one really add the support.
 
->  sparse.1 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/sparse.1 b/sparse.1
-> index ccae55cc..4aeb0039 100644
-> --- a/sparse.1
-> +++ b/sparse.1
-> @@ -364,4 +364,4 @@ https://sparse.wiki.kernel.org/
->  linux-sparse@vger.kernel.org
->  .
->  .SH MAINTAINER
-> -Josh Triplett <josh@kernel.org>
-> +Christopher Li <sparse@chrisli.org>
-> -- 
-> 2.10.2
-> 
+Luc Van Oostenryck (2):
+  fix missing element in types declaration
+  add support for __int128
+
+ parse.c             | 12 ++++++++++-
+ validation/int128.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 69 insertions(+), 1 deletion(-)
+ create mode 100644 validation/int128.c
+
+-- 
+2.10.2
+
