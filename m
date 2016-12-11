@@ -1,177 +1,140 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3] fix typing error in compound assignment
-Date: Sat, 10 Dec 2016 23:43:17 +0100
-Message-ID: <20161210224317.40672-1-luc.vanoostenryck@gmail.com>
-References: <2d5af300-0a96-aec0-27a9-61efd768cdd2@ramsayjones.plus.com>
+Subject: [PATCH] llvm: fix typing when comparing to a constant
+Date: Sun, 11 Dec 2016 10:49:19 +0100
+Message-ID: <20161211094919.20894-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33627 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752250AbcLJWpk (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34315 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751983AbcLKJt2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Dec 2016 17:45:40 -0500
-Received: by mail-wm0-f68.google.com with SMTP id u144so3240071wmu.0
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Dec 2016 14:45:39 -0800 (PST)
-In-Reply-To: <2d5af300-0a96-aec0-27a9-61efd768cdd2@ramsayjones.plus.com>
+        Sun, 11 Dec 2016 04:49:28 -0500
+Received: by mail-wm0-f67.google.com with SMTP id g23so4386884wme.1
+        for <linux-sparse@vger.kernel.org>; Sun, 11 Dec 2016 01:49:28 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Al Viro <viro@zeniv.linux.org.uk>, Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Azat Khuzhin <a3at.mail@gmail.com>, Xi Wang <xi.wang@gmail.com>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
-A compound assignment like, for example:
-	x /= a;
-should have the same effect as the operation followed by the
-assignment except that the left side should only be evaluated
-once. So the statement above (assuming 'x' free of side-effects)
-should have the same effect as:
-	x = x / a;
+In translation to LLVM, comparisons are processed like usual binary
+operations. But contrary to, for example, an addition where the
+result type and the type of both operands are all the same, a
+comparison always returns an integer result (with boolean values)
+which shouldn't depends on the type/size of its operands.
 
-In particular, the usual conversions should applied. So, if the
-type of 'x' and 'a' is, respectively, 'unsigned int' (32 bit) and
-'long' (64 bit), the statement above should be equivalent to:
-	x = (unsigned int) ((long) x / a);
+There is currently a bug regarding this when an operand of a
+comparison is an integer constant:
+    the type of this constant is assumed to be the type of the result
+    of the comparison (in sparse's IR, the constants are typeless,
+    we thus need to guess/retrieve their type from the context)
 
-But what is really done currently is something like:
-	x = x / (unsigned int) a;
-In other words, the right-hand side is casted to the same type as the
-lhs and the operation is always done with this type, neglecting the
-usual conversions and thus forcing the operation to always be done
-with the lhs type, here 'unsigned int' instead of 'long'.
-For example, with the values:
-        unsigned int x = 1;
-        long a = -1;
+For example, with the following C code:
+	_Bool foo(int a) { return a != 3; }
 
-We have:
-	x = 1 / (unsigned int) (-1L);
-	x = 1 / 0xffffffff;
-	x = 0;
-instead of the expected:
-	x = (unsigned int) ((long)1 / -1L);
-	x = (unsigned int) (-1L);
-	x = 0xffffffff;
+After linearization we can have the following very straightforward:
+	setne.1    %rd <- %arg1, $3
 
-The patch fix this by first calculating the type corresponding to
-the usual conversion and then casting the right-hand side to this
-type, which is fine since it's a rvalue anyway.
-Later steps will then use the rhs type when doing the operation.
-On the example above, the cast will be a no-op and the operation will
-be done with the correct type:
-	x = x / (long) a;
-which, at linearization, will become:
-	x = (unsigned int) ((long) x / (long) a);
-and with unneeded casts optimized away:
-	x = (unsigned int) ((long) x / a);
-Which will give us the expected result.
+And we expect the following LLVM IR:
+	%rd = icmp ne i32 %0, 3
 
-If the types where in the other order, the result will also be done
-with the correct type:
-	long x;
-	unsigned int a;
-	...
-	x /= a;
-will become:
-	x = x / (long) a;
-and, at linearization:
-	x = (long) ((long) x / (long) a);
-and with unneeded casts optimized away:
-	x = (x / (long) a);
+But what is built is the illegal:
+	%rd = icmp ne i32 %0, i1 true
+because is constant '3' is translated to 'i1 true' since
+'setne.1' result type is boolean (i1 in LLVM parlance).
 
-Cc: Al Viro <viro@zeniv.linux.org.uk>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Fix this by separating the code for comparison from the others
+binary operations and using the left-hand side type to interpret
+the type of the constant (which is fine because the usual conversion
+insure that both types match and there is never a constant on the lhs).
+
+Cc: Azat Khuzhin <a3at.mail@gmail.com>
+Cc: Xi Wang <xi.wang@gmail.com>
+Cc: Pekka Enberg <penberg@kernel.org>
+Cc: Jeff Garzik <jeff@garzik.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
+ sparse-llvm.c | 53 ++++++++++++++++++++++++++++++++++-------------------
+ 1 file changed, 34 insertions(+), 19 deletions(-)
 
-Changes since v2:
- - no change in the patch itself
- - fix left-right mixup in the description, thanks to Ramsay Jones.
- - fix the test case which passed on sparse-next which doesn't yet
-   have the contains/excludes patch *sigh*
-
-Changes since v1:
- - no change in the patch itself
- - change the description with a more interesting example, thanks
-   to Alexander Viro (a division instead of an addition where
-   2-complement arithmetic which gave the same end result anyway).
- - adapt the test case to match the patch description.
-
-
- evaluate.c                        |  5 ++++-
- linearize.c                       | 10 ++++++----
- validation/compound-assign-type.c | 15 +++++++++++++++
- 3 files changed, 25 insertions(+), 5 deletions(-)
- create mode 100644 validation/compound-assign-type.c
-
-diff --git a/evaluate.c b/evaluate.c
-index e350c0c0..0ea3e866 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1258,7 +1258,7 @@ static int evaluate_assign_op(struct expression *expr)
- 			if (!restricted_value(expr->right, t))
- 				return 1;
- 		} else if (!(sclass & TYPE_RESTRICT))
--			goto Cast;
-+			goto usual;
- 		/* source and target would better be identical restricted */
- 		if (t == s)
- 			return 1;
-@@ -1281,6 +1281,9 @@ static int evaluate_assign_op(struct expression *expr)
- 	expression_error(expr, "invalid assignment");
- 	return 0;
- 
-+usual:
-+	target = usual_conversions(op, expr->left, expr->right,
-+				tclass, sclass, target, source);
- Cast:
- 	expr->right = cast_to(expr->right, target);
- 	return 1;
-diff --git a/linearize.c b/linearize.c
-index cb252282..3f1b0d3c 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1156,6 +1156,7 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 	struct access_data ad = { NULL, };
- 	struct expression *target = expr->left;
- 	struct expression *src = expr->right;
-+	struct symbol *ctype;
- 	pseudo_t value;
- 
- 	value = linearize_expression(ep, src);
-@@ -1181,10 +1182,11 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 		if (!src)
- 			return VOID;
- 
--		oldvalue = cast_pseudo(ep, oldvalue, src->ctype, expr->ctype);
--		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], src->ctype);
--		dst = add_binary_op(ep, src->ctype, opcode, oldvalue, value);
--		value = cast_pseudo(ep, dst, expr->ctype, src->ctype);
-+		ctype = src->ctype;
-+		oldvalue = cast_pseudo(ep, oldvalue, target->ctype, ctype);
-+		opcode = opcode_sign(op_trans[expr->op - SPECIAL_BASE], ctype);
-+		dst = add_binary_op(ep, ctype, opcode, oldvalue, value);
-+		value = cast_pseudo(ep, dst, ctype, expr->ctype);
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 6b41afd8..29b7cae0 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -535,24 +535,6 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 		target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+ 		break;
  	}
- 	value = linearize_store_gen(ep, value, &ad);
- 	finish_address_gen(ep, &ad);
-diff --git a/validation/compound-assign-type.c b/validation/compound-assign-type.c
-new file mode 100644
-index 00000000..450fa26d
---- /dev/null
-+++ b/validation/compound-assign-type.c
-@@ -0,0 +1,15 @@
-+static unsigned int foo(unsigned int x, long a)
+-
+-	/* Binary comparison */
+-	case OP_BINCMP ... OP_BINCMP_END: {
+-		LLVMTypeRef dst_type = insn_symbol_type(fn->module, insn);
+-
+-		if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
+-			LLVMIntPredicate op = translate_op(insn->opcode);
+-
+-			target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
+-		} else {
+-			LLVMRealPredicate op = translate_fop(insn->opcode);
+-
+-			target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
+-		}
+-
+-		target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+-		break;
+-	}
+ 	default:
+ 		assert(0);
+ 		break;
+@@ -561,6 +543,37 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 	insn->target->priv = target;
+ }
+ 
++static void output_op_compare(struct function *fn, struct instruction *insn)
 +{
-+	x /= a;
-+	return x;
++	LLVMValueRef lhs, rhs, target;
++	char target_name[64];
++
++	lhs = pseudo_to_value(fn, insn, insn->src1);
++
++	if (insn->src2->type == PSEUDO_VAL)
++		rhs = LLVMConstInt(LLVMTypeOf(lhs), insn->src2->value, 1);
++	else
++		rhs = pseudo_to_value(fn, insn, insn->src2);
++
++	pseudo_name(insn->target, target_name);
++
++	LLVMTypeRef dst_type = insn_symbol_type(fn->module, insn);
++
++	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
++		LLVMIntPredicate op = translate_op(insn->opcode);
++
++		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
++	} else {
++		LLVMRealPredicate op = translate_fop(insn->opcode);
++
++		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
++	}
++
++	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
++
++	insn->target->priv = target;
 +}
 +
-+/*
-+ * check-name: compound-assign-type
-+ * check-command: test-linearize -m64 $file
-+ * check-output-ignore
-+ *
-+ * check-output-excludes: divu\\.32
-+ * check-output-contains: divs\\.64
-+ * check-output-contains: scast\\.32
-+ */
+ static void output_op_ret(struct function *fn, struct instruction *insn)
+ {
+ 	pseudo_t pseudo = insn->src;
+@@ -874,9 +887,11 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 		output_op_ptrcast(fn, insn);
+ 		break;
+ 	case OP_BINARY ... OP_BINARY_END:
+-	case OP_BINCMP ... OP_BINCMP_END:
+ 		output_op_binary(fn, insn);
+ 		break;
++	case OP_BINCMP ... OP_BINCMP_END:
++		output_op_compare(fn, insn);
++		break;
+ 	case OP_SEL:
+ 		output_op_sel(fn, insn);
+ 		break;
 -- 
 2.10.2
 
