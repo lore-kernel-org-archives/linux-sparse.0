@@ -1,196 +1,102 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/3] simplify comparisons followed by an equality test against 0 or 1
-Date: Sun, 11 Dec 2016 22:13:27 +0100
-Message-ID: <20161211211328.26735-3-luc.vanoostenryck@gmail.com>
-References: <20161211211328.26735-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 3/5] unssa: try to avoid some OP_PHI copies
+Date: Mon, 12 Dec 2016 16:28:59 +0100
+Message-ID: <20161212152901.24948-4-luc.vanoostenryck@gmail.com>
+References: <20161212152901.24948-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37077 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753790AbcLKVQD (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35911 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932244AbcLLP3L (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 11 Dec 2016 16:16:03 -0500
-Received: by mail-wm0-f42.google.com with SMTP id t79so40147199wmt.0
-        for <linux-sparse@vger.kernel.org>; Sun, 11 Dec 2016 13:16:02 -0800 (PST)
-In-Reply-To: <20161211211328.26735-1-luc.vanoostenryck@gmail.com>
+        Mon, 12 Dec 2016 10:29:11 -0500
+Received: by mail-wm0-f66.google.com with SMTP id m203so11935242wma.3
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Dec 2016 07:29:10 -0800 (PST)
+In-Reply-To: <20161212152901.24948-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Expressions involving equality testing against zero are ubiquitious
-and can often be simplified with previous comparisons.
+OP_PHI's target can interfer with it's own source swhen defined
+in the same basic block. Such interference can create problem
+like the 'swap problem' (which only exist if the phi-node are
+'processed' sequentially if they're processed in parallel such
+problems don't exist) when phi-nodes are destructed. To avoid
+such problems OP_PHI are rewritten as OP_COPY.
 
-For example, when using test-linearize on the following code:
-	_Bool foo(int a) { return !(a < 3); }
-the following was emitted:
-	setlt.32    %r2 <- %arg1, $3
-	seteq.32    %r3 <- %r2, $0
-	setne.1     %r4 <- %r3, $0
-	ret.1       %r4
+if an OP_PHI and it's OP_PHISOURCE are in different basic blocks
+no such interference is possible and the copy is not needed.
 
-but this can be simplified into:
-	setge.1     %r4 <- %arg1, $3
-	ret.1       %r4
+This patch detect such situation and eliminate these unneeded copies.
 
-Implement this simplification and add associated test cases.
+Note: during unSSA we're removing the OP_PHI & OP_PHISOURCE
+  but we need to use the def-use chains between them. We must
+  thus not use kill_instruction() in OP_PHI (this would break
+  def-use chains and leave stray OP_PHISOURCE), it's enough
+  to set their bb to NULL.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                     | 65 ++++++++++++++++++++++++++++++++++++++++++
- validation/optim/setcc-setcc.c | 19 ++++++++++++
- validation/optim/setcc-seteq.c | 13 +++++++++
- validation/optim/setcc-setne.c | 13 +++++++++
- 4 files changed, 110 insertions(+)
- create mode 100644 validation/optim/setcc-setcc.c
- create mode 100644 validation/optim/setcc-seteq.c
- create mode 100644 validation/optim/setcc-setne.c
+ unssa.c | 32 ++++++++++++++++++++++++++++++++
+ 1 file changed, 32 insertions(+)
 
-diff --git a/simplify.c b/simplify.c
-index b29b3ebb..d076ebb5 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -310,6 +310,67 @@ static int simplify_asr(struct instruction *insn, pseudo_t pseudo, long long val
- 	return 0;
- }
+diff --git a/unssa.c b/unssa.c
+index 2660e94c..50782352 100644
+--- a/unssa.c
++++ b/unssa.c
+@@ -30,6 +30,32 @@
+ #include <assert.h>
  
-+static int compare_opcode(int opcode, int inverse)
+ 
++static int simplify_phi_node(struct instruction *phi, pseudo_t tmp)
 +{
-+	if (!inverse)
-+		return opcode;
++	pseudo_t target = phi->target;
++	struct pseudo_user *pu;
++	pseudo_t src;
 +
-+	switch (opcode) {
-+	case OP_SET_EQ:	return OP_SET_NE;
-+	case OP_SET_NE:	return OP_SET_EQ;
++	// verify if this phi can be simplified
++	FOR_EACH_PTR(phi->phi_list, src) {
++		struct instruction *def = src->def;
 +
-+	case OP_SET_LT:	return OP_SET_GE;
-+	case OP_SET_LE:	return OP_SET_GT;
-+	case OP_SET_GT:	return OP_SET_LE;
-+	case OP_SET_GE:	return OP_SET_LT;
++		if (!def)
++			continue;
++		if (def->bb == phi->bb)
++			return 0;
++	} END_FOR_EACH_PTR(src);
 +
-+	case OP_SET_A:	return OP_SET_BE;
-+	case OP_SET_AE:	return OP_SET_B;
-+	case OP_SET_B:	return OP_SET_AE;
-+	case OP_SET_BE:	return OP_SET_A;
++	// no need to make a copy of this one
++	// -> replace the target pseudo by the tmp
++	FOR_EACH_PTR(target->users, pu) {
++		use_pseudo(pu->insn, tmp, pu->userp);
++	} END_FOR_EACH_PTR(pu);
 +
-+	default:
-+		return opcode;
-+	}
++	phi->bb = NULL;
++	return 1;
 +}
 +
-+static int simplify_seteq_setne(struct instruction *insn, long long value)
-+{
-+	struct instruction *def = insn->src1->def;
-+	pseudo_t src1, src2;
-+	int inverse;
-+	int opcode;
-+
-+	if (value != 0 && value != 1)
-+		return 0;
-+
-+	if (!def)
-+		return 0;
-+
-+	inverse = (insn->opcode == OP_SET_NE) == value;
-+	opcode = def->opcode;
-+	switch (opcode) {
-+	case OP_BINCMP ... OP_BINCMP_END:
-+		// Convert:
-+		//	setcc.n	%t <- %a, %b
-+		//	setne.m %r <- %t, $0
-+		// into:
-+		//	setcc.n	%t <- %a, %b
-+		//	setcc.m %r <- %a, $b
-+		// and similar for setne/eq ... 0/1
-+		src1 = def->src1;
-+		src2 = def->src2;
-+		remove_usage(insn->src1, &insn->src1);
-+		insn->opcode = compare_opcode(opcode, inverse);
-+		use_pseudo(insn, src1, &insn->src1);
-+		use_pseudo(insn, src2, &insn->src2);
-+		return REPEAT_CSE;
-+
-+	default:
-+		return 0;
-+	}
-+}
-+
- static int simplify_constant_rightside(struct instruction *insn)
+ static void replace_phi_node(struct instruction *phi)
  {
- 	long long value = insn->src2->value;
-@@ -342,6 +403,10 @@ static int simplify_constant_rightside(struct instruction *insn)
- 		if (!value)
- 			return replace_with_pseudo(insn, insn->src2);
- 		return 0;
+ 	pseudo_t tmp;
+@@ -40,6 +66,9 @@ static void replace_phi_node(struct instruction *phi)
+ 	tmp->ident = phi->target->ident;
+ 	tmp->def = NULL;		// defined by all the phisrc
+ 
++	// can we avoid to make of copy?
++	simplify_phi_node(phi, tmp);
 +
-+	case OP_SET_NE:
-+	case OP_SET_EQ:
-+		return simplify_seteq_setne(insn, value);
- 	}
- 	return 0;
- }
-diff --git a/validation/optim/setcc-setcc.c b/validation/optim/setcc-setcc.c
-new file mode 100644
-index 00000000..fac7520e
---- /dev/null
-+++ b/validation/optim/setcc-setcc.c
-@@ -0,0 +1,19 @@
-+static _Bool blt(int a, int b)	{ return  (a <  b); }
-+static _Bool bnge(int a, int b)	{ return !(a >= b); }
-+static _Bool bgt(int a, int b)	{ return  (a >  b); }
-+static _Bool bnle(int a, int b)	{ return !(a <= b); }
-+static _Bool ble(int a, int b)	{ return  (a <= b); }
-+static _Bool bngt(int a, int b)	{ return !(a >  b); }
-+static _Bool bge(int a, int b)	{ return  (a >= b); }
-+static _Bool bnlt(int a, int b)	{ return !(a <  b); }
+ 	// rewrite all it's phi_src to copy to a new tmp
+ 	FOR_EACH_PTR(phi->phi_list, p) {
+ 		struct instruction *def = p->def;
+@@ -53,6 +82,9 @@ static void replace_phi_node(struct instruction *phi)
+ 		def->target = tmp;
+ 	} END_FOR_EACH_PTR(p);
+ 
++	if (!phi->bb)
++		return;
 +
-+/*
-+ * check-name: optim/setcc-setcc
-+ * check-command: test-linearize $file
-+ * check-output-ignore
-+ *
-+ * check-output-excludes: set..\\.32
-+ * check-output-excludes: setne\\.1
-+ * check-output-excludes: seteq\\.1
-+ * check-output-contains: set[gt][te]\\.1
-+ */
-diff --git a/validation/optim/setcc-seteq.c b/validation/optim/setcc-seteq.c
-new file mode 100644
-index 00000000..d8765fe1
---- /dev/null
-+++ b/validation/optim/setcc-seteq.c
-@@ -0,0 +1,13 @@
-+static _Bool beq0(int a)	{ return  (a == 0); }
-+static _Bool bnotneq0(int a)	{ return !(a != 0); }
-+static _Bool bnot(int a)	{ return !a; }
-+
-+/*
-+ * check-name: optim/setcc-seteq
-+ * check-command: test-linearize $file
-+ * check-output-ignore
-+ *
-+ * check-output-excludes: set..\\.32
-+ * check-output-excludes: setne\\.1
-+ * check-output-contains: seteq\\.1
-+ */
-diff --git a/validation/optim/setcc-setne.c b/validation/optim/setcc-setne.c
-new file mode 100644
-index 00000000..f982eb34
---- /dev/null
-+++ b/validation/optim/setcc-setne.c
-@@ -0,0 +1,13 @@
-+static _Bool bnoteq0(int a)	{ return !(a == 0); }
-+static _Bool bne0(int a)	{ return  (a != 0); }
-+static _Bool bnotnot(int a)	{ return !!a; }
-+
-+/*
-+ * check-name: optim/setcc-setne
-+ * check-command: test-linearize $file
-+ * check-output-ignore
-+ *
-+ * check-output-excludes: set..\\.32
-+ * check-output-excludes: seteq\\.1
-+ * check-output-contains: setne\\.1
-+ */
+ 	// rewrite the phi node:
+ 	//	phi	%rt, ...
+ 	// to:
 -- 
 2.10.2
 
