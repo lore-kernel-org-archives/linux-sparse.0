@@ -1,104 +1,104 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/4] fix phisrc mixup
-Date: Wed,  4 Jan 2017 04:03:20 +0100
-Message-ID: <20170104030321.28019-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/4] missing load simplification
+Date: Wed,  4 Jan 2017 04:03:21 +0100
+Message-ID: <20170104030321.28019-5-luc.vanoostenryck@gmail.com>
 References: <20170104030321.28019-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f195.google.com ([209.85.210.195]:35774 "EHLO
-        mail-wj0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753485AbdADDEM (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35283 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753489AbdADDEM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Tue, 3 Jan 2017 22:04:12 -0500
-Received: by mail-wj0-f195.google.com with SMTP id hb5so40765744wjc.2
-        for <linux-sparse@vger.kernel.org>; Tue, 03 Jan 2017 19:03:37 -0800 (PST)
+Received: by mail-wm0-f66.google.com with SMTP id l2so64006991wml.2
+        for <linux-sparse@vger.kernel.org>; Tue, 03 Jan 2017 19:03:38 -0800 (PST)
 In-Reply-To: <20170104030321.28019-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In some cases phi sources are all mixed-up.
-For example, on the following case:
-	static int foo(void)
+In memops:find_dominating_parents(), the 'load-load optimization'
+(see commit cf07903a "Don't bother finding dominating loads if ...")
+cause some loads simplification to be missed.
+For example, with the following code:
+	int foo(int *i, int *j)
 	{
-		int i = 6;
-		int j = 1;
+		*i = 6;
+		*j = 1;
+
 		do {
-			if (i != 6)
-				i++;
-			i++;
-		} while (i != j);
-		return j;
+			if (*i != 6)
+				(*i)++;
+			(*i)++;
+		} while (*i != *j);
+
+		return *j;
 	}
 
 test-linearize returns something like:
+	foo:
 	.L0:
-		phisrc.32   %phi3(i) <- $6
-		phisrc.32   %phi7(i) <- $6
+		<entry-point>
+		store.32    $6 -> 0[%arg1]
+		store.32    $1 -> 0[%arg2]
 		br          .L1
+
 	.L1:
-		phi.32      %r1(i) <- %phi7(i), %phi8(i)
-		setne.32    %r2 <- %r1(i), $6
-		br          %r2, .L4, .L5
+		load.32     %r4 <- 0[%arg1]
+		setne.32    %r5 <- %r4, $6
+		br          %r5, .L4, .L5
+
 	.L4:
-		add.32      %r4 <- %r1(i), $1
-		phisrc.32   %phi5(i) <- %r4
+		add.32      %r8 <- %r4, $1
+		store.32    %r8 -> 0[%arg1]
 		br          .L5
+
 	.L5:
-		phi.32      %r5 <- %phi3(i), %phi4(i), %phi5(i)
-		add.32      %r6(i) <- %r5, $1
-		phisrc.32   %phi4(i) <- %r6(i)
-		phisrc.32   %phi8(i) <- %r6(i)
-		setne.32    %r8 <- %r6(i), $1
-		br          %r8, .L1, .L6
+		load.32     %r10 <- 0[%arg1]
+		add.32      %r11 <- %r10, $1
+		store.32    %r11 -> 0[%arg1]
+		load.32     %r15 <- 0[%arg2]
+		setne.32    %r16 <- %r11, %r15
+		br          %r16, .L1, .L6
+
 	.L6:
-		ret.32      $1
+		ret.32      %r15
 
-The phi-node in .L5 is odd: .L5 has 2 parents (.L1 & .L4), we thus
-expect to have 2 phisrc, one in .L1 and another one in .L4. There is
-other oddities with phisrc: the redundant ones in .L0 and .L5.
-In fact there is some sort of mixup with the phi & phisrc of .L1
-and the ones in .L5 (and investigation showed it doesn't come from
-further simplification phase but are already there since the creation
-of these phi & phisrc).
+where we can notice that the first load in .L5 is not needed,
+the value could be retrieved from %r4 and %r8, like:
+	@@ -8,15 +8,17 @@
+	 .L1:
+	 	load.32     %r4 <- 0[%arg1]
+	 	setne.32    %r5 <- %r4, $6
+	+	phisrc.32   %phi4 <- %r4
+	 	br          %r5, .L4, .L5
 
-The fix essentially consists in a revert of
-  (commit cf07903a "Don't bother finding dominating loads if we have to search multiple paths")
-which was already partially reverted in
-  (commit c040f2e0 "Remove incorrect left-over from (not useful) old load-load dominance trials.")
+	 .L4:
+	 	add.32      %r8 <- %r4, $1
+	 	store.32    %r8 -> 0[%arg1]
+	+	phisrc.32   %phi5 <- %r8
+	 	br          .L5
 
-We then get the more expected:
-	.L0:
-		phisrc.32   %phi6(i) <- $6
-		br          .L1
-	.L1:
-		phi.32      %r1(i) <- %phi6(i), %phi7(i)
-		setne.32    %r2 <- %r1(i), $6
-		phisrc.32   %phi3(i) <- %r1(i)
-		br          %r2, .L4, .L5
-	.L4:
-		add.32      %r4 <- %r1(i), $1
-		phisrc.32   %phi4(i) <- %r4
-		br          .L5
-	.L5:
-		phi.32      %r5 <- %phi3(i), %phi4(i)
-		add.32      %r6(i) <- %r5, $1
-		phisrc.32   %phi7(i) <- %r6(i)
-		setne.32    %r8 <- %r6(i), $1
-		br          %r8, .L1, .L6
-	.L6:
-		ret.32      $1
+	 .L5:
+	-	load.32     %r10 <- 0[%arg1]
+	+	phi.32      %r10 <- %phi4, %phi5
+	 	add.32      %r11 <- %r10, $1
+	 	store.32    %r11 -> 0[%arg1]
+	 	load.32     %r15 <- 0[%arg2]
+
+The fix essentially consists in reverting commit cf07903a but on
+memops.c's version of find_dominating_parents().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c | 10 +++-------
+ memops.c | 10 +++-------
  1 file changed, 3 insertions(+), 7 deletions(-)
 
-diff --git a/flow.c b/flow.c
-index d8e253b1..ef07b6db 100644
---- a/flow.c
-+++ b/flow.c
-@@ -329,15 +329,13 @@ static int phisrc_in_bb(struct pseudo_list *list, struct basic_block *bb)
+diff --git a/memops.c b/memops.c
+index 6dac1f57..5efdd6f2 100644
+--- a/memops.c
++++ b/memops.c
+@@ -18,12 +18,10 @@
  
  static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
  	struct basic_block *bb, unsigned long generation, struct pseudo_list **dominators,
@@ -107,15 +107,12 @@ index d8e253b1..ef07b6db 100644
  {
  	struct basic_block *parent;
  
- 	if (!bb->parents)
- 		return !!local;
- 
 -	if (bb_list_size(bb->parents) > 1)
 -		loads = 0;
  	FOR_EACH_PTR(bb->parents, parent) {
  		struct instruction *one;
  		struct instruction *br;
-@@ -355,8 +353,6 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
+@@ -41,8 +39,6 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
  			}
  			if (!dominance)
  				continue;
@@ -124,7 +121,7 @@ index d8e253b1..ef07b6db 100644
  			goto found_dominator;
  		} END_FOR_EACH_PTR_REVERSE(one);
  no_dominance:
-@@ -364,7 +360,7 @@ no_dominance:
+@@ -50,7 +46,7 @@ no_dominance:
  			continue;
  		parent->generation = generation;
  
@@ -133,15 +130,15 @@ index d8e253b1..ef07b6db 100644
  			return 0;
  		continue;
  
-@@ -467,7 +463,7 @@ found:
- 	bb->generation = generation;
- 
- 	dominators = NULL;
--	if (!find_dominating_parents(pseudo, insn, bb, generation, &dominators, local, 1))
-+	if (!find_dominating_parents(pseudo, insn, bb, generation, &dominators, local))
- 		return 0;
- 
- 	/* This happens with initial assignments to structures etc.. */
+@@ -124,7 +120,7 @@ static void simplify_loads(struct basic_block *bb)
+ 			generation = ++bb_generation;
+ 			bb->generation = generation;
+ 			dominators = NULL;
+-			if (find_dominating_parents(pseudo, insn, bb, generation, &dominators, local, 1)) {
++			if (find_dominating_parents(pseudo, insn, bb, generation, &dominators, local)) {
+ 				/* This happens with initial assignments to structures etc.. */
+ 				if (!dominators) {
+ 					if (local) {
 -- 
 2.11.0
 
