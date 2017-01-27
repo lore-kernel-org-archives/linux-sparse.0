@@ -1,24 +1,33 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Van Oostenryck Luc <luc.vanoostenryck@gmail.com>
 Subject: Re: Output from linearize and LLVM error
-Date: Fri, 27 Jan 2017 15:09:17 +0000
-Message-ID: <CACXZuxcwfTFFEpLmopuRgv-bTYQQ5SYUoKQniTSAE_VYEdKRQg@mail.gmail.com>
+Date: Fri, 27 Jan 2017 16:59:30 +0100
+Message-ID: <CAExDi1SVaW1ZrcGZLHS+2T22zaAEiMKiNVzVnX4PdgurwoizXA@mail.gmail.com>
 References: <CACXZuxdM0zwfubUxHTJDen456-y9cpgpQJBcB8gKoXYtX5baSA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f44.google.com ([209.85.213.44]:32990 "EHLO
-        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755046AbdA0PKM (ORCPT
+Received: from mail-qt0-f193.google.com ([209.85.216.193]:33112 "EHLO
+        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932195AbdA0QAF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 27 Jan 2017 10:10:12 -0500
-Received: by mail-vk0-f44.google.com with SMTP id k127so176645806vke.0
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Jan 2017 07:09:18 -0800 (PST)
+        Fri, 27 Jan 2017 11:00:05 -0500
+Received: by mail-qt0-f193.google.com with SMTP id n13so46759541qtc.0
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Jan 2017 07:59:36 -0800 (PST)
 In-Reply-To: <CACXZuxdM0zwfubUxHTJDen456-y9cpgpQJBcB8gKoXYtX5baSA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: linux-sparse@vger.kernel.org
 
-On 27 January 2017 at 14:00, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
+On Fri, Jan 27, 2017 at 3:00 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> Hi
+> I am investigating some assertion failures I am getting from LLVM when
+> trying to compile some test code. Following is a simple test program
+> that is failing.
+>
+> typedef unsigned long long size_t;
+> extern void *malloc(size_t);
 > struct foo {
 >         int i;
 > };
@@ -28,6 +37,15 @@ On 27 January 2017 at 14:00, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
 >         foo *p = (foo *) malloc(sizeof(struct foo));
 >         return p;
 > }
+>
+> There were two failures. First one occurs in the result of the
+> sizeof() expression - it seems the builder tries to create an integer
+> constant but passes LLVM a 'char *' as the type, which causes an
+> assertion failure in LLVM. This error occurs in pseudo_to_value()
+> function in sparse-llvm.c for the case PSEUDO_VAL. I worked around
+> this by checking if the type is a pointer and then asking LLVM to
+> create an integer constant of appropriate size (not sure why the type
+> is a pointer type here).
 >
 > Here is the output from test-linearize:
 >
@@ -40,31 +58,21 @@ On 27 January 2017 at 14:00, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
 >
 > The second LLVM assertion failure occurs in the cast to (64).
 >
+> My question is this - does this cast look correct? Should it not be a
+> pointer cast rather than an integer cast?
 
-In linearize.c:
+I think both problems are already addressed but the patches haven't
+yet been handled.
 
-static struct instruction *alloc_cast_instruction(struct symbol *src,
-struct symbol *ctype)
-{
- int opcode = OP_CAST;
- struct symbol *base = src;
- if (base->ctype.modifiers & MOD_SIGNED)
-  opcode = OP_SCAST;
- if (base->type == SYM_NODE)
-  base = base->ctype.base_type;
- if (base->type == SYM_PTR) {
-  base = base->ctype.base_type;
-  if (base != &void_ctype)
-   opcode = OP_PTRCAST;
- }
- if (base->ctype.base_type == &fp_type)
-  opcode = OP_FPCAST;
- return alloc_typed_instruction(opcode, ctype);
-}
+You may look at:
+- https://patchwork.kernel.org/patch/9469701/
+- https://patchwork.kernel.org/patch/9516077/
 
-So if base->type is SYM_PTR but base->c.type.base_type is not void
-then the cast instruction is left as OP_CAST, but it should be
-OP_PTRCAST regardless?
+> Also the output from test-linearize and test-parsing do not seem to
+> dump the types. How can I get the types dumped out as well?
 
-Thanks and Regards
-Dibyendu
+Yes, it's sometimes annoying.
+Generaly, I when I need this, I add a few printf( .... show_typename(sym))
+
+Regards,
+Luc Van Oostenryck
