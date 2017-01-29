@@ -1,162 +1,97 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 2/8] kill uses of replaced instructions
-Date: Sun, 29 Jan 2017 11:48:02 +0100
-Message-ID: <20170129104808.2500-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 5/8] fix killing OP_SELECT
+Date: Sun, 29 Jan 2017 11:48:05 +0100
+Message-ID: <20170129104808.2500-6-luc.vanoostenryck@gmail.com>
 References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35485 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750944AbdA2Ksv (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35510 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750966AbdA2Ksx (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 29 Jan 2017 05:48:51 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u63so1548551wmu.2
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 02:48:50 -0800 (PST)
+        Sun, 29 Jan 2017 05:48:53 -0500
+Received: by mail-wm0-f67.google.com with SMTP id u63so1548702wmu.2
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 02:48:52 -0800 (PST)
 In-Reply-To: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-When an instruction is replaced by a pseudo, the 'usage' of its
-operands should be removed too but it's not the case.
+Currently kill_instruction() doesn't do anything with the
+operands of select instructions (OP_SELECT). But when these
+instructions are removed we must also remove the operands 'usage'.
+Without this the instructions which provides the select's
+operands are not optimized away as expected.
 
-The fix consists in calling kill_use() for each operands after
-the pseudo is replaced.
-Not all types of instruction are considered, only those which
-can be replaced by a pseudo.
+This patch fixes this by doing for OP_SELECTs the basic
+kill_instruction() for ternary instruction, like OP_RANGE.
 
-The following example illustrate the situation. When looking at
-the output of test-linearize, the following function:
+As an example, when looking at the output of test-linearize,
+the following code:
 
-	static int kill_add(int a, int b)
+	void foo(int x)
 	{
-		return (a + b) && 0;
+		unsigned int ui;
+
+		ui = x + 1;
+		ui = ui ? 0 : 1;
 	}
 
-without the patch, gives this output:
+gives this output:
 
-	kill_add:
-		add.32      %r3 <- %arg1, %arg2
-		ret.32      $0
+	foo:
+		add.32      %r2 <- %arg1, $1
+		ret
 
-The 'add' instruction is obviously unneeded but nevertheless present.
+Since the result of the ?: is never used, the whole code should be
+optimized away. The 'select' instruction itself is indeed discarded
+but the 'add' is not.
 
-Before any optimization the code was something like:
+With the patch, the output is much closer to what's expected:
 
-	kill_add:
-		add.32      %r3 <- %arg1, %arg2
-		and_bool.32 %r4 <- %r3, $0
-		ret.32      %r4
-
-During the simplification phase, the result of the 'and' instruction (%r4)
-have been replaced by '0' and the instruction itself is discarded.
-But '%r3' usage has not been adjusted and the further phases are not
-aware that '%r3' is not needed anymore and so the 'add' instruction is kept
-while not needed by anything.
-
-With the patch the 'add' instruction is correctly discarded, giving the
-expected output:
-
-	kill_add:
-		ret.32      $0
+	foo:
+		ret
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                      | 20 +++++++++++++++
- validation/kill-replaced-insn.c | 54 +++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 74 insertions(+)
- create mode 100644 validation/kill-replaced-insn.c
+ simplify.c               |  1 +
+ validation/kill-select.c | 16 ++++++++++++++++
+ 2 files changed, 17 insertions(+)
+ create mode 100644 validation/kill-select.c
 
 diff --git a/simplify.c b/simplify.c
-index 3dea03b5e..ed41e441a 100644
+index fc6bae791..1e4aa63b4 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -253,6 +253,26 @@ static inline int constant(pseudo_t pseudo)
- static int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
- {
- 	convert_instruction_target(insn, pseudo);
-+
-+	switch (insn->opcode) {
+@@ -216,6 +216,7 @@ void kill_instruction(struct instruction *insn)
+ 		repeat_phase |= REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
+ 		return;
+ 
 +	case OP_SEL:
-+	case OP_RANGE:
-+		kill_use(&insn->src3);
-+	case OP_BINARY ... OP_BINCMP_END:
-+		kill_use(&insn->src2);
-+	case OP_NOT:
-+	case OP_NEG:
-+	case OP_SYMADDR:
-+	case OP_CAST:
-+	case OP_SCAST:
-+	case OP_FPCAST:
-+	case OP_PTRCAST:
-+		kill_use(&insn->src1);
-+		break;
-+
-+	default:
-+		assert(0);
-+	}
- 	insn->bb = NULL;
- 	return REPEAT_CSE;
- }
-diff --git a/validation/kill-replaced-insn.c b/validation/kill-replaced-insn.c
+ 	case OP_RANGE:
+ 		insn->bb = NULL;
+ 		repeat_phase |= REPEAT_CSE;
+diff --git a/validation/kill-select.c b/validation/kill-select.c
 new file mode 100644
-index 000000000..be031b6c1
+index 000000000..445472be8
 --- /dev/null
-+++ b/validation/kill-replaced-insn.c
-@@ -0,0 +1,54 @@
-+// See if the replaced operation is effectively killed or not
-+
-+static int kill_add(int a, int b)
++++ b/validation/kill-select.c
+@@ -0,0 +1,16 @@
++void foo(int x);
++void foo(int x)
 +{
-+	return (a + b) && 0;
-+}
++	unsigned int ui;
 +
-+static int kill_scast(short a)
-+{
-+	return ((int) a) && 0;
-+}
-+
-+static int kill_ucast(unsigned char a)
-+{
-+	return ((int) a) && 0;
-+}
-+
-+static int kill_pcast(int *a)
-+{
-+	return ((void*) a) && 0;
-+}
-+
-+static int kill_fcast(double a)
-+{
-+	return ((int) a) && 0;
-+}
-+
-+static int kill_select(int a)
-+{
-+	return (a ? 1 : 0) && 0;
-+}
-+
-+static int kill_load(int *a)
-+{
-+	return *a && 0;
-+}
-+
-+static int kill_store(int *a)
-+{
-+	return (*a = 1) && 0;
++	ui = x + 1;
++	ui = ui ? 0 : 1;
 +}
 +
 +/*
-+ * check-name: kill-replaced-insn
++ * check-name: kill-select
 + * check-command: test-linearize $file
 + *
 + * check-output-ignore
 + * check-output-excludes: add\\.
-+ * check-output-excludes: scast\\.
-+ * check-output-excludes: \\<cast\\.
-+ * check-output-excludes: ptrcast\\.
-+ * check-output-excludes: fpcast\\.
-+ * check-output-excludes: sel\\.
 + */
 -- 
 2.11.0
