@@ -1,117 +1,111 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 4/8] fix killing OP_CAST & friends
-Date: Sun, 29 Jan 2017 11:48:04 +0100
-Message-ID: <20170129104808.2500-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 8/8] cleanup kill_instruction()
+Date: Sun, 29 Jan 2017 11:48:08 +0100
+Message-ID: <20170129104808.2500-9-luc.vanoostenryck@gmail.com>
 References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32872 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35538 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750952AbdA2Ksw (ORCPT
+        with ESMTP id S1750944AbdA2Ks4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 29 Jan 2017 05:48:52 -0500
-Received: by mail-wm0-f67.google.com with SMTP id v77so8887780wmv.0
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 02:48:52 -0800 (PST)
+        Sun, 29 Jan 2017 05:48:56 -0500
+Received: by mail-wm0-f67.google.com with SMTP id u63so1548937wmu.2
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 02:48:55 -0800 (PST)
 In-Reply-To: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently  kill_instruction() doesn't do anything with the
-operands of casts instructions. But when theses instructions
-are removed the operands 'usage' must be adjusted and this is
-not done and as result the instructions producing the operands
-of these casts are not optimized away as expected.
-
-This patch fixes that by killing these casts the same way as others
-unary instructions (OP_NOT & OP_NEG).
-
-To illustrate the situation, the output of test-linearize
-on the following code:
-	extern void __abort(void);
-	struct s {
-		int elem:3;
-	};
-	void foo(struct s *x);
-	void foo(struct s *x)
-	{
-		if (x->elem == 0) {
-			if (x->elem != 0 && x->elem != 1)
-				__abort();
-		}
-	}
-
-gives this output without the patch:
-	foo:
-		load.32     %r2 <- 0[%arg1]
-		cast.32     %r3 <- (3) %r2
-		br          .L1
-	.L1:
-		ret
-
-Since x->elem can't be at the same time == 0 & != 0, the inner if is never
-true and the whole code should have been optimized away.
-The 'cast' instruction is obviously not needed but nevertheless present.
-
-With the patch, the output is much closer to what's expected:
-	foo:
-		load.32     %r2 <- 0[%arg1]
-		br          .L1
-	.L1:
-		ret
-
-Note 1) The 'load' instruction is also dead but it's a separate problem.
+No functional changes:
+- factorize out the '->bb = NULL' and '|= REPEAT_CSE'.
+- fall through the switch cases for ternary/bunary/unary ops.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c              |  4 ++++
- validation/kill-casts.c | 22 ++++++++++++++++++++++
- 2 files changed, 26 insertions(+)
- create mode 100644 validation/kill-casts.c
+ simplify.c | 47 +++++++++++++++++++++--------------------------
+ 1 file changed, 21 insertions(+), 26 deletions(-)
 
 diff --git a/simplify.c b/simplify.c
-index 90998021d..fc6bae791 100644
+index 66550fa3d..f62fc83a1 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -195,6 +195,10 @@ void kill_instruction(struct instruction *insn)
- 		repeat_phase |= REPEAT_CSE;
+@@ -188,54 +188,49 @@ void kill_instruction(struct instruction *insn)
  		return;
  
-+	case OP_CAST:
-+	case OP_SCAST:
-+	case OP_FPCAST:
-+	case OP_PTRCAST:
+ 	switch (insn->opcode) {
++	case OP_SEL:
++	case OP_RANGE:
++		kill_use(&insn->src3);
++		/* fall through */
++
+ 	case OP_BINARY ... OP_BINCMP_END:
+-		insn->bb = NULL;
+-		kill_use(&insn->src1);
+ 		kill_use(&insn->src2);
+-		repeat_phase |= REPEAT_CSE;
+-		return;
++		/* fall through */
+ 
+ 	case OP_CAST:
+ 	case OP_SCAST:
+ 	case OP_FPCAST:
+ 	case OP_PTRCAST:
  	case OP_NOT: case OP_NEG:
- 		insn->bb = NULL;
+-		insn->bb = NULL;
  		kill_use(&insn->src1);
-diff --git a/validation/kill-casts.c b/validation/kill-casts.c
-new file mode 100644
-index 000000000..cf52f2460
---- /dev/null
-+++ b/validation/kill-casts.c
-@@ -0,0 +1,22 @@
-+extern void __abort(void);
+-		repeat_phase |= REPEAT_CSE;
+-		return;
++		break;
+ 
+ 	case OP_PHI:
+ 		clear_phi(insn);
+-		insn->bb = NULL;
+-		repeat_phase |= REPEAT_CSE;
+-		return;
++		break;
+ 
+ 	case OP_SYMADDR:
+-		insn->bb = NULL;
+-		repeat_phase |= REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
+-		return;
++		repeat_phase |= REPEAT_SYMBOL_CLEANUP;
++		break;
+ 
+-	case OP_SEL:
+-	case OP_RANGE:
+-		insn->bb = NULL;
+-		repeat_phase |= REPEAT_CSE;
+-		kill_use(&insn->src1);
+-		kill_use(&insn->src2);
+-		kill_use(&insn->src3);
+-		return;
+ 	case OP_BR:
++		if (!insn->bb_true || !insn->bb_false)
++			break;
++		/* fall through */
 +
-+struct s {
-+	int elem:3;
-+};
+ 	case OP_COMPUTEDGOTO:
+-		insn->bb = NULL;
+-		repeat_phase |= REPEAT_CSE;
+-		if (insn->bb_true && insn->bb_false)
+-			kill_use(&insn->cond);
+-		return;
++		kill_use(&insn->cond);
++		break;
+ 
+ 	case OP_ENTRY:
++	default:
+ 		/* ignore */
+ 		return;
+ 	}
 +
-+void foo(struct s *x);
-+void foo(struct s *x)
-+{
-+	if (x->elem == 0) {
-+		if (x->elem != 0 && x->elem != 1)
-+			__abort();
-+	}
-+}
-+
-+/*
-+ * check-name: kill-casts
-+ * check-command: test-linearize $file
-+ *
-+ * check-output-ignore
-+ * check-output-excludes: cast\\.
-+ */
++	insn->bb = NULL;
++	repeat_phase |= REPEAT_CSE;
++	return;
+ }
+ 
+ /*
 -- 
 2.11.0
 
