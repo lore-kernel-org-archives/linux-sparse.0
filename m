@@ -1,45 +1,36 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 7/8] explicitely ignore killing OP_ENTRY
-Date: Sun, 29 Jan 2017 11:48:07 +0100
-Message-ID: <20170129104808.2500-8-luc.vanoostenryck@gmail.com>
+Subject: status of sparse-next
+Date: Sun, 29 Jan 2017 12:04:09 +0100
+Message-ID: <20170129110408.plroh36zakyh5uay@macbook.local>
 References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32896 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750997AbdA2KtA (ORCPT
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:37745 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751132AbdA2LbA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 29 Jan 2017 05:49:00 -0500
-Received: by mail-wm0-f67.google.com with SMTP id v77so8887951wmv.0
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 02:48:59 -0800 (PST)
+        Sun, 29 Jan 2017 06:31:00 -0500
+Received: by mail-wm0-f42.google.com with SMTP id v77so8528754wmv.0
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Jan 2017 03:30:55 -0800 (PST)
+Content-Disposition: inline
 In-Reply-To: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>
 
-It doesn't change anything, it's more for documentation
-purpose.
+I've tested reatively extensively the current sparse-next.
+There was a crash problem triggered by one of my patches and
+two others minors problems, all three addressed by this serie.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c | 4 ++++
- 1 file changed, 4 insertions(+)
+With this changes, sparse-next behave correctly on:
+- the testsuite
+- using sparse on an allyesconfig of the kernel on x86
+- no crashes on the GCC testsuite (where sparse or test-linearizes
+  make sense).
+- my collection of test files (200+ files but consisting mainly
+  of simple cases concerning linearization).
 
-diff --git a/simplify.c b/simplify.c
-index 690fdc4e8..66550fa3d 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -231,6 +231,10 @@ void kill_instruction(struct instruction *insn)
- 		if (insn->bb_true && insn->bb_false)
- 			kill_use(&insn->cond);
- 		return;
-+
-+	case OP_ENTRY:
-+		/* ignore */
-+		return;
- 	}
- }
- 
--- 
-2.11.0
 
+Luc
