@@ -1,74 +1,62 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Subject: Re: Output from linearize and LLVM error
-Date: Fri, 27 Jan 2017 21:43:20 +0100
-Message-ID: <20170127204319.agxtocpiblrcmrbj@macpro.local>
+Date: Sun, 29 Jan 2017 00:26:40 +0000
+Message-ID: <CACXZuxeAJ5Re_9RzeoAdK+1KbKadHd4=wm+PXUCSt3aRGqOE6g@mail.gmail.com>
 References: <CACXZuxdM0zwfubUxHTJDen456-y9cpgpQJBcB8gKoXYtX5baSA@mail.gmail.com>
  <CAExDi1SVaW1ZrcGZLHS+2T22zaAEiMKiNVzVnX4PdgurwoizXA@mail.gmail.com>
  <CACXZuxe=L+DZzzax2vQCrty9ZYK60dJbnWp98Cz+NJmiaoRL4A@mail.gmail.com>
  <CACXZuxe6UNi2ktdAn95-zUGWbchiK7z3NgS-2spe=TnwY5X_tg@mail.gmail.com>
- <20170127190716.e7ux5guhg7sbomar@macpro.local>
+ <20170127190716.e7ux5guhg7sbomar@macpro.local> <20170127204319.agxtocpiblrcmrbj@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:35601 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750716AbdA0Wfy (ORCPT
+Received: from mail-vk0-f54.google.com ([209.85.213.54]:36472 "EHLO
+        mail-vk0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752609AbdA2A1j (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 27 Jan 2017 17:35:54 -0500
-Received: by mail-wm0-f50.google.com with SMTP id r126so136980510wmr.0
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Jan 2017 14:34:14 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20170127190716.e7ux5guhg7sbomar@macpro.local>
+        Sat, 28 Jan 2017 19:27:39 -0500
+Received: by mail-vk0-f54.google.com with SMTP id t8so197171990vke.3
+        for <linux-sparse@vger.kernel.org>; Sat, 28 Jan 2017 16:26:41 -0800 (PST)
+In-Reply-To: <20170127204319.agxtocpiblrcmrbj@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: linux-sparse@vger.kernel.org
 
-On Fri, Jan 27, 2017 at 08:07:17PM +0100, Luc Van Oostenryck wrote:
-> On Fri, Jan 27, 2017 at 06:18:07PM +0000, Dibyendu Majumdar wrote:
-> > H Luc,
-> > 
-> > On 27 January 2017 at 17:11, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> > > On 27 January 2017 at 15:59, Van Oostenryck Luc
-> > > <luc.vanoostenryck@gmail.com> wrote:
-> > >> I think both problems are already addressed but the patches haven't
-> > >> yet been handled.
-> > >>
-> > >> You may look at:
-> > >> - https://patchwork.kernel.org/patch/9469701/
-> > 
-> > I had a look at the two patches. I think this one is only for
-> > comparison operations? So the particular failure I saw will still
-> > occur I think.
-> 
-> Yes, indeed.
-> I've quickly looked at your test case;
-> It seems to be related to a type problem, probably related to
-> size_t.(I see:
-> 	... call i8* @alloc(i0 4)
-> and this 'i0' is very suspect.
-> The following also fail because of a type problem but with the pointer.
-> Even with replacing the pointers by void pointers it gives:
-> 	i64  %0 = call i8* @malloc(i0 4)
-> where the i64 is clearly wrong.
-> It's possible that this late problem is a side effect of my second
-> patch, I'll  investigate this tommorow.
-> 
+Hi Luc,
 
-It seems that (at least a part of) your problem that malloc()
-is called with a constant value and this is not handled correctly
-by sparse-llvm. If the size is not a constant but given as argument
-to testfunc() things are OK.
+On 27 January 2017 at 20:43, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> To get the type of malloc()'s arg and this is done by calling
+> pseudo_to_value() with the malloc instruction and the pseudo
+> for the size (but no info about this pseudo being malloc()'s arg).
+> LLVMConstInt() is then called with the constant value and the type
+> is given by calling insn_symbol_type() with the malloc instruction
+> but again, it's not possible to get the right type without specifying
+> we try to get the type of the first argument of the called function
+> and not the type of the result.
+>
 
-To get the type of malloc()'s arg and this is done by calling
-pseudo_to_value() with the malloc instruction and the pseudo
-for the size (but no info about this pseudo being malloc()'s arg).
-LLVMConstInt() is then called with the constant value and the type
-is given by calling insn_symbol_type() with the malloc instruction
-but again, it's not possible to get the right type without specifying
-we try to get the type of the first argument of the called function
-and not the type of the result.
+I think that there is a problem wherever pseudo_to_value() is being
+used and the pseudo is an integer constant. Firstly the logic for
+determining the size of the constant needs to cover all cases and
+secondly depending upon the context the constant may need to be cast
+to a pointer. So while the patch you mentioned before tries to solve
+this for comparison operations, I think that the solution needs to
+cater for all use cases not just those. The handling of arguments is
+an example of this.
 
-But maybe, you have already see this.
+My suggestion is that pseudo_to_value() for PSEUDO_VAL should always
+return an integer constant of type 'long long'  and the caller of
+pseudo_to_value() should adjust the constant to right size (by
+truncating or extending) or to pointer type if necessary as the caller
+has more information. For instance, in the handling of OP_CALL, the
+function output_op_call() knows when the call is for an argument, etc.
+Currently pseudo_to_value() tries to work out the integer size, but
+cannot do this correctly due to lack of information, and also even if
+it did work out the size, the cast to pointer would be missed I think.
 
-Luc
+Does this make sense?
+
+Thanks and Regards
+Dibyendu
