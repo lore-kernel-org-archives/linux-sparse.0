@@ -1,52 +1,67 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 0/5] more simplification of constant multiplicative ops
-Date: Tue,  7 Feb 2017 21:50:23 +0100
-Message-ID: <20170207205028.35869-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 5/5] simplify '(x % 1)' into '0'
+Date: Tue,  7 Feb 2017 21:50:28 +0100
+Message-ID: <20170207205028.35869-6-luc.vanoostenryck@gmail.com>
 References: <CANeU7Q=67iWdgssXLEQyX0Saoe8iCf17jDCh7PWwwpeAuEhVAQ@mail.gmail.com>
+ <20170207205028.35869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:36491 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754072AbdBGUxS (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36364 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755243AbdBGUxS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Tue, 7 Feb 2017 15:53:18 -0500
-Received: by mail-wm0-f45.google.com with SMTP id c85so177708356wmi.1
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:52:33 -0800 (PST)
-In-Reply-To: <CANeU7Q=67iWdgssXLEQyX0Saoe8iCf17jDCh7PWwwpeAuEhVAQ@mail.gmail.com>
+Received: by mail-wr0-f195.google.com with SMTP id k90so6572050wrc.3
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:52:39 -0800 (PST)
+In-Reply-To: <20170207205028.35869-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This serie add a few more simplification of multiplicative operators
-(multiplication, division & modulo) with constants 1 or -1.
-Only simplifications that doesn't depend on undefined behavior are done.
+For completeness, add the dual simplification 'x * 1 => x'
+for modulo: 'x % 1 => 0'.
 
-Changes since v1:
-- no functional changes
-- remove unneeded case + break in patch 2
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c                       | 5 +++++
+ validation/optim/muldiv-by-one.c | 3 +++
+ 2 files changed, 8 insertions(+)
 
-Changes since v2:
-- fix copy-paste error in test case for OP_DIVS by -1
-- add test case for OP_DIVU by -1
-Both thanks to Rasmus Villemoes.
-
-
-Luc Van Oostenryck (5):
-  move OP_MUL simplification in a separate function
-  simplify '(x / 1)' to 'x'
-  simplify '(x * -1)' to '-x'
-  simplify '(x / -1)' to '-x' (but only for signed division)
-  simplify '(x % 1)' into '0'
-
- simplify.c                          | 36 ++++++++++++++++++++++++++++++++++++
- validation/optim/muldiv-by-one.c    | 19 +++++++++++++++++++
- validation/optim/muldiv-by-zero.c   | 13 +++++++++++++
- validation/optim/muldiv-minus-one.c | 18 ++++++++++++++++++
- 4 files changed, 86 insertions(+)
- create mode 100644 validation/optim/muldiv-by-one.c
- create mode 100644 validation/optim/muldiv-by-zero.c
- create mode 100644 validation/optim/muldiv-minus-one.c
-
+diff --git a/simplify.c b/simplify.c
+index 86d2f5da9..b0d229a92 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -361,6 +361,11 @@ static int simplify_constant_rightside(struct instruction *insn)
+ 	case OP_ASR:
+ 		return simplify_asr(insn, insn->src1, value);
+ 
++	case OP_MODU: case OP_MODS:
++		if (value == 1)
++			return replace_with_pseudo(insn, value_pseudo(0));
++		return 0;
++
+ 	case OP_DIVU: case OP_DIVS:
+ 	case OP_MULU: case OP_MULS:
+ 		return simplify_mul_div(insn, value);
+diff --git a/validation/optim/muldiv-by-one.c b/validation/optim/muldiv-by-one.c
+index f6dd7cb2c..5d9b458e0 100644
+--- a/validation/optim/muldiv-by-one.c
++++ b/validation/optim/muldiv-by-one.c
+@@ -5,6 +5,8 @@ si smul1(si a) {  return a * 1; }
+ ui umul1(ui a) {  return a * 1; }
+ si sdiv1(si a) {  return a / 1; }
+ ui udiv1(ui a) {  return a / 1; }
++si smod1(si a) {  return a % 1; }
++ui umod1(ui a) {  return a % 1; }
+ 
+ /*
+  * check-name: muldiv-by-one
+@@ -13,4 +15,5 @@ ui udiv1(ui a) {  return a / 1; }
+  *
+  * check-output-excludes: mul[us]\\.
+  * check-output-excludes: div[us]\\.
++ * check-output-excludes: mod[us]\\.
+  */
 -- 
 2.11.0
 
