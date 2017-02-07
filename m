@@ -1,41 +1,61 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 4/5] simplify '(x / -1)' to '-x' (but only for signed
- division)
-Date: Tue, 7 Feb 2017 21:28:06 +0100
-Message-ID: <20170207202805.vtpnn3w5nyt4xwp7@macpro.local>
-References: <CANeU7QkOmqZH-X4C3Ma6b94jyx1LnjM=UEH2CjEt0SwgZ4Y2Kw@mail.gmail.com>
- <20170207190028.24343-1-luc.vanoostenryck@gmail.com>
- <20170207190028.24343-5-luc.vanoostenryck@gmail.com>
- <87mvdx4wph.fsf@rasmusvillemoes.dk>
+From: Van Oostenryck Luc <luc.vanoostenryck@gmail.com>
+Subject: Re: [RFC/PATCH] arm64: Rename macro arguments to silence sparse
+Date: Tue, 7 Feb 2017 21:33:15 +0100
+Message-ID: <CAExDi1T5+odE6j2mFpUheN+3RQwabvgKmqKHHgWReE3L6oQAVA@mail.gmail.com>
+References: <20170207010143.22371-1-sboyd@codeaurora.org>
+ <d5bb9d5a-5b02-ffab-d404-bbda532b6c76@codeaurora.org>
+ <20170207015047.4ffc3xzrqsuuzo54@macpro.local>
+ <5f7a5bf1-1285-d9c3-b892-c8f9f8ee6d63@codeaurora.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32877 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754790AbdBGU2O (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Feb 2017 15:28:14 -0500
-Received: by mail-wm0-f67.google.com with SMTP id v77so30352730wmv.0
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:28:08 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <87mvdx4wph.fsf@rasmusvillemoes.dk>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
+In-Reply-To: <5f7a5bf1-1285-d9c3-b892-c8f9f8ee6d63@codeaurora.org>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Stephen Boyd <sboyd@codeaurora.org>
+Cc: Catalin Marinas <catalin.marinas@arm.com>, Christopher Li <sparse@chrisli.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-sparse@vger.kernel.org
-To: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
 
-On Tue, Feb 07, 2017 at 08:39:22PM +0100, Rasmus Villemoes wrote:
-> On Tue, Feb 07 2017, Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
-> 
-> >  int smulm1(int a) { return a * -1; }
-> >  u32 umulm1(u32 a) { return a * (u32) -1; }
-> > +int sdivm1(int a) { return a * -1; }
-> 
-> You probably meant / rather than *.
-Indeed, nice catch. Thanks.
+On Tue, Feb 7, 2017 at 9:11 PM, Stephen Boyd <sboyd@codeaurora.org> wrote:
+> On 02/06/2017 05:50 PM, Luc Van Oostenryck wrote:
+>> On Mon, Feb 06, 2017 at 05:08:17PM -0800, Stephen Boyd wrote:
+>>> On 02/06/2017 05:01 PM, Stephen Boyd wrote:
+>>>> When I compile files with sparse, I get these sorts of warnings:
+>>>>
+>>>> arch/arm64/include/asm/lse.h:14:28: warning: Unknown escape 'l'
+>>>> arch/arm64/include/asm/lse.h:14:37: warning: Unknown escape 'l'
+>>>> arch/arm64/include/asm/alternative.h:172:28: warning: Unknown escape 'o'
+>>>>
+>>>> This is because sparse is trying to tokenize these files and sees
+>>>> a line like this:
+>>>>
+>>>>  alternative_insn "\llsc", "\lse", ARM64_HAS_LSE_ATOMICS
+>>>>
+>>>> It gets past alternative_insn part and then sees the start of a
+>>>> string with the double quote character. So sparse starts to parse
+>>>> the string (eat_string() in the sparse code) but the string has
+>>>> an escape character '\' in it. Sparse sees the escape character,
+>>>> so it checks to see if it's an escape sequence, but '\l' isn't.
+>>>> This causes sparse to spit out this warning of an unknown escape
+>>>> sequence 'l'.
+>>>>
+>>>> In reality, sparse isn't going to use these macros anyway because
+>>>> this whole thing is inside an __ASSEMBLER__ ifdef.
+>> Yes, annoying. Conversion of escaped characters is supposed to be
+>> done just after preprocessing. It's definitively a bug.
+>
+> Ok. Thanks for the fixes to sparse. My hack patch can be safely ignored.
 
-> Also, shouldn't you also add a test that
-> when a is unsigned, a/-1 does _not_ get transformed to -a?
-Hummm , yes but ... well, I'll see what I can do.
+Well, I don't know.
+Maybe it's still useful for everyone using the official version of sparse
+or an older one.
 
-Luc
+Luc Van Oostenryck
