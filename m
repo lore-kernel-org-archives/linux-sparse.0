@@ -1,69 +1,34 @@
-From: Chris Li <christ.li@gmail.com>
-Subject: Re: [PATCH 2/3] allow builtins to have prototype and evaluate/expand methods
-Date: Wed, 8 Feb 2017 04:26:47 +0800
-Message-ID: <CANeU7QnVqeOASzooDPuNocKNm3pzx_B6T2D=eA39vp=1MiGCEw@mail.gmail.com>
-References: <20170123213728.89900-1-luc.vanoostenryck@gmail.com>
- <20170123213728.89900-3-luc.vanoostenryck@gmail.com> <CANeU7QkTLwcVq4Spv4CcZjpjuZybW1=39Z5hU=5Qu6jYGB8=EA@mail.gmail.com>
- <20170207201253.4i2ye6inqwma65rf@macpro.local>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v2 4/5] simplify '(x / -1)' to '-x' (but only for signed division)
+Date: Wed, 8 Feb 2017 04:33:30 +0800
+Message-ID: <CANeU7Q=67iWdgssXLEQyX0Saoe8iCf17jDCh7PWwwpeAuEhVAQ@mail.gmail.com>
+References: <CANeU7QkOmqZH-X4C3Ma6b94jyx1LnjM=UEH2CjEt0SwgZ4Y2Kw@mail.gmail.com>
+ <20170207190028.24343-1-luc.vanoostenryck@gmail.com> <20170207190028.24343-5-luc.vanoostenryck@gmail.com>
+ <87mvdx4wph.fsf@rasmusvillemoes.dk> <20170207202805.vtpnn3w5nyt4xwp7@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:35855 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754721AbdBGUfU (ORCPT
+Received: from mail-io0-f196.google.com ([209.85.223.196]:34912 "EHLO
+        mail-io0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932273AbdBGUkW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Feb 2017 15:35:20 -0500
-Received: by mail-it0-f65.google.com with SMTP id f200so13577449itf.3
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:34:59 -0800 (PST)
-In-Reply-To: <20170207201253.4i2ye6inqwma65rf@macpro.local>
+        Tue, 7 Feb 2017 15:40:22 -0500
+Received: by mail-io0-f196.google.com with SMTP id m98so13977986iod.2
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:40:21 -0800 (PST)
+In-Reply-To: <20170207202805.vtpnn3w5nyt4xwp7@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Johannes Berg <johannes@sipsolutions.net>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Feb 8, 2017 at 4:12 AM, Luc Van Oostenryck
+On Wed, Feb 8, 2017 at 4:28 AM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> On Wed, Feb 08, 2017 at 03:49:54AM +0800, Chris Li wrote:
->> On Tue, Jan 24, 2017 at 5:37 AM, Luc Van Oostenryck
->> <luc.vanoostenryck@gmail.com> wrote:
->> > So far, builtin functions which had some evaluate/expand method
->> > couldn't also have a prototype because each would have its own symbol
->> > and only the one for the prototype will be seen.
->> > This also meant that the evaluate/expand functions had to take care
->> > to set the correct types for they argumenst & results, which is fine
->> > for some generic builtins like __builtin_constant_p() it's much less
->> > practical for the ones like __builtin_bswap{16,32,64}().
->> >
->> > Fix this by marking the idents for the builtins we declare some
->> > evaluate/expand methods has being the ident of a builtin function
->> > and later at evaluation time, to share the methods between all the symbols
->> > corresponding to an identifier so marked.
->>
->> This certainly fix the problem for builtin functions. However, I think there
->> is more general bug in sparse not limit to builtin functions. When the symbol
->> is declare twice, the later one did not migrate all the declare information from
->> the previous one.
+
 >
-> I'm very well aware of this bug/problem, it creates all sort of complications
-> but I vaguely understood it was a design choice. To be 100%, you're talking
-> the fact that each declaration create a new symbol only related by their
-> identifier chain, right?
->
->> In function external_declaration()
->>
->>         check_declaration(decl);
->>         if (decl->same_symbol)
->>                 decl->definition = decl->same_symbol->definition;
->>
->> Here it only migrates the definition. I think if you add symbol->op in
->> the migration
->> as well, it *should* work for your case. I haven't test this myself.
->> If that works for you, it is a more general fix. Want to give it a try?
->>
->> We might want to extract the migration code into a new function and
->> later adding new code it. e.g. function attributes.
->
-> Yes and diagnose any compatibility.
-> I'll give it a try but I won't be able to do that before the weekend.
->
-> Luc
+>> Also, shouldn't you also add a test that
+>> when a is unsigned, a/-1 does _not_ get transformed to -a?
+> Hummm , yes but ... well, I'll see what I can do.
+
+Let me know if there is a V3 coming then.
+
+Chris
