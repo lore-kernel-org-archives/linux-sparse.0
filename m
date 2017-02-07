@@ -1,70 +1,53 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 4/5] simplify '(x / -1)' to '-x' (but only for signed division)
-Date: Tue,  7 Feb 2017 21:50:27 +0100
-Message-ID: <20170207205028.35869-5-luc.vanoostenryck@gmail.com>
-References: <CANeU7Q=67iWdgssXLEQyX0Saoe8iCf17jDCh7PWwwpeAuEhVAQ@mail.gmail.com>
- <20170207205028.35869-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 2/3] allow builtins to have prototype and evaluate/expand
+ methods
+Date: Tue, 7 Feb 2017 22:34:49 +0100
+Message-ID: <20170207213448.ah3tjuifg6iwpahg@macpro.local>
+References: <20170123213728.89900-1-luc.vanoostenryck@gmail.com>
+ <20170123213728.89900-3-luc.vanoostenryck@gmail.com>
+ <CANeU7QkTLwcVq4Spv4CcZjpjuZybW1=39Z5hU=5Qu6jYGB8=EA@mail.gmail.com>
+ <20170207201253.4i2ye6inqwma65rf@macpro.local>
+ <CANeU7QnfuFjr_bZRqeED8Q54xcm-yeo9-=R8vVHbhvt8ukjxTQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wj0-f193.google.com ([209.85.210.193]:35177 "EHLO
-        mail-wj0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755156AbdBGUxS (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36608 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754304AbdBGVew (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Feb 2017 15:53:18 -0500
-Received: by mail-wj0-f193.google.com with SMTP id i7so4819759wjf.2
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:52:38 -0800 (PST)
-In-Reply-To: <20170207205028.35869-1-luc.vanoostenryck@gmail.com>
+        Tue, 7 Feb 2017 16:34:52 -0500
+Received: by mail-wr0-f196.google.com with SMTP id k90so6657934wrc.3
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 13:34:51 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnfuFjr_bZRqeED8Q54xcm-yeo9-=R8vVHbhvt8ukjxTQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-A previous patch added the simplification for multiply by -1
-but we can do the same for the signed divide.
+On Wed, Feb 08, 2017 at 04:32:08AM +0800, Christopher Li wrote:
+> On Wed, Feb 8, 2017 at 4:12 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> >
+> > I'm very well aware of this bug/problem, it creates all sort of complications
+> > but I vaguely understood it was a design choice. To be 100%, you're talking
+> > the fact that each declaration create a new symbol only related by their
+> > identifier chain, right?
+> 
+> Yes. I don't see a way not creating the symbol for each declaration.
+> However, we can make a better job at migrating the bits between each
+> declaration.
 
-This patch add this simplification
-Also add the corresponding test cases.
+I see roughly a way how we could do that but I'm far from being
+convinced it would be a good idea.
+The problem is not that we have one symbol per declaration, it's
+even not that we have several symbols for the same object, it's
+that we don't have a central place holding the information about
+the object.  Like, for example, we can't answer something essential
+like "what is the type of this function" because we have as much
+types as we have declarations. So yes, verification of the
+comptability between the declarations and consolidate them is what
+is missing.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c                          | 2 ++
- validation/optim/muldiv-minus-one.c | 5 +++++
- 2 files changed, 7 insertions(+)
 
-diff --git a/simplify.c b/simplify.c
-index 363cc5ad7..86d2f5da9 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -323,6 +323,8 @@ static int simplify_mul_div(struct instruction *insn, long long value)
- 	case OP_MULU:
- 		if (value == 0)
- 			return replace_with_pseudo(insn, insn->src2);
-+	/* Fall through */
-+	case OP_DIVS:
- 		if (!(value & sbit))	// positive
- 			break;
- 
-diff --git a/validation/optim/muldiv-minus-one.c b/validation/optim/muldiv-minus-one.c
-index 729b73443..42b086afd 100644
---- a/validation/optim/muldiv-minus-one.c
-+++ b/validation/optim/muldiv-minus-one.c
-@@ -2,6 +2,8 @@ typedef	unsigned int u32;
- 
- int smulm1(int a) { return a * -1; }
- u32 umulm1(u32 a) { return a * (u32) -1; }
-+int sdivm1(int a) { return a / -1; }
-+u32 udivm1(u32 a) { return a / (u32) -1; }
- 
- /*
-  * check-name: muldiv-minus-one
-@@ -9,5 +11,8 @@ u32 umulm1(u32 a) { return a * (u32) -1; }
-  * check-output-ignore
-  *
-  * check-output-excludes: mul[us]\\.
-+ * check-output-excludes: divs\\.
-  * check-output-contains: neg\\.
-+ * check-output-contains: divu\\.
-+ * check-output-pattern-3-times: neg\\.
-  */
--- 
-2.11.0
-
+Luc
