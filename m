@@ -1,36 +1,45 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/4] improve -m32/-m64
-Date: Tue,  7 Feb 2017 21:04:21 +0100
-Message-ID: <20170207200425.34189-1-luc.vanoostenryck@gmail.com>
+From: Stephen Boyd <sboyd@codeaurora.org>
+Subject: Re: [PATCH 0/3] diagnose unknown escapes after preprocessing
+Date: Tue, 7 Feb 2017 12:10:52 -0800
+Message-ID: <2a9f4f21-ef0e-fb47-ffb8-76519fbad147@codeaurora.org>
+References: <20170207174507.22722-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:35860 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753893AbdBGUGc (ORCPT
+Received: from smtp.codeaurora.org ([198.145.29.96]:39344 "EHLO
+        smtp.codeaurora.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752811AbdBGUL1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Feb 2017 15:06:32 -0500
-Received: by mail-wm0-f52.google.com with SMTP id c85so176265291wmi.1
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:06:31 -0800 (PST)
+        Tue, 7 Feb 2017 15:11:27 -0500
+In-Reply-To: <20170207174507.22722-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Christopher Li <sparse@chrisli.org>
 
-This series aims to make -m32/-m64 more useful and
-to extend these flags to also support LLP64 model.
+On 02/07/2017 09:45 AM, Luc Van Oostenryck wrote:
+> This series aims to solve the wrong warning recently 
+> received when using sparse on Linux's kernel for arm64. 
+> It quite straightforwardly move the diagnostic of
+> unknown escape sequence together with escape conversion,
+> after preprocessing.
+>
+> Patch 1 is just a test case (and could be folded with patch 2)
+> Patch 2 is the fix in itself
+> Patch 3 remove potential cruft left by patch 2.
+>
+>
+> Luc Van Oostenryck (3):
+>   add testcase for wrong early escape conversion
+>   warn on unknown escapes after preprocessing
+>   remove 'Escape' from token character class\
 
-- patch 1 & 3 are quite straightforward.
-- patch 2 is more code reorg/preparatory step
-- patch 4 add support for LLP64 and is more a RFC
+Thanks for the fix!
 
-Luc Van Oostenryck (4):
-  define __LP64__ & _LP64 if arch_m64 is enabled
-  add an helper for common predefined macros
-  define __LONG_MAX__ & __SIZEOF_POINTER__
-  add support for LLP64 arch
-
- lib.c | 45 ++++++++++++++++++++++++++++++++++++---------
- 1 file changed, 36 insertions(+), 9 deletions(-)
+Tested-by: Stephen Boyd <sboyd@codeaurora.org>
 
 -- 
-2.11.0
+Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
 
