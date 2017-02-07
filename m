@@ -1,61 +1,69 @@
-From: Van Oostenryck Luc <luc.vanoostenryck@gmail.com>
-Subject: Re: [RFC/PATCH] arm64: Rename macro arguments to silence sparse
-Date: Tue, 7 Feb 2017 21:33:15 +0100
-Message-ID: <CAExDi1T5+odE6j2mFpUheN+3RQwabvgKmqKHHgWReE3L6oQAVA@mail.gmail.com>
-References: <20170207010143.22371-1-sboyd@codeaurora.org>
- <d5bb9d5a-5b02-ffab-d404-bbda532b6c76@codeaurora.org>
- <20170207015047.4ffc3xzrqsuuzo54@macpro.local>
- <5f7a5bf1-1285-d9c3-b892-c8f9f8ee6d63@codeaurora.org>
+From: Chris Li <christ.li@gmail.com>
+Subject: Re: [PATCH 2/3] allow builtins to have prototype and evaluate/expand methods
+Date: Wed, 8 Feb 2017 04:26:47 +0800
+Message-ID: <CANeU7QnVqeOASzooDPuNocKNm3pzx_B6T2D=eA39vp=1MiGCEw@mail.gmail.com>
+References: <20170123213728.89900-1-luc.vanoostenryck@gmail.com>
+ <20170123213728.89900-3-luc.vanoostenryck@gmail.com> <CANeU7QkTLwcVq4Spv4CcZjpjuZybW1=39Z5hU=5Qu6jYGB8=EA@mail.gmail.com>
+ <20170207201253.4i2ye6inqwma65rf@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <5f7a5bf1-1285-d9c3-b892-c8f9f8ee6d63@codeaurora.org>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Stephen Boyd <sboyd@codeaurora.org>
-Cc: Catalin Marinas <catalin.marinas@arm.com>, Christopher Li <sparse@chrisli.org>, Will Deacon <will.deacon@arm.com>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset=UTF-8
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-it0-f65.google.com ([209.85.214.65]:35855 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754721AbdBGUfU (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 7 Feb 2017 15:35:20 -0500
+Received: by mail-it0-f65.google.com with SMTP id f200so13577449itf.3
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Feb 2017 12:34:59 -0800 (PST)
+In-Reply-To: <20170207201253.4i2ye6inqwma65rf@macpro.local>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Johannes Berg <johannes@sipsolutions.net>
 
-On Tue, Feb 7, 2017 at 9:11 PM, Stephen Boyd <sboyd@codeaurora.org> wrote:
-> On 02/06/2017 05:50 PM, Luc Van Oostenryck wrote:
->> On Mon, Feb 06, 2017 at 05:08:17PM -0800, Stephen Boyd wrote:
->>> On 02/06/2017 05:01 PM, Stephen Boyd wrote:
->>>> When I compile files with sparse, I get these sorts of warnings:
->>>>
->>>> arch/arm64/include/asm/lse.h:14:28: warning: Unknown escape 'l'
->>>> arch/arm64/include/asm/lse.h:14:37: warning: Unknown escape 'l'
->>>> arch/arm64/include/asm/alternative.h:172:28: warning: Unknown escape 'o'
->>>>
->>>> This is because sparse is trying to tokenize these files and sees
->>>> a line like this:
->>>>
->>>>  alternative_insn "\llsc", "\lse", ARM64_HAS_LSE_ATOMICS
->>>>
->>>> It gets past alternative_insn part and then sees the start of a
->>>> string with the double quote character. So sparse starts to parse
->>>> the string (eat_string() in the sparse code) but the string has
->>>> an escape character '\' in it. Sparse sees the escape character,
->>>> so it checks to see if it's an escape sequence, but '\l' isn't.
->>>> This causes sparse to spit out this warning of an unknown escape
->>>> sequence 'l'.
->>>>
->>>> In reality, sparse isn't going to use these macros anyway because
->>>> this whole thing is inside an __ASSEMBLER__ ifdef.
->> Yes, annoying. Conversion of escaped characters is supposed to be
->> done just after preprocessing. It's definitively a bug.
+On Wed, Feb 8, 2017 at 4:12 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Wed, Feb 08, 2017 at 03:49:54AM +0800, Chris Li wrote:
+>> On Tue, Jan 24, 2017 at 5:37 AM, Luc Van Oostenryck
+>> <luc.vanoostenryck@gmail.com> wrote:
+>> > So far, builtin functions which had some evaluate/expand method
+>> > couldn't also have a prototype because each would have its own symbol
+>> > and only the one for the prototype will be seen.
+>> > This also meant that the evaluate/expand functions had to take care
+>> > to set the correct types for they argumenst & results, which is fine
+>> > for some generic builtins like __builtin_constant_p() it's much less
+>> > practical for the ones like __builtin_bswap{16,32,64}().
+>> >
+>> > Fix this by marking the idents for the builtins we declare some
+>> > evaluate/expand methods has being the ident of a builtin function
+>> > and later at evaluation time, to share the methods between all the symbols
+>> > corresponding to an identifier so marked.
+>>
+>> This certainly fix the problem for builtin functions. However, I think there
+>> is more general bug in sparse not limit to builtin functions. When the symbol
+>> is declare twice, the later one did not migrate all the declare information from
+>> the previous one.
 >
-> Ok. Thanks for the fixes to sparse. My hack patch can be safely ignored.
-
-Well, I don't know.
-Maybe it's still useful for everyone using the official version of sparse
-or an older one.
-
-Luc Van Oostenryck
+> I'm very well aware of this bug/problem, it creates all sort of complications
+> but I vaguely understood it was a design choice. To be 100%, you're talking
+> the fact that each declaration create a new symbol only related by their
+> identifier chain, right?
+>
+>> In function external_declaration()
+>>
+>>         check_declaration(decl);
+>>         if (decl->same_symbol)
+>>                 decl->definition = decl->same_symbol->definition;
+>>
+>> Here it only migrates the definition. I think if you add symbol->op in
+>> the migration
+>> as well, it *should* work for your case. I haven't test this myself.
+>> If that works for you, it is a more general fix. Want to give it a try?
+>>
+>> We might want to extract the migration code into a new function and
+>> later adding new code it. e.g. function attributes.
+>
+> Yes and diagnose any compatibility.
+> I'll give it a try but I won't be able to do that before the weekend.
+>
+> Luc
