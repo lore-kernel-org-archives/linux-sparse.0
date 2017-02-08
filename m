@@ -1,38 +1,39 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse: add nocapture as an ignored attribute
-Date: Thu, 9 Feb 2017 07:00:02 +0800
-Message-ID: <CANeU7QnKz276LaompJ97jLggRhkPGGDN6hYuWo+HOnt5F5TQ1w@mail.gmail.com>
-References: <96833.1486594318@turing-police.cc.vt.edu>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
+Date: Thu, 9 Feb 2017 00:45:12 +0100
+Message-ID: <20170208234511.xqitikuftzuhgvo3@macpro.local>
+References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
+ <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com>
+ <20170208165055.ibu47j2axwi2j53f@macpro.local>
+ <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
+ <20170208213544.ahkbsgvikwdb7nsu@macpro.local>
+ <CANeU7Qn9CqWmQ-VUY928xm2fogqMGpfEbaBw+LrtfDbOrLTNfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:32770 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752425AbdBHXaS (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:32773 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752342AbdBHXyN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 18:30:18 -0500
-Received: by mail-io0-f176.google.com with SMTP id v96so3919476ioi.0
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 15:30:13 -0800 (PST)
-In-Reply-To: <96833.1486594318@turing-police.cc.vt.edu>
+        Wed, 8 Feb 2017 18:54:13 -0500
+Received: by mail-wr0-f195.google.com with SMTP id i10so10257899wrb.0
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 15:54:12 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qn9CqWmQ-VUY928xm2fogqMGpfEbaBw+LrtfDbOrLTNfQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Valdis Kletnieks <valdis.kletnieks@vt.edu>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Feb 9, 2017 at 6:51 AM,  <valdis.kletnieks@vt.edu> wrote:
-> commit 4397a428cbcd67e418b1d1fee8442c8b192994c9
-> Author: Emese Revfy <re.emese@gmail.com>
-> Date:   Tue Jul 26 22:40:37 2016 +0200
->
->     gcc-plugins: Add the initify gcc plugin
->
-> This adds a new attribute 'nocapture'.  Tell sparse about it.
->
-> Signed-off-by: Valdis Kletnieks <valdis.kletnieks@vt.edu>
+On Thu, Feb 09, 2017 at 06:13:46AM +0800, Christopher Li wrote:
+> 
+> Any way, your new version of patch is applied in sparse-next.
+> 
+> Chris
 
-Can you add some test case how the nocapture attribute
-was used in your source code?
+Thanks.
+I've just finished to test everything again and everything is
+fine. Linux's kernel x86 allyesconfig output give exactly the
+same output as two days ago as it was expected.
 
-Thanks
-
-Chris
+Luc
