@@ -1,35 +1,37 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2] add support for LLP64 arch
-Date: Thu, 9 Feb 2017 06:33:46 +0800
-Message-ID: <CANeU7QkYvDA27AbJaj9i+qMOLhnGW+YAKtEQCzOEguK6kOWvdg@mail.gmail.com>
-References: <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
- <20170208221549.17543-1-luc.vanoostenryck@gmail.com>
+Subject: Re: sparse: add nocapture as an ignored attribute
+Date: Thu, 9 Feb 2017 07:00:02 +0800
+Message-ID: <CANeU7QnKz276LaompJ97jLggRhkPGGDN6hYuWo+HOnt5F5TQ1w@mail.gmail.com>
+References: <96833.1486594318@turing-police.cc.vt.edu>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:35866 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751966AbdBHXCG (ORCPT
+Received: from mail-io0-f176.google.com ([209.85.223.176]:32770 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752425AbdBHXaS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 18:02:06 -0500
-Received: by mail-it0-f65.google.com with SMTP id f200so607645itf.3
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 15:02:05 -0800 (PST)
-In-Reply-To: <20170208221549.17543-1-luc.vanoostenryck@gmail.com>
+        Wed, 8 Feb 2017 18:30:18 -0500
+Received: by mail-io0-f176.google.com with SMTP id v96so3919476ioi.0
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 15:30:13 -0800 (PST)
+In-Reply-To: <96833.1486594318@turing-police.cc.vt.edu>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Valdis Kletnieks <valdis.kletnieks@vt.edu>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Feb 9, 2017 at 6:15 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> There was recently on the mailing list some questions
-> and a need to support LLP64 model.
+On Thu, Feb 9, 2017 at 6:51 AM,  <valdis.kletnieks@vt.edu> wrote:
+> commit 4397a428cbcd67e418b1d1fee8442c8b192994c9
+> Author: Emese Revfy <re.emese@gmail.com>
+> Date:   Tue Jul 26 22:40:37 2016 +0200
 >
-> This patch add is by adjusting a few size-related variables
-> under the control of a new flag: -msize-llp64 (ugly name
-> but we already have we have '-msize-long').
+>     gcc-plugins: Add the initify gcc plugin
+>
+> This adds a new attribute 'nocapture'.  Tell sparse about it.
+>
+> Signed-off-by: Valdis Kletnieks <valdis.kletnieks@vt.edu>
 
-That looks much better. Applied on sparse-next.
+Can you add some test case how the nocapture attribute
+was used in your source code?
 
 Thanks
 
