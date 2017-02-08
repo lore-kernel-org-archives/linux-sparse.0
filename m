@@ -1,44 +1,89 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
-Date: Thu, 9 Feb 2017 04:40:07 +0800
-Message-ID: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
-References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
- <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com> <20170208165055.ibu47j2axwi2j53f@macpro.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] fix killing OP_SETVAL instructions
+Date: Wed,  8 Feb 2017 22:07:52 +0100
+Message-ID: <20170208210752.16227-1-luc.vanoostenryck@gmail.com>
+References: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f180.google.com ([209.85.223.180]:35384 "EHLO
-        mail-io0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751000AbdBHUkI (ORCPT
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:33175 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751011AbdBHVIB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 15:40:08 -0500
-Received: by mail-io0-f180.google.com with SMTP id j18so196377ioe.2
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 12:40:08 -0800 (PST)
-In-Reply-To: <20170208165055.ibu47j2axwi2j53f@macpro.local>
+        Wed, 8 Feb 2017 16:08:01 -0500
+Received: by mail-wm0-f50.google.com with SMTP id t18so53277067wmt.0
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 13:08:01 -0800 (PST)
+In-Reply-To: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Feb 9, 2017 at 12:50 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->> So now that "fix value of label statement" is applied, you can
->> safely apply "fix killing of OP_SETVAL instructions" somewhere
->> after it, it won't create useless noise.
->
-> I just noticed that you have added it at the top of sparse-next
-> but what you applied (basically adding "case OP_SETVAL" in
-> simplify_instruction()) is *not* what the patch I sent did
-> (adding "case OP_SETVAL" in kill_instruction())s and causes
-> quick crashes..
-> I suppose there was a conflict or so.
->
-> Do you want that I sent a new patch or can you solve it
-> directly?
+Currently, kill_instruction() ignore OP_SETVAL instructions
+with the result that some instructions are not optimized away
+as expected.
 
-Strange. That is the only patch I found in my series.
+For example, when looking at the output of test-linearize,
+the following function:
 
-Sure, go ahead and send me the new one. I will take out the
-one in sparse-next and replace to your new one.
+	static int kill_setval(void)
+	{
+	l:
+		return &&l && 0;
+	}
 
-Chris
+gives the following output:
+
+	kill_setval:
+		set.64      %r6 <- .L1
+		ret.32      $0
+
+The 'set' instruction is obviously unneeded but nevertheless present.
+
+With the patch, the output is the expected:
+
+	kill_set:
+		ret.32      $0
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c                      | 1 +
+ validation/kill-replaced-insn.c | 7 +++++++
+ 2 files changed, 8 insertions(+)
+
+diff --git a/simplify.c b/simplify.c
+index cbb1844e2..a7e74ae0e 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -201,6 +201,7 @@ void kill_instruction(struct instruction *insn)
+ 	case OP_SCAST:
+ 	case OP_FPCAST:
+ 	case OP_PTRCAST:
++	case OP_SETVAL:
+ 	case OP_NOT: case OP_NEG:
+ 		kill_use(&insn->src1);
+ 		break;
+diff --git a/validation/kill-replaced-insn.c b/validation/kill-replaced-insn.c
+index be031b6c1..920218778 100644
+--- a/validation/kill-replaced-insn.c
++++ b/validation/kill-replaced-insn.c
+@@ -30,6 +30,12 @@ static int kill_select(int a)
+ 	return (a ? 1 : 0) && 0;
+ }
+ 
++static int kill_setval(int a)
++{
++l:
++	return &&l && 0;
++}
++
+ static int kill_load(int *a)
+ {
+ 	return *a && 0;
+@@ -51,4 +57,5 @@ static int kill_store(int *a)
+  * check-output-excludes: ptrcast\\.
+  * check-output-excludes: fpcast\\.
+  * check-output-excludes: sel\\.
++ * check-output-excludes: set\\.
+  */
+-- 
+2.11.0
+
