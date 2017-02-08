@@ -1,89 +1,54 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix killing OP_SETVAL instructions
-Date: Wed,  8 Feb 2017 22:07:52 +0100
-Message-ID: <20170208210752.16227-1-luc.vanoostenryck@gmail.com>
-References: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC,PATCH 4/4] add support for LLP64 arch
+Date: Thu, 9 Feb 2017 05:24:01 +0800
+Message-ID: <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
+References: <20170207200425.34189-1-luc.vanoostenryck@gmail.com> <20170207200425.34189-5-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f50.google.com ([74.125.82.50]:33175 "EHLO
-        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751011AbdBHVIB (ORCPT
+Received: from mail-it0-f66.google.com ([209.85.214.66]:34815 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751851AbdBHVYH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 16:08:01 -0500
-Received: by mail-wm0-f50.google.com with SMTP id t18so53277067wmt.0
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 13:08:01 -0800 (PST)
-In-Reply-To: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
+        Wed, 8 Feb 2017 16:24:07 -0500
+Received: by mail-it0-f66.google.com with SMTP id o185so303751itb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 13:24:07 -0800 (PST)
+In-Reply-To: <20170207200425.34189-5-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-Currently, kill_instruction() ignore OP_SETVAL instructions
-with the result that some instructions are not optimized away
-as expected.
+The patch as already apply in sparse-next.
 
-For example, when looking at the output of test-linearize,
-the following function:
+On Wed, Feb 8, 2017 at 4:04 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> There was recently on the mailing list some questions
+> and a need to support LLP64 model.
+>
+> This patch add is by adjusting a few size-related variables
+> under the control of a new flag: -msize-llp64 (ugly name
+> but we already have we have '-msize-long').
 
-	static int kill_setval(void)
-	{
-	l:
-		return &&l && 0;
-	}
+I am wondering how does gcc windows handle such situation.
 
-gives the following output:
+Should we some flag some arch thing like "mingw64" which
+turn on the LLP64 mode. If gcc has such a flag for cross compile
+mingw, we should borrow that instead.
 
-	kill_setval:
-		set.64      %r6 <- .L1
-		ret.32      $0
+]> +               if (arch_m64 == ARCH_LP64) {
+> +                       bits_in_long = 64;
+> +                       max_int_alignment = 8;
+> +                       size_t_ctype = &ulong_ctype;
+> +                       ssize_t_ctype = &long_ctype;
+> +                       add_pre_buffer("#weak_define __LP64__ 1\n");
+> +                       add_pre_buffer("#weak_define _LP64 1\n");
+> +               } else {
 
-The 'set' instruction is obviously unneeded but nevertheless present.
+It works as it is. But we might want to test against arch_m64==ARCH_LLP64
+just to make the code section clear what it was for.
 
-With the patch, the output is the expected:
+Again, ff there is a new version of patch. I will replace this one in
+sparse-next.
 
-	kill_set:
-		ret.32      $0
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c                      | 1 +
- validation/kill-replaced-insn.c | 7 +++++++
- 2 files changed, 8 insertions(+)
-
-diff --git a/simplify.c b/simplify.c
-index cbb1844e2..a7e74ae0e 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -201,6 +201,7 @@ void kill_instruction(struct instruction *insn)
- 	case OP_SCAST:
- 	case OP_FPCAST:
- 	case OP_PTRCAST:
-+	case OP_SETVAL:
- 	case OP_NOT: case OP_NEG:
- 		kill_use(&insn->src1);
- 		break;
-diff --git a/validation/kill-replaced-insn.c b/validation/kill-replaced-insn.c
-index be031b6c1..920218778 100644
---- a/validation/kill-replaced-insn.c
-+++ b/validation/kill-replaced-insn.c
-@@ -30,6 +30,12 @@ static int kill_select(int a)
- 	return (a ? 1 : 0) && 0;
- }
- 
-+static int kill_setval(int a)
-+{
-+l:
-+	return &&l && 0;
-+}
-+
- static int kill_load(int *a)
- {
- 	return *a && 0;
-@@ -51,4 +57,5 @@ static int kill_store(int *a)
-  * check-output-excludes: ptrcast\\.
-  * check-output-excludes: fpcast\\.
-  * check-output-excludes: sel\\.
-+ * check-output-excludes: set\\.
-  */
--- 
-2.11.0
-
+Chris
