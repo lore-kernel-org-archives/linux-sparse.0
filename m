@@ -1,78 +1,59 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [RFC,PATCH 4/4] add support for LLP64 arch
-Date: Wed, 8 Feb 2017 23:01:32 +0100
-Message-ID: <20170208220131.dt6zlo43d7yy6f6d@macpro.local>
-References: <20170207200425.34189-1-luc.vanoostenryck@gmail.com>
- <20170207200425.34189-5-luc.vanoostenryck@gmail.com>
- <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
+Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
+Date: Wed, 8 Feb 2017 22:35:45 +0100
+Message-ID: <20170208213544.ahkbsgvikwdb7nsu@macpro.local>
+References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
+ <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com>
+ <20170208165055.ibu47j2axwi2j53f@macpro.local>
+ <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34525 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751815AbdBHW2t (ORCPT
+Received: from mail-wr0-f182.google.com ([209.85.128.182]:33311 "EHLO
+        mail-wr0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751958AbdBHWh5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 17:28:49 -0500
-Received: by mail-wm0-f67.google.com with SMTP id c85so370260wmi.1
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 14:28:48 -0800 (PST)
+        Wed, 8 Feb 2017 17:37:57 -0500
+Received: by mail-wr0-f182.google.com with SMTP id i10so70168019wrb.0
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 14:37:57 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
+In-Reply-To: <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Feb 09, 2017 at 05:24:01AM +0800, Christopher Li wrote:
-> The patch as already apply in sparse-next.
-> 
-> On Wed, Feb 8, 2017 at 4:04 AM, Luc Van Oostenryck
+On Thu, Feb 09, 2017 at 04:40:07AM +0800, Christopher Li wrote:
+> On Thu, Feb 9, 2017 at 12:50 AM, Luc Van Oostenryck
 > <luc.vanoostenryck@gmail.com> wrote:
-> > There was recently on the mailing list some questions
-> > and a need to support LLP64 model.
+> >> So now that "fix value of label statement" is applied, you can
+> >> safely apply "fix killing of OP_SETVAL instructions" somewhere
+> >> after it, it won't create useless noise.
 > >
-> > This patch add is by adjusting a few size-related variables
-> > under the control of a new flag: -msize-llp64 (ugly name
-> > but we already have we have '-msize-long').
+> > I just noticed that you have added it at the top of sparse-next
+> > but what you applied (basically adding "case OP_SETVAL" in
+> > simplify_instruction()) is *not* what the patch I sent did
+> > (adding "case OP_SETVAL" in kill_instruction())s and causes
+> > quick crashes..
+> > I suppose there was a conflict or so.
+> >
+> > Do you want that I sent a new patch or can you solve it
+> > directly?
 > 
-> I am wondering how does gcc windows handle such situation.
-> 
-> Should we some flag some arch thing like "mingw64" which
-> turn on the LLP64 mode. If gcc has such a flag for cross compile
-> mingw, we should borrow that instead.
+> Strange. That is the only patch I found in my series.
 
-Well, I suppose GCC is configured for MinGW at build time (and
-I understood that cygwin on x86-64 is LP64).
-Anyway, I don't any kind of option in GCC that would correspond
-to this.
+Well, it was the rigth patch in the sense that it had the right
+log message and stuff but the resulting diff was only correct
+within a 1 line context. With a 3 lines context 'git am' or
+a pure 'patch < ...' should have given a conflict as one of
+the patch that was initialy just after it
+(1856b3461 "fix killing OP_CAST & friends") made also some
+changes in the same lines and these two patch have now been
+exchanged.
 
-I propose to leave it as such or to simply drop this patch as
-I'm planning to change somewhat this part anyway (essentially
-because 99% of the time I'm doing cross-compile development
-and the current situation doesn't suit me at all. And when
-hacking on sparse, I'm much much more interested in the output
-of test-linearize than sparse in itself, so cgcc is useless
-for me. This serie is just the minimal to make my live easier and
-this LLP64 is just something closely related someone had a need for).
+> Sure, go ahead and send me the new one. I will take out the
+> one in sparse-next and replace to your new one.
 
-> ]> +               if (arch_m64 == ARCH_LP64) {
-> > +                       bits_in_long = 64;
-> > +                       max_int_alignment = 8;
-> > +                       size_t_ctype = &ulong_ctype;
-> > +                       ssize_t_ctype = &long_ctype;
-> > +                       add_pre_buffer("#weak_define __LP64__ 1\n");
-> > +                       add_pre_buffer("#weak_define _LP64 1\n");
-> > +               } else {
-> 
-> It works as it is. But we might want to test against arch_m64==ARCH_LLP64
-> just to make the code section clear what it was for.
-> 
-> Again, ff there is a new version of patch. I will replace this one in
-> sparse-next.
-> 
-> Chris
+Done.
 
-Yes, it was what I wanted to do first but then I realised it will hardly
-be a third choice and so I did it this way.
-A new version is coming.
-
-Luc
+Luc 
