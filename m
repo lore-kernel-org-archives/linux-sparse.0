@@ -1,54 +1,106 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
-Date: Thu, 9 Feb 2017 06:13:46 +0800
-Message-ID: <CANeU7Qn9CqWmQ-VUY928xm2fogqMGpfEbaBw+LrtfDbOrLTNfQ@mail.gmail.com>
-References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
- <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com>
- <20170208165055.ibu47j2axwi2j53f@macpro.local> <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
- <20170208213544.ahkbsgvikwdb7nsu@macpro.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2] add support for LLP64 arch
+Date: Wed,  8 Feb 2017 23:15:49 +0100
+Message-ID: <20170208221549.17543-1-luc.vanoostenryck@gmail.com>
+References: <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:35959 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751346AbdBHWNr (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34893 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751670AbdBHW10 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Feb 2017 17:13:47 -0500
-Received: by mail-it0-f41.google.com with SMTP id c7so112225633itd.1
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 14:13:47 -0800 (PST)
-In-Reply-To: <20170208213544.ahkbsgvikwdb7nsu@macpro.local>
+        Wed, 8 Feb 2017 17:27:26 -0500
+Received: by mail-wm0-f67.google.com with SMTP id u63so358904wmu.2
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Feb 2017 14:26:56 -0800 (PST)
+In-Reply-To: <CANeU7QkYmA1opeNQTYjOUXs8hSn1oG3RumVtR094rb4w8KucEQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Thu, Feb 9, 2017 at 5:35 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->> Strange. That is the only patch I found in my series.
->
-> Well, it was the rigth patch in the sense that it had the right
-> log message and stuff but the resulting diff was only correct
-> within a 1 line context. With a 3 lines context 'git am' or
-> a pure 'patch < ...' should have given a conflict as one of
-> the patch that was initialy just after it
-> (1856b3461 "fix killing OP_CAST & friends") made also some
-> changes in the same lines and these two patch have now been
-> exchanged.
+There was recently on the mailing list some questions
+and a need to support LLP64 model.
 
-I see. So what happen is that the git am rejects it while
-the patch program has not problem apply the patch. So I take
-the patched version, which was wrong in terms of conflict resolution.
+This patch add is by adjusting a few size-related variables
+under the control of a new flag: -msize-llp64 (ugly name
+but we already have we have '-msize-long').
 
-I go through my logs, similar things happen in the following two commit.
+CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ lib.c | 34 +++++++++++++++++++++++++++-------
+ 1 file changed, 27 insertions(+), 7 deletions(-)
 
-684710647 testsuite: check patterns presence or absence in output
-49118f27e2 testsuite: check the nbr of times a pattern should be present
+diff --git a/lib.c b/lib.c
+index 2a1bbac87..467e040be 100644
+--- a/lib.c
++++ b/lib.c
+@@ -257,10 +257,14 @@ static enum { STANDARD_C89,
+               STANDARD_GNU89,
+               STANDARD_GNU99, } standard = STANDARD_GNU89;
+ 
++#define ARCH_LP32  0
++#define ARCH_LP64  1
++#define ARCH_LLP64 2
++
+ #ifdef __x86_64__
+-#define ARCH_M64_DEFAULT 1
++#define ARCH_M64_DEFAULT ARCH_LP64
+ #else
+-#define ARCH_M64_DEFAULT 0
++#define ARCH_M64_DEFAULT ARCH_LP32
+ #endif
+ 
+ int arch_m64 = ARCH_M64_DEFAULT;
+@@ -387,9 +391,11 @@ static char **handle_multiarch_dir(char *arg, char **next)
+ static char **handle_switch_m(char *arg, char **next)
+ {
+ 	if (!strcmp(arg, "m64")) {
+-		arch_m64 = 1;
++		arch_m64 = ARCH_LP64;
+ 	} else if (!strcmp(arg, "m32")) {
+-		arch_m64 = 0;
++		arch_m64 = ARCH_LP32;
++	} else if (!strcmp(arg, "msize-llp64")) {
++		arch_m64 = ARCH_LLP64;
+ 	} else if (!strcmp(arg, "msize-long")) {
+ 		arch_msize_long = 1;
+ 	} else if (!strcmp(arg, "multiarch-dir"))
+@@ -399,18 +405,32 @@ static char **handle_switch_m(char *arg, char **next)
+ 
+ static void handle_arch_m64_finalize(void)
+ {
+-	if (arch_m64) {
++	switch (arch_m64) {
++	case ARCH_LP32:
++		/* default values */
++		return;
++	case ARCH_LP64:
+ 		bits_in_long = 64;
+ 		max_int_alignment = 8;
+-		bits_in_pointer = 64;
+-		pointer_alignment = 8;
+ 		size_t_ctype = &ulong_ctype;
+ 		ssize_t_ctype = &long_ctype;
+ 		add_pre_buffer("#weak_define __LP64__ 1\n");
+ 		add_pre_buffer("#weak_define _LP64 1\n");
++		goto case_64bit_common;
++	case ARCH_LLP64:
++		bits_in_long = 32;
++		max_int_alignment = 4;
++		size_t_ctype = &ullong_ctype;
++		ssize_t_ctype = &llong_ctype;
++		add_pre_buffer("#weak_define __LLP64__ 1\n");
++		goto case_64bit_common;
++	case_64bit_common:
++		bits_in_pointer = 64;
++		pointer_alignment = 8;
+ #ifdef __x86_64__
+ 		add_pre_buffer("#weak_define __x86_64__ 1\n");
+ #endif
++		break;
+ 	}
+ }
+ 
+-- 
+2.11.0
 
-"git am" initial rejects it but the patch program accepts it.
-
-Can you double check this two changes sounds correct to you?
-I did take a second look, seems normal to me.
-
-Any way, your new version of patch is applied in sparse-next.
-
-Chris
