@@ -1,94 +1,41 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 10/14] testsuite: check the nbr of times a pattern should be present
-Date: Mon, 13 Feb 2017 00:29:00 +0100
-Message-ID: <20170212232904.49647-11-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 14/14] testsuite: quieter error reporting for 'known-to-fail'
+Date: Mon, 13 Feb 2017 00:29:04 +0100
+Message-ID: <20170212232904.49647-15-luc.vanoostenryck@gmail.com>
 References: <20170208222805.c77ilwchxpg2vnx4@macpro.local>
  <20170212232904.49647-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34516 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751302AbdBLX3U (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34551 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751333AbdBLX3Y (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Feb 2017 18:29:20 -0500
-Received: by mail-wm0-f66.google.com with SMTP id c85so16482352wmi.1
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 15:29:19 -0800 (PST)
+        Sun, 12 Feb 2017 18:29:24 -0500
+Received: by mail-wm0-f68.google.com with SMTP id c85so16482540wmi.1
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 15:29:23 -0800 (PST)
 In-Reply-To: <20170212232904.49647-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Complement the 'check-output-contains/excludes' tags to also
-be able to specify the number of times a given pattern should
-occurs in the output.
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/test-suite |  4 ++++
- validation/test-suite    | 28 ++++++++++++++++++++++++++++
- 2 files changed, 32 insertions(+)
+ validation/test-suite | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/Documentation/test-suite b/Documentation/test-suite
-index a0f205f43..2e786bbf3 100644
---- a/Documentation/test-suite
-+++ b/Documentation/test-suite
-@@ -49,6 +49,10 @@ check-output-excludes: <pattern> (optional)
- 	Several such tags can be given, in which case the output
- 	must contains none of the patterns.
- 
-+check-output-pattern-<nbr>-times: <pattern> (optional)
-+	Similar than the contains/excludes her above, but with full control
-+	of the number of times the pattern should occurs in the output.
-+
- 	Using test-suite
- 	~~~~~~~~~~~~~~~~
- 
 diff --git a/validation/test-suite b/validation/test-suite
-index e5317109d..c14a4c5ab 100755
+index 47015c61f..a5f5e25e2 100755
 --- a/validation/test-suite
 +++ b/validation/test-suite
-@@ -93,6 +93,27 @@ has_none_patterns()
- 	has_patterns "$1" "$2" "$3" -eq
- }
+@@ -214,6 +214,8 @@ do_test()
  
-+##
-+# nbr_patterns(ifile tag ofile) - does ofile contains the
-+#                        the patterns given by ifile's tags
-+#                        the right number of time?
-+nbr_patterns()
-+{
-+	ifile="$1"
-+	patt="$2"
-+	ofile="$3"
-+	grep "$patt-[0-9][0-9]*-times:" "$ifile" | \
-+	sed -e "s/^.*$patt-\([0-9][0-9]*\)-times: *\(.*\)/\1 \2/" | \
-+	while read nbr pat; do
-+		n=$(grep -s "$pat" "$ofile" | wc -l)
-+		if [ "$n" -ne "$nbr" ]; then
-+			return 1
-+		fi
-+	done
-+
-+	return $?
-+}
-+
- ##
- # verbose(string) - prints string if we are in verbose mode
- verbose()
-@@ -221,6 +242,13 @@ do_test()
- 		test_failed=1
- 	fi
- 
-+	# verify the 'check-output-pattern-X-times' tags
-+	nbr_patterns "$file" 'check-output-pattern' $file.output.got
-+	if [ "$?" -ne "0" ]; then
-+		error "Actual output doesn't contain the pattern the expected number."
-+		test_failed=1
-+	fi
-+
  	get_tag "check-known-to-fail" $file
  	must_fail=`expr "$?" = 0`
++	quiet=0
++	[ $must_fail -eq 1 ] && [ $V -eq 0 ] && quiet=1
  	known_ko_tests=`expr $known_ko_tests + $must_fail`
+ 
+ 	for stream in output error; do
 -- 
 2.11.0
 
