@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 11/14] testsuite: use 'error' instead of 'info' for successful tests known to fail
-Date: Mon, 13 Feb 2017 00:29:01 +0100
-Message-ID: <20170212232904.49647-12-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 12/14] testsuite: get 'check-known-to-fail' earlier
+Date: Mon, 13 Feb 2017 00:29:02 +0100
+Message-ID: <20170212232904.49647-13-luc.vanoostenryck@gmail.com>
 References: <20170208222805.c77ilwchxpg2vnx4@macpro.local>
  <20170212232904.49647-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34524 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751302AbdBLX3V (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35699 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751333AbdBLX3W (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Feb 2017 18:29:21 -0500
-Received: by mail-wm0-f68.google.com with SMTP id c85so16482396wmi.1
+        Sun, 12 Feb 2017 18:29:22 -0500
+Received: by mail-wm0-f66.google.com with SMTP id u63so16480688wmu.2
         for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 15:29:21 -0800 (PST)
 In-Reply-To: <20170212232904.49647-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
@@ -20,22 +20,28 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/test-suite | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ validation/test-suite | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/validation/test-suite b/validation/test-suite
-index c14a4c5ab..852904a4d 100755
+index 852904a4d..fdb7cbc26 100755
 --- a/validation/test-suite
 +++ b/validation/test-suite
-@@ -259,7 +259,7 @@ do_test()
- 		if [ "$test_failed" -eq "1" ]; then
- 			echo "info: test '$file' is known to fail"
- 		else
--			echo "info: test '$file' is known to fail but succeed!"
-+			echo "error: test '$file' is known to fail but succeed!"
- 			test_failed=1
- 		fi
+@@ -212,6 +212,10 @@ do_test()
+ 	$cmd 1> $file.output.got 2> $file.error.got
+ 	actual_exit_value=$?
+ 
++	get_tag "check-known-to-fail" $file
++	must_fail=`expr "$?" = 0`
++	known_ko_tests=`expr $known_ko_tests + $must_fail`
++
+ 	for stream in output error; do
+ 		grep -s -q "check-$stream-ignore" $file && continue
+ 
+@@ -249,10 +253,6 @@ do_test()
+ 		test_failed=1
  	fi
--- 
-2.11.0
-
+ 
+-	get_tag "check-known-to-fail" $file
+-	must_fail=`expr "$?" = 0`
+-	known_ko_tests=`expr $known_ko_tests + $must_fail`
