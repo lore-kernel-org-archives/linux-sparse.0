@@ -1,72 +1,63 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 2/3] allow builtins to have prototype and evaluate/expand
- methods
-Date: Sun, 12 Feb 2017 16:03:33 +0100
-Message-ID: <20170212150332.33xlxmzohgb7hrpp@macpro.local>
-References: <20170123213728.89900-1-luc.vanoostenryck@gmail.com>
- <20170123213728.89900-3-luc.vanoostenryck@gmail.com>
- <CANeU7QkTLwcVq4Spv4CcZjpjuZybW1=39Z5hU=5Qu6jYGB8=EA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH v2 0/3] builtins expansion
+Date: Sun, 12 Feb 2017 16:10:57 +0100
+Message-ID: <20170212151100.15868-1-luc.vanoostenryck@gmail.com>
+References: <20170212150332.33xlxmzohgb7hrpp@macpro.local>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35570 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751116AbdBLPDh (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:35238 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751225AbdBLPMU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Feb 2017 10:03:37 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u63so14608125wmu.2
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 07:03:37 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QkTLwcVq4Spv4CcZjpjuZybW1=39Z5hU=5Qu6jYGB8=EA@mail.gmail.com>
+        Sun, 12 Feb 2017 10:12:20 -0500
+Received: by mail-wr0-f193.google.com with SMTP id o16so20559288wra.2
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 07:12:19 -0800 (PST)
+In-Reply-To: <20170212150332.33xlxmzohgb7hrpp@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Chris Li <christ.li@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Johannes Berg <johannes@sipsolutions.net>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Johannes Berg <johannes@sipsolutions.net>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Feb 08, 2017 at 03:49:54AM +0800, Chris Li wrote:
-> On Tue, Jan 24, 2017 at 5:37 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > So far, builtin functions which had some evaluate/expand method
-> > couldn't also have a prototype because each would have its own symbol
-> > and only the one for the prototype will be seen.
-> > This also meant that the evaluate/expand functions had to take care
-> > to set the correct types for they argumenst & results, which is fine
-> > for some generic builtins like __builtin_constant_p() it's much less
-> > practical for the ones like __builtin_bswap{16,32,64}().
-> >
-> > Fix this by marking the idents for the builtins we declare some
-> > evaluate/expand methods has being the ident of a builtin function
-> > and later at evaluation time, to share the methods between all the symbols
-> > corresponding to an identifier so marked.
-> 
-> This certainly fix the problem for builtin functions. However, I think there
-> is more general bug in sparse not limit to builtin functions. When the symbol
-> is declare twice, the later one did not migrate all the declare information from
-> the previous one.
-> 
-> In function external_declaration()
-> 
->         check_declaration(decl);
->         if (decl->same_symbol)
->                 decl->definition = decl->same_symbol->definition;
-> 
-> Here it only migrates the definition. I think if you add symbol->op in
-> the migration
-> as well, it *should* work for your case. I haven't test this myself.
-> If that works for you, it is a more general fix. Want to give it a try?
+This serie solves the problem of the expansion of some builtins
+like __builtin_bswap16() which gcc consider as an integer constant
+expression when the arg is itself an integer constant.
+Such builtins are used as such in the kernel and their non-expansion
+create undesirable warnings from sparse.
 
-OK, I've look at this.
-The difference between your patch and mine is that yours share/
-migrate the methods for all symbols while mine purposely did that
-for builtins only. The reasons I did this way was to avoid to share
-methods between things that don't need to, for example if someone
-define a function that have the same name as one of the numerous
-attributes (which are not reserved keywords and aren't necessarily
-protected by leading double underscore). But having look at this now,
-I see that it should never be a problem when this happen (but is it
-a good idea?).
+This serie needs to be applied on top of Johannes Berg's patch
+concerning the same problem and the tests depend on the testsuite
+extensions posted previously.
 
-Anyway, I've retest with your patch and everything is fine, as
-expected, and I'm sending a new version of the serie.
+Change since v1:
+- simpler and more generic way to share the eval/expand ops
+  thanks to Christopher Li
+- small changes in the log messages
+- change the variable name in the bswap expansion method.
+- small reorganization of the test files
 
-Luc
+Luc Van Oostenryck (3):
+  move evaluation & expansion of builtins in a separate file
+  let identical symbols share their evaluate/expand methods
+  expand __builtin_bswap*() with constant args
+
+ Makefile                                           |   1 +
+ builtin.c                                          | 240 +++++++++++++++++++++
+ expand.c                                           |  24 +--
+ expand.h                                           |  34 +++
+ lib.c                                              |  35 +--
+ lib.h                                              |   5 +
+ parse.c                                            |   4 +-
+ symbol.c                                           | 160 +-------------
+ symbol.h                                           |   3 +-
+ validation/builtin-args-checking.c                 |  45 ++++
+ ...in-constant-eval.c => builtin-bswap-constant.c} |   2 +-
+ validation/builtin-bswap-variable.c                |  32 +++
+ 12 files changed, 367 insertions(+), 218 deletions(-)
+ create mode 100644 builtin.c
+ create mode 100644 expand.h
+ create mode 100644 validation/builtin-args-checking.c
+ rename validation/{builtin-constant-eval.c => builtin-bswap-constant.c} (93%)
+ create mode 100644 validation/builtin-bswap-variable.c
+
+-- 
+2.11.0
+
