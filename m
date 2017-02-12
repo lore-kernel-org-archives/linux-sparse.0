@@ -1,53 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
-Date: Mon, 13 Feb 2017 00:25:45 +0100
-Message-ID: <CAExDi1RcL5J_hKxS_7R2s+fNq_YCLab6PaWr2QHMbx6sygij8w@mail.gmail.com>
-References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
- <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com>
- <20170208165055.ibu47j2axwi2j53f@macpro.local> <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
- <20170208213544.ahkbsgvikwdb7nsu@macpro.local> <CANeU7Qn9CqWmQ-VUY928xm2fogqMGpfEbaBw+LrtfDbOrLTNfQ@mail.gmail.com>
- <20170208222805.c77ilwchxpg2vnx4@macpro.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH v2 00/14] testsuite improvements
+Date: Mon, 13 Feb 2017 00:28:50 +0100
+Message-ID: <20170212232904.49647-1-luc.vanoostenryck@gmail.com>
+References: <20170208222805.c77ilwchxpg2vnx4@macpro.local>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:32777 "EHLO
-        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751168AbdBLXZr (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36029 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751000AbdBLX3L (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Feb 2017 18:25:47 -0500
-Received: by mail-qk0-f193.google.com with SMTP id 11so12356705qkl.0
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 15:25:46 -0800 (PST)
+        Sun, 12 Feb 2017 18:29:11 -0500
+Received: by mail-wm0-f65.google.com with SMTP id r18so16525725wmd.3
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Feb 2017 15:29:10 -0800 (PST)
 In-Reply-To: <20170208222805.c77ilwchxpg2vnx4@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Feb 8, 2017 at 11:28 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Thu, Feb 09, 2017 at 06:13:46AM +0800, Christopher Li wrote:
->> I see. So what happen is that the git am rejects it while
->> the patch program has not problem apply the patch. So I take
->> the patched version, which was wrong in terms of conflict resolution.
->>
->> I go through my logs, similar things happen in the following two commit.
->>
->> 684710647 testsuite: check patterns presence or absence in output
->> 49118f27e2 testsuite: check the nbr of times a pattern should be present
->>
->> "git am" initial rejects it but the patch program accepts it.
->>
->> Can you double check this two changes sounds correct to you?
->> I did take a second look, seems normal to me.
->
-> I just checked, two chunks of the second of these patches are in
-> another place than what I have here in my original tree but
-> it's equivalent regarding functionality.
+This serie aimes to improve the test suite in two ways:
+1) make effective use of the 'known-to-fail' tag
+2) check the presence or absence of some patterns in the output file
 
-Sigh. I was a bit short on time when checking this and the diff I looked
-at was somehow misleading but in fact the functionality is not at all equivalent
-although all the tests did the expected result.
+The patches are organised like this:
+- patches 1 & 3 are cleanup some tests
+- patch 4 adds a test case for -Wenum-mismatch
+- patch 2 & 6 make effective use of the 'known-to-fail' tag
+- patches 5 & 8 check the presence or absence of the patterns
+- patch 9 adds some self checking 
+- patch 10 lets check the number of times a pattern occurs
+- patch 11: somehow correct a message from the testsuite
+- patches 12-14: make the testsuite quieter regarding the 'known-to-fail'
 
-I'm resending a respin of the two concerned series.
+Changes since V1
+- none, it's only a consolidation of two sub-series
+- add some selfchecking (patch 9)
 
-Luc
+Luc Van Oostenryck (14):
+  testsuite: give a proper name to the 'binary-constant' test
+  testsuite: make tests known to fail effectively fail
+  testsuite: simplify the ioc-typecheck case
+  testsuite: add a simple test for -Wenum-mismatch
+  testsuite: add tag to ignore the output/error
+  testsuite: report as error tests known to fail but which succeed
+  allow to launch the test suite from the project root dir
+  testsuite: check patterns presence or absence in output
+  testsuite: add some selfchecking
+  testsuite: check the nbr of times a pattern should be present
+  testsuite: use 'error' instead of 'info' for successful tests known to fail
+  testsuite: get 'check-known-to-fail' earlier
+  testsuite: allow quieter error reporting
+  testsuite: quieter error reporting for 'known-to-fail'
+
+ Documentation/test-suite          |  20 +++++++
+ validation/badtype1.c             |   4 ++
+ validation/binary-constant.c      |   2 +-
+ validation/enum-mismatch.c        |  19 ++++++
+ validation/ioc-typecheck.c        |  12 +---
+ validation/struct-ns2.c           |   6 ++
+ validation/test-suite             | 119 ++++++++++++++++++++++++++++++++++----
+ validation/testsuite-selfcheck1.c |  10 ++++
+ validation/testsuite-selfcheck2.c |  10 ++++
+ validation/testsuite-selfcheck3.c |  10 ++++
+ 10 files changed, 192 insertions(+), 20 deletions(-)
+ create mode 100644 validation/enum-mismatch.c
+ create mode 100644 validation/testsuite-selfcheck1.c
+ create mode 100644 validation/testsuite-selfcheck2.c
+ create mode 100644 validation/testsuite-selfcheck3.c
+
+-- 
+2.11.0
+
