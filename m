@@ -1,41 +1,40 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 0/8] fix uses of killed instructions
-Date: Mon, 13 Feb 2017 17:59:15 +0100
-Message-ID: <CAExDi1QuA=Pimkv8yS4T1WVNqavuHtTn322xgeZMFe92+4pCBQ@mail.gmail.com>
-References: <20170129104808.2500-1-luc.vanoostenryck@gmail.com>
- <CAExDi1RJ8rPE7n7eGmBRnSe3FudW28HF7DkVErmVmniZrwSQJQ@mail.gmail.com>
- <20170208165055.ibu47j2axwi2j53f@macpro.local> <CANeU7Qkc1qShbgresJbRZbORuzzcMR28vPvv38kwFxHiE15ZLQ@mail.gmail.com>
- <20170208213544.ahkbsgvikwdb7nsu@macpro.local> <CANeU7Qn9CqWmQ-VUY928xm2fogqMGpfEbaBw+LrtfDbOrLTNfQ@mail.gmail.com>
- <20170208222805.c77ilwchxpg2vnx4@macpro.local> <CAExDi1RcL5J_hKxS_7R2s+fNq_YCLab6PaWr2QHMbx6sygij8w@mail.gmail.com>
- <CANeU7Q=SO7pRy4OY+K8+tkrvg_nb5+Rs0zbE4iVVpMVrFZ3yQg@mail.gmail.com>
+From: Edward Cree <ecree@solarflare.com>
+Subject: Casting 0 to a __bitwise type
+Date: Tue, 14 Feb 2017 21:36:40 +0000
+Message-ID: <9c361aab-ee4b-8309-ff1a-b0e65bb93c5d@solarflare.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f170.google.com ([209.85.216.170]:36146 "EHLO
-        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752073AbdBMQ7Q (ORCPT
+Received: from nbfkord-smmo02.seg.att.com ([209.65.160.78]:10774 "EHLO
+        nbfkord-smmo02.seg.att.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1753399AbdBNVqp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Feb 2017 11:59:16 -0500
-Received: by mail-qt0-f170.google.com with SMTP id k15so88813391qtg.3
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Feb 2017 08:59:16 -0800 (PST)
-In-Reply-To: <CANeU7Q=SO7pRy4OY+K8+tkrvg_nb5+Rs0zbE4iVVpMVrFZ3yQg@mail.gmail.com>
+        Tue, 14 Feb 2017 16:46:45 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Mon, Feb 13, 2017 at 12:38 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Mon, Feb 13, 2017 at 7:25 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> Sigh. I was a bit short on time when checking this and the diff I looked
->> at was somehow misleading but in fact the functionality is not at all equivalent
->> although all the tests did the expected result.
->>
->> I'm resending a respin of the two concerned series.
->
-> Not problem. I will re-apply your new series.
+I'm given to understand that bitwise types consider 0 'special', in that
+ sparse will allow, say:
+        typedef __u32 __bitwise __be32;
+        __be32 value = 0;
+However, it appears that if I try to cast a constant 0 to a bitwise type,
+        static inline void ip6_fill_mask(__be32 *mask)
+        {
+                mask[0] = mask[1] = mask[2] = mask[3] = ~(__be32)0;
+        }
+sparse complains "warning: cast to restricted __be32".
+Why is this?  Is there some subtle reason why the cast is incorrect, or
+ is sparse just unable to notice that the value being cast is 0?
+It allows it if I rewrite it with a local variable, making the cast
+ implicit:
+        static inline void ip6_fill_mask(__be32 *mask)
+        {
+                __be32 nothing = 0;
 
-Thanks. It's really OK now, it passes all the tests *and* is able to
-detect errors now.
+                mask[0] = mask[1] = mask[2] = mask[3] = ~nothing;
+        }
 
-Luc
+-Ed
+The information contained in this message is confidential and is intended for the addressee(s) only. If you have received this message in error, please notify the sender immediately and delete the message. Unless you are an addressee (or authorized to receive for an addressee), you may not use, copy or disclose to anyone this message or any information contained in this message. The unauthorized use, disclosure, copying or alteration of this message is strictly prohibited.
