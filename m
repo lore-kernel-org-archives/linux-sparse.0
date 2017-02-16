@@ -1,68 +1,78 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 13/16] fix killing of rewritten loads
-Date: Thu, 16 Feb 2017 05:57:05 +0100
-Message-ID: <20170216045708.50661-14-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 15/16] use kill_instruction() when killing any instructions during CSE
+Date: Thu, 16 Feb 2017 05:57:07 +0100
+Message-ID: <20170216045708.50661-16-luc.vanoostenryck@gmail.com>
 References: <20170216045708.50661-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34582 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753237AbdBPE51 (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36212 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753394AbdBPE53 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Feb 2017 23:57:27 -0500
-Received: by mail-wm0-f66.google.com with SMTP id c85so1298721wmi.1
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Feb 2017 20:57:27 -0800 (PST)
+        Wed, 15 Feb 2017 23:57:29 -0500
+Received: by mail-wm0-f67.google.com with SMTP id r18so1284939wmd.3
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Feb 2017 20:57:29 -0800 (PST)
 In-Reply-To: <20170216045708.50661-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_LOADs removed by rewrite_load_instruction() had their ->bb simply
-set to NULL the usage of its operand was not adjusted.
+Instructions removed during CSE had their ->bb simply set to NULL
+and the usage of their operand was not adjusted.
 
 Fix that by calling kill_instruction().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                           |  2 +-
- validation/kill-rewritten-load.c | 16 ++++++++++++++++
- 2 files changed, 17 insertions(+), 1 deletion(-)
- create mode 100644 validation/kill-rewritten-load.c
+ cse.c                 |  7 +------
+ validation/kill-cse.c | 21 +++++++++++++++++++++
+ 2 files changed, 22 insertions(+), 6 deletions(-)
+ create mode 100644 validation/kill-cse.c
 
-diff --git a/flow.c b/flow.c
-index 8409fac60..fbac9336c 100644
---- a/flow.c
-+++ b/flow.c
-@@ -401,7 +401,7 @@ void rewrite_load_instruction(struct instruction *insn, struct pseudo_list *domi
- 	 * pseudo.
- 	 */
- 	FOR_EACH_PTR(dominators, phi) {
--		phi->def->bb = NULL;
-+		kill_instruction(phi->def);
- 	} END_FOR_EACH_PTR(phi);
- 	convert_load_instruction(insn, new);
- 	return;
-diff --git a/validation/kill-rewritten-load.c b/validation/kill-rewritten-load.c
+diff --git a/cse.c b/cse.c
+index 165b862af..048a3eb79 100644
+--- a/cse.c
++++ b/cse.c
+@@ -251,12 +251,7 @@ static struct instruction * cse_one_instruction(struct instruction *insn, struct
+ {
+ 	convert_instruction_target(insn, def->target);
+ 
+-	if (insn->opcode == OP_PHI) {
+-		kill_instruction(insn);
+-	}
+-
+-	insn->opcode = OP_NOP;
+-	insn->bb = NULL;
++	kill_instruction(insn);
+ 	repeat_phase |= REPEAT_CSE;
+ 	return def;
+ }
+diff --git a/validation/kill-cse.c b/validation/kill-cse.c
 new file mode 100644
-index 000000000..31b895e53
+index 000000000..2e2b10246
 --- /dev/null
-+++ b/validation/kill-rewritten-load.c
-@@ -0,0 +1,16 @@
-+int foo(int i)
++++ b/validation/kill-cse.c
+@@ -0,0 +1,21 @@
++int foo(int a)
 +{
-+	i++;
-+	if (i && 0)
-+		i;
-+	return 0;
++	return ((a == 0) + 1) != ((a == 0) + 1);
 +}
 +
-+
 +/*
-+ * check-name: kill-rewritten-load
++ * check-name: kill-cse
++ * check-description:
++ *	Verify that instructions removed at CSE are
++ *	properly adjust the usage of their operands.
 + * check-command: test-linearize -Wno-decl $file
-+ * check-output-ignore
 + *
-+ * check-output-excludes: add\\.
++ * check-output-start
++foo:
++.L0:
++	<entry-point>
++	ret.32      $0
++
++
++ * check-output-end
 + */
 -- 
 2.11.0
