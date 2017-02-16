@@ -1,37 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] simplify float-to-float casts that doesn't change size
-Date: Thu, 16 Feb 2017 14:53:02 +0100
-Message-ID: <20170216135215.tbhmu3tssruwuuf7@macbook.local>
-References: <20170216025831.25449-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qm_+QE4_RDMGEBfCqdsuEdeJGdbneeL=-HC-Dp1Hjx85Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] fix expansion cost of pure functions
+Date: Thu, 16 Feb 2017 16:45:32 +0100
+Message-ID: <20170216154532.9261-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f175.google.com ([209.85.128.175]:35782 "EHLO
-        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754478AbdBPNxz (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36805 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932364AbdBPPpn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 16 Feb 2017 08:53:55 -0500
-Received: by mail-wr0-f175.google.com with SMTP id c4so12124520wrd.2
-        for <linux-sparse@vger.kernel.org>; Thu, 16 Feb 2017 05:53:54 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qm_+QE4_RDMGEBfCqdsuEdeJGdbneeL=-HC-Dp1Hjx85Q@mail.gmail.com>
+        Thu, 16 Feb 2017 10:45:43 -0500
+Received: by mail-wr0-f195.google.com with SMTP id z61so1740869wrc.3
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Feb 2017 07:45:42 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Feb 16, 2017 at 08:41:17PM +0800, Christopher Li wrote:
-> On Thu, Feb 16, 2017 at 10:58 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > ---
-> >  simplify.c                    |  2 ++
-> >  validation/optim/fpcast-nop.c | 15 +++++++++++++++
-> >  2 files changed, 17 insertions(+)
-> >  create mode 100644 validation/optim/fpcast-nop.c
-> >
-> 
-> Can you add a SOB line?
+Expansion cost of an expression should be a monotonically
+increasing function of its sub-expressions.
 
-Of course.
-    Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Here, for the costs of calling a pure function, the costs is
+reset to zero (wich is used when the expression expand to
+a constant/to test if the expression is a constant or not).
+
+Fix this by setting the cost as the total expansion cost of
+all the arguments plus one for the function itself.
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ expand.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/expand.c b/expand.c
+index 7af12707e..738c79c51 100644
+--- a/expand.c
++++ b/expand.c
+@@ -796,7 +796,7 @@ static int expand_symbol_call(struct expression *expr, int cost)
+ 		return ctype->op->expand(expr, cost);
+ 
+ 	if (ctype->ctype.modifiers & MOD_PURE)
+-		return 0;
++		return cost + 1;
+ 
+ 	return SIDE_EFFECTS;
+ }
+-- 
+2.11.0
+
