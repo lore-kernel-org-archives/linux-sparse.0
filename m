@@ -1,44 +1,84 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/5] more validation of C99 for-loop initializers
-Date: Sat, 18 Feb 2017 21:30:43 +0100
-Message-ID: <20170218203048.22276-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/5] replace test for c99 for-loop initializers
+Date: Sat, 18 Feb 2017 21:30:44 +0100
+Message-ID: <20170218203048.22276-2-luc.vanoostenryck@gmail.com>
+References: <20170218203048.22276-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:35550 "EHLO
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:34423 "EHLO
         mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753461AbdBRUaz (ORCPT
+        with ESMTP id S1753492AbdBRUa4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Feb 2017 15:30:55 -0500
-Received: by mail-wr0-f194.google.com with SMTP id q39so8390200wrb.2
+        Sat, 18 Feb 2017 15:30:56 -0500
+Received: by mail-wr0-f194.google.com with SMTP id 89so1731421wrr.1
         for <linux-sparse@vger.kernel.org>; Sat, 18 Feb 2017 12:30:55 -0800 (PST)
+In-Reply-To: <20170218203048.22276-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This serie adds some validations of C99-style for-loop
-initializers: scope and storage.
+The existing test is an indirect test, using a warning
+about context imbalance to show that some part of code
+was discarded.
 
-Patch 1 replaces the current indirect test by a direct one
-Patch 2 adds a test case for the scope
-Patch 3 adds some test cases for storage.
-Patch 4 is a preparatory patch for 5).
-Patch 5 adds missing storage validation
+Now that we have the minimal tools to test the output of
+test-linearize, use them to replace the test by a direct one.
 
-Luc Van Oostenryck (5):
-  replace test for c99 for-loop initializers
-  add test case for scope of C99 for-loop declarations
-  add test cases for storage of c99 for-loop declarations
-  add a method to external_declaration()
-  check the storage of C99 for-loop initializers
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ validation/c99-for-loop.c | 36 ++++++++++++------------------------
+ 1 file changed, 12 insertions(+), 24 deletions(-)
 
- lib.c                          |  2 +-
- parse.c                        | 37 ++++++++++++++++++++++++++++++-------
- parse.h                        |  3 ++-
- validation/c99-for-loop-decl.c | 40 ++++++++++++++++++++++++++++++++++++++++
- validation/c99-for-loop.c      | 36 ++++++++++++------------------------
- 5 files changed, 85 insertions(+), 33 deletions(-)
- create mode 100644 validation/c99-for-loop-decl.c
-
+diff --git a/validation/c99-for-loop.c b/validation/c99-for-loop.c
+index 42246c513..427fde268 100644
+--- a/validation/c99-for-loop.c
++++ b/validation/c99-for-loop.c
+@@ -1,33 +1,21 @@
+-int op(int);
+-
+-static int good(void)
++int c99(void);
++int c99(void)
+ {
+-	__context__(1);
+-	for (int i = 0; i < 10; i++) {
+-		if (!op(i)) {
+-			__context__(-1);
+-			return 0;
+-		}
+-	}
+-	__context__(-1);
+-	return 1;
+-}
++	int r = -1;
+ 
+-static int bad(void)
+-{
+-	__context__(1);
+ 	for (int i = 0; i < 10; i++) {
+-		if (!op(i)) {
+-			__context__(-1);
+-			return 0;
+-		}
++		r = i;
+ 	}
+-	return 1;
++
++	return r;
+ }
++
+ /*
+  * check-name: C99 for loop variable declaration
++ * check-command: test-linearize $file
+  *
+- * check-error-start
+-c99-for-loop.c:16:12: warning: context imbalance in 'bad' - different lock contexts for basic block
+- * check-error-end
++ * check-output-ignore
++ * check-output-contains: phisrc\\.
++ * check-output-contains: phi\\.
++ * check-output-contains: add\\.
+  */
 -- 
 2.11.0
 
