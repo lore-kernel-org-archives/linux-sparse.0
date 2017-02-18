@@ -1,85 +1,99 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/5] check the storage of C99 for-loop initializers
-Date: Sat, 18 Feb 2017 21:30:48 +0100
-Message-ID: <20170218203048.22276-6-luc.vanoostenryck@gmail.com>
-References: <20170218203048.22276-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] make -Wbitwise operational again
+Date: Sat, 18 Feb 2017 22:14:03 +0100
+Message-ID: <20170218211403.39019-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32926 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753555AbdBRUbA (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34034 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753745AbdBRVQR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Feb 2017 15:31:00 -0500
-Received: by mail-wm0-f67.google.com with SMTP id v77so8040780wmv.0
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Feb 2017 12:30:59 -0800 (PST)
-In-Reply-To: <20170218203048.22276-1-luc.vanoostenryck@gmail.com>
+        Sat, 18 Feb 2017 16:16:17 -0500
+Received: by mail-wm0-f65.google.com with SMTP id c85so8156593wmi.1
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Feb 2017 13:16:14 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>, Edward Cree <ecree@solarflare.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In C99, it is valid to declarare a variable inside
-a for-loop initializer but only when the storage is local
-(automatic or register).
+The flag -Wbitwise have no effect since patch 02a886bfa
+("Introduce keyword driven attribute parsing"): the corresponding
+checks are now always done.
 
-Until now this was not enforced.
+Fix that by reintroducing it in the same way as it was:
+ignore the bitwise attribute if the flag is not set.
+It's less invasive that checking the flag at each place
+an corresponding warning is emitted.
+Also, to not perturb the current situation the flag is now
+enabled by default.
 
-Fix that by adding the appropriate checks called by
-external_declaration() via the new function pointer when
-parsing this declaration in a for-loop context.
-
+Reported-by: Edward Cree <ecree@solarflare.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c                        | 17 ++++++++++++++++-
- validation/c99-for-loop-decl.c |  1 -
- 2 files changed, 16 insertions(+), 2 deletions(-)
+ lib.c   |  2 +-
+ parse.c | 16 ++++++++++++++--
+ 2 files changed, 15 insertions(+), 3 deletions(-)
 
+diff --git a/lib.c b/lib.c
+index d47325243..cce027c96 100644
+--- a/lib.c
++++ b/lib.c
+@@ -216,7 +216,7 @@ static struct token *pre_buffer_begin = NULL;
+ static struct token *pre_buffer_end = NULL;
+ 
+ int Waddress_space = 1;
+-int Wbitwise = 0;
++int Wbitwise = 1;
+ int Wcast_to_as = 0;
+ int Wcast_truncate = 1;
+ int Wcontext = 1;
 diff --git a/parse.c b/parse.c
-index 866186fd2..5b029ccdc 100644
+index a4a126720..d07b27a21 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -2217,6 +2217,21 @@ static struct token *parse_return_statement(struct token *token, struct statemen
- 	return expression_statement(token->next, &stmt->ret_value);
+@@ -79,6 +79,7 @@ typedef struct token *attr_t(struct token *, struct symbol *,
+ 
+ static attr_t
+ 	attribute_packed, attribute_aligned, attribute_modifier,
++	attribute_bitwise,
+ 	attribute_address_space, attribute_context,
+ 	attribute_designated_init,
+ 	attribute_transparent_union, ignore_attribute,
+@@ -339,6 +340,10 @@ static struct symbol_op attr_mod_op = {
+ 	.attribute = attribute_modifier,
+ };
+ 
++static struct symbol_op attr_bitwise_op = {
++	.attribute = attribute_bitwise,
++};
++
+ static struct symbol_op attr_force_op = {
+ 	.attribute = attribute_force,
+ };
+@@ -496,8 +501,8 @@ static struct init_keyword {
+ 	{ "noderef",	NS_KEYWORD,	MOD_NODEREF,	.op = &attr_mod_op },
+ 	{ "safe",	NS_KEYWORD,	MOD_SAFE, 	.op = &attr_mod_op },
+ 	{ "force",	NS_KEYWORD,	.op = &attr_force_op },
+-	{ "bitwise",	NS_KEYWORD,	MOD_BITWISE,	.op = &attr_mod_op },
+-	{ "__bitwise__",NS_KEYWORD,	MOD_BITWISE,	.op = &attr_mod_op },
++	{ "bitwise",	NS_KEYWORD,	MOD_BITWISE,	.op = &attr_bitwise_op },
++	{ "__bitwise__",NS_KEYWORD,	MOD_BITWISE,	.op = &attr_bitwise_op },
+ 	{ "address_space",NS_KEYWORD,	.op = &address_space_op },
+ 	{ "mode",	NS_KEYWORD,	.op = &mode_op },
+ 	{ "context",	NS_KEYWORD,	.op = &context_op },
+@@ -1105,6 +1110,13 @@ static struct token *attribute_modifier(struct token *token, struct symbol *attr
+ 	return token;
  }
  
-+static void add_for_loop_decl(struct symbol_list **list, struct symbol *sym)
++static struct token *attribute_bitwise(struct token *token, struct symbol *attr, struct decl_state *ctx)
 +{
-+	unsigned long storage;
-+
-+	storage = sym->ctype.modifiers & MOD_STORAGE;
-+	if (storage & ~(MOD_AUTO | MOD_REGISTER)) {
-+		const char *name = show_ident(sym->ident);
-+		sparse_error(sym->pos, "non-local var '%s' in for-loop initializer", name);
-+		sym->ctype.modifiers &= ~MOD_STORAGE;
-+	}
-+
-+	add_symbol(list, sym);
-+	fn_local_symbol(sym);
++	if (Wbitwise)
++		attribute_modifier(token, attr, ctx);
++	return token;
 +}
 +
- static struct token *parse_for_statement(struct token *token, struct statement *stmt)
+ static struct token *attribute_address_space(struct token *token, struct symbol *attr, struct decl_state *ctx)
  {
- 	struct symbol_list *syms;
-@@ -2230,7 +2245,7 @@ static struct token *parse_for_statement(struct token *token, struct statement *
- 	e1 = NULL;
- 	/* C99 variable declaration? */
- 	if (lookup_type(token)) {
--		token = external_declaration(token, NULL, &syms);
-+		token = external_declaration(token, add_for_loop_decl, &syms);
- 	} else {
- 		token = parse_expression(token, &e1);
- 		token = expect(token, ';', "in 'for'");
-diff --git a/validation/c99-for-loop-decl.c b/validation/c99-for-loop-decl.c
-index b9db8c9c6..e813b0ae3 100644
---- a/validation/c99-for-loop-decl.c
-+++ b/validation/c99-for-loop-decl.c
-@@ -30,7 +30,6 @@ static int c99(void)
- 
- /*
-  * check-name: C99 for-loop declarations
-- * check-known-to-fail
-  *
-  * check-error-start
- c99-for-loop-decl.c:22:27: warning: symbol with external linkage has initializer
+ 	struct expression *expr = NULL;
 -- 
 2.11.0
 
