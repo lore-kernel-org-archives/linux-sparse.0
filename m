@@ -1,66 +1,61 @@
-From: Edward Cree <ecree@solarflare.com>
-Subject: Re: [RFC PATCH 1/2] Allow casting to a restricted type if
- !restricted_value
-Date: Mon, 20 Feb 2017 11:52:03 +0000
-Message-ID: <19d73ab0-d008-a011-e04c-568614cb621d@solarflare.com>
-References: <e8e65c94-4d07-b20e-1bdb-30c7a8d1108f@solarflare.com>
- <1d8e35fa-643b-afa4-8089-f5a945a50eef@solarflare.com>
- <20170217175847.mq6mgml47cagxcah@macbook.local>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH v2 1/5] replace test for c99 for-loop initializers
+Date: Mon, 20 Feb 2017 14:05:48 +0000
+Message-ID: <6b1a3334-0c2d-d322-c70e-d613b40dd225@ramsayjones.plus.com>
+References: <1ebf742e-5680-4160-6dc5-808fcfb5cc44@ramsayjones.plus.com>
+ <20170220072052.2429-1-luc.vanoostenryck@gmail.com>
+ <20170220072052.2429-2-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from nbfkord-smmo03.seg.att.com ([209.65.160.84]:12262 "EHLO
-        nbfkord-smmo03.seg.att.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751402AbdBTLxS (ORCPT
+Received: from avasout04.plus.net ([212.159.14.19]:44409 "EHLO
+        avasout04.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753677AbdBTOFv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Feb 2017 06:53:18 -0500
-In-Reply-To: <20170217175847.mq6mgml47cagxcah@macbook.local>
+        Mon, 20 Feb 2017 09:05:51 -0500
+In-Reply-To: <20170220072052.2429-2-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>
 
-On 17/02/17 20:23, Luc Van Oostenryck wrote:
-> On Fri, Feb 17, 2017 at 03:11:15PM +0000, Edward Cree wrote:
->> If the operand of a cast to a restricted type is an unrestricted value,
->>  the cast should not produce a warning, since an equivalent implied cast
->>  (e.g. in an initialiser) would not do so.
->>
->> Signed-off-by: Edward Cree <ecree@solarflare.com>
->> ---
->>  evaluate.c | 2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->> diff --git a/evaluate.c b/evaluate.c
->> index e350c0c..8e855b1 100644
->> --- a/evaluate.c
->> +++ b/evaluate.c
->> @@ -2771,7 +2771,7 @@ static struct symbol *evaluate_cast(struct expression *expr)
->>                 t2 = unfoul(t2);
->>
->>         if (t1 != t2) {
->> -               if (class1 & TYPE_RESTRICT)
->> +               if ((class1 & TYPE_RESTRICT) && restricted_value(target, t1))
->>                         warning(expr->pos, "cast to %s",
->>                                 show_typename(t1));
->>                 if (class2 & TYPE_RESTRICT)
-> I'm fine with this.
->
-> Just the 't1' in restricted_value() that should probably be 't2'
-> (as can be seen on the warnings, just below t1 is the destination type
-> and t2 is the origin type) but since this argument is not used anyway
-> and the semantic of this not defined, it won't matter at all.
-> Maybe best to use NULL.
-As far as I can tell, restricted_value() is supposed to take the type to
- which the value is being converted.  Looking at the other call sites,
- restricted_binop_type() for example calls it on (right, ltype) and on
- (left, rtype), in order to determine a common type.
-I think in fact restricted_value() already has access to t2, it comes from
- target->ctype and we're passing in target.
-> Also, I think it would be best to squash the two patches together.
-Sure, I'll do that when I re-send.
-> (And I think you will need to resend it from another email address
-> because of the notice automatically added to your emails).
-Every time I send to a new mailing list I have to get it whitelisted.
-Sigh.  Hopefully this mail shouldn't get the notice tacked on...
--Ed
+
+
+On 20/02/17 07:20, Luc Van Oostenryck wrote:
+> This test is to insure that a for-loop with C99-style initializer
+> linearize correctly: the same as a C89-style one (modulo any effect
+> on the scope of the variables). For example that code like:
+> 	for (int = 0; i < 10; i++)
+> 		do_stuff(i);
+> is linearized the same as  code like:
+> 	int i;
+> 	for (i = 0; i < 10; i++)
+> 		do_stuff(i);
+> 
+> A test for this already exist in the testsuite:
+> 	0e91f878 ("validation: Check C99 for loop variables")
+> which show the correctness of the fix::
+> 	ed73fd32 ("linearize: Emit C99 declarations correctly")
+> But this test is an indirect one, using the presence or absence of
+> warning about context imbalance to show that some part of code is
+> present or not.
+> 
+> Now that we have the minimal tools to test the output of
+> test-linearize, use them to replace the test by a direct one.
+> 
+> Note: ideally we would like to show that the C89 & the C99 version
+> generate the same code but the testsuie deosn't allow this (yet).
+> 
+> CC: Ramsay Jones <ramsay@ramsayjones.plus.com>
+> Test-case-for: ed73fd32 ("linearize: Emit C99 declarations correctly")
+> Replaces:      0e91f878 ("validation: Check C99 for loop variables")
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+
+Yep, much better. Thanks!
+
+ATB,
+Ramsay Jones
+
+[resent to the mailinglist]
