@@ -1,105 +1,37 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 1/5] replace test for c99 for-loop initializers
-Date: Mon, 20 Feb 2017 08:20:48 +0100
-Message-ID: <20170220072052.2429-2-luc.vanoostenryck@gmail.com>
-References: <1ebf742e-5680-4160-6dc5-808fcfb5cc44@ramsayjones.plus.com>
- <20170220072052.2429-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] use VOID instead of directly using &void_pseudo
+Date: Mon, 20 Feb 2017 11:45:36 +0100
+Message-ID: <20170220104536.12105-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35901 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750920AbdBTHcV (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:32962 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751330AbdBTKrn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Feb 2017 02:32:21 -0500
-Received: by mail-wm0-f66.google.com with SMTP id r18so12712901wmd.3
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Feb 2017 23:32:20 -0800 (PST)
-In-Reply-To: <20170220072052.2429-1-luc.vanoostenryck@gmail.com>
+        Mon, 20 Feb 2017 05:47:43 -0500
+Received: by mail-wr0-f193.google.com with SMTP id s27so2349418wrb.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Feb 2017 02:47:43 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This test is to insure that a for-loop with C99-style initializer
-linearize correctly: the same as a C89-style one (modulo any effect
-on the scope of the variables). For example that code like:
-	for (int = 0; i < 10; i++)
-		do_stuff(i);
-is linearized the same as  code like:
-	int i;
-	for (i = 0; i < 10; i++)
-		do_stuff(i);
-
-A test for this already exist in the testsuite:
-	0e91f878 ("validation: Check C99 for loop variables")
-which show the correctness of the fix::
-	ed73fd32 ("linearize: Emit C99 declarations correctly")
-But this test is an indirect one, using the presence or absence of
-warning about context imbalance to show that some part of code is
-present or not.
-
-Now that we have the minimal tools to test the output of
-test-linearize, use them to replace the test by a direct one.
-
-Note: ideally we would like to show that the C89 & the C99 version
-generate the same code but the testsuie deosn't allow this (yet).
-
-CC: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Test-case-for: ed73fd32 ("linearize: Emit C99 declarations correctly")
-Replaces:      0e91f878 ("validation: Check C99 for loop variables")
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/c99-for-loop.c | 36 ++++++++++++------------------------
- 1 file changed, 12 insertions(+), 24 deletions(-)
+ linearize.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/validation/c99-for-loop.c b/validation/c99-for-loop.c
-index 42246c513..427fde268 100644
---- a/validation/c99-for-loop.c
-+++ b/validation/c99-for-loop.c
-@@ -1,33 +1,21 @@
--int op(int);
--
--static int good(void)
-+int c99(void);
-+int c99(void)
- {
--	__context__(1);
--	for (int i = 0; i < 10; i++) {
--		if (!op(i)) {
--			__context__(-1);
--			return 0;
--		}
--	}
--	__context__(-1);
--	return 1;
--}
-+	int r = -1;
- 
--static int bad(void)
--{
--	__context__(1);
- 	for (int i = 0; i < 10; i++) {
--		if (!op(i)) {
--			__context__(-1);
--			return 0;
--		}
-+		r = i;
- 	}
--	return 1;
-+
-+	return r;
- }
-+
- /*
-  * check-name: C99 for loop variable declaration
-+ * check-command: test-linearize $file
-  *
-- * check-error-start
--c99-for-loop.c:16:12: warning: context imbalance in 'bad' - different lock contexts for basic block
-- * check-error-end
-+ * check-output-ignore
-+ * check-output-contains: phisrc\\.
-+ * check-output-contains: phi\\.
-+ * check-output-contains: add\\.
-  */
+diff --git a/linearize.c b/linearize.c
+index 99203d915..6908e9f57 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1862,7 +1862,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
+ 	struct basic_block *active;
+ 	pseudo_t src = linearize_expression(ep, expr);
+ 	active = ep->active;
+-	if (active && src != &void_pseudo) {
++	if (active && src != VOID) {
+ 		struct instruction *phi_node = first_instruction(bb_return->insns);
+ 		pseudo_t phi;
+ 		if (!phi_node) {
 -- 
 2.11.0
 
