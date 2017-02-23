@@ -1,44 +1,32 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH] fix expansion cost of pure functions
-Date: Thu, 23 Feb 2017 07:57:00 +0800
-Message-ID: <CANeU7QkmOAAbOJs_QYnxh4O=J7y_Vbg8rM5jmdzKvvL5q_XFxg@mail.gmail.com>
-References: <20170216154532.9261-1-luc.vanoostenryck@gmail.com>
+Date: Wed, 22 Feb 2017 17:01:03 -0800
+Message-ID: <CA+55aFz_+qEteX-o-2O+=RWiNWQ-N603vFDUNTBG8W2Bn11Png@mail.gmail.com>
+References: <20170216154532.9261-1-luc.vanoostenryck@gmail.com> <CANeU7QkmOAAbOJs_QYnxh4O=J7y_Vbg8rM5jmdzKvvL5q_XFxg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:35093 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932894AbdBWA2l (ORCPT
+Received: from mail-oi0-f54.google.com ([209.85.218.54]:34705 "EHLO
+        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932456AbdBWBBw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Feb 2017 19:28:41 -0500
-Received: by mail-it0-f54.google.com with SMTP id 203so157045583ith.0
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Feb 2017 16:28:36 -0800 (PST)
-In-Reply-To: <20170216154532.9261-1-luc.vanoostenryck@gmail.com>
+        Wed, 22 Feb 2017 20:01:52 -0500
+Received: by mail-oi0-f54.google.com with SMTP id 65so10603326oig.1
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Feb 2017 17:01:04 -0800 (PST)
+In-Reply-To: <CANeU7QkmOAAbOJs_QYnxh4O=J7y_Vbg8rM5jmdzKvvL5q_XFxg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Feb 16, 2017 at 11:45 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Expansion cost of an expression should be a monotonically
-> increasing function of its sub-expressions.
+On Wed, Feb 22, 2017 at 3:57 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> Here, for the costs of calling a pure function, the costs is
-> reset to zero (wich is used when the expression expand to
-> a constant/to test if the expression is a constant or not).
->
-> Fix this by setting the cost as the total expansion cost of
-> all the arguments plus one for the function itself.
+> I think dropping to zero has some thing to do with get rid of
+> the side effect cost. So it possible the cost can be dropping.
 
-I am not sure about this one, adding CC to Linus.
+No, I think the zero is just a bug, introduced in commit 8376ab091a
+("sparse: Fix __builtin_safe_p for pure and const functions").
 
-Currently pure function and constant function both share MOD_PURE.
-If the function has attribute "pure" or "constant", then the user is
-telling the compiler this function does not have side effects.
+I might be missing something, but I think Luc's patch is fine.
 
-I think dropping to zero has some thing to do with get rid of
-the side effect cost. So it possible the cost can be dropping.
-But maybe it shouldn't drop to zero.
-
-Chris
+              Linus
