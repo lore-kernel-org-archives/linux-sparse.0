@@ -1,57 +1,42 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix usage in simplify_seteq_setne()
-Date: Fri, 24 Feb 2017 07:54:34 +0100
-Message-ID: <20170224065434.46976-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 0/4] assorted cleanups
+Date: Fri, 24 Feb 2017 09:11:38 +0100
+Message-ID: <CAExDi1Th1v5G7Hg3HY7ViMumY8PzfUENztwfvnuAS2xz26ZKnQ@mail.gmail.com>
+References: <20170215221358.68400-1-luc.vanoostenryck@gmail.com> <CANeU7Qnnjzn6+8UTa2hnEYPujnrO-cER-hu-wyrrpk7ODSEOQQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36629 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750973AbdBXG4m (ORCPT
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:34340 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751219AbdBXIL4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Feb 2017 01:56:42 -0500
-Received: by mail-wm0-f66.google.com with SMTP id r18so1467103wmd.3
-        for <linux-sparse@vger.kernel.org>; Thu, 23 Feb 2017 22:56:41 -0800 (PST)
+        Fri, 24 Feb 2017 03:11:56 -0500
+Received: by mail-qt0-f177.google.com with SMTP id n21so11519185qta.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Feb 2017 00:11:39 -0800 (PST)
+In-Reply-To: <CANeU7Qnnjzn6+8UTa2hnEYPujnrO-cER-hu-wyrrpk7ODSEOQQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-The usage was removed before the new operands were used
-which can lead to undefined pseudos.
+On Thu, Feb 16, 2017 at 3:29 AM, Christopher Li <sparse@chrisli.org> wrote:
+> On Thu, Feb 16, 2017 at 6:13 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> This serie is only a small collections of independent
+>> cleanups, mainly removal of unused struct members.
+>>
+>> Patches 1-4 have no functional changes.
+>> Patch 4 make show_statement() slightly more useful.
+>
+> Thanks,
+>
+> Applied and pushed to sparse-next.
+>
+> Do you have more patches coming? If not I am going to cut
+> a sparse release RC soon.
+>
+> Chris
 
-Fix this by moving the call to remove_usage() where
-it should always have been: after the call to use_pseudo().
+What I sent one hour ago was my last pending fix.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- simplify.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/simplify.c b/simplify.c
-index 3bc9985e8..76a599e50 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -432,7 +432,8 @@ static int compare_opcode(int opcode, int inverse)
- 
- static int simplify_seteq_setne(struct instruction *insn, long long value)
- {
--	struct instruction *def = insn->src1->def;
-+	pseudo_t old = insn->src1;
-+	struct instruction *def = old->def;
- 	pseudo_t src1, src2;
- 	int inverse;
- 	int opcode;
-@@ -456,10 +457,10 @@ static int simplify_seteq_setne(struct instruction *insn, long long value)
- 		// and similar for setne/eq ... 0/1
- 		src1 = def->src1;
- 		src2 = def->src2;
--		remove_usage(insn->src1, &insn->src1);
- 		insn->opcode = compare_opcode(opcode, inverse);
- 		use_pseudo(insn, src1, &insn->src1);
- 		use_pseudo(insn, src2, &insn->src2);
-+		remove_usage(old, &insn->src1);
- 		return REPEAT_CSE;
- 
- 	default:
--- 
-2.11.1
-
+Luc
