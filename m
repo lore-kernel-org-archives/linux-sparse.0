@@ -1,72 +1,85 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Unreachable code diagnostic
-Date: Fri, 24 Feb 2017 20:56:55 +0100
-Message-ID: <20170224195654.3cd7bc2dz5mzhnlh@macpro.local>
+Date: Fri, 24 Feb 2017 21:11:53 +0100
+Message-ID: <20170224201152.7skvolezq4j75su6@macpro.local>
 References: <20170224180759.GB16328@bombadil.infradead.org>
- <20170224185707.jll2n5634hju7vy6@x>
+ <CA+55aFwwv+tMb1-7u7EzVxLrn1CtdQ2Wu7jXTfxV7DrzrROmvg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:38722 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751219AbdBXT47 (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:34314 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751283AbdBXUL6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Feb 2017 14:56:59 -0500
-Received: by mail-wm0-f46.google.com with SMTP id r141so22582247wmg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Feb 2017 11:56:58 -0800 (PST)
+        Fri, 24 Feb 2017 15:11:58 -0500
+Received: by mail-wr0-f194.google.com with SMTP id 89so3560025wrr.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Feb 2017 12:11:57 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <20170224185707.jll2n5634hju7vy6@x>
+In-Reply-To: <CA+55aFwwv+tMb1-7u7EzVxLrn1CtdQ2Wu7jXTfxV7DrzrROmvg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Matthew Wilcox <willy@infradead.org>, linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Matthew Wilcox <willy@infradead.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Fri, Feb 24, 2017 at 10:57:07AM -0800, Josh Triplett wrote:
-> On Fri, Feb 24, 2017 at 10:07:59AM -0800, Matthew Wilcox wrote:
-> > I was recently sent some code that looked like this:
-> > 
-> > int foo()
-> > {
-> > 	lock();
-> > 	return bar();
-> > 	unlock();
-> > }
-> > 
-> > When you're restructuring code that contains locks, this is a
-> > *really* easy mistake to make.  I've done it myself.  But there's no
-> > compiler warning for it!  gcc doesn't have it, sparse doesn't have it.
+On Fri, Feb 24, 2017 at 10:33:37AM -0800, Linus Torvalds wrote:
+> On Fri, Feb 24, 2017 at 10:07 AM, Matthew Wilcox <willy@infradead.org> wrote:
+> >
+> > Maybe sparse could warn about code after an unconditional return
+> > statement?
 > 
-> Sparse does have a warning (via -Wcontext) for this, if you annotate
-> lock() and unlock() with __acquires(somelock) and __releases(somelock),
-> which expand to __attribute__((context(somelock,0,1))) and
-> __attribute__((context(somelock,0,1))) respectively.  You'll get a
-> warning that foo() returns with the lock held.
+> This is not likely to be a very successful model, I suspect.
 > 
-> Not at all perfect, but it does have reasonable handling of
-> conditionals, including a way to handle cond_lock().
+> You already partly see the problem:
+> 
+> > I wouldn't like to see it warn about code after a conditional
+> > return statement where the condition is always true; I think that would
+> > have a lot of false positives due to macros.
+> 
+> because the thing is, we actually have tons and tons of unreachable
+> code due to things like
+> 
+>    if (IS_ENABLED(CONFIG_XYZ)) {...
+> 
+> which allows us much cleaner code than using things like #ifdef's.
+> 
+> So yes, unreachable code in general is actually very common.
+> 
 
-Absolutely, -Wcontext is even enabled by default.
-So with what is done in the kernel, you have something like:
-	#define __acquires(x)  __attribute__((context(x,0,1)))
-	#define __releases(x)  __attribute__((context(x,1,0)))
-	
-	void lock(void) __acquires(lock);
-	void unlock(void) __releases(lock);
-	
-	int bar(void);
-	
-	static int foo(void)
-	{
-	        lock();
-	        return bar();
-	        unlock();
-	}
+snip snip 
 
-For which sparse returns the following warning:
-	zz.c:9:5: warning: context imbalance in 'foo' - wrong count at exit
+> 
+> now, getting back to your "limit it _only_ to code after an
+> unconditional 'return' statement" suggestion. The reason I don't
+> believe that will be all that useful either, is that a reasonable C
+> compiler (or something like sparse) simply doesn't even see many
+> conditionals.
+> 
+> That comes largely from how the C pre-processor is such a separate
+> phase and not actually integrated with the C syntax itself. So if any
+> of the conditionals above end up being done as cpp macros, it's
+> basically pretty much impossible to see them.
+> 
+> You'd actually likely be better off with something that doesn't
+> actually really parse the C code, but parses the code _without_ doing
+> preprocessor expansion, and basically look at it without doing the
+> full code analysis. More like what tools like checkpatch etc do -
+> lookign for the superficial patterns, rather than the patterns that
+> you see when you actually expand everything.
+> 
+> I'm not disputing that you can always find particular cases where a
+> warning would make sense, I just have a very strong suspicion that you
+> end up having to limit the condition you search for _so_ much that it
+> ends up being basically pointless for anything but the one or two
+> cases you already knew about and that triggered it.
+> 
+>               Linus
 
-But of course, that's just for code properly lock/context annotated and I'm
-not sure if what you're asking, which is much more general, is only motivated
-by lock/unlock problems or by others problems too.
+
+I'm not very sure what are the cases in wich Matthew is really
+interested but I suppose that, even after preprocessing and
+elimination of if (0) {...}, a return statement in the middle
+of a compound statement is very often unintentional. 
+That should be easy to check.
+
 
 Luc Van Oostenryck
