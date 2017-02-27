@@ -1,133 +1,64 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2] fix size of loaded bitfields
-Date: Mon, 27 Feb 2017 10:27:49 +0100
-Message-ID: <20170227092749.30083-1-luc.vanoostenryck@gmail.com>
-References: <CANeU7Q=n3WhBF4v1u-BRJMnqWmqY5xrtF=6yrPiFV5y+8GQD5A@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/2] split OP_BR between unconditional & conditional: OP_CBR
+Date: Mon, 27 Feb 2017 23:02:23 +0800
+Message-ID: <CANeU7Q=60E+2tvn=bdjaYnZFS3U3PMiTTq0=eYS-NkPDK3aJNA@mail.gmail.com>
+References: <20170218012848.27417-1-luc.vanoostenryck@gmail.com> <20170218012848.27417-2-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35841 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751663AbdB0JzS (ORCPT
+Received: from mail-it0-f53.google.com ([209.85.214.53]:36078 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750934AbdB0PCZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Feb 2017 04:55:18 -0500
-In-Reply-To: <CANeU7Q=n3WhBF4v1u-BRJMnqWmqY5xrtF=6yrPiFV5y+8GQD5A@mail.gmail.com>
+        Mon, 27 Feb 2017 10:02:25 -0500
+Received: by mail-it0-f53.google.com with SMTP id h10so59704776ith.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Feb 2017 07:02:24 -0800 (PST)
+In-Reply-To: <20170218012848.27417-2-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Loading a bitfield correctly take in account the offset
-of the bitfield inside the whole container integer.
-But truncating it to the width of the bitfield is not done
-or is done very implicitely (because the correct size is not lost).
-For example, with the following code:
-	struct bfu {
-		unsigned int a:3;
-	};
-	unsigned int get__bfu_a(struct bfu bf) { return bf.a; }
+On Sat, Feb 18, 2017 at 9:28 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This could be corrected in several ways (like changing all
+> the places wheer the first test is used, use the helper
+> everywhere or never set ->cond to VOID) but the simplest
+> is to simply split them in two separated instructions:
+> OP_BR & OP_CBR, especailly given the fact that in most cases
+> the OP_BR was first selected by a switch (opcode).
 
-test-linearize gives as output something like:
-	get__bfu_a:
-		cast.32     %r2 <- (3) %arg1
-		ret.32      %r2
+I think that change itself is fine. The implications is that all sparse
+back end user will need to be updated to use CBR instead of BR.
 
-We can notice the (3) in the cast instruction but this is misleading
-as %arg1 is not 3bit wide.
+Sparse can be compiled as a lib to link against. We might want to
+have some API version for sprase to check which version of sparse
+it is.  Currently there is SPARSE_VERSION but that is a macro
+which does not reflect in the lib version of sparse. That is a separate
+patch though.
 
-Fix this by adding the missing truncating cast.
-This will then gives something like:
-	get__bfu_a:
-		cast.3      %r2 <- (32) %arg1
-		cast.32     %r3 <- (3) %r2
-		ret.32      %r3
+> @@ -811,9 +811,10 @@ static int rewrite_parent_branch(struct basic_block *bb, struct basic_block *old
+>                 return 0;
+>
+>         switch (insn->opcode) {
+> +       case OP_CBR:
+> +               changed |= rewrite_branch(bb, &insn->bb_false, old, new);
 
-Note the truncation could also be done by a and-mask but the cast
-is more logical since we're here only changing size and not doing
-some arithmetic operations.
+We can use some comment of fall though the case here.
 
-Fixes: 1688f039c ("Re-do memory access linearization.")
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
-Changes since v1:
-- Fix the test case that was still at the and-mask version instead
-  of the cast for doing the truncation.
-- Slightly change the bitfield's width in the test case for easier
-  parsing of the result.
+>         case OP_BR:
+>                 changed |= rewrite_branch(bb, &insn->bb_true, old, new);
+> -               changed |= rewrite_branch(bb, &insn->bb_false, old, new);
+>                 assert(changed);
+>                 return changed;
+>         case OP_SWITCH: {
+> @@ -886,9 +887,10 @@ static void vrfy_children(struct basic_block *bb)
+>         }
+>         switch (br->opcode) {
+>                 struct multijmp *jmp;
+> +       case OP_CBR:
+> +               vrfy_bb_in_list(br->bb_false, bb->children);
 
+Same here.
 
- linearize.c                |  4 +++-
- validation/bitfield-size.c | 41 +++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 44 insertions(+), 1 deletion(-)
- create mode 100644 validation/bitfield-size.c
-
-diff --git a/linearize.c b/linearize.c
-index 99203d915..c77555bd6 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -32,6 +32,7 @@ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
- struct access_data;
- static pseudo_t add_load(struct entrypoint *ep, struct access_data *);
- static pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *);
-+static pseudo_t cast_pseudo(struct entrypoint *ep, pseudo_t src, struct symbol *from, struct symbol *to);
- 
- struct pseudo void_pseudo = {};
- 
-@@ -999,7 +1000,8 @@ static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad
- 		pseudo_t newval = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
- 		new = newval;
- 	}
--		
-+	if (ad->bit_size != type_size(ad->source_type))
-+		new = cast_pseudo(ep, new, ad->source_type, ad->result_type);
- 	return new;
- }
- 
-diff --git a/validation/bitfield-size.c b/validation/bitfield-size.c
-new file mode 100644
-index 000000000..ce78ecf21
---- /dev/null
-+++ b/validation/bitfield-size.c
-@@ -0,0 +1,41 @@
-+struct bfu {
-+	unsigned int a:4;
-+	unsigned int  :2;
-+	unsigned int b:4;
-+};
-+unsigned int get__bfu_a(struct bfu bf) { return bf.a; }
-+unsigned int get__bfu_b(struct bfu bf) { return bf.b; }
-+unsigned int get_pbfu_a(struct bfu *bf) { return bf->a; }
-+unsigned int get_pbfu_b(struct bfu *bf) { return bf->b; }
-+
-+
-+struct bfs {
-+	signed int a:4;
-+	signed int  :2;
-+	signed int b:4;
-+};
-+signed int get__bfs_a(struct bfs bf) { return bf.a; }
-+signed int get__bfs_b(struct bfs bf) { return bf.b; }
-+signed int get_pbfs_a(struct bfs *bf) { return bf->a; }
-+signed int get_pbfs_b(struct bfs *bf) { return bf->b; }
-+
-+
-+struct bfi {
-+	int a:4;
-+	int  :2;
-+	int b:4;
-+};
-+unsigned int get__bfi_a(struct bfi bf) { return bf.a; }
-+unsigned int get__bfi_b(struct bfi bf) { return bf.b; }
-+unsigned int get_pbfi_a(struct bfi *bf) { return bf->a; }
-+unsigned int get_pbfi_b(struct bfi *bf) { return bf->b; }
-+
-+/*
-+ * check-name: bitfield size
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-output-ignore
-+ *
-+ * check-output-pattern-24-times: cast\\.
-+ * check-output-pattern-12-times: cast\\.4
-+ * check-output-pattern-6-times: lsr\\..*\\$6
-+ */
--- 
-2.11.1
-
+Chris
