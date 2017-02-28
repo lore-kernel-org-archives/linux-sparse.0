@@ -1,45 +1,52 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 2/2] remove unused helper is_branch_goto()
-Date: Tue, 28 Feb 2017 14:30:28 +0100
-Message-ID: <20170228133028.45237-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 0/2] split OP_BR between OP_BR & OP_CBR
+Date: Tue, 28 Feb 2017 14:30:26 +0100
+Message-ID: <20170228133028.45237-1-luc.vanoostenryck@gmail.com>
 References: <CANeU7Q=60E+2tvn=bdjaYnZFS3U3PMiTTq0=eYS-NkPDK3aJNA@mail.gmail.com>
- <20170228133028.45237-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33441 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752542AbdB1NdN (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:35994 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752645AbdB1NdN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Tue, 28 Feb 2017 08:33:13 -0500
-Received: by mail-wm0-f65.google.com with SMTP id v77so2412267wmv.0
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Feb 2017 05:32:43 -0800 (PST)
-In-Reply-To: <20170228133028.45237-1-luc.vanoostenryck@gmail.com>
+Received: by mail-wr0-f195.google.com with SMTP id l37so1663708wrc.3
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Feb 2017 05:32:37 -0800 (PST)
+In-Reply-To: <CANeU7Q=60E+2tvn=bdjaYnZFS3U3PMiTTq0=eYS-NkPDK3aJNA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This helper is also made unneeded since the introduction of OP_CBR.
+This series introduces a new instruction opcode (OP_CBR)
+for conditional branches. Previously both conditional and
+non-conditional branches used the OP_BR opcode which is
+now reserved for non-conditional branches.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- linearize.h | 4 ----
- 1 file changed, 4 deletions(-)
+The motivation is the correctness of the test between
+the two kind of branches and an added benefit is the
+simplicity of this test now.
 
-diff --git a/linearize.h b/linearize.h
-index 2aa255154..bac82d7ff 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -237,10 +237,6 @@ struct basic_block {
- 	};
- };
- 
--static inline int is_branch_goto(struct instruction *br)
--{
--	return br && br->opcode==OP_BR && (!br->bb_true || !br->bb_false);
--}
- 
- static inline void add_bb(struct basic_block_list **list, struct basic_block *bb)
- {
+
+Changes since v1:
+- add missing '/* fall through */' 
+- convert 2 more tests of ->cond/->bb_{true,false}
+  into tests of ->opcode == OP_CBR/OP_BR
+
+Luc Van Oostenryck (2):
+  split OP_BR between unconditional & conditional: OP_CBR
+  remove unused helper is_branch_goto()
+
+ example.c                       |   2 +
+ flow.c                          |  17 +++--
+ linearize.c                     |  14 +++--
+ linearize.h                     |   5 +-
+ liveness.c                      |   3 +-
+ simplify.c                      |  15 ++---
+ sparse-llvm.c                   |  25 ++++----
+ validation/loop-linearization.c | 136 ++++++++++++++++++++++++++++++++++++++++
+ 8 files changed, 179 insertions(+), 38 deletions(-)
+ create mode 100644 validation/loop-linearization.c
+
 -- 
 2.11.1
 
