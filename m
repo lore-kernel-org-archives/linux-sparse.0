@@ -1,67 +1,48 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Sparse-LLVM issue compiling NULL pointers
-Date: Tue, 28 Feb 2017 16:49:23 +0000
-Message-ID: <CACXZuxeq=ZOTroVmtHqjNpPzFw-nvu4beWfXeVUhBnaBt12gjA@mail.gmail.com>
+Date: Wed, 1 Mar 2017 06:49:18 +0100
+Message-ID: <20170301054917.th5eptntfnnui3qx@macpro.local>
 References: <CACXZuxdav6y9uRC9mavNkVZS173k0ftw-8FpPanKLsoF-ws0Sw@mail.gmail.com>
- <20170228150956.moyfiyd5zf7tbeze@macbook.local> <CACXZuxd+SKSFxB5S0y9-bGep64_Vvpw3SvqDQqeKNzo3dtw_Mg@mail.gmail.com>
+ <20170228150956.moyfiyd5zf7tbeze@macbook.local>
+ <CAExDi1Sa3zDs--jht_43EmefT_nj5ThO_-QRdAFZJn=+rAw0iQ@mail.gmail.com>
+ <20170228173519.hyq3aihtg3zouoih@macpro.local>
+ <CACXZuxdFQD+6yPcisZ=hJssO5fyxm9LYJbvVHsvnjRz87cCjrQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:35840 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751457AbdB1Stq (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:35072 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750736AbdCAF5T (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 28 Feb 2017 13:49:46 -0500
-Received: by mail-it0-f45.google.com with SMTP id h10so82890619ith.1
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Feb 2017 10:48:53 -0800 (PST)
-In-Reply-To: <CACXZuxd+SKSFxB5S0y9-bGep64_Vvpw3SvqDQqeKNzo3dtw_Mg@mail.gmail.com>
+        Wed, 1 Mar 2017 00:57:19 -0500
+Received: by mail-wm0-f48.google.com with SMTP id v186so101461972wmd.0
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Feb 2017 21:56:27 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxdFQD+6yPcisZ=hJssO5fyxm9LYJbvVHsvnjRz87cCjrQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 28 February 2017 at 16:04, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> On 28 February 2017 at 15:09, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> On Tue, Feb 28, 2017 at 06:20:43AM +0000, Dibyendu Majumdar wrote:
->>> I am trying to debug a failure in sparse-llvm when compiling following:
->>>
->>> struct mytype {
->>>  int *foo;
->>> };
->>> extern void init_mytype(struct mytype *mt);
->>> void init_mytype(struct mytype *mt) {
->>>  mt->foo = (void *)0;
->>> }
->>>
->>
->> I think that the best you can do for us to be able to help you is to create
->> test case showing concretely the issues you have.
->>
->
-> Above is a simple test case. If you use an LLVM build with assertions
-> enabled then the code generator aborts:
->
-> Assertion failed: getOperand(0)->getType() ==
-> cast<PointerType>(getOperand(1)->getType())->getElementType() && "Ptr
-> must be a pointer to Val type!", file
-> C:\d\llvm-3.9.0.src\lib\IR\Instructions.cpp, line 1436
->
-> In the details I posted I was trying to say that :
->
-> a) The Expression Value does not appear to pass down the fact that it
-> has found a NULL pointer - i.e. (void *)0.
-> b) And even if this is conveyed (by making changes I suggested) then
-> it is lost at the time of converting to value pseudo. As far as I can
-> tell the cast is not being optimized away, it is just lost in
-> translation.
->
-> I could be wrong in my analysis as I mentioned before. I will try to
-> generate some debug info to further show what seems to be happening.
->
+On Tue, Feb 28, 2017 at 06:08:16PM +0000, Dibyendu Majumdar wrote:
+> 
+> Following modified version should handle values than 0.
 
-I should add that if (int *) is used instead of (void *) in the above
-example, it still aborts, although this time the changes I suggested
-are not relevant.
 
-Regards
+Good, I'll cook a patch based on this.
+
+But I still have a fundamental problem with pseudo_to_value().
+It's working with your example because we're using an OP_STORE
+and we're interesting in the type of the "target" and for this
+instruction (admittedly, like most instructions) insn->type is
+the type of insn->target. With insn->src or OP_SETNE, the result
+would have been incorrect.
+
+So while this patch is a little improvement and doesn't hurt,
+it's still not a good solution.
+What I last wrote on the subject the 29th Jan still holds
+(the "type" info should be given as argument to pseudo_to_value()
+instead of passing the pointer to the instruction) or at least
+something along this line.
+
+Luc Van Oostenryck
