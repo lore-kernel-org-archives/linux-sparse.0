@@ -1,36 +1,71 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Subject: Re: Sparse-LLVM issue compiling NULL pointers
-Date: Thu, 2 Mar 2017 18:21:55 +0100
-Message-ID: <20170302172154.5wpphmfnvtfhyu4c@macpro.local>
-References: <CACXZuxdav6y9uRC9mavNkVZS173k0ftw-8FpPanKLsoF-ws0Sw@mail.gmail.com>
- <20170228150956.moyfiyd5zf7tbeze@macbook.local>
- <CAExDi1Sa3zDs--jht_43EmefT_nj5ThO_-QRdAFZJn=+rAw0iQ@mail.gmail.com>
- <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
+Date: Thu, 2 Mar 2017 18:58:26 +0000
+Message-ID: <CACXZuxfkYqgPxE3OGdz7funUJtB6=K3TTwhzyZLJ=Kcio_7HXg@mail.gmail.com>
+References: <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
  <CACXZuxd2fO7-i84+nS5sC7ZHC68=_uJX3P9k75z05Y8vy2BAUA@mail.gmail.com>
- <20170302052124.fsqogvysufayy4to@macbook.local>
- <CACXZuxemR+d9J+PZN0wpUOSFS8eP+1QhzM=YiJQ13xV3hYKvJQ@mail.gmail.com>
+ <20170302052124.fsqogvysufayy4to@macbook.local> <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
+ <20170302135655.s742zcslis5r56if@macpro.local> <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
+ <20170302160403.zz5efgh34jvjh5q5@macpro.local> <CACXZuxefWw7VT8VJPXuYZ2kBLK-N=eYGc6BF5Lnbg9vP-RqLWw@mail.gmail.com>
+ <CACXZuxeayh3PUdypas6Ww_1mT23ZOuJiZZA_NWDkSQbfes9Xzw@mail.gmail.com>
+ <CACXZuxdaYwKm2pJV3zbusUbUdKx2M-nVjSJBfV6G4QwTY1vJ-A@mail.gmail.com> <20170302174353.4tb664cnfjjtxk5t@macpro.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:35142 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751644AbdCBTCz (ORCPT
+Received: from mail-io0-f176.google.com ([209.85.223.176]:34659 "EHLO
+        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751255AbdCBTJC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 2 Mar 2017 14:02:55 -0500
-Received: by mail-wr0-f172.google.com with SMTP id g10so59316469wrg.2
-        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 11:01:57 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxemR+d9J+PZN0wpUOSFS8eP+1QhzM=YiJQ13xV3hYKvJQ@mail.gmail.com>
+        Thu, 2 Mar 2017 14:09:02 -0500
+Received: by mail-io0-f176.google.com with SMTP id 90so60108496ios.1
+        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 11:07:26 -0800 (PST)
+In-Reply-To: <20170302174353.4tb664cnfjjtxk5t@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Mar 02, 2017 at 04:39:38PM +0000, Dibyendu Majumdar wrote:
-> I am using the following fix. There is some noise below as this code
-> is from modified version.
+On 2 March 2017 at 17:43, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Thu, Mar 02, 2017 at 05:18:16PM +0000, Dibyendu Majumdar wrote:
+>> Hi Luc,
+>>
+>> I was looking at whether I can use the standard LLVM GEP api to access
+>> struct and array members in sparse-llvm. I noticed that the output
+>> from sparse has byte offsets of each member - but not the member's
+>> ordinal position.
+>
+> Indeed, when the offset is a compile constant otherwise the offset
+> is set to zero and there is a pair OP_MUL/OP_ADD before that does
+> the needed pointer arithmetic.
+>
+>> To use the native LLVM methods we would have to
+>> allow LLVM to work out byte offsets, and just use the struct or array
+>> definition. This would I think make the code more robust and also lead
+>> to better optimisation.
+>
+> I'm not sure to understand here: which byte offsets need to be worked out?
 
-OK, thanks.
-I'll look at this a bit later, possibly tomorrow.
+You use the GEP API which allows you say that you want to access field
+5 from a struct, and so on. Here 5 is the fifth field. LLVM works out
+the rest. This is better than casting the struct to char* and then
+doing pointer arithmetic.
 
-Luc
+>
+> Also, for the optimization, I wouldn't worry for now because:
+> - the linearized code is already optimized (nothing sophisticated but the
+>   essential is already there)
+> - you can always later call LLVM's optimization passes
+> - the code selector will also do some optimization.
+>
+
+Sure but my experience with LLVM is that it needs to have type
+metadata for each store and load instruction to properly do type based
+alias analysis. Otherwise it will miss optimisation opportunities.
+Maybe we can still provide type metadata as we do have the symbol
+definition etc.
+
+But I agree that if sparse-llvm works correctly for all inputs then
+that is a big step forward (for me) !
+
+Regards
