@@ -1,49 +1,114 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Sparse-LLVM issue compiling NULL pointers
-Date: Fri, 3 Mar 2017 12:39:24 +0000
-Message-ID: <CACXZuxf9fxwA60OBj7hvdUrrT9Mw0EAF9YaHaKygiFGNr_VwXg@mail.gmail.com>
-References: <20170302052124.fsqogvysufayy4to@macbook.local>
- <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
- <20170302135655.s742zcslis5r56if@macpro.local> <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
- <20170302160403.zz5efgh34jvjh5q5@macpro.local> <CACXZuxefWw7VT8VJPXuYZ2kBLK-N=eYGc6BF5Lnbg9vP-RqLWw@mail.gmail.com>
- <CACXZuxdr9ubL6S8PEzAHtOt9AT=PjYcv_8EotLD8_Cagc7ZGPw@mail.gmail.com>
- <20170302171842.xuk535w6wrfxke3b@macpro.local> <20170302200916.4agmd5jihtkzyvp5@macpro.local>
- <CACXZuxfNkXS2qaLW+GoeOZ6TK57jJMzpRNdVCr418Bac-U7=MA@mail.gmail.com>
- <20170303042753.vn4kc474erpnysdm@macpro.local> <CACXZuxd-ZbSdwENfSaqCEtQEf8i22CXhDjA_hkyigKhL2wZTiw@mail.gmail.com>
- <CAExDi1T++WcupS6iiOkhuzuV8pgtuqAL9ftbQF00AQdABeoQFQ@mail.gmail.com>
+Subject: Re: [PATCH] llvm: fix output_op_[ptr]cast()
+Date: Fri, 3 Mar 2017 07:37:22 +0000
+Message-ID: <CACXZuxcN_5H+Ur53axpwbxy-LwQX2fANp5x6GUU-jU+7b4_2tw@mail.gmail.com>
+References: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
+ <20170303052459.2351-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:37503 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751050AbdCCNos (ORCPT
+Received: from mail-it0-f41.google.com ([209.85.214.41]:36486 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752069AbdCCOaO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 08:44:48 -0500
-Received: by mail-it0-f50.google.com with SMTP id 203so12958168ith.0
-        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 05:43:50 -0800 (PST)
-In-Reply-To: <CAExDi1T++WcupS6iiOkhuzuV8pgtuqAL9ftbQF00AQdABeoQFQ@mail.gmail.com>
+        Fri, 3 Mar 2017 09:30:14 -0500
+Received: by mail-it0-f41.google.com with SMTP id h10so13599926ith.1
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 06:30:13 -0800 (PST)
+In-Reply-To: <20170303052459.2351-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 3 March 2017 at 07:50, Luc Van Oostenryck
+Hi Luc,
+
+On 3 March 2017 at 05:24, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> On Fri, Mar 3, 2017 at 5:38 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> Also by casting to an integer subsequent operations fail. Any idea why
->> cast is being output rather than ptrcast?
+> This should fox the problems of mixed types in casts.
+> Without much testing but should be essentialy OK.
 >
-> Yes, it's because casts to void* is not considered as a pointer cast,
-> the rationale
-> being that a void* will need to be casted toa real pointer before being used.
+> CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
+> ---
+>  sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 35 insertions(+), 5 deletions(-)
 >
-> Have you still problem after the patch I sent earlier (cfr:
-> https://patchwork.kernel.org/patch/9602045/ )?
+> diff --git a/sparse-llvm.c b/sparse-llvm.c
+> index edd0615ec..92ad26845 100644
+> --- a/sparse-llvm.c
+> +++ b/sparse-llvm.c
+> @@ -763,6 +763,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
+>  static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+>  {
+>         LLVMValueRef src, target;
+> +       LLVMTypeRef dtype;
+> +       LLVMOpcode op;
+>         char target_name[64];
+>
+>         src = insn->src->priv;
+> @@ -773,15 +775,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+>
+>         assert(!symbol_is_fp_type(insn->type));
+>
+> -       target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
+> +       dtype = insn_symbol_type(fn->module, insn);
+> +       switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+> +       case LLVMPointerTypeKind:
+> +               op = LLVMBitCast;
+> +               break;
+> +       case LLVMIntegerTypeKind:
+> +               op = LLVMIntToPtr;
+> +               break;
+> +       default:
+> +               assert(0);
+> +       }
+>
+> +       target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
+>         insn->target->priv = target;
+>  }
+>
+>  static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
+>  {
+>         LLVMValueRef src, target;
+> +       LLVMTypeRef dtype;
+>         char target_name[64];
+> +       unsigned int width;
+> +
+> +       if (is_ptr_type(insn->type))
+> +               return output_op_ptrcast(fn, insn);
+>
+>         src = insn->src->priv;
+>         if (!src)
+> @@ -791,11 +809,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+>
+>         assert(!symbol_is_fp_type(insn->type));
+>
+> -       if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
+> -               target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
+> -       else
+> -               target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
+> +       dtype = insn_symbol_type(fn->module, insn);
+> +       switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+> +       case LLVMPointerTypeKind:
+> +               op = LLVMPtrToInt;
+> +               break;
+> +       case LLVMIntegerTypeKind:
+> +               width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
+> +               if (insn->size < width)
+> +                       op = LLVMTrunc;
+> +               else if (insn->size == width)
+> +                       op = LLVMBitCast;
+> +               break;
+> +       default:
+> +               assert(0);
+> +       }
+>
+> +       target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
+>         insn->target->priv = target;
+>  }
 >
 
-I applied the patch but there is still the same problem as the op_cast
-is converting a pointer to int, but then the following operation
-expects a pointer.
+
+This doesn't quite work. The problem is that in op_cast, the pointer
+is being cast to int, but subsequent operations expect a pointer.
 
 Regards
