@@ -1,45 +1,80 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Subject: Re: Sparse-LLVM issue compiling NULL pointers
-Date: Thu, 2 Mar 2017 18:02:10 +0000
-Message-ID: <CACXZuxfR6HNzvzkCLy1R2bik4R2p9t1i1+fga91GP-SnMAkwmQ@mail.gmail.com>
-References: <CAExDi1Sa3zDs--jht_43EmefT_nj5ThO_-QRdAFZJn=+rAw0iQ@mail.gmail.com>
- <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
+Date: Fri, 3 Mar 2017 02:52:00 +0000
+Message-ID: <CACXZuxfNkXS2qaLW+GoeOZ6TK57jJMzpRNdVCr418Bac-U7=MA@mail.gmail.com>
+References: <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
  <CACXZuxd2fO7-i84+nS5sC7ZHC68=_uJX3P9k75z05Y8vy2BAUA@mail.gmail.com>
  <20170302052124.fsqogvysufayy4to@macbook.local> <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
  <20170302135655.s742zcslis5r56if@macpro.local> <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
  <20170302160403.zz5efgh34jvjh5q5@macpro.local> <CACXZuxefWw7VT8VJPXuYZ2kBLK-N=eYGc6BF5Lnbg9vP-RqLWw@mail.gmail.com>
- <CACXZuxeayh3PUdypas6Ww_1mT23ZOuJiZZA_NWDkSQbfes9Xzw@mail.gmail.com>
- <20170302174959.kh7x5bmwccl7fpig@macpro.local> <CAExDi1QY1+KEsdzBuy0aorDwzvoL2Vos-F5P1HsJZCjT9o0R0w@mail.gmail.com>
+ <CACXZuxdr9ubL6S8PEzAHtOt9AT=PjYcv_8EotLD8_Cagc7ZGPw@mail.gmail.com>
+ <20170302171842.xuk535w6wrfxke3b@macpro.local> <20170302200916.4agmd5jihtkzyvp5@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:34994 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751148AbdCCCVg (ORCPT
+Received: from mail-it0-f52.google.com ([209.85.214.52]:37353 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751137AbdCCC7X (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 2 Mar 2017 21:21:36 -0500
-Received: by mail-it0-f41.google.com with SMTP id 203so5192954ith.0
-        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 18:21:35 -0800 (PST)
-In-Reply-To: <CAExDi1QY1+KEsdzBuy0aorDwzvoL2Vos-F5P1HsJZCjT9o0R0w@mail.gmail.com>
+        Thu, 2 Mar 2017 21:59:23 -0500
+Received: by mail-it0-f52.google.com with SMTP id 203so5662815ith.0
+        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 18:58:50 -0800 (PST)
+In-Reply-To: <20170302200916.4agmd5jihtkzyvp5@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 2 March 2017 at 17:57, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->> Removing the last line of output_op_store() (insn->target->priv = target;)
->> should fix this.
->
-> In fact LLVMBuildStore() return a LLVMValueRef.
-> Could this be the 'void' we seen?
->
+Hi Luc,
 
-It returns a Value that is a store instruction, or at least that's the
-way I interpret this and so yes, I think the type of this was void.
+Next problem:
 
-BTW removing the line makes progress, but it fails at the add
-instruction later. Are there other issues like this you can spot? I am
-a bit lost here I am afraid.
+The following fails.
+
+typedef unsigned long long size_t;
+struct buffer_type_st {
+ struct buffer_type_st    *next_buffer;
+ char           *buffer;
+};
+typedef struct buffer_type_st buffer_type_t;
+struct link_st {
+ struct link_st           *next;
+};
+typedef struct link_st link_t;
+struct allocator_st {
+ buffer_type_t    *buffer_list;
+ link_t           *free_list;
+ char           *next_avail;
+ char           *last;
+ size_t          size;
+ size_t          n;
+};
+typedef struct allocator_st allocator;
+extern void *
+alloc_node(allocator * a);
+extern void
+grow_allocator(allocator * a);
+void *
+alloc_node(allocator * a)
+{
+ link_t           *tmp;
+ tmp = a->free_list;
+ return (void *) tmp;
+}
+
+
+I get LLVM assertion failure for following instruction:
+
+insn cast.64     %r4 <- (64) %r2
+
+Assertion failed: isa<X>(Val) && "cast<Ty>() argument of incompatible
+type!", file C:\d\llvm-3.9.0.src\include\llvm/Support/Casting.h, line
+237
+
+I think this is because the linearize is outputting an integer cast
+rather than pointer cast so LLVM is not happy.
 
 Regards
+Dibyendu
+
+p.s. should I start a new thread for each separate issue?
