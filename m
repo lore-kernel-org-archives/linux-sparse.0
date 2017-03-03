@@ -1,143 +1,49 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] give a type to OP_PHISOURCE
-Date: Fri,  3 Mar 2017 10:54:21 +0100
-Message-ID: <20170303095421.39740-1-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: Sparse-LLVM issue compiling NULL pointers
+Date: Fri, 3 Mar 2017 12:39:24 +0000
+Message-ID: <CACXZuxf9fxwA60OBj7hvdUrrT9Mw0EAF9YaHaKygiFGNr_VwXg@mail.gmail.com>
+References: <20170302052124.fsqogvysufayy4to@macbook.local>
+ <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
+ <20170302135655.s742zcslis5r56if@macpro.local> <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
+ <20170302160403.zz5efgh34jvjh5q5@macpro.local> <CACXZuxefWw7VT8VJPXuYZ2kBLK-N=eYGc6BF5Lnbg9vP-RqLWw@mail.gmail.com>
+ <CACXZuxdr9ubL6S8PEzAHtOt9AT=PjYcv_8EotLD8_Cagc7ZGPw@mail.gmail.com>
+ <20170302171842.xuk535w6wrfxke3b@macpro.local> <20170302200916.4agmd5jihtkzyvp5@macpro.local>
+ <CACXZuxfNkXS2qaLW+GoeOZ6TK57jJMzpRNdVCr418Bac-U7=MA@mail.gmail.com>
+ <20170303042753.vn4kc474erpnysdm@macpro.local> <CACXZuxd-ZbSdwENfSaqCEtQEf8i22CXhDjA_hkyigKhL2wZTiw@mail.gmail.com>
+ <CAExDi1T++WcupS6iiOkhuzuV8pgtuqAL9ftbQF00AQdABeoQFQ@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36304 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751667AbdCCNEb (ORCPT
+Received: from mail-it0-f50.google.com ([209.85.214.50]:37503 "EHLO
+        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751050AbdCCNos (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 08:04:31 -0500
-Received: by mail-wm0-f68.google.com with SMTP id v190so3036088wme.3
-        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 05:04:30 -0800 (PST)
+        Fri, 3 Mar 2017 08:44:48 -0500
+Received: by mail-it0-f50.google.com with SMTP id 203so12958168ith.0
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 05:43:50 -0800 (PST)
+In-Reply-To: <CAExDi1T++WcupS6iiOkhuzuV8pgtuqAL9ftbQF00AQdABeoQFQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
+On 3 March 2017 at 07:50, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Fri, Mar 3, 2017 at 5:38 AM, Dibyendu Majumdar
+> <mobile@majumdar.org.uk> wrote:
+>> Also by casting to an integer subsequent operations fail. Any idea why
+>> cast is being output rather than ptrcast?
+>
+> Yes, it's because casts to void* is not considered as a pointer cast,
+> the rationale
+> being that a void* will need to be casted toa real pointer before being used.
+>
+> Have you still problem after the patch I sent earlier (cfr:
+> https://patchwork.kernel.org/patch/9602045/ )?
+>
 
-There is no good reasons fro that and it complicate the
-further correct processing or make it impossible.
+I applied the patch but there is still the same problem as the op_cast
+is converting a pointer to int, but then the following operation
+expects a pointer.
 
-CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
-
-diff --git a/flow.c b/flow.c
-index 7730e70f1..e574d5e98 100644
---- a/flow.c
-+++ b/flow.c
-@@ -370,7 +370,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
-diff --git a/linearize.c b/linearize.c
-index bdc85beb9..fb4c7bd10 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -815,9 +815,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
- }
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
- {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
- 
-@@ -1350,19 +1350,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
- 
- 	if (!expr_false || !ep->active)
- 		return VOID;
- 
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1376,7 +1375,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
- 
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1388,12 +1386,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1875,7 +1873,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
- 	}
-diff --git a/linearize.h b/linearize.h
-index bac82d7ff..c03940eea 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -331,7 +331,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
- 
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
- 
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
--- 
-2.11.1
-
+Regards
