@@ -1,55 +1,143 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] llvm: add support for OP_NEG
-Date: Fri,  3 Mar 2017 11:23:32 +0100
-Message-ID: <20170303102332.43997-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] give a type to OP_PHISOURCE
+Date: Fri,  3 Mar 2017 10:54:21 +0100
+Message-ID: <20170303095421.39740-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33767 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36304 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751050AbdCCNEQ (ORCPT
+        with ESMTP id S1751667AbdCCNEb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 08:04:16 -0500
-Received: by mail-wm0-f68.google.com with SMTP id n11so3053196wma.0
-        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 05:03:21 -0800 (PST)
+        Fri, 3 Mar 2017 08:04:31 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v190so3036088wme.3
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 05:04:30 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
+Currently, OP_PHISOURCEs are given a size but not a type.
+
+There is no good reasons fro that and it complicate the
+further correct processing or make it impossible.
+
 CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
+ flow.c      |  2 +-
+ linearize.c | 16 +++++++---------
+ linearize.h |  2 +-
+ memops.c    |  2 +-
+ 4 files changed, 10 insertions(+), 12 deletions(-)
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index fac19713a..2feff885f 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -950,9 +950,22 @@ static void output_insn(struct function *fn, struct instruction *insn)
- 		insn->target->priv = target;
- 		break;
+diff --git a/flow.c b/flow.c
+index 7730e70f1..e574d5e98 100644
+--- a/flow.c
++++ b/flow.c
+@@ -370,7 +370,7 @@ found_dominator:
+ 		if (dominators && phisrc_in_bb(*dominators, parent))
+ 			continue;
+ 		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->size);
++		phi = alloc_phi(parent, one->target, one->type);
+ 		phi->ident = phi->ident ? : pseudo->ident;
+ 		add_instruction(&parent->insns, br);
+ 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+diff --git a/linearize.c b/linearize.c
+index bdc85beb9..fb4c7bd10 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -815,9 +815,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
+ 	return pseudo;
+ }
+ 
+-pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
++pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
+ {
+-	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
++	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
+ 	pseudo_t phi = __alloc_pseudo(0);
+ 	static int nr = 0;
+ 
+@@ -1350,19 +1350,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
+ 	struct basic_block *bb_false;
+ 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
+ 	pseudo_t phi1, phi2;
+-	int size = type_size(expr->ctype);
+ 
+ 	if (!expr_false || !ep->active)
+ 		return VOID;
+ 
+ 	bb_false = alloc_basic_block(ep, expr_false->pos);
+ 	src1 = linearize_expression(ep, cond);
+-	phi1 = alloc_phi(ep->active, src1, size);
++	phi1 = alloc_phi(ep->active, src1, expr->ctype);
+ 	add_branch(ep, expr, src1, merge, bb_false);
+ 
+ 	set_activeblock(ep, bb_false);
+ 	src2 = linearize_expression(ep, expr_false);
+-	phi2 = alloc_phi(ep->active, src2, size);
++	phi2 = alloc_phi(ep->active, src2, expr->ctype);
+ 	set_activeblock(ep, merge);
+ 
+ 	return add_join_conditional(ep, expr, phi1, phi2);
+@@ -1376,7 +1375,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
+ 	pseudo_t src1, src2;
+ 	pseudo_t phi1, phi2;
+ 	struct basic_block *bb_true, *bb_false, *merge;
+-	int size = type_size(expr->ctype);
+ 
+ 	if (!cond || !expr_true || !expr_false || !ep->active)
+ 		return VOID;
+@@ -1388,12 +1386,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
+ 
+ 	set_activeblock(ep, bb_true);
+ 	src1 = linearize_expression(ep, expr_true);
+-	phi1 = alloc_phi(ep->active, src1, size);
++	phi1 = alloc_phi(ep->active, src1, expr->ctype);
+ 	add_goto(ep, merge); 
+ 
+ 	set_activeblock(ep, bb_false);
+ 	src2 = linearize_expression(ep, expr_false);
+-	phi2 = alloc_phi(ep->active, src2, size);
++	phi2 = alloc_phi(ep->active, src2, expr->ctype);
+ 	set_activeblock(ep, merge);
+ 
+ 	return add_join_conditional(ep, expr, phi1, phi2);
+@@ -1875,7 +1873,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
+ 			phi_node->bb = bb_return;
+ 			add_instruction(&bb_return->insns, phi_node);
+ 		}
+-		phi = alloc_phi(active, src, type_size(expr->ctype));
++		phi = alloc_phi(active, src, expr->ctype);
+ 		phi->ident = &return_ident;
+ 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
  	}
--	case OP_NEG:
--		assert(0);
-+	case OP_NEG: {
-+		LLVMValueRef src, target;
-+		char target_name[64];
-+
-+		src = pseudo_to_value(fn, insn, insn->src);
-+
-+		pseudo_name(insn->target, target_name);
-+
-+		if (symbol_is_fp_type(insn->type))
-+			target = LLVMBuildFNeg(fn->builder, src, target_name);
-+		else
-+			target = LLVMBuildNeg(fn->builder, src, target_name);
-+
-+		insn->target->priv = target;
- 		break;
-+	}
- 	case OP_CONTEXT:
- 		assert(0);
- 		break;
+diff --git a/linearize.h b/linearize.h
+index bac82d7ff..c03940eea 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -331,7 +331,7 @@ struct entrypoint {
+ extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
+ extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
+ 
+-pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
++pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
+ pseudo_t alloc_pseudo(struct instruction *def);
+ pseudo_t value_pseudo(long long val);
+ 
+diff --git a/memops.c b/memops.c
+index 5efdd6f2d..187a63284 100644
+--- a/memops.c
++++ b/memops.c
+@@ -52,7 +52,7 @@ no_dominance:
+ 
+ found_dominator:
+ 		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->size);
++		phi = alloc_phi(parent, one->target, one->type);
+ 		phi->ident = phi->ident ? : one->target->ident;
+ 		add_instruction(&parent->insns, br);
+ 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
 -- 
 2.11.1
 
