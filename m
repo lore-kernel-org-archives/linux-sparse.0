@@ -1,35 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] llvm: fix output_op_[ptr]cast()
-Date: Fri, 3 Mar 2017 20:55:09 +0100
-Message-ID: <CAExDi1Rgc9M9rs2KfXv_Wrn_iKA+FKKc0e8MHBxU59mLOZASAg@mail.gmail.com>
-References: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
- <20170303052459.2351-1-luc.vanoostenryck@gmail.com> <CACXZuxcN_5H+Ur53axpwbxy-LwQX2fANp5x6GUU-jU+7b4_2tw@mail.gmail.com>
- <CACXZuxd_gY9uaDHiCzq1TqRweeyp22ifWDDYZbYmjnMkGohenw@mail.gmail.com> <CACXZuxcBg1ry4d2AihkAJUX-6L-W_17HYXvja3q=2TFPGoJmNg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] llvm: fix: do not mix pointers and floats when doing compares
+Date: Fri,  3 Mar 2017 21:52:40 +0100
+Message-ID: <20170303205240.67622-1-luc.vanoostenryck@gmail.com>
+References: <CACXZuxdr8HiVb=BsA3cZJEAUa3Dqd0OXe4N84djM1tVaDveMEw@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f182.google.com ([209.85.220.182]:34214 "EHLO
-        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751970AbdCCU7y (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33560 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751722AbdCCVYO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 15:59:54 -0500
-Received: by mail-qk0-f182.google.com with SMTP id g129so12951140qkd.1
-        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 12:59:51 -0800 (PST)
-In-Reply-To: <CACXZuxcBg1ry4d2AihkAJUX-6L-W_17HYXvja3q=2TFPGoJmNg@mail.gmail.com>
+        Fri, 3 Mar 2017 16:24:14 -0500
+Received: by mail-wm0-f66.google.com with SMTP id n11so4975094wma.0
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 13:23:10 -0800 (PST)
+In-Reply-To: <CACXZuxdr8HiVb=BsA3cZJEAUa3Dqd0OXe4N84djM1tVaDveMEw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Mar 3, 2017 at 7:30 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Perhaps we need these fixes?
->
-> https://patchwork.kernel.org/patch/8175541/
+In output_op_compare() everything that is not of interger
+type is treated as floats, pointers disagree.
 
-I very much doubt it would make any difference.
-This patch is part of a serie enforcing correct handling
-of constant expression *as defined by the standard*.
-It won't change the type of an expression or something like this.
+Fix this by rearranging the code and use a switch to easily
+treat pointers like integers as required for LLVM's icmp.
 
-Luc
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse-llvm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 7c7b70027..be47c5e75 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -587,14 +587,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+ 
+ 	LLVMTypeRef dst_type = insn_symbol_type(insn);
+ 
+-	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
++	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
++	case LLVMPointerTypeKind:
++	case LLVMIntegerTypeKind: {
+ 		LLVMIntPredicate op = translate_op(insn->opcode);
+ 
+ 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
+-	} else {
++		break;
++	}
++	case LLVMHalfTypeKind:
++	case LLVMFloatTypeKind:
++	case LLVMDoubleTypeKind:
++	case LLVMX86_FP80TypeKind:
++	case LLVMFP128TypeKind:
++	case LLVMPPC_FP128TypeKind: {
+ 		LLVMRealPredicate op = translate_fop(insn->opcode);
+ 
+ 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
++		break;
++	}
++	default:
++		assert(0);
+ 	}
+ 
+ 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+-- 
+2.11.1
+
