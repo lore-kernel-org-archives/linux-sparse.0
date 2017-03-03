@@ -1,114 +1,88 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH] llvm: fix output_op_[ptr]cast()
-Date: Fri, 3 Mar 2017 07:37:22 +0000
-Message-ID: <CACXZuxcN_5H+Ur53axpwbxy-LwQX2fANp5x6GUU-jU+7b4_2tw@mail.gmail.com>
-References: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
- <20170303052459.2351-1-luc.vanoostenryck@gmail.com>
+Subject: Re: Sparse-LLVM issue compiling NULL pointers
+Date: Fri, 3 Mar 2017 03:01:12 +0000
+Message-ID: <CACXZuxfSUVhOis7449hLZPrFvoTy_cV5UTJSS3VVtTGKDZy64Q@mail.gmail.com>
+References: <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
+ <CACXZuxd2fO7-i84+nS5sC7ZHC68=_uJX3P9k75z05Y8vy2BAUA@mail.gmail.com>
+ <20170302052124.fsqogvysufayy4to@macbook.local> <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
+ <20170302135655.s742zcslis5r56if@macpro.local> <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
+ <20170302160403.zz5efgh34jvjh5q5@macpro.local> <CACXZuxefWw7VT8VJPXuYZ2kBLK-N=eYGc6BF5Lnbg9vP-RqLWw@mail.gmail.com>
+ <CACXZuxdr9ubL6S8PEzAHtOt9AT=PjYcv_8EotLD8_Cagc7ZGPw@mail.gmail.com>
+ <20170302171842.xuk535w6wrfxke3b@macpro.local> <20170302200916.4agmd5jihtkzyvp5@macpro.local>
+ <CACXZuxfNkXS2qaLW+GoeOZ6TK57jJMzpRNdVCr418Bac-U7=MA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:36486 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752069AbdCCOaO (ORCPT
+Received: from mail-it0-f52.google.com ([209.85.214.52]:38107 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752447AbdCCQK0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 09:30:14 -0500
-Received: by mail-it0-f41.google.com with SMTP id h10so13599926ith.1
-        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 06:30:13 -0800 (PST)
-In-Reply-To: <20170303052459.2351-1-luc.vanoostenryck@gmail.com>
+        Fri, 3 Mar 2017 11:10:26 -0500
+Received: by mail-it0-f52.google.com with SMTP id m27so15808102iti.1
+        for <linux-sparse@vger.kernel.org>; Fri, 03 Mar 2017 08:10:25 -0800 (PST)
+In-Reply-To: <CACXZuxfNkXS2qaLW+GoeOZ6TK57jJMzpRNdVCr418Bac-U7=MA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Luc,
-
-On 3 March 2017 at 05:24, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> This should fox the problems of mixed types in casts.
-> Without much testing but should be essentialy OK.
+On 3 March 2017 at 02:52, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
+> Hi Luc,
 >
-> CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
-> ---
->  sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
->  1 file changed, 35 insertions(+), 5 deletions(-)
+> Next problem:
 >
-> diff --git a/sparse-llvm.c b/sparse-llvm.c
-> index edd0615ec..92ad26845 100644
-> --- a/sparse-llvm.c
-> +++ b/sparse-llvm.c
-> @@ -763,6 +763,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
->  static void output_op_ptrcast(struct function *fn, struct instruction *insn)
->  {
->         LLVMValueRef src, target;
-> +       LLVMTypeRef dtype;
-> +       LLVMOpcode op;
->         char target_name[64];
+> The following fails.
 >
->         src = insn->src->priv;
-> @@ -773,15 +775,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+> typedef unsigned long long size_t;
+> struct buffer_type_st {
+>  struct buffer_type_st    *next_buffer;
+>  char           *buffer;
+> };
+> typedef struct buffer_type_st buffer_type_t;
+> struct link_st {
+>  struct link_st           *next;
+> };
+> typedef struct link_st link_t;
+> struct allocator_st {
+>  buffer_type_t    *buffer_list;
+>  link_t           *free_list;
+>  char           *next_avail;
+>  char           *last;
+>  size_t          size;
+>  size_t          n;
+> };
+> typedef struct allocator_st allocator;
+> extern void *
+> alloc_node(allocator * a);
+> extern void
+> grow_allocator(allocator * a);
+> void *
+> alloc_node(allocator * a)
+> {
+>  link_t           *tmp;
+>  tmp = a->free_list;
+>  return (void *) tmp;
+> }
 >
->         assert(!symbol_is_fp_type(insn->type));
 >
-> -       target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
-> +       dtype = insn_symbol_type(fn->module, insn);
-> +       switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-> +       case LLVMPointerTypeKind:
-> +               op = LLVMBitCast;
-> +               break;
-> +       case LLVMIntegerTypeKind:
-> +               op = LLVMIntToPtr;
-> +               break;
-> +       default:
-> +               assert(0);
-> +       }
+> I get LLVM assertion failure for following instruction:
 >
-> +       target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
->         insn->target->priv = target;
->  }
+> insn cast.64     %r4 <- (64) %r2
 >
->  static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
->  {
->         LLVMValueRef src, target;
-> +       LLVMTypeRef dtype;
->         char target_name[64];
-> +       unsigned int width;
-> +
-> +       if (is_ptr_type(insn->type))
-> +               return output_op_ptrcast(fn, insn);
+> Assertion failed: isa<X>(Val) && "cast<Ty>() argument of incompatible
+> type!", file C:\d\llvm-3.9.0.src\include\llvm/Support/Casting.h, line
+> 237
 >
->         src = insn->src->priv;
->         if (!src)
-> @@ -791,11 +809,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
->
->         assert(!symbol_is_fp_type(insn->type));
->
-> -       if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
-> -               target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
-> -       else
-> -               target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
-> +       dtype = insn_symbol_type(fn->module, insn);
-> +       switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-> +       case LLVMPointerTypeKind:
-> +               op = LLVMPtrToInt;
-> +               break;
-> +       case LLVMIntegerTypeKind:
-> +               width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
-> +               if (insn->size < width)
-> +                       op = LLVMTrunc;
-> +               else if (insn->size == width)
-> +                       op = LLVMBitCast;
-> +               break;
-> +       default:
-> +               assert(0);
-> +       }
->
-> +       target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
->         insn->target->priv = target;
->  }
+> I think this is because the linearize is outputting an integer cast
+> rather than pointer cast so LLVM is not happy.
 >
 
+Simpler example:
 
-This doesn't quite work. The problem is that in op_cast, the pointer
-is being cast to int, but subsequent operations expect a pointer.
-
-Regards
+void *
+alloc_node(void)
+{
+ char *tmp;
+ tmp = (void *)0;
+ return tmp;
+}
