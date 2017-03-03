@@ -1,104 +1,52 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] llvm: fix output_op_[ptr]cast()
-Date: Fri,  3 Mar 2017 06:24:59 +0100
-Message-ID: <20170303052459.2351-1-luc.vanoostenryck@gmail.com>
-References: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
+Subject: Re: Sparse-LLVM issue compiling NULL pointers
+Date: Fri, 3 Mar 2017 06:35:57 +0100
+Message-ID: <20170303053556.dvdbrx4pkm6jdilk@macpro.local>
+References: <20170228150956.moyfiyd5zf7tbeze@macbook.local>
+ <CAExDi1Sa3zDs--jht_43EmefT_nj5ThO_-QRdAFZJn=+rAw0iQ@mail.gmail.com>
+ <CACXZuxeRe1Oe-Anht7hnsZgwZroP8sZdajvLBdO3oYCE1ofZ8Q@mail.gmail.com>
+ <CACXZuxd2fO7-i84+nS5sC7ZHC68=_uJX3P9k75z05Y8vy2BAUA@mail.gmail.com>
+ <20170302052124.fsqogvysufayy4to@macbook.local>
+ <CACXZuxe_+-8H6SSA0NvpUdchWYzo_v=2KJq61QC9cVNYG3DGkQ@mail.gmail.com>
+ <20170302135655.s742zcslis5r56if@macpro.local>
+ <CACXZuxeiWM9zJZqtUC1YN6tFO6VsHkfTn9CZefr6P5nYUOpoRA@mail.gmail.com>
+ <20170302160403.zz5efgh34jvjh5q5@macpro.local>
+ <CACXZuxf8-L6hy+TOd6pfmiAhoOXc-K5YJwUjonmmOGxv_djVnA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36413 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751160AbdCCFdl (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:36958 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750983AbdCCFqQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 3 Mar 2017 00:33:41 -0500
-Received: by mail-wm0-f68.google.com with SMTP id v190so1389118wme.3
-        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 21:33:28 -0800 (PST)
-In-Reply-To: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
+        Fri, 3 Mar 2017 00:46:16 -0500
+Received: by mail-wm0-f48.google.com with SMTP id n11so7211290wma.0
+        for <linux-sparse@vger.kernel.org>; Thu, 02 Mar 2017 21:45:12 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxf8-L6hy+TOd6pfmiAhoOXc-K5YJwUjonmmOGxv_djVnA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-This should fox the problems of mixed types in casts.
-Without much testing but should be essentialy OK.
+On Thu, Mar 02, 2017 at 06:41:35PM +0000, Dibyendu Majumdar wrote:
+> This seems spot on as by making change as below, the final assertion
+> failure went away. I have not yet checked the generated code but that
+> is next.
+> 
+>  case OP_ADD:
+>   if (symbol_is_fp_type(C, insn->type))
+>    target = LLVMBuildFAdd(fn->builder, lhs, rhs, target_name);
+>   else {
+>    if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind) {
+>     target = LLVMBuildGEP(fn->builder, lhs, &rhs, 1, "");
+>    }
+>    else if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind) {
 
-CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
----
- sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 35 insertions(+), 5 deletions(-)
+Yes, this is what I meant but here you're testing twice the type of 'lhs'.
+One of the test should be on 'rhs'.
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index edd0615ec..92ad26845 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -763,6 +763,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
- static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
-+	LLVMOpcode op;
- 	char target_name[64];
- 
- 	src = insn->src->priv;
-@@ -773,15 +775,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- 
- 	assert(!symbol_is_fp_type(insn->type));
- 
--	target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
-+	dtype = insn_symbol_type(fn->module, insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-+	case LLVMPointerTypeKind:
-+		op = LLVMBitCast;
-+		break;
-+	case LLVMIntegerTypeKind:
-+		op = LLVMIntToPtr;
-+		break;
-+	default:
-+		assert(0);
-+	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
- }
- 
- static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
- 	char target_name[64];
-+	unsigned int width;
-+
-+	if (is_ptr_type(insn->type))
-+		return output_op_ptrcast(fn, insn);
- 
- 	src = insn->src->priv;
- 	if (!src)
-@@ -791,11 +809,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 
- 	assert(!symbol_is_fp_type(insn->type));
- 
--	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
--		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
--	else
--		target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
-+	dtype = insn_symbol_type(fn->module, insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-+	case LLVMPointerTypeKind:
-+		op = LLVMPtrToInt;
-+		break;
-+	case LLVMIntegerTypeKind:
-+		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
-+		if (insn->size < width)
-+			op = LLVMTrunc;
-+		else if (insn->size == width)
-+			op = LLVMBitCast;
-+		break;
-+	default:
-+		assert(0);
-+	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
- }
- 
--- 
-2.11.1
+Can you resend it in another thread once it's fixed?
 
+Thanks,
+Luc
