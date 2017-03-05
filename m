@@ -1,66 +1,62 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse-llvm the result of expression add assign when target is a
- pointer should be a pointer
-Date: Sun, 5 Mar 2017 11:53:29 +0100
-Message-ID: <20170305105328.bcl7xe3mg34gtyzz@macpro.local>
-References: <CACXZuxe1xK9A7PKnHzYYTemKv5Jvf1Wiam5V77inn1ReLiSQSg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 08/13] llvm: add support for OP_NEG
+Date: Sun,  5 Mar 2017 12:20:42 +0100
+Message-ID: <20170305112047.3411-9-luc.vanoostenryck@gmail.com>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:36761 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751359AbdCEKxe (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35958 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751539AbdCEL1b (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 05:53:34 -0500
-Received: by mail-wr0-f169.google.com with SMTP id u108so98874453wrb.3
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 02:53:33 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxe1xK9A7PKnHzYYTemKv5Jvf1Wiam5V77inn1ReLiSQSg@mail.gmail.com>
+        Sun, 5 Mar 2017 06:27:31 -0500
+Received: by mail-wr0-f196.google.com with SMTP id l37so18335646wrc.3
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:27:30 -0800 (PST)
+In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sun, Mar 05, 2017 at 07:29:33AM +0000, Dibyendu Majumdar wrote:
-> Hi,
-> 
-> I am starting a new thread on this issue. When processing following
-> simple example:
-> 
-> char *incr(char *p) {
->  char *tmp = p;
->  tmp += 5;
->  return tmp;
-> }
+sparse-llvm has not yet support for OP_NEG (which
+need to be done via a subtraction from zero).
 
-There is indeed a problem with this example.
- 
-> This results in following sequence:
-> 
-> incr:
-> .L000001CB177AD5C8:
->         <entry-point>
->         ptrcast.64  %r3 <- (64) %arg1
->         add.64      %r4 <- %r3, $5
->         cast.64     %r5 <- (64) %r4
->         ret.64      %r5
+Fix this by issuing the appropriate substraction.
 
-You must first upgrade to a recent version of sparse as
-you seem to not have some fundamental patches here (especially
-the patch https://patchwork.kernel.org/patch/9516077/ I've
-already talked about it to you). The master branch should be good
-the one named 'sparse-next' would be even better.
+CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse-llvm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
-The linearized code should be:
-	incr:
-	.L0:
-	        <entry-point>
-	        cast.64     %r3 <- (64) %arg1
-	        add.64      %r4 <- %r3, $5
-	        ptrcast.64  %r5 <- (64) %r4
-	        ret.64      %r5
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index ee374b217..c489009a6 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -951,9 +951,22 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 		insn->target->priv = target;
+ 		break;
+ 	}
+-	case OP_NEG:
+-		assert(0);
++	case OP_NEG: {
++		LLVMValueRef src, target;
++		char target_name[64];
++
++		src = pseudo_to_value(fn, insn, insn->src);
++
++		pseudo_name(insn->target, target_name);
++
++		if (symbol_is_fp_type(insn->type))
++			target = LLVMBuildFNeg(fn->builder, src, target_name);
++		else
++			target = LLVMBuildNeg(fn->builder, src, target_name);
++
++		insn->target->priv = target;
+ 		break;
++	}
+ 	case OP_CONTEXT:
+ 		assert(0);
+ 		break;
+-- 
+2.11.1
 
-Notice the difference in the casts.
-
-
--- Luc Van Oostenryck
