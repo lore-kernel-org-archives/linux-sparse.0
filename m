@@ -1,57 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 06/13] llvm: fix type of literal integer passed as arguments
-Date: Sun,  5 Mar 2017 12:20:40 +0100
-Message-ID: <20170305112047.3411-7-luc.vanoostenryck@gmail.com>
-References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+Subject: [WIP 00/13] LLVM fixes
+Date: Sun,  5 Mar 2017 12:20:34 +0100
+Message-ID: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34016 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752474AbdCELaH (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34615 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752474AbdCELae (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:30:07 -0500
-Received: by mail-wr0-f193.google.com with SMTP id u48so18395949wrc.1
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:30:06 -0800 (PST)
-In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+        Sun, 5 Mar 2017 06:30:34 -0500
+Received: by mail-wm0-f65.google.com with SMTP id u132so1463637wmg.1
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:30:33 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Like for all others instructions, LLVM needs the type
-of each operands. However this information is not always
-available via the pseudo, like here when passing a integer
-constant as argument since for sparse constants are typeless.
+This series solves a number of issues in sparse-llvm,
+mainly about wrong type information as needed for LLVM
+or simply the lack of these infos.
+These issues have been reported and investigated by
+Dibyendu Majumdar.
 
-Fix this by getting the type via the function prototype.
+These patches have been lightly tested and already
+allow to compile a lot more code to LLVM.
+It's still incomplete though:
+- it won't work on bitfields
+- it won't work on computed gotos
+- it won't work on label-as-value
+- it won't work on exotic instructions (OP_SPLICE)
+- few things are working correctly with floats
+  (but this is not specific to sparse-llvm).
+There is most probably a bunch of others issues too.
 
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- sparse-llvm.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+For testing purpose this serie is also available at:
+  https://github.com/lucvoo/sparse/tree/llvm-fixes-v0
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index c593f831f..27cc1b88c 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -740,7 +740,16 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 
- 	i = 0;
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		args[i++] = pseudo_to_value(fn, insn, arg);
-+		LLVMValueRef value;
-+		if (arg->type == PSEUDO_VAL) {
-+			/* Value pseudos do not have type information. */
-+			/* Use the function prototype to get the type. */
-+			struct symbol *ctype = get_nth1_arg(insn->func->sym, i + 1);
-+			value = val_to_value(fn, arg->value, ctype);
-+		} else {
-+			value = pseudo_to_value(fn, insn, arg);
-+		}
-+		args[i++] = value;
- 	} END_FOR_EACH_PTR(arg);
- 
- 	func = pseudo_to_value(fn, insn, insn->func);
+
+Luc Van Oostenryck (13):
+  llvm: add a helper to convert an integer to a ValueRef
+  llvm: fix translation of PSEUDO_VALs into a ValueRefs
+  llvm: fix output_op_store() which modify its operand
+  llvm: fix output_op_[ptr]cast()
+  add get_nth1_arg()
+  llvm: fix type of literal integer passed as arguments
+  llvm: fix output OP_ADD mixed with pointers
+  llvm: add support for OP_NEG
+  give a type to OP_PHISOURCE
+  give a type to OP_SEL, always
+  llvm: remove unneeded arg 'module'
+  llvm: remove unneeded arg 'fn'
+  llvm: fix: do not mix pointers and floats when doing compares
+
+ flow.c                        |   2 +-
+ linearize.c                   |  18 ++--
+ linearize.h                   |   2 +-
+ memops.c                      |   2 +-
+ sparse-llvm.c                 | 187 +++++++++++++++++++++++++++++++-----------
+ symbol.h                      |  13 +++
+ validation/backend/null.c     |  24 ++++++
+ validation/backend/store-x2.c |  16 ++++
+ 8 files changed, 203 insertions(+), 61 deletions(-)
+ create mode 100644 validation/backend/null.c
+ create mode 100644 validation/backend/store-x2.c
+
 -- 
 2.11.1
 
