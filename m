@@ -1,68 +1,65 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 13/13] llvm: fix: do not mix pointers and floats when doing compares
-Date: Sun,  5 Mar 2017 12:20:47 +0100
-Message-ID: <20170305112047.3411-14-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 01/13] llvm: add a helper to convert an integer to a ValueRef
+Date: Sun,  5 Mar 2017 12:20:35 +0100
+Message-ID: <20170305112047.3411-2-luc.vanoostenryck@gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34994 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751539AbdCEL3O (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36346 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752490AbdCEL3a (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:29:14 -0500
-Received: by mail-wr0-f196.google.com with SMTP id u108so14400001wrb.2
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:29:13 -0800 (PST)
+        Sun, 5 Mar 2017 06:29:30 -0500
+Received: by mail-wr0-f194.google.com with SMTP id l37so18339325wrc.3
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:29:29 -0800 (PST)
 In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In output_op_compare() everything that is not of interger
-type is treated as floats, pointers disagree.
+This needs to take in account the fact that the value can have
+a non-integer type, for example it can be an address constant.
 
-Fix this by rearranging the code and use a switch to easily
-treat pointers like integers as required for LLVM's icmp.
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 17 +++++++++++++++--
- 1 file changed, 15 insertions(+), 2 deletions(-)
+ sparse-llvm.c | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 7c7b70027..be47c5e75 100644
+index 9f362b3ed..41ee1fa1f 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -587,14 +587,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+@@ -303,6 +303,30 @@ static void pseudo_name(pseudo_t pseudo, char *buf)
+ 	}
+ }
  
- 	LLVMTypeRef dst_type = insn_symbol_type(insn);
- 
--	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
-+	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
++static LLVMValueRef val_to_value(struct function *fn, unsigned long long val, struct symbol *ctype)
++{
++	LLVMTypeRef dtype;
++	LLVMTypeRef itype;
++	LLVMValueRef result;
++
++	assert(ctype);
++	dtype = symbol_type(fn->module, ctype);
++	switch (LLVMGetTypeKind(dtype)) {
 +	case LLVMPointerTypeKind:
-+	case LLVMIntegerTypeKind: {
- 		LLVMIntPredicate op = translate_op(insn->opcode);
- 
- 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
--	} else {
++		itype = LLVMIntType(bits_in_pointer);
++		result = LLVMConstInt(itype, val, 1);
++		result = LLVMConstIntToPtr(result, dtype);
 +		break;
-+	}
-+	case LLVMHalfTypeKind:
-+	case LLVMFloatTypeKind:
-+	case LLVMDoubleTypeKind:
-+	case LLVMX86_FP80TypeKind:
-+	case LLVMFP128TypeKind:
-+	case LLVMPPC_FP128TypeKind: {
- 		LLVMRealPredicate op = translate_fop(insn->opcode);
- 
- 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
++	case LLVMIntegerTypeKind:
++		result = LLVMConstInt(dtype, val, 1);
 +		break;
-+	}
 +	default:
 +		assert(0);
- 	}
- 
- 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
++	}
++
++	return result;
++}
++
+ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *insn, pseudo_t pseudo)
+ {
+ 	LLVMValueRef result = NULL;
 -- 
 2.11.1
 
