@@ -1,73 +1,82 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v3 5/7] check the storage of C99 for-loop initializers
-Date: Sun, 5 Mar 2017 22:26:53 +0800
-Message-ID: <CANeU7Qn0Tk=cJdiXY4fjNkdOXnECmvZHCeoD-2dW6B0TceQQmQ@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v3 4/7] add a method to external_declaration()
+Date: Sun, 5 Mar 2017 16:12:20 +0100
+Message-ID: <20170305151220.rsfs5wpdfixhstor@macpro.local>
 References: <20170228094635.qbod5dwqwrw6etvt@macbook.local>
- <20170228100403.33184-1-luc.vanoostenryck@gmail.com> <20170228100403.33184-6-luc.vanoostenryck@gmail.com>
+ <20170228100403.33184-1-luc.vanoostenryck@gmail.com>
+ <20170228100403.33184-5-luc.vanoostenryck@gmail.com>
+ <CANeU7Qk34VzZ6Q2oxEcFrreK=NOwmpSGbiVgvyckpp154xWJaQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:34901 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752470AbdCEO5n (ORCPT
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:33468 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752431AbdCEPMZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 09:57:43 -0500
-Received: by mail-it0-f43.google.com with SMTP id 203so36419708ith.0
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 06:57:43 -0800 (PST)
-In-Reply-To: <20170228100403.33184-6-luc.vanoostenryck@gmail.com>
+        Sun, 5 Mar 2017 10:12:25 -0500
+Received: by mail-wr0-f180.google.com with SMTP id u48so101203791wrc.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 07:12:24 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qk34VzZ6Q2oxEcFrreK=NOwmpSGbiVgvyckpp154xWJaQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Feb 28, 2017 at 6:04 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> In C99, it is valid to declare a variable inside a
-> for-loop initializer but only when the storage is local
-> (automatic or register).
-> Until now this was not enforced.
->
+On Sun, Mar 05, 2017 at 10:04:01PM +0800, Christopher Li wrote:
+> I am fine with the code logic change. However, I wish function has better names.
+> It just looking at the function name, "external_decl" vs "external_declaration",
+> it is hard to guess which function is lower level than the other.
 
-Will apply in sparse-next with some comment.
+Sure. I didn't liked it myself but at the moment I didn't got something
+better. I'll try harder.
+ 
+> > -               }
+> > +               if (!is_typedef)
+> > +                       process_decl(list, decl);
+> 
+> I think here better check the process_decl is not NULL.
+> The caller might issue NULL call back which means it is not
+> interested in adding the symbol to a list.
 
->
-> +static void process_for_loop_decl(struct symbol_list **list, struct symbol *sym)
-> +{
-> +       unsigned long storage;
-> +
-> +       storage = sym->ctype.modifiers & MOD_STORAGE;
-> +       if (storage & ~(MOD_AUTO | MOD_REGISTER)) {
-> +               const char *name = show_ident(sym->ident);
-> +               sparse_error(sym->pos, "non-local var '%s' in for-loop initializer", name);
-> +               sym->ctype.modifiers &= ~MOD_STORAGE;
-> +       }
-> +
-> +       add_symbol(list, sym);
-> +       fn_local_symbol(sym);
+Yes, we can and it's cheap but I think we'll always need a
+callback here. And even if we don't, it's easy enough to provide
+a callback that do nothing which avoid to always have to test the
+pointer here to handle an hypothetical corner case.
 
-The more I look at it, the more I feel that the above two lines
-should kind of appear in every process_*_declar function.
+> > +static void default_process_decl(struct symbol_list **list, struct symbol *decl)
+> > +{
+> > +       if (!(decl->ctype.modifiers & (MOD_EXTERN | MOD_INLINE))) {
+> > +               add_symbol(list, decl);
+> > +               fn_local_symbol(decl);
+> > +       }
+> 
+> Again, if I look at just pure function name "default_process_decl", it is
+> very hard to me to guess what should happen in this function.
+> After all, "process a declare" is very generic, it can mean any thing.
 
-So may be we should just change your patch 4/7 into:
+Yes, sure, but the keyword here is 'default' like in "don't care what this
+is doing, it's the that's correct for most/normal situations".
 
-               if (!is_typedef) {
+> I suggest a more meaningful name related what the code does.
+> e.g. "track_local_declaration". I don't know, I want to find a better name.
+> You are welcome to suggest a better one.
 
-+                     if (process_decl)
-+                                process_decl(sym);
+I'll look for one.
 
-                       if (!(decl->ctype.modifiers & (MOD_EXTERN |
-MOD_INLINE))) {
-                               add_symbol(list, decl);
-                               fn_local_symbol(decl);
-                       }
-               }
+> > +}
+> > +
+> > +struct token *external_declaration(struct token *token, struct symbol_list **list)
+> > +{
+> > +       return external_decl(token, default_process_decl, list);
+> > +}
+> 
+> If I don't have a better function name for external_decl, I might just not use
+> the wrapper function at all.
 
-Then for the default case, just pass NULL as process_decl. Might want
-to find a better name for this function callback arguments as well.
+Yes, OK.
+And to be honest, the current name 'external_declaration()' is far
+from being a good name eithers: it doesn't give a hint on *what*
+the function is doing and it's not only for 'extern' declaration.
 
-Because you are actually not interested in change the behavor of adding
-to the list at all. You just want to get an notification when the symbol does
-get added into the list. Now thing of it, I can't come up with one example
-process_xxx_decl not add the symbol nor doing the fn_local_symbol.
-
-Chris
+Luc
