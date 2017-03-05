@@ -1,145 +1,306 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 09/13] give a type to OP_PHISOURCE
-Date: Sun,  5 Mar 2017 12:20:43 +0100
-Message-ID: <20170305112047.3411-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 11/13] llvm: remove unneeded arg 'module'
+Date: Sun,  5 Mar 2017 12:20:45 +0100
+Message-ID: <20170305112047.3411-12-luc.vanoostenryck@gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34985 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752159AbdCEL1f (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35740 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752362AbdCEL1p (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:27:35 -0500
-Received: by mail-wm0-f68.google.com with SMTP id z63so7283297wmg.2
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:27:33 -0800 (PST)
+        Sun, 5 Mar 2017 06:27:45 -0500
+Received: by mail-wr0-f196.google.com with SMTP id u108so14397617wrb.2
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:27:44 -0800 (PST)
 In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
-
-There is no good reasons fro that and it complicate the
-further correct processing or make it impossible.
-
-CC: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
+ sparse-llvm.c | 72 +++++++++++++++++++++++++++++------------------------------
+ 1 file changed, 36 insertions(+), 36 deletions(-)
 
-diff --git a/flow.c b/flow.c
-index 7730e70f1..e574d5e98 100644
---- a/flow.c
-+++ b/flow.c
-@@ -370,7 +370,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
-diff --git a/linearize.c b/linearize.c
-index bdc85beb9..fb4c7bd10 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -815,9 +815,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index c489009a6..35562e570 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -34,14 +34,14 @@ static inline bool symbol_is_fp_type(struct symbol *sym)
+ 	return sym->ctype.base_type == &fp_type;
  }
  
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
+-static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym);
++static LLVMTypeRef symbol_type(struct symbol *sym);
+ 
+-static LLVMTypeRef func_return_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef func_return_type(struct symbol *sym)
  {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
+-	return symbol_type(module, sym->ctype.base_type);
++	return symbol_type(sym->ctype.base_type);
+ }
  
-@@ -1350,19 +1350,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
+-static LLVMTypeRef sym_func_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_func_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef *arg_type;
+ 	LLVMTypeRef func_type;
+@@ -55,7 +55,7 @@ static LLVMTypeRef sym_func_type(LLVMModuleRef module, struct symbol *sym)
+ 	 * symbol declaration info.
+ 	 */
  
- 	if (!expr_false || !ep->active)
- 		return VOID;
+-	ret_type = func_return_type(module, sym);
++	ret_type = func_return_type(sym);
  
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
+ 	/* count args, build argument type information */
+ 	FOR_EACH_PTR(sym->arguments, arg) {
+@@ -68,7 +68,7 @@ static LLVMTypeRef sym_func_type(LLVMModuleRef module, struct symbol *sym)
+ 	FOR_EACH_PTR(sym->arguments, arg) {
+ 		struct symbol *arg_sym = arg->ctype.base_type;
  
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
+-		arg_type[idx++] = symbol_type(module, arg_sym);
++		arg_type[idx++] = symbol_type(arg_sym);
+ 	} END_FOR_EACH_PTR(arg);
+ 	func_type = LLVMFunctionType(ret_type, arg_type, n_arg,
+ 				     sym->variadic);
+@@ -76,7 +76,7 @@ static LLVMTypeRef sym_func_type(LLVMModuleRef module, struct symbol *sym)
+ 	return func_type;
+ }
  
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1376,7 +1375,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
+-static LLVMTypeRef sym_array_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_array_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef elem_type;
+ 	struct symbol *base_type;
+@@ -85,7 +85,7 @@ static LLVMTypeRef sym_array_type(LLVMModuleRef module, struct symbol *sym)
+ 	/* empty struct is undefined [6.7.2.1(8)] */
+ 	assert(base_type->bit_size > 0);
  
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1388,12 +1386,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
+-	elem_type = symbol_type(module, base_type);
++	elem_type = symbol_type(base_type);
+ 	if (!elem_type)
+ 		return NULL;
  
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
+@@ -94,7 +94,7 @@ static LLVMTypeRef sym_array_type(LLVMModuleRef module, struct symbol *sym)
  
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
+ #define MAX_STRUCT_MEMBERS 64
  
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1875,7 +1873,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
+-static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_struct_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef elem_types[MAX_STRUCT_MEMBERS];
+ 	struct symbol *member;
+@@ -112,7 +112,7 @@ static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
+ 
+ 		assert(nr < MAX_STRUCT_MEMBERS);
+ 
+-		member_type = symbol_type(module, member);
++		member_type = symbol_type(member);
+ 
+ 		elem_types[nr++] = member_type; 
+ 	} END_FOR_EACH_PTR(member);
+@@ -121,7 +121,7 @@ static LLVMTypeRef sym_struct_type(LLVMModuleRef module, struct symbol *sym)
+ 	return ret;
+ }
+ 
+-static LLVMTypeRef sym_union_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_union_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef elements;
+ 	unsigned union_size;
+@@ -138,7 +138,7 @@ static LLVMTypeRef sym_union_type(LLVMModuleRef module, struct symbol *sym)
+ 	return LLVMStructType(&elements, 1, 0 /* packed? */);
+ }
+ 
+-static LLVMTypeRef sym_ptr_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef sym_ptr_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef type;
+ 
+@@ -146,7 +146,7 @@ static LLVMTypeRef sym_ptr_type(LLVMModuleRef module, struct symbol *sym)
+ 	if (is_void_type(sym->ctype.base_type))
+ 		type = LLVMInt8Type();
+ 	else
+-		type = symbol_type(module, sym->ctype.base_type);
++		type = symbol_type(sym->ctype.base_type);
+ 
+ 	return LLVMPointerType(type, 0);
+ }
+@@ -199,13 +199,13 @@ static LLVMTypeRef sym_basetype_type(struct symbol *sym)
+ 	return ret;
+ }
+ 
+-static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
++static LLVMTypeRef symbol_type(struct symbol *sym)
+ {
+ 	LLVMTypeRef ret = NULL;
+ 
+ 	/* don't cache the result for SYM_NODE */
+ 	if (sym->type == SYM_NODE)
+-		return symbol_type(module, sym->ctype.base_type);
++		return symbol_type(sym->ctype.base_type);
+ 
+ 	if (sym->aux)
+ 		return sym->aux;
+@@ -213,25 +213,25 @@ static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
+ 	switch (sym->type) {
+ 	case SYM_BITFIELD:
+ 	case SYM_ENUM:
+-		ret = symbol_type(module, sym->ctype.base_type);
++		ret = symbol_type(sym->ctype.base_type);
+ 		break;
+ 	case SYM_BASETYPE:
+ 		ret = sym_basetype_type(sym);
+ 		break;
+ 	case SYM_PTR:
+-		ret = sym_ptr_type(module, sym);
++		ret = sym_ptr_type(sym);
+ 		break;
+ 	case SYM_UNION:
+-		ret = sym_union_type(module, sym);
++		ret = sym_union_type(sym);
+ 		break;
+ 	case SYM_STRUCT:
+-		ret = sym_struct_type(module, sym);
++		ret = sym_struct_type(sym);
+ 		break;
+ 	case SYM_ARRAY:
+-		ret = sym_array_type(module, sym);
++		ret = sym_array_type(sym);
+ 		break;
+ 	case SYM_FN:
+-		ret = sym_func_type(module, sym);
++		ret = sym_func_type(sym);
+ 		break;
+ 	default:
+ 		assert(0);
+@@ -242,10 +242,10 @@ static LLVMTypeRef symbol_type(LLVMModuleRef module, struct symbol *sym)
+ 	return ret;
+ }
+ 
+-static LLVMTypeRef insn_symbol_type(LLVMModuleRef module, struct instruction *insn)
++static LLVMTypeRef insn_symbol_type(struct instruction *insn)
+ {
+ 	if (insn->type)
+-		return symbol_type(module, insn->type);
++		return symbol_type(insn->type);
+ 
+ 	switch (insn->size) {
+ 		case 8:		return LLVMInt8Type();
+@@ -310,7 +310,7 @@ static LLVMValueRef val_to_value(struct function *fn, unsigned long long val, st
+ 	LLVMValueRef result;
+ 
+ 	assert(ctype);
+-	dtype = symbol_type(fn->module, ctype);
++	dtype = symbol_type(ctype);
+ 	switch (LLVMGetTypeKind(dtype)) {
+ 	case LLVMPointerTypeKind:
+ 		itype = LLVMIntType(bits_in_pointer);
+@@ -369,7 +369,7 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 			}
+ 		} else {
+ 			const char *name = show_ident(sym->ident);
+-			LLVMTypeRef type = symbol_type(fn->module, sym);
++			LLVMTypeRef type = symbol_type(sym);
+ 
+ 			if (LLVMGetTypeKind(type) == LLVMFunctionTypeKind) {
+ 				result = LLVMGetNamedFunction(fn->module, name);
+@@ -547,7 +547,7 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, "");
+ 		target = LLVMBuildAnd(fn->builder, lhs_nz, rhs_nz, target_name);
+ 
+-		dst_type = insn_symbol_type(fn->module, insn);
++		dst_type = insn_symbol_type(insn);
+ 		target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+ 		break;
  	}
-diff --git a/linearize.h b/linearize.h
-index bac82d7ff..c03940eea 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -331,7 +331,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
+@@ -559,7 +559,7 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, "");
+ 		target = LLVMBuildOr(fn->builder, lhs_nz, rhs_nz, target_name);
  
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
+-		dst_type = insn_symbol_type(fn->module, insn);
++		dst_type = insn_symbol_type(insn);
+ 		target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+ 		break;
+ 	}
+@@ -585,7 +585,7 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
  
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
+ 	pseudo_name(insn->target, target_name);
  
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+-	LLVMTypeRef dst_type = insn_symbol_type(fn->module, insn);
++	LLVMTypeRef dst_type = insn_symbol_type(insn);
+ 
+ 	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
+ 		LLVMIntPredicate op = translate_op(insn->opcode);
+@@ -627,7 +627,7 @@ static LLVMValueRef calc_memop_addr(struct function *fn, struct instruction *ins
+ 	/* convert src to the effective pointer type */
+ 	src = pseudo_to_value(fn, insn, insn->src);
+ 	as = LLVMGetPointerAddressSpace(LLVMTypeOf(src));
+-	addr_type = LLVMPointerType(insn_symbol_type(fn->module, insn), as);
++	addr_type = LLVMPointerType(insn_symbol_type(insn), as);
+ 	src = LLVMBuildPointerCast(fn->builder, src, addr_type, "");
+ 
+ 	/* addr = src + off */
+@@ -812,7 +812,7 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+ 
+ 	assert(!symbol_is_fp_type(insn->type));
+ 
+-	dtype = insn_symbol_type(fn->module, insn);
++	dtype = insn_symbol_type(insn);
+ 	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+ 	case LLVMPointerTypeKind:
+ 		op = LLVMBitCast;
+@@ -846,7 +846,7 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+ 
+ 	assert(!symbol_is_fp_type(insn->type));
+ 
+-	dtype = insn_symbol_type(fn->module, insn);
++	dtype = insn_symbol_type(insn);
+ 	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+ 	case LLVMPointerTypeKind:
+ 		op = LLVMPtrToInt;
+@@ -1023,12 +1023,12 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	FOR_EACH_PTR(base_type->arguments, arg) {
+ 		struct symbol *arg_base_type = arg->ctype.base_type;
+ 
+-		arg_types[nr_args++] = symbol_type(module, arg_base_type);
++		arg_types[nr_args++] = symbol_type(arg_base_type);
+ 	} END_FOR_EACH_PTR(arg);
+ 
+ 	name = show_ident(sym->ident);
+ 
+-	return_type = symbol_type(module, ret_type);
++	return_type = symbol_type(ret_type);
+ 
+ 	function.type = LLVMFunctionType(return_type, arg_types, nr_args, 0);
+ 
+@@ -1065,7 +1065,7 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 			/* insert alloca into entry block */
+ 			entrybbr = LLVMGetEntryBasicBlock(function.fn);
+ 			LLVMPositionBuilderAtEnd(function.builder, entrybbr);
+-			phi_type = insn_symbol_type(module, insn);
++			phi_type = insn_symbol_type(insn);
+ 			ptr = LLVMBuildAlloca(function.builder, phi_type, "");
+ 			/* emit forward load for phi */
+ 			LLVMClearInsertionPosition(function.builder);
+@@ -1095,7 +1095,7 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 	if (initializer) {
+ 		switch (initializer->type) {
+ 		case EXPR_VALUE:
+-			initial_value = LLVMConstInt(symbol_type(module, sym), initializer->value, 1);
++			initial_value = LLVMConstInt(symbol_type(sym), initializer->value, 1);
+ 			break;
+ 		case EXPR_SYMBOL: {
+ 			struct symbol *sym = initializer->symbol;
+@@ -1115,7 +1115,7 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 			assert(0);
+ 		}
+ 	} else {
+-		LLVMTypeRef type = symbol_type(module, sym);
++		LLVMTypeRef type = symbol_type(sym);
+ 
+ 		initial_value = LLVMConstNull(type);
+ 	}
 -- 
 2.11.1
 
