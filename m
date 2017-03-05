@@ -1,109 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 04/13] llvm: fix output_op_[ptr]cast()
-Date: Sun,  5 Mar 2017 12:20:38 +0100
-Message-ID: <20170305112047.3411-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
+Date: Sun,  5 Mar 2017 12:20:41 +0100
+Message-ID: <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36007 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752364AbdCEL1u (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33470 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751539AbdCEL15 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:27:50 -0500
-Received: by mail-wm0-f68.google.com with SMTP id v190so9486096wme.3
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:27:49 -0800 (PST)
+        Sun, 5 Mar 2017 06:27:57 -0500
+Received: by mail-wm0-f65.google.com with SMTP id n11so9496465wma.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:27:56 -0800 (PST)
 In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_PTRCASTs can't always be directly translated into LLVM bitcasts and
-OP_[S]CASTs can't always be translated into LLVM's trunc/sext/zext
-because integer to pointer and pointer to integer must be handled too.
+In sparse, pointer arithmetic and accessing the field
+of a structure or an array is simply done via OP_ADD,
+the offset being calculated at evaluation time.
+On the other hand, LLVM allows addition only on two
+integers and pointer arithmetic/member access is done
+via 'getelementptr'.
 
-Fix this in output_op_ptrcast() & output_op_cast() by issuing
-LLVMBuildIntToPtr/PtrToInt when appropriate.
+sparse-llvm didn't took this in account which resulted
+in type error in 'add' instructions.
 
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Fix this by catching addition involving pointer and issuing
+a getelementptr' instruction for these.
+
+Originally-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 35 insertions(+), 5 deletions(-)
+ sparse-llvm.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 665b6c7dc..c593f831f 100644
+index 27cc1b88c..ee374b217 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -787,6 +787,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
- static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
-+	LLVMOpcode op;
- 	char target_name[64];
- 
- 	src = insn->src->priv;
-@@ -797,15 +799,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- 
- 	assert(!symbol_is_fp_type(insn->type));
- 
--	target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
-+	dtype = insn_symbol_type(fn->module, insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-+	case LLVMPointerTypeKind:
-+		op = LLVMBitCast;
-+		break;
-+	case LLVMIntegerTypeKind:
-+		op = LLVMIntToPtr;
-+		break;
-+	default:
-+		assert(0);
-+	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
- }
- 
- static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
- 	char target_name[64];
-+	unsigned int width;
-+
-+	if (is_ptr_type(insn->type))
-+		return output_op_ptrcast(fn, insn);
- 
- 	src = insn->src->priv;
- 	if (!src)
-@@ -815,11 +833,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 
- 	assert(!symbol_is_fp_type(insn->type));
- 
--	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
--		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
--	else
--		target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
-+	dtype = insn_symbol_type(fn->module, insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-+	case LLVMPointerTypeKind:
-+		op = LLVMPtrToInt;
-+		break;
-+	case LLVMIntegerTypeKind:
-+		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
-+		if (insn->size < width)
-+			op = LLVMTrunc;
-+		else if (insn->size == width)
-+			op = LLVMBitCast;
-+		break;
-+	default:
-+		assert(0);
-+	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
- }
- 
+@@ -472,6 +472,10 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 	case OP_ADD:
+ 		if (symbol_is_fp_type(insn->type))
+ 			target = LLVMBuildFAdd(fn->builder, lhs, rhs, target_name);
++		else if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind)
++			target = LLVMBuildGEP(fn->builder, lhs, &rhs, 1, "");
++		else if (LLVMGetTypeKind(LLVMTypeOf(rhs)) == LLVMPointerTypeKind)
++			target = LLVMBuildGEP(fn->builder, rhs, &lhs, 1, "");
+ 		else
+ 			target = LLVMBuildAdd(fn->builder, lhs, rhs, target_name);
+ 		break;
 -- 
 2.11.1
 
