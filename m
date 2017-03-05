@@ -1,91 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 02/13] llvm: fix translation of PSEUDO_VALs into a ValueRefs
-Date: Sun,  5 Mar 2017 12:20:36 +0100
-Message-ID: <20170305112047.3411-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 13/13] llvm: fix: do not mix pointers and floats when doing compares
+Date: Sun,  5 Mar 2017 12:20:47 +0100
+Message-ID: <20170305112047.3411-14-luc.vanoostenryck@gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36308 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751539AbdCEL2y (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34994 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751539AbdCEL3O (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:28:54 -0500
-Received: by mail-wm0-f67.google.com with SMTP id v190so9488800wme.3
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:28:53 -0800 (PST)
+        Sun, 5 Mar 2017 06:29:14 -0500
+Received: by mail-wr0-f196.google.com with SMTP id u108so14400001wrb.2
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:29:13 -0800 (PST)
 In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In sparse-llvm there is the assumption that a PSEUDO_VAL is always
-of integer type. But this is not always the case: constant pointers,
-like NULL, are also of the PSEUDO_VAL kind.
+In output_op_compare() everything that is not of interger
+type is treated as floats, pointers disagree.
 
-Fix this by using the newly created helper val_to_value() and using the
-instruction's type where this pseudo is used as the type of the value.
-
-Note: while this patch improve the situation, like for example for the
-test cases added here, it's still not correct because now we're making
-the assumption that 'insn->type' is the type we need for the pseudo.
-This is often true, but certainly not always.
-For example this is not true for:
-- OP_STORE/OP_LOAD's insn->src
-- OP_SET{EQ,...}'s   insn->src[12]
-- probably some  others ones
-- in general, obviously, for any instructions where the target has
-  a different type than the operands.
+Fix this by rearranging the code and use a switch to easily
+treat pointers like integers as required for LLVM's icmp.
 
 Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c             |  2 +-
- validation/backend/null.c | 24 ++++++++++++++++++++++++
- 2 files changed, 25 insertions(+), 1 deletion(-)
- create mode 100644 validation/backend/null.c
+ sparse-llvm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 41ee1fa1f..d48b3b20a 100644
+index 7c7b70027..be47c5e75 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -384,7 +384,7 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
- 		break;
+@@ -587,14 +587,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+ 
+ 	LLVMTypeRef dst_type = insn_symbol_type(insn);
+ 
+-	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
++	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
++	case LLVMPointerTypeKind:
++	case LLVMIntegerTypeKind: {
+ 		LLVMIntPredicate op = translate_op(insn->opcode);
+ 
+ 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
+-	} else {
++		break;
++	}
++	case LLVMHalfTypeKind:
++	case LLVMFloatTypeKind:
++	case LLVMDoubleTypeKind:
++	case LLVMX86_FP80TypeKind:
++	case LLVMFP128TypeKind:
++	case LLVMPPC_FP128TypeKind: {
+ 		LLVMRealPredicate op = translate_fop(insn->opcode);
+ 
+ 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
++		break;
++	}
++	default:
++		assert(0);
  	}
- 	case PSEUDO_VAL:
--		result = LLVMConstInt(insn_symbol_type(fn->module, insn), pseudo->value, 1);
-+		result = val_to_value(fn, pseudo->value, insn->type);
- 		break;
- 	case PSEUDO_ARG: {
- 		result = LLVMGetParam(fn->fn, pseudo->nr - 1);
-diff --git a/validation/backend/null.c b/validation/backend/null.c
-new file mode 100644
-index 000000000..5c595c70b
---- /dev/null
-+++ b/validation/backend/null.c
-@@ -0,0 +1,24 @@
-+extern int *ip[];
-+
-+void foo(void);
-+void foo(void)
-+{
-+	ip[0] = (void *)0L;
-+	ip[1] = (int *)0L;
-+	ip[2] = (void *)0;
-+	ip[3] = (int *)0;
-+	ip[4] = (void *)(long)0;
-+	ip[5] = (int *)(long)0;
-+	ip[6] = (void *)123;
-+	ip[7] = (int *)123;
-+	ip[8] = (void *)123L;
-+	ip[9] = (int *)123L;
-+	ip[10] = (void *)(long)123;
-+	ip[11] = (int *)(long)123;
-+}
-+
-+/*
-+ * check-name: store constants to pointer
-+ * check-command: sparse-llvm $file
-+ * check-output-ignore
-+ */
+ 
+ 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
 -- 
 2.11.1
 
