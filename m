@@ -1,68 +1,89 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [WIP 00/13] LLVM fixes
-Date: Sun,  5 Mar 2017 12:20:34 +0100
-Message-ID: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 03/13] llvm: fix output_op_store() which modify its operand
+Date: Sun,  5 Mar 2017 12:20:37 +0100
+Message-ID: <20170305112047.3411-4-luc.vanoostenryck@gmail.com>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34615 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33179 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752474AbdCELae (ORCPT
+        with ESMTP id S1752470AbdCELai (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 06:30:34 -0500
-Received: by mail-wm0-f65.google.com with SMTP id u132so1463637wmg.1
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:30:33 -0800 (PST)
+        Sun, 5 Mar 2017 06:30:38 -0500
+Received: by mail-wm0-f65.google.com with SMTP id n11so9502920wma.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 03:30:36 -0800 (PST)
+In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series solves a number of issues in sparse-llvm,
-mainly about wrong type information as needed for LLVM
-or simply the lack of these infos.
-These issues have been reported and investigated by
-Dibyendu Majumdar.
+In sparse-llvm the field 'priv' of a pseudo is used to store
+the corresponding LLVMValueRef. This field is normaly assigned
+when processing the instruction that produces the speudo.
 
-These patches have been lightly tested and already
-allow to compile a lot more code to LLVM.
-It's still incomplete though:
-- it won't work on bitfields
-- it won't work on computed gotos
-- it won't work on label-as-value
-- it won't work on exotic instructions (OP_SPLICE)
-- few things are working correctly with floats
-  (but this is not specific to sparse-llvm).
-There is most probably a bunch of others issues too.
+In output_op_store(), the field insn->target->priv is overwritten
+by the LLVMValueRef returned by LLVMBuildStore().
+It's unclear what this return value is:
+- this corrupts the pseudo, making it unusable in subsequent
+  instructions.
+- there is no reason to change this field anyway.
 
-For testing purpose this serie is also available at:
-  https://github.com/lucvoo/sparse/tree/llvm-fixes-v0
+Fix this by removing the assignment to insn->target->priv
+in output_op_store().
 
-
-Luc Van Oostenryck (13):
-  llvm: add a helper to convert an integer to a ValueRef
-  llvm: fix translation of PSEUDO_VALs into a ValueRefs
-  llvm: fix output_op_store() which modify its operand
-  llvm: fix output_op_[ptr]cast()
-  add get_nth1_arg()
-  llvm: fix type of literal integer passed as arguments
-  llvm: fix output OP_ADD mixed with pointers
-  llvm: add support for OP_NEG
-  give a type to OP_PHISOURCE
-  give a type to OP_SEL, always
-  llvm: remove unneeded arg 'module'
-  llvm: remove unneeded arg 'fn'
-  llvm: fix: do not mix pointers and floats when doing compares
-
- flow.c                        |   2 +-
- linearize.c                   |  18 ++--
- linearize.h                   |   2 +-
- memops.c                      |   2 +-
- sparse-llvm.c                 | 187 +++++++++++++++++++++++++++++++-----------
- symbol.h                      |  13 +++
- validation/backend/null.c     |  24 ++++++
- validation/backend/store-x2.c |  16 ++++
- 8 files changed, 203 insertions(+), 61 deletions(-)
- create mode 100644 validation/backend/null.c
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse-llvm.c                 |  6 ++----
+ validation/backend/store-x2.c | 16 ++++++++++++++++
+ 2 files changed, 18 insertions(+), 4 deletions(-)
  create mode 100644 validation/backend/store-x2.c
 
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index d48b3b20a..665b6c7dc 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -646,16 +646,14 @@ static void output_op_load(struct function *fn, struct instruction *insn)
+ 
+ static void output_op_store(struct function *fn, struct instruction *insn)
+ {
+-	LLVMValueRef addr, target, target_in;
++	LLVMValueRef addr, target_in;
+ 
+ 	addr = calc_memop_addr(fn, insn);
+ 
+ 	target_in = pseudo_to_value(fn, insn, insn->target);
+ 
+ 	/* perform store */
+-	target = LLVMBuildStore(fn->builder, target_in, addr);
+-
+-	insn->target->priv = target;
++	LLVMBuildStore(fn->builder, target_in, addr);
+ }
+ 
+ static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
+diff --git a/validation/backend/store-x2.c b/validation/backend/store-x2.c
+new file mode 100644
+index 000000000..5ccc9b43a
+--- /dev/null
++++ b/validation/backend/store-x2.c
+@@ -0,0 +1,16 @@
++void foo(int *p, int a, int b);
++void foo(int *p, int a, int b)
++{
++	int c = a + b;
++
++	p[0] = c;
++	p[1] = c;
++}
++
++/*
++ * check-name: store-x2
++ * check-command: sparsec -c $file -o tmp.o
++ * check-description: Verify in output_op_store() that
++ *	the first store doesn't mess anymore with the
++ *	'target' and thus making the second store unusable.
++ */
 -- 
 2.11.1
 
