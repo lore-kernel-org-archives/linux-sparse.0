@@ -1,20 +1,20 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v3 6/7] make process_decl() aware of the presence of an initializer
-Date: Sun, 5 Mar 2017 22:49:37 +0800
-Message-ID: <CANeU7Qm1oPqK=56=c8q=dtVBr27vF0NufGgCr4Y0RYnyJVfBQg@mail.gmail.com>
+Subject: Re: [PATCH v3 5/7] check the storage of C99 for-loop initializers
+Date: Sun, 5 Mar 2017 22:26:53 +0800
+Message-ID: <CANeU7Qn0Tk=cJdiXY4fjNkdOXnECmvZHCeoD-2dW6B0TceQQmQ@mail.gmail.com>
 References: <20170228094635.qbod5dwqwrw6etvt@macbook.local>
- <20170228100403.33184-1-luc.vanoostenryck@gmail.com> <20170228100403.33184-7-luc.vanoostenryck@gmail.com>
+ <20170228100403.33184-1-luc.vanoostenryck@gmail.com> <20170228100403.33184-6-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:33494 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752470AbdCEO5f (ORCPT
+Received: from mail-it0-f43.google.com ([209.85.214.43]:34901 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752470AbdCEO5n (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 09:57:35 -0500
-Received: by mail-io0-f171.google.com with SMTP id f84so98430546ioj.0
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 06:57:34 -0800 (PST)
-In-Reply-To: <20170228100403.33184-7-luc.vanoostenryck@gmail.com>
+        Sun, 5 Mar 2017 09:57:43 -0500
+Received: by mail-it0-f43.google.com with SMTP id 203so36419708ith.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 06:57:43 -0800 (PST)
+In-Reply-To: <20170228100403.33184-6-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
@@ -22,41 +22,52 @@ Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 On Tue, Feb 28, 2017 at 6:04 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-
-
-> @@ -2896,7 +2896,9 @@ static struct token *external_decl(struct token *token, process_decl_t process_d
->         }
+> In C99, it is valid to declare a variable inside a
+> for-loop initializer but only when the storage is local
+> (automatic or register).
+> Until now this was not enforced.
 >
->         for (;;) {
-> +               int has_init = 0;
->                 if (!is_typedef && match_op(token, '=')) {
-> +                       has_init = 1;
 
-This can be written as:
+Will apply in sparse-next with some comment.
 
-int has_init = !is_typedef && match_op(token, '=');
-if (has_init) {
-     ....
+>
+> +static void process_for_loop_decl(struct symbol_list **list, struct symbol *sym)
+> +{
+> +       unsigned long storage;
+> +
+> +       storage = sym->ctype.modifiers & MOD_STORAGE;
+> +       if (storage & ~(MOD_AUTO | MOD_REGISTER)) {
+> +               const char *name = show_ident(sym->ident);
+> +               sparse_error(sym->pos, "non-local var '%s' in for-loop initializer", name);
+> +               sym->ctype.modifiers &= ~MOD_STORAGE;
+> +       }
+> +
+> +       add_symbol(list, sym);
+> +       fn_local_symbol(sym);
 
->                         if (decl->ctype.modifiers & MOD_EXTERN) {
->                                 warning(decl->pos, "symbol with external linkage has initializer");
->                                 decl->ctype.modifiers &= ~MOD_EXTERN;
-> @@ -2904,7 +2906,7 @@ static struct token *external_decl(struct token *token, process_decl_t process_d
->                         token = initializer(&decl->initializer, token->next);
->                 }
->                 if (!is_typedef)
-> -                       process_decl(list, decl);
-> +                       process_decl(list, decl, has_init);
+The more I look at it, the more I feel that the above two lines
+should kind of appear in every process_*_declar function.
 
-My comment regarding patch 5/7 still stands valid here. If you keep the common
-logic here, move the code from "default_process_decl" body back to here.
-You can avoid passing has_init into process_decl at all.
+So may be we should just change your patch 4/7 into:
 
-Passing the "has_init" into a call back function make the code hard to
-read because the logic has separated into two function. At the same time
-process_for_loop_decl does not issue this warning at all, I think it should.
+               if (!is_typedef) {
 
-I will apply this patch for sparse-next, I agree the warning is useful
-behavior. I am also expecting a follow up patch.
++                     if (process_decl)
++                                process_decl(sym);
+
+                       if (!(decl->ctype.modifiers & (MOD_EXTERN |
+MOD_INLINE))) {
+                               add_symbol(list, decl);
+                               fn_local_symbol(decl);
+                       }
+               }
+
+Then for the default case, just pass NULL as process_decl. Might want
+to find a better name for this function callback arguments as well.
+
+Because you are actually not interested in change the behavor of adding
+to the list at all. You just want to get an notification when the symbol does
+get added into the list. Now thing of it, I can't come up with one example
+process_xxx_decl not add the symbol nor doing the fn_local_symbol.
 
 Chris
