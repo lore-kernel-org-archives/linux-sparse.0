@@ -1,7 +1,7 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
-Date: Mon, 6 Mar 2017 17:06:01 +0000
-Message-ID: <CACXZuxc3fDdh9OwKN4LGtEn=rf7rGe=GNn9Z_-3GevFa4yqWnw@mail.gmail.com>
+Date: Tue, 7 Mar 2017 01:07:27 +0800
+Message-ID: <CANeU7QnS2_OgvaZo1T+_cfw=ZKFvZEM8dnMet4kfqhTzGWUDHQ@mail.gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
  <20170305112047.3411-8-luc.vanoostenryck@gmail.com> <CANeU7Qk6xjhNPVZWxTB4iOavH5=bha+a_utz7+PJuSTo1WKgOg@mail.gmail.com>
  <CACXZuxfX0TiYGJDewbRW9Tr3-nzqiBrdOK0K+mO0qqwyGCrjSQ@mail.gmail.com>
@@ -9,53 +9,21 @@ References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:38342 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753770AbdCFRGE (ORCPT
+Received: from mail-io0-f177.google.com ([209.85.223.177]:33570 "EHLO
+        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754129AbdCFRH3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 12:06:04 -0500
-Received: by mail-it0-f46.google.com with SMTP id m27so54335597iti.1
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 09:06:04 -0800 (PST)
+        Mon, 6 Mar 2017 12:07:29 -0500
+Received: by mail-io0-f177.google.com with SMTP id f84so116489942ioj.0
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 09:07:28 -0800 (PST)
 In-Reply-To: <20170306164306.hibukuy2t4j4camh@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Luc,
-
-On 6 March 2017 at 16:43, Luc Van Oostenryck
+On Tue, Mar 7, 2017 at 12:43 AM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> On Tue, Mar 07, 2017 at 12:22:07AM +0800, Christopher Li wrote:
->> On Mon, Mar 6, 2017 at 11:32 PM, Dibyendu Majumdar
->> <mobile@majumdar.org.uk> wrote:
->> >
->> > Sparse-llvm appears to bypass the normal struct GEP in LLVM. It
->> > basically casts everything to char *, uses GEP to obtain a pointer to
->> > member, and then casts it back to member type. So this should work for
->> > structs and unions.
->>
->> That is exactly my question. I haven't understand how this by pass
->> can work in all the situation.
->>
->> >
->> > This case is more about handing pointer arithmetic correctly. Here GEP
->> > is being used as array element access and not for struct member
->> > access.
->>
->> Even using array element access, I still have some question regarding
->> the the mapping process of the array index.
->> Correct me if I am wrong, the GEP indices are express as array index.
->> So after convert to (char*) + offset, the offset will express as
->> n*(sizeof(element type)).
->> "n" is the array index.
->>
->> However, the OP_ADD instruction, the offset is byte offset value. The offset
->> part might not be align to n*(sizeof(array_elelment)). Assume we can use
->> some pack struct to get some member located not at the natural alignment offset.
->>
->> Even if the offset is at the type size alignment, shouldn't the indices express
->> as ( offset / sizeof(element type))? What do I miss?
 >
 > With an example:
 > == C code ==
@@ -81,9 +49,41 @@ On 6 March 2017 at 16:43, Luc Van Oostenryck
 >         }
 >
 
-This may be the issue Chris is highlighting -  above the offset should
-be 5 not 20 in the LLVM code as the array type is i32* not i8*. Does
-sparse always output array offsets in char*?
 
-Regards
-Dibyendu
+OK, good. Let's use this example.
+I am using clang to get the llvm bytecode. t.c is your example.
+
+clang -S -emit-llvm /tmp/t.c
+Here is output, compare the line I am pointing at:
+The indices should be 5 according clang's output.
+However sparse-llvm generate as 20 per your output
+if I am reading it correctly.
+
+Chris
+
+============== t.ll =====================
+ ModuleID = '/tmp/t.c'
+target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-unknown-linux-gnu"
+
+; Function Attrs: nounwind uwtable
+define i8* @foo(i32* %p) #0 {
+  %1 = alloca i32*, align 8
+  store i32* %p, i32** %1, align 8
+  %2 = load i32*, i32** %1, align 8
+  %3 = getelementptr inbounds i32, i32* %2, i64 5 <======== look here
+  %4 = bitcast i32* %3 to i8*
+  ret i8* %4
+}
+
+attributes #0 = { nounwind uwtable "disable-tail-calls"="false"
+"less-precise-fpmad"="false" "no-frame-pointer-elim"="true"
+"no-frame-pointer-elim-non-leaf" "no-infs-fp-math"="false"
+"no-nans-fp-math"="false" "stack-protector-buffer-size"="8"
+"target-cpu"="x86-64" "target-features"="+fxsr,+mmx,+sse,+sse2"
+"unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.ident = !{!0}
+
+!0 = !{!"clang version 3.8.1 (tags/RELEASE_381/final)"}
+================================================
