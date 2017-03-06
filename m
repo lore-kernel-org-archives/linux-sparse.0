@@ -1,72 +1,73 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
-Date: Mon, 6 Mar 2017 23:16:44 +0800
-Message-ID: <CANeU7Qk6xjhNPVZWxTB4iOavH5=bha+a_utz7+PJuSTo1WKgOg@mail.gmail.com>
-References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com> <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Possible incorrect linearization of code (master branch)
+Date: Mon, 6 Mar 2017 15:22:19 +0000
+Message-ID: <CACXZuxeNopu3Syg+TCL3TLnhwmA84qkQ1NsN4hjL-VLPi6ASYA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f66.google.com ([209.85.214.66]:34721 "EHLO
-        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754074AbdCFPQp (ORCPT
+Received: from mail-io0-f173.google.com ([209.85.223.173]:35602 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753640AbdCFPWV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 10:16:45 -0500
-Received: by mail-it0-f66.google.com with SMTP id r141so9863690ita.1
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 07:16:45 -0800 (PST)
-In-Reply-To: <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
+        Mon, 6 Mar 2017 10:22:21 -0500
+Received: by mail-io0-f173.google.com with SMTP id z13so71037279iof.2
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 07:22:21 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> In sparse, pointer arithmetic and accessing the field
-> of a structure or an array is simply done via OP_ADD,
-> the offset being calculated at evaluation time.
-> On the other hand, LLVM allows addition only on two
-> integers and pointer arithmetic/member access is done
-> via 'getelementptr'.
->
-> sparse-llvm didn't took this in account which resulted
-> in type error in 'add' instructions.
->
-> Fix this by catching addition involving pointer and issuing
-> a getelementptr' instruction for these.
+Hi,
 
-I have one related question. In the case of anonymous
-structure or union, how to you figure out which series of
-GEP it needs to be? I think sparse already lost the element
-pointer index information. You can construct it back by looking
-at the bit offset. But if there is union then the element point can
-have multiple path to reach to the same bit offset. I don't
-know how to deal with that.
+I have this test program:
 
->
-> Originally-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  sparse-llvm.c | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/sparse-llvm.c b/sparse-llvm.c
-> index 27cc1b88c..ee374b217 100644
-> --- a/sparse-llvm.c
-> +++ b/sparse-llvm.c
-> @@ -472,6 +472,10 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
->         case OP_ADD:
->                 if (symbol_is_fp_type(insn->type))
->                         target = LLVMBuildFAdd(fn->builder, lhs, rhs, target_name);
-> +               else if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind)
-> +                       target = LLVMBuildGEP(fn->builder, lhs, &rhs, 1, "");
-> +               else if (LLVMGetTypeKind(LLVMTypeOf(rhs)) == LLVMPointerTypeKind)
-> +                       target = LLVMBuildGEP(fn->builder, rhs, &lhs, 1, "");
+extern char *incr(char *p);
+char *incr(char *p) {
+ char *tmp = p;
+ tmp += 5;
+ return tmp;
+}
+int main(const char *argv[]) {
+ char *text =  "abcde";
+ char *p = incr(text);
+ return (*p == 'e') ? 0 : 1;
+}
 
-It seems that you only have one level of indices. Also the OP_ADD use the member
-offset of the struct. I am not sure how it map into GEP indices.
-Correct me if I am
-wrong, it seems to me you use the member offset as element indices. I
-think it need
-to get a mapping between offset to indices.
+The linearizer outputs following which I think is incorrect as it is
+missing a load.
 
-Chris
+incr:
+.L0:
+        <entry-point>
+        cast.64     %r3 <- (64) %arg1
+        add.64      %r4 <- %r3, $5
+        ptrcast.64  %r5 <- (64) %r4
+        ret.64      %r5
+
+main:
+.L2:
+        <entry-point>
+        call.64     %r10 <- incr, "abcde"
+        setne.32    %r15 <- %r13, $101
+        ret.32      %r15
+
+If I change the return in main to be a if else block then correct code
+is generated.
+
+int main(const char *argv[]) {
+ char *text =  "abcde";
+ char *p = incr(text);
+ // return (*p == 'e') ? 0 : 1;
+ if (*p == 'e')
+  return 0;
+ else
+  return 1;
+}
+
+main:
+.L2:
+        <entry-point>
+        call.64     %r10 <- incr, "abcde"
+        load.8      %r12 <- 0[%r10]
+        scast.32    %r13 <- (8) %r12
+        setne.32    %r15 <- %r13, $101
+        ret.32      %r15
