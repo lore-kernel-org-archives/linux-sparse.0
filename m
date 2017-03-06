@@ -1,82 +1,41 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [WIP 00/13] LLVM fixes
-Date: Mon, 6 Mar 2017 09:47:10 +0800
-Message-ID: <CANeU7QnkWXYF6U_S2YdqJs=hqCtRDrsn+jHVf922vnxzDBXb=g@mail.gmail.com>
-References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] llvm: fix output_op_[ptr]cast()
+Date: Mon, 6 Mar 2017 09:56:42 +0800
+Message-ID: <CANeU7Qk1JVtk1VTn-ifosVi58Mw8H6TvhiT7wRDF5N5ODpoYMA@mail.gmail.com>
+References: <CACXZuxcd6q6c5VzsYME01nzUhKzLjzvxTDt3juSbNB226APTTg@mail.gmail.com>
+ <20170303052459.2351-1-luc.vanoostenryck@gmail.com> <CACXZuxcN_5H+Ur53axpwbxy-LwQX2fANp5x6GUU-jU+7b4_2tw@mail.gmail.com>
+ <CACXZuxd_gY9uaDHiCzq1TqRweeyp22ifWDDYZbYmjnMkGohenw@mail.gmail.com>
+ <CACXZuxcBg1ry4d2AihkAJUX-6L-W_17HYXvja3q=2TFPGoJmNg@mail.gmail.com> <CAExDi1Rgc9M9rs2KfXv_Wrn_iKA+FKKc0e8MHBxU59mLOZASAg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:33184 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752414AbdCFB4N (ORCPT
+Received: from mail-io0-f182.google.com ([209.85.223.182]:36130 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752414AbdCFB4n (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 20:56:13 -0500
-Received: by mail-io0-f173.google.com with SMTP id f84so103186854ioj.0
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 17:56:12 -0800 (PST)
-In-Reply-To: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+        Sun, 5 Mar 2017 20:56:43 -0500
+Received: by mail-io0-f182.google.com with SMTP id l7so104423322ioe.3
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 17:56:43 -0800 (PST)
+In-Reply-To: <CAExDi1Rgc9M9rs2KfXv_Wrn_iKA+FKKc0e8MHBxU59mLOZASAg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@gmail.com>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Adding CC to Pekka Enberg, he submit most of the llvm patches.
+On Sat, Mar 4, 2017 at 3:55 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Fri, Mar 3, 2017 at 7:30 PM, Dibyendu Majumdar
+> <mobile@majumdar.org.uk> wrote:
+>> Perhaps we need these fixes?
+>>
+>> https://patchwork.kernel.org/patch/8175541/
+>
+> I very much doubt it would make any difference.
+> This patch is part of a serie enforcing correct handling
+> of constant expression *as defined by the standard*.
+> It won't change the type of an expression or something like this.
+
+I second that. Those patch series give warnings but it should not
+affect the IR.
 
 Chris
-
-On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> This series solves a number of issues in sparse-llvm,
-> mainly about wrong type information as needed for LLVM
-> or simply the lack of these infos.
-> These issues have been reported and investigated by
-> Dibyendu Majumdar.
->
-> These patches have been lightly tested and already
-> allow to compile a lot more code to LLVM.
-> It's still incomplete though:
-> - it won't work on bitfields
-> - it won't work on computed gotos
-> - it won't work on label-as-value
-> - it won't work on exotic instructions (OP_SPLICE)
-> - few things are working correctly with floats
->   (but this is not specific to sparse-llvm).
-> There is most probably a bunch of others issues too.
->
-> For testing purpose this serie is also available at:
->   https://github.com/lucvoo/sparse/tree/llvm-fixes-v0
->
->
-> Luc Van Oostenryck (13):
->   llvm: add a helper to convert an integer to a ValueRef
->   llvm: fix translation of PSEUDO_VALs into a ValueRefs
->   llvm: fix output_op_store() which modify its operand
->   llvm: fix output_op_[ptr]cast()
->   add get_nth1_arg()
->   llvm: fix type of literal integer passed as arguments
->   llvm: fix output OP_ADD mixed with pointers
->   llvm: add support for OP_NEG
->   give a type to OP_PHISOURCE
->   give a type to OP_SEL, always
->   llvm: remove unneeded arg 'module'
->   llvm: remove unneeded arg 'fn'
->   llvm: fix: do not mix pointers and floats when doing compares
->
->  flow.c                        |   2 +-
->  linearize.c                   |  18 ++--
->  linearize.h                   |   2 +-
->  memops.c                      |   2 +-
->  sparse-llvm.c                 | 187 +++++++++++++++++++++++++++++++-----------
->  symbol.h                      |  13 +++
->  validation/backend/null.c     |  24 ++++++
->  validation/backend/store-x2.c |  16 ++++
->  8 files changed, 203 insertions(+), 61 deletions(-)
->  create mode 100644 validation/backend/null.c
->  create mode 100644 validation/backend/store-x2.c
->
-> --
-> 2.11.1
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
