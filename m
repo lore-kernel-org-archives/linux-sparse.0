@@ -1,95 +1,67 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
-Date: Mon, 6 Mar 2017 21:09:57 +0100
-Message-ID: <20170306200956.s6wqxw2mfk2lgjlu@macpro.local>
+Subject: Re: [PATCH 05/13] add get_nth1_arg()
+Date: Mon, 6 Mar 2017 17:52:06 +0100
+Message-ID: <20170306165205.ryo63cytkfq3lffq@macpro.local>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
- <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
- <CANeU7Qk6xjhNPVZWxTB4iOavH5=bha+a_utz7+PJuSTo1WKgOg@mail.gmail.com>
- <CACXZuxfX0TiYGJDewbRW9Tr3-nzqiBrdOK0K+mO0qqwyGCrjSQ@mail.gmail.com>
- <CANeU7Q=Y7mx501ZAvXesWCL_C92RsjQvFNJ_4dLvUeOg2chFhg@mail.gmail.com>
- <20170306164306.hibukuy2t4j4camh@macpro.local>
- <CA+55aFx=R=Z2jrTQhT2o4oA-it+sQjKT097zMgPhgKFp0byPFw@mail.gmail.com>
+ <20170305112047.3411-6-luc.vanoostenryck@gmail.com>
+ <CANeU7Qma7hJQeLjc83aXR-cNGA3w7Z4cQDYFstK3PrUWUfZDaw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f181.google.com ([209.85.128.181]:34142 "EHLO
-        mail-wr0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753184AbdCFUKg (ORCPT
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:38255 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754108AbdCFUpF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 15:10:36 -0500
-Received: by mail-wr0-f181.google.com with SMTP id l37so124956787wrc.1
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 12:10:00 -0800 (PST)
+        Mon, 6 Mar 2017 15:45:05 -0500
+Received: by mail-wm0-f46.google.com with SMTP id t193so75064986wmt.1
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 12:45:04 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CA+55aFx=R=Z2jrTQhT2o4oA-it+sQjKT097zMgPhgKFp0byPFw@mail.gmail.com>
+In-Reply-To: <CANeU7Qma7hJQeLjc83aXR-cNGA3w7Z4cQDYFstK3PrUWUfZDaw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Mon, Mar 06, 2017 at 10:17:35AM -0800, Linus Torvalds wrote:
-> On Mon, Mar 6, 2017 at 8:43 AM, Luc Van Oostenryck
+On Mon, Mar 06, 2017 at 10:40:17PM +0800, Christopher Li wrote:
+> On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
 > <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > With an example:
-> > == C code ==
-> >         void *foo(int *p) { return p + 5; }
-> >
-> > == linearized code ==
-> >         foo:
-> >         .L0:
-> >                 <entry-point>
-> >                 add.64      %r2 <- %arg1, $20
-> >                 cast.64     %r3 <- (64) %r2
-> >                 ret.64      %r3
+> > A backend may need to know the size or the type of an
+> > argument and there is no easy way to access to this info.
 > 
-> This is correct.
-
-Interestingly, the following code is linearized a bit differently:
-== C code ==
-	void *foo(int *p) { return p += 5; }
-== linearized code ==
-	foo:
-	.L0:
-	        <entry-point>
-	        cast.64     %r98 <- (64) %arg1
-	        add.64      %r99 <- %r98, $20
-	        ptrcast.64  %r100 <- (64) %r99
-	        cast.64     %r101 <- (64) %r100
-	        ret.64      %r101
-
-Where the type of %r98 & %r99 is 'unsigned long' (or more probably size_t).
-This is then correctly LLVMized as:
-	define i8* @foo(i32* %ARG1) {
-	L18:
-	  %R98 = ptrtoint i32* %ARG1 to i64
-	  %R99 = add i64 %R98, 20
-	  %R100 = inttoptr i64 %R99 to i32*
-	  %R101 = bitcast i32* %R100 to i8*
-	  ret i8* %R101
-	}
- 
-> > == LLVM code from sparse-llvm ==
-> >
-> >         define i8* @foo(i32* %ARG1) {
-> >         L0:
-> >           %0 = getelementptr i32, i32* %ARG1, inttoptr (i64 20 to i32*)
-> >           %R3 = bitcast i32* %0 to i8*
+> Actually, there is a way to do it with two list iterative. Will comment
+> it on the next patch that use the get_nth1_arg().
 > 
-> This is garbage, I'm afraid.
 > 
-> When sparse does the "add 20 to pointer", it adds the *byte offset* 20
-> to the pointer. The LLVM module should not use "getelementptr" for
-> this, because it's not element #20, it's the element at offset 20.
-
-It's clear that there is a semantic gap between sparse's & LLVM's IR.
-
-> I think you're supposed to either use "uglygep" with the base pointer
-> cast to a simple address-unit pointer (ie unsigned char).
+> > +static inline struct symbol *get_nth1_arg(struct symbol *fn, int idx)
+> > +{
+> > +       struct symbol_list *args = fn->ctype.base_type->arguments;
+> > +       struct symbol *arg;
+> > +       int i = 0;
+> > +       FOR_EACH_PTR(args, arg) {
+> > +               if (++i == idx)
+> > +                       return arg;
+> > +       } END_FOR_EACH_PTR(arg);
+> > +
+> > +       return NULL;
 > 
-> Or not use GEP at all.
+> As I said, I am not sure this is necessary in the particular case.
+> However, the nth list entry is some what useful. If we add that,
+> we should add it to ptrlist.c. Then every time of ptr_list can have it.
 > 
->                 Linus
+> Also, there is no need to do "++i", it should use the list->nr to skip
+> over the list node for the case where n is relative large. Then only do the
+> counting inside the list node. If list is packed, it is every easier, we can
+> just return from the index. Depend on we want to allow unpacked list
+> or not.
 
-I bet we'll have others problems with GEP.
+Absolutely, this can be optimized.
 
-Luc
+But this serie is a work in progress to help Dibyendu and I won't
+otherwise spend much time on sparse-llvm.
+
+It should also be noted that, in general, counting the list entries
+via the list->nr can be problematic as some part of the code store
+NULL pointers to remove entries (but it's not the case here with
+the arguments).
+
+Luc Van Oostenryck
