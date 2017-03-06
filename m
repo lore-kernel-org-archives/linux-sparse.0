@@ -1,76 +1,72 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 06/13] llvm: fix type of literal integer passed as arguments
-Date: Mon, 6 Mar 2017 22:56:29 +0800
-Message-ID: <CANeU7Qn7XP18dexKFNiD34SFEATVMEQ8TJ=jV3DFeAyr_O58AQ@mail.gmail.com>
-References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com> <20170305112047.3411-7-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
+Date: Mon, 6 Mar 2017 23:16:44 +0800
+Message-ID: <CANeU7Qk6xjhNPVZWxTB4iOavH5=bha+a_utz7+PJuSTo1WKgOg@mail.gmail.com>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com> <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:34526 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753105AbdCFPFJ (ORCPT
+Received: from mail-it0-f66.google.com ([209.85.214.66]:34721 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754074AbdCFPQp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 10:05:09 -0500
-Received: by mail-it0-f65.google.com with SMTP id r141so9818223ita.1
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 07:04:38 -0800 (PST)
-In-Reply-To: <20170305112047.3411-7-luc.vanoostenryck@gmail.com>
+        Mon, 6 Mar 2017 10:16:45 -0500
+Received: by mail-it0-f66.google.com with SMTP id r141so9863690ita.1
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 07:16:45 -0800 (PST)
+In-Reply-To: <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
 On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> Like for all others instructions, LLVM needs the type
-> of each operands. However this information is not always
-> available via the pseudo, like here when passing a integer
-> constant as argument since for sparse constants are typeless.
+> In sparse, pointer arithmetic and accessing the field
+> of a structure or an array is simply done via OP_ADD,
+> the offset being calculated at evaluation time.
+> On the other hand, LLVM allows addition only on two
+> integers and pointer arithmetic/member access is done
+> via 'getelementptr'.
 >
-> Fix this by getting the type via the function prototype.
+> sparse-llvm didn't took this in account which resulted
+> in type error in 'add' instructions.
 >
-> Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+> Fix this by catching addition involving pointer and issuing
+> a getelementptr' instruction for these.
+
+I have one related question. In the case of anonymous
+structure or union, how to you figure out which series of
+GEP it needs to be? I think sparse already lost the element
+pointer index information. You can construct it back by looking
+at the bit offset. But if there is union then the element point can
+have multiple path to reach to the same bit offset. I don't
+know how to deal with that.
+
+>
+> Originally-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  sparse-llvm.c | 11 ++++++++++-
->  1 file changed, 10 insertions(+), 1 deletion(-)
+>  sparse-llvm.c | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
 > diff --git a/sparse-llvm.c b/sparse-llvm.c
-> index c593f831f..27cc1b88c 100644
+> index 27cc1b88c..ee374b217 100644
 > --- a/sparse-llvm.c
 > +++ b/sparse-llvm.c
-> @@ -740,7 +740,16 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+> @@ -472,6 +472,10 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+>         case OP_ADD:
+>                 if (symbol_is_fp_type(insn->type))
+>                         target = LLVMBuildFAdd(fn->builder, lhs, rhs, target_name);
+> +               else if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind)
+> +                       target = LLVMBuildGEP(fn->builder, lhs, &rhs, 1, "");
+> +               else if (LLVMGetTypeKind(LLVMTypeOf(rhs)) == LLVMPointerTypeKind)
+> +                       target = LLVMBuildGEP(fn->builder, rhs, &lhs, 1, "");
 
-Adding CC to Jeff Garzik,
-
-I notice a near by line in the same function does:
-
-FOR_EACH_PTR(insn->arguments, arg) {
-                  n_arg++;
-} END_FOR_EACH_PTR(arg);
-
-Shouldn't it just use ptr_list_size() instead?
-
->
->         i = 0;
->         FOR_EACH_PTR(insn->arguments, arg) {
-> -               args[i++] = pseudo_to_value(fn, insn, arg);
-> +               LLVMValueRef value;
-> +               if (arg->type == PSEUDO_VAL) {
-> +                       /* Value pseudos do not have type information. */
-> +                       /* Use the function prototype to get the type. */
-> +                       struct symbol *ctype = get_nth1_arg(insn->func->sym, i + 1);
-
-Here is an usage case of iterate through two separate list in order.
-You can use PREPARE_PTR_LIST() and NEXT_PTR_LIST()
-with FOR_EACH_PTR() to iterate the ins->func->sym list in order.
-
-You can take a look at evaluate.c how to use PREPARE_PTR_LIST
-with FOR_EACH_PTR().  e.g. evaluate.c::evaluate_arguments().
-
-If we use get_nth1_arg here. We are effectively using two for loops.
-The outer loop count from one to nth argument. The inner loop in
-get_nth1_arg() count from one to nth argument again.
-
-Using PREPARE_PTR_LIST(), it has just one loop.
+It seems that you only have one level of indices. Also the OP_ADD use the member
+offset of the struct. I am not sure how it map into GEP indices.
+Correct me if I am
+wrong, it seems to me you use the member offset as element indices. I
+think it need
+to get a mapping between offset to indices.
 
 Chris
