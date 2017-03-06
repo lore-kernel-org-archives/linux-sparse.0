@@ -1,50 +1,53 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] give a type to OP_PHISOURCE
-Date: Mon, 6 Mar 2017 05:13:21 +0100
-Message-ID: <20170306041321.wfejdyhupjmppwl6@macpro.local>
-References: <20170303095421.39740-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qn-m=7F1OQKk+pYQzSNpx3e5AOnuQENbG7bz=1BjoQ3Qw@mail.gmail.com>
- <20170306024439.gkuv7a42oqx3or23@macpro.local>
- <CANeU7Q=1E7xR2V7Wi_K75oKwjez3H4siwYr0=-oC-hQp0cWLeA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 05/13] add get_nth1_arg()
+Date: Mon, 6 Mar 2017 22:40:17 +0800
+Message-ID: <CANeU7Qma7hJQeLjc83aXR-cNGA3w7Z4cQDYFstK3PrUWUfZDaw@mail.gmail.com>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com> <20170305112047.3411-6-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:37737 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752743AbdCFENZ (ORCPT
+Received: from mail-it0-f51.google.com ([209.85.214.51]:37489 "EHLO
+        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753746AbdCFOrE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 23:13:25 -0500
-Received: by mail-wm0-f48.google.com with SMTP id n11so54252467wma.0
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 20:13:24 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=1E7xR2V7Wi_K75oKwjez3H4siwYr0=-oC-hQp0cWLeA@mail.gmail.com>
+        Mon, 6 Mar 2017 09:47:04 -0500
+Received: by mail-it0-f51.google.com with SMTP id 203so51253970ith.0
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 06:47:03 -0800 (PST)
+In-Reply-To: <20170305112047.3411-6-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Mon, Mar 06, 2017 at 11:50:06AM +0800, Christopher Li wrote:
-> On Mon, Mar 6, 2017 at 10:44 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > Yes, those in the serie are the last version.
-> > The other ones can be discarded (I keep uptodate the status of my
-> > patches on patchwork).
-> 
-> So far I have been using patchworks as way to fetch patches.
-> I should learn to use the status field. That is good to know.
+On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> A backend may need to know the size or the type of an
+> argument and there is no easy way to access to this info.
 
-I keep things simple and normaly just set the status to:
-- 'Awaiting upstream' when you have pushed the patch on sparse-next,
-- 'Superseded' when I post a newer version
-And at more irregular interval I archive entries that are pushed
-to the master branch.
+Actually, there is a way to do it with two list iterative. Will comment
+it on the next patch that use the get_nth1_arg().
 
-For the CSE patch of last week, I've set its status to 'Under review'
-instead of 'RFC' so that is stay visible on the web page:
-	https://patchwork.kernel.org/project/linux-sparse/list/
 
-Note: if you use the pwclient, you can script the status update
-which is nice because otherwise it's a PITA to do this via the
-web page when you have to do more than a few.
+> +static inline struct symbol *get_nth1_arg(struct symbol *fn, int idx)
+> +{
+> +       struct symbol_list *args = fn->ctype.base_type->arguments;
+> +       struct symbol *arg;
+> +       int i = 0;
+> +       FOR_EACH_PTR(args, arg) {
+> +               if (++i == idx)
+> +                       return arg;
+> +       } END_FOR_EACH_PTR(arg);
+> +
+> +       return NULL;
 
--- Luc
+As I said, I am not sure this is necessary in the particular case.
+However, the nth list entry is some what useful. If we add that,
+we should add it to ptrlist.c. Then every time of ptr_list can have it.
+
+Also, there is no need to do "++i", it should use the list->nr to skip
+over the list node for the case where n is relative large. Then only do the
+counting inside the list node. If list is packed, it is every easier, we can
+just return from the index. Depend on we want to allow unpacked list
+or not.
+
+Chris
