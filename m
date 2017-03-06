@@ -1,59 +1,44 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Possible incorrect linearization of code (master branch)
-Date: Mon, 6 Mar 2017 20:26:12 +0100
-Message-ID: <CAExDi1RSA0qgBEbH8DH9w573-g1DrH4DhOrUo_GDdnKVh--F-w@mail.gmail.com>
-References: <CACXZuxeNopu3Syg+TCL3TLnhwmA84qkQ1NsN4hjL-VLPi6ASYA@mail.gmail.com>
- <20170306163638.huqjg6my2qhwyyzy@macpro.local> <CACXZuxd_6YS7cficTeuPayyYCT-0Q==i3hje_Xd-MtoAP6bLyQ@mail.gmail.com>
+Subject: Re: [PATCH 07/13] llvm: fix output OP_ADD mixed with pointers
+Date: Mon, 6 Mar 2017 20:50:29 +0100
+Message-ID: <20170306195028.zihiz2e34qdxjckg@macpro.local>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
+ <20170305112047.3411-8-luc.vanoostenryck@gmail.com>
+ <CANeU7Qk6xjhNPVZWxTB4iOavH5=bha+a_utz7+PJuSTo1WKgOg@mail.gmail.com>
+ <CACXZuxfX0TiYGJDewbRW9Tr3-nzqiBrdOK0K+mO0qqwyGCrjSQ@mail.gmail.com>
+ <CANeU7Q=Y7mx501ZAvXesWCL_C92RsjQvFNJ_4dLvUeOg2chFhg@mail.gmail.com>
+ <20170306164306.hibukuy2t4j4camh@macpro.local>
+ <CACXZuxc3fDdh9OwKN4LGtEn=rf7rGe=GNn9Z_-3GevFa4yqWnw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:34987 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932471AbdCFT0T (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34881 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752935AbdCFTwJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 14:26:19 -0500
-Received: by mail-qk0-f177.google.com with SMTP id v125so108637666qkh.2
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 11:26:18 -0800 (PST)
-In-Reply-To: <CACXZuxd_6YS7cficTeuPayyYCT-0Q==i3hje_Xd-MtoAP6bLyQ@mail.gmail.com>
+        Mon, 6 Mar 2017 14:52:09 -0500
+Received: by mail-wr0-f195.google.com with SMTP id u108so19105497wrb.2
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 11:50:33 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxc3fDdh9OwKN4LGtEn=rf7rGe=GNn9Z_-3GevFa4yqWnw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Mon, Mar 6, 2017 at 7:47 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Okay thanks. I had originally started from the release 0.5 version of
-> Sparse, and applied fixes selectively.
+On Mon, Mar 06, 2017 at 05:06:01PM +0000, Dibyendu Majumdar wrote:
+> 
+> This may be the issue Chris is highlighting -  above the offset should
+> be 5 not 20 in the LLVM code as the array type is i32* not i8*. Does
+> sparse always output array offsets in char*?
 
-release 0.5 is quite old and a lot of patches have been added;
-almost nothing related to correctness of LLVM but well about the correctness
-of the linearization.
+Yes, of course.
 
-> Because I have a modified
-> version of Sparse with all global state removed, merging changes is a
-> bit painful as it has be done manually.
+I think that the best way to see things is not to consider that 
+"sparse output offset in char*". As you have already seen, what
+sparse produce after linearization is more low-level that LLVM's IR,
+it's closer to what a CPU would see. So I think you should see
+sparse's offset simply as an *address offset*, the values involved
+being the values that would in the register of some CPU.
 
-I can imagine this.
-I, of course, hve no idea why you (have to) do this but I can only very strongly
-advice you to try to avoid this as much as possible.
-
-> That is why I have not been
-> tracking sparse-next as I thought it is not yet stable. I have now
-> merged all changes from master. Should I merge sparse-next now or wait
-> for it to be merged into master?
-
-It depends a bit you confortable you are with applying patches,
-merging or rebasing
-branches but as you have seen there is needed patches in sparse-next
-that are not
-yes in master although master was updated very recently.
-
-It depends also about the nature of your changes, what is the
-probability to have
-nasty conflicts.
-
-But idealy you would take very recent stuff but not too recent
-(sparse-next itself may be
-a bit too wild in the sense that the very top of it is often rebased).
-
--- Luc Van Oostenryck
+-- Luc 
