@@ -1,33 +1,50 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] give a type to OP_PHISOURCE
-Date: Mon, 6 Mar 2017 11:48:53 +0800
-Message-ID: <CANeU7Qkejeecj42Hi_--CyDzFTuH+rsGeFt3F9XL9bVuXUHSug@mail.gmail.com>
-References: <20170303095421.39740-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qn-m=7F1OQKk+pYQzSNpx3e5AOnuQENbG7bz=1BjoQ3Qw@mail.gmail.com> <20170306025806.cbodfbhg7uptzcoh@macpro.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] returns the correct type when evaluating NULL
+Date: Mon,  6 Mar 2017 05:43:49 +0100
+Message-ID: <20170306044349.16869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:34237 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752705AbdCFD5f (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:36834 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752905AbdCFEn6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Mar 2017 22:57:35 -0500
-Received: by mail-io0-f181.google.com with SMTP id 90so105479613ios.1
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 19:57:34 -0800 (PST)
-In-Reply-To: <20170306025806.cbodfbhg7uptzcoh@macpro.local>
+        Sun, 5 Mar 2017 23:43:58 -0500
+Received: by mail-wr0-f196.google.com with SMTP id l37so20151980wrc.3
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Mar 2017 20:43:57 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Mar 6, 2017 at 10:58 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Unrelated to this serie, but is it possible that you've somehow
-> forgot this patch: https://patchwork.kernel.org/patch/9582509/ ?
-> It was one where I had forgot to add my s-o-b.
+In evaluate_cast(), the expression '(void*)<some zero constant>',
+aka 'NULL', is detected and given the type 'null_ctype',
+a special kind of pointer type.
+However the returned type is the original one: 'void *'.
 
-Thanks for the reminding, I did forget about this patch.
+This doesn't seem to be intented as in all other cases, the
+evaluate_...() functions and ultimately evaluate_expression()
+always return the type of the expression.
 
-Applied.
+Fix this by returning the type given to the expression: null_ctype.
 
-Chris
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ evaluate.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/evaluate.c b/evaluate.c
+index 47eeaef2e..440d05da6 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -2844,7 +2844,7 @@ static struct symbol *evaluate_cast(struct expression *expr)
+ 				expr->type = EXPR_VALUE;
+ 				expr->ctype = &null_ctype;
+ 				expr->value = 0;
+-				return ctype;
++				return expr->ctype;
+ 			}
+ 		}
+ 	}
+-- 
+2.11.1
+
