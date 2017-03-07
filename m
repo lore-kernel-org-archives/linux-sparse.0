@@ -1,57 +1,51 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Possible incorrect linearization of code (master branch)
-Date: Tue, 7 Mar 2017 07:42:34 +0100
-Message-ID: <20170307064233.dvo5ctrphaneubei@macpro.local>
-References: <CACXZuxeNopu3Syg+TCL3TLnhwmA84qkQ1NsN4hjL-VLPi6ASYA@mail.gmail.com>
- <20170306163638.huqjg6my2qhwyyzy@macpro.local>
- <CACXZuxd_6YS7cficTeuPayyYCT-0Q==i3hje_Xd-MtoAP6bLyQ@mail.gmail.com>
- <CAExDi1RSA0qgBEbH8DH9w573-g1DrH4DhOrUo_GDdnKVh--F-w@mail.gmail.com>
- <CACXZuxexwB_krnNULmiGMCySoaVqx1Q+KiuE_tPS7P59nT7giA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 02/13] llvm: fix translation of PSEUDO_VALs into a ValueRefs
+Date: Tue, 7 Mar 2017 23:11:20 +0800
+Message-ID: <CANeU7Q=tPmE4wuCw7MN4kyru_eTCOrGG-kDd6azq0JQkimQ17w@mail.gmail.com>
+References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com> <20170305112047.3411-3-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:33105 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752233AbdCGH5j (ORCPT
+Received: from mail-it0-f66.google.com ([209.85.214.66]:35853 "EHLO
+        mail-it0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755402AbdCGPj2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Mar 2017 02:57:39 -0500
-Received: by mail-wm0-f51.google.com with SMTP id v203so8514739wmg.0
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 23:56:13 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxexwB_krnNULmiGMCySoaVqx1Q+KiuE_tPS7P59nT7giA@mail.gmail.com>
+        Tue, 7 Mar 2017 10:39:28 -0500
+Received: by mail-it0-f66.google.com with SMTP id w185so913109ita.3
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Mar 2017 07:38:48 -0800 (PST)
+In-Reply-To: <20170305112047.3411-3-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Mon, Mar 06, 2017 at 10:39:42PM +0000, Dibyendu Majumdar wrote:
-> On 6 March 2017 at 19:26, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > On Mon, Mar 6, 2017 at 7:47 PM, Dibyendu Majumdar
-> >> Because I have a modified
-> >> version of Sparse with all global state removed, merging changes is a
-> >> bit painful as it has be done manually.
-> >
-> > I can imagine this.
-> > I, of course, hve no idea why you (have to) do this but I can only very strongly
-> > advice you to try to avoid this as much as possible.
-> >
-> 
-> As I mentioned before I am using Sparse to create a JIT compiler for
-> C. So this needs to be callable as a library - and I need the ability
-> to call it many times. Moreover it must be possible to call several
-> instances of Sparse simultaneously without conflict. To achieve all
-> this, all global state is held in a set of structures. The main change
-> is that the most function calls have an additional argument. The other
-> changes are related to initialization of the various global structures
-> used by Sparse. Generally I try to keep the code as far as possible
-> identical to Sparse except for these changes. Even so merging is very
-> painful.
+On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> In sparse-llvm there is the assumption that a PSEUDO_VAL is always
+> of integer type. But this is not always the case: constant pointers,
+> like NULL, are also of the PSEUDO_VAL kind.
 
-OK, I understand better now.
-Yes, I imagine it must be painful.
+After apply this patch, the test suite has three more new test failure.
+A closer look there are assert failed in three of the test cases.
 
-Do you really need to have this ability to run several instances during
-development, while investigating problems?
+error: actual error text does not match expected error text.
+error: see backend/loop2.c.error.* for further investigation.
+--- backend/loop2.c.error.expected 2017-03-07 23:06:42.298291232 +0800
++++ backend/loop2.c.error.got 2017-03-07 23:06:42.460291747 +0800
++sparse-llvm: sparse-llvm.c:312: val_to_value: Assertion `ctype' failed.
++.././sparsec: line 35:  8495 Aborted                 (core dumped)
+$DIRNAME/sparse-llvm $SPARSEOPTS > $TMPLLVM
 
--- Luc 
+
+Also the previous 1/13 patch will generate warning without this path.
+
+sparse-llvm.c:306:21: warning: =E2=80=98val_to_value=E2=80=99 defined but n=
+ot used
+[-Wunused-function]
+ static LLVMValueRef val_to_value(struct function *fn, unsigned long
+long val, struct symbol *ctype)
+                     ^~~~~~~~~~~~
+We should fix the warning. Maybe combine the previous patch with this one?
+
+Chris
