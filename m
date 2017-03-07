@@ -1,48 +1,56 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Possible incorrect linearization of code (master branch)
-Date: Mon, 6 Mar 2017 22:39:42 +0000
-Message-ID: <CACXZuxexwB_krnNULmiGMCySoaVqx1Q+KiuE_tPS7P59nT7giA@mail.gmail.com>
-References: <CACXZuxeNopu3Syg+TCL3TLnhwmA84qkQ1NsN4hjL-VLPi6ASYA@mail.gmail.com>
- <20170306163638.huqjg6my2qhwyyzy@macpro.local> <CACXZuxd_6YS7cficTeuPayyYCT-0Q==i3hje_Xd-MtoAP6bLyQ@mail.gmail.com>
- <CAExDi1RSA0qgBEbH8DH9w573-g1DrH4DhOrUo_GDdnKVh--F-w@mail.gmail.com>
+Subject: sparse-llvm incorrect definition of local variables
+Date: Tue, 7 Mar 2017 00:08:22 +0000
+Message-ID: <CACXZuxdH3tryp92DVHhd8zs9bUTbrAs92Pz+knnDqDzj4eXWYQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:32860 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753129AbdCGAjr (ORCPT
+Received: from mail-it0-f41.google.com ([209.85.214.41]:32959 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754172AbdCGAlX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Mar 2017 19:39:47 -0500
-Received: by mail-it0-f48.google.com with SMTP id w124so4792678itb.0
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 16:37:55 -0800 (PST)
-In-Reply-To: <CAExDi1RSA0qgBEbH8DH9w573-g1DrH4DhOrUo_GDdnKVh--F-w@mail.gmail.com>
+        Mon, 6 Mar 2017 19:41:23 -0500
+Received: by mail-it0-f41.google.com with SMTP id w124so4796787itb.0
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Mar 2017 16:39:33 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 6 March 2017 at 19:26, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Mon, Mar 6, 2017 at 7:47 PM, Dibyendu Majumdar
->> Because I have a modified
->> version of Sparse with all global state removed, merging changes is a
->> bit painful as it has be done manually.
->
-> I can imagine this.
-> I, of course, hve no idea why you (have to) do this but I can only very strongly
-> advice you to try to avoid this as much as possible.
->
+Hi,
 
-As I mentioned before I am using Sparse to create a JIT compiler for
-C. So this needs to be callable as a library - and I need the ability
-to call it many times. Moreover it must be possible to call several
-instances of Sparse simultaneously without conflict. To achieve all
-this, all global state is held in a set of structures. The main change
-is that the most function calls have an additional argument. The other
-changes are related to initialization of the various global structures
-used by Sparse. Generally I try to keep the code as far as possible
-identical to Sparse except for these changes. Even so merging is very
-painful.
+When I try to compile following in sparse-llvm:
+
+int main(const char *argv[]) {
+ int values[5];
+ values[0] = 9;
+ values[1] = 8;
+ values[2] = 7;
+ values[3] = 6;
+ values[4] = 5;
+ int *p = &values[4];
+ return (*p == 5) ? 0 : 1;
+}
+
+I get:
+
+@values = external global [5 x i32]
+define i32 @main(i8**) {
+L0:
+  store i32 9, i32* getelementptr inbounds ([5 x i32], [5 x i32]*
+@values, i32 0, i32 0)
+  store i32 8, i32* bitcast (i8* getelementptr inbounds (i8, i8*
+bitcast ([5 x i32]* @values to i8*), i64 4) to i32*)
+  store i32 7, i32* bitcast (i8* getelementptr inbounds (i8, i8*
+bitcast ([5 x i32]* @values to i8*), i64 8) to i32*)
+  store i32 6, i32* bitcast (i8* getelementptr inbounds (i8, i8*
+bitcast ([5 x i32]* @values to i8*), i64 12) to i32*)
+  store i32 5, i32* bitcast (i8* getelementptr inbounds (i8, i8*
+bitcast ([5 x i32]* @values to i8*), i64 16) to i32*)
+  ret i32 0
+}
+
+Here 'values' has been defined above as external global, whereas it
+should be allocated on the stack.
 
 Regards
 Dibyendu
