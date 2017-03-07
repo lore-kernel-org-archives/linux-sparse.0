@@ -1,49 +1,36 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH 06/13] llvm: fix type of literal integer passed as arguments
-Date: Tue, 7 Mar 2017 19:41:39 +0000
-Message-ID: <CACXZuxeTUqXuBd+42SGFB5sLDirea1q2WnG8s=SqcU+DAd1-3Q@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 02/13] llvm: fix translation of PSEUDO_VALs into a ValueRefs
+Date: Wed, 8 Mar 2017 06:48:08 +0800
+Message-ID: <CANeU7Qn=9i2pC--do4OCBoxvQxjYbEe1Rv5ZZcK65Y061rLzBw@mail.gmail.com>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
- <20170305112047.3411-7-luc.vanoostenryck@gmail.com> <CANeU7Qnoqg-rM2MS+3BuKEvsLUBvnv+rvfYmE=XkhMicdejN=A@mail.gmail.com>
+ <20170305112047.3411-3-luc.vanoostenryck@gmail.com> <CANeU7Q=tPmE4wuCw7MN4kyru_eTCOrGG-kDd6azq0JQkimQ17w@mail.gmail.com>
+ <20170307161817.g7v5aihjjbhpweqs@macbook.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36127 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756091AbdCGTmG (ORCPT
+Received: from mail-io0-f172.google.com ([209.85.223.172]:34287 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933298AbdCGXqo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Mar 2017 14:42:06 -0500
-Received: by mail-it0-f51.google.com with SMTP id h10so77806855ith.1
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Mar 2017 11:41:40 -0800 (PST)
-In-Reply-To: <CANeU7Qnoqg-rM2MS+3BuKEvsLUBvnv+rvfYmE=XkhMicdejN=A@mail.gmail.com>
+        Tue, 7 Mar 2017 18:46:44 -0500
+Received: by mail-io0-f172.google.com with SMTP id g6so17006346ioj.1
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Mar 2017 15:45:43 -0800 (PST)
+In-Reply-To: <20170307161817.g7v5aihjjbhpweqs@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On 7 March 2017 at 15:33, Christopher Li <sparse@chrisli.org> wrote:
-> On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> Like for all others instructions, LLVM needs the type
->> of each operands. However this information is not always
->> available via the pseudo, like here when passing a integer
->> constant as argument since for sparse constants are typeless.
->>
->> Fix this by getting the type via the function prototype.
->>
->> +               LLVMValueRef value;
->> +               if (arg->type == PSEUDO_VAL) {
->> +                       /* Value pseudos do not have type information. */
->> +                       /* Use the function prototype to get the type. */
->> +                       struct symbol *ctype = get_nth1_arg(insn->func->sym, i + 1);
+On Wed, Mar 8, 2017 at 12:18 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>> We should fix the warning. Maybe combine the previous patch with this one?
 >
-> I try to come up with an example to use the PREPARE_PTR_LIST() in this patch.
+> Yes, if you prefer so.
+> Generally I prefer to separate the introduction of new code and its use
+> but it doesn't really matter much.
 
-I suppose that the function prototype may not have the same number of
-declared parameters as the actual call arguments - e.g. if the
-function is variadic. In that case there may not be corresponding
-parameter definition available. I think that in this case default
-argument promotion rules will need to be applied for trailing
-arguments.
+I don't have a problem with separate new code vs using it. No big deal there.
 
-Regards
-Dibyendu
+It is the warning I want to get rid of.
+
+Chris
