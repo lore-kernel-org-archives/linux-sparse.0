@@ -1,54 +1,61 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 06/13] llvm: fix type of literal integer passed as
- arguments
-Date: Tue, 7 Mar 2017 17:21:08 +0100
-Message-ID: <20170307162107.vgkloatftquqahif@macbook.local>
+Subject: Re: [PATCH 02/13] llvm: fix translation of PSEUDO_VALs into a
+ ValueRefs
+Date: Tue, 7 Mar 2017 17:18:18 +0100
+Message-ID: <20170307161817.g7v5aihjjbhpweqs@macbook.local>
 References: <20170305112047.3411-1-luc.vanoostenryck@gmail.com>
- <20170305112047.3411-7-luc.vanoostenryck@gmail.com>
- <CANeU7Qnoqg-rM2MS+3BuKEvsLUBvnv+rvfYmE=XkhMicdejN=A@mail.gmail.com>
+ <20170305112047.3411-3-luc.vanoostenryck@gmail.com>
+ <CANeU7Q=tPmE4wuCw7MN4kyru_eTCOrGG-kDd6azq0JQkimQ17w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34102 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755606AbdCGQV3 (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34886 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755271AbdCGQYj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Mar 2017 11:21:29 -0500
-Received: by mail-wm0-f66.google.com with SMTP id u132so1824398wmg.1
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Mar 2017 08:21:11 -0800 (PST)
+        Tue, 7 Mar 2017 11:24:39 -0500
+Received: by mail-wr0-f193.google.com with SMTP id u108so866643wrb.2
+        for <linux-sparse@vger.kernel.org>; Tue, 07 Mar 2017 08:24:25 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Qnoqg-rM2MS+3BuKEvsLUBvnv+rvfYmE=XkhMicdejN=A@mail.gmail.com>
+In-Reply-To: <CANeU7Q=tPmE4wuCw7MN4kyru_eTCOrGG-kDd6azq0JQkimQ17w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Tue, Mar 07, 2017 at 11:33:19PM +0800, Christopher Li wrote:
+On Tue, Mar 07, 2017 at 11:11:20PM +0800, Christopher Li wrote:
 > On Sun, Mar 5, 2017 at 7:20 PM, Luc Van Oostenryck
 > <luc.vanoostenryck@gmail.com> wrote:
-> > Like for all others instructions, LLVM needs the type
-> > of each operands. However this information is not always
-> > available via the pseudo, like here when passing a integer
-> > constant as argument since for sparse constants are typeless.
-> >
-> > Fix this by getting the type via the function prototype.
-> >
-> > +               LLVMValueRef value;
-> > +               if (arg->type == PSEUDO_VAL) {
-> > +                       /* Value pseudos do not have type information. */
-> > +                       /* Use the function prototype to get the type. */
-> > +                       struct symbol *ctype = get_nth1_arg(insn->func->sym, i + 1);
+> > In sparse-llvm there is the assumption that a PSEUDO_VAL is always
+> > of integer type. But this is not always the case: constant pointers,
+> > like NULL, are also of the PSEUDO_VAL kind.
 > 
-> I try to come up with an example to use the PREPARE_PTR_LIST() in this patch.
-> I hit a bug "insn->func->sym"  assume "insn->func" is a function symbol node.
-> If "insn->func" is a function pointer then access "insn->func->sym" is wrong.
+> After apply this patch, the test suite has three more new test failure.
+> A closer look there are assert failed in three of the test cases.
+> 
+> error: actual error text does not match expected error text.
+> error: see backend/loop2.c.error.* for further investigation.
+> --- backend/loop2.c.error.expected 2017-03-07 23:06:42.298291232 +0800
+> +++ backend/loop2.c.error.got 2017-03-07 23:06:42.460291747 +0800
+> +sparse-llvm: sparse-llvm.c:312: val_to_value: Assertion `ctype' failed.
+> +.././sparsec: line 35:  8495 Aborted                 (core dumped)
+> $DIRNAME/sparse-llvm $SPARSEOPTS > $TMPLLVM
 
-Mmmm yes, indeed.
- 
-> Any way, my modify patch attached. It should work similar to this patch
-> without using the nth argument help function. My limited test hit this
-> function pointer bug.
+Mmmm, strange but it's very possible that I didn't tested patch by patch.
+I'll look at it.
 
-OK. 
+> Also the previous 1/13 patch will generate warning without this path.
+> 
+> sparse-llvm.c:306:21: warning: ‘val_to_value’ defined but not used
+> [-Wunused-function]
+>  static LLVMValueRef val_to_value(struct function *fn, unsigned long
+> long val, struct symbol *ctype)
+>                      ^~~~~~~~~~~~
+> We should fix the warning. Maybe combine the previous patch with this one?
 
--- Luc
+Yes, if you prefer so.
+Generally I prefer to separate the introduction of new code and its use
+but it doesn't really matter much.
+
+-- Luc 
