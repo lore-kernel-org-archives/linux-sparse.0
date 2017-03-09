@@ -1,98 +1,64 @@
-From: Tomas Winkler <tomasw@gmail.com>
-Subject: Re: Arrays of variable length
-Date: Thu, 9 Mar 2017 16:29:18 +0200
-Message-ID: <CA+i0qc5==KMapL9abAuhxHW7tn3OktqDM53=0Rx9LUPw5MwwpQ@mail.gmail.com>
-References: <CA+i0qc5_NFqb=_6P46yrebrQYzSuCCKgq_xyeui_x6nTRGx62A@mail.gmail.com>
- <yw1xlgsjdcjk.fsf@unicorn.mansr.com> <20170305211254.GA3220@khazad-dum.debian.net>
- <yw1xh937ckl4.fsf@unicorn.mansr.com> <CA+i0qc6+m61dz-Bj95355ZmpPqKW8-RrWFRswTaajx5_fEOg0A@mail.gmail.com>
- <yw1xk27ybo30.fsf@unicorn.mansr.com> <CA+i0qc4iwENN0HyG2--suhgc3_Q=RpFt0tFNgCqWQvALqot4dA@mail.gmail.com>
- <yw1xfuimbkml.fsf@unicorn.mansr.com> <CA+i0qc4VOXbHBSbhTOGEZ6D04X-tQsMmtAoj8JtzEf6TCOm=Pg@mail.gmail.com>
- <yw1xbmtabk6i.fsf@unicorn.mansr.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <yw1xbmtabk6i.fsf@unicorn.mansr.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>
-Cc: Henrique de Moraes Holschuh <hmh@hmh.eng.br>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, Al Viro <viro@zeniv.linux.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [RFC] rationale for systematic elimination of OP_SYMADDR instructions
+Date: Thu,  9 Mar 2017 15:20:44 +0100
+Message-ID: <20170309142044.96408-1-luc.vanoostenryck@gmail.com>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:33035 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754559AbdCIO1w (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 9 Mar 2017 09:27:52 -0500
+Received: by mail-wr0-f195.google.com with SMTP id g10so8124197wrg.0
+        for <linux-sparse@vger.kernel.org>; Thu, 09 Mar 2017 06:27:50 -0800 (PST)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Mar 9, 2017 at 4:26 PM, M=C3=A5ns Rullg=C3=A5rd <mans@mansr.com> wr=
-ote:
-> Tomas Winkler <tomasw@gmail.com> writes:
->
->> On Thu, Mar 9, 2017 at 4:16 PM, M=C3=A5ns Rullg=C3=A5rd <mans@mansr.com>=
- wrote:
->>> Tomas Winkler <tomasw@gmail.com> writes:
->>>
->>>> On Thu, Mar 9, 2017 at 3:02 PM, M=C3=A5ns Rullg=C3=A5rd <mans@mansr.co=
-m> wrote:
->>>>> Tomas Winkler <tomasw@gmail.com> writes:
->>>>>
->>>>>> On Mon, Mar 6, 2017 at 2:31 AM, M=C3=A5ns Rullg=C3=A5rd <mans@mansr.=
-com> wrote:
->>>>>>> Henrique de Moraes Holschuh <hmh@hmh.eng.br> writes:
->>>>>>>
->>>>>>>> On Sun, 05 Mar 2017, M=C3=A5ns Rullg=C3=A5rd wrote:
->>>>>>>>> Tomas Winkler <tomasw@gmail.com> writes:
->>>>>>>>> > Sparse complains for arrays declared with variable length
->>>>>>>>> >
->>>>>>>>> > 'warning: Variable length array is used'
->>>>>>>>> >
->>>>>>>>> > Prior to c99 this was not allowed but lgcc (c99) doesn't have p=
-roblem
->>>>>>>>> > with that  https://gcc.gnu.org/onlinedocs/gcc/Variable-Length.h=
-tml.
->>>>>>>>> > And also Linux kernel compilation with W=3D1 doesn't complain.
->>>>>>>>> >
->>>>>>>>> > Since sparse is used extensively would like to ask what is the =
-correct
->>>>>>>>> > usage of arrays of variable length
->>>>>>>>> > within Linux Kernel.
->>>>>>>>>
->>>>>>>>> Variable-length arrays are a very bad idea.  Don't use them, ever=
-.
->>>>>>>>> If the size has a sane upper bound, just use that value staticall=
-y.
->>>>>>>>> Otherwise, you have a stack overflow waiting to happen and should=
- be
->>>>>>>>> using some kind of dynamic allocation instead.
->>>>>>>>>
->>>>>>>>> Furthermore, use of VLAs generally results in less efficient code=
-.  For
->>>>>>>>> instance, it forces gcc to waste a register for the frame pointer=
-, and
->>>>>>>>> it often prevents inlining.
->>>>>>>>
->>>>>>>> Well, if we're going to forbid VLAs in the kernel, IMHO the kernel=
- build
->>>>>>>> system should call gcc with -Werror=3Dvla to get that point across=
- early,
->>>>>>>> and flush out any offenders.
->>>>>>>
->>>>>>> If it were up to me, that's exactly what I'd do.
->>>>>>
->>>>>>>
->>>>>> Some parts of the kernel depends on VLA such as ___ON_STACK macros i=
-n
->>>>>> include/crypto/hash.h
->>>>>> It's actually pretty neat implementation, maybe it's too harsh to
->>>>>> disable  VLA completely.
->>>>>
->>>>> And what happens if the requested size is insane?
->>>>
->>>> One option is to add '-Wvla-larger-than=3Dn'
->>>
->>> If you know the upper bound, why use VLAs in the first place?
->>
->> This is a water mark and not  actual usage, but maybe I didn't
->> understand your comment.
->
-> If there is an upper bound known at compile time, why not simply use
-> that size statically?  If there is no upper bound, well, then you have a
-> problem.
+While investigating some problems related to code generation
+I realized that OP_SYMADDR are systematically eliminated,
+the target address are simply replaced by the symbol itself.
 
-If the compiler can do the job, why not to use this flexibility ?
+While it's not wrong per se as it all depends to the semantic
+we want to give to pseudos and the instructions and how high-
+or low-level we want to IR, I don't think it was the intention
+to remove them and more importantly I don't think it's desirable.
 
-Tomas
+Those OP_SYMADDR allowed to make a clear separation between a symbol
+(a name with a type and info for storage & linkage) and its address
+(which can be stored in memory or in a register and on which
+arithmetic operations can then be done on it). Once these addresses
+are replaced by the symbol itself, those symbols can appears almost
+everywhere in the linearized code:
+- in calls' arguments,
+- in adds and subs (while doing pointer arithmetic),
+- in casts,
+- in load & stores,
+- ...
+and they complicate things considerably once you begin to be
+interested concretly in things after linearization & simplification
+since soon or later you will need the address anyway.
+
+So my question is:
+	"is there a good reason to eliminate those instructions?",
+and ultimately:
+	"is there any objections to the following patch?".
+
+
+-- Luc Van Oostenryck
+
+
+---
+diff --git a/simplify.c b/simplify.c
+index 5d00937f1..a84e4787f 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -1159,7 +1159,7 @@ int simplify_instruction(struct instruction *insn)
+ 	case OP_SYMADDR:
+ 		if (dead_insn(insn, NULL, NULL, NULL))
+ 			return REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
+-		return replace_with_pseudo(insn, insn->symbol);
++		return 0;
+ 	case OP_CAST:
+ 	case OP_SCAST:
+ 	case OP_FPCAST:
