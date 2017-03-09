@@ -1,43 +1,101 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm incorrect definition of local variables
-Date: Thu, 9 Mar 2017 14:42:08 +0000
-Message-ID: <CACXZuxctddtv9VKSK7_cfC=vBAu04hXxvSa02BmTF_Y8mDqPEg@mail.gmail.com>
-References: <CACXZuxdH3tryp92DVHhd8zs9bUTbrAs92Pz+knnDqDzj4eXWYQ@mail.gmail.com>
- <20170307064436.qtcscbwbjsrjoyko@macpro.local> <CACXZuxcC-VPjB9CD0E9zUXp6XNS8v1DdvPUZ1vc88jqwYdFUhA@mail.gmail.com>
- <20170308065337.vwrebdlo4poc4da4@macpro.local> <CACXZuxcbDJAeRBN_wpTRPRk7efOM2vLytke=k_0f4=C0dOQtrA@mail.gmail.com>
- <CACXZuxeQO4p+J5MyggZhWJF9FfwnXHdG_wxx34jF3NFXqgd4Yg@mail.gmail.com> <20170309143513.pe7y5kuclabndyzu@macbook.local>
+From: =?iso-8859-1?Q?M=E5ns_Rullg=E5rd?= <mans@mansr.com>
+Subject: Re: Arrays of variable length
+Date: Thu, 09 Mar 2017 14:38:07 +0000
+Message-ID: <yw1x7f3ybjn4.fsf@unicorn.mansr.com>
+References: <CA+i0qc5_NFqb=_6P46yrebrQYzSuCCKgq_xyeui_x6nTRGx62A@mail.gmail.com>
+        <yw1xlgsjdcjk.fsf@unicorn.mansr.com>
+        <20170305211254.GA3220@khazad-dum.debian.net>
+        <yw1xh937ckl4.fsf@unicorn.mansr.com>
+        <CA+i0qc6+m61dz-Bj95355ZmpPqKW8-RrWFRswTaajx5_fEOg0A@mail.gmail.com>
+        <yw1xk27ybo30.fsf@unicorn.mansr.com>
+        <CA+i0qc4iwENN0HyG2--suhgc3_Q=RpFt0tFNgCqWQvALqot4dA@mail.gmail.com>
+        <yw1xfuimbkml.fsf@unicorn.mansr.com>
+        <CA+i0qc4VOXbHBSbhTOGEZ6D04X-tQsMmtAoj8JtzEf6TCOm=Pg@mail.gmail.com>
+        <yw1xbmtabk6i.fsf@unicorn.mansr.com>
+        <CA+i0qc5==KMapL9abAuhxHW7tn3OktqDM53=0Rx9LUPw5MwwpQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:36578 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754955AbdCIOmg (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Mar 2017 09:42:36 -0500
-Received: by mail-it0-f41.google.com with SMTP id h10so129557421ith.1
-        for <linux-sparse@vger.kernel.org>; Thu, 09 Mar 2017 06:42:09 -0800 (PST)
-In-Reply-To: <20170309143513.pe7y5kuclabndyzu@macbook.local>
+Received: from unicorn.mansr.com ([81.2.72.234]:45594 "EHLO unicorn.mansr.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932290AbdCIOpN (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 9 Mar 2017 09:45:13 -0500
+In-Reply-To: <CA+i0qc5==KMapL9abAuhxHW7tn3OktqDM53=0Rx9LUPw5MwwpQ@mail.gmail.com>
+        (Tomas Winkler's message of "Thu, 9 Mar 2017 16:29:18 +0200")
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Tomas Winkler <tomasw@gmail.com>
+Cc: Henrique de Moraes Holschuh <hmh@hmh.eng.br>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, Al Viro <viro@zeniv.linux.org.uk>
 
-On 9 March 2017 at 14:35, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Thu, Mar 09, 2017 at 01:50:16AM +0000, Dibyendu Majumdar wrote:
+Tomas Winkler <tomasw@gmail.com> writes:
+
+> On Thu, Mar 9, 2017 at 4:26 PM, Måns Rullgård <mans@mansr.com> wrote:
+>> Tomas Winkler <tomasw@gmail.com> writes:
 >>
->> I think by combining the symbol's identifier and address a unique
->> reference can be created - thus whenever we encounter a symbol that is
->> not extern or toplevel we should create a local object using the
->> symbol's name + address as the LLVM identifier.
+>>> On Thu, Mar 9, 2017 at 4:16 PM, Måns Rullgård <mans@mansr.com> wrote:
+>>>> Tomas Winkler <tomasw@gmail.com> writes:
+>>>>
+>>>>> On Thu, Mar 9, 2017 at 3:02 PM, Måns Rullgård <mans@mansr.com> wrote:
+>>>>>> Tomas Winkler <tomasw@gmail.com> writes:
+>>>>>>
+>>>>>>> On Mon, Mar 6, 2017 at 2:31 AM, Måns Rullgård <mans@mansr.com> wrote:
+>>>>>>>> Henrique de Moraes Holschuh <hmh@hmh.eng.br> writes:
+>>>>>>>>
+>>>>>>>>> On Sun, 05 Mar 2017, Måns Rullgård wrote:
+>>>>>>>>>> Tomas Winkler <tomasw@gmail.com> writes:
+>>>>>>>>>> > Sparse complains for arrays declared with variable length
+>>>>>>>>>> >
+>>>>>>>>>> > 'warning: Variable length array is used'
+>>>>>>>>>> >
+>>>>>>>>>> > Prior to c99 this was not allowed but lgcc (c99) doesn't have problem
+>>>>>>>>>> > with that  https://gcc.gnu.org/onlinedocs/gcc/Variable-Length.html.
+>>>>>>>>>> > And also Linux kernel compilation with W=1 doesn't complain.
+>>>>>>>>>> >
+>>>>>>>>>> > Since sparse is used extensively would like to ask what is the correct
+>>>>>>>>>> > usage of arrays of variable length
+>>>>>>>>>> > within Linux Kernel.
+>>>>>>>>>>
+>>>>>>>>>> Variable-length arrays are a very bad idea.  Don't use them, ever.
+>>>>>>>>>> If the size has a sane upper bound, just use that value statically.
+>>>>>>>>>> Otherwise, you have a stack overflow waiting to happen and should be
+>>>>>>>>>> using some kind of dynamic allocation instead.
+>>>>>>>>>>
+>>>>>>>>>> Furthermore, use of VLAs generally results in less efficient code.  For
+>>>>>>>>>> instance, it forces gcc to waste a register for the frame pointer, and
+>>>>>>>>>> it often prevents inlining.
+>>>>>>>>>
+>>>>>>>>> Well, if we're going to forbid VLAs in the kernel, IMHO the kernel build
+>>>>>>>>> system should call gcc with -Werror=vla to get that point across early,
+>>>>>>>>> and flush out any offenders.
+>>>>>>>>
+>>>>>>>> If it were up to me, that's exactly what I'd do.
+>>>>>>>
+>>>>>>>>
+>>>>>>> Some parts of the kernel depends on VLA such as ___ON_STACK macros in
+>>>>>>> include/crypto/hash.h
+>>>>>>> It's actually pretty neat implementation, maybe it's too harsh to
+>>>>>>> disable  VLA completely.
+>>>>>>
+>>>>>> And what happens if the requested size is insane?
+>>>>>
+>>>>> One option is to add '-Wvla-larger-than=n'
+>>>>
+>>>> If you know the upper bound, why use VLAs in the first place?
+>>>
+>>> This is a water mark and not  actual usage, but maybe I didn't
+>>> understand your comment.
+>>
+>> If there is an upper bound known at compile time, why not simply use
+>> that size statically?  If there is no upper bound, well, then you have a
+>> problem.
 >
-> That's more or less the idea, of course.
-> And you need to consider all objects that you don't need to
-> allocate because they are always in a (pseudo-) register.
->
+> If the compiler can do the job, why not to use this flexibility ?
 
-Ok thank you. I will try to implement a fix and get back when I have
-something that works or if I get stuck.
+Because, as I already said, there are security implications if the size
+is unbounded, and even with safely bounded size, using VLAs interferes
+with compiler optimisations.  Ensuring VLAs are used safely is usually
+more work than simply avoiding them in the first place.
 
-Regards
-Dibyendu
+-- 
+Måns Rullgård
