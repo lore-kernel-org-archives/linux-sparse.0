@@ -1,74 +1,64 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm incorrect definition of local variables
-Date: Thu, 9 Mar 2017 01:50:16 +0000
-Message-ID: <CACXZuxeQO4p+J5MyggZhWJF9FfwnXHdG_wxx34jF3NFXqgd4Yg@mail.gmail.com>
-References: <CACXZuxdH3tryp92DVHhd8zs9bUTbrAs92Pz+knnDqDzj4eXWYQ@mail.gmail.com>
- <20170307064436.qtcscbwbjsrjoyko@macpro.local> <CACXZuxcC-VPjB9CD0E9zUXp6XNS8v1DdvPUZ1vc88jqwYdFUhA@mail.gmail.com>
- <20170308065337.vwrebdlo4poc4da4@macpro.local> <CACXZuxcbDJAeRBN_wpTRPRk7efOM2vLytke=k_0f4=C0dOQtrA@mail.gmail.com>
+From: Tomas Winkler <tomasw@gmail.com>
+Subject: Re: Arrays of variable length
+Date: Thu, 9 Mar 2017 09:54:54 +0200
+Message-ID: <CA+i0qc6+m61dz-Bj95355ZmpPqKW8-RrWFRswTaajx5_fEOg0A@mail.gmail.com>
+References: <CA+i0qc5_NFqb=_6P46yrebrQYzSuCCKgq_xyeui_x6nTRGx62A@mail.gmail.com>
+ <yw1xlgsjdcjk.fsf@unicorn.mansr.com> <20170305211254.GA3220@khazad-dum.debian.net>
+ <yw1xh937ckl4.fsf@unicorn.mansr.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:36145 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754559AbdCIBuX (ORCPT
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:33655 "EHLO
+        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753747AbdCIIBJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Mar 2017 20:50:23 -0500
-Received: by mail-io0-f169.google.com with SMTP id l7so19481721ioe.3
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Mar 2017 17:50:17 -0800 (PST)
-In-Reply-To: <CACXZuxcbDJAeRBN_wpTRPRk7efOM2vLytke=k_0f4=C0dOQtrA@mail.gmail.com>
+        Thu, 9 Mar 2017 03:01:09 -0500
+In-Reply-To: <yw1xh937ckl4.fsf@unicorn.mansr.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: =?UTF-8?B?TcOlbnMgUnVsbGfDpXJk?= <mans@mansr.com>
+Cc: Henrique de Moraes Holschuh <hmh@hmh.eng.br>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, Al Viro <viro@zeniv.linux.org.uk>
 
-On 8 March 2017 at 23:38, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> On 8 March 2017 at 06:53, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> On Tue, Mar 07, 2017 at 07:31:34AM +0000, Dibyendu Majumdar wrote:
->>> >> Here 'values' has been defined above as external global, whereas it
->>> >> should be allocated on the stack.
+On Mon, Mar 6, 2017 at 2:31 AM, M=C3=A5ns Rullg=C3=A5rd <mans@mansr.com> wr=
+ote:
+> Henrique de Moraes Holschuh <hmh@hmh.eng.br> writes:
+>
+>> On Sun, 05 Mar 2017, M=C3=A5ns Rullg=C3=A5rd wrote:
+>>> Tomas Winkler <tomasw@gmail.com> writes:
+>>> > Sparse complains for arrays declared with variable length
 >>> >
->>> > Mmmh, I'll need to look a bit further at this one.
+>>> > 'warning: Variable length array is used'
 >>> >
+>>> > Prior to c99 this was not allowed but lgcc (c99) doesn't have problem
+>>> > with that  https://gcc.gnu.org/onlinedocs/gcc/Variable-Length.html.
+>>> > And also Linux kernel compilation with W=3D1 doesn't complain.
+>>> >
+>>> > Since sparse is used extensively would like to ask what is the correc=
+t
+>>> > usage of arrays of variable length
+>>> > within Linux Kernel.
 >>>
->>> It appears that sparse-llvm only creates a local stack object for each
->>> OP_PHI instruction. What should be the general approach for
->>> identifying local stack objects in sparse linearized output?
+>>> Variable-length arrays are a very bad idea.  Don't use them, ever.
+>>> If the size has a sane upper bound, just use that value statically.
+>>> Otherwise, you have a stack overflow waiting to happen and should be
+>>> using some kind of dynamic allocation instead.
+>>>
+>>> Furthermore, use of VLAs generally results in less efficient code.  For
+>>> instance, it forces gcc to waste a register for the frame pointer, and
+>>> it often prevents inlining.
 >>
->> I've looked a bit at this and there is several issues at hand.
->> It's also not something LLVM specific.
->> So I can't answer to this for now. Hopefully, I'll be able to tell
->> you more in a few days.
->>
+>> Well, if we're going to forbid VLAs in the kernel, IMHO the kernel build
+>> system should call gcc with -Werror=3Dvla to get that point across early=
+,
+>> and flush out any offenders.
 >
-> Thank you for looking into this. It would be good to know what issues
-> you have discovered. I was wondering if a simple solution is to check
-> whether the symbol is marked  as toplevel / extern - and if not then
-> define it as a local symbol in LLVM. However we would need to handle
-> scope - i.e. if the same symbol occurs multiple times in a function in
-> different scopes then these need to be defined accordingly. Example:
->
-> extern void init(int *v);
-> int main(const char *argv[]) {
->  int n = 0;
->  {
->   int x[5];
->   init(x);
->   n += x[0];
->  }
->  {
->   int x[6];
->   init(x);
->   n += x[0];
->  }
->  return n;
-> }
->
+> If it were up to me, that's exactly what I'd do.
 
-I think by combining the symbol's identifier and address a unique
-reference can be created - thus whenever we encounter a symbol that is
-not extern or toplevel we should create a local object using the
-symbol's name + address as the LLVM identifier.
+>
+Some parts of the kernel depends on VLA such as ___ON_STACK macros in
+include/crypto/hash.h
+It's actually pretty neat implementation, maybe it's too harsh to
+disable  VLA completely.
 
-Regards
-Dibyendu
+Tomas
