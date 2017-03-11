@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 17/27] llvm: add test cases for arrays passed as argument
-Date: Sat, 11 Mar 2017 10:06:56 +0100
-Message-ID: <20170311090706.17171-18-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 16/27] llvm: add test cases for pointers passed as argument
+Date: Sat, 11 Mar 2017 10:06:55 +0100
+Message-ID: <20170311090706.17171-17-luc.vanoostenryck@gmail.com>
 References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:32873 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755476AbdCKJHk (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35179 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755108AbdCKJHj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:40 -0500
-Received: by mail-wr0-f195.google.com with SMTP id g10so14110924wrg.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:39 -0800 (PST)
+        Sat, 11 Mar 2017 04:07:39 -0500
+Received: by mail-wm0-f66.google.com with SMTP id z63so2305159wmg.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:38 -0800 (PST)
 In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,61 +19,58 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/function-ptr.c | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+ validation/backend/pointer-param.c | 42 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 42 insertions(+)
+ create mode 100644 validation/backend/pointer-param.c
 
-diff --git a/validation/backend/function-ptr.c b/validation/backend/function-ptr.c
-index e035fe958..e44352312 100644
---- a/validation/backend/function-ptr.c
-+++ b/validation/backend/function-ptr.c
-@@ -34,11 +34,15 @@ void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long
- 	fip((void*)0);
- 	fip(ipval);
- 	fip(&ival);
-+	fip(array);
-+	fim(matrix);
- 
- 	fvp(p);
- 	fvp((void*)0);
- 	fvp(ipval);
- 	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
- 
- 	fvp(fun);
- 	fvp(&fun);
-@@ -78,11 +82,15 @@ void glb(int a, int *p)
- 	fip((void*)0);
- 	fip(ipval);
- 	fip(&ival);
-+	fip(array);
-+	fim(matrix);
- 
- 	fvp(p);
- 	fvp((void*)0);
- 	fvp(ipval);
- 	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
- 
- 	fvp(fun);
- 	fvp(&fun);
-@@ -127,11 +135,15 @@ void ops(int a, int *p, struct ops *ops)
- 	ops->fip((void*)0);
- 	ops->fip(ipval);
- 	ops->fip(&ival);
-+	ops->fip(array);
-+	ops->fim(matrix);
- 
- 	ops->fvp(p);
- 	ops->fvp((void*)0);
- 	ops->fvp(ipval);
- 	ops->fvp(&ival);
-+	ops->fvp(array);
-+	ops->fvp(matrix);
- 
- 	ops->fvp(fun);
- 	ops->fvp(&fun);
+diff --git a/validation/backend/pointer-param.c b/validation/backend/pointer-param.c
+new file mode 100644
+index 000000000..b705e6f4d
+--- /dev/null
++++ b/validation/backend/pointer-param.c
+@@ -0,0 +1,42 @@
++extern int gfun(int);
++static int sfun(int a) { return a; }
++
++void usei(int *);
++void usef(int (*)(int));
++void usev(void *);
++
++void foo(int *p, int a[5], int (*pfun)(int));
++void foo(int *p, int a[5], int (*pfun)(int))
++{
++	extern int valg[5], valh[5], vali[5];
++	static int vals[5], valt[5], valr[5];
++	       int vala[5], valb[5], valc[5];
++
++	usei(p);
++	usei(valg);
++	usei(&valh[0]);
++	usei(&vali[1]);
++	usei(vals);
++	usei(&valt[0]);
++	usei(&valr[1]);
++	usei(vala);
++	usei(&valb[0]);
++	usei(&valc[1]);
++
++	usef(pfun);
++	usef(gfun);
++	usef(&gfun);
++	usef(sfun);
++	usef(&sfun);
++
++	usev(pfun);
++	usev(gfun);
++	usev(&gfun);
++	usev(sfun);
++	usev(&sfun);
++}
++
++/*
++ * check-name: pointer-param
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
 -- 
 2.11.1
 
