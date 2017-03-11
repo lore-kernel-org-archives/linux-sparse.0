@@ -1,58 +1,37 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH v2 00/27] LLVM fixes
-Date: Sat, 11 Mar 2017 11:12:20 +0000
-Message-ID: <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com>
+Date: Sat, 11 Mar 2017 12:49:03 +0100
+Message-ID: <20170311114903.zrhufw6ydneky3ya@macbook.local>
 References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+ <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:33189 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755038AbdCKLMW (ORCPT
+Received: from mail-wr0-f179.google.com ([209.85.128.179]:36546 "EHLO
+        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755108AbdCKLtI (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 06:12:22 -0500
-Received: by mail-io0-f173.google.com with SMTP id f84so60981513ioj.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 03:12:21 -0800 (PST)
-In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+        Sat, 11 Mar 2017 06:49:08 -0500
+Received: by mail-wr0-f179.google.com with SMTP id u108so78599567wrb.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 03:49:07 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
-Hi Luc,
+On Sat, Mar 11, 2017 at 11:12:20AM +0000, Dibyendu Majumdar wrote:
+> We still cannot invoke
+> functions via pointers to functions using the (*ident)(arg) syntax due
+> to the incorrect load operation output by the linearizer.
 
-On 11 March 2017 at 09:06, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> This series solves a number of issues in sparse-llvm,
-> mainly about wrong or missing type information as needed
-> to build LLVM IR.
-> These issues have been reported and investigated by
-> Dibyendu Majumdar.
->
-> * patches 1-4 adds missing type info in sparse's IR
-> * patch   4 is not needed by this serie but logically belong
->           to the same group as patches 1-3. It can be dropped.
-> * patches 5-7 are fixes
-> * patch   8 makes debugging easier
-> * patches 8-10 are preparatory steps for patch 11
-> * patches 11 & 12 are fixes
-> * patch   13 is a preparatory step for patch 14
-> * patch   14 solves a lot of issues
-> * patches 15-18 are test cases solved by patch 14
-> * patch   19 & 20 are fixes
-> * patches 21, 23-27 are cleanups
-> * patch   22 makes debugging easier
->
->
+Yes, I'm working on it.
 
-Thank you very much for this series of patches. I have merged them
-into my project and things are better. We still cannot invoke
-functions via pointers to functions using the (*ident)(arg) syntax due
-to the incorrect load operation output by the linearizer.
+> I have been trying to compile a smallish program (AVL Tree
+> implementation) - making progress but it still fails to compile, so I
+> will report the next issue!
 
-I have been trying to compile a smallish program (AVL Tree
-implementation) - making progress but it still fails to compile, so I
-will report the next issue!
+Good. 
 
-Thanks and Regards
-Dibyendu
+-- Luc Van Oostenryck
