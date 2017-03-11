@@ -1,89 +1,109 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 06/27] llvm: fix output_op_store() which modify its operand
-Date: Sat, 11 Mar 2017 10:06:45 +0100
-Message-ID: <20170311090706.17171-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 07/27] llvm: fix output_op_[ptr]cast()
+Date: Sat, 11 Mar 2017 10:06:46 +0100
+Message-ID: <20170311090706.17171-8-luc.vanoostenryck@gmail.com>
 References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35116 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752678AbdCKJH2 (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36001 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755108AbdCKJH3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:28 -0500
-Received: by mail-wm0-f65.google.com with SMTP id z63so2304612wmg.2
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:27 -0800 (PST)
+        Sat, 11 Mar 2017 04:07:29 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v190so2299208wme.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:28 -0800 (PST)
 In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In sparse-llvm the field 'priv' of a pseudo is used to store
-the corresponding LLVMValueRef. This field is normaly assigned
-when processing the instruction that produces the speudo.
+OP_PTRCASTs can't always be directly translated into LLVM bitcasts and
+OP_[S]CASTs can't always be translated into LLVM's trunc/sext/zext
+because integer to pointer and pointer to integer must be handled too.
 
-In output_op_store(), the field insn->target->priv is overwritten
-by the LLVMValueRef returned by LLVMBuildStore().
-It's unclear what this return value is:
-- this corrupts the pseudo, making it unusable in subsequent
-  instructions.
-- there is no reason to change this field anyway.
-
-Fix this by removing the assignment to insn->target->priv
-in output_op_store().
+Fix this in output_op_ptrcast() & output_op_cast() by issuing
+LLVMBuildIntToPtr/PtrToInt when appropriate.
 
 Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c                 |  6 ++----
- validation/backend/store-x2.c | 16 ++++++++++++++++
- 2 files changed, 18 insertions(+), 4 deletions(-)
- create mode 100644 validation/backend/store-x2.c
+ sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 35 insertions(+), 5 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index d48b3b20a..665b6c7dc 100644
+index 665b6c7dc..c593f831f 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -646,16 +646,14 @@ static void output_op_load(struct function *fn, struct instruction *insn)
- 
- static void output_op_store(struct function *fn, struct instruction *insn)
+@@ -787,6 +787,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
+ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
  {
--	LLVMValueRef addr, target, target_in;
-+	LLVMValueRef addr, target_in;
+ 	LLVMValueRef src, target;
++	LLVMTypeRef dtype;
++	LLVMOpcode op;
+ 	char target_name[64];
  
- 	addr = calc_memop_addr(fn, insn);
+ 	src = insn->src->priv;
+@@ -797,15 +799,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
  
- 	target_in = pseudo_to_value(fn, insn, insn->target);
+ 	assert(!symbol_is_fp_type(insn->type));
  
- 	/* perform store */
--	target = LLVMBuildStore(fn->builder, target_in, addr);
--
--	insn->target->priv = target;
-+	LLVMBuildStore(fn->builder, target_in, addr);
+-	target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
++	dtype = insn_symbol_type(fn->module, insn);
++	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
++	case LLVMPointerTypeKind:
++		op = LLVMBitCast;
++		break;
++	case LLVMIntegerTypeKind:
++		op = LLVMIntToPtr;
++		break;
++	default:
++		assert(0);
++	}
+ 
++	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
+ 	insn->target->priv = target;
  }
  
- static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
-diff --git a/validation/backend/store-x2.c b/validation/backend/store-x2.c
-new file mode 100644
-index 000000000..5ccc9b43a
---- /dev/null
-+++ b/validation/backend/store-x2.c
-@@ -0,0 +1,16 @@
-+void foo(int *p, int a, int b);
-+void foo(int *p, int a, int b)
-+{
-+	int c = a + b;
+ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
+ {
+ 	LLVMValueRef src, target;
++	LLVMTypeRef dtype;
+ 	char target_name[64];
++	unsigned int width;
 +
-+	p[0] = c;
-+	p[1] = c;
-+}
-+
-+/*
-+ * check-name: store-x2
-+ * check-command: sparsec -c $file -o tmp.o
-+ * check-description: Verify in output_op_store() that
-+ *	the first store doesn't mess anymore with the
-+ *	'target' and thus making the second store unusable.
-+ */
++	if (is_ptr_type(insn->type))
++		return output_op_ptrcast(fn, insn);
+ 
+ 	src = insn->src->priv;
+ 	if (!src)
+@@ -815,11 +833,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+ 
+ 	assert(!symbol_is_fp_type(insn->type));
+ 
+-	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
+-		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
+-	else
+-		target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
++	dtype = insn_symbol_type(fn->module, insn);
++	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
++	case LLVMPointerTypeKind:
++		op = LLVMPtrToInt;
++		break;
++	case LLVMIntegerTypeKind:
++		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
++		if (insn->size < width)
++			op = LLVMTrunc;
++		else if (insn->size == width)
++			op = LLVMBitCast;
++		break;
++	default:
++		assert(0);
++	}
+ 
++	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
+ 	insn->target->priv = target;
+ }
+ 
 -- 
 2.11.1
 
