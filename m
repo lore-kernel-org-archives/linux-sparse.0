@@ -1,103 +1,109 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 15/27] llvm: add test cases for symbol's address
-Date: Sat, 11 Mar 2017 10:06:54 +0100
-Message-ID: <20170311090706.17171-16-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 14/27] keep OP_SYMADDR instructions
+Date: Sat, 11 Mar 2017 10:06:53 +0100
+Message-ID: <20170311090706.17171-15-luc.vanoostenryck@gmail.com>
 References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33121 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755424AbdCKJHi (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36037 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755383AbdCKJHh (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:38 -0500
-Received: by mail-wm0-f67.google.com with SMTP id n11so2315158wma.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:37 -0800 (PST)
+        Sat, 11 Mar 2017 04:07:37 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v190so2299531wme.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:35 -0800 (PST)
 In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+OP_SYMADDR instructions are systematically eliminated during
+simplification phase, their target address being simply replaced
+by the symbol itself.
+
+While it's not wrong per se (as it all depends to the semantic
+we want to give to pseudos and the instructions and how high-
+or low-level we want the IR to be), it's not clear if this
+simplification was really intentional and don't seems to have
+any advantages.
+
+OP_SYMADDRs allow to make a clear separation between a symbol
+(a name with a type and info for storage & linkage) and its address
+(which can be stored in memory or in a register and on which
+arithmetic operations can then be done on it). Once these addresses
+are replaced by the symbol itself, those symbols can appears almost
+everywhere in the linearized code:
+- in calls' arguments,
+- in adds and subs (while doing pointer arithmetic),
+- in casts,
+- in load & stores,
+- ...
+and they complicate things considerably once you begin to be
+interested concretly in things after linearization & simplification
+since soon or later you will need the address anyway.
+
+Change this by removing the 'simplification' of OP_SYMADDR.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/symaddr.c | 70 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 70 insertions(+)
- create mode 100644 validation/backend/symaddr.c
+ simplify.c           |  2 +-
+ validation/symaddr.c | 35 +++++++++++++++++++++++++++++++++++
+ 2 files changed, 36 insertions(+), 1 deletion(-)
+ create mode 100644 validation/symaddr.c
 
-diff --git a/validation/backend/symaddr.c b/validation/backend/symaddr.c
+diff --git a/simplify.c b/simplify.c
+index 5d00937f1..a84e4787f 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -1159,7 +1159,7 @@ int simplify_instruction(struct instruction *insn)
+ 	case OP_SYMADDR:
+ 		if (dead_insn(insn, NULL, NULL, NULL))
+ 			return REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
+-		return replace_with_pseudo(insn, insn->symbol);
++		return 0;
+ 	case OP_CAST:
+ 	case OP_SCAST:
+ 	case OP_FPCAST:
+diff --git a/validation/symaddr.c b/validation/symaddr.c
 new file mode 100644
-index 000000000..71fb9deff
+index 000000000..4fe776c21
 --- /dev/null
-+++ b/validation/backend/symaddr.c
-@@ -0,0 +1,70 @@
-+extern void useip(int *);
-+extern void useia(int (*)[3]);
-+extern void usevp(void *);
-+static int  sfun(void) { return 0; }
-+static int  spun(void) { return 0; }
++++ b/validation/symaddr.c
+@@ -0,0 +1,35 @@
++int g;
++int a[3];
++int b[3];
 +
-+void lfoo(int *p, int a)
-+{
-+	int larra[3], larrb[3], larrc[3], larrd[3], larre[3], larrf[3];
-+	useip(p);
-+	useip(larra);
-+	useip(larrb + 1);
-+	useip(larrc + a);
-+	useip(&larrd[1]);
-+	useip(&larre[a]);
-+	useia(&larrf);
-+}
++void usep(int*);
 +
-+static int sarra[3], sarrb[3], sarrc[3], sarrd[3], sarre[3], sarrf[3];
-+static int s, sfun(void), spun(void);
-+void sfoo(int *p, int a)
++int foo(void)
 +{
-+	useip(p);
-+	useip(&s);
-+	useip(sarra);
-+	useip(sarrb + 1);
-+	useip(sarrc + a);
-+	useip(&sarrd[1]);
-+	useip(&sarre[a]);
-+	useia(&sarrf);
-+	usevp(sfun);
-+	usevp(&spun);
-+}
-+
-+extern int xarra[3], xarrb[3], xarrc[3], xarrd[3], xarre[3], xarrf[3];
-+extern int x, xfun(void), xpun(void);
-+void xfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&x);
-+	useip(xarra);
-+	useip(xarrb + 1);
-+	useip(xarrc + a);
-+	useip(&xarrd[1]);
-+	useip(&xarre[a]);
-+	useia(&xarrf);
-+	usevp(xfun);
-+	usevp(&xpun);
-+}
-+
-+int garra[3], garrb[3], garrc[3], garrd[3], garre[3], garrf[3];
-+int g, gfun(void), gpun(void);
-+void gfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&g);
-+	useip(garra);
-+	useip(garrb + 1);
-+	useip(garrc + a);
-+	useip(&garrd[1]);
-+	useip(&garre[a]);
-+	useia(&garrf);
-+	usevp(gfun);
-+	usevp(&gpun);
++	int r = 0;
++	usep(&g);
++	usep(a);
++	usep(b + 1);
++	return r;
 +}
 +
 +/*
-+ * check-name: symbol address
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ * check-name: symaddr
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++foo:
++.L0:
++	<entry-point>
++	symaddr.64  %r1 <- g
++	call        usep, %r1
++	symaddr.64  %r2 <- a
++	call        usep, %r2
++	symaddr.64  %r3 <- b
++	add.64      %r4 <- %r3, $4
++	call        usep, %r4
++	ret.32      $0
++
++
++ * check-output-end
 + */
 -- 
 2.11.1
