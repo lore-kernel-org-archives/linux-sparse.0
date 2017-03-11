@@ -1,144 +1,114 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 01/27] give a type to OP_PHISOURCE
-Date: Sat, 11 Mar 2017 10:06:40 +0100
-Message-ID: <20170311090706.17171-2-luc.vanoostenryck@gmail.com>
-References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 00/27] LLVM fixes
+Date: Sat, 11 Mar 2017 10:06:39 +0100
+Message-ID: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33042 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33008 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751024AbdCKJHW (ORCPT
+        with ESMTP id S1751024AbdCKJHQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:22 -0500
-Received: by mail-wm0-f65.google.com with SMTP id n11so2314476wma.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:21 -0800 (PST)
-In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+        Sat, 11 Mar 2017 04:07:16 -0500
+Received: by mail-wm0-f65.google.com with SMTP id n11so2314165wma.0
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:15 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
+This series solves a number of issues in sparse-llvm,
+mainly about wrong or missing type information as needed
+to build LLVM IR.
+These issues have been reported and investigated by
+Dibyendu Majumdar.
 
-There is no good reasons for that and it complicates
-further correct processing or makes it impossible.
+* patches 1-4 adds missing type info in sparse's IR
+* patch   4 is not needed by this serie but logically belong
+	  to the same group as patches 1-3. It can be dropped.
+* patches 5-7 are fixes
+* patch	  8 makes debugging easier
+* patches 8-10 are preparatory steps for patch 11
+* patches 11 & 12 are fixes
+* patch   13 is a preparatory step for patch 14
+* patch   14 solves a lot of issues
+* patches 15-18 are test cases solved by patch 14
+* patch   19 & 20 are fixes
+* patches 21, 23-27 are cleanups
+* patch   22 makes debugging easier
+	  
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
+These patches already allow to compile a lot more code to LLVM
+but there is still known issues with sparse-llvm:
+- it won't work on bitfields
+- it won't work on computed gotos
+- it won't work on label-as-value
+- it won't work on exotic instructions (OP_SPLICE)
+- few things are working correctly with floats
+  (but this is not specific to sparse-llvm).
+There is most probably a bunch of others issues too.
 
-diff --git a/flow.c b/flow.c
-index a5332203f..8111e1ae6 100644
---- a/flow.c
-+++ b/flow.c
-@@ -370,7 +370,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
-diff --git a/linearize.c b/linearize.c
-index 5199b6b02..3a9c8f2e2 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -815,9 +815,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
- }
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
- {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
- 
-@@ -1350,19 +1350,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
- 
- 	if (!expr_false || !ep->active)
- 		return VOID;
- 
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1376,7 +1375,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
- 
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1388,12 +1386,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1875,7 +1873,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
- 	}
-diff --git a/linearize.h b/linearize.h
-index bac82d7ff..c03940eea 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -331,7 +331,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
- 
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
- 
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+For convenience, this serie is also available at:
+  https://github.com/lucvoo/sparse/tree/llvm-fixes-v2
+
+
+Luc Van Oostenryck (27):
+  give a type to OP_PHISOURCE
+  give a type to OP_SEL, always
+  give a type to OP_SYMADDR
+  give a type to PSEUDO_ARGs
+  llvm: fix translation of PSEUDO_VALs into a ValueRefs
+  llvm: fix output_op_store() which modify its operand
+  llvm: fix output_op_[ptr]cast()
+  llvm: give a name to call return values
+  llvm: add test cases for the type of constants
+  add ptr_list_nth_entry()
+  llvm: fix type of literal integer passed as arguments
+  llvm: fix output OP_ADD mixed with pointers
+  llvm: add support for OP_SYMADDR
+  keep OP_SYMADDR instructions
+  llvm: add test cases for symbol's address
+  llvm: add test cases for pointers passed as argument
+  llvm: add test cases for arrays passed as argument
+  llvm: add test cases for degenerated pointers
+  llvm: add support for OP_NEG
+  llvm: fix pointer/float mixup in comparisons
+  llvm: use pseudo_list_size() instead of open coding it
+  llvm: give arguments a name
+  llvm: remove unneeded arg 'module'
+  llvm: remove unneeded arg 'fn'
+  llvm: remove unneeded 'generation'
+  llvm: remove unneeded function::type
+  llvm: reduce scope of 'bb_nr'
+
+ flow.c                              |   2 +-
+ linearize.c                         |  31 +++--
+ linearize.h                         |   8 +-
+ memops.c                            |   2 +-
+ ptrlist.c                           |  18 +++
+ ptrlist.h                           |   1 +
+ simplify.c                          |   2 +-
+ sparse-llvm.c                       | 254 ++++++++++++++++++++++++++----------
+ symbol.h                            |   5 +
+ validation/backend/degenerate-ptr.c |  72 ++++++++++
+ validation/backend/function-ptr.c   | 149 +++++++++++++++++++++
+ validation/backend/null.c           |  24 ++++
+ validation/backend/pointer-add.c    |  54 ++++++++
+ validation/backend/pointer-cmp.c    |   9 ++
+ validation/backend/pointer-param.c  |  42 ++++++
+ validation/backend/store-x2.c       |  16 +++
+ validation/backend/symaddr.c        |  70 ++++++++++
+ validation/backend/type-constant.c  |  23 ++++
+ validation/symaddr.c                |  35 +++++
+ 19 files changed, 724 insertions(+), 93 deletions(-)
+ create mode 100644 validation/backend/degenerate-ptr.c
+ create mode 100644 validation/backend/null.c
+ create mode 100644 validation/backend/pointer-add.c
+ create mode 100644 validation/backend/pointer-cmp.c
+ create mode 100644 validation/backend/pointer-param.c
+ create mode 100644 validation/backend/store-x2.c
+ create mode 100644 validation/backend/symaddr.c
+ create mode 100644 validation/backend/type-constant.c
+ create mode 100644 validation/symaddr.c
+
 -- 
 2.11.1
 
