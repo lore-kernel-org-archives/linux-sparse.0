@@ -1,52 +1,87 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH v2 00/27] LLVM fixes
-Date: Sat, 11 Mar 2017 21:21:34 +0000
-Message-ID: <CACXZuxcViP8VddEdJ0dAUAuA4cmkL1g-gkRKfmi+gUcBrpCj7Q@mail.gmail.com>
-References: <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com>
- <20170311114903.zrhufw6ydneky3ya@macbook.local> <CACXZuxcL4NHa2Ahdtu91rANDFTUw8hY9BizN-9pLgpyQ2wPf-w@mail.gmail.com>
- <20170311123039.tcpo2dcajfmxwmsm@macbook.local> <CACXZuxc4F-PgDQO0p-nYB0D6NkrJf7cS0qWB=SkO5tQJzGFpxQ@mail.gmail.com>
- <20170311141201.kptzqgn4qpu3gaic@macbook.local> <CACXZuxfojJBjZBibhBOUT9z0K8JLWRKmxwHCMqEYShd7vR5zhQ@mail.gmail.com>
- <CAFtxgO5T6Lrb3OYX+OgG4chZrFWG7Jk1Gp2HWtLu5yPU_+QKuw@mail.gmail.com>
- <20170311155135.kjxkiymcn7jo2ez2@macbook.local> <CACXZuxdZMf=j+kn7CRoasb+Gf+BWQER71uVFAkRRr8dwrmEP=A@mail.gmail.com>
- <20170311204432.ahvs2w7ewd6jcoh4@macbook.local>
+Subject: sparse-llvm issue with counter in a loop
+Date: Sat, 11 Mar 2017 22:04:59 +0000
+Message-ID: <CACXZuxdJXMo6peguA=5CF_3n+6i7gHJ9KLGU4fUuew=8e=ShWw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f53.google.com ([209.85.214.53]:36895 "EHLO
-        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754480AbdCKVVg (ORCPT
+Received: from mail-io0-f169.google.com ([209.85.223.169]:32936 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932275AbdCKWFB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 16:21:36 -0500
-Received: by mail-it0-f53.google.com with SMTP id g138so13908921itb.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 13:21:35 -0800 (PST)
-In-Reply-To: <20170311204432.ahvs2w7ewd6jcoh4@macbook.local>
+        Sat, 11 Mar 2017 17:05:01 -0500
+Received: by mail-io0-f169.google.com with SMTP id f84so65367692ioj.0
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 14:05:00 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Jeff Garzik <jeff@garzik.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 11 March 2017 at 20:44, Luc Van Oostenryck > But there is still
-some bad issues that remains,
-> for example pointer subtraction with NULL and some
-> optimization that destroy correct typing info.
-> They're bad enough to make me doubt of the value of this change.
->
-> Here are some failing cases:
->         #define NULL ((void *)0)
->         int  tst(int  *ip) { return !ip; }
->         int  foo(int  *ip) { return ip != NULL; }
->         long bar(void *vp) { return vp - NULL; }
->         long baz(int  *ip) { return ip - ((int *)0); }
->
+Hi
 
-I only get a failure on the last one. But I am synced with master - so
-it may be an issue with sparse-next branch?
+I am not sure what is happening here. The test program is:
 
-For the last one, looks like linearized output is incorrect?
+extern int printf(const char *fmt, ...);
+int main(void) {
+    int Count;
+    for (Count = 0; Count < 4; Count++)
+    {
+        printf("%d\n", Count);
+        switch (Count)
+        {
+        case 1:
+            printf("%d\n", 1);
+            break;
+        case 2:
+            printf("%d\n", 2);
+            break;
+        default:
+            printf("%d\n", 0);
+            break;
+        }
+    }
+    return 0;
+}
 
-baz:
-.L6:
+The linearized output I get:
+
+main:
+.L0:
         <entry-point>
-        divs.64     %r13 <- %arg1, $4
-        scast.32    %r14 <- (64) %r13
-        ret.32      %r14
+        phisrc.32   %phi4(Count) <- $0
+        br          .L4
+.L4:
+        phi.32      %r1(Count) <- %phi4(Count), %phi5(Count)
+        setlt.32    %r2 <- %r1(Count), $4
+        br          %r2, .L1, .L9
+.L1:
+        symaddr.64  %r3 <- <anon symbol:000001A5682A1E38>
+        call.32     %r5 <- printf, %r3, %r1(Count)
+        switch      %r1(Count), 1 -> .L6, 2 -> .L7, default -> .L8
+.L6:
+        symaddr.64  %r7 <- <anon symbol:000001A5682A21B8>
+        call.32     %r8 <- printf, %r7, $1
+        br          .L2
+.L7:
+        symaddr.64  %r9 <- <anon symbol:000001A5682A2538>
+        call.32     %r10 <- printf, %r9, $2
+        br          .L2
+.L8:
+        symaddr.64  %r11 <- <anon symbol:000001A5682A28B8>
+        call.32     %r12 <- printf, %r11, $0
+        br          .L2
+.L2:
+        add.32      %r14 <- %r1(Count), $1
+        phisrc.32   %phi5(Count) <- %r14
+        br          .L4
+.L9:
+        ret.32      $0
+
+
+In sparse-llvm the instruction:
+add.32      %r14 <- %r1(Count), $1
+
+fails because the type of %r1(Count) is void. I am not sure why the
+type is void here.
+
+Thanks and Regards
+Dibyendu
