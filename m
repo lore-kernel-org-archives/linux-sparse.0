@@ -1,114 +1,91 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 00/27] LLVM fixes
-Date: Sat, 11 Mar 2017 10:06:39 +0100
-Message-ID: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 04/27] give a type to PSEUDO_ARGs
+Date: Sat, 11 Mar 2017 10:06:43 +0100
+Message-ID: <20170311090706.17171-5-luc.vanoostenryck@gmail.com>
+References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33008 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751024AbdCKJHQ (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34948 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753724AbdCKJH0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:16 -0500
-Received: by mail-wm0-f65.google.com with SMTP id n11so2314165wma.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:15 -0800 (PST)
+        Sat, 11 Mar 2017 04:07:26 -0500
+Received: by mail-wr0-f193.google.com with SMTP id u108so14120104wrb.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:24 -0800 (PST)
+In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series solves a number of issues in sparse-llvm,
-mainly about wrong or missing type information as needed
-to build LLVM IR.
-These issues have been reported and investigated by
-Dibyendu Majumdar.
+Currently, PSEUDO_ARGs are created as if being produce/defined
+by the OP_ENTRY instruction.
 
-* patches 1-4 adds missing type info in sparse's IR
-* patch   4 is not needed by this serie but logically belong
-	  to the same group as patches 1-3. It can be dropped.
-* patches 5-7 are fixes
-* patch	  8 makes debugging easier
-* patches 8-10 are preparatory steps for patch 11
-* patches 11 & 12 are fixes
-* patch   13 is a preparatory step for patch 14
-* patch   14 solves a lot of issues
-* patches 15-18 are test cases solved by patch 14
-* patch   19 & 20 are fixes
-* patches 21, 23-27 are cleanups
-* patch   22 makes debugging easier
-	  
+While there is certainly some logics behind it, it's also not
+much useful. Worse, the others pseudo which define the 'def'
+member (PSEUDO_REG) often use it to get the type corresponding
+to the pseudo with 'pseudo->def->type'. Of course, the OP_ENTRY
+can't be used so.
 
-These patches already allow to compile a lot more code to LLVM
-but there is still known issues with sparse-llvm:
-- it won't work on bitfields
-- it won't work on computed gotos
-- it won't work on label-as-value
-- it won't work on exotic instructions (OP_SPLICE)
-- few things are working correctly with floats
-  (but this is not specific to sparse-llvm).
-There is most probably a bunch of others issues too.
+Furthermore, when the type (or the size) of an argument we need
+to retrieve this information from the function prototype while
+this info could already be given to the pseudo at its creation.
 
-For convenience, this serie is also available at:
-  https://github.com/lucvoo/sparse/tree/llvm-fixes-v2
+Fix this by using the 'sym' field of PSEUDO_ARG to store the
+argument's type (and now the 'def' field become meaningless).
 
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ linearize.c | 6 +++---
+ linearize.h | 6 +++---
+ 2 files changed, 6 insertions(+), 6 deletions(-)
 
-Luc Van Oostenryck (27):
-  give a type to OP_PHISOURCE
-  give a type to OP_SEL, always
-  give a type to OP_SYMADDR
-  give a type to PSEUDO_ARGs
-  llvm: fix translation of PSEUDO_VALs into a ValueRefs
-  llvm: fix output_op_store() which modify its operand
-  llvm: fix output_op_[ptr]cast()
-  llvm: give a name to call return values
-  llvm: add test cases for the type of constants
-  add ptr_list_nth_entry()
-  llvm: fix type of literal integer passed as arguments
-  llvm: fix output OP_ADD mixed with pointers
-  llvm: add support for OP_SYMADDR
-  keep OP_SYMADDR instructions
-  llvm: add test cases for symbol's address
-  llvm: add test cases for pointers passed as argument
-  llvm: add test cases for arrays passed as argument
-  llvm: add test cases for degenerated pointers
-  llvm: add support for OP_NEG
-  llvm: fix pointer/float mixup in comparisons
-  llvm: use pseudo_list_size() instead of open coding it
-  llvm: give arguments a name
-  llvm: remove unneeded arg 'module'
-  llvm: remove unneeded arg 'fn'
-  llvm: remove unneeded 'generation'
-  llvm: remove unneeded function::type
-  llvm: reduce scope of 'bb_nr'
-
- flow.c                              |   2 +-
- linearize.c                         |  31 +++--
- linearize.h                         |   8 +-
- memops.c                            |   2 +-
- ptrlist.c                           |  18 +++
- ptrlist.h                           |   1 +
- simplify.c                          |   2 +-
- sparse-llvm.c                       | 254 ++++++++++++++++++++++++++----------
- symbol.h                            |   5 +
- validation/backend/degenerate-ptr.c |  72 ++++++++++
- validation/backend/function-ptr.c   | 149 +++++++++++++++++++++
- validation/backend/null.c           |  24 ++++
- validation/backend/pointer-add.c    |  54 ++++++++
- validation/backend/pointer-cmp.c    |   9 ++
- validation/backend/pointer-param.c  |  42 ++++++
- validation/backend/store-x2.c       |  16 +++
- validation/backend/symaddr.c        |  70 ++++++++++
- validation/backend/type-constant.c  |  23 ++++
- validation/symaddr.c                |  35 +++++
- 19 files changed, 724 insertions(+), 93 deletions(-)
- create mode 100644 validation/backend/degenerate-ptr.c
- create mode 100644 validation/backend/null.c
- create mode 100644 validation/backend/pointer-add.c
- create mode 100644 validation/backend/pointer-cmp.c
- create mode 100644 validation/backend/pointer-param.c
- create mode 100644 validation/backend/store-x2.c
- create mode 100644 validation/backend/symaddr.c
- create mode 100644 validation/backend/type-constant.c
- create mode 100644 validation/symaddr.c
-
+diff --git a/linearize.c b/linearize.c
+index ea4616f80..255231c60 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -801,14 +801,14 @@ pseudo_t value_pseudo(long long val)
+ 	return pseudo;
+ }
+ 
+-static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
++static pseudo_t argument_pseudo(struct entrypoint *ep, int nr, struct symbol *arg)
+ {
+ 	pseudo_t pseudo = __alloc_pseudo(0);
+ 	struct instruction *entry = ep->entry;
+ 
+ 	pseudo->type = PSEUDO_ARG;
+ 	pseudo->nr = nr;
+-	pseudo->def = entry;
++	pseudo->sym = arg;
+ 	add_pseudo(&entry->arg_list, pseudo);
+ 
+ 	/* Argument pseudos have neither usage nor def */
+@@ -1540,7 +1540,7 @@ static void linearize_argument(struct entrypoint *ep, struct symbol *arg, int nr
+ 	ad.source_type = arg;
+ 	ad.result_type = arg;
+ 	ad.address = symbol_pseudo(ep, arg);
+-	linearize_store_gen(ep, argument_pseudo(ep, nr), &ad);
++	linearize_store_gen(ep, argument_pseudo(ep, nr, arg), &ad);
+ 	finish_address_gen(ep, &ad);
+ }
+ 
+diff --git a/linearize.h b/linearize.h
+index c03940eea..9d192f7aa 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -34,9 +34,9 @@ struct pseudo {
+ 	struct pseudo_user_list *users;
+ 	struct ident *ident;
+ 	union {
+-		struct symbol *sym;
+-		struct instruction *def;
+-		long long value;
++		struct symbol *sym;	// PSEUDO_SYM & ARG
++		struct instruction *def;// PSEUDO_REG & PHI
++		long long value;	// PSEUDO_VAL
+ 	};
+ 	void *priv;
+ };
 -- 
 2.11.1
 
