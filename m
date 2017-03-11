@@ -1,99 +1,46 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm issue with counter in a loop
-Date: Sat, 11 Mar 2017 22:38:07 +0000
-Message-ID: <CACXZuxdHKLiq-Bp8PWyMeCqphFRUbV6x6hKV80xQ2vkNW-DPqg@mail.gmail.com>
-References: <CACXZuxdJXMo6peguA=5CF_3n+6i7gHJ9KLGU4fUuew=8e=ShWw@mail.gmail.com>
+Subject: Re: [PATCH v2 00/27] LLVM fixes
+Date: Sat, 11 Mar 2017 22:57:27 +0000
+Message-ID: <CACXZuxfwk4OVaOBRZh8P=LL8aOf5Uic9B5p+ZYQgm5p5W3SviA@mail.gmail.com>
+References: <CACXZuxcL4NHa2Ahdtu91rANDFTUw8hY9BizN-9pLgpyQ2wPf-w@mail.gmail.com>
+ <20170311123039.tcpo2dcajfmxwmsm@macbook.local> <CACXZuxc4F-PgDQO0p-nYB0D6NkrJf7cS0qWB=SkO5tQJzGFpxQ@mail.gmail.com>
+ <20170311141201.kptzqgn4qpu3gaic@macbook.local> <CACXZuxfojJBjZBibhBOUT9z0K8JLWRKmxwHCMqEYShd7vR5zhQ@mail.gmail.com>
+ <CAFtxgO5T6Lrb3OYX+OgG4chZrFWG7Jk1Gp2HWtLu5yPU_+QKuw@mail.gmail.com>
+ <20170311155135.kjxkiymcn7jo2ez2@macbook.local> <CACXZuxdZMf=j+kn7CRoasb+Gf+BWQER71uVFAkRRr8dwrmEP=A@mail.gmail.com>
+ <20170311204432.ahvs2w7ewd6jcoh4@macbook.local> <CACXZuxcViP8VddEdJ0dAUAuA4cmkL1g-gkRKfmi+gUcBrpCj7Q@mail.gmail.com>
+ <20170311223056.dgmyobmxvgpfn3fj@macbook.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:33359 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754980AbdCKWiJ (ORCPT
+Received: from mail-io0-f182.google.com ([209.85.223.182]:32781 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933216AbdCKW53 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 17:38:09 -0500
-Received: by mail-io0-f171.google.com with SMTP id f84so65548516ioj.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 14:38:08 -0800 (PST)
-In-Reply-To: <CACXZuxdJXMo6peguA=5CF_3n+6i7gHJ9KLGU4fUuew=8e=ShWw@mail.gmail.com>
+        Sat, 11 Mar 2017 17:57:29 -0500
+Received: by mail-io0-f182.google.com with SMTP id f84so65647346ioj.0
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 14:57:28 -0800 (PST)
+In-Reply-To: <20170311223056.dgmyobmxvgpfn3fj@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Jeff Garzik <jeff@garzik.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@kernel.org>
 
-On 11 March 2017 at 22:04, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> I am not sure what is happening here. The test program is:
+On 11 March 2017 at 22:30, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>> >         long baz(int  *ip) { return ip - ((int *)0); }
+>> >
+>>
+> baz:
+>> .L6:
+>>         <entry-point>
+>>         divs.64     %r13 <- %arg1, $4
+>>         scast.32    %r14 <- (64) %r13
+>>         ret.32      %r14
 >
-> extern int printf(const char *fmt, ...);
-> int main(void) {
->     int Count;
->     for (Count = 0; Count < 4; Count++)
->     {
->         printf("%d\n", Count);
->         switch (Count)
->         {
->         case 1:
->             printf("%d\n", 1);
->             break;
->         case 2:
->             printf("%d\n", 2);
->             break;
->         default:
->             printf("%d\n", 0);
->             break;
->         }
->     }
->     return 0;
-> }
->
-> The linearized output I get:
->
-> main:
-> .L0:
->         <entry-point>
->         phisrc.32   %phi4(Count) <- $0
->         br          .L4
-> .L4:
->         phi.32      %r1(Count) <- %phi4(Count), %phi5(Count)
->         setlt.32    %r2 <- %r1(Count), $4
->         br          %r2, .L1, .L9
-> .L1:
->         symaddr.64  %r3 <- <anon symbol:000001A5682A1E38>
->         call.32     %r5 <- printf, %r3, %r1(Count)
->         switch      %r1(Count), 1 -> .L6, 2 -> .L7, default -> .L8
-> .L6:
->         symaddr.64  %r7 <- <anon symbol:000001A5682A21B8>
->         call.32     %r8 <- printf, %r7, $1
->         br          .L2
-> .L7:
->         symaddr.64  %r9 <- <anon symbol:000001A5682A2538>
->         call.32     %r10 <- printf, %r9, $2
->         br          .L2
-> .L8:
->         symaddr.64  %r11 <- <anon symbol:000001A5682A28B8>
->         call.32     %r12 <- printf, %r11, $0
->         br          .L2
-> .L2:
->         add.32      %r14 <- %r1(Count), $1
->         phisrc.32   %phi5(Count) <- %r14
->         br          .L4
-> .L9:
->         ret.32      $0
->
->
-> In sparse-llvm the instruction:
-> add.32      %r14 <- %r1(Count), $1
->
-> fails because the type of %r1(Count) is void. I am not sure why the
-> type is void here.
+> It's not incorrect, only that the scast is unneeded.
+> But strangely, I don't see that cast here.
 >
 
-Looks like the 'void' is coming from this in output_op_switch() in
-sparse-llvm.c:
+Why the division? That seems incorrect to me.
 
- target = LLVMBuildSwitch(fn->builder, sw_val,
-     def ? def->priv : NULL, n_jmp);
-...
- insn->target->priv = target;
-
-
-So this is probably incorrect. Looks like we should not set
-insn->target->priv  here as it is already set. Removing the assignment
-resolves the issue.
+Regards
