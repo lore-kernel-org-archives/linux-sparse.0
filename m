@@ -1,37 +1,52 @@
-From: Jeff Garzik <jeff@garzik.org>
-Subject: Re: [PATCH v2 00/27] LLVM fixes
-Date: Sat, 11 Mar 2017 10:10:27 -0500
-Message-ID: <CAFtxgO5T6Lrb3OYX+OgG4chZrFWG7Jk1Gp2HWtLu5yPU_+QKuw@mail.gmail.com>
-References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
- <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com>
- <20170311114903.zrhufw6ydneky3ya@macbook.local> <CACXZuxcL4NHa2Ahdtu91rANDFTUw8hY9BizN-9pLgpyQ2wPf-w@mail.gmail.com>
- <20170311123039.tcpo2dcajfmxwmsm@macbook.local> <CACXZuxc4F-PgDQO0p-nYB0D6NkrJf7cS0qWB=SkO5tQJzGFpxQ@mail.gmail.com>
- <20170311141201.kptzqgn4qpu3gaic@macbook.local> <CACXZuxfojJBjZBibhBOUT9z0K8JLWRKmxwHCMqEYShd7vR5zhQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v0 1/4] be more careful with concat_user_list()
+Date: Sat, 11 Mar 2017 16:47:22 +0100
+Message-ID: <20170311154725.87906-2-luc.vanoostenryck@gmail.com>
+References: <20170311154725.87906-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:36028 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750954AbdCKPK3 (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36695 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755335AbdCKPto (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 10:10:29 -0500
-Received: by mail-qt0-f175.google.com with SMTP id r45so7846922qte.3
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 07:10:28 -0800 (PST)
-In-Reply-To: <CACXZuxfojJBjZBibhBOUT9z0K8JLWRKmxwHCMqEYShd7vR5zhQ@mail.gmail.com>
+        Sat, 11 Mar 2017 10:49:44 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v190so3364299wme.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 07:49:32 -0800 (PST)
+In-Reply-To: <20170311154725.87906-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Mar 11, 2017 at 9:16 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> I still think pseudo values should have a type - then we won't need
-> all the complexity!
+In convert_instruction_target(), once all users have been converted
+the old user list is concatened to the one of the replacing pseudo.
+But this pseudo may be one for which a user list is meaningless,
+like PSEUDO_VAL.
 
-Yep, agreed - giving pseudos a type is both natural and intentional -
-it is a natural outcome of the operation, and should be available
-without any further lookups.  Giving pseudos a type actually
-simplifies complexity and makes tree manipulation (optimizer) easier.
+While as such it's not a problem, it inhibit the reuse of the users
+pointer for other uses.
 
- ...of course we need to maintain that type information correctly in
-all cases and through all transformations...
+Fix this by doing the concatenation only if the pseudo can have
+an use-list.
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/flow.c b/flow.c
+index 8111e1ae6..6878c0b4c 100644
+--- a/flow.c
++++ b/flow.c
+@@ -254,7 +254,8 @@ void convert_instruction_target(struct instruction *insn, pseudo_t src)
+ 			*pu->userp = src;
+ 		}
+ 	} END_FOR_EACH_PTR(pu);
+-	concat_user_list(target->users, &src->users);
++	if (has_use_list(src))
++		concat_user_list(target->users, &src->users);
+ 	target->users = NULL;
+ }
+ 
+-- 
+2.11.1
+
