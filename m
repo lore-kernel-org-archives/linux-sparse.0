@@ -1,57 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 09/27] llvm: add test cases for the type of constants
-Date: Sat, 11 Mar 2017 10:06:48 +0100
-Message-ID: <20170311090706.17171-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 10/27] add ptr_list_nth_entry()
+Date: Sat, 11 Mar 2017 10:06:49 +0100
+Message-ID: <20170311090706.17171-11-luc.vanoostenryck@gmail.com>
 References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33087 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755338AbdCKJHb (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:35137 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752741AbdCKJHc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 04:07:31 -0500
-Received: by mail-wm0-f65.google.com with SMTP id n11so2314818wma.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:30 -0800 (PST)
+        Sat, 11 Mar 2017 04:07:32 -0500
+Received: by mail-wm0-f66.google.com with SMTP id z63so2304776wmg.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 01:07:31 -0800 (PST)
 In-Reply-To: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+Usually ptr lists are accessed iteratively via the FOR/END macros
+but in few case we may need to access a given element in a list,
+like for example when accessing a given argument of a function.
+
+Create an helper doing that instead of open coding it.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/type-constant.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
- create mode 100644 validation/backend/type-constant.c
+ ptrlist.c | 18 ++++++++++++++++++
+ ptrlist.h |  1 +
+ 2 files changed, 19 insertions(+)
 
-diff --git a/validation/backend/type-constant.c b/validation/backend/type-constant.c
-new file mode 100644
-index 000000000..cded7f2ea
---- /dev/null
-+++ b/validation/backend/type-constant.c
-@@ -0,0 +1,23 @@
-+char creti(void) { return 3; }
-+int  ireti(void) { return 3; }
-+long lreti(void) { return 3; }
+diff --git a/ptrlist.c b/ptrlist.c
+index 5dc1117c5..29aafac7d 100644
+--- a/ptrlist.c
++++ b/ptrlist.c
+@@ -246,3 +246,21 @@ void __free_ptr_list(struct ptr_list **listp)
+ 
+ 	*listp = NULL;
+ }
 +
-+char cinii(void) { char r = 3; return r; }
-+int  iinii(void) { int  r = 3; return r; }
-+long linii(void) { long r = 3; return r; }
++void *ptr_list_nth_entry(struct ptr_list *list, unsigned int idx)
++{
++	struct ptr_list *head = list;
 +
++	if (!head)
++		return NULL;
 +
-+void *vretn(void) { return (void*)0; }
-+char *cretn(void) { return (void*)0; }
-+int  *iretn(void) { return (void*)0; }
-+long *lretn(void) { return (void*)0; }
++	do {
++		unsigned int nr = list->nr;
 +
-+void *vinin(void) { void *r = (void*)0; return r; }
-+char *cinin(void) { char *r = (void*)0; return r; }
-+int  *iinin(void) { int  *r = (void*)0; return r; }
-+long *linin(void) { long *r = (void*)0; return r; }
-+
-+/*
-+ * check-name: type-constant
-+ * check-command: ./sparsec -Wno-decl -c $file -o r.o
-+ */
++		if (idx < nr)
++			return list->list[idx];
++		else
++			idx -= nr;
++	} while ((list = list->next) != head);
++	return NULL;
++}
+diff --git a/ptrlist.h b/ptrlist.h
+index d09be2f51..bf171f89f 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -44,6 +44,7 @@ extern void concat_ptr_list(struct ptr_list *a, struct ptr_list **b);
+ extern void __free_ptr_list(struct ptr_list **);
+ extern int ptr_list_size(struct ptr_list *);
+ extern int linearize_ptr_list(struct ptr_list *, void **, int);
++extern void *ptr_list_nth_entry(struct ptr_list *, unsigned int idx);
+ 
+ /*
+  * Hey, who said that you can't do overloading in C?
 -- 
 2.11.1
 
