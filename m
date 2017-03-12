@@ -1,48 +1,31 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Trying to understand linearized output
-Date: Sun, 12 Mar 2017 20:27:38 +0100
-Message-ID: <20170312192736.ds7k7jjiapoilir2@macpro.local>
-References: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
- <20170312171021.ivhh2fjyyj3xcgb5@macpro.local>
- <CACXZuxdX3ANytHJ+MPEm9gqcV0D8wJt7cWq4vSVkU7ffmDHFuw@mail.gmail.com>
- <20170312172050.24fwpfamwb3iivru@macpro.local>
- <CACXZuxdevCRT1VNrPRC1VXSH5nHQj17F9aPpDHOQU++Uu_384A@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Error handling in sparse-llvm
+Date: Sun, 12 Mar 2017 19:40:18 +0000
+Message-ID: <CACXZuxcU4ZQ0=D67F4EkqyFKANQVjhSxfSzsqdzXbNXYsGXGfQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:34870 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934858AbdCLT1m (ORCPT
+Received: from mail-io0-f174.google.com ([209.85.223.174]:36609 "EHLO
+        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934652AbdCLTkU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 15:27:42 -0400
-Received: by mail-wm0-f54.google.com with SMTP id v186so27016062wmd.0
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 12:27:40 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxdevCRT1VNrPRC1VXSH5nHQj17F9aPpDHOQU++Uu_384A@mail.gmail.com>
+        Sun, 12 Mar 2017 15:40:20 -0400
+Received: by mail-io0-f174.google.com with SMTP id l7so73454009ioe.3
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 12:40:19 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 12, 2017 at 06:00:33PM +0000, Dibyendu Majumdar wrote:
-> I got confused by the numbering initially as I was expecting all
-> pseudos within a single function to be numbered sequentially.
+Hi,
 
-Yes.
-I think they should, but in normal circonstances it doesn't matter.
+At present there are a bunch of asserts for scenarios not handled by
+Sparse LLVM backend. A more robust error handling method is needed
+that works even in release builds, and doesn't abort the process.
+Given the way the code is structured currently, I was thinking maybe
+it will be easiest to use setjmp/longjmp mechanism to terminate the
+LLVM backend on error. I am not sure that this entirely safe with LLVM
+as the LLVM code is C++ - I think it might be okay as long as the LLVM
+module / context is properly disposed at the end.
 
-> So I should just read following :
-> 
-> phisrc.64   %phi98(current) <- %r333
-> 
-> As:
-> 
-> %phi98(current) = %r333
-> 
-> And 98 just happens to be the identifier for the pseudo, and 'phi' is
-> just to help the reader know that the value will go into a phi
-> instruction later. Is that correct?
-
-Absolutely.
-
--- Luc
+Regards
+Dibyendu
