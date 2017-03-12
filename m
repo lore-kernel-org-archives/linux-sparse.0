@@ -1,54 +1,66 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm op_fpcast implementation missing
-Date: Sun, 12 Mar 2017 12:04:43 +0000
-Message-ID: <CACXZuxcpYWZYy-XwbBWWS6si4cdfnxFXAHsthsAeMKijWZeNzg@mail.gmail.com>
-References: <CACXZuxdZDSYP2j-8BJ6X_F9qpYWtdcVqZny06G_Qe0dkv_pOpw@mail.gmail.com>
- <20170312000126.zhnamtidjwdycvkg@macbook.local>
+Subject: sparse-llvm potential error in linearized output
+Date: Sun, 12 Mar 2017 13:04:30 +0000
+Message-ID: <CACXZuxfajgS=+3MEw-ECnsmnpZqu8WXLhjrvsfjkD1X-+dNxbw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:37243 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755704AbdCLMFi (ORCPT
+Received: from mail-io0-f175.google.com ([209.85.223.175]:33206 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755733AbdCLNEc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 08:05:38 -0400
-Received: by mail-it0-f43.google.com with SMTP id g138so18468938itb.0
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 05:04:44 -0700 (PDT)
-In-Reply-To: <20170312000126.zhnamtidjwdycvkg@macbook.local>
+        Sun, 12 Mar 2017 09:04:32 -0400
+Received: by mail-io0-f175.google.com with SMTP id f84so69711370ioj.0
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 06:04:31 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 12 March 2017 at 00:01, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Sat, Mar 11, 2017 at 11:53:53PM +0000, Dibyendu Majumdar wrote:
->> Following test fails:
->>
->> int main(void)
->> {
->>  float f = 'a';
->>  float g = 97;
->>  printf("%f %f\n", f, g);
->>  return 0;
->> }
->
-> Just for info, there is a lot of things missing or incorrect with
-> floating-points and I'm not speaking of the llvm part but of
-> sparse itself.
->
-> I have some test cases somewhere in one of my topic branches
-> but this is very very low priority to me.
->
+I have the following test:
 
-Ok no problem. I have tried to add partial support for FPCAST and
-SETVAL in my project. Here is the commit:
+extern int printf(const char *, ...);
+static char *randomletters = "agqwewbxklpfgytuorz";
+int main(void)
+{
+ int i;
+ for (i = 0; i < 20; i++) {
+  int key;
+  key = randomletters[i];
+  printf("Inserting %d\n", key);
+ }
+ return 0;
+}
 
-https://github.com/dibyendumajumdar/dmr_c/commit/b95d54c9555ccf9e230edea5c1a3701172b7b1e2
+The linearized output is:
 
-Please let me know if this looks reasonable.
+main:
+.L0:
+        <entry-point>
+        phisrc.32   %phi4(i) <- $0
+        br          .L4
+.L4:
+        phi.32      %r1(i) <- %phi4(i), %phi5(i)
+        setlt.32    %r2 <- %r1(i), $20
+        br          %r2, .L1, .L5
+.L1:
+        load.64     %r3 <- 0[randomletters]
+        scast.64    %r5 <- (32) %r1(i)
+        add.64      %r6 <- %r3, %r5
+        load.8      %r7 <- 0[%r6]
+        scast.32    %r8 <- (8) %r7
+        symaddr.64  %r9 <- <anon symbol:0000020914372028>
+        call.32     %r11 <- printf, %r9, %r8
+        add.32      %r13 <- %r1(i), $1
+        phisrc.32   %phi5(i) <- %r13
+        br          .L4
+.L5:
+        ret.32      $0
 
-Unfortunately due to my amended codebase I am not able to submit patches here.
+The following instruction looks incorrect to me:
+
+        load.64     %r3 <- 0[randomletters]
+
 
 Thanks and Regards
+
 Dibyendu
