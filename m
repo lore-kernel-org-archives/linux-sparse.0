@@ -1,37 +1,31 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse linear instruction offset for memops
-Date: Sun, 12 Mar 2017 14:46:18 +0000
-Message-ID: <CACXZuxcS5c-QS-KzDjxMD6j5MVAJfKicDaKRR6V10NQTKqHLcg@mail.gmail.com>
+Subject: sparse-llvm error in GEP offset
+Date: Sun, 12 Mar 2017 15:01:23 +0000
+Message-ID: <CACXZuxd=VaN_vi_+XkR1EuLgcc3QY4TQ9_vzsG-pCK_2r1=21g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:33366 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933174AbdCLOqU (ORCPT
+Received: from mail-it0-f41.google.com ([209.85.214.41]:38575 "EHLO
+        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934115AbdCLPBZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 10:46:20 -0400
-Received: by mail-io0-f170.google.com with SMTP id f84so70355951ioj.0
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 07:46:19 -0700 (PDT)
+        Sun, 12 Mar 2017 11:01:25 -0400
+Received: by mail-it0-f41.google.com with SMTP id m27so19483054iti.1
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 08:01:24 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi
+Hi,
 
-I am investigating a crash in the avltree test program I mentioned
-before. I noticed the following:
+The memops offset field in sparse linearized instruction is unsigned,
+which is causing invalid memory access in sparse-llvm. A workaround
+for this is to cast the offset to int in calc_memop_addr() function in
+sparse-llvm:
 
-Linearised output:
+ off = LLVMConstInt(int_type, (int) insn->offset, 0);
 
- load.64     %r338 <- -16[%r333]
-
-LLVM output:
-
-  %10 = getelementptr inbounds i8, i8* %9, i64 4294967280
-
-Instead of -16 we are getting a garbage offset. This appears to be
-caused by the fact that the offset field in the instruction is
-unsigned. Should the offset be a signed field instead?
+However, perhaps the offset should not be unsigned in the first place.
 
 Regards
 Dibyendu
