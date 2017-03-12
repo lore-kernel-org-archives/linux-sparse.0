@@ -1,62 +1,48 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: dmr_C - a project based on Sparse that aims to create a JIT compiler
- for C
-Date: Sun, 12 Mar 2017 18:21:37 +0000
-Message-ID: <CACXZuxdQR-CRO2mUoh3kDcTbxx2Kx_PsoGb6vMT-FiBFVGSGjw@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: Trying to understand linearized output
+Date: Sun, 12 Mar 2017 20:27:38 +0100
+Message-ID: <20170312192736.ds7k7jjiapoilir2@macpro.local>
+References: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
+ <20170312171021.ivhh2fjyyj3xcgb5@macpro.local>
+ <CACXZuxdX3ANytHJ+MPEm9gqcV0D8wJt7cWq4vSVkU7ffmDHFuw@mail.gmail.com>
+ <20170312172050.24fwpfamwb3iivru@macpro.local>
+ <CACXZuxdevCRT1VNrPRC1VXSH5nHQj17F9aPpDHOQU++Uu_384A@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:37974 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934142AbdCLSVj (ORCPT
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:34870 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934858AbdCLT1m (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 14:21:39 -0400
-Received: by mail-it0-f54.google.com with SMTP id m27so20795865iti.1
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 11:21:38 -0700 (PDT)
+        Sun, 12 Mar 2017 15:27:42 -0400
+Received: by mail-wm0-f54.google.com with SMTP id v186so27016062wmd.0
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 12:27:40 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxdevCRT1VNrPRC1VXSH5nHQj17F9aPpDHOQU++Uu_384A@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi,
+On Sun, Mar 12, 2017 at 06:00:33PM +0000, Dibyendu Majumdar wrote:
+> I got confused by the numbering initially as I was expecting all
+> pseudos within a single function to be numbered sequentially.
 
-I am creating a JIT compiler for C building upon the Sparse library.
-The project is hosted on GitHub (link below) and has the same license
-as Sparse.
+Yes.
+I think they should, but in normal circonstances it doesn't matter.
 
-Initially I plan to build the backend by reusing the Sparse LLVM
-backend hence my interest in making sure that it works correctly. But
-in the long run, I would like a backend that is really compact - LLVM
-is just too big a beast. I am currently considering nanojit as the
-alternative backend.
+> So I should just read following :
+> 
+> phisrc.64   %phi98(current) <- %r333
+> 
+> As:
+> 
+> %phi98(current) = %r333
+> 
+> And 98 just happens to be the identifier for the pseudo, and 'phi' is
+> just to help the reader know that the value will go into a phi
+> instruction later. Is that correct?
 
-I decided to use Sparse as a front-end as it seems to be fully
-featured as a C front-end, and also does lot more than a simple
-parser. The fact that it produces SSA IR is perfect for my needs. I
-did not want to use a front-end such as Clang because of the sheer
-size and complexity of Clang which results from supporting C++ and
-Objective C. I want to build a relatively small and compact JIT engine
-that doesn't have a lot of extra baggage.
+Absolutely.
 
-To reuse Sparse as the JIT engine, I am making some changes to it.
-Primarily I have removed (almost) all global state - as I needed the
-ability to clean up all state after each compilation run, and serve
-any number of requests within the same process instance. The other
-changes are to do with making sure that Sparse can be compiled using
-MSVC - so I had to change some of the gcc specific C features used in
-Sparse.
-
-The interest in a JIT engine for C arose from my attempt to create a
-JIT compiler for the Lua language. I have coded this in LLVM but it is
-too tedious to code and maintain. Being able to use a C based JIT will
-make life much easier. Not only that it also makes it easier to switch
-to a non-LLVM backend.
-
-I think Sparse is an amazing project - so many thanks to you all for
-creating it, and for making it available under MIT license.
-
-Link to my project:
-
-https://github.com/dibyendumajumdar/dmr_c
-
-Thanks and Regards
-Dibyendu
+-- Luc
