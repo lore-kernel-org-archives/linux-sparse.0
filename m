@@ -1,49 +1,37 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse linear instruction offset for memops
-Date: Sun, 12 Mar 2017 18:27:13 +0100
-Message-ID: <20170312172712.nw7nsphvaqz44s2r@macpro.local>
-References: <CACXZuxcS5c-QS-KzDjxMD6j5MVAJfKicDaKRR6V10NQTKqHLcg@mail.gmail.com>
+Subject: Re: sparse-llvm error in GEP offset
+Date: Sun, 12 Mar 2017 18:31:08 +0100
+Message-ID: <20170312173108.2kcar7zterlgu7rj@macpro.local>
+References: <CACXZuxd=VaN_vi_+XkR1EuLgcc3QY4TQ9_vzsG-pCK_2r1=21g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f175.google.com ([209.85.128.175]:36551 "EHLO
-        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934461AbdCLR1l (ORCPT
+Received: from mail-wr0-f173.google.com ([209.85.128.173]:33356 "EHLO
+        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934545AbdCLRbM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 13:27:41 -0400
-Received: by mail-wr0-f175.google.com with SMTP id u108so90863976wrb.3
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 10:27:16 -0700 (PDT)
+        Sun, 12 Mar 2017 13:31:12 -0400
+Received: by mail-wr0-f173.google.com with SMTP id u48so91104884wrc.0
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 10:31:11 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CACXZuxcS5c-QS-KzDjxMD6j5MVAJfKicDaKRR6V10NQTKqHLcg@mail.gmail.com>
+In-Reply-To: <CACXZuxd=VaN_vi_+XkR1EuLgcc3QY4TQ9_vzsG-pCK_2r1=21g@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 12, 2017 at 02:46:18PM +0000, Dibyendu Majumdar wrote:
-> Hi
+On Sun, Mar 12, 2017 at 03:01:23PM +0000, Dibyendu Majumdar wrote:
+> Hi,
 > 
-> I am investigating a crash in the avltree test program I mentioned
-> before. I noticed the following:
+> The memops offset field in sparse linearized instruction is unsigned,
+> which is causing invalid memory access in sparse-llvm. A workaround
+> for this is to cast the offset to int in calc_memop_addr() function in
+> sparse-llvm:
 > 
-> Linearised output:
+>  off = LLVMConstInt(int_type, (int) insn->offset, 0);
 > 
->  load.64     %r338 <- -16[%r333]
-> 
-> LLVM output:
-> 
->   %10 = getelementptr inbounds i8, i8* %9, i64 4294967280
-> 
-> Instead of -16 we are getting a garbage offset. This appears to be
-> caused by the fact that the offset field in the instruction is
-> unsigned. Should the offset be a signed field instead?
+> However, perhaps the offset should not be unsigned in the first place.
 
-It's not the problem here, I think.
-The LLVM instruction is an *inbound* GEP, so there is no reasons
-to use a negative offset as it would automatically be out-of-bound.
+I think so, yes.
 
-The GEP is unappropriate here, the correct code should really
-subtract the offset from the pointer and then use this as the
-load address.
-
--- Luc Van Oostenryck
+-- Luc 
