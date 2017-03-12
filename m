@@ -1,62 +1,49 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Trying to understand linearized output
-Date: Sun, 12 Mar 2017 18:20:51 +0100
-Message-ID: <20170312172050.24fwpfamwb3iivru@macpro.local>
-References: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
- <20170312171021.ivhh2fjyyj3xcgb5@macpro.local>
- <CACXZuxdX3ANytHJ+MPEm9gqcV0D8wJt7cWq4vSVkU7ffmDHFuw@mail.gmail.com>
+Subject: Re: sparse linear instruction offset for memops
+Date: Sun, 12 Mar 2017 18:27:13 +0100
+Message-ID: <20170312172712.nw7nsphvaqz44s2r@macpro.local>
+References: <CACXZuxcS5c-QS-KzDjxMD6j5MVAJfKicDaKRR6V10NQTKqHLcg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f177.google.com ([209.85.128.177]:34845 "EHLO
-        mail-wr0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933837AbdCLRUz (ORCPT
+Received: from mail-wr0-f175.google.com ([209.85.128.175]:36551 "EHLO
+        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934461AbdCLR1l (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 13:20:55 -0400
-Received: by mail-wr0-f177.google.com with SMTP id g10so90978970wrg.2
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 10:20:54 -0700 (PDT)
+        Sun, 12 Mar 2017 13:27:41 -0400
+Received: by mail-wr0-f175.google.com with SMTP id u108so90863976wrb.3
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 10:27:16 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CACXZuxdX3ANytHJ+MPEm9gqcV0D8wJt7cWq4vSVkU7ffmDHFuw@mail.gmail.com>
+In-Reply-To: <CACXZuxcS5c-QS-KzDjxMD6j5MVAJfKicDaKRR6V10NQTKqHLcg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Mar 12, 2017 at 05:15:54PM +0000, Dibyendu Majumdar wrote:
-> On 12 March 2017 at 17:10, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > On Sun, Mar 12, 2017 at 02:11:37PM +0000, Dibyendu Majumdar wrote:
-> >> ...
-> >>
-> >> My question is:
-> >>
-> >> phisrc.64   %phi98(current) <- %r333
-> >>
-> >> The phi98 above is presumably referencing a pseudo which has number
-> >> 98. But this is not part of this function, so I am confused. Does this
-> >> look right?
-> >
-> > I didn't checked all the details by it looks right.
-> >
-> > The %phi98 is not referencing a pseudo which has the number 98.
-> > It is a pseudo numbered 98 and which is of type PSEUDO_PHI.
-> > Those kind of pseudos are exclusively created by 'phisrc' instructions
-> > and used by 'phi' instructions.
-> > Here this %phi98 is used by the phi instructions at block .L127
-> >
-> > These 'phi' instructions are the core of the SSA representation of
-> > intermediate code. If needed Wikipedia gives a good introduction:
-> >          https://en.wikipedia.org/wiki/Static_single_assignment_form
+On Sun, Mar 12, 2017 at 02:46:18PM +0000, Dibyendu Majumdar wrote:
+> Hi
 > 
+> I am investigating a crash in the avltree test program I mentioned
+> before. I noticed the following:
 > 
-> Thanks. I am familiar with phi instructions in LLVM, but the phisrc
-> instructions in Sparse are new to me.
+> Linearised output:
+> 
+>  load.64     %r338 <- -16[%r333]
+> 
+> LLVM output:
+> 
+>   %10 = getelementptr inbounds i8, i8* %9, i64 4294967280
+> 
+> Instead of -16 we are getting a garbage offset. This appears to be
+> caused by the fact that the offset field in the instruction is
+> unsigned. Should the offset be a signed field instead?
 
-Good. I wasn't sure.
+It's not the problem here, I think.
+The LLVM instruction is an *inbound* GEP, so there is no reasons
+to use a negative offset as it would automatically be out-of-bound.
 
-Those phisrc are unimportant, you can consider them as a kind of 'move'
-which is only but systematically used for each pseudo feeded to a phi
-instruction. They ahev no special semantic, they just make some things
-little bit easier for sparse.
+The GEP is unappropriate here, the correct code should really
+subtract the offset from the pointer and then use this as the
+load address.
 
-Luc
+-- Luc Van Oostenryck
