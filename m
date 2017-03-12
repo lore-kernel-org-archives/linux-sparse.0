@@ -1,43 +1,43 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse-llvm op_fpcast implementation missing
-Date: Sun, 12 Mar 2017 01:01:27 +0100
-Message-ID: <20170312000126.zhnamtidjwdycvkg@macbook.local>
-References: <CACXZuxdZDSYP2j-8BJ6X_F9qpYWtdcVqZny06G_Qe0dkv_pOpw@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH v2 00/27] LLVM fixes
+Date: Sun, 12 Mar 2017 02:35:21 +0000
+Message-ID: <CACXZuxczJH_wDHdwwENNmkUECsqO+7+PPzy6PUpw+B=rW0SiFg@mail.gmail.com>
+References: <20170311090706.17171-1-luc.vanoostenryck@gmail.com>
+ <CACXZuxc8rbcGSO9dTkFSKST8UJkDgc2ifFae5=Y+cojtm5qb3Q@mail.gmail.com> <20170311114903.zrhufw6ydneky3ya@macbook.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:36680 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754980AbdCLABb (ORCPT
+Received: from mail-io0-f182.google.com ([209.85.223.182]:36353 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755500AbdCLCfX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Mar 2017 19:01:31 -0500
-Received: by mail-wr0-f178.google.com with SMTP id u108so84058881wrb.3
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 16:01:30 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxdZDSYP2j-8BJ6X_F9qpYWtdcVqZny06G_Qe0dkv_pOpw@mail.gmail.com>
+        Sat, 11 Mar 2017 21:35:23 -0500
+Received: by mail-io0-f182.google.com with SMTP id l7so67870977ioe.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Mar 2017 18:35:22 -0800 (PST)
+In-Reply-To: <20170311114903.zrhufw6ydneky3ya@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Pekka Enberg <penberg@kernel.org>, Jeff Garzik <jeff@garzik.org>
 
-On Sat, Mar 11, 2017 at 11:53:53PM +0000, Dibyendu Majumdar wrote:
-> Hi,
-> 
-> Following test fails:
-> 
-> int main(void)
-> {
->  float f = 'a';
->  float g = 97;
->  printf("%f %f\n", f, g);
->  return 0;
-> }
+On 11 March 2017 at 11:49, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Sat, Mar 11, 2017 at 11:12:20AM +0000, Dibyendu Majumdar wrote:
+>> I have been trying to compile a smallish program (AVL Tree
+>> implementation) - making progress but it still fails to compile, so I
+>> will report the next issue!
+>
+> Good.
+>
 
-Just for info, there is a lot of things missing or incorrect with
-floating-points and I'm not speaking of the llvm part but of
-sparse itself.
+Sadly it crashes when run using lli.
 
-I have some test cases somewhere in one of my topic branches
-but this is very very low priority to me.
+You can see the test programs I am using here:
 
--- Luc
+https://github.com/dibyendumajumdar/dmr_c/tree/master/tests
+
+I do not have driver scripts yet - but the README identifies the
+programs that fail.
+
+Regards
+Dibyendu
