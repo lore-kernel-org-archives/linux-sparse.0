@@ -1,42 +1,46 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm potential error in linearized output
-Date: Sun, 12 Mar 2017 16:52:12 +0000
-Message-ID: <CACXZuxf5CtaZj4uk1Rq+M3pys04F4OP7AOWPvDTEtV5JrM_udg@mail.gmail.com>
-References: <CACXZuxfajgS=+3MEw-ECnsmnpZqu8WXLhjrvsfjkD1X-+dNxbw@mail.gmail.com>
- <CA+55aFzqZozMb0A4HMJ8UTNEV+LqHWXQsSBrPLMts_vkxsKtQA@mail.gmail.com>
- <CA+55aFxuovvof9UhSAnQMuBjEr0xd8qxbDSV1cpi_ubWx386Zg@mail.gmail.com> <CA+55aFyaW01tfG5LP+aeV-hSppzhqW7gCV7EM2OmxbJyg0cBXw@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: Trying to understand linearized output
+Date: Sun, 12 Mar 2017 18:10:22 +0100
+Message-ID: <20170312171021.ivhh2fjyyj3xcgb5@macpro.local>
+References: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f172.google.com ([209.85.223.172]:35712 "EHLO
-        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933837AbdCLQwO (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:37186 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933837AbdCLRKl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 12:52:14 -0400
-Received: by mail-io0-f172.google.com with SMTP id z13so72717866iof.2
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 09:52:13 -0700 (PDT)
-In-Reply-To: <CA+55aFyaW01tfG5LP+aeV-hSppzhqW7gCV7EM2OmxbJyg0cBXw@mail.gmail.com>
+        Sun, 12 Mar 2017 13:10:41 -0400
+Received: by mail-wm0-f48.google.com with SMTP id n11so25348047wma.0
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 10:10:25 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 12 March 2017 at 16:27, Linus Torvalds <torvalds@linux-foundation.org> wrote:
-> On Mar 12, 2017 6:04 AM, "Dibyendu Majumdar" <mobile@majumdar.org.uk> wrote:
->         load.64     %r3 <- 0[randomletters]
+On Sun, Mar 12, 2017 at 02:11:37PM +0000, Dibyendu Majumdar wrote:
+> ...
 >
->
-> Looks fine to me.
->
-> You have a variable called randomletters, and it's a pointer to a char. That
-> 64-bit load just loads that pointer value from the variable into %r3.
->
-> The sparse linearized format only has one memory access model: load with
-> constant offset. The base can either be a symbol address (like in this case)
-> or a register.
->
+> My question is:
+> 
+> phisrc.64   %phi98(current) <- %r333
+> 
+> The phi98 above is presumably referencing a pseudo which has number
+> 98. But this is not part of this function, so I am confused. Does this
+> look right?
 
-Ok thanks.
+I didn't checked all the details by it looks right.
 
-Regards
-Dibyendu
+The %phi98 is not referencing a pseudo which has the number 98.
+It is a pseudo numbered 98 and which is of type PSEUDO_PHI.
+Those kind of pseudos are exclusively created by 'phisrc' instructions
+and used by 'phi' instructions.
+Here this %phi98 is used by the phi instructions at block .L127
+
+These 'phi' instructions are the core of the SSA representation of
+intermediate code. If needed Wikipedia gives a good introduction:
+	 https://en.wikipedia.org/wiki/Static_single_assignment_form
+
+-- Luc Van Oostenryck
