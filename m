@@ -1,80 +1,62 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Trying to understand linearized output
-Date: Sun, 12 Mar 2017 18:00:33 +0000
-Message-ID: <CACXZuxdevCRT1VNrPRC1VXSH5nHQj17F9aPpDHOQU++Uu_384A@mail.gmail.com>
-References: <CACXZuxfTBH2hr8kOXepJ7VGCrfvjMU3h8GhDfZhtPEA6Ynw6jA@mail.gmail.com>
- <20170312171021.ivhh2fjyyj3xcgb5@macpro.local> <CACXZuxdX3ANytHJ+MPEm9gqcV0D8wJt7cWq4vSVkU7ffmDHFuw@mail.gmail.com>
- <20170312172050.24fwpfamwb3iivru@macpro.local>
+Subject: dmr_C - a project based on Sparse that aims to create a JIT compiler
+ for C
+Date: Sun, 12 Mar 2017 18:21:37 +0000
+Message-ID: <CACXZuxdQR-CRO2mUoh3kDcTbxx2Kx_PsoGb6vMT-FiBFVGSGjw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:36982 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934791AbdCLSBE (ORCPT
+Received: from mail-it0-f54.google.com ([209.85.214.54]:37974 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934142AbdCLSVj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Mar 2017 14:01:04 -0400
-Received: by mail-it0-f46.google.com with SMTP id g138so20712969itb.0
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 11:00:34 -0700 (PDT)
-In-Reply-To: <20170312172050.24fwpfamwb3iivru@macpro.local>
+        Sun, 12 Mar 2017 14:21:39 -0400
+Received: by mail-it0-f54.google.com with SMTP id m27so20795865iti.1
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Mar 2017 11:21:38 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 12 March 2017 at 17:20, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Sun, Mar 12, 2017 at 05:15:54PM +0000, Dibyendu Majumdar wrote:
->> On 12 March 2017 at 17:10, Luc Van Oostenryck
->> <luc.vanoostenryck@gmail.com> wrote:
->> > On Sun, Mar 12, 2017 at 02:11:37PM +0000, Dibyendu Majumdar wrote:
->> >> ...
->> >>
->> >> My question is:
->> >>
->> >> phisrc.64   %phi98(current) <- %r333
->> >>
->> >> The phi98 above is presumably referencing a pseudo which has number
->> >> 98. But this is not part of this function, so I am confused. Does this
->> >> look right?
->> >
->> > I didn't checked all the details by it looks right.
->> >
->> > The %phi98 is not referencing a pseudo which has the number 98.
->> > It is a pseudo numbered 98 and which is of type PSEUDO_PHI.
->> > Those kind of pseudos are exclusively created by 'phisrc' instructions
->> > and used by 'phi' instructions.
->> > Here this %phi98 is used by the phi instructions at block .L127
->> >
->> > These 'phi' instructions are the core of the SSA representation of
->> > intermediate code. If needed Wikipedia gives a good introduction:
->> >          https://en.wikipedia.org/wiki/Static_single_assignment_form
->>
->>
->> Thanks. I am familiar with phi instructions in LLVM, but the phisrc
->> instructions in Sparse are new to me.
->
-> Good. I wasn't sure.
->
-> Those phisrc are unimportant, you can consider them as a kind of 'move'
-> which is only but systematically used for each pseudo feeded to a phi
-> instruction. They ahev no special semantic, they just make some things
-> little bit easier for sparse.
->
+Hi,
 
-I got confused by the numbering initially as I was expecting all
-pseudos within a single function to be numbered sequentially.
+I am creating a JIT compiler for C building upon the Sparse library.
+The project is hosted on GitHub (link below) and has the same license
+as Sparse.
 
-So I should just read following :
+Initially I plan to build the backend by reusing the Sparse LLVM
+backend hence my interest in making sure that it works correctly. But
+in the long run, I would like a backend that is really compact - LLVM
+is just too big a beast. I am currently considering nanojit as the
+alternative backend.
 
-phisrc.64   %phi98(current) <- %r333
+I decided to use Sparse as a front-end as it seems to be fully
+featured as a C front-end, and also does lot more than a simple
+parser. The fact that it produces SSA IR is perfect for my needs. I
+did not want to use a front-end such as Clang because of the sheer
+size and complexity of Clang which results from supporting C++ and
+Objective C. I want to build a relatively small and compact JIT engine
+that doesn't have a lot of extra baggage.
 
-As:
+To reuse Sparse as the JIT engine, I am making some changes to it.
+Primarily I have removed (almost) all global state - as I needed the
+ability to clean up all state after each compilation run, and serve
+any number of requests within the same process instance. The other
+changes are to do with making sure that Sparse can be compiled using
+MSVC - so I had to change some of the gcc specific C features used in
+Sparse.
 
-%phi98(current) = %r333
+The interest in a JIT engine for C arose from my attempt to create a
+JIT compiler for the Lua language. I have coded this in LLVM but it is
+too tedious to code and maintain. Being able to use a C based JIT will
+make life much easier. Not only that it also makes it easier to switch
+to a non-LLVM backend.
 
-And 98 just happens to be the identifier for the pseudo, and 'phi' is
-just to help the reader know that the value will go into a phi
-instruction later. Is that correct?
+I think Sparse is an amazing project - so many thanks to you all for
+creating it, and for making it available under MIT license.
 
-Regards
+Link to my project:
+
+https://github.com/dibyendumajumdar/dmr_c
+
+Thanks and Regards
 Dibyendu
