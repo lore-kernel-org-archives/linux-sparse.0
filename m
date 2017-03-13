@@ -1,40 +1,46 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse-llvm results from trying to compile a largish program
-Date: Mon, 13 Mar 2017 19:34:26 +0000
-Message-ID: <CACXZuxdT9fXHnysUFUoMqe+dEuDSKHsQS3Tn8KFEfAP2cnAnJA@mail.gmail.com>
+Subject: sparse-llvm subtraction of one pointer from another should result in
+ int difference
+Date: Mon, 13 Mar 2017 20:59:02 +0000
+Message-ID: <CACXZuxdaVMn8gHkUWWp6opkB0CJ7WAVmEt2P_yqtT9WUO_-LVQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:37811 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753155AbdCMTe2 (ORCPT
+Received: from mail-io0-f182.google.com ([209.85.223.182]:35256 "EHLO
+        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750902AbdCMU7E (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Mar 2017 15:34:28 -0400
-Received: by mail-it0-f48.google.com with SMTP id g138so38462250itb.0
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Mar 2017 12:34:28 -0700 (PDT)
+        Mon, 13 Mar 2017 16:59:04 -0400
+Received: by mail-io0-f182.google.com with SMTP id z13so92827465iof.2
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Mar 2017 13:59:03 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 Hi,
 
-I tried to compile a Lua implementation using sparse-llvm. This
-particular implementation is called 'minilua' as it is a cut down
-version of Lua 5.1.5 created by Mike Pall for the LuaJIT project.
+I was investigating an error reported while compiling minilua (please
+see my earlier post on minlua) and I found that one of the issues was
+that the result of subtracting one pointer from another is not handled
+correctly in sparse-llvm. I think the OP_SUB implementation should be
+changed as follows:
 
-I had to change all static initializations of course as these are
-unsupported in sparse-llvm. I also had to add support for casting
-floating point values to integer type in 'op_cast' implementation.
-
-sparse-llvm managed to consume the program after these changes but
-there were many LLVM errors reported, which indicates that the
-generated code is incorrect.
-
-I have saved the results from this exercise here:
-
-https://github.com/dibyendumajumdar/dmr_c/tree/master/tests/minilua
-
-Hopefully this will help in analysing the errors and deciding how to fix them.
+ case OP_SUB:
+  if (symbol_is_fp_type(C, insn->type))
+   target = LLVMBuildFSub(fn->builder, lhs, rhs, target_name);
+  else if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMPointerTypeKind &&
+   LLVMGetTypeKind(LLVMTypeOf(rhs)) == LLVMPointerTypeKind) {
+   // Both arguments are pointer
+   // Result will be integer
+   lhs = LLVMBuildPtrToInt(fn->builder, lhs,
+LLVMIntType(C->target->bits_in_pointer), "");
+   rhs = LLVMBuildPtrToInt(fn->builder, rhs,
+LLVMIntType(C->target->bits_in_pointer), "");
+   target = LLVMBuildSub(fn->builder, lhs, rhs, target_name);
+  }
+  else
+   target = LLVMBuildSub(fn->builder, lhs, rhs, target_name);
+  break;
 
 Thanks and Regards
 Dibyendu
