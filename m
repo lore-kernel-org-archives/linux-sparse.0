@@ -1,34 +1,76 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse-llvm switch constants must all be same type as switch value
-Date: Mon, 13 Mar 2017 21:24:47 +0000
-Message-ID: <CACXZuxfOP79gJbOD=02pPYWV4HQbnN0tRVWup77_etBxvhjAAQ@mail.gmail.com>
+Subject: sparse-llvm incorrect type when ealing with union type
+Date: Mon, 13 Mar 2017 22:54:01 +0000
+Message-ID: <CACXZuxcb=27brA9N=w-tnZ9V0StKnDYZ4y27cS6eoenA7S0ctw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:38890 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750812AbdCMVYt (ORCPT
+Received: from mail-io0-f179.google.com ([209.85.223.179]:34353 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752449AbdCMWyD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Mar 2017 17:24:49 -0400
-Received: by mail-it0-f51.google.com with SMTP id m27so40197882iti.1
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Mar 2017 14:24:48 -0700 (PDT)
+        Mon, 13 Mar 2017 18:54:03 -0400
+Received: by mail-io0-f179.google.com with SMTP id b140so15309iof.1
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Mar 2017 15:54:02 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 Hi,
 
-While investigating errors that occurred when compiling 'minilua' I
-found that the sparse-llvm output for switch statements is hard coded
-to generate int32 values even when the switch is on a different
-integer type. I believe following fix is needed in output_op_switch():
+I am investigating a type error in LLVM. Here is the snippet of code:
 
- FOR_EACH_PTR(insn->multijmp_list, jmp) {
-  if (jmp->begin == jmp->end) {  /* case N */
-   LLVMAddCase(target,
-    LLVMConstInt(LLVMTypeOf(sw_val), jmp->begin, 0),
-    jmp->target->priv);
-  } else if (jmp->begin < jmp->end) { /* case M..N */
-   assert(0);
-  }
- } END_FOR_EACH_PTR(jmp);
+typedef union GCObject GCObject;
+typedef unsigned char lu_byte;
+typedef double lua_Number;
+typedef union {
+ GCObject *gc;
+ void *p;
+ lua_Number n;
+ int b;
+} Value;
+typedef struct lua_TValue {
+ Value value;
+ int tt;
+} TValue;
+typedef struct UpVal {
+ GCObject *next;
+ lu_byte tt;
+ lu_byte marked;
+ TValue *v;
+ union {
+  TValue value;
+  struct {
+   struct UpVal *prev;
+   struct UpVal *next;
+  } l;
+ } u;
+} UpVal;
+static void close(UpVal *uv)
+{
+ uv->v = &uv->u.value;
+}
+
+The linearized output is:
+
+close:
+.L0:
+        <entry-point>
+        add.64      %r2 <- %arg1, $24
+        store.64    %r2 -> 16[%arg1]
+        ret
+
+The result of the add operation ends up the same type as arg1 which is
+UpVal*. But this is then assigned to uv->v which is expected to be
+TValue*. So LLVM doesn't like it.
+
+While in this case we could cast to the expected value before the
+store - I am worried that in other cases where the value is read and
+used somewhere it will have the wrong type.
+
+I see that the add instruction's type is 'void *'.
+
+Any suggestions on how to solve this issue?
+
+Thanks and Regards
+Dibyendu
