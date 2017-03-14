@@ -1,26 +1,38 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse-llvm the LLVM IR for select instruction fails due to different types
-Date: Tue, 14 Mar 2017 16:07:40 +0000
-Message-ID: <CACXZuxcGKmEbv=Umh26U=Uermy+n1f2A9_ZmBYJHE15WBYPFrw@mail.gmail.com>
+Subject: sparse-llvm duplicate declarations of data
+Date: Tue, 14 Mar 2017 20:29:46 +0000
+Message-ID: <CACXZuxcpyux92Jwe4HodmReoNwiefM7L0OnzX0XMDZ5gm6RAEA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:37862 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752317AbdCNQHm (ORCPT
+Received: from mail-io0-f174.google.com ([209.85.223.174]:33688 "EHLO
+        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751286AbdCNU3t (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 14 Mar 2017 12:07:42 -0400
-Received: by mail-it0-f46.google.com with SMTP id g138so2512338itb.0
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Mar 2017 09:07:42 -0700 (PDT)
+        Tue, 14 Mar 2017 16:29:49 -0400
+Received: by mail-io0-f174.google.com with SMTP id f84so7530669ioj.0
+        for <linux-sparse@vger.kernel.org>; Tue, 14 Mar 2017 13:29:48 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 Hi,
 
-LLVM complains when the operands of a select are not the same type. I
-think it is okay to cast one of the operands to the type of the other
-- on the basis that subsequent operations will cast things anyway.
+In the following test case:
+
+static int once;
+static int once = 1;
+extern int printf(const char *, ...);
+static int value(int *p)
+{
+ return *p;
+}
+int main(void)
+{
+ return value(&once) == 1 ? 0 : 1;
+}
+
+Sparse-llvm declares the global 'once' twice as there is a check
+missing on whether the global has already been defined.
 
 Regards
-Dibyendu
