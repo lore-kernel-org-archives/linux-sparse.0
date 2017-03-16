@@ -1,36 +1,74 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Seg fault in linearizer after latest patch series
-Date: Thu, 16 Mar 2017 00:30:06 +0000
-Message-ID: <CACXZuxeONJVzyfK=+FOGt1YBUpsiyGiz5-apjcfp-UAouqtDaw@mail.gmail.com>
-References: <CACXZuxd6UpSy=ztcn2nE+58DkimdQ9aaerLQgW7hAJXv1gbmuQ@mail.gmail.com>
+Subject: Re: Potential linearizer over simplication
+Date: Thu, 16 Mar 2017 11:16:31 +0000
+Message-ID: <CACXZuxczRiSSRu1V4v82P1u+VbwRF7-DXUkDq3WXU+9S=MSvjA@mail.gmail.com>
+References: <CACXZuxcf6TX8=9Cn=oa7-i_ok3KSeDUeyGg3ssdswjUFK=ADbg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:34363 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751043AbdCPAaI (ORCPT
+Received: from mail-it0-f48.google.com ([209.85.214.48]:35524 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751321AbdCPLXq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Mar 2017 20:30:08 -0400
-Received: by mail-io0-f177.google.com with SMTP id b140so32049006iof.1
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Mar 2017 17:30:07 -0700 (PDT)
-In-Reply-To: <CACXZuxd6UpSy=ztcn2nE+58DkimdQ9aaerLQgW7hAJXv1gbmuQ@mail.gmail.com>
+        Thu, 16 Mar 2017 07:23:46 -0400
+Received: by mail-it0-f48.google.com with SMTP id m27so83893793iti.0
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Mar 2017 04:23:45 -0700 (PDT)
+In-Reply-To: <CACXZuxcf6TX8=9Cn=oa7-i_ok3KSeDUeyGg3ssdswjUFK=ADbg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
 
-On 16 March 2017 at 00:24, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> Hi Luc,
+On 15 March 2017 at 00:00, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
+> I am investigating a test that is failing. I noticed that the
+> linearized output for:
 >
-> I am getting a segmentation fault in the linearizer - which I
-> replicated using  your GitHub repository branch llvm-fixes-v2.
+> static double cbrtl (double x)
+> {
+>     int hx;
+>     double r,s,w;
+>     double lt;
+>     unsigned sign;
+>     union {
+>  double t;
+>  unsigned pt[2];
+>     } ut, ux;
+>     int n0;
+>     ut.t = 1.0;
+>     n0 = (ut.pt[0] == 0);
+>     ut.t = 0.0;
+>     ux.t = x;
 >
-> Please try -v option when running test-linearizer on this program.
-> Other programs also cause this. Looks like the offending line is
-> accessing the def field in a pseudo - and I think one of your recent
-> changes does not set def anymore?
+> is this:
+>
+> cbrtl:
+> .L0:
+>  <entry-point>
+>  load.32     %r2 <- 0[ut]
+>  seteq.32    %r3 <- %r2, $0
+>  set.64      %r4 <- 0.000000
+>  store.64    %r4 -> 0[ut]
+>  store.64    %arg1 -> 0[ux]
+>
+> The assignment of 1.0 to ut.t has been skipped. Does this look
+> correct? Is there a way to switch off optimisation / simplification?
 >
 
-Sorry I mean above that it does set def in argument pseudos. So
-perhaps a chek is needed when there is an attempt to access def.
+Hi , investigating this further it seems that the problem is in
+kill_dominated_stores(). The original sequence is:
 
-Regards
+        set.64      %r1 <- 1.000000
+        store.64    %r1 -> 0[ut]
+        load.32     %r2 <- 0[ut]
+        seteq.32    %r3 <- %r2, $0
+        store.32    %r3 -> 0[n0]
+        set.64      %r4 <- 0.000000
+        store.64    %r4 -> 0[ut]
+
+As there is a load of 32 from 0[ut] and that value is then stored
+somewhere else, the first store.64 instruction should mot be killed,
+but this is being killed in the above mentioned function. I do not
+understand the code enough to suggest a fix unfortunately.
+
+Thanks and Regards
+Dibyendu
