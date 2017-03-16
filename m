@@ -1,60 +1,67 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse-llvm functions must be cast to correct type before calling
-Date: Thu, 16 Mar 2017 20:58:25 +0000
-Message-ID: <CACXZuxcmizMoxj=xGAJYbbEbCHQC=4E7spC4MUqT1=0d+-NiAw@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [RFC v0 0/4] Give a type to constants too
+Date: Thu, 16 Mar 2017 21:42:35 +0100
+Message-ID: <20170316204233.gdmoriioei6u3vu2@macbook.local>
+References: <20170311154725.87906-1-luc.vanoostenryck@gmail.com>
+ <CA+55aFyqMScsVe8-5T=omdpSsFaYmdD-PbK3KqKW=1gXgitMaA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f46.google.com ([209.85.214.46]:37539 "EHLO
-        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751663AbdCPVF0 (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34326 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753832AbdCPVOE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 16 Mar 2017 17:05:26 -0400
-Received: by mail-it0-f46.google.com with SMTP id g138so3538341itb.0
-        for <linux-sparse@vger.kernel.org>; Thu, 16 Mar 2017 14:05:25 -0700 (PDT)
+        Thu, 16 Mar 2017 17:14:04 -0400
+Received: by mail-wr0-f196.google.com with SMTP id u48so7409149wrc.1
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Mar 2017 14:14:03 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CA+55aFyqMScsVe8-5T=omdpSsFaYmdD-PbK3KqKW=1gXgitMaA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
 
-Hi,
+On Thu, Mar 16, 2017 at 10:25:08AM -0700, Linus Torvalds wrote:
+> Sorry for not reacting to this earlier..
 
-The following test (adapted from snippet posted by Linus) fails in sparse-llvm:
+No problem, of course, but since you're looking over here, hehe,s
+I wonder if you would have an opinion on:
+   http://marc.info/?l=linux-sparse&m=148728997923939&w=4
+and to a lesser degree:
+   http://marc.info/?l=linux-sparse&m=148906980631077&w=4
+I would appreciate it very much.
 
-typedef unsigned int (*binop_t)(int, int);
-typedef unsigned int (*unop_t)(int);
-extern int printf(const char *, ...);
-#define BINOP 0
-#define UNOP 1
-static unsigned int execute(int type, void *fn, int arg1, int arg2)
-{
- if (type == BINOP)
-  return ((binop_t)fn)(arg1,arg2);
- return ((unop_t)fn)(arg1);
-}
-static unsigned int unary(int arg1)
-{
- return arg1+3;
-}
-int main(void)
-{
- return execute(UNOP, unary, 3, 10) == 6 ? 0 : 1;
-}
+> On Sat, Mar 11, 2017 at 7:47 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > This is a RFC for giving a type to constants/PSEUDO_VALs.
+> 
+> This seems completely broken. Not from an implementation standpoint,
+> but from a conceptual one.
 
-To resolve this before calling a function we need to cast it to the
-expected type. This can be done like this in output_op_call():
+Yes, I agree completely. I realized once I tried to make use of it.
 
- struct symbol *ftype = get_function_basetype(insn->fntype);
+> To explain, let me give a completely idiotic example:
 
 ...
 
- LLVMTypeRef function_type = symbol_type(C, fn->module, ftype);
- LLVMTypeRef fptr_type = LLVMPointerType(function_type, 0);
- LLVMTypeRef bytep = LLVMPointerType(LLVMInt8Type(), 0);
- target = LLVMBuildBitCast(fn->builder, func, bytep, name);
- target = LLVMBuildBitCast(fn->builder, target, fptr_type, name);
- target = LLVMBuildCall(fn->builder, target, args, n_arg, name);
- insn->target->priv = target;
+> Linearization has fundamentally gotten rid of all the C types, and all
+> you can find are some rough remnants of them (you can find the *size*
+> of the type, and you can find the rough "type" of type - is it a
+> pointer, FP value or integer. There aren't even any signs, although
+> some _operations_ are signed (but not the pseudos).
+> 
+> The same pseudo can have many different types.
+> 
+>                     Linus
+
+There is just one problem, like Dibyendu noticed, it is when you use
+a constant in the variable part of a variadic function. In this case
+you don't have any type/size information from the function and
+nothing from the pseudo either.
+
+I don't see how this could be done without requiring that pseudos
+(which indded have indeed no type) have a fixed size that must not
+be changed by CSE or the simplifications.
 
 
-Thanks and Regards
-Dibyendu
+-- Luc
