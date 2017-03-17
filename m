@@ -1,44 +1,60 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Cast to double being removed
-Date: Fri, 17 Mar 2017 00:00:00 +0000
-Message-ID: <CACXZuxdNCM5wWvnYhvt65WaX6hSR_fTnaqd7=pv8O81NWoYQ_w@mail.gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: Cast to double being removed
+Date: Thu, 16 Mar 2017 17:24:18 -0700
+Message-ID: <CA+55aFxCqUY5k7=rmmfzW+=44+csM71bxcqqGJgLXqsg5C6F4Q@mail.gmail.com>
+References: <CACXZuxdNCM5wWvnYhvt65WaX6hSR_fTnaqd7=pv8O81NWoYQ_w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:36898 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752993AbdCQAGJ (ORCPT
+Received: from mail-it0-f53.google.com ([209.85.214.53]:37814 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753482AbdCQAYU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 16 Mar 2017 20:06:09 -0400
-Received: by mail-it0-f41.google.com with SMTP id g138so7926414itb.0
-        for <linux-sparse@vger.kernel.org>; Thu, 16 Mar 2017 17:06:08 -0700 (PDT)
+        Thu, 16 Mar 2017 20:24:20 -0400
+Received: by mail-it0-f53.google.com with SMTP id g138so8285902itb.0
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Mar 2017 17:24:19 -0700 (PDT)
+In-Reply-To: <CACXZuxdNCM5wWvnYhvt65WaX6hSR_fTnaqd7=pv8O81NWoYQ_w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi,
+On Thu, Mar 16, 2017 at 5:00 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>
+> The cast to double has been removed. I am trying to understand where
+> this is happening as it seems to happen quite early on. Any tips on
+> where I should look?
 
-In this simple example:
+Since sparse was mostly done for kernel stuff, there's almost no
+floating point support anywhere.
 
-extern int printf(const char *, ...);
-int main(void)
-{
-    printf("%f\n", (double)-1);
-    return 0;
-}
+There's something seriously screwed up with explicit double casting.
+See the differences between
 
-The linearized output is:
+  double f1(void) { return -1; }
+  double f2(void) { return (double)-1; }
+  double f3(void) { return -1.0; }
 
-main:
-.L0:
-        <entry-point>
-        symaddr.64  %r1 <- <anon symbol:000001BAAB487258>
-        call.32     %r2 <- printf, %r1, $-1
-        ret.32      $0
+and notice how the first one and third ones actually kind-of make
+sense. The second one? Not so much, it just uses a 64-bit integer.
 
-The cast to double has been removed. I am trying to understand where
-this is happening as it seems to happen quite early on. Any tips on
-where I should look?
+The bug is already at the parse tree stage, the linearization doesn't
+even see the cast.
 
-Thanks and Regards
-Dibyendu
+I think it's this, in simplify_cast():
+
+        /* A cast of a constant? */
+        if (constant(src)) {
+                int sign = orig_type->ctype.modifiers & MOD_SIGNED;
+                long long val = get_cast_value(src->value, orig_size,
+size, sign);
+                src = value_pseudo(val);
+                goto simplify;
+        }
+
+which doesn't even check whether it's a FP value, it just looks if
+it's a constant and assumes it's an integer. At least it checks the
+sign ;)
+
+               Linus
