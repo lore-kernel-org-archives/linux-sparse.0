@@ -1,231 +1,131 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm incorrect definition of local variables
-Date: Fri, 17 Mar 2017 10:48:18 +0000
-Message-ID: <CACXZuxfx_s4bhStgFP9d-jWCEJDLhYmJADOGbi-A2A7_KE_jeQ@mail.gmail.com>
-References: <CACXZuxdH3tryp92DVHhd8zs9bUTbrAs92Pz+knnDqDzj4eXWYQ@mail.gmail.com>
- <CACXZuxeGTrPGUqsyXGR3t_kh3YHjejGC+MHTZNms8pTi4VPUSw@mail.gmail.com> <CACXZuxfJ0sTgU32u=7ks-bAy5hEHsFRqOSG3DedgJ7DH2RLBfw@mail.gmail.com>
+Subject: Re: [RFC v0 0/4] Give a type to constants, considered harmful
+Date: Fri, 17 Mar 2017 11:03:49 +0000
+Message-ID: <CACXZuxcfGzSFvvdE9nGZmKbcMKTOi=CWJDTOFC3QLbawCqZbBQ@mail.gmail.com>
+References: <20170311154725.87906-1-luc.vanoostenryck@gmail.com>
+ <20170312203040.erc4n2iollen2274@macpro.local> <CACXZuxd=G7mMX2msGh6TuQMgDYkM3G6H5O2Yab6MWbWPJmWtKA@mail.gmail.com>
+ <20170316172001.zyn7fu6ig4aoyez5@macbook.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:36509 "EHLO
+Received: from mail-it0-f43.google.com ([209.85.214.43]:38306 "EHLO
         mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751140AbdCQKsU (ORCPT
+        with ESMTP id S1750980AbdCQLMc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 17 Mar 2017 06:48:20 -0400
-Received: by mail-it0-f43.google.com with SMTP id w124so18594247itb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 17 Mar 2017 03:48:19 -0700 (PDT)
-In-Reply-To: <CACXZuxfJ0sTgU32u=7ks-bAy5hEHsFRqOSG3DedgJ7DH2RLBfw@mail.gmail.com>
+        Fri, 17 Mar 2017 07:12:32 -0400
+Received: by mail-it0-f43.google.com with SMTP id m27so21122264iti.1
+        for <linux-sparse@vger.kernel.org>; Fri, 17 Mar 2017 04:10:44 -0700 (PDT)
+In-Reply-To: <20170316172001.zyn7fu6ig4aoyez5@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
 
-Hi
+Hi Luc,
 
-I found additional issues with the handling of variables, in
-particular if a variable is declared static inside a function.
-Following is an updated set of changes that improve the situation.
-These are against my modified code base but should translate easily to
-sparse-llvm.
+On 16 March 2017 at 17:20, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Sun, Mar 12, 2017 at 10:25:48PM +0000, Dibyendu Majumdar wrote:
+>> On 12 March 2017 at 20:30, Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
+>> > I have begun to try to make use of this and I'm now convinced
+>> > that this direction is not a viable solution for sparse.
+>> >
+>> > Sparse's IR is slightly lower-level that LLVM's IR, more close
+>> > to what a real CPU would do. This can already be seen at some
+>> > instructions (nothing like GEP in sparse), the real difference
+>> > is less obvious but it's heer that things begin to hurt.
+>> > Indeed, sparse's CPU-like model implies that values are typeless
+>> > but have a size and sparse's CSE and simplification is heavily
+>> > based on this.
+>> > Once you try to add and maintain complete and correct typing to
+>> > sparse's instructions so that they can be used easily by sparse-llvm
+>> > you realize that:
+>> > - you need to add a lot more casts
+>> > - you need to change CSE to make things equivalent only if they
+>> >   have the same type
+>> > - a lot of simplifications are wrong, some can be corrected by adding
+>> >   even more casts.
+>> >
+>> > So, while I'm very fine to add typing info where it was missing,
+>> > I have no interest in making the simplifications more complex and
+>> > of lesser quality.
+>> >
+>>
+>> I do not know / understand enough to comment on this but I find that
+>> your patches are working well for sparse-llvm.
+>
+> Yes, sure. This fixes a number of issues regarding sparse-llvm and
+> more importantly it gives opportinities for even more fixes.
+>
+> But if you look at patch 4/4, you can see that I already had to
+> restrict equivalent (for Common Subexpression Elimination)
+> PSEUDO_VAL to those of the same type. That's annoying.
+>
+> Once you take the simplifications in account, you realize that a
+> pseudo that had one type before simplification become of another
+> type after simplification. This is more annoying but yes fixable
+> with a cost.
+>
+> And in general, the simplifications we do destroy the exact (C) types.
+> From what I've seen there is no way we can keep the full types and
+> do the simplifications we do.
+>
+> So, even giving the correct types to the instructions that missed
+> them is useless once you do the CSE and the simplifications.
+> Which is perfectly logical, once the types have been validated
+> why would the IR instructions mind that the value is 'int' or 'long'
+> if both have the same size, same with a plain 'int' and a 'const int'?
+> Same with addresses of object of different types.
+>
+> After all, LLVM also don't care much about primitive types, integers
+> also are not typed, just their size matter (and the information about
+> the size is carried by the instruction). It's only for pointers that
+> LLVM care about the size.
+>
+>> In particular without
+>> the type information in constants, I cannot see how variadic functions
+>> can be called correctly.
+>
+> Yes, variadic called with constants is an 'interesting' case.
+> But here also, it's not the the type that is needed for correctness,
+> it's only the size.
+>
+>> If the changes done so far haven't broken anything then perhaps they
+>> can be left in?
+>
+> I'll of course do my best to keep as much as possible.
+>
+> For sparse-llvm, I haven't thought a lot about it, partly because
+> I'm not interested in it, but I think there is two possibilities
+> for it to be correct and complete:
+> 1) ignore as much typing as possible, including casting pointers
+>    to integer of the right size (wich will emiminate all issues with
+>    GEP and pointer arithmetic, and only casting them back to pointers
+>    for loads & stores.
+> 2) bypass the CSE & simplification (and possibly using LLVM's
+>    optimization phases).
+>
 
-static LLVMValueRef build_local(struct dmr_C *C, struct function *fn,
-struct symbol *sym)
-{
- const char *name = show_ident(C, sym->ident);
- LLVMTypeRef type = symbol_type(C, fn->module, sym);
- LLVMValueRef result;
- char localname[256] = { 0 };
- snprintf(localname, sizeof localname, "%s_%p", name, sym);
- if (is_static(sym) || is_extern(sym) || is_toplevel(sym)) {
-  result = LLVMGetNamedGlobal(fn->module, localname);
-  if (!result) {
-   result = LLVMAddGlobal(fn->module, type, localname);
-   if (!is_extern(sym))
-    LLVMSetLinkage(result, LLVMInternalLinkage);
-   else
-    LLVMSetLinkage(result, LLVMExternalLinkage);
-  }
- }
- else {
-  /* insert alloca into entry block */
-  /* LLVM requires allocas to be at the start */
-  LLVMBasicBlockRef entrybbr = LLVMGetEntryBasicBlock(fn->fn);
-  /* Use temporary Builder as we don't want to mess the function builder */
-  LLVMBuilderRef tmp_builder = LLVMCreateBuilder();
-  LLVMValueRef firstins = LLVMGetFirstInstruction(entrybbr);
-  if (firstins)
-   LLVMPositionBuilderBefore(tmp_builder, firstins);
-  else
-   LLVMPositionBuilderAtEnd(tmp_builder, entrybbr);
-  /* Since multiple locals may have same name but in different scopes we
-  append the symbol's address to make each variable unique */
-  result = LLVMBuildAlloca(tmp_builder, type, localname);
-  LLVMDisposeBuilder(tmp_builder);
- }
- sym->priv = result;
- return result;
-}
+Thank you for the detailed explanation of issues. I agree that there
+is a mismatch of levels in the sparse linearized IR which is low level
+and the LLVM IR which is somewhat higher level. It is still possible
+to make sparse-llvm work by essentially casting most results to the
+expected type. If for PSEUDO_VALs we had the size information only -
+that would help because all we need is the size to ensure that the
+value is passed correctly during a function call in the variadic
+function case.
 
-static LLVMValueRef pseudo_to_value(struct dmr_C *C, struct function
-*fn, struct instruction *insn, pseudo_t pseudo)
-{
- LLVMValueRef result = NULL;
-...
- case PSEUDO_SYM: {
-  struct symbol *sym = pseudo->sym;
-  struct expression *expr;
-  result = (LLVMValueRef)sym->priv;
-  if (result)
-   return result;
-  assert(sym->bb_target == NULL);
-  expr = sym->initializer;
-  if (expr) {
-   switch (expr->type) {
-   case EXPR_STRING: {
-    const char *s = expr->string->data;
-    LLVMValueRef indices[] = { LLVMConstInt(LLVMInt64Type(), 0, 0),
-LLVMConstInt(LLVMInt64Type(), 0, 0) };
-    LLVMValueRef data;
-    data = LLVMAddGlobal(fn->module, LLVMArrayType(LLVMInt8Type(),
-strlen(s) + 1), ".str");
-    LLVMSetLinkage(data, LLVMPrivateLinkage);
-    LLVMSetGlobalConstant(data, 1);
-    char *scopy = allocator_allocate(&C->byte_allocator, strlen(s) + 1);
-    strcpy(scopy, s);
-    LLVMSetInitializer(data, LLVMConstString(scopy, strlen(scopy) + 1, true));
-    result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
-    sym->priv = result;
-    break;
-   }
-   case EXPR_SYMBOL: {
-    expression_error(C, expr, "unresolved symbol reference in initializer\n");
-    show_expression(C, expr);
-    exit(1);
-    break;
-   }
-   case EXPR_VALUE:
-    result = build_local(C, fn, sym);
-    if (is_static(sym))
-     LLVMSetInitializer(result, LLVMConstInt(symbol_type(C,
-fn->module, sym), expr->value, 1));
-    else
-     LLVMBuildStore(fn->builder, LLVMConstInt(symbol_type(C,
-fn->module, sym), expr->value, 1), result);
-    sym->priv = result;
-    break;
-   case EXPR_FVALUE:
-    result = build_local(C, fn, sym);
-    if (is_static(sym))
-     LLVMSetInitializer(result, LLVMConstReal(symbol_type(C,
-fn->module, sym), expr->fvalue));
-    else
-     LLVMBuildStore(fn->builder, LLVMConstReal(symbol_type(C,
-fn->module, sym), expr->fvalue), result);
-    sym->priv = result;
-    break;
-   default:
-    expression_error(C, expr, "unsupported expr type in initializer:
-%d\n", expr->type);
-    show_expression(C, expr);
-    exit(1);
-   }
-  }
-  else {
-   const char *name = show_ident(C, sym->ident);
-   LLVMTypeRef type = symbol_type(C, fn->module, sym);
-   if (LLVMGetTypeKind(type) == LLVMFunctionTypeKind) {
-    result = LLVMGetNamedFunction(fn->module, name);
-    if (!result)
-     result = LLVMAddFunction(fn->module, name, type);
-    sym->priv = result;
-   }
-   else if (is_extern(sym) || is_toplevel(sym)) {
-    result = LLVMGetNamedGlobal(fn->module, name);
-    if (!result) {
-     result = LLVMAddGlobal(fn->module, type, name);
-     if (is_extern(sym))
-      LLVMSetLinkage(result, LLVMExternalLinkage);
-    }
-    sym->priv = result;
-   }
-   else {
-    result = build_local(C, fn, sym);
-    if (is_static(sym)) {
-     LLVMSetInitializer(result, LLVMConstNull(type));
-    }
-    sym->priv = result;
-   }
-  }
-  break;
- }
- case PSEUDO_VAL: {
-...
- return result;
-}
+The downside of the approach required in sparse-llvm is that LLVM will
+not be able to perform many of its optimisations which require
+additional type based metadata.
 
-static LLVMValueRef output_data(struct dmr_C *C, LLVMModuleRef module,
-struct symbol *sym)
-{
- struct expression *initializer = sym->initializer;
- LLVMValueRef initial_value = NULL;
- LLVMValueRef data = NULL;
- const char *name;
- if (initializer) {
-  switch (initializer->type) {
-  case EXPR_VALUE:
-   initial_value = LLVMConstInt(symbol_type(C, module, sym),
-initializer->value, 1);
-   break;
-  case EXPR_FVALUE:
-   initial_value = LLVMConstReal(symbol_type(C, module, sym),
-initializer->fvalue);
-   break;
-  case EXPR_SYMBOL: {
-   struct symbol *sym = initializer->symbol;
-   if (sym->ident)
-    initial_value = LLVMGetNamedGlobal(module, show_ident(C, sym->ident));
-   if (!initial_value)
-    initial_value = output_data(C, module, sym);
-   break;
-  }
-  case EXPR_STRING: {
-   const char *s = initializer->string->data;
-   char *scopy = allocator_allocate(&C->byte_allocator, strlen(s) + 1);
-   strcpy(scopy, s);
-   initial_value = LLVMConstString(scopy, strlen(scopy) + 1, true);
-   break;
-  }
-  default:
-   expression_error(C, initializer, "unsupported expr type in global
-data initializer: %d\n", initializer->type);
-   show_expression(C, initializer);
-  }
-  if (!initial_value)
-   return NULL;
- } else {
-  LLVMTypeRef type = symbol_type(C, module, sym);
-  initial_value = LLVMConstNull(type);
- }
- name = show_ident(C, sym->ident);
- if (!sym->priv) {
-  if (sym->ident)
-   data = LLVMGetNamedGlobal(module, name);
-  if (!data)
-   data = LLVMAddGlobal(module, LLVMTypeOf(initial_value), name);
-  LLVMSetLinkage(data, data_linkage(C, sym));
-  if (sym->ctype.modifiers & MOD_CONST)
-   LLVMSetGlobalConstant(data, 1);
-  if (sym->ctype.modifiers & MOD_TLS)
-   LLVMSetThreadLocal(data, 1);
-  if (sym->ctype.alignment)
-   LLVMSetAlignment(data, sym->ctype.alignment);
-  if (!(sym->ctype.modifiers & MOD_EXTERN))
-   LLVMSetInitializer(data, initial_value);
-  sym->priv = data;
- }
- else {
-  data = sym->priv;
-  if (!(sym->ctype.modifiers & MOD_EXTERN))
-   LLVMSetInitializer(data, initial_value);
- }
- return data;
-}
+Once the sparse-llvm implementation works correctly for real life
+complex programs, I hope to start work on a different backend using
+'nanojit'. The nanojit IR is close to sparse IR, except there are no
+phi nodes. But we convert phis to stack variables in sparse-llvm
+anyway so this approach will translate well. 'nanojit' is very small
+JIT - much less capable than LLVM but at the same time, better as a
+JIT engine due to speed of compilation and compactness.
+
+Thanks and Regards
+Dibyendu
