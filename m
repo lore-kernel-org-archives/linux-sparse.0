@@ -1,131 +1,301 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [RFC v0 0/4] Give a type to constants, considered harmful
-Date: Fri, 17 Mar 2017 11:03:49 +0000
-Message-ID: <CACXZuxcfGzSFvvdE9nGZmKbcMKTOi=CWJDTOFC3QLbawCqZbBQ@mail.gmail.com>
-References: <20170311154725.87906-1-luc.vanoostenryck@gmail.com>
- <20170312203040.erc4n2iollen2274@macpro.local> <CACXZuxd=G7mMX2msGh6TuQMgDYkM3G6H5O2Yab6MWbWPJmWtKA@mail.gmail.com>
- <20170316172001.zyn7fu6ig4aoyez5@macbook.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH] use OP_PUSH + OP_CALL
+Date: Fri, 17 Mar 2017 12:30:39 +0100
+Message-ID: <20170317113039.32507-1-luc.vanoostenryck@gmail.com>
+References: <CA+55aFzKqWTZBdDG+ecedw40HxEs0FezqJBuc=VRTvj1Bmps7Q@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f43.google.com ([209.85.214.43]:38306 "EHLO
-        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbdCQLMc (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36848 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750898AbdCQLar (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 17 Mar 2017 07:12:32 -0400
-Received: by mail-it0-f43.google.com with SMTP id m27so21122264iti.1
-        for <linux-sparse@vger.kernel.org>; Fri, 17 Mar 2017 04:10:44 -0700 (PDT)
-In-Reply-To: <20170316172001.zyn7fu6ig4aoyez5@macbook.local>
+        Fri, 17 Mar 2017 07:30:47 -0400
+Received: by mail-wr0-f194.google.com with SMTP id l37so9172833wrc.3
+        for <linux-sparse@vger.kernel.org>; Fri, 17 Mar 2017 04:30:46 -0700 (PDT)
+In-Reply-To: <CA+55aFzKqWTZBdDG+ecedw40HxEs0FezqJBuc=VRTvj1Bmps7Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi Luc,
+Here is the introduction of a new instruction
+very similar to 'push' instructions in real CPU
+which purpose is to give a correct type to function
+arguments.
 
-On 16 March 2017 at 17:20, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Sun, Mar 12, 2017 at 10:25:48PM +0000, Dibyendu Majumdar wrote:
->> On 12 March 2017 at 20:30, Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
->> > I have begun to try to make use of this and I'm now convinced
->> > that this direction is not a viable solution for sparse.
->> >
->> > Sparse's IR is slightly lower-level that LLVM's IR, more close
->> > to what a real CPU would do. This can already be seen at some
->> > instructions (nothing like GEP in sparse), the real difference
->> > is less obvious but it's heer that things begin to hurt.
->> > Indeed, sparse's CPU-like model implies that values are typeless
->> > but have a size and sparse's CSE and simplification is heavily
->> > based on this.
->> > Once you try to add and maintain complete and correct typing to
->> > sparse's instructions so that they can be used easily by sparse-llvm
->> > you realize that:
->> > - you need to add a lot more casts
->> > - you need to change CSE to make things equivalent only if they
->> >   have the same type
->> > - a lot of simplifications are wrong, some can be corrected by adding
->> >   even more casts.
->> >
->> > So, while I'm very fine to add typing info where it was missing,
->> > I have no interest in making the simplifications more complex and
->> > of lesser quality.
->> >
->>
->> I do not know / understand enough to comment on this but I find that
->> your patches are working well for sparse-llvm.
->
-> Yes, sure. This fixes a number of issues regarding sparse-llvm and
-> more importantly it gives opportinities for even more fixes.
->
-> But if you look at patch 4/4, you can see that I already had to
-> restrict equivalent (for Common Subexpression Elimination)
-> PSEUDO_VAL to those of the same type. That's annoying.
->
-> Once you take the simplifications in account, you realize that a
-> pseudo that had one type before simplification become of another
-> type after simplification. This is more annoying but yes fixable
-> with a cost.
->
-> And in general, the simplifications we do destroy the exact (C) types.
-> From what I've seen there is no way we can keep the full types and
-> do the simplifications we do.
->
-> So, even giving the correct types to the instructions that missed
-> them is useless once you do the CSE and the simplifications.
-> Which is perfectly logical, once the types have been validated
-> why would the IR instructions mind that the value is 'int' or 'long'
-> if both have the same size, same with a plain 'int' and a 'const int'?
-> Same with addresses of object of different types.
->
-> After all, LLVM also don't care much about primitive types, integers
-> also are not typed, just their size matter (and the information about
-> the size is carried by the instruction). It's only for pointers that
-> LLVM care about the size.
->
->> In particular without
->> the type information in constants, I cannot see how variadic functions
->> can be called correctly.
->
-> Yes, variadic called with constants is an 'interesting' case.
-> But here also, it's not the the type that is needed for correctness,
-> it's only the size.
->
->> If the changes done so far haven't broken anything then perhaps they
->> can be left in?
->
-> I'll of course do my best to keep as much as possible.
->
-> For sparse-llvm, I haven't thought a lot about it, partly because
-> I'm not interested in it, but I think there is two possibilities
-> for it to be correct and complete:
-> 1) ignore as much typing as possible, including casting pointers
->    to integer of the right size (wich will emiminate all issues with
->    GEP and pointer arithmetic, and only casting them back to pointers
->    for loads & stores.
-> 2) bypass the CSE & simplification (and possibly using LLVM's
->    optimization phases).
->
+It seems to work well but I still need to check
+liveness & DCE.
 
-Thank you for the detailed explanation of issues. I agree that there
-is a mismatch of levels in the sparse linearized IR which is low level
-and the LLVM IR which is somewhat higher level. It is still possible
-to make sparse-llvm work by essentially casting most results to the
-expected type. If for PSEUDO_VALs we had the size information only -
-that would help because all we need is the size to ensure that the
-value is passed correctly during a function call in the variadic
-function case.
+sparse-llvm is fine with it too but it will need
+to be first integrated with the other changes.
 
-The downside of the approach required in sparse-llvm is that LLVM will
-not be able to perform many of its optimisations which require
-additional type based metadata.
 
-Once the sparse-llvm implementation works correctly for real life
-complex programs, I hope to start work on a different backend using
-'nanojit'. The nanojit IR is close to sparse IR, except there are no
-phi nodes. But we convert phis to stack variables in sparse-llvm
-anyway so this approach will translate well. 'nanojit' is very small
-JIT - much less capable than LLVM but at the same time, better as a
-JIT engine due to speed of compilation and compactness.
+-- Luc Van Oostenryck
 
-Thanks and Regards
-Dibyendu
+---
+ example.c                  |  4 ++--
+ linearize.c                | 29 +++++++++++++++++++++--------
+ linearize.h                |  7 ++++++-
+ liveness.c                 | 14 ++++++++------
+ simplify.c                 | 11 ++++++++++-
+ sparse-llvm.c              |  4 ++--
+ validation/call-variadic.c | 31 +++++++++++++++++++++++++++++++
+ 7 files changed, 80 insertions(+), 20 deletions(-)
+ create mode 100644 validation/call-variadic.c
+
+diff --git a/example.c b/example.c
+index 691e0f97c..69e00b325 100644
+--- a/example.c
++++ b/example.c
+@@ -1121,11 +1121,11 @@ static void generate_ret(struct bb_state *state, struct instruction *ret)
+  */
+ static void generate_call(struct bb_state *state, struct instruction *insn)
+ {
++	struct instruction *arg;
+ 	int offset = 0;
+-	pseudo_t arg;
+ 
+ 	FOR_EACH_PTR(insn->arguments, arg) {
+-		output_insn(state, "pushl %s", generic(state, arg));
++		output_insn(state, "pushl %s", generic(state, arg->src));
+ 		offset += 4;
+ 	} END_FOR_EACH_PTR(arg);
+ 	flush_reg(state, hardregs+0);
+diff --git a/linearize.c b/linearize.c
+index 5199b6b02..d5ac71f3d 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -233,6 +233,7 @@ static const char *opcodes[] = {
+ 	[OP_FPCAST] = "fpcast",
+ 	[OP_PTRCAST] = "ptrcast",
+ 	[OP_INLINED_CALL] = "# call",
++	[OP_PUSH] = "push",
+ 	[OP_CALL] = "call",
+ 	[OP_VANEXT] = "va_next",
+ 	[OP_VAARG] = "va_arg",
+@@ -407,17 +408,15 @@ const char *show_instruction(struct instruction *insn)
+ 	case OP_STORE: case OP_SNOP:
+ 		buf += sprintf(buf, "%s -> %d[%s]", show_pseudo(insn->target), insn->offset, show_pseudo(insn->src));
+ 		break;
++	case OP_PUSH:
++		buf += sprintf(buf, "%s", show_pseudo(insn->src));
++		break;
+ 	case OP_INLINED_CALL:
+-	case OP_CALL: {
+-		struct pseudo *arg;
++	case OP_CALL:
+ 		if (insn->target && insn->target != VOID)
+ 			buf += sprintf(buf, "%s <- ", show_pseudo(insn->target));
+ 		buf += sprintf(buf, "%s", show_pseudo(insn->func));
+-		FOR_EACH_PTR(insn->arguments, arg) {
+-			buf += sprintf(buf, ", %s", show_pseudo(arg));
+-		} END_FOR_EACH_PTR(arg);
+ 		break;
+-	}
+ 	case OP_CAST:
+ 	case OP_SCAST:
+ 	case OP_FPCAST:
+@@ -1197,6 +1196,20 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+ 	return value;
+ }
+ 
++/*
++ * Add an argument for a call.
++ *   -) insn->opcode == O_CALL | OP_INLINE_CALL
++ *   -) ctype = typeof(arg)
++ */
++static void push_argument(struct entrypoint *ep, struct instruction *insn, pseudo_t arg, struct symbol *ctype)
++{
++	struct instruction *push = alloc_typed_instruction(OP_PUSH, ctype);
++	push->call = insn;
++	use_pseudo(push, arg, &push->src);
++	add_instruction(&insn->arguments, push);
++	add_one_insn(ep, push);
++}
++
+ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expression *expr)
+ {
+ 	struct expression *arg, *fn;
+@@ -1213,7 +1226,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
+ 
+ 	FOR_EACH_PTR(expr->args, arg) {
+ 		pseudo_t new = linearize_expression(ep, arg);
+-		use_pseudo(insn, new, add_pseudo(&insn->arguments, new));
++		push_argument(ep, insn, new, arg->ctype);
+ 	} END_FOR_EACH_PTR(arg);
+ 
+ 	fn = expr->fn;
+@@ -1680,7 +1693,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
+ 		concat_symbol_list(args->declaration, &ep->syms);
+ 		FOR_EACH_PTR(args->declaration, sym) {
+ 			pseudo_t value = linearize_one_symbol(ep, sym);
+-			use_pseudo(insn, value, add_pseudo(&insn->arguments, value));
++			push_argument(ep, insn, value, sym);
+ 		} END_FOR_EACH_PTR(sym);
+ 	}
+ 
+diff --git a/linearize.h b/linearize.h
+index bac82d7ff..7b6e53fc5 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -112,9 +112,13 @@ struct instruction {
+ 		};
+ 		struct /* call */ {
+ 			pseudo_t func;
+-			struct pseudo_list *arguments;
++			struct instruction_list *arguments;
+ 			struct symbol *fntype;
+ 		};
++		struct /* push/arg */ {
++			pseudo_t arg;			/* same as src, src1 & symbol */
++			struct instruction *call;
++		};
+ 		struct /* context */ {
+ 			int increment;
+ 			int check;
+@@ -201,6 +205,7 @@ enum opcode {
+ 	OP_FPCAST,
+ 	OP_PTRCAST,
+ 	OP_INLINED_CALL,
++	OP_PUSH,
+ 	OP_CALL,
+ 	OP_VANEXT,
+ 	OP_VAARG,
+diff --git a/liveness.c b/liveness.c
+index 7461738b4..7b5b1693a 100644
+--- a/liveness.c
++++ b/liveness.c
+@@ -46,13 +46,12 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
+ 	void (*def)(struct basic_block *, pseudo_t),
+ 	void (*use)(struct basic_block *, pseudo_t))
+ {
+-	pseudo_t pseudo;
+-
+ 	#define USES(x)		use(bb, insn->x)
+ 	#define DEFINES(x)	def(bb, insn->x)
+ 
+ 	switch (insn->opcode) {
+ 	case OP_RET:
++	case OP_PUSH:
+ 		USES(src);
+ 		break;
+ 
+@@ -118,14 +117,17 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
+ 		USES(src); DEFINES(target);
+ 		break;
+ 
+-	case OP_CALL:
++	case OP_CALL: {
++		struct instruction *arg;
++
+ 		USES(func);
+ 		if (insn->target != VOID)
+ 			DEFINES(target);
+-		FOR_EACH_PTR(insn->arguments, pseudo) {
+-			use(bb, pseudo);
+-		} END_FOR_EACH_PTR(pseudo);
++		FOR_EACH_PTR(insn->arguments, arg) {
++			use(bb, arg->src);
++		} END_FOR_EACH_PTR(arg);
+ 		break;
++	}
+ 
+ 	case OP_SLICE:
+ 		USES(base); DEFINES(target);
+diff --git a/simplify.c b/simplify.c
+index 5d00937f1..9a3abdff4 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -182,6 +182,14 @@ static void kill_use_list(struct pseudo_list *list)
+ 	} END_FOR_EACH_PTR(p);
+ }
+ 
++static void kill_insn_list(struct instruction_list *list)
++{
++	struct instruction *insn;
++	FOR_EACH_PTR(list, insn) {
++		kill_insn(insn, 0);
++	} END_FOR_EACH_PTR(insn);
++}
++
+ /*
+  * kill an instruction:
+  * - remove it from its bb
+@@ -213,6 +221,7 @@ void kill_insn(struct instruction *insn, int force)
+ 	case OP_SETVAL:
+ 	case OP_NOT: case OP_NEG:
+ 	case OP_SLICE:
++	case OP_PUSH:
+ 		kill_use(&insn->src1);
+ 		break;
+ 
+@@ -240,7 +249,7 @@ void kill_insn(struct instruction *insn, int force)
+ 			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
+ 				return;
+ 		}
+-		kill_use_list(insn->arguments);
++		kill_insn_list(insn->arguments);
+ 		if (insn->func->type == PSEUDO_REG)
+ 			kill_use(&insn->func);
+ 		break;
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 9f362b3ed..ecc4f032f 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -707,7 +707,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ {
+ 	LLVMValueRef target, func;
+ 	int n_arg = 0, i;
+-	struct pseudo *arg;
++	struct instruction *arg;
+ 	LLVMValueRef *args;
+ 
+ 	FOR_EACH_PTR(insn->arguments, arg) {
+@@ -718,7 +718,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ 
+ 	i = 0;
+ 	FOR_EACH_PTR(insn->arguments, arg) {
+-		args[i++] = pseudo_to_value(fn, insn, arg);
++		args[i++] = pseudo_to_value(fn, arg, arg->src);
+ 	} END_FOR_EACH_PTR(arg);
+ 
+ 	func = pseudo_to_value(fn, insn, insn->func);
+diff --git a/validation/call-variadic.c b/validation/call-variadic.c
+new file mode 100644
+index 000000000..372c8fc7d
+--- /dev/null
++++ b/validation/call-variadic.c
+@@ -0,0 +1,31 @@
++#define NULL	((void*)0)
++
++extern int print(const char *msg, ...);
++
++int foo(int a, long l, int *p)
++{
++	print("msg %c: %d %d/%ld %ld/%p %p\n", 'x', a, __LINE__, l, 0L, p, NULL);
++}
++
++/*
++ * check-name: call-variadic
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++foo:
++.L0:
++	<entry-point>
++	push.64     "msg %c: %d %d/%ld %ld/%p %p\n"
++	push.32     $120
++	push.32     %arg1
++	push.32     $7
++	push.64     %arg2
++	push.64     $0
++	push.64     %arg3
++	push.64     $0
++	call.32     %r5 <- print
++	ret.32      %r5
++
++
++ * check-output-end
++ */
+-- 
+2.12.0
+
