@@ -1,31 +1,34 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse-llvm incorrect type when ealing with union type
-Date: Sun, 19 Mar 2017 16:36:10 +0100
-Message-ID: <20170319153609.yykbjbbb6v4lw4xb@macpro.local>
-References: <CACXZuxcb=27brA9N=w-tnZ9V0StKnDYZ4y27cS6eoenA7S0ctw@mail.gmail.com>
+Subject: Re: sparse-llvm subtraction of one pointer from another should
+ result in int difference
+Date: Sun, 19 Mar 2017 16:37:42 +0100
+Message-ID: <20170319153742.5zuijqckyw67tyks@macpro.local>
+References: <CACXZuxdaVMn8gHkUWWp6opkB0CJ7WAVmEt2P_yqtT9WUO_-LVQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f175.google.com ([209.85.128.175]:35018 "EHLO
-        mail-wr0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751731AbdCSPgn (ORCPT
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:34317 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751511AbdCSPib (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 19 Mar 2017 11:36:43 -0400
-Received: by mail-wr0-f175.google.com with SMTP id g10so78258854wrg.2
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 08:36:13 -0700 (PDT)
+        Sun, 19 Mar 2017 11:38:31 -0400
+Received: by mail-wm0-f53.google.com with SMTP id 196so14877193wmm.1
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 08:37:45 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CACXZuxcb=27brA9N=w-tnZ9V0StKnDYZ4y27cS6eoenA7S0ctw@mail.gmail.com>
+In-Reply-To: <CACXZuxdaVMn8gHkUWWp6opkB0CJ7WAVmEt2P_yqtT9WUO_-LVQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Mar 13, 2017 at 10:54:01PM +0000, Dibyendu Majumdar wrote:
+On Mon, Mar 13, 2017 at 08:59:02PM +0000, Dibyendu Majumdar wrote:
 > Hi,
 > 
-> I am investigating a type error in LLVM. Here is the snippet of code:
+> I was investigating an error reported while compiling minilua (please
+> see my earlier post on minlua) and I found that one of the issues was
+> that the result of subtracting one pointer from another is not handled
+> correctly in sparse-llvm.
 
-This seems to be fixed in the llvm-fixes-v3 serie I submitted yesterday.
-But I never saw exactly what was the specific problem here.
+This is fixed in the llvm-fixes-v3 serie I submitted yesterday.
 
 -- Luc
