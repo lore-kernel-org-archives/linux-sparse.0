@@ -1,65 +1,60 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Small improvement to output from show_instruction()
-Date: Sun, 19 Mar 2017 13:16:46 +0000
-Message-ID: <CACXZuxchDG8VnvN5cY=TXwcRe46DDpLx8Hh5eRx6KGq91oLn_w@mail.gmail.com>
+Subject: Re: sparse-llvm the LLVM IR for select instruction fails due to
+ different types
+Date: Sun, 19 Mar 2017 13:04:30 +0000
+Message-ID: <CACXZuxeAaEGy25AmMky9GLrS0eetEg9O4dMTWk9TfB=Sm+Vc2A@mail.gmail.com>
+References: <CACXZuxcGKmEbv=Umh26U=Uermy+n1f2A9_ZmBYJHE15WBYPFrw@mail.gmail.com>
+ <20170319002145.4x3amj6bnb36yocj@macbook.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f47.google.com ([209.85.214.47]:36504 "EHLO
-        mail-it0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751300AbdCSNRk (ORCPT
+Received: from mail-it0-f44.google.com ([209.85.214.44]:35665 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751262AbdCSNhD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 19 Mar 2017 09:17:40 -0400
-Received: by mail-it0-f47.google.com with SMTP id w124so64292535itb.1
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 06:16:47 -0700 (PDT)
+        Sun, 19 Mar 2017 09:37:03 -0400
+Received: by mail-it0-f44.google.com with SMTP id y18so8173496itc.0
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 06:37:02 -0700 (PDT)
+In-Reply-To: <20170319002145.4x3amj6bnb36yocj@macbook.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi
+On 19 March 2017 at 00:21, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Tue, Mar 14, 2017 at 04:07:40PM +0000, Dibyendu Majumdar wrote:
+>> LLVM complains when the operands of a select are not the same type. I
+>> think it is okay to cast one of the operands to the type of the other
+>> - on the basis that subsequent operations will cast things anyway.
+>
+> Submit a test case, please.
+>
 
-To aid understanding and for debugging it is useful if the instruction
-type is indicated when the type is not an integer value. I suggest
-following small change to show_instruction():
-
- if (opcode < ARRAY_SIZE(opcodes)) {
-  const char *op = opcodes[opcode];
-  if (!op)
-   buf += sprintf(buf, "opcode:%d", opcode);
-  else
-   buf += sprintf(buf, "%s", op);
-  if (insn->type && is_float_type(insn->type))
-   buf += sprintf(buf, ".f%d", insn->size);
-  else if (insn->size)
-   buf += sprintf(buf, ".%d", insn->size);
-  if (insn->type) {
-   if (is_ptr_type(insn->type))
-    buf += sprintf(buf, "*");
-  }
-  memset(buf, ' ', 20);
-  buf++;
- }
-
-For example, the output for following:
-
-extern int printf(const char *, ...);
-int main(void)
+typedef union GCObject GCObject;
+typedef union {
+ GCObject *gc;
+ void *p;
+ int b;
+} Value;
+typedef struct lua_TValue {
+ Value value;
+ int tt;
+} TValue;
+typedef struct CClosure {
+ GCObject *next;
+ TValue upvalue[1];
+} CClosure;
+typedef struct LClosure {
+ GCObject *next;
+ GCObject *gclist;
+} LClosure;
+typedef union Closure {
+ CClosure c;
+ LClosure l;
+} Closure;
+static TValue luaO_nilobject_;
+TValue *select(Closure *closure, int op)
 {
-    printf("%f\n", (double)-1);
-    return 0;
+ return op == 1 ? &closure->c.upvalue[0] : (TValue *) &luaO_nilobject_;
 }
-
-is shown as:
-
-main:
-.L0:
-        <entry-point>
-        symaddr.64* %r1 <- <anon symbol:0000024A51894818>
-        push.64*    %r1
-        push.f64    $-1
-        call.32     %r2 <- printf
-        ret.32      $0
-
-
-Thanks and Regards
-Dibyendu
