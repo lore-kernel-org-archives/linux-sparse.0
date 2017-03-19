@@ -1,113 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 01/30] fix usage of inlined calls
-Date: Sun, 19 Mar 2017 02:41:58 +0100
-Message-ID: <20170319014227.8833-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 11/30] llvm: give arguments a name
+Date: Sun, 19 Mar 2017 02:42:08 +0100
+Message-ID: <20170319014227.8833-12-luc.vanoostenryck@gmail.com>
 References: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34466 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751315AbdCSBmk (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:33756 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751398AbdCSBmv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Mar 2017 21:42:40 -0400
-Received: by mail-wm0-f65.google.com with SMTP id u132so8889931wmg.1
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:42:38 -0700 (PDT)
+        Sat, 18 Mar 2017 21:42:51 -0400
+Received: by mail-wr0-f195.google.com with SMTP id g10so13853483wrg.0
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:42:49 -0700 (PDT)
 In-Reply-To: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_INLINED_CALL are there only as a sort of annotation
-for debugging purpose. It is thus wrong to associate
-pseudo's usage to them (even if the pseudo are the arguments
-of the function now inlined).
+Arguments, like all LLVMValues, are given a default name
+but these name are simply '%0', '%1', ... and are thus not
+very readable.
 
-Fix this by removing the use_pseudo() for each arguments.
+Fix this by giving them an explicit name 'ARG1', ... to
+match the names used in sparse's linearized code.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c               |  2 +-
- validation/call-inlined.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 59 insertions(+), 1 deletion(-)
- create mode 100644 validation/call-inlined.c
+ sparse-llvm.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-diff --git a/linearize.c b/linearize.c
-index 5199b6b02..5337723e2 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1680,7 +1680,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
- 		concat_symbol_list(args->declaration, &ep->syms);
- 		FOR_EACH_PTR(args->declaration, sym) {
- 			pseudo_t value = linearize_one_symbol(ep, sym);
--			use_pseudo(insn, value, add_pseudo(&insn->arguments, value));
-+			add_pseudo(&insn->arguments, value);
- 		} END_FOR_EACH_PTR(sym);
- 	}
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 23ae482e1..b9176e19d 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -955,6 +955,17 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
  
-diff --git a/validation/call-inlined.c b/validation/call-inlined.c
-new file mode 100644
-index 000000000..6fd94edcb
---- /dev/null
-+++ b/validation/call-inlined.c
-@@ -0,0 +1,58 @@
-+static const char messg[] = "def";
+ 	function.builder = LLVMCreateBuilder();
+ 
++	/* give a name to each argument */
++	for (int i = 0; i < nr_args; i++) {
++		char name[MAX_PSEUDO_NAME];
++		LLVMValueRef arg;
 +
-+static inline int add(int a, int b)
-+{
-+	return a + b;
-+}
++		arg = LLVMGetParam(function.fn, i);
++		snprintf(name, sizeof(name), "ARG%d", i+1);
++		LLVMSetValueName(arg, name);
++	}
 +
-+int  foo(int a, int b) { return add(a + b, 1); }
-+void bar(int a, int b) {        add(a + b, 1); }
-+
-+
-+static inline const char *lstrip(const char *str)
-+{
-+	return str + 1;
-+}
-+
-+const char *bas(void) { return lstrip("abc"); }
-+const char *qus(void) { return lstrip(messg); }
-+
-+/*
-+ * check-name: call-inlined
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-start
-+foo:
-+.L0:
-+	<entry-point>
-+	add.32      %r3 <- %arg1, %arg2
-+	add.32      %r5 <- %r3, $1
-+	# call      %r5 <- add, %r3, $1
-+	ret.32      %r5
-+
-+
-+bar:
-+.L3:
-+	<entry-point>
-+	# call      %r12 <- add, %r10, $1
-+	ret
-+
-+
-+bas:
-+.L6:
-+	<entry-point>
-+	add.64      %r16 <- "abc", $1
-+	# call      %r16 <- lstrip, %r14
-+	ret.64      %r16
-+
-+
-+qus:
-+.L9:
-+	<entry-point>
-+	add.64      %r21 <- messg, $1
-+	# call      %r21 <- lstrip, %r19
-+	ret.64      %r21
-+
-+
-+ * check-output-end
-+ */
++	/* create the BBs */
+ 	FOR_EACH_PTR(ep->bbs, bb) {
+ 		static int nr_bb;
+ 		LLVMBasicBlockRef bbr;
 -- 
 2.12.0
 
