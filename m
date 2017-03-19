@@ -1,106 +1,49 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 23/30] llvm: add test cases for degenerated pointers
-Date: Sun, 19 Mar 2017 02:42:20 +0100
-Message-ID: <20170319014227.8833-24-luc.vanoostenryck@gmail.com>
-References: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: sparse-llvm switch constants must all be same type as switch value
+Date: Sun, 19 Mar 2017 12:31:27 +0000
+Message-ID: <CACXZuxc3iC8jKFb-fE4SE=9ujOLK400sRFqH0z5ech4DHqfJ6A@mail.gmail.com>
+References: <CACXZuxfOP79gJbOD=02pPYWV4HQbnN0tRVWup77_etBxvhjAAQ@mail.gmail.com>
+ <20170319005245.os6jl436ajvqiyud@macpro.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36176 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751424AbdCSBnC (ORCPT
+Received: from mail-it0-f52.google.com ([209.85.214.52]:34346 "EHLO
+        mail-it0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751262AbdCSMcE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Mar 2017 21:43:02 -0400
-Received: by mail-wr0-f196.google.com with SMTP id l37so13792252wrc.3
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:43:01 -0700 (PDT)
-In-Reply-To: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
+        Sun, 19 Mar 2017 08:32:04 -0400
+Received: by mail-it0-f52.google.com with SMTP id y18so1361234itc.1
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 05:31:28 -0700 (PDT)
+In-Reply-To: <20170319005245.os6jl436ajvqiyud@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- validation/backend/degenerate-ptr.c | 72 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 72 insertions(+)
- create mode 100644 validation/backend/degenerate-ptr.c
+On 19 March 2017 at 00:52, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Mon, Mar 13, 2017 at 09:24:47PM +0000, Dibyendu Majumdar wrote:
+>>
+>> While investigating errors that occurred when compiling 'minilua' I
+>> found that the sparse-llvm output for switch statements is hard coded
+>> to generate int32 values even when the switch is on a different
+>> integer type.
+>
+> Could you submit a test case for this?
+>
 
-diff --git a/validation/backend/degenerate-ptr.c b/validation/backend/degenerate-ptr.c
-new file mode 100644
-index 000000000..8de979e06
---- /dev/null
-+++ b/validation/backend/degenerate-ptr.c
-@@ -0,0 +1,72 @@
-+extern int array[3];
-+extern int matrix[3][3];
-+extern int fun(int);
-+
-+extern int fia(int []);
-+extern int fip(int *);
-+extern int fim(int (*)[3]);
-+extern int fvp(void *);
-+extern int ffp(int (*)(int));
-+
-+void call(void);
-+void call(void)
-+{
-+	fia(array);
-+
-+	fip(array);
-+	fim(matrix);
-+
-+	fvp(array);
-+	fvp(matrix);
-+
-+	fvp(fun);
-+	fvp(&fun);
-+	ffp(fun);
-+	ffp(&fun);
-+}
-+
-+void local(void);
-+void local(void)
-+{
-+	int *ip;
-+	int (*im)[3];
-+	void *vp;
-+	int (*fp)(int);
-+
-+	ip = array;
-+	im = matrix;
-+
-+	vp = array;
-+	vp = matrix;
-+
-+	vp = fun;
-+	vp = &fun;
-+	fp = fun;
-+	fp = &fun;
-+}
-+
-+
-+extern int *ip;
-+extern int (*im)[3];
-+extern void *vp;
-+extern int (*fp)(int);
-+
-+void global(void);
-+void global(void)
-+{
-+	ip = array;
-+	im = matrix;
-+
-+	vp = array;
-+	vp = matrix;
-+
-+	vp = fun;
-+	vp = &fun;
-+	fp = fun;
-+	fp = &fun;
-+}
-+
-+/*
-+ * check-name: degenerated pointer handling
-+ * check-command: ./sparsec -c $file -o tmp.o
-+ */
--- 
-2.12.0
-
+extern int printf(const char *, ...);
+int main(int argc, const char *argv[])
+{
+ const char *cp = argv[0];
+ switch (*cp) {
+ case 's':
+  printf("%c\n", *cp);
+  break;
+ default:
+  if (*cp)
+   printf("%c\n", *cp);
+  break;
+ }
+ return 0;
+}
