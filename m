@@ -1,185 +1,46 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 22/30] llvm: add test cases for arrays passed as argument
-Date: Sun, 19 Mar 2017 02:42:19 +0100
-Message-ID: <20170319014227.8833-23-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 29/30] llvm: variadic functions are not being marked as such
+Date: Sun, 19 Mar 2017 02:42:26 +0100
+Message-ID: <20170319014227.8833-30-luc.vanoostenryck@gmail.com>
 References: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:35315 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751416AbdCSBnB (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36192 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751440AbdCSBnJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Mar 2017 21:43:01 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u108so13841390wrb.2
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:43:00 -0700 (PDT)
+        Sat, 18 Mar 2017 21:43:09 -0400
+Received: by mail-wr0-f195.google.com with SMTP id l37so13792343wrc.3
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:43:07 -0700 (PDT)
 In-Reply-To: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+It appears that when a function is compiled, its variadic flag is not
+being set in LLVM so LLVM complains when at call sites variable
+arguments are passed.
+
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Originally-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/function-ptr.c | 148 +++++++++++++++++++++++++++++++++++++-
- 1 file changed, 145 insertions(+), 3 deletions(-)
+ sparse-llvm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/validation/backend/function-ptr.c b/validation/backend/function-ptr.c
-index fc022b3cd..47e85deab 100644
---- a/validation/backend/function-ptr.c
-+++ b/validation/backend/function-ptr.c
-@@ -1,8 +1,150 @@
--typedef int (*fn_t)(int x, int y);
-+extern int ival;
-+extern int *ipval;
-+extern int array[3];
-+extern int matrix[3][3];
-+extern int fun(int);
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index f320f7288..bae55de3b 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -1068,7 +1068,7 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
  
--static int run(fn_t fn, int x, int y)
-+// via an argument
-+void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)));
-+void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)))
- {
--	return fn(x, y);
-+	fv();
-+
-+	fb(a);
-+	fi(a);
-+	fl(a);
-+	fb(123);
-+	fi(123);
-+	fl(123);
-+	fb(123L);
-+	fi(123L);
-+	fl(123L);
-+	fb(ival);
-+	fi(ival);
-+	fl(ival);
-+
-+	fip(p);
-+	fip((void*)0);
-+	fip(ipval);
-+	fip(&ival);
-+	fip(array);
-+	fim(matrix);
-+
-+	fvp(p);
-+	fvp((void*)0);
-+	fvp(ipval);
-+	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
-+
-+	fvp(fun);
-+	fvp(&fun);
-+	ffp(fun);
-+	ffp(&fun);
-+}
-+
-+// a global
-+extern int (*fb)(unsigned char);
-+extern int (*fi)(int);
-+extern int (*fl)(long);
-+extern int (*fv)(void);
-+extern int (*fip)(int *);
-+extern int (*fim)(int (*)[3]);
-+extern int (*fvp)(void *);
-+extern int (*ffp)(int (*)(int));
-+
-+void glb(int a, int *p);
-+void glb(int a, int *p)
-+{
-+	fv();
-+
-+	fb(a);
-+	fi(a);
-+	fl(a);
-+	fb(123);
-+	fi(123);
-+	fl(123);
-+	fb(123L);
-+	fi(123L);
-+	fl(123L);
-+	fb(ival);
-+	fi(ival);
-+	fl(ival);
-+
-+	fip(p);
-+	fip((void*)0);
-+	fip(ipval);
-+	fip(&ival);
-+	fip(array);
-+	fim(matrix);
-+
-+	fvp(p);
-+	fvp((void*)0);
-+	fvp(ipval);
-+	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
-+
-+	fvp(fun);
-+	fvp(&fun);
-+	ffp(fun);
-+	ffp(&fun);
-+}
-+
-+// via a struct member:
-+// -> force to create a register containing the function pointer
-+struct ops {
-+	int (*fb)(unsigned char);
-+	int (*fi)(int);
-+	int (*fl)(long);
-+	int (*fv)(void);
-+	int (*fip)(int *);
-+	int (*fim)(int (*)[3]);
-+	int (*fvp)(void *);
-+	int (*ffp)(int (*)(int));
-+
-+	int (*const cfi)(int);		// for the fun of it
-+};
-+
-+void ops(int a, int *p, struct ops *ops);
-+void ops(int a, int *p, struct ops *ops)
-+{
-+	ops->fv();
-+
-+	ops->fb(a);
-+	ops->fi(a);
-+	ops->fl(a);
-+	ops->fb(123);
-+	ops->fi(123);
-+	ops->fl(123);
-+	ops->fb(123L);
-+	ops->fi(123L);
-+	ops->fl(123L);
-+	ops->fb(ival);
-+	ops->fi(ival);
-+	ops->fl(ival);
-+
-+	ops->fip(p);
-+	ops->fip((void*)0);
-+	ops->fip(ipval);
-+	ops->fip(&ival);
-+	ops->fip(array);
-+	ops->fim(matrix);
-+
-+	ops->fvp(p);
-+	ops->fvp((void*)0);
-+	ops->fvp(ipval);
-+	ops->fvp(&ival);
-+	ops->fvp(array);
-+	ops->fvp(matrix);
-+
-+	ops->fvp(fun);
-+	ops->fvp(&fun);
-+	ops->ffp(fun);
-+	ops->ffp(&fun);
-+	ops->fvp(fi);
-+
-+	ops->cfi(42);
- }
+ 	name = show_ident(sym->ident);
  
- /*
+-	fun_type = LLVMFunctionType(ret_type, arg_types, nr_args, 0);
++	fun_type = LLVMFunctionType(ret_type, arg_types, nr_args, base_type->variadic);
+ 
+ 	function.fn = LLVMAddFunction(module, name, fun_type);
+ 	LLVMSetFunctionCallConv(function.fn, LLVMCCallConv);
 -- 
 2.12.0
 
