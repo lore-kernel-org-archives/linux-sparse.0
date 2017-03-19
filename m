@@ -1,143 +1,113 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 04/30] give a type to OP_PHISOURCE
-Date: Sun, 19 Mar 2017 02:42:01 +0100
-Message-ID: <20170319014227.8833-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 01/30] fix usage of inlined calls
+Date: Sun, 19 Mar 2017 02:41:58 +0100
+Message-ID: <20170319014227.8833-2-luc.vanoostenryck@gmail.com>
 References: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34985 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751189AbdCSBmn (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34466 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751315AbdCSBmk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Mar 2017 21:42:43 -0400
-Received: by mail-wm0-f67.google.com with SMTP id z133so8937020wmb.2
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:42:42 -0700 (PDT)
+        Sat, 18 Mar 2017 21:42:40 -0400
+Received: by mail-wm0-f65.google.com with SMTP id u132so8889931wmg.1
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 18:42:38 -0700 (PDT)
 In-Reply-To: <20170319014227.8833-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
+OP_INLINED_CALL are there only as a sort of annotation
+for debugging purpose. It is thus wrong to associate
+pseudo's usage to them (even if the pseudo are the arguments
+of the function now inlined).
 
-For consistency, give it a type too.
+Fix this by removing the use_pseudo() for each arguments.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
+ linearize.c               |  2 +-
+ validation/call-inlined.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 59 insertions(+), 1 deletion(-)
+ create mode 100644 validation/call-inlined.c
 
-diff --git a/flow.c b/flow.c
-index ec7e3f22c..9265a099d 100644
---- a/flow.c
-+++ b/flow.c
-@@ -371,7 +371,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
 diff --git a/linearize.c b/linearize.c
-index 54752a1a2..6eacb2e36 100644
+index 5199b6b02..5337723e2 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -820,9 +820,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
- }
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
- {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
- 
-@@ -1369,19 +1369,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
- 
- 	if (!expr_false || !ep->active)
- 		return VOID;
- 
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1395,7 +1394,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
- 
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1407,12 +1405,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1894,7 +1892,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
+@@ -1680,7 +1680,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
+ 		concat_symbol_list(args->declaration, &ep->syms);
+ 		FOR_EACH_PTR(args->declaration, sym) {
+ 			pseudo_t value = linearize_one_symbol(ep, sym);
+-			use_pseudo(insn, value, add_pseudo(&insn->arguments, value));
++			add_pseudo(&insn->arguments, value);
+ 		} END_FOR_EACH_PTR(sym);
  	}
-diff --git a/linearize.h b/linearize.h
-index 0cdd0fa9a..d437e268d 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -339,7 +339,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
  
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
- 
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
- 
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+diff --git a/validation/call-inlined.c b/validation/call-inlined.c
+new file mode 100644
+index 000000000..6fd94edcb
+--- /dev/null
++++ b/validation/call-inlined.c
+@@ -0,0 +1,58 @@
++static const char messg[] = "def";
++
++static inline int add(int a, int b)
++{
++	return a + b;
++}
++
++int  foo(int a, int b) { return add(a + b, 1); }
++void bar(int a, int b) {        add(a + b, 1); }
++
++
++static inline const char *lstrip(const char *str)
++{
++	return str + 1;
++}
++
++const char *bas(void) { return lstrip("abc"); }
++const char *qus(void) { return lstrip(messg); }
++
++/*
++ * check-name: call-inlined
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++foo:
++.L0:
++	<entry-point>
++	add.32      %r3 <- %arg1, %arg2
++	add.32      %r5 <- %r3, $1
++	# call      %r5 <- add, %r3, $1
++	ret.32      %r5
++
++
++bar:
++.L3:
++	<entry-point>
++	# call      %r12 <- add, %r10, $1
++	ret
++
++
++bas:
++.L6:
++	<entry-point>
++	add.64      %r16 <- "abc", $1
++	# call      %r16 <- lstrip, %r14
++	ret.64      %r16
++
++
++qus:
++.L9:
++	<entry-point>
++	add.64      %r21 <- messg, $1
++	# call      %r21 <- lstrip, %r19
++	ret.64      %r21
++
++
++ * check-output-end
++ */
 -- 
 2.12.0
 
