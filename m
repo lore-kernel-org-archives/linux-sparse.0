@@ -1,32 +1,40 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse-llvm incorrect check for floating point type
-Date: Sun, 19 Mar 2017 16:26:07 +0100
-Message-ID: <20170319152606.4h7ljv4w3xaiaebw@macpro.local>
-References: <CACXZuxd6DsWh7i=+ETza_AOhWTdgF9b28cwmp+3G-0GsVsBJwQ@mail.gmail.com>
+Subject: Re: sparse-llvm the LLVM IR for select instruction fails due to
+ different types
+Date: Sun, 19 Mar 2017 16:18:27 +0100
+Message-ID: <20170319151826.vmghnrd4k7iblmb4@macpro.local>
+References: <CACXZuxcGKmEbv=Umh26U=Uermy+n1f2A9_ZmBYJHE15WBYPFrw@mail.gmail.com>
+ <20170319002145.4x3amj6bnb36yocj@macbook.local>
+ <CACXZuxeAaEGy25AmMky9GLrS0eetEg9O4dMTWk9TfB=Sm+Vc2A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:34774 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751824AbdCSP1L (ORCPT
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:37990 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751597AbdCSP1L (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sun, 19 Mar 2017 11:27:11 -0400
-Received: by mail-wr0-f172.google.com with SMTP id l37so78312978wrc.1
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 08:26:10 -0700 (PDT)
+Received: by mail-wm0-f49.google.com with SMTP id t189so47507220wmt.1
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 08:25:58 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CACXZuxd6DsWh7i=+ETza_AOhWTdgF9b28cwmp+3G-0GsVsBJwQ@mail.gmail.com>
+In-Reply-To: <CACXZuxeAaEGy25AmMky9GLrS0eetEg9O4dMTWk9TfB=Sm+Vc2A@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Mar 15, 2017 at 12:40:21AM +0000, Dibyendu Majumdar wrote:
-> Hi,
-> 
-> The function symbol_is_fp_type() in sparse-llvm.c doesn't check if
-> symbol is SYM_NODE and hence does not detect a floating point type
-> correctly.
+On Sun, Mar 19, 2017 at 01:04:30PM +0000, Dibyendu Majumdar wrote:
+> On 19 March 2017 at 00:21, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > On Tue, Mar 14, 2017 at 04:07:40PM +0000, Dibyendu Majumdar wrote:
+> >> LLVM complains when the operands of a select are not the same type. I
+> >> think it is okay to cast one of the operands to the type of the other
+> >> - on the basis that subsequent operations will cast things anyway.
+> >
+> > Submit a test case, please.
+> >
 
-This is fixed in the llvm-fixes-v3 serie I sent yesterday.
+I was thinking to something for the test suite. 
+Anyway, this is fixed in the llvm-fixes-v3 serie I submitted yesterday.
 
--- Luc 
+-- Luc
