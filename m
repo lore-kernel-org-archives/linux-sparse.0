@@ -1,44 +1,46 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] avoid crash with test-linearize -vv
-Date: Sun, 19 Mar 2017 19:01:18 +0100
-Message-ID: <20170319180118.83953-1-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: sparse-llvm incorrect type when ealing with union type
+Date: Sun, 19 Mar 2017 17:55:44 +0000
+Message-ID: <CACXZuxeEgMv2iY=kFi_jWpJ2m5Lmx2qxr738mw8oJ+f=pPR2sw@mail.gmail.com>
+References: <CACXZuxcb=27brA9N=w-tnZ9V0StKnDYZ4y27cS6eoenA7S0ctw@mail.gmail.com>
+ <20170319153609.yykbjbbb6v4lw4xb@macpro.local> <CACXZuxcSn=qPJF4S0SPmGr5xd64X6WevnwFcC+UuWPZPQ=odFQ@mail.gmail.com>
+ <CAExDi1QY0UKpLkMantdMna4LjqB2obDTz_cHdjhW3mLiyyDgBw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:36148 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752254AbdCSSJo (ORCPT
+Received: from mail-it0-f48.google.com ([209.85.214.48]:36700 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752060AbdCSS1F (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 19 Mar 2017 14:09:44 -0400
-Received: by mail-wr0-f193.google.com with SMTP id l37so15379576wrc.3
-        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 11:09:43 -0700 (PDT)
+        Sun, 19 Mar 2017 14:27:05 -0400
+Received: by mail-it0-f48.google.com with SMTP id w124so68350354itb.1
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Mar 2017 11:27:04 -0700 (PDT)
+In-Reply-To: <CAExDi1QY0UKpLkMantdMna4LjqB2obDTz_cHdjhW3mLiyyDgBw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-When verbose is set to 2 or higher, show_instruction()
-also display removed instructions. Some of these instructions
-can have their associated symbol removed and set to NULL
-which will cause a crash with 'test-linearize -vv'.
+Hi Luc,
 
-Fix this by avoiding to dereference symbol's details of
-removed instructions.
----
- linearize.c | 2 ++
- 1 file changed, 2 insertions(+)
+On 19 March 2017 at 17:15, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Sun, Mar 19, 2017 at 5:37 PM, Dibyendu Majumdar
+> <mobile@majumdar.org.uk> wrote:
+>> On 19 March 2017 at 15:36, Luc Van Oostenryck
+>> <luc.vanoostenryck@gmail.com> wrote:
+>>>
+>> I noticed that in the latest patch series for add/sub you are not
+>> using GEP anymore, and there is a conversion to target type at the end
+>> of a binary op. I will try out these changes and report back.
+>
+> Yes. It's not that the GEP was wrong but it was not enough and the more
+> complete solution made this one unneeded.
+>
 
-diff --git a/linearize.c b/linearize.c
-index 4ebd6d6d8..1bbada887 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -319,6 +319,8 @@ const char *show_instruction(struct instruction *insn)
- 		struct symbol *sym = insn->symbol->sym;
- 		buf += sprintf(buf, "%s <- ", show_pseudo(insn->target));
- 
-+		if (!insn->bb && !sym)
-+			break;
- 		if (sym->bb_target) {
- 			buf += sprintf(buf, ".L%u", sym->bb_target->nr);
- 			break;
--- 
-2.12.0
+I have now tested the changes to binary op implementation - and I can
+confirm that all my tests pass, and this appears to be a better
+approach than the previous one that used the GEP instruction.
 
+Thanks and Regards
+Dibyendu
