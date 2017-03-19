@@ -1,44 +1,47 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Possible linearizer issue
-Date: Sat, 18 Mar 2017 11:41:26 +0000
-Message-ID: <CACXZuxeuav4vrT=xKxLcV7RpUET8NM7VLuviTNr4N_XfGQxmHQ@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse-llvm functions must be cast to correct type before calling
+Date: Sun, 19 Mar 2017 01:20:14 +0100
+Message-ID: <20170319002014.p2yah76w6ww35crr@macbook.local>
+References: <CACXZuxcmizMoxj=xGAJYbbEbCHQC=4E7spC4MUqT1=0d+-NiAw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:35401 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751302AbdCRLl2 (ORCPT
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:35672 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751133AbdCSAUT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Mar 2017 07:41:28 -0400
-Received: by mail-it0-f45.google.com with SMTP id m27so47150810iti.0
-        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 04:41:27 -0700 (PDT)
+        Sat, 18 Mar 2017 20:20:19 -0400
+Received: by mail-wr0-f170.google.com with SMTP id g10so72071713wrg.2
+        for <linux-sparse@vger.kernel.org>; Sat, 18 Mar 2017 17:20:18 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxcmizMoxj=xGAJYbbEbCHQC=4E7spC4MUqT1=0d+-NiAw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi
+On Thu, Mar 16, 2017 at 08:58:25PM +0000, Dibyendu Majumdar wrote:
+> Hi,
+> 
+> The following test (adapted from snippet posted by Linus) fails in sparse-llvm:
 
-I am investigating a failure in one of the tests. The generated
-linearized code has instructions such as:
+...
+ 
+> To resolve this before calling a function we need to cast it to the
+> expected type. This can be done like this in output_op_call():
 
-.L363:
- br          VOID, .L366, .L439
-.L366:
- load.32     %r413 <- 44[%arg1]
- br          %r413, .L368, .L369
-.L368:
- load.64     %r415 <- 0[s7813er]
- call.32     %r416 <- printf, %r415, $2
- br          .L369
-.L369:
- phisrc.32   %phi97(rc) <- $2
- br          .L439
-.L439:
- phi.32      %r557 <- %phi95(rc), VOID, %phi97(rc), VOID, VOID, VOID
+This is a very general problem with sparse-llvm, directly caused
+by the fact the sparse associates type to instructions and LLVM
+to the values.
 
-The test program is here:
+What's happening is that the first time a pseudo is used
+it's a value is created (with the curret type, of course)
+*and* is stored in the pseudo::priv.
+The next times this pseudo is used the LLVM value is directly
+taken from the ::priv without regards for the current type.
 
-https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/set1/cq2.c
+In the coming update of the LLVM serie, I added an helper
+for this sort of things: adjust_type(). But it need to be
+added at the right place(s).
 
-Regards
-Dibyendu
+-- Luc
