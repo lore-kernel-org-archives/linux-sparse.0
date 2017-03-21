@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 34/63] llvm: ignore OP_INLINED_CALL
-Date: Tue, 21 Mar 2017 01:15:38 +0100
-Message-ID: <20170321001607.75169-35-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 46/63] llvm: make value_to_ivalue() more flexible
+Date: Tue, 21 Mar 2017 01:15:50 +0100
+Message-ID: <20170321001607.75169-47-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33200 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755916AbdCUAQ5 (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33274 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754656AbdCUARK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:57 -0400
-Received: by mail-wm0-f65.google.com with SMTP id n11so268474wma.0
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:56 -0700 (PDT)
+        Mon, 20 Mar 2017 20:17:10 -0400
+Received: by mail-wm0-f68.google.com with SMTP id n11so268983wma.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:09 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,21 +19,77 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 1 -
- 1 file changed, 1 deletion(-)
+ sparse-llvm.c                      | 15 ++++++++++-----
+ validation/backend/shift-special.c | 13 +++++++++++++
+ 2 files changed, 23 insertions(+), 5 deletions(-)
+ create mode 100644 validation/backend/shift-special.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 87850d2be..e6134af29 100644
+index 58bddf216..8cf65c1d3 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -929,7 +929,6 @@ static void output_insn(struct function *fn, struct instruction *insn)
- 		assert(0);
- 		break;
- 	case OP_INLINED_CALL:
--		assert(0);
- 		break;
- 	case OP_CALL:
- 		output_op_call(fn, insn);
+@@ -413,13 +413,18 @@ static LLVMValueRef pseudo_to_rvalue(struct function *fn, struct instruction *in
+ 	return LLVMBuildBitCast(fn->builder, val, dtype, name);
+ }
+ 
+-static LLVMValueRef value_to_ivalue(struct function *fn, LLVMValueRef val)
++static LLVMValueRef value_to_ivalue(struct function *fn, struct symbol *ctype, LLVMValueRef val)
+ {
++	const char *name = LLVMGetValueName(val);
++	LLVMTypeRef dtype = symbol_type(ctype);
++
+ 	if (LLVMGetTypeKind(LLVMTypeOf(val)) == LLVMPointerTypeKind) {
+ 		LLVMTypeRef dtype = LLVMIntType(bits_in_pointer);
+-		const char *name = LLVMGetValueName(val);
+ 		val = LLVMBuildPtrToInt(fn->builder, val, dtype, name);
+ 	}
++	if (ctype && is_int_type(ctype)) {
++		val = LLVMBuildIntCast(fn->builder, val, dtype, name);
++	}
+ 	return val;
+ }
+ 
+@@ -445,7 +450,7 @@ static LLVMValueRef value_to_pvalue(struct function *fn, struct symbol *ctype, L
+ static LLVMValueRef adjust_type(struct function *fn, struct symbol *ctype, LLVMValueRef val)
+ {
+ 	if (is_int_type(ctype))
+-		return value_to_ivalue(fn, val);
++		return value_to_ivalue(fn, ctype, val);
+ 	if (is_ptr_type(ctype))
+ 		return value_to_pvalue(fn, ctype, val);
+ 	return val;
+@@ -511,10 +516,10 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 	char target_name[64];
+ 
+ 	lhs = pseudo_to_value(fn, insn, insn->src1);
+-	lhs = value_to_ivalue(fn, lhs);
++	lhs = value_to_ivalue(fn, insn->type, lhs);
+ 
+ 	rhs = pseudo_to_value(fn, insn, insn->src2);
+-	rhs = value_to_ivalue(fn, rhs);
++	rhs = value_to_ivalue(fn, insn->type, rhs);
+ 
+ 	pseudo_name(insn->target, target_name);
+ 
+diff --git a/validation/backend/shift-special.c b/validation/backend/shift-special.c
+new file mode 100644
+index 000000000..d5e4d3d32
+--- /dev/null
++++ b/validation/backend/shift-special.c
+@@ -0,0 +1,13 @@
++long shift(long a, short b);
++long shift(long a, short b)
++{
++	long r1 = a << b;
++	long r2 = b << a;
++
++	return r1 + r2;
++}
++
++/*
++ * check-name: shift-special
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
