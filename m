@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 15/63] llvm: remove unneeded function::type
-Date: Tue, 21 Mar 2017 01:15:19 +0100
-Message-ID: <20170321001607.75169-16-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 10/63] give a type to OP_SWITCH
+Date: Tue, 21 Mar 2017 01:15:14 +0100
+Message-ID: <20170321001607.75169-11-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35767 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755840AbdCUAQh (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35733 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755772AbdCUAQc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:37 -0400
-Received: by mail-wm0-f66.google.com with SMTP id z133so257745wmb.2
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:36 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:32 -0400
+Received: by mail-wm0-f68.google.com with SMTP id z133so257547wmb.2
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:30 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,41 +19,33 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ linearize.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index f41fbe6e3..68bd94181 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -21,7 +21,6 @@
+diff --git a/linearize.c b/linearize.c
+index 5a4ba82ef..4eb788915 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1906,16 +1906,17 @@ static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
+ 	struct instruction *switch_ins;
+ 	struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
+ 	struct basic_block *active, *default_case;
++	struct expression *expr = stmt->switch_expression;
+ 	struct multijmp *jmp;
+ 	pseudo_t pseudo;
  
- struct function {
- 	LLVMBuilderRef			builder;
--	LLVMTypeRef			type;
- 	LLVMValueRef			fn;
- 	LLVMModuleRef			module;
- };
-@@ -933,6 +932,7 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
- 	struct symbol *ret_type = sym->ctype.base_type->ctype.base_type;
- 	LLVMTypeRef arg_types[MAX_ARGS];
- 	LLVMTypeRef return_type;
-+	LLVMTypeRef fun_type;
- 	struct function function = { .module = module };
- 	struct basic_block *bb;
- 	struct symbol *arg;
-@@ -949,9 +949,9 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+-	pseudo = linearize_expression(ep, stmt->switch_expression);
++	pseudo = linearize_expression(ep, expr);
  
- 	return_type = symbol_type(ret_type);
+ 	active = ep->active;
+ 	if (!bb_reachable(active))
+ 		return VOID;
  
--	function.type = LLVMFunctionType(return_type, arg_types, nr_args, 0);
-+	fun_type = LLVMFunctionType(return_type, arg_types, nr_args, 0);
- 
--	function.fn = LLVMAddFunction(module, name, function.type);
-+	function.fn = LLVMAddFunction(module, name, fun_type);
- 	LLVMSetFunctionCallConv(function.fn, LLVMCCallConv);
- 
- 	LLVMSetLinkage(function.fn, function_linkage(sym));
+-	switch_ins = alloc_instruction(OP_SWITCH, 0);
++	switch_ins = alloc_typed_instruction(OP_SWITCH, expr->ctype);
+ 	use_pseudo(switch_ins, pseudo, &switch_ins->cond);
+ 	add_one_insn(ep, switch_ins);
+ 	finish_block(ep);
 -- 
 2.12.0
 
