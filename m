@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 04/63] add is_signed_type()
-Date: Tue, 21 Mar 2017 01:15:08 +0100
-Message-ID: <20170321001607.75169-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 01/63] only output internal pointer value when verbose is set
+Date: Tue, 21 Mar 2017 01:15:05 +0100
+Message-ID: <20170321001607.75169-2-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:34230 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754190AbdCUAQZ (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33234 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753724AbdCUAQW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:25 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u48so20448998wrc.1
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:24 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:22 -0400
+Received: by mail-wr0-f193.google.com with SMTP id g10so20440781wrg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:20 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,106 +19,31 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- compile-i386.c | 14 ++------------
- show-parse.c   | 11 +----------
- symbol.h       |  9 +++++++++
- 3 files changed, 12 insertions(+), 22 deletions(-)
+ linearize.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/compile-i386.c b/compile-i386.c
-index 44b72ec39..a7db0843d 100644
---- a/compile-i386.c
-+++ b/compile-i386.c
-@@ -192,7 +192,6 @@ static const char *current_section;
- static void emit_comment(const char * fmt, ...) FORMAT_ATTR(1);
- static void emit_move(struct storage *src, struct storage *dest,
- 		      struct symbol *ctype, const char *comment);
--static int type_is_signed(struct symbol *sym);
- static struct storage *x86_address_gen(struct expression *expr);
- static struct storage *x86_symbol_expr(struct symbol *sym);
- static void x86_symbol(struct symbol *sym);
-@@ -1165,7 +1164,7 @@ static void emit_move(struct storage *src, struct storage *dest,
- 
- 	if (ctype) {
- 		bits = ctype->bit_size;
--		is_signed = type_is_signed(ctype);
-+		is_signed = is_signed_type(ctype);
- 	} else {
- 		bits = 32;
- 		is_signed = 0;
-@@ -1357,7 +1356,7 @@ static struct storage *emit_binop(struct expression *expr)
- 	if ((expr->op == '/') || (expr->op == '%'))
- 		return emit_divide(expr, left, right);
- 
--	is_signed = type_is_signed(expr->ctype);
-+	is_signed = is_signed_type(expr->ctype);
- 
- 	switch (expr->op) {
- 	case '+':
-@@ -2266,15 +2265,6 @@ static void x86_symbol_init(struct symbol *sym)
- 	priv->addr = new;
- }
- 
--static int type_is_signed(struct symbol *sym)
--{
--	if (sym->type == SYM_NODE)
--		sym = sym->ctype.base_type;
--	if (sym->type == SYM_PTR)
--		return 0;
--	return !(sym->ctype.modifiers & MOD_UNSIGNED);
--}
--
- static struct storage *x86_label_expr(struct expression *expr)
- {
- 	struct storage *new = stack_alloc(4);
-diff --git a/show-parse.c b/show-parse.c
-index d365d737f..b6ab7b3db 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -949,15 +949,6 @@ static int show_symbol_init(struct symbol *sym)
- 	return 0;
- }
- 
--static int type_is_signed(struct symbol *sym)
--{
--	if (sym->type == SYM_NODE)
--		sym = sym->ctype.base_type;
--	if (sym->type == SYM_PTR)
--		return 0;
--	return !(sym->ctype.modifiers & MOD_UNSIGNED);
--}
--
- static int show_cast_expr(struct expression *expr)
- {
- 	struct symbol *old_type, *new_type;
-@@ -973,7 +964,7 @@ static int show_cast_expr(struct expression *expr)
- 	if (oldbits >= newbits)
- 		return op;
- 	new = new_pseudo();
--	is_signed = type_is_signed(old_type);
-+	is_signed = is_signed_type(old_type);
- 	if (is_signed) {
- 		printf("\tsext%d.%d\tv%d,v%d\n", oldbits, newbits, new, op);
- 	} else {
-diff --git a/symbol.h b/symbol.h
-index 36f8345b5..0621d36d7 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -335,6 +335,15 @@ static inline int is_enum_type(const struct symbol *type)
- 	return (type->type == SYM_ENUM);
- }
- 
-+static inline int is_signed_type(struct symbol *sym)
-+{
-+	if (sym->type == SYM_NODE)
-+		sym = sym->ctype.base_type;
-+	if (sym->type == SYM_PTR)
-+		return 0;
-+	return !(sym->ctype.modifiers & MOD_UNSIGNED);
-+}
-+
- static inline int is_type_type(struct symbol *type)
- {
- 	return (type->ctype.modifiers & MOD_TYPE) != 0;
+diff --git a/linearize.c b/linearize.c
+index 5199b6b02..686cb9deb 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -120,7 +120,7 @@ const char *show_pseudo(pseudo_t pseudo)
+ 			break;
+ 		}
+ 		expr = sym->initializer;
+-		snprintf(buf, 64, "<anon symbol:%p>", sym);
++		snprintf(buf, 64, "<anon symbol:%p>", verbose ? sym : NULL);
+ 		if (expr) {
+ 			switch (expr->type) {
+ 			case EXPR_VALUE:
+@@ -326,7 +326,7 @@ const char *show_instruction(struct instruction *insn)
+ 			buf += sprintf(buf, "%s", show_ident(sym->ident));
+ 			break;
+ 		}
+-		buf += sprintf(buf, "<anon symbol:%p>", sym);
++		buf += sprintf(buf, "<anon symbol:%p>", verbose ? sym : NULL);
+ 		break;
+ 	}
+ 		
 -- 
 2.12.0
 
