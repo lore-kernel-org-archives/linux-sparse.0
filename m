@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 61/63] llvm: add support for OP_FPCAST
-Date: Tue, 21 Mar 2017 01:16:05 +0100
-Message-ID: <20170321001607.75169-62-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 59/63] llvm: fix get value from non-anonymous symbol
+Date: Tue, 21 Mar 2017 01:16:03 +0100
+Message-ID: <20170321001607.75169-60-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33536 "EHLO
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33529 "EHLO
         mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753678AbdCUARb (ORCPT
+        with ESMTP id S1755818AbdCUARY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:17:31 -0400
-Received: by mail-wr0-f193.google.com with SMTP id g10so20442567wrg.0
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:30 -0700 (PDT)
+        Mon, 20 Mar 2017 20:17:24 -0400
+Received: by mail-wr0-f193.google.com with SMTP id g10so20442516wrg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:23 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,83 +19,94 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c             | 22 +++++++++++++++++++++-
- validation/backend/cast.c |  5 +++--
- 2 files changed, 24 insertions(+), 3 deletions(-)
+ sparse-llvm.c                     |  9 +--------
+ validation/backend/load-global.c  | 21 +++++++++++++++++++++
+ validation/backend/string-value.c | 21 +++++++++++++++++++++
+ 3 files changed, 43 insertions(+), 8 deletions(-)
+ create mode 100644 validation/backend/load-global.c
+ create mode 100644 validation/backend/string-value.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index f57571f1c..cdeb38d8e 100644
+index 73ca96cce..93237b3d0 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -934,6 +934,26 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 	insn->target->priv = target;
- }
+@@ -303,7 +303,7 @@ static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
+ 	assert(sym->bb_target == NULL);
  
-+static void output_op_fpcast(struct function *fn, struct instruction *insn)
+ 	expr = sym->initializer;
+-	if (expr) {
++	if (expr && !sym->ident) {
+ 		switch (expr->type) {
+ 		case EXPR_STRING: {
+ 			const char *s = expr->string->data;
+@@ -318,13 +318,6 @@ static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
+ 			result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+ 			return result;
+ 		}
+-		case EXPR_SYMBOL: {
+-			struct symbol *sym = expr->symbol;
+-
+-			result = LLVMGetNamedGlobal(fn->module, show_ident(sym->ident));
+-			assert(result != NULL);
+-			break;
+-		}
+ 		default:
+ 			break;
+ 		}
+diff --git a/validation/backend/load-global.c b/validation/backend/load-global.c
+new file mode 100644
+index 000000000..dedb35f3b
+--- /dev/null
++++ b/validation/backend/load-global.c
+@@ -0,0 +1,21 @@
++const char *s = "abc";
++int x = 4;
++int y;
++
++int *p = &x;
++int *q;
++
++int loadn(void) { return y; }
++int loadi(void) { return x; }
++
++const char *loads(void) { return s; }
++
++int *retpn(void) { return  q; }
++int loadpn(void) { return *q; }
++int *retpi(void) { return  p; }
++int loadpi(void) { return *p; }
++
++/*
++ * check-name: use simple value from global vars
++ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ */
+diff --git a/validation/backend/string-value.c b/validation/backend/string-value.c
+new file mode 100644
+index 000000000..8cdec4a2d
+--- /dev/null
++++ b/validation/backend/string-value.c
+@@ -0,0 +1,21 @@
++extern void use(const char *);
++
++const char *ret(void)
 +{
-+	LLVMTypeRef dtype = symbol_type(insn->type);
-+	LLVMValueRef src, target;
-+	struct symbol *otype = insn->orig_type;
-+	char name[64];
-+
-+	assert(is_float_type(insn->type));
-+
-+	pseudo_name(insn->target, name);
-+	src = get_operand(fn, otype, insn->src);
-+	if (is_float_type(otype))
-+		target = LLVMBuildFPCast(fn->builder, src, dtype, name);
-+	else if (is_signed_type(otype))
-+		target = LLVMBuildSIToFP(fn->builder, src, dtype, name);
-+	else
-+		target = LLVMBuildUIToFP(fn->builder, src, dtype, name);
-+	insn->target->priv = target;
++	return "abc";
 +}
 +
- static void output_op_setval(struct function *fn, struct instruction *insn)
- {
- 	struct expression *val = insn->val;
-@@ -1008,7 +1028,7 @@ static void output_insn(struct function *fn, struct instruction *insn)
- 		output_op_cast(fn, insn, LLVMSExt);
- 		break;
- 	case OP_FPCAST:
--		assert(0);
-+		output_op_fpcast(fn, insn);
- 		break;
- 	case OP_PTRCAST:
- 		output_op_ptrcast(fn, insn);
-diff --git a/validation/backend/cast.c b/validation/backend/cast.c
-index 598b16aab..4c308dfe8 100644
---- a/validation/backend/cast.c
-+++ b/validation/backend/cast.c
-@@ -1,4 +1,5 @@
- typedef _Bool bool;
-+typedef   signed char schar;
- typedef unsigned char uchar;
- typedef unsigned short ushort;
- typedef unsigned int uint;
-@@ -14,6 +15,7 @@ typedef unsigned long long ulonglong;
- #define DEFINE_CASTS(from)			\
- 	DEFINE_CAST(from, bool)			\
- 	DEFINE_CAST(from, char)			\
-+	DEFINE_CAST(from, schar)		\
- 	DEFINE_CAST(from, uchar)		\
- 	DEFINE_CAST(from, short)		\
- 	DEFINE_CAST(from, ushort)		\
-@@ -23,13 +25,12 @@ typedef unsigned long long ulonglong;
- 	DEFINE_CAST(from, ulong)		\
- 	DEFINE_CAST(from, longlong)		\
- 	DEFINE_CAST(from, ulonglong)		\
--/*
- 	DEFINE_CAST(from, float)		\
- 	DEFINE_CAST(from, double)
--*/
- 
- DEFINE_CASTS(bool)
- DEFINE_CASTS(char)
-+DEFINE_CASTS(schar)
- DEFINE_CASTS(uchar)
- DEFINE_CASTS(short)
- DEFINE_CASTS(ushort)
++const char *add(void)
++{
++	return "def" + 1;
++}
++
++void call(void)
++{
++	use("ijk");
++}
++
++/*
++ * check-name: string-value
++ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
