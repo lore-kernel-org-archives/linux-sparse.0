@@ -1,31 +1,26 @@
-From: Pekka Enberg <penberg@iki.fi>
-Subject: Re: [PATCH v4 00/63] LLVM fixes
-Date: Tue, 21 Mar 2017 12:29:23 +0200
-Message-ID: <a7ea0770-9f8b-1cd9-b2b4-32fb272ea09e@iki.fi>
-References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Reverting OP_SYMADDR in sparse-llvm
+Date: Tue, 21 Mar 2017 10:59:47 +0000
+Message-ID: <CACXZuxdwK2QJzPOfP-QaLiWa5ow9oRHPA7=EpMEzkin6FrsfiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from out1-smtp.messagingengine.com ([66.111.4.25]:43022 "EHLO
-        out1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1756606AbdCUKa6 (ORCPT
+Received: from mail-io0-f171.google.com ([209.85.223.171]:36551 "EHLO
+        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756171AbdCULHF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 21 Mar 2017 06:30:58 -0400
-In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
+        Tue, 21 Mar 2017 07:07:05 -0400
+Received: by mail-io0-f171.google.com with SMTP id l7so46117078ioe.3
+        for <linux-sparse@vger.kernel.org>; Tue, 21 Mar 2017 04:07:04 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 03/21/2017 02:15 AM, Luc Van Oostenryck wrote:
-> This series solves a number of issues in sparse-llvm,
-> mainly about wrong or missing type information as needed
-> to build LLVM IR.
->
+Hi Luc,
 
-FWIW,
+In the last two sets of patches I have noticed that you have reverted
+the change related to OP_SYMADDR. I would like to understand what fix
+in sparse-llvm made this change unnecessary.
 
-Acked-by: Pekka Enberg <penberg@kernel.org>
-
-- Pekka
+Thanks and Regards
+Dibyendu
