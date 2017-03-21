@@ -1,182 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 00/63] LLVM fixes
-Date: Tue, 21 Mar 2017 01:15:04 +0100
-Message-ID: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 02/63] allow binop simplification after canonicalization
+Date: Tue, 21 Mar 2017 01:15:06 +0100
+Message-ID: <20170321001607.75169-3-luc.vanoostenryck@gmail.com>
+References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34212 "EHLO
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35837 "EHLO
         mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754190AbdCUAQV (ORCPT
+        with ESMTP id S1754190AbdCUAQX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:21 -0400
-Received: by mail-wr0-f196.google.com with SMTP id u48so20448884wrc.1
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:20 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:23 -0400
+Received: by mail-wr0-f196.google.com with SMTP id u108so20435059wrb.2
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:22 -0700 (PDT)
+In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series solves a number of issues in sparse-llvm,
-mainly about wrong or missing type information as needed
-to build LLVM IR.
-Most of these issues have been reported and investigated by
-Dibyendu Majumdar.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 20 +++++++++-----------
+ 1 file changed, 9 insertions(+), 11 deletions(-)
 
-Changes since v3:
-- systematically insure that operands and output values
-  have the expected type (which may different than the
-  stored with). Some work may still be needed here.
-- add support for OP_SWITCH with a range
-- add support for floating-point casts (to and from)
-- add support for OP_SETVAL (floats & labels)
-- fix type of globals having an initializer
-
-Changes since v2:
-- remove the changes tha gave a type to PSEUDO_VALs
-- introduction of OP_PUSH instructions
-- move toward generic solution using the instruction's type
-- some more fixes
-- temporary remove changes related to OP_SYMADDR
-
-
-These patches already allow to compile a lot more code to LLVM
-but there is still known issues with sparse-llvm:
-- it won't work on bitfields
-- it won't work on computed gotos
-- it won't work on label-as-value
-- it won't work on exotic instructions (OP_SPLICE)
-- there is a bunch of problems with floats
-  (but this is not specific to sparse-llvm).
-There is most probably a bunch of others issues too.
-
-For convenience, this serie is also available at:
-  https://github.com/lucvoo/sparse/tree/llvm-fixes-v4
-
-
-Luc Van Oostenryck (63):
-  only output internal pointer value when verbose is set
-  allow binop simplification after canonicalization
-  canonicalize compare instructions
-  add is_signed_type()
-  fix usage of inlined calls
-  inlined calls should not block BB packing
-  give function's arguments a type via OP_PUSH
-  give a type to OP_PHISOURCE
-  give a type to OP_SEL, always
-  give a type to OP_SWITCH
-  add doc about sparse's instructions/IR
-  add support for wider type in switch-case
-  llvm: remove unneeded arg 'module'
-  llvm: remove unneeded 'generation'
-  llvm: remove unneeded function::type
-  llvm: reduce scope of 'bb_nr'
-  llvm: use pseudo_list_size() instead of open coding it
-  llvm: give arguments a name
-  llvm: give a name to call's return values
-  llvm: avoid useless temp variable
-  llvm: extract get_sym_value() from pseudo_to_value()
-  llvm: fix test of floating-point type
-  llvm: fix translation of PSEUDO_VALs into a ValueRefs
-  llvm: fix output_op_store() which modify its operand
-  llvm: fix output_op_[ptr]cast()
-  llvm: take care of degenerated rvalues
-  llvm: add test cases for symbol's address
-  llvm: add test cases for pointers passed as argument
-  llvm: add test cases for arrays passed as argument
-  llvm: add test cases for degenerated pointers
-  llvm: add support for OP_NEG
-  llvm: add support for OP_SETVAL with floats
-  llvm: add support for OP_SETVAL with labels
-  llvm: ignore OP_INLINED_CALL
-  llvm: fix pointer/float mixup in comparisons
-  llvm: fix type in comparison with an address constant
-  llvm: give correct type to binops
-  llvm: adjust OP_RET's type
-  llvm: variadic functions are not being marked as such
-  llvm: fix type of switch constants
-  llvm: make pseudo_name() more flexible
-  llvm: give a name to all values
-  llvm: add support for OP_SWITCH with a range
-  llvm: fix OP_SWITCH has no target
-  llvm: make value_to_pvalue() more flexible
-  llvm: make value_to_ivalue() more flexible
-  llvm: add test case pointer compare with cast
-  llvm: let pseudo_to_value() directly use the type
-  llvm: remove unneeded pseudo_to_value() unneeded argument
-  llvm: introduce get_ioperand()
-  llvm: fix mutating function pointer
-  llvm: fix mutated OP_RET
-  llvm: fix mutated OP_SEL
-  llvm: fix mutated OP_SWITCH
-  llvm: fix mutated OP_PHISOURCE
-  llvm: fix mutated OP_[PTR]CAST
-  llvm: add support for restricted types
-  llvm: fix get value from initialized symbol
-  llvm: fix get value from non-anonymous symbol
-  llvm: fix type of bitfields
-  llvm: add support for OP_FPCAST
-  llvm: add support for cast from floats
-  llvm: cleanup of output_[ptr]cast()
-
- Documentation/instructions.txt          | 270 +++++++++++++++
- compile-i386.c                          |  14 +-
- example.c                               |   4 +-
- flow.c                                  |   3 +-
- linearize.c                             |  70 ++--
- linearize.h                             |  14 +-
- liveness.c                              |  14 +-
- memops.c                                |   2 +-
- show-parse.c                            |  11 +-
- simplify.c                              |  69 +++-
- sparse-llvm.c                           | 583 +++++++++++++++++++++-----------
- symbol.h                                |   9 +
- validation/backend/cast.c               |   7 +-
- validation/backend/compare-with-null.c  |  12 +
- validation/backend/constant-pointer.c   |  24 ++
- validation/backend/degenerate-ptr.c     |  72 ++++
- validation/backend/function-ptr-xtype.c |  37 ++
- validation/backend/function-ptr.c       | 148 +++++++-
- validation/backend/label-as-value.c     |  13 +
- validation/backend/load-global.c        |  21 ++
- validation/backend/pointer-add.c        |  54 +++
- validation/backend/pointer-cmp.c        |  12 +
- validation/backend/pointer-param.c      |  42 +++
- validation/backend/pointer-sub.c        |  17 +
- validation/backend/setval.c             |   7 +
- validation/backend/shift-special.c      |  13 +
- validation/backend/store-x2.c           |  16 +
- validation/backend/string-value.c       |  21 ++
- validation/backend/switch.c             | 248 ++++++++++++++
- validation/backend/symaddr.c            |  70 ++++
- validation/backend/type-constant.c      |  23 ++
- validation/call-inlined.c               |  54 +++
- validation/call-variadic.c              |  31 ++
- validation/loop-linearization.c         |   9 +-
- validation/optim/call-inlined.c         |  30 ++
- validation/switch-long.c                |  47 +++
- 36 files changed, 1801 insertions(+), 290 deletions(-)
- create mode 100644 Documentation/instructions.txt
- create mode 100644 validation/backend/compare-with-null.c
- create mode 100644 validation/backend/constant-pointer.c
- create mode 100644 validation/backend/degenerate-ptr.c
- create mode 100644 validation/backend/function-ptr-xtype.c
- create mode 100644 validation/backend/label-as-value.c
- create mode 100644 validation/backend/load-global.c
- create mode 100644 validation/backend/pointer-add.c
- create mode 100644 validation/backend/pointer-cmp.c
- create mode 100644 validation/backend/pointer-param.c
- create mode 100644 validation/backend/pointer-sub.c
- create mode 100644 validation/backend/setval.c
- create mode 100644 validation/backend/shift-special.c
- create mode 100644 validation/backend/store-x2.c
- create mode 100644 validation/backend/string-value.c
- create mode 100644 validation/backend/switch.c
- create mode 100644 validation/backend/symaddr.c
- create mode 100644 validation/backend/type-constant.c
- create mode 100644 validation/call-inlined.c
- create mode 100644 validation/call-variadic.c
- create mode 100644 validation/optim/call-inlined.c
- create mode 100644 validation/switch-long.c
-
+diff --git a/simplify.c b/simplify.c
+index 5d00937f1..66035bbce 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -735,13 +735,13 @@ static int canonical_order(pseudo_t p1, pseudo_t p2)
+ 	return 1;
+ }
+ 
+-static int simplify_commutative_binop(struct instruction *insn)
++static int canonicalize_commutative(struct instruction *insn)
+ {
+-	if (!canonical_order(insn->src1, insn->src2)) {
+-		switch_pseudo(insn, &insn->src1, insn, &insn->src2);
+-		return REPEAT_CSE;
+-	}
+-	return 0;
++	if (canonical_order(insn->src1, insn->src2))
++		return 0;
++
++	switch_pseudo(insn, &insn->src1, insn, &insn->src2);
++	return repeat_phase |= REPEAT_CSE;
+ }
+ 
+ static inline int simple_pseudo(pseudo_t pseudo)
+@@ -1129,17 +1129,15 @@ int simplify_instruction(struct instruction *insn)
+ 	case OP_ADD: case OP_MULS:
+ 	case OP_AND: case OP_OR: case OP_XOR:
+ 	case OP_AND_BOOL: case OP_OR_BOOL:
++		canonicalize_commutative(insn);
+ 		if (simplify_binop(insn))
+ 			return REPEAT_CSE;
+-		if (simplify_commutative_binop(insn))
+-			return REPEAT_CSE;
+ 		return simplify_associative_binop(insn);
+ 
+ 	case OP_MULU:
+ 	case OP_SET_EQ: case OP_SET_NE:
+-		if (simplify_binop(insn))
+-			return REPEAT_CSE;
+-		return simplify_commutative_binop(insn);
++		canonicalize_commutative(insn);
++		return simplify_binop(insn);
+ 
+ 	case OP_SUB:
+ 	case OP_DIVU: case OP_DIVS:
 -- 
 2.12.0
 
