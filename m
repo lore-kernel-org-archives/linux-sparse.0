@@ -1,95 +1,88 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 27/63] llvm: add test cases for symbol's address
-Date: Tue, 21 Mar 2017 01:15:31 +0100
-Message-ID: <20170321001607.75169-28-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 24/63] llvm: fix output_op_store() which modify its operand
+Date: Tue, 21 Mar 2017 01:15:28 +0100
+Message-ID: <20170321001607.75169-25-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34734 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755901AbdCUAQu (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33348 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755839AbdCUAQr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:50 -0400
-Received: by mail-wm0-f66.google.com with SMTP id u132so263364wmg.1
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:49 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:47 -0400
+Received: by mail-wr0-f193.google.com with SMTP id g10so20441457wrg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:46 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+In sparse-llvm the field 'priv' of a pseudo is used to store
+the corresponding LLVMValueRef. This field is normaly assigned
+when processing the instruction that produces the speudo.
+
+In output_op_store(), the field insn->target->priv is overwritten
+by the LLVMValueRef returned by LLVMBuildStore().
+It's unclear what this return value is:
+- this corrupts the pseudo, making it unusable in subsequent
+  instructions.
+- there is no reason to change this field anyway.
+
+Fix this by removing the assignment to insn->target->priv
+in output_op_store().
+
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/symaddr.c | 62 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 62 insertions(+)
- create mode 100644 validation/backend/symaddr.c
+ sparse-llvm.c                 |  6 ++----
+ validation/backend/store-x2.c | 16 ++++++++++++++++
+ 2 files changed, 18 insertions(+), 4 deletions(-)
+ create mode 100644 validation/backend/store-x2.c
 
-diff --git a/validation/backend/symaddr.c b/validation/backend/symaddr.c
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 94ebc9577..e01406281 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -651,16 +651,14 @@ static void output_op_load(struct function *fn, struct instruction *insn)
+ 
+ static void output_op_store(struct function *fn, struct instruction *insn)
+ {
+-	LLVMValueRef addr, target, target_in;
++	LLVMValueRef addr, target_in;
+ 
+ 	addr = calc_memop_addr(fn, insn);
+ 
+ 	target_in = pseudo_to_value(fn, insn, insn->target);
+ 
+ 	/* perform store */
+-	target = LLVMBuildStore(fn->builder, target_in, addr);
+-
+-	insn->target->priv = target;
++	LLVMBuildStore(fn->builder, target_in, addr);
+ }
+ 
+ static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
+diff --git a/validation/backend/store-x2.c b/validation/backend/store-x2.c
 new file mode 100644
-index 000000000..71bca2d76
+index 000000000..5ccc9b43a
 --- /dev/null
-+++ b/validation/backend/symaddr.c
-@@ -0,0 +1,62 @@
-+extern void useip(int *);
-+extern void useia(int (*)[3]);
-+extern void usevp(void *);
-+static int  sfun(void) { return 0; }
-+static int  spun(void) { return 0; }
-+
-+void lfoo(int *p, int a)
++++ b/validation/backend/store-x2.c
+@@ -0,0 +1,16 @@
++void foo(int *p, int a, int b);
++void foo(int *p, int a, int b)
 +{
-+	int larra[3], larrb[3], larrc[3], larrd[3], larre[3], larrf[3];
-+	useip(p);
-+	useip(larra);
-+	useip(larrb + 1);
-+	useip(&larrd[1]);
-+	useia(&larrf);
-+}
++	int c = a + b;
 +
-+static int sarra[3], sarrb[3], sarrc[3], sarrd[3], sarre[3], sarrf[3];
-+static int s, sfun(void), spun(void);
-+void sfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&s);
-+	useip(sarra);
-+	useip(sarrb + 1);
-+	useip(&sarrd[1]);
-+	useia(&sarrf);
-+	usevp(sfun);
-+	usevp(&spun);
-+}
-+
-+extern int xarra[3], xarrb[3], xarrc[3], xarrd[3], xarre[3], xarrf[3];
-+extern int x, xfun(void), xpun(void);
-+void xfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&x);
-+	useip(xarra);
-+	useip(xarrb + 1);
-+	useip(&xarrd[1]);
-+	useia(&xarrf);
-+	usevp(xfun);
-+	usevp(&xpun);
-+}
-+
-+int garra[3], garrb[3], garrc[3], garrd[3], garre[3], garrf[3];
-+int g, gfun(void), gpun(void);
-+void gfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&g);
-+	useip(garra);
-+	useip(garrb + 1);
-+	useip(&garrd[1]);
-+	useia(&garrf);
-+	usevp(gfun);
-+	usevp(&gpun);
++	p[0] = c;
++	p[1] = c;
 +}
 +
 +/*
-+ * check-name: symbol address
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ * check-name: store-x2
++ * check-command: sparsec -c $file -o tmp.o
++ * check-description: Verify in output_op_store() that
++ *	the first store doesn't mess anymore with the
++ *	'target' and thus making the second store unusable.
 + */
 -- 
 2.12.0
