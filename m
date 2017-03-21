@@ -1,143 +1,304 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 08/63] give a type to OP_PHISOURCE
-Date: Tue, 21 Mar 2017 01:15:12 +0100
-Message-ID: <20170321001607.75169-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 11/63] add doc about sparse's instructions/IR
+Date: Tue, 21 Mar 2017 01:15:15 +0100
+Message-ID: <20170321001607.75169-12-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36455 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755772AbdCUAQ3 (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36469 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755818AbdCUAQd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:29 -0400
-Received: by mail-wr0-f194.google.com with SMTP id l37so20367276wrc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:28 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:33 -0400
+Received: by mail-wr0-f195.google.com with SMTP id l37so20367381wrc.3
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:32 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
-
-For consistency, give it a type too.
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
+ Documentation/instructions.txt | 270 +++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 270 insertions(+)
+ create mode 100644 Documentation/instructions.txt
 
-diff --git a/flow.c b/flow.c
-index ec7e3f22c..9265a099d 100644
---- a/flow.c
-+++ b/flow.c
-@@ -371,7 +371,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
-diff --git a/linearize.c b/linearize.c
-index 34a5125a0..bc2489067 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -820,9 +820,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
- }
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
- {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
- 
-@@ -1369,19 +1369,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
- 
- 	if (!expr_false || !ep->active)
- 		return VOID;
- 
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1395,7 +1394,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
- 
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1407,12 +1405,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1894,7 +1892,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
- 	}
-diff --git a/linearize.h b/linearize.h
-index 0cdd0fa9a..d437e268d 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -339,7 +339,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
- 
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
- 
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
- 
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+diff --git a/Documentation/instructions.txt b/Documentation/instructions.txt
+new file mode 100644
+index 000000000..db30e52f7
+--- /dev/null
++++ b/Documentation/instructions.txt
+@@ -0,0 +1,270 @@
++This brievely describe which field of struct instruction is
++used by which operation.
++
++== Terminator ==
++=== OP_RET ===
++Return from subroutine.
++- .src : returned value (NULL if void)
++- .type: type of .src
++
++=== OP_BR ===
++Unconditional branch
++- .bb_true: destination basic block
++
++=== OP_CBR ===
++Conditional branch
++- .cond: condition
++- .type: type of .cond, must be an integral type
++- .bb_true, .bb_false: destination basic blocks
++
++=== OP_SWITCH ===
++Switch / multi-branch
++- .cond: condition
++- .type: type of .cond, must be an integral type
++- .multijmp_list: pairs of case-value - destination basic block
++
++=== OP_COMPUTEDGOTO ===
++Computed goto / branch to register
++- .target: target address
++- .type: type of .target	FIXME
++- .multijmp_list: list of possible destination basic blocks
++
++== Arithmetic binops ==
++They all follow the same signature:
++- .src1, .src1: operands (types must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target
++
++=== OP_ADD ===
++Addition.
++
++=== OP_SUB ===
++Subtraction.
++
++=== OP_MULU ===
++Multiplication (unsigned ints & floating-points)
++
++=== OP_MULS, ===
++Multiplication (signed ints)
++
++=== OP_DIVU ===
++Division (unsigned ints & floating-points)
++
++=== OP_DIVS, ===
++Division (signed ints)
++
++=== OP_MODU ===
++Modulo (unsigned division remainder, integer only)
++
++=== OP_MODS, ===
++Modulo (signed division remainder, integer only)
++
++=== OP_SHL ===
++Shift left (integer only)
++
++=== OP_LSR ===
++Logical Shift right (integer only)
++
++=== OP_ASR, ===
++Arithmetic Shift right (integer only)
++
++== Logical ==
++They all follow the same signature:
++- .src1, .src2: operands (types must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target, must be an integral type
++
++=== OP_AND ===
++=== OP_OR ===
++=== OP_XOR ===
++
++== Boolean ==
++=== OP_AND_BOOL ===
++=== OP_OR_BOOL ===
++
++== Comparison ==
++- .src1, .src2: operands (types must be compatible)
++- .target: result of the operation (0/1 valued integer)
++- .type: type of .target, must be an integral type
++
++=== OP_SET_EQ ===
++Compare equal.
++
++=== OP_SET_NE ===
++Compare not-equal.
++
++=== OP_SET_LE ===
++Compare less-than-or-equal (signed).
++
++=== OP_SET_GE ===
++Compare greater-than-or-equal (signed).
++
++=== OP_SET_LT ===
++Compare less-than (signed).
++
++=== OP_SET_GT ===
++Compare greater-than (signed).
++
++=== OP_SET_B ===
++Compare less-than (unsigned).
++
++=== OP_SET_A ===
++Compare greater-than (unsigned).
++
++=== OP_SET_BE ===
++Compare less-than-or-equal (unsigned).
++
++=== OP_SET_AE ===
++Compare greater-than-or-equal (unsigned).
++
++== Unary trinary ops ==
++=== OP_NOT ===
++Logical not.
++- .src: operand (type must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target, must be an integral type
++
++=== OP_NEG ===
++Arithmetic negation.
++- .src: operand (type must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target
++
++=== OP_COPY ===
++Copy (only needed after out-of-SSA).
++- .src: operand (type must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target
++
++=== OP_SEL ===
++- .src1: condition, must be of integral type
++- .src2, .src3: operands (types must be compatible with .target)
++- .target: result of the operation
++- .type: type of .target
++
++== Type conversion ==
++They all follow the same signature:
++- .src: source value
++- .orig_type: type of .src
++- .target: result value
++- .type: type of .target
++
++=== OP_CAST ===
++Cast to unsigned integer (and to void pointer).
++
++=== OP_SCAST ===
++Cast to signed integer.
++
++=== OP_FPCAST ===
++Cast to floating-point.
++
++=== OP_PTRCAST ===
++Cast to pointer.
++
++== Memory ==
++=== OP_LOAD ===
++Load.
++- .src: base address to load from
++- .offset: address offset
++- .target: loaded value
++- .type: type of .target
++
++=== OP_STORE ===
++Store.
++- .src: base address to store to
++- .offset: address offset
++- .target: value to be stored
++- .type: type of .target
++
++=== OP_SYMADDR ===
++Symbol's address.
++- .symbol: the symbol
++- .target: symbol's address
++
++=== OP_SETVAL ===
++"Set Value"
++- .val: value's expression
++- .target: the value
++- .type: type of .target
++The expression can be an EXPR_STRING, EXPR_FVALUE or an EXPR_LABEL.
++
++== Other ==
++=== OP_PHI ===
++Phi-node (for SSA form).
++- .phi_list: phi-operands (type must be compatible with .target)
++- .target: "result"
++- .type: type of .target
++
++=== OP_PHISOURCE ===
++Phi-node source.
++Like OP_COPY but exclusively used to create *all* OP_PHI operands.
++
++=== OP_INLINED_CALL ===
++
++=== OP_PUSH ===
++Push argument.
++- .src: argument
++- .type: type of .src
++
++=== OP_CALL ===
++Function call.
++- .func: the function (can be a symbol or a "register")
++- .arguments: list of the associated OP_PUSH instructions
++- .target: function return value (if any)
++- .type: type of .target
++- .fntype: the full function type
++
++=== OP_SLICE ===
++Extract a "slice" from an aggregate.
++- .base: aggregate
++- .from, .len: offet @ size of the slice within the aggregate
++- .target: result
++- .type: type of .target
++
++=== OP_ASM ===
++Inlined assembly code.
++- .string: asm template
++- .asm_rules: asm constraints, rules
++
++== Sparse tagging (line numbers, context, whatever) ==
++=== OP_CONTEXT ===
++Currently only used for lock/unlock tracking.
++- .context_expr: unused
++- .increment: (1 for locking, -1 for unlocking)
++- .check: (ignore the instruction if 0)
++
++=== OP_RANGE ===
++Range checking.
++- .src1: value to be checked
++- .src2, src3: bound of the value (must be constants?)
++- .type: FIXME
++
++== Misc ==
++=== OP_ENTRY ===
++Function entry point (no associated semantic).
++
++=== OP_BADOP ===
++Invalid operation (should never be generated).
++
++=== OP_NOP ===
++No-op (should never be generated).
++
++=== OP_SNOP ===
++Store no-op (removed store operation).
++
++=== OP_LNOP ===
++Load no-op (removed load operation).
++
++=== OP_DEATHNOTE ===
++Annotation telling the pseudo will be death after the next
++instruction (other than some other annotation, that is).
++
++== Unused ==
++=== OP_VANEXT ===
++=== OP_VAARG ===
++=== OP_MALLOC ===
++=== OP_FREE ===
++=== OP_ALLOCA ===
++=== OP_GET_ELEMENT_PTR ===
++=== OP_INVOKE ===
++=== OP_UNWIND ===
 -- 
 2.12.0
 
