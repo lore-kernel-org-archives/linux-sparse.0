@@ -1,85 +1,151 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 35/63] llvm: fix pointer/float mixup in comparisons
-Date: Tue, 21 Mar 2017 01:15:39 +0100
-Message-ID: <20170321001607.75169-36-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 42/63] llvm: give a name to all values
+Date: Tue, 21 Mar 2017 01:15:46 +0100
+Message-ID: <20170321001607.75169-43-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36583 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755954AbdCUAQ6 (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33248 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753279AbdCUARG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:58 -0400
-Received: by mail-wr0-f194.google.com with SMTP id l37so20368016wrc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:57 -0700 (PDT)
+        Mon, 20 Mar 2017 20:17:06 -0400
+Received: by mail-wm0-f66.google.com with SMTP id n11so268836wma.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:05 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In output_op_compare() everything that is not of interger
-type is treated as floats. Pointers disagree.
-
-Fix this by rearranging the code and treat pointers like integers
-as required for LLVM's icmp.
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c                    | 17 +++++++++++++++--
- validation/backend/pointer-cmp.c |  9 +++++++++
- 2 files changed, 24 insertions(+), 2 deletions(-)
- create mode 100644 validation/backend/pointer-cmp.c
+ sparse-llvm.c | 37 +++++++++++++++++++++++--------------
+ 1 file changed, 23 insertions(+), 14 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index e6134af29..8c9b6a7ba 100644
+index bf76bbe77..6530d2d59 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -596,14 +596,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+@@ -407,15 +407,18 @@ static LLVMValueRef pseudo_to_rvalue(struct function *fn, struct instruction *in
+ {
+ 	LLVMValueRef val = pseudo_to_value(fn, insn, pseudo);
+ 	LLVMTypeRef dtype = symbol_type(insn->type);
++	char name[MAX_PSEUDO_NAME];
  
- 	LLVMTypeRef dst_type = insn_symbol_type(insn);
+-	return LLVMBuildBitCast(fn->builder, val, dtype, "");
++	pseudo_name(pseudo, name);
++	return LLVMBuildBitCast(fn->builder, val, dtype, name);
+ }
  
--	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
-+	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
-+	case LLVMPointerTypeKind:
-+	case LLVMIntegerTypeKind: {
- 		LLVMIntPredicate op = translate_op(insn->opcode);
- 
- 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
--	} else {
-+		break;
-+	}
-+	case LLVMHalfTypeKind:
-+	case LLVMFloatTypeKind:
-+	case LLVMDoubleTypeKind:
-+	case LLVMX86_FP80TypeKind:
-+	case LLVMFP128TypeKind:
-+	case LLVMPPC_FP128TypeKind: {
- 		LLVMRealPredicate op = translate_fop(insn->opcode);
- 
- 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
-+		break;
-+	}
-+	default:
-+		assert(0);
+ static LLVMValueRef value_to_ivalue(struct function *fn, LLVMValueRef val)
+ {
+ 	if (LLVMGetTypeKind(LLVMTypeOf(val)) == LLVMPointerTypeKind) {
+ 		LLVMTypeRef dtype = LLVMIntType(bits_in_pointer);
+-		val = LLVMBuildPtrToInt(fn->builder, val, dtype, "");
++		const char *name = LLVMGetValueName(val);
++		val = LLVMBuildPtrToInt(fn->builder, val, dtype, name);
  	}
+ 	return val;
+ }
+@@ -424,7 +427,8 @@ static LLVMValueRef value_to_pvalue(struct function *fn, struct symbol *ctype, L
+ {
+ 	if (LLVMGetTypeKind(LLVMTypeOf(val)) == LLVMIntegerTypeKind) {
+ 		LLVMTypeRef dtype = symbol_type(ctype);
+-		val = LLVMBuildIntToPtr(fn->builder, val, dtype, "");
++		const char *name = LLVMGetValueName(val);
++		val = LLVMBuildIntToPtr(fn->builder, val, dtype, name);
+ 	}
+ 	return val;
+ }
+@@ -444,13 +448,14 @@ static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base, LLVMValu
+ 	unsigned int as = LLVMGetPointerAddressSpace(type);
+ 	LLVMTypeRef bytep = LLVMPointerType(LLVMInt8Type(), as);
+ 	LLVMValueRef addr;
++	const char *name = LLVMGetValueName(off);
  
- 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
-diff --git a/validation/backend/pointer-cmp.c b/validation/backend/pointer-cmp.c
-new file mode 100644
-index 000000000..fa76d1b57
---- /dev/null
-+++ b/validation/backend/pointer-cmp.c
-@@ -0,0 +1,9 @@
-+int cmpint(   int x,   int y)	{ return x == y; }
-+int cmpflt( float x, float y)	{ return x == y; }
-+int cmpvptr(void *x, void *y)	{ return x == y; }
-+int cmpiptr(int  *x, int  *y)	{ return x == y; }
-+
-+/*
-+ * check-name: pointer comparison
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
+ 	/* convert base to char* type */
+-	base = LLVMBuildPointerCast(builder, base, bytep, "");
++	base = LLVMBuildPointerCast(builder, base, bytep, name);
+ 	/* addr = base + off */
+-	addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, "");
++	addr = LLVMBuildInBoundsGEP(builder, base, &off, 1, name);
+ 	/* convert back to the actual pointer type */
+-	addr = LLVMBuildPointerCast(builder, addr, type, "");
++	addr = LLVMBuildPointerCast(builder, addr, type, name);
+ 	return addr;
+ }
+ 
+@@ -576,8 +581,8 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 		LLVMValueRef lhs_nz, rhs_nz;
+ 		LLVMTypeRef dst_type;
+ 
+-		lhs_nz = LLVMBuildIsNotNull(fn->builder, lhs, "");
+-		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, "");
++		lhs_nz = LLVMBuildIsNotNull(fn->builder, lhs, LLVMGetValueName(lhs));
++		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, LLVMGetValueName(rhs));
+ 		target = LLVMBuildAnd(fn->builder, lhs_nz, rhs_nz, target_name);
+ 
+ 		dst_type = insn_symbol_type(insn);
+@@ -588,8 +593,8 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
+ 		LLVMValueRef lhs_nz, rhs_nz;
+ 		LLVMTypeRef dst_type;
+ 
+-		lhs_nz = LLVMBuildIsNotNull(fn->builder, lhs, "");
+-		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, "");
++		lhs_nz = LLVMBuildIsNotNull(fn->builder, lhs, LLVMGetValueName(lhs));
++		rhs_nz = LLVMBuildIsNotNull(fn->builder, rhs, LLVMGetValueName(rhs));
+ 		target = LLVMBuildOr(fn->builder, lhs_nz, rhs_nz, target_name);
+ 
+ 		dst_type = insn_symbol_type(insn);
+@@ -675,7 +680,7 @@ static LLVMValueRef calc_memop_addr(struct function *fn, struct instruction *ins
+ 	src = pseudo_to_value(fn, insn, insn->src);
+ 	as = LLVMGetPointerAddressSpace(LLVMTypeOf(src));
+ 	addr_type = LLVMPointerType(insn_symbol_type(insn), as);
+-	src = LLVMBuildPointerCast(fn->builder, src, addr_type, "");
++	src = LLVMBuildPointerCast(fn->builder, src, addr_type, LLVMGetValueName(src));
+ 
+ 	/* addr = src + off */
+ 	addr = calc_gep(fn->builder, src, off);
+@@ -686,11 +691,13 @@ static LLVMValueRef calc_memop_addr(struct function *fn, struct instruction *ins
+ static void output_op_load(struct function *fn, struct instruction *insn)
+ {
+ 	LLVMValueRef addr, target;
++	char name[MAX_PSEUDO_NAME];
+ 
+ 	addr = calc_memop_addr(fn, insn);
+ 
+ 	/* perform load */
+-	target = LLVMBuildLoad(fn->builder, addr, "load_target");
++	pseudo_name(insn->target, name);
++	target = LLVMBuildLoad(fn->builder, addr, name);
+ 
+ 	insn->target->priv = target;
+ }
+@@ -710,7 +717,7 @@ static void output_op_store(struct function *fn, struct instruction *insn)
+ static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
+ {
+ 	if (LLVMTypeOf(value) != LLVMInt1Type())
+-		value = LLVMBuildIsNotNull(fn->builder, value, "cond");
++		value = LLVMBuildIsNotNull(fn->builder, value, LLVMGetValueName(value));
+ 
+ 	return value;
+ }
+@@ -733,12 +740,14 @@ static void output_op_br(struct function *fn, struct instruction *br)
+ static void output_op_sel(struct function *fn, struct instruction *insn)
+ {
+ 	LLVMValueRef target, src1, src2, src3;
++	char name[MAX_PSEUDO_NAME];
+ 
+ 	src1 = bool_value(fn, pseudo_to_value(fn, insn, insn->src1));
+ 	src2 = pseudo_to_value(fn, insn, insn->src2);
+ 	src3 = pseudo_to_value(fn, insn, insn->src3);
+ 
+-	target = LLVMBuildSelect(fn->builder, src1, src2, src3, "select");
++	pseudo_name(insn->target, name);
++	target = LLVMBuildSelect(fn->builder, src1, src2, src3, name);
+ 
+ 	insn->target->priv = target;
+ }
 -- 
 2.12.0
 
