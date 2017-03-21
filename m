@@ -1,89 +1,125 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 24/63] llvm: fix output_op_store() which modify its operand
-Date: Tue, 21 Mar 2017 01:15:28 +0100
-Message-ID: <20170321001607.75169-25-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 21/63] llvm: extract get_sym_value() from pseudo_to_value()
+Date: Tue, 21 Mar 2017 01:15:25 +0100
+Message-ID: <20170321001607.75169-22-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33348 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755839AbdCUAQr (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34308 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755901AbdCUAQn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:47 -0400
-Received: by mail-wr0-f193.google.com with SMTP id g10so20441457wrg.0
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:46 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:43 -0400
+Received: by mail-wr0-f195.google.com with SMTP id u48so20449467wrc.1
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:42 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In sparse-llvm the field 'priv' of a pseudo is used to store
-the corresponding LLVMValueRef. This field is normaly assigned
-when processing the instruction that produces the speudo.
-
-In output_op_store(), the field insn->target->priv is overwritten
-by the LLVMValueRef returned by LLVMBuildStore().
-It's unclear what this return value is:
-- this corrupts the pseudo, making it unusable in subsequent
-  instructions.
-- there is no reason to change this field anyway.
-
-Fix this by removing the assignment to insn->target->priv
-in output_op_store().
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c                 |  6 ++----
- validation/backend/store-x2.c | 16 ++++++++++++++++
- 2 files changed, 18 insertions(+), 4 deletions(-)
- create mode 100644 validation/backend/store-x2.c
+ sparse-llvm.c | 100 +++++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 53 insertions(+), 47 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 94ebc9577..e01406281 100644
+index 072cf2638..d7e8ee725 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -651,16 +651,14 @@ static void output_op_load(struct function *fn, struct instruction *insn)
- 
- static void output_op_store(struct function *fn, struct instruction *insn)
- {
--	LLVMValueRef addr, target, target_in;
-+	LLVMValueRef addr, target_in;
- 
- 	addr = calc_memop_addr(fn, insn);
- 
- 	target_in = pseudo_to_value(fn, insn, insn->target);
- 
- 	/* perform store */
--	target = LLVMBuildStore(fn->builder, target_in, addr);
--
--	insn->target->priv = target;
-+	LLVMBuildStore(fn->builder, target_in, addr);
+@@ -305,6 +305,57 @@ static void pseudo_name(pseudo_t pseudo, char *buf)
+ 	}
  }
  
- static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
-diff --git a/validation/backend/store-x2.c b/validation/backend/store-x2.c
-new file mode 100644
-index 000000000..5ccc9b43a
---- /dev/null
-+++ b/validation/backend/store-x2.c
-@@ -0,0 +1,16 @@
-+void foo(int *p, int a, int b);
-+void foo(int *p, int a, int b)
++static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
 +{
-+	int c = a + b;
++	LLVMValueRef result = NULL;
++	struct expression *expr;
 +
-+	p[0] = c;
-+	p[1] = c;
++	assert(sym->bb_target == NULL);
++
++	expr = sym->initializer;
++	if (expr) {
++		switch (expr->type) {
++		case EXPR_STRING: {
++			const char *s = expr->string->data;
++			LLVMValueRef indices[] = { LLVMConstInt(LLVMInt64Type(), 0, 0), LLVMConstInt(LLVMInt64Type(), 0, 0) };
++			LLVMValueRef data;
++
++			data = LLVMAddGlobal(fn->module, LLVMArrayType(LLVMInt8Type(), strlen(s) + 1), ".str");
++			LLVMSetLinkage(data, LLVMPrivateLinkage);
++			LLVMSetGlobalConstant(data, 1);
++			LLVMSetInitializer(data, LLVMConstString(strdup(s), strlen(s) + 1, true));
++
++			result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
++			break;
++		}
++		case EXPR_SYMBOL: {
++			struct symbol *sym = expr->symbol;
++
++			result = LLVMGetNamedGlobal(fn->module, show_ident(sym->ident));
++			assert(result != NULL);
++			break;
++		}
++		default:
++			assert(0);
++		}
++	} else {
++		const char *name = show_ident(sym->ident);
++		LLVMTypeRef type = symbol_type(sym);
++
++		if (LLVMGetTypeKind(type) == LLVMFunctionTypeKind) {
++			result = LLVMGetNamedFunction(fn->module, name);
++			if (!result)
++				result = LLVMAddFunction(fn->module, name, type);
++		} else {
++			result = LLVMGetNamedGlobal(fn->module, name);
++			if (!result)
++				result = LLVMAddGlobal(fn->module, type, name);
++		}
++	}
++
++	return result;
 +}
 +
-+/*
-+ * check-name: store-x2
-+ * check-command: sparsec -c $file -o tmp.o
-+ * check-description: Verify in output_op_store() that
-+ *	the first store doesn't mess anymore with the
-+ *	'target' and thus making the second store unusable.
-+ */
--- 
-2.12.0
-
+ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *insn, pseudo_t pseudo)
+ {
+ 	LLVMValueRef result = NULL;
+@@ -313,54 +364,9 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 	case PSEUDO_REG:
+ 		result = pseudo->priv;
+ 		break;
+-	case PSEUDO_SYM: {
+-		struct symbol *sym = pseudo->sym;
+-		struct expression *expr;
+-
+-		assert(sym->bb_target == NULL);
+-
+-		expr = sym->initializer;
+-		if (expr) {
+-			switch (expr->type) {
+-			case EXPR_STRING: {
+-				const char *s = expr->string->data;
+-				LLVMValueRef indices[] = { LLVMConstInt(LLVMInt64Type(), 0, 0), LLVMConstInt(LLVMInt64Type(), 0, 0) };
+-				LLVMValueRef data;
+-
+-				data = LLVMAddGlobal(fn->module, LLVMArrayType(LLVMInt8Type(), strlen(s) + 1), ".str");
+-				LLVMSetLinkage(data, LLVMPrivateLinkage);
+-				LLVMSetGlobalConstant(data, 1);
+-				LLVMSetInitializer(data, LLVMConstString(strdup(s), strlen(s) + 1, true));
+-
+-				result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
+-				break;
+-			}
+-			case EXPR_SYMBOL: {
+-				struct symbol *sym = expr->symbol;
+-
+-				result = LLVMGetNamedGlobal(fn->module, show_ident(sym->ident));
+-				assert(result != NULL);
+-				break;
+-			}
+-			default:
+-				assert(0);
+-			}
+-		} else {
+-			const char *name = show_ident(sym->ident);
+-			LLVMTypeRef type = symbol_type(sym);
