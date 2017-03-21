@@ -1,69 +1,85 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 41/63] llvm: make pseudo_name() more flexible
-Date: Tue, 21 Mar 2017 01:15:45 +0100
-Message-ID: <20170321001607.75169-42-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 35/63] llvm: fix pointer/float mixup in comparisons
+Date: Tue, 21 Mar 2017 01:15:39 +0100
+Message-ID: <20170321001607.75169-36-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34408 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754356AbdCUARF (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36583 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755954AbdCUAQ6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:17:05 -0400
-Received: by mail-wr0-f196.google.com with SMTP id u48so20450003wrc.1
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:04 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:58 -0400
+Received: by mail-wr0-f194.google.com with SMTP id l37so20368016wrc.3
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:57 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+In output_op_compare() everything that is not of interger
+type is treated as floats. Pointers disagree.
+
+Fix this by rearranging the code and treat pointers like integers
+as required for LLVM's icmp.
+
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 17 ++++++-----------
- 1 file changed, 6 insertions(+), 11 deletions(-)
+ sparse-llvm.c                    | 17 +++++++++++++++--
+ validation/backend/pointer-cmp.c |  9 +++++++++
+ 2 files changed, 24 insertions(+), 2 deletions(-)
+ create mode 100644 validation/backend/pointer-cmp.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index a64125fe8..bf76bbe77 100644
+index e6134af29..8c9b6a7ba 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -270,31 +270,26 @@ static LLVMLinkage function_linkage(struct symbol *sym)
+@@ -596,14 +596,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
  
- #define MAX_PSEUDO_NAME 64
+ 	LLVMTypeRef dst_type = insn_symbol_type(insn);
  
--static void pseudo_name(pseudo_t pseudo, char *buf)
-+static const char *pseudo_name(pseudo_t pseudo, char *buf)
- {
- 	switch (pseudo->type) {
- 	case PSEUDO_REG:
- 		snprintf(buf, MAX_PSEUDO_NAME, "R%d", pseudo->nr);
- 		break;
--	case PSEUDO_SYM:
--		assert(0);
--		break;
--	case PSEUDO_VAL:
--		assert(0);
--		break;
--	case PSEUDO_ARG: {
--		assert(0);
--		break;
--	}
- 	case PSEUDO_PHI:
- 		snprintf(buf, MAX_PSEUDO_NAME, "PHI%d", pseudo->nr);
- 		break;
-+	case PSEUDO_SYM:
-+	case PSEUDO_VAL:
-+	case PSEUDO_ARG:
- 	case PSEUDO_VOID:
- 		buf[0] = '\0';
- 		break;
- 	default:
- 		assert(0);
+-	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
++	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
++	case LLVMPointerTypeKind:
++	case LLVMIntegerTypeKind: {
+ 		LLVMIntPredicate op = translate_op(insn->opcode);
+ 
+ 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
+-	} else {
++		break;
++	}
++	case LLVMHalfTypeKind:
++	case LLVMFloatTypeKind:
++	case LLVMDoubleTypeKind:
++	case LLVMX86_FP80TypeKind:
++	case LLVMFP128TypeKind:
++	case LLVMPPC_FP128TypeKind: {
+ 		LLVMRealPredicate op = translate_fop(insn->opcode);
+ 
+ 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
++		break;
++	}
++	default:
++		assert(0);
  	}
-+
-+	return buf;
- }
  
- static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
+ 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
+diff --git a/validation/backend/pointer-cmp.c b/validation/backend/pointer-cmp.c
+new file mode 100644
+index 000000000..fa76d1b57
+--- /dev/null
++++ b/validation/backend/pointer-cmp.c
+@@ -0,0 +1,9 @@
++int cmpint(   int x,   int y)	{ return x == y; }
++int cmpflt( float x, float y)	{ return x == y; }
++int cmpvptr(void *x, void *y)	{ return x == y; }
++int cmpiptr(int  *x, int  *y)	{ return x == y; }
++
++/*
++ * check-name: pointer comparison
++ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
