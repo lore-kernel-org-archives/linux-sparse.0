@@ -1,109 +1,158 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 25/63] llvm: fix output_op_[ptr]cast()
-Date: Tue, 21 Mar 2017 01:15:29 +0100
-Message-ID: <20170321001607.75169-26-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 23/63] llvm: fix translation of PSEUDO_VALs into a ValueRefs
+Date: Tue, 21 Mar 2017 01:15:27 +0100
+Message-ID: <20170321001607.75169-24-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34929 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755901AbdCUAQs (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33101 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755901AbdCUAQq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:48 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u108so20435767wrb.2
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:47 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:46 -0400
+Received: by mail-wm0-f65.google.com with SMTP id n11so267876wma.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:45 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_PTRCASTs can't always be directly translated into LLVM bitcasts and
-OP_[S]CASTs can't always be translated into LLVM's trunc/sext/zext
-because integer to pointer and pointer to integer must be handled too.
+In sparse-llvm there is the assumption that a PSEUDO_VAL is always
+of integer type. But this is not always the case: constant pointers,
+like NULL, are also of the PSEUDO_VAL kind.
 
-Fix this in output_op_ptrcast() & output_op_cast() by issuing
-LLVMBuildIntToPtr/PtrToInt when appropriate.
+Fix this by adding a helper 'val_to_value()' and using the
+instruction's type where this pseudo is used as the type of the value.
+
+Note: while this patch improve the situation, like for example for the
+test cases added here, it's still not correct because now we're making
+the assumption that 'insn->type' is the type we need for the pseudo.
+This is often true, but certainly not always.
+For example this is not true for:
+- OP_STORE/OP_LOAD's insn->src
+- OP_SET{EQ,...}'s   insn->src[12]
+- probably some  others ones
+- in general, obviously, for any instructions where the target has
+  a different type than the operands.
 
 Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 40 +++++++++++++++++++++++++++++++++++-----
- 1 file changed, 35 insertions(+), 5 deletions(-)
+ sparse-llvm.c                         | 31 ++++++++++++++++++++++++++++++-
+ validation/backend/constant-pointer.c | 24 ++++++++++++++++++++++++
+ validation/backend/type-constant.c    | 23 +++++++++++++++++++++++
+ 3 files changed, 77 insertions(+), 1 deletion(-)
+ create mode 100644 validation/backend/constant-pointer.c
+ create mode 100644 validation/backend/type-constant.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index e01406281..135b9e001 100644
+index ee3857c49..94ebc9577 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -792,6 +792,8 @@ static void output_op_phi(struct function *fn, struct instruction *insn)
- static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
-+	LLVMOpcode op;
- 	char target_name[64];
- 
- 	src = insn->src->priv;
-@@ -802,15 +804,31 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- 
- 	assert(!is_float_type(insn->type));
- 
--	target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(insn), target_name);
-+	dtype = insn_symbol_type(insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
-+	case LLVMPointerTypeKind:
-+		op = LLVMBitCast;
-+		break;
-+	case LLVMIntegerTypeKind:
-+		op = LLVMIntToPtr;
-+		break;
-+	default:
-+		assert(0);
-+	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
+@@ -348,6 +348,35 @@ static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
+ 	return result;
  }
  
- static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOpcode op)
- {
- 	LLVMValueRef src, target;
-+	LLVMTypeRef dtype;
- 	char target_name[64];
-+	unsigned int width;
++static LLVMValueRef constant_value(unsigned long long val, LLVMTypeRef dtype)
++{
++	LLVMTypeRef itype;
++	LLVMValueRef result;
 +
-+	if (is_ptr_type(insn->type))	// cast to void* is OP_CAST ...
-+		return output_op_ptrcast(fn, insn);
- 
- 	src = insn->src->priv;
- 	if (!src)
-@@ -820,11 +838,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 
- 	assert(!is_float_type(insn->type));
- 
--	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
--		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(insn), target_name);
--	else
--		target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(insn), target_name);
-+	dtype = insn_symbol_type(insn);
-+	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
++	switch (LLVMGetTypeKind(dtype)) {
 +	case LLVMPointerTypeKind:
-+		op = LLVMPtrToInt;
++		itype = LLVMIntType(bits_in_pointer);
++		result = LLVMConstInt(itype, val, 1);
++		result = LLVMConstIntToPtr(result, dtype);
 +		break;
 +	case LLVMIntegerTypeKind:
-+		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
-+		if (insn->size < width)
-+			op = LLVMTrunc;
-+		else if (insn->size == width)
-+			op = LLVMBitCast;
++		result = LLVMConstInt(dtype, val, 1);
 +		break;
 +	default:
 +		assert(0);
 +	}
- 
-+	target = LLVMBuildCast(fn->builder, op, src, dtype, target_name);
- 	insn->target->priv = target;
- }
- 
++	return result;
++}
++
++static LLVMValueRef val_to_value(unsigned long long val, struct symbol *ctype)
++{
++	LLVMTypeRef dtype;
++
++	assert(ctype);
++	dtype = symbol_type(ctype);
++	return constant_value(val, dtype);
++}
++
+ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *insn, pseudo_t pseudo)
+ {
+ 	LLVMValueRef result = NULL;
+@@ -360,7 +389,7 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 		result = get_sym_value(fn, pseudo->sym);
+ 		break;
+ 	case PSEUDO_VAL:
+-		result = LLVMConstInt(insn_symbol_type(insn), pseudo->value, 1);
++		result = val_to_value(pseudo->value, insn->type);
+ 		break;
+ 	case PSEUDO_ARG: {
+ 		result = LLVMGetParam(fn->fn, pseudo->nr - 1);
+diff --git a/validation/backend/constant-pointer.c b/validation/backend/constant-pointer.c
+new file mode 100644
+index 000000000..9012c7843
+--- /dev/null
++++ b/validation/backend/constant-pointer.c
+@@ -0,0 +1,24 @@
++extern int *ip[];
++
++void foo(void);
++void foo(void)
++{
++	ip[0] = (void *)0L;
++	ip[1] = (int *)0L;
++	ip[2] = (void *)0;
++	ip[3] = (int *)0;
++	ip[4] = (void *)(long)0;
++	ip[5] = (int *)(long)0;
++	ip[6] = (void *)123;
++	ip[7] = (int *)123;
++	ip[8] = (void *)123L;
++	ip[9] = (int *)123L;
++	ip[10] = (void *)(long)123;
++	ip[11] = (int *)(long)123;
++}
++
++/*
++ * check-name: constant pointers
++ * check-command: sparse-llvm $file
++ * check-output-ignore
++ */
+diff --git a/validation/backend/type-constant.c b/validation/backend/type-constant.c
+new file mode 100644
+index 000000000..cded7f2ea
+--- /dev/null
++++ b/validation/backend/type-constant.c
+@@ -0,0 +1,23 @@
++char creti(void) { return 3; }
++int  ireti(void) { return 3; }
++long lreti(void) { return 3; }
++
++char cinii(void) { char r = 3; return r; }
++int  iinii(void) { int  r = 3; return r; }
++long linii(void) { long r = 3; return r; }
++
++
++void *vretn(void) { return (void*)0; }
++char *cretn(void) { return (void*)0; }
++int  *iretn(void) { return (void*)0; }
++long *lretn(void) { return (void*)0; }
++
++void *vinin(void) { void *r = (void*)0; return r; }
++char *cinin(void) { char *r = (void*)0; return r; }
++int  *iinin(void) { int  *r = (void*)0; return r; }
++long *linin(void) { long *r = (void*)0; return r; }
++
++/*
++ * check-name: type-constant
++ * check-command: ./sparsec -Wno-decl -c $file -o r.o
++ */
 -- 
 2.12.0
 
