@@ -1,56 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 18/63] llvm: give arguments a name
-Date: Tue, 21 Mar 2017 01:15:22 +0100
-Message-ID: <20170321001607.75169-19-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 14/63] llvm: remove unneeded 'generation'
+Date: Tue, 21 Mar 2017 01:15:18 +0100
+Message-ID: <20170321001607.75169-15-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36501 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755839AbdCUAQk (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34285 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755839AbdCUAQg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:40 -0400
-Received: by mail-wr0-f194.google.com with SMTP id l37so20367561wrc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:39 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:36 -0400
+Received: by mail-wr0-f193.google.com with SMTP id u48so20449337wrc.1
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:35 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Arguments, like all LLVMValues, are given a default name
-but these name are simply '%0', '%1', ... and are thus not
-very readable.
-
-Fix this by giving them an explicit name 'ARG1', ... to
-match the names used in sparse's linearized code.
+It's not needed here since there is no recursive access to BBs.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 11 +++++++++++
- 1 file changed, 11 insertions(+)
+ sparse-llvm.c | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 23ae482e1..b9176e19d 100644
+index 9b702863d..f41fbe6e3 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -955,6 +955,17 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+@@ -911,12 +911,10 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 	}
+ }
  
- 	function.builder = LLVMCreateBuilder();
+-static void output_bb(struct function *fn, struct basic_block *bb, unsigned long generation)
++static void output_bb(struct function *fn, struct basic_block *bb)
+ {
+ 	struct instruction *insn;
  
-+	/* give a name to each argument */
-+	for (int i = 0; i < nr_args; i++) {
-+		char name[MAX_PSEUDO_NAME];
-+		LLVMValueRef arg;
-+
-+		arg = LLVMGetParam(function.fn, i);
-+		snprintf(name, sizeof(name), "ARG%d", i+1);
-+		LLVMSetValueName(arg, name);
-+	}
-+
-+	/* create the BBs */
+-	bb->generation = generation;
+-
+ 	FOR_EACH_PTR(bb->insns, insn) {
+ 		if (!insn->bb)
+ 			continue;
+@@ -930,7 +928,6 @@ static void output_bb(struct function *fn, struct basic_block *bb, unsigned long
+ 
+ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ {
+-	unsigned long generation = ++bb_generation;
+ 	struct symbol *sym = ep->name;
+ 	struct symbol *base_type = sym->ctype.base_type;
+ 	struct symbol *ret_type = sym->ctype.base_type->ctype.base_type;
+@@ -964,9 +961,6 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	static int nr_bb;
+ 
  	FOR_EACH_PTR(ep->bbs, bb) {
- 		static int nr_bb;
+-		if (bb->generation == generation)
+-			continue;
+-
  		LLVMBasicBlockRef bbr;
--- 
-2.12.0
-
+ 		char bbname[32];
+ 		struct instruction *insn;
+@@ -997,12 +991,9 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	END_FOR_EACH_PTR(bb);
+ 
+ 	FOR_EACH_PTR(ep->bbs, bb) {
+-		if (bb->generation == generation)
+-			continue;
