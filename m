@@ -1,303 +1,66 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 44/63] llvm: fix OP_SWITCH has no target
-Date: Tue, 21 Mar 2017 01:15:48 +0100
-Message-ID: <20170321001607.75169-45-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 36/63] llvm: fix type in comparison with an address constant
+Date: Tue, 21 Mar 2017 01:15:40 +0100
+Message-ID: <20170321001607.75169-37-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33260 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754656AbdCUARI (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:33402 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755969AbdCUAQ7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:17:08 -0400
-Received: by mail-wm0-f67.google.com with SMTP id n11so268903wma.0
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:17:07 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:59 -0400
+Received: by mail-wr0-f195.google.com with SMTP id g10so20441759wrg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:58 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+Since sparse's constant are typeless comparing a pointer with
+an address constant lack correct type information.
+
+Fix this by casting the constant to the same type as the LHS.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c               |   4 +-
- validation/backend/switch.c | 248 ++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 249 insertions(+), 3 deletions(-)
- create mode 100644 validation/backend/switch.c
+ sparse-llvm.c                          |  3 +--
+ validation/backend/compare-with-null.c | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+ create mode 100644 validation/backend/compare-with-null.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 035c7b42d..238cf0f50 100644
+index 8c9b6a7ba..3f77f8f40 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -771,15 +771,13 @@ static void output_op_switch(struct function *fn, struct instruction *insn)
- 				 def ? def->priv : NULL, n_jmp);
+@@ -586,9 +586,8 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+ 	char target_name[64];
  
- 	FOR_EACH_PTR(insn->multijmp_list, jmp) {
--		long val;
-+		long long val;
- 
- 		for (val = jmp->begin; val <= jmp->end; val++) {
- 			LLVMValueRef Val = val_to_value(val, insn->type);
- 			LLVMAddCase(target, Val, jmp->target->priv);
- 		}
- 	} END_FOR_EACH_PTR(jmp);
+ 	lhs = pseudo_to_value(fn, insn, insn->src1);
 -
--	insn->target->priv = target;
- }
+ 	if (insn->src2->type == PSEUDO_VAL)
+-		rhs = LLVMConstInt(LLVMTypeOf(lhs), insn->src2->value, 1);
++		rhs = constant_value(insn->src2->value, LLVMTypeOf(lhs));
+ 	else
+ 		rhs = pseudo_to_value(fn, insn, insn->src2);
  
- static void output_op_call(struct function *fn, struct instruction *insn)
-diff --git a/validation/backend/switch.c b/validation/backend/switch.c
+diff --git a/validation/backend/compare-with-null.c b/validation/backend/compare-with-null.c
 new file mode 100644
-index 000000000..d77250cc3
+index 000000000..e23562bc5
 --- /dev/null
-+++ b/validation/backend/switch.c
-@@ -0,0 +1,248 @@
-+int def(void);
-+int r0(void);
-+int r1(void);
-+int r2(void);
-+int r3(void);
-+int r4(void);
-+int r5(void);
-+int r6(void);
-+int r7(void);
-+int r8(void);
-+int r9(void);
++++ b/validation/backend/compare-with-null.c
+@@ -0,0 +1,12 @@
++int  tstv(void *p) { return !p; }
++int  cmpv(void *p) { return p == ((void*)0); }
 +
-+int small(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	}
-+
-+	return def();
-+}
-+
-+int densefull(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	case 3: return r3();
-+	case 4: return r4();
-+	case 5: return r5();
-+	case 6: return r6();
-+	case 7: return r7();
-+	case 8: return r8();
-+	case 9: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int densepart(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	case 3: return r3();
-+	case 4: return r4();
-+
-+	case 6: return r6();
-+	case 7: return r7();
-+	case 8: return r8();
-+	case 9: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int dense_dense_20(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	case 3: return r3();
-+	case 4: return r4();
-+	case 5: return r5();
-+	case 6: return r6();
-+	case 7: return r7();
-+	case 8: return r8();
-+	case 9: return r9();
-+
-+	case 20: return r0();
-+	case 21: return r1();
-+	case 22: return r2();
-+	case 23: return r3();
-+	case 24: return r4();
-+	case 25: return r5();
-+	case 26: return r6();
-+	case 27: return r7();
-+	case 28: return r8();
-+	case 29: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int dense_dense_100(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	case 3: return r3();
-+	case 4: return r4();
-+	case 5: return r5();
-+	case 6: return r6();
-+	case 7: return r7();
-+	case 8: return r8();
-+	case 9: return r9();
-+
-+	case 100: return r0();
-+	case 101: return r1();
-+	case 102: return r2();
-+	case 103: return r3();
-+	case 104: return r4();
-+	case 105: return r5();
-+	case 106: return r6();
-+	case 107: return r7();
-+	case 108: return r8();
-+	case 109: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int dense_dense_1000(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 1: return r1();
-+	case 2: return r2();
-+	case 3: return r3();
-+	case 4: return r4();
-+	case 5: return r5();
-+	case 6: return r6();
-+	case 7: return r7();
-+	case 8: return r8();
-+	case 9: return r9();
-+
-+	case 1000: return r0();
-+	case 1001: return r1();
-+	case 1002: return r2();
-+	case 1003: return r3();
-+	case 1004: return r4();
-+	case 1005: return r5();
-+	case 1006: return r6();
-+	case 1007: return r7();
-+	case 1008: return r8();
-+	case 1009: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int sparse(int a)
-+{
-+	switch (a) {
-+	case 0: return r0();
-+	case 3: return r1();
-+	case 12: return r2();
-+	case 31: return r3();
-+	case 54: return r4();
-+	case 75: return r5();
-+	case 96: return r6();
-+	case 107: return r7();
-+	case 189: return r8();
-+	case 999: return r9();
-+	}
-+
-+	return def();
-+}
-+
-+int range_simple(int a)
-+{
-+	switch (a) {
-+	case 1 ... 9: return r0();
-+	}
-+
-+	return def();
-+}
-+
-+int range_complex(int a)
-+{
-+	switch (a) {
-+	case -1: return r0();
-+	case 1 ... 9: return r0();
-+	case 10 ... 19: return r1();
-+	case 200 ... 202: return r2();
-+	case 300 ... 303: return r3();
-+	}
-+
-+	return def();
-+}
-+
-+void switch_call(int a)
-+{
-+	int r;
-+
-+	switch (a) {
-+	case 0: r0(); break;
-+	case 1: r1(); break;
-+	case 2: r2(); break;
-+	case 3: r3(); break;
-+	case 4: r4(); break;
-+	case 5: r5(); break;
-+	case 6: r6(); break;
-+	case 7: r7(); break;
-+	case 8: r8(); break;
-+	case 9: r9(); break;
-+	}
-+}
-+
-+int switch_retcall(int a)
-+{
-+	int r = 0;
-+
-+	switch (a) {
-+	case 0: r = r0(); break;
-+	case 1: r = r1(); break;
-+	case 2: r = r2(); break;
-+	case 3: r = r3(); break;
-+	case 4: r = r4(); break;
-+	case 5: r = r5(); break;
-+	case 6: r = r6(); break;
-+	case 7: r = r7(); break;
-+	case 8: r = r8(); break;
-+	case 9: r = r9(); break;
-+	}
-+
-+	return r;
-+}
-+
-+int switch_cmov(int a)
-+{
-+	int r;
-+
-+	switch (a) {
-+	case 0: r = 3; break;
-+	case 1: r = 1; break;
-+	case 2: r = 7; break;
-+	case 3: r = 2; break;
-+	case 4: r = 9; break;
-+
-+	case 6: r = 5; break;
-+	case 7: r = 8; break;
-+	case 8: r = 6; break;
-+	case 9: r = 4; break;
-+	}
-+
-+	return r;
-+}
++int  tsti(int  *p) { return !p; }
++int  cmpi(int  *p) { return p == ((int *)0); }
++int  cmpx(int  *p) { return p == ((void*)0); }
 +
 +/*
-+ * check-name: llvm-switch
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ * check-name: compare-with-null
++ * check-command: sparsec -Wno-decl -c $file -o tmp.o
++ * check-output-ignore
 + */
 -- 
 2.12.0
