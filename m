@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 10/63] give a type to OP_SWITCH
-Date: Tue, 21 Mar 2017 01:15:14 +0100
-Message-ID: <20170321001607.75169-11-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 26/63] llvm: take care of degenerated rvalues
+Date: Tue, 21 Mar 2017 01:15:30 +0100
+Message-ID: <20170321001607.75169-27-luc.vanoostenryck@gmail.com>
 References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35733 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755772AbdCUAQc (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36539 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755951AbdCUAQt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 20:16:32 -0400
-Received: by mail-wm0-f68.google.com with SMTP id z133so257547wmb.2
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:30 -0700 (PDT)
+        Mon, 20 Mar 2017 20:16:49 -0400
+Received: by mail-wr0-f194.google.com with SMTP id l37so20367757wrc.3
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:48 -0700 (PDT)
 In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,33 +19,46 @@ Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ sparse-llvm.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
-diff --git a/linearize.c b/linearize.c
-index 5a4ba82ef..4eb788915 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1906,16 +1906,17 @@ static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
- 	struct instruction *switch_ins;
- 	struct basic_block *switch_end = alloc_basic_block(ep, stmt->pos);
- 	struct basic_block *active, *default_case;
-+	struct expression *expr = stmt->switch_expression;
- 	struct multijmp *jmp;
- 	pseudo_t pseudo;
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 135b9e001..ad69124e1 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -408,6 +408,14 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 	return result;
+ }
  
--	pseudo = linearize_expression(ep, stmt->switch_expression);
-+	pseudo = linearize_expression(ep, expr);
++static LLVMValueRef pseudo_to_rvalue(struct function *fn, struct instruction *insn, pseudo_t pseudo)
++{
++	LLVMValueRef val = pseudo_to_value(fn, insn, pseudo);
++	LLVMTypeRef dtype = symbol_type(insn->type);
++
++	return LLVMBuildBitCast(fn->builder, val, dtype, "");
++}
++
+ static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base, LLVMValueRef off)
+ {
+ 	LLVMTypeRef type = LLVMTypeOf(base);
+@@ -655,7 +663,7 @@ static void output_op_store(struct function *fn, struct instruction *insn)
  
- 	active = ep->active;
- 	if (!bb_reachable(active))
- 		return VOID;
+ 	addr = calc_memop_addr(fn, insn);
  
--	switch_ins = alloc_instruction(OP_SWITCH, 0);
-+	switch_ins = alloc_typed_instruction(OP_SWITCH, expr->ctype);
- 	use_pseudo(switch_ins, pseudo, &switch_ins->cond);
- 	add_one_insn(ep, switch_ins);
- 	finish_block(ep);
+-	target_in = pseudo_to_value(fn, insn, insn->target);
++	target_in = pseudo_to_rvalue(fn, insn, insn->target);
+ 
+ 	/* perform store */
+ 	LLVMBuildStore(fn->builder, target_in, addr);
+@@ -744,7 +752,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ 
+ 	i = 0;
+ 	FOR_EACH_PTR(insn->arguments, arg) {
+-		args[i++] = pseudo_to_value(fn, arg, arg->src);
++		args[i++] = pseudo_to_rvalue(fn, arg, arg->src);
+ 	} END_FOR_EACH_PTR(arg);
+ 
+ 	func = pseudo_to_value(fn, insn, insn->func);
 -- 
 2.12.0
 
