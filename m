@@ -1,66 +1,95 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Possible linearizer issue
-Date: Tue, 21 Mar 2017 00:59:24 +0100
-Message-ID: <20170320235923.w5sdofxvbi66d24o@macpro.local>
-References: <CACXZuxeuav4vrT=xKxLcV7RpUET8NM7VLuviTNr4N_XfGQxmHQ@mail.gmail.com>
- <CACXZuxdw6ifjMUWv4TDh+0KCTvaG-AK14=78mdPcPN7eqk4MHg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH v4 03/63] canonicalize compare instructions
+Date: Tue, 21 Mar 2017 01:15:07 +0100
+Message-ID: <20170321001607.75169-4-luc.vanoostenryck@gmail.com>
+References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f180.google.com ([209.85.128.180]:36607 "EHLO
-        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754873AbdCTX73 (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36427 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753724AbdCUAQY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Mar 2017 19:59:29 -0400
-Received: by mail-wr0-f180.google.com with SMTP id u108so102292610wrb.3
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 16:59:28 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxdw6ifjMUWv4TDh+0KCTvaG-AK14=78mdPcPN7eqk4MHg@mail.gmail.com>
+        Mon, 20 Mar 2017 20:16:24 -0400
+Received: by mail-wr0-f195.google.com with SMTP id l37so20367106wrc.3
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Mar 2017 17:16:22 -0700 (PDT)
+In-Reply-To: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Mar 20, 2017 at 11:43:33PM +0000, Dibyendu Majumdar wrote:
-> On 18 March 2017 at 11:41, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> > I am investigating a failure in one of the tests. The generated
-> > linearized code has instructions such as:
-> >
-> > .L363:
-> >  br          VOID, .L366, .L439
-> > .L366:
-> >  load.32     %r413 <- 44[%arg1]
-> >  br          %r413, .L368, .L369
-> > .L368:
-> >  load.64     %r415 <- 0[s7813er]
-> >  call.32     %r416 <- printf, %r415, $2
-> >  br          .L369
-> > .L369:
-> >  phisrc.32   %phi97(rc) <- $2
-> >  br          .L439
-> > .L439:
-> >  phi.32      %r557 <- %phi95(rc), VOID, %phi97(rc), VOID, VOID, VOID
-> >
-> > The test program is here:
-> >
-> > https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/set1/cq2.c
-> >
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 38 ++++++++++++++++++++++++++++++++++----
+ 1 file changed, 34 insertions(+), 4 deletions(-)
 
-It's quite old as there is several instance of very similar code that
-are quite OK and just this last one is wrong.
-I'll look at it tomorrow.
+diff --git a/simplify.c b/simplify.c
+index 66035bbce..da40caa65 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -427,6 +427,26 @@ static int compare_opcode(int opcode, int inverse)
+ 	}
+ }
  
-> It seems that the issue is occurring in simplify_flow(). If I disable
-> the call to this, then the program compiles successfully and also
-> runs. None of my other tests fail with this step disabled.
-> 
-> Any clues what might be going wrong?
-
-I suspect an issue with the tracking of pseudo usage.
++static int compare_swap(int opcode)
++{
++	switch (opcode) {
++	case OP_SET_EQ:	return OP_SET_EQ;
++	case OP_SET_NE:	return OP_SET_NE;
++
++	case OP_SET_LT:	return OP_SET_GT;
++	case OP_SET_LE:	return OP_SET_GE;
++	case OP_SET_GT:	return OP_SET_LT;
++	case OP_SET_GE:	return OP_SET_LE;
++
++	case OP_SET_A:	return OP_SET_B;
++	case OP_SET_AE:	return OP_SET_BE;
++	case OP_SET_B:	return OP_SET_A;
++	case OP_SET_BE:	return OP_SET_AE;
++	default:
++		return opcode;
++	}
++}
++
+ static int simplify_seteq_setne(struct instruction *insn, long long value)
+ {
+ 	pseudo_t old = insn->src1;
+@@ -744,6 +764,14 @@ static int canonicalize_commutative(struct instruction *insn)
+ 	return repeat_phase |= REPEAT_CSE;
+ }
  
-> Does disabling simplify_flow() have any other effect except for missed
-> optimizations?
++static int canonicalize_compare(struct instruction *insn)
++{
++	int repeat = canonicalize_commutative(insn);
++	if (repeat)
++		insn->opcode = compare_swap(insn->opcode);
++	return repeat;
++}
++
+ static inline int simple_pseudo(pseudo_t pseudo)
+ {
+ 	return pseudo->type == PSEUDO_VAL || pseudo->type == PSEUDO_SYM;
+@@ -1139,15 +1167,17 @@ int simplify_instruction(struct instruction *insn)
+ 		canonicalize_commutative(insn);
+ 		return simplify_binop(insn);
+ 
++	case OP_SET_LE: case OP_SET_GE:
++	case OP_SET_LT: case OP_SET_GT:
++	case OP_SET_B:  case OP_SET_A:
++	case OP_SET_BE: case OP_SET_AE:
++		canonicalize_compare(insn);
++		/* fall through */
+ 	case OP_SUB:
+ 	case OP_DIVU: case OP_DIVS:
+ 	case OP_MODU: case OP_MODS:
+ 	case OP_SHL:
+ 	case OP_LSR: case OP_ASR:
+-	case OP_SET_LE: case OP_SET_GE:
+-	case OP_SET_LT: case OP_SET_GT:
+-	case OP_SET_B:  case OP_SET_A:
+-	case OP_SET_BE: case OP_SET_AE:
+ 		return simplify_binop(insn);
+ 
+ 	case OP_NOT: case OP_NEG:
+-- 
+2.12.0
 
-It should not.
-
--- Luc
