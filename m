@@ -1,75 +1,64 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: sparse-llvm issue with handling of phisrc instruction
-Date: Wed, 22 Mar 2017 16:46:24 +0000
-Message-ID: <CACXZuxdzxg_+rXu-OEUe+CwbbW+C-0CHZ=1wRrGa1ysptGDozA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/7] teach sparse about -Waddress
+Date: Wed, 22 Mar 2017 18:32:51 +0100
+Message-ID: <20170322173257.63019-2-luc.vanoostenryck@gmail.com>
+References: <20170322173257.63019-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f171.google.com ([209.85.223.171]:35844 "EHLO
-        mail-io0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964892AbdCVQq1 (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34323 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759680AbdCVRdK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Mar 2017 12:46:27 -0400
-Received: by mail-io0-f171.google.com with SMTP id l7so68332922ioe.3
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 09:46:25 -0700 (PDT)
+        Wed, 22 Mar 2017 13:33:10 -0400
+Received: by mail-wr0-f196.google.com with SMTP id y90so3982639wrb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 10:33:08 -0700 (PDT)
+In-Reply-To: <20170322173257.63019-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
 
-Hi
+This is used by GCC to report suspicious use of addresses.
 
-I am trying to see if sparse-llvm can handle unsimplified IR output
-from linearizer. I think there is a problem in how it handles phisrc.
-Example:
+So, reuse the same name for same or similar use.
 
-static int testfunc(int i) {
-return i-6;
-}
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ lib.c | 2 ++
+ lib.h | 1 +
+ 2 files changed, 3 insertions(+)
 
-Linearied IR:
-testfunc:
-.L0:
-        <entry-point>
-        store.32    %arg1 -> 0[i]
-        load.32     %r1 <- 0[i]
-        sub.32      %r2 <- %r1, $6
-        phisrc.32   %phi1(return) <- %r2
-        br          .L1
+diff --git a/lib.c b/lib.c
+index 272d2c88a..f4d5760b7 100644
+--- a/lib.c
++++ b/lib.c
+@@ -215,6 +215,7 @@ void die(const char *fmt, ...)
+ static struct token *pre_buffer_begin = NULL;
+ static struct token *pre_buffer_end = NULL;
+ 
++int Waddress = 0;
+ int Waddress_space = 1;
+ int Wbitwise = 1;
+ int Wcast_to_as = 0;
+@@ -467,6 +468,7 @@ static const struct warning {
+ 	const char *name;
+ 	int *flag;
+ } warnings[] = {
++	{ "address", &Waddress },
+ 	{ "address-space", &Waddress_space },
+ 	{ "bitwise", &Wbitwise },
+ 	{ "cast-to-as", &Wcast_to_as },
+diff --git a/lib.h b/lib.h
+index 134e56040..0bf8c97e4 100644
+--- a/lib.h
++++ b/lib.h
+@@ -101,6 +101,7 @@ extern void add_pre_buffer(const char *fmt, ...) FORMAT_ATTR(1);
+ 
+ extern int preprocess_only;
+ 
++extern int Waddress;
+ extern int Waddress_space;
+ extern int Wbitwise;
+ extern int Wcast_to_as;
+-- 
+2.12.0
 
-.L1:
-        phi.32      %r3 <- %phi1(return)
-        ret.32      %r2
-
-
-But the LLVM IR is missing a store instruction corresponding to the
-phisrc instruction:
-
-define internal i32 @testfunc(i32 %ARG1) {
-L0:
-  %i_0000029F015CAA78 = alloca i32
-  %0 = alloca i32
-  %1 = ptrtoint i32* %i_0000029F015CAA78 to i64
-  %2 = add i64 %1, 0
-  %3 = inttoptr i64 %2 to i32*
-  store i32 %ARG1, i32* %3
-  %4 = ptrtoint i32* %i_0000029F015CAA78 to i64
-  %5 = add i64 %4, 0
-  %6 = inttoptr i64 %5 to i32*
-  %load_target = load i32, i32* %6
-  %R2 = sub i32 %load_target, 6
-  br label %L1
-
-L1:                                               ; preds = %L0
-  %7 = load i32, i32* %0
-  ret i32 %R2
-}
-
-Basically we need a store from %i_0000029F015CAA78 to %0 output for
-the phisrc instruction above.
-
-I see that it emits stores for phi_users when it encounters a phisrc
-but the phi_users list appears to be empty here. Is that expected? If
-so, then how to fix this issue i.e. add the missing store?
-
-Thanks and Regards
-Dibyendu
