@@ -1,29 +1,45 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Adding an option to sparse to disable the IR simplifications
-Date: Wed, 22 Mar 2017 19:56:16 +0000
-Message-ID: <CACXZuxeJGkN26dYEbs6smHvd6XyLnjtNFciZ1wJCVto4Z0nodw@mail.gmail.com>
+Subject: Re: sparse-llvm issue with handling of phisrc instruction
+Date: Wed, 22 Mar 2017 20:33:24 +0000
+Message-ID: <CACXZuxeKH+3PG8UsYREgDzRWc2JAPf2yrgVh=xsTgvJBfW14tA@mail.gmail.com>
+References: <CACXZuxdzxg_+rXu-OEUe+CwbbW+C-0CHZ=1wRrGa1ysptGDozA@mail.gmail.com>
+ <CAExDi1RkSpRpSdm9i8ADSOkrQdVBMHNb=K5b+he4Gy4MMjD9wg@mail.gmail.com>
+ <CACXZuxecFEoQPsUcbq8Oujvt5OYiscqcuYeMwQc5fv1ehPuAgA@mail.gmail.com>
+ <CAExDi1Q_FMB+W_0-vscA6KWSPs4nZ4Dzmb42DrSrzFJ3Y5MiKw@mail.gmail.com>
+ <CACXZuxfrMKckUhy9+kWGeBZt2dWiFqmXEvgJgCV7xmWej3A_Fw@mail.gmail.com>
+ <20170322192929.waqifaco6wtm7wue@macpro.local> <CACXZuxeo24ABdTRgm_VR1UOvbGZ8-9rCpmDtLD8yqPNLeA1suw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:37632 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751170AbdCVT4S (ORCPT
+Received: from mail-io0-f173.google.com ([209.85.223.173]:36396 "EHLO
+        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753948AbdCVUd0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Mar 2017 15:56:18 -0400
-Received: by mail-it0-f51.google.com with SMTP id 190so29579710itm.0
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 12:56:17 -0700 (PDT)
+        Wed, 22 Mar 2017 16:33:26 -0400
+Received: by mail-io0-f173.google.com with SMTP id l7so71383063ioe.3
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 13:33:25 -0700 (PDT)
+In-Reply-To: <CACXZuxeo24ABdTRgm_VR1UOvbGZ8-9rCpmDtLD8yqPNLeA1suw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi,
+Hi Luc,
 
-With the progress made with spars-llvm in recent weeks we are now
-beginning to hit bugs in the simplifications carried out by the
-linearizer. So it is useful I think to have an ability to turn off
-these modifications - perhaps by a command line argument. This will
-enable testing of sparse-llvm with and without the simplifications,
-and help identify issues caused by the latter phase.
+On 22 March 2017 at 19:46, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
+>
+> You were right - I needed to retain following line:
+>
+> track_pseudo_death(C, ep);
+>
+> Anyway it appears that this now populates the phi_users list so that
+> the code works correctly.
+>
 
-Thanks and Regards
+Of course now I can see the following in sparse-llvm:
+
+/* need ->phi_users */
+dbg_dead = 1;
+
+Regards
 Dibyendu
