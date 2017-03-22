@@ -1,67 +1,140 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Another potential issue with linearized output
-Date: Wed, 22 Mar 2017 10:08:29 +0100
-Message-ID: <CAExDi1TXPDBYp3YMvX=tEwUcyXmBuSGDvWDmy9tWsTwTyamsuA@mail.gmail.com>
-References: <CACXZuxetXE1QQ2jK5Pc5+FQB-vN3pguUNm8FuJ5hZ23C845KKA@mail.gmail.com>
- <CACXZuxfdKn-x_-nVbLy4PGMpmVDk-_7RESOQcfPT8FLa7JDEzQ@mail.gmail.com>
- <CACXZuxc9eMUN1HVVUCTG82qMe_ZkzjhJzivdMNN_nhDzi-j3OA@mail.gmail.com> <CACXZuxfcG62TpXyrvnsfmPZFYmHHhrasXR7OxMMuEnJETn3ZgQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH] fix OP_PHI usage in try_to_simplify_bb(), correctly
+Date: Wed, 22 Mar 2017 11:53:31 +0100
+Message-ID: <20170322105331.91596-1-luc.vanoostenryck@gmail.com>
+References: <CACXZuxeomDxKsmdu7e5YEg_-3exNpV-psjQ_o3P0BLV1A2=z0Q@mail.gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f169.google.com ([209.85.216.169]:36546 "EHLO
-        mail-qt0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1758945AbdCVJPQ (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34789 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1758909AbdCVKzk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Mar 2017 05:15:16 -0400
-Received: by mail-qt0-f169.google.com with SMTP id r45so149052666qte.3
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 02:15:15 -0700 (PDT)
-In-Reply-To: <CACXZuxfcG62TpXyrvnsfmPZFYmHHhrasXR7OxMMuEnJETn3ZgQ@mail.gmail.com>
+        Wed, 22 Mar 2017 06:55:40 -0400
+Received: by mail-wm0-f65.google.com with SMTP id u132so8558783wmg.1
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 03:55:39 -0700 (PDT)
+In-Reply-To: <CACXZuxeomDxKsmdu7e5YEg_-3exNpV-psjQ_o3P0BLV1A2=z0Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Mar 22, 2017 at 1:12 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> On 21 March 2017 at 22:21, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
->> I have tracked this down to the treatment of variable n2.
->
-> Here is a small program that reproduces the issue:
->
-> static int regc(void)
-> {
->   char r00, r01, r02;
->   int s, n1, n2, j, d[2];
->   r00 = 0;
->   r01 = 1;
->   r02 = 2;
->   d[0] = &r01 - &r00;
->   d[1] = &r02 - &r01;
->
->   n1 = d[0];
->   s = 1;
->
->   for (j = 0; j < 2; j++)
->     switch (s) {
->     case 1:
->       n2 = d[j];
->       break;
->     case 2:
->       if (d[j] == n2) {
->         break;
->       }
->       s = 4;
->       break;
->     };
->   return s;
-> }
+Patch 11b1a83b1 solved an issue with dangling PSEUDO_PHI
+by killing it's use after a branch rewrite.
 
-Interesting case.
-It seems that is closely related to the fact that there is some code paths where
-n2 is undefined (not yet stored) even if these paths can't happen at execution
-time (like j == 0, s == 2).
-The memops/symbol simplification then wrongly simplify away the store.
+However, the change didn't took in account the fact that,
+even after the branch rewrite, some other paths may exist
+where this pseudo was needed.
 
-I'll look for a solution.
+Fix this by cheking that no such path exist before killing
+the (usage of the) pseudo.
 
--- Luc
+Fixes: 11b1a83b1 "fix OP_PHI usage in try_to_simplify_bb()"
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c                       | 35 ++++++++++++++++++++++++++++++++++-
+ validation/kill-phi-ttsbb2.c | 40 ++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 74 insertions(+), 1 deletion(-)
+ create mode 100644 validation/kill-phi-ttsbb2.c
+
+diff --git a/flow.c b/flow.c
+index a5332203f..c12bc0716 100644
+--- a/flow.c
++++ b/flow.c
+@@ -79,6 +79,39 @@ static int bb_depends_on(struct basic_block *target, struct basic_block *src)
+ 	return 0;
+ }
+ 
++/*
++ * Return 1 if 'pseudo' is needed in some parent of 'bb'.
++ * Need liveness info.
++ */
++static int needed_phisrc(struct instruction *phi, struct basic_block *curr, unsigned long generation)
++{
++	pseudo_t target = phi->target;
++	struct basic_block *bb;
++	int rc = 0;
++
++	curr->generation = generation;
++	FOR_EACH_PTR(curr->children, bb) {
++		if (bb->generation == generation)
++			continue;
++		if (bb == phi->bb)
++			continue;
++		if (pseudo_in_list(bb->defines, target)) {
++			continue;
++		}
++		if (pseudo_in_list(bb->needs, target)) {
++			rc = 1;
++			goto ret;
++		}
++		rc = needed_phisrc(phi, bb, generation);
++		if (rc)
++			goto ret;
++
++	} END_FOR_EACH_PTR(bb);
++
++ret:
++	return rc;
++}
++
+ /*
+  * When we reach here, we have:
+  *  - a basic block that ends in a conditional branch and
+@@ -121,7 +154,7 @@ static int try_to_simplify_bb(struct basic_block *bb, struct instruction *first,
+ 			continue;
+ 		changed |= rewrite_branch(source, &br->bb_true, bb, target);
+ 		changed |= rewrite_branch(source, &br->bb_false, bb, target);
+-		if (changed)
++		if (changed && !needed_phisrc(first, source, ++bb_generation))
+ 			kill_use(THIS_ADDRESS(phi));
+ 	} END_FOR_EACH_PTR(phi);
+ 	return changed;
+diff --git a/validation/kill-phi-ttsbb2.c b/validation/kill-phi-ttsbb2.c
+new file mode 100644
+index 000000000..c7d89aa0e
+--- /dev/null
++++ b/validation/kill-phi-ttsbb2.c
+@@ -0,0 +1,40 @@
++extern int error(int);
++
++int foo(int perr);
++int foo(int perr)
++{
++	int err = 0;
++	int rc = 0;
++	int j = 0;
++	int i = 1;
++
++	i && j++;
++
++	i-- && j;
++
++	i && j--;
++
++	if (j != 1) {
++		err = 1;
++		if (perr)
++			error(1);
++	}
++
++	if (err != 0)
++		rc = 1;
++
++	return rc;
++}
++
++/*
++ * check-name: kill-phi-ttsbb2
++ * check-description:
++ *	Verify if OP_PHI usage is adjusted after successful try_to_simplify_bb()
++ * check-warning: this test is sensitive to details of code generation
++ *                with proper bb packing (taking care of phi-nodes) it
++ *		  will be optimized away and test nothing. You have been warned.
++ * check-command: test-linearize $file
++ * check-output-ignore
++ *
++ * check-output-excludes: VOID
++ */
+-- 
+2.12.0
+
