@@ -1,78 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/7] warn if testing the address of an array
-Date: Wed, 22 Mar 2017 18:32:55 +0100
-Message-ID: <20170322173257.63019-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/7] fix evaluation of a function or array symbol in conditionals
+Date: Wed, 22 Mar 2017 18:32:56 +0100
+Message-ID: <20170322173257.63019-7-luc.vanoostenryck@gmail.com>
 References: <20170322173257.63019-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34610 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36649 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759680AbdCVRdP (ORCPT
+        with ESMTP id S1759029AbdCVRdQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Mar 2017 13:33:15 -0400
-Received: by mail-wm0-f67.google.com with SMTP id u132so11598551wmg.1
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 10:33:13 -0700 (PDT)
+        Wed, 22 Mar 2017 13:33:16 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x124so11642712wmf.3
+        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 10:33:14 -0700 (PDT)
 In-Reply-To: <20170322173257.63019-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
 
-Testing the address of an array is quite suspicious:
-it's most probably the sign of an error somewhere.
-Furthermore, such uses always evaluate to true.
+Functions and arrays degenerate as pointers in most context
+but this wasn't done in the case of conditionals.
 
-So, add a warning about such use (but only if -Waddress was given).
+As a result the value of the conditional after linearization
+was invalid.
+
+Fix this by calling degenerate() in evaluate_conditional().
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                      |  3 +++
- validation/cond-address-array.c | 26 ++++++++++++++++++++++++++
- 2 files changed, 29 insertions(+)
- create mode 100644 validation/cond-address-array.c
+ evaluate.c                |  1 +
+ validation/cond-address.c | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
+ create mode 100644 validation/cond-address.c
 
 diff --git a/evaluate.c b/evaluate.c
-index d8ec1c2e3..f2d95c79d 100644
+index f2d95c79d..976857915 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -872,6 +872,9 @@ static struct symbol *evaluate_conditional(struct expression *expr, int iterator
- 		if (is_func_type(ctype)) {
- 			if (Waddress)
- 				warning(expr->pos, "the address of %s will always evaluate as true", "a function");
-+		} else if (is_array_type(ctype)) {
-+			if (Waddress)
-+				warning(expr->pos, "the address of %s will always evaluate as true", "an array");
- 		} else if (!is_scalar_type(ctype)) {
- 			sparse_error(expr->pos, "incorrect type in conditional");
- 			info(expr->pos, "   got %s", show_typename(ctype));
-diff --git a/validation/cond-address-array.c b/validation/cond-address-array.c
+@@ -881,6 +881,7 @@ static struct symbol *evaluate_conditional(struct expression *expr, int iterator
+ 			ctype = NULL;
+ 		}
+ 	}
++	ctype = degenerate(expr);
+ 
+ 	return ctype;
+ }
+diff --git a/validation/cond-address.c b/validation/cond-address.c
 new file mode 100644
-index 000000000..e1d2f87f8
+index 000000000..2a69f4b92
 --- /dev/null
-+++ b/validation/cond-address-array.c
-@@ -0,0 +1,26 @@
-+int foo(void) {
-+	extern int a[];
++++ b/validation/cond-address.c
+@@ -0,0 +1,14 @@
++extern void f(void);
++extern int a[];
 +
-+	if (a)
-+		return 1;
-+	return 0;
-+}
-+
-+int bar(void) {
-+	int a[2];
-+
-+	if (a)
-+		return 1;
-+	return 0;
-+}
++int foo(void) { if (f) return 1; return 0; }
++int bar(void) { if (a) return 1; return 0; }
++int qux(void) { if (f && a) return 1; return 0; }
 +
 +/*
-+ * check-name: cond-address-array.c
-+ * check-command: test-linearize -Wno-decl -Waddress $file
++ * check-name: cond-address.c
++ * check-command: test-linearize -Wno-decl $file
 + * check-output-ignore
 + *
-+ * check-error-start
-+cond-address-array.c:4:13: warning: the address of an array will always evaluate as true
-+cond-address-array.c:12:13: warning: the address of an array will always evaluate as true
-+ * check-error-end
++ * check-excludes: VOID
 + */
 -- 
 2.12.0
