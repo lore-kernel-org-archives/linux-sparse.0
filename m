@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 14/51] llvm: take care of degenerated rvalues
-Date: Sat, 25 Mar 2017 00:20:20 +0100
-Message-ID: <20170324232057.15033-15-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 17/51] llvm: add test cases for arrays passed as argument
+Date: Sat, 25 Mar 2017 00:20:23 +0100
+Message-ID: <20170324232057.15033-18-luc.vanoostenryck@gmail.com>
 References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33073 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36076 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935335AbdCXXXm (ORCPT
+        with ESMTP id S935482AbdCXXXo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:23:42 -0400
-Received: by mail-wm0-f67.google.com with SMTP id n11so820533wma.0
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:40 -0700 (PDT)
+        Fri, 24 Mar 2017 19:23:44 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x124so804053wmf.3
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:43 -0700 (PDT)
 In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,46 +19,167 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 12 ++++++++++--
- 1 file changed, 10 insertions(+), 2 deletions(-)
+ validation/backend/function-ptr.c | 148 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 145 insertions(+), 3 deletions(-)
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 135b9e001..ad69124e1 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -408,6 +408,14 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
- 	return result;
- }
+diff --git a/validation/backend/function-ptr.c b/validation/backend/function-ptr.c
+index fc022b3cd..47e85deab 100644
+--- a/validation/backend/function-ptr.c
++++ b/validation/backend/function-ptr.c
+@@ -1,8 +1,150 @@
+-typedef int (*fn_t)(int x, int y);
++extern int ival;
++extern int *ipval;
++extern int array[3];
++extern int matrix[3][3];
++extern int fun(int);
  
-+static LLVMValueRef pseudo_to_rvalue(struct function *fn, struct instruction *insn, pseudo_t pseudo)
-+{
-+	LLVMValueRef val = pseudo_to_value(fn, insn, pseudo);
-+	LLVMTypeRef dtype = symbol_type(insn->type);
+-static int run(fn_t fn, int x, int y)
++// via an argument
++void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)));
++void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)))
+ {
+-	return fn(x, y);
++	fv();
 +
-+	return LLVMBuildBitCast(fn->builder, val, dtype, "");
++	fb(a);
++	fi(a);
++	fl(a);
++	fb(123);
++	fi(123);
++	fl(123);
++	fb(123L);
++	fi(123L);
++	fl(123L);
++	fb(ival);
++	fi(ival);
++	fl(ival);
++
++	fip(p);
++	fip((void*)0);
++	fip(ipval);
++	fip(&ival);
++	fip(array);
++	fim(matrix);
++
++	fvp(p);
++	fvp((void*)0);
++	fvp(ipval);
++	fvp(&ival);
++	fvp(array);
++	fvp(matrix);
++
++	fvp(fun);
++	fvp(&fun);
++	ffp(fun);
++	ffp(&fun);
 +}
 +
- static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base, LLVMValueRef off)
- {
- 	LLVMTypeRef type = LLVMTypeOf(base);
-@@ -655,7 +663,7 @@ static void output_op_store(struct function *fn, struct instruction *insn)
++// a global
++extern int (*fb)(unsigned char);
++extern int (*fi)(int);
++extern int (*fl)(long);
++extern int (*fv)(void);
++extern int (*fip)(int *);
++extern int (*fim)(int (*)[3]);
++extern int (*fvp)(void *);
++extern int (*ffp)(int (*)(int));
++
++void glb(int a, int *p);
++void glb(int a, int *p)
++{
++	fv();
++
++	fb(a);
++	fi(a);
++	fl(a);
++	fb(123);
++	fi(123);
++	fl(123);
++	fb(123L);
++	fi(123L);
++	fl(123L);
++	fb(ival);
++	fi(ival);
++	fl(ival);
++
++	fip(p);
++	fip((void*)0);
++	fip(ipval);
++	fip(&ival);
++	fip(array);
++	fim(matrix);
++
++	fvp(p);
++	fvp((void*)0);
++	fvp(ipval);
++	fvp(&ival);
++	fvp(array);
++	fvp(matrix);
++
++	fvp(fun);
++	fvp(&fun);
++	ffp(fun);
++	ffp(&fun);
++}
++
++// via a struct member:
++// -> force to create a register containing the function pointer
++struct ops {
++	int (*fb)(unsigned char);
++	int (*fi)(int);
++	int (*fl)(long);
++	int (*fv)(void);
++	int (*fip)(int *);
++	int (*fim)(int (*)[3]);
++	int (*fvp)(void *);
++	int (*ffp)(int (*)(int));
++
++	int (*const cfi)(int);		// for the fun of it
++};
++
++void ops(int a, int *p, struct ops *ops);
++void ops(int a, int *p, struct ops *ops)
++{
++	ops->fv();
++
++	ops->fb(a);
++	ops->fi(a);
++	ops->fl(a);
++	ops->fb(123);
++	ops->fi(123);
++	ops->fl(123);
++	ops->fb(123L);
++	ops->fi(123L);
++	ops->fl(123L);
++	ops->fb(ival);
++	ops->fi(ival);
++	ops->fl(ival);
++
++	ops->fip(p);
++	ops->fip((void*)0);
++	ops->fip(ipval);
++	ops->fip(&ival);
++	ops->fip(array);
++	ops->fim(matrix);
++
++	ops->fvp(p);
++	ops->fvp((void*)0);
++	ops->fvp(ipval);
++	ops->fvp(&ival);
++	ops->fvp(array);
++	ops->fvp(matrix);
++
++	ops->fvp(fun);
++	ops->fvp(&fun);
++	ops->ffp(fun);
++	ops->ffp(&fun);
++	ops->fvp(fi);
++
++	ops->cfi(42);
+ }
  
- 	addr = calc_memop_addr(fn, insn);
- 
--	target_in = pseudo_to_value(fn, insn, insn->target);
-+	target_in = pseudo_to_rvalue(fn, insn, insn->target);
- 
- 	/* perform store */
- 	LLVMBuildStore(fn->builder, target_in, addr);
-@@ -744,7 +752,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 
- 	i = 0;
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		args[i++] = pseudo_to_value(fn, arg, arg->src);
-+		args[i++] = pseudo_to_rvalue(fn, arg, arg->src);
- 	} END_FOR_EACH_PTR(arg);
- 
- 	func = pseudo_to_value(fn, insn, insn->func);
+ /*
 -- 
 2.12.0
 
