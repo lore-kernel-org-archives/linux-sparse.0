@@ -1,96 +1,61 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 15/51] llvm: add test cases for symbol's address
-Date: Sat, 25 Mar 2017 00:20:21 +0100
-Message-ID: <20170324232057.15033-16-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 19/51] llvm: add support for OP_NEG
+Date: Sat, 25 Mar 2017 00:20:25 +0100
+Message-ID: <20170324232057.15033-20-luc.vanoostenryck@gmail.com>
 References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:34503 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934542AbdCXXXm (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34256 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935335AbdCXXXq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:23:42 -0400
-Received: by mail-wr0-f194.google.com with SMTP id y90so606319wrb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:41 -0700 (PDT)
+        Fri, 24 Mar 2017 19:23:46 -0400
+Received: by mail-wm0-f65.google.com with SMTP id u132so809849wmg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:45 -0700 (PDT)
 In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+sparse-llvm has not yet support for OP_NEG and stop on an assert
+if one is encountered.
+
+Fix this by invoking the appropriate LLVMBuild[F]Neg().
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/symaddr.c | 62 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 62 insertions(+)
- create mode 100644 validation/backend/symaddr.c
+ sparse-llvm.c | 17 +++++++++++++++--
+ 1 file changed, 15 insertions(+), 2 deletions(-)
 
-diff --git a/validation/backend/symaddr.c b/validation/backend/symaddr.c
-new file mode 100644
-index 000000000..71bca2d76
---- /dev/null
-+++ b/validation/backend/symaddr.c
-@@ -0,0 +1,62 @@
-+extern void useip(int *);
-+extern void useia(int (*)[3]);
-+extern void usevp(void *);
-+static int  sfun(void) { return 0; }
-+static int  spun(void) { return 0; }
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index ad69124e1..6cc01cdd9 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -951,9 +951,22 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 		insn->target->priv = target;
+ 		break;
+ 	}
+-	case OP_NEG:
+-		assert(0);
++	case OP_NEG: {
++		LLVMValueRef src, target;
++		char target_name[64];
 +
-+void lfoo(int *p, int a)
-+{
-+	int larra[3], larrb[3], larrc[3], larrd[3], larre[3], larrf[3];
-+	useip(p);
-+	useip(larra);
-+	useip(larrb + 1);
-+	useip(&larrd[1]);
-+	useia(&larrf);
-+}
++		src = pseudo_to_value(fn, insn, insn->src);
 +
-+static int sarra[3], sarrb[3], sarrc[3], sarrd[3], sarre[3], sarrf[3];
-+static int s, sfun(void), spun(void);
-+void sfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&s);
-+	useip(sarra);
-+	useip(sarrb + 1);
-+	useip(&sarrd[1]);
-+	useia(&sarrf);
-+	usevp(sfun);
-+	usevp(&spun);
-+}
++		pseudo_name(insn->target, target_name);
 +
-+extern int xarra[3], xarrb[3], xarrc[3], xarrd[3], xarre[3], xarrf[3];
-+extern int x, xfun(void), xpun(void);
-+void xfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&x);
-+	useip(xarra);
-+	useip(xarrb + 1);
-+	useip(&xarrd[1]);
-+	useia(&xarrf);
-+	usevp(xfun);
-+	usevp(&xpun);
-+}
++		if (is_float_type(insn->type))
++			target = LLVMBuildFNeg(fn->builder, src, target_name);
++		else
++			target = LLVMBuildNeg(fn->builder, src, target_name);
 +
-+int garra[3], garrb[3], garrc[3], garrd[3], garre[3], garrf[3];
-+int g, gfun(void), gpun(void);
-+void gfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&g);
-+	useip(garra);
-+	useip(garrb + 1);
-+	useip(&garrd[1]);
-+	useia(&garrf);
-+	usevp(gfun);
-+	usevp(&gpun);
-+}
-+
-+/*
-+ * check-name: symbol address
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
++		insn->target->priv = target;
+ 		break;
++	}
+ 	case OP_CONTEXT:
+ 		assert(0);
+ 		break;
 -- 
 2.12.0
 
