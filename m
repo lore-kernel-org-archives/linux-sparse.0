@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 51/51] llvm: cleanup of output_[ptr]cast()
-Date: Sat, 25 Mar 2017 00:20:57 +0100
-Message-ID: <20170324232057.15033-52-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 39/51] llvm: fix mutating function pointer
+Date: Sat, 25 Mar 2017 00:20:45 +0100
+Message-ID: <20170324232057.15033-40-luc.vanoostenryck@gmail.com>
 References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34952 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936553AbdCXXYR (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33138 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936162AbdCXXYF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:24:17 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u108so606618wrb.2
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:24:15 -0700 (PDT)
+        Fri, 24 Mar 2017 19:24:05 -0400
+Received: by mail-wr0-f196.google.com with SMTP id 20so612580wrx.0
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:24:04 -0700 (PDT)
 In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,86 +19,70 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 39 ++++++++++++---------------------------
- 1 file changed, 12 insertions(+), 27 deletions(-)
+ sparse-llvm.c                           |  5 ++++-
+ validation/backend/function-ptr-xtype.c | 37 +++++++++++++++++++++++++++++++++
+ 2 files changed, 41 insertions(+), 1 deletion(-)
+ create mode 100644 validation/backend/function-ptr-xtype.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index b8a52b9ac..deb0054c8 100644
+index ba70b0e6b..6fd33cbe9 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -875,21 +875,17 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- 	LLVMOpcode op;
- 	char target_name[64];
+@@ -829,7 +829,10 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ 		args[i++] = pseudo_to_rvalue(fn, arg, arg->src);
+ 	} END_FOR_EACH_PTR(arg);
  
-+	assert(is_ptr_type(insn->type));
+-	func = pseudo_to_value(fn, NULL, insn->func);
++	if (insn->func->type == PSEUDO_REG || insn->func->type == PSEUDO_PHI)
++		func = get_operand(fn, insn->fntype, insn->func);
++	else
++		func = pseudo_to_value(fn, insn->fntype, insn->func);
+ 	pseudo_name(insn->target, name);
+ 	target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
  
- 	src = get_operand(fn, otype, insn->src);
- 	pseudo_name(insn->target, target_name);
- 
--	assert(!is_float_type(insn->type));
--
--	dtype = insn_symbol_type(insn);
--	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
--	case LLVMPointerTypeKind:
-+	dtype = symbol_type(insn->type);
-+	if (is_ptr_type(otype)) {
- 		op = LLVMBitCast;
--		break;
--	case LLVMIntegerTypeKind:
-+	} else if (is_int_type(otype)) {
- 		op = LLVMIntToPtr;
--		break;
--	default:
-+	} else {
- 		assert(0);
- 	}
- 
-@@ -903,38 +899,27 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 	LLVMTypeRef dtype;
- 	struct symbol *otype = insn->orig_type;
- 	char target_name[64];
--	unsigned int width;
- 
- 	if (is_ptr_type(insn->type))	// cast to void* is OP_CAST ...
- 		return output_op_ptrcast(fn, insn);
- 
-+	assert(is_int_type(insn->type));
- 
- 	src = get_operand(fn, otype, insn->src);
- 	pseudo_name(insn->target, target_name);
- 
--	assert(!is_float_type(insn->type));
--
- 	dtype = symbol_type(insn->type);
--	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
--	case LLVMPointerTypeKind:
-+	if (is_ptr_type(otype)) {
- 		op = LLVMPtrToInt;
--		break;
--	case LLVMIntegerTypeKind:
--		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
-+	} else if (is_float_type(otype)) {
-+		op = (op == LLVMZExt) ? LLVMFPToUI : LLVMFPToSI;
-+	} else if (is_int_type(otype)) {
-+		unsigned int width = otype->bit_size;
- 		if (insn->size < width)
- 			op = LLVMTrunc;
- 		else if (insn->size == width)
- 			op = LLVMBitCast;
--		break;
--	case LLVMHalfTypeKind:
--	case LLVMFloatTypeKind:
--	case LLVMDoubleTypeKind:
--	case LLVMX86_FP80TypeKind:
--	case LLVMFP128TypeKind:
--	case LLVMPPC_FP128TypeKind:
--		op = (op == LLVMZExt) ? LLVMFPToUI : LLVMFPToSI;
--		break;
--	default:
-+	} else {
- 		assert(0);
- 	}
- 
+diff --git a/validation/backend/function-ptr-xtype.c b/validation/backend/function-ptr-xtype.c
+new file mode 100644
+index 000000000..9cdfab051
+--- /dev/null
++++ b/validation/backend/function-ptr-xtype.c
+@@ -0,0 +1,37 @@
++typedef int  (*binop_t)(int, int);
++typedef int  (*unop_t)(int);
++typedef int  (*idef_t)(void);
++typedef long (*ldef_t)(void);
++typedef void (*use_t)(int);
++
++// We want to 'fn' have several different types.
++// The goal is for the ->priv member to be used
++// with a type different from what it was first stored.
++
++int foo(void *fn, int arg1, int arg2);
++int foo(void *fn, int arg1, int arg2)
++{
++	int res = 0;
++
++	res += ((binop_t)fn)(arg1, arg2);
++	res += ((unop_t)fn)(arg1);
++	res += ((ldef_t)fn)();
++	res += ((idef_t)fn)();
++	((use_t)fn)(res);
++	return res;
++}
++
++int bar(int (*fn)(int), int arg1, int arg2);
++int bar(int (*fn)(int), int arg1, int arg2)
++{
++	int res = 0;
++
++	res += ((binop_t)fn)(arg1, arg2);
++	res += fn(arg1);
++	return res;
++}
++
++/*
++ * check-name: mutate function pointer's type
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
