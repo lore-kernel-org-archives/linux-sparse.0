@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 17/51] llvm: add test cases for arrays passed as argument
-Date: Sat, 25 Mar 2017 00:20:23 +0100
-Message-ID: <20170324232057.15033-18-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 21/51] llvm: add support for OP_SETVAL with labels
+Date: Sat, 25 Mar 2017 00:20:27 +0100
+Message-ID: <20170324232057.15033-22-luc.vanoostenryck@gmail.com>
 References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:36076 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935482AbdCXXXo (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34270 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935549AbdCXXXs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:23:44 -0400
-Received: by mail-wm0-f67.google.com with SMTP id x124so804053wmf.3
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:43 -0700 (PDT)
+        Fri, 24 Mar 2017 19:23:48 -0400
+Received: by mail-wm0-f66.google.com with SMTP id u132so809916wmg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:47 -0700 (PDT)
 In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,167 +19,44 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/function-ptr.c | 148 +++++++++++++++++++++++++++++++++++++-
- 1 file changed, 145 insertions(+), 3 deletions(-)
+ sparse-llvm.c                       |  3 +++
+ validation/backend/label-as-value.c | 13 +++++++++++++
+ 2 files changed, 16 insertions(+)
+ create mode 100644 validation/backend/label-as-value.c
 
-diff --git a/validation/backend/function-ptr.c b/validation/backend/function-ptr.c
-index fc022b3cd..47e85deab 100644
---- a/validation/backend/function-ptr.c
-+++ b/validation/backend/function-ptr.c
-@@ -1,8 +1,150 @@
--typedef int (*fn_t)(int x, int y);
-+extern int ival;
-+extern int *ipval;
-+extern int array[3];
-+extern int matrix[3][3];
-+extern int fun(int);
- 
--static int run(fn_t fn, int x, int y)
-+// via an argument
-+void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)));
-+void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)))
- {
--	return fn(x, y);
-+	fv();
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 29cb11ee3..87850d2be 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -876,6 +876,9 @@ static void output_op_setval(struct function *fn, struct instruction *insn)
+ 	case EXPR_FVALUE:
+ 		target = LLVMConstReal(dtype, val->fvalue);
+ 		break;
++	case EXPR_LABEL:
++		target = LLVMBlockAddress(fn->fn, val->symbol->bb_target->priv);
++		break;
+ 	default:
+ 		assert(0);
+ 	}
+diff --git a/validation/backend/label-as-value.c b/validation/backend/label-as-value.c
+new file mode 100644
+index 000000000..6888c6613
+--- /dev/null
++++ b/validation/backend/label-as-value.c
+@@ -0,0 +1,13 @@
++void *foo(void *def);
++void *foo(void *def)
++{
++	if (!def)
++yes:		return &&yes;
 +
-+	fb(a);
-+	fi(a);
-+	fl(a);
-+	fb(123);
-+	fi(123);
-+	fl(123);
-+	fb(123L);
-+	fi(123L);
-+	fl(123L);
-+	fb(ival);
-+	fi(ival);
-+	fl(ival);
-+
-+	fip(p);
-+	fip((void*)0);
-+	fip(ipval);
-+	fip(&ival);
-+	fip(array);
-+	fim(matrix);
-+
-+	fvp(p);
-+	fvp((void*)0);
-+	fvp(ipval);
-+	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
-+
-+	fvp(fun);
-+	fvp(&fun);
-+	ffp(fun);
-+	ffp(&fun);
++	return def;
 +}
 +
-+// a global
-+extern int (*fb)(unsigned char);
-+extern int (*fi)(int);
-+extern int (*fl)(long);
-+extern int (*fv)(void);
-+extern int (*fip)(int *);
-+extern int (*fim)(int (*)[3]);
-+extern int (*fvp)(void *);
-+extern int (*ffp)(int (*)(int));
-+
-+void glb(int a, int *p);
-+void glb(int a, int *p)
-+{
-+	fv();
-+
-+	fb(a);
-+	fi(a);
-+	fl(a);
-+	fb(123);
-+	fi(123);
-+	fl(123);
-+	fb(123L);
-+	fi(123L);
-+	fl(123L);
-+	fb(ival);
-+	fi(ival);
-+	fl(ival);
-+
-+	fip(p);
-+	fip((void*)0);
-+	fip(ipval);
-+	fip(&ival);
-+	fip(array);
-+	fim(matrix);
-+
-+	fvp(p);
-+	fvp((void*)0);
-+	fvp(ipval);
-+	fvp(&ival);
-+	fvp(array);
-+	fvp(matrix);
-+
-+	fvp(fun);
-+	fvp(&fun);
-+	ffp(fun);
-+	ffp(&fun);
-+}
-+
-+// via a struct member:
-+// -> force to create a register containing the function pointer
-+struct ops {
-+	int (*fb)(unsigned char);
-+	int (*fi)(int);
-+	int (*fl)(long);
-+	int (*fv)(void);
-+	int (*fip)(int *);
-+	int (*fim)(int (*)[3]);
-+	int (*fvp)(void *);
-+	int (*ffp)(int (*)(int));
-+
-+	int (*const cfi)(int);		// for the fun of it
-+};
-+
-+void ops(int a, int *p, struct ops *ops);
-+void ops(int a, int *p, struct ops *ops)
-+{
-+	ops->fv();
-+
-+	ops->fb(a);
-+	ops->fi(a);
-+	ops->fl(a);
-+	ops->fb(123);
-+	ops->fi(123);
-+	ops->fl(123);
-+	ops->fb(123L);
-+	ops->fi(123L);
-+	ops->fl(123L);
-+	ops->fb(ival);
-+	ops->fi(ival);
-+	ops->fl(ival);
-+
-+	ops->fip(p);
-+	ops->fip((void*)0);
-+	ops->fip(ipval);
-+	ops->fip(&ival);
-+	ops->fip(array);
-+	ops->fim(matrix);
-+
-+	ops->fvp(p);
-+	ops->fvp((void*)0);
-+	ops->fvp(ipval);
-+	ops->fvp(&ival);
-+	ops->fvp(array);
-+	ops->fvp(matrix);
-+
-+	ops->fvp(fun);
-+	ops->fvp(&fun);
-+	ops->ffp(fun);
-+	ops->ffp(&fun);
-+	ops->fvp(fi);
-+
-+	ops->cfi(42);
- }
- 
- /*
++/*
++ * check-name: label-as-value
++ * check-command: ./sparsec -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
