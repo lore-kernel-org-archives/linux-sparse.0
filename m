@@ -1,351 +1,237 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 08/14] give function's arguments a type via OP_PUSH
-Date: Sat, 25 Mar 2017 00:14:15 +0100
-Message-ID: <20170324231421.14869-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 03/14] canonicalize compare instructions
+Date: Sat, 25 Mar 2017 00:14:10 +0100
+Message-ID: <20170324231421.14869-4-luc.vanoostenryck@gmail.com>
 References: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35921 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934086AbdCXXOi (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35880 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755322AbdCXXOd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:14:38 -0400
-Received: by mail-wm0-f66.google.com with SMTP id x124so780404wmf.3
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:36 -0700 (PDT)
+        Fri, 24 Mar 2017 19:14:33 -0400
+Received: by mail-wm0-f68.google.com with SMTP id x124so780160wmf.3
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:31 -0700 (PDT)
 In-Reply-To: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The linearized code, sparse's IR, have no use of C's complex type
-system. Those types are checked in previous phases and the pseudos
-doesn't a type directly attached to them as all needed type info
-are now conveyed by the instructions (like (register) size,
-signedness (OP_DIVU vs OP_DIVS), ...).
+Currently only commutative instructions are canonicalized
+(the "simpler" operands, often a constant, is forced, if present
+to be in the second operand). This improve CSE (more cases are
+considered as equivalent) and help to reduce the number of "pattern"
+to be handled at simplification.
 
-In particular, PSEUDO_VAL (used for integer and address constants)
-are completely typeless.
-There is a problem with this when calling a variadic function
-with a constant argument as in this case there is no type in the
-function prototype (for the variadic part, of course) and there is
-no defining instructions holding the type of the argument.
+Do this also for compare instructions since in thsi case we can
+swap the order of the operands if at the same time we also swap
+the 'direction' on the comparison.
 
-Fix this by adding a new instruction, OP_PUSH, which will be used
-to pass arguments to function calls and whose purpose is to give
-a correct type/size to function's arguments.
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Idea-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- example.c                       |  4 ++--
- linearize.c                     | 35 +++++++++++++++++++++++++++--------
- linearize.h                     | 10 +++++++++-
- liveness.c                      | 14 ++++++++------
- simplify.c                      | 11 ++++++++++-
- sparse-llvm.c                   |  4 ++--
- validation/call-variadic.c      | 31 +++++++++++++++++++++++++++++++
- validation/loop-linearization.c |  9 ++++++---
- 8 files changed, 95 insertions(+), 23 deletions(-)
- create mode 100644 validation/call-variadic.c
+ simplify.c                       |  38 ++++++++++--
+ validation/optim/canonical-cmp.c | 124 +++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 158 insertions(+), 4 deletions(-)
+ create mode 100644 validation/optim/canonical-cmp.c
 
-diff --git a/example.c b/example.c
-index 691e0f97c..69e00b325 100644
---- a/example.c
-+++ b/example.c
-@@ -1121,11 +1121,11 @@ static void generate_ret(struct bb_state *state, struct instruction *ret)
-  */
- static void generate_call(struct bb_state *state, struct instruction *insn)
- {
-+	struct instruction *arg;
- 	int offset = 0;
--	pseudo_t arg;
- 
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		output_insn(state, "pushl %s", generic(state, arg));
-+		output_insn(state, "pushl %s", generic(state, arg->src));
- 		offset += 4;
- 	} END_FOR_EACH_PTR(arg);
- 	flush_reg(state, hardregs+0);
-diff --git a/linearize.c b/linearize.c
-index 66d5204d7..34a5125a0 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -233,6 +233,7 @@ static const char *opcodes[] = {
- 	[OP_FPCAST] = "fpcast",
- 	[OP_PTRCAST] = "ptrcast",
- 	[OP_INLINED_CALL] = "# call",
-+	[OP_PUSH] = "push",
- 	[OP_CALL] = "call",
- 	[OP_VANEXT] = "va_next",
- 	[OP_VAARG] = "va_arg",
-@@ -407,17 +408,21 @@ const char *show_instruction(struct instruction *insn)
- 	case OP_STORE: case OP_SNOP:
- 		buf += sprintf(buf, "%s -> %d[%s]", show_pseudo(insn->target), insn->offset, show_pseudo(insn->src));
- 		break;
-+	case OP_PUSH:
-+		buf += sprintf(buf, "%s", show_pseudo(insn->src));
-+		break;
- 	case OP_INLINED_CALL:
--	case OP_CALL: {
--		struct pseudo *arg;
-+	case OP_CALL:
- 		if (insn->target && insn->target != VOID)
- 			buf += sprintf(buf, "%s <- ", show_pseudo(insn->target));
- 		buf += sprintf(buf, "%s", show_pseudo(insn->func));
--		FOR_EACH_PTR(insn->arguments, arg) {
--			buf += sprintf(buf, ", %s", show_pseudo(arg));
--		} END_FOR_EACH_PTR(arg);
-+		if (opcode == OP_INLINED_CALL) {
-+			struct pseudo *arg;
-+			FOR_EACH_PTR(insn->inlined_args, arg) {
-+				buf += sprintf(buf, ", %s", show_pseudo(arg));
-+			} END_FOR_EACH_PTR(arg);
-+		}
- 		break;
--	}
- 	case OP_CAST:
- 	case OP_SCAST:
- 	case OP_FPCAST:
-@@ -1197,6 +1202,20 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 	return value;
- }
- 
-+/*
-+ * Add an argument for a call.
-+ *   -) insn->opcode == O_CALL | OP_INLINE_CALL
-+ *   -) ctype = typeof(arg)
-+ */
-+static void push_argument(struct entrypoint *ep, struct instruction *insn, pseudo_t arg, struct symbol *ctype)
-+{
-+	struct instruction *push = alloc_typed_instruction(OP_PUSH, ctype);
-+	push->call = insn;
-+	use_pseudo(push, arg, &push->src);
-+	add_instruction(&insn->arguments, push);
-+	add_one_insn(ep, push);
-+}
-+
- static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expression *expr)
- {
- 	struct expression *arg, *fn;
-@@ -1213,7 +1232,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
- 
- 	FOR_EACH_PTR(expr->args, arg) {
- 		pseudo_t new = linearize_expression(ep, arg);
--		use_pseudo(insn, new, add_pseudo(&insn->arguments, new));
-+		push_argument(ep, insn, new, arg->ctype);
- 	} END_FOR_EACH_PTR(arg);
- 
- 	fn = expr->fn;
-@@ -1680,7 +1699,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
- 		concat_symbol_list(args->declaration, &ep->syms);
- 		FOR_EACH_PTR(args->declaration, sym) {
- 			pseudo_t value = linearize_one_symbol(ep, sym);
--			add_pseudo(&insn->arguments, value);
-+			add_pseudo(&insn->inlined_args, value);
- 		} END_FOR_EACH_PTR(sym);
- 	}
- 
-diff --git a/linearize.h b/linearize.h
-index bac82d7ff..0cdd0fa9a 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -112,9 +112,16 @@ struct instruction {
- 		};
- 		struct /* call */ {
- 			pseudo_t func;
--			struct pseudo_list *arguments;
-+			union {
-+				struct instruction_list *arguments;
-+				struct pseudo_list *inlined_args;
-+			};
- 			struct symbol *fntype;
- 		};
-+		struct /* push/arg */ {
-+			pseudo_t arg;			/* same as src, src1 & symbol */
-+			struct instruction *call;
-+		};
- 		struct /* context */ {
- 			int increment;
- 			int check;
-@@ -201,6 +208,7 @@ enum opcode {
- 	OP_FPCAST,
- 	OP_PTRCAST,
- 	OP_INLINED_CALL,
-+	OP_PUSH,
- 	OP_CALL,
- 	OP_VANEXT,
- 	OP_VAARG,
-diff --git a/liveness.c b/liveness.c
-index 7461738b4..7b5b1693a 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -46,13 +46,12 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 	void (*def)(struct basic_block *, pseudo_t),
- 	void (*use)(struct basic_block *, pseudo_t))
- {
--	pseudo_t pseudo;
--
- 	#define USES(x)		use(bb, insn->x)
- 	#define DEFINES(x)	def(bb, insn->x)
- 
- 	switch (insn->opcode) {
- 	case OP_RET:
-+	case OP_PUSH:
- 		USES(src);
- 		break;
- 
-@@ -118,14 +117,17 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 		USES(src); DEFINES(target);
- 		break;
- 
--	case OP_CALL:
-+	case OP_CALL: {
-+		struct instruction *arg;
-+
- 		USES(func);
- 		if (insn->target != VOID)
- 			DEFINES(target);
--		FOR_EACH_PTR(insn->arguments, pseudo) {
--			use(bb, pseudo);
--		} END_FOR_EACH_PTR(pseudo);
-+		FOR_EACH_PTR(insn->arguments, arg) {
-+			use(bb, arg->src);
-+		} END_FOR_EACH_PTR(arg);
- 		break;
-+	}
- 
- 	case OP_SLICE:
- 		USES(base); DEFINES(target);
 diff --git a/simplify.c b/simplify.c
-index deacf97b4..97750cddd 100644
+index 66035bbce..e3296a830 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -182,6 +182,14 @@ static void kill_use_list(struct pseudo_list *list)
- 	} END_FOR_EACH_PTR(p);
+@@ -427,6 +427,26 @@ static int compare_opcode(int opcode, int inverse)
+ 	}
  }
  
-+static void kill_insn_list(struct instruction_list *list)
++static int swap_compare_opcode(int opcode)
 +{
-+	struct instruction *insn;
-+	FOR_EACH_PTR(list, insn) {
-+		kill_insn(insn, 0);
-+	} END_FOR_EACH_PTR(insn);
++	static const unsigned char opcode_tbl[] = {
++		[OP_SET_EQ - OP_BINCMP] = OP_SET_EQ,
++		[OP_SET_NE - OP_BINCMP] = OP_SET_NE,
++		[OP_SET_GT - OP_BINCMP] = OP_SET_LT,
++		[OP_SET_GE - OP_BINCMP] = OP_SET_LE,
++		[OP_SET_LE - OP_BINCMP] = OP_SET_GE,
++		[OP_SET_LT - OP_BINCMP] = OP_SET_GT,
++		[OP_SET_A  - OP_BINCMP] = OP_SET_B ,
++		[OP_SET_AE - OP_BINCMP] = OP_SET_BE,
++		[OP_SET_BE - OP_BINCMP] = OP_SET_AE,
++		[OP_SET_B  - OP_BINCMP] = OP_SET_A ,
++	};
++
++	assert(opcode >= OP_BINCMP && opcode <= OP_BINCMP_END);
++
++	return opcode_tbl[opcode - OP_BINCMP];
 +}
 +
- /*
-  * kill an instruction:
-  * - remove it from its bb
-@@ -213,6 +221,7 @@ void kill_insn(struct instruction *insn, int force)
- 	case OP_SETVAL:
- 	case OP_NOT: case OP_NEG:
- 	case OP_SLICE:
-+	case OP_PUSH:
- 		kill_use(&insn->src1);
- 		break;
- 
-@@ -240,7 +249,7 @@ void kill_insn(struct instruction *insn, int force)
- 			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
- 				return;
- 		}
--		kill_use_list(insn->arguments);
-+		kill_insn_list(insn->arguments);
- 		if (insn->func->type == PSEUDO_REG)
- 			kill_use(&insn->func);
- 		break;
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 9f362b3ed..ecc4f032f 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -707,7 +707,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ static int simplify_seteq_setne(struct instruction *insn, long long value)
  {
- 	LLVMValueRef target, func;
- 	int n_arg = 0, i;
--	struct pseudo *arg;
-+	struct instruction *arg;
- 	LLVMValueRef *args;
+ 	pseudo_t old = insn->src1;
+@@ -744,6 +764,14 @@ static int canonicalize_commutative(struct instruction *insn)
+ 	return repeat_phase |= REPEAT_CSE;
+ }
  
- 	FOR_EACH_PTR(insn->arguments, arg) {
-@@ -718,7 +718,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 
- 	i = 0;
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		args[i++] = pseudo_to_value(fn, insn, arg);
-+		args[i++] = pseudo_to_value(fn, arg, arg->src);
- 	} END_FOR_EACH_PTR(arg);
- 
- 	func = pseudo_to_value(fn, insn, insn->func);
-diff --git a/validation/call-variadic.c b/validation/call-variadic.c
-new file mode 100644
-index 000000000..cbb8aa68b
---- /dev/null
-+++ b/validation/call-variadic.c
-@@ -0,0 +1,31 @@
-+#define NULL	((void*)0)
-+
-+extern int print(const char *msg, ...);
-+
-+int foo(const char *fmt, int a, long l, int *p)
++static int canonicalize_compare(struct instruction *insn)
 +{
-+	print("msg %c: %d %d/%ld %ld/%p %p\n", 'x', a, __LINE__, l, 0L, p, NULL);
++	int repeat = canonicalize_commutative(insn);
++	if (repeat)
++		insn->opcode = swap_compare_opcode(insn->opcode);
++	return repeat;
 +}
++
+ static inline int simple_pseudo(pseudo_t pseudo)
+ {
+ 	return pseudo->type == PSEUDO_VAL || pseudo->type == PSEUDO_SYM;
+@@ -1139,15 +1167,17 @@ int simplify_instruction(struct instruction *insn)
+ 		canonicalize_commutative(insn);
+ 		return simplify_binop(insn);
+ 
++	case OP_SET_LE: case OP_SET_GE:
++	case OP_SET_LT: case OP_SET_GT:
++	case OP_SET_B:  case OP_SET_A:
++	case OP_SET_BE: case OP_SET_AE:
++		canonicalize_compare(insn);
++		/* fall through */
+ 	case OP_SUB:
+ 	case OP_DIVU: case OP_DIVS:
+ 	case OP_MODU: case OP_MODS:
+ 	case OP_SHL:
+ 	case OP_LSR: case OP_ASR:
+-	case OP_SET_LE: case OP_SET_GE:
+-	case OP_SET_LT: case OP_SET_GT:
+-	case OP_SET_B:  case OP_SET_A:
+-	case OP_SET_BE: case OP_SET_AE:
+ 		return simplify_binop(insn);
+ 
+ 	case OP_NOT: case OP_NEG:
+diff --git a/validation/optim/canonical-cmp.c b/validation/optim/canonical-cmp.c
+new file mode 100644
+index 000000000..19b416310
+--- /dev/null
++++ b/validation/optim/canonical-cmp.c
+@@ -0,0 +1,124 @@
++typedef	  signed int	sint;
++typedef	unsigned int	uint;
++
++sint seq(sint p, sint a) { return (123 == p) ? a : 0; }
++sint sne(sint p, sint a) { return (123 != p) ? a : 0; }
++
++sint slt(sint p, sint a) { return (123 >  p) ? a : 0; }
++sint sle(sint p, sint a) { return (123 >= p) ? a : 0; }
++sint sge(sint p, sint a) { return (123 <= p) ? a : 0; }
++sint sgt(sint p, sint a) { return (123 <  p) ? a : 0; }
++
++uint ueq(uint p, uint a) { return (123 == p) ? a : 0; }
++uint une(uint p, uint a) { return (123 != p) ? a : 0; }
++
++uint ubt(uint p, uint a) { return (123 >  p) ? a : 0; }
++uint ube(uint p, uint a) { return (123 >= p) ? a : 0; }
++uint uae(uint p, uint a) { return (123 <= p) ? a : 0; }
++uint uat(uint p, uint a) { return (123 <  p) ? a : 0; }
 +
 +/*
-+ * check-name: call-variadic
++ * check-name: canonical-cmp
 + * check-command: test-linearize -Wno-decl $file
 + *
++ * check-output-exclude: \$123,
++ *
 + * check-output-start
-+foo:
++seq:
 +.L0:
 +	<entry-point>
-+	push.64     "msg %c: %d %d/%ld %ld/%p %p\n"
-+	push.32     $120
-+	push.32     %arg2
-+	push.32     $7
-+	push.64     %arg3
-+	push.64     $0
-+	push.64     %arg4
-+	push.64     $0
-+	call.32     %r5 <- print
++	seteq.32    %r4 <- %arg1, $123
++	select.32   %r5 <- %r4, %arg2, $0
 +	ret.32      %r5
++
++
++sne:
++.L2:
++	<entry-point>
++	setne.32    %r11 <- %arg1, $123
++	select.32   %r12 <- %r11, %arg2, $0
++	ret.32      %r12
++
++
++slt:
++.L4:
++	<entry-point>
++	setlt.32    %r18 <- %arg1, $123
++	select.32   %r19 <- %r18, %arg2, $0
++	ret.32      %r19
++
++
++sle:
++.L6:
++	<entry-point>
++	setle.32    %r25 <- %arg1, $123
++	select.32   %r26 <- %r25, %arg2, $0
++	ret.32      %r26
++
++
++sge:
++.L8:
++	<entry-point>
++	setge.32    %r32 <- %arg1, $123
++	select.32   %r33 <- %r32, %arg2, $0
++	ret.32      %r33
++
++
++sgt:
++.L10:
++	<entry-point>
++	setgt.32    %r39 <- %arg1, $123
++	select.32   %r40 <- %r39, %arg2, $0
++	ret.32      %r40
++
++
++ueq:
++.L12:
++	<entry-point>
++	seteq.32    %r45 <- %arg1, $123
++	select.32   %r46 <- %r45, %arg2, $0
++	ret.32      %r46
++
++
++une:
++.L14:
++	<entry-point>
++	setne.32    %r50 <- %arg1, $123
++	select.32   %r51 <- %r50, %arg2, $0
++	ret.32      %r51
++
++
++ubt:
++.L16:
++	<entry-point>
++	setb.32     %r55 <- %arg1, $123
++	select.32   %r56 <- %r55, %arg2, $0
++	ret.32      %r56
++
++
++ube:
++.L18:
++	<entry-point>
++	setbe.32    %r60 <- %arg1, $123
++	select.32   %r61 <- %r60, %arg2, $0
++	ret.32      %r61
++
++
++uae:
++.L20:
++	<entry-point>
++	setae.32    %r65 <- %arg1, $123
++	select.32   %r66 <- %r65, %arg2, $0
++	ret.32      %r66
++
++
++uat:
++.L22:
++	<entry-point>
++	seta.32     %r70 <- %arg1, $123
++	select.32   %r71 <- %r70, %arg2, $0
++	ret.32      %r71
 +
 +
 + * check-output-end
 + */
-diff --git a/validation/loop-linearization.c b/validation/loop-linearization.c
-index 25c6dfb87..d53366bde 100644
---- a/validation/loop-linearization.c
-+++ b/validation/loop-linearization.c
-@@ -48,7 +48,8 @@ ffor:
- 	cbr         %r2, .L1, .L3
- 
- .L1:
--	call.32     %r4 <- p, %r1(i)
-+	push.32     %r1(i)
-+	call.32     %r4 <- p
- 	cbr         %r4, .L2, .L5
- 
- .L5:
-@@ -81,7 +82,8 @@ fwhile:
- 	cbr         %r9, .L9, .L11
- 
- .L9:
--	call.32     %r11 <- p, %r8(i)
-+	push.32     %r8(i)
-+	call.32     %r11 <- p
- 	cbr         %r11, .L14, .L13
- 
- .L13:
-@@ -110,7 +112,8 @@ fdo:
- 
- .L17:
- 	phi.32      %r15(i) <- %phi16(i), %phi17(i)
--	call.32     %r16 <- p, %r15(i)
-+	push.32     %r15(i)
-+	call.32     %r16 <- p
- 	cbr         %r16, .L18, .L20
- 
- .L20:
 -- 
 2.12.0
 
