@@ -1,28 +1,36 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Sparse IR documentation
-Date: Wed, 22 Mar 2017 22:20:02 +0000
-Message-ID: <CACXZuxeoXt=uqQHKbv9LHki7x0-jG1t0KW11=MiFmZtpJ4qodQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] avoid crash with test-linearize -vv
+Date: Thu, 23 Mar 2017 20:03:36 -0700
+Message-ID: <CANeU7QnSaE6TsnRLXAufpcczd4ouaRKK+vSQm_r8YC9A0Rv-sw@mail.gmail.com>
+References: <20170319180118.83953-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f177.google.com ([209.85.223.177]:34327 "EHLO
-        mail-io0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751346AbdCVWUF (ORCPT
+Received: from mail-io0-f181.google.com ([209.85.223.181]:35377 "EHLO
+        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935255AbdCXDDi (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Mar 2017 18:20:05 -0400
-Received: by mail-io0-f177.google.com with SMTP id b140so72774604iof.1
-        for <linux-sparse@vger.kernel.org>; Wed, 22 Mar 2017 15:20:04 -0700 (PDT)
+        Thu, 23 Mar 2017 23:03:38 -0400
+Received: by mail-io0-f181.google.com with SMTP id z13so9596115iof.2
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Mar 2017 20:03:37 -0700 (PDT)
+In-Reply-To: <20170319180118.83953-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-Hi,
+On Sun, Mar 19, 2017 at 11:01 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> When verbose is set to 2 or higher, show_instruction()
+> also display removed instructions. Some of these instructions
+> can have their associated symbol removed and set to NULL
+> which will cause a crash with 'test-linearize -vv'.
+>
+> Fix this by avoiding to dereference symbol's details of
+> removed instructions.
 
-The documentation on sparse IR posted by Luc
-(https://patchwork.kernel.org/patch/9635657/)  in the recent LLVM
-patch series is a great start. I think it will be very useful to end
-this into full specification type document similar to that available
-for LLVM IR instructions.
+I like to apply it. Can you add SOB?
 
-Thanks and Regards
-Dibyendu
+Thanks
+
+Chris
