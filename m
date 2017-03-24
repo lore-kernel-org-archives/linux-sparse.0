@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 10/51] llvm: fix test of floating-point type
-Date: Sat, 25 Mar 2017 00:20:16 +0100
-Message-ID: <20170324232057.15033-11-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 20/51] llvm: add support for OP_SETVAL with floats
+Date: Sat, 25 Mar 2017 00:20:26 +0100
+Message-ID: <20170324232057.15033-21-luc.vanoostenryck@gmail.com>
 References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:32994 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934542AbdCXXXi (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34265 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934542AbdCXXXr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:23:38 -0400
-Received: by mail-wr0-f194.google.com with SMTP id 20so611735wrx.0
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:37 -0700 (PDT)
+        Fri, 24 Mar 2017 19:23:47 -0400
+Received: by mail-wm0-f65.google.com with SMTP id u132so809897wmg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:46 -0700 (PDT)
 In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,139 +19,61 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 42 +++++++++++++++++-------------------------
- 1 file changed, 17 insertions(+), 25 deletions(-)
+ sparse-llvm.c               | 19 ++++++++++++++++++-
+ validation/backend/setval.c |  7 +++++++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
+ create mode 100644 validation/backend/setval.c
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index d7e8ee725..ee3857c49 100644
+index 6cc01cdd9..29cb11ee3 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -25,14 +25,6 @@ struct function {
- 	LLVMModuleRef			module;
- };
+@@ -866,6 +866,23 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+ 	insn->target->priv = target;
+ }
  
--static inline bool symbol_is_fp_type(struct symbol *sym)
--{
--	if (!sym)
--		return false;
--
--	return sym->ctype.base_type == &fp_type;
--}
--
- static LLVMTypeRef symbol_type(struct symbol *sym);
- 
- static LLVMTypeRef func_return_type(struct symbol *sym)
-@@ -154,7 +146,7 @@ static LLVMTypeRef sym_basetype_type(struct symbol *sym)
++static void output_op_setval(struct function *fn, struct instruction *insn)
++{
++	struct expression *val = insn->val;
++	LLVMTypeRef dtype = symbol_type(insn->type);
++	LLVMValueRef target;
++
++	switch (val->type) {
++	case EXPR_FVALUE:
++		target = LLVMConstReal(dtype, val->fvalue);
++		break;
++	default:
++		assert(0);
++	}
++
++	insn->target->priv = target;
++}
++
+ static void output_insn(struct function *fn, struct instruction *insn)
  {
- 	LLVMTypeRef ret = NULL;
- 
--	if (symbol_is_fp_type(sym)) {
-+	if (is_float_type(sym)) {
- 		switch (sym->bit_size) {
- 		case 32:
- 			ret = LLVMFloatType();
-@@ -454,69 +446,69 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
  	switch (insn->opcode) {
- 	/* Binary */
- 	case OP_ADD:
--		if (symbol_is_fp_type(insn->type))
-+		if (is_float_type(insn->type))
- 			target = LLVMBuildFAdd(fn->builder, lhs, rhs, target_name);
- 		else
- 			target = LLVMBuildAdd(fn->builder, lhs, rhs, target_name);
+@@ -882,7 +899,7 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 		assert(0);
  		break;
- 	case OP_SUB:
--		if (symbol_is_fp_type(insn->type))
-+		if (is_float_type(insn->type))
- 			target = LLVMBuildFSub(fn->builder, lhs, rhs, target_name);
- 		else
- 			target = LLVMBuildSub(fn->builder, lhs, rhs, target_name);
+ 	case OP_SETVAL:
+-		assert(0);
++		output_op_setval(fn, insn);
  		break;
- 	case OP_MULU:
--		if (symbol_is_fp_type(insn->type))
-+		if (is_float_type(insn->type))
- 			target = LLVMBuildFMul(fn->builder, lhs, rhs, target_name);
- 		else
- 			target = LLVMBuildMul(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_MULS:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildMul(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_DIVU:
--		if (symbol_is_fp_type(insn->type))
-+		if (is_float_type(insn->type))
- 			target = LLVMBuildFDiv(fn->builder, lhs, rhs, target_name);
- 		else
- 			target = LLVMBuildUDiv(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_DIVS:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildSDiv(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_MODU:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildURem(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_MODS:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildSRem(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_SHL:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildShl(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_LSR:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildLShr(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_ASR:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildAShr(fn->builder, lhs, rhs, target_name);
- 		break;
- 	
- 	/* Logical */
- 	case OP_AND:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildAnd(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_OR:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildOr(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_XOR:
--		assert(!symbol_is_fp_type(insn->type));
-+		assert(!is_float_type(insn->type));
- 		target = LLVMBuildXor(fn->builder, lhs, rhs, target_name);
- 		break;
- 	case OP_AND_BOOL: {
-@@ -781,7 +773,7 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
- 
- 	pseudo_name(insn->target, target_name);
- 
--	assert(!symbol_is_fp_type(insn->type));
-+	assert(!is_float_type(insn->type));
- 
- 	target = LLVMBuildBitCast(fn->builder, src, insn_symbol_type(insn), target_name);
- 
-@@ -799,7 +791,7 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 
- 	pseudo_name(insn->target, target_name);
- 
--	assert(!symbol_is_fp_type(insn->type));
-+	assert(!is_float_type(insn->type));
- 
- 	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
- 		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(insn), target_name);
+ 	case OP_SWITCH:
+ 		output_op_switch(fn, insn);
+diff --git a/validation/backend/setval.c b/validation/backend/setval.c
+new file mode 100644
+index 000000000..e3557571d
+--- /dev/null
++++ b/validation/backend/setval.c
+@@ -0,0 +1,7 @@
++double setfval64(void) { return 1.23; }
++float  setfval32(void) { return 1.23F; }
++
++/*
++ * check-name: setval-float
++ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
++ */
 -- 
 2.12.0
 
