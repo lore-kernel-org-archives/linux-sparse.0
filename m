@@ -1,233 +1,117 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 03/14] canonicalize compare instructions
-Date: Sat, 25 Mar 2017 00:14:10 +0100
-Message-ID: <20170324231421.14869-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 07/14] inlined calls should not block BB packing
+Date: Sat, 25 Mar 2017 00:14:14 +0100
+Message-ID: <20170324231421.14869-8-luc.vanoostenryck@gmail.com>
 References: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35880 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755322AbdCXXOd (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35913 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755312AbdCXXOg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:14:33 -0400
-Received: by mail-wm0-f68.google.com with SMTP id x124so780160wmf.3
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:31 -0700 (PDT)
+        Fri, 24 Mar 2017 19:14:36 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x124so780334wmf.3
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:35 -0700 (PDT)
 In-Reply-To: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently only commutative instructions are canonicalized
-(the "simpler" operands, often a constant, is forced, if present
-to be in the second operand). This improve CSE (more cases are
-considered as equivalent) and help to reduce the number of "pattern"
-to be handled at simplification.
+OP_INLINED_CALL are there only as a sort of annotation
+for debugging purpose.
+Their presence should thus not block the packing of
+basic blocks.
 
-Do this also for compare instructions since in thsi case we can
-swap the order of the operands if at the same time we also swap
-the 'direction' on the comparison.
+Fix this by ignoring OP_INLINED_CALL when trying to pack
+a basic block.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                       |  38 ++++++++++--
- validation/optim/canonical-cmp.c | 124 +++++++++++++++++++++++++++++++++++++++
- 2 files changed, 158 insertions(+), 4 deletions(-)
- create mode 100644 validation/optim/canonical-cmp.c
+ flow.c                          |  1 +
+ validation/call-inlined.c       |  4 ----
+ validation/optim/call-inlined.c | 30 ++++++++++++++++++++++++++++++
+ 3 files changed, 31 insertions(+), 4 deletions(-)
+ create mode 100644 validation/optim/call-inlined.c
 
-diff --git a/simplify.c b/simplify.c
-index 66035bbce..e3296a830 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -427,6 +427,26 @@ static int compare_opcode(int opcode, int inverse)
- 	}
- }
+diff --git a/flow.c b/flow.c
+index 237c9f1fa..ec7e3f22c 100644
+--- a/flow.c
++++ b/flow.c
+@@ -949,6 +949,7 @@ void pack_basic_blocks(struct entrypoint *ep)
+ 				continue;
+ 			switch (first->opcode) {
+ 			case OP_NOP: case OP_LNOP: case OP_SNOP:
++			case OP_INLINED_CALL:
+ 				continue;
+ 			case OP_CBR:
+ 			case OP_BR: {
+diff --git a/validation/call-inlined.c b/validation/call-inlined.c
+index 6fd94edcb..dae68f0e2 100644
+--- a/validation/call-inlined.c
++++ b/validation/call-inlined.c
+@@ -27,14 +27,12 @@ foo:
+ 	<entry-point>
+ 	add.32      %r3 <- %arg1, %arg2
+ 	add.32      %r5 <- %r3, $1
+-	# call      %r5 <- add, %r3, $1
+ 	ret.32      %r5
  
-+static int swap_compare_opcode(int opcode)
-+{
-+	static const unsigned char opcode_tbl[] = {
-+		[OP_SET_EQ - OP_BINCMP] = OP_SET_EQ,
-+		[OP_SET_NE - OP_BINCMP] = OP_SET_NE,
-+		[OP_SET_GT - OP_BINCMP] = OP_SET_LT,
-+		[OP_SET_GE - OP_BINCMP] = OP_SET_LE,
-+		[OP_SET_LE - OP_BINCMP] = OP_SET_GE,
-+		[OP_SET_LT - OP_BINCMP] = OP_SET_GT,
-+		[OP_SET_A  - OP_BINCMP] = OP_SET_B ,
-+		[OP_SET_AE - OP_BINCMP] = OP_SET_BE,
-+		[OP_SET_BE - OP_BINCMP] = OP_SET_AE,
-+		[OP_SET_B  - OP_BINCMP] = OP_SET_A ,
-+	};
-+
-+	assert(opcode >= OP_BINCMP && opcode <= OP_BINCMP_END);
-+
-+	return opcode_tbl[opcode - OP_BINCMP];
-+}
-+
- static int simplify_seteq_setne(struct instruction *insn, long long value)
- {
- 	pseudo_t old = insn->src1;
-@@ -744,6 +764,14 @@ static int canonicalize_commutative(struct instruction *insn)
- 	return repeat_phase |= REPEAT_CSE;
- }
  
-+static int canonicalize_compare(struct instruction *insn)
-+{
-+	int repeat = canonicalize_commutative(insn);
-+	if (repeat)
-+		insn->opcode = swap_compare_opcode(insn->opcode);
-+	return repeat;
-+}
-+
- static inline int simple_pseudo(pseudo_t pseudo)
- {
- 	return pseudo->type == PSEUDO_VAL || pseudo->type == PSEUDO_SYM;
-@@ -1139,15 +1167,17 @@ int simplify_instruction(struct instruction *insn)
- 		canonicalize_commutative(insn);
- 		return simplify_binop(insn);
+ bar:
+ .L3:
+ 	<entry-point>
+-	# call      %r12 <- add, %r10, $1
+ 	ret
  
-+	case OP_SET_LE: case OP_SET_GE:
-+	case OP_SET_LT: case OP_SET_GT:
-+	case OP_SET_B:  case OP_SET_A:
-+	case OP_SET_BE: case OP_SET_AE:
-+		canonicalize_compare(insn);
-+		/* fall through */
- 	case OP_SUB:
- 	case OP_DIVU: case OP_DIVS:
- 	case OP_MODU: case OP_MODS:
- 	case OP_SHL:
- 	case OP_LSR: case OP_ASR:
--	case OP_SET_LE: case OP_SET_GE:
--	case OP_SET_LT: case OP_SET_GT:
--	case OP_SET_B:  case OP_SET_A:
--	case OP_SET_BE: case OP_SET_AE:
- 		return simplify_binop(insn);
  
- 	case OP_NOT: case OP_NEG:
-diff --git a/validation/optim/canonical-cmp.c b/validation/optim/canonical-cmp.c
+@@ -42,7 +40,6 @@ bas:
+ .L6:
+ 	<entry-point>
+ 	add.64      %r16 <- "abc", $1
+-	# call      %r16 <- lstrip, %r14
+ 	ret.64      %r16
+ 
+ 
+@@ -50,7 +47,6 @@ qus:
+ .L9:
+ 	<entry-point>
+ 	add.64      %r21 <- messg, $1
+-	# call      %r21 <- lstrip, %r19
+ 	ret.64      %r21
+ 
+ 
+diff --git a/validation/optim/call-inlined.c b/validation/optim/call-inlined.c
 new file mode 100644
-index 000000000..19b416310
+index 000000000..00698a4b1
 --- /dev/null
-+++ b/validation/optim/canonical-cmp.c
-@@ -0,0 +1,124 @@
-+typedef	  signed int	sint;
-+typedef	unsigned int	uint;
++++ b/validation/optim/call-inlined.c
+@@ -0,0 +1,30 @@
++static const char messg[] = "def";
 +
-+sint seq(sint p, sint a) { return (123 == p) ? a : 0; }
-+sint sne(sint p, sint a) { return (123 != p) ? a : 0; }
++static inline int add(int a, int b)
++{
++	return a + b;
++}
 +
-+sint slt(sint p, sint a) { return (123 >  p) ? a : 0; }
-+sint sle(sint p, sint a) { return (123 >= p) ? a : 0; }
-+sint sge(sint p, sint a) { return (123 <= p) ? a : 0; }
-+sint sgt(sint p, sint a) { return (123 <  p) ? a : 0; }
-+
-+uint ueq(uint p, uint a) { return (123 == p) ? a : 0; }
-+uint une(uint p, uint a) { return (123 != p) ? a : 0; }
-+
-+uint ubt(uint p, uint a) { return (123 >  p) ? a : 0; }
-+uint ube(uint p, uint a) { return (123 >= p) ? a : 0; }
-+uint uae(uint p, uint a) { return (123 <= p) ? a : 0; }
-+uint uat(uint p, uint a) { return (123 <  p) ? a : 0; }
++int foo(int a, int b, int p)
++{
++	if (p) {
++		add(a + b, 1);
++		return p;
++	}
++	return 0;
++}
 +
 +/*
-+ * check-name: canonical-cmp
++ * check-name: call-inlined
 + * check-command: test-linearize -Wno-decl $file
 + *
-+ * check-output-exclude: \$123,
-+ *
 + * check-output-start
-+seq:
++foo:
 +.L0:
 +	<entry-point>
-+	seteq.32    %r4 <- %arg1, $123
-+	select.32   %r5 <- %r4, %arg2, $0
-+	ret.32      %r5
-+
-+
-+sne:
-+.L2:
-+	<entry-point>
-+	setne.32    %r11 <- %arg1, $123
-+	select.32   %r12 <- %r11, %arg2, $0
-+	ret.32      %r12
-+
-+
-+slt:
-+.L4:
-+	<entry-point>
-+	setlt.32    %r18 <- %arg1, $123
-+	select.32   %r19 <- %r18, %arg2, $0
-+	ret.32      %r19
-+
-+
-+sle:
-+.L6:
-+	<entry-point>
-+	setle.32    %r25 <- %arg1, $123
-+	select.32   %r26 <- %r25, %arg2, $0
-+	ret.32      %r26
-+
-+
-+sge:
-+.L8:
-+	<entry-point>
-+	setge.32    %r32 <- %arg1, $123
-+	select.32   %r33 <- %r32, %arg2, $0
-+	ret.32      %r33
-+
-+
-+sgt:
-+.L10:
-+	<entry-point>
-+	setgt.32    %r39 <- %arg1, $123
-+	select.32   %r40 <- %r39, %arg2, $0
-+	ret.32      %r40
-+
-+
-+ueq:
-+.L12:
-+	<entry-point>
-+	seteq.32    %r45 <- %arg1, $123
-+	select.32   %r46 <- %r45, %arg2, $0
-+	ret.32      %r46
-+
-+
-+une:
-+.L14:
-+	<entry-point>
-+	setne.32    %r50 <- %arg1, $123
-+	select.32   %r51 <- %r50, %arg2, $0
-+	ret.32      %r51
-+
-+
-+ubt:
-+.L16:
-+	<entry-point>
-+	setb.32     %r55 <- %arg1, $123
-+	select.32   %r56 <- %r55, %arg2, $0
-+	ret.32      %r56
-+
-+
-+ube:
-+.L18:
-+	<entry-point>
-+	setbe.32    %r60 <- %arg1, $123
-+	select.32   %r61 <- %r60, %arg2, $0
-+	ret.32      %r61
-+
-+
-+uae:
-+.L20:
-+	<entry-point>
-+	setae.32    %r65 <- %arg1, $123
-+	select.32   %r66 <- %r65, %arg2, $0
-+	ret.32      %r66
-+
-+
-+uat:
-+.L22:
-+	<entry-point>
-+	seta.32     %r70 <- %arg1, $123
-+	select.32   %r71 <- %r70, %arg2, $0
-+	ret.32      %r71
++	select.32   %r9 <- %arg3, %arg3, $0
++	ret.32      %r9
 +
 +
 + * check-output-end
