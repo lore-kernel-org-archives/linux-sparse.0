@@ -1,152 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 00/51] LLVM fixes
-Date: Sat, 25 Mar 2017 00:20:06 +0100
-Message-ID: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 02/51] llvm: remove unneeded 'generation'
+Date: Sat, 25 Mar 2017 00:20:08 +0100
+Message-ID: <20170324232057.15033-3-luc.vanoostenryck@gmail.com>
+References: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34123 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934479AbdCXXX3 (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:32954 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934553AbdCXXXa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:23:29 -0400
-Received: by mail-wm0-f67.google.com with SMTP id u132so809166wmg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:27 -0700 (PDT)
+        Fri, 24 Mar 2017 19:23:30 -0400
+Received: by mail-wr0-f195.google.com with SMTP id 20so611484wrx.0
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:23:29 -0700 (PDT)
+In-Reply-To: <20170324232057.15033-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series solves a number of issues in sparse-llvm,
-mainly about wrong or missing type information as needed
-to build LLVM IR.
-Most of these issues have been reported and investigated by
-Dibyendu Majumdar.
+It's not needed here since there is no recursive access to BBs.
 
-Changes since v4:
-- extract the non sparse-llvm specific patches into
-  a separate, preparatory serie.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse-llvm.c | 13 ++-----------
+ 1 file changed, 2 insertions(+), 11 deletions(-)
 
-Changes since v3:
-- systematically insure that operands and output values
-  have the expected type (which may different than the
-  stored with). Some work may still be needed here.
-- add support for OP_SWITCH with a range
-- add support for floating-point casts (to and from)
-- add support for OP_SETVAL (floats & labels)
-- fix type of globals having an initializer
-
-Changes since v2:
-- remove the changes tha gave a type to PSEUDO_VALs
-- introduction of OP_PUSH instructions
-- move toward generic solution using the instruction's type
-- some more fixes
-- temporary remove changes related to OP_SYMADDR
-
-
-These patches already allow to compile a lot more code to LLVM
-but there is still known issues with sparse-llvm:
-- it won't work on bitfields
-- it won't work on computed gotos
-- it won't work on label-as-value
-- it won't work on exotic instructions (OP_SPLICE)
-- there is a bunch of problems with floats
-  (but this is not specific to sparse-llvm).
-There is most probably a bunch of others issues too.
-
-For convenience, this serie is also available at:
-  https://github.com/lucvoo/sparse/tree/llvm-fixes-v5
-
-Luc Van Oostenryck (51):
-  llvm: remove unneeded arg 'module'
-  llvm: remove unneeded 'generation'
-  llvm: remove unneeded function::type
-  llvm: reduce scope of 'bb_nr'
-  llvm: use pseudo_list_size() instead of open coding it
-  llvm: give arguments a name
-  llvm: give a name to call's return values
-  llvm: avoid useless temp variable
-  llvm: extract get_sym_value() from pseudo_to_value()
-  llvm: fix test of floating-point type
-  llvm: fix translation of PSEUDO_VALs into a ValueRefs
-  llvm: fix output_op_store() which modify its operand
-  llvm: fix output_op_[ptr]cast()
-  llvm: take care of degenerated rvalues
-  llvm: add test cases for symbol's address
-  llvm: add test cases for pointers passed as argument
-  llvm: add test cases for arrays passed as argument
-  llvm: add test cases for degenerated pointers
-  llvm: add support for OP_NEG
-  llvm: add support for OP_SETVAL with floats
-  llvm: add support for OP_SETVAL with labels
-  llvm: ignore OP_INLINED_CALL
-  llvm: fix pointer/float mixup in comparisons
-  llvm: fix type in comparison with an address constant
-  llvm: give correct type to binops
-  llvm: adjust OP_RET's type
-  llvm: variadic functions are not being marked as such
-  llvm: fix type of switch constants
-  llvm: make pseudo_name() more flexible
-  llvm: give a name to all values
-  llvm: add support for OP_SWITCH with a range
-  llvm: fix OP_SWITCH has no target
-  llvm: make value_to_pvalue() more flexible
-  llvm: make value_to_ivalue() more flexible
-  llvm: add test case pointer compare with cast
-  llvm: let pseudo_to_value() directly use the type
-  llvm: remove unneeded pseudo_to_value() unneeded argument
-  llvm: introduce get_ioperand()
-  llvm: fix mutating function pointer
-  llvm: fix mutated OP_RET
-  llvm: fix mutated OP_SEL
-  llvm: fix mutated OP_SWITCH
-  llvm: fix mutated OP_PHISOURCE
-  llvm: fix mutated OP_[PTR]CAST
-  llvm: add support for restricted types
-  llvm: fix get value from initialized symbol
-  llvm: fix get value from non-anonymous symbol
-  llvm: fix type of bitfields
-  llvm: add support for OP_FPCAST
-  llvm: add support for cast from floats
-  llvm: cleanup of output_[ptr]cast()
-
- sparse-llvm.c                           | 581 +++++++++++++++++++++-----------
- validation/backend/cast.c               |   7 +-
- validation/backend/compare-with-null.c  |  12 +
- validation/backend/constant-pointer.c   |  24 ++
- validation/backend/degenerate-ptr.c     |  72 ++++
- validation/backend/function-ptr-xtype.c |  37 ++
- validation/backend/function-ptr.c       | 148 +++++++-
- validation/backend/label-as-value.c     |  13 +
- validation/backend/load-global.c        |  21 ++
- validation/backend/pointer-add.c        |  54 +++
- validation/backend/pointer-cmp.c        |  12 +
- validation/backend/pointer-param.c      |  42 +++
- validation/backend/pointer-sub.c        |  17 +
- validation/backend/setval.c             |   7 +
- validation/backend/shift-special.c      |  13 +
- validation/backend/store-x2.c           |  16 +
- validation/backend/string-value.c       |  21 ++
- validation/backend/switch.c             | 248 ++++++++++++++
- validation/backend/symaddr.c            |  70 ++++
- validation/backend/type-constant.c      |  23 ++
- 20 files changed, 1229 insertions(+), 209 deletions(-)
- create mode 100644 validation/backend/compare-with-null.c
- create mode 100644 validation/backend/constant-pointer.c
- create mode 100644 validation/backend/degenerate-ptr.c
- create mode 100644 validation/backend/function-ptr-xtype.c
- create mode 100644 validation/backend/label-as-value.c
- create mode 100644 validation/backend/load-global.c
- create mode 100644 validation/backend/pointer-add.c
- create mode 100644 validation/backend/pointer-cmp.c
- create mode 100644 validation/backend/pointer-param.c
- create mode 100644 validation/backend/pointer-sub.c
- create mode 100644 validation/backend/setval.c
- create mode 100644 validation/backend/shift-special.c
- create mode 100644 validation/backend/store-x2.c
- create mode 100644 validation/backend/string-value.c
- create mode 100644 validation/backend/switch.c
- create mode 100644 validation/backend/symaddr.c
- create mode 100644 validation/backend/type-constant.c
-
--- 
-2.12.0
-
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 9b702863d..f41fbe6e3 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -911,12 +911,10 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 	}
+ }
+ 
+-static void output_bb(struct function *fn, struct basic_block *bb, unsigned long generation)
++static void output_bb(struct function *fn, struct basic_block *bb)
+ {
+ 	struct instruction *insn;
+ 
+-	bb->generation = generation;
+-
+ 	FOR_EACH_PTR(bb->insns, insn) {
+ 		if (!insn->bb)
+ 			continue;
+@@ -930,7 +928,6 @@ static void output_bb(struct function *fn, struct basic_block *bb, unsigned long
+ 
+ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ {
+-	unsigned long generation = ++bb_generation;
+ 	struct symbol *sym = ep->name;
+ 	struct symbol *base_type = sym->ctype.base_type;
+ 	struct symbol *ret_type = sym->ctype.base_type->ctype.base_type;
+@@ -964,9 +961,6 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	static int nr_bb;
+ 
+ 	FOR_EACH_PTR(ep->bbs, bb) {
+-		if (bb->generation == generation)
+-			continue;
+-
+ 		LLVMBasicBlockRef bbr;
+ 		char bbname[32];
+ 		struct instruction *insn;
+@@ -997,12 +991,9 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 	END_FOR_EACH_PTR(bb);
+ 
+ 	FOR_EACH_PTR(ep->bbs, bb) {
+-		if (bb->generation == generation)
+-			continue;
