@@ -1,82 +1,94 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 00/14] prepare LLVM fixes
-Date: Sat, 25 Mar 2017 00:14:07 +0100
-Message-ID: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 02/14] canonicalize binops before simplification
+Date: Sat, 25 Mar 2017 00:14:09 +0100
+Message-ID: <20170324231421.14869-3-luc.vanoostenryck@gmail.com>
+References: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35044 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755244AbdCXXOa (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:34150 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755312AbdCXXOb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:14:30 -0400
-Received: by mail-wm0-f66.google.com with SMTP id z133so785146wmb.2
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:28 -0700 (PDT)
+        Fri, 24 Mar 2017 19:14:31 -0400
+Received: by mail-wm0-f68.google.com with SMTP id u132so786453wmg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:30 -0700 (PDT)
+In-Reply-To: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This serie contains preparatory patches for 
-sparse-llvm's fixes but not sparse-llvm specific
-and having some values of their own.
+Currently, canonicalization of binops (more specifically
+insuring that the operands of binops are in canonical order)
+is only done after simplify_binop(). But the goal of
+canonicalization is to limit the number of cases/patterns
+we need to check/handle during ... simplification.
+So canonicalization need to be done before simplification.
 
-These patches were extracted from a previous
-serie containing also the sparse-llvm patches.
+Fix this by moving (this part of) canonicalization before
+doing simplification.
 
-Changes since extraction:
-- no functional changes
-- add missing parts in the IR doc
-- fix some typos in the IR doc
-- move OP_PUSHs near their OP_CALL
-- give a real commit msg for some of the patches
-- improve the commit msg of some of the patches
-- use a table for compare_swap() & compare_opcode()
-- use a better name for compare_swap() & compare_opcode()
+Note 1: the motivation of this patch is to prepare code for
+        the canonicalization of compare instructions
 
+Note 2: this patch allow now some simplification of ...
+        the simplification code (simplify_binop()), this
+	will be done in a later serie.
 
-Luc Van Oostenryck (14):
-  don't output value of anonymous symbol's pointer
-  canonicalize binops before simplification
-  canonicalize compare instructions
-  rewrite compare_opcode() like swap_compare_opcode()
-  add is_signed_type()
-  fix usage of inlined calls
-  inlined calls should not block BB packing
-  give function's arguments a type via OP_PUSH
-  insure that all OP_PUSHs are just before their OP_CALL
-  give a type to OP_PHISOURCEs
-  give a type to OP_SELs, always
-  give a type to OP_SWITCHs
-  add doc about sparse's instructions/IR
-  add support for wider type in switch-case
+Note 3: this patch changes slightly the cost of the CSE/
+	simplification, positively or negatively, depending
+	on the ration of simplification/canonicalization
+	that can be done.
 
- Documentation/instructions.txt   | 296 +++++++++++++++++++++++++++++++++++++++
- compile-i386.c                   |  14 +-
- example.c                        |   4 +-
- flow.c                           |   3 +-
- linearize.c                      |  78 +++++++----
- linearize.h                      |  14 +-
- liveness.c                       |  14 +-
- memops.c                         |   2 +-
- show-parse.c                     |  11 +-
- simplify.c                       | 104 +++++++++-----
- sparse-llvm.c                    |   4 +-
- symbol.h                         |   9 ++
- validation/call-inlined.c        |  54 +++++++
- validation/call-variadic.c       |  31 ++++
- validation/loop-linearization.c  |   9 +-
- validation/optim/call-inlined.c  |  30 ++++
- validation/optim/canonical-cmp.c | 124 ++++++++++++++++
- validation/push-call.c           |  26 ++++
- validation/switch-long.c         |  47 +++++++
- 19 files changed, 774 insertions(+), 100 deletions(-)
- create mode 100644 Documentation/instructions.txt
- create mode 100644 validation/call-inlined.c
- create mode 100644 validation/call-variadic.c
- create mode 100644 validation/optim/call-inlined.c
- create mode 100644 validation/optim/canonical-cmp.c
- create mode 100644 validation/push-call.c
- create mode 100644 validation/switch-long.c
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 20 +++++++++-----------
+ 1 file changed, 9 insertions(+), 11 deletions(-)
 
+diff --git a/simplify.c b/simplify.c
+index 5d00937f1..66035bbce 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -735,13 +735,13 @@ static int canonical_order(pseudo_t p1, pseudo_t p2)
+ 	return 1;
+ }
+ 
+-static int simplify_commutative_binop(struct instruction *insn)
++static int canonicalize_commutative(struct instruction *insn)
+ {
+-	if (!canonical_order(insn->src1, insn->src2)) {
+-		switch_pseudo(insn, &insn->src1, insn, &insn->src2);
+-		return REPEAT_CSE;
+-	}
+-	return 0;
++	if (canonical_order(insn->src1, insn->src2))
++		return 0;
++
++	switch_pseudo(insn, &insn->src1, insn, &insn->src2);
++	return repeat_phase |= REPEAT_CSE;
+ }
+ 
+ static inline int simple_pseudo(pseudo_t pseudo)
+@@ -1129,17 +1129,15 @@ int simplify_instruction(struct instruction *insn)
+ 	case OP_ADD: case OP_MULS:
+ 	case OP_AND: case OP_OR: case OP_XOR:
+ 	case OP_AND_BOOL: case OP_OR_BOOL:
++		canonicalize_commutative(insn);
+ 		if (simplify_binop(insn))
+ 			return REPEAT_CSE;
+-		if (simplify_commutative_binop(insn))
+-			return REPEAT_CSE;
+ 		return simplify_associative_binop(insn);
+ 
+ 	case OP_MULU:
+ 	case OP_SET_EQ: case OP_SET_NE:
+-		if (simplify_binop(insn))
+-			return REPEAT_CSE;
+-		return simplify_commutative_binop(insn);
++		canonicalize_commutative(insn);
++		return simplify_binop(insn);
+ 
+ 	case OP_SUB:
+ 	case OP_DIVU: case OP_DIVS:
 -- 
 2.12.0
 
