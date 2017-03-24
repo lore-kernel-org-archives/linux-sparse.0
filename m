@@ -1,144 +1,138 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v5 10/14] give a type to OP_PHISOURCEs
-Date: Sat, 25 Mar 2017 00:14:17 +0100
-Message-ID: <20170324231421.14869-11-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v5 14/14] add support for wider type in switch-case
+Date: Sat, 25 Mar 2017 00:14:21 +0100
+Message-ID: <20170324231421.14869-15-luc.vanoostenryck@gmail.com>
 References: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35932 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934817AbdCXXOj (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36744 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934140AbdCXXOn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 19:14:39 -0400
-Received: by mail-wm0-f65.google.com with SMTP id x124so780481wmf.3
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:38 -0700 (PDT)
+        Fri, 24 Mar 2017 19:14:43 -0400
+Received: by mail-wr0-f194.google.com with SMTP id u1so579327wra.3
+        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 16:14:42 -0700 (PDT)
 In-Reply-To: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, OP_PHISOURCEs are given a size but not a type.
+Currently the different cases of a switch-statement, or more
+exactly the 'struct multijmp' that hold the value of these cases
+excepted only value of 'int' type. Trying to use a wider value
+results in the value being truncated but any integer value should
+be valid.
 
-For consistency and for sparse-LLVM which need it,
-give them a type too.
+Fix this by unsigned 'long long' to hold these values.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c      |  2 +-
- linearize.c | 16 +++++++---------
- linearize.h |  2 +-
- memops.c    |  2 +-
- 4 files changed, 10 insertions(+), 12 deletions(-)
+ linearize.c              |  8 ++++----
+ linearize.h              |  2 +-
+ validation/switch-long.c | 47 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 52 insertions(+), 5 deletions(-)
+ create mode 100644 validation/switch-long.c
 
-diff --git a/flow.c b/flow.c
-index ec7e3f22c..9265a099d 100644
---- a/flow.c
-+++ b/flow.c
-@@ -371,7 +371,7 @@ found_dominator:
- 		if (dominators && phisrc_in_bb(*dominators, parent))
- 			continue;
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : pseudo->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
 diff --git a/linearize.c b/linearize.c
-index 4dcc8d2e0..2df610eb2 100644
+index 73599798f..7bef5a251 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -820,9 +820,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
- 	return pseudo;
+@@ -77,7 +77,7 @@ static struct basic_block *alloc_basic_block(struct entrypoint *ep, struct posit
+ 	return bb;
  }
  
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
+-static struct multijmp *alloc_multijmp(struct basic_block *target, int begin, int end)
++static struct multijmp *alloc_multijmp(struct basic_block *target, long long begin, long long end)
  {
--	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
-+	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
- 	pseudo_t phi = __alloc_pseudo(0);
- 	static int nr = 0;
+ 	struct multijmp *multijmp = __alloc_multijmp(0);
+ 	multijmp->target = target;
+@@ -366,9 +366,9 @@ const char *show_instruction(struct instruction *insn)
+ 		buf += sprintf(buf, "%s", show_pseudo(insn->cond));
+ 		FOR_EACH_PTR(insn->multijmp_list, jmp) {
+ 			if (jmp->begin == jmp->end)
+-				buf += sprintf(buf, ", %d -> .L%u", jmp->begin, jmp->target->nr);
++				buf += sprintf(buf, ", %lld -> .L%u", jmp->begin, jmp->target->nr);
+ 			else if (jmp->begin < jmp->end)
+-				buf += sprintf(buf, ", %d ... %d -> .L%u", jmp->begin, jmp->end, jmp->target->nr);
++				buf += sprintf(buf, ", %lld ... %lld -> .L%u", jmp->begin, jmp->end, jmp->target->nr);
+ 			else
+ 				buf += sprintf(buf, ", default -> .L%u", jmp->target->nr);
+ 		} END_FOR_EACH_PTR(jmp);
+@@ -1938,7 +1938,7 @@ static pseudo_t linearize_switch(struct entrypoint *ep, struct statement *stmt)
+ 			default_case = bb_case;
+ 			continue;
+ 		} else {
+-			int begin, end;
++			long long begin, end;
  
-@@ -1377,19 +1377,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
- 	struct basic_block *bb_false;
- 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
- 	pseudo_t phi1, phi2;
--	int size = type_size(expr->ctype);
- 
- 	if (!expr_false || !ep->active)
- 		return VOID;
- 
- 	bb_false = alloc_basic_block(ep, expr_false->pos);
- 	src1 = linearize_expression(ep, cond);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_branch(ep, expr, src1, merge, bb_false);
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1403,7 +1402,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 	pseudo_t src1, src2;
- 	pseudo_t phi1, phi2;
- 	struct basic_block *bb_true, *bb_false, *merge;
--	int size = type_size(expr->ctype);
- 
- 	if (!cond || !expr_true || !expr_false || !ep->active)
- 		return VOID;
-@@ -1415,12 +1413,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
- 
- 	set_activeblock(ep, bb_true);
- 	src1 = linearize_expression(ep, expr_true);
--	phi1 = alloc_phi(ep->active, src1, size);
-+	phi1 = alloc_phi(ep->active, src1, expr->ctype);
- 	add_goto(ep, merge); 
- 
- 	set_activeblock(ep, bb_false);
- 	src2 = linearize_expression(ep, expr_false);
--	phi2 = alloc_phi(ep->active, src2, size);
-+	phi2 = alloc_phi(ep->active, src2, expr->ctype);
- 	set_activeblock(ep, merge);
- 
- 	return add_join_conditional(ep, expr, phi1, phi2);
-@@ -1902,7 +1900,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
- 			phi_node->bb = bb_return;
- 			add_instruction(&bb_return->insns, phi_node);
- 		}
--		phi = alloc_phi(active, src, type_size(expr->ctype));
-+		phi = alloc_phi(active, src, expr->ctype);
- 		phi->ident = &return_ident;
- 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
- 	}
+ 			begin = end = case_stmt->case_expression->value;
+ 			if (case_stmt->case_to)
 diff --git a/linearize.h b/linearize.h
-index 0cdd0fa9a..d437e268d 100644
+index d437e268d..f0e76c098 100644
 --- a/linearize.h
 +++ b/linearize.h
-@@ -339,7 +339,7 @@ struct entrypoint {
- extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
- extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
+@@ -47,7 +47,7 @@ extern struct pseudo void_pseudo;
  
--pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
-+pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
- pseudo_t alloc_pseudo(struct instruction *def);
- pseudo_t value_pseudo(long long val);
+ struct multijmp {
+ 	struct basic_block *target;
+-	int begin, end;
++	long long begin, end;
+ };
  
-diff --git a/memops.c b/memops.c
-index 5efdd6f2d..187a63284 100644
---- a/memops.c
-+++ b/memops.c
-@@ -52,7 +52,7 @@ no_dominance:
- 
- found_dominator:
- 		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
-+		phi = alloc_phi(parent, one->target, one->type);
- 		phi->ident = phi->ident ? : one->target->ident;
- 		add_instruction(&parent->insns, br);
- 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+ struct asm_constraint {
+diff --git a/validation/switch-long.c b/validation/switch-long.c
+new file mode 100644
+index 000000000..5bfdb4397
+--- /dev/null
++++ b/validation/switch-long.c
+@@ -0,0 +1,47 @@
++void def(void);
++void r0(void);
++void r1(void);
++
++void sw_long(long long a)
++{
++	switch (a) {
++	case 0: return r0();
++	case 1LL << 00: return r1();
++	case 1LL << 32: return r1();
++	}
++
++	return def();
++}
++
++/*
++ * check-name: switch-long
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++sw_long:
++.L0:
++	<entry-point>
++	switch.64   %arg1, 0 -> .L2, 1 -> .L3, 4294967296 -> .L4, default -> .L1
++
++.L2:
++	call        r0
++	br          .L5
++
++.L3:
++	call        r1
++	br          .L5
++
++.L4:
++	call        r1
++	br          .L5
++
++.L1:
++	call        def
++	br          .L5
++
++.L5:
++	ret
++
++
++ * check-output-end
++ */
 -- 
 2.12.0
 
