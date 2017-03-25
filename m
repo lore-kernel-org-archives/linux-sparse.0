@@ -1,49 +1,40 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v4 03/63] canonicalize compare instructions
-Date: Sat, 25 Mar 2017 01:03:10 +0100
-Message-ID: <CAMHZB6HBo0pSkO86riLvy0SYdWR5=EGGxaqH=wkguLVDi5XRhA@mail.gmail.com>
-References: <20170321001607.75169-1-luc.vanoostenryck@gmail.com>
- <20170321001607.75169-4-luc.vanoostenryck@gmail.com> <CANeU7Qkhygbv5xBHKicwJDRdDY-EJctauxvLoz33wZ_keeqXHQ@mail.gmail.com>
- <20170324081156.qhblvgndemthg7wf@macbook.local> <CANeU7QnU-mdNq5MDXcu4-s3V85p2cjF-siSRULjZHD-AB+MxWA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v5 04/14] rewrite compare_opcode() like swap_compare_opcode()
+Date: Sat, 25 Mar 2017 16:35:39 -0700
+Message-ID: <CANeU7Qm_6_PtvOE=WpubgPgyo7SSGXvX3j8rq5m4UzR1EiHxQQ@mail.gmail.com>
+References: <20170324231421.14869-1-luc.vanoostenryck@gmail.com>
+ <20170324231421.14869-5-luc.vanoostenryck@gmail.com> <CA+55aFzgt9iAKQqNzBPDFT=kTL9sP=OyjsQOJ+mxuJYQRwPQkg@mail.gmail.com>
+ <CAMHZB6Fb2Zjpr720P88RPCe-TBtak0G9qiBAiTk0eLpeFCV31g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f178.google.com ([209.85.220.178]:36643 "EHLO
-        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753554AbdCYADR (ORCPT
+Received: from mail-it0-f46.google.com ([209.85.214.46]:37300 "EHLO
+        mail-it0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751205AbdCYXf4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 24 Mar 2017 20:03:17 -0400
-Received: by mail-qk0-f178.google.com with SMTP id p22so3912381qka.3
-        for <linux-sparse@vger.kernel.org>; Fri, 24 Mar 2017 17:03:16 -0700 (PDT)
-In-Reply-To: <CANeU7QnU-mdNq5MDXcu4-s3V85p2cjF-siSRULjZHD-AB+MxWA@mail.gmail.com>
+        Sat, 25 Mar 2017 19:35:56 -0400
+Received: by mail-it0-f46.google.com with SMTP id 190so21558773itm.0
+        for <linux-sparse@vger.kernel.org>; Sat, 25 Mar 2017 16:35:50 -0700 (PDT)
+In-Reply-To: <CAMHZB6Fb2Zjpr720P88RPCe-TBtak0G9qiBAiTk0eLpeFCV31g@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Mar 25, 2017 at 12:47 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Fri, Mar 24, 2017 at 1:11 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
+On Fri, Mar 24, 2017 at 4:54 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Yes, indeed.
+> I've some plan to add better handling of floating-point and the compare
+> is part of it. It'll need a new set of instructions to do it correctly
+> (precisely
+> because for fp numbers once you care about NaNs/unordered "a < b" is *not*
+> the same as "!(a >= b)").
+> But there is also a number of bugs I want to solve, especially one related to
+> the misplacement of phi-node and another about missing reloads. For the moment
+> I think we can pretend that all the fp values we deal with are ordered ones.
 
->>
->> My preference, if performance mattered here, would be to play
->> with the bits of the opcode, something like:
->>         #define OP_SET__EQUAL   (1 << ...)
->>         #define OP_SET__SIGNED  (1 << ...)
->>         #define OP_SET__LTHAN   ...
->>         #define OP_SET__GTHAN   ...
->>
->>         ...
->>
->>         int swap_compare_opcode(opcode) { return opcode ^= (OP_SET__LTHAN|OP_SET__GTHAN); }
->
-> That is ugly. I don't want that.
->
-> I cook up an untested patch include here to show what I have in mind.
-> It should be very close to your case statement way of writing it.  You are
-> welcome to change it.
+Can we detect it is the floating point type then avoid doing the
+compare swap for
+floating point?
 
-I already resent the serie, maybe 30 minutes ago or so.
-but without this ugly thing you don't want.
-
--- Luc
+Chris
