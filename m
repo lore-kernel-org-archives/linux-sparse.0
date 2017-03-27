@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 37/52] llvm: remove unneeded pseudo_to_value() unneeded argument
-Date: Mon, 27 Mar 2017 23:24:01 +0200
-Message-ID: <20170327212416.18536-38-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 14/52] llvm: take care of degenerated rvalues
+Date: Mon, 27 Mar 2017 23:23:38 +0200
+Message-ID: <20170327212416.18536-15-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:33953 "EHLO
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33327 "EHLO
         mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752356AbdC0V1C (ORCPT
+        with ESMTP id S1752238AbdC0V0p (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:27:02 -0400
-Received: by mail-wr0-f196.google.com with SMTP id w43so14205201wrb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:01 -0700 (PDT)
+        Mon, 27 Mar 2017 17:26:45 -0400
+Received: by mail-wr0-f196.google.com with SMTP id 20so17042260wrx.0
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:44 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,54 +19,46 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ sparse-llvm.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 29f0c079d..58fe8e213 100644
+index c5af97141..0e7670ed6 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -629,11 +629,11 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
- 	LLVMValueRef lhs, rhs, target;
- 	char target_name[64];
+@@ -408,6 +408,14 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 	return result;
+ }
  
--	lhs = pseudo_to_value(fn, insn->type, insn->src1);
-+	lhs = pseudo_to_value(fn, NULL, insn->src1);
- 	if (insn->src2->type == PSEUDO_VAL)
- 		rhs = constant_value(insn->src2->value, LLVMTypeOf(lhs));
- 	else
--		rhs = pseudo_to_value(fn, insn->type, insn->src2);
-+		rhs = pseudo_to_value(fn, NULL, insn->src2);
- 
- 	pseudo_name(insn->target, target_name);
- 
-@@ -739,7 +739,7 @@ static LLVMValueRef bool_value(struct function *fn, LLVMValueRef value)
- static void output_op_cbr(struct function *fn, struct instruction *br)
++static LLVMValueRef pseudo_to_rvalue(struct function *fn, struct instruction *insn, pseudo_t pseudo)
++{
++	LLVMValueRef val = pseudo_to_value(fn, insn, pseudo);
++	LLVMTypeRef dtype = symbol_type(insn->type);
++
++	return LLVMBuildBitCast(fn->builder, val, dtype, "");
++}
++
+ static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base, LLVMValueRef off)
  {
- 	LLVMValueRef cond = bool_value(fn,
--			pseudo_to_value(fn, br->type, br->cond));
-+			pseudo_to_value(fn, NULL, br->cond));
+ 	LLVMTypeRef type = LLVMTypeOf(base);
+@@ -655,7 +663,7 @@ static void output_op_store(struct function *fn, struct instruction *insn)
  
- 	LLVMBuildCondBr(fn->builder, cond,
- 			br->bb_true->priv,
-@@ -756,7 +756,7 @@ static void output_op_sel(struct function *fn, struct instruction *insn)
- 	LLVMValueRef target, src1, src2, src3;
- 	char name[MAX_PSEUDO_NAME];
+ 	addr = calc_memop_addr(fn, insn);
  
--	src1 = bool_value(fn, pseudo_to_value(fn, insn->type, insn->src1));
-+	src1 = bool_value(fn, pseudo_to_value(fn, NULL, insn->src1));
- 	src2 = pseudo_to_value(fn, insn->type, insn->src2);
- 	src3 = pseudo_to_value(fn, insn->type, insn->src3);
+-	target_in = pseudo_to_value(fn, insn, insn->target);
++	target_in = pseudo_to_rvalue(fn, insn, insn->target);
  
-@@ -811,7 +811,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 		args[i++] = pseudo_to_rvalue(fn, arg, arg->src);
+ 	/* perform store */
+ 	LLVMBuildStore(fn->builder, target_in, addr);
+@@ -744,7 +752,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
+ 
+ 	i = 0;
+ 	FOR_EACH_PTR(insn->arguments, arg) {
+-		args[i++] = pseudo_to_value(fn, arg, arg->src);
++		args[i++] = pseudo_to_rvalue(fn, arg, arg->src);
  	} END_FOR_EACH_PTR(arg);
  
--	func = pseudo_to_value(fn, insn->type, insn->func);
-+	func = pseudo_to_value(fn, NULL, insn->func);
- 	pseudo_name(insn->target, name);
- 	target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
- 
+ 	func = pseudo_to_value(fn, insn, insn->func);
 -- 
 2.12.0
 
