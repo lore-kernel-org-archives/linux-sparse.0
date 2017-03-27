@@ -1,351 +1,144 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 09/15] give function's arguments a type via OP_PUSH
-Date: Mon, 27 Mar 2017 19:33:59 +0200
-Message-ID: <20170327173405.11405-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 11/15] give a type to OP_PHISOURCEs
+Date: Mon, 27 Mar 2017 19:34:01 +0200
+Message-ID: <20170327173405.11405-12-luc.vanoostenryck@gmail.com>
 References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:33174 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751403AbdC0RhN (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34711 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751410AbdC0RhN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 27 Mar 2017 13:37:13 -0400
-Received: by mail-wr0-f194.google.com with SMTP id 20so15305544wrx.0
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:23 -0700 (PDT)
+Received: by mail-wr0-f196.google.com with SMTP id w43so12463429wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:25 -0700 (PDT)
 In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The linearized code, sparse's IR, have no use of C's complex type
-system. Those types are checked in previous phases and the pseudos
-doesn't a type directly attached to them as all needed type info
-are now conveyed by the instructions (like (register) size,
-signedness (OP_DIVU vs OP_DIVS), ...).
+Currently, OP_PHISOURCEs are given a size but not a type.
 
-In particular, PSEUDO_VAL (used for integer and address constants)
-are completely typeless.
-There is a problem with this when calling a variadic function
-with a constant argument as in this case there is no type in the
-function prototype (for the variadic part, of course) and there is
-no defining instructions holding the type of the argument.
+For consistency and for sparse-LLVM which need it,
+give them a type too.
 
-Fix this by adding a new instruction, OP_PUSH, which will be used
-to pass arguments to function calls and whose purpose is to give
-a correct type/size to function's arguments.
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Idea-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- example.c                       |  4 ++--
- linearize.c                     | 35 +++++++++++++++++++++++++++--------
- linearize.h                     | 10 +++++++++-
- liveness.c                      | 14 ++++++++------
- simplify.c                      | 11 ++++++++++-
- sparse-llvm.c                   |  4 ++--
- validation/call-variadic.c      | 31 +++++++++++++++++++++++++++++++
- validation/loop-linearization.c |  9 ++++++---
- 8 files changed, 95 insertions(+), 23 deletions(-)
- create mode 100644 validation/call-variadic.c
+ flow.c      |  2 +-
+ linearize.c | 16 +++++++---------
+ linearize.h |  2 +-
+ memops.c    |  2 +-
+ 4 files changed, 10 insertions(+), 12 deletions(-)
 
-diff --git a/example.c b/example.c
-index 691e0f97c..69e00b325 100644
---- a/example.c
-+++ b/example.c
-@@ -1121,11 +1121,11 @@ static void generate_ret(struct bb_state *state, struct instruction *ret)
-  */
- static void generate_call(struct bb_state *state, struct instruction *insn)
- {
-+	struct instruction *arg;
- 	int offset = 0;
--	pseudo_t arg;
- 
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		output_insn(state, "pushl %s", generic(state, arg));
-+		output_insn(state, "pushl %s", generic(state, arg->src));
- 		offset += 4;
- 	} END_FOR_EACH_PTR(arg);
- 	flush_reg(state, hardregs+0);
+diff --git a/flow.c b/flow.c
+index 04ef8cd1d..45bae773e 100644
+--- a/flow.c
++++ b/flow.c
+@@ -404,7 +404,7 @@ found_dominator:
+ 		if (dominators && phisrc_in_bb(*dominators, parent))
+ 			continue;
+ 		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->size);
++		phi = alloc_phi(parent, one->target, one->type);
+ 		phi->ident = phi->ident ? : pseudo->ident;
+ 		add_instruction(&parent->insns, br);
+ 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
 diff --git a/linearize.c b/linearize.c
-index 4ac570fc0..f1f98947f 100644
+index d4610de8f..4b6483efa 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -233,6 +233,7 @@ static const char *opcodes[] = {
- 	[OP_FPCAST] = "fpcast",
- 	[OP_PTRCAST] = "ptrcast",
- 	[OP_INLINED_CALL] = "# call",
-+	[OP_PUSH] = "push",
- 	[OP_CALL] = "call",
- 	[OP_VANEXT] = "va_next",
- 	[OP_VAARG] = "va_arg",
-@@ -411,17 +412,21 @@ const char *show_instruction(struct instruction *insn)
- 	case OP_STORE: case OP_SNOP:
- 		buf += sprintf(buf, "%s -> %d[%s]", show_pseudo(insn->target), insn->offset, show_pseudo(insn->src));
- 		break;
-+	case OP_PUSH:
-+		buf += sprintf(buf, "%s", show_pseudo(insn->src));
-+		break;
- 	case OP_INLINED_CALL:
--	case OP_CALL: {
--		struct pseudo *arg;
-+	case OP_CALL:
- 		if (insn->target && insn->target != VOID)
- 			buf += sprintf(buf, "%s <- ", show_pseudo(insn->target));
- 		buf += sprintf(buf, "%s", show_pseudo(insn->func));
--		FOR_EACH_PTR(insn->arguments, arg) {
--			buf += sprintf(buf, ", %s", show_pseudo(arg));
--		} END_FOR_EACH_PTR(arg);
-+		if (opcode == OP_INLINED_CALL) {
-+			struct pseudo *arg;
-+			FOR_EACH_PTR(insn->inlined_args, arg) {
-+				buf += sprintf(buf, ", %s", show_pseudo(arg));
-+			} END_FOR_EACH_PTR(arg);
-+		}
- 		break;
--	}
- 	case OP_CAST:
- 	case OP_SCAST:
- 	case OP_FPCAST:
-@@ -1200,6 +1205,20 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
- 	return value;
+@@ -824,9 +824,9 @@ static pseudo_t argument_pseudo(struct entrypoint *ep, int nr)
+ 	return pseudo;
  }
  
-+/*
-+ * Add an argument for a call.
-+ *   -) insn->opcode == O_CALL | OP_INLINE_CALL
-+ *   -) ctype = typeof(arg)
-+ */
-+static void push_argument(struct entrypoint *ep, struct instruction *insn, pseudo_t arg, struct symbol *ctype)
-+{
-+	struct instruction *push = alloc_typed_instruction(OP_PUSH, ctype);
-+	push->call = insn;
-+	use_pseudo(push, arg, &push->src);
-+	add_instruction(&insn->arguments, push);
-+	add_one_insn(ep, push);
-+}
-+
- static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expression *expr)
+-pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size)
++pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type)
  {
- 	struct expression *arg, *fn;
-@@ -1216,7 +1235,7 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
+-	struct instruction *insn = alloc_instruction(OP_PHISOURCE, size);
++	struct instruction *insn = alloc_typed_instruction(OP_PHISOURCE, type);
+ 	pseudo_t phi = __alloc_pseudo(0);
+ 	static int nr = 0;
  
- 	FOR_EACH_PTR(expr->args, arg) {
- 		pseudo_t new = linearize_expression(ep, arg);
--		use_pseudo(insn, new, add_pseudo(&insn->arguments, new));
-+		push_argument(ep, insn, new, arg->ctype);
- 	} END_FOR_EACH_PTR(arg);
+@@ -1380,19 +1380,18 @@ static pseudo_t linearize_short_conditional(struct entrypoint *ep, struct expres
+ 	struct basic_block *bb_false;
+ 	struct basic_block *merge = alloc_basic_block(ep, expr->pos);
+ 	pseudo_t phi1, phi2;
+-	int size = type_size(expr->ctype);
  
- 	fn = expr->fn;
-@@ -1683,7 +1702,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
- 		concat_symbol_list(args->declaration, &ep->syms);
- 		FOR_EACH_PTR(args->declaration, sym) {
- 			pseudo_t value = linearize_one_symbol(ep, sym);
--			add_pseudo(&insn->arguments, value);
-+			add_pseudo(&insn->inlined_args, value);
- 		} END_FOR_EACH_PTR(sym);
+ 	if (!expr_false || !ep->active)
+ 		return VOID;
+ 
+ 	bb_false = alloc_basic_block(ep, expr_false->pos);
+ 	src1 = linearize_expression(ep, cond);
+-	phi1 = alloc_phi(ep->active, src1, size);
++	phi1 = alloc_phi(ep->active, src1, expr->ctype);
+ 	add_branch(ep, expr, src1, merge, bb_false);
+ 
+ 	set_activeblock(ep, bb_false);
+ 	src2 = linearize_expression(ep, expr_false);
+-	phi2 = alloc_phi(ep->active, src2, size);
++	phi2 = alloc_phi(ep->active, src2, expr->ctype);
+ 	set_activeblock(ep, merge);
+ 
+ 	return add_join_conditional(ep, expr, phi1, phi2);
+@@ -1406,7 +1405,6 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
+ 	pseudo_t src1, src2;
+ 	pseudo_t phi1, phi2;
+ 	struct basic_block *bb_true, *bb_false, *merge;
+-	int size = type_size(expr->ctype);
+ 
+ 	if (!cond || !expr_true || !expr_false || !ep->active)
+ 		return VOID;
+@@ -1418,12 +1416,12 @@ static pseudo_t linearize_conditional(struct entrypoint *ep, struct expression *
+ 
+ 	set_activeblock(ep, bb_true);
+ 	src1 = linearize_expression(ep, expr_true);
+-	phi1 = alloc_phi(ep->active, src1, size);
++	phi1 = alloc_phi(ep->active, src1, expr->ctype);
+ 	add_goto(ep, merge); 
+ 
+ 	set_activeblock(ep, bb_false);
+ 	src2 = linearize_expression(ep, expr_false);
+-	phi2 = alloc_phi(ep->active, src2, size);
++	phi2 = alloc_phi(ep->active, src2, expr->ctype);
+ 	set_activeblock(ep, merge);
+ 
+ 	return add_join_conditional(ep, expr, phi1, phi2);
+@@ -1905,7 +1903,7 @@ static pseudo_t linearize_return(struct entrypoint *ep, struct statement *stmt)
+ 			phi_node->bb = bb_return;
+ 			add_instruction(&bb_return->insns, phi_node);
+ 		}
+-		phi = alloc_phi(active, src, type_size(expr->ctype));
++		phi = alloc_phi(active, src, expr->ctype);
+ 		phi->ident = &return_ident;
+ 		use_pseudo(phi_node, phi, add_pseudo(&phi_node->phi_list, phi));
  	}
- 
 diff --git a/linearize.h b/linearize.h
-index 5ae78f596..0d27012aa 100644
+index 0d27012aa..0a70d8129 100644
 --- a/linearize.h
 +++ b/linearize.h
-@@ -113,9 +113,16 @@ struct instruction {
- 		};
- 		struct /* call */ {
- 			pseudo_t func;
--			struct pseudo_list *arguments;
-+			union {
-+				struct instruction_list *arguments;
-+				struct pseudo_list *inlined_args;
-+			};
- 			struct symbol *fntype;
- 		};
-+		struct /* push/arg */ {
-+			pseudo_t arg;			/* same as src, src1 & symbol */
-+			struct instruction *call;
-+		};
- 		struct /* context */ {
- 			int increment;
- 			int check;
-@@ -202,6 +209,7 @@ enum opcode {
- 	OP_FPCAST,
- 	OP_PTRCAST,
- 	OP_INLINED_CALL,
-+	OP_PUSH,
- 	OP_CALL,
- 	OP_VANEXT,
- 	OP_VAARG,
-diff --git a/liveness.c b/liveness.c
-index 7461738b4..7b5b1693a 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -46,13 +46,12 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 	void (*def)(struct basic_block *, pseudo_t),
- 	void (*use)(struct basic_block *, pseudo_t))
- {
--	pseudo_t pseudo;
--
- 	#define USES(x)		use(bb, insn->x)
- 	#define DEFINES(x)	def(bb, insn->x)
+@@ -342,7 +342,7 @@ struct entrypoint {
+ extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
+ extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
  
- 	switch (insn->opcode) {
- 	case OP_RET:
-+	case OP_PUSH:
- 		USES(src);
- 		break;
+-pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, int size);
++pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
+ pseudo_t alloc_pseudo(struct instruction *def);
+ pseudo_t value_pseudo(long long val);
  
-@@ -118,14 +117,17 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 		USES(src); DEFINES(target);
- 		break;
+diff --git a/memops.c b/memops.c
+index 5efdd6f2d..187a63284 100644
+--- a/memops.c
++++ b/memops.c
+@@ -52,7 +52,7 @@ no_dominance:
  
--	case OP_CALL:
-+	case OP_CALL: {
-+		struct instruction *arg;
-+
- 		USES(func);
- 		if (insn->target != VOID)
- 			DEFINES(target);
--		FOR_EACH_PTR(insn->arguments, pseudo) {
--			use(bb, pseudo);
--		} END_FOR_EACH_PTR(pseudo);
-+		FOR_EACH_PTR(insn->arguments, arg) {
-+			use(bb, arg->src);
-+		} END_FOR_EACH_PTR(arg);
- 		break;
-+	}
- 
- 	case OP_SLICE:
- 		USES(base); DEFINES(target);
-diff --git a/simplify.c b/simplify.c
-index 21ed39d78..7ca727416 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -182,6 +182,14 @@ static void kill_use_list(struct pseudo_list *list)
- 	} END_FOR_EACH_PTR(p);
- }
- 
-+static void kill_insn_list(struct instruction_list *list)
-+{
-+	struct instruction *insn;
-+	FOR_EACH_PTR(list, insn) {
-+		kill_insn(insn, 0);
-+	} END_FOR_EACH_PTR(insn);
-+}
-+
- /*
-  * kill an instruction:
-  * - remove it from its bb
-@@ -213,6 +221,7 @@ void kill_insn(struct instruction *insn, int force)
- 	case OP_SETVAL:
- 	case OP_NOT: case OP_NEG:
- 	case OP_SLICE:
-+	case OP_PUSH:
- 		kill_use(&insn->src1);
- 		break;
- 
-@@ -240,7 +249,7 @@ void kill_insn(struct instruction *insn, int force)
- 			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
- 				return;
- 		}
--		kill_use_list(insn->arguments);
-+		kill_insn_list(insn->arguments);
- 		if (insn->func->type == PSEUDO_REG)
- 			kill_use(&insn->func);
- 		break;
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 9f362b3ed..ecc4f032f 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -707,7 +707,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- {
- 	LLVMValueRef target, func;
- 	int n_arg = 0, i;
--	struct pseudo *arg;
-+	struct instruction *arg;
- 	LLVMValueRef *args;
- 
- 	FOR_EACH_PTR(insn->arguments, arg) {
-@@ -718,7 +718,7 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 
- 	i = 0;
- 	FOR_EACH_PTR(insn->arguments, arg) {
--		args[i++] = pseudo_to_value(fn, insn, arg);
-+		args[i++] = pseudo_to_value(fn, arg, arg->src);
- 	} END_FOR_EACH_PTR(arg);
- 
- 	func = pseudo_to_value(fn, insn, insn->func);
-diff --git a/validation/call-variadic.c b/validation/call-variadic.c
-new file mode 100644
-index 000000000..75b6d4081
---- /dev/null
-+++ b/validation/call-variadic.c
-@@ -0,0 +1,31 @@
-+#define NULL	((void*)0)
-+
-+extern int print(const char *msg, ...);
-+
-+int foo(const char *fmt, int a, long l, int *p)
-+{
-+	print("msg %c: %d %d/%ld %ld/%p %p\n", 'x', a, __LINE__, l, 0L, p, NULL);
-+}
-+
-+/*
-+ * check-name: call-variadic
-+ * check-command: test-linearize -Wno-decl -m64 $file
-+ *
-+ * check-output-start
-+foo:
-+.L0:
-+	<entry-point>
-+	push.64     "msg %c: %d %d/%ld %ld/%p %p\n"
-+	push.32     $120
-+	push.32     %arg2
-+	push.32     $7
-+	push.64     %arg3
-+	push.64     $0
-+	push.64     %arg4
-+	push.64     $0
-+	call.32     %r5 <- print
-+	ret.32      %r5
-+
-+
-+ * check-output-end
-+ */
-diff --git a/validation/loop-linearization.c b/validation/loop-linearization.c
-index 25c6dfb87..d53366bde 100644
---- a/validation/loop-linearization.c
-+++ b/validation/loop-linearization.c
-@@ -48,7 +48,8 @@ ffor:
- 	cbr         %r2, .L1, .L3
- 
- .L1:
--	call.32     %r4 <- p, %r1(i)
-+	push.32     %r1(i)
-+	call.32     %r4 <- p
- 	cbr         %r4, .L2, .L5
- 
- .L5:
-@@ -81,7 +82,8 @@ fwhile:
- 	cbr         %r9, .L9, .L11
- 
- .L9:
--	call.32     %r11 <- p, %r8(i)
-+	push.32     %r8(i)
-+	call.32     %r11 <- p
- 	cbr         %r11, .L14, .L13
- 
- .L13:
-@@ -110,7 +112,8 @@ fdo:
- 
- .L17:
- 	phi.32      %r15(i) <- %phi16(i), %phi17(i)
--	call.32     %r16 <- p, %r15(i)
-+	push.32     %r15(i)
-+	call.32     %r16 <- p
- 	cbr         %r16, .L18, .L20
- 
- .L20:
+ found_dominator:
+ 		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->size);
++		phi = alloc_phi(parent, one->target, one->type);
+ 		phi->ident = phi->ident ? : one->target->ident;
+ 		add_instruction(&parent->insns, br);
+ 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
 -- 
 2.12.0
 
