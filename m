@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 38/52] llvm: introduce get_ioperand()
-Date: Mon, 27 Mar 2017 23:24:02 +0200
-Message-ID: <20170327212416.18536-39-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 43/52] llvm: fix mutated OP_PHISOURCE
+Date: Mon, 27 Mar 2017 23:24:07 +0200
+Message-ID: <20170327212416.18536-44-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33966 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752452AbdC0V1I (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33662 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752635AbdC0V11 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:27:08 -0400
-Received: by mail-wr0-f195.google.com with SMTP id w43so14205292wrb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:07 -0700 (PDT)
+        Mon, 27 Mar 2017 17:27:27 -0400
+Received: by mail-wr0-f196.google.com with SMTP id 20so17044775wrx.0
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:12 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,44 +19,22 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 28 +++++++++++++++++++++++-----
- 1 file changed, 23 insertions(+), 5 deletions(-)
+ sparse-llvm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 58fe8e213..0c92eab23 100644
+index 50b82e221..4e9bf930b 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -456,6 +456,27 @@ static LLVMValueRef adjust_type(struct function *fn, struct symbol *ctype, LLVMV
- 	return val;
- }
+@@ -845,7 +845,7 @@ static void output_op_phisrc(struct function *fn, struct instruction *insn)
+ 	assert(insn->target->priv == NULL);
  
-+/*
-+ * Get the LLVMValue corresponding to the pseudo
-+ * and force the type corresponding to ctype.
-+ */
-+static LLVMValueRef get_operand(struct function *fn, struct symbol *ctype, pseudo_t pseudo)
-+{
-+	LLVMValueRef target = pseudo_to_value(fn, ctype, pseudo);
-+	return adjust_type(fn, ctype, target);
-+}
-+
-+/*
-+ * Get the LLVMValue corresponding to the pseudo
-+ * and force the type corresponding to ctype but
-+ * map all pointers to intptr_t.
-+ */
-+static LLVMValueRef get_ioperand(struct function *fn, struct symbol *ctype, pseudo_t pseudo)
-+{
-+	LLVMValueRef target = pseudo_to_value(fn, ctype, pseudo);
-+	return value_to_ivalue(fn, ctype, target);
-+}
-+
- static LLVMValueRef calc_gep(LLVMBuilderRef builder, LLVMValueRef base, LLVMValueRef off)
- {
- 	LLVMTypeRef type = LLVMTypeOf(base);
-@@ -515,11 +536,8 @@ static void output_op_binary(struct function *fn, struct instruction *insn)
- 	LLVMValueRef lhs, rhs, target;
- 	char target_name[64];
+ 	/* target = src */
+-	v = pseudo_to_value(fn, insn->type, insn->phi_src);
++	v = get_operand(fn, insn->type, insn->phi_src);
  
--	lhs = pseudo_to_value(fn, insn->type, insn->src1);
--	lhs = value_to_ivalue(fn, insn->type, lhs);
+ 	FOR_EACH_PTR(insn->phi_users, phi) {
+ 		LLVMValueRef load, ptr;
+-- 
+2.12.0
+
