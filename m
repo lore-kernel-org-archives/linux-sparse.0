@@ -1,130 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 08/15] inlined calls should not block BB packing
-Date: Mon, 27 Mar 2017 19:33:58 +0200
-Message-ID: <20170327173405.11405-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 01/15] don't output value of anonymous symbol's pointer
+Date: Mon, 27 Mar 2017 19:33:51 +0200
+Message-ID: <20170327173405.11405-2-luc.vanoostenryck@gmail.com>
 References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36422 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751385AbdC0RhM (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34541 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751353AbdC0RhM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 27 Mar 2017 13:37:12 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u1so15369233wra.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:21 -0700 (PDT)
+Received: by mail-wr0-f193.google.com with SMTP id w43so12461847wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:19 -0700 (PDT)
 In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_INLINED_CALL are there only as a sort of annotation
-for debugging purpose.
-Their presence should thus not block the packing of
-basic blocks.
+The value of this pointer is of no use unless you're
+using a debugger (or just to see if two things are
+identical or not) and it's presence produces noise
+when comparing the output of two runs for testing.
 
-Fix this by ignoring OP_INLINED_CALL when trying to pack
-a basic block.
+Change this by issuing it only if 'verbose' is set.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                          |  1 +
- validation/call-inlined.c       |  6 +-----
- validation/optim/call-inlined.c | 30 ++++++++++++++++++++++++++++++
- 3 files changed, 32 insertions(+), 5 deletions(-)
- create mode 100644 validation/optim/call-inlined.c
+ linearize.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/flow.c b/flow.c
-index c9259919f..04ef8cd1d 100644
---- a/flow.c
-+++ b/flow.c
-@@ -982,6 +982,7 @@ void pack_basic_blocks(struct entrypoint *ep)
- 				continue;
- 			switch (first->opcode) {
- 			case OP_NOP: case OP_LNOP: case OP_SNOP:
-+			case OP_INLINED_CALL:
- 				continue;
- 			case OP_CBR:
- 			case OP_BR: {
-diff --git a/validation/call-inlined.c b/validation/call-inlined.c
-index 6fd94edcb..b907ded60 100644
---- a/validation/call-inlined.c
-+++ b/validation/call-inlined.c
-@@ -19,7 +19,7 @@ const char *qus(void) { return lstrip(messg); }
- 
- /*
-  * check-name: call-inlined
-- * check-command: test-linearize -Wno-decl $file
-+ * check-command: test-linearize -Wno-decl -m64 $file
-  *
-  * check-output-start
- foo:
-@@ -27,14 +27,12 @@ foo:
- 	<entry-point>
- 	add.32      %r3 <- %arg1, %arg2
- 	add.32      %r5 <- %r3, $1
--	# call      %r5 <- add, %r3, $1
- 	ret.32      %r5
- 
- 
- bar:
- .L3:
- 	<entry-point>
--	# call      %r12 <- add, %r10, $1
- 	ret
- 
- 
-@@ -42,7 +40,6 @@ bas:
- .L6:
- 	<entry-point>
- 	add.64      %r16 <- "abc", $1
--	# call      %r16 <- lstrip, %r14
- 	ret.64      %r16
- 
- 
-@@ -50,7 +47,6 @@ qus:
- .L9:
- 	<entry-point>
- 	add.64      %r21 <- messg, $1
--	# call      %r21 <- lstrip, %r19
- 	ret.64      %r21
- 
- 
-diff --git a/validation/optim/call-inlined.c b/validation/optim/call-inlined.c
-new file mode 100644
-index 000000000..00698a4b1
---- /dev/null
-+++ b/validation/optim/call-inlined.c
-@@ -0,0 +1,30 @@
-+static const char messg[] = "def";
-+
-+static inline int add(int a, int b)
-+{
-+	return a + b;
-+}
-+
-+int foo(int a, int b, int p)
-+{
-+	if (p) {
-+		add(a + b, 1);
-+		return p;
-+	}
-+	return 0;
-+}
-+
-+/*
-+ * check-name: call-inlined
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-start
-+foo:
-+.L0:
-+	<entry-point>
-+	select.32   %r9 <- %arg3, %arg3, $0
-+	ret.32      %r9
-+
-+
-+ * check-output-end
-+ */
+diff --git a/linearize.c b/linearize.c
+index 9c2d48aca..7dccf21d8 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -120,7 +120,7 @@ const char *show_pseudo(pseudo_t pseudo)
+ 			break;
+ 		}
+ 		expr = sym->initializer;
+-		snprintf(buf, 64, "<anon symbol:%p>", sym);
++		snprintf(buf, 64, "<anon symbol:%p>", verbose ? sym : NULL);
+ 		if (expr) {
+ 			switch (expr->type) {
+ 			case EXPR_VALUE:
+@@ -328,7 +328,7 @@ const char *show_instruction(struct instruction *insn)
+ 			buf += sprintf(buf, "%s", show_ident(sym->ident));
+ 			break;
+ 		}
+-		buf += sprintf(buf, "<anon symbol:%p>", sym);
++		buf += sprintf(buf, "<anon symbol:%p>", verbose ? sym : NULL);
+ 		break;
+ 	}
+ 		
 -- 
 2.12.0
 
