@@ -1,69 +1,185 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 07/52] llvm: give a name to call's return values
-Date: Mon, 27 Mar 2017 23:23:31 +0200
-Message-ID: <20170327212416.18536-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 17/52] llvm: add test cases for arrays passed as argument
+Date: Mon, 27 Mar 2017 23:23:41 +0200
+Message-ID: <20170327212416.18536-18-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34873 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751810AbdC0V0i (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34733 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752469AbdC0V0s (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:26:38 -0400
-Received: by mail-wr0-f193.google.com with SMTP id p52so14119073wrc.2
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:32 -0700 (PDT)
+        Mon, 27 Mar 2017 17:26:48 -0400
+Received: by mail-wr0-f195.google.com with SMTP id w43so14203437wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:47 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, a name is given to the result of instruction like
-binops, compares, ... but not to function calls.
-
-Functionally, it doesn't change anything but those names are
-useful by easing reading while debugging, reading the generated
-code, ...
-
-Fix this by giving a name to OP_CALL's result too.
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 8 +++++++-
- 1 file changed, 7 insertions(+), 1 deletion(-)
+ validation/backend/function-ptr.c | 148 +++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 145 insertions(+), 3 deletions(-)
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 53c13122b..8de144e2a 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -297,6 +297,9 @@ static void pseudo_name(pseudo_t pseudo, char *buf)
- 	case PSEUDO_PHI:
- 		snprintf(buf, MAX_PSEUDO_NAME, "PHI%d", pseudo->nr);
- 		break;
-+	case PSEUDO_VOID:
-+		buf[0] = '\0';
-+		break;
- 	default:
- 		assert(0);
- 	}
-@@ -708,6 +711,8 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 	int n_arg = 0, i;
- 	struct instruction *arg;
- 	LLVMValueRef *args;
-+	char name[64];
+diff --git a/validation/backend/function-ptr.c b/validation/backend/function-ptr.c
+index fc022b3cd..47e85deab 100644
+--- a/validation/backend/function-ptr.c
++++ b/validation/backend/function-ptr.c
+@@ -1,8 +1,150 @@
+-typedef int (*fn_t)(int x, int y);
++extern int ival;
++extern int *ipval;
++extern int array[3];
++extern int matrix[3][3];
++extern int fun(int);
+ 
+-static int run(fn_t fn, int x, int y)
++// via an argument
++void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)));
++void arg(int a, int *p, int (*fb)(unsigned char), int (*fi)(int), int (*fl)(long), int (*fv)(void), int (*fip)(int *), int (*fim)(int (*)[3]), int (*fvp)(void *), int (*ffp)(int (*)(int)))
+ {
+-	return fn(x, y);
++	fv();
 +
- 
- 	n_arg = instruction_list_size(insn->arguments);
- 	args = calloc(n_arg, sizeof(LLVMValueRef));
-@@ -718,7 +723,8 @@ static void output_op_call(struct function *fn, struct instruction *insn)
- 	} END_FOR_EACH_PTR(arg);
- 
- 	func = pseudo_to_value(fn, insn, insn->func);
--	target = LLVMBuildCall(fn->builder, func, args, n_arg, "");
-+	pseudo_name(insn->target, name);
-+	target = LLVMBuildCall(fn->builder, func, args, n_arg, name);
- 
- 	insn->target->priv = target;
++	fb(a);
++	fi(a);
++	fl(a);
++	fb(123);
++	fi(123);
++	fl(123);
++	fb(123L);
++	fi(123L);
++	fl(123L);
++	fb(ival);
++	fi(ival);
++	fl(ival);
++
++	fip(p);
++	fip((void*)0);
++	fip(ipval);
++	fip(&ival);
++	fip(array);
++	fim(matrix);
++
++	fvp(p);
++	fvp((void*)0);
++	fvp(ipval);
++	fvp(&ival);
++	fvp(array);
++	fvp(matrix);
++
++	fvp(fun);
++	fvp(&fun);
++	ffp(fun);
++	ffp(&fun);
++}
++
++// a global
++extern int (*fb)(unsigned char);
++extern int (*fi)(int);
++extern int (*fl)(long);
++extern int (*fv)(void);
++extern int (*fip)(int *);
++extern int (*fim)(int (*)[3]);
++extern int (*fvp)(void *);
++extern int (*ffp)(int (*)(int));
++
++void glb(int a, int *p);
++void glb(int a, int *p)
++{
++	fv();
++
++	fb(a);
++	fi(a);
++	fl(a);
++	fb(123);
++	fi(123);
++	fl(123);
++	fb(123L);
++	fi(123L);
++	fl(123L);
++	fb(ival);
++	fi(ival);
++	fl(ival);
++
++	fip(p);
++	fip((void*)0);
++	fip(ipval);
++	fip(&ival);
++	fip(array);
++	fim(matrix);
++
++	fvp(p);
++	fvp((void*)0);
++	fvp(ipval);
++	fvp(&ival);
++	fvp(array);
++	fvp(matrix);
++
++	fvp(fun);
++	fvp(&fun);
++	ffp(fun);
++	ffp(&fun);
++}
++
++// via a struct member:
++// -> force to create a register containing the function pointer
++struct ops {
++	int (*fb)(unsigned char);
++	int (*fi)(int);
++	int (*fl)(long);
++	int (*fv)(void);
++	int (*fip)(int *);
++	int (*fim)(int (*)[3]);
++	int (*fvp)(void *);
++	int (*ffp)(int (*)(int));
++
++	int (*const cfi)(int);		// for the fun of it
++};
++
++void ops(int a, int *p, struct ops *ops);
++void ops(int a, int *p, struct ops *ops)
++{
++	ops->fv();
++
++	ops->fb(a);
++	ops->fi(a);
++	ops->fl(a);
++	ops->fb(123);
++	ops->fi(123);
++	ops->fl(123);
++	ops->fb(123L);
++	ops->fi(123L);
++	ops->fl(123L);
++	ops->fb(ival);
++	ops->fi(ival);
++	ops->fl(ival);
++
++	ops->fip(p);
++	ops->fip((void*)0);
++	ops->fip(ipval);
++	ops->fip(&ival);
++	ops->fip(array);
++	ops->fim(matrix);
++
++	ops->fvp(p);
++	ops->fvp((void*)0);
++	ops->fvp(ipval);
++	ops->fvp(&ival);
++	ops->fvp(array);
++	ops->fvp(matrix);
++
++	ops->fvp(fun);
++	ops->fvp(&fun);
++	ops->ffp(fun);
++	ops->ffp(&fun);
++	ops->fvp(fi);
++
++	ops->cfi(42);
  }
+ 
+ /*
 -- 
 2.12.0
 
