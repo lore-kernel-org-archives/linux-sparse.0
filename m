@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 15/52] llvm: add test cases for symbol's address
-Date: Mon, 27 Mar 2017 23:23:39 +0200
-Message-ID: <20170327212416.18536-16-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 08/52] llvm: avoid useless temp variable
+Date: Mon, 27 Mar 2017 23:23:32 +0200
+Message-ID: <20170327212416.18536-9-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34974 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752522AbdC0V0v (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34636 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752238AbdC0V0k (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:26:51 -0400
-Received: by mail-wr0-f193.google.com with SMTP id p52so14119678wrc.2
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:45 -0700 (PDT)
+        Mon, 27 Mar 2017 17:26:40 -0400
+Received: by mail-wr0-f195.google.com with SMTP id w43so14202690wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:33 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,78 +19,26 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/backend/symaddr.c | 62 ++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 62 insertions(+)
- create mode 100644 validation/backend/symaddr.c
+ sparse-llvm.c | 7 ++-----
+ 1 file changed, 2 insertions(+), 5 deletions(-)
 
-diff --git a/validation/backend/symaddr.c b/validation/backend/symaddr.c
-new file mode 100644
-index 000000000..71bca2d76
---- /dev/null
-+++ b/validation/backend/symaddr.c
-@@ -0,0 +1,62 @@
-+extern void useip(int *);
-+extern void useia(int (*)[3]);
-+extern void usevp(void *);
-+static int  sfun(void) { return 0; }
-+static int  spun(void) { return 0; }
-+
-+void lfoo(int *p, int a)
-+{
-+	int larra[3], larrb[3], larrc[3], larrd[3], larre[3], larrf[3];
-+	useip(p);
-+	useip(larra);
-+	useip(larrb + 1);
-+	useip(&larrd[1]);
-+	useia(&larrf);
-+}
-+
-+static int sarra[3], sarrb[3], sarrc[3], sarrd[3], sarre[3], sarrf[3];
-+static int s, sfun(void), spun(void);
-+void sfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&s);
-+	useip(sarra);
-+	useip(sarrb + 1);
-+	useip(&sarrd[1]);
-+	useia(&sarrf);
-+	usevp(sfun);
-+	usevp(&spun);
-+}
-+
-+extern int xarra[3], xarrb[3], xarrc[3], xarrd[3], xarre[3], xarrf[3];
-+extern int x, xfun(void), xpun(void);
-+void xfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&x);
-+	useip(xarra);
-+	useip(xarrb + 1);
-+	useip(&xarrd[1]);
-+	useia(&xarrf);
-+	usevp(xfun);
-+	usevp(&xpun);
-+}
-+
-+int garra[3], garrb[3], garrc[3], garrd[3], garre[3], garrf[3];
-+int g, gfun(void), gpun(void);
-+void gfoo(int *p, int a)
-+{
-+	useip(p);
-+	useip(&g);
-+	useip(garra);
-+	useip(garrb + 1);
-+	useip(&garrd[1]);
-+	useia(&garrf);
-+	usevp(gfun);
-+	usevp(&gpun);
-+}
-+
-+/*
-+ * check-name: symbol address
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
--- 
-2.12.0
-
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 8de144e2a..db38bcda5 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -932,9 +932,8 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ {
+ 	struct symbol *sym = ep->name;
+ 	struct symbol *base_type = sym->ctype.base_type;
+-	struct symbol *ret_type = sym->ctype.base_type->ctype.base_type;
+ 	LLVMTypeRef arg_types[MAX_ARGS];
+-	LLVMTypeRef return_type;
++	LLVMTypeRef ret_type = symbol_type(base_type->ctype.base_type);
+ 	LLVMTypeRef fun_type;
+ 	struct function function = { .module = module };
+ 	struct basic_block *bb;
+@@ -951,9 +950,7 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 
+ 	name = show_ident(sym->ident);
+ 
+-	return_type = symbol_type(ret_type);
