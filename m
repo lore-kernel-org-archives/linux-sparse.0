@@ -1,456 +1,105 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2] fix expansion of integers to floats
-Date: Mon, 27 Mar 2017 16:34:03 +0200
-Message-ID: <20170327143403.62903-1-luc.vanoostenryck@gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: extra 'make check' failures on 32bit Linux
+Date: Mon, 27 Mar 2017 16:27:28 +0100
+Message-ID: <444abf20-b5ef-664a-fed4-ebfd8969e1da@ramsayjones.plus.com>
+References: <806988fb-6e3c-872b-d7ab-282336f67f73@ramsayjones.plus.com>
+ <20170327010342.vd34svh3kee43qir@macpro.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36224 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752257AbdC0OgW (ORCPT
+Received: from avasout01.plus.net ([84.93.230.227]:39200 "EHLO
+        avasout01.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752292AbdC0P1h (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 10:36:22 -0400
-Received: by mail-wr0-f196.google.com with SMTP id u1so13907842wra.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 07:36:21 -0700 (PDT)
+        Mon, 27 Mar 2017 11:27:37 -0400
+In-Reply-To: <20170327010342.vd34svh3kee43qir@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-The test wasn't using is_float_type() and thus missed
-SYM_NODE->SUM_BASETYPE::fp_type.
 
-Fix this by using is_float_type().
 
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
-Changes since v1:
-- fix the cases on 32-bit machines.
+On 27/03/17 02:03, Luc Van Oostenryck wrote:
+> On Sun, Mar 26, 2017 at 11:21:44PM +0100, Ramsay Jones wrote:
+>> Hi Christopher, Luc,
+>>
+>> On occasion I build sparse on 32-bit Linux and I have noticed, for some
+>> weeks now, unexpected test failures. I have been meaning to take a look
+>> at fixing these failures, but I just haven't had the time ... :(
+> 
+>>   ...
+>>   
+>>        TEST     division constants (div.c)
+>>   error: actual error text does not match expected error text.
+>>   error: see div.c.error.* for further investigation.
+>>   --- div.c.error.expected	2017-03-26 18:26:04.142887258 +0100
+>>   +++ div.c.error.got	2017-03-26 18:26:04.142887258 +0100
+>>   @@ -2,8 +2,6 @@
+>>    div.c:4:20: warning: division by zero
+>>    div.c:5:22: warning: division by zero
+>>    div.c:7:25: warning: constant integer operation overflow
+>>   -div.c:8:27: warning: constant integer operation overflow
+>>    div.c:9:34: warning: constant integer operation overflow
+>>    div.c:11:25: warning: constant integer operation overflow
+>>   -div.c:12:27: warning: constant integer operation overflow
+>>    div.c:13:34: warning: constant integer operation overflow
+>>   ...
+> 
+> It's not very clear to me what is the cause of this error.
+> Have you only since some weeks (then I think it's since the
+> we define __SIZEOF_POINTER__) or is it older (then I think
+> it exists since quite a long time)?
 
- expand.c                            |   3 +-
- validation/cast-constant-to-float.c |  35 ++++
- validation/cast-constants.c         | 357 ++++++++++++++++++++++++++++++++++++
- 3 files changed, 393 insertions(+), 2 deletions(-)
- create mode 100644 validation/cast-constant-to-float.c
- create mode 100644 validation/cast-constants.c
+I just did a git bisect, which shows:
 
-diff --git a/expand.c b/expand.c
-index 11f7255bf..5f908c971 100644
---- a/expand.c
-+++ b/expand.c
-@@ -88,8 +88,7 @@ void cast_value(struct expression *expr, struct symbol *newtype,
- 	long long value, mask, signmask;
- 	long long oldmask, oldsignmask, dropped;
+...
+
+$ git bisect good
+8d688c9a6ee220ce00b30afd8bdffa34434c9950 is the first bad commit
+commit 8d688c9a6ee220ce00b30afd8bdffa34434c9950
+Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Date:   Tue Feb 7 21:04:24 2017 +0100
+
+    define __LONG_MAX__ & __SIZEOF_POINTER__
+    
+    They're part of GCC's common predefined macros and some
+    code & header files depends on them.
+    
+    Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+    Signed-off-by: Christopher Li <sparse@chrisli.org>
+
+:100644 100644 38ff165b360525c2b83cd76d674593ee79cb9ffb 65887c40d3b5b020991be2372b0af5c1b7088776 M	lib.c
+$ 
+
+So, I looked in the debugger and 'bits_in_long' and 'bits_in_pointer'
+are set correctly, but __LONG_MAX__ is being printed with an LL suffix,
+so, this fixes it for me:
+
+$ git diff
+diff --git a/lib.c b/lib.c
+index 272d2c8..502c264 100644
+--- a/lib.c
++++ b/lib.c
+@@ -834,7 +834,7 @@ static void predefined_macros(void)
+        add_pre_buffer("#define __CHECKER__ 1\n");
  
--	if (newtype->ctype.base_type == &fp_type ||
--	    oldtype->ctype.base_type == &fp_type)
-+	if (is_float_type(newtype) || is_float_type(oldtype))
- 		goto Float;
+        val = (1ULL << (bits_in_long-1)) - 1;
+-       add_pre_buffer("#weak_define __LONG_MAX__ %#llxLL\n", val);
++       add_pre_buffer("#weak_define __LONG_MAX__ %#llxL\n", val);
+        add_pre_buffer("#weak_define __SIZEOF_POINTER__ %d\n", bits_in_pointer/8);
+ }
  
- 	// For pointers and integers, we can just move the value around
-diff --git a/validation/cast-constant-to-float.c b/validation/cast-constant-to-float.c
-new file mode 100644
-index 000000000..86b7ac0f7
---- /dev/null
-+++ b/validation/cast-constant-to-float.c
-@@ -0,0 +1,35 @@
-+typedef unsigned int uint;
-+typedef unsigned long ulong;
-+
-+double f1(void) { return -1; }
-+double f2(void) { return (double)-1; }
-+double f3(void) { return -1.0; }
-+
-+/*
-+ * check-name: cast-constant-to-float
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-start
-+f1:
-+.L0:
-+	<entry-point>
-+	set.64      %r1 <- -1.000000
-+	ret.64      %r1
-+
-+
-+f2:
-+.L2:
-+	<entry-point>
-+	set.64      %r3 <- -1.000000
-+	ret.64      %r3
-+
-+
-+f3:
-+.L4:
-+	<entry-point>
-+	set.64      %r5 <- -1.000000
-+	ret.64      %r5
-+
-+
-+ * check-output-end
-+ */
-diff --git a/validation/cast-constants.c b/validation/cast-constants.c
-new file mode 100644
-index 000000000..f47d6fd34
---- /dev/null
-+++ b/validation/cast-constants.c
-@@ -0,0 +1,357 @@
-+typedef unsigned int uint;
-+typedef unsigned long ulong;
-+
-+static int uint_2_int(void) { return (int)123U; }
-+static int long_2_int(void) { return (int)123L; }
-+static int ulong_2_int(void) { return (int)123UL; }
-+static int vptr_2_int(void) { return (int)((void*)123); }
-+static int iptr_2_int(void) { return (int)((int*)128); }
-+static int float_2_int(void) { return (int)1.123F; }
-+static int double_2_int(void) { return (int)1.123L; }
-+static uint int_2_uint(void) { return (uint)123; }
-+static uint long_2_uint(void) { return (uint)123L; }
-+static uint ulong_2_uint(void) { return (uint)123UL; }
-+static uint vptr_2_uint(void) { return (uint)((void*)123); }
-+static uint iptr_2_uint(void) { return (uint)((int*)128); }
-+static uint float_2_uint(void) { return (uint)1.123F; }
-+static uint double_2_uint(void) { return (uint)1.123L; }
-+static long int_2_long(void) { return (long)123; }
-+static long uint_2_long(void) { return (long)123U; }
-+static long ulong_2_long(void) { return (long)123UL; }
-+static long vptr_2_long(void) { return (long)((void*)123); }
-+static long iptr_2_long(void) { return (long)((int*)128); }
-+static long float_2_long(void) { return (long)1.123F; }
-+static long double_2_long(void) { return (long)1.123L; }
-+static ulong int_2_ulong(void) { return (ulong)123; }
-+static ulong uint_2_ulong(void) { return (ulong)123U; }
-+static ulong long_2_ulong(void) { return (ulong)123L; }
-+static ulong vptr_2_ulong(void) { return (ulong)((void*)123); }
-+static ulong iptr_2_ulong(void) { return (ulong)((int*)128); }
-+static ulong float_2_ulong(void) { return (ulong)1.123F; }
-+static ulong double_2_ulong(void) { return (ulong)1.123L; }
-+static void * int_2_vptr(void) { return (void *)123; }
-+static void * uint_2_vptr(void) { return (void *)123U; }
-+static void * long_2_vptr(void) { return (void *)123L; }
-+static void * ulong_2_vptr(void) { return (void *)123UL; }
-+static void * iptr_2_vptr(void) { return (void *)((int*)128); }
-+static int * int_2_iptr(void) { return (int *)123; }
-+static int * uint_2_iptr(void) { return (int *)123U; }
-+static int * long_2_iptr(void) { return (int *)123L; }
-+static int * ulong_2_iptr(void) { return (int *)123UL; }
-+static int * vptr_2_iptr(void) { return (int *)((void*)123); }
-+static float int_2_float(void) { return (float)123; }
-+static float uint_2_float(void) { return (float)123U; }
-+static float long_2_float(void) { return (float)123L; }
-+static float ulong_2_float(void) { return (float)123UL; }
-+static float double_2_float(void) { return (float)1.123L; }
-+static double int_2_double(void) { return (double)123; }
-+static double uint_2_double(void) { return (double)123U; }
-+static double long_2_double(void) { return (double)123L; }
-+static double ulong_2_double(void) { return (double)123UL; }
-+static double float_2_double(void) { return (double)1.123F; }
-+
-+/*
-+ * check-name: cast-constants.c
-+ * check-command: test-linearize -m64 $file
-+ *
-+ * check-output-start
-+uint_2_int:
-+.L0:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+long_2_int:
-+.L2:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+ulong_2_int:
-+.L4:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+vptr_2_int:
-+.L6:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+iptr_2_int:
-+.L8:
-+	<entry-point>
-+	ret.32      $128
-+
-+
-+float_2_int:
-+.L10:
-+	<entry-point>
-+	ret.32      $1
-+
-+
-+double_2_int:
-+.L12:
-+	<entry-point>
-+	ret.32      $1
-+
-+
-+int_2_uint:
-+.L14:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+long_2_uint:
-+.L16:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+ulong_2_uint:
-+.L18:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+vptr_2_uint:
-+.L20:
-+	<entry-point>
-+	ret.32      $123
-+
-+
-+iptr_2_uint:
-+.L22:
-+	<entry-point>
-+	ret.32      $128
-+
-+
-+float_2_uint:
-+.L24:
-+	<entry-point>
-+	ret.32      $1
-+
-+
-+double_2_uint:
-+.L26:
-+	<entry-point>
-+	ret.32      $1
-+
-+
-+int_2_long:
-+.L28:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+uint_2_long:
-+.L30:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+ulong_2_long:
-+.L32:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+vptr_2_long:
-+.L34:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+iptr_2_long:
-+.L36:
-+	<entry-point>
-+	ret.64      $128
-+
-+
-+float_2_long:
-+.L38:
-+	<entry-point>
-+	ret.64      $1
-+
-+
-+double_2_long:
-+.L40:
-+	<entry-point>
-+	ret.64      $1
-+
-+
-+int_2_ulong:
-+.L42:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+uint_2_ulong:
-+.L44:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+long_2_ulong:
-+.L46:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+vptr_2_ulong:
-+.L48:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+iptr_2_ulong:
-+.L50:
-+	<entry-point>
-+	ret.64      $128
-+
-+
-+float_2_ulong:
-+.L52:
-+	<entry-point>
-+	ret.64      $1
-+
-+
-+double_2_ulong:
-+.L54:
-+	<entry-point>
-+	ret.64      $1
-+
-+
-+int_2_vptr:
-+.L56:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+uint_2_vptr:
-+.L58:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+long_2_vptr:
-+.L60:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+ulong_2_vptr:
-+.L62:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+iptr_2_vptr:
-+.L64:
-+	<entry-point>
-+	ret.64      $128
-+
-+
-+int_2_iptr:
-+.L66:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+uint_2_iptr:
-+.L68:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+long_2_iptr:
-+.L70:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+ulong_2_iptr:
-+.L72:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+vptr_2_iptr:
-+.L74:
-+	<entry-point>
-+	ret.64      $123
-+
-+
-+int_2_float:
-+.L76:
-+	<entry-point>
-+	set.32      %r39 <- 123.000000
-+	ret.32      %r39
-+
-+
-+uint_2_float:
-+.L78:
-+	<entry-point>
-+	set.32      %r41 <- 123.000000
-+	ret.32      %r41
-+
-+
-+long_2_float:
-+.L80:
-+	<entry-point>
-+	set.32      %r43 <- 123.000000
-+	ret.32      %r43
-+
-+
-+ulong_2_float:
-+.L82:
-+	<entry-point>
-+	set.32      %r45 <- 123.000000
-+	ret.32      %r45
-+
-+
-+double_2_float:
-+.L84:
-+	<entry-point>
-+	set.32      %r47 <- 1.123000
-+	ret.32      %r47
-+
-+
-+int_2_double:
-+.L86:
-+	<entry-point>
-+	set.64      %r49 <- 123.000000
-+	ret.64      %r49
-+
-+
-+uint_2_double:
-+.L88:
-+	<entry-point>
-+	set.64      %r51 <- 123.000000
-+	ret.64      %r51
-+
-+
-+long_2_double:
-+.L90:
-+	<entry-point>
-+	set.64      %r53 <- 123.000000
-+	ret.64      %r53
-+
-+
-+ulong_2_double:
-+.L92:
-+	<entry-point>
-+	set.64      %r55 <- 123.000000
-+	ret.64      %r55
-+
-+
-+float_2_double:
-+.L94:
-+	<entry-point>
-+	set.64      %r57 <- 1.123000
-+	ret.64      %r57
-+
-+
-+ * check-output-end
-+ */
--- 
-2.12.0
+$ 
+
+Not a proper fix, but ...
+
+Ah, I've just noticed you have sent some patches. ;-)
+
+I will take a look and let you know.
+
+ATB,
+Ramsay Jones
+
 
