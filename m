@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 47/52] llvm: fix get value from non-anonymous symbol
-Date: Mon, 27 Mar 2017 23:24:11 +0200
-Message-ID: <20170327212416.18536-48-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 51/52] llvm: cleanup of output_[ptr]cast()
+Date: Mon, 27 Mar 2017 23:24:15 +0200
+Message-ID: <20170327212416.18536-52-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:35933 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751810AbdC0V1M (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33752 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752635AbdC0V1a (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:27:12 -0400
-Received: by mail-wr0-f196.google.com with SMTP id u1so17119448wra.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:10 -0700 (PDT)
+        Mon, 27 Mar 2017 17:27:30 -0400
+Received: by mail-wr0-f193.google.com with SMTP id 20so17045462wrx.0
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:29 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,103 +19,86 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c                     | 11 ++---------
- validation/backend/load-global.c  | 21 +++++++++++++++++++++
- validation/backend/string-value.c | 21 +++++++++++++++++++++
- 3 files changed, 44 insertions(+), 9 deletions(-)
- create mode 100644 validation/backend/load-global.c
- create mode 100644 validation/backend/string-value.c
+ sparse-llvm.c | 39 ++++++++++++---------------------------
+ 1 file changed, 12 insertions(+), 27 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 65b859f4b..c1aefc682 100644
+index a0b4293fa..b82fbefa1 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -303,7 +303,7 @@ static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
- 	assert(sym->bb_target == NULL);
+@@ -875,21 +875,17 @@ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+ 	LLVMOpcode op;
+ 	char target_name[64];
  
- 	expr = sym->initializer;
--	if (expr) {
-+	if (expr && !sym->ident) {
- 		switch (expr->type) {
- 		case EXPR_STRING: {
- 			const char *s = expr->string->data;
-@@ -318,13 +318,6 @@ static LLVMValueRef get_sym_value(struct function *fn, struct symbol *sym)
- 			result = LLVMConstGEP(data, indices, ARRAY_SIZE(indices));
- 			return result;
- 		}
--		case EXPR_SYMBOL: {
--			struct symbol *sym = expr->symbol;
++	assert(is_ptr_type(insn->type));
+ 
+ 	src = get_operand(fn, otype, insn->src);
+ 	pseudo_name(insn->target, target_name);
+ 
+-	assert(!is_float_type(insn->type));
 -
--			result = LLVMGetNamedGlobal(fn->module, show_ident(sym->ident));
--			assert(result != NULL);
--			break;
--		}
- 		default:
- 			break;
- 		}
-@@ -1212,7 +1205,7 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
- 		initial_value = LLVMConstNull(type);
+-	dtype = insn_symbol_type(insn);
+-	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+-	case LLVMPointerTypeKind:
++	dtype = symbol_type(insn->type);
++	if (is_ptr_type(otype)) {
+ 		op = LLVMBitCast;
+-		break;
+-	case LLVMIntegerTypeKind:
++	} else if (is_int_type(otype)) {
+ 		op = LLVMIntToPtr;
+-		break;
+-	default:
++	} else {
+ 		assert(0);
  	}
  
--	name = show_ident(sym->ident);
-+	name = sym->ident ? show_ident(sym->ident) : "" ;
+@@ -903,38 +899,27 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+ 	LLVMTypeRef dtype;
+ 	struct symbol *otype = insn->orig_type;
+ 	char target_name[64];
+-	unsigned int width;
  
- 	data = LLVMAddGlobal(module, LLVMTypeOf(initial_value), name);
+ 	if (is_ptr_type(insn->type))	// cast to void* is OP_CAST ...
+ 		return output_op_ptrcast(fn, insn);
  
-diff --git a/validation/backend/load-global.c b/validation/backend/load-global.c
-new file mode 100644
-index 000000000..dedb35f3b
---- /dev/null
-+++ b/validation/backend/load-global.c
-@@ -0,0 +1,21 @@
-+const char *s = "abc";
-+int x = 4;
-+int y;
-+
-+int *p = &x;
-+int *q;
-+
-+int loadn(void) { return y; }
-+int loadi(void) { return x; }
-+
-+const char *loads(void) { return s; }
-+
-+int *retpn(void) { return  q; }
-+int loadpn(void) { return *q; }
-+int *retpi(void) { return  p; }
-+int loadpi(void) { return *p; }
-+
-+/*
-+ * check-name: use simple value from global vars
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
-diff --git a/validation/backend/string-value.c b/validation/backend/string-value.c
-new file mode 100644
-index 000000000..8cdec4a2d
---- /dev/null
-+++ b/validation/backend/string-value.c
-@@ -0,0 +1,21 @@
-+extern void use(const char *);
-+
-+const char *ret(void)
-+{
-+	return "abc";
-+}
-+
-+const char *add(void)
-+{
-+	return "def" + 1;
-+}
-+
-+void call(void)
-+{
-+	use("ijk");
-+}
-+
-+/*
-+ * check-name: string-value
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
++	assert(is_int_type(insn->type));
+ 
+ 	src = get_operand(fn, otype, insn->src);
+ 	pseudo_name(insn->target, target_name);
+ 
+-	assert(!is_float_type(insn->type));
+-
+ 	dtype = symbol_type(insn->type);
+-	switch (LLVMGetTypeKind(LLVMTypeOf(src))) {
+-	case LLVMPointerTypeKind:
++	if (is_ptr_type(otype)) {
+ 		op = LLVMPtrToInt;
+-		break;
+-	case LLVMIntegerTypeKind:
+-		width = LLVMGetIntTypeWidth(LLVMTypeOf(src));
++	} else if (is_float_type(otype)) {
++		op = (op == LLVMZExt) ? LLVMFPToUI : LLVMFPToSI;
++	} else if (is_int_type(otype)) {
++		unsigned int width = otype->bit_size;
+ 		if (insn->size < width)
+ 			op = LLVMTrunc;
+ 		else if (insn->size == width)
+ 			op = LLVMBitCast;
+-		break;
+-	case LLVMHalfTypeKind:
+-	case LLVMFloatTypeKind:
+-	case LLVMDoubleTypeKind:
+-	case LLVMX86_FP80TypeKind:
+-	case LLVMFP128TypeKind:
+-	case LLVMPPC_FP128TypeKind:
+-		op = (op == LLVMZExt) ? LLVMFPToUI : LLVMFPToSI;
+-		break;
+-	default:
++	} else {
+ 		assert(0);
+ 	}
+ 
 -- 
 2.12.0
 
