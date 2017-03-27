@@ -1,124 +1,142 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 06/15] add is_signed_type()
-Date: Mon, 27 Mar 2017 19:33:56 +0200
-Message-ID: <20170327173405.11405-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 10/15] insure that all OP_PUSHs are just before their OP_CALL
+Date: Mon, 27 Mar 2017 19:34:00 +0200
+Message-ID: <20170327173405.11405-11-luc.vanoostenryck@gmail.com>
 References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:34608 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751346AbdC0RhM (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:35587 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751405AbdC0RhN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 13:37:12 -0400
-Received: by mail-wr0-f195.google.com with SMTP id w43so12462499wrb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:19 -0700 (PDT)
+        Mon, 27 Mar 2017 13:37:13 -0400
+Received: by mail-wr0-f193.google.com with SMTP id p52so12377259wrc.2
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:23 -0700 (PDT)
 In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+These OP_PUSH doesn't really operate on a stack, they're
+there just to give the args to the call. As such, we want
+to have all of them just before their corresponding OP_CALL.
+
+Currently, it's not the case as we push the args as soon as
+they're linearized. So code like:
+	int foo(int a, int b, int c) { return f(a, f(b, c)); }
+is linearized as something like:
+	foo:
+		push	%arg1
+		push	%arg2
+		push	%arg3
+		call	%r1 <- f
+		push	%r1
+		call	%r2 <- f
+		ret	%r2
+while we want something like:
+	foo:
+		push	%arg2
+		push	%arg3
+		call	%r1 <- f
+		push	%arg1
+		push	%r1
+		call	%r2 <- f
+		ret	%r2
+
+Fix this by first linearizing all the arguments and only then
+adding the OP_PUSH instructions instead of pushing each arg
+as soon as it is linearized.
+
+Note: this is purely for the readability of the generated code,
+      the push instructions being anyway linked by their
+      respective OP_CALL.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- compile-i386.c | 14 ++------------
- show-parse.c   | 11 +----------
- symbol.h       |  9 +++++++++
- 3 files changed, 12 insertions(+), 22 deletions(-)
+ linearize.c            | 14 +++++++++++---
+ validation/push-call.c | 26 ++++++++++++++++++++++++++
+ 2 files changed, 37 insertions(+), 3 deletions(-)
+ create mode 100644 validation/push-call.c
 
-diff --git a/compile-i386.c b/compile-i386.c
-index 44b72ec39..a7db0843d 100644
---- a/compile-i386.c
-+++ b/compile-i386.c
-@@ -192,7 +192,6 @@ static const char *current_section;
- static void emit_comment(const char * fmt, ...) FORMAT_ATTR(1);
- static void emit_move(struct storage *src, struct storage *dest,
- 		      struct symbol *ctype, const char *comment);
--static int type_is_signed(struct symbol *sym);
- static struct storage *x86_address_gen(struct expression *expr);
- static struct storage *x86_symbol_expr(struct symbol *sym);
- static void x86_symbol(struct symbol *sym);
-@@ -1165,7 +1164,7 @@ static void emit_move(struct storage *src, struct storage *dest,
- 
- 	if (ctype) {
- 		bits = ctype->bit_size;
--		is_signed = type_is_signed(ctype);
-+		is_signed = is_signed_type(ctype);
- 	} else {
- 		bits = 32;
- 		is_signed = 0;
-@@ -1357,7 +1356,7 @@ static struct storage *emit_binop(struct expression *expr)
- 	if ((expr->op == '/') || (expr->op == '%'))
- 		return emit_divide(expr, left, right);
- 
--	is_signed = type_is_signed(expr->ctype);
-+	is_signed = is_signed_type(expr->ctype);
- 
- 	switch (expr->op) {
- 	case '+':
-@@ -2266,15 +2265,6 @@ static void x86_symbol_init(struct symbol *sym)
- 	priv->addr = new;
- }
- 
--static int type_is_signed(struct symbol *sym)
--{
--	if (sym->type == SYM_NODE)
--		sym = sym->ctype.base_type;
--	if (sym->type == SYM_PTR)
--		return 0;
--	return !(sym->ctype.modifiers & MOD_UNSIGNED);
--}
--
- static struct storage *x86_label_expr(struct expression *expr)
+diff --git a/linearize.c b/linearize.c
+index f1f98947f..d4610de8f 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1210,19 +1210,19 @@ static pseudo_t linearize_assignment(struct entrypoint *ep, struct expression *e
+  *   -) insn->opcode == O_CALL | OP_INLINE_CALL
+  *   -) ctype = typeof(arg)
+  */
+-static void push_argument(struct entrypoint *ep, struct instruction *insn, pseudo_t arg, struct symbol *ctype)
++static void push_argument(struct instruction *insn, pseudo_t arg, struct symbol *ctype)
  {
- 	struct storage *new = stack_alloc(4);
-diff --git a/show-parse.c b/show-parse.c
-index d365d737f..b6ab7b3db 100644
---- a/show-parse.c
-+++ b/show-parse.c
-@@ -949,15 +949,6 @@ static int show_symbol_init(struct symbol *sym)
- 	return 0;
+ 	struct instruction *push = alloc_typed_instruction(OP_PUSH, ctype);
+ 	push->call = insn;
+ 	use_pseudo(push, arg, &push->src);
+ 	add_instruction(&insn->arguments, push);
+-	add_one_insn(ep, push);
  }
  
--static int type_is_signed(struct symbol *sym)
--{
--	if (sym->type == SYM_NODE)
--		sym = sym->ctype.base_type;
--	if (sym->type == SYM_PTR)
--		return 0;
--	return !(sym->ctype.modifiers & MOD_UNSIGNED);
--}
--
- static int show_cast_expr(struct expression *expr)
+ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expression *expr)
  {
- 	struct symbol *old_type, *new_type;
-@@ -973,7 +964,7 @@ static int show_cast_expr(struct expression *expr)
- 	if (oldbits >= newbits)
- 		return op;
- 	new = new_pseudo();
--	is_signed = type_is_signed(old_type);
-+	is_signed = is_signed_type(old_type);
- 	if (is_signed) {
- 		printf("\tsext%d.%d\tv%d,v%d\n", oldbits, newbits, new, op);
- 	} else {
-diff --git a/symbol.h b/symbol.h
-index 36f8345b5..0621d36d7 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -335,6 +335,15 @@ static inline int is_enum_type(const struct symbol *type)
- 	return (type->type == SYM_ENUM);
- }
+ 	struct expression *arg, *fn;
+ 	struct instruction *insn = alloc_typed_instruction(OP_CALL, expr->ctype);
++	struct instruction *push;
+ 	pseudo_t retval, call;
+ 	struct ctype *ctype = NULL;
+ 	struct symbol *fntype;
+@@ -1233,11 +1233,19 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
+ 		return VOID;
+ 	}
  
-+static inline int is_signed_type(struct symbol *sym)
++	// first generate all the parameters
+ 	FOR_EACH_PTR(expr->args, arg) {
+ 		pseudo_t new = linearize_expression(ep, arg);
+-		push_argument(ep, insn, new, arg->ctype);
++		push_argument(insn, new, arg->ctype);
+ 	} END_FOR_EACH_PTR(arg);
+ 
++	// and push them all just before the actual call
++	// (because the linearization of the arguments can
++	//  create other calls)
++	FOR_EACH_PTR(insn->arguments, push) {
++		add_one_insn(ep, push);
++	} END_FOR_EACH_PTR(push);
++
+ 	fn = expr->fn;
+ 
+ 	if (fn->ctype)
+diff --git a/validation/push-call.c b/validation/push-call.c
+new file mode 100644
+index 000000000..8151e0c70
+--- /dev/null
++++ b/validation/push-call.c
+@@ -0,0 +1,26 @@
++int f(int a, int b);
++
++int fun(int a, int b, int c)
 +{
-+	if (sym->type == SYM_NODE)
-+		sym = sym->ctype.base_type;
-+	if (sym->type == SYM_PTR)
-+		return 0;
-+	return !(sym->ctype.modifiers & MOD_UNSIGNED);
++	return f(a, f(b, c));
 +}
 +
- static inline int is_type_type(struct symbol *type)
- {
- 	return (type->ctype.modifiers & MOD_TYPE) != 0;
++/*
++ * check-name: push-call
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++fun:
++.L0:
++	<entry-point>
++	push.32     %arg2
++	push.32     %arg3
++	call.32     %r4 <- f
++	push.32     %arg1
++	push.32     %r4
++	call.32     %r5 <- f
++	ret.32      %r5
++
++
++ * check-output-end
++ */
 -- 
 2.12.0
 
