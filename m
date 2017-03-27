@@ -1,330 +1,130 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 14/15] add doc about sparse's instructions/IR
-Date: Mon, 27 Mar 2017 19:34:04 +0200
-Message-ID: <20170327173405.11405-15-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 08/15] inlined calls should not block BB packing
+Date: Mon, 27 Mar 2017 19:33:58 +0200
+Message-ID: <20170327173405.11405-9-luc.vanoostenryck@gmail.com>
 References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:36532 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751437AbdC0RhN (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:36422 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751385AbdC0RhM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 13:37:13 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u1so15370141wra.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:27 -0700 (PDT)
+        Mon, 27 Mar 2017 13:37:12 -0400
+Received: by mail-wr0-f194.google.com with SMTP id u1so15369233wra.3
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:21 -0700 (PDT)
 In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+OP_INLINED_CALL are there only as a sort of annotation
+for debugging purpose.
+Their presence should thus not block the packing of
+basic blocks.
+
+Fix this by ignoring OP_INLINED_CALL when trying to pack
+a basic block.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/instructions.txt | 296 +++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 296 insertions(+)
- create mode 100644 Documentation/instructions.txt
+ flow.c                          |  1 +
+ validation/call-inlined.c       |  6 +-----
+ validation/optim/call-inlined.c | 30 ++++++++++++++++++++++++++++++
+ 3 files changed, 32 insertions(+), 5 deletions(-)
+ create mode 100644 validation/optim/call-inlined.c
 
-diff --git a/Documentation/instructions.txt b/Documentation/instructions.txt
+diff --git a/flow.c b/flow.c
+index c9259919f..04ef8cd1d 100644
+--- a/flow.c
++++ b/flow.c
+@@ -982,6 +982,7 @@ void pack_basic_blocks(struct entrypoint *ep)
+ 				continue;
+ 			switch (first->opcode) {
+ 			case OP_NOP: case OP_LNOP: case OP_SNOP:
++			case OP_INLINED_CALL:
+ 				continue;
+ 			case OP_CBR:
+ 			case OP_BR: {
+diff --git a/validation/call-inlined.c b/validation/call-inlined.c
+index 6fd94edcb..b907ded60 100644
+--- a/validation/call-inlined.c
++++ b/validation/call-inlined.c
+@@ -19,7 +19,7 @@ const char *qus(void) { return lstrip(messg); }
+ 
+ /*
+  * check-name: call-inlined
+- * check-command: test-linearize -Wno-decl $file
++ * check-command: test-linearize -Wno-decl -m64 $file
+  *
+  * check-output-start
+ foo:
+@@ -27,14 +27,12 @@ foo:
+ 	<entry-point>
+ 	add.32      %r3 <- %arg1, %arg2
+ 	add.32      %r5 <- %r3, $1
+-	# call      %r5 <- add, %r3, $1
+ 	ret.32      %r5
+ 
+ 
+ bar:
+ .L3:
+ 	<entry-point>
+-	# call      %r12 <- add, %r10, $1
+ 	ret
+ 
+ 
+@@ -42,7 +40,6 @@ bas:
+ .L6:
+ 	<entry-point>
+ 	add.64      %r16 <- "abc", $1
+-	# call      %r16 <- lstrip, %r14
+ 	ret.64      %r16
+ 
+ 
+@@ -50,7 +47,6 @@ qus:
+ .L9:
+ 	<entry-point>
+ 	add.64      %r21 <- messg, $1
+-	# call      %r21 <- lstrip, %r19
+ 	ret.64      %r21
+ 
+ 
+diff --git a/validation/optim/call-inlined.c b/validation/optim/call-inlined.c
 new file mode 100644
-index 000000000..b8d3d6bbc
+index 000000000..00698a4b1
 --- /dev/null
-+++ b/Documentation/instructions.txt
-@@ -0,0 +1,296 @@
-+This document briefly describes which field of struct instruction is
-+used by which operation.
++++ b/validation/optim/call-inlined.c
+@@ -0,0 +1,30 @@
++static const char messg[] = "def";
 +
-+Some of those fields are used by almost all instructions,
-+some others are specific to only one or a few instructions.
-+The common ones are:
-+- .src1, .src2, .src2, .src3: (pseudo_t) operands of binops or ternary ops.
-+- .src: (pseudo_t) operand of unary ops (alias for .src1).
-+- .target: (pseudo_t) result of unary, binary & ternary ops, is sometimes used
-+	otherwise by some others instructions.
-+- .cond: (pseudo_t) input operands for condition (alias .target!)
-+- .type: (symbol*) usually the type of .result, sometimes of the operands
++static inline int add(int a, int b)
++{
++	return a + b;
++}
 +
-+== Terminators ==
-+=== OP_RET ===
-+Return from subroutine.
-+- .src : returned value (NULL if void)
-+- .type: type of .src
++int foo(int a, int b, int p)
++{
++	if (p) {
++		add(a + b, 1);
++		return p;
++	}
++	return 0;
++}
 +
-+=== OP_BR ===
-+Unconditional branch
-+- .bb_true: destination basic block
++/*
++ * check-name: call-inlined
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++foo:
++.L0:
++	<entry-point>
++	select.32   %r9 <- %arg3, %arg3, $0
++	ret.32      %r9
 +
-+=== OP_CBR ===
-+Conditional branch
-+- .cond: condition
-+- .type: type of .cond, must be an integral type
-+- .bb_true, .bb_false: destination basic blocks
 +
-+=== OP_SWITCH ===
-+Switch / multi-branch
-+- .cond: condition
-+- .type: type of .cond, must be an integral type
-+- .multijmp_list: pairs of case-value - destination basic block
-+
-+=== OP_COMPUTEDGOTO ===
-+Computed goto / branch to register
-+- .target: target address (type is irrelevant, void*)
-+- .multijmp_list: list of possible destination basic blocks
-+
-+== Arithmetic binops ==
-+They all follow the same signature:
-+- .src1, .src1: operands (types must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target
-+
-+=== OP_ADD ===
-+Addition.
-+
-+=== OP_SUB ===
-+Subtraction.
-+
-+=== OP_MULU ===
-+Multiplication (unsigned ints & floating-points)
-+
-+=== OP_MULS ===
-+Multiplication (signed ints)
-+
-+=== OP_DIVU ===
-+Division (unsigned ints & floating-points)
-+
-+=== OP_DIVS ===
-+Division (signed ints)
-+
-+=== OP_MODU ===
-+Modulo (unsigned division remainder, integer only)
-+
-+=== OP_MODS ===
-+Modulo (signed division remainder, integer only)
-+
-+=== OP_SHL ===
-+Shift left (integer only)
-+
-+=== OP_LSR ===
-+Logical Shift right (integer only)
-+
-+=== OP_ASR ===
-+Arithmetic Shift right (integer only)
-+
-+== Logical ops ==
-+They all follow the same signature:
-+- .src1, .src2: operands (types must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target, must be an integral type
-+
-+=== OP_AND ===
-+=== OP_OR ===
-+=== OP_XOR ===
-+
-+== Boolean ops ==
-+=== OP_AND_BOOL ===
-+=== OP_OR_BOOL ===
-+
-+== Comparisons ==
-+They all have the following signature:
-+- .src1, .src2: operands (types must be compatible)
-+- .target: result of the operation (0/1 valued integer)
-+- .type: type of .target, must be an integral type
-+
-+=== OP_SET_EQ ===
-+Compare equal.
-+
-+=== OP_SET_NE ===
-+Compare not-equal.
-+
-+=== OP_SET_LE ===
-+Compare less-than-or-equal (signed).
-+
-+=== OP_SET_GE ===
-+Compare greater-than-or-equal (signed).
-+
-+=== OP_SET_LT ===
-+Compare less-than (signed).
-+
-+=== OP_SET_GT ===
-+Compare greater-than (signed).
-+
-+=== OP_SET_B ===
-+Compare less-than (unsigned).
-+
-+=== OP_SET_A ===
-+Compare greater-than (unsigned).
-+
-+=== OP_SET_BE ===
-+Compare less-than-or-equal (unsigned).
-+
-+=== OP_SET_AE ===
-+Compare greater-than-or-equal (unsigned).
-+
-+== Unary ops ==
-+=== OP_NOT ===
-+Logical not.
-+- .src: operand (type must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target, must be an integral type
-+
-+=== OP_NEG ===
-+Arithmetic negation.
-+- .src: operand (type must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target
-+
-+=== OP_COPY ===
-+Copy (only needed after out-of-SSA).
-+- .src: operand (type must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target
-+
-+== Type conversions ==
-+They all have the following signature:
-+- .src: source value
-+- .orig_type: type of .src
-+- .target: result value
-+- .type: type of .target
-+
-+=== OP_CAST ===
-+Cast to unsigned integer (and to void pointer).
-+
-+=== OP_SCAST ===
-+Cast to signed integer.
-+
-+=== OP_FPCAST ===
-+Cast to floating-point.
-+
-+=== OP_PTRCAST ===
-+Cast to pointer.
-+
-+== Ternary ops ==
-+=== OP_SEL ===
-+- .src1: condition, must be of integral type
-+- .src2, .src3: operands (types must be compatible with .target)
-+- .target: result of the operation
-+- .type: type of .target
-+
-+=== OP_RANGE ===
-+Range/bounds checking (only used for an unused sparse extension).
-+- .src1: value to be checked
-+- .src2, src3: bound of the value (must be constants?)
-+- .type: type of .src[123]?
-+
-+== Memory ops ==
-+=== OP_LOAD ===
-+Load.
-+- .src: base address to load from
-+- .offset: address offset
-+- .target: loaded value
-+- .type: type of .target
-+
-+=== OP_STORE ===
-+Store.
-+- .src: base address to store to
-+- .offset: address offset
-+- .target: value to be stored
-+- .type: type of .target
-+
-+== Others ==
-+=== OP_SYMADDR ===
-+Create a pseudo corresponding to the address of a symbol.
-+- .symbol: (pseudo_t) input symbol (alias .src)
-+- .target: symbol's address
-+
-+=== OP_SETVAL ===
-+Create a pseudo corresponding to a value.
-+The value is given as an expression EXPR_STRING, EXPR_FVALUE or
-+EXPR_LABEL (pseudos for integral constants are directly created
-+at linearization and doesn't need this instruction)
-+- .val: (expression) input expression
-+- .target: the resulting value
-+- .type: type of .target, the value
-+
-+=== OP_PHI ===
-+Phi-node (for SSA form).
-+- .phi_list: phi-operands (type must be compatible with .target)
-+- .target: "result"
-+- .type: type of .target
-+
-+=== OP_PHISOURCE ===
-+Phi-node source.
-+Like OP_COPY but exclusively used to give a defining instructions
-+(and thus also a type) to *all* OP_PHI operands.
-+- .phi_src: operand (type must be compatible with .target, alias .src)
-+- .target: the "result" PSEUDO_PHI
-+- .type: type of .target
-+- .phi_users: list of phi instructions using the target pseudo
-+
-+=== OP_PUSH ===
-+Give an argument to the following OP_CALL.
-+- .arg: (pseudo_t) argument (alias .src)
-+- .type: type of .src
-+- .call: corresponding instruction
-+
-+=== OP_CALL ===
-+Function call.
-+- .func: (pseudo_t) the function (can be a symbol or a "register", alias .src))
-+- .arguments: list of the associated OP_PUSH instructions
-+- .target: function return value (if any)
-+- .type: type of .target
-+- .fntype: the full function type
-+
-+=== OP_INLINED_CALL ===
-+Only used as an annotation to show that the instructions just above
-+correspond to a function that have been inlined.
-+- .func: (pseudo_t) the function (must be a symbol, alias .src))
-+- .inlined_args: list of pseudos that where the function's arguments
-+- .target: function return value (if any)
-+- .type: type of .target
-+- .fntype: the full function type
-+
-+=== OP_SLICE ===
-+Extract a "slice" from an aggregate.
-+- .base: (pseudo_t) aggregate (alias .src)
-+- .from, .len: offet & size of the "slice" within the aggregate
-+- .target: result
-+- .type: type of .target
-+
-+=== OP_ASM ===
-+Inlined assembly code.
-+- .string: asm template
-+- .asm_rules: asm constraints, rules
-+
-+== Sparse tagging (line numbers, context, whatever) ==
-+=== OP_CONTEXT ===
-+Currently only used for lock/unlock tracking.
-+- .context_expr: unused
-+- .increment: (1 for locking, -1 for unlocking)
-+- .check: (ignore the instruction if 0)
-+
-+== Misc ops ==
-+=== OP_ENTRY ===
-+Function entry point (no associated semantic).
-+
-+=== OP_BADOP ===
-+Invalid operation (should never be generated).
-+
-+=== OP_NOP ===
-+No-op (should never be generated).
-+
-+=== OP_SNOP ===
-+Store no-op (removed store operation).
-+
-+=== OP_LNOP ===
-+Load no-op (removed load operation).
-+
-+=== OP_DEATHNOTE ===
-+Annotation telling the pseudo will be death after the next
-+instruction (other than some other annotation, that is).
-+
-+== Unused ops ==
-+=== OP_VANEXT ===
-+=== OP_VAARG ===
-+=== OP_MALLOC ===
-+=== OP_FREE ===
-+=== OP_ALLOCA ===
-+=== OP_GET_ELEMENT_PTR ===
-+=== OP_INVOKE ===
-+=== OP_UNWIND ===
++ * check-output-end
++ */
 -- 
 2.12.0
 
