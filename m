@@ -1,113 +1,124 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 07/15] fix usage of inlined calls
-Date: Mon, 27 Mar 2017 19:33:57 +0200
-Message-ID: <20170327173405.11405-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 06/15] add is_signed_type()
+Date: Mon, 27 Mar 2017 19:33:56 +0200
+Message-ID: <20170327173405.11405-7-luc.vanoostenryck@gmail.com>
 References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:34630 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751367AbdC0RhM (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34608 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751346AbdC0RhM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 27 Mar 2017 13:37:12 -0400
-Received: by mail-wr0-f194.google.com with SMTP id w43so12462687wrb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:20 -0700 (PDT)
+Received: by mail-wr0-f195.google.com with SMTP id w43so12462499wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:19 -0700 (PDT)
 In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-OP_INLINED_CALL are there only as a sort of annotation
-for debugging purpose. It is thus wrong to associate
-pseudo's usage to them (even if the pseudo are the arguments
-of the function now inlined).
-
-Fix this by removing the use_pseudo() for each arguments.
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c               |  2 +-
- validation/call-inlined.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 59 insertions(+), 1 deletion(-)
- create mode 100644 validation/call-inlined.c
+ compile-i386.c | 14 ++------------
+ show-parse.c   | 11 +----------
+ symbol.h       |  9 +++++++++
+ 3 files changed, 12 insertions(+), 22 deletions(-)
 
-diff --git a/linearize.c b/linearize.c
-index 7dccf21d8..4ac570fc0 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1683,7 +1683,7 @@ static pseudo_t linearize_inlined_call(struct entrypoint *ep, struct statement *
- 		concat_symbol_list(args->declaration, &ep->syms);
- 		FOR_EACH_PTR(args->declaration, sym) {
- 			pseudo_t value = linearize_one_symbol(ep, sym);
--			use_pseudo(insn, value, add_pseudo(&insn->arguments, value));
-+			add_pseudo(&insn->arguments, value);
- 		} END_FOR_EACH_PTR(sym);
- 	}
+diff --git a/compile-i386.c b/compile-i386.c
+index 44b72ec39..a7db0843d 100644
+--- a/compile-i386.c
++++ b/compile-i386.c
+@@ -192,7 +192,6 @@ static const char *current_section;
+ static void emit_comment(const char * fmt, ...) FORMAT_ATTR(1);
+ static void emit_move(struct storage *src, struct storage *dest,
+ 		      struct symbol *ctype, const char *comment);
+-static int type_is_signed(struct symbol *sym);
+ static struct storage *x86_address_gen(struct expression *expr);
+ static struct storage *x86_symbol_expr(struct symbol *sym);
+ static void x86_symbol(struct symbol *sym);
+@@ -1165,7 +1164,7 @@ static void emit_move(struct storage *src, struct storage *dest,
  
-diff --git a/validation/call-inlined.c b/validation/call-inlined.c
-new file mode 100644
-index 000000000..6fd94edcb
---- /dev/null
-+++ b/validation/call-inlined.c
-@@ -0,0 +1,58 @@
-+static const char messg[] = "def";
-+
-+static inline int add(int a, int b)
+ 	if (ctype) {
+ 		bits = ctype->bit_size;
+-		is_signed = type_is_signed(ctype);
++		is_signed = is_signed_type(ctype);
+ 	} else {
+ 		bits = 32;
+ 		is_signed = 0;
+@@ -1357,7 +1356,7 @@ static struct storage *emit_binop(struct expression *expr)
+ 	if ((expr->op == '/') || (expr->op == '%'))
+ 		return emit_divide(expr, left, right);
+ 
+-	is_signed = type_is_signed(expr->ctype);
++	is_signed = is_signed_type(expr->ctype);
+ 
+ 	switch (expr->op) {
+ 	case '+':
+@@ -2266,15 +2265,6 @@ static void x86_symbol_init(struct symbol *sym)
+ 	priv->addr = new;
+ }
+ 
+-static int type_is_signed(struct symbol *sym)
+-{
+-	if (sym->type == SYM_NODE)
+-		sym = sym->ctype.base_type;
+-	if (sym->type == SYM_PTR)
+-		return 0;
+-	return !(sym->ctype.modifiers & MOD_UNSIGNED);
+-}
+-
+ static struct storage *x86_label_expr(struct expression *expr)
+ {
+ 	struct storage *new = stack_alloc(4);
+diff --git a/show-parse.c b/show-parse.c
+index d365d737f..b6ab7b3db 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -949,15 +949,6 @@ static int show_symbol_init(struct symbol *sym)
+ 	return 0;
+ }
+ 
+-static int type_is_signed(struct symbol *sym)
+-{
+-	if (sym->type == SYM_NODE)
+-		sym = sym->ctype.base_type;
+-	if (sym->type == SYM_PTR)
+-		return 0;
+-	return !(sym->ctype.modifiers & MOD_UNSIGNED);
+-}
+-
+ static int show_cast_expr(struct expression *expr)
+ {
+ 	struct symbol *old_type, *new_type;
+@@ -973,7 +964,7 @@ static int show_cast_expr(struct expression *expr)
+ 	if (oldbits >= newbits)
+ 		return op;
+ 	new = new_pseudo();
+-	is_signed = type_is_signed(old_type);
++	is_signed = is_signed_type(old_type);
+ 	if (is_signed) {
+ 		printf("\tsext%d.%d\tv%d,v%d\n", oldbits, newbits, new, op);
+ 	} else {
+diff --git a/symbol.h b/symbol.h
+index 36f8345b5..0621d36d7 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -335,6 +335,15 @@ static inline int is_enum_type(const struct symbol *type)
+ 	return (type->type == SYM_ENUM);
+ }
+ 
++static inline int is_signed_type(struct symbol *sym)
 +{
-+	return a + b;
++	if (sym->type == SYM_NODE)
++		sym = sym->ctype.base_type;
++	if (sym->type == SYM_PTR)
++		return 0;
++	return !(sym->ctype.modifiers & MOD_UNSIGNED);
 +}
 +
-+int  foo(int a, int b) { return add(a + b, 1); }
-+void bar(int a, int b) {        add(a + b, 1); }
-+
-+
-+static inline const char *lstrip(const char *str)
-+{
-+	return str + 1;
-+}
-+
-+const char *bas(void) { return lstrip("abc"); }
-+const char *qus(void) { return lstrip(messg); }
-+
-+/*
-+ * check-name: call-inlined
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-start
-+foo:
-+.L0:
-+	<entry-point>
-+	add.32      %r3 <- %arg1, %arg2
-+	add.32      %r5 <- %r3, $1
-+	# call      %r5 <- add, %r3, $1
-+	ret.32      %r5
-+
-+
-+bar:
-+.L3:
-+	<entry-point>
-+	# call      %r12 <- add, %r10, $1
-+	ret
-+
-+
-+bas:
-+.L6:
-+	<entry-point>
-+	add.64      %r16 <- "abc", $1
-+	# call      %r16 <- lstrip, %r14
-+	ret.64      %r16
-+
-+
-+qus:
-+.L9:
-+	<entry-point>
-+	add.64      %r21 <- messg, $1
-+	# call      %r21 <- lstrip, %r19
-+	ret.64      %r21
-+
-+
-+ * check-output-end
-+ */
+ static inline int is_type_type(struct symbol *type)
+ {
+ 	return (type->ctype.modifiers & MOD_TYPE) != 0;
 -- 
 2.12.0
 
