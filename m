@@ -1,129 +1,92 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 02/15] add table to "negate" some opcode
-Date: Mon, 27 Mar 2017 19:33:52 +0200
-Message-ID: <20170327173405.11405-3-luc.vanoostenryck@gmail.com>
-References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 00/15] prepare for LLVM fixes
+Date: Mon, 27 Mar 2017 19:33:50 +0200
+Message-ID: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33055 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751364AbdC0RhN (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:34527 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751287AbdC0RhM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 13:37:13 -0400
-Received: by mail-wr0-f193.google.com with SMTP id 20so15304347wrx.0
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:15 -0700 (PDT)
-In-Reply-To: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
+        Mon, 27 Mar 2017 13:37:12 -0400
+Received: by mail-wr0-f196.google.com with SMTP id w43so12461729wrb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 10:36:13 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Some optimizations transform an instruction opcode
-into another. For example, it may be needed to know
-the opcode corresponding to the negation of a comparison.
+This serie contains preparatory patches for
+sparse-llvm's fixes but not sparse-llvm specific
+and having some values of their own.
 
-This patch make this easy and flexible by adding a table
-for the relation between opcodes.
+These patches were extracted from a previous
+serie containing also the sparse-llvm patches.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- Makefile    |  1 +
- linearize.h |  3 +++
- opcode.c    | 36 ++++++++++++++++++++++++++++++++++++
- opcode.h    |  9 +++++++++
- 4 files changed, 49 insertions(+)
+Changes since v5:
+- use a table for compare_opcode() & swap_compare_opcode()
+- fix test cases on 32bit machines
+
+Changes since extraction:
+- no functional changes
+- add missing parts in the IR doc
+- fix some typos in the IR doc
+- move OP_PUSHs near their OP_CALL
+- give a real commit msg for some of the patches
+- improve the commit msg of some of the patches
+- use a table for compare_swap() & compare_opcode()
+- use a better name for compare_swap() & compare_opcode()
+
+
+Luc Van Oostenryck (15):
+  don't output value of anonymous symbol's pointer
+  add table to "negate" some opcode
+  use opcode table for compare_opcode()
+  canonicalize binops before simplification
+  canonicalize compare instructions
+  add is_signed_type()
+  fix usage of inlined calls
+  inlined calls should not block BB packing
+  give function's arguments a type via OP_PUSH
+  insure that all OP_PUSHs are just before their OP_CALL
+  give a type to OP_PHISOURCEs
+  give a type to OP_SELs, always
+  give a type to OP_SWITCHs
+  add doc about sparse's instructions/IR
+  add support for wider type in switch-case
+
+ Documentation/instructions.txt   | 296 +++++++++++++++++++++++++++++++++++++++
+ Makefile                         |   1 +
+ compile-i386.c                   |  14 +-
+ example.c                        |   4 +-
+ flow.c                           |   3 +-
+ linearize.c                      |  78 +++++++----
+ linearize.h                      |  17 ++-
+ liveness.c                       |  14 +-
+ memops.c                         |   2 +-
+ opcode.c                         |  36 +++++
+ opcode.h                         |  10 ++
+ show-parse.c                     |  11 +-
+ simplify.c                       |  77 +++++-----
+ sparse-llvm.c                    |   4 +-
+ symbol.h                         |   9 ++
+ validation/call-inlined.c        |  54 +++++++
+ validation/call-variadic.c       |  31 ++++
+ validation/loop-linearization.c  |   9 +-
+ validation/optim/call-inlined.c  |  30 ++++
+ validation/optim/canonical-cmp.c | 124 ++++++++++++++++
+ validation/push-call.c           |  26 ++++
+ validation/switch-long.c         |  47 +++++++
+ 22 files changed, 790 insertions(+), 107 deletions(-)
+ create mode 100644 Documentation/instructions.txt
  create mode 100644 opcode.c
  create mode 100644 opcode.h
+ create mode 100644 validation/call-inlined.c
+ create mode 100644 validation/call-variadic.c
+ create mode 100644 validation/optim/call-inlined.c
+ create mode 100644 validation/optim/canonical-cmp.c
+ create mode 100644 validation/push-call.c
+ create mode 100644 validation/switch-long.c
 
-diff --git a/Makefile b/Makefile
-index 76902b75e..3ac100744 100644
---- a/Makefile
-+++ b/Makefile
-@@ -106,6 +106,7 @@ LIB_OBJS= target.o parse.o tokenize.o pre-process.o symbol.o lib.o scope.o \
- 	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
- 	  char.o sort.o allocate.o compat-$(OS).o ptrlist.o \
- 	  builtin.o \
-+	  opcode.o \
- 	  flow.o cse.o simplify.o memops.o liveness.o storage.o unssa.o dissect.o
- 
- LIB_FILE= libsparse.a
-diff --git a/linearize.h b/linearize.h
-index bac82d7ff..5ae78f596 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -4,6 +4,7 @@
- #include "lib.h"
- #include "allocate.h"
- #include "token.h"
-+#include "opcode.h"
- #include "parse.h"
- #include "symbol.h"
- 
-@@ -217,6 +218,8 @@ enum opcode {
- 
- 	/* Needed to translate SSA back to normal form */
- 	OP_COPY,
-+
-+	OP_LAST,			/* keep this one last! */
- };
- 
- struct basic_block_list;
-diff --git a/opcode.c b/opcode.c
-new file mode 100644
-index 000000000..0aed1ca1f
---- /dev/null
-+++ b/opcode.c
-@@ -0,0 +1,36 @@
-+/*
-+ * Copyright (C) 2017 Luc Van Oostenryck
-+ *
-+ * Permission is hereby granted, free of charge, to any person obtaining a copy
-+ * of this software and associated documentation files (the "Software"), to deal
-+ * in the Software without restriction, including without limitation the rights
-+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-+ * copies of the Software, and to permit persons to whom the Software is
-+ * furnished to do so, subject to the following conditions:
-+ *
-+ * The above copyright notice and this permission notice shall be included in
-+ * all copies or substantial portions of the Software.
-+ *
-+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-+ * THE SOFTWARE.
-+ */
-+
-+#include "linearize.h"
-+
-+const struct opcode_table opcode_table[OP_LAST] = {
-+	[OP_SET_EQ] = {	.negate = OP_SET_NE, },
-+	[OP_SET_NE] = {	.negate = OP_SET_EQ, },
-+	[OP_SET_LT] = {	.negate = OP_SET_GE, },
-+	[OP_SET_LE] = {	.negate = OP_SET_GT, },
-+	[OP_SET_GE] = {	.negate = OP_SET_LT, },
-+	[OP_SET_GT] = {	.negate = OP_SET_LE, },
-+	[OP_SET_B ] = {	.negate = OP_SET_AE, },
-+	[OP_SET_BE] = {	.negate = OP_SET_A , },
-+	[OP_SET_AE] = {	.negate = OP_SET_B , },
-+	[OP_SET_A ] = {	.negate = OP_SET_BE, },
-+};
-diff --git a/opcode.h b/opcode.h
-new file mode 100644
-index 000000000..3a89de05e
---- /dev/null
-+++ b/opcode.h
-@@ -0,0 +1,9 @@
-+#ifndef OPCODE_H
-+#define OPCODE_H
-+
-+
-+extern const struct opcode_table {
-+	int	negate:8;
-+} opcode_table[];
-+
-+#endif
 -- 
 2.12.0
 
