@@ -1,91 +1,70 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/5] predefine __INT_MAX__ and friends
-Date: Mon, 27 Mar 2017 16:19:15 +0200
-Message-ID: <20170327141918.61151-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/5] do not depends on limits.h to test __CHAR_BIT__
+Date: Mon, 27 Mar 2017 16:19:18 +0200
+Message-ID: <20170327141918.61151-6-luc.vanoostenryck@gmail.com>
 References: <20170327141918.61151-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:33552 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753489AbdC0OV5 (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35624 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753483AbdC0OV4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 10:21:57 -0400
-Received: by mail-wr0-f193.google.com with SMTP id 20so13746457wrx.0
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 07:21:41 -0700 (PDT)
+        Mon, 27 Mar 2017 10:21:56 -0400
+Received: by mail-wr0-f196.google.com with SMTP id p52so10815518wrc.2
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 07:21:50 -0700 (PDT)
 In-Reply-To: <20170327141918.61151-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Some tests or some code depends on these macros being predefined
-by the compiler.
+This test depends on the header <limits.h> which itself depends
+on some macros being defined by the compiler.
 
-Predefine them.
+Now these macros are predefined (at least the obvious ones)
+but it's annoying for the tests to depends on external things
+like this header.
+
+Remove this dependence by rewriting the test to use the predefined
+macros directly.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c                                | 23 ++++++++++++++++++-----
- validation/preprocessor/predef-max.c | 18 ++++++++++++++++++
- 2 files changed, 36 insertions(+), 5 deletions(-)
- create mode 100644 validation/preprocessor/predef-max.c
+ validation/builtin_char_bit.c             |  7 -------
+ validation/preprocessor/predef-char-bit.c | 16 ++++++++++++++++
+ 2 files changed, 16 insertions(+), 7 deletions(-)
+ delete mode 100644 validation/builtin_char_bit.c
+ create mode 100644 validation/preprocessor/predef-char-bit.c
 
-diff --git a/lib.c b/lib.c
-index 272d2c88a..4e6e6acd6 100644
---- a/lib.c
-+++ b/lib.c
-@@ -827,15 +827,28 @@ static char **handle_switch(char *arg, char **next)
- 	return next;
- }
- 
--static void predefined_macros(void)
-+static void predefined_sizeof(const char *name, unsigned bits)
- {
--	unsigned long long val;
-+	add_pre_buffer("#weak_define __SIZEOF_%s__ %d\n", name, bits/8);
-+}
- 
-+static void predefined_type_size(const char *name, const char *suffix, unsigned bits)
-+{
-+	unsigned long long max = (1ULL << (bits - 1 )) - 1;
-+
-+	add_pre_buffer("#weak_define __%s_MAX__ %#llx%s\n", name, max, suffix);
-+	predefined_sizeof(name, bits);
-+}
-+
-+static void predefined_macros(void)
-+{
- 	add_pre_buffer("#define __CHECKER__ 1\n");
- 
--	val = (1ULL << (bits_in_long-1)) - 1;
--	add_pre_buffer("#weak_define __LONG_MAX__ %#llxLL\n", val);
--	add_pre_buffer("#weak_define __SIZEOF_POINTER__ %d\n", bits_in_pointer/8);
-+	predefined_type_size("INT", "", bits_in_int);
-+	predefined_type_size("LONG", "L", bits_in_long);
-+	predefined_type_size("LONG_LONG", "LL", bits_in_longlong);
-+
-+	predefined_sizeof("POINTER", bits_in_pointer);
- }
- 
- void declare_builtin_functions(void)
-diff --git a/validation/preprocessor/predef-max.c b/validation/preprocessor/predef-max.c
+diff --git a/validation/builtin_char_bit.c b/validation/builtin_char_bit.c
+deleted file mode 100644
+index 30e6bed46..000000000
+--- a/validation/builtin_char_bit.c
++++ /dev/null
+@@ -1,7 +0,0 @@
+-#include <limits.h>
+-
+-static unsigned int word_bits = sizeof(unsigned int) * CHAR_BIT;
+-
+-/*
+- * check-name: __CHAR_BIT__
+- */
+diff --git a/validation/preprocessor/predef-char-bit.c b/validation/preprocessor/predef-char-bit.c
 new file mode 100644
-index 000000000..ad4b7eaf1
+index 000000000..fed0166e4
 --- /dev/null
-+++ b/validation/preprocessor/predef-max.c
-@@ -0,0 +1,18 @@
-+#define TEST_MAX(X, Z)	if (X != ((~ Z) >> 1))	return 1
++++ b/validation/preprocessor/predef-char-bit.c
+@@ -0,0 +1,16 @@
++#define TEST_BIT(X, T)	if (__ ## X ## _BIT__  != 8 * sizeof(T)) return 1
 +
-+int test_max(void)
++int test(void)
 +{
-+	TEST_MAX(__INT_MAX__, 0U);
-+	TEST_MAX(__LONG_MAX__, 0UL);
-+	TEST_MAX(__LONG_LONG_MAX__, 0ULL);
++	TEST_BIT(CHAR, char);
 +
 +	return 0;
 +}
 +
 +/*
-+ * check-name: predefined __<type>_MAX__
++ * check-name: predefined __<type>_BIT__
 + * check-command: test-linearize -Wno-decl $file
 + * check-output-ignore
 + *
