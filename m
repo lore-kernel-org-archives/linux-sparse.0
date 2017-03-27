@@ -1,85 +1,101 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v6 23/52] llvm: fix pointer/float mixup in comparisons
-Date: Mon, 27 Mar 2017 23:23:47 +0200
-Message-ID: <20170327212416.18536-24-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v6 49/52] llvm: add support for OP_FPCAST
+Date: Mon, 27 Mar 2017 23:24:13 +0200
+Message-ID: <20170327212416.18536-50-luc.vanoostenryck@gmail.com>
 References: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34790 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752503AbdC0V0t (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:33733 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752575AbdC0V1T (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 17:26:49 -0400
-Received: by mail-wr0-f196.google.com with SMTP id w43so14203960wrb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:26:47 -0700 (PDT)
+        Mon, 27 Mar 2017 17:27:19 -0400
+Received: by mail-wr0-f195.google.com with SMTP id 20so17045348wrx.0
+        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 14:27:18 -0700 (PDT)
 In-Reply-To: <20170327212416.18536-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In output_op_compare() everything that is not of interger
-type is treated as floats. Pointers disagree.
-
-Fix this by rearranging the code and treat pointers like integers
-as required for LLVM's icmp.
-
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c                    | 17 +++++++++++++++--
- validation/backend/pointer-cmp.c |  9 +++++++++
- 2 files changed, 24 insertions(+), 2 deletions(-)
- create mode 100644 validation/backend/pointer-cmp.c
+ sparse-llvm.c             | 22 +++++++++++++++++++++-
+ validation/backend/cast.c |  5 +++--
+ 2 files changed, 24 insertions(+), 3 deletions(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index c64bfe2f7..86c57ab33 100644
+index 840e8c6ba..604b96842 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -596,14 +596,27 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+@@ -934,6 +934,26 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
+ 	insn->target->priv = target;
+ }
  
- 	LLVMTypeRef dst_type = insn_symbol_type(insn);
- 
--	if (LLVMGetTypeKind(LLVMTypeOf(lhs)) == LLVMIntegerTypeKind) {
-+	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
-+	case LLVMPointerTypeKind:
-+	case LLVMIntegerTypeKind: {
- 		LLVMIntPredicate op = translate_op(insn->opcode);
- 
- 		target = LLVMBuildICmp(fn->builder, op, lhs, rhs, target_name);
--	} else {
-+		break;
-+	}
-+	case LLVMHalfTypeKind:
-+	case LLVMFloatTypeKind:
-+	case LLVMDoubleTypeKind:
-+	case LLVMX86_FP80TypeKind:
-+	case LLVMFP128TypeKind:
-+	case LLVMPPC_FP128TypeKind: {
- 		LLVMRealPredicate op = translate_fop(insn->opcode);
- 
- 		target = LLVMBuildFCmp(fn->builder, op, lhs, rhs, target_name);
-+		break;
-+	}
-+	default:
-+		assert(0);
- 	}
- 
- 	target = LLVMBuildZExt(fn->builder, target, dst_type, target_name);
-diff --git a/validation/backend/pointer-cmp.c b/validation/backend/pointer-cmp.c
-new file mode 100644
-index 000000000..fa76d1b57
---- /dev/null
-+++ b/validation/backend/pointer-cmp.c
-@@ -0,0 +1,9 @@
-+int cmpint(   int x,   int y)	{ return x == y; }
-+int cmpflt( float x, float y)	{ return x == y; }
-+int cmpvptr(void *x, void *y)	{ return x == y; }
-+int cmpiptr(int  *x, int  *y)	{ return x == y; }
++static void output_op_fpcast(struct function *fn, struct instruction *insn)
++{
++	LLVMTypeRef dtype = symbol_type(insn->type);
++	LLVMValueRef src, target;
++	struct symbol *otype = insn->orig_type;
++	char name[64];
 +
-+/*
-+ * check-name: pointer comparison
-+ * check-command: ./sparsec -Wno-decl -c $file -o tmp.o
-+ */
++	assert(is_float_type(insn->type));
++
++	pseudo_name(insn->target, name);
++	src = get_operand(fn, otype, insn->src);
++	if (is_float_type(otype))
++		target = LLVMBuildFPCast(fn->builder, src, dtype, name);
++	else if (is_signed_type(otype))
++		target = LLVMBuildSIToFP(fn->builder, src, dtype, name);
++	else
++		target = LLVMBuildUIToFP(fn->builder, src, dtype, name);
++	insn->target->priv = target;
++}
++
+ static void output_op_setval(struct function *fn, struct instruction *insn)
+ {
+ 	struct expression *val = insn->val;
+@@ -1008,7 +1028,7 @@ static void output_insn(struct function *fn, struct instruction *insn)
+ 		output_op_cast(fn, insn, LLVMSExt);
+ 		break;
+ 	case OP_FPCAST:
+-		assert(0);
++		output_op_fpcast(fn, insn);
+ 		break;
+ 	case OP_PTRCAST:
+ 		output_op_ptrcast(fn, insn);
+diff --git a/validation/backend/cast.c b/validation/backend/cast.c
+index 598b16aab..4c308dfe8 100644
+--- a/validation/backend/cast.c
++++ b/validation/backend/cast.c
+@@ -1,4 +1,5 @@
+ typedef _Bool bool;
++typedef   signed char schar;
+ typedef unsigned char uchar;
+ typedef unsigned short ushort;
+ typedef unsigned int uint;
+@@ -14,6 +15,7 @@ typedef unsigned long long ulonglong;
+ #define DEFINE_CASTS(from)			\
+ 	DEFINE_CAST(from, bool)			\
+ 	DEFINE_CAST(from, char)			\
++	DEFINE_CAST(from, schar)		\
+ 	DEFINE_CAST(from, uchar)		\
+ 	DEFINE_CAST(from, short)		\
+ 	DEFINE_CAST(from, ushort)		\
+@@ -23,13 +25,12 @@ typedef unsigned long long ulonglong;
+ 	DEFINE_CAST(from, ulong)		\
+ 	DEFINE_CAST(from, longlong)		\
+ 	DEFINE_CAST(from, ulonglong)		\
+-/*
+ 	DEFINE_CAST(from, float)		\
+ 	DEFINE_CAST(from, double)
+-*/
+ 
+ DEFINE_CASTS(bool)
+ DEFINE_CASTS(char)
++DEFINE_CASTS(schar)
+ DEFINE_CASTS(uchar)
+ DEFINE_CASTS(short)
+ DEFINE_CASTS(ushort)
 -- 
 2.12.0
 
