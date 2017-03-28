@@ -1,71 +1,76 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Potential incorrect simplification
-Date: Tue, 28 Mar 2017 23:22:50 +0100
-Message-ID: <CACXZuxc55Kjm=GRRaLJZ9CfvkcmukynsM3crSPax+My-WrGo1w@mail.gmail.com>
+Date: Wed, 29 Mar 2017 00:28:29 +0200
+Message-ID: <20170328222828.ahih2egqe7pe5jdw@macpro.local>
 References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
  <CAExDi1TtcpZtnEV6ctyA9MacJA_9h4njmhd-MSA3KgOq8oK_gA@mail.gmail.com>
  <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
- <20170328141113.kbrwdva6ttsrokts@macpro.local> <CACXZuxen9UFGNp8=-OQHoqRQJ5F__rwQoCJJ6TdkAo6HEXWOQw@mail.gmail.com>
+ <20170328141113.kbrwdva6ttsrokts@macpro.local>
+ <CACXZuxen9UFGNp8=-OQHoqRQJ5F__rwQoCJJ6TdkAo6HEXWOQw@mail.gmail.com>
  <CA+55aFx6g3-+6tJ_6Uqu4K1pQoDnqcXrjSGYsryLjjksEtT06A@mail.gmail.com>
+ <20170328170049.2y6lwxx64yzjjwmc@macpro.local>
+ <CA+55aFz6C5bEJqr72mBauWRUQiKYJ8eQpiXrKRW7JEiKXjZdrw@mail.gmail.com>
+ <20170328202746.bmamqhxitmpvfsad@macpro.local>
+ <CA+55aFyWtn3_o+D5f1V9NvwHSDBFHi57tv4vOjJAffhCyqL7mA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:36506 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752323AbdC1WW6 (ORCPT
+Received: from mail-wr0-f174.google.com ([209.85.128.174]:33554 "EHLO
+        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932157AbdC1W2i (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 28 Mar 2017 18:22:58 -0400
-Received: by mail-it0-f54.google.com with SMTP id e75so73082814itd.1
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 15:22:52 -0700 (PDT)
-In-Reply-To: <CA+55aFx6g3-+6tJ_6Uqu4K1pQoDnqcXrjSGYsryLjjksEtT06A@mail.gmail.com>
+        Tue, 28 Mar 2017 18:28:38 -0400
+Received: by mail-wr0-f174.google.com with SMTP id w43so101387288wrb.0
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 15:28:32 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CA+55aFyWtn3_o+D5f1V9NvwHSDBFHi57tv4vOjJAffhCyqL7mA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Linus,
+On Tue, Mar 28, 2017 at 02:57:01PM -0700, Linus Torvalds wrote:
+> On Tue, Mar 28, 2017 at 1:27 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > On Tue, Mar 28, 2017 at 11:02:32AM -0700, Linus Torvalds wrote:
+> >>
+> >> The single-store shortcut is actually pretty important, because it is
+> >> what turns a *lot* of local variables from stack memory things into
+> >> pseudos. That's partly because the sparse optimizations aren't all
+> >> that smart.
+> >
+> > Everytime I look at this part of the code, I think the same:
+> >   why turn all vars into stack memory to have to turn them later
+> >   into pseudos?
+> 
+> Oh, you absolutely *cannot* turn them into pseudo's directly.
 
-On 28 March 2017 at 17:20, Linus Torvalds <torvalds@linux-foundation.org> wrote:
-> On Tue, Mar 28, 2017 at 7:19 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->>
->> Well the unsimplified output is correct. The problem appears after
->> simplification.
->
-> No. The unsimplified output has the exact same bug:
->
->   main:
->   .L0:
->         <entry-point>
->         load.32     %r1 <- 0[s3]
->         shl.32      %r2 <- $1, $6
->         and.32      %r3 <- %r1, $-65
->
-> That "load.32" loads an uninitialized value from the stack.
->
-> The simplification then just simplifies the uninitialized load to just
-> be an uninitialized pseudo instead. Exact same code.
->
-> And arguably both unsimplified and simplified code is "correct" in the
-> sense that it's exactly what the original source code does:
->
->    s3.onebit = 1;
->
+No no, of course. I was just thinking loud about how easy it would
+be to simplify the case of simple local variables whose address is
+not taken.
+ 
+> A pseudo is a "register", and in SSA format. Local variables are not
+> registers, and do not honor SSA.
+> 
+> So local variables are very much *not* pseudos at any time. Local
+> variables can have their address taken, local variables can be
+> assigned multiple times, local variables can have complex types, none
+> of which is pseudo-like behavior.
+> 
+> Now, some *very* limited cases of local variables end up being
+> trivially very similar to pseudos, and those simple cases get turned
+> into pseudos. But that only happens for the simple cases - when their
+> address is not taken or used, and when they only have a single
+> assignment to them.
+> 
+> But local variables do not start out as pseudos, exactly because the
+> pseudo case is a very very very limited case of the full local
+> variable case.
 
-I think that the unsimplified output is correct in that it is doing
-what the C code says. Because if you look at the C code, the code is
-only accessing a field that has been initialized prior to access - so
-I do not think this counts as undefined behaviour. I am unable to find
-the wording in the C standard that would make this clear one way or
-another, but my reading of the standard is that the C code is legal.
+I was not thinking to turn them directly into pseudos, just to recognize 
+that they will turn into pseudo and this is useless to turn them into
+stack memory. So multiple assignmement would be OK, but having its 
+address taken would not and being an array would also not be OK.
+I have no idea if it would simplify or speedup things though.
 
-I understand that to the simplification phase the first load looks
-like load of undefined value - but that is not the semantic of the C
-code that led to it.
-
-I checked that clang generates the same sequence of instructions as
-sparse when optimization is switched off - but turning on optimization
-gets rid of all the code except for the return.
-
-Thanks and Regards
-Dibyendu
+-- Luc
