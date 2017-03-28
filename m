@@ -1,44 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Potential incorrect simplification
-Date: Tue, 28 Mar 2017 16:11:14 +0200
-Message-ID: <20170328141113.kbrwdva6ttsrokts@macpro.local>
-References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
- <CAExDi1TtcpZtnEV6ctyA9MacJA_9h4njmhd-MSA3KgOq8oK_gA@mail.gmail.com>
- <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 0/4] floating-point specific instructions
+Date: Tue, 28 Mar 2017 16:18:25 +0200
+Message-ID: <20170328141829.21421-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:35495 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752826AbdC1OLe (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33751 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751350AbdC1OZV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 28 Mar 2017 10:11:34 -0400
-Received: by mail-wr0-f178.google.com with SMTP id u1so107337186wra.2
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 07:11:28 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
+        Tue, 28 Mar 2017 10:25:21 -0400
+Received: by mail-wm0-f68.google.com with SMTP id o81so1099wmb.0
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 07:25:20 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Mar 28, 2017 at 02:58:57PM +0100, Dibyendu Majumdar wrote:
-> Hi Luc,
-> 
-> 
-> The first instruction and.32 refers to %r4 which is undefined.
+Floating-point arithmetic is quite different from arithmetic
+on integers (or on real numbers). In particular,
+most transformations, simplifications that can be done on integers
+are invalid when done on floats.
 
-Yes, I saw.
-This %r4 corresponds (somehow) to s3 which isn't initialized.
+Since they don't follow the same rules as their integer
+counterpart, better to give a specific opcode to floating-point
+operations instead of having to test the type of the operands at
+each manipulation.
 
-But yes, there is two problems here:
-*) we should use something explicit, like VOID
-*) there is a circulary dependence between %r3 & %r4, the first %r4
-   being obviously wrong.
 
-I suspect there is a lot of problems present once there is some
-undefined variables.
+Luc Van Oostenryck (4):
+  fix linearize_inc_dec() with floats
+  add test case for boolean negation on float
+  fix support of floating-point compare
+  add support of floating-point specific arithmetic ops
 
-Thanks for the repoort.
+ cse.c                               |  14 ++++
+ linearize.c                         |  58 ++++++++++++++---
+ linearize.h                         |  25 ++++++++
+ liveness.c                          |   1 +
+ opcode.c                            |  46 +++++++++++---
+ opcode.h                            |  10 +++
+ simplify.c                          |   2 +-
+ sparse-llvm.c                       |  64 ++++++++++---------
+ validation/backend/arithmetic-ops.c |  20 ++++++
+ validation/bool-float.c             |   9 +++
+ validation/fp-ops.c                 |  57 +++++++++++++++++
+ validation/inc-dec-float.c          |  13 ++++
+ validation/optim/canonical-fcmp.c   | 123 ++++++++++++++++++++++++++++++++++++
+ 13 files changed, 394 insertions(+), 48 deletions(-)
+ create mode 100644 validation/bool-float.c
+ create mode 100644 validation/fp-ops.c
+ create mode 100644 validation/inc-dec-float.c
+ create mode 100644 validation/optim/canonical-fcmp.c
 
--- Luc
+-- 
+2.12.0
+
