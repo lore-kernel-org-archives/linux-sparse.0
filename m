@@ -1,95 +1,57 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: Potential incorrect simplification
-Date: Tue, 28 Mar 2017 11:02:32 -0700
-Message-ID: <CA+55aFz6C5bEJqr72mBauWRUQiKYJ8eQpiXrKRW7JEiKXjZdrw@mail.gmail.com>
-References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
- <CAExDi1TtcpZtnEV6ctyA9MacJA_9h4njmhd-MSA3KgOq8oK_gA@mail.gmail.com>
- <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
- <20170328141113.kbrwdva6ttsrokts@macpro.local> <CACXZuxen9UFGNp8=-OQHoqRQJ5F__rwQoCJJ6TdkAo6HEXWOQw@mail.gmail.com>
- <CA+55aFx6g3-+6tJ_6Uqu4K1pQoDnqcXrjSGYsryLjjksEtT06A@mail.gmail.com> <20170328170049.2y6lwxx64yzjjwmc@macpro.local>
+Subject: Re: [PATCH v6 00/15] prepare for LLVM fixes
+Date: Tue, 28 Mar 2017 11:10:17 -0700
+Message-ID: <CA+55aFx+-mvbjN_m0A3ZFFVtBHEAwbmuruMS5P_082_Fr2auzg@mail.gmail.com>
+References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
+ <7406f777-5e8b-5ae0-55e0-26a36ddb64b5@ramsayjones.plus.com> <20170327222212.jle5tzjevfsigvuw@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f48.google.com ([209.85.214.48]:36197 "EHLO
-        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753955AbdC1SCy (ORCPT
+Received: from mail-it0-f68.google.com ([209.85.214.68]:35175 "EHLO
+        mail-it0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752509AbdC1SKd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 28 Mar 2017 14:02:54 -0400
-Received: by mail-it0-f48.google.com with SMTP id e75so64870715itd.1
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 11:02:53 -0700 (PDT)
-In-Reply-To: <20170328170049.2y6lwxx64yzjjwmc@macpro.local>
+        Tue, 28 Mar 2017 14:10:33 -0400
+Received: by mail-it0-f68.google.com with SMTP id y18so5052325itc.2
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 11:10:32 -0700 (PDT)
+In-Reply-To: <20170327222212.jle5tzjevfsigvuw@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Tue, Mar 28, 2017 at 10:00 AM, Luc Van Oostenryck
+On Mon, Mar 27, 2017 at 3:22 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
 >
-> I agree, of course, but I think there is a problem anyway.
-
-Yes. I just wanted to point out that it's not the simplification phase
-that is the problem, and that sparse is technically correct (for some
-definition of "technically" ;)
-
-> The problem here with this %r4 is created by the single-store
-> shortcut which replace all loads with the same value as the one
-> used for the unique store (even loads that are not dominated
-> by the store). Fair enough, don't use uninitialized vars.
-
-Yeah.
-
-Personally, I absolutely detest a lot of the undefined C corner cases.
-I'm a huge fan of the language, but almost all of the the "undefined
-behavior" in C is a huge mistake.
-
-Pretty much every "undefined behavior" in the standard should have
-been "implementation defined", or at least have the option to be so.
-For example, it would have been much nicer if all variables were
-implicitly initialized to zero, not just static variables. In 99% of
-all cases the compiler won't even care, since it will see the actual
-real initialization anyway, and the "initialize automatic variables to
-zero" wouldn't matter - except from a repeatability, security and
-simplicity standpoint.
-
-Obviously, that particular choice made more sense in legacy C (when
-optimizations weren't nearly as smart as what people take for granted
-today, and CPU cycles were more expensive).
-
-> Now, if you remove this single-store shortcut and just let the normal
-> find_dominating_stores() do its job, the resulting code become
-> the expected:
->         ret.32      $0
+> It's a time somehow painfull, I agree. It's why I try also push
+> the serie on github when the serie is worth of it (and complete).
+> in this case you can find everything at:
+>         https://github.com/lucvoo/sparse/commits/llvm-fixes-v6
 >
-> Not just by coincidence (I checked the intermediate steps):
-> sparse deduces then correctly that the value in the conditional
-> is always true and everything become dead after that.
+> (and yes, this tree contains a few more patches, not in the serie
+> already submitted but not yet in sparse-next).
 
-Nice.
+I do wish that sparse would use more of a real git workflow, instead
+of just applying patches.
 
-> But what annoys me really is that:
-> -) once you remove the single-store shortcut, it seems there is
->    other problems (I just saw it by doing some code comparison,
->    I need to create a few clear examples).
+Sending out patches to a mailing list is _wonderful_ for actually
+doing code review and making people *aware* of what's going on, but
+it's not a great maintenance model. It doesn't scale, and it makes for
+lots of maintainer work.
 
-The single-store shortcut is actually pretty important, because it is
-what turns a *lot* of local variables from stack memory things into
-pseudos. That's partly because the sparse optimizations aren't all
-that smart.
+Particularly with somebody like Luc, who sends involved patch series
+for core stuff and knows what he is doing, I think Chris could just do
+git merges, and lower the maintenance overhead a lot.
 
-Sparse code gen sometimes looks really good, but it's really largely
-due to SSA really being a wonderful model. It makes some "complex"
-optimizations magically trivial.  But outside of those things, sparse
-really is pretty damn stupid.
+NOTE! If you do git merges using the github interface, things often go
+south *very* quickly.  github likes to do "merges" using rebase,
+probably because it caters to projects who don't understand about the
+whole "keep a sane history". So it's really really easy to use github
+in ways that interact really badly with good git workflows. But you
+*can* do merges entirely using github, if you actually know what
+you're doing and are careful to not do rebasing merges with core
+contributors (using rebase for the occasional small patch series from
+random fly-by contributors is ok, but I think even then github screws
+up signed-off chains).
 
-I actually would whole-heartedly support a "all local variables are
-initialized to zero" mode, which would get rid of a lot of these
-undefined cases.
-
-But it would also be good to just warn about it - the problem is that
-sparse doesn't even necessarily *understand* when it generates garbage
-from garbage input, because the transformations are so mindless, and
-the SSA code works without ever understanding the notion of truly
-"dominating" operations.
-
-                   Linus
+               Linus
