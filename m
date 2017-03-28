@@ -1,78 +1,69 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: sparse-llvm load and store sizes are not handled correctly
-Date: Tue, 28 Mar 2017 13:21:30 +0100
-Message-ID: <CACXZuxeppm_aL3rJPBZL_sUDiwb1dkbjQum=t-Ed4Mz8sEG02g@mail.gmail.com>
-References: <CACXZuxd3E8UZA6=dDuesaAHqd5wWF+ZCM_sCa+YYOMhgnpMM8w@mail.gmail.com>
+Subject: Potential incorrect simplification
+Date: Tue, 28 Mar 2017 13:40:22 +0100
+Message-ID: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:36928 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751306AbdC1MaV (ORCPT
+Received: from mail-it0-f45.google.com ([209.85.214.45]:36834 "EHLO
+        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932220AbdC1MlR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 28 Mar 2017 08:30:21 -0400
-Received: by mail-it0-f50.google.com with SMTP id 190so16338905itm.0
-        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 05:30:10 -0700 (PDT)
-In-Reply-To: <CACXZuxd3E8UZA6=dDuesaAHqd5wWF+ZCM_sCa+YYOMhgnpMM8w@mail.gmail.com>
+        Tue, 28 Mar 2017 08:41:17 -0400
+Received: by mail-it0-f45.google.com with SMTP id e75so54407808itd.1
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 05:40:57 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 28 March 2017 at 12:42, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> I have this test:
->
-> extern int printf(const char *, ...);
->
-> int main(void)
-> {
-> int x = 6;
-> const char txt[] = "local string %d %f %f\n";
-> float g = 4.2;
-> double e = 42.34;
->
-> printf(txt, x, g, e);
->
-> return 0;
-> }
->
-> When I generate the linearized output with simplifications disabled, I get:
->
-> C:\d\github\dmr_c\tests\bugs>..\..\build\Debug\linearize.exe init1.c
-> main:
-> .L0:
->         <entry-point>
->         store.32    $6 -> 0[x]
->         load.184*   %r1 <- 0["local string %d %f %f\n"]
->         store.184*  %r1 -> 0[txt]
->         set.f32     %r2 <- 4.200000
->         store.f32   %r2 -> 0[g]
->         set.f64     %r3 <- 42.340000
->         store.f64   %r3 -> 0[e]
->         symaddr.64* %r4 <- txt
->         set.f64     %r5 <- 4.200000
->         set.f64     %r6 <- 42.340000
->         push.64*    %r4
->         push.32     $6
->         push.f64    %r5
->         push.f64    %r6
->         call.32     %r7 <- printf
->         phisrc.32   %phi1(return) <- $0
->         br          .L1
->
-> .L1:
->         phi.32      %r8 <- %phi1(return)
->         ret.32      $0
->
-> What is interesting is that the load and store ops have a size that is
-> 184 bits. This scenario is not handled by sparse-llvm correctly.
->
-> Presumably for the store here we need to copy the data? What about the load?
->
+I am getting a failure in following test when simplifications are enabled:
 
-So it seems that when dealing with store we need to check if the
-target type is an aggregate type - array, or struct - because stores
-to these types are not yet implemented in sparse-llvm. I am not sure
-whether load needs a check too.
+extern int printf(const char *, ...);
+
+int main(void)
+{
+   struct{
+     int twobit:2;
+     int       :1;
+     int threebit:3;
+     unsigned int onebit:1;
+   } s3;
+
+   s3.onebit = 1;
+   if(s3.onebit != 1){
+      printf("Be especially careful with 1-bit fields! %d\n", (int) s3.onebit);
+      return 1;
+   }
+   return 0;
+}
+
+The output (truncated) from linearizer without simplications is this:
+
+main:
+.L0:
+        <entry-point>
+        load.32     %r1 <- 0[s3]
+        shl.32      %r2 <- $1, $6
+        and.32      %r3 <- %r1, $-65
+        or.32       %r4 <- %r3, %r2
+        store.32    %r4 -> 0[s3]
+        load.32     %r5 <- 0[s3]
+        lsr.32      %r6 <- %r5, $6
+        cast.32     %r7 <- (1) %r6
+        setne.32    %r8 <- %r7, $1
+        br          %r8, .L1, .L2
+
+But if simplifications are on then we get:
+
+main:
+.L0:
+        <entry-point>
+        and.32      %r3 <- %r4, $-65
+        or.32       %r4 <- %r3, $64
+        lsr.32      %r6 <- %r4, $6
+        cast.32     %r7 <- (1) %r6
+        setne.32    %r8 <- %r7, $1
+        br          %r8, .L1, .L3
 
 Regards
 Dibyendu
