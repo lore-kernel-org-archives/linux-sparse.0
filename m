@@ -1,62 +1,71 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v6 00/15] prepare for LLVM fixes
-Date: Tue, 28 Mar 2017 00:22:13 +0200
-Message-ID: <20170327222212.jle5tzjevfsigvuw@macpro.local>
-References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
- <7406f777-5e8b-5ae0-55e0-26a36ddb64b5@ramsayjones.plus.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: sparse-llvm load and store sizes are not handled correctly
+Date: Tue, 28 Mar 2017 12:42:26 +0100
+Message-ID: <CACXZuxd3E8UZA6=dDuesaAHqd5wWF+ZCM_sCa+YYOMhgnpMM8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36791 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752271AbdC0WWR (ORCPT
+Received: from mail-it0-f44.google.com ([209.85.214.44]:35795 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932147AbdC1Lme (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 27 Mar 2017 18:22:17 -0400
-Received: by mail-wr0-f196.google.com with SMTP id u1so17436406wra.3
-        for <linux-sparse@vger.kernel.org>; Mon, 27 Mar 2017 15:22:16 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <7406f777-5e8b-5ae0-55e0-26a36ddb64b5@ramsayjones.plus.com>
+        Tue, 28 Mar 2017 07:42:34 -0400
+Received: by mail-it0-f44.google.com with SMTP id y18so108537116itc.0
+        for <linux-sparse@vger.kernel.org>; Tue, 28 Mar 2017 04:42:28 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Mar 27, 2017 at 10:56:52PM +0100, Ramsay Jones wrote:
-> 
-> 
-> On 27/03/17 18:33, Luc Van Oostenryck wrote:
-> > This serie contains preparatory patches for
-> > sparse-llvm's fixes but not sparse-llvm specific
-> > and having some values of their own.
-> > 
-> > These patches were extracted from a previous
-> > serie containing also the sparse-llvm patches.
-> > 
-> > Changes since v5:
-> > - use a table for compare_opcode() & swap_compare_opcode()
-> > - fix test cases on 32bit machines
-> 
-> Hmm, I assumed that this series should apply to master, and then
-> the following 52 patch series on top.
+Hi,
 
-Well no, sorry.
-I haven't explained because I thought it was obvious but
-of course, it's not obvious at all.
+I have this test:
 
-These series apply, and in general any patches or series I send,
-in the order I send them, on top of the stable part of sparse-next.
-And by "the stable part of sparse-next" I mean that if sparse-next
-contains serie-xyz-v2 and I sent serie-xyz-v3, the serie will apply
-at the same place that the -v2 serie was.
+extern int printf(const char *, ...);
 
-It's a time somehow painfull, I agree. It's why I try also push
-the serie on github when the serie is worth of it (and complete).
-in this case you can find everything at:
-	https://github.com/lucvoo/sparse/commits/llvm-fixes-v6
+int main(void)
+{
+int x = 6;
+const char txt[] = "local string %d %f %f\n";
+float g = 4.2;
+double e = 42.34;
 
-(and yes, this tree contains a few more patches, not in the serie
-already submitted but not yet in sparse-next).
+printf(txt, x, g, e);
 
-Sorry for any lost of time.
+return 0;
+}
 
--- Luc
+When I generate the linearized output with simplifications disabled, I get:
+
+C:\d\github\dmr_c\tests\bugs>..\..\build\Debug\linearize.exe init1.c
+main:
+.L0:
+        <entry-point>
+        store.32    $6 -> 0[x]
+        load.184*   %r1 <- 0["local string %d %f %f\n"]
+        store.184*  %r1 -> 0[txt]
+        set.f32     %r2 <- 4.200000
+        store.f32   %r2 -> 0[g]
+        set.f64     %r3 <- 42.340000
+        store.f64   %r3 -> 0[e]
+        symaddr.64* %r4 <- txt
+        set.f64     %r5 <- 4.200000
+        set.f64     %r6 <- 42.340000
+        push.64*    %r4
+        push.32     $6
+        push.f64    %r5
+        push.f64    %r6
+        call.32     %r7 <- printf
+        phisrc.32   %phi1(return) <- $0
+        br          .L1
+
+.L1:
+        phi.32      %r8 <- %phi1(return)
+        ret.32      $0
+
+What is interesting is that the load and store ops have a size that is
+184 bits. This scenario is not handled by sparse-llvm correctly.
+
+Presumably for the store here we need to copy the data? What about the load?
+
+Thanks and Regards
+Dibyendu
