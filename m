@@ -1,48 +1,44 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v6 00/15] prepare for LLVM fixes
-Date: Fri, 31 Mar 2017 17:26:42 +0800
-Message-ID: <CANeU7Qk_XYxG9Lq-RpkvRwrhS0zv7LwFDDTKTFWnJ_QX_uzhhA@mail.gmail.com>
-References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
- <7406f777-5e8b-5ae0-55e0-26a36ddb64b5@ramsayjones.plus.com>
- <20170327222212.jle5tzjevfsigvuw@macpro.local> <CA+55aFx+-mvbjN_m0A3ZFFVtBHEAwbmuruMS5P_082_Fr2auzg@mail.gmail.com>
- <CANeU7Q=d22MqFigDcaW1o59BTYV2rKNhfjjDCVpxA_JTDey_ag@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: Update on dmr_C project
+Date: Fri, 31 Mar 2017 11:30:05 +0200
+Message-ID: <CAMHZB6F0bS7jgNOE-Z5YFtkbFw5sW0tMO2MHJ8Dxxro8dLJ6hg@mail.gmail.com>
+References: <CACXZuxeDk+nyFb1548_rc5j27iBgT8awL6yz4PQpQStih1G19w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f176.google.com ([209.85.223.176]:33557 "EHLO
-        mail-io0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932648AbdCaJ0o (ORCPT
+Received: from mail-qk0-f176.google.com ([209.85.220.176]:33290 "EHLO
+        mail-qk0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932554AbdCaJaH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 31 Mar 2017 05:26:44 -0400
-Received: by mail-io0-f176.google.com with SMTP id f84so35891698ioj.0
-        for <linux-sparse@vger.kernel.org>; Fri, 31 Mar 2017 02:26:43 -0700 (PDT)
-In-Reply-To: <CANeU7Q=d22MqFigDcaW1o59BTYV2rKNhfjjDCVpxA_JTDey_ag@mail.gmail.com>
+        Fri, 31 Mar 2017 05:30:07 -0400
+Received: by mail-qk0-f176.google.com with SMTP id d201so32018894qkc.0
+        for <linux-sparse@vger.kernel.org>; Fri, 31 Mar 2017 02:30:06 -0700 (PDT)
+In-Reply-To: <CACXZuxeDk+nyFb1548_rc5j27iBgT8awL6yz4PQpQStih1G19w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Mar 31, 2017 at 12:49 PM, Christopher Li <sparse@chrisli.org> wrote:
+On Fri, Mar 31, 2017 at 2:30 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> Hi,
 >
-> That being said, I do wish there is a way to figure out which patches
-> haven't changed in the new series. e.g. from V4 to V5, only a few patches
-> actually change. I can just focus on those changed one. I suppose I can
-> write a script to detect the same patch on different series.
+> Just a quick update on dmr_C project.
 >
+> + I am now able to compile minilua using sparse-llvm (dmr_C version)
+> and run a simple hello.lua script. Even running a simple Lua script
+> like this entails quite a lot, so I am really pleased to hit this
+> milestone.
 
-BTW, I just add that feature to my patch series script. It has been working
-for me on the new llvm-fix series. For every patch in the new series, the
-script do "interdiff" with every patch on previous series and output
-the smallest
-diff. That usually nicely show the incremental change compare to
-previous series.
+Great!
 
-For the case there is no change, just apply that patch because it is the same
-as the previous series, which I already apply and reviewed.
+> ...
+> I wanted to thank you for the help given to me over the past few
+> weeks, and of course for creating Sparse in the first place.
+>
+> Although there is still more testing to do, and bugs to fix, I will
+> now start work in parallel on a different backend to sparse that does
+> not use LLVM. I will report progress when there is something to show.
 
-This feature actually work out better than I expected.
-
-Even if I use git merge, I still need to find out exactly what change between
-two branch, which has rebased and different commit mixed. e.g. V4 and V6.
-
-Chris
+Looking forward.
+-- Luc
