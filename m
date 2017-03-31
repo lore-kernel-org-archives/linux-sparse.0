@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 14/25] constexpr: recognize address constants created through pointer arithmetic
-Date: Fri, 31 Mar 2017 03:44:48 +0200
-Message-ID: <20170331014459.9351-15-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 20/25] constexpr: relax some constant expression rules for pointer expressions
+Date: Fri, 31 Mar 2017 03:44:54 +0200
+Message-ID: <20170331014459.9351-21-luc.vanoostenryck@gmail.com>
 References: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36047 "EHLO
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33361 "EHLO
         mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934889AbdCaBqn (ORCPT
+        with ESMTP id S934889AbdCaBqs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Mar 2017 21:46:43 -0400
-Received: by mail-wr0-f196.google.com with SMTP id k6so15310014wre.3
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:42 -0700 (PDT)
+        Thu, 30 Mar 2017 21:46:48 -0400
+Received: by mail-wr0-f196.google.com with SMTP id u18so16611762wrc.0
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:47 -0700 (PDT)
 In-Reply-To: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,75 +19,85 @@ Cc: Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>, L
 
 From: Nicolai Stange <nicstange@gmail.com>
 
-An address constant +/- an integer constant expression qualifies as an
-address constant again.
-Furthermore, the array-subscript operator "[]" may be used in the creation
-of address constant.
+The official constraints on constant expressions [6.6] are insanely
+strict in that they do not allow some constructs commonly used in the
+wild.
 
-Handle both cases by making evaluate_ptr_add() check whether an integer
-constant expression is added to an address constant and tag the result as
-being an address constant again if so.
+Relax them by treating
+- address constants cast to different pointer type as address constants
+  again,
+- address constants cast to arithmetic type as arithmetic constant
+  expressions
+- conditional expressions whose true and false branches both yield
+  address constants as address constants,
+- and conditional expressions whose condition is an address constant
+  as an constant expression to the extent their true and false branches
+  allow.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                           |  7 +++++++
- validation/constexpr-pointer-arith.c | 28 ++++++++++++++++++++++++++++
- 2 files changed, 35 insertions(+)
- create mode 100644 validation/constexpr-pointer-arith.c
+ evaluate.c | 29 +++++++++++++++++++++++++++--
+ 1 file changed, 27 insertions(+), 2 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index ce2e52e15..e58d9c373 100644
+index be72b22b9..022c7b5f3 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -571,6 +571,13 @@ static struct symbol *evaluate_ptr_add(struct expression *expr, struct symbol *i
- 	classify_type(degenerate(expr->left), &ctype);
- 	base = examine_pointer_target(ctype);
+@@ -1136,10 +1136,20 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+ 	expr->flags = (expr->conditional->flags & (*true)->flags &
+ 			expr->cond_false->flags & ~CEF_CONST_MASK);
+ 	/*
++	 * A conditional operator yields a particular constant
++	 * expression type only if all of its three subexpressions are
++	 * of that type [6.6(6), 6.6(8)].
++	 * As an extension, relax this restriction by allowing any
++	 * constant expression type for the condition expression.
++	 *
+ 	 * A conditional operator never yields an address constant
+ 	 * [6.6(9)].
++	 * However, as an extension, if the condition is any constant
++	 * expression, and the true and false expressions are both
++	 * address constants, mark the result as an address constant.
+ 	 */
+-	expr->flags &= ~CEF_ADDR;
++	if (expr->conditional->flags & (CEF_ACE | CEF_ADDR))
++		expr->flags = (*true)->flags & expr->cond_false->flags & ~CEF_CONST_MASK;
  
-+	/*
-+	 * An address constant +/- an integer constant expression
-+	 * yields an address constant again [6.6(7)].
-+	 */
-+	if ((expr->left->flags & CEF_ADDR) && (expr->right->flags & CEF_ICE))
-+		expr->flags = CEF_ADDR;
+ 	lclass = classify_type(ltype, &ltype);
+ 	rclass = classify_type(rtype, &rtype);
+@@ -2762,6 +2772,14 @@ static int cast_flags(struct expression *expr, struct expression *old)
+ 		 * constants [6.6(9)].
+ 		 */
+ 		flags &= ~CEF_ADDR;
 +
- 	if (!base) {
- 		expression_error(expr, "missing type information");
- 		return NULL;
-diff --git a/validation/constexpr-pointer-arith.c b/validation/constexpr-pointer-arith.c
-new file mode 100644
-index 000000000..a92202800
---- /dev/null
-+++ b/validation/constexpr-pointer-arith.c
-@@ -0,0 +1,28 @@
-+static int a = 1;
-+static int b[2] = {1, 1};
++		/*
++		 * As an extension, treat address constants cast to
++		 * integer type as an arithmetic constant.
++		 */
++		if (old->flags & CEF_ADDR)
++			flags = CEF_ACE;
 +
-+static int *c = &b[1];					// OK
-+static int *d = (int*)0 + 1;				// OK
-+static int *e = &b[1] + 1;				// OK
-+static int *f = b + 1;					// OK
-+static int *g = d + 1;					// KO
-+static int *h = &a + 1;				// OK
-+static int *i = &b[1] + 1;				// OK
-+static int *j = b + 1;					// OK
-+static int *k = d + 1;					// KO
-+static int *l = &*&b[1];				// OK
-+static int *m = &*(&a + 1);				// OK
-+static int *n = &*(&b[1] + 1);				// OK
-+static int *o = &*(b + 1);				// OK
-+static int *p = &*(d + 1);				// KO
-+
-+/*
-+ * check-name: pointer arithmetic constness verification.
-+ * check-command: sparse -Wconstexpr-not-const $file
-+ *
-+ * check-error-start
-+constexpr-pointer-arith.c:8:19: warning: non-constant initializer for static object
-+constexpr-pointer-arith.c:12:19: warning: non-constant initializer for static object
-+constexpr-pointer-arith.c:17:22: warning: non-constant initializer for static object
-+ * check-error-end
-+ */
+ 		/*
+ 		 * Cast to float type -> not an integer constant
+ 		 * expression [6.6(6)].
+@@ -2778,8 +2796,15 @@ static int cast_flags(struct expression *expr, struct expression *old)
+ 		/*
+ 		 * Casts of integer literals to pointer type yield
+ 		 * address constants [6.6(9)].
++		 *
++		 * As an extension, treat address constants cast to a
++		 * different pointer type as address constants again.
++		 *
++		 * As another extension, treat integer constant
++		 * expressions (in contrast to literals) cast to
++		 * pointer type as address constants.
+ 		 */
+-		if (old->flags & CEF_INT)
++		if (old->flags & (CEF_ICE | CEF_ADDR))
+ 			flags = CEF_ADDR;
+ 	}
+ 
 -- 
 2.12.0
 
