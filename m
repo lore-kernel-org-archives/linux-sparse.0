@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 12/25] constexpr: recognize static objects as address constants
-Date: Fri, 31 Mar 2017 03:44:46 +0200
-Message-ID: <20170331014459.9351-13-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 18/25] constexpr: examine constness of __builtin_offsetof at evaluation only
+Date: Fri, 31 Mar 2017 03:44:52 +0200
+Message-ID: <20170331014459.9351-19-luc.vanoostenryck@gmail.com>
 References: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:35181 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934997AbdCaBql (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:34267 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935038AbdCaBqr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Mar 2017 21:46:41 -0400
-Received: by mail-wr0-f195.google.com with SMTP id p52so16621478wrc.2
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:40 -0700 (PDT)
+        Thu, 30 Mar 2017 21:46:47 -0400
+Received: by mail-wr0-f194.google.com with SMTP id w43so16583345wrb.1
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:45 -0700 (PDT)
 In-Reply-To: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,114 +19,116 @@ Cc: Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>, L
 
 From: Nicolai Stange <nicstange@gmail.com>
 
-Introduce support for recognizing address constants created either
-- explicitly by referencing a static storage duration object by means
-  of the unary & operator,
-- implicitly by the use of an expression of array or function type.
+Currently, the determination of a __builtin_offsetof() expressions'
+constness flags is done in two steps:
+- Several flags are speculatively set at expression parsing time
+- and possibly cleared again at evaluation if the member expression
+  includes a non-const array index like in
+    __builtin_offsetof(struct A, a.b[non_const_foo])
 
-Initially tag an expression as being an address constant at the primary
-expression level, i.e. upon encountering a symbol designating an object of
-static storage duration in primary_expression().
+For consistency with other expression types' evaluation, defer the
+determination of a __builtin_offsetof() expression's constness to
+evaluation time, too.
 
-Carry the address constant flag over to the *-preop wrapped expression
-created by evaluate_symbol_expression().
-
-When dereferencing such a *-preop wrapped expression, make
-evaluate_addressof() keep any address constant flag for the unwrapped
-expression.
+Furthermore, carry an array index expression's constness flags
+through the implicit cast to size_t type.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                            |  3 ++-
- expression.c                          |  8 ++++++++
- validation/constexpr-addr-of-static.c | 36 +++++++++++++++++++++++++++++++++++
- 3 files changed, 46 insertions(+), 1 deletion(-)
- create mode 100644 validation/constexpr-addr-of-static.c
+ evaluate.c                      |  8 ++++++--
+ expression.c                    |  3 ---
+ validation/constexpr-offsetof.c | 21 +++++++++++++++++++++
+ 3 files changed, 27 insertions(+), 5 deletions(-)
+ create mode 100644 validation/constexpr-offsetof.c
 
 diff --git a/evaluate.c b/evaluate.c
-index 726ec15d3..c111f6d19 100644
+index cdbc08ef2..be72b22b9 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -70,9 +70,11 @@ static struct symbol *evaluate_symbol_expression(struct expression *expr)
- 	addr->symbol = sym;
- 	addr->symbol_name = expr->symbol_name;
- 	addr->ctype = &lazy_ptr_ctype;	/* Lazy evaluation: we need to do a proper job if somebody does &sym */
-+	addr->flags = expr->flags;
- 	expr->type = EXPR_PREOP;
- 	expr->op = '*';
- 	expr->unop = addr;
-+	expr->flags = CEF_NONE;
- 
- 	/* The type of a symbol is the symbol itself! */
- 	expr->ctype = sym;
-@@ -1689,7 +1691,6 @@ static struct symbol *evaluate_addressof(struct expression *expr)
+@@ -3056,23 +3056,27 @@ static struct symbol *evaluate_offsetof(struct expression *expr)
+ 		} else {
+ 			struct expression *idx = expr->index, *m;
+ 			struct symbol *i_type = evaluate_expression(idx);
++			unsigned old_idx_flags;
+ 			int i_class = classify_type(i_type, &i_type);
++
+ 			if (!is_int(i_class)) {
+ 				expression_error(expr, "non-integer index");
+ 				return NULL;
+ 			}
+ 			unrestrict(idx, i_class, &i_type);
++			old_idx_flags = idx->flags;
+ 			idx = cast_to(idx, size_t_ctype);
++			idx->flags = old_idx_flags;
+ 			m = alloc_const_expression(expr->pos,
+ 						   bits_to_bytes(ctype->bit_size));
+ 			m->ctype = size_t_ctype;
+-			m->flags |= CEF_SET_ICE;
++			m->flags = CEF_SET_INT;
+ 			expr->type = EXPR_BINOP;
+ 			expr->left = idx;
+ 			expr->right = m;
+ 			expr->op = '*';
+ 			expr->ctype = size_t_ctype;
+-			expr->flags = m->flags & idx->flags;
++			expr->flags = m->flags & idx->flags & ~CEF_CONST_MASK;
+ 		}
  	}
- 	ctype = op->ctype;
- 	*expr = *op->unop;
--	expr->flags = CEF_NONE;
- 
- 	if (expr->type == EXPR_SYMBOL) {
- 		struct symbol *sym = expr->symbol;
+ 	if (e) {
 diff --git a/expression.c b/expression.c
-index 7f1eff306..00edd1f99 100644
+index 241ab7bad..3f1ea2141 100644
 --- a/expression.c
 +++ b/expression.c
-@@ -435,6 +435,14 @@ struct token *primary_expression(struct token *token, struct expression **tree)
- 		}
- 		expr->symbol_name = token->ident;
- 		expr->symbol = sym;
-+
-+		/*
-+		 * A pointer to an lvalue designating a static storage
-+		 * duration object is an address constant [6.6(9)].
-+		 */
-+		if (sym && (sym->ctype.modifiers & (MOD_TOPLEVEL | MOD_STATIC)))
-+			expr->flags = CEF_ADDR;
-+
- 		token = next;
- 		break;
- 	}
-diff --git a/validation/constexpr-addr-of-static.c b/validation/constexpr-addr-of-static.c
+@@ -199,7 +199,6 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 			return expect(token, ')', "at end of __builtin_offset");
+ 		case SPECIAL_DEREFERENCE:
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = CEF_SET_ICE;
+ 			e->op = '[';
+ 			*p = e;
+ 			p = &e->down;
+@@ -207,7 +206,6 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 		case '.':
+ 			token = token->next;
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = CEF_SET_ICE;
+ 			e->op = '.';
+ 			if (token_type(token) != TOKEN_IDENT) {
+ 				sparse_error(token->pos, "Expected member name");
+@@ -219,7 +217,6 @@ static struct token *builtin_offsetof_expr(struct token *token,
+ 		case '[':
+ 			token = token->next;
+ 			e = alloc_expression(token->pos, EXPR_OFFSETOF);
+-			e->flags = CEF_SET_ICE;
+ 			e->op = '[';
+ 			token = parse_expression(token, &e->index);
+ 			token = expect(token, ']',
+diff --git a/validation/constexpr-offsetof.c b/validation/constexpr-offsetof.c
 new file mode 100644
-index 000000000..a3af99ae7
+index 000000000..d1697b0c5
 --- /dev/null
-+++ b/validation/constexpr-addr-of-static.c
-@@ -0,0 +1,36 @@
-+static int a = 1;
-+static int b[2] = {1, 1};
-+static void c(void) {}
++++ b/validation/constexpr-offsetof.c
+@@ -0,0 +1,21 @@
++struct A {
++	int a[1];
++	int b;
++};
 +
-+static int *d = &a;		// OK
-+static int *e = d;		// KO
-+static int *f = b;		// OK
++extern int c;
 +
-+static void (*g)(void) = c;	// OK
-+static void (*h)(void) = &c;	// OK
-+
-+static int *i = &*&a;		// OK
-+static int *j = &*b;		// OK
-+static int *k = &*d;		// KO
-+
-+
-+static void l(void) {
-+	int a = 1;
-+	static int *b = &a;	// KO
-+}
-+
-+static void m(void) {
-+	static int a = 1;
-+	static int *b = &a;	// OK
-+}
++static int o[] = {
++	[__builtin_offsetof(struct A, b)] = 0,		// OK
++	[__builtin_offsetof(struct A, a[0])] = 0,	// OK
++	[__builtin_offsetof(struct A, a[0*0])] = 0,	// OK
++	[__builtin_offsetof(struct A, a[c])] = 0	// KO
++};
 +
 +/*
-+ * check-name: address of static object constness verification.
-+ * check-command: sparse -Wconstexpr-not-const $file
++ * check-name: __builtin_offsetof() constness verification.
 + *
 + * check-error-start
-+constexpr-addr-of-static.c:6:17: warning: non-constant initializer for static object
-+constexpr-addr-of-static.c:14:19: warning: non-constant initializer for static object
-+constexpr-addr-of-static.c:19:26: warning: non-constant initializer for static object
++constexpr-offsetof.c:12:39: error: bad constant expression
 + * check-error-end
 + */
 -- 
