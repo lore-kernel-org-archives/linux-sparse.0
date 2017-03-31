@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 07/25] constexpr: add support for tagging arithmetic constant expressions
-Date: Fri, 31 Mar 2017 03:44:41 +0200
-Message-ID: <20170331014459.9351-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 05/25] constexpr: examine constness of preops at evaluation only
+Date: Fri, 31 Mar 2017 03:44:39 +0200
+Message-ID: <20170331014459.9351-6-luc.vanoostenryck@gmail.com>
 References: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33272 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934847AbdCaBqg (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:35127 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934847AbdCaBqe (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Mar 2017 21:46:36 -0400
-Received: by mail-wr0-f195.google.com with SMTP id u18so16611188wrc.0
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:35 -0700 (PDT)
+        Thu, 30 Mar 2017 21:46:34 -0400
+Received: by mail-wr0-f196.google.com with SMTP id p52so16621170wrc.2
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:33 -0700 (PDT)
 In-Reply-To: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,80 +19,113 @@ Cc: Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>, L
 
 From: Nicolai Stange <nicstange@gmail.com>
 
-Arithmetic constant expressions may be either of (6.6(8)):
-- integer constant expressions
-- floating point constants
-or any arithmetic expression build up from them.
-Furthermore, casts with arithmetic destination types preserve
-arithmetic constness.
+Move the whole calculation of prefix expressions' constness flags to
+the evaluation phase such that expressions like
 
-Arithmetic constant expressions may be used as initializers for
-objects of static storage duration.
+  -__builtin_choose_expr(0, 0, 0)
+  ~__builtin_choose_expr(0, 0, 0)
+  !__builtin_choose_expr(0, 0, 0)
 
-Introduce a new constexpr flag : CEF_ACE.
-
-Modify CEF_SET_ICE and CEF_SET_FLOAT to also include that new bit.
-Thus, whenever an integer constant expression or a floating point
-constant is recognized, it is automatically tagged as an arithmetic
-constant expression.
-
-Note that everything has already been set up such that the new flag
-propagates nicely from subexpressions to parent expressions at evaluation.
+can now be recognized as qualifying as integer constant expressions.
 
 Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- expression.h | 22 ++++++++++++----------
- 1 file changed, 12 insertions(+), 10 deletions(-)
+ evaluate.c                   |  8 ++++----
+ expression.c                 |  3 ---
+ validation/constexpr-preop.c | 29 +++++++++++++++++++++++++++++
+ 3 files changed, 33 insertions(+), 7 deletions(-)
+ create mode 100644 validation/constexpr-preop.c
 
-diff --git a/expression.h b/expression.h
-index c084783c8..67b6a83e3 100644
---- a/expression.h
-+++ b/expression.h
-@@ -96,16 +96,19 @@ enum constexpr_flag {
- 	/*
- 	 * A constant expression in the sense of [6.6]:
- 	 * - integer constant expression [6.6(6)]
-+	 * - arithmetic constant expression [6.6(8)]
- 	 */
- 	CEF_ICE = (1 << 4),
-+	CEF_ACE = (1 << 5),
+diff --git a/evaluate.c b/evaluate.c
+index 48530f28c..07788eacc 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1805,8 +1805,8 @@ static struct symbol *evaluate_sign(struct expression *expr)
+ {
+ 	struct symbol *ctype = expr->unop->ctype;
+ 	int class = classify_type(ctype, &ctype);
+-	if (expr->flags && !(expr->unop->flags & CEF_ICE))
+-		expr->flags = CEF_NONE;
++	unsigned char flags = expr->unop->flags & ~CEF_CONST_MASK;
++
+ 	/* should be an arithmetic type */
+ 	if (!(class & TYPE_NUM))
+ 		return bad_expr_type(expr);
+@@ -1823,6 +1823,7 @@ Normal:
+ 	}
+ 	if (expr->op == '+')
+ 		*expr = *expr->unop;
++	expr->flags = flags;
+ 	expr->ctype = ctype;
+ 	return ctype;
+ Restr:
+@@ -1860,8 +1861,7 @@ static struct symbol *evaluate_preop(struct expression *expr)
+ 		return evaluate_postop(expr);
  
--
--	CEF_SET_ICE = (CEF_ICE),
-+	/* integer constant expression => arithmetic constant expression */
-+	CEF_SET_ICE = (CEF_ICE | CEF_ACE),
- 
- 	/* integer constant => integer constant expression */
- 	CEF_SET_INT = (CEF_INT | CEF_SET_ICE),
- 
--	CEF_SET_FLOAT = (CEF_FLOAT),
-+	/* floating point constant => arithmetic constant expression */
-+	CEF_SET_FLOAT = (CEF_FLOAT | CEF_ACE),
- 
- 	/* enumeration constant => integer constant expression */
- 	CEF_SET_ENUM = (CEF_ENUM | CEF_SET_ICE),
-@@ -118,14 +121,13 @@ enum constexpr_flag {
- 	 * expression" [6.6] flags.
- 	 */
- 	CEF_CONST_MASK = (CEF_INT | CEF_FLOAT | CEF_CHAR),
--};
- 
--/*
-- * not an integer constant expression => neither of integer,
-- * enumeration and character constant
-- */
--#define CEF_CLR_ICE \
--	(CEF_ICE | CEF_INT | CEF_ENUM |	CEF_CHAR)
-+	/*
-+	 * not an integer constant expression => neither of integer,
-+	 * enumeration and character constant
-+	 */
-+	CEF_CLR_ICE = (CEF_ICE | CEF_INT | CEF_ENUM | CEF_CHAR),
+ 	case '!':
+-		if (expr->flags && !(expr->unop->flags & CEF_ICE))
+-			expr->flags = CEF_NONE;
++		expr->flags = expr->unop->flags & ~CEF_CONST_MASK;
+ 		if (is_safe_type(ctype))
+ 			warning(expr->pos, "testing a 'safe expression'");
+ 		if (is_float_type(ctype)) {
+diff --git a/expression.c b/expression.c
+index b59af8886..0332c4406 100644
+--- a/expression.c
++++ b/expression.c
+@@ -450,8 +450,6 @@ struct token *primary_expression(struct token *token, struct expression **tree)
+ 			expr = alloc_expression(token->pos, EXPR_PREOP);
+ 			expr->op = '(';
+ 			token = parens_expression(token, &expr->unop, "in expression");
+-			if (expr->unop)
+-				expr->flags = expr->unop->flags;
+ 			break;
+ 		}
+ 		if (token->special == '[' && lookup_type(token->next)) {
+@@ -663,7 +661,6 @@ static struct token *unary_expression(struct token *token, struct expression **t
+ 			unary = alloc_expression(token->pos, EXPR_PREOP);
+ 			unary->op = token->special;
+ 			unary->unop = unop;
+-			unary->flags = unop->flags & ~CEF_CONST_MASK;
+ 			*tree = unary;
+ 			return next;
+ 		}
+diff --git a/validation/constexpr-preop.c b/validation/constexpr-preop.c
+new file mode 100644
+index 000000000..5d869da4f
+--- /dev/null
++++ b/validation/constexpr-preop.c
+@@ -0,0 +1,29 @@
++static int a[] = {
++  [+0] = 0,					// OK
++  [+__builtin_choose_expr(0, 0, 0)] = 0,	// OK
++  [+0.] = 0,					// KO
++  [+__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
++  [-0] = 0,					// OK
++  [-__builtin_choose_expr(0, 0, 0)] = 0,	// OK
++  [-0.] = 0,					// KO
++  [-__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
++  [~0] = 0,					// OK
++  [~__builtin_choose_expr(0, 0, 0)] = 0,	// OK
++  [!0] = 0,					// OK
++  [!__builtin_choose_expr(0, 0, 0)] = 0,	// OK
++  [!0.] = 0,					// KO
++  [!__builtin_choose_expr(0, 0, 0.)] = 0,	// KO
 +};
- 
- enum {
- 	Taint_comma = 1,
++
++/*
++ * check-name: Expression constness propagation in preops
++ *
++ * check-error-start
++constexpr-preop.c:4:5: error: bad constant expression
++constexpr-preop.c:5:33: error: bad constant expression
++constexpr-preop.c:8:4: error: bad constant expression
++constexpr-preop.c:9:4: error: bad constant expression
++constexpr-preop.c:14:4: error: bad integer constant expression
++constexpr-preop.c:15:4: error: bad integer constant expression
++ * check-error-end
++ */
 -- 
 2.12.0
 
