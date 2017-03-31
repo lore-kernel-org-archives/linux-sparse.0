@@ -1,87 +1,76 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 10/25] constexpr: collect storage modifiers of initializers
-Date: Fri, 31 Mar 2017 03:44:44 +0200
-Message-ID: <20170331014459.9351-11-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 13/25] constexpr: recognize address constants created through casts
+Date: Fri, 31 Mar 2017 03:44:47 +0200
+Message-ID: <20170331014459.9351-14-luc.vanoostenryck@gmail.com>
 References: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:36013 "EHLO
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36039 "EHLO
         mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934847AbdCaBqj (ORCPT
+        with ESMTP id S935001AbdCaBqm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Mar 2017 21:46:39 -0400
-Received: by mail-wr0-f195.google.com with SMTP id k6so15309803wre.3
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:38 -0700 (PDT)
+        Thu, 30 Mar 2017 21:46:42 -0400
+Received: by mail-wr0-f195.google.com with SMTP id k6so15309975wre.3
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:41 -0700 (PDT)
 In-Reply-To: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This is a preparatory step for checking the constness
-of initializers of static storage duration objects;
+From: Nicolai Stange <nicstange@gmail.com>
 
+According to 6.6(9), an address constant may get created by casting
+an integer constant to pointer type.
+
+Make evaluate_cast() handle this case, that is tag a cast expression
+as being an address constant if the target is a integer constant and
+the destination is of pointer type.
+
+Signed-off-by: Nicolai Stange <nicstange@gmail.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ evaluate.c                          |  7 +++++++
+ validation/constexpr-pointer-cast.c | 13 +++++++++++++
+ 2 files changed, 20 insertions(+)
+ create mode 100644 validation/constexpr-pointer-cast.c
 
 diff --git a/evaluate.c b/evaluate.c
-index 07edda41b..138ee1dd6 100644
+index c111f6d19..ce2e52e15 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -2451,13 +2451,13 @@ static struct expression *next_designators(struct expression *old,
- }
- 
- static int handle_initializer(struct expression **ep, int nested,
--				     int class, struct symbol *ctype);
-+		int class, struct symbol *ctype, unsigned long mods);
- 
- /*
-  * deal with traversing subobjects [6.7.8(17,18,20)]
-  */
- static void handle_list_initializer(struct expression *expr,
--				    int class, struct symbol *ctype)
-+		int class, struct symbol *ctype, unsigned long mods)
- {
- 	struct expression *e, *last = NULL, *top = NULL, *next;
- 	int jumped = 0;
-@@ -2515,7 +2515,8 @@ found:
- 		else
- 			v = &top->ident_expression;
- 
--		if (handle_initializer(v, 1, lclass, top->ctype))
-+		mods |= ctype->ctype.modifiers & MOD_STORAGE;
-+		if (handle_initializer(v, 1, lclass, top->ctype, mods))
- 			continue;
- 
- 		if (!(lclass & TYPE_COMPOUND)) {
-@@ -2608,7 +2609,7 @@ static struct expression *handle_scalar(struct expression *e, int nested)
-  * until we dig into the inner struct.
-  */
- static int handle_initializer(struct expression **ep, int nested,
--				     int class, struct symbol *ctype)
-+		int class, struct symbol *ctype, unsigned long mods)
- {
- 	int is_string = is_string_type(ctype);
- 	struct expression *e = *ep, *p;
-@@ -2648,7 +2649,7 @@ static int handle_initializer(struct expression **ep, int nested,
- 				goto String;
- 			}
- 		}
--		handle_list_initializer(e, class, ctype);
-+		handle_list_initializer(e, class, ctype, mods);
- 		return 1;
+@@ -2760,6 +2760,13 @@ static int cast_flags(struct expression *expr, struct expression *old)
+ 		 */
+ 		else if (old->flags & CEF_FLOAT)
+ 			flags = CEF_SET_ICE;
++	} else if (class & TYPE_PTR) {
++		/*
++		 * Casts of integer literals to pointer type yield
++		 * address constants [6.6(9)].
++		 */
++		if (old->flags & CEF_INT)
++			flags = CEF_ADDR;
  	}
  
-@@ -2696,7 +2697,7 @@ static void evaluate_initializer(struct symbol *ctype, struct expression **ep)
- {
- 	struct symbol *type;
- 	int class = classify_type(ctype, &type);
--	if (!handle_initializer(ep, 0, class, ctype))
-+	if (!handle_initializer(ep, 0, class, ctype, 0))
- 		expression_error(*ep, "invalid initializer");
- }
- 
+ 	return flags;
+diff --git a/validation/constexpr-pointer-cast.c b/validation/constexpr-pointer-cast.c
+new file mode 100644
+index 000000000..d19c10828
+--- /dev/null
++++ b/validation/constexpr-pointer-cast.c
+@@ -0,0 +1,13 @@
++static int *a = (int*)0;	// OK
++static int b = 0;
++static int *c = (int*)b;	// KO
++
++
++/*
++ * check-name: integer literal cast to pointer type constness verification.
++ * check-command: sparse -Wconstexpr-not-const $file
++ *
++ * check-error-start
++constexpr-pointer-cast.c:3:18: warning: non-constant initializer for static object
++ * check-error-end
++ */
 -- 
 2.12.0
 
