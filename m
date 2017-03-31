@@ -1,44 +1,125 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Update on dmr_C project
-Date: Fri, 31 Mar 2017 01:30:27 +0100
-Message-ID: <CACXZuxeDk+nyFb1548_rc5j27iBgT8awL6yz4PQpQStih1G19w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 00/25] improve constexpr handling
+Date: Fri, 31 Mar 2017 03:44:34 +0200
+Message-ID: <20170331014459.9351-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f50.google.com ([209.85.214.50]:36493 "EHLO
-        mail-it0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934931AbdCaAaf (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34139 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934699AbdCaBq3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Mar 2017 20:30:35 -0400
-Received: by mail-it0-f50.google.com with SMTP id e75so4233816itd.1
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 17:30:34 -0700 (PDT)
+        Thu, 30 Mar 2017 21:46:29 -0400
+Received: by mail-wr0-f195.google.com with SMTP id w43so16582395wrb.1
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 18:46:28 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Nicolai Stange <nicstange@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi,
+Here is a respin of the series originally made and
+submitted by Nicolai Stange.
 
-Just a quick update on dmr_C project.
+The goal of this series is to improve the tracking of 
+expression constness in the sense of C99 [6.4.4, 6.6]:
+more fine-grained and more correct. A new flag is added
+for a strict mode while by default offering the relaxed
+mode we're used to, for example for kernel compile.
 
-+ I am now able to compile minilua using sparse-llvm (dmr_C version)
-and run a simple hello.lua script. Even running a simple Lua script
-like this entails quite a lot, so I am really pleased to hit this
-milestone.
+Many thanks for Nicolai for his great job.
 
-+ The sparse-llvm functionality is now exposed as a library function.
+Changes since v3:
+* take Chris' remarks in account:
+  - rename 'constexpr_flags' to the shorter 'flags'
+  - rename 'CONSTEXPR_FLAG_XYZ' to something shorter
+  - remove redundant 'INT' in the CONST_MASK
+  - try to avoid long lines and 
+  - try to avoid to have to break lines
+* and also:
+  - initialize EXPR_VALUE with SET_INT when typed
+  - extract the logic added in evaluate_cast and
+    use it in cast_to() where it is also needed
+  - remove patch 20 (symbol: do not inherit storage mod...)
+    as now MOD_PTRINHERIT doesn't imply MOD_STORAGE anymore
+  - avoid borrowing of surrounding storage mods
+  - add constness stuff for __builtin_bswap()
 
-+ All functions with external linkage have been renamed to have prefix of dmrC_.
 
-+ I was finally able to complete the change to ptrlist so that almost
-all global state is now gone. There are some static int counters
-remaining that I need to fix.
+This serie can also be pulled from:
+	git://github.com/lucvoo/sparse.git constexpr-v4
+the changes up to commit:
+	4d963a28d371ce75f65a70aa29f14cec5f08d8ff
+since commit:
+	5c9411a5c0482b0ceb70861114df4c229e1298ca
 
-I wanted to thank you for the help given to me over the past few
-weeks, and of course for creating Sparse in the first place.
+Nicolai Stange (20):
+  constexpr: introduce additional expression constness tracking flags
+  constexpr: init flags at expression allocation
+  constexpr: examine constness of casts at evaluation only
+  constexpr: examine constness of binops and alike at evaluation only
+  constexpr: examine constness of preops at evaluation only
+  constexpr: examine constness of conditionals at evaluation only
+  constexpr: add support for tagging arithmetic constant expressions
+  constexpr: add support for tagging address constants
+  constexpr: check static storage duration objects' intializers' constness
+  constexpr: recognize static objects as address constants
+  constexpr: recognize address constants created through casts
+  constexpr: recognize address constants created through pointer arithmetic
+  constexpr: recognize members of static compound objects as address constants
+  constexpr: recognize string literals as address constants
+  constexpr: recognize references to labels as address constants
+  constexpr: examine constness of __builtin_offsetof at evaluation only
+  constexpr: flag builtins constant_p, safe_p and warning as constexprs
+  constexpr: relax some constant expression rules for pointer expressions
+  constexpr: support compound literals as address constants
+  constexpr: treat comparisons between types as integer constexpr
 
-Although there is still more testing to do, and bugs to fix, I will
-now start work in parallel on a different backend to sparse that does
-not use LLVM. I will report progress when there is something to show.
+Luc Van Oostenryck (5):
+  constexpr: rename handle_simple_initializer() to handle_initializer()
+  constexpr: collect storage modifiers of initializers
+  return an error if too few args
+  give default return type in evaluate_call()
+  constexpr: flag __builtin_bswap() as constexpr
 
-Thanks and Regards
-Dibyendu
+
+ builtin.c                                    |  26 +++-
+ evaluate.c                                   | 206 ++++++++++++++++++++-------
+ expand.c                                     |   2 +-
+ expression.c                                 |  48 +++----
+ expression.h                                 |  70 ++++++++-
+ lib.c                                        |   2 +
+ lib.h                                        |   1 +
+ sparse.1                                     |   9 ++
+ validation/constexpr-addr-of-static-member.c |  26 ++++
+ validation/constexpr-addr-of-static.c        |  36 +++++
+ validation/constexpr-binop.c                 |  33 +++++
+ validation/constexpr-cast.c                  |  25 ++++
+ validation/constexpr-compound-literal.c      |  19 +++
+ validation/constexpr-conditional.c           |  34 +++++
+ validation/constexpr-init.c                  |  60 ++++++++
+ validation/constexpr-labelref.c              |  14 ++
+ validation/constexpr-offsetof.c              |  21 +++
+ validation/constexpr-pointer-arith.c         |  28 ++++
+ validation/constexpr-pointer-cast.c          |  13 ++
+ validation/constexpr-preop.c                 |  29 ++++
+ validation/constexpr-pure-builtin.c          |  23 +++
+ validation/constexpr-string.c                |   9 ++
+ validation/constexpr-types-compatible-p.c    |   8 ++
+ 23 files changed, 649 insertions(+), 93 deletions(-)
+ create mode 100644 validation/constexpr-addr-of-static-member.c
+ create mode 100644 validation/constexpr-addr-of-static.c
+ create mode 100644 validation/constexpr-binop.c
+ create mode 100644 validation/constexpr-cast.c
+ create mode 100644 validation/constexpr-compound-literal.c
+ create mode 100644 validation/constexpr-conditional.c
+ create mode 100644 validation/constexpr-init.c
+ create mode 100644 validation/constexpr-labelref.c
+ create mode 100644 validation/constexpr-offsetof.c
+ create mode 100644 validation/constexpr-pointer-arith.c
+ create mode 100644 validation/constexpr-pointer-cast.c
+ create mode 100644 validation/constexpr-preop.c
+ create mode 100644 validation/constexpr-pure-builtin.c
+ create mode 100644 validation/constexpr-string.c
+ create mode 100644 validation/constexpr-types-compatible-p.c
+
+-- 
+2.12.0
+
