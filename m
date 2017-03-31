@@ -1,69 +1,45 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v6 00/15] prepare for LLVM fixes
-Date: Fri, 31 Mar 2017 12:49:01 +0800
-Message-ID: <CANeU7Q=d22MqFigDcaW1o59BTYV2rKNhfjjDCVpxA_JTDey_ag@mail.gmail.com>
-References: <20170327173405.11405-1-luc.vanoostenryck@gmail.com>
- <7406f777-5e8b-5ae0-55e0-26a36ddb64b5@ramsayjones.plus.com>
- <20170327222212.jle5tzjevfsigvuw@macpro.local> <CA+55aFx+-mvbjN_m0A3ZFFVtBHEAwbmuruMS5P_082_Fr2auzg@mail.gmail.com>
+Subject: Re: [PATCH v3 00/21] improve constexpr handling
+Date: Fri, 31 Mar 2017 13:06:24 +0800
+Message-ID: <CANeU7QkuDjEeD=MvcLVz_DfAk5AsjRBqgCTcHnG5u1aHzEs-bA@mail.gmail.com>
+References: <20161123040528.GA74337@macpro.local> <CANeU7Qm9FLZUexqu92mUSEojzrbi9SpsYrDMCP7J8qmskHcBFA@mail.gmail.com>
+ <87a8cqlhcy.fsf@gmail.com> <CANeU7QkzefYMpkNgemsJ8WPUsj7fg8zUgKN8kth-0x7c85bK3w@mail.gmail.com>
+ <87polm5eqq.fsf@gmail.com> <CANeU7QmsdVoccP0pN9RKkKC+-0mPSbfB59wQ5ngC3qEi4EY1+g@mail.gmail.com>
+ <87lgwa59nm.fsf@gmail.com> <CANeU7Qm21LCu2GgdTLbcDERBbgdYWoX_wp4DTKaFdi=G1ZcqAQ@mail.gmail.com>
+ <87h96x5hzv.fsf@gmail.com> <CANeU7Qn4ATFNP=tsUXPtxk2CuTGcp-PyLGT6UW8zxYfxiODaBg@mail.gmail.com>
+ <20170329144233.7hjyhshb72pbtv7s@macpro.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f195.google.com ([209.85.223.195]:33483 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751223AbdCaEtD (ORCPT
+Received: from mail-it0-f43.google.com ([209.85.214.43]:36798 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751120AbdCaFG0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 31 Mar 2017 00:49:03 -0400
-Received: by mail-io0-f195.google.com with SMTP id f84so4951492ioj.0
-        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 21:49:02 -0700 (PDT)
-In-Reply-To: <CA+55aFx+-mvbjN_m0A3ZFFVtBHEAwbmuruMS5P_082_Fr2auzg@mail.gmail.com>
+        Fri, 31 Mar 2017 01:06:26 -0400
+Received: by mail-it0-f43.google.com with SMTP id e75so6694413itd.1
+        for <linux-sparse@vger.kernel.org>; Thu, 30 Mar 2017 22:06:25 -0700 (PDT)
+In-Reply-To: <20170329144233.7hjyhshb72pbtv7s@macpro.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nicolai Stange <nicstange@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Josh Triplett <josh@joshtriplett.org>
 
-On Wed, Mar 29, 2017 at 2:10 AM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> I do wish that sparse would use more of a real git workflow, instead
-> of just applying patches.
+On Wed, Mar 29, 2017 at 10:42 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Tue, Dec 06, 2016 at 02:00:50PM +0800, Christopher Li wrote:
+>> The constant flags should be set regardless. Otherwise it is not consistent
+>> with the rest of the code.
 >
-> Sending out patches to a mailing list is _wonderful_ for actually
-> doing code review and making people *aware* of what's going on, but
-> it's not a great maintenance model. It doesn't scale, and it makes for
-> lots of maintainer work.
->
-> Particularly with somebody like Luc, who sends involved patch series
-> for core stuff and knows what he is doing, I think Chris could just do
-> git merges, and lower the maintenance overhead a lot.
+> Chris, I don't really understand your remark here (regardless what ?).
+> Can you explain it a bit more please?
 
-I have a pretty comfortable script system to deal with patches right now.
-So for me applying patches does not have significant overhead compare
-to git.
-
-Patches give me more flexibly on reviewing. Git merge is either merge
-with the whole thing or not. It is does not work if there is some thing
-change in between. I like to apply the patch and play with it a bit then
-move to the next one. I suppose I can write some script to follow git branch
-as one change at a time. My current patch series script is extremely flexible
-on cherry pick the patches and tracking which patch was rejected for
-what reason etc.
-
-That being said, I do wish there is a way to figure out which patches
-haven't changed in the new series. e.g. from V4 to V5, only a few patches
-actually change. I can just focus on those changed one. I suppose I can
-write a script to detect the same patch on different series.
-
-> NOTE! If you do git merges using the github interface, things often go
-> south *very* quickly.  github likes to do "merges" using rebase,
-> probably because it caters to projects who don't understand about the
-> whole "keep a sane history". So it's really really easy to use github
-> in ways that interact really badly with good git workflows. But you
-> *can* do merges entirely using github, if you actually know what
-> you're doing and are careful to not do rebasing merges with core
-> contributors (using rebase for the occasional small patch series from
-> random fly-by contributors is ok, but I think even then github screws
-> up signed-off chains).
-
-I notices that too. I don't use the github web ui merge. I just merge change
-by hand.
+In has been a while. The currently code only touch the result constexpr_flags if
+left and right are pointer and integer.  Otherwise, the
+constantexpr_flags are not
+touch at all. It is not obvious what is the previous state of the
+constantexpr_flags.
+I mean maybe it should clear it is that is not a constant? Most of the
+evaluate_xxx
+function will just set the new constexpr_flags.
 
 Chris
