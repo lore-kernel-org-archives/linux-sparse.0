@@ -1,65 +1,58 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Potential issue with handling of va_arg()
-Date: Sat, 1 Apr 2017 13:56:54 +0100
-Message-ID: <CACXZuxfznvD82rF5nk9xu4gbFmzDy9Qw7+vpJJSCgijsBSwO4g@mail.gmail.com>
-References: <CACXZuxcVfKc914gx8Bj=eYsT1fS46hG8BfvBQK5Kthhk+yjeDA@mail.gmail.com>
- <CACXZuxeBMkbp3zTpsFFdMXsuW+ea2z+HKNFAMdSbiuEcF-hvfg@mail.gmail.com> <CAMHZB6GHpSktsr3V4UyQvMKWuCmpDekbd297QRcwAuq2tGkh+Q@mail.gmail.com>
+Subject: Sparse testing
+Date: Sat, 1 Apr 2017 14:11:36 +0100
+Message-ID: <CACXZuxeo-JFVTa8W0RLOJG-KEb2vdRO8HLFYcTOko-Eq1+u=DA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f42.google.com ([209.85.214.42]:33374 "EHLO
-        mail-it0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751339AbdDAM4z (ORCPT
+Received: from mail-io0-f169.google.com ([209.85.223.169]:33228 "EHLO
+        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751201AbdDANLh (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 1 Apr 2017 08:56:55 -0400
-Received: by mail-it0-f42.google.com with SMTP id 68so8682597itx.0
-        for <linux-sparse@vger.kernel.org>; Sat, 01 Apr 2017 05:56:55 -0700 (PDT)
-In-Reply-To: <CAMHZB6GHpSktsr3V4UyQvMKWuCmpDekbd297QRcwAuq2tGkh+Q@mail.gmail.com>
+        Sat, 1 Apr 2017 09:11:37 -0400
+Received: by mail-io0-f169.google.com with SMTP id f84so53793405ioj.0
+        for <linux-sparse@vger.kernel.org>; Sat, 01 Apr 2017 06:11:37 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Luc,
+Hi,
 
-On 31 March 2017 at 19:55, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Fri, Mar 31, 2017 at 4:06 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> On 31 March 2017 at 14:47, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
->>> I am investigating a failure in this test:
->>>
->>> #include <stdarg.h>
->>> #include <stdlib.h>
->>> #include <stdio.h>
->>>
->>> void error_message(const char *fmt, ...) {
->>> va_list argp;
->>> va_start(argp, fmt);
->>
->> I think this might be because the macro __builtin_va_start() is being
->> defined in sparse but this doesn't match what gets defined by gcc? I
->> see this in sparse:
->>
->
-> Current support for vaarg is more faked than anything else.
-> There is just the minimum needed to be able to do correct parsing
-> of code using it but there is nothing behind it.
->
+With regards to the recent discussion of the pain in merging changes,
+and also generally, I think that the Sparse test suite needs to be
+enhanced. My impression is that most tests do not validate the
+generated linearized IR. The sparse-llvm tests do not validate the
+generated LLVM IR either.
 
-Okay, I think a workaround for sparse-llvm is to disable generation of
-the macros related to var arg processing - this will cause the
-compilation to fail with undefined errors, rather than silently
-generating bad code. I have done this in dmr_C where the relevant
-macros are not defined when llvm backend is being used. I was
-experiencing crashes with minilua due to this issue - I have reworked
-minilua so that the functions that rely upon var arg processing are
-moved to a separate source file which cannot be compiled with
-sparse-llvm.
+Without such validation it is hard to detect when some change breaks
+stuff. I think that having robust tests will also ease the pain of
+merging contributions as you will be able to detect breaks more
+reliably.
 
-For my use case the var arg issue is not a pressing issue to fix, what
-is more important is that bad code is never generated and the cases
-not handled correctly are detected early and compilation fails.
+Because of this reason, I have been reluctant to merge changes into my
+repository as I first want to have a set of regression tests that I
+can run whenever I merge changes. I have done some work on this. As
+validating sparse IR and LLVM IR is relatively difficult since even a
+spurious change in the IR output will cause tests to fail - the
+approach I have taken is that all tests are designed to be run. The
+success of the test is therefore determined by whether the compiled
+test runs correctly and generates the required outputs.
 
-Thanks and Regards
+Ideally we need a mix of simple unit tests and complex real life
+programs, as not all issues can be caught by simple tests.
+
+I am happy to contribute the tests I have been creating. I have
+sourced many of them from other opensource projects: I think that they
+are all permissively licensed. But even if some license conflicts, all
+that is needed is excluding the tests from the distribution I think.
+In my view it is still worth having these tests run every time there
+is a change.
+
+Unfortunately all my tests need a working sparse-llvm component. So
+until all the changes I have done are reflected in sparse, the tests
+will not compile I think. As I have reported before the current patch
+series does not cover all the fixes, therefore additional fixes are
+needed.
+
+Regards
 Dibyendu
