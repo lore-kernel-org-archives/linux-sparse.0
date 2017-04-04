@@ -1,58 +1,50 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Sparse testing
-Date: Sat, 1 Apr 2017 14:11:36 +0100
-Message-ID: <CACXZuxeo-JFVTa8W0RLOJG-KEb2vdRO8HLFYcTOko-Eq1+u=DA@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse with 4.10?
+Date: Tue, 4 Apr 2017 22:12:29 +0200
+Message-ID: <CAMHZB6G2bQ9SUQLHxxmz0t5Cue73i+-U8bONyq0WMk_gikvyQg@mail.gmail.com>
+References: <CAHmME9o--jumLrBbRn63ewKOE49+uYJ9B8V5FocptdwZ5Kd9Fw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f169.google.com ([209.85.223.169]:33228 "EHLO
-        mail-io0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751201AbdDANLh (ORCPT
+Received: from mail-qk0-f172.google.com ([209.85.220.172]:33441 "EHLO
+        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754790AbdDDUMb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 1 Apr 2017 09:11:37 -0400
-Received: by mail-io0-f169.google.com with SMTP id f84so53793405ioj.0
-        for <linux-sparse@vger.kernel.org>; Sat, 01 Apr 2017 06:11:37 -0700 (PDT)
+        Tue, 4 Apr 2017 16:12:31 -0400
+Received: by mail-qk0-f172.google.com with SMTP id h67so53323143qke.0
+        for <linux-sparse@vger.kernel.org>; Tue, 04 Apr 2017 13:12:31 -0700 (PDT)
+In-Reply-To: <CAHmME9o--jumLrBbRn63ewKOE49+uYJ9B8V5FocptdwZ5Kd9Fw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi,
+On Tue, Apr 4, 2017 at 4:14 PM, Jason A. Donenfeld <Jason@zx2c4.com> wrote:
+> Hey,
+>
+> Compiling modules against 4.10 and checking with the latest sparse git
+> master yields these warnings for each and every file:
+>
+> ./include/linux/mm.h:1713:47: warning: unknown expression (14 0)
+> ./include/linux/mm.h:1714:16: warning: call with no type!
+>
+> That corresponds to this function:
+>
+> static struct page *pmd_to_page(pmd_t *pmd)
+> {
+>        unsigned long mask = ~(PTRS_PER_PMD * sizeof(pmd_t) - 1);
+>        return virt_to_page((void *)((unsigned long) pmd & mask));
+> }
+>
+> Something broken with the parsing?
 
-With regards to the recent discussion of the pain in merging changes,
-and also generally, I think that the Sparse test suite needs to be
-enhanced. My impression is that most tests do not validate the
-generated linearized IR. The sparse-llvm tests do not validate the
-generated LLVM IR either.
++ CC: mailing list
 
-Without such validation it is hard to detect when some change breaks
-stuff. I think that having robust tests will also ease the pain of
-merging contributions as you will be able to detect breaks more
-reliably.
+I can't reproduce this on arch/x86, neither with defconfig, nor with
+allyesconfig.
 
-Because of this reason, I have been reluctant to merge changes into my
-repository as I first want to have a set of regression tests that I
-can run whenever I merge changes. I have done some work on this. As
-validating sparse IR and LLVM IR is relatively difficult since even a
-spurious change in the IR output will cause tests to fail - the
-approach I have taken is that all tests are designed to be run. The
-success of the test is therefore determined by whether the compiled
-test runs correctly and generates the required outputs.
+Lastest sparse git master is fbbfc7309, right?
+Can you send your .config and/or tell a bit more about anything
+unusual you could have?
 
-Ideally we need a mix of simple unit tests and complex real life
-programs, as not all issues can be caught by simple tests.
-
-I am happy to contribute the tests I have been creating. I have
-sourced many of them from other opensource projects: I think that they
-are all permissively licensed. But even if some license conflicts, all
-that is needed is excluding the tests from the distribution I think.
-In my view it is still worth having these tests run every time there
-is a change.
-
-Unfortunately all my tests need a working sparse-llvm component. So
-until all the changes I have done are reflected in sparse, the tests
-will not compile I think. As I have reported before the current patch
-series does not cover all the fixes, therefore additional fixes are
-needed.
-
-Regards
-Dibyendu
+-- Luc Van Oostenryck
