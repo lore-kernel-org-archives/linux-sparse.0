@@ -1,50 +1,51 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse with 4.10?
-Date: Tue, 4 Apr 2017 22:12:29 +0200
-Message-ID: <CAMHZB6G2bQ9SUQLHxxmz0t5Cue73i+-U8bONyq0WMk_gikvyQg@mail.gmail.com>
-References: <CAHmME9o--jumLrBbRn63ewKOE49+uYJ9B8V5FocptdwZ5Kd9Fw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: [PATCH 1/6] define ident_list
+Date: Tue,  4 Apr 2017 23:49:50 +0200
+Message-ID: <20170404214955.47926-2-luc.vanoostenryck@gmail.com>
+References: <20170404214955.47926-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f172.google.com ([209.85.220.172]:33441 "EHLO
-        mail-qk0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754790AbdDDUMb (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36284 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754617AbdDDVuL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 4 Apr 2017 16:12:31 -0400
-Received: by mail-qk0-f172.google.com with SMTP id h67so53323143qke.0
-        for <linux-sparse@vger.kernel.org>; Tue, 04 Apr 2017 13:12:31 -0700 (PDT)
-In-Reply-To: <CAHmME9o--jumLrBbRn63ewKOE49+uYJ9B8V5FocptdwZ5Kd9Fw@mail.gmail.com>
+        Tue, 4 Apr 2017 17:50:11 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x124so8042444wmf.3
+        for <linux-sparse@vger.kernel.org>; Tue, 04 Apr 2017 14:50:10 -0700 (PDT)
+In-Reply-To: <20170404214955.47926-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Apr 4, 2017 at 4:14 PM, Jason A. Donenfeld <Jason@zx2c4.com> wrote:
-> Hey,
->
-> Compiling modules against 4.10 and checking with the latest sparse git
-> master yields these warnings for each and every file:
->
-> ./include/linux/mm.h:1713:47: warning: unknown expression (14 0)
-> ./include/linux/mm.h:1714:16: warning: call with no type!
->
-> That corresponds to this function:
->
-> static struct page *pmd_to_page(pmd_t *pmd)
-> {
->        unsigned long mask = ~(PTRS_PER_PMD * sizeof(pmd_t) - 1);
->        return virt_to_page((void *)((unsigned long) pmd & mask));
-> }
->
-> Something broken with the parsing?
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ lib.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-+ CC: mailing list
+diff --git a/lib.h b/lib.h
+index 134e56040..19b5cb0b3 100644
+--- a/lib.h
++++ b/lib.h
+@@ -75,6 +75,7 @@ DECLARE_PTR_LIST(basic_block_list, struct basic_block);
+ DECLARE_PTR_LIST(instruction_list, struct instruction);
+ DECLARE_PTR_LIST(multijmp_list, struct multijmp);
+ DECLARE_PTR_LIST(pseudo_list, struct pseudo);
++DECLARE_PTR_LIST(ident_list, struct ident);
+ DECLARE_PTR_LIST(string_list, char);
+ 
+ typedef struct pseudo *pseudo_t;
+@@ -244,6 +245,11 @@ static inline void add_expression(struct expression_list **list, struct expressi
+ 	add_ptr_list(list, expr);
+ }
+ 
++static inline void add_ident(struct ident_list **list, struct ident *ident)
++{
++	add_ptr_list(list, ident);
++}
++
+ #define hashval(x) ((unsigned long)(x))
+ 
+ #endif
+-- 
+2.12.0
 
-I can't reproduce this on arch/x86, neither with defconfig, nor with
-allyesconfig.
-
-Lastest sparse git master is fbbfc7309, right?
-Can you send your .config and/or tell a bit more about anything
-unusual you could have?
-
--- Luc Van Oostenryck
