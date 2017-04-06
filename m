@@ -1,98 +1,132 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/4] remove bit_size & bit_offset from struct access_data
-Date: Fri,  7 Apr 2017 01:00:27 +0200
-Message-ID: <20170406230029.11384-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/4] add support for a new flag: -fdump-linearize[=only]
+Date: Fri,  7 Apr 2017 01:00:26 +0200
+Message-ID: <20170406230029.11384-2-luc.vanoostenryck@gmail.com>
 References: <20170406230029.11384-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34196 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752226AbdDFXAi (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33065 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753035AbdDFXAh (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Apr 2017 19:00:38 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u18so7293259wrc.1
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 16:00:38 -0700 (PDT)
+        Thu, 6 Apr 2017 19:00:37 -0400
+Received: by mail-wr0-f194.google.com with SMTP id g19so15333460wrb.0
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 16:00:37 -0700 (PDT)
 In-Reply-To: <20170406230029.11384-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In struct access_data, the fields: 'bit_offset', 'bit_size' and
-'alignment' are always the ones corresponding to the 'result_type'
-and are thus completely redundant.
+The effect of this flag is to dump the IR just after the
+linearization, before any simplification, and to stop
+further processing if '=only' is given as argument.
 
-Change this by removing these fields and directly using
-the info from the 'result_type' field.
-
-Note: the motivation for this change is the realization that the
-      initialization of bitfields are buggy because the 'bit_size'
-      is never set for initializers. The bug could be solved by
-      initializing 'bit_size' & 'bit_offset' but it was much
-      simpler (and feel safer) to simply use the values from
-      'result_type'.
+The motivation of this flag is of course for debugging,
+to be able to inspect the raw result of the linearization,
+undisturbed by an simplification.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 19 +++++++++----------
- 1 file changed, 9 insertions(+), 10 deletions(-)
+ lib.c       | 22 ++++++++++++++++++++++
+ lib.h       |  2 ++
+ linearize.c |  6 ++++++
+ sparse.1    |  7 +++++++
+ 4 files changed, 37 insertions(+)
 
+diff --git a/lib.c b/lib.c
+index 272d2c88a..f5e4860a6 100644
+--- a/lib.c
++++ b/lib.c
+@@ -250,6 +250,8 @@ int Wvla = 1;
+ int dbg_entry = 0;
+ int dbg_dead = 0;
+ 
++int fdump_linearize;
++
+ int preprocess_only;
+ 
+ static enum { STANDARD_C89,
+@@ -645,12 +647,32 @@ static char **handle_switch_ftabstop(char *arg, char **next)
+ 	return next;
+ }
+ 
++static char **handle_switch_fdump(char *arg, char **next)
++{
++	if (!strncmp(arg, "linearize", 9)) {
++		if (arg[6] == '\0')
++			fdump_linearize = 1;
++		else if (!strcmp(arg+9, "=only"))
++			fdump_linearize = 2;
++		else
++			goto err;
++	}
++
++	/* ignore others flags */
++	return next;
++
++err:
++	die("error: unknown flag \"-fdump-%s\"", arg);
++}
++
+ static char **handle_switch_f(char *arg, char **next)
+ {
+ 	arg++;
+ 
+ 	if (!strncmp(arg, "tabstop=", 8))
+ 		return handle_switch_ftabstop(arg+8, next);
++	if (!strncmp(arg, "dump-", 5))
++		return handle_switch_fdump(arg+5, next);
+ 
+ 	/* handle switches w/ arguments above, boolean and only boolean below */
+ 
+diff --git a/lib.h b/lib.h
+index 134e56040..fb612d154 100644
+--- a/lib.h
++++ b/lib.h
+@@ -136,6 +136,8 @@ extern int Wvla;
+ extern int dbg_entry;
+ extern int dbg_dead;
+ 
++extern int fdump_linearize;
++
+ extern int arch_m64;
+ 
+ extern void declare_builtin_functions(void);
 diff --git a/linearize.c b/linearize.c
-index 61c804333..e9610932b 100644
+index 2f850fb7e..61c804333 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -844,8 +844,7 @@ struct access_data {
- 	struct symbol *source_type;	// source ctype
- 	pseudo_t address;		// pseudo containing address ..
- 	pseudo_t origval;		// pseudo for original value ..
--	unsigned int offset, alignment;	// byte offset
--	unsigned int bit_size, bit_offset; // which bits
-+	unsigned int offset;		// byte offset
- 	struct position pos;
- };
- 
-@@ -898,9 +897,6 @@ static int linearize_address_gen(struct entrypoint *ep,
- 	ad->pos = expr->pos;
- 	ad->result_type = ctype;
- 	ad->source_type = base_type(ctype);
--	ad->bit_size = ctype->bit_size;
--	ad->alignment = ctype->ctype.alignment;
--	ad->bit_offset = ctype->bit_offset;
- 	if (expr->type == EXPR_PREOP && expr->op == '*')
- 		return linearize_simple_address(ep, expr->unop, ad);
- 
-@@ -948,9 +944,11 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
- 	pseudo_t store = value;
- 
- 	if (type_size(ad->source_type) != type_size(ad->result_type)) {
-+		struct symbol *ctype = ad->result_type;
-+		unsigned int shift = ctype->bit_offset;
-+		unsigned int size = ctype->bit_size;
- 		pseudo_t orig = add_load(ep, ad);
--		int shift = ad->bit_offset;
--		unsigned long long mask = (1ULL << ad->bit_size)-1;
-+		unsigned long long mask = (1ULL << size) - 1;
- 
- 		if (shift) {
- 			store = add_binary_op(ep, ad->source_type, OP_SHL, value, value_pseudo(shift));
-@@ -997,14 +995,15 @@ static pseudo_t add_symbol_address(struct entrypoint *ep, struct symbol *sym)
- 
- static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad)
- {
-+	struct symbol *ctype = ad->result_type;
- 	pseudo_t new = add_load(ep, ad);
- 
--	if (ad->bit_offset) {
--		pseudo_t shift = value_pseudo(ad->bit_offset);
-+	if (ctype->bit_offset) {
-+		pseudo_t shift = value_pseudo(ctype->bit_offset);
- 		pseudo_t newval = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
- 		new = newval;
+@@ -2171,6 +2171,12 @@ static struct entrypoint *linearize_fn(struct symbol *sym, struct symbol *base_t
+ 		add_one_insn(ep, insn);
  	}
--	if (ad->bit_size != type_size(ad->source_type))
-+	if (ctype->bit_size != type_size(ad->source_type))
- 		new = cast_pseudo(ep, new, ad->source_type, ad->result_type);
- 	return new;
- }
+ 
++	if (fdump_linearize) {
++		if (fdump_linearize == 2)
++			return ep;
++		show_entry(ep);
++	}
++
+ 	/*
+ 	 * Do trivial flow simplification - branches to
+ 	 * branches, kill dead basicblocks etc
+diff --git a/sparse.1 b/sparse.1
+index 85d6e646b..525d3ded5 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -344,6 +344,13 @@ Look for system headers in the multiarch subdirectory \fIdir\fR.
+ The \fIdir\fR name would normally take the form of the target's
+ normalized GNU triplet. (e.g. i386-linux-gnu).
+ .
++.SH DEBUG OPTIONS
++.TP
++.B \-fdump-linearize[=only]
++Dump the IR code of a function directly after its linearization,
++before any simplifications is made. If the argument \fB=only\fR is
++also given no further processing is done on the function.
++.
+ .SH OTHER OPTIONS
+ .TP
+ .B \-ftabstop=WIDTH
 -- 
 2.12.0
 
