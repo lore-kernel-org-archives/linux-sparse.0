@@ -1,55 +1,36 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/4] fix bitfield initiallizers
-Date: Fri,  7 Apr 2017 01:00:25 +0200
-Message-ID: <20170406230029.11384-1-luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH 4/4] fix implicit zero initializer.
+Date: Thu, 6 Apr 2017 16:39:53 -0700
+Message-ID: <CA+55aFzH_69Yhqa+V+j64_Q4h2V9G_QsXj5HSuNL2bfwbrxckw@mail.gmail.com>
+References: <20170406230029.11384-1-luc.vanoostenryck@gmail.com> <20170406230029.11384-5-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33057 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752226AbdDFXAg (ORCPT
+Received: from mail-io0-f179.google.com ([209.85.223.179]:35324 "EHLO
+        mail-io0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755403AbdDFXjy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Apr 2017 19:00:36 -0400
-Received: by mail-wr0-f195.google.com with SMTP id g19so15333410wrb.0
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 16:00:36 -0700 (PDT)
+        Thu, 6 Apr 2017 19:39:54 -0400
+Received: by mail-io0-f179.google.com with SMTP id z13so40299046iof.2
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 16:39:54 -0700 (PDT)
+In-Reply-To: <20170406230029.11384-5-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-The goal of this series is to fix two bugs related
-to the initialization of bitfields:
-- bad shift & mask
-- no implicit zeroing
+On Thu, Apr 6, 2017 at 4:00 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The C standard requires that, when initializing an aggregate, all
+> fieds not explicitly initialized shall be implicity zero-initialized
 
-One notable change is the removal of bit_offset & bit_size
-from struct access_data.
+Note the "all fields".
 
+Which is not the same as "the whole aggregate" which is what you do.
+The parts that don't have fields at all are undefined.
 
-This series is available at:
-	git://github.com/lucvoo/sparse.git fix-bitfield-init
-based on commit:
-	14964df5373292af78b29529d4fc7e1a26b67a97 (sparse-next @ 2017-03-31)
-up to commit:
-	6e778f937073d96934c6240b5d47a76b0d592e27
+I think your patch is fine, and you might as well clear the whole
+backing store, but I think strictly speaking you're initializing more
+than what the standard says.
 
-
-Luc Van Oostenryck (4):
-  add support for a new flag: -fdump-linearize[=only]
-  remove bit_size & bit_offset from struct access_data
-  add test case for linearize_initializer() of bitfields
-  fix implicit zero initializer.
-
- lib.c                                   |  22 +++++++
- lib.h                                   |   2 +
- linearize.c                             |  36 +++++++----
- sparse.1                                |   7 +++
- validation/linear/bitfield-init-mask.c  |  27 +++++++++
- validation/linear/bitfield-init-zero.c  | 102 ++++++++++++++++++++++++++++++++
- validation/linear/struct-init-full.c    |  28 +++++++++
- validation/linear/struct-init-partial.c |  41 +++++++++++++
- 8 files changed, 255 insertions(+), 10 deletions(-)
- create mode 100644 validation/linear/bitfield-init-mask.c
- create mode 100644 validation/linear/bitfield-init-zero.c
- create mode 100644 validation/linear/struct-init-full.c
- create mode 100644 validation/linear/struct-init-partial.c
-
--- Luc Van Oostenryck
+                Linus
