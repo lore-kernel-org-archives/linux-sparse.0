@@ -1,55 +1,45 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 4/4] fix implicit zero initializer.
-Date: Fri, 7 Apr 2017 02:13:48 +0200
-Message-ID: <20170407001347.vehiimlrmrg6nayx@macbook.local>
-References: <20170406230029.11384-1-luc.vanoostenryck@gmail.com>
- <20170406230029.11384-5-luc.vanoostenryck@gmail.com>
- <CA+55aFzH_69Yhqa+V+j64_Q4h2V9G_QsXj5HSuNL2bfwbrxckw@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH 1/4] add support for a new flag: -fdump-linearize[=only]
+Date: Fri, 7 Apr 2017 01:32:04 +0100
+Message-ID: <CACXZuxddGHr6xx7KC93Lw-bVoexwmuFQwuE2qsQ3yO6bGBehXg@mail.gmail.com>
+References: <20170406230029.11384-1-luc.vanoostenryck@gmail.com> <20170406230029.11384-2-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f171.google.com ([209.85.128.171]:33708 "EHLO
-        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751685AbdDGANw (ORCPT
+Received: from mail-io0-f175.google.com ([209.85.223.175]:32887 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752124AbdDGAcF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Apr 2017 20:13:52 -0400
-Received: by mail-wr0-f171.google.com with SMTP id g19so41170222wrb.0
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 17:13:51 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CA+55aFzH_69Yhqa+V+j64_Q4h2V9G_QsXj5HSuNL2bfwbrxckw@mail.gmail.com>
+        Thu, 6 Apr 2017 20:32:05 -0400
+Received: by mail-io0-f175.google.com with SMTP id t68so6910237iof.0
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Apr 2017 17:32:05 -0700 (PDT)
+In-Reply-To: <20170406230029.11384-2-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>
 
-On Thu, Apr 06, 2017 at 04:39:53PM -0700, Linus Torvalds wrote:
-> On Thu, Apr 6, 2017 at 4:00 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > The C standard requires that, when initializing an aggregate, all
-> > fieds not explicitly initialized shall be implicity zero-initialized
-> 
-> Note the "all fields".
-> 
-> Which is not the same as "the whole aggregate" which is what you do.
-> The parts that don't have fields at all are undefined.
+Hi Luc,
 
-Yes indeed. I didn't really think about this little subtility.
+On 7 April 2017 at 00:00, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The effect of this flag is to dump the IR just after the
+> linearization, before any simplification, and to stop
+> further processing if '=only' is given as argument.
+>
+> The motivation of this flag is of course for debugging,
+> to be able to inspect the raw result of the linearization,
+> undisturbed by an simplification.
+>
 
-> I think your patch is fine, and you might as well clear the whole
-> backing store, but I think strictly speaking you're initializing more
-> than what the standard says.
+In my view it is better to use the existing -O<n> option to control
+whether or not simplifications are done. That way sparse-llvm can be
+run with/without simplifications.
 
-Yes, absolutely.
-For the moment it's quite crude but generate correct code
-(unless we want to track the undefined values).
-It should be smarter, though, because of these holes but also
-because what I hinted in the note:
-for the moment, 'struct { int a, b, c, } s = { 1, 2, 3, };'
-will generate something like:
-	store.96	$0 -> 0[s]
-	store.32	$1 -> 0[s]
-	store.32	$2 -> 4[s]
-	store.32	$3 -> 8[s]
-which is a bit sad.
+Of course there is an issue that what should be the default for this
+setting if no option is given by the user. I would suggest that -O0
+switches off simplifications, any other value or not specifying -O
+switches it on.
 
--- Luc
+Thanks and Regards
+Dibyendu
