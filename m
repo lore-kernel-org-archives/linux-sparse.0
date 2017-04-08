@@ -1,133 +1,266 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 1/6] add support for a new flag: -fdump-linearize[=only]
-Date: Sat,  8 Apr 2017 23:18:56 +0200
-Message-ID: <20170408211901.40507-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 4/6] fix implicit zero initializer.
+Date: Sat,  8 Apr 2017 23:18:59 +0200
+Message-ID: <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
 References: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36684 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752002AbdDHVTO (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36694 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752187AbdDHVTQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 8 Apr 2017 17:19:14 -0400
-Received: by mail-wm0-f68.google.com with SMTP id q125so3594246wmd.3
-        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:13 -0700 (PDT)
+        Sat, 8 Apr 2017 17:19:16 -0400
+Received: by mail-wm0-f66.google.com with SMTP id q125so3594308wmd.3
+        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:16 -0700 (PDT)
 In-Reply-To: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The effect of this flag is to dump the IR just after the
-linearization, before any simplification, and to stop
-further processing if '=only' is given as argument.
+The C standard requires that, when initializing an aggregate, all
+fieds not explicitly initialized shall be implicity zero-initialized
+(more exactly "the same as objects that have static storage duration"
+[6.7.9.21]).
 
-The motivation of this flag is of course for debugging,
-to be able to inspect the raw result of the linearization,
-undisturbed by an simplification.
+Until now sparse didn't did this.
+Fix this (when an initializer is present and the object not a scalar)
+by first storing zeroes in the whole object before doing the
+initialization of each fields explicitly initialized.
+
+Note 1: this patch initialize the *whole* aggregate while the
+	standard only requires that existing fields are initialized.
+	Thanks to Linus to notice this.
+Note 2: this implicit initialization is not needed if all fields are
+        explicitly initialized but is done anyway, for the moment.
+Note 3: the code simplify nicely when there is a single field that is
+        initialized, much less so when there is several ones.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c       | 23 +++++++++++++++++++++++
- lib.h       |  2 ++
- linearize.c |  6 ++++++
- sparse.1    |  7 +++++++
- 4 files changed, 38 insertions(+)
+ linearize.c                             |  15 +++++
+ validation/linear/bitfield-init-zero.c  | 102 ++++++++++++++++++++++++++++++++
+ validation/linear/struct-init-full.c    |  28 +++++++++
+ validation/linear/struct-init-partial.c |  41 +++++++++++++
+ 4 files changed, 186 insertions(+)
+ create mode 100644 validation/linear/bitfield-init-zero.c
+ create mode 100644 validation/linear/struct-init-full.c
+ create mode 100644 validation/linear/struct-init-partial.c
 
-diff --git a/lib.c b/lib.c
-index 272d2c88a..ca8ff2d17 100644
---- a/lib.c
-+++ b/lib.c
-@@ -250,6 +250,8 @@ int Wvla = 1;
- int dbg_entry = 0;
- int dbg_dead = 0;
- 
-+int fdump_linearize;
-+
- int preprocess_only;
- 
- static enum { STANDARD_C89,
-@@ -645,12 +647,33 @@ static char **handle_switch_ftabstop(char *arg, char **next)
- 	return next;
- }
- 
-+static char **handle_switch_fdump(char *arg, char **next)
-+{
-+	if (!strncmp(arg, "linearize", 9)) {
-+		arg += 9;
-+		if (*arg == '\0')
-+			fdump_linearize = 1;
-+		else if (!strcmp(arg, "=only"))
-+			fdump_linearize = 2;
-+		else
-+			goto err;
-+	}
-+
-+	/* ignore others flags */
-+	return next;
-+
-+err:
-+	die("error: unknown flag \"-fdump-%s\"", arg);
-+}
-+
- static char **handle_switch_f(char *arg, char **next)
- {
- 	arg++;
- 
- 	if (!strncmp(arg, "tabstop=", 8))
- 		return handle_switch_ftabstop(arg+8, next);
-+	if (!strncmp(arg, "dump-", 5))
-+		return handle_switch_fdump(arg+5, next);
- 
- 	/* handle switches w/ arguments above, boolean and only boolean below */
- 
-diff --git a/lib.h b/lib.h
-index 134e56040..fb612d154 100644
---- a/lib.h
-+++ b/lib.h
-@@ -136,6 +136,8 @@ extern int Wvla;
- extern int dbg_entry;
- extern int dbg_dead;
- 
-+extern int fdump_linearize;
-+
- extern int arch_m64;
- 
- extern void declare_builtin_functions(void);
 diff --git a/linearize.c b/linearize.c
-index 2f850fb7e..61c804333 100644
+index 5c273a91d..f628f5a74 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -2171,6 +2171,12 @@ static struct entrypoint *linearize_fn(struct symbol *sym, struct symbol *base_t
- 		add_one_insn(ep, insn);
- 	}
+@@ -1635,6 +1635,21 @@ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
  
-+	if (fdump_linearize) {
-+		if (fdump_linearize == 2)
-+			return ep;
-+		show_entry(ep);
+ 	sym->initialized = 1;
+ 	ad.address = symbol_pseudo(ep, sym);
++
++	if (sym->initializer && !is_scalar_type(sym)) {
++		// default zero initialization [6.7.9.21]
++		// FIXME: this init the whole aggregate while
++		// only the existing fields need to be initialized.
++		// FIXME: this init the whole aggregate even if
++		// all fields arelater  explicitely initialized.
++		struct expression *expr = sym->initializer;
++		ad.pos = expr->pos;
++		ad.result_type = sym;
++		ad.source_type = base_type(sym);
++		ad.address = symbol_pseudo(ep, sym);
++		linearize_store_gen(ep, value_pseudo(0), &ad);
 +	}
 +
- 	/*
- 	 * Do trivial flow simplification - branches to
- 	 * branches, kill dead basicblocks etc
-diff --git a/sparse.1 b/sparse.1
-index 85d6e646b..525d3ded5 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -344,6 +344,13 @@ Look for system headers in the multiarch subdirectory \fIdir\fR.
- The \fIdir\fR name would normally take the form of the target's
- normalized GNU triplet. (e.g. i386-linux-gnu).
- .
-+.SH DEBUG OPTIONS
-+.TP
-+.B \-fdump-linearize[=only]
-+Dump the IR code of a function directly after its linearization,
-+before any simplifications is made. If the argument \fB=only\fR is
-+also given no further processing is done on the function.
-+.
- .SH OTHER OPTIONS
- .TP
- .B \-ftabstop=WIDTH
+ 	value = linearize_initializer(ep, sym->initializer, &ad);
+ 	finish_address_gen(ep, &ad);
+ 	return value;
+diff --git a/validation/linear/bitfield-init-zero.c b/validation/linear/bitfield-init-zero.c
+new file mode 100644
+index 000000000..39a64345e
+--- /dev/null
++++ b/validation/linear/bitfield-init-zero.c
+@@ -0,0 +1,102 @@
++struct bfu {
++	unsigned int a:11;
++	unsigned int f:9;
++	unsigned int  :2;
++	unsigned int z:3;
++};
++
++struct bfu bfuu_init(unsigned int a)
++{
++	struct bfu bf = { .f = a, };
++	return bf;
++}
++
++struct bfu bfus_init(int a)
++{
++	struct bfu bf = { .f = a, };
++	return bf;
++}
++
++unsigned int bfu_get0(void)
++{
++	struct bfu bf = { };
++	return bf.f;
++}
++
++
++struct bfs {
++	signed int a:11;
++	signed int f:9;
++	signed int  :2;
++	signed int z:3;
++};
++
++struct bfs bfsu_init(unsigned int a)
++{
++	struct bfs bf = { .f = a, };
++	return bf;
++}
++
++struct bfs bfss_init(int a)
++{
++	struct bfs bf = { .f = a, };
++	return bf;
++}
++
++int bfs_get0(void)
++{
++	struct bfs bf = { };
++	return bf.f;
++}
++
++/*
++ * check-name: bitfield implicit init zero
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++bfuu_init:
++.L0:
++	<entry-point>
++	cast.9      %r2 <- (32) %arg1
++	shl.32      %r4 <- %r2, $11
++	ret.32      %r4
++
++
++bfus_init:
++.L2:
++	<entry-point>
++	scast.9     %r10 <- (32) %arg1
++	shl.32      %r12 <- %r10, $11
++	ret.32      %r12
++
++
++bfu_get0:
++.L4:
++	<entry-point>
++	ret.32      $0
++
++
++bfsu_init:
++.L6:
++	<entry-point>
++	cast.9      %r23 <- (32) %arg1
++	shl.32      %r25 <- %r23, $11
++	ret.32      %r25
++
++
++bfss_init:
++.L8:
++	<entry-point>
++	scast.9     %r31 <- (32) %arg1
++	shl.32      %r33 <- %r31, $11
++	ret.32      %r33
++
++
++bfs_get0:
++.L10:
++	<entry-point>
++	ret.32      $0
++
++
++ * check-output-end
++ */
+diff --git a/validation/linear/struct-init-full.c b/validation/linear/struct-init-full.c
+new file mode 100644
+index 000000000..f1b03db71
+--- /dev/null
++++ b/validation/linear/struct-init-full.c
+@@ -0,0 +1,28 @@
++struct s {
++	int a, b, c;
++};
++
++struct s s_init_all(int a)
++{
++	struct s s = { .a = a, .b = 42, .c = 123, };
++	return s;
++}
++
++/*
++ * check-name: struct implicit init zero not needed
++ * check-command: test-linearize -Wno-decl $file
++ * check-known-to-fail
++ *
++ * check-output-start
++s_init_all:
++.L4:
++	<entry-point>
++	store.32    %arg1 -> 0[s]
++	store.32    $42 -> 4[s]
++	store.32    $123 -> 8[s]
++	load.96     %r8 <- 0[s]
++	ret.96      %r8
++
++
++ * check-output-end
++ */
+diff --git a/validation/linear/struct-init-partial.c b/validation/linear/struct-init-partial.c
+new file mode 100644
+index 000000000..1f5078bfa
+--- /dev/null
++++ b/validation/linear/struct-init-partial.c
+@@ -0,0 +1,41 @@
++struct s {
++	int a, b, c;
++};
++
++struct s s_init_first(int a)
++{
++	struct s s = { .a = a, };
++	return s;
++}
++
++struct s s_init_third(int a)
++{
++	struct s s = { .c = a, };
++	return s;
++}
++
++/*
++ * check-name: struct implicit init zero needed
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-start
++s_init_first:
++.L0:
++	<entry-point>
++	store.96    $0 -> 0[s]
++	store.32    %arg1 -> 0[s]
++	load.96     %r2 <- 0[s]
++	ret.96      %r2
++
++
++s_init_third:
++.L2:
++	<entry-point>
++	store.96    $0 -> 0[s]
++	store.32    %arg1 -> 8[s]
++	load.96     %r5 <- 0[s]
++	ret.96      %r5
++
++
++ * check-output-end
++ */
 -- 
 2.12.0
 
