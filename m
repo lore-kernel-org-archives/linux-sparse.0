@@ -1,68 +1,52 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 3/6] add test case for linearize_initializer() of bitfields
-Date: Sat,  8 Apr 2017 23:18:58 +0200
-Message-ID: <20170408211901.40507-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 5/6] remove alignment from struct access_data
+Date: Sat,  8 Apr 2017 23:19:00 +0200
+Message-ID: <20170408211901.40507-6-luc.vanoostenryck@gmail.com>
 References: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35035 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752002AbdDHVTP (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:33559 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752292AbdDHVTR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 8 Apr 2017 17:19:15 -0400
-Received: by mail-wm0-f65.google.com with SMTP id d79so3604279wmi.2
-        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:15 -0700 (PDT)
+        Sat, 8 Apr 2017 17:19:17 -0400
+Received: by mail-wm0-f66.google.com with SMTP id o81so3595966wmb.0
+        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:16 -0700 (PDT)
 In-Reply-To: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In linearize_initializer(), 'ad->bit_size' & 'ad->bit_offset' were
-never set, making the correct initialization impossible (a bit_size of
-zero being especially bad, resulting in a mask of -1 instead of 0).
+In struct access_data, the field 'alignment' is always
+the one present in 'result_type' and is thus completely
+redundant.
 
-This is now fixed since 'bit_size' & 'bit_offset' are taken directly
-from 'result_type'.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Change this by removing this field.
 ---
- validation/linear/bitfield-init-mask.c | 27 +++++++++++++++++++++++++++
- 1 file changed, 27 insertions(+)
- create mode 100644 validation/linear/bitfield-init-mask.c
+ linearize.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/validation/linear/bitfield-init-mask.c b/validation/linear/bitfield-init-mask.c
-new file mode 100644
-index 000000000..94afa400c
---- /dev/null
-+++ b/validation/linear/bitfield-init-mask.c
-@@ -0,0 +1,27 @@
-+struct bfu {
-+	unsigned int a:11;
-+	unsigned int f:9;
-+	unsigned int z:3;
-+};
-+
-+struct bfu bfu_init_00_11(int a)
-+{
-+	struct bfu bfu = { .a = a, };
-+	return bfu;
-+}
-+
-+struct bfu bfu_init_20_23(int a)
-+{
-+	struct bfu bfu = { .z = a, };
-+	return bfu;
-+}
-+
-+/*
-+ * check-name: bitfield initializer mask
-+ * check-command: test-linearize -fdump-linearize=only -Wno-decl $file
-+ * check-output-ignore
-+ *
-+ * check-output-contains: and\\..*fffff800\$
-+ * check-output-contains: shl\\..* \\$20
-+ * check-output-contains: and\\..*ff8fffff\$
-+ */
+diff --git a/linearize.c b/linearize.c
+index f628f5a74..1f93da9ae 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -844,7 +844,7 @@ struct access_data {
+ 	struct symbol *source_type;	// source ctype
+ 	pseudo_t address;		// pseudo containing address ..
+ 	pseudo_t origval;		// pseudo for original value ..
+-	unsigned int offset, alignment;	// byte offset
++	unsigned int offset;		// byte offset
+ 	struct position pos;
+ };
+ 
+@@ -897,7 +897,6 @@ static int linearize_address_gen(struct entrypoint *ep,
+ 	ad->pos = expr->pos;
+ 	ad->result_type = ctype;
+ 	ad->source_type = base_type(ctype);
+-	ad->alignment = ctype->ctype.alignment;
+ 	if (expr->type == EXPR_PREOP && expr->op == '*')
+ 		return linearize_simple_address(ep, expr->unop, ad);
+ 
 -- 
 2.12.0
 
