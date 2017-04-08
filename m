@@ -1,265 +1,67 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 4/6] fix implicit zero initializer.
-Date: Sat,  8 Apr 2017 23:18:59 +0200
-Message-ID: <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 3/6] add test case for linearize_initializer() of bitfields
+Date: Sat,  8 Apr 2017 23:18:58 +0200
+Message-ID: <20170408211901.40507-4-luc.vanoostenryck@gmail.com>
 References: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36694 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752187AbdDHVTQ (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35035 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752002AbdDHVTP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 8 Apr 2017 17:19:16 -0400
-Received: by mail-wm0-f66.google.com with SMTP id q125so3594308wmd.3
-        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:16 -0700 (PDT)
+        Sat, 8 Apr 2017 17:19:15 -0400
+Received: by mail-wm0-f65.google.com with SMTP id d79so3604279wmi.2
+        for <linux-sparse@vger.kernel.org>; Sat, 08 Apr 2017 14:19:15 -0700 (PDT)
 In-Reply-To: <20170408211901.40507-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The C standard requires that, when initializing an aggregate, all
-fieds not explicitly initialized shall be implicity zero-initialized
-(more exactly "the same as objects that have static storage duration"
-[6.7.9.21]).
+In linearize_initializer(), 'ad->bit_size' & 'ad->bit_offset' were
+never set, making the correct initialization impossible (a bit_size of
+zero being especially bad, resulting in a mask of -1 instead of 0).
 
-Until now sparse didn't did this.
-Fix this (when an initializer is present and the object not a scalar)
-by first storing zeroes in the whole object before doing the
-initialization of each fields explicitly initialized.
-
-Note 1: this patch initialize the *whole* aggregate while the
-	standard only requires that existing fields are initialized.
-	Thanks to Linus to notice this.
-Note 2: this implicit initialization is not needed if all fields are
-        explicitly initialized but is done anyway, for the moment.
-Note 3: the code simplify nicely when there is a single field that is
-        initialized, much less so when there is several ones.
+This is now fixed since 'bit_size' & 'bit_offset' are taken directly
+from 'result_type'.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c                             |  15 +++++
- validation/linear/bitfield-init-zero.c  | 102 ++++++++++++++++++++++++++++++++
- validation/linear/struct-init-full.c    |  28 +++++++++
- validation/linear/struct-init-partial.c |  41 +++++++++++++
- 4 files changed, 186 insertions(+)
- create mode 100644 validation/linear/bitfield-init-zero.c
- create mode 100644 validation/linear/struct-init-full.c
- create mode 100644 validation/linear/struct-init-partial.c
+ validation/linear/bitfield-init-mask.c | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+ create mode 100644 validation/linear/bitfield-init-mask.c
 
-diff --git a/linearize.c b/linearize.c
-index 5c273a91d..f628f5a74 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1635,6 +1635,21 @@ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
- 
- 	sym->initialized = 1;
- 	ad.address = symbol_pseudo(ep, sym);
-+
-+	if (sym->initializer && !is_scalar_type(sym)) {
-+		// default zero initialization [6.7.9.21]
-+		// FIXME: this init the whole aggregate while
-+		// only the existing fields need to be initialized.
-+		// FIXME: this init the whole aggregate even if
-+		// all fields arelater  explicitely initialized.
-+		struct expression *expr = sym->initializer;
-+		ad.pos = expr->pos;
-+		ad.result_type = sym;
-+		ad.source_type = base_type(sym);
-+		ad.address = symbol_pseudo(ep, sym);
-+		linearize_store_gen(ep, value_pseudo(0), &ad);
-+	}
-+
- 	value = linearize_initializer(ep, sym->initializer, &ad);
- 	finish_address_gen(ep, &ad);
- 	return value;
-diff --git a/validation/linear/bitfield-init-zero.c b/validation/linear/bitfield-init-zero.c
+diff --git a/validation/linear/bitfield-init-mask.c b/validation/linear/bitfield-init-mask.c
 new file mode 100644
-index 000000000..39a64345e
+index 000000000..94afa400c
 --- /dev/null
-+++ b/validation/linear/bitfield-init-zero.c
-@@ -0,0 +1,102 @@
++++ b/validation/linear/bitfield-init-mask.c
+@@ -0,0 +1,27 @@
 +struct bfu {
 +	unsigned int a:11;
 +	unsigned int f:9;
-+	unsigned int  :2;
 +	unsigned int z:3;
 +};
 +
-+struct bfu bfuu_init(unsigned int a)
++struct bfu bfu_init_00_11(int a)
 +{
-+	struct bfu bf = { .f = a, };
-+	return bf;
++	struct bfu bfu = { .a = a, };
++	return bfu;
 +}
 +
-+struct bfu bfus_init(int a)
++struct bfu bfu_init_20_23(int a)
 +{
-+	struct bfu bf = { .f = a, };
-+	return bf;
-+}
-+
-+unsigned int bfu_get0(void)
-+{
-+	struct bfu bf = { };
-+	return bf.f;
-+}
-+
-+
-+struct bfs {
-+	signed int a:11;
-+	signed int f:9;
-+	signed int  :2;
-+	signed int z:3;
-+};
-+
-+struct bfs bfsu_init(unsigned int a)
-+{
-+	struct bfs bf = { .f = a, };
-+	return bf;
-+}
-+
-+struct bfs bfss_init(int a)
-+{
-+	struct bfs bf = { .f = a, };
-+	return bf;
-+}
-+
-+int bfs_get0(void)
-+{
-+	struct bfs bf = { };
-+	return bf.f;
++	struct bfu bfu = { .z = a, };
++	return bfu;
 +}
 +
 +/*
-+ * check-name: bitfield implicit init zero
-+ * check-command: test-linearize -Wno-decl $file
++ * check-name: bitfield initializer mask
++ * check-command: test-linearize -fdump-linearize=only -Wno-decl $file
++ * check-output-ignore
 + *
-+ * check-output-start
-+bfuu_init:
-+.L0:
-+	<entry-point>
-+	cast.9      %r2 <- (32) %arg1
-+	shl.32      %r4 <- %r2, $11
-+	ret.32      %r4
-+
-+
-+bfus_init:
-+.L2:
-+	<entry-point>
-+	scast.9     %r10 <- (32) %arg1
-+	shl.32      %r12 <- %r10, $11
-+	ret.32      %r12
-+
-+
-+bfu_get0:
-+.L4:
-+	<entry-point>
-+	ret.32      $0
-+
-+
-+bfsu_init:
-+.L6:
-+	<entry-point>
-+	cast.9      %r23 <- (32) %arg1
-+	shl.32      %r25 <- %r23, $11
-+	ret.32      %r25
-+
-+
-+bfss_init:
-+.L8:
-+	<entry-point>
-+	scast.9     %r31 <- (32) %arg1
-+	shl.32      %r33 <- %r31, $11
-+	ret.32      %r33
-+
-+
-+bfs_get0:
-+.L10:
-+	<entry-point>
-+	ret.32      $0
-+
-+
-+ * check-output-end
-+ */
-diff --git a/validation/linear/struct-init-full.c b/validation/linear/struct-init-full.c
-new file mode 100644
-index 000000000..f1b03db71
---- /dev/null
-+++ b/validation/linear/struct-init-full.c
-@@ -0,0 +1,28 @@
-+struct s {
-+	int a, b, c;
-+};
-+
-+struct s s_init_all(int a)
-+{
-+	struct s s = { .a = a, .b = 42, .c = 123, };
-+	return s;
-+}
-+
-+/*
-+ * check-name: struct implicit init zero not needed
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-start
-+s_init_all:
-+.L4:
-+	<entry-point>
-+	store.32    %arg1 -> 0[s]
-+	store.32    $42 -> 4[s]
-+	store.32    $123 -> 8[s]
-+	load.96     %r8 <- 0[s]
-+	ret.96      %r8
-+
-+
-+ * check-output-end
-+ */
-diff --git a/validation/linear/struct-init-partial.c b/validation/linear/struct-init-partial.c
-new file mode 100644
-index 000000000..1f5078bfa
---- /dev/null
-+++ b/validation/linear/struct-init-partial.c
-@@ -0,0 +1,41 @@
-+struct s {
-+	int a, b, c;
-+};
-+
-+struct s s_init_first(int a)
-+{
-+	struct s s = { .a = a, };
-+	return s;
-+}
-+
-+struct s s_init_third(int a)
-+{
-+	struct s s = { .c = a, };
-+	return s;
-+}
-+
-+/*
-+ * check-name: struct implicit init zero needed
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-start
-+s_init_first:
-+.L0:
-+	<entry-point>
-+	store.96    $0 -> 0[s]
-+	store.32    %arg1 -> 0[s]
-+	load.96     %r2 <- 0[s]
-+	ret.96      %r2
-+
-+
-+s_init_third:
-+.L2:
-+	<entry-point>
-+	store.96    $0 -> 0[s]
-+	store.32    %arg1 -> 8[s]
-+	load.96     %r5 <- 0[s]
-+	ret.96      %r5
-+
-+
-+ * check-output-end
++ * check-output-contains: and\\..*fffff800\$
++ * check-output-contains: shl\\..* \\$20
++ * check-output-contains: and\\..*ff8fffff\$
 + */
 -- 
 2.12.0
