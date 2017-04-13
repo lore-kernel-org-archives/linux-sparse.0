@@ -1,57 +1,108 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/8] avoid creating orphaned OP_PHISRCs
-Date: Thu, 13 Apr 2017 18:55:43 +0200
-Message-ID: <20170413165551.2785-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/8] extract add_dominator() from find_dominating_parents()
+Date: Thu, 13 Apr 2017 18:55:44 +0200
+Message-ID: <20170413165551.2785-2-luc.vanoostenryck@gmail.com>
+References: <20170413165551.2785-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36693 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753951AbdDMQz7 (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36705 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753970AbdDMQz7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Thu, 13 Apr 2017 12:55:59 -0400
-Received: by mail-wm0-f66.google.com with SMTP id q125so13647547wmd.3
-        for <linux-sparse@vger.kernel.org>; Thu, 13 Apr 2017 09:55:58 -0700 (PDT)
+Received: by mail-wm0-f68.google.com with SMTP id q125so13647643wmd.3
+        for <linux-sparse@vger.kernel.org>; Thu, 13 Apr 2017 09:55:59 -0700 (PDT)
+In-Reply-To: <20170413165551.2785-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The goal of this series is to avoid the creation of
-orphaned OP_PHISRCs by simplify_loads() when it appears
-that the loads con't be simplified afterall but that some
-OP_PHISRC have already been created.
-This change then lead to some code restructuration and
-simplification.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c   | 19 ++++++++++++-------
+ flow.h   |  1 +
+ memops.c |  8 +-------
+ 3 files changed, 14 insertions(+), 14 deletions(-)
 
-This series is available at:
-	git://github.com/lucvoo/sparse.git fix-orphaned-phisrc
-based on commits (a merge)
-	ac6c25bc066eab36942539ba11c7ab6cf0c63674 (bool-context)
-	ecda2093f19088fa94c3a4ac85359c6d0f1c64af (fix-cond-address)
-	fc981fe285c37ee297e93ef1cc8725caac75f9b3 (fix-bitfield-init-v2)
-up to commit:
-	8b6716908788dfd1713215e7d4ddaa4f3d341948
-
-
-Luc Van Oostenryck (8):
-  extract add_dominator() from find_dominating_parents()
-  add helper add_load_dominators()
-  remove test on initial phi->ident
-  avoid phisrc orphaned by simplify_loads()
-  avoid phisrc orphaned by find_dominating_stores()
-  integrate add_load_dominators() into rewrite_load_instruction()
-  check duplicated phi-nodes directly on dominators
-  avoid creating unneeded phi-sources
-
- flow.c                               | 79 +++++++++++++++++++++++-------------
- flow.h                               |  2 +-
- memops.c                             | 14 ++-----
- validation/linear/phisrc-orphan-ld.c | 22 ++++++++++
- validation/linear/phisrc-orphan-st.c | 17 ++++++++
- validation/loop-linearization.c      | 30 +++++++-------
- 6 files changed, 110 insertions(+), 54 deletions(-)
- create mode 100644 validation/linear/phisrc-orphan-ld.c
- create mode 100644 validation/linear/phisrc-orphan-st.c
-
+diff --git a/flow.c b/flow.c
+index 45bae773e..50507a5e7 100644
+--- a/flow.c
++++ b/flow.c
+@@ -374,8 +374,6 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
+ 
+ 	FOR_EACH_PTR(bb->parents, parent) {
+ 		struct instruction *one;
+-		struct instruction *br;
+-		pseudo_t phi;
+ 
+ 		FOR_EACH_PTR_REVERSE(parent->insns, one) {
+ 			int dominance;
+@@ -403,15 +401,22 @@ no_dominance:
+ found_dominator:
+ 		if (dominators && phisrc_in_bb(*dominators, parent))
+ 			continue;
+-		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->type);
+-		phi->ident = phi->ident ? : pseudo->ident;
+-		add_instruction(&parent->insns, br);
+-		use_pseudo(insn, phi, add_pseudo(dominators, phi));
++		add_dominator(dominators, insn, one, pseudo->ident);
+ 	} END_FOR_EACH_PTR(parent);
+ 	return 1;
+ }		
+ 
++void add_dominator(struct pseudo_list **phi_list, struct instruction *insn,
++	struct instruction *dom, struct ident *ident)
++{
++	struct basic_block *bb = dom->bb;
++	struct instruction *br = delete_last_instruction(&bb->insns);
++	pseudo_t phi = alloc_phi(bb, dom->target, dom->type);
++	phi->ident = phi->ident ? : ident ? : dom->target->ident;
++	add_instruction(&bb->insns, br);
++	use_pseudo(insn, phi, add_pseudo(phi_list, phi));
++}
++
+ /*
+  * We should probably sort the phi list just to make it easier to compare
+  * later for equality. 
+diff --git a/flow.h b/flow.h
+index 31ed80d40..800585547 100644
+--- a/flow.h
++++ b/flow.h
+@@ -38,6 +38,7 @@ static inline void kill_instruction_force(struct instruction *insn)
+ void check_access(struct instruction *insn);
+ void convert_load_instruction(struct instruction *, pseudo_t);
+ void rewrite_load_instruction(struct instruction *, struct pseudo_list *);
++void add_dominator(struct pseudo_list **, struct instruction *, struct instruction *, struct ident*);
+ int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom, int local);
+ 
+ extern void clear_liveness(struct entrypoint *ep);
+diff --git a/memops.c b/memops.c
+index 187a63284..ac43b6a0a 100644
+--- a/memops.c
++++ b/memops.c
+@@ -24,8 +24,6 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
+ 
+ 	FOR_EACH_PTR(bb->parents, parent) {
+ 		struct instruction *one;
+-		struct instruction *br;
+-		pseudo_t phi;
+ 
+ 		FOR_EACH_PTR_REVERSE(parent->insns, one) {
+ 			int dominance;
+@@ -51,11 +49,7 @@ no_dominance:
+ 		continue;
+ 
+ found_dominator:
+-		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->type);
+-		phi->ident = phi->ident ? : one->target->ident;
+-		add_instruction(&parent->insns, br);
+-		use_pseudo(insn, phi, add_pseudo(dominators, phi));
++		add_dominator(dominators, insn, one, NULL);
+ 	} END_FOR_EACH_PTR(parent);
+ 	return 1;
+ }		
 -- 
 2.12.0
 
