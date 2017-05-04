@@ -1,36 +1,52 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [GIT PULL] pending fixes for sparse's next release
-Date: Thu, 4 May 2017 09:37:19 -0400
-Message-ID: <CANeU7QnOdw-U+r3EkYucqo=r4d9RaqGQ8aZbjBv6XOtsm8hgqg@mail.gmail.com>
-References: <20170430034149.iltu3kctg6n7w4g2@macpro.local> <CANeU7QkKubmzFjfbSqN0aQ=rwo=XJKtM1BfDHrb3Z3Nuc=VkKw@mail.gmail.com>
- <20170503223020.43cj45t4smjhw6qc@desk.local> <CANeU7QkgH+Z=f5Lw_AY38J1UMuN4qL8cMOWBWZWR5hw0J78weg@mail.gmail.com>
- <20170504114413.yokqlmhxbhehgget@ltop.local>
+From: Lance Richardson <lrichard@redhat.com>
+Subject: Re: [PATCH v4] sparse: add support for _Static_assert
+Date: Thu, 4 May 2017 09:56:31 -0400 (EDT)
+Message-ID: <1628848509.4869836.1493906191848.JavaMail.zimbra@redhat.com>
+References: <20170503165518.7625-1-lrichard@redhat.com> <CANeU7Q=pC0Q2z3xtACq1AJ89Y3mr8aNEpo6GO42y6n0MuxV0ug@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:35964 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753141AbdEDNhV (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 4 May 2017 09:37:21 -0400
-Received: by mail-io0-f170.google.com with SMTP id p80so22345629iop.3
-        for <linux-sparse@vger.kernel.org>; Thu, 04 May 2017 06:37:20 -0700 (PDT)
-In-Reply-To: <20170504114413.yokqlmhxbhehgget@ltop.local>
+Received: from mx1.redhat.com ([209.132.183.28]:58108 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755241AbdEDN4c (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 4 May 2017 09:56:32 -0400
+In-Reply-To: <CANeU7Q=pC0Q2z3xtACq1AJ89Y3mr8aNEpo6GO42y6n0MuxV0ug@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, May 4, 2017 at 7:44 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Is there anything else than fixes that you would like to see
-> in the coming release?
+> From: "Christopher Li" <sparse@chrisli.org>
+> To: "Lance Richardson" <lrichard@redhat.com>
+> Cc: "Linux-Sparse" <linux-sparse@vger.kernel.org>
+> Sent: Wednesday, 3 May, 2017 11:03:22 PM
+> Subject: Re: [PATCH v4] sparse: add support for _Static_assert
+> 
+> On Wed, May 3, 2017 at 12:55 PM, Lance Richardson <lrichard@redhat.com>
+> wrote:
+> > +               } else if (token_type(token) == TOKEN_IDENT &&
+> > +                          (keyword = lookup_keyword(token->ident,
+> > NS_KEYWORD)) &&
+> > +                          keyword->op == &static_assert_op) {
+> 
+> I think you should add _Static_assert into header file "ident-list.h"
+> then you can simplify this test as:
+> 
+> else if (token_type(token) == TOKEN_IDENT &&
+>             token->ident == &_Static_assert_ident)
+> 
+> We don't need to go through a keyword look up then test
+> the keyword->op == &static_assert_op.
+> 
+> Chris
+> 
 
-Let me check.
+Makes sense, thanks for the suggestion. This should also address Luc's
+comment about "extern int _Static_assert;" being accepted in the v4 version.
 
-> Maybe you can already 'promote' to master the previous -next
-> (14964df53 "avoid crash with test-linearize -vv")?
+Will fold into v5.
 
-Yes, I want to do that too.
+Thanks,
 
-Chris
+   Lance
