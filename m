@@ -1,46 +1,46 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/6] keyword cleanup
-Date: Fri,  5 May 2017 03:50:28 +0200
-Message-ID: <20170505015034.65164-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/6] keyword: add test case for reserved '_Static_assert'
+Date: Fri,  5 May 2017 03:50:29 +0200
+Message-ID: <20170505015034.65164-2-luc.vanoostenryck@gmail.com>
+References: <20170505015034.65164-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:35622 "EHLO
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36005 "EHLO
         mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752030AbdEEBum (ORCPT
+        with ESMTP id S1752030AbdEEBvt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 4 May 2017 21:50:42 -0400
-Received: by mail-wr0-f195.google.com with SMTP id g12so2990103wrg.2
-        for <linux-sparse@vger.kernel.org>; Thu, 04 May 2017 18:50:41 -0700 (PDT)
+        Thu, 4 May 2017 21:51:49 -0400
+Received: by mail-wr0-f195.google.com with SMTP id v42so2991755wrc.3
+        for <linux-sparse@vger.kernel.org>; Thu, 04 May 2017 18:51:49 -0700 (PDT)
+In-Reply-To: <20170505015034.65164-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The recent patch "add support for _Static_assert" triggered
-some spring cleanup of the "ident-list.h" file.
-The changes in this series are mainly moving around some
-definitions and removing unneeded ones.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ validation/reserved.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-The patches are to be applied on top of the '_Static_assert' patch.
+diff --git a/validation/reserved.c b/validation/reserved.c
+index e5d7af862..2ca9ac40a 100644
+--- a/validation/reserved.c
++++ b/validation/reserved.c
+@@ -16,6 +16,7 @@ static int (__typeof__);
+ static int (inline);
+ static int (__inline);
+ static int (__inline__);
++static int (_Static_assert);
+ /*
+  * check-name: const et.al. are reserved identifiers
+  * check-error-start:
+@@ -37,5 +38,6 @@ reserved.c:15:12: error: Trying to use reserved word '__typeof__' as identifier
+ reserved.c:16:12: error: Trying to use reserved word 'inline' as identifier
+ reserved.c:17:12: error: Trying to use reserved word '__inline' as identifier
+ reserved.c:18:12: error: Trying to use reserved word '__inline__' as identifier
++reserved.c:19:12: error: Trying to use reserved word '_Static_assert' as identifier
+  * check-error-end:
+  */
+-- 
+2.12.0
 
-Luc Van Oostenryck (6):
-  keyword: add test case for reserved '_Static_assert'
-  keyword: regroup the [reserved] keywords
-  keyword: explicitly add C99 & C11 keywords
-  keyword: add more reserved keywords to the test case
-  keyword: add a comment about NS_TYPEDEF & reserved keywords
-  keyword: no pre-declaration needed for attribute names
-
- ident-list.h          |  78 ++++++-----------------
- parse.c               |   1 +
- validation/reserved.c | 171 ++++++++++++++++++++++++++++++++++++++++++--------
- 3 files changed, 163 insertions(+), 87 deletions(-)
-
-
-The series can also be found at:
-  git://github.com/lucvoo/sparse.git keyword-cleanup
-based on commit a04a3b0acdaa0d95bba30a12e691804e13ef8166:
-  sparse: add support for _Static_assert
-up to commit 467aed81354b5a404a7c6c47aa38a2c6bfe08b8f:
-  keyword: no pre-declaration needed for attribute names
-
--- Luc Van Oostenryck
