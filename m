@@ -1,179 +1,113 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] fix: kill unreachable BBs after killing a child
-Date: Tue, 9 May 2017 17:27:17 +0200
-Message-ID: <20170509152716.weyudhvs7po23vnt@ltop.local>
-References: <20170508185710.22021-1-luc.vanoostenryck@gmail.com>
- <CANeU7Q=RU6PbRFFd7ZT4=bQh7-rHW=c9K+9bUPReSKuQmq8FqQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v6] sparse: add support for _Static_assert
+Date: Tue, 9 May 2017 08:53:43 -0700
+Message-ID: <CANeU7Q=oVwcFtB-RhG0+iFoHsF2BR+_wMZ4MP4x+ZmKDfvatew@mail.gmail.com>
+References: <20170508211543.20681-1-lrichard@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36274 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751210AbdEIP1W (ORCPT
+Received: from mail-it0-f54.google.com ([209.85.214.54]:36940 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755708AbdEIPxt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 9 May 2017 11:27:22 -0400
-Received: by mail-wr0-f196.google.com with SMTP id v42so970834wrc.3
-        for <linux-sparse@vger.kernel.org>; Tue, 09 May 2017 08:27:21 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=RU6PbRFFd7ZT4=bQh7-rHW=c9K+9bUPReSKuQmq8FqQ@mail.gmail.com>
+        Tue, 9 May 2017 11:53:49 -0400
+Received: by mail-it0-f54.google.com with SMTP id g126so4260648ith.0
+        for <linux-sparse@vger.kernel.org>; Tue, 09 May 2017 08:53:49 -0700 (PDT)
+In-Reply-To: <20170508211543.20681-1-lrichard@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Lance Richardson <lrichard@redhat.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, May 09, 2017 at 03:38:43AM -0700, Christopher Li wrote:
-> On Mon, May 8, 2017 at 11:57 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > Fix this by calling kill_unreachable_bbs() after having
-> > simplified the switch into a branch. This will avoid to
-> > create a cycle with because of the removed phisrc in the
-> > header and as an added benefit will avoid to waste time
-> > trying to simplify BBs that are unreachable.
-> >
-> > In addition, it's now useless to call kill_bb() for each
-> > removed switch's children as kill_unreachable_bbs() will
-> > do that too.
-> 
-> I thin the fix is correct. Have some very minor comment.
-> 
-> > diff --git a/linearize.c b/linearize.c
-> > index a9f36b823..ee9591897 100644
-> > --- a/linearize.c
-> > +++ b/linearize.c
-> > @@ -642,8 +642,6 @@ static void set_activeblock(struct entrypoint *ep, struct basic_block *bb)
-> >  static void remove_parent(struct basic_block *child, struct basic_block *parent)
-> >  {
-> >         remove_bb_from_list(&child->parents, parent, 1);
-> > -       if (!child->parents)
-> > -               kill_bb(child);
-> 
-> This makes every caller of remove_parent() need to clean up the
-> unreachable basic blocks. Currently there is only one caller  "insert_branch()"
-> which is fine. But if developer write a new code call this function, he might
-> forget to clean up the unreachable basic blocks. Kind of like a trap.
+Hi Lance,
 
-Yes, true. I didn't liked it very much myself and hesitated to
-remove the helper and directly calling remove_bb_from_list()
-from insert_branch().  I'll do this now.
- 
-but note that in 'normal' situation, it's doesn't really matter
-if the BB is killed now or not because:
-1) it's only the direct descendant that is killed, the indirect
-   ones have to wait anyway.
-2) kill_unreachable_bbs() is called after each cleanup loops
+thanks for the patch. Looks very good.
+Have some very minor comment below:
 
-> >
-> >  /* Change a "switch" into a branch */
-> > @@ -670,6 +668,7 @@ void insert_branch(struct basic_block *bb, struct instruction *jmp, struct basic
-> >                 remove_parent(child, bb);
-> >         } END_FOR_EACH_PTR(child);
-> >         PACK_PTR_LIST(&bb->children);
-> > +       kill_unreachable_bbs(bb->ep);
-> 
-> It is correct to do so. The kill unreachable is relative expensive.
-> Need to go through
-> all the basic block in a function.
 
-I don't really agree with this.
-When doing the patch I also at first thought the same but then
-I changed my mind because:
-1) it *only* need to run through all the BB (in fact the cost is
-   O(nbr of BB edges) while there is a lot of places where we 
-   loop through all *instructions*
-2) the fact that the unneeded BB are killed as soon as possible
-   means that the normal CSE+simplification won't wastly run
-   anymore on the indirect descendant blocks (I can redo the
-   measurements but I think I saw a measurable speedup because
-   of this).
+On Mon, May 8, 2017 at 2:15 PM, Lance Richardson <lrichard@redhat.com> wrote:
+> @@ -1945,13 +1953,17 @@ static struct token *declaration_list(struct token *token, struct symbol_list **
+>  static struct token *struct_declaration_list(struct token *token, struct symbol_list **list)
+>  {
+>         while (!match_op(token, '}')) {
+> -               if (!match_op(token, ';'))
+> -                       token = declaration_list(token, list);
+> -               if (!match_op(token, ';')) {
+> -                       sparse_error(token->pos, "expected ; at end of declaration");
+> -                       break;
+> +               if (match_ident(token, &_Static_assert_ident))
+> +                       token = parse_static_assert(token, NULL);
 
-> If there function has more than one
-> switch statement
-> get simplified, then each simplification will go through each basic block again.
-> Preferably  kill_unreachable() only run once at the finial stage.
-> 
-> I don't know how feasible to have remove_parent() mark the "ep" needs to clean.
-> Then at some later point kill off the dead basic block all together.
+I agree with Luc that his better with a "continue" then
+the following "else" section does not need to changed.
 
-Don't forget that the only reason for this patch is a *correctness*
-issue when the removed BB is followed by a loop (if it has no other
-entry point (which is generaly the case) and which thus become
-unreachable).
 
-We can mark the ep (the easiest is the reuse repeat_phase and add
-REPEAT_FLOW (which I'll will need to do anyway for something else,
-I'm polishing the patch)) but it won't change anything as we *must
-not* allow simplifications to be done once there is such a dead
-cycle and the only way to detect such cycles is via something
-like the marker algorithm used by kill_unreachable_bbs().
+> @@ -2093,6 +2105,37 @@ static struct token *parse_asm_declarator(struct token *token, struct decl_state
+>         return token;
+>  }
+>
+> +static struct token *parse_static_assert(struct token *token, struct symbol_list **unused)
+> +{
+> +       struct expression *cond = NULL, *message = NULL;
+> +       struct token *errtok;
+> +       int valid = 1;
+> +
+> +       token = expect(token->next, '(', "after _Static_assert");
+> +       errtok = token;
+> +       token = constant_expression(token, &cond);
+> +       if (!cond) {
 
-> Currently simplify a switch statement should be relative rare.
+I think errtok is not needed here. If there is an expression, the normal
+case. Then errtok will holding the start of the expression. errok->pos
+== cond->pos.
+Call it errtok is a bit miss leading.
 
-Like a lot of things, it depends.
-For example, the kernel use a lot inline functions or macro with
-code like:
-	...
-	switch (sizeof(x)) {
-	case 1: ...
-	case 2: ...
-	case 4: ...
-	case 8: ...
-	default: issue a build error
-	}
-Also, the simplification concerned here is 'insert_branch()'
-which, like I explained in the commit message, is used by the
-switch simplification but is also used by other branch
-simplifications.
+If cond == NULL,  that means the expression is empty. Then we have
+errtok == token. Either way errtok is not very useful.
 
-> Have two switch
-> statement in same function get simplify at the same time should be
-> even rarer.
-> Might not worth the effort to optimize for that.
-> 
-> As it is, the patch is acceptable.
+> +               sparse_error(errtok->pos, "Expected constant expression");
 
-I really also would prefer that we would not have to walk the BBs
-but I really think we don't have good others choices.
- 
-If we would really really want to avoid to call kill_unreachable_bss()
-we could in simplify_one_memop(), once we detect a possible loop in the
-addresses calculation (which is the core of the problem here: avoid
-to detect such a false loop), instead of issuing a message is to first
-call kill_unreachable_bbs() and then redo the memop simplification if
-some BBs were killed and the concerned instruction still exist).
-But:
-- it's more complicated than needed
-- the advanatge would only be based on the principle that
-  kill_unreachable_bbs() is costly (which is not really)
-- calling kill_unreachable_bbs() early has the advantage
-  to avoid doing memop and instruction simplification and CSE
-  on code that is in fact unreacheble (and those are more costly 
-  because they are done on every instructions)
-  I don't have the number anymore, but when testing what
-  I saw (and I was a bit surprised at first) was that with the
-  patch, compiling the kernel with sparse and calling test-linearize
-  on GCC's testsuite and such was in fact slightly faster (but
-  admitingly, the difference was small and it could have been
-  within the accuracy of the measurementi. I can redo the 
-  measurement if needed).
+BTW, when the error happen here, "errtok" is actually the next token after
+the missing expression, normally the ','. So the error actually happen before
+that token.
 
-Also, when talking about performance, if you do some profiling
-you very quickly realize:
-- CSE is quite costly (it's not new, cfr.
-   http://marc.info/?l=linux-sparse&m=111616763219436&w=4
-  and commit b5a8032aaeaf2121a642ead32653d4288fa2983d)
-  I have looked at this more than once but I don't see what we
-  can do but:
-  - avoid to call CSE on dead code
-  - call CSE less often, possibly to not trying to reach the
-    fix point, of course this impact the quality of the code
-- memory allocation eats a lot of memory cycles too (about
-  16-20%, not especially in userland but also by things
-  like kernel's clear_page())
-  But, see how you can easily win a speed up of 5%:
-  http://marc.info/?l=linux-sparse&m=149198627609282&w=4
-  There is a lot that can be done here. I have a few things
-  in preparation but it won't be for soon.
-- __add_ptr_list() is also surprinsingly high but I think that it's
-  simply because it's really called a lot.
+> +               valid = 0;
+> +       }
+> +       token = expect(token, ',', "after conditional expression in _Static_assert");
+> +       errtok = token;
+> +       token = parse_expression(token, &message);
+> +       if (!message || message->type != EXPR_STRING) {
+> +               sparse_error(errtok->pos, "bad or missing string literal");
+> +               valid = 0;
+> +       }
+> +       token = expect(token, ')', "after diagnostic message in _Static_assert");
+> +
+> +        token = expect(token, ';', "after _Static_assert()");
 
--- Luc
+There is some white space mix with tab in this line.
+
+> +
+> +       if (valid && !const_expression_value(cond) && cond->type == EXPR_VALUE)
+
+I am tempted to get rid of the "valid" variable. BTW, the "cond->type
+== EXPR_VALUE"
+should take place *before* the "!const_expression_value(cond)", other
+wise it will try
+to get const expression for non value expression, due to the evaluate order.
+
+Some thing like:
+
+            if (cond && cond->type == EXPR_VALUE &&
+!const_expression_value(cond))
+
+> +               sparse_error(cond->pos, "static assertion failed: %s",
+> +                            show_string(message->string));
+
+Then there:
+           message ?  show_string(message->string) : "");
+
+I think the assert failed without message string, we already report
+the error on empty string
+expression. Raising the assert here might be acceptable?
+
+Chris
