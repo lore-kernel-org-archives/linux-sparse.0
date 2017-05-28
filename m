@@ -1,122 +1,58 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [GIT PULL] next batch of patches
-Date: Sat, 20 May 2017 18:14:31 +0200
-Message-ID: <20170520161430.rojzqbt7rl6rud5b@desk.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 0/6] testsuite speedup
+Date: Sun, 28 May 2017 21:29:00 +0200
+Message-ID: <20170528192906.1023-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:36526 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750760AbdETQOf (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35773 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750802AbdE1T3M (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 20 May 2017 12:14:35 -0400
-Received: by mail-wr0-f173.google.com with SMTP id l50so30390354wrc.3
-        for <linux-sparse@vger.kernel.org>; Sat, 20 May 2017 09:14:34 -0700 (PDT)
-Content-Disposition: inline
+        Sun, 28 May 2017 15:29:12 -0400
+Received: by mail-wm0-f65.google.com with SMTP id g15so12960162wmc.2
+        for <linux-sparse@vger.kernel.org>; Sun, 28 May 2017 12:29:11 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Chris,
+The goal of this series is to speedup the testsuite,
+mainly by avoiding to unneedlessly spawn child processes.
 
-Please pull these patches for sparse's next release.
-More or less half of them are fixes, the remaining ones
-are utilities like -fmem-report, -fdump-linearize and
-support for -dD.
+The resulting speedup here is over 2.5, which is quite appreciable.
 
-Thank you,
-Luc
+Luc Van Oostenryck (6):
+  testsuite: get all tags in once
+  testsuite: grep the expected output only when needed
+  testsuite: grep the output patterns only when needed
+  testsuite: use shell arithmetic instead of fork-execing expr
+  testsuite: remove unneeded './' before commands
+  testsuite: avoid fork+execing basename
 
---->8
+ validation/backend/arithmetic-ops.c   |   2 +-
+ validation/backend/array.c            |   2 +-
+ validation/backend/bitwise-ops.c      |   2 +-
+ validation/backend/bool-test.c        |   2 +-
+ validation/backend/cast.c             |   2 +-
+ validation/backend/cmp-ops.c          |   2 +-
+ validation/backend/extern.c           |   2 +-
+ validation/backend/function-ptr.c     |   2 +-
+ validation/backend/hello.c            |   2 +-
+ validation/backend/int-cond.c         |   2 +-
+ validation/backend/load-type.c        |   2 +-
+ validation/backend/logical-ops.c      |   2 +-
+ validation/backend/loop.c             |   2 +-
+ validation/backend/loop2.c            |   2 +-
+ validation/backend/ptrcast.c          |   2 +-
+ validation/backend/store-type.c       |   2 +-
+ validation/backend/struct-access.c    |   2 +-
+ validation/backend/struct.c           |   2 +-
+ validation/backend/sum.c              |   2 +-
+ validation/backend/union.c            |   2 +-
+ validation/backend/void-return-type.c |   2 +-
+ validation/prototype.c                |   2 +-
+ validation/test-suite                 | 137 +++++++++++++++++++---------------
+ 23 files changed, 97 insertions(+), 84 deletions(-)
 
-The following changes since commit 51de1cca1bde56d9a1c73142fa2c93eeba65d0bf:
+-- 
+2.13.0
 
-  Merge branches 'quiets-bool-cast-restricted-v2', 'keyword-cleanup-v2', 'not-so-crazy-v2' and 'ignore-void-if-convert-v3' into tip (2017-05-12 12:59:06 +0200)
-
-are available in the git repository at:
-
-  git://github.com/lucvoo/sparse.git tags/fixes-for-stable-20170520
-
-for you to fetch changes up to 88578349140acf4405b768a60be05e10b7b8b158:
-
-  Merge branches 'dump-macros-v2', 'fix-predefined-size', 'fix-bool-context', 'fix-missing-reload', 'fix-insert-branch', 'fix-NULL-type', 'testsuite-clean', 'fix-bitfield-init-v3' and 'fdump-linearize' into tip (2017-05-19 16:11:51 +0200)
-
-----------------------------------------------------------------
-Pending fixes for sparse's next release
-
-----------------------------------------------------------------
-Luc Van Oostenryck (24):
-      fix boolean context for OP_AND_BOOL & OP_OR_BOOL
-      fix missing reload
-      add get_<allocator>_stats()
-      add show_allocation_stats()
-      add helper handle_simple_switch()
-      teach sparse how to handle '-fmem-report'
-      use -fmem-report to report allocation stats
-      testsuite: cleanup result files
-      fix: kill old branch in insert_branch()
-      returns the correct type when evaluating NULL
-      remove bit_size & bit_offset from struct access_data
-      add test case for linearize_initializer() of bitfields
-      fix implicit zero initializer.
-      remove alignment from struct access_data
-      remove origval from struct access_data
-      add support for a new flag: -fdump-linearize[=only]
-      define ident_list
-      teach sparse how to dump macro definitions
-      fix hardcoded size of wide chars
-      avoid to redefine __INT_MAX__ and friends
-      fix definition of __SCHAR_MAX__ & friends
-      teach sparse how to handle -dD flag
-      let -dD report macro definitions
-      Merge branches 'dump-macros-v2', 'fix-predefined-size', 'fix-bool-context', 'fix-missing-reload', 'fix-insert-branch', 'fix-NULL-type', 'testsuite-clean', 'fix-bitfield-init-v3' and 'fdump-linearize' into tip
-
- Makefile                                    |   1 +
- allocate.c                                  |   8 +++
- allocate.h                                  |  13 ++++
- char.c                                      |   4 +-
- evaluate.c                                  |   2 +-
- flow.c                                      |  12 +++-
- lib.c                                       |  91 +++++++++++++++++++++----
- lib.h                                       |  13 ++++
- linearize.c                                 |  86 +++++++++++++++++------
- pre-process.c                               |  55 +++++++++++++++
- sparse-llvm.c                               |   1 +
- sparse.1                                    |  10 +++
- sparse.c                                    |   2 +
- stats.c                                     |  62 +++++++++++++++++
- target.c                                    |   2 +
- target.h                                    |   2 +
- test-linearize.c                            |   2 +
- test-unssa.c                                |   1 +
- validation/alias-distinct.c                 |  17 +++++
- validation/alias-mixed.c                    |  30 ++++++++
- validation/alias-same.c                     |  17 +++++
- validation/empty-file                       |   0
- validation/kill-insert-branch.c             |  22 ++++++
- validation/linear/bitfield-init-mask.c      |  27 ++++++++
- validation/linear/bitfield-init-zero.c      | 102 ++++++++++++++++++++++++++++
- validation/linear/struct-init-full.c        |  28 ++++++++
- validation/linear/struct-init-partial.c     |  41 +++++++++++
- validation/optim/bool-context.c             |  12 ++++
- validation/optim/bool-simplify.c            |   8 ++-
- validation/preprocessor/dump-macros-empty.c |   7 ++
- validation/preprocessor/dump-macros-multi.c |   7 ++
- validation/preprocessor/dump-macros.c       |  18 +++++
- validation/test-suite                       |   1 +
- 33 files changed, 663 insertions(+), 41 deletions(-)
- create mode 100644 stats.c
- create mode 100644 validation/alias-distinct.c
- create mode 100644 validation/alias-mixed.c
- create mode 100644 validation/alias-same.c
- create mode 100644 validation/empty-file
- create mode 100644 validation/kill-insert-branch.c
- create mode 100644 validation/linear/bitfield-init-mask.c
- create mode 100644 validation/linear/bitfield-init-zero.c
- create mode 100644 validation/linear/struct-init-full.c
- create mode 100644 validation/linear/struct-init-partial.c
- create mode 100644 validation/optim/bool-context.c
- create mode 100644 validation/preprocessor/dump-macros-empty.c
- create mode 100644 validation/preprocessor/dump-macros-multi.c
- create mode 100644 validation/preprocessor/dump-macros.c
