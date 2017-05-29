@@ -1,65 +1,57 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] cgcc: fix __DECIMAL_DIG__
-Date: Mon, 29 May 2017 02:41:53 +0200
-Message-ID: <20170529004153.3951-1-luc.vanoostenryck@gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH 0/6] testsuite speedup
+Date: Mon, 29 May 2017 02:44:52 +0100
+Message-ID: <b5d44360-82c0-5a3f-ecdc-98a9b7e9f35a@ramsayjones.plus.com>
+References: <20170528192906.1023-1-luc.vanoostenryck@gmail.com>
+ <47420cd6-74bc-8037-5d92-7e65f8aa8560@ramsayjones.plus.com>
+ <CAExDi1S9oFHbUtv08rwGKOvjOVijzsrGm20dzW65N2ue=pUy1Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36365 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750837AbdE2AmC (ORCPT
+Received: from avasout08.plus.net ([212.159.14.20]:50198 "EHLO
+        avasout08.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750864AbdE2Boz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 28 May 2017 20:42:02 -0400
-Received: by mail-wm0-f66.google.com with SMTP id k15so13999125wmh.3
-        for <linux-sparse@vger.kernel.org>; Sun, 28 May 2017 17:42:01 -0700 (PDT)
+        Sun, 28 May 2017 21:44:55 -0400
+In-Reply-To: <CAExDi1S9oFHbUtv08rwGKOvjOVijzsrGm20dzW65N2ue=pUy1Q@mail.gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-There seems to be a mixup about how to calculate __DECIMAL_DIG__
-especially for PPC.
 
-Fix it by using the correct values: 21 for 80 bit long double (i386)
-and 36 for 128 bits long double (all the others).
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- cgcc | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+On 28/05/17 23:39, Luc Van Oostenryck wrote:
+> On Mon, May 29, 2017 at 12:04 AM, Ramsay Jones
+> <ramsay@ramsayjones.plus.com> wrote:
+>>
+>>
+>> On 28/05/17 20:29, Luc Van Oostenryck wrote:
+>>> The goal of this series is to speedup the testsuite,
+>>> mainly by avoiding to unneedlessly spawn child processes.
+>>>
+>>> The resulting speedup here is over 2.5, which is quite appreciable.
+>>
+>> I would have liked to try these out, particularly on cygwin, but I
+>> could not get them to apply. (patch #4 has a line: 'rm -f $file.{error,output}.{expected,got,diff}' in the context which I don't have).
+>>
+>> I was attempting to apply on top of 'sparse-next-20170516'.
+>> Should I apply to a different branch?
+>> Were they built on a branch I don't have?
+> 
+> Ah yes, sorry for that.
+> It should be applied on top of the next sparse-next but Chris hasn't yet
+> pulled it.
+> 
+> If you wish you can directly use the branch on my github tree:
+>         git://github.com/lucvoo/sparse.git testsuite-faster
 
-diff --git a/cgcc b/cgcc
-index c29fa587e..456369655 100755
---- a/cgcc
-+++ b/cgcc
-@@ -258,25 +258,25 @@ sub add_specs {
-     } elsif ($spec eq 'sparc') {
- 	return (' -D__sparc=1 -D__sparc__=1' .
- 		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
--		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
-+		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
- 		&define_size_t ($m64 ? "long unsigned int" : "unsigned int") .
- 		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
-     } elsif ($spec eq 'sparc64') {
- 	return (' -D__sparc=1 -D__sparc__=1 -D__sparcv9__=1 -D__sparc64__=1 -D__arch64__=1 -D__LP64__=1' .
- 		&integer_types (8, 16, 32, 64, 64, 128) .
--		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
-+		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
- 		&define_size_t ("long unsigned int") .
- 		' -D__SIZEOF_POINTER__=8');
-     } elsif ($spec eq 'x86_64') {
- 	return (' -D__x86_64=1 -D__x86_64__=1' . ($m32 ? '' : ' -D__LP64__=1') .
- 		&integer_types (8, 16, 32, $m32 ? 32 : 64, 64, 128) .
--		&float_types (1, 1, 33, [24,8], [53,11], [113,15]) .
-+		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
- 		&define_size_t ($m32 ? "unsigned int" : "long unsigned int") .
- 		' -D__SIZEOF_POINTER__=' . ($m32 ? '4' : '8'));
-     } elsif ($spec eq 'ppc') {
- 	return (' -D__powerpc__=1 -D_BIG_ENDIAN -D_STRING_ARCH_unaligned=1' .
- 		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
--		&float_types (1, 1, 21, [24,8], [53,11], [113,15]) .
-+		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
- 		&define_size_t ($m64 ? "long unsigned int" : "unsigned int") .
- 		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
-     } elsif ($spec eq 's390x') {
--- 
-2.13.0
+Thanks. I very quickly tried it on cygwin and the time to run the
+testsuite fell from 2m14.607s down to 1m0.298s. So, a nice time
+saver. ;-)
+
+ATB,
+Ramsay Jones
 
