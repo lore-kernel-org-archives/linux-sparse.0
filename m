@@ -1,46 +1,43 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/6] testsuite speedup
-Date: Mon, 29 May 2017 00:39:43 +0200
-Message-ID: <CAExDi1S9oFHbUtv08rwGKOvjOVijzsrGm20dzW65N2ue=pUy1Q@mail.gmail.com>
-References: <20170528192906.1023-1-luc.vanoostenryck@gmail.com> <47420cd6-74bc-8037-5d92-7e65f8aa8560@ramsayjones.plus.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH] teach cgcc about OSX aka darwin
+Date: Mon, 29 May 2017 02:37:57 +0200
+Message-ID: <20170529003757.3848-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f174.google.com ([209.85.220.174]:33425 "EHLO
-        mail-qk0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750830AbdE1Wjo (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36193 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750837AbdE2AkE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 28 May 2017 18:39:44 -0400
-Received: by mail-qk0-f174.google.com with SMTP id y201so37534978qka.0
-        for <linux-sparse@vger.kernel.org>; Sun, 28 May 2017 15:39:44 -0700 (PDT)
-In-Reply-To: <47420cd6-74bc-8037-5d92-7e65f8aa8560@ramsayjones.plus.com>
+        Sun, 28 May 2017 20:40:04 -0400
+Received: by mail-wm0-f68.google.com with SMTP id k15so13993942wmh.3
+        for <linux-sparse@vger.kernel.org>; Sun, 28 May 2017 17:40:03 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, May 29, 2017 at 12:04 AM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
->
->
-> On 28/05/17 20:29, Luc Van Oostenryck wrote:
->> The goal of this series is to speedup the testsuite,
->> mainly by avoiding to unneedlessly spawn child processes.
->>
->> The resulting speedup here is over 2.5, which is quite appreciable.
->
-> I would have liked to try these out, particularly on cygwin, but I
-> could not get them to apply. (patch #4 has a line: 'rm -f $file.{error,output}.{expected,got,diff}' in the context which I don't have).
->
-> I was attempting to apply on top of 'sparse-next-20170516'.
-> Should I apply to a different branch?
-> Were they built on a branch I don't have?
+cgcc knows about a few unix OSes but not yet about OSX/darwin.
 
-Ah yes, sorry for that.
-It should be applied on top of the next sparse-next but Chris hasn't yet
-pulled it.
+Fix this by adding the two needed defines to cgcc's specs.
 
-If you wish you can directly use the branch on my github tree:
-        git://github.com/lucvoo/sparse.git testsuite-faster
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ cgcc | 3 +++
+ 1 file changed, 3 insertions(+)
 
--- Luc
+diff --git a/cgcc b/cgcc
+index c29fa587e..e4d4ff0bf 100755
+--- a/cgcc
++++ b/cgcc
+@@ -237,6 +237,9 @@ sub add_specs {
+     } elsif ($spec eq 'openbsd') {
+ 	return &add_specs ('unix') .
+ 	    ' -D__OpenBSD__=1';
++    } elsif ($spec eq 'darwin') {
++	return
++	    ' -D__APPLE__=1 -D__MACH__=1';
+     } elsif ($spec eq 'unix') {
+ 	return ' -Dunix=1 -D__unix=1 -D__unix__=1';
+     } elsif ( $spec =~ /^cygwin/) {
+-- 
+2.13.0
+
