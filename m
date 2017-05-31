@@ -1,57 +1,57 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH 0/6] testsuite speedup
-Date: Mon, 29 May 2017 02:44:52 +0100
-Message-ID: <b5d44360-82c0-5a3f-ecdc-98a9b7e9f35a@ramsayjones.plus.com>
-References: <20170528192906.1023-1-luc.vanoostenryck@gmail.com>
- <47420cd6-74bc-8037-5d92-7e65f8aa8560@ramsayjones.plus.com>
- <CAExDi1S9oFHbUtv08rwGKOvjOVijzsrGm20dzW65N2ue=pUy1Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/9] division by zero warnings
+Date: Wed, 31 May 2017 05:21:58 +0200
+Message-ID: <20170531032207.95830-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout08.plus.net ([212.159.14.20]:50198 "EHLO
-        avasout08.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750864AbdE2Boz (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:35211 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751088AbdEaDWR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 28 May 2017 21:44:55 -0400
-In-Reply-To: <CAExDi1S9oFHbUtv08rwGKOvjOVijzsrGm20dzW65N2ue=pUy1Q@mail.gmail.com>
-Content-Language: en-GB
+        Tue, 30 May 2017 23:22:17 -0400
+Received: by mail-wr0-f195.google.com with SMTP id g76so303757wrd.2
+        for <linux-sparse@vger.kernel.org>; Tue, 30 May 2017 20:22:16 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+
+The goal of this series is to add the 'division by zero'
+warnings that are missing. Indeed, sparse only warned about
+division by zero when the LHS was a constant. When the LHS
+was not a constant (and thus also when the division was part
+of a compound assignement) no warning was ever issued.
+
+Note: the floating point division need a similar changes
+      which will be part of another series.
 
 
+This series is also available in the git repository at:
+  git://github.com/lucvoo/sparse.git div-by-zero
 
-On 28/05/17 23:39, Luc Van Oostenryck wrote:
-> On Mon, May 29, 2017 at 12:04 AM, Ramsay Jones
-> <ramsay@ramsayjones.plus.com> wrote:
->>
->>
->> On 28/05/17 20:29, Luc Van Oostenryck wrote:
->>> The goal of this series is to speedup the testsuite,
->>> mainly by avoiding to unneedlessly spawn child processes.
->>>
->>> The resulting speedup here is over 2.5, which is quite appreciable.
->>
->> I would have liked to try these out, particularly on cygwin, but I
->> could not get them to apply. (patch #4 has a line: 'rm -f $file.{error,output}.{expected,got,diff}' in the context which I don't have).
->>
->> I was attempting to apply on top of 'sparse-next-20170516'.
->> Should I apply to a different branch?
->> Were they built on a branch I don't have?
-> 
-> Ah yes, sorry for that.
-> It should be applied on top of the next sparse-next but Chris hasn't yet
-> pulled it.
-> 
-> If you wish you can directly use the branch on my github tree:
->         git://github.com/lucvoo/sparse.git testsuite-faster
 
-Thanks. I very quickly tried it on cygwin and the time to run the
-testsuite fell from 2m14.607s down to 1m0.298s. So, a nice time
-saver. ;-)
+Luc Van Oostenryck (9):
+  add is_pseudo_value()
+  add a .warned field to struct instruction
+  div0: warn on integer divide by 0 also when the lhs is not constant
+  div0: warn on division by zero - general case
+  div0: add warning option -Wdiv-by-zero
+  div0: use -Wdiv-by-zero
+  div0: warn also during simplification
+  div0: warn on float divide by 0 also when the lhs is not constant
+  div0: add missing tests for floating point div by zero
 
-ATB,
-Ramsay Jones
+ expand.c                    | 30 +++++++++++-------------
+ lib.c                       |  2 ++
+ lib.h                       |  1 +
+ linearize.c                 | 20 ++++++++++++++++
+ linearize.h                 | 12 ++++++++--
+ simplify.c                  | 12 ++++++++++
+ validation/div-by-zero-fp.c | 24 +++++++++++++++++++
+ validation/div-by-zero.c    | 57 +++++++++++++++++++++++++++++++++++++++++++++
+ 8 files changed, 140 insertions(+), 18 deletions(-)
+ create mode 100644 validation/div-by-zero-fp.c
+ create mode 100644 validation/div-by-zero.c
+
+-- 
+2.13.0
 
