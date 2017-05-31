@@ -1,54 +1,63 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 9/9] div0: add missing tests for floating point div by zero
-Date: Wed, 31 May 2017 05:22:07 +0200
-Message-ID: <20170531032207.95830-10-luc.vanoostenryck@gmail.com>
-References: <20170531032207.95830-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] force to 0 expressions which are erroneously non-constant
+Date: Wed, 31 May 2017 15:31:23 +0200
+Message-ID: <20170531133123.3105-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:33309 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751090AbdEaDWZ (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36588 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750998AbdEaNbc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 30 May 2017 23:22:25 -0400
-Received: by mail-wr0-f196.google.com with SMTP id v104so307258wrb.0
-        for <linux-sparse@vger.kernel.org>; Tue, 30 May 2017 20:22:25 -0700 (PDT)
-In-Reply-To: <20170531032207.95830-1-luc.vanoostenryck@gmail.com>
+        Wed, 31 May 2017 09:31:32 -0400
+Received: by mail-wm0-f66.google.com with SMTP id k15so3662066wmh.3
+        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 06:31:32 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+Wher some expression that need to be constant but in fact is not
+constant, sparse throw an error and leave the expression as-is.
+
+But some code may make the explicit or implicit assumption that
+the expression is constant and use its value, resulting in some
+random value, which is not desirable.
+
+One situation where this happen is in code like:
+	switch (x) {
+	case <some non-const expression>: ...
+In this case, the linearization of the switch/case statement
+will unconditionally use the value of the case expression
+but the expression has no value.
+
+One way to avoid this would be to add defensive checks each time
+a value is retrieved but this is a lot of work and time for no
+benefit.
+
+Change this by forcing the expression to be a constant value of 0
+just after the error message has been issued.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/div-by-zero-fp.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ expand.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/validation/div-by-zero-fp.c b/validation/div-by-zero-fp.c
-index 787af1636..957bc732c 100644
---- a/validation/div-by-zero-fp.c
-+++ b/validation/div-by-zero-fp.c
-@@ -3,14 +3,22 @@ double gbad(double a) { return 2.0 / 0.0; }
- double fool(double a) { return a / 0; }
- double ffoo(double a) { return a / 0.0; }
+diff --git a/expand.c b/expand.c
+index dacee7a76..8ee52cfd5 100644
+--- a/expand.c
++++ b/expand.c
+@@ -1054,8 +1054,11 @@ static void expand_const_expression(struct expression *expr, const char *where)
+ {
+ 	if (expr) {
+ 		expand_expression(expr);
+-		if (expr->type != EXPR_VALUE)
++		if (expr->type != EXPR_VALUE) {
+ 			expression_error(expr, "Expected constant expression in %s", where);
++			expr->type = EXPR_VALUE;
++			expr->value = 0;
++		}
+ 	}
+ }
  
-+double fbar(double a) { if (a && 0) a / 0.0; return 0; }
-+double fbaz(double a) { return a /= 0.0; }
-+double fquz(double a) { return a / (a && 0); }
-+
- /*
-  * check-name: div-by-zero-fp.c
-  * check-command: sparse -Wno-decl $file
-+ * check-known-to-fail
-  *
-  * check-error-start
- div-by-zero-fp.c:1:36: warning: division by zero
- div-by-zero-fp.c:2:36: warning: division by zero
- div-by-zero-fp.c:3:34: warning: division by zero
- div-by-zero-fp.c:4:34: warning: division by zero
-+div-by-zero-fp.c:6:39: warning: division by zero
-+div-by-zero-fp.c:7:34: warning: division by zero
-+div-by-zero-fp.c:8:34: warning: division by zero
-  * check-error-end
-  */
 -- 
 2.13.0
 
