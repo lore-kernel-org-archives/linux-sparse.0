@@ -1,46 +1,61 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/3] -Wmemcpy-max-count & friends
-Date: Thu,  1 Jun 2017 22:27:21 +0200
-Message-ID: <20170601202724.77597-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/3] memcpy()'s byte count is unsigned
+Date: Thu,  1 Jun 2017 22:27:22 +0200
+Message-ID: <20170601202724.77597-2-luc.vanoostenryck@gmail.com>
 References: <84e547c2-8a5b-225c-1363-361e091821f4@ramsayjones.plus.com>
+ <20170601202724.77597-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33745 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36272 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751029AbdFAU1f (ORCPT
+        with ESMTP id S1751125AbdFAU1g (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Jun 2017 16:27:35 -0400
-Received: by mail-wm0-f68.google.com with SMTP id b84so14127458wmh.0
-        for <linux-sparse@vger.kernel.org>; Thu, 01 Jun 2017 13:27:35 -0700 (PDT)
-In-Reply-To: <84e547c2-8a5b-225c-1363-361e091821f4@ramsayjones.plus.com>
+        Thu, 1 Jun 2017 16:27:36 -0400
+Received: by mail-wm0-f68.google.com with SMTP id k15so14123959wmh.3
+        for <linux-sparse@vger.kernel.org>; Thu, 01 Jun 2017 13:27:36 -0700 (PDT)
+In-Reply-To: <20170601202724.77597-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Chris Li <sparse@chrisli.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Junio C Hamano <gitster@pobox.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-sparse will warn if memcpy() (and some others memcpy-like
-functions) is called with a very large static byte count.
-But this warning cannot be disabled and the limit is arbitrary
-fixed at 100000.
+The checker part of sparse does some checking on memcpy(),
+memset(), copy_{from,to}_user() byte count and warn if the
+value is known to be too large. The comparison is done with
+signed numbers and it also warns if the value is negative.
 
-The goal of this series is to allow to disable this warning if
-found too unconvenient or to allow to configure its limit.
+However these functions take an unsigned byte count (size_t)
+and so the value can't really be negative.
 
+Additionaly, the number of bits used by sparse internally may not
+be the same as the one used for the target's size_t. So sparse's
+check against negative value may not be the same as checking if
+the target's value would be so-large-than-the-upper-bit-is-set.
 
-The series can also be found on the tree:
-	git://github.com/lucvoo/sparse.git memcpy-max-count
+Change this by removing the test for negative values and simply
+do an unsigned compare.
 
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-Luc Van Oostenryck (3):
-  memcpy()'s byte count is unsigned
-  add support for -Wmemcpy-max-count
-  add support for -fmemcpy-max-count
-
- lib.c    | 18 ++++++++++++++++++
- lib.h    |  2 ++
- sparse.1 | 18 ++++++++++++++++++
- sparse.c |  6 +++---
- 4 files changed, 41 insertions(+), 3 deletions(-)
-
+diff --git a/sparse.c b/sparse.c
+index 02ab97743..1cb90e20d 100644
+--- a/sparse.c
++++ b/sparse.c
+@@ -152,9 +152,9 @@ static void check_byte_count(struct instruction *insn, pseudo_t count)
+ 	if (!count)
+ 		return;
+ 	if (count->type == PSEUDO_VAL) {
+-		long long val = count->value;
+-		if (val <= 0 || val > 100000)
+-			warning(insn->pos, "%s with byte count of %lld",
++		unsigned long long val = count->value;
++		if (val > 100000ULL)
++			warning(insn->pos, "%s with byte count of %llu",
+ 				show_ident(insn->func->sym->ident), val);
+ 		return;
+ 	}
 -- 
 2.13.0
 
