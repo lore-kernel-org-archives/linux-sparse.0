@@ -1,58 +1,43 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 3/5] add helper handle_simple_switch()
-Date: Wed, 31 May 2017 23:15:52 -0700
-Message-ID: <CANeU7Qkrmkbb6s9k2Jj_mF95g8bwdqJ5-HqabU3_NZ_ozfj1tA@mail.gmail.com>
-References: <20170412083703.11552-1-luc.vanoostenryck@gmail.com> <20170412083703.11552-4-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v2 4/6] fix implicit zero initializer.
+Date: Wed, 31 May 2017 23:41:32 -0700
+Message-ID: <CANeU7Qnsadz4VYNDOwCk0x+8W9HH0zWXxD5qxcxuXVqd+ppDWA@mail.gmail.com>
+References: <20170408211901.40507-1-luc.vanoostenryck@gmail.com> <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:36612 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750926AbdFAGPy (ORCPT
+Received: from mail-it0-f54.google.com ([209.85.214.54]:38268 "EHLO
+        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750848AbdFAGle (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Jun 2017 02:15:54 -0400
-Received: by mail-it0-f65.google.com with SMTP id i206so4019877ita.3
-        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 23:15:53 -0700 (PDT)
-In-Reply-To: <20170412083703.11552-4-luc.vanoostenryck@gmail.com>
+        Thu, 1 Jun 2017 02:41:34 -0400
+Received: by mail-it0-f54.google.com with SMTP id r63so25356004itc.1
+        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 23:41:33 -0700 (PDT)
+In-Reply-To: <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-I have some very minor comment.
-
-On Wed, Apr 12, 2017 at 1:37 AM, Luc Van Oostenryck
+On Sat, Apr 8, 2017 at 2:18 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  lib.c | 19 +++++++++++++++++++
->  1 file changed, 19 insertions(+)
+> diff --git a/linearize.c b/linearize.c
+> index 5c273a91d..f628f5a74 100644
+> --- a/linearize.c
+> +++ b/linearize.c
+> @@ -1635,6 +1635,21 @@ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
 >
-> diff --git a/lib.c b/lib.c
-> index 8c9c36bd5..1d21a2fb7 100644
-> --- a/lib.c
-> +++ b/lib.c
-> @@ -454,6 +454,25 @@ static void handle_arch_finalize(void)
->  }
->
->
-> +static int handle_simple_switch(const char *arg, const char *name, int *flag)
-> +{
-> +       int val = 1;
+>         sym->initialized = 1;
+>         ad.address = symbol_pseudo(ep, sym);
 > +
-> +       // Prefixe "no-" mean to turn flag off.
-> +       if (strncmp(arg, "no-", 3) == 0) {
+> +       if (sym->initializer && !is_scalar_type(sym)) {
+> +               // default zero initialization [6.7.9.21]
+> +               // FIXME: this init the whole aggregate while
+> +               // only the existing fields need to be initialized.
+> +               // FIXME: this init the whole aggregate even if
+> +               // all fields arelater  explicitely initialized.
 
-You don't need to compare to zero. This can be written as:
- if (!strncmp(arg, "no-", 3)) {
-
-That is how most of the strcmp done in sparse.
-
-> +       if (strcmp(arg, name) == 0) {
-> +               *flag = val;
-> +               return 1;
-> +       }
-
-Same here.
+Some very minor comment. The multi-line comment should be
+written in the C type. /* ... */
 
 Chris
