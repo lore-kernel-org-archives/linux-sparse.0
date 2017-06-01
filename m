@@ -1,43 +1,36 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2 4/6] fix implicit zero initializer.
-Date: Wed, 31 May 2017 23:41:32 -0700
-Message-ID: <CANeU7Qnsadz4VYNDOwCk0x+8W9HH0zWXxD5qxcxuXVqd+ppDWA@mail.gmail.com>
-References: <20170408211901.40507-1-luc.vanoostenryck@gmail.com> <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 2/6] teach sparse how to dump macro definitions
+Date: Wed, 31 May 2017 23:56:41 -0700
+Message-ID: <CANeU7Qkukj_K+PtoSezYkN=t_53oy=a7Amp2n0m5RA+owxKtZQ@mail.gmail.com>
+References: <20170404214955.47926-1-luc.vanoostenryck@gmail.com> <20170404214955.47926-3-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:38268 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750848AbdFAGle (ORCPT
+Received: from mail-io0-f175.google.com ([209.85.223.175]:34429 "EHLO
+        mail-io0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751053AbdFAG4m (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Jun 2017 02:41:34 -0400
-Received: by mail-it0-f54.google.com with SMTP id r63so25356004itc.1
-        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 23:41:33 -0700 (PDT)
-In-Reply-To: <20170408211901.40507-5-luc.vanoostenryck@gmail.com>
+        Thu, 1 Jun 2017 02:56:42 -0400
+Received: by mail-io0-f175.google.com with SMTP id k91so27768636ioi.1
+        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 23:56:42 -0700 (PDT)
+In-Reply-To: <20170404214955.47926-3-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Apr 8, 2017 at 2:18 PM, Luc Van Oostenryck
+On Tue, Apr 4, 2017 at 2:49 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> diff --git a/linearize.c b/linearize.c
-> index 5c273a91d..f628f5a74 100644
-> --- a/linearize.c
-> +++ b/linearize.c
-> @@ -1635,6 +1635,21 @@ static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym)
+> diff --git a/pre-process.c b/pre-process.c
+> index 7c57ba1cd..74414dfeb 100644
+> --- a/pre-process.c
+> +++ b/pre-process.c
+> @@ -44,6 +44,7 @@
+>  #include "expression.h"
+>  #include "scope.h"
 >
->         sym->initialized = 1;
->         ad.address = symbol_pseudo(ep, sym);
-> +
-> +       if (sym->initializer && !is_scalar_type(sym)) {
-> +               // default zero initialization [6.7.9.21]
-> +               // FIXME: this init the whole aggregate while
-> +               // only the existing fields need to be initialized.
-> +               // FIXME: this init the whole aggregate even if
-> +               // all fields arelater  explicitely initialized.
+> +static struct ident_list *macros;      // only needed for -dD
 
-Some very minor comment. The multi-line comment should be
-written in the C type. /* ... */
+I think the macros list should be initialized as NULL.
 
 Chris
