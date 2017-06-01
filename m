@@ -1,63 +1,58 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] force to 0 expressions which are erroneously non-constant
-Date: Wed, 31 May 2017 15:31:23 +0200
-Message-ID: <20170531133123.3105-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 3/5] add helper handle_simple_switch()
+Date: Wed, 31 May 2017 23:15:52 -0700
+Message-ID: <CANeU7Qkrmkbb6s9k2Jj_mF95g8bwdqJ5-HqabU3_NZ_ozfj1tA@mail.gmail.com>
+References: <20170412083703.11552-1-luc.vanoostenryck@gmail.com> <20170412083703.11552-4-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36588 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750998AbdEaNbc (ORCPT
+Received: from mail-it0-f65.google.com ([209.85.214.65]:36612 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750926AbdFAGPy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 31 May 2017 09:31:32 -0400
-Received: by mail-wm0-f66.google.com with SMTP id k15so3662066wmh.3
-        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 06:31:32 -0700 (PDT)
+        Thu, 1 Jun 2017 02:15:54 -0400
+Received: by mail-it0-f65.google.com with SMTP id i206so4019877ita.3
+        for <linux-sparse@vger.kernel.org>; Wed, 31 May 2017 23:15:53 -0700 (PDT)
+In-Reply-To: <20170412083703.11552-4-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Wher some expression that need to be constant but in fact is not
-constant, sparse throw an error and leave the expression as-is.
+I have some very minor comment.
 
-But some code may make the explicit or implicit assumption that
-the expression is constant and use its value, resulting in some
-random value, which is not desirable.
+On Wed, Apr 12, 2017 at 1:37 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  lib.c | 19 +++++++++++++++++++
+>  1 file changed, 19 insertions(+)
+>
+> diff --git a/lib.c b/lib.c
+> index 8c9c36bd5..1d21a2fb7 100644
+> --- a/lib.c
+> +++ b/lib.c
+> @@ -454,6 +454,25 @@ static void handle_arch_finalize(void)
+>  }
+>
+>
+> +static int handle_simple_switch(const char *arg, const char *name, int *flag)
+> +{
+> +       int val = 1;
+> +
+> +       // Prefixe "no-" mean to turn flag off.
+> +       if (strncmp(arg, "no-", 3) == 0) {
 
-One situation where this happen is in code like:
-	switch (x) {
-	case <some non-const expression>: ...
-In this case, the linearization of the switch/case statement
-will unconditionally use the value of the case expression
-but the expression has no value.
+You don't need to compare to zero. This can be written as:
+ if (!strncmp(arg, "no-", 3)) {
 
-One way to avoid this would be to add defensive checks each time
-a value is retrieved but this is a lot of work and time for no
-benefit.
+That is how most of the strcmp done in sparse.
 
-Change this by forcing the expression to be a constant value of 0
-just after the error message has been issued.
+> +       if (strcmp(arg, name) == 0) {
+> +               *flag = val;
+> +               return 1;
+> +       }
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- expand.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Same here.
 
-diff --git a/expand.c b/expand.c
-index dacee7a76..8ee52cfd5 100644
---- a/expand.c
-+++ b/expand.c
-@@ -1054,8 +1054,11 @@ static void expand_const_expression(struct expression *expr, const char *where)
- {
- 	if (expr) {
- 		expand_expression(expr);
--		if (expr->type != EXPR_VALUE)
-+		if (expr->type != EXPR_VALUE) {
- 			expression_error(expr, "Expected constant expression in %s", where);
-+			expr->type = EXPR_VALUE;
-+			expr->value = 0;
-+		}
- 	}
- }
- 
--- 
-2.13.0
-
+Chris
