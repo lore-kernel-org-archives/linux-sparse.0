@@ -1,46 +1,44 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 3/3] add support for -fmemcpy-max-count
-Date: Fri, 2 Jun 2017 03:45:07 +0200
-Message-ID: <CAMHZB6EtTDXkDLKumGnyBm9n3vbNNEGLnGqT9mndL+r77q2emA@mail.gmail.com>
-References: <84e547c2-8a5b-225c-1363-361e091821f4@ramsayjones.plus.com>
- <20170601202724.77597-1-luc.vanoostenryck@gmail.com> <20170601202724.77597-4-luc.vanoostenryck@gmail.com>
- <45f3b371-2839-5353-17a7-ea82b113d4f1@ramsayjones.plus.com>
- <CAMHZB6GT8d2UUBO2po+o0QLaBh_3ZOLgA0_zYz7s1_xgDr4DQA@mail.gmail.com> <faa88d94-b243-e8be-39f0-b84ccbf92ba0@ramsayjones.plus.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/6] testsuite speedup
+Date: Fri, 2 Jun 2017 00:29:47 -0700
+Message-ID: <CANeU7QkDj5eKxGZHpJ_QZVpq5dhbxYRu4_+D93PzO8to+THaqQ@mail.gmail.com>
+References: <20170528192906.1023-1-luc.vanoostenryck@gmail.com>
+ <CANeU7Q=DrsNrLdnSH55pUk1fAcNPUzUh5bHQ76fqt18PtRgOPQ@mail.gmail.com> <CAExDi1SZv31NHPZ2ddCsQQKpr5T-H6j3ZBwi_0p8EfCG-ycYUA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f194.google.com ([209.85.220.194]:35495 "EHLO
-        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751134AbdFBBpJ (ORCPT
+Received: from mail-it0-f43.google.com ([209.85.214.43]:37134 "EHLO
+        mail-it0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750772AbdFBH3y (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Jun 2017 21:45:09 -0400
-Received: by mail-qk0-f194.google.com with SMTP id v195so8013412qka.2
-        for <linux-sparse@vger.kernel.org>; Thu, 01 Jun 2017 18:45:09 -0700 (PDT)
-In-Reply-To: <faa88d94-b243-e8be-39f0-b84ccbf92ba0@ramsayjones.plus.com>
+        Fri, 2 Jun 2017 03:29:54 -0400
+Received: by mail-it0-f43.google.com with SMTP id m47so8420936iti.0
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Jun 2017 00:29:53 -0700 (PDT)
+In-Reply-To: <CAExDi1SZv31NHPZ2ddCsQQKpr5T-H6j3ZBwi_0p8EfCG-ycYUA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Chris Li <sparse@chrisli.org>, Junio C Hamano <gitster@pobox.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Jun 2, 2017 at 3:42 AM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
+On Thu, Jun 1, 2017 at 7:05 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Yes, but there is a few issues with this:
+> - 'test-suite single file.c' doesn't exit with the right return code yet
+> - parallelizing tests with make won't return the summary of the tests
+>   (which may or may not be needed)
+> - the error messages could be mixed in
+> - make would stop at the first error (which may be OK or not)
+> - would be better used with something like 'test-suite --very-quiet file.c'
 
->> Well, for now setting the limit to 0 would just warn about any
->> non-zero memcpy/memset
->> but it's something that could very easily be added, sure.
->
-> Yes, as I noted in another email, I didn't read the code correctly!
-> (and in my patch I had a single -Wmem-limit=n argument which _did_
-> disable the check when n = 0).
->
-> Naming issues aside (and I'm bad at naming, so don't listen to me
-> on that), I like your -W[no-]memcpy-max-count and -fmemcpy-limit=n
-> split.
->
-> [You may want to remove the '=COUNT' from the commit message of
-> the 2/3 patch].
+How about the parallel running just run individual test and
+save the result/error in per test file. Have the a report target that process
+all the individual run result. That will get rid of the result
+ordering issue, no
+error mix in, no early stop etc.
 
-Oh yes, indeed.
-Thanks.
+test-suite will need to change a bit for the separate report phrase.
+I am not suggesting make that into this series. This series is fine
+as it is. I am only making suggestion that parallelizing can speed
+up the check run by a few times.
 
--- Luc
+Chris
