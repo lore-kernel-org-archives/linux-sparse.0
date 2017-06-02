@@ -1,49 +1,151 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/3] -Wmemcpy-max-count & friends
-Date: Fri, 2 Jun 2017 02:26:16 +0200
-Message-ID: <CAMHZB6Fd4Z2ofZJUHbN_52VRGcg__2rN9WEvb3MbHC9wduPjOA@mail.gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH 3/3] add support for -fmemcpy-max-count
+Date: Fri, 2 Jun 2017 01:30:02 +0100
+Message-ID: <45f3b371-2839-5353-17a7-ea82b113d4f1@ramsayjones.plus.com>
 References: <84e547c2-8a5b-225c-1363-361e091821f4@ramsayjones.plus.com>
- <20170601202724.77597-1-luc.vanoostenryck@gmail.com> <ecc76f93-d919-449d-62ff-d2f1b4bc0fae@ramsayjones.plus.com>
+ <20170601202724.77597-1-luc.vanoostenryck@gmail.com>
+ <20170601202724.77597-4-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:35338 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751134AbdFBA0X (ORCPT
+Received: from avasout08.plus.net ([212.159.14.20]:54403 "EHLO
+        avasout08.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751129AbdFBAaF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Jun 2017 20:26:23 -0400
-Received: by mail-qt0-f171.google.com with SMTP id w1so21938790qtg.2
-        for <linux-sparse@vger.kernel.org>; Thu, 01 Jun 2017 17:26:22 -0700 (PDT)
-In-Reply-To: <ecc76f93-d919-449d-62ff-d2f1b4bc0fae@ramsayjones.plus.com>
+        Thu, 1 Jun 2017 20:30:05 -0400
+In-Reply-To: <20170601202724.77597-4-luc.vanoostenryck@gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Chris Li <sparse@chrisli.org>, Junio C Hamano <gitster@pobox.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+Cc: Chris Li <sparse@chrisli.org>, Junio C Hamano <gitster@pobox.com>
 
-On Fri, Jun 2, 2017 at 2:11 AM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
->
->
-> On 01/06/17 21:27, Luc Van Oostenryck wrote:
->> sparse will warn if memcpy() (and some others memcpy-like
->> functions) is called with a very large static byte count.
->> But this warning cannot be disabled and the limit is arbitrary
->> fixed at 100000.
->>
->> The goal of this series is to allow to disable this warning if
->> found too unconvenient or to allow to configure its limit.
->>
->>
->> The series can also be found on the tree:
->>       git://github.com/lucvoo/sparse.git memcpy-max-count
->
-> Heh, I think you know I wrote a similar patch about a decade ago ...
->
-> [I tried to find it the other day but couldn't find it - I think
-> it is on my old laptop, which doesn't get booted up these days!]
 
-More or less, yes. I saw it in the email where you and Junio talked
-about how this memset() warning was a bit blocking for git to use
-sparse, which is the motivation of these 3 patches.
 
--- Luc
+On 01/06/17 21:27, Luc Van Oostenryck wrote:
+> By default, sparse will warn if memcpy() (or memset(),
+> copy_from_user(), copy_to_user()) is called with a very large
+> static byte-count.
+> 
+> But the limit is currently fixed at 100000, which may be fine
+> for some uses but not for others. For example, this value is
+> too low for sparse to be used on the git tree where, for example,
+> some array used to sort the index is cleared with memset().
+> 
+> Change this by making the limit configurable via a new flag:
+> -fmemcpy-max-count.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  lib.c    | 16 ++++++++++++++++
+>  lib.h    |  1 +
+>  sparse.1 | 10 ++++++++++
+>  sparse.c |  3 +--
+>  4 files changed, 28 insertions(+), 2 deletions(-)
+> 
+> diff --git a/lib.c b/lib.c
+> index 90fd2b494..1378cc243 100644
+> --- a/lib.c
+> +++ b/lib.c
+> @@ -256,6 +256,7 @@ int dbg_dead = 0;
+>  
+>  int fmem_report = 0;
+>  int fdump_linearize;
+> +unsigned long fmemcpy_max_count = 100000;
+>  
+>  int preprocess_only;
+>  
+> @@ -670,6 +671,19 @@ static char **handle_switch_O(char *arg, char **next)
+>  	return next;
+>  }
+>  
+> +static char **handle_switch_fmemcpy_max_count(char *arg, char **next)
+> +{
+> +	unsigned long val;
+> +	char *end;
+> +
+> +	val = strtoul(arg, &end, 0);
+> +	if (*end != '\0' || end == arg)
+> +		die("error: missing argument to \"-fmemcpy-max-count=\"");
+> +
+> +	fmemcpy_max_count = val;
+> +	return next;
+> +}
+> +
+>  static char **handle_switch_ftabstop(char *arg, char **next)
+>  {
+>  	char *end;
+> @@ -713,6 +727,8 @@ static char **handle_switch_f(char *arg, char **next)
+>  		return handle_switch_ftabstop(arg+8, next);
+>  	if (!strncmp(arg, "dump-", 5))
+>  		return handle_switch_fdump(arg+5, next);
+> +	if (!strncmp(arg, "memcpy-max-count=", 17))
+> +		return handle_switch_fmemcpy_max_count(arg+17, next);
+>  
+>  	/* handle switches w/ arguments above, boolean and only boolean below */
+>  	if (handle_simple_switch(arg, "mem-report", &fmem_report))
+> diff --git a/lib.h b/lib.h
+> index 8090fe247..b7cb451e0 100644
+> --- a/lib.h
+> +++ b/lib.h
+> @@ -143,6 +143,7 @@ extern int dbg_dead;
+>  
+>  extern int fmem_report;
+>  extern int fdump_linearize;
+> +extern unsigned long fmemcpy_max_count;
+>  
+>  extern int arch_m64;
+>  
+> diff --git a/sparse.1 b/sparse.1
+> index efbd78d01..932ac82ef 100644
+> --- a/sparse.1
+> +++ b/sparse.1
+> @@ -216,6 +216,9 @@ Warn about call of \fBmemset()\fR, \fBmemset()\fR, \fBcopy_from_user()\fR, or
+>  
+>  Sparse issues these warnings by default. To turn them off, use
+>  \fB\-Wno\-memcpy\-max\-count\fR.
+> +
+> +The limit can be changed with \fB\-fmemcpy\-max\-count=COUNT\fR,
+> +the default being \fB100000\fR.
+>  .
+>  .TP
+>  .B \-Wnon\-pointer\-null
+> @@ -364,6 +367,13 @@ Report some statistics about memory allocation used by the tool.
+>  .
+>  .SH OTHER OPTIONS
+>  .TP
+> +.B \-fmemcpy-limit=COUNT
+> +By default, sparse will warn if \fBmemcpy()\fR (or \fBmemset()\fR,
+> +\fBcopy_from_user()\fR, copy_to_user()\fR) is called with a very large
+> +(known at compile-time) byte-count. COUNT is the value under which
+> +no such warning will be given. The default limit is 100000.
+> +.
+> +.TP
+
+So, in addition to -Wno-memcpy-max-count, you could turn the warning
+off with just -fmemcpy-limit=0. cool.
+
+Thanks!
+
+ATB,
+Ramsay Jones
+
+>  .B \-ftabstop=WIDTH
+>  Set the distance between tab stops.  This helps sparse report correct
+>  column numbers in warnings or errors.  If the value is less than 1 or
+> diff --git a/sparse.c b/sparse.c
+> index aa5979f1a..bceacd94e 100644
+> --- a/sparse.c
+> +++ b/sparse.c
+> @@ -153,8 +153,7 @@ static void check_byte_count(struct instruction *insn, pseudo_t count)
+>  		return;
+>  	if (count->type == PSEUDO_VAL) {
+>  		unsigned long long val = count->value;
+> -		if (Wmemcpy_max_count && val > 100000ULL)
+> -
+> +		if (Wmemcpy_max_count && val > fmemcpy_max_count)
+>  			warning(insn->pos, "%s with byte count of %llu",
+>  				show_ident(insn->func->sym->ident), val);
+>  		return;
+> 
