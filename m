@@ -1,50 +1,30 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH 0/3] -Wmemcpy-max-count & friends
-Date: Sat, 3 Jun 2017 14:23:44 +0100
-Message-ID: <ac5aba83-932f-d7b0-6ff7-b7c2d03c2946@ramsayjones.plus.com>
-References: <20170603074727.66945-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] teach cgcc about OSX aka darwin
+Date: Mon, 5 Jun 2017 11:13:00 -0700
+Message-ID: <CANeU7QkVXSuGAJCwjdHQCtXinTvUEdNy3Cus4CkBoRq-UW-79A@mail.gmail.com>
+References: <20170529003757.3848-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout08.plus.net ([212.159.14.20]:54605 "EHLO
-        avasout08.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbdFCNXr (ORCPT
+Received: from mail-it0-f53.google.com ([209.85.214.53]:35384 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751162AbdFESNB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 3 Jun 2017 09:23:47 -0400
-In-Reply-To: <20170603074727.66945-1-luc.vanoostenryck@gmail.com>
-Content-Language: en-GB
+        Mon, 5 Jun 2017 14:13:01 -0400
+Received: by mail-it0-f53.google.com with SMTP id m62so70038091itc.0
+        for <linux-sparse@vger.kernel.org>; Mon, 05 Jun 2017 11:13:01 -0700 (PDT)
+In-Reply-To: <20170529003757.3848-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
-Cc: Chris Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
+On Sun, May 28, 2017 at 5:37 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> cgcc knows about a few unix OSes but not yet about OSX/darwin.
+>
+> Fix this by adding the two needed defines to cgcc's specs.
 
+Looks fine to me.
 
-On 03/06/17 08:47, Luc Van Oostenryck wrote:
-> sparse will warn if memcpy() (and some others memcpy-like
-> functions) is called with a very large static byte count.
-> But this warning cannot be disabled and the limit is arbitrary
-> fixed at 100000.
-> 
-> The goal of this series is to allow to disable this warning if
-> found too bothersome or to allow to configure its limit.
-> 
-> 
-> Changes since v1:
-> - take in account Ramsay's remarks and suggestion:
->   - fix some name mixups in the man page & commit message
->   - use a limit of 0 as being equivalent to an infinite
->     limit, effectively disabling the warning.
-> - somewhat rewrote the man page for -fmemcpy-max-count
-> - extend the limit's range
-> 
-> The series can also be found on the tree:
-> 	git://github.com/lucvoo/sparse.git memcpy-max-count-v2
-
-Looks good to me. Thanks!
-
-ATB,
-Ramsay Jones
-
-
+Chris
