@@ -1,50 +1,62 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/2] warn on implicit type
-Date: Thu, 8 Jun 2017 09:25:17 +0200
-Message-ID: <20170608072514.vicslfcnvqalauaq@ltop.local>
-References: <20170608024736.49780-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qny5i4TDMWihLv9CnPXWTpVsZfZXG8dqUR3USYTsJZpNA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH 1/3] extract has_users() from dead_insn()
+Date: Thu,  8 Jun 2017 09:39:25 +0200
+Message-ID: <20170608073927.55218-2-luc.vanoostenryck@gmail.com>
+References: <20170608073927.55218-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34101 "EHLO
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:34397 "EHLO
         mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751534AbdFHHZV (ORCPT
+        with ESMTP id S1751559AbdFHHjj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 8 Jun 2017 03:25:21 -0400
-Received: by mail-wm0-f66.google.com with SMTP id 70so5818292wme.1
-        for <linux-sparse@vger.kernel.org>; Thu, 08 Jun 2017 00:25:20 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qny5i4TDMWihLv9CnPXWTpVsZfZXG8dqUR3USYTsJZpNA@mail.gmail.com>
+        Thu, 8 Jun 2017 03:39:39 -0400
+Received: by mail-wm0-f66.google.com with SMTP id 70so5875340wme.1
+        for <linux-sparse@vger.kernel.org>; Thu, 08 Jun 2017 00:39:39 -0700 (PDT)
+In-Reply-To: <20170608073927.55218-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Jun 07, 2017 at 11:16:27PM -0700, Christopher Li wrote:
-> On Wed, Jun 7, 2017 at 7:47 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > The goal of this mini-series is to warn about implicit.
-> > It's part of a larger series whose goal is to straighten
-> > situations where the return type of a function doesn't
-> > match the type of what is returned, often silently and
-> > with incoherence in the code generated.
-> 
-> Looks good to me.
-> 
-> BTW, are those intend to merge into sparse-next or for
-> review only?
+so that it can be reused for others uses.
 
-It's not something for the release, so for review only.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 17 ++++++++++++-----
+ 1 file changed, 12 insertions(+), 5 deletions(-)
+
+diff --git a/simplify.c b/simplify.c
+index a141ddd43..65114193a 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -301,16 +301,23 @@ void kill_insn(struct instruction *insn, int force)
+ 	return;
+ }
  
-> If it is for sparse-next. I kind of wish to have one dedicate
-> branch to pull from you. You can still have different branch
-> for review. It is just went I pull, I don't have to merge between
-> your branches.
++static int has_users(pseudo_t p)
++{
++	struct pseudo_user *pu;
++	FOR_EACH_PTR(p->users, pu) {
++		if (*pu->userp != VOID)
++			return 1;
++	} END_FOR_EACH_PTR(pu);
++	return 0;
++}
++
+ /*
+  * Kill trivially dead instructions
+  */
+ static int dead_insn(struct instruction *insn, pseudo_t *src1, pseudo_t *src2, pseudo_t *src3)
+ {
+-	struct pseudo_user *pu;
+-	FOR_EACH_PTR(insn->target->users, pu) {
+-		if (*pu->userp != VOID)
+-			return 0;
+-	} END_FOR_EACH_PTR(pu);
++	if (has_users(insn->target))
++		return 0;
+ 
+ 	insn->bb = NULL;
+ 	kill_use(src1);
+-- 
+2.13.0
 
-Yes, understood.
-Like for the previous ones, when it will be a pull request
-it will be clearly so (with 'PULL' in the title and the output
-of 'git request-pull' in the body).
-
--- Luc
