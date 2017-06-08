@@ -1,43 +1,40 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/2] warn on implicit type
-Date: Thu,  8 Jun 2017 04:47:34 +0200
-Message-ID: <20170608024736.49780-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] warn on implicit type
+Date: Wed, 7 Jun 2017 23:16:27 -0700
+Message-ID: <CANeU7Qny5i4TDMWihLv9CnPXWTpVsZfZXG8dqUR3USYTsJZpNA@mail.gmail.com>
+References: <20170608024736.49780-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36110 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751873AbdFHCr5 (ORCPT
+Received: from mail-io0-f172.google.com ([209.85.223.172]:32895 "EHLO
+        mail-io0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750919AbdFHGQ3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 7 Jun 2017 22:47:57 -0400
-Received: by mail-wm0-f66.google.com with SMTP id d17so270191wme.3
-        for <linux-sparse@vger.kernel.org>; Wed, 07 Jun 2017 19:47:57 -0700 (PDT)
+        Thu, 8 Jun 2017 02:16:29 -0400
+Received: by mail-io0-f172.google.com with SMTP id b184so16107949ioe.0
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Jun 2017 23:16:28 -0700 (PDT)
+In-Reply-To: <20170608024736.49780-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Chris Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-The goal of this mini-series is to warn about implicit.
-It's part of a larger series whose goal is to straighten
-situations where the return type of a function doesn't
-match the type of what is returned, often silently and
-with incoherence in the code generated.
+On Wed, Jun 7, 2017 at 7:47 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The goal of this mini-series is to warn about implicit.
+> It's part of a larger series whose goal is to straighten
+> situations where the return type of a function doesn't
+> match the type of what is returned, often silently and
+> with incoherence in the code generated.
 
+Looks good to me.
 
-This series can also be pulled from:
-  git://github.com/lucvoo/sparse.git implicit-int
+BTW, are those intend to merge into sparse-next or for
+review only?
 
-----------------------------------------------------------------
-Luc Van Oostenryck (2):
-      ret-void: add test case for toplevel asm
-      ret-void: warn for implicit type
+If it is for sparse-next. I kind of wish to have one dedicate
+branch to pull from you. You can still have different branch
+for review. It is just went I pull, I don't have to merge between
+your branches.
 
- parse.c                        |  9 +++++++++
- validation/alias-mixed.c       |  2 +-
- validation/asm-toplevel.c      |  7 +++++++
- validation/badtype2.c          |  1 +
- validation/implicit-ret-type.c | 15 +++++++++++++++
- validation/implicit-type.c     | 14 ++++++++++++++
- validation/typedef_shadow.c    |  1 +
- 7 files changed, 48 insertions(+), 1 deletion(-)
- create mode 100644 validation/asm-toplevel.c
- create mode 100644 validation/implicit-ret-type.c
- create mode 100644 validation/implicit-type.c
+Chris
