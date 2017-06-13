@@ -1,72 +1,42 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Sparse release v0.5.1-rc1
-Date: Tue, 13 Jun 2017 06:58:30 +0200
-Message-ID: <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
-References: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
+From: Charlemagne Lasse <charlemagnelasse@gmail.com>
+Subject: ./include/linux/err.h:35:16: warning: dereference of noderef expression
+Date: Tue, 13 Jun 2017 11:55:26 +0200
+Message-ID: <CAFGhKby4e5fLwr=0xj9by_UiX2u7eVYJZz5gNaAjYKDRrUDB3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:33787 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751915AbdFME6e (ORCPT
+Received: from mail-oi0-f66.google.com ([209.85.218.66]:36069 "EHLO
+        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751834AbdFMJz1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Jun 2017 00:58:34 -0400
-Received: by mail-wr0-f178.google.com with SMTP id v104so121018566wrb.0
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Jun 2017 21:58:33 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
+        Tue, 13 Jun 2017 05:55:27 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: kernelnewbies@kernelnewbies.org, linux-kernel@vger.kernel.org, Jeff Layton <jlayton@primarydata.com>, Dan Carpenter <dan.carpenter@oracle.com>
 
-On Mon, Jun 12, 2017 at 10:05:27AM -0700, Christopher Li wrote:
-> Hi,
-> 
-> 
-> I know that sparse has due for a new release for very long time.
-> So here it is.
+Hi,
 
-Great!
+I have following code which generates a warning when compiling with "make C=1".
 
-> I take what is in the spase-next and put them into
-> a branch "sparse-0.5.1-rc1".
-> 
-> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-0.5.1-rc1
-> 
-> Thanks to Luc Van Oostenryck who contribute a great deal
-> of the high quality patches. Sparse should behave much better
-> when checking the recent kernel source code.
-> 
-> Please give the RC1 a good test. Report any problem you found.
+~~~~~~~
+struct task_struct *kthread;
+kthread = kthread_create(xxxxx, yyyyy, "zzzzz");
+if (IS_ERR(kthread)) {
+~~~~~~~
 
-I really think that for this it would be better to not have
-this rc1 in a separate branch but instead a simple tag in
-the master branch, like most projects do.
-A lot of people are willing to take the last version of the
-master branch but won't bother to checkout another one.
-It also conveys the message that this rc1 may be unstable and
-too risky for be part of the master branch. It's also not good
-for distros and environments which do automatic build, daily
-snapshots and such as they won't use another branch.
+The warning is
 
-> Luc, do you have another other bug fix low risk patches you want to
-> add in this release? I want to do a quick release then go back to merge
-> your other changes.
+    ./include/linux/err.h:35:16: warning: dereference of noderef expression
 
-Nothing really important but I would like to have the following
-ones in the release:
-- patch "avoid warning on explicit 'bool <- restricted' casts" 
-  I would have liked an Acked-by from Al Viro on this one but
-  he is quite busy.
-- patch "add support for -Wmemcpy-max-count" & friends
-  This patch will likely be used for the git tree
-- patch "finer control over error vs. warnings"
-  which can reveal potential problems which were hidden
-- patch "teach cgcc about OSX aka darwin"
-- patch "ret-void: warn for implicit type"
-- series "testsuite speedup"
+And disappears when I remove the IS_ERR. How do I correctly work
+around this incorrect warning?
 
-I'll send a pull request tomorrow.
+Btw. I am using Debian stretch amd64. It seems like this is related to
+the __force used in the parameter list of IS_ERR. Removing it also
+removes the warning.
 
--- Luc 
+If it is fixed in sparse's git then when will there be a new release of it?
+
+Greetings,
+Charlemagne Lasse
