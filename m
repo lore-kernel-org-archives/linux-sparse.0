@@ -1,47 +1,72 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Status of sparse-next
-Date: Mon, 12 Jun 2017 23:27:46 +0100
-Message-ID: <CACXZuxfu_W9tzOPdONFD4fGCiivY+VsF_YWfuddwtz8X+B1vUg@mail.gmail.com>
-References: <CACXZuxfeUP6bvDwmYv=O4yR7GXOCDeFPf5Sk-_OdXtE+=uZ1Eg@mail.gmail.com>
- <20170611224629.ak7evynf6lcyorz7@ltop.local> <CACXZuxdqtQY=ak+tNJ64H4hg2CdCxLs_W73tYEQhMKFCmoJ3_A@mail.gmail.com>
- <CANeU7Q=P-MbopU3k_gNQEBNMVDLP1C1BYrKEK9n0d3UvAnNpQA@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: Sparse release v0.5.1-rc1
+Date: Tue, 13 Jun 2017 06:58:30 +0200
+Message-ID: <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
+References: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:36302 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752619AbdFLW1s (ORCPT
+Received: from mail-wr0-f178.google.com ([209.85.128.178]:33787 "EHLO
+        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751915AbdFME6e (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 12 Jun 2017 18:27:48 -0400
-Received: by mail-wr0-f169.google.com with SMTP id v111so116017309wrc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Jun 2017 15:27:48 -0700 (PDT)
-In-Reply-To: <CANeU7Q=P-MbopU3k_gNQEBNMVDLP1C1BYrKEK9n0d3UvAnNpQA@mail.gmail.com>
+        Tue, 13 Jun 2017 00:58:34 -0400
+Received: by mail-wr0-f178.google.com with SMTP id v104so121018566wrb.0
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Jun 2017 21:58:33 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
+On Mon, Jun 12, 2017 at 10:05:27AM -0700, Christopher Li wrote:
+> Hi,
+> 
+> 
+> I know that sparse has due for a new release for very long time.
+> So here it is.
 
-On 12 June 2017 at 17:26, Christopher Li <sparse@chrisli.org> wrote:
-> On Sun, Jun 11, 2017 at 3:57 PM, Dibyendu Majumdar
->>>> I was wondering if the sparse-next branch is going to be stable soon.
->
-> I want to clarify that, "stable" you mean the code quality is good (no obvious
-> bugs or crashes), or the git branch will not be roll back.
->
-> As for the code quality, I believe that is reasonable stable.
->
-> As for change roll back, the sparse-next is created with the goal to
-> test out some of the newly merge changes. In theory rolling back history
-> is possible with sparse-next if we find out some thing seriously wrong
-> with the purposed changes. So it is not a stable point if you want to base
-> your change on. The master branch will not roll back history,
-> that is a more stable branch.
->
+Great!
 
-Okay thanks, I will wait until the master branch has all the changes,
-as I want to minimize the number of merges I have to do.
+> I take what is in the spase-next and put them into
+> a branch "sparse-0.5.1-rc1".
+> 
+> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-0.5.1-rc1
+> 
+> Thanks to Luc Van Oostenryck who contribute a great deal
+> of the high quality patches. Sparse should behave much better
+> when checking the recent kernel source code.
+> 
+> Please give the RC1 a good test. Report any problem you found.
 
-Thanks and Regards
-Dibyendu
+I really think that for this it would be better to not have
+this rc1 in a separate branch but instead a simple tag in
+the master branch, like most projects do.
+A lot of people are willing to take the last version of the
+master branch but won't bother to checkout another one.
+It also conveys the message that this rc1 may be unstable and
+too risky for be part of the master branch. It's also not good
+for distros and environments which do automatic build, daily
+snapshots and such as they won't use another branch.
+
+> Luc, do you have another other bug fix low risk patches you want to
+> add in this release? I want to do a quick release then go back to merge
+> your other changes.
+
+Nothing really important but I would like to have the following
+ones in the release:
+- patch "avoid warning on explicit 'bool <- restricted' casts" 
+  I would have liked an Acked-by from Al Viro on this one but
+  he is quite busy.
+- patch "add support for -Wmemcpy-max-count" & friends
+  This patch will likely be used for the git tree
+- patch "finer control over error vs. warnings"
+  which can reveal potential problems which were hidden
+- patch "teach cgcc about OSX aka darwin"
+- patch "ret-void: warn for implicit type"
+- series "testsuite speedup"
+
+I'll send a pull request tomorrow.
+
+-- Luc 
