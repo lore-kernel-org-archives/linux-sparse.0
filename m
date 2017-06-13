@@ -1,44 +1,52 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: Sparse release v0.5.1-rc1
-Date: Tue, 13 Jun 2017 18:05:13 +0200
-Message-ID: <20170613160511.fkjvpulf7mhzqi7z@ltop.local>
+Date: Tue, 13 Jun 2017 10:54:45 -0700
+Message-ID: <CANeU7QkJGdKuiBRw7mFHOh08TTOs=Au6vpgxBkN6LAyV5SvBtg@mail.gmail.com>
 References: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
  <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
- <5396b5dd-8a26-238c-19b3-12132a9a556b@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f170.google.com ([209.85.128.170]:35093 "EHLO
-        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751768AbdFMQFS (ORCPT
+Received: from mail-it0-f44.google.com ([209.85.214.44]:37079 "EHLO
+        mail-it0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752643AbdFMRyw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Jun 2017 12:05:18 -0400
-Received: by mail-wr0-f170.google.com with SMTP id q97so150222783wrb.2
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Jun 2017 09:05:17 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <5396b5dd-8a26-238c-19b3-12132a9a556b@ramsayjones.plus.com>
+        Tue, 13 Jun 2017 13:54:52 -0400
+Received: by mail-it0-f44.google.com with SMTP id m47so42082751iti.0
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Jun 2017 10:54:46 -0700 (PDT)
+In-Reply-To: <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jun 13, 2017 at 04:08:23PM +0100, Ramsay Jones wrote:
-> Luc, I have not actually tested these patches (I was waiting for
-> something I could git-fetch). I have no doubt they are good, but
+On Mon, Jun 12, 2017 at 9:58 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> I really think that for this it would be better to not have
+> this rc1 in a separate branch but instead a simple tag in
+> the master branch, like most projects do.
 
-This -rc1 is in fact the parent of the mem-max-count mini-series,
-so you tested it already a bit :)
+Done. I pushed to master with tag "v0.5.1-rc1".
 
-> it just occurred to me that a patch may be missing. I don't recall
-> seeing a change to cgcc to filter-out the new, sparse only, options.
-> ie. they need to be added to the check_only_option subroutine (#102).
+> Nothing really important but I would like to have the following
+> ones in the release:
+> - patch "avoid warning on explicit 'bool <- restricted' casts"
+>   I would have liked an Acked-by from Al Viro on this one but
+>   he is quite busy.
+> - patch "add support for -Wmemcpy-max-count" & friends
+>   This patch will likely be used for the git tree
+> - patch "finer control over error vs. warnings"
+>   which can reveal potential problems which were hidden
+> - patch "teach cgcc about OSX aka darwin"
+> - patch "ret-void: warn for implicit type"
+> - series "testsuite speedup"
+>
+> I'll send a pull request tomorrow.
 
-Indeed, it's really great that you thought about it
-because since I don't use cgcc myself, I would never
-have thought about updated it.
+Sounds good. I think I have review most of them already.
+It should be a easy pull. I will create a RC2 after I pull from you.
 
-I'll add what is needed and check if anything else is
-missing there.
+Thanks for the great work.
 
-Thank you very much to bringing this to my attention.
--- Luc
+Chris
