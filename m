@@ -1,87 +1,44 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Sparse release v0.5.1-rc1
-Date: Tue, 13 Jun 2017 16:08:23 +0100
-Message-ID: <5396b5dd-8a26-238c-19b3-12132a9a556b@ramsayjones.plus.com>
+Date: Tue, 13 Jun 2017 18:05:13 +0200
+Message-ID: <20170613160511.fkjvpulf7mhzqi7z@ltop.local>
 References: <CANeU7QnnwD5+XDp-C1-4oxrD8Vn-tMWhoNC8NBv0M36PO9J2fQ@mail.gmail.com>
  <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
+ <5396b5dd-8a26-238c-19b3-12132a9a556b@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout07.plus.net ([84.93.230.235]:60212 "EHLO
-        avasout07.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752456AbdFMPQE (ORCPT
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:35093 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751768AbdFMQFS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Jun 2017 11:16:04 -0400
-In-Reply-To: <20170613045829.p4ilb7xjxg35hzvm@ltop.local>
-Content-Language: en-GB
+        Tue, 13 Jun 2017 12:05:18 -0400
+Received: by mail-wr0-f170.google.com with SMTP id q97so150222783wrb.2
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Jun 2017 09:05:17 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <5396b5dd-8a26-238c-19b3-12132a9a556b@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
+On Tue, Jun 13, 2017 at 04:08:23PM +0100, Ramsay Jones wrote:
+> Luc, I have not actually tested these patches (I was waiting for
+> something I could git-fetch). I have no doubt they are good, but
 
+This -rc1 is in fact the parent of the mem-max-count mini-series,
+so you tested it already a bit :)
 
-On 13/06/17 05:58, Luc Van Oostenryck wrote:
-> On Mon, Jun 12, 2017 at 10:05:27AM -0700, Christopher Li wrote:
->> Hi,
->>
->>
->> I know that sparse has due for a new release for very long time.
->> So here it is.
-> 
-> Great!
-> 
->> I take what is in the spase-next and put them into
->> a branch "sparse-0.5.1-rc1".
->>
->> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-0.5.1-rc1
->>
->> Thanks to Luc Van Oostenryck who contribute a great deal
->> of the high quality patches. Sparse should behave much better
->> when checking the recent kernel source code.
->>
->> Please give the RC1 a good test. Report any problem you found.
-> 
-> I really think that for this it would be better to not have
-> this rc1 in a separate branch but instead a simple tag in
-> the master branch, like most projects do.
-> A lot of people are willing to take the last version of the
-> master branch but won't bother to checkout another one.
-> It also conveys the message that this rc1 may be unstable and
-> too risky for be part of the master branch. It's also not good
-> for distros and environments which do automatic build, daily
-> snapshots and such as they won't use another branch.
-> 
->> Luc, do you have another other bug fix low risk patches you want to
->> add in this release? I want to do a quick release then go back to merge
->> your other changes.
-> 
-> Nothing really important but I would like to have the following
-> ones in the release:
-> - patch "avoid warning on explicit 'bool <- restricted' casts" 
->   I would have liked an Acked-by from Al Viro on this one but
->   he is quite busy.
-> - patch "add support for -Wmemcpy-max-count" & friends
->   This patch will likely be used for the git tree
+> it just occurred to me that a patch may be missing. I don't recall
+> seeing a change to cgcc to filter-out the new, sparse only, options.
+> ie. they need to be added to the check_only_option subroutine (#102).
 
-Luc, I have not actually tested these patches (I was waiting for
-something I could git-fetch). I have no doubt they are good, but
-it just occurred to me that a patch may be missing. I don't recall
-seeing a change to cgcc to filter-out the new, sparse only, options.
-ie. they need to be added to the check_only_option subroutine (#102).
+Indeed, it's really great that you thought about it
+because since I don't use cgcc myself, I would never
+have thought about updated it.
 
-> - patch "finer control over error vs. warnings"
->   which can reveal potential problems which were hidden
-> - patch "teach cgcc about OSX aka darwin"
-> - patch "ret-void: warn for implicit type"
-> - series "testsuite speedup"
-> 
-> I'll send a pull request tomorrow.
-> 
-> -- Luc 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+I'll add what is needed and check if anything else is
+missing there.
+
+Thank you very much to bringing this to my attention.
+-- Luc
