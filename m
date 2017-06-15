@@ -1,38 +1,37 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [GIT PULL] patches for -rc2
-Date: Thu, 15 Jun 2017 07:42:15 -0700
-Message-ID: <CANeU7Qn5FhotwWLw4h7M399GnLLFrhD6L2iT+EsVWWaVbrEJ9Q@mail.gmail.com>
-References: <20170615043455.3ke55dyo6v4vpebo@ltop.local> <CANeU7QmtKh5LxJVvaFVGy7KApXTtzW+-G19LogbEZH=kTNLHAQ@mail.gmail.com>
- <20170615082050.4ztydiu3d6m4fx2e@ltop.local>
+Subject: Re: c2xml uses out of type modifiers mapping
+Date: Thu, 15 Jun 2017 07:45:32 -0700
+Message-ID: <CANeU7QmjwNp1h=MjH4_1uUf71spOEn=fnQ69Gs6brJMkwzP+Rw@mail.gmail.com>
+References: <CACXZuxeVo=5Lz2idvtbeHjLJHLZ4gPissRVfCyDAsKw1mKPRTw@mail.gmail.com>
+ <CANeU7Qm2nkZCDtUf1Vb2EdMCuYstc6j4Wd6tqAWyKwDH9-E-RA@mail.gmail.com> <CACXZuxdt53Q-0pBy8_EaKj=UGvNJ770ZBQ3NGSXz6aD0MUxeKg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f51.google.com ([209.85.214.51]:36327 "EHLO
-        mail-it0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752571AbdFOOmQ (ORCPT
+Received: from mail-it0-f53.google.com ([209.85.214.53]:37479 "EHLO
+        mail-it0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752316AbdFOOpd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 15 Jun 2017 10:42:16 -0400
-Received: by mail-it0-f51.google.com with SMTP id m47so19386433iti.1
-        for <linux-sparse@vger.kernel.org>; Thu, 15 Jun 2017 07:42:16 -0700 (PDT)
-In-Reply-To: <20170615082050.4ztydiu3d6m4fx2e@ltop.local>
+        Thu, 15 Jun 2017 10:45:33 -0400
+Received: by mail-it0-f53.google.com with SMTP id m47so12205036iti.0
+        for <linux-sparse@vger.kernel.org>; Thu, 15 Jun 2017 07:45:33 -0700 (PDT)
+In-Reply-To: <CACXZuxdt53Q-0pBy8_EaKj=UGvNJ770ZBQ3NGSXz6aD0MUxeKg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Jun 15, 2017 at 1:20 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> And of course, I had to mess it up by forgetting to add
-> my SoB to the new patches for cgcc. Sorry for that.
-> I have added them now, as well as adding missing credits,
-> and republished the updated version. The patches themselves
-> haven't changed, only the commit messages.
->
-> Please, drop what you have already pulled and take the
-> following instead.
->
+On Wed, Jun 14, 2017 at 1:51 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> Hi Chris,
+> Happy to, although cannot promise when, as it means I will have to
+> setup a sparse repository for the sole purpose of creating patches.
+> BTW, Is there a guide on how to submit patches?
 
-No worries. I update git fetch already. Will take a look later today.
+You can take the document of submitting patches for Linux kernel.
+Of course replace the kernel bits to sparse. Sparse using the same
+coding stander
+as the Linux kernel. The git work flow you need to do is very similar.
+
+https://www.kernel.org/doc/html/v4.11/process/submitting-patches.html
 
 Chris
