@@ -1,43 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Potential issue in sparse_file()
-Date: Fri, 16 Jun 2017 10:32:29 -0700
-Message-ID: <CANeU7QkHJdpZS4JdKEH9JrzNZufdETXa+JcQtFgM9VmuCvwG3A@mail.gmail.com>
-References: <CACXZuxemXEhsWmtB_Y6OD1XrLqCLk=pXqP+Z7NAv7ChWNEFCzw@mail.gmail.com>
- <CANeU7QkoeYYvjmND1yGT=Zt=sfCAMvtNm-z9RZmr9dgdYxU1Hg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/2] fix bogus "crazy progammer"
+Date: Fri, 16 Jun 2017 21:18:42 +0200
+Message-ID: <20170616191844.86256-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f54.google.com ([209.85.214.54]:38402 "EHLO
-        mail-it0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750780AbdFPRcb (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36760 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751012AbdFPTS4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 16 Jun 2017 13:32:31 -0400
-Received: by mail-it0-f54.google.com with SMTP id b205so16868252itg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2017 10:32:31 -0700 (PDT)
-In-Reply-To: <CANeU7QkoeYYvjmND1yGT=Zt=sfCAMvtNm-z9RZmr9dgdYxU1Hg@mail.gmail.com>
+        Fri, 16 Jun 2017 15:18:56 -0400
+Received: by mail-wm0-f67.google.com with SMTP id d17so6638807wme.3
+        for <linux-sparse@vger.kernel.org>; Fri, 16 Jun 2017 12:18:55 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Chris Li <sparse@chrisli.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Jun 16, 2017 at 9:44 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Fri, Jun 16, 2017 at 5:33 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> Hi,
->>
->> I noticed that sparse_file() closes the file descriptor even when it
->> is 0. Is this the intended behavior?
->
-> I don't see a problem with it. The tokenize_stream() will keep reading
-> the file descriptor until it hit EOF.
->
-> If the stander input (file descriptor 0) already hit EOF, there is not much
-> you can read from it any way. You might just as well close it.
+The goal of this series is to fix the bogus "crazy progammer"
+warnings issued by sparse when running on the git tree.
 
-That being said, the more correct behavior is adding a test,
- only close it when it is not zero. It will have impact on if some one
-give the '-' twice to sparse.
+This "crazy programmer" warning is issued when there is
+a circulary dependency between pseudos but in the present
+case this circulary dependence was only an consequence of
+optimizations applied on a wrong state.
 
-I will accept a patch like that.
+With this bug fixed, there is only a single sparse warnings 
+left in the git tree (and it's most probably a bogus one).
+Big congrats to them!
+For comparison the Linux kernel has more than 1000 errors and
+close to 24000 warnings (on an allyesconfig for x86-64),
+plenty of bogus ones but also a lot of real ones.
 
-Chris
+For the adventurous ones, this series is also available at:
+  git://github.com/lucvoo/sparse.git fix-eager-ttsbb
+
+
+Luc Van Oostenryck (2):
+  fix OP_PHI usage in try_to_simplify_bb() only when non-bogus
+  fix: try_to_simplify_bb eargerness
+
+ flow.c               | 47 ++++++++++++++++++++++++++---------------------
+ validation/crazy03.c | 33 +++++++++++++++++++++++++++++++++
+ 2 files changed, 59 insertions(+), 21 deletions(-)
+ create mode 100644 validation/crazy03.c
+
+-- 
+2.13.0
+
