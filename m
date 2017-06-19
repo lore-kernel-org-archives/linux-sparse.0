@@ -1,61 +1,55 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/2] fix bogus "crazy progammer"
-Date: Sun, 18 Jun 2017 10:11:05 +0200
-Message-ID: <20170618081104.hxfykfovebsdt6lf@ltop.local>
-References: <20170616191844.86256-1-luc.vanoostenryck@gmail.com>
- <8132b29c-0bfc-9294-8040-a2f7271affd6@ramsayjones.plus.com>
- <20170617034449.6clvouwqxpfiujrb@ltop.local>
- <3c71421d-eb26-5268-7701-568d59e5b4d0@ramsayjones.plus.com>
- <20170618064340.czth3trqkb4tu5al@ltop.local>
- <CANeU7Q=keoffx75SxwPeS3UxWUKTxJ=LNPheqTncpgvNTDUP3Q@mail.gmail.com>
+From: Jordan Crouse <jcrouse@codeaurora.org>
+Subject: __user with scalar data types
+Date: Mon, 19 Jun 2017 10:15:09 -0600
+Message-ID: <20170619161509.GA25997@jcrouse-lnx.qualcomm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f47.google.com ([74.125.82.47]:36029 "EHLO
-        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750968AbdFRILJ (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 18 Jun 2017 04:11:09 -0400
-Received: by mail-wm0-f47.google.com with SMTP id m125so55772949wmm.1
-        for <linux-sparse@vger.kernel.org>; Sun, 18 Jun 2017 01:11:08 -0700 (PDT)
+Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CANeU7Q=keoffx75SxwPeS3UxWUKTxJ=LNPheqTncpgvNTDUP3Q@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Jun 18, 2017 at 12:24:17AM -0700, Christopher Li wrote:
-> On Sat, Jun 17, 2017 at 11:43 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > For info, I also tested on some other platform, just for the fun
-> > and only running the testsuite. The results are:
-> 
-> Great you have got this issue fix.
-> 
-> I assume you want this fix merge for the -rc2 as well, right?
+A number of us over in DRM land have been using __u64 scalar types
+to store pointers for uapi structures in accordance with Daniel Vetter's
+now classic treatise on ioctls:
 
-Yes, sure.
-I would like to let it 'soak' a little bit more but I don't see
-well how it could be more tested.
-I may try the kernel on some non-x86 archs but it won't be for
-today or tomorrow.
+http://blog.ffwll.ch/2013/11/botching-up-ioctls.html
 
-I have also a patch series for the root cause of the 1st patch:
-the misplacement of phi-nodes. This series solve all sort of
-problems but it's not the kind of changes for this release:
-it's radical changes to some pretty fundamental things and it's
-diffstat is: "16 files changed, 679 insertions(+), 476 deletions(-)"
-excluding all the changes in the testcases. This will need to
-wait for after the release and it's not yet ready anyway, not
-even close to.
+A smaller number of us have further been marking the __u64 with __user,
+to wit:
 
-For the release, I also want the other fix I posted this week,
-the one titled "fix: add missing examine in evaluate_dereference()"
-which is much more straight-forward.
+struct uapistruct {
+	...
+	__u64 __user myptr;
+	---
+};
 
+And then converting it for use in the kernel as such:
 
-I'll send another pull request in the next few days.
+{
+	void __user *userptr = (void __user *)(uintptr_t)args->myptr;
 
--- Luc
+	copy_from_user(local, userptr, size);
+	...
+}
+
+The problem is that sparse doesn't like the momentary switch to
+uintptr_t:
+
+	warning: dereference of noderef expression
+
+Which raised a bikeshed debate over whether it is appropriate to mark a scalar
+type as __user.  My opinion is that it is appropriate because __user should mark
+user memory regardless of the container.
+
+I'm looking for opinions or semi-authoritative edicts to determine if we should
+either start changing our uapi headers or go off and try to figure out how to
+make sparse understand this particular usage.
+
+Thanks!
+Jordan
+-- 
+The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
+a Linux Foundation Collaborative Project
