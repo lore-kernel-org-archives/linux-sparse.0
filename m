@@ -1,55 +1,28 @@
-From: Jordan Crouse <jcrouse@codeaurora.org>
-Subject: __user with scalar data types
-Date: Mon, 19 Jun 2017 10:15:09 -0600
-Message-ID: <20170619161509.GA25997@jcrouse-lnx.qualcomm.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: __user with scalar data types
+Date: Mon, 19 Jun 2017 17:34:38 +0100
+Message-ID: <20170619163438.GE10672@ZenIV.linux.org.uk>
+References: <20170619161509.GA25997@jcrouse-lnx.qualcomm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
+In-Reply-To: <20170619161509.GA25997@jcrouse-lnx.qualcomm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org
+To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, dri-devel@lists.freedesktop.org
 List-Id: linux-sparse@vger.kernel.org
 
-A number of us over in DRM land have been using __u64 scalar types
-to store pointers for uapi structures in accordance with Daniel Vetter's
-now classic treatise on ioctls:
+On Mon, Jun 19, 2017 at 10:15:09AM -0600, Jordan Crouse wrote:
 
-http://blog.ffwll.ch/2013/11/botching-up-ioctls.html
+> Which raised a bikeshed debate over whether it is appropriate to mark a scalar
+> type as __user.  My opinion is that it is appropriate because __user should mark
+> user memory regardless of the container.
 
-A smaller number of us have further been marking the __u64 with __user,
-to wit:
+What the hell?  __user is a qualifier like const, volatile, etc.  It's a property
+of *pointer* *type*.  Not some nebulous "marks userland memory" thing.
 
-struct uapistruct {
-	...
-	__u64 __user myptr;
-	---
-};
+> I'm looking for opinions or semi-authoritative edicts to determine if we should
+> either start changing our uapi headers or go off and try to figure out how to
+> make sparse understand this particular usage.
 
-And then converting it for use in the kernel as such:
-
-{
-	void __user *userptr = (void __user *)(uintptr_t)args->myptr;
-
-	copy_from_user(local, userptr, size);
-	...
-}
-
-The problem is that sparse doesn't like the momentary switch to
-uintptr_t:
-
-	warning: dereference of noderef expression
-
-Which raised a bikeshed debate over whether it is appropriate to mark a scalar
-type as __user.  My opinion is that it is appropriate because __user should mark
-user memory regardless of the container.
-
-I'm looking for opinions or semi-authoritative edicts to determine if we should
-either start changing our uapi headers or go off and try to figure out how to
-make sparse understand this particular usage.
-
-Thanks!
-Jordan
--- 
-The Qualcomm Innovation Center, Inc. is a member of Code Aurora Forum,
-a Linux Foundation Collaborative Project
+Stop cargo-culting, please.
