@@ -1,80 +1,57 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix: __builtin_bswap{16,32,64}() constantness
-Date: Tue, 20 Jun 2017 18:42:53 +0200
-Message-ID: <20170620164253.76292-1-luc.vanoostenryck@gmail.com>
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH] dissect: use built_in_ident() instead of MK_IDENT()
+Date: Tue, 20 Jun 2017 18:56:33 +0200
+Message-ID: <20170620165633.GA26352@redhat.com>
+References: <20170619211454.45244-1-luc.vanoostenryck@gmail.com>
+ <20170620111740.GB21354@redhat.com>
+ <20170620125345.nlchvizgz5ar5yrn@ltop.local>
+ <20170620160711.GA23849@redhat.com>
+ <20170620163950.gkdezvohrcz7okoo@ltop.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f196.google.com ([209.85.220.196]:35840 "EHLO
-        mail-qk0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751128AbdFTQnC (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 20 Jun 2017 12:43:02 -0400
-Received: by mail-qk0-f196.google.com with SMTP id r62so11680287qkf.3
-        for <linux-sparse@vger.kernel.org>; Tue, 20 Jun 2017 09:43:01 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:42000 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751120AbdFTQ4f (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 20 Jun 2017 12:56:35 -0400
+Content-Disposition: inline
+In-Reply-To: <20170620163950.gkdezvohrcz7okoo@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Chris Li <sparse@chrisli.org>
 
-When expanding those builtins, we directly excludes a non-constant
-arg (via the expression expansion cost) and the to retrieve the
-value we use const_expression_value().
+On 06/20, Luc Van Oostenryck wrote:
+>
+> On Tue, Jun 20, 2017 at 06:07:11PM +0200, Oleg Nesterov wrote:
+> > Hmm. Now that I git-cloned the code I understand. And I can't recall why MK_IDENT() was
+> > written this way, it simply doesn't look right.
+>
+> It looks to me as you simply wanted to avoid doing dynamic allocation
+> and/or the cost of the hashing.
 
-But const_expression_value() is to be used for expressions that
-qualify as 'integer constant expression' as per the C standard.
-However we want to be able to use this builtin with all integer
-expressions having a known value at compile time, even those
-not qualified as true 'integer constant expression'.
+This is clear ;) what is not clear is why I didn't do, say,
 
-Fix this by using get_expression_value_silent() instead of
-const_expression_value().
+	#define	MK_IDENT(s)	({				\
+		static struct {					\
+			struct ident ident;			\
+			char name[sizeof(s)];			\
+		} ident = {					\
+			.ident.len  = sizeof(s)-1,		\
+			.name = s,				\
+		};						\
+		&ident.ident;					\
+	})
 
-Note: this bug was found by testing sparse on the git tree
-      on ARM64.
+probably because I wanted to avoid __attribute__((packed)) in struct ident,
+not sure.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- builtin.c                           | 4 +++-
- validation/builtin-bswap-constant.c | 6 ++++++
- 2 files changed, 9 insertions(+), 1 deletion(-)
+> > Probably can be fixed but I agree, lets
+> > remove it.
+>
+> Probably yes, but yes btter to remove it.
 
-diff --git a/builtin.c b/builtin.c
-index dbb81032b..4f2a106cb 100644
---- a/builtin.c
-+++ b/builtin.c
-@@ -179,13 +179,15 @@ static struct symbol_op choose_op = {
- /* The argument is constant and valid if the cost is zero */
- static int expand_bswap(struct expression *expr, int cost)
- {
-+	struct expression *arg;
- 	long long val;
- 
- 	if (cost)
- 		return cost;
- 
- 	/* the arguments number & type have already been checked */
--	val = const_expression_value(first_expression(expr->args));
-+	arg = first_expression(expr->args);
-+	val = get_expression_value_silent(arg);
- 	switch (expr->ctype->bit_size) {
- 	case 16: expr->value = __builtin_bswap16(val); break;
- 	case 32: expr->value = __builtin_bswap32(val); break;
-diff --git a/validation/builtin-bswap-constant.c b/validation/builtin-bswap-constant.c
-index 4560f67e9..18574d4c5 100644
---- a/validation/builtin-bswap-constant.c
-+++ b/validation/builtin-bswap-constant.c
-@@ -16,6 +16,12 @@ unsigned long long bswap64(void)
- 	return __builtin_bswap64(0x123456789abcdef0ULL);
- }
- 
-+unsigned int half_constant(void);
-+unsigned int half_constant(void)
-+{
-+	int v = 0x12345678;
-+	return __builtin_bswap32(v);
-+}
- /*
-  * check-name: builtin-bswap-constant
-  * check-command: test-linearize $file
--- 
-2.13.0
+Agreed.
+
+Oleg.
 
