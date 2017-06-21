@@ -1,39 +1,53 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] fix: __builtin_bswap{16,32,64}() constantness
-Date: Tue, 20 Jun 2017 21:50:33 -0700
-Message-ID: <CANeU7QmjPsZiv-oqMdxZnWc=VwCYcSUegFPpCaocwT5iGiDCQA@mail.gmail.com>
-References: <20170620164253.76292-1-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] cgcc: teach cgcc about ppc64[le]
+Date: Wed, 21 Jun 2017 15:34:55 +0200
+Message-ID: <20170621133455.97253-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f45.google.com ([209.85.214.45]:38290 "EHLO
-        mail-it0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750991AbdFUEuf (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:36109 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751014AbdFUNfH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 21 Jun 2017 00:50:35 -0400
-Received: by mail-it0-f45.google.com with SMTP id b205so25665479itg.1
-        for <linux-sparse@vger.kernel.org>; Tue, 20 Jun 2017 21:50:35 -0700 (PDT)
-In-Reply-To: <20170620164253.76292-1-luc.vanoostenryck@gmail.com>
+        Wed, 21 Jun 2017 09:35:07 -0400
+Received: by mail-wr0-f193.google.com with SMTP id 77so26553133wrb.3
+        for <linux-sparse@vger.kernel.org>; Wed, 21 Jun 2017 06:35:07 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Jun 20, 2017 at 9:42 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> When expanding those builtins, we directly excludes a non-constant
-> arg (via the expression expansion cost) and the to retrieve the
-> value we use const_expression_value().
->
-> But const_expression_value() is to be used for expressions that
-> qualify as 'integer constant expression' as per the C standard.
-> However we want to be able to use this builtin with all integer
-> expressions having a known value at compile time, even those
-> not qualified as true 'integer constant expression'.
->
-> Fix this by using get_expression_value_silent() instead of
-> const_expression_value().
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ cgcc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-Looks good to me.
+diff --git a/cgcc b/cgcc
+index 904695c81..f5f352234 100755
+--- a/cgcc
++++ b/cgcc
+@@ -283,6 +283,12 @@ sub add_specs {
+ 		&float_types (1, 1, 21, [24,8], [53,11], [113,15]) .
+ 		&define_size_t ($m64 ? "long unsigned int" : "unsigned int") .
+ 		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
++    } elsif ($spec eq 'ppc64') {
++	return (' -D__powerpc__=1 -D__PPC__=1 -D_STRING_ARCH_unaligned=1' .
++		' -D__powerpc64__=1 -D__PPC64__=1' .
++		' -D_CALL_ELF=2' .
++		' -m64' .
++		&float_types (1, 1, 21, [24,8], [53,11], [113,15]));
+     } elsif ($spec eq 's390x') {
+ 	return (' -D__s390x__ -D__s390__ -D_BIG_ENDIAN' .
+ 		&integer_types (8, 16, 32, $m64 ? 64 : 32, 64) .
+@@ -307,6 +313,10 @@ sub add_specs {
+ 	    return &add_specs ('x86_64');
+ 	} elsif ($arch =~ /^(ppc)$/i) {
+ 	    return &add_specs ('ppc');
++	} elsif ($arch =~ /^(ppc64)$/i) {
++	    return &add_specs ('ppc64') . ' -mbig-endian';
++	} elsif ($arch =~ /^(ppc64le)$/i) {
++	    return &add_specs ('ppc64') . ' -mlittle-endian';
+ 	} elsif ($arch =~ /^(s390x)$/i) {
+ 	    return &add_specs ('s390x');
+ 	} elsif ($arch =~ /^(sparc64)$/i) {
+-- 
+2.13.0
 
-Chris
