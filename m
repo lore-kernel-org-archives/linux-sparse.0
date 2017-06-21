@@ -1,53 +1,38 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] cgcc: teach cgcc about arm64
-Date: Wed, 21 Jun 2017 00:12:51 +0200
-Message-ID: <20170620221251.93292-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/3] teach sparse about endianness
+Date: Tue, 20 Jun 2017 21:13:02 -0700
+Message-ID: <CANeU7QmUcoYB79m78Ey4K=0NUvDG=hoo9AiR1VJ6NK1kpQCdUA@mail.gmail.com>
+References: <20170620201931.92864-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:36578 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752401AbdFTWNB (ORCPT
+Received: from mail-it0-f48.google.com ([209.85.214.48]:37368 "EHLO
+        mail-it0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750707AbdFUENE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 20 Jun 2017 18:13:01 -0400
-Received: by mail-wr0-f195.google.com with SMTP id 77so21166779wrb.3
-        for <linux-sparse@vger.kernel.org>; Tue, 20 Jun 2017 15:13:00 -0700 (PDT)
+        Wed, 21 Jun 2017 00:13:04 -0400
+Received: by mail-it0-f48.google.com with SMTP id m47so24994075iti.0
+        for <linux-sparse@vger.kernel.org>; Tue, 20 Jun 2017 21:13:03 -0700 (PDT)
+In-Reply-To: <20170620201931.92864-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-This is needed to use sparse on the git tree on an arm64
-machine (where a bug in the __builtin_bswapXX() expansion
-was discovered).
+On Tue, Jun 20, 2017 at 1:19 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The goal of this series is to let sparse correctly
+> check macros, structures, ... endian-specific.
+> This is done by:
+> 1) the introduction of a pair of option flags:
+>    -mbig-endian/-mlittle-endian
+> 2) a set of predefined macros:
+>    __{BIG,LITTLE}_ENDIAN__,
+>    __ORDER_{BIG,LITTLE}_ENDIAN__ &
+>    __BYTE_ORDER__
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- cgcc | 6 ++++++
- 1 file changed, 6 insertions(+)
+This series looks good to me.
 
-diff --git a/cgcc b/cgcc
-index fd9d482fa..28c55335a 100755
---- a/cgcc
-+++ b/cgcc
-@@ -289,6 +289,10 @@ sub add_specs {
- 		&float_types (1, 1, 36, [24,8], [53,11], [113,15]) .
- 		&define_size_t ("long unsigned int") .
- 		' -D__SIZEOF_POINTER__=' . ($m64 ? '8' : '4'));
-+    } elsif ($spec eq 'aarch64') {
-+	return (' -D__aarch64__=1 -m64' .
-+		&integer_types (8, 16, 32, 64, 64) .
-+		&float_types (1, 1, 36, [24,8], [53,11], [113,15]));
-     } elsif ($spec eq 'host_os_specs') {
- 	my $os = `uname -s`;
- 	chomp $os;
-@@ -308,6 +312,8 @@ sub add_specs {
- 	    return &add_specs ('s390x');
- 	} elsif ($arch =~ /^(sparc64)$/i) {
- 	    return &add_specs ('sparc64');
-+	} elsif ($arch =~ /^(aarch64)$/i) {
-+	    return &add_specs ('aarch64');
- 	}
-     } else {
- 	die "$0: invalid specs: $spec\n";
--- 
-2.13.0
+Signed-off-By: <sparse@chrisli.org>
 
+Chris
