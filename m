@@ -1,65 +1,197 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH] Adding ignored attribute optimize
-Date: Tue, 27 Jun 2017 10:21:43 -0700
-Message-ID: <CANeU7QnNNL1u3BxhWLebFqzn+9Y7hHKABDo_mkEqfwF+VO963Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="001a1140fbb036b0bc0552f44db4"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/2] avoid some struct symbol member for for-statements
+Date: Wed, 28 Jun 2017 22:49:17 +0200
+Message-ID: <20170628204918.25853-2-luc.vanoostenryck@gmail.com>
+References: <20170628204918.25853-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f181.google.com ([209.85.223.181]:34898 "EHLO
-        mail-io0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751579AbdF0RVp (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36215 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751551AbdF1UtY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 27 Jun 2017 13:21:45 -0400
-Received: by mail-io0-f181.google.com with SMTP id h134so21712100iof.2
-        for <linux-sparse@vger.kernel.org>; Tue, 27 Jun 2017 10:21:45 -0700 (PDT)
+        Wed, 28 Jun 2017 16:49:24 -0400
+Received: by mail-wm0-f68.google.com with SMTP id y5so13624007wmh.3
+        for <linux-sparse@vger.kernel.org>; Wed, 28 Jun 2017 13:49:24 -0700 (PDT)
+In-Reply-To: <20170628204918.25853-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
---001a1140fbb036b0bc0552f44db4
-Content-Type: text/plain; charset="UTF-8"
+The for-statement needs a lot of fields in struct statement, much
+more than any other statement. This is due to the complexity of
+the for-statement.
 
-I notice this unknow attribute "__optimize__"when I am looking
-sparse checking result on the recent kernel compile.
+The possibility in C99 to declare variables in the initialization
+part of the statement add yet another field to hold the declared
+symbols. However, these symbols doesn't need a lis of their own,
+they can simply be put in the list of a STMT_DECLARATION used
+as the 'pre-' statement of a classic for-statement.
 
-Chris
+Merge the symbols list with the pre-statement.
 
---001a1140fbb036b0bc0552f44db4
-Content-Type: text/x-patch; charset="US-ASCII";
-	name="0001-Adding-ignored-attribute-optimize.patch"
-Content-Disposition: attachment;
-	filename="0001-Adding-ignored-attribute-optimize.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_j4fu9kdz0
+Note: The motivation for this change is to make struct statement
+      smaller. The change also make further processing slightly
+      simpler since we don't have to process the declaration
+      separately.
 
-RnJvbSBkODkyNWYxMjVlZThiMWNjNmViMjlmNDMzMTJiODFmM2Y4NTkzNzRkIE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
-YXRlOiBGcmksIDIzIEp1biAyMDE3IDE3OjEzOjE3IC0wNzAwClN1YmplY3Q6IFtQQVRDSF0gQWRk
-aW5nIGlnbm9yZWQgYXR0cmlidXRlIG9wdGltaXplCgpJdCB3YXMgdXNlZCBpbiBrdm0vdm14LmMK
-ClNpZ25lZC1vZi1CeTogQ2hyaXN0b3BoZXIgTGkgPHNwYXJzZUBjaHJpc2xpLm9yZz4KLS0tCiBw
-YXJzZS5jICAgICAgICAgICAgICAgICAgICB8ICA2ICsrKystLQogdmFsaWRhdGlvbi9hdHRyLW9w
-dGltaXplLmMgfCAxNiArKysrKysrKysrKysrKysrCiAyIGZpbGVzIGNoYW5nZWQsIDIwIGluc2Vy
-dGlvbnMoKyksIDIgZGVsZXRpb25zKC0pCiBjcmVhdGUgbW9kZSAxMDA2NDQgdmFsaWRhdGlvbi9h
-dHRyLW9wdGltaXplLmMKCmRpZmYgLS1naXQgYS9wYXJzZS5jIGIvcGFyc2UuYwppbmRleCAyMTQ1
-NDc5Li5mNjY1ZjA1IDEwMDY0NAotLS0gYS9wYXJzZS5jCisrKyBiL3BhcnNlLmMKQEAgLTYwNyw2
-ICs2MDcsOCBAQCBzdGF0aWMgY29uc3QgY2hhciAqaWdub3JlZF9hdHRyaWJ1dGVzW10gPSB7CiAJ
-Il9fbmFrZWRfXyIsCiAJIm5vX2luc3RydW1lbnRfZnVuY3Rpb24iLAogCSJfX25vX2luc3RydW1l
-bnRfZnVuY3Rpb25fXyIsCisJIm5vX3Nhbml0aXplX2FkZHJlc3MiLAorCSJfX25vX3Nhbml0aXpl
-X2FkZHJlc3NfXyIsCiAJIm5vY2xvbmUiLAogCSJfX25vY2xvbmUiLAogCSJfX25vY2xvbmVfXyIs
-CkBAIC02MTgsNiArNjIwLDggQEAgc3RhdGljIGNvbnN0IGNoYXIgKmlnbm9yZWRfYXR0cmlidXRl
-c1tdID0gewogCSJub3Rocm93IiwKIAkiX19ub3Rocm93IiwKIAkiX19ub3Rocm93X18iLAorCSJv
-cHRpbWl6ZSIsCisJIl9fb3B0aW1pemVfXyIsCiAJInJlZ3Bhcm0iLAogCSJfX3JlZ3Bhcm1fXyIs
-CiAJInNlY3Rpb24iLApAQCAtNjQ2LDggKzY1MCw2IEBAIHN0YXRpYyBjb25zdCBjaGFyICppZ25v
-cmVkX2F0dHJpYnV0ZXNbXSA9IHsKIAkiX193YXJuaW5nX18iLAogCSJ3ZWFrIiwKIAkiX193ZWFr
-X18iLAotCSJub19zYW5pdGl6ZV9hZGRyZXNzIiwKLQkiX19ub19zYW5pdGl6ZV9hZGRyZXNzX18i
-LAogfTsKIAogCmRpZmYgLS1naXQgYS92YWxpZGF0aW9uL2F0dHItb3B0aW1pemUuYyBiL3ZhbGlk
-YXRpb24vYXR0ci1vcHRpbWl6ZS5jCm5ldyBmaWxlIG1vZGUgMTAwNjQ0CmluZGV4IDAwMDAwMDAu
-LmM0NWNiZTgKLS0tIC9kZXYvbnVsbAorKysgYi92YWxpZGF0aW9uL2F0dHItb3B0aW1pemUuYwpA
-QCAtMCwwICsxLDE2IEBACisKKyNkZWZpbmUgX19ub2Nsb25lCV9fYXR0cmlidXRlX18oKF9fbm9j
-bG9uZV9fLCBfX29wdGltaXplX18oIm5vLXRyYWNlciIpKSkKKworc3RydWN0IGt2bV92Y3B1Owor
-CitzdGF0aWMgdm9pZCBfX25vY2xvbmUgdm14X3ZjcHVfcnVuKHN0cnVjdCBrdm1fdmNwdSAqdmNw
-dSkKK3sKKwlfX2FzbV9fKCIiKTsKK30KKworZXh0ZXJuIHZvaWQgKnJ1bjsKK3ZvaWQgKnJ1biA9
-IHZteF92Y3B1X3J1bjsKKworLyoKKyAqIGNoZWNrLW5hbWU6IG9wdGltaXplIGF0dHJpYnV0ZXMK
-KyAqLwotLSAKMi45LjQKCg==
---001a1140fbb036b0bc0552f44db4--
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ compile-i386.c |  1 -
+ dissect.c      |  1 -
+ evaluate.c     |  1 -
+ inline.c       |  2 --
+ linearize.c    |  6 ------
+ parse.c        | 22 +++++++++++++++-------
+ parse.h        |  1 -
+ show-parse.c   |  1 -
+ 8 files changed, 15 insertions(+), 20 deletions(-)
+
+diff --git a/compile-i386.c b/compile-i386.c
+index 24e408baa..de252c8f9 100644
+--- a/compile-i386.c
++++ b/compile-i386.c
+@@ -1926,7 +1926,6 @@ static void emit_loop(struct statement *stmt)
+ 	loop_continue = new_label();
+ 	loopstk_push(loop_continue, loop_bottom);
+ 
+-	x86_symbol_decl(stmt->iterator_syms);
+ 	x86_statement(pre_statement);
+ 	if (!post_condition || post_condition->type != EXPR_VALUE || post_condition->value) {
+ 		loop_top = new_label();
+diff --git a/dissect.c b/dissect.c
+index 5f067eb4c..9f823980d 100644
+--- a/dissect.c
++++ b/dissect.c
+@@ -494,7 +494,6 @@ static struct symbol *do_statement(usage_t mode, struct statement *stmt)
+ 	}
+ 
+ 	break; case STMT_ITERATOR:
+-		do_sym_list(stmt->iterator_syms);
+ 		do_statement(U_VOID, stmt->iterator_pre_statement);
+ 		do_expression(U_R_VAL, stmt->iterator_pre_condition);
+ 		do_statement(U_VOID, stmt->iterator_post_statement);
+diff --git a/evaluate.c b/evaluate.c
+index cf3cf244d..e5b3b5904 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3279,7 +3279,6 @@ static void evaluate_if_statement(struct statement *stmt)
+ 
+ static void evaluate_iterator(struct statement *stmt)
+ {
+-	evaluate_symbol_list(stmt->iterator_syms);
+ 	evaluate_conditional(stmt->iterator_pre_condition, 1);
+ 	evaluate_conditional(stmt->iterator_post_condition,1);
+ 	evaluate_statement(stmt->iterator_pre_statement);
+diff --git a/inline.c b/inline.c
+index a3002c6bd..dec07a25c 100644
+--- a/inline.c
++++ b/inline.c
+@@ -421,8 +421,6 @@ static struct statement *copy_one_statement(struct statement *stmt)
+ 		stmt = dup_statement(stmt);
+ 		stmt->iterator_break = copy_symbol(stmt->pos, stmt->iterator_break);
+ 		stmt->iterator_continue = copy_symbol(stmt->pos, stmt->iterator_continue);
+-		stmt->iterator_syms = copy_symbol_list(stmt->iterator_syms);
+-
+ 		stmt->iterator_pre_statement = copy_one_statement(stmt->iterator_pre_statement);
+ 		stmt->iterator_pre_condition = copy_expression(stmt->iterator_pre_condition);
+ 
+diff --git a/linearize.c b/linearize.c
+index 7313e72d8..6d0695a18 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -2000,12 +2000,6 @@ static pseudo_t linearize_iterator(struct entrypoint *ep, struct statement *stmt
+ 	struct statement  *post_statement = stmt->iterator_post_statement;
+ 	struct expression *post_condition = stmt->iterator_post_condition;
+ 	struct basic_block *loop_top, *loop_body, *loop_continue, *loop_end;
+-	struct symbol *sym;
+-
+-	FOR_EACH_PTR(stmt->iterator_syms, sym) {
+-		linearize_one_symbol(ep, sym);
+-	} END_FOR_EACH_PTR(sym);
+-	concat_symbol_list(stmt->iterator_syms, &ep->syms);
+ 	linearize_statement(ep, pre_statement);
+ 
+ 	loop_body = loop_top = alloc_basic_block(ep, stmt->pos);
+diff --git a/parse.c b/parse.c
+index 214547904..e063dae99 100644
+--- a/parse.c
++++ b/parse.c
+@@ -2282,36 +2282,44 @@ static void validate_for_loop_decl(struct symbol *sym)
+ 
+ static struct token *parse_for_statement(struct token *token, struct statement *stmt)
+ {
+-	struct symbol_list *syms;
+-	struct expression *e1, *e2, *e3;
++	struct expression *e2, *e3;
+ 	struct statement *iterator;
++	struct statement *pre = NULL;
+ 
+-	start_iterator(stmt);
+ 	token = expect(token->next, '(', "after 'for'");
+ 
+-	syms = NULL;
+-	e1 = NULL;
+ 	/* C99 variable declaration? */
+ 	if (lookup_type(token)) {
++		struct symbol_list *syms = NULL;
++		struct position pos = token->pos;
++		start_symbol_scope();
+ 		token = external_declaration(token, &syms, validate_for_loop_decl);
++		pre = alloc_statement(pos, STMT_DECLARATION);
++		pre->declaration = syms;
+ 	} else {
++		struct expression *e1 = NULL;
+ 		token = parse_expression(token, &e1);
+ 		token = expect(token, ';', "in 'for'");
++		pre = make_statement(e1);
+ 	}
++
++	start_iterator(stmt);
+ 	token = parse_expression(token, &e2);
+ 	token = expect(token, ';', "in 'for'");
+ 	token = parse_expression(token, &e3);
+ 	token = expect(token, ')', "in 'for'");
+ 	token = statement(token, &iterator);
+ 
+-	stmt->iterator_syms = syms;
+-	stmt->iterator_pre_statement = make_statement(e1);
++	stmt->iterator_pre_statement = pre;
+ 	stmt->iterator_pre_condition = e2;
+ 	stmt->iterator_post_statement = make_statement(e3);
+ 	stmt->iterator_post_condition = NULL;
+ 	stmt->iterator_statement = iterator;
+ 	end_iterator(stmt);
+ 
++	if (pre && pre->type == STMT_DECLARATION)
++		end_symbol_scope();
++
+ 	return token;
+ }
+ 
+diff --git a/parse.h b/parse.h
+index 26227a387..e01497096 100644
+--- a/parse.h
++++ b/parse.h
+@@ -88,7 +88,6 @@ struct statement {
+ 		struct /* iterator_struct */ {
+ 			struct symbol *iterator_break;
+ 			struct symbol *iterator_continue;
+-			struct symbol_list *iterator_syms;
+ 			struct statement  *iterator_pre_statement;
+ 			struct expression *iterator_pre_condition;
+ 
+diff --git a/show-parse.c b/show-parse.c
+index 5e3e13165..6801a68e2 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -633,7 +633,6 @@ int show_statement(struct statement *stmt)
+ 		struct expression *post_condition = stmt->iterator_post_condition;
+ 		int val, loop_top = 0, loop_bottom = 0;
+ 
+-		show_symbol_decl(stmt->iterator_syms);
+ 		show_statement(pre_statement);
+ 		if (pre_condition) {
+ 			if (pre_condition->type == EXPR_VALUE) {
+-- 
+2.13.0
+
