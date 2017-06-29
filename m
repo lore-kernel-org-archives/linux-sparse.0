@@ -1,54 +1,35 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 6/7] diet: squeeze struct symbol's members
-Date: Thu, 29 Jun 2017 07:16:45 +0200
-Message-ID: <20170629051646.35988-7-luc.vanoostenryck@gmail.com>
-References: <20170629051646.35988-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] Adding ignored attribute optimize
+Date: Thu, 29 Jun 2017 09:04:38 +0200
+Message-ID: <20170629070437.o6j2bkv6wdbcknwa@ltop.local>
+References: <CANeU7QnNNL1u3BxhWLebFqzn+9Y7hHKABDo_mkEqfwF+VO963Q@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35230 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751675AbdF2FTF (ORCPT
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:36171 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751612AbdF2HEl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 29 Jun 2017 01:19:05 -0400
-Received: by mail-wm0-f66.google.com with SMTP id u23so342843wma.2
-        for <linux-sparse@vger.kernel.org>; Wed, 28 Jun 2017 22:19:04 -0700 (PDT)
-In-Reply-To: <20170629051646.35988-1-luc.vanoostenryck@gmail.com>
+        Thu, 29 Jun 2017 03:04:41 -0400
+Received: by mail-wm0-f49.google.com with SMTP id 62so73167951wmw.1
+        for <linux-sparse@vger.kernel.org>; Thu, 29 Jun 2017 00:04:41 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnNNL1u3BxhWLebFqzn+9Y7hHKABDo_mkEqfwF+VO963Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-struct symbol::arguments is only used for functions, while
-struct symbol::initializer is never used for functions.
+On Tue, Jun 27, 2017 at 10:21:43AM -0700, Christopher Li wrote:
+> I notice this unknow attribute "__optimize__"when I am looking
+> sparse checking result on the recent kernel compile.
 
-Put both of them in an union in order to make the structure
-a bit more lightweight.
+There is also a long time 'require_context' in drivers/block/drbd,/
+a failed attempt to fix or extend sparse's handling of lock context.
+Why is it still there after all those years, I have no idea.
+ 
+Anyway, my position about these unknown attributes is still the same
+of course: we should simply ignore them instead of annoying people
+with useless warnings.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- symbol.h | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/symbol.h b/symbol.h
-index 1bedc75c3..d8733e99f 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -175,12 +175,14 @@ struct symbol {
- 					transparent_union:1;
- 			struct expression *array_size;
- 			struct ctype ctype;
--			struct symbol_list *arguments;
- 			struct statement *stmt;
-+			union {
-+				struct symbol_list *arguments;
-+				struct expression *initializer;
-+			};
- 			struct symbol_list *symbol_list;
- 			struct statement *inline_stmt;
- 			struct symbol_list *inline_symbol_list;
--			struct expression *initializer;
- 			struct entrypoint *ep;
- 			struct symbol *definition;
- 		};
--- 
-2.13.0
-
+-- Luc
