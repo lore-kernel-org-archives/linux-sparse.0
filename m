@@ -1,27 +1,28 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+From: Lance Richardson <lrichard@redhat.com>
 Subject: Re: Sparse release v0.5.1 RC3
-Date: Sat, 1 Jul 2017 21:31:58 +0100
-Message-ID: <b79fe0eb-06fa-d7fd-67c6-988ed578fbf2@ramsayjones.plus.com>
+Date: Sat, 1 Jul 2017 16:37:27 -0400 (EDT)
+Message-ID: <905534368.29108867.1498941447093.JavaMail.zimbra@redhat.com>
 References: <CANeU7Q=q8PVxavt1CegVebT9aSnQ2ugXrE4PStf7ey08Kg+NpA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout07.plus.net ([84.93.230.235]:33008 "EHLO
-        avasout07.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751968AbdGAUcB (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 1 Jul 2017 16:32:01 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:54570 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751968AbdGAUh2 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Sat, 1 Jul 2017 16:37:28 -0400
 In-Reply-To: <CANeU7Q=q8PVxavt1CegVebT9aSnQ2ugXrE4PStf7ey08Kg+NpA@mail.gmail.com>
-Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Lance Richardson <lrichard@redhat.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-
-
-On 30/06/17 02:30, Christopher Li wrote:
+> From: "Christopher Li" <sparse@chrisli.org>
+> To: "Linux-Sparse" <linux-sparse@vger.kernel.org>
+> Cc: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>, "Lance Richardson" <lrichard@redhat.com>
+> Sent: Thursday, 29 June, 2017 9:30:34 PM
+> Subject: Sparse release v0.5.1 RC3
+> 
 > I have update the master on sparse git repository to
 > RC3. We actually skip the RC2 on this release.
 > 
@@ -34,13 +35,15 @@ On 30/06/17 02:30, Christopher Li wrote:
 > Again, please give it a good test. Report back what issue
 > you might find. If there is no big issue, I plan to tag the finial version
 > of v0.5.1 next week.
+> 
+> Chris
+> 
 
-Tested on Linux (i686 and x86_64) and cygwin (x86_64).
+Hi Chris,
 
-Both the sparse testsuite and 'make sparse' on the git tree
-work as expected, without additional failures.
+I've tried it against davem's net repository and openvswitch master under
+Fedora 25 x86_64, looks good!
 
-Thanks! :-D
+Thanks,
 
-ATB,
-Ramsay Jones
+   Lance
