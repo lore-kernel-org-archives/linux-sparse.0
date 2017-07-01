@@ -1,33 +1,30 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Sparse release v0.5.1 RC3
-Date: Sat, 1 Jul 2017 22:45:56 +0200
-Message-ID: <20170701204555.vkpl4fsvudsoot6y@ltop.local>
+Date: Sat, 1 Jul 2017 22:46:52 +0200
+Message-ID: <20170701204651.gfgarvt6nag7mbur@ltop.local>
 References: <CANeU7Q=q8PVxavt1CegVebT9aSnQ2ugXrE4PStf7ey08Kg+NpA@mail.gmail.com>
- <905534368.29108867.1498941447093.JavaMail.zimbra@redhat.com>
+ <b79fe0eb-06fa-d7fd-67c6-988ed578fbf2@ramsayjones.plus.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35938 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751978AbdGAUqA (ORCPT
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:35219 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751978AbdGAUqy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 1 Jul 2017 16:46:00 -0400
-Received: by mail-wm0-f46.google.com with SMTP id 62so136991931wmw.1
-        for <linux-sparse@vger.kernel.org>; Sat, 01 Jul 2017 13:46:00 -0700 (PDT)
+        Sat, 1 Jul 2017 16:46:54 -0400
+Received: by mail-wm0-f43.google.com with SMTP id w126so136626632wme.0
+        for <linux-sparse@vger.kernel.org>; Sat, 01 Jul 2017 13:46:54 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <905534368.29108867.1498941447093.JavaMail.zimbra@redhat.com>
+In-Reply-To: <b79fe0eb-06fa-d7fd-67c6-988ed578fbf2@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Lance Richardson <lrichard@redhat.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Lance Richardson <lrichard@redhat.com>
 
-On Sat, Jul 01, 2017 at 04:37:27PM -0400, Lance Richardson wrote:
-> > From: "Christopher Li" <sparse@chrisli.org>
-> > To: "Linux-Sparse" <linux-sparse@vger.kernel.org>
-> > Cc: "Luc Van Oostenryck" <luc.vanoostenryck@gmail.com>, "Lance Richardson" <lrichard@redhat.com>
-> > Sent: Thursday, 29 June, 2017 9:30:34 PM
-> > Subject: Sparse release v0.5.1 RC3
-> > 
+On Sat, Jul 01, 2017 at 09:31:58PM +0100, Ramsay Jones wrote:
+> 
+> 
+> On 30/06/17 02:30, Christopher Li wrote:
 > > I have update the master on sparse git repository to
 > > RC3. We actually skip the RC2 on this release.
 > > 
@@ -40,16 +37,14 @@ On Sat, Jul 01, 2017 at 04:37:27PM -0400, Lance Richardson wrote:
 > > Again, please give it a good test. Report back what issue
 > > you might find. If there is no big issue, I plan to tag the finial version
 > > of v0.5.1 next week.
-> > 
-> > Chris
-> > 
 > 
-> Hi Chris,
+> Tested on Linux (i686 and x86_64) and cygwin (x86_64).
 > 
-> I've tried it against davem's net repository and openvswitch master under
-> Fedora 25 x86_64, looks good!
+> Both the sparse testsuite and 'make sparse' on the git tree
+> work as expected, without additional failures.
+> 
+> Thanks! :-D
 
-Nice.
-Thanks for the testing.
+Thanks again for the testing.
 
 -- Luc 
