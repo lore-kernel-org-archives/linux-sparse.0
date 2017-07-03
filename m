@@ -1,33 +1,90 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 0/2] list of gcc supported attribute name
-Date: Mon, 3 Jul 2017 11:35:59 -0700
-Message-ID: <CANeU7QmC-mpubM+2T-50tqwXbXshpFoYzxg4cTw+t-jQDb-J=g@mail.gmail.com>
+Subject: [PATCH 1/2] Let create_symbol check for previous same symbol
+Date: Mon, 3 Jul 2017 11:41:31 -0700
+Message-ID: <CANeU7QmVQT9kdKW+FtgpC5sXjyp_zF_GEpwLivLofLJ3ra2egw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed; boundary="94eb2c119c629a1b0d05536e1db5"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:36498 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751708AbdGCSgB (ORCPT
+Received: from mail-pg0-f43.google.com ([74.125.83.43]:34802 "EHLO
+        mail-pg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754143AbdGCSlc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 3 Jul 2017 14:36:01 -0400
-Received: by mail-pg0-f48.google.com with SMTP id u62so98659184pgb.3
-        for <linux-sparse@vger.kernel.org>; Mon, 03 Jul 2017 11:36:00 -0700 (PDT)
+        Mon, 3 Jul 2017 14:41:32 -0400
+Received: by mail-pg0-f43.google.com with SMTP id t186so99203807pgb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 03 Jul 2017 11:41:32 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This patch add full list of known gcc supported attributes.
+--94eb2c119c629a1b0d05536e1db5
+Content-Type: text/plain; charset="UTF-8"
 
-So sparse should not give warning on the legit gcc attribute
-any more.
+Avoid create a new one if same symbol exists.
 
-Test with full kernel allmodeconfig compile with the exact
-same output as before(master branch).
-
-I want to include this two patches in the sparse release 0.5.1.
-
-Git repository here:
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-next-20170603
+This allow  sparse process the full list of gcc supported
+attribute without worry about the duplicate one already
+implemented in sparse.
 
 Chris
+
+--94eb2c119c629a1b0d05536e1db5
+Content-Type: text/x-patch; charset="US-ASCII";
+	name="0001-Let-create_symbol-check-for-previous-same-symbol.patch"
+Content-Disposition: attachment;
+	filename="0001-Let-create_symbol-check-for-previous-same-symbol.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j4oho30h0
+
+RnJvbSAzNmMyM2ZlMmQwMGYzNmEyYWZhMGEyZDQ2OTBjMDk4YTVkZTExZDE4IE1vbiBTZXAgMTcg
+MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
+YXRlOiBNb24sIDMgSnVsIDIwMTcgMDM6MzQ6MTEgLTA3MDAKU3ViamVjdDogW1BBVENIIDEvMl0g
+TGV0IGNyZWF0ZV9zeW1ib2wgY2hlY2sgZm9yIHByZXZpb3VzIHNhbWUgc3ltYm9sCgpBdm9pZCBj
+cmVhdGUgYSBuZXcgb25lIGlmIHNhbWUgc3ltYm9sIGV4aXN0cy4KClNpZ25lZC1vZmYtQnk6IDxz
+cGFyc2VAY2hyaXNsaS5vcmc+Ci0tLQogcGFyc2UuYyAgICB8ICA2ICsrKystLQogc3ltYm9sLmMg
+ICB8IDE1ICsrKysrKysrKysrKy0tLQogdG9rZW4uaCAgICB8ICAyICstCiB0b2tlbml6ZS5jIHwg
+IDQgKystLQogNCBmaWxlcyBjaGFuZ2VkLCAxOSBpbnNlcnRpb25zKCspLCA4IGRlbGV0aW9ucygt
+KQoKZGlmZiAtLWdpdCBhL3BhcnNlLmMgYi9wYXJzZS5jCmluZGV4IGY2NjVmMDUuLjk1M2QwNGIg
+MTAwNjQ0Ci0tLSBhL3BhcnNlLmMKKysrIGIvcGFyc2UuYwpAQCAtNjcxLDggKzY3MSwxMCBAQCB2
+b2lkIGluaXRfcGFyc2VyKGludCBzdHJlYW0pCiAJCWNvbnN0IGNoYXIgKiBuYW1lID0gaWdub3Jl
+ZF9hdHRyaWJ1dGVzW2ldOwogCQlzdHJ1Y3Qgc3ltYm9sICpzeW0gPSBjcmVhdGVfc3ltYm9sKHN0
+cmVhbSwgbmFtZSwgU1lNX0tFWVdPUkQsCiAJCQkJCQkgICBOU19LRVlXT1JEKTsKLQkJc3ltLT5p
+ZGVudC0+a2V5d29yZCA9IDE7Ci0JCXN5bS0+b3AgPSAmaWdub3JlX2F0dHJfb3A7CisJCWlmICgh
+c3ltLT5vcCkgeworCQkJc3ltLT5pZGVudC0+a2V5d29yZCA9IDE7CisJCQlzeW0tPm9wID0gJmln
+bm9yZV9hdHRyX29wOworCQl9CiAJfQogfQogCmRpZmYgLS1naXQgYS9zeW1ib2wuYyBiL3N5bWJv
+bC5jCmluZGV4IDA4Yzg1ZjQuLjMwMWZlMTMgMTAwNjQ0Ci0tLSBhL3N5bWJvbC5jCisrKyBiL3N5
+bWJvbC5jCkBAIC02MzksMTAgKzYzOSwxOSBAQCB2b2lkIGJpbmRfc3ltYm9sKHN0cnVjdCBzeW1i
+b2wgKnN5bSwgc3RydWN0IGlkZW50ICppZGVudCwgZW51bSBuYW1lc3BhY2UgbnMpCiAKIHN0cnVj
+dCBzeW1ib2wgKmNyZWF0ZV9zeW1ib2woaW50IHN0cmVhbSwgY29uc3QgY2hhciAqbmFtZSwgaW50
+IHR5cGUsIGludCBuYW1lc3BhY2UpCiB7Ci0Jc3RydWN0IHRva2VuICp0b2tlbiA9IGJ1aWx0X2lu
+X3Rva2VuKHN0cmVhbSwgbmFtZSk7Ci0Jc3RydWN0IHN5bWJvbCAqc3ltID0gYWxsb2Nfc3ltYm9s
+KHRva2VuLT5wb3MsIHR5cGUpOworCXN0cnVjdCBpZGVudCAqaWRlbnQgPSBidWlsdF9pbl9pZGVu
+dChuYW1lKTsKKwlzdHJ1Y3Qgc3ltYm9sICpzeW0gPSBsb29rdXBfc3ltYm9sKGlkZW50LCBuYW1l
+c3BhY2UpOwogCi0JYmluZF9zeW1ib2woc3ltLCB0b2tlbi0+aWRlbnQsIG5hbWVzcGFjZSk7CisJ
+aWYgKHN5bSAmJiBzeW0tPnR5cGUgIT0gdHlwZSkKKwkJZGllKCJzeW1ib2wgJXMgY3JlYXRlIHdp
+dGggZGlmZmVyZW50IHR5cGU6ICVkIG9sZCAlZCIsIG5hbWUsCisJCQkJdHlwZSwgc3ltLT50eXBl
+KTsKKworCWlmICghc3ltKSB7CisJCXN0cnVjdCB0b2tlbiAqdG9rZW4gPSBidWlsdF9pbl90b2tl
+bihzdHJlYW0sIGlkZW50KTsKKworCQlzeW0gPSBhbGxvY19zeW1ib2wodG9rZW4tPnBvcywgdHlw
+ZSk7CisJCWJpbmRfc3ltYm9sKHN5bSwgdG9rZW4tPmlkZW50LCBuYW1lc3BhY2UpOworCX0KIAly
+ZXR1cm4gc3ltOwogfQogCmRpZmYgLS1naXQgYS90b2tlbi5oIGIvdG9rZW4uaAppbmRleCBmN2Q4
+OGViLi44NDdmZGY0IDEwMDY0NAotLS0gYS90b2tlbi5oCisrKyBiL3Rva2VuLmgKQEAgLTIxOCw3
+ICsyMTgsNyBAQCBleHRlcm4gaW50IGluaXRfc3RyZWFtKGNvbnN0IGNoYXIgKiwgaW50IGZkLCBj
+b25zdCBjaGFyICoqbmV4dF9wYXRoKTsKIGV4dGVybiBjb25zdCBjaGFyICpzdHJlYW1fbmFtZShp
+bnQgc3RyZWFtKTsKIGV4dGVybiBzdHJ1Y3QgaWRlbnQgKmhhc2hfaWRlbnQoc3RydWN0IGlkZW50
+ICopOwogZXh0ZXJuIHN0cnVjdCBpZGVudCAqYnVpbHRfaW5faWRlbnQoY29uc3QgY2hhciAqKTsK
+LWV4dGVybiBzdHJ1Y3QgdG9rZW4gKmJ1aWx0X2luX3Rva2VuKGludCwgY29uc3QgY2hhciAqKTsK
+K2V4dGVybiBzdHJ1Y3QgdG9rZW4gKmJ1aWx0X2luX3Rva2VuKGludCwgc3RydWN0IGlkZW50ICop
+OwogZXh0ZXJuIGNvbnN0IGNoYXIgKnNob3dfc3BlY2lhbChpbnQpOwogZXh0ZXJuIGNvbnN0IGNo
+YXIgKnNob3dfaWRlbnQoY29uc3Qgc3RydWN0IGlkZW50ICopOwogZXh0ZXJuIGNvbnN0IGNoYXIg
+KnNob3dfc3RyaW5nKGNvbnN0IHN0cnVjdCBzdHJpbmcgKnN0cmluZyk7CmRpZmYgLS1naXQgYS90
+b2tlbml6ZS5jIGIvdG9rZW5pemUuYwppbmRleCBiYzk3MjQyLi45OWI5NTgwIDEwMDY0NAotLS0g
+YS90b2tlbml6ZS5jCisrKyBiL3Rva2VuaXplLmMKQEAgLTkwNCwxNCArOTA0LDE0IEBAIHN0cnVj
+dCBpZGVudCAqYnVpbHRfaW5faWRlbnQoY29uc3QgY2hhciAqbmFtZSkKIAlyZXR1cm4gY3JlYXRl
+X2hhc2hlZF9pZGVudChuYW1lLCBsZW4sIGhhc2hfbmFtZShuYW1lLCBsZW4pKTsKIH0KIAotc3Ry
+dWN0IHRva2VuICpidWlsdF9pbl90b2tlbihpbnQgc3RyZWFtLCBjb25zdCBjaGFyICpuYW1lKQor
+c3RydWN0IHRva2VuICpidWlsdF9pbl90b2tlbihpbnQgc3RyZWFtLCBzdHJ1Y3QgaWRlbnQgKmlk
+ZW50KQogewogCXN0cnVjdCB0b2tlbiAqdG9rZW47CiAKIAl0b2tlbiA9IF9fYWxsb2NfdG9rZW4o
+MCk7CiAJdG9rZW4tPnBvcy5zdHJlYW0gPSBzdHJlYW07CiAJdG9rZW5fdHlwZSh0b2tlbikgPSBU
+T0tFTl9JREVOVDsKLQl0b2tlbi0+aWRlbnQgPSBidWlsdF9pbl9pZGVudChuYW1lKTsKKwl0b2tl
+bi0+aWRlbnQgPSBpZGVudDsKIAlyZXR1cm4gdG9rZW47CiB9CiAKLS0gCjIuOS40Cgo=
+--94eb2c119c629a1b0d05536e1db5--
