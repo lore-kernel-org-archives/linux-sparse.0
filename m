@@ -1,165 +1,78 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 2/2] Add full list of gcc attribute
-Date: Mon, 3 Jul 2017 11:43:25 -0700
-Message-ID: <CANeU7QmVL_qjs8du-_UetFekS=yPJh+T+Vn1YRGwDoLWckAQrQ@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] Adding ignored attribute optimize
+Date: Mon, 3 Jul 2017 22:41:23 +0200
+Message-ID: <20170703204122.wpwp4hfottgog6os@ltop.local>
+References: <CANeU7QnNNL1u3BxhWLebFqzn+9Y7hHKABDo_mkEqfwF+VO963Q@mail.gmail.com>
+ <20170629070437.o6j2bkv6wdbcknwa@ltop.local>
+ <CANeU7QnfvQ5KNFKvGGeJ1u7CDpd5wigosY0BrGNT1H0KouPHuA@mail.gmail.com>
+ <20170701092440.egmgcexgwuuybzj7@ltop.local>
+ <CANeU7Q=Zj6LT1--TP-XGouwVZVTgJor8h1+2GZ1r0HCjVa5pmw@mail.gmail.com>
+ <20170702195818.2lhotikeq2ozjb2n@ltop.local>
+ <CANeU7QndbPf7cGaCYixx=YqJzBxx4DmEiAwMNXNxvCirLRZK8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="001a1149bdee7315cc05536e2497"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f54.google.com ([74.125.83.54]:35843 "EHLO
-        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754143AbdGCSn1 (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35946 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751989AbdGCUl1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 3 Jul 2017 14:43:27 -0400
-Received: by mail-pg0-f54.google.com with SMTP id u62so98726667pgb.3
-        for <linux-sparse@vger.kernel.org>; Mon, 03 Jul 2017 11:43:27 -0700 (PDT)
+        Mon, 3 Jul 2017 16:41:27 -0400
+Received: by mail-wm0-f65.google.com with SMTP id y5so22541454wmh.3
+        for <linux-sparse@vger.kernel.org>; Mon, 03 Jul 2017 13:41:27 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QndbPf7cGaCYixx=YqJzBxx4DmEiAwMNXNxvCirLRZK8Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
---001a1149bdee7315cc05536e2497
-Content-Type: text/plain; charset="UTF-8"
+On Mon, Jul 03, 2017 at 11:23:48AM -0700, Christopher Li wrote:
+> On Sun, Jul 2, 2017 at 12:58 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > "should report error" ...
+> > What error exactly? Is there something that doesn't work on sparse
+> > or on GCC's side regarding this 'require_context'? What need to be
+> > fixed exactly?
+> 
+> Have you look at the require_context code causing the warning in the
+> kernel? That code only issue require_context when compiling with sparse.
 
-This will greatly reduce the "unknown attribute" warning.
+Yes, I have looked at the code. Not only looked at but also searching how
+it is *used*. And the result is that the defined macros are aither:
+* not used (__protexted_{read,write}_by()
+* always used with a macro that *also* use __context__ (__must_hold())
+* a single exception: a member is declared with __protect_by() but that
+  change exactly nothing.
+In other words, this __require_context() has exactly zero effect and
+doesn't need any fixes. It can simply be removed.
 
-Chris
+> The fix should be just either convert to context parsing sparse supported,
+> implement in sparse, or just remove the require_context in kernel. It is
+> not doing any thing there right now. What else do you thing it is the
+> right fix for it?
 
---001a1149bdee7315cc05536e2497
-Content-Type: text/x-patch; charset="US-ASCII";
-	name="0002-Add-full-list-of-gcc-attribute.patch"
-Content-Disposition: attachment;
-	filename="0002-Add-full-list-of-gcc-attribute.patch"
-Content-Transfer-Encoding: base64
-X-Attachment-Id: f_j4ohtetz0
+There is nothing to fix since nothing is broken and everything works
+as it should, including sparse's context checking. At worse, someone
+use for this code a version of sparse that support other kind of context
+checking that was never officially supported.
 
-RnJvbSBhZThlODk0ZGM1YjI5NGVmN2QzMTEzOWFhMWQxOWYwYmNlYjgyMjI5IE1vbiBTZXAgMTcg
-MDA6MDA6MDAgMjAwMQpGcm9tOiBDaHJpc3RvcGhlciBMaSA8c3BhcnNlQGNocmlzbGkub3JnPgpE
-YXRlOiBNb24sIDMgSnVsIDIwMTcgMDQ6MTg6MzEgLTA3MDAKU3ViamVjdDogW1BBVENIIDIvMl0g
-QWRkIGZ1bGwgbGlzdCBvZiBnY2MgYXR0cmlidXRlCgpUaGlzIHdpbGwgZ3JlYXRseSByZWR1Y2Ug
-dGhlICJ1bmtub3duIGF0dHJpYnV0ZSIgd2FybmluZy4KClNpZ25lZC1vZmYtQnk6IDxzcGFyc2VA
-Y2hyaXNsaS5vcmc+Ci0tLQogZ2NjLWF0dHItbGlzdC5oIHwgMjA0ICsrKysrKysrKysrKysrKysr
-KysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrCiBwYXJzZS5jICAgICAgICAg
-fCAxMTQgKysrLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQogMiBmaWxlcyBjaGFuZ2VkLCAy
-MTQgaW5zZXJ0aW9ucygrKSwgMTA0IGRlbGV0aW9ucygtKQogY3JlYXRlIG1vZGUgMTAwNjQ0IGdj
-Yy1hdHRyLWxpc3QuaAoKZGlmZiAtLWdpdCBhL2djYy1hdHRyLWxpc3QuaCBiL2djYy1hdHRyLWxp
-c3QuaApuZXcgZmlsZSBtb2RlIDEwMDY0NAppbmRleCAwMDAwMDAwLi5lYzhjZjQ0Ci0tLSAvZGV2
-L251bGwKKysrIGIvZ2NjLWF0dHItbGlzdC5oCkBAIC0wLDAgKzEsMjA0IEBACitHQ0NfQVRUUihC
-RUxPVzEwMCkKK0dDQ19BVFRSKE9TX1Rhc2spCitHQ0NfQVRUUihPU19tYWluKQorR0NDX0FUVFIo
-T1NfdGFzaykKK0dDQ19BVFRSKGFiaV90YWcpCitHQ0NfQVRUUihhYnNkYXRhKQorR0NDX0FUVFIo
-YWRkcmVzcykKK0dDQ19BVFRSKGFsaWFzKQorR0NDX0FUVFIoYWxpZ25lZCkKK0dDQ19BVFRSKGFs
-bG9jX2FsaWduKQorR0NDX0FUVFIoYWxsb2Nfc2l6ZSkKK0dDQ19BVFRSKGFsdGl2ZWMpCitHQ0Nf
-QVRUUihhbHdheXNfaW5saW5lKQorR0NDX0FUVFIoYXJ0aWZpY2lhbCkKK0dDQ19BVFRSKGFzc3Vt
-ZV9hbGlnbmVkKQorR0NDX0FUVFIoYmFua19zd2l0Y2gpCitHQ0NfQVRUUihiYXNlZCkKK0dDQ19B
-VFRSKGJlbG93MTAwKQorR0NDX0FUVFIoYm5kX2luc3RydW1lbnQpCitHQ0NfQVRUUihibmRfbGVn
-YWN5KQorR0NDX0FUVFIoYm5kX3ZhcmlhYmxlX3NpemUpCitHQ0NfQVRUUihicmVha19oYW5kbGVy
-KQorR0NDX0FUVFIoYnJrX2ludGVycnVwdCkKK0dDQ19BVFRSKGNhbGxlZV9wb3BfYWdncmVnYXRl
-X3JldHVybikKK0dDQ19BVFRSKGNiKQorR0NDX0FUVFIoY2RlY2wpCitHQ0NfQVRUUihjbGVhbnVw
-KQorR0NDX0FUVFIoY21zZV9ub25zZWN1cmVfY2FsbCkKK0dDQ19BVFRSKGNtc2Vfbm9uc2VjdXJl
-X2VudHJ5KQorR0NDX0FUVFIoY29sZCkKK0dDQ19BVFRSKGNvbW1vbikKK0dDQ19BVFRSKGNvbW1v
-bl9vYmplY3QpCitHQ0NfQVRUUihjb25zdCkKK0dDQ19BVFRSKGNvbnN0cnVjdG9yKQorR0NDX0FU
-VFIoY3JpdGljYWwpCitHQ0NfQVRUUihkZWZhdWx0KQorR0NDX0FUVFIoZGVwcmVjYXRlZCkKK0dD
-Q19BVFRSKGRlc2lnbmF0ZWRfaW5pdCkKK0dDQ19BVFRSKGRlc3RydWN0b3IpCitHQ0NfQVRUUihk
-aXNpbnRlcnJ1cHQpCitHQ0NfQVRUUihkbGxleHBvcnQpCitHQ0NfQVRUUihkbGxpbXBvcnQpCitH
-Q0NfQVRUUihlaWdodGJpdF9kYXRhKQorR0NDX0FUVFIoZWl0aGVyKQorR0NDX0FUVFIoZXJyb3Ip
-CitHQ0NfQVRUUihleGNlcHRpb24pCitHQ0NfQVRUUihleGNlcHRpb25faGFuZGxlcikKK0dDQ19B
-VFRSKGV4dGVybmFsbHlfdmlzaWJsZSkKK0dDQ19BVFRSKGZhbGx0aHJvdWdoKQorR0NDX0FUVFIo
-ZmFyKQorR0NDX0FUVFIoZmFzdF9pbnRlcnJ1cHQpCitHQ0NfQVRUUihmYXN0Y2FsbCkKK0dDQ19B
-VFRSKGZsYXR0ZW4pCitHQ0NfQVRUUihmb3JjZV9hbGlnbl9hcmdfcG9pbnRlcikKK0dDQ19BVFRS
-KGZvcm1hdCkKK0dDQ19BVFRSKGZvcm1hdF9hcmcpCitHQ0NfQVRUUihmb3J3YXJkZXJfc2VjdGlv
-bikKK0dDQ19BVFRSKGZ1bmN0aW9uX3ZlY3RvcikKK0dDQ19BVFRSKGdjY19zdHJ1Y3QpCitHQ0Nf
-QVRUUihnbnVfaW5saW5lKQorR0NDX0FUVFIoaGlkZGVuKQorR0NDX0FUVFIoaG90KQorR0NDX0FU
-VFIoaG90cGF0Y2gpCitHQ0NfQVRUUihpZnVuYykKK0dDQ19BVFRSKGluaXRfcHJpb3JpdHkpCitH
-Q0NfQVRUUihpbnRlcmZhY2Vhcm0pCitHQ0NfQVRUUihpbnRlcm5hbCkKK0dDQ19BVFRSKGludGVy
-cnVwdCkKK0dDQ19BVFRSKGludGVycnVwdF9oYW5kbGVyKQorR0NDX0FUVFIoaW50ZXJydXB0X3Ro
-cmVhZCkKK0dDQ19BVFRSKGlvKQorR0NDX0FUVFIoaW9fbG93KQorR0NDX0FUVFIoaXNyKQorR0ND
-X0FUVFIoa2VlcF9pbnRlcnJ1cHRzX21hc2tlZCkKK0dDQ19BVFRSKGtlcm5lbCkKK0dDQ19BVFRS
-KGtzcGlzdXNwKQorR0NDX0FUVFIobDFfZGF0YSkKK0dDQ19BVFRSKGwxX2RhdGFfQSkKK0dDQ19B
-VFRSKGwxX2RhdGFfQikKK0dDQ19BVFRSKGwxX3RleHQpCitHQ0NfQVRUUihsMikKK0dDQ19BVFRS
-KGxlYWYpCitHQ0NfQVRUUihsb25nX2NhbGwpCitHQ0NfQVRUUihsb25nY2FsbCkKK0dDQ19BVFRS
-KGxvd2VyKQorR0NDX0FUVFIobWFsbG9jKQorR0NDX0FUVFIobWF5X2FsaWFzKQorR0NDX0FUVFIo
-bWF5YmVfdW51c2VkKQorR0NDX0FUVFIobWVkaXVtX2NhbGwpCitHQ0NfQVRUUihtaWNyb21pcHMp
-CitHQ0NfQVRUUihtaXBzMTYpCitHQ0NfQVRUUihtb2RlKQorR0NDX0FUVFIobW9kZWwpCitHQ0Nf
-QVRUUihtb25pdG9yKQorR0NDX0FUVFIobXNfYWJpKQorR0NDX0FUVFIobXNfaG9va19wcm9sb2d1
-ZSkKK0dDQ19BVFRSKG1zX3N0cnVjdCkKK0dDQ19BVFRSKG5ha2VkKQorR0NDX0FUVFIobmVhcikK
-K0dDQ19BVFRSKG5lc3RlZCkKK0dDQ19BVFRSKG5lc3RlZF9yZWFkeSkKK0dDQ19BVFRSKG5lc3Rp
-bmcpCitHQ0NfQVRUUihubWkpCitHQ0NfQVRUUihubWlfaGFuZGxlcikKK0dDQ19BVFRSKG5vX2Fk
-ZHJlc3Nfc2FmZXR5X2FuYWx5c2lzKQorR0NDX0FUVFIobm9fY2FsbGVyX3NhdmVkX3JlZ2lzdGVy
-cykKK0dDQ19BVFRSKG5vX2ljZikKK0dDQ19BVFRSKG5vX2luc3RydW1lbnRfZnVuY3Rpb24pCitH
-Q0NfQVRUUihub19wcm9maWxlX2luc3RydW1lbnRfZnVuY3Rpb24pCitHQ0NfQVRUUihub19yZW9y
-ZGVyKQorR0NDX0FUVFIobm9fc2FuaXRpemUpCitHQ0NfQVRUUihub19zYW5pdGl6ZV9hZGRyZXNz
-KQorR0NDX0FUVFIobm9fc2FuaXRpemVfdGhyZWFkKQorR0NDX0FUVFIobm9fc2FuaXRpemVfdW5k
-ZWZpbmVkKQorR0NDX0FUVFIobm9fc3BsaXRfc3RhY2spCitHQ0NfQVRUUihub19zdGFja19saW1p
-dCkKK0dDQ19BVFRSKG5vY2xvbmUpCitHQ0NfQVRUUihub2NvbW1vbikKK0dDQ19BVFRSKG5vY29t
-cHJlc3Npb24pCitHQ0NfQVRUUihub2Rpc2NhcmQpCitHQ0NfQVRUUihub2luaXQpCitHQ0NfQVRU
-Uihub2lubGluZSkKK0dDQ19BVFRSKG5vbWljcm9taXBzKQorR0NDX0FUVFIobm9taXBzMTYpCitH
-Q0NfQVRUUihub25udWxsKQorR0NDX0FUVFIobm9wbHQpCitHQ0NfQVRUUihub3JldHVybikKK0dD
-Q19BVFRSKG5vc2F2ZV9sb3dfcmVncykKK0dDQ19BVFRSKG5vdF9uZXN0ZWQpCitHQ0NfQVRUUihu
-b3Rocm93KQorR0NDX0FUVFIobm90c2hhcmVkKQorR0NDX0FUVFIob3B0aW1pemUpCitHQ0NfQVRU
-UihwYWNrZWQpCitHQ0NfQVRUUihwYXJ0aWFsX3NhdmUpCitHQ0NfQVRUUihwY3MpCitHQ0NfQVRU
-UihwZXJzaXN0ZW50KQorR0NDX0FUVFIocHJvZ21lbSkKK0dDQ19BVFRSKHByb3RlY3RlZCkKK0dD
-Q19BVFRSKHB1cmUpCitHQ0NfQVRUUihyZWVudHJhbnQpCitHQ0NfQVRUUihyZWdwYXJtKQorR0ND
-X0FUVFIocmVuZXNhcykKK0dDQ19BVFRSKHJlc2JhbmspCitHQ0NfQVRUUihyZXNldCkKK0dDQ19B
-VFRSKHJldHVybnNfbm9ubnVsbCkKK0dDQ19BVFRSKHJldHVybnNfdHdpY2UpCitHQ0NfQVRUUihz
-MzkwX3ZlY3Rvcl9ib29sKQorR0NDX0FUVFIoc2FkZHIpCitHQ0NfQVRUUihzYXZlX2FsbCkKK0dD
-Q19BVFRSKHNhdmVfdm9sYXRpbGVzKQorR0NDX0FUVFIoc2F2ZWFsbCkKK0dDQ19BVFRSKHNjYWxh
-cl9zdG9yYWdlX29yZGVyKQorR0NDX0FUVFIoc2RhKQorR0NDX0FUVFIoc2VjdGlvbikKK0dDQ19B
-VFRSKHNlbGVjdGFueSkKK0dDQ19BVFRSKHNlbnRpbmVsKQorR0NDX0FUVFIoc2hhcmVkKQorR0ND
-X0FUVFIoc2hvcnRfY2FsbCkKK0dDQ19BVFRSKHNob3J0Y2FsbCkKK0dDQ19BVFRSKHNpZ25hbCkK
-K0dDQ19BVFRSKHNpbWQpCitHQ0NfQVRUUihzcF9zd2l0Y2gpCitHQ0NfQVRUUihzcHVfdmVjdG9y
-KQorR0NDX0FUVFIoc3NlcmVncGFybSkKK0dDQ19BVFRSKHN0YWNrX3Byb3RlY3QpCitHQ0NfQVRU
-UihzdGRjYWxsKQorR0NDX0FUVFIoc3lzY2FsbF9saW5rYWdlKQorR0NDX0FUVFIoc3lzdl9hYmkp
-CitHQ0NfQVRUUih0YXJnZXQpCitHQ0NfQVRUUih0YXJnZXRfY2xvbmVzKQorR0NDX0FUVFIodGRh
-KQorR0NDX0FUVFIodGhpc2NhbGwpCitHQ0NfQVRUUih0aW55KQorR0NDX0FUVFIodGlueV9kYXRh
-KQorR0NDX0FUVFIodGxzX21vZGVsKQorR0NDX0FUVFIodHJhbnNhY3Rpb25fY2FsbGFibGUpCitH
-Q0NfQVRUUih0cmFuc2FjdGlvbl9tYXlfY2FuY2VsX291dGVyKQorR0NDX0FUVFIodHJhbnNhY3Rp
-b25fcHVyZSkKK0dDQ19BVFRSKHRyYW5zYWN0aW9uX3NhZmUpCitHQ0NfQVRUUih0cmFuc2FjdGlv
-bl9zYWZlX2R5bmFtaWMpCitHQ0NfQVRUUih0cmFuc2FjdGlvbl91bnNhZmUpCitHQ0NfQVRUUih0
-cmFuc2FjdGlvbl93cmFwKQorR0NDX0FUVFIodHJhbnNwYXJlbnRfdW5pb24pCitHQ0NfQVRUUih0
-cmFwX2V4aXQpCitHQ0NfQVRUUih0cmFwYV9oYW5kbGVyKQorR0NDX0FUVFIodW51c2VkKQorR0ND
-X0FUVFIodXBwZXIpCitHQ0NfQVRUUih1c2VfZGVidWdfZXhjZXB0aW9uX3JldHVybikKK0dDQ19B
-VFRSKHVzZV9zaGFkb3dfcmVnaXN0ZXJfc2V0KQorR0NDX0FUVFIodXNlZCkKK0dDQ19BVFRSKHZl
-Y3RvcikKK0dDQ19BVFRSKHZlY3Rvcl9zaXplKQorR0NDX0FUVFIodmVyc2lvbl9pZCkKK0dDQ19B
-VFRSKHZpc2liaWxpdHkpCitHQ0NfQVRUUih2bGl3KQorR0NDX0FUVFIodm9sYXRpbGUpCitHQ0Nf
-QVRUUih3YWtldXApCitHQ0NfQVRUUih3YXJtKQorR0NDX0FUVFIod2Fybl91bnVzZWQpCitHQ0Nf
-QVRUUih3YXJuX3VudXNlZF9yZXN1bHQpCitHQ0NfQVRUUih3YXJuaW5nKQorR0NDX0FUVFIod2Vh
-aykKK0dDQ19BVFRSKHdlYWtyZWYpCitHQ0NfQVRUUih6ZGEpCmRpZmYgLS1naXQgYS9wYXJzZS5j
-IGIvcGFyc2UuYwppbmRleCA5NTNkMDRiLi4wMmE1NWE3IDEwMDY0NAotLS0gYS9wYXJzZS5jCisr
-KyBiL3BhcnNlLmMKQEAgLTU0MCwxMTYgKzU0MCwyMiBAQCBzdGF0aWMgc3RydWN0IGluaXRfa2V5
-d29yZCB7CiAJeyAiX193b3JkX18iLAlOU19LRVlXT1JELAlNT0RfTE9ORywJLm9wID0gJm1vZGVf
-d29yZF9vcCB9LAogfTsKIAorCiBzdGF0aWMgY29uc3QgY2hhciAqaWdub3JlZF9hdHRyaWJ1dGVz
-W10gPSB7Ci0JImFsaWFzIiwKLQkiX19hbGlhc19fIiwKLQkiYWxsb2NfYWxpZ24iLAotCSJfX2Fs
-bG9jX2FsaWduX18iLAotCSJhbGxvY19zaXplIiwKLQkiX19hbGxvY19zaXplX18iLAotCSJhbHdh
-eXNfaW5saW5lIiwKLQkiX19hbHdheXNfaW5saW5lX18iLAotCSJhcnRpZmljaWFsIiwKLQkiX19h
-cnRpZmljaWFsX18iLAotCSJhc3N1bWVfYWxpZ25lZCIsCi0JIl9fYXNzdW1lX2FsaWduZWRfXyIs
-CisKKyNkZWZpbmUgR0NDX0FUVFIoeCkJCVwKKwlTVFJJTkdJRlkoeCksIAkJXAorCVNUUklOR0lG
-WShfXyMjeCMjX18pLAorCisjaW5jbHVkZSAiZ2NjLWF0dHItbGlzdC5oIgorCisjdW5kZWYgR0ND
-X0FUVFIKKwogCSJib3VuZGVkIiwKIAkiX19ib3VuZGVkX18iLAotCSJjZGVjbCIsCi0JIl9fY2Rl
-Y2xfXyIsCi0JImNvbGQiLAotCSJfX2NvbGRfXyIsCi0JImNvbnN0cnVjdG9yIiwKLQkiX19jb25z
-dHJ1Y3Rvcl9fIiwKLQkiZGVwcmVjYXRlZCIsCi0JIl9fZGVwcmVjYXRlZF9fIiwKLQkiZGVzdHJ1
-Y3RvciIsCi0JIl9fZGVzdHJ1Y3Rvcl9fIiwKLQkiZGxsZXhwb3J0IiwKLQkiX19kbGxleHBvcnRf
-XyIsCi0JImRsbGltcG9ydCIsCi0JIl9fZGxsaW1wb3J0X18iLAotCSJlcnJvciIsCi0JIl9fZXJy
-b3JfXyIsCi0JImV4dGVybmFsbHlfdmlzaWJsZSIsCi0JIl9fZXh0ZXJuYWxseV92aXNpYmxlX18i
-LAotCSJmYXN0Y2FsbCIsCi0JIl9fZmFzdGNhbGxfXyIsCi0JImZvcm1hdCIsCi0JIl9fZm9ybWF0
-X18iLAotCSJmb3JtYXRfYXJnIiwKLQkiX19mb3JtYXRfYXJnX18iLAotCSJnbnVfaW5saW5lIiwK
-LQkiX19nbnVfaW5saW5lX18iLAotCSJob3QiLAotCSJfX2hvdF9fIiwKLQkiaG90cGF0Y2giLAot
-CSJfX2hvdHBhdGNoX18iLAotICAgICAgICAibGVhZiIsCi0gICAgICAgICJfX2xlYWZfXyIsCi0J
-ImwxX3RleHQiLAotCSJfX2wxX3RleHRfXyIsCi0JImwxX2RhdGEiLAotCSJfX2wxX2RhdGFfXyIs
-Ci0JImwyIiwKLQkiX19sMl9fIiwKLQkibWFsbG9jIiwKLQkiX19tYWxsb2NfXyIsCi0JIm1heV9h
-bGlhcyIsCi0JIl9fbWF5X2FsaWFzX18iLAotCSJtb2RlbCIsCi0JIl9fbW9kZWxfXyIsCi0JIm1z
-X2FiaSIsCi0JIl9fbXNfYWJpX18iLAotCSJtc19ob29rX3Byb2xvZ3VlIiwKLQkiX19tc19ob29r
-X3Byb2xvZ3VlX18iLAotCSJuYWtlZCIsCi0JIl9fbmFrZWRfXyIsCi0JIm5vX2luc3RydW1lbnRf
-ZnVuY3Rpb24iLAotCSJfX25vX2luc3RydW1lbnRfZnVuY3Rpb25fXyIsCi0JIm5vX3Nhbml0aXpl
-X2FkZHJlc3MiLAotCSJfX25vX3Nhbml0aXplX2FkZHJlc3NfXyIsCi0JIm5vY2xvbmUiLAogCSJf
-X25vY2xvbmUiLAotCSJfX25vY2xvbmVfXyIsCi0JIm5vaW5saW5lIiwKLQkiX19ub2lubGluZV9f
-IiwKLQkibm9ubnVsbCIsCiAJIl9fbm9ubnVsbCIsCi0JIl9fbm9ubnVsbF9fIiwKLQkibm90aHJv
-dyIsCiAJIl9fbm90aHJvdyIsCi0JIl9fbm90aHJvd19fIiwKLQkib3B0aW1pemUiLAotCSJfX29w
-dGltaXplX18iLAotCSJyZWdwYXJtIiwKLQkiX19yZWdwYXJtX18iLAotCSJzZWN0aW9uIiwKLQki
-X19zZWN0aW9uX18iLAotCSJzZW50aW5lbCIsCi0JIl9fc2VudGluZWxfXyIsCi0JInNpZ25hbCIs
-Ci0JIl9fc2lnbmFsX18iLAotCSJzdGRjYWxsIiwKLQkiX19zdGRjYWxsX18iLAotCSJzeXNjYWxs
-X2xpbmthZ2UiLAotCSJfX3N5c2NhbGxfbGlua2FnZV9fIiwKLQkic3lzdl9hYmkiLAotCSJfX3N5
-c3ZfYWJpX18iLAotCSJ1bnVzZWQiLAotCSJfX3VudXNlZF9fIiwKLQkidXNlZCIsCi0JIl9fdXNl
-ZF9fIiwKLQkidmVjdG9yX3NpemUiLAotCSJfX3ZlY3Rvcl9zaXplX18iLAotCSJ2aXNpYmlsaXR5
-IiwKLQkiX192aXNpYmlsaXR5X18iLAotCSJ3YXJuX3VudXNlZF9yZXN1bHQiLAotCSJfX3dhcm5f
-dW51c2VkX3Jlc3VsdF9fIiwKLQkid2FybmluZyIsCi0JIl9fd2FybmluZ19fIiwKLQkid2VhayIs
-Ci0JIl9fd2Vha19fIiwKIH07CiAKIAotLSAKMi45LjQKCg==
---001a1149bdee7315cc05536e2497--
+> > That's *exactly* why sparse should *not* report. You have no way to
+> > tell if what you're reporting is legitimate or not. And in most
+> > cases it's legitimate on GCC's side but you still want to report it.
+> 
+> I don't like sparse warn on the legit gcc attribute either.
+> I have some patch should make both of us happy.
+> 
+> GCC is open. It is not that hard to get a full list of gcc supported
+> attribute names.  I add the full list of gcc supported attribute list
+> into the sparse. Sparse should not warn on any known gcc attributes
+> any more. Patch on the way.
+> 
+> Let's be done with this.
+
+Will your patch also cover the new attributes in GCC8? And the ones
+that clang use now or will use in the short future? Or those used
+by some othesr compilers that use the same syntax, like does the
+ARM's compiler?
+
+-- Luc
