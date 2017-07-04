@@ -1,385 +1,42 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Sparse release v0.5.1 RC4
-Date: Tue, 4 Jul 2017 08:56:47 -0700
-Message-ID: <CANeU7Q=b1PfJ7b+LzOkFRSz=vxA0VVFN6onGepgaVVHJH3z=YQ@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: New backend for Sparse
+Date: Tue, 4 Jul 2017 23:11:04 +0100
+Message-ID: <CACXZuxetCi8s1KSvttt6KeuwRgnQNenBPexVd3gyUhrzCiN2qA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:35138 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752206AbdGDP4s (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:38377 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752229AbdGDWLG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 4 Jul 2017 11:56:48 -0400
-Received: by mail-pg0-f51.google.com with SMTP id j186so111886631pge.2
-        for <linux-sparse@vger.kernel.org>; Tue, 04 Jul 2017 08:56:48 -0700 (PDT)
+        Tue, 4 Jul 2017 18:11:06 -0400
+Received: by mail-wm0-f48.google.com with SMTP id f67so95648203wmh.1
+        for <linux-sparse@vger.kernel.org>; Tue, 04 Jul 2017 15:11:05 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Lance Richardson <lrichard@redhat.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
-RC4 has one very minor update compare to RC3.
-Thanks to feedback from Luc, sparse now has the full list of gcc
-attributes. It will not complain about known gcc attribute any more.
+Hi,
 
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/
+For the past few months I have been working (sporadically) on a new
+backend for Sparse. This backend utilizes a JIT library originally
+created at Adobe, then used and subsequently abandoned by Mozilla. It
+is known as NanoJIT. The NanoJIT library is small compared to LLVM and
+lacks the latter's optimization capabilities. Also there are some
+limitations in the library that prevent some features of the C
+language from being supported. The main advantage for me is that it
+has been relatively easy to implement the backend - the NanoJIT IR is
+similar to Sparse IR in that it works at a low level - and does not
+understand aggregate types. Hence in some ways it is a better fit for
+Sparse than LLVM.
 
-As usual, please give it a good test. Report back any issue you might find.
+I wanted to share following which gives you some idea of the progress
+made thus far:
 
-If no big surprise, I will tag the final release at the end of this week.
+https://github.com/dibyendumajumdar/dmr_c/tree/master/tests/nano
 
-Chris
+Eventually I think I would like to write my own backend from scratch
+... but that is perhaps some way away.
 
-Aaro Koskinen (1):
-      build: allow use of PKG_CONFIG to override pkg-config
-
-Andy Shevchenko (1):
-      lib.c: skip --param parameters
-
-Ard Biesheuvel (2):
-      sparse: treat function pointers as pointers to const data
-      Ignore pure attribute in assignement
-
-Azat Khuzhin (2):
-      sparse, llvm: compile: skip function prototypes to avoid SIGSEGV
-      validation/prototype: regression for skipping prototypes
-
-Christian Borntraeger (1):
-      s390x: add the proper defines for data types
-
-Christopher Li (12):
-      Minor clean up for option handling
-      round up the array element size to byte align
-      Make same_symbol list share the same scope
-      rename -Werror to -Wsparse-error
-      teach next_designators() use array_element_offset()
-      Ptr list sorting should use memmove instead of memcpy
-      Make macro expanded string immutable
-      Fix warning compiling sparse-llvm
-      Adding ignored attribute optimize
-      Let create_symbol check for previous same symbol
-      Add full list of gcc attribute
-      bump sparse's version to 0.5.1-rc4
-
-Cody P Schafer (3):
-      build: allow use of LLVM_CONFIG to override llvm-config config script
-      sparse{i,c}: use LLVM_CONFIG to find llc and lli
-      parse: support c99 [static ...] in abstract array declarators
-
-Dan Carpenter (1):
-      ptrlist: reading deleted items in NEXT_PTR_LIST()
-
-Daniel Wagner (1):
-      parse: Add comment to struct statement
-
-Edward Cree (1):
-      Allow casting to a restricted type if !restricted_value
-
-Emilio G. Cota (1):
-      Define __CHAR_BIT__
-
-Emily Maier (2):
-      linearize: Emit C99 declarations correctly
-      validation: Check C99 for loop variables
-
-Hans Verkuil (3):
-      Add test case for extern array
-      Add test case for anonymous union initializer
-      Add test case for the ioc type check
-
-Heiko Carstens (1):
-      sparse/parse.c: ignore hotpatch attribute
-
-Jeff Layton (2):
-      sparse: make bits_to_bytes round up instead of down
-      Handle SForced in storage_modifiers
-
-Joe Perches (1):
-      sparse: Allow override of sizeof(bool) warning
-
-Johannes Berg (1):
-      implement constant-folding in __builtin_bswap*()
-
-John Keeping (3):
-      validation/sizeof-bool: fix broken test case
-      evaluate: split out implementation of compatible_assignment_types
-      Support GCC's transparent unions
-
-Lance Richardson (3):
-      sparse: ignore __assume_aligned__ attribute
-      sparse: update __builtin_object_size() prototype
-      sparse: add support for _Static_assert
-
-Linus Torvalds (5):
-      Add warning about duplicate initializers
-      Use any previous initializer to size a symbol
-      Fix error at anoymous unions
-      Fix scoping of extern symbols in block scope
-      Fix initializers in anonymous structs and unions
-
-Luc Van Oostenryck (224):
-      Teach sparse about the __COUNTER__ predefined macro
-      Fix size calculation of unsized bool array
-      Do not drop 'nocast' modifier when taking the address.
-      fix mixup in "Handle SForced in storage_modifiers"
-      Fix type checking of variadic functions
-      add missing #include "char.h" to char.c
-      make 'ignored_attributes[]' static
-      cleanup: remove evaluate_arguments()'s unused argument
-      Warn on unknown attributes instead of throwing errors
-      Remove unneeded variable in integer_promotion()
-      fix discarded label statement
-      add test case for builtin bswap with constant args
-      make ptrlist walking against robust against empty blocks
-      let "compile" not crash on bools
-      give comparable label's names to basic blocks
-      OP_SWITCH should use 'insn->cond' instead of 'insn->target'
-      remove unused field 'multijump' in struct instruction
-      storage should not be inherited by pointers
-      testsuite: simplify test function-pointer-inheritance
-      use a shorter name for function-pointer-modifier-inheritance.c
-      testsuite: test modifiers preserved by '&' operator
-      testsuite: test modifiers preserved by 'typeof()'
-      some modifiers need to be preserved by 'typeof()'
-      Update maintainers in the manpage
-      cgcc should not define non-reserved identifiers
-      recursive phi_defines cannot happen
-      fix missing element in types declaration
-      add support for __int128
-      fix typing error in compound assignment
-      llvm: fix typing when comparing to a constant
-      llvm: remove unneeded OP_COPY support
-      fix cast to bool
-      unssa: do not try to update liveness
-      unssa: simplify rewrite of OP_PHISOURCE
-      unssa: try to avoid some OP_PHI copies
-      unssa: eliminate trivial phisrc copies
-      unssa: update comment about the unneeded copies
-      volatile loads must not be simplified
-      fix superfluous phisrc
-      fix phisrc mixup
-      missing load simplification
-      fix value of label statement
-      C11: teach sparse about '_Thread_local'
-      C11: teach sparse about '_Noreturn'
-      C11: teach sparse about '_Alignof()'
-      C11: teach sparse about '_Alignas()'
-      C11: teach sparse about '--std={c11,gnu11}'
-      fix cast's target type info
-      fix crash while testing between conditional & unconditional OP_BR
-      kill uses of replaced instructions
-      fix killing OP_PHI instructions
-      fix killing OP_CAST & friends
-      fix killing OP_SELECT
-      fix killing OP_COMPUTEDGOTO
-      explicitely ignore killing OP_ENTRY
-      cleanup kill_instruction()
-      fix conditional context test case with void
-      add helper: is_scalar_type()
-      validate expression's type in conditionals
-      remove unused arg in uses/defs functions
-      add testcase for wrong early escape conversion
-      warn on unknown escapes after preprocessing
-      remove 'Escape' from token character class
-      fix killing OP_SETVAL instructions
-      define __LP64__ & _LP64 if arch_m64 is enabled
-      add an helper for common predefined macros
-      define __LONG_MAX__ & __SIZEOF_POINTER__
-      move OP_MUL simplification in a separate function
-      simplify '(x / 1)' to 'x'
-      simplify '(x * -1)' to '-x'
-      simplify '(x / -1)' to '-x' (but only for signed division)
-      simplify '(x % 1)' into '0'
-      simplify '~(~x)' and '-(-x)' to 'x'
-      simplify '(x || 1)' to '1'
-      simplify '(x op x)' to '0', '1' or 'x'
-      add warning option '-Wtautological-compare'
-      simplify comparisons followed by an equality test against 0 or 1
-      simplify '(x || x)' and '(x && x)'
-      add support for LLP64 arch
-      move evaluation & expansion of builtins in a separate file
-      let identical symbols share their evaluate/expand methods
-      expand __builtin_bswap*() with constant args
-      testsuite: give a proper name to the 'binary-constant' test
-      testsuite: make tests known to fail effectively fail
-      testsuite: simplify the ioc-typecheck case
-      testsuite: add a simple test for -Wenum-mismatch
-      testsuite: add tag to ignore the output/error
-      testsuite: report as error tests known to fail but which succeed
-      allow to launch the test suite from the project root dir
-      testsuite: check patterns presence or absence in output
-      testsuite: add some selfchecking
-      testsuite: check the nbr of times a pattern should be present
-      testsuite: use 'error' instead of 'info' for successful tests
-known to fail
-      testsuite: get 'check-known-to-fail' earlier
-      testsuite: allow quieter error reporting
-      testsuite: quieter error reporting for 'known-to-fail'
-      cleanup: there is no 'struct phi' to allocate
-      remove unused field 'multijmp' in struct statement
-      remove unused field 'goto_bb' in struct statement
-      fix show-parse()'s labels
-      add killing of OP_SLICEs
-      add killing of OP_PHISOURCEs
-      add helper kill_use_list()
-      fix killing of OP_PHIs
-      fix clear_phi(), replace it by kill_instruction()
-      remove unused clear_phi()
-      fix killing of otherwise not-handled instructions
-      kill_instruction() may need to be forced or not
-      add killing of pure calls
-      fix killing OP_CALL via pointers
-      add killing of non-volatile loads
-      add killing of stores
-      fix killing of rewritten loads
-      use kill_instruction() when killing an OP_PHI during CSE
-      use kill_instruction() when killing any instructions during CSE
-      fix OP_PHI usage in try_to_simplify_bb()
-      simplify float-to-float casts that doesn't change size
-      CSE: add test cases for comparisons duality
-      CSE: use commutativity to identify equivalent instructions
-      CSE: avoid hashing removed instructions
-      fix expansion cost of pure functions
-      add missing braces around FOR_EACH_PTR loop
-      make -Wbitwise operational again
-      use option: '-Woverride-init'
-      add test case for warnings about overlapping initializers
-      allow to warn on all overlapping initializers
-      fix checking of overlapping initializer
-      ignore whole-range overlapping initializer
-      fix usage in simplify_seteq_setne()
-      fix size of loaded bitfields
-      split OP_BR between unconditional & conditional: OP_CBR
-      remove unused helper is_branch_goto()
-      replace test for c99 for-loop initializers
-      add test case for scope of C99 for-loop declarations
-      add test cases for storage of c99 for-loop declarations
-      add an optional validation method to external_declaration()
-      check the storage of C99 for-loop initializers
-      move 'extern with initializer' validation after the validate method
-      use VOID instead of directly using &void_pseudo
-      teach sparse about -Waddress
-      add is_func_type()
-      warn if testing the address of a function
-      add is_array_type()
-      warn if testing the address of an array
-      fix evaluation of a function or array symbol in conditionals
-      fix is_scalar_type()
-      fix test for cast to bool on 32bit machines
-      predefine __INT_MAX__ and friends
-      predefine __SIZEOF_INT__ & friends
-      fix test validation/div.c
-      fix cast to pointer to floating-point
-      do not depends on limits.h to test __CHAR_BIT__
-      fix expansion of integers to floats
-      avoid crash with test-linearize -vv
-      fix OP_PHI usage in try_to_simplify_bb(), correctly
-      be more careful with concat_user_list()
-      avoid useless warning for 'bool <- restricted type' conversion
-      introduce REPEAT_CFG_CLEANUP
-      let kill_unreachable_bbs() clear REPEAT_CFG_CLEANUP
-      fix: kill unreachable BBs after killing a child
-      ignore VOID when trying to if-convert phi-nodes
-      fix boolean context for OP_AND_BOOL & OP_OR_BOOL
-      fix missing reload
-      keyword: add test case for reserved '_Static_assert'
-      keyword: regroup the [reserved] keywords
-      keyword: explicitly add C99 & C11 keywords
-      keyword: add more reserved keywords to the test case
-      keyword: add a comment about NS_TYPEDEF & reserved keywords
-      keyword: no pre-declaration needed for attribute names
-      add get_<allocator>_stats()
-      add show_allocation_stats()
-      add helper handle_simple_switch()
-      teach sparse how to handle '-fmem-report'
-      use -fmem-report to report allocation stats
-      testsuite: cleanup result files
-      fix: kill old branch in insert_branch()
-      returns the correct type when evaluating NULL
-      remove bit_size & bit_offset from struct access_data
-      add test case for linearize_initializer() of bitfields
-      fix implicit zero initializer.
-      remove alignment from struct access_data
-      remove origval from struct access_data
-      add support for a new flag: -fdump-linearize[=only]
-      more tests for implicit 'bool <- restricted' casts
-      avoid warning on explicit 'bool <- restricted' casts
-      define ident_list
-      teach sparse how to dump macro definitions
-      fix hardcoded size of wide chars
-      avoid to redefine __INT_MAX__ and friends
-      fix definition of __SCHAR_MAX__ & friends
-      teach sparse how to handle -dD flag
-      let -dD report macro definitions
-      testsuite: get all tags in once
-      testsuite: grep the expected output only when needed
-      testsuite: grep the output patterns only when needed
-      testsuite: use shell arithmetic instead of fork-execing expr
-      testsuite: remove unneeded './' before commands
-      testsuite: avoid fork+execing basename
-      teach cgcc about OSX aka darwin
-      ret-void: add test case for toplevel asm
-      ret-void: warn for implicit type
-      use NULL instead of 0 in testcases.
-      finer control over error vs. warnings
-      Add more declarations for more builtin functions
-      keep the warnings table alphabetically sorted
-      cgcc: alphasort warning names in check_only_option()
-      cgcc: add missing warning names to check_only_option()
-      cgcc: filter-out '-fdump-linearize[=...]'
-      memcpy()'s byte count is unsigned
-      add support for -Wmemcpy-max-count
-      add support for -fmemcpy-max-count
-      fix: add missing examine in evaluate_dereference()
-      fix OP_PHI usage in try_to_simplify_bb() only when non-bogus
-      fix: try_to_simplify_bb eargerness
-      add fallback for missing __builtin_bswapXX()
-      fix: __builtin_bswap{16,32,64}() constantness
-      dissect: use built_in_ident() instead of MK_IDENT()
-      teach sparse about -m{big,little}-endian
-      teach sparse about __{BIG,LITTLE}_ENDIAN__
-      teach sparse about __BYTE_ORDER__ & __ORDER_{BIG,LITTLE}_ENDIAN__
-      cgcc: teach cgcc about arm64
-      cgcc: teach cgcc about ppc64[le]
-      cgcc: teach cgcc about arm
-      bump sparse's version to -rc3
-
-Michael Stefaniuc (3):
-      Add the __builtin functions needed for INFINITY and nan().
-      Add a define for __builtin_ms_va_copy()
-      Add tests for the builtin INF and nan() functions.
-
-Oleg Nesterov (3):
-      dissect: teach do_expression() to handle EXPR_OFFSETOF
-      dissect: teach do_initializer() to handle the nested EXPR_IDENTIFIER's
-      dissect: s/mode_t/usage_t/ in report_member()
-
-Omar Sandoval (1):
-      sparse-llvm: Fix LLVM 3.5 linker errors
-
-Pavel Roskin (1):
-      Use LLVM_CONFIG instead of llvm-config in Makefile
-
-Ramsay Jones (13):
-      Add the __restrict__ keyword
-      sparse: add 'gnu_inline' to the ignored attributes
-      don't call isdigit/tolower with a char argument
-      Makefile: suppress error message from shell
-      don't run sparse{c,i} tests when sparse-llvm is disabled
-      Add support for multiarch system header files
-      cgcc: use only the cc command to determine $gcc_base_dir
-      cgcc: use $ccom to set $multiarch_dir if not specified
-      test-suite: remove bashism to avoid test failures
-      cgcc: avoid passing a sparse-only option to cc
-      parse.c: remove duplicate 'may_alias' ignored_attributes
-      compile-i386.c: don't ignore return value of write(2)
-      sparse: add 'alloc_align' to the ignored attributes
-
-Rui Teng (1):
-      sparse: add no_sanitize_address as an ignored attribute
-
-Thomas Graf (1):
-      sparse: Make -Werror turn warnigns into errors
-
-Tony Camuso (2):
-      .gitignore: add cscope and Qt project files
-      Add default case to switches on enum variables
+Thanks and Regards
+Dibyendu
