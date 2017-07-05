@@ -1,42 +1,43 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: New backend for Sparse
-Date: Tue, 4 Jul 2017 23:11:04 +0100
-Message-ID: <CACXZuxetCi8s1KSvttt6KeuwRgnQNenBPexVd3gyUhrzCiN2qA@mail.gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: Sparse release v0.5.1 RC4
+Date: Wed, 5 Jul 2017 19:59:51 +0100
+Message-ID: <e1c19dc8-8962-4ac8-7ee5-64fcc5f59244@ramsayjones.plus.com>
+References: <CANeU7Q=b1PfJ7b+LzOkFRSz=vxA0VVFN6onGepgaVVHJH3z=YQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:38377 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752229AbdGDWLG (ORCPT
+Received: from avasout08.plus.net ([212.159.14.20]:42768 "EHLO
+        avasout08.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751772AbdGES7y (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 4 Jul 2017 18:11:06 -0400
-Received: by mail-wm0-f48.google.com with SMTP id f67so95648203wmh.1
-        for <linux-sparse@vger.kernel.org>; Tue, 04 Jul 2017 15:11:05 -0700 (PDT)
+        Wed, 5 Jul 2017 14:59:54 -0400
+In-Reply-To: <CANeU7Q=b1PfJ7b+LzOkFRSz=vxA0VVFN6onGepgaVVHJH3z=YQ@mail.gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Lance Richardson <lrichard@redhat.com>
 
-Hi,
 
-For the past few months I have been working (sporadically) on a new
-backend for Sparse. This backend utilizes a JIT library originally
-created at Adobe, then used and subsequently abandoned by Mozilla. It
-is known as NanoJIT. The NanoJIT library is small compared to LLVM and
-lacks the latter's optimization capabilities. Also there are some
-limitations in the library that prevent some features of the C
-language from being supported. The main advantage for me is that it
-has been relatively easy to implement the backend - the NanoJIT IR is
-similar to Sparse IR in that it works at a low level - and does not
-understand aggregate types. Hence in some ways it is a better fit for
-Sparse than LLVM.
 
-I wanted to share following which gives you some idea of the progress
-made thus far:
+On 04/07/17 16:56, Christopher Li wrote:
+> RC4 has one very minor update compare to RC3.
+> Thanks to feedback from Luc, sparse now has the full list of gcc
+> attributes. It will not complain about known gcc attribute any more.
+> 
+> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/
+> 
+> As usual, please give it a good test. Report back any issue you might find.
+> 
+> If no big surprise, I will tag the final release at the end of this week.
 
-https://github.com/dibyendumajumdar/dmr_c/tree/master/tests/nano
+Tested on Linux (i686 and x86_64) and cygwin (x86_64).
 
-Eventually I think I would like to write my own backend from scratch
-... but that is perhaps some way away.
+Both the sparse testsuite and 'make sparse' on the git tree
+work as expected, without additional failures.
 
-Thanks and Regards
-Dibyendu
+Thanks! :-P
+
+ATB,
+Ramsay Jones
