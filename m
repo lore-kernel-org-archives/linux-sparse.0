@@ -1,46 +1,72 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Sparse release v0.5.1 RC4
-Date: Wed, 5 Jul 2017 14:41:33 -0700
-Message-ID: <CANeU7Qnr9-8X4zcfB3z_Pe6sCWF_FdH0+K+3RWRaO=js6JyBNA@mail.gmail.com>
-References: <CANeU7Q=b1PfJ7b+LzOkFRSz=vxA0VVFN6onGepgaVVHJH3z=YQ@mail.gmail.com>
- <e1c19dc8-8962-4ac8-7ee5-64fcc5f59244@ramsayjones.plus.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/5] avoid crash in rewrite_branch()
+Date: Thu,  6 Jul 2017 21:19:48 +0200
+Message-ID: <20170706191950.81268-4-luc.vanoostenryck@gmail.com>
+References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:36613 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752440AbdGEVlf (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:32983 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752788AbdGFTUB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 5 Jul 2017 17:41:35 -0400
-Received: by mail-pf0-f176.google.com with SMTP id q86so802190pfl.3
-        for <linux-sparse@vger.kernel.org>; Wed, 05 Jul 2017 14:41:34 -0700 (PDT)
-In-Reply-To: <e1c19dc8-8962-4ac8-7ee5-64fcc5f59244@ramsayjones.plus.com>
+        Thu, 6 Jul 2017 15:20:01 -0400
+Received: by mail-wr0-f194.google.com with SMTP id x23so2620638wrb.0
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Jul 2017 12:20:01 -0700 (PDT)
+In-Reply-To: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Lance Richardson <lrichard@redhat.com>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Jul 5, 2017 at 11:59 AM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
->
->
-> On 04/07/17 16:56, Christopher Li wrote:
->> RC4 has one very minor update compare to RC3.
->> Thanks to feedback from Luc, sparse now has the full list of gcc
->> attributes. It will not complain about known gcc attribute any more.
->>
->> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/
->>
->> As usual, please give it a good test. Report back any issue you might find.
->>
->> If no big surprise, I will tag the final release at the end of this week.
->
-> Tested on Linux (i686 and x86_64) and cygwin (x86_64).
->
-> Both the sparse testsuite and 'make sparse' on the git tree
-> work as expected, without additional failures.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c                            |  2 +-
+ validation/crash-rewrite-branch.c | 24 ++++++++++++++++++++++++
+ 2 files changed, 25 insertions(+), 1 deletion(-)
+ create mode 100644 validation/crash-rewrite-branch.c
 
-Thank you so much for the testing. Still looking good for the finial release
-at end of this week.
+diff --git a/flow.c b/flow.c
+index 3974984de..d8198ce8d 100644
+--- a/flow.c
++++ b/flow.c
+@@ -30,7 +30,7 @@ static int rewrite_branch(struct basic_block *bb,
+ 	struct basic_block *old,
+ 	struct basic_block *new)
+ {
+-	if (*ptr != old || new == old)
++	if (*ptr != old || new == old || !bb->ep)
+ 		return 0;
+ 
+ 	/* We might find new if-conversions or non-dominating CSEs */
+diff --git a/validation/crash-rewrite-branch.c b/validation/crash-rewrite-branch.c
+new file mode 100644
+index 000000000..eb310df1c
+--- /dev/null
++++ b/validation/crash-rewrite-branch.c
+@@ -0,0 +1,24 @@
++void a(int c, int e)
++{
++	for(;                   b; c ;
++
++	if (()) {
++		unsigned short d = e;
++		if (())
++			while ()
++				;
++		&d;
++	}
++
++	if (()) {
++		int f = &f;
++	}
++}
++
++/*
++ * check-name: crash rewrite_branch
++ * check-command: test-linearize $file
++ *
++ * check-error-ignore
++ * check-output-ignore
++ */
+-- 
+2.13.0
 
-Chris
