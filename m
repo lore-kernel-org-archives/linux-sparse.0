@@ -1,88 +1,53 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Thu, 6 Jul 2017 23:18:39 -0700
-Message-ID: <CANeU7QmHW5MHKmEBf4ULeVyyHp4zue+errEw2ZB+y1P3Q8uLRQ@mail.gmail.com>
+Date: Thu, 6 Jul 2017 23:27:58 -0700
+Message-ID: <CANeU7Q===1Qm0kEGX4DQLeY9jeu1DdmhzvKGw7FNG1j5zWz-gw@mail.gmail.com>
 References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
  <20170706191950.81268-2-luc.vanoostenryck@gmail.com> <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
- <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com> <20170707060413.jmnflgn6kutugozb@ltop.local>
+ <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
+ <20170707054459.pkhqnmrz7yt3sppc@ltop.local> <CANeU7Q=6MZSn2Lm_+xhqrR1mU95Fq-j6oox8jEYqW+zW=UYTEA@mail.gmail.com>
+ <20170707061016.gcbmwrp7zbhlhbpv@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f175.google.com ([209.85.192.175]:34313 "EHLO
-        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750883AbdGGGSl (ORCPT
+Received: from mail-pf0-f177.google.com ([209.85.192.177]:33549 "EHLO
+        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750941AbdGGG2A (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Jul 2017 02:18:41 -0400
-Received: by mail-pf0-f175.google.com with SMTP id q85so12247925pfq.1
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Jul 2017 23:18:41 -0700 (PDT)
-In-Reply-To: <20170707060413.jmnflgn6kutugozb@ltop.local>
+        Fri, 7 Jul 2017 02:28:00 -0400
+Received: by mail-pf0-f177.google.com with SMTP id e7so12397858pfk.0
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Jul 2017 23:28:00 -0700 (PDT)
+In-Reply-To: <20170707061016.gcbmwrp7zbhlhbpv@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Jul 6, 2017 at 11:04 PM, Luc Van Oostenryck
+On Thu, Jul 6, 2017 at 11:10 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> On Thu, Jul 06, 2017 at 06:18:48PM -0700, Christopher Li wrote:
->> On Thu, Jul 6, 2017 at 5:40 PM, Christopher Li <sparse@chrisli.org> wrote:
->> Most noticablely remove_usage() inside of the  kill_use_list()
->> loop.
 >
-> Can you explain a bit what's wrong with this one?
+>> Go try this patch with a "make check". It has over one hundreds fails.
+>
+> I'll do, later (just wakeup here).
 
-Sure. Sorry I haven't be more specific.
-The offending list in question is not the instruction list. It is the
-pesudo->user list.
+No problem at all.
 
-kill_use_list is iterate though p->user.
-FOR_EACH_PTR(list, p) {
-if (p == VOID)
-continue;
-kill_use(THIS_ADDRESS(p));
-} END_FOR_EACH_PTR(p)
+Just a head up. I need to crash soon. And tomorrow I will not have much
+Internet access at all. I have time to code but no internet. I will see if I
+can get a ptrlist safe against delete.
 
+>
+>> Those are real bugs. The current big offender is remove_usage() inside
+>> of the  kill_use_list(). It might relate to your code as well. Can you help me
+>> take a look at the offender?
+>
+> Yes, of course I'll help with this.
+> And yes, I added a bunch of these remove_use() with the recursive call
+> to kill_instruction() which I never liked much but solved a bunch of
+> things.
 
-And remove_usage() is deleting the very same list
-from with in the loop. That is the bug.
-
-Basically, deleting entry from inner loop while outer loop
-is going over the same list has the deleted entry[] sliding
-forward problem. Cause the outer loop possible to skip some
-entries.
-
-It likely a different bug than the one you discover.
-Your crash is likely cause by pack_ptr_list inside the
-ptrlist loop. Which cause some pointer point to deleted
-node.
-
-
-I set a break point at die and get the back track as follows:
-#0  die (fmt=fmt@entry=0x43e160 "%s:%d delete entry with %d parent
-using ") at lib.c:204
-#1  0x0000000000420a0f in delete_pseudo_user_list_entry
-(list=list@entry=0x7ffff7f2e158, entry=entry@entry=0x7ffff7f72c28,
-count=1)
-    at simplify.c:175
-#2  0x0000000000420d16 in remove_usage (usep=0x7ffff7f72c28,
-p=0x7ffff7f2e150) at simplify.c:189
-#3  kill_use (usep=0x7ffff7f72c28) at simplify.c:200
-#4  kill_use_list (list=0x7ffff7f72c10) at simplify.c:210
-#5  0x0000000000420bc9 in kill_insn (insn=insn@entry=0x7ffff7f36450,
-force=force@entry=0) at simplify.c:249
-#6  0x0000000000422244 in kill_instruction (insn=0x7ffff7f36450) at flow.h:32
-#7  clean_up_phi (insn=0x7ffff7f36450) at simplify.c:162
-#8  simplify_instruction (insn=insn@entry=0x7ffff7f36450) at simplify.c:1202
-#9  0x000000000042015b in clean_up_one_instruction
-(insn=0x7ffff7f36450, bb=0x7ffff7f3e5b0) at cse.c:45
-#10 clean_up_insns (ep=0x7ffff7f56010) at cse.c:135
-#11 cleanup_and_cse (ep=ep@entry=0x7ffff7f56010) at cse.c:366
-#12 0x00000000004182e0 in linearize_fn (base_type=<optimized out>,
-sym=0x7ffff7f56010) at linearize.c:2244
-#13 linearize_symbol (sym=sym@entry=0x7ffff7f69490) at linearize.c:2286
-#14 0x0000000000401139 in clean_up_symbols (list=0x7ffff7f6f510) at
-test-linearize.c:49
-#15 main (argc=<optimized out>, argv=<optimized out>) at test-linearize.c:62
-
-Hope that helps.
+Thanks for the help. Yes, that is exactly the bug I am talking about.
+Deleting list entry while the parent is still looping on it.
+Sparse ptrlist currently has very subtle bug on this situation.
 
 Chris
