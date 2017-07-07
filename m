@@ -1,75 +1,59 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Fri, 7 Jul 2017 14:01:37 +0100
-Message-ID: <CACXZuxfg2GU99i2eRb45rCYNb5r7206VvC6PWjOkwdK1F4gcaQ@mail.gmail.com>
+Date: Fri, 7 Jul 2017 14:18:53 +0100
+Message-ID: <CACXZuxf5JSfECtZni5OLmh3_iTarC39nu9-DqRNsivTT6iHb7g@mail.gmail.com>
 References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
  <20170706191950.81268-2-luc.vanoostenryck@gmail.com> <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
  <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
- <20170707054459.pkhqnmrz7yt3sppc@ltop.local> <CANeU7Q=6MZSn2Lm_+xhqrR1mU95Fq-j6oox8jEYqW+zW=UYTEA@mail.gmail.com>
- <CACXZuxfoPyT65p46wZBN8=FMEgTwCeh3Y2P3Rc5KbYO39OK_xg@mail.gmail.com>
- <CACXZuxeN2E5TCvof+7N0iFwZpULePf3E7V=0-+kUTrNURV2tvw@mail.gmail.com>
- <20170707093831.37mnz572mayodfip@ltop.local> <CACXZuxdwFQu_PnppN0C19M2icbhoPSo5TcYq+Ezt7OvMK+tzhA@mail.gmail.com>
- <CANeU7Q=K2eVq8v=jFE1HwEJHpNP8i4bG7FkgtBqFqF_-Zmopdg@mail.gmail.com>
- <CACXZuxcwKmZuDyccQwVXrA-WqijeGppoLtmujJA4Jagic3fGaw@mail.gmail.com> <CANeU7Q=frSJEEdTs8GBnsfTaqrVSg7GpqYXkeFmsZtS0A3qU=g@mail.gmail.com>
+ <CA+55aFyUN-anJrFmo25tATO2wJS8+24S8TK=PAZBEYr0LvZN8g@mail.gmail.com>
+ <CANeU7Q=XzVrNoUOScCJjtautBsc0ittc_Okh+0wESuV4rRqing@mail.gmail.com>
+ <20170707082802.gphim2wpqsncqoyh@ltop.local> <CANeU7Qk3s90N35co_HOT0vfHhZDjthMv5=5dT9Hy72JQFfc=ng@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f174.google.com ([209.85.128.174]:34482 "EHLO
-        mail-wr0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750726AbdGGNBk (ORCPT
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:36168 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750778AbdGGNSz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Jul 2017 09:01:40 -0400
-Received: by mail-wr0-f174.google.com with SMTP id 77so46166627wrb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:01:39 -0700 (PDT)
-In-Reply-To: <CANeU7Q=frSJEEdTs8GBnsfTaqrVSg7GpqYXkeFmsZtS0A3qU=g@mail.gmail.com>
+        Fri, 7 Jul 2017 09:18:55 -0400
+Received: by mail-wr0-f180.google.com with SMTP id c11so46825564wrc.3
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:18:54 -0700 (PDT)
+In-Reply-To: <CANeU7Qk3s90N35co_HOT0vfHhZDjthMv5=5dT9Hy72JQFfc=ng@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 7 July 2017 at 13:54, Christopher Li <sparse@chrisli.org> wrote:
-> On Fri, Jul 7, 2017 at 3:08 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
+Hi Chris,
+
+On 7 July 2017 at 10:06, Christopher Li <sparse@chrisli.org> wrote:
+> On Fri, Jul 7, 2017 at 1:28 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
 >>
->> I will test this in my version but I believe that deleting entries in
->> list->list[] is okay. Every time the next operation on the iterator is
->> called, it checks whether its index in the node is still valid. As
->> long as nodes are not deleted then it should work - but I need to
->> prove it via a test case.
+> My idea of the ref count will do exactly that when the inner
+> loop try to delete an entry but outer loop holding the node as well.
+> It will increase the deleted count and replace the ptr entry to
+> NULL.
 >
-> As far as I can tell, your code will have the same bug.  If
-> same list used in the outer loop and inner loop and inner
-> loop delete an entry.
+> When the ref count of the node drop to zero and node has delete count.
+> Pack the entry[] array, remove NULL entry and even possible delete
+> the node as well.
 >
->
->>
->> Here is my forward iterator next implementation:
->>
->> void *ptrlist_iter_next(struct ptr_list_iter *self) {
->>   if (self->__head == NULL)
->>     return NULL;
->>   self->__nr++;
->> Lretry:
->>   if (self->__nr < self->__list->nr_) {
->>     return self->__list->list_[self->__nr];
->>   } else if (self->__list->next_ != self->__head) {
->>     self->__list = self->__list->next_;
->>     self->__nr = 0;
->>     goto Lretry;
->>   }
->
-> Let say __list has 8 entry. nr = 8.  self->__nr = 3.
-> In the inner loop delete first 2 entry. Then the list[2:8]
-> will shift to list[0:6]. Now your self->__nr = 3 will
-> skip the next 2 entry because they move to list[1:3].
+> Let me know if you see any problem with that approach.
 >
 
-Yes okay. So that means the inner loop cannot modify the list, as even
-adding an element will alter the order.
+How will the insertion scenario be handled - or even splits caused by
+insertion? These would also invalidate the order of the entries in a
+ptr list node, right?
 
-Presumably this issue occurs when the same list is traversed
-recursively and the inner loop modifies the list. Was this usage
-always there is Sparse or is it a recent change?
+I think that maybe an alternative approach is to use a lock, and
+ensure that the ptr list node is locked while it is being iterated.
+Only lock holder can modify. Any inner loop will fail if it tries to
+modify the node. The lock can be a pointer - so if NULL unlocked, else
+locked. Using a pointer as lock allows concept of ownership.
+
+But anyway this is only to catch scenarios where the list is being
+changed by an inner loop.
 
 Regards
 Dibyendu
