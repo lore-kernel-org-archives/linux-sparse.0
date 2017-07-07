@@ -1,80 +1,44 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 20/34] ptrlist: use the iterator API for DO_INSERT_CURRENT()
-Date: Fri,  7 Jul 2017 15:39:48 +0200
-Message-ID: <20170707134002.49500-21-luc.vanoostenryck@gmail.com>
-References: <20170707134002.49500-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
+Date: Fri, 7 Jul 2017 15:47:14 +0200
+Message-ID: <20170707134713.3kirm7f4lqexxrot@ltop.local>
+References: <20170706191950.81268-2-luc.vanoostenryck@gmail.com>
+ <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
+ <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
+ <CA+55aFyUN-anJrFmo25tATO2wJS8+24S8TK=PAZBEYr0LvZN8g@mail.gmail.com>
+ <CANeU7Q=XzVrNoUOScCJjtautBsc0ittc_Okh+0wESuV4rRqing@mail.gmail.com>
+ <20170707082802.gphim2wpqsncqoyh@ltop.local>
+ <CANeU7Qk3s90N35co_HOT0vfHhZDjthMv5=5dT9Hy72JQFfc=ng@mail.gmail.com>
+ <CACXZuxf5JSfECtZni5OLmh3_iTarC39nu9-DqRNsivTT6iHb7g@mail.gmail.com>
+ <CAExDi1TRKuokxpUH3BNC5rQ8TFfpHH=Xoj-M3DU1TfVMopKFeA@mail.gmail.com>
+ <CACXZuxcaR7DbmgxVyLHWuEJW-_aCqsxtd=ajsKVXjksnqcf2vg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:33168 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752522AbdGGNkc (ORCPT
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:34267 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752855AbdGGNrR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Jul 2017 09:40:32 -0400
-Received: by mail-lf0-f68.google.com with SMTP id t72so4029493lff.0
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:40:31 -0700 (PDT)
-In-Reply-To: <20170707134002.49500-1-luc.vanoostenryck@gmail.com>
+        Fri, 7 Jul 2017 09:47:17 -0400
+Received: by mail-wr0-f180.google.com with SMTP id 77so47879188wrb.1
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:47:17 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CACXZuxcaR7DbmgxVyLHWuEJW-_aCqsxtd=ajsKVXjksnqcf2vg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
----
- ptrlist.h | 42 ++++++++++++++++++++++--------------------
- 1 file changed, 22 insertions(+), 20 deletions(-)
+On Fri, Jul 07, 2017 at 02:29:56PM +0100, Dibyendu Majumdar wrote:
+> Agree that if refcount is used as a lock to prevent inner loops from
+> amending the list then it is the same. But I think Chris is trying to
+> do more - i.e. allow an inner loop to amend the list. That might
+> simply not be possible to handle safely.
 
-diff --git a/ptrlist.h b/ptrlist.h
-index 0e6d30b99..ab2b13a3c 100644
---- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -213,27 +213,29 @@ do {										\
- 
- extern void split_ptr_list_head(struct ptr_list *);
- 
--#define DO_SPLIT(ptr, __cur) do {							\
--	split_ptr_list_head(__cur.l);							\
--	if (__cur.n >= __cur.l->nr) {							\
--		__cur.n -= __cur.l->nr;							\
--		__cur.l = __cur.l->next;						\
--	};										\
--} while (0)
-+static inline void ptr_cur_insert(struct ptr_cur *cur, void *new, void *ptr)
-+{
-+	void **this, **last;
-+
-+	if (cur->l->nr == LIST_NODE_NR) {
-+		split_ptr_list_head(cur->l);
-+		if (cur->n >= cur->l->nr) {
-+			cur->n -= cur->l->nr;
-+			cur->l = cur->l->next;
-+		}
-+	}
-+	this = cur->l->list + cur->n;
-+	last = cur->l->list + cur->l->nr - 1;
-+	while (last >= this) {
-+		last[1] = last[0];
-+		last--;
-+	}
-+	*this = (new);
-+	cur->l->nr++;
-+}
- 
--#define DO_INSERT_CURRENT(new, ptr, __cur) do {						\
--	void **__this, **__last;							\
--	if (__cur.l->nr == LIST_NODE_NR)						\
--		DO_SPLIT(ptr, __cur);							\
--	__this = __cur.l->list + __cur.n;						\
--	__last = __cur.l->list + __cur.l->nr - 1;					\
--	while (__last >= __this) {							\
--		__last[1] = __last[0];							\
--		__last--;								\
--	}										\
--	*__this = (new);								\
--	__cur.l->nr++;									\
--} while (0)
-+#define DO_INSERT_CURRENT(new, ptr, __cur) \
-+	ptr_cur_insert(&__cur, new, ptr)
- 
- #define INSERT_CURRENT(new, ptr) \
- 	DO_INSERT_CURRENT(new, ptr, __cur##ptr)
--- 
-2.13.0
+We have to do something more (or something less :)) otherwise
+the refcount can only be used to detect a problem. In other words,
+having a situation like "OK, I can't safely do XYZ here" is maybe
+better than the current situation but doesn't help when you need
+to do XYZ.
 
+-- Luc
