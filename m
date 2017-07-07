@@ -1,63 +1,63 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Fri, 7 Jul 2017 09:30:37 +0200
-Message-ID: <20170707073036.x2kzu3tdu4kafky3@ltop.local>
+Date: Fri, 7 Jul 2017 01:25:14 -0700
+Message-ID: <CANeU7QnAyCaDFj5S5Nk0OxWpXSesnjiijQQDxpJBvfY8oVUVjw@mail.gmail.com>
 References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
- <20170706191950.81268-2-luc.vanoostenryck@gmail.com>
- <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
+ <20170706191950.81268-2-luc.vanoostenryck@gmail.com> <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
  <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
- <20170707054459.pkhqnmrz7yt3sppc@ltop.local>
- <CANeU7Q=6MZSn2Lm_+xhqrR1mU95Fq-j6oox8jEYqW+zW=UYTEA@mail.gmail.com>
- <20170707061016.gcbmwrp7zbhlhbpv@ltop.local>
- <CANeU7Q===1Qm0kEGX4DQLeY9jeu1DdmhzvKGw7FNG1j5zWz-gw@mail.gmail.com>
+ <20170707060413.jmnflgn6kutugozb@ltop.local> <CANeU7QmHW5MHKmEBf4ULeVyyHp4zue+errEw2ZB+y1P3Q8uLRQ@mail.gmail.com>
+ <20170707071124.7jl346vehsisv7bx@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:34100 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750983AbdGGHam (ORCPT
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:34257 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751893AbdGGIZP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Jul 2017 03:30:42 -0400
-Received: by mail-wr0-f169.google.com with SMTP id 77so34300812wrb.1
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 00:30:41 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q===1Qm0kEGX4DQLeY9jeu1DdmhzvKGw7FNG1j5zWz-gw@mail.gmail.com>
+        Fri, 7 Jul 2017 04:25:15 -0400
+Received: by mail-pg0-f53.google.com with SMTP id t186so13899073pgb.1
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 01:25:15 -0700 (PDT)
+In-Reply-To: <20170707071124.7jl346vehsisv7bx@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Thu, Jul 06, 2017 at 11:27:58PM -0700, Christopher Li wrote:
-> On Thu, Jul 6, 2017 at 11:10 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> >> Go try this patch with a "make check". It has over one hundreds fails.
-> >
-> > I'll do, later (just wakeup here).
-> 
-> No problem at all.
-> 
-> Just a head up. I need to crash soon. And tomorrow I will not have much
-> Internet access at all. I have time to code but no internet. I will see if I
-> can get a ptrlist safe against delete.
+On Fri, Jul 7, 2017 at 12:11 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>> And remove_usage() is deleting the very same list
+>> from with in the loop. That is the bug.
+>
+> Strange. kill_use_list() is only iterated via insn->phi_list
+> or insn->arguments, not p->user.
+>
+> But yes, something is surely messing with the lists here.
+>
 
-Sure, no problem.
- 
-> Sparse ptrlist currently has very subtle bug on this situation.
+I figure it out. It is a false alarm on the checking side.
+The condition I want to check can still cause a bug,
+but this report is not one of those conditions.
 
-Yes, it's not the first time we have been bitten by them.
+It is cause by this code:
 
-The real problem, in my opinion, is:
-- The ptr_list macros & functions have rules about their usage but
-  * they are not explained at all
-  * they is no way to enforce them or detect a violation
-  * detection a violation will probably have a cost higher than
-    we'll be willing to pay.
-  * it's hard to not violate these rules because list walking is
-    ubiquitous.
-- Problems can only occurs when deleting an element from the list.
-  Pure walking of the list, adding an element or modifying one
-  is safe. Even modifying the pointer itself, like, for example,
-  setting it to NULL, is safe (hint, hint!).
+static int dead_insn(struct instruction *insn, pseudo_t *src1,
+pseudo_t *src2, pseudo_t *src3)
+{
+struct pseudo_user *pu;
+FOR_EACH_PTR(insn->target->users, pu) {
+if (*pu->userp != VOID)
+return 0;
+} END_FOR_EACH_PTR(pu);
 
--- Luc
+So the return terminate the execution flow before
+reaching to the  END_FOR_EACH_PTR(pu).
+The ptr->active still think we are in the loop
+But we are not.
+
+It is a bug in the checking side. I still think this kind
+of checking is useful, but need some special handle
+of bail out of the ptr_list loop.
+
+Very sorry about that.
+
+Chris
