@@ -1,111 +1,298 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Thu, 6 Jul 2017 17:40:59 -0700
-Message-ID: <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
-References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com> <20170706191950.81268-2-luc.vanoostenryck@gmail.com>
+Date: Thu, 6 Jul 2017 18:18:48 -0700
+Message-ID: <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
+References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
+ <20170706191950.81268-2-luc.vanoostenryck@gmail.com> <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:32824 "EHLO
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:34303 "EHLO
         mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752351AbdGGAlB (ORCPT
+        with ESMTP id S1753093AbdGGBSt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Jul 2017 20:41:01 -0400
-Received: by mail-pf0-f195.google.com with SMTP id e199so2313957pfh.0
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Jul 2017 17:41:01 -0700 (PDT)
-In-Reply-To: <20170706191950.81268-2-luc.vanoostenryck@gmail.com>
+        Thu, 6 Jul 2017 21:18:49 -0400
+Received: by mail-pf0-f195.google.com with SMTP id c24so2405755pfe.1
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Jul 2017 18:18:49 -0700 (PDT)
+In-Reply-To: <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Jul 6, 2017 at 12:19 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> In commit (51cfbc90a5 "fix: kill unreachable BBs after killing a child")
-> kill_unreachable_bbs() was called during simplification in order
-> to avoid creating fake cycles between phis and issuing bogus
-> "crazy programmer" warnings.
+On Thu, Jul 6, 2017 at 5:40 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> However, simplification is done via cse.c:clean_up_insns()
-> which is looping over all BBs while kill_unreachable_bbs()
-> loops over all BBs *and* can delete some of them which may
-> corrupt the looping in clean_up_insns().
->
-> Fix this, by adding a flag to kill_unreachable_bbs(), telling
-> if it is safe to delete the BBs or if we can just mark them
-> as unreachable (set bb->ep to NULL and unlink any parent and/or
-> chilren), in which case the deletion will be done later.
->
-> Note: the reproducer is one with very broken syntax but nothing
->       seems to forbid the same situation to happen with a valid
->       program.
->
-> Fixes: 51cfbc90a5e1462fcd624a1598ecd985a508a5d6
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-
-Thanks for catching it. That is a very serious bug.
-The release will be on hold until this bug has been fix.
-It is actually more than one of them. I will send out a separate patch
-catching this kind of behavior.
-
-
-When the parent is doing the loop on this, the
-lower level  caller remove the list element is very hasty.
-
-> -void kill_unreachable_bbs(struct entrypoint *ep)
-> +void kill_unreachable_bbs(struct entrypoint *ep, int del)
->  {
->         struct basic_block *bb;
->         unsigned long generation = ++bb_generation;
-> @@ -837,7 +837,8 @@ void kill_unreachable_bbs(struct entrypoint *ep)
->                 /* Mark it as being dead */
->                 kill_bb(bb);
->                 bb->ep = NULL;
-> -               DELETE_CURRENT_PTR(bb);
-> +               if (del)
-> +                       DELETE_CURRENT_PTR(bb);
->         } END_FOR_EACH_PTR(bb);
->         PACK_PTR_LIST(&ep->bbs);
+> Thanks for catching it. That is a very serious bug.
+> The release will be on hold until this bug has been fix.
+> It is actually more than one of them. I will send out a separate patch
+> catching this kind of behavior.
 >
 
-Well, it can happen to other ptr list as well. And it did.
+Here is the patch. There is another offender in simplify.c
 
-For this one, I thing it is simpler just move the kill_unreachable_bbs()
-to the outer stage.
+Chris
 
-Some thing like this, what do you say?
-It did pass the validation test you send out on this patch.
-
-From c4ef6086b07cdf1d0d1790a274ba056910b00b44 Mon Sep 17 00:00:00 2001
 From: Christopher Li <sparse@chrisli.org>
 Date: Thu, 6 Jul 2017 16:25:38 -0700
-Subject: [PATCH 1/2] move kill_unreachable_bbs to outer cse stage
+Subject: [PATCH 2/2] check on delete list entry while parent caller using it.
 
+This is checking for type the bug Luc reported.
+Basiclly, the parent DO_FOR_EACH() has __nr caching the
+current ptr position. When the inner loop function delete
+one entry before the current position. The parent current
+position needs to be adjust, because the entry[] has been
+move forward.
+
+This patch only check usage FOR_EACH_XXX macro. There is
+also PREPARE_PTR_LIST haven't cover by this patch.
+It is already catching bugs left and right.
+
+Most noticablely remove_usage() inside of the  kill_use_list()
+loop.
 ---
- cse.c       | 3 +++
- linearize.c | 3 ---
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ ptrlist.h | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-diff --git a/cse.c b/cse.c
-index 0d3815c..af9863f 100644
---- a/cse.c
-+++ b/cse.c
-@@ -387,6 +387,9 @@ repeat:
-  }
-  }
+diff --git a/ptrlist.h b/ptrlist.h
+index d09be2f..4f38a4e 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -25,7 +25,8 @@
+ #define LIST_NODE_NR (29)
 
-+ if (repeat_phase & REPEAT_CFG_CLEANUP)
-+ kill_unreachable_bbs(ep);
-+
-  if (repeat_phase & REPEAT_SYMBOL_CLEANUP)
-  simplify_memops(ep);
+ struct ptr_list {
+- int nr;
++ unsigned int nr:16;
++ unsigned int active:16;
+  struct ptr_list *prev;
+  struct ptr_list *next;
+  void *list[LIST_NODE_NR];
+@@ -44,6 +45,7 @@ extern void concat_ptr_list(struct ptr_list *a,
+struct ptr_list **b);
+ extern void __free_ptr_list(struct ptr_list **);
+ extern int ptr_list_size(struct ptr_list *);
+ extern int linearize_ptr_list(struct ptr_list *, void **, int);
++extern void die(const char *, ...);
 
-diff --git a/linearize.c b/linearize.c
-index 7313e72..a367207 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -671,9 +671,6 @@ void insert_branch(struct basic_block *bb, struct
-instruction *jmp, struct basic
-  remove_parent(child, bb);
-  } END_FOR_EACH_PTR(child);
-  PACK_PTR_LIST(&bb->children);
+ /*
+  * Hey, who said that you can't do overloading in C?
+@@ -158,6 +160,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  CHECK_TYPE(head,ptr); \
+  if (__head) { \
+  do { int __nr; \
++ __list->active++; \
+  for (__nr = 0; __nr < __list->nr; __nr++) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -167,6 +170,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \
+  } while ((__list = __list->next) != __head); \
+  } \
+ } while (0)
+@@ -179,6 +183,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  do { int __nr; \
+  __list = __list->prev; \
+  __nr = __list->nr; \
++ __list->active++; \
+  while (--__nr >= 0) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -189,6 +194,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \
+  } while (__list != __head); \
+  } \
+ } while (0)From: Christopher Li <sparse@chrisli.org>
+Date: Thu, 6 Jul 2017 16:25:38 -0700
+Subject: [PATCH 2/2] check on delete list entry while parent caller using it.
+
+This is checking for type the bug Luc reported.
+Basiclly, the parent DO_FOR_EACH() has __nr caching the
+current ptr position. When the inner loop function delete
+one entry before the current position. The parent current
+position needs to be adjust, because the entry[] has been
+move forward.
+
+This patch only check usage FOR_EACH_XXX macro. There is
+also PREPARE_PTR_LIST haven't cover by this patch.
+It is already catching bugs left and right.
+
+Most noticablely remove_usage() inside of the  kill_use_list()
+loop.
+---
+ ptrlist.h | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/ptrlist.h b/ptrlist.h
+index d09be2f..4f38a4e 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -25,7 +25,8 @@
+ #define LIST_NODE_NR (29)
+
+ struct ptr_list {
+- int nr;
++ unsigned int nr:16;
++ unsigned int active:16;
+  struct ptr_list *prev;
+  struct ptr_list *next;
+  void *list[LIST_NODE_NR];
+@@ -44,6 +45,7 @@ extern void concat_ptr_list(struct ptr_list *a,
+struct ptr_list **b);
+ extern void __free_ptr_list(struct ptr_list **);
+ extern int ptr_list_size(struct ptr_list *);
+ extern int linearize_ptr_list(struct ptr_list *, void **, int);
++extern void die(const char *, ...);
+
+ /*
+  * Hey, who said that you can't do overloading in C?
+@@ -158,6 +160,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  CHECK_TYPE(head,ptr); \
+  if (__head) { \
+  do { int __nr; \
++ __list->active++; \
+  for (__nr = 0; __nr < __list->nr; __nr++) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -167,6 +170,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \From: Christopher Li <sparse@chrisli.org>
+Date: Thu, 6 Jul 2017 16:25:38 -0700
+Subject: [PATCH 2/2] check on delete list entry while parent caller using it.
+
+This is checking for type the bug Luc reported.
+Basiclly, the parent DO_FOR_EACH() has __nr caching the
+current ptr position. When the inner loop function delete
+one entry before the current position. The parent current
+position needs to be adjust, because the entry[] has been
+move forward.
+
+This patch only check usage FOR_EACH_XXX macro. There is
+also PREPARE_PTR_LIST haven't cover by this patch.
+It is already catching bugs left and right.
+
+Most noticablely remove_usage() inside of the  kill_use_list()
+loop.
+---
+ ptrlist.h | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/ptrlist.h b/ptrlist.h
+index d09be2f..4f38a4e 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -25,7 +25,8 @@
+ #define LIST_NODE_NR (29)
+
+ struct ptr_list {
+- int nr;
++ unsigned int nr:16;
++ unsigned int active:16;
+  struct ptr_list *prev;
+  struct ptr_list *next;
+  void *list[LIST_NODE_NR];
+@@ -44,6 +45,7 @@ extern void concat_ptr_list(struct ptr_list *a,
+struct ptr_list **b);
+ extern void __free_ptr_list(struct ptr_list **);
+ extern int ptr_list_size(struct ptr_list *);
+ extern int linearize_ptr_list(struct ptr_list *, void **, int);
++extern void die(const char *, ...);
+
+ /*
+  * Hey, who said that you can't do overloading in C?
+@@ -158,6 +160,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  CHECK_TYPE(head,ptr); \
+  if (__head) { \
+  do { int __nr; \
++ __list->active++; \
+  for (__nr = 0; __nr < __list->nr; __nr++) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -167,6 +170,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \
+  } while ((__list = __list->next) != __head); \
+  } \
+ } while (0)
+@@ -179,6 +183,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  do { int __nr; \
+  __list = __list->prev; \
+  __nr = __list->nr; \
++ __list->active++; \
+  while (--__nr >= 0) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -189,6 +194,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \
+  } while (__list != __head); \
+  } \
+ } while (0)
+@@ -270,6 +276,9 @@ extern void split_ptr_list_head(struct ptr_list *);
+  DO_INSERT_CURRENT(new, ptr, __head##ptr, __list##ptr, __nr##ptr)
+
+ #define DO_DELETE_CURRENT(ptr, __head, __list, __nr) do { \
++ if (__list->active > 1) \
++ die("%s:%d delete entry with %d parent using ", \
++       __FILE__, __LINE__, __list->active - 1); \
+  void **__this = __list->list + __nr; \
+  void **__last = __list->list + __list->nr - 1; \
+  while (__this < __last) { \
+-- 
+2.9.4
+
+  } while ((__list = __list->next) != __head); \
+  } \
+ } while (0)
+@@ -179,6 +183,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  do { int __nr; \
+  __list = __list->prev; \
+  __nr = __list->nr; \
++ __list->active++; \
+  while (--__nr >= 0) { \
+  do { \
+  ptr = PTR_ENTRY(__list,__nr); \
+@@ -189,6 +194,7 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  } while (0); \
+  } while (0); \
+  } \
++ __list->active--; \
+  } while (__list != __head); \
+  } \
+ } while (0)
+@@ -270,6 +276,9 @@ extern void split_ptr_list_head(struct ptr_list *);
+  DO_INSERT_CURRENT(new, ptr, __head##ptr, __list##ptr, __nr##ptr)
+
+ #define DO_DELETE_CURRENT(ptr, __head, __list, __nr) do { \
++ if (__list->active > 1) \
++ die("%s:%d delete entry with %d parent using ", \
++       __FILE__, __LINE__, __list->active - 1); \
+  void **__this = __list->list + __nr; \
+  void **__last = __list->list + __list->nr - 1; \
+  while (__this < __last) { \
+-- 
+2.9.4
+
+@@ -270,6 +276,9 @@ extern void split_ptr_list_head(struct ptr_list *);
+  DO_INSERT_CURRENT(new, ptr, __head##ptr, __list##ptr, __nr##ptr)
+
+ #define DO_DELETE_CURRENT(ptr, __head, __list, __nr) do { \
++ if (__list->active > 1) \
++ die("%s:%d delete entry with %d parent using ", \
++       __FILE__, __LINE__, __list->active - 1); \
+  void **__this = __list->list + __nr; \
+  void **__last = __list->list + __list->nr - 1; \
+  while (__this < __last) { \
+-- 
+2.9.4
