@@ -1,73 +1,76 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Fri, 7 Jul 2017 14:29:56 +0100
-Message-ID: <CACXZuxcaR7DbmgxVyLHWuEJW-_aCqsxtd=ajsKVXjksnqcf2vg@mail.gmail.com>
-References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
- <20170706191950.81268-2-luc.vanoostenryck@gmail.com> <CANeU7QnbwqVcZdbarrj4OdpR9-TaG9=t5Q_CDFZXSuB+SN8zLw@mail.gmail.com>
- <CANeU7QnVNE38ODJ+cgUzD3Vz4XKogk-RL2v6-dS2aX9Oc4_0uQ@mail.gmail.com>
- <CA+55aFyUN-anJrFmo25tATO2wJS8+24S8TK=PAZBEYr0LvZN8g@mail.gmail.com>
- <CANeU7Q=XzVrNoUOScCJjtautBsc0ittc_Okh+0wESuV4rRqing@mail.gmail.com>
- <20170707082802.gphim2wpqsncqoyh@ltop.local> <CANeU7Qk3s90N35co_HOT0vfHhZDjthMv5=5dT9Hy72JQFfc=ng@mail.gmail.com>
- <CACXZuxf5JSfECtZni5OLmh3_iTarC39nu9-DqRNsivTT6iHb7g@mail.gmail.com> <CAExDi1TRKuokxpUH3BNC5rQ8TFfpHH=Xoj-M3DU1TfVMopKFeA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 07/34] ptrlist: add forward iterator
+Date: Fri,  7 Jul 2017 15:39:35 +0200
+Message-ID: <20170707134002.49500-8-luc.vanoostenryck@gmail.com>
+References: <20170707134002.49500-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f176.google.com ([209.85.128.176]:33003 "EHLO
-        mail-wr0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750778AbdGGN37 (ORCPT
+Received: from mail-lf0-f49.google.com ([209.85.215.49]:34705 "EHLO
+        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752523AbdGGNkX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Jul 2017 09:29:59 -0400
-Received: by mail-wr0-f176.google.com with SMTP id r103so47365533wrb.0
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:29:58 -0700 (PDT)
-In-Reply-To: <CAExDi1TRKuokxpUH3BNC5rQ8TFfpHH=Xoj-M3DU1TfVMopKFeA@mail.gmail.com>
+        Fri, 7 Jul 2017 09:40:23 -0400
+Received: by mail-lf0-f49.google.com with SMTP id t72so24097547lff.1
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Jul 2017 06:40:17 -0700 (PDT)
+In-Reply-To: <20170707134002.49500-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi Luc,
+---
+ ptrlist.c | 27 +++++++++++++++++++++++++++
+ ptrlist.h |  3 +++
+ 2 files changed, 30 insertions(+)
 
-On 7 July 2017 at 14:25, Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
-> On Fri, Jul 7, 2017 at 3:18 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> On 7 July 2017 at 10:06, Christopher Li <sparse@chrisli.org> wrote:
->>> On Fri, Jul 7, 2017 at 1:28 AM, Luc Van Oostenryck
->>> <luc.vanoostenryck@gmail.com> wrote:
->>>>
->>> My idea of the ref count will do exactly that when the inner
->>> loop try to delete an entry but outer loop holding the node as well.
->>> It will increase the deleted count and replace the ptr entry to
->>> NULL.
->>>
->>> When the ref count of the node drop to zero and node has delete count.
->>> Pack the entry[] array, remove NULL entry and even possible delete
->>> the node as well.
->>>
->>> Let me know if you see any problem with that approach.
->>>
->>
->> How will the insertion scenario be handled - or even splits caused by
->> insertion? These would also invalidate the order of the entries in a
->> ptr list node, right?
->>
->> I think that maybe an alternative approach is to use a lock, and
->> ensure that the ptr list node is locked while it is being iterated.
->
-> Don't forget that it's not multithreaded code we're talking here:
-> a lock, in itself, won't help since there is no concurrent access.
+diff --git a/ptrlist.c b/ptrlist.c
+index 5dc1117c5..5798aec43 100644
+--- a/ptrlist.c
++++ b/ptrlist.c
+@@ -246,3 +246,30 @@ void __free_ptr_list(struct ptr_list **listp)
+ 
+ 	*listp = NULL;
+ }
++
++
++int ptr_cur_next(struct ptr_cur *cur)
++{
++	do {
++		struct ptr_list *curl = cur->l;
++
++		if (++cur->n < curl->nr)
++			return 1;
++
++		cur->l = curl->next;
++		cur->n = -1;
++	} while (cur->l != cur->h);
++
++	return 0;
++}
++
++int ptr_cur_beg(struct ptr_cur *cur, struct ptr_list *head)
++{
++	if (!head)
++		return 0;
++
++	cur->h = head;
++	cur->l = head;
++	cur->n = -1;
++	return 1;
++}
+diff --git a/ptrlist.h b/ptrlist.h
+index d271f9e04..ff38538cb 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -51,6 +51,9 @@ extern void __free_ptr_list(struct ptr_list **);
+ extern int ptr_list_size(struct ptr_list *);
+ extern int linearize_ptr_list(struct ptr_list *, void **, int);
+ 
++int ptr_cur_beg(struct ptr_cur *cur, struct ptr_list *head);
++int ptr_cur_next(struct ptr_cur *cur);
++
+ /*
+  * Hey, who said that you can't do overloading in C?
+  *
+-- 
+2.13.0
 
-Yes realize that - so the lock here is only a concept. It is not a
-mutex or anything like that.
-
->
-> Otherwise, it's quite similar to Chris' idea of using a refcount.
-> But then, we 'just' have to correctly maintain this refcount.
->
-
-Agree that if refcount is used as a lock to prevent inner loops from
-amending the list then it is the same. But I think Chris is trying to
-do more - i.e. allow an inner loop to amend the list. That might
-simply not be possible to handle safely.
-
-Regards
-Dibyendu
