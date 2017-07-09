@@ -1,54 +1,42 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Bug relate to delete ptr list entry while parent looping on it
-Date: Sun, 9 Jul 2017 12:14:10 +0200
-Message-ID: <20170709101409.tdtnr7ammncqxzj2@ltop.local>
-References: <CANeU7QnEnRiaLgYP-cLOgEJD1Hrc3aUMn7MrpjYJoGFjBzKUnA@mail.gmail.com>
- <20170709071845.qqjvyh75h4wxccfq@ltop.local>
- <CANeU7Q=8m=MbvXvoCfGucSEkTEzGyrd+Lr+-M3KenDCZb9s_-w@mail.gmail.com>
+Subject: Re: [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
+Date: Sun, 9 Jul 2017 12:26:40 +0200
+Message-ID: <20170709102637.6pakvvwfduzulatl@ltop.local>
+References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
+ <20170706191950.81268-2-luc.vanoostenryck@gmail.com>
+ <CANeU7Qktna3bNQ+kgVsULqwmze49wijZihA-Ea-weKcURmgL_Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f171.google.com ([209.85.128.171]:35144 "EHLO
-        mail-wr0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751667AbdGIKOP (ORCPT
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:36290 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751667AbdGIK0o (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Jul 2017 06:14:15 -0400
-Received: by mail-wr0-f171.google.com with SMTP id k67so100809246wrc.2
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Jul 2017 03:14:15 -0700 (PDT)
+        Sun, 9 Jul 2017 06:26:44 -0400
+Received: by mail-wr0-f170.google.com with SMTP id c11so101337411wrc.3
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Jul 2017 03:26:43 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Q=8m=MbvXvoCfGucSEkTEzGyrd+Lr+-M3KenDCZb9s_-w@mail.gmail.com>
+In-Reply-To: <CANeU7Qktna3bNQ+kgVsULqwmze49wijZihA-Ea-weKcURmgL_Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Jul 09, 2017 at 01:54:41AM -0700, Christopher Li wrote:
-> On Sun, Jul 9, 2017 at 12:18 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > On Sat, Jul 08, 2017 at 10:54:18PM -0700, Christopher Li wrote:
-> >> Hi Luc,
-> >>
-> >> I make some progress of the ptrlist ref count patch.
-> > Have you this new version available somewhere?
+> diff --git a/flow.c b/flow.c
+> index c7161d4..5d2f15a 100644
+> --- a/flow.c
+> +++ b/flow.c
+> @@ -841,7 +841,7 @@ void kill_unreachable_bbs(struct entrypoint *ep)
+>   } END_FOR_EACH_PTR(bb);
+>   PACK_PTR_LIST(&ep->bbs);
 > 
-> Just clean it up a bit:
-> 
-> https://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git/log/?h=ptrlist-refcount-clean
+> - repeat_phase &= ~REPEAT_CFG_CLEANUP;
+> + repeat_phase |=  REPEAT_CSE ;
 
-OK, thanks.
- 
-> While you where there, can you take a look at the patch before it?
-> I need to have it to avoid die on the ep->bbs list.
-I already looked at it Friday but I haven't yet totally made my mind
-about it.
-I understand quite well the need and motivation for it.
-It passes my crash tests here too.
+It would be good to add a comment for why the '|= REPEAT_CSE' is needed here.
 
-Problem is that this is exactly what I did first when I needed it 
-for the insert_branch()/"crazy programmer" but but for some reasons
-I had to move it directly after the insert_branch().
-
-I'm not sure anymore about the reasons though.
-I suppose it was some bad effects with CSE.
+And not removing the REPEAT_CFG_CLEANUP is an error IMO.
+At the end of the function the CFG *is* clean. If you don't
+clear it here, then what is its meaning?
 
 -- Luc
