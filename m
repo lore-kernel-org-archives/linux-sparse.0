@@ -1,58 +1,113 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Bug relate to delete ptr list entry while parent looping on it
-Date: Mon, 10 Jul 2017 06:54:06 -0700
-Message-ID: <CANeU7QkUcJdG7GErme4+HJOiruSmJAH9AjFZS0kTMcY46Hf3jw@mail.gmail.com>
-References: <CANeU7QnEnRiaLgYP-cLOgEJD1Hrc3aUMn7MrpjYJoGFjBzKUnA@mail.gmail.com>
- <20170709071236.w2cww4r6oac5vdk7@ltop.local>
+Subject: [PATCH RFC] Let pseudo->users loop on duplicate version of list
+Date: Mon, 10 Jul 2017 08:32:46 -0700
+Message-ID: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f54.google.com ([74.125.83.54]:36170 "EHLO
-        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932079AbdGJNyI (ORCPT
+Received: from mail-pg0-f49.google.com ([74.125.83.49]:33821 "EHLO
+        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754363AbdGJPcw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 10 Jul 2017 09:54:08 -0400
-Received: by mail-pg0-f54.google.com with SMTP id u62so49874425pgb.3
-        for <linux-sparse@vger.kernel.org>; Mon, 10 Jul 2017 06:54:07 -0700 (PDT)
-In-Reply-To: <20170709071236.w2cww4r6oac5vdk7@ltop.local>
+        Mon, 10 Jul 2017 11:32:52 -0400
+Received: by mail-pg0-f49.google.com with SMTP id t186so51536611pgb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 10 Jul 2017 08:32:52 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Sun, Jul 9, 2017 at 12:12 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->> Most of the case is "return" or "jmp" inside a ptrlist
->> loop.
-> Yes, I saw that when running your previous version on the testsuite.
+I found a temporary solution is simple enough.
 
-One interesting idea is just use sparse context balance check
-to check the sparse code itself. It should work wonderfully
-with the ptrlist ref count. Because the loop will always terminate
-inside a function. We will never have the false alarm like the kernel
-has, which cause by some lock_acquire helper function.
+Instead of marking the entry deleted. I just use a duplicate
+version of the list->list[] when doing the loop. It will have
+unwanted effect that iterator will issue some ptr are already
+deleted. Other than that, it is very straight forward.
 
-I have been doing it by hand so far. If I know I need to go through
-that many attempt to fix it, I might use the context check earlier.
-
-> Yes, the recursive kill_instruction I talked about.
-> I have already been bitten by it several time (not especially
-> about ptrlist thing, but other stuff too), it's quite dangerous.
-
-I dig a bit deeper. In this case, the outer loop is holding
-position 12, and the delete is happen on 11, one entry before.
-There for delete entry 11 will cause the list->list[] to slide forward
-impact position 12. The situation I am worry about does happen
-in real life.
-
-> 1) it would be a big code change
-> 2) change in simplification have non-onbious impact on the diagnostics
->    that are emitted (simplification -> dead code elimination (1st impact)
->    -> branch simplification/mergin (2nd impact)).
-> But theer exist other simple fixes.
-
-Suggestions of other simple fixes? This bug is holding the release.
-I would love to get some simple temporary way to work around the bug.
-It does not need to be perfect.
+It pass the kernel compile test without issue different warnings.
+It also pass the ptrlist ref checking. The ref count patch can now
+complete the full kernel check without die() on it. Again no difference
+in warning.
 
 Chris
+
+
+From 18453b4b920ae53f25bc389609218d97e7f583a1 Mon Sep 17 00:00:00 2001
+From: Christopher Li <sparse@chrisli.org>
+Date: Mon, 10 Jul 2017 07:53:21 -0700
+Subject: [PATCH] Let pseudo->users loop on duplicate version of list
+
+pseudo->users list will change during find dominator.
+That cause a bug in the ptrlist because the outer loop iterator
+is not award of the deletion of the entry.
+
+Let the outer loop using a duplicate version of entry
+to avoid this problem for now.
+
+This is to fix the bug report by the ptrlist ref counting check.
+With this change, the ptrlist ref counting check can complete
+the kernel compile without reporting an error.
+
+Signed-of-By: Christopher Li <sparse@chrisli.org>
+---
+ flow.c    |  7 ++++++-
+ ptrlist.h | 17 +++++++++++++++++
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+
+diff --git a/flow.c b/flow.c
+index fce8bde..2705448 100644
+--- a/flow.c
++++ b/flow.c
+@@ -730,7 +730,12 @@ multi_def:
+ complex_def:
+ external_visibility:
+  all = 1;
+- FOR_EACH_PTR_REVERSE(pseudo->users, pu) {
++ /*
++ * FIXME: pseudo->users will have some entry deleted during looping.
++ * The loop will run on a duplicated version of the list entry for now.
++ * Should fix it properly later.
++ */
++ FOR_EACH_PTR_REVERSE_DUP(pseudo->users, pu) {
+  struct instruction *insn = pu->insn;
+  if (insn->opcode == OP_LOAD)
+  all &= find_dominating_stores(pseudo, insn, ++bb_generation, !mod);
+diff --git a/ptrlist.h b/ptrlist.h
+index d09be2f..5299ee5 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -184,6 +184,20 @@ static inline void *last_ptr_list(struct ptr_list *list)
+  ptr = PTR_ENTRY(__list,__nr); \
+  do {
+
++#define DO_FOR_EACH_REVERSE_DUP(head, ptr, __head, __list, __dup,
+__nr, PTR_ENTRY) do { \
++ struct ptr_list *__head = (struct ptr_list *) (head); \
++ struct ptr_list *__list = __head; \
++ CHECK_TYPE(head,ptr); \
++ if (__head) { \
++ do { int __nr; \
++ __list = __list->prev; \
++ __nr = __list->nr; \
++ struct ptr_list __dup; \
++ memcpy(__dup.list, __list->list, sizeof(ptr)*__nr); \
++ while (--__nr >= 0) { \
++ do { \
++ ptr = PTR_ENTRY(&__dup,__nr); \
++ do {
+
+ #define DO_END_FOR_EACH_REVERSE(ptr, __head, __list, __nr) \
+  } while (0); \
+@@ -231,6 +245,9 @@ static inline void *last_ptr_list(struct ptr_list *list)
+ #define FOR_EACH_PTR_REVERSE(head, ptr) \
+  DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY)
+
++#define FOR_EACH_PTR_REVERSE_DUP(head, ptr) \
++ DO_FOR_EACH_REVERSE_DUP(head, ptr, __head##ptr, __list##ptr,
+__dup##ptr, __nr##ptr, PTR_ENTRY)
++
+ #define END_FOR_EACH_PTR_REVERSE(ptr) \
+  DO_END_FOR_EACH_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr)
+
+-- 
+2.9.4
