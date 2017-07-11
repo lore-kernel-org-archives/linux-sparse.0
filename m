@@ -1,113 +1,66 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH RFC] Let pseudo->users loop on duplicate version of list
-Date: Mon, 10 Jul 2017 08:32:46 -0700
-Message-ID: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] V2 move kill_unreachable_bbs to outer cse stage Was Re:
+ [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
+Date: Tue, 11 Jul 2017 11:26:26 +0200
+Message-ID: <20170711092625.ux6xonjiqxhotczf@ltop.local>
+References: <CANeU7QkCcx1d29megDn9bQ0g7rw04=ujsWCe_bN1Kc1NW_-NZw@mail.gmail.com>
+ <20170709165157.w6jnjkwca7dwxj64@ltop.local>
+ <CANeU7Qms0KKSWU0dyHomz1iEczdiYn_7SwsJZmPCSXDhsag0Tw@mail.gmail.com>
+ <20170710070520.fzr3wqgaugkfocfo@ltop.local>
+ <CANeU7QnoP5g2kww5Up1gW7ucWB2H7xuGdzQ-0bTei4cWxjAz=w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f49.google.com ([74.125.83.49]:33821 "EHLO
-        mail-pg0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754363AbdGJPcw (ORCPT
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:36534 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754141AbdGKJ01 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 10 Jul 2017 11:32:52 -0400
-Received: by mail-pg0-f49.google.com with SMTP id t186so51536611pgb.1
-        for <linux-sparse@vger.kernel.org>; Mon, 10 Jul 2017 08:32:52 -0700 (PDT)
+        Tue, 11 Jul 2017 05:26:27 -0400
+Received: by mail-wr0-f170.google.com with SMTP id c11so174877660wrc.3
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Jul 2017 02:26:26 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QnoP5g2kww5Up1gW7ucWB2H7xuGdzQ-0bTei4cWxjAz=w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-I found a temporary solution is simple enough.
+On Mon, Jul 10, 2017 at 06:21:22AM -0700, Christopher Li wrote:
+> On Mon, Jul 10, 2017 at 12:05 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> >> > It would also be nice to know why the patch that came with the bug
+> >> > report have been discarded without a single comment.
+> >>
+> >> Sorry I haven't been more specific. I think the original patch is a bit
+> >> too complicated. Also just as I suspected, there is more than the bb
+> >> list get affected. If possible, I think we should try to avoid get into nested
+> >> loop delete in the first place rather than make the nested loop delete
+> >> work.
+> >
+> > I can hardly qualify my patch as 'complicated' but well ...
+> > This patch have been done with two goals in mind:
+> > 1) solve the problem with the deleted BB
+> > 2) do not change anything at the simplification since interaction
+> >    between differents parts there can have bad effects (it's to fix
+> >    a problem there that the kill_unreachable_bbs() had been added).
+> >
+> > Your patch, take care of point 1) but not 2) and effectively
+> > change when the BBs are removed and this change the interaction
+> > between insert_branch() and some others parts.
+> 
+> You are right. I will never consider 2) as my goal. Simply because
+> if the compiler has to depend on certain order of optimization (delete
+> dead BB vs memops, CSE) and it can't figure out the order by itself.
+> Then I consider a bug in the compiler.
 
-Instead of marking the entry deleted. I just use a duplicate
-version of the list->list[] when doing the loop. It will have
-unwanted effect that iterator will issue some ptr are already
-deleted. Other than that, it is very straight forward.
+You may qualify this as a bug but in the real world it's totally
+normal to have interactions between optimization passes (yes, this
+means that the result will depend on the order of the passes).
+This is especially true when it concern dead code elimination.
 
-It pass the kernel compile test without issue different warnings.
-It also pass the ptrlist ref checking. The ref count patch can now
-complete the full kernel check without die() on it. Again no difference
-in warning.
+Any decent compiler book will tell you a bit more about this.
 
-Chris
+But well, you're the maintainer, it's your responsability to
+make the good choices for the project.
 
-
-From 18453b4b920ae53f25bc389609218d97e7f583a1 Mon Sep 17 00:00:00 2001
-From: Christopher Li <sparse@chrisli.org>
-Date: Mon, 10 Jul 2017 07:53:21 -0700
-Subject: [PATCH] Let pseudo->users loop on duplicate version of list
-
-pseudo->users list will change during find dominator.
-That cause a bug in the ptrlist because the outer loop iterator
-is not award of the deletion of the entry.
-
-Let the outer loop using a duplicate version of entry
-to avoid this problem for now.
-
-This is to fix the bug report by the ptrlist ref counting check.
-With this change, the ptrlist ref counting check can complete
-the kernel compile without reporting an error.
-
-Signed-of-By: Christopher Li <sparse@chrisli.org>
----
- flow.c    |  7 ++++++-
- ptrlist.h | 17 +++++++++++++++++
- 2 files changed, 23 insertions(+), 1 deletion(-)
-
-diff --git a/flow.c b/flow.c
-index fce8bde..2705448 100644
---- a/flow.c
-+++ b/flow.c
-@@ -730,7 +730,12 @@ multi_def:
- complex_def:
- external_visibility:
-  all = 1;
-- FOR_EACH_PTR_REVERSE(pseudo->users, pu) {
-+ /*
-+ * FIXME: pseudo->users will have some entry deleted during looping.
-+ * The loop will run on a duplicated version of the list entry for now.
-+ * Should fix it properly later.
-+ */
-+ FOR_EACH_PTR_REVERSE_DUP(pseudo->users, pu) {
-  struct instruction *insn = pu->insn;
-  if (insn->opcode == OP_LOAD)
-  all &= find_dominating_stores(pseudo, insn, ++bb_generation, !mod);
-diff --git a/ptrlist.h b/ptrlist.h
-index d09be2f..5299ee5 100644
---- a/ptrlist.h
-+++ b/ptrlist.h
-@@ -184,6 +184,20 @@ static inline void *last_ptr_list(struct ptr_list *list)
-  ptr = PTR_ENTRY(__list,__nr); \
-  do {
-
-+#define DO_FOR_EACH_REVERSE_DUP(head, ptr, __head, __list, __dup,
-__nr, PTR_ENTRY) do { \
-+ struct ptr_list *__head = (struct ptr_list *) (head); \
-+ struct ptr_list *__list = __head; \
-+ CHECK_TYPE(head,ptr); \
-+ if (__head) { \
-+ do { int __nr; \
-+ __list = __list->prev; \
-+ __nr = __list->nr; \
-+ struct ptr_list __dup; \
-+ memcpy(__dup.list, __list->list, sizeof(ptr)*__nr); \
-+ while (--__nr >= 0) { \
-+ do { \
-+ ptr = PTR_ENTRY(&__dup,__nr); \
-+ do {
-
- #define DO_END_FOR_EACH_REVERSE(ptr, __head, __list, __nr) \
-  } while (0); \
-@@ -231,6 +245,9 @@ static inline void *last_ptr_list(struct ptr_list *list)
- #define FOR_EACH_PTR_REVERSE(head, ptr) \
-  DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY)
-
-+#define FOR_EACH_PTR_REVERSE_DUP(head, ptr) \
-+ DO_FOR_EACH_REVERSE_DUP(head, ptr, __head##ptr, __list##ptr,
-__dup##ptr, __nr##ptr, PTR_ENTRY)
-+
- #define END_FOR_EACH_PTR_REVERSE(ptr) \
-  DO_END_FOR_EACH_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr)
-
--- 
-2.9.4
+-- Luc Van Oostenryck 
