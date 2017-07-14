@@ -1,43 +1,35 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH RFC] Let pseudo->users loop on duplicate version of list
-Date: Thu, 13 Jul 2017 05:23:10 -0700
-Message-ID: <CANeU7Q=0X1gdjotU6=KxduBS38b1yK3CGexUD7FBEWdemT7Aig@mail.gmail.com>
-References: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
- <CANeU7Q=d_+QD+MSGyYqwL82M2RdC_AFVaeR-y87z3U3OKjNBKw@mail.gmail.com>
- <CACXZuxerM5i33YgKn=GfnWQe+pViCUfUmJ10sz0K-+PjG28uwA@mail.gmail.com>
- <CANeU7QkTAQ6XaAGrd1PmQ_4Jcv2vxD-cK_9+kKFbyX5b+Pg+Wg@mail.gmail.com>
- <CACXZuxeGmWGFbMmJCKi+aZbbxx89upb=_Vzqe7Ta99mOGHuVrg@mail.gmail.com>
- <CANeU7Qk+81ABEnGLxwbHnx510JWk7U8s=RnFqm_jM8pj-4EyDw@mail.gmail.com> <CACXZuxfxUDJKGcH6wFhnxmfXM9jxmMOKyO=5zswQvfGbE88=sw@mail.gmail.com>
+Subject: sparse-next and preview of 0.5.1-rc5
+Date: Fri, 14 Jul 2017 10:48:57 -0700
+Message-ID: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:35295 "EHLO
-        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbdGMMXL (ORCPT
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:36833 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750725AbdGNRzN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 13 Jul 2017 08:23:11 -0400
-Received: by mail-pg0-f41.google.com with SMTP id j186so28868343pge.2
-        for <linux-sparse@vger.kernel.org>; Thu, 13 Jul 2017 05:23:11 -0700 (PDT)
-In-Reply-To: <CACXZuxfxUDJKGcH6wFhnxmfXM9jxmMOKyO=5zswQvfGbE88=sw@mail.gmail.com>
+        Fri, 14 Jul 2017 13:55:13 -0400
+Received: by mail-pg0-f53.google.com with SMTP id u62so48901191pgb.3
+        for <linux-sparse@vger.kernel.org>; Fri, 14 Jul 2017 10:55:13 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Wed, Jul 12, 2017 at 11:05 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
->> My ptrlist ref count patch haven't check the split node situation.
->> Even Luc's suggestion for "mark and sweep" to delete the ptrlist
->> is not going to help with the nested loop split. I will add that check.
->> I don't expect new offenders but let's make sure about it.
->>
->
-> I did raise this before
-> (http://marc.info/?l=linux-sparse&m=149943353732715&w=2) but maybe it
-> got lost in the other stuff.
+I have push a preview version of 0.5.1-rc5 to sparse-next.
 
-I add a check to the ptrlist refcount patch to look for insert inside
-nested loop. Just as I expected,  running the full kernel source check
-did not reveal any such situation. That is a good news in a sense.
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-next
+
+If no big surprise, I will push RC5 to master and tag it tomorrow.
+
+The preview of RC5 contain the fix to the nested loop delete bug
+report by Luc and other one report by the ptrlist ref count patch. The
+nested loop delete bug is really happening with normal kernel checking.
+I am glad that is under control now.
+
+There is also one update from gcc attribute.
+
+I have run the following project compilation with sparse and I haven't see
+"crazy programmer" error. Linux kernel, git and gcc (for 64 bit).
 
 Chris
