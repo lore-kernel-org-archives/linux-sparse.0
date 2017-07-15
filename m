@@ -1,35 +1,39 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: sparse-next and preview of 0.5.1-rc5
-Date: Fri, 14 Jul 2017 10:48:57 -0700
-Message-ID: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse-next and preview of 0.5.1-rc5
+Date: Sat, 15 Jul 2017 20:22:00 +0200
+Message-ID: <20170715182159.ltikqlbe6rktxfhz@ltop.local>
+References: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:36833 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750725AbdGNRzN (ORCPT
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:34279 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751088AbdGOSWE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 14 Jul 2017 13:55:13 -0400
-Received: by mail-pg0-f53.google.com with SMTP id u62so48901191pgb.3
-        for <linux-sparse@vger.kernel.org>; Fri, 14 Jul 2017 10:55:13 -0700 (PDT)
+        Sat, 15 Jul 2017 14:22:04 -0400
+Received: by mail-wr0-f180.google.com with SMTP id 77so79587771wrb.1
+        for <linux-sparse@vger.kernel.org>; Sat, 15 Jul 2017 11:22:04 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
 
-I have push a preview version of 0.5.1-rc5 to sparse-next.
+On Fri, Jul 14, 2017 at 10:48:57AM -0700, Christopher Li wrote:
+> I have push a preview version of 0.5.1-rc5 to sparse-next.
+> 
+> https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-next
+> 
+> If no big surprise, I will push RC5 to master and tag it tomorrow.
 
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/log/?h=sparse-next
+[Sorry, I'm on vacation and very little computer access].
 
-If no big surprise, I will push RC5 to master and tag it tomorrow.
+I still object to the kill_unreachable_bbs() patch and I ask
+to reconsider it in favor of the original one.
 
-The preview of RC5 contain the fix to the nested loop delete bug
-report by Luc and other one report by the ptrlist ref count patch. The
-nested loop delete bug is really happening with normal kernel checking.
-I am glad that is under control now.
+Since this has already been discussed, I can only invite to read
+again the original patch and the one it fixes where the situation
+is explained, I think, clearly.
 
-There is also one update from gcc attribute.
-
-I have run the following project compilation with sparse and I haven't see
-"crazy programmer" error. Linux kernel, git and gcc (for 64 bit).
-
-Chris
+-- Luc
