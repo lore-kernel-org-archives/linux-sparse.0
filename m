@@ -1,40 +1,75 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 3/3] Adding _Pragma()
-Date: Mon, 17 Jul 2017 00:01:03 -0400
-Message-ID: <CANeU7QnTHFpwvdHzLFUhYPky4oxfkvsgU-8z2-g59DFnN2rd7A@mail.gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: [PATCH] Makefile: suppress pkg-config output from make
+Date: Mon, 17 Jul 2017 15:41:44 +0100
+Message-ID: <8a9ee6b0-93e6-86fa-c572-8c74cc4be597@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:34718 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750715AbdGQEBF (ORCPT
+Received: from avasout06.plus.net ([212.159.14.18]:56491 "EHLO
+        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751278AbdGQOlr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 17 Jul 2017 00:01:05 -0400
-Received: by mail-pf0-f193.google.com with SMTP id c24so18130259pfe.1
-        for <linux-sparse@vger.kernel.org>; Sun, 16 Jul 2017 21:01:04 -0700 (PDT)
+        Mon, 17 Jul 2017 10:41:47 -0400
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-This will make the selfcheck target reduce a lot of error on
-test-inspect.c.  The gtk header file use _Pragma().
 
-Signed-of-By: Christopher Li <sparse@chrisli.org>
+Commit 2a4b245052 ("Makefile: clean up and simplify", 15-07-2017), moved
+a PKG_CONFIG invocation from command scope to a top-level make variable
+setting. For users who don't have libxml installed, this results in
+pkg-config issuing warning messages on _each_ invocation of make:
+
+  $ make
+  ...
+  Package libxml-2.0 was not found in the pkg-config search path.
+  Perhaps you should add the directory containing `libxml-2.0.pc'
+  to the PKG_CONFIG_PATH environment variable
+  No package 'libxml-2.0' found
+  ...
+  $
+
+In order to suppress the message, move the LIBXML_CFLAGS make variable
+setting into the $(HAVE_LIBXML) conditional.
+
+Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
 ---
- lib.c | 1 +
- 1 file changed, 1 insertion(+)
 
-diff --git a/lib.c b/lib.c
-index de63504..ce66a81 100644
---- a/lib.c
-+++ b/lib.c
-@@ -1156,6 +1156,7 @@ void create_builtin_stream(void)
+Hi Christopher,
 
-  add_pre_buffer("#define __extension__\n");
-  add_pre_buffer("#define __pragma__\n");
-+ add_pre_buffer("#define _Pragma(x)\n");
+I like the 'selfcheck' (dog-fooding) target - many years ago I had
+patches to make sparse run clean on itself (both Linux and Cygwin).
+I didn't get around to getting all of them upstream. I just tried
+a selfcheck on cygwin and Linux and neither were clean. ;-)
 
-  // gcc defines __SIZE_TYPE__ to be size_t.  For linux/i86 and
-  // solaris/sparc that is really "unsigned int" and for linux/x86_64
+ATB,
+Ramsay Jones
+
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index ae81586..4214e17 100644
+--- a/Makefile
++++ b/Makefile
+@@ -62,6 +62,7 @@ ifeq ($(HAVE_LIBXML),yes)
+ PROGRAMS+=c2xml
+ INST_PROGRAMS+=c2xml
+ c2xml_EXTRA_OBJS = `$(PKG_CONFIG) --libs libxml-2.0`
++LIBXML_CFLAGS := $(shell $(PKG_CONFIG) --cflags libxml-2.0)
+ else
+ $(warning Your system does not have libxml, disabling c2xml)
+ endif
+@@ -194,7 +195,6 @@ ifneq ($(DEP_FILES),)
+ include $(DEP_FILES)
+ endif
+ 
+-LIBXML_CFLAGS := $(shell $(PKG_CONFIG) --cflags libxml-2.0)
+ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
+ 
+ %.o: %.c $(LIB_H)
 -- 
-2.9.4
+2.13.0
