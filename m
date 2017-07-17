@@ -1,54 +1,35 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: make selfcheck
-Date: Mon, 17 Jul 2017 19:19:30 +0100
-Message-ID: <39e3d856-fd32-8059-10bb-ad1367e7d7a9@ramsayjones.plus.com>
-References: <d5ab8af1-6a09-9985-7de1-8ad639369795@ramsayjones.plus.com>
+Date: Mon, 17 Jul 2017 15:16:51 -0400
+Message-ID: <CANeU7QmRaS8C8AyvtduDccK_w9pOjqppbMDoEDtyNH0OnN6ikw@mail.gmail.com>
+References: <d5ab8af1-6a09-9985-7de1-8ad639369795@ramsayjones.plus.com> <39e3d856-fd32-8059-10bb-ad1367e7d7a9@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout06.plus.net ([212.159.14.18]:57506 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751315AbdGQSTd (ORCPT
+Received: from mail-pf0-f180.google.com ([209.85.192.180]:33927 "EHLO
+        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751311AbdGQTQw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 17 Jul 2017 14:19:33 -0400
-In-Reply-To: <d5ab8af1-6a09-9985-7de1-8ad639369795@ramsayjones.plus.com>
-Content-Language: en-GB
+        Mon, 17 Jul 2017 15:16:52 -0400
+Received: by mail-pf0-f180.google.com with SMTP id q85so80876556pfq.1
+        for <linux-sparse@vger.kernel.org>; Mon, 17 Jul 2017 12:16:52 -0700 (PDT)
+In-Reply-To: <39e3d856-fd32-8059-10bb-ad1367e7d7a9@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Mon, Jul 17, 2017 at 2:19 PM, Ramsay Jones
+<ramsay@ramsayjones.plus.com> wrote:
+>
+> This should have been './cgcc -no-compile', of course. :(
+>
+Yes, of course. I discover that myself too. I am sending out a V2
+version of the patches.
+In the V2 version I move the checker command to be controlled by "$(CHECKER)".
+For example I can change CHECKER to test-linearize and get the full
+byte code output.
 
+BTW, are you OK I merge your change with mine in the V2 patches?
 
-On 17/07/17 17:30, Ramsay Jones wrote:
-> Hi Christopher,
-> 
-> The 'make selfcheck' target fails very quickly on cygwin, like so:
-> 
->   $ make selfcheck
->        CHECK    target.c
->        CHECK    parse.c
->   /usr/include/sys/_default_fcntl.h:163:14: error: redefinition of struct flock
->   make: *** [Makefile:204: parse.sc] Error 1
->   $ 
-> 
-> This is caused by sparse not defining the '__CYGWIN__' macro, which
-> would have been defined by cgcc, so the follwing fixes that:
-> 
-> -- >8 --
-> diff --git a/Makefile b/Makefile
-> index 4214e17..a3d3b9c 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -201,7 +201,7 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
->  	$(QUIET_CC)$(CC) -o $@ -c $(ALL_CFLAGS) $<
->  
->  %.sc: %.c sparse
-> -	$(QUIET_CHECK) ./sparse -c $(ALL_CFLAGS) $<
-> +	$(QUIET_CHECK) ./cgcc -c $(ALL_CFLAGS) $<
-
-This should have been './cgcc -no-compile', of course. :(
-
-ATB,
-Ramsay Jones
+Chris
