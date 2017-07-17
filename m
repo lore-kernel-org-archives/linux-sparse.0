@@ -1,43 +1,31 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse-next and preview of 0.5.1-rc5
-Date: Sun, 16 Jul 2017 21:20:38 -0400
-Message-ID: <CANeU7QnL+96T_ngrcgwHREey0TF8a6ENo4ehScKtX2PfBOvnew@mail.gmail.com>
-References: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
- <20170715182159.ltikqlbe6rktxfhz@ltop.local> <CANeU7Qkt4+QsgrrwUSwiiJ_V77gnJgb5YW0qSwwx1-uu9-GhLw@mail.gmail.com>
+Subject: [PATCH 0/3] Adding selfcheck target
+Date: Sun, 16 Jul 2017 21:55:38 -0400
+Message-ID: <CANeU7QmP5Ezy6cbmMZOFsRk8FN+8JDzL9BU5hJ8dLoaWmCNR=g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f181.google.com ([209.85.192.181]:36187 "EHLO
-        mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751219AbdGQBUj (ORCPT
+Received: from mail-pf0-f175.google.com ([209.85.192.175]:35117 "EHLO
+        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751257AbdGQBzk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 16 Jul 2017 21:20:39 -0400
-Received: by mail-pf0-f181.google.com with SMTP id q86so68656348pfl.3
-        for <linux-sparse@vger.kernel.org>; Sun, 16 Jul 2017 18:20:39 -0700 (PDT)
-In-Reply-To: <CANeU7Qkt4+QsgrrwUSwiiJ_V77gnJgb5YW0qSwwx1-uu9-GhLw@mail.gmail.com>
+        Sun, 16 Jul 2017 21:55:40 -0400
+Received: by mail-pf0-f175.google.com with SMTP id e199so7876164pfh.2
+        for <linux-sparse@vger.kernel.org>; Sun, 16 Jul 2017 18:55:39 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Jul 15, 2017 at 10:34 PM, Christopher Li <sparse@chrisli.org> wrote:
+Because we reserve a little bit more time on the 0.5.1-rc5 release,
+I want to sneak in make selfcheck target for sparse. It should be
+very low risk. The _Pragma() macro should have some impact
+for sparse use in the field.
 
-> Of course.  I will hold the RC5 for you. I haven't push the change to
-> master yet. It is only in sparse-next, I can still roll back the change in we
-> wants to.
->
-> Can you show me some C input file that your original patch will do the
-> right thing and current one will miss the opportunity to simplify?
-> Even for the case it is just a suspect of producing worse code is fine.
-> Just point me to some test case, I will investigate and compare the
-> results.
-
-Ping. I am still waiting for your test source to compare the two
-approach of kill_unreachable_bb(). If both generate the equivalent result,
-I prefer the simpler approach.
-
-I will hold the RC5 until Wednesday if I don't have additional input.
-
-Thanks
+I am using the selfcheck for ptrlist refcount patch now. It is so
+much better. I should have use it from the very beginning.
+It immediately report about 20 refcount related context imbalance.
+None of those are false alarm. I am not going to push the refcount
+patch to RC5. This is series is what I consider low risk and useful
+for RC5.
 
 Chris
