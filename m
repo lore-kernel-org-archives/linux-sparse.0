@@ -1,48 +1,124 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
-Date: Tue, 18 Jul 2017 13:11:14 -0400
-Message-ID: <CANeU7QkGeMuX7hjfxw-3Mi1_urmBS8znrxRO0VFp5Q+gh7FPTQ@mail.gmail.com>
-References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+From: Pavel Roskin <plroskin@gmail.com>
+Subject: [PATCH] Add -gcc-version option
+Date: Tue, 18 Jul 2017 14:59:45 -0700
+Message-ID: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:34489 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751510AbdGRRLP (ORCPT
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:35724 "EHLO
+        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752762AbdGRV7q (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 13:11:15 -0400
-Received: by mail-pg0-f45.google.com with SMTP id 123so16095833pgj.1
-        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 10:11:15 -0700 (PDT)
-In-Reply-To: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+        Tue, 18 Jul 2017 17:59:46 -0400
+Received: by mail-oi0-f67.google.com with SMTP id h143so2084186oic.2
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 14:59:46 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Michael Stefaniuc <mstefani@mykolab.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: linux-sparse@vger.kernel.org
 
-On Tue, Jul 18, 2017 at 10:47 AM, Michael Stefaniuc
-<mstefani@mykolab.com> wrote:
->
-> make[1]: Entering directory '/j/wine/build/sparse64/dlls/user32/tests'
-> cgcc -c -o menu.o /home/michi/work/wine/dlls/user32/tests/menu.c -I. \
->   -I/home/michi/work/wine/dlls/user32/tests -I../../../include
-> -I/home/michi/work/wine/include \
->   -D__WINESRC__ -D_REENTRANT -fPIC -Wall -pipe -fno-strict-aliasing
-> -Wdeclaration-after-statement \
->   -Wempty-body -Wignored-qualifiers -Wshift-overflow=2
-> -Wstrict-prototypes -Wtype-limits \
->   -Wunused-but-set-parameter -Wvla -Wwrite-strings -Wpointer-arith
-> -Wlogical-op -gdwarf-2 \
->   -gstrict-dwarf -g -O2
+The option argument is parsed into major, minor and patchlevel versions,
+which are defined as __GNUC__, __GNUC_MINOR__, and __GNUC_PATCHLEVEL__ in
+the preprocessor.
 
-Adding CC of Luc,
+One possible use is running sparse compiled with the lastest gcc compiler
+on a Linux kernel that doesn't support that compiler.
 
-It is much easier to reproduce the error from the command line as above.
-Just update the wine directory name is good enough for me.
+Signed-off-by: Pavel Roskin <pavel.roskin@virginorbit.com>
+---
+ lib.c    | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ sparse.1 |  7 +++++++
+ 2 files changed, 52 insertions(+)
 
-I can see how it is loop on the CSE phase. It is trying to simplify the
-set_ne constant follow by a branch. However it did not change the
-instruction and keep setting the CSE flag. Need more digging.
+diff --git a/lib.c b/lib.c
+index ce66a81..aff6862 100644
+--- a/lib.c
++++ b/lib.c
+@@ -24,6 +24,7 @@
+  */
+ #include <ctype.h>
+ #include <fcntl.h>
++#include <limits.h>
+ #include <stdarg.h>
+ #include <stddef.h>
+ #include <stdio.h>
+@@ -831,10 +832,54 @@ static char **handle_base_dir(char *arg, char **next)
+     return next;
+ }
 
-My gut feeling is that we should fix this before the release.
++static char **handle_gcc_version(char *arg, char **next)
++{
++    unsigned long gcc_major_ul, gcc_minor_ul = 0, gcc_patchlevel_ul = 0;
++    char *gcc_version, *p;
++
++    gcc_version = *++next;
++    if (!gcc_version)
++        die("missing argument for -gcc-version option");
++
++    gcc_major_ul = strtoul(gcc_version, &p, 10);
++    if (gcc_major_ul > INT_MAX)
++        die("bad gcc major version");
++
++    if (*p == '\0')
++        goto good;
++    else if (*p != '.')
++        die("bad character after gcc major version");
++
++    gcc_minor_ul = strtoul(p + 1, &p, 10);
++    if (gcc_minor_ul > INT_MAX)
++        die("bad gcc minor version");
++
++    if (*p == '\0')
++        goto good;
++    else if (*p != '.')
++        die("bad character after gcc minor version");
++
++    gcc_patchlevel_ul = strtoul(p + 1, &p, 10);
++    if (gcc_patchlevel_ul > INT_MAX)
++        die("bad gcc patchlevel version");
++
++    if (*p != '\0')
++        die("bad character after gcc patchlevel version");
++
++good:
++    gcc_major = gcc_major_ul;
++    gcc_minor = gcc_minor_ul;
++    gcc_patchlevel = gcc_patchlevel_ul;
++
++    return next;
++}
++
+ static char **handle_switch_g(char *arg, char **next)
+ {
+     if (!strcmp (arg, "gcc-base-dir"))
+         return handle_base_dir(arg, next);
++    else if (!strcmp (arg, "gcc-version"))
++        return handle_gcc_version(arg, next);
 
-Chris
+     return next;
+ }
+diff --git a/sparse.1 b/sparse.1
+index b79c587..9f2c52d 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -355,6 +355,13 @@ Look for system headers in the multiarch
+subdirectory \fIdir\fR.
+ The \fIdir\fR name would normally take the form of the target's
+ normalized GNU triplet. (e.g. i386-linux-gnu).
+ .
++.TP
++.B \-gcc-version \fIversion\fR
++Simulate behavior of gcc of the specified version. At this time, this
++switch only affects macros \fI__GNUC__\fR, \fI__GNUC_MINOR__\fR, and
++\fI__GNUC_PATCHLEVEL__\fR. The default value is the version of gcc that
++compiled sparse, or \fI2.95.0\fR if that information is missing.
++.
+ .SH DEBUG OPTIONS
+ .TP
+ .B \-fdump-linearize[=only]
+-- 
+2.13.3
+
+
+-- 
+Regards,
+Pavel Roskin
