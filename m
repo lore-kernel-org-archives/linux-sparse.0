@@ -1,59 +1,36 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
-Date: Tue, 18 Jul 2017 19:12:17 -0400
-Message-ID: <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
-References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+Subject: Re: [PATCH] Add -gcc-version option
+Date: Tue, 18 Jul 2017 19:35:14 -0400
+Message-ID: <CANeU7Qn7Te3kxzcWAzC_4Hn2MLSsGFTdNX2AjJwmWdb6e2n+pA@mail.gmail.com>
+References: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f181.google.com ([209.85.192.181]:32868 "EHLO
-        mail-pf0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751906AbdGRXMS (ORCPT
+Received: from mail-pg0-f43.google.com ([74.125.83.43]:34417 "EHLO
+        mail-pg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751794AbdGRXfP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 19:12:18 -0400
-Received: by mail-pf0-f181.google.com with SMTP id s70so9083906pfs.0
-        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 16:12:18 -0700 (PDT)
-In-Reply-To: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+        Tue, 18 Jul 2017 19:35:15 -0400
+Received: by mail-pg0-f43.google.com with SMTP id 123so20688865pgj.1
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 16:35:14 -0700 (PDT)
+In-Reply-To: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Michael Stefaniuc <mstefani@mykolab.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Pavel Roskin <plroskin@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Jul 18, 2017 at 10:47 AM, Michael Stefaniuc
-<mstefani@mykolab.com> wrote:
-> Hello guys,
+On Tue, Jul 18, 2017 at 5:59 PM, Pavel Roskin <plroskin@gmail.com> wrote:
+> The option argument is parsed into major, minor and patchlevel versions,
+> which are defined as __GNUC__, __GNUC_MINOR__, and __GNUC_PATCHLEVEL__ in
+> the preprocessor.
 >
-> I thought I'll test the new sparse on the Wine source code, especially
-> as I remember to have gotten 1-2 of those famous "Crazy programmer" errors.
->
-> But I seem to get an infinite loop with a mem leak: 100% CPU with the
-> memory utilization increasing until this line triggers
-> sparse/allocate.c:105:                 die("out of memory");
+> One possible use is running sparse compiled with the lastest gcc compiler
+> on a Linux kernel that doesn't support that compiler.
 
+I am curious, can you just invoke sparse with -D__GNUC__=1 -D__GNUC_MINOR__=2
+to do the same thing?
 
-OK, I have shrink the test program into the following code.
-It can still reproduce the dead loop. It is related to simplify
-the phi source.
-
-Unfortunately I need to go now.
-
-Luc, you want to take a look?
+The current __GNUC__ was a weak define it is suitable for overriding
+if you wants to.
 
 Chris
-
-==========================================
-
-extern char *strcpy (char *__dest, const char *__src);
-
-static void test_menu_iteminfo( void )
-{
-int ansi = 1;
-void *init, *string;
-char stringA[0x80];
-do {
-if(ansi)
-string=stringA;
-if(ansi)
-strcpy( string, init );
-} while( !(ansi = !ansi) );
-}
