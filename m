@@ -1,61 +1,59 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: make selfcheck
-Date: Tue, 18 Jul 2017 17:52:53 +0100
-Message-ID: <f9db8db5-ca7d-d83d-fa65-182d8b61f773@ramsayjones.plus.com>
+Date: Tue, 18 Jul 2017 13:04:24 -0400
+Message-ID: <CANeU7Qms_3VuKivHw20e6=MrWgRyVXJ_fJNTULSX3Y7AF9XqkQ@mail.gmail.com>
 References: <d5ab8af1-6a09-9985-7de1-8ad639369795@ramsayjones.plus.com>
  <39e3d856-fd32-8059-10bb-ad1367e7d7a9@ramsayjones.plus.com>
  <CANeU7QmRaS8C8AyvtduDccK_w9pOjqppbMDoEDtyNH0OnN6ikw@mail.gmail.com>
  <ae7e6285-eb5b-9137-fab4-0ecc502aab7a@ramsayjones.plus.com>
- <CANeU7Q=7=w6WhCkg=KNfLOy5HMGizgO46zh+M_D6mK8AOASnNg@mail.gmail.com>
+ <CANeU7Q=7=w6WhCkg=KNfLOy5HMGizgO46zh+M_D6mK8AOASnNg@mail.gmail.com> <f9db8db5-ca7d-d83d-fa65-182d8b61f773@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout06.plus.net ([212.159.14.18]:44462 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751363AbdGRQw4 (ORCPT
+Received: from mail-pg0-f45.google.com ([74.125.83.45]:34545 "EHLO
+        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752631AbdGRRE0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 12:52:56 -0400
-In-Reply-To: <CANeU7Q=7=w6WhCkg=KNfLOy5HMGizgO46zh+M_D6mK8AOASnNg@mail.gmail.com>
-Content-Language: en-GB
+        Tue, 18 Jul 2017 13:04:26 -0400
+Received: by mail-pg0-f45.google.com with SMTP id 123so16002683pgj.1
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 10:04:25 -0700 (PDT)
+In-Reply-To: <f9db8db5-ca7d-d83d-fa65-182d8b61f773@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Tue, Jul 18, 2017 at 12:52 PM, Ramsay Jones
+<ramsay@ramsayjones.plus.com> wrote:
+>
+> Hmm, I don't think cgcc should be merged into sparse completely no.
+> Some things from cgcc could be moved into sparse, but not everything.
+> One of the main uses of cgcc is as a proxy for (g)cc. (Yes, that could
+> also be moved into sparse, but why bother?)
 
+I think the macro define etc should be merge to sparse. Right now
+some kernel file compile differently because sparse missing some platform
+specific macro. The last time I look at it, the coda file system has some
+header file generating error in sparse.
 
-On 18/07/17 13:53, Christopher Li wrote:
-> On Mon, Jul 17, 2017 at 3:28 PM, Ramsay Jones
-> <ramsay@ramsayjones.plus.com> wrote:
->>
->> I nearly have a clean 'make selfcheck' (I suspect you do too!).
->> I was supposed to have gone out a while ago, ... I guess I will
->> not get it finished before I go. :(
-> 
-> I have send out a V2 version of the patch.
-> 
-> BTW, I think most of the macro define part of the cgcc should be move to sparse
-> as well. In the end, cgcc can be merge with sparse as one. I think
-> even with all those
-> macro used by user space program, it shouldn't impact the kernel compile, right?
+I am thinking maybe have cgcc as symlink to sparse. If sparse
+detect it is invoke from cgcc, it will do the call gcc part.
 
-Hmm, I don't think cgcc should be merged into sparse completely no.
-Some things from cgcc could be moved into sparse, but not everything.
-One of the main uses of cgcc is as a proxy for (g)cc. (Yes, that could
-also be moved into sparse, but why bother?)
+> I still have the 'intptr_t' and 'int32_t' warnings on cygwin, which I
+> could solve either in cgcc or sparse (I was leaning in the direction
+> of sparse, because Luc has already added some of these macros). These
+> definitions would not cause any problems on the kernel (well, if they
+> did, it would also be a problem with gcc!).
 
-I still have the 'intptr_t' and 'int32_t' warnings on cygwin, which I
-could solve either in cgcc or sparse (I was leaning in the direction
-of sparse, because Luc has already added some of these macros). These
-definitions would not cause any problems on the kernel (well, if they
-did, it would also be a problem with gcc!).
+Right, that is my point sparse need to more of those macro to
+behave more like gcc.
 
-However, I would not like to say whether some of the 'platform user
-space' macros would cause a problem on the kernel or not. The only
-way to know is to give it a try! (Unfortunately, due to lack of disk
-space, I have deleted my kernel git repository). :(
+> However, I would not like to say whether some of the 'platform user
+> space' macros would cause a problem on the kernel or not. The only
+> way to know is to give it a try! (Unfortunately, due to lack of disk
+> space, I have deleted my kernel git repository). :(
 
-ATB,
-Ramsay Jones
+It is easy enough to compare for me. I can just turn a kernel check with
+cgcc and see if there is any difference.
 
+Chris
