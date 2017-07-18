@@ -1,124 +1,123 @@
-From: Pavel Roskin <plroskin@gmail.com>
-Subject: [PATCH] Add -gcc-version option
-Date: Tue, 18 Jul 2017 14:59:45 -0700
-Message-ID: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:35724 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752762AbdGRV7q (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 17:59:46 -0400
-Received: by mail-oi0-f67.google.com with SMTP id h143so2084186oic.2
-        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 14:59:46 -0700 (PDT)
-Sender: linux-sparse-owner@vger.kernel.org
+From: Thomas Garnier <thgarnie@google.com>
+Subject: x86: PIE support and option to extend KASLR randomization
+Date: Tue, 18 Jul 2017 15:33:11 -0700
+Message-ID: <20170718223333.110371-1-thgarnie@google.com>
+Return-path: <kernel-hardening-return-8999-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+To: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Thomas Garnier <thgarnie@google.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?q?Radim=20Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>
+Cc: x86@kernel.org, linux-crypto@vger.kernel.org, linux-kernel@vger.kernel.org, xen-devel@lists.xenproject.org, kvm@vger.kernel.org, linux-pm@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
 
-The option argument is parsed into major, minor and patchlevel versions,
-which are defined as __GNUC__, __GNUC_MINOR__, and __GNUC_PATCHLEVEL__ in
-the preprocessor.
+These patches make the changes necessary to build the kernel as Position
+Independent Executable (PIE) on x86_64. A PIE kernel can be relocated below
+the top 2G of the virtual address space. It allows to optionally extend the
+KASLR randomization range from 1G to 3G.
 
-One possible use is running sparse compiled with the lastest gcc compiler
-on a Linux kernel that doesn't support that compiler.
+Thanks a lot to Ard Biesheuvel & Kees Cook on their feedback on compiler
+changes, PIE support and KASLR in general.
 
-Signed-off-by: Pavel Roskin <pavel.roskin@virginorbit.com>
----
- lib.c    | 45 +++++++++++++++++++++++++++++++++++++++++++++
- sparse.1 |  7 +++++++
- 2 files changed, 52 insertions(+)
+The patches:
+ - 1-3, 5-15: Change in assembly code to be PIE compliant.
+ - 4: Add a new _ASM_GET_PTR macro to fetch a symbol address generically.
+ - 16: Adapt percpu design to work correctly when PIE is enabled.
+ - 17: Provide an option to default visibility to hidden except for key symbols.
+       It removes errors between compilation units.
+ - 18: Adapt relocation tool to handle PIE binary correctly.
+ - 19: Add the CONFIG_X86_PIE option (off by default)
+ - 20: Adapt relocation tool to generate a 64-bit relocation table.
+ - 21: Add options to build modules as mcmodel=large and dynamically create a
+       PLT for relative references out of range (adapted from arm64).
+ - 22: Add the CONFIG_RANDOMIZE_BASE_LARGE option to increase relocation range
+       from 1G to 3G (off by default).
 
-diff --git a/lib.c b/lib.c
-index ce66a81..aff6862 100644
---- a/lib.c
-+++ b/lib.c
-@@ -24,6 +24,7 @@
-  */
- #include <ctype.h>
- #include <fcntl.h>
-+#include <limits.h>
- #include <stdarg.h>
- #include <stddef.h>
- #include <stdio.h>
-@@ -831,10 +832,54 @@ static char **handle_base_dir(char *arg, char **next)
-     return next;
- }
+Performance/Size impact:
 
-+static char **handle_gcc_version(char *arg, char **next)
-+{
-+    unsigned long gcc_major_ul, gcc_minor_ul = 0, gcc_patchlevel_ul = 0;
-+    char *gcc_version, *p;
-+
-+    gcc_version = *++next;
-+    if (!gcc_version)
-+        die("missing argument for -gcc-version option");
-+
-+    gcc_major_ul = strtoul(gcc_version, &p, 10);
-+    if (gcc_major_ul > INT_MAX)
-+        die("bad gcc major version");
-+
-+    if (*p == '\0')
-+        goto good;
-+    else if (*p != '.')
-+        die("bad character after gcc major version");
-+
-+    gcc_minor_ul = strtoul(p + 1, &p, 10);
-+    if (gcc_minor_ul > INT_MAX)
-+        die("bad gcc minor version");
-+
-+    if (*p == '\0')
-+        goto good;
-+    else if (*p != '.')
-+        die("bad character after gcc minor version");
-+
-+    gcc_patchlevel_ul = strtoul(p + 1, &p, 10);
-+    if (gcc_patchlevel_ul > INT_MAX)
-+        die("bad gcc patchlevel version");
-+
-+    if (*p != '\0')
-+        die("bad character after gcc patchlevel version");
-+
-+good:
-+    gcc_major = gcc_major_ul;
-+    gcc_minor = gcc_minor_ul;
-+    gcc_patchlevel = gcc_patchlevel_ul;
-+
-+    return next;
-+}
-+
- static char **handle_switch_g(char *arg, char **next)
- {
-     if (!strcmp (arg, "gcc-base-dir"))
-         return handle_base_dir(arg, next);
-+    else if (!strcmp (arg, "gcc-version"))
-+        return handle_gcc_version(arg, next);
+Hackbench (50% and 1600% loads):
+ - PIE disabled: no significant change (-0.50% / +0.50%)
+ - PIE enabled: 7% to 8% on half load, 10% on heavy load.
 
-     return next;
- }
-diff --git a/sparse.1 b/sparse.1
-index b79c587..9f2c52d 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -355,6 +355,13 @@ Look for system headers in the multiarch
-subdirectory \fIdir\fR.
- The \fIdir\fR name would normally take the form of the target's
- normalized GNU triplet. (e.g. i386-linux-gnu).
- .
-+.TP
-+.B \-gcc-version \fIversion\fR
-+Simulate behavior of gcc of the specified version. At this time, this
-+switch only affects macros \fI__GNUC__\fR, \fI__GNUC_MINOR__\fR, and
-+\fI__GNUC_PATCHLEVEL__\fR. The default value is the version of gcc that
-+compiled sparse, or \fI2.95.0\fR if that information is missing.
-+.
- .SH DEBUG OPTIONS
- .TP
- .B \-fdump-linearize[=only]
--- 
-2.13.3
+These results are aligned with the different research on user-mode PIE
+impact on cpu intensive benchmarks (around 10% on x86_64).
 
+slab_test (average of 10 runs):
+ - PIE disabled: no significant change (-1% / +1%)
+ - PIE enabled: 3% to 4%
 
--- 
-Regards,
-Pavel Roskin
+Kernbench (average of 10 Half and Optimal runs):
+ Elapsed Time:
+ - PIE disabled: no significant change (-0.22% / +0.06%)
+ - PIE enabled: around 0.50%
+ System Time:
+ - PIE disabled: no significant change (-0.99% / -1.28%)
+ - PIE enabled: 5% to 6%
+
+Size of vmlinux (Ubuntu configuration):
+ File size:
+ - PIE disabled: 472928672 bytes (-0.000169% from baseline)
+ - PIE enabled: 216878461 bytes (-54.14% from baseline)
+ .text sections:
+ - PIE disabled: 9373572 bytes (+0.04% from baseline)
+ - PIE enabled: 9499138 bytes (+1.38% from baseline)
+
+The big decrease in vmlinux file size is due to the lower number of
+relocations appended to the file.
+
+diffstat:
+ arch/x86/Kconfig                             |   37 +++++
+ arch/x86/Makefile                            |   17 ++
+ arch/x86/boot/boot.h                         |    2 
+ arch/x86/boot/compressed/Makefile            |    5 
+ arch/x86/boot/compressed/misc.c              |   10 +
+ arch/x86/crypto/aes-x86_64-asm_64.S          |   45 +++---
+ arch/x86/crypto/aesni-intel_asm.S            |   14 +
+ arch/x86/crypto/aesni-intel_avx-x86_64.S     |    6 
+ arch/x86/crypto/camellia-aesni-avx-asm_64.S  |   42 ++---
+ arch/x86/crypto/camellia-aesni-avx2-asm_64.S |   44 +++---
+ arch/x86/crypto/camellia-x86_64-asm_64.S     |    8 -
+ arch/x86/crypto/cast5-avx-x86_64-asm_64.S    |   50 +++---
+ arch/x86/crypto/cast6-avx-x86_64-asm_64.S    |   44 +++---
+ arch/x86/crypto/des3_ede-asm_64.S            |   96 ++++++++-----
+ arch/x86/crypto/ghash-clmulni-intel_asm.S    |    4 
+ arch/x86/crypto/glue_helper-asm-avx.S        |    4 
+ arch/x86/crypto/glue_helper-asm-avx2.S       |    6 
+ arch/x86/entry/entry_64.S                    |   26 ++-
+ arch/x86/include/asm/asm.h                   |   13 +
+ arch/x86/include/asm/bug.h                   |    2 
+ arch/x86/include/asm/jump_label.h            |    8 -
+ arch/x86/include/asm/kvm_host.h              |    6 
+ arch/x86/include/asm/module.h                |   16 ++
+ arch/x86/include/asm/page_64_types.h         |    9 +
+ arch/x86/include/asm/paravirt_types.h        |   12 +
+ arch/x86/include/asm/percpu.h                |   25 ++-
+ arch/x86/include/asm/pm-trace.h              |    2 
+ arch/x86/include/asm/processor.h             |    8 -
+ arch/x86/include/asm/setup.h                 |    2 
+ arch/x86/kernel/Makefile                     |    2 
+ arch/x86/kernel/acpi/wakeup_64.S             |   31 ++--
+ arch/x86/kernel/cpu/common.c                 |    4 
+ arch/x86/kernel/head64.c                     |   28 +++
+ arch/x86/kernel/head_64.S                    |   47 +++++-
+ arch/x86/kernel/kvm.c                        |    6 
+ arch/x86/kernel/module-plts.c                |  198 +++++++++++++++++++++++++++
+ arch/x86/kernel/module.c                     |   18 +-
+ arch/x86/kernel/module.lds                   |    4 
+ arch/x86/kernel/relocate_kernel_64.S         |    2 
+ arch/x86/kernel/setup_percpu.c               |    2 
+ arch/x86/kernel/vmlinux.lds.S                |   13 +
+ arch/x86/kvm/svm.c                           |    4 
+ arch/x86/lib/cmpxchg16b_emu.S                |    8 -
+ arch/x86/power/hibernate_asm_64.S            |    4 
+ arch/x86/tools/relocs.c                      |  134 +++++++++++++++---
+ arch/x86/tools/relocs.h                      |    4 
+ arch/x86/tools/relocs_common.c               |   15 +-
+ arch/x86/xen/xen-asm.S                       |   12 -
+ arch/x86/xen/xen-asm.h                       |    3 
+ arch/x86/xen/xen-head.S                      |    9 -
+ include/asm-generic/sections.h               |    6 
+ include/linux/compiler.h                     |    8 +
+ init/Kconfig                                 |    9 +
+ kernel/kallsyms.c                            |   16 +-
+ 54 files changed, 868 insertions(+), 282 deletions(-)
