@@ -1,47 +1,69 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] V2 move kill_unreachable_bbs to outer cse stage Was Re:
- [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
-Date: Wed, 19 Jul 2017 16:57:38 -0400
-Message-ID: <CANeU7Qk3N2F+yOUC5SHGJ=jzWMNhgVL=EV3tbSWPZj-7JRVEHw@mail.gmail.com>
-References: <CANeU7QkCcx1d29megDn9bQ0g7rw04=ujsWCe_bN1Kc1NW_-NZw@mail.gmail.com>
- <20170719204854.6jwkt6q7shnlfelu@ltop.local>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH RFC] Let pseudo->users loop on duplicate version of list
+Date: Wed, 19 Jul 2017 23:14:40 +0200
+Message-ID: <20170719211437.7axhrrjrvr4k6dvg@ltop.local>
+References: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
+ <CANeU7Q=d_+QD+MSGyYqwL82M2RdC_AFVaeR-y87z3U3OKjNBKw@mail.gmail.com>
+ <CACXZuxerM5i33YgKn=GfnWQe+pViCUfUmJ10sz0K-+PjG28uwA@mail.gmail.com>
+ <CANeU7QkTAQ6XaAGrd1PmQ_4Jcv2vxD-cK_9+kKFbyX5b+Pg+Wg@mail.gmail.com>
+ <CACXZuxeGmWGFbMmJCKi+aZbbxx89upb=_Vzqe7Ta99mOGHuVrg@mail.gmail.com>
+ <CANeU7Qk+81ABEnGLxwbHnx510JWk7U8s=RnFqm_jM8pj-4EyDw@mail.gmail.com>
+ <CACXZuxfxUDJKGcH6wFhnxmfXM9jxmMOKyO=5zswQvfGbE88=sw@mail.gmail.com>
+ <CANeU7Qk8VCsj_EDBrj9H1bjR5a-_bLPQJiza_-eC90j=qiw7xw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f177.google.com ([209.85.192.177]:33973 "EHLO
-        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753239AbdGSU5j (ORCPT
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38814 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753239AbdGSVOn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 16:57:39 -0400
-Received: by mail-pf0-f177.google.com with SMTP id q85so4332394pfq.1
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 13:57:39 -0700 (PDT)
-In-Reply-To: <20170719204854.6jwkt6q7shnlfelu@ltop.local>
+        Wed, 19 Jul 2017 17:14:43 -0400
+Received: by mail-wm0-f47.google.com with SMTP id w191so10068835wmw.1
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 14:14:42 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qk8VCsj_EDBrj9H1bjR5a-_bLPQJiza_-eC90j=qiw7xw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, Jul 19, 2017 at 4:48 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> The original patch had a testcase for the regressions testsuite.
-> Is there a reasons why there it has been dropped here?
->
-> The original patch had a reference to the patch it fixed,
-> which is quite helpful to understand the exact situation.
-> Is there a reason why it has been dropped here?
+On Wed, Jul 12, 2017 at 10:27:25PM -0700, Christopher Li wrote:
+> From 7264a822d9d9e545152ac675fbc5b5e970ce254b Mon Sep 17 00:00:00 2001
+> From: Christopher Li <sparse@chrisli.org>
+> Date: Wed, 12 Jul 2017 14:46:50 -0700
+> Subject: [PATCH] Let pseudo->users loop on duplicate versin of list
+> 
+> pseudo->users list will change during find dominator.
+> That cause a bug in the ptrlist because the outer loop iterator
+> is not award of the deletion of the entry.
+> 
+> Let the outer loop using a duplicate version of entry
+> to avoid this problem for now.
 
-Nope, I was hoping your can merge the patch with your test
-case and resubmit as a combine patch. I haven't heard from
-you so far so that is what I have.
+When I see this description, the first thing I think is:
+"you have a problem with an object, you duplicate the object,
+ not you have two problem (at least)".
+In short, how you will keep coherency between the two?
 
-It feel wrong for me to take your test case and submit as mine.
-Again I consider my change just an alternative incremental change
-build on top of yours.
+So yes, without any doubts, this fixes the iteration in the outer loop
+not taking correctly in account the deletion in the inner loop.
 
-If you want to improve the commit message or comment on the
-source, I am all for it. I am glad to see that. I haven't push my
-change to master for that reason. On the other hand, I can't
-hold the release for ever.
+But is the code working correctly now? I don't think so.
+In fact, since the outer loop is using a copy of the initial list,
+now *any* changes in the list will siply be ignored by the outer loop.
+- if an user is removed from the users list (for example in a
+  position much further than the current position in the inner),
+  previously, the inner loop will of course not have processed
+  this user, while now it will process it although this user no
+  more a user of this pseudo.
+  It there any explanation which could explain that the current
+  behaviour is correct?
+- same if the inner loop add a new user, now the outer loop will
+  never process this user.
 
-Chris
+To be clear, the issue I'm raising here is not about 'maybe missing
+an optimisation' but well a question of applying an optimization
+while the real condition are in fatc not met, and thus producings
+incorrect code.
+
+-- Luc
