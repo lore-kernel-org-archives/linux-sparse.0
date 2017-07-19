@@ -1,30 +1,50 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
-Date: Wed, 19 Jul 2017 22:43:01 +0200
-Message-ID: <CAExDi1Quxc_ZfmdW2-kY=Q312Dnbi_7OsRX85_uGrHWTk1vtpw@mail.gmail.com>
-References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
- <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
- <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com> <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
+Subject: Re: [PATCH] V2 move kill_unreachable_bbs to outer cse stage Was Re:
+ [PATCH 1/5] do not corrupt ptrlist while killing unreachable BBs
+Date: Wed, 19 Jul 2017 22:48:57 +0200
+Message-ID: <20170719204854.6jwkt6q7shnlfelu@ltop.local>
+References: <CANeU7QkCcx1d29megDn9bQ0g7rw04=ujsWCe_bN1Kc1NW_-NZw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f174.google.com ([209.85.216.174]:35176 "EHLO
-        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753888AbdGSUnC (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:33745 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755237AbdGSUtC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 16:43:02 -0400
-Received: by mail-qt0-f174.google.com with SMTP id b40so10200810qtb.2
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 13:43:02 -0700 (PDT)
-In-Reply-To: <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
+        Wed, 19 Jul 2017 16:49:02 -0400
+Received: by mail-wm0-f48.google.com with SMTP id 15so2422697wmm.0
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 13:49:01 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QkCcx1d29megDn9bQ0g7rw04=ujsWCe_bN1Kc1NW_-NZw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Michael Stefaniuc <mstefani@mykolab.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-> Luc, do you have time to take a look at this? Without your input,
-> RC5 will be released with commit  11b1a83b disabled.
+> From 484a3a27d95b4bf3be9ac4b9bcf1aca1abe3ac19 Mon Sep 17 00:00:00 2001
+> From: Christopher Li <sparse@chrisli.org>
+> Date: Sat, 8 Jul 2017 19:34:49 -0700
+> Subject: [PATCH] move kill_unreachable_bbs to outer cse stage
+> 
+> The current way of kill_unreach_bbs in insert_branch()
+> cause delete entry in ptrlist that the upper level
+> caller is looping on.
+> 
+> Move it outside to the cse stage avoid that problem.
+> 
+> Reported-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> Signed-of-By: Christopher Li <sparse@chrisli.org>
+> ---
+>  cse.c       | 3 +++
+>  flow.c      | 2 --
+>  linearize.c | 3 ---
+>  3 files changed, 3 insertions(+), 5 deletions(-)
 
-I'm not yet fully back but I'll be able to look at it later, probably
-tomorrow (it's already evening here).
+The original patch had a testcase for the regressions testsuite.
+Is there a reasons why there it has been dropped here?
+
+The original patch had a reference to the patch it fixed,
+which is quite helpful to understand the exact situation.
+Is there a reason why it has been dropped here?
 
 -- Luc
