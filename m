@@ -1,50 +1,51 @@
-From: Pavel Roskin <plroskin@gmail.com>
-Subject: Re: [PATCH] Add -gcc-version option
-Date: Wed, 19 Jul 2017 10:27:07 -0700
-Message-ID: <CAN_72e0f6Zg3YeDrMmb5OOHHr4qj14Wc_WeomeZirjXx0zOU=w@mail.gmail.com>
-References: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
- <CANeU7Qn7Te3kxzcWAzC_4Hn2MLSsGFTdNX2AjJwmWdb6e2n+pA@mail.gmail.com>
- <CAN_72e2SE4pcUNNUSOJVRW31YdXmm-tR0ybOjpT7QDV2fmne4g@mail.gmail.com> <CANeU7Q=HYVQY3HkSqKPekxSMhzFsxpV2UV905h3Qyf2sNGF1ug@mail.gmail.com>
+From: Brian Gerst <brgerst@gmail.com>
+Subject: Re: [RFC 21/22] x86/module: Add support for mcmodel large and PLTs
+Date: Wed, 19 Jul 2017 13:34:46 -0400
+Message-ID: <CAMzpN2jWTS8R5V6i5q=bq4NGW_svELw5bjgWTOX=Ow3ddWx-6Q@mail.gmail.com>
+References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-22-thgarnie@google.com>
+ <c0bc2d98-d6eb-e3db-3799-2e28e9919f3d@zytor.com> <CAMzpN2j+Z27uudHXqqMhbk=s=pnk7LdA2FPkgmsdZzO3ysemsQ@mail.gmail.com>
+ <CAJcbSZFphkF8bcodkcwpK-oi3D7GTQXyTkOLPkmtWSPLPkvB0Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:36317 "EHLO
-        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753297AbdGSR1I (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 13:27:08 -0400
-Received: by mail-oi0-f42.google.com with SMTP id x187so6693062oig.3
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 10:27:08 -0700 (PDT)
-In-Reply-To: <CANeU7Q=HYVQY3HkSqKPekxSMhzFsxpV2UV905h3Qyf2sNGF1ug@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <kernel-hardening-return-9055-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <CAJcbSZFphkF8bcodkcwpK-oi3D7GTQXyTkOLPkmtWSPLPkvB0Q@mail.gmail.com>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>Christ
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Jul 19, 2017 at 6:07 AM, Christopher Li <sparse@chrisli.org> wrote:
-
-> When you specify the gcc version, there is also implicit version
-> specific behavior
-> go with it. I can see user file bugs said I give sparse gcc version X,
-> but gcc has
-> macro Y in X. That is not the case with sparse, that is a bug. I don't
-> want to give
-> the user false impression that sparse can set a gcc version and simulate the gcc
-> version specific behavior.
-
-Makes sense.
-
-> It is simpler just put the version specific macro into a header file and ask
-> sparse to include it. You should be able to add that to command line as well.
+On Wed, Jul 19, 2017 at 11:58 AM, Thomas Garnier <thgarnie@google.com> wrote:
+> On Tue, Jul 18, 2017 at 8:59 PM, Brian Gerst <brgerst@gmail.com> wrote:
+>> On Tue, Jul 18, 2017 at 9:35 PM, H. Peter Anvin <hpa@zytor.com> wrote:
+>>> On 07/18/17 15:33, Thomas Garnier wrote:
+>>>> With PIE support and KASLR extended range, the modules may be further
+>>>> away from the kernel than before breaking mcmodel=kernel expectations.
+>>>>
+>>>> Add an option to build modules with mcmodel=large. The modules generated
+>>>> code will make no assumptions on placement in memory.
+>>>>
+>>>> Despite this option, modules still expect kernel functions to be within
+>>>> 2G and generate relative calls. To solve this issue, the PLT arm64 code
+>>>> was adapted for x86_64. When a relative relocation go outside its range,
+>>>> a dynamic PLT entry is used to correctly jump to the destination.
+>>>
+>>> Why large as opposed to medium or medium-PIC?
+>>
+>> Or for that matter, why not small-PIC?  We aren't changing the size of
+>> the kernel to be larger than 2G text or data.  Small-PIC would still
+>> allow it to be placed anywhere in the address space, and would
+>> generate far better code.
 >
-> Chris
+> My understanding was that small=PIC and medium=PIC assume that the
+> module code is in the lower 2G of memory. I will do additional testing
+> on the modules to confirm that.
 
-I did not realize that sparse supports -include. It turns out it does,
-which is even better than specifying three defines.
+That is only for small/medium absolute (non-PIC) code.  Think about
+userspace shared libraries.  They are not limited to being mapped in
+the lower 2G of the address space.
 
-I don't see any references to -D or -include in the sparse manual
-page. I think they should be documented.
-
--- 
-Regards,
-Pavel Roskin
+--
+Brian Gerst
