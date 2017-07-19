@@ -1,40 +1,51 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] Add -gcc-version option
-Date: Wed, 19 Jul 2017 15:16:43 -0400
-Message-ID: <CANeU7QnUdVGruZV=acWuOwx5_euJJyY8dxmqLtmTbDNxhD+Urg@mail.gmail.com>
-References: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
- <CANeU7Qn7Te3kxzcWAzC_4Hn2MLSsGFTdNX2AjJwmWdb6e2n+pA@mail.gmail.com>
- <CAN_72e2SE4pcUNNUSOJVRW31YdXmm-tR0ybOjpT7QDV2fmne4g@mail.gmail.com>
- <CANeU7Q=HYVQY3HkSqKPekxSMhzFsxpV2UV905h3Qyf2sNGF1ug@mail.gmail.com> <CAN_72e0f6Zg3YeDrMmb5OOHHr4qj14Wc_WeomeZirjXx0zOU=w@mail.gmail.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: Re: x86: PIE support and option to extend
+ KASLR randomization
+Date: Wed, 19 Jul 2017 12:21:05 -0700
+Message-ID: <CAGXu5jKRC0G9GCQoYfPF9htns=_KU53UTPTSt54BRYmgbGOp5w@mail.gmail.com>
+References: <20170718223333.110371-1-thgarnie@google.com> <alpine.DEB.2.20.1707190906490.17764@nuc-kabylake>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:36348 "EHLO
-        mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934027AbdGSTQo (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 15:16:44 -0400
-Received: by mail-pf0-f171.google.com with SMTP id o88so3454646pfk.3
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 12:16:44 -0700 (PDT)
-In-Reply-To: <CAN_72e0f6Zg3YeDrMmb5OOHHr4qj14Wc_WeomeZirjXx0zOU=w@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <kernel-hardening-return-9063-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Sender: keescook@google.com
+In-Reply-To: <alpine.DEB.2.20.1707190906490.17764@nuc-kabylake>
+To: Christopher Lameter <cl@linux.com>
+Cc: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@in>
 List-Id: linux-sparse@vger.kernel.org
-To: Pavel Roskin <plroskin@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Jul 19, 2017 at 1:27 PM, Pavel Roskin <plroskin@gmail.com> wrote:
+On Wed, Jul 19, 2017 at 7:08 AM, Christopher Lameter <cl@linux.com> wrote:
+> On Tue, 18 Jul 2017, Thomas Garnier wrote:
 >
-> I did not realize that sparse supports -include. It turns out it does,
-> which is even better than specifying three defines.
+>> Performance/Size impact:
+>> Hackbench (50% and 1600% loads):
+>>  - PIE enabled: 7% to 8% on half load, 10% on heavy load.
+>> slab_test (average of 10 runs):
+>>  - PIE enabled: 3% to 4%
+>> Kernbench (average of 10 Half and Optimal runs):
+>>  - PIE enabled: 5% to 6%
+>>
+>> Size of vmlinux (Ubuntu configuration):
+>>  File size:
+>>  - PIE disabled: 472928672 bytes (-0.000169% from baseline)
+>>  - PIE enabled: 216878461 bytes (-54.14% from baseline)
 >
-> I don't see any references to -D or -include in the sparse manual
-> page. I think they should be documented.
+> Maybe we need something like CONFIG_PARANOIA so that we can determine at
+> build time how much performance we want to sacrifice for performance?
+>
+> Its going to be difficult to understand what all these hardening config
+> options do.
 
-It is kind of expected due to usage of cgcc. cgcc expect to be run like
-gcc but with one extra step of sparse check checking on it. In order to
-duplicate the gcc behavior on macro, sparse will need to  accept most
-of the gcc preprocessor command line options.
+This kind of thing got discussed recently, and like
+CONFIG_EXPERIMENTAL, a global config doesn't really work. The best
+thing to do is to document each config as well as possible and system
+builders can decide.
 
-As for the document, patch are welcome :-)
+-Kees
 
-Chris
+-- 
+Kees Cook
+Pixel Security
