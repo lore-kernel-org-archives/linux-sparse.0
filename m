@@ -1,37 +1,45 @@
-From: Christopher Lameter <cl@linux.com>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Wed, 19 Jul 2017 09:08:55 -0500 (CDT)
-Message-ID: <alpine.DEB.2.20.1707190906490.17764@nuc-kabylake>
-References: <20170718223333.110371-1-thgarnie@google.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
+Date: Wed, 19 Jul 2017 11:25:57 -0400
+Message-ID: <CANeU7Q=aKJ_JHNBAeG_yatjb7hb_S1D5vfHJ72_B3EK-nrutdg@mail.gmail.com>
+References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+ <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
+ <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com> <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <kernel-hardening-return-9036-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <20170718223333.110371-1-thgarnie@google.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?ISO-8859-2?Q?Radim_Kr=E8m=E1=F8?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:33279 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754233AbdGSPZ6 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 19 Jul 2017 11:25:58 -0400
+Received: by mail-pf0-f176.google.com with SMTP id s70so1487909pfs.0
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 08:25:58 -0700 (PDT)
+In-Reply-To: <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Michael Stefaniuc <mstefani@mykolab.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, 18 Jul 2017, Thomas Garnier wrote:
-
-> Performance/Size impact:
-> Hackbench (50% and 1600% loads):
->  - PIE enabled: 7% to 8% on half load, 10% on heavy load.
-> slab_test (average of 10 runs):
->  - PIE enabled: 3% to 4%
-> Kernbench (average of 10 Half and Optimal runs):
->  - PIE enabled: 5% to 6%
+On Wed, Jul 19, 2017 at 9:26 AM, Christopher Li <sparse@chrisli.org> wrote:
+> I have revert the change cause this problem on sparse-next.
 >
-> Size of vmlinux (Ubuntu configuration):
->  File size:
->  - PIE disabled: 472928672 bytes (-0.000169% from baseline)
->  - PIE enabled: 216878461 bytes (-54.14% from baseline)
+> Wine compile should be able to complete now.
 
-Maybe we need something like CONFIG_PARANOIA so that we can determine at
-build time how much performance we want to sacrifice for performance?
+Yes, I have single CPU build the wine package to a complete.
+The test sparse is on the sparse-next branch.
 
-Its going to be difficult to understand what all these hardening config
-options do.
+cgcc -o wineserver async.o atom.o change.o class.o clipboard.o
+completion.o console.o debugger.o device.o \
+  directory.o event.o fd.o file.o handle.o hook.o mach.o mailslot.o
+main.o mapping.o mutex.o \
+  named_pipe.o object.o process.o procfs.o ptrace.o queue.o region.o
+registry.o request.o \
+  semaphore.o serial.o signal.o snapshot.o sock.o symlink.o thread.o
+timer.o token.o trace.o \
+  unicode.o user.o window.o winstation.o -Wl,--rpath,\$ORIGIN/../libs/wine \
+  ../libs/port/libwine_port.a -lwine -L../libs/wine
+make[1]: Leaving directory '/home/xxx/git/oss/wine/server'
+Wine build complete.
+
+Chris
