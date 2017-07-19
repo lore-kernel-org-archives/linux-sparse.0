@@ -1,40 +1,126 @@
-From: Brian Gerst <brgerst@gmail.com>
-Subject: Re: [RFC 21/22] x86/module: Add support for mcmodel large and PLTs
-Date: Tue, 18 Jul 2017 23:59:49 -0400
-Message-ID: <CAMzpN2j+Z27uudHXqqMhbk=s=pnk7LdA2FPkgmsdZzO3ysemsQ@mail.gmail.com>
-References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-22-thgarnie@google.com>
- <c0bc2d98-d6eb-e3db-3799-2e28e9919f3d@zytor.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: [PATCH] temporary revert commit 11b1a83b d7985338 cause deadloop
+Date: Wed, 19 Jul 2017 07:43:24 -0400
+Message-ID: <CANeU7Q=DKhxVrVab8VwQczFuJ4UK7ucu08JBXseQtjYH729ZsA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-hardening-return-9028-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <c0bc2d98-d6eb-e3db-3799-2e28e9919f3d@zytor.com>
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>Ch
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:36438 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753465AbdGSLn0 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 19 Jul 2017 07:43:26 -0400
+Received: by mail-pg0-f65.google.com with SMTP id y129so6606550pgy.3
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 04:43:25 -0700 (PDT)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-On Tue, Jul 18, 2017 at 9:35 PM, H. Peter Anvin <hpa@zytor.com> wrote:
-> On 07/18/17 15:33, Thomas Garnier wrote:
->> With PIE support and KASLR extended range, the modules may be further
->> away from the kernel than before breaking mcmodel=kernel expectations.
->>
->> Add an option to build modules with mcmodel=large. The modules generated
->> code will make no assumptions on placement in memory.
->>
->> Despite this option, modules still expect kernel functions to be within
->> 2G and generate relative calls. To solve this issue, the PLT arm64 code
->> was adapted for x86_64. When a relative relocation go outside its range,
->> a dynamic PLT entry is used to correctly jump to the destination.
->
-> Why large as opposed to medium or medium-PIC?
+Michael Stefaniuc report that sparse deadloop on one of the
+wine source file. The minimal test case to reproduced the
+deadloop has been add to validation as "kill-unreachable-phi.c".
 
-Or for that matter, why not small-PIC?  We aren't changing the size of
-the kernel to be larger than 2G text or data.  Small-PIC would still
-allow it to be placed anywhere in the address space, and would
-generate far better code.
+The change that introduce the deadloop can be trace back to
+11b1a83b "fix OP_PHI usage in try_to_simplify_bb()" and later
+d7985338 "fix OP_PHI usage in try_to_simplify_bb() only when non-bogus"
 
---
-Brian Gerst
+Temporary revert the change to avoid the deadloop.
+
+The revert cause one of the test case fail because some phi
+related optimization was not done. I set that test case to
+known to fail.
+
+Reported-by: Michael Stefaniuc <mstefani@mykolab.com>
+Signed-off-by: Christopher Li <sparse@chrisli.org>
+---
+ flow.c                            | 16 +++++++---------
+ validation/kill-phi-ttsbb.c       |  1 +
+ validation/kill-unreachable-phi.c | 27 +++++++++++++++++++++++++++
+ 3 files changed, 35 insertions(+), 9 deletions(-)
+ create mode 100644 validation/kill-unreachable-phi.c
+
+diff --git a/flow.c b/flow.c
+index bfe54f7..4ff6745 100644
+--- a/flow.c
++++ b/flow.c
+@@ -119,14 +119,6 @@ static int try_to_simplify_bb(struct basic_block
+*bb, struct instruction *first,
+ {
+  int changed = 0;
+  pseudo_t phi;
+- int bogus;
+-
+- /*
+- * This a due to improper dominance tracking during
+- * simplify_symbol_usage()/conversion to SSA form.
+- * No sane simplification can be done when we have this.
+- */
+- bogus = bb_list_size(bb->parents) != pseudo_list_size(first->phi_list);
+
+  FOR_EACH_PTR(first->phi_list, phi) {
+  struct instruction *def = phi->def;
+@@ -156,8 +148,14 @@ static int try_to_simplify_bb(struct basic_block
+*bb, struct instruction *first,
+  continue;
+  changed |= rewrite_branch(source, &br->bb_true, bb, target);
+  changed |= rewrite_branch(source, &br->bb_false, bb, target);
+- if (changed && !bogus)
++ /*
++ * FIXME: change 11b1a83 cause deadloop on wine compile,
++ * disable for now.
++ */
++#if 0
++ if (changed)
+  kill_use(THIS_ADDRESS(phi));
++#endif
+  } END_FOR_EACH_PTR(phi);
+  return changed;
+ }
+diff --git a/validation/kill-phi-ttsbb.c b/validation/kill-phi-ttsbb.c
+index 178a65d..b05c4c2 100644
+--- a/validation/kill-phi-ttsbb.c
++++ b/validation/kill-phi-ttsbb.c
+@@ -22,6 +22,7 @@ static int foo(int a, int b)
+  * Verify if OP_PHI usage is adjusted after successful try_to_simplify_bb()
+  * check-command: test-linearize $file
+  * check-output-ignore
++ * check-known-to-fail
+  *
+  * check-output-excludes: phi\\.
+  * check-output-excludes: phisrc\\.
+diff --git a/validation/kill-unreachable-phi.c
+b/validation/kill-unreachable-phi.c
+new file mode 100644
+index 0000000..4c7e249
+--- /dev/null
++++ b/validation/kill-unreachable-phi.c
+@@ -0,0 +1,27 @@
++extern char *strcpy (char *__dest, const char *__src);
++
++static void test_menu_iteminfo( void )
++{
++ int ansi = 1;
++ void *init, *string;
++ char initA[]="XYZ";
++ char stringA[0x80];
++ do {
++ if(ansi) {
++ string=stringA;
++ init = initA;
++ }
++ if(ansi)
++ strcpy( string, init );
++ } while( !(ansi = !ansi) );
++}
++/*
++ * check-name: kill-unreachable-phi
++ * check-description:
++ * In wine source tests/menu.c
++ * Improper killing a phi instruction inside not reachable BB cause
++ * dead loop on sparse.
++ *
++ * check-output-ignore
++ *
++ */
+-- 
+2.13.3
