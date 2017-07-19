@@ -1,189 +1,35 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
-Date: Tue, 18 Jul 2017 20:07:19 -0400
-Message-ID: <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
-References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com> <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
+From: "H. Peter Anvin" <hpa@zytor.com>
+Subject: Re: [RFC 21/22] x86/module: Add support for mcmodel large and PLTs
+Date: Tue, 18 Jul 2017 18:35:05 -0700
+Message-ID: <c0bc2d98-d6eb-e3db-3799-2e28e9919f3d@zytor.com>
+References: <20170718223333.110371-1-thgarnie@google.com>
+ <20170718223333.110371-22-thgarnie@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f173.google.com ([209.85.192.173]:36726 "EHLO
-        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751969AbdGSAHU (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 20:07:20 -0400
-Received: by mail-pf0-f173.google.com with SMTP id o88so12286832pfk.3
-        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 17:07:20 -0700 (PDT)
-In-Reply-To: <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <kernel-hardening-return-9025-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170718223333.110371-22-thgarnie@google.com>
+Content-Language: en-US
+To: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>
+Cc: x86@kernel.org, linux-crypto@vger.kernel.org, linux-kernel@vger.kernel.org, xen-devel@lists.xenproject.org, kvm@vger.kernel.org, linux-pm@vger.kernel.org, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-sparse@vger.kernel.org
-To: Michael Stefaniuc <mstefani@mykolab.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Jul 18, 2017 at 7:12 PM, Christopher Li <sparse@chrisli.org> wrote:
->
-> OK, I have shrink the test program into the following code.
-> It can still reproduce the dead loop. It is related to simplify
-> the phi source.
+On 07/18/17 15:33, Thomas Garnier wrote:
+> With PIE support and KASLR extended range, the modules may be further
+> away from the kernel than before breaking mcmodel=kernel expectations.
+> 
+> Add an option to build modules with mcmodel=large. The modules generated
+> code will make no assumptions on placement in memory.
+> 
+> Despite this option, modules still expect kernel functions to be within
+> 2G and generate relative calls. To solve this issue, the PLT arm64 code
+> was adapted for x86_64. When a relative relocation go outside its range,
+> a dynamic PLT entry is used to correctly jump to the destination.
 
-So I add a show_entry() in side each of the CSE loop.
-Here is what I have so far. Commends in <==========
+Why large as opposed to medium or medium-PIC?
 
-Chris
-
-====================== The original
-test_menu_iteminfo:
-.L0:
-        <entry-point>
-        phisrc.32   %phi3(ansi) <- $1
-        br          .L1
-
-.L1:
-        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
-        cbr         %r1(ansi), .L4, .L5
-
-.L4:
-        symaddr.64  %r2 <- stringA
-        cast.64     %r3 <- (64) %r2
-        br          .L5
-
-.L5:
-        cbr         %r1(ansi), .L6, .L7
-
-.L6:
-        ptrcast.64  %r6 <- (64) %r3
-        ptrcast.64  %r8 <- (64) VOID
-        call.64     %r9 <- strcpy, %r6, %r8
-        br          .L7
-
-.L7:
-        br          .L2
-
-.L2:
-        seteq.32    %r11 <- %r1(ansi), $0
-        phisrc.32   %phi4(ansi) <- %r11
-        cbr         %r11, .L3, .L1
-
-.L3:
-        ret
-
-======================
-test_menu_iteminfo:
-.L0:
-        <entry-point>
-        phisrc.32   %phi3(ansi) <- $1
-        br          .L1
-
-.L1:
-        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
-        cbr         %r1(ansi), .L4, .L5
-
-.L4:
-   ### <======= r2 getsymaddr get simplify away
-        cast.64     %r3 <- (64) stringA
-        br          .L5
-
-.L5:
-        cbr         %r1(ansi), .L6, .L7
-
-.L6:
-        ptrcast.64  %r6 <- (64) %r3
-        ptrcast.64  %r8 <- (64) VOID
-        call.64     %r9 <- strcpy, %r6, %r8
-        br          .L7
-
-.L7:
-        br          .L2
-
-.L2:
-        seteq.32    %r11 <- %r1(ansi), $0
-        phisrc.32   %phi4(ansi) <- %r11
-        cbr         %r1(ansi), .L1, .L3
-
-.L3:
-        ret
-======================
-test_menu_iteminfo:
-.L0:
-        <entry-point>
-        phisrc.32   %phi3(ansi) <- $1
-        br          .L1
-
-.L1:
-        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
-        cbr         %r1(ansi), .L4, .L5
-
-.L4:
-        cast.64     %r3 <- (64) stringA
-        br          .L5
-
-.L5:
-        cbr         %r1(ansi), .L6, .L2
-
-.L6:
-        ptrcast.64  %r6 <- (64) %r3
-        ptrcast.64  %r8 <- (64) VOID
-        call.64     %r9 <- strcpy, %r6, %r8
-        br          .L2   <=============== L2 merge with L7
-
-.L2:
-        seteq.32    %r11 <- %r1(ansi), $0
-        phisrc.32   %phi4(ansi) <- %r11
-        cbr         %r1(ansi), .L1, .L3
-
-.L3:
-        ret
-======================
-test_menu_iteminfo:
-.L0:
-        <entry-point>
-        br          .L4 <========= phisrc3 get optimize away. This seems wrong
-
-.L1:
-        phi.32      %r1(ansi) <- VOID, %phi4(ansi) <======= this seems wrong.
-        cbr         %r1(ansi), .L4, .L5
-
-.L4:
-        cast.64     %r3 <- (64) stringA
-        br          .L5
-
-.L5:
-        cbr         %r1(ansi), .L6, .L3
-
-.L6:
-        ptrcast.64  %r6 <- (64) %r3
-        ptrcast.64  %r8 <- (64) VOID
-        call.64     %r9 <- strcpy, %r6, %r8
-        br          .L2
-
-.L2:
-        seteq.32    %r11 <- %r1(ansi), $0
-        phisrc.32   %phi4(ansi) <- %r11
-        cbr         %r1(ansi), .L4, .L3
-
-.L3:
-        ret
-======================
-test_menu_iteminfo:
-.L0:
-        <entry-point>
-        br          .L4
-
-.L4:
-        cast.64     %r3 <- (64) stringA
-        br          .L5
-
-.L5:
-        cbr         %r11, .L3, .L6
-
-.L6:
-        ptrcast.64  %r6 <- (64) %r3
-        ptrcast.64  %r8 <- (64) VOID
-        call.64     %r9 <- strcpy, %r6, %r8
-        br          .L2
-
-.L2:
-        setne.32    %r11 <- %r11, $0 <====== this seems very wrong
-        cbr         %r11, .L4, .L3
-
-.L3:
-        ret
+	-hpa
