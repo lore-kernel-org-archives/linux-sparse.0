@@ -1,28 +1,47 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 5/5] avoid crash with sym->bb_target == NULL
-Date: Thu, 20 Jul 2017 00:23:33 +0200
-Message-ID: <20170719222331.uxi5he3eki3lwmrh@ltop.local>
-References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
- <20170706191950.81268-6-luc.vanoostenryck@gmail.com>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: [RFC 06/22] kvm: Adapt assembly for PIE support
+Date: Wed, 19 Jul 2017 15:44:48 -0700
+Message-ID: <CAJcbSZFjiqPoOUDFSU_WhneEJCEhrAe6nV4tRGOpRg7hsOk1-A@mail.gmail.com>
+References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-7-thgarnie@google.com>
+ <CAMzpN2gF7QxDbVG-6ad3Qarcn1N_JT5tit9CMvQL95LQGeZivA@mail.gmail.com>
+ <CAJcbSZGqY=btU=+eWfgdhF0je0Yn_GxkymFHn+OV-1BuzgbRYw@mail.gmail.com> <0cdd02e1-8bf2-41cd-f085-c338c2fd8e25@zytor.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f173.google.com ([209.85.128.173]:32849 "EHLO
-        mail-wr0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932154AbdGSWXg (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 18:23:36 -0400
-Received: by mail-wr0-f173.google.com with SMTP id v105so33657943wrb.0
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 15:23:35 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20170706191950.81268-6-luc.vanoostenryck@gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <kernel-hardening-return-9067-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <0cdd02e1-8bf2-41cd-f085-c338c2fd8e25@zytor.com>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Brian Gerst <brgerst@gmail.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christo
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>
 
-This patch fixes a reproducible crash and have been ignored
-since it has been posted two weeks ago.
-Is there any reasons why?
+On Wed, Jul 19, 2017 at 3:27 PM, H. Peter Anvin <hpa@zytor.com> wrote:
+> On 07/19/17 08:40, Thomas Garnier wrote:
+>>>
+>>> This doesn't look right.  It's accessing a per-cpu variable.  The
+>>> per-cpu section is an absolute, zero-based section and not subject to
+>>> relocation.
+>>
+>> PIE does not respect the zero-based section, it tries to have
+>> everything relative. Patch 16/22 also adapt per-cpu to work with PIE
+>> (while keeping the zero absolute design by default).
+>>
+>
+> This is silly.  The right thing is for PIE is to be explicitly absolute,
+> without (%rip).  The use of (%rip) memory references for percpu is just
+> an optimization.
 
--- Luc
+I agree that it is odd but that's how the compiler generates code. I
+will re-explore PIC options with mcmodel=small or medium, as mentioned
+on other threads.
+
+>
+>         -hpa
+>
+
+
+
+-- 
+Thomas
