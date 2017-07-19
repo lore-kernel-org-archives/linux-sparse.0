@@ -1,42 +1,73 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [RFC 20/22] x86/relocs: Add option to generate 64-bit relocations
-Date: Wed, 19 Jul 2017 15:47:50 -0700
-Message-ID: <CAJcbSZE3fQ5vgUm4648kwExY_-p7a3d+QdNQ8K8tbhZVhOHFtA@mail.gmail.com>
-References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-21-thgarnie@google.com>
- <e499e745-e276-a4c9-2cd6-0977ca025448@zytor.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH RFC] Let pseudo->users loop on duplicate version of list
+Date: Thu, 20 Jul 2017 00:51:00 +0200
+Message-ID: <CAMHZB6E9LkHc4KR5ktoS2MzZpZpW09h4_U8XH+PVE4HTmi1LcQ@mail.gmail.com>
+References: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
+ <CANeU7Q=d_+QD+MSGyYqwL82M2RdC_AFVaeR-y87z3U3OKjNBKw@mail.gmail.com>
+ <CACXZuxerM5i33YgKn=GfnWQe+pViCUfUmJ10sz0K-+PjG28uwA@mail.gmail.com>
+ <CANeU7QkTAQ6XaAGrd1PmQ_4Jcv2vxD-cK_9+kKFbyX5b+Pg+Wg@mail.gmail.com>
+ <CACXZuxeGmWGFbMmJCKi+aZbbxx89upb=_Vzqe7Ta99mOGHuVrg@mail.gmail.com>
+ <CANeU7Qk+81ABEnGLxwbHnx510JWk7U8s=RnFqm_jM8pj-4EyDw@mail.gmail.com>
+ <CACXZuxfxUDJKGcH6wFhnxmfXM9jxmMOKyO=5zswQvfGbE88=sw@mail.gmail.com>
+ <CANeU7Qk8VCsj_EDBrj9H1bjR5a-_bLPQJiza_-eC90j=qiw7xw@mail.gmail.com>
+ <20170719211437.7axhrrjrvr4k6dvg@ltop.local> <CANeU7QmQ4JmD_wLoZ6r7bV7Uu4BASnvuHpmQ7VKAoZXR9FD93w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-hardening-return-9068-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <e499e745-e276-a4c9-2cd6-0977ca025448@zytor.com>
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christo
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-qk0-f177.google.com ([209.85.220.177]:35298 "EHLO
+        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933224AbdGSWvB (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 19 Jul 2017 18:51:01 -0400
+Received: by mail-qk0-f177.google.com with SMTP id v125so6153075qkd.2
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 15:51:01 -0700 (PDT)
+In-Reply-To: <CANeU7QmQ4JmD_wLoZ6r7bV7Uu4BASnvuHpmQ7VKAoZXR9FD93w@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, Jul 19, 2017 at 3:33 PM, H. Peter Anvin <hpa@zytor.com> wrote:
-> On 07/18/17 15:33, Thomas Garnier wrote:
->> The x86 relocation tool generates a list of 32-bit signed integers. There
->> was no need to use 64-bit integers because all addresses where above the 2G
->> top of the memory.
->>
->> This change add a large-reloc option to generate 64-bit unsigned integers.
->> It can be used when the kernel plan to go below the top 2G and 32-bit
->> integers are not enough.
+On Wed, Jul 19, 2017 at 11:42 PM, Christopher Li <sparse@chrisli.org> wrote:
+> On Wed, Jul 19, 2017 at 2:14 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> When I see this description, the first thing I think is:
+>> "you have a problem with an object, you duplicate the object,
+>>  not you have two problem (at least)".
+>> In short, how you will keep coherency between the two?
 >
-> Why on Earth?  This would only be necessary if the *kernel itself* was
-> more than 2G, which isn't going to happen for the forseeable future.
+> We don't :-). Both the remove case and insert case has been
+> discussed. First of all, the ptrlist-refcount patch check for the
+> insert case, there is none so far. If you believe there is one,
+> I would like to know.
 
-Because the relocation integer is an absolute address, not an offset
-in the binary. Next iteration, I can try using a 32-bit offset for
-everyone.
+Some add_user() can be called in this loop. so it's just a question
+to some input code complex enough to have an add_user()
+done on the same pseudo as the one concerned in the outer
+loop.
+
+> About the looping on the deleted entry. That is the very first
+> thing I shout in the V1 version of the patch. The thing is,
+> the pseudo_user have a point to instruction. If the instruction
+> is deleted then that instruction will have insn->bb = NULL.
 >
->         -hpa
->
+> Not a perfect fix. But better than the previous. Because
+> the for loop is actually looping on reverse order. Any delete
+> will cause major align problem __nr counting from the tail.
 
+Yes, those list delete inside iteration loops are definitively to avoid.
 
+> Any way, My V1 and email asking for suggestion how to fix it
+> About 10 days  ago. I haven't heard any thing better. If you
+> have other way to fix it properly, I am all for it. It is not too late
+> but time is running out soon.
 
--- 
-Thomas
+I stated several times that the only real solution will be to mark the
+elements as being deleted (and only effectively delete them in some
+safe situations) exactly like it is done for instruction (which are probably
+the type the most often deleted from lists. Trying to effectively
+removing them from lists like it is currently done for the others types
+would most probably fail in the most horrible ways).
+It's a simple & clean solution, provably correct in *all* situations.
+But I don't remember having seen any replies from you on this subject.
+
+-- Luc
