@@ -1,51 +1,56 @@
-From: Brian Gerst <brgerst@gmail.com>
-Subject: Re: [RFC 21/22] x86/module: Add support for mcmodel large and PLTs
-Date: Wed, 19 Jul 2017 13:34:46 -0400
-Message-ID: <CAMzpN2jWTS8R5V6i5q=bq4NGW_svELw5bjgWTOX=Ow3ddWx-6Q@mail.gmail.com>
-References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-22-thgarnie@google.com>
- <c0bc2d98-d6eb-e3db-3799-2e28e9919f3d@zytor.com> <CAMzpN2j+Z27uudHXqqMhbk=s=pnk7LdA2FPkgmsdZzO3ysemsQ@mail.gmail.com>
- <CAJcbSZFphkF8bcodkcwpK-oi3D7GTQXyTkOLPkmtWSPLPkvB0Q@mail.gmail.com>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: [RFC 16/22] x86/percpu: Adapt percpu for PIE support
+Date: Wed, 19 Jul 2017 11:26:32 -0700
+Message-ID: <CAJcbSZFXrDZikh9P5M81ztkiMv7EhO4x0bzBdYE8RYC=HMZgqg@mail.gmail.com>
+References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-17-thgarnie@google.com>
+ <CAMzpN2g5YkFZTY7yfvG03QUKc-=asKMZbqke9g4e2oT_pgg7Yw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-hardening-return-9055-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+Return-path: <kernel-hardening-return-9059-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
 List-Post: <mailto:kernel-hardening@lists.openwall.com>
 List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
 List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
 List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <CAJcbSZFphkF8bcodkcwpK-oi3D7GTQXyTkOLPkmtWSPLPkvB0Q@mail.gmail.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>Christ
+In-Reply-To: <CAMzpN2g5YkFZTY7yfvG03QUKc-=asKMZbqke9g4e2oT_pgg7Yw@mail.gmail.com>
+To: Brian Gerst <brgerst@gmail.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>Chris
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Jul 19, 2017 at 11:58 AM, Thomas Garnier <thgarnie@google.com> wrote:
-> On Tue, Jul 18, 2017 at 8:59 PM, Brian Gerst <brgerst@gmail.com> wrote:
->> On Tue, Jul 18, 2017 at 9:35 PM, H. Peter Anvin <hpa@zytor.com> wrote:
->>> On 07/18/17 15:33, Thomas Garnier wrote:
->>>> With PIE support and KASLR extended range, the modules may be further
->>>> away from the kernel than before breaking mcmodel=kernel expectations.
->>>>
->>>> Add an option to build modules with mcmodel=large. The modules generated
->>>> code will make no assumptions on placement in memory.
->>>>
->>>> Despite this option, modules still expect kernel functions to be within
->>>> 2G and generate relative calls. To solve this issue, the PLT arm64 code
->>>> was adapted for x86_64. When a relative relocation go outside its range,
->>>> a dynamic PLT entry is used to correctly jump to the destination.
->>>
->>> Why large as opposed to medium or medium-PIC?
+On Tue, Jul 18, 2017 at 8:08 PM, Brian Gerst <brgerst@gmail.com> wrote:
+> On Tue, Jul 18, 2017 at 6:33 PM, Thomas Garnier <thgarnie@google.com> wrote:
+>> Perpcu uses a clever design where the .percu ELF section has a virtual
+>> address of zero and the relocation code avoid relocating specific
+>> symbols. It makes the code simple and easily adaptable with or without
+>> SMP support.
 >>
->> Or for that matter, why not small-PIC?  We aren't changing the size of
->> the kernel to be larger than 2G text or data.  Small-PIC would still
->> allow it to be placed anywhere in the address space, and would
->> generate far better code.
+>> This design is incompatible with PIE because generated code always try to
+>> access the zero virtual address relative to the default mapping address.
+>> It becomes impossible when KASLR is configured to go below -2G. This
+>> patch solves this problem by removing the zero mapping and adapting the GS
+>> base to be relative to the expected address. These changes are done only
+>> when PIE is enabled. The original implementation is kept as-is
+>> by default.
 >
-> My understanding was that small=PIC and medium=PIC assume that the
-> module code is in the lower 2G of memory. I will do additional testing
-> on the modules to confirm that.
+> The reason the per-cpu section is zero-based on x86-64 is to
+> workaround GCC hardcoding the stack protector canary at %gs:40.  So
+> this patch is incompatible with CONFIG_STACK_PROTECTOR.
 
-That is only for small/medium absolute (non-PIC) code.  Think about
-userspace shared libraries.  They are not limited to being mapped in
-the lower 2G of the address space.
+Ok, that make sense. I don't want this feature to not work with
+CONFIG_CC_STACKPROTECTOR*. One way to fix that would be adding a GDT
+entry for gs so gs:40 points to the correct memory address and
+gs:[rip+XX] works correctly through the MSR. Given the separate
+discussion on mcmodel, I am going first to check if we can move from
+PIE to PIC with a mcmodel=small or medium that would remove the percpu
+change requirement. I tried before without success but I understand
+better percpu and other components so maybe I can make it work.
 
---
-Brian Gerst
+Thanks a lot for the feedback.
+
+>
+> --
+> Brian Gerst
+
+
+
+-- 
+Thomas
