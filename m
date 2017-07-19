@@ -1,58 +1,59 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [RFC 13/22] x86/power/64: Adapt assembly for PIE support
-Date: Wed, 19 Jul 2017 20:41:27 +0200
-Message-ID: <20170719184127.GA1285@amd>
-References: <20170718223333.110371-1-thgarnie@google.com>
- <20170718223333.110371-14-thgarnie@google.com>
+From: Michael Stefaniuc <mstefani@mykolab.com>
+Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
+Date: Wed, 19 Jul 2017 20:50:38 +0200
+Message-ID: <3327446f-4ba6-655f-0f3a-31e337e7fd8b@mykolab.com>
+References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+ <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
+ <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
+ <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
+ <CANeU7Q=aKJ_JHNBAeG_yatjb7hb_S1D5vfHJ72_B3EK-nrutdg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="dDRMvlgZJXvWKvBx"
-Return-path: <kernel-hardening-return-9061-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Content-Disposition: inline
-In-Reply-To: <20170718223333.110371-14-thgarnie@google.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Brian Gerst <brgerst@gmail.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Tejun Heo <tj@kernel.org>Chris
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mx.kolabnow.com ([95.128.36.42]:49434 "EHLO mx.kolabnow.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754965AbdGSSuw (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 19 Jul 2017 14:50:52 -0400
+In-Reply-To: <CANeU7Q=aKJ_JHNBAeG_yatjb7hb_S1D5vfHJ72_B3EK-nrutdg@mail.gmail.com>
+Content-Language: en-US
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+
+Hello Chris,
+
+On 07/19/2017 05:25 PM, Christopher Li wrote:
+> On Wed, Jul 19, 2017 at 9:26 AM, Christopher Li <sparse@chrisli.org> wrote:
+>> I have revert the change cause this problem on sparse-next.
+>>
+>> Wine compile should be able to complete now.
+> 
+> Yes, I have single CPU build the wine package to a complete.
+> The test sparse is on the sparse-next branch.
+make -j12 works fine too. Thanks for the fix.
+
+Btw. I don't see any "crazy programmer" left for Wine.
 
 
---dDRMvlgZJXvWKvBx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+bye
+	michael
 
-On Tue 2017-07-18 15:33:24, Thomas Garnier wrote:
-> Change the assembly code to use only relative references of symbols for t=
-he
-> kernel to be PIE compatible.
->=20
-> Position Independent Executable (PIE) support will allow to extended the
-> KASLR randomization range below the -2G memory limit.
->=20
-> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+> 
+> cgcc -o wineserver async.o atom.o change.o class.o clipboard.o
+> completion.o console.o debugger.o device.o \
+>   directory.o event.o fd.o file.o handle.o hook.o mach.o mailslot.o
+> main.o mapping.o mutex.o \
+>   named_pipe.o object.o process.o procfs.o ptrace.o queue.o region.o
+> registry.o request.o \
+>   semaphore.o serial.o signal.o snapshot.o sock.o symlink.o thread.o
+> timer.o token.o trace.o \
+>   unicode.o user.o window.o winstation.o -Wl,--rpath,\$ORIGIN/../libs/wine \
+>   ../libs/port/libwine_port.a -lwine -L../libs/wine
+> make[1]: Leaving directory '/home/xxx/git/oss/wine/server'
+> Wine build complete.
+> 
+> Chris
+> 
 
-Acked-by: Pavel Machek <pavel@ucw.cz>
-
-(But not tested; testing it would be nice).
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---dDRMvlgZJXvWKvBx
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAllvp9cACgkQMOfwapXb+vIO8gCgpBYoGg7aQUDBer0KqNDdRxMr
-PN0AnAkhnZL2b5/6noFSLfiKXYwfgtge
-=XHtW
------END PGP SIGNATURE-----
-
---dDRMvlgZJXvWKvBx--
