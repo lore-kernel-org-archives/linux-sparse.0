@@ -1,41 +1,55 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
-Date: Wed, 19 Jul 2017 14:16:54 -0700
-Message-ID: <CANeU7Q=Vt-yJ-7TKzxb2CxanZREqOJS-kGOU-2FEJTbjeT5_-A@mail.gmail.com>
-References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
- <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
- <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
- <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com> <CAExDi1Quxc_ZfmdW2-kY=Q312Dnbi_7OsRX85_uGrHWTk1vtpw@mail.gmail.com>
+Subject: Re: [PATCH RFC] Let pseudo->users loop on duplicate version of list
+Date: Wed, 19 Jul 2017 14:42:33 -0700
+Message-ID: <CANeU7QmQ4JmD_wLoZ6r7bV7Uu4BASnvuHpmQ7VKAoZXR9FD93w@mail.gmail.com>
+References: <CANeU7QmpvfZutvnSwrjH7ZYXhw3S3HDh19eHXkBGY7oz7ADtmw@mail.gmail.com>
+ <CANeU7Q=d_+QD+MSGyYqwL82M2RdC_AFVaeR-y87z3U3OKjNBKw@mail.gmail.com>
+ <CACXZuxerM5i33YgKn=GfnWQe+pViCUfUmJ10sz0K-+PjG28uwA@mail.gmail.com>
+ <CANeU7QkTAQ6XaAGrd1PmQ_4Jcv2vxD-cK_9+kKFbyX5b+Pg+Wg@mail.gmail.com>
+ <CACXZuxeGmWGFbMmJCKi+aZbbxx89upb=_Vzqe7Ta99mOGHuVrg@mail.gmail.com>
+ <CANeU7Qk+81ABEnGLxwbHnx510JWk7U8s=RnFqm_jM8pj-4EyDw@mail.gmail.com>
+ <CACXZuxfxUDJKGcH6wFhnxmfXM9jxmMOKyO=5zswQvfGbE88=sw@mail.gmail.com>
+ <CANeU7Qk8VCsj_EDBrj9H1bjR5a-_bLPQJiza_-eC90j=qiw7xw@mail.gmail.com> <20170719211437.7axhrrjrvr4k6dvg@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:36818 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754253AbdGSVQz (ORCPT
+Received: from mail-pg0-f46.google.com ([74.125.83.46]:33139 "EHLO
+        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752840AbdGSVme (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Jul 2017 17:16:55 -0400
-Received: by mail-pg0-f51.google.com with SMTP id 125so5303035pgi.3
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 14:16:55 -0700 (PDT)
-In-Reply-To: <CAExDi1Quxc_ZfmdW2-kY=Q312Dnbi_7OsRX85_uGrHWTk1vtpw@mail.gmail.com>
+        Wed, 19 Jul 2017 17:42:34 -0400
+Received: by mail-pg0-f46.google.com with SMTP id k14so5652548pgr.0
+        for <linux-sparse@vger.kernel.org>; Wed, 19 Jul 2017 14:42:34 -0700 (PDT)
+In-Reply-To: <20170719211437.7axhrrjrvr4k6dvg@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Michael Stefaniuc <mstefani@mykolab.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, Jul 19, 2017 at 4:43 PM, Luc Van Oostenryck
+On Wed, Jul 19, 2017 at 2:14 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
->
-> I'm not yet fully back but I'll be able to look at it later, probably
-> tomorrow (it's already evening here).
+> When I see this description, the first thing I think is:
+> "you have a problem with an object, you duplicate the object,
+>  not you have two problem (at least)".
+> In short, how you will keep coherency between the two?
 
-That is fine. How about we temporary disable that in the 0.5.1 release.
-Re-enable it with some proper fix of the phi domination problem. e.g.
-0.5.2.
+We don't :-). Both the remove case and insert case has been
+discussed. First of all, the ptrlist-refcount patch check for the
+insert case, there is none so far. If you believe there is one,
+I would like to know.
 
-Right now I feel a little bit uncomfortable with 11b1a83b. Already two bugs
-trigger in the field. The previous fix d7985338 is not a proper fix any way.
-I think the right thing to do is just release 0.5.1 with 11b1a83b disabled.
-Turn on 11b1a83b in sparse-next and do more fixing there. Release
-0.5.2 when it settle down with other new merges.
+About the looping on the deleted entry. That is the very first
+thing I shout in the V1 version of the patch. The thing is,
+the pseudo_user have a point to instruction. If the instruction
+is deleted then that instruction will have insn->bb = NULL.
+
+Not a perfect fix. But better than the previous. Because
+the for loop is actually looping on reverse order. Any delete
+will cause major align problem __nr counting from the tail.
+
+Any way, My V1 and email asking for suggestion how to fix it
+About 10 days  ago. I haven't heard any thing better. If you
+have other way to fix it properly, I am all for it. It is not too late
+but time is running out soon.
 
 Chris
