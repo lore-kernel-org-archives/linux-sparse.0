@@ -1,46 +1,189 @@
-From: Pavel Roskin <plroskin@gmail.com>
-Subject: Re: [PATCH] Add -gcc-version option
-Date: Tue, 18 Jul 2017 16:46:47 -0700
-Message-ID: <CAN_72e2SE4pcUNNUSOJVRW31YdXmm-tR0ybOjpT7QDV2fmne4g@mail.gmail.com>
-References: <CAN_72e10vHGWwmovq_ra7FKE9EQgo-T+r8AavwFErkEV9Hnuww@mail.gmail.com>
- <CANeU7Qn7Te3kxzcWAzC_4Hn2MLSsGFTdNX2AjJwmWdb6e2n+pA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
+Date: Tue, 18 Jul 2017 20:07:19 -0400
+Message-ID: <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
+References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com> <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f45.google.com ([209.85.218.45]:36430 "EHLO
-        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751987AbdGRXqt (ORCPT
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:36726 "EHLO
+        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751969AbdGSAHU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 18 Jul 2017 19:46:49 -0400
-Received: by mail-oi0-f45.google.com with SMTP id x187so30453149oig.3
-        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 16:46:48 -0700 (PDT)
-In-Reply-To: <CANeU7Qn7Te3kxzcWAzC_4Hn2MLSsGFTdNX2AjJwmWdb6e2n+pA@mail.gmail.com>
+        Tue, 18 Jul 2017 20:07:20 -0400
+Received: by mail-pf0-f173.google.com with SMTP id o88so12286832pfk.3
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Jul 2017 17:07:20 -0700 (PDT)
+In-Reply-To: <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Michael Stefaniuc <mstefani@mykolab.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Jul 18, 2017 at 4:35 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Tue, Jul 18, 2017 at 5:59 PM, Pavel Roskin <plroskin@gmail.com> wrote:
->> The option argument is parsed into major, minor and patchlevel versions,
->> which are defined as __GNUC__, __GNUC_MINOR__, and __GNUC_PATCHLEVEL__ in
->> the preprocessor.
->>
->> One possible use is running sparse compiled with the lastest gcc compiler
->> on a Linux kernel that doesn't support that compiler.
+On Tue, Jul 18, 2017 at 7:12 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> I am curious, can you just invoke sparse with -D__GNUC__=1 -D__GNUC_MINOR__=2
-> to do the same thing?
->
-> The current __GNUC__ was a weak define it is suitable for overriding
-> if you wants to.
+> OK, I have shrink the test program into the following code.
+> It can still reproduce the dead loop. It is related to simplify
+> the phi source.
 
-Yes, that works! I wish I thought of it earlier and did not waste time
-writing that patch.
+So I add a show_entry() in side each of the CSE loop.
+Here is what I have so far. Commends in <==========
 
-That option may still be useful if sparse attempts to imitate the
-behavior of specific gcc versions (in addition to the defines).
+Chris
 
--- 
-Regards,
-Pavel Roskin
+====================== The original
+test_menu_iteminfo:
+.L0:
+        <entry-point>
+        phisrc.32   %phi3(ansi) <- $1
+        br          .L1
+
+.L1:
+        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
+        cbr         %r1(ansi), .L4, .L5
+
+.L4:
+        symaddr.64  %r2 <- stringA
+        cast.64     %r3 <- (64) %r2
+        br          .L5
+
+.L5:
+        cbr         %r1(ansi), .L6, .L7
+
+.L6:
+        ptrcast.64  %r6 <- (64) %r3
+        ptrcast.64  %r8 <- (64) VOID
+        call.64     %r9 <- strcpy, %r6, %r8
+        br          .L7
+
+.L7:
+        br          .L2
+
+.L2:
+        seteq.32    %r11 <- %r1(ansi), $0
+        phisrc.32   %phi4(ansi) <- %r11
+        cbr         %r11, .L3, .L1
+
+.L3:
+        ret
+
+======================
+test_menu_iteminfo:
+.L0:
+        <entry-point>
+        phisrc.32   %phi3(ansi) <- $1
+        br          .L1
+
+.L1:
+        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
+        cbr         %r1(ansi), .L4, .L5
+
+.L4:
+   ### <======= r2 getsymaddr get simplify away
+        cast.64     %r3 <- (64) stringA
+        br          .L5
+
+.L5:
+        cbr         %r1(ansi), .L6, .L7
+
+.L6:
+        ptrcast.64  %r6 <- (64) %r3
+        ptrcast.64  %r8 <- (64) VOID
+        call.64     %r9 <- strcpy, %r6, %r8
+        br          .L7
+
+.L7:
+        br          .L2
+
+.L2:
+        seteq.32    %r11 <- %r1(ansi), $0
+        phisrc.32   %phi4(ansi) <- %r11
+        cbr         %r1(ansi), .L1, .L3
+
+.L3:
+        ret
+======================
+test_menu_iteminfo:
+.L0:
+        <entry-point>
+        phisrc.32   %phi3(ansi) <- $1
+        br          .L1
+
+.L1:
+        phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
+        cbr         %r1(ansi), .L4, .L5
+
+.L4:
+        cast.64     %r3 <- (64) stringA
+        br          .L5
+
+.L5:
+        cbr         %r1(ansi), .L6, .L2
+
+.L6:
+        ptrcast.64  %r6 <- (64) %r3
+        ptrcast.64  %r8 <- (64) VOID
+        call.64     %r9 <- strcpy, %r6, %r8
+        br          .L2   <=============== L2 merge with L7
+
+.L2:
+        seteq.32    %r11 <- %r1(ansi), $0
+        phisrc.32   %phi4(ansi) <- %r11
+        cbr         %r1(ansi), .L1, .L3
+
+.L3:
+        ret
+======================
+test_menu_iteminfo:
+.L0:
+        <entry-point>
+        br          .L4 <========= phisrc3 get optimize away. This seems wrong
+
+.L1:
+        phi.32      %r1(ansi) <- VOID, %phi4(ansi) <======= this seems wrong.
+        cbr         %r1(ansi), .L4, .L5
+
+.L4:
+        cast.64     %r3 <- (64) stringA
+        br          .L5
+
+.L5:
+        cbr         %r1(ansi), .L6, .L3
+
+.L6:
+        ptrcast.64  %r6 <- (64) %r3
+        ptrcast.64  %r8 <- (64) VOID
+        call.64     %r9 <- strcpy, %r6, %r8
+        br          .L2
+
+.L2:
+        seteq.32    %r11 <- %r1(ansi), $0
+        phisrc.32   %phi4(ansi) <- %r11
+        cbr         %r1(ansi), .L4, .L3
+
+.L3:
+        ret
+======================
+test_menu_iteminfo:
+.L0:
+        <entry-point>
+        br          .L4
+
+.L4:
+        cast.64     %r3 <- (64) stringA
+        br          .L5
+
+.L5:
+        cbr         %r11, .L3, .L6
+
+.L6:
+        ptrcast.64  %r6 <- (64) %r3
+        ptrcast.64  %r8 <- (64) VOID
+        call.64     %r9 <- strcpy, %r6, %r8
+        br          .L2
+
+.L2:
+        setne.32    %r11 <- %r11, $0 <====== this seems very wrong
+        cbr         %r11, .L4, .L3
+
+.L3:
+        ret
