@@ -1,137 +1,92 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 2/2] pre-process: replace use of vla's with heap allocation
-Date: Thu, 20 Jul 2017 08:02:33 -0400
-Message-ID: <CANeU7QkmtVVPhhanR2M7=3P9cCse0B9rXJSfx8c1NCC4aHZ-qw@mail.gmail.com>
-References: <5ffb141e-fdb2-a1b8-a5b7-c922d1a9ef08@ramsayjones.plus.com>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: [RFC 16/22] x86/percpu: Adapt percpu for PIE support
+Date: Thu, 20 Jul 2017 07:26:39 -0700
+Message-ID: <CAJcbSZHuOhMHW6OTyt7-vZkPLS3XRQ48gpkF-TyohXpDW+825w@mail.gmail.com>
+References: <20170718223333.110371-1-thgarnie@google.com> <20170718223333.110371-17-thgarnie@google.com>
+ <CAMzpN2g5YkFZTY7yfvG03QUKc-=asKMZbqke9g4e2oT_pgg7Yw@mail.gmail.com>
+ <CAJcbSZFXrDZikh9P5M81ztkiMv7EhO4x0bzBdYE8RYC=HMZgqg@mail.gmail.com> <25a2974a-fbb4-ea4b-d090-582d6d0de7fd@zytor.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f43.google.com ([74.125.83.43]:35381 "EHLO
-        mail-pg0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934876AbdGTMCe (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 20 Jul 2017 08:02:34 -0400
-Received: by mail-pg0-f43.google.com with SMTP id v190so13980398pgv.2
-        for <linux-sparse@vger.kernel.org>; Thu, 20 Jul 2017 05:02:34 -0700 (PDT)
-In-Reply-To: <5ffb141e-fdb2-a1b8-a5b7-c922d1a9ef08@ramsayjones.plus.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <kernel-hardening-return-9088-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <25a2974a-fbb4-ea4b-d090-582d6d0de7fd@zytor.com>
+To: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Brian Gerst <brgerst@gmail.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@alien8.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, Christian Borntraeger <borntraeger@de.ibm.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christo
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Wed, Jul 19, 2017 at 4:13 PM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
+On Wed, Jul 19, 2017 at 4:33 PM, H. Peter Anvin <hpa@zytor.com> wrote:
+> On 07/19/17 11:26, Thomas Garnier wrote:
+>> On Tue, Jul 18, 2017 at 8:08 PM, Brian Gerst <brgerst@gmail.com> wrote:
+>>> On Tue, Jul 18, 2017 at 6:33 PM, Thomas Garnier <thgarnie@google.com> wrote:
+>>>> Perpcu uses a clever design where the .percu ELF section has a virtual
+>>>> address of zero and the relocation code avoid relocating specific
+>>>> symbols. It makes the code simple and easily adaptable with or without
+>>>> SMP support.
+>>>>
+>>>> This design is incompatible with PIE because generated code always try to
+>>>> access the zero virtual address relative to the default mapping address.
+>>>> It becomes impossible when KASLR is configured to go below -2G. This
+>>>> patch solves this problem by removing the zero mapping and adapting the GS
+>>>> base to be relative to the expected address. These changes are done only
+>>>> when PIE is enabled. The original implementation is kept as-is
+>>>> by default.
+>>>
+>>> The reason the per-cpu section is zero-based on x86-64 is to
+>>> workaround GCC hardcoding the stack protector canary at %gs:40.  So
+>>> this patch is incompatible with CONFIG_STACK_PROTECTOR.
+>>
+>> Ok, that make sense. I don't want this feature to not work with
+>> CONFIG_CC_STACKPROTECTOR*. One way to fix that would be adding a GDT
+>> entry for gs so gs:40 points to the correct memory address and
+>> gs:[rip+XX] works correctly through the MSR.
 >
-> The 'selfcheck' make target issues warnings about using vla's in the
-> pre-processor code, like so:
+> What are you talking about?  A GDT entry and the MSR do the same thing,
+> except that a GDT entry is limited to an offset of 0-0xffffffff (which
+> doesn't work for us, obviously.)
 >
->        CHECK    pre-process.c
->   pre-process.c:712:25: warning: Variable length array is used.
->   pre-process.c:2019:28: warning: Variable length array is used.
+
+A GDT entry would allow gs:0x40 to be valid while all gs:[rip+XX]
+addresses uses the MSR.
+
+I didn't tested it but that was used on the RFG mitigation [1]. The fs
+segment register was used for both thread storage and shadow stack.
+
+[1] http://xlab.tencent.com/en/2016/11/02/return-flow-guard/
+
+>> Given the separate
+>> discussion on mcmodel, I am going first to check if we can move from
+>> PIE to PIC with a mcmodel=small or medium that would remove the percpu
+>> change requirement. I tried before without success but I understand
+>> better percpu and other components so maybe I can make it work.
 >
-> A Makefile change to pass '-Wno-vla' to sparse when processing this
-> source file (or all source files) may be a better solution than the
-> one given here.
+>>> This is silly.  The right thing is for PIE is to be explicitly absolute,
+>>> without (%rip).  The use of (%rip) memory references for percpu is just
+>>> an optimization.
+>>
+>> I agree that it is odd but that's how the compiler generates code. I
+>> will re-explore PIC options with mcmodel=small or medium, as mentioned
+>> on other threads.
 >
-> Replace the use of vla's with heap allocation. This has performance
-> implications (although it may me safer), due to the dynamic memory
-> allocation and the zero initialisation of the memory (using calloc).
-> I have not done any timing measurements to see if this is a problem
-> in practice.
-
-I purpose the following patch. Make the expand using stack for small
-argument numbers. That should not have much performance impact
-at all because long macro arguments are rare.
-
-Incremental patch follows. If you think that is fine, I will apply the
-combined patch as yours.
-
-> +       if (nargs > 0)
-> +               args = calloc(nargs, sizeof(*args));
-
-Need to check alloc failed.
-
-> +
->         if (sym->arglist) {
->                 if (!match_op(scan_next(&token->next), '('))
->                         return 1;
-
-Need to free alloc memory.
+> Why should the way compiler generates code affect the way we do things
+> in assembly?
+>
+> That being said, the compiler now has support for generating this kind
+> of code explicitly via the __seg_gs pointer modifier.  That should let
+> us drop the __percpu_prefix and just use variables directly.  I suspect
+> we want to declare percpu variables as "volatile __seg_gs" to account
+> for the possibility of CPU switches.
+>
+> Older compilers won't be able to work with this, of course, but I think
+> that it is acceptable for those older compilers to not be able to
+> support PIE.
+>
+>         -hpa
+>
 
 
-> +       if (nargs > 0)
-> +               args = calloc(nargs, sizeof(*args));
 
-Same here need to check alloc failed.
-
-Chris
-
-Purposed incremental fix up follows:
-
---- sparse.chrisl.orig/pre-process.c
-+++ sparse.chrisl/pre-process.c
-@@ -709,21 +709,30 @@ static int expand(struct token **list, s
-  struct ident *expanding = token->ident;
-  struct token **tail;
-  int nargs = sym->arglist ? sym->arglist->count.normal : 0;
-- struct arg *args = NULL;
-+#define ARG_LIMIT 8
-+ struct arg arg_array[ARG_LIMIT], *args = arg_array;
-+ int err = 0;
-
-  if (expanding->tainted) {
-  token->pos.noexpand = 1;
-  return 1;
-  }
-
-- if (nargs > 0)
-+ if (nargs >= ARG_LIMIT) {
-  args = calloc(nargs, sizeof(*args));
-+ if (!args)
-+ die("calloc(%d, %lu) failed", nargs, sizeof(*args));
-+ }
-
-  if (sym->arglist) {
-- if (!match_op(scan_next(&token->next), '('))
-- return 1;
-- if (!collect_arguments(token->next, sym->arglist, args, token))
-- return 1;
-+ if (!match_op(scan_next(&token->next), '(')) {
-+ err = 1;
-+ goto exit;
-+ }
-+ if (!collect_arguments(token->next, sym->arglist, args, token)) {
-+ err = 1;
-+ goto exit;
-+ }
-  expand_arguments(nargs, args);
-  }
-
-@@ -741,9 +750,11 @@ static int expand(struct token **list, s
-  (*list)->pos.whitespace = token->pos.whitespace;
-  *tail = last;
-
-- free(args);
-+exit:
-+ if (nargs >= ARG_LIMIT)
-+ free(args);
-
-- return 0;
-+ return err;
- }
-
- static const char *token_name_sequence(struct token *token, int
-endop, struct token *start)
-@@ -2024,8 +2035,11 @@ static void dump_macro(struct symbol *sy
-  struct token **args = NULL;
-  struct token *token;
-
-- if (nargs > 0)
-+ if (nargs > 0) {
-  args = calloc(nargs, sizeof(*args));
-+ if (!args)
-+ die("calloc %ld", nargs * sizeof(*args));
-+ }
-
-  printf("#define %s", show_ident(sym->ident));
-  token = sym->arglist;
+-- 
+Thomas
