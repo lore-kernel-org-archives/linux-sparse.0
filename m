@@ -1,173 +1,132 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH 2/2] pre-process: replace use of vla's with heap
- allocation
-Date: Thu, 20 Jul 2017 17:44:48 +0100
-Message-ID: <cce05c3f-a309-9fa7-3107-e6e6831972aa@ramsayjones.plus.com>
-References: <5ffb141e-fdb2-a1b8-a5b7-c922d1a9ef08@ramsayjones.plus.com>
- <CANeU7QkmtVVPhhanR2M7=3P9cCse0B9rXJSfx8c1NCC4aHZ-qw@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse-next and preview of 0.5.1-rc5
+Date: Fri, 21 Jul 2017 00:35:57 +0200
+Message-ID: <20170720223554.54ohh7pfl7qm43dc@ltop.local>
+References: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
+ <20170715182159.ltikqlbe6rktxfhz@ltop.local>
+ <CANeU7Qkt4+QsgrrwUSwiiJ_V77gnJgb5YW0qSwwx1-uu9-GhLw@mail.gmail.com>
+ <20170719221738.2gkctzmdjajz4uec@ltop.local>
+ <CANeU7QkevpEdcp-WmM820sjJ4-LhVyPHeGHETh64WG3jPzewhA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout06.plus.net ([212.159.14.18]:38202 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755346AbdGTQox (ORCPT
+Received: from mail-wm0-f41.google.com ([74.125.82.41]:37986 "EHLO
+        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965821AbdGTWgF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 20 Jul 2017 12:44:53 -0400
-In-Reply-To: <CANeU7QkmtVVPhhanR2M7=3P9cCse0B9rXJSfx8c1NCC4aHZ-qw@mail.gmail.com>
-Content-Language: en-GB
+        Thu, 20 Jul 2017 18:36:05 -0400
+Received: by mail-wm0-f41.google.com with SMTP id w191so38563611wmw.1
+        for <linux-sparse@vger.kernel.org>; Thu, 20 Jul 2017 15:36:04 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QkevpEdcp-WmM820sjJ4-LhVyPHeGHETh64WG3jPzewhA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
 
+On Wed, Jul 19, 2017 at 08:19:02PM -0700, Christopher Li wrote:
+> On Wed, Jul 19, 2017 at 3:17 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> >
+> > Even now, I'm not really back. Just taking time to reply here
+> > while I have the opportunity to.
+> 
+> OK. Good to know then guessing
+> 
+> 
+> >> Can you show me some C input file that your original patch will do the
+> >> right thing and current one will miss the opportunity to simplify?
+> >> Even for the case it is just a suspect of producing worse code is fine.
+> >> Just point me to some test case, I will investigate and compare the
+> >> results.
+> >
+> > Test cases are test cases and code is code.
+> >
+> > I'll copy here verbatim the commit message of the patch that was fixed
+> > by the original patch (the one that had "Fixes: 51cfbc90a5e1462fcd624a1598ecd985a508a5d6
+> 
+> I still don't have a valid test case to difference sparse-next
+> and your patch series.
 
+You don't need a test case to *think* about the code or simply read
+the explanation I wrote here under.
+ 
+> If your test case is that switch statement, I make a test case
+> out of it. Sparse-next and yoru patch show the same result
+> bytecode wise:
 
-On 20/07/17 13:02, Christopher Li wrote:
-> On Wed, Jul 19, 2017 at 4:13 PM, Ramsay Jones
-> <ramsay@ramsayjones.plus.com> wrote:
->>
->> The 'selfcheck' make target issues warnings about using vla's in the
->> pre-processor code, like so:
->>
->>        CHECK    pre-process.c
->>   pre-process.c:712:25: warning: Variable length array is used.
->>   pre-process.c:2019:28: warning: Variable length array is used.
->>
->> A Makefile change to pass '-Wno-vla' to sparse when processing this
->> source file (or all source files) may be a better solution than the
->> one given here.
->>
->> Replace the use of vla's with heap allocation. This has performance
->> implications (although it may me safer), due to the dynamic memory
->> allocation and the zero initialisation of the memory (using calloc).
->> I have not done any timing measurements to see if this is a problem
->> in practice.
+Of course, it does.
+ 
+> >         commit 51cfbc90a5e1462fcd624a1598ecd985a508a5d6
+> >         Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> >         Date:   2017-04-26 12:21:21 +0200
+> >
+> >             fix: kill unreachable BBs after killing a child
+> >
+> >             When simplifying a switch into a simple branch all the now
+> >             unused children of the current BB must be removed.
+> >             If one of these children become now orphaned, it is directly
+> >             killed (it will need to be killed soon or later since it is
+> >             unreachable).
+> >
+> >             However, if one of the killed children is the header of a loop
+> >             where some variables are updated this may cause problems.
+> >             Indeed, by killing the header (which contains the phisrc of
+> >             the entry value of the variable) the whole loop may become
+> >             unreachable but is not killed yet, OTOH simplification of
+> >             the associated OP_PHI may create a cycle which may then be
+> >             detected later by simplify_one_memop() which will issue a
+> >             "crazy programmer" warning while the programmer was innocent.
 > 
-> I purpose the following patch. Make the expand using stack for small
-> argument numbers. That should not have much performance impact
-> at all because long macro arguments are rare.
+> That sounds very much like the wine dead loop case recently report on
+> the mailing list.
 
-My first reaction was surprise that you didn't go for the Makefile
-idea - setting '-Wno-vla' would be the simplest solution. ;-)
+These two cases are not at all related.
 
-I can understand warning about vla usage (especially in the kernel),
-but it a 'standard' supported feature. I don't use them myself, partly
-because they are a 'relatively' new feature, but also because I have had
-some bad experience in the past using alloca in similar circumstances.
+> >             This situation can be seen in code like:
+> >                     int *p;
+> >                     switch (i - i) {        // will be optimized to 0
+> >                     case 0:                 // will be the simple branch
+> >                             return 0;
+> >                     case 1:                 // will be optimized away
+> >                             p = ptr;
+> >                             do {            // will be an unreachable loop
+> >                                     *p++ = 123;
+> >                             } while (--i);
+> >                     }
+> >
+> >             Fix this by calling kill_unreachable_bbs() after having
+> >             simplified the switch into a branch. This will avoid to
+> >             create a cycle with because of the removed phisrc in the
+> >             header and as an added benefit will avoid to waste time
+> >             trying to simplify BBs that are unreachable.
+> >
+> >             In addition, it's now useless to call kill_bb() for each
+> >             removed switch's children as kill_unreachable_bbs() will
+> >             do that too.
+> 
+> The simple patch in sparse-next has the same output result
+> 
+> > It's not at all a problem of some missing optimization opportunity.
+> > It's a problem of applying some optimization (OP_PHI simplification)
+> > and then giving a warning for the consequence of this optimization
+> > (the "crazy programmer" warning) in incorrect conditions/wrong
+> > assumption (a variable must not be considered as undefined if it
+> > is part of an unreachable BB, it should just be ignored).
+> >
+> > I hope it is clear enough now.
+> 
+> Can you show me a test C code trigger the problem?
 
-My second thought was, have you done some timing tests (no I haven't)
-and determined that this causes a noticeable slowdown?
+OK, it wasn't clear enough.
 
-> Incremental patch follows. If you think that is fine, I will apply the
-> combined patch as yours.
-> 
->> +       if (nargs > 0)
->> +               args = calloc(nargs, sizeof(*args));
-> 
-> Need to check alloc failed.
+It will be a few more days before I can access to my usual dev stuff
+where my tests and tests results are.
 
-Yes, indeed! *blush*
-
->> +
->>         if (sym->arglist) {
->>                 if (!match_op(scan_next(&token->next), '('))
->>                         return 1;
-> 
-> Need to free alloc memory.
-
-Ahem, I obviously didn't think about this patch too much! :-D
-
-> 
-> 
->> +       if (nargs > 0)
->> +               args = calloc(nargs, sizeof(*args));
-> 
-> Same here need to check alloc failed.
-> 
-> Chris
-> 
-> Purposed incremental fix up follows:
-
-Hmm, dunno.
-
-I did, briefly, think about adding an 'array' capability to the
-sparse ALLOCATOR facility (you can only allocate single instances
-from the current allocators - ignoring 'string' and 'bytes').
-
-ATB,
-Ramsay Jones
-
-> 
-> --- sparse.chrisl.orig/pre-process.c
-> +++ sparse.chrisl/pre-process.c
-> @@ -709,21 +709,30 @@ static int expand(struct token **list, s
->   struct ident *expanding = token->ident;
->   struct token **tail;
->   int nargs = sym->arglist ? sym->arglist->count.normal : 0;
-> - struct arg *args = NULL;
-> +#define ARG_LIMIT 8
-> + struct arg arg_array[ARG_LIMIT], *args = arg_array;
-> + int err = 0;
-> 
->   if (expanding->tainted) {
->   token->pos.noexpand = 1;
->   return 1;
->   }
-> 
-> - if (nargs > 0)
-> + if (nargs >= ARG_LIMIT) {
->   args = calloc(nargs, sizeof(*args));
-> + if (!args)
-> + die("calloc(%d, %lu) failed", nargs, sizeof(*args));
-> + }
-> 
->   if (sym->arglist) {
-> - if (!match_op(scan_next(&token->next), '('))
-> - return 1;
-> - if (!collect_arguments(token->next, sym->arglist, args, token))
-> - return 1;
-> + if (!match_op(scan_next(&token->next), '(')) {
-> + err = 1;
-> + goto exit;
-> + }
-> + if (!collect_arguments(token->next, sym->arglist, args, token)) {
-> + err = 1;
-> + goto exit;
-> + }
->   expand_arguments(nargs, args);
->   }
-> 
-> @@ -741,9 +750,11 @@ static int expand(struct token **list, s
->   (*list)->pos.whitespace = token->pos.whitespace;
->   *tail = last;
-> 
-> - free(args);
-> +exit:
-> + if (nargs >= ARG_LIMIT)
-> + free(args);
-> 
-> - return 0;
-> + return err;
->  }
-> 
->  static const char *token_name_sequence(struct token *token, int
-> endop, struct token *start)
-> @@ -2024,8 +2035,11 @@ static void dump_macro(struct symbol *sy
->   struct token **args = NULL;
->   struct token *token;
-> 
-> - if (nargs > 0)
-> + if (nargs > 0) {
->   args = calloc(nargs, sizeof(*args));
-> + if (!args)
-> + die("calloc %ld", nargs * sizeof(*args));
-> + }
-> 
->   printf("#define %s", show_ident(sym->ident));
->   token = sym->arglist;
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-sparse" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+However, using the description here above, it's not very hard to imagine
+a situation where the two patch will behave differently.
+You can even create a test case from the old test case here above
+and removing a single line, the one "p = ptr;". It's also very easy
+to create all sort of variants of it.
+ 
+-- Luc
