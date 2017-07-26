@@ -1,42 +1,123 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Sparse warnings on GENMASK + arm32
-Date: Wed, 26 Jul 2017 09:47:15 -0400
-Message-ID: <CANeU7Qme-sAvpFhuaA-YjRoCu_-zyySVpnYuSTYjZoM9D64PYQ@mail.gmail.com>
-References: <20170726013020.GL2146@codeaurora.org> <1000702648.38599568.1501075981880.JavaMail.zimbra@redhat.com>
+Subject: Re: sparse-next and preview of 0.5.1-rc5
+Date: Wed, 26 Jul 2017 12:10:20 -0400
+Message-ID: <CANeU7Q=YQUgzBeKhzOSROdJEobTAjXU1oSbicceB9axg1sFGsg@mail.gmail.com>
+References: <CANeU7Qk-9RcNkWoEL5-0AKyd2Q30BvtjfivEG_KgD4kAH-aEdA@mail.gmail.com>
+ <20170715182159.ltikqlbe6rktxfhz@ltop.local> <CANeU7Qkt4+QsgrrwUSwiiJ_V77gnJgb5YW0qSwwx1-uu9-GhLw@mail.gmail.com>
+ <20170719221738.2gkctzmdjajz4uec@ltop.local> <CANeU7QkevpEdcp-WmM820sjJ4-LhVyPHeGHETh64WG3jPzewhA@mail.gmail.com>
+ <20170720223554.54ohh7pfl7qm43dc@ltop.local> <CANeU7QkgF5N_Byw3j4G-dV1ZoWR6CW+y+UZa3MkrVcFNZmYz8Q@mail.gmail.com>
+ <CANeU7QnovxzRQuhjyRHY==B2Vk5qU9Qk08rTDuvdwmARGci4Og@mail.gmail.com> <20170726090022.2waraq4rgci2wuq2@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1000702648.38599568.1501075981880.JavaMail.zimbra@redhat.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Lance Richardson <lrichard@redhat.com>
-Cc: Stephen Boyd <sboyd@codeaurora.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:33195 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750898AbdGZQKV (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 26 Jul 2017 12:10:21 -0400
+Received: by mail-pg0-f51.google.com with SMTP id b8so9558405pgn.0
+        for <linux-sparse@vger.kernel.org>; Wed, 26 Jul 2017 09:10:21 -0700 (PDT)
+In-Reply-To: <20170726090022.2waraq4rgci2wuq2@ltop.local>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, Jul 26, 2017 at 9:33 AM, Lance Richardson <lrichard@redhat.com> wrote:
-> Hmm, it seems sparse is incorrectly taking ~0UL to be a 64-bit value
-> while BITS_PER_LONG is (correctly) evaluated to be 32.
+On Wed, Jul 26, 2017 at 5:00 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This is typical of situations where undefined pseudos are involved.
+> For example this is what Linus wrote on the subject some months ago:
 >
-> #define GENMASK(h, l) \
->         (((~0UL) << (l)) & (~0UL >> (BITS_PER_LONG - 1 - (h))))
+>                and.32      %r3 <- %r4, $-65
+>                 or.32       %r4 <- %r3, $64
 >
-What is the sizeof(unsigned long) in ARM 32 bit world?
+>         which *initializes* the pseudo %r4 in the second instruction, but uses
+>         it in the first one. That's a classic pattern of uninitialized pseudos
+>         in sparse exactly because of the SSA logic.
+>
+>         But it is all internally consistent, and the simplification is
+>         "correct". The simplification phase very much has a "garbage in,
+>         garbage out" model.
 
-~0UL has the type of "unsigned long", I assume BITS_PER_LONG
-is just plain "int"? Using sparse -E should be able to get the expression
-after the macro expression.
+I think that model is wrong. It is not only "garbage in, garbage out".
+It cause sparse freak out due to incorrect SSA form like the wine dead
+loop bug. In the above example, %r4 was used *before* it's define,
+so there must exist an execution flow loop back to the beginning of
+this block. So the proper way should be some thing like:
 
-The kernel compile invoke sparse directly. That is the assumption
-that the host gcc has the same type size as the target gcc.
-That is no longer true if you have cross compiler.
+phi.32 %phi4 <- %phisrc1(VOID), %phisrc2(%r4)
+and.32 %r3 <- %phi4, $-65
+or.32 %r4 <- %r3, $64
+phisrc.32 %phiscrc2 <- %r4
 
-If you want to have sparse understand the proper architecture difference,
-the current practices is using cgcc to handle the architecture specific
-macros.
+Luc, are you fully back yet?
 
-you can try to invoke the kernel building with: CHECK="cgcc -no-compile".
-Warning: I haven't try that myself, it might not work as expected.
+If you are, please take a look at the wine compile dead loop bug. I
+already simplify the test source into minimal form. My guess is that it
+is cause by this invalid SSA form as well.
 
-In the long run, I do wish sparse can implement the proper handling of
-the architecture specific stuff by itself without go through of cgcc.
+BTW, gcc does not do this kind of invalid SSA form in their IR.
+
+We really should change this model.
+>
+> Yes, this is what was explained in the original patch description.
+
+OK we are on the same page on cause of the crazy programmer.
+Only different view on the SSA form.
+
+ the BB early to avoid the "crazy programmer".
+>> That sounds more like a cover up rather than a proper fix up.
+>
+> Like explained in the original patch description, this situation with
+> a self-defined pseudo can happen in unreachable code *even* if the
+> pseudo was in fact defined if:
+> - the definition was done in a loop header
+> - the loop header was deleted by insert_branch()
+>   * the definition is then removed, the pseudo become undefined
+>   * it shouldn't matter since all it's use is now in dead code
+>   * we don't know the that the loop is now dead code before
+>     kill_unreachable_bbs() is called.
+>   * therefore, kill_unreachable_bbs() must be called:
+>     - after a branch have been deleted
+>     - before simplify_one_memop() is called and is about to issue the
+>       "crazy programmer" warning
+>       BECAUSE THE "crazy programmer" WARNING SHOULD NOT BE ISSUED
+>       IF THE CONCERNED CODE IS IN FACT DEAD CODE.
+
+I totally get that part. My point is that, the crazy programmer warning
+is an ill form of SSA to begin with. We might need to address that illegal
+SSA form as well. My impression is that the illegal SSA from cause the
+wine dead loop bug as well.
+
+> So, if you really prefer, you can call kill_unreachable_bbs() just before
+> the "crazy programmer" check instead of just after the branch delete
+> like it was done in my patch but calling kill_unreachable_bbs()
+> only after clean_up_insn() like done in your patch is wrong.
+
+I don't think it is wrong. Because even with your patch, there is
+other ways to get into "crazy programmer" situation. We need to
+address that.
+
+My point is that, "crazy programmer" is an ill form of  SSA it shouldn't
+exist in the first place.
+
+>
+>> If we have the proper SSA form, the "crazy programmer" shouldn't
+>> pop up at all.
+>
+> See Linus explanation here above.
+
+I am not convinced that is a good enough reason to allow this
+kind of ill form of SSA. It save a phi instruction but cost a lot of
+trouble down the road.
+
+> I found absolutely incredible the amount of time already wasted
+> on this issue and it is even not closed yet.
+> I feel really tired and totally disgusted by all this.
+
+Luc, I hope you have a good rest during your time off sparse.
+
+Getting the compiler back end optimization right is hard and
+tedious.
 
 Chris
