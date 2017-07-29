@@ -1,28 +1,42 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] thread_info: suppress sparse warning in check_copy_size()
-Date: Fri, 28 Jul 2017 11:16:49 +0200
-Message-ID: <CAExDi1QnPdUfrLgAzJUq=4ZQ9r+cLF26oyq=rm20bLj0XAYZiQ@mail.gmail.com>
-References: <1501108037-14429-1-git-send-email-abdallah.meziti.pro@gmail.com> <CAADWXX8b3rJZBBv5V+eoSpC-073Peh4nnTxoJWjMJTbkasSTJg@mail.gmail.com>
+Subject: Re: [PATCH 5/5] avoid crash with sym->bb_target == NULL
+Date: Sat, 29 Jul 2017 14:30:08 +0200
+Message-ID: <CAExDi1RgcMd9e6mw6h-K3ERG6zd30hbv2Ka+7Ek8RJjLT0u2gg@mail.gmail.com>
+References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
+ <20170706191950.81268-6-luc.vanoostenryck@gmail.com> <CANeU7QnKA8bJihFUC_f=_gcWg27QOQWLxDXd+MO9aYg33g_TVg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:37564 "EHLO
-        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751045AbdG1JQv (ORCPT
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:34315 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753288AbdG2MaJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 28 Jul 2017 05:16:51 -0400
-In-Reply-To: <CAADWXX8b3rJZBBv5V+eoSpC-073Peh4nnTxoJWjMJTbkasSTJg@mail.gmail.com>
+        Sat, 29 Jul 2017 08:30:09 -0400
+Received: by mail-qt0-f177.google.com with SMTP id s6so100700241qtc.1
+        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 05:30:08 -0700 (PDT)
+In-Reply-To: <CANeU7QnKA8bJihFUC_f=_gcWg27QOQWLxDXd+MO9aYg33g_TVg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: AbdAllah-MEZITI <abdallah.meziti.pro@gmail.com>, luto@kernel.org, Mark Rutland <mark.rutland@arm.com>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Heiko Carstens <heiko.carstens@de.ibm.com>, Kyle Huey <me@kylehuey.com>, Sahara <keun-o.park@darkmatter.ae>, Al Viro <viro@zeniv.linux.org.uk>, lkml <linux-kernel@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Lance Richardson <lrichard@redhat.com>, Johannes Berg <johannes@sipsolutions.net>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Jul 27, 2017 at 12:41 AM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> This is wrong. The sparse version of __compiletime_object_size()
-> should just be fixed to take a 'const' pointer without complaints.
+On Thu, Jul 20, 2017 at 12:57 PM, Christopher Li <sparse@chrisli.org> wrote:
+> On Thu, Jul 6, 2017 at 3:19 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> +                       sym = expr->symbol;
+>> +                       if (sym->bb_target)
+>> +                               buf += sprintf(buf, ".L%u", sym->bb_target->nr);
+> You chould do:
+> bb = expr->symbol->target;
+> if (bb)
+>     buf +=  sprintf(buf, ".L%u", bb ? bb->nr);
+> else
+>     buf += sprintf(buf, ".L<invalid>");
+>
+> It is up to you.
 
-The underlying __builtin_object_size() has been fixed in the sparse tree
-6 months ago or so.
+Yes, it's more informative but I have a later series which convert all these
+to calls to a function show_label() which then do the right thing.
+So, I prefer to leave like this for the moment.
 
 -- Luc
