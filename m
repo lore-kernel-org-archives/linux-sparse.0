@@ -1,33 +1,63 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 5/5] avoid crash with sym->bb_target == NULL
-Date: Sat, 29 Jul 2017 08:49:11 -0400
-Message-ID: <CANeU7Qk3vRvme2Wms=vwD3fSBD+K-eK=jigS13wq42JVwBpk-g@mail.gmail.com>
-References: <20170706191950.81268-1-luc.vanoostenryck@gmail.com>
- <20170706191950.81268-6-luc.vanoostenryck@gmail.com> <CANeU7QnKA8bJihFUC_f=_gcWg27QOQWLxDXd+MO9aYg33g_TVg@mail.gmail.com>
- <CAExDi1RgcMd9e6mw6h-K3ERG6zd30hbv2Ka+7Ek8RJjLT0u2gg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [GIT PULL] fix for rare crashes
+Date: Sat, 29 Jul 2017 14:53:03 +0200
+Message-ID: <20170729125303.65852-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:38485 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753607AbdG2MtM (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33388 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753607AbdG2MxN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 29 Jul 2017 08:49:12 -0400
-Received: by mail-pg0-f53.google.com with SMTP id k190so55671136pgk.5
-        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 05:49:12 -0700 (PDT)
-In-Reply-To: <CAExDi1RgcMd9e6mw6h-K3ERG6zd30hbv2Ka+7Ek8RJjLT0u2gg@mail.gmail.com>
+        Sat, 29 Jul 2017 08:53:13 -0400
+Received: by mail-wm0-f65.google.com with SMTP id q189so19219022wmd.0
+        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 05:53:12 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Jul 29, 2017 at 8:30 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> Yes, it's more informative but I have a later series which convert all these
-> to calls to a function show_label() which then do the right thing.
-> So, I prefer to leave like this for the moment.
+Chris, this pull request is for the rare crashes fixes
+discovered after -rc4.
+The changes since the initial post are:
+- add a note to patch 1
+- avoid an unneeded allocation in patch 4
+- add a missing signoff
 
-That is of course fine. Let me know if you have updated series to pull from.
 
-Chris
+The following changes since commit ec3f72e981792a86a9e002471a06d61ecd5c6675:
+
+  bump sparse's version to 0.5.1-rc4 (2017-07-04 08:24:40 -0700)
+
+are available in the git repository at:
+
+  git://github.com/lucvoo/sparse.git tags/for-chris
+
+for you to fetch changes up to a0d89707326626a16be31fcddc9933c07378a747:
+
+  avoid crash with sym->bb_target == NULL (2017-07-29 14:39:03 +0200)
+ 
+
+Thanks.
+
+----------------------------------------------------------------
+Luc Van Oostenryck (5):
+      do not corrupt ptrlist while killing unreachable BBs
+      avoid crash when ep->active is NULL
+      avoid crash in rewrite_branch()
+      avoid some crashes in add_dominators()
+      avoid crash with sym->bb_target == NULL
+
+ flow.c                            |  7 ++++---
+ flow.h                            |  2 +-
+ linearize.c                       | 20 ++++++++++++++------
+ memops.c                          |  2 ++
+ validation/crash-add-doms.c       | 22 ++++++++++++++++++++++
+ validation/crash-bb_target.c      | 10 ++++++++++
+ validation/crash-ep-active.c      | 12 ++++++++++++
+ validation/crash-ptrlist.c        | 23 +++++++++++++++++++++++
+ validation/crash-rewrite-branch.c | 24 ++++++++++++++++++++++++
+ 9 files changed, 112 insertions(+), 10 deletions(-)
+ create mode 100644 validation/crash-add-doms.c
+ create mode 100644 validation/crash-bb_target.c
+ create mode 100644 validation/crash-ep-active.c
+ create mode 100644 validation/crash-ptrlist.c
+ create mode 100644 validation/crash-rewrite-branch.c
