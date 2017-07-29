@@ -1,73 +1,165 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 2/2] pre-process: replace use of vla's with heap allocation
-Date: Sat, 29 Jul 2017 15:17:06 +0200
-Message-ID: <CAExDi1S_mQRHQmAOOhdctbJOgLCo0pArXO6_QKY2WaNMsb9Y0Q@mail.gmail.com>
-References: <5ffb141e-fdb2-a1b8-a5b7-c922d1a9ef08@ramsayjones.plus.com>
- <CANeU7QkmtVVPhhanR2M7=3P9cCse0B9rXJSfx8c1NCC4aHZ-qw@mail.gmail.com> <cce05c3f-a309-9fa7-3107-e6e6831972aa@ramsayjones.plus.com>
+Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
+Date: Sat, 29 Jul 2017 16:39:15 +0200
+Message-ID: <20170729143914.amo3vkoiqv7rkvmz@ltop.local>
+References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+ <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
+ <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
+ <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f193.google.com ([209.85.220.193]:34235 "EHLO
-        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753709AbdG2NRI (ORCPT
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:37007 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753728AbdG2OjT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 29 Jul 2017 09:17:08 -0400
-Received: by mail-qk0-f193.google.com with SMTP id q66so23264799qki.1
-        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 06:17:07 -0700 (PDT)
-In-Reply-To: <cce05c3f-a309-9fa7-3107-e6e6831972aa@ramsayjones.plus.com>
+        Sat, 29 Jul 2017 10:39:19 -0400
+Received: by mail-wm0-f52.google.com with SMTP id t201so16558740wmt.0
+        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 07:39:19 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Michael Stefaniuc <mstefani@mykolab.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Thu, Jul 20, 2017 at 6:44 PM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
->
->
-> On 20/07/17 13:02, Christopher Li wrote:
->> On Wed, Jul 19, 2017 at 4:13 PM, Ramsay Jones
->> <ramsay@ramsayjones.plus.com> wrote:
->>>
->>> The 'selfcheck' make target issues warnings about using vla's in the
->>> pre-processor code, like so:
->>>
->>>        CHECK    pre-process.c
->>>   pre-process.c:712:25: warning: Variable length array is used.
->>>   pre-process.c:2019:28: warning: Variable length array is used.
->>>
->>> A Makefile change to pass '-Wno-vla' to sparse when processing this
->>> source file (or all source files) may be a better solution than the
->>> one given here.
->>>
->>> Replace the use of vla's with heap allocation. This has performance
->>> implications (although it may me safer), due to the dynamic memory
->>> allocation and the zero initialisation of the memory (using calloc).
->>> I have not done any timing measurements to see if this is a problem
->>> in practice.
->>
->> I purpose the following patch. Make the expand using stack for small
->> argument numbers. That should not have much performance impact
->> at all because long macro arguments are rare.
->
-> My first reaction was surprise that you didn't go for the Makefile
-> idea - setting '-Wno-vla' would be the simplest solution. ;-)
->
-> I can understand warning about vla usage (especially in the kernel),
-> but it a 'standard' supported feature. I don't use them myself, partly
-> because they are a 'relatively' new feature, but also because I have had
-> some bad experience in the past using alloca in similar circumstances.
+On Wed, Jul 19, 2017 at 09:26:29AM -0400, Christopher Li wrote:
 
-I second this opinion.
-In the kernel, stacks are quite small and it's very natural to:
-- limit stack use to the minimal
-- control stack usage
-and so VLAs are avoided (but not banned).
-But in userspace this limit doesn't exist so why make the code
-more complicated?
+OK I finally had the time to look at this closely.
 
-> My second thought was, have you done some timing tests (no I haven't)
-> and determined that this causes a noticeable slowdown?
+> On Tue, Jul 18, 2017 at 8:07 PM, Christopher Li <sparse@chrisli.org> wrote:
+> > ======================
+> > test_menu_iteminfo:
+> > .L0:
+> >         <entry-point>
+> >         phisrc.32   %phi3(ansi) <- $1
+> >         br          .L1
+> >
+> > .L1:
+> >         phi.32      %r1(ansi) <- %phi3(ansi), %phi4(ansi)
+> >         cbr         %r1(ansi), .L4, .L5
+> >
+> > .L4:
+> >         cast.64     %r3 <- (64) stringA
+> >         br          .L5
+> >
+> > .L5:
+> >         cbr         %r1(ansi), .L6, .L2
+> >
+> > .L6:
+> >         ptrcast.64  %r6 <- (64) %r3
+> >         ptrcast.64  %r8 <- (64) VOID
+> >         call.64     %r9 <- strcpy, %r6, %r8
+> >         br          .L2   <=============== L2 merge with L7
+> >
+> > .L2:
+> >         seteq.32    %r11 <- %r1(ansi), $0
+> >         phisrc.32   %phi4(ansi) <- %r11
+> >         cbr         %r1(ansi), .L1, .L3
+> >
+> > .L3:
+> >         ret
+> > ======================
+> > test_menu_iteminfo:
+> > .L0:
+> >         <entry-point>
+> >         br          .L4 <========= phisrc3 get optimize away. This seems wrong
+> 
+> I see more what is going on there now.
+> Basically we have %phi3 = 1, a constant.
+> There for when control flow go from L0->L1, %r1 = %phi3 = 1.
+> It will go to L4 for sure.
+> 
+> So L0 modify to goto L4 directly. That is fine.
 
-Also, this is not IMO -rc4+ material.
+Indeed, it's fine.
+ 
+> >
+> > .L1:
+> >         phi.32      %r1(ansi) <- VOID, %phi4(ansi) <======= this seems wrong.
+> >         cbr         %r1(ansi), .L4, .L5
+> 
+> phisrc3 has only one usage on L1. phisrc3 can be optimize away
+> and replace it with value 1. Showing VOID there is wrong.
+
+No it's fine. It's the way of displaying that the element have been removed.
+
+> it should be:
+> 
+> phi.32 %r1(ansi) <- 1, %phi4(ansi)
+
+No, not really.
+L1 has now only a single parent, the phi-node is now a trivial one,
+not really a join anymore.
+An explicit way of displaying it should simply be:
+	phi.32      %r1(ansi) <- %phi4(ansi)
+ 
+Everything is correct until:
+	test_menu_iteminfo:
+	.L0:
+		<entry-point>
+		br          .L4
+	.L1:
+		phi.32      %r1(ansi) <- VOID, %phi4(ansi)
+		cbr         %r1(ansi), .L4, .L5
+	.L4:
+		cast.64     %r3 <- (64) stringA
+		br          .L5
+	.L5:
+		cbr         %r1(ansi), .L6, .L3
+	.L6:
+		ptrcast.64  %r6 <- (64) %r3
+		ptrcast.64  %r8 <- (64) VOID			<== wrong but unrelated
+		call.64     %r9 <- strcpy, %r6, %r8
+		br          .L2
+	.L2:
+		seteq.32    %r11 <- %r1(ansi), $0
+		phisrc.32   %phi4(ansi) <- %r11
+		cbr         %r1(ansi), .L1, .L3
+	.L3:
+		ret
+
+Then simplify_branch_branch() is called on L2 -> L1
+and wrongly succeed giving:
+	.L0:
+	        <entry-point>
+	        br          .L4
+	.L1:
+	        phi.32      %r1(ansi) <- VOID, %phi4(ansi)	<== now dead
+	        cbr         %r1(ansi), .L4, .L5
+	.L4:
+	        cast.64     %r3 <- (64) stringA
+	        br          .L5
+	.L5:
+	        cbr         %r1(ansi), .L6, .L3
+	.L6:
+	        ptrcast.64  %r6 <- (64) %r3
+		ptrcast.64  %r8 <- (64) VOID			<== wrong but unrelated
+	        call.64     %r9 <- strcpy, %r6, %r8
+	        br          .L2
+	.L2:
+	        seteq.32    %r11 <- %r1(ansi), $0
+	        phisrc.32   %phi4(ansi) <- %r11
+	        cbr         %r1(ansi), .L4, .L3			<== bad change
+	.L3:
+	        ret
+
+This will then trigger the wrong simplifications:
+	%phi4 <- %r11
+and
+	%r1   <- %r11
+giving finally:
+	        setne.32    %r11 <- %r11, $0
+
+As far as I can see, simplify_branch_branch() needs something
+like the bb_defines_phi() I had to add to try_to_simplify_bb()
+(basically it's bb_depends_on() which is not 'strong' enough).
+
+I'll need a bit more time to see exactly what is needed, for
+example if we can simply reuse bb_defines_phi() or not, and
+to test all this.
+
+At this point I don't think anymore that the revert is the most
+appropriate thing to do.
 
 -- Luc
