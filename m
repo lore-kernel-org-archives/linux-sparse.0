@@ -1,37 +1,38 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 2/2] pre-process: replace use of vla's with heap
- allocation
-Date: Sat, 29 Jul 2017 18:22:36 +0200
-Message-ID: <20170729162235.kt7ernrjliju6n2f@ltop.local>
-References: <5ffb141e-fdb2-a1b8-a5b7-c922d1a9ef08@ramsayjones.plus.com>
- <CANeU7QkmtVVPhhanR2M7=3P9cCse0B9rXJSfx8c1NCC4aHZ-qw@mail.gmail.com>
- <cce05c3f-a309-9fa7-3107-e6e6831972aa@ramsayjones.plus.com>
- <CAExDi1S_mQRHQmAOOhdctbJOgLCo0pArXO6_QKY2WaNMsb9Y0Q@mail.gmail.com>
- <CANeU7Q=eCq6Ndxsq8GnVNb7J=MYD=3vHjBf1R1miLPbyWkXYxg@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: ptrlist-iterator performance on one wine source file
+Date: Sat, 29 Jul 2017 12:25:40 -0400
+Message-ID: <CANeU7QnHbCmpTmD7ckokE7XezHB6-ZAFzX-h+J8cPe=wWxx3VA@mail.gmail.com>
+References: <CANeU7QkRxYFB41o9dTMp=n=epsNTZLr1ZsjowW=DigRiVNkPjg@mail.gmail.com>
+ <20170729130116.b5jd4rvkiwzgsfwt@ltop.local> <CANeU7QnGxae2dw_vU306nc+iUR2CuGczjDjp2fUYB5yPzye22w@mail.gmail.com>
+ <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:35365 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752633AbdG2QWj (ORCPT
+Received: from mail-pf0-f173.google.com ([209.85.192.173]:36263 "EHLO
+        mail-pf0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752633AbdG2QZl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 29 Jul 2017 12:22:39 -0400
-Received: by mail-wm0-f46.google.com with SMTP id m85so43606530wma.0
-        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 09:22:39 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Q=eCq6Ndxsq8GnVNb7J=MYD=3vHjBf1R1miLPbyWkXYxg@mail.gmail.com>
+        Sat, 29 Jul 2017 12:25:41 -0400
+Received: by mail-pf0-f173.google.com with SMTP id z129so66816200pfb.3
+        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 09:25:41 -0700 (PDT)
+In-Reply-To: <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Sat, Jul 29, 2017 at 12:16:53PM -0400, Christopher Li wrote:
-> On Sat, Jul 29, 2017 at 9:17 AM, Luc Van Oostenryck
-> > Also, this is not IMO -rc4+ material.
-> 
-> Agree, because it changes the code behavior. Do you mind have the '-Wno-vla'
-> in -rc5? That should not change any code it generate. I am fine either way.
+On Sat, Jul 29, 2017 at 12:04 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> You can't do that once cycles are involved. You need something
+> like the marking algorithm used by kill_unreachable_bbs() for that.
+> And it was such a  cycle that created the problem with the false
+> "crazy programmer" warning.
 
-I don't mind.
+No I don't think so. The find dominator already taking the cycles into
+account. By definition if X dominate Y, means every execution flow
+from entry point to Y will need to go through X. If X was not reachable,
+nor does Y. It does not change where the block get deleted. It just don't
+not need to do the marking algorithm. That is the point of dominator tree.
 
--- Luc
+Chris
