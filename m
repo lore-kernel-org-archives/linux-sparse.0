@@ -1,80 +1,113 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: ptrlist-iterator performance on one wine source file
-Date: Sat, 29 Jul 2017 15:33:03 -0400
-Message-ID: <CANeU7QnRQG84w+e-gTjp2yOZYdwq+itgExg_UTG-zUuRT8FYLg@mail.gmail.com>
-References: <CANeU7QkRxYFB41o9dTMp=n=epsNTZLr1ZsjowW=DigRiVNkPjg@mail.gmail.com>
- <20170729130116.b5jd4rvkiwzgsfwt@ltop.local> <CANeU7QnGxae2dw_vU306nc+iUR2CuGczjDjp2fUYB5yPzye22w@mail.gmail.com>
- <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
- <CANeU7QnHbCmpTmD7ckokE7XezHB6-ZAFzX-h+J8cPe=wWxx3VA@mail.gmail.com> <CAMHZB6FjKnPojtirh0csQMXhZC-TT=hHRPne+z7q74joDHYdbg@mail.gmail.com>
+Subject: Re: Infinite loop with OOM while testing Sparse on Wine code
+Date: Sat, 29 Jul 2017 16:05:12 -0400
+Message-ID: <CANeU7Q=Yccus6M5rYo_rzGcennKJ+Zyd+5b5YoDPystG-58hWA@mail.gmail.com>
+References: <a4d23510-5bd4-9d88-f7a8-731882744043@mykolab.com>
+ <CANeU7QnEui=yTjf+=TYU89mEhOrOj3b3X_W0csxJJ-eLRokWcg@mail.gmail.com>
+ <CANeU7Qk37weXva_-_M4bXeTTAT-DYGcccy+6jYv8pO6gzZNLcA@mail.gmail.com>
+ <CANeU7Qkm_V8cYW3yKKBHo6PY9r0CA+XoTfJCVZbcOS14Am_PiA@mail.gmail.com> <20170729143914.amo3vkoiqv7rkvmz@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:34631 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751446AbdG2TdE (ORCPT
+Received: from mail-pf0-f178.google.com ([209.85.192.178]:34415 "EHLO
+        mail-pf0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751621AbdG2UFN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 29 Jul 2017 15:33:04 -0400
-Received: by mail-pg0-f48.google.com with SMTP id u185so17543459pgb.1
-        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 12:33:04 -0700 (PDT)
-In-Reply-To: <CAMHZB6FjKnPojtirh0csQMXhZC-TT=hHRPne+z7q74joDHYdbg@mail.gmail.com>
+        Sat, 29 Jul 2017 16:05:13 -0400
+Received: by mail-pf0-f178.google.com with SMTP id q85so107117327pfq.1
+        for <linux-sparse@vger.kernel.org>; Sat, 29 Jul 2017 13:05:13 -0700 (PDT)
+In-Reply-To: <20170729143914.amo3vkoiqv7rkvmz@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Michael Stefaniuc <mstefani@mykolab.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Sat, Jul 29, 2017 at 12:35 PM, Luc Van Oostenryck
+On Sat, Jul 29, 2017 at 10:39 AM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
->>> You can't do that once cycles are involved. You need something
->>> like the marking algorithm used by kill_unreachable_bbs() for that.
->>> And it was such a  cycle that created the problem with the false
->>> "crazy programmer" warning.
->>
->> No I don't think so. The find dominator already taking the cycles into
->> account. By definition if X dominate Y, means every execution flow
->> from entry point to Y will need to go through X. If X was not reachable,
->> nor does Y. It does not change where the block get deleted. It just don't
->> not need to do the marking algorithm. That is the point of dominator tree.
+> No it's fine. It's the way of displaying that the element have been removed.
 >
-> OK, I misread and misunderstood that you was talking about  the
-> dominator *tree*.
+>> it should be:
+>>
+>> phi.32 %r1(ansi) <- 1, %phi4(ansi)
+>
+> No, not really.
+> L1 has now only a single parent, the phi-node is now a trivial one,
+> not really a join anymore.
+> An explicit way of displaying it should simply be:
+>         phi.32      %r1(ansi) <- %phi4(ansi)
 
-I was confused after your misunderstood as well. Well for a few minutes.
-The dominator tree does not have back edges. So if the edge on CFG
-we are removing is matching the edge on dominator tree. In other words,
-we are removing an edge from the dominator tree,  the whole branch
-of that tree can be removed as dead code.
+OK, Great. It seems my decode attempt did not go far at all :(
+Nice try.
+.
+>
+> Everything is correct until:
+>         test_menu_iteminfo:
+>         .L0:
+>                 <entry-point>
+>                 br          .L4
+>         .L1:
+>                 phi.32      %r1(ansi) <- VOID, %phi4(ansi)
+>                 cbr         %r1(ansi), .L4, .L5
+>         .L4:
+>                 cast.64     %r3 <- (64) stringA
+>                 br          .L5
+>         .L5:
+>                 cbr         %r1(ansi), .L6, .L3
+>         .L6:
+>                 ptrcast.64  %r6 <- (64) %r3
+>                 ptrcast.64  %r8 <- (64) VOID                    <== wrong but unrelated
+>                 call.64     %r9 <- strcpy, %r6, %r8
+>                 br          .L2
+>         .L2:
+>                 seteq.32    %r11 <- %r1(ansi), $0
+>                 phisrc.32   %phi4(ansi) <- %r11
+>                 cbr         %r1(ansi), .L1, .L3
+>         .L3:
+>                 ret
+>
+> Then simplify_branch_branch() is called on L2 -> L1
+> and wrongly succeed giving:
 
-> The real problem with such a tree is that you need to maintain it as
-> it potentially changes each time there is a change in the CFG.
+My original thinking was .L1:
+Ophi.32      %r1(ansi) <- VOID, %phi4(ansi)
 
-Right. So far most of the case is removing edges and blocks. That should
-be relative trivial to update the dominator tree. I haven't try it so we will
-see.
+feeding the .L2:
+cbr         %r1(ansi), .L1, .L3
 
-Do we have a case actually *add* edge or block to the CFG?
-I don't recall one.
+Got the wrong result so I suspect some thing was wrong with
+%r1(ansi).  I admit I don't know what exactly simplify_branch_branch()
+was doing there.
 
-> And of course, building this tree is not linear (in the number of BBs)
-> while finding the dead BBs is linear.
-Find one round of dead BBs is linear, N number of BBs. Right now we
-mark and sweep the CFG for every node removed, total of M dead nodes.
-Then the total is M*N.
+.L5: also have
+cbr         %r1(ansi), .L6, .L3
+I don't know why this one is fine.
 
-In the memops finding dominating store is doing a lot worse. That is
-why gcc complete that file almost instantly. Sparse takes 30 seconds
-on my machine. One big problem is it did not cache the dominating
-result. It is redoing the finding again and again.
 
-The algorithm I am using is this one:
+>                 seteq.32    %r11 <- %r1(ansi), $0
+>                 phisrc.32   %phi4(ansi) <- %r11
+>                 cbr         %r1(ansi), .L4, .L3                 <== bad change
+>         .L3:
+>                 ret
+>
+> This will then trigger the wrong simplifications:
+>         %phi4 <- %r11
+> and
+>         %r1   <- %r11
+> giving finally:
+>                 setne.32    %r11 <- %r11, $0
+>
+> As far as I can see, simplify_branch_branch() needs something
+> like the bb_defines_phi() I had to add to try_to_simplify_bb()
+> (basically it's bb_depends_on() which is not 'strong' enough).
 
-Cooper, Keith D.; Harvey, Timothy J.; and Kennedy, Ken (2001).
-A Simple, Fast Dominance Algorithm
-https://www.cs.rice.edu/~keith/EMBED/dom.pdf
+Thanks you so much for the excellent diagnose.
 
-It is O(N^2), in practice it is faster than  Lengauer and Tarjan
-which is O(E *log(N)).
+> At this point I don't think anymore that the revert is the most
+> appropriate thing to do.
 
-Most of the sparse source code I try converge within 3 rounds.
-For practical purpose it feels like linear.
+That is what I am looking for. I want to find out if there is any
+thing else like this on -rc4+.
+
+Thanks again.
 
 Chris
