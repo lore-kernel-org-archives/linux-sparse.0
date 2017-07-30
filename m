@@ -1,87 +1,87 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: ptrlist-iterator performance on one wine source file
-Date: Sun, 30 Jul 2017 18:16:03 +0200
-Message-ID: <CAMHZB6Emib_U7AtDLZ5Wc6KGXtZzMwhbT-N+sk-B05PUVbtfNg@mail.gmail.com>
-References: <CANeU7QkRxYFB41o9dTMp=n=epsNTZLr1ZsjowW=DigRiVNkPjg@mail.gmail.com>
- <20170729130116.b5jd4rvkiwzgsfwt@ltop.local> <CANeU7QnGxae2dw_vU306nc+iUR2CuGczjDjp2fUYB5yPzye22w@mail.gmail.com>
- <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
- <CANeU7QnHbCmpTmD7ckokE7XezHB6-ZAFzX-h+J8cPe=wWxx3VA@mail.gmail.com>
- <CAMHZB6FjKnPojtirh0csQMXhZC-TT=hHRPne+z7q74joDHYdbg@mail.gmail.com>
- <CANeU7QnRQG84w+e-gTjp2yOZYdwq+itgExg_UTG-zUuRT8FYLg@mail.gmail.com>
- <CAMHZB6E8PwoeofUFRB_zdVx=HqqHM72UhcqwH1QPDa_U+4V-DQ@mail.gmail.com>
- <CANeU7Qne+bdhtzrVCi-qihDt9kyJ8wN6i3XTixYJNX5yFmiBpA@mail.gmail.com>
- <20170730151254.xlnz7c4zphhnhump@ltop.local> <CANeU7Q=5SycRKw4Z1NXHPuza_UbUjSF=E9wy6Ko6UEzSHPO2ng@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] fix: try_to_simplify_bb eargerness part 2
+Date: Sun, 30 Jul 2017 13:06:32 -0400
+Message-ID: <CANeU7Qk+UOfbiggFDC5YfGGiWQVeGrarTsqk0DKsA==Gp_ndyw@mail.gmail.com>
+References: <20170729233805.lvdhpk5bnyaj5zq6@ltop.local> <20170729235850.22180-1-luc.vanoostenryck@gmail.com>
+ <CANeU7QkYo13a+7wJMpEFWpXKdDGm4ufkn18Nvfh14x65FSUEGw@mail.gmail.com> <CAMHZB6ECGgH4GAaMow9NN4x-NZhb5T7H44KjjUE2L9=iyWUYFA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:33024 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754344AbdG3QQE (ORCPT
+Received: from mail-pg0-f50.google.com ([74.125.83.50]:35753 "EHLO
+        mail-pg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754109AbdG3RGe (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 30 Jul 2017 12:16:04 -0400
-Received: by mail-qt0-f175.google.com with SMTP id a18so79595584qta.0
-        for <linux-sparse@vger.kernel.org>; Sun, 30 Jul 2017 09:16:04 -0700 (PDT)
-In-Reply-To: <CANeU7Q=5SycRKw4Z1NXHPuza_UbUjSF=E9wy6Ko6UEzSHPO2ng@mail.gmail.com>
+        Sun, 30 Jul 2017 13:06:34 -0400
+Received: by mail-pg0-f50.google.com with SMTP id v190so129379956pgv.2
+        for <linux-sparse@vger.kernel.org>; Sun, 30 Jul 2017 10:06:34 -0700 (PDT)
+In-Reply-To: <CAMHZB6ECGgH4GAaMow9NN4x-NZhb5T7H44KjjUE2L9=iyWUYFA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Michael Stefaniuc <mstefani@mykolab.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Jul 30, 2017 at 5:49 PM, Christopher Li <sparse@chrisli.org> wrote:
-
->>> >> In the memops finding dominating store is doing a lot worse. That is
->>> >> why gcc complete that file almost instantly. Sparse takes 30 seconds
->>> >> on my machine. One big problem is it did not cache the dominating
->>> >> result. It is redoing the finding again and again.
->>>
->>> > Uh?
->>> > Which input file your talking about?
->>>
->>> This ptrlist testing wine source file that takes  23 second for sparse to run.
->>> I take a brief look at it, it is doing a lot of dominating search.
->>
->> Is it possible to have a pathname or a link?
+On Sun, Jul 30, 2017 at 12:04 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
 >
-> It is the very first email I send out:
+> It's was draft/temptative patch for -rc5.
 >
+Thanks for the clarification.
+
 >
-> git clone git://source.winehq.org/git/wine.git
-> cd win/dlls/usp10/tests
+> Please don't, I'm still working on it.
+
+Of course, I don't apply it now. I will wait for your git pull to apply.
+
+> I don't like at all this situation also.
+> The problem is quite complex and deep.
 >
-> The test command:
+> This patch seems to solve the problem and (at least something
+> similar) is needed but my first analysis was also right and thus something
+> similar is still needed for simplify_branch_branch().
 >
-> time sparse -m64 -c -o usp10.o usp10.c -I. -I../../../include
-> -D__WINESRC__ -D_REENTRANT -fPIC -Wall -pipe -fno-strict-aliasing
-> -Wdeclaration-after-statement -Wempty-body -Wignored-qualifiers
-> -Wshift-overflow=2 -Wstrict-prototypes -Wtype-limits
-> -Wunused-but-set-parameter -Wvla -Wwrite-strings -Wpointer-arith
-> -Wlogical-op -gdwarf-2 -gstrict-dwarf -g -O2
+> Also, the revert would not be a good solution because it would
+> only avoid to trigger the problem on this input but won't solve anything.
 
-OK, thanks. I'll take a look once the infinite loop problem will be closed.
+I totally agree. The revert is temporary bandage to buy us more time to fix
+the real problem. That is well understood. We still have the question to answer
+will RC5 and follow up official release have the revert or not.
 
-> I think gcc compile this file very fast but sparse spend a lot of time on it.
+Currently I am leaning towards keep the revert for this release but I can
+be convinced otherwise.
 
-Interesting.
-On most input sparse is much faster than gcc, often by a factor or 10
-or even more. But of course, if there is a problem with sparse ...
+> The problem is unrelated to undefined *var* but these wrong branch
+> simplification bypass some pseudo definition which, in a way,
+> become undefined on some paths which then create the problem
+> you saw with setne %r11, %r11, 0
 
-> My impression it is spending time repeat finding dominating stores.
-Possible indeed.
-> I did not look at it very deep, but I know sparse did not cache
-> any dominating information. It do fresh search every time.
+Yes, we all know "setne %r11, %r11, 0" is the big offender.
+We just don't have a clear picture why it get there.
 
-Yes. It's even done for each instruction to CSE (but most of the
-time it's not much costly, still looking after a few parents though).
+> Well, I don't see things exactly the same.
+> For me, there is a code base, there are bugs in the code,
+> we discover the bugs and we fix them.
 
->> It's not the size of the file that matter here, it's the size
->> (and complexity) of the function(s).
->
-> Yes, mean the complexity of the functions. How many blocks.
-> My impression parse.c has the largest one I saw so far. I have't
-> done it very scientifically. Other file all have relatively small functions.
+Sorry that came out wrong, I mean to said there is some more
+deeper issue.
 
-I really don't think sparse has any function large enough to worry after
-non-linearity (you would need at least a few hundred BBs).
-IMO, the thing to look at/worry about is the constant factor.
+> But yes, this is quite annoying, especially with try_to_simplify_bb()
+> on which I already spend many hours on it.
 
-> Chris
+I also spend many hours on it haven't able to crack it yet. The best I can
+do is make it simplify the original huge test input as a much smaller
+test case.
+
+"Help me, Obi-Wan Kenobi. You're my only hope."
+
+
+> The two big things that need to be fixed regarding optimization are:
+> - the placement of the phi-node
+> - associate each phi's source to the phi-node's parent
+>   (Linus may object on this, he at least objected 10 years ago)
+
+We will revisit this after the release. I have my wish list as well.
+
+Right now let's solve this bug first. At least come to a decision
+what to do with it on the upcoming release.
+
+Chris
