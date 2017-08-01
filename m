@@ -1,44 +1,91 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v3 0/7] fixes for rare issues
-Date: Tue, 1 Aug 2017 22:46:02 +0200
-Message-ID: <CAExDi1Tq2SuzS9iCyR0ct00uw8ACnGBiAND58drfeXSUoFd5LQ@mail.gmail.com>
-References: <20170731203624.58971-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qk4cRLtKmPxSVCEe9WJLEb8VajdCiokNV=ic4YALvKcqw@mail.gmail.com>
- <CAExDi1TQh2kFXbyMgX_1tTG0b2F-k-_+CNDJeiKiBW0T0Q4nEA@mail.gmail.com>
- <CAExDi1Qoq21smgUvkqmdTxeJwdYJikC8taFYTdzBmx6Zea5tYg@mail.gmail.com> <CAExDi1Sm1dUM3FQ838_5kr2maejva6tzc8NYzRtxV1KprgijhA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: ptrlist-iterator performance on one wine source file
+Date: Tue, 1 Aug 2017 17:09:12 -0400
+Message-ID: <CANeU7QkShNBJ2nWh0wvTN3fTvwX710BT-g=aFf+GS1upnD_Gxw@mail.gmail.com>
+References: <CANeU7QnGxae2dw_vU306nc+iUR2CuGczjDjp2fUYB5yPzye22w@mail.gmail.com>
+ <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
+ <CANeU7QnHbCmpTmD7ckokE7XezHB6-ZAFzX-h+J8cPe=wWxx3VA@mail.gmail.com>
+ <CAMHZB6FjKnPojtirh0csQMXhZC-TT=hHRPne+z7q74joDHYdbg@mail.gmail.com>
+ <CANeU7QnRQG84w+e-gTjp2yOZYdwq+itgExg_UTG-zUuRT8FYLg@mail.gmail.com>
+ <CAMHZB6E8PwoeofUFRB_zdVx=HqqHM72UhcqwH1QPDa_U+4V-DQ@mail.gmail.com>
+ <CANeU7Qne+bdhtzrVCi-qihDt9kyJ8wN6i3XTixYJNX5yFmiBpA@mail.gmail.com>
+ <20170730151254.xlnz7c4zphhnhump@ltop.local> <CANeU7Q=5SycRKw4Z1NXHPuza_UbUjSF=E9wy6Ko6UEzSHPO2ng@mail.gmail.com>
+ <CAMHZB6Emib_U7AtDLZ5Wc6KGXtZzMwhbT-N+sk-B05PUVbtfNg@mail.gmail.com> <20170801203357.4ywboptvr6tlytab@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/mixed; boundary="94eb2c13eaa63ad17e0555b78f66"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f180.google.com ([209.85.216.180]:33015 "EHLO
-        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752240AbdHAUqD (ORCPT
+Received: from mail-pg0-f45.google.com ([74.125.83.45]:34586 "EHLO
+        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752105AbdHAVJO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 1 Aug 2017 16:46:03 -0400
-Received: by mail-qt0-f180.google.com with SMTP id a18so16416384qta.0
-        for <linux-sparse@vger.kernel.org>; Tue, 01 Aug 2017 13:46:03 -0700 (PDT)
-In-Reply-To: <CAExDi1Sm1dUM3FQ838_5kr2maejva6tzc8NYzRtxV1KprgijhA@mail.gmail.com>
+        Tue, 1 Aug 2017 17:09:14 -0400
+Received: by mail-pg0-f45.google.com with SMTP id u185so12642895pgb.1
+        for <linux-sparse@vger.kernel.org>; Tue, 01 Aug 2017 14:09:14 -0700 (PDT)
+In-Reply-To: <20170801203357.4ywboptvr6tlytab@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Michael Stefaniuc <mstefani@mykolab.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On Tue, Aug 1, 2017 at 12:42 AM, Luc Van Oostenryck
+--94eb2c13eaa63ad17e0555b78f66
+Content-Type: text/plain; charset="UTF-8"
+
+On Tue, Aug 1, 2017 at 4:33 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-
->> One of the thing I haven't tested is the performance.
->> Several things here can make things slower:
->> - REPEAT_CFG_CLEANUP is now set after every call to rewrite_branch()
->>   (and will then trigger at some point a call to kill_unreachable_bbs())
->> - kill_unreachable_bbs() set REPEAT_CSE is a BB have been deleted
->>   (which may trigger another CSE cycle possibly not present before)
->> - the bb_depends_on() change add some code with looping through
->>   the BB's instructions, nothing really heavy but still some more code
->>   to run
->> All these are needed though.
 >
-> And indeed I see that some tests that took me 38s now take 48s.
-> I'll look tomorrow for the real cause and see what can be done there.
+> When I try the command you gave with -rc4 sparse I get:
+>         real    0m3.281s
+>         user    0m3.175s
+>         sys     0m0.097s
+> wich is very far from the 23-30s you got. Dunno what the difference could be.
 
-OK. That was a false alert, I was still running with debug on.
+Did you run it with all the parameter?
 
--- Luc
+If I just run the sort version:
+
+time sparse -m64 -c -o usp10.o usp10.c -I. -I../../../include
+-D__WINESRC__ -D_REENTRANT
+
+It is:
+real 0m4.532s
+user 0m4.436s
+sys 0m0.075s
+
+But if I run with all parameter.
+
+sh -x slow.sh
+
++ sparse -m64 -c -o usp10.o usp10.c -I. -I../../../include
+-D__WINESRC__ -D_REENTRANT -fPIC -Wall -pipe -fno-strict-aliasing
+-Wdeclaration-after-statement -Wempty-body -Wignored-qualifiers
+-Wshift-overflow=2 -Wstrict-prototypes -Wtype-limits
+-Wunused-but-set-parameter -Wvla -Wwrite-strings -Wpointer-arith
+-Wlogical-op -gdwarf-2 -gstrict-dwarf -g -O2
+/usr/include/sys/sysmacros.h:79:1: warning: constant
+0xfffff00000000000u is so big it is unsigned long
+/usr/include/sys/sysmacros.h:80:1: warning: constant
+0x00000ffffff00000u is so big it is unsigned long
+...
+
+real 0m24.771s
+user 0m24.447s
+sys 0m0.213s
+
+Again, I haven't dig very deep with this yet. Might be a bug some where indeed.
+
+Chris
+
+--94eb2c13eaa63ad17e0555b78f66
+Content-Type: application/x-sh; name="slow.sh"
+Content-Disposition: attachment; filename="slow.sh"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_j5u2pkp40
+
+dGltZSBzcGFyc2UgLW02NCAtYyAtbyB1c3AxMC5vIHVzcDEwLmMgLUkuIC1JLi4vLi4vLi4vaW5j
+bHVkZSAtRF9fV0lORVNSQ19fIC1EX1JFRU5UUkFOVCAtZlBJQyAtV2FsbCAtcGlwZSAtZm5vLXN0
+cmljdC1hbGlhc2luZyAtV2RlY2xhcmF0aW9uLWFmdGVyLXN0YXRlbWVudCAtV2VtcHR5LWJvZHkg
+LVdpZ25vcmVkLXF1YWxpZmllcnMgLVdzaGlmdC1vdmVyZmxvdz0yIC1Xc3RyaWN0LXByb3RvdHlw
+ZXMgLVd0eXBlLWxpbWl0cyAtV3VudXNlZC1idXQtc2V0LXBhcmFtZXRlciAtV3ZsYSAtV3dyaXRl
+LXN0cmluZ3MgLVdwb2ludGVyLWFyaXRoIC1XbG9naWNhbC1vcCAtZ2R3YXJmLTIgLWdzdHJpY3Qt
+ZHdhcmYgLWcgLU8yCg==
+--94eb2c13eaa63ad17e0555b78f66--
