@@ -1,71 +1,49 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: ptrlist-iterator performance on one wine source file
-Date: Thu, 3 Aug 2017 00:50:20 +0200
-Message-ID: <CAMHZB6E0NYy_bNJftB5n4BFZ4-fNf___n0RN1OPb+jkV4Ry-Dw@mail.gmail.com>
-References: <CANeU7QnGxae2dw_vU306nc+iUR2CuGczjDjp2fUYB5yPzye22w@mail.gmail.com>
- <CAExDi1Tkws5eRO1APi6tOdhGTzvaCpuHQ8k9h+T7odD5Yx3W3Q@mail.gmail.com>
- <CANeU7QnHbCmpTmD7ckokE7XezHB6-ZAFzX-h+J8cPe=wWxx3VA@mail.gmail.com>
- <CAMHZB6FjKnPojtirh0csQMXhZC-TT=hHRPne+z7q74joDHYdbg@mail.gmail.com>
- <CANeU7QnRQG84w+e-gTjp2yOZYdwq+itgExg_UTG-zUuRT8FYLg@mail.gmail.com>
- <CAMHZB6E8PwoeofUFRB_zdVx=HqqHM72UhcqwH1QPDa_U+4V-DQ@mail.gmail.com>
- <CANeU7Qne+bdhtzrVCi-qihDt9kyJ8wN6i3XTixYJNX5yFmiBpA@mail.gmail.com>
- <20170730151254.xlnz7c4zphhnhump@ltop.local> <CANeU7Q=5SycRKw4Z1NXHPuza_UbUjSF=E9wy6Ko6UEzSHPO2ng@mail.gmail.com>
- <CAMHZB6Emib_U7AtDLZ5Wc6KGXtZzMwhbT-N+sk-B05PUVbtfNg@mail.gmail.com>
- <20170801203357.4ywboptvr6tlytab@ltop.local> <CANeU7QkShNBJ2nWh0wvTN3fTvwX710BT-g=aFf+GS1upnD_Gxw@mail.gmail.com>
- <CAExDi1R9QZJorwhMq4=nRLvMet+S0RCpeiMurko=rNYLpu8c2A@mail.gmail.com> <CANeU7QmzundH7qpdYhQqDJgBv+5pPemwft+1uH5oVQ1POnoQDw@mail.gmail.com>
+Subject: Re: What is cooking in sparse-next
+Date: Thu, 3 Aug 2017 00:56:16 +0200
+Message-ID: <CAMHZB6H=5dORMuDA-LwUV2zHx7p-QAHaxmi9qe6S1oeqM8KYRw@mail.gmail.com>
+References: <CANeU7QkzU9rvyne26zYYEN_jxeLwUN_TWh+YLjRP-X2chiE_-A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f173.google.com ([209.85.216.173]:37740 "EHLO
-        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751750AbdHBWuV (ORCPT
+Received: from mail-qk0-f182.google.com ([209.85.220.182]:34001 "EHLO
+        mail-qk0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751058AbdHBW4S (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 2 Aug 2017 18:50:21 -0400
-Received: by mail-qt0-f173.google.com with SMTP id 16so35628961qtz.4
-        for <linux-sparse@vger.kernel.org>; Wed, 02 Aug 2017 15:50:21 -0700 (PDT)
-In-Reply-To: <CANeU7QmzundH7qpdYhQqDJgBv+5pPemwft+1uH5oVQ1POnoQDw@mail.gmail.com>
+        Wed, 2 Aug 2017 18:56:18 -0400
+Received: by mail-qk0-f182.google.com with SMTP id u139so35481688qka.1
+        for <linux-sparse@vger.kernel.org>; Wed, 02 Aug 2017 15:56:17 -0700 (PDT)
+In-Reply-To: <CANeU7QkzU9rvyne26zYYEN_jxeLwUN_TWh+YLjRP-X2chiE_-A@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-On Wed, Aug 2, 2017 at 3:17 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Tue, Aug 1, 2017 at 5:46 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> has any effects for sparse and the only effect of -O2 is
->> to define __OPTIMIZE__.
+On Wed, Aug 2, 2017 at 9:47 PM, Christopher Li <sparse@chrisli.org> wrote:
+> I have merge Luc's fix-fuzzy-crashes-v3 into sparse-next as base.
 >
-> Yes, indeed. It is the -O2 make the difference.
+> I also revert the change aa497b9f6dab68a1f1d2b8f02bc03b523de15716
+> which revert commit 11b1a83b d7985338.
 >
-> I recently upgrade to Fedora 26. I think it is the system header file
-> making a difference
-> on the __OPTIMIZE__. I attach two files here. O2.c is the one with -O2 flag
-> after processor. The 0.c is the one without.
+> In other words, 11b1a83b d7985338 is reinstated in sparse-next.
+> Only the test case has remain in the sparse-next.
 >
-> There is huge difference in them.
+> I want to give Luc's 7 patches a bit more chance to test. That is what
+> sparse-next was for, testing new patches.
 >
-> I confirm with O2.c I am seeing the 24 second delay. And 0.c 4 seconds.
+> I think it is a better base for the RC5 any way.
 >
-> I attach the two files with gzip.
+> I have verify the full kernel checking with spase remain pretty much unchanged.
+> More testing on the way. Guys, please throw more test on the sparse-next as
+> well.
+>
+> Please report back if any one run into problem with the current tip of
+> sparse-next.
+>
+> BTW, Luc, if you have better patch to fix the second nested loop delete
+> problem, feel free to trash the one in sparse-next :-)
 
-It seems that the email was rejected on the mailing list.
-
-> I think you should be able to reproduce it with O2.c now.
-
-Yes, I can reproduce it now.
-The differences in the two file are not big. Basically, in -O2 there is
-- a bunch of small functions which have now an inline definition
-- a set of strcmp(winetest_platform, "wine") which are replaced
-  by a macro of hell.
-It's, of course, the last one which creates the problem.
-The macro seems to try to optimize the compare using the fact
-that the compiler will statically evaluate things like:
-- strlen("wine")
-- "wine"[0], "wine"[1], ...
-but sparse doesn't do this kind of simplification (yet) and this result
-in much much more code.
-
-A first inspection of the generated code doesn't show anything
-obviously wrong but I don't exclude there is another problem.
+Which patch? Which second nested loop delete?
+The "Let pseudo->users loop on duplicate version of list" one?
 
 -- Luc
