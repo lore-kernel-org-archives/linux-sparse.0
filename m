@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 1/5] ptrlist: add a counter for the number of removed elemnets
-Date: Sat,  5 Aug 2017 00:17:38 +0200
-Message-ID: <20170804221742.66665-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 3/5] ptrlist: add MARK_CURRENT_DELETED
+Date: Sat,  5 Aug 2017 00:17:40 +0200
+Message-ID: <20170804221742.66665-4-luc.vanoostenryck@gmail.com>
 References: <20170804221742.66665-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34951 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751343AbdHDWRx (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:37298 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751930AbdHDWRz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 4 Aug 2017 18:17:53 -0400
-Received: by mail-wm0-f65.google.com with SMTP id r77so7117820wmd.2
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 15:17:52 -0700 (PDT)
+        Fri, 4 Aug 2017 18:17:55 -0400
+Received: by mail-wr0-f195.google.com with SMTP id 12so3787193wrb.4
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 15:17:55 -0700 (PDT)
 In-Reply-To: <20170804221742.66665-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,23 +19,28 @@ Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.co
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- ptrlist.h | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ ptrlist.h | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/ptrlist.h b/ptrlist.h
-index d09be2f51..d8203cf0b 100644
+index d8203cf0b..74b80e220 100644
 --- a/ptrlist.h
 +++ b/ptrlist.h
-@@ -25,7 +25,8 @@
- #define LIST_NODE_NR (29)
+@@ -287,6 +287,14 @@ extern void split_ptr_list_head(struct ptr_list *);
+ #define REPLACE_CURRENT_PTR(ptr, new_ptr)						\
+ 	do { *THIS_ADDRESS(ptr) = (new_ptr); } while (0)
  
- struct ptr_list {
--	int nr;
-+	int nr:8;
-+	int rm:8;
- 	struct ptr_list *prev;
- 	struct ptr_list *next;
- 	void *list[LIST_NODE_NR];
++#define DO_MARK_CURRENT_DELETED(ptr, __list) do {	\
++		REPLACE_CURRENT_PTR(ptr, NULL);		\
++		__list->rm++;				\
++	} while (0)
++
++#define MARK_CURRENT_DELETED(ptr) \
++	DO_MARK_CURRENT_DELETED(ptr, __list##ptr)
++
+ extern void pack_ptr_list(struct ptr_list **);
+ 
+ #define PACK_PTR_LIST(x) pack_ptr_list((struct ptr_list **)(x))
 -- 
 2.13.2
 
