@@ -1,75 +1,86 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: ptrlist-iterator performance on one wine source file
-Date: Fri, 4 Aug 2017 02:11:24 +0200
-Message-ID: <20170804001122.4ivc2sktypvg2w3i@ltop.local>
-References: <20170730151254.xlnz7c4zphhnhump@ltop.local>
- <CANeU7Q=5SycRKw4Z1NXHPuza_UbUjSF=E9wy6Ko6UEzSHPO2ng@mail.gmail.com>
- <CAMHZB6Emib_U7AtDLZ5Wc6KGXtZzMwhbT-N+sk-B05PUVbtfNg@mail.gmail.com>
- <20170801203357.4ywboptvr6tlytab@ltop.local>
- <CANeU7QkShNBJ2nWh0wvTN3fTvwX710BT-g=aFf+GS1upnD_Gxw@mail.gmail.com>
- <CAExDi1R9QZJorwhMq4=nRLvMet+S0RCpeiMurko=rNYLpu8c2A@mail.gmail.com>
- <CANeU7QmzundH7qpdYhQqDJgBv+5pPemwft+1uH5oVQ1POnoQDw@mail.gmail.com>
- <CAMHZB6E0NYy_bNJftB5n4BFZ4-fNf___n0RN1OPb+jkV4Ry-Dw@mail.gmail.com>
- <20170803214906.dvvyibtf53j3ah6m@ltop.local>
- <CA+55aFzif2qNMQ0xniB6ubgGJu67h25K3G9jyGHPHa6o-unjTg@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] fix: give a type to bad conditionnal expressions
+Date: Fri,  4 Aug 2017 02:16:39 +0200
+Message-ID: <20170804001639.4823-1-luc.vanoostenryck@gmail.com>
+References: <20170804001122.4ivc2sktypvg2w3i@ltop.local>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f41.google.com ([74.125.82.41]:36769 "EHLO
-        mail-wm0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751866AbdHDAL1 (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36026 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751887AbdHDASs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 3 Aug 2017 20:11:27 -0400
-Received: by mail-wm0-f41.google.com with SMTP id t201so7495142wmt.1
-        for <linux-sparse@vger.kernel.org>; Thu, 03 Aug 2017 17:11:27 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CA+55aFzif2qNMQ0xniB6ubgGJu67h25K3G9jyGHPHa6o-unjTg@mail.gmail.com>
+        Thu, 3 Aug 2017 20:18:48 -0400
+Received: by mail-wr0-f195.google.com with SMTP id y67so1983811wrb.3
+        for <linux-sparse@vger.kernel.org>; Thu, 03 Aug 2017 17:18:48 -0700 (PDT)
+In-Reply-To: <20170804001122.4ivc2sktypvg2w3i@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Aug 03, 2017 at 03:35:04PM -0700, Linus Torvalds wrote:
-> On Thu, Aug 3, 2017 at 2:49 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > My conclusion is that most of the problem here comes from the fact that:
-> >    - sparse always inlines function marked as inline
-> >    - and does so very early, before any optimizations (so the extra macro
-> >      code is inlined 2044 times and need to be processed 2044 times).
-> 
-> Yeah, I think that's sadly fairly fundamental to how sparse inlining works.
-> 
-> Sparse inlines things on a tree level, but most optimizations and
-> simplifications are done on the SSA representation.
-> 
-> That very early inlining was actually a fairly big design decision
-> originally - at some point I actually wanted to allow sparse to have
-> inline functions act as untyped "templates" that it inlined, and that
-> had their types evaluated only within the context of being used.
+Bad conditional expressions used to have no type (NULL)
+this in turn makes that some further processing are
+not done. In particular, here, the expansion of the
+operands are not done.
 
-Yes, it makes sense.
+Fix this by giving to such expression a type 'bad_type'.
+
+Note: nor gcc, not clang seems to emit a warning for the
+      the testcase here which is not conform to the standard.
+      OTOH, sparse complains and this was the cause of the
+      non-expansion of the builtin.
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ evaluate.c                   |  1 +
+ validation/cond-err-expand.c | 27 +++++++++++++++++++++++++++
+ 2 files changed, 28 insertions(+)
+ create mode 100644 validation/cond-err-expand.c
+
+diff --git a/evaluate.c b/evaluate.c
+index cf3cf244d..5b4abdb6a 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1220,6 +1220,7 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
  
-> I have this memory of that actually even working to some degree at
-> some point (ie you could leave arguments to inline functions untyped,
-> and they would take their type from the invocation). But that may have
-> been with special patches.
-> 
-> But yes, for this particular case it's apparently a horrible choice,
-> exactly because it inlines very early before any actual evaluation of
-> anything.
+ Err:
+ 	expression_error(expr, "incompatible types in conditional expression (%s)", typediff);
++	expr->ctype = &bad_ctype;
+ 	return NULL;
+ 
+ out:
+diff --git a/validation/cond-err-expand.c b/validation/cond-err-expand.c
+new file mode 100644
+index 000000000..72af8d4b1
+--- /dev/null
++++ b/validation/cond-err-expand.c
+@@ -0,0 +1,27 @@
++static inline void f(void)
++{
++	__builtin_constant_p(0);
++}
++
++int foo(int a)
++{
++	return 0 ? 0 : f();
++}
++
++int bar(int a)
++{
++	return 1 ? f() : 0;
++}
++
++/*
++ * check-name: cond-err-expand.c
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-error-start
++cond-err-expand.c:8:18: error: incompatible types in conditional expression (different base types)
++cond-err-expand.c:13:18: error: incompatible types in conditional expression (different base types)
++ * check-error-end
++ *
++ * check-output-ignore
++ * check-excludes: call.* __builtin_constant_p
++ */
+-- 
+2.13.2
 
-Well, if we'll want one day to have some sort of automatic inlining,
-like for small functions or functions that are only called once,
-we'll need to have inlining on linearized code. One more thing in
-the todo list. Otherwise, for 'normal' sane usage, the current
-inliner work well enough.
-
-OTOH, I just saw that the heavy inlining is only a marginal part
-of the problem here. The real problem is that __builtin_constant_p()
-is not expanded because of a type mismatch in a conditional:
-one operand is 0 while the other is the inline function which return void.
-The type mismatch makes that the expression has no type so no expansion
-is done.
-
--- Luc
