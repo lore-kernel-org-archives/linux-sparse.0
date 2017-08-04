@@ -1,105 +1,99 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 2/2] fix: give a type to bad cond expr with known condition
-Date: Fri,  4 Aug 2017 18:06:22 +0200
-Message-ID: <20170804160622.18260-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 1/2] take comma expr in account for constant value
+Date: Fri,  4 Aug 2017 18:06:21 +0200
+Message-ID: <20170804160622.18260-2-luc.vanoostenryck@gmail.com>
 References: <20170804160622.18260-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:36198 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752242AbdHDQGe (ORCPT
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:38116 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752242AbdHDQGc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 4 Aug 2017 12:06:34 -0400
-Received: by mail-wr0-f194.google.com with SMTP id y67so3286676wrb.3
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 09:06:34 -0700 (PDT)
+        Fri, 4 Aug 2017 12:06:32 -0400
+Received: by mail-wr0-f196.google.com with SMTP id g32so3284468wrd.5
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 09:06:32 -0700 (PDT)
 In-Reply-To: <20170804160622.18260-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Conditional expressions whose second & third operands
-have non-compatible types are not conform to the C standard
-and sparse emit a warning for them and return the expression
-as being erroneous. In consequence, such expressions are not
-given a type. This, in turn, makes that some further processing
-cannot be done (correctly).
+It's often the case that we simply need the expr's truth value.
 
-It seems that neither GCC nor clang emit a warning when
-there is a type mismatch but the condition is a constant.
+To get the value of an expression or simply if we need to know
+if it's a constant value we can use some functions like
+get_expression_value() or const_expression_value() depending
+on the type of warning needed if the expression is not constant
+(for various definition of constant).
 
-In the case we're interested here (the slow compilation of a file)
-the operation that cannot be done is the expansion its operands.
-This, in turn and among other things, makes that builtins like
-__builtin_constant_p() are not evaluated with disatrous consequence
-for the amount of work done in the next phases.
+However none of these functions take in account the fact that
+a comma expression can also have a value known at compile time.
 
-Fix this by giving to conditional expressions with constant
-condition the same type as the operand selected by the conditional
-(but keeping the warning) as GCC & clang seems to do.
+In order to not introduce unwanted change elsewheer in the code,
+introduce a new function expr_truth_value() which never warn
+but will return -1 if the expr have no known boolean value.
+
+Note: the whole set of functions should be unified to take comma
+      expressions in account when needed.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                   | 12 ++++++++++++
- validation/cond-err-expand.c | 27 +++++++++++++++++++++++++++
- 2 files changed, 39 insertions(+)
- create mode 100644 validation/cond-err-expand.c
+ expand.c     | 30 ++++++++++++++++++++++++++++++
+ expression.h |  1 +
+ 2 files changed, 31 insertions(+)
 
-diff --git a/evaluate.c b/evaluate.c
-index cf3cf244d..649e132b8 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1220,6 +1220,18 @@ static struct symbol *evaluate_conditional_expression(struct expression *expr)
+diff --git a/expand.c b/expand.c
+index 5f908c971..f436b5b50 100644
+--- a/expand.c
++++ b/expand.c
+@@ -1281,6 +1281,36 @@ long long get_expression_value_silent(struct expression *expr)
+ 	return __get_expression_value(expr, 2);
+ }
  
- Err:
- 	expression_error(expr, "incompatible types in conditional expression (%s)", typediff);
-+	/*
-+	 * if the condition is constant, the type is in fact known
-+	 * so use it, as gcc & clang do.
-+	 */
-+	switch (expr_truth_value(expr->conditional)) {
-+	case 1:	expr->ctype = ltype;
-+		break;
-+	case 0: expr->ctype = rtype;
-+		break;
++int expr_truth_value(struct expression *expr)
++{
++	const int saved = conservative;
++	struct symbol *ctype;
++
++	if (!expr)
++		return 0;
++
++	ctype = evaluate_expression(expr);
++	if (!ctype)
++		return -1;
++
++	conservative = 1;
++	expand_expression(expr);
++	conservative = saved;
++
++redo:
++	switch (expr->type) {
++	case EXPR_COMMA:
++		expr = expr->right;
++		goto redo;
++	case EXPR_VALUE:
++		return expr->value != 0;
++	case EXPR_FVALUE:
++		return expr->fvalue != 0;
 +	default:
-+		break;
++		return -1;
 +	}
- 	return NULL;
++}
++
+ int is_zero_constant(struct expression *expr)
+ {
+ 	const int saved = conservative;
+diff --git a/expression.h b/expression.h
+index 80b3be5f5..d0f3ac925 100644
+--- a/expression.h
++++ b/expression.h
+@@ -178,6 +178,7 @@ struct expression {
  
- out:
-diff --git a/validation/cond-err-expand.c b/validation/cond-err-expand.c
-new file mode 100644
-index 000000000..93bbac153
---- /dev/null
-+++ b/validation/cond-err-expand.c
-@@ -0,0 +1,27 @@
-+static inline void f(void)
-+{
-+	__builtin_constant_p(0);
-+}
-+
-+void foo(void)
-+{
-+	0 ? 0 : f();
-+}
-+
-+void bar(void)
-+{
-+	1 ? f() : 0;
-+}
-+
-+/*
-+ * check-name: cond-err-expand.c
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-error-start
-+cond-err-expand.c:8:11: error: incompatible types in conditional expression (different base types)
-+cond-err-expand.c:13:11: error: incompatible types in conditional expression (different base types)
-+ * check-error-end
-+ *
-+ * check-output-ignore
-+ * check-excludes: call.* __builtin_constant_p
-+ */
+ /* Constant expression values */
+ int is_zero_constant(struct expression *);
++int expr_truth_value(struct expression *expr);
+ long long get_expression_value(struct expression *);
+ long long const_expression_value(struct expression *);
+ long long get_expression_value_silent(struct expression *expr);
 -- 
 2.13.2
 
