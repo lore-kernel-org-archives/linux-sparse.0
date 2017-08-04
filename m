@@ -1,215 +1,149 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH RFC] Let pseudo->users loop on duplicate version of list
-Date: Fri, 4 Aug 2017 18:58:41 +0200
-Message-ID: <20170804165839.shbkk2eb7w743nri@ltop.local>
-References: <CAMHZB6E9LkHc4KR5ktoS2MzZpZpW09h4_U8XH+PVE4HTmi1LcQ@mail.gmail.com>
- <CANeU7Qmr00XPkKgE_60TyZMToGwGOgzsqbb3Gwj1JqKTZ1PW_Q@mail.gmail.com>
- <CAExDi1Tt4P9oFZVoEL9yWwU4N_Te5ZEtNe=KcvAYJuaHtbEVyQ@mail.gmail.com>
- <CANeU7Qn+O=yXQP11uw-i2R0rmDCiyNsvFZX4M=zwLO-4-MJk_A@mail.gmail.com>
- <20170803101835.qhxbyrvly3bhfxyd@ltop.local>
- <CANeU7Q=nH-mfJ4=ggHhN2xCS9OPHZhUPPXkXd9HGoc6gEhGm7w@mail.gmail.com>
- <20170804004110.ctq3w6lcv5jclur7@ltop.local>
- <CANeU7Q=qSLDM99=S3btE1OqZ_n_nHChtYvqi8H_48EHhc04JkA@mail.gmail.com>
- <20170804103835.ahb3dv2t2ictuvwf@ltop.local>
- <CANeU7Qk8LrOG7+n3=r0B7m+CK6DTNeKs9cWzoZKTzckEz_96Fw@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] mark pseudo user as deleted instead of removing them
+Date: Fri, 4 Aug 2017 14:19:54 -0400
+Message-ID: <CANeU7Q=WRs47kXndEj6bPTJFUoVH211pAKwv3aV0Sx87oxZasA@mail.gmail.com>
+References: <CANeU7Q=nH-mfJ4=ggHhN2xCS9OPHZhUPPXkXd9HGoc6gEhGm7w@mail.gmail.com>
+ <20170804002230.5047-1-luc.vanoostenryck@gmail.com> <CANeU7Q=eNTqHRS__DPFnoOMH7vnUJHRh+3wCcFR-EF_SB7zmSA@mail.gmail.com>
+ <CANeU7Q=Lsy+_5qBVGGBhK9ux5pJDVy6i0OTTsBoK=UCeSkTJhw@mail.gmail.com> <20170804155822.kr3bzd2amnxzqk76@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:35957 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752433AbdHDQ6p (ORCPT
+Received: from mail-pf0-f169.google.com ([209.85.192.169]:35477 "EHLO
+        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751281AbdHDSTz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 4 Aug 2017 12:58:45 -0400
-Received: by mail-wm0-f48.google.com with SMTP id t201so24464199wmt.1
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 09:58:45 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qk8LrOG7+n3=r0B7m+CK6DTNeKs9cWzoZKTzckEz_96Fw@mail.gmail.com>
+        Fri, 4 Aug 2017 14:19:55 -0400
+Received: by mail-pf0-f169.google.com with SMTP id t86so10799668pfe.2
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Aug 2017 11:19:55 -0700 (PDT)
+In-Reply-To: <20170804155822.kr3bzd2amnxzqk76@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 04, 2017 at 10:48:35AM -0400, Christopher Li wrote:
-> On Fri, Aug 4, 2017 at 6:38 AM, Luc Van Oostenryck wrote:
-> > It was a rethorical question as a reponse to your own question
-> > because your own asking to show something while we're talking
-> > design and potentiality doesn't help at all.
-> 
-> That is exactly the feeling I am getting from you. You said some thing
-> might not work. I want to find out exactly what do you have in mind might
-> not work.  Otherwise the conversion is base on doubt is not very
-> useful.
+First thing first, I don't have strong reason to object this patch.
+So it can be merge into RC5.
 
-Replace 'doubt' by 'warning' and it give already another sense to it.
-My whole message has always been the same: "Warning, it's not so easy
-or obvious and I have reasons to think that it won't always be possible
-or desirable (so it may be good to also think about alternative or to
-somehow accept thet idea that maybe not all cases will be solved the
-same way".
+On Fri, Aug 4, 2017 at 11:58 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> Of course, it's why I said it wasn't very pretty.
+>
+> It is so for now because this patch only concerns lists
+> with pseudo_users and only these lists need this check
+> (and I certainly don't want to duplicate all the macros now).
 
-> I want details. This goes both ways. You can also ask me to clarify
-> more details on certain things in my mental model.
+OK. I see. As a minor point, (will not affect patch being accepted)
+I want to make this into a part of the stander list.
+And the "if (list->rm)" will make sure we only take the new code
+path for pseudo_users. Because we only call to MARK_CURRENT_DELTE()
+on pseudo_users.
 
-You can ask details about an existing implementation, you can ask
-details about some idea already well elaborated. 
-You can't ask details about something that by nature have not yet details,
-but I have already tried to give you all sort of indices that would
-give some matter to think about.
+Have two version of the API is confusing to the developer of sparse.
+I would rather hind those temporary detail from the developer.
+This ptr_list_size_null() is likely get remove from the next version of
+sparse any way. So it would better not to expose it.
 
-> > 1) Converting a recursive algo to an iterative one is not always
-> >    a good solution, for example the iterative one can be much
-> >    more complex/less elegant. You may also need more memory
-> >    (because you often need to store additional info).
-> >    A typical example is searching in a tree: it can be done
-> >    with iteration but it's generaly not done because the
-> >    recursive version is so much simpler & elegant (and probably
-> >    efficient too).
-> 
-> In my observe and modify model, the traverse of a tree can use
-> recursive, even on the same ptrlist.
 
-When you're searching in a (binary) tree, at some point you will need
-to backtrack, to return to some previous branching point. The usual
-way to do that is to use recursion and the branching point is
-implicitely stored in the stack. You can do the same without recursion,
-without using the call stack but then you need to store info about the
-branching point.
-It's an example that this sort of changes is no for free.
+>
+> There is only one case and it's to support an abuse of the list typing.
+> I have a patch to have the clean typing (and thus no more null pointers in lists).
+> Not -rc5 material IMO though.
 
-> > 2) Converting something to a work queue is not the same as
-> >    converting recursion to iteration anyway.
-> >    Recursion vs. iteration is something about how walking through
-> >    a data structure. Using a work queue is about how/when doing an
-> >    operation on an object.
-> 
-> You walk the graph to do some thing. That is given. Nobody walk the graph
-> for the sake of just walking the graph. The optimize can be model
-> as an algorithm walk the graph and make modification of the graph.
-> Is that a fair statement?
+Agree.
 
-Sorry, I don't understand what you mean. 
+>
+>> >  extern void concat_ptr_list(struct ptr_list *a, struct ptr_list **b);
+>> >  extern void __free_ptr_list(struct ptr_list **);
+>> >  extern int ptr_list_size(struct ptr_list *);
+>> > +extern int ptr_list_size_null(struct ptr_list *);
+>>
+>> I don't think we need ptr_list_size_null vs ptr_list_size.
+>
+> Certainly true when all the lists will have been converted.
+> Even true for the ones that doesn't but for the moment,
+> as prototype to discuss the principle and to be sure to not
+> introduce any changes else where, I've kept them separated.
 
-> > An example among other of complications you can have when converting
-> > to work queue is something like:
-> > Imagine you're iterating through a list of instruction checking/
-> > searching after something. If found, you want to do an operation
-> > on the instruction just found.
-> 
-> Now we are talking.
-> 
-> > Sound like something for a work queue, right? Just put the
-> > object you found in the work queue and let do the operation later.
-> > Now what if the operation is about inserting another instruction
-> > just before the one just found (like done when adding death notes)?
-> > - if you do it immediatly, you have the context of the instruction
-> >   and inserting the death notes is easy/cheap
-> 
-> Here you make some assumption that you can't save the context of
-> the instruction in the work queue.
+I do not mean to convert all ptrlist. I am object to have two similar
+api. If we do a test of "if (list->rm)", we can make sure only the
+pseudo_user get the new code path. Because that is the only
+ptrlist is going to mark ptrlist deleted and having list->rm != 0.
 
-No, I don't make such assumption, it's an example showing that not
-doing things there may have a cost. Saving the context is such a cost.
+>
+> Yes, details that will matter once we'll agree on the principle.
 
-> That is not necessary true. In
-> my mental model, the work queue will contain the context of what
-> needs to be done, e.g. the pointer to the instruct. Other context
-> if needed. I want to know more about what context you can't save.
+Principle is fine :-)
 
-I never said you can't save context.
-On the contrary I've said that you'll most probably have to store
-some context to be able to do things in a deferred way and this
-will have a cost (and I use here the word 'context' in a very general
-abstract meaning).
+>
+>> Why do we need two different version of pack_ptr_list?
+>
+> same as for ptr_list_size_null().
 
-> BTW, most of the context can be found on the graph does not
-> need to save in to work queue.
-> 
-> Take simplify_branch_branch for example, when you know this
-> instruction should be simplified, there is very little information
-> need to be save in the work queue.
+I see your reasoning was to reduce code impact.
+I think the testing of (ptrlist->rm) can do the same thing.
 
-Absolutely, in this example yes.
-In some others examples, it is less so.
 
-> > - if you do the insertion later when processing the work queue
-> >   you won't have anymore the context of the instruction
-> >   and to insert the death note you will first have to
-> >   search after it (to have the context back) before you will
-> >   be able to do the insertion and this search will cost you.
-> 
-> Again, I don't have a clear picture of what context you are talking
-> about.
+>
+>> If the ptrlist->rm != 0, that already means this ptrlist has been
+>> used for mark deleted. Can we use just one pack_ptr_list instead?
 
-You have an instruction and you need to insert another instruction
-in front of it. If you do that while you was searching after this
-instruction, it's very easy because you have the head-list-nr trio
-implicitely available via the ptrlist macros. This trio is here
-the context you need in order to efficiently insert an instruction
-in front ot it.
 
-Now, for some reasons you want to defer this instruction.
-What will you put in the work queue?
-- the pointer to the instruction?
-  then to insert you will need to search again in the list until
-  you found the instruction. At this point you will have back
-  the context needed to do the insertion but you had to do a search.
-- the pointer to where the instruction stored in the list?
-  then you can easily exchange this instruction with another one
-  but how will this be usefull to the insertion? Well sure,
-  with the pointer you can get back the original head-list-nr
-  but is this usefull here? If you store somewhere the instruction
-  pointer pointer, in practice that mean that the list that contain
-  it become immutable (presumably you also hold pointers for the
-  neighbour instructions). The only thing that can work at this point
-  is a normal liked list, nor the block-based ptrlist.
-  Is that a problem? Maybe, maybe not much.
+I want to have one single API instead of two. As the code impact
+caution, the "if (ptrlist->rm)" test will make sure only pseudo_user
+list get the new code path.
 
-> Please clarify. If it is the instruction before this instruction,
-> I can't image why I need it. If really need it I can still cache it or
-> search it in the bb->insns list.
-> 
-> BTW, my impression is that, the algorithm "constant propagation using ssa"
-> is such an example what you are describing here. In the constant
-> propagation, you first find the instruction that use constant.
-> Then you find out if that instruction can be simplify as constant.
-> Next thing is put the instruction using of this simplify instruction result
-> into the queue to see if they can be simplify as well.
+Currently you use two different api function call to make sure
+the new code don't impact other list. I mean to say you can do
+the same with "if (ptrlist->rm)" testing.
 
-No, because in this case each instruction is still independend, you 
-don't need to know anything about the surrounding instructions.
-So it's a case where it should be easy to convert it.
-The example for the deathnotes insertion is not like this.
+Sparse also has usage as library for other projects.
+Having some stable api is a good thing. I don't want a new temporary
+API which get removed later if we can avoid it.
 
-> > It's just an example but there is a whole class of similar situations.
-> > Delaying thing by moving it to a work queue will also have negative
-> > impact on cache (but in a way, it's also a problem of having lost the
-> > context).
-> 
-> Caching, maybe. But I don't think caching is a strong point to against it.
-> I am just a system guy playing catch up game on compiler designs. The more
-> I read, the more I find out using work queue is a very common
-> thing amount those classic optimization algorithms.
-> 
-> > And again, I'm not telling that using workqueue is never a good solution,
-> > I'm saying that most probably it won't always be a good solution.
-> 
-> My reading is that, "I have doubt but I can't articulate precisely why it
-> is the case." Fill in more detail we can have more discussion.
+>
+> Not sure to understand you here.
 
-If by "I have doubt" you understand "I have doubt about using it
-systematically to avoid problems with nested lists", you would be
-quite close. If you mean instead "I have doubt about using
-it preferably (for cleanless and effective solution to avoid problems
-with nested lists" you would be very wrong.
+See above, hope I explain it clear enough.
 
-> Granted, no algorithm is *always" a good solution to all problem.
-> As I express in my previous email, I have no doubt this can be done.
 
-You have no doubts that it can be done everywhere in sparse to avoid
-problems with nested lists or you have no doubts that it can be
-done at least in some or most case?
+>
+>> Another thing is that, we might want to put some code
+>> to assert in the ptrlist split and seeing ptrlist->rm != 0.
+>
+> OK, but again the goal of this patch is not about ptrlist split.
+> It's only for the very specific case you found where there is a
+> problem with deletion on pseudo-users lists. No more, no less.
 
-Like I have already told since the beginning, I have doubts about doing
-it everywhere and I have already explained why (or at least tried to).
+OK, that is just a suggestion any way. Minor one.
 
--- Luc
+>
+>> Another thing I am thinking is weather this change too big for RC5.
+>
+> As such, I don't think it's a big change for -rc5, it's quite well
+> contained to some very specific code.
+
+If we are going to push this for RC5, can we have one set of API
+for this case? I see reason not to introduce temporary API which
+will get remove later.
+
+Having the check for "if (list->rm)" and only add new code under
+that condition will make sure enough we don't impact the other list
+and old code?
+
+> I agree that it would be natural to ask if we want a fix for this problem
+> in the -rc5, though, as the problem have been there forever and nothing
+> really bad has been discovered.
+
+Fine with me.
+
+> I would be fine with this patch (but it would need a bit more testing).
+> I would be fine with no patch at all.
+> I would be ok with your patch (the one with list duplication) but I
+> think it's not a good one, even as a temporary bandaid (for the reasons
+> I explained the first time I commented on it).
+
+Fair enough. Yes. I can apply it. The question is, do you want to remove
+the duplicate set of API? (by testing "list->rm").
+
+Chris
