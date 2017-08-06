@@ -1,7 +1,7 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Potential incorrect simplification
-Date: Sun, 6 Aug 2017 18:04:18 +0100
-Message-ID: <CACXZuxcQEnZopJEcvRTAEpU=giRfykLP_rZLkqdRZ=hFJBpVAA@mail.gmail.com>
+Date: Sun, 6 Aug 2017 19:45:14 +0200
+Message-ID: <CAMHZB6Eq2D9NhZ_xiq1PZ_vioodQWVU85CnPvwg5fwwU+nZW=Q@mail.gmail.com>
 References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
  <CAExDi1TtcpZtnEV6ctyA9MacJA_9h4njmhd-MSA3KgOq8oK_gA@mail.gmail.com>
  <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
@@ -9,52 +9,35 @@ References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
  <CA+55aFx6g3-+6tJ_6Uqu4K1pQoDnqcXrjSGYsryLjjksEtT06A@mail.gmail.com>
  <CANeU7Qk-4U2G_6CZ7KHbGZiqRe9=fpNOzE4eyfLjz3fnd_n3ww@mail.gmail.com>
  <20170806140035.f2tqkmiufjytiwri@ltop.local> <CANeU7QnjRSnnSc8ew69-0M7XP2zoSVh3jhCciYDRVF0i24d=sQ@mail.gmail.com>
- <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com> <CAMHZB6FH7431uaYzuQN4jxhwMSYHLXjrVkUs4xuwsvUsAgkDBQ@mail.gmail.com>
+ <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
+ <CAMHZB6FH7431uaYzuQN4jxhwMSYHLXjrVkUs4xuwsvUsAgkDBQ@mail.gmail.com> <CACXZuxcQEnZopJEcvRTAEpU=giRfykLP_rZLkqdRZ=hFJBpVAA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:37315 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751331AbdHFRET (ORCPT
+Received: from mail-qt0-f182.google.com ([209.85.216.182]:34510 "EHLO
+        mail-qt0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751300AbdHFRpP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 13:04:19 -0400
-Received: by mail-wm0-f54.google.com with SMTP id t201so52585614wmt.0
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 10:04:19 -0700 (PDT)
-In-Reply-To: <CAMHZB6FH7431uaYzuQN4jxhwMSYHLXjrVkUs4xuwsvUsAgkDBQ@mail.gmail.com>
+        Sun, 6 Aug 2017 13:45:15 -0400
+Received: by mail-qt0-f182.google.com with SMTP id s6so30644735qtc.1
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 10:45:14 -0700 (PDT)
+In-Reply-To: <CACXZuxcQEnZopJEcvRTAEpU=giRfykLP_rZLkqdRZ=hFJBpVAA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 6 August 2017 at 17:56, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Sun, Aug 6, 2017 at 5:52 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> Hi,
->>
->> I would like to assert that in the C code there was no attempt to
->> access uninitialized value. If you have a look at the original report
->> here:
->>
->> http://marc.info/?l=linux-sparse&m=149070715427276&w=2
->>
->> You will see that the C code assigns a value to the field before
->> attempting to access it as shown below.
->>
->> s3.onebit = 1;
->> if(s3.onebit != 1){
->> }
->
-> True but this should be solved by patch b1672eab399fdce2c050e8aa07767489a2071981
-> available since -rc1.
-> Isn't it the case?
->
+On Sun, Aug 6, 2017 at 7:04 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> Wouldn't have thought so - as the variable is not initialized at the
+> point of declaration. The assignment occurs after declaring the struct
+> variable s3.
 
-Wouldn't have thought so - as the variable is not initialized at the
-point of declaration. The assignment occurs after declaring the struct
-variable s3.
+IIRC, this patch was written specifically for the case you reported here.
 
-I haven't tried that patch though.
+> I haven't tried that patch though.
 
-Regards
-Dibyendu
+You'll need the full series:
+https://github.com/lucvoo/sparse/tree/fix-bitfield-init-v3
+
+-- Luc
