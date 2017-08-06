@@ -1,30 +1,78 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: SCC: a sparse based compiler backend
-Date: Sun,  6 Aug 2017 23:01:52 +0200
-Message-ID: <20170806210152.11002-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC] sparse SSA construction
+Date: Sun, 6 Aug 2017 19:01:29 -0400
+Message-ID: <CANeU7Qk3trZmFqyGuhOxBLzFBOT131o=HhNhwQrzLrHoO2PQ1Q@mail.gmail.com>
+References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f51.google.com ([74.125.82.51]:36713 "EHLO
-        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751342AbdHFVCA (ORCPT
+Received: from mail-pg0-f52.google.com ([74.125.83.52]:34575 "EHLO
+        mail-pg0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751352AbdHFXBa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 17:02:00 -0400
-Received: by mail-wm0-f51.google.com with SMTP id t201so54716667wmt.1
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 14:01:59 -0700 (PDT)
+        Sun, 6 Aug 2017 19:01:30 -0400
+Received: by mail-pg0-f52.google.com with SMTP id u185so26857066pgb.1
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 16:01:30 -0700 (PDT)
+In-Reply-To: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Since it seems to be an interest on the subject, here is a
-small compiler, or more exactly, a partial compiler backend.
+On Sun, Aug 6, 2017 at 4:26 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Since it seems to be some interest on the subject and
+> to avoid duplicated work, here is a rewrite of sparse's
+> construction of the SSA form.
+>
+> It's not using one of the classical algorithm but is
+> using something newer, simpler and often faster.
+> It's main advantage beyond the simplicity is that you don't
+> need to first build the whole CFG & linearized code to
+> to directly throw it away (or heavily transform it) as
+> it builds the SSA form directly during the linearization.
 
-Acessing symbols is very limited though and there is nothing
-done yet for register allocation (and even less scheduling).
+OK, great.
 
-It can currently generate code for ARM & ARM64 and can easily
-be adapted for other RISC arch. Code for x86 would need more work.
+May I ask the question that, the SSA form you are building
+from this codes. Does it violate the SSA dominance property
+define as:
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D
+=CE=A6-Functions are placed in all basic blocks of the
+Dominance Frontier.
 
-I don't feel the need to patchbomb the ML so here is the URL:
-  git://github.com/lucvoo/sparse.git codegen
+Dominance Property of SSA:
+1. If x is used in a Phi-function in block N,
+then the definition of x dominates *every* <=3D=3D=3D=3D notice "every"
+predecessor of N.
+2. If x is used in a non-Phi statement in N,
+then the definition of x dominates N
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D
 
--- Luc
+In other word, does it produce the "usage before
+define" IR similar to this?
+
+        and.32      %r3 <- %r4, $-65
+         or.32       %r4 <- %r3, $64
+
+> It's not finished code but it's working well (and is
+> effectively a bit faster and use less memory).
+
+The correct behavior is the most important one.
+Then performance.
+
+> What's interesting for sparse now is that:
+> - the phi-noes are correctly placed
+
+In the dominance frontier, right? That is great.
+
+> - uninitialized variables can be handled much more easily.
+
+That I am very curios how it was done. See the above
+question. I might not have time to go through your code
+very quickly. I will do my best when I have some time.
+
+Chris
