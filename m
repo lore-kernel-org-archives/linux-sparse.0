@@ -1,7 +1,7 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Potential incorrect simplification
-Date: Sun, 6 Aug 2017 18:58:38 +0100
-Message-ID: <CACXZuxfyC1KPVviEGCJkFmt9MQ-C8LT73kxNPk2kPy-QAooRTg@mail.gmail.com>
+Date: Sun, 6 Aug 2017 20:15:32 +0200
+Message-ID: <CAMHZB6FotFBkEcx2_RDRX4OmNYzE9arh8gtreFYAsc2v21HHRw@mail.gmail.com>
 References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
  <CAExDi1TtcpZtnEV6ctyA9MacJA_9h4njmhd-MSA3KgOq8oK_gA@mail.gmail.com>
  <CACXZuxfxNNh+ThcT=7Xr98tToL2GimFi7UOTSwgNq6mfLLGNfA@mail.gmail.com>
@@ -11,42 +11,47 @@ References: <CACXZuxeRXsYWgwihs1nmmTYaLoyhw+PDAy6jEemkZJFpySdfQA@mail.gmail.com>
  <20170806140035.f2tqkmiufjytiwri@ltop.local> <CANeU7QnjRSnnSc8ew69-0M7XP2zoSVh3jhCciYDRVF0i24d=sQ@mail.gmail.com>
  <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
  <CAMHZB6FH7431uaYzuQN4jxhwMSYHLXjrVkUs4xuwsvUsAgkDBQ@mail.gmail.com>
- <CACXZuxcQEnZopJEcvRTAEpU=giRfykLP_rZLkqdRZ=hFJBpVAA@mail.gmail.com> <CAMHZB6Eq2D9NhZ_xiq1PZ_vioodQWVU85CnPvwg5fwwU+nZW=Q@mail.gmail.com>
+ <CACXZuxcQEnZopJEcvRTAEpU=giRfykLP_rZLkqdRZ=hFJBpVAA@mail.gmail.com>
+ <CAMHZB6Eq2D9NhZ_xiq1PZ_vioodQWVU85CnPvwg5fwwU+nZW=Q@mail.gmail.com> <CACXZuxfyC1KPVviEGCJkFmt9MQ-C8LT73kxNPk2kPy-QAooRTg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:36816 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751331AbdHFR6k (ORCPT
+Received: from mail-qt0-f174.google.com ([209.85.216.174]:34085 "EHLO
+        mail-qt0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751343AbdHFSPd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 13:58:40 -0400
-Received: by mail-wr0-f172.google.com with SMTP id y43so32149330wrd.3
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 10:58:40 -0700 (PDT)
-In-Reply-To: <CAMHZB6Eq2D9NhZ_xiq1PZ_vioodQWVU85CnPvwg5fwwU+nZW=Q@mail.gmail.com>
+        Sun, 6 Aug 2017 14:15:33 -0400
+Received: by mail-qt0-f174.google.com with SMTP id s6so30818635qtc.1
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 11:15:33 -0700 (PDT)
+In-Reply-To: <CACXZuxfyC1KPVviEGCJkFmt9MQ-C8LT73kxNPk2kPy-QAooRTg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 6 August 2017 at 18:45, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Sun, Aug 6, 2017 at 7:04 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> Wouldn't have thought so - as the variable is not initialized at the
->> point of declaration. The assignment occurs after declaring the struct
->> variable s3.
+On Sun, Aug 6, 2017 at 7:58 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> On 6 August 2017 at 18:45, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> On Sun, Aug 6, 2017 at 7:04 PM, Dibyendu Majumdar
+>> <mobile@majumdar.org.uk> wrote:
+>>> Wouldn't have thought so - as the variable is not initialized at the
+>>> point of declaration. The assignment occurs after declaring the struct
+>>> variable s3.
+>>
+>> IIRC, this patch was written specifically for the case you reported here.
+>>
+>>> I haven't tried that patch though.
+>>
+>> You'll need the full series:
+>> https://github.com/lucvoo/sparse/tree/fix-bitfield-init-v3
+>>
 >
-> IIRC, this patch was written specifically for the case you reported here.
->
->> I haven't tried that patch though.
->
-> You'll need the full series:
-> https://github.com/lucvoo/sparse/tree/fix-bitfield-init-v3
->
+> I will have a look at it. I did report separately the issue of not
+> zeroing out structs when they are initialized and the change you
+> mentioned earlier looks more for addressing that issue.
 
-I will have a look at it. I did report separately the issue of not
-zeroing out structs when they are initialized and the change you
-mentioned earlier looks more for addressing that issue.
+Indeed.
+I mixed up both (or more exactly, I thought it solved both).
 
-Regards
-Dibyendu
+-- Luc
