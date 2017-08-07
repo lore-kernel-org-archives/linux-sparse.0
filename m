@@ -1,43 +1,59 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: Sparse documentation format, rST vs MD
-Date: Mon, 7 Aug 2017 04:57:14 -0700
-Message-ID: <20170807115713.zfu4d726kmopfym3@x>
-References: <CANeU7QkbNzGVVGbvMdaN14g2nPnF3ha6+mBkLJfhCFvf90cy_w@mail.gmail.com>
- <20170807045611.aq3ofd57a7mtvdcm@x>
- <CANeU7Qm5VWBG9YzZXOjPLjve+MVeuRpY_LeyW=CHyYcxS5swLA@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Best way to inspect the parse tree from Sparse
+Date: Mon, 7 Aug 2017 16:11:43 +0100
+Message-ID: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay5-d.mail.gandi.net ([217.70.183.197]:37493 "EHLO
-        relay5-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753092AbdHGL5V (ORCPT
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:38386 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751396AbdHGPLp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 07:57:21 -0400
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qm5VWBG9YzZXOjPLjve+MVeuRpY_LeyW=CHyYcxS5swLA@mail.gmail.com>
+        Mon, 7 Aug 2017 11:11:45 -0400
+Received: by mail-wm0-f45.google.com with SMTP id m85so9507315wma.1
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 08:11:45 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Aug 07, 2017 at 07:46:25AM -0400, Christopher Li wrote:
-> On Mon, Aug 7, 2017 at 12:56 AM, Josh Triplett <josh@joshtriplett.org> wrote:
-> 
-> > I personally find the Markdown format *much* closer to normal text
-> 
-> Same here. But I know I am biased.
-> 
-> > formatting in email, and I'd highly recommend using it.  I'm not sure
-> > why the kernel picked reStructuredText, but I don't think there's likely
-> > to be a huge amount of cross-pollination between the two in terms of
-> > documentation.  In particular, you're unlikely to want to borrow files
-> > from the kernel given the different license.
-> 
-> Mostly just submitting-patches.rst for the Signed-off-by part.
-> For the coding style we can just point to the Linux kernel one.
-> 
-> I think it is fine to have a few *documents* remain GPL in sparse.
-> It is not link to any source file. It is not a source file at all.
-> I don't think any one will nick pick the license detail on this.
+Hi,
 
-Purely procedural documentation seems fine, sure.
+I would like to understand the structure of the parse tree generated
+by Sparse a bit better. I am looking at the output from the show_*()
+functions but it is not clear to me exactly what the output means. For
+example:
+
+extern int printf(const char *, ...);
+
+int main(int argc, const char *argv[]) {
+printf("hello world!\n");
+return 0;
+}
+
+Results in:
+
+.align 4
+int extern [signed] [addressable] [toplevel] main( ... )
+        movi.64         v2,&"hello world!\n"
+        push.64         v2
+        call            printf
+        add.64          vSP,vSP,$8
+        mov.32          v3,retval
+        movi.32         v4,$0
+        addi.64         v5,vFP,$offsetof(return:00000202755B1A98)
+        st.32           v4,[v5]
+        ret             (00000202755B1A98)
+.L00000202755B1A98:
+        addi.64         v6,vFP,$offsetof(return:00000202755B1A98)
+        ld.32           v7,[v6]
+        mov.32          retval,7
+        ret
+
+
+I get the first four lines, but the rest don't make sense to me. I
+suppose that the dump is trying to show the parse tree in a linear
+form ...  but is that useful? Would it be better to dump the parse
+tree in a different form?
+
+Regards
+Dibyendu
