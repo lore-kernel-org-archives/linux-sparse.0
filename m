@@ -1,62 +1,47 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Sparse documentation format, rST vs MD
-Date: Sun, 6 Aug 2017 21:28:58 -0400
-Message-ID: <CANeU7QkbNzGVVGbvMdaN14g2nPnF3ha6+mBkLJfhCFvf90cy_w@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/3] fix loading of partially defined bitfield
+Date: Mon,  7 Aug 2017 03:33:35 +0200
+Message-ID: <20170807013338.46211-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f46.google.com ([74.125.83.46]:37605 "EHLO
-        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751375AbdHGB3A (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35347 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751375AbdHGBdm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 21:29:00 -0400
-Received: by mail-pg0-f46.google.com with SMTP id y129so27740006pgy.4
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:28:59 -0700 (PDT)
+        Sun, 6 Aug 2017 21:33:42 -0400
+Received: by mail-wm0-f65.google.com with SMTP id r77so12119367wmd.2
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:33:42 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-I want to use some mark down format for the document
-of sparse.
+The goal of this series is to fix the problem present in sparse
+when a bitfield in an uninitialized automatic variable is first
+set then read-back.
 
-There is two choice here:
+In this case the bitfield itself is initialized but not the
+remaining of the structure/word and sparse was not smart
+enough to handle it.
 
-rST (reStructuredText)
-https://en.wikipedia.org/wiki/ReStructuredText
+This is for testing only and the patches are not meant to 
+be applied on the main tree becasue it need the new SSA
+construction to handle the undefined vars correctly.
 
-MD (Mark Down)
-https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+(two other simplifications is also needed to make the
+generated code a no-op as it should be but not yet
+implemented).
 
-Does any one care which format to use?
+The whole code is available in the git repository at:
 
-So far I am weak leaning towards MD but I can be convenience
-otherwise. Mostly because MD render on github is very nicely.
-I already use MD on other projects.
+  git://github.com/lucvoo/sparse.git fix-loading-partialy-defined-bitfields
 
-Here is my run down of Pros and Cons
-rST Pros:
+----------------------------------------------------------------
+Luc Van Oostenryck (3):
+      new helper: def_opcode()
+      change loading of bitfields
+      simplify ((A & M') | B ) & M when M' & M == 0
 
--  Linux kernel already using rST for documents like
-   submiting-patches.rst. I need a file for sparse version of
-   submitting-patches.
-
-- might be more friendly to code syntax. But I am not going to use
-  those really deep extensions any way.
-
-rST Cons (for me):
-- I don't know rST at all. I need to learn it.
-- github does not recognized rST naturally.
-
-
-MarkDown Pros:
-- More friendly to web.
-- Github etc can render .md properly on display.
-- I already know how the syntax. No need to learn.
-
-MarkdDown Cons:
-- Kernel is using rST. I need to convert the format if I borrow
-  some file from the Linux Kernel.
-
-Feed back?
-
-Chris
+ linearize.c                | 15 +++++++-----
+ simplify.c                 | 61 ++++++++++++++++++++++++++++++++++++++++------
+ validation/bitfield-size.c |  6 +++--
+ 3 files changed, 66 insertions(+), 16 deletions(-)
