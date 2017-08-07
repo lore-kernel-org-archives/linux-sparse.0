@@ -1,59 +1,36 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Best way to inspect the parse tree from Sparse
-Date: Mon, 7 Aug 2017 16:11:43 +0100
-Message-ID: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Best way to inspect the parse tree from Sparse
+Date: Mon, 7 Aug 2017 11:19:40 -0400
+Message-ID: <CANeU7QmHw64LL7Ke-JrN5O1EmU8uKXg9V1REswFUKZToRG75uw@mail.gmail.com>
+References: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:38386 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751396AbdHGPLp (ORCPT
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:36686 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751375AbdHGPTl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 11:11:45 -0400
-Received: by mail-wm0-f45.google.com with SMTP id m85so9507315wma.1
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 08:11:45 -0700 (PDT)
+        Mon, 7 Aug 2017 11:19:41 -0400
+Received: by mail-pg0-f51.google.com with SMTP id v77so2822493pgb.3
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 08:19:41 -0700 (PDT)
+In-Reply-To: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi,
+On Mon, Aug 7, 2017 at 11:11 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> Hi,
+>
+> I would like to understand the structure of the parse tree generated
+> by Sparse a bit better. I am looking at the output from the show_*()
+> functions but it is not clear to me exactly what the output means. For
+> example:
 
-I would like to understand the structure of the parse tree generated
-by Sparse a bit better. I am looking at the output from the show_*()
-functions but it is not clear to me exactly what the output means. For
-example:
+You can try test-inspect, it will pop up a gtk window which
+you can click on the object and expand the object members.
 
-extern int printf(const char *, ...);
+It is not complete but it is very easy to extend.
 
-int main(int argc, const char *argv[]) {
-printf("hello world!\n");
-return 0;
-}
-
-Results in:
-
-.align 4
-int extern [signed] [addressable] [toplevel] main( ... )
-        movi.64         v2,&"hello world!\n"
-        push.64         v2
-        call            printf
-        add.64          vSP,vSP,$8
-        mov.32          v3,retval
-        movi.32         v4,$0
-        addi.64         v5,vFP,$offsetof(return:00000202755B1A98)
-        st.32           v4,[v5]
-        ret             (00000202755B1A98)
-.L00000202755B1A98:
-        addi.64         v6,vFP,$offsetof(return:00000202755B1A98)
-        ld.32           v7,[v6]
-        mov.32          retval,7
-        ret
-
-
-I get the first four lines, but the rest don't make sense to me. I
-suppose that the dump is trying to show the parse tree in a linear
-form ...  but is that useful? Would it be better to dump the parse
-tree in a different form?
-
-Regards
-Dibyendu
+Chris
