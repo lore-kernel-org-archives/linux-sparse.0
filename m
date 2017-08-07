@@ -1,84 +1,89 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/3] new helper: def_opcode()
-Date: Mon,  7 Aug 2017 03:33:36 +0200
-Message-ID: <20170807013338.46211-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/3] simplify ((A & M') | B ) & M when M' & M == 0
+Date: Mon,  7 Aug 2017 03:33:38 +0200
+Message-ID: <20170807013338.46211-4-luc.vanoostenryck@gmail.com>
 References: <20170807013338.46211-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:37231 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751375AbdHGBdq (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33217 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751426AbdHGBdv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 21:33:46 -0400
-Received: by mail-wm0-f67.google.com with SMTP id t138so12076864wmt.4
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:33:45 -0700 (PDT)
+        Sun, 6 Aug 2017 21:33:51 -0400
+Received: by mail-wm0-f65.google.com with SMTP id q189so12145653wmd.0
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:33:50 -0700 (PDT)
 In-Reply-To: <20170807013338.46211-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 19 ++++++++++++-------
- 1 file changed, 12 insertions(+), 7 deletions(-)
+ simplify.c | 42 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 41 insertions(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index f292fd5b6..cfb6b2cda 100644
+index cfb6b2cda..3fb2c8d8f 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -380,6 +380,13 @@ static int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
- 	return REPEAT_CSE;
+@@ -532,6 +532,46 @@ static int simplify_seteq_setne(struct instruction *insn, long long value)
+ 	}
  }
  
-+static inline int def_opcode(pseudo_t p)
++static int simplify_and_or_mask(struct instruction *insn, pseudo_t and, pseudo_t other, unsigned long long mask)
 +{
-+	if (p->type != PSEUDO_REG)
-+		return -1;
-+	return p->def->opcode;
++	struct instruction *def = and->def;
++	pseudo_t old;
++
++	if (!constant(def->src2))
++		return 0;
++	if (def->src2->value & mask)
++		return 0;
++	old = insn->src1;
++	use_pseudo(insn, other, &insn->src1);
++	remove_usage(old, &insn->src1);
++	return REPEAT_CSE;
 +}
 +
- static unsigned int value_size(long long value)
++static int simplify_constant_mask(struct instruction *insn, unsigned long long mask)
++{
++	struct instruction *left;
++	pseudo_t src1, src2;
++
++	switch (def_opcode(insn->src1)) {
++	case OP_OR:
++		// Let's handle ((A & M') | B ) & M
++		// or           (B | (A & M')) & M
++		// when M' & M == 0
++		left = insn->src1->def;
++		src1 = left->src1;
++		src2 = left->src2;
++		if (def_opcode(src1) == OP_AND)
++			return simplify_and_or_mask(insn, src1, src2, mask);
++		if (def_opcode(src2) == OP_AND)
++			return simplify_and_or_mask(insn, src2, src1, mask);
++		break;
++
++	default:
++		break;
++	}
++	return 0;
++}
++
+ static int simplify_constant_rightside(struct instruction *insn)
  {
- 	value >>= 8;
-@@ -404,9 +411,9 @@ static unsigned int operand_size(struct instruction *insn, pseudo_t pseudo)
- {
- 	unsigned int size = insn->size;
- 
--	if (pseudo->type == PSEUDO_REG) {
-+	if (def_opcode(pseudo) == OP_CAST) {
- 		struct instruction *src = pseudo->def;
--		if (src && src->opcode == OP_CAST && src->orig_type) {
-+		if (src->orig_type) {
- 			unsigned int orig_size = src->orig_type->bit_size;
- 			if (orig_size < size)
- 				size = orig_size;
-@@ -822,13 +829,11 @@ static int simplify_associative_binop(struct instruction *insn)
- 
- 	if (!simple_pseudo(insn->src2))
- 		return 0;
--	if (pseudo->type != PSEUDO_REG)
-+	if (def_opcode(pseudo) != insn->opcode)
- 		return 0;
- 	def = pseudo->def;
- 	if (def == insn)
- 		return 0;
--	if (def->opcode != insn->opcode)
+ 	long long value = insn->src2->value;
+@@ -576,7 +616,7 @@ static int simplify_constant_rightside(struct instruction *insn)
+ 	case OP_AND:
+ 		if (!value)
+ 			return replace_with_pseudo(insn, insn->src2);
 -		return 0;
- 	if (!simple_pseudo(def->src2))
- 		return 0;
- 	if (ptr_list_size((struct ptr_list *)def->target->users) != 1)
-@@ -993,9 +998,9 @@ static int simplify_cast(struct instruction *insn)
- 	}
++		return simplify_constant_mask(insn, value);
  
- 	/* A cast of a "and" might be a no-op.. */
--	if (src->type == PSEUDO_REG) {
-+	if (def_opcode(src) == OP_AND) {
- 		struct instruction *def = src->def;
--		if (def->opcode == OP_AND && def->size >= size) {
-+		if (def->size >= size) {
- 			pseudo_t val = def->src2;
- 			if (val->type == PSEUDO_VAL) {
- 				unsigned long long value = val->value;
+ 	case OP_SET_NE:
+ 	case OP_SET_EQ:
 -- 
 2.13.2
 
