@@ -1,38 +1,70 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Upcoming sparse release RC5
-Date: Sun, 6 Aug 2017 22:06:40 -0400
-Message-ID: <CANeU7Qm=wV4=+ak2-o8ZBRy6Ee_ZwpPqNESQDvpGA1EvfndMpg@mail.gmail.com>
-References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
- <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: Sparse documentation format, rST vs MD
+Date: Sun, 6 Aug 2017 21:56:12 -0700
+Message-ID: <20170807045611.aq3ofd57a7mtvdcm@x>
+References: <CANeU7QkbNzGVVGbvMdaN14g2nPnF3ha6+mBkLJfhCFvf90cy_w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pg0-f45.google.com ([74.125.83.45]:37223 "EHLO
-        mail-pg0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751748AbdHGCGl (ORCPT
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:54531 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751433AbdHGE4Q (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 22:06:41 -0400
-Received: by mail-pg0-f45.google.com with SMTP id y129so28034760pgy.4
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 19:06:41 -0700 (PDT)
-In-Reply-To: <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
+        Mon, 7 Aug 2017 00:56:16 -0400
+Content-Disposition: inline
+In-Reply-To: <CANeU7QkbNzGVVGbvMdaN14g2nPnF3ha6+mBkLJfhCFvf90cy_w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Aug 5, 2017 at 6:32 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> sparse-next is currently not fast-forwardable from master.
->
+On Sun, Aug 06, 2017 at 09:28:58PM -0400, Christopher Li wrote:
+> I want to use some mark down format for the document
+> of sparse.
+> 
+> There is two choice here:
+> 
+> rST (reStructuredText)
+> https://en.wikipedia.org/wiki/ReStructuredText
+> 
+> MD (Mark Down)
+> https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
+> 
+> Does any one care which format to use?
+> 
+> So far I am weak leaning towards MD but I can be convenience
+> otherwise. Mostly because MD render on github is very nicely.
+> I already use MD on other projects.
+> 
+> Here is my run down of Pros and Cons
+> rST Pros:
+> 
+> -  Linux kernel already using rST for documents like
+>    submiting-patches.rst. I need a file for sparse version of
+>    submitting-patches.
+> 
+> - might be more friendly to code syntax. But I am not going to use
+>   those really deep extensions any way.
+> 
+> rST Cons (for me):
+> - I don't know rST at all. I need to learn it.
+> - github does not recognized rST naturally.
+> 
+> 
+> MarkDown Pros:
+> - More friendly to web.
+> - Github etc can render .md properly on display.
+> - I already know how the syntax. No need to learn.
+> 
+> MarkdDown Cons:
+> - Kernel is using rST. I need to convert the format if I borrow
+>   some file from the Linux Kernel.
+> 
+> Feed back?
 
-BTW, do you have any thing to add for RC5? If not I am going
-tag the RC5 and hope that is the last RC for this release.
-
-I still need to add two document for sparse. I assume I can
-add it after RC5 into the release because there is no any
-code changes. Maybe I should check in two place holder
-file now so it does not mess up with the packaging for the
-finial release.
-
-Chris
+I personally find the Markdown format *much* closer to normal text
+formatting in email, and I'd highly recommend using it.  I'm not sure
+why the kernel picked reStructuredText, but I don't think there's likely
+to be a huge amount of cross-pollination between the two in terms of
+documentation.  In particular, you're unlikely to want to borrow files
+from the kernel given the different license.
