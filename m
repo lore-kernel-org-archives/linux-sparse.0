@@ -1,89 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/3] simplify ((A & M') | B ) & M when M' & M == 0
-Date: Mon,  7 Aug 2017 03:33:38 +0200
-Message-ID: <20170807013338.46211-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/3] change loading of bitfields
+Date: Mon,  7 Aug 2017 03:33:37 +0200
+Message-ID: <20170807013338.46211-3-luc.vanoostenryck@gmail.com>
 References: <20170807013338.46211-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33217 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35361 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751426AbdHGBdv (ORCPT
+        with ESMTP id S1751375AbdHGBdu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 21:33:51 -0400
-Received: by mail-wm0-f65.google.com with SMTP id q189so12145653wmd.0
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:33:50 -0700 (PDT)
+        Sun, 6 Aug 2017 21:33:50 -0400
+Received: by mail-wm0-f65.google.com with SMTP id r77so12119465wmd.2
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 18:33:49 -0700 (PDT)
 In-Reply-To: <20170807013338.46211-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 42 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 41 insertions(+), 1 deletion(-)
+ linearize.c                | 15 +++++++++------
+ validation/bitfield-size.c |  6 ++++--
+ 2 files changed, 13 insertions(+), 8 deletions(-)
 
-diff --git a/simplify.c b/simplify.c
-index cfb6b2cda..3fb2c8d8f 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -532,6 +532,46 @@ static int simplify_seteq_setne(struct instruction *insn, long long value)
+diff --git a/linearize.c b/linearize.c
+index af46191f1..b06cf4e19 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1077,14 +1077,17 @@ static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad
+ {
+ 	struct symbol *ctype = ad->result_type;
+ 	pseudo_t new = add_load(ep, ad);
++	unsigned int off = ctype->bit_offset;
++	unsigned int siz = ctype->bit_size;
+ 
+-	if (ctype->bit_offset) {
+-		pseudo_t shift = value_pseudo(ctype->bit_offset);
+-		pseudo_t newval = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
+-		new = newval;
++	if (siz != type_size(ad->source_type)) {
++		pseudo_t mask = value_pseudo(((1ULL << siz) - 1) << off);
++		new = add_binary_op(ep, ad->source_type, OP_AND, new, mask);
++	}
++	if (off) {
++		pseudo_t shift = value_pseudo(off);
++		new = add_binary_op(ep, ad->source_type, OP_LSR, new, shift);
  	}
+-	if (ctype->bit_size != type_size(ad->source_type))
+-		new = cast_pseudo(ep, new, ad->source_type, ad->result_type);
+ 	return new;
  }
  
-+static int simplify_and_or_mask(struct instruction *insn, pseudo_t and, pseudo_t other, unsigned long long mask)
-+{
-+	struct instruction *def = and->def;
-+	pseudo_t old;
-+
-+	if (!constant(def->src2))
-+		return 0;
-+	if (def->src2->value & mask)
-+		return 0;
-+	old = insn->src1;
-+	use_pseudo(insn, other, &insn->src1);
-+	remove_usage(old, &insn->src1);
-+	return REPEAT_CSE;
-+}
-+
-+static int simplify_constant_mask(struct instruction *insn, unsigned long long mask)
-+{
-+	struct instruction *left;
-+	pseudo_t src1, src2;
-+
-+	switch (def_opcode(insn->src1)) {
-+	case OP_OR:
-+		// Let's handle ((A & M') | B ) & M
-+		// or           (B | (A & M')) & M
-+		// when M' & M == 0
-+		left = insn->src1->def;
-+		src1 = left->src1;
-+		src2 = left->src2;
-+		if (def_opcode(src1) == OP_AND)
-+			return simplify_and_or_mask(insn, src1, src2, mask);
-+		if (def_opcode(src2) == OP_AND)
-+			return simplify_and_or_mask(insn, src2, src1, mask);
-+		break;
-+
-+	default:
-+		break;
-+	}
-+	return 0;
-+}
-+
- static int simplify_constant_rightside(struct instruction *insn)
- {
- 	long long value = insn->src2->value;
-@@ -576,7 +616,7 @@ static int simplify_constant_rightside(struct instruction *insn)
- 	case OP_AND:
- 		if (!value)
- 			return replace_with_pseudo(insn, insn->src2);
--		return 0;
-+		return simplify_constant_mask(insn, value);
- 
- 	case OP_SET_NE:
- 	case OP_SET_EQ:
+diff --git a/validation/bitfield-size.c b/validation/bitfield-size.c
+index ce78ecf21..c8c94bb15 100644
+--- a/validation/bitfield-size.c
++++ b/validation/bitfield-size.c
+@@ -35,7 +35,9 @@ unsigned int get_pbfi_b(struct bfi *bf) { return bf->b; }
+  * check-command: test-linearize -Wno-decl $file
+  * check-output-ignore
+  *
+- * check-output-pattern-24-times: cast\\.
+- * check-output-pattern-12-times: cast\\.4
++ * check-output-excludes: cast\\.4
++ * check-output-pattern-6-times: cast\\.
+  * check-output-pattern-6-times: lsr\\..*\\$6
++ * check-output-pattern-6-times: and\\..*\\$15
++ * check-output-pattern-6-times: and\\..*\\$960
+  */
 -- 
 2.13.2
 
