@@ -1,97 +1,136 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [RFC] sparse SSA construction
-Date: Mon, 7 Aug 2017 01:44:42 +0200
-Message-ID: <20170806234441.vcpux6zyhfsfef3c@ltop.local>
-References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qk3trZmFqyGuhOxBLzFBOT131o=HhNhwQrzLrHoO2PQ1Q@mail.gmail.com>
+Subject: Re: Potential incorrect simplification
+Date: Mon, 7 Aug 2017 02:31:28 +0200
+Message-ID: <20170807003126.xjahzeki2aff32kq@ltop.local>
+References: <CA+55aFx6g3-+6tJ_6Uqu4K1pQoDnqcXrjSGYsryLjjksEtT06A@mail.gmail.com>
+ <CANeU7Qk-4U2G_6CZ7KHbGZiqRe9=fpNOzE4eyfLjz3fnd_n3ww@mail.gmail.com>
+ <20170806140035.f2tqkmiufjytiwri@ltop.local>
+ <CANeU7QnjRSnnSc8ew69-0M7XP2zoSVh3jhCciYDRVF0i24d=sQ@mail.gmail.com>
+ <20170806150712.seci4rq2nhuqx2mc@ltop.local>
+ <CANeU7QnbtvGQMBZjfBSA-njbMMrPVcTb4xTOU8kd_JPb14n63Q@mail.gmail.com>
+ <20170806165156.onm2bzojkueit6ec@ltop.local>
+ <CANeU7QnqdkrtxbCzc8_g6BBjFzdcw4XgfB-8vmBq6esb7mq9aw@mail.gmail.com>
+ <CAMHZB6EMCtU63D10GfQiJ0pgrJurZhcsBY9aw0ohqP_QQDA_pw@mail.gmail.com>
+ <CANeU7QkFwMw-yFSXpQ1pTzf9fiVFLWtpqCju0hu2Z50dqHR4OA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:37065 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751355AbdHFXoq (ORCPT
+Received: from mail-wm0-f47.google.com ([74.125.82.47]:38037 "EHLO
+        mail-wm0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751371AbdHGAbb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Aug 2017 19:44:46 -0400
-Received: by mail-wm0-f53.google.com with SMTP id t201so56174869wmt.0
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 16:44:45 -0700 (PDT)
+        Sun, 6 Aug 2017 20:31:31 -0400
+Received: by mail-wm0-f47.google.com with SMTP id m85so56597726wma.1
+        for <linux-sparse@vger.kernel.org>; Sun, 06 Aug 2017 17:31:31 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Qk3trZmFqyGuhOxBLzFBOT131o=HhNhwQrzLrHoO2PQ1Q@mail.gmail.com>
+In-Reply-To: <CANeU7QkFwMw-yFSXpQ1pTzf9fiVFLWtpqCju0hu2Z50dqHR4OA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Aug 06, 2017 at 07:01:29PM -0400, Christopher Li wrote:
-> On Sun, Aug 6, 2017 at 4:26 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > Since it seems to be some interest on the subject and
-> > to avoid duplicated work, here is a rewrite of sparse's
-> > construction of the SSA form.
+On Sun, Aug 06, 2017 at 07:34:50PM -0400, Christopher Li wrote:
+> >> Yes, you keep on arguing this is the result of uninitialized variable.
+> >> Nothing to worry about.
 > >
-> > It's not using one of the classical algorithm but is
-> > using something newer, simpler and often faster.
-> > It's main advantage beyond the simplicity is that you don't
-> > need to first build the whole CFG & linearized code to
-> > to directly throw it away (or heavily transform it) as
-> > it builds the SSA form directly during the linearization.
+> > You asked a question about the *current* behaviour of sparse
+> > and I explained the reason of this behaviour.
 > 
-> OK, great.
+> I ask the question weather this SSA form is legal (in the sense
+> that preserving SSA property if you want to be more specific.)
 > 
-> May I ask the question that, the SSA form you are building
-> from this codes. Does it violate the SSA dominance property
+> You are saying you did not answer my question directly. You did not
+> pass judgement on weather this thing is legal or not. You just say why
+> it was done this way.
 
-Of course not. Unless there is a bug, that is.
+Because answering this question with an 'yes' or a 'no' is pointless.
+Imagine that some authority on compiler would have answered to you
+'yes' I consider that as legal because this or that. Would it have
+helped you? I don't think so. Same with 'no'.
 
-> In other word, does it produce the "usage before
-> define" IR similar to this?
+> > It's not because explain this that I'm also saying
+> > "that is the correct behaviour and nothing must be changed about".
+> >
+> > And you know that I don't think so because we already talked about it.
+> > And I already said you that I have code that redo the SSA construction
+> > and that this code doesn't have the issues with undef vars because
+> > I used a special value for them.
 > 
->         and.32      %r3 <- %r4, $-65
->          or.32       %r4 <- %r3, $64
+> That is what I want to find out, if your new SSA form have the similar
+> problem violating the SSA property or not.
 
-It gives the code as I showed as reply to Dibyendu's mail.
-For example, his code gives:
-        foo:
-        .L0:
-                <entry-point>
-                and.32      %r2 <- UNDEF, $-65
-                or.32       %r3 <- %r2, $64
-                lsr.32      %r4 <- %r3, $6
-                cast.1      %r5 <- (32) %r4
-                cast.32     %r6 <- (1) %r5
-                setne.32    %r7 <- %r6, $1
-                ret.32      %r7
+It would have been easier to simply ask it.
+ 
+> >> Then how to fix it is just technical details.
+> >> I care less about warning uninitialized variable warning, which
+> >> we can't do a perfect job any way. I am more worry about those
+> >> screw up SSA forms.
+> >
+> > It's where we disagree.
+> > You're talking about this SSA thing as if you're busy writing a
+> > compiler but currently and since its creation sparse is a
+> > *semantic checker* used in *complement* of a real compiler
+> > to give warnings that the compiler doesn't bother with.
+> 
+> Please don't mix the raising warning thing as if do proper SSA
+> hinder you raise warning about uninitialized value.
 
-with UNDEF being a new type of pseudo.
+Have I said that or even suggest it?
 
-On purpose, nothing is done yet with the UNDEFs.
+> It is actually
+> the reverse, do proper SSA will help you find out using uninitialized
+> value better.
+> 
+> But as I said, we can't get the warning perfect right due to nature
+> of the problem.
 
-> That I am very curios how it was done. See the above
-> question.
+Yes, it's pretty well known about uninitialized vars.
 
-IMO, the best is to read the article. My code is
-still very close to the article's pseudo-code.
+> > My opinion is that it is *very* valuable to given the best possible
+> > warnings and yes it sucks that so many things relative to
+> > compiler technology are undecidable or NP-hard & friends.
+> > But this only means that it is impossible to do a *perfect* job,
+> > not that it is impossible to do a *good* job.
+> 
+> No disagreement here. Warning and proper SSA form is two different
+> thing.
 
-Basically, it's a lazy approach. Things are done
-when possible and are delayed if not. 
-More specifically, you can do what is needed in a BB
-once you have all the parents, otherwise you need to
-delay things. The article call this 'BB is sealed'
-and there is a 'seal' operation that need to be called
-to process what was delayed.
-Complications arise with gotos (and the article doesn't
-talk about them) but I've added a solution for it
-(but I would like to return to it later).
+Good.
+ 
+> You told me about the placement of phi node. I look it up. Yes
+> it is a big problem. But that "usage before define" and violating the
+> SSA dominance property you never told me about.
 
-From what I've seen/heard this algo have been pretty well
-received. Personnaly, I'm very happy with its simplicity
-and its result. 
+I certainly not said something like "usage before define" since it's
+just a symptom. I told you about solving problmes with the handling
+of undefined vars.
 
-One thing that is missing is the more complex cases
-with trivial phi-nodes.
+> You does not seem to
+> understand what property SSA should have in the first few response
+> to my email, questioning how to define "illegal SSA".  That is my
+> impression, I can be wrong.
 
-Another thing I would like to change is the ptrmap
-implementation I've added: it need to be hash-table based
-(but it's only an implementation detail that matters
-for performance on really big functions).
+Your impression is very wrong.
+Otherwise I wouldn't have bothered to write code to redo the SSA
+construction thing and told you that there is a lot of problems
+with the current SSA.
+
+> >> Now that RC5 is almost out of the door.  It is my intention to start this
+> >> discussion to clarify things and point out things I believe is wrong.
+> >> I know it is going to be a controversial topic :-)
+> >
+> > I have a feeling that the 150+ patches that are pending since
+> > January-March will have to wait even more.
+> > Same for a series that is waiting since more than 2 years now.
+> > Am I wrong?
+> 
+> No, and sorry about that. I was too busy at that time. But now I have
+> allocate some time for sparse. Let's do the review process again
+> after the release.
+
+OK good to hear that.
+I insist very heavily that I would like those to be handled *before*
+moving further witht the SSA thing. Especially for Nicolai's series
+which is waiting since a scandalous amount of time.
 
 -- Luc
