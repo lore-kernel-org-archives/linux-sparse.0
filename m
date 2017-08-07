@@ -1,59 +1,38 @@
-From: Jonathan Corbet <corbet@lwn.net>
-Subject: Re: Sparse documentation format, rST vs MD
-Date: Mon, 7 Aug 2017 10:25:32 -0600
-Message-ID: <20170807102532.547fc0e2@lwn.net>
-References: <CANeU7QkbNzGVVGbvMdaN14g2nPnF3ha6+mBkLJfhCFvf90cy_w@mail.gmail.com>
-        <20170807045611.aq3ofd57a7mtvdcm@x>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: Upcoming sparse release RC5
+Date: Mon, 7 Aug 2017 18:41:55 +0200
+Message-ID: <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
+References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
+ <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com> <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from ms.lwn.net ([45.79.88.28]:59662 "EHLO ms.lwn.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751443AbdHGQZd (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 12:25:33 -0400
-In-Reply-To: <20170807045611.aq3ofd57a7mtvdcm@x>
+Received: from mail-qt0-f181.google.com ([209.85.216.181]:35596 "EHLO
+        mail-qt0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751834AbdHGQl4 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 7 Aug 2017 12:41:56 -0400
+Received: by mail-qt0-f181.google.com with SMTP id p3so5872370qtg.2
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 09:41:56 -0700 (PDT)
+In-Reply-To: <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, 6 Aug 2017 21:56:12 -0700
-Josh Triplett <josh@joshtriplett.org> wrote:
+On Sun, Aug 6, 2017 at 12:50 AM, Christopher Li <sparse@chrisli.org> wrote:
+>>> I will soon release the RC5.
+>>
+>> sparse-next is currently not fast-forwardable from master.
+>
+> I think I use one of your branch as base. I will fix it now.
 
-> I'm not sure
-> why the kernel picked reStructuredText, but I don't think there's likely
-> to be a huge amount of cross-pollination between the two in terms of
-> documentation.
+You have now rebased an existing branch,
+the one for "fix crash with sym->bb_target == NULL".
+There was no reasons for that.
 
-To address the "why the kernel picked RST" question, in case anybody's
-curious...
+Please make good use of 'git pull' instead of rebasing external
+branches, it's a pain.
+Thanks.
 
-We looked hard at MD, AsciiDoc, and RST; indeed, there were patches in
-circulation for both MD and AsciiDoc before RST even entered the picture.
-In the end RST won out because:
-
- - It allows the creation of large, integrated, multi-file documents.
-   Every MD file is a world unto itself, and AsciiDoc is about the same.
-   RST lets us put in nice things like global indexes and cross-references.
-
- - Some people want to do fancy tables.  It was argued that AsciiDoc is
-   actually the best here; MD is not.
-
- - RST is actively developed and widely used.  AsciiDoc looks stale; MD is
-   actively developed in a large number of mostly compatible variants.
-
- - Production of numerous output formats without the need for obnoxious
-   toolchains.  This, alas, turned out not to be true for PDF output; if
-   your docs are simpler, though, you might be able to use rst2pdf and
-   avoid a lot of pain.
-
- - RST has a nice extension mechanism that makes it easy for us to add our
-   own functionality.
-
-...and probably something else I forgot.  
-
-(I'm not arguing that sparse should or should not use RST, BTW, just
-answering Josh's implied question for the kernel).
-
-jon
+-- Luc
