@@ -1,50 +1,50 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 7/8] transform (A << S) >> S into A & (-1 >> S)
-Date: Tue, 8 Aug 2017 00:27:25 +0200
-Message-ID: <CAExDi1RUUf9r6bZHi1sv3MOPaBWvS-nmr26DE741Nemond-3qQ@mail.gmail.com>
-References: <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
- <20170807191205.86590-1-luc.vanoostenryck@gmail.com> <20170807191205.86590-8-luc.vanoostenryck@gmail.com>
- <CA+55aFyEJOfbmru8BMk4DUYop4HpP7HAhVr5_hGXdtNMK0CGog@mail.gmail.com> <CAExDi1TfyR7brtPvV1htcRA0fF1+xrxdsepbAOqgN+29M9SyvQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Upcoming sparse release RC5
+Date: Mon, 7 Aug 2017 19:32:37 -0400
+Message-ID: <CANeU7Q=9Ma3+gA21+=bLi38XFw5B1FDoVFUvtaxLR3V0oHeCig@mail.gmail.com>
+References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
+ <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
+ <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com> <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:32878 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751743AbdHGW11 (ORCPT
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:37164 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751881AbdHGXcj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 18:27:27 -0400
-Received: by mail-qt0-f194.google.com with SMTP id u19so1853787qtc.0
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 15:27:26 -0700 (PDT)
-In-Reply-To: <CAExDi1TfyR7brtPvV1htcRA0fF1+xrxdsepbAOqgN+29M9SyvQ@mail.gmail.com>
+        Mon, 7 Aug 2017 19:32:39 -0400
+Received: by mail-pg0-f51.google.com with SMTP id y129so7282319pgy.4
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 16:32:38 -0700 (PDT)
+In-Reply-To: <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Aug 8, 2017 at 12:08 AM, Luc Van Oostenryck
+On Mon, Aug 7, 2017 at 12:41 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> On Mon, Aug 7, 2017 at 11:54 PM, Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
->> On Mon, Aug 7, 2017 at 12:12 PM, Luc Van Oostenryck
->> <luc.vanoostenryck@gmail.com> wrote:
->>> +               // replace (A << S) >> S
->>> +               // by      A & (-1 >> S)
->>
->> Umm. This seems misleading.
->>
->> Don't you mean "value of all ones of the same size as A, shifted right by S"
->>
->>> +               insn->src2 = value_pseudo(-1ULL >> value);
->>
->> ..and this seems buggy. There's a lot of bits in -1ULL, but what if
->> the size of 'S' is only 32-bit?
->>
->> So I think you should take the size of A into account?
->>
->> Or am I missing something?
+>> I think I use one of your branch as base. I will fix it now.
+>
+> You have now rebased an existing branch,
+> the one for "fix crash with sym->bb_target == NULL".
+> There was no reasons for that.
 
-You're right. It must be wrong.
-I think it's working but only because in the tests I've used
-it's optimized away.
+I just do git rebase master from the sparse-next.
 
--- Luc
+I think sparse-next was design to allow to rebase.
+
+It is not about git pull any more, because I rebase the sparse-next
+from your branch, I need rebase because I need to throw out the
+patch replaced by yours in sparse-next.
+
+Your branch is not fast forward to master.
+
+If your branch is fast forward to master then I don't need to
+rebase sparse-next to master again.
+
+That being said, what is your recommended way to fix it instead
+of rebase?
+
+We can still fix up sparse-next as I haven't push to master.
+
+Chris
