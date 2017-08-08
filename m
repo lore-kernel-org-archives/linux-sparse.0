@@ -1,54 +1,54 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH v2 6/8] transform (A & M) >> S to (A >> S) & (M >> S)
-Date: Mon, 7 Aug 2017 18:00:57 -0700
-Message-ID: <CA+55aFyw=CN=RoEAVMFXc6qk=Y-hbuDvgN=thmyZTj1tSRxkhQ@mail.gmail.com>
-References: <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
- <20170807191205.86590-1-luc.vanoostenryck@gmail.com> <20170807191205.86590-7-luc.vanoostenryck@gmail.com>
- <CANeU7Q=VSGSTLweWegU1RxZO9_iV9UT0p9L5xe95rC6-vMuntA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [GIT PULL] fix list corruption with recursive remove_usage()
+Date: Tue,  8 Aug 2017 03:04:22 +0200
+Message-ID: <20170808010422.88647-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:37541 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751610AbdHHBA6 (ORCPT
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:34621 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751719AbdHHBE3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 21:00:58 -0400
-Received: by mail-oi0-f65.google.com with SMTP id j194so1931417oib.4
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 18:00:57 -0700 (PDT)
-In-Reply-To: <CANeU7Q=VSGSTLweWegU1RxZO9_iV9UT0p9L5xe95rC6-vMuntA@mail.gmail.com>
+        Mon, 7 Aug 2017 21:04:29 -0400
+Received: by mail-wm0-f42.google.com with SMTP id t138so2737755wmt.1
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 18:04:28 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Aug 7, 2017 at 5:22 PM, Christopher Li <sparse@chrisli.org> wrote:
->
-> Why (A>>S) & (M >>S) is easier to simplify?
->
-> The original has two instruction but the result has three.
+Chris,
+Please pull these patches for replacement of the ones
+currently on sparse-next.
+It's ones to avoid list corruption that may happen with
+pseudo-users when deleting one while doing nested ptrlist walking.
 
-No, M and S are constants, so the end result also has just two ("lsr"
-and "and").
+The code is unchanged since the last submit and is the same as
+the one currently on sparse-next.
 
-And the simplified form has a smaller constant.
+Thanks,
+Luc
 
-So I think that optimization makes a lot of sense.
+----------------------------------------------------------------
+The following changes since commit 0c4c998690e5e31696404fa518022865fd9232d2:
 
-It *might* result in further simplifications just because the final
-'and' might be simpler, and even the "A >> S" might now be something
-you can simplify (for example "A >> 16" could be turned into a 16-bit
-load if the source of A is a 32-bit load).
+  fix crash with sym->bb_target == NULL (2017-07-31 22:21:59 +0200)
 
-But even in the absence of such further simplification, the smaller
-constant thing likely makes it worth it. Almost all architectures have
-an easier time with smaller constants, and doing
+are available in the git repository at:
 
-   (a >> 24) & 255;
+  git://github.com/lucvoo/sparse.git for-chris
 
-is often noticeably more efficient than
+for you to fetch changes up to bddf7d1e4ed81c3def7c6de2796a5489ca678399:
 
-   (a & 0xff000000) >> 24;
+  mark pseudo users as deleted instead of removing them (2017-08-05 00:14:02 +0200)
 
-just because of the constant issue.
+----------------------------------------------------------------
+Luc Van Oostenryck (5):
+      ptrlist: add a counter for the number of removed elemnets
+      ptrlist: adjust ptr_list_size for the new ->rm field
+      ptrlist: add MARK_CURRENT_DELETED
+      ptrlist: avoid iteration on NULL entries
+      mark pseudo users as deleted instead of removing them
 
-                Linus
+ ptrlist.c  |  2 +-
+ ptrlist.h  | 15 ++++++++++++++-
+ simplify.c |  5 +++--
+ 3 files changed, 18 insertions(+), 4 deletions(-)
