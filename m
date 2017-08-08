@@ -1,48 +1,71 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 8/8] fix: cast of OP_AND only valid if it's an OP_CAST
-Date: Wed,  9 Aug 2017 01:06:34 +0200
-Message-ID: <20170808230634.16227-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 7/8] transform (A << S) >> S into A & (-1 >> S)
+Date: Wed,  9 Aug 2017 01:06:33 +0200
+Message-ID: <20170808230634.16227-8-luc.vanoostenryck@gmail.com>
 References: <20170808230634.16227-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36349 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752523AbdHHXHB (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33794 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752475AbdHHXHB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Tue, 8 Aug 2017 19:07:01 -0400
-Received: by mail-wm0-f66.google.com with SMTP id d40so4904237wma.3
-        for <linux-sparse@vger.kernel.org>; Tue, 08 Aug 2017 16:07:01 -0700 (PDT)
+Received: by mail-wm0-f65.google.com with SMTP id x64so4929617wmg.1
+        for <linux-sparse@vger.kernel.org>; Tue, 08 Aug 2017 16:07:00 -0700 (PDT)
 In-Reply-To: <20170808230634.16227-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-A cast of an OP_AND can be simplified away if the mask
-already 'cover' the value.
-However this cannot be done if the cast is in fact
-a sign-extension.
+More exactly, transform it into:
+	A & (Mask(size) >> S)
+which is equivalent to:
+	A & Mask(size - S)
+where Mask(X) is ((1 << X) - 1)
 
-Fix this by adding the appropriate check of OP_CAST vs. OP_SCAST
+This transformation is especially usefull when simplifying code
+accessing bitfields or for other masking manipulations.
 
-Fixes: caeaf72d34d1e91aaea7340241232d1d877907b7
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ simplify.c | 17 +++++++++++++++++
+ 1 file changed, 17 insertions(+)
 
 diff --git a/simplify.c b/simplify.c
-index 23cdd19ae..daf91d82b 100644
+index f1a898700..23cdd19ae 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -1046,7 +1046,7 @@ static int simplify_cast(struct instruction *insn)
- 	}
+@@ -416,6 +416,8 @@ static int simplify_lsr(struct instruction *insn, pseudo_t pseudo, long long val
+ {
+ 	struct instruction *def;
+ 	unsigned long long mask;
++	unsigned int width;
++	pseudo_t old;
  
- 	/* A cast of a "and" might be a no-op.. */
--	if (def_opcode(src) == OP_AND) {
-+	if (insn->opcode == OP_CAST && def_opcode(src) == OP_AND) {
- 		struct instruction *def = src->def;
- 		if (def->size >= size) {
- 			pseudo_t val = def->src2;
+ 	if (!value)
+ 		return replace_with_pseudo(insn, pseudo);
+@@ -434,6 +436,21 @@ static int simplify_lsr(struct instruction *insn, pseudo_t pseudo, long long val
+ 		insn->opcode = OP_AND;
+ 		insn->src2 = value_pseudo(mask >> value);
+ 		return REPEAT_CSE;
++	case OP_SHL:
++		// replace (A << S) >> S
++		// by      A & (Mask(size) >> S)
++		def = insn->src1->def;
++		if (!constant(def->src2))
++			break;
++		if (def->src2->value != value)
++			break;
++		width = insn->size - value;
++		insn->src2 = value_pseudo((1ULL << width) - 1);
++		insn->opcode = OP_AND;
++		old = insn->src1;
++		use_pseudo(insn, def->src1, &insn->src1);
++		remove_usage(old, &insn->src1);
++		return REPEAT_CSE;
+ 	}
+ 	return 0;
+ }
 -- 
 2.13.2
 
