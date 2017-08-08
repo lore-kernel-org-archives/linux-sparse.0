@@ -1,53 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [GIT PULL v5] fix list corruption with recursive remove_usage()
-Date: Tue,  8 Aug 2017 04:00:22 +0200
-Message-ID: <20170808020022.12729-1-luc.vanoostenryck@gmail.com>
+Subject: Re: Upcoming sparse release RC5
+Date: Tue, 8 Aug 2017 04:13:32 +0200
+Message-ID: <CAExDi1QDDDTKb9Ht6-pquT1w5PS_G+yCBPtoYLofuMPVuxgN+Q@mail.gmail.com>
+References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
+ <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
+ <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
+ <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
+ <CANeU7Q=9Ma3+gA21+=bLi38XFw5B1FDoVFUvtaxLR3V0oHeCig@mail.gmail.com>
+ <20170808002331.f3g6l7yzhsq3vhxe@ltop.local> <CANeU7QmJmzumvNNFm5W=Ti8TJdw-BZ2DeR0t2UXO-R2vCjqh6Q@mail.gmail.com>
+ <CAExDi1R6Vg8cztVA32nOEHKRgpiUcZnHfOoK6rshJq46FSaj2g@mail.gmail.com> <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:33231 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751891AbdHHCA1 (ORCPT
+Received: from mail-qk0-f178.google.com ([209.85.220.178]:34566 "EHLO
+        mail-qk0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751639AbdHHCNe (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 22:00:27 -0400
-Received: by mail-wm0-f52.google.com with SMTP id k20so2972642wmg.0
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 19:00:27 -0700 (PDT)
+        Mon, 7 Aug 2017 22:13:34 -0400
+Received: by mail-qk0-f178.google.com with SMTP id u139so12618466qka.1
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 19:13:33 -0700 (PDT)
+In-Reply-To: <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Chris,
-Please pull these patches for replacement of the ones
-currently on sparse-next.
-It's ones to avoid list corruption that may happen with
-pseudo-users when deleting one while doing nested ptrlist walking.
+On Tue, Aug 8, 2017 at 3:34 AM, Christopher Li <sparse@chrisli.org> wrote:
 
-The code is the one with the typo corrected in the right patch.
+> If you maintain that "for-chris" to aggregate your own topic branch.
+> I can just use "for-chris" as a base to rease the sparse-next,
+> I only need to rebase patches not from you.
 
-Thanks,
-Luc
+Yes, exactly.
 
-----------------------------------------------------------------
-The following changes since commit 0c4c998690e5e31696404fa518022865fd9232d2:
+> I do want to have the flexibility to rebase spase-next.
+> It is just how to do it in a way impact you less.
 
-  fix crash with sym->bb_target == NULL (2017-07-31 22:21:59 +0200)
+Just don't rebase my series. I maintain a few aggregation
+branches with all the topics branches I need and often
+do new dev on top of them because I need to.
+When I don't need it I base new dev on some stable point
+like master.
 
-are available in the git repository at:
+If it is a small thing I did the day before, it won't probably be a big
+problem but for older stuff it is.
 
-  git://github.com/lucvoo/sparse.git for-chris
+>>> I often need to seek clarify if this patches series is mean for merge.
+>>> If you make that in the dedicate pull branch, I will know for sure.
 
-for you to fetch changes up to faad58bc8499e52ccf71da79a2ba46e2d928e33e:
+Let's do as we had agreed: real pull request will have "[GIT PULL]"
+in the email and will always be from the 'for-chris'. I also guarantee
+that the pull will not need a non-trivial merge when done from
+the current sparse-next.
 
-  mark pseudo users as deleted instead of removing them (2017-08-08 03:46:26 +0200)
-
-----------------------------------------------------------------
-Luc Van Oostenryck (5):
-      ptrlist: add a counter for the number of removed elemnets
-      ptrlist: adjust ptr_list_size for the new ->rm field
-      ptrlist: add MARK_CURRENT_DELETED
-      ptrlist: avoid iteration on NULL entries
-      mark pseudo users as deleted instead of removing them
-
- ptrlist.c  |  2 +-
- ptrlist.h  | 15 ++++++++++++++-
- simplify.c |  5 +++--
- 3 files changed, 18 insertions(+), 4 deletions(-)
+-- Luc
