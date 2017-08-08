@@ -1,42 +1,53 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH v2 6/8] transform (A & M) >> S to (A >> S) & (M >> S)
-Date: Mon, 7 Aug 2017 21:50:56 -0400
-Message-ID: <CANeU7QnMbkx5txddPFBTcGq6Mcm5vcmum7sNqPFrU2W0micXBg@mail.gmail.com>
-References: <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
- <20170807191205.86590-1-luc.vanoostenryck@gmail.com> <20170807191205.86590-7-luc.vanoostenryck@gmail.com>
- <CANeU7Q=VSGSTLweWegU1RxZO9_iV9UT0p9L5xe95rC6-vMuntA@mail.gmail.com> <CA+55aFyw=CN=RoEAVMFXc6qk=Y-hbuDvgN=thmyZTj1tSRxkhQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [GIT PULL v5] fix list corruption with recursive remove_usage()
+Date: Tue,  8 Aug 2017 04:00:22 +0200
+Message-ID: <20170808020022.12729-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pf0-f180.google.com ([209.85.192.180]:35668 "EHLO
-        mail-pf0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751924AbdHHBu5 (ORCPT
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:33231 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751891AbdHHCA1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 21:50:57 -0400
-Received: by mail-pf0-f180.google.com with SMTP id t86so8287320pfe.2
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 18:50:57 -0700 (PDT)
-In-Reply-To: <CA+55aFyw=CN=RoEAVMFXc6qk=Y-hbuDvgN=thmyZTj1tSRxkhQ@mail.gmail.com>
+        Mon, 7 Aug 2017 22:00:27 -0400
+Received: by mail-wm0-f52.google.com with SMTP id k20so2972642wmg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 19:00:27 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Aug 7, 2017 at 9:00 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> But even in the absence of such further simplification, the smaller
-> constant thing likely makes it worth it. Almost all architectures have
-> an easier time with smaller constants, and doing
->
->    (a >> 24) & 255;
->
-> is often noticeably more efficient than
->
->    (a & 0xff000000) >> 24;
->
-> just because of the constant issue.
+Chris,
+Please pull these patches for replacement of the ones
+currently on sparse-next.
+It's ones to avoid list corruption that may happen with
+pseudo-users when deleting one while doing nested ptrlist walking.
 
-That totally make sense.
+The code is the one with the typo corrected in the right patch.
 
-Thanks
+Thanks,
+Luc
 
-Chris
+----------------------------------------------------------------
+The following changes since commit 0c4c998690e5e31696404fa518022865fd9232d2:
+
+  fix crash with sym->bb_target == NULL (2017-07-31 22:21:59 +0200)
+
+are available in the git repository at:
+
+  git://github.com/lucvoo/sparse.git for-chris
+
+for you to fetch changes up to faad58bc8499e52ccf71da79a2ba46e2d928e33e:
+
+  mark pseudo users as deleted instead of removing them (2017-08-08 03:46:26 +0200)
+
+----------------------------------------------------------------
+Luc Van Oostenryck (5):
+      ptrlist: add a counter for the number of removed elemnets
+      ptrlist: adjust ptr_list_size for the new ->rm field
+      ptrlist: add MARK_CURRENT_DELETED
+      ptrlist: avoid iteration on NULL entries
+      mark pseudo users as deleted instead of removing them
+
+ ptrlist.c  |  2 +-
+ ptrlist.h  | 15 ++++++++++++++-
+ simplify.c |  5 +++--
+ 3 files changed, 18 insertions(+), 4 deletions(-)
