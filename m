@@ -1,98 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 6/8] transform (A & M) >> S to (A >> S) & (M >> S)
-Date: Wed,  9 Aug 2017 01:06:32 +0200
-Message-ID: <20170808230634.16227-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 8/8] fix: cast of OP_AND only valid if it's an OP_CAST
+Date: Wed,  9 Aug 2017 01:06:34 +0200
+Message-ID: <20170808230634.16227-9-luc.vanoostenryck@gmail.com>
 References: <20170808230634.16227-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34813 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752521AbdHHXG7 (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36349 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752523AbdHHXHB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 8 Aug 2017 19:06:59 -0400
-Received: by mail-wm0-f67.google.com with SMTP id x64so4929589wmg.1
-        for <linux-sparse@vger.kernel.org>; Tue, 08 Aug 2017 16:06:59 -0700 (PDT)
+        Tue, 8 Aug 2017 19:07:01 -0400
+Received: by mail-wm0-f66.google.com with SMTP id d40so4904237wma.3
+        for <linux-sparse@vger.kernel.org>; Tue, 08 Aug 2017 16:07:01 -0700 (PDT)
 In-Reply-To: <20170808230634.16227-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This is especially usefull when simplifying code
-accessing bitfields.
+A cast of an OP_AND can be simplified away if the mask
+already 'cover' the value.
+However this cannot be done if the cast is in fact
+a sign-extension.
 
+Fix this by adding the appropriate check of OP_CAST vs. OP_SCAST
+
+Fixes: caeaf72d34d1e91aaea7340241232d1d877907b7
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                 | 29 ++++++++++++++++++++++++++++-
- validation/bitfield-size.c |  4 +---
- 2 files changed, 29 insertions(+), 4 deletions(-)
+ simplify.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index 9893613da..f1a898700 100644
+index 23cdd19ae..daf91d82b 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -412,6 +412,32 @@ static int simplify_asr(struct instruction *insn, pseudo_t pseudo, long long val
- 	return 0;
- }
+@@ -1046,7 +1046,7 @@ static int simplify_cast(struct instruction *insn)
+ 	}
  
-+static int simplify_lsr(struct instruction *insn, pseudo_t pseudo, long long value)
-+{
-+	struct instruction *def;
-+	unsigned long long mask;
-+
-+	if (!value)
-+		return replace_with_pseudo(insn, pseudo);
-+	switch (def_opcode(insn->src1)) {
-+	case OP_AND:
-+		// replace (A & M) >> S
-+		// by      (A >> S) & (M >> S)
-+		def = insn->src1->def;
-+		if (!constant(def->src2))
-+			break;
-+		if (nbr_pseudo_users(insn->src1) > 1)
-+			break;
-+		mask = def->src2->value;
-+		def->opcode = OP_LSR;
-+		def->src2 = value_pseudo(value);
-+		insn->opcode = OP_AND;
-+		insn->src2 = value_pseudo(mask >> value);
-+		return REPEAT_CSE;
-+	}
-+	return 0;
-+}
-+
- static int simplify_mul_div(struct instruction *insn, long long value)
- {
- 	unsigned long long sbit = 1ULL << (insn->size - 1);
-@@ -562,13 +588,14 @@ static int simplify_constant_rightside(struct instruction *insn)
- 	case OP_ADD:
- 	case OP_OR: case OP_XOR:
- 	case OP_SHL:
--	case OP_LSR:
- 	case_neutral_zero:
- 		if (!value)
- 			return replace_with_pseudo(insn, insn->src1);
- 		return 0;
- 	case OP_ASR:
- 		return simplify_asr(insn, insn->src1, value);
-+	case OP_LSR:
-+		return simplify_lsr(insn, insn->src1, value);
- 
- 	case OP_MODU: case OP_MODS:
- 		if (value == 1)
-diff --git a/validation/bitfield-size.c b/validation/bitfield-size.c
-index c8c94bb15..34400479a 100644
---- a/validation/bitfield-size.c
-+++ b/validation/bitfield-size.c
-@@ -36,8 +36,6 @@ unsigned int get_pbfi_b(struct bfi *bf) { return bf->b; }
-  * check-output-ignore
-  *
-  * check-output-excludes: cast\\.4
-- * check-output-pattern-6-times: cast\\.
-  * check-output-pattern-6-times: lsr\\..*\\$6
-- * check-output-pattern-6-times: and\\..*\\$15
-- * check-output-pattern-6-times: and\\..*\\$960
-+ * check-output-pattern-12-times: and\\..*\\$15
-  */
+ 	/* A cast of a "and" might be a no-op.. */
+-	if (def_opcode(src) == OP_AND) {
++	if (insn->opcode == OP_CAST && def_opcode(src) == OP_AND) {
+ 		struct instruction *def = src->def;
+ 		if (def->size >= size) {
+ 			pseudo_t val = def->src2;
 -- 
 2.13.2
 
