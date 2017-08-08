@@ -1,46 +1,37 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Upcoming sparse release RC5
-Date: Tue, 8 Aug 2017 03:43:08 +0200
-Message-ID: <CAExDi1R8GzvkAaGOUfkTLctuFfiA8JaF8vzp2mRr+-fKSaNzGA@mail.gmail.com>
-References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
- <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
- <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
- <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
- <CANeU7Q=9Ma3+gA21+=bLi38XFw5B1FDoVFUvtaxLR3V0oHeCig@mail.gmail.com>
- <20170808002331.f3g6l7yzhsq3vhxe@ltop.local> <CANeU7QmJmzumvNNFm5W=Ti8TJdw-BZ2DeR0t2UXO-R2vCjqh6Q@mail.gmail.com>
- <CAExDi1R6Vg8cztVA32nOEHKRgpiUcZnHfOoK6rshJq46FSaj2g@mail.gmail.com> <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH v2 6/8] transform (A & M) >> S to (A >> S) & (M >> S)
+Date: Mon, 7 Aug 2017 21:48:33 -0400
+Message-ID: <CANeU7QmdUz-FKVOdKy-J+fqpNU_tb_cNFkAjtiL8poiTVWFcNw@mail.gmail.com>
+References: <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
+ <20170807191205.86590-1-luc.vanoostenryck@gmail.com> <20170807191205.86590-7-luc.vanoostenryck@gmail.com>
+ <CANeU7Q=VSGSTLweWegU1RxZO9_iV9UT0p9L5xe95rC6-vMuntA@mail.gmail.com> <CAExDi1RAaLD2aeCLBqcAngqKDuG5FpeOpZQP6TZ=Mo+MFBKwyQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f177.google.com ([209.85.220.177]:33663 "EHLO
-        mail-qk0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751924AbdHHBnK (ORCPT
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:34506 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751930AbdHHBse (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 7 Aug 2017 21:43:10 -0400
-Received: by mail-qk0-f177.google.com with SMTP id a77so12458441qkb.0
-        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 18:43:09 -0700 (PDT)
-In-Reply-To: <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
+        Mon, 7 Aug 2017 21:48:34 -0400
+Received: by mail-pg0-f53.google.com with SMTP id u185so8459699pgb.1
+        for <linux-sparse@vger.kernel.org>; Mon, 07 Aug 2017 18:48:34 -0700 (PDT)
+In-Reply-To: <CAExDi1RAaLD2aeCLBqcAngqKDuG5FpeOpZQP6TZ=Mo+MFBKwyQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Aug 8, 2017 at 3:34 AM, Christopher Li <sparse@chrisli.org> wrote:
->>> I just checked, that compile error still on the git url you send out
->>> in the email. I still can't use it
->>
->> Are you sure?
->> in the link I pasted here above, the git branch is:
->>
->>     git://github.com/lucvoo/sparse.git fix-nested-pseudo-users-deletion-v4
->>
->>     aka: bddf7d1e4ed81c3def7c6de2796a5489ca678399
+On Mon, Aug 7, 2017 at 8:29 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Tue, Aug 8, 2017 at 2:22 AM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> Yes, see the git log -p bddf7d1e4ed81c3def7c6de2796a5489ca678399
+>> Why (A>>S) & (M >>S) is easier to simplify?
+>>
+>> The original has two instruction but the result has three.
+>
+> Only 2 because M & S are constants and so (M >> S) is already evaluated.
 
-Yes, I see now.
-It compiles but not the previous commit.
+Ah, thanks for point it out the obvious. Your M means Mask.
+I did not catch that.
 
-please ignore the pull request I just sent.
-
---Luc
+Chris
