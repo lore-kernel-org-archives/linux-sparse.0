@@ -1,44 +1,54 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Interaction between bitfields and casts
-Date: Thu, 10 Aug 2017 00:06:12 +0200
-Message-ID: <CAMHZB6GwFtiXzKKRS79srkWH-Cq_mH5TmQJmro4qR3gto-WLqA@mail.gmail.com>
-References: <CACXZuxfUC1DostLzrB2nk9eOvDox1oxG-HjHm+nrWqtyRWEGVQ@mail.gmail.com>
- <CA+55aFw6PfWeEFcRPQg5DQOU_8Xzc48N-5Hr2F_e4=BYgqzdDg@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH v4 2/9] Remove single-store shortcut
+Date: Wed, 9 Aug 2017 23:23:58 +0100
+Message-ID: <CACXZuxc053p7yxDa_Y=tXxt+J4bLikiKjQU0us=_b27EHV1CFg@mail.gmail.com>
+References: <CANeU7Qk99kn3etn8yoEKKFzcW15wHjt7OYPSpZhqCDc4DE3EDQ@mail.gmail.com>
+ <20170809193806.30975-1-luc.vanoostenryck@gmail.com> <20170809193806.30975-3-luc.vanoostenryck@gmail.com>
+ <CACXZuxejN5zBn4NN7XXmGhM26NJMiGAutW7+csb7kVPjWZRVLg@mail.gmail.com> <CAMHZB6FFs-SMSLr3awsHB+k1CTwwezrtbidS2bOMKJ1F2j_jng@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:35624 "EHLO
-        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752309AbdHIWGN (ORCPT
+Received: from mail-vk0-f47.google.com ([209.85.213.47]:35525 "EHLO
+        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752192AbdHIWX7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 18:06:13 -0400
-Received: by mail-qk0-f169.google.com with SMTP id d145so44098863qkc.2
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 15:06:13 -0700 (PDT)
-In-Reply-To: <CA+55aFw6PfWeEFcRPQg5DQOU_8Xzc48N-5Hr2F_e4=BYgqzdDg@mail.gmail.com>
+        Wed, 9 Aug 2017 18:23:59 -0400
+Received: by mail-vk0-f47.google.com with SMTP id d124so30904863vkf.2
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 15:23:59 -0700 (PDT)
+In-Reply-To: <CAMHZB6FFs-SMSLr3awsHB+k1CTwwezrtbidS2bOMKJ1F2j_jng@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Wed, Aug 9, 2017 at 11:27 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
+Hi Luc,
 
-> So the OP_*CAST functions really are a bit confused. Maybe Luc has
-> cleaned some of it up already, I'm going partly from memory.
+On 9 August 2017 at 21:02, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> On Wed, Aug 9, 2017 at 9:47 PM, Dibyendu Majumdar
+> <mobile@majumdar.org.uk> wrote:
+>> Hi Luc,
+>>
+>> This this change independent of the rest of changes in the series -
+>> i.e. can I just apply this change?
+>
+> Absolutely.
+>
 
-I have but I never posted it yet.
-Basically, I have specialized them:
-- TRUNC, ZEXT & SEXT: truncate (may be not neede), zero & sign extend
-for integers
-- PTRU & UPTR: conversion pointer from/to unsigned integer (not sure
-it's needed)
-- FCVTU & FCVTS: convert float to unsigned/signed integers
-- UCVTF & SCVTF: convert int to float
-- FCVTF: float to float convert (maybe even better/simpler with FTRUNC
-& FEXT ?=C3=A0)
+Thank you. I am trying out this change as I am hoping it will help
+avoid the incorrect simplifications we saw in some cases. So far my
+findings are:
 
-The main objective being to make things more explicit a avoid to have
-to test the orig-type at each time.
+It solves the bit field access issue: i.e. this test works
+(https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/set1/onebit.c).
 
--- Luc
+But it doesn't help with the issue with pseudos defined in one branch
+of the code (https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/bugs/simplifybug.c).
+
+Is there another fix / patch that you made to overcome above issue or
+would you expect both issues to be fixed by this change?
+
+I will run my test cases with this change and report if anything breaks.
+
+Regards
+Dibyendu
