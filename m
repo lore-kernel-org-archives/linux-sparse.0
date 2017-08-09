@@ -1,50 +1,59 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [GIT PULL] patches for -rc5
-Date: Wed, 9 Aug 2017 21:20:17 +0200
-Message-ID: <20170809192015.li6dmzg3griy6uug@ltop.local>
-References: <20170809004307.16663-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Best way to inspect the parse tree from Sparse
+Date: Wed, 9 Aug 2017 15:22:38 -0400
+Message-ID: <CANeU7Qk37J8WTVmzDhzjCbpmJ6cf59LNB6sX6ncRFHP=wvJFQw@mail.gmail.com>
+References: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
+ <20170807184653.a6xtjfbutnsnecnf@ltop.local> <CANeU7Qm3JuMq_0OMiNxgcLKMkO8rhLNcWF3yeXqORZPpbvLUmg@mail.gmail.com>
+ <CACXZuxeTzEGNME0WV8S9Gbe-Vbu--pq6XF4sH4YEKPD_gysiNA@mail.gmail.com>
+ <CACXZuxfrgT1Q9X5B7iw=+zYA7bO4uchBo8txqsqnBw-xf+2C_A@mail.gmail.com>
+ <CANeU7QmpT1-zEXmxtesaicD+W_dwMMxODno7og+5C6tuBFimpQ@mail.gmail.com> <CACXZuxcWQBtjH=szWHOzjU9D1+t3E+Bd-2XK=+e_Fx9rO29jvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f53.google.com ([74.125.82.53]:38298 "EHLO
-        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751698AbdHITUW (ORCPT
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:34631 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751891AbdHITWj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 15:20:22 -0400
-Received: by mail-wm0-f53.google.com with SMTP id f15so4451688wmg.1
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 12:20:21 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20170809004307.16663-1-luc.vanoostenryck@gmail.com>
+        Wed, 9 Aug 2017 15:22:39 -0400
+Received: by mail-yw0-f175.google.com with SMTP id s143so46005171ywg.1
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 12:22:39 -0700 (PDT)
+In-Reply-To: <CACXZuxcWQBtjH=szWHOzjU9D1+t3E+Bd-2XK=+e_Fx9rO29jvg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 09, 2017 at 02:43:07AM +0200, Luc Van Oostenryck wrote:
-> Chris,
-> Please pull these patches for the upcoming release.
-> No surprise here, it's the patches that have been on
-> sparse-next, with no rebasing on external branches and
-> some extra testing.
-> 
-> The following changes since commit fa71b7ac0594c9ddf81ec27753280cffef702489:
-> 
->   Adding gcc attribute no_gccisr (2017-07-13 23:57:09 -0700)
-> 
-> are available in the git repository at:
-> 
->   git://github.com/lucvoo/sparse.git tip
-> 
-> for you to fetch changes up to cccba8defbf0386305f522e63e1a1dd939f8c734:
-> 
->   Bump sparse's version to -rc5 (2017-08-09 00:24:23 +0200)
-> 
+On Wed, Aug 9, 2017 at 2:47 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>
+> Thread 1 "test-inspect" received signal SIGSEGV, Segmentation fault.
+> ast_iter_n_children (tree_model=0x725400, iter=0x0) at ast-model.c:404
 
-Having to take the commits that was already on sparse-next, I forgot
-to take care of the SoB. I had thus to redo the thing.
+Err, iter == NULL.
 
-It's the same request only that the correct reference is:
-	4cdf1fa9bbd2116eb73510636dc6d79ecc185d9a
+The function comment said it all. if iter == NULL, should return the
+root node's children number.
 
-Sorry for that,
--- Luc
+Can you try the following one line change?
+I can only verify it compiles. But I have no way to test it.
+
+I also totally forget how this tree view model works now.
+Let's hope that fix it.
+
+Thanks
+
+Chris
+
+diff --git a/ast-model.c b/ast-model.c
+index 704c487..cbfdc1f 100644
+--- a/ast-model.c
++++ b/ast-model.c
+@@ -401,7 +401,7 @@ static gint
+ ast_iter_n_children (GtkTreeModel *tree_model,
+                           GtkTreeIter  *iter)
+ {
+-       AstNode  *node = iter->user_data;
++       AstNode  *node = iter ? iter->user_data : AST_NODE(tree_model);
+
+        inspect_child_node(node);
+        return node->childnodes->len;
