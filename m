@@ -1,49 +1,50 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Best way to inspect the parse tree from Sparse
-Date: Wed, 9 Aug 2017 11:47:57 -0700
-Message-ID: <CACXZuxcWQBtjH=szWHOzjU9D1+t3E+Bd-2XK=+e_Fx9rO29jvg@mail.gmail.com>
-References: <CACXZuxdB3HKmTvh8Xa41OD+3-R4_Hx5g8OqS_D6H093Etb0y2Q@mail.gmail.com>
- <20170807184653.a6xtjfbutnsnecnf@ltop.local> <CANeU7Qm3JuMq_0OMiNxgcLKMkO8rhLNcWF3yeXqORZPpbvLUmg@mail.gmail.com>
- <CACXZuxeTzEGNME0WV8S9Gbe-Vbu--pq6XF4sH4YEKPD_gysiNA@mail.gmail.com>
- <CACXZuxfrgT1Q9X5B7iw=+zYA7bO4uchBo8txqsqnBw-xf+2C_A@mail.gmail.com> <CANeU7QmpT1-zEXmxtesaicD+W_dwMMxODno7og+5C6tuBFimpQ@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [GIT PULL] patches for -rc5
+Date: Wed, 9 Aug 2017 21:20:17 +0200
+Message-ID: <20170809192015.li6dmzg3griy6uug@ltop.local>
+References: <20170809004307.16663-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f172.google.com ([209.85.217.172]:34260 "EHLO
-        mail-ua0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750873AbdHISr6 (ORCPT
+Received: from mail-wm0-f53.google.com ([74.125.82.53]:38298 "EHLO
+        mail-wm0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751698AbdHITUW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 14:47:58 -0400
-Received: by mail-ua0-f172.google.com with SMTP id q25so32288369uah.1
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 11:47:58 -0700 (PDT)
-In-Reply-To: <CANeU7QmpT1-zEXmxtesaicD+W_dwMMxODno7og+5C6tuBFimpQ@mail.gmail.com>
+        Wed, 9 Aug 2017 15:20:22 -0400
+Received: by mail-wm0-f53.google.com with SMTP id f15so4451688wmg.1
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 12:20:21 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20170809004307.16663-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: linux-sparse@vger.kernel.org
 
-Hi Chris,
+On Wed, Aug 09, 2017 at 02:43:07AM +0200, Luc Van Oostenryck wrote:
+> Chris,
+> Please pull these patches for the upcoming release.
+> No surprise here, it's the patches that have been on
+> sparse-next, with no rebasing on external branches and
+> some extra testing.
+> 
+> The following changes since commit fa71b7ac0594c9ddf81ec27753280cffef702489:
+> 
+>   Adding gcc attribute no_gccisr (2017-07-13 23:57:09 -0700)
+> 
+> are available in the git repository at:
+> 
+>   git://github.com/lucvoo/sparse.git tip
+> 
+> for you to fetch changes up to cccba8defbf0386305f522e63e1a1dd939f8c734:
+> 
+>   Bump sparse's version to -rc5 (2017-08-09 00:24:23 +0200)
+> 
 
-Yes I do have libgtk-2.0-dev installed as otherwise it would not build.
+Having to take the commits that was already on sparse-next, I forgot
+to take care of the SoB. I had thus to redo the thing.
 
-On 9 August 2017 at 19:41, Christopher Li <sparse@chrisli.org> wrote:
-> You can also do a gdb on the test-inspect and report back what
-> back trace do you get. My wild guess is that, it is got some incomparable
-> library or some thing.
->
+It's the same request only that the correct reference is:
+	4cdf1fa9bbd2116eb73510636dc6d79ecc185d9a
 
-Here is the back trace from gdb:
-
-Starting program: /home/dylan/github/linux-sparse/test-inspect parse.c
-[Thread debugging using libthread_db enabled]
-Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-[New Thread 0x7fffede40700 (LWP 19249)]
-[New Thread 0x7fffed63f700 (LWP 19250)]
-[New Thread 0x7fffece3e700 (LWP 19251)]
-
-Thread 1 "test-inspect" received signal SIGSEGV, Segmentation fault.
-ast_iter_n_children (tree_model=0x725400, iter=0x0) at ast-model.c:404
-404        AstNode  *node = iter->user_data;
-
-Regards
-Dibyendu
+Sorry for that,
+-- Luc
