@@ -1,38 +1,40 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] documentation: update email reference link
-Date: Fri, 11 Aug 2017 01:34:03 +0200
-Message-ID: <CAExDi1SLVUCNZ+CdJHbBm00N51H3t6EAEQsaXPmvFXzfYuk4bw@mail.gmail.com>
-References: <501dfa0c-ab37-74f3-f710-1f885c0bd01c@infradead.org>
+Subject: Re: [PATCH v4 7/9] transform (A & M) >> S to (A >> S) & (M >> S)
+Date: Fri, 11 Aug 2017 01:41:04 +0200
+Message-ID: <CAExDi1Qf15pyLadMRjo4QkjAv_gxq4stPuAd-7eyiuRyKYSCWQ@mail.gmail.com>
+References: <CANeU7Qk99kn3etn8yoEKKFzcW15wHjt7OYPSpZhqCDc4DE3EDQ@mail.gmail.com>
+ <20170809193806.30975-1-luc.vanoostenryck@gmail.com> <20170809193806.30975-8-luc.vanoostenryck@gmail.com>
+ <CANeU7QmSNz8vTjiukmakHsWHveKkA-8bLY_E4AtfKRbKUtJSCA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f50.google.com ([209.85.218.50]:34309 "EHLO
-        mail-oi0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750735AbdHJXeE (ORCPT
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:36648 "EHLO
+        mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751388AbdHJXlF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 10 Aug 2017 19:34:04 -0400
-Received: by mail-oi0-f50.google.com with SMTP id x3so20849316oia.1
-        for <linux-sparse@vger.kernel.org>; Thu, 10 Aug 2017 16:34:04 -0700 (PDT)
-In-Reply-To: <501dfa0c-ab37-74f3-f710-1f885c0bd01c@infradead.org>
+        Thu, 10 Aug 2017 19:41:05 -0400
+Received: by mail-oi0-f53.google.com with SMTP id g131so20747066oic.3
+        for <linux-sparse@vger.kernel.org>; Thu, 10 Aug 2017 16:41:05 -0700 (PDT)
+In-Reply-To: <CANeU7QmSNz8vTjiukmakHsWHveKkA-8bLY_E4AtfKRbKUtJSCA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 11, 2017 at 1:11 AM, Randy Dunlap <rdunlap@infradead.org> wrote:
-> From: Randy Dunlap <rdunlap@infradead.org>
+On Thu, Aug 10, 2017 at 3:16 AM, Christopher Li <sparse@chrisli.org> wrote:
+
+>> +               // replace (A & M) >> S
+>> +               // by      (A >> S) & (M >> S)
 >
-> gmane.org was shut down for awhile, then bought by someone else,
-> and is now being rebuilt. Links to it are not reliable for now,
-> so add a link to marc.info for the same email message.
+> A little bit suggestion base on my previous reading and question ask on
+> this. When I first read the comment without reading the code, then I would
+> wondering why (A>>S) & (M>>S) is simpler. The following code actually
+> explain the constant mask very well. So the comment best understand if
+> the code was read. Adding some comment on M is constant will help a
+> lot in the comment.
 
-Yes, the marc.info is also the one referenced on vger's LISTINFO
-as well as http://www.spinics.net/lists/linux-sparse/
+Yes.
+In fact, these patches still need to have a proper commit message.
+I've added a not for now.
 
->    http://article.gmane.org/gmane.linux.kernel.mm/75784
-
-linux.kernel.mm ???
-Is this 'mm' really correct?
-Anyway, this link is currently dead and I think should be removed.
-
--- Luc
+--Luc
