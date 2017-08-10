@@ -1,72 +1,64 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Upcoming sparse release RC5
-Date: Thu, 10 Aug 2017 01:42:09 +0100
-Message-ID: <CACXZuxfcQ8t3VP1QtQpuB8Pz2Uv0o5RHUaLVSx5as312v8ryVw@mail.gmail.com>
-References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
- <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
- <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
- <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
- <CANeU7Q=9Ma3+gA21+=bLi38XFw5B1FDoVFUvtaxLR3V0oHeCig@mail.gmail.com>
- <20170808002331.f3g6l7yzhsq3vhxe@ltop.local> <CANeU7QmJmzumvNNFm5W=Ti8TJdw-BZ2DeR0t2UXO-R2vCjqh6Q@mail.gmail.com>
- <CAExDi1R6Vg8cztVA32nOEHKRgpiUcZnHfOoK6rshJq46FSaj2g@mail.gmail.com>
- <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
- <CAExDi1QDDDTKb9Ht6-pquT1w5PS_G+yCBPtoYLofuMPVuxgN+Q@mail.gmail.com>
- <CANeU7Q=bCw0wYWsNTgbu=mLmDq40_Db-=f2rTb+UC2b8szpxvA@mail.gmail.com>
- <CAExDi1RWu1geE77zfQJxATcpVziEEpm4PiOKJ2kMGuZzawubwQ@mail.gmail.com>
- <CANeU7Qn1wfucEqfsyGjqoLwJRwAxpreh_r+Fk7Q0yJYVbEQamw@mail.gmail.com>
- <CACXZuxfXE7cbdGPXvTTpyka77MD0iuyLrK39vjbA=W0prUjPaA@mail.gmail.com>
- <CANeU7Qnn=-M3MrUBwPdGqog5T+NiSLS_xgnww0jM53+KYimxtQ@mail.gmail.com>
- <CACXZuxd83EjbX5i9cgo0H3TTNKBV+pHec7HURVb2GF-GJOFszQ@mail.gmail.com> <CANeU7Q=w3REgmDDQ-t6LyWrnOijqcxnokr3AjCC4Rqk3x7ZmvA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [GIT PULL] patches for -rc5
+Date: Wed, 9 Aug 2017 20:48:27 -0400
+Message-ID: <CANeU7Q=rxqJ3J1eH7b-QbiiV4JPg6CyDFYGhYiA1-nGEy4sk-A@mail.gmail.com>
+References: <20170809004307.16663-1-luc.vanoostenryck@gmail.com>
+ <20170809192015.li6dmzg3griy6uug@ltop.local> <CANeU7Q=JLy294tJiVVU=4Z0PhEQPgpgZwwcHSyCEsb1_W+k6ZQ@mail.gmail.com>
+ <CAExDi1T-r4WRx_uGPGYJZ2Kk7PtN5hu4A+3+VNB9YDx1w42rHw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f180.google.com ([209.85.217.180]:36465 "EHLO
-        mail-ua0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752231AbdHJAmL (ORCPT
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:36023 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752219AbdHJAs2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 20:42:11 -0400
-Received: by mail-ua0-f180.google.com with SMTP id k43so35153710uaf.3
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 17:42:10 -0700 (PDT)
-In-Reply-To: <CANeU7Q=w3REgmDDQ-t6LyWrnOijqcxnokr3AjCC4Rqk3x7ZmvA@mail.gmail.com>
+        Wed, 9 Aug 2017 20:48:28 -0400
+Received: by mail-yw0-f171.google.com with SMTP id u207so49930554ywc.3
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 17:48:28 -0700 (PDT)
+In-Reply-To: <CAExDi1T-r4WRx_uGPGYJZ2Kk7PtN5hu4A+3+VNB9YDx1w42rHw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
-
-On 10 August 2017 at 01:18, Christopher Li <sparse@chrisli.org> wrote:
-> On Wed, Aug 9, 2017 at 5:10 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->>
->> I think that compile error should not be possible? Because before you
->> merge any patch presumably you build Sparse and run the tests?
->>
->> As for other changes that were later removed - in my view this is
->> valuable history as it tells people what was tried and discarded and
->> why. I still feel all history is good.
->>
+On Wed, Aug 9, 2017 at 8:32 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
 >
-> OK. I think my obsession of "clean up the history" is wrong and not  worthy
-> doing. Linus's criticism of sparse-next rebase is correct.  I will just got back
-> to the master doing the normal git pull and merges. That actually simplify
-> my own work flow as we.
+> I have no problem for you to take only till the preceding ref.
+> But as we agreed and so that you just have something that fast-forward to
+> master *all* the changes must come from my tree first. I do the integration
+> and you just pull from me.
+> It's exactly what you asked and we agreed, right?
 >
 
-It will also help me if I can assume that a patch will not be re-done.
-At the moment I cannot apply any patch - because I do not know if a
-new version of the patch will be published soon. Instead if changes
-always go forward - i.e. you apply fixes to existing patches - then I
-can safely apply a patch, and when a fix is published, apply the fix.
+We agree to give this a try. I already realize this is not going to work.
+Please drop that. One big consideration is that, I give up the "clean up the
+history" thing on sparse-next. So no more rebase on the sparse-next.
 
-I learnt from database technology that it is better for changes to
-always go forward - trying to revert past changes by undoing them is
-troublesome as it means you may need to undo all changes that follow
-the one you want to undo. Progress can become very difficult in this
-approach. That is why in databases, often undo is just another forward
-change - there is no going back to remove a past change. A really good
-description of this approach is given in the ARIES approach to
-database recovery.
+From now on I will just do the normal git merge on master. I don't think we
+need to go through your branch again, because there is no leading sparse-next
+any more.
 
-Regards
-Dibyendu
+So the model will be, you give me pull request. I either give feed back or just
+merge it. If there is a bug or improvement. We will do incremental fix
+on master.
+Just like the other git base open source project.
+
+I will never rebase any thing on master, especially your changes.
+
+Sorry about going back and forth. I think that is the right thing to do.
+It will actually simplify things a lot. I admit the "clean up of
+history" thing is
+stupid. Linus was right about that. I should just do the normal merges
+and take your
+tree as it is.
+
+So you can actually just send me the topic changes merge request.
+If you want to send me combined merge request that is fine too.
+Branch name does not matter any more.
+
+Please give me a bit time to release RC5 before revisit your new patches.
+
+Thanks for the great work.
+
+Chris
