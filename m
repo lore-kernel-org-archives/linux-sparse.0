@@ -1,36 +1,37 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: master branch testing
-Date: Fri, 11 Aug 2017 00:51:48 +0200
-Message-ID: <CAExDi1ST9p2h+3JX=-a6rhBPCw18tAvQOPjprF53wzeprD+iaw@mail.gmail.com>
-References: <eba87902-3115-2ae7-fee9-0f2c352af2f3@ramsayjones.plus.com>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: [PATCH] documentation: update email reference link
+Date: Thu, 10 Aug 2017 16:11:34 -0700
+Message-ID: <501dfa0c-ab37-74f3-f710-1f885c0bd01c@infradead.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:34598 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752135AbdHJWvt (ORCPT
+Received: from merlin.infradead.org ([205.233.59.134]:43638 "EHLO
+        merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752281AbdHJXLh (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 10 Aug 2017 18:51:49 -0400
-Received: by mail-oi0-f41.google.com with SMTP id x3so20209932oia.1
-        for <linux-sparse@vger.kernel.org>; Thu, 10 Aug 2017 15:51:49 -0700 (PDT)
-In-Reply-To: <eba87902-3115-2ae7-fee9-0f2c352af2f3@ramsayjones.plus.com>
+        Thu, 10 Aug 2017 19:11:37 -0400
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Thu, Aug 10, 2017 at 11:42 PM, Ramsay Jones
-<ramsay@ramsayjones.plus.com> wrote:
-> Hi Chris,
->
-> I have tested the current master branch (@ commit 5b247b1) on
-> Linux 32-bit (i686), Linux 64-bit (x86-64) and cygwin (x86-64)
-> and have found no additional problems. (sparse test-suite and
-> git master next and pu branches).
->
-> Thanks!
+From: Randy Dunlap <rdunlap@infradead.org>
 
-It's us that must thank you.
-So ... Thank you!
+gmane.org was shut down for awhile, then bought by someone else,
+and is now being rebuilt. Links to it are not reliable for now,
+so add a link to marc.info for the same email message.
 
--- Luc
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+---
+ Documentation/sparse.txt |    1 +
+ 1 file changed, 1 insertion(+)
+
+--- sparse-2017-0810.orig/Documentation/sparse.txt
++++ sparse-2017-0810/Documentation/sparse.txt
+@@ -43,3 +43,4 @@ Reference:
+ * Linus' e-mail about __nocast vs __bitwise:
+ 
+   http://article.gmane.org/gmane.linux.kernel.mm/75784
++  http://marc.info/?l=linux-mm&m=133245421127324&w=2
+
