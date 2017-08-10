@@ -1,51 +1,51 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [GIT PULL] patches for -rc5
-Date: Wed, 9 Aug 2017 20:12:37 -0400
-Message-ID: <CANeU7Q=JLy294tJiVVU=4Z0PhEQPgpgZwwcHSyCEsb1_W+k6ZQ@mail.gmail.com>
-References: <20170809004307.16663-1-luc.vanoostenryck@gmail.com> <20170809192015.li6dmzg3griy6uug@ltop.local>
+Subject: Re: Upcoming sparse release RC5
+Date: Wed, 9 Aug 2017 20:18:31 -0400
+Message-ID: <CANeU7Q=w3REgmDDQ-t6LyWrnOijqcxnokr3AjCC4Rqk3x7ZmvA@mail.gmail.com>
+References: <CANeU7QmZXY5Q4GmBMh42WpdiRyYfA=Ddpvjk_35=_Rmhb=RMiA@mail.gmail.com>
+ <CAExDi1Qshm920Te38c-HZsrWDtxVS-WP6HRXkeNujWySXX0mXg@mail.gmail.com>
+ <CANeU7QnY20n-UHY07RotcAJzFtMREB-CcsE1WXLi=b=cwQCizQ@mail.gmail.com>
+ <CAExDi1QVtkoFCXzSoP0mg+3gbE45Z-bOGLAtjsTi8tsQZMdcEg@mail.gmail.com>
+ <CANeU7Q=9Ma3+gA21+=bLi38XFw5B1FDoVFUvtaxLR3V0oHeCig@mail.gmail.com>
+ <20170808002331.f3g6l7yzhsq3vhxe@ltop.local> <CANeU7QmJmzumvNNFm5W=Ti8TJdw-BZ2DeR0t2UXO-R2vCjqh6Q@mail.gmail.com>
+ <CAExDi1R6Vg8cztVA32nOEHKRgpiUcZnHfOoK6rshJq46FSaj2g@mail.gmail.com>
+ <CANeU7QkU+GZA6J_B5SdZw0L=yvmYr_V=ue-h-TrZoWaGc-ATvg@mail.gmail.com>
+ <CAExDi1QDDDTKb9Ht6-pquT1w5PS_G+yCBPtoYLofuMPVuxgN+Q@mail.gmail.com>
+ <CANeU7Q=bCw0wYWsNTgbu=mLmDq40_Db-=f2rTb+UC2b8szpxvA@mail.gmail.com>
+ <CAExDi1RWu1geE77zfQJxATcpVziEEpm4PiOKJ2kMGuZzawubwQ@mail.gmail.com>
+ <CANeU7Qn1wfucEqfsyGjqoLwJRwAxpreh_r+Fk7Q0yJYVbEQamw@mail.gmail.com>
+ <CACXZuxfXE7cbdGPXvTTpyka77MD0iuyLrK39vjbA=W0prUjPaA@mail.gmail.com>
+ <CANeU7Qnn=-M3MrUBwPdGqog5T+NiSLS_xgnww0jM53+KYimxtQ@mail.gmail.com> <CACXZuxd83EjbX5i9cgo0H3TTNKBV+pHec7HURVb2GF-GJOFszQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:32784 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752171AbdHJAMi (ORCPT
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:36406 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752178AbdHJASc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 20:12:38 -0400
-Received: by mail-yw0-f170.google.com with SMTP id p68so49656688ywg.0
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 17:12:38 -0700 (PDT)
-In-Reply-To: <20170809192015.li6dmzg3griy6uug@ltop.local>
+        Wed, 9 Aug 2017 20:18:32 -0400
+Received: by mail-yw0-f174.google.com with SMTP id u207so49665372ywc.3
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 17:18:32 -0700 (PDT)
+In-Reply-To: <CACXZuxd83EjbX5i9cgo0H3TTNKBV+pHec7HURVb2GF-GJOFszQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 9, 2017 at 3:20 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Wed, Aug 09, 2017 at 02:43:07AM +0200, Luc Van Oostenryck wrote:
->> Chris,
->> Please pull these patches for the upcoming release.
->> No surprise here, it's the patches that have been on
->> sparse-next, with no rebasing on external branches and
->> some extra testing.
->>
->> The following changes since commit fa71b7ac0594c9ddf81ec27753280cffef702489:
->>
->>   Adding gcc attribute no_gccisr (2017-07-13 23:57:09 -0700)
->>
->> are available in the git repository at:
->>
->>   git://github.com/lucvoo/sparse.git tip
->>
->> for you to fetch changes up to cccba8defbf0386305f522e63e1a1dd939f8c734:
->>
->>   Bump sparse's version to -rc5 (2017-08-09 00:24:23 +0200)
+On Wed, Aug 9, 2017 at 5:10 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>
+> I think that compile error should not be possible? Because before you
+> merge any patch presumably you build Sparse and run the tests?
+>
+> As for other changes that were later removed - in my view this is
+> valuable history as it tells people what was tried and discarded and
+> why. I still feel all history is good.
+>
 
-Please don't do the -rc5 bump just yet. I need to add some documents.
-
-I can take the master to 989132ba9259b80bc8b8bac7d9b29fabf1d9e483, the one
-before -rc5 bump. Please let me do the bump. It usually come with the sign tags
-as well.
-
-Thanks
+OK. I think my obsession of "clean up the history" is wrong and not  worthy
+doing. Linus's criticism of sparse-next rebase is correct.  I will just got back
+to the master doing the normal git pull and merges. That actually simplify
+my own work flow as we.
 
 Chris
