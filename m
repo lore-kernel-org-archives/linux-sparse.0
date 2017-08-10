@@ -1,89 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH 2/2] Documents: project ideas
-Date: Wed, 9 Aug 2017 23:30:48 -0400
-Message-ID: <CANeU7Qm5czpkmaswwhqyXZn95-eeU-7SM6+uEUBqUh64oEVRKQ@mail.gmail.com>
+From: Chris Li <christ.li@gmail.com>
+Subject: RFC: ptrlist insert during iteration
+Date: Wed, 9 Aug 2017 23:56:48 -0400
+Message-ID: <CANeU7QnyNWOLe+u+ZOKr0EGPn9_RJ7T=sPi5mMiC-UTvaqeoEw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:33266 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752095AbdHJDau (ORCPT
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:33094 "EHLO
+        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752176AbdHJD4t (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Aug 2017 23:30:50 -0400
-Received: by mail-yw0-f196.google.com with SMTP id u207so5420621ywc.0
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 20:30:49 -0700 (PDT)
+        Wed, 9 Aug 2017 23:56:49 -0400
+Received: by mail-yw0-f173.google.com with SMTP id p68so51675568ywg.0
+        for <linux-sparse@vger.kernel.org>; Wed, 09 Aug 2017 20:56:49 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Linux-Sparse <linux-sparse@vger.kernel.org>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-Adding project idea to improve sparse.
+I have give this a little bit more thought.
+Find more bugs in the previous proposal.
 
-Signed-off-by: Christopher Li <sparse@chrisli.org>
----
- Documentation/project-ideas.md | 52 ++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 52 insertions(+)
- create mode 100644 Documentation/project-ideas.md
+Data structure:
+occupier mask:
+     indicate which ptrlist entry is valid.
+insert mask:
+     Indicate which ptrlist entry is new insert during current loop.
 
-diff --git a/Documentation/project-ideas.md b/Documentation/project-ideas.md
-new file mode 100644
-index 0000000..9adce20
---- /dev/null
-+++ b/Documentation/project-ideas.md
-@@ -0,0 +1,52 @@
-+Why hacking on sparse
-+=====================
-+
-+1. sparse is small.
-+   The full project compiles in less than * seconds on old and not
-performing laptop.
-+2. sparse is fast.
-+   Typically, sparse can check on C file ** of time it take for gcc
-to generate object files.
-+3. sparse can digest the full kernel source file.
-+   With sparse-llvm, sparse use llvm as back end to emit real machine code.
-+
-+New developer hacking on sparse
-+==============================
-+
-+
-+* Sparse all sparse warning message should include the option how
-+   to disable it.
-+       e.g. "pre-process.c:20*:28: warning: Variable length array is used."
-+       should be something like
-+        "pre-process.c:20*:28: warning: Variable length array is
-+used. (-Wno-vla)"
-+* extend test-inspect to inspect more AST fields.
-+* Addd inspect to inspect instructions.
-+* adding architecture handling in sparse similar to cgcc
-+* parallel processing of test-suit
-+* Howto: fix the kernel rcu related checker warnings
-+* option to disable AST level inline.
-+* debug: debug version of sparse do all the verification double
-+* testsuit: verify and compare IR (suggested by Dibyendu Majumdar)
-+
-+For experienced developers
-+==========================
-+
-+* merge C type on incremental declare of C type and function prototype.
-+* move attribute out of ctype to allow easier to add new attribute.
-+* serialize, general object walking driven by data structures.
-+* serialize, write sparse byte code into file
-+* serialize, load sparse byte code from file.
-+* symbol index/linker, know which symbol in which byte code file.
-+* inline function in instruction level
-+* cross function checking
-+* checker error output database
-+* debug: optimization step by step log
-+* debug: fancy animation of CFG
-+* phi node location (Luc has patch)
-+* revisit crazy programmer warning, invalid SSA form.
-+* ptrlist, looping while modify inside the loop.
-+* dead code eliminate using ssa
-+* constant propagation using ssa.
-+* x86/arm back end instruction set define
-+* register allocation.
-+* emit x86/arm machine level code
-+
--- 
-2.13.3
+I find out for each ptr iteration. The insert mask need to restart
+with fresh zero.
+e.g. if the insert mask start with 00010B, and after the current
+ptr iteration, the insert mask become 00110B. The loop iterator
+has no way to tell if the new bit was insert before or after the
+original bit.
+
+That is the reason insert mask will need to start fresh zero
+for each pointer iteration.
+
+If there is nest loops, the inner loop will need to maintain and
+merge the insert mask for the outer loop.
+
+It need some thing similar to the ptrlist refcount to do some
+save/merge on the insert mask context when iterator
+enter/exit the ptrlist node.
+
+It is pretty complicate, but do able if we really want to do it.
+
+Chris
