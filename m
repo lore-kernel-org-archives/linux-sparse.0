@@ -1,56 +1,73 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: RFC: Move Sparse development to github
-Date: Thu, 10 Aug 2017 07:46:25 -0400
-Message-ID: <CANeU7Q=dX9ZbnmsuSS19bJMdpieUtqdJzExTCbfKNHdnDqnzog@mail.gmail.com>
-References: <CACXZuxfUbrV5P0aoTfOvfaX3RDW=Nc2-BPfXj1DLENznt_TE4Q@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v2 1/8] Remove single-store shortcut
+Date: Thu, 10 Aug 2017 14:26:31 +0200
+Message-ID: <CAExDi1TGUP9TETWGYguiaa0yjLPhs81k7WakWSSzramJm8pRSg@mail.gmail.com>
+References: <CACXZuxd30jwczag_GHW3cmqPcBybEi7jfwfku81vW2nHzo_kyA@mail.gmail.com>
+ <20170807191205.86590-1-luc.vanoostenryck@gmail.com> <20170807191205.86590-2-luc.vanoostenryck@gmail.com>
+ <CANeU7QkmmQOx90sZUsn+8BGCN8Jcz40_8xWBzGZvRYk0GuX=PA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:33805 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752261AbdHJLq1 (ORCPT
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:36720 "EHLO
+        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752740AbdHJM0c (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 10 Aug 2017 07:46:27 -0400
-Received: by mail-yw0-f172.google.com with SMTP id s143so2899971ywg.1
-        for <linux-sparse@vger.kernel.org>; Thu, 10 Aug 2017 04:46:26 -0700 (PDT)
-In-Reply-To: <CACXZuxfUbrV5P0aoTfOvfaX3RDW=Nc2-BPfXj1DLENznt_TE4Q@mail.gmail.com>
+        Thu, 10 Aug 2017 08:26:32 -0400
+Received: by mail-oi0-f45.google.com with SMTP id g131so4965418oic.3
+        for <linux-sparse@vger.kernel.org>; Thu, 10 Aug 2017 05:26:32 -0700 (PDT)
+In-Reply-To: <CANeU7QkmmQOx90sZUsn+8BGCN8Jcz40_8xWBzGZvRYk0GuX=PA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Aug 10, 2017 at 6:58 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Hi,
+On Thu, Aug 10, 2017 at 1:01 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> I would like to propose moving Sparse development to github. The model
-> I would like to propose is as follows:
+> The reason this short cut is wrong is that, it is not  about
+> how many store we have (single vs multiple).  It is about
+> weather all the usage(load) has one single store
+> immediate dominates it. If it does, even exist of other stores,
+> this optimization can still be done.
 
-It does not need to be move from the release stand point of view.
-I already have an github account and github repository of sparse.
+More exactly, this shortcut is wrong because it is based on
+the assumption that if there is a single store, then this store
+must necessary dominates all the loads.
+This assumption is, of course, wrong when the var is not
+explicitly defined.
 
-I can merge the merge request from github (not using the github UI though).
-The merge will reflect on github. That should satisfy most of your
-points here.
+> The question would be if we have easy and quick way to
+> detect that all the load are immediate dominated by the
+> one single store.
 
-A lot of time is spend on the discussion and figure out what is the
-right thing to do. I still like the review before commit model. If Luc
-want to make this is clear this is a git pull request I want this pull.
-It be pull rather quickly using the current master model. A lot of time
-I need to clarify weather the patch is for release or for view.
+That's what the general case does.
 
-I can sync the master to github every time I push to korg. That part
-is easy.
+> If that condition holds, we can still do the "short-cut".
 
-I am not a big fan of using the github UI for merge though. I can read the
-github issue request there fine.
+Only for limited special cases. It's not worth, forget about it.
 
-What you are really asking is having Luc on github has his own
-sparse tree. Not just patches.  I totally support of that too. I would be
-happy to pull from his tree.
+Anyway, it's very temporary because the code still put the
+phi-nodes at wrong places.
+This simplify_one_symbol() is replaced by the new SSA construction
+branch.
 
-I still prefer the review and merge model for release though.
+Believe it or not but this placement of phi-nodes is a much bigger
+issue than those undefined vars. For example, on the kernel,
+this patch has exactly zero (visible) effect. But every non-trivial
+piece of code is plainly very wrong because of those bad phi-nodes.
 
-Thanks
+> BTW, I consider this patch can separate out from the other
+> patch in this series meaning wise.
 
-Chris
+Yes, it's what I said :"this patch and the preceding one
+(because it's needed for the test case)".
+
+> Please let me know if you want to include this in the RC5.
+> Give me a proper git pull address. Topic branch is fine.
+
+Yes, I'll do later.
+(if you want just for testing, please take the ref in the cover letter
+and drop the top patches. Unless comments from you, I don't
+have the intention to change something to these two patches)
+
+Regards,
+-- Luc
