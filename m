@@ -1,7 +1,7 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Subject: Re: [RFC v0 0/4] Give a type to constants too
-Date: Fri, 11 Aug 2017 08:00:50 -0400
-Message-ID: <CANeU7Qkzpdxc5vCdZT3Uc4Ajj1S7aL6sCR_21xBf1M1iDeSJHA@mail.gmail.com>
+Date: Fri, 11 Aug 2017 13:20:38 +0100
+Message-ID: <CACXZuxcytdnZjcjf-d0cMCeXLxSA_m66RO1G+dkpMqX81tVB1A@mail.gmail.com>
 References: <CA+55aFyqMScsVe8-5T=omdpSsFaYmdD-PbK3KqKW=1gXgitMaA@mail.gmail.com>
  <CACXZuxcKbT66NV6cc1+VObmcKYUWtCXvp3U_CY1mPuT5tdSw9g@mail.gmail.com>
  <CA+55aFyVDASFQA=DsOKcTvLxA9NmsyZZpBOFovuTm8WJwb36vQ@mail.gmail.com>
@@ -15,21 +15,46 @@ References: <CA+55aFyqMScsVe8-5T=omdpSsFaYmdD-PbK3KqKW=1gXgitMaA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:33806 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752864AbdHKMAw (ORCPT
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:33307 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752902AbdHKMUj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 11 Aug 2017 08:00:52 -0400
-Received: by mail-yw0-f169.google.com with SMTP id s143so20899087ywg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2017 05:00:51 -0700 (PDT)
+        Fri, 11 Aug 2017 08:20:39 -0400
+Received: by mail-vk0-f42.google.com with SMTP id j189so12652861vka.0
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2017 05:20:39 -0700 (PDT)
 In-Reply-To: <20170811114937.fqzgxdqcq64jlpgn@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Jeff Garzik <jeff@garzik.org>, Pekka Enberg <penberg@kernel.org>
 
-On Fri, Aug 11, 2017 at 7:49 AM, Luc Van Oostenryck
+Hi Luc,
+
+On 11 August 2017 at 12:49, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
+> On Fri, Aug 11, 2017 at 11:28:23AM +0100, Dibyendu Majumdar wrote:
+>> On 10 August 2017 at 23:34, Luc Van Oostenryck
+>> <luc.vanoostenryck@gmail.com> wrote:
+>> > * the OP_PUSH instructions do a perfect job of giving a type to functions
+>> >   arguments
+>> > * the OP_PUSH instructions also nicely abstract away the *operation* of
+>> >   argument passing that all architectures have. It's a good thing.
+>> >
+>>
+>> It is true that OP_PUSH instructions resolved the issue I was having.
+>> However there is something odd about them as they are not really
+>> instructions in the instruction stream, are they? They get added as
+>> arguments to the OP_CALL instruction. The solution works great though.
+>
+> Yes, they are somehow odd. I'm not totally sure by what you exactly
+> mean by "in the instruction stream", though.
+>
+> Let's use an example:
+>         fun(1, a)
+>
+> Currently it's linearized as:
+>         call    fun, 1, a
+>
 > The first version of the patch gave:
 >         arg     %r1, $1
 >         arg     %r2, a
@@ -39,32 +64,11 @@ On Fri, Aug 11, 2017 at 7:49 AM, Luc Van Oostenryck
 >         push    $1
 >         push    a
 >         call    fun
+> which is very much like a lot of functions really work.
 
+I was mistaken - I think they do appear in the instruction stream. I
+thought they didn't because we kind of ignore them - and only look at
+them as part of the OP_CALL arguments.
 
-I think he means the push instruction is not in the bb->insns list.
-
-I agree with that view. The push instruction is very different than
-any other instruction.  It contain mostly "repeated" information.
-It is only needed when two things goes together:
-1) the functions is varidic,
-2) the OP_SETVAL is on the varidic part of the argument.
-
-Which is rare, most of the function call are not varidic.
-
-Another reason is that, it actually mess up with the parsing
-state. If I am writing a script to parse the linearized output.
-Notice that all other instruction don't have state itself.
-The PUSH has state. It need to remember the ordered
-position to the parser to figure out which PUSH apply
-to which calling argument.
-
-It also take up valuable screen space when I am staring
-at the linearized byte code.
-
-That is why I am actually what to explore Linus' alternative
-suggest to push. Give OP_SETVAL a size.
-
-Linus proposal two valid solution, add size to pseudo,
-or the push. I haven't explore the first one yet.
-
-Chris
+Regards
+Dibyendu
