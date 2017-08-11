@@ -1,62 +1,43 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [RFC v2 13/23] x86/power/64: Adapt assembly for PIE support
-Date: Fri, 11 Aug 2017 08:09:41 -0700
-Message-ID: <CAJcbSZEiuMQ9+VOFywyRhs4sEZs9AHSzYqpg1yDZFxQ8vvgcWw@mail.gmail.com>
-References: <20170810172615.51965-1-thgarnie@google.com> <20170810172615.51965-14-thgarnie@google.com>
- <20170811123618.GC16126@amd>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: master branch for upcoming RC5
+Date: Fri, 11 Aug 2017 17:15:28 +0200
+Message-ID: <CAExDi1QDakpqyS9m1=a6NNYx=tFvx+Lz=FuQOaEzHheRvqbgSA@mail.gmail.com>
+References: <CANeU7QnAL0XxRHXifJunkPi1+My-vUJ84neaMPjPR+v7-UQmSQ@mail.gmail.com>
+ <CACXZuxeQoL-zfoAqxwMLfRKCEt_TbZp-8gONQJgkWn98WF7=sA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-hardening-return-9340-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <20170811123618.GC16126@amd>
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>, Paul
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:36460 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752915AbdHKPP3 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 11 Aug 2017 11:15:29 -0400
+Received: by mail-oi0-f52.google.com with SMTP id g131so35909400oic.3
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Aug 2017 08:15:29 -0700 (PDT)
+In-Reply-To: <CACXZuxeQoL-zfoAqxwMLfRKCEt_TbZp-8gONQJgkWn98WF7=sA@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 11, 2017 at 5:36 AM, Pavel Machek <pavel@ucw.cz> wrote:
-> On Thu 2017-08-10 10:26:05, Thomas Garnier wrote:
->> Change the assembly code to use only relative references of symbols for the
->> kernel to be PIE compatible.
->>
->> Position Independent Executable (PIE) support will allow to extended the
->> KASLR randomization range below the -2G memory limit.
->>
->> Signed-off-by: Thomas Garnier <thgarnie@google.com>
+On Fri, Aug 11, 2017 at 5:00 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
 >
-> Acked-by: Pavel Machek <pavel@ucw.cz>
+> Were these two issues caused by recent changes - or are they bugs in
+> the released version of Sparse?
 
-Thanks Pavel!
+Both have been there since essentially forever.
+It's only recently that we discovered how bad the situation was
 
->
->> --- a/arch/x86/power/hibernate_asm_64.S
->> +++ b/arch/x86/power/hibernate_asm_64.S
->> @@ -24,7 +24,7 @@
->>  #include <asm/frame.h>
->>
->>  ENTRY(swsusp_arch_suspend)
->> -     movq    $saved_context, %rax
->> +     leaq    saved_context(%rip), %rax
->>       movq    %rsp, pt_regs_sp(%rax)
->>       movq    %rbp, pt_regs_bp(%rax)
->>       movq    %rsi, pt_regs_si(%rax)
->> @@ -115,7 +115,7 @@ ENTRY(restore_registers)
->>       movq    %rax, %cr4;  # turn PGE back on
->>
->>       /* We don't restore %rax, it must be 0 anyway */
->> -     movq    $saved_context, %rax
->> +     leaq    saved_context(%rip), %rax
->>       movq    pt_regs_sp(%rax), %rsp
->>       movq    pt_regs_bp(%rax), %rbp
->>       movq    pt_regs_si(%rax), %rsi
->
-> --
-> (english) http://www.livejournal.com/~pavelmachek
-> (cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blog.html
+> I ran the test case kill-unreachable-phi.c in my repository and did
+> not see an infinite loop. My repository is way behind the latest
+> changes in Sparse as I last synced up earlier this year so maybe I am
+> not seeing this issue?
 
+It's possible. It's the kind of things that is very sensitive to
+details like the exact ordering of different operations.
 
+It's probably another change somewhere that triggered a chain
+and finally, this bug showed up.
 
--- 
-Thomas
+-- Luc
