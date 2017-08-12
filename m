@@ -1,76 +1,44 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse-llvm test cases
-Date: Sat, 12 Aug 2017 16:43:28 +0200
-Message-ID: <CAExDi1QoYQ=shqx6CtiwkDznjwqjixTyaq1yqasD-YQv7Vtu1w@mail.gmail.com>
-References: <CACXZuxdrwNpr3yVkV=pBYty9jSjK_-HA9zDXwpfyB5evv_8Uzw@mail.gmail.com>
- <CANeU7Q=zF9hRqnNCN-+p0Y64yfkyaBvroeSP7faM4DSWW2RW5g@mail.gmail.com>
- <CACXZuxdvBVV+gDzWmFs=FA_s5Ric1djbF7mLNiea06SaSiqUOQ@mail.gmail.com>
- <CAExDi1TKwLKy66m35CMc4QZ5nRAbZMMmcheTrxTWxHACoPMm5Q@mail.gmail.com> <CACXZuxdFO=TbVgfqMCcAz5wTTk3=VizAodhOYMjiSb0cW5oRMw@mail.gmail.com>
+Subject: Re: [PATCH] avoid infinite loop during simplification
+Date: Sat, 12 Aug 2017 16:50:32 +0200
+Message-ID: <CAExDi1S+uqc2EU_O6+UF7hUXY8Ade7-7-YV_jucLx1cTYiZ5dQ@mail.gmail.com>
+References: <20170812125525.34044-1-luc.vanoostenryck@gmail.com>
+ <CANeU7QmjFd17UTFGSe_FOR+0jTn+azzaHvwq_FtG6sSGL1sx+Q@mail.gmail.com>
+ <CAExDi1RZ9v_5TFvcAOF2JkPWJYD_awt9uqga8tSvgzpmoaHrWQ@mail.gmail.com> <CANeU7QnU+_h-1si+ROWuVqLSG3pTbrzbso0Ck-21ru=q62UsNg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f46.google.com ([209.85.218.46]:36595 "EHLO
+Received: from mail-oi0-f46.google.com ([209.85.218.46]:35165 "EHLO
         mail-oi0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbdHLOn3 (ORCPT
+        with ESMTP id S1750980AbdHLOuc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 12 Aug 2017 10:43:29 -0400
-Received: by mail-oi0-f46.google.com with SMTP id g131so54647070oic.3
-        for <linux-sparse@vger.kernel.org>; Sat, 12 Aug 2017 07:43:29 -0700 (PDT)
-In-Reply-To: <CACXZuxdFO=TbVgfqMCcAz5wTTk3=VizAodhOYMjiSb0cW5oRMw@mail.gmail.com>
+        Sat, 12 Aug 2017 10:50:32 -0400
+Received: by mail-oi0-f46.google.com with SMTP id e124so55042361oig.2
+        for <linux-sparse@vger.kernel.org>; Sat, 12 Aug 2017 07:50:32 -0700 (PDT)
+In-Reply-To: <CANeU7QnU+_h-1si+ROWuVqLSG3pTbrzbso0Ck-21ru=q62UsNg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Aug 12, 2017 at 3:44 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
+On Sat, Aug 12, 2017 at 4:31 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> I have a native MSVC build - I'd rather not have to rely upon mingw /
-> cygwin.
-
-I can understand that.
-
-> Windows 10 now has a Linux subsystem - I am planning to do my
-> Linux builds within that. But I would rather have a test harness that
-> runs natively on all platforms.
-
-I can understand that also but:
-- if you want to validate the IR, it's something that is platform independent
-  and if validated on your linux platform it will be valid for the others too
-- the script used to run the test is something very simple, it shouldn't
-  take much work to write a version in some other language.
-  Making this new version *the* official version is something else
-  and rewritting all the testcases so that this or that is easier for this
-  new version would be a totally different question, of course.
-
+> I think we need to draw the line some where.
 >
-> Being able to run it is an easy way to verify that the test works -
-> because the success / failure condition is part of the test itself /
-> or output produced by the test. Ideally though I would like to be able
-> to validate the Sparse IR - but don't know an easy way to do this
-> other than comparing the output from linearizer.
+> Now RC5 is out. The merge window is closed.
+> It is not critical to have it.
 
-Slowly, it's what I'm already doing in the current testcases.
-It's far from ideal but we can already progress.
+Certainly.
 
->> One thing I want to have for testing linearized code is a simulator
->> for sparse's IR. It's even something quite easy (or at least straightforward)
->> to do. At least once you can associate to each phi-node's 'argument' the
->> parent BB they come from. This is something I'm planning to do for several
->> reasons.
+> If  there is serious bug cause
+> RC6 then we can merge this in as well.
 >
-> Do you mean you will have a VM that runs Sparse IR? That would be nice
-> but it is a lot of effort I would think.
+> Otherwise I would say hold on to after the release.
 
-Yes. I call that a simulator but it's all the same.
-It would be a program that take some input file
-(either directly the C source or the IR in some format yet to defined)
-and will 'execute' the IR instruction.
-It's in fact something very easy to do, something like a weekend project,
-*once* we associate parent BB to phi-node's 'arguments'.
+That's very fine for me.
 
-This BB for phi-node's arg is something very needed and it's the top
-of my todo list but for the moment, there is more important things to
-fix.
+> Let's get this 0.5.1 release out.
+
+I'm all in favor of that.
 
 -- Luc
