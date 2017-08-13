@@ -1,72 +1,60 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Sparse 0.5.1 RC5 released.
-Date: Sun, 13 Aug 2017 14:54:00 +0100
-Message-ID: <CACXZuxejatWcHmdm_aczwdZBssv=R0q+vJ2dANsYT5snJLDHSA@mail.gmail.com>
+Date: Sun, 13 Aug 2017 16:18:08 +0200
+Message-ID: <CAExDi1TftYYi=CS09_yUdMP0xni3zwq-ZJoRz3hEWgykiybLpQ@mail.gmail.com>
 References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
  <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
  <CAExDi1Qaa4+km-B-KHpBJ1dH5EOnOCzyU18yP8Y67ETfgbqagA@mail.gmail.com> <CACXZuxeR4eWwxCA0-oNfY_zBR7VGWixVuUzQr5ydvYsMFwvB1Q@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f181.google.com ([209.85.217.181]:33492 "EHLO
-        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750816AbdHMNyB (ORCPT
+Received: from mail-oi0-f49.google.com ([209.85.218.49]:36251 "EHLO
+        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750918AbdHMOSJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 13 Aug 2017 09:54:01 -0400
-Received: by mail-ua0-f181.google.com with SMTP id 80so29133475uas.0
-        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 06:54:00 -0700 (PDT)
+        Sun, 13 Aug 2017 10:18:09 -0400
+Received: by mail-oi0-f49.google.com with SMTP id g131so66101898oic.3
+        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 07:18:09 -0700 (PDT)
 In-Reply-To: <CACXZuxeR4eWwxCA0-oNfY_zBR7VGWixVuUzQr5ydvYsMFwvB1Q@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-Hi Luc,
+On Sun, Aug 13, 2017 at 3:18 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
 
-On 13 August 2017 at 14:18, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> On 13 August 2017 at 14:10, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> On Sun, Aug 13, 2017 at 2:56 PM, Dibyendu Majumdar
->> <mobile@majumdar.org.uk> wrote:
->>> I am merging and testing this in my repository. I notice that after
->>> applying the changes related to killing of BBs - there is a
->>> significant slow down in Sparse.
->>>
->>> Before the merge:
->>>
->>> real: 4.3 minutes
->>> user: 4.1 minutes
->>>
->>> After the merge:
->>>
->>> real: 18.9 minutes
->>> user: 18.7 minutes
->>>
->>> I just noticed this and these are my initial tests. But I thought it
->>> worth letting you know.
->>
+>> Care to send your code, I can see where the problem could be?
+>
 > Yes apologies I should have mentioned the test case:
 >
 > https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/lcc/cq.c
->
+
+No problem.
+
 > I am checking whether the slowdown is due to some other factor such as:
->
-> a) Build options - I need to check whether my build is an optimized
-> build or not.
 
-I had optimizations switched off - but with -O2, results are not good either:
+I just gave a try and, I was a bit surprised as with the current master,
+here it takes me about 5s to get the output of test-linearize (which I find
+already a bit slow). It's far far from the time you have.
 
-Before merge:
+OTOH with -rc4, it takes only 0.05s !
 
-real: 1.6 minutes
-user: 1.5 minutes
+The situation is really weird, it's an interaction between the patches:
+- remove single-store shortcut (first slowdown to 0.8s)
+- fix ptrlist corruption while killing unreachable BBs (second slowdown to 2.9s)
+- mark pseudo users as deleted instead of removing them (third slowdown to 5.5s)
 
-After merge:
+All three patches were expected to create *some* slowdown,
+the first one very obviously and much more than the others.
 
-real: 8.3 minutes
-user: 8.2 minutes
+It's interesting to note that without the 'remove single shortcut' patch, the
+two others ones don't seem to have a significative effect on the time.
 
-I do have function based iterators so that is another thing to check.
+My guess here is that indeed, with this input, the single-store shortcut
+is a huge optimization and without it much much more code is created
+(phi-nodes, I suppose) and this impact very negatively the two other fixes.
 
-Regards
-Dibyendu
+I'll see what can be done.
+
+-- Luc
