@@ -1,32 +1,41 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Sparse 0.5.1 RC5 released.
-Date: Sun, 13 Aug 2017 22:09:44 +0200
-Message-ID: <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com>
-References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
- <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
- <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com> <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/4] Makefile: adding debug version of sparse
+Date: Sun, 13 Aug 2017 16:14:13 -0400
+Message-ID: <CANeU7Q=dv0k3UzHmNeOXwdgojsx6hRQDkwoAxRc7v=Bs0eCJrQ@mail.gmail.com>
+References: <CANeU7Q=HyZNGXRFydfuxD5KRRwQ-gjMyH4u4OHcmnrttKtFe8A@mail.gmail.com>
+ <CAExDi1SiYjFEAWLHSQUL_we=aFAC=AufBezQQtpyZb4uMttFOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f67.google.com ([209.85.218.67]:38544 "EHLO
-        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750714AbdHMUJq (ORCPT
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:33757 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750867AbdHMUOO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 13 Aug 2017 16:09:46 -0400
-Received: by mail-oi0-f67.google.com with SMTP id s21so7702370oie.5
-        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 13:09:45 -0700 (PDT)
-In-Reply-To: <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
+        Sun, 13 Aug 2017 16:14:14 -0400
+Received: by mail-yw0-f169.google.com with SMTP id p68so45611532ywg.0
+        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 13:14:14 -0700 (PDT)
+In-Reply-To: <CAExDi1SiYjFEAWLHSQUL_we=aFAC=AufBezQQtpyZb4uMttFOw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Aug 13, 2017 at 9:10 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
+On Sun, Aug 13, 2017 at 3:31 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Chris,
 >
-> I have to disable simplifications anyway to get correct IR in some
-> cases.
+> The patches you're sending are all whitespace damaged.
+> Not only these 4 ones the ones you sent before too.
 
-Care to send some examples you have problems with?
+Yes, gmail tend to damage white space. That is why I send
+attachment before.
 
--- Luc
+I can give a git link if that helps. On my chrisl repo,
+
+git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git debug-target
+
+I can always give link in the email if you prefer.
+I don't seems to have a good way to fix gmail not damaging
+the white space. I am already using the text mode.
+
+Chris
