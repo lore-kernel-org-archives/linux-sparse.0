@@ -1,43 +1,58 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Adding an option to sparse to disable the IR simplifications
-Date: Mon, 14 Aug 2017 13:09:46 -0400
-Message-ID: <CANeU7Qnxiz1x_VRRyYiN1PYXeB1zoH8-Qo3T8c0SWQ7HzhN88g@mail.gmail.com>
-References: <CACXZuxeJGkN26dYEbs6smHvd6XyLnjtNFciZ1wJCVto4Z0nodw@mail.gmail.com>
- <CACXZuxdoLAW4rtk=zgwor9hVj8cxZ5GwSKGMSQUis_eWRiQ4GA@mail.gmail.com>
- <CACXZuxeyNL_OE0geog_TJPGtWj5TCP2CyX5UHeKxERvzsthbBw@mail.gmail.com>
- <CAExDi1S+g2AVH-wn4zAG1OiQPZKCb7x2kuSvD=-niPO1Yivhqw@mail.gmail.com> <CACXZuxfND-vZ7zT9qN3q-ghckQByx_FFBOwykxL3Ff_skqSvEQ@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH] Give the constant pseudo value a size
+Date: Mon, 14 Aug 2017 18:11:58 +0100
+Message-ID: <CACXZuxekYwfO5LRYDbCQoP9eqRvYJvnCSj8YQ=TAw6wt6Q1KsA@mail.gmail.com>
+References: <CANeU7Q=irkzkaKdaZT-0POrhj73ac3X8Bk-MW+jvFGtr1h5z0w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:32777 "EHLO
-        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750994AbdHNRJr (ORCPT
+Received: from mail-vk0-f42.google.com ([209.85.213.42]:37696 "EHLO
+        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751365AbdHNRL7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 13:09:47 -0400
-Received: by mail-yw0-f175.google.com with SMTP id p68so58709311ywg.0
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 10:09:47 -0700 (PDT)
-In-Reply-To: <CACXZuxfND-vZ7zT9qN3q-ghckQByx_FFBOwykxL3Ff_skqSvEQ@mail.gmail.com>
+        Mon, 14 Aug 2017 13:11:59 -0400
+Received: by mail-vk0-f42.google.com with SMTP id r199so33532801vke.4
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 10:11:59 -0700 (PDT)
+In-Reply-To: <CANeU7Q=irkzkaKdaZT-0POrhj73ac3X8Bk-MW+jvFGtr1h5z0w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Mon, Aug 14, 2017 at 12:59 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
+Hi Chris,
+
+On 13 August 2017 at 05:18, Christopher Li <sparse@chrisli.org> wrote:
+> This is actually easier than I though.
+> It is also very simple to reason about.
 >
-> We can perhaps also move towards a granular level of control as in gcc
-> or clang - i.e. enable or disable specific simplifications.
+> If you are not looking at the size field at all.
+> It is exactly the same as before, except we
+> create a few more pseudo for the same value
+> that have different size.
+>
+> The size just tag along the constant pseudo.
+> Which did not change any way.
 >
 
-Yes,  we can also do that. I I think the the back end should have some way
-to control what kind of the optimization it want and what level it want etc.
+I assume that you have not yet applied this approach to Sparse-LLVM
+and tested that it works for var arg calls? I would suggest completing
+the changes so that it can be tested thoroughly.
 
-I plan to release 0.5.1 finial on Wednesday. Then the merge windows is
-open again. We can start to work on getting the IR right, getting SSA right etc.
-I also have some patch want to merged as well like the ptrlist ref count.
+I personally don't have a preference one way or the other which approach we use.
 
-It can even have a post release branch for experiment. After release
-this branch will merge back to master.
+The push approach has the benefit that it makes clear what arguments
+are being passed in a call. Previously this information was not
+revealed in the Sparse linearized dump. It would be a shame to lose
+that information - perhaps you could still dump the arguments along
+with a call?
 
+Second benefit to me is that I have already incorporated this into
+dmrC so changing it will mean rework for me.
 
-Chris
+BTW one could also have a more restricted 'push' solution that is
+specific to var arg calls - i.e. only capture the arguments when
+calling a var arg function, and avoid putting the push instructions
+into the linear stream.
+
+Regards
+Dibyendu
