@@ -1,58 +1,68 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH] Give the constant pseudo value a size
-Date: Mon, 14 Aug 2017 18:11:58 +0100
-Message-ID: <CACXZuxekYwfO5LRYDbCQoP9eqRvYJvnCSj8YQ=TAw6wt6Q1KsA@mail.gmail.com>
+Date: Mon, 14 Aug 2017 13:23:22 -0400
+Message-ID: <CANeU7Q=gK9fgX6RkHdOmnvSB8iEEsJzC-RCgXfu=Y6gED=pUxg@mail.gmail.com>
 References: <CANeU7Q=irkzkaKdaZT-0POrhj73ac3X8Bk-MW+jvFGtr1h5z0w@mail.gmail.com>
+ <CACXZuxekYwfO5LRYDbCQoP9eqRvYJvnCSj8YQ=TAw6wt6Q1KsA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f42.google.com ([209.85.213.42]:37696 "EHLO
-        mail-vk0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751365AbdHNRL7 (ORCPT
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:34098 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751538AbdHNRXX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 13:11:59 -0400
-Received: by mail-vk0-f42.google.com with SMTP id r199so33532801vke.4
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 10:11:59 -0700 (PDT)
-In-Reply-To: <CANeU7Q=irkzkaKdaZT-0POrhj73ac3X8Bk-MW+jvFGtr1h5z0w@mail.gmail.com>
+        Mon, 14 Aug 2017 13:23:23 -0400
+Received: by mail-yw0-f179.google.com with SMTP id s143so58809224ywg.1
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 10:23:23 -0700 (PDT)
+In-Reply-To: <CACXZuxekYwfO5LRYDbCQoP9eqRvYJvnCSj8YQ=TAw6wt6Q1KsA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi Chris,
+On Mon, Aug 14, 2017 at 1:11 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> I assume that you have not yet applied this approach to Sparse-LLVM
+> and tested that it works for var arg calls? I would suggest completing
+> the changes so that it can be tested thoroughly.
 
-On 13 August 2017 at 05:18, Christopher Li <sparse@chrisli.org> wrote:
-> This is actually easier than I though.
-> It is also very simple to reason about.
->
-> If you are not looking at the size field at all.
-> It is exactly the same as before, except we
-> create a few more pseudo for the same value
-> that have different size.
->
-> The size just tag along the constant pseudo.
-> Which did not change any way.
->
+No. this is just one night's hack to make the plumbing part work.
+Provide a size for the VALUE pseudo. I haven't have a chance to
+integrate into sparse-llvm.
 
-I assume that you have not yet applied this approach to Sparse-LLVM
-and tested that it works for var arg calls? I would suggest completing
-the changes so that it can be tested thoroughly.
+> The push approach has the benefit that it makes clear what arguments
+> are being passed in a call. Previously this information was not
+> revealed in the Sparse linearized dump. It would be a shame to lose
+> that information - perhaps you could still dump the arguments along
+> with a call?
 
-I personally don't have a preference one way or the other which approach we use.
+Are you sure?
+Here is what I have for RC5:
+./test-linearize cse.c
 
-The push approach has the benefit that it makes clear what arguments
-are being passed in a call. Previously this information was not
-revealed in the Sparse linearized dump. It would be a shame to lose
-that information - perhaps you could still dump the arguments along
-with a call?
+.L414:
+load.64     %r1052 <- 0[insn]
+call.64     %r1053 <- try_to_cse, %arg1, %r1044(last), %r1052
+store.64    %r1053 -> 0[insn]
+phisrc.64   %phi474 <- %r1053
+br          .L413
 
-Second benefit to me is that I have already incorporated this into
-dmrC so changing it will mean rework for me.
+You can see exactly what is the calling arguments. There is an pseudo_list
+for the arguments.
 
-BTW one could also have a more restricted 'push' solution that is
-specific to var arg calls - i.e. only capture the arguments when
-calling a var arg function, and avoid putting the push instructions
-into the linear stream.
+struct /* call */ {
+pseudo_t func;
+struct pseudo_list *arguments; <==============
+struct symbol *fntype;
+};
 
-Regards
-Dibyendu
+
+The only thing you want, which is not there is the VALUE pseudo_size.
+I add that in this patch.
+
+I haven't take a deep look into the push instruction patch yet. I image this is
+less impact on the IR and get the job done. With less redundant information
+in the IR. The instruction stream is more compact as well.
+
+
+Chris
