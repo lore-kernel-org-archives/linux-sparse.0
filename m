@@ -1,50 +1,65 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Sparse 0.5.1 RC5 released.
-Date: Mon, 14 Aug 2017 01:58:46 +0200
-Message-ID: <CAExDi1ShgSwAC6rTe8gJmUtEm4MxWxVJJM2UXPTW7yFTsKfqTQ@mail.gmail.com>
-References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
- <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
- <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com>
- <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
- <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com>
- <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
- <CAExDi1Qcox7wBFEnRKN5Cvk1miupBD9jXT7_W7+JiNqESHXX5Q@mail.gmail.com>
- <CACXZuxfWAYNj3idcoWF2b4pcVHYQ5nOoASD8yG=n5NrT=WU+eg@mail.gmail.com>
- <CAExDi1SS9VWX=G5nQ5uOjZAzh_PHOOovbzGZQs_izAXk4aYv-w@mail.gmail.com>
- <CACXZuxcmg1Q=cmrtpaiEkdNzL=jJCY48J37NrqTP7T6-w0m-0A@mail.gmail.com>
- <CAExDi1SiExepjbRiFbVaPz70DVoFv0=8pgDSiCqJEPaV4HHEpg@mail.gmail.com>
- <CACXZuxe-Q-5J38K-iu38FXFeOm3cQpwhVercFV3iPq+amJKw+A@mail.gmail.com>
- <CAExDi1QjkWAU7u8JVDTQZ9Q8YtVkqTF60qDZ+361Z4zGzJPd+A@mail.gmail.com>
- <CACXZuxeUWJitGjcb_yjD-KisrodWj-S8RL4pd1KOY3oKnq_8zg@mail.gmail.com>
- <CAExDi1TjLH+tiDj-WgsWGaKMr3Uy8Z+PuyCLrC_LxQHh+rCJ2A@mail.gmail.com>
- <CACXZuxd_WGV840rYhYt6LcTfL+E2uqj+Wr1WpyzUWd8pZQCo1g@mail.gmail.com> <CAExDi1TkuM52Lo6yDWVfi=acGFt+HFmCyfs63AuM0pfPTP5WhA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 1/4] Makefile: adding debug version of sparse
+Date: Sun, 13 Aug 2017 20:24:34 -0400
+Message-ID: <CANeU7QnD-swKVD1p44Upds1_Nm6cARu0+QU_gk0kkBhtHvpoZg@mail.gmail.com>
+References: <CANeU7Q=HyZNGXRFydfuxD5KRRwQ-gjMyH4u4OHcmnrttKtFe8A@mail.gmail.com>
+ <CAExDi1SiYjFEAWLHSQUL_we=aFAC=AufBezQQtpyZb4uMttFOw@mail.gmail.com>
+ <CANeU7Q=dv0k3UzHmNeOXwdgojsx6hRQDkwoAxRc7v=Bs0eCJrQ@mail.gmail.com> <3cce2a1d-4944-5286-2c40-5271da10aabe@ramsayjones.plus.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f54.google.com ([209.85.218.54]:35752 "EHLO
-        mail-oi0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751210AbdHMX6s (ORCPT
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:36796 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751367AbdHNAYf (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 13 Aug 2017 19:58:48 -0400
-Received: by mail-oi0-f54.google.com with SMTP id e124so71734070oig.2
-        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 16:58:48 -0700 (PDT)
-In-Reply-To: <CAExDi1TkuM52Lo6yDWVfi=acGFt+HFmCyfs63AuM0pfPTP5WhA@mail.gmail.com>
+        Sun, 13 Aug 2017 20:24:35 -0400
+Received: by mail-yw0-f195.google.com with SMTP id n83so5352858ywn.3
+        for <linux-sparse@vger.kernel.org>; Sun, 13 Aug 2017 17:24:35 -0700 (PDT)
+In-Reply-To: <3cce2a1d-4944-5286-2c40-5271da10aabe@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Aug 14, 2017 at 1:47 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
+On Sun, Aug 13, 2017 at 5:38 PM, Ramsay Jones
+<ramsay@ramsayjones.plus.com> wrote:
+>
+> EXAMPLE
+>    Use gmail as the smtp server
+>        To use git send-email to send your patches through the GMail SMTP
+>        server, edit ~/.gitconfig to specify your account settings:
+>
+>            [sendemail]
+>                    smtpEncryption = tls
+>                    smtpServer = smtp.gmail.com
+>                    smtpUser = yourname@gmail.com
+>                    smtpServerPort = 587
+>
+>        If you have multifactor authentication setup on your gmail account, you
+>        will need to generate an app-specific password for use with git
+>        send-email. Visit
+>        https://security.google.com/settings/security/apppasswords to setup an
+>        app-specific password. Once setup, you can store it with the
+>        credentials helper:
+>
+>            $ git credential fill
+>            protocol=smtp
+>            host=smtp.gmail.com
+>            username=youname@gmail.com
+>            password=app-password
+>
+>        Once your commits are ready to be sent to the mailing list, run the
+>        following commands:
 
-OK, I now only have the others three errors:
-Both operands to ICmp instruction are not of the same type!
-  %R369 = icmp ne i8* %R3673, %struct.lua_TValue* %R366
-Both operands to ICmp instruction are not of the same type!
-  %R1905 = icmp eq { [120 x i8] }* %R1902, { [16 x i8] }* %ARG2
-Both operands to ICmp instruction are not of the same type!
-  %R2097 = icmp eq i8* %R209521, %struct.lua_TValue* %R2094
+Thank you. That is what I just try in the other email. Some how
+gmail want to go through some step that I am not comfortable doing.
+That is why I wish git send-email has gmail oauth2 support.
 
-I'll look after a reproducer tomorrow.
+I search the internet, some people get it to work using the smtp
+server but some did not.
 
--- Luc
+I will find a way to do it.
+
+Thanks again.
+
+Chris
