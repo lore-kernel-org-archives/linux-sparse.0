@@ -1,52 +1,45 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: Sparse 0.5.1 RC5 released.
-Date: Mon, 14 Aug 2017 19:48:30 +0100
-Message-ID: <CACXZuxfHu8M1Lxpjmtj6=HS8T0o5dvDzmSryEqkKn6iG7MAxTw@mail.gmail.com>
+Date: Mon, 14 Aug 2017 20:51:19 +0200
+Message-ID: <CAExDi1T8_fuzv6QMBCiDvrFWbhGMUJYdr2DEpdCTWEQhWJHqng@mail.gmail.com>
 References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
  <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
  <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com>
  <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
  <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com>
  <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
- <CAExDi1Qcox7wBFEnRKN5Cvk1miupBD9jXT7_W7+JiNqESHXX5Q@mail.gmail.com>
- <CACXZuxfWAYNj3idcoWF2b4pcVHYQ5nOoASD8yG=n5NrT=WU+eg@mail.gmail.com> <CANeU7Q=-vw1=HgVqs7B-4gHj+Ysr6CVQvr+FpvW7ZNgsf7c=Vg@mail.gmail.com>
+ <CAExDi1Qh_T89GkTAXtS9ZXiAk9J0Y-b7ohwCjg=K3FPX4qjQOw@mail.gmail.com>
+ <CACXZuxfsJLe0uG9aXNSiKgZofYVGf_kYmFhn6Vj5bBT56xnwgw@mail.gmail.com>
+ <CAExDi1Qovq8gAXw8d7cSt73Gz+y8_3cH+yc40TaPudY_QNqPVQ@mail.gmail.com>
+ <CACXZuxf4T1u1=3pE52V2smtqS_61XSx6Ed7aWXPgRK+3FtDnvw@mail.gmail.com>
+ <CAExDi1Qf85VY8ovn2uRoo6Qivwa0G5L529feuCzHt3FJOBEAog@mail.gmail.com> <CACXZuxfhQAUuzcZEm+eYQAuSMnouposoV0WRXsUH4hkcf2ODWA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:37554 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751494AbdHNSsc (ORCPT
+Received: from mail-oi0-f67.google.com ([209.85.218.67]:34248 "EHLO
+        mail-oi0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751603AbdHNSvU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 14:48:32 -0400
-Received: by mail-ua0-f179.google.com with SMTP id f9so40014104uaf.4
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 11:48:32 -0700 (PDT)
-In-Reply-To: <CANeU7Q=-vw1=HgVqs7B-4gHj+Ysr6CVQvr+FpvW7ZNgsf7c=Vg@mail.gmail.com>
+        Mon, 14 Aug 2017 14:51:20 -0400
+Received: by mail-oi0-f67.google.com with SMTP id v11so10109195oif.1
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 11:51:20 -0700 (PDT)
+In-Reply-To: <CACXZuxfhQAUuzcZEm+eYQAuSMnouposoV0WRXsUH4hkcf2ODWA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-Hi Chris,
-
-On 14 August 2017 at 01:30, Christopher Li <sparse@chrisli.org> wrote:
-> On Sun, Aug 13, 2017 at 6:12 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
+On Mon, Aug 14, 2017 at 6:54 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
 >
->> Simplified with single store shortcut switched OFF:
->> https://github.com/dibyendumajumdar/dmr_c/blob/mergesparse/tests/minilua/minilua_opt.lin
->>
->
-> I haven't go through every thing yet. This above output is definitely
-> *not* RC5 output. It has push instruction. When you integrate
-> so much new code, it is hard to say where the slow down come
-> from.
->
+> I would rather just have the SSA construction bits first, without too
+> many other changes.
 
-In my tests the removal of single store shortcut makes the time
-increase from .2 to 8.2 seconds.
-I am compiling following:
+I know and it's why I made the sssa-mini but it contains just that:
+only the minimal changes needed for the SSA construction on top
+of the current master.
 
-https://github.com/dibyendumajumdar/dmr_c/blob/mergesparse/tests/lcc/cq.c
+But at least you know what can be done with these fixes and
+where you can find them.
 
-
-Regards
+-- Luc
