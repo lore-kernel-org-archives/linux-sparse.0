@@ -1,106 +1,42 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] remove wrong part of simplify_loads()
-Date: Mon, 14 Aug 2017 18:04:50 +0200
-Message-ID: <20170814160450.24348-1-luc.vanoostenryck@gmail.com>
-References: <CACXZuxf=pO2pXmJoTtWvO2d7HCzpyfCWOqc4EJ7fBjyh7fdsWw@mail.gmail.com>
+Subject: Re: Sparse 0.5.1 RC5 released.
+Date: Mon, 14 Aug 2017 18:15:25 +0200
+Message-ID: <CAExDi1Qh_T89GkTAXtS9ZXiAk9J0Y-b7ohwCjg=K3FPX4qjQOw@mail.gmail.com>
+References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
+ <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
+ <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com>
+ <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
+ <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com> <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32797 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751441AbdHNQE6 (ORCPT
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:36467 "EHLO
+        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752199AbdHNQP1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 12:04:58 -0400
-Received: by mail-wm0-f67.google.com with SMTP id q189so15016739wmd.0
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 09:04:57 -0700 (PDT)
-In-Reply-To: <CACXZuxf=pO2pXmJoTtWvO2d7HCzpyfCWOqc4EJ7fBjyh7fdsWw@mail.gmail.com>
+        Mon, 14 Aug 2017 12:15:27 -0400
+Received: by mail-oi0-f42.google.com with SMTP id g131so88258273oic.3
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 09:15:26 -0700 (PDT)
+In-Reply-To: <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-Currently simplify_loads() is broken with exactly the
-same error as in simplify_one_symbol().
+On Sun, Aug 13, 2017 at 10:20 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>> Care to send some examples you have problems with?
+>
+> Sure - you already know this one:
+>
+> https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/bugs/simplifybug.c
+>
+> https://github.com/dibyendumajumdar/dmr_c/blob/master/tests/minilua/minilua.c
+>
 
-The core of the problem is that phi-nodes are stored at
-the place where the value is needed, where the initial load
-was, while phi-nodes must be placed where branches meet.
+OK, I just checked on the paranoia.c and once the global initializations
+are removed sparse-llvm has not more problems when using all the
+needed fixes. An updated tree can be found as usual at:
+        git://github.com/lucvoo/sparse.git sssa-next
 
-Temporary fix this removing this 'simplification'.
-
-Note: It's possible to do this a bit less crudely
-Note: This patch is kinda useless without the SSA construction
-      first fixed..
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- memops.c | 63 ---------------------------------------------------------------
- 1 file changed, 63 deletions(-)
-
-diff --git a/memops.c b/memops.c
-index aeacdf566..99430e455 100644
---- a/memops.c
-+++ b/memops.c
-@@ -16,51 +16,6 @@
- #include "linearize.h"
- #include "flow.h"
- 
--static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
--	struct basic_block *bb, unsigned long generation, struct pseudo_list **dominators,
--	int local)
--{
--	struct basic_block *parent;
--
--	FOR_EACH_PTR(bb->parents, parent) {
--		struct instruction *one;
--		struct instruction *br;
--		pseudo_t phi;
--
--		FOR_EACH_PTR_REVERSE(parent->insns, one) {
--			int dominance;
--			if (!one->bb)
--				continue;
--			if (one == insn)
--				goto no_dominance;
--			dominance = dominates(pseudo, insn, one, local);
--			if (dominance < 0) {
--				if (one->opcode == OP_LOAD)
--					continue;
--				return 0;
--			}
--			if (!dominance)
--				continue;
--			goto found_dominator;
--		} END_FOR_EACH_PTR_REVERSE(one);
--no_dominance:
--		if (parent->generation == generation)
--			continue;
--		parent->generation = generation;
--
--		if (!find_dominating_parents(pseudo, insn, parent, generation, dominators, local))
--			return 0;
--		continue;
--
--found_dominator:
--		br = delete_last_instruction(&parent->insns);
--		phi = alloc_phi(parent, one->target, one->size);
--		phi->ident = phi->ident ? : one->target->ident;
--		add_instruction(&parent->insns, br);
--		use_pseudo(insn, phi, add_pseudo(dominators, phi));
--	} END_FOR_EACH_PTR(parent);
--	return 1;
--}		
- 
- static int address_taken(pseudo_t pseudo)
- {
-@@ -91,8 +46,6 @@ static void simplify_loads(struct basic_block *bb)
- 			struct instruction *dom;
- 			pseudo_t pseudo = insn->src;
- 			int local = local_pseudo(pseudo);
--			struct pseudo_list *dominators;
--			unsigned long generation;
- 
- 			/* Check for illegal offsets.. */
- 			check_access(insn);
-@@ -117,22 +70,6 @@ static void simplify_loads(struct basic_block *bb)
- 					goto next_load;
- 				}
- 			} END_FOR_EACH_PTR_REVERSE(dom);
+-- Luc
