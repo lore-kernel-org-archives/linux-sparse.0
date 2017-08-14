@@ -1,39 +1,44 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/3] assorted LLVM fixes
-Date: Mon, 14 Aug 2017 22:29:26 +0200
-Message-ID: <CAExDi1T6H4YA28DuPU3ic+qK1-nbP+UycQA+FqPG9XvMiQhhXQ@mail.gmail.com>
-References: <20170814194152.36289-1-luc.vanoostenryck@gmail.com> <CANeU7Qmbs9FZqw1ZNRY7=ZyDjuL3OWMMyjeO_cUBRzpb-=wBbA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Sparse 0.5.1 RC5 released.
+Date: Mon, 14 Aug 2017 16:30:13 -0400
+Message-ID: <CANeU7QmJ=6_if+siSEwzRppJ8n9FEZOWY-iEAphyhjRm=mTK7g@mail.gmail.com>
+References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
+ <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
+ <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com>
+ <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
+ <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com>
+ <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
+ <CAExDi1Qcox7wBFEnRKN5Cvk1miupBD9jXT7_W7+JiNqESHXX5Q@mail.gmail.com>
+ <CACXZuxfWAYNj3idcoWF2b4pcVHYQ5nOoASD8yG=n5NrT=WU+eg@mail.gmail.com>
+ <CANeU7Q=-vw1=HgVqs7B-4gHj+Ysr6CVQvr+FpvW7ZNgsf7c=Vg@mail.gmail.com>
+ <CACXZuxfHu8M1Lxpjmtj6=HS8T0o5dvDzmSryEqkKn6iG7MAxTw@mail.gmail.com>
+ <CANeU7QmaBHLLkXFNZt38wpBGUpaAK38SwWOkJM_hCzs2ijEPaw@mail.gmail.com>
+ <CACXZuxeB2wUsZH51pPk2PztbH0J4QQJGKCCsc5LkhDqtwfvQ9A@mail.gmail.com>
+ <CANeU7QmSHbQYjptB8pasbNhp75tQ2bWSy1AMGUZxGNeHYfCcvA@mail.gmail.com> <CANeU7QnSK_TpAyi7SsBz76TqGeWcHKXQu2j5U7_E5NZ-+bR80g@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f41.google.com ([209.85.218.41]:35016 "EHLO
-        mail-oi0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752150AbdHNU31 (ORCPT
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:35559 "EHLO
+        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752133AbdHNUaO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 16:29:27 -0400
-Received: by mail-oi0-f41.google.com with SMTP id e124so95086214oig.2
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 13:29:27 -0700 (PDT)
-In-Reply-To: <CANeU7Qmbs9FZqw1ZNRY7=ZyDjuL3OWMMyjeO_cUBRzpb-=wBbA@mail.gmail.com>
+        Mon, 14 Aug 2017 16:30:14 -0400
+Received: by mail-yw0-f173.google.com with SMTP id l82so61503047ywc.2
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 13:30:14 -0700 (PDT)
+In-Reply-To: <CANeU7QnSK_TpAyi7SsBz76TqGeWcHKXQu2j5U7_E5NZ-+bR80g@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
 
-On Mon, Aug 14, 2017 at 10:21 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Mon, Aug 14, 2017 at 3:41 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> This series contains two fixes for sparse-llvm.
->> It is supposed to be applied on top of all others
->> LLVM fixes.
+On Mon, Aug 14, 2017 at 3:47 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> Can you resend your other LLVM fixes (this patches are depend
-> on) after the release? I can even have a temporary branch
-> to merge those right now.
+> Most of the time is spending on the s714 function.
+>
+> That function has a lot of variable name and a lot of blocks.
+>
 
-These patches were for Dibyendu as they are the last fixes
-needed for the problmes he showed yesterday.
+I think that is the normal path of finding dominating stores
+for the  "simplify_loads()"
 
-They make no sense to be applied alone. As written here above
-they are "supposed to be applied on top of all others LLVM fixes".
-
--- Luc
+Chris
