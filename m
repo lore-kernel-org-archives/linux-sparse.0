@@ -1,41 +1,32 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Sparse 0.5.1 RC5 released.
-Date: Mon, 14 Aug 2017 15:23:32 -0400
-Message-ID: <CANeU7QmSHbQYjptB8pasbNhp75tQ2bWSy1AMGUZxGNeHYfCcvA@mail.gmail.com>
-References: <CANeU7Qkr5CPe2uEHx3-gR+dPc5C9_kKYCB=AHVLrPw+JXZ8=yw@mail.gmail.com>
- <CACXZuxeoO0Udx41Qk4JJjM9fXTa4ta2X-yAyKsY+1SkOrxQE-A@mail.gmail.com>
- <CANeU7QmkJjxr_AmBTrDhVz6VP3oZcs-8xAL3kXegrWozqkvZGA@mail.gmail.com>
- <CACXZuxfaPNCWx1+Oy08ZqfRY+eNtZ5rWpLjyHaXnK3kuvur3LQ@mail.gmail.com>
- <CAExDi1R1mQvth6OcWBZP-ur_xLfPztfaAtZWW0U8Sz=QSuW1Rw@mail.gmail.com>
- <CACXZuxfitdon6pOKxwNH2uSv2CR_-4UxzfbgsJx0TqwkP=VgPA@mail.gmail.com>
- <CAExDi1Qcox7wBFEnRKN5Cvk1miupBD9jXT7_W7+JiNqESHXX5Q@mail.gmail.com>
- <CACXZuxfWAYNj3idcoWF2b4pcVHYQ5nOoASD8yG=n5NrT=WU+eg@mail.gmail.com>
- <CANeU7Q=-vw1=HgVqs7B-4gHj+Ysr6CVQvr+FpvW7ZNgsf7c=Vg@mail.gmail.com>
- <CACXZuxfHu8M1Lxpjmtj6=HS8T0o5dvDzmSryEqkKn6iG7MAxTw@mail.gmail.com>
- <CANeU7QmaBHLLkXFNZt38wpBGUpaAK38SwWOkJM_hCzs2ijEPaw@mail.gmail.com> <CACXZuxeB2wUsZH51pPk2PztbH0J4QQJGKCCsc5LkhDqtwfvQ9A@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/3] assorted LLVM fixes
+Date: Mon, 14 Aug 2017 21:41:49 +0200
+Message-ID: <20170814194152.36289-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:36020 "EHLO
-        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752150AbdHNTXd (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35820 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750910AbdHNTl7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 14 Aug 2017 15:23:33 -0400
-Received: by mail-yw0-f182.google.com with SMTP id u207so60691245ywc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 12:23:33 -0700 (PDT)
-In-Reply-To: <CACXZuxeB2wUsZH51pPk2PztbH0J4QQJGKCCsc5LkhDqtwfvQ9A@mail.gmail.com>
+        Mon, 14 Aug 2017 15:41:59 -0400
+Received: by mail-wm0-f65.google.com with SMTP id r77so15567365wmd.2
+        for <linux-sparse@vger.kernel.org>; Mon, 14 Aug 2017 12:41:59 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Lance Richardson <lrichard@redhat.com>, Michael Stefaniuc <mstefani@mykolab.com>
+To: linux-sparse@vger.kernel.org
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Aug 14, 2017 at 2:58 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
->
-> Here it is:
->
-> https://github.com/dibyendumajumdar/dmr_c/blob/mergesparse/tests/lcc/cq_preprocessed.c
+This series contains two fixes for sparse-llvm.
+It is supposed to be applied on top of all others
+LLVM fixes.
 
-Thanks. Taking a look right now.
+Luc Van Oostenryck (3):
+  llvm: warn instead of assert on global inits
+  llvm: add support for float initializer
+  llvm: only compare void pointers
 
-Chris
+ sparse-llvm.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+-- 
+2.14.0
+
