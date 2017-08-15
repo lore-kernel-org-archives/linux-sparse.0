@@ -1,39 +1,94 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [RFC] sparse SSA construction
-Date: Tue, 15 Aug 2017 10:18:05 -0400
-Message-ID: <CANeU7Qnsybn+G4gvLew7CukC5DtbPwHZ2Gpx1=LnapHuXdQymw@mail.gmail.com>
-References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
- <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
- <CANeU7Qk9C-78+-a2TOGUWiLof9S_p9vO6bHyNf6xZqZ5X1CoUQ@mail.gmail.com>
- <CACXZuxeGgFmjDosHv-Exd9qRLfonFGUrD7sx-ucQejuR0jsD+w@mail.gmail.com>
- <CANeU7QmQ8DdeBLx9kDNf-xnTOUc=V7VNu95A+dAL4oUbLngonw@mail.gmail.com> <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Tue, 15 Aug 2017 07:20:38 -0700
+Message-ID: <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+References: <20170810172615.51965-1-thgarnie@google.com> <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com> <20170815075609.mmzbfwritjzvrpsn@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:34211 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751095AbdHOOSH (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 15 Aug 2017 10:18:07 -0400
-Received: by mail-yw0-f177.google.com with SMTP id s143so5492379ywg.1
-        for <linux-sparse@vger.kernel.org>; Tue, 15 Aug 2017 07:18:06 -0700 (PDT)
-In-Reply-To: <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Return-path: <kernel-hardening-return-9460-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Aug 15, 2017 at 10:09 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
+On Tue, Aug 15, 2017 at 12:56 AM, Ingo Molnar <mingo@kernel.org> wrote:
+>
+> * Thomas Garnier <thgarnie@google.com> wrote:
+>
+>> > Do these changes get us closer to being able to build the kernel as truly
+>> > position independent, i.e. to place it anywhere in the valid x86-64 address
+>> > space? Or any other advantages?
 >>
+>> Yes, PIE allows us to put the kernel anywhere in memory. It will allow us to
+>> have a full randomized address space where position and order of sections are
+>> completely random. There is still some work to get there but being able to build
+>> a PIE kernel is a significant step.
 >
-> https://github.com/lucvoo/sparse/tree/sssa-mini-clean
+> So I _really_ dislike the whole PIE approach, because of the huge slowdown:
 >
-> This is built on top of RC5 so merge will be quite straightforward.
+> +config RANDOMIZE_BASE_LARGE
+> +       bool "Increase the randomization range of the kernel image"
+> +       depends on X86_64 && RANDOMIZE_BASE
+> +       select X86_PIE
+> +       select X86_MODULE_PLTS if MODULES
+> +       default n
+> +       ---help---
+> +         Build the kernel as a Position Independent Executable (PIE) and
+> +         increase the available randomization range from 1GB to 3GB.
+> +
+> +         This option impacts performance on kernel CPU intensive workloads up
+> +         to 10% due to PIE generated code. Impact on user-mode processes and
+> +         typical usage would be significantly less (0.50% when you build the
+> +         kernel).
+> +
+> +         The kernel and modules will generate slightly more assembly (1 to 2%
+> +         increase on the .text sections). The vmlinux binary will be
+> +         significantly smaller due to less relocations.
+>
+> To put 10% kernel overhead into perspective: enabling this option wipes out about
+> 5-10 years worth of painstaking optimizations we've done to keep the kernel fast
+> ... (!!)
 
-Sure, I am going to take a look at that after I am done with the
-paper.
+Note that 10% is the high-bound of a CPU intensive workload.
 
-Thanks
+>
+> I think the fundamental flaw is the assumption that we need a PIE executable to
+> have a freely relocatable kernel on 64-bit CPUs.
+>
+> Have you considered a kernel with -mcmodel=small (or medium) instead of -fpie
+> -mcmodel=large? We can pick a random 2GB window in the (non-kernel) canonical
+> x86-64 address space to randomize the location of kernel text. The location of
+> modules can be further randomized within that 2GB window.
 
-Chris
+-model=small/medium assume you are on the low 32-bit. It generates
+instructions where the virtual addresses have the high 32-bit to be
+zero.
+
+I am going to start doing performance testing on -mcmodel=large to see
+if it is faster than -fPIE.
+
+>
+> It should have far less performance impact than the register-losing and
+> overhead-inducing -fpie / -mcmodel=large (for modules) execution models.
+>
+> My quick guess is tha the performance impact might be close to zero in fact.
+
+If mcmodel=small/medium was possible for kernel, I don't think it
+would have less performance impact than mcmodel=large. It would still
+need to set the high 32-bit to be a static value, only the relocation
+would be a different size.
+
+>
+> Thanks,
+>
+>         Ingo
+
+
+
+-- 
+Thomas
