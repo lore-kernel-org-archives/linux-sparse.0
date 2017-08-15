@@ -1,74 +1,79 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Tue, 15 Aug 2017 09:56:09 +0200
-Message-ID: <20170815075609.mmzbfwritjzvrpsn@gmail.com>
-References: <20170810172615.51965-1-thgarnie@google.com>
- <20170811124127.kkb5pnkljz4umxuj@gmail.com>
- <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [RFC] sparse SSA construction
+Date: Tue, 15 Aug 2017 14:41:54 +0100
+Message-ID: <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
+References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-9438-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-ua0-f173.google.com ([209.85.217.173]:38619 "EHLO
+        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751031AbdHONlz (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 15 Aug 2017 09:41:55 -0400
+Received: by mail-ua0-f173.google.com with SMTP id y36so3032042uac.5
+        for <linux-sparse@vger.kernel.org>; Tue, 15 Aug 2017 06:41:55 -0700 (PDT)
+In-Reply-To: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
+Hi Luc,
 
-* Thomas Garnier <thgarnie@google.com> wrote:
+On 6 August 2017 at 21:26, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Since it seems to be some interest on the subject and
+> to avoid duplicated work, here is a rewrite of sparse's
+> construction of the SSA form.
+>
+> It's not using one of the classical algorithm but is
+> using something newer, simpler and often faster.
+> It's main advantage beyond the simplicity is that you don't
+> need to first build the whole CFG & linearized code to
+> to directly throw it away (or heavily transform it) as
+> it builds the SSA form directly during the linearization.
+>
+> It's not finished code but it's working well (and is
+> effectively a bit faster and use less memory).
+> What's interesting for sparse now is that:
+> - the phi-noes are correctly placed
+> - uninitialized variables can be handled much more easily.
+>
+> I don't feel it's needed to patchbomb the ML for the moment
+> so I'll only give the URL to the repo:
+>
+>   git://github.com/lucvoo/sparse.git sssa
 
-> > Do these changes get us closer to being able to build the kernel as truly 
-> > position independent, i.e. to place it anywhere in the valid x86-64 address 
-> > space? Or any other advantages?
-> 
-> Yes, PIE allows us to put the kernel anywhere in memory. It will allow us to 
-> have a full randomized address space where position and order of sections are 
-> completely random. There is still some work to get there but being able to build 
-> a PIE kernel is a significant step.
+I have merged the new SSA implementation in your sssa-mini-clean
+branch - which I understand is minimal set of changes needed for the
+new SSA on top of RC5 - into my project dmrC.
 
-So I _really_ dislike the whole PIE approach, because of the huge slowdown:
+I have been testing the changes  - and so far I am pleased to report
+that after a small set of changes (described below) - all my existing
+tests pass.
 
-+config RANDOMIZE_BASE_LARGE
-+       bool "Increase the randomization range of the kernel image"
-+       depends on X86_64 && RANDOMIZE_BASE
-+       select X86_PIE
-+       select X86_MODULE_PLTS if MODULES
-+       default n
-+       ---help---
-+         Build the kernel as a Position Independent Executable (PIE) and
-+         increase the available randomization range from 1GB to 3GB.
-+
-+         This option impacts performance on kernel CPU intensive workloads up
-+         to 10% due to PIE generated code. Impact on user-mode processes and
-+         typical usage would be significantly less (0.50% when you build the
-+         kernel).
-+
-+         The kernel and modules will generate slightly more assembly (1 to 2%
-+         increase on the .text sections). The vmlinux binary will be
-+         significantly smaller due to less relocations.
+a) I had to disallow struct / union types from being treated as simple types.
+b) I am setting UNDEF pseudos a value of 0 in LLVM backend - this is
+to ensure I can do the same in other backends.
+c) I found that CBR instructions can get a PSEUDO_VAL as the condition
+which was not being handled correctly in my version of LLVM backend.
+Somehow this did not occur in the past so I am not yet sure how this
+is related to the changes.
 
-To put 10% kernel overhead into perspective: enabling this option wipes out about 
-5-10 years worth of painstaking optimizations we've done to keep the kernel fast 
-... (!!)
+The new implementation does not appear to suffer from the performance
+degradation we saw after removing the single store shortcut.
 
-I think the fundamental flaw is the assumption that we need a PIE executable to 
-have a freely relocatable kernel on 64-bit CPUs.
+Finally the new code seems simpler and elegant. I would suggest adding
+some comments in ssa.c - perhaps copy the pseudo code from the paper
+it is based on - to better explain what is going on.
 
-Have you considered a kernel with -mcmodel=small (or medium) instead of -fpie 
--mcmodel=large? We can pick a random 2GB window in the (non-kernel) canonical 
-x86-64 address space to randomize the location of kernel text. The location of 
-modules can be further randomized within that 2GB window.
+Many thanks for this great piece of work.
 
-It should have far less performance impact than the register-losing and 
-overhead-inducing -fpie / -mcmodel=large (for modules) execution models.
+I do recommend submitting a patch of sssa-mini-clean - as this is the
+minimal set on top of RC5. By integrating this post 0.5.1 release some
+amount of time can be spent testing and validating this before other
+changes are done.
 
-My quick guess is tha the performance impact might be close to zero in fact.
-
-Thanks,
-
-	Ingo
+Regards
+Dibyendu
