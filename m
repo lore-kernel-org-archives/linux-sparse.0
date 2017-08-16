@@ -1,60 +1,69 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [RFC] sparse SSA construction
-Date: Wed, 16 Aug 2017 13:39:38 +0100
-Message-ID: <CACXZuxcFHGsfhMTT-BacMkkE5vZk7jScAZdkjeaX0rT+yWiEFQ@mail.gmail.com>
-References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
- <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
- <CANeU7Qk9C-78+-a2TOGUWiLof9S_p9vO6bHyNf6xZqZ5X1CoUQ@mail.gmail.com>
- <CACXZuxeGgFmjDosHv-Exd9qRLfonFGUrD7sx-ucQejuR0jsD+w@mail.gmail.com>
- <CANeU7QmQ8DdeBLx9kDNf-xnTOUc=V7VNu95A+dAL4oUbLngonw@mail.gmail.com>
- <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
- <CA+55aFwXc6QDgZSv++ZUUTHEixsMoKUq6Wc-6sQ4g5po5ZmA5g@mail.gmail.com>
- <CAMHZB6GZCcOfAD3qkFs39hVQ1om5TdCM5CTTwAb2aqLH1Hbriw@mail.gmail.com>
- <CACXZuxdbgoYtSwsutp+FUqjb8v_yX=BpmntBiBn092eoJ-zBjg@mail.gmail.com>
- <CAExDi1SXeds8_NPa37VTVLL-fRxY=xfhTDtFj8D4rUcAeoBkig@mail.gmail.com>
- <CACXZuxfd074S1jJMotGzn=MK-RORU7DEe7uj_yQ7oZPeyxVF9g@mail.gmail.com> <CAMHZB6Es+y+xCGMOrd=gvsqiTVWgz3niOXOQrv3fTFzr=6akVA@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: Some random thoughts regarding the SSA paper
+Date: Wed, 16 Aug 2017 08:42:05 -0400
+Message-ID: <CANeU7Q=byg+e9qKhyO9cuVgrveqmWUajv_e6AWuK4PsJV4+T4g@mail.gmail.com>
+References: <CANeU7QmcVS_8oko6RhG_g_97AjUNVYa=KDqDocbXL5ney=mrJw@mail.gmail.com>
+ <CACXZuxdnMFA5HPg3GXLWXP6+Mk8+UikcZsJZH8DJ227PYHyEfQ@mail.gmail.com>
+ <CANeU7Q=r4A8WQrqaACQ2iak9CcEXds20peJrr1AqJ8tyxCF56Q@mail.gmail.com> <CACXZuxcjBJdM2Sy4KWjaU1Oofr+S3=1vRkznOd9WatycuOSWsw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:32856 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751637AbdHPMjk (ORCPT
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:33422 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752092AbdHPMmG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 08:39:40 -0400
-Received: by mail-ua0-f173.google.com with SMTP id r9so3840957uad.0
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 05:39:39 -0700 (PDT)
-In-Reply-To: <CAMHZB6Es+y+xCGMOrd=gvsqiTVWgz3niOXOQrv3fTFzr=6akVA@mail.gmail.com>
+        Wed, 16 Aug 2017 08:42:06 -0400
+Received: by mail-yw0-f171.google.com with SMTP id p68so21719247ywg.0
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 05:42:06 -0700 (PDT)
+In-Reply-To: <CACXZuxcjBJdM2Sy4KWjaU1Oofr+S3=1vRkznOd9WatycuOSWsw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi Luc,
+On Wed, Aug 16, 2017 at 8:24 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>
+> The paper says that the algorithm creates correct SSA for all
+> programs. Specifically quoting:
+>
+> <quote>
+> prove that the SSA construction algorithm constructs pruned SSA form
+> for all programs and minimal SSA form for programs with reducible
+> control flow
+> <endquote>
+>
+> Secondly even for irreducible control flow, it provides an algorithm
+> for creating minimal SSA in section 3.2, right?
 
-On 16 August 2017 at 13:28, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> On Wed, Aug 16, 2017 at 2:16 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
+It do provide a solution. and the price is high. The complexity is
+O(B*B*V*V).  Go look at page 15 of the paper.
+
+>
+> Luc's implementation seems to work fine with gotos? Have you tested
+> Luc's implementation? I think it is better to try out the solution and
+> see if there is a problem.
+
+I haven't, as I said I try to finish reading the paper before looking that
+the implementation. If  Luc is the paper suggestion to fix up the irreducible
+case. , then we are down the road for O(B*B*V*V) complexity.
+
+>>> The great thing about Sparse I find is that it is smaller and simpler
+>>> than gcc or clang - and I would urge that this should be maintained.
 >>
->> Is it the problem that you are constructing SSA while linearizing - so
->> that you do not have the gotos resolved? Would it be a better design
->> to finish linear stream, and then run SSA conversion?
+>> Exactly. I am totally agree with you. My worries are the hidden complexity
+>> dealing with gotos in that paper.
+>>
 >
-> The *big* advantage of this method is that you *do not* have to first
-> generate the whole thing *and then* transform it into SSA form.
-> The price is a slight complication in the handling of gotos.
-> The more classic approach  need special handling for gotos too.
->
+> I am wondering if the complexity is only because Luc's implementation
+> creates SSA on the fly rather than as a second phase. I posted another
+> question on that topic.
 
-It is an advantage and a disadvantage in the sense that it makes SSA
-construction not reusable - or have I misunderstood? Looking at the
-implementation I felt that it could be run as a second phase - is that
-assumption wrong?
+My way of seeing it, the complexity is introduced when you have input
+source contain irreducible grahy. This paper doe not have good way to
+deal with it. It can solve it, but that is O(B*B*V*V) complexity.
 
-I am just trying to understand the issue as it seems the paper claims
-it creates pruned SSA for all programs - not just reducible control
-flow. Have you contacted the authors regarding the issues you are
-having with gotos? Might be worth doing so.
+In other words, we can some input source that cause the method describe
+in this paper quadruple to the size of the input.
 
-Regards
-Dibyendu
+Chris
