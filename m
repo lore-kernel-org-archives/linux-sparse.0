@@ -1,7 +1,7 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [RFC] sparse SSA construction
-Date: Wed, 16 Aug 2017 00:58:53 -0400
-Message-ID: <CANeU7Qm05_jY3tx=eBYshciwe=zaHm55qrGAre07zwk6R=m4Eg@mail.gmail.com>
+Date: Wed, 16 Aug 2017 01:15:39 -0400
+Message-ID: <CANeU7Q=vWytMCrUgHLYhhZ8RiCk1itzmmLbhFWXT6RsLzZ_0dw@mail.gmail.com>
 References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
  <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
  <CANeU7Qk9C-78+-a2TOGUWiLof9S_p9vO6bHyNf6xZqZ5X1CoUQ@mail.gmail.com>
@@ -10,104 +10,59 @@ References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
  <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
  <CA+55aFwXc6QDgZSv++ZUUTHEixsMoKUq6Wc-6sQ4g5po5ZmA5g@mail.gmail.com>
  <CAMHZB6GZCcOfAD3qkFs39hVQ1om5TdCM5CTTwAb2aqLH1Hbriw@mail.gmail.com>
- <CA+55aFzvNEGEbO=H9C5q29js7A57zMm00a8i5NqDfPsZAxpr2g@mail.gmail.com> <CANeU7Qmq8N7Bqg0pWNONC8NkZ5J7p07B+UPBB-0eF9dTAOBYYg@mail.gmail.com>
+ <CA+55aFzvNEGEbO=H9C5q29js7A57zMm00a8i5NqDfPsZAxpr2g@mail.gmail.com> <CAExDi1QQzTKeC1b=9sJYTANBvBDswqwqH1O1XsSED_oeYYVwnA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:33423 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751160AbdHPE6z (ORCPT
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:36203 "EHLO
+        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751452AbdHPFPl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 00:58:55 -0400
-Received: by mail-yw0-f180.google.com with SMTP id p68so16358530ywg.0
-        for <linux-sparse@vger.kernel.org>; Tue, 15 Aug 2017 21:58:54 -0700 (PDT)
-In-Reply-To: <CANeU7Qmq8N7Bqg0pWNONC8NkZ5J7p07B+UPBB-0eF9dTAOBYYg@mail.gmail.com>
+        Wed, 16 Aug 2017 01:15:41 -0400
+Received: by mail-yw0-f173.google.com with SMTP id u207so16452071ywc.3
+        for <linux-sparse@vger.kernel.org>; Tue, 15 Aug 2017 22:15:41 -0700 (PDT)
+In-Reply-To: <CAExDi1QQzTKeC1b=9sJYTANBvBDswqwqH1O1XsSED_oeYYVwnA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 16, 2017 at 12:23 AM, Christopher Li <sparse@chrisli.org> wrote:
-> If sparse only place the phi node on where the loads are, which a lot of
-> case happen to be the DF (dominance frontier). In the case that DF
-> does not have loads, that is where current sparse do wrong, sparse
-> does not place a phi node  there. Which violate the SSA property.
+On Tue, Aug 15, 2017 at 5:43 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Yes, what I thought for a long while,
+> But when things like try_ti_simplify_bb() come in play,
+> with pack_basic_blocks() on top the things become
+> *very* messy I often you can't make sense of it anymore.
 
-I give an example for the above situation I am talking about:
+It is not only messy, it is plain wrong that SSA dominance property
+has been violated.
 
-int a, b, c, d;
+>> IOW, you could think of the phi nodes as being "outside" the
+>> instruction flow entirely, and just being the definition of the pseudo
+>> they define. They have to be placed somewhere, but the "somewhere" is
+>> somewhat arbitrary.
+>
+> It's true to a certain point, after it, you need to have them placed at
+> the confluence point. I can't explain better for now. I'll have an
+> example tomorrow.
 
-void foo(void)
-{
-  int e, f;
-  if (a)
-     e = b;
-  else
-     e = c;
-  if (b)
-     c = a+b;
-  d = e;
-}
+I give one example in my other email. I think that arbitrary view is
+actually wrong:
 
-"if (b)" is where the dominance of "e = b" and "e =c" joined.
-I don't do any loading of "e" there.
-To insert some blocks before using "e", I use the "if (b)".
+phi node is a function that select value depend on which edge the
+control flow come from. Place it arbitrary cause the phi node
+does not have access the edge information how the define joined.
+It need to be place at the dominance frontier, which just barely
+out of reach of the dominance of the define.
 
-Now let's look at the test-linearize output:
-foo:
-.L0:
-<entry-point>
-load.32     %r1(a) <- 0[a]
-cbr         %r1(a), .L1, .L2
+> Not directly related to that is that I really think we need to associate
+> a ph-node's source to it's parent BB.
 
-.L1:
-load.32     %r2(e) <- 0[b]
-phisrc.32   %phi3(b) <- %r2(e)
-phisrc.32   %phi4(e) <- %r2(e)
-phisrc.32   %phi6(e) <- %r2(e)
-phisrc.32   %phi7(e) <- %r2(e)
-br          .L3
+Exactly. Notice that parent ( predecessor) might not be the BB
+that define the variable. It is where the definition not longer
+dominance (dominance frontier).
 
-.L2:
-load.32     %r3 <- 0[c]
-phisrc.32   %phi5(e) <- %r3
-br          .L3
-
-.L3:
-load.32     %r4(b) <- 0[b] <========  notice no phi node here.
-          It is required because here it knows which edge
-          it arrived. From L1, use %r2, from L2 use %r3.
-
-
-cbr         %r4(b), .L4, .L5
-
-.L4:
-add.32      %r7 <- %r1(a), %r4(b)
-store.32    %r7 -> 0[c]
-br          .L5
-
-.L5:
-phi.32      %r8 <- %phi4(e), %phi5(e) <====== phi node here
-store.32    %r8 -> 0[d]
-ret
-
-Notice how phi node is too late in .L5.
-
-L5 does not have the edge information how
-L1 and L2 joined. That information is at L3.
-
-The phi source is not going to remedy this.
-Because phi source is not going to know how
-the phi source is going to join other phi source in
-the later blocks.
-
-The edge information is the one that is critically
-missing here.
-
-Actually, if we do SSA properly, we don't need the
-phi source at all. We can directly use the source of
-the phisource, which is %r2 and %r3.
-if arrive in L3 from L1 use %r2, from L2 using %r3.
-
+Again, the simple way to explain this, it is the requirement of
+the SSA dominance property.
 
 Chris
