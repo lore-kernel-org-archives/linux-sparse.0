@@ -1,52 +1,114 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [RFC] sparse SSA construction
-Date: Wed, 16 Aug 2017 09:22:08 -0400
-Message-ID: <CANeU7Qkm=y5PSvfVGZ9+1qet7A3iL98m2QGqp=amfYwg4-mpJA@mail.gmail.com>
-References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
- <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
- <CANeU7Qk9C-78+-a2TOGUWiLof9S_p9vO6bHyNf6xZqZ5X1CoUQ@mail.gmail.com>
- <CACXZuxeGgFmjDosHv-Exd9qRLfonFGUrD7sx-ucQejuR0jsD+w@mail.gmail.com>
- <CANeU7QmQ8DdeBLx9kDNf-xnTOUc=V7VNu95A+dAL4oUbLngonw@mail.gmail.com>
- <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
- <CA+55aFwXc6QDgZSv++ZUUTHEixsMoKUq6Wc-6sQ4g5po5ZmA5g@mail.gmail.com>
- <CAMHZB6GZCcOfAD3qkFs39hVQ1om5TdCM5CTTwAb2aqLH1Hbriw@mail.gmail.com>
- <CACXZuxdbgoYtSwsutp+FUqjb8v_yX=BpmntBiBn092eoJ-zBjg@mail.gmail.com>
- <CAExDi1SXeds8_NPa37VTVLL-fRxY=xfhTDtFj8D4rUcAeoBkig@mail.gmail.com>
- <CACXZuxfd074S1jJMotGzn=MK-RORU7DEe7uj_yQ7oZPeyxVF9g@mail.gmail.com>
- <CAMHZB6Es+y+xCGMOrd=gvsqiTVWgz3niOXOQrv3fTFzr=6akVA@mail.gmail.com>
- <CACXZuxcFHGsfhMTT-BacMkkE5vZk7jScAZdkjeaX0rT+yWiEFQ@mail.gmail.com>
- <CANeU7Qn_raZ2RaK+aK_ms6GZOxE_-vRcqfc1oZrnTm1nTN49vw@mail.gmail.com>
- <CACXZuxd1NrUevtuAJe4rOELKA5iOajxLo=MxHqpk6U82UtGvUw@mail.gmail.com> <CANeU7Q=foyyU1_VvBKEdu8yLrOC2Si=2xboXYeokBBo0Bin64A@mail.gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Wed, 16 Aug 2017 17:12:35 +0200
+Message-ID: <20170816151235.oamkdva6cwpc4cex@gmail.com>
+References: <20170810172615.51965-1-thgarnie@google.com>
+ <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+ <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+ <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:32917 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751370AbdHPNWK (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 09:22:10 -0400
-Received: by mail-yw0-f171.google.com with SMTP id p68so22405620ywg.0
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 06:22:10 -0700 (PDT)
-In-Reply-To: <CANeU7Q=foyyU1_VvBKEdu8yLrOC2Si=2xboXYeokBBo0Bin64A@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-9475-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 16, 2017 at 9:11 AM, Christopher Li <sparse@chrisli.org> wrote:
->> But Luc's implementation handles gotos fine without the extra phase -
->> hence please please try out the implementation before arriving at
->> conclusions.
->
-> As I state very clear in the title, my thought as regarding the paper,
-> and paper only. I will take some time to read Luc's implementation
-> next.
 
-Oops, sorry I mix up  the two email thread talk about SSA.
-This thread is about the patch not paper. You are right I shouldn't
-draw conclusion on it before reading it in more detail.
+* Thomas Garnier <thgarnie@google.com> wrote:
 
-Let me restart.  Now I read the paper (kind of). I should go read the
-implementation patches.
+> On Tue, Aug 15, 2017 at 12:56 AM, Ingo Molnar <mingo@kernel.org> wrote:
+> >
+> > * Thomas Garnier <thgarnie@google.com> wrote:
+> >
+> >> > Do these changes get us closer to being able to build the kernel as truly
+> >> > position independent, i.e. to place it anywhere in the valid x86-64 address
+> >> > space? Or any other advantages?
+> >>
+> >> Yes, PIE allows us to put the kernel anywhere in memory. It will allow us to
+> >> have a full randomized address space where position and order of sections are
+> >> completely random. There is still some work to get there but being able to build
+> >> a PIE kernel is a significant step.
+> >
+> > So I _really_ dislike the whole PIE approach, because of the huge slowdown:
+> >
+> > +config RANDOMIZE_BASE_LARGE
+> > +       bool "Increase the randomization range of the kernel image"
+> > +       depends on X86_64 && RANDOMIZE_BASE
+> > +       select X86_PIE
+> > +       select X86_MODULE_PLTS if MODULES
+> > +       default n
+> > +       ---help---
+> > +         Build the kernel as a Position Independent Executable (PIE) and
+> > +         increase the available randomization range from 1GB to 3GB.
+> > +
+> > +         This option impacts performance on kernel CPU intensive workloads up
+> > +         to 10% due to PIE generated code. Impact on user-mode processes and
+> > +         typical usage would be significantly less (0.50% when you build the
+> > +         kernel).
+> > +
+> > +         The kernel and modules will generate slightly more assembly (1 to 2%
+> > +         increase on the .text sections). The vmlinux binary will be
+> > +         significantly smaller due to less relocations.
+> >
+> > To put 10% kernel overhead into perspective: enabling this option wipes out about
+> > 5-10 years worth of painstaking optimizations we've done to keep the kernel fast
+> > ... (!!)
+> 
+> Note that 10% is the high-bound of a CPU intensive workload.
 
-Chris
+Note that the 8-10% hackbench or even a 2%-4% range would be 'huge' in terms of 
+modern kernel performance. In many cases we are literally applying cycle level 
+optimizations that are barely measurable. A 0.1% speedup in linear execution speed 
+is already a big success.
+
+> I am going to start doing performance testing on -mcmodel=large to see if it is 
+> faster than -fPIE.
+
+Unfortunately mcmodel=large looks pretty heavy too AFAICS, at the machine 
+instruction level.
+
+Function calls look like this:
+
+ -mcmodel=medium:
+
+   757:   e8 98 ff ff ff          callq  6f4 <test_code>
+
+ -mcmodel=large
+
+   77b:   48 b8 10 f7 df ff ff    movabs $0xffffffffffdff710,%rax
+   782:   ff ff ff 
+   785:   48 8d 04 03             lea    (%rbx,%rax,1),%rax
+   789:   ff d0                   callq  *%rax
+
+And we'd do this for _EVERY_ function call in the kernel. That kind of crap is 
+totally unacceptable.
+
+> > I think the fundamental flaw is the assumption that we need a PIE executable 
+> > to have a freely relocatable kernel on 64-bit CPUs.
+> >
+> > Have you considered a kernel with -mcmodel=small (or medium) instead of -fpie 
+> > -mcmodel=large? We can pick a random 2GB window in the (non-kernel) canonical 
+> > x86-64 address space to randomize the location of kernel text. The location of 
+> > modules can be further randomized within that 2GB window.
+> 
+> -model=small/medium assume you are on the low 32-bit. It generates instructions 
+> where the virtual addresses have the high 32-bit to be zero.
+
+How are these assumptions hardcoded by GCC? Most of the instructions should be 
+relocatable straight away, as most call/jump/branch instructions are RIP-relative.
+
+I.e. is there no GCC code generation mode where code can be placed anywhere in the 
+canonical address space, yet call and jump distance is within 31 bits so that the 
+generated code is fast?
+
+Thanks,
+
+	Ingo
