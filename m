@@ -1,114 +1,102 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Wed, 16 Aug 2017 17:12:35 +0200
-Message-ID: <20170816151235.oamkdva6cwpc4cex@gmail.com>
-References: <20170810172615.51965-1-thgarnie@google.com>
- <20170811124127.kkb5pnkljz4umxuj@gmail.com>
- <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
- <20170815075609.mmzbfwritjzvrpsn@gmail.com>
- <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-9475-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 00/29] Simple & Efficient SSA construction.
+Date: Wed, 16 Aug 2017 17:34:26 +0200
+Message-ID: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33627 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751471AbdHPPfF (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 16 Aug 2017 11:35:05 -0400
+Received: by mail-wr0-f193.google.com with SMTP id n88so3695452wrb.0
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:04 -0700 (PDT)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+
+The goal of this series is to implement and integrate to sparse
+the method described in the paper:
+    "Simple and Efficient Construction of Static Single Assignment Form"
+	by Matthias Braun, Sebastian Buchwald, Sebastian Hack,
+	   Roland Leissa, Christoph Mallon and Andreas Zwinkau.
+    cfr. http://www.cdl.uni-saarland.de/papers/bbhlmz13cc.pdf
+
+In the present case, the principal motivation to use this method
+is that the current one in sparse is severely broken.
 
 
-* Thomas Garnier <thgarnie@google.com> wrote:
+The series is also available in the git repository at:
 
-> On Tue, Aug 15, 2017 at 12:56 AM, Ingo Molnar <mingo@kernel.org> wrote:
-> >
-> > * Thomas Garnier <thgarnie@google.com> wrote:
-> >
-> >> > Do these changes get us closer to being able to build the kernel as truly
-> >> > position independent, i.e. to place it anywhere in the valid x86-64 address
-> >> > space? Or any other advantages?
-> >>
-> >> Yes, PIE allows us to put the kernel anywhere in memory. It will allow us to
-> >> have a full randomized address space where position and order of sections are
-> >> completely random. There is still some work to get there but being able to build
-> >> a PIE kernel is a significant step.
-> >
-> > So I _really_ dislike the whole PIE approach, because of the huge slowdown:
-> >
-> > +config RANDOMIZE_BASE_LARGE
-> > +       bool "Increase the randomization range of the kernel image"
-> > +       depends on X86_64 && RANDOMIZE_BASE
-> > +       select X86_PIE
-> > +       select X86_MODULE_PLTS if MODULES
-> > +       default n
-> > +       ---help---
-> > +         Build the kernel as a Position Independent Executable (PIE) and
-> > +         increase the available randomization range from 1GB to 3GB.
-> > +
-> > +         This option impacts performance on kernel CPU intensive workloads up
-> > +         to 10% due to PIE generated code. Impact on user-mode processes and
-> > +         typical usage would be significantly less (0.50% when you build the
-> > +         kernel).
-> > +
-> > +         The kernel and modules will generate slightly more assembly (1 to 2%
-> > +         increase on the .text sections). The vmlinux binary will be
-> > +         significantly smaller due to less relocations.
-> >
-> > To put 10% kernel overhead into perspective: enabling this option wipes out about
-> > 5-10 years worth of painstaking optimizations we've done to keep the kernel fast
-> > ... (!!)
-> 
-> Note that 10% is the high-bound of a CPU intensive workload.
+  git://github.com/lucvoo/sparse.git sssa-mini-v1
 
-Note that the 8-10% hackbench or even a 2%-4% range would be 'huge' in terms of 
-modern kernel performance. In many cases we are literally applying cycle level 
-optimizations that are barely measurable. A 0.1% speedup in linear execution speed 
-is already a big success.
+for you to fetch changes up to 98a21bc0c82af5115687c7e03a277519836bcac6:
 
-> I am going to start doing performance testing on -mcmodel=large to see if it is 
-> faster than -fPIE.
+  sssa: remove now unneeded simplify_one_symbol() (2017-08-16 17:25:25 +0200)
 
-Unfortunately mcmodel=large looks pretty heavy too AFAICS, at the machine 
-instruction level.
+----------------------------------------------------------------
+Luc Van Oostenryck (29):
+      remove wrong part of simplify_loads()
+      give a type to OP_PHISOURCEs
+      fix test case kill-phi-ttsb
+      add test case for incomplete type
+      add test case for bad return type
+      topasm: top-level asm is special
+      ret-void: return nothing only for void functions
+      small code reorg of add_store()
+      add helper to test if a variable is "simple"
+      add helper imple_access() to test if an access is "simple"
+      add PSEUDO_UNDEF
+      add undef_pseudo()
+      add insert_phi_node()
+      extract alloc_phisrc() from alloc_phi()
+      add remove_use()
+      ptrmap: add missing #include "compat.h"
+      ptrmap: core implementation
+      ptrmap: add type-safe interface
+      sssa: add Simple SSA interfaces
+      sssa: add needed new members
+      sssa: add basic implementation
+      sssa: add seal_gotos() needed to seal BBs targeted by gotos
+      sssa: set var's ident
+      sssa: add PSEUDO_INDIR
+      sssa: reorg load_var()
+      sssa: protect against unreachable loops
+      sssa: remove trivial phi-nodes
+      sssa: switch to the new SSA construction
+      sssa: remove now unneeded simplify_one_symbol()
 
-Function calls look like this:
-
- -mcmodel=medium:
-
-   757:   e8 98 ff ff ff          callq  6f4 <test_code>
-
- -mcmodel=large
-
-   77b:   48 b8 10 f7 df ff ff    movabs $0xffffffffffdff710,%rax
-   782:   ff ff ff 
-   785:   48 8d 04 03             lea    (%rbx,%rax,1),%rax
-   789:   ff d0                   callq  *%rax
-
-And we'd do this for _EVERY_ function call in the kernel. That kind of crap is 
-totally unacceptable.
-
-> > I think the fundamental flaw is the assumption that we need a PIE executable 
-> > to have a freely relocatable kernel on 64-bit CPUs.
-> >
-> > Have you considered a kernel with -mcmodel=small (or medium) instead of -fpie 
-> > -mcmodel=large? We can pick a random 2GB window in the (non-kernel) canonical 
-> > x86-64 address space to randomize the location of kernel text. The location of 
-> > modules can be further randomized within that 2GB window.
-> 
-> -model=small/medium assume you are on the low 32-bit. It generates instructions 
-> where the virtual addresses have the high 32-bit to be zero.
-
-How are these assumptions hardcoded by GCC? Most of the instructions should be 
-relocatable straight away, as most call/jump/branch instructions are RIP-relative.
-
-I.e. is there no GCC code generation mode where code can be placed anywhere in the 
-canonical address space, yet call and jump distance is within 31 bits so that the 
-generated code is fast?
-
-Thanks,
-
-	Ingo
+ Makefile                                |   2 +
+ allocate.h                              |   2 +
+ flow.c                                  | 324 --------------------------------
+ flow.h                                  |   2 +-
+ linearize.c                             | 174 ++++++++++++-----
+ linearize.h                             |  23 ++-
+ memops.c                                |  63 -------
+ ptrmap.c                                |  84 +++++++++
+ ptrmap.h                                |  28 +++
+ simplify.c                              |  13 ++
+ sparse-llvm.c                           |   4 +
+ ssa.c                                   | 219 +++++++++++++++++++++
+ ssa.h                                   |  12 ++
+ symbol.h                                |  34 ++++
+ validation/bad-return-type.c            |  19 ++
+ validation/cast-constant-to-float.c     |   8 +-
+ validation/cast-constants.c             |  40 ++--
+ validation/cast-kinds.c                 | 160 ++++++++--------
+ validation/context.c                    |   2 +-
+ validation/incomplete-struct.c          |  23 +++
+ validation/kill-casts.c                 |   1 -
+ validation/kill-phi-ttsbb.c             |   2 +-
+ validation/linear/bitfield-init-zero.c  |  24 +--
+ validation/linear/struct-init-partial.c |   8 +-
+ validation/loop-linearization.c         |  60 +++---
+ validation/memops-volatile.c            |   4 +-
+ validation/optim/bool-simplify.c        |  12 +-
+ 27 files changed, 745 insertions(+), 602 deletions(-)
+ create mode 100644 ptrmap.c
+ create mode 100644 ptrmap.h
+ create mode 100644 ssa.c
+ create mode 100644 ssa.h
+ create mode 100644 validation/bad-return-type.c
+ create mode 100644 validation/incomplete-struct.c
