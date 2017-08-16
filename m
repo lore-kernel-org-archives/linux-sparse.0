@@ -1,46 +1,40 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 00/29] Simple & Efficient SSA construction.
-Date: Wed, 16 Aug 2017 18:12:27 +0200
-Message-ID: <CAExDi1RPS3qeqH=nr-9982FUnL3-99VoV7hQaxZbwWZsTCim=g@mail.gmail.com>
-References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com> <CA+55aFz+yT2W4GdLHVtsOs1Y7VhZjLPyW51=d8XXWLK-G7ffbw@mail.gmail.com>
+From: Daniel Micay <danielmicay@gmail.com>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Wed, 16 Aug 2017 12:26:36 -0400
+Message-ID: <1502900796.1302.52.camel@gmail.com>
+References: <20170810172615.51965-1-thgarnie@google.com>
+	 <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+	 <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+	 <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+	 <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+	 <20170816151235.oamkdva6cwpc4cex@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f66.google.com ([209.85.218.66]:38625 "EHLO
-        mail-oi0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751531AbdHPQM2 (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 12:12:28 -0400
-Received: by mail-oi0-f66.google.com with SMTP id s21so3948676oie.5
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 09:12:28 -0700 (PDT)
-In-Reply-To: <CA+55aFz+yT2W4GdLHVtsOs1Y7VhZjLPyW51=d8XXWLK-G7ffbw@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Transfer-Encoding: 7bit
+Return-path: <kernel-hardening-return-9477-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170816151235.oamkdva6cwpc4cex@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>, Thomas Garnier <thgarnie@google.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?UTF-8?Q?Kr=C4=8Dm=C3=A1=C5=99?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Wed, Aug 16, 2017 at 5:51 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> On Wed, Aug 16, 2017 at 8:34 AM, Luc Van Oostenryck wrote:
->> The goal of this series is to implement and integrate to sparse
->> the method described in the paper:
->
-> Thanks, now the changes have a good commit log, and the patches all
-> look good to me.
->
-> I didn't *test* any of it, or try to follow the logic, but it can't be
-> worse than what we had, so "just make it so".
+> How are these assumptions hardcoded by GCC? Most of the instructions
+> should be 
+> relocatable straight away, as most call/jump/branch instructions are
+> RIP-relative.
+> 
+> I.e. is there no GCC code generation mode where code can be placed
+> anywhere in the 
+> canonical address space, yet call and jump distance is within 31 bits
+> so that the 
+> generated code is fast?
 
-Thank you.
+That's what PIE is meant to do. However, not disabling support for lazy
+linking (-fno-plt) / symbol interposition (-Bsymbolic) is going to cause
+it to add needless overhead.
 
-My own tests are pretty promising: no crashes, testsuite OK,
-kernel allyesconfig OK too (but there is just 8 additional
-'bad context' warnings I would like to investigate, OTOH,
-knowing how broken the current SSA is I would bet that
-these warnings were, in fact, missing in the old/present version).
-
-For the logic, the (first part of the) paper is pretty straight
-forward I won't be able to explain better than they did.
-
-Best regards,
--- Luc Van Oostenryck
+arm64 is using -pie -shared -Bsymbolic in arch/arm64/Makefile for their
+CONFIG_RELOCATABLE option. See 08cc55b2afd97a654f71b3bebf8bb0ec89fdc498.
