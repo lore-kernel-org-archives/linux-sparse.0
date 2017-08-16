@@ -1,52 +1,62 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Some random thoughts regarding the SSA paper
-Date: Wed, 16 Aug 2017 13:47:03 +0100
-Message-ID: <CACXZuxf2Nh=S3bmF+uCDwVaPbHDF44Vb2TPPuMwdXsEBBGTwGw@mail.gmail.com>
-References: <CANeU7QmcVS_8oko6RhG_g_97AjUNVYa=KDqDocbXL5ney=mrJw@mail.gmail.com>
- <CACXZuxdnMFA5HPg3GXLWXP6+Mk8+UikcZsJZH8DJ227PYHyEfQ@mail.gmail.com>
- <CANeU7Q=r4A8WQrqaACQ2iak9CcEXds20peJrr1AqJ8tyxCF56Q@mail.gmail.com>
- <CACXZuxcjBJdM2Sy4KWjaU1Oofr+S3=1vRkznOd9WatycuOSWsw@mail.gmail.com> <CANeU7Q=byg+e9qKhyO9cuVgrveqmWUajv_e6AWuK4PsJV4+T4g@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC] sparse SSA construction
+Date: Wed, 16 Aug 2017 08:50:25 -0400
+Message-ID: <CANeU7Qn_raZ2RaK+aK_ms6GZOxE_-vRcqfc1oZrnTm1nTN49vw@mail.gmail.com>
+References: <20170806202651.8763-1-luc.vanoostenryck@gmail.com>
+ <CACXZuxchKzgv_cN7MzZnT09OX1thdODoinqSVzK8jSxdPCVK8w@mail.gmail.com>
+ <CANeU7Qk9C-78+-a2TOGUWiLof9S_p9vO6bHyNf6xZqZ5X1CoUQ@mail.gmail.com>
+ <CACXZuxeGgFmjDosHv-Exd9qRLfonFGUrD7sx-ucQejuR0jsD+w@mail.gmail.com>
+ <CANeU7QmQ8DdeBLx9kDNf-xnTOUc=V7VNu95A+dAL4oUbLngonw@mail.gmail.com>
+ <CACXZuxcb8YVcdkTjvo-0cxDughp0kveQCN_sDKWzxxE0QFs=+A@mail.gmail.com>
+ <CA+55aFwXc6QDgZSv++ZUUTHEixsMoKUq6Wc-6sQ4g5po5ZmA5g@mail.gmail.com>
+ <CAMHZB6GZCcOfAD3qkFs39hVQ1om5TdCM5CTTwAb2aqLH1Hbriw@mail.gmail.com>
+ <CACXZuxdbgoYtSwsutp+FUqjb8v_yX=BpmntBiBn092eoJ-zBjg@mail.gmail.com>
+ <CAExDi1SXeds8_NPa37VTVLL-fRxY=xfhTDtFj8D4rUcAeoBkig@mail.gmail.com>
+ <CACXZuxfd074S1jJMotGzn=MK-RORU7DEe7uj_yQ7oZPeyxVF9g@mail.gmail.com>
+ <CAMHZB6Es+y+xCGMOrd=gvsqiTVWgz3niOXOQrv3fTFzr=6akVA@mail.gmail.com> <CACXZuxcFHGsfhMTT-BacMkkE5vZk7jScAZdkjeaX0rT+yWiEFQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f175.google.com ([209.85.217.175]:35734 "EHLO
-        mail-ua0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751620AbdHPMrE (ORCPT
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:33441 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751580AbdHPMu1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 08:47:04 -0400
-Received: by mail-ua0-f175.google.com with SMTP id d29so13339133uai.2
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 05:47:03 -0700 (PDT)
-In-Reply-To: <CANeU7Q=byg+e9qKhyO9cuVgrveqmWUajv_e6AWuK4PsJV4+T4g@mail.gmail.com>
+        Wed, 16 Aug 2017 08:50:27 -0400
+Received: by mail-yw0-f177.google.com with SMTP id p68so21851043ywg.0
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 05:50:26 -0700 (PDT)
+In-Reply-To: <CACXZuxcFHGsfhMTT-BacMkkE5vZk7jScAZdkjeaX0rT+yWiEFQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
+On Wed, Aug 16, 2017 at 8:39 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> It is an advantage and a disadvantage in the sense that it makes SSA
+> construction not reusable - or have I misunderstood? Looking at the
 
-On 16 August 2017 at 13:42, Christopher Li <sparse@chrisli.org> wrote:
-> On Wed, Aug 16, 2017 at 8:24 AM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->>
->> The paper says that the algorithm creates correct SSA for all
->> programs. Specifically quoting:
->>
->> <quote>
->> prove that the SSA construction algorithm constructs pruned SSA form
->> for all programs and minimal SSA form for programs with reducible
->> control flow
->> <endquote>
->>
->> Secondly even for irreducible control flow, it provides an algorithm
->> for creating minimal SSA in section 3.2, right?
+Not sure I understand the question.
+
+> implementation I felt that it could be run as a second phase - is that
+> assumption wrong?
+
+That assumption is correct. But not having the advantage the paper
+claim any more.
+
 >
-> It do provide a solution. and the price is high. The complexity is
-> O(B*B*V*V).  Go look at page 15 of the paper.
->
+> I am just trying to understand the issue as it seems the paper claims
+> it creates pruned SSA for all programs - not just reducible control
+> flow. Have you contacted the authors regarding the issues you are
 
-That is only if you want a minimal SSA right? Do you need one? Again I
-suggest you try out Luc's implementation which appears to work fine -
-and it doesn't do this extra pass I believe.
+Sorry I might mislead you. I said the paper solution for irreducable
+graph is *not* simple *nor* efficient any more. The paper do suggest
+a way to do it. But I consider that way complex (in execution time sense).
+I haven't take a closer look at the code yet.
 
-Regards
-Dibyendu
+> having with gotos? Might be worth doing so.
+
+My reading of the paper is yes. Having "goto" will interrupt that
+CFG less method. It can also lead to irreducible graph. Which means
+extra step to clean it up. That extra step is expensive in the O() terms.
+
+Chris
