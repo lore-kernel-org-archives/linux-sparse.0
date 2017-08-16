@@ -1,79 +1,95 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 09/29] add helper to test if a variable is "simple"
-Date: Wed, 16 Aug 2017 17:34:35 +0200
-Message-ID: <20170816153455.97693-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 11/29] add PSEUDO_UNDEF
+Date: Wed, 16 Aug 2017 17:34:37 +0200
+Message-ID: <20170816153455.97693-12-luc.vanoostenryck@gmail.com>
 References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:33974 "EHLO
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:38904 "EHLO
         mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751569AbdHPPfZ (ORCPT
+        with ESMTP id S1751580AbdHPPf3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 11:35:25 -0400
-Received: by mail-wr0-f195.google.com with SMTP id x43so3697232wrb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:24 -0700 (PDT)
+        Wed, 16 Aug 2017 11:35:29 -0400
+Received: by mail-wr0-f195.google.com with SMTP id g32so3683342wrd.5
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:28 -0700 (PDT)
 In-Reply-To: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Here by 'simple' we really mean 'worth of putting in a register'.
+Processing in the middle-end are much easier if undefined values
+have been clearly identified. Once done, we can then make
+choices like:
+- always initialize them to zero
+- allow arbitraly simplification,
+- ...
 
-We select all scalar types as well as struct and unions with a
-size not bigger than a long (register).
-
-Global and static variables, variables which address have been
-taken and volatiles variables are never selected.
+Prepare for this by declaring a new type of pseudo: PSEUDO_UNDEF
+somewhat similar to PSEUDO_VOID.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- symbol.h | 33 +++++++++++++++++++++++++++++++++
- 1 file changed, 33 insertions(+)
+ linearize.c   | 2 ++
+ linearize.h   | 3 ++-
+ sparse-llvm.c | 4 ++++
+ 3 files changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/symbol.h b/symbol.h
-index 327449611..3f075c5bc 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -407,6 +407,39 @@ static inline int is_scalar_type(struct symbol *type)
- 	return 0;
+diff --git a/linearize.c b/linearize.c
+index 190c47241..9ec65079a 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -155,6 +155,8 @@ const char *show_pseudo(pseudo_t pseudo)
+ 		if (pseudo->ident)
+ 			sprintf(buf+i, "(%s)", show_ident(pseudo->ident));
+ 		break;
++	case PSEUDO_UNDEF:
++		return "UNDEF";
+ 	default:
+ 		snprintf(buf, 64, "<bad pseudo type %d>", pseudo->type);
+ 	}
+diff --git a/linearize.h b/linearize.h
+index c03940eea..54fcf2a46 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -21,6 +21,7 @@ DECLARE_PTR_LIST(pseudo_user_list, struct pseudo_user);
+ 
+ enum pseudo_type {
+ 	PSEUDO_VOID,
++	PSEUDO_UNDEF,
+ 	PSEUDO_REG,
+ 	PSEUDO_SYM,
+ 	PSEUDO_VAL,
+@@ -290,7 +291,7 @@ static inline void add_pseudo_user_ptr(struct pseudo_user *user, struct pseudo_u
+ 
+ static inline int has_use_list(pseudo_t p)
+ {
+-	return (p && p->type != PSEUDO_VOID && p->type != PSEUDO_VAL);
++	return (p && p->type != PSEUDO_VOID && p->type != PSEUDO_UNDEF && p->type != PSEUDO_VAL);
  }
  
-+static inline int is_simple_type(struct symbol *type)
-+{
-+	if (type->type == SYM_NODE)
-+		type = type->ctype.base_type;
-+	switch (type->type) {
-+	case SYM_ENUM:
-+	case SYM_BITFIELD:
-+	case SYM_PTR:
-+	case SYM_RESTRICT:	// OK, always integer types
-+		return 1;
-+	case SYM_STRUCT:
-+	case SYM_UNION:
-+		return type->bit_size <= long_ctype.bit_size;
-+	default:
+ static inline struct pseudo_user *alloc_pseudo_user(struct instruction *insn, pseudo_t *pp)
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 29fb65f15..f8d48d264 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -289,6 +289,7 @@ static void pseudo_name(pseudo_t pseudo, char *buf)
+ 		assert(0);
+ 		break;
+ 	case PSEUDO_VAL:
++	case PSEUDO_UNDEF:
+ 		assert(0);
+ 		break;
+ 	case PSEUDO_ARG: {
+@@ -372,6 +373,9 @@ static LLVMValueRef pseudo_to_value(struct function *fn, struct instruction *ins
+ 	case PSEUDO_VOID:
+ 		result = NULL;
+ 		break;
++	case PSEUDO_UNDEF:
++		result = LLVMGetUndef(symbol_type(fn->module, insn->type));
 +		break;
-+	}
-+	if (type->ctype.base_type == &int_type)
-+		return 1;
-+	if (type->ctype.base_type == &fp_type)
-+		return 1;
-+	return 0;
-+}
-+
-+static inline int is_simple_var(struct symbol *var)
-+{
-+	if (!is_simple_type(var))
-+		return 0;
-+#define	MOD_NONREG	(MOD_STATIC|MOD_NONLOCAL|MOD_ADDRESSABLE|MOD_VOLATILE)
-+	if (var->ctype.modifiers & MOD_NONREG)
-+		return 0;
-+	return 1;
-+}
-+
- static inline int is_function(struct symbol *type)
- {
- 	return type && type->type == SYM_FN;
+ 	default:
+ 		assert(0);
+ 	}
 -- 
 2.14.0
 
