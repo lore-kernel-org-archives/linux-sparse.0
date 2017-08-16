@@ -1,92 +1,119 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 22/29] sssa: add seal_gotos() needed to seal BBs targeted by gotos
-Date: Wed, 16 Aug 2017 17:34:48 +0200
-Message-ID: <20170816153455.97693-23-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 26/29] sssa: protect against unreachable loops
+Date: Wed, 16 Aug 2017 17:34:52 +0200
+Message-ID: <20170816153455.97693-27-luc.vanoostenryck@gmail.com>
 References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:37140 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751580AbdHPPfr (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:37194 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751635AbdHPPfy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 11:35:47 -0400
-Received: by mail-wr0-f195.google.com with SMTP id z91so651499wrc.4
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:47 -0700 (PDT)
+        Wed, 16 Aug 2017 11:35:54 -0400
+Received: by mail-wr0-f194.google.com with SMTP id z91so651928wrc.4
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:53 -0700 (PDT)
 In-Reply-To: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The paper for the new SSA construction nicely leave the question
-of GOTOs as en exercice for the student.
+If unreachable loops are somehow presetn at the moment
+we're doing a lookup things can turn into infinite loops.
+Protect us agaisnt this by using the classic 'generation'
+counter to detech any cycle and take the appropriate actions.
 
-This patch is such an exercice.
+Note: reachable loops don't need this protection since
+      at least one node will have more than 1 parent.
+Note: how libfirm handle this? By adding keep-alive edge
+      (to keep endless loops to be observable)?
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.h |  1 +
- ssa.c       | 20 +++++++++++++++++++-
- ssa.h       |  1 +
- 3 files changed, 21 insertions(+), 1 deletion(-)
+ ssa.c | 24 +++++++++++++++---------
+ 1 file changed, 15 insertions(+), 9 deletions(-)
 
-diff --git a/linearize.h b/linearize.h
-index 30f34aa8f..eba0323d0 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -237,6 +237,7 @@ struct basic_block {
- 	union {
- 		struct {		// SSA construction
- 			unsigned int sealed:1;
-+			unsigned int unsealable:1;
- 		};
- 		struct {		// liveness
- 			struct pseudo_list *needs, *defines;
 diff --git a/ssa.c b/ssa.c
-index 32e440669..d8fa32d93 100644
+index 7950ffeaf..9d532dbf6 100644
 --- a/ssa.c
 +++ b/ssa.c
-@@ -81,7 +81,7 @@ void store_var(struct basic_block *bb, struct symbol *var, pseudo_t val)
- void seal_bb(struct basic_block *bb)
+@@ -13,7 +13,7 @@
+ #include <assert.h>
+ 
+ 
+-static pseudo_t load_var_(struct basic_block*, struct symbol*);
++static pseudo_t load_var_(struct basic_block*, struct symbol*, unsigned long);
+ 
+ 
+ // FIXME: -> common file
+@@ -25,13 +25,13 @@ static void append_instruction(struct basic_block *bb, struct instruction *insn)
+ 	add_instruction(&bb->insns, br);
+ }
+ 
+-static pseudo_t add_phi_operand(struct symbol *var, pseudo_t phi)
++static pseudo_t add_phi_operand(struct symbol *var, pseudo_t phi, unsigned long generation)
  {
- 	struct instruction *insn;
--	if (bb->sealed)
-+	if (bb->sealed || bb->unsealable)
- 		return;
- 	FOR_EACH_PTR(bb->insns, insn) {
- 		struct symbol *var;
-@@ -96,3 +96,21 @@ void seal_bb(struct basic_block *bb)
+ 	struct instruction *node = phi->def;
+ 	struct basic_block *parent;
+ 
+ 	FOR_EACH_PTR(node->bb->parents, parent) {
+-		pseudo_t val = load_var_(parent, var);
++		pseudo_t val = load_var_(parent, var, generation);
+ 		struct instruction *phisrc = alloc_phisrc(val, var);
+ 		pseudo_t src = phisrc->target;
+ 		append_instruction(parent, phisrc);
+@@ -41,9 +41,10 @@ static pseudo_t add_phi_operand(struct symbol *var, pseudo_t phi)
+ 	return phi;
+ }
+ 
+-static pseudo_t load_var_(struct basic_block *bb, struct symbol *var)
++static pseudo_t load_var_(struct basic_block *bb, struct symbol *var, unsigned long generation)
+ {
+ 	pseudo_t val = phi_map_lookup(var->phi_map, bb);
++	unsigned long bbgen = bb->generation;
+ 
+ 	if (val) {
+ 		while (val->type == PSEUDO_INDIR)
+@@ -62,14 +63,19 @@ static pseudo_t load_var_(struct basic_block *bb, struct symbol *var)
+ 	case 0:	// never defined
+ 		val = undef_pseudo();
+ 		break;
+-	case 1: // no phi needed
+-		val = load_var_(first_basic_block(bb->parents), var);
++	case 1:
++		if (bbgen == generation)
++			goto cycle;
++		bb->generation = generation;
++		// no phi needed
++		val = load_var_(first_basic_block(bb->parents), var, generation);
+ 		break;
+ 	default:
++	cycle:
+ 		val = insert_phi_node(bb, var);
+ 		val->ident = var->ident;
+ 		store_var(bb, var, val);
+-		val = add_phi_operand(var, val);
++		val = add_phi_operand(var, val, generation);
+ 	}
+ 
+ out:
+@@ -80,7 +86,7 @@ out:
+ 
+ pseudo_t load_var(struct basic_block *bb, struct symbol *var)
+ {
+-	return load_var_(bb, var);
++	return load_var_(bb, var, ++bb_generation);
+ }
+ 
+ void store_var(struct basic_block *bb, struct symbol *var, pseudo_t val)
+@@ -102,7 +108,7 @@ void seal_bb(struct basic_block *bb)
+ 		var = insn->var;
+ 		assert(var);
+ 		insn->var = NULL;
+-		add_phi_operand(var, insn->target);
++		add_phi_operand(var, insn->target, ++bb_generation);
  	} END_FOR_EACH_PTR(insn);
  	bb->sealed = 1;
  }
-+
-+void seal_gotos(struct entrypoint *ep)
-+{
-+	struct basic_block *bb;
-+
-+	FOR_EACH_PTR(ep->bbs, bb) {
-+		if (bb->sealed)
-+			continue;
-+		if (bb->unsealable)
-+			bb->unsealable = 0;
-+		seal_bb(bb);
-+	} END_FOR_EACH_PTR(bb);
-+
-+	// cleanup these fields as they are aliased to ::needs & ::defines
-+	FOR_EACH_PTR(ep->bbs, bb) {
-+		bb->sealed = bb->unsealable = 0;
-+	} END_FOR_EACH_PTR(bb);
-+}
-diff --git a/ssa.h b/ssa.h
-index 484c2b418..e88b857b5 100644
---- a/ssa.h
-+++ b/ssa.h
-@@ -7,5 +7,6 @@
- pseudo_t load_var(struct basic_block *bb, struct symbol *var);
- void store_var(struct basic_block *bb, struct symbol *var, pseudo_t val);
- void seal_bb(struct basic_block *bb);
-+void seal_gotos(struct entrypoint *ep);
- 
- #endif
 -- 
 2.14.0
 
