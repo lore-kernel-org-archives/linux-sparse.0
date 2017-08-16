@@ -1,173 +1,101 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 17/29] ptrmap: core implementation
-Date: Wed, 16 Aug 2017 17:34:43 +0200
-Message-ID: <20170816153455.97693-18-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 25/29] sssa: reorg load_var()
+Date: Wed, 16 Aug 2017 17:34:51 +0200
+Message-ID: <20170816153455.97693-26-luc.vanoostenryck@gmail.com>
 References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:34072 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751471AbdHPPfj (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34199 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751635AbdHPPfw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Aug 2017 11:35:39 -0400
-Received: by mail-wr0-f194.google.com with SMTP id x43so3698110wrb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:38 -0700 (PDT)
+        Wed, 16 Aug 2017 11:35:52 -0400
+Received: by mail-wr0-f195.google.com with SMTP id x43so3699116wrb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 08:35:52 -0700 (PDT)
 In-Reply-To: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Sparse currently has a memory efficient implementation for lists
-of pointers to some objects.
-
-These are used for 2 different purposes:
-- either for a simple set of objects
-- either as a sequence (ordered) of objects.
-
-Incoming develpment has another need:
-- a map of object (aka: dictionnary, table, ...)
-where the only needed operations are:
-- add a new element (with it's key)
-- replace the element corresponding to a key)
-- lookup an element via it's key
-
-The implementation done in this patch is a very simple one
-based on list of blocks of key-value pairs.
-
-The idea being to later switch to a dynamic structure using
-a hash-table as soon as the number of element reach some threshold.
-However, these hash-table are only needed for some huge
-and artificial input files.
+No functional changes here. Only shuffling some code
+arround to make the next patch more readable.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile |  1 +
- ptrmap.c | 84 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- ptrmap.h | 12 ++++++++++
- 3 files changed, 97 insertions(+)
- create mode 100644 ptrmap.c
- create mode 100644 ptrmap.h
+ ssa.c | 25 +++++++++++++++----------
+ 1 file changed, 15 insertions(+), 10 deletions(-)
 
-diff --git a/Makefile b/Makefile
-index 48e1f508f..762aee505 100644
---- a/Makefile
-+++ b/Makefile
-@@ -117,6 +117,7 @@ LIB_OBJS= target.o parse.o tokenize.o pre-process.o symbol.o lib.o scope.o \
- 	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
- 	  char.o sort.o allocate.o compat-$(OS).o ptrlist.o \
- 	  builtin.o \
-+	  ptrmap.o \
- 	  stats.o \
- 	  flow.o cse.o simplify.o memops.o liveness.o storage.o unssa.o dissect.o
+diff --git a/ssa.c b/ssa.c
+index 10279a602..7950ffeaf 100644
+--- a/ssa.c
++++ b/ssa.c
+@@ -13,6 +13,9 @@
+ #include <assert.h>
  
-diff --git a/ptrmap.c b/ptrmap.c
-new file mode 100644
-index 000000000..2a08380c9
---- /dev/null
-+++ b/ptrmap.c
-@@ -0,0 +1,84 @@
-+#include "ptrmap.h"
-+#include "allocate.h"
-+#include <stddef.h>
+ 
++static pseudo_t load_var_(struct basic_block*, struct symbol*);
 +
-+#define	MAP_NR	7
 +
-+struct ptrpair {
-+	void *key;
-+	void *val;
-+};
-+struct ptrmap {
-+	struct ptrmap *next;
-+	int nr;
-+	struct ptrpair pairs[MAP_NR];
-+};
+ // FIXME: -> common file
+ static void append_instruction(struct basic_block *bb, struct instruction *insn)
+ {
+@@ -28,7 +31,7 @@ static pseudo_t add_phi_operand(struct symbol *var, pseudo_t phi)
+ 	struct basic_block *parent;
+ 
+ 	FOR_EACH_PTR(node->bb->parents, parent) {
+-		pseudo_t val = load_var(parent, var);
++		pseudo_t val = load_var_(parent, var);
+ 		struct instruction *phisrc = alloc_phisrc(val, var);
+ 		pseudo_t src = phisrc->target;
+ 		append_instruction(parent, phisrc);
+@@ -38,9 +41,15 @@ static pseudo_t add_phi_operand(struct symbol *var, pseudo_t phi)
+ 	return phi;
+ }
+ 
+-static pseudo_t load_var_parents(struct basic_block *bb, struct symbol *var)
++static pseudo_t load_var_(struct basic_block *bb, struct symbol *var)
+ {
+-	pseudo_t val;
++	pseudo_t val = phi_map_lookup(var->phi_map, bb);
 +
-+DECLARE_ALLOCATOR(ptrmap);
-+ALLOCATOR(ptrmap, "ptrmap");
-+
-+void __ptrmap_add(struct ptrmap **mapp, void *key, void *val)
-+{
-+	struct ptrmap *head = *mapp;
-+	struct ptrmap *newmap;
-+	struct ptrmap *map;
-+	struct ptrpair *pair;
-+	int nr;
-+
-+	if ((map = head)) {
-+		struct ptrmap *next = map->next;
-+		if (next)		// head is full
-+			map = next;
-+		if ((nr = map->nr) < MAP_NR)
-+			goto oldmap;
++	if (val) {
++		while (val->type == PSEUDO_INDIR)
++			val = val->target;
++		return val;
 +	}
-+
-+	// need a new block
-+	newmap = __alloc_ptrmap(0);
-+	if (!head) {
-+		*mapp = newmap;
-+	} else {
-+		newmap->next = head->next;
-+		head->next = newmap;
-+	}
-+	map = newmap;
-+	nr = 0;
-+
-+oldmap:
-+	pair = &map->pairs[nr];
-+	pair->key = key;
-+	pair->val = val;
-+	map->nr = ++nr;
-+}
-+
-+void *__ptrmap_lookup(struct ptrmap *map, void *key)
-+{
-+	for (; map; map = map->next) {
-+		int i, n = map->nr;
-+		for (i = 0; i < n; i++) {
-+			struct ptrpair *pair = &map->pairs[i];
-+			if (pair->key == key)
-+				return pair->val;
-+		}
-+	}
-+	return NULL;
-+}
-+
-+void __ptrmap_update(struct ptrmap **mapp, void *key, void *val)
-+{
-+	struct ptrmap *map = *mapp;
-+
-+	for (; map; map = map->next) {
-+		int i, n = map->nr;
-+		for (i = 0; i < n; i++) {
-+			struct ptrpair *pair = &map->pairs[i];
-+			if (pair->key == key) {
-+				if (pair->val != val)
-+					pair->val = val;
-+				return;
-+			}
-+		}
-+	}
-+
-+	__ptrmap_add(mapp, key, val);
-+}
-diff --git a/ptrmap.h b/ptrmap.h
-new file mode 100644
-index 000000000..070db15e2
---- /dev/null
-+++ b/ptrmap.h
-@@ -0,0 +1,12 @@
-+#ifndef PTRMAP_H
-+#define PTRMAP_H
-+
-+struct ptrmap;
-+
-+
-+/* ptrmap.c */
-+void __ptrmap_add(struct ptrmap **mapp, void *key, void *val);
-+void __ptrmap_update(struct ptrmap **mapp, void *key, void *val);
-+void *__ptrmap_lookup(struct ptrmap *map, void *key);
-+
-+#endif
+ 
+ 	if (!bb->sealed) {	// incomplete CFG
+ 		val = insert_phi_node(bb, var);
+@@ -54,7 +63,7 @@ static pseudo_t load_var_parents(struct basic_block *bb, struct symbol *var)
+ 		val = undef_pseudo();
+ 		break;
+ 	case 1: // no phi needed
+-		val = load_var(first_basic_block(bb->parents), var);
++		val = load_var_(first_basic_block(bb->parents), var);
+ 		break;
+ 	default:
+ 		val = insert_phi_node(bb, var);
+@@ -64,18 +73,14 @@ static pseudo_t load_var_parents(struct basic_block *bb, struct symbol *var)
+ 	}
+ 
+ out:
++	assert(val->type != PSEUDO_INDIR);
+ 	store_var(bb, var, val);
+ 	return val;
+ }
+ 
+ pseudo_t load_var(struct basic_block *bb, struct symbol *var)
+ {
+-	pseudo_t val = phi_map_lookup(var->phi_map, bb);
+-	if (!val)
+-		val = load_var_parents(bb, var);
+-	while (val->type == PSEUDO_INDIR)
+-		val = val->target;
+-	return val;
++	return load_var_(bb, var);
+ }
+ 
+ void store_var(struct basic_block *bb, struct symbol *var, pseudo_t val)
 -- 
 2.14.0
 
