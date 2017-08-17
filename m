@@ -1,346 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 01/14] add documentation for IR instructions
-Date: Thu, 17 Aug 2017 06:05:16 +0200
-Message-ID: <20170817040529.7289-2-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 02/14] cast: add tests for warnings issued by sparse -v
+Date: Thu, 17 Aug 2017 06:05:17 +0200
+Message-ID: <20170817040529.7289-3-luc.vanoostenryck@gmail.com>
 References: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:38329 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750755AbdHQEFk (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:35153 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750755AbdHQEFm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Aug 2017 00:05:40 -0400
-Received: by mail-wr0-f195.google.com with SMTP id 49so32917wrw.5
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:40 -0700 (PDT)
+        Thu, 17 Aug 2017 00:05:42 -0400
+Received: by mail-wr0-f194.google.com with SMTP id p8so123644wrf.2
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:41 -0700 (PDT)
 In-Reply-To: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Until now the 'instructions' used for spare's IR are
-not at all documented.
+The sparse command (aka the 'checker') do a number of additional
+checks when used with the -v flag. I strongly believes that this
+option is rarely used let me not disgress about it here.
 
-This patch is a fist step toward having these instructions
-properly documented.
+One of this additional checks are about casts.
+Let add soe testcase in thr tessuite in order to avoid any
+regression there.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/IR.md | 306 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 306 insertions(+)
- create mode 100644 Documentation/IR.md
+ validation/cast-kinds-check.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+ create mode 100644 validation/cast-kinds-check.c
 
-diff --git a/Documentation/IR.md b/Documentation/IR.md
+diff --git a/validation/cast-kinds-check.c b/validation/cast-kinds-check.c
 new file mode 100644
-index 000000000..7e13e740d
+index 000000000..f3ece313a
 --- /dev/null
-+++ b/Documentation/IR.md
-@@ -0,0 +1,306 @@
-+# Sparse Instructions (IR)
++++ b/validation/cast-kinds-check.c
+@@ -0,0 +1,26 @@
++#include "cast-kinds.c"
 +
-+## General
-+Sparse's instructions clearly belong to the family of
-+3-addresses code: most instruction taking one or two
-+operands and produce one result.
-+
-+Concretely, things are a bit more complex as a few instructions
-+take 3 operands and some take an unbounded number of operands.
-+The type of each of these operands can also differs.
-+
-+Operands, result and some parameters are stored in the members
-+of a `struct instruction`.
-+Some of these members are used by almost all instructions,
-+some others are specific to only one or a few instructions.
-+The common ones are:
-+- `.src1`, `.src2`, `.src3`: operands of binops or ternary ops, type is `pseudo_t`.
-+- `.src`: operand of unary ops (alias for `.src1`), type is `pseudo_t`.
-+- `.target`: result of unary, binary & ternary ops, is sometimes used
-+	otherwise by some others instructions, type is `pseudo_t`.
-+- `.cond`: input operands for condition (alias `.target`!), type is `pseudo_t`.
-+- `.type`: usually the type of `.result`, sometimes of the operands, type is `struct symbol *`.
-+
-+## Terminators
-+### OP_RET
-+Return from subroutine.
-+- `.src` : returned value (NULL if void)
-+- `.type`: type of `.src`
-+
-+### OP_BR
-+Unconditional branch
-+- `.bb_true`: destination basic block
-+
-+### OP_CBR
-+Conditional branch
-+- `.cond`: condition
-+- `.type`: type of `.cond`, must be an integral type
-+- `.bb_true`, `.bb_false`: destination basic blocks
-+
-+### OP_SWITCH
-+Switch / multi-branch
-+- `.cond`: condition
-+- `.type`: type of `.cond`, must be an integral type
-+- `.multijmp_list`: pairs of case-value - destination basic block
-+
-+### OP_COMPUTEDGOTO
-+Computed goto / branch to register
-+- `.target`: target address (type is irrelevant, void*)
-+- `.multijmp_list`: list of possible destination basic blocks
-+
-+## Arithmetic binops
-+They all follow the same signature:
-+- `.src1`, `.src2`: operands (types must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`
-+
-+### OP_ADD
-+Addition.
-+
-+### OP_SUB
-+Subtraction.
-+
-+### OP_MULU
-+Multiplication (unsigned ints & floating-points)
-+
-+### OP_MULS
-+Multiplication (signed ints)
-+
-+### OP_DIVU
-+Division (unsigned ints & floating-points)
-+
-+### OP_DIVS
-+Division (signed ints)
-+
-+### OP_MODU
-+Modulo (unsigned division remainder, integer only)
-+
-+### OP_MODS
-+Modulo (signed division remainder, integer only)
-+
-+### OP_SHL
-+Shift left (integer only)
-+
-+### OP_LSR
-+Logical Shift right (integer only)
-+
-+### OP_ASR
-+Arithmetic Shift right (integer only)
-+
-+## Logical ops
-+They all follow the same signature:
-+- `.src1`, `.src2`: operands (types must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`, must be an integral type
-+
-+### OP_AND
-+### OP_OR
-+### OP_XOR
-+
-+## Boolean ops
-+### OP_AND_BOOL
-+### OP_OR_BOOL
-+
-+## Comparisons
-+They all have the following signature:
-+- `.src1`, `.src2`: operands (types must be compatible)
-+- `.target`: result of the operation (0/1 valued integer)
-+- `.type`: type of `.target`, must be an integral type
-+
-+### OP_SET_EQ
-+Compare equal.
-+
-+### OP_SET_NE
-+Compare not-equal.
-+
-+### OP_SET_LE
-+Compare less-than-or-equal (signed).
-+
-+### OP_SET_GE
-+Compare greater-than-or-equal (signed).
-+
-+### OP_SET_LT
-+Compare less-than (signed).
-+
-+### OP_SET_GT
-+Compare greater-than (signed).
-+
-+### OP_SET_B
-+Compare less-than (unsigned).
-+
-+### OP_SET_A
-+Compare greater-than (unsigned).
-+
-+### OP_SET_BE
-+Compare less-than-or-equal (unsigned).
-+
-+### OP_SET_AE
-+Compare greater-than-or-equal (unsigned).
-+
-+## Unary ops
-+### OP_NOT
-+Logical not.
-+- `.src`: operand (type must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`, must be an integral type
-+
-+### OP_NEG
-+Arithmetic negation.
-+- `.src`: operand (type must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`
-+
-+## Type conversions
-+They all have the following signature:
-+- `.src`: source value
-+- `.orig_type`: type of `.src`
-+- `.target`: result value
-+- `.type`: type of `.target`
-+
-+### OP_CAST
-+Cast to unsigned integer (and to void pointer).
-+
-+### OP_SCAST
-+Cast to signed integer.
-+
-+### OP_FPCAST
-+Cast to floating-point.
-+
-+### OP_PTRCAST
-+Cast to pointer.
-+
-+## Ternary ops
-+### OP_SEL
-+- `.src1`: condition, must be of integral type
-+- `.src2`, `.src3`: operands (types must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`
-+
-+## Memory ops
-+### OP_LOAD
-+Load.
-+- `.src`: base address to load from
-+- `.offset`: address offset
-+- `.target`: loaded value
-+- `.type`: type of `.target`
-+
-+### OP_STORE
-+Store.
-+- `.src`: base address to store to
-+- `.offset`: address offset
-+- `.target`: value to be stored
-+- `.type`: type of `.target`
-+
-+## Others
-+### OP_SYMADDR
-+Create a pseudo corresponding to the address of a symbol.
-+- `.symbol`: input symbol (alias `.src`), type is `pseudo_t`
-+- `.target`: symbol's address
-+
-+### OP_SETVAL
-+Create a pseudo corresponding to a value.
-+The value is given as an expression EXPR_STRING, EXPR_FVALUE or
-+EXPR_LABEL (pseudos for integral constants are directly created
-+at linearization and doesn't need this instruction)
-+- `.val`: (expression) input expression
-+- `.target`: the resulting value
-+- `.type`: type of `.target`, the value
-+
-+### OP_PHI
-+Phi-node (for SSA form).
-+- `.phi_list`: phi-operands (type must be compatible with `.target`)
-+- `.target`: "result"
-+- `.type`: type of `.target`
-+
-+### OP_PHISOURCE
-+Phi-node source.
-+Like OP_COPY but exclusively used to give a defining instructions
-+(and thus also a type) to *all* OP_PHI operands.
-+- `.phi_src`: operand (type must be compatible with `.target`, alias `.src`)
-+- `.target`: the "result" PSEUDO_PHI
-+- `.type`: type of `.target`
-+- `.phi_users`: list of phi instructions using the target pseudo
-+
-+### OP_PUSH
-+Give an argument to the following OP_CALL.
-+- `.arg`: argument (alias `.src`), type is `pseudo_t`
-+- `.type`: type of `.src`
-+- `.call`: corresponding instruction
-+
-+### OP_CALL
-+Function call.
-+- `.func`: the function (can be a symbol or a "register", alias `.src`)), type is `pseudo_t`
-+- `.arguments`: list of the associated OP_PUSH instructions
-+- `.target`: function return value (if any)
-+- `.type`: type of `.target`
-+- `.fntype`: the full function type
-+
-+### OP_INLINED_CALL
-+Only used as an annotation to show that the instructions just above
-+correspond to a function that have been inlined.
-+- `.func`: the function (must be a symbol, alias `.src`)), type is `pseudo_t`
-+- `.inlined_args`: list of pseudos that where the function's arguments
-+- `.target`: function return value (if any)
-+- `.type`: type of `.target`
-+- `.fntype`: the full function type
-+
-+### OP_SLICE
-+Extract a "slice" from an aggregate.
-+- `.base`: aggregate (alias `.src`), type is `pseudo_t`
-+- `.from`, `.len`: offet & size of the "slice" within the aggregate
-+- `.target`: result
-+- `.type`: type of `.target`
-+
-+### OP_ASM
-+Inlined assembly code.
-+- `.string`: asm template
-+- `.asm_rules`: asm constraints, rules
-+
-+## Sparse tagging (line numbers, context, whatever)
-+### OP_CONTEXT
-+Currently only used for lock/unlock tracking.
-+- `.context_expr`: unused
-+- `.increment`: (1 for locking, -1 for unlocking)
-+- `.check`: (ignore the instruction if 0)
-+
-+## Misc ops
-+### OP_ENTRY
-+Function entry point (no associated semantic).
-+
-+### OP_BADOP
-+Invalid operation (should never be generated).
-+
-+### OP_NOP
-+No-op (should never be generated).
-+
-+### OP_SNOP
-+Store no-op (removed store operation).
-+
-+### OP_LNOP
-+Load no-op (removed load operation).
-+
-+### OP_DEATHNOTE
-+Annotation telling the pseudo will be death after the next
-+instruction (other than some other annotation, that is).
-+
-+### OP_COPY
-+Copy (only needed after out-of-SSA).
-+- `.src`: operand (type must be compatible with `.target`)
-+- `.target`: result of the operation
-+- `.type`: type of `.target`
-+
-+### OP_RANGE
-+Range/bounds checking (only used for an unused sparse extension).
-+- `.src1`: value to be checked
-+- `.src2`, src3: bound of the value (must be constants?)
-+- `.type`: type of `.src`
-+
-+## Unused ops
-+### OP_VANEXT
-+### OP_VAARG
-+### OP_MALLOC
-+### OP_FREE
-+### OP_ALLOCA
-+### OP_GET_ELEMENT_PTR
-+### OP_INVOKE
-+### OP_UNWIND
++/*
++ * check-name: cast-kinds check
++ * check-command: sparse -m64 -v $file
++ *
++ * check-error-start
++cast-kinds.c:5:45: warning: cast drops bits
++cast-kinds.c:6:47: warning: cast drops bits
++cast-kinds.c:7:46: warning: cast drops bits
++cast-kinds.c:8:45: warning: cast drops bits
++cast-kinds.c:10:49: warning: cast drops bits
++cast-kinds.c:12:48: warning: cast drops bits
++cast-kinds.c:13:50: warning: cast drops bits
++cast-kinds.c:14:49: warning: cast drops bits
++cast-kinds.c:15:48: warning: cast drops bits
++cast-kinds.c:17:52: warning: cast drops bits
++cast-kinds.c:21:49: warning: cast wasn't removed
++cast-kinds.c:22:48: warning: cast wasn't removed
++cast-kinds.c:28:52: warning: cast wasn't removed
++cast-kinds.c:29:51: warning: cast wasn't removed
++cast-kinds.c:34:52: warning: cast wasn't removed
++cast-kinds.c:35:54: warning: cast wasn't removed
++cast-kinds.c:36:52: warning: cast wasn't removed
++ * check-error-end
++ */
 -- 
 2.14.0
 
