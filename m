@@ -1,60 +1,48 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Thu, 17 Aug 2017 10:09:20 +0200
-Message-ID: <20170817080920.5ljlkktngw2cisfg@gmail.com>
-References: <20170810172615.51965-1-thgarnie@google.com>
- <20170811124127.kkb5pnkljz4umxuj@gmail.com>
- <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
- <20170815075609.mmzbfwritjzvrpsn@gmail.com>
- <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com>
- <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH 00/29] Simple & Efficient SSA construction.
+Date: Thu, 17 Aug 2017 11:10:05 +0100
+Message-ID: <CACXZuxdW5Mu6bzZZRiDySw6U52sPA4do3mP6=H1x9WP77ZtPxg@mail.gmail.com>
+References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com> <CANeU7Q=+Jeuz41pDMVwqDNoCVj8C8bk=nx6+LY8uXcdP5pRiPw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-9498-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
-To: Thomas Garnier <thgarnie@google.com>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-vk0-f53.google.com ([209.85.213.53]:37851 "EHLO
+        mail-vk0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752685AbdHQKKG (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 17 Aug 2017 06:10:06 -0400
+Received: by mail-vk0-f53.google.com with SMTP id r199so20747657vke.4
+        for <linux-sparse@vger.kernel.org>; Thu, 17 Aug 2017 03:10:06 -0700 (PDT)
+In-Reply-To: <CANeU7Q=+Jeuz41pDMVwqDNoCVj8C8bk=nx6+LY8uXcdP5pRiPw@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
+Hi Chris,
 
-* Thomas Garnier <thgarnie@google.com> wrote:
+On 17 August 2017 at 05:42, Christopher Li <sparse@chrisli.org> wrote:
+> On Wed, Aug 16, 2017 at 11:34 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> The goal of this series is to implement and integrate to sparse
+>> the method described in the paper:
+>>     "Simple and Efficient Construction of Static Single Assignment Form"
+>>         by Matthias Braun, Sebastian Buchwald, Sebastian Hack,
+>>            Roland Leissa, Christoph Mallon and Andreas Zwinkau.
+>>     cfr. http://www.cdl.uni-saarland.de/papers/bbhlmz13cc.pdf
+>>
+> BTW, how do you want your patches to be merged? Assume there is
+> some feed back. Do you want to come up with V2 V3 or have them merged
+> to master then come up with fix up on master?
+>
 
-> > > -model=small/medium assume you are on the low 32-bit. It generates 
-> > > instructions where the virtual addresses have the high 32-bit to be zero.
-> >
-> > How are these assumptions hardcoded by GCC? Most of the instructions should be 
-> > relocatable straight away, as most call/jump/branch instructions are 
-> > RIP-relative.
-> 
-> I think PIE is capable to use relative instructions well. mcmodel=large assumes 
-> symbols can be anywhere.
+Please could we avoid redoing the patch series unless there is
+something fundamentally wrong with the whole series such as missing
+log messages or signoffs? I would suggest that we simply apply fixes
+on top of the series if needed - and indeed if you want to change
+something that would enable you to apply the fix as well.
 
-So if the numbers in your changelog and Kconfig text cannot be trusted, there's 
-this description of the size impact which I suspect is less susceptible to 
-measurement error:
+This certainly makes downstream projects such as dmrC easier to maintain.
 
-+         The kernel and modules will generate slightly more assembly (1 to 2%
-+         increase on the .text sections). The vmlinux binary will be
-+         significantly smaller due to less relocations.
-
-... but describing a 1-2% kernel text size increase as "slightly more assembly" 
-shows a gratituous disregard to kernel code generation quality! In reality that's 
-a huge size increase that in most cases will almost directly transfer to a 1-2% 
-slowdown for kernel intense workloads.
-
-Where does that size increase come from, if PIE is capable of using relative 
-instructins well? Does it come from the loss of a generic register and the 
-resulting increase in register pressure, stack spills, etc.?
-
-So I'm still unhappy about this all, and about the attitude surrounding it.
-
-Thanks,
-
-	Ingo
+Thanks and Regards
+Dibyendu
