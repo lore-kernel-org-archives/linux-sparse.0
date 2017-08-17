@@ -1,36 +1,60 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 11/29] add PSEUDO_UNDEF
-Date: Thu, 17 Aug 2017 03:30:28 -0400
-Message-ID: <CANeU7Q=8Q5HtN9mkS3t7GX9E=+eM1kp+57x1mqUBGy2fUZrJFQ@mail.gmail.com>
-References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com> <20170816153455.97693-12-luc.vanoostenryck@gmail.com>
+From: Ingo Molnar <mingo@kernel.org>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Thu, 17 Aug 2017 10:09:20 +0200
+Message-ID: <20170817080920.5ljlkktngw2cisfg@gmail.com>
+References: <20170810172615.51965-1-thgarnie@google.com>
+ <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+ <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+ <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+ <20170816151235.oamkdva6cwpc4cex@gmail.com>
+ <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:34078 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750939AbdHQHa3 (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Aug 2017 03:30:29 -0400
-Received: by mail-yw0-f179.google.com with SMTP id s143so36183540ywg.1
-        for <linux-sparse@vger.kernel.org>; Thu, 17 Aug 2017 00:30:29 -0700 (PDT)
-In-Reply-To: <20170816153455.97693-12-luc.vanoostenryck@gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-9498-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Wed, Aug 16, 2017 at 11:34 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Processing in the middle-end are much easier if undefined values
-> have been clearly identified. Once done, we can then make
-> choices like:
-> - always initialize them to zero
-> - allow arbitraly simplification,
 
-Can pick arbitrate initialized value, but can't do arbitraly simplification.
+* Thomas Garnier <thgarnie@google.com> wrote:
 
-The chance looks good. I need to take a crash now.
+> > > -model=small/medium assume you are on the low 32-bit. It generates 
+> > > instructions where the virtual addresses have the high 32-bit to be zero.
+> >
+> > How are these assumptions hardcoded by GCC? Most of the instructions should be 
+> > relocatable straight away, as most call/jump/branch instructions are 
+> > RIP-relative.
+> 
+> I think PIE is capable to use relative instructions well. mcmodel=large assumes 
+> symbols can be anywhere.
 
-To be continue...
+So if the numbers in your changelog and Kconfig text cannot be trusted, there's 
+this description of the size impact which I suspect is less susceptible to 
+measurement error:
 
-Chris
++         The kernel and modules will generate slightly more assembly (1 to 2%
++         increase on the .text sections). The vmlinux binary will be
++         significantly smaller due to less relocations.
+
+... but describing a 1-2% kernel text size increase as "slightly more assembly" 
+shows a gratituous disregard to kernel code generation quality! In reality that's 
+a huge size increase that in most cases will almost directly transfer to a 1-2% 
+slowdown for kernel intense workloads.
+
+Where does that size increase come from, if PIE is capable of using relative 
+instructins well? Does it come from the loss of a generic register and the 
+resulting increase in register pressure, stack spills, etc.?
+
+So I'm still unhappy about this all, and about the attitude surrounding it.
+
+Thanks,
+
+	Ingo
