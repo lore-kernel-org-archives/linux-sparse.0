@@ -1,68 +1,91 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 02/14] cast: add tests for warnings issued by sparse -v
-Date: Thu, 17 Aug 2017 06:05:17 +0200
-Message-ID: <20170817040529.7289-3-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 05/14] cast: handle NO-OP casts
+Date: Thu, 17 Aug 2017 06:05:20 +0200
+Message-ID: <20170817040529.7289-6-luc.vanoostenryck@gmail.com>
 References: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:35153 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750755AbdHQEFm (ORCPT
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34588 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750755AbdHQEFu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Aug 2017 00:05:42 -0400
-Received: by mail-wr0-f194.google.com with SMTP id p8so123644wrf.2
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:41 -0700 (PDT)
+        Thu, 17 Aug 2017 00:05:50 -0400
+Received: by mail-wr0-f193.google.com with SMTP id x43so6181332wrb.1
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:49 -0700 (PDT)
 In-Reply-To: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The sparse command (aka the 'checker') do a number of additional
-checks when used with the -v flag. I strongly believes that this
-option is rarely used let me not disgress about it here.
+Some casts, the ones which deosn't chnage the size or the resulting
+'machine type', are no-op.
 
-One of this additional checks are about casts.
-Let add soe testcase in thr tessuite in order to avoid any
-regression there.
+Directly simplify away such casts.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/cast-kinds-check.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
- create mode 100644 validation/cast-kinds-check.c
+ linearize.c             |  8 ++++++++
+ validation/cast-kinds.c | 15 +++++++++++++++
+ 2 files changed, 23 insertions(+)
 
-diff --git a/validation/cast-kinds-check.c b/validation/cast-kinds-check.c
-new file mode 100644
-index 000000000..f3ece313a
---- /dev/null
-+++ b/validation/cast-kinds-check.c
-@@ -0,0 +1,26 @@
-+#include "cast-kinds.c"
+diff --git a/linearize.c b/linearize.c
+index 7f8dbc64a..3f8d955c5 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1161,6 +1161,8 @@ static int get_cast_opcode(struct symbol *dst, struct symbol *src)
+ 	case MTYPE_FLOAT:
+ 		switch (stype) {
+ 		case MTYPE_FLOAT:
++			if (dst->bit_size == src->bit_size)
++				return OP_NOP;
+ 			return OP_FCVTF;
+ 		case MTYPE_UINT:
+ 			return OP_UCVTF;
+@@ -1198,6 +1200,12 @@ static pseudo_t cast_pseudo(struct entrypoint *ep, pseudo_t src, struct symbol *
+ 	if (from->bit_size < 0 || to->bit_size < 0)
+ 		return VOID;
+ 	opcode = get_cast_opcode(to, from);
++	switch (opcode) {
++	case OP_NOP:
++		return src;
++	default:
++		break;
++	}
+ 	insn = alloc_typed_instruction(opcode, to);
+ 	result = alloc_pseudo(insn);
+ 	insn->target = result;
+diff --git a/validation/cast-kinds.c b/validation/cast-kinds.c
+index 34bf685d2..0312bc92b 100644
+--- a/validation/cast-kinds.c
++++ b/validation/cast-kinds.c
+@@ -50,6 +50,9 @@ static double long_2_double(long a) { return (double)a; }
+ static double ulong_2_double(ulong a) { return (double)a; }
+ static double float_2_double(float a) { return (double)a; }
+ 
++static float float_2_float(float a) { return a; }
++static double double_2_double(double a) { return a; }
 +
-+/*
-+ * check-name: cast-kinds check
-+ * check-command: sparse -m64 -v $file
-+ *
-+ * check-error-start
-+cast-kinds.c:5:45: warning: cast drops bits
-+cast-kinds.c:6:47: warning: cast drops bits
-+cast-kinds.c:7:46: warning: cast drops bits
-+cast-kinds.c:8:45: warning: cast drops bits
-+cast-kinds.c:10:49: warning: cast drops bits
-+cast-kinds.c:12:48: warning: cast drops bits
-+cast-kinds.c:13:50: warning: cast drops bits
-+cast-kinds.c:14:49: warning: cast drops bits
-+cast-kinds.c:15:48: warning: cast drops bits
-+cast-kinds.c:17:52: warning: cast drops bits
-+cast-kinds.c:21:49: warning: cast wasn't removed
-+cast-kinds.c:22:48: warning: cast wasn't removed
-+cast-kinds.c:28:52: warning: cast wasn't removed
-+cast-kinds.c:29:51: warning: cast wasn't removed
-+cast-kinds.c:34:52: warning: cast wasn't removed
-+cast-kinds.c:35:54: warning: cast wasn't removed
-+cast-kinds.c:36:52: warning: cast wasn't removed
-+ * check-error-end
-+ */
+ /*
+  * check-name: cast-kinds
+  * check-command: test-linearize -m64 $file
+@@ -383,5 +386,17 @@ float_2_double:
+ 	ret.64      %r143
+ 
+ 
++float_2_float:
++.L96:
++	<entry-point>
++	ret.32      %arg1
++
++
++double_2_double:
++.L98:
++	<entry-point>
++	ret.64      %arg1
++
++
+  * check-output-end
+  */
 -- 
 2.14.0
 
