@@ -1,959 +1,519 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 14/14] cast: specialize integer casts
-Date: Thu, 17 Aug 2017 06:05:29 +0200
-Message-ID: <20170817040529.7289-15-luc.vanoostenryck@gmail.com>
-References: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 00/29] Simple & Efficient SSA construction.
+Date: Thu, 17 Aug 2017 00:42:19 -0400
+Message-ID: <CANeU7Q=+Jeuz41pDMVwqDNoCVj8C8bk=nx6+LY8uXcdP5pRiPw@mail.gmail.com>
+References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34694 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750741AbdHQEGK (ORCPT
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:34442 "EHLO
+        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750734AbdHQEmV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Aug 2017 00:06:10 -0400
-Received: by mail-wr0-f196.google.com with SMTP id x43so6182099wrb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:06:09 -0700 (PDT)
-In-Reply-To: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
+        Thu, 17 Aug 2017 00:42:21 -0400
+Received: by mail-yw0-f176.google.com with SMTP id s143so34564664ywg.1
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:42:21 -0700 (PDT)
+In-Reply-To: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-Aoo cast to unsigned integer and signed integer used to be
-done with 2 instructions: OP_CAST & OP_SCAST.
+On Wed, Aug 16, 2017 at 11:34 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The goal of this series is to implement and integrate to sparse
+> the method described in the paper:
+>     "Simple and Efficient Construction of Static Single Assignment Form"
+>         by Matthias Braun, Sebastian Buchwald, Sebastian Hack,
+>            Roland Leissa, Christoph Mallon and Andreas Zwinkau.
+>     cfr. http://www.cdl.uni-saarland.de/papers/bbhlmz13cc.pdf
+>
+> In the present case, the principal motivation to use this method
+> is that the current one in sparse is severely broken.
+>
+>
+> The series is also available in the git repository at:
+>
+>   git://github.com/lucvoo/sparse.git sssa-mini-v1
+>
+> for you to fetch changes up to 98a21bc0c82af5115687c7e03a277519836bcac6:
+>
+>   sssa: remove now unneeded simplify_one_symbol() (2017-08-16 17:25:25 +0200)
 
-Those are not very convenient as they don't reflect the real
-operation that need to be done.
-This patch specialize thises instruction in 4:
-- OP_TRUNC, for casts to a smaller type
-- OP_ZEXT,  for cast that need a zero extension
-- OP_SEXT,  for cast that need a sign extension
-Integer-to-integer casts of the same size are treated
-as a NOP and in fact are never emitted.
+Hi Luc,
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- Documentation/IR.md                    |  11 +-
- cse.c                                  |   8 +-
- example.c                              |   9 +-
- linearize.c                            |  27 +++--
- linearize.h                            |   5 +-
- liveness.c                             |   4 +-
- simplify.c                             |  36 +++----
- sparse-llvm.c                          |  15 ++-
- sparse.c                               |   5 +-
- validation/bitfield-size.c             |   5 +-
- validation/builtin-bswap-variable.c    |   4 +-
- validation/cast-kinds-check.c          |   5 -
- validation/cast-kinds.c                | 179 ++++++++++++++++-----------------
- validation/cast-weirds.c               |   8 +-
- validation/compound-assign-type.c      |   3 +-
- validation/linear/bitfield-init-zero.c |   8 +-
- validation/memops-volatile.c           |   4 +-
- validation/optim/bool-simplify.c       |   4 +-
- 18 files changed, 171 insertions(+), 169 deletions(-)
+Thank you so much for the patch.
 
-diff --git a/Documentation/IR.md b/Documentation/IR.md
-index dcfd89bb6..e0299aba0 100644
---- a/Documentation/IR.md
-+++ b/Documentation/IR.md
-@@ -160,11 +160,14 @@ They all have the following signature:
- Currently, a cast to a void pointer is treated like a
- cast to an unsigned integer of the same size.
- 
--### OP_CAST
--Cast to unsigned integer.
-+### OP_TRUNC
-+Cast from integer to an integer of a smaller size.
- 
--### OP_SCAST
--Cast to signed integer.
-+### OP_SEXT
-+Cast from integer to an integer of a bigger size with sign extension.
-+
-+### OP_ZEXT
-+Cast from integer to an integer of a bigger size with zero extension.
- 
- ### OP_UTPTR
- Cast from pointer-sized unsigned integer to pointer type.
-diff --git a/cse.c b/cse.c
-index 166b7cda6..790e7b663 100644
---- a/cse.c
-+++ b/cse.c
-@@ -86,8 +86,8 @@ static void clean_up_one_instruction(struct basic_block *bb, struct instruction
- 		hash += hashval(insn->symbol);
- 		break;
- 
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_PTRCAST:
- 	case OP_UTPTR: case OP_PTRTU:
- 		/*
-@@ -231,8 +231,8 @@ static int insn_compare(const void *_i1, const void *_i2)
- 	case OP_PHI:
- 		return phi_list_compare(i1->phi_list, i2->phi_list);
- 
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_PTRCAST:
- 	case OP_UTPTR: case OP_PTRTU:
- 		/*
-diff --git a/example.c b/example.c
-index 3a0ec0747..7192fc462 100644
---- a/example.c
-+++ b/example.c
-@@ -81,8 +81,9 @@ static const char *opcodes[] = {
- 	[OP_PHI] = "phi",
- 	[OP_PHISOURCE] = "phisrc",
- 	[OP_COPY] = "copy",
--	[OP_CAST] = "cast",
--	[OP_SCAST] = "scast",
-+	[OP_SEXT] = "sext",
-+	[OP_ZEXT] = "zext",
-+	[OP_TRUNC] = "trunc",
- 	[OP_FCVTU] = "fcvtu",
- 	[OP_FCVTS] = "fcvts",
- 	[OP_UCVTF] = "ucvtf",
-@@ -1426,7 +1427,9 @@ static void generate_one_insn(struct instruction *insn, struct bb_state *state)
- 		generate_compare(state, insn);
- 		break;
- 
--	case OP_CAST: case OP_SCAST: case OP_PTRCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
-+	case OP_PTRCAST:
- 	case OP_UTPTR:
- 	case OP_PTRTU:
- 	case OP_FCVTU: case OP_FCVTS:
-diff --git a/linearize.c b/linearize.c
-index 5d6cf7385..da33fe09b 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -228,8 +228,9 @@ static const char *opcodes[] = {
- 	/* Other */
- 	[OP_PHI] = "phi",
- 	[OP_PHISOURCE] = "phisrc",
--	[OP_CAST] = "cast",
--	[OP_SCAST] = "scast",
-+	[OP_SEXT] = "sext",
-+	[OP_ZEXT] = "zext",
-+	[OP_TRUNC] = "trunc",
- 	[OP_FCVTU] = "fcvtu",
- 	[OP_FCVTS] = "fcvts",
- 	[OP_UCVTF] = "ucvtf",
-@@ -429,8 +430,8 @@ const char *show_instruction(struct instruction *insn)
- 		} END_FOR_EACH_PTR(arg);
- 		break;
- 	}
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-@@ -1194,13 +1195,14 @@ static int get_cast_opcode(struct symbol *dst, struct symbol *src)
- 		case MTYPE_PTR:
- 		case MTYPE_VPTR:
- 		case MTYPE_UINT:
--			return OP_CAST;
-+			stype = MTYPE_UINT;
-+			/* fall through */
- 		case MTYPE_SINT:
--			return OP_SCAST;
-+			break;
- 		default:
- 			return OP_BADOP;
--			break;
- 		}
-+		/* fall through */
- 	case MTYPE_UINT:
- 	case MTYPE_SINT:
- 		switch (stype) {
-@@ -1210,15 +1212,18 @@ static int get_cast_opcode(struct symbol *dst, struct symbol *src)
- 			return OP_PTRTU;
- 		case MTYPE_VPTR:
- 		case MTYPE_UINT:
--			return OP_CAST;
- 		case MTYPE_SINT:
--			return OP_SCAST;
-+			if (dst->bit_size ==src->bit_size)
-+				return OP_NOP;
-+			if (dst->bit_size  < src->bit_size)
-+				return OP_TRUNC;
-+			return stype == MTYPE_SINT ? OP_SEXT : OP_ZEXT;
- 		default:
--			break;
-+			return OP_BADOP;
- 		}
- 		/* fall through */
- 	default:
--		return OP_CAST;
-+		return OP_BADOP;
- 	}
- }
- 
-diff --git a/linearize.h b/linearize.h
-index 165d2b579..5f2c94e86 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -196,8 +196,9 @@ enum opcode {
- 	/* Other */
- 	OP_PHI,
- 	OP_PHISOURCE,
--	OP_CAST,
--	OP_SCAST,
-+	OP_SEXT,
-+	OP_ZEXT,
-+	OP_TRUNC,
- 	OP_FCVTU, OP_FCVTS,
- 	OP_UCVTF, OP_SCVTF,
- 	OP_FCVTF,
-diff --git a/liveness.c b/liveness.c
-index ef2030f3e..bf98bcca0 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -111,8 +111,8 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 		USES(phi_src);
- 		break;
- 
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-diff --git a/simplify.c b/simplify.c
-index 86512cc84..dcd29f427 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -236,8 +236,8 @@ void kill_insn(struct instruction *insn, int force)
- 		kill_use(&insn->src2);
- 		/* fall through */
- 
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-@@ -342,8 +342,8 @@ static int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
- 	case OP_NOT:
- 	case OP_NEG:
- 	case OP_SYMADDR:
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-@@ -386,7 +386,7 @@ static unsigned int operand_size(struct instruction *insn, pseudo_t pseudo)
- 
- 	if (pseudo->type == PSEUDO_REG) {
- 		struct instruction *src = pseudo->def;
--		if (src && src->opcode == OP_CAST && src->orig_type) {
-+		if (src && src->opcode == OP_ZEXT && src->orig_type) {
- 			unsigned int orig_size = src->orig_type->bit_size;
- 			if (orig_size < size)
- 				size = orig_size;
-@@ -978,11 +978,14 @@ static int simplify_cast(struct instruction *insn)
- 	}
- 
- 	if (size == orig_size) {
--		int op = (orig_type->ctype.modifiers & MOD_SIGNED) ? OP_SCAST : OP_CAST;
--		if (insn->opcode == op)
--			goto simplify;
--		if (insn->opcode == OP_FCVTF)
-+		switch (insn->opcode) {
-+		//case OP_NOPCAST:	// FIXME: what to do?
-+		//case OP_PTRCAST:	// FIXME: what to do?
-+		case OP_FCVTF:
- 			goto simplify;
-+		default:
-+			break;
-+		}
- 	}
- 
- 	return 0;
-@@ -1131,13 +1134,10 @@ static int simplify_branch(struct instruction *insn)
- 				return REPEAT_CSE;
- 			}
- 		}
--		if (def->opcode == OP_CAST || def->opcode == OP_SCAST) {
--			int orig_size = def->orig_type ? def->orig_type->bit_size : 0;
--			if (def->size > orig_size) {
--				use_pseudo(insn, def->src, &insn->cond);
--				remove_usage(cond, &insn->cond);
--				return REPEAT_CSE;
--			}
-+		if (def->opcode == OP_SEXT || def->opcode == OP_ZEXT) {
-+			use_pseudo(insn, def->src, &insn->cond);
-+			remove_usage(cond, &insn->cond);
-+			return REPEAT_CSE;
- 		}
- 	}
- 	return 0;
-@@ -1207,8 +1207,8 @@ int simplify_instruction(struct instruction *insn)
- 		if (dead_insn(insn, NULL, NULL, NULL))
- 			return REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
- 		return replace_with_pseudo(insn, insn->symbol);
--	case OP_CAST:
--	case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 8dd6a5185..debf0cb7a 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -790,13 +790,7 @@ static void output_op_cast(struct function *fn, struct instruction *insn, LLVMOp
- 		src = pseudo_to_value(fn, insn, insn->src);
- 
- 	pseudo_name(insn->target, target_name);
--
--	assert(!symbol_is_fp_type(insn->type));
--
--	if (insn->size < LLVMGetIntTypeWidth(LLVMTypeOf(src)))
--		target = LLVMBuildTrunc(fn->builder, src, insn_symbol_type(fn->module, insn), target_name);
--	else
--		target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
-+	target = LLVMBuildCast(fn->builder, op, src, insn_symbol_type(fn->module, insn), target_name);
- 
- 	insn->target->priv = target;
- }
-@@ -849,12 +843,15 @@ static void output_insn(struct function *fn, struct instruction *insn)
- 	case OP_CALL:
- 		output_op_call(fn, insn);
- 		break;
--	case OP_CAST:
-+	case OP_ZEXT:
- 		output_op_cast(fn, insn, LLVMZExt);
- 		break;
--	case OP_SCAST:
-+	case OP_SEXT:
- 		output_op_cast(fn, insn, LLVMSExt);
- 		break;
-+	case OP_TRUNC:
-+		output_op_cast(fn, insn, LLVMTrunc);
-+		break;
- 	case OP_FCVTU: case OP_FCVTS:
- 	case OP_UCVTF: case OP_SCVTF:
- 	case OP_FCVTF:
-diff --git a/sparse.c b/sparse.c
-index bceacd94e..b4d14aeec 100644
---- a/sparse.c
-+++ b/sparse.c
-@@ -120,7 +120,7 @@ static void check_cast_instruction(struct instruction *insn)
- 		int old = orig_type->bit_size;
- 		int new = insn->size;
- 		int oldsigned = (orig_type->ctype.modifiers & MOD_SIGNED) != 0;
--		int newsigned = insn->opcode == OP_SCAST;
-+		int newsigned = insn->opcode == OP_SEXT;
- 
- 		if (new > old) {
- 			if (oldsigned == newsigned)
-@@ -214,7 +214,8 @@ static void check_call_instruction(struct instruction *insn)
- static void check_one_instruction(struct instruction *insn)
- {
- 	switch (insn->opcode) {
--	case OP_CAST: case OP_SCAST:
-+	case OP_SEXT: case OP_ZEXT:
-+	case OP_TRUNC:
- 		if (verbose)
- 			check_cast_instruction(insn);
- 		break;
-diff --git a/validation/bitfield-size.c b/validation/bitfield-size.c
-index ce78ecf21..c708a52db 100644
---- a/validation/bitfield-size.c
-+++ b/validation/bitfield-size.c
-@@ -35,7 +35,8 @@ unsigned int get_pbfi_b(struct bfi *bf) { return bf->b; }
-  * check-command: test-linearize -Wno-decl $file
-  * check-output-ignore
-  *
-- * check-output-pattern-24-times: cast\\.
-- * check-output-pattern-12-times: cast\\.4
-+ * check-output-pattern-8-times: zext\\.
-+ * check-output-pattern-4-times: sext\\.
-+ * check-output-pattern-12-times: trunc\\.4
-  * check-output-pattern-6-times: lsr\\..*\\$6
-  */
-diff --git a/validation/builtin-bswap-variable.c b/validation/builtin-bswap-variable.c
-index 738ba2a45..40ad64134 100644
---- a/validation/builtin-bswap-variable.c
-+++ b/validation/builtin-bswap-variable.c
-@@ -25,8 +25,8 @@ static u64 swap64v(u32 a)
-  *
-  * check-output-ignore
-  * check-output-contains:call.16 .* __builtin_bswap16
-- * check-output-contains:cast.32 .* (64) %arg1
-+ * check-output-contains:trunc.32 .* (64) %arg1
-  * check-output-contains:call.32 .* __builtin_bswap32
-- * check-output-contains:cast.64 .* (32) %arg1
-+ * check-output-contains:zext.64 .* (32) %arg1
-  * check-output-contains:call.64 .* __builtin_bswap64
-  */
-diff --git a/validation/cast-kinds-check.c b/validation/cast-kinds-check.c
-index fe0f83e24..4654dbda2 100644
---- a/validation/cast-kinds-check.c
-+++ b/validation/cast-kinds-check.c
-@@ -13,11 +13,6 @@ cast-kinds.c:12:48: warning: cast drops bits
- cast-kinds.c:13:50: warning: cast drops bits
- cast-kinds.c:14:49: warning: cast drops bits
- cast-kinds.c:15:48: warning: cast drops bits
--cast-kinds.c:21:49: warning: cast wasn't removed
--cast-kinds.c:28:52: warning: cast wasn't removed
--cast-kinds.c:34:52: warning: cast wasn't removed
--cast-kinds.c:35:54: warning: cast wasn't removed
--cast-kinds.c:36:52: warning: cast wasn't removed
- cast-kinds.c:37:42: warning: non size-preserving integer to pointer cast
- cast-kinds.c:38:44: warning: non size-preserving integer to pointer cast
-  * check-error-end
-diff --git a/validation/cast-kinds.c b/validation/cast-kinds.c
-index 3ac95c3dc..7d977f91b 100644
---- a/validation/cast-kinds.c
-+++ b/validation/cast-kinds.c
-@@ -74,44 +74,44 @@ uint_2_int:
- long_2_int:
- .L2:
- 	<entry-point>
--	scast.32    %r5 <- (64) %arg1
--	ret.32      %r5
-+	trunc.32    %r4 <- (64) %arg1
-+	ret.32      %r4
- 
- 
- ulong_2_int:
- .L4:
- 	<entry-point>
--	cast.32     %r8 <- (64) %arg1
--	ret.32      %r8
-+	trunc.32    %r7 <- (64) %arg1
-+	ret.32      %r7
- 
- 
- vptr_2_int:
- .L6:
- 	<entry-point>
--	cast.32     %r11 <- (64) %arg1
--	ret.32      %r11
-+	trunc.32    %r10 <- (64) %arg1
-+	ret.32      %r10
- 
- 
- iptr_2_int:
- .L8:
- 	<entry-point>
--	ptrtu.64    %r14 <- (64) %arg1
--	cast.32     %r15 <- (64) %r14
--	ret.32      %r15
-+	ptrtu.64    %r13 <- (64) %arg1
-+	trunc.32    %r14 <- (64) %r13
-+	ret.32      %r14
- 
- 
- float_2_int:
- .L10:
- 	<entry-point>
--	fcvts.32    %r18 <- (32) %arg1
--	ret.32      %r18
-+	fcvts.32    %r17 <- (32) %arg1
-+	ret.32      %r17
- 
- 
- double_2_int:
- .L12:
- 	<entry-point>
--	fcvts.32    %r21 <- (64) %arg1
--	ret.32      %r21
-+	fcvts.32    %r20 <- (64) %arg1
-+	ret.32      %r20
- 
- 
- int_2_uint:
-@@ -123,58 +123,58 @@ int_2_uint:
- long_2_uint:
- .L16:
- 	<entry-point>
--	scast.32    %r27 <- (64) %arg1
--	ret.32      %r27
-+	trunc.32    %r25 <- (64) %arg1
-+	ret.32      %r25
- 
- 
- ulong_2_uint:
- .L18:
- 	<entry-point>
--	cast.32     %r30 <- (64) %arg1
--	ret.32      %r30
-+	trunc.32    %r28 <- (64) %arg1
-+	ret.32      %r28
- 
- 
- vptr_2_uint:
- .L20:
- 	<entry-point>
--	cast.32     %r33 <- (64) %arg1
--	ret.32      %r33
-+	trunc.32    %r31 <- (64) %arg1
-+	ret.32      %r31
- 
- 
- iptr_2_uint:
- .L22:
- 	<entry-point>
--	ptrtu.64    %r36 <- (64) %arg1
--	cast.32     %r37 <- (64) %r36
--	ret.32      %r37
-+	ptrtu.64    %r34 <- (64) %arg1
-+	trunc.32    %r35 <- (64) %r34
-+	ret.32      %r35
- 
- 
- float_2_uint:
- .L24:
- 	<entry-point>
--	fcvtu.32    %r40 <- (32) %arg1
--	ret.32      %r40
-+	fcvtu.32    %r38 <- (32) %arg1
-+	ret.32      %r38
- 
- 
- double_2_uint:
- .L26:
- 	<entry-point>
--	fcvtu.32    %r43 <- (64) %arg1
--	ret.32      %r43
-+	fcvtu.32    %r41 <- (64) %arg1
-+	ret.32      %r41
- 
- 
- int_2_long:
- .L28:
- 	<entry-point>
--	scast.64    %r46 <- (32) %arg1
--	ret.64      %r46
-+	sext.64     %r44 <- (32) %arg1
-+	ret.64      %r44
- 
- 
- uint_2_long:
- .L30:
- 	<entry-point>
--	cast.64     %r49 <- (32) %arg1
--	ret.64      %r49
-+	zext.64     %r47 <- (32) %arg1
-+	ret.64      %r47
- 
- 
- ulong_2_long:
-@@ -186,43 +186,42 @@ ulong_2_long:
- vptr_2_long:
- .L34:
- 	<entry-point>
--	cast.64     %r55 <- (64) %arg1
--	ret.64      %r55
-+	ret.64      %arg1
- 
- 
- iptr_2_long:
- .L36:
- 	<entry-point>
--	ptrtu.64    %r58 <- (64) %arg1
--	ret.64      %r58
-+	ptrtu.64    %r54 <- (64) %arg1
-+	ret.64      %r54
- 
- 
- float_2_long:
- .L38:
- 	<entry-point>
--	fcvts.64    %r61 <- (32) %arg1
--	ret.64      %r61
-+	fcvts.64    %r57 <- (32) %arg1
-+	ret.64      %r57
- 
- 
- double_2_long:
- .L40:
- 	<entry-point>
--	fcvts.64    %r64 <- (64) %arg1
--	ret.64      %r64
-+	fcvts.64    %r60 <- (64) %arg1
-+	ret.64      %r60
- 
- 
- int_2_ulong:
- .L42:
- 	<entry-point>
--	scast.64    %r67 <- (32) %arg1
--	ret.64      %r67
-+	sext.64     %r63 <- (32) %arg1
-+	ret.64      %r63
- 
- 
- uint_2_ulong:
- .L44:
- 	<entry-point>
--	cast.64     %r70 <- (32) %arg1
--	ret.64      %r70
-+	zext.64     %r66 <- (32) %arg1
-+	ret.64      %r66
- 
- 
- long_2_ulong:
-@@ -234,171 +233,167 @@ long_2_ulong:
- vptr_2_ulong:
- .L48:
- 	<entry-point>
--	cast.64     %r76 <- (64) %arg1
--	ret.64      %r76
-+	ret.64      %arg1
- 
- 
- iptr_2_ulong:
- .L50:
- 	<entry-point>
--	ptrtu.64    %r79 <- (64) %arg1
--	ret.64      %r79
-+	ptrtu.64    %r73 <- (64) %arg1
-+	ret.64      %r73
- 
- 
- float_2_ulong:
- .L52:
- 	<entry-point>
--	fcvtu.64    %r82 <- (32) %arg1
--	ret.64      %r82
-+	fcvtu.64    %r76 <- (32) %arg1
-+	ret.64      %r76
- 
- 
- double_2_ulong:
- .L54:
- 	<entry-point>
--	fcvtu.64    %r85 <- (64) %arg1
--	ret.64      %r85
-+	fcvtu.64    %r79 <- (64) %arg1
-+	ret.64      %r79
- 
- 
- int_2_vptr:
- .L56:
- 	<entry-point>
--	scast.64    %r88 <- (32) %arg1
--	ret.64      %r88
-+	sext.64     %r82 <- (32) %arg1
-+	ret.64      %r82
- 
- 
- uint_2_vptr:
- .L58:
- 	<entry-point>
--	cast.64     %r91 <- (32) %arg1
--	ret.64      %r91
-+	zext.64     %r85 <- (32) %arg1
-+	ret.64      %r85
- 
- 
- long_2_vptr:
- .L60:
- 	<entry-point>
--	scast.64    %r94 <- (64) %arg1
--	ret.64      %r94
-+	ret.64      %arg1
- 
- 
- ulong_2_vptr:
- .L62:
- 	<entry-point>
--	cast.64     %r97 <- (64) %arg1
--	ret.64      %r97
-+	ret.64      %arg1
- 
- 
- iptr_2_vptr:
- .L64:
- 	<entry-point>
--	cast.64     %r100 <- (64) %arg1
--	ret.64      %r100
-+	ret.64      %arg1
- 
- 
- int_2_iptr:
- .L66:
- 	<entry-point>
--	scast.64    %r103 <- (32) %arg1
--	utptr.64    %r104 <- (64) %r103
--	ret.64      %r104
-+	sext.64     %r94 <- (32) %arg1
-+	utptr.64    %r95 <- (64) %r94
-+	ret.64      %r95
- 
- 
- uint_2_iptr:
- .L68:
- 	<entry-point>
--	cast.64     %r107 <- (32) %arg1
--	utptr.64    %r108 <- (64) %r107
--	ret.64      %r108
-+	zext.64     %r98 <- (32) %arg1
-+	utptr.64    %r99 <- (64) %r98
-+	ret.64      %r99
- 
- 
- long_2_iptr:
- .L70:
- 	<entry-point>
--	utptr.64    %r111 <- (64) %arg1
--	ret.64      %r111
-+	utptr.64    %r102 <- (64) %arg1
-+	ret.64      %r102
- 
- 
- ulong_2_iptr:
- .L72:
- 	<entry-point>
--	utptr.64    %r114 <- (64) %arg1
--	ret.64      %r114
-+	utptr.64    %r105 <- (64) %arg1
-+	ret.64      %r105
- 
- 
- vptr_2_iptr:
- .L74:
- 	<entry-point>
--	ptrcast.64  %r117 <- (64) %arg1
--	ret.64      %r117
-+	ptrcast.64  %r108 <- (64) %arg1
-+	ret.64      %r108
- 
- 
- int_2_float:
- .L76:
- 	<entry-point>
--	scvtf.32    %r120 <- (32) %arg1
--	ret.32      %r120
-+	scvtf.32    %r111 <- (32) %arg1
-+	ret.32      %r111
- 
- 
- uint_2_float:
- .L78:
- 	<entry-point>
--	ucvtf.32    %r123 <- (32) %arg1
--	ret.32      %r123
-+	ucvtf.32    %r114 <- (32) %arg1
-+	ret.32      %r114
- 
- 
- long_2_float:
- .L80:
- 	<entry-point>
--	scvtf.32    %r126 <- (64) %arg1
--	ret.32      %r126
-+	scvtf.32    %r117 <- (64) %arg1
-+	ret.32      %r117
- 
- 
- ulong_2_float:
- .L82:
- 	<entry-point>
--	ucvtf.32    %r129 <- (64) %arg1
--	ret.32      %r129
-+	ucvtf.32    %r120 <- (64) %arg1
-+	ret.32      %r120
- 
- 
- double_2_float:
- .L84:
- 	<entry-point>
--	fcvtf.32    %r132 <- (64) %arg1
--	ret.32      %r132
-+	fcvtf.32    %r123 <- (64) %arg1
-+	ret.32      %r123
- 
- 
- int_2_double:
- .L86:
- 	<entry-point>
--	scvtf.64    %r135 <- (32) %arg1
--	ret.64      %r135
-+	scvtf.64    %r126 <- (32) %arg1
-+	ret.64      %r126
- 
- 
- uint_2_double:
- .L88:
- 	<entry-point>
--	ucvtf.64    %r138 <- (32) %arg1
--	ret.64      %r138
-+	ucvtf.64    %r129 <- (32) %arg1
-+	ret.64      %r129
- 
- 
- long_2_double:
- .L90:
- 	<entry-point>
--	scvtf.64    %r141 <- (64) %arg1
--	ret.64      %r141
-+	scvtf.64    %r132 <- (64) %arg1
-+	ret.64      %r132
- 
- 
- ulong_2_double:
- .L92:
- 	<entry-point>
--	ucvtf.64    %r144 <- (64) %arg1
--	ret.64      %r144
-+	ucvtf.64    %r135 <- (64) %arg1
-+	ret.64      %r135
- 
- 
- float_2_double:
- .L94:
- 	<entry-point>
--	fcvtf.64    %r147 <- (32) %arg1
--	ret.64      %r147
-+	fcvtf.64    %r138 <- (32) %arg1
-+	ret.64      %r138
- 
- 
- float_2_float:
-diff --git a/validation/cast-weirds.c b/validation/cast-weirds.c
-index 71e52ff57..a99c65d25 100644
---- a/validation/cast-weirds.c
-+++ b/validation/cast-weirds.c
-@@ -20,7 +20,7 @@ cast-weirds.c:5:44: warning: non size-preserving integer to pointer cast
- int_2_iptr:
- .L0:
- 	<entry-point>
--	scast.64    %r2 <- (32) %arg1
-+	sext.64     %r2 <- (32) %arg1
- 	utptr.64    %r3 <- (64) %r2
- 	ret.64      %r3
- 
-@@ -28,7 +28,7 @@ int_2_iptr:
- uint_2_iptr:
- .L2:
- 	<entry-point>
--	cast.64     %r6 <- (32) %arg1
-+	zext.64     %r6 <- (32) %arg1
- 	utptr.64    %r7 <- (64) %r6
- 	ret.64      %r7
- 
-@@ -36,14 +36,14 @@ uint_2_iptr:
- int_2_vptr:
- .L4:
- 	<entry-point>
--	scast.64    %r10 <- (32) %arg1
-+	sext.64     %r10 <- (32) %arg1
- 	ret.64      %r10
- 
- 
- uint_2_vptr:
- .L6:
- 	<entry-point>
--	cast.64     %r13 <- (32) %arg1
-+	zext.64     %r13 <- (32) %arg1
- 	ret.64      %r13
- 
- 
-diff --git a/validation/compound-assign-type.c b/validation/compound-assign-type.c
-index 450fa26d9..e13dcfcd2 100644
---- a/validation/compound-assign-type.c
-+++ b/validation/compound-assign-type.c
-@@ -11,5 +11,6 @@ static unsigned int foo(unsigned int x, long a)
-  *
-  * check-output-excludes: divu\\.32
-  * check-output-contains: divs\\.64
-- * check-output-contains: scast\\.32
-+ * check-output-contains: zext.64 .* (32) %arg1
-+ * check-output-contains: trunc.32 .* (64)
-  */
-diff --git a/validation/linear/bitfield-init-zero.c b/validation/linear/bitfield-init-zero.c
-index 39a64345e..7a410a7c4 100644
---- a/validation/linear/bitfield-init-zero.c
-+++ b/validation/linear/bitfield-init-zero.c
-@@ -57,7 +57,7 @@ int bfs_get0(void)
- bfuu_init:
- .L0:
- 	<entry-point>
--	cast.9      %r2 <- (32) %arg1
-+	trunc.9     %r2 <- (32) %arg1
- 	shl.32      %r4 <- %r2, $11
- 	ret.32      %r4
- 
-@@ -65,7 +65,7 @@ bfuu_init:
- bfus_init:
- .L2:
- 	<entry-point>
--	scast.9     %r10 <- (32) %arg1
-+	trunc.9     %r10 <- (32) %arg1
- 	shl.32      %r12 <- %r10, $11
- 	ret.32      %r12
- 
-@@ -79,7 +79,7 @@ bfu_get0:
- bfsu_init:
- .L6:
- 	<entry-point>
--	cast.9      %r23 <- (32) %arg1
-+	trunc.9     %r23 <- (32) %arg1
- 	shl.32      %r25 <- %r23, $11
- 	ret.32      %r25
- 
-@@ -87,7 +87,7 @@ bfsu_init:
- bfss_init:
- .L8:
- 	<entry-point>
--	scast.9     %r31 <- (32) %arg1
-+	trunc.9     %r31 <- (32) %arg1
- 	shl.32      %r33 <- %r31, $11
- 	ret.32      %r33
- 
-diff --git a/validation/memops-volatile.c b/validation/memops-volatile.c
-index 0f3e12ad2..3b8662f1e 100644
---- a/validation/memops-volatile.c
-+++ b/validation/memops-volatile.c
-@@ -13,8 +13,8 @@ foo:
- .L0:
- 	<entry-point>
- 	store.32    %arg2 -> 0[%arg1]
--	load.32     %r5 <- 0[%arg1]
--	ret.32      %r5
-+	load.32     %r4 <- 0[%arg1]
-+	ret.32      %r4
- 
- 
-  * check-output-end
-diff --git a/validation/optim/bool-simplify.c b/validation/optim/bool-simplify.c
-index 05be11497..5b3cf449e 100644
---- a/validation/optim/bool-simplify.c
-+++ b/validation/optim/bool-simplify.c
-@@ -33,7 +33,7 @@ and_1:
- .L2:
- 	<entry-point>
- 	setne.1     %r8 <- %arg1, $0
--	cast.32     %r11 <- (1) %r8
-+	zext.32     %r11 <- (1) %r8
- 	ret.32      %r11
- 
- 
-@@ -41,7 +41,7 @@ or_0:
- .L4:
- 	<entry-point>
- 	setne.1     %r14 <- %arg1, $0
--	cast.32     %r17 <- (1) %r14
-+	zext.32     %r17 <- (1) %r14
- 	ret.32      %r17
- 
- 
--- 
-2.14.0
+Here is the kernel full allmodconfig running ssa-mini-v1 on my new
+compile server. On the new server the timing is very consistent.
+The variance of run to run is under 0.1 second.
 
+ssa-mini-v1:
+1205.82user 463.65system 1:16.97elapsed 2168%CPU (0avgtext+0avgdata
+536216maxresident)k
+0inputs+12824outputs (0major+132162996minor)pagefaults 0swaps
+1206.35user 463.27system 1:16.95elapsed 2169%CPU (0avgtext+0avgdata
+536296maxresident)k
+0inputs+12824outputs (0major+132156314minor)pagefaults 0swaps
+
+
+This is the rc5 as base line.
+1173.42user 453.56system 1:15.21elapsed 2163%CPU (0avgtext+0avgdata
+238072maxresident)k
+0inputs+12784outputs (0major+128858147minor)pagefaults 0swaps
+1172.86user 453.53system 1:15.14elapsed 2164%CPU (0avgtext+0avgdata
+238076maxresident)k
+0inputs+12784outputs (0major+128858804minor)pagefaults 0swaps
+
+So the ssa-mini-v1 is about 2% slower than the current rc5.
+
+I inline the sparse checking different here.
+I will take a look at you patches next :-)
+
+BTW, how do you want your patches to be merged? Assume there is
+some feed back. Do you want to come up with V2 V3 or have them merged
+to master then come up with fix up on master?
+
+Thanks
+
+Chris
+
+diff -ruN linux-checker/rc5/drivers/base/firmware_class.sp
+linux-checker/ssa/drivers/base/firmware_class.sp
+--- linux-checker/rc5/drivers/base/firmware_class.sp 2017-08-17
+00:27:32.065207474 -0400
++++ linux-checker/ssa/drivers/base/firmware_class.sp 2017-08-17
+00:18:56.525833366 -0400
+@@ -1 +1 @@
+-drivers/base/firmware_class.c:395:9: warning: context imbalance in
+'fw_free_buf' - wrong count at exit
++drivers/base/firmware_class.c:391:13: warning: context imbalance in
+'fw_free_buf' - wrong count at exit
+diff -ruN linux-checker/rc5/drivers/block/drbd/drbd_actlog.sp
+linux-checker/ssa/drivers/block/drbd/drbd_actlog.sp
+--- linux-checker/rc5/drivers/block/drbd/drbd_actlog.sp 2017-08-17
+00:27:32.496218655 -0400
++++ linux-checker/ssa/drivers/block/drbd/drbd_actlog.sp 2017-08-17
+00:18:57.015846078 -0400
+@@ -26,3 +26,4 @@
+ drivers/block/drbd/drbd_int.h:1773:14: error: incompatible types in
+comparison expression (different address spaces)
+ drivers/block/drbd/drbd_actlog.c:469:44: error: incompatible types in
+comparison expression (different address spaces)
+ drivers/block/drbd/drbd_actlog.c:173:16: warning: context imbalance
+in '_drbd_md_sync_page_io' - different lock contexts for basic block
++drivers/block/drbd/drbd_actlog.c:1244:24: warning: context imbalance
+in 'drbd_rs_del_all' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/drivers/block/drbd/drbd_nl.sp
+linux-checker/ssa/drivers/block/drbd/drbd_nl.sp
+--- linux-checker/rc5/drivers/block/drbd/drbd_nl.sp 2017-08-17
+00:27:32.724224570 -0400
++++ linux-checker/ssa/drivers/block/drbd/drbd_nl.sp 2017-08-17
+00:18:57.303853549 -0400
+@@ -62,6 +62,7 @@
+ drivers/block/drbd/drbd_int.h:791:24: error: incompatible types in
+comparison expression (different address spaces)
+ drivers/block/drbd/drbd_int.h:791:24: error: incompatible types in
+comparison expression (different address spaces)
+ drivers/block/drbd/drbd_int.h:791:24: error: incompatible types in
+comparison expression (different address spaces)
++drivers/block/drbd/drbd_nl.c:436:17: warning: context imbalance in
+'highest_fencing_policy' - different lock contexts for basic block
+ drivers/block/drbd/drbd_nl.c:3419:9: warning: context imbalance in
+'drbd_adm_dump_devices' - different lock contexts for basic block
+ drivers/block/drbd/drbd_nl.c:3687:9: warning: context imbalance in
+'drbd_adm_dump_peer_devices' - different lock contexts for basic block
+-drivers/block/drbd/drbd_nl.c:3858:9: warning: context imbalance in
+'nla_put_status_info' - different lock contexts for basic block
++drivers/block/drbd/drbd_nl.c:3735:12: warning: context imbalance in
+'nla_put_status_info' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/drivers/block/drbd/drbd_state.sp
+linux-checker/ssa/drivers/block/drbd/drbd_state.sp
+--- linux-checker/rc5/drivers/block/drbd/drbd_state.sp 2017-08-17
+00:27:32.669223143 -0400
++++ linux-checker/ssa/drivers/block/drbd/drbd_state.sp 2017-08-17
+00:18:57.216851292 -0400
+@@ -27,5 +27,7 @@
+ drivers/block/drbd/drbd_state.c:1309:36: warning: cast to non-scalar
+ drivers/block/drbd/drbd_state.c:1310:36: warning: cast to non-scalar
+ drivers/block/drbd/drbd_state.c:2037:17: error: incompatible types in
+comparison expression (different address spaces)
++drivers/block/drbd/drbd_state.c:806:14: warning: context imbalance in
+'is_valid_state' - different lock contexts for basic block
++drivers/block/drbd/drbd_state.c:1074:9: warning: context imbalance in
+'sanitize_state' - different lock contexts for basic block
+ drivers/block/drbd/drbd_state.c:1917:25: warning: context imbalance
+in 'after_state_ch' - unexpected unlock
+ drivers/block/drbd/drbd_state.c:2333:32: warning: context imbalance
+in '_conn_request_state' - unexpected unlock
+diff -ruN linux-checker/rc5/drivers/block/drbd/drbd_worker.sp
+linux-checker/ssa/drivers/block/drbd/drbd_worker.sp
+--- linux-checker/rc5/drivers/block/drbd/drbd_worker.sp 2017-08-17
+00:27:32.640222391 -0400
++++ linux-checker/ssa/drivers/block/drbd/drbd_worker.sp 2017-08-17
+00:18:57.135849191 -0400
+@@ -39,6 +39,6 @@
+ drivers/block/drbd/drbd_worker.c:1876:38: error: incompatible types
+in comparison expression (different address spaces)
+ drivers/block/drbd/drbd_worker.c:2081:14: error: incompatible types
+in comparison expression (different address spaces)
+ drivers/block/drbd/drbd_worker.c:2136:14: error: incompatible types
+in comparison expression (different address spaces)
+-drivers/block/drbd/drbd_worker.c:84:25: warning: context imbalance in
+'drbd_md_endio' - unexpected unlock
++drivers/block/drbd/drbd_int.h:2140:9: warning: context imbalance in
+'drbd_md_endio' - unexpected unlock
+ drivers/block/drbd/drbd_worker.c:274:9: warning: context imbalance in
+'drbd_request_endio' - unexpected unlock
+ drivers/block/drbd/drbd_worker.c:393:12: warning: context imbalance
+in 'read_for_csum' - wrong count at exit
+diff -ruN linux-checker/rc5/drivers/block/zram/zram_drv.sp
+linux-checker/ssa/drivers/block/zram/zram_drv.sp
+--- linux-checker/rc5/drivers/block/zram/zram_drv.sp 2017-08-17
+00:27:32.761225530 -0400
++++ linux-checker/ssa/drivers/block/zram/zram_drv.sp 2017-08-17
+00:18:57.303853549 -0400
+@@ -1,2 +1,2 @@
+ drivers/block/zram/zram_drv.c:425:13: warning: context imbalance in
+'zram_slot_lock' - wrong count at exit
+-./include/linux/bit_spinlock.h:62:25: warning: context imbalance in
+'zram_slot_unlock' - unexpected unlock
++./arch/x86/include/asm/bitops.h:133:9: warning: context imbalance in
+'zram_slot_unlock' - unexpected unlock
+diff -ruN linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4/l2t.sp
+linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4/l2t.sp
+--- linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4/l2t.sp
+2017-08-17 00:27:55.087804725 -0400
++++ linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4/l2t.sp
+2017-08-17 00:19:19.860438712 -0400
+@@ -1 +1 @@
+-./include/linux/skbuff.h:1754:29: warning: context imbalance in
+'handle_failed_resolution' - unexpected unlock
++./include/linux/skbuff.h:1733:9: warning: context imbalance in
+'handle_failed_resolution' - unexpected unlock
+diff -ruN linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4/sge.sp
+linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4/sge.sp
+--- linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4/sge.sp
+2017-08-17 00:27:55.177807060 -0400
++++ linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4/sge.sp
+2017-08-17 00:19:19.965441436 -0400
+@@ -10,3 +10,4 @@
+ drivers/net/ethernet/chelsio/cxgb4/sge.c:2091:43: warning: cast to
+restricted __be64
+ drivers/net/ethernet/chelsio/cxgb4/sge.c:1189:34: warning: context
+imbalance in 't4_eth_xmit' - different lock contexts for basic block
+ drivers/net/ethernet/chelsio/cxgb4/sge.c:1645:28: warning: context
+imbalance in 'service_ofldq' - unexpected unlock
++drivers/net/ethernet/chelsio/cxgb4/sge.c:2674:17: warning: context
+imbalance in 'sge_tx_timer_cb' - different lock contexts for basic
+block
+diff -ruN linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4vf/sge.sp
+linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4vf/sge.sp
+--- linux-checker/rc5/drivers/net/ethernet/chelsio/cxgb4vf/sge.sp
+2017-08-17 00:27:54.992802261 -0400
++++ linux-checker/ssa/drivers/net/ethernet/chelsio/cxgb4vf/sge.sp
+2017-08-17 00:19:20.099444912 -0400
+@@ -0,0 +1 @@
++drivers/net/ethernet/chelsio/cxgb4vf/sge.c:2146:17: warning: context
+imbalance in 'sge_tx_timer_cb' - different lock contexts for basic
+block
+diff -ruN linux-checker/rc5/drivers/net/ethernet/myricom/myri10ge/myri10ge.sp
+linux-checker/ssa/drivers/net/ethernet/myricom/myri10ge/myri10ge.sp
+--- linux-checker/rc5/drivers/net/ethernet/myricom/myri10ge/myri10ge.sp
+2017-08-17 00:27:57.390864471 -0400
++++ linux-checker/ssa/drivers/net/ethernet/myricom/myri10ge/myri10ge.sp
+2017-08-17 00:19:22.537508160 -0400
+@@ -0,0 +1 @@
++drivers/net/ethernet/myricom/myri10ge/myri10ge.c:1449:35: warning:
+context imbalance in 'myri10ge_intr' - different lock contexts for
+basic block
+diff -ruN linux-checker/rc5/drivers/net/ethernet/neterion/vxge/vxge-config.sp
+linux-checker/ssa/drivers/net/ethernet/neterion/vxge/vxge-config.sp
+--- linux-checker/rc5/drivers/net/ethernet/neterion/vxge/vxge-config.sp
+2017-08-17 00:27:57.707872695 -0400
++++ linux-checker/ssa/drivers/net/ethernet/neterion/vxge/vxge-config.sp
+2017-08-17 00:19:22.506507356 -0400
+@@ -58,4 +58,4 @@
+ drivers/net/ethernet/neterion/vxge/vxge-config.c:919:46: warning:
+cast to restricted __be64
+ drivers/net/ethernet/neterion/vxge/vxge-config.c:919:46: warning:
+cast to restricted __be64
+ drivers/net/ethernet/neterion/vxge/vxge-config.c:919:46: warning:
+cast to restricted __be64
+-drivers/net/ethernet/neterion/vxge/vxge-config.c:218:9: warning:
+context imbalance in 'vxge_hw_vpath_fw_api' - different lock contexts
+for basic block
++drivers/net/ethernet/neterion/vxge/vxge-config.c:157:1: warning:
+context imbalance in 'vxge_hw_vpath_fw_api' - different lock contexts
+for basic block
+diff -ruN linux-checker/rc5/drivers/net/ethernet/neterion/vxge/vxge-main.sp
+linux-checker/ssa/drivers/net/ethernet/neterion/vxge/vxge-main.sp
+--- linux-checker/rc5/drivers/net/ethernet/neterion/vxge/vxge-main.sp
+2017-08-17 00:27:57.449866002 -0400
++++ linux-checker/ssa/drivers/net/ethernet/neterion/vxge/vxge-main.sp
+2017-08-17 00:19:22.544508342 -0400
+@@ -0,0 +1,3 @@
++drivers/net/ethernet/neterion/vxge/vxge-main.c:116:27: warning:
+context imbalance in 'vxge_poll_inta' - different lock contexts for
+basic block
++drivers/net/ethernet/neterion/vxge/vxge-main.c:116:27: warning:
+context imbalance in 'vxge_netpoll' - different lock contexts for
+basic block
++drivers/net/ethernet/neterion/vxge/vxge-main.c:116:27: warning:
+context imbalance in 'vxge_tx_msix_handle' - different lock contexts
+for basic block
+diff -ruN linux-checker/rc5/drivers/net/wan/sbni.sp
+linux-checker/ssa/drivers/net/wan/sbni.sp
+--- linux-checker/rc5/drivers/net/wan/sbni.sp 2017-08-17
+00:28:00.488944842 -0400
++++ linux-checker/ssa/drivers/net/wan/sbni.sp 2017-08-17
+00:19:25.338580825 -0400
+@@ -1,2 +1,2 @@
+ drivers/net/wan/sbni.c:525:20: warning: context imbalance in
+'sbni_interrupt' - different lock contexts for basic block
+-drivers/net/wan/sbni.c:577:9: warning: context imbalance in
+'handle_channel' - different lock contexts for basic block
++drivers/net/wan/sbni.c:531:1: warning: context imbalance in
+'handle_channel' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/drivers/net/wireless/intel/iwlwifi/mvm/fw-dbg.sp
+linux-checker/ssa/drivers/net/wireless/intel/iwlwifi/mvm/fw-dbg.sp
+--- linux-checker/rc5/drivers/net/wireless/intel/iwlwifi/mvm/fw-dbg.sp
+2017-08-17 00:28:01.987983730 -0400
++++ linux-checker/ssa/drivers/net/wireless/intel/iwlwifi/mvm/fw-dbg.sp
+2017-08-17 00:19:27.150627834 -0400
+@@ -0,0 +1 @@
++drivers/net/wireless/intel/iwlwifi/mvm/fw-dbg.c:459:9: warning:
+context imbalance in 'iwl_read_prph_block' - different lock contexts
+for basic block
+diff -ruN linux-checker/rc5/drivers/scsi/device_handler/scsi_dh_alua.sp
+linux-checker/ssa/drivers/scsi/device_handler/scsi_dh_alua.sp
+--- linux-checker/rc5/drivers/scsi/device_handler/scsi_dh_alua.sp
+2017-08-17 00:28:06.435099097 -0400
++++ linux-checker/ssa/drivers/scsi/device_handler/scsi_dh_alua.sp
+2017-08-17 00:19:31.388737779 -0400
+@@ -1,2 +1,3 @@
+ drivers/scsi/device_handler/scsi_dh_alua.c:139:16: warning: Variable
+length array is used.
+ drivers/scsi/device_handler/scsi_dh_alua.c:167:16: warning: Variable
+length array is used.
++drivers/scsi/device_handler/scsi_dh_alua.c:658:33: warning: context
+imbalance in 'alua_rtpg' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/drivers/scsi/libfc/fc_fcp.sp
+linux-checker/ssa/drivers/scsi/libfc/fc_fcp.sp
+--- linux-checker/rc5/drivers/scsi/libfc/fc_fcp.sp 2017-08-17
+00:28:07.033114610 -0400
++++ linux-checker/ssa/drivers/scsi/libfc/fc_fcp.sp 2017-08-17
+00:19:31.949752332 -0400
+@@ -7,6 +7,6 @@
+ drivers/scsi/libfc/fc_fcp.c:1465:26: warning: context imbalance in
+'fc_fcp_timeout' - unexpected unlock
+ drivers/scsi/libfc/fc_fcp.c:1654:26: warning: context imbalance in
+'fc_fcp_rec_resp' - unexpected unlock
+ drivers/scsi/libfc/fc_fcp.c:1699:26: warning: context imbalance in
+'fc_fcp_rec_error' - unexpected unlock
+-drivers/scsi/libfc/fc_fcp.c:1804:34: warning: context imbalance in
+'fc_fcp_srr_resp' - unexpected unlock
++drivers/scsi/libfc/fc_fcp.c:246:23: warning: context imbalance in
+'fc_fcp_srr_resp' - unexpected unlock
+ drivers/scsi/libfc/fc_fcp.c:1848:26: warning: context imbalance in
+'fc_fcp_srr_error' - unexpected unlock
+ drivers/scsi/libfc/fc_fcp.c:2153:9: warning: context imbalance in
+'fc_eh_abort' - unexpected unlock
+diff -ruN linux-checker/rc5/drivers/scsi/mvsas/mv_sas.sp
+linux-checker/ssa/drivers/scsi/mvsas/mv_sas.sp
+--- linux-checker/rc5/drivers/scsi/mvsas/mv_sas.sp 2017-08-17
+00:28:07.361123120 -0400
++++ linux-checker/ssa/drivers/scsi/mvsas/mv_sas.sp 2017-08-17
+00:19:32.287761101 -0400
+@@ -31,5 +31,5 @@
+ drivers/scsi/mvsas/mv_sas.c:1671:23: warning: cast to restricted __le32
+ drivers/scsi/mvsas/mv_sas.c:1672:23: warning: cast to restricted __le32
+ drivers/scsi/mvsas/mv_sas.c:1092:13: warning: context imbalance in
+'mvs_port_notify_formed' - different lock contexts for basic block
+-drivers/scsi/mvsas/mv_sas.c:1238:9: warning: context imbalance in
+'mvs_dev_found_notify' - different lock contexts for basic block
++drivers/scsi/mvsas/mv_sas.c:1190:12: warning: context imbalance in
+'mvs_dev_found_notify' - different lock contexts for basic block
+ drivers/scsi/mvsas/mv_sas.c:1832:9: warning: context imbalance in
+'mvs_slot_complete' - unexpected unlock
+diff -ruN linux-checker/rc5/fs/btrfs/ctree.sp
+linux-checker/ssa/fs/btrfs/ctree.sp
+--- linux-checker/rc5/fs/btrfs/ctree.sp 2017-08-17 00:28:19.948449660 -0400
++++ linux-checker/ssa/fs/btrfs/ctree.sp 2017-08-17 00:19:45.049092155 -0400
+@@ -1,3 +1,3 @@
+ fs/btrfs/ctree.c:154:22: error: incompatible types in comparison
+expression (different address spaces)
+-fs/btrfs/ctree.c:635:42: warning: context imbalance in
+'tree_mod_log_insert_move' - unexpected unlock
+-fs/btrfs/ctree.c:864:42: warning: context imbalance in
+'tree_mod_log_eb_copy' - unexpected unlock
++fs/btrfs/ctree.c:354:9: warning: context imbalance in
+'tree_mod_log_insert_move' - unexpected unlock
++fs/btrfs/ctree.c:354:9: warning: context imbalance in
+'tree_mod_log_eb_copy' - unexpected unlock
+diff -ruN linux-checker/rc5/fs/btrfs/dev-replace.sp
+linux-checker/ssa/fs/btrfs/dev-replace.sp
+--- linux-checker/rc5/fs/btrfs/dev-replace.sp 2017-08-17
+00:28:20.029451761 -0400
++++ linux-checker/ssa/fs/btrfs/dev-replace.sp 2017-08-17
+00:19:45.090093219 -0400
+@@ -6,7 +6,7 @@
+ fs/btrfs/dev-replace.c:807:17: error: incompatible types in
+comparison expression (different address spaces)
+ fs/btrfs/dev-replace.c:364:9: error: incompatible types in comparison
+expression (different address spaces)
+ fs/btrfs/dev-replace.c:364:9: error: incompatible types in comparison
+expression (different address spaces)
+-fs/btrfs/dev-replace.c:866:9: warning: context imbalance in
+'btrfs_dev_replace_lock' - wrong count at exit
++fs/btrfs/dev-replace.c:864:6: warning: context imbalance in
+'btrfs_dev_replace_lock' - wrong count at exit
+ fs/btrfs/dev-replace.c:886:17: warning: context imbalance in
+'btrfs_dev_replace_unlock' - unexpected unlock
+ fs/btrfs/dev-replace.c:900:9: warning: context imbalance in
+'btrfs_dev_replace_set_lock_blocking' - unexpected unlock
+ fs/btrfs/dev-replace.c:911:9: warning: context imbalance in
+'btrfs_dev_replace_clear_lock_blocking' - wrong count at exit
+diff -ruN linux-checker/rc5/fs/btrfs/extent-tree.sp
+linux-checker/ssa/fs/btrfs/extent-tree.sp
+--- linux-checker/rc5/fs/btrfs/extent-tree.sp 2017-08-17
+00:28:19.860447377 -0400
++++ linux-checker/ssa/fs/btrfs/extent-tree.sp 2017-08-17
+00:19:45.581105957 -0400
+@@ -1,3 +1,3 @@
+ fs/btrfs/extent-tree.c:7412:39: warning: context imbalance in
+'btrfs_lock_cluster' - wrong count at exit
+ fs/btrfs/extent-tree.c:7688:44: warning: context imbalance in
+'find_free_extent' - unexpected unlock
+-fs/btrfs/extent-tree.c:9764:9: warning: context imbalance in
+'btrfs_put_block_group_cache' - wrong count at exit
++fs/btrfs/extent-tree.c:9759:6: warning: context imbalance in
+'btrfs_put_block_group_cache' - wrong count at exit
+diff -ruN linux-checker/rc5/fs/ceph/caps.sp linux-checker/ssa/fs/ceph/caps.sp
+--- linux-checker/rc5/fs/ceph/caps.sp 2017-08-17 00:28:20.364460452 -0400
++++ linux-checker/ssa/fs/ceph/caps.sp 2017-08-17 00:19:45.554105256 -0400
+@@ -1,3 +1,3 @@
+ fs/ceph/caps.c:2036:9: warning: context imbalance in 'try_flush_caps'
+- wrong count at exit
+-fs/ceph/caps.c:3155:9: warning: context imbalance in
+'handle_cap_grant' - wrong count at exit
++fs/ceph/caps.c:2909:13: warning: context imbalance in
+'handle_cap_grant' - wrong count at exit
+ fs/ceph/caps.c:3739:17: warning: context imbalance in
+'ceph_handle_caps' - unexpected unlock
+diff -ruN linux-checker/rc5/fs/ntfs/compress.sp
+linux-checker/ssa/fs/ntfs/compress.sp
+--- linux-checker/rc5/fs/ntfs/compress.sp 2017-08-17 00:28:24.202560020 -0400
++++ linux-checker/ssa/fs/ntfs/compress.sp 2017-08-17 00:19:49.671212062 -0400
+@@ -1,3 +1,3 @@
+ fs/ntfs/compress.c:195:58: warning: Variable length array is used.
+ fs/ntfs/compress.c:220:28: warning: context imbalance in
+'ntfs_decompress' - unexpected unlock
+-fs/ntfs/compress.c:886:16: warning: context imbalance in
+'ntfs_read_compressed_block' - different lock contexts for basic block
++fs/ntfs/compress.c:785:16: warning: context imbalance in
+'ntfs_read_compressed_block' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/ipc/sem.sp linux-checker/ssa/ipc/sem.sp
+--- linux-checker/rc5/ipc/sem.sp 2017-08-17 00:28:27.519646071 -0400
++++ linux-checker/ssa/ipc/sem.sp 2017-08-17 00:19:53.227304314 -0400
+@@ -1,5 +1,5 @@
+ ipc/sem.c:521:9: warning: context imbalance in 'newary' - unexpected unlock
+-ipc/sem.c:1132:17: warning: context imbalance in 'freeary' - unexpected unlock
++ipc/sem.c:446:9: warning: context imbalance in 'freeary' - unexpected unlock
+ ipc/sem.c:1585:9: warning: context imbalance in 'semctl_down' -
+different lock contexts for basic block
+ ipc/sem.c:1690:24: warning: context imbalance in 'find_alloc_undo' -
+wrong count at exit
+ ./include/linux/rcupdate.h:663:9: warning: context imbalance in
+'SyS_semtimedop' - unexpected unlock
+diff -ruN linux-checker/rc5/ipc/util.sp linux-checker/ssa/ipc/util.sp
+--- linux-checker/rc5/ipc/util.sp 2017-08-17 00:28:27.471644826 -0400
++++ linux-checker/ssa/ipc/util.sp 2017-08-17 00:19:53.161302602 -0400
+@@ -3,5 +3,5 @@
+ ipc/util.c:373:27: warning: context imbalance in 'ipcget_public' -
+unexpected unlock
+ ipc/util.c:518:22: warning: context imbalance in 'ipc_lock' -
+different lock contexts for basic block
+ ipc/util.c:687:29: warning: context imbalance in 'sysvipc_find_ipc' -
+different lock contexts for basic block
+-ipc/util.c:725:27: warning: context imbalance in 'sysvipc_proc_next'
+- unexpected unlock
+-ipc/util.c:769:27: warning: context imbalance in 'sysvipc_proc_stop'
+- unexpected unlock
++ipc/util.h:162:20: warning: context imbalance in 'sysvipc_proc_next'
+- unexpected unlock
++ipc/util.h:162:20: warning: context imbalance in 'sysvipc_proc_stop'
+- unexpected unlock
+diff -ruN linux-checker/rc5/kernel/cgroup/cgroup.sp
+linux-checker/ssa/kernel/cgroup/cgroup.sp
+--- linux-checker/rc5/kernel/cgroup/cgroup.sp 2017-08-17
+00:28:27.999658524 -0400
++++ linux-checker/ssa/kernel/cgroup/cgroup.sp 2017-08-17
+00:19:53.705316715 -0400
+@@ -1 +1 @@
+-kernel/cgroup/cgroup.c:2656:9: warning: context imbalance in
+'cgroup_lock_and_drain_offline' - wrong count at exit
++kernel/cgroup/cgroup.c:2645:6: warning: context imbalance in
+'cgroup_lock_and_drain_offline' - wrong count at exit
+diff -ruN linux-checker/rc5/kernel/debug/debug_core.sp
+linux-checker/ssa/kernel/debug/debug_core.sp
+--- linux-checker/rc5/kernel/debug/debug_core.sp 2017-08-17
+00:28:27.883655514 -0400
++++ linux-checker/ssa/kernel/debug/debug_core.sp 2017-08-17
+00:19:53.626314665 -0400
+@@ -1 +1 @@
+-./arch/x86/include/asm/paravirt.h:809:16: warning: context imbalance
+in 'kgdb_cpu_enter' - different lock contexts for basic block
++kernel/debug/debug_core.c:495:9: warning: context imbalance in
+'kgdb_cpu_enter' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/kernel/events/core.sp
+linux-checker/ssa/kernel/events/core.sp
+--- linux-checker/rc5/kernel/events/core.sp 2017-08-17 00:28:28.175663090 -0400
++++ linux-checker/ssa/kernel/events/core.sp 2017-08-17 00:19:53.907321955 -0400
+@@ -136,9 +136,9 @@
+ kernel/events/core.c:149:16: warning: incorrect type in initializer
+(different address spaces)
+ kernel/events/core.c:11016:26: warning: incorrect type in initializer
+(different address spaces)
+ kernel/events/core.c:11044:26: warning: incorrect type in initializer
+(different address spaces)
+-kernel/events/core.c:156:9: warning: context imbalance in
+'perf_ctx_lock' - wrong count at exit
++kernel/events/core.c:152:13: warning: context imbalance in
+'perf_ctx_lock' - wrong count at exit
+ kernel/events/core.c:164:17: warning: context imbalance in
+'perf_ctx_unlock' - unexpected unlock
+-./include/linux/rcupdate.h:661:9: warning: context imbalance in
+'perf_lock_task_context' - different lock contexts for basic block
++kernel/events/core.c:1331:17: warning: context imbalance in
+'perf_lock_task_context' - different lock contexts for basic block
+ kernel/events/core.c:1358:17: warning: context imbalance in
+'perf_pin_task_context' - unexpected unlock
+ kernel/events/core.c:2363:9: warning: context imbalance in
+'__perf_install_in_context' - wrong count at exit
+ kernel/events/core.c:3862:17: warning: context imbalance in
+'find_get_context' - unexpected unlock
+diff -ruN linux-checker/rc5/net/irda/irqueue.sp
+linux-checker/ssa/net/irda/irqueue.sp
+--- linux-checker/rc5/net/irda/irqueue.sp 2017-08-17 00:28:30.494723251 -0400
++++ linux-checker/ssa/net/irda/irqueue.sp 2017-08-17 00:19:56.477388628 -0400
+@@ -1,4 +1,4 @@
+-net/irda/irqueue.c:405:25: warning: context imbalance in
+'hashbin_delete' - different lock contexts for basic block
++net/irda/irqueue.c:414:33: warning: context imbalance in
+'hashbin_delete' - different lock contexts for basic block
+ net/irda/irqueue.c:445:6: warning: context imbalance in
+'hashbin_insert' - different lock contexts for basic block
+ net/irda/irqueue.c:538:9: warning: context imbalance in
+'hashbin_remove_first' - different lock contexts for basic block
+ net/irda/irqueue.c:628:9: warning: context imbalance in
+'hashbin_remove' - different lock contexts for basic block
+diff -ruN linux-checker/rc5/security/selinux/avc.sp
+linux-checker/ssa/security/selinux/avc.sp
+--- linux-checker/rc5/security/selinux/avc.sp 2017-08-17
+00:28:32.946786862 -0400
++++ linux-checker/ssa/security/selinux/avc.sp 2017-08-17
+00:19:59.397464380 -0400
+@@ -0,0 +1 @@
++security/selinux/avc.c:523:58: warning: context imbalance in
+'avc_alloc_node' - different lock contexts for basic block
