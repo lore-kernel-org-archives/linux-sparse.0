@@ -1,98 +1,346 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 00/14] rework of cast operations
-Date: Thu, 17 Aug 2017 06:05:15 +0200
-Message-ID: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 01/14] add documentation for IR instructions
+Date: Thu, 17 Aug 2017 06:05:16 +0200
+Message-ID: <20170817040529.7289-2-luc.vanoostenryck@gmail.com>
+References: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f170.google.com ([209.85.128.170]:35259 "EHLO
-        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750755AbdHQEFi (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:38329 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750755AbdHQEFk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 17 Aug 2017 00:05:38 -0400
-Received: by mail-wr0-f170.google.com with SMTP id 49so23863560wrw.2
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:37 -0700 (PDT)
+        Thu, 17 Aug 2017 00:05:40 -0400
+Received: by mail-wr0-f195.google.com with SMTP id 49so32917wrw.5
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Aug 2017 21:05:40 -0700 (PDT)
+In-Reply-To: <20170817040529.7289-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The goal of this series is to specialize the few cast
-instuctions into more specialized ones so that the
-precise nature of the operations is fully specified
-by the instruction and thus no additional need to be
-done later.
+Until now the 'instructions' used for spare's IR are
+not at all documented.
 
-With this series we have:
-- TRUNC, for int to smaller size int
-- ZEXT,  for int to bigger int with zero extend
-- SEXT,  for int to bigger int with sign extend
-- PTRTU, for pointer to same sized [unsigned] int
-- UTPTR, for pointer from same sized [unsigned] int
-- PTRCAST, for pointer to pointer
-- FCVT[US], for float to unsigned/signed integer
-- [US]CVTF, for float from unsigned/signed integer
-- FCVTF, for float to float
+This patch is a fist step toward having these instructions
+properly documented.
 
-Also:
-- for these casts, void pointer are treated as unsigned integers
-- casts from int to same sized int are trated as NOP and never
-  generated.
-
-
-There are few points I'm not yet decided about, especially thinking
-about what would be needed to to [type based] analysis:
-- maybe we should no drop the NOP and have a real NOPCAST ?
-- this NOPCAST may then be used for floats and pointers too?
-- this NOPCAST could then be simplified away when needed
-- PTRTU & UTPTR are in the same situation:
-  - are they needed?
-  - when can we simplified them away?
-- it may be good to split FCVTF into: FTRUNC, NOPCAST & TEXT
-- is it still good to treat void pointers the same as some integer?
-
-----------------------------------------------------------------
-This series is also available in the git repository at:
-
-  git://github.com/lucvoo/sparse.git cast-rework
-
-----------------------------------------------------------------
-Luc Van Oostenryck (14):
-      add documentation for IR instructions
-      cast: add tests for warnings issued by sparse -v
-      cast: prepare finer grained cast instructions
-      cast: specialize FPCAST into [USF]CVTF
-      cast: handle NO-OP casts
-      cast: specialize floats to integer conversion
-      cast: specialize casts from unsigned to pointers
-      cast: make [u]intptr_ctype alias of [s]size_t_ctype
-      cast: make pointer casts always size preserving
-      cast: temporary simplify handling cast to/from void*
-      cast: specialize cast from pointers
-      cast: add support for -Wpointer-to-int-cast
-      cast: make casts from pointer always size preserving
-      cast: specialize integer casts
-
- Documentation/IR.md                    | 330 +++++++++++++++++++++++++++++++++
- cse.c                                  |  10 +-
- example.c                              |  22 ++-
- lib.c                                  |   4 +
- lib.h                                  |   2 +
- linearize.c                            | 165 ++++++++++++++---
- linearize.h                            |  11 +-
- liveness.c                             |  10 +-
- simplify.c                             |  54 +++---
- sparse-llvm.c                          |  21 ++-
- sparse.c                               |   5 +-
- symbol.h                               |   3 +
- validation/bitfield-size.c             |   5 +-
- validation/builtin-bswap-variable.c    |   4 +-
- validation/cast-kinds-check.c          |  19 ++
- validation/cast-kinds.c                | 181 ++++++++++--------
- validation/cast-weirds.c               |  51 +++++
- validation/compound-assign-type.c      |   3 +-
- validation/linear/bitfield-init-zero.c |   8 +-
- validation/memops-volatile.c           |   4 +-
- validation/optim/bool-simplify.c       |   4 +-
- 21 files changed, 757 insertions(+), 159 deletions(-)
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ Documentation/IR.md | 306 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 306 insertions(+)
  create mode 100644 Documentation/IR.md
- create mode 100644 validation/cast-kinds-check.c
- create mode 100644 validation/cast-weirds.c
+
+diff --git a/Documentation/IR.md b/Documentation/IR.md
+new file mode 100644
+index 000000000..7e13e740d
+--- /dev/null
++++ b/Documentation/IR.md
+@@ -0,0 +1,306 @@
++# Sparse Instructions (IR)
++
++## General
++Sparse's instructions clearly belong to the family of
++3-addresses code: most instruction taking one or two
++operands and produce one result.
++
++Concretely, things are a bit more complex as a few instructions
++take 3 operands and some take an unbounded number of operands.
++The type of each of these operands can also differs.
++
++Operands, result and some parameters are stored in the members
++of a `struct instruction`.
++Some of these members are used by almost all instructions,
++some others are specific to only one or a few instructions.
++The common ones are:
++- `.src1`, `.src2`, `.src3`: operands of binops or ternary ops, type is `pseudo_t`.
++- `.src`: operand of unary ops (alias for `.src1`), type is `pseudo_t`.
++- `.target`: result of unary, binary & ternary ops, is sometimes used
++	otherwise by some others instructions, type is `pseudo_t`.
++- `.cond`: input operands for condition (alias `.target`!), type is `pseudo_t`.
++- `.type`: usually the type of `.result`, sometimes of the operands, type is `struct symbol *`.
++
++## Terminators
++### OP_RET
++Return from subroutine.
++- `.src` : returned value (NULL if void)
++- `.type`: type of `.src`
++
++### OP_BR
++Unconditional branch
++- `.bb_true`: destination basic block
++
++### OP_CBR
++Conditional branch
++- `.cond`: condition
++- `.type`: type of `.cond`, must be an integral type
++- `.bb_true`, `.bb_false`: destination basic blocks
++
++### OP_SWITCH
++Switch / multi-branch
++- `.cond`: condition
++- `.type`: type of `.cond`, must be an integral type
++- `.multijmp_list`: pairs of case-value - destination basic block
++
++### OP_COMPUTEDGOTO
++Computed goto / branch to register
++- `.target`: target address (type is irrelevant, void*)
++- `.multijmp_list`: list of possible destination basic blocks
++
++## Arithmetic binops
++They all follow the same signature:
++- `.src1`, `.src2`: operands (types must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`
++
++### OP_ADD
++Addition.
++
++### OP_SUB
++Subtraction.
++
++### OP_MULU
++Multiplication (unsigned ints & floating-points)
++
++### OP_MULS
++Multiplication (signed ints)
++
++### OP_DIVU
++Division (unsigned ints & floating-points)
++
++### OP_DIVS
++Division (signed ints)
++
++### OP_MODU
++Modulo (unsigned division remainder, integer only)
++
++### OP_MODS
++Modulo (signed division remainder, integer only)
++
++### OP_SHL
++Shift left (integer only)
++
++### OP_LSR
++Logical Shift right (integer only)
++
++### OP_ASR
++Arithmetic Shift right (integer only)
++
++## Logical ops
++They all follow the same signature:
++- `.src1`, `.src2`: operands (types must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`, must be an integral type
++
++### OP_AND
++### OP_OR
++### OP_XOR
++
++## Boolean ops
++### OP_AND_BOOL
++### OP_OR_BOOL
++
++## Comparisons
++They all have the following signature:
++- `.src1`, `.src2`: operands (types must be compatible)
++- `.target`: result of the operation (0/1 valued integer)
++- `.type`: type of `.target`, must be an integral type
++
++### OP_SET_EQ
++Compare equal.
++
++### OP_SET_NE
++Compare not-equal.
++
++### OP_SET_LE
++Compare less-than-or-equal (signed).
++
++### OP_SET_GE
++Compare greater-than-or-equal (signed).
++
++### OP_SET_LT
++Compare less-than (signed).
++
++### OP_SET_GT
++Compare greater-than (signed).
++
++### OP_SET_B
++Compare less-than (unsigned).
++
++### OP_SET_A
++Compare greater-than (unsigned).
++
++### OP_SET_BE
++Compare less-than-or-equal (unsigned).
++
++### OP_SET_AE
++Compare greater-than-or-equal (unsigned).
++
++## Unary ops
++### OP_NOT
++Logical not.
++- `.src`: operand (type must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`, must be an integral type
++
++### OP_NEG
++Arithmetic negation.
++- `.src`: operand (type must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`
++
++## Type conversions
++They all have the following signature:
++- `.src`: source value
++- `.orig_type`: type of `.src`
++- `.target`: result value
++- `.type`: type of `.target`
++
++### OP_CAST
++Cast to unsigned integer (and to void pointer).
++
++### OP_SCAST
++Cast to signed integer.
++
++### OP_FPCAST
++Cast to floating-point.
++
++### OP_PTRCAST
++Cast to pointer.
++
++## Ternary ops
++### OP_SEL
++- `.src1`: condition, must be of integral type
++- `.src2`, `.src3`: operands (types must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`
++
++## Memory ops
++### OP_LOAD
++Load.
++- `.src`: base address to load from
++- `.offset`: address offset
++- `.target`: loaded value
++- `.type`: type of `.target`
++
++### OP_STORE
++Store.
++- `.src`: base address to store to
++- `.offset`: address offset
++- `.target`: value to be stored
++- `.type`: type of `.target`
++
++## Others
++### OP_SYMADDR
++Create a pseudo corresponding to the address of a symbol.
++- `.symbol`: input symbol (alias `.src`), type is `pseudo_t`
++- `.target`: symbol's address
++
++### OP_SETVAL
++Create a pseudo corresponding to a value.
++The value is given as an expression EXPR_STRING, EXPR_FVALUE or
++EXPR_LABEL (pseudos for integral constants are directly created
++at linearization and doesn't need this instruction)
++- `.val`: (expression) input expression
++- `.target`: the resulting value
++- `.type`: type of `.target`, the value
++
++### OP_PHI
++Phi-node (for SSA form).
++- `.phi_list`: phi-operands (type must be compatible with `.target`)
++- `.target`: "result"
++- `.type`: type of `.target`
++
++### OP_PHISOURCE
++Phi-node source.
++Like OP_COPY but exclusively used to give a defining instructions
++(and thus also a type) to *all* OP_PHI operands.
++- `.phi_src`: operand (type must be compatible with `.target`, alias `.src`)
++- `.target`: the "result" PSEUDO_PHI
++- `.type`: type of `.target`
++- `.phi_users`: list of phi instructions using the target pseudo
++
++### OP_PUSH
++Give an argument to the following OP_CALL.
++- `.arg`: argument (alias `.src`), type is `pseudo_t`
++- `.type`: type of `.src`
++- `.call`: corresponding instruction
++
++### OP_CALL
++Function call.
++- `.func`: the function (can be a symbol or a "register", alias `.src`)), type is `pseudo_t`
++- `.arguments`: list of the associated OP_PUSH instructions
++- `.target`: function return value (if any)
++- `.type`: type of `.target`
++- `.fntype`: the full function type
++
++### OP_INLINED_CALL
++Only used as an annotation to show that the instructions just above
++correspond to a function that have been inlined.
++- `.func`: the function (must be a symbol, alias `.src`)), type is `pseudo_t`
++- `.inlined_args`: list of pseudos that where the function's arguments
++- `.target`: function return value (if any)
++- `.type`: type of `.target`
++- `.fntype`: the full function type
++
++### OP_SLICE
++Extract a "slice" from an aggregate.
++- `.base`: aggregate (alias `.src`), type is `pseudo_t`
++- `.from`, `.len`: offet & size of the "slice" within the aggregate
++- `.target`: result
++- `.type`: type of `.target`
++
++### OP_ASM
++Inlined assembly code.
++- `.string`: asm template
++- `.asm_rules`: asm constraints, rules
++
++## Sparse tagging (line numbers, context, whatever)
++### OP_CONTEXT
++Currently only used for lock/unlock tracking.
++- `.context_expr`: unused
++- `.increment`: (1 for locking, -1 for unlocking)
++- `.check`: (ignore the instruction if 0)
++
++## Misc ops
++### OP_ENTRY
++Function entry point (no associated semantic).
++
++### OP_BADOP
++Invalid operation (should never be generated).
++
++### OP_NOP
++No-op (should never be generated).
++
++### OP_SNOP
++Store no-op (removed store operation).
++
++### OP_LNOP
++Load no-op (removed load operation).
++
++### OP_DEATHNOTE
++Annotation telling the pseudo will be death after the next
++instruction (other than some other annotation, that is).
++
++### OP_COPY
++Copy (only needed after out-of-SSA).
++- `.src`: operand (type must be compatible with `.target`)
++- `.target`: result of the operation
++- `.type`: type of `.target`
++
++### OP_RANGE
++Range/bounds checking (only used for an unused sparse extension).
++- `.src1`: value to be checked
++- `.src2`, src3: bound of the value (must be constants?)
++- `.type`: type of `.src`
++
++## Unused ops
++### OP_VANEXT
++### OP_VAARG
++### OP_MALLOC
++### OP_FREE
++### OP_ALLOCA
++### OP_GET_ELEMENT_PTR
++### OP_INVOKE
++### OP_UNWIND
+-- 
+2.14.0
+
