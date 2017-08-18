@@ -1,33 +1,38 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 28/29] sssa: switch to the new SSA construction
-Date: Fri, 18 Aug 2017 23:58:40 +0200
-Message-ID: <CAExDi1Tz1gJ789fu83MT2jpd_eSoY+9j+4Cn+VFHRCdD4H1NUA@mail.gmail.com>
-References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
- <20170816153455.97693-29-luc.vanoostenryck@gmail.com> <CANeU7Qnag6mAy-opTWoM-pzGaipgVZxMTrEHzjXOgWWqmrT2SA@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Investigating a problem
+Date: Fri, 18 Aug 2017 23:43:04 +0100
+Message-ID: <CACXZuxeHWAviEDKdmVepGnXyU9qnGZzOgfkh696x1Au_rhANNw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f42.google.com ([209.85.218.42]:34140 "EHLO
-        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752467AbdHRV6l (ORCPT
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:38532 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750969AbdHRWnF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 17:58:41 -0400
-Received: by mail-oi0-f42.google.com with SMTP id x3so109455202oia.1
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 14:58:40 -0700 (PDT)
-In-Reply-To: <CANeU7Qnag6mAy-opTWoM-pzGaipgVZxMTrEHzjXOgWWqmrT2SA@mail.gmail.com>
+        Fri, 18 Aug 2017 18:43:05 -0400
+Received: by mail-ua0-f181.google.com with SMTP id n29so8494224uai.5
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 15:43:05 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 18, 2017 at 11:47 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Wed, Aug 16, 2017 at 11:34 AM, Luc Van Oostenryck wrote:
+Hi,
 
->> to use the new SA construction method.
->
-> You mean SSA construction method :-)
+I am investigating a problem with following code:
 
-I'm used to more often use 'SSSA' for Simple SSA and thus refering
-the method & implementation. Here I removed one more 'S'.
+extern int testme(int a, int b);
 
--- Luc
+int testme(int a, int b)
+{
+if (a == b)
+return 0;
+return 5;
+}
+
+The CBR instruction appears to get a NULL type.
+
+I would like to know if this works correctly in Sparse LLVM (right now
+I can't build Sparse LLVM hence I cannot test this).
+
+Thanks and Regards
+Dibyendu
