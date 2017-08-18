@@ -1,40 +1,36 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 13/29] add insert_phi_node()
-Date: Fri, 18 Aug 2017 22:52:15 +0200
-Message-ID: <CAExDi1Q=bKkbz6Ggz4YBYTFUOm_LKW8Oo6U=9XAmtfFaLeERvQ@mail.gmail.com>
-References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
- <20170816153455.97693-14-luc.vanoostenryck@gmail.com> <CANeU7QkAM=5Z+Ksn+Wjx66kF=Hz3pumfADiHQAs74AoKdYC4=A@mail.gmail.com>
+Subject: Re: idea/question about sparse's context checking
+Date: Fri, 18 Aug 2017 22:59:42 +0200
+Message-ID: <CAExDi1Sn4q67_WcN6jSWKDSyxSSR2UPseTYm9Or9uopcQNn81w@mail.gmail.com>
+References: <20170818132039.hii2siz5sjaua5qr@ltop.local> <CA+55aFxMcfPU4yVY6dNL0xiMQ8_hC7UrM0EgwggvxnhAq_ZXdA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f49.google.com ([209.85.218.49]:33393 "EHLO
-        mail-oi0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751693AbdHRUwQ (ORCPT
+Received: from mail-oi0-f53.google.com ([209.85.218.53]:36497 "EHLO
+        mail-oi0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751786AbdHRU7n (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 16:52:16 -0400
-Received: by mail-oi0-f49.google.com with SMTP id f11so108129341oic.0
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 13:52:16 -0700 (PDT)
-In-Reply-To: <CANeU7QkAM=5Z+Ksn+Wjx66kF=Hz3pumfADiHQAs74AoKdYC4=A@mail.gmail.com>
+        Fri, 18 Aug 2017 16:59:43 -0400
+Received: by mail-oi0-f53.google.com with SMTP id g131so108090321oic.3
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 13:59:43 -0700 (PDT)
+In-Reply-To: <CA+55aFxMcfPU4yVY6dNL0xiMQ8_hC7UrM0EgwggvxnhAq_ZXdA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Fri, Aug 18, 2017 at 10:39 PM, Christopher Li <sparse@chrisli.org> wrote:
+On Fri, Aug 18, 2017 at 9:34 PM, Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+> On Fri, Aug 18, 2017 at 6:20 AM, Luc Van Oostenryck wrote:
 >
-> You do need to preserve the order of the phi node, right?
-> At first I was thinking always insert the phi at the first instruction.
-> Then I realized that, it is possible some phi node use some other
-> phi node as source in case of a loop. So the order does need
-> to be preserved some how.
+> I think that's a great idea.
+I confess that it's totally copied from how it's done for the return value.
 
-It's not needed because:
-1) phi-nodes need to have 'parallel-assignment' semantics anyway
-    like in languages where you can write 'a, b = b, a' to exchange
-    two variables. In other words, if the order would matter it would
-    be a bug.
-2) you can never have (the target of) a phi-node (OP_PHI)
-    as another phi-node' source because all such sources are
-    created by OP_PHISOURCEs.
+> We do all the flow stuff for variables
+> anyway, and using a hidden variable would make it potentially a lot
+> more flexible. You could make the context op do much more than just a
+> fixed inc/dec.
+
+Yes, I see potential too, but nothing very specific. Have you something in mind?
 
 -- Luc
