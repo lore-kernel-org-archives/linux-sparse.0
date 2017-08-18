@@ -1,34 +1,50 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: idea/question about sparse's context checking
-Date: Fri, 18 Aug 2017 12:34:43 -0700
-Message-ID: <CA+55aFxMcfPU4yVY6dNL0xiMQ8_hC7UrM0EgwggvxnhAq_ZXdA@mail.gmail.com>
-References: <20170818132039.hii2siz5sjaua5qr@ltop.local>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Sparse 0.5.1 is released
+Date: Fri, 18 Aug 2017 15:46:03 -0400
+Message-ID: <CANeU7Qn-ARUVc3jV3AwhJ-79AB92m4Qht7S-E_UXtxFf0-nSzw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f52.google.com ([209.85.218.52]:36445 "EHLO
-        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751687AbdHRTeo (ORCPT
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:34608 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752038AbdHRTqE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 15:34:44 -0400
-Received: by mail-oi0-f52.google.com with SMTP id g131so106182952oic.3
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 12:34:44 -0700 (PDT)
-In-Reply-To: <20170818132039.hii2siz5sjaua5qr@ltop.local>
+        Fri, 18 Aug 2017 15:46:04 -0400
+Received: by mail-yw0-f177.google.com with SMTP id s143so64766791ywg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 12:46:04 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Randy Dunlap <rdunlap@infradead.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Michael Stefaniuc <mstefani@mykolab.com>
 
-On Fri, Aug 18, 2017 at 6:20 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> My idea/question is the following: this interpretation
-> is already done for all 'normal' values. So couldn't we
-> consider the context as a special kind of 'variable',
+It is finally there. Sparse 0.5.1 is released.
 
-I think that's a great idea.  We do all the flow stuff for variables
-anyway, and using a hidden variable would make it potentially a lot
-more flexible. You could make the context op do much more than just a
-fixed inc/dec.
+I consider this the best quality of release of sparse I ever
+experienced so far. There are lots of enhancement and bug fixes
+incorporate into this release.
 
-                    Linus
+I would like to thank every one that contributes to this release,
+people who submit patches, perform testing and send bug
+reports.
+
+I want to specially thank Luc Vanoostenryck who makes this
+release possible. He has 242 commits in this release, far more
+than any one else.
+
+The development effort for the next release has already began.
+
+Finally, I would like to call for developers joining the sparse project.
+If you are interested in modern compilers, reading compiler books
+and want some excise. Sparse is a good project to start.
+
+Sparse is very small, the project compiles under 10 seconds.
+It can digest the full kernel source file, generate internal byte
+code representation and perform check on it. All this happens in
+1/10 of the time it took gcc to compile the same source file.
+
+Here is some project ideas,
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/tree/Documentation/project-ideas.md
+
+Thanks
+
+Chris
