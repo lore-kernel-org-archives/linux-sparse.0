@@ -1,7 +1,7 @@
-From: Christopher Li <sparse@chrisli.org>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH 09/29] add helper to test if a variable is "simple"
-Date: Fri, 18 Aug 2017 16:14:20 -0400
-Message-ID: <CANeU7Q=wgPStjUYkYCbiy5DEiLPZ-kML+2XiAwumn__FMYePTg@mail.gmail.com>
+Date: Fri, 18 Aug 2017 22:27:54 +0200
+Message-ID: <CAExDi1T5RT9gsgGR2mHGCgaBUySH2jupKxyHJb2E7W6vWBaAQw@mail.gmail.com>
 References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
  <20170816153455.97693-10-luc.vanoostenryck@gmail.com> <CANeU7QmU30Oafe5Peq6D5tnfBE+k=T+tttt3_vV0MeDGbbTZxQ@mail.gmail.com>
  <CACXZuxfQejAOR-JwSh+tYtjBgr3wYawVgEFNAXRU6c_QoTQKRA@mail.gmail.com>
@@ -11,59 +11,48 @@ References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
  <CACXZuxf0gQfdMqa6XLmcmnrzD9SzqefL5Aw9+AsuYqp8cC_HnQ@mail.gmail.com>
  <CANeU7QkGxD3g=kQkMHKNzagMA51moni0EHy_iazEDidQjEeZQg@mail.gmail.com>
  <CACXZuxd0aesRaQYqq8hzojxLQUfowZmdLT3c_8ZN2nUe6tbbzg@mail.gmail.com>
- <CANeU7Qk5=4Cm7HVeCk402nz4p2HivossoMgM6XTxHrk41Dz2BA@mail.gmail.com> <CAMHZB6H12RnZe3Swai56AZYfZBc8_wOabtb+2iWtuz=Kmdy_Uw@mail.gmail.com>
+ <CANeU7Qk5=4Cm7HVeCk402nz4p2HivossoMgM6XTxHrk41Dz2BA@mail.gmail.com>
+ <CAMHZB6H12RnZe3Swai56AZYfZBc8_wOabtb+2iWtuz=Kmdy_Uw@mail.gmail.com> <CANeU7Q=wgPStjUYkYCbiy5DEiLPZ-kML+2XiAwumn__FMYePTg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:37047 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751668AbdHRUOV (ORCPT
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:34650 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751586AbdHRU14 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 16:14:21 -0400
-Received: by mail-qt0-f171.google.com with SMTP id 16so59433498qtz.4
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 13:14:21 -0700 (PDT)
-In-Reply-To: <CAMHZB6H12RnZe3Swai56AZYfZBc8_wOabtb+2iWtuz=Kmdy_Uw@mail.gmail.com>
+        Fri, 18 Aug 2017 16:27:56 -0400
+Received: by mail-oi0-f65.google.com with SMTP id v11so10350502oif.1
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 13:27:55 -0700 (PDT)
+In-Reply-To: <CANeU7Q=wgPStjUYkYCbiy5DEiLPZ-kML+2XiAwumn__FMYePTg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, Aug 18, 2017 at 3:21 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
+On Fri, Aug 18, 2017 at 10:14 PM, Christopher Li <sparse@chrisli.org> wrote:
+> On Fri, Aug 18, 2017 at 3:21 PM, Luc Van Oostenryck wrote:
 >
-> It's very easy, you just need for is_promotable() to always return
-> false. But really, what would be the point?
+>> The points that matter to me are:
+>> 1) generate correct SSA information.
+>>     This is ultra-important because with incorrect SSA
+>>      a lot of the optimizations are wrong, introduce errors
+>>      and infinite loops or need ugly workarounds.
+>
+> That I totally agree. Incorrect SSA can't not use as SSA at all.
+>
+>> 2) correct any other issues sparse could have with the generated IR
+>> 3) correct any errors sparse could have with an optimization
+>> 4) add support for construct sparse doesn't support yet
+>> 5) add more features, make the sparse's code more efficient
+>>     and the generated IR too.
+>
+> All agree.
+>
+>> 5') do not forget that sparse is firstly the/a C checker for the kernel
+>>     (and others projects).
+>
+> Sure. But sparse need to get good IR to perform the checking.
 
-I was mostly thinking debugging and verification purpose.
-AST to linearized byte code without the SSA conversion of
-memory variable is very straight forward.
+Hence, points 2 & 3 :)
 
-Also, I just realized that, promoting memory access into SSA
-pseudo is actually not avoidable at instruction level. After CSE
-and flow optimization, there might open up new chance to
-promote local variable into SSA form. We might need some code
-to promote memory access to SSA pseudo from instruction level
-any way.
-
-> The points that matter to me are:
-> 1) generate correct SSA information.
->     This is ultra-important because with incorrect SSA
->      a lot of the optimizations are wrong, introduce errors
->      and infinite loops or need ugly workarounds.
-
-That I totally agree. Incorrect SSA can't not use as SSA at all.
-
-> 2) correct any other issues sparse could have with the generated IR
-> 3) correct any errors sparse could have with an optimization
-> 4) add support for construct sparse doesn't support yet
-> 5) add more features, make the sparse's code more efficient
->     and the generated IR too.
-
-All agree.
-
-> 5') do not forget that sparse is firstly the/a C checker for the kernel
->     (and others projects).
-
-Sure. But sparse need to get good IR to perform the checking.
-
-Chris
+-- Luc
