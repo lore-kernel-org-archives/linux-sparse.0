@@ -1,104 +1,77 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: idea/question about sparse's context checking
-Date: Fri, 18 Aug 2017 14:18:51 -0400
-Message-ID: <CANeU7QkY2=KrJTZaLJRu1KVc38Vmpggzmxf_AxawdseoZacCEQ@mail.gmail.com>
-References: <20170818132039.hii2siz5sjaua5qr@ltop.local> <CANeU7QkfuSuZkaEAjpAYtGGs=DEHBZRw6rojFLywsvvKaH2WtA@mail.gmail.com>
- <CAExDi1Rp5=kqy_nR6rvuM5U-u5Noh-zQsLghM1cHRDtS02P8bA@mail.gmail.com>
+Subject: Re: [PATCH 09/29] add helper to test if a variable is "simple"
+Date: Fri, 18 Aug 2017 14:35:45 -0400
+Message-ID: <CANeU7Qk5=4Cm7HVeCk402nz4p2HivossoMgM6XTxHrk41Dz2BA@mail.gmail.com>
+References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
+ <20170816153455.97693-10-luc.vanoostenryck@gmail.com> <CANeU7QmU30Oafe5Peq6D5tnfBE+k=T+tttt3_vV0MeDGbbTZxQ@mail.gmail.com>
+ <CACXZuxfQejAOR-JwSh+tYtjBgr3wYawVgEFNAXRU6c_QoTQKRA@mail.gmail.com>
+ <CAExDi1SBiBWPO8RzfbxDbEnqaDTqO=EFX9HmjB+BjsaW75Ccbw@mail.gmail.com>
+ <CACXZuxd4FLJ7h7jeyi_NL8eDseciidShLX7xWMmF84bOBLxmVg@mail.gmail.com>
+ <CAExDi1TNbGgNkKqaPM0tgUof6m9hJVSR-XZaYbQO4QOPewFjzw@mail.gmail.com>
+ <CACXZuxf0gQfdMqa6XLmcmnrzD9SzqefL5Aw9+AsuYqp8cC_HnQ@mail.gmail.com>
+ <CANeU7QkGxD3g=kQkMHKNzagMA51moni0EHy_iazEDidQjEeZQg@mail.gmail.com> <CACXZuxd0aesRaQYqq8hzojxLQUfowZmdLT3c_8ZN2nUe6tbbzg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:33129 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751204AbdHRSSw (ORCPT
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:33823 "EHLO
+        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750944AbdHRSfq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 14:18:52 -0400
-Received: by mail-yw0-f181.google.com with SMTP id p68so63566656ywg.0
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 11:18:52 -0700 (PDT)
-In-Reply-To: <CAExDi1Rp5=kqy_nR6rvuM5U-u5Noh-zQsLghM1cHRDtS02P8bA@mail.gmail.com>
+        Fri, 18 Aug 2017 14:35:46 -0400
+Received: by mail-yw0-f176.google.com with SMTP id s143so63769049ywg.1
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 11:35:46 -0700 (PDT)
+In-Reply-To: <CACXZuxd0aesRaQYqq8hzojxLQUfowZmdLT3c_8ZN2nUe6tbbzg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, Aug 18, 2017 at 12:15 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->>> let the normal simplification process act on them?
->>> If the context is (proveably) well balanced, there
->>> shouldn't be any phi-node left for this context.
->>
->> Assume you do the context pseudo attach to the lock
->> variable. Then you will have to do the pointer alias properly.
->> People might have different pointer point to that variable.
+On Fri, Aug 18, 2017 at 2:15 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+> I have it setup so that if optimization is switched off I skip the CSE
+> / Flow Simplification steps. In the older version the
+> simplify_symbol_usage() was also being skipped but that is not used
+> now. (Although the way I have merged this - I have the old code still
+> there, and I can switch between the two implementations using a
+> #define).
 >
-> No no, it's not the point here.
-> What I meant in the idea is that currently OP_CONTEXT
-> and its associated attribute work with a unique implicit
-> 'object', called 'context' but not explicitly associated to
-> a symbol/variable and thus they need their own specific
-> machinery.
+> As all my LLVM tests pass in this setup this is fine right now. I
+> still get failures in some cases when the other subsequent stages are
+> enabled - so there must be some incorrect simplifications occurring
+> somewhere. I do not yet have specific tests to track down where the
+> issues are.
 
-Ah, I did not get your idea at the first read. So you mean
-do not use bb->context to store the context. There will
-be still one context per BB. Store the context into pseudo
-and some how that pseudo in link into the BB.
+At the point the SSA code is not merge yet. After we merger it.
+report back if you found some issue using the llvm back end.
 
-I was thinking weather you are going to create more than one
-context per BB, attach the context to the locking objects.
-That is not what you are trying to do.
-
-If my understanding of you just try to move bb->context
-into pseudos. In principle that is fine. It is also depend on
-a lot of implementation details as well. Do you still need to
-lookup the context per basic block?
-
->> It can become negative for some helper function that
->> wrap around the unclock function.
 >
-> This need to be checked (and currently there is a small gap
-> where it can go negative and positive again and not warned
-> about it.
+> As I mentioned before - ideally it would be good have a SSA step that
+> is reusable. Then you could run this step several times during the
+> process - and allow some simplification phases to generate non SSA
+> code. Perhaps the new SSA approach can be adapted for this. This would
+> also allow access to the first pass linearized output without
+> promotion to pseudos.
 
-Not sure that is worthy while to warn. It can happen in the function
-assume the lock is taken when enter the function.
-The unlock it, do some thing , relock it.
-There is total legit reason to do it.
+As the way this ssa conversion is implement. I actually don't know
+how hard it is to skip the promotion. I haven't look to that part of
+the code yet. I image there will be a test if this variable has been
+taking address or not. If so, it can't directly promote to pseudo without
+the load/store. That would be one possible place to insert the option
+to disable this. But again, let me look at the code first.
 
-Without cross function checking, there is no good way to know
-the function is(or should) always called with lock held.
+> But this should not stop us from moving forward with this change - as
+> I think the SSA hooks into the linearization step are pretty specific
+> and it should be relatively easy to have a mode where those steps are
+> "dummied" - i.e. do nothing.
+>
+> I have a question though. For my other backend I need liveness
+> analysis done even if I skip the other steps. Is it okay to run the
+> liveness analysis phase while skipping the CSE / Flow simplification
+> phases?
 
-> There are several problems here:
-> 1) the false alarms. These are unavoidable, it's equivalent to the
->     halting problem. We can only be correct and precise in restricted
->    situations (no loops, for example). It's not what the idea here is about.
-
-The really hard one are not avoidable. The one I am talking about.
-Which call some helper function to acquired the lock is avoidable.
-Last time I look at it, that make up a the large part of the false
-alarm.
-
-> 2) what you describe here about the inlines.
->     The underlying problems is to match the 'names/expression'
->     given in the declarations with the ones used in(side) the definition.
->     I've some drafts but I'm not totally sure about what exactly can be
->    done.
-> 3) because of 2) we ignore all the names and we simply care about
->     the sum of all contexts.
->     So, in truth, we can only deal with a single context.
-
-There are two issues. I think having multiple context or tight the
-context into a variable is nice to have, but not that important.
-Even if we implemented that, most likely it is going to yield more
-warnings due to not able to find the name/expression properly.
-It is very unlikely that in the same function has real two context
-error cancel each other out. So having one context for now
-is more or less fine.
-
-Not able to do cross function check on context is the big
-issue in context checking. If we can do cross function
-checking, then a lot of warning can be eliminated.
-
-You can also take a look at the metalevel compiling papers.
-The company coverity was started out doing metalevel compiling
-checks. Coverity report a lot of bugs in Linux kernel back in the days.
+You can, but it is less effective. You will see a lot of load/store into the
+memory. SSA make it easy to trace the define and usage chain.
+Without that you can't really see well what is going on with the content
+of the memory.
 
 Chris
