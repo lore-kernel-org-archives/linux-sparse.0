@@ -1,41 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH 09/29] add helper to test if a variable is "simple"
-Date: Fri, 18 Aug 2017 18:26:44 +0200
-Message-ID: <CAExDi1QwKb+=LYmfw0cMHbjgZ8rVkojk2VWypg+kkCUkQTF0xA@mail.gmail.com>
+Date: Fri, 18 Aug 2017 18:38:05 +0200
+Message-ID: <CAExDi1RrKzNMXv=jNQXtviB=Aq5aHYJJfOsa34K_153-Z8gRew@mail.gmail.com>
 References: <20170816153455.97693-1-luc.vanoostenryck@gmail.com>
  <20170816153455.97693-10-luc.vanoostenryck@gmail.com> <CANeU7QmU30Oafe5Peq6D5tnfBE+k=T+tttt3_vV0MeDGbbTZxQ@mail.gmail.com>
- <CAExDi1RrEw4si8F9AEuHCrt9Zu7iDQ+btOysqciPVR=P-AQu4g@mail.gmail.com> <CANeU7Qkf4D9QQhWR1s5mkUCrWn3ze96VkajuMkOCJg_fZciNcg@mail.gmail.com>
+ <CACXZuxfQejAOR-JwSh+tYtjBgr3wYawVgEFNAXRU6c_QoTQKRA@mail.gmail.com>
+ <CAExDi1SBiBWPO8RzfbxDbEnqaDTqO=EFX9HmjB+BjsaW75Ccbw@mail.gmail.com>
+ <CACXZuxd4FLJ7h7jeyi_NL8eDseciidShLX7xWMmF84bOBLxmVg@mail.gmail.com>
+ <CAExDi1TNbGgNkKqaPM0tgUof6m9hJVSR-XZaYbQO4QOPewFjzw@mail.gmail.com>
+ <CACXZuxf0gQfdMqa6XLmcmnrzD9SzqefL5Aw9+AsuYqp8cC_HnQ@mail.gmail.com> <CANeU7QkGxD3g=kQkMHKNzagMA51moni0EHy_iazEDidQjEeZQg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi0-f51.google.com ([209.85.218.51]:35422 "EHLO
-        mail-oi0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750913AbdHRQ0p (ORCPT
+Received: from mail-oi0-f42.google.com ([209.85.218.42]:33187 "EHLO
+        mail-oi0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752563AbdHRQiG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 12:26:45 -0400
-Received: by mail-oi0-f51.google.com with SMTP id e124so101760116oig.2
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 09:26:45 -0700 (PDT)
-In-Reply-To: <CANeU7Qkf4D9QQhWR1s5mkUCrWn3ze96VkajuMkOCJg_fZciNcg@mail.gmail.com>
+        Fri, 18 Aug 2017 12:38:06 -0400
+Received: by mail-oi0-f42.google.com with SMTP id f11so101848420oic.0
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 09:38:06 -0700 (PDT)
+In-Reply-To: <CANeU7QkGxD3g=kQkMHKNzagMA51moni0EHy_iazEDidQjEeZQg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Fri, Aug 18, 2017 at 6:13 PM, Christopher Li <sparse@chrisli.org> wrote:
->>
->> Note: it's not even 'what can be put in a pseudo(-register)'
->>           were selecting here. It's OK to have pseudos for
->>           'non-simple' values, They will just be transient and we
->>           won't be interested in their 'flow'.
+On Fri, Aug 18, 2017 at 6:18 PM, Christopher Li <sparse@chrisli.org> wrote:
 >
-> We need to be very careful about composite type pointer alias.
+> I just realized another side effect of doing the SSA conversion on
+> the AST directly. It means we will not have access to the linearization
+> byte code before promoting the memory variable to pseudo.
 
-There are only pointer aliases if there are pointers. Here, we're only
-interested in local variables.
+Of course.
+But consider the other side: it means that you already have already
+a lot of variables promoted to pseudo *while* doing the linearization.
+It means that you already can know quite a bit about the 'values'
+during linearization and avoid to generate code that will be thrown
+away soon after being created.
 
-But, and thanks to this remarks, I added a test and realized that
-contrary to what I thought, the MOD_ADDRESSABLE is *not*
-propagated from member to parent. So for the moment, I'll need
-to drop this and only look at pure scalar variables. It's annoying.
+> Maybe later on we can consider an option to
+> avoid doing the SSA conversion on memory variable as an option.
+
+Sure, but it's a serious research topic too.
+Lots can be done. A few things are easy and cheap, most are quite
+complex and expensive.
 
 -- Luc
