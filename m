@@ -1,50 +1,75 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Sparse 0.5.1 is released
-Date: Fri, 18 Aug 2017 15:46:03 -0400
-Message-ID: <CANeU7Qn-ARUVc3jV3AwhJ-79AB92m4Qht7S-E_UXtxFf0-nSzw@mail.gmail.com>
+Subject: Re: idea/question about sparse's context checking
+Date: Fri, 18 Aug 2017 15:59:50 -0400
+Message-ID: <CANeU7Qk47B03ut_sWSVeCzx+VaCoQWfaO18ksXDmxwjbdsmFqA@mail.gmail.com>
+References: <20170818132039.hii2siz5sjaua5qr@ltop.local> <CANeU7QkfuSuZkaEAjpAYtGGs=DEHBZRw6rojFLywsvvKaH2WtA@mail.gmail.com>
+ <CAExDi1Rp5=kqy_nR6rvuM5U-u5Noh-zQsLghM1cHRDtS02P8bA@mail.gmail.com>
+ <CANeU7QkY2=KrJTZaLJRu1KVc38Vmpggzmxf_AxawdseoZacCEQ@mail.gmail.com> <CAMHZB6HPD7mt=WVMr6ri7jxyohp-FkcvjR+XK9_sY-5zB4gQUg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:34608 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752038AbdHRTqE (ORCPT
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:35072 "EHLO
+        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751687AbdHRT7v (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 15:46:04 -0400
-Received: by mail-yw0-f177.google.com with SMTP id s143so64766791ywg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 12:46:04 -0700 (PDT)
+        Fri, 18 Aug 2017 15:59:51 -0400
+Received: by mail-yw0-f178.google.com with SMTP id n83so37143715ywn.2
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 12:59:50 -0700 (PDT)
+In-Reply-To: <CAMHZB6HPD7mt=WVMr6ri7jxyohp-FkcvjR+XK9_sY-5zB4gQUg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Randy Dunlap <rdunlap@infradead.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Dibyendu Majumdar <mobile@majumdar.org.uk>, Michael Stefaniuc <mstefani@mykolab.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Josh Triplett <josh@joshtriplett.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-It is finally there. Sparse 0.5.1 is released.
+On Fri, Aug 18, 2017 at 3:01 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
 
-I consider this the best quality of release of sparse I ever
-experienced so far. There are lots of enhancement and bug fixes
-incorporate into this release.
+> No, it will just be a pseudo, like any other pseudos so we
+> could have as much as we want. We'll just need to deal
+> with them during simplification phase.
 
-I would like to thank every one that contributes to this release,
-people who submit patches, perform testing and send bug
-reports.
+I see. You use a special pseudo to store the context. Every
+context change will corresponding that pesudo add/decrease.
+That is a good idea.
 
-I want to specially thank Luc Vanoostenryck who makes this
-release possible. He has 242 commits in this release, far more
-than any one else.
+>> Not sure that is worthy while to warn. It can happen in the function
+>> assume the lock is taken when enter the function.
+>> The unlock it, do some thing , relock it.
+>> There is total legit reason to do it.
+>
+> No, it's an error to (try to) unlock a lock that is not taken.
 
-The development effort for the next release has already began.
+Right. But the function itself can't see the caller always call
+this function with lock already holed. If the caller call without
+holding the lock that will be a bug.
 
-Finally, I would like to call for developers joining the sparse project.
-If you are interested in modern compilers, reading compiler books
-and want some excise. Sparse is a good project to start.
+>> There are two issues. I think having multiple context or tight the
+>> context into a variable is nice to have, but not that important.
+>> Even if we implemented that, most likely it is going to yield more
+>> warnings due to not able to find the name/expression properly.
+>> It is very unlikely that in the same function has real two context
+>> error cancel each other out. So having one context for now
+>> is more or less fine.
+>
+> Well, it can more frequent that we could think of.
+> And anyway, it's the goal of a checker to look after error,
+> and the rarer they are the more the checker (which
+> find them!) is valuable.
 
-Sparse is very small, the project compiles under 10 seconds.
-It can digest the full kernel source file, generate internal byte
-code representation and perform check on it. All this happens in
-1/10 of the time it took gcc to compile the same source file.
+That is true. We have have some prototypes and see
+how much new warnings it introduce. I am curious how much
+of the report is real bug vs false psitives.
 
-Here is some project ideas,
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/tree/Documentation/project-ideas.md
+> The problem is that the context attribute accept arbitrary
+> *expressions* and not a simple name/argument. But it's
+> normal that it accepts expressions as otherwise a lot of
+> the functions would need a specific argument for it
+> (and there is an idea behind that because for the
+> functions where the expression is simply one of the
+> arguments, we can do the propagation almost for free
+> in the inliner).
 
-Thanks
+When you inline it, it is not cross function any more.
+That is one way to solve it.
 
 Chris
