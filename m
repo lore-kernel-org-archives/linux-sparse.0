@@ -1,43 +1,33 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: SSSA and some C pointer manipulation.
-Date: Sat, 19 Aug 2017 06:56:44 -0400
-Message-ID: <CANeU7Q=x_DZzp93jP9AU5zpTuggR1AGa9pYqwi-kitXV5EKs0w@mail.gmail.com>
-References: <CANeU7Qm-k0xzRXwVx0bSg688+yFTa_PrC7EnKdyJY8HCWZT-uw@mail.gmail.com>
- <CACXZuxdO+pco93WYtbh4W95c6r+f9fp_85TFhQvn-8UOQvOBWw@mail.gmail.com>
+Subject: Re: [RFC PATCH 0/4] simple, registrable, promotable & friends
+Date: Sat, 19 Aug 2017 07:28:24 -0400
+Message-ID: <CANeU7Q=Yb2w9EthKUvbSzMzjZm1c9asb2zGueGGNrj2JdNd-xg@mail.gmail.com>
+References: <20170817223558.21258-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f178.google.com ([209.85.161.178]:36355 "EHLO
-        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752025AbdHSK4p (ORCPT
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:34464 "EHLO
+        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751643AbdHSL2Z (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 19 Aug 2017 06:56:45 -0400
-Received: by mail-yw0-f178.google.com with SMTP id c206so2237301ywb.3
-        for <linux-sparse@vger.kernel.org>; Sat, 19 Aug 2017 03:56:45 -0700 (PDT)
-In-Reply-To: <CACXZuxdO+pco93WYtbh4W95c6r+f9fp_85TFhQvn-8UOQvOBWw@mail.gmail.com>
+        Sat, 19 Aug 2017 07:28:25 -0400
+Received: by mail-yw0-f170.google.com with SMTP id s143so71432478ywg.1
+        for <linux-sparse@vger.kernel.org>; Sat, 19 Aug 2017 04:28:25 -0700 (PDT)
+In-Reply-To: <20170817223558.21258-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Dibyendu Majumdar <mobile@majumdar.org.uk>
 
-On 8/19/17, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> I think it is an excellent idea to create a bunch of careful tests to
-> assess / validate the changes. Perhaps the tests should cover various
-> scenarios including switch statements, gotos, computed gotos, looping
-> constructs, etc. And specific uses of globals, pointers, locals etc.
+On Thu, Aug 17, 2017 at 6:35 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> The goal of this series is tosolve the issues with the
+> current is_simple_{var,type}():
+> - the name was less than optimal, I've choosen 'promotable'
+> - fix the case for structs & unions.
 >
 
-That is the idea for the test suite. To test how sparse handle
-different source code.
-
-There is also the idea of the debug version of sparse. Instead
-having the fix input source. It will do dynamic verification
-of sparse at run time. e.g. If there is a slow and reliable way
-to generate SSA conversion. Then in the debug version will do
-both the slow and reliable way and the new fast and optimal way.
-Then compare notes to draw conclusion that the new way *is* better.
-AT least not worse than the old way. In this case I want to verify
-that, the new method at least cover all the variable converted
-by the old method. Including variable used by pointers.
+This series looks fine to me. The SSSA method still have the
+question of using C pointers. But that is a separate issue.
 
 Chris
