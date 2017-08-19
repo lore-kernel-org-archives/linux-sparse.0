@@ -1,53 +1,32 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Sparse-llvm: Incorrect conversion to bool value in CBR: was:
- Investigating a problem
-Date: Sat, 19 Aug 2017 02:15:46 +0200
-Message-ID: <CAMHZB6HaQuU3e6q=Y0BHQ41u=OFswV4VwRuteiNFMyey6ydRhw@mail.gmail.com>
-References: <CACXZuxf8ck5W8kSHeA9pe7YEFgpmpULyBS1nsSrjFEJCVzB9bw@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Issue with bitfield
+Date: Sat, 19 Aug 2017 02:24:59 +0100
+Message-ID: <CACXZuxeuyK0iJp1h5J8b1BmtTroQVsbfJqkeENG3=uNyyqvDoQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f182.google.com ([209.85.217.182]:35914 "EHLO
-        mail-ua0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751114AbdHSAPr (ORCPT
+Received: from mail-vk0-f44.google.com ([209.85.213.44]:35074 "EHLO
+        mail-vk0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751106AbdHSBZA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Aug 2017 20:15:47 -0400
-Received: by mail-ua0-f182.google.com with SMTP id k43so40667815uaf.3
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 17:15:47 -0700 (PDT)
-In-Reply-To: <CACXZuxf8ck5W8kSHeA9pe7YEFgpmpULyBS1nsSrjFEJCVzB9bw@mail.gmail.com>
+        Fri, 18 Aug 2017 21:25:00 -0400
+Received: by mail-vk0-f44.google.com with SMTP id d124so37279561vkf.2
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Aug 2017 18:25:00 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Aug 19, 2017 at 1:38 AM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Hi,
->
-> It seems that the function bool_value() in sparse-llvm does not work
-> if the value is floating point. A more specific conversion is
-> necessary for floating point to boolean value.
+Hi,
 
-I guess you don't have the patch
-https://github.com/lucvoo/sparse/commit/bbbd9f179579a6cea6d8b2ae731fade5ec9a9ee8
-and maybe also a whole series dealing with booleans.
+This test program appears to generate incorrect IR.
 
-If you have any doubt, you can always use my sssa-next on a test case,
-this tree contains most of the LLVM fixes, plus others stuff and the new SSA.
+extern int printf(const char *s, ...);
 
-With code:
-    _Bool foo (float a) { return a; }
-
-You get:
-; ModuleID = '<stdin>'
-source_filename = "sparse"
-
-define i1 @foo(float %ARG1.) {
-L0:
-  %R2. = fcmp une float %ARG1., 0.000000e+00
-  ret i1 %R2.
+int main(void) {
+struct { char a:4; char b:4; } x = { 2, 4 };
+printf("a=%d b=%d\n", (int)x.a, (int)x.b);
+return 0;
 }
 
-which is the correct code
-
--- Luc
+Regards
+Dibyendu
