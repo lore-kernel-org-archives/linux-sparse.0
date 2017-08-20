@@ -1,52 +1,61 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: Question about Sparse Linear form and pseudos
-Date: Sun, 20 Aug 2017 14:22:12 -0400
-Message-ID: <CANeU7Qkn69crpxr2gR=jHsVPVyk=FfE-vkjGCkfM_yhNcsiAXA@mail.gmail.com>
-References: <CACXZuxd4iKbuvZZ5M0q=xRRDMpxc5UjXp=4+vBjvF8rjdV4-=A@mail.gmail.com>
- <20170820151513.ddoxdwo7iwd2nefh@ltop.local> <CACXZuxenUKprEMjScasEMZNxYDFGeSy8soPpYxbDbd+1kWHY1w@mail.gmail.com>
- <CA+55aFwzXM1e+7uDA_3fSWn1Jof3YFQ4y+r16MaRYF09KU5Xcg@mail.gmail.com>
- <CACXZuxcsTb9mzX-4P6QGCHxVY_=MjTwJexF8BnoFErotCTFjdg@mail.gmail.com> <CA+55aFx1QVQg4fsgXtduexbx4YdQe1QBPQiA6GK37CVi=3cBpw@mail.gmail.com>
+Subject: Re: Sparse parsing question: string literal
+Date: Sun, 20 Aug 2017 14:25:48 -0400
+Message-ID: <CANeU7QktQppCsNS4oqDwSg_7LiYFcVULxQqGrUCw6_=m6OZLWQ@mail.gmail.com>
+References: <CACXZuxcvbCc+eOyqzrUUs4qkTpS705u065nc5=H8DLJ9AQnCEw@mail.gmail.com>
+ <CANeU7Qkq60MA_ufvPsx6dXvr5ZW-kVaGmwVVQ8gQY1g=srZ1MA@mail.gmail.com>
+ <ccf4cac2-003f-f856-28db-49dacae374b6@knosof.co.uk> <CANeU7QmGO7BCDFYhsBmpipB4TYPXWybd9txDOq9Fkw91HKHtug@mail.gmail.com>
+ <28542583-07ad-55d2-5678-bf90f0570e17@knosof.co.uk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:36396 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753263AbdHTSWO (ORCPT
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:35846 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753176AbdHTSZt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 20 Aug 2017 14:22:14 -0400
-Received: by mail-yw0-f173.google.com with SMTP id o192so1795282ywd.3
-        for <linux-sparse@vger.kernel.org>; Sun, 20 Aug 2017 11:22:13 -0700 (PDT)
-In-Reply-To: <CA+55aFx1QVQg4fsgXtduexbx4YdQe1QBPQiA6GK37CVi=3cBpw@mail.gmail.com>
+        Sun, 20 Aug 2017 14:25:49 -0400
+Received: by mail-yw0-f174.google.com with SMTP id o192so1816109ywd.3
+        for <linux-sparse@vger.kernel.org>; Sun, 20 Aug 2017 11:25:49 -0700 (PDT)
+In-Reply-To: <28542583-07ad-55d2-5678-bf90f0570e17@knosof.co.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Derek M Jones <derek@knosof.co.uk>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Aug 20, 2017 at 12:33 PM, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
+On Sun, Aug 20, 2017 at 12:31 PM, Derek M Jones <derek@knosof.co.uk> wrote:
 >
-> I wouldn't guarantee it - I *think* it may be the case that even the
-> initial linearization is actually proper SSA (just with everything
-> going through memory), but I don't think it's necessarily a real
+>
+> It's a question of intent.
+>
+> sizeof(function_name) was written, but was
+> sizeof(function_name()) intended?
 
-I think the initial linearize byte code, the internal usage of pseudo
-is SSA and that is by choice.
+The case I saw was for as part of the structure initialization.
+It want to store the generic object and its size.
+So it has { .... , function_name, sizeof(function_name), .... }
+some thing like that.
 
-> design choice. We do have a "non-SSA" mode that turns phi sources into
-> OP_COPY that is very much not SSA.
+For that usage I am pretty sure it is sizeof(&function_name).
 
-"non-SSA" should happen in a much later stage, when we done with
-all the optimization transformation that require SSA. We can remove
-SSA. When emit to real machine code, the real machine code does
-not have any thing similar to the phi function, which select register
-base one where it come from. So the SSA form need to be undo, at
-very late stage. SSA is just a tool to help optimizations, not the final
-goal.
+But you are right the other way to guess the intend can be
+sizeof(function_name()).
 
-> So our linearization form does support a non-SSA mode, although
-> honestly, I'm not sure how useful it is.
 
-I don't think there is any real use for non-SSA mode in sparse right
-now.
+>
+> Of course sizeof(&function_name) may have been written, but
+> sizeof(&function_name()) was intended.  But that & is an
+> unusually thing to include in a function call, which makes it
+> less likely that () were accidentally omitted.
+>
+> Is it reasonable to require people to add & to signal,
+> yes I really do mean pointer to function?  The indignity
+> if having to type that extra character!
+>
+> I'm inclined towards generating warnings, since there is a
+> way of making the warning to go away, e.g., add & or ().
+
+OK, that make sense. The warning should stay.
+
+Thanks
 
 Chris
