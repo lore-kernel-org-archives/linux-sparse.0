@@ -1,47 +1,86 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Sparse parsing question: symbols in parse tree
-Date: Sun, 20 Aug 2017 23:15:31 +0100
-Message-ID: <CACXZuxcV3qyhTj_GWeJ0cTqRS+TKbuzzOvHh7svdYqfSP3mrTA@mail.gmail.com>
-References: <CACXZuxctG4_rqA0v2KNmxNvK693wH8EMVGhCjPEcHisiKUdUBA@mail.gmail.com>
- <CA+55aFwpbwTM32PiBME0YDnCCZ58_Qq+shJ0BvagnKL5YDyk+Q@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] fix expansion of constant bitfield dereference
+Date: Mon, 21 Aug 2017 00:16:02 +0200
+Message-ID: <20170820221602.27852-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:34448 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753335AbdHTWPc (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:34761 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753334AbdHTWQQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 20 Aug 2017 18:15:32 -0400
-Received: by mail-ua0-f173.google.com with SMTP id i3so20993108uad.1
-        for <linux-sparse@vger.kernel.org>; Sun, 20 Aug 2017 15:15:32 -0700 (PDT)
-In-Reply-To: <CA+55aFwpbwTM32PiBME0YDnCCZ58_Qq+shJ0BvagnKL5YDyk+Q@mail.gmail.com>
+        Sun, 20 Aug 2017 18:16:16 -0400
+Received: by mail-wr0-f195.google.com with SMTP id p14so9528032wrg.1
+        for <linux-sparse@vger.kernel.org>; Sun, 20 Aug 2017 15:16:15 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi Linus,
+During the expansion of a dereference, it's if the initializer
+which corrrespond to the offset we're interested is a constant.
+In which case this dereference can be avoided and the value
+given in the initializer can be used instead.
 
-On 20 August 2017 at 23:09, Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
-> On Sun, Aug 20, 2017 at 2:51 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->>
->> Whenever an EXPR_SYMBOL is encountered does this actually equate to
->> the address of the symbol?
->
-> Yes, it should.
->
-> Note that not all EXPR_SYMBOL are really symbols in the C sense. As
-> mentioned in another thread, you can also have anonymous symbols -
-> they act kind of like a named variable, just without the name.
->
-> The most common case of an anonymous symbol is a constant string, but
-> we do the general case of "cast followed by an initializer" as an
-> anonymous symbol of any type.
->
+However, it's not enough to check for the offset since for bitfields
+several are placed at the same offset.
+Currently, the first initializer matching the offset is selected.
 
-That's interesting - thanks!
+Fix this by refusing such expansion if the constant value correspond
+to a bitfield.
 
-Regards
-Dibyendu
+Reported-by: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ expand.c                           |  2 ++
+ validation/bitfield-expand-deref.c | 27 +++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+)
+ create mode 100644 validation/bitfield-expand-deref.c
+
+diff --git a/expand.c b/expand.c
+index f436b5b50..d44cfac73 100644
+--- a/expand.c
++++ b/expand.c
+@@ -644,6 +644,8 @@ static int expand_dereference(struct expression *expr)
+ 		if (value) {
+ 			/* FIXME! We should check that the size is right! */
+ 			if (value->type == EXPR_VALUE) {
++				if (is_bitfield_type(value->ctype))
++					return UNSAFE;
+ 				expr->type = EXPR_VALUE;
+ 				expr->value = value->value;
+ 				expr->taint = 0;
+diff --git a/validation/bitfield-expand-deref.c b/validation/bitfield-expand-deref.c
+new file mode 100644
+index 000000000..58d1fe176
+--- /dev/null
++++ b/validation/bitfield-expand-deref.c
+@@ -0,0 +1,27 @@
++struct s {
++	int a:8;
++	int b:8;
++};
++
++int foo(void)
++{
++	struct s x = { .a = 12, .b = 34, };
++
++	return x.b;
++}
++
++int bar(int a)
++{
++	struct s x = { .a = 12, .b = a, };
++
++	return x.b;
++}
++
++/*
++ * check-name: bitfield expand deref
++ * check-command: test-linearize -Wno-decl $file
++
++ * check-output-ignore
++ * check-output-excludes: ret\..*\$12
++ * check-output-contains: ret\..*\$34
++ */
+-- 
+2.14.0
+
