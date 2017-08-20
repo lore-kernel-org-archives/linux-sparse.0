@@ -1,70 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Issue with bitfield
-Date: Sat, 19 Aug 2017 22:18:15 +0200
-Message-ID: <20170819201812.7ug7bu6dwjqoetip@ltop.local>
-References: <CACXZuxeuyK0iJp1h5J8b1BmtTroQVsbfJqkeENG3=uNyyqvDoQ@mail.gmail.com>
+Subject: Re: SSSA and some C pointer manipulation.
+Date: Sun, 20 Aug 2017 02:08:09 +0200
+Message-ID: <CAMHZB6EqBouFuAMy+Nvr=XAJqxZBGgrRSzsz=zbhv-yQ6zLJtg@mail.gmail.com>
+References: <CANeU7Qm-k0xzRXwVx0bSg688+yFTa_PrC7EnKdyJY8HCWZT-uw@mail.gmail.com>
+ <CACXZuxdO+pco93WYtbh4W95c6r+f9fp_85TFhQvn-8UOQvOBWw@mail.gmail.com>
+ <CANeU7Q=x_DZzp93jP9AU5zpTuggR1AGa9pYqwi-kitXV5EKs0w@mail.gmail.com> <CACXZuxf-yb5WODCDJ2cQxJ2_sKUwSeKwAmOX+GHCWpd0qOvGvQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:37106 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751626AbdHSUSU (ORCPT
+Received: from mail-ua0-f177.google.com ([209.85.217.177]:35275 "EHLO
+        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752467AbdHTAIK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 19 Aug 2017 16:18:20 -0400
-Received: by mail-wm0-f43.google.com with SMTP id i66so22111020wmg.0
-        for <linux-sparse@vger.kernel.org>; Sat, 19 Aug 2017 13:18:19 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CACXZuxeuyK0iJp1h5J8b1BmtTroQVsbfJqkeENG3=uNyyqvDoQ@mail.gmail.com>
+        Sat, 19 Aug 2017 20:08:10 -0400
+Received: by mail-ua0-f177.google.com with SMTP id q42so25398447uad.2
+        for <linux-sparse@vger.kernel.org>; Sat, 19 Aug 2017 17:08:10 -0700 (PDT)
+In-Reply-To: <CACXZuxf-yb5WODCDJ2cQxJ2_sKUwSeKwAmOX+GHCWpd0qOvGvQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Aug 19, 2017 at 02:24:59AM +0100, Dibyendu Majumdar wrote:
-> Hi,
-> 
-> This test program appears to generate incorrect IR.
-> 
-> extern int printf(const char *s, ...);
-> 
-> int main(void) {
-> struct { char a:4; char b:4; } x = { 2, 4 };
-> printf("a=%d b=%d\n", (int)x.a, (int)x.b);
-> return 0;
-> }
+On Sat, Aug 19, 2017 at 1:57 PM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>
+> Yes. I have a growing set of tests but I only check the final result
+> is correct - i.e. the code can be run (both with and without
+> simplifications) and will produce expected results.
 
+While I'm all in favour of such tests, I also think that at the current
+stage of sparse's development, such tests are not what we
+need because:
+1) to be able to run/execute the code you need a whole machinery
+    we don't have yet
+2) they are dependent on implementation details, kinda architecture/
+    machine specific
+3) they are dependent on the correctness of the backend used
+4) they are dependent on run-time support (like printf()
+    implementation, for example.
+4) they don't help at all to debug
 
-It's a very surprising bug. It's not a linearization or
-an optimization bug as the AST is already wrong.
-With a simpler test case, like:
-	struct s {
-		char a:4;
-		char b:4;
-	};
-	
-	int foo(void)
-	{
-		struct s x = { .a = 2, .b = 4 };
-	
-		return x.b;
-	}
-
-you can see that the linearization produce correct
-code for the initializer.
-You can also see that the return statement to be
-linearized is something like
-	STMT_RETURN
-		ret_value: EXPR_VALUE (value = 2)
-
-The EXPR_VALUE means that the expression is a constant
-(which is indeed the case but I would expect that the
-optimization has to deduce this) but it's value is wrong
-(a quick check seems to indicate that whatever selected
-by the x.<member> expression, it's always the value
-of the first member that we get here.
-It needs real investigation, though.
-It would guess for a bug in the expansion or something.
-
-Nice catch!
+So, this kind of tests makes a lot of sense to you because you're
+developing a backend. They will certainly be useful later if/when
+sparse will have a backend. But currently, small, specific, more
+unit-like tests are much more useful to me.
 
 -- Luc
