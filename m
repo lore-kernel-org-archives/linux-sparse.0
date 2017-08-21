@@ -1,47 +1,37 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Question about Sparse parsing of initializers
-Date: Mon, 21 Aug 2017 20:32:57 +0100
-Message-ID: <CACXZuxfhxQcHYZ6SGarbuw=-0U57PdO2kXHFdAiwKaN+6rT9vg@mail.gmail.com>
-References: <CACXZuxdMMvWmyW7THq5se-jf07vVt0kQZg3BOtomV6rKEdyRog@mail.gmail.com>
- <CANeU7Qm9+3MM+vM1tjktEvpbZrQiFydpZ2rw9HrMe8N9=1V=8g@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: master merge plans
+Date: Mon, 21 Aug 2017 15:39:12 -0400
+Message-ID: <CANeU7Q=9nUo+D3R3ypCS=-kND2vD_Qx84ua59_bi0-VGftPuqA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f176.google.com ([209.85.217.176]:38455 "EHLO
-        mail-ua0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753541AbdHUTc6 (ORCPT
+Received: from mail-yw0-f178.google.com ([209.85.161.178]:32812 "EHLO
+        mail-yw0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753222AbdHUTjN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 21 Aug 2017 15:32:58 -0400
-Received: by mail-ua0-f176.google.com with SMTP id n29so26127367uai.5
-        for <linux-sparse@vger.kernel.org>; Mon, 21 Aug 2017 12:32:58 -0700 (PDT)
-In-Reply-To: <CANeU7Qm9+3MM+vM1tjktEvpbZrQiFydpZ2rw9HrMe8N9=1V=8g@mail.gmail.com>
+        Mon, 21 Aug 2017 15:39:13 -0400
+Received: by mail-yw0-f178.google.com with SMTP id h127so28500157ywf.0
+        for <linux-sparse@vger.kernel.org>; Mon, 21 Aug 2017 12:39:12 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
+Here is the stuff I am considering:
 
-On 21 August 2017 at 20:31, Christopher Li <sparse@chrisli.org> wrote:
-> On Mon, Aug 21, 2017 at 3:29 PM, Dibyendu Majumdar
-> <mobile@majumdar.org.uk> wrote:
->> I see a comment in show_initializer_expr() that:
->>
->> // Initializer indexes and identifiers should
->> // have been evaluated to EXPR_POS
->>
->> Does this mean that EXPR_IDENTIFIER and EXPR_INDEX are intermediate
->> steps that get replaced by EXPR_POS?
->
-> Yes, that is exactly the case.
->
-> EXPR_IDENTIFIER are for { .name = "my name" }
-> EXPR_INDEX are for { [2] = 10 }
->
-> EXPR_POS has convert those into structure bit offset.
->
+1) gcc attribute update (trivial and safe to merge)
+2) Makefile update to enable debug builds.
+    This I want to merge first because it impact a lot of
+    Makefile, other patches typically add some source file.
+    Which is easy to resolve the conflict than the other way
+    around.
+    I will send out the update soon
+3) Luc's SSSA
+    Luc has sssa-mini-v2 now. Is that the latest on to be merged?
+    I still want to have option to disable SSSA and option to enable
+    old code path. That can be done after the merge though.
 
-Okay thanks!
+Any thing else I missed? Please let me know.
 
-Regards
-Dibyendu
+
+Chris
