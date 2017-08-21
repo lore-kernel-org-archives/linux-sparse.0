@@ -1,89 +1,60 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: RFC: One strange idea inspired by the SSSA
-Date: Mon, 21 Aug 2017 16:14:14 +0200
-Message-ID: <CAMHZB6EuyzzTiJdwPC5p727628uDhyt1aRQFdg+Yj6V3hmDozw@mail.gmail.com>
-References: <CANeU7Qn2zyruhC5r1bMM8uOzCvk_6xvezQCWdV_U6jAxQiVuDg@mail.gmail.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Mon, 21 Aug 2017 16:28:54 +0200
+Message-ID: <20170821142854.dmuusnbc2tsrai3v@hirez.programming.kicks-ass.net>
+References: <20170810172615.51965-1-thgarnie@google.com>
+ <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+ <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+ <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+ <20170816151235.oamkdva6cwpc4cex@gmail.com>
+ <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f177.google.com ([209.85.217.177]:36478 "EHLO
-        mail-ua0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754175AbdHUOOP (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 21 Aug 2017 10:14:15 -0400
-Received: by mail-ua0-f177.google.com with SMTP id k12so9798507uag.3
-        for <linux-sparse@vger.kernel.org>; Mon, 21 Aug 2017 07:14:15 -0700 (PDT)
-In-Reply-To: <CANeU7Qn2zyruhC5r1bMM8uOzCvk_6xvezQCWdV_U6jAxQiVuDg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-9536-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Content-Disposition: inline
+In-Reply-To: <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon, Aug 21, 2017 at 3:28 PM, Christopher Li <sparse@chrisli.org> wrote:
-> The SSSA paper idea is interesting. It get the simple case
-> handle very fast. However, I see it has two draw backs.
-> 1) Creating the redundant phi node and using per pseudo
->     ptrmap[block] -> pesudo mapping has over head in terms
->     of memory allocation and execution.
+On Mon, Aug 21, 2017 at 03:32:22PM +0200, Peter Zijlstra wrote:
+> On Wed, Aug 16, 2017 at 05:12:35PM +0200, Ingo Molnar wrote:
+> > Unfortunately mcmodel=large looks pretty heavy too AFAICS, at the machine 
+> > instruction level.
+> > 
+> > Function calls look like this:
+> > 
+> >  -mcmodel=medium:
+> > 
+> >    757:   e8 98 ff ff ff          callq  6f4 <test_code>
+> > 
+> >  -mcmodel=large
+> > 
+> >    77b:   48 b8 10 f7 df ff ff    movabs $0xffffffffffdff710,%rax
+> >    782:   ff ff ff 
+> >    785:   48 8d 04 03             lea    (%rbx,%rax,1),%rax
+> >    789:   ff d0                   callq  *%rax
+> > 
+> > And we'd do this for _EVERY_ function call in the kernel. That kind of crap is 
+> > totally unacceptable.
+> 
+> So why does this need to be computed for every single call? How often
+> will we move the kernel around at runtime?
+> 
+> Why can't we process the relocation at load time and then discard the
+> relocation tables along with the rest of __init ?
 
-I've checked yesterday evening on some big functions and the
-ptrmap use 26 times less memory than the ptrlist. I then added
-the call needed to free all ptrmap as soon as they're not needed.
-I really think this memory for ptrmap is a non-issue.
+Ah, I see, this is large mode and that needs to use MOVABS to load 64bit
+immediates. Still, small RIP relative should be able to live at any
+point as long as everything lives inside the same 2G relative range, so
+would still allow the goal of increasing the KASLR range.
 
-> 2) it does not handle the case access memory via pointers.
->     This draw back is a major one.
->     This means we need to have other means of promoting
->     memory access to pseudo, (may be using classing SSA
->     conversion?)
->
->
-> My have a hunch that the SSA promoting from the instruction
-> level is kind of unavoidable. e.g. some promotion might happen
-> after CSE.
-
-Right.
-
-> If we take that as an assumption. Then I have this idea similar
-> to the SSSA paper in the sense that it take advantage of the
-> source file that is reducible graph. Instead of inserting the phi
-> instruction on all possible block join point.
-
-Mind to explain what you mean by 'all possible block join point' and
-why you believe the method do this?
-
-> We can do some thing
-> else that can be beneficial to the classic SSA promotion algorithm.
-> We can mark the DF local defined in the Appel "morden
-> compiler implementation in java" page 406.
->
-> DF local(n) define as: The successor of n that is not strictly
-> dominated by n.
-
-Don't you need the whole CFG for this (when you have
-a loop, for example)?
-
-> ...
->
-> So if we mark those DF local(n) for a block during linearization.
-> Then we don't need to go through the dominating *tree* to find
-> DF(n). We know that during linearization. This can serve as
-> some thing similar to the "single store short cut", except that
-> it can place the phi node properly.
-
-The SSSA method already do something very close to the
-'single-store shortcut'. I strongly encourage you to play a bit
-with 'test-linearize -fdump-linearize=only' on some examples.
-
-Also, we must not forget that it's all a question of trade-off.
-The advantage of this method is that it can do a good part
-of the job on-the-fly, without needing the CFG. With the CFG
-you can do some smarter things but then you first need to build
-everything blindly and only then you can begin to be smarter.
-
-It's the same if you want pruned SSA. Then you only have
-to do the conversion for live variables but ... you first need
-to calculate the liveness information. Idem about the
-dominance graph.
-
--- Luc
+So I'm not seeing how we need large mode for that. That said, after
+reading up on all this, RIP relative will not be too pretty either,
+while CALL is naturally RIP relative, data still needs an explicit %rip
+offset, still loads better than the large model.
