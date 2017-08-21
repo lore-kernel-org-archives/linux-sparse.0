@@ -1,58 +1,48 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH] fix expansion of constant bitfield dereference
-Date: Mon, 21 Aug 2017 14:32:35 +0100
-Message-ID: <CACXZuxcLv_W_FSq9nUrRO-5SsR1pGJ7U-xX4w_-6jLBLaJpuww@mail.gmail.com>
-References: <20170820221602.27852-1-luc.vanoostenryck@gmail.com> <CANeU7Q=HgV-H0yRZ60n1A0uo79z+0F6mQEVxN8PQhQ_RQnB2NQ@mail.gmail.com>
+From: Peter Zijlstra <peterz@infradead.org>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Mon, 21 Aug 2017 15:32:22 +0200
+Message-ID: <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
+References: <20170810172615.51965-1-thgarnie@google.com>
+ <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+ <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+ <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+ <20170816151235.oamkdva6cwpc4cex@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f65.google.com ([209.85.213.65]:37027 "EHLO
-        mail-vk0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753854AbdHUNcg (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 21 Aug 2017 09:32:36 -0400
-Received: by mail-vk0-f65.google.com with SMTP id r199so6596616vke.4
-        for <linux-sparse@vger.kernel.org>; Mon, 21 Aug 2017 06:32:36 -0700 (PDT)
-In-Reply-To: <CANeU7Q=HgV-H0yRZ60n1A0uo79z+0F6mQEVxN8PQhQ_RQnB2NQ@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-9535-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Content-Disposition: inline
+In-Reply-To: <20170816151235.oamkdva6cwpc4cex@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
+On Wed, Aug 16, 2017 at 05:12:35PM +0200, Ingo Molnar wrote:
+> Unfortunately mcmodel=large looks pretty heavy too AFAICS, at the machine 
+> instruction level.
+> 
+> Function calls look like this:
+> 
+>  -mcmodel=medium:
+> 
+>    757:   e8 98 ff ff ff          callq  6f4 <test_code>
+> 
+>  -mcmodel=large
+> 
+>    77b:   48 b8 10 f7 df ff ff    movabs $0xffffffffffdff710,%rax
+>    782:   ff ff ff 
+>    785:   48 8d 04 03             lea    (%rbx,%rax,1),%rax
+>    789:   ff d0                   callq  *%rax
+> 
+> And we'd do this for _EVERY_ function call in the kernel. That kind of crap is 
+> totally unacceptable.
 
-On 21 August 2017 at 13:26, Christopher Li <sparse@chrisli.org> wrote:
-> On Sun, Aug 20, 2017 at 6:16 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> During the expansion of a dereference, it's if the initializer
->> which corrrespond to the offset we're interested is a constant.
->> In which case this dereference can be avoided and the value
->> given in the initializer can be used instead.
->>
->> However, it's not enough to check for the offset since for bitfields
->> several are placed at the same offset.
->> Currently, the first initializer matching the offset is selected.
->>
->> Fix this by refusing such expansion if the constant value correspond
->> to a bitfield.
->>
->
->> --- a/expand.c
->> +++ b/expand.c
->> @@ -644,6 +644,8 @@ static int expand_dereference(struct expression *expr)
->>                 if (value) {
->>                         /* FIXME! We should check that the size is right! */
->>                         if (value->type == EXPR_VALUE) {
->> +                               if (is_bitfield_type(value->ctype))
->> +                                       return UNSAFE;
->
-> You might want to consider move this outside of the EXPR_VALUE.
-> I assume there is a bug in sparse matching the value to the member
-> wrong, it could happen to EXPR_FVALUE as well.
->
+So why does this need to be computed for every single call? How often
+will we move the kernel around at runtime?
 
-Since a bitfield is always integer and this issue is occurring with
-bitfields, then I guess this change is correct?
-
-Regards
-Dibyendu
+Why can't we process the relocation at load time and then discard the
+relocation tables along with the rest of __init ?
