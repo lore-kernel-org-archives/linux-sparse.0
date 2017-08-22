@@ -1,37 +1,40 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: master merge plans
-Date: Tue, 22 Aug 2017 10:59:54 -0400
-Message-ID: <CANeU7QmekgnTBVF_7kZRAL-LB+g2W4MZbchxrApnQVeQk32wDw@mail.gmail.com>
-References: <CANeU7Q=9nUo+D3R3ypCS=-kND2vD_Qx84ua59_bi0-VGftPuqA@mail.gmail.com>
- <CAExDi1QryT9Hc6+yY0_E4Y6opsq3JiYo0KOidSDSj4VGD0J1Nw@mail.gmail.com> <CACXZuxfkduQSVJjzmYow5akJff_prmBeOS6Os-OnqCNpCCictA@mail.gmail.com>
+Subject: Re: Sparse parsing question - iterator statements
+Date: Tue, 22 Aug 2017 11:02:43 -0400
+Message-ID: <CANeU7QmzODQwr8PERtyRqmoK+91b9Z5kg-guTkwTPwybRJJGXA@mail.gmail.com>
+References: <CACXZuxfWQHzHs1gps6SPPKvX53HUwVfEeca=sJPatKg39GF-8w@mail.gmail.com>
+ <CANeU7Qk6gOS8u-AZy3rujav=z-TiVf69HXNX4jL2b6FFLaxfNg@mail.gmail.com> <CACXZuxdKSnt0SW=vS0w=c7WUkFKSV7F8kn6WZQJo+6dXz1vtbA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:34044 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932329AbdHVO7z (ORCPT
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:35715 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932329AbdHVPCp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Aug 2017 10:59:55 -0400
-Received: by mail-yw0-f181.google.com with SMTP id s143so109629095ywg.1
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Aug 2017 07:59:55 -0700 (PDT)
-In-Reply-To: <CACXZuxfkduQSVJjzmYow5akJff_prmBeOS6Os-OnqCNpCCictA@mail.gmail.com>
+        Tue, 22 Aug 2017 11:02:45 -0400
+Received: by mail-yw0-f179.google.com with SMTP id s187so24390009ywf.2
+        for <linux-sparse@vger.kernel.org>; Tue, 22 Aug 2017 08:02:44 -0700 (PDT)
+In-Reply-To: <CACXZuxdKSnt0SW=vS0w=c7WUkFKSV7F8kn6WZQJo+6dXz1vtbA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Aug 22, 2017 at 10:53 AM, Dibyendu Majumdar
+On Tue, Aug 22, 2017 at 10:51 AM, Dibyendu Majumdar
 <mobile@majumdar.org.uk> wrote:
->>
 >
-> It will be great if the SSSA series is merged and tested a bit before
-> merging other changes.
+> Except that the if (!) / break is implicit?
 
-I can create a topic branch for SSSA on sparse repository.
+It is the same why if_statement works. if _statement has
+if_condition. The iterator_staemement has two conditions.
+Pre_condition and post_condition.
 
-Merge it when it is ready?
+It is not more implicit than the if_condition in the if _condition.
+>>        if (!post_condition())
+>>                 break;
+>
+> And here too?
 
-Right now I do wish the SSSA has the two options I request
-before.
+Same here.
 
 Chris
