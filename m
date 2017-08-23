@@ -1,82 +1,57 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 15/48] rename 'struct warning' to 'struct flag'
-Date: Wed, 23 Aug 2017 22:15:21 +0200
-Message-ID: <20170823201554.90551-16-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 09/48] small code reorg of add_store()
+Date: Wed, 23 Aug 2017 22:15:15 +0200
+Message-ID: <20170823201554.90551-10-luc.vanoostenryck@gmail.com>
 References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:38776 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932443AbdHWUQa (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:38720 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932443AbdHWUQS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Aug 2017 16:16:30 -0400
-Received: by mail-wm0-f68.google.com with SMTP id a70so623395wmd.5
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:30 -0700 (PDT)
+        Wed, 23 Aug 2017 16:16:18 -0400
+Received: by mail-wm0-f65.google.com with SMTP id a70so622929wmd.5
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:17 -0700 (PDT)
 In-Reply-To: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-'struct warning' can be reused for flags other than warnings.
-
-To avoid future confusion, rename it to something more general:
-'struct flag' (which in its context, handling of compiler flags,
-is clear enough).
+No functional changes here. Just prepare for coming changes.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ linearize.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
-diff --git a/lib.c b/lib.c
-index 73e9a2fe6..f847d1aba 100644
---- a/lib.c
-+++ b/lib.c
-@@ -506,7 +506,7 @@ static char **handle_switch_o(char *arg, char **next)
- 	return next;
- }
- 
--static const struct warning {
-+static const struct flag {
- 	const char *name;
- 	int *flag;
- } warnings[] = {
-@@ -551,7 +551,7 @@ enum {
- };
- 
- 
--static char **handle_onoff_switch(char *arg, char **next, const struct warning warnings[], int n)
-+static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[], int n)
+diff --git a/linearize.c b/linearize.c
+index 69e4f3e8f..3a1bc74ed 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -930,14 +930,16 @@ static pseudo_t add_load(struct entrypoint *ep, struct access_data *ad)
+ static void add_store(struct entrypoint *ep, struct access_data *ad, pseudo_t value)
  {
- 	int flag = WARNING_ON;
- 	char *p = arg + 1;
-@@ -593,7 +593,7 @@ static char **handle_switch_W(char *arg, char **next)
- 	return next;
+ 	struct basic_block *bb = ep->active;
++	struct instruction *store;
+ 
+-	if (bb_reachable(bb)) {
+-		struct instruction *store = alloc_typed_instruction(OP_STORE, ad->source_type);
+-		store->offset = ad->offset;
+-		use_pseudo(store, value, &store->target);
+-		use_pseudo(store, ad->address, &store->src);
+-		add_one_insn(ep, store);
+-	}
++	if (!bb)
++		return;
++
++	store = alloc_typed_instruction(OP_STORE, ad->source_type);
++	store->offset = ad->offset;
++	use_pseudo(store, value, &store->target);
++	use_pseudo(store, ad->address, &store->src);
++	add_one_insn(ep, store);
  }
  
--static struct warning debugs[] = {
-+static struct flag debugs[] = {
- 	{ "entry", &dbg_entry},
- 	{ "dead", &dbg_dead},
- };
-@@ -612,7 +612,7 @@ static char **handle_switch_v(char *arg, char **next)
- 	return next;
- }
- 
--static struct warning dumps[] = {
-+static struct flag dumps[] = {
- 	{ "D", &dump_macro_defs},
- };
- 
-@@ -626,7 +626,7 @@ static char **handle_switch_d(char *arg, char **next)
- }
- 
- 
--static void handle_onoff_switch_finalize(const struct warning warnings[], int n)
-+static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
- {
- 	unsigned i;
- 
+ static pseudo_t linearize_store_gen(struct entrypoint *ep,
 -- 
 2.14.0
 
