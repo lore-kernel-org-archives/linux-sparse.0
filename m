@@ -1,124 +1,139 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 00/48] fix promotion of symbol to register
-Date: Wed, 23 Aug 2017 22:15:06 +0200
-Message-ID: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 01/48] remove wrong part of simplify_loads()
+Date: Wed, 23 Aug 2017 22:15:07 +0200
+Message-ID: <20170823201554.90551-2-luc.vanoostenryck@gmail.com>
+References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36956 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932443AbdHWUQC (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35612 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932443AbdHWUQF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Aug 2017 16:16:02 -0400
-Received: by mail-wm0-f65.google.com with SMTP id v186so629587wmf.4
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:02 -0700 (PDT)
+        Wed, 23 Aug 2017 16:16:05 -0400
+Received: by mail-wm0-f67.google.com with SMTP id x79so646879wma.2
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:04 -0700 (PDT)
+In-Reply-To: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series fixes the promotion of symbols accesses from
-memory to pseudos.
-The fix in itself is in the few of the last patches (40-43)
-but is preceded by an extensive rework of the whole thing.
+Currently simplify_loads() is broken with exactly the
+same error as in simplify_one_symbol().
 
-As is, it seems to work quite well and of course more
-accesses are promoted than the Simple SSA was able to do
-(SSSA only cared about purely local vars of which the address
-was never ever taken).
+The core of the problem is that phi-nodes are stored at
+the place where the value is needed, where the initial load
+was, while phi-nodes must be placed where branches meet.
 
-For performance, the situation is highly dependent on the
-type of code: the amount of work that is done in
-simplify_loads() can easily take 80% of the time for complex
-files.
+Temporary fix this removing this 'simplification'.
 
-Warning 1: this is for review & testing only
-Warning 2: it's not (yet) bissectable between patches 40 & 43
-Warning 3: simplify_loads is still broken and will need the same
-           fix (but the code is currently disabled)
+Note: It's possible to do this a bit less crudely
+Note: This patch is kinda useless without the SSA construction
+      first fixed..
 
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ memops.c                | 63 -------------------------------------------------
+ validation/kill-casts.c |  1 -
+ 2 files changed, 64 deletions(-)
 
-This series is  available in the git repository at:
+diff --git a/memops.c b/memops.c
+index aeacdf566..99430e455 100644
+--- a/memops.c
++++ b/memops.c
+@@ -16,51 +16,6 @@
+ #include "linearize.h"
+ #include "flow.h"
+ 
+-static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
+-	struct basic_block *bb, unsigned long generation, struct pseudo_list **dominators,
+-	int local)
+-{
+-	struct basic_block *parent;
+-
+-	FOR_EACH_PTR(bb->parents, parent) {
+-		struct instruction *one;
+-		struct instruction *br;
+-		pseudo_t phi;
+-
+-		FOR_EACH_PTR_REVERSE(parent->insns, one) {
+-			int dominance;
+-			if (!one->bb)
+-				continue;
+-			if (one == insn)
+-				goto no_dominance;
+-			dominance = dominates(pseudo, insn, one, local);
+-			if (dominance < 0) {
+-				if (one->opcode == OP_LOAD)
+-					continue;
+-				return 0;
+-			}
+-			if (!dominance)
+-				continue;
+-			goto found_dominator;
+-		} END_FOR_EACH_PTR_REVERSE(one);
+-no_dominance:
+-		if (parent->generation == generation)
+-			continue;
+-		parent->generation = generation;
+-
+-		if (!find_dominating_parents(pseudo, insn, parent, generation, dominators, local))
+-			return 0;
+-		continue;
+-
+-found_dominator:
+-		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->size);
+-		phi->ident = phi->ident ? : one->target->ident;
+-		add_instruction(&parent->insns, br);
+-		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+-	} END_FOR_EACH_PTR(parent);
+-	return 1;
+-}		
+ 
+ static int address_taken(pseudo_t pseudo)
+ {
+@@ -91,8 +46,6 @@ static void simplify_loads(struct basic_block *bb)
+ 			struct instruction *dom;
+ 			pseudo_t pseudo = insn->src;
+ 			int local = local_pseudo(pseudo);
+-			struct pseudo_list *dominators;
+-			unsigned long generation;
+ 
+ 			/* Check for illegal offsets.. */
+ 			check_access(insn);
+@@ -117,22 +70,6 @@ static void simplify_loads(struct basic_block *bb)
+ 					goto next_load;
+ 				}
+ 			} END_FOR_EACH_PTR_REVERSE(dom);
+-
+-			/* OK, go find the parents */
+-			generation = ++bb_generation;
+-			bb->generation = generation;
+-			dominators = NULL;
+-			if (find_dominating_parents(pseudo, insn, bb, generation, &dominators, local)) {
+-				/* This happens with initial assignments to structures etc.. */
+-				if (!dominators) {
+-					if (local) {
+-						assert(pseudo->type != PSEUDO_ARG);
+-						convert_load_instruction(insn, value_pseudo(0));
+-					}
+-					goto next_load;
+-				}
+-				rewrite_load_instruction(insn, dominators);
+-			}
+ 		}
+ next_load:
+ 		/* Do the next one */;
+diff --git a/validation/kill-casts.c b/validation/kill-casts.c
+index cf52f2460..7b72c4719 100644
+--- a/validation/kill-casts.c
++++ b/validation/kill-casts.c
+@@ -18,5 +18,4 @@ void foo(struct s *x)
+  * check-command: test-linearize $file
+  *
+  * check-output-ignore
+- * check-output-excludes: cast\\.
+  */
+-- 
+2.14.0
 
-  git://github.com/lucvoo/sparse.git mem2reg
-
-
-Luc Van Oostenryck (48):
-      remove wrong part of simplify_loads()
-      remove trivial phi-nodes during clean_up_phi()
-      give a type to OP_PHISOURCEs
-      fix test case kill-phi-ttsb
-      add test case for incomplete type
-      add test case for bad return type
-      topasm: top-level asm is special
-      ret-void: return nothing only for void functions
-      small code reorg of add_store()
-      add PSEUDO_UNDEF
-      add undef_pseudo()
-      add insert_phi_node()
-      extract alloc_phisrc() from alloc_phi()
-      add remove_use()
-      rename 'struct warning' to 'struct flag'
-      let handle_simple_switch() handle an array of flags
-      dump-ir: rename -fdump-linearize to -fdump-ir
-      dump-ir: use defines
-      dump-ir: add an helper to parse sub-options
-      dump-ir: make it more flexible
-      sssa: move simplify_one_symbol() to a separate file
-      mem2reg: rename to use 'promote' instead of 'simplify'
-      mem2reg: simplify check of modifiers for external visibility
-      mem2reg: extract externaly_visible()
-      mem2reg: reorg externaly_visible() returns
-      mem2reg: ignore all killed instructions
-      mem2reg: extract kill_pseudo_stores()
-      mem2reg: extract kill_pseudo_dominated_stores()
-      mem2reg: extract kill_pseudo_dead_stores()
-      mem2reg: remove one indent level
-      mem2reg: add comment to find_dominating_stores()
-      mem2reg: add flags to enable/disable some parts
-      mem2reg: rename the other kill_dominated_stores()
-      mem2reg: move rewrite_load_instruction() here
-      mem2reg: be clear that we're using a symbol/var
-      mem2reg: be clear that we're using a symbol/var here too
-      mem2reg: add description for find_dominating_parents()
-      mem2reg: let rewrite_load_instruction() take the symbol as arg
-      mem2reg: remove check phisrc_in_bb()
-      mem2reg: delay the creation of phi-sources
-      mem2reg: make rewrite_load_instruction() functional
-      mem2reg: rename one->target to dom
-      mem2reg: get recursion right
-      mem2reg: don't check dominance by removed instructions
-      mem2reg: update copyright
-      mem2reg: allow dumping IR
-      mem2reg: add some small test cases
-      mem2reg: don't promote unused or already promoted vars
-
- Makefile                                |   1 +
- cgcc                                    |   2 +-
- flow.c                                  | 362 -------------------------
- flow.h                                  |   4 +-
- lib.c                                   | 102 +++++--
- lib.h                                   |  11 +-
- linearize.c                             | 101 +++++--
- linearize.h                             |   8 +-
- mem2reg.c                               | 453 ++++++++++++++++++++++++++++++++
- memops.c                                |  85 ++----
- simplify.c                              |  69 +++--
- sparse-llvm.c                           |   4 +
- sparse.1                                |  30 ++-
- validation/bad-return-type.c            |  19 ++
- validation/incomplete-struct.c          |  23 ++
- validation/kill-casts.c                 |   1 -
- validation/kill-phi-ttsbb.c             |   2 +-
- validation/linear/bitfield-init-mask.c  |   2 +-
- validation/loop-linearization.c         |  60 ++---
- validation/mem2reg/global-direct00.c    |  24 ++
- validation/mem2reg/local-addr-taken00.c |  21 ++
- validation/mem2reg/local-direct00.c     |  20 ++
- validation/optim/trivial-phis.c         |  15 ++
- 23 files changed, 883 insertions(+), 536 deletions(-)
- create mode 100644 mem2reg.c
- create mode 100644 validation/bad-return-type.c
- create mode 100644 validation/incomplete-struct.c
- create mode 100644 validation/mem2reg/global-direct00.c
- create mode 100644 validation/mem2reg/local-addr-taken00.c
- create mode 100644 validation/mem2reg/local-direct00.c
- create mode 100644 validation/optim/trivial-phis.c
