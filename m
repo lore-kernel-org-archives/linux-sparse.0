@@ -1,159 +1,124 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: SSSA and some C pointer manipulation.
-Date: Wed, 23 Aug 2017 03:03:11 +0200
-Message-ID: <20170823010309.rlumcq556aueqqji@ltop.local>
-References: <CANeU7Qm-k0xzRXwVx0bSg688+yFTa_PrC7EnKdyJY8HCWZT-uw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [RFC PATCH 00/48] fix promotion of symbol to register
+Date: Wed, 23 Aug 2017 22:15:06 +0200
+Message-ID: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:35411 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752619AbdHWBDP (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:36956 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932443AbdHWUQC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 22 Aug 2017 21:03:15 -0400
-Received: by mail-wm0-f45.google.com with SMTP id r187so5007718wma.0
-        for <linux-sparse@vger.kernel.org>; Tue, 22 Aug 2017 18:03:15 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <CANeU7Qm-k0xzRXwVx0bSg688+yFTa_PrC7EnKdyJY8HCWZT-uw@mail.gmail.com>
+        Wed, 23 Aug 2017 16:16:02 -0400
+Received: by mail-wm0-f65.google.com with SMTP id v186so629587wmf.4
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:02 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Aug 18, 2017 at 10:46:13PM -0400, Christopher Li wrote:
-> Hi Luc,
-> 
-> I have done the first round of reading your 29 patches.
-> It is actually very nice organized. Thanks for the effort
-> to make this review so easy to digest.
-> 
-> One thing I notices is that, if the use site is very far
-> from define, there are a lot of blocks in between. That
-> will cause a lot of possible phi node to be created.
-> That plus the ptrmap will have some memory allocation
-> over head. Might explain the 2% slow down.
-> Compare to classic way to convert to SSA. The expansive
-> part is doing the dominator tree. However that is mostly
-> read, very few write. The SSA is doing a lot of write
-> (creating phi node just in case it is needed.)
-> 
-> Another thing I just realized is that, this SSSA conversion
-> only works for *local* variable, not C pointers?
-> I want to construct some test source to verify.
-> However it is not even working for the base case:
-> 
-> ================test 1.c=========
+This series fixes the promotion of symbols accesses from
+memory to pseudos.
+The fix in itself is in the few of the last patches (40-43)
+but is preceded by an extensive rework of the whole thing.
 
-int a, b, c, d, e;
+As is, it seems to work quite well and of course more
+accesses are promoted than the Simple SSA was able to do
+(SSSA only cared about purely local vars of which the address
+was never ever taken).
 
-void foo(void)
-{
-	if (a)
-		b = c;
-	else
-		b = d;
-	if (c)
-		a = b;
-	if (b)
-		e = a;
-}
+For performance, the situation is highly dependent on the
+type of code: the amount of work that is done in
+simplify_loads() can easily take 80% of the time for complex
+files.
 
-We should idealy have:
-- loads of a, c & d
-- store(s) of b
-- load of c
-- resue b's value
-- the store of a = b
-- reuse b's value
-- resue a's value
-- store e = a
-
-What I have now for this is:
-	foo:
-	.L0:
-		<entry-point>
-		load.32     %r1(a) <- 0[a]
-		cbr         %r1(a), .L1, .L2
-
-	.L1:
-		load.32     %r2(b) <- 0[c]
-		store.32    %r2(b) -> 0[b]
-		phisrc.32   %phi3 <- %r2(b)
-		br          .L3
-
-	.L2:
-		load.32     %r3 <- 0[d]
-		store.32    %r3 -> 0[b]
-		phisrc.32   %phi4 <- %r3
-		br          .L3
-
-	.L3:
-		phi.32      %r9(b) <- %phi3, %phi4
-		load.32     %r4 <- 0[c]
-		select.32   %r8(a) <- %r4, %r9(b), %r1(a)
-		cbr         %r4, .L4, .L5
-
-	.L4:
-		store.32    %r9(b) -> 0[a]
-		br          .L5
-
-	.L5:
-		cbr         %r9(b), .L6, .L8
-
-	.L6:
-		store.32    %r8(a) -> 0[e]
-		br          .L8
-
-	.L8:
-		ret
+Warning 1: this is for review & testing only
+Warning 2: it's not (yet) bissectable between patches 40 & 43
+Warning 3: simplify_loads is still broken and will need the same
+           fix (but the code is currently disabled)
 
 
-For comparison, what -rc5 gives is:
-	foo:
-	.L0:
-		<entry-point>
-		load.32     %r1(a) <- 0[a]
-		phisrc.32   %phi1(a) <- %r1(a)
-		cbr         %r1(a), .L1, .L2
+This series is  available in the git repository at:
 
-	.L1:
-		load.32     %r2(b) <- 0[c]
-		store.32    %r2(b) -> 0[b]
-		phisrc.32   %phi3(c) <- %r2(b)
-		phisrc.32   %phi4(b) <- %r2(b)
-		phisrc.32   %phi7(b) <- %r2(b)
-		phisrc.32   %phi9(b) <- %r2(b)
-		br          .L3
-
-	.L2:
-		load.32     %r3 <- 0[d]
-		store.32    %r3 -> 0[b]
-		phisrc.32   %phi5(b) <- %r3
-		phisrc.32   %phi8(b) <- %r3
-		br          .L3
-
-	.L3:
-		load.32     %r4 <- 0[c]
-		cbr         %r4, .L4, .L5
-
-	.L4:
-		phi.32      %r5 <- %phi7(b), %phi8(b)
-		store.32    %r5 -> 0[a]
-		phisrc.32   %phi2(a) <- %r5
-		phisrc.32   %phi6(b) <- %r5
-		br          .L5
-
-	.L5:
-		phi.32      %r6 <- %phi4(b), %phi5(b), %phi6(b)
-		cbr         %r6, .L6, .L7
-
-	.L6:
-		phi.32      %r7 <- %phi1(a), %phi2(a)
-		store.32    %r7 -> 0[e]
-		br          .L7
-
-	.L7:
-		ret
+  git://github.com/lucvoo/sparse.git mem2reg
 
 
--- Luc
+Luc Van Oostenryck (48):
+      remove wrong part of simplify_loads()
+      remove trivial phi-nodes during clean_up_phi()
+      give a type to OP_PHISOURCEs
+      fix test case kill-phi-ttsb
+      add test case for incomplete type
+      add test case for bad return type
+      topasm: top-level asm is special
+      ret-void: return nothing only for void functions
+      small code reorg of add_store()
+      add PSEUDO_UNDEF
+      add undef_pseudo()
+      add insert_phi_node()
+      extract alloc_phisrc() from alloc_phi()
+      add remove_use()
+      rename 'struct warning' to 'struct flag'
+      let handle_simple_switch() handle an array of flags
+      dump-ir: rename -fdump-linearize to -fdump-ir
+      dump-ir: use defines
+      dump-ir: add an helper to parse sub-options
+      dump-ir: make it more flexible
+      sssa: move simplify_one_symbol() to a separate file
+      mem2reg: rename to use 'promote' instead of 'simplify'
+      mem2reg: simplify check of modifiers for external visibility
+      mem2reg: extract externaly_visible()
+      mem2reg: reorg externaly_visible() returns
+      mem2reg: ignore all killed instructions
+      mem2reg: extract kill_pseudo_stores()
+      mem2reg: extract kill_pseudo_dominated_stores()
+      mem2reg: extract kill_pseudo_dead_stores()
+      mem2reg: remove one indent level
+      mem2reg: add comment to find_dominating_stores()
+      mem2reg: add flags to enable/disable some parts
+      mem2reg: rename the other kill_dominated_stores()
+      mem2reg: move rewrite_load_instruction() here
+      mem2reg: be clear that we're using a symbol/var
+      mem2reg: be clear that we're using a symbol/var here too
+      mem2reg: add description for find_dominating_parents()
+      mem2reg: let rewrite_load_instruction() take the symbol as arg
+      mem2reg: remove check phisrc_in_bb()
+      mem2reg: delay the creation of phi-sources
+      mem2reg: make rewrite_load_instruction() functional
+      mem2reg: rename one->target to dom
+      mem2reg: get recursion right
+      mem2reg: don't check dominance by removed instructions
+      mem2reg: update copyright
+      mem2reg: allow dumping IR
+      mem2reg: add some small test cases
+      mem2reg: don't promote unused or already promoted vars
+
+ Makefile                                |   1 +
+ cgcc                                    |   2 +-
+ flow.c                                  | 362 -------------------------
+ flow.h                                  |   4 +-
+ lib.c                                   | 102 +++++--
+ lib.h                                   |  11 +-
+ linearize.c                             | 101 +++++--
+ linearize.h                             |   8 +-
+ mem2reg.c                               | 453 ++++++++++++++++++++++++++++++++
+ memops.c                                |  85 ++----
+ simplify.c                              |  69 +++--
+ sparse-llvm.c                           |   4 +
+ sparse.1                                |  30 ++-
+ validation/bad-return-type.c            |  19 ++
+ validation/incomplete-struct.c          |  23 ++
+ validation/kill-casts.c                 |   1 -
+ validation/kill-phi-ttsbb.c             |   2 +-
+ validation/linear/bitfield-init-mask.c  |   2 +-
+ validation/loop-linearization.c         |  60 ++---
+ validation/mem2reg/global-direct00.c    |  24 ++
+ validation/mem2reg/local-addr-taken00.c |  21 ++
+ validation/mem2reg/local-direct00.c     |  20 ++
+ validation/optim/trivial-phis.c         |  15 ++
+ 23 files changed, 883 insertions(+), 536 deletions(-)
+ create mode 100644 mem2reg.c
+ create mode 100644 validation/bad-return-type.c
+ create mode 100644 validation/incomplete-struct.c
+ create mode 100644 validation/mem2reg/global-direct00.c
+ create mode 100644 validation/mem2reg/local-addr-taken00.c
+ create mode 100644 validation/mem2reg/local-direct00.c
+ create mode 100644 validation/optim/trivial-phis.c
