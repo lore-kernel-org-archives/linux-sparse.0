@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 43/48] mem2reg: get recursion right
-Date: Wed, 23 Aug 2017 22:15:49 +0200
-Message-ID: <20170823201554.90551-44-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 47/48] mem2reg: add some small test cases
+Date: Wed, 23 Aug 2017 22:15:53 +0200
+Message-ID: <20170823201554.90551-48-luc.vanoostenryck@gmail.com>
 References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35005 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932567AbdHWUR1 (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36218 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932567AbdHWURe (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Aug 2017 16:17:27 -0400
-Received: by mail-wm0-f65.google.com with SMTP id x79so650368wma.2
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:17:26 -0700 (PDT)
+        Wed, 23 Aug 2017 16:17:34 -0400
+Received: by mail-wm0-f66.google.com with SMTP id f127so643133wmf.3
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:17:34 -0700 (PDT)
 In-Reply-To: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -18,116 +18,97 @@ To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
 ---
- mem2reg.c                       | 71 ++++++++++++++++++++++++-----------------
- validation/loop-linearization.c |  4 +--
- 2 files changed, 43 insertions(+), 32 deletions(-)
+ validation/mem2reg/global-direct00.c    | 24 ++++++++++++++++++++++++
+ validation/mem2reg/local-addr-taken00.c | 21 +++++++++++++++++++++
+ validation/mem2reg/local-direct00.c     | 20 ++++++++++++++++++++
+ 3 files changed, 65 insertions(+)
+ create mode 100644 validation/mem2reg/global-direct00.c
+ create mode 100644 validation/mem2reg/local-addr-taken00.c
+ create mode 100644 validation/mem2reg/local-direct00.c
 
-diff --git a/mem2reg.c b/mem2reg.c
-index e27739701..5f1c968a0 100644
---- a/mem2reg.c
-+++ b/mem2reg.c
-@@ -70,6 +70,10 @@ complex_phi:
- 	return new;
- }
- 
+diff --git a/validation/mem2reg/global-direct00.c b/validation/mem2reg/global-direct00.c
+new file mode 100644
+index 000000000..cd0f0d1a0
+--- /dev/null
++++ b/validation/mem2reg/global-direct00.c
+@@ -0,0 +1,24 @@
++int a, c, d;
 +
-+static pseudo_t find_dominating_value(struct symbol *sym, struct instruction *insn,
-+	struct basic_block *bb, unsigned long generation, int local);
-+
- /*
-  * sym - the symbol/var we're looking the value for
-  * insn - a load of 'sym'
-@@ -110,13 +114,9 @@ static int find_dominating_parents(struct symbol *sym, struct instruction *insn,
- 			goto found_dominator;
- 		} END_FOR_EACH_PTR_REVERSE(one);
- no_dominance:
--		if (parent->generation == generation)
--			continue;
--		parent->generation = generation;
--
--		if (!find_dominating_parents(sym, insn, parent, generation, dominators, local))
-+		dom = find_dominating_value(sym, insn, parent, generation, local);
-+		if (!dom)
- 			return 0;
--		continue;
- 
- found_dominator:
- 		add_pseudo(dominators, dom);
-@@ -124,6 +124,39 @@ found_dominator:
- 	return 1;
- }
- 
-+static pseudo_t find_dominating_value(struct symbol *sym, struct instruction *insn,
-+	struct basic_block *bb, unsigned long generation, int local)
++int foo(void)
 +{
-+	struct pseudo_list *dominators = NULL;
-+
-+	if (bb->generation == generation) {
-+		return insn->target;
-+		// FIXME: is that exact ?
-+	}
-+
-+	bb->generation = generation;
-+	if (!find_dominating_parents(sym, insn, bb, generation, &dominators, local))
-+		return NULL;
-+
-+	/* This happens with initial assignments to structures etc.. */
-+	if (!dominators) {
-+		if (!local)
-+			return NULL;
-+		check_access(insn);
-+
-+		// FIXME: should be UNDEF
-+		return value_pseudo(0);
-+	}
-+
-+	/*
-+	 * If we find just one dominating instruction, we
-+	 * can turn it into a direct thing. Otherwise we'll
-+	 * have to turn the load into a phi-node of the
-+	 * dominators.
-+	 */
-+	return dominating_value(sym, bb, dominators);
++	int b, e;
++	if (a)
++		b = c;
++	else
++		b = d;
++	if (c)
++		a = b;
++	if (b)
++		e = a;
++	return e;
 +}
 +
- /*
-  * sym: a symbol/variable
-  * insn: is a load of the symbol 'sym'.
-@@ -134,7 +167,6 @@ static int find_dominating_stores(struct symbol *sym, struct instruction *insn,
- {
- 	struct basic_block *bb = insn->bb;
- 	struct instruction *one, *dom = NULL;
--	struct pseudo_list *dominators;
- 	pseudo_t pseudo = sym->pseudo;
- 	pseudo_t val;
- 	int partial;
-@@ -177,31 +209,10 @@ found:
- 	}
- 
- 	/* OK, go find the parents */
--	bb->generation = generation;
--
--	dominators = NULL;
--	if (!find_dominating_parents(sym, insn, bb, generation, &dominators, local))
-+	val = find_dominating_value(sym, insn, bb, generation, local);
-+	if (!val)
- 		return 0;
- 
--	/* This happens with initial assignments to structures etc.. */
--	if (!dominators) {
--		if (!local)
--			return 0;
--		check_access(insn);
--
--		// FIXME: should be UNDEF
--		val = value_pseudo(0);
--		goto convert;
--	}
--
--	/*
--	 * If we find just one dominating instruction, we
--	 * can turn it into a direct thing. Otherwise we'll
--	 * have to turn the load into a phi-node of the
--	 * dominators.
--	 */
--	val = dominating_value(sym, bb, dominators);
++/*
++ * check-name: mem2reg global direct 00
++ * check-command: test-linearize -fdump-ir=mem2reg,only -Wno-decl $file
++ * check-output-ignore
++ *
++ * check-output-pattern-4-times: load\\.
++ * check-output-pattern-1-times: store\\.
++ */
+diff --git a/validation/mem2reg/local-addr-taken00.c b/validation/mem2reg/local-addr-taken00.c
+new file mode 100644
+index 000000000..bcfa32257
+--- /dev/null
++++ b/validation/mem2reg/local-addr-taken00.c
+@@ -0,0 +1,21 @@
++int foo(int c, int a, int b)
++{
++	int l;
++	int *p = &l;
++
++	if (c)
++		l = a;
++	else
++		l = b;
++
++	return l;
++}
++
++/*
++ * check-name: mem2reg local address taken 00
++ * check-command: test-linearize -fdump-ir=mem2reg,only -Wno-decl $file
++ * check-output-ignore
++ *
++ * check-output-excludes: load\\.
++ * check-output-excludes: store\\.
++ */
+diff --git a/validation/mem2reg/local-direct00.c b/validation/mem2reg/local-direct00.c
+new file mode 100644
+index 000000000..fc55fa076
+--- /dev/null
++++ b/validation/mem2reg/local-direct00.c
+@@ -0,0 +1,20 @@
++int foo(int c, int a, int b)
++{
++	int l;
++
++	if (c)
++		l = a;
++	else
++		l = b;
++
++	return l;
++}
++
++/*
++ * check-name: mem2reg local direct 00
++ * check-command: test-linearize -fdump-ir=mem2reg,only -Wno-decl $file
++ * check-output-ignore
++ *
++ * check-output-excludes: load\\.
++ * check-output-excludes: store\\.
++ */
+-- 
+2.14.0
+
