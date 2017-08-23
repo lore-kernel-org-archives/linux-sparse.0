@@ -1,73 +1,81 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC PATCH 14/48] add remove_use()
-Date: Wed, 23 Aug 2017 22:15:20 +0200
-Message-ID: <20170823201554.90551-15-luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 12/48] add insert_phi_node()
+Date: Wed, 23 Aug 2017 22:15:18 +0200
+Message-ID: <20170823201554.90551-13-luc.vanoostenryck@gmail.com>
 References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:38765 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:37082 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932443AbdHWUQ1 (ORCPT
+        with ESMTP id S932443AbdHWUQY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 23 Aug 2017 16:16:27 -0400
-Received: by mail-wm0-f67.google.com with SMTP id a70so623298wmd.5
-        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:27 -0700 (PDT)
+        Wed, 23 Aug 2017 16:16:24 -0400
+Received: by mail-wm0-f67.google.com with SMTP id v186so630532wmf.4
+        for <linux-sparse@vger.kernel.org>; Wed, 23 Aug 2017 13:16:24 -0700 (PDT)
 In-Reply-To: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Add an helper to remove the usage of a pseudo, like kill_use()
-do but unlike kill_use(), without trying to kill (recursively!)
-the defining instruction if the usage drop to zero.
+This helper is used later during the SSA construction and is,
+as its name suggest, used to insert phi-nodes in the
+instruction stream.
 
-It will be used during SSA construction, when it is not yet safe
-to kill instructions. If the usage drop to zero, nothing special
-is done, the instruaction becomes dead and will be eliminated
-later.
+More exactly, the phi-node will be put at the begining of the
+specified BB, just after the others phi-nodes but before
+any other instructions.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.h     |  1 +
- simplify.c | 13 +++++++++++++
- 2 files changed, 14 insertions(+)
+ linearize.c | 22 ++++++++++++++++++++++
+ linearize.h |  1 +
+ 2 files changed, 23 insertions(+)
 
-diff --git a/flow.h b/flow.h
-index b592ad4d3..3133245e5 100644
---- a/flow.h
-+++ b/flow.h
-@@ -24,6 +24,7 @@ extern int simplify_instruction(struct instruction *);
- 
- extern void kill_bb(struct basic_block *);
- extern void kill_use(pseudo_t *);
-+extern void remove_use(pseudo_t *);
- extern void kill_unreachable_bbs(struct entrypoint *ep);
- 
- extern void kill_insn(struct instruction *, int force);
-diff --git a/simplify.c b/simplify.c
-index 766ac451d..cea903a24 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -224,6 +224,19 @@ void kill_use(pseudo_t *usep)
- 	}
+diff --git a/linearize.c b/linearize.c
+index 3ef65d585..4f4102af7 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -852,6 +852,28 @@ pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *t
+ 	return phi;
  }
  
-+/*
-+ * Like kill_use() but do not recursively kill instructions
-+ * that become without users.
-+ */
-+void remove_use(pseudo_t *usep)
++pseudo_t insert_phi_node(struct basic_block *bb, struct symbol *type)
 +{
-+	pseudo_t p = *usep;
-+	*usep = VOID;
-+	if (has_use_list(p)) {
-+		delete_pseudo_user_list_entry(&p->users, usep, 1);
-+	}
++	struct instruction *phi_node = alloc_typed_instruction(OP_PHI, type);
++	struct instruction *insn;
++	pseudo_t phi;
++
++	phi = alloc_pseudo(phi_node);
++	phi_node->target = phi;
++	phi_node->bb = bb;
++
++	FOR_EACH_PTR(bb->insns, insn) {
++		enum opcode op = insn->opcode;
++		if (op == OP_ENTRY || op == OP_PHI)
++			continue;
++		INSERT_CURRENT(phi_node, insn);
++		return phi;
++	} END_FOR_EACH_PTR(insn);
++
++	add_instruction(&bb->insns, phi_node);
++	return phi;
 +}
 +
- static void kill_use_list(struct pseudo_list *list)
- {
- 	pseudo_t p;
+ /*
+  * We carry the "access_data" structure around for any accesses,
+  * which simplifies things a lot. It contains all the access
+diff --git a/linearize.h b/linearize.h
+index 060d5f327..a67f5b3e7 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -332,6 +332,7 @@ struct entrypoint {
+ extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
+ extern void insert_branch(struct basic_block *bb, struct instruction *br, struct basic_block *target);
+ 
++pseudo_t insert_phi_node(struct basic_block *bb, struct symbol *type);
+ pseudo_t alloc_phi(struct basic_block *source, pseudo_t pseudo, struct symbol *type);
+ pseudo_t alloc_pseudo(struct instruction *def);
+ pseudo_t value_pseudo(long long val);
 -- 
 2.14.0
 
