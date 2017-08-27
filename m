@@ -1,36 +1,35 @@
-From: Christopher Lameter <cl@linux.com>
-Subject: Re: Re: x86: PIE support and option to extend
- KASLR randomization
-Date: Fri, 25 Aug 2017 10:38:18 -0500 (CDT)
-Message-ID: <alpine.DEB.2.20.1708251036150.5830@nuc-kabylake>
-References: <20170810172615.51965-1-thgarnie@google.com> <20170811124127.kkb5pnkljz4umxuj@gmail.com> <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com> <20170815075609.mmzbfwritjzvrpsn@gmail.com> <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com> <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com> <20170817080920.5ljlkktngw2cisfg@gmail.com> <CAFUG7CdUEFYANSGRuNX0Xt1TJ0Z7f+M_ERgR03dUVxVqLENLpw@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [RFC PATCH 00/48] fix promotion of symbol to register
+Date: Sun, 27 Aug 2017 00:40:05 -0400
+Message-ID: <CANeU7Q=jDt-RLxa8g3HND1reGjeM-j_d=E7JxJrD=BMQFgwaQg@mail.gmail.com>
+References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Return-path: <kernel-hardening-return-9565-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <CAFUG7CdUEFYANSGRuNX0Xt1TJ0Z7f+M_ERgR03dUVxVqLENLpw@mail.gmail.com>
-To: Boris Lukashev <blukashev@sempervictus.com>
-Cc: Ingo Molnar <mingo@kernel.org>, Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?ISO-8859-2?Q?Radim_Kr=E8m=E1=F8?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Rafael J . Wysocki
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:33386 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750740AbdH0EkH (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sun, 27 Aug 2017 00:40:07 -0400
+Received: by mail-yw0-f169.google.com with SMTP id s143so15703112ywg.0
+        for <linux-sparse@vger.kernel.org>; Sat, 26 Aug 2017 21:40:06 -0700 (PDT)
+In-Reply-To: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
+On Wed, Aug 23, 2017 at 4:15 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+>   git://github.com/lucvoo/sparse.git mem2reg
+>
 
+Hi Luc, I did not see your mem2reg branch on github.
+Did you push it on github?
 
-On Thu, 17 Aug 2017, Boris Lukashev wrote:
+Sorry haven't have chance to get to it earlier.
 
-> Is the expectation then to have security functions also decrease size
-> and operational latency? Seems a bit unrealistic if so.
-> 1-2% performance hit on systems which have become at least several
-> hundred % faster over recent years is not a significant performance
-> regression compared to the baseline before.
+Of course I can still apply patch for testing.
 
-Where do you get these fantastic numbers? Where can I buy a system like
-that? Commonly we see regressions with single threaded integer
-performance on most newer processor generations.
-
-These hundreds of percent improvement can only come from floating point
-performance using specialized instructions. There are only a very limited
-number of applications that can make use of it.
+Chris
