@@ -1,37 +1,43 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: master merge plans
-Date: Tue, 29 Aug 2017 07:27:51 -0400
-Message-ID: <CANeU7Q=M9GWZzqXetXD6Ypj5s-6yv586VFwgsyLHuejcXK5YPw@mail.gmail.com>
-References: <CANeU7Q=9nUo+D3R3ypCS=-kND2vD_Qx84ua59_bi0-VGftPuqA@mail.gmail.com>
- <CAExDi1QryT9Hc6+yY0_E4Y6opsq3JiYo0KOidSDSj4VGD0J1Nw@mail.gmail.com>
- <CANeU7QkQR6b936UR3VoYuzLGYdiOcTM=SaWtifsRNeF0rKhP+g@mail.gmail.com>
- <CANeU7Qm+LOCG2B7HXBbwsvCLR7bipHTH6nnkXtN7ruR8pNW6bA@mail.gmail.com>
- <CAMHZB6Hiqca+zi5eX8jN_-v9nZ3Cv2DwkW9isjyOSuUdvEnf6Q@mail.gmail.com> <CANeU7Qm-YdXmeA-rgYa1A+hPb=TEDgXhBJy3m9zJ1m_wP6EpOw@mail.gmail.com>
+Subject: Re: [RFC PATCH 00/48] fix promotion of symbol to register
+Date: Tue, 29 Aug 2017 08:37:39 -0400
+Message-ID: <CANeU7QmsSLc1wt5Qc6kknk9=7ZO8EKC-Zg4YD53-uhyJXdHV_Q@mail.gmail.com>
+References: <20170823201554.90551-1-luc.vanoostenryck@gmail.com>
+ <CANeU7Q=jDt-RLxa8g3HND1reGjeM-j_d=E7JxJrD=BMQFgwaQg@mail.gmail.com> <CANeU7Q=3fuZ3FotCgs5HY7hNBX0hQD--bjXQEbRR=1hcVVQPMw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:36245 "EHLO
-        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752350AbdH2L1w (ORCPT
+Received: from mail-yw0-f173.google.com ([209.85.161.173]:34407 "EHLO
+        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751243AbdH2Mhl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 29 Aug 2017 07:27:52 -0400
-Received: by mail-yw0-f182.google.com with SMTP id h127so15387402ywf.3
-        for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2017 04:27:52 -0700 (PDT)
-In-Reply-To: <CANeU7Qm-YdXmeA-rgYa1A+hPb=TEDgXhBJy3m9zJ1m_wP6EpOw@mail.gmail.com>
+        Tue, 29 Aug 2017 08:37:41 -0400
+Received: by mail-yw0-f173.google.com with SMTP id t188so16238993ywb.1
+        for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2017 05:37:41 -0700 (PDT)
+In-Reply-To: <CANeU7Q=3fuZ3FotCgs5HY7hNBX0hQD--bjXQEbRR=1hcVVQPMw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 23, 2017 at 4:50 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Tue, Aug 22, 2017 at 4:05 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->>
->> At worse these numbers show something like 0.1-0.3%.
+On Sun, Aug 27, 2017 at 1:16 AM, Christopher Li <sparse@chrisli.org> wrote:
+> Hmm, with all the patch applied. sparse seems takes forever on
+> two files of the full kernel check stress test. It looks like it is
+> in a deadloop.
 >
-> I am doing some finial stage testing and reviewing the const expr patch.
->
+>  sound/pci/hda/hda_generic.c
+>  drivers/block/drbd/drbd_receiver.c
 
-The context expression branch has been merge to master.
+Hi Luc, are you seeing this at all?
+
+The full kernel check sparse is hanging on these two files.
+
+>>>   git://github.com/lucvoo/sparse.git mem2reg
+>>>
+
+I haven't able to fetch your branch yet. The above
+result is by applying patches to master.
+
+Thanks
 
 Chris
