@@ -1,95 +1,37 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: Re: x86: PIE support and option to extend
- KASLR randomization
-Date: Mon, 28 Aug 2017 11:59:23 +0200
-Message-ID: <20170828095922.GA18012@amd>
-References: <20170810172615.51965-1-thgarnie@google.com>
- <20170811124127.kkb5pnkljz4umxuj@gmail.com>
- <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
- <20170815075609.mmzbfwritjzvrpsn@gmail.com>
- <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com>
- <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
- <20170817080920.5ljlkktngw2cisfg@gmail.com>
- <CAFUG7CdUEFYANSGRuNX0Xt1TJ0Z7f+M_ERgR03dUVxVqLENLpw@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: master merge plans
+Date: Tue, 29 Aug 2017 07:27:51 -0400
+Message-ID: <CANeU7Q=M9GWZzqXetXD6Ypj5s-6yv586VFwgsyLHuejcXK5YPw@mail.gmail.com>
+References: <CANeU7Q=9nUo+D3R3ypCS=-kND2vD_Qx84ua59_bi0-VGftPuqA@mail.gmail.com>
+ <CAExDi1QryT9Hc6+yY0_E4Y6opsq3JiYo0KOidSDSj4VGD0J1Nw@mail.gmail.com>
+ <CANeU7QkQR6b936UR3VoYuzLGYdiOcTM=SaWtifsRNeF0rKhP+g@mail.gmail.com>
+ <CANeU7Qm+LOCG2B7HXBbwsvCLR7bipHTH6nnkXtN7ruR8pNW6bA@mail.gmail.com>
+ <CAMHZB6Hiqca+zi5eX8jN_-v9nZ3Cv2DwkW9isjyOSuUdvEnf6Q@mail.gmail.com> <CANeU7Qm-YdXmeA-rgYa1A+hPb=TEDgXhBJy3m9zJ1m_wP6EpOw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="WIyZ46R2i8wDzkSu"
-Return-path: <kernel-hardening-return-9576-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Content-Disposition: inline
-In-Reply-To: <CAFUG7CdUEFYANSGRuNX0Xt1TJ0Z7f+M_ERgR03dUVxVqLENLpw@mail.gmail.com>
-To: Boris Lukashev <blukashev@sempervictus.com>
-Cc: Ingo Molnar <mingo@kernel.org>, Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Te
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:36245 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752350AbdH2L1w (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 29 Aug 2017 07:27:52 -0400
+Received: by mail-yw0-f182.google.com with SMTP id h127so15387402ywf.3
+        for <linux-sparse@vger.kernel.org>; Tue, 29 Aug 2017 04:27:52 -0700 (PDT)
+In-Reply-To: <CANeU7Qm-YdXmeA-rgYa1A+hPb=TEDgXhBJy3m9zJ1m_wP6EpOw@mail.gmail.com>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
+On Wed, Aug 23, 2017 at 4:50 PM, Christopher Li <sparse@chrisli.org> wrote:
+> On Tue, Aug 22, 2017 at 4:05 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>>
+>> At worse these numbers show something like 0.1-0.3%.
+>
+> I am doing some finial stage testing and reviewing the const expr patch.
+>
 
---WIyZ46R2i8wDzkSu
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+The context expression branch has been merge to master.
 
-Hi!
-
-> > +         The kernel and modules will generate slightly more assembly (=
-1 to 2%
-> > +         increase on the .text sections). The vmlinux binary will be
-> > +         significantly smaller due to less relocations.
-> >
-> > ... but describing a 1-2% kernel text size increase as "slightly more a=
-ssembly"
-> > shows a gratituous disregard to kernel code generation quality! In real=
-ity that's
-> > a huge size increase that in most cases will almost directly transfer t=
-o a 1-2%
-> > slowdown for kernel intense workloads.
-> >
-> > Where does that size increase come from, if PIE is capable of using rel=
-ative
-> > instructins well? Does it come from the loss of a generic register and =
-the
-> > resulting increase in register pressure, stack spills, etc.?
-> >
-> > So I'm still unhappy about this all, and about the attitude surrounding=
- it.
->=20
-> Is the expectation then to have security functions also decrease size
-> and operational latency? Seems a bit unrealistic if so.
-> 1-2% performance hit on systems which have become at least several
-> hundred % faster over recent years is not a significant performance
-> regression compared to the baseline before.
-
-We are probably willing to trade security for 2% performance impact...
-if you can show that same security advantage can't be achieved without
-the impact (and it is opt-in and documented and so on).
-
-Kernel is not really a bottleneck for many people. For me, even CPUs
-are not bottleneck, disk is.
-
-But what is not okay is "hey, this is security, I can slow things
-down. Merge it, because... security!".
-
-Best regards,
-
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---WIyZ46R2i8wDzkSu
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlmj6XoACgkQMOfwapXb+vKoAQCgxGEhuA4qK9TP8Gv7ryOV8XoZ
-v6QAoLsAwustidDVeUK6439ZUkIuqVMe
-=EZIN
------END PGP SIGNATURE-----
-
---WIyZ46R2i8wDzkSu--
+Chris
