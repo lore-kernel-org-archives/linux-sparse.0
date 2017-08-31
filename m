@@ -1,109 +1,64 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Subject: Re: sparse test failures on ppc32le (and other not so common archs)
-Date: Thu, 31 Aug 2017 22:55:14 +0200
-Message-ID: <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
- <c1cfea1b-c9e6-0df2-855e-cf66e25c9ccc@ramsayjones.plus.com>
- <20170830173652.2s26nti2s2mgupnd@taurus.defre.kleine-koenig.org>
- <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com>
+From: Al Viro <viro@ZenIV.linux.org.uk>
+Subject: Re: Sparse preprocessing bug with zero-arg variadic macros
+Date: Thu, 31 Aug 2017 22:09:22 +0100
+Message-ID: <20170831210922.GA9227@ZenIV.linux.org.uk>
+References: <20170831133400.zjeaxhf25rbdftic@treble>
+ <CA+55aFy8sXZKibU_RK-+hu_SD-QMaWxxsAQNYALkmvMiYfEo=Q@mail.gmail.com>
+ <20170831205433.GQ5426@ZenIV.linux.org.uk>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="6iisxornfqwwwl4k"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from arcturus.kleine-koenig.org ([78.47.169.190]:37377 "EHLO
-        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750908AbdHaUzR (ORCPT
+Received: from zeniv.linux.org.uk ([195.92.253.2]:53286 "EHLO
+        ZenIV.linux.org.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751276AbdHaVJY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Aug 2017 16:55:17 -0400
+        Thu, 31 Aug 2017 17:09:24 -0400
 Content-Disposition: inline
-In-Reply-To: <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com>
+In-Reply-To: <20170831205433.GQ5426@ZenIV.linux.org.uk>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+
+On Thu, Aug 31, 2017 at 09:54:33PM +0100, Al Viro wrote:
+> What a mess...  Note that for non-vararg it *is* the right interpretation
+> (with #define A(x) [x] we will have A() interpreted as "empty token sequence
+> as the only argument", not "no arguments given").  For vararg case we
+> normally do not need to distinguish "not given" and "empty" - the only
+> thing that cares is exactly the ,## kludge.  There with
+> #define B(x,...) [x,##__VA_ARGS__]
+> B(1) and B(1,) yield [1] and [1,] resp.  And for everything other than
+> "just ..." we even get it right...
+> 
+> I see what's going on there; will post a fix in a few.
 
 
---6iisxornfqwwwl4k
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Fix macro argument parsing for (...) case
 
-Hello Christopher,
+Nasty corner case for the sake of ,##__VA_ARGS__ perversion - for something
+like #define A(x,...) [x,##__VA_ARGS] we want A(1) to expand to [1] and
+A(1,) - to [1,].  In other words, "no vararg given" and "vararg empty" are
+different and need to be distinguished.  Unfortunately, in case when there
+was nothing but vararg we got it wrong - #define A(...) ,##__VA_ARGS ended
+up with A() interpreted as "one empty argument" (as it would in non-vararg
+case) rather than "zero arguments".
 
-On Wed, Aug 30, 2017 at 08:11:49PM -0400, Christopher Li wrote:
-> On Wed, Aug 30, 2017 at 1:36 PM, Uwe Kleine-K=F6nig <uwe@kleine-koenig.or=
-g> wrote:
-> >> >
-> >> > diff --git a/validation/backend/sum.c b/validation/backend/sum.c
-> >> > index 0604299..d0be8dd 100644
-> >> > --- a/validation/backend/sum.c
-> >> > +++ b/validation/backend/sum.c
-> >> > @@ -1,3 +1,5 @@
-> >> > +#define __powerpc64__
-> >> > +#define _CALL_ELF 2
-> >> >  #include <stdio.h>
-> >> >  #include <stdlib.h>
-> >> >
-> >> >
-> >>
-> >> Yep, sparse/sparsec do not define various macros that gcc/clang define
-> >> by default on a given architecture. This is a known problem (that I ha=
-ve
-> >> been meaning to fix ...). The 'workaround' for the time being is to use
-> >> the cgcc front-end to sparse. (for example 'make CC=3Dcgcc', or perhaps
-> >> 'cgcc -no-compile').
-> >>
-> >> [You didn't mention your usage - is this for a kernel build?]
-> >
-> > This problem became visible during the make check phase when creating p=
-ackaged
-> > on the listed archs for horst[1]. You can see a build logs at
-> >
-> >         https://buildd.debian.org/status/fetch.php?pkg=3Dhorst&arch=3Ds=
-390x&ver=3D5.0-1&stamp=3D1503905687&raw=3D0
-> >         https://buildd.debian.org/status/fetch.php?pkg=3Dhorst&arch=3Dp=
-pc64el&ver=3D5.0-1&stamp=3D1503906226&raw=3D0
-> >
-> > The error message looks identical (I checked the ppc64el log) to the
-> > problem with backend/sum.c:
-> >
-> >         sparse -g -O2 -fdebug-prefix-map=3D/<<PKGBUILDDIR>>=3D. -fstack=
--protector-strong -Wformat -Werror=3Dformat-security -std=3Dgnu99 -Wall -We=
-xtra -g -I. -DDO_DEBUG -I/usr/include/libnl3 *.[ch]
-> >         /usr/include/powerpc64le-linux-gnu/gnu/stubs.h:8:12: error: una=
-ble to open 'gnu/stubs-32.h'
->=20
-> That is very much like on x86_64 missing define "#weak_define __x86_64__ =
-1"
->=20
-> Does cgcc work for you? In the future we do want to move the archetecture
-> related define from cgcc into sparse by itself. For now you can set
-> "sparse" as "cgcc -no-compile"
-
-Yes that works. So to address the Debian bug I can do:
-
- - move sparse to /usr/lib
- - teach cgcc about the move of sparse
- - make /usr/bin/sparse call cgcc -no-compile "$@"
-
-or is it easier to teach sparse about the architecture stuff?
-
-Best regards
-Uwe
-
---6iisxornfqwwwl4k
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlmod68ACgkQwfwUeK3K
-7AkZawf9GORaEVTBTx0Vy9jcufkyZUTNGS2YWWC/jZGax9MuOJ8O/rAK+3CQCEhB
-iLHBgmB9D5BcaXF82QoDGK61AIDAxo7wjBS0vqwJSZZu0O2q1HXygBqN5mTVRlB8
-cECz14QF57EmX7DROkZTvCVyX32jwmQUh/pHRdez16uyQto+KzoMadevDcs7khIE
-B1nl0BkVkHMLO2vasjJovvFc5kwiBNMaauYV8QLBHymgtNDxTSiz4xbVjWJDFu6v
-+wMzIm9ubVIRsTTqWYtk4v/wOElHG/0+vbuCuxxJ27DmGzD0atJ3kOO/JT5xAf7h
-aB8gTNsyua/sVhC7VZBubFhZBJrQsA==
-=qzuQ
------END PGP SIGNATURE-----
-
---6iisxornfqwwwl4k--
+Signed-off-by: Al Viro <viro@zeniv.linux.org.uk>
+---
+diff --git a/pre-process.c b/pre-process.c
+index 74414df..8800dce 100644
+--- a/pre-process.c
++++ b/pre-process.c
+@@ -296,9 +296,11 @@ static int collect_arguments(struct token *start, struct token *arglist, struct
+ 		for (count = 0; count < wanted; count++) {
+ 			struct argcount *p = &arglist->next->count;
+ 			next = collect_arg(start, p->vararg, &what->pos, p->normal);
+-			arglist = arglist->next->next;
+ 			if (eof_token(next))
+ 				goto Eclosing;
++			if (p->vararg && wanted == 1 && eof_token(start->next))
++				break;
++			arglist = arglist->next->next;
+ 			args[count].arg = start->next;
+ 			args[count].n_normal = p->normal;
+ 			args[count].n_quoted = p->quoted;
