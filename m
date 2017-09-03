@@ -1,61 +1,80 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: sparse test failures on ppc32le (and other not so common archs)
-Date: Fri, 1 Sep 2017 15:55:06 -0700
-Message-ID: <20170901225506.nmxgugitn25brpq6@x>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
- <c1cfea1b-c9e6-0df2-855e-cf66e25c9ccc@ramsayjones.plus.com>
- <20170830173652.2s26nti2s2mgupnd@taurus.defre.kleine-koenig.org>
- <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com>
- <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
- <CANeU7QkBF=uw_EVBe7-zLadUU=cgCvFS7uKxdRk_vq=6SO7W5Q@mail.gmail.com>
- <20170901070212.7xurrbentxybdhfx@x>
- <20170901075709.gkjnug4dmsyvji7i@taurus.defre.kleine-koenig.org>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:51181 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752560AbdIAWzN (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 1 Sep 2017 18:55:13 -0400
-Content-Disposition: inline
-In-Reply-To: <20170901075709.gkjnug4dmsyvji7i@taurus.defre.kleine-koenig.org>
-Sender: linux-sparse-owner@vger.kernel.org
+From: Boqun Feng <boqun.feng@gmail.com>
+Subject: [PATCH] kernel: Emphasize the return value of READ_ONCE() is honored
+Date: Sun,  3 Sep 2017 08:43:33 +0800
+Message-ID: <20170903004334.18364-1-boqun.feng@gmail.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: Boqun Feng <boqun.feng@gmail.com>, Akira Yokosawa <akiyks@gmail.com>, "Paul E . McKenney" <paulmck@linux.vnet.ibm.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Cc: Christopher Li <sparse@chrisli.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
 
-On Fri, Sep 01, 2017 at 09:57:09AM +0200, Uwe Kleine-König wrote:
-> On Fri, Sep 01, 2017 at 12:02:12AM -0700, Josh Triplett wrote:
-> > On Thu, Aug 31, 2017 at 08:47:55PM -0400, Christopher Li wrote:
-> > > On Thu, Aug 31, 2017 at 4:55 PM, Uwe Kleine-König <uwe@kleine-> Yes
-> > > that works. So to address the Debian bug I can do:
-> > > >
-> > > >  - move sparse to /usr/lib
-> > > >  - teach cgcc about the move of sparse
-> > > >  - make /usr/bin/sparse call cgcc -no-compile "$@"
-> > > 
-> > > I don't like that. It means the user can't invoke sparse directly.
-> > > 
-> > > >
-> > > > or is it easier to teach sparse about the architecture stuff?
-> > > 
-> > > First of all. It is not very trivial to teach sparse about the architecture
-> > > stuff. To my mind, we need to move all the cgcc logic into sparse.
-> > 
-> > Related to that: while it would mean we couldn't necessarily just rely
-> > entirely on GCC's definitions for a target platform, I think in an ideal
-> > world we could have a sparse binary that understood *all* target
-> > platforms at once, such that you could ask Sparse on x86_64 to "compile"
-> > as though targeting any arbitrary architecture. That would also have the
-> > major advantage of making it easy to run the Sparse testsuite for
-> > *every* target architecture without needing compilers for every such
-> > architecture.
-> 
-> You'd need the target arch's system headers though.
+READ_ONCE() is used around in kernel to provide a control dependency,
+and to make the control dependency valid, we must 1) make the load of
+READ_ONCE() actually happen and 2) make sure compilers take the return
+value of READ_ONCE() serious. 1) is already done and commented,
+and in current implementation, 2) is also considered done in the
+same way as 1): a 'volatile' load.
 
-Only for building userspace code, not for building standalone/kernel
-code, or the Sparse testsuite.
+Whereas, during a recent discussion brought up by Akira Yokosawa on
+memory-barriers.txt:
 
-- Josh Triplett
+	https://marc.info/?l=linux-kernel&m=150052964519882&w=2
+
+, a problem is discovered, which would be triggered if 2) is not
+achieved. Moreover, according to Paul Mckenney, using volatile might not
+actually give us what we want for 2) depending on compiler writers'
+definition of 'volatile'. Therefore it's necessary to emphasize 2) as a
+part of the semantics of READ_ONCE(), this not only fits the conceptual
+semantics we have been using, but also makes the implementation
+requirement more accurate.
+
+In the future, we can either make compiler writers accept our use of
+'volatile', or(if that fails) find another way to provide this
+guarantee.
+
+Cc: Akira Yokosawa <akiyks@gmail.com>
+Cc: Paul E. McKenney <paulmck@linux.vnet.ibm.com>
+Signed-off-by: Boqun Feng <boqun.feng@gmail.com>
+---
+ include/linux/compiler.h | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index eca8ad75e28b..b386dbf8c65c 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -305,6 +305,32 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
+  * mutilate accesses that either do not require ordering or that interact
+  * with an explicit memory barrier or atomic instruction that provides the
+  * required ordering.
++ *
++ * The return value of READ_ONCE() should be honored by compilers, IOW,
++ * compilers must treat the return value of READ_ONCE() as an unknown value at
++ * compile time, i.e. no optimization should be done based on the value of a
++ * READ_ONCE(). For example, the following code snippet:
++ *
++ * 	int a = 0;
++ * 	int x = 0;
++ *
++ * 	void some_func() {
++ * 		int t = READ_ONCE(a);
++ * 		if (!t)
++ * 			WRITE_ONCE(x, 1);
++ * 	}
++ *
++ * , should never be optimized as:
++ *
++ * 	void some_func() {
++ * 		int t = READ_ONCE(a);
++ * 		WRITE_ONCE(x, 1);
++ * 	}
++ *
++ * because the compiler is 'smart' enough to think the value of 'a' is never
++ * changed.
++ *
++ * We provide this guarantee by making READ_ONCE() a *volatile* load.
+  */
+ 
+ #define __READ_ONCE(x, check)						\
+-- 
+2.14.1
