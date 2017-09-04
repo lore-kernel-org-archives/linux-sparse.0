@@ -1,78 +1,131 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: sparse test failures on ppc32le (and other not so common archs)
-Date: Mon, 4 Sep 2017 14:00:56 -0400
-Message-ID: <CANeU7Q=fBkQAWfB8sWW0=ZWC8CJV83w8Bo_iHeaRBHKc8vLB-Q@mail.gmail.com>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
- <c1cfea1b-c9e6-0df2-855e-cf66e25c9ccc@ramsayjones.plus.com>
- <20170830173652.2s26nti2s2mgupnd@taurus.defre.kleine-koenig.org>
- <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com>
- <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
- <CANeU7QkBF=uw_EVBe7-zLadUU=cgCvFS7uKxdRk_vq=6SO7W5Q@mail.gmail.com>
- <20170901070212.7xurrbentxybdhfx@x> <CAMHZB6En=BeF_6NBfEDr26hdP5rmTt+A4p5Y3Cn=nEzZDaTz9w@mail.gmail.com>
+Subject: Re: Simple SSA status
+Date: Mon, 4 Sep 2017 14:29:46 -0400
+Message-ID: <CANeU7Q==zoxfgzGLKS00AqZ-M07Whr9Nu5gZtANd4PK_u3J47A@mail.gmail.com>
+References: <CANeU7Q=9nUo+D3R3ypCS=-kND2vD_Qx84ua59_bi0-VGftPuqA@mail.gmail.com>
+ <CAExDi1QryT9Hc6+yY0_E4Y6opsq3JiYo0KOidSDSj4VGD0J1Nw@mail.gmail.com>
+ <CACXZuxfkduQSVJjzmYow5akJff_prmBeOS6Os-OnqCNpCCictA@mail.gmail.com>
+ <CANeU7QmekgnTBVF_7kZRAL-LB+g2W4MZbchxrApnQVeQk32wDw@mail.gmail.com> <20170903202629.bipsxi7xnmh3y3oy@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:36157 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753871AbdIDSA6 (ORCPT
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:34316 "EHLO
+        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753932AbdIDS3r (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 4 Sep 2017 14:00:58 -0400
-Received: by mail-yw0-f171.google.com with SMTP id w204so4595445ywg.3
-        for <linux-sparse@vger.kernel.org>; Mon, 04 Sep 2017 11:00:58 -0700 (PDT)
-In-Reply-To: <CAMHZB6En=BeF_6NBfEDr26hdP5rmTt+A4p5Y3Cn=nEzZDaTz9w@mail.gmail.com>
+        Mon, 4 Sep 2017 14:29:47 -0400
+Received: by mail-yw0-f180.google.com with SMTP id k78so4896646ywe.1
+        for <linux-sparse@vger.kernel.org>; Mon, 04 Sep 2017 11:29:47 -0700 (PDT)
+In-Reply-To: <20170903202629.bipsxi7xnmh3y3oy@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
+Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>
 
-On Sun, Sep 3, 2017 at 5:14 PM, Luc Van Oostenryck
+On Sun, Sep 3, 2017 at 4:26 PM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
+>>
+>> Merge it when it is ready?
 >
-> I really think that the testsuite should not depend on system or library
-> header.
+> I've put it on hold for the moment.
 
-I think that is a good point. We can start cleaning up the system header
-file dependency in the existing test suite. See how it goes.
+Thanks for the update. Glad to heard you back.
 
->
-> Otherwise, I'm not at all opposed to sparse being universal but I would like
-> to note that things can become very quickly very very messy.
-> For example, for the current problem here I understood that it was
-> at least partially based on the lack of a definition of _CALL_ELF
-> but do we need to define it to 1 or to 2, in other words, do we need
-> to support the ELFv1 ABI or the ELFv2? GCC has some flags for this
-> (-mabi=elfv[12]) but what default value do we want? ELFv1 is the default
+> The conversion of purely local vars was the easy job.
+> The real challenge is to do it for the other loads & stores
+> (in simplify_symbol_usage() & simplify_memops()).
+> I'm working on it and have some encouraging results:
+> - correct phi-nodes
+> - pass the test-suite
+> - no crashes in GCC test-suite and others
+> - no infinite loops
+> - no catastrophic performance on exceptional workoads
+> - roughly convert as much stores & loads as currently
+> - good performance (within 2-5% as rc5 on some workloads)
+> - in some case, surprising good effect on optimization
 
-I think we can just sparse default to as late as the latest release
-version of gcc.
-
-> for big-endian platform and ELFv2 for little-endian platform, so yes,
-> we need a flag for the endianness but which endianness we want as default?
-
-I am tempting to make the endianness the same as the host gcc by default.
-Then it can be overwrite by architecture flags.
+That is great. Very exciting news.
 
 >
-> Things become even more fun when taking in account the difference
-> between GCC version. Do we want to be universal there too (and thus
-> have some flags for to specify which gcc's version we want to mimick)?
-> What about other compilers?
+> I don't know yet if keeping the Simple SSA during linearization
+> will be worth to keep or not.
 
-I purpose just sync to the latest gcc version (or a late enough version
-we can agree on. e.g. the one that supported by kernel compile.) Sparse
-current try to sync to the latest gcc attributes already.
+I have the same question as well.  When I find out the Simple SSA
+can't handle memory to register using pointers. It already means
+we need to keep the other non local variable path alive.
+We can do some bench mark to find out. If the performance
+is very similar, remove the simple SSA will actually simplify
+the code because we only need to care about one code path.
 
-> I think that part of the needed info can be auto-extracted from GCC
-> when doing a native build. Using some sort of spec file or a .sparserc
+>> Right now I do wish the SSSA has the two options I request
+>> before.
+>
+> I don't remember what was the other option you asked but keeping
+> both the old and the new method is not something I'm interested in.
+> We know that the current method is broken. In fact, it's broken in two
+> different ways:
 
-Is there a way to do auto-extract? That would be a good starting point.
+I have no intend to keep the broken behavior. My wish list for the two
+options rephrased:
+1) Option to by pass the simpole SSA conversion which generate the
+    raw load/store instruction before convert memory to register.
+2) Option to do the memory to register conversion not cover by
+    simple SSA conversion. It sounds like you implement this already.
 
-> I also note that currently, sparse is already largely universal *because*
-> it *doesn't* need those platform details (or only the very minimal: word size).
+> - the phi-nodes are mis-placed (they are on the use site instead of the
+>   meet point).
 
-Sparse is not universal, it just support a very small sub set of the C
-source file that haven't expose to those platform detail macros. Adding
-those architecture macro support will not make it any less universal.
-Might slow things down, that is some thing we need to watch out for.
+Right. The meet point on the book also call Dominance Frontier :-)
+
+> - each phi-nodes have as many sources as there are definitions for this
+>   variable (more or less) instead of having one for each parents.
+
+I am not sure I understand this. If you always place phi node at
+DF. It will have as many source as incoming edge. That is part
+of the common SSA dominance property. If we do it right, I can't
+see why we still need the phi source instruction.
+
+
+>
+> I also recently discovered that the logic for aliases is broken.
+> For example, code like:
+>         int foo(void)
+>         {
+>                 int i = 1;
+>                 int *a;
+>                 int **p;
+>
+>                 a = &i;
+>                 p = &a;
+>                 *p[0] = 0;
+>                 return i;
+>         }
+> is mis-compiled as it always returns 1 instead of 0
+> (it fails to see that *p[0] is aliased to i).
+
+That is exactly why we need instruction level aliases
+analyze. The SSA conversion should be done after
+aliases analyze.
+>
+> What I'm interested in is, in this order:
+> 1) produce correct IR
+
+Agree.
+
+> 2) convert as much loads & stores as currently
+>    (but only when it's correct to do it, of course)
+
+Agree.
+
+> 3) have performance that is similar as we currently have
+
+Agree.
+
+>
+> Point 2) is needed to avoid more false warnings during
+> context checking (and have a very significant effect on
+> performance).
+
+It seems we are all in agreement.
 
 Chris
