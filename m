@@ -1,62 +1,110 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Another code snippet that Sparse has problems with
-Date: Thu, 7 Sep 2017 22:22:27 +0200
-Message-ID: <CAExDi1Rm2Ez9B+fXxhdNy1PfOr-A-PJEecSmpu5Wb6F3hng5cg@mail.gmail.com>
-References: <CACXZuxeoG1v1y8Jm6kHSrFEad0WJo-kaoWk_QbWAM8hn1R_BwQ@mail.gmail.com>
- <20170907013101.f6d4eeftkolbsjr5@ltop.local> <CACXZuxceJuvMPZKZbLXDrzsXWK2a9A8M8L4rFaJ0f-s7vL-1vQ@mail.gmail.com>
+Subject: Re: Sparse-llvm question regarding handling of phi/phsrc instructions
+Date: Thu, 7 Sep 2017 22:25:57 +0200
+Message-ID: <CAExDi1RQ3HnnByw_y-jMpm1bH_yTMyQEVSLyCvGFzb8W9TpCXA@mail.gmail.com>
+References: <CACXZuxfKGmGEtOm8DOz=J9f77eSMyQGT8NRpc_6tEBncuJuy7A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lf0-f46.google.com ([209.85.215.46]:34209 "EHLO
-        mail-lf0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755790AbdIGUW3 (ORCPT
+Received: from mail-lf0-f54.google.com ([209.85.215.54]:33995 "EHLO
+        mail-lf0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755841AbdIGUZ7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 7 Sep 2017 16:22:29 -0400
-Received: by mail-lf0-f46.google.com with SMTP id l196so1565320lfl.1
-        for <linux-sparse@vger.kernel.org>; Thu, 07 Sep 2017 13:22:28 -0700 (PDT)
-In-Reply-To: <CACXZuxceJuvMPZKZbLXDrzsXWK2a9A8M8L4rFaJ0f-s7vL-1vQ@mail.gmail.com>
+        Thu, 7 Sep 2017 16:25:59 -0400
+Received: by mail-lf0-f54.google.com with SMTP id l196so1581537lfl.1
+        for <linux-sparse@vger.kernel.org>; Thu, 07 Sep 2017 13:25:58 -0700 (PDT)
+In-Reply-To: <CACXZuxfKGmGEtOm8DOz=J9f77eSMyQGT8NRpc_6tEBncuJuy7A@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Sep 7, 2017 at 12:18 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Hi Luc,
+2017-09-07 18:04 GMT+02:00 Dibyendu Majumdar <mobile@majumdar.org.uk>:
+> Hi,
 >
-> On 7 September 2017 at 02:31, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> On Thu, Sep 07, 2017 at 12:05:58AM +0100, Dibyendu Majumdar wrote:
->>> I recently found another test case that fails:
->>>
->>> static int test_do(void) {
->>>     int a = 0;
->>>     int count = 27;
->>>     switch (count % 8) {
->>>     case 0: do {  a++;
->>>     case 7:       a++;
->>>     case 6:       a++;
->>>     case 5:       a++;
->>>     case 4:       a++;
->>>     case 3:       a++;
->>>     case 2:       a++;
->>>     case 1:       a++;
->>>             } while ((count -= 8) > 0);
->>>     }
->>>     if (27 != a) return 1;
->>>     return 0;
->>> }
->>
+> The following code snippet:
 >
-> What's interesting is that I find that this code compiles OK with the
-> old SSA implementation, with or without single store short-cut, and
-> with out without simplifications.
+> static int test_do(void) {
+>     int a = 0;
+>     int count = 27;
+>     switch (count % 8) {
+>     case 0: do {  a++;
+>     case 7:       a++;
+>     case 6:       a++;
+>     case 5:       a++;
+>     case 4:       a++;
+>     case 3:       a++;
+>     case 2:       a++;
+>     case 1:       a++;
+>             } while ((count -= 8) > 0);
+>     }
+>     return a;
+> }
 >
-> But the newssa implementation ( your original sssa-mini) fails when
-> simplifications are turned on.
+> Results in following linear output:
+>
+> test_do:
+> .L0:
+>         <entry-point>
+>         phisrc.32   %phi3(a) <- $0
+>         phisrc.32   %phi4(a) <- $0
+>         phisrc.32   %phi6(a) <- $0
+>         phisrc.32   %phi8(a) <- $0
+>         phisrc.32   %phi10(a) <- $0
+>         phisrc.32   %phi12(a) <- $0
+>         phisrc.32   %phi14(a) <- $0
+>         phisrc.32   %phi16(a) <- $0
+>         phisrc.32   %phi18(a) <- $0
+>         phisrc.32   %phi20(count) <- $27
+>         br          .L7
+>
+> .L10:
+>         phi.32      %r3 <- %phi18(a), %phi19(a)
+>         add.32      %r4 <- %r3, $1
+>         phisrc.32   %phi17(a) <- %r4
+>         phi.32      %r5 <- %phi16(a), %phi17(a)
+> ...
+>
+> This is translated to following LLVM IR:
+>
+> define internal i32 @test_do() {
+> L0:
+>   %0 = alloca i32
+>   %1 = alloca i32
+>   %2 = alloca i32
+>   %3 = alloca i32
+>   %4 = alloca i32
+>   %5 = alloca i32
+>   %6 = alloca i32
+>   %7 = alloca i32
+>   %8 = alloca i32
+>   %9 = alloca i32
+>   store i32 0, i32* %9
+>   store i32 0, i32* %7
+>   store i32 0, i32* %6
+>   store i32 0, i32* %5
+>   store i32 0, i32* %4
+>   store i32 0, i32* %3
+>   store i32 0, i32* %2
+>   store i32 0, i32* %1
+>   store i32 0, i32* %0
+>   store i32 27, i32* %8
+>   br label %L2
+>
+> L1:                                               ; preds = %L2
+>   %10 = load i32, i32* %0
+>   %R4 = add i32 %10, 1
+> ...
+>
+> It seems to me that 'a' ends up having 9 different slots on the stack,
+> but it should really be merged into one slot, i.e. we should detect
+> that the phis all related to the same symbol, and create only one
+> alloca?
 
-It's possible but it's just a coincidence. The code generated by the rc5
-version is wrong and rc5 or newssa need the patch I send because of
-what is done on phi-node operands in insert_branch()/remove_parent().
+
+Yes and no. It's just one of the problem with the SSA conversion
+as done in rc5.
+If you try the same code with newssa, you have something much
+saner, no?
 
 -- Luc
