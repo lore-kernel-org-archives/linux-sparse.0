@@ -1,86 +1,63 @@
 From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: Sparse-llvm question regarding handling of phi/phsrc instructions
-Date: Fri, 8 Sep 2017 11:11:08 +0100
-Message-ID: <CACXZuxebbu2h4iSXduwaBVxLaubj_ZSnp_c8_tZncRfK5DbpWA@mail.gmail.com>
-References: <CACXZuxfKGmGEtOm8DOz=J9f77eSMyQGT8NRpc_6tEBncuJuy7A@mail.gmail.com>
- <CAExDi1RQ3HnnByw_y-jMpm1bH_yTMyQEVSLyCvGFzb8W9TpCXA@mail.gmail.com> <CACXZuxexgWjzvvZC-YNbzfaGuLyB+ovkJcdAkkySN8FF13XsrA@mail.gmail.com>
+Subject: Some thoughts on the SSA debate
+Date: Fri, 8 Sep 2017 11:28:57 +0100
+Message-ID: <CACXZuxdGXjyMJAh8CCUUFbLXWaLfLJ121S8UbRp9NbE4B1koZA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f52.google.com ([209.85.213.52]:32874 "EHLO
-        mail-vk0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752122AbdIHKLJ (ORCPT
+Received: from mail-ua0-f181.google.com ([209.85.217.181]:36634 "EHLO
+        mail-ua0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752248AbdIHK26 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 8 Sep 2017 06:11:09 -0400
-Received: by mail-vk0-f52.google.com with SMTP id t10so2915837vke.0
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Sep 2017 03:11:09 -0700 (PDT)
-In-Reply-To: <CACXZuxexgWjzvvZC-YNbzfaGuLyB+ovkJcdAkkySN8FF13XsrA@mail.gmail.com>
+        Fri, 8 Sep 2017 06:28:58 -0400
+Received: by mail-ua0-f181.google.com with SMTP id q29so3401591uaf.3
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Sep 2017 03:28:58 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Luc,
+Hi,
 
-On 7 September 2017 at 21:33, Dibyendu Majumdar <mobile@majumdar.org.uk> wrote:
-> On 7 September 2017 at 21:25, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> 2017-09-07 18:04 GMT+02:00 Dibyendu Majumdar <mobile@majumdar.org.uk>:
->>> The following code snippet:
->>>
->>> static int test_do(void) {
->>>     int a = 0;
->>>     int count = 27;
->>>     switch (count % 8) {
->>>     case 0: do {  a++;
->>>     case 7:       a++;
->>>     case 6:       a++;
->>>     case 5:       a++;
->>>     case 4:       a++;
->>>     case 3:       a++;
->>>     case 2:       a++;
->>>     case 1:       a++;
->>>             } while ((count -= 8) > 0);
->>>     }
->>>     return a;
->>> }
->>>
->>> Results in following linear output:
->>>
->>> test_do:
->>> .L0:
->>>         <entry-point>
->>>         phisrc.32   %phi3(a) <- $0
->>>         phisrc.32   %phi4(a) <- $0
->>>         phisrc.32   %phi6(a) <- $0
->>>         phisrc.32   %phi8(a) <- $0
->>>         phisrc.32   %phi10(a) <- $0
->>>         phisrc.32   %phi12(a) <- $0
->>>         phisrc.32   %phi14(a) <- $0
->>>         phisrc.32   %phi16(a) <- $0
->>>         phisrc.32   %phi18(a) <- $0
->>>         phisrc.32   %phi20(count) <- $27
->>>         br          .L7
->>>
->>> .L10:
->>>         phi.32      %r3 <- %phi18(a), %phi19(a)
->>>         add.32      %r4 <- %r3, $1
->>>         phisrc.32   %phi17(a) <- %r4
->>>         phi.32      %r5 <- %phi16(a), %phi17(a)
->>> ...
->>>
->>> It seems to me that 'a' ends up having 9 different slots on the stack,
->>> but it should really be merged into one slot, i.e. we should detect
->>> that the phis all related to the same symbol, and create only one
->>> alloca?
->>
->>
+Having tried out the newssa approach for a bit, and after working on
+another backend that doesn't use SSA phi nodes, I would like to share
+some of my personal thoughts with regards to the changes:
 
-What is also interesting is that in the old way by switching off the
-simplifications the generated code avoids all the phis and is actually
-simpler in terms of memory operations in the backend. Now LLVM can
-sort this out easily as it transforms this to use phis anyway, but my
-other backend is simpler, and for that non SSA version is better.
+1. Firstly I think it is important to retain the existing "pre-phi"
+linear code. This is fine for backends such as LLVM which do a good
+job of transforming code anyway. It is also usually less buggy and
+serves as a baseline for correctness. So after careful consideration I
+would vote against adding phi instructions in the initial phase.
+
+2. It also appears to me that the original phi instructions, while not
+textbook correct in terms of placement, are internally consistent, in
+the sense that the only issue I have found so far is the inability to
+handle variables that are initialized in a branch of the code. Perhaps
+this is just a bug? The other issue with the original implementation
+appears to be related to the patches that attempted to kill things -
+but I get the feeling that the original design did not envision
+removing unused things physically, but just marked them logically
+dead?
+
+3. It also appears that the SSA construction approach by Matthias
+Braun et al is inadequate in the sense that it is not a full solution
+and requires additional hacks. This is unfortunate as I understood the
+aim was to avoid hacks and ad-hoc changes and go with a more published
+algorithm. In view of this, perhaps the current experiment has failed
+and the effort should be directed to building the industry standard
+approach?
+
+4. Final thought is that although I was previously suggesting changes
+should go into master, I think for such a large piece of fundamental
+work maybe the changes should be done on a dedicated branch and only
+merged when completely tested and validated.
+
+I hesitated putting forth my thoughts here as I still have the freedom
+in my project to accept / reject changes happening in Sparse, and so I
+am able to take a different approach. Also, I am not really qualified
+to judge the full implications of the new SSA construction approach -
+hence I am going by my impressions after testing and using the
+approach, and observing the issues that have been discussed so far on
+the list.
 
 Regards
 Dibyendu
