@@ -1,40 +1,38 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] build: disable sparse-llvm on non-x86
-Date: Tue, 12 Sep 2017 11:53:54 -0400
-Message-ID: <CANeU7Q=F=Gub_kG3Le-84AyjAJUydvqsdhgTyZxcxFgxh-vW6Q@mail.gmail.com>
-References: <20170909210215.2mjxhsw76ee6eeqy@taurus.defre.kleine-koenig.org>
- <20170910015622.42436-1-luc.vanoostenryck@gmail.com> <CANeU7QkHagTY2-BOnefCNxDXda5Ch2kaVBiYYa=XK3GP3HxjdQ@mail.gmail.com>
- <CAExDi1QQ4dMmS89y7bAqN=HDLiUtOHZME5XYXG8c34gYpJ_mqA@mail.gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Handling of local variables in the backend
+Date: Tue, 12 Sep 2017 22:54:42 +0100
+Message-ID: <CACXZuxd2XOKBaTnPEGEy-XZPTg_PJrA_XnNUfbbHm2X7zxKcmA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:36303 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750999AbdILPx4 (ORCPT
+Received: from mail-ua0-f169.google.com ([209.85.217.169]:33564 "EHLO
+        mail-ua0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751017AbdILVyo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 12 Sep 2017 11:53:56 -0400
-Received: by mail-yw0-f195.google.com with SMTP id r85so3762232ywg.3
-        for <linux-sparse@vger.kernel.org>; Tue, 12 Sep 2017 08:53:56 -0700 (PDT)
-In-Reply-To: <CAExDi1QQ4dMmS89y7bAqN=HDLiUtOHZME5XYXG8c34gYpJ_mqA@mail.gmail.com>
+        Tue, 12 Sep 2017 17:54:44 -0400
+Received: by mail-ua0-f169.google.com with SMTP id g47so16804925uad.0
+        for <linux-sparse@vger.kernel.org>; Tue, 12 Sep 2017 14:54:43 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Antoine Beaupre <anarcat@debian.org>
+To: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Sep 12, 2017 at 3:10 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> Please do as is the easiest for you.
-> I don't mind as I don't have something that depend on it.
+Hi,
 
-I have test your change does not conflict with my other Makefile
-overhaul of the debug build. I already apply your patch to master.
+One issue I am facing at the moment is that there is no explicit
+alloca for each symbol that is used in a function - so that the
+backend has to detect when a symbol is accessed and then do alloca to
+associate stack space. In the LLVM backend this is not so much an
+issue as LLVM allows instructions to be inserted at a particular point
+- so my code just ensures that all the allocas go at the start of the
+function as required by LLVM. But I am having trouble with the other
+backend that doesn't have this capability.
 
-Next thing is merge the debug build overhaul then add the config
-option on top of that.
+I think that there is no easy way to identify all the symbols used for
+which stack space is needed and do the allocas at the start - is
+there? I mean the only way is to go through all the instructions to
+find these references as far as I know.
 
-The master branch has been updated and pushed.
+Is there a better way?
 
-Thanks
-
-Chris
+Regards
+Dibyendu
