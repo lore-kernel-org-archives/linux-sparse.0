@@ -1,48 +1,58 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] build: disable sparse-llvm on non-x86
-Date: Tue, 12 Sep 2017 08:34:11 +0200
-Message-ID: <CAExDi1T_G=R8-H7ZgQ6xnzr+-8nDVZtmjwObKdzocr=HEFp_Cw@mail.gmail.com>
-References: <20170909210215.2mjxhsw76ee6eeqy@taurus.defre.kleine-koenig.org>
- <20170910015622.42436-1-luc.vanoostenryck@gmail.com> <CANeU7Qn-8nLGr_JF61SGGPA=LDAs_h1C578B0RBb2u_KQn9UVA@mail.gmail.com>
- <CAExDi1SO=ztWy4hhW1FE5PzXh_DYb7RD17HqnzH8C0JP=5GUvw@mail.gmail.com> <CANeU7QkeWt7FcP1F3=bJx7tqo07+CkSOzucEcdLdxZ3bUOqMhQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: sparse test failures on ppc32le (and other not so common archs)
+Date: Tue, 12 Sep 2017 02:36:09 -0400
+Message-ID: <CANeU7QmRmP-7_L7zNF63E6vw9rr3bRDnTsrsj7r8SFUJWmMwTA@mail.gmail.com>
+References: <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
+ <CANeU7QkBF=uw_EVBe7-zLadUU=cgCvFS7uKxdRk_vq=6SO7W5Q@mail.gmail.com>
+ <20170901070212.7xurrbentxybdhfx@x> <CAMHZB6En=BeF_6NBfEDr26hdP5rmTt+A4p5Y3Cn=nEzZDaTz9w@mail.gmail.com>
+ <715b7059-4ff0-0982-ff92-56c13c4160e7@kleine-koenig.org> <CAMHZB6GHoA6v_RPtKF3WBbX0DPB5pqfz9wLf1iP8MWfUVdbteQ@mail.gmail.com>
+ <20170906144450.tsa7dlmpeb4uz2pc@taurus.defre.kleine-koenig.org>
+ <CANeU7QmOA4cC55zgiQ-ArySWQWzC-mMQAGF750PYRB=K-_ZPMQ@mail.gmail.com>
+ <20170906153603.v2m3e6mqg62htwmg@taurus.defre.kleine-koenig.org>
+ <CANeU7Q=7VAN26GvJSf7ApTt6Y5ArQOnEJ7kASes9Suo67t_Rvg@mail.gmail.com> <20170912062710.rd6jzjx3535l3agv@taurus.defre.kleine-koenig.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:33660 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751089AbdILGeN (ORCPT
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:33248 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750911AbdILGgL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 12 Sep 2017 02:34:13 -0400
-Received: by mail-lf0-f68.google.com with SMTP id y15so4902734lfd.0
-        for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2017 23:34:13 -0700 (PDT)
-In-Reply-To: <CANeU7QkeWt7FcP1F3=bJx7tqo07+CkSOzucEcdLdxZ3bUOqMhQ@mail.gmail.com>
+        Tue, 12 Sep 2017 02:36:11 -0400
+Received: by mail-yw0-f169.google.com with SMTP id s62so26279231ywg.0
+        for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2017 23:36:11 -0700 (PDT)
+In-Reply-To: <20170912062710.rd6jzjx3535l3agv@taurus.defre.kleine-koenig.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Antoine Beaupre <anarcat@debian.org>
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
 
-On Tue, Sep 12, 2017 at 8:27 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Tue, Sep 12, 2017 at 2:12 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->>
->> Everything is temporary, isn't it? ;)
->>
+On Tue, Sep 12, 2017 at 2:27 AM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig.o=
+rg> wrote:
+>> BTW, if I want to get a PPC64 machine for Linux testing purpose, is the
+>> used apple G5 a good place to start?
 >
-> Of course :-)
+> Honestly I don't know. https://wiki.debian.org/ppc64el tells
 >
->> In the other thread I explained the nature of the problem, it's *just* a
->> question to match the options for the model/sub-architecture between
->> LLVM compiler and the assembler.
->> Easy to do if you choose the dumbest (generic) model, pretty annoying
->> otherwise and a nightmare to test.
+>         Debian/ppc64el requires, at minimum, a POWER8 processor machine.
+>         Although Debian was initially bootstrapped on a POWER7 set of
+>         servers. this class of server is not supported anymore, and you
+>         are not able to run Debian/ppc64el on a POWER7 processor without
+>         hitting an illegal instruction fault.
 >
-> Yes, I saw the other email you have it pretty much figure out
-> already. I am tempting just pick up an used apple G5 and install
-> Linux on it for ppc64 testing.
+> Hm https://en.wikipedia.org/wiki/POWER8 tells:
+>
+>         Systems based on POWER8 became available from IBM in June
+>         2014. Systems and POWER8 processor designs made by other
+>         OpenPOWER members was available in early 2015.
+>
+> So I think this rules out a G5.
 
-It's not the problem.
-I tested it on a ppc64le (power8) machine while I investigated the
-problem. So let's say that it's solved/tested for ppc64. Then what
-about all the other models & archs?
+Thanks for the tip. I am glad I asked before I pull the trigger.
 
--- Luc
+> https://wiki.debian.org/ppc64el/Installation mentions you can run this
+> under qemu however.
+
+Good idea. I will give that a try too.
+
+Chris
