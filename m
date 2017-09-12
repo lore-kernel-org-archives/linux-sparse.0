@@ -1,45 +1,93 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] build: disable sparse-llvm on non-x86
-Date: Tue, 12 Sep 2017 08:12:17 +0200
-Message-ID: <CAExDi1SO=ztWy4hhW1FE5PzXh_DYb7RD17HqnzH8C0JP=5GUvw@mail.gmail.com>
-References: <20170909210215.2mjxhsw76ee6eeqy@taurus.defre.kleine-koenig.org>
- <20170910015622.42436-1-luc.vanoostenryck@gmail.com> <CANeU7Qn-8nLGr_JF61SGGPA=LDAs_h1C578B0RBb2u_KQn9UVA@mail.gmail.com>
+From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
+Subject: Re: sparse test failures on ppc32le (and other not so common archs)
+Date: Tue, 12 Sep 2017 08:27:10 +0200
+Message-ID: <20170912062710.rd6jzjx3535l3agv@taurus.defre.kleine-koenig.org>
+References: <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
+ <CANeU7QkBF=uw_EVBe7-zLadUU=cgCvFS7uKxdRk_vq=6SO7W5Q@mail.gmail.com>
+ <20170901070212.7xurrbentxybdhfx@x>
+ <CAMHZB6En=BeF_6NBfEDr26hdP5rmTt+A4p5Y3Cn=nEzZDaTz9w@mail.gmail.com>
+ <715b7059-4ff0-0982-ff92-56c13c4160e7@kleine-koenig.org>
+ <CAMHZB6GHoA6v_RPtKF3WBbX0DPB5pqfz9wLf1iP8MWfUVdbteQ@mail.gmail.com>
+ <20170906144450.tsa7dlmpeb4uz2pc@taurus.defre.kleine-koenig.org>
+ <CANeU7QmOA4cC55zgiQ-ArySWQWzC-mMQAGF750PYRB=K-_ZPMQ@mail.gmail.com>
+ <20170906153603.v2m3e6mqg62htwmg@taurus.defre.kleine-koenig.org>
+ <CANeU7Q=7VAN26GvJSf7ApTt6Y5ArQOnEJ7kASes9Suo67t_Rvg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha512;
+        protocol="application/pgp-signature"; boundary="hpjiacih7zqbua2b"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lf0-f48.google.com ([209.85.215.48]:37837 "EHLO
-        mail-lf0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750911AbdILGMT (ORCPT
+Received: from arcturus.kleine-koenig.org ([78.47.169.190]:46717 "EHLO
+        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751217AbdILG1T (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 12 Sep 2017 02:12:19 -0400
-Received: by mail-lf0-f48.google.com with SMTP id 80so23638222lfy.4
-        for <linux-sparse@vger.kernel.org>; Mon, 11 Sep 2017 23:12:19 -0700 (PDT)
-In-Reply-To: <CANeU7Qn-8nLGr_JF61SGGPA=LDAs_h1C578B0RBb2u_KQn9UVA@mail.gmail.com>
+        Tue, 12 Sep 2017 02:27:19 -0400
+Content-Disposition: inline
+In-Reply-To: <CANeU7Q=7VAN26GvJSf7ApTt6Y5ArQOnEJ7kASes9Suo67t_Rvg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Antoine Beaupre <anarcat@debian.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
 
-On Tue, Sep 12, 2017 at 8:02 AM, Christopher Li <sparse@chrisli.org> wrote:
-> On Sat, Sep 9, 2017 at 9:56 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> sparse-llvm doesn't have support for targets other than
->> x86 or x86-64.
->>
->> Disable sparse-llvm on other archs as it create problems during
->> build, selftest, ...
->
-> Thanks, will apply.
->
-> This is temporary while we looking at how to fix the other
-> architecture properly, right?
 
-Everything is temporary, isn't it? ;)
+--hpjiacih7zqbua2b
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-In the other thread I explained the nature of the problem, it's *just* a
-question to match the options for the model/sub-architecture between
-LLVM compiler and the assembler.
-Easy to do if you choose the dumbest (generic) model, pretty annoying
-otherwise and a nightmare to test.
+On Tue, Sep 12, 2017 at 01:59:47AM -0400, Christopher Li wrote:
+> On Wed, Sep 6, 2017 at 11:36 AM, Uwe Kleine-K=F6nig <uwe@kleine-koenig.or=
+g> wrote:
+> > There is https://dsa.debian.org/doc/guest-account/ which would give you
+> > the possibility to access some Debian machines. Other than that I intend
+>=20
+> Sorry for the delay. Thanks for the pointer of the guest account.
 
--- Luc
+Tell me if you want to do that. And plan for a delay because there is
+some "paper work" to be done before; mainly by other people, so it might
+(or might not) take a moment.
+
+> > to upload 0.5.1 to Debian soon and then can provide you links to build
+> > failures in the build server farm :-) And if you have a patch, I can
+> > volunteer to make the test monkey for you.
+>=20
+> BTW, if I want to get a PPC64 machine for Linux testing purpose, is the
+> used apple G5 a good place to start?
+
+Honestly I don't know. https://wiki.debian.org/ppc64el tells
+
+	Debian/ppc64el requires, at minimum, a POWER8 processor machine.
+	Although Debian was initially bootstrapped on a POWER7 set of
+	servers. this class of server is not supported anymore, and you
+	are not able to run Debian/ppc64el on a POWER7 processor without
+	hitting an illegal instruction fault.
+
+Hm https://en.wikipedia.org/wiki/POWER8 tells:
+
+	Systems based on POWER8 became available from IBM in June
+	2014. Systems and POWER8 processor designs made by other
+	OpenPOWER members was available in early 2015.
+
+So I think this rules out a G5.
+
+https://wiki.debian.org/ppc64el/Installation mentions you can run this
+under qemu however.
+
+Best regards
+Uwe
+
+--hpjiacih7zqbua2b
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlm3fjoACgkQwfwUeK3K
+7AlqQwf9EKsk8ziurgoWC6TPzJVQ1f3145EPg512pd9sdAN8ps1iSMSlUBMqRszf
+aXDWrA4ip9tPr5ocdCZuDnCXVKnafATNshDyPFYipUVdmLvE6c4pwo+kPOLTGvDg
+HuXThrTfQLAapa4/naNbjipUuLKQM4wfmm+MtEI+3o1H4zv4K0s1e9Iv1YlFya2W
+6MCz4DukBh3I4pDVp0nQeOJ1nyNTz+GZqmUe3oinKYE567yIsNNqo/zybg5trzJD
+qqJyRKsXpGnutUYn2tQHR/LW7Al5xQRt6vBE0DHAHY1wPkIVsk/5FbPKoGcPGION
+4q3qCDtrjUNmAnkMV9eUn8p+L+5RfQ==
+=ArRs
+-----END PGP SIGNATURE-----
+
+--hpjiacih7zqbua2b--
