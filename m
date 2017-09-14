@@ -1,51 +1,71 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: SMATCH indicates warning to almost all files in Linux Kernel + ARM
-Date: Thu, 14 Sep 2017 19:33:56 +0200
-Message-ID: <CAExDi1QgpPJw1oAr=Q=myCTsgP+71EBU4=w5=3GiGAMsw3Tn9A@mail.gmail.com>
-References: <8760clkby1.wl%kuninori.morimoto.gx@renesas.com> <CANeU7QmvVRtO6kddNwG0C8yv1+g=8tbcfqy9++Vy=wsDvH-rTQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: [PATCH] build: only generate version.h when needed and remove it in clean target
+Date: Thu, 14 Sep 2017 20:45:40 +0200
+Message-ID: <20170914184540.26650-1-uwe@kleine-koenig.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f65.google.com ([209.85.214.65]:33171 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751401AbdINRd5 (ORCPT
+Received: from arcturus.kleine-koenig.org ([78.47.169.190]:48609 "EHLO
+        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751652AbdINSpq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 14 Sep 2017 13:33:57 -0400
-In-Reply-To: <CANeU7QmvVRtO6kddNwG0C8yv1+g=8tbcfqy9++Vy=wsDvH-rTQ@mail.gmail.com>
+        Thu, 14 Sep 2017 14:45:46 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, Dan Carpenter <dan.carpenter@oracle.com>, smatch@vger.kernel.org
-Cc: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Thu, Sep 14, 2017 at 5:55 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Thu, Sep 14, 2017 at 3:01 AM, Kuninori Morimoto
-> <kuninori.morimoto.gx@renesas.com> wrote:
->>
->> Hi Christopher
->>
->> I'm using SMATCH for Linux Kernel + ARM compile.
->> It indicates below warning for almost all files on ARM compile.
->> Thus, it is difficult to check "real" CHECK.
->> Is this my/kernel fault ?
->
-> Adding linux sparse mailing list.
+This way version.h isn't generated when running $(make clean) but only
+when lib.c is about to be compiled.
 
-Adding Dan & smatch mailing list.
+This simplifies packaging for Debian because the package building programs
+abort when there are additional files after $(make clean).
+---
+ Makefile | 20 +++++++++++++-------
+ 1 file changed, 13 insertions(+), 7 deletions(-)
 
->>   CC      sound/soc/soc-dapm.o
->>   CHK     kernel/config_data.h
->> linux/arch/arm64/include/asm/lse.h:14:28: warning: Unknown escape 'l'
->> linux/arch/arm64/include/asm/lse.h:14:37: warning: Unknown escape 'l'
->> linux/arch/arm64/include/asm/alternative.h:172:28: warning: Unknown escape 'o'
->
-> This is cause by the assembly syntax in arm header file.
->
->> ...
->> .macro alt_lse, llsc, lse
->>         alternative_insn "\llsc", "\lse", ARM64_HAS_LSE_ATOMICS
->> .endm
+diff --git a/Makefile b/Makefile
+index a4653aa1b747..13b0f97f146e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,12 +1,6 @@
+ VERSION=0.5.1
+ 
+-# Generating file version.h if current version has changed
+ SPARSE_VERSION:=$(shell git describe 2>/dev/null || echo '$(VERSION)')
+-VERSION_H := $(shell cat version.h 2>/dev/null)
+-ifneq ($(lastword $(VERSION_H)),"$(SPARSE_VERSION)")
+-$(info $(shell echo '     GEN      'version.h))
+-$(shell echo '#define SPARSE_VERSION "$(SPARSE_VERSION)"' > version.h)
+-endif
+ 
+ OS = linux
+ 
+@@ -215,6 +209,18 @@ pre-process.sc: CHECKER_FLAGS += -Wno-vla
+ %.o: %.c $(LIB_H)
+ 	$(QUIET_CC)$(CC) -o $@ -c $(ALL_CFLAGS) $<
+ 
++version.h: FORCE
++	$(QUIET_GEN)echo '#define SPARSE_VERSION "$(SPARSE_VERSION)"' > version.h.tmp; \
++	if cmp -s version.h version.h.tmp; then \
++		rm version.h.tmp; \
++	else \
++		mv version.h.tmp version.h; \
++	fi
++
++.PHONY: FORCE
++
++lib.o: version.h
++
+ %.sc: %.c sparse
+ 	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(ALL_CFLAGS) $<
+ 
+@@ -223,7 +229,7 @@ selfcheck: $(ALL_OBJS:.o=.sc)
+ 
+ 
+ clean: clean-check
+-	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc
++	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc version.h
+ 
+ dist:
+ 	@if test "$(SPARSE_VERSION)" != "v$(VERSION)" ; then \
+-- 
+2.14.1
 
-This is solved in sparse since commit f83c2b8f0b5fcb8f60342b5a2fa51a84901f355a:
-    "warn on unknown escapes after preprocessing"
-
--- Luc Van Oostenryck
