@@ -1,68 +1,60 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: Some thoughts on the SSA debate
-Date: Wed, 13 Sep 2017 21:10:01 +0200
-Message-ID: <CAExDi1QisEx6tEiTB1_kEhSpSLk60GSJuqBZBXFyuJc8wN+Omw@mail.gmail.com>
-References: <CACXZuxdGXjyMJAh8CCUUFbLXWaLfLJ121S8UbRp9NbE4B1koZA@mail.gmail.com>
- <20170909020604.5io7kuw6itquzbfp@ltop.local> <CACXZuxdtwsp=YXN_4q5Ox=6R6fKdz-6kLUcTYskJcwd6qvh5DQ@mail.gmail.com>
- <CAExDi1QyP5FRTrNgfEx7zK=bKQyPQ36gHgDSBRtqWOi=-Bf-sw@mail.gmail.com>
- <CACXZuxcQrFOaM8T5z-5tZNU3XnY8d4aOQ3FfRs2SSY+Gv1T7rA@mail.gmail.com>
- <CAExDi1QW8U=rkLX-JMzi=uQG0RTJ-bCjRT46m3CTb7LifKXMQA@mail.gmail.com> <CACXZuxeO_rpOFwhjf8vb1SsiHH0NJNneKyoDwF_BzyYyz6n4kw@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: SMATCH indicates warning to almost all files in Linux Kernel + ARM
+Date: Thu, 14 Sep 2017 11:55:23 -0400
+Message-ID: <CANeU7QmvVRtO6kddNwG0C8yv1+g=8tbcfqy9++Vy=wsDvH-rTQ@mail.gmail.com>
+References: <8760clkby1.wl%kuninori.morimoto.gx@renesas.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lf0-f49.google.com ([209.85.215.49]:46763 "EHLO
-        mail-lf0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751893AbdIMTKE (ORCPT
+Received: from mail-yw0-f196.google.com ([209.85.161.196]:35205 "EHLO
+        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751568AbdINPzZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 13 Sep 2017 15:10:04 -0400
-Received: by mail-lf0-f49.google.com with SMTP id m199so3066767lfe.3
-        for <linux-sparse@vger.kernel.org>; Wed, 13 Sep 2017 12:10:03 -0700 (PDT)
-In-Reply-To: <CACXZuxeO_rpOFwhjf8vb1SsiHH0NJNneKyoDwF_BzyYyz6n4kw@mail.gmail.com>
+        Thu, 14 Sep 2017 11:55:25 -0400
+Received: by mail-yw0-f196.google.com with SMTP id u134so1956226ywu.2
+        for <linux-sparse@vger.kernel.org>; Thu, 14 Sep 2017 08:55:25 -0700 (PDT)
+In-Reply-To: <8760clkby1.wl%kuninori.morimoto.gx@renesas.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
+To: Kuninori Morimoto <kuninori.morimoto.gx@renesas.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Sep 13, 2017 at 8:25 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
-> Hi Luc,
+On Thu, Sep 14, 2017 at 3:01 AM, Kuninori Morimoto
+<kuninori.morimoto.gx@renesas.com> wrote:
 >
-> On 12 September 2017 at 14:06, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
->> On Tue, Sep 12, 2017 at 1:47 PM, Dibyendu Majumdar
->>> But the issue
->>> right now is that the simplifications are not always correct even with
->>> the new SSA so that I have to disable everything anyway.
->>
->> It's what you do but it's not what I do.
->> The other part that is broken is simplify_loads() which try to convert
->> more variables after each simplification/CSE steps.
->> Since the code is copied from the code for the initial conversion
->> it's broken in the same ways.
->> I just disabled it and things are then correct.
->>
+> Hi Christopher
 >
-> I probably ought to update my project with the latest version you
-> have. Please let me know if you have an updated minimal changes branch
-> that I can apply.
+> I'm using SMATCH for Linux Kernel + ARM compile.
+> It indicates below warning for almost all files on ARM compile.
+> Thus, it is difficult to check "real" CHECK.
+> Is this my/kernel fault ?
 
-For SSSA, I have what you should have already or something quite close:
-* https://github.com/lucvoo/sparse/tree/sssa-mini-v3
+Adding linux sparse mailing list.
 
-And the same but with all LLVM fixes and others fixes or optimizations:
-* https://github.com/lucvoo/sparse/tree/sssa-next
 
-I also have something I use only as a sort of reference which I have
-absolutely no intention to ever submit. It doesn't do the SSA conversion
-during linearization and converts more vars. It also seems to be quite
-correct and so is useful to me for doing comparisons but that's all (and it's
-not tested for against the kernel, for example):
-* https://github.com/lucvoo/sparse/tree/mem2ssa-next
+>   CC      sound/soc/soc-dapm.o
+>   CHK     kernel/config_data.h
+> linux/arch/arm64/include/asm/lse.h:14:28: warning: Unknown escape 'l'
+> linux/arch/arm64/include/asm/lse.h:14:37: warning: Unknown escape 'l'
+> linux/arch/arm64/include/asm/alternative.h:172:28: warning: Unknown escape 'o'
 
-None of these trees are stable as I often rebuild them while working
-on the base.
-So, I'm not sure how useful they can be for you but if you find a problem
-with linearization, SSA conversion or optimization, you can always check
-with one of these (probably the last one) to see if it's already fixed or not.
+This is cause by the assembly syntax in arm header file.
 
--- Luc
+> ...
+> .macro alt_lse, llsc, lse
+>         alternative_insn "\llsc", "\lse", ARM64_HAS_LSE_ATOMICS
+> .endm
+> ...
+>
+
+It seems that ARM has some very interesting assembly
+directly embed into the C source code. That is not support
+by sparse. Those section of code is protected by
+__ASSEMBLY__ macro.
+
+Can you try to turn off  __ASSEMBLY__ definition in the
+sparse invocation?
+
+As far as I can tell. That should get rid of the warning.
+
+Chris
