@@ -1,91 +1,182 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 8/9] option: constify match_option()
-Date: Fri, 15 Sep 2017 09:32:22 +0200
-Message-ID: <20170915073223.7568-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 9/9] option: handle switches by table
+Date: Fri, 15 Sep 2017 09:32:23 +0200
+Message-ID: <20170915073223.7568-10-luc.vanoostenryck@gmail.com>
 References: <20170915073223.7568-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34480 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751366AbdIOHch (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35553 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751431AbdIOHcj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 15 Sep 2017 03:32:37 -0400
-Received: by mail-wm0-f67.google.com with SMTP id i131so2007001wma.1
-        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 00:32:37 -0700 (PDT)
+        Fri, 15 Sep 2017 03:32:39 -0400
+Received: by mail-wm0-f65.google.com with SMTP id e64so2003962wmi.2
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 00:32:38 -0700 (PDT)
 In-Reply-To: <20170915073223.7568-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Until now, match_option() needed a non-const argment and returned
-a non-const result. Since it is no more needed, let's use const.
+Currently, the parsing of options is often quite ad-hoc and thus:
+- need a lot of code
+- is not clear at all
+
+Improve this by making this table driven.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c | 14 +++++++-------
- 1 file changed, 7 insertions(+), 7 deletions(-)
+ lib.c | 91 +++++++++++++++++++++++++++++++++++--------------------------------
+ 1 file changed, 48 insertions(+), 43 deletions(-)
 
 diff --git a/lib.c b/lib.c
-index 95601b002..3c9618a02 100644
+index 3c9618a02..a03a94d69 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -475,7 +475,7 @@ static void handle_arch_finalize(void)
- 	handle_arch_msize_long_finalize();
+@@ -483,13 +483,18 @@ const char *match_option(const char *arg, const char *prefix)
+ 	return NULL;
  }
  
--char *match_option(char *arg, const char *prefix)
-+const char *match_option(const char *arg, const char *prefix)
++
++#define OPT_INVERSE	1
+ struct flag {
+ 	const char *name;
+ 	int *flag;
++	int (*fun)(const char *arg, const char *opt, const struct flag *, int options);
++	unsigned long mask;
+ };
+ 
+-static int handle_simple_switch(const char *arg, const struct flag *flags)
++static int handle_switches(const char *ori, const char *opt, const struct flag *flags)
  {
- 	unsigned int n = strlen(prefix);
- 	if (strncmp(arg, prefix, n) == 0)
-@@ -514,9 +514,9 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
++	const char *arg = opt;
+ 	int val = 1;
+ 
+ 	// Prefixe "no-" mean to turn flag off.
+@@ -499,7 +504,22 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
+ 	}
+ 
+ 	for (; flags->name; flags++) {
+-		if (strcmp(arg, flags->name) == 0) {
++		const char *opt = match_option(arg, flags->name);
++		int rc;
++
++		if (!opt)
++			continue;
++
++		if (flags->fun) {
++			int options = 0;
++			if (!val)
++				options |= OPT_INVERSE;
++			if ((rc = flags->fun(ori, opt, flags, options)))
++				return rc;
++		}
++
++		// boolean flag
++		if (opt[0] == '\0' && flags->flag) {
+ 			*flags->flag = val;
+ 			return 1;
+ 		}
+@@ -514,21 +534,17 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
  #define	OPTNUM_UNLIMITED		2
  
  #define OPT_NUMERIC(NAME, TYPE, FUNCTION)	\
--static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
-+static int opt_##NAME(const char *arg, const char *name, TYPE *ptr, int flag)\
+-static int opt_##NAME(const char *arg, const char *name, TYPE *ptr, int flag)\
++static int opt_##NAME(const char *arg, const char *opt, TYPE *ptr, int flag)	\
  {									\
--	char *opt;							\
-+	const char *opt;						\
+-	const char *opt;						\
  	char *end;							\
  	TYPE val;							\
  									\
-@@ -728,7 +728,7 @@ static char **handle_switch_O(char *arg, char **next)
+-	if (!(opt = match_option(arg, name+2)))				\
+-		return 0;						\
+-	opt++; /* opt's last char is '=' */				\
+ 	val = FUNCTION(opt, &end, 0);					\
+ 	if (*end != '\0' || end == opt) {				\
+ 		if ((flag & OPTNUM_UNLIMITED) && !strcmp(opt, "unlimited"))	\
+ 			val = ~val;					\
+ 		else							\
+-			die("error: missing argument to \"%s\"", name);	\
++			die("error: wrong argument to \'%s\'", arg);	\
+ 	}								\
+ 	if ((flag & OPTNUM_ZERO_IS_INF) && val == 0)			\
+ 		val = ~val;						\
+@@ -728,62 +744,51 @@ static char **handle_switch_O(char *arg, char **next)
  	return next;
  }
  
--static char **handle_switch_ftabstop(char *arg, char **next)
-+static char **handle_switch_ftabstop(const char *arg, char **next)
+-static char **handle_switch_ftabstop(const char *arg, char **next)
++static int handle_ftabstop(const char *arg, const char *opt, const struct flag *flag, int options)
  {
- 	char *end;
+-	char *end;
  	unsigned long val;
-@@ -744,7 +744,7 @@ static char **handle_switch_ftabstop(char *arg, char **next)
- 	return next;
++	char *end;
+ 
+-	if (*arg == '\0')
+-		die("error: missing argument to \"-ftabstop=\"");
++	if (*opt == '\0')
++		die("error: missing argument to \"%s\"", arg);
+ 
+ 	/* we silently ignore silly values */
+-	val = strtoul(arg, &end, 10);
++	val = strtoul(opt, &end, 10);
+ 	if (*end == '\0' && 1 <= val && val <= 100)
+ 		tabstop = val;
+ 
+-	return next;
++	return 1;
  }
  
--static char **handle_switch_fdump(char *arg, char **next)
-+static char **handle_switch_fdump(const char *arg, char **next)
+-static char **handle_switch_fdump(const char *arg, char **next)
++static int handle_fdump_ir(const char *arg, const char *opt, const struct flag *flag, int options)
  {
- 	const char *opt;
+-	const char *opt;
+-
+-	if ((opt = match_option(arg, "linearize"))) {
+-		if (*opt == '\0')
+-			fdump_linearize = 1;
+-		else if (!strcmp(opt, "=only"))
+-			fdump_linearize = 2;
+-		else
+-			goto err;
+-	}
++	if (*opt == '\0')
++		fdump_linearize = 1;
++	else if (!strcmp(opt, "=only"))
++		fdump_linearize = 2;
++	else
++		die("error: wrong option \"%s\"", arg);
  
-@@ -771,7 +771,7 @@ static struct flag fflags[] = {
+-	/* ignore others flags */
+-	return next;
++	return 1;
++}
+ 
+-err:
+-	die("error: unknown flag \"-fdump-%s\"", arg);
++static int handle_fmemcpy_max_count(const char *arg, const char *opt, const struct flag *flag, int options)
++{
++	opt_ullong(arg, opt, &fmemcpy_max_count, OPTNUM_ZERO_IS_INF|OPTNUM_UNLIMITED);
++	return 1;
+ }
+ 
+ static struct flag fflags[] = {
+-	{ "mem-report",			&fmem_report },
++	{ "dump-linearize",	NULL,	handle_fdump_ir },
++	{ "mem-report",		&fmem_report },
++	{ "memcpy-max-count=",	NULL,	handle_fmemcpy_max_count },
++	{ "tabstop=",		NULL,	handle_ftabstop },
+ 	{ },
+ };
  
  static char **handle_switch_f(char *arg, char **next)
  {
--	char *opt;
-+	const char *opt;
- 	arg++;
- 
- 	if ((opt = match_option(arg, "tabstop=")))
-@@ -805,7 +805,7 @@ static char **handle_switch_a(char *arg, char **next)
- 	return next;
- }
- 
--static char **handle_switch_s(char *arg, char **next)
-+static char **handle_switch_s(const char *arg, char **next)
- {
- 	if ((arg = match_option(arg, "std="))) {
- 		if (!strcmp (arg, "c89") ||
--- 
-2.14.0
-
+-	const char *opt;
+-	arg++;
+-
+-	if ((opt = match_option(arg, "tabstop=")))
+-		return handle_switch_ftabstop(opt, next);
+-	if ((opt = match_option(arg, "dump-")))
+-		return handle_switch_fdump(opt, next);
+-	if (opt_ullong(arg, "-fmemcpy-max-count=", &fmemcpy_max_count,
+-				OPTNUM_ZERO_IS_INF|OPTNUM_UNLIMITED))
+-		return next;
