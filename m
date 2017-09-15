@@ -1,39 +1,43 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 00/28] testsuite improvements
-Date: Fri, 15 Sep 2017 13:03:49 -0400
-Message-ID: <CANeU7QnY8j4=UN9ssernyKdG_LsASj2ZUv80JLwcodmjLJGPkA@mail.gmail.com>
-References: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 0/8] dump the IR
+Date: Fri, 15 Sep 2017 13:06:11 -0400
+Message-ID: <CANeU7QnT_zeTLjfiGJnfDPbUV0AG=BFV7=QqeRg9vLdBjiOqfQ@mail.gmail.com>
+References: <20170915074034.7785-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:45018 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751635AbdIORDw (ORCPT
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:48412 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750865AbdIORGN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 15 Sep 2017 13:03:52 -0400
-Received: by mail-yw0-f169.google.com with SMTP id r85so1816486ywg.1
-        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 10:03:52 -0700 (PDT)
-In-Reply-To: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
+        Fri, 15 Sep 2017 13:06:13 -0400
+Received: by mail-yw0-f174.google.com with SMTP id v137so1808547ywg.5
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 10:06:12 -0700 (PDT)
+In-Reply-To: <20170915074034.7785-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Sep 15, 2017 at 3:13 AM, Luc Van Oostenryck
+On Fri, Sep 15, 2017 at 3:40 AM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> This series contains diverse small improvements to
-> the testsuite.
+> The goal of thsi series is to allow and control dumping of
+> the IR at different stage of the processing.
+>
+> This is meant to be used for testing & debugging.
+>
+>
+> Note: this series depends on the series 'option-parsing'
+>
+>
+> This series is also available for review in the git repository at:
+>
+>   git://github.com/lucvoo/sparse.git dump-ir
 >
 
-Thanks for the patch. It will keep me busy for a little while.
+I think with more extend on the dumping IR is good.
 
-I am might not able to finish reading it today.
-
-BTW, patchworks seems not updating. I haven't able to fetch
-yours and some other  patch on the sparse mailing list.
-
-https://patchwork.kernel.org/project/linux-sparse/list/
-
-Not a big deal. I can use your git tree branch.
+We might be able to get ride of test-linearize and test-parsing.
+Just use sparse to do the dumping.
 
 Chris
