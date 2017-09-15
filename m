@@ -1,66 +1,69 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 00/28] testsuite improvements
-Date: Fri, 15 Sep 2017 09:13:30 +0200
-Message-ID: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 02/28] testsuite: allow to test a few cases at once
+Date: Fri, 15 Sep 2017 09:13:32 +0200
+Message-ID: <20170915071358.7312-3-luc.vanoostenryck@gmail.com>
+References: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33043 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750820AbdIOHQH (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:33054 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750871AbdIOHQJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 15 Sep 2017 03:16:07 -0400
-Received: by mail-wm0-f65.google.com with SMTP id 187so1975199wmn.0
-        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 00:16:06 -0700 (PDT)
+        Fri, 15 Sep 2017 03:16:09 -0400
+Received: by mail-wm0-f68.google.com with SMTP id 187so1975260wmn.0
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 00:16:08 -0700 (PDT)
+In-Reply-To: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This series contains diverse small improvements to
-the testsuite.
+Sometimes we want to only launch a few tests, not the whole
+testsuite. the 'single' option allow to test a single case
+but it's too restrictive.
 
+Changes this by allowing arbirary arguments as files to be tested.
 
-The series is also available for review in the git repository at:
-  git://github.com/lucvoo/sparse.git testsuite-clean
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ validation/test-suite | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
-----------------------------------------------------------------
-Luc Van Oostenryck (28):
-      testsuite: 'echo -n' may not be interpreted as '-n'
-      testsuite: allow to test a few cases at once
-      testsuite: move verbose() & error()
-      testsuite: better message for pattern nbr checking
-      testsuite: better message for pattern absence/presence
-      testsuite: saner checking of pattern occurences
-      testsuite: clearer result summary
-      testsuite: check error messages first
-      testsuite: saner handling of 'must_fail'
-      testsuite: allow to parse several options
-      testsuite: add support for -q|--quiet
-      testsuite: add support for -a|--abort
-      testsuite: get options from env too
-      testsuite: allow --format & --single
-      testsuite: remove useless selftest
-      testsuite: remove useless test-be.c
-      testsuite: extract disable()
-      testsuite: simplify documentation
-      testsuite: allow arch-specific tests
-      testsuite: save screen real estate
-      testsuite: add a blank line before format
-      testsuite: 'quiet' must be initialized earlier
-      testsuite: move up arg_file()
-      testsuite: make do_format() more self-contained
-      testsuite: format: saner defaults handling
-      testsuite: format: strip .c from default name
-      testsuite: add support for 'format -f'
-      testsuite: add support for 'format -l'
+diff --git a/validation/test-suite b/validation/test-suite
+index 53cd30190..9e30ed937 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -6,7 +6,7 @@ cd $(dirname "$0")
+ 
+ default_path=".."
+ default_cmd="sparse \$file"
+-tests_list=`find . -name '*.c' | sed -e 's#^\./\(.*\)#\1#' | sort`
++tests_list=""
+ prog_name=`basename $0`
+ 
+ if [ ! -x "$default_path/sparse-llvm" ]; then
+@@ -156,6 +156,7 @@ echo "Usage: $prog_name [command] [command arguments]"
+ echo
+ echo "commands:"
+ echo "    none                       runs the whole test suite"
++echo "    file ...                   runs the test suite on the given file(s)"
+ echo "    single file                runs the test in 'file'"
+ echo "    format file [name [cmd]]   helps writing a new test case using cmd"
+ echo
+@@ -370,8 +371,14 @@ arg_file()
+ 
+ case "$1" in
+ 	'')
++		tests_list=`find . -name '*.c' | sed -e 's#^\./\(.*\)#\1#' | sort`
+ 		do_test_suite
+ 		;;
++	*.c)
++		tests_list="$@"
++		do_test_suite
++		;;
++
+ 	single)
+ 		arg_file "$2"
+ 		do_test "$2"
+-- 
+2.14.0
 
- Documentation/test-suite          |  35 +++--
- validation/test-be.c              |  46 ------
- validation/test-suite             | 286 ++++++++++++++++++++++++++++++--------
- validation/testsuite-selfcheck1.c |  10 --
- validation/testsuite-selfcheck2.c |  10 --
- validation/testsuite-selfcheck3.c |  10 --
- 6 files changed, 249 insertions(+), 148 deletions(-)
- delete mode 100644 validation/test-be.c
- delete mode 100644 validation/testsuite-selfcheck1.c
- delete mode 100644 validation/testsuite-selfcheck2.c
- delete mode 100644 validation/testsuite-selfcheck3.c
