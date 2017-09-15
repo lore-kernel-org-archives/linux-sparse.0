@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 09/15] add test case for bad layout of bool in bitfields
-Date: Fri, 15 Sep 2017 10:46:58 +0200
-Message-ID: <20170915084704.39196-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 10/15] add test case for missed overflow detection
+Date: Fri, 15 Sep 2017 10:46:59 +0200
+Message-ID: <20170915084704.39196-11-luc.vanoostenryck@gmail.com>
 References: <20170915084704.39196-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:38772 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:38777 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750838AbdIOIrT (ORCPT
+        with ESMTP id S1751111AbdIOIrU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 15 Sep 2017 04:47:19 -0400
-Received: by mail-wm0-f68.google.com with SMTP id x17so2140644wmd.5
-        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 01:47:19 -0700 (PDT)
+        Fri, 15 Sep 2017 04:47:20 -0400
+Received: by mail-wm0-f68.google.com with SMTP id x17so2140674wmd.5
+        for <linux-sparse@vger.kernel.org>; Fri, 15 Sep 2017 01:47:20 -0700 (PDT)
 In-Reply-To: <20170915084704.39196-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,41 +19,34 @@ Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@g
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/bitfield-bool-layout.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
- create mode 100644 validation/bitfield-bool-layout.c
+ validation/overflow.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+ create mode 100644 validation/overflow.c
 
-diff --git a/validation/bitfield-bool-layout.c b/validation/bitfield-bool-layout.c
+diff --git a/validation/overflow.c b/validation/overflow.c
 new file mode 100644
-index 000000000..4e0a2b4a2
+index 000000000..c2655e329
 --- /dev/null
-+++ b/validation/bitfield-bool-layout.c
-@@ -0,0 +1,26 @@
-+struct bfb {
-+	_Bool a:1;
-+	_Bool f:1;
-+	_Bool z:1;
-+};
++++ b/validation/overflow.c
+@@ -0,0 +1,19 @@
++extern int a;
 +
++int a = __INT_MAX__ * 2;
 +
-+struct bfb foo(struct bfb s)
++int foo(void)
 +{
-+	return s;
++	return __INT_MAX__ * 2;
 +}
 +
 +/*
-+ * check-name: bitfield-bool-layout
-+ * check-description: given that bool is here 1-bit wide
-+ *	each field here above completely 'fill' a bool.
-+ *	Thus 3 bools need to be allocated, but since the
-+ *	alignment is 1-byte the result has a size of 3
-+ *	bytes, 24 bits thus instead of 8.
-+ * check-command: test-linearize -Wno-decl $file
++ * check-name: overflow
++ * check-command: sparse -Wno-decl $file
 + *
 + * check-known-to-fail
-+ * check-output-ignore
-+ * check-output-excludes: ret\\.24
-+ * check-output-contains: ret\\.8
++ * check-error-start
++bug-overflow.c:3:21: warning: integer overflow in expression
++bug-overflow.c:7:28: warning: integer overflow in expression
++ * check-error-end
 + */
 -- 
 2.14.0
