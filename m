@@ -1,82 +1,52 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Subject: Re: [PATCH] cgcc: teach cgcc about GNU/kFreeBSD
-Date: Sat, 16 Sep 2017 15:57:48 +0200
-Message-ID: <20170916135748.grwftxoif42dr5dx@taurus.defre.kleine-koenig.org>
-References: <20170914200327.15129-1-uwe@kleine-koenig.org>
- <CANeU7QkUorcf-ADV+hKGBBkGpssL==tFtajikVDxug_Z4ffYNg@mail.gmail.com>
- <CAExDi1TpPbeYV+ryhbKh1pe88sGtnFKRd9_TNcbNJ0FgkmB=3A@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: sparse with 4.10?
+Date: Sat, 16 Sep 2017 16:33:45 +0200
+Message-ID: <20170916143343.p32j3uw5rvk4hxp5@ltop.local>
+References: <CAHmME9o--jumLrBbRn63ewKOE49+uYJ9B8V5FocptdwZ5Kd9Fw@mail.gmail.com>
+ <CAMHZB6G2bQ9SUQLHxxmz0t5Cue73i+-U8bONyq0WMk_gikvyQg@mail.gmail.com>
+ <CAHmME9qu6p344M_VnubGtRYvbM7+w4kDmHGJG_PZvLK0kaheOw@mail.gmail.com>
+ <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="uvv6sklektiwf4n2"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from arcturus.kleine-koenig.org ([78.47.169.190]:49810 "EHLO
-        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751211AbdIPN5v (ORCPT
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:49128 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751253AbdIPOdt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 16 Sep 2017 09:57:51 -0400
+        Sat, 16 Sep 2017 10:33:49 -0400
+Received: by mail-wm0-f51.google.com with SMTP id r68so13788770wmg.3
+        for <linux-sparse@vger.kernel.org>; Sat, 16 Sep 2017 07:33:48 -0700 (PDT)
 Content-Disposition: inline
-In-Reply-To: <CAExDi1TpPbeYV+ryhbKh1pe88sGtnFKRd9_TNcbNJ0FgkmB=3A@mail.gmail.com>
+In-Reply-To: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Chris Li <christ.li@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+
+On Sat, Sep 16, 2017 at 02:25:18PM +0200, Jason A. Donenfeld wrote:
+> Hey guys,
+> 
+> Sorry for the delay. I finally produced an extremely minimal test case
+> that can reproduce this bug. Please see the attached tarball. Hit
+> make, and you'll see the error:
+> 
+> ./include/linux/mm.h:1766:47: warning: unknown expression (14 0)
+> ./include/linux/mm.h:1767:16: warning: call with no type!
 
 
---uvv6sklektiwf4n2
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Thanks, I can now reproduce this.
 
-On Sat, Sep 16, 2017 at 09:50:07AM +0200, Luc Van Oostenryck wrote:
-> On Fri, Sep 15, 2017 at 6:56 PM, Chris Li <christ.li@gmail.com> wrote:
-> > On Thu, Sep 14, 2017 at 4:03 PM, Uwe Kleine-K=F6nig <uwe@kleine-koenig.=
-org> wrote:
-> >> +    } elsif ($spec eq 'gnu/kfreebsd') {
-> >> +       return &add_specs ('unix') .
-> >> +           ' -D__FreeBSD_kernel__=3D1'
-> >
-> > This looks good. I will apply it.
-> > I don't have FreeBSD to test it though.
->=20
-> FYI, this is not really FreeBSD, it's Debian's GNU/kFreeBSD:
-> GNU for userland with a FreeBSD kernel.
+It's quite strange.
 
-ack
+It's related to the fact that you include mm.h via the '-include' flag.
+If you include it with '#include' (as it should be), there is no problem.
+Same when trying with the result of the preprocessing.
+But all three should have the same effect.
 
-> > I assume you do
-> > the sufficient testing on it already.
->=20
-> Yes, my point of view too.
+The error message itself has somethng to do with the type 'pmd_t'
+but again I don't see anything wrong there and I suppose it's because
+of the point above.
 
-FTR: The difference is:
+I'll need to investigate this a bit more.
 
-	(sid_k-a-dchroot)ukleinek@falla:~/sparse$ PATH=3D.:$PATH ./cgcc -c flow.c
-	(sid_k-a-dchroot)ukleinek@falla:~/sparse$=20
-
-with the patch applied vs
-
-	(sid_k-a-dchroot)ukleinek@falla:~/sparse$ PATH=3D.:$PATH ./cgcc -c flow.c
-	./cgcc: invalid specs: gnu/kfreebsd
-	(sid_k-a-dchroot)ukleinek@falla:~/sparse$=20
-
-in the current state.
-
-Best regards
-Uwe
-
---uvv6sklektiwf4n2
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlm9LdkACgkQwfwUeK3K
-7AkzqAf/dGPTekXAOyXkxUWwec1dy2CW+K8ko/Y9b3WpzDn8dKd+eJ/nZQpybW4n
-wg+jw6ybpNWG6/lyIwFoodi9Vvq8xHB9B6h+rMD0mqOWthhA0jFL89KzsewYIEJS
-aanCp9KI0NJj2cQVe99rXMz6xHh47TWDSd/lsXE+z7cisXgknn9ZimnL7U+rx8j8
-jvjxFlAGL0pavqFhku3iSgZHx39wkbBLb6u+LlcEl5s9t0Naek9IfTeuMi71UsZg
-PZqFY0zPGG24pMFUx5NjAnzAUPR5z2emAWK1ZpNDxhrspY01e0lAdIEEtzfxnOCV
-dmuphoRHFs7iTBNQIuKHryDfSIERqw==
-=GwQJ
------END PGP SIGNATURE-----
-
---uvv6sklektiwf4n2--
+-- Luc Van Oostenryck
