@@ -1,47 +1,33 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/2] fix missing evaluation when using '-include <file>'
-Date: Sun, 17 Sep 2017 12:05:50 +0200
-Message-ID: <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
+Date: Sun, 17 Sep 2017 13:59:19 +0200
+Message-ID: <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
 References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
+ <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34653 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750802AbdIQKGA (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 17 Sep 2017 06:06:00 -0400
-Received: by mail-wm0-f66.google.com with SMTP id i131so6288888wma.1
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Sep 2017 03:05:59 -0700 (PDT)
-In-Reply-To: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
+Received: from frisell.zx2c4.com ([192.95.5.64]:57475 "EHLO frisell.zx2c4.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750803AbdIQL7V (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Sun, 17 Sep 2017 07:59:21 -0400
+Received: by frisell.zx2c4.com (ZX2C4 Mail Server) with ESMTP id fc417de7
+        for <linux-sparse@vger.kernel.org>;
+        Sun, 17 Sep 2017 11:51:32 +0000 (UTC)
+Received: by frisell.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id bf2e818f (TLSv1.2:ECDHE-RSA-AES128-GCM-SHA256:128:NO)
+        for <linux-sparse@vger.kernel.org>;
+        Sun, 17 Sep 2017 11:51:32 +0000 (UTC)
+Received: by mail-oi0-f51.google.com with SMTP id p126so3383399oih.9
+        for <linux-sparse@vger.kernel.org>; Sun, 17 Sep 2017 04:59:20 -0700 (PDT)
+In-Reply-To: <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Christopher Li <sparse@chrisli.org>, "Jason A . Donenfeld" <Jason@zx2c4.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-This mini series is to fix a bug where functions included via
-'-include <file>' are not evaluated and thus not expanded or
-linearized as they should be.
+I can confirm this patchfix works well on my slightly more complicated
+codebase that was encountering this bug.
 
-Thanks to Jason A. Donenfeld for catching that and having enough
-perseverance to create a small reproducer.
-
-----------------------------------------------------------------
-
-The patches are also available in the git repository at:
-
-  git://github.com/lucvoo/sparse.git fix-include-eval
-
-for you to fetch changes up to 36d1d8b9a453c1f7c215136624198aee9a6f174c:
-
-  fix: missing evaluate with '-include' (2017-09-17 11:54:23 +0200)
-
-----------------------------------------------------------------
-Luc Van Oostenryck (2):
-      fix: missing evaluate with '-include' : add testcase
-      fix: missing evaluate with '-include'
-
- lib.c                       | 14 ++++++++++++++
- validation/include-eval.c   |  6 ++++++
- validation/include-eval.inc | 12 ++++++++++++
- 3 files changed, 32 insertions(+)
- create mode 100644 validation/include-eval.c
- create mode 100644 validation/include-eval.inc
+By the way, I love the idea of first adding the _failing_ test with
+check-known-to-fail, and then removing that flag when the commit that
+fixes it lands. Very nice.
