@@ -1,57 +1,45 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/3] add test case for bad return type
-Date: Mon, 18 Sep 2017 16:10:57 +0200
-Message-ID: <20170918141057.69745-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/3] fix test case kill-phi-ttsb
+Date: Mon, 18 Sep 2017 16:10:55 +0200
+Message-ID: <20170918141057.69745-2-luc.vanoostenryck@gmail.com>
 References: <20170918141057.69745-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:37115 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753126AbdIROLK (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:35039 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752946AbdIROLH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 Sep 2017 10:11:10 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u48so424012wrf.4
-        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 07:11:09 -0700 (PDT)
+        Mon, 18 Sep 2017 10:11:07 -0400
+Received: by mail-wm0-f67.google.com with SMTP id e64so1027822wmi.2
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 07:11:06 -0700 (PDT)
 In-Reply-To: <20170918141057.69745-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-add test cases for the diagnostic of:
-- void function returning an integer
-- int  function returning with a bare 'return'
+The function used in te test case has a return type of 'int'
+but has nothing to return.
+
+Fix this by using the correct return type: 'void'
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/bad-return-type.c | 19 +++++++++++++++++++
- 1 file changed, 19 insertions(+)
- create mode 100644 validation/bad-return-type.c
+ validation/kill-phi-ttsbb.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/validation/bad-return-type.c b/validation/bad-return-type.c
-new file mode 100644
-index 000000000..0f3b3f516
---- /dev/null
-+++ b/validation/bad-return-type.c
-@@ -0,0 +1,19 @@
-+void foo(int a)
-+{
-+	return a;
-+}
-+
-+int bar(void)
-+{
-+	return;
-+}
-+
-+/*
-+ * check-name: bad return type
-+ * check-command: sparse -Wno-decl $file
-+ *
-+ * check-error-start
-+bad-return-type.c:3:16: error: return expression in void function
-+bad-return-type.c:8:9: error: return with no return value
-+ * check-error-end
-+ */
+diff --git a/validation/kill-phi-ttsbb.c b/validation/kill-phi-ttsbb.c
+index 178a65d19..7fea30bfd 100644
+--- a/validation/kill-phi-ttsbb.c
++++ b/validation/kill-phi-ttsbb.c
+@@ -1,7 +1,7 @@
+ int def(void);
+ void use(int);
+ 
+-static int foo(int a, int b)
++static void foo(int a, int b)
+ {
+ 	int c;
+ 
 -- 
 2.14.0
 
