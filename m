@@ -1,51 +1,61 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/5] llvm: only compare void pointers
-Date: Mon, 18 Sep 2017 11:30:14 +0200
-Message-ID: <20170918093014.11878-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/5] llvm: warn instead of assert on global inits
+Date: Mon, 18 Sep 2017 11:30:10 +0200
+Message-ID: <20170918093014.11878-2-luc.vanoostenryck@gmail.com>
 References: <20170918093014.11878-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:37790 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932580AbdIRJaa (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35974 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932576AbdIRJa0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 Sep 2017 05:30:30 -0400
-Received: by mail-wm0-f67.google.com with SMTP id f4so278865wmh.4
-        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 02:30:29 -0700 (PDT)
+        Mon, 18 Sep 2017 05:30:26 -0400
+Received: by mail-wm0-f65.google.com with SMTP id r136so281724wmf.3
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 02:30:25 -0700 (PDT)
 In-Reply-To: <20170918093014.11878-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-LLVM use a stricter type system fro it's IR than sparse does.
-In the present case, sparse allow to compare pointers regardless
-of their types.
+Currently, sparse-llvm can't emit the needed code for
+all initializers and when it's the case it stop abruptly
+with an assert(0).
 
-This create LLVM errors if we try to simply translate, instruction
-by instruction, spasre compare instructions to LLVM compares.
+This is kinda useless.
 
-Fix this by casting all pointers to void *, before comparing them.
+Somehow fix this by issuing a warning instead and try to
+continue gracefully.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- sparse-llvm.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ sparse-llvm.c | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 3a68d09d9..9a0a76096 100644
+index 3a68d09d9..9a32efe36 100644
 --- a/sparse-llvm.c
 +++ b/sparse-llvm.c
-@@ -654,6 +654,10 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+@@ -1212,7 +1212,9 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 			break;
+ 		}
+ 		default:
+-			assert(0);
++			warning(initializer->pos, "can't initialize type: %s", show_typename(sym));
++			initial_value = NULL;
++			break;
+ 		}
+ 	} else {
+ 		LLVMTypeRef type = symbol_type(sym);
+@@ -1220,6 +1222,9 @@ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+ 		initial_value = LLVMConstNull(type);
+ 	}
  
- 	switch  (LLVMGetTypeKind(LLVMTypeOf(lhs))) {
- 	case LLVMPointerTypeKind:
-+		lhs = value_to_pvalue(fn, &ptr_ctype, lhs);
-+		rhs = value_to_pvalue(fn, &ptr_ctype, rhs);
-+		/* fall through */
++	if (!initial_value)
++		return NULL;
 +
- 	case LLVMIntegerTypeKind: {
- 		LLVMIntPredicate op = translate_op(insn->opcode);
+ 	name = sym->ident ? show_ident(sym->ident) : "" ;
  
+ 	data = LLVMAddGlobal(module, LLVMTypeOf(initial_value), name);
 -- 
 2.14.0
 
