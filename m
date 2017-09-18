@@ -1,81 +1,57 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] testsuite: respect command line's quotes & whitespaces
-Date: Mon, 18 Sep 2017 15:52:27 +0200
-Message-ID: <20170918135227.65141-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/3] add test case for bad return type
+Date: Mon, 18 Sep 2017 16:10:57 +0200
+Message-ID: <20170918141057.69745-4-luc.vanoostenryck@gmail.com>
+References: <20170918141057.69745-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:37599 "EHLO
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:37115 "EHLO
         mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753836AbdIRNwe (ORCPT
+        with ESMTP id S1753126AbdIROLK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 Sep 2017 09:52:34 -0400
-Received: by mail-wr0-f193.google.com with SMTP id u48so388666wrf.4
-        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 06:52:33 -0700 (PDT)
+        Mon, 18 Sep 2017 10:11:10 -0400
+Received: by mail-wr0-f193.google.com with SMTP id u48so424012wrf.4
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 07:11:09 -0700 (PDT)
+In-Reply-To: <20170918141057.69745-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently the testsuite use 'eval echo $cmd' to expand
-the name of the test file to be given on the command line.
-
-This as the annoying consequence to go a bit too far in
-the expansion of variables and to destroy any quotes and
-whitespaces escaping that would have done.
-
-Fix this by doing the eval later, when effectively executing
-the command.
+add test cases for the diagnostic of:
+- void function returning an integer
+- int  function returning with a bare 'return'
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
+ validation/bad-return-type.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+ create mode 100644 validation/bad-return-type.c
 
-The patch is also available for review & testing in the git repository at:
-  git://github.com/lucvoo/sparse.git testsuite-fix-quotes-cmdline
-
- validation/preprocessor/arg-cli-ko.c | 1 -
- validation/test-suite                | 6 +++---
- 2 files changed, 3 insertions(+), 4 deletions(-)
-
-diff --git a/validation/preprocessor/arg-cli-ko.c b/validation/preprocessor/arg-cli-ko.c
-index d4e2803c0..104bb8b0f 100644
---- a/validation/preprocessor/arg-cli-ko.c
-+++ b/validation/preprocessor/arg-cli-ko.c
-@@ -6,7 +6,6 @@ M2(0,1)
-  * check-command: sparse -E '-DM1(X)=X' '-DM2(X, Y)=B Y S X T' $file
-  *
-  * check-description: this is a failure of the testsuite.
-- * check-known-to-fail
-  *
-  * check-output-start
- 
-diff --git a/validation/test-suite b/validation/test-suite
-index 055eecc21..bd92e14a4 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -309,13 +309,13 @@ do_test()
- 		fi
- 	fi
- 
--	cmd=`eval echo $default_path/$check_command`
-+	cmd="$default_path/$check_command"
- 
- 	if [ -z "$vquiet" ]; then
- 		echo "  TEST	$test_name ($file)"
- 	fi
- 
--	verbose "Using command       : $cmd"
-+	verbose "Using command       : $(eval echo $cmd)"
- 
- 	# grab the expected exit value
- 	expected_exit_value=$check_exit_value
-@@ -327,7 +327,7 @@ do_test()
- 	fi
- 
- 	# grab the actual output & exit value
--	$cmd 1> $file.output.got 2> $file.error.got
-+	eval $cmd 1> $file.output.got 2> $file.error.got
- 	actual_exit_value=$?
- 
- 	must_fail=$check_known_to_fail
+diff --git a/validation/bad-return-type.c b/validation/bad-return-type.c
+new file mode 100644
+index 000000000..0f3b3f516
+--- /dev/null
++++ b/validation/bad-return-type.c
+@@ -0,0 +1,19 @@
++void foo(int a)
++{
++	return a;
++}
++
++int bar(void)
++{
++	return;
++}
++
++/*
++ * check-name: bad return type
++ * check-command: sparse -Wno-decl $file
++ *
++ * check-error-start
++bad-return-type.c:3:16: error: return expression in void function
++bad-return-type.c:8:9: error: return with no return value
++ * check-error-end
++ */
 -- 
 2.14.0
 
