@@ -1,36 +1,78 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
-Date: Sun, 17 Sep 2017 21:02:10 +0200
-Message-ID: <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
-References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
- <20170917100552.72288-1-luc.vanoostenryck@gmail.com> <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH 2/5] llvm: gracefully catch impossible type/value
+Date: Mon, 18 Sep 2017 11:30:11 +0200
+Message-ID: <20170918093014.11878-3-luc.vanoostenryck@gmail.com>
+References: <20170918093014.11878-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f170.google.com ([209.85.223.170]:46814 "EHLO
-        mail-io0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751239AbdIQTIH (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:37772 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932580AbdIRJa1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 17 Sep 2017 15:08:07 -0400
-Received: by mail-io0-f170.google.com with SMTP id d16so14286316ioj.3
-        for <linux-sparse@vger.kernel.org>; Sun, 17 Sep 2017 12:08:07 -0700 (PDT)
-In-Reply-To: <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
+        Mon, 18 Sep 2017 05:30:27 -0400
+Received: by mail-wm0-f67.google.com with SMTP id f4so278775wmh.4
+        for <linux-sparse@vger.kernel.org>; Mon, 18 Sep 2017 02:30:26 -0700 (PDT)
+In-Reply-To: <20170918093014.11878-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
+Cc: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sun, Sep 17, 2017 at 1:59 PM, Jason A. Donenfeld <Jason@zx2c4.com> wrote:
-> I can confirm this patchfix works well on my slightly more complicated
-> codebase that was encountering this bug.
+Until now, in sparse-llvm, an assert(0) was used each time
+something which was not yet handled was encountered.
 
-Good.
-Thanks for the extra testing.
+This is doubly annoying because:
+- the assert gave no info about the cause
+- it also hide possible further issuses.
 
-> By the way, I love the idea of first adding the _failing_ test with
-> check-known-to-fail, and then removing that flag when the commit that
-> fixes it lands. Very nice.
+Fix this by:
+- removing the asserts
+- use a warnng explaining what's at hand
+- try to continue with the following instructions.
 
-Yes, it certainly helps to test and to see what's happening.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sparse-llvm.c | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
--- Luc
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index 3a68d09d9..9855ae403 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -353,18 +353,23 @@ static LLVMValueRef constant_value(unsigned long long val, LLVMTypeRef dtype)
+ 		result = LLVMConstInt(dtype, val, 1);
+ 		break;
+ 	default:
+-		assert(0);
++		return NULL;
+ 	}
+ 	return result;
+ }
+ 
+ static LLVMValueRef val_to_value(unsigned long long val, struct symbol *ctype)
+ {
++	LLVMValueRef result;
+ 	LLVMTypeRef dtype;
+ 
+ 	assert(ctype);
+ 	dtype = symbol_type(ctype);
+-	return constant_value(val, dtype);
++	result = constant_value(val, dtype);
++	if (result)
++		return result;
++	sparse_error(ctype->pos, "no value possible for %s", show_typename(ctype));
++	return LLVMGetUndef(symbol_type(ctype));
+ }
+ 
+ static LLVMValueRef pseudo_to_value(struct function *fn, struct symbol *ctype, pseudo_t pseudo)
+@@ -647,6 +652,8 @@ static void output_op_compare(struct function *fn, struct instruction *insn)
+ 		rhs = constant_value(insn->src2->value, LLVMTypeOf(lhs));
+ 	else
+ 		rhs = pseudo_to_value(fn, NULL, insn->src2);
++	if (!rhs)
++		rhs = LLVMGetUndef(symbol_type(insn->type));
+ 
+ 	pseudo_name(insn->target, target_name);
+ 
+-- 
+2.14.0
+
