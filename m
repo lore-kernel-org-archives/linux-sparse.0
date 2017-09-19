@@ -1,39 +1,38 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] use shorter name for constexpr tests
-Date: Tue, 19 Sep 2017 14:30:27 +0200
-Message-ID: <CAExDi1QXyFoeL5qMaR8H0wEx_+6rCEo37Vni_qc68UUPXK7BQA@mail.gmail.com>
-References: <20170915065347.6772-1-luc.vanoostenryck@gmail.com> <CANeU7QkJR97fZ8OJHKU4uzFTa9ryiapUGRgfcCV=9iKYakbMnQ@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] build: only generate version.h when needed and remove it
+ in clean target
+Date: Tue, 19 Sep 2017 09:13:06 -0400
+Message-ID: <CANeU7Q=DcKL2qjHvwN50UM5nQ5bcs-WuhC2Yx26FVm6NTkP5fQ@mail.gmail.com>
+References: <20170914184540.26650-1-uwe@kleine-koenig.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-it0-f41.google.com ([209.85.214.41]:46469 "EHLO
-        mail-it0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750972AbdISMa2 (ORCPT
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:35236 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751361AbdISNNH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 Sep 2017 08:30:28 -0400
-Received: by mail-it0-f41.google.com with SMTP id 6so1665258itl.1
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Sep 2017 05:30:28 -0700 (PDT)
-In-Reply-To: <CANeU7QkJR97fZ8OJHKU4uzFTa9ryiapUGRgfcCV=9iKYakbMnQ@mail.gmail.com>
+        Tue, 19 Sep 2017 09:13:07 -0400
+Received: by mail-yw0-f195.google.com with SMTP id u134so1710385ywu.2
+        for <linux-sparse@vger.kernel.org>; Tue, 19 Sep 2017 06:13:07 -0700 (PDT)
+In-Reply-To: <20170914184540.26650-1-uwe@kleine-koenig.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Sep 19, 2017 at 2:20 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Fri, Sep 15, 2017 at 2:53 AM, Luc Van Oostenryck wrote:
->> The name used for these tests, while very correct, are a bit
->> longuish. They generaly take more than one line on the screen
->> which is annoying when running the testsuite.
->>
->> Change this by using shorter names for these tests.
+On Thu, Sep 14, 2017 at 2:45 PM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig.o=
+rg> wrote:
+> This way version.h isn't generated when running $(make clean) but only
+> when lib.c is about to be compiled.
 >
-> Looks good. I assume that is for review only.
-> It will show up in the git pull some where right?
+> This simplifies packaging for Debian because the package building program=
+s
+> abort when there are additional files after $(make clean).
 
-Yes, I'm busy to put together pending patches because I have
-way too much of them (about 300 patches, without anything related
-to SSA conversion or cast rework).
+BTW, this one needs a SOB as well. I want to apply the modify 3 liner
+version using the $(MAKECMDGOALS).
 
-I'm posting stuff I haven't yet and will send a pull request later.
+Thanks
 
--- Luc
+Chris
