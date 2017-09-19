@@ -1,85 +1,84 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] build: only generate version.h when needed and remove it
- in clean target
-Date: Tue, 19 Sep 2017 11:42:30 -0400
-Message-ID: <CANeU7Q=+pM5=Lezf1Wo750ULaKGvLTOMCvTMp6zvPdiKzu_S3w@mail.gmail.com>
-References: <20170914184540.26650-1-uwe@kleine-koenig.org> <CANeU7QnQ-fFvvUfqjCjXfUT5Dn-+vEY-u0KxnNPML3G3iuNBZw@mail.gmail.com>
- <8d555c9d-6eb0-85a2-5f78-999aaf0b12e7@kleine-koenig.org>
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+Subject: Re: [PATCH] cgcc: teach cgcc about GNU/kFreeBSD
+Date: Tue, 19 Sep 2017 19:33:47 +0200
+Message-ID: <b580c0f7-716d-17b0-7e2b-410530c4a0cf@kleine-koenig.org>
+References: <20170914200327.15129-1-uwe@kleine-koenig.org>
+ <CANeU7QndhpsDA5YzVzPBvoKNrYuHutJeYF9A=+Dyx=sJ_fi+OQ@mail.gmail.com>
+ <a8abb58e-e95c-0d76-3b2c-8786a3325c9e@kleine-koenig.org>
+ <CANeU7Q=S6OENzU_ogLGY0uPUT5E6SvGK1KLmKc37+7CKXV_ogw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="Vi1fHsMpuTlUjSWWbAQ7BHLVF2e6sDUuw"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:56966 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751581AbdISPmc (ORCPT
+Received: from arcturus.kleine-koenig.org ([78.47.169.190]:51376 "EHLO
+        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751585AbdISRdw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 Sep 2017 11:42:32 -0400
-Received: by mail-yw0-f181.google.com with SMTP id w22so280108ywa.13
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Sep 2017 08:42:31 -0700 (PDT)
-In-Reply-To: <8d555c9d-6eb0-85a2-5f78-999aaf0b12e7@kleine-koenig.org>
+        Tue, 19 Sep 2017 13:33:52 -0400
+In-Reply-To: <CANeU7Q=S6OENzU_ogLGY0uPUT5E6SvGK1KLmKc37+7CKXV_ogw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
+To: Chris Li <christ.li@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Sep 19, 2017 at 10:50 AM, Uwe Kleine-K=C3=B6nig
-<uwe@kleine-koenig.org> wrote:
->> You can use "ifneq ($(MAKECMDGOALS),clean)"
->
-> So it still triggers when doing
->
->         make clean all
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--Vi1fHsMpuTlUjSWWbAQ7BHLVF2e6sDUuw
+Content-Type: multipart/mixed; boundary="WEV2LtVlqw3nlmX2VG7MveswlvQo94gP1";
+ protected-headers="v1"
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+To: Chris Li <christ.li@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Message-ID: <b580c0f7-716d-17b0-7e2b-410530c4a0cf@kleine-koenig.org>
+Subject: Re: [PATCH] cgcc: teach cgcc about GNU/kFreeBSD
+References: <20170914200327.15129-1-uwe@kleine-koenig.org>
+ <CANeU7QndhpsDA5YzVzPBvoKNrYuHutJeYF9A=+Dyx=sJ_fi+OQ@mail.gmail.com>
+ <a8abb58e-e95c-0d76-3b2c-8786a3325c9e@kleine-koenig.org>
+ <CANeU7Q=S6OENzU_ogLGY0uPUT5E6SvGK1KLmKc37+7CKXV_ogw@mail.gmail.com>
+In-Reply-To: <CANeU7Q=S6OENzU_ogLGY0uPUT5E6SvGK1KLmKc37+7CKXV_ogw@mail.gmail.com>
 
-That is the correct behavior. Because "all" require version.h.
-It is a silly thing to put clean and all together, but the makefile
-actually do the right thing.
+--WEV2LtVlqw3nlmX2VG7MveswlvQo94gP1
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
->
-> Also you don't want to generate it for $(make check).
+On 09/19/2017 05:15 PM, Chris Li wrote:
+> On Tue, Sep 19, 2017 at 10:41 AM, Uwe Kleine-K=C3=B6nig
+> <uwe@kleine-koenig.org> wrote:
+>> I didn't add a Sob on purpose. It is not specified what this means and=
+ I
+>> refuse follow an unformalized formalism. Without a respective document=
 
-check is depend on all which depend on version.h.
-So that seems acceptable to me.
+>> in sparse I really doubt it has any significance anyhow.
+>=20
+> It did in sparse Documentation/submitting-patches.md.
 
-Plus in the make check case, it will only look at the version.h,
-it will not regenerate it if data is the same.
+ah, I missed that. (I wonder if it is sensible to just link to the
+respective kernel stuff instead of copying that verbatim into sparse,
+but I don't really care.)
 
-> IMHO that's hardly manageable to get done consistently this way and the
-> easiest is a separate rule for version.h that is triggered by make
-> dependencies as I suggested
+I can resend accordingly
 
-The problem is that, you end up updating the version.h from make's
-point of view. Then make detect the version.h's time stamp haven't
-change and take a short cut. That is the part I consider not clean.
-
-In other words, if you only look at the make rules and ignore the
-time stamp short cut. "version.h" will be force to update every
-time. It should also recompile lib.o without the short cut.
-
->> to wrap it. GNU make document even show that as examples
->> of using $(MAKECMDGOALS).
->
-> IMHO that is no prove that the idea is sane.
-
-All the example you give seems give sane result.
+Uwe
 
 
->> The above section is not needed if you use the ifneq test on $(MAKECMDGO=
-ALS).> I also test it and found the problem that, the version.h was force
->> to obsolete. Two consequent make will always show "GEN version.h"
->> line.
->
-> Then maybe split it into
->
->         CHECK version.h
->         GEN   version.h
->
-> ? The GEN would be skipped if version.h doesn't need an update.
+--WEV2LtVlqw3nlmX2VG7MveswlvQo94gP1--
 
-Then there is another thing I consider slightly unclean.
-The check rules will optionally update another target "version.h" without
-specificity in its rules.
+--Vi1fHsMpuTlUjSWWbAQ7BHLVF2e6sDUuw
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-We can use order only rules for check target. The whole thing seems
-gets more complicated than it needs to.
+-----BEGIN PGP SIGNATURE-----
 
-Chris
+iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlnBVPsACgkQwfwUeK3K
+7AnUiAf7BnBeJtRnx+5+JmwLC4a3FPAd+DzAFlkJ5SR9F9RW703G27DXGjqS868B
+vKIgoIPbn6PtnZ7oGaqDqPu+Hmd8nsBHUww2Z9XeC7HdoUUE0AeBMwaj9jsFN+2L
+xcrFNG2de62vb6Yf+CmC+MrEOvkUyEw9D1lefka3X+kuJ+JZgaYtqAUyGTrekKW2
+2l0YOVm3nnJ/icg3wdHh0RLMJ3MVo/3j+pM4RZ9fnsulcX4RozelJToKMT1gDfpA
+vIGfliu5g75eqLvD89yFQjKmjmW/SM/6yFQWB0sVQh8G8cLyujuZtxiRG0yoFDXx
+/efIPskr5fHuKM3EVrQFRT0KjyxYEQ==
+=w5Hx
+-----END PGP SIGNATURE-----
+
+--Vi1fHsMpuTlUjSWWbAQ7BHLVF2e6sDUuw--
