@@ -1,35 +1,48 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 00/28] testsuite improvements
-Date: Wed, 20 Sep 2017 01:53:28 -0400
-Message-ID: <CANeU7QkwOYet=oqDon2azex-PgEsx+EvK4BGCGLEdNSfPus29g@mail.gmail.com>
-References: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: [PATCH] build: remove version.h in clean target
+Date: Wed, 20 Sep 2017 17:08:14 +0200
+Message-ID: <20170920150814.19794-1-uwe@kleine-koenig.org>
+References: <20170914184540.26650-1-uwe@kleine-koenig.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:55835 "EHLO
-        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751468AbdITFx3 (ORCPT
+Received: from arcturus.kleine-koenig.org ([78.47.169.190]:51667 "EHLO
+        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751711AbdITPIU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 20 Sep 2017 01:53:29 -0400
-Received: by mail-yw0-f175.google.com with SMTP id o143so1185037ywd.12
-        for <linux-sparse@vger.kernel.org>; Tue, 19 Sep 2017 22:53:29 -0700 (PDT)
-In-Reply-To: <20170915071358.7312-1-luc.vanoostenryck@gmail.com>
+        Wed, 20 Sep 2017 11:08:20 -0400
+In-Reply-To: <20170914184540.26650-1-uwe@kleine-koenig.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Fri, Sep 15, 2017 at 3:13 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> This series contains diverse small improvements to
-> the testsuite.
->
->
-> The series is also available for review in the git repository at:
->   git://github.com/lucvoo/sparse.git testsuite-clean
+Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+---
+Hello,
 
-I take a brief look at this series. It seems fine to me.
+I think this is the inarguable part and that alone is still a
+considerable improvement for me.
 
-I will wait for the git pull for it then.
+Best regards
+Uwe
 
-Chris
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index a4653aa1b747..d0341764158e 100644
+--- a/Makefile
++++ b/Makefile
+@@ -223,7 +223,7 @@ selfcheck: $(ALL_OBJS:.o=.sc)
+ 
+ 
+ clean: clean-check
+-	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc
++	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc version.h
+ 
+ dist:
+ 	@if test "$(SPARSE_VERSION)" != "v$(VERSION)" ; then \
+-- 
+2.14.1
+
