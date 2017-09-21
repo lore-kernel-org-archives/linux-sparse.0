@@ -1,96 +1,97 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Subject: Re: Bug#873508: sparse test failures on ppc32le (and other not so
- common archs)
-Date: Thu, 21 Sep 2017 20:58:23 +0200
-Message-ID: <20170921185823.5fnxchdowq5krxy3@taurus.defre.kleine-koenig.org>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
- <c1cfea1b-c9e6-0df2-855e-cf66e25c9ccc@ramsayjones.plus.com>
- <20170830173652.2s26nti2s2mgupnd@taurus.defre.kleine-koenig.org>
- <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com>
- <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org>
- <c0e4a9fe-05ff-1280-f1ee-0c757ba3310b@ramsayjones.plus.com>
- <150392922734.24087.13050909898214597041.reportbug@curie.anarc.at>
- <20170901074643.rivm2rit53mavkjr@taurus.defre.kleine-koenig.org>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Thu, 21 Sep 2017 14:16:43 -0700
+Message-ID: <CAJcbSZHOuxy5BVxD0xJUdQfB-OMgbvfiP-2CJzf52K-7JZAy-A@mail.gmail.com>
+References: <20170815075609.mmzbfwritjzvrpsn@gmail.com> <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+ <20170816151235.oamkdva6cwpc4cex@gmail.com> <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
+ <20170817080920.5ljlkktngw2cisfg@gmail.com> <CAJcbSZGbtc-i0X1NiBAvZA7cxpGkwSLKNB7oDNCsFxOCdhkR_g@mail.gmail.com>
+ <CAJcbSZGhvwt=5ERtBHLJnwS=6AXBZLTMfrafzeUCqYy=-MKWDg@mail.gmail.com>
+ <20170825080443.tvvr6wzs362cjcuu@gmail.com> <CAJcbSZFJQMKw21kLwr4QGoSM7DMgKRzzjWxkYBF2c1HciCzvGg@mail.gmail.com>
+ <CAJcbSZH6hwaWKrvUZR33ExYaZaWKMSv4tJJA3yZkniLvLbTFMw@mail.gmail.com> <20170921155919.skpyt7dutod5ul4t@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="3us2cpllse3iam2r"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from arcturus.kleine-koenig.org ([78.47.169.190]:52155 "EHLO
-        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751773AbdIUS60 (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 21 Sep 2017 14:58:26 -0400
-Content-Disposition: inline
-In-Reply-To: <20170901074643.rivm2rit53mavkjr@taurus.defre.kleine-koenig.org>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <kernel-hardening-return-9918-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <20170921155919.skpyt7dutod5ul4t@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
+
+On Thu, Sep 21, 2017 at 8:59 AM, Ingo Molnar <mingo@kernel.org> wrote:
+>
+> ( Sorry about the delay in answering this. I could blame the delay on the merge
+>   window, but in reality I've been procrastinating this is due to the permanent,
+>   non-trivial impact PIE has on generated C code. )
+>
+> * Thomas Garnier <thgarnie@google.com> wrote:
+>
+>> 1) PIE sometime needs two instructions to represent a single
+>> instruction on mcmodel=kernel.
+>
+> What again is the typical frequency of this occurring in an x86-64 defconfig
+> kernel, with the very latest GCC?
+
+I am not sure what is the best way to measure that.
+
+>
+> Also, to make sure: which unwinder did you use for your measurements,
+> frame-pointers or ORC? Please use ORC only for future numbers, as
+> frame-pointers is obsolete from a performance measurement POV.
+
+I used the default configuration which uses frame-pointer. I built all
+the different binaries with ORC and I see an improvement in size:
+
+On latest revision (just built and ran performance tests this week):
+
+With framepointer: PIE .text is 0.837324% than baseline
+
+With ORC: PIE .text is 0.814224% than baseline
+
+Comparing baselines only, ORC is -2.849832% than frame-pointers.
+
+>
+>> 2) GCC does not optimize switches in PIE in order to reduce relocations:
+>
+> Hopefully this can either be fixed in GCC or at least influenced via a compiler
+> switch in the future.
+>
+>> The switches are the biggest increase on small functions but I don't
+>> think they represent a large portion of the difference (number 1 is).
+>
+> Ok.
+>
+>> A side note, while testing gcc 7.2.0 on hackbench I have seen the PIE
+>> kernel being faster by 1% across multiple runs (comparing 50 runs done
+>> across 5 reboots twice). I don't think PIE is faster than a
+>> mcmodel=kernel but recent versions of gcc makes them fairly similar.
+>
+> So I think we are down to an overhead range where the inherent noise (both random
+> and systematic one) in 'hackbench' overwhelms the signal we are trying to measure.
+>
+> So I think it's the kernel .text size change that is the best noise-free proxy for
+> the overhead impact of PIE.
+
+I agree but it might be hard to measure the exact impact. What is
+acceptable and what is not?
+
+>
+> It doesn't hurt to double check actual real performance as well, just don't expect
+> there to be much of a signal for anything but fully cached microbenchmark
+> workloads.
+
+That's aligned with what I see in the latest performance testing.
+Performance is close enough that it is hard to get exact numbers (pie
+is just a bit slower than baseline on hackench (~1%)).
+
+>
+> Thanks,
+>
+>         Ingo
 
 
---3us2cpllse3iam2r
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
 
-Control: clone 873508 -1
-Control: retitle -1 Please use cgcc to check hosted C code instead of sparse
-Control: severity -1 normal
-Control: reassign -1 horst
-
-On Fri, Sep 01, 2017 at 09:46:44AM +0200, Uwe Kleine-K=F6nig wrote:
-> @anarcat: Given that cgcc seems to work, would you agree to apply the
-> following patch to horst:
->=20
-> diff --git a/Makefile b/Makefile
-> index 4f924fa..d563652 100644
-> --- a/Makefile
-> +++ b/Makefile
-> @@ -110,7 +110,7 @@ $(NAME): $(OBJS)
->  $(OBJS): .buildflags
-> =20
->  check:
-> -	sparse $(CFLAGS) *.[ch]
-> +	cgcc -no-compile $(CFLAGS) *.[ch]
-> =20
->  clean:
->  	-rm -f *.o radiotap/*.o *~
->=20
-
-In the meantime I learned from upstream that sparse is not expected to
-grok arbitrary hosted code. For that it is needed to use the cgcc
-wrapper to handle the required cpp symbols. That it works on some
-architectures with plain sparse is mostly luck.
-
-I still expect some platforms to fail with the wrapper, too, because
-cgcc doesn't know about all platforms yet. But I intend to upload a new
-sparse package soon that includes a build time check for that, and the
-respective fixes are easy.
-
-> and downgrade the bug to "important"? That would be a compromise that
-> buys us a bit of time.
-
-I'd say sparse failing on hosted code isn't "important", but cgcc should
-have all necessary definitions for Debian platforms. So I'm keeping this
-bug at important and intend to close it once all platforms are known to
-it.
-
-Best regards
-Uwe
-
---3us2cpllse3iam2r
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlnEC8sACgkQwfwUeK3K
-7Algrgf+NdflGLzJ2yt74LlEtKUJoSUJnBUm7HuZZXHUQ2AO4DqC7ZO0WvkIwv4j
-soZVe5RCwmR97h4d1I2r0kEYqtVuM1qXW6uQgUXR/gRBsrYee0LfzhqlWMZ8y8Gk
-96foK+f//z45pJVPGyL5leaX7UJmBZXrSvpAy6RG+FQJwQV6TwuONcS+1y0MG4j+
-8dFRk1rLfhLVUBP0hC4naU3zfr5suJiL0t5DxzSqnLCSNz0NKC0gv7hdEfzkRhJH
-jAQeSx97HyqkLJ89F39Bv36T8ZZS5PmPfX+plKmnlty9r1uD/M/uVUG4jiOY/jso
-uqBVSe49SnOVVwOw6BWtrJo51bBQDw==
-=8JvN
------END PGP SIGNATURE-----
-
---3us2cpllse3iam2r--
+-- 
+Thomas
