@@ -1,143 +1,78 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Thu, 21 Sep 2017 17:06:15 -0700
-Message-ID: <CAJcbSZEuQqK-LNBC0psG-Md9JZiyb2+p0ikh2_C7Jgr2o_GVEA@mail.gmail.com>
-References: <20170815075609.mmzbfwritjzvrpsn@gmail.com> <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com> <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
- <20170817080920.5ljlkktngw2cisfg@gmail.com> <CAJcbSZGbtc-i0X1NiBAvZA7cxpGkwSLKNB7oDNCsFxOCdhkR_g@mail.gmail.com>
+From: Markus Trippelsdorf <markus@trippelsdorf.de>
+Subject: Re: x86: PIE support and option to extend KASLR
+	randomization
+Date: Fri, 22 Sep 2017 06:24:44 +0200
+Message-ID: <20170922042444.GA235@x4>
+References: <CAJcbSZFM_zpL1av1JVaow8NdsGeH+6oZKeDnMPdXR0PGfynzsg@mail.gmail.com>
+ <20170817080920.5ljlkktngw2cisfg@gmail.com>
+ <CAJcbSZGbtc-i0X1NiBAvZA7cxpGkwSLKNB7oDNCsFxOCdhkR_g@mail.gmail.com>
  <CAJcbSZGhvwt=5ERtBHLJnwS=6AXBZLTMfrafzeUCqYy=-MKWDg@mail.gmail.com>
- <20170825080443.tvvr6wzs362cjcuu@gmail.com> <CAJcbSZFJQMKw21kLwr4QGoSM7DMgKRzzjWxkYBF2c1HciCzvGg@mail.gmail.com>
+ <20170825080443.tvvr6wzs362cjcuu@gmail.com>
+ <CAJcbSZFJQMKw21kLwr4QGoSM7DMgKRzzjWxkYBF2c1HciCzvGg@mail.gmail.com>
  <CAJcbSZH6hwaWKrvUZR33ExYaZaWKMSv4tJJA3yZkniLvLbTFMw@mail.gmail.com>
- <20170921155919.skpyt7dutod5ul4t@gmail.com> <CAJcbSZHOuxy5BVxD0xJUdQfB-OMgbvfiP-2CJzf52K-7JZAy-A@mail.gmail.com>
+ <20170921155919.skpyt7dutod5ul4t@gmail.com>
+ <CAKv+Gu8Uw18pW9nK8aVdBoyuybAV6_mhtagVrje_cBUHMGY4WA@mail.gmail.com>
+ <CAJcbSZGAsXwMNWnZUs28-3f--ssUYh75XW+aoQztPFYe0j52yQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <kernel-hardening-return-9920-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-In-Reply-To: <CAJcbSZHOuxy5BVxD0xJUdQfB-OMgbvfiP-2CJzf52K-7JZAy-A@mail.gmail.com>
-To: Ingo Molnar <mingo@kernel.org>
-Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, =?UTF-8?B?UmFkaW0gS3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Disposition: inline
+In-Reply-To: <CAJcbSZGAsXwMNWnZUs28-3f--ssUYh75XW+aoQztPFYe0j52yQ@mail.gmail.com>
+List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Peter Zijlstra <a.p.zijlstra@chello.nl>, Michal Hocko <mhocko@suse.com>, Len Brown <len.brown@intel.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Peter Zijlstra <peterz@infradead.org>, Catalin Marinas <catalin.marinas@arm.com>, Christopher Li <sparse@chrisli.org>, Alexei Starovoitov <ast@kernel.org>, David Howells <dhowells@redhat.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, Kernel Hardening <kernel-hardening@lists.openwall.com>, Christoph Lameter <cl@linux.com>, Ingo Molnar <mingo@kernel.org>, Kees Cook <keescook@chromium.org>, the arch/x86 maintainers <x86@kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, Daniel Borkmann <daniel@iogearbox.net>, Matthew Wilcox <mawilcox@microsoft.com>, Peter Foley <pefoley2@pefoley.com>, Joerg Roedel <jor>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Sep 21, 2017 at 2:16 PM, Thomas Garnier <thgarnie@google.com> wrote:
->
-> On Thu, Sep 21, 2017 at 8:59 AM, Ingo Molnar <mingo@kernel.org> wrote:
-> >
-> > ( Sorry about the delay in answering this. I could blame the delay on the merge
-> >   window, but in reality I've been procrastinating this is due to the permanent,
-> >   non-trivial impact PIE has on generated C code. )
-> >
-> > * Thomas Garnier <thgarnie@google.com> wrote:
-> >
-> >> 1) PIE sometime needs two instructions to represent a single
-> >> instruction on mcmodel=kernel.
-> >
-> > What again is the typical frequency of this occurring in an x86-64 defconfig
-> > kernel, with the very latest GCC?
->
-> I am not sure what is the best way to measure that.
-
-A very approximate approach would be to look at each instruction using
-the signed trick with a _32S relocation. All _32S relocations won't be
-translated to more instructions because some are just relocating part
-of an absolute mov which would be actually smaller if relative.
-
-Used this command to get a relative estimate:
-
-objdump -dr ./baseline/vmlinux | egrep -A 2 '\-0x[0-9a-f]{8}' | grep
-_32S | wc -l
-
-Got 6130 places, if you assume each add at least 7 bytes. It adds at
-least 42910 bytes on the .text section. The text section is 78599
-bytes bigger from baseline to PIE. That's at least 54% of the size
-difference. Assuming we found all of them and we can't factor the
-impact on using an additional register.
-
-Similar approach with the switch table but a bit more complex:
-
-1) Find all constructs as with an lea (%rip) followed by a jmp
-instruction inside a function (typical unfolded switch case).
-2) Remove occurrences of less than 4 for the destination address
-
-Result: 480 switch cases in 49 functions. Each case take at least 9
-bytes and the switch itself takes 16 bytes (assuming one per
-function).
-
-That's 5104 bytes for easy to identify switches (less than 7% of the increase).
-
-I am certainly missing a lot of differences. I checked if the percpu
-changes impacted the size and it doesn't (only 3 bytes added on PIE).
-
-I also tried different ways to compare the .text section like size of
-symbols or number of bytes on full disassembly but the results are
-really off from the whole .text size so I am not sure if it is the
-right way to go about it.
-
->
-> >
-> > Also, to make sure: which unwinder did you use for your measurements,
-> > frame-pointers or ORC? Please use ORC only for future numbers, as
-> > frame-pointers is obsolete from a performance measurement POV.
->
-> I used the default configuration which uses frame-pointer. I built all
-> the different binaries with ORC and I see an improvement in size:
->
-> On latest revision (just built and ran performance tests this week):
->
-> With framepointer: PIE .text is 0.837324% than baseline
->
-> With ORC: PIE .text is 0.814224% than baseline
->
-> Comparing baselines only, ORC is -2.849832% than frame-pointers.
->
-> >
-> >> 2) GCC does not optimize switches in PIE in order to reduce relocations:
-> >
-> > Hopefully this can either be fixed in GCC or at least influenced via a compiler
-> > switch in the future.
-> >
-> >> The switches are the biggest increase on small functions but I don't
-> >> think they represent a large portion of the difference (number 1 is).
-> >
-> > Ok.
-> >
-> >> A side note, while testing gcc 7.2.0 on hackbench I have seen the PIE
-> >> kernel being faster by 1% across multiple runs (comparing 50 runs done
-> >> across 5 reboots twice). I don't think PIE is faster than a
-> >> mcmodel=kernel but recent versions of gcc makes them fairly similar.
-> >
-> > So I think we are down to an overhead range where the inherent noise (both random
-> > and systematic one) in 'hackbench' overwhelms the signal we are trying to measure.
-> >
-> > So I think it's the kernel .text size change that is the best noise-free proxy for
-> > the overhead impact of PIE.
->
-> I agree but it might be hard to measure the exact impact. What is
-> acceptable and what is not?
->
-> >
-> > It doesn't hurt to double check actual real performance as well, just don't expect
-> > there to be much of a signal for anything but fully cached microbenchmark
-> > workloads.
->
-> That's aligned with what I see in the latest performance testing.
-> Performance is close enough that it is hard to get exact numbers (pie
-> is just a bit slower than baseline on hackench (~1%)).
->
-> >
-> > Thanks,
-> >
-> >         Ingo
->
->
->
-> --
-> Thomas
-
-
-
-
--- 
-Thomas
+T24gMjAxNy4wOS4yMSBhdCAxNDoyMSAtMDcwMCwgVGhvbWFzIEdhcm5pZXIgd3JvdGU6Cj4gT24g
+VGh1LCBTZXAgMjEsIDIwMTcgYXQgOToxMCBBTSwgQXJkIEJpZXNoZXV2ZWwKPiA8YXJkLmJpZXNo
+ZXV2ZWxAbGluYXJvLm9yZz4gd3JvdGU6Cj4gPgo+ID4gT24gMjEgU2VwdGVtYmVyIDIwMTcgYXQg
+MDg6NTksIEluZ28gTW9sbmFyIDxtaW5nb0BrZXJuZWwub3JnPiB3cm90ZToKPiA+ID4KPiA+ID4g
+KCBTb3JyeSBhYm91dCB0aGUgZGVsYXkgaW4gYW5zd2VyaW5nIHRoaXMuIEkgY291bGQgYmxhbWUg
+dGhlIGRlbGF5IG9uIHRoZSBtZXJnZQo+ID4gPiAgIHdpbmRvdywgYnV0IGluIHJlYWxpdHkgSSd2
+ZSBiZWVuIHByb2NyYXN0aW5hdGluZyB0aGlzIGlzIGR1ZSB0byB0aGUgcGVybWFuZW50LAo+ID4g
+PiAgIG5vbi10cml2aWFsIGltcGFjdCBQSUUgaGFzIG9uIGdlbmVyYXRlZCBDIGNvZGUuICkKPiA+
+ID4KPiA+ID4gKiBUaG9tYXMgR2FybmllciA8dGhnYXJuaWVAZ29vZ2xlLmNvbT4gd3JvdGU6Cj4g
+PiA+Cj4gPiA+PiAxKSBQSUUgc29tZXRpbWUgbmVlZHMgdHdvIGluc3RydWN0aW9ucyB0byByZXBy
+ZXNlbnQgYSBzaW5nbGUKPiA+ID4+IGluc3RydWN0aW9uIG9uIG1jbW9kZWw9a2VybmVsLgo+ID4g
+Pgo+ID4gPiBXaGF0IGFnYWluIGlzIHRoZSB0eXBpY2FsIGZyZXF1ZW5jeSBvZiB0aGlzIG9jY3Vy
+cmluZyBpbiBhbiB4ODYtNjQgZGVmY29uZmlnCj4gPiA+IGtlcm5lbCwgd2l0aCB0aGUgdmVyeSBs
+YXRlc3QgR0NDPwo+ID4gPgo+ID4gPiBBbHNvLCB0byBtYWtlIHN1cmU6IHdoaWNoIHVud2luZGVy
+IGRpZCB5b3UgdXNlIGZvciB5b3VyIG1lYXN1cmVtZW50cywKPiA+ID4gZnJhbWUtcG9pbnRlcnMg
+b3IgT1JDPyBQbGVhc2UgdXNlIE9SQyBvbmx5IGZvciBmdXR1cmUgbnVtYmVycywgYXMKPiA+ID4g
+ZnJhbWUtcG9pbnRlcnMgaXMgb2Jzb2xldGUgZnJvbSBhIHBlcmZvcm1hbmNlIG1lYXN1cmVtZW50
+IFBPVi4KPiA+ID4KPiA+ID4+IDIpIEdDQyBkb2VzIG5vdCBvcHRpbWl6ZSBzd2l0Y2hlcyBpbiBQ
+SUUgaW4gb3JkZXIgdG8gcmVkdWNlIHJlbG9jYXRpb25zOgo+ID4gPgo+ID4gPiBIb3BlZnVsbHkg
+dGhpcyBjYW4gZWl0aGVyIGJlIGZpeGVkIGluIEdDQyBvciBhdCBsZWFzdCBpbmZsdWVuY2VkIHZp
+YSBhIGNvbXBpbGVyCj4gPiA+IHN3aXRjaCBpbiB0aGUgZnV0dXJlLgo+ID4gPgo+ID4KPiA+IFRo
+ZXJlIGFyZSBzb21ld2hhdCByZWxhdGVkIGNvbmNlcm5zIGluIHRoZSBBUk0gd29ybGQsIHNvIGl0
+IHdvdWxkIGJlCj4gPiBnb29kIGlmIHdlIGNvdWxkIHdvcmsgd2l0aCB0aGUgR0NDIGRldmVsb3Bl
+cnMgdG8gZ2V0IGEgbW9yZSBoaWdoIGxldmVsCj4gPiBhbmQgYXJjaCBuZXV0cmFsIGNvbW1hbmQg
+bGluZSBvcHRpb24gKC1ta2VybmVsLXBpZT8gc291bmRzIHl1bW15ISkKPiA+IHRoYXQgc3RvcHMg
+dGhlIGNvbXBpbGVyIGZyb20gbWFraW5nIGluZmVyZW5jZXMgdGhhdCBvbmx5IGhvbGQgZm9yCj4g
+PiBzaGFyZWQgbGlicmFyaWVzIGFuZC9vciBvdGhlciBob3N0ZWQgZXhlY3V0YWJsZXMgKEdPVCBp
+bmRpcmVjdGlvbnMsCj4gPiBhdm9pZGluZyB0ZXh0IHJlbG9jYXRpb25zIGV0YykuIFRoYXQgd2F5
+LCB3ZSB3aWxsIGFsc28gYmUgYWJsZSB0byBkcm9wCj4gPiB0aGUgJ2hpZGRlbicgdmlzaWJpbGl0
+eSBvdmVycmlkZSBhdCBzb21lIHBvaW50LCB3aGljaCB3ZSBjdXJyZW50bHkKPiA+IG5lZWQgdG8g
+cHJldmVudCB0aGUgY29tcGlsZXIgZnJvbSByZWRpcmVjdGluZyBhbGwgZ2xvYmFsIHN5bWJvbAo+
+ID4gcmVmZXJlbmNlcyB2aWEgZW50cmllcyBpbiB0aGUgR09ULgo+IAo+IE15IHBsYW4gd2FzIHRv
+IGFkZCBhIC1tdGxzLXJlZz08ZnN8Z3M+IHRvIHN3aXRjaCB0aGUgZGVmYXVsdCBzZWdtZW50Cj4g
+cmVnaXN0ZXIgZm9yIHN0YWNrIGNvb2tpZXMgYnV0IEkgY2FuIHNlZSBncmVhdCBiZW5lZml0cyBp
+biBoYXZpbmcgYQo+IG1vcmUgZ2VuZXJhbCBrZXJuZWwgZmxhZyB0aGF0IHdvdWxkIGFsbG93IHRv
+IGdldCByaWQgb2YgdGhlIEdPVCBhbmQKPiBQTFQgd2hlbiB5b3UgYXJlIGJ1aWxkaW5nIHBvc2l0
+aW9uIGluZGVwZW5kZW50IGNvZGUgZm9yIHRoZSBrZXJuZWwuIEl0Cj4gY291bGQgYWxzbyBpbmNs
+dWRlIG9wdGltaXphdGlvbnMgbGlrZSBmb2xkaW5nIHN3aXRjaCB0YWJsZXMgZXRjLi4uCj4gCj4g
+U2hvdWxkIHdlIHN0YXJ0IGEgc2VwYXJhdGUgZGlzY3Vzc2lvbiBvbiB0aGF0PyBBbnlvbmUgdGhh
+dCB3b3VsZCBiZQo+IG1vcmUgZXhwZXJpZW5jZWQgdGhhbiBJIHRvIHB1c2ggdGhhdCB0byBnY2Mg
+JiBjbGFuZyB1cHN0cmVhbT8KCkp1c3Qgb3BlbiBhIGdjYyBidWcuIFNlZQpodHRwczovL2djYy5n
+bnUub3JnL2J1Z3ppbGxhL3Nob3dfYnVnLmNnaT9pZD04MTcwOCBhcyBhbiBleGFtcGxlLgoKLS0g
+Ck1hcmt1cwoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18K
+WGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwczovL2xp
+c3RzLnhlbi5vcmcveGVuLWRldmVsCg==
