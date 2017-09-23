@@ -1,59 +1,63 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Sat, 23 Sep 2017 12:00:29 +0200
-Message-ID: <20170923100029.6nzpui6c3ke76bbs@gmail.com>
-References: <20170810172615.51965-1-thgarnie@google.com>
- <20170811124127.kkb5pnkljz4umxuj@gmail.com>
- <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
- <20170815075609.mmzbfwritjzvrpsn@gmail.com>
- <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com>
- <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
- <20170821142854.dmuusnbc2tsrai3v@hirez.programming.kicks-ass.net>
- <c830ba59-65d3-187f-3868-732059269f28@zytor.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] build: make PREFIX overwritable on the commandline
+Date: Sat, 23 Sep 2017 07:20:27 -0400
+Message-ID: <CANeU7QnCU7qfFzRGMC-v=Q5onaJgSUvAqiUWJT0FaKHc_Qp2RQ@mail.gmail.com>
+References: <20170922212524.8095-1-uwe@kleine-koenig.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <kernel-hardening-return-9945-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Sender: Ingo Molnar <mingo.kernel.org@gmail.com>
-Content-Disposition: inline
-In-Reply-To: <c830ba59-65d3-187f-3868-732059269f28@zytor.com>
-To: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Peter Zijlstra <peterz@infradead.org>, Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Tejun Heo <tj@kernel.org>, Christoph
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-yw0-f174.google.com ([209.85.161.174]:50503 "EHLO
+        mail-yw0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750766AbdIWLU2 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sat, 23 Sep 2017 07:20:28 -0400
+Received: by mail-yw0-f174.google.com with SMTP id u11so2220367ywh.7
+        for <linux-sparse@vger.kernel.org>; Sat, 23 Sep 2017 04:20:28 -0700 (PDT)
+In-Reply-To: <20170922212524.8095-1-uwe@kleine-koenig.org>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+
+On Fri, Sep 22, 2017 at 5:25 PM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig.o=
+rg> wrote:
+> This way I can just use
+>
+>         make install PREFIX=3D/usr
+>
+> on the command line to install sparse into the system.
+>
+>  DESTDIR=3D
+> -PREFIX=3D$(HOME)
+> +PREFIX ?=3D $(HOME)
+
+Are you sure you need this patch to use "make install PREFIX=3D/usr" ?
+
+Variable that assign from the command line will ignore other normal assignm=
+ent.
+You need to use override to assign to command line variables.
+
+This patch can show it:
+diff --git a/Makefile b/Makefile
+index a4653aa1..868e7816 100644
+--- a/Makefile
++++ b/Makefile
+@@ -55,6 +55,7 @@ endif
+
+ DESTDIR=3D
+ PREFIX=3D$(HOME)
++$(info prefix origin: $(origin PREFIX) value: $(PREFIX))
+ BINDIR=3D$(PREFIX)/bin
+ LIBDIR=3D$(PREFIX)/lib
+ MANDIR=3D$(PREFIX)/share/man
 
 
-* H. Peter Anvin <hpa@zytor.com> wrote:
+When I invoke with PREFIX=3D/usr/local/
 
-> We do need to consider how we want modules to fit into whatever model we
-> choose, though.  They can be adjacent, or we could go with a more
-> traditional dynamic link model where the modules can be separate, and
-> chained together with the main kernel via the GOT.
+$ make PREFIX=3D/usr/local/ clean
+prefix origin: command line value: /usr/local/
 
-So I believe we should start with 'adjacent'. The thing is, having modules 
-separately randomized mostly helps if any of the secret locations fails and
-we want to prevent hopping from one to the other. But if one the kernel-privileged
-secret location fails then KASLR has already failed to a significant degree...
+So your patch is not needed.
 
-So I think the large-PIC model for modules does not buy us any real advantages in 
-practice, and the disadvantages of large-PIC are real and most Linux users have to 
-pay that cost unconditionally, as distro kernels have half of their kernel 
-functionality living in modules.
-
-But I do see fundamental value in being able to hide the kernel somewhere in a ~48 
-bits address space, especially if we also implement Linus's suggestion to utilize 
-the lower bits as well. 0..281474976710656 is a nicely large range and will get 
-larger with time.
-
-But it should all be done smartly and carefully:
-
-For example, there would be collision with regular user-space mappings, right?
-Can local unprivileged users use mmap(MAP_FIXED) probing to figure out where
-the kernel lives?
-
-Thanks,
-
-	Ingo
+Chris
