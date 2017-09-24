@@ -1,68 +1,99 @@
-From: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Subject: Re: [PATCH] build: make PREFIX overwritable on the commandline
-Date: Sat, 23 Sep 2017 20:31:53 +0200
-Message-ID: <20170923183153.i4mt4zlsniv22jbv@taurus.defre.kleine-koenig.org>
-References: <20170922212524.8095-1-uwe@kleine-koenig.org>
- <CANeU7QnCU7qfFzRGMC-v=Q5onaJgSUvAqiUWJT0FaKHc_Qp2RQ@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: x86: PIE support and option to extend KASLR randomization
+Date: Mon, 25 Sep 2017 00:37:08 +0200
+Message-ID: <20170924223708.GA12616@amd>
+References: <20170810172615.51965-1-thgarnie@google.com>
+ <20170811124127.kkb5pnkljz4umxuj@gmail.com>
+ <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
+ <20170815075609.mmzbfwritjzvrpsn@gmail.com>
+ <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
+ <20170816151235.oamkdva6cwpc4cex@gmail.com>
+ <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
+ <20170821142854.dmuusnbc2tsrai3v@hirez.programming.kicks-ass.net>
+ <c830ba59-65d3-187f-3868-732059269f28@zytor.com>
+ <20170923100029.6nzpui6c3ke76bbs@gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-        protocol="application/pgp-signature"; boundary="5or4puarkrrril6i"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from arcturus.kleine-koenig.org ([78.47.169.190]:46057 "EHLO
-        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750839AbdIWScD (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 23 Sep 2017 14:32:03 -0400
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="+QahgC5+KEYLbs62"
+Return-path: <kernel-hardening-return-9949-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
 Content-Disposition: inline
-In-Reply-To: <CANeU7QnCU7qfFzRGMC-v=Q5onaJgSUvAqiUWJT0FaKHc_Qp2RQ@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <20170923100029.6nzpui6c3ke76bbs@gmail.com>
+To: Ingo Molnar <mingo@kernel.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Tejun Heo <tj@kernel.org>, Christo
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
 
---5or4puarkrrril6i
-Content-Type: text/plain; charset=iso-8859-1
+--+QahgC5+KEYLbs62
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Sat, Sep 23, 2017 at 07:20:27AM -0400, Christopher Li wrote:
-> On Fri, Sep 22, 2017 at 5:25 PM, Uwe Kleine-K=F6nig <uwe@kleine-koenig.or=
-g> wrote:
-> > This way I can just use
-> >
-> >         make install PREFIX=3D/usr
-> >
-> > on the command line to install sparse into the system.
-> >
-> >  DESTDIR=3D
-> > -PREFIX=3D$(HOME)
-> > +PREFIX ?=3D $(HOME)
+Hi!
+
+> > We do need to consider how we want modules to fit into whatever model we
+> > choose, though.  They can be adjacent, or we could go with a more
+> > traditional dynamic link model where the modules can be separate, and
+> > chained together with the main kernel via the GOT.
 >=20
-> Are you sure you need this patch to use "make install PREFIX=3D/usr" ?
+> So I believe we should start with 'adjacent'. The thing is, having module=
+s=20
+> separately randomized mostly helps if any of the secret locations fails a=
+nd
+> we want to prevent hopping from one to the other. But if one the kernel-p=
+rivileged
+> secret location fails then KASLR has already failed to a significant degr=
+ee...
+>=20
+> So I think the large-PIC model for modules does not buy us any real advan=
+tages in=20
+> practice, and the disadvantages of large-PIC are real and most Linux user=
+s have to=20
+> pay that cost unconditionally, as distro kernels have half of their kerne=
+l=20
+> functionality living in modules.
+>=20
+> But I do see fundamental value in being able to hide the kernel somewhere=
+ in a ~48=20
+> bits address space, especially if we also implement Linus's suggestion to=
+ utilize=20
+> the lower bits as well. 0..281474976710656 is a nicely large range and wi=
+ll get=20
+> larger with time.
+>=20
+> But it should all be done smartly and carefully:
+>=20
+> For example, there would be collision with regular user-space mappings, r=
+ight?
+> Can local unprivileged users use mmap(MAP_FIXED) probing to figure out wh=
+ere
+> the kernel lives?
 
-Oh, you're right. I pass PREFIX via the environment. But as there are
-already other things I pass on the command line I can also pass PREFIX
-there. I still consider ?=3D as the right thing to do there, but it's not
-important any more. If you still consider the patch fine, I can update
-the commit log accordingly.
+Local unpriviledged users can probably get your secret bits using
+cache probing and jump prediction buffers.
 
-Best regards
-Uwe
+Yes, you don't want to leak the information using mmap(MAP_FIXED), but
+CPU will leak it for you, anyway.
+									Pavel
 
---5or4puarkrrril6i
+--=20
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
+g.html
+
+--+QahgC5+KEYLbs62
 Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
 -----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlnGqJYACgkQwfwUeK3K
-7AmeUwgAkxO061p5nGFxJstStE+wQV1OVJVnrvFp7PlMnJQaoggbs4INDKx2Goz/
-jaWyHeKSoVKoOojNENrjKaiu0KxGRJ/WGfIXDQe0At3U63dWI0F8Ao9BUi54il1O
-OqRzZvrarKGL7xsEFcjQdrpBfnlGjhWHADB2+hRy7TevspqS5RYqymKFYhK9HzIz
-KpfkOEzY/HL7dprVgtwwSM5x94leXpt6UhAfRjkBnAEKB4OAa38vBycs7b+x08j4
-TrleupvntjRCPiGb6OvcjauWFTSF+JwP+QLoBszYQLleatanjPd+oaUdlGJQ/wSh
-fueBrQrMT7M+RKcvJqFDLheCgjjzdw==
-=gI+S
+iEYEARECAAYFAlnIM5QACgkQMOfwapXb+vJIOwCdHR6N9F/ftl4zHYKwJHnThgDz
+BhEAn2Rqlf4Dn3hmUmy6pDrdlrDma6Ry
+=oY77
 -----END PGP SIGNATURE-----
 
---5or4puarkrrril6i--
+--+QahgC5+KEYLbs62--
