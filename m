@@ -1,38 +1,46 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] fix cgcc ELF version for ppc64/pcc64le
-Date: Tue, 3 Oct 2017 00:46:44 -0400
-Message-ID: <CANeU7QkHASgSkVuKT0yj6MD_g+KoXDGj5XWY1pw=0vwhYAriBg@mail.gmail.com>
-References: <20170927080007.jz2vfe4ekjjowkbe@taurus.defre.kleine-koenig.org> <20170927211137.16461-1-luc.vanoostenryck@gmail.com>
+From: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: [PATCH 1/6] build: make PREFIX overwritable from the environment
+Date: Wed,  4 Oct 2017 15:26:00 +0200
+Message-ID: <20171004132605.24734-2-uwe@kleine-koenig.org>
+References: <20171004132605.24734-1-uwe@kleine-koenig.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qt0-f178.google.com ([209.85.216.178]:53985 "EHLO
-        mail-qt0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750708AbdJCEqp (ORCPT
+Received: from arcturus.kleine-koenig.org ([78.47.169.190]:54537 "EHLO
+        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751997AbdJDN0N (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 3 Oct 2017 00:46:45 -0400
-Received: by mail-qt0-f178.google.com with SMTP id 47so10880235qts.10
-        for <linux-sparse@vger.kernel.org>; Mon, 02 Oct 2017 21:46:45 -0700 (PDT)
-In-Reply-To: <20170927211137.16461-1-luc.vanoostenryck@gmail.com>
+        Wed, 4 Oct 2017 09:26:13 -0400
+In-Reply-To: <20171004132605.24734-1-uwe@kleine-koenig.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
+To: linux-sparse@vger.kernel.org
 
-On Wed, Sep 27, 2017 at 5:11 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Commit e0306fe0 "cgcc: teach cgcc about ppc64[le]" add support
-> for PPC64 to cgcc by adding the needed options like '-m64' &
-> '-m{little,big}-endian' and defines likes '-D__PPC64__=1'.
->
-> In this commit the defined '-D_CALL_ELF=2' was also added
-> but the value of 2 is for ELF v2 ABI, normally used for ppc64le,
-> while the older ELF ABI, normally used for plain ppc64 should use
-> '-D_CALL_ELF=2'.
->
-> Fix this by using the value of 1 or 2 for '_CALL_ELF' depending
-> if the architecture is ppc64 or ppc64le.
+This way I can just use
 
-Applied on master.
+	env PREFIX=/usr make install
 
-Chris
+on the command line to install sparse into the system.
+
+Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index d0341764158e..e011df3cc0dc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -54,7 +54,7 @@ BASIC_CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
+ endif
+ 
+ DESTDIR=
+-PREFIX=$(HOME)
++PREFIX ?= $(HOME)
+ BINDIR=$(PREFIX)/bin
+ LIBDIR=$(PREFIX)/lib
+ MANDIR=$(PREFIX)/share/man
+-- 
+2.14.2
+
