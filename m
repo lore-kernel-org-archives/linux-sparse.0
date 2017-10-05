@@ -1,81 +1,44 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: [RFC v3 25/27] x86/pie: Add option to build the kernel
-	as PIE
-Date: Wed,  4 Oct 2017 14:20:01 -0700
-Message-ID: <20171004212003.28296-26-thgarnie@google.com>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [RFC v3 20/27] x86/ftrace: Adapt function tracing for PIE support
+Date: Thu, 5 Oct 2017 09:06:33 -0400
+Message-ID: <20171005090633.5a6ce840@gandalf.local.home>
 References: <20171004212003.28296-1-thgarnie@google.com>
+	<20171004212003.28296-21-thgarnie@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <20171004212003.28296-1-thgarnie@google.com>
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Thomas Garnier <thgarnie@google.com>, Arnd Bergmann <arnd@arndb.de>, Kees Cook <keescook@chromium.org>, Matthias Kaehlcke <mka@chromium.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Juergen Gross <jgross@suse.com>, Chris Wright <chrisw@sous-sol.org>, Alok Kataria <akataria@vmware.com>, Rusty Russell <rusty@rustcorp.com.au>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>Bor
-Cc: linux-arch@vger.kernel.org, kvm@vger.kernel.org, linux-pm@vger.kernel.org, x86@kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, virtualization@lists.linux-foundation.org, linux-sparse@vger.kernel.org, linux-crypto@vger.kernel.org, kernel-hardening@lists.openwall.com, xen-devel@lists.xenproject.org
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20171004212003.28296-21-thgarnie@google.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Michal Hocko <mhocko@suse.com>, Radim =?UTF-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, linux-doc@vger.kernel.org, Daniel Micay <danielmicay@gmail.com>, Len Brown <len.brown@intel.com>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, "Jan H .
+	=?UTF-8?B?U2Now7ZuaGVycg==?=" <jschoenh@amazon.de>, Alexei Starovoitov <ast@kernel.org>, Matthew Wilcox <mawilcox@microsoft.com>, virtualization@lists.linux-foundation.org, David Howells <dhowells@redhat.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, kernel-hardening@lists.openwall.com, Andrey Ryabinin <aryabinin@virtuozzo.com>, Christoph Lameter <cl@linux.com>, Thomas Gleixner <tglx@linutronix.de>, Chris Metcalf <cmetcalf@mellanox.com>, x86@kernel.org, Herbert Xu <herbert@gondor.apana.org.au>
 List-Id: linux-sparse@vger.kernel.org
 
-QWRkIHRoZSBDT05GSUdfWDg2X1BJRSBvcHRpb24gd2hpY2ggYnVpbGRzIHRoZSBrZXJuZWwgYXMg
-YSBQb3NpdGlvbgpJbmRlcGVuZGVudCBFeGVjdXRhYmxlIChQSUUpLiBUaGUga2VybmVsIGlzIGN1
-cnJlbnRseSBidWlsZCB3aXRoIHRoZQptY21vZGVsPWtlcm5lbCBvcHRpb24gd2hpY2ggZm9yY2Vz
-IGl0IHRvIHN0YXkgb24gdGhlIHRvcCAyRyBvZiB0aGUKdmlydHVhbCBhZGRyZXNzIHNwYWNlLiBX
-aXRoIFBJRSwgdGhlIGtlcm5lbCB3aWxsIGJlIGFibGUgdG8gbW92ZSBiZWxvdwp0aGUgY3VycmVu
-dCBsaW1pdC4KClRoZSAtLWVtaXQtcmVsb2NzIGxpbmtlciBvcHRpb24gd2FzIGtlcHQgaW5zdGVh
-ZCBvZiB1c2luZyAtcGllIHRvIGxpbWl0CnRoZSBpbXBhY3Qgb24gbWFwcGVkIHNlY3Rpb25zLiBB
-bnkgaW5jb21wYXRpYmxlIHJlbG9jYXRpb24gd2lsbCBiZQpjYXRjaCBieSB0aGUgYXJjaC94ODYv
-dG9vbHMvcmVsb2NzIGJpbmFyeSBhdCBjb21waWxlIHRpbWUuCgpQZXJmb3JtYW5jZS9TaXplIGlt
-cGFjdDoKU2l6ZSBvZiB2bWxpbnV4IChEZWZhdWx0IGNvbmZpZ3VyYXRpb24pOgogRmlsZSBzaXpl
-OgogLSBQSUUgZGlzYWJsZWQ6ICswLjAwMDAzMSUKIC0gUElFIGVuYWJsZWQ6IC0zLjIxMCUgKGxl
-c3MgcmVsb2NhdGlvbnMpCiAudGV4dCBzZWN0aW9uOgogLSBQSUUgZGlzYWJsZWQ6ICswLjAwMDY0
-NCUKIC0gUElFIGVuYWJsZWQ6ICswLjgzNyUKClNpemUgb2Ygdm1saW51eCAoVWJ1bnR1IGNvbmZp
-Z3VyYXRpb24pOgogRmlsZSBzaXplOgogLSBQSUUgZGlzYWJsZWQ6IC0wLjIwMSUKIC0gUElFIGVu
-YWJsZWQ6IC0wLjA4MiUKIC50ZXh0IHNlY3Rpb246CiAtIFBJRSBkaXNhYmxlZDogc2FtZQogLSBQ
-SUUgZW5hYmxlZDogKzEuMzE5JQoKU2l6ZSBvZiB2bWxpbnV4IChEZWZhdWx0IGNvbmZpZ3VyYXRp
-b24gKyBPUkMpOgogRmlsZSBzaXplOgogLSBQSUUgZW5hYmxlZDogLTMuMTY3JQogLnRleHQgc2Vj
-dGlvbjoKIC0gUElFIGVuYWJsZWQ6ICswLjgxNCUKClNpemUgb2Ygdm1saW51eCAoVWJ1bnR1IGNv
-bmZpZ3VyYXRpb24gKyBPUkMpOgogRmlsZSBzaXplOgogLSBQSUUgZW5hYmxlZDogLTMuMTY3JQog
-LnRleHQgc2VjdGlvbjoKIC0gUElFIGVuYWJsZWQ6ICsxLjI2JQoKVGhlIHNpemUgaW5jcmVhc2Ug
-aXMgbWFpbmx5IGR1ZSB0byBub3QgaGF2aW5nIGFjY2VzcyB0byB0aGUgMzItYml0IHNpZ25lZApy
-ZWxvY2F0aW9uIHRoYXQgY2FuIGJlIHVzZWQgd2l0aCBtY21vZGVsPWtlcm5lbC4gQSBzbWFsbCBw
-YXJ0IGlzIGR1ZSB0byByZWR1Y2VkCm9wdGltaXphdGlvbiBmb3IgUElFIGNvZGUuIFRoaXMgYnVn
-IFsxXSB3YXMgb3BlbmVkIHdpdGggZ2NjIHRvIHByb3ZpZGUgYSBiZXR0ZXIKY29kZSBnZW5lcmF0
-aW9uIGZvciBrZXJuZWwgUElFLgoKSGFja2JlbmNoICg1MCUgYW5kIDE2MDAlIG9uIHRocmVhZC9w
-cm9jZXNzIGZvciBwaXBlL3NvY2tldHMpOgogLSBQSUUgZGlzYWJsZWQ6IG5vIHNpZ25pZmljYW50
-IGNoYW5nZSAoYXZnICswLjElIG9uIGxhdGVzdCB0ZXN0KS4KIC0gUElFIGVuYWJsZWQ6IGJldHdl
-ZW4gLTAuNTAlIHRvICswLjg2JSBpbiBhdmVyYWdlIChkZWZhdWx0IGFuZCBVYnVudHUgY29uZmln
-KS4KCnNsYWJfdGVzdCAoYXZlcmFnZSBvZiAxMCBydW5zKToKIC0gUElFIGRpc2FibGVkOiBubyBz
-aWduaWZpY2FudCBjaGFuZ2UgKC0yJSBvbiBsYXRlc3QgcnVuLCBsaWtlbHkgbm9pc2UpLgogLSBQ
-SUUgZW5hYmxlZDogYmV0d2VlbiAtMSUgYW5kICswLjglIG9uIGxhdGVzdCBydW5zLgoKS2VybmJl
-bmNoIChhdmVyYWdlIG9mIDEwIEhhbGYgYW5kIE9wdGltYWwgcnVucyk6CiBFbGFwc2VkIFRpbWU6
-CiAtIFBJRSBkaXNhYmxlZDogbm8gc2lnbmlmaWNhbnQgY2hhbmdlIChhdmcgLTAuMjM5JSkKIC0g
-UElFIGVuYWJsZWQ6IGF2ZXJhZ2UgKzAuMDclCiBTeXN0ZW0gVGltZToKIC0gUElFIGRpc2FibGVk
-OiBubyBzaWduaWZpY2FudCBjaGFuZ2UgKGF2ZyAtMC4yNzclKQogLSBQSUUgZW5hYmxlZDogYXZl
-cmFnZSArMC43JQoKWzFdIGh0dHBzOi8vZ2NjLmdudS5vcmcvYnVnemlsbGEvc2hvd19idWcuY2dp
-P2lkPTgyMzAzCgpTaWduZWQtb2ZmLWJ5OiBUaG9tYXMgR2FybmllciA8dGhnYXJuaWVAZ29vZ2xl
-LmNvbT4KLS0tCiBhcmNoL3g4Ni9LY29uZmlnICB8IDggKysrKysrKysKIGFyY2gveDg2L01ha2Vm
-aWxlIHwgMSArCiAyIGZpbGVzIGNoYW5nZWQsIDkgaW5zZXJ0aW9ucygrKQoKZGlmZiAtLWdpdCBh
-L2FyY2gveDg2L0tjb25maWcgYi9hcmNoL3g4Ni9LY29uZmlnCmluZGV4IDFlNGIzOTljNjRlNS4u
-YjkyZjk2OTIzNzEyIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9LY29uZmlnCisrKyBiL2FyY2gveDg2
-L0tjb25maWcKQEAgLTIxNDEsNiArMjE0MSwxNCBAQCBjb25maWcgWDg2X0dMT0JBTF9TVEFDS1BS
-T1RFQ1RPUgogCWJvb2wKIAlkZXBlbmRzIG9uIENDX1NUQUNLUFJPVEVDVE9SCiAKK2NvbmZpZyBY
-ODZfUElFCisJYm9vbAorCWRlcGVuZHMgb24gWDg2XzY0CisJc2VsZWN0IERFRkFVTFRfSElEREVO
-CisJc2VsZWN0IERZTkFNSUNfTU9EVUxFX0JBU0UKKwlzZWxlY3QgTU9EVUxFX1JFTF9DUkNTIGlm
-IE1PRFZFUlNJT05TCisJc2VsZWN0IFg4Nl9HTE9CQUxfU1RBQ0tQUk9URUNUT1IgaWYgQ0NfU1RB
-Q0tQUk9URUNUT1IKKwogY29uZmlnIEhPVFBMVUdfQ1BVCiAJYm9vbCAiU3VwcG9ydCBmb3IgaG90
-LXBsdWdnYWJsZSBDUFVzIgogCWRlcGVuZHMgb24gU01QCmRpZmYgLS1naXQgYS9hcmNoL3g4Ni9N
-YWtlZmlsZSBiL2FyY2gveDg2L01ha2VmaWxlCmluZGV4IDQyNzc0MTg1YTU4YS4uYzQ5ODU1YjRi
-MWJlIDEwMDY0NAotLS0gYS9hcmNoL3g4Ni9NYWtlZmlsZQorKysgYi9hcmNoL3g4Ni9NYWtlZmls
-ZQpAQCAtMTQ0LDYgKzE0NCw3IEBAIGVsc2UKIAogICAgICAgICBLQlVJTERfQ0ZMQUdTICs9IC1t
-bm8tcmVkLXpvbmUKIGlmZGVmIENPTkZJR19YODZfUElFCisgICAgICAgIEtCVUlMRF9DRkxBR1Mg
-Kz0gLWZQSUMKICAgICAgICAgS0JVSUxEX0xERkxBR1NfTU9EVUxFICs9IC1UICQoc3JjdHJlZSkv
-YXJjaC94ODYva2VybmVsL21vZHVsZS5sZHMKIGVsc2UKICAgICAgICAgS0JVSUxEX0NGTEFHUyAr
-PSAtbWNtb2RlbD1rZXJuZWwKLS0gCjIuMTQuMi45MjAuZ2NmMGM2Nzk3OWMtZ29vZwoKCl9fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWls
-aW5nIGxpc3QKWGVuLWRldmVsQGxpc3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54ZW4ub3JnL3hl
-bi1kZXZlbAo=
+On Wed,  4 Oct 2017 14:19:56 -0700
+Thomas Garnier <thgarnie@google.com> wrote:
+
+> When using -fPIE/PIC with function tracing, the compiler generates a
+> call through the GOT (call *__fentry__@GOTPCREL). This instruction
+> takes 6 bytes instead of 5 on the usual relative call.
+> 
+> With this change, function tracing supports 6 bytes on traceable
+> function and can still replace relative calls on the ftrace assembly
+> functions.
+> 
+> Position Independent Executable (PIE) support will allow to extended the
+> KASLR randomization range below the -2G memory limit.
+
+Question: This 6 bytes is only the initial call that gcc creates. When
+function tracing is enabled, the calls are back to the normal call to
+the ftrace trampoline?
+
+-- Steve
