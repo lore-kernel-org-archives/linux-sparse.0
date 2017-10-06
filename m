@@ -1,81 +1,47 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: x86: PIE support and option to extend KASLR randomization
-Date: Fri, 6 Oct 2017 12:39:33 +0200
-Message-ID: <20171006103933.GA9497@amd>
-References: <CAJcbSZFTX3uiS2g8JriS6+z_+WrG8z3hrQo4OSuyHpiyUDJWYA@mail.gmail.com>
- <20170815075609.mmzbfwritjzvrpsn@gmail.com>
- <CAJcbSZE+TiY2whT94WqCJNXzR=2ATOHcQ10H5RqBZA1j=k1VHQ@mail.gmail.com>
- <20170816151235.oamkdva6cwpc4cex@gmail.com>
- <20170821133222.2ek6bhqgdeoymxsg@hirez.programming.kicks-ass.net>
- <20170821142854.dmuusnbc2tsrai3v@hirez.programming.kicks-ass.net>
- <c830ba59-65d3-187f-3868-732059269f28@zytor.com>
- <20170923100029.6nzpui6c3ke76bbs@gmail.com>
- <20170924223708.GA12616@amd>
- <20170925073342.2yoghmanhx6c75ho@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/6] build: various updates
+Date: Fri, 6 Oct 2017 12:03:03 -0700
+Message-ID: <CANeU7QnYphoaeq1Vi6XdV+8fk0hoC_hdMVu6vOXiMKR93LFVBA@mail.gmail.com>
+References: <20171004132605.24734-1-uwe@kleine-koenig.org>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-	protocol="application/pgp-signature"; boundary="fUYQa+Pmc3FrFX/N"
-Return-path: <kernel-hardening-return-10092-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
-List-Post: <mailto:kernel-hardening@lists.openwall.com>
-List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
-List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
-List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
-Content-Disposition: inline
-In-Reply-To: <20170925073342.2yoghmanhx6c75ho@gmail.com>
-To: Ingo Molnar <mingo@kernel.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Matthias Kaehlcke <mka@chromium.org>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Juergen Gross <jgross@suse.com>, Paolo Bonzini <pbonzini@redhat.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, Joerg Roedel <joro@8bytes.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, Brian Gerst <brgerst@gmail.com>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Tejun Heo <tj@kernel.org>, Christo
-List-Id: linux-sparse@vger.kernel.org
-
-
---fUYQa+Pmc3FrFX/N
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:37878 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752079AbdJFTDE (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 6 Oct 2017 15:03:04 -0400
+Received: by mail-qt0-f194.google.com with SMTP id 32so8738736qtp.4
+        for <linux-sparse@vger.kernel.org>; Fri, 06 Oct 2017 12:03:04 -0700 (PDT)
+In-Reply-To: <20171004132605.24734-1-uwe@kleine-koenig.org>
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
+To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Mon 2017-09-25 09:33:42, Ingo Molnar wrote:
->=20
-> * Pavel Machek <pavel@ucw.cz> wrote:
->=20
-> > > For example, there would be collision with regular user-space mapping=
-s, right?=20
-> > > Can local unprivileged users use mmap(MAP_FIXED) probing to figure ou=
-t where=20
-> > > the kernel lives?
-> >=20
-> > Local unpriviledged users can probably get your secret bits using cache=
- probing=20
-> > and jump prediction buffers.
-> >=20
-> > Yes, you don't want to leak the information using mmap(MAP_FIXED), but =
-CPU will=20
-> > leak it for you, anyway.
->=20
-> Depends on the CPU I think, and CPU vendors are busy trying to mitigate t=
-his=20
-> angle.
+On Wed, Oct 4, 2017 at 6:25 AM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig.or=
+g> wrote:
+> Hello,
+>
+> this series motiviation is to support CPPFLAGS which is needed for
+> Debian packaging and includes the stuff I found while adding this.
 
-I believe any x86 CPU running Linux will leak it. And with CPU vendors
-putting "artifical inteligence" into branch prediction, no, I don't
-think it is going to get better.
+Sorry I was traveling in the last two days. Not able to reply
+it earlier.
 
-That does not mean we shoudl not prevent mmap() info leak, but...
+The first patch is applicable. However the others have
+major conflict with the debug build change:
 
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
+https://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git/log/?h=3Ddebu=
+g-target-v3
 
---fUYQa+Pmc3FrFX/N
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
+I plan to merge that first because it has deeper impact.
+It also have impact on your patch too. I will comment that
+on separate email reply to your patch.
 
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
+Can you give the debug-target-v3 a review?
 
-iEYEARECAAYFAlnXXWUACgkQMOfwapXb+vLHdQCfT0gtt1DcnPzO7HUoTmQNbTIP
-73cAn2DmS20EcLXQtKA4VV7Dur1vaFqH
-=9iUT
------END PGP SIGNATURE-----
+Thanks
 
---fUYQa+Pmc3FrFX/N--
+Chris
