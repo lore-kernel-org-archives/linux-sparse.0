@@ -1,192 +1,235 @@
-From: Tom Lendacky <thomas.lendacky@amd.com>
-Subject: Re: [PATCH v1 00/27] x86: PIE support and option to
- extend KASLR randomization
-Date: Wed, 11 Oct 2017 16:34:21 -0500
-Message-ID: <22e56a56-978a-738f-52b9-2d0c17839c9e@amd.com>
-References: <20171011203027.11248-1-thgarnie@google.com>
+From: Thomas Garnier <thgarnie@google.com>
+Subject: Re: [PATCH v1 00/27] x86: PIE support and option to extend KASLR randomization
+Date: Thu, 12 Oct 2017 08:34:13 -0700
+Message-ID: <CAJcbSZEzEGuby155zQZJqEbi1EO1v2bue+DB1oAXZfwMVOoySg@mail.gmail.com>
+References: <20171011203027.11248-1-thgarnie@google.com> <22e56a56-978a-738f-52b9-2d0c17839c9e@amd.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <xen-devel-bounces@lists.xen.org>
-In-Reply-To: <20171011203027.11248-1-thgarnie@google.com>
-Content-Language: en-US
-List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
-List-Post: <mailto:xen-devel@lists.xen.org>
-List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
-List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
- <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
-Errors-To: xen-devel-bounces@lists.xen.org
-Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
-To: Thomas Garnier <thgarnie@google.com>, Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Kees Cook <keescook@chromium.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Matthias Kaehlcke <mka@chromium.org>, Andy Lutomirski <luto@kernel.org>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Juergen Gross <jgross@suse.com>, Chris Wright <chrisw@sous-sol.org>, Alok Kataria <akataria@vmware.com>, Rusty Russell <rusty@rustcorp.com.au>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>
-Cc: linux-arch@vger.kernel.org, kvm@vger.kernel.org, linux-pm@vger.kernel.org, x86@kernel.org, linux-doc@vger.kernel.org, linux-kernel@vger.kernel.org, virtualization@lists.linux-foundation.org, linux-sparse@vger.kernel.org, linux-crypto@vger.kernel.org, kernel-hardening@lists.openwall.com, xen-devel@lists.xenproject.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <kernel-hardening-return-10150-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+In-Reply-To: <22e56a56-978a-738f-52b9-2d0c17839c9e@amd.com>
+To: Tom Lendacky <thomas.lendacky@amd.com>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H . Peter Anvin" <hpa@zytor.com>, Peter Zijlstra <peterz@infradead.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Arnd Bergmann <arnd@arndb.de>, Kees Cook <keescook@chromium.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Matthias Kaehlcke <mka@chromium.org>, Andy Lutomirski <luto@kernel.org>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Borislav Petkov <bp@suse.de>, "Rafael J . Wysocki" <rjw@rjwysocki.net>, Len Brown <len.brown@intel.com>, Pavel Machek <pavel@ucw.cz>, Juergen Gross <jgross@suse.com>, Chris Wright <chrisw@sous-sol.org>, Alok Kataria <akataria@vmware.com>, Rusty Russell <rusty@rustcorp.com.au>, Tejun Heo <tj@kernel.org>, Christoph Lameter <cl@linux.com>, Boris Ostrovsky <boris.ostrovsky@o>
 List-Id: linux-sparse@vger.kernel.org
 
-T24gMTAvMTEvMjAxNyAzOjMwIFBNLCBUaG9tYXMgR2FybmllciB3cm90ZToKPiBDaGFuZ2VzOgo+
-ICAgLSBwYXRjaCB2MToKPiAgICAgLSBTaW1wbGlmeSBmdHJhY2UgaW1wbGVtZW50YXRpb24uCj4g
-ICAgIC0gVXNlIGdjYyBtc3RhY2stcHJvdGVjdG9yLWd1YXJkLXJlZz0lZ3Mgd2l0aCBQSUUgd2hl
-biBwb3NzaWJsZS4KPiAgIC0gcmZjIHYzOgo+ICAgICAtIFVzZSAtLWVtaXQtcmVsb2NzIGluc3Rl
-YWQgb2YgLXBpZSB0byByZWR1Y2UgZHluYW1pYyByZWxvY2F0aW9uIHNwYWNlIG9uCj4gICAgICAg
-bWFwcGVkIG1lbW9yeS4gSXQgYWxzbyBzaW1wbGlmaWVzIHRoZSByZWxvY2F0aW9uIHByb2Nlc3Mu
-Cj4gICAgIC0gTW92ZSB0aGUgc3RhcnQgdGhlIG1vZHVsZSBzZWN0aW9uIG5leHQgdG8gdGhlIGtl
-cm5lbC4gUmVtb3ZlIHRoZSBuZWVkIGZvcgo+ICAgICAgIC1tY21vZGVsPWxhcmdlIG9uIG1vZHVs
-ZXMuIEV4dGVuZHMgbW9kdWxlIHNwYWNlIGZyb20gMSB0byAyRyBtYXhpbXVtLgo+ICAgICAtIFN1
-cHBvcnQgZm9yIFhFTiBQVkggYXMgMzItYml0IHJlbG9jYXRpb25zIGNhbiBiZSBpZ25vcmVkIHdp
-dGgKPiAgICAgICAtLWVtaXQtcmVsb2NzLgo+ICAgICAtIFN1cHBvcnQgZm9yIEdPVCByZWxvY2F0
-aW9ucyBwcmV2aW91c2x5IGRvbmUgYXV0b21hdGljYWxseSB3aXRoIC1waWUuCj4gICAgIC0gUmVt
-b3ZlIG5lZWQgZm9yIGR5bmFtaWMgUExUIGluIG1vZHVsZXMuCj4gICAgIC0gU3VwcG9ydCBkeW1h
-bWljIEdPVCBmb3IgbW9kdWxlcy4KPiAgIC0gcmZjIHYyOgo+ICAgICAtIEFkZCBzdXBwb3J0IGZv
-ciBnbG9iYWwgc3RhY2sgY29va2llIHdoaWxlIGNvbXBpbGVyIGRlZmF1bHQgdG8gZnMgd2l0aG91
-dAo+ICAgICAgIG1jbW9kZWw9a2VybmVsCj4gICAgIC0gQ2hhbmdlIHBhdGNoIDcgdG8gY29ycmVj
-dGx5IGp1bXAgb3V0IG9mIHRoZSBpZGVudGl0eSBtYXBwaW5nIG9uIGtleGVjIGxvYWQKPiAgICAg
-ICBwcmVzZXJ2ZS4KPiAKPiBUaGVzZSBwYXRjaGVzIG1ha2UgdGhlIGNoYW5nZXMgbmVjZXNzYXJ5
-IHRvIGJ1aWxkIHRoZSBrZXJuZWwgYXMgUG9zaXRpb24KPiBJbmRlcGVuZGVudCBFeGVjdXRhYmxl
-IChQSUUpIG9uIHg4Nl82NC4gQSBQSUUga2VybmVsIGNhbiBiZSByZWxvY2F0ZWQgYmVsb3cKPiB0
-aGUgdG9wIDJHIG9mIHRoZSB2aXJ0dWFsIGFkZHJlc3Mgc3BhY2UuIEl0IGFsbG93cyB0byBvcHRp
-b25hbGx5IGV4dGVuZCB0aGUKPiBLQVNMUiByYW5kb21pemF0aW9uIHJhbmdlIGZyb20gMUcgdG8g
-M0cuCgpIaSBUaG9tYXMsCgpJJ3ZlIGFwcGxpZWQgeW91ciBwYXRjaGVzIHNvIHRoYXQgSSBjYW4g
-dmVyaWZ5IHRoYXQgU01FIHdvcmtzIHdpdGggUElFLgpVbmZvcnR1bmF0ZWx5LCBJJ20gcnVubmlu
-ZyBpbnRvIGJ1aWxkIHdhcm5pbmdzIGFuZCBlcnJvcnMgd2hlbiBJIGVuYWJsZQpQSUUuCgpXaXRo
-IENPTkZJR19TVEFDS19WQUxJREFUSU9OPXkgSSByZWNlaXZlIGxvdHMgb2YgbWVzc2FnZXMgbGlr
-ZSB0aGlzOgoKICBkcml2ZXJzL3Njc2kvbGliZmMvZmNfZXhjaC5vOiB3YXJuaW5nOiBvYmp0b29s
-OiBmY19kZXN0cm95X2V4Y2hfbWdyKCkrMHgwOiBjYWxsIHdpdGhvdXQgZnJhbWUgcG9pbnRlciBz
-YXZlL3NldHVwCgpEaXNhYmxpbmcgQ09ORklHX1NUQUNLX1ZBTElEQVRJT04gc3VwcHJlc3NlcyB0
-aG9zZS4KCkJ1dCBuZWFyIHRoZSBlbmQgb2YgdGhlIGJ1aWxkLCBJIHJlY2VpdmUgZXJyb3JzIGxp
-a2UgdGhpczoKCiAgYXJjaC94ODYva2VybmVsL3NldHVwLm86IEluIGZ1bmN0aW9uIGBkdW1wX2tl
-cm5lbF9vZmZzZXQnOgogIC4uLi9hcmNoL3g4Ni9rZXJuZWwvc2V0dXAuYzo4MDE6KC50ZXh0KzB4
-MzIpOiByZWxvY2F0aW9uIHRydW5jYXRlZCB0byBmaXQ6IFJfWDg2XzY0XzMyUyBhZ2FpbnN0IHN5
-bWJvbCBgX3RleHQnIGRlZmluZWQgaW4gLnRleHQgc2VjdGlvbiBpbiAudG1wX3ZtbGludXgxCiAg
-LgogIC4gYWJvdXQgMTAgbW9yZSBvZiB0aGUgYWJvdmUgdHlwZSBtZXNzYWdlcwogIC4KICBtYWtl
-OiAqKiogW3ZtbGludXhdIEVycm9yIDEKICBFcnJvciBidWlsZGluZyBrZXJuZWwsIGV4aXRpbmcK
-CkFyZSB0aGVyZSBhbnkgY29uZmlnIG9wdGlvbnMgdGhhdCBzaG91bGQgb3Igc2hvdWxkIG5vdCBi
-ZSBlbmFibGVkIHdoZW4KYnVpbGRpbmcgd2l0aCBQSUUgZW5hYmxlZD8gIElzIHRoZXJlIGEgY29t
-cGlsZXIgcmVxdWlyZW1lbnQgZm9yIFBJRSAoSSdtCnVzaW5nIGdjYyB2ZXJzaW9uIDUuNC4wIDIw
-MTYwNjA5IChVYnVudHUgNS40LjAtNnVidW50dTF+MTYuMDQuNSkpPwoKVGhhbmtzLApUb20KCj4g
-Cj4gVGhhbmtzIGEgbG90IHRvIEFyZCBCaWVzaGV1dmVsICYgS2VlcyBDb29rIG9uIHRoZWlyIGZl
-ZWRiYWNrIG9uIGNvbXBpbGVyCj4gY2hhbmdlcywgUElFIHN1cHBvcnQgYW5kIEtBU0xSIGluIGdl
-bmVyYWwuIFRoYW5rcyB0byBSb2xhbmQgTWNHcmF0aCBvbiBoaXMKPiBmZWVkYmFjayBmb3IgdXNp
-bmcgLXBpZSB2ZXJzdXMgLS1lbWl0LXJlbG9jcyBhbmQgZGV0YWlscyBvbiBjb21waWxlciBjb2Rl
-Cj4gZ2VuZXJhdGlvbi4KPiAKPiBUaGUgcGF0Y2hlczoKPiAgIC0gMS0zLCA1LTEjLCAxNy0xODog
-Q2hhbmdlIGluIGFzc2VtYmx5IGNvZGUgdG8gYmUgUElFIGNvbXBsaWFudC4KPiAgIC0gNDogQWRk
-IGEgbmV3IF9BU01fR0VUX1BUUiBtYWNybyB0byBmZXRjaCBhIHN5bWJvbCBhZGRyZXNzIGdlbmVy
-aWNhbGx5Lgo+ICAgLSAxNDogQWRhcHQgcGVyY3B1IGRlc2lnbiB0byB3b3JrIGNvcnJlY3RseSB3
-aGVuIFBJRSBpcyBlbmFibGVkLgo+ICAgLSAxNTogUHJvdmlkZSBhbiBvcHRpb24gdG8gZGVmYXVs
-dCB2aXNpYmlsaXR5IHRvIGhpZGRlbiBleGNlcHQgZm9yIGtleSBzeW1ib2xzLgo+ICAgICAgICAg
-SXQgcmVtb3ZlcyBlcnJvcnMgYmV0d2VlbiBjb21waWxhdGlvbiB1bml0cy4KPiAgIC0gMTY6IEFk
-YXB0IHJlbG9jYXRpb24gdG9vbCB0byBoYW5kbGUgUElFIGJpbmFyeSBjb3JyZWN0bHkuCj4gICAt
-IDE5OiBBZGQgc3VwcG9ydCBmb3IgZ2xvYmFsIGNvb2tpZS4KPiAgIC0gMjA6IFN1cHBvcnQgZnRy
-YWNlIHdpdGggUElFICh1c2VkIG9uIFVidW50dSBjb25maWcpLgo+ICAgLSAyMTogRml4IGluY29y
-cmVjdCBhZGRyZXNzIG1hcmtlciBvbiBkdW1wX3BhZ2V0YWJsZXMuCj4gICAtIDIyOiBBZGQgb3B0
-aW9uIHRvIG1vdmUgdGhlIG1vZHVsZSBzZWN0aW9uIGp1c3QgYWZ0ZXIgdGhlIGtlcm5lbC4KPiAg
-IC0gMjM6IEFkYXB0IG1vZHVsZSBsb2FkaW5nIHRvIHN1cHBvcnQgUElFIHdpdGggZHluYW1pYyBH
-T1QuCj4gICAtIDI0OiBNYWtlIHRoZSBHT1QgcmVhZC1vbmx5Lgo+ICAgLSAyNTogQWRkIHRoZSBD
-T05GSUdfWDg2X1BJRSBvcHRpb24gKG9mZiBieSBkZWZhdWx0KS4KPiAgIC0gMjY6IEFkYXB0IHJl
-bG9jYXRpb24gdG9vbCB0byBnZW5lcmF0ZSBhIDY0LWJpdCByZWxvY2F0aW9uIHRhYmxlLgo+ICAg
-LSAyNzogQWRkIHRoZSBDT05GSUdfUkFORE9NSVpFX0JBU0VfTEFSR0Ugb3B0aW9uIHRvIGluY3Jl
-YXNlIHJlbG9jYXRpb24gcmFuZ2UKPiAgICAgICAgIGZyb20gMUcgdG8gM0cgKG9mZiBieSBkZWZh
-dWx0KS4KPiAKPiBQZXJmb3JtYW5jZS9TaXplIGltcGFjdDoKPiAKPiBTaXplIG9mIHZtbGludXgg
-KERlZmF1bHQgY29uZmlndXJhdGlvbik6Cj4gICBGaWxlIHNpemU6Cj4gICAtIFBJRSBkaXNhYmxl
-ZDogKzAuMDAwMDMxJQo+ICAgLSBQSUUgZW5hYmxlZDogLTMuMjEwJSAobGVzcyByZWxvY2F0aW9u
-cykKPiAgIC50ZXh0IHNlY3Rpb246Cj4gICAtIFBJRSBkaXNhYmxlZDogKzAuMDAwNjQ0JQo+ICAg
-LSBQSUUgZW5hYmxlZDogKzAuODM3JQo+IAo+IFNpemUgb2Ygdm1saW51eCAoVWJ1bnR1IGNvbmZp
-Z3VyYXRpb24pOgo+ICAgRmlsZSBzaXplOgo+ICAgLSBQSUUgZGlzYWJsZWQ6IC0wLjIwMSUKPiAg
-IC0gUElFIGVuYWJsZWQ6IC0wLjA4MiUKPiAgIC50ZXh0IHNlY3Rpb246Cj4gICAtIFBJRSBkaXNh
-YmxlZDogc2FtZQo+ICAgLSBQSUUgZW5hYmxlZDogKzEuMzE5JQo+IAo+IFNpemUgb2Ygdm1saW51
-eCAoRGVmYXVsdCBjb25maWd1cmF0aW9uICsgT1JDKToKPiAgIEZpbGUgc2l6ZToKPiAgIC0gUElF
-IGVuYWJsZWQ6IC0zLjE2NyUKPiAgIC50ZXh0IHNlY3Rpb246Cj4gICAtIFBJRSBlbmFibGVkOiAr
-MC44MTQlCj4gCj4gU2l6ZSBvZiB2bWxpbnV4IChVYnVudHUgY29uZmlndXJhdGlvbiArIE9SQyk6
-Cj4gICBGaWxlIHNpemU6Cj4gICAtIFBJRSBlbmFibGVkOiAtMy4xNjclCj4gICAudGV4dCBzZWN0
-aW9uOgo+ICAgLSBQSUUgZW5hYmxlZDogKzEuMjYlCj4gCj4gVGhlIHNpemUgaW5jcmVhc2UgaXMg
-bWFpbmx5IGR1ZSB0byBub3QgaGF2aW5nIGFjY2VzcyB0byB0aGUgMzItYml0IHNpZ25lZAo+IHJl
-bG9jYXRpb24gdGhhdCBjYW4gYmUgdXNlZCB3aXRoIG1jbW9kZWw9a2VybmVsLiBBIHNtYWxsIHBh
-cnQgaXMgZHVlIHRvIHJlZHVjZWQKPiBvcHRpbWl6YXRpb24gZm9yIFBJRSBjb2RlLiBUaGlzIGJ1
-ZyBbMV0gd2FzIG9wZW5lZCB3aXRoIGdjYyB0byBwcm92aWRlIGEgYmV0dGVyCj4gY29kZSBnZW5l
-cmF0aW9uIGZvciBrZXJuZWwgUElFLgo+IAo+IEhhY2tiZW5jaCAoNTAlIGFuZCAxNjAwJSBvbiB0
-aHJlYWQvcHJvY2VzcyBmb3IgcGlwZS9zb2NrZXRzKToKPiAgIC0gUElFIGRpc2FibGVkOiBubyBz
-aWduaWZpY2FudCBjaGFuZ2UgKGF2ZyArMC4xJSBvbiBsYXRlc3QgdGVzdCkuCj4gICAtIFBJRSBl
-bmFibGVkOiBiZXR3ZWVuIC0wLjUwJSB0byArMC44NiUgaW4gYXZlcmFnZSAoZGVmYXVsdCBhbmQg
-VWJ1bnR1IGNvbmZpZykuCj4gCj4gc2xhYl90ZXN0IChhdmVyYWdlIG9mIDEwIHJ1bnMpOgo+ICAg
-LSBQSUUgZGlzYWJsZWQ6IG5vIHNpZ25pZmljYW50IGNoYW5nZSAoLTIlIG9uIGxhdGVzdCBydW4s
-IGxpa2VseSBub2lzZSkuCj4gICAtIFBJRSBlbmFibGVkOiBiZXR3ZWVuIC0xJSBhbmQgKzAuOCUg
-b24gbGF0ZXN0IHJ1bnMuCj4gCj4gS2VybmJlbmNoIChhdmVyYWdlIG9mIDEwIEhhbGYgYW5kIE9w
-dGltYWwgcnVucyk6Cj4gICBFbGFwc2VkIFRpbWU6Cj4gICAtIFBJRSBkaXNhYmxlZDogbm8gc2ln
-bmlmaWNhbnQgY2hhbmdlIChhdmcgLTAuMjM5JSkKPiAgIC0gUElFIGVuYWJsZWQ6IGF2ZXJhZ2Ug
-KzAuMDclCj4gICBTeXN0ZW0gVGltZToKPiAgIC0gUElFIGRpc2FibGVkOiBubyBzaWduaWZpY2Fu
-dCBjaGFuZ2UgKGF2ZyAtMC4yNzclKQo+ICAgLSBQSUUgZW5hYmxlZDogYXZlcmFnZSArMC43JQo+
-IAo+IFsxXSBodHRwczovL2djYy5nbnUub3JnL2J1Z3ppbGxhL3Nob3dfYnVnLmNnaT9pZD04MjMw
-Mwo+IAo+IGRpZmZzdGF0Ogo+ICAgRG9jdW1lbnRhdGlvbi94ODYveDg2XzY0L21tLnR4dCAgICAg
-ICAgICAgICAgfCAgICAzCj4gICBhcmNoL3g4Ni9LY29uZmlnICAgICAgICAgICAgICAgICAgICAg
-ICAgICAgICB8ICAgNDMgKysrKysrCj4gICBhcmNoL3g4Ni9NYWtlZmlsZSAgICAgICAgICAgICAg
-ICAgICAgICAgICAgICB8ICAgNDAgKysrKysKPiAgIGFyY2gveDg2L2Jvb3QvYm9vdC5oICAgICAg
-ICAgICAgICAgICAgICAgICAgIHwgICAgMgo+ICAgYXJjaC94ODYvYm9vdC9jb21wcmVzc2VkL01h
-a2VmaWxlICAgICAgICAgICAgfCAgICA1Cj4gICBhcmNoL3g4Ni9ib290L2NvbXByZXNzZWQvbWlz
-Yy5jICAgICAgICAgICAgICB8ICAgMTAgKwo+ICAgYXJjaC94ODYvY3J5cHRvL2Flcy14ODZfNjQt
-YXNtXzY0LlMgICAgICAgICAgfCAgIDQ1ICsrKystLQo+ICAgYXJjaC94ODYvY3J5cHRvL2Flc25p
-LWludGVsX2FzbS5TICAgICAgICAgICAgfCAgIDE0ICstCj4gICBhcmNoL3g4Ni9jcnlwdG8vYWVz
-bmktaW50ZWxfYXZ4LXg4Nl82NC5TICAgICB8ICAgIDYKPiAgIGFyY2gveDg2L2NyeXB0by9jYW1l
-bGxpYS1hZXNuaS1hdngtYXNtXzY0LlMgIHwgICA0MiArKystLS0KPiAgIGFyY2gveDg2L2NyeXB0
-by9jYW1lbGxpYS1hZXNuaS1hdngyLWFzbV82NC5TIHwgICA0NCArKystLS0KPiAgIGFyY2gveDg2
-L2NyeXB0by9jYW1lbGxpYS14ODZfNjQtYXNtXzY0LlMgICAgIHwgICAgOCAtCj4gICBhcmNoL3g4
-Ni9jcnlwdG8vY2FzdDUtYXZ4LXg4Nl82NC1hc21fNjQuUyAgICB8ICAgNTAgKysrKy0tLQo+ICAg
-YXJjaC94ODYvY3J5cHRvL2Nhc3Q2LWF2eC14ODZfNjQtYXNtXzY0LlMgICAgfCAgIDQ0ICsrKy0t
-LQo+ICAgYXJjaC94ODYvY3J5cHRvL2RlczNfZWRlLWFzbV82NC5TICAgICAgICAgICAgfCAgIDk2
-ICsrKysrKysrKy0tLS0tCj4gICBhcmNoL3g4Ni9jcnlwdG8vZ2hhc2gtY2xtdWxuaS1pbnRlbF9h
-c20uUyAgICB8ICAgIDQKPiAgIGFyY2gveDg2L2NyeXB0by9nbHVlX2hlbHBlci1hc20tYXZ4LlMg
-ICAgICAgIHwgICAgNAo+ICAgYXJjaC94ODYvY3J5cHRvL2dsdWVfaGVscGVyLWFzbS1hdngyLlMg
-ICAgICAgfCAgICA2Cj4gICBhcmNoL3g4Ni9lbnRyeS9lbnRyeV8zMi5TICAgICAgICAgICAgICAg
-ICAgICB8ICAgIDMKPiAgIGFyY2gveDg2L2VudHJ5L2VudHJ5XzY0LlMgICAgICAgICAgICAgICAg
-ICAgIHwgICAyOSArKy0tCj4gICBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9hc20uaCAgICAgICAgICAg
-ICAgICAgICB8ICAgMTMgKwo+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vYnVnLmggICAgICAgICAg
-ICAgICAgICAgfCAgICAyCj4gICBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9mdHJhY2UuaCAgICAgICAg
-ICAgICAgICB8ICAgIDYKPiAgIGFyY2gveDg2L2luY2x1ZGUvYXNtL2p1bXBfbGFiZWwuaCAgICAg
-ICAgICAgIHwgICAgOCAtCj4gICBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9rdm1faG9zdC5oICAgICAg
-ICAgICAgICB8ICAgIDYKPiAgIGFyY2gveDg2L2luY2x1ZGUvYXNtL21vZHVsZS5oICAgICAgICAg
-ICAgICAgIHwgICAxMSArCj4gICBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9wYWdlXzY0X3R5cGVzLmgg
-ICAgICAgICB8ICAgIDkgKwo+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vcGFyYXZpcnRfdHlwZXMu
-aCAgICAgICAgfCAgIDEyICsKPiAgIGFyY2gveDg2L2luY2x1ZGUvYXNtL3BlcmNwdS5oICAgICAg
-ICAgICAgICAgIHwgICAyNSArKy0KPiAgIGFyY2gveDg2L2luY2x1ZGUvYXNtL3BndGFibGVfNjRf
-dHlwZXMuaCAgICAgIHwgICAgNgo+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vcG0tdHJhY2UuaCAg
-ICAgICAgICAgICAgfCAgICAyCj4gICBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9wcm9jZXNzb3IuaCAg
-ICAgICAgICAgICB8ICAgMTIgKwo+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vc2VjdGlvbnMuaCAg
-ICAgICAgICAgICAgfCAgICA4ICsKPiAgIGFyY2gveDg2L2luY2x1ZGUvYXNtL3NldHVwLmggICAg
-ICAgICAgICAgICAgIHwgICAgMgo+ICAgYXJjaC94ODYvaW5jbHVkZS9hc20vc3RhY2twcm90ZWN0
-b3IuaCAgICAgICAgfCAgIDE5ICsrCj4gICBhcmNoL3g4Ni9rZXJuZWwvYWNwaS93YWtldXBfNjQu
-UyAgICAgICAgICAgICB8ICAgMzEgKystLQo+ICAgYXJjaC94ODYva2VybmVsL2FzbS1vZmZzZXRz
-LmMgICAgICAgICAgICAgICAgfCAgICAzCj4gICBhcmNoL3g4Ni9rZXJuZWwvYXNtLW9mZnNldHNf
-MzIuYyAgICAgICAgICAgICB8ICAgIDMKPiAgIGFyY2gveDg2L2tlcm5lbC9hc20tb2Zmc2V0c182
-NC5jICAgICAgICAgICAgIHwgICAgMwo+ICAgYXJjaC94ODYva2VybmVsL2NwdS9jb21tb24uYyAg
-ICAgICAgICAgICAgICAgfCAgICA3IC0KPiAgIGFyY2gveDg2L2tlcm5lbC9jcHUvbWljcm9jb2Rl
-L2NvcmUuYyAgICAgICAgIHwgICAgNAo+ICAgYXJjaC94ODYva2VybmVsL2Z0cmFjZS5jICAgICAg
-ICAgICAgICAgICAgICAgfCAgIDQyICsrKysrLQo+ICAgYXJjaC94ODYva2VybmVsL2hlYWQ2NC5j
-ICAgICAgICAgICAgICAgICAgICAgfCAgIDMyICsrKy0KPiAgIGFyY2gveDg2L2tlcm5lbC9oZWFk
-XzMyLlMgICAgICAgICAgICAgICAgICAgIHwgICAgMwo+ICAgYXJjaC94ODYva2VybmVsL2hlYWRf
-NjQuUyAgICAgICAgICAgICAgICAgICAgfCAgIDQxICsrKysrLQo+ICAgYXJjaC94ODYva2VybmVs
-L2t2bS5jICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA2Cj4gICBhcmNoL3g4Ni9rZXJuZWwv
-bW9kdWxlLmMgICAgICAgICAgICAgICAgICAgICB8ICAxODIgKysrKysrKysrKysrKysrKysrKysr
-KysrKystCj4gICBhcmNoL3g4Ni9rZXJuZWwvbW9kdWxlLmxkcyAgICAgICAgICAgICAgICAgICB8
-ICAgIDMKPiAgIGFyY2gveDg2L2tlcm5lbC9wcm9jZXNzLmMgICAgICAgICAgICAgICAgICAgIHwg
-ICAgNQo+ICAgYXJjaC94ODYva2VybmVsL3JlbG9jYXRlX2tlcm5lbF82NC5TICAgICAgICAgfCAg
-ICA4IC0KPiAgIGFyY2gveDg2L2tlcm5lbC9zZXR1cF9wZXJjcHUuYyAgICAgICAgICAgICAgIHwg
-ICAgMgo+ICAgYXJjaC94ODYva2VybmVsL3ZtbGludXgubGRzLlMgICAgICAgICAgICAgICAgfCAg
-IDEzICsKPiAgIGFyY2gveDg2L2t2bS9zdm0uYyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwg
-ICAgNAo+ICAgYXJjaC94ODYvbGliL2NtcHhjaGcxNmJfZW11LlMgICAgICAgICAgICAgICAgfCAg
-ICA4IC0KPiAgIGFyY2gveDg2L21tL2R1bXBfcGFnZXRhYmxlcy5jICAgICAgICAgICAgICAgIHwg
-ICAxMSArCj4gICBhcmNoL3g4Ni9wb3dlci9oaWJlcm5hdGVfYXNtXzY0LlMgICAgICAgICAgICB8
-ICAgIDQKPiAgIGFyY2gveDg2L3Rvb2xzL3JlbG9jcy5jICAgICAgICAgICAgICAgICAgICAgIHwg
-IDE3MCArKysrKysrKysrKysrKysrKysrKysrKy0tCj4gICBhcmNoL3g4Ni90b29scy9yZWxvY3Mu
-aCAgICAgICAgICAgICAgICAgICAgICB8ICAgIDQKPiAgIGFyY2gveDg2L3Rvb2xzL3JlbG9jc19j
-b21tb24uYyAgICAgICAgICAgICAgIHwgICAxNSArLQo+ICAgYXJjaC94ODYveGVuL3hlbi1hc20u
-UyAgICAgICAgICAgICAgICAgICAgICAgfCAgIDEyIC0KPiAgIGFyY2gveDg2L3hlbi94ZW4taGVh
-ZC5TICAgICAgICAgICAgICAgICAgICAgIHwgICAgOSAtCj4gICBhcmNoL3g4Ni94ZW4veGVuLXB2
-aC5TICAgICAgICAgICAgICAgICAgICAgICB8ICAgMTMgKwo+ICAgZHJpdmVycy9iYXNlL2Zpcm13
-YXJlX2NsYXNzLmMgICAgICAgICAgICAgICAgfCAgICA0Cj4gICBpbmNsdWRlL2FzbS1nZW5lcmlj
-L3NlY3Rpb25zLmggICAgICAgICAgICAgICB8ICAgIDYKPiAgIGluY2x1ZGUvYXNtLWdlbmVyaWMv
-dm1saW51eC5sZHMuaCAgICAgICAgICAgIHwgICAxMiArCj4gICBpbmNsdWRlL2xpbnV4L2NvbXBp
-bGVyLmggICAgICAgICAgICAgICAgICAgICB8ICAgIDggKwo+ICAgaW5pdC9LY29uZmlnICAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA5ICsKPiAgIGtlcm5lbC9rYWxsc3ltcy5j
-ICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAxNiArLQo+ICAga2VybmVsL3RyYWNlL3Ry
-YWNlLmggICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA0Cj4gICBsaWIvZHluYW1pY19kZWJ1
-Zy5jICAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDQKPiAgIDcwIGZpbGVzIGNoYW5nZWQs
-IDEwMzIgaW5zZXJ0aW9ucygrKSwgMzA4IGRlbGV0aW9ucygtKQo+IAoKX19fX19fX19fX19fX19f
-X19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApY
-ZW4tZGV2ZWxAbGlzdHMueGVuLm9yZwpodHRwczovL2xpc3RzLnhlbi5vcmcveGVuLWRldmVsCg==
+On Wed, Oct 11, 2017 at 2:34 PM, Tom Lendacky <thomas.lendacky@amd.com> wrote:
+> On 10/11/2017 3:30 PM, Thomas Garnier wrote:
+>> Changes:
+>>   - patch v1:
+>>     - Simplify ftrace implementation.
+>>     - Use gcc mstack-protector-guard-reg=%gs with PIE when possible.
+>>   - rfc v3:
+>>     - Use --emit-relocs instead of -pie to reduce dynamic relocation space on
+>>       mapped memory. It also simplifies the relocation process.
+>>     - Move the start the module section next to the kernel. Remove the need for
+>>       -mcmodel=large on modules. Extends module space from 1 to 2G maximum.
+>>     - Support for XEN PVH as 32-bit relocations can be ignored with
+>>       --emit-relocs.
+>>     - Support for GOT relocations previously done automatically with -pie.
+>>     - Remove need for dynamic PLT in modules.
+>>     - Support dymamic GOT for modules.
+>>   - rfc v2:
+>>     - Add support for global stack cookie while compiler default to fs without
+>>       mcmodel=kernel
+>>     - Change patch 7 to correctly jump out of the identity mapping on kexec load
+>>       preserve.
+>>
+>> These patches make the changes necessary to build the kernel as Position
+>> Independent Executable (PIE) on x86_64. A PIE kernel can be relocated below
+>> the top 2G of the virtual address space. It allows to optionally extend the
+>> KASLR randomization range from 1G to 3G.
+>
+> Hi Thomas,
+>
+> I've applied your patches so that I can verify that SME works with PIE.
+> Unfortunately, I'm running into build warnings and errors when I enable
+> PIE.
+>
+> With CONFIG_STACK_VALIDATION=y I receive lots of messages like this:
+>
+>   drivers/scsi/libfc/fc_exch.o: warning: objtool: fc_destroy_exch_mgr()+0x0: call without frame pointer save/setup
+>
+> Disabling CONFIG_STACK_VALIDATION suppresses those.
+
+I ran into that, I plan to fix it in the next iteration.
+
+>
+> But near the end of the build, I receive errors like this:
+>
+>   arch/x86/kernel/setup.o: In function `dump_kernel_offset':
+>   .../arch/x86/kernel/setup.c:801:(.text+0x32): relocation truncated to fit: R_X86_64_32S against symbol `_text' defined in .text section in .tmp_vmlinux1
+>   .
+>   . about 10 more of the above type messages
+>   .
+>   make: *** [vmlinux] Error 1
+>   Error building kernel, exiting
+>
+> Are there any config options that should or should not be enabled when
+> building with PIE enabled?  Is there a compiler requirement for PIE (I'm
+> using gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.5))?
+
+I never ran into these ones and I tested compilers older and newer.
+What was your exact configuration?
+
+>
+> Thanks,
+> Tom
+>
+>>
+>> Thanks a lot to Ard Biesheuvel & Kees Cook on their feedback on compiler
+>> changes, PIE support and KASLR in general. Thanks to Roland McGrath on his
+>> feedback for using -pie versus --emit-relocs and details on compiler code
+>> generation.
+>>
+>> The patches:
+>>   - 1-3, 5-1#, 17-18: Change in assembly code to be PIE compliant.
+>>   - 4: Add a new _ASM_GET_PTR macro to fetch a symbol address generically.
+>>   - 14: Adapt percpu design to work correctly when PIE is enabled.
+>>   - 15: Provide an option to default visibility to hidden except for key symbols.
+>>         It removes errors between compilation units.
+>>   - 16: Adapt relocation tool to handle PIE binary correctly.
+>>   - 19: Add support for global cookie.
+>>   - 20: Support ftrace with PIE (used on Ubuntu config).
+>>   - 21: Fix incorrect address marker on dump_pagetables.
+>>   - 22: Add option to move the module section just after the kernel.
+>>   - 23: Adapt module loading to support PIE with dynamic GOT.
+>>   - 24: Make the GOT read-only.
+>>   - 25: Add the CONFIG_X86_PIE option (off by default).
+>>   - 26: Adapt relocation tool to generate a 64-bit relocation table.
+>>   - 27: Add the CONFIG_RANDOMIZE_BASE_LARGE option to increase relocation range
+>>         from 1G to 3G (off by default).
+>>
+>> Performance/Size impact:
+>>
+>> Size of vmlinux (Default configuration):
+>>   File size:
+>>   - PIE disabled: +0.000031%
+>>   - PIE enabled: -3.210% (less relocations)
+>>   .text section:
+>>   - PIE disabled: +0.000644%
+>>   - PIE enabled: +0.837%
+>>
+>> Size of vmlinux (Ubuntu configuration):
+>>   File size:
+>>   - PIE disabled: -0.201%
+>>   - PIE enabled: -0.082%
+>>   .text section:
+>>   - PIE disabled: same
+>>   - PIE enabled: +1.319%
+>>
+>> Size of vmlinux (Default configuration + ORC):
+>>   File size:
+>>   - PIE enabled: -3.167%
+>>   .text section:
+>>   - PIE enabled: +0.814%
+>>
+>> Size of vmlinux (Ubuntu configuration + ORC):
+>>   File size:
+>>   - PIE enabled: -3.167%
+>>   .text section:
+>>   - PIE enabled: +1.26%
+>>
+>> The size increase is mainly due to not having access to the 32-bit signed
+>> relocation that can be used with mcmodel=kernel. A small part is due to reduced
+>> optimization for PIE code. This bug [1] was opened with gcc to provide a better
+>> code generation for kernel PIE.
+>>
+>> Hackbench (50% and 1600% on thread/process for pipe/sockets):
+>>   - PIE disabled: no significant change (avg +0.1% on latest test).
+>>   - PIE enabled: between -0.50% to +0.86% in average (default and Ubuntu config).
+>>
+>> slab_test (average of 10 runs):
+>>   - PIE disabled: no significant change (-2% on latest run, likely noise).
+>>   - PIE enabled: between -1% and +0.8% on latest runs.
+>>
+>> Kernbench (average of 10 Half and Optimal runs):
+>>   Elapsed Time:
+>>   - PIE disabled: no significant change (avg -0.239%)
+>>   - PIE enabled: average +0.07%
+>>   System Time:
+>>   - PIE disabled: no significant change (avg -0.277%)
+>>   - PIE enabled: average +0.7%
+>>
+>> [1] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82303
+>>
+>> diffstat:
+>>   Documentation/x86/x86_64/mm.txt              |    3
+>>   arch/x86/Kconfig                             |   43 ++++++
+>>   arch/x86/Makefile                            |   40 +++++
+>>   arch/x86/boot/boot.h                         |    2
+>>   arch/x86/boot/compressed/Makefile            |    5
+>>   arch/x86/boot/compressed/misc.c              |   10 +
+>>   arch/x86/crypto/aes-x86_64-asm_64.S          |   45 ++++--
+>>   arch/x86/crypto/aesni-intel_asm.S            |   14 +-
+>>   arch/x86/crypto/aesni-intel_avx-x86_64.S     |    6
+>>   arch/x86/crypto/camellia-aesni-avx-asm_64.S  |   42 +++---
+>>   arch/x86/crypto/camellia-aesni-avx2-asm_64.S |   44 +++---
+>>   arch/x86/crypto/camellia-x86_64-asm_64.S     |    8 -
+>>   arch/x86/crypto/cast5-avx-x86_64-asm_64.S    |   50 ++++---
+>>   arch/x86/crypto/cast6-avx-x86_64-asm_64.S    |   44 +++---
+>>   arch/x86/crypto/des3_ede-asm_64.S            |   96 +++++++++-----
+>>   arch/x86/crypto/ghash-clmulni-intel_asm.S    |    4
+>>   arch/x86/crypto/glue_helper-asm-avx.S        |    4
+>>   arch/x86/crypto/glue_helper-asm-avx2.S       |    6
+>>   arch/x86/entry/entry_32.S                    |    3
+>>   arch/x86/entry/entry_64.S                    |   29 ++--
+>>   arch/x86/include/asm/asm.h                   |   13 +
+>>   arch/x86/include/asm/bug.h                   |    2
+>>   arch/x86/include/asm/ftrace.h                |    6
+>>   arch/x86/include/asm/jump_label.h            |    8 -
+>>   arch/x86/include/asm/kvm_host.h              |    6
+>>   arch/x86/include/asm/module.h                |   11 +
+>>   arch/x86/include/asm/page_64_types.h         |    9 +
+>>   arch/x86/include/asm/paravirt_types.h        |   12 +
+>>   arch/x86/include/asm/percpu.h                |   25 ++-
+>>   arch/x86/include/asm/pgtable_64_types.h      |    6
+>>   arch/x86/include/asm/pm-trace.h              |    2
+>>   arch/x86/include/asm/processor.h             |   12 +
+>>   arch/x86/include/asm/sections.h              |    8 +
+>>   arch/x86/include/asm/setup.h                 |    2
+>>   arch/x86/include/asm/stackprotector.h        |   19 ++
+>>   arch/x86/kernel/acpi/wakeup_64.S             |   31 ++--
+>>   arch/x86/kernel/asm-offsets.c                |    3
+>>   arch/x86/kernel/asm-offsets_32.c             |    3
+>>   arch/x86/kernel/asm-offsets_64.c             |    3
+>>   arch/x86/kernel/cpu/common.c                 |    7 -
+>>   arch/x86/kernel/cpu/microcode/core.c         |    4
+>>   arch/x86/kernel/ftrace.c                     |   42 +++++-
+>>   arch/x86/kernel/head64.c                     |   32 +++-
+>>   arch/x86/kernel/head_32.S                    |    3
+>>   arch/x86/kernel/head_64.S                    |   41 +++++-
+>>   arch/x86/kernel/kvm.c                        |    6
+>>   arch/x86/kernel/module.c                     |  182 ++++++++++++++++++++++++++-
+>>   arch/x86/kernel/module.lds                   |    3
+>>   arch/x86/kernel/process.c                    |    5
+>>   arch/x86/kernel/relocate_kernel_64.S         |    8 -
+>>   arch/x86/kernel/setup_percpu.c               |    2
+>>   arch/x86/kernel/vmlinux.lds.S                |   13 +
+>>   arch/x86/kvm/svm.c                           |    4
+>>   arch/x86/lib/cmpxchg16b_emu.S                |    8 -
+>>   arch/x86/mm/dump_pagetables.c                |   11 +
+>>   arch/x86/power/hibernate_asm_64.S            |    4
+>>   arch/x86/tools/relocs.c                      |  170 +++++++++++++++++++++++--
+>>   arch/x86/tools/relocs.h                      |    4
+>>   arch/x86/tools/relocs_common.c               |   15 +-
+>>   arch/x86/xen/xen-asm.S                       |   12 -
+>>   arch/x86/xen/xen-head.S                      |    9 -
+>>   arch/x86/xen/xen-pvh.S                       |   13 +
+>>   drivers/base/firmware_class.c                |    4
+>>   include/asm-generic/sections.h               |    6
+>>   include/asm-generic/vmlinux.lds.h            |   12 +
+>>   include/linux/compiler.h                     |    8 +
+>>   init/Kconfig                                 |    9 +
+>>   kernel/kallsyms.c                            |   16 +-
+>>   kernel/trace/trace.h                         |    4
+>>   lib/dynamic_debug.c                          |    4
+>>   70 files changed, 1032 insertions(+), 308 deletions(-)
+>>
+
+
+
+-- 
+Thomas
