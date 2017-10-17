@@ -1,44 +1,52 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [GIT PULL] llvm fixes
-Date: Mon, 16 Oct 2017 16:41:44 +0200
-Message-ID: <20171016144143.5v2jehfmxcyhutrb@ltop.local>
-References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+From: Jacob Keller <jacob.e.keller@intel.com>
+Subject: [PATCH] sparse: document that -Wbitwise is default
+Date: Tue, 17 Oct 2017 16:31:36 -0700
+Message-ID: <20171017233136.24533-1-jacob.e.keller@intel.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:49030 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752399AbdJPOls (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 16 Oct 2017 10:41:48 -0400
-Received: by mail-wm0-f44.google.com with SMTP id i124so4023690wmf.3
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Oct 2017 07:41:47 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
+Received: from mga14.intel.com ([192.55.52.115]:35996 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755538AbdJQXbi (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 17 Oct 2017 19:31:38 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Jacob Keller <jacob.e.keller@intel.com>
 
-On Mon, Sep 18, 2017 at 11:51:35AM +0200, Luc Van Oostenryck wrote:
-> Chris,
-> 
-> Please, pull these patches for master. 
-> 
-> No surprises here, it's just all March's good old fixes
-> for sparse-llvm which have been rebased on top of rc5.
-> 
-> Thanks,
-> Luc
+In commit commit 02a886bfa3d9 ("Introduce keyword driven
+attribute parsing", 2007-03-08) the -Wbitwise keyword was broken and did
+not actually work. Instead, bitwise checks were always enabled.
 
+This was fixed by commit commit 0dfda0d1f0fe ("make -Wbitwise
+operational again", 2017-02-18) which allowed -Wbitwise and -Wno-bitwise
+to work as expected.
 
-Chris,
+However, since -Wbitwise was enabled for so long, that commit changed
+the default of -Wbitwise to be enabled, rather than the documented
+"disabled".
 
-This have been posted 4 weeks ago and I sent a reminder two weeks ago
-but I haven't seen anything from you. Same for the patches series I sent
-about the same time.
+Fix the documentation to match, and explain that -Wbitwise is enabled by
+default and must be disabled.
 
-Is there any hopes to see things moving forward soon?
+Signed-off-by: Jacob Keller <jacob.e.keller@intel.com>
+---
+ sparse.1 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Regards,
--- Luc
+diff --git a/sparse.1 b/sparse.1
+index fd4527aa5c95..bdfe14902ba6 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -67,8 +67,8 @@ kind of like "NULL" for pointers). So "gfp_t" or the "safe endianness"
+ types would be __bitwise: you can only operate on them by doing
+ specific operations that know about *that* particular type.
+ 
+-Generally, you want bitwise if you are looking for type safety. Sparse
+-does not issue these warnings by default.
++Sparse issues these warnings by default.  To turn them off, use
++\fB\-Wno\-bitwise\fR.
+ .
+ .TP
+ .B \-Wcast\-to\-as
+-- 
+2.14.1.436.g33e61a4f0239
+
