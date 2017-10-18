@@ -1,40 +1,42 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] sparse: document that -Wbitwise is default
-Date: Wed, 18 Oct 2017 12:29:43 -0700
-Message-ID: <CANeU7Qmd3BxncccFvVOx4_gSAuhjejRj3PQhB18mQu=uS6=ZSA@mail.gmail.com>
-References: <20171017233136.24533-1-jacob.e.keller@intel.com>
+Subject: Re: [PATCH] build: assign extra flags to ALL_CFLAGS instead of CFLAGS
+Date: Wed, 18 Oct 2017 12:36:41 -0700
+Message-ID: <CANeU7QmPgxKqjZpvudX_MYwhwGWx6nnZrats3brDMVvUUvBTFg@mail.gmail.com>
+References: <20171018150727.26821-1-jlayton@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:48521 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750730AbdJRT3o (ORCPT
+Received: from mail-yw0-f170.google.com ([209.85.161.170]:56915 "EHLO
+        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750839AbdJRTgp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 18 Oct 2017 15:29:44 -0400
-Received: by mail-yw0-f193.google.com with SMTP id q1so1524391ywh.5
-        for <linux-sparse@vger.kernel.org>; Wed, 18 Oct 2017 12:29:44 -0700 (PDT)
-In-Reply-To: <20171017233136.24533-1-jacob.e.keller@intel.com>
+        Wed, 18 Oct 2017 15:36:45 -0400
+Received: by mail-yw0-f170.google.com with SMTP id l32so1546599ywh.13
+        for <linux-sparse@vger.kernel.org>; Wed, 18 Oct 2017 12:36:45 -0700 (PDT)
+In-Reply-To: <20171018150727.26821-1-jlayton@kernel.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jacob Keller <jacob.e.keller@intel.com>
+To: Jeff Layton <jlayton@kernel.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Oct 17, 2017 at 4:31 PM, Jacob Keller <jacob.e.keller@intel.com> wrote:
-> In commit commit 02a886bfa3d9 ("Introduce keyword driven
-> attribute parsing", 2007-03-08) the -Wbitwise keyword was broken and did
-> not actually work. Instead, bitwise checks were always enabled.
+On Wed, Oct 18, 2017 at 8:07 AM, Jeff Layton <jlayton@kernel.org> wrote:
+> From: Jeff Layton <jlayton@redhat.com>
 >
-> This was fixed by commit commit 0dfda0d1f0fe ("make -Wbitwise
-> operational again", 2017-02-18) which allowed -Wbitwise and -Wno-bitwise
-> to work as expected.
+> The fedora packaging tools want to override $CFLAGS when building
+> sparse, but that fails on a couple of targets.
 >
-> However, since -Wbitwise was enabled for so long, that commit changed
-> the default of -Wbitwise to be enabled, rather than the documented
-> "disabled".
->
-> Fix the documentation to match, and explain that -Wbitwise is enabled by
-> default and must be disabled.
+> There are a couple of build targets in the makefile that want to add
+> options to $CFLAGS. When we do a build though, we pass $ALL_CFLAGS
+> to the compiler, and that ends up not getting options passed in
+> via $CFLAGS on the command line.
 
-Thanks. Will apply.
+Can you give example of what CFLAGS it passed in the command line?
+Does it append some flags only?
+
+It seems wrong to overwrite CFLAGS from command line. That are
+other flags store in the CFLAGS will get overwritten.
+
+We have add some variable in the ALL_CFLAGS list for overwrite
+purpose  e.g. CFLAGS_CMD then have command line over write that?
 
 Chris
