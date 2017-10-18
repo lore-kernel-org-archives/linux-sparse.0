@@ -1,52 +1,61 @@
-From: Jacob Keller <jacob.e.keller@intel.com>
-Subject: [PATCH] sparse: document that -Wbitwise is default
-Date: Tue, 17 Oct 2017 16:31:36 -0700
-Message-ID: <20171017233136.24533-1-jacob.e.keller@intel.com>
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH] build: assign extra flags to ALL_CFLAGS instead of CFLAGS
+Date: Wed, 18 Oct 2017 11:07:27 -0400
+Message-ID: <20171018150727.26821-1-jlayton@kernel.org>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mga14.intel.com ([192.55.52.115]:35996 "EHLO mga14.intel.com"
+Received: from mail.kernel.org ([198.145.29.99]:38312 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755538AbdJQXbi (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 17 Oct 2017 19:31:38 -0400
+        id S1751659AbdJRPHa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 18 Oct 2017 11:07:30 -0400
+Received: from tleilax.poochiereds.net (cpe-71-70-156-158.nc.res.rr.com [71.70.156.158])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by mail.kernel.org (Postfix) with ESMTPSA id 5831D21879
+        for <linux-sparse@vger.kernel.org>; Wed, 18 Oct 2017 15:07:29 +0000 (UTC)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Jacob Keller <jacob.e.keller@intel.com>
 
-In commit commit 02a886bfa3d9 ("Introduce keyword driven
-attribute parsing", 2007-03-08) the -Wbitwise keyword was broken and did
-not actually work. Instead, bitwise checks were always enabled.
+From: Jeff Layton <jlayton@redhat.com>
 
-This was fixed by commit commit 0dfda0d1f0fe ("make -Wbitwise
-operational again", 2017-02-18) which allowed -Wbitwise and -Wno-bitwise
-to work as expected.
+The fedora packaging tools want to override $CFLAGS when building
+sparse, but that fails on a couple of targets.
 
-However, since -Wbitwise was enabled for so long, that commit changed
-the default of -Wbitwise to be enabled, rather than the documented
-"disabled".
+There are a couple of build targets in the makefile that want to add
+options to $CFLAGS. When we do a build though, we pass $ALL_CFLAGS
+to the compiler, and that ends up not getting options passed in
+via $CFLAGS on the command line.
 
-Fix the documentation to match, and explain that -Wbitwise is enabled by
-default and must be disabled.
+Fix the two specific build targets to add the options to $ALL_CFLAGS
+instead of $CFLAGS.
 
-Signed-off-by: Jacob Keller <jacob.e.keller@intel.com>
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- sparse.1 | 4 ++--
+ Makefile | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/sparse.1 b/sparse.1
-index fd4527aa5c95..bdfe14902ba6 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -67,8 +67,8 @@ kind of like "NULL" for pointers). So "gfp_t" or the "safe endianness"
- types would be __bitwise: you can only operate on them by doing
- specific operations that know about *that* particular type.
+diff --git a/Makefile b/Makefile
+index d0341764158e..b24680b885fe 100644
+--- a/Makefile
++++ b/Makefile
+@@ -83,7 +83,7 @@ PROGRAMS += test-inspect
+ INST_PROGRAMS += test-inspect
+ test-inspect_EXTRA_DEPS := ast-model.o ast-view.o ast-inspect.o
+ test-inspect_OBJS := test-inspect.o $(test-inspect_EXTRA_DEPS)
+-$(test-inspect_OBJS) $(test-inspect_OBJS:.o=.sc): CFLAGS += $(GTK_CFLAGS)
++$(test-inspect_OBJS) $(test-inspect_OBJS:.o=.sc): ALL_CFLAGS += $(GTK_CFLAGS)
+ test-inspect_EXTRA_OBJS := $(GTK_LIBS)
+ else
+ $(warning Your system does not have gtk3/gtk2, disabling test-inspect)
+@@ -208,7 +208,7 @@ ifneq ($(DEP_FILES),)
+ include $(DEP_FILES)
+ endif
  
--Generally, you want bitwise if you are looking for type safety. Sparse
--does not issue these warnings by default.
-+Sparse issues these warnings by default.  To turn them off, use
-+\fB\-Wno\-bitwise\fR.
- .
- .TP
- .B \-Wcast\-to\-as
+-c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
++c2xml.o c2xml.sc: ALL_CFLAGS += $(LIBXML_CFLAGS)
+ 
+ pre-process.sc: CHECKER_FLAGS += -Wno-vla
+ 
 -- 
-2.14.1.436.g33e61a4f0239
+2.13.6
 
