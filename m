@@ -1,107 +1,51 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] build: assign extra flags to ALL_CFLAGS instead of CFLAGS
-Date: Wed, 18 Oct 2017 15:14:34 -0700
-Message-ID: <CANeU7QnRU7EgQTX1DiDHQj7JZBeKs2ZAeHKKSJNQxhKPXwoKjA@mail.gmail.com>
-References: <20171018150727.26821-1-jlayton@kernel.org> <CANeU7QmPgxKqjZpvudX_MYwhwGWx6nnZrats3brDMVvUUvBTFg@mail.gmail.com>
- <1508358019.4628.35.camel@poochiereds.net>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [GIT PULL] debug build of sparse v4
+Date: Thu, 19 Oct 2017 00:18:58 +0200
+Message-ID: <CAMHZB6Eg33Hg-ozFcVuBzp4HgHBeFApT2es4Bd0D=LuzLEw0MQ@mail.gmail.com>
+References: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:54455 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750955AbdJRWOg (ORCPT
+Received: from mail-ua0-f195.google.com ([209.85.217.195]:50275 "EHLO
+        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750920AbdJRWTA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 18 Oct 2017 18:14:36 -0400
-Received: by mail-yw0-f193.google.com with SMTP id w5so1902778ywg.11
-        for <linux-sparse@vger.kernel.org>; Wed, 18 Oct 2017 15:14:35 -0700 (PDT)
-In-Reply-To: <1508358019.4628.35.camel@poochiereds.net>
+        Wed, 18 Oct 2017 18:19:00 -0400
+Received: by mail-ua0-f195.google.com with SMTP id v27so4665755uav.7
+        for <linux-sparse@vger.kernel.org>; Wed, 18 Oct 2017 15:18:59 -0700 (PDT)
+In-Reply-To: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Layton <jlayton@poochiereds.net>
-Cc: Jeff Layton <jlayton@kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>
 
-On Wed, Oct 18, 2017 at 1:20 PM, Jeff Layton <jlayton@poochiereds.net> wrot=
-e:
+On Wed, Oct 18, 2017 at 11:26 PM, Christopher Li <sparse@chrisli.org> wrote:
+> Hi,
 >
-> Fedora, Red Hat, etc., define some macros that are considered "standard"
-> build options during packaging. These get passed into "make" and make is
-> expected to add to that list as necessary.
-
-Does all open source package follow this convention or that is a result
-of a lot of open source project using autotools
-
+> This is the V4 version of the debug build change.
 >
-> Here's what the make command looks like when called by rpmbuild with the
-> fedora package (built out of my homedir):
+> https://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git/log/?h=debug-target-v4
 >
->     $ make DESTDIR=3D/home/jlayton/rpmbuild/BUILDROOT/sparse-0.5.1-1.fc26=
-.x86_64 PREFIX=3D/usr BINDIR=3D/usr/bin LIBDIR=3D/usr/lib64 INCLUDEDIR=3D/u=
-sr/include PKGCONFIGDIR=3D/usr/lib64/pkgconfig -j16 'CFLAGS=3D-O2 -g -pipe =
--Wall -Werror=3Dformat-security -Wp,-D_FORTIFY_SOURCE=3D2 -fexceptions -fst=
-ack-protector-strong --param=3Dssp-buffer-size=3D4 -grecord-gcc-switches -s=
-pecs=3D/usr/lib/rpm/redhat/redhat-hardened-cc1 -m64 -mtune=3Dgeneric' HAVE_=
-LLVM=3Dno
-
-So here by specifying CFLAGS, the original assign for CFLAGS:
-
-CFLAGS =3D -O$(OPT) -finline-functions -fno-strict-aliasing -g
-
-The above assignment will be ignored. Is that intentional?
-
-Put it in a different way, Now " -finline-functions
--fno-strict-aliasing" are no longer
-pass to gcc when compile sparse files any more.
-
+> This change allow sparse to build debug version of sparse
+> along side of the release version. The debug build of sparse
+> can be used by patches like ptrlist ref count to check the nest
+> loop modify usage. The debug build can add other verification feature
+> that might slow down sparse.
 >
-> This is how things like FORTIFY_SOURCE end up being widespread in
-> distros without having to touch every program.
->
->
->> It seems wrong to overwrite CFLAGS from command line. That are
->> other flags store in the CFLAGS will get overwritten.
->>
->
-> I'm not sure I understand the objection here. Basically we just want to
-> pass in a "base" set of CFLAGS and then let make add others as it sees
-> fit.
+> I plan to merge that to master. If there is other objections, it is
+> a good time to raise it now.
 
-So your intention is just adding arguments. No removing existing CFLAG
-arguments. e.g. removing " -finline-functions -fno-strict-aliasing" from
-your invocation is just accident.
+No real objections but I have some doubts about all the debug part.
+I think that people hacking on sparse and who need to debug know
+what they need and want to debug.
+For example, the OPT=0 is, IMO, useless as you generally need
+others flags too. Also, when you debug, you generally need to rerun
+things several times, so using extra options on the command line is
+not ideal (a mechanism like local.mk is better suited but local.mk
+itself is not).
 
->> We have add some variable in the ALL_CFLAGS list for overwrite
->> purpose  e.g. CFLAGS_CMD then have command line over write that?
->>
->
-> FWIW, I inherited this specfile long ago and have only tweaked it since.
-> It could probably be better, but I'd like to make it less of a special
-> snowflake over the long haul. Hand rolled makefiles are generally a pain
-> in this regard.
+Also, what's the real need for dbgbuild/ & debug/ ?
+IMO, it's a big complexification of all the rules with plenty of
+duplicated things for very few, if any, benefits.
 
-Well, sparse is not using autotools. So it is always be special if you cons=
-ider
-autotools the norm.
-
-If your goal is just add some baseline compile options to gcc.
-It seems better by provide some thing like CFLAGS_CMD as part of the
-ALL_CFLAGS group. Then you can just add your options there. The variable
-name of "CFLAGS_CMD" is subject to discussion. You can make suggestions.
-Overwrite the CFLAGS variable from command line does have side effect
-of dropping some options like " -finline-functions -fno-strict-aliasing".
-It comes down to is your intend to drop those?
-
->
-> I can certainly adapt the specfile this to pass in some other variable
-> than CFLAGS if you like, but I don't really see how that would improve
-> anything.
-
-" -finline-functions -fno-strict-aliasing" has impact on the output code
-it produce. Unless you are intentionally dropping them. Provide other varia=
-ble
-for you to overwrite can preserve those compile flags.
-
-You do know that once you specify CFLAGS in the make command line,
-by default all other assign to CFLAGS from the Makefile will be ignored.
-
-Chris
+-- Luc
