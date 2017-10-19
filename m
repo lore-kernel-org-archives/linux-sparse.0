@@ -1,87 +1,67 @@
-From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [GIT PULL] debug build of sparse v4
-Date: Thu, 19 Oct 2017 14:42:07 +0200
-Message-ID: <8f1174fe-6d7c-e640-d0cf-db7000658570@kleine-koenig.org>
+Date: Thu, 19 Oct 2017 09:39:37 -0700
+Message-ID: <CANeU7QmArhzduMQd-bBbCVeKpTAxROUA2OxJ+8K2v+A2Oug8yg@mail.gmail.com>
 References: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
+ <CAMHZB6Eg33Hg-ozFcVuBzp4HgHBeFApT2es4Bd0D=LuzLEw0MQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
- protocol="application/pgp-signature";
- boundary="G5RrnNAWmLFH5g2QNFXV8cQ7o60JhRSS7"
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from arcturus.kleine-koenig.org ([78.47.169.190]:36290 "EHLO
-        arcturus.kleine-koenig.org" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752713AbdJSMmO (ORCPT
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:56022 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752783AbdJSQji (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 19 Oct 2017 08:42:14 -0400
-In-Reply-To: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
+        Thu, 19 Oct 2017 12:39:38 -0400
+Received: by mail-yw0-f195.google.com with SMTP id t11so4025212ywg.12
+        for <linux-sparse@vger.kernel.org>; Thu, 19 Oct 2017 09:39:38 -0700 (PDT)
+In-Reply-To: <CAMHZB6Eg33Hg-ozFcVuBzp4HgHBeFApT2es4Bd0D=LuzLEw0MQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Jeff Layton <jlayton@redhat.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---G5RrnNAWmLFH5g2QNFXV8cQ7o60JhRSS7
-Content-Type: multipart/mixed; boundary="U2Glc9nt2DajUKA7dsJvjkqIqUPLWkkWo";
- protected-headers="v1"
-From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
-To: Christopher Li <sparse@chrisli.org>,
- Linux-Sparse <linux-sparse@vger.kernel.org>
-Cc: Jeff Layton <jlayton@redhat.com>,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Message-ID: <8f1174fe-6d7c-e640-d0cf-db7000658570@kleine-koenig.org>
-Subject: Re: [GIT PULL] debug build of sparse v4
-References: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
-In-Reply-To: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
+On Wed, Oct 18, 2017 at 3:18 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> No real objections but I have some doubts about all the debug part.
+> I think that people hacking on sparse and who need to debug know
+> what they need and want to debug.
 
---U2Glc9nt2DajUKA7dsJvjkqIqUPLWkkWo
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+Right, this change is to allow a separate debug binary let say "dbg-sparse",
+to be execute from "sparse" when needed.
 
-Hello,
+Take the ptrlist ref count checking for example. I image have
+sparse --check-ptrlist, which will invoke dbg-sparse to do the
+checking. I expect the distro will include dbg-sparse as part
+of the sparse package as well.
 
-On 10/18/2017 11:26 PM, Christopher Li wrote:
-> This change allow sparse to build debug version of sparse
-> along side of the release version. The debug build of sparse
-> can be used by patches like ptrlist ref count to check the nest
-> loop modify usage. The debug build can add other verification feature
-> that might slow down sparse.
+The end result is that. The user of sparse, not sparse developers,
+can invoke sparse with those extra verification (at cost of slow
+down sparse) on the custom input source without modify and
+recompile sparse.
 
-I wonder about the name. From a debug build (in contrast to a release
-build) I would expect that it allows to debug sparse itself (Think: add
--g to gcc, or (not) -DNODEBUG for assert(3)), but I understand you use
-that term differently here.
+> For example, the OPT=0 is, IMO, useless as you generally need
+> others flags too. Also, when you debug, you generally need to rerun
+> things several times, so using extra options on the command line is
+> not ideal (a mechanism like local.mk is better suited but local.mk
+> itself is not).
 
-Why not do the the extra tests when called as (say)
+In that case, you can just OPT=0 into local.mk and problem solved?
+Even if you do that, you still need to provide OPT variable for overwrite
+purpose. Append and reset the whole variable is easy.
+Partial modify the content of variable from one to another is harder and
+annoying.
 
-	sparse --aggressive
+Can you clarify "but local.mk itself is not".
 
-=2E Then there is no need for an extra binary at all keeping the build
-system simple and that also makes it it easier to understand for users
-(but I might judge others by my own standards here?) For gcc this flag
-is -Wall, there isn't an extra binary either.
+> Also, what's the real need for dbgbuild/ & debug/ ?
+> IMO, it's a big complexification of all the rules with plenty of
+> duplicated things for very few, if any, benefits.
 
-Best regards
-Uwe
+Provide extra verification on user input files. Another candidate
+of those verification can be, the sorting of ptrlist.
+There is function  verify_seq_sorted () verify the list is indeed sorted.
+But that function currently is not turn on in sparse. Presumably
+it is used in the development phase of the ptr list sorting.
+That verification function can be turn on in the debug build for example.
 
-
---U2Glc9nt2DajUKA7dsJvjkqIqUPLWkkWo--
-
---G5RrnNAWmLFH5g2QNFXV8cQ7o60JhRSS7
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlnonZ8ACgkQwfwUeK3K
-7AnBAAf7BgBn1LQGgDABT2owwoliYBRzE7vvdpTGjwWzzMiNjkkN/JTf8bxGdrws
-gnbAVSQO/JRyC7XjwgXg8sqFV+4F1gErj3W+xpNgxF6B0FL/70bca6CmGzyIZK1W
-SvOABnWw4qYScCMqGt/of+lvzUHnvbKuWzgEaNjqVz6wPi/ebGAilFWLfOxJr9SK
-0hNm5K8+ejXRiDpj5I2cQKx6fasGpVAkWXwSvOJM9qUrDI987XhZcAA0JctrKmqw
-XyHtZQNiIrqoMbpawPNsUVwNkB9TgxiwGObwq+fUqHF47R2UI9bl6Gjiqd+ileRg
-XLCym9FRU8w8l59Hgt5HFxlbD0omNw==
-=KKWe
------END PGP SIGNATURE-----
-
---G5RrnNAWmLFH5g2QNFXV8cQ7o60JhRSS7--
+Chris
