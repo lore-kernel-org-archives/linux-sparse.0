@@ -1,92 +1,84 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [GIT PULL] debug build of sparse v4
-Date: Thu, 19 Oct 2017 21:39:08 +0200
-Message-ID: <CAMHZB6G_1NkgucsVN1oiw2na_9BZKCOgqS9yggEL517LPsFFcg@mail.gmail.com>
-References: <CANeU7QmUzmvhTVpiKmET76qgoZf60yxM3_URAt-auiR12trh4A@mail.gmail.com>
- <CAMHZB6Eg33Hg-ozFcVuBzp4HgHBeFApT2es4Bd0D=LuzLEw0MQ@mail.gmail.com> <CANeU7QmArhzduMQd-bBbCVeKpTAxROUA2OxJ+8K2v+A2Oug8yg@mail.gmail.com>
+From: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Subject: Re: [PATCH v1 15/27] compiler: Option to default to
+	hidden symbols
+Date: Thu, 19 Oct 2017 21:38:08 +0200
+Message-ID: <20171019193808.GI17331@wotan.suse.de>
+References: <20171011203027.11248-1-thgarnie@google.com>
+ <20171011203027.11248-16-thgarnie@google.com>
+ <20171012200201.GW11645@wotan.suse.de>
+ <CAJcbSZEJ-kjcRQD3uHm0QZuOvbHpg9FV=wn7v4-RweDG7J3uqg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f68.google.com ([209.85.213.68]:52793 "EHLO
-        mail-vk0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753011AbdJSTjK (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 19 Oct 2017 15:39:10 -0400
-Received: by mail-vk0-f68.google.com with SMTP id 126so6049523vkj.9
-        for <linux-sparse@vger.kernel.org>; Thu, 19 Oct 2017 12:39:09 -0700 (PDT)
-In-Reply-To: <CANeU7QmArhzduMQd-bBbCVeKpTAxROUA2OxJ+8K2v+A2Oug8yg@mail.gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xen.org>
+Content-Disposition: inline
+In-Reply-To: <CAJcbSZEJ-kjcRQD3uHm0QZuOvbHpg9FV=wn7v4-RweDG7J3uqg@mail.gmail.com>
+List-Unsubscribe: <https://lists.xen.org/cgi-bin/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xen.org>
+List-Help: <mailto:xen-devel-request@lists.xen.org?subject=help>
+List-Subscribe: <https://lists.xen.org/cgi-bin/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xen.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xen.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xen.org>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Michal Hocko <mhocko@suse.com>, Radim =?utf-8?B?S3LEjW3DocWZ?= <rkrcmar@redhat.com>, linux-doc@vger.kernel.org, Daniel Micay <danielmicay@gmail.com>, Len Brown <len.brown@intel.com>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, Jan H =?iso-8859-1?Q?=2E_Sch=F6nherr?= <jschoenh@amazon.de>, Alexei Starovoitov <ast@kernel.org>, virtualization@lists.linux-foundation.org, David Howells <dhowells@redhat.com>, Paul Gortmaker <paul.gortmaker@windriver.com>, Waiman Long <longman@redhat.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, Kernel Hardening <kernel-hardening@lists.openwall.com>, Christoph Lameter <cl@linux.com>, Alok Kataria <akataria@vmware.com>, the arch/x86 maintainers <x86@kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, Daniel Borkmann <daniel@iogearbox.net>, Jonatha
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>
 
-On Thu, Oct 19, 2017 at 6:39 PM, Christopher Li <sparse@chrisli.org> wrote:
-> On Wed, Oct 18, 2017 at 3:18 PM, Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
->> No real objections but I have some doubts about all the debug part.
->> I think that people hacking on sparse and who need to debug know
->> what they need and want to debug.
->
-> Right, this change is to allow a separate debug binary let say "dbg-sparse",
-> to be execute from "sparse" when needed.
-
-My point is: if "when needed" means "when sparse developpers
-need to debug something" then I really think all this is not needed
-as the dev can very well build the executable he needs, with the
-options he needs, use his own workflow, ...
-
-> Take the ptrlist ref count checking for example. I image have
-> sparse --check-ptrlist, which will invoke dbg-sparse to do the
-> checking. I expect the distro will include dbg-sparse as part
-> of the sparse package as well.
-
-Really? Are the distros interested in this sort of things? Is there
-a real need for it? Who do you really think will use this?
-
-> The end result is that. The user of sparse, not sparse developers,
-> can invoke sparse with those extra verification (at cost of slow
-> down sparse) on the custom input source without modify and
-> recompile sparse.
-
-Yes *can* ... but will they?
-Why isn't there a dbg-gcc, dbg-bash, ... ?
-
->> For example, the OPT=0 is, IMO, useless as you generally need
->> others flags too. Also, when you debug, you generally need to rerun
->> things several times, so using extra options on the command line is
->> not ideal (a mechanism like local.mk is better suited but local.mk
->> itself is not).
->
-> In that case, you can just OPT=0 into local.mk and problem solved?
-> Even if you do that, you still need to provide OPT variable for overwrite
-> purpose. Append and reset the whole variable is easy.
-> Partial modify the content of variable from one to another is harder and
-> annoying.
->
-> Can you clarify "but local.mk itself is not".
-
-If you have a sort of config file, or anything allowing to adapt things
-to your needs, you want at least to have a dot file for it.
-But for a project using git, you also want that the file doesn't interfer
-with git status but also with git clean (including git clean -x).
-
->> Also, what's the real need for dbgbuild/ & debug/ ?
->> IMO, it's a big complexification of all the rules with plenty of
->> duplicated things for very few, if any, benefits.
->
-> Provide extra verification on user input files. Another candidate
-> of those verification can be, the sorting of ptrlist.
-
-> There is function  verify_seq_sorted () verify the list is indeed sorted.
-> But that function currently is not turn on in sparse. Presumably
-> it is used in the development phase of the ptr list sorting.
-> That verification function can be turn on in the debug build for example.
-
-Yes *can* ...
-Same questions: who will use this and when? Are extra binaries and
-duplicated build rules a good answer for this?
-
-More broadly: what problem do you try to solve with these patches?
-What values do these patches bring to sparse?
-Does sparse need these patches?
-
--- Luc
+T24gV2VkLCBPY3QgMTgsIDIwMTcgYXQgMDQ6MTU6MTBQTSAtMDcwMCwgVGhvbWFzIEdhcm5pZXIg
+d3JvdGU6Cj4gT24gVGh1LCBPY3QgMTIsIDIwMTcgYXQgMTowMiBQTSwgTHVpcyBSLiBSb2RyaWd1
+ZXogPG1jZ3JvZkBrZXJuZWwub3JnPiB3cm90ZToKPiA+IE9uIFdlZCwgT2N0IDExLCAyMDE3IGF0
+IDAxOjMwOjE1UE0gLTA3MDAsIFRob21hcyBHYXJuaWVyIHdyb3RlOgo+ID4+IGRpZmYgLS1naXQg
+YS9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyLmggYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyLmgKPiA+
+PiBpbmRleCBlOTVhMjYzMWU1NDUuLjY5OTc3MTZmNzNiZiAxMDA2NDQKPiA+PiAtLS0gYS9pbmNs
+dWRlL2xpbnV4L2NvbXBpbGVyLmgKPiA+PiArKysgYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyLmgK
+PiA+PiBAQCAtNzgsNiArNzgsMTQgQEAgZXh0ZXJuIHZvaWQgX19jaGtfaW9fcHRyKGNvbnN0IHZv
+bGF0aWxlIHZvaWQgX19pb21lbSAqKTsKPiA+PiAgI2luY2x1ZGUgPGxpbnV4L2NvbXBpbGVyLWNs
+YW5nLmg+Cj4gPj4gICNlbmRpZgo+ID4+Cj4gPj4gKy8qIFVzZWZ1bCBmb3IgUG9zaXRpb24gSW5k
+ZXBlbmRlbnQgQ29kZSB0byByZWR1Y2UgZ2xvYmFsIHJlZmVyZW5jZXMgKi8KPiA+PiArI2lmZGVm
+IENPTkZJR19ERUZBVUxUX0hJRERFTgo+ID4+ICsjcHJhZ21hIEdDQyB2aXNpYmlsaXR5IHB1c2go
+aGlkZGVuKQo+ID4+ICsjZGVmaW5lIF9fZGVmYXVsdF92aXNpYmlsaXR5ICBfX2F0dHJpYnV0ZV9f
+KCh2aXNpYmlsaXR5ICgiZGVmYXVsdCIpKSkKPiA+Cj4gPiBEb2VzIHRoaXMgc3RpbGwgd29yayB3
+aXRoIENPTkZJR19MRF9ERUFEX0NPREVfREFUQV9FTElNSU5BVElPTiA/Cj4gCj4gSSBjYW5ub3Qg
+bWFrZSBpdCB3b3JrIHdpdGggb3Igd2l0aG91dCB0aGlzIGNoYW5nZS4gSG93IGlzIGl0IHN1cHBv
+c2VkCj4gdG8gYmUgdXNlZD8KClNhZGx5IEkgZG9uJ3QgdGhpbmsgbXVjaCBkb2N1bWVudGF0aW9u
+IHdhcyByZWFsbHkgYWRkZWQgYXMgcGFydCBvZiB0aGUgTmljaydzCmNvbW1pdHMgYWJvdXQgZmVh
+dHVyZSwgZXZlbiB0aG91Z2ggY29tbWl0IGI2NzA2N2YxMTc2ICgia2J1aWxkOiBhbGxvdyBhcmNo
+cyB0bwpzZWxlY3QgbGluayBkZWFkIGNvZGUvZGF0YSBlbGltaW5hdGlvbiIpICpkb2VzKiBzYXkg
+dGhpcyB3YXMgZG9jdW1lbnRlZC4KClNpZGUgcmFudDogdGhlIHdob2xlIENPTkZJR19MVE8gcmVt
+b3ZhbCB3YXMgbWVyZ2VkIGluIHRoZSBzYW1lIGNvbW1pdCB3aXRob3V0CnRoaXMgaGF2aW5nIGdv
+bmUgaW4gYXMgYSBzZXBhcmF0ZSBhdG9taWMgcGF0Y2guCgpOaWNrIGNhbiB5b3UgcHJvdmlkZSBh
+IGJpdCBtb3JlIGd1aWRhbmNlIGFib3V0IGhvdyB0byBnZXQgdGhpcyBmZWF0dXJlIGdvaW5nIG9y
+CnRlc3RlZCBvbiBhbiBhcmNoaXRlY3R1cmU/IE9yIGFyZSB5b3UganVzdCBzdGlja2luZyB0byBh
+c3N1bWluZyBmb2xrcyB1c2luZyB0aGUKbGlua2VyIC8gY29tcGlsZXIgZmxhZ3Mgd2lsbCBrbm93
+IHdoYXQgdG8gZG8/ICpTb21lKiBndWlkYW5jZSBjb3VsZCBoZWxwLgoKPiBGb3IgbWUgd2l0aCwg
+aXQgY3Jhc2hlcyB3aXRoIGEgYmFkIGNvbnNkZXYgYXQ6Cj4gaHR0cDovL2VsaXhpci5mcmVlLWVs
+ZWN0cm9ucy5jb20vbGludXgvbGF0ZXN0L3NvdXJjZS9kcml2ZXJzL3R0eS90dHlfaW8uYyNMMzE5
+NAoKRnJvbSBteSByZWFkaW5nIG9mIHRoZSBjb21taXQgbG9nIGhlIG9ubHkgaGFkIHRlc3RlZCBp
+dCB3aXRoIHdpdGggcG93ZXJwYzY0bGUsCmVhY2ggb3RoZXIgYXJjaGl0ZWN0dXJlIHdvdWxkIGhh
+dmUgdG8gZG8gd29yayB0byBnZXQgYXMgZmFyIGFzIGV2ZW4gYm9vdGluZy4KCkl0IHdvdWxkIHJl
+cXVpcmUgc29tZW9uZSB0aGVuIHRlc3RpbmcgTmljaydzIHBhdGNoZXMgYWdhaW5zdCBhIHdvcmtp
+bmcKcG93ZXJwYyBzZXR1cCB0byBlbnN1cmUgd2UgZG9uJ3QgcmVncmVzcyB0aGVyZS4KCj4gPj4g
+ZGlmZiAtLWdpdCBhL2luaXQvS2NvbmZpZyBiL2luaXQvS2NvbmZpZwo+ID4+IGluZGV4IGNjYjFk
+OGRhZjI0MS4uYjY0MDIwMWZjZmY3IDEwMDY0NAo+ID4+IC0tLSBhL2luaXQvS2NvbmZpZwo+ID4+
+ICsrKyBiL2luaXQvS2NvbmZpZwo+ID4+IEBAIC0xNjQ5LDYgKzE2NDksMTMgQEAgY29uZmlnIFBS
+T0ZJTElORwo+ID4+ICBjb25maWcgVFJBQ0VQT0lOVFMKPiA+PiAgICAgICBib29sCj4gPj4KPiA+
+PiArIwo+ID4+ICsjIERlZmF1bHQgdG8gaGlkZGVuIHZpc2liaWxpdHkgZm9yIGFsbCBzeW1ib2xz
+Lgo+ID4+ICsjIFVzZWZ1bCBmb3IgUG9zaXRpb24gSW5kZXBlbmRlbnQgQ29kZSB0byByZWR1Y2Ug
+Z2xvYmFsIHJlZmVyZW5jZXMuCj4gPj4gKyMKPiA+PiArY29uZmlnIERFRkFVTFRfSElEREVOCj4g
+Pj4gKyAgICAgYm9vbAo+ID4KPiA+IE5vdGUgaXQgaXMgZGVmYXVsdC4KPiA+Cj4gPiBIYXMgMC1k
+YXkgcmFuIHRocm91Z2ggdGhpcyBnaXQgdHJlZT8gSXQgc2hvdWxkIGJlIGVhc3kgdG8gZ2V0IGl0
+IGFkZGVkIGZvcgo+ID4gdGVzdGluZy4gQWxzbywgZXZlbiB0aG91Z2ggbW9zdCBjaGFuZ2VzIGFy
+ZSB4ODYgYmFzZWQgdGhlcmUgYXJlIHNvbWUgZ2VuZXJpYwo+ID4gY2hhbmdlcyBhbmQgSSdkIGxv
+dmUgYSB3YXJtIGZ1enp5IHRoaXMgd29uJ3QgYnJlYWsgb2RkIC8gcmFuZG9tIGJ1aWxkcy4KPiA+
+IEFsdGhvdWdoIDAtZGF5IGRvZXMgY292ZXIgYSBsb3Qgb2YgdGVzdCBjYXNlcywgaXQgb25seSBo
+YXMgbGltaXRlZCBydW4gdGltZQo+ID4gdGVzdHMuIFRoZXJlIGFyZSBzb21lIG90aGVyIHRlc3Qg
+YmVkcyB3aGljaCBhbHNvIGNvdmVyIHNvbWUgbW9yZSBvYnNjdXJlCj4gPiBhcmNoaXRlY3R1cmVz
+LiBIYXZpbmcgYSB0ZXN0IHBhc3Mgb24gR3VlbnRlcidzIHRlc3QgYmVkIHdvdWxkIGJlIG5pY2Ug
+dG8KPiA+IHNlZS4gRm9yIHRoYXQgcGxlYXNlIGNvb3JkaW5hdGUgd2l0aCBHdWVudGVyIGlmIGhl
+J3Mgd2lsbGluZyB0byBydW4gdGhpcwo+ID4gYSB0ZXN0IGZvciB5b3UuCj4gCj4gTm90IHlldCwg
+cGxhbiB0byBnaXZlIGEgdjEuNSB0byBLZWVzIENvb2sgdG8ga2VlcCBpbiBvbmUgb2YgaGlzIHRy
+ZWUKPiBmb3IgY291cGxlIHdlZWtzLiBJIGV4cGVjdCBpdCB3aWxsIGlkZW50aWZ5IGludGVyZXN0
+aW5nIGlzc3Vlcy4KCkkgYmV0IDopCgogIEx1aXMKCl9fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fClhlbi1kZXZlbCBtYWlsaW5nIGxpc3QKWGVuLWRldmVsQGxp
+c3RzLnhlbi5vcmcKaHR0cHM6Ly9saXN0cy54ZW4ub3JnL3hlbi1kZXZlbAo=
