@@ -1,36 +1,37 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] build: clean up $CFLAGS handling in the makefile
-Date: Thu, 26 Oct 2017 10:11:50 -0700
-Message-ID: <CANeU7Qmv5qcN-MDbwHRbF74Cahu6xCjzEZ3PAk3EEai93umdMA@mail.gmail.com>
-References: <20171025100222.5983-1-jlayton@kernel.org> <20171025142009.foxh2rblmfpxvm7d@ltop.local>
- <CANeU7Qnvvezdc62s-cAWNonw2cKOJPWH2xSdgTdAL4M4skSnJw@mail.gmail.com> <1509019885.29077.6.camel@kernel.org>
+From: Hedemann Harald <laundry@bestwesternpremierdubai.com>
+Subject: Urgent Reply Needed
+Date: Sun, 29 Oct 2017 09:40:48 +0100
+Message-ID: <00d2663abbf38123f21c66e9b515320f@bestwesternpremierdubai.com>
+Reply-To: hedemannharald@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:47511 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932137AbdJZRLv (ORCPT
+Received: from smtp01-smtp-4.daemonmail.net ([216.104.162.134]:43283 "EHLO
+        smtp01-smtp-4.daemonmail.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751080AbdJ2Iu1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 26 Oct 2017 13:11:51 -0400
-Received: by mail-yw0-f196.google.com with SMTP id u142so3528622ywg.4
-        for <linux-sparse@vger.kernel.org>; Thu, 26 Oct 2017 10:11:51 -0700 (PDT)
-In-Reply-To: <1509019885.29077.6.camel@kernel.org>
+        Sun, 29 Oct 2017 04:50:27 -0400
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Oct 26, 2017 at 5:11 AM, Jeff Layton <jlayton@kernel.org> wrote:
->
-> It's not clear to me what Chris is suggesting below. It sounds sort of
-> like you're OK with the patch I originally suggested, but want different
-> variable names?
->
-> Perhaps instead of describing it, you could roll up an alternative patch
-> that shows what you would prefer to see here?
 
-Sure. I am traveling today so I am not able to send out the patch today.
 
-I will do that.
+-- 
+Hi, compliments of the best of moment!
 
-Chris
+There is a viable business opportunity in our company to supply the raw
+materials we use in our production which I've been buying from your
+region in my former capacity as purchase officer of our company. I
+require partnership of a reliable and trustworthy individuals in your
+region, the raw materials is hugely available in your region.
+
+The opportunity will not interfere with your present job as it doesn't
+matter your area of specialization.
+
+Should you desire to know more about the opportunity, kindly write me
+back to enable me avail you the full details of the offer.
+
+Thanks and Regards
+Mr.Hedemann Harald
