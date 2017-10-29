@@ -1,18 +1,18 @@
 From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [GIT PULL] llvm fixes
-Date: Mon, 30 Oct 2017 07:13:20 +0800
-Message-ID: <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
+Date: Mon, 30 Oct 2017 07:31:28 +0800
+Message-ID: <CANeU7QmSeq8x4D3KK4_qkfjzb1T+4J=bJsnKNggBZrh6wC7n8Q@mail.gmail.com>
 References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:47247 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751316AbdJ2XNV (ORCPT
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:49078 "EHLO
+        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751319AbdJ2Xb3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 29 Oct 2017 19:13:21 -0400
-Received: by mail-yw0-f172.google.com with SMTP id u142so10018016ywg.4
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Oct 2017 16:13:21 -0700 (PDT)
+        Sun, 29 Oct 2017 19:31:29 -0400
+Received: by mail-yw0-f176.google.com with SMTP id q1so10042157ywh.5
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Oct 2017 16:31:29 -0700 (PDT)
 In-Reply-To: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -24,29 +24,44 @@ On Mon, Sep 18, 2017 at 5:51 PM, Luc Van Oostenryck
 > Chris,
 >
 > Please, pull these patches for master.
->
-> No surprises here, it's just all March's good old fixes
-> for sparse-llvm which have been rebased on top of rc5.
->
 
-Hi Luc,
+Ah, I can't find the exact corresponding patch series in the email.
+So I will just comment from the git change.
+=========quote===========
+commit ae7fd3b06c225fd8faf67c3e20db07b64eca7fc3
+ don't output value of anonymous symbol's pointer
 
-Sorry for the delay. I will start to reply to your patch email in this series.
-I have some feed back store on my computer a while back but I haven't
-have to the chance send out the email.
+    The value of this pointer is of no use unless you're
+    using a debugger (or just to see if two things are
+    identical or not) and it's presence produces noise
+    when comparing the output of two runs for testing.
 
-Over all the the series seems good. It seems have some measurable
-speed up in my stress test. There is one of two patch I will comment more
-in the follow up email. I will reply in the order of the patch send
-out. If a patch
-does not have comment, that means it looks good to me.
+    Change this by issuing it only if 'verbose' is set.
+diff --git a/linearize.c b/linearize.c
+index 42d1680..b69f838 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -120,7 +120,7 @@ const char *show_pseudo(pseudo_t pseudo)
+                        break;
+                }
+                expr = sym->initializer;
+-               snprintf(buf, 64, "<anon symbol:%p>", sym);
++               snprintf(buf, 64, "<anon symbol:%p>", verbose ? sym : NULL);
+=======================================================
 
-BTW, I think a lot of the 68 patches can be break into smaller series.
-There is some inter dependency but not that much especially relate to
-the testsuite. Smaller series will make it easier to review.
+Very trivial feed back:
 
-More email to follow up.
+I think it is better not print out the %p for NULL.
+Just skip the %p if not verbose was set.
 
-Thanks for the series and sorry for the delay.
+BTW, I understand you are reluctant to make trivial change to very
+old series of branch. That make sense.
+
+In that case, I can make a topic branch to track the feedback and fix up
+as incremental change. Then integrate that branch when all the feedback
+settle down. I don't mind writing some feedback patches myself if
+you prefer.
+
+Thanks
 
 Chris
