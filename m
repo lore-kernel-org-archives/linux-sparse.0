@@ -1,100 +1,90 @@
-From: Josh Triplett <josh@joshtriplett.org>
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
 Subject: Re: [PATCH 29/36] build: use git-clean
-Date: Sun, 5 Nov 2017 12:38:45 -0800
-Message-ID: <20171105203845.inkp5mcrm634lmov@s>
+Date: Sun, 5 Nov 2017 21:50:17 +0100
+Message-ID: <00d1e1c1-c35b-85e6-0a91-c3302e14dd14@kleine-koenig.org>
 References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
  <20171105162544.72960-29-luc.vanoostenryck@gmail.com>
  <20171105174100.r3y4o4m2i47d25o5@s>
  <20171105201629.qwitgngzeb7jzr6n@ltop.local>
+ <20171105203845.inkp5mcrm634lmov@s>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="mR8tdSdX1Kx8H1G0thQ7FLBwwRRHtA8U1"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay6-d.mail.gandi.net ([217.70.183.198]:52269 "EHLO
-        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750888AbdKEUit (ORCPT
+Received: from antares.kleine-koenig.org ([94.130.110.236]:60616 "EHLO
+        antares.kleine-koenig.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750724AbdKEUuW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 15:38:49 -0500
-Content-Disposition: inline
-In-Reply-To: <20171105201629.qwitgngzeb7jzr6n@ltop.local>
+        Sun, 5 Nov 2017 15:50:22 -0500
+In-Reply-To: <20171105203845.inkp5mcrm634lmov@s>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: linux-sparse@vger.kernel.org, Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
+To: Josh Triplett <josh@joshtriplett.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-On Sun, Nov 05, 2017 at 09:16:31PM +0100, Luc Van Oostenryck wrote:
-> On Sun, Nov 05, 2017 at 09:41:02AM -0800, Josh Triplett wrote:
-> > On Sun, Nov 05, 2017 at 05:25:37PM +0100, Luc Van Oostenryck wrote:
-> > > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> > > ---
-> > >  Makefile | 12 ++----------
-> > >  1 file changed, 2 insertions(+), 10 deletions(-)
-> > > 
-> > > diff --git a/Makefile b/Makefile
-> > > index afc1efe98..f0f7a5b69 100644
-> > > --- a/Makefile
-> > > +++ b/Makefile
-> > > @@ -233,16 +233,8 @@ check: all
-> > >  	$(Q)cd validation && ./test-suite
-> > >  
-> > >  
-> > > -clean: clean-check
-> > > -	@rm -f *.[oa] .*.d $(PROGRAMS) version.h
-> > > -clean-check:
-> > > +clean: FORCE
-> > >  	@echo '     CLEAN'
-> > > -	@find validation/ \( -name "*.c.output.expected" \
-> > > -	                 -o -name "*.c.output.got" \
-> > > -	                 -o -name "*.c.output.diff" \
-> > > -	                 -o -name "*.c.error.expected" \
-> > > -	                 -o -name "*.c.error.got" \
-> > > -	                 -o -name "*.c.error.diff" \
-> > > -	                 \) -exec rm {} \;
-> > > +	@git clean -q -d -x -e .sparse.mk -e '*.[ch]'
-> > 
-> > No, you can't use git-clean here, for two reasons.
-> > 
-> > First, it has to be possible to build, and clean, sparse from a
-> > tarball release, not just a git repository.
-> > 
-> > And second, even if not for that, this should *not* use -x or -d, *only*
-> > -X. Otherwise, you might remove, say, a pile of carefully written
-> > patches and cover letters sitting in the user's Sparse source directory.
-> 
-> Hehe, I thought this would be somehow controversial ;)
-> 
-> TBH, I'm far from conviced for the first point.
-> There hasn't been any tarbal release since 2014 and, unless I'm
-> mistaken, people can't anymore get a tarball from kernel.org's cgit.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--mR8tdSdX1Kx8H1G0thQ7FLBwwRRHtA8U1
+Content-Type: multipart/mixed; boundary="FcLSM4JSA47NxQjldmJE6oQLaaiqNla1k";
+ protected-headers="v1"
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+To: Josh Triplett <josh@joshtriplett.org>,
+ Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
+Message-ID: <00d1e1c1-c35b-85e6-0a91-c3302e14dd14@kleine-koenig.org>
+Subject: Re: [PATCH 29/36] build: use git-clean
+References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
+ <20171105162544.72960-29-luc.vanoostenryck@gmail.com>
+ <20171105174100.r3y4o4m2i47d25o5@s>
+ <20171105201629.qwitgngzeb7jzr6n@ltop.local>
+ <20171105203845.inkp5mcrm634lmov@s>
+In-Reply-To: <20171105203845.inkp5mcrm634lmov@s>
 
-As far as I can tell,
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/snapshot/sparse-0.5.1.tar.gz
-still works, for instance.
+--FcLSM4JSA47NxQjldmJE6oQLaaiqNla1k
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-> The real question would be: "is there anybody, doing some kind of
-> development on sparse and who won't use git?"
+On 11/05/2017 09:38 PM, Josh Triplett wrote:
+> On Sun, Nov 05, 2017 at 09:16:31PM +0100, Luc Van Oostenryck wrote:
+>> The real question would be: "is there anybody, doing some kind of
+>> development on sparse and who won't use git?"
+>=20
+> Sure: anyone doing packaging. If someone wants to package Sparse for a
+> distribution, they'll likely do so in a way that does not include .git
+> in the source package. And if that package wants to "make clean" for an=
+y
+> reason, or if someone grabs the source from that distribution for
+> development and happens to run "make clean", that would be *bad*.
 
-Sure: anyone doing packaging. If someone wants to package Sparse for a
-distribution, they'll likely do so in a way that does not include .git
-in the source package. And if that package wants to "make clean" for any
-reason, or if someone grabs the source from that distribution for
-development and happens to run "make clean", that would be *bad*.
+Ack with my sparse Debian package maintainer hat on. If you check the
+Debian build logs (e.g.
+https://buildd.debian.org/status/fetch.php?pkg=3Dsparse&arch=3Darm64&ver=3D=
+0.5.1-2&stamp=3D1506419417&raw=3D0)
+you can see that the first relevant step after extracting the source tar
+and applying patches is to run make clean.
 
-Worse yet: I keep my home directory in git, and would very much not like
-"git clean" run in *that* if .git doesn't exist in Sparse. I'd be
-immediately filing a "critical" bug report about data loss against the
-package, and trying to restore what data I can from backups.
+Best regards
+Uwe
 
-> For the second point, well ... I purposely added '-e *.[ch]' to
-> avoid some problems and if I call 'make clean' I expect that things
-> like patches and cover letter are removed, but I agree that my
-> expectations here most probably doesn't match other's.
 
-I most assuredly would not expect "make clean" to do this. I regularly
-"make clean" in repositories while having valuable files in the
-directory: patches, cover-letters, lists of email addresess to CC
-patches to, benchmark results, etc.
+--FcLSM4JSA47NxQjldmJE6oQLaaiqNla1k--
 
-> I think I'll drop this patch and continue to directly use
-> 'git clean -x' when I needed it.
+--mR8tdSdX1Kx8H1G0thQ7FLBwwRRHtA8U1
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-Thank you.
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAln/eYkACgkQwfwUeK3K
+7AlHTgf+LSoyTdXE+94N8a+dE8GwoEEScvU7v7TRHXS3H9VJIyQlP0BOldMKeJ31
+GvU/e9CdcSvCdU5AljRyqYT5o+Haok6qAUEMJ3k/WTIF3pZ7XVyTIv3GzY2K2ieX
+IaMz7A+g+Z8dzA49aEEAZufxvI2+gr7AAav7zPmWsCgfNCHgJgo7XAOV2yeR7WdU
+wPciEMZmJzY8C01t7nQ+v+2Pwzc5bsG/jI47ZIdtWO9M8Qx3DOHljbKJv8jXyrLI
+Ez4M1IfXznrCYl5vx/Rai35RI+8dWucVihxIkqGz7r19yMQ0FBFHHMJlvMZi3gix
+BHs7rQPF398oefwq7sdPiQ2xn8sgBQ==
+=xVrJ
+-----END PGP SIGNATURE-----
+
+--mR8tdSdX1Kx8H1G0thQ7FLBwwRRHtA8U1--
