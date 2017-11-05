@@ -1,133 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 07/36] build: remove unused support for pkgconfig
-Date: Sun,  5 Nov 2017 17:25:15 +0100
-Message-ID: <20171105162544.72960-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 08/36] build: use '_OBJS' instead of '_EXTRA_DEPS'
+Date: Sun,  5 Nov 2017 17:25:16 +0100
+Message-ID: <20171105162544.72960-8-luc.vanoostenryck@gmail.com>
 References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:51324 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750819AbdKEQ0A (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:55133 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750731AbdKEQ0B (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 11:26:00 -0500
-Received: by mail-wm0-f67.google.com with SMTP id b9so9858026wmh.0
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 08:25:59 -0800 (PST)
+        Sun, 5 Nov 2017 11:26:01 -0500
+Received: by mail-wm0-f66.google.com with SMTP id r68so9818523wmr.3
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 08:26:00 -0800 (PST)
 In-Reply-To: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Sparse being a library was installed as such and with support for
-pkgconfig.
+Some programs are composed of several source files other than the
+main one. These files need then to be added at linking time.
+These extra file are currently specified using variables named
+"<program-name>_EXTRA_DEPS" but the way these variables are used
+make that they can only hold .o files (or .a ones) and are not
+some kind of generic dependencie.
 
-However, it seems that sparse is only used for its tools and not
-as a library (at least not as an external one) and currently
-doesn't offer a stable interface.
-
-For now, remove the support for this, it will be easy enough to
-restore it if there is a new need.
+Make this explicit by using the suffix '_OBJS' instead.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- .gitignore   |  1 -
- Makefile     | 27 +++------------------------
- sparse.pc.in |  9 ---------
- 3 files changed, 3 insertions(+), 34 deletions(-)
- delete mode 100644 sparse.pc.in
+ Makefile | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/.gitignore b/.gitignore
-index 44218a2fe..9f996dc87 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -7,7 +7,6 @@
- 
- # generated
- pre-process.h
--sparse.pc
- version.h
- 
- # programs
 diff --git a/Makefile b/Makefile
-index bc4469410..bd8a08f13 100644
+index bd8a08f13..eb7154992 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -48,11 +48,8 @@ endif
- DESTDIR=
- PREFIX ?= $(HOME)
- BINDIR=$(PREFIX)/bin
--LIBDIR=$(PREFIX)/lib
- MANDIR=$(PREFIX)/share/man
- MAN1DIR=$(MANDIR)/man1
--INCLUDEDIR=$(PREFIX)/include
--PKGCONFIGDIR=$(LIBDIR)/pkgconfig
- 
- PROGRAMS=test-lexing test-parsing obfuscate compile graph sparse \
- 	 test-linearize example test-unssa test-dissect ctags
-@@ -105,9 +102,6 @@ else
- $(warning Your system does not have llvm, disabling sparse-llvm)
- endif
- 
--LIB_H=    token.h parse.h lib.h symbol.h scope.h expression.h target.h \
--	  linearize.h bitmap.h ident-list.h compat.h flow.h allocate.h \
--	  storage.h ptrlist.h dissect.h
- 
- LIB_OBJS= target.o parse.o tokenize.o pre-process.o symbol.o lib.o scope.o \
- 	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
-@@ -151,12 +145,6 @@ define INSTALL_FILE
- 
- endef
- 
--SED_PC_CMD = 's|@version@|$(VERSION)|g;		\
--	      s|@prefix@|$(PREFIX)|g;		\
--	      s|@libdir@|$(LIBDIR)|g;		\
--	      s|@includedir@|$(INCLUDEDIR)|g'
--
--
- 
- # Allow users to override build settings without dirtying their trees
- # For debugging, put this in local.mk:
-@@ -166,24 +154,15 @@ SED_PC_CMD = 's|@version@|$(VERSION)|g;		\
- -include local.mk
- 
- 
--all: $(PROGRAMS) sparse.pc
-+all: $(PROGRAMS)
- 
--all-installable: $(INST_PROGRAMS) $(LIBS) $(LIB_H) sparse.pc
-+all-installable: $(INST_PROGRAMS)
- 
- install: all-installable
- 	$(Q)install -d $(DESTDIR)$(BINDIR)
--	$(Q)install -d $(DESTDIR)$(LIBDIR)
- 	$(Q)install -d $(DESTDIR)$(MAN1DIR)
--	$(Q)install -d $(DESTDIR)$(INCLUDEDIR)/sparse
--	$(Q)install -d $(DESTDIR)$(PKGCONFIGDIR)
- 	$(foreach f,$(INST_PROGRAMS),$(call INSTALL_EXEC,$f,$(BINDIR)))
+@@ -70,8 +70,8 @@ GTK_CFLAGS := $(shell $(PKG_CONFIG) --cflags gtk+-$(GTK_VERSION))
+ GTK_LIBS := $(shell $(PKG_CONFIG) --libs gtk+-$(GTK_VERSION))
+ PROGRAMS += test-inspect
+ INST_PROGRAMS += test-inspect
+-test-inspect_EXTRA_DEPS := ast-model.o ast-view.o ast-inspect.o
+-test-inspect_OBJS := test-inspect.o $(test-inspect_EXTRA_DEPS)
++test-inspect_OBJS := test-inspect.o
++test-inspect_OBJS += ast-model.o ast-view.o ast-inspect.o
+ $(test-inspect_OBJS) $(test-inspect_OBJS:.o=.sc): CFLAGS += $(GTK_CFLAGS)
+ test-inspect_EXTRA_OBJS := $(GTK_LIBS)
+ else
+@@ -165,9 +165,9 @@ install: all-installable
  	$(foreach f,$(INST_MAN1),$(call INSTALL_FILE,$f,$(MAN1DIR)))
--	$(foreach f,$(LIBS),$(call INSTALL_FILE,$f,$(LIBDIR)))
--	$(foreach f,$(LIB_H),$(call INSTALL_FILE,$f,$(INCLUDEDIR)/sparse))
--	$(call INSTALL_FILE,sparse.pc,$(PKGCONFIGDIR))
--
--sparse.pc: sparse.pc.in
--	$(QUIET_GEN)sed $(SED_PC_CMD) sparse.pc.in > sparse.pc
  
  
- compile_EXTRA_DEPS = compile-i386.o
-@@ -219,7 +198,7 @@ selfcheck: $(ALL_OBJS:.o=.sc)
+-compile_EXTRA_DEPS = compile-i386.o
++compile_OBJS := compile-i386.o
+ 
+-$(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_EXTRA_DEPS) $(LIBS)))
++$(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_OBJS) $(LIBS)))
+ $(PROGRAMS): % : %.o 
+ 	$(QUIET_LINK)$(LD) $(LDFLAGS) -o $@ $^ $($@_EXTRA_OBJS)
+ 
+@@ -193,7 +193,7 @@ pre-process.sc: CHECKER_FLAGS += -Wno-vla
+ %.sc: %.c sparse
+ 	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
+ 
+-ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
++ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_OBJS))
+ selfcheck: $(ALL_OBJS:.o=.sc)
  
  
- clean: clean-check
--	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h sparse.pc version.h
-+	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) pre-process.h version.h
- 
- dist:
- 	@if test "$(SPARSE_VERSION)" != "v$(VERSION)" ; then \
-diff --git a/sparse.pc.in b/sparse.pc.in
-deleted file mode 100644
-index f1281c97a..000000000
---- a/sparse.pc.in
-+++ /dev/null
-@@ -1,9 +0,0 @@
--prefix=@prefix@
--libdir=@libdir@
--includedir=@includedir@
+-- 
+2.14.0
+
