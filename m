@@ -1,51 +1,39 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 29/36] build: use git-clean
-Date: Sun, 5 Nov 2017 21:58:49 +0100
-Message-ID: <20171105205846.pt2dloi3dwxrccgi@ltop.local>
+Date: Mon, 6 Nov 2017 07:09:11 +0800
+Message-ID: <CANeU7Qn84dG+AfncgrmmdtM3WnTk7J6JpMxaGMtKyoESGMyPdA@mail.gmail.com>
 References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
- <20171105162544.72960-29-luc.vanoostenryck@gmail.com>
- <20171105174100.r3y4o4m2i47d25o5@s>
- <20171105201629.qwitgngzeb7jzr6n@ltop.local>
- <20171105203845.inkp5mcrm634lmov@s>
- <00d1e1c1-c35b-85e6-0a91-c3302e14dd14@kleine-koenig.org>
+ <20171105162544.72960-29-luc.vanoostenryck@gmail.com> <20171105174100.r3y4o4m2i47d25o5@s>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:55799 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751058AbdKEU6v (ORCPT
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:43245 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751278AbdKEXJM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 15:58:51 -0500
-Received: by mail-wm0-f42.google.com with SMTP id y83so10468360wmc.4
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 12:58:51 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <00d1e1c1-c35b-85e6-0a91-c3302e14dd14@kleine-koenig.org>
+        Sun, 5 Nov 2017 18:09:12 -0500
+Received: by mail-yw0-f193.google.com with SMTP id y75so6490625ywg.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 15:09:12 -0800 (PST)
+In-Reply-To: <20171105174100.r3y4o4m2i47d25o5@s>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, linux-sparse@vger.kernel.org
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>, =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
 
-On Sun, Nov 05, 2017 at 09:50:17PM +0100, Uwe Kleine-König wrote:
-> On 11/05/2017 09:38 PM, Josh Triplett wrote:
-> > On Sun, Nov 05, 2017 at 09:16:31PM +0100, Luc Van Oostenryck wrote:
-> >> The real question would be: "is there anybody, doing some kind of
-> >> development on sparse and who won't use git?"
-> > 
-> > Sure: anyone doing packaging. If someone wants to package Sparse for a
-> > distribution, they'll likely do so in a way that does not include .git
-> > in the source package. And if that package wants to "make clean" for any
-> > reason, or if someone grabs the source from that distribution for
-> > development and happens to run "make clean", that would be *bad*.
-> 
-> Ack with my sparse Debian package maintainer hat on. If you check the
-> Debian build logs (e.g.
-> https://buildd.debian.org/status/fetch.php?pkg=sparse&arch=arm64&ver=0.5.1-2&stamp=1506419417&raw=0)
-> you can see that the first relevant step after extracting the source tar
-> and applying patches is to run make clean.
+On Mon, Nov 6, 2017 at 1:41 AM, Josh Triplett <josh@joshtriplett.org> wrote:
+> No, you can't use git-clean here, for two reasons.
+>
+> First, it has to be possible to build, and clean, sparse from a
+> tarball release, not just a git repository.
 
-OK, then it's definitively not an option.
+I totally agree with Josh,
 
-Thanks to both of you.
+Sparse should be able to build clean from just tar balls
+without git.
 
--- Luc
+You can still download the sparse tar ball from KORG
+using snapshot for example.
+
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/snapshot/sparse-0.5.1.tar.gz
+
+Chris
