@@ -1,50 +1,63 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [GIT PULL] llvm fixes
-Date: Sun, 5 Nov 2017 18:03:52 +0100
-Message-ID: <20171105170349.o7r7z3qb4a36pmtf@ltop.local>
+Date: Sun, 5 Nov 2017 18:10:15 +0100
+Message-ID: <20171105171013.mktkihyuuagqthaq@ltop.local>
 References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
  <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
- <CANeU7Qk4AGhSzzpPXT1-NmWRzSprUXEjWm6o1iy8yKAb-TceQg@mail.gmail.com>
+ <CANeU7QnFkJC4YePAdSTmKXNKiraCZHKJPSaNbKVPqdf01NhrYg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f43.google.com ([74.125.82.43]:53304 "EHLO
-        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750799AbdKERD6 (ORCPT
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:52070 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750778AbdKERKS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 12:03:58 -0500
-Received: by mail-wm0-f43.google.com with SMTP id r196so9931817wmf.2
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 09:03:57 -0800 (PST)
+        Sun, 5 Nov 2017 12:10:18 -0500
+Received: by mail-wm0-f51.google.com with SMTP id b9so9977640wmh.0
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 09:10:18 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Qk4AGhSzzpPXT1-NmWRzSprUXEjWm6o1iy8yKAb-TceQg@mail.gmail.com>
+In-Reply-To: <CANeU7QnFkJC4YePAdSTmKXNKiraCZHKJPSaNbKVPqdf01NhrYg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Nov 05, 2017 at 04:49:37PM +0800, Christopher Li wrote:
-> >commit 5674da2d1af2467605fcc9b798fb54ee2d28efc7
+On Sun, Nov 05, 2017 at 04:29:57PM +0800, Christopher Li wrote:
+> >commit e4a0824120939235e40277a57425a72fbfcd5b9b
 > >Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> >Date:   Mon Mar 20 15:18:53 2017 +0100
-> >
-> >    canonicalize compare instructions
-> >
-> >    Currently only commutative instructions are canonicalized
-> >    (the "simpler" operands, often a constant, is forced, if present
-> >    to be in the second operand). This improve CSE (more cases are
-> >    considered as equivalent) and help to reduce the number of "pattern"
-> >    to be handled at simplification.
+> >Date:   Sun Mar 26 19:35:14 2017 +0200
 > >
 > 
-> 
-> Notice that LT and GT and equivalent instructions after swapping the src.
-> Another way to do it we might just remove one kind of instruction from the
-> sparse IR. From the linearization point just map GT into LT and swap the source.
-> 
-> So the IR does not allow those duplicated equilateral instructions. There is
-> less canonization to be done.
+> I think this patch ideally should be combined with the next patch.
+> As it is, this patch is not self contain. There is no user of this table.
 
-The principal and most important action done during canonicalization is
-insuring that constants are on the RHS.
+I'm fine with this. Certainly when:
+*) the user is introduced in the next patch  
+*) there is 'static but unused' warnings issued
+
+> ...
+> > static int simplify_seteq_setne(struct instruction *insn, long long value)
+> > {
+> >       pseudo_t old = insn->src1;
+> >@@ -484,7 +460,7 @@ static int simplify_seteq_setne(struct instruction *insn, long long value)
+> >               // and similar for setne/eq ... 0/1
+> >               src1 = def->src1;
+> >               src2 = def->src2;
+> >-              insn->opcode = compare_opcode(opcode, inverse);
+> >+              insn->opcode = inverse ? opcode_table[opcode].negate : opcode;
+> 
+> I think it would be better to have some kind of assert check here, the opcode
+> you swap from the table is indeep opcode. Because you assign the opcode
+> array using sparse index. It is easy to miss a spot creating the empty slot in
+> the table.
+
+Sorry, I see the words, I sorta gues what you mean but I can't parse
+what you wrote.
+
+> Also, the opcode table might be able to compressed only contain
+> section of the BINCMP opcodes.
+
+Yes, it's something that may be done after all the related changes
+are done if the speedup is worth the added complexity.
 
 -- Luc
