@@ -1,56 +1,100 @@
 From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH 21/36] build: no need to clean *.so and SLIB_FILE
-Date: Sun, 5 Nov 2017 12:30:54 -0800
-Message-ID: <20171105203054.25623mvmathjndu2@s>
+Subject: Re: [PATCH 29/36] build: use git-clean
+Date: Sun, 5 Nov 2017 12:38:45 -0800
+Message-ID: <20171105203845.inkp5mcrm634lmov@s>
 References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
- <20171105162544.72960-21-luc.vanoostenryck@gmail.com>
- <20171105174807.b4p6hmthwammarbv@s>
- <20171105200629.hkffk2l5zsev24mm@ltop.local>
+ <20171105162544.72960-29-luc.vanoostenryck@gmail.com>
+ <20171105174100.r3y4o4m2i47d25o5@s>
+ <20171105201629.qwitgngzeb7jzr6n@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from relay3-d.mail.gandi.net ([217.70.183.195]:52109 "EHLO
-        relay3-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750724AbdKEUa6 (ORCPT
+Received: from relay6-d.mail.gandi.net ([217.70.183.198]:52269 "EHLO
+        relay6-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750888AbdKEUit (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 15:30:58 -0500
+        Sun, 5 Nov 2017 15:38:49 -0500
 Content-Disposition: inline
-In-Reply-To: <20171105200629.hkffk2l5zsev24mm@ltop.local>
+In-Reply-To: <20171105201629.qwitgngzeb7jzr6n@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: linux-sparse@vger.kernel.org, Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>
 
-On Sun, Nov 05, 2017 at 09:06:31PM +0100, Luc Van Oostenryck wrote:
-> On Sun, Nov 05, 2017 at 09:48:07AM -0800, Josh Triplett wrote:
-> > On Sun, Nov 05, 2017 at 05:25:29PM +0100, Luc Van Oostenryck wrote:
+On Sun, Nov 05, 2017 at 09:16:31PM +0100, Luc Van Oostenryck wrote:
+> On Sun, Nov 05, 2017 at 09:41:02AM -0800, Josh Triplett wrote:
+> > On Sun, Nov 05, 2017 at 05:25:37PM +0100, Luc Van Oostenryck wrote:
 > > > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > > > ---
-> > >  Makefile | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > >  Makefile | 12 ++----------
+> > >  1 file changed, 2 insertions(+), 10 deletions(-)
 > > > 
 > > > diff --git a/Makefile b/Makefile
-> > > index a8578c305..23c334132 100644
+> > > index afc1efe98..f0f7a5b69 100644
 > > > --- a/Makefile
 > > > +++ b/Makefile
-> > > @@ -207,7 +207,7 @@ version.h: FORCE
+> > > @@ -233,16 +233,8 @@ check: all
+> > >  	$(Q)cd validation && ./test-suite
 > > >  
 > > >  
-> > >  clean: clean-check
-> > > -	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) version.h
-> > > +	rm -f *.[oa] .*.d $(PROGRAMS) $(SLIB_FILE) version.h
+> > > -clean: clean-check
+> > > -	@rm -f *.[oa] .*.d $(PROGRAMS) version.h
+> > > -clean-check:
+> > > +clean: FORCE
+> > >  	@echo '     CLEAN'
+> > > -	@find validation/ \( -name "*.c.output.expected" \
+> > > -	                 -o -name "*.c.output.got" \
+> > > -	                 -o -name "*.c.output.diff" \
+> > > -	                 -o -name "*.c.error.expected" \
+> > > -	                 -o -name "*.c.error.got" \
+> > > -	                 -o -name "*.c.error.diff" \
+> > > -	                 \) -exec rm {} \;
+> > > +	@git clean -q -d -x -e .sparse.mk -e '*.[ch]'
 > > 
-> > You didn't remove SLIB_FILE here. And also, this should get squashed
-> > into the patch that stops building these.
+> > No, you can't use git-clean here, for two reasons.
+> > 
+> > First, it has to be possible to build, and clean, sparse from a
+> > tarball release, not just a git repository.
+> > 
+> > And second, even if not for that, this should *not* use -x or -d, *only*
+> > -X. Otherwise, you might remove, say, a pile of carefully written
+> > patches and cover letters sitting in the user's Sparse source directory.
 > 
-> I know, this patch only remove the '*.so' which was redundant with
-> $(SLIB_FILE).
-> This was before I decided to remove everything related to shared lib.
+> Hehe, I thought this would be somehow controversial ;)
+> 
+> TBH, I'm far from conviced for the first point.
+> There hasn't been any tarbal release since 2014 and, unless I'm
+> mistaken, people can't anymore get a tarball from kernel.org's cgit.
 
-Ah, I see. The subject seemed likt it was saying "no need to clean
-either of these", rather than "no need to clean both, one suffices".
+As far as I can tell,
+https://git.kernel.org/pub/scm/devel/sparse/sparse.git/snapshot/sparse-0.5.1.tar.gz
+still works, for instance.
 
-> And yes, once shared are removed, it's simpler to remove everything
-> at the same time. I'll do that in next version.
+> The real question would be: "is there anybody, doing some kind of
+> development on sparse and who won't use git?"
 
-Thanks!
+Sure: anyone doing packaging. If someone wants to package Sparse for a
+distribution, they'll likely do so in a way that does not include .git
+in the source package. And if that package wants to "make clean" for any
+reason, or if someone grabs the source from that distribution for
+development and happens to run "make clean", that would be *bad*.
+
+Worse yet: I keep my home directory in git, and would very much not like
+"git clean" run in *that* if .git doesn't exist in Sparse. I'd be
+immediately filing a "critical" bug report about data loss against the
+package, and trying to restore what data I can from backups.
+
+> For the second point, well ... I purposely added '-e *.[ch]' to
+> avoid some problems and if I call 'make clean' I expect that things
+> like patches and cover letter are removed, but I agree that my
+> expectations here most probably doesn't match other's.
+
+I most assuredly would not expect "make clean" to do this. I regularly
+"make clean" in repositories while having valuable files in the
+directory: patches, cover-letters, lists of email addresess to CC
+patches to, benchmark results, etc.
+
+> I think I'll drop this patch and continue to directly use
+> 'git clean -x' when I needed it.
+
+Thank you.
