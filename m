@@ -1,150 +1,79 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: [PATCH] Simplify expr->flags assignement
-Date: Sun, 5 Nov 2017 02:54:49 -0500
-Message-ID: <CANeU7Qn=cU4xxiweJf0KHCgCcLQxabmfUJ5NNEjj+d9rWyKFnw@mail.gmail.com>
+Subject: Re: [GIT PULL] llvm fixes
+Date: Sun, 5 Nov 2017 16:29:57 +0800
+Message-ID: <CANeU7QnFkJC4YePAdSTmKXNKiraCZHKJPSaNbKVPqdf01NhrYg@mail.gmail.com>
+References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com> <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:54007 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750942AbdKEHyv (ORCPT
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:53774 "EHLO
+        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751675AbdKEI36 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 02:54:51 -0500
-Received: by mail-yw0-f196.google.com with SMTP id q126so5564754ywq.10
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 00:54:50 -0700 (PDT)
+        Sun, 5 Nov 2017 03:29:58 -0500
+Received: by mail-yw0-f180.google.com with SMTP id q126so5590960ywq.10
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 01:29:58 -0700 (PDT)
+In-Reply-To: <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nicolai Stange <nicstange@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Some back ground of this patch. After the I merge the constant
-expression series. I have setup my build machine to run some
-repeated stress test again each of the commit change. Each change
-has run 5 times and there is beak time between each stress run
-to allow the machine cool down.
+>commit e4a0824120939235e40277a57425a72fbfcd5b9b
+>Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+>Date:   Sun Mar 26 19:35:14 2017 +0200
+>
+>    add table to "negate" some opcode
+>
+>    Some optimizations transform an instruction opcode
+>    into another. For example, it may be needed to know
+>    the opcode corresponding to the negation of a comparison.
+>
+>    This patch make this easy and flexible by adding a table
+>    for the relation between opcodes.
 
-I am looking for the change that cause the biggest jump in the commit
-series. So that brings me to a patch in the series introduce the flags.
-I make some simplification on it. That is this patch.
+>+const struct opcode_table opcode_table[OP_LAST] = {
+>+      [OP_SET_EQ] = { .negate = OP_SET_NE, },
+>+      [OP_SET_NE] = { .negate = OP_SET_EQ, },
+>+      [OP_SET_LT] = { .negate = OP_SET_GE, },
+>+      [OP_SET_LE] = { .negate = OP_SET_GT, },
+>+      [OP_SET_GE] = { .negate = OP_SET_LT, },
+>+      [OP_SET_GT] = { .negate = OP_SET_LE, },
+>+      [OP_SET_B ] = { .negate = OP_SET_AE, },
+>+      [OP_SET_BE] = { .negate = OP_SET_A , },
+>+      [OP_SET_AE] = { .negate = OP_SET_B , },
+>+      [OP_SET_A ] = { .negate = OP_SET_BE, },
+>+};
 
-For the record, Here is the timing run back then with and without
-this patch, each has 5 run. It is hard to tell, but it seems the
-stress test can confirm the patch make a tiny little bit of difference.
-Big deal. :-)
+I think this patch ideally should be combined with the next patch.
+As it is, this patch is not self contain. There is no user of this table.
 
-It has been a while, I might just sending it out before I forget
-about it.
+
+>commit b38e2263075d1caa7694f47cc5f1cc8d78a2871d
+>Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+>Date:   Mon Mar 27 17:19:43 2017 +0200
+>
+>    use opcode table for compare_opcode()
+>
+>    At the same time, change also the name of the function.
+>
+...
+> static int simplify_seteq_setne(struct instruction *insn, long long value)
+> {
+>       pseudo_t old = insn->src1;
+>@@ -484,7 +460,7 @@ static int simplify_seteq_setne(struct instruction *insn, long long value)
+>               // and similar for setne/eq ... 0/1
+>               src1 = def->src1;
+>               src2 = def->src2;
+>-              insn->opcode = compare_opcode(opcode, inverse);
+>+              insn->opcode = inverse ? opcode_table[opcode].negate : opcode;
+
+I think it would be better to have some kind of assert check here, the opcode
+you swap from the table is indeep opcode. Because you assign the opcode
+array using sparse index. It is easy to miss a spot creating the empty slot in
+the table.
+
+Also, the opcode table might be able to compressed only contain
+section of the BINCMP opcodes.
 
 Chris
-
-$ stress.py exp 0 1
-# cpus 24
-exp~0 dc9902c Simplify expr->flags assignement
-
-real 1m18.737s
-user 20m54.255s
-sys 7m37.059s
-
-real 1m18.886s
-user 20m55.832s
-sys 7m35.513s
-
-real 1m18.900s
-user 20m56.276s
-sys 7m35.648s
-
-real 1m18.759s
-user 20m53.276s
-sys 7m37.484s
-
-real 1m18.829s
-user 20m55.247s
-sys 7m36.025s
-exp~1 17c0bae constexpr: flag __builtin_bswap() as constexpr
-
-real 1m18.959s
-user 20m55.826s
-sys 7m37.334s
-
-real 1m18.909s
-user 20m57.096s
-sys 7m36.704s
-
-real 1m18.906s
-user 20m57.002s
-sys 7m36.329s
-
-real 1m18.789s
-user 20m56.551s
-sys 7m36.875s
-
-real 1m18.964s
-user 20m56.409s
-sys 7m37.103s
-
-
-The same patch can be fetch on:
-
-https://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git/log/?h=simplify-context-expr
-
-From 6d83f6ecb4e33b981ad6ec302be50d679ec2c3e9 Mon Sep 17 00:00:00 2001
-From: Christopher Li <sparse@chrisli.org>
-Date: Thu, 24 Aug 2017 01:24:52 -0400
-\
----
- evaluate.c | 13 ++++++-------
- 1 file changed, 6 insertions(+), 7 deletions(-)
-
-diff --git a/evaluate.c b/evaluate.c
-index b96696d3..9715b71d 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -906,8 +906,8 @@ static struct symbol *evaluate_logical(struct
-expression *expr)
-
-        /* the result is int [6.5.13(3), 6.5.14(3)] */
-        expr->ctype = &int_ctype;
--       expr->flags = expr->left->flags & expr->right->flags;
--       expr->flags &= ~(CEF_CONST_MASK | CEF_ADDR);
-+       expr->flags = expr->left->flags & expr->right->flags
-+                       & ~(CEF_CONST_MASK | CEF_ADDR);
-        return &int_ctype;
- }
-
-@@ -920,8 +920,8 @@ static struct symbol *evaluate_binop(struct
-expression *expr)
-
-        /* number op number */
-        if (lclass & rclass & TYPE_NUM) {
--               expr->flags = expr->left->flags & expr->right->flags;
--               expr->flags &= ~CEF_CONST_MASK;
-+               expr->flags = expr->left->flags & expr->right->flags
-+                               & ~CEF_CONST_MASK;
-
-                if ((lclass | rclass) & TYPE_FLOAT) {
-                        switch (op) {
-@@ -1036,7 +1036,7 @@ static struct symbol *evaluate_compare(struct
-expression *expr)
-        if (is_safe_type(left->ctype) || is_safe_type(right->ctype))
-
--       expr->flags = left->flags & right->flags & ~CEF_CONST_MASK & ~CEF_ADDR;
-+       expr->flags = left->flags & right->flags & ~(CEF_CONST_MASK | CEF_ADDR);
-
-        /* number on number */
-        if (lclass & rclass & TYPE_NUM) {
-@@ -1914,12 +1914,11 @@ static struct symbol *evaluate_preop(struct
-expression *expr)
-                return evaluate_postop(expr);
-
-        case '!':
--               expr->flags = expr->unop->flags & ~CEF_CONST_MASK;
-                /*
-                 * A logical negation never yields an address constant
-                 * [6.6(9)].
-                 */
--               expr->flags &= ~CEF_ADDR;
-+               expr->flags = expr->unop->flags & ~(CEF_CONST_MASK | CEF_ADDR);
-
-                if (is_safe_type(ctype))
-                        warning(expr->pos, "testing a 'safe expression'");
--- 
-2.13.6
