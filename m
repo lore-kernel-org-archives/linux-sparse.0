@@ -1,55 +1,50 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] build: clean up $CFLAGS handling in the makefile
-Date: Sun, 5 Nov 2017 17:57:53 +0100
-Message-ID: <20171105165751.iqqlaxz6yu27nouj@ltop.local>
-References: <20171025100222.5983-1-jlayton@kernel.org>
- <20171025142009.foxh2rblmfpxvm7d@ltop.local>
- <CANeU7Qnvvezdc62s-cAWNonw2cKOJPWH2xSdgTdAL4M4skSnJw@mail.gmail.com>
- <1509019885.29077.6.camel@kernel.org>
- <CANeU7QmOACXKv2T2ovg7mxEDdpjUrwRgyYUsp2benDWh9R-2iw@mail.gmail.com>
- <1509476260.4553.45.camel@kernel.org>
- <CANeU7Qm8YHpYLLW8O=y=m9m6kRAD_5MiTnS79N5ffCk-PVcxFQ@mail.gmail.com>
- <20171101141705.aqn5gnwvuohkapp3@ltop.local>
- <CANeU7Qm4+DWdcDrMytWqxTELrwuyMEkhs2hFGj6599ghetBE8A@mail.gmail.com>
+Subject: Re: [GIT PULL] llvm fixes
+Date: Sun, 5 Nov 2017 18:03:52 +0100
+Message-ID: <20171105170349.o7r7z3qb4a36pmtf@ltop.local>
+References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
+ <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
+ <CANeU7Qk4AGhSzzpPXT1-NmWRzSprUXEjWm6o1iy8yKAb-TceQg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:47713 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750731AbdKEQ55 (ORCPT
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:53304 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750799AbdKERD6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 11:57:57 -0500
-Received: by mail-wm0-f66.google.com with SMTP id r196so9595766wmf.2
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 08:57:56 -0800 (PST)
+        Sun, 5 Nov 2017 12:03:58 -0500
+Received: by mail-wm0-f43.google.com with SMTP id r196so9931817wmf.2
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 09:03:57 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Qm4+DWdcDrMytWqxTELrwuyMEkhs2hFGj6599ghetBE8A@mail.gmail.com>
+In-Reply-To: <CANeU7Qk4AGhSzzpPXT1-NmWRzSprUXEjWm6o1iy8yKAb-TceQg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
-Cc: Jeff Layton <jlayton@kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Nov 05, 2017 at 08:45:53AM +0800, Christopher Li wrote:
-> On Wed, Nov 1, 2017 at 10:17 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> 
-> > This is still not correct. It still doesn't allow to compile sparse
-> > via 'make CFLAGS=<some extra flags, possibly none>'.
+On Sun, Nov 05, 2017 at 04:49:37PM +0800, Christopher Li wrote:
+> >commit 5674da2d1af2467605fcc9b798fb54ee2d28efc7
+> >Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> >Date:   Mon Mar 20 15:18:53 2017 +0100
 > >
-> > Visibly this hasn't been tested.
+> >    canonicalize compare instructions
+> >
+> >    Currently only commutative instructions are canonicalized
+> >    (the "simpler" operands, often a constant, is forced, if present
+> >    to be in the second operand). This improve CSE (more cases are
+> >    considered as equivalent) and help to reduce the number of "pattern"
+> >    to be handled at simplification.
+> >
 > 
-> Sorry about that.
 > 
-> There is one spot I miss after solving conflict of rebase master.
-
-You rejected the patch, wrote your own version and you had to rebase it
-and you had a conflict?
- 
-> How about this one:
+> Notice that LT and GT and equivalent instructions after swapping the src.
+> Another way to do it we might just remove one kind of instruction from the
+> sparse IR. From the linearization point just map GT into LT and swap the source.
 > 
-> https://git.kernel.org/pub/scm/devel/sparse/chrisl/sparse.git/log/?h=cflags-v3
+> So the IR does not allow those duplicated equilateral instructions. There is
+> less canonization to be done.
 
-Much better!
-Now you can give it a try at 'make CFLAGS=-O3 selfcheck'.
+The principal and most important action done during canonicalization is
+insuring that constants are on the RHS.
 
-
--- Luc Van Oostenryck 
+-- Luc
