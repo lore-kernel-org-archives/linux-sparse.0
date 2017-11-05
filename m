@@ -1,43 +1,64 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: multiarch & base dir
-Date: Sun, 5 Nov 2017 17:59:04 +0800
-Message-ID: <CANeU7QkaiPxUcw7g+jGdNY1JZd8=MuMa=k11kX7PKmBMzPaQGg@mail.gmail.com>
-References: <20171105093301.adsucwshznehtdr4@ltop.local>
+Subject: Re: [GIT PULL] llvm fixes
+Date: Sun, 5 Nov 2017 16:49:37 +0800
+Message-ID: <CANeU7Qk4AGhSzzpPXT1-NmWRzSprUXEjWm6o1iy8yKAb-TceQg@mail.gmail.com>
+References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com> <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:45708 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752041AbdKEJ7F (ORCPT
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:53307 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752331AbdKEIti (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Nov 2017 04:59:05 -0500
-Received: by mail-yw0-f193.google.com with SMTP id j4so5683171ywb.2
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 01:59:05 -0800 (PST)
-In-Reply-To: <20171105093301.adsucwshznehtdr4@ltop.local>
+        Sun, 5 Nov 2017 03:49:38 -0500
+Received: by mail-yw0-f182.google.com with SMTP id q126so5605351ywq.10
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Nov 2017 01:49:38 -0700 (PDT)
+In-Reply-To: <CANeU7Qnu7h09YHhGVOY3r4M9FNOvOrs+kB_yJT-i0cSeLtKhAw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sun, Nov 5, 2017 at 5:33 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Commit 85e2e2a25 "Add support for multiarch system header files"
-> added for GCC's multiarch directory. One of the change was :
-> +       /* add the multiarch include directories, if any */
-> +       if (multiarch_dir && *multiarch_dir) {
-> +               add_pre_buffer("#add_system \"/usr/include/%s\"\n", multiarch_dir);
-> +               add_pre_buffer("#add_system \"/usr/local/include/%s\"\n", multiarch_dir);
-> +       }
+>commit 5674da2d1af2467605fcc9b798fb54ee2d28efc7
+>Author: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+>Date:   Mon Mar 20 15:18:53 2017 +0100
 >
+>    canonicalize compare instructions
 >
-> There, the multiarch dir is appended to /usr/include & /usr/local/include.
-> I'm wondering if using GCC_BASE should be used here instead.
-> Any thoughts?
+>    Currently only commutative instructions are canonicalized
+>    (the "simpler" operands, often a constant, is forced, if present
+>    to be in the second operand). This improve CSE (more cases are
+>    considered as equivalent) and help to reduce the number of "pattern"
+>    to be handled at simplification.
+>
+> const struct opcode_table opcode_table[OP_LAST] = {
+>-      [OP_SET_EQ] = { .negate = OP_SET_NE, },
+>-      [OP_SET_NE] = { .negate = OP_SET_EQ, },
+>-      [OP_SET_LT] = { .negate = OP_SET_GE, },
+>-      [OP_SET_LE] = { .negate = OP_SET_GT, },
+>-      [OP_SET_GE] = { .negate = OP_SET_LT, },
+>-      [OP_SET_GT] = { .negate = OP_SET_LE, },
+>-      [OP_SET_B ] = { .negate = OP_SET_AE, },
+>-      [OP_SET_BE] = { .negate = OP_SET_A , },
+>-      [OP_SET_AE] = { .negate = OP_SET_B , },
+>-      [OP_SET_A ] = { .negate = OP_SET_BE, },
+>+      [OP_SET_EQ] = { .negate = OP_SET_NE, .swap = OP_SET_EQ, },
+>+      [OP_SET_NE] = { .negate = OP_SET_EQ, .swap = OP_SET_NE, },
+>+      [OP_SET_LT] = { .negate = OP_SET_GE, .swap = OP_SET_GT, },
+>+      [OP_SET_LE] = { .negate = OP_SET_GT, .swap = OP_SET_GE, },
+>+      [OP_SET_GE] = { .negate = OP_SET_LT, .swap = OP_SET_LE, },
+>+      [OP_SET_GT] = { .negate = OP_SET_LE, .swap = OP_SET_LT, },
+>+      [OP_SET_B ] = { .negate = OP_SET_AE, .swap = OP_SET_A , },
+>+      [OP_SET_BE] = { .negate = OP_SET_A , .swap = OP_SET_AE, },
+>+      [OP_SET_AE] = { .negate = OP_SET_B , .swap = OP_SET_BE, },
+>+      [OP_SET_A ] = { .negate = OP_SET_BE, .swap = OP_SET_B , },
 
-I think the multiarch is for cross compile. I guess using GCC_BASE will not fit
-the cross compile need. GCC_BASE has hard code to the current gcc that compile
-sparse. Not necessary the same cross compile setting to run sparse.
 
-I don't know, Ramsay might be able comment more on this.
+Notice that LT and GT and equivalent instructions after swapping the src.
+Another way to do it we might just remove one kind of instruction from the
+sparse IR. From the linearization point just map GT into LT and swap the source.
+
+So the IR does not allow those duplicated equilateral instructions. There is
+less canonization to be done.
 
 Chris
