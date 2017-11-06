@@ -1,60 +1,76 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 33/36] build: simpler logic for quiet commands
-Date: Mon, 6 Nov 2017 09:55:26 +0100
-Message-ID: <CAExDi1SXfthzUonmiXCDosWyxi-snqK_+fDVMdJe_yoo_yqR0w@mail.gmail.com>
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+Subject: Re: [PATCH 28/36] build: use a dot file name instead of local.mk:
+ .sparse.mk
+Date: Mon, 6 Nov 2017 09:57:23 +0100
+Message-ID: <57a86c63-05ff-fcfc-41c0-e0a7b1ccc0cf@kleine-koenig.org>
 References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
- <20171105162544.72960-33-luc.vanoostenryck@gmail.com> <7db4d636-d988-7bb3-e440-0a624317e8b9@kleine-koenig.org>
- <CAExDi1TL3oXH2MZBYRJkzLcGB9O_cSk6u_0UD_JJdchTMvsxAA@mail.gmail.com> <a91d5505-54a2-c8da-dbb3-af44f0c5f264@kleine-koenig.org>
+ <20171105162544.72960-28-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="xXfsDP65Bb38K25ig491IAsT55CnELkrI"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-io0-f173.google.com ([209.85.223.173]:47984 "EHLO
-        mail-io0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750739AbdKFIz1 (ORCPT
+Received: from antares.kleine-koenig.org ([94.130.110.236]:60836 "EHLO
+        antares.kleine-koenig.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750760AbdKFI53 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 6 Nov 2017 03:55:27 -0500
-Received: by mail-io0-f173.google.com with SMTP id h70so14911057ioi.4
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Nov 2017 00:55:27 -0800 (PST)
-In-Reply-To: <a91d5505-54a2-c8da-dbb3-af44f0c5f264@kleine-koenig.org>
+        Mon, 6 Nov 2017 03:57:29 -0500
+In-Reply-To: <20171105162544.72960-28-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: =?UTF-8?Q?Uwe_Kleine=2DK=C3=B6nig?= <uwe@kleine-koenig.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
 
-On Mon, Nov 6, 2017 at 9:44 AM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig.or=
-g> wrote:
-> On 11/06/2017 09:28 AM, Luc Van Oostenryck wrote:
->> On Mon, Nov 6, 2017 at 9:15 AM, Uwe Kleine-K=C3=B6nig <uwe@kleine-koenig=
-.org> wrote:
->>> Hello Luc,
->>>
->>> On 11/05/2017 05:25 PM, Luc Van Oostenryck wrote:
->>>> @@ -175,10 +168,12 @@ ldflags +=3D $($(@)_LDFLAGS) $(LDFLAGS)
->>>>  ldlibs  +=3D $($(@)_LDLIBS)  $(LDLIBS)
->>>>  $(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_OBJS)))
->>>>  $(PROGRAMS): % : %.o $(LIBS)
->>>> -     $(QUIET_LINK)$(LD) $(ldflags) $^ $(ldlibs) -o $@
->>>> +     @echo "  LD      $@"
->>>> +     $(Q)$(LD) $(ldflags) $^ $(ldlibs) -o $@
->>>
->>> Is it intended that you introduce changed behaviour here? Now you get
->>> the pretty printed output when building with V=3D1.
->>
->> It was not the intention as such but, yes, I knew the behaviour changed.
->> I don't think the new behaviour is a problem, on the contrary, but if it=
- is
->> a problem it can be changed back.
->
-> I don't consider it problematic, the added benefit is that it becomes
-> easier to relate a V=3D1 build with a V=3D0 build.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--xXfsDP65Bb38K25ig491IAsT55CnELkrI
+Content-Type: multipart/mixed; boundary="BOkHepW3iWL2nN0cQ3jHuRNKBFGhWRdQK";
+ protected-headers="v1"
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+ linux-sparse@vger.kernel.org
+Message-ID: <57a86c63-05ff-fcfc-41c0-e0a7b1ccc0cf@kleine-koenig.org>
+Subject: Re: [PATCH 28/36] build: use a dot file name instead of local.mk:
+ .sparse.mk
+References: <20171105162448.72907-1-luc.vanoostenryck@gmail.com>
+ <20171105162544.72960-28-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20171105162544.72960-28-luc.vanoostenryck@gmail.com>
 
-Indeed.
+--BOkHepW3iWL2nN0cQ3jHuRNKBFGhWRdQK
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-> But IMHO this should not
-> be sold as "simpler logic" without any further comment.
+Hello Luc,
 
-Yes. It's not the only patch in this series which commit message
-should be improved.
+> -local.mk
+> +.sparse.mk
 
--- Luc
+what is the motivation to hide this file? IMHO it is better to be aware
+of eventual changes to the build system and so don't hide the file.
+
+Having said that I question if it is a good idea at all to provide a way
+to change the build without dirtying the working copy.
+
+Best regards
+Uwe
+
+
+--BOkHepW3iWL2nN0cQ3jHuRNKBFGhWRdQK--
+
+--xXfsDP65Bb38K25ig491IAsT55CnELkrI
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAloAI/MACgkQwfwUeK3K
+7AmuLgf/QicArcK3QcEj/A+AMpd6BvJJUFq19h+4XZ/Vdy/ANwwnOwCX9aksH+oR
+Up68mm9U3siYQHfj+oi+H8R+RjADgWxQ99fP5Y7gPs6zaWqQ63KGYeW7Uwal1zzX
+Ihdkq2bNQYrnfrVcI7xodfq/HGF1tsXmNYI6RIEDFeeO61ti2TSIrdPRnuAL2SzL
+E9P6XHjd9hVgthElUSUQJNr0LKu+hE3vGbI+TktVbqWgJkLEOKX27LPq3URUW0k0
+RJ6X9V0X2lAZ5f4t08tX+xIxHR4OTUQTjx9+UCi7zFVmMvj6Nuj4evA7sQM0LgJg
+yPsDAXdhgs0B5AZxU2bF4ikfjs6K/Q==
+=RmmR
+-----END PGP SIGNATURE-----
+
+--xXfsDP65Bb38K25ig491IAsT55CnELkrI--
