@@ -1,82 +1,99 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/9] option: rename 'struct warning' to 'struct flag'
-Date: Wed,  8 Nov 2017 11:10:01 +0100
-Message-ID: <20171108101008.43804-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/9] option: let handle_simple_switch() handle an array of flags
+Date: Wed,  8 Nov 2017 11:10:02 +0100
+Message-ID: <20171108101008.43804-4-luc.vanoostenryck@gmail.com>
 References: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:46546 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:49019 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751278AbdKHKKX (ORCPT
+        with ESMTP id S1750832AbdKHKKY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Nov 2017 05:10:23 -0500
-Received: by mail-wm0-f67.google.com with SMTP id r68so9277055wmr.1
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:22 -0800 (PST)
+        Wed, 8 Nov 2017 05:10:24 -0500
+Received: by mail-wm0-f67.google.com with SMTP id p75so9264735wmg.3
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:23 -0800 (PST)
 In-Reply-To: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-'struct warning' can be reused for flags other than warnings.
+This was used to handle a single flag but we need something
+more compact when we need to handle several flags.
 
-To avoid future confusion, rename it to something more general:
-'struct flag' (which in its context, handling of compiler flags,
-is clear enough).
+So, adapt this helper so that it now takes an array of flags
+instead of a single flag.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ lib.c | 27 ++++++++++++++++++---------
+ 1 file changed, 18 insertions(+), 9 deletions(-)
 
 diff --git a/lib.c b/lib.c
-index 351da6f48..04f9de5a8 100644
+index 04f9de5a8..992fdb49a 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -513,7 +513,7 @@ static char **handle_switch_o(char *arg, char **next)
- 	return next;
+@@ -483,7 +483,12 @@ char *match_option(char *arg, const char *prefix)
+ 	return NULL;
  }
  
--static const struct warning {
-+static const struct flag {
- 	const char *name;
- 	int *flag;
- } warnings[] = {
-@@ -558,7 +558,7 @@ enum {
- };
- 
- 
--static char **handle_onoff_switch(char *arg, char **next, const struct warning warnings[], int n)
-+static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[], int n)
+-static int handle_simple_switch(const char *arg, const char *name, int *flag)
++struct flag {
++	const char *name;
++	int *flag;
++};
++
++static int handle_simple_switch(const char *arg, const struct flag *flags)
  {
- 	int flag = WARNING_ON;
- 	char *p = arg + 1;
-@@ -600,7 +600,7 @@ static char **handle_switch_W(char *arg, char **next)
+ 	int val = 1;
+ 
+@@ -493,9 +498,11 @@ static int handle_simple_switch(const char *arg, const char *name, int *flag)
+ 		val = 0;
+ 	}
+ 
+-	if (strcmp(arg, name) == 0) {
+-		*flag = val;
+-		return 1;
++	for (; flags->name; flags++) {
++		if (strcmp(arg, flags->name) == 0) {
++			*flags->flag = val;
++			return 1;
++		}
+ 	}
+ 
+ 	// not handled
+@@ -513,10 +520,7 @@ static char **handle_switch_o(char *arg, char **next)
  	return next;
  }
  
--static struct warning debugs[] = {
-+static struct flag debugs[] = {
- 	{ "entry", &dbg_entry},
- 	{ "dead", &dbg_dead},
- };
-@@ -619,7 +619,7 @@ static char **handle_switch_v(char *arg, char **next)
- 	return next;
+-static const struct flag {
+-	const char *name;
+-	int *flag;
+-} warnings[] = {
++static const struct flag warnings[] = {
+ 	{ "address", &Waddress },
+ 	{ "address-space", &Waddress_space },
+ 	{ "bitwise", &Wbitwise },
+@@ -745,6 +749,11 @@ err:
+ 	die("error: unknown flag \"-fdump-%s\"", arg);
  }
  
--static struct warning dumps[] = {
-+static struct flag dumps[] = {
- 	{ "D", &dump_macro_defs},
- };
- 
-@@ -633,7 +633,7 @@ static char **handle_switch_d(char *arg, char **next)
- }
- 
- 
--static void handle_onoff_switch_finalize(const struct warning warnings[], int n)
-+static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
++static struct flag fflags[] = {
++	{ "mem-report",			&fmem_report },
++	{ },
++};
++
+ static char **handle_switch_f(char *arg, char **next)
  {
- 	unsigned i;
+ 	char *opt;
+@@ -758,7 +767,7 @@ static char **handle_switch_f(char *arg, char **next)
+ 		return handle_switch_fmemcpy_max_count(opt, next);
  
+ 	/* handle switches w/ arguments above, boolean and only boolean below */
+-	if (handle_simple_switch(arg, "mem-report", &fmem_report))
++	if (handle_simple_switch(arg, fflags))
+ 		return next;
+ 
+ 	return next;
 -- 
 2.14.0
 
