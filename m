@@ -1,88 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/9] option: use OPTION_NUMERIC() for handle_switch_fmemcpy_max_count()
-Date: Wed,  8 Nov 2017 11:10:06 +0100
-Message-ID: <20171108101008.43804-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/9] option: add support for '-<some-option>=unlimited'
+Date: Wed,  8 Nov 2017 11:10:05 +0100
+Message-ID: <20171108101008.43804-7-luc.vanoostenryck@gmail.com>
 References: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:48560 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751738AbdKHKK2 (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:57343 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751839AbdKHKK1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Nov 2017 05:10:28 -0500
-Received: by mail-wr0-f194.google.com with SMTP id 15so1897523wrb.5
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:28 -0800 (PST)
+        Wed, 8 Nov 2017 05:10:27 -0500
+Received: by mail-wm0-f67.google.com with SMTP id z3so9535790wme.5
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:27 -0800 (PST)
 In-Reply-To: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
+For some options with a numerical value, it is sometimes desirable,
+when the value is used to limits something, to easily specify we
+want to remove any limits.
+
+This patch allow to use 'unlimited' for this by interpreting it as
+the maximum value.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c    | 22 +++++-----------------
- sparse.1 |  2 +-
- 2 files changed, 6 insertions(+), 18 deletions(-)
+ lib.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
 diff --git a/lib.c b/lib.c
-index 4c210d58f..95601b002 100644
+index 6352b4e93..4c210d58f 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -536,6 +536,8 @@ static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
- 	return 1;							\
- }
+@@ -511,6 +511,7 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
  
-+OPT_NUMERIC(ullong, unsigned long long, strtoull)
-+
  
- static char **handle_switch_o(char *arg, char **next)
- {
-@@ -726,21 +728,6 @@ static char **handle_switch_O(char *arg, char **next)
- 	return next;
- }
+ #define	OPTNUM_ZERO_IS_INF		1
++#define	OPTNUM_UNLIMITED		2
  
--static char **handle_switch_fmemcpy_max_count(char *arg, char **next)
--{
--	unsigned long long val;
--	char *end;
--
--	val = strtoull(arg, &end, 0);
--	if (*end != '\0' || end == arg)
--		die("error: missing argument to \"-fmemcpy-max-count=\"");
--
--	if (val == 0)
--		val = ~0ULL;
--	fmemcpy_max_count = val;
--	return next;
--}
--
- static char **handle_switch_ftabstop(char *arg, char **next)
- {
- 	char *end;
-@@ -791,8 +778,9 @@ static char **handle_switch_f(char *arg, char **next)
- 		return handle_switch_ftabstop(opt, next);
- 	if ((opt = match_option(arg, "dump-")))
- 		return handle_switch_fdump(opt, next);
--	if ((opt = match_option(arg, "memcpy-max-count=")))
--		return handle_switch_fmemcpy_max_count(opt, next);
-+	if (opt_ullong(arg, "-fmemcpy-max-count=", &fmemcpy_max_count,
-+				OPTNUM_ZERO_IS_INF|OPTNUM_UNLIMITED))
-+		return next;
- 
- 	/* handle switches w/ arguments above, boolean and only boolean below */
- 	if (handle_simple_switch(arg, fflags))
-diff --git a/sparse.1 b/sparse.1
-index b79c58767..bec8d6d73 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -369,7 +369,7 @@ Report some statistics about memory allocation used by the tool.
- .TP
- .B \-fmemcpy-max-count=COUNT
- Set the limit for the warnings given by \fB-Wmemcpy-max-count\fR.
--A COUNT of 0, useless in itself, will effectively disable the warning.
-+A COUNT of 'unlimited' or '0' will effectively disable the warning.
- The default limit is 100000.
- .
- .TP
+ #define OPT_NUMERIC(NAME, TYPE, FUNCTION)	\
+ static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
+@@ -524,6 +525,9 @@ static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
+ 	opt++; /* opt's last char is '=' */				\
+ 	val = FUNCTION(opt, &end, 0);					\
+ 	if (*end != '\0' || end == opt) {				\
++		if ((flag & OPTNUM_UNLIMITED) && !strcmp(opt, "unlimited"))	\
++			val = ~val;					\
++		else							\
+ 			die("error: missing argument to \"%s\"", name);	\
+ 	}								\
+ 	if ((flag & OPTNUM_ZERO_IS_INF) && val == 0)			\
 -- 
 2.14.0
 
