@@ -1,56 +1,91 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 6/9] option: add support for '-<some-option>=unlimited'
-Date: Wed,  8 Nov 2017 11:10:05 +0100
-Message-ID: <20171108101008.43804-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 8/9] option: constify match_option()
+Date: Wed,  8 Nov 2017 11:10:07 +0100
+Message-ID: <20171108101008.43804-9-luc.vanoostenryck@gmail.com>
 References: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:57343 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751839AbdKHKK1 (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:53591 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751278AbdKHKKa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Nov 2017 05:10:27 -0500
-Received: by mail-wm0-f67.google.com with SMTP id z3so9535790wme.5
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:27 -0800 (PST)
+        Wed, 8 Nov 2017 05:10:30 -0500
+Received: by mail-wm0-f65.google.com with SMTP id r196so9561991wmf.2
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 02:10:30 -0800 (PST)
 In-Reply-To: <20171108101008.43804-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-For some options with a numerical value, it is sometimes desirable,
-when the value is used to limits something, to easily specify we
-want to remove any limits.
-
-This patch allow to use 'unlimited' for this by interpreting it as
-the maximum value.
+Until now, match_option() needed a non-const argment and returned
+a non-const result. Since it is no more needed, let's use const.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ lib.c | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
 diff --git a/lib.c b/lib.c
-index 6352b4e93..4c210d58f 100644
+index 95601b002..3c9618a02 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -511,6 +511,7 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
+@@ -475,7 +475,7 @@ static void handle_arch_finalize(void)
+ 	handle_arch_msize_long_finalize();
+ }
  
- 
- #define	OPTNUM_ZERO_IS_INF		1
-+#define	OPTNUM_UNLIMITED		2
+-char *match_option(char *arg, const char *prefix)
++const char *match_option(const char *arg, const char *prefix)
+ {
+ 	unsigned int n = strlen(prefix);
+ 	if (strncmp(arg, prefix, n) == 0)
+@@ -514,9 +514,9 @@ static int handle_simple_switch(const char *arg, const struct flag *flags)
+ #define	OPTNUM_UNLIMITED		2
  
  #define OPT_NUMERIC(NAME, TYPE, FUNCTION)	\
- static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
-@@ -524,6 +525,9 @@ static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
- 	opt++; /* opt's last char is '=' */				\
- 	val = FUNCTION(opt, &end, 0);					\
- 	if (*end != '\0' || end == opt) {				\
-+		if ((flag & OPTNUM_UNLIMITED) && !strcmp(opt, "unlimited"))	\
-+			val = ~val;					\
-+		else							\
- 			die("error: missing argument to \"%s\"", name);	\
- 	}								\
- 	if ((flag & OPTNUM_ZERO_IS_INF) && val == 0)			\
+-static int opt_##NAME(char *arg, const char *name, TYPE *ptr, int flag)	\
++static int opt_##NAME(const char *arg, const char *name, TYPE *ptr, int flag)\
+ {									\
+-	char *opt;							\
++	const char *opt;						\
+ 	char *end;							\
+ 	TYPE val;							\
+ 									\
+@@ -728,7 +728,7 @@ static char **handle_switch_O(char *arg, char **next)
+ 	return next;
+ }
+ 
+-static char **handle_switch_ftabstop(char *arg, char **next)
++static char **handle_switch_ftabstop(const char *arg, char **next)
+ {
+ 	char *end;
+ 	unsigned long val;
+@@ -744,7 +744,7 @@ static char **handle_switch_ftabstop(char *arg, char **next)
+ 	return next;
+ }
+ 
+-static char **handle_switch_fdump(char *arg, char **next)
++static char **handle_switch_fdump(const char *arg, char **next)
+ {
+ 	const char *opt;
+ 
+@@ -771,7 +771,7 @@ static struct flag fflags[] = {
+ 
+ static char **handle_switch_f(char *arg, char **next)
+ {
+-	char *opt;
++	const char *opt;
+ 	arg++;
+ 
+ 	if ((opt = match_option(arg, "tabstop=")))
+@@ -805,7 +805,7 @@ static char **handle_switch_a(char *arg, char **next)
+ 	return next;
+ }
+ 
+-static char **handle_switch_s(char *arg, char **next)
++static char **handle_switch_s(const char *arg, char **next)
+ {
+ 	if ((arg = match_option(arg, "std="))) {
+ 		if (!strcmp (arg, "c89") ||
 -- 
 2.14.0
 
