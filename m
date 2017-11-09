@@ -1,44 +1,45 @@
 From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 9/9] option: handle switches by table
-Date: Fri, 10 Nov 2017 02:42:48 +0800
-Message-ID: <CANeU7Qm+S3T0sKPBZCVCD=nePQGWdGAzzShR=UQnKx+mQf-LoA@mail.gmail.com>
-References: <20171108101008.43804-1-luc.vanoostenryck@gmail.com> <20171108101008.43804-10-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v2 0/7] restricted pointers
+Date: Fri, 10 Nov 2017 02:55:01 +0800
+Message-ID: <CANeU7Qm-QOpvhRyYsqcG4-f3-H=KS0bMH2B43wE_H1YHt=hGiA@mail.gmail.com>
+References: <20171108210613.14252-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:50543 "EHLO
+Received: from mail-yw0-f180.google.com ([209.85.161.180]:44688 "EHLO
         mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752659AbdKISmt (ORCPT
+        with ESMTP id S1752790AbdKISzC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2017 13:42:49 -0500
-Received: by mail-yw0-f180.google.com with SMTP id i198so6134398ywe.7
-        for <linux-sparse@vger.kernel.org>; Thu, 09 Nov 2017 10:42:48 -0800 (PST)
-In-Reply-To: <20171108101008.43804-10-luc.vanoostenryck@gmail.com>
+        Thu, 9 Nov 2017 13:55:02 -0500
+Received: by mail-yw0-f180.google.com with SMTP id k11so6189350ywh.1
+        for <linux-sparse@vger.kernel.org>; Thu, 09 Nov 2017 10:55:02 -0800 (PST)
+In-Reply-To: <20171108210613.14252-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Nov 8, 2017 at 6:10 PM, Luc Van Oostenryck
+On Thu, Nov 9, 2017 at 5:06 AM, Luc Van Oostenryck
 <luc.vanoostenryck@gmail.com> wrote:
-> Currently, the parsing of options is often quite ad-hoc and thus:
-> - need a lot of code
-> - is not clear at all
+> The goal of this series is to prepare for a real support
+> for C99's 'restrict' type qualifier.
+> As preliminary steps this series also contains a
+> cleanup of the #define MOD_XYZ and as bonus it teaches
+> sparse about C11's '_Atomic' as type *qualifier*
 >
-> Improve this by making this table driven.
+> Change since v1:
+> - remove patches related to error vs. warnings which
+>   have already been integrated.
+> - improve commit messages
+>
+> This series is available for review & testing at:
+>         git://github.com/lucvoo/sparse.git restricted-pointers-v2
 
-Please start the patch with the greatest idea table driven option parsing.
+Thanks for the series.
 
-Please also considering reducing the number of patches require
-to get to the same code.
+I very briefly go over the series. Nothing particularly bad stand out.
+I don't have the chance to do the normal process of apply each
+patch individually. Will go back to it at more detail
+level after catch up with the backlogs.
 
--       const char *opt;
--       arg++;
--
--       if ((opt = match_option(arg, "tabstop=")))
--               return handle_switch_ftabstop(opt, next);
--       if ((opt = match_option(arg, "dump-")))
--               return handle_switch_fdump(opt, next);
--       if (opt_ullong(arg, "-fmemcpy-max-count=", &fmemcpy_max_count,
--                               OPTNUM_ZERO_IS_INF|OPTNUM_UNLIMITED))
--               return next;
+Chris
