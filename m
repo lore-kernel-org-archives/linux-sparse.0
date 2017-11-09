@@ -1,72 +1,53 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 08/37] build: use '_OBJS' instead of '_EXTRA_DEPS'
-Date: Thu,  9 Nov 2017 07:46:19 +0100
-Message-ID: <20171109064648.15379-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 05/37] build: pass CPPFLAGS to compiler
+Date: Thu,  9 Nov 2017 07:46:16 +0100
+Message-ID: <20171109064648.15379-6-luc.vanoostenryck@gmail.com>
 References: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:46875 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752541AbdKIGrJ (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:56065 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752535AbdKIGrF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2017 01:47:09 -0500
-Received: by mail-wm0-f66.google.com with SMTP id r68so14821274wmr.1
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:08 -0800 (PST)
+        Thu, 9 Nov 2017 01:47:05 -0500
+Received: by mail-wm0-f68.google.com with SMTP id b189so465606wmd.4
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:04 -0800 (PST)
 In-Reply-To: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Josh Triplett <josh@joshtriplett.org>, Jeff Layton <jlayton@redhat.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Some programs are composed of several source files other than the
-main one. These files need then to be added at linking time.
-These extra file are currently specified using variables named
-"<program-name>_EXTRA_DEPS" but the way these variables are used
-make that they can only hold .o files (or .a ones) and are not
-some kind of generic dependencie.
+From: Uwe Kleine-König <uwe@kleine-koenig.org>
 
-Make this explicit by using the suffix '_OBJS' instead.
+Debian packages use CPPFLAGS to pass -D_FORTIFY_SOURCE=2 for hardening.
 
+Originally-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index bd8a08f13..eb7154992 100644
+index 39b34f901..f1af83e32 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -70,8 +70,8 @@ GTK_CFLAGS := $(shell $(PKG_CONFIG) --cflags gtk+-$(GTK_VERSION))
- GTK_LIBS := $(shell $(PKG_CONFIG) --libs gtk+-$(GTK_VERSION))
- PROGRAMS += test-inspect
- INST_PROGRAMS += test-inspect
--test-inspect_EXTRA_DEPS := ast-model.o ast-view.o ast-inspect.o
--test-inspect_OBJS := test-inspect.o $(test-inspect_EXTRA_DEPS)
-+test-inspect_OBJS := test-inspect.o
-+test-inspect_OBJS += ast-model.o ast-view.o ast-inspect.o
- $(test-inspect_OBJS) $(test-inspect_OBJS:.o=.sc): CFLAGS += $(GTK_CFLAGS)
- test-inspect_EXTRA_OBJS := $(GTK_LIBS)
- else
-@@ -165,9 +165,9 @@ install: all-installable
- 	$(foreach f,$(INST_MAN1),$(call INSTALL_FILE,$f,$(MAN1DIR)))
+@@ -209,10 +209,10 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
+ pre-process.sc: CHECKER_FLAGS += -Wno-vla
  
+ %.o: %.c $(LIB_H)
+-	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
++	$(QUIET_CC)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
  
--compile_EXTRA_DEPS = compile-i386.o
-+compile_OBJS := compile-i386.o
- 
--$(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_EXTRA_DEPS) $(LIBS)))
-+$(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_OBJS) $(LIBS)))
- $(PROGRAMS): % : %.o 
- 	$(QUIET_LINK)$(LD) $(LDFLAGS) -o $@ $^ $($@_EXTRA_OBJS)
- 
-@@ -193,7 +193,7 @@ pre-process.sc: CHECKER_FLAGS += -Wno-vla
  %.sc: %.c sparse
- 	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
+-	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(CFLAGS) $<
++	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
  
--ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
-+ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_OBJS))
+ ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
  selfcheck: $(ALL_OBJS:.o=.sc)
- 
- 
 -- 
 2.14.0
 
