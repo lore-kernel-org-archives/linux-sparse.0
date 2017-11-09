@@ -1,49 +1,36 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: [PATCH] Makefile: use locally built sparse in the selfcheck target
-Date: Thu, 9 Nov 2017 16:30:48 +0000
-Message-ID: <10d6a020-ebe8-6a31-e4cb-ff67c1a1009c@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] Makefile: use locally built sparse in the selfcheck
+ target
+Date: Thu, 9 Nov 2017 18:06:45 +0100
+Message-ID: <20171109170644.vn6ktpk2newq5ps3@ltop.local>
+References: <10d6a020-ebe8-6a31-e4cb-ff67c1a1009c@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout04.plus.net ([212.159.14.19]:48355 "EHLO
-        avasout04.plus.net.plus.net" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1750909AbdKIQav (ORCPT
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:32811 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750726AbdKIRGt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2017 11:30:51 -0500
-Content-Language: en-GB
+        Thu, 9 Nov 2017 12:06:49 -0500
+Received: by mail-wm0-f45.google.com with SMTP id r68so2988371wmr.0
+        for <linux-sparse@vger.kernel.org>; Thu, 09 Nov 2017 09:06:48 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <10d6a020-ebe8-6a31-e4cb-ff67c1a1009c@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
 
-Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
----
+Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Hi Chris,
 
-I was recently setting up a new system and didn't have sparse
-installed. The 'make selfcheck' target failed ...
+BTW, selfcheck also fails when reaching sparse-llvm.c because of
+the use of CFLAGS/BASIC_CFLAGS/ALL_CFLAGS/COMMON_CFLAGS/PKG_CFLAGS.
 
-ATB,
-Ramsay Jones
+I suppose you don't have LLVM on the platform you use, no problem,
+I just wanted to inform you about it.
+It's already fixed on my series you just commented about.
 
- Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Makefile b/Makefile
-index d034176..d1a303e 100644
---- a/Makefile
-+++ b/Makefile
-@@ -18,7 +18,7 @@ LDFLAGS += -g
- LD = gcc
- AR = ar
- PKG_CONFIG = pkg-config
--CHECKER = ./cgcc -no-compile
-+CHECKER = CHECK=./sparse ./cgcc -no-compile
- CHECKER_FLAGS =
- 
- ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
--- 
-2.15.0
+Regards,
+-- Luc Van Oostenryck
