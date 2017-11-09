@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 16/37] build: CHECKER_FLAGS=-Wno-vla for all targets
-Date: Thu,  9 Nov 2017 07:46:27 +0100
-Message-ID: <20171109064648.15379-17-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 15/37] build: reuse rule for ALL_OBJS
+Date: Thu,  9 Nov 2017 07:46:26 +0100
+Message-ID: <20171109064648.15379-16-luc.vanoostenryck@gmail.com>
 References: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:56986 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752493AbdKIGrX (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:50496 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752493AbdKIGrV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2017 01:47:23 -0500
-Received: by mail-wm0-f65.google.com with SMTP id z3so15288581wme.5
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:23 -0800 (PST)
+        Thu, 9 Nov 2017 01:47:21 -0500
+Received: by mail-wm0-f66.google.com with SMTP id s66so14660472wmf.5
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:21 -0800 (PST)
 In-Reply-To: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,24 +19,23 @@ Cc: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Josh Triplett <
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+ Makefile | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 2d3deec3a..c77a166f8 100644
+index b694db61a..2d3deec3a 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -18,7 +18,7 @@ LD = gcc
- AR = ar
- PKG_CONFIG = pkg-config
- CHECKER = ./cgcc -no-compile
--CHECKER_FLAGS =
-+CHECKER_FLAGS = -Wno-vla
+@@ -195,8 +195,7 @@ cflags   += $($(*)_CFLAGS) $(CPPFLAGS) $(CFLAGS)
+ %.sc: %.c sparse
+ 	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(cflags) -c $<
  
- HAVE_LIBXML:=$(shell $(PKG_CONFIG) --exists libxml-2.0 2>/dev/null && echo 'yes')
- HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
-@@ -186,8 +186,6 @@ DEPS := $(OBJS:%.o=.%.o.d)
- -include $(DEPS)
+-ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_OBJS))
+-selfcheck: $(ALL_OBJS:.o=.sc)
++selfcheck: $(OBJS:.o=.sc)
  
  
--pre-process.sc: CHECKER_FLAGS += -Wno-vla
+ clean: clean-check
+-- 
+2.14.0
+
