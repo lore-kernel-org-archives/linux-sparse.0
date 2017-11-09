@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 22/37] build: make clean targets quieter
-Date: Thu,  9 Nov 2017 07:46:33 +0100
-Message-ID: <20171109064648.15379-23-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 23/37] build: remove rule for shared lib, it's unused
+Date: Thu,  9 Nov 2017 07:46:34 +0100
+Message-ID: <20171109064648.15379-24-luc.vanoostenryck@gmail.com>
 References: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:32818 "EHLO
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:48639 "EHLO
         mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752493AbdKIGre (ORCPT
+        with ESMTP id S1752465AbdKIGrg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Nov 2017 01:47:34 -0500
-Received: by mail-wm0-f67.google.com with SMTP id r68so983518wmr.0
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:34 -0800 (PST)
+        Thu, 9 Nov 2017 01:47:36 -0500
+Received: by mail-wm0-f67.google.com with SMTP id p75so14804635wmg.3
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Nov 2017 22:47:36 -0800 (PST)
 In-Reply-To: <20171109064648.15379-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,26 +19,38 @@ Cc: =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Josh Triplett <
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ Makefile | 18 +++---------------
+ 1 file changed, 3 insertions(+), 15 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index cd48a2a3b..af03d5dd5 100644
+index af03d5dd5..0f69b479f 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -218,9 +218,10 @@ check: all
+@@ -116,16 +116,7 @@ else
+ $(warning Your system does not have llvm, disabling sparse-llvm)
+ endif
  
+-LIB_FILE= libsparse.a
+-SLIB_FILE= libsparse.so
+-
+-# If you add $(SLIB_FILE) to this, you also need to add -fpic to CFLAGS above.
+-# Doing so incurs a noticeable performance hit, and Sparse does not have a
+-# stable shared library interface, so this does not occur by default.  If you
+-# really want a shared library, you may want to build Sparse twice: once
+-# without -fpic to get all the Sparse tools, and again with -fpic to get the
+-# shared library.
+-LIBS=$(LIB_FILE)
++LIBS := libsparse.a
  
- clean: clean-check
--	rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) version.h
-+	@rm -f *.[oa] .*.d *.so $(PROGRAMS) $(SLIB_FILE) version.h
- clean-check:
--	find validation/ \( -name "*.c.output.expected" \
-+	@echo '     CLEAN'
-+	@find validation/ \( -name "*.c.output.expected" \
- 	                 -o -name "*.c.output.got" \
- 	                 -o -name "*.c.output.diff" \
- 	                 -o -name "*.c.error.expected" \
--- 
-2.14.0
-
+ #
+ # Pretty print
+@@ -172,12 +163,9 @@ $(foreach p,$(PROGRAMS),$(eval $(p): $($(p)_OBJS)))
+ $(PROGRAMS): % : %.o $(LIBS)
+ 	$(QUIET_LINK)$(LD) $(ldflags) -o $@ $^ $(ldlibs)
+ 
+-$(LIB_FILE): $(LIB_OBJS)
++libsparse.a: $(LIB_OBJS)
+ 	$(QUIET_AR)$(AR) rcs $@ $(LIB_OBJS)
+ 
+-$(SLIB_FILE): $(LIB_OBJS)
+-	$(QUIET_LINK)$(CC) $(LDFLAGS) -Wl,-soname,$@ -shared -o $@ $(LIB_OBJS)
