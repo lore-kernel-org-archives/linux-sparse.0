@@ -1,19 +1,19 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 04/38] build: drop -g from LDFLAGS
-Date: Sat, 11 Nov 2017 15:24:03 +0100
-Message-ID: <20171111142437.67359-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 05/38] build: pass CPPFLAGS to compiler
+Date: Sat, 11 Nov 2017 15:24:04 +0100
+Message-ID: <20171111142437.67359-6-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:56359 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:37195 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750899AbdKKOY5 (ORCPT
+        with ESMTP id S1750922AbdKKOZA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:24:57 -0500
-Received: by mail-wm0-f68.google.com with SMTP id z3so7587060wme.5
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:24:57 -0800 (PST)
+        Sat, 11 Nov 2017 09:25:00 -0500
+Received: by mail-wm0-f68.google.com with SMTP id b14so7475808wme.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:00 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -22,28 +22,32 @@ Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C
 
 From: Uwe Kleine-König <uwe@kleine-koenig.org>
 
--g is a compiler option that is ignored by the linker. So it should be
-included in CFLAGS (it already is) but not LDFLAGS.
+Debian packages use CPPFLAGS to pass -D_FORTIFY_SOURCE=2 for hardening.
 
-Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+Originally-by: Uwe Kleine-König <uwe@kleine-koenig.org>
 Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 1 -
- 1 file changed, 1 deletion(-)
+ Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index 069dae6c8..39b34f901 100644
+index 39b34f901..f1af83e32 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -14,7 +14,6 @@ OS = linux
- CC = gcc
- CFLAGS = -O2 -finline-functions -fno-strict-aliasing -g
- CFLAGS += -Wall -Wwrite-strings
--LDFLAGS += -g
- LD = gcc
- AR = ar
- PKG_CONFIG = pkg-config
+@@ -209,10 +209,10 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
+ pre-process.sc: CHECKER_FLAGS += -Wno-vla
+ 
+ %.o: %.c $(LIB_H)
+-	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
++	$(QUIET_CC)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+ 
+ %.sc: %.c sparse
+-	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(CFLAGS) $<
++	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
+ 
+ ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
+ selfcheck: $(ALL_OBJS:.o=.sc)
 -- 
 2.14.0
 
