@@ -1,53 +1,47 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 05/38] build: pass CPPFLAGS to compiler
-Date: Sat, 11 Nov 2017 15:24:04 +0100
-Message-ID: <20171111142437.67359-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 06/38] build: fix effectiveness of generated dependencies
+Date: Sat, 11 Nov 2017 15:24:05 +0100
+Message-ID: <20171111142437.67359-7-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:37195 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750922AbdKKOZA (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:53202 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750928AbdKKOZC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:25:00 -0500
-Received: by mail-wm0-f68.google.com with SMTP id b14so7475808wme.2
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:00 -0800 (PST)
+        Sat, 11 Nov 2017 09:25:02 -0500
+Received: by mail-wm0-f65.google.com with SMTP id t139so7601301wmt.1
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:02 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
-From: Uwe Kleine-König <uwe@kleine-koenig.org>
+Commit fb8734e3f "Makefile: clean up and simplify" added blindly
+$(LIB_H) as dependency to all .o targets.
+This completely defeat the purpose of generated dependencies.
 
-Debian packages use CPPFLAGS to pass -D_FORTIFY_SOURCE=2 for hardening.
+Fix this by removing this unneeded dependency.
 
-Originally-by: Uwe Kleine-König <uwe@kleine-koenig.org>
-Reviewed-by: Josh Triplett <josh@joshtriplett.org>
+Fixes: fb8734e3fa18619277f54f131a9b898ce7171645
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index 39b34f901..f1af83e32 100644
+index f1af83e32..bc4469410 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -209,10 +209,10 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
+@@ -208,7 +208,7 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
+ 
  pre-process.sc: CHECKER_FLAGS += -Wno-vla
  
- %.o: %.c $(LIB_H)
--	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
-+	$(QUIET_CC)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
+-%.o: %.c $(LIB_H)
++%.o: %.c
+ 	$(QUIET_CC)$(CC) $(CFLAGS) $(CPPFLAGS) -c -o $@ $<
  
  %.sc: %.c sparse
--	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(CFLAGS) $<
-+	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) $(CFLAGS) $(CPPFLAGS) -c $<
- 
- ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
- selfcheck: $(ALL_OBJS:.o=.sc)
 -- 
 2.14.0
 
