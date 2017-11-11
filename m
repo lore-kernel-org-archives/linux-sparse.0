@@ -1,41 +1,35 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] flush stdout when warning
-Date: Sat, 11 Nov 2017 17:31:22 +0100
-Message-ID: <20171111163122.69604-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] Fix illegal simplification of volatile stores
+Date: Sun, 12 Nov 2017 01:29:08 +0800
+Message-ID: <CANeU7QnJgGdWtM3KkJOtWG72v_soBZfeXGkqMUmQcv-L=NM5oQ@mail.gmail.com>
+References: <20171111162500.69476-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:52704 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751517AbdKKQd3 (ORCPT
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:44889 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751690AbdKKR3J (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 11:33:29 -0500
-Received: by mail-wm0-f65.google.com with SMTP id t139so7954731wmt.1
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 08:33:29 -0800 (PST)
+        Sat, 11 Nov 2017 12:29:09 -0500
+Received: by mail-yw0-f169.google.com with SMTP id k191so2096526ywe.1
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 09:29:09 -0800 (PST)
+In-Reply-To: <20171111162500.69476-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-This is much needed for tools like test-linearize
-which output on stderr & stdout and without this patch
-error messages and normal output are out-of-sync.
+On Sun, Nov 12, 2017 at 12:24 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This series inhibit the illegal simplification of redundant
+> stores when the stores are volatiles ones.
+>
+> Luc Van Oostenryck (2):
+>   add test case for bogus volatile simplification
+>   fix: volatile stores must not be simplified
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- lib.c | 1 +
- 1 file changed, 1 insertion(+)
+Looks good to me.
 
-diff --git a/lib.c b/lib.c
-index 73e9a2fe6..ac2e8e0ec 100644
---- a/lib.c
-+++ b/lib.c
-@@ -110,6 +110,7 @@ static void do_warn(const char *type, struct position pos, const char * fmt, va_
- 	vsprintf(buffer, fmt, args);	
- 	name = stream_name(pos.stream);
- 		
-+	fflush(stdout);
- 	fprintf(stderr, "%s:%d:%d: %s%s\n",
- 		name, pos.line, pos.pos, type, buffer);
- }
--- 
-2.14.0
+Can I apply those?
 
+Chris
