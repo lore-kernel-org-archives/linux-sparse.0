@@ -1,52 +1,68 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 38/38] build: let -fno-strict-aliasing be a mandatory flag
-Date: Sat, 11 Nov 2017 15:24:37 +0100
-Message-ID: <20171111142437.67359-39-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 35/38] build: reorg & add comment
+Date: Sat, 11 Nov 2017 15:24:34 +0100
+Message-ID: <20171111142437.67359-36-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:37298 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750929AbdKKO0B (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:54620 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751124AbdKKOZy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:26:01 -0500
-Received: by mail-wm0-f66.google.com with SMTP id b14so7478371wme.2
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:26:01 -0800 (PST)
+        Sat, 11 Nov 2017 09:25:54 -0500
+Received: by mail-wm0-f65.google.com with SMTP id r68so7599809wmr.3
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:54 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
+No functionnal changes here, only shuffling a few lines around,
+adding separators and adding a few comments
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ Makefile | 17 +++++++++--------
+ 1 file changed, 9 insertions(+), 8 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index a2d3e8c89..f26c1f962 100644
+index d67f54afe..92bf9e726 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -6,7 +6,7 @@ OS = linux
- 
- 
- CC = gcc
--CFLAGS = -O2 -finline-functions -fno-strict-aliasing -g
-+CFLAGS = -O2 -finline-functions -g
- CFLAGS += -Wall -Wwrite-strings
- LD = gcc
- AR = ar
-@@ -79,6 +79,11 @@ INST_MAN1=sparse.1 cgcc.1
- 
- all:
+@@ -85,6 +85,9 @@ cflags += -DGCC_BASE=\"$(GCC_BASE)\"
+ MULTIARCH_TRIPLET := $(shell $(CC) -print-multiarch 2>/dev/null)
+ cflags += -DMULTIARCH_TRIPLET=\"$(MULTIARCH_TRIPLET)\"
  
 +########################################################################
-+# common flags/options/...
++# target specificities
 +
-+cflags = -fno-strict-aliasing
-+
- GCC_BASE := $(shell $(CC) --print-file-name=)
- cflags += -DGCC_BASE=\"$(GCC_BASE)\"
+ compile: compile-i386.o
+ EXTRA_OBJS += compile-i386.o
  
--- 
-2.14.0
-
+@@ -157,15 +160,15 @@ else
+ $(warning Your system does not have llvm, disabling sparse-llvm)
+ endif
+ 
++########################################################################
+ LIBS := libsparse.a
++OBJS := $(LIB_OBJS) $(EXTRA_OBJS) $(PROGRAMS:%=%.o)
+ 
+-#
+ # Pretty print
+-#
+ V	      = @
+ Q	      = $(V:1=)
+ 
+-
++########################################################################
+ all: $(PROGRAMS)
+ 
+ ldflags += $($(@)-ldflags) $(LDFLAGS)
+@@ -178,11 +181,6 @@ libsparse.a: $(LIB_OBJS)
+ 	@echo "  AR      $@"
+ 	$(Q)$(AR) rcs $@ $^
+ 
+-OBJS := $(LIB_OBJS) $(EXTRA_OBJS) $(PROGRAMS:%=%.o)
+-DEPS := $(OBJS:%.o=.%.o.d)
+-
+--include $(DEPS)
