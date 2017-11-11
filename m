@@ -1,16 +1,16 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 36/38] build: use a single space before assignments
-Date: Sat, 11 Nov 2017 15:24:35 +0100
-Message-ID: <20171111142437.67359-37-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 37/38] build: add rule to run a single test
+Date: Sat, 11 Nov 2017 15:24:36 +0100
+Message-ID: <20171111142437.67359-38-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:56474 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750818AbdKKOZ5 (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:53695 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750929AbdKKOZ7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:25:57 -0500
-Received: by mail-wm0-f66.google.com with SMTP id z3so7589732wme.5
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:57 -0800 (PST)
+        Sat, 11 Nov 2017 09:25:59 -0500
+Received: by mail-wm0-f68.google.com with SMTP id g141so7556459wmg.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:59 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -19,24 +19,22 @@ Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/Makefile b/Makefile
-index 92bf9e726..2c70d904b 100644
+index 2c70d904b..a2d3e8c89 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -165,8 +165,8 @@ LIBS := libsparse.a
- OBJS := $(LIB_OBJS) $(EXTRA_OBJS) $(PROGRAMS:%=%.o)
+@@ -208,6 +208,8 @@ version.h: FORCE
  
- # Pretty print
--V	      = @
--Q	      = $(V:1=)
-+V := @
-+Q := $(V:1=)
+ check: all
+ 	$(Q)cd validation && ./test-suite
++validation/%.t: FORCE
++	@validation/test-suite single $*.c
  
- ########################################################################
- all: $(PROGRAMS)
+ 
+ clean: clean-check
 -- 
 2.14.0
 
