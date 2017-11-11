@@ -1,21 +1,52 @@
-From: "Ms.Lev" <jefepolitico.atahualpa@mdieloro.gob.ec>
-Subject: Proposal
-Date: Fri, 10 Nov 2017 07:43:09 +0530
-Message-ID: <20171110021301.E3FB4971851__4652.045449666$1510304268$gmane$org@mail.mdieloro.gob.ec>
-Reply-To: dalv1515@outlook.com
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 01/38] build: make PREFIX overwritable from the environment
+Date: Sat, 11 Nov 2017 15:24:00 +0100
+Message-ID: <20171111142437.67359-2-luc.vanoostenryck@gmail.com>
+References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdieloro.gob.ec ([181.211.241.244]:51779 "EHLO
-        mail.mdieloro.gob.ec" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751163AbdKJI5t (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:56250 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750746AbdKKOYw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 10 Nov 2017 03:57:49 -0500
-Content-Description: Mail message body
+        Sat, 11 Nov 2017 09:24:52 -0500
+Received: by mail-wm0-f67.google.com with SMTP id 9so2081783wme.4
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:24:52 -0800 (PST)
+In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipient <jefepolitico.atahualpa@mdieloro.gob.ec>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
-I have a rather important business proposal for you, I shall provide you with details upon your response to my email.
+From: Uwe Kleine-König <uwe@kleine-koenig.org>
+
+This way I can just use
+
+	env PREFIX=/usr make install
+
+on the command line to install sparse into the system.
+
+Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index d03417641..e011df3cc 100644
+--- a/Makefile
++++ b/Makefile
+@@ -54,7 +54,7 @@ BASIC_CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
+ endif
+ 
+ DESTDIR=
+-PREFIX=$(HOME)
++PREFIX ?= $(HOME)
+ BINDIR=$(PREFIX)/bin
+ LIBDIR=$(PREFIX)/lib
+ MANDIR=$(PREFIX)/share/man
+-- 
+2.14.0
 
