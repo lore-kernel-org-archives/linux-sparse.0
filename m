@@ -1,40 +1,94 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 25/38] build: remove the dist rule since unused
-Date: Sat, 11 Nov 2017 15:24:24 +0100
-Message-ID: <20171111142437.67359-26-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 26/38] build: use one line per item
+Date: Sat, 11 Nov 2017 15:24:25 +0100
+Message-ID: <20171111142437.67359-27-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33718 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750928AbdKKOZe (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:53648 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750911AbdKKOZg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:25:34 -0500
-Received: by mail-wm0-f68.google.com with SMTP id r68so8900104wmr.0
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:34 -0800 (PST)
+        Sat, 11 Nov 2017 09:25:36 -0500
+Received: by mail-wm0-f66.google.com with SMTP id g141so7555345wmg.2
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:25:35 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
-The last .tar.gz was for v0.5.0 in 2014.
+This help to minimize merge conflicts.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 7 -------
- 1 file changed, 7 deletions(-)
+ Makefile | 51 +++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 43 insertions(+), 8 deletions(-)
 
 diff --git a/Makefile b/Makefile
-index cc8044915..6d90bfbef 100644
+index 6d90bfbef..7f136e87e 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -194,13 +194,6 @@ version.h: FORCE
- 	fi
+@@ -29,17 +29,52 @@ MAN1DIR=$(MANDIR)/man1
+ ########################################################################
  
  
--dist:
--	@if test "$(SPARSE_VERSION)" != "v$(VERSION)" ; then \
--		echo 'Update VERSION in the Makefile before running "make dist".' ; \
--		exit 1 ; \
--	fi
--	git archive --format=tar --prefix=sparse-$(VERSION)/ HEAD^{tree} | gzip -9 > sparse-$(VERSION).tar.gz
+-PROGRAMS=test-lexing test-parsing obfuscate compile graph sparse \
+-	 test-linearize example test-unssa test-dissect ctags
++LIB_OBJS :=
++LIB_OBJS += allocate.o
++LIB_OBJS += builtin.o
++LIB_OBJS += char.o
++LIB_OBJS += compat-$(OS).o
++LIB_OBJS += cse.o
++LIB_OBJS += dissect.o
++LIB_OBJS += evaluate.o
++LIB_OBJS += expand.o
++LIB_OBJS += expression.o
++LIB_OBJS += flow.o
++LIB_OBJS += inline.o
++LIB_OBJS += lib.o
++LIB_OBJS += linearize.o
++LIB_OBJS += liveness.o
++LIB_OBJS += memops.o
++LIB_OBJS += parse.o
++LIB_OBJS += pre-process.o
++LIB_OBJS += ptrlist.o
++LIB_OBJS += scope.o
++LIB_OBJS += show-parse.o
++LIB_OBJS += simplify.o
++LIB_OBJS += sort.o
++LIB_OBJS += stats.o
++LIB_OBJS += storage.o
++LIB_OBJS += symbol.o
++LIB_OBJS += target.o
++LIB_OBJS += tokenize.o
++LIB_OBJS += unssa.o
++
++PROGRAMS :=
++PROGRAMS += compile
++PROGRAMS += ctags
++PROGRAMS += example
++PROGRAMS += graph
++PROGRAMS += obfuscate
++PROGRAMS += sparse
++PROGRAMS += test-dissect
++PROGRAMS += test-lexing
++PROGRAMS += test-linearize
++PROGRAMS += test-parsing
++PROGRAMS += test-unssa
++
+ INST_PROGRAMS=sparse cgcc
+ INST_MAN1=sparse.1 cgcc.1
+ 
+-LIB_OBJS= target.o parse.o tokenize.o pre-process.o symbol.o lib.o scope.o \
+-	  expression.o show-parse.o evaluate.o expand.o inline.o linearize.o \
+-	  char.o sort.o allocate.o compat-$(OS).o ptrlist.o \
+-	  builtin.o \
+-	  stats.o \
+-	  flow.o cse.o simplify.o memops.o liveness.o storage.o unssa.o dissect.o
+ 
+ all:
+ 
+-- 
+2.14.0
+
