@@ -1,19 +1,19 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v4 03/38] build: drop BASIC_CFLAGS and ALL_CFLAGS
-Date: Sat, 11 Nov 2017 15:24:02 +0100
-Message-ID: <20171111142437.67359-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v4 04/38] build: drop -g from LDFLAGS
+Date: Sat, 11 Nov 2017 15:24:03 +0100
+Message-ID: <20171111142437.67359-5-luc.vanoostenryck@gmail.com>
 References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:56257 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:56359 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750818AbdKKOY4 (ORCPT
+        with ESMTP id S1750899AbdKKOY5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 11 Nov 2017 09:24:56 -0500
-Received: by mail-wm0-f68.google.com with SMTP id 9so2081966wme.4
-        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:24:56 -0800 (PST)
+        Sat, 11 Nov 2017 09:24:57 -0500
+Received: by mail-wm0-f68.google.com with SMTP id z3so7587060wme.5
+        for <linux-sparse@vger.kernel.org>; Sat, 11 Nov 2017 06:24:57 -0800 (PST)
 In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -22,76 +22,28 @@ Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, =?UTF-8?q?Uwe=20Kleine-K=C
 
 From: Uwe Kleine-König <uwe@kleine-koenig.org>
 
-There is no good reason to not use plain CFLAGS for all usages.
-This simplifies understanding the Makefile for the casual reader.
+-g is a compiler option that is ignored by the linker. So it should be
+included in CFLAGS (it already is) but not LDFLAGS.
 
 Signed-off-by: Uwe Kleine-König <uwe@kleine-koenig.org>
+Reviewed-by: Josh Triplett <josh@joshtriplett.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 16 +++++++---------
- 1 file changed, 7 insertions(+), 9 deletions(-)
+ Makefile | 1 -
+ 1 file changed, 1 deletion(-)
 
 diff --git a/Makefile b/Makefile
-index ddb4c5e3d..069dae6c8 100644
+index 069dae6c8..39b34f901 100644
 --- a/Makefile
 +++ b/Makefile
-@@ -21,8 +21,6 @@ PKG_CONFIG = pkg-config
- CHECKER = ./cgcc -no-compile
- CHECKER_FLAGS =
- 
--ALL_CFLAGS = $(CFLAGS) $(BASIC_CFLAGS)
--
- HAVE_LIBXML:=$(shell $(PKG_CONFIG) --exists libxml-2.0 2>/dev/null && echo 'yes')
- HAVE_GCC_DEP:=$(shell touch .gcc-test.c && 				\
- 		$(CC) -c -Wp,-MD,.gcc-test.d .gcc-test.c 2>/dev/null && \
-@@ -39,13 +37,13 @@ LLVM_CONFIG:=llvm-config
- HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
- 
- GCC_BASE := $(shell $(CC) --print-file-name=)
--BASIC_CFLAGS = -DGCC_BASE=\"$(GCC_BASE)\"
-+CFLAGS += -DGCC_BASE=\"$(GCC_BASE)\"
- 
- MULTIARCH_TRIPLET := $(shell $(CC) -print-multiarch 2>/dev/null)
--BASIC_CFLAGS += -DMULTIARCH_TRIPLET=\"$(MULTIARCH_TRIPLET)\"
-+CFLAGS += -DMULTIARCH_TRIPLET=\"$(MULTIARCH_TRIPLET)\"
- 
- ifeq ($(HAVE_GCC_DEP),yes)
--BASIC_CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
-+CFLAGS += -Wp,-MD,$(@D)/.$(@F).d
- endif
- 
- DESTDIR=
-@@ -96,7 +94,7 @@ LLVM_LIBS := $(shell $(LLVM_CONFIG) --libs)
- LLVM_LIBS += $(shell $(LLVM_CONFIG) --system-libs 2>/dev/null)
- PROGRAMS += $(LLVM_PROGS)
- INST_PROGRAMS += sparse-llvm sparsec
--sparse-llvm.o: BASIC_CFLAGS += $(LLVM_CFLAGS)
-+sparse-llvm.o: CFLAGS += $(LLVM_CFLAGS)
- sparse-llvm_EXTRA_OBJS := $(LLVM_LIBS) $(LLVM_LDFLAGS)
- else
- $(warning LLVM 3.0 or later required. Your system has version $(LLVM_VERSION) installed.)
-@@ -122,7 +120,7 @@ LIB_OBJS= target.o parse.o tokenize.o pre-process.o symbol.o lib.o scope.o \
- LIB_FILE= libsparse.a
- SLIB_FILE= libsparse.so
- 
--# If you add $(SLIB_FILE) to this, you also need to add -fpic to BASIC_CFLAGS above.
-+# If you add $(SLIB_FILE) to this, you also need to add -fpic to CFLAGS above.
- # Doing so incurs a noticeable performance hit, and Sparse does not have a
- # stable shared library interface, so this does not occur by default.  If you
- # really want a shared library, you may want to build Sparse twice: once
-@@ -212,10 +210,10 @@ c2xml.o c2xml.sc: CFLAGS += $(LIBXML_CFLAGS)
- pre-process.sc: CHECKER_FLAGS += -Wno-vla
- 
- %.o: %.c $(LIB_H)
--	$(QUIET_CC)$(CC) -o $@ -c $(ALL_CFLAGS) $<
-+	$(QUIET_CC)$(CC) -o $@ -c $(CFLAGS) $<
- 
- %.sc: %.c sparse
--	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(ALL_CFLAGS) $<
-+	$(QUIET_CHECK) $(CHECKER) $(CHECKER_FLAGS) -c $(CFLAGS) $<
- 
- ALL_OBJS :=  $(LIB_OBJS) $(foreach p,$(PROGRAMS),$(p).o $($(p)_EXTRA_DEPS))
- selfcheck: $(ALL_OBJS:.o=.sc)
+@@ -14,7 +14,6 @@ OS = linux
+ CC = gcc
+ CFLAGS = -O2 -finline-functions -fno-strict-aliasing -g
+ CFLAGS += -Wall -Wwrite-strings
+-LDFLAGS += -g
+ LD = gcc
+ AR = ar
+ PKG_CONFIG = pkg-config
 -- 
 2.14.0
 
