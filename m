@@ -1,473 +1,153 @@
-From: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Subject: [PATCH 1/5] plugins: implement format_template attribute
-Date: Sun, 12 Nov 2017 22:19:07 +0100
-Message-ID: <20171112211911.27779-1-linux@rasmusvillemoes.dk>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/2] Fix illegal simplification of volatile stores
+Date: Mon, 13 Nov 2017 06:10:26 +0800
+Message-ID: <CANeU7QnW5x7nmrsXdR9WP+dtbGsZdYsp4nk4fUn0NZx8SnGwkg@mail.gmail.com>
+References: <20171111162500.69476-1-luc.vanoostenryck@gmail.com>
+ <CANeU7QnJgGdWtM3KkJOtWG72v_soBZfeXGkqMUmQcv-L=NM5oQ@mail.gmail.com>
+ <20171111225218.m3cqbid6ug7r57jw@ltop.local> <CANeU7QnSOro=WkH_VBoGGCPonAaw-hMGJTVG_8OQPzm19zKvaQ@mail.gmail.com>
+ <CAExDi1QwQFQ+dci=j5KrB6_Q65JD496J0U4w_Hv7usHwb-qj-g@mail.gmail.com>
+ <CANeU7Q=o+90-BL9RSwONBLmVfvD-RWkDubBskksuvLah1zi8fg@mail.gmail.com>
+ <20171112111039.qo6uan73jazriu7n@ltop.local> <CANeU7QnLjm1cSD-KY49wXrx1WPNzoXu8TXuym7gei2Aioe+mTQ@mail.gmail.com>
+ <20171112184811.ciaoudtwo5bazaj6@ltop.local>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35950 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750969AbdKLVTm (ORCPT
+Received: from mail-yw0-f176.google.com ([209.85.161.176]:48216 "EHLO
+        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750921AbdKLWK1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Nov 2017 16:19:42 -0500
-Received: by mail-wm0-f68.google.com with SMTP id r68so11352534wmr.1
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Nov 2017 13:19:41 -0800 (PST)
+        Sun, 12 Nov 2017 17:10:27 -0500
+Received: by mail-yw0-f176.google.com with SMTP id q1so12043676ywh.5
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Nov 2017 14:10:27 -0800 (PST)
+In-Reply-To: <20171112184811.ciaoudtwo5bazaj6@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>, Jean Delvare <jdelvare@suse.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Thomas Gleixner <tglx@linutronix.de>
-Cc: linux-hwmon@vger.kernel.org, linux-usb@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Emese Revfy <re.emese@gmail.com>, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, linux-kbuild@vger.kernel.org, kernel-hardening@lists.openwall.com
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Most format strings in the kernel are string literals, so the compiler
-and other static analyzers can do type checking. This plugin covers a
-few of the remaining cases, by introducing a format_template
-attribute.
+On Mon, Nov 13, 2017 at 2:48 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> I didn't at all forgot this and I still believe that at the
+> time you indeed never saw those pull requests (there was more
+> than one). But time passes and accumulates.
+> Even if you didn't saw the pull requests, you saw the posting
+> for the series, no? And it's since months that you're aware
+> that you didn't saw the pull request. There is also the mail
+> archive and, much more useful, patchwork that keep all the
+> patches. I also sent you a newer pull request 8 weeks ago,
+> right? And it was ignored for 7 weeks, right?
+> You could have send an email saying "sorry, I'll need a few weeks
+> more because now I don't have the time" but no, just nothing.
 
-Consider struct usb_class_driver. Its member 'name' is used as a
-format string in usb_register_dev(), and that use obviously expects
-that the format string contains a single "%d" (or maybe %u). So the
-idea is that we simply attach __format_template("%d") to the
-declaration of the name member of struct usb_class_driver. We can then
-check that any static initialization of that member is with a string
-literal with the same set of specifiers. This is what the plugin
-currently does. There are a number of things it also could/should do:
+Luc, that is what I did. Didn't you receive this email on Oct 17:
+=======================================
+Yes, I have the off line review write up. Let me send it out.
 
-- Check run-time assignments of literals to a __format_template
-annotated struct member.
+Thanks for the reminding.
 
-- Use this at call sites of *printf functions, where the format string
-argument is a __format_template annotated struct member - that is, use
-the template in lieu of a string literal. For now, this is not
-implemented - mostly because I'm lazy and don't want to write my own
-format checking code (again), and I suppose there should be an internal
-gcc function I could (ab)use to say "check this variadic function call,
-but use _this_ as format string".
+Chris
+=======================================
 
-- It should also be possible to attach it to function parameters -
-e.g. the namefmt parameter to kthread_create_on_cpu should have
-__format_template("%u"); its only caller is __smpboot_create_thread
-which passes struct smp_hotplug_thread->thread_comm, which in turn
-should also have that attribute. Combined with the above, this would
-check the entire chain from initializer to sprintf().
+What kind of games you are trying to play here?
 
-While strictly speaking "%*s" and "%d %s" both expect (int, const
-char*), they're morally distinct, so I don't want to treat them as
-equivalent. If this is ever a problem, I think one should let the
-attribute take an optional flag argument, which could then control how
-strict or lax the checking should be.
+The reason those email is hard to write, even after I have
+the offline review is that. I know for a fact that you are going
+to make a big deal of OP_PUSH.
 
-I'm not sure how much this affects compilation time, but there's not
-really any point in building with this all the time - it should
-suffice that the various build bots do it once in a while. Even
-without the plugin, the __format_template(...) in headers serve
-as concise documentation.
+It is not about the technical merit any more. It is about
+Chris is not a good maintainer there for Luc should do
+whatever he want.
 
-Applying this attribute to smp_hotplug_thread::thread_comm and modifying
-kernel/watchdog.c slightly, an example of the error message produced for
-violations is:
+You are making your series not touchable. Amount all
+all patch email send over the mailing list. How much can
+I actually pull from according our agreement? Zero.
 
-kernel/watchdog.c:528:1: error: initializer string 'watchdog/%u %d' contains extra format specifier '%d' compared to format template 'foobar/%u'
+There is only one valid git pull request, the llvm-fix one.
+It is hold up by the OP_PUSH. I have full screen of
+patch you send I can't apply.
 
-Signed-off-by: Rasmus Villemoes <linux@rasmusvillemoes.dk>
----
- arch/Kconfig                                 |  18 ++
- include/linux/compiler.h                     |   6 +
- scripts/Makefile.gcc-plugins                 |   2 +
- scripts/gcc-plugins/format_template_plugin.c | 331 +++++++++++++++++++++++++++
- 4 files changed, 357 insertions(+)
- create mode 100644 scripts/gcc-plugins/format_template_plugin.c
+>> Come on, what Linus mean was I should use git merge
+>> rather than apply patches. You take it out of context
+>> of comparing applying patch vs git merge. You insert your
+>> own interpretation that I should not try to provide feed back
+>> and fix up with your branch.
+>
+> I copied his words verbatim.
+> You seem to be very sure of what he meant, fine.
 
-diff --git a/arch/Kconfig b/arch/Kconfig
-index 057370a0ac4e..71c582eaeb69 100644
---- a/arch/Kconfig
-+++ b/arch/Kconfig
-@@ -517,6 +517,24 @@ config GCC_PLUGIN_RANDSTRUCT_PERFORMANCE
- 	  in structures.  This reduces the performance hit of RANDSTRUCT
- 	  at the cost of weakened randomization.
- 
-+config GCC_PLUGIN_FORMAT_TEMPLATE
-+	bool "Enable format_template attribute"
-+	depends on GCC_PLUGINS
-+	help
-+	  This plugin implements a format_template attribute which can
-+	  be attached to struct members which are supposed to hold a
-+	  (printf) format string. This allows the compiler to check
-+	  that (a) any string statically assigned to such a struct
-+	  member has format specifiers compatible with those in the
-+	  template and (b) when such a struct member is used as the
-+	  format argument to a printf function, use the template in
-+	  lieu of a string literal to do type checking of the variadic
-+	  arguments.
-+
-+	  Even without using the plugin, attaching the format_template
-+	  attribute can be beneficial, since it serves as
-+	  documentation.
-+
- config HAVE_CC_STACKPROTECTOR
- 	bool
- 	help
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 202710420d6d..478914ad280b 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -625,4 +625,10 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
- 	(_________p1); \
- })
- 
-+#ifdef HAVE_ATTRIBUTE_FORMAT_TEMPLATE
-+#define __format_template(x) __attribute__((__format_template__(x)))
-+#else
-+#define __format_template(x)
-+#endif
-+
- #endif /* __LINUX_COMPILER_H */
-diff --git a/scripts/Makefile.gcc-plugins b/scripts/Makefile.gcc-plugins
-index b2a95af7df18..2f9bc96aab90 100644
---- a/scripts/Makefile.gcc-plugins
-+++ b/scripts/Makefile.gcc-plugins
-@@ -35,6 +35,8 @@ ifdef CONFIG_GCC_PLUGINS
-   gcc-plugin-cflags-$(CONFIG_GCC_PLUGIN_RANDSTRUCT)	+= -DRANDSTRUCT_PLUGIN
-   gcc-plugin-cflags-$(CONFIG_GCC_PLUGIN_RANDSTRUCT_PERFORMANCE)	+= -fplugin-arg-randomize_layout_plugin-performance-mode
- 
-+  gcc-plugin-$(CONFIG_GCC_PLUGIN_FORMAT_TEMPLATE)	+= format_template_plugin.so
-+
-   GCC_PLUGINS_CFLAGS := $(strip $(addprefix -fplugin=$(objtree)/scripts/gcc-plugins/, $(gcc-plugin-y)) $(gcc-plugin-cflags-y))
- 
-   export PLUGINCC GCC_PLUGINS_CFLAGS GCC_PLUGIN GCC_PLUGIN_SUBDIR
-diff --git a/scripts/gcc-plugins/format_template_plugin.c b/scripts/gcc-plugins/format_template_plugin.c
-new file mode 100644
-index 000000000000..09a798773cfd
---- /dev/null
-+++ b/scripts/gcc-plugins/format_template_plugin.c
-@@ -0,0 +1,331 @@
-+#include <string.h>
-+#include <assert.h>
-+
-+#include "gcc-common.h"
-+#include "c-family/c-pragma.h"
-+
-+int plugin_is_GPL_compatible;
-+
-+static struct plugin_info format_template_plugin_info = {
-+	.version	= "20151209",
-+	.help		= "format_template_plugin\n",
-+};
-+
-+static tree handle_format_template_attribute(tree *node, tree name, tree args, int __unused flags, bool *no_add_attrs)
-+{
-+	tree tmpl, orig_attr;
-+
-+	*no_add_attrs = true;
-+	switch (TREE_CODE(*node)) {
-+	case FIELD_DECL:
-+		break;
-+	default:
-+		error("%qE attribute only applies to struct members", name);
-+		return NULL_TREE;
-+	}
-+
-+	tmpl = TREE_VALUE(args);
-+	if (TREE_CODE(tmpl) != STRING_CST) {
-+		error("%qE parameter of the %qE attribute is not a string constant", args, name);
-+		return NULL_TREE;
-+	}
-+
-+	orig_attr = lookup_attribute("format_template", DECL_ATTRIBUTES(*node));
-+	if (orig_attr) {
-+		error("%qE attribute applied twice", name);
-+		return NULL_TREE;
-+	}
-+	else
-+		*no_add_attrs = false;
-+
-+	return NULL_TREE;
-+}
-+
-+static struct attribute_spec format_template_attr = {
-+	.name				= "format_template",
-+	.min_length			= 1,
-+	.max_length			= 1,
-+	.decl_required			= true,
-+	.type_required			= false,
-+	.function_type_required		= false,
-+	.handler			= handle_format_template_attribute,
-+#if BUILDING_GCC_VERSION >= 4007
-+	.affects_type_identity		= false
-+#endif
-+};
-+
-+static void register_attributes(void __unused *event_data, void __unused *data)
-+{
-+	register_attribute(&format_template_attr);
-+}
-+
-+static void define_feature_macro(void __unused *event_data, void __unused *data)
-+{
-+	cpp_define(parse_in, "HAVE_ATTRIBUTE_FORMAT_TEMPLATE");
-+}
-+
-+enum {
-+	QUAL_NONE,
-+	QUAL_SHORT, /* h */
-+	QUAL_BYTE, /* hh, == QUAL_SHORT+1*/
-+	QUAL_LONG, /* l */
-+	QUAL_LONGLONG, /* ll, == QUAL_LONG+1 */
-+	QUAL_MAX, /* j */
-+	QUAL_SIZE, /* z */
-+	QUAL_PTRDIFF, /* t */
-+};
-+#define FW_P_NONE (-1)
-+#define FW_P_ARG (-2)
-+
-+struct spec_iter {
-+	const char *spec;
-+	int len;
-+
-+	int field_width;
-+	int precision;
-+	int qual;
-+	char type;
-+
-+};
-+
-+static inline void
-+spec_iter_init(struct spec_iter *spec, const char *s)
-+{
-+	spec->spec = s;
-+	spec->len = 0;
-+}
-+
-+static void get_fw_p(const char **c, int *dst, int prec)
-+{
-+	*dst = FW_P_NONE;
-+	if (prec) {
-+		if (**c != '.')
-+			return;
-+		++(*c);
-+		*dst = 0;
-+	}
-+	if (**c == '*') {
-+		++(*c);
-+		*dst = FW_P_ARG;
-+		return;
-+	}
-+	if (!ISDIGIT(**c))
-+		return;
-+	*dst = **c - '0';
-+	++(*c);
-+	while (ISDIGIT(**c)) {
-+		/* should do if (*dst > 10000) warn("insane explicit field width/precision"); */
-+		*dst *= 10;
-+		*dst += **c - '0';
-+		++(*c);
-+	}
-+}
-+
-+static int spec_next(struct spec_iter *spec)
-+{
-+	const char *c;
-+	int slen = 0;
-+
-+	spec->spec += spec->len;
-+again:
-+	c = strchrnul(spec->spec, '%');
-+	slen += c - spec->spec;
-+	if (!c[0]) {
-+		spec->spec = NULL;
-+		return slen;
-+	}
-+	assert(c[0] == '%');
-+	if (c[1] == '%') {
-+		slen++;
-+		spec->spec = c+2;
-+		goto again;
-+	}
-+
-+	spec->spec = c;
-+	++c;
-+	/* skip flags */
-+	while (strchr("#0- +", *c))
-+		++c;
-+
-+	get_fw_p(&c, &spec->field_width, 0);
-+	get_fw_p(&c, &spec->precision, 1);
-+
-+	spec->qual = QUAL_NONE;
-+	switch (*c) {
-+	case 'h': spec->qual = QUAL_SHORT; break;
-+	case 'l': spec->qual = QUAL_LONG; break;
-+#if 0 /* The kernel doesn't grok the j qualifier */
-+	case 'j': spec->qual = QUAL_MAX; break;
-+#endif
-+	case 'z': spec->qual = QUAL_SIZE; break;
-+	case 't': spec->qual = QUAL_PTRDIFF; break;
-+	}
-+	if (spec->qual) {
-+		++c;
-+		if (*c == c[-1] && (*c == 'h' || *c == 'l')) {
-+			spec->qual++;
-+			++c;
-+		}
-+	}
-+
-+	spec->type = *c++;
-+	spec->len = c - spec->spec;
-+
-+	switch (spec->type) {
-+	case 'd':
-+	case 'u':
-+	case 'x':
-+	case 'X':
-+	case 'o':
-+	case 'c':
-+	case 's':
-+		break;
-+	/*
-+	 * Disallowing %p is the safe and sane thing to do, given the
-+	 * different interpretations based on following alphanumerics.
-+	 */
-+	case 'p':
-+	/*
-+	 * Why are there two with the same meaning? %i is the lesser
-+	 * used one and should just die.
-+	 */
-+	case 'i':
-+		error("unsupported specifier '%.*s' in template or initializer", spec->len, spec->spec);
-+	default:
-+		error("invalid specifier '%.*s' in template or initializer", spec->len, spec->spec);
-+	}
-+
-+	return slen;
-+}
-+
-+static bool specs_compatible(const struct spec_iter *a, const struct spec_iter *b)
-+{
-+	if (a->qual != b->qual)
-+		return false;
-+	if (a->field_width != b->field_width)
-+		return false;
-+	if (a->precision != b->precision)
-+		return false;
-+	if (a->type != b->type)
-+		return false;
-+	return true;
-+}
-+
-+static void check_literal(tree attr, const char *str)
-+{
-+	const char *pattern = TREE_STRING_POINTER(TREE_VALUE(TREE_VALUE(attr)));
-+	struct spec_iter sp, ss;
-+	int i;
-+
-+	spec_iter_init(&sp, pattern);
-+	spec_iter_init(&ss, str);
-+
-+	/*
-+	 * Walk over the pattern and string in lockstep.
-+	 */
-+	for (i = 1; ; ++i) {
-+		spec_next(&sp);
-+		spec_next(&ss);
-+		/*
-+		 * It's ok for the template to have more specifiers
-+		 * than the actual string. But issue warning(s)
-+		 * anyway, conditional on -Wformat-extra-args.
-+		 */
-+		if (ss.spec == NULL) {
-+			while (sp.spec != NULL) {
-+			       warning(OPT_Wformat_extra_args,
-+				       "format template '%s' contains extra specifier '%.*s' compared to initializer string '%s'",
-+				       pattern, sp.len, sp.spec, str);
-+			       spec_next(&sp);
-+			}
-+			return;
-+		}
-+		/*
-+		 * It's absolutely not ok for the actual string to
-+		 * have more specifiers than the template.
-+		 */
-+		if (!sp.spec) {
-+			do {
-+				error("initializer string '%s' contains extra format specifier '%.*s' compared to format template '%s'",
-+					str, ss.len, ss.spec, pattern);
-+				spec_next(&ss);
-+			} while (ss.spec != NULL);
-+			return;
-+		}
-+		if (!specs_compatible(&ss, &sp)) {
-+			error("specifier %d in '%s' ('%.*s') incompatible with format template '%s'",
-+			      i, str, ss.len, ss.spec, pattern);
-+		}
-+	}
-+}
-+
-+static void check_declaration(void *event_data, void *data __unused)
-+{
-+	tree decl = (tree)event_data;
-+	tree ini, type;
-+	unsigned idx;
-+	tree field, value;
-+
-+	switch (TREE_CODE(decl)) {
-+	case VAR_DECL:
-+		break;
-+	default:
-+		return;
-+	}
-+
-+	ini = DECL_INITIAL(decl);
-+	if (!ini)
-+		return;
-+
-+	type = TREE_TYPE(decl);
-+	if (TREE_CODE(type) != RECORD_TYPE)
-+		return;
-+
-+	if (TREE_CODE(ini) != CONSTRUCTOR) {
-+		// warning(0, "weird, initializer is not a CONSTRUCTOR, tree_code=%d", TREE_CODE(ini));
-+		return;
-+	}
-+
-+	FOR_EACH_CONSTRUCTOR_ELT(CONSTRUCTOR_ELTS(ini), idx, field, value) {
-+		tree attr;
-+
-+		/* if (TREE_CODE(value) != STRING_CST) */
-+		/* 	continue; */
-+
-+		attr = lookup_attribute("format_template", DECL_ATTRIBUTES(field));
-+		if (!attr)
-+			continue;
-+
-+		/*
-+		 * Hm, apparently the string literal is hidden behind
-+		 * a NOP_EXPR and a ADDR_EXPR.
-+		 */
-+		STRIP_NOPS(value);
-+		if (TREE_CODE(value) == ADDR_EXPR)
-+			value = TREE_OPERAND(value, 0);
-+
-+		if (TREE_CODE(value) != STRING_CST)
-+			continue;
-+
-+		check_literal(attr, TREE_STRING_POINTER(value));
-+
-+	}
-+
-+}
-+
-+int plugin_init(struct plugin_name_args *plugin_info, struct plugin_gcc_version *version)
-+{
-+	const char *const plugin_name = plugin_info->base_name;
-+
-+	if (!plugin_default_version_check(version, &gcc_version)) {
-+		error(G_("incompatible gcc/plugin versions"));
-+		return 1;
-+	}
-+
-+	register_callback(plugin_name, PLUGIN_INFO, NULL, &format_template_plugin_info);
-+	register_callback(plugin_name, PLUGIN_START_UNIT, &define_feature_macro, NULL);
-+	register_callback(plugin_name, PLUGIN_FINISH_DECL, &check_declaration, NULL);
-+	register_callback(plugin_name, PLUGIN_ATTRIBUTES, &register_attributes, NULL);
-+
-+	return 0;
-+}
--- 
-2.11.0
+Of course. Stop using Linus email as justification of forcing
+your code in, even when it is questionable not having technical
+merit.
 
+The review and merge process is design to keep the bad bits
+out. You are handicapping me by insist on refuse to make any
+fix up changes.
+
+>
+> Because I don't comment on code that I somehow disagree with,
+> or is not to my taste but which is working well enough that
+> I don't want to block.
+
+So it is not about technical merit any more. It is about some
+one you disagree with.
+
+And what is the reason for not reviewing this:
+"Simplify expr->flags assignement":
+
+https://patchwork.kernel.org/patch/10042019/
+
+You are basically starving my patches so that you can claim
+"patch proposed and dropped".
+
+Luc, you have make it personal. You need to be more open
+minded with the person you have technical disagreement
+with. The more you do this kind of stuff the more it shows
+that you are not ready to become a good open source maintainer.
+
+>
+> In my world, evidences are patches, working patches, integrated
+> with the rest of the code and reasonably tested.
+> I have a solution which do that, it has been submitted and used
+> by me and Dibyendu. You claim to have a superior solution, OK.
+> Where are the patches? Where can we see the whole thing integrated
+> with all the others fixes? On what have this been tested?
+
+Come on, I want to get some feed back from you first before
+I develop that into a full working series. Since you are the one
+insist on type-less constant so you might able to see some reasoning
+I don't. So far you provide none.
+
+Fine, I will follow up with this one.
+
+> The code is there Chris, it has been submitted, it has my SoB and
+> thus agree with the license. You have fully the right to take my
+> code, you don't need my blessing.
+> If you want to take the code I wrote, take some bits and drop some
+> others and if you think it's a good idea, that's how you can be
+> useful to sparse, fine, please do.
+
+Of course I don't want to partial apply the series.
+But I do have technical reason to hold of the OP_PUSH.
+What is the solution you suggest here if I don't agree with
+OP_PUSH?
+
+I can of course follow up with the PSEUDO_VAL.size one.
+But what about your other part of the series. Can you purpose
+a different pull request without OP_PUSH?
+
+Let's discuss a working model I can do my job rejecting some
+patch if really necessary. How many email have we exchange
+and not having a solution?
+
+>
+> So, now it's me that is holding things? Incredible.
+
+Yes, by refusing to get a workable solutions if I reject OP_PUSH.
+
+Am I not allow to reject the OP_PUSH because it lack of
+technical merit?
+
+The whole reason I am hesitate to send out that OP_PUSH
+review is because I know you will this kind of behavior.
+
+Chris
