@@ -1,39 +1,34 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+From: Christopher Li <sparse@chrisli.org>
 Subject: Re: [PATCH 0/2] V2 llvm constant value pseudo size fix
-Date: Mon, 13 Nov 2017 20:31:31 +0000
-Message-ID: <CACXZuxcAp_YEVwpi=9f7n_srWM8VRauaRBfFfxrryNfjj=s30w@mail.gmail.com>
+Date: Tue, 14 Nov 2017 07:23:46 +0800
+Message-ID: <CANeU7Qk4g2yyhagiRBrCziLkHozDGJDuUswE0Pw+=nVGLPKLLw@mail.gmail.com>
 References: <CANeU7QknH=xpuButjBpVved131s8Kw4AJRZZGTBDLN+LBH_H9A@mail.gmail.com>
+ <CACXZuxcAp_YEVwpi=9f7n_srWM8VRauaRBfFfxrryNfjj=s30w@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f173.google.com ([209.85.217.173]:54306 "EHLO
-        mail-ua0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755170AbdKMUbd (ORCPT
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:55329 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751240AbdKMXXr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Nov 2017 15:31:33 -0500
-Received: by mail-ua0-f173.google.com with SMTP id j14so12315702uag.11
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Nov 2017 12:31:32 -0800 (PST)
-In-Reply-To: <CANeU7QknH=xpuButjBpVved131s8Kw4AJRZZGTBDLN+LBH_H9A@mail.gmail.com>
+        Mon, 13 Nov 2017 18:23:47 -0500
+Received: by mail-yw0-f175.google.com with SMTP id q37so1174219ywa.12
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Nov 2017 15:23:47 -0800 (PST)
+In-Reply-To: <CACXZuxcAp_YEVwpi=9f7n_srWM8VRauaRBfFfxrryNfjj=s30w@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
+To: Dibyendu Majumdar <mobile@majumdar.org.uk>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
-
-On 13 November 2017 at 15:27, Christopher Li <sparse@chrisli.org> wrote:
-> I add the second patch to allow sparse-llvm to use
-> the new size store in constant value pseudo.
+On Tue, Nov 14, 2017 at 4:31 AM, Dibyendu Majumdar
+<mobile@majumdar.org.uk> wrote:
+>> Dibyendu, can you give this series some test since you report
+>> it?
+>>
 >
-> The whole series is very simple, only two patches.
-> It directly address the problem of sparse-llvm wasn't
-> able to get the integer size from constant value pseudo.
->
-> Dibyendu, can you give this series some test since you report
-> it?
+> I am happy to test but it might take a week or two, due to other commitments.
 >
 
-I am happy to test but it might take a week or two, due to other commitments.
+No problem. Thank you so much.
 
-Regards
-Dibyendu
+Chris
