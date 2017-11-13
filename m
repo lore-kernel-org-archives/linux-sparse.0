@@ -1,56 +1,27 @@
-From: "M,Shakour Rosarita" <hassantara789@gmail.com>
-Subject: Hello Dear...
-Date: Mon, 13 Nov 2017 12:08:18 +0000
-Message-ID: <CAMyxZDE63FQAQ=JTZN_2Ks1T4PC7+RQ2oo6+S3vs4Q0Mp-K2iQ__33.1136202023075$1510574914$gmane$org@mail.gmail.com>
-Reply-To: mshakourrosarita22@gmail.com
+From: Amos Kalonzo <daniel.basha.tg@gmail.com>
+Subject: Re:
+Date: Mon, 13 Nov 2017 15:55:29 +0100
+Message-ID: <CAKUwMNBF_G0zCBA-QOUO2R4oLZzL_9_AierxU6RvQA0C0fNcOw__29254.6798744754$1510585021$gmane$org@mail.gmail.com>
+Reply-To: info@acalonzo.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f195.google.com ([209.85.217.195]:53408 "EHLO
-        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752693AbdKMMIT (ORCPT
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:57050 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753253AbdKMOza (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Nov 2017 07:08:19 -0500
-Received: by mail-ua0-f195.google.com with SMTP id e10so8491102uah.10
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Nov 2017 04:08:19 -0800 (PST)
+        Mon, 13 Nov 2017 09:55:30 -0500
+Received: by mail-yw0-f193.google.com with SMTP id r186so5120652ywe.13
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Nov 2017 06:55:30 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Hello Dear...
+Attn:
 
-I know that this message will come to you as a surprise. I hoped that
-you will not expose or betray this trust and confident that I am about
-to repose on you, my name is M, Shakour Rosarita. I am 19 years old
-Girl, female, from Tartu Syria, (never married) 61 kg, white in
-complexion, and I am currently living in the refugee camp here in
-Abidjan Ivory Coast, My late beloved father M,Shakour Hassin was a
-renowned businessman and owner of Natour Petrol Station in Syria, he
-was killed in a stampede riot in Tartu, Syria.
-When I got the news about my parents. I fled to a nearby country
-Jordan before I joined a ferry to Africa and came to Abidjan capital
-city Ivory Coast West Africa find safety here.
-I came in 2015 to Abidjan and I now live in refugee camps here as
-refugees are allowed freely to enter here without, My late father
-deposited (US$6.200.000.00m) My late father kept the money at the bank
-of Africa, I want you to help me transfer the money to your hand so
-that you will help me bring me into your country for my continue
-education.
+I am wondering why You haven't respond to my email for some days now.
+reference to my client's contract balance payment of (11.7M,USD)
+Kindly get back to me for more details.
 
-I sent my pictures here for you to see. Who I am seriously looking for
-a good-person in my life, so I want to hear from you soon and learn
-more about you.
+Best Regards
 
-I am an open-minded and friendly girl to share a good time with you
-and have fun and enjoy on the go, bird watching, the rest of our
-lives. My Hobbies, tourism books, dance, music, soccer, tennis,
-swimming and cinema.
-I would just think about you, including your dose and doesn=E2=80=99t .I
-believe we will do well together, and live like one family.
-Thank you and God bless you, for you in your promise to help me here,
-looking forward to your reply by the grace of God and have a good day.
-I hope you send me your photos as well? I await your next reply in
-faith please reply through my private email at
-(mshakourrosarita22@gmail.com):
-Thanks.
-Ms Rosarita
+Amos Kalonzo
