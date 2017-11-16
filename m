@@ -1,32 +1,63 @@
-From: "YCIL" <jefepolitico.atahualpa@mdieloro.gob.ec>
-Subject: Work With Us!
-Date: Thu, 16 Nov 2017 02:25:32 +0530
-Message-ID: <20171115205520.234BB9645E7@mail.mdieloro.gob.ec>
-Reply-To: yunnandelhi@india.com
-Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
-Content-Transfer-Encoding: 8BIT
+From: Logan Gunthorpe <logang@deltatee.com>
+Subject: [PATCH] add __builtin functions for isinf_sign, isfinite and isnan
+Date: Thu, 16 Nov 2017 14:27:19 -0700
+Message-ID: <20171116212719.1217-1-logang@deltatee.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mdieloro.gob.ec ([181.211.241.244]:51464 "EHLO
-        mail.mdieloro.gob.ec" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753427AbdKOVxS (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Nov 2017 16:53:18 -0500
-Content-Description: Mail message body
+Received: from ale.deltatee.com ([207.54.116.67]:46478 "EHLO ale.deltatee.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751599AbdKPV2H (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 16 Nov 2017 16:28:07 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipient <jefepolitico.atahualpa@mdieloro.gob.ec>
+To: linux-sparse@vger.kernel.org
+Cc: Logan Gunthorpe <logang@deltatee.com>
 
- Our Company Yunnan Copper Industry (Group) Co., Ltd, based in India is
-in search of a competent Corporate Individual or Company/Firm that will be responsible in handling funds as our ''Representative Manager'' in the United
-States/Canada region. If interested kindly email our Human Resources
-Department for more description of the job, compensations and monthly salary involved.
+These bultins are defined by in gcc since 4.4. They are also now
+used by the isinf, isfinite and isnan macros. So using them with a
+newer gcc causes 'undefined identifier' errors.
 
-Note: It is a part time job that won't interrupt your present work or
-business. Also please note especially that we will require a Company/Business Account where the
-payments from our clients will be sent to for you to help us receive.
+Add the builtin definitions and some validation checks for these
+functions.
 
-Looking forward to your response.
+Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
+---
+ lib.c                    | 3 +++
+ validation/builtin_inf.c | 8 ++++++++
+ 2 files changed, 11 insertions(+)
 
-PLEASE IGNORE IF THIS IS NOT YOUR DIRECT EMAIL ADDRESS AND ALSO 
-IF YOU DO NOT HAVE A COMPANY/BUSINESS ACCOUNT TO RECEIVE THE FUNDS!
+diff --git a/lib.c b/lib.c
+index 4602cf8..cc740e9 100644
+--- a/lib.c
++++ b/lib.c
+@@ -1105,6 +1105,9 @@ void declare_builtin_functions(void)
+ 	add_pre_buffer("extern double __builtin_nan(const char *);\n");
+ 	add_pre_buffer("extern float __builtin_nanf(const char *);\n");
+ 	add_pre_buffer("extern long double __builtin_nanl(const char *);\n");
++	add_pre_buffer("extern int __builtin_isinf_sign(float);\n");
++	add_pre_buffer("extern int __builtin_isfinite(float);\n");
++	add_pre_buffer("extern int __builtin_isnan(float);\n");
+ 
+ 	/* And some __FORTIFY_SOURCE ones.. */
+ 	add_pre_buffer ("extern __SIZE_TYPE__ __builtin_object_size(const void *, int);\n");
+diff --git a/validation/builtin_inf.c b/validation/builtin_inf.c
+index 48546e4..0855ab0 100644
+--- a/validation/builtin_inf.c
++++ b/validation/builtin_inf.c
+@@ -7,6 +7,14 @@ static long double li = __builtin_infl();
+ static double dn = __builtin_nan("");
+ static float fn = __builtin_nanf("");
+ static long double ln = __builtin_nanl("");
++static int inf = __builtin_isinf_sign(0.0);
++static int fin = __builtin_isfinite(0.0);
++static int nan = __builtin_isnan(0.0);
++
++#include <math.h>
++static int inf2 = isinf(0.0);
++static int fin2 = isfinite(0.0);
++static int nan2 = isnan(0.0);
+ 
+ /*
+  * check-name: __builtin INFINITY / nan()
+-- 
+2.11.0
+
