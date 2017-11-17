@@ -1,45 +1,54 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2] add __builtin functions for isinf_sign, isfinite and
- isnan
-Date: Fri, 17 Nov 2017 09:13:49 +0100
-Message-ID: <20171117081348.5cdzuctwi6i3ltu6@ltop.local>
-References: <20171116230817.10011-1-logang@deltatee.com>
+Subject: Re: [PATCH v4 00/38] Makefile reognization
+Date: Fri, 17 Nov 2017 10:23:27 +0100
+Message-ID: <20171117092326.jje4m4o5np567y6z@ltop.local>
+References: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:46637 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965253AbdKQINt (ORCPT
+Received: from mail-wm0-f46.google.com ([74.125.82.46]:39799 "EHLO
+        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1757449AbdKQJX2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 17 Nov 2017 03:13:49 -0500
-Received: by mail-wm0-f66.google.com with SMTP id z3so4681031wme.5
-        for <linux-sparse@vger.kernel.org>; Fri, 17 Nov 2017 00:13:49 -0800 (PST)
+        Fri, 17 Nov 2017 04:23:28 -0500
+Received: by mail-wm0-f46.google.com with SMTP id l8so5005925wmg.4
+        for <linux-sparse@vger.kernel.org>; Fri, 17 Nov 2017 01:23:28 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <20171116230817.10011-1-logang@deltatee.com>
+In-Reply-To: <20171111142437.67359-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Logan Gunthorpe <logang@deltatee.com>
-Cc: linux-sparse@vger.kernel.org, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
+Cc: Uwe =?iso-8859-1?Q?Kleine-K=F6nig?= <uwe@kleine-koenig.org>, Jeff Layton <jlayton@redhat.com>, Josh Triplett <josh@joshtriplett.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
-On Thu, Nov 16, 2017 at 04:08:17PM -0700, Logan Gunthorpe wrote:
-> These bultins are defined by in gcc since 4.4. They are also now
-> used by the isinf, isfinite and isnan macros. So using them with a
-> newer gcc causes 'undefined identifier' errors.
+On Sat, Nov 11, 2017 at 03:23:59PM +0100, Luc Van Oostenryck wrote:
+> The goal of this series is to reorganize sparse's Makefile
+> in order to offer a few features asked by the distros:
+> 1) allow CFLAGS & CPPFLAGS to be taken from the command line
+> 2) allow PREFIX to be taken from the environment
+> Support for pkg-config is removed as well as some old crufts.
 > 
-> Add the builtin definitions and some validation checks for these
-> functions.
+> This cleanup is based on a previous series by Uwe Kleine-König
+> and further inspired by a patch and a need from Jeff Layton.
 > 
-> Signed-off-by: Logan Gunthorpe <logang@deltatee.com>
-
-Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-
-> ---
+> The changes since v1 are:
+> *) fold the two patches concerning the removal of shared lib support
+> *) remove the patch using git-clean for 'make clean'
 > 
-> Changes since v1:
->  * Remove math.h dependancy from validation tests. As a consequnce
->    we don't test that the math functions work. (Per a request from
->    Christopher.)
+> The changes since v2 are:
+> *) change a commit message to make explicit the fact that
+>    quiet's commands abbreviated part are also issued for V=1
+> *) add a convenience rule for running a single test via:
+>         make validation/<name-of-testfile>.t
+> 
+> The changes since v3 are:
+> *) make the name 'local.mk' be configurable instead of
+>    the renaming that was done.
+> *) move '-fno-strict-aliasing' out of the overridable CFLAGS
+> *) rename the ...{_OBJS,_LDFLAGS,_LDLIBS} to ...{-objs,-ldflags,-ldlibs}
+>    to be consistent about the private 'cflags'.
 
-It would only have tested if your <math.h> doesn't have errors.
+This has now been pushed to my dev tree at:
+	git://github.com/lucvoo/sparse.git master
 
--- Luc
+-- Luc Van Oostenryck 
