@@ -1,31 +1,34 @@
-From: "Mitesh Shah" <mpshah@gmail.com>
-Subject: (unknown)
-Date: Sun, 19 Nov 2017 23:07:00 +0300
-Message-ID: <D2F3E6CC-2488-47BB-CB2F-BAA5B1C0532F@gdou.edu.cn>
-Mime-Version: 1.0 (1.0)
-Content-Type: text/plain;
-        charset=us-ascii
-Content-Transfer-Encoding: 8BIT
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/2] fix missing base type examination
+Date: Sat, 25 Nov 2017 10:31:13 +0100
+Message-ID: <20171125093115.95791-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [210.38.128.67] ([210.38.128.67]:56723 "HELO eyou.net"
-        rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with SMTP
-        id S1750952AbdKSUSQ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 19 Nov 2017 15:18:16 -0500
-Received: from mail.gdou.edu.cn (mail.gdou.edu.cn [106.76.239.210])
-        by gdou.edu.cn (MTA vdccf12) with ESMTP id c9f18e91011a97b002d0b25e344e4451
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Nov 2017 04:07:03 +0800
-Subject: 
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:39383 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750819AbdKYJdg (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sat, 25 Nov 2017 04:33:36 -0500
+Received: by mail-wm0-f42.google.com with SMTP id x63so26271512wmf.4
+        for <linux-sparse@vger.kernel.org>; Sat, 25 Nov 2017 01:33:36 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linux Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Salutations Linux
+The goal of this series is to add te missing
+examination of the base type in evaluate_dereference().
+
+Luc Van Oostenryck (2):
+  add test case unexamined base type
+  fix: evaluate_dereference() unexamined base type
+
+ evaluate.c                                |  2 +-
+ validation/bugs/unexamined-base-type-00.c | 28 ++++++++++++++++++++++++++++
+ 2 files changed, 29 insertions(+), 1 deletion(-)
+ create mode 100644 validation/bugs/unexamined-base-type-00.c
 
 
-http://bit.ly/2ATC9sN
+The series is available for testing at:
+	git://github.com/lucvoo/sparse-dev.git fix-unexamined
 
-
-
-
-Mitesh Shah
-
+-- Luc Van Oostenryck
