@@ -1,82 +1,82 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [SPARSE] cast rework (was: Re: Interaction between bitfields and
- casts)
-Date: Sat, 25 Nov 2017 17:18:31 +0100
-Message-ID: <20171125161825.64d4s27k57ep3psg@ltop.local>
-References: <CACXZuxfUC1DostLzrB2nk9eOvDox1oxG-HjHm+nrWqtyRWEGVQ@mail.gmail.com>
- <CA+55aFw6PfWeEFcRPQg5DQOU_8Xzc48N-5Hr2F_e4=BYgqzdDg@mail.gmail.com>
- <CAMHZB6GwFtiXzKKRS79srkWH-Cq_mH5TmQJmro4qR3gto-WLqA@mail.gmail.com>
- <CA+55aFyKPG265hBvvo7rYmzKkeOD+-o-Xr6UNzcJzKhxDYyy7w@mail.gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [GIT PULL] llvm fixes
+Date: Mon, 27 Nov 2017 01:42:55 +0800
+Message-ID: <CANeU7Q=pZAuzju8EJACZ9HVKzM6C=L0PDY6xnid6Ub5=RkuXwg@mail.gmail.com>
+References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
+ <20171117095147.a4v4alrcr77rafut@ltop.local> <CANeU7QnTtcKP9ukNqGmMzfVMviYwYEfYFhgLRHHGxCqR7sPGEQ@mail.gmail.com>
+ <20171117195004.s472oqlldfrgiz2t@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f44.google.com ([74.125.82.44]:38191 "EHLO
-        mail-wm0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751231AbdKYQSf (ORCPT
+Received: from mail-yb0-f175.google.com ([209.85.213.175]:38083 "EHLO
+        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751046AbdKZRm4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 25 Nov 2017 11:18:35 -0500
-Received: by mail-wm0-f44.google.com with SMTP id n74so1888185wmi.3
-        for <linux-sparse@vger.kernel.org>; Sat, 25 Nov 2017 08:18:35 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CA+55aFyKPG265hBvvo7rYmzKkeOD+-o-Xr6UNzcJzKhxDYyy7w@mail.gmail.com>
+        Sun, 26 Nov 2017 12:42:56 -0500
+Received: by mail-yb0-f175.google.com with SMTP id v77so2726444ybi.5
+        for <linux-sparse@vger.kernel.org>; Sun, 26 Nov 2017 09:42:56 -0800 (PST)
+In-Reply-To: <20171117195004.s472oqlldfrgiz2t@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Dibyendu Majumdar <mobile@majumdar.org.uk>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Aug 09, 2017 at 03:44:02PM -0700, Linus Torvalds wrote:
-> On Wed, Aug 9, 2017 at 3:06 PM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > I have but I never posted it yet.
-> > Basically, I have specialized them:
-> > - TRUNC, ZEXT & SEXT: truncate (may be not neede), zero & sign extend
-> > for integers
-> 
-> Makes sense.
-> 
-> And yes, I think we could skip TRUNC (casting to a smaller type is one
-> of those questionable things we do now).
-> 
-> Our IR doesn't really have any well-defined form for upper bits anyway
-> (ie there's no guarantee that values are zero-extended or
-> sign-extended to the full register width in the IR), so "TRUNC"
-> doesn't really have any sane semantics.
-> 
-> > - PTRU & UPTR: conversion pointer from/to unsigned integer (not sure
-> > it's needed)
-> 
-> So this is a separate thing that doesn't take a size?
-> 
-> So a "int to ptr" conversion on a 64-bit architecture would be a
-> combination of SEXT.64 and a UPTR?
-> 
-> If so, then yes, I think that's the right thing to do (and then in
-> basically all cases the PTRU/UPTR just goes away).
-> 
-> Or, like TRUNC, just say that pointers simply *are* the same thing as
-> an integer of the same size, and PTRU/UPTR just doesn't exist at all.
-> 
-> > - FCVTU & FCVTS: convert float to unsigned/signed integers
-> > - UCVTF & SCVTF: convert int to float
-> > - FCVTF: float to float convert (maybe even better/simpler with FTRUNC
-> > & FEXT ?à)
-> >
-> > The main objective being to make things more explicit a avoid to have
-> > to test the orig-type at each time.
-> 
-> Yes. I think what you describe is the right thing to do. The current
-> casting is just wrong and nasty, and has too much implicit stuff.
-> 
->                     Linus
+On Sat, Nov 18, 2017 at 3:50 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>> Do you see any problem using the pseudo value with size patch?
+>> Now it has the second patch to work with llvm as well. Should be testable.
+>
+> I already said in June-August that I tried this approach and that
+> it didn't work (well, I'm sure that it is possible to make it work,
+> it's just more complex that it seems).
+>
+> I'm sure it's testable (but what does that mean exactly?).
+> I'm convinced it passes the testsuite and kernel check.
+> But given that, as stated here above, nowhere in the code
+> this information is needed, it's pretty normal that the
+> changes have zero effect there. OTOH, these changes have
+> impact on a few things related to the level below, thus
+> *it is needed* to test things at IR level.
+>
+> Now, I have no hard problem with the PSEUDO_VAL.size
+> approach from a theorical point of view (even if I would
+> prefer the mathematical PoV that 0 is 0, 1 is 1, etc.).
+> I even think that *eventually* it may very well be
+> the right solution (probably the whole typing at IR
+> level need to be revisited).
 
-I'm busy to test & polish the patch series corresponding to this and
-I discovered an annoying oddball:
-   Cast to an union (where the union contains a field of the same
-   type as the source).
-This is a GCC extension and unlike a normal cast it produces an l-value.
-The kernel uses this a few times (at least once as an l-value).
-It will need a bit work on sparse side to handle this.
+I think constant pseudo have a size is the right
+solution in the long run. I
 
--- Luc
+> On a practical level, things are differents:
+> - The introduction of PSEUDO_VAL.size create
+>   a segragation between pseudos of the same value
+>   but different uses (different sizes).
+>   This has impact on the CSE.
+>   Admittingly, there shouldn't be any impact and it's
+>   maybe a sign that something is wrong elsewhere.
+
+As you said, it should be some thing CSE done wrong
+to cause it a problem. The pseudo register has a size
+being implicit on that. If CSE merge two instruction with
+different source pseudo size into one, that seems wrong.
+
+If you know a special test case can trigger that, I would
+like to see it as well.
+
+> - There are places in the code where kinds of implicit
+>   castings are done (the OP_SET_* instructions are
+>   especially concerned). Some may consider this as a
+>   bug, to me it's at least a problem.
+>   To solve the problems there you need to:
+>   1) identify all places where such is done
+>   2) look if the pseudo is a constant
+>   3) if it is a constant, look at its type/size
+>   4) make the needed adjustment.
+
+If there is a size change during the implicit cast,
+it can be a good thing to make the truncate and
+size extend more obvious. I think you have some idea
+relate to that.
+
+Chris
