@@ -1,41 +1,76 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [GIT PULL] llvm fixes
-Date: Sun, 26 Nov 2017 20:34:47 +0100
-Message-ID: <20171126193445.zc6frfjle7xq7ug2@ltop.local>
-References: <20170918095135.12066-1-luc.vanoostenryck@gmail.com>
- <20171117095147.a4v4alrcr77rafut@ltop.local>
- <CANeU7QnTtcKP9ukNqGmMzfVMviYwYEfYFhgLRHHGxCqR7sPGEQ@mail.gmail.com>
- <20171117195004.s472oqlldfrgiz2t@ltop.local>
- <CANeU7Q=pZAuzju8EJACZ9HVKzM6C=L0PDY6xnid6Ub5=RkuXwg@mail.gmail.com>
+Subject: function designators & function pointers
+Date: Sun, 26 Nov 2017 22:58:13 +0100
+Message-ID: <20171126215812.iswufpk3cssq2hdf@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:36930 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751510AbdKZTet (ORCPT
+Received: from mail-wm0-f43.google.com ([74.125.82.43]:39962 "EHLO
+        mail-wm0-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751979AbdKZV6R (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 26 Nov 2017 14:34:49 -0500
-Received: by mail-wm0-f52.google.com with SMTP id v186so30846361wma.2
-        for <linux-sparse@vger.kernel.org>; Sun, 26 Nov 2017 11:34:49 -0800 (PST)
+        Sun, 26 Nov 2017 16:58:17 -0500
+Received: by mail-wm0-f43.google.com with SMTP id b189so31164471wmd.5
+        for <linux-sparse@vger.kernel.org>; Sun, 26 Nov 2017 13:58:17 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Q=pZAuzju8EJACZ9HVKzM6C=L0PDY6xnid6Ub5=RkuXwg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Al Viro <viro@zeniv.linux.org.uk>
 
-On Mon, Nov 27, 2017 at 01:42:55AM +0800, Christopher Li wrote:
-> 
-> If there is a size change during the implicit cast,
-> it can be a good thing to make the truncate and
-> size extend more obvious. I think you have some idea
-> relate to that.
+I've found some problems with the linearization of
+function calls and/or their evaluation.
+But I would like first to be sure of what is wanted here.
 
-Yes, I have essentially finished the cast rework. However,
-my tests now reveals some forgotten cases and some bugs.
-It's a good thing but they must be fixed.
+The problems turn around the fact that in the C standards:
+1) a function designator is usually implicitly converted to a
+   function pointer (C11 6.3.2.1p4)
+	"(except with 'sizeof' ...) a function designator with type
+	 ‘function returning type’ is converted to an expression
+	  that has type ‘pointer to function returning type’".
+2) for function calls (C11 6.5.2.2p1):
+	"The expression that denotes the called function
+	 (Most often, this is the result of converting an
+	 identifier that is a function designator) shall have
+	 type 'pointer to function returning ...'"
+3) for the '*' operator and functions (C11 6.5.3.2p4):
+	"If the operand points to a function, the result is a
+	 function designator; ... If the operand has type
+	 ‘pointer to type’, the result has type ‘type’".
 
-It also won't solve problems with pseudos silently changing
-from type/size (which is more a question of IR simplification).
+
+So, my understanding of the standard is that the following
+function calls are all strictly equivalent (and GCC seems to agree):
+
+	extern int foo(void);
+
+	foo();
+	(foo)();
+	(*foo)();
+	(**foo)();
+	(***foo)();
+	// and so on
+
+Same for the following ones:
+	extern int (*bar)(void);
+
+	bar();
+	(bar)();
+	(*bar)();
+	(**bar)();
+	(***bar)();
+	// and so on
+
+
+On both cases we can add as much '*' as we want: each one produces
+a function designator that is/should directly be re-converted to
+a function pointer (and the function pointer is then used for the
+cal in itself).
+
+Currently, sparse doesn't like those 'unneeded dereferences'.
+Do we want to accept them?
+Do we want to warn on them (because they're really weird, unneeded
+and thus maybe the sign of some errors)?
 
 -- Luc
