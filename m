@@ -1,45 +1,32 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix: build sparse-llvm on i686s too.
-Date: Wed,  6 Dec 2017 11:25:54 +0100
-Message-ID: <20171206102554.12887-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] fix: build sparse-llvm on i686s too.
+Date: Thu, 7 Dec 2017 10:20:06 +0800
+Message-ID: <CANeU7QnuAwrXcC7n=_M+UL=xAUoxaHrb=Wbb3d=W05dP3Wm3TQ@mail.gmail.com>
+References: <20171206102554.12887-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:38093 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755028AbdLFK0M (ORCPT
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:45299 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752047AbdLGCUH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 6 Dec 2017 05:26:12 -0500
-Received: by mail-wm0-f67.google.com with SMTP id 64so6151025wme.3
-        for <linux-sparse@vger.kernel.org>; Wed, 06 Dec 2017 02:26:12 -0800 (PST)
+        Wed, 6 Dec 2017 21:20:07 -0500
+Received: by mail-yb0-f195.google.com with SMTP id 184so2393698ybw.12
+        for <linux-sparse@vger.kernel.org>; Wed, 06 Dec 2017 18:20:07 -0800 (PST)
+In-Reply-To: <20171206102554.12887-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-In commit "f1e4ba13d (build: disable sparse-llvm on non-x86)",
-we wanted to disable the build of sparse-llvm on non-x86 archs
-but the pattern used also excluded machines like 'i686'.
+On Wed, Dec 6, 2017 at 6:25 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> In commit "f1e4ba13d (build: disable sparse-llvm on non-x86)",
+> we wanted to disable the build of sparse-llvm on non-x86 archs
+> but the pattern used also excluded machines like 'i686'.
+>
+> Fix this by using the pattern 'i[3456]86' instead.
 
-Fix this by using the pattern 'i[3456]86' instead.
+Looks good to me.
 
-Fixes: f1e4ba13d1499407a72349b50052ae818c8d8553
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/Makefile b/Makefile
-index eac6df7ed..1ae0a33f0 100644
---- a/Makefile
-+++ b/Makefile
-@@ -142,7 +142,7 @@ endif
- LLVM_CONFIG:=llvm-config
- HAVE_LLVM:=$(shell $(LLVM_CONFIG) --version >/dev/null 2>&1 && echo 'yes')
- ifeq ($(HAVE_LLVM),yes)
--ifeq ($(shell uname -m | grep -q '\(i386\|x86\)' && echo ok),ok)
-+ifeq ($(shell uname -m | grep -q '\(i[3456]86\|x86\)' && echo ok),ok)
- LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version)
- ifeq ($(shell expr "$(LLVM_VERSION)" : '[3-9]\.'),2)
- LLVM_PROGS := sparse-llvm
--- 
-2.15.0
-
+Chris
