@@ -1,32 +1,49 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH] fix: build sparse-llvm on i686s too.
-Date: Thu, 7 Dec 2017 10:20:06 +0800
-Message-ID: <CANeU7QnuAwrXcC7n=_M+UL=xAUoxaHrb=Wbb3d=W05dP3Wm3TQ@mail.gmail.com>
-References: <20171206102554.12887-1-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/3] add missing degenerate() for logical-not
+Date: Thu,  7 Dec 2017 18:16:10 +0100
+Message-ID: <20171207171613.34989-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yb0-f195.google.com ([209.85.213.195]:45299 "EHLO
-        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752047AbdLGCUH (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:46647 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756742AbdLGRQc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 6 Dec 2017 21:20:07 -0500
-Received: by mail-yb0-f195.google.com with SMTP id 184so2393698ybw.12
-        for <linux-sparse@vger.kernel.org>; Wed, 06 Dec 2017 18:20:07 -0800 (PST)
-In-Reply-To: <20171206102554.12887-1-luc.vanoostenryck@gmail.com>
+        Thu, 7 Dec 2017 12:16:32 -0500
+Received: by mail-wm0-f68.google.com with SMTP id r78so14421572wme.5
+        for <linux-sparse@vger.kernel.org>; Thu, 07 Dec 2017 09:16:32 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Wed, Dec 6, 2017 at 6:25 PM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> In commit "f1e4ba13d (build: disable sparse-llvm on non-x86)",
-> we wanted to disable the build of sparse-llvm on non-x86 archs
-> but the pattern used also excluded machines like 'i686'.
->
-> Fix this by using the pattern 'i[3456]86' instead.
+The goal of this series is to fix the evaluation of expressions
+doing the (logical) negation of arrays or functions.
+In this case, of course, the array or function must degenerate
+into a pointer but it wasn't done. It doesn't make any
+visible difference for the checker but the linearization
+of such expressions was wrong.
 
-Looks good to me.
+Luc Van Oostenryck (3):
+  add more testcases for using addresses in conditionals
+  add testcases linearization of degenerated arrays/functions
+  fix: add missing degenerate() for logical not
 
-Chris
+ evaluate.c                                         |   1 +
+ .../{cond-address-array.c => Waddress-array.c}     |   9 +-
+ ...cond-address-function.c => Waddress-function.c} |   7 +-
+ validation/Waddress-weak.c                         |  25 +++++
+ validation/Waddress.c                              | 110 +++++++++++++++++++++
+ validation/linear/degen-array.c                    |  31 ++++++
+ validation/linear/degen-function.c                 |  38 +++++++
+ validation/linear/degen-log-not.c                  |  40 ++++++++
+ 8 files changed, 252 insertions(+), 9 deletions(-)
+ rename validation/{cond-address-array.c => Waddress-array.c} (37%)
+ rename validation/{cond-address-function.c => Waddress-function.c} (39%)
+ create mode 100644 validation/Waddress-weak.c
+ create mode 100644 validation/Waddress.c
+ create mode 100644 validation/linear/degen-array.c
+ create mode 100644 validation/linear/degen-function.c
+ create mode 100644 validation/linear/degen-log-not.c
+
+-- 
+2.15.0
+
