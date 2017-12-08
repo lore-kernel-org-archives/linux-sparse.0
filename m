@@ -1,40 +1,58 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 03/16] testsuite: convert to the new pattern syntax
-Date: Fri,  8 Dec 2017 14:14:42 +0100
-Message-ID: <20171208131455.7786-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 06/16] testsuite: add & use warning()
+Date: Fri,  8 Dec 2017 14:14:45 +0100
+Message-ID: <20171208131455.7786-7-luc.vanoostenryck@gmail.com>
 References: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:46813 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753274AbdLHNPN (ORCPT
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:37644 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752989AbdLHNPQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 8 Dec 2017 08:15:13 -0500
-Received: by mail-wm0-f65.google.com with SMTP id r78so3253767wme.5
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2017 05:15:13 -0800 (PST)
+        Fri, 8 Dec 2017 08:15:16 -0500
+Received: by mail-wm0-f67.google.com with SMTP id f140so3153518wmd.2
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2017 05:15:16 -0800 (PST)
 In-Reply-To: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The old one is too ugly and has to die.
+Allow this new helper to indicate wich file trigger the
+warning and replace the existing call to 'echo "warning: ...'.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/fp2i-cast.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ validation/test-suite | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/validation/fp2i-cast.c b/validation/fp2i-cast.c
-index 08f8c9252..98d7453e5 100644
---- a/validation/fp2i-cast.c
-+++ b/validation/fp2i-cast.c
-@@ -26,5 +26,5 @@ ul d2ul(double a) { return a; }
-  * check-command: test-linearize -Wno-decl $file
-  *
-  * check-output-ignore
-- * check-output-pattern-8-times: cast\\.
-+ * check-output-pattern(8): cast\\.
-  */
+diff --git a/validation/test-suite b/validation/test-suite
+index f04d81779..420214c65 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -51,6 +51,14 @@ verbose()
+ 	return 0
+ }
+ 
++##
++# warning(string) - prints a warning
++warning()
++{
++	[ "$quiet" -ne 1 ] && echo "warning: $1"
++	return 0
++}
++
+ ##
+ # error(string[, die]) - prints an error and exits with value die if given
+ error()
+@@ -253,7 +261,7 @@ do_test()
+ 	# can this test be handled by test-suite ?
+ 	# (it has to have a check-name key in it)
+ 	if [ "$check_name" = "" ]; then
+-		echo "warning: test '$file' unhandled"
++		warning "$file: test unhandled"
+ 		unhandled_tests=$(($unhandled_tests + 1))
+ 		return 2
+ 	fi
 -- 
 2.15.0
 
