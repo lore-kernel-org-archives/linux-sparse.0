@@ -1,47 +1,60 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 3/3] fix: add missing degenerate() for logical not
-Date: Fri, 8 Dec 2017 09:49:22 +0800
-Message-ID: <CANeU7QkxL73nNSqaQXu-jprQMXnZFMcD5WbFdmvf4di6N3oiRg@mail.gmail.com>
-References: <20171207171613.34989-1-luc.vanoostenryck@gmail.com> <20171207171613.34989-4-luc.vanoostenryck@gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 00/16] testsuite improvements
+Date: Fri,  8 Dec 2017 14:14:39 +0100
+Message-ID: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:39747 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751904AbdLHBtX (ORCPT
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:44673 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752989AbdLHNPL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 7 Dec 2017 20:49:23 -0500
-Received: by mail-yw0-f195.google.com with SMTP id y187so3736495ywg.6
-        for <linux-sparse@vger.kernel.org>; Thu, 07 Dec 2017 17:49:23 -0800 (PST)
-In-Reply-To: <20171207171613.34989-4-luc.vanoostenryck@gmail.com>
+        Fri, 8 Dec 2017 08:15:11 -0500
+Received: by mail-wm0-f54.google.com with SMTP id t8so3244521wmc.3
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2017 05:15:10 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Fri, Dec 8, 2017 at 1:16 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Expressions involving the logical-not '!' does not
-> call degenerate().
->
-> Since the result type is always 'int' and thus independent
-> of the expression being negated, this has no effect on the
-> type-checking but the linearization is wrong.
-> For example, code like:
->         int foo(void)
->         {
->                 if (!arr) return 1;
->                 return 0;
->         }
-> generates:
->         foo:
->                 load        %r6 <- 0[arr]
->                 seteq.32    %r7 <- VOID, $0
->                 ret.32      %r7
-> The 'load' being, obviously wrong.
->
-> Fix this by adding the missing degenerate().
+This series contains a few fixes & improvements to the
+testsuite; mainly:
+- allow to run the testsuite on all the tests of a subdir
+- teach 'format' to directly append to the testcase
+- validate the 'check-...' tags
 
-Good catch. This series looks good to me.
+Luc Van Oostenryck (16):
+  testsuite: make the '%.t' rule depends on PROGRAMS too
+  testsuite: fix a few more incorrect check-commands
+  testsuite: convert to the new pattern syntax
+  testsuite: remove old ugly pattern syntax
+  testsuite: move verbose/error() before get_tag_value()
+  testsuite: add & use warning()
+  testsuite: reset 'quiet' at the start of each testcase
+  testsuite: fix invalid 'check-...' tags
+  testsuite: validate the 'check-...' tags
+  testsuite: early return in getopt loop
+  testsuite: move do_test_suite out of the getopt loop
+  testsuite: move no-arg out of the getopt loop
+  testsuite: change do_usage text
+  testsuite: allow to test only a subdir
+  testsuite: default to shift in the getopt loop
+  testsuite: add support for 'format -a'
 
-Chris
+ Makefile                          |   2 +-
+ validation/cond-address.c         |   2 +-
+ validation/cond-err-expand.c      |   2 +-
+ validation/fp-ops.c               |   2 +-
+ validation/fp2i-cast.c            |   2 +-
+ validation/nested-declarator.c    |   4 +-
+ validation/nested-declarator2.c   |   4 +-
+ validation/optim/canonical-cmp.c  |   2 +-
+ validation/optim/canonical-fcmp.c |   2 +-
+ validation/option-parsing-00.c    |   2 +-
+ validation/option-parsing-01.c    |   2 +-
+ validation/reserved.c             |   4 +-
+ validation/test-suite             | 149 +++++++++++++++++++-------------------
+ validation/typedef_shadow.c       |   4 +-
+ 14 files changed, 92 insertions(+), 91 deletions(-)
+
+-- 
+2.15.0
+
