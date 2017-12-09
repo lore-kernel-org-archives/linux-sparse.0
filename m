@@ -1,74 +1,55 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 15/16] testsuite: default to shift in the getopt loop
-Date: Fri,  8 Dec 2017 14:14:54 +0100
-Message-ID: <20171208131455.7786-16-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 00/16] testsuite improvements
+Date: Sat, 9 Dec 2017 10:09:05 +0800
+Message-ID: <CANeU7QnkVby=2P+q5xt8KSKaceFZx+1+m1SVp=vfDEZ2pkymbQ@mail.gmail.com>
 References: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:44150 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753457AbdLHNPY (ORCPT
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:43277 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752423AbdLICJG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 8 Dec 2017 08:15:24 -0500
-Received: by mail-wm0-f68.google.com with SMTP id t8so3245605wmc.3
-        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2017 05:15:24 -0800 (PST)
+        Fri, 8 Dec 2017 21:09:06 -0500
+Received: by mail-yw0-f182.google.com with SMTP id n25so5010846ywh.10
+        for <linux-sparse@vger.kernel.org>; Fri, 08 Dec 2017 18:09:06 -0800 (PST)
 In-Reply-To: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-The getopt loop used to bear by default and only some
-options had to explicitly call 'shift' and 'continue'
-to process further elements.
+On Fri, Dec 8, 2017 at 9:14 PM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This series contains a few fixes & improvements to the
+> testsuite; mainly:
+> - allow to run the testsuite on all the tests of a subdir
+> - teach 'format' to directly append to the testcase
+> - validate the 'check-...' tags
+>
+> Luc Van Oostenryck (16):
+>   testsuite: make the '%.t' rule depends on PROGRAMS too
+>   testsuite: fix a few more incorrect check-commands
+>   testsuite: convert to the new pattern syntax
+>   testsuite: remove old ugly pattern syntax
+>   testsuite: move verbose/error() before get_tag_value()
+>   testsuite: add & use warning()
+>   testsuite: reset 'quiet' at the start of each testcase
+>   testsuite: fix invalid 'check-...' tags
+>   testsuite: validate the 'check-...' tags
+>   testsuite: early return in getopt loop
+>   testsuite: move do_test_suite out of the getopt loop
+>   testsuite: move no-arg out of the getopt loop
+>   testsuite: change do_usage text
+>   testsuite: allow to test only a subdir
+>   testsuite: default to shift in the getopt loop
+>   testsuite: add support for 'format -a'
 
-Change this to a 'normal' loop, shifting the next arg by default
-and breaking of the loop when needed.
+I haven't have a chance to do the full review as I did before
+applying them. I just briefly go over the patches. From the
+distance I look, the series looks fine for me.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- validation/test-suite | 10 +---------
- 1 file changed, 1 insertion(+), 9 deletions(-)
+Usually as long as the make check was not broken,
+I am not too worry about the testsuite changes.
 
-diff --git a/validation/test-suite b/validation/test-suite
-index 098cc7869..8c0453590 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -510,13 +510,9 @@ while [ "$#" -gt "0" ]; do
- 	case "$1" in
- 	-a|--abort)
- 		abort=1
--		shift
--		continue
- 		;;
- 	-q|--quiet)
- 		vquiet=1
--		shift
--		continue
- 		;;
- 
- 	single|--single)
-@@ -541,8 +537,6 @@ while [ "$#" -gt "0" ]; do
- 
- 	*.c)
- 		tests_list="$tests_list $1"
--		shift
--		continue
- 		;;
- 	*)
- 		if [ ! -d "$1" ]; then
-@@ -550,11 +544,9 @@ while [ "$#" -gt "0" ]; do
- 			exit 1
- 		fi
- 		tests_list="$tests_list $(find "$1" -name '*.c' | sort)"
--		shift
--		continue
- 		;;
- 	esac
--	break
-+	shift
- done
- 
- if [ -z "$tests_list" ]; then
--- 
-2.15.0
-
+Chris
