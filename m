@@ -1,41 +1,36 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 00/16] testsuite improvements
-Date: Sun, 10 Dec 2017 18:25:41 +0100
-Message-ID: <20171210172540.dd2vx6rtk3l6bsfu@ltop.local>
-References: <20171208131455.7786-1-luc.vanoostenryck@gmail.com>
- <CANeU7QnkVby=2P+q5xt8KSKaceFZx+1+m1SVp=vfDEZ2pkymbQ@mail.gmail.com>
+Subject: [PATCH 0/6] whitespace & '-D' option
+Date: Wed, 13 Dec 2017 18:15:25 +0100
+Message-ID: <20171213171531.43707-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:34664 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751746AbdLJRZn (ORCPT
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:40284 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753802AbdLMRPm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 10 Dec 2017 12:25:43 -0500
-Received: by mail-wm0-f42.google.com with SMTP id y82so10440055wmg.1
-        for <linux-sparse@vger.kernel.org>; Sun, 10 Dec 2017 09:25:43 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CANeU7QnkVby=2P+q5xt8KSKaceFZx+1+m1SVp=vfDEZ2pkymbQ@mail.gmail.com>
+        Wed, 13 Dec 2017 12:15:42 -0500
+Received: by mail-wm0-f54.google.com with SMTP id f206so6519114wmf.5
+        for <linux-sparse@vger.kernel.org>; Wed, 13 Dec 2017 09:15:42 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Dec 09, 2017 at 10:09:05AM +0800, Christopher Li wrote:
-> 
-> I haven't have a chance to do the full review as I did before
-> applying them. I just briefly go over the patches. From the
-> distance I look, the series looks fine for me.
-> 
-> Usually as long as the make check was not broken,
-> I am not too worry about the testsuite changes.
-> 
-> Chris
+This series contains two fixes concerning the '-D' option
+and white spaces. A a bonus it also contains an improvement
+to the testsuite which now respect quotes/whitespace in
+commands' options.
 
-Thanks,
+Luc Van Oostenryck (6):
+  add testcase for 'sparse -D M...'
+  fix: accept 'sparse -D M...'
+  testsuite: add test case for quoting of command's arguments
+  testsuite: respect command line's quotes & whitespaces
+  add test case for space within command line
+  fix: spaces in macro definition on the command line
 
-This has now been pushed to:
-	git://github.com/lucvoo/sparse.git
+-- 
+2.15.0
 
-
--- Luc Van Oostenryck
