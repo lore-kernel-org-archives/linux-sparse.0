@@ -1,84 +1,44 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/6] testsuite: respect command line's quotes & whitespaces
-Date: Wed, 13 Dec 2017 18:15:29 +0100
-Message-ID: <20171213171531.43707-5-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH 0/6] whitespace & '-D' option
+Date: Fri, 15 Dec 2017 14:15:17 +0800
+Message-ID: <CANeU7Qkas1L8YkVorGbbH_cH_Azm_KEErrGv0LQJ9GcH_0fbvg@mail.gmail.com>
 References: <20171213171531.43707-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:37797 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753154AbdLMRPs (ORCPT
+Received: from mail-yb0-f171.google.com ([209.85.213.171]:32909 "EHLO
+        mail-yb0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751266AbdLOGPS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 13 Dec 2017 12:15:48 -0500
-Received: by mail-wm0-f67.google.com with SMTP id f140so6556203wmd.2
-        for <linux-sparse@vger.kernel.org>; Wed, 13 Dec 2017 09:15:47 -0800 (PST)
+        Fri, 15 Dec 2017 01:15:18 -0500
+Received: by mail-yb0-f171.google.com with SMTP id b15so1716956ybn.0
+        for <linux-sparse@vger.kernel.org>; Thu, 14 Dec 2017 22:15:17 -0800 (PST)
 In-Reply-To: <20171213171531.43707-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Currently the testsuite use 'eval echo $cmd' to expand
-the name of the test file to be given on the command line.
+On Thu, Dec 14, 2017 at 1:15 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This series contains two fixes concerning the '-D' option
+> and white spaces. A a bonus it also contains an improvement
+> to the testsuite which now respect quotes/whitespace in
+> commands' options.
+>
+> Luc Van Oostenryck (6):
+>   add testcase for 'sparse -D M...'
+>   fix: accept 'sparse -D M...'
+>   testsuite: add test case for quoting of command's arguments
+>   testsuite: respect command line's quotes & whitespaces
+>   add test case for space within command line
+>   fix: spaces in macro definition on the command line
 
-This has the annoying consequence to go a bit too far in
-the expansion of variables and to destroy any quotes and
-whitespaces escaping that would have done.
+Hi Luc,
 
-Fix this by doing the eval later, when effectively executing
-the command.
+I will be traveling for the whole next week.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- validation/self-quote-args.c |  1 -
- validation/test-suite        | 10 +++++-----
- 2 files changed, 5 insertions(+), 6 deletions(-)
+No sure I will have time to get on it in the
+follow week. I will take a look when I get back.
 
-diff --git a/validation/self-quote-args.c b/validation/self-quote-args.c
-index acac41d7d..be9873d23 100644
---- a/validation/self-quote-args.c
-+++ b/validation/self-quote-args.c
-@@ -3,6 +3,5 @@
-  * check-description: This is testing that the test-suite
-  *	respect the quoting of the command's arguments.
-  * check-command: sparse '-foption with-spaces' empty-file
-- * check-known-to-fail
-  * check-output-ignore
-  */
-diff --git a/validation/test-suite b/validation/test-suite
-index 192fba300..dba8fd50c 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -308,25 +308,25 @@ do_test()
- 		fi
- 	fi
- 
--	cmd=`eval echo $default_path/$check_command`
--
- 	if [ -z "$vquiet" ]; then
- 		echo "  TEST    $test_name ($file)"
- 	fi
- 
--	verbose "Using command       : $cmd"
-+	verbose "Using command       : $(echo "$@")"
- 
- 	# grab the expected exit value
- 	expected_exit_value=$check_exit_value
- 	verbose "Expecting exit value: $expected_exit_value"
- 
- 	# do we want a timeout?
-+	pre=""
- 	if [ $check_timeout -ne 0 ]; then
--		cmd="timeout -k 1s $check_timeout $cmd"
-+		pre="timeout -k 1s $check_timeout"
- 	fi
- 
- 	# grab the actual output & exit value
--	$cmd 1> $file.output.got 2> $file.error.got
-+	shift
-+	eval $pre ../$base_cmd "$@" 1> $file.output.got 2> $file.error.got
- 	actual_exit_value=$?
- 
- 	must_fail=$check_known_to_fail
--- 
-2.15.0
-
+Chris
