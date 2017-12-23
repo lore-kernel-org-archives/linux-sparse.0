@@ -1,74 +1,48 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] fix: evaluate_dereference() unexamined base type
-Date: Thu, 21 Dec 2017 01:30:17 +0100
-Message-ID: <20171221003017.57211-3-luc.vanoostenryck@gmail.com>
-References: <20171221003017.57211-1-luc.vanoostenryck@gmail.com>
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:43048 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756563AbdLUAaY (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 20 Dec 2017 19:30:24 -0500
-Received: by mail-wm0-f66.google.com with SMTP id n138so12995655wmg.2
-        for <linux-sparse@vger.kernel.org>; Wed, 20 Dec 2017 16:30:23 -0800 (PST)
-In-Reply-To: <20171221003017.57211-1-luc.vanoostenryck@gmail.com>
-Sender: linux-sparse-owner@vger.kernel.org
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [PATCH 2/2] Introduce __cond_lock_err
+Date: Sat, 23 Dec 2017 01:39:11 -0800
+Message-ID: <20171223093910.GB6160@localhost>
+References: <20171219165823.24243-1-willy@infradead.org>
+ <20171219165823.24243-2-willy@infradead.org>
+ <20171221214810.GC9087@linux.intel.com>
+ <20171222011000.GB23624@bombadil.infradead.org>
+ <20171222042120.GA18036@localhost>
+ <20171222123112.GA6401@bombadil.infradead.org>
+ <20171222133634.GE6401@bombadil.infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Return-path: <owner-linux-mm@kvack.org>
+Content-Disposition: inline
+In-Reply-To: <20171222133634.GE6401@bombadil.infradead.org>
+Sender: owner-linux-mm@kvack.org
+To: Matthew Wilcox <willy@infradead.org>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-kernel@vger.kernel.org, Dave Hansen <dave.hansen@intel.com>, linux-mm@kvack.org, Matthew Wilcox <mawilcox@microsoft.com>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Examination of a pointer type doesn't examine the corresponding
-base type (this base type may not yet be complete). So, this
-examination must be done later, when the base type is needed.
++linux-sparse
 
-However, in some cases it's possible to call evaluate_dereference()
-while the base type is still unexamined.
+On Fri, Dec 22, 2017 at 05:36:34AM -0800, Matthew Wilcox wrote:
+> On Fri, Dec 22, 2017 at 04:31:12AM -0800, Matthew Wilcox wrote:
+> > On Thu, Dec 21, 2017 at 08:21:20PM -0800, Josh Triplett wrote:
+> > > On Thu, Dec 21, 2017 at 05:10:00PM -0800, Matthew Wilcox wrote:
+> > > > Yes, but this define is only #if __CHECKER__, so it doesn't matter what we
+> > > > return as this code will never run.
+> > > 
+> > > It does matter slightly, as Sparse does some (very limited) value-based
+> > > analyses. Let's future-proof it.
+> > > 
+> > > > That said, if sparse supports the GNU syntax of ?: then I have no
+> > > > objection to doing that.
+> > > 
+> > > Sparse does support that syntax.
+> > 
+> > Great, I'll fix that and resubmit.
+> 
+> Except the context imbalance warning comes back if I do.  This is sparse
+> 0.5.1 (Debian's 0.5.1-2 package).
 
-Fix this by adding the missing examine_symbol_type() on the base type.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- evaluate.c                               | 1 +
- validation/linear/deref-ptr-ptr.c        | 1 -
- validation/linear/unexamined-base-type.c | 1 -
- 3 files changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/evaluate.c b/evaluate.c
-index 6b3e2c257..85f1b21bb 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -1778,6 +1778,7 @@ static struct symbol *evaluate_dereference(struct expression *expr)
- 
- 	node = alloc_symbol(expr->pos, SYM_NODE);
- 	target = ctype->ctype.base_type;
-+	examine_symbol_type(target);
- 
- 	switch (ctype->type) {
- 	default:
-diff --git a/validation/linear/deref-ptr-ptr.c b/validation/linear/deref-ptr-ptr.c
-index 022595d78..963acd36c 100644
---- a/validation/linear/deref-ptr-ptr.c
-+++ b/validation/linear/deref-ptr-ptr.c
-@@ -6,7 +6,6 @@ char *foo(char **pfmt)
- /*
-  * check-name: deref-ptr-ptr
-  * check-command: test-linearize -m64 -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-excludes: load[^.]
-  * check-output-contains: load\.
-diff --git a/validation/linear/unexamined-base-type.c b/validation/linear/unexamined-base-type.c
-index a138ba132..96aee3f0e 100644
---- a/validation/linear/unexamined-base-type.c
-+++ b/validation/linear/unexamined-base-type.c
-@@ -28,7 +28,6 @@ static void bar(struct s *d, struct s *s1, struct s *s2)
-  *		                   ^^^		!! WRONG !!
-  *		and.32      %r6 <- %r5, $1
-  *		ret.32      %r6
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-excludes: load[^.]
--- 
-2.15.0
-
+--
+To unsubscribe, send a message with 'unsubscribe linux-mm' in
+the body to majordomo@kvack.org.  For more info on Linux MM,
+see: http://www.linux-mm.org/ .
+Don't email: <a href=mailto:"dont@kvack.org"> email@kvack.org </a>
