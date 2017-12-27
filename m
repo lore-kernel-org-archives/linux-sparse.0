@@ -1,38 +1,33 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH 1/2] V2 Give the constant pseudo value a size
-Date: Sun, 24 Dec 2017 13:10:34 +0000
-Message-ID: <CACXZuxdHeCqQ5x7i2a6ZTHAFSMJWHm3Myyq3TkP6Wj5Ca6bcVQ@mail.gmail.com>
-References: <CANeU7Q=VPubjUkjWP20Ye8rA8d42OfVD=xM1U-quVqGK4kQb+g@mail.gmail.com>
+From: Word Gospel <wordofgospelrania@gmail.com>
+Subject: Re: You will definetely be interested...
+Date: Wed, 27 Dec 2017 10:23:40 +0000
+Message-ID: <CA+HvR7yBgq==KG-sAFrc3fhMYzUkG-5vKPy49+RmCjueOVhSHQ__26960.3206230842$1514370119$gmane$org@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ua0-f196.google.com ([209.85.217.196]:35269 "EHLO
-        mail-ua0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751570AbdLXNKf (ORCPT
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:39261 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751862AbdL0KXn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 24 Dec 2017 08:10:35 -0500
-Received: by mail-ua0-f196.google.com with SMTP id g16so7654136uak.2
-        for <linux-sparse@vger.kernel.org>; Sun, 24 Dec 2017 05:10:34 -0800 (PST)
-In-Reply-To: <CANeU7Q=VPubjUkjWP20Ye8rA8d42OfVD=xM1U-quVqGK4kQb+g@mail.gmail.com>
+        Wed, 27 Dec 2017 05:23:43 -0500
+Received: by mail-wm0-f66.google.com with SMTP id i11so38479702wmf.4
+        for <linux-sparse@vger.kernel.org>; Wed, 27 Dec 2017 02:23:42 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-Hi Chris,
+Hi Dear,
 
-On 13 November 2017 at 15:28, Christopher Li <sparse@chrisli.org> wrote:
-> Currently value pseudo does not have size.
-> This create a problem pointed out by Dibyendu.
-> When using LLVM, calling varidic function with
-> constant value, there is no where to find the
-> size.
->
-> Linus give out two suggestions. One is give pseudo
-> a size. The other one is the push instruction.
-> This is the implementation of the first suggestion.
+Reading your profile has given me courage in search of a reasponsable
+and trust worthy Fellow. The past has treated me so awfully but now I
+am ready to move on despite of my health condition. I will like to
+have a sincere and important discussion with you that will be in your
+favor likewise to you and your environment especially to your close
+family. Endeavor to reply me and I have attached my picture in case
+you long to know who emailed you. I will be waiting to hear from you
+as soon as possble.
+Thanks for paying attention to my mail and will appreciate so much if
+I receive a reply from you for understable details.
 
-I tested out this change in my code base and it seems fine. I hope this helps.
+Thanks,
 
-Thanks and Regards
-Dibyendu
+Mrs. Rania Hassan
