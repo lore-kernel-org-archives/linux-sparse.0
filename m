@@ -1,34 +1,20 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 1/2] V2 Give the constant pseudo value a size
-Date: Sat, 30 Dec 2017 11:44:34 +0800
-Message-ID: <CANeU7QnJ92r-uUBGyK37t0tZeHrqJqJDn1W-T8BkwcH5yicAiQ@mail.gmail.com>
-References: <CANeU7Q=VPubjUkjWP20Ye8rA8d42OfVD=xM1U-quVqGK4kQb+g@mail.gmail.com>
- <CACXZuxdHeCqQ5x7i2a6ZTHAFSMJWHm3Myyq3TkP6Wj5Ca6bcVQ@mail.gmail.com>
+From: foundation@gmail.com
+Subject: =?utf-8?q?Spende_von_=E2=82=AC_3=2E400=2E000=2C00_EUR?=
+Date: Mon, 01 Jan 2018 00:10:08 +0200
+Message-ID: <20171231223057.782DE27056D3@wsbmail01.wsb.wroclaw.pl>
+Reply-To: roycockrumpovertyfoundation@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:43334 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750790AbdL3Dof (ORCPT
+Received: from mail.wsb.wroclaw.pl ([95.143.242.162]:53272 "EHLO
+        wsbmail01.wsb.wroclaw.pl" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750854AbdLaWLL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 29 Dec 2017 22:44:35 -0500
-Received: by mail-yw0-f181.google.com with SMTP id n25so9939894ywh.10
-        for <linux-sparse@vger.kernel.org>; Fri, 29 Dec 2017 19:44:35 -0800 (PST)
-In-Reply-To: <CACXZuxdHeCqQ5x7i2a6ZTHAFSMJWHm3Myyq3TkP6Wj5Ca6bcVQ@mail.gmail.com>
+        Sun, 31 Dec 2017 17:11:11 -0500
+Content-Description: Mail message body
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Recipients <foundation@gmail.com>
 
-On Sun, Dec 24, 2017 at 9:10 PM, Dibyendu Majumdar
-<mobile@majumdar.org.uk> wrote:
->
-> I tested out this change in my code base and it seems fine. I hope this helps.
->
-
-Thanks you so much for testing this branch.
-It is good to know that it works for you.
-
-Sorry for the late reply.
-
-Chris
+Hallo, ich Roy Cockrum, 58, aus Knoxville, Tennessee Vereinigte Staaten von Amerika, du hast eine Wohltätigkeitsspende von € 3.400.000,00 EUR, ich gewann die America Lotterie in Amerika im Wert von $ 259,9 Millionen, und ich gebe einen Teil davon Zu fünf glücklichen Leuten und Wohltätigkeitshäusern in Gelübde, um die Armut vor dieser Welt zu beseitigen, ich kämpfe gegen die Armut. Kontaktieren Sie mich für weitere Details: roycockrumpovertyfoundation@gmail.com
