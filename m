@@ -1,44 +1,29 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] ctags: avoid null deref
-Date: Tue,  2 Jan 2018 16:11:16 +0100
-Message-ID: <20180102151116.22060-3-luc.vanoostenryck@gmail.com>
+From: foobar <foobar@redchan.it>
+Subject: Re: [PATCH 2/2] ctags: avoid null deref
+Date: Wed, 3 Jan 2018 15:55:23 +0000
+Message-ID: <20180103155523.2f1fa60bd0d4a9f708016f8a@redchan.it>
 References: <20180101225817.3cb135dc04ea0195f28d8512@redchan.it>
- <20180102151116.22060-1-luc.vanoostenryck@gmail.com>
+        <20180102151116.22060-1-luc.vanoostenryck@gmail.com>
+        <20180102151116.22060-3-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:45575 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751332AbeABPLb (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 2 Jan 2018 10:11:31 -0500
-Received: by mail-wm0-f67.google.com with SMTP id 9so61627519wme.4
-        for <linux-sparse@vger.kernel.org>; Tue, 02 Jan 2018 07:11:31 -0800 (PST)
-In-Reply-To: <20180102151116.22060-1-luc.vanoostenryck@gmail.com>
+Received: from cock.li ([185.100.85.212]:36225 "EHLO cock.li"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750864AbeACPz7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 3 Jan 2018 10:55:59 -0500
+In-Reply-To: <20180102151116.22060-3-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: foobar <foobar@redchan.it>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org
 
-Protect the dereference of null base_type.
+Luc, thank you for addressing this issue so quickly!
 
-Reported-by: foobar <foobar@redchan.it>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- ctags.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+On Tue,  2 Jan 2018 16:11:16 +0100
+Luc Van Oostenryck <luc.vanoostenryck@gmail.com> wrote:
 
-diff --git a/ctags.c b/ctags.c
-index 9ec6b3c37..30976542d 100644
---- a/ctags.c
-+++ b/ctags.c
-@@ -135,7 +135,7 @@ static void examine_symbol(struct symbol *sym)
- 
- 	switch (sym->type) {
- 	case SYM_NODE:
--		if (base->type == SYM_FN)
-+		if (base && base->type == SYM_FN)
- 			sym->kind = 'f';
- 		examine_symbol(base);
- 		break;
--- 
-2.15.0
+> Protect the dereference of null base_type.
 
+I wonder, maybe it would be better not to add this protection so future similar bugs can be found ?
