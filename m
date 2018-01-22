@@ -1,131 +1,45 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/3] add testcases for ignored type attributes
-Date: Mon, 22 Jan 2018 07:36:03 +0100
-Message-ID: <20180122063605.97737-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/3] move up apply_ctype()'s declaration
+Date: Mon, 22 Jan 2018 07:36:04 +0100
+Message-ID: <20180122063605.97737-3-luc.vanoostenryck@gmail.com>
 References: <20180122063605.97737-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:41851 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751073AbeAVGgR (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:45772 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751062AbeAVGgS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 22 Jan 2018 01:36:17 -0500
-Received: by mail-wm0-f65.google.com with SMTP id f71so14107712wmf.0
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Jan 2018 22:36:17 -0800 (PST)
+        Mon, 22 Jan 2018 01:36:18 -0500
+Received: by mail-wm0-f68.google.com with SMTP id i186so14097843wmi.4
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Jan 2018 22:36:18 -0800 (PST)
 In-Reply-To: <20180122063605.97737-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Currently, sparse doesn't correctly take in account
-type attributes.
-
-Add some test cases for those.
+No functional changes, just to make the following patch
+more readable.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/type-attribute-align.c | 20 ++++++++++++++++++++
- validation/type-attribute-as.c    | 34 ++++++++++++++++++++++++++++++++++
- validation/type-attribute-mod.c   | 22 ++++++++++++++++++++++
- 3 files changed, 76 insertions(+)
- create mode 100644 validation/type-attribute-align.c
- create mode 100644 validation/type-attribute-as.c
- create mode 100644 validation/type-attribute-mod.c
+ parse.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/validation/type-attribute-align.c b/validation/type-attribute-align.c
-new file mode 100644
-index 000000000..d56769c44
---- /dev/null
-+++ b/validation/type-attribute-align.c
-@@ -0,0 +1,20 @@
-+#define	__aligned(N)	__attribute__((aligned(N)))
-+#define alignof(X)	__alignof__(X)
+diff --git a/parse.c b/parse.c
+index e255345fd..a60fcff45 100644
+--- a/parse.c
++++ b/parse.c
+@@ -627,6 +627,8 @@ struct statement *alloc_statement(struct position pos, int type)
+ 
+ static struct token *struct_declaration_list(struct token *token, struct symbol_list **list);
+ 
++static void apply_ctype(struct position pos, struct ctype *thistype, struct ctype *ctype);
 +
-+struct s {
-+	short a, b, c;
-+} __aligned(2*sizeof(short));
-+
-+static int fs(void) { return  sizeof(struct s); }
-+static int fa(void) { return alignof(struct s); }
-+
-+void main(void)
-+{
-+	_Static_assert( sizeof(struct s) == 4 * sizeof(short), "size");
-+	_Static_assert(alignof(struct s) == 2 * sizeof(short), "alignment");
-+}
-+
-+/*
-+ * check-name: type-attribute-align
-+ * check-known-to-fail
-+ */
-diff --git a/validation/type-attribute-as.c b/validation/type-attribute-as.c
-new file mode 100644
-index 000000000..375ad4c76
---- /dev/null
-+++ b/validation/type-attribute-as.c
-@@ -0,0 +1,34 @@
-+#define	__user		__attribute__((address_space(1)))
-+
-+struct s {
-+	int i;
-+} __user;
-+
-+
-+extern void use0(void *);
-+extern void use1(void __user *);
-+
-+void main(void)
-+{
-+	struct s s;
-+	int i;
-+
-+	use0(&s);	// KO
-+	use0(&i);	// OK
-+	use1(&s);	// OK
-+	use1(&i);	// KO
-+}
-+
-+/*
-+ * check-name: type-attribute-as
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+type-attribute-as.c:16:15: warning: incorrect type in argument 1 (different address spaces)
-+type-attribute-as.c:16:15:    expected void *<noident>
-+type-attribute-as.c:16:15:    got struct s <asn:1>*<noident>
-+type-attribute-as.c:19:15: warning: incorrect type in argument 1 (different address spaces)
-+type-attribute-as.c:19:15:    expected void <asn:1>*<noident>
-+type-attribute-as.c:19:15:    got int *<noident>
-+ * check-error-end
-+ */
-diff --git a/validation/type-attribute-mod.c b/validation/type-attribute-mod.c
-new file mode 100644
-index 000000000..0e7b166a4
---- /dev/null
-+++ b/validation/type-attribute-mod.c
-@@ -0,0 +1,22 @@
-+#define	__noderef	__attribute__((noderef))
-+
-+struct s {
-+	int i;
-+} __noderef;
-+
-+
-+void main(void)
-+{
-+	struct s s;
-+
-+	s.i = 0;
-+}
-+
-+/*
-+ * check-name: type-attribute-mod
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+type-attribute-mod.c:12:9: warning: dereference of noderef expression
-+ * check-error-end
-+ */
--- 
-2.16.0
-
+ static void apply_modifiers(struct position pos, struct decl_state *ctx)
+ {
+ 	struct symbol *ctype;
+@@ -962,8 +964,6 @@ static struct token *enum_specifier(struct token *token, struct decl_state *ctx)
+ 	return ret;
+ }
+ 
+-static void apply_ctype(struct position pos, struct ctype *thistype, struct ctype *ctype);
