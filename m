@@ -1,74 +1,63 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] also report type & size when warning on non-power-of-2 pointer subtraction
-Date: Sun, 21 Jan 2018 17:18:47 +0100
-Message-ID: <20180121161847.94239-1-luc.vanoostenryck@gmail.com>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: [PATCH] Documentation: editing fixes in test-suite
+Date: Sun, 21 Jan 2018 21:38:39 -0800
+Message-ID: <5bf3731a-c3be-e94e-2aaf-4c443e6ed870@infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:43195 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750793AbeAUQS6 (ORCPT
+Received: from bombadil.infradead.org ([65.50.211.133]:34957 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750828AbeAVFip (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Jan 2018 11:18:58 -0500
-Received: by mail-wm0-f65.google.com with SMTP id g1so11870310wmg.2
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Jan 2018 08:18:58 -0800 (PST)
+        Mon, 22 Jan 2018 00:38:45 -0500
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+Cc: Josh Triplett <josh@joshtriplett.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+
+From: Randy Dunlap <rdunlap@infradead.org>
+
+Fix typos, grammar, punctuation, and spelling in Documentation/test-suite.
+
+Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-
-The option -Wptr-subtraction-blows warns when pointer subtraction
-is done and the base size is not a power-of-2.
-However, the current message doesn't give much context.
-
-Change this by giving the base type and the size in the warning.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Josh Triplett <josh@joshtriplett.org>
 ---
- evaluate.c                 |  2 +-
- validation/ptr-sub-blows.c | 22 ++++++++++++++++++++++
- 2 files changed, 23 insertions(+), 1 deletion(-)
- create mode 100644 validation/ptr-sub-blows.c
+ Documentation/test-suite |    8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/evaluate.c b/evaluate.c
-index 4be4e8e5b..7818af48f 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -848,7 +848,7 @@ static struct symbol *evaluate_ptr_sub(struct expression *expr)
+--- sprs-2018-0119.orig/Documentation/test-suite
++++ sprs-2018-0119/Documentation/test-suite
+@@ -35,7 +35,7 @@ check-output-start / check-output-end (o
  
- 		if (value & (value-1)) {
- 			if (Wptr_subtraction_blows)
--				warning(expr->pos, "potentially expensive pointer subtraction");
-+				warning(expr->pos, "potentially expensive pointer subtraction (size = %lu for %s)", value, show_typename(lbase));
- 		}
+ check-output-ignore / check-error-ignore (optional)
+ 	Don't check the expected output (stdout or stderr) of check-command
+-	(usefull when this output is not comparable or if you're only interested
++	(useful when this output is not comparable or if you're only interested
+ 	in the exit value).
+ 	By default this check is done.
  
- 		sub->op = '-';
-diff --git a/validation/ptr-sub-blows.c b/validation/ptr-sub-blows.c
-new file mode 100644
-index 000000000..433bd4e0c
---- /dev/null
-+++ b/validation/ptr-sub-blows.c
-@@ -0,0 +1,22 @@
-+static int ok(int *a, int *b)
-+{
-+	return a - b;
-+}
-+
-+struct s {
-+	int a, b, c;
-+};
-+
-+static int ko(struct s *a, struct s *b)
-+{
-+	return a - b;
-+}
-+
-+/*
-+ * check-name: ptr-sub-blows
-+ * check-command: sparse -Wptr-subtraction-blows $file
-+ *
-+ * check-error-start
-+ptr-sub-blows.c:12:18: warning: potentially expensive pointer subtraction (size = 12 for struct s)
-+ * check-error-end
-+ */
--- 
-2.16.0
+@@ -54,8 +54,8 @@ check-output-excludes: <pattern> (option
+ 	must contains none of the patterns.
+ 
+ check-output-pattern-<nbr>-times: <pattern> (optional)
+-	Similar than the contains/excludes her above, but with full control
+-	of the number of times the pattern should occurs in the output.
++	Similar to the contains/excludes above, but with full control
++	of the number of times the pattern should occur in the output.
+ 
+ 	Using test-suite
+ 	~~~~~~~~~~~~~~~~
+@@ -84,7 +84,7 @@ cmd:
+ 	"sparse $file".
+ 
+ The output of the test-suite format command can be redirected into the
+-test case to create a test-suite formated file.
++test case to create a test-suite formatted file.
+ 
+ $ ./test-suite format bad-assignment.c Assignment >> bad-assignment.c
+ $ cat !$
+
 
