@@ -1,57 +1,55 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Randy Dunlap <rdunlap@infradead.org>
 Subject: Re: [PATCH] test-suite: handle format with filename.c not existing
-Date: Wed, 24 Jan 2018 20:25:06 +0100
-Message-ID: <20180124192504.qg2nbb44hqpdevd4@ltop.local>
+Date: Wed, 24 Jan 2018 11:26:56 -0800
+Message-ID: <9b5a65f0-f411-206e-7973-3d38f06a7102@infradead.org>
 References: <5d19aa93-b421-eb1f-3a4c-92fc9476747a@infradead.org>
- <20180124082814.a36sur5e7cusrleb@ltop.local>
- <bb561f3d-342c-4f6c-5309-e16aa6fdafa4@infradead.org>
- <20180124191922.t54focjgwmls7uz7@ltop.local>
+ <CANeU7QkL3UrbsHRVhwXcAas7cBOTVyzHsGzZSKr0zAiEBFAWpg@mail.gmail.com>
+ <2386463a-5601-78d5-6827-5f03321e4adb@infradead.org>
+ <CANeU7QkQXoSO+wDDMUfsFuuhavt+YLZXiCCKuqNLTuq3aMc3rQ@mail.gmail.com>
+ <a647d436-f31a-1475-b9d3-b445a02095f8@infradead.org>
+ <CANeU7Q=qbo-kMduqM8Xws9WXvr89gt-thLrQLp7dox3O_VutLw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f52.google.com ([74.125.82.52]:33147 "EHLO
-        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752450AbeAXTZJ (ORCPT
+Received: from bombadil.infradead.org ([65.50.211.133]:33973 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932088AbeAXT07 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 24 Jan 2018 14:25:09 -0500
-Received: by mail-wm0-f52.google.com with SMTP id x4so27973213wmc.0
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Jan 2018 11:25:09 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20180124191922.t54focjgwmls7uz7@ltop.local>
+        Wed, 24 Jan 2018 14:26:59 -0500
+In-Reply-To: <CANeU7Q=qbo-kMduqM8Xws9WXvr89gt-thLrQLp7dox3O_VutLw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+To: Christopher Li <sparse@chrisli.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Jan 24, 2018 at 08:19:23PM +0100, Luc Van Oostenryck wrote:
-> On Wed, Jan 24, 2018 at 09:48:07AM -0800, Randy Dunlap wrote:
-> > On 01/24/2018 12:28 AM, Luc Van Oostenryck wrote:
-> > > On Mon, Jan 22, 2018 at 11:05:09AM -0800, Randy Dunlap wrote:
-> > >> From: Randy Dunlap <rdunlap@infradead.org>
-> > >>
-> > >> In error(), quiet is undefined when the command:
-> > >>   $ ./test-suite format filename1.c foobar1
-> > >>
-> > >> is used and filename1.c does not exist. This causes a shell script error:
-> > >>   ./test-suite: line 147: [: : integer expression expected
-> > >>
-> > >> because $quiet is undefined in
-> > >>   [ "$quiet" -ne 1 ] && echo "error: $1"
-> > >> so the error message is lost.
-> > >>
-> > >> Just initialize quiet before any command line parsing.
-> > >>
-> > >> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
-> > > 
-> > > cfr: https://marc.info/?l=linux-sparse&m=151273892009415
-> > 
-> > I don't think that will fix the original problem that I posted the
-> > patch for.
-> 
-> Yes, you're right.
-> The original problem doesn't exist in my tree but for another reason.
+On 01/24/2018 11:19 AM, Christopher Li wrote:
+> On Tue, Jan 23, 2018 at 5:38 PM, Randy Dunlap <rdunlap@infradead.org> wrote:
+>>>> diff --git a/validation/test-suite b/validation/test-suite
+>>> index cf151a3..5e10942 100755
+>>> --- a/validation/test-suite
+>>> +++ b/validation/test-suite
+>>> @@ -31,6 +31,7 @@ known_ko_tests=0
+>>>
+>>>  # defaults to not verbose
+>>>  [ -z "$V" ] && V=0
+>>> +[ $V -eq 0 ] && quiet=1 || quiet=0
+>>>
+>>>  ##
+>>
+>> Fine with me.
+>>
+>> Acked-by: Randy Dunlap <rdunlap@infradead.org>
+>> Tested-by: Randy Dunlap <rdunlap@infradead.org>
+>>
+> I consider that as a minor tweak of your original patch.
+> May I apply that change and keep you as the author of the
+> patch?
 
-Nevertheless, the reason explained in my patch is still valid
-and $quiet also need to be reset early in do_test().
+Sure, no problem.
 
--- Luc
+Thanks.
+
+-- 
+~Randy
