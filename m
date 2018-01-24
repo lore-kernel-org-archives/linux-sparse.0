@@ -1,50 +1,48 @@
-From: Randy Dunlap <rdunlap@infradead.org>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH] test-suite: handle format with filename.c not existing
-Date: Tue, 23 Jan 2018 17:38:38 -0800
-Message-ID: <a647d436-f31a-1475-b9d3-b445a02095f8@infradead.org>
+Date: Wed, 24 Jan 2018 09:15:20 +0100
+Message-ID: <20180124081519.6j3pap5k2kj2dpbb@ltop.local>
 References: <5d19aa93-b421-eb1f-3a4c-92fc9476747a@infradead.org>
  <CANeU7QkL3UrbsHRVhwXcAas7cBOTVyzHsGzZSKr0zAiEBFAWpg@mail.gmail.com>
  <2386463a-5601-78d5-6827-5f03321e4adb@infradead.org>
- <CANeU7QkQXoSO+wDDMUfsFuuhavt+YLZXiCCKuqNLTuq3aMc3rQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from merlin.infradead.org ([205.233.59.134]:49940 "EHLO
-        merlin.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751682AbeAXBim (ORCPT
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:37060 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752314AbeAXIPZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 23 Jan 2018 20:38:42 -0500
-In-Reply-To: <CANeU7QkQXoSO+wDDMUfsFuuhavt+YLZXiCCKuqNLTuq3aMc3rQ@mail.gmail.com>
-Content-Language: en-US
+        Wed, 24 Jan 2018 03:15:25 -0500
+Received: by mail-wm0-f45.google.com with SMTP id v71so6753930wmv.2
+        for <linux-sparse@vger.kernel.org>; Wed, 24 Jan 2018 00:15:24 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <2386463a-5601-78d5-6827-5f03321e4adb@infradead.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Randy Dunlap <rdunlap@infradead.org>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 01/23/2018 03:38 PM, Christopher Li wrote:
-
-> yes, I was thinking some thing like this,
-> but I haven't give it a lot of test.
+On Tue, Jan 23, 2018 at 10:20:55AM -0800, Randy Dunlap wrote:
 > 
->> diff --git a/validation/test-suite b/validation/test-suite
-> index cf151a3..5e10942 100755
-> --- a/validation/test-suite
-> +++ b/validation/test-suite
-> @@ -31,6 +31,7 @@ known_ko_tests=0
+> At the beginning of the file, $must_fail is not defined, so it will not -eq 1,
+> so quiet will remain = 0.
 > 
->  # defaults to not verbose
->  [ -z "$V" ] && V=0
-> +[ $V -eq 0 ] && quiet=1 || quiet=0
+> I guess that I don't understand the interplay between $V and $quiet and why
+> have both of them.
+
+$V is something global, set once for all when starting the test suite.
+$quiet is something that can change for each file being tested.
+
+> Are you suggesting that $quiet should be initialized by default like this:
+> (just drop the $must_fail part)
 > 
->  ##
+> > quiet=0
+> > [ $V -eq 0 ] && quiet=1
 
-Fine with me.
+The whole can probably be simplified a bit but the idea with
+$must_fail (set for test cases we known/expected to fail) is
+that we're not interested in any sort of details about the
+failure of a test that is supposed to fail.
 
-Acked-by: Randy Dunlap <rdunlap@infradead.org>
-Tested-by: Randy Dunlap <rdunlap@infradead.org>
-
-Thanks.
-
--- 
-~Randy
+Regards,
+-- Luc
