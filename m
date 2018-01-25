@@ -1,44 +1,86 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: should we document more command line options
-Date: Wed, 24 Jan 2018 21:08:07 +0100
-Message-ID: <20180124200806.bembuf4agxbzjtcj@ltop.local>
-References: <23350ab8-06a9-5b09-2409-358d33219679@infradead.org>
+From: Randy Dunlap <rdunlap@infradead.org>
+Subject: Re: [PATCH] sparse: option to print compound global data symbol info
+Date: Wed, 24 Jan 2018 22:15:32 -0800
+Message-ID: <6c5e4947-0ca7-0ca7-17fa-42c8162e4556@infradead.org>
+References: <80f9f805-fb35-65d6-4a86-ebe0b740fe58@infradead.org>
+ <20180121042702.sinboahtsdngkojv@ltop.local>
+ <CANeU7Qk=WERUJY9Px1NE__AxxXKMzGMbP1CRLYEUQF8C3KGpJw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:39185 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752504AbeAXUIL (ORCPT
+Received: from bombadil.infradead.org ([65.50.211.133]:55843 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750763AbeAYGPe (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 24 Jan 2018 15:08:11 -0500
-Received: by mail-wm0-f42.google.com with SMTP id b21so10910273wme.4
-        for <linux-sparse@vger.kernel.org>; Wed, 24 Jan 2018 12:08:11 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <23350ab8-06a9-5b09-2409-358d33219679@infradead.org>
+        Thu, 25 Jan 2018 01:15:34 -0500
+In-Reply-To: <CANeU7Qk=WERUJY9Px1NE__AxxXKMzGMbP1CRLYEUQF8C3KGpJw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
+To: Christopher Li <sparse@chrisli.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Wed, Jan 24, 2018 at 11:47:21AM -0800, Randy Dunlap wrote:
-> I suppose that we could just add something in the general DESCRIPTION paragraph
-> like:
+On 01/23/2018 02:46 AM, Christopher Li wrote:
+> On Sat, Jan 20, 2018 at 8:27 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+>> On Sat, Jan 20, 2018 at 07:36:24PM -0800, Randy Dunlap wrote:
+>>> From: Randy Dunlap <rdunlap@infradead.org>
+>>> with help from Linus. (many moons ago)
+>>>
+>>> sparse addition to print all compound/composite global data symbols
+>>> with their sizes and alignment.
+>>>
+>>> usage: -list-symbols
+>>> Example: (in kernel tree)
+>>>   make C=2 CF="-list-symbols" arch/x86_64/kernel/smpboot.o
+>>>   arch/x86/kernel/smpboot.c:99:1: struct cpuinfo_x86 [addressable] [noderef] [toplevel] <asn:3>cpu_info: compound size 240, alignment 8
+>>
+>> If this only lists compound symbols, it seems a bit strange to me
+>> to use '-list-symbols' as the option name. Maybe you could go one
+>> step further an have '-list-symbols=compound' and if needed it can
+>> be extended to '-list-symbols=all'.
 > 
->   Besides the options listed below, sparse also accepts many C compiler command
->   line options.
+> I think maybe it can be group with the "-v<debug>" options. e.g. "-vcompound".
+> After all it is showing some debug information very similar to "-ventry".
 > 
-> but that's not very helpful (at least to me).  For my use, I made a short text
-> file of other (not documented in sparse.1) command line options.  Should these
-> be added to sparse.1 or elsewhere or not at all?  (Of course, some of these
-> could be incorrect. :)
 
-It seems that until now, the only options that were documented were
-the ones specific to sparse, in other words the ones that are not
-present in GCC. I suppose the rationale was that it is wasn't
-needed since the aim is to be GCC compatible.
-But of course, a lot of existing GCC options are simply ignored
-by sparse, so yes, it may be interesting to know which options
-are really implemented but their effect and this their description
-should normally be the same in GCC.
- 
--- Luc
+OK, thanks for that.  I was a bit hung up on where to go with that.
+
+>>
+>> Not really needed as it's already included indirectly but it
+>> won't hurt, of course.
+>> ...
+>>
+>> Not needed since already declared in lib.h.
+> 
+> Agree here and other Luc's feedback, so I skip the duplication.
+> 
+>>
+>>> +static void list_all_symbols(struct symbol_list *list)
+>>> +{
+>>> +     struct symbol *sym;
+>>> +
+>>> +     FOR_EACH_PTR(list, sym) {
+>>> +             /* Only show arrays, structures, unions, enums, & typedefs */
+> 
+> This comment is a bit confusing for me. It mention "Only show ... *enums*"
+> 
+>>
+>>> +             if (sym->type == SYM_FN || sym->type == SYM_ENUM)
+>>> +                     continue;
+>>> +             if (!sym->ctype.base_type)
+>>> +                     continue;
+>>> +             if (sym->ctype.base_type->type == SYM_FN)
+>>> +                     continue;
+>>> +             if (sym->ctype.base_type->type == SYM_ENUM)
+>>> +                     continue;
+> 
+> Here it skips enums. Not consistent with previous comment
+> about showing enums. Am I missing something obvious?
+
+Nope.  I have already corrected that locally a few days ago.
+
+thanks.
+-- 
+~Randy
