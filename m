@@ -1,34 +1,45 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] lib.c: early return from handle_onoff_switch()
-Date: Fri, 26 Jan 2018 08:21:13 +0100
-Message-ID: <20180126072111.2xyh2yl2brhblxu4@ltop.local>
-References: <d198c16f-9dcf-3238-942f-889c4322ba54@infradead.org>
+From: Peter Schuster <femi.ageuh@gmail.com>
+Subject: =?UTF-8?Q?Darlehen_Geld_f=C3=BCr_Einzelpersonen_und_Fachleute_in_w?=
+        =?UTF-8?Q?eniger_als_72_Stunden?=
+Date: Fri, 26 Jan 2018 08:22:47 +0100
+Message-ID: <CACKcKZ-YTVoO8xO=VcRR-F_91T=fQ=MZa2wBTk_EaRT7GRz52Q__30574.497083626$1516951292$gmane$org@mail.gmail.com>
+Reply-To: klaus.peterschuster@outlook.de
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f46.google.com ([74.125.82.46]:39991 "EHLO
-        mail-wm0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751641AbeAZHVR (ORCPT
+Received: from mail-ot0-f174.google.com ([74.125.82.174]:44870 "EHLO
+        mail-ot0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751946AbeAZHWz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 26 Jan 2018 02:21:17 -0500
-Received: by mail-wm0-f46.google.com with SMTP id v123so19182841wmd.5
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Jan 2018 23:21:16 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <d198c16f-9dcf-3238-942f-889c4322ba54@infradead.org>
+        Fri, 26 Jan 2018 02:22:55 -0500
+Received: by mail-ot0-f174.google.com with SMTP id t20so9361850ote.11
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Jan 2018 23:22:55 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Thu, Jan 25, 2018 at 06:12:54PM -0800, Randy Dunlap wrote:
-> From: Randy Dunlap <rdunlap@infradead.org>
-> 
-> When handling "-Wsparse-all" in handle_onoff_switch(), once all
-> warning flags have been set, the function can return instead of
-> checking for "no-" or other option names because they won't be
-> found. Just return NULL, which is what happens when handling
-> "-Wsparse-all" anyway.
-> 
-> Signed-off-by: Randy Dunlap <rdunlap@infradead.org>
+Hallo,
 
-Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Sind Sie in einer schwierigen Situation, f=C3=BCr die Sie sich f=C3=BCr ein
+Darlehen suchen? Ben=C3=B6tigen Sie eine Finanzierung, um eine Schuld zu
+begleichen oder eine Aktivit=C3=A4t zu finanzieren? Haben Sie einen
+Verbraucherkredit, eine Hypothek, einen pers=C3=B6nlichen Kredit, eine
+Hypothek, Investition Darlehen, Schuldenkonsolidierung Darlehen oder
+andere braucht?
+
+Ich bin ein einzelner Investor. I zur Verf=C3=BCgung stellen die Kredit
+kurz-, mittel- und langfristige. Ihr Finanzierungsbedingungen sind
+sehr einfach und meine Zinssatz betr=C3=A4gt 3% pro Jahr.
+
+F=C3=BCr alle Anfragen, bleibe ich zur Verf=C3=BCgung, um Ihre Fragen zu be=
+antworten.
+
+Danke, dass Sie mir per E-Mail an Sie von  :   klaus.peterschuster@outlook.=
+de
+
+Mit freundlichen Gr=C3=BC=C3=9Fen.
+
+Peter Schuster
+
+Financial Bank
+https://firstfinancialsa.com/de
