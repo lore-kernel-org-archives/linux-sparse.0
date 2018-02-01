@@ -1,59 +1,54 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: [PATCH 1/3] compiler-gcc.h: Introduce __optimize function attribute
-Date: Thu,  1 Feb 2018 11:21:58 +0100
-Message-ID: <1517480520-4465-1-git-send-email-geert@linux-m68k.org>
+From: Arnd Bergmann <arnd@arndb.de>
+Subject: Re: [PATCH 2/3] compiler-gcc.h: __nostackprotector needs gcc-4.4 and up
+Date: Thu, 1 Feb 2018 12:46:02 +0100
+Message-ID: <CAK8P3a1Tm7zJf1VEGFPmhwqS=h92=_ssfAENJcrmxGg0eJCqnA@mail.gmail.com>
+References: <1517480520-4465-1-git-send-email-geert@linux-m68k.org> <1517480520-4465-2-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-crypto-owner@vger.kernel.org>
-Sender: linux-crypto-owner@vger.kernel.org
-To: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Christopher Li <sparse@chrisli.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Tom Lendacky <thomas.lendacky@amd.com>
-Cc: Arnd Bergmann <arnd@arndb.de>, Andrew Morton <akpm@linux-foundation.org>, linux-crypto@vger.kernel.org, linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail-ot0-f194.google.com ([74.125.82.194]:39039 "EHLO
+        mail-ot0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752044AbeBALqD (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 1 Feb 2018 06:46:03 -0500
+In-Reply-To: <1517480520-4465-2-git-send-email-geert@linux-m68k.org>
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Christopher Li <sparse@chrisli.org>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, Tom Lendacky <thomas.lendacky@amd.com>, Andrew Morton <akpm@linux-foundation.org>, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 
-Create a new function attribute __optimize, which allows to specify an
-optimization level on a per-function basis.
+On Thu, Feb 1, 2018 at 11:21 AM, Geert Uytterhoeven
+<geert@linux-m68k.org> wrote:
+> Gcc versions before 4.4 do not recognize the __optimize__ compiler
+> attribute:
+>
+>     warning: =E2=80=98__optimize__=E2=80=99 attribute directive ignored
+>
+> Fixes: 7375ae3a0b79ea07 ("compiler-gcc.h: Introduce __nostackprotector fu=
+nction attribute")
+> Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
+> ---
+> Can anyone please verify this?
+> Apparently __nostackprotector is used on x86 only, which is usually
+> served by modern compilers.
 
-Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
----
-I assume this is supported as of gcc-4.4:
-  - gcc version 4.3.3 (GCC): warning: ‘__optimize__’ attribute directive
-    ignored
-  - gcc version 4.4.7 (Ubuntu/Linaro 4.4.7-1ubuntu2): OK
----
- include/linux/compiler-gcc.h | 4 ++++
- include/linux/compiler.h     | 4 ++++
- 2 files changed, 8 insertions(+)
+I've checked that __optimize("no-stack-protector") is accepted by exactly t=
+hose
+compilers that your 40400 version check tests for, across all architectures=
+, so
+that's fine.
 
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 631354acfa720475..0a278a527944ad2f 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -196,6 +196,10 @@
- #endif /* __CHECKER__ */
- #endif /* GCC_VERSION >= 40300 */
- 
-+#if GCC_VERSION >= 40400
-+#define __optimize(level)	__attribute__((__optimize__(level)))
-+#endif /* GCC_VERSION >= 40400 */
-+
- #if GCC_VERSION >= 40500
- 
- #ifndef __CHECKER__
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 52e611ab9a6cf6fd..5ff818e9a836e898 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -271,6 +271,10 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
- 
- #endif /* __ASSEMBLY__ */
- 
-+#ifndef __optimize
-+# define __optimize(level)
-+#endif
-+
- /* Compile time object size, -1 for unknown */
- #ifndef __compiletime_object_size
- # define __compiletime_object_size(obj) -1
--- 
-2.7.4
+However,  looking at commit 91cfc88c66bf ("x86: Use __nostackprotect for
+sme_encrypt_kernel"), I suspect that gcc-4.1 through 4.3 will now cause
+a runtime failure in sme_encrypt_kernel() without a compile-time warning.
+
+I would leave __nostackprotector unchanged here, so we at least get
+a warning for functions that need to disable the stack protector to work
+correctly.
+
+We might want to add an #ifdef CONFIG_CC_STACKPROTECTOR around
+the __nostackprotector definition, so that we only warn if stackprotector
+is globally enabled.
+
+       Arnd
