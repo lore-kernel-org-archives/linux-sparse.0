@@ -1,50 +1,69 @@
 From: Ard Biesheuvel <ard.biesheuvel@linaro.org>
-Subject: Re: [PATCH 3/3] crypto: sha3-generic - Use __optimize to support old compilers
-Date: Thu, 1 Feb 2018 17:30:23 +0000
-Message-ID: <CAKv+Gu85sNC=5U2tgbEQ3ivEo0jVpundzkT-bGz50s0O-1PqHw@mail.gmail.com>
-References: <1517480520-4465-1-git-send-email-geert@linux-m68k.org> <1517480520-4465-3-git-send-email-geert@linux-m68k.org>
+Subject: Re: [PATCH 1/3] compiler-gcc.h: Introduce __optimize function attribute
+Date: Thu, 1 Feb 2018 17:30:43 +0000
+Message-ID: <CAKv+Gu_YjkGAjO1bM_eGFw8z3732y06M2EXfS7A34CaYkNdatA@mail.gmail.com>
+References: <1517480520-4465-1-git-send-email-geert@linux-m68k.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-crypto-owner@vger.kernel.org>
-In-Reply-To: <1517480520-4465-3-git-send-email-geert@linux-m68k.org>
+In-Reply-To: <1517480520-4465-1-git-send-email-geert@linux-m68k.org>
 Sender: linux-crypto-owner@vger.kernel.org
 To: Geert Uytterhoeven <geert@linux-m68k.org>
 Cc: Herbert Xu <herbert@gondor.apana.org.au>, "David S . Miller" <davem@davemloft.net>, Christopher Li <sparse@chrisli.org>, Tom Lendacky <thomas.lendacky@amd.com>, Arnd Bergmann <arnd@arndb.de>, Andrew Morton <akpm@linux-foundation.org>, "open list:HARDWARE RANDOM NUMBER GENERATOR CORE" <linux-crypto@vger.kernel.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On 1 February 2018 at 10:22, Geert Uytterhoeven <geert@linux-m68k.org> wrot=
+On 1 February 2018 at 10:21, Geert Uytterhoeven <geert@linux-m68k.org> wrot=
 e:
-> With gcc-4.1.2:
+> Create a new function attribute __optimize, which allows to specify an
+> optimization level on a per-function basis.
 >
->     crypto/sha3_generic.c:39: warning: =E2=80=98__optimize__=E2=80=99 att=
-ribute directive ignored
->
-> Use the newly introduced __optimize macro to fix this.
->
-> Fixes: 83dee2ce1ae791c3 ("crypto: sha3-generic - rewrite KECCAK transform=
- to help the compiler optimize")
 > Signed-off-by: Geert Uytterhoeven <geert@linux-m68k.org>
 
 Acked-by: Ard Biesheuvel <ard.biesheuvel@linaro.org>
 
 > ---
->  crypto/sha3_generic.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> I assume this is supported as of gcc-4.4:
+>   - gcc version 4.3.3 (GCC): warning: =E2=80=98__optimize__=E2=80=99 attr=
+ibute directive
+>     ignored
+>   - gcc version 4.4.7 (Ubuntu/Linaro 4.4.7-1ubuntu2): OK
+> ---
+>  include/linux/compiler-gcc.h | 4 ++++
+>  include/linux/compiler.h     | 4 ++++
+>  2 files changed, 8 insertions(+)
 >
-> diff --git a/crypto/sha3_generic.c b/crypto/sha3_generic.c
-> index a965b9d8055983af..c409cd87fea5decd 100644
-> --- a/crypto/sha3_generic.c
-> +++ b/crypto/sha3_generic.c
-> @@ -35,7 +35,7 @@ static const u64 keccakf_rndc[24] =3D {
+> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+> index 631354acfa720475..0a278a527944ad2f 100644
+> --- a/include/linux/compiler-gcc.h
+> +++ b/include/linux/compiler-gcc.h
+> @@ -196,6 +196,10 @@
+>  #endif /* __CHECKER__ */
+>  #endif /* GCC_VERSION >=3D 40300 */
 >
->  /* update the state with given number of rounds */
+> +#if GCC_VERSION >=3D 40400
+> +#define __optimize(level)      __attribute__((__optimize__(level)))
+> +#endif /* GCC_VERSION >=3D 40400 */
+> +
+>  #if GCC_VERSION >=3D 40500
 >
-> -static void __attribute__((__optimize__("O3"))) keccakf(u64 st[25])
-> +static void __optimize("O3") keccakf(u64 st[25])
->  {
->         u64 t[5], tt, bc[5];
->         int round;
+>  #ifndef __CHECKER__
+> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> index 52e611ab9a6cf6fd..5ff818e9a836e898 100644
+> --- a/include/linux/compiler.h
+> +++ b/include/linux/compiler.h
+> @@ -271,6 +271,10 @@ static __always_inline void __write_once_size(volati=
+le void *p, void *res, int s
+>
+>  #endif /* __ASSEMBLY__ */
+>
+> +#ifndef __optimize
+> +# define __optimize(level)
+> +#endif
+> +
+>  /* Compile time object size, -1 for unknown */
+>  #ifndef __compiletime_object_size
+>  # define __compiletime_object_size(obj) -1
 > --
 > 2.7.4
 >
