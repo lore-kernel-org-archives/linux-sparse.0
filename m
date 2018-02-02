@@ -1,79 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/8] do not report bad types twice
-Date: Fri,  2 Feb 2018 13:17:34 +0100
-Message-ID: <20180202121735.39621-8-luc.vanoostenryck@gmail.com>
-References: <20180202121735.39621-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/8] avoid duplicated warnings
+Date: Fri,  2 Feb 2018 13:17:27 +0100
+Message-ID: <20180202121735.39621-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:34184 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751606AbeBBMTy (ORCPT
+Received: from mail-wm0-f48.google.com ([74.125.82.48]:56152 "EHLO
+        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751463AbeBBMTs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 2 Feb 2018 07:19:54 -0500
-Received: by mail-wm0-f66.google.com with SMTP id j21-v6so2317102wmh.1
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Feb 2018 04:19:53 -0800 (PST)
-In-Reply-To: <20180202121735.39621-1-luc.vanoostenryck@gmail.com>
+        Fri, 2 Feb 2018 07:19:48 -0500
+Received: by mail-wm0-f48.google.com with SMTP id 143so12139112wma.5
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Feb 2018 04:19:47 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The type 'bad_ctype' is only used after an error has been detected.
-Since this error has also been reported, there is no reasons
-to issue more errors when a 'bad_ctype' is involved. This allow
-to focus on the root cause of the error.
+The goal of this series is to eliminate some duplicated
+warnings in order to reduce noise and allow to better
+focus on the origin of the problem.
 
-Fix this by checking in bad_expr_type() if one of the operands
-is already a 'bad_ctype' and do not issue an diagnostic message
-in this case.
+The series is also available in the Git repository at:
+  git://github.com/lucvoo/sparse-dev.git expr-bad-twice
 
-Note: the kernel has a bunch of these situations where the
-      exact same warning is given several times in a row,
-      sometimes as much as a dozen time.
+----------------------------------------------------------------
+Luc Van Oostenryck (8):
+  add testcases for duplicated warning about invalid types
+  fix error in bad conditional
+  early return if null ctype in evaluate_conditional()
+  add helper: valid_type()
+  use valid_type to avoid to warn twice on conditionals
+  add helpers: valid_expr_type() & valid_subexpr_type()
+  do not report bad types twice
+  always evaluate both operands
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- evaluate.c                   | 7 ++++++-
- validation/bad-type-twice2.c | 1 -
- 2 files changed, 6 insertions(+), 2 deletions(-)
+ evaluate.c                   | 66 +++++++++++++++++++++++++++-----------------
+ symbol.h                     |  5 ++++
+ validation/bad-type-twice0.c | 13 +++++++++
+ validation/bad-type-twice1.c | 16 +++++++++++
+ validation/bad-type-twice2.c | 18 ++++++++++++
+ 5 files changed, 93 insertions(+), 25 deletions(-)
+ create mode 100644 validation/bad-type-twice0.c
+ create mode 100644 validation/bad-type-twice1.c
+ create mode 100644 validation/bad-type-twice2.c
 
-diff --git a/evaluate.c b/evaluate.c
-index 14922017b..f63c0344d 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -404,15 +404,20 @@ static inline int is_string_type(struct symbol *type)
- 
- static struct symbol *bad_expr_type(struct expression *expr)
- {
--	sparse_error(expr->pos, "incompatible types for operation (%s)", show_special(expr->op));
- 	switch (expr->type) {
- 	case EXPR_BINOP:
- 	case EXPR_COMPARE:
-+		if (!valid_subexpr_type(expr))
-+			break;
-+		sparse_error(expr->pos, "incompatible types for operation (%s)", show_special(expr->op));
- 		info(expr->pos, "   left side has type %s", show_typename(expr->left->ctype));
- 		info(expr->pos, "   right side has type %s", show_typename(expr->right->ctype));
- 		break;
- 	case EXPR_PREOP:
- 	case EXPR_POSTOP:
-+		if (!valid_expr_type(expr->unop))
-+			break;
-+		sparse_error(expr->pos, "incompatible types for operation (%s)", show_special(expr->op));
- 		info(expr->pos, "   argument has type %s", show_typename(expr->unop->ctype));
- 		break;
- 	default:
-diff --git a/validation/bad-type-twice2.c b/validation/bad-type-twice2.c
-index 916e82028..0aadd7a30 100644
---- a/validation/bad-type-twice2.c
-+++ b/validation/bad-type-twice2.c
-@@ -7,7 +7,6 @@ int foo(int x, int y)
- 
- /*
-  * check-name: bad-type-twice2
-- * check-known-to-fail
-  *
-  * check-error-start
- bad-type-twice2.c:1:8: warning: 'type_t' has implicit type
 -- 
 2.16.0
 
