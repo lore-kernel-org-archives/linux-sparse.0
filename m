@@ -1,77 +1,295 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix examination of bad typeof
-Date: Fri,  2 Feb 2018 19:53:07 +0100
-Message-ID: <20180202185307.78965-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] extract extract eval_insn() from simplify_constant_binop()
+Date: Mon,  5 Feb 2018 23:34:38 +0100
+Message-ID: <20180205223438.24060-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:52277 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752826AbeBBSxQ (ORCPT
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:42897 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750796AbeBEWer (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 2 Feb 2018 13:53:16 -0500
-Received: by mail-wm0-f66.google.com with SMTP id g1so14611826wmg.2
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Feb 2018 10:53:15 -0800 (PST)
+        Mon, 5 Feb 2018 17:34:47 -0500
+Received: by mail-wr0-f194.google.com with SMTP id 41so29888301wrc.9
+        for <linux-sparse@vger.kernel.org>; Mon, 05 Feb 2018 14:34:47 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-When the operand of typeof() is invalid, the corresponding
-type is also invalid and can't be used. But currently,
-when the corresponding SYM_TYPEOF symbol is examined,
-this symbol is then simply returned as is. This, of course,
-create problem for subsequent code since an examined type is
-not supposed to be a SYM_TYPEOF anymore (one of the symptoms
-will be warning about "unknown type 11").
+For some optimizations, t's interesting to be able to do
+directly the evaluation of constant operations and not to
+have to wait a cyle of optimization or to have to allocate
+an new instruction.
 
-Fix this by changing the SYM_TYPEOF into a SYM_NODE (as it's
-expect) but pointing to bad_ctype. So further processing gently
-continue and the 'bad_ctype' will do its job when needed.
+So, extract extract the part dealing exclusively with
+the evalution into a separate function.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- symbol.c                |  4 +++-
- validation/typeof-bad.c | 17 +++++++++++++++++
- 2 files changed, 20 insertions(+), 1 deletion(-)
- create mode 100644 validation/typeof-bad.c
+ simplify.c | 241 ++++++++++++++++++++++++++++++++-----------------------------
+ 1 file changed, 128 insertions(+), 113 deletions(-)
 
-diff --git a/symbol.c b/symbol.c
-index e87cd1cb3..7e46ba9c4 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -496,7 +496,9 @@ struct symbol *examine_symbol_type(struct symbol * sym)
- 			sym->ctype.base_type = base;
- 			return examine_node_type(sym);
- 		}
--		break;
-+		sym->type = SYM_NODE;
-+		sym->ctype.base_type = &bad_ctype;
-+		return sym;
- 	}
- 	case SYM_PREPROCESSOR:
- 		sparse_error(sym->pos, "ctype on preprocessor command? (%s)", show_ident(sym->ident));
-diff --git a/validation/typeof-bad.c b/validation/typeof-bad.c
-new file mode 100644
-index 000000000..a9366bad1
---- /dev/null
-+++ b/validation/typeof-bad.c
-@@ -0,0 +1,17 @@
-+static typeof(undef) a;
-+
-+static int foo(void)
+diff --git a/simplify.c b/simplify.c
+index 4c48559e4..087b35222 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -392,6 +392,131 @@ static unsigned int operand_size(struct instruction *insn, pseudo_t pseudo)
+ 	return size;
+ }
+ 
++static pseudo_t eval_insn(struct instruction *insn)
 +{
-+	return a;
++	/* FIXME! Verify signs and sizes!! */
++	unsigned int size = insn->size;
++	long long left = insn->src1->value;
++	long long right = insn->src2->value;
++	unsigned long long ul, ur;
++	long long res, mask, bits;
++
++	mask = 1ULL << (size-1);
++	bits = mask | (mask-1);
++
++	if (left & mask)
++		left |= ~bits;
++	if (right & mask)
++		right |= ~bits;
++	ul = left & bits;
++	ur = right & bits;
++
++	switch (insn->opcode) {
++	case OP_ADD:
++		res = left + right;
++		break;
++	case OP_SUB:
++		res = left - right;
++		break;
++	case OP_MULU:
++		res = ul * ur;
++		break;
++	case OP_MULS:
++		res = left * right;
++		break;
++	case OP_DIVU:
++		if (!ur)
++			goto undef;
++		res = ul / ur;
++		break;
++	case OP_DIVS:
++		if (!right)
++			goto undef;
++		if (left == mask && right == -1)
++			goto undef;
++		res = left / right;
++		break;
++	case OP_MODU:
++		if (!ur)
++			goto undef;
++		res = ul % ur;
++		break;
++	case OP_MODS:
++		if (!right)
++			goto undef;
++		if (left == mask && right == -1)
++			goto undef;
++		res = left % right;
++		break;
++	case OP_SHL:
++		res = left << right;
++		break;
++	case OP_LSR:
++		res = ul >> ur;
++		break;
++	case OP_ASR:
++		res = left >> right;
++		break;
++       /* Logical */
++	case OP_AND:
++		res = left & right;
++		break;
++	case OP_OR:
++		res = left | right;
++		break;
++	case OP_XOR:
++		res = left ^ right;
++		break;
++	case OP_AND_BOOL:
++		res = left && right;
++		break;
++	case OP_OR_BOOL:
++		res = left || right;
++		break;
++
++	/* Binary comparison */
++	case OP_SET_EQ:
++		res = left == right;
++		break;
++	case OP_SET_NE:
++		res = left != right;
++		break;
++	case OP_SET_LE:
++		res = left <= right;
++		break;
++	case OP_SET_GE:
++		res = left >= right;
++		break;
++	case OP_SET_LT:
++		res = left < right;
++		break;
++	case OP_SET_GT:
++		res = left > right;
++		break;
++	case OP_SET_B:
++		res = ul < ur;
++		break;
++	case OP_SET_A:
++		res = ul > ur;
++		break;
++	case OP_SET_BE:
++		res = ul <= ur;
++		break;
++	case OP_SET_AE:
++		res = ul >= ur;
++		break;
++	default:
++		return NULL;
++	}
++	res &= bits;
++
++	return value_pseudo(res);
++
++undef:
++	return NULL;
 +}
 +
-+/*
-+ * check-name: typeof-bad
-+ *
-+ * check-error-start
-+typeof-bad.c:1:15: error: undefined identifier 'undef'
-+typeof-bad.c:5:16: warning: incorrect type in return expression (different base types)
-+typeof-bad.c:5:16:    expected int
-+typeof-bad.c:5:16:    got bad type static [toplevel] a
-+ * check-error-end
-+ */
++
+ static int simplify_asr(struct instruction *insn, pseudo_t pseudo, long long value)
+ {
+ 	unsigned int size = operand_size(insn, pseudo);
+@@ -547,122 +672,12 @@ static int simplify_constant_leftside(struct instruction *insn)
+ 
+ static int simplify_constant_binop(struct instruction *insn)
+ {
+-	/* FIXME! Verify signs and sizes!! */
+-	long long left = insn->src1->value;
+-	long long right = insn->src2->value;
+-	unsigned long long ul, ur;
+-	long long res, mask, bits;
+-
+-	mask = 1ULL << (insn->size-1);
+-	bits = mask | (mask-1);
+-
+-	if (left & mask)
+-		left |= ~bits;
+-	if (right & mask)
+-		right |= ~bits;
+-	ul = left & bits;
+-	ur = right & bits;
++	pseudo_t res = eval_insn(insn);
+ 
+-	switch (insn->opcode) {
+-	case OP_ADD:
+-		res = left + right;
+-		break;
+-	case OP_SUB:
+-		res = left - right;
+-		break;
+-	case OP_MULU:
+-		res = ul * ur;
+-		break;
+-	case OP_MULS:
+-		res = left * right;
+-		break;
+-	case OP_DIVU:
+-		if (!ur)
+-			return 0;
+-		res = ul / ur;
+-		break;
+-	case OP_DIVS:
+-		if (!right)
+-			return 0;
+-		if (left == mask && right == -1)
+-			return 0;
+-		res = left / right;
+-		break;
+-	case OP_MODU:
+-		if (!ur)
+-			return 0;
+-		res = ul % ur;
+-		break;
+-	case OP_MODS:
+-		if (!right)
+-			return 0;
+-		if (left == mask && right == -1)
+-			return 0;
+-		res = left % right;
+-		break;
+-	case OP_SHL:
+-		res = left << right;
+-		break;
+-	case OP_LSR:
+-		res = ul >> ur;
+-		break;
+-	case OP_ASR:
+-		res = left >> right;
+-		break;
+-       /* Logical */
+-	case OP_AND:
+-		res = left & right;
+-		break;
+-	case OP_OR:
+-		res = left | right;
+-		break;
+-	case OP_XOR:
+-		res = left ^ right;
+-		break;
+-	case OP_AND_BOOL:
+-		res = left && right;
+-		break;
+-	case OP_OR_BOOL:
+-		res = left || right;
+-		break;
+-			       
+-	/* Binary comparison */
+-	case OP_SET_EQ:
+-		res = left == right;
+-		break;
+-	case OP_SET_NE:
+-		res = left != right;
+-		break;
+-	case OP_SET_LE:
+-		res = left <= right;
+-		break;
+-	case OP_SET_GE:
+-		res = left >= right;
+-		break;
+-	case OP_SET_LT:
+-		res = left < right;
+-		break;
+-	case OP_SET_GT:
+-		res = left > right;
+-		break;
+-	case OP_SET_B:
+-		res = ul < ur;
+-		break;
+-	case OP_SET_A:
+-		res = ul > ur;
+-		break;
+-	case OP_SET_BE:
+-		res = ul <= ur;
+-		break;
+-	case OP_SET_AE:
+-		res = ul >= ur;
+-		break;
+-	default:
++	if (!res)
+ 		return 0;
+-	}
+-	res &= bits;
+ 
+-	replace_with_pseudo(insn, value_pseudo(res));
++	replace_with_pseudo(insn, res);
+ 	return REPEAT_CSE;
+ }
+ 
 -- 
 2.16.0
 
