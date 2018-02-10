@@ -1,70 +1,40 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] fix dead dominator
-Date: Sat, 10 Feb 2018 14:29:45 +0100
-Message-ID: <20180210132945.92758-3-luc.vanoostenryck@gmail.com>
-References: <20180210132945.92758-1-luc.vanoostenryck@gmail.com>
+From: Christopher Li <sparse@chrisli.org>
+Subject: Re: [PATCH] remove warning "call with no type"
+Date: Sat, 10 Feb 2018 11:00:26 -0800
+Message-ID: <CANeU7Qnp+3nLjE7AZ=tMOA4OmjEa3j_XQe6UgUHd2_e5W4fTiA@mail.gmail.com>
+References: <20180131104043.3345-1-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:39885 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750968AbeBJNcD (ORCPT
+Received: from mail-qk0-f181.google.com ([209.85.220.181]:36661 "EHLO
+        mail-qk0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752003AbeBJTA2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Feb 2018 08:32:03 -0500
-Received: by mail-wm0-f67.google.com with SMTP id b21so2210708wme.4
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 05:32:02 -0800 (PST)
-In-Reply-To: <20180210132945.92758-1-luc.vanoostenryck@gmail.com>
+        Sat, 10 Feb 2018 14:00:28 -0500
+Received: by mail-qk0-f181.google.com with SMTP id 15so14029416qkl.3
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:00:27 -0800 (PST)
+In-Reply-To: <20180131104043.3345-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-During simplify_one_symbol(), if possible, loads are replaced by
-an OP_PHI and the corresponding OP_PHISOURCE. To simplify things
-firther, If all the phisrcs correspond to an unique pseudo (often
-because there is only a single phisrc), then it's useless to
-create the OP_PHI: the created OP_PHISOURCEs can be removed and
-the initial load can be converted to the unique pseudo.
+On Wed, Jan 31, 2018 at 2:40 AM, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> This warning is issued when trying to linearize a call
+> expressions with a null expr->ctype but such null ctype
+> is a consequence of an error detected during evaluation
+> and this error must already have issued a warning or an
+> error message specific to the problem.
+>
+> In short, this "call with no type" is non-informative
+> and redundant, so avoid usless noise and remove this
+> warning.
 
-However, if the unique pseudo was never used, the removal of
-the OP_PHISOURCEs, done *before* the load conversion, will
-kill the defining load (at this point the only user of the
-pseudo was the OP_PHISOURCEs) which will then erroneously make
-a VOID from the pseudo.
+The change looks fine to me. This the change assume the
+expr->ctype be NULL is result of an error and has been reported
+before. I am sure that assumption holds for most of the cases. Not
+sure it holds for all corner cases. On the other hand, if the expr->ctype
+is NULL, it is already screwed, change it to VOID is not too bad.
 
-Fix this by doing the load conversion before removing the
-unneeded OP_PHISOURCEs.
----
- flow.c                         | 2 +-
- validation/mem2reg/load-dead.c | 1 -
- 2 files changed, 1 insertion(+), 2 deletions(-)
-
-diff --git a/flow.c b/flow.c
-index d553df128..e4c881d56 100644
---- a/flow.c
-+++ b/flow.c
-@@ -453,10 +453,10 @@ void rewrite_load_instruction(struct instruction *insn, struct pseudo_list *domi
- 	 * and convert the load into a LNOP and replace the
- 	 * pseudo.
- 	 */
-+	convert_load_instruction(insn, new);
- 	FOR_EACH_PTR(dominators, phi) {
- 		kill_instruction(phi->def);
- 	} END_FOR_EACH_PTR(phi);
--	convert_load_instruction(insn, new);
- 	return;
- 
- complex_phi:
-diff --git a/validation/mem2reg/load-dead.c b/validation/mem2reg/load-dead.c
-index 19ac4e5e4..1165fa1ea 100644
---- a/validation/mem2reg/load-dead.c
-+++ b/validation/mem2reg/load-dead.c
-@@ -12,7 +12,6 @@ static void foo(int a)
- /*
-  * check-name: load-dead
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-excludes: VOID
--- 
-2.16.0
-
+Chris
