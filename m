@@ -1,38 +1,36 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [PATCH 4/8] add helper: valid_type()
-Date: Sat, 10 Feb 2018 11:38:11 -0800
-Message-ID: <CANeU7Q=BT0Mk30HRF-jaOHwqB6qckrC+muXwb7+D0pRDmDMdTw@mail.gmail.com>
-References: <20180202121735.39621-1-luc.vanoostenryck@gmail.com> <20180202121735.39621-5-luc.vanoostenryck@gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 3/8] early return if null ctype in evaluate_conditional()
+Date: Sat, 10 Feb 2018 20:43:50 +0100
+Message-ID: <20180210194350.76pdd5sukyfvqqae@ltop.local>
+References: <20180202121735.39621-1-luc.vanoostenryck@gmail.com>
+ <20180202121735.39621-4-luc.vanoostenryck@gmail.com>
+ <CANeU7QmA+2WQcZRbgG9bb_N8su1SH90U3JFyyntiyijAXJbCxQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f171.google.com ([209.85.220.171]:36919 "EHLO
-        mail-qk0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751622AbeBJTiM (ORCPT
+Received: from mail-wr0-f180.google.com ([209.85.128.180]:42031 "EHLO
+        mail-wr0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751371AbeBJTnz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Feb 2018 14:38:12 -0500
-Received: by mail-qk0-f171.google.com with SMTP id c128so14095331qkb.4
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:38:12 -0800 (PST)
-In-Reply-To: <20180202121735.39621-5-luc.vanoostenryck@gmail.com>
+        Sat, 10 Feb 2018 14:43:55 -0500
+Received: by mail-wr0-f180.google.com with SMTP id 41so11416879wrc.9
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:43:54 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QmA+2WQcZRbgG9bb_N8su1SH90U3JFyyntiyijAXJbCxQ@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Fri, Feb 2, 2018 at 4:17 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> 'bad_type' is used for ... bad types instead of NULL
-> in order to avoid later lots of null-checking.
+On Sat, Feb 10, 2018 at 11:28:44AM -0800, Christopher Li wrote:
+> On Fri, Feb 2, 2018 at 4:17 AM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > NB: no functional changes here.
+> >
+> This is not straightly necessary to re-indent a section of the code.
 
-Is there a good reason to keep both NULL and "bad_type"
-to represent bad types?
+Not needed but it was the prupose of the patch so that one of the following
+patches become very clear about the functional change it made.
+It's a very good things to separate functional from non-functional changes.
 
-May be we should keep it simple, make NULL as the
-haven't been evaluated. After evaluate if there is type
-error, replace the NULL as bad type. So that we can tell
-this expression is evaluated or not.
-
-In other word, replace all usage of NULL as bad type into
-"bad_type". That would be more consistent.
-
-Chris
+-- Luc
