@@ -1,46 +1,37 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] remove warning "call with no type"
-Date: Sat, 10 Feb 2018 20:54:33 +0100
-Message-ID: <20180210195431.nqtd6smqvmvtlcqp@ltop.local>
-References: <20180131104043.3345-1-luc.vanoostenryck@gmail.com>
- <CANeU7Qnp+3nLjE7AZ=tMOA4OmjEa3j_XQe6UgUHd2_e5W4fTiA@mail.gmail.com>
+Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
+Date: Sat, 10 Feb 2018 21:02:40 +0100
+Message-ID: <20180210200237.a4xmiyppshy5bbbk@ltop.local>
+References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
+ <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
+ <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
+ <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
+ <CAExDi1ST5ddB5Ti4rTOCdXsihc=xsuZ6riPAqvFCotrNmjUrUQ@mail.gmail.com>
+ <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:53583 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751952AbeBJTyg (ORCPT
+Received: from mail-wm0-f42.google.com ([74.125.82.42]:37163 "EHLO
+        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751182AbeBJUCo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Feb 2018 14:54:36 -0500
-Received: by mail-wm0-f49.google.com with SMTP id t74so3150656wme.3
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:54:35 -0800 (PST)
+        Sat, 10 Feb 2018 15:02:44 -0500
+Received: by mail-wm0-f42.google.com with SMTP id v71so3255856wmv.2
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 12:02:43 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Qnp+3nLjE7AZ=tMOA4OmjEa3j_XQe6UgUHd2_e5W4fTiA@mail.gmail.com>
+In-Reply-To: <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Christopher Li <sparse@chrisli.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+To: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
 
-On Sat, Feb 10, 2018 at 11:00:26AM -0800, Christopher Li wrote:
-> On Wed, Jan 31, 2018 at 2:40 AM, Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> > This warning is issued when trying to linearize a call
-> > expressions with a null expr->ctype but such null ctype
-> > is a consequence of an error detected during evaluation
-> > and this error must already have issued a warning or an
-> > error message specific to the problem.
-> >
-> > In short, this "call with no type" is non-informative
-> > and redundant, so avoid usless noise and remove this
-> > warning.
+On Tue, Jan 30, 2018 at 02:23:11PM +0100, Jason A. Donenfeld wrote:
+> Any chance of this getting merged into the real sparse tree?
 > 
-> The change looks fine to me. This the change assume the
-> expr->ctype be NULL is result of an error and has been reported
-> before. I am sure that assumption holds for most of the cases. Not
-> sure it holds for all corner cases.
+> Jason
 
-I consider that if it this not the case, it's a bug which
-will need to be fixed by adding the proper error reporting.
-But I haven't yet seen such case.
+Chris,
+
+Can you please take a look at this one, please?
 
 -- Luc
