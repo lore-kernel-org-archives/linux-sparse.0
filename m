@@ -1,49 +1,46 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 4/8] add helper: valid_type()
-Date: Sat, 10 Feb 2018 20:51:11 +0100
-Message-ID: <20180210195109.zqfiihvn7wqkjzc5@ltop.local>
-References: <20180202121735.39621-1-luc.vanoostenryck@gmail.com>
- <20180202121735.39621-5-luc.vanoostenryck@gmail.com>
- <CANeU7Q=BT0Mk30HRF-jaOHwqB6qckrC+muXwb7+D0pRDmDMdTw@mail.gmail.com>
+Subject: Re: [PATCH] remove warning "call with no type"
+Date: Sat, 10 Feb 2018 20:54:33 +0100
+Message-ID: <20180210195431.nqtd6smqvmvtlcqp@ltop.local>
+References: <20180131104043.3345-1-luc.vanoostenryck@gmail.com>
+ <CANeU7Qnp+3nLjE7AZ=tMOA4OmjEa3j_XQe6UgUHd2_e5W4fTiA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f172.google.com ([209.85.128.172]:38651 "EHLO
-        mail-wr0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751952AbeBJTvO (ORCPT
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:53583 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751952AbeBJTyg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Feb 2018 14:51:14 -0500
-Received: by mail-wr0-f172.google.com with SMTP id t94so11424590wrc.5
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:51:14 -0800 (PST)
+        Sat, 10 Feb 2018 14:54:36 -0500
+Received: by mail-wm0-f49.google.com with SMTP id t74so3150656wme.3
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 11:54:35 -0800 (PST)
 Content-Disposition: inline
-In-Reply-To: <CANeU7Q=BT0Mk30HRF-jaOHwqB6qckrC+muXwb7+D0pRDmDMdTw@mail.gmail.com>
+In-Reply-To: <CANeU7Qnp+3nLjE7AZ=tMOA4OmjEa3j_XQe6UgUHd2_e5W4fTiA@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Christopher Li <sparse@chrisli.org>
 Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Sat, Feb 10, 2018 at 11:38:11AM -0800, Christopher Li wrote:
-> On Fri, Feb 2, 2018 at 4:17 AM, Luc Van Oostenryck
+On Sat, Feb 10, 2018 at 11:00:26AM -0800, Christopher Li wrote:
+> On Wed, Jan 31, 2018 at 2:40 AM, Luc Van Oostenryck
 > <luc.vanoostenryck@gmail.com> wrote:
-> > 'bad_type' is used for ... bad types instead of NULL
-> > in order to avoid later lots of null-checking.
+> > This warning is issued when trying to linearize a call
+> > expressions with a null expr->ctype but such null ctype
+> > is a consequence of an error detected during evaluation
+> > and this error must already have issued a warning or an
+> > error message specific to the problem.
+> >
+> > In short, this "call with no type" is non-informative
+> > and redundant, so avoid usless noise and remove this
+> > warning.
 > 
-> Is there a good reason to keep both NULL and "bad_type"
-> to represent bad types?
-> 
-> May be we should keep it simple, make NULL as the
-> haven't been evaluated. After evaluate if there is type
-> error, replace the NULL as bad type. So that we can tell
-> this expression is evaluated or not.
-> 
-> In other word, replace all usage of NULL as bad type into
-> "bad_type". That would be more consistent.
+> The change looks fine to me. This the change assume the
+> expr->ctype be NULL is result of an error and has been reported
+> before. I am sure that assumption holds for most of the cases. Not
+> sure it holds for all corner cases.
 
-This is indded one of the longer term goal (or at least to
-make things much cleaner).
-For the moment, it's far from being the case though, because
-some of the functions return NULL to indicate that they
-failed and then this return value is used and assigned.
-It's quite a bit messy.
+I consider that if it this not the case, it's a bug which
+will need to be fixed by adding the proper error reporting.
+But I haven't yet seen such case.
 
 -- Luc
