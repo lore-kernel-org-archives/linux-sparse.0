@@ -1,37 +1,128 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
-Date: Sat, 10 Feb 2018 21:02:40 +0100
-Message-ID: <20180210200237.a4xmiyppshy5bbbk@ltop.local>
-References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
- <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
- <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
- <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
- <CAExDi1ST5ddB5Ti4rTOCdXsihc=xsuZ6riPAqvFCotrNmjUrUQ@mail.gmail.com>
- <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] fix missing checks for deleted instructions
+Date: Sun, 11 Feb 2018 10:21:04 +0100
+Message-ID: <20180211092104.6703-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f42.google.com ([74.125.82.42]:37163 "EHLO
-        mail-wm0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751182AbeBJUCo (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:53718 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752273AbeBKJVM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Feb 2018 15:02:44 -0500
-Received: by mail-wm0-f42.google.com with SMTP id v71so3255856wmv.2
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Feb 2018 12:02:43 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
+        Sun, 11 Feb 2018 04:21:12 -0500
+Received: by mail-wm0-f68.google.com with SMTP id t74so4570744wme.3
+        for <linux-sparse@vger.kernel.org>; Sun, 11 Feb 2018 01:21:12 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>, Christopher Li <sparse@chrisli.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Tue, Jan 30, 2018 at 02:23:11PM +0100, Jason A. Donenfeld wrote:
-> Any chance of this getting merged into the real sparse tree?
-> 
-> Jason
+Instructions with a null ->bb are instructions which have
+been killed. As such, they must thus always be ignored
+but it's not always the case.
 
-Chris,
+Fix this by adding a check for null ->bb where there is
+some looping over all the instructions of a basic block.
 
-Can you please take a look at this one, please?
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c                           | 20 ++++++++++++++++----
+ validation/mem2reg/killed-insn.c | 15 +++++++++++++++
+ 2 files changed, 31 insertions(+), 4 deletions(-)
+ create mode 100644 validation/mem2reg/killed-insn.c
 
--- Luc
+diff --git a/flow.c b/flow.c
+index e4c881d56..62658b920 100644
+--- a/flow.c
++++ b/flow.c
+@@ -164,6 +164,8 @@ static int bb_has_side_effects(struct basic_block *bb)
+ {
+ 	struct instruction *insn;
+ 	FOR_EACH_PTR(bb->insns, insn) {
++		if (!insn->bb)
++			continue;
+ 		switch (insn->opcode) {
+ 		case OP_CALL:
+ 			/* FIXME! This should take "const" etc into account */
+@@ -396,6 +398,8 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
+ 
+ 		FOR_EACH_PTR_REVERSE(parent->insns, one) {
+ 			int dominance;
++			if (!one->bb)
++				continue;
+ 			if (one == insn)
+ 				goto no_dominance;
+ 			dominance = dominates(pseudo, insn, one, local);
+@@ -484,6 +488,8 @@ static int find_dominating_stores(pseudo_t pseudo, struct instruction *insn,
+ 	partial = 0;
+ 	FOR_EACH_PTR(bb->insns, one) {
+ 		int dominance;
++		if (!one->bb)
++			continue;
+ 		if (one == insn)
+ 			goto found;
+ 		dominance = dominates(pseudo, insn, one, local);
+@@ -559,6 +565,8 @@ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct b
+ 	FOR_EACH_PTR_REVERSE(bb->insns, insn) {
+ 		int opcode = insn->opcode;
+ 
++		if (!insn->bb)
++			continue;
+ 		if (opcode != OP_LOAD && opcode != OP_STORE) {
+ 			if (local)
+ 				continue;
+@@ -608,6 +616,8 @@ static void kill_dominated_stores(pseudo_t pseudo, struct instruction *insn,
+ 	bb->generation = generation;
+ 	FOR_EACH_PTR_REVERSE(bb->insns, one) {
+ 		int dominance;
++		if (!one->bb)
++			continue;
+ 		if (!found) {
+ 			if (one != insn)
+ 				continue;
+@@ -777,6 +787,8 @@ void kill_bb(struct basic_block *bb)
+ 	struct basic_block *child, *parent;
+ 
+ 	FOR_EACH_PTR(bb->insns, insn) {
++		if (!insn->bb)
++			continue;
+ 		kill_instruction_force(insn);
+ 		kill_defs(insn);
+ 		/*
+@@ -1022,10 +1034,10 @@ out:
+ 
+ 		kill_instruction(delete_last_instruction(&parent->insns));
+ 		FOR_EACH_PTR(bb->insns, insn) {
+-			if (insn->bb) {
+-				assert(insn->bb == bb);
+-				insn->bb = parent;
+-			}
++			if (!insn->bb)
++				continue;
++			assert(insn->bb == bb);
++			insn->bb = parent;
+ 			add_instruction(&parent->insns, insn);
+ 		} END_FOR_EACH_PTR(insn);
+ 		bb->insns = NULL;
+diff --git a/validation/mem2reg/killed-insn.c b/validation/mem2reg/killed-insn.c
+new file mode 100644
+index 000000000..641525d3f
+--- /dev/null
++++ b/validation/mem2reg/killed-insn.c
+@@ -0,0 +1,15 @@
++static int g;
++static void foo(void)
++{
++	int a[2] = { };
++	a;
++	a[1] = g;
++}
++
++/*
++ * check-name: killed-insn
++ * check-command: test-linearize -fdump-ir=mem2reg $file
++ *
++ * check-output-ignore
++ * check-output-excludes: store\.
++ */
+-- 
+2.16.0
+
