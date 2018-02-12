@@ -1,119 +1,50 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 6/9] let kill_instruction() report if changes were made
-Date: Mon, 12 Feb 2018 23:02:43 +0100
-Message-ID: <20180212220246.17750-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 8/9] add testcase for bad killing of dominated stores
+Date: Mon, 12 Feb 2018 23:02:45 +0100
+Message-ID: <20180212220246.17750-9-luc.vanoostenryck@gmail.com>
 References: <20180212220246.17750-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:32921 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932724AbeBLWDB (ORCPT
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:51418 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932730AbeBLWDD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 12 Feb 2018 17:03:01 -0500
-Received: by mail-wm0-f68.google.com with SMTP id x4so10661944wmc.0
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Feb 2018 14:03:00 -0800 (PST)
+        Mon, 12 Feb 2018 17:03:03 -0500
+Received: by mail-wm0-f65.google.com with SMTP id r71so12351033wmd.1
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Feb 2018 14:03:02 -0800 (PST)
 In-Reply-To: <20180212220246.17750-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This let us take others actions if no changes have been made
-and allow simpler call to this function since its effect on
-'repeat_phase' can be directly returned.
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.h     | 10 +++++-----
- simplify.c | 17 ++++++++---------
- 2 files changed, 13 insertions(+), 14 deletions(-)
+ validation/optim/store-dominated.c | 16 ++++++++++++++++
+ 1 file changed, 16 insertions(+)
+ create mode 100644 validation/optim/store-dominated.c
 
-diff --git a/flow.h b/flow.h
-index 6743db1ee..8e96f62fb 100644
---- a/flow.h
-+++ b/flow.h
-@@ -26,14 +26,14 @@ extern void kill_bb(struct basic_block *);
- extern void kill_use(pseudo_t *);
- extern void kill_unreachable_bbs(struct entrypoint *ep);
- 
--extern void kill_insn(struct instruction *, int force);
--static inline void kill_instruction(struct instruction *insn)
-+extern int kill_insn(struct instruction *, int force);
-+static inline int kill_instruction(struct instruction *insn)
- {
--	kill_insn(insn, 0);
-+	return kill_insn(insn, 0);
- }
--static inline void kill_instruction_force(struct instruction *insn)
-+static inline int kill_instruction_force(struct instruction *insn)
- {
--	kill_insn(insn, 1);
-+	return kill_insn(insn, 1);
- }
- 
- void check_access(struct instruction *insn);
-diff --git a/simplify.c b/simplify.c
-index 5a90b9c6a..f0dc69ff9 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -221,10 +221,10 @@ static void kill_use_list(struct pseudo_list *list)
-  * the function does that unconditionally (must only be used
-  * for unreachable instructions.
-  */
--void kill_insn(struct instruction *insn, int force)
-+int kill_insn(struct instruction *insn, int force)
- {
- 	if (!insn || !insn->bb)
--		return;
-+		return 0;
- 
- 	switch (insn->opcode) {
- 	case OP_SEL:
-@@ -266,9 +266,9 @@ void kill_insn(struct instruction *insn, int force)
- 		if (!force) {
- 			/* a "pure" function can be killed too */
- 			if (!(insn->func->type == PSEUDO_SYM))
--				return;
-+				return 0;
- 			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
--				return;
-+				return 0;
- 		}
- 		kill_use_list(insn->arguments);
- 		if (insn->func->type == PSEUDO_REG)
-@@ -277,20 +277,20 @@ void kill_insn(struct instruction *insn, int force)
- 
- 	case OP_LOAD:
- 		if (!force && insn->type->ctype.modifiers & MOD_VOLATILE)
--			return;
-+			return 0;
- 		kill_use(&insn->src);
- 		break;
- 
- 	case OP_STORE:
- 		if (!force)
--			return;
-+			return 0;
- 		kill_use(&insn->src);
- 		kill_use(&insn->target);
- 		break;
- 
- 	case OP_ENTRY:
- 		/* ignore */
--		return;
-+		return 0;
- 
- 	case OP_BR:
- 	case OP_SETFVAL:
-@@ -299,8 +299,7 @@ void kill_insn(struct instruction *insn, int force)
- 	}
- 
- 	insn->bb = NULL;
--	repeat_phase |= REPEAT_CSE;
--	return;
-+	return repeat_phase |= REPEAT_CSE;
- }
- 
- /*
+diff --git a/validation/optim/store-dominated.c b/validation/optim/store-dominated.c
+new file mode 100644
+index 000000000..f1e2e6f29
+--- /dev/null
++++ b/validation/optim/store-dominated.c
+@@ -0,0 +1,16 @@
++static int a[];
++
++static void foo(void)
++{
++	int *c = &a[1];
++	*c = *c = 0;
++}
++
++/*
++ * check-name: store-dominated
++ * check-command: test-linearize $file
++ * check-known-to-fail
++ *
++ * check-output-ignore
++ * check-output-excludes: add\.
++ */
 -- 
 2.16.0
 
