@@ -1,71 +1,61 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 05/10] fix usage of deadborn loads
-Date: Tue, 13 Feb 2018 22:58:07 +0100
-Message-ID: <20180213215812.18735-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 03/10] fix killing of converted loads
+Date: Tue, 13 Feb 2018 22:58:05 +0100
+Message-ID: <20180213215812.18735-4-luc.vanoostenryck@gmail.com>
 References: <20180213215812.18735-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:55569 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:50342 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965962AbeBMWAY (ORCPT
+        with ESMTP id S965960AbeBMWAX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Feb 2018 17:00:24 -0500
-Received: by mail-wm0-f65.google.com with SMTP id a84so7452013wmi.5
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 14:00:24 -0800 (PST)
+        Tue, 13 Feb 2018 17:00:23 -0500
+Received: by mail-wm0-f65.google.com with SMTP id k87so1017338wmi.0
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 14:00:22 -0800 (PST)
 In-Reply-To: <20180213215812.18735-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-In some situations, loads and others instructions can be
-unreachable already when linearized, for example in code like:
-	void foo(int *ptr)
-	{
-		return;
-		*ptr;
-	}
-Such loads are detected in find_dominating_stores() and must
-be discarded. This is done and the load have its opcode set
-to OP_LNOP (wich is only useful for debugging) but it's
-address is left as being used by the load.
+Converted loads are dead and can be removed but that
+also means that the address usage need to be adjusted
+which wasn't done.
 
-Fix this by removing the address usage.
+Fix this by directly using kill_instruction().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                             | 2 +-
- validation/mem2reg/load-deadborn.c | 9 +++++++++
- 2 files changed, 10 insertions(+), 1 deletion(-)
- create mode 100644 validation/mem2reg/load-deadborn.c
+ flow.c                            | 4 +---
+ validation/optim/load-converted.c | 1 -
+ 2 files changed, 1 insertion(+), 4 deletions(-)
 
 diff --git a/flow.c b/flow.c
-index 62658b920..2a6bf5ea3 100644
+index 62658b920..c614a11d9 100644
 --- a/flow.c
 +++ b/flow.c
-@@ -481,7 +481,7 @@ static int find_dominating_stores(pseudo_t pseudo, struct instruction *insn,
+@@ -305,9 +305,7 @@ void convert_instruction_target(struct instruction *insn, pseudo_t src)
+ void convert_load_instruction(struct instruction *insn, pseudo_t src)
+ {
+ 	convert_instruction_target(insn, src);
+-	/* Turn the load into a no-op */
+-	insn->opcode = OP_LNOP;
+-	insn->bb = NULL;
++	kill_instruction(insn);
+ }
  
- 	/* Unreachable load? Undo it */
- 	if (!bb) {
--		insn->opcode = OP_LNOP;
-+		kill_use(&insn->src);
- 		return 1;
- 	}
- 
-diff --git a/validation/mem2reg/load-deadborn.c b/validation/mem2reg/load-deadborn.c
-new file mode 100644
-index 000000000..fa0baeae8
---- /dev/null
-+++ b/validation/mem2reg/load-deadborn.c
-@@ -0,0 +1,9 @@
-+static void foo(int a)
-+{
-+	return;
-+	a;
-+}
-+
-+/*
-+ * check-name: load-deadborn
-+ */
+ static int overlapping_memop(struct instruction *a, struct instruction *b)
+diff --git a/validation/optim/load-converted.c b/validation/optim/load-converted.c
+index 010c6bc7b..7cbb53cf4 100644
+--- a/validation/optim/load-converted.c
++++ b/validation/optim/load-converted.c
+@@ -8,7 +8,6 @@ static int foo(int *p, int i)
+ /*
+  * check-name: load-converted
+  * check-command: test-linearize -Wno-decl $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-excludes: add\.
 -- 
 2.16.0
 
