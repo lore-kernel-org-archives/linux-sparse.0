@@ -1,57 +1,48 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 4/9] add helpers for pseudo's user-list's size
-Date: Tue, 13 Feb 2018 00:25:33 +0100
-Message-ID: <20180212232532.lklvfbht3zaxq5me@ltop.local>
-References: <20180212220246.17750-1-luc.vanoostenryck@gmail.com>
- <20180212220246.17750-5-luc.vanoostenryck@gmail.com>
- <CA+55aFzwX8CKAeDuTwVg3MKa+LHXNaphi+mqoZE+2C7gaG61wg@mail.gmail.com>
- <20180212222802.cyr2iwtfjb4pli2o@ltop.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Subject: [PATCH] cleanup: remove unused 'struct pseudo_ptr_list'
+Date: Tue, 13 Feb 2018 01:49:32 +0100
+Message-ID: <20180213004932.34780-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f48.google.com ([74.125.82.48]:51174 "EHLO
-        mail-wm0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932272AbeBLXZg (ORCPT
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:38469 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932736AbeBMAtn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 12 Feb 2018 18:25:36 -0500
-Received: by mail-wm0-f48.google.com with SMTP id f71so12587290wmf.0
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Feb 2018 15:25:36 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20180212222802.cyr2iwtfjb4pli2o@ltop.local>
+        Mon, 12 Feb 2018 19:49:43 -0500
+Received: by mail-wr0-f195.google.com with SMTP id t94so16981615wrc.5
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Feb 2018 16:49:43 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Mon, Feb 12, 2018 at 11:28:04PM +0100, Luc Van Oostenryck wrote:
-> On Mon, Feb 12, 2018 at 02:11:34PM -0800, Linus Torvalds wrote:
-> > On Mon, Feb 12, 2018 at 2:02 PM, Luc Van Oostenryck
-> > <luc.vanoostenryck@gmail.com> wrote:
-> > > Also add has_user(), a wrapper around the above that
-> > > can directly be used on a pseudo.
-> > 
-> > You add that wrapper, but then:
-> > 
-> > > -       if (ptr_list_size((struct ptr_list *) *list) == 0)
-> > > +       if (pseudo_user_list_size(*list) == 0)
-> > 
-> > you don't actually *use* it. That seems pointless.
-> 
-> Yes, I know it's not ideal.
-> My intention when I made has_users() was to use it too,
-> but I also made it to directly take a pseudo as argument
-> (which is the common case). And then when wanting to use
-> it I saw that there is pseudo here, only the pseudo_user_list.
-> So, I had to use the intermediate pseudo_user_list_size()
-> here instead of has_users().
-> 
-> I may change has_users() to take the user list instead
-> of the pseudo but my mental model was pseudos. 
+'struct pseudo_ptr_list' was used to store pseudo usage
+but this structure is not used since commit e7fb6e092
+(Add instruction to pseudo user tracking).
 
-I've splitted the patch in two, one with leaving
-the changes with pseudo_user_list_size() and another
-one introduncing has_users(). I think that it makes
-things easier to follow.
+Remove the leftovers.
 
-Thanks for noticing.
--- Luc
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ linearize.h | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/linearize.h b/linearize.h
+index c0c49bdf0..eba0dd532 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -9,7 +9,6 @@
+ #include "symbol.h"
+ 
+ struct instruction;
+-DECLARE_PTR_LIST(pseudo_ptr_list, pseudo_t);
+ 
+ struct pseudo_user {
+ 	struct instruction *insn;
+@@ -310,11 +309,6 @@ static inline int bb_reachable(struct basic_block *bb)
+ 	return bb != NULL;
+ }
+ 
+-static inline void add_pseudo_ptr(pseudo_t *ptr, struct pseudo_ptr_list **list)
+-{
+-	add_ptr_list(list, ptr);
+-}
