@@ -1,119 +1,137 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 09/10] let kill_instruction() report if changes were made
-Date: Tue, 13 Feb 2018 22:58:11 +0100
-Message-ID: <20180213215812.18735-10-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 04/10] kill dead stores when simplifying symbols
+Date: Tue, 13 Feb 2018 22:58:06 +0100
+Message-ID: <20180213215812.18735-5-luc.vanoostenryck@gmail.com>
 References: <20180213215812.18735-1-luc.vanoostenryck@gmail.com>
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:53641 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965865AbeBMWAa (ORCPT
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:40194 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965865AbeBMWAY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Feb 2018 17:00:30 -0500
-Received: by mail-wm0-f65.google.com with SMTP id t74so18809143wme.3
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 14:00:30 -0800 (PST)
+        Tue, 13 Feb 2018 17:00:24 -0500
+Received: by mail-wm0-f68.google.com with SMTP id v123so18592043wmd.5
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 14:00:23 -0800 (PST)
 In-Reply-To: <20180213215812.18735-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This let us take others actions if no changes have been made
-and allow simpler call to this function since its effect on
-'repeat_phase' can be directly returned.
+In the initial simplify_symbols() and in simplify_memops()
+when a store is simplified away, it's killed via kill_store()
+where its ->bb is set to NULL and the usage is removed from
+the value. However the usage is not removed from the address.
+As consequence, code related to the address calculation
+is not optimized away as it should be since the value is
+wrongly considered as needed.
+
+Fix this by using kill_instruction_force() to remove these
+stores.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.h     | 10 +++++-----
- simplify.c | 17 ++++++++---------
- 2 files changed, 13 insertions(+), 14 deletions(-)
+ flow.c                             | 17 ++++-------------
+ memops.c                           | 11 +----------
+ validation/optim/store-dominated.c |  1 -
+ 3 files changed, 5 insertions(+), 24 deletions(-)
 
-diff --git a/flow.h b/flow.h
-index 6743db1ee..8e96f62fb 100644
---- a/flow.h
-+++ b/flow.h
-@@ -26,14 +26,14 @@ extern void kill_bb(struct basic_block *);
- extern void kill_use(pseudo_t *);
- extern void kill_unreachable_bbs(struct entrypoint *ep);
- 
--extern void kill_insn(struct instruction *, int force);
--static inline void kill_instruction(struct instruction *insn)
-+extern int kill_insn(struct instruction *, int force);
-+static inline int kill_instruction(struct instruction *insn)
- {
--	kill_insn(insn, 0);
-+	return kill_insn(insn, 0);
- }
--static inline void kill_instruction_force(struct instruction *insn)
-+static inline int kill_instruction_force(struct instruction *insn)
- {
--	kill_insn(insn, 1);
-+	return kill_insn(insn, 1);
+diff --git a/flow.c b/flow.c
+index 62658b920..e6f99a0de 100644
+--- a/flow.c
++++ b/flow.c
+@@ -544,15 +544,6 @@ found:
+ 	return 1;
  }
  
- void check_access(struct instruction *insn);
-diff --git a/simplify.c b/simplify.c
-index 5a90b9c6a..f0dc69ff9 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -221,10 +221,10 @@ static void kill_use_list(struct pseudo_list *list)
-  * the function does that unconditionally (must only be used
-  * for unreachable instructions.
-  */
--void kill_insn(struct instruction *insn, int force)
-+int kill_insn(struct instruction *insn, int force)
+-static void kill_store(struct instruction *insn)
+-{
+-	if (insn) {
+-		insn->bb = NULL;
+-		insn->opcode = OP_SNOP;
+-		kill_use(&insn->target);
+-	}
+-}
+-
+ /* Kill a pseudo that is dead on exit from the bb */
+ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct basic_block *bb, int local)
  {
- 	if (!insn || !insn->bb)
--		return;
-+		return 0;
- 
- 	switch (insn->opcode) {
- 	case OP_SEL:
-@@ -266,9 +266,9 @@ void kill_insn(struct instruction *insn, int force)
- 		if (!force) {
- 			/* a "pure" function can be killed too */
- 			if (!(insn->func->type == PSEUDO_SYM))
--				return;
-+				return 0;
- 			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
--				return;
-+				return 0;
+@@ -577,7 +568,7 @@ static void kill_dead_stores(pseudo_t pseudo, unsigned long generation, struct b
+ 		if (insn->src == pseudo) {
+ 			if (opcode == OP_LOAD)
+ 				return;
+-			kill_store(insn);
++			kill_instruction_force(insn);
+ 			continue;
  		}
- 		kill_use_list(insn->arguments);
- 		if (insn->func->type == PSEUDO_REG)
-@@ -277,20 +277,20 @@ void kill_insn(struct instruction *insn, int force)
+ 		if (local)
+@@ -608,7 +599,7 @@ static void kill_dominated_stores(pseudo_t pseudo, struct instruction *insn,
  
- 	case OP_LOAD:
- 		if (!force && insn->type->ctype.modifiers & MOD_VOLATILE)
--			return;
-+			return 0;
- 		kill_use(&insn->src);
- 		break;
- 
- 	case OP_STORE:
- 		if (!force)
--			return;
-+			return 0;
- 		kill_use(&insn->src);
- 		kill_use(&insn->target);
- 		break;
- 
- 	case OP_ENTRY:
- 		/* ignore */
--		return;
-+		return 0;
- 
- 	case OP_BR:
- 	case OP_SETFVAL:
-@@ -299,8 +299,7 @@ void kill_insn(struct instruction *insn, int force)
+ 	/* Unreachable store? Undo it */
+ 	if (!bb) {
+-		kill_store(insn);
++		kill_instruction_force(insn);
+ 		return;
  	}
+ 	if (bb->generation == generation)
+@@ -631,7 +622,7 @@ static void kill_dominated_stores(pseudo_t pseudo, struct instruction *insn,
+ 			return;
+ 		if (one->opcode == OP_LOAD)
+ 			return;
+-		kill_store(one);
++		kill_instruction_force(one);
+ 	} END_FOR_EACH_PTR_REVERSE(one);
  
- 	insn->bb = NULL;
--	repeat_phase |= REPEAT_CSE;
--	return;
-+	return repeat_phase |= REPEAT_CSE;
+ 	if (!found) {
+@@ -723,7 +714,7 @@ external_visibility:
+ 		FOR_EACH_PTR(pseudo->users, pu) {
+ 			struct instruction *insn = pu->insn;
+ 			if (insn->opcode == OP_STORE)
+-				kill_store(insn);
++				kill_instruction_force(insn);
+ 		} END_FOR_EACH_PTR(pu);
+ 	} else {
+ 		/*
+diff --git a/memops.c b/memops.c
+index 788ed2f2f..5762f4f2c 100644
+--- a/memops.c
++++ b/memops.c
+@@ -139,15 +139,6 @@ next_load:
+ 	} END_FOR_EACH_PTR_REVERSE(insn);
  }
  
+-static void kill_store(struct instruction *insn)
+-{
+-	if (insn) {
+-		insn->bb = NULL;
+-		insn->opcode = OP_SNOP;
+-		kill_use(&insn->target);
+-	}
+-}
+-
+ static void kill_dominated_stores(struct basic_block *bb)
+ {
+ 	struct instruction *insn;
+@@ -178,7 +169,7 @@ static void kill_dominated_stores(struct basic_block *bb)
+ 					if (dom->opcode == OP_LOAD)
+ 						goto next_store;
+ 					/* Yeehaa! Found one! */
+-					kill_store(dom);
++					kill_instruction_force(dom);
+ 				}
+ 			} END_FOR_EACH_PTR_REVERSE(dom);
+ 
+diff --git a/validation/optim/store-dominated.c b/validation/optim/store-dominated.c
+index f1e2e6f29..d74db7790 100644
+--- a/validation/optim/store-dominated.c
++++ b/validation/optim/store-dominated.c
+@@ -9,7 +9,6 @@ static void foo(void)
  /*
+  * check-name: store-dominated
+  * check-command: test-linearize $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-excludes: add\.
 -- 
 2.16.0
 
