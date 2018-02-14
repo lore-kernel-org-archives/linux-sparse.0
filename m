@@ -1,44 +1,63 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] use show_pseudo() for OP_SYMADDR's symbol
-Date: Wed, 14 Feb 2018 01:28:04 +0100
-Message-ID: <20180214002804.22668-3-luc.vanoostenryck@gmail.com>
-References: <20180214002804.22668-1-luc.vanoostenryck@gmail.com>
+Subject: Re: warning: division by zero
+Date: Wed, 14 Feb 2018 01:39:09 +0100
+Message-ID: <20180214003907.2ym6hgjp3vzptw53@ltop.local>
+References: <8708546d-78da-622d-bc26-d2a0cf40cda4@infradead.org>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:56268 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966200AbeBNA2N (ORCPT
+Received: from mail-wm0-f50.google.com ([74.125.82.50]:51023 "EHLO
+        mail-wm0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966207AbeBNAjN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Feb 2018 19:28:13 -0500
-Received: by mail-wm0-f65.google.com with SMTP id a84so7919245wmi.5
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 16:28:13 -0800 (PST)
-In-Reply-To: <20180214002804.22668-1-luc.vanoostenryck@gmail.com>
+        Tue, 13 Feb 2018 19:39:13 -0500
+Received: by mail-wm0-f50.google.com with SMTP id k87so1510435wmi.0
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 16:39:12 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <8708546d-78da-622d-bc26-d2a0cf40cda4@infradead.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Randy Dunlap <rdunlap@infradead.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-In show_instruction(), what is done to display OP_SYMADDR's
-symbol is very close to what is done to display a PSEUDO_SYM.
-In fact, what is done by show_pseudo() is more complete and
-more informative.
+On Tue, Feb 13, 2018 at 04:26:04PM -0800, Randy Dunlap wrote:
+> In Linux kernel, we get that message 2 times (in x86_64 allmodconfig):
+> 
+> ../fs/exofs/ore_raid.c:95:64: warning: division by zero
+> ../fs/exofs/ore_raid.c:116:36: warning: division by zero
+> 
+> when dividing by variable sizeof_a1pa, where that is:
+> 	const unsigned sizeof__a1pa = sizeof(_aab->__a1pa[0]);
+> 
+> which is in this struct:
+> 	struct _alloc_all_bytes {
+> 		struct __alloc_stripe_pages_2d {
+> 			struct __stripe_pages_2d sp2d;
+> 			struct __1_page_stripe _1p_stripes[pages_in_unit];
+> 		} __asp2d;
+> 		struct __alloc_1p_arrays {
+> 			struct page *pages[group_width];
+> 			struct page *scribble[group_width];
+> 			char page_is_read[data_devs];
+> 		} __a1pa[pages_in_unit];
+> 	} *_aab;
+> 
+> where 'pages_in_unit' is a function parameter. So, yes, it could have a value
+> of zero.
+> 
+> Is the warning message considered correct or useful as is?  If so, OK, no problem.
 
-So simply use show_pseudo() to display this part. This will
-also avoid crashes caused by a NULL symbol.
+It's a division by zero, not because the parameter can be zero
+but because currently sparse doesn't handle the size of VLAs which
+are always considered as zero-sized.
+So, no I don't consider this warning as correct and even less useful.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- linearize.c | 19 +++----------------
- 1 file changed, 3 insertions(+), 16 deletions(-)
+I have a WIP series to handle VLA's sizeof, if there is some interests
+I can boost a bit its priority.
 
-diff --git a/linearize.c b/linearize.c
-index c174d631f..4995d06ec 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -342,24 +342,11 @@ const char *show_instruction(struct instruction *insn)
- 		buf += sprintf(buf, ".L%u", insn->bb_true->nr);
- 		break;
- 
--	case OP_SYMADDR: {
--		struct symbol *sym = insn->symbol->sym;
-+	case OP_SYMADDR:
- 		buf += sprintf(buf, "%s <- ", show_pseudo(insn->target));
+> Although I would rather see something more like:
+> 	warning: variable length array on stack
+
+That's of course something different that could indeed be quite useful.
+
+-- Luc
