@@ -1,47 +1,57 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/2] llvm: use list_size() to count the numbers of arguments
-Date: Wed, 14 Feb 2018 00:52:08 +0100
-Message-ID: <20180213235209.21615-2-luc.vanoostenryck@gmail.com>
-References: <20180213235209.21615-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
+Date: Wed, 14 Feb 2018 01:02:45 +0100
+Message-ID: <20180214000243.263hmp3puro4h4q3@ltop.local>
+References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
+ <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
+ <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
+ <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
+ <CAExDi1ST5ddB5Ti4rTOCdXsihc=xsuZ6riPAqvFCotrNmjUrUQ@mail.gmail.com>
+ <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
+ <20180210200237.a4xmiyppshy5bbbk@ltop.local>
+ <CANeU7QkhZix7xj4_pskyPUXSsSLX1qpXU98rJTf1BBBbxvCnXg@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:36619 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966168AbeBMXyY (ORCPT
+Received: from mail-wr0-f179.google.com ([209.85.128.179]:42982 "EHLO
+        mail-wr0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966157AbeBNACs (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Feb 2018 18:54:24 -0500
-Received: by mail-wr0-f196.google.com with SMTP id y3so20283741wrh.3
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 15:54:24 -0800 (PST)
-In-Reply-To: <20180213235209.21615-1-luc.vanoostenryck@gmail.com>
+        Tue, 13 Feb 2018 19:02:48 -0500
+Received: by mail-wr0-f179.google.com with SMTP id k9so6507861wre.9
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 16:02:48 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <CANeU7QkhZix7xj4_pskyPUXSsSLX1qpXU98rJTf1BBBbxvCnXg@mail.gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Christopher Li <sparse@chrisli.org>
+Cc: "Jason A. Donenfeld" <Jason@zx2c4.com>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-The function sym_func_type() contains a small loop
-which count the number of arguments, one by one.
+On Tue, Feb 13, 2018 at 03:49:56PM -0800, Christopher Li wrote:
+> On Sat, Feb 10, 2018 at 12:02 PM, Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> > On Tue, Jan 30, 2018 at 02:23:11PM +0100, Jason A. Donenfeld wrote:
+> >> Any chance of this getting merged into the real sparse tree?
+> >>
+> >> Jason
+> >
+> > Chris,
+> >
+> > Can you please take a look at this one, please?
+> 
+> Hi, I take a look at this series. It is this series, right?
+> 
+> https://patchwork.kernel.org/patch/9954727/
 
-Do this more simply and more efficiently by using
-symbol_list_size().
+These two patches:
+https://patchwork.kernel.org/patch/9954725/
+https://patchwork.kernel.org/patch/9954727/
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- sparse-llvm.c | 9 ++-------
- 1 file changed, 2 insertions(+), 7 deletions(-)
+> It looks fine to me. I do want to apply them.
+> 
+> Do you want to make this 2 patch series pullable from master
+> or I just apply them as patch?
 
-diff --git a/sparse-llvm.c b/sparse-llvm.c
-index 3a1778083..96b1499de 100644
---- a/sparse-llvm.c
-+++ b/sparse-llvm.c
-@@ -38,15 +38,10 @@ static LLVMTypeRef sym_func_type(struct symbol *sym)
- 	LLVMTypeRef func_type;
- 	LLVMTypeRef ret_type;
- 	struct symbol *arg;
--	int n_arg = 0;
-+	int n_arg;
- 
- 	ret_type = func_return_type(sym);
--
--	/* count args, build argument type information */
--	FOR_EACH_PTR(sym->arguments, arg) {
--		n_arg++;
--	} END_FOR_EACH_PTR(arg);
+Just apply them, please.
+
+-- Luc
