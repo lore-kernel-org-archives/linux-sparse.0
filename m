@@ -1,46 +1,38 @@
-From: Dibyendu Majumdar <mobile@majumdar.org.uk>
-Subject: Re: [PATCH 3/5] IR: remove never-generated instructions
-Date: Wed, 14 Feb 2018 05:08:06 +0000
-Message-ID: <CACXZuxc7dFwDPq56das5Q1p6hA9qW=C3QdppRf0cjHeeQcsnUg@mail.gmail.com>
-References: <20180214010843.23651-1-luc.vanoostenryck@gmail.com> <20180214010843.23651-4-luc.vanoostenryck@gmail.com>
+From: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
+Date: Wed, 14 Feb 2018 13:15:09 +0100
+Message-ID: <CAHmME9r9xfzFb02H_E8Ri_tTY9mO-cWBFxrxifZLTYQ_KVvDgQ@mail.gmail.com>
+References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
+ <20170917100552.72288-1-luc.vanoostenryck@gmail.com> <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
+ <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
+ <CAExDi1ST5ddB5Ti4rTOCdXsihc=xsuZ6riPAqvFCotrNmjUrUQ@mail.gmail.com>
+ <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
+ <20180210200237.a4xmiyppshy5bbbk@ltop.local> <CANeU7QkhZix7xj4_pskyPUXSsSLX1qpXU98rJTf1BBBbxvCnXg@mail.gmail.com>
+ <20180214000243.263hmp3puro4h4q3@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-vk0-f41.google.com ([209.85.213.41]:46933 "EHLO
-        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751148AbeBNFIH (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 14 Feb 2018 00:08:07 -0500
-Received: by mail-vk0-f41.google.com with SMTP id o204so296724vkd.13
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 21:08:07 -0800 (PST)
-In-Reply-To: <20180214010843.23651-4-luc.vanoostenryck@gmail.com>
+Received: from frisell.zx2c4.com ([192.95.5.64]:48709 "EHLO frisell.zx2c4.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753264AbeBNMPL (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 14 Feb 2018 07:15:11 -0500
+Received: by frisell.zx2c4.com (ZX2C4 Mail Server) with ESMTP id d926c565
+        for <linux-sparse@vger.kernel.org>;
+        Wed, 14 Feb 2018 11:59:28 +0000 (UTC)
+Received: by frisell.zx2c4.com (ZX2C4 Mail Server) with ESMTPSA id 74813deb (TLSv1.2:ECDHE-RSA-AES128-GCM-SHA256:128:NO)
+        for <linux-sparse@vger.kernel.org>;
+        Wed, 14 Feb 2018 11:59:28 +0000 (UTC)
+Received: by mail-oi0-f42.google.com with SMTP id 23so4255225oip.12
+        for <linux-sparse@vger.kernel.org>; Wed, 14 Feb 2018 04:15:10 -0800 (PST)
+In-Reply-To: <20180214000243.263hmp3puro4h4q3@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
+Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On 14 February 2018 at 01:08, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
-> Some of the IR instructions have been defined but are
-> never generated.
->
-> -### Unused ops
-> -#### OP_VANEXT
-> -#### OP_VAARG
-> -#### OP_MALLOC
-> -#### OP_FREE
-> -#### OP_ALLOCA
-> -#### OP_GET_ELEMENT_PTR
-> -#### OP_INVOKE
-> -#### OP_UNWIND
+Hi Christopher,
 
-Hi Luc, I would argue for not removing some of these instructions.
+Could you apply those two patches, and then afterwards, cut a 0.5.2 release?
 
-The VA instructions are definitely needed as today Sparse backend code
-generators cannot handle var args because no instructions are
-generated.
-Similarly alloca should perhaps be emitted to indicate stack
-allocations - this would make the stack usage explicit.
-
-Thanks and Regards
-Dibyendu
+Thanks,
+Jason
