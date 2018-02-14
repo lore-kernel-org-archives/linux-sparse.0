@@ -1,83 +1,46 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] rename base_type() to bitfield_base_type()
-Date: Wed, 14 Feb 2018 02:51:42 +0100
-Message-ID: <20180214015142.24725-3-luc.vanoostenryck@gmail.com>
-References: <20180214015142.24725-1-luc.vanoostenryck@gmail.com>
+From: Dibyendu Majumdar <mobile@majumdar.org.uk>
+Subject: Re: [PATCH 3/5] IR: remove never-generated instructions
+Date: Wed, 14 Feb 2018 05:08:06 +0000
+Message-ID: <CACXZuxc7dFwDPq56das5Q1p6hA9qW=C3QdppRf0cjHeeQcsnUg@mail.gmail.com>
+References: <20180214010843.23651-1-luc.vanoostenryck@gmail.com> <20180214010843.23651-4-luc.vanoostenryck@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:55157 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966425AbeBNBvw (ORCPT
+Received: from mail-vk0-f41.google.com ([209.85.213.41]:46933 "EHLO
+        mail-vk0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751148AbeBNFIH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 13 Feb 2018 20:51:52 -0500
-Received: by mail-wm0-f65.google.com with SMTP id i192so86471wme.4
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 17:51:51 -0800 (PST)
-In-Reply-To: <20180214015142.24725-1-luc.vanoostenryck@gmail.com>
+        Wed, 14 Feb 2018 00:08:07 -0500
+Received: by mail-vk0-f41.google.com with SMTP id o204so296724vkd.13
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Feb 2018 21:08:07 -0800 (PST)
+In-Reply-To: <20180214010843.23651-4-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-In linearize.c, base_type() is not some kind of generic helper
-like get_base_type() but is a more specialized thing used for
-loads and stores and giving only the base type of bitfields.
+On 14 February 2018 at 01:08, Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+> Some of the IR instructions have been defined but are
+> never generated.
+>
+> -### Unused ops
+> -#### OP_VANEXT
+> -#### OP_VAARG
+> -#### OP_MALLOC
+> -#### OP_FREE
+> -#### OP_ALLOCA
+> -#### OP_GET_ELEMENT_PTR
+> -#### OP_INVOKE
+> -#### OP_UNWIND
 
-Rename this helper to bitfield_base_type() to make this more
-self-explained.
+Hi Luc, I would argue for not removing some of these instructions.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- linearize.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+The VA instructions are definitely needed as today Sparse backend code
+generators cannot handle var args because no instructions are
+generated.
+Similarly alloca should perhaps be emitted to indicate stack
+allocations - this would make the stack usage explicit.
 
-diff --git a/linearize.c b/linearize.c
-index 5aff861d4..a4ec79d81 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -913,7 +913,7 @@ static int linearize_simple_address(struct entrypoint *ep,
- 	return 1;
- }
- 
--static struct symbol *base_type(struct symbol *sym)
-+static struct symbol *bitfield_base_type(struct symbol *sym)
- {
- 	struct symbol *base = sym;
- 
-@@ -945,7 +945,7 @@ static int linearize_address_gen(struct entrypoint *ep,
- 
- static pseudo_t add_load(struct entrypoint *ep, struct access_data *ad)
- {
--	struct symbol *btype = base_type(ad->type);
-+	struct symbol *btype = bitfield_base_type(ad->type);
- 	struct instruction *insn;
- 	pseudo_t new;
- 
-@@ -964,7 +964,7 @@ static void add_store(struct entrypoint *ep, struct access_data *ad, pseudo_t va
- 	struct basic_block *bb = ep->active;
- 
- 	if (bb_reachable(bb)) {
--		struct symbol *btype = base_type(ad->type);
-+		struct symbol *btype = bitfield_base_type(ad->type);
- 		struct instruction *store = alloc_typed_instruction(OP_STORE, btype);
- 		store->offset = ad->offset;
- 		use_pseudo(store, value, &store->target);
-@@ -978,7 +978,7 @@ static pseudo_t linearize_store_gen(struct entrypoint *ep,
- 		struct access_data *ad)
- {
- 	struct symbol *ctype = ad->type;
--	struct symbol *btype = base_type(ctype);
-+	struct symbol *btype = bitfield_base_type(ctype);
- 	pseudo_t store = value;
- 
- 	if (type_size(btype) != type_size(ctype)) {
-@@ -1043,7 +1043,7 @@ static pseudo_t add_symbol_address(struct entrypoint *ep, struct symbol *sym)
- static pseudo_t linearize_load_gen(struct entrypoint *ep, struct access_data *ad)
- {
- 	struct symbol *ctype = ad->type;
--	struct symbol *btype = base_type(ctype);
-+	struct symbol *btype = bitfield_base_type(ctype);
- 	pseudo_t new = add_load(ep, ad);
- 
- 	if (ctype->bit_offset) {
--- 
-2.16.0
-
+Thanks and Regards
+Dibyendu
