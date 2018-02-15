@@ -1,41 +1,47 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] sparse: ignore indirect_branch attribute
-Date: Thu, 15 Feb 2018 21:42:27 +0100
-Message-ID: <20180215204225.kexgsqbcuvkwhpva@ltop.local>
-References: <c97d360f-a0d2-8c0d-b951-e064843ff4d8@infradead.org>
- <20180213221245.2ylhdtqdf4c5qmog@ltop.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm0-f54.google.com ([74.125.82.54]:39790 "EHLO
-        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1161186AbeBOUma (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 15 Feb 2018 15:42:30 -0500
-Received: by mail-wm0-f54.google.com with SMTP id b21so3210893wme.4
-        for <linux-sparse@vger.kernel.org>; Thu, 15 Feb 2018 12:42:29 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20180213221245.2ylhdtqdf4c5qmog@ltop.local>
-Sender: linux-sparse-owner@vger.kernel.org
+Subject: [PATCH] disable sparse warnings about unknown attributes
+Date: Thu, 15 Feb 2018 22:07:50 +0100
+Message-ID: <20180215210750.28813-1-luc.vanoostenryck@gmail.com>
+Return-path: <linux-kbuild-owner@vger.kernel.org>
+Sender: linux-kbuild-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, linux-kbuild@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>, Randy Dunlap <rdunlap@infradead.org>, linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
-To: Randy Dunlap <rdunlap@infradead.org>
-Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Tue, Feb 13, 2018 at 11:12:47PM +0100, Luc Van Oostenryck wrote:
-> On Tue, Feb 13, 2018 at 01:52:54PM -0800, Randy Dunlap wrote:
-> > From: Randy Dunlap <rdunlap@infradead.org>
-> > 
-> > Teach sparse about the "indirect_branch" attribute as used in
-> > Linux kernel:
-> > #define __noretpoline __attribute__((indirect_branch("keep")))
-> > and tell sparse to ignore it.
-> > 
-> > This eliminates over 148K warnings (which also cause the
-> > 0day bot to send error reports uselessly).
+Currently, sparse issues warnings on code using an attribute
+it doesn't know about.
 
-FWIW, I've pushed this to my stable tree:
-	https://github.com/lucvoo/sparse 
-	git://github.com/lucvoo/sparse.git
-together with a patch making '-Wunknown-attribute' off by default.
+One of the problem with this is that these warnings have no
+value for the developer, it's just noise for him. At best these
+warnings tell something about some deficiencies of sparse itself
+but not about a potential problem with code analyzed.
 
--- Luc
+A second problem with this is that sparse release are, alas,
+less frequent than new attributes are added to GCC.
+
+So, avoid the noise by asking sparse to not warn about
+attributes it doesn't know about.
+
+Reference: https://marc.info/?l=linux-sparse&m=151871600016790
+Reference: https://marc.info/?l=linux-sparse&m=151871725417322
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index 79ad2bfa2..8d9a7374c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -388,7 +388,7 @@ PYTHON		= python
+ CHECK		= sparse
+ 
+ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
+-		  -Wbitwise -Wno-return-void $(CF)
++		  -Wbitwise -Wno-return-void -Wno-unknown-attribute $(CF)
+ NOSTDINC_FLAGS  =
+ CFLAGS_MODULE   =
+ AFLAGS_MODULE   =
+-- 
+2.16.0
+
