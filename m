@@ -1,53 +1,41 @@
-From: Christopher Li <sparse@chrisli.org>
-Subject: Re: [RFC PATCH 0/2] drop the concept of 'known-but-ignored' attributes
-Date: Thu, 15 Feb 2018 12:06:06 -0800
-Message-ID: <CANeU7Qm7VZc07HkQJwg-uj98D-uz5XJB7MQHqOD86jbtYAa_5g@mail.gmail.com>
-References: <20180213232109.20933-1-luc.vanoostenryck@gmail.com>
- <20180215155724.GB1882@localhost> <CA+55aFyWiRtNu+KK3h15hsy7Wt6VXK9ex3+gtJWbcqJ3WtyDrg@mail.gmail.com>
- <20180215195351.ugvy6eqv2lcxdbbn@ltop.local>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] sparse: ignore indirect_branch attribute
+Date: Thu, 15 Feb 2018 21:42:27 +0100
+Message-ID: <20180215204225.kexgsqbcuvkwhpva@ltop.local>
+References: <c97d360f-a0d2-8c0d-b951-e064843ff4d8@infradead.org>
+ <20180213221245.2ylhdtqdf4c5qmog@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-qk0-f169.google.com ([209.85.220.169]:36398 "EHLO
-        mail-qk0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1162691AbeBOUGJ (ORCPT
+Received: from mail-wm0-f54.google.com ([74.125.82.54]:39790 "EHLO
+        mail-wm0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1161186AbeBOUma (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 15 Feb 2018 15:06:09 -0500
-Received: by mail-qk0-f169.google.com with SMTP id 15so1147310qkl.3
-        for <linux-sparse@vger.kernel.org>; Thu, 15 Feb 2018 12:06:08 -0800 (PST)
-In-Reply-To: <20180215195351.ugvy6eqv2lcxdbbn@ltop.local>
+        Thu, 15 Feb 2018 15:42:30 -0500
+Received: by mail-wm0-f54.google.com with SMTP id b21so3210893wme.4
+        for <linux-sparse@vger.kernel.org>; Thu, 15 Feb 2018 12:42:29 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20180213221245.2ylhdtqdf4c5qmog@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Josh Triplett <josh@joshtriplett.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Lance Richardson <lrichard@redhat.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Randy Dunlap <rdunlap@infradead.org>, Rui Teng <rui.teng@linux.vnet.ibm.com>
+To: Randy Dunlap <rdunlap@infradead.org>
+Cc: Linux-Sparse <linux-sparse@vger.kernel.org>
 
-On Thu, Feb 15, 2018 at 11:53 AM, Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->> So I do think the warning itself should be off by default - but maybe
->> the "known but ignored" table should exist so that sparse people can
->> say "is there a new attribute that I need to look at"?
->
-> Yes, I think that the off by default is a clear thing.
-> For the table, yes, I sort of agree with you and Josh at some level
-> but in practice I don't think it will be of any help. There is
-> already a number of attributes (and builtins) sparse *should* act on
-> (for attributes, I'm thinking to 'noreturn', for example) but haven't
-> and this for a long time already. I also think that once the warning
-> will be off by default, the table won't be updated anymore.
+On Tue, Feb 13, 2018 at 11:12:47PM +0100, Luc Van Oostenryck wrote:
+> On Tue, Feb 13, 2018 at 01:52:54PM -0800, Randy Dunlap wrote:
+> > From: Randy Dunlap <rdunlap@infradead.org>
+> > 
+> > Teach sparse about the "indirect_branch" attribute as used in
+> > Linux kernel:
+> > #define __noretpoline __attribute__((indirect_branch("keep")))
+> > and tell sparse to ignore it.
+> > 
+> > This eliminates over 148K warnings (which also cause the
+> > 0day bot to send error reports uselessly).
 
-I agree with the default should be turn off for kernel checking
-to reduce the noise.
+FWIW, I've pushed this to my stable tree:
+	https://github.com/lucvoo/sparse 
+	git://github.com/lucvoo/sparse.git
+together with a patch making '-Wunknown-attribute' off by default.
 
-The known attribute table does have some usage. If the developer are
-writing sparse related checking, he might want to know if he misspell
-some sparse specific attribute. The other case is that, some sparse
-specific attribute is not implement in this version of sparse. It might
-be useful to know.
-
-In this case, the developer can turn this warning on to catch if
-there is misspell of the "adress_space" attribute for example.
-
-I suggest change default on off, but keep the warning option if
-some one want to turn it on.
-
-Chris
+-- Luc
