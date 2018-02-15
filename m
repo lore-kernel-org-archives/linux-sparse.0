@@ -1,44 +1,31 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: [PATCH 0/2] fix missing evaluation when using '-include <file>'
-Date: Wed, 14 Feb 2018 16:00:42 -0800
-Message-ID: <c4fc5ede-354e-e8db-92a6-232431c764d9@infradead.org>
-References: <CAHmME9o02YNvfqV3RFofJE8FXwRaUACzq03TBADSYc74E02iBg@mail.gmail.com>
- <20170917100552.72288-1-luc.vanoostenryck@gmail.com>
- <CAHmME9ofqdqwUsjmk9TSutFMOFGqstJo1rLuO7VOiC-OCRErGA@mail.gmail.com>
- <CAExDi1Qwc7MSRdDNAURFZNp3SLhWHaC0PKMfgpjVxeC3ZP8S+A@mail.gmail.com>
- <CAExDi1ST5ddB5Ti4rTOCdXsihc=xsuZ6riPAqvFCotrNmjUrUQ@mail.gmail.com>
- <CAHmME9qREfXRQb3ORwd7nyN2E-OTANRKpyirc6FkMON6T8fLOw@mail.gmail.com>
- <20180210200237.a4xmiyppshy5bbbk@ltop.local>
- <CANeU7QkhZix7xj4_pskyPUXSsSLX1qpXU98rJTf1BBBbxvCnXg@mail.gmail.com>
- <20180214000243.263hmp3puro4h4q3@ltop.local>
- <CAHmME9r9xfzFb02H_E8Ri_tTY9mO-cWBFxrxifZLTYQ_KVvDgQ@mail.gmail.com>
+From: Josh Triplett <josh@joshtriplett.org>
+Subject: Re: [RFC PATCH 0/2] drop the concept of 'known-but-ignored'
+ attributes
+Date: Thu, 15 Feb 2018 07:57:25 -0800
+Message-ID: <20180215155724.GB1882@localhost>
+References: <20180213232109.20933-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from bombadil.infradead.org ([198.137.202.133]:39878 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1031901AbeBOAAp (ORCPT
+Received: from relay2-d.mail.gandi.net ([217.70.183.194]:50163 "EHLO
+        relay2-d.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1424912AbeBOP5e (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 14 Feb 2018 19:00:45 -0500
-In-Reply-To: <CAHmME9r9xfzFb02H_E8Ri_tTY9mO-cWBFxrxifZLTYQ_KVvDgQ@mail.gmail.com>
-Content-Language: en-US
+        Thu, 15 Feb 2018 10:57:34 -0500
+Content-Disposition: inline
+In-Reply-To: <20180213232109.20933-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: "Jason A. Donenfeld" <Jason@zx2c4.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, Lance Richardson <lrichard@redhat.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Randy Dunlap <rdunlap@infradead.org>, Rui Teng <rui.teng@linux.vnet.ibm.com>, Christopher Li <sparse@chrisli.org>
 
-On 02/14/2018 04:15 AM, Jason A. Donenfeld wrote:
-> Hi Christopher,
-> 
-> Could you apply those two patches, and then afterwards, cut a 0.5.2 release?
-> 
-> Thanks,
-> Jason
+On Wed, Feb 14, 2018 at 12:21:07AM +0100, Luc Van Oostenryck wrote:
+> The goal of this series is to drop the concept of
+> 'known-but-ignored' attributes which, for a semantic
+> checker like sparse, adds absolutely no added value
+> but bring endless annoyances.
 
-It would be useful for continuous kernel build bots to have the
-"ignore indirect_branch attribute" patch as well.
-
-thanks,
--- 
-~Randy
+I absolutely agree that these have been annoying. However, they've also
+been useful in the past to identify new flags used in the kernel and
+other projects that we may need to actually act on, rather than just
+ignore.
