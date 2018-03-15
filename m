@@ -1,18 +1,13 @@
-From: Thomas Garnier via Virtualization
-	<virtualization@lists.linux-foundation.org>
-Subject: Re: [PATCH v2 06/27] x86/entry/64: Adapt assembly for PIE support
-Date: Wed, 14 Mar 2018 17:09:37 +0000
-Message-ID: <CAJcbSZHz9c-W4ZEVFVn3Fepj9Tau6YzDdcvxAQdK5Aw-8S6Jzg@mail.gmail.com>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH v2 00/27] x86: PIE support and option to extend KASLR
+	randomization
+Date: Thu, 15 Mar 2018 09:48:36 +0100
+Message-ID: <20180315084836.GA15953@amd>
 References: <20180313205945.245105-1-thgarnie@google.com>
-	<20180313205945.245105-7-thgarnie@google.com>
-	<20180314102951.GQ4043@hirez.programming.kicks-ass.net>
-	<alpine.DEB.2.20.1803141051210.14471@nuc-kabylake>
-Reply-To: Thomas Garnier <thgarnie@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/mixed; boundary="===============2098409007256012406=="
 Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <alpine.DEB.2.20.1803141051210.14471@nuc-kabylake>
+In-Reply-To: <20180313205945.245105-1-thgarnie@google.com>
 List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
 	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
 List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
@@ -22,89 +17,67 @@ List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualizati
 	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
 Sender: virtualization-bounces@lists.linux-foundation.org
 Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Christoph Lameter <cl@linux.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Michal Hocko <mhocko@suse.com>, Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, Petr Mladek <pmladek@suse.com>, Len Brown <len.brown@intel.com>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, Dave Hansen <dave.hansen@linux.intel.com>, the arch/x86 maintainers <x86@kernel.org>, Dominik Brodowski <linux@dominikbrodowski.net>, LKML <linux-kernel@vger.kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Pavel Machek <pavel@ucw.cz>, "H . Peter Anvin" <hpa@zytor.com>, Kernel Hardening <kernel-hardening@lists.openwall.com>, Jiri Slaby <jslaby@suse.cz>, Alok Kataria <akataria@vmware.com>, Linux Doc Mailing List <linux-doc@vger.kernel.org>, linux-arch <linux-arch@vger.kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, Baoquan He <bhe@redhat.c>
+To: Thomas Garnier <thgarnie@google.com>
+Cc: Kate Stewart <kstewart@linuxfoundation.org>, Nicolas Pitre <nicolas.pitre@linaro.org>, Michal Hocko <mhocko@suse.com>, Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, Petr Mladek <pmladek@suse.com>, Len Brown <len.brown@intel.com>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org, Dominik Brodowski <linux@dominikbrodowski.net>, linux-kernel@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, "H . Peter Anvin" <hpa@zytor.com>, kernel-hardening@lists.openwall.com, Christoph Lameter <cl@linux.com>, Jiri Slaby <jslaby@suse.cz>, Alok Kataria <akataria@vmware.com>, linux-doc@vger.kernel.org, linux-arch@vger.kernel.org, Herbert Xu <herbert@gondor.apana.org.au>, Baoquan He <bhe@redhat.com>, Jonathan Corbet <corbet@lwn.net>, Boris Ostrovsky <boris.ostrovsky@oracle.com>, Ra
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Mar 14, 2018 at 8:55 AM Christopher Lameter <cl@linux.com> wrote:
+
+--===============2098409007256012406==
+Content-Type: multipart/signed; micalg=pgp-sha1;
+	protocol="application/pgp-signature"; boundary="0OAP2g/MAC+5xKAE"
+Content-Disposition: inline
 
 
+--0OAP2g/MAC+5xKAE
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
 
-> On Wed, 14 Mar 2018, Peter Zijlstra wrote:
+Hi!
 
-> > On Tue, Mar 13, 2018 at 01:59:24PM -0700, Thomas Garnier wrote:
-> > > @@ -1576,7 +1578,9 @@ first_nmi:
-> > >     addq    $8, (%rsp)      /* Fix up RSP */
-> > >     pushfq                  /* RFLAGS */
-> > >     pushq   $__KERNEL_CS    /* CS */
-> > > -   pushq   $1f             /* RIP */
-> > > +   pushq   %rax            /* Support Position Independent Code */
-> > > +   leaq    1f(%rip), %rax  /* RIP */
-> > > +   xchgq   %rax, (%rsp)    /* Restore RAX, put 1f */
-> > >     iretq                   /* continues at repeat_nmi below */
-> > >     UNWIND_HINT_IRET_REGS
-> > >  1:
-> >
-> > Urgh, xchg with a memop has an implicit LOCK prefix.
+> These patches make the changes necessary to build the kernel as Position
+> Independent Executable (PIE) on x86_64. A PIE kernel can be relocated bel=
+ow
+> the top 2G of the virtual address space. It allows to optionally extend t=
+he
+> KASLR randomization range from 1G to 3G.
 
-> this_cpu_xchg uses no lock cmpxchg as a replacement to reduce latency.
+Would you explain why PIE code is good idea?
 
-Great, I will update my implementation.
+You are adding less than 2 bits of randomness. Cost is new config
+option, some size and performance impact, and more than 1000 lines of
+code...
 
-Thanks Peter and Christoph.
+Is there some grand plan of adding 30 more bits of randomness with
+future patch or something?
+									Pavel
+--=20
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
+g.html
 
+--0OAP2g/MAC+5xKAE
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
->  From linux/arch/x86/include/asm/percpu.h
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-> /*
->   * xchg is implemented using cmpxchg without a lock prefix. xchg is
->   * expensive due to the implied lock prefix.  The processor cannot
-prefetch
->   * cachelines if xchg is used.
->   */
-> #define percpu_xchg_op(var, nval)                                       \
-> ({                                                                      \
->          typeof(var) pxo_ret__;                                          \
->          typeof(var) pxo_new__ = (nval);                                 \
->          switch (sizeof(var)) {                                          \
->          case 1:                                                         \
->                  asm("\n\tmov "__percpu_arg(1)",%%al"                    \
->                      "\n1:\tcmpxchgb %2, "__percpu_arg(1)                \
->                      "\n\tjnz 1b"                                        \
->                              : "=&a" (pxo_ret__), "+m" (var)             \
->                              : "q" (pxo_new__)                           \
->                              : "memory");                                \
->                  break;                                                  \
->          case 2:                                                         \
->                  asm("\n\tmov "__percpu_arg(1)",%%ax"                    \
->                      "\n1:\tcmpxchgw %2, "__percpu_arg(1)                \
->                      "\n\tjnz 1b"                                        \
->                              : "=&a" (pxo_ret__), "+m" (var)             \
->                              : "r" (pxo_new__)                           \
->                              : "memory");                                \
->                  break;                                                  \
->          case 4:                                                         \
->                  asm("\n\tmov "__percpu_arg(1)",%%eax"                   \
->                      "\n1:\tcmpxchgl %2, "__percpu_arg(1)                \
->                      "\n\tjnz 1b"                                        \
->                              : "=&a" (pxo_ret__), "+m" (var)             \
->                              : "r" (pxo_new__)                           \
->                              : "memory");                                \
->                  break;                                                  \
->          case 8:                                                         \
->                  asm("\n\tmov "__percpu_arg(1)",%%rax"                   \
->                      "\n1:\tcmpxchgq %2, "__percpu_arg(1)                \
->                      "\n\tjnz 1b"                                        \
->                              : "=&a" (pxo_ret__), "+m" (var)             \
->                              : "r" (pxo_new__)                           \
->                              : "memory");                                \
->                  break;                                                  \
->          default: __bad_percpu_size();                                   \
->          }                                                               \
->          pxo_ret__;                                                      \
+iEYEARECAAYFAlqqM2QACgkQMOfwapXb+vIPUQCgiwtu3igz+Mea6JgZEWaFBEa4
+DdUAn1zcqcTDjpsItrwfFnQZ9XU/fRNQ
+=OpfY
+-----END PGP SIGNATURE-----
 
+--0OAP2g/MAC+5xKAE--
 
+--===============2098409007256012406==
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
 
-
--- 
-Thomas
+_______________________________________________
+Virtualization mailing list
+Virtualization@lists.linux-foundation.org
+https://lists.linuxfoundation.org/mailman/listinfo/virtualization
+--===============2098409007256012406==--
