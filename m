@@ -1,17 +1,17 @@
-From: Andrey Ryabinin <aryabinin@virtuozzo.com>
+From: Andrey Konovalov <andreyknvl@google.com>
 Subject: Re: [RFC PATCH v2 13/15] khwasan: add hooks implementation
-Date: Wed, 4 Apr 2018 15:39:50 +0300
-Message-ID: <0c4397da-e231-0044-986f-b8468314be76@virtuozzo.com>
+Date: Wed, 4 Apr 2018 19:00:35 +0200
+Message-ID: <CAAeHK+xmCLe85_QNDam_BVTp9wVzjxgvko2+0JapJCzmciGa5g@mail.gmail.com>
 References: <cover.1521828273.git.andreyknvl@google.com>
  <ba4a74ba1bc48dd66a3831143c3119d13c291fe3.1521828274.git.andreyknvl@google.com>
  <805d1e85-2d3c-2327-6e6c-f14a56dc0b67@virtuozzo.com>
  <CAAeHK+yg5ODeDy7k9fako5mcCLLnBrO729Zp_-UtDuzh3hZgZA@mail.gmail.com>
+ <0c4397da-e231-0044-986f-b8468314be76@virtuozzo.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="us-ascii"
 Content-Transfer-Encoding: 7bit
 Return-path: <kvmarm-bounces@lists.cs.columbia.edu>
-In-Reply-To: <CAAeHK+yg5ODeDy7k9fako5mcCLLnBrO729Zp_-UtDuzh3hZgZA@mail.gmail.com>
-Content-Language: en-US
+In-Reply-To: <0c4397da-e231-0044-986f-b8468314be76@virtuozzo.com>
 List-Unsubscribe: <https://lists.cs.columbia.edu/mailman/options/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=unsubscribe>
 List-Archive: <https://lists.cs.columbia.edu/pipermail/kvmarm>
@@ -21,93 +21,53 @@ List-Subscribe: <https://lists.cs.columbia.edu/mailman/listinfo/kvmarm>,
  <mailto:kvmarm-request@lists.cs.columbia.edu?subject=subscribe>
 Errors-To: kvmarm-bounces@lists.cs.columbia.edu
 Sender: kvmarm-bounces@lists.cs.columbia.edu
-To: Andrey Konovalov <andreyknvl@google.com>
+To: Andrey Ryabinin <aryabinin@virtuozzo.com>
 Cc: Julien Thierry <julien.thierry@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Christopher Li <sparse@chrisli.org>, Tyler Baicar <tbaicar@codeaurora.org>, Will Deacon <will.deacon@arm.com>, Paul Lawrence <paullawrence@google.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Yury Norov <ynorov@caviumnetworks.com>, Alexander Potapenko <glider@google.com>, Christoph Lameter <cl@linux.com>, Michael Weiser <michael.weiser@gmx.de>, Ingo Molnar <mingo@kernel.org>, Herbert Xu <herbert@gondor.apana.org.au>, Jonathan Corbet <corbet@lwn.net>, linux-doc@vger.kernel.org, Mark Brand <markbrand@google.com>, kasan-dev <kasan-dev@googlegroups.com>, kvmarm@lists.cs.columbia.edu, linux-sparse@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, David Rientjes <rientjes@google.com>, Ramana Radhakrishnan <Ramana.Radhakrishna>
 List-Id: linux-sparse@vger.kernel.org
 
-On 04/03/2018 05:59 PM, Andrey Konovalov wrote:
+On Wed, Apr 4, 2018 at 2:39 PM, Andrey Ryabinin <aryabinin@virtuozzo.com> wrote:
+>>>
+>>> You can save tag somewhere in page struct and make page_address() return tagged address.
+>>>
+>>> I'm not sure it might be even possible to squeeze the tag into page->flags on some configurations,
+>>> see include/linux/page-flags-layout.h
+>>
+>> One page can contain multiple objects with different tags, so we would
+>> need to save the tag for each of them.
+>
+> What do you mean? Slab page? The per-page tag is needed only for !PageSlab pages.
+> For slab pages we have kmalloc/kmem_cache_alloc() which already return properly tagged address.
+>
+> But the page allocator returns a pointer to struct page. One has to call page_address(page)
+> to use that page. Returning 'ignore-me'-tagged address from page_address() makes the whole
+> class of bugs invisible to KHWASAN. This is a serious downside comparing to classic KASAN which can
+> detect missuses of page allocator API.
 
->>
->>
->>>  void check_memory_region(unsigned long addr, size_t size, bool write,
->>>                               unsigned long ret_ip)
->>>  {
->>> +     u8 tag;
->>> +     u8 *shadow_first, *shadow_last, *shadow;
->>> +     void *untagged_addr;
->>> +
->>> +     tag = get_tag((const void *)addr);
->>> +
->>> +     /* Ignore accesses for pointers tagged with 0xff (native kernel
->>> +      * pointer tag) to suppress false positives caused by kmap.
->>> +      *
->>> +      * Some kernel code was written to account for archs that don't keep
->>> +      * high memory mapped all the time, but rather map and unmap particular
->>> +      * pages when needed. Instead of storing a pointer to the kernel memory,
->>> +      * this code saves the address of the page structure and offset within
->>> +      * that page for later use. Those pages are then mapped and unmapped
->>> +      * with kmap/kunmap when necessary and virt_to_page is used to get the
->>> +      * virtual address of the page. For arm64 (that keeps the high memory
->>> +      * mapped all the time), kmap is turned into a page_address call.
->>> +
->>> +      * The issue is that with use of the page_address + virt_to_page
->>> +      * sequence the top byte value of the original pointer gets lost (gets
->>> +      * set to 0xff.
->>> +      */
->>> +     if (tag == 0xff)
->>> +             return;
->>
->> You can save tag somewhere in page struct and make page_address() return tagged address.
->>
->> I'm not sure it might be even possible to squeeze the tag into page->flags on some configurations,
->> see include/linux/page-flags-layout.h
-> 
-> One page can contain multiple objects with different tags, so we would
-> need to save the tag for each of them.
+Yes, slab page. Here's an example:
 
-What do you mean? Slab page? The per-page tag is needed only for !PageSlab pages.
-For slab pages we have kmalloc/kmem_cache_alloc() which already return properly tagged address.
+1. do_get_write_access() allocates frozen_buffer with jbd2_alloc,
+which calls kmem_cache_alloc, and then saves the result to
+jh->b_frozen_data.
 
-But the page allocator returns a pointer to struct page. One has to call page_address(page)
-to use that page. Returning 'ignore-me'-tagged address from page_address() makes the whole
-class of bugs invisible to KHWASAN. This is a serious downside comparing to classic KASAN which can
-detect missuses of page allocator API.
+2. jbd2_journal_write_metadata_buffer() takes the value of
+jh_in->b_frozen_data and calls virt_to_page() (and offset_in_page())
+on it.
 
+3. jbd2_journal_write_metadata_buffer() then calls kmap_atomic(),
+which calls page_address(), on the resulting page address.
 
+The tag gets erased. The page belongs to slab and can contain multiple
+objects with different tags.
 
+>>> I don't see any possible way of khwasan_enabled being 0 here.
 >>
->>
->>>  void *kasan_slab_alloc(struct kmem_cache *cache, void *object, gfp_t flags)
->>>  {
->>> +     if (!READ_ONCE(khwasan_enabled))
->>> +             return object;
->>
->> ...
->>
->>>  void *kasan_kmalloc(struct kmem_cache *cache, const void *object,
->>>                       size_t size, gfp_t flags)
->>>  {
->>
->>> +     if (!READ_ONCE(khwasan_enabled))
->>> +             return (void *)object;
->>> +
->>
->> ...
->>
->>>  void *kasan_kmalloc_large(const void *ptr, size_t size, gfp_t flags)
->>>  {
->>
->> ...
->>
->>> +
->>> +     if (!READ_ONCE(khwasan_enabled))
->>> +             return (void *)ptr;
->>> +
->>
->> I don't see any possible way of khwasan_enabled being 0 here.
-> 
-> Can't kmem_cache_alloc be called for the temporary caches that are
-> used before the slab allocator and kasan are initialized?
+>> Can't kmem_cache_alloc be called for the temporary caches that are
+>> used before the slab allocator and kasan are initialized?
+>
+> kasan_init() runs before allocators are initialized.
+> slab allocator obviously has to be initialized before it can be used.
 
-kasan_init() runs before allocators are initialized.
-slab allocator obviously has to be initialized before it can be used.
+Checked the code, it seems you are right. Boot caches are created
+after kasan_init() is called. I will remove khwasan_enabled.
+
+Thanks!
