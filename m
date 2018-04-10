@@ -1,62 +1,56 @@
 From: Joey Pabalinas <joeypabalinas@gmail.com>
 Subject: Re: [PATCH v3] sparse: add -Wpointer-arith flag to toggle
  sizeof(void) warnings
-Date: Tue, 10 Apr 2018 12:09:44 -1000
-Message-ID: <20180410220944.vnpzmugf5xbdsnpl@gmail.com>
+Date: Tue, 10 Apr 2018 12:25:23 -1000
+Message-ID: <20180410222523.6vart7pch3zkhywq@gmail.com>
 References: <20180410010204.qeudkkru4jilun3v@gmail.com>
  <20180410194117.ei4eo3kaxvv2ezdx@ltop.local>
+ <20180410220944.vnpzmugf5xbdsnpl@gmail.com>
 Mime-Version: 1.0
 Content-Type: multipart/signed; micalg=pgp-sha256;
-        protocol="application/pgp-signature"; boundary="uuv24zrkmtttto3j"
+        protocol="application/pgp-signature"; boundary="ruzuhg4w35nttn6s"
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180410194117.ei4eo3kaxvv2ezdx@ltop.local>
+In-Reply-To: <20180410220944.vnpzmugf5xbdsnpl@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Joey Pabalinas <joeypabalinas@gmail.com>, linux-sparse@vger.kernel.org, Kees Cook <keescook@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Martin Uecker <Martin.Uecker@med.uni-goettingen.de>, Al Viro <viro@ZenIV.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
+To: Joey Pabalinas <joeypabalinas@gmail.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org, Kees Cook <keescook@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Martin Uecker <Martin.Uecker@med.uni-goettingen.de>, Al Viro <viro@ZenIV.linux.org.uk>, Christopher Li <sparse@chrisli.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
 
 
---uuv24zrkmtttto3j
+--ruzuhg4w35nttn6s
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
 Content-Transfer-Encoding: quoted-printable
 
-On Tue, Apr 10, 2018 at 09:41:19PM +0200, Luc Van Oostenryck wrote:
-> Thank you very much.
->=20
-> There is just a problem with the test but it's my fault as I
-> pointed to you to my tree but the master tree lack a lot of fixes
-> and have problems when dereferencing function pointers.
-> So, for the master tree, I propose to use a version with these
-> tests removed:
-> 	git://github.com/lucvoo/sparse-dev.git pointer-arith-v3
+On Tue, Apr 10, 2018 at 12:09:44PM -1000, Joey Pabalinas wrote:
+> Not a problem; I will rebase it on the v0.5.2-rc1 tag and
+> take out the function pointer test-case.
 
-Not a problem; I will rebase it on the v0.5.2-rc1 tag and
-take out the function pointer test-case.
+Sorry, I meant v0.5.2, heh. Sending the v4 now.
 
 --=20
 Cheers,
 Joey Pabalinas
 
---uuv24zrkmtttto3j
+--ruzuhg4w35nttn6s
 Content-Type: application/pgp-signature; name="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQIzBAEBCAAdFiEEKlZXrihdNOcUPZTNruvLfWhyVBkFAlrNNigACgkQruvLfWhy
-VBkyDxAAh5rSE9rwBu5Qe35V2SM8oPxZ7lo50mLDX6wKNYD2lXg7WYgT1jhtk6J1
-CjrxPnO5KtpFGDO0dr9g1gMf1NQ8CcgeLRcIL+FN4jM1vdDozcvOod0AgOg1wNQP
-95oboPSHBPvWFcUPPP/Wjm8KJKez23dfJwGVoIDX9e3LvXtN3Pc3igr0fLkQC2uP
-jDDQvRJ5kzdR+S2qDjmvEv2ueiaE3GWPsoDjVt4JCWVGrMsens6kh5VY9Rz+IuND
-PeLUOGmFBXZDNrfwSRVIIXavpbs5YdSbYzBPsIEWjtto4I1YBkWCHBAUFlvAg5l5
-FmE/ESxmKY4z/5JvGmP6soZU/mt19P6LQe8nr2l1MPaPbKIabsUUp48mGG2cF542
-cJi9XpgJzMr6Ltq0d2ZKANCZJ3sUNSYUfUX7k2oS119b8kJa3wOIvJmL8JzmkOp0
-EXKxnE3A10DGSv6bLIO1JfJmLzYlavEFS2MS8ww0pRR2SJ3cCAgEewJMhSo/jDWD
-8paMMaA3SvnePUJpWv7RZa3vdFzjC2nPp49L6vsjlHbaVzMDjTMAbQe3Zne6tsKe
-UXwt+mgIuGDzw5EZ0j0OuQSza30Je0Gkwu4JhLBd46/DO+bkn3cF5tXvXvXLAfm/
-SlJGIti2WgQ308iCO755dsusUGWhnkVLAEs5mAsFncQ+ZhQ+ZVc=
-=cweM
+iQIzBAEBCAAdFiEEKlZXrihdNOcUPZTNruvLfWhyVBkFAlrNOdMACgkQruvLfWhy
+VBkDIRAAj3RUdUdyzgqORR6/UZYK8uAmF+Kh9kABNhPEuM4vXEDeWoNraZjW7rl9
+UpTb7ctIxwf4m6oi/XzoeLuVKGjW53jsnPwOLidzPh+uq1P4tVr4Wx9201e3elWt
+I8hc/f1FuMgMB7BDx1IOK64Hy3EfRcFPIfAcVNM1GitKfwt5I+gxIH5W/bHbi2bq
+daXqfYf7gq9PyYXfICONfWevZYucZZNBeDMaaomEHf09F2GoZ3TmsTUgD1ROlh9t
+QgksPOOGqTKO/YviMI7CVM2+YOQhjZ8+bU2G7dkbi8u+nLxbldZpIckFgDUIcXKV
+/VLfzzCl5ldpPmsLMMrg/x6rQpcoBrdNk9+4VV9D41qkYP08cwHwtDzavAc9Lts9
++lwHWjzmE0yCA3IwUqrvRPd/iroet7rn+kqKt8tT0tobgN8dGRkz/b/vaBIqJaCC
+c5oBw9zOZNFCzlTK/isM/qgkEWZBa3b+XATxFh83CJep8hYBIddX4u6ZKUTVIDwK
+j4mOPd5lgPqj7DGHD1LOMeLr5yGGWMe1YCawr+OYjsQTva8aLWffqwsTQOECEVNL
+HPZS3nl5qBUk/pW4AWuQDITz8nTGETSl1zbbo6r6UEldCBHBGCnk9nGCRsPBVWUZ
+u5O+14K4iGf/gWwrfvzTkYTtXGua8EEsUkljBXnClt+GdM7Uvo4=
+=vSny
 -----END PGP SIGNATURE-----
 
---uuv24zrkmtttto3j--
+--ruzuhg4w35nttn6s--
