@@ -1,122 +1,105 @@
-From: Thiebaud Weksteen <tweek@google.com>
-Subject: Re: [PATCH v2 1/4] tpm: Add explicit endianness cast
-Date: Tue, 24 Apr 2018 09:57:58 +0000
-Message-ID: <CA+zpnLeJ_aKnmiQaOwRERj43uAFSaJQsWnSKJVzsJJB0VW-52w@mail.gmail.com>
-References: <20180412101350.210547-1-tweek@google.com> <20180412101350.210547-2-tweek@google.com>
- <20180417030202.GA30624@ziepe.ca> <CA+zpnLdU=t6eOY9GOLAyiXkZBw=NueckiejHSexd8P7MKYuRww@mail.gmail.com>
- <20180417140013.GA2029@ziepe.ca> <CA+zpnLePcFJQURBNZEt=mRSRb9GUYR=1t9EQn82W0+311xKZ7w@mail.gmail.com>
- <20180420145740.GC30433@ziepe.ca> <CA+zpnLcSDTz99Z4fe4CGxH6RzTGvQCoGqQc4p_EMOj9=cuFQgg@mail.gmail.com>
- <20180423100629.effueb6i7q3hmhu3@ltop.local>
+From: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: Bug#873508: sparse test failures on ppc32le (and other not so common archs)
+Date: Fri, 27 Apr 2018 07:56:38 +0200
+Message-ID: <779a85fe-0691-0f8b-c70a-85df449003bc@kleine-koenig.org>
+References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org> <150392922734.24087.13050909898214597041.reportbug@curie.anarc.at>
+Reply-To: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, 873508@bugs.debian.org
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180423100629.effueb6i7q3hmhu3@ltop.local>
-Sender: linux-kernel-owner@vger.kernel.org
-To: luc.vanoostenryck@gmail.com
-Cc: jgg@ziepe.ca, Christopher Li <sparse@chrisli.org>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, Nayna Jain <nayna@linux.vnet.ibm.com>, linux-integrity@vger.kernel.org, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org, josh@joshtriplett.org
+Content-Type: multipart/signed; micalg=pgp-sha512;
+ protocol="application/pgp-signature";
+ boundary="WLXmqMhZeba6Qul5ZUkRV91CafJW6Xy3r"
+Return-path: <bounce-debian-bugs-dist=glddb-debian-bugs-dist2=m.gmane.org@lists.debian.org>
+Resent-To: debian-bugs-dist@lists.debian.org
+Resent-Message-ID: <handler.873508.B873508.15248090707116@bugs.debian.org>
+In-Reply-To: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
+List-URL: <https://lists.debian.org/debian-bugs-dist/>
+List-Post: <mailto:debian-bugs-dist@lists.debian.org>
+List-Help: <mailto:debian-bugs-dist-request@lists.debian.org?subject=help>
+List-Subscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=subscribe>
+List-Unsubscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=unsubscribe>
+To: linux-sparse@vger.kernel.org
+Cc: 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Apr 23, 2018 at 12:06 PM Luc Van Oostenryck <
-luc.vanoostenryck@gmail.com> wrote:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--WLXmqMhZeba6Qul5ZUkRV91CafJW6Xy3r
+Content-Type: multipart/mixed; boundary="tsP6BUa2VIKFdNzk4p3BcdmG7zdZL89V8";
+ protected-headers="v1"
+From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
+To: linux-sparse@vger.kernel.org
+Cc: 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
+Message-ID: <779a85fe-0691-0f8b-c70a-85df449003bc@kleine-koenig.org>
+Subject: Re: sparse test failures on ppc32le (and other not so common archs)
+References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
+In-Reply-To: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org>
 
-> On Mon, Apr 23, 2018 at 09:22:06AM +0000, Thiebaud Weksteen wrote:
-> > On Fri, Apr 20, 2018 at 4:57 PM Jason Gunthorpe <jgg@ziepe.ca> wrote:
-> >
-> > > On Thu, Apr 19, 2018 at 01:09:12PM +0000, Thiebaud Weksteen wrote:
-> > > > On Tue, Apr 17, 2018 at 4:00 PM Jason Gunthorpe <jgg@ziepe.ca>
-wrote:
-> > > >
-> > > > > On Tue, Apr 17, 2018 at 08:32:33AM +0000, Thiebaud Weksteen wrote:
-> > > > > > On Tue, Apr 17, 2018 at 5:02 AM Jason Gunthorpe <jgg@ziepe.ca>
-> > wrote:
-> > > > > >
-> > > > > > > On Thu, Apr 12, 2018 at 12:13:47PM +0200, Thiebaud Weksteen
-wrote:
-> > > > > > > > Signed-off-by: Thiebaud Weksteen <tweek@google.com>
-> > > > > > > >  drivers/char/tpm/tpm_eventlog_of.c | 4 ++--
-> > > > > > > >  1 file changed, 2 insertions(+), 2 deletions(-)
-> > > > > > > >
-> > > > > > > > diff --git a/drivers/char/tpm/tpm_eventlog_of.c
-> > > > > > b/drivers/char/tpm/tpm_eventlog_of.c
-> > > > > > > > index 96fd5646f866..d74568d58a66 100644
-> > > > > > > > +++ b/drivers/char/tpm/tpm_eventlog_of.c
-> > > > > > > > @@ -56,8 +56,8 @@ int tpm_read_log_of(struct tpm_chip *chip)
-> > > > > > > >        * but physical tpm needs the conversion.
-> > > > > > > >        */
-> > > > > > > >       if (of_property_match_string(np, "compatible",
-> > "IBM,vtpm") <
-> > > > 0) {
-> > > > > > > > -             size = be32_to_cpup(sizep);
-> > > > > > > > -             base = be64_to_cpup(basep);
-> > > > > > > > +             size = be32_to_cpup((__be32 *)sizep);
-> > > > > > > > +             base = be64_to_cpup((__be64 *)basep);
-> > > > > >
-> > > > > > > Er, no.. change the definitions of sizep and basep to be __be
-> > > > > >
-> > > > > > > Jason
-> > > > > >
-> > > > > > Please read the comment before the condition. sizep and
-> > > > > > basep may contain either little endian or big endian and this
-block
-> > is
-> > > > used
-> > > > > > to adjust that. Let me know if there is a better way for
-handling
-> > this.
-> > > >
-> > > > > Well a cast like that will throw sparse warnings, you need
-__force at
-> > > > > least
-> > > >
-> > > > I don't think so. Since the variable is only defined as u32*, no
-> > specific
-> > > > warning is generated. I've used `make C=2 drivers/char/tpm/` with
-this
-> > > > patch applied and no new warning is being triggered.
+--tsP6BUa2VIKFdNzk4p3BcdmG7zdZL89V8
+Content-Type: text/plain; charset=windows-1252
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-> Interesting.
+Hello,
 
-> > > I'm surprised to hear you say that..
+On 08/30/2017 06:14 PM, Uwe Kleine-K=F6nig wrote:
+> Antoine Beaupre (on Cc:) noticed that sparse doesn't work on some not s=
+o
+> common architectures like ppc32le, s390x, ppc64 and sparc64[1]. This is=
 
-> Same for me.
+> nicely catched by the testsuite, e.g.:
+>
+> [..]
 
-> > > Sparse is supposed to require force on all cast that change the
-> > > annotation, and there are many examples in the kernel that have force
-> > > in that case.
+Just a heads up: I uploaded 0.5.2 to Debian and there are problems left
+on hurd-i386 (where PATH_MAX isn't defined[1]) and x32 where I get:
+
+	env CHECK=3D./sparse ./cgcc -no-compile memops.c
+	/usr/include/x86_64-linux-gnux32/gnu/stubs.h:10:12: error: unable to
+open 'gnu/stubs-64.h'
+
+The stubs.h file looks as follows:
+
+#if !defined __x86_64__
+# include <gnu/stubs-32.h>
+#endif
+#if defined __x86_64__ && defined __LP64__
+# include <gnu/stubs-64.h>
+#endif
+#if defined __x86_64__ && defined __ILP32__
+# include <gnu/stubs-x32.h>
+#endif
+
+Given that libc6-dev only provides stubs-x32.h from these three, I guess
+we must not define __LP64__ in this case. I don't have a x32 machine
+handy, but the complete build log of the auto builder can be found at
+
+	https://buildd.debian.org/status/fetch.php?pkg=3Dsparse&arch=3Dx32&ver=3D=
+0.5.2-1&stamp=3D1524169455&raw=3D0
+
+Best regards
+Uwe
+
+[1]
+https://buildd.debian.org/status/fetch.php?pkg=3Dsparse&arch=3Dhurd-i386&=
+ver=3D0.5.2-1&stamp=3D1524168405&raw=3D0
 
 
-> Yes, sparse is supposed to warn in such cases and the __force is there
-> to quiets the warning when it is known that the cast is in fact correct.
+--tsP6BUa2VIKFdNzk4p3BcdmG7zdZL89V8--
 
+--WLXmqMhZeba6Qul5ZUkRV91CafJW6Xy3r
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-> > +linux-sparse@vger.kernel.org and sparse@chrisli.org for a sanity check.
-> >
-> > If you look at the man page of sparse, under the bitwise option, it
-states:
-> > "Sparse will warn on [...] any conversion of one restricted type into
-> > another, except via a cast that includes __attribute__((force)).". In
-our
-> > case, it is a conversion from unrestricted to restricted which does not
-> > fall in this category.
+-----BEGIN PGP SIGNATURE-----
 
-> The man page is not very clear here. It must be understood in the context
-> where each use of '__bitwise' will create a new *distinct* type.
-> Given this and the normal type checking, sparse should warn
-> "on any conversion of one restricted type into another *or* between a
-> restricted and the corresponding plain/unrestricted type" (or consider
-> that an 'unrestricted type' is 'a restricted type with no restriction',
-> which is, I think, what was meant here).
+iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlriu5oACgkQwfwUeK3K
+7AmZbQgAj3Lz4vAS4R0U3MOcnssT2J7L5ILB8oNGusTKFCZ9FnsB5T1nSRaEYRcp
+3VlnvBCwaZHYvTQrJzrgzSldz+8hCH2pq2jFMPzRn4UpISDeDRnCGwa4mT3kkedB
+ad6T/uqO/fLaSmaulzreorNXBBZjj4TQjWvmrE5ouYOL8TxGUDy3vqTbL8AmofhW
+bollSehIo02bWhRahgO6dw9rsQvjUM/NHsVI5rHT6NxDVk0aaqufqJJv6rZR1bI6
+KZbz6Oh7kWTzCGsiN5ewzUk5dCfuiNSQzSlfUkgQYrksb8fNGtqzXD5Wd/tYfCG6
+irh3NsQHWKnZTy051DKAI1QUfiCGFg==
+=izKD
+-----END PGP SIGNATURE-----
 
-
-Thanks for the explanation, that make sense. I believe the issue happens
-when dealing with restricted pointer types more than regular types. Also,
-this is not new and has probably been going on for the last 13 years. For
-instance, 81179bb6a54c2c626b4cbcc084ca974bb2d7f2a3 explicitly removed the
-__force attribute. I'll send a validation patch for sparse and update this
-patch.
-
-> The fact that sparse doesn't warn in your case is clearly a bug in
-> sparse's type checking.
-
-> Regards,
-> -- Luc Van Oostenryck
+--WLXmqMhZeba6Qul5ZUkRV91CafJW6Xy3r--
