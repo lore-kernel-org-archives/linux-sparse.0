@@ -1,51 +1,90 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Bug#873508: sparse test failures & PATH_MAX
-Date: Fri, 27 Apr 2018 18:11:11 +0200
-Message-ID: <20180427161110.3apj6vx4q2imbm3e@ltop.local>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org> <779a85fe-0691-0f8b-c70a-85df449003bc@kleine-koenig.org> <20180427073258.ga6i5maalktyukxu@ltop.local> <fffc3da7-186a-62d2-f1ef-1a6e95d4d613@kleine-koenig.org> <150392922734.24087.13050909898214597041.reportbug@curie.anarc.at>
-Reply-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 873508@bugs.debian.org
+From: Nadav Amit <namit@vmware.com>
+Subject: [RFC 1/8] x86: objtool: use asm macro for better compiler decisions
+Date: Tue, 15 May 2018 07:11:08 -0700
+Message-ID: <20180515141124.84254-2-namit@vmware.com>
+References: <20180515141124.84254-1-namit@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <bounce-debian-bugs-dist=glddb-debian-bugs-dist2=m.gmane.org@lists.debian.org>
-Resent-To: debian-bugs-dist@lists.debian.org
-Resent-Message-ID: <handler.873508.B873508.152484547729093@bugs.debian.org>
-Content-Disposition: inline
-In-Reply-To: <fffc3da7-186a-62d2-f1ef-1a6e95d4d613@kleine-koenig.org>
-List-URL: <https://lists.debian.org/debian-bugs-dist/>
-List-Post: <mailto:debian-bugs-dist@lists.debian.org>
-List-Help: <mailto:debian-bugs-dist-request@lists.debian.org?subject=help>
-List-Subscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=subscribe>
-List-Unsubscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=unsubscribe>
-To: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-Cc: linux-sparse@vger.kernel.org, 873508@bugs.debian.org, Antoine Beaupre <anarcat@debian.org>
+Content-Type: text/plain
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180515141124.84254-1-namit@vmware.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org
+Cc: nadav.amit@gmail.com, Nadav Amit <namit@vmware.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Apr 27, 2018 at 09:33:55AM +0200, Uwe Kleine-König wrote:
-> On 04/27/2018 09:33 AM, Luc Van Oostenryck wrote:
-> > On Fri, Apr 27, 2018 at 07:56:38AM +0200, Uwe Kleine-König wrote:
-> >> Hello,
-> >>
-> >>> [..]
-> >>
-> >> Just a heads up: I uploaded 0.5.2 to Debian and there are problems left
-> >> on hurd-i386 (where PATH_MAX isn't defined[1])
-> >> ...
-> >> [1]
-> >> https://buildd.debian.org/status/fetch.php?pkg=sparse&arch=hurd-i386&ver=0.5.2-1&stamp=1524168405&raw=0
-> > 
-> > Thanks for the repport.
-> > I'll see what can be done.
-> 
-> I think the default idiom is:
-> 
-> #ifndef PATH_MAX
-> #define PATH_MAX 4096
-> #endif
+GCC considers the number of statements in inlined assembly blocks,
+according to new-lines and semicolons, as an indication to the cost of
+the block in time and space. This data is distorted by the kernel code,
+which puts information in alternative sections. As a result, the
+compiler may perform incorrect inlining and branch optimizations.
 
-Yes.
-I had hoped to avoid this together with removing a memcpy() but things are
-more annoying than I had first thought.
+In the case of objtool, this distortion is extreme, since anyhow the
+annotations of objtool are discarded during linkage.
 
-Best regards,
--- Luc
+The solution is to set an assembly macro and call it from the inlinedv
+assembly block. As a result GCC considers the inline assembly block as
+a single instruction.
+
+This patch slightly increases the kernel size.
+
+   text    data     bss     dec     hex filename
+18126699 10066728 2936832 31130259 1db0293 ./vmlinux before
+18126824 10067268 2936832 31130924 1db052c ./vmlinux after (+665)
+
+But allows more aggressive inlining. Static text symbols:
+Before: 40033
+After: 40015 (-18)
+
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
+
+Signed-off-by: Nadav Amit <namit@vmware.com>
+---
+ include/linux/compiler.h | 29 +++++++++++++++++++++--------
+ 1 file changed, 21 insertions(+), 8 deletions(-)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index ab4711c63601..369753000541 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -98,17 +98,30 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+  * The __COUNTER__ based labels are a hack to make each instance of the macros
+  * unique, to convince GCC not to merge duplicate inline asm statements.
+  */
++
++asm ("\n"
++	".macro __annotate_reachable counter:req\n"
++	"\\counter:\n\t"
++	".pushsection .discard.reachable\n\t"
++	".long \\counter\\()b -.\n\t"
++	".popsection\n"
++	".endm\n");
++
+ #define annotate_reachable() ({						\
+-	asm volatile("%c0:\n\t"						\
+-		     ".pushsection .discard.reachable\n\t"		\
+-		     ".long %c0b - .\n\t"				\
+-		     ".popsection\n\t" : : "i" (__COUNTER__));		\
++	asm volatile("__annotate_reachable %c0" : : "i" (__COUNTER__));	\
+ })
++
++asm ("\n"
++	".macro __annotate_unreachable counter:req\n"
++	"\\counter:\n\t"
++	".pushsection .discard.unreachable\n\t"
++	".long \\counter\\()b -.\n\t"
++	".popsection\n"
++	".endm");
++
+ #define annotate_unreachable() ({					\
+-	asm volatile("%c0:\n\t"						\
+-		     ".pushsection .discard.unreachable\n\t"		\
+-		     ".long %c0b - .\n\t"				\
+-		     ".popsection\n\t" : : "i" (__COUNTER__));		\
++	asm volatile("__annotate_unreachable %c0" : :			\
++		     "i" (__COUNTER__));				\
+ })
+ #define ASM_UNREACHABLE							\
+ 	"999:\n\t"							\
+-- 
+2.17.0
