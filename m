@@ -1,32 +1,94 @@
 From: Nadav Amit <namit@vmware.com>
-Subject: Re: [RFC 0/8] Improving compiler inlining decisions
-Date: Wed, 16 May 2018 04:30:19 +0000
-Message-ID: <03B86732-8D0B-40A7-B09C-5823104E631F@vmware.com>
-References: <20180515141124.84254-1-namit@vmware.com>
- <20180516034802.nuf7ft65nvtgc65j@treble>
+Subject: [PATCH 0/6] Macrofying inline assembly for better compilation
+Date: Thu, 17 May 2018 09:13:56 -0700
+Message-ID: <20180517161402.78089-1-namit@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180516034802.nuf7ft65nvtgc65j@treble>
-Content-Language: en-US
-Content-ID: <41EF0C5E06A1F24B953A2126074DC072@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Josh Poimboeuf <jpoimboe@redhat.com>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Jonathan Corbet <corbet@lwn.net>, Juergen Gross <jgross@suse.com>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, "x86@kernel.org" <x86@kernel.org>
+To: linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: nadav.amit@gmail.com, Nadav Amit <namit@vmware.com>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Jonathan Corbet <corbet@lwn.net>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.linux-foundation.org
 List-Id: linux-sparse@vger.kernel.org
 
-Josh Poimboeuf <jpoimboe@redhat.com> wrote:
+This patch-set deals with an interesting yet stupid problem: kernel code
+that does not get inlined despite its simplicity. There are several
+causes for this behavior: "cold" attribute on __init, different function
+optimization levels; conditional constant computations based on
+__builtin_constant_p(); and finally large inline assembly blocks.
 
-> On Tue, May 15, 2018 at 07:11:07AM -0700, Nadav Amit wrote:
->> This patch-set deals with an interesting yet stupid problem: code that
->> does not get inlined despite its simplicity.
->=20
-> I got the 0/8 patch twice, and didn't get the 1/8 patch.  Was there an
-> issue with the sending of the patches?
+This patch-set deals with the inline assembly problem. I separated these
+patches from the others (that were sent in the RFC) for easier
+inclusion.
 
-Strange. I am not sure why it happened. Anyhow 1/8 is available here:
-https://lkml.org/lkml/2018/5/15/961 . I will forward it to you.
+The problem with inline assembly is that inline assembly is often used
+by the kernel for things that are other than code - for example,
+assembly directives and data. GCC however is oblivious to the content of
+the blocks and assumes their cost in space and time is proportional to
+the number of the perceived assembly "instruction", according to the
+number of newlines and semicolons. Alternatives, paravirt and other
+mechanisms are affected, causing code not to be inlined, and degrading
+compilation quality in general.
 
-Thanks,
-Nadav
+The solution that this patch-set carries for this problem is to create
+an assembly macro, and then call it from the inline assembly block.  As
+a result, the compiler sees a single "instruction" and assigns the more
+appropriate cost to the code. In addition, this patch-set removes
+unneeded new-lines from common x86 inline asm's, which "confuse" GCC
+heuristics.
+
+Overall this patch-set slightly increases the kernel size (my build was
+done using my localmodconfig + localyesconfig for the record):
+
+   text    data     bss     dec     hex filename
+18126699 10066728 2936832 31130259 1db0293 ./vmlinux before
+18148888 10064016 2936832 31149736 1db4ea8 ./vmlinux after (+0.06%)
+
+The patch-set eliminates many of the static text symbols:
+Before: 40033
+After:	39650	(-1%)
+
+A microbenchmark with a loop of page-fault and MADV_DONTNEED show 2%
+performance improvement with this patch-set (when PTI is off).
+
+Changes from RFC:
+- Better formatting [Jan]
+- i386 build problems [0-day]
+- Inline comments
+- Separating __builtin_constant_p() into a different future patch-set
+
+Cc: Alok Kataria <akataria@vmware.com>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Jan Beulich <JBeulich@suse.com>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Juergen Gross <jgross@suse.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: linux-sparse@vger.kernel.org
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Randy Dunlap <rdunlap@infradead.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: virtualization@lists.linux-foundation.org
+Cc: x86@kernel.org
+
+Nadav Amit (6):
+  x86: objtool: use asm macro for better compiler decisions
+  x86: bug: prevent gcc distortions
+  x86: alternative: macrofy locks for better inlining
+  x86: prevent inline distortion by paravirt ops
+  x86: refcount: prevent gcc distortions
+  x86: removing unneeded new-lines
+
+ arch/x86/include/asm/alternative.h    | 34 +++++++++++----
+ arch/x86/include/asm/asm.h            |  4 +-
+ arch/x86/include/asm/bug.h            | 56 ++++++++++++++++--------
+ arch/x86/include/asm/cmpxchg.h        | 10 ++---
+ arch/x86/include/asm/paravirt_types.h | 63 +++++++++++++++++----------
+ arch/x86/include/asm/refcount.h       | 62 ++++++++++++++++----------
+ arch/x86/include/asm/special_insns.h  | 12 ++---
+ include/linux/compiler.h              | 37 ++++++++++++----
+ 8 files changed, 183 insertions(+), 95 deletions(-)
+
+-- 
+2.17.0
