@@ -1,47 +1,62 @@
-From: David Laight <David.Laight@ACULAB.COM>
-Subject: RE: [PATCH 0/6] Macrofying inline assembly for better compilation
-Date: Fri, 18 May 2018 09:20:40 +0000
-Message-ID: <8737d8d4c7e84c47938e9b1aaeae16b9@AcuMS.aculab.com>
+From: Nadav Amit <namit@vmware.com>
+Subject: Re: [PATCH 0/6] Macrofying inline assembly for better compilation
+Date: Fri, 18 May 2018 14:15:38 +0000
+Message-ID: <4F1E3042-CF9A-423C-BDB2-80ACD1B98488@vmware.com>
 References: <20180517161402.78089-1-namit@vmware.com>
+ <8737d8d4c7e84c47938e9b1aaeae16b9@AcuMS.aculab.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 8BIT
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180517161402.78089-1-namit@vmware.com>
+In-Reply-To: <8737d8d4c7e84c47938e9b1aaeae16b9@AcuMS.aculab.com>
 Content-Language: en-US
+Content-ID: <15A30C300624144496C77D6FAE6DF4F0@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: 'Nadav Amit' <namit@vmware.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>
-Cc: "nadav.amit@gmail.com" <nadav.amit@gmail.com>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Jonathan Corbet <corbet@lwn.net>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>
+To: David Laight <David.Laight@ACULAB.COM>
+Cc: "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Jonathan Corbet <corbet@lwn.net>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Randy Dunlap <rdunlap@infradead.org>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-From: Nadav Amit
-> Sent: 17 May 2018 17:14
-> This patch-set deals with an interesting yet stupid problem: kernel code
-> that does not get inlined despite its simplicity. There are several
-> causes for this behavior: "cold" attribute on __init, different function
-> optimization levels; conditional constant computations based on
-> __builtin_constant_p(); and finally large inline assembly blocks.
-> 
-> This patch-set deals with the inline assembly problem. I separated these
-> patches from the others (that were sent in the RFC) for easier
-> inclusion.
-> 
-> The problem with inline assembly is that inline assembly is often used
-> by the kernel for things that are other than code - for example,
-> assembly directives and data. GCC however is oblivious to the content of
-> the blocks and assumes their cost in space and time is proportional to
-> the number of the perceived assembly "instruction", according to the
-> number of newlines and semicolons. Alternatives, paravirt and other
-> mechanisms are affected, causing code not to be inlined, and degrading
-> compilation quality in general.
-> 
-> The solution that this patch-set carries for this problem is to create
-> an assembly macro, and then call it from the inline assembly block.  As
-> a result, the compiler sees a single "instruction" and assigns the more
-> appropriate cost to the code. In addition, this patch-set removes
-> unneeded new-lines from common x86 inline asm's, which "confuse" GCC
-> heuristics.
-
-Can't you get the same effect by using always_inline ?
-
-	David
+RGF2aWQgTGFpZ2h0IDxEYXZpZC5MYWlnaHRAQUNVTEFCLkNPTT4gd3JvdGU6DQoNCj4gRnJvbTog
+TmFkYXYgQW1pdA0KPj4gU2VudDogMTcgTWF5IDIwMTggMTc6MTQNCj4+IFRoaXMgcGF0Y2gtc2V0
+IGRlYWxzIHdpdGggYW4gaW50ZXJlc3RpbmcgeWV0IHN0dXBpZCBwcm9ibGVtOiBrZXJuZWwgY29k
+ZQ0KPj4gdGhhdCBkb2VzIG5vdCBnZXQgaW5saW5lZCBkZXNwaXRlIGl0cyBzaW1wbGljaXR5LiBU
+aGVyZSBhcmUgc2V2ZXJhbA0KPj4gY2F1c2VzIGZvciB0aGlzIGJlaGF2aW9yOiAiY29sZCIgYXR0
+cmlidXRlIG9uIF9faW5pdCwgZGlmZmVyZW50IGZ1bmN0aW9uDQo+PiBvcHRpbWl6YXRpb24gbGV2
+ZWxzOyBjb25kaXRpb25hbCBjb25zdGFudCBjb21wdXRhdGlvbnMgYmFzZWQgb24NCj4+IF9fYnVp
+bHRpbl9jb25zdGFudF9wKCk7IGFuZCBmaW5hbGx5IGxhcmdlIGlubGluZSBhc3NlbWJseSBibG9j
+a3MuDQo+PiANCj4+IFRoaXMgcGF0Y2gtc2V0IGRlYWxzIHdpdGggdGhlIGlubGluZSBhc3NlbWJs
+eSBwcm9ibGVtLiBJIHNlcGFyYXRlZCB0aGVzZQ0KPj4gcGF0Y2hlcyBmcm9tIHRoZSBvdGhlcnMg
+KHRoYXQgd2VyZSBzZW50IGluIHRoZSBSRkMpIGZvciBlYXNpZXINCj4+IGluY2x1c2lvbi4NCj4+
+IA0KPj4gVGhlIHByb2JsZW0gd2l0aCBpbmxpbmUgYXNzZW1ibHkgaXMgdGhhdCBpbmxpbmUgYXNz
+ZW1ibHkgaXMgb2Z0ZW4gdXNlZA0KPj4gYnkgdGhlIGtlcm5lbCBmb3IgdGhpbmdzIHRoYXQgYXJl
+IG90aGVyIHRoYW4gY29kZSAtIGZvciBleGFtcGxlLA0KPj4gYXNzZW1ibHkgZGlyZWN0aXZlcyBh
+bmQgZGF0YS4gR0NDIGhvd2V2ZXIgaXMgb2JsaXZpb3VzIHRvIHRoZSBjb250ZW50IG9mDQo+PiB0
+aGUgYmxvY2tzIGFuZCBhc3N1bWVzIHRoZWlyIGNvc3QgaW4gc3BhY2UgYW5kIHRpbWUgaXMgcHJv
+cG9ydGlvbmFsIHRvDQo+PiB0aGUgbnVtYmVyIG9mIHRoZSBwZXJjZWl2ZWQgYXNzZW1ibHkgImlu
+c3RydWN0aW9uIiwgYWNjb3JkaW5nIHRvIHRoZQ0KPj4gbnVtYmVyIG9mIG5ld2xpbmVzIGFuZCBz
+ZW1pY29sb25zLiBBbHRlcm5hdGl2ZXMsIHBhcmF2aXJ0IGFuZCBvdGhlcg0KPj4gbWVjaGFuaXNt
+cyBhcmUgYWZmZWN0ZWQsIGNhdXNpbmcgY29kZSBub3QgdG8gYmUgaW5saW5lZCwgYW5kIGRlZ3Jh
+ZGluZw0KPj4gY29tcGlsYXRpb24gcXVhbGl0eSBpbiBnZW5lcmFsLg0KPj4gDQo+PiBUaGUgc29s
+dXRpb24gdGhhdCB0aGlzIHBhdGNoLXNldCBjYXJyaWVzIGZvciB0aGlzIHByb2JsZW0gaXMgdG8g
+Y3JlYXRlDQo+PiBhbiBhc3NlbWJseSBtYWNybywgYW5kIHRoZW4gY2FsbCBpdCBmcm9tIHRoZSBp
+bmxpbmUgYXNzZW1ibHkgYmxvY2suICBBcw0KPj4gYSByZXN1bHQsIHRoZSBjb21waWxlciBzZWVz
+IGEgc2luZ2xlICJpbnN0cnVjdGlvbiIgYW5kIGFzc2lnbnMgdGhlIG1vcmUNCj4+IGFwcHJvcHJp
+YXRlIGNvc3QgdG8gdGhlIGNvZGUuIEluIGFkZGl0aW9uLCB0aGlzIHBhdGNoLXNldCByZW1vdmVz
+DQo+PiB1bm5lZWRlZCBuZXctbGluZXMgZnJvbSBjb21tb24geDg2IGlubGluZSBhc20ncywgd2hp
+Y2ggImNvbmZ1c2UiIEdDQw0KPj4gaGV1cmlzdGljcy4NCj4gDQo+IENhbid0IHlvdSBnZXQgdGhl
+IHNhbWUgZWZmZWN0IGJ5IHVzaW5nIGFsd2F5c19pbmxpbmUgPw0KDQpJIHdhbnRlZCBhbmQgZm9y
+Z290IHRvIG1lbnRpb24gaW4gdGhlIGNvdmVyLWxldHRlciB3aHkgYWx3YXlzX2lubGluZSBpcyBu
+b3QNCmEgcHJvcGVyIHNvbHV0aW9uOg0KDQoxLiBJdCBpcyBub3QgZWFzeSB0byBnbyBvdmVyIDQw
+MCBmdW5jdGlvbnMgYW5kIG1hcmsgdGhlbSBhcyBfX2Fsd2F5c19pbmxpbmUuDQogICBNYWludGFp
+bmluZyBpdCBhZnRlcndhcmRzIChpLmUuLCByZW1vdmluZyB0aGUgX19hbHdheXNfaW5saW5lIGlm
+IHRoZQ0KICAgZnVuY3Rpb24gaXMgY2hhbmdlZCBhbmQgYmVjb21lcyDigJxoZWF2aWVyIikgaXMg
+ZXZlbiBoYXJkZXIuDQoNCjIuIFRoZSBrZXJuZWwgY2FuIGJlIGNvbmZpZ3VyZWQgaW4gYSBtYW55
+IHdheXMsIHdoaWNoIHdvdWxkIG1ha2UNCiAgIGZ1bmN0aW9ucyBtb3JlIOKAnGNoZWFwZXLigJ0g
+b3IgbW9yZSDigJxleHBlbnNpdmXigJ0sIHNvIHlvdSBjYW5ub3QgYWx3YXlzDQogICBwcmVkZXRl
+cm1pbmUgd2hldGhlciBhIGZ1bmN0aW9uIHNob3VsZCBiZSBpbmxpbmVkLg0KDQozLiBJZiB5b3Ug
+bWFyayBhIGZ1bmN0aW9uIF9fYWx3YXlzX2lubGluZSB5b3UgY2FuIGp1c3QgY2F1c2UgdGhlIGNh
+bGxpbmcNCiAgIGZ1bmN0aW9uIG5vdCB0byBiZSBpbmxpbmVkICh3aGVuIGl0IHNob3VsZCBiZSBp
+bmxpbmVkIGFzIHdlbGwpLiBJdCBiZWNvbWVzDQogICBhIHdoYWNrLWEtbW9sZS4NCg0KNC4gSXQg
+aXMgbm90IG9ubHkgYWJvdXQgaW5saW5pbmcuIFRoZSBjb21waWxlciBhbHNvIG1ha2VzIGJyYW5j
+aCBkZWNpc2lvbnMNCiAgIGJhc2VkIG9uIHRoZSBwZXJjZWl2ZWQgY29zdCBvZiB0aGUgY29kZSwg
+aW5jbHVkaW5nIGlubGluZWQgZnVuY3Rpb24uDQoNClJlZ2FyZHMsDQpOYWRhdg0KDQo=
