@@ -1,205 +1,220 @@
-From: Thomas Garnier via Virtualization
-	<virtualization@lists.linux-foundation.org>
-Subject: [PATCH v4 00/27] x86: PIE support and option to extend KASLR
-	randomization
-Date: Tue, 29 May 2018 15:15:01 -0700
-Message-ID: <20180529221625.33541-1-thgarnie@google.com>
-Reply-To: Thomas Garnier <thgarnie@google.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
+From: Thomas Garnier <thgarnie@google.com>
+Subject: [PATCH v4 15/27] compiler: Option to default to hidden symbols
+Date: Tue, 29 May 2018 15:15:16 -0700
+Message-ID: <20180529221625.33541-16-thgarnie@google.com>
+References: <20180529221625.33541-1-thgarnie@google.com>
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180529221625.33541-1-thgarnie@google.com>
+Sender: linux-kernel-owner@vger.kernel.org
 To: kernel-hardening@lists.openwall.com
-Cc: Nicolas Pitre <nicolas.pitre@linaro.org>, Sergey Senozhatsky <sergey.senozhatsky.work@gmail.com>, Jan Kiszka <jan.kiszka@siemens.com>, Paolo Bonzini <pbonzini@redhat.com>, Pavel Machek <pavel@ucw.cz>, Christoph Lameter <cl@linux.com>, linux-arch@vger.kernel.org, linux-sparse@vger.kernel.org, Matthias Kaehlcke <mka@chromium.org>, xen-devel@lists.xenproject.org, Petr Mladek <pmladek@suse.com>, linux-pm@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>, Cao jin <caoj.fnst@cn.fujitsu.com>, Andy Lutomirski <luto@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, nixiaoming <nixiaoming@huawei.com>, Skip Jiri Kosina <jkosina@suse.cz>, Randy Dunlap <rdunlap@infradead.org>, "Rafael J. Wysocki" <rjw@rjwysocki.net>, linux-kernel@vger.kernel.org, Jia Zhang <qianyue.zj@alibaba-inc.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>, linux-crypto@vger.kernel.org, Greg Kroah-Hartman <gre>
+Cc: Thomas Garnier <thgarnie@google.com>, Skip Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Skip Frederic Weisbecker <frederic@kernel.org>, Skip Dominik Brodowski <linux@dominikbrodowski.net>, Skip Nicholas Piggin <npiggin@gmail.com>, Skip Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Borislav Petkov <bp@alien8.de>, "Luis R. Rodriguez" <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Arnd Bergmann <arnd@arndb.de>, Christopher Li <sparse@chrisli.org>, Steven Rostedt <rostedt@goodmis.org>, Jason Baron <jbaron@akamai.com>, Dou Liyang <douly.fnst@cn.fujitsu.com>, Lukas Wunner <lukas@wunner.de>"Paul E. McKenney" <p>
 List-Id: linux-sparse@vger.kernel.org
 
-Changes:
- - patch v4:
-   - Simplify early boot by removing global variables.
-   - Modify the mcount location script for __mcount_loc intead of the address
-     read in the ftrace implementation.
-   - Edit commit description to explain better where the kernel can be located.
-   - Streamlined the testing done on each patch proposal. Always testing
-     hibernation, suspend, ftrace and kprobe to ensure no regressions.
- - patch v3:
-   - Update on message to describe longer term PIE goal.
-   - Minor change on ftrace if condition.
-   - Changed code using xchgq.
- - patch v2:
-   - Adapt patch to work post KPTI and compiler changes
-   - Redo all performance testing with latest configs and compilers
-   - Simplify mov macro on PIE (MOVABS now)
-   - Reduce GOT footprint
- - patch v1:
-   - Simplify ftrace implementation.
-   - Use gcc mstack-protector-guard-reg=%gs with PIE when possible.
- - rfc v3:
-   - Use --emit-relocs instead of -pie to reduce dynamic relocation space on
-     mapped memory. It also simplifies the relocation process.
-   - Move the start the module section next to the kernel. Remove the need for
-     -mcmodel=large on modules. Extends module space from 1 to 2G maximum.
-   - Support for XEN PVH as 32-bit relocations can be ignored with
-     --emit-relocs.
-   - Support for GOT relocations previously done automatically with -pie.
-   - Remove need for dynamic PLT in modules.
-   - Support dymamic GOT for modules.
- - rfc v2:
-   - Add support for global stack cookie while compiler default to fs without
-     mcmodel=kernel
-   - Change patch 7 to correctly jump out of the identity mapping on kexec load
-     preserve.
+Provide an option to default visibility to hidden except for key
+symbols. This option is disabled by default and will be used by x86_64
+PIE support to remove errors between compilation units.
 
-These patches make the changes necessary to build the kernel as Position
-Independent Executable (PIE) on x86_64. A PIE kernel can be relocated below
-the top 2G of the virtual address space. It allows to optionally extend the
-KASLR randomization range from 1G to 3G. The chosen range is the one currently
-available, future changes will allow the kernel module to have a wider
-randomization range.
+The default visibility is also enabled for external symbols that are
+compared as they maybe equals (start/end of sections). In this case,
+older versions of GCC will remove the comparison if the symbols are
+hidden. This issue exists at least on gcc 4.9 and before.
 
-Thanks a lot to Ard Biesheuvel & Kees Cook on their feedback on compiler
-changes, PIE support and KASLR in general. Thanks to Roland McGrath on his
-feedback for using -pie versus --emit-relocs and details on compiler code
-generation.
+Signed-off-by: Thomas Garnier <thgarnie@google.com>
+---
+ arch/x86/boot/boot.h                 |  2 +-
+ arch/x86/include/asm/setup.h         |  2 +-
+ arch/x86/kernel/cpu/microcode/core.c |  4 ++--
+ drivers/base/firmware_loader/main.c  |  4 ++--
+ include/asm-generic/sections.h       |  6 ++++++
+ include/linux/compiler.h             |  7 +++++++
+ init/Kconfig                         |  7 +++++++
+ kernel/kallsyms.c                    | 16 ++++++++--------
+ kernel/trace/trace.h                 |  4 ++--
+ lib/dynamic_debug.c                  |  4 ++--
+ 10 files changed, 38 insertions(+), 18 deletions(-)
 
-The patches:
- - 1-3, 5-13, 18-19: Change in assembly code to be PIE compliant.
- - 4: Add a new _ASM_MOVABS macro to fetch a symbol address generically.
- - 14: Adapt percpu design to work correctly when PIE is enabled.
- - 15: Provide an option to default visibility to hidden except for key symbols.
-       It removes errors between compilation units.
- - 16: Add PROVIDE_HIDDEN replacement on the linker script for weak symbols to
-       reduce GOT footprint.
- - 17: Adapt relocation tool to handle PIE binary correctly.
- - 20: Add support for global cookie.
- - 21: Support ftrace with PIE (used on Ubuntu config).
- - 22: Add option to move the module section just after the kernel.
- - 23: Adapt module loading to support PIE with dynamic GOT.
- - 24: Make the GOT read-only.
- - 25: Add the CONFIG_X86_PIE option (off by default).
- - 26: Adapt relocation tool to generate a 64-bit relocation table.
- - 27: Add the CONFIG_RANDOMIZE_BASE_LARGE option to increase relocation range
-       from 1G to 3G (off by default).
-
-Performance/Size impact:
-
-Size of vmlinux (Default configuration):
- File size:
- - PIE disabled: +0.18%
- - PIE enabled: -1.977% (less relocations)
- .text section:
- - PIE disabled: same
- - PIE enabled: same
-
-Size of vmlinux (Ubuntu configuration):
- File size:
- - PIE disabled: +0.21%
- - PIE enabled: +10%
- .text section:
- - PIE disabled: same
- - PIE enabled: +0.001%
-
-The size increase is mainly due to not having access to the 32-bit signed
-relocation that can be used with mcmodel=kernel. A small part is due to reduced
-optimization for PIE code. This bug [1] was opened with gcc to provide a better
-code generation for kernel PIE.
-
-Hackbench (50% and 1600% on thread/process for pipe/sockets):
- - PIE disabled: no significant change (avg -/+ 0.5% on latest test).
- - PIE enabled: between -1% to +1% in average (default and Ubuntu config).
-
-Kernbench (average of 10 Half and Optimal runs):
- Elapsed Time:
- - PIE disabled: no significant change (avg -0.5%)
- - PIE enabled: average -0.5% to +0.5%
- System Time:
- - PIE disabled: no significant change (avg -0.1%)
- - PIE enabled: average -0.4% to +0.4%.
-
-[1] https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82303
-
-diffstat:
- Documentation/x86/x86_64/mm.txt              |    3 
- arch/x86/Kconfig                             |   45 ++++++
- arch/x86/Makefile                            |   58 ++++++++
- arch/x86/boot/boot.h                         |    2 
- arch/x86/boot/compressed/Makefile            |    5 
- arch/x86/boot/compressed/misc.c              |   10 +
- arch/x86/crypto/aes-x86_64-asm_64.S          |   45 ++++--
- arch/x86/crypto/aesni-intel_asm.S            |    8 -
- arch/x86/crypto/aesni-intel_avx-x86_64.S     |    6 
- arch/x86/crypto/camellia-aesni-avx-asm_64.S  |   42 +++---
- arch/x86/crypto/camellia-aesni-avx2-asm_64.S |   44 +++---
- arch/x86/crypto/camellia-x86_64-asm_64.S     |    8 -
- arch/x86/crypto/cast5-avx-x86_64-asm_64.S    |   50 ++++---
- arch/x86/crypto/cast6-avx-x86_64-asm_64.S    |   44 +++---
- arch/x86/crypto/des3_ede-asm_64.S            |   96 +++++++++-----
- arch/x86/crypto/ghash-clmulni-intel_asm.S    |    4 
- arch/x86/crypto/glue_helper-asm-avx.S        |    4 
- arch/x86/crypto/glue_helper-asm-avx2.S       |    6 
- arch/x86/crypto/sha256-avx2-asm.S            |   23 ++-
- arch/x86/entry/calling.h                     |    2 
- arch/x86/entry/entry_32.S                    |    3 
- arch/x86/entry/entry_64.S                    |   25 ++-
- arch/x86/include/asm/asm.h                   |    1 
- arch/x86/include/asm/bug.h                   |    2 
- arch/x86/include/asm/ftrace.h                |    4 
- arch/x86/include/asm/jump_label.h            |    8 -
- arch/x86/include/asm/kvm_host.h              |    8 -
- arch/x86/include/asm/module.h                |   11 +
- arch/x86/include/asm/page_64_types.h         |    9 +
- arch/x86/include/asm/paravirt_types.h        |   12 +
- arch/x86/include/asm/percpu.h                |   25 ++-
- arch/x86/include/asm/pgtable_64_types.h      |    6 
- arch/x86/include/asm/pm-trace.h              |    2 
- arch/x86/include/asm/processor.h             |   16 +-
- arch/x86/include/asm/sections.h              |    8 +
- arch/x86/include/asm/setup.h                 |    2 
- arch/x86/include/asm/stackprotector.h        |   19 ++
- arch/x86/kernel/Makefile                     |    6 
- arch/x86/kernel/acpi/wakeup_64.S             |   31 ++--
- arch/x86/kernel/asm-offsets.c                |    3 
- arch/x86/kernel/asm-offsets_32.c             |    3 
- arch/x86/kernel/asm-offsets_64.c             |    3 
- arch/x86/kernel/cpu/common.c                 |    3 
- arch/x86/kernel/cpu/microcode/core.c         |    4 
- arch/x86/kernel/ftrace.c                     |   42 +++++-
- arch/x86/kernel/head64.c                     |   23 ++-
- arch/x86/kernel/head_32.S                    |    3 
- arch/x86/kernel/head_64.S                    |   31 +++-
- arch/x86/kernel/kvm.c                        |    6 
- arch/x86/kernel/module.c                     |  181 ++++++++++++++++++++++++++-
- arch/x86/kernel/module.lds                   |    3 
- arch/x86/kernel/process.c                    |    5 
- arch/x86/kernel/relocate_kernel_64.S         |   16 +-
- arch/x86/kernel/setup_percpu.c               |    5 
- arch/x86/kernel/vmlinux.lds.S                |   13 +
- arch/x86/kvm/svm.c                           |    4 
- arch/x86/lib/cmpxchg16b_emu.S                |    8 -
- arch/x86/mm/dump_pagetables.c                |    3 
- arch/x86/power/hibernate_asm_64.S            |    4 
- arch/x86/tools/relocs.c                      |  169 +++++++++++++++++++++++--
- arch/x86/tools/relocs.h                      |    4 
- arch/x86/tools/relocs_common.c               |   15 +-
- arch/x86/xen/xen-asm.S                       |   12 -
- arch/x86/xen/xen-head.S                      |   11 -
- arch/x86/xen/xen-pvh.S                       |   13 +
- drivers/base/firmware_loader/main.c          |    4 
- include/asm-generic/sections.h               |    6 
- include/asm-generic/vmlinux.lds.h            |   12 +
- include/linux/compiler.h                     |    7 +
- init/Kconfig                                 |   16 ++
- kernel/kallsyms.c                            |   16 +-
- kernel/trace/trace.h                         |    4 
- lib/dynamic_debug.c                          |    4 
- scripts/link-vmlinux.sh                      |   14 ++
- scripts/recordmcount.c                       |   79 +++++++----
- 75 files changed, 1109 insertions(+), 343 deletions(-)
+diff --git a/arch/x86/boot/boot.h b/arch/x86/boot/boot.h
+index ef5a9cc66fb8..d726c35bdd96 100644
+--- a/arch/x86/boot/boot.h
++++ b/arch/x86/boot/boot.h
+@@ -193,7 +193,7 @@ static inline bool memcmp_gs(const void *s1, addr_t s2, size_t len)
+ }
+ 
+ /* Heap -- available for dynamic lists. */
+-extern char _end[];
++extern char _end[] __default_visibility;
+ extern char *HEAP;
+ extern char *heap_end;
+ #define RESET_HEAP() ((void *)( HEAP = _end ))
+diff --git a/arch/x86/include/asm/setup.h b/arch/x86/include/asm/setup.h
+index ae13bc974416..083a6e99b884 100644
+--- a/arch/x86/include/asm/setup.h
++++ b/arch/x86/include/asm/setup.h
+@@ -68,7 +68,7 @@ static inline void x86_ce4100_early_setup(void) { }
+  * This is set up by the setup-routine at boot-time
+  */
+ extern struct boot_params boot_params;
+-extern char _text[];
++extern char _text[] __default_visibility;
+ 
+ static inline bool kaslr_enabled(void)
+ {
+diff --git a/arch/x86/kernel/cpu/microcode/core.c b/arch/x86/kernel/cpu/microcode/core.c
+index 77e201301528..6a4f5d9d7eb6 100644
+--- a/arch/x86/kernel/cpu/microcode/core.c
++++ b/arch/x86/kernel/cpu/microcode/core.c
+@@ -149,8 +149,8 @@ static bool __init check_loader_disabled_bsp(void)
+ 	return *res;
+ }
+ 
+-extern struct builtin_fw __start_builtin_fw[];
+-extern struct builtin_fw __end_builtin_fw[];
++extern struct builtin_fw __start_builtin_fw[] __default_visibility;
++extern struct builtin_fw __end_builtin_fw[] __default_visibility;
+ 
+ bool get_builtin_firmware(struct cpio_data *cd, const char *name)
+ {
+diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
+index 0943e7065e0e..2ffd019af2d4 100644
+--- a/drivers/base/firmware_loader/main.c
++++ b/drivers/base/firmware_loader/main.c
+@@ -94,8 +94,8 @@ static struct firmware_cache fw_cache;
+ 
+ #ifdef CONFIG_FW_LOADER
+ 
+-extern struct builtin_fw __start_builtin_fw[];
+-extern struct builtin_fw __end_builtin_fw[];
++extern struct builtin_fw __start_builtin_fw[] __default_visibility;
++extern struct builtin_fw __end_builtin_fw[] __default_visibility;
+ 
+ static void fw_copy_to_prealloc_buf(struct firmware *fw,
+ 				    void *buf, size_t size)
+diff --git a/include/asm-generic/sections.h b/include/asm-generic/sections.h
+index 849cd8eb5ca0..0a0e23405ddd 100644
+--- a/include/asm-generic/sections.h
++++ b/include/asm-generic/sections.h
+@@ -32,6 +32,9 @@
+  *	__softirqentry_text_start, __softirqentry_text_end
+  *	__start_opd, __end_opd
+  */
++#ifdef CONFIG_DEFAULT_HIDDEN
++#pragma GCC visibility push(default)
++#endif
+ extern char _text[], _stext[], _etext[];
+ extern char _data[], _sdata[], _edata[];
+ extern char __bss_start[], __bss_stop[];
+@@ -49,6 +52,9 @@ extern char __start_once[], __end_once[];
+ 
+ /* Start and end of .ctors section - used for constructor calls. */
+ extern char __ctors_start[], __ctors_end[];
++#ifdef CONFIG_DEFAULT_HIDDEN
++#pragma GCC visibility pop
++#endif
+ 
+ /* Start and end of .opd section - used for function descriptors. */
+ extern char __start_opd[], __end_opd[];
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index ab4711c63601..a9ac84e37af9 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -278,6 +278,13 @@ unsigned long read_word_at_a_time(const void *addr)
+ 	__u.__val;					\
+ })
+ 
++#ifdef CONFIG_DEFAULT_HIDDEN
++#pragma GCC visibility push(hidden)
++#define __default_visibility  __attribute__((visibility ("default")))
++#else
++#define __default_visibility
++#endif
++
+ #endif /* __KERNEL__ */
+ 
+ #endif /* __ASSEMBLY__ */
+diff --git a/init/Kconfig b/init/Kconfig
+index e4acab9f9fd1..f16247675f84 100644
+--- a/init/Kconfig
++++ b/init/Kconfig
+@@ -1694,6 +1694,13 @@ config PROFILING
+ config TRACEPOINTS
+ 	bool
+ 
++#
++# Default to hidden visibility for all symbols.
++# Useful for Position Independent Code to reduce global references.
++#
++config DEFAULT_HIDDEN
++	bool
++
+ source "arch/Kconfig"
+ 
+ endmenu		# General setup
+diff --git a/kernel/kallsyms.c b/kernel/kallsyms.c
+index a23e21ada81b..f4e58b7a6daf 100644
+--- a/kernel/kallsyms.c
++++ b/kernel/kallsyms.c
+@@ -29,24 +29,24 @@
+  * These will be re-linked against their real values
+  * during the second link stage.
+  */
+-extern const unsigned long kallsyms_addresses[] __weak;
+-extern const int kallsyms_offsets[] __weak;
+-extern const u8 kallsyms_names[] __weak;
++extern const unsigned long kallsyms_addresses[] __weak __default_visibility;
++extern const int kallsyms_offsets[] __weak __default_visibility;
++extern const u8 kallsyms_names[] __weak __default_visibility;
+ 
+ /*
+  * Tell the compiler that the count isn't in the small data section if the arch
+  * has one (eg: FRV).
+  */
+ extern const unsigned long kallsyms_num_syms
+-__attribute__((weak, section(".rodata")));
++__attribute__((weak, section(".rodata"))) __default_visibility;
+ 
+ extern const unsigned long kallsyms_relative_base
+-__attribute__((weak, section(".rodata")));
++__attribute__((weak, section(".rodata"))) __default_visibility;
+ 
+-extern const u8 kallsyms_token_table[] __weak;
+-extern const u16 kallsyms_token_index[] __weak;
++extern const u8 kallsyms_token_table[] __weak __default_visibility;
++extern const u16 kallsyms_token_index[] __weak __default_visibility;
+ 
+-extern const unsigned long kallsyms_markers[] __weak;
++extern const unsigned long kallsyms_markers[] __weak __default_visibility;
+ 
+ /*
+  * Expand a compressed symbol data into the resulting uncompressed string,
+diff --git a/kernel/trace/trace.h b/kernel/trace/trace.h
+index 6fb46a06c9dc..e659f452cf8c 100644
+--- a/kernel/trace/trace.h
++++ b/kernel/trace/trace.h
+@@ -1746,8 +1746,8 @@ extern int trace_event_enable_disable(struct trace_event_file *file,
+ 				      int enable, int soft_disable);
+ extern int tracing_alloc_snapshot(void);
+ 
+-extern const char *__start___trace_bprintk_fmt[];
+-extern const char *__stop___trace_bprintk_fmt[];
++extern const char *__start___trace_bprintk_fmt[] __default_visibility;
++extern const char *__stop___trace_bprintk_fmt[] __default_visibility;
+ 
+ extern const char *__start___tracepoint_str[];
+ extern const char *__stop___tracepoint_str[];
+diff --git a/lib/dynamic_debug.c b/lib/dynamic_debug.c
+index c7c96bc7654a..40b752b53627 100644
+--- a/lib/dynamic_debug.c
++++ b/lib/dynamic_debug.c
+@@ -37,8 +37,8 @@
+ #include <linux/device.h>
+ #include <linux/netdevice.h>
+ 
+-extern struct _ddebug __start___verbose[];
+-extern struct _ddebug __stop___verbose[];
++extern struct _ddebug __start___verbose[] __default_visibility;
++extern struct _ddebug __stop___verbose[] __default_visibility;
+ 
+ struct ddebug_table {
+ 	struct list_head link;
+-- 
+2.17.0.921.gf22659ad46-goog
