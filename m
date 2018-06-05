@@ -1,153 +1,122 @@
-From: kbuild test robot <lkp@intel.com>
-Subject: Re: [PATCH v2 2/9] x86: objtool: use asm macro for better compiler
- decisions
-Date: Tue, 5 Jun 2018 13:41:03 +0800
-Message-ID: <201806051343.jOeEcDni%fengguang.wu@intel.com>
-References: <20180604112131.59100-3-namit@vmware.com>
-Mime-Version: 1.0
-Content-Type: multipart/mixed; boundary="ZPt4rx8FFjLCG7dd"
+From: changbin.du@intel.com
+Subject: [RESEND PATCH v5 0/4] kernel hacking: GCC optimization for better debug experience (-Og)
+Date: Tue,  5 Jun 2018 16:13:36 +0800
+Message-ID: <1528186420-6615-1-git-send-email-changbin.du@intel.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180604112131.59100-3-namit@vmware.com>
 Sender: linux-kernel-owner@vger.kernel.org
-Cc: kbuild-all@01.org, linux-kernel@vger.kernel.org, x86@kernel.org, Nadav Amit <namit@vmware.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: mingo@redhat.com, akpm@linux-foundation.org, yamada.masahiro@socionext.com, michal.lkml@markovi.net
+Cc: rostedt@goodmis.org, tglx@linutronix.de, rdunlap@infradead.org, x86@kernel.org, linux@armlinux.org.uk, lgirdwood@gmail.com, broonie@kernel.org, arnd@arndb.de, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sparse@vger.kernel.org, changbin.du@gmail.com, Changbin Du <changbin.du@intel.com>
 List-Id: linux-sparse@vger.kernel.org
 
+From: Changbin Du <changbin.du@intel.com>
 
---ZPt4rx8FFjLCG7dd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Hi all,
+I know some kernel developers was searching for a method to dissable GCC
+optimizations, probably they want to apply GCC '-O0' option. But since Linux
+kernel replys on GCC optimization to remove some dead code, so '-O0' just
+breaks the build. They do need this because they want to debug kernel with
+qemu, simics, kgtp or kgdb.
 
-Hi Nadav,
+Thanks for the GCC '-Og' optimization level introduced in GCC 4.8, which
+offers a reasonable level of optimization while maintaining fast compilation
+and a good debugging experience. It is similar to '-O1' while perferring to
+keep debug ability over runtime speed. With '-Og', we can build a kernel with
+better debug ability and little performance drop after some simple change.
 
-Thank you for the patch! Yet something to improve:
+In this series, firstly introduce a new config CONFIG_NO_AUTO_INLINE after two
+fixes for this new option. With this option, only functions explicitly marked
+with "inline" will  be inlined. This will allow the function tracer to trace
+more functions because it only traces functions that the compiler has not
+inlined.
 
-[auto build test ERROR on linus/master]
-[also build test ERROR on v4.17 next-20180604]
-[cannot apply to tip/x86/core]
-[if your patch is applied to the wrong git tree, please drop us a note to help improve the system]
+Then introduce new config CC_OPTIMIZE_FOR_DEBUGGING which apply '-Og'
+optimization level for whole kernel, with a simple fix in fix_to_virt().
+Currently I have only tested this option on x86 and ARM platform. Other
+platforms should also work but probably need some compiling fixes as what
+having done in this series. I leave that to who want to try this debug
+option.
 
-url:    https://github.com/0day-ci/linux/commits/Nadav-Amit/x86-macrofying-inline-asm-for-better-compilation/20180605-124313
-config: c6x-evmc6678_defconfig (attached as .config)
-compiler: c6x-elf-gcc (GCC) 8.1.0
-reproduce:
-        wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
-        chmod +x ~/bin/make.cross
-        # save the attached .config to linux build tree
-        make.cross ARCH=c6x 
+Comparison of vmlinux size: a bit smaller.
 
-All errors (new ones prefixed by >>):
+    w/o CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+    $ size vmlinux
+       text    data     bss     dec     hex filename
+    22665554   9709674  2920908 35296136        21a9388 vmlinux
 
-   include/linux/compiler.h: Assembler messages:
->> include/linux/compiler.h:308: Error: Macro `annotate_unreachable' was already defined
+    w/ CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+    $ size vmlinux
+       text    data     bss     dec     hex filename
+    21499032   10102758 2920908 34522698        20ec64a vmlinux
 
-vim +308 include/linux/compiler.h
 
-   307	
- > 308	.macro ANNOTATE_UNREACHABLE counter:req
-   309	.endm
-   310	
+Comparison of system performance: a bit drop (~6%).
+    This benchmark of kernel compilation is suggested by Ingo Molnar.
+    https://lkml.org/lkml/2018/5/2/74
 
----
-0-DAY kernel test infrastructure                Open Source Technology Center
-https://lists.01.org/pipermail/kbuild-all                   Intel Corporation
+    Preparation: Set cpufreq to 'performance'.
+    for ((cpu=0; cpu<120; cpu++)); do
+      G=/sys/devices/system/cpu/cpu$cpu/cpufreq/scaling_governor
+      [ -f $G ] && echo performance > $G
+    done
 
---ZPt4rx8FFjLCG7dd
-Content-Type: application/gzip
-Content-Disposition: attachment; filename=".config.gz"
-Content-Transfer-Encoding: base64
+    w/o CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+    $ perf stat --repeat 5 --null --pre                 '\
+        cp -a kernel ../kernel.copy.$(date +%s);         \
+        rm -rf *;                                        \
+        git checkout .;                                  \
+        echo 1 > /proc/sys/vm/drop_caches;               \
+        find ../kernel* -type f | xargs cat >/dev/null;  \
+        make -j kernel >/dev/null;                       \
+        make clean >/dev/null 2>&1;                      \
+        sync                                            '\
+                                                         \
+        make -j8 >/dev/null
 
-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
+     Performance counter stats for 'make -j8' (5 runs):
 
---ZPt4rx8FFjLCG7dd--
+        219.764246652 seconds time elapsed                   ( +-  0.78% )
+
+    w/ CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+    $ perf stat --repeat 5 --null --pre                 '\
+        cp -a kernel ../kernel.copy.$(date +%s);         \
+        rm -rf *;                                        \
+        git checkout .;                                  \
+        echo 1 > /proc/sys/vm/drop_caches;               \
+        find ../kernel* -type f | xargs cat >/dev/null;  \
+        make -j kernel >/dev/null;                       \
+        make clean >/dev/null 2>&1;                      \
+        sync                                            '\
+                                                         \
+        make -j8 >/dev/null
+
+    Performance counter stats for 'make -j8' (5 runs):
+
+         233.574187771 seconds time elapsed                  ( +-  0.19% )
+
+v5:
+  o Exchange the position of last two patches to avoid compiling error.
+v4:
+  o Remove aready merged one "regulator: add dummy function of_find_regulator_by_node".
+
+Changbin Du (4):
+  x86/mm: surround level4_kernel_pgt with #ifdef
+    CONFIG_X86_5LEVEL...#endif
+  kernel hacking: new config NO_AUTO_INLINE to disable compiler
+    auto-inline optimizations
+  ARM: mm: fix build error in fix_to_virt with
+    CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
+  kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING to apply GCC -Og
+    optimization
+
+ Makefile                          | 10 ++++++++++
+ arch/arm/mm/mmu.c                 |  2 +-
+ arch/x86/include/asm/pgtable_64.h |  2 ++
+ arch/x86/kernel/head64.c          | 13 ++++++-------
+ include/linux/compiler-gcc.h      |  2 +-
+ include/linux/compiler.h          |  2 +-
+ init/Kconfig                      | 19 +++++++++++++++++++
+ lib/Kconfig.debug                 | 17 +++++++++++++++++
+ 8 files changed, 57 insertions(+), 10 deletions(-)
+
+-- 
+2.7.4
