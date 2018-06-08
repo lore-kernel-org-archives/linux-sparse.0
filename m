@@ -1,41 +1,71 @@
-From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
-Subject: [PATCH v11 01/13] compiler.h, kasan: add __SANITIZE_ADDRESS__ check for __no_kasan_or_inline
-Date: Fri,  8 Jun 2018 19:09:36 +0200
-Message-ID: <20180608171216.26521-2-jarkko.sakkinen@linux.intel.com>
-References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [PATCH v5 2/4] kernel hacking: new config NO_AUTO_INLINE to
+ disable compiler auto-inline optimizations
+Date: Fri, 8 Jun 2018 16:03:55 -0400
+Message-ID: <20180608160355.67712eb8@vmware.local.home>
+References: <1528186420-6615-3-git-send-email-changbin.du@intel.com>
+        <201806060501.btF3aJMZ%fengguang.wu@intel.com>
+        <20180606095714.1d3c2def@vmware.local.home>
+        <20180606142600.GN13775@localhost>
+        <20180606142622.2338abf6@vmware.local.home>
+        <20180607041718.qpqucjzlvcm5h3gn@vireshk-i7>
+        <20180607074628.kd3iyxevwj3ypzbr@intel.com>
+        <20180607083856.ealw62v3wx43zeqz@vireshk-i7>
+        <1303b1abf9f9229a8d3ccbb68a3e413266b360d7.camel@petrovitsch.priv.at>
+        <20180607091025.m7dfix3e2xbwx4cs@vireshk-i7>
+        <20180607091816.GT13775@localhost>
+Mime-Version: 1.0
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
+In-Reply-To: <20180607091816.GT13775@localhost>
 Sender: linux-kernel-owner@vger.kernel.org
-To: x86@kernel.org, platform-driver-x86@vger.kernel.org
-Cc: dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Christopher Li <sparse@chrisli.org>, "open list:SPARSE CHECKER" <linux-sparse@vger.kernel.org>, open list <linux-kernel@vger.kernel.org>
+To: Johan Hovold <johan@kernel.org>
+Cc: Viresh Kumar <viresh.kumar@linaro.org>, Bernd Petrovitsch <bernd@petrovitsch.priv.at>, "Du, Changbin" <changbin.du@intel.com>, gregkh@linuxfoundation.org, alex.elder@linaro.org, kbuild test robot <lkp@intel.com>, linux-arch@vger.kernel.org, michal.lkml@markovi.net, linux-kernel@vger.kernel.org, arnd@arndb.de, yamada.masahiro@socionext.com, lgirdwood@gmail.com, broonie@kernel.org, rdunlap@infradead.org, x86@kernel.org, linux@armlinux.org.uk, linux-sparse@vger.kernel.org, mingo@redhat.com, kbuild-all@01.org, akpm@linux-foundation.org, changbin.du@gmail.com, tglx@linutronix.de, linux-kbuild@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-sparse@vger.kernel.org
 
-From: Sean Christopherson <sean.j.christopherson@intel.com>
+On Thu, 7 Jun 2018 11:18:16 +0200
+Johan Hovold <johan@kernel.org> wrote:
 
-Add 'defined(__SANITIZE_ADDRESS__)' to check to determine whether
-__no_kasan_or_inline should be 'no_kasan' or 'inline'.  Files that
-compile with KASAN disabled may not link to KASAN, in which case
-the __maybe_unused attribute added in the 'no_kasan' option can
-cause linker errors due to unused functions that manually invoke
-KASAN functions, e.g. read_word_at_a_time(), not being discarded.
 
-Signed-off-by: Sean Christopherson <sean.j.christopherson@intel.com>
----
- include/linux/compiler.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> If you want to work around the warning and think you can do it in some
+> non-contrived way, then go for it.
+> 
+> Clearing the request buffer, checking for termination using strnlen, and
+> then using memcpy might not be too bad.
+> 
+> But after all, it is a false positive, so leaving things as they stand
+> is fine too.
 
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index ab4711c63601..e7a863a3ac8c 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -188,7 +188,7 @@ void __read_once_size(const volatile void *p, void *res, int size)
- 	__READ_ONCE_SIZE;
- }
+Not sure how contrived you think this is, but it solves the warning
+without adding extra work in the normal case.
+
+-- Steve
+
+diff --git a/drivers/staging/greybus/fw-management.c b/drivers/staging/greybus/fw-management.c
+index 71aec14f8181..4fb9f1dff47d 100644
+--- a/drivers/staging/greybus/fw-management.c
++++ b/drivers/staging/greybus/fw-management.c
+@@ -150,15 +150,18 @@ static int fw_mgmt_load_and_validate_operation(struct fw_mgmt *fw_mgmt,
+ 	}
  
--#ifdef CONFIG_KASAN
-+#if defined(CONFIG_KASAN) && defined(__SANITIZE_ADDRESS__)
- /*
-  * We can't declare function 'inline' because __no_sanitize_address confilcts
-  * with inlining. Attempt to inline it may cause a build failure.
--- 
-2.17.0
+ 	request.load_method = load_method;
+-	strncpy(request.firmware_tag, tag, GB_FIRMWARE_TAG_MAX_SIZE);
++	strncpy(request.firmware_tag, tag, GB_FIRMWARE_TAG_MAX_SIZE - 1);
+ 
+ 	/*
+ 	 * The firmware-tag should be NULL terminated, otherwise throw error and
+ 	 * fail.
+ 	 */
+-	if (request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] != '\0') {
+-		dev_err(fw_mgmt->parent, "load-and-validate: firmware-tag is not NULL terminated\n");
+-		return -EINVAL;
++	if (request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 2] != '\0') {
++		if (tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] != '\0') {
++			dev_err(fw_mgmt->parent, "load-and-validate: firmware-tag is not NULL terminated\n");
++			return -EINVAL;
++		}
++		request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] = '\0';
+ 	}
+ 
+ 	/* Allocate ids from 1 to 255 (u8-max), 0 is an invalid id */
