@@ -1,118 +1,83 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: [PATCH v3 0/9] x86: macrofying inline asm for better compilation
-Date: Sun, 10 Jun 2018 07:19:02 -0700
-Message-ID: <20180610141911.52948-1-namit@vmware.com>
+From: Johan Hovold <johan@kernel.org>
+Subject: Re: [PATCH v5 2/4] kernel hacking: new config NO_AUTO_INLINE to
+ disable compiler auto-inline optimizations
+Date: Mon, 11 Jun 2018 17:46:33 +0200
+Message-ID: <20180611154633.GC13775@localhost>
+References: <20180606095714.1d3c2def@vmware.local.home>
+ <20180606142600.GN13775@localhost>
+ <20180606142622.2338abf6@vmware.local.home>
+ <20180607041718.qpqucjzlvcm5h3gn@vireshk-i7>
+ <20180607074628.kd3iyxevwj3ypzbr@intel.com>
+ <20180607083856.ealw62v3wx43zeqz@vireshk-i7>
+ <1303b1abf9f9229a8d3ccbb68a3e413266b360d7.camel@petrovitsch.priv.at>
+ <20180607091025.m7dfix3e2xbwx4cs@vireshk-i7>
+ <20180607091816.GT13775@localhost>
+ <20180608160355.67712eb8@vmware.local.home>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
+In-Reply-To: <20180608160355.67712eb8@vmware.local.home>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org
-Cc: Nadav Amit <namit@vmware.com>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.linux-foundation.org, Linus Torvalds <torvalds@linux-foundation.org>
+To: Steven Rostedt <rostedt@goodmis.org>
+Cc: Johan Hovold <johan@kernel.org>, Viresh Kumar <viresh.kumar@linaro.org>, Bernd Petrovitsch <bernd@petrovitsch.priv.at>, "Du, Changbin" <changbin.du@intel.com>, gregkh@linuxfoundation.org, alex.elder@linaro.org, kbuild test robot <lkp@intel.com>, linux-arch@vger.kernel.org, michal.lkml@markovi.net, linux-kernel@vger.kernel.org, arnd@arndb.de, yamada.masahiro@socionext.com, lgirdwood@gmail.com, broonie@kernel.org, rdunlap@infradead.org, x86@kernel.org, linux@armlinux.org.uk, linux-sparse@vger.kernel.org, mingo@redhat.com, kbuild-all@01.org, akpm@linux-foundation.org, changbin.du@gmail.com, tglx@linutronix.de, linux-kbuild@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-sparse@vger.kernel.org
 
-This patch-set deals with an interesting yet stupid problem: kernel code
-that does not get inlined despite its simplicity. There are several
-causes for this behavior: "cold" attribute on __init, different function
-optimization levels; conditional constant computations based on
-__builtin_constant_p(); and finally large inline assembly blocks.
+On Fri, Jun 08, 2018 at 04:03:55PM -0400, Steven Rostedt wrote:
+> On Thu, 7 Jun 2018 11:18:16 +0200
+> Johan Hovold <johan@kernel.org> wrote:
+> 
+> 
+> > If you want to work around the warning and think you can do it in some
+> > non-contrived way, then go for it.
+> > 
+> > Clearing the request buffer, checking for termination using strnlen, and
+> > then using memcpy might not be too bad.
+> > 
+> > But after all, it is a false positive, so leaving things as they stand
+> > is fine too.
+> 
+> Not sure how contrived you think this is, but it solves the warning
+> without adding extra work in the normal case.
+> 
+> -- Steve
+> 
+> diff --git a/drivers/staging/greybus/fw-management.c b/drivers/staging/greybus/fw-management.c
+> index 71aec14f8181..4fb9f1dff47d 100644
+> --- a/drivers/staging/greybus/fw-management.c
+> +++ b/drivers/staging/greybus/fw-management.c
+> @@ -150,15 +150,18 @@ static int fw_mgmt_load_and_validate_operation(struct fw_mgmt *fw_mgmt,
+>  	}
+>  
+>  	request.load_method = load_method;
+> -	strncpy(request.firmware_tag, tag, GB_FIRMWARE_TAG_MAX_SIZE);
+> +	strncpy(request.firmware_tag, tag, GB_FIRMWARE_TAG_MAX_SIZE - 1);
+>  
+>  	/*
+>  	 * The firmware-tag should be NULL terminated, otherwise throw error and
+>  	 * fail.
+>  	 */
+> -	if (request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] != '\0') {
+> -		dev_err(fw_mgmt->parent, "load-and-validate: firmware-tag is not NULL terminated\n");
+> -		return -EINVAL;
+> +	if (request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 2] != '\0') {
+> +		if (tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] != '\0') {
+> +			dev_err(fw_mgmt->parent, "load-and-validate: firmware-tag is not NULL terminated\n");
+> +			return -EINVAL;
+> +		}
+> +		request.firmware_tag[GB_FIRMWARE_TAG_MAX_SIZE - 1] = '\0';
+>  	}
 
-This patch-set deals with the inline assembly problem. I separated these
-patches from the others (that were sent in the RFC) for easier
-inclusion. I also separated the removal of unnecessary new-lines which
-would be sent separately.
+Well, I think it's quite far from obvious what is going on above, and
+not least why things are being done this way (which a comment may help
+with).
 
-The problem with inline assembly is that inline assembly is often used
-by the kernel for things that are other than code - for example,
-assembly directives and data. GCC however is oblivious to the content of
-the blocks and assumes their cost in space and time is proportional to
-the number of the perceived assembly "instruction", according to the
-number of newlines and semicolons. Alternatives, paravirt and other
-mechanisms are affected, causing code not to be inlined, and degrading
-compilation quality in general.
+And just NUL-terminating the (automatic) buffer before returning wasn't
+enough? Then it may be better to do away with strncpy completely.
 
-The solution that this patch-set carries for this problem is to create
-an assembly macro, and then call it from the inline assembly block.  As
-a result, the compiler sees a single "instruction" and assigns the more
-appropriate cost to the code.
+But should we really be working around gcc this way? If the
+implementation of this new warning isn't smart enough yet, should it not
+just be disabled instead?
 
-To avoid uglification of the code, as many noted, the macros are first
-precompiled into an assembly file, which is later assembled together
-with the the C files. This also enables to avoid duplicate
-implementation that was set before for the asm and C code. This can be
-seen in the exception table changes.
-
-Overall this patch-set slightly increases the kernel size (my build was
-done using my Ubuntu 18.04 config + localyesconfig for the record):
-
-   text	   data	    bss	    dec	    hex	filename
-18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
-18163608 10227348 2957312 31348268 1de562c ./vmlinux after (+0.1%)
-
-The number of static functions in the image is reduced by 379, but
-actually inlining is even better, which does not always shows in these
-numbers: a function may be inlined causing the calling function not to
-be inlined.
-
-The Makefile stuff may not be too clean. Ideas for improvements are
-welcome.
-
-v2->v3: * Several build issues resolved (0-day)
-	* Wrong comments fix (Josh)
-	* Change asm vs C order in refcount (Kees)
-
-v1->v2:	* Compiling the macros into a separate .s file, improving
-	  readability (Linus)
-	* Improving assembly formatting, applying most of the comments
-	  according to my judgment (Jan)
-	* Adding exception-table, cpufeature and jump-labels
-	* Removing new-line cleanup; to be submitted separately
-
-Cc: Alok Kataria <akataria@vmware.com>
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: "H. Peter Anvin" <hpa@zytor.com>
-Cc: Ingo Molnar <mingo@redhat.com>
-Cc: Jan Beulich <JBeulich@suse.com>
-Cc: Josh Poimboeuf <jpoimboe@redhat.com>
-Cc: Juergen Gross <jgross@suse.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: linux-sparse@vger.kernel.org
-Cc: Peter Zijlstra <peterz@infradead.org>
-Cc: Philippe Ombredanne <pombredanne@nexb.com>
-Cc: Thomas Gleixner <tglx@linutronix.de>
-Cc: virtualization@lists.linux-foundation.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: x86@kernel.org
-
-Nadav Amit (9):
-  Makefile: Prepare for using macros for inline asm
-  x86: objtool: use asm macro for better compiler decisions
-  x86: refcount: prevent gcc distortions
-  x86: alternatives: macrofy locks for better inlining
-  x86: bug: prevent gcc distortions
-  x86: prevent inline distortion by paravirt ops
-  x86: extable: use macros instead of inline assembly
-  x86: cpufeature: use macros instead of inline assembly
-  x86: jump-labels: use macros instead of inline assembly
-
- Makefile                               |  9 ++-
- arch/x86/Makefile                      | 11 ++-
- arch/x86/include/asm/alternative-asm.h | 20 ++++--
- arch/x86/include/asm/alternative.h     | 11 +--
- arch/x86/include/asm/asm.h             | 61 +++++++---------
- arch/x86/include/asm/bug.h             | 98 +++++++++++++++-----------
- arch/x86/include/asm/cpufeature.h      | 82 ++++++++++++---------
- arch/x86/include/asm/jump_label.h      | 65 ++++++++++-------
- arch/x86/include/asm/paravirt_types.h  | 54 +++++++-------
- arch/x86/include/asm/refcount.h        | 74 +++++++++++--------
- arch/x86/kernel/Makefile               |  6 ++
- arch/x86/kernel/macros.S               | 16 +++++
- include/asm-generic/bug.h              |  8 +--
- include/linux/compiler.h               | 56 +++++++++++----
- scripts/Kbuild.include                 |  4 +-
- 15 files changed, 347 insertions(+), 228 deletions(-)
- create mode 100644 arch/x86/kernel/macros.S
-
--- 
-2.17.0
+Thanks,
+Johan
