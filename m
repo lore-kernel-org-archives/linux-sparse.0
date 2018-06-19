@@ -1,136 +1,33 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: [PATCH v4 2/9] x86: objtool: use asm macro for better compiler decisions
-Date: Tue, 12 Jun 2018 04:50:43 -0700
-Message-ID: <20180612115050.185112-3-namit@vmware.com>
-References: <20180612115050.185112-1-namit@vmware.com>
+From: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>
+Subject: Re: [PATCH v11 00/13] Intel SGX1 support
+Date: Tue, 19 Jun 2018 17:59:43 +0300
+Message-ID: <20180619145943.GC8034@linux.intel.com>
+References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
+ <20180612105011.GA26931@amd>
 Mime-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180612115050.185112-1-namit@vmware.com>
+Content-Disposition: inline
+In-Reply-To: <20180612105011.GA26931@amd>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, x86@kernel.org
-Cc: Nadav Amit <namit@vmware.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
+To: Pavel Machek <pavel@ucw.cz>
+Cc: x86@kernel.org, platform-driver-x86@vger.kernel.org, dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad Rzeszutek Wilk <konrad.wilk@oracle.com>, open list:KERNEL VIRTUAL M
 List-Id: linux-sparse@vger.kernel.org
 
-GCC considers the number of statements in inlined assembly blocks,
-according to new-lines and semicolons, as an indication to the cost of
-the block in time and space. This data is distorted by the kernel code,
-which puts information in alternative sections. As a result, the
-compiler may perform incorrect inlining and branch optimizations.
+On Tue, Jun 12, 2018 at 12:50:12PM +0200, Pavel Machek wrote:
+> On Fri 2018-06-08 19:09:35, Jarkko Sakkinen wrote:
+> > Intel(R) SGX is a set of CPU instructions that can be used by applications
+> > to set aside private regions of code and data. The code outside the enclave
+> > is disallowed to access the memory inside the enclave by the CPU access
+> > control.  In a way you can think that SGX provides inverted sandbox. It
+> > protects the application from a malicious host.
+> 
+> Do you intend to allow non-root applications to use SGX?
+> 
+> What are non-evil uses for SGX?
+> 
+> ...because it is quite useful for some kinds of evil:
 
-In the case of objtool, this distortion is extreme, since anyhow the
-annotations of objtool are discarded during linkage.
+The default permissions for the device are 600.
 
-The solution is to set an assembly macro and call it from the inline
-assembly block. As a result GCC considers the inline assembly block as
-a single instruction.
-
-This patch slightly increases the kernel size.
-
-   text	   data	    bss	    dec	    hex	filename
-18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
-18140970 10225412 2957312 31323694 1ddf62e ./vmlinux after (+829)
-
-Static text symbols:
-Before:	40321
-After:	40302	(-19)
-
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: linux-sparse@vger.kernel.org
-
-Reviewed-by: Josh Poimboeuf <jpoimboe@redhat.com>
-Signed-off-by: Nadav Amit <namit@vmware.com>
----
- arch/x86/kernel/macros.S |  2 ++
- include/linux/compiler.h | 56 ++++++++++++++++++++++++++++++----------
- 2 files changed, 45 insertions(+), 13 deletions(-)
-
-diff --git a/arch/x86/kernel/macros.S b/arch/x86/kernel/macros.S
-index cfc1c7d1a6eb..cee28c3246dc 100644
---- a/arch/x86/kernel/macros.S
-+++ b/arch/x86/kernel/macros.S
-@@ -5,3 +5,5 @@
-  * commonly used. The macros are precompiled into assmebly file which is later
-  * assembled together with each compiled file.
-  */
-+
-+#include <linux/compiler.h>
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index ab4711c63601..3efd85334774 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -99,22 +99,13 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
-  * unique, to convince GCC not to merge duplicate inline asm statements.
-  */
- #define annotate_reachable() ({						\
--	asm volatile("%c0:\n\t"						\
--		     ".pushsection .discard.reachable\n\t"		\
--		     ".long %c0b - .\n\t"				\
--		     ".popsection\n\t" : : "i" (__COUNTER__));		\
-+	asm volatile("ANNOTATE_REACHABLE counter=%c0"			\
-+		     : : "i" (__COUNTER__));				\
- })
- #define annotate_unreachable() ({					\
--	asm volatile("%c0:\n\t"						\
--		     ".pushsection .discard.unreachable\n\t"		\
--		     ".long %c0b - .\n\t"				\
--		     ".popsection\n\t" : : "i" (__COUNTER__));		\
-+	asm volatile("ANNOTATE_UNREACHABLE counter=%c0"			\
-+		     : : "i" (__COUNTER__));				\
- })
--#define ASM_UNREACHABLE							\
--	"999:\n\t"							\
--	".pushsection .discard.unreachable\n\t"				\
--	".long 999b - .\n\t"						\
--	".popsection\n\t"
- #else
- #define annotate_reachable()
- #define annotate_unreachable()
-@@ -280,6 +271,45 @@ unsigned long read_word_at_a_time(const void *addr)
- 
- #endif /* __KERNEL__ */
- 
-+#else /* __ASSEMBLY__ */
-+
-+#ifdef __KERNEL__
-+#ifndef LINKER_SCRIPT
-+
-+#ifdef CONFIG_STACK_VALIDATION
-+.macro ANNOTATE_UNREACHABLE counter:req
-+\counter:
-+	.pushsection .discard.unreachable
-+	.long \counter\()b -.
-+	.popsection
-+.endm
-+
-+.macro ANNOTATE_REACHABLE counter:req
-+\counter:
-+	.pushsection .discard.reachable
-+	.long \counter\()b -.
-+	.popsection
-+.endm
-+
-+.macro ASM_UNREACHABLE
-+999:
-+	.pushsection .discard.unreachable
-+	.long 999b - .
-+	.popsection
-+.endm
-+#else /* CONFIG_STACK_VALIDATION */
-+.macro ANNOTATE_UNREACHABLE counter:req
-+.endm
-+
-+.macro ANNOTATE_REACHABLE counter:req
-+.endm
-+
-+.macro ASM_UNREACHABLE
-+.endm
-+#endif /* CONFIG_STACK_VALIDATION */
-+
-+#endif /* LINKER_SCRIPT */
-+#endif /* __KERNEL__ */
- #endif /* __ASSEMBLY__ */
- 
- #ifndef __optimize
--- 
-2.17.0
+/Jarkko
