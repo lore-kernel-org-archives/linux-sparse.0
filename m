@@ -1,55 +1,132 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH v11 00/13] Intel SGX1 support
-Date: Tue, 19 Jun 2018 14:48:33 -0700
-Message-ID: <20180619214833.GA5873@localhost>
-References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
- <20180612105011.GA26931@amd>
- <20180619145943.GC8034@linux.intel.com>
- <20180619200414.GA3143@amd>
+From: Nadav Amit <namit@vmware.com>
+Subject: [PATCH v5 0/9] x86: macrofying inline asm for better compilation
+Date: Tue, 19 Jun 2018 12:48:45 -0700
+Message-ID: <20180619194854.69486-1-namit@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180619200414.GA3143@amd>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, x86@kernel.org, platform-driver-x86@vger.kernel.org, dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad Rzeszutek Wilk <konrad.wi>
+To: linux-kernel@vger.kernel.org, x86@kernel.org
+Cc: Nadav Amit <namit@vmware.com>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.linux-foundation.org, Linus Torvalds <torvalds@linux-foundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Jun 19, 2018 at 10:04:15PM +0200, Pavel Machek wrote:
-> On Tue 2018-06-19 17:59:43, Jarkko Sakkinen wrote:
-> > On Tue, Jun 12, 2018 at 12:50:12PM +0200, Pavel Machek wrote:
-> > > On Fri 2018-06-08 19:09:35, Jarkko Sakkinen wrote:
-> > > > Intel(R) SGX is a set of CPU instructions that can be used by applications
-> > > > to set aside private regions of code and data. The code outside the enclave
-> > > > is disallowed to access the memory inside the enclave by the CPU access
-> > > > control.  In a way you can think that SGX provides inverted sandbox. It
-> > > > protects the application from a malicious host.
-> > > 
-> > > Do you intend to allow non-root applications to use SGX?
-> > > 
-> > > What are non-evil uses for SGX?
-> > > 
-> > > ...because it is quite useful for some kinds of evil:
-> > 
-> > The default permissions for the device are 600.
-> 
-> Good. This does not belong to non-root.
+This patch-set deals with an interesting yet stupid problem: kernel code
+that does not get inlined despite its simplicity. There are several
+causes for this behavior: "cold" attribute on __init, different function
+optimization levels; conditional constant computations based on
+__builtin_constant_p(); and finally large inline assembly blocks.
 
-There are entirely legitimate use cases for using this as an
-unprivileged user. However, that'll be up to system and distribution
-policy, which can evolve over time, and it makes sense for the *initial*
-kernel permission to start out root-only and then adjust permissions via
-udev.
+This patch-set deals with the inline assembly problem. I separated these
+patches from the others (that were sent in the RFC) for easier
+inclusion. I also separated the removal of unnecessary new-lines which
+would be sent separately.
 
-> What are some non-evil uses for SGX?
+The problem with inline assembly is that inline assembly is often used
+by the kernel for things that are other than code - for example,
+assembly directives and data. GCC however is oblivious to the content of
+the blocks and assumes their cost in space and time is proportional to
+the number of the perceived assembly "instruction", according to the
+number of newlines and semicolons. Alternatives, paravirt and other
+mechanisms are affected, causing code not to be inlined, and degrading
+compilation quality in general.
 
-Building a software certificate store. Hardening key-agent software like
-ssh-agent or gpg-agent. Building a challenge-response authentication
-system. Providing more assurance that your server infrastructure is
-uncompromised. Offloading computation to a system without having to
-fully trust that system.
+The solution that this patch-set carries for this problem is to create
+an assembly macro, and then call it from the inline assembly block.  As
+a result, the compiler sees a single "instruction" and assigns the more
+appropriate cost to the code.
 
-As one of many possibilities, imagine a distcc that didn't have to trust
-the compile nodes. The compile nodes could fail to return results at
-all, but they couldn't alter the results.
+To avoid uglification of the code, as many noted, the macros are first
+precompiled into an assembly file, which is later assembled together
+with the C files. This also enables to avoid duplicate implementation
+that was set before for the asm and C code. This can be seen in the
+exception table changes.
+
+Overall this patch-set slightly increases the kernel size (my build was
+done using my Ubuntu 18.04 config + localyesconfig for the record):
+
+   text	   data	    bss	    dec	    hex	filename
+18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
+18163608 10227348 2957312 31348268 1de562c ./vmlinux after (+0.1%)
+
+The number of static functions in the image is reduced by 379, but
+actually inlining is even better, which does not always shows in these
+numbers: a function may be inlined causing the calling function not to
+be inlined.
+
+I ran some benchmarks, and in general the performance impact is not very
+notable. You can still see 10 cycles shaved off some syscalls that
+manipulate page-tables (e.g., mprotect()), in which paravirt caused many
+functions not to be inlined. In addition this patch-set can prevent
+issues such as [1], and arguably improves code readability and
+maintainability.
+
+[1] https://patchwork.kernel.org/patch/10450037/
+
+v4->v5:	* Makefile fixes (Masahiro, Sam)
+
+v3->v4: * Changed naming of macros in 2 patches (PeterZ)
+	* Minor cleanup of the paravirt patch
+
+v2->v3: * Several build issues resolved (0-day)
+	* Wrong comments fix (Josh)
+	* Change asm vs C order in refcount (Kees)
+
+v1->v2:	* Compiling the macros into a separate .s file, improving
+	  readability (Linus)
+	* Improving assembly formatting, applying most of the comments
+	  according to my judgment (Jan)
+	* Adding exception-table, cpufeature and jump-labels
+	* Removing new-line cleanup; to be submitted separately
+
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Sam Ravnborg <sam@ravnborg.org>
+Cc: Alok Kataria <akataria@vmware.com>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: "H. Peter Anvin" <hpa@zytor.com>
+Cc: Ingo Molnar <mingo@redhat.com>
+Cc: Jan Beulich <JBeulich@suse.com>
+Cc: Josh Poimboeuf <jpoimboe@redhat.com>
+Cc: Juergen Gross <jgross@suse.com>
+Cc: Kate Stewart <kstewart@linuxfoundation.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: linux-sparse@vger.kernel.org
+Cc: Peter Zijlstra <peterz@infradead.org>
+Cc: Philippe Ombredanne <pombredanne@nexb.com>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: virtualization@lists.linux-foundation.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: x86@kernel.org
+
+
+Nadav Amit (9):
+  Makefile: Prepare for using macros for inline asm
+  x86: objtool: use asm macro for better compiler decisions
+  x86: refcount: prevent gcc distortions
+  x86: alternatives: macrofy locks for better inlining
+  x86: bug: prevent gcc distortions
+  x86: prevent inline distortion by paravirt ops
+  x86: extable: use macros instead of inline assembly
+  x86: cpufeature: use macros instead of inline assembly
+  x86: jump-labels: use macros instead of inline assembly
+
+ Makefile                               |  9 ++-
+ arch/x86/Makefile                      | 11 ++-
+ arch/x86/include/asm/alternative-asm.h | 20 ++++--
+ arch/x86/include/asm/alternative.h     | 11 +--
+ arch/x86/include/asm/asm.h             | 61 +++++++---------
+ arch/x86/include/asm/bug.h             | 98 +++++++++++++++-----------
+ arch/x86/include/asm/cpufeature.h      | 82 ++++++++++++---------
+ arch/x86/include/asm/jump_label.h      | 65 ++++++++++-------
+ arch/x86/include/asm/paravirt_types.h  | 56 +++++++--------
+ arch/x86/include/asm/refcount.h        | 74 +++++++++++--------
+ arch/x86/kernel/macros.S               | 16 +++++
+ include/asm-generic/bug.h              |  8 +--
+ include/linux/compiler.h               | 56 +++++++++++----
+ scripts/Kbuild.include                 |  4 +-
+ scripts/mod/Makefile                   |  2 +
+ 15 files changed, 340 insertions(+), 233 deletions(-)
+ create mode 100644 arch/x86/kernel/macros.S
+
+-- 
+2.17.0
