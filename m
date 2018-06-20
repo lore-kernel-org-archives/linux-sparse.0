@@ -1,54 +1,26 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: Re: [PATCH v5 0/9] x86: macrofying inline asm for better compilation
-Date: Wed, 20 Jun 2018 16:47:18 +0000
-Message-ID: <AEBE7B6B-0E78-4018-A347-8DCFE4C60E0D@vmware.com>
-References: <20180619194854.69486-1-namit@vmware.com>
- <20180620101101.GB2530@hirez.programming.kicks-ass.net>
+From: Fabio Estevam <festevam@gmail.com>
+Subject: Re: [PATCH v3 17/17] kasan: add SPDX-License-Identifier mark to
+ source files
+Date: Wed, 20 Jun 2018 16:15:18 -0300
+Message-ID: <CAOMZO5BgPaMsmx_3AJvMTKCFjhusfH=kH26U_PQCSD5TcUDA+w@mail.gmail.com>
+References: <cover.1529515183.git.andreyknvl@google.com> <f76d3070776e0038eda3cd76d471d1bfeae18480.1529515183.git.andreyknvl@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180620101101.GB2530@hirez.programming.kicks-ass.net>
-Content-Language: en-US
-Content-ID: <D8D911AD57C47E4CBDD83B14BD4672F1@namprd05.prod.outlook.com>
+In-Reply-To: <f76d3070776e0038eda3cd76d471d1bfeae18480.1529515183.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-found>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@lin>
 List-Id: linux-sparse@vger.kernel.org
 
-YXQgMzoxMSBBTSwgUGV0ZXIgWmlqbHN0cmEgPHBldGVyekBpbmZyYWRlYWQub3JnPiB3cm90ZToN
-Cg0KPiBPbiBUdWUsIEp1biAxOSwgMjAxOCBhdCAxMjo0ODo0NVBNIC0wNzAwLCBOYWRhdiBBbWl0
-IHdyb3RlOg0KPj4gTmFkYXYgQW1pdCAoOSk6DQo+PiAgTWFrZWZpbGU6IFByZXBhcmUgZm9yIHVz
-aW5nIG1hY3JvcyBmb3IgaW5saW5lIGFzbQ0KPj4gIHg4Njogb2JqdG9vbDogdXNlIGFzbSBtYWNy
-byBmb3IgYmV0dGVyIGNvbXBpbGVyIGRlY2lzaW9ucw0KPj4gIHg4NjogcmVmY291bnQ6IHByZXZl
-bnQgZ2NjIGRpc3RvcnRpb25zDQo+PiAgeDg2OiBhbHRlcm5hdGl2ZXM6IG1hY3JvZnkgbG9ja3Mg
-Zm9yIGJldHRlciBpbmxpbmluZw0KPj4gIHg4NjogYnVnOiBwcmV2ZW50IGdjYyBkaXN0b3J0aW9u
-cw0KPj4gIHg4NjogcHJldmVudCBpbmxpbmUgZGlzdG9ydGlvbiBieSBwYXJhdmlydCBvcHMNCj4+
-ICB4ODY6IGV4dGFibGU6IHVzZSBtYWNyb3MgaW5zdGVhZCBvZiBpbmxpbmUgYXNzZW1ibHkNCj4+
-ICB4ODY6IGNwdWZlYXR1cmU6IHVzZSBtYWNyb3MgaW5zdGVhZCBvZiBpbmxpbmUgYXNzZW1ibHkN
-Cj4+ICB4ODY6IGp1bXAtbGFiZWxzOiB1c2UgbWFjcm9zIGluc3RlYWQgb2YgaW5saW5lIGFzc2Vt
-Ymx5DQo+PiANCj4+IE1ha2VmaWxlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDkg
-KystDQo+PiBhcmNoL3g4Ni9NYWtlZmlsZSAgICAgICAgICAgICAgICAgICAgICB8IDExICsrLQ0K
-Pj4gYXJjaC94ODYvaW5jbHVkZS9hc20vYWx0ZXJuYXRpdmUtYXNtLmggfCAyMCArKysrLS0NCj4+
-IGFyY2gveDg2L2luY2x1ZGUvYXNtL2FsdGVybmF0aXZlLmggICAgIHwgMTEgKy0tDQo+PiBhcmNo
-L3g4Ni9pbmNsdWRlL2FzbS9hc20uaCAgICAgICAgICAgICB8IDYxICsrKysrKystLS0tLS0tLS0N
-Cj4+IGFyY2gveDg2L2luY2x1ZGUvYXNtL2J1Zy5oICAgICAgICAgICAgIHwgOTggKysrKysrKysr
-KysrKysrLS0tLS0tLS0tLS0NCj4+IGFyY2gveDg2L2luY2x1ZGUvYXNtL2NwdWZlYXR1cmUuaCAg
-ICAgIHwgODIgKysrKysrKysrKysrLS0tLS0tLS0tDQo+PiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9q
-dW1wX2xhYmVsLmggICAgICB8IDY1ICsrKysrKysrKystLS0tLS0tDQo+PiBhcmNoL3g4Ni9pbmNs
-dWRlL2FzbS9wYXJhdmlydF90eXBlcy5oICB8IDU2ICsrKysrKystLS0tLS0tLQ0KPj4gYXJjaC94
-ODYvaW5jbHVkZS9hc20vcmVmY291bnQuaCAgICAgICAgfCA3NCArKysrKysrKysrKy0tLS0tLS0t
-DQo+PiBhcmNoL3g4Ni9rZXJuZWwvbWFjcm9zLlMgICAgICAgICAgICAgICB8IDE2ICsrKysrDQo+
-PiBpbmNsdWRlL2FzbS1nZW5lcmljL2J1Zy5oICAgICAgICAgICAgICB8ICA4ICstLQ0KPj4gaW5j
-bHVkZS9saW51eC9jb21waWxlci5oICAgICAgICAgICAgICAgfCA1NiArKysrKysrKysrKy0tLS0N
-Cj4+IHNjcmlwdHMvS2J1aWxkLmluY2x1ZGUgICAgICAgICAgICAgICAgIHwgIDQgKy0NCj4+IHNj
-cmlwdHMvbW9kL01ha2VmaWxlICAgICAgICAgICAgICAgICAgIHwgIDIgKw0KPj4gMTUgZmlsZXMg
-Y2hhbmdlZCwgMzQwIGluc2VydGlvbnMoKyksIDIzMyBkZWxldGlvbnMoLSkNCj4+IGNyZWF0ZSBt
-b2RlIDEwMDY0NCBhcmNoL3g4Ni9rZXJuZWwvbWFjcm9zLlMNCj4gDQo+IEFzaWRlIGZyb20gdGhl
-IG9uZSBuaWdnbGU6DQo+IA0KPiBBY2tlZC1ieTogUGV0ZXIgWmlqbHN0cmEgKEludGVsKSA8cGV0
-ZXJ6QGluZnJhZGVhZC5vcmc+DQoNClRoYW5rcyEgSSBhcHBsaWVkIHlvdXIgY29tbWVudHMgZm9y
-IHBhdGNoZXMgNiAmIDkuIEkgd2lsbCBzZW5kIGFub3RoZXINCnZlcnNpb24gbGF0ZXIgdG9kYXku
-DQoNCkkgaGF2ZSBzb21lIG90aGVyIHBhdGNoZXMgdGhhdCBhZGRyZXNzIGlubGluaW5nIGlzc3Vl
-cyBhbmQgY29kZSByZWR1bmRhbmN5DQpmb3IgdGhlIGFsdGVybmF0aXZlIG1lY2hhbmlzbSBhbmQg
-dGhlIFJTQiBzdHVmZmluZyBjb2RlLCBidXQgSeKAmWxsIHNlbmQgdGhlbQ0KYWZ0ZXIgdGhpcyBz
-ZXQgaXMgYXBwbGllZC4NCg0KUmVnYXJkcywNCk5hZGF2
+On Wed, Jun 20, 2018 at 2:40 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
+
+> diff --git a/mm/kasan/kasan.h b/mm/kasan/kasan.h
+> index 6f4f2ebf5f57..3feacd889e24 100644
+> --- a/mm/kasan/kasan.h
+> +++ b/mm/kasan/kasan.h
+> @@ -1,4 +1,4 @@
+> -/* SPDX-License-Identifier: GPL-2.0 */
+> +// SPDX-License-Identifier: GPL-2.0
+
+The original notation is correct: /* */ style is used for header files.
