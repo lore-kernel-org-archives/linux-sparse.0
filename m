@@ -1,57 +1,54 @@
-From: Peter Zijlstra <peterz@infradead.org>
+From: Nadav Amit <namit@vmware.com>
 Subject: Re: [PATCH v5 0/9] x86: macrofying inline asm for better compilation
-Date: Wed, 20 Jun 2018 12:11:01 +0200
-Message-ID: <20180620101101.GB2530@hirez.programming.kicks-ass.net>
+Date: Wed, 20 Jun 2018 16:47:18 +0000
+Message-ID: <AEBE7B6B-0E78-4018-A347-8DCFE4C60E0D@vmware.com>
 References: <20180619194854.69486-1-namit@vmware.com>
+ <20180620101101.GB2530@hirez.programming.kicks-ass.net>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-Content-Disposition: inline
-In-Reply-To: <20180619194854.69486-1-namit@vmware.com>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Nadav Amit <namit@vmware.com>
-Cc: Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Philippe Ombredanne <pombredanne@nexb.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Christopher Li <sparse@chrisli.org>, x86@kernel.org, linux-kernel@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>, virtualization@lists.linux-foundation.org, Masahiro Yamada <yamada.masahiro@socionext.com>, linux-sparse@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, "H. Peter Anvin" <hpa@zytor.com>, Alok Kataria <akataria@vmware.com>, Sam Ravnborg <sam@ravnborg.org>, Thomas Gleixner <tglx@linutronix.de>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180620101101.GB2530@hirez.programming.kicks-ass.net>
+Content-Language: en-US
+Content-ID: <D8D911AD57C47E4CBDD83B14BD4672F1@namprd05.prod.outlook.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Peter Zijlstra <peterz@infradead.org>
+Cc: Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@redhat.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-found>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Jun 19, 2018 at 12:48:45PM -0700, Nadav Amit wrote:
-> Nadav Amit (9):
->   Makefile: Prepare for using macros for inline asm
->   x86: objtool: use asm macro for better compiler decisions
->   x86: refcount: prevent gcc distortions
->   x86: alternatives: macrofy locks for better inlining
->   x86: bug: prevent gcc distortions
->   x86: prevent inline distortion by paravirt ops
->   x86: extable: use macros instead of inline assembly
->   x86: cpufeature: use macros instead of inline assembly
->   x86: jump-labels: use macros instead of inline assembly
-> 
->  Makefile                               |  9 ++-
->  arch/x86/Makefile                      | 11 ++-
->  arch/x86/include/asm/alternative-asm.h | 20 ++++--
->  arch/x86/include/asm/alternative.h     | 11 +--
->  arch/x86/include/asm/asm.h             | 61 +++++++---------
->  arch/x86/include/asm/bug.h             | 98 +++++++++++++++-----------
->  arch/x86/include/asm/cpufeature.h      | 82 ++++++++++++---------
->  arch/x86/include/asm/jump_label.h      | 65 ++++++++++-------
->  arch/x86/include/asm/paravirt_types.h  | 56 +++++++--------
->  arch/x86/include/asm/refcount.h        | 74 +++++++++++--------
->  arch/x86/kernel/macros.S               | 16 +++++
->  include/asm-generic/bug.h              |  8 +--
->  include/linux/compiler.h               | 56 +++++++++++----
->  scripts/Kbuild.include                 |  4 +-
->  scripts/mod/Makefile                   |  2 +
->  15 files changed, 340 insertions(+), 233 deletions(-)
->  create mode 100644 arch/x86/kernel/macros.S
-
-Aside from the one niggle:
-
-Acked-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+YXQgMzoxMSBBTSwgUGV0ZXIgWmlqbHN0cmEgPHBldGVyekBpbmZyYWRlYWQub3JnPiB3cm90ZToN
+Cg0KPiBPbiBUdWUsIEp1biAxOSwgMjAxOCBhdCAxMjo0ODo0NVBNIC0wNzAwLCBOYWRhdiBBbWl0
+IHdyb3RlOg0KPj4gTmFkYXYgQW1pdCAoOSk6DQo+PiAgTWFrZWZpbGU6IFByZXBhcmUgZm9yIHVz
+aW5nIG1hY3JvcyBmb3IgaW5saW5lIGFzbQ0KPj4gIHg4Njogb2JqdG9vbDogdXNlIGFzbSBtYWNy
+byBmb3IgYmV0dGVyIGNvbXBpbGVyIGRlY2lzaW9ucw0KPj4gIHg4NjogcmVmY291bnQ6IHByZXZl
+bnQgZ2NjIGRpc3RvcnRpb25zDQo+PiAgeDg2OiBhbHRlcm5hdGl2ZXM6IG1hY3JvZnkgbG9ja3Mg
+Zm9yIGJldHRlciBpbmxpbmluZw0KPj4gIHg4NjogYnVnOiBwcmV2ZW50IGdjYyBkaXN0b3J0aW9u
+cw0KPj4gIHg4NjogcHJldmVudCBpbmxpbmUgZGlzdG9ydGlvbiBieSBwYXJhdmlydCBvcHMNCj4+
+ICB4ODY6IGV4dGFibGU6IHVzZSBtYWNyb3MgaW5zdGVhZCBvZiBpbmxpbmUgYXNzZW1ibHkNCj4+
+ICB4ODY6IGNwdWZlYXR1cmU6IHVzZSBtYWNyb3MgaW5zdGVhZCBvZiBpbmxpbmUgYXNzZW1ibHkN
+Cj4+ICB4ODY6IGp1bXAtbGFiZWxzOiB1c2UgbWFjcm9zIGluc3RlYWQgb2YgaW5saW5lIGFzc2Vt
+Ymx5DQo+PiANCj4+IE1ha2VmaWxlICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgIDkg
+KystDQo+PiBhcmNoL3g4Ni9NYWtlZmlsZSAgICAgICAgICAgICAgICAgICAgICB8IDExICsrLQ0K
+Pj4gYXJjaC94ODYvaW5jbHVkZS9hc20vYWx0ZXJuYXRpdmUtYXNtLmggfCAyMCArKysrLS0NCj4+
+IGFyY2gveDg2L2luY2x1ZGUvYXNtL2FsdGVybmF0aXZlLmggICAgIHwgMTEgKy0tDQo+PiBhcmNo
+L3g4Ni9pbmNsdWRlL2FzbS9hc20uaCAgICAgICAgICAgICB8IDYxICsrKysrKystLS0tLS0tLS0N
+Cj4+IGFyY2gveDg2L2luY2x1ZGUvYXNtL2J1Zy5oICAgICAgICAgICAgIHwgOTggKysrKysrKysr
+KysrKysrLS0tLS0tLS0tLS0NCj4+IGFyY2gveDg2L2luY2x1ZGUvYXNtL2NwdWZlYXR1cmUuaCAg
+ICAgIHwgODIgKysrKysrKysrKysrLS0tLS0tLS0tDQo+PiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9q
+dW1wX2xhYmVsLmggICAgICB8IDY1ICsrKysrKysrKystLS0tLS0tDQo+PiBhcmNoL3g4Ni9pbmNs
+dWRlL2FzbS9wYXJhdmlydF90eXBlcy5oICB8IDU2ICsrKysrKystLS0tLS0tLQ0KPj4gYXJjaC94
+ODYvaW5jbHVkZS9hc20vcmVmY291bnQuaCAgICAgICAgfCA3NCArKysrKysrKysrKy0tLS0tLS0t
+DQo+PiBhcmNoL3g4Ni9rZXJuZWwvbWFjcm9zLlMgICAgICAgICAgICAgICB8IDE2ICsrKysrDQo+
+PiBpbmNsdWRlL2FzbS1nZW5lcmljL2J1Zy5oICAgICAgICAgICAgICB8ICA4ICstLQ0KPj4gaW5j
+bHVkZS9saW51eC9jb21waWxlci5oICAgICAgICAgICAgICAgfCA1NiArKysrKysrKysrKy0tLS0N
+Cj4+IHNjcmlwdHMvS2J1aWxkLmluY2x1ZGUgICAgICAgICAgICAgICAgIHwgIDQgKy0NCj4+IHNj
+cmlwdHMvbW9kL01ha2VmaWxlICAgICAgICAgICAgICAgICAgIHwgIDIgKw0KPj4gMTUgZmlsZXMg
+Y2hhbmdlZCwgMzQwIGluc2VydGlvbnMoKyksIDIzMyBkZWxldGlvbnMoLSkNCj4+IGNyZWF0ZSBt
+b2RlIDEwMDY0NCBhcmNoL3g4Ni9rZXJuZWwvbWFjcm9zLlMNCj4gDQo+IEFzaWRlIGZyb20gdGhl
+IG9uZSBuaWdnbGU6DQo+IA0KPiBBY2tlZC1ieTogUGV0ZXIgWmlqbHN0cmEgKEludGVsKSA8cGV0
+ZXJ6QGluZnJhZGVhZC5vcmc+DQoNClRoYW5rcyEgSSBhcHBsaWVkIHlvdXIgY29tbWVudHMgZm9y
+IHBhdGNoZXMgNiAmIDkuIEkgd2lsbCBzZW5kIGFub3RoZXINCnZlcnNpb24gbGF0ZXIgdG9kYXku
+DQoNCkkgaGF2ZSBzb21lIG90aGVyIHBhdGNoZXMgdGhhdCBhZGRyZXNzIGlubGluaW5nIGlzc3Vl
+cyBhbmQgY29kZSByZWR1bmRhbmN5DQpmb3IgdGhlIGFsdGVybmF0aXZlIG1lY2hhbmlzbSBhbmQg
+dGhlIFJTQiBzdHVmZmluZyBjb2RlLCBidXQgSeKAmWxsIHNlbmQgdGhlbQ0KYWZ0ZXIgdGhpcyBz
+ZXQgaXMgYXBwbGllZC4NCg0KUmVnYXJkcywNCk5hZGF2
