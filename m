@@ -1,50 +1,50 @@
 From: Andrey Konovalov <andreyknvl@google.com>
 Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
-Date: Thu, 28 Jun 2018 20:29:07 +0200
-Message-ID: <CAAeHK+xz552VNpZxgWwU-hbTqF5_F6YVDw3fSv=4OT8mNrqPzg@mail.gmail.com>
-References: <cover.1530018818.git.andreyknvl@google.com> <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
+Date: Thu, 28 Jun 2018 20:56:41 +0200
+Message-ID: <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
+References: <cover.1530018818.git.andreyknvl@google.com> <20180628105057.GA26019@e103592.cambridge.arm.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
+In-Reply-To: <20180628105057.GA26019@e103592.cambridge.arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@l>
+To: Dave Martin <Dave.Martin@arm.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Jun 28, 2018 at 1:08 AM, Andrew Morton
-<akpm@linux-foundation.org> wrote:
-> On Tue, 26 Jun 2018 15:15:10 +0200 Andrey Konovalov <andreyknvl@google.com> wrote:
->> ====== Benchmarks
->>
->> The following numbers were collected on Odroid C2 board. Both KASAN and
->> KHWASAN were used in inline instrumentation mode.
->>
->> Boot time [1]:
->> * ~1.7 sec for clean kernel
->> * ~5.0 sec for KASAN
->> * ~5.0 sec for KHWASAN
->>
->> Slab memory usage after boot [2]:
->> * ~40 kb for clean kernel
->> * ~105 kb + 1/8th shadow ~= 118 kb for KASAN
->> * ~47 kb + 1/16th shadow ~= 50 kb for KHWASAN
->>
->> Network performance [3]:
->> * 8.33 Gbits/sec for clean kernel
->> * 3.17 Gbits/sec for KASAN
->> * 2.85 Gbits/sec for KHWASAN
->>
->> Note, that KHWASAN (compared to KASAN) doesn't require quarantine.
->>
->> [1] Time before the ext4 driver is initialized.
->> [2] Measured as `cat /proc/meminfo | grep Slab`.
->> [3] Measured as `iperf -s & iperf -c 127.0.0.1 -t 30`.
+On Thu, Jun 28, 2018 at 12:51 PM, Dave Martin <Dave.Martin@arm.com> wrote:
+> On Tue, Jun 26, 2018 at 03:15:10PM +0200, Andrey Konovalov wrote:
+>> 1. By using the Top Byte Ignore arm64 CPU feature, we can store pointer
+>>    tags in the top byte of each kernel pointer.
 >
-> The above doesn't actually demonstrate the whole point of the
-> patchset: to reduce KASAN's very high memory consumption?
+> [...]
+>
+> This is a change from the current situation, so the kernel may be
+> making implicit assumptions about the top byte of kernel addresses.
+>
+> Randomising the top bits may cause things like address conversions and
+> pointer arithmetic to break.
+>
+> For example, (q - p) will not produce the expected result if q and p
+> have different tags.
 
-You mean that memory usage numbers collected after boot don't give a
-representative picture of actual memory consumption on real workloads?
+If q and p have different tags, that means they come from different
+allocations. I don't think it would make sense to calculate pointer
+difference in this case.
 
-What kind of memory consumption testing would you like to see?
+>
+> Conversions, such as between pointer and pfn, may also go wrong if not
+> appropriately masked.
+>
+> There are also potential pointer comparison and aliasing issues if
+> the tag bits are ever stripped or modified.
+>
+>
+> What was your approach to tracking down all the points in the code
+> where we have a potential issue?
+
+I've been fuzzing the kernel built with KWHASAN with syzkaller. This
+gives a decent coverage and I was able to find some places where
+fixups were required this way. Right now the fuzzer is running without
+issues. It doesn't prove that all such places are fixed, but I don't
+know a better way to test this.
