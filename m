@@ -1,56 +1,37 @@
-From: Dave Martin <Dave.Martin@arm.com>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
- sanitizer
-Date: Thu, 28 Jun 2018 11:51:06 +0100
-Message-ID: <20180628105057.GA26019@e103592.cambridge.arm.com>
-References: <cover.1530018818.git.andreyknvl@google.com>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
+Date: Thu, 28 Jun 2018 20:26:39 +0200
+Message-ID: <CAAeHK+wg35W6D3Cat7w8kqV+9fB6dKmnCUuUrZP_tz5=vKk+0Q@mail.gmail.com>
+References: <cover.1530018818.git.andreyknvl@google.com> <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
+ <CAN=P9pivApAo76Kjc0TUDE0kvJn0pET=47xU6e=ioZV2VqO0Rg@mail.gmail.com>
+ <CAEZpscCcP6=O_OCqSwW8Y6u9Ee99SzWN+hRcgpP2tK=OEBFnNw@mail.gmail.com> <20180627181138.14c9b66e13b8778506205f89@linux-foundation.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <cover.1530018818.git.andreyknvl@google.com>
+In-Reply-To: <20180627181138.14c9b66e13b8778506205f89@linux-foundation.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Vishwath Mohan <vishwath@google.com>, Kostya Serebryany <kcc@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Jun 26, 2018 at 03:15:10PM +0200, Andrey Konovalov wrote:
-> This patchset adds a new mode to KASAN [1], which is called KHWASAN
-> (Kernel HardWare assisted Address SANitizer).
-> 
-> The plan is to implement HWASan [2] for the kernel with the incentive,
-> that it's going to have comparable to KASAN performance, but in the same
-> time consume much less memory, trading that off for somewhat imprecise
-> bug detection and being supported only for arm64.
-> 
-> The overall idea of the approach used by KHWASAN is the following:
-> 
-> 1. By using the Top Byte Ignore arm64 CPU feature, we can store pointer
->    tags in the top byte of each kernel pointer.
+On Thu, Jun 28, 2018 at 3:11 AM, Andrew Morton
+<akpm@linux-foundation.org> wrote:
+> On Wed, 27 Jun 2018 17:59:00 -0700 Vishwath Mohan <vishwath@google.com> wrote:
+>> Yeah, I can confirm that it's an issue. Like Kostya mentioned, I don't have
+>> data on-hand, but anecdotally both ASAN and KASAN have proven problematic
+>> to enable for environments that don't tolerate the increased memory
+>> pressure well. This includes,
+>> (a) Low-memory form factors - Wear, TV, Things, lower-tier phones like Go
+>> (c) Connected components like Pixel's visual core
+>> <https://www.blog.google/products/pixel/pixel-visual-core-image-processing-and-machine-learning-pixel-2/>
+>>
+>>
+>> These are both places I'd love to have a low(er) memory footprint option at
+>> my disposal.
+>
+> Thanks.
+>
+> It really is important that such information be captured in the
+> changelogs.  In as much detail as can be mustered.
 
-[...]
-
-This is a change from the current situation, so the kernel may be
-making implicit assumptions about the top byte of kernel addresses.
-
-Randomising the top bits may cause things like address conversions and
-pointer arithmetic to break.
-
-For example, (q - p) will not produce the expected result if q and p
-have different tags.
-
-Conversions, such as between pointer and pfn, may also go wrong if not
-appropriately masked.
-
-There are also potential pointer comparison and aliasing issues if
-the tag bits are ever stripped or modified.
-
-
-What was your approach to tracking down all the points in the code
-where we have a potential issue?
-
-(I haven't dug through the series in detail yet, so this may be
-answered somewhere already...)
-
-Cheers
----Dave
+I'll add it to the changelog in v5. Thanks!
