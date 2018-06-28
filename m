@@ -1,69 +1,56 @@
-From: Geert Uytterhoeven <geert@linux-m68k.org>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
-Date: Thu, 28 Jun 2018 09:01:42 +0200
-Message-ID: <CAMuHMdVVutxU3paxcjsuLVjCuooHqs61o0DEySkOK1zUeMj2tw@mail.gmail.com>
-References: <cover.1530018818.git.andreyknvl@google.com> <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
- <CAN=P9pivApAo76Kjc0TUDE0kvJn0pET=47xU6e=ioZV2VqO0Rg@mail.gmail.com>
+From: Dave Martin <Dave.Martin@arm.com>
+Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
+ sanitizer
+Date: Thu, 28 Jun 2018 11:51:06 +0100
+Message-ID: <20180628105057.GA26019@e103592.cambridge.arm.com>
+References: <cover.1530018818.git.andreyknvl@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAN=P9pivApAo76Kjc0TUDE0kvJn0pET=47xU6e=ioZV2VqO0Rg@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <cover.1530018818.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kostya Serebryany <kcc@google.com>
-Cc: Andrew Morton <akpm@linux-foundation.org>, Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W. Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg KH <gregkh@linuxfoundation.o>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Kostya,
+On Tue, Jun 26, 2018 at 03:15:10PM +0200, Andrey Konovalov wrote:
+> This patchset adds a new mode to KASAN [1], which is called KHWASAN
+> (Kernel HardWare assisted Address SANitizer).
+> 
+> The plan is to implement HWASan [2] for the kernel with the incentive,
+> that it's going to have comparable to KASAN performance, but in the same
+> time consume much less memory, trading that off for somewhat imprecise
+> bug detection and being supported only for arm64.
+> 
+> The overall idea of the approach used by KHWASAN is the following:
+> 
+> 1. By using the Top Byte Ignore arm64 CPU feature, we can store pointer
+>    tags in the top byte of each kernel pointer.
 
-On Thu, Jun 28, 2018 at 2:04 AM Kostya Serebryany <kcc@google.com> wrote:
-> On Wed, Jun 27, 2018 at 4:08 PM Andrew Morton <akpm@linux-foundation.org> wrote:
-> > On Tue, 26 Jun 2018 15:15:10 +0200 Andrey Konovalov <andreyknvl@google.com> wrote:
-> > > This patchset adds a new mode to KASAN [1], which is called KHWASAN
-> > > (Kernel HardWare assisted Address SANitizer).
-> > >
-> > > The plan is to implement HWASan [2] for the kernel with the incentive,
-> > > that it's going to have comparable to KASAN performance, but in the same
-> > > time consume much less memory, trading that off for somewhat imprecise
-> > > bug detection and being supported only for arm64.
-> >
-> > Why do we consider this to be a worthwhile change?
-> >
-> > Is KASAN's memory consumption actually a significant problem?  Some
-> > data regarding that would be very useful.
->
-> On mobile, ASAN's and KASAN's memory usage is a significant problem.
-> Not sure if I can find scientific evidence of that.
-> CC-ing Vishwath Mohan who deals with KASAN on Android to provide
-> anecdotal evidence.
->
-> There are several other benefits too:
-> * HWASAN more reliably detects non-linear-buffer-overflows compared to
-> ASAN (same for kernel-HWASAN vs kernel-ASAN)
-> * Same for detecting use-after-free (since HWASAN doesn't rely on quarantine).
-> * Much easier to implement stack-use-after-return detection (which
-> IIRC KASAN doesn't have yet, because in KASAN it's too hard)
->
-> > If it is a large problem then we still have that problem on x86, so the
-> > problem remains largely unsolved?
->
-> The problem is more significant on mobile devices than on desktop/server.
-> I'd love to have [K]HWASAN on x86_64 as well, but it's less trivial since x86_64
-> doesn't have an analog of aarch64's top-byte-ignore hardware feature.
+[...]
 
-This depends on your mobile devices and desktops and servers.
-There exist mobile devices with more memory than some desktops or servers.
+This is a change from the current situation, so the kernel may be
+making implicit assumptions about the top byte of kernel addresses.
 
-So actual numbers (O(KiB)? O(MiB)? O(GiB)?) would be nice to have.
+Randomising the top bits may cause things like address conversions and
+pointer arithmetic to break.
 
-Thanks!
+For example, (q - p) will not produce the expected result if q and p
+have different tags.
 
-Gr{oetje,eeting}s,
+Conversions, such as between pointer and pfn, may also go wrong if not
+appropriately masked.
 
-                        Geert
+There are also potential pointer comparison and aliasing issues if
+the tag bits are ever stripped or modified.
 
--- 
-Geert Uytterhoeven -- There's lots of Linux beyond ia32 -- geert@linux-m68k.org
 
-In personal conversations with technical people, I call myself a hacker. But
-when I'm talking to journalists I just say "programmer" or something like that.
-                                -- Linus Torvalds
+What was your approach to tracking down all the points in the code
+where we have a potential issue?
+
+(I haven't dug through the series in detail yet, so this may be
+answered somewhere already...)
+
+Cheers
+---Dave
