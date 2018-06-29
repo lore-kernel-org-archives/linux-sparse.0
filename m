@@ -1,50 +1,36 @@
-From: Dan Carpenter <dan.carpenter@oracle.com>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
- sanitizer
-Date: Fri, 29 Jun 2018 16:42:57 +0300
-Message-ID: <20180629134257.ci5ninozkh2ni6wd@mwanda>
-References: <cover.1530018818.git.andreyknvl@google.com>
- <20180628105057.GA26019@e103592.cambridge.arm.com>
- <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
- <20180629110419.GC26019@e103592.cambridge.arm.com>
- <20180629112613.7i4xesjyxolc63gu@ltop.local>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
+Date: Fri, 29 Jun 2018 16:40:20 +0200
+Message-ID: <CAAeHK+zwmOMgP=Om6TKz8V5_4qgFhDfQSA01CBMnhbBWmHe9sQ@mail.gmail.com>
+References: <cover.1530018818.git.andreyknvl@google.com> <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
+ <CAAeHK+xz552VNpZxgWwU-hbTqF5_F6YVDw3fSv=4OT8mNrqPzg@mail.gmail.com>
+ <20180628124039.8a42ab5e2994fb2876ff4f75@linux-foundation.org>
+ <CAAeHK+xsBOKghUp9XhpfXGqU=gjSYuy3G2GH14zWNEmaLPy8_w@mail.gmail.com> <20180629130155.e7ztz5ikxfl352ff@lakrids.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20180629112613.7i4xesjyxolc63gu@ltop.local>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Mark Rutland <mark.rutland@arm.com>, Kate Stewart <kstewart@linuxfoundation.org>, linux-doc@vger.kernel.org, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Paul Lawrence <paullawrence@google.com>, Linux Memory Management List <linux-mm@kvack.org>, Alexander Potapenko <glider@google.com>, Chintan Pandya <cpandya@codeaurora.org>, Christoph Lameter <cl@linux.com>, smatch@vger.kernel.org, Ingo Molnar <mingo@kernel.org>, Jacob Bramley <Jacob.Bramley@arm.com>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Mark Brand <markbrand@google.com>, kasan-dev <kasan-dev@googlegroups.com>, linux-sparse@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Dmitry Vyukov <dvyukov@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Dave Martin <Dave.Martin@arm.com>, Evgeniy
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180629130155.e7ztz5ikxfl352ff@lakrids.cambridge.arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Jun 29, 2018 at 01:26:14PM +0200, Luc Van Oostenryck wrote:
-> On Fri, Jun 29, 2018 at 12:04:22PM +0100, Dave Martin wrote:
-> > 
-> > Can sparse be hacked to identify pointer subtractions where the pointers
-> > are cannot be statically proved to point into the same allocation?
-> 
-> sparse only see the (deatils of) the function it analyses and all
-> visible declarations, nothing more.
-> 
-> It would be more a job for smatch which do global analysis.
-> But to identify such subtractions yu must already have a (good)
-> pointer alias analysis which I don't think smatch do (but I can
-> be wrong, Dan & smatch's ml added in CC).
+On Fri, Jun 29, 2018 at 3:01 PM, Mark Rutland <mark.rutland@arm.com> wrote:
+> On Fri, Jun 29, 2018 at 02:45:08PM +0200, Andrey Konovalov wrote:
+>> So with clean kernel after boot we get 40 kb memory usage. With KASAN
+>> it is ~120 kb, which is 200% overhead. With KHWASAN it's 50 kb, which
+>> is 25% overhead. This should approximately scale to any amounts of
+>> used slab memory. For example with 100 mb memory usage we would get
+>> +200 mb for KASAN and +25 mb with KHWASAN. (And KASAN also requires
+>> quarantine for better use-after-free detection). I can explicitly
+>> mention the overhead in %s in the changelog.
+>
+> Could you elaborate on where that SLAB overhead comes from?
+>
+> IIUC that's not for the shadow itself (since it's allocated up-front and
+> not accounted to SLAB), and that doesn't take into account the
+> quarantine, so what's eating that space?
 
-That would be hard to manage.  Maybe in a year from now...
-
-Pointer math errors tend to get caught pretty quick because they're on
-the success path so I don't imagine there are huge numbers of bugs.
-
-regards,
-dan carpenter
+Redzones. KHWASAN doesn't need them since the next slab object is
+marked with a different tag (with a high probability) and acts as a
+redzone.
