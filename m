@@ -1,8 +1,8 @@
-From: Will Deacon <will.deacon@arm.com>
+From: Catalin Marinas <catalin.marinas@arm.com>
 Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
  sanitizer
-Date: Fri, 29 Jun 2018 12:07:10 +0100
-Message-ID: <20180629110709.GA17859@arm.com>
+Date: Fri, 29 Jun 2018 12:07:06 +0100
+Message-ID: <20180629110706.37aqq6x4vhnblkb6@armageddon.cambridge.arm.com>
 References: <cover.1530018818.git.andreyknvl@google.com>
  <20180628105057.GA26019@e103592.cambridge.arm.com>
  <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
@@ -13,7 +13,7 @@ Content-Disposition: inline
 In-Reply-To: <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Dave Martin <Dave.Martin@arm.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
+Cc: Dave Martin <Dave.Martin@arm.com>, Mark Rutland <mark.rutland@arm.com>, Kate Stewart <kstewart@linuxfoundation.org>, linux-doc@vger.kernel.org, Will Deacon <will.deacon@arm.com>, Paul Lawrence <paullawrence@google.com>, Linux Memory Management List <linux-mm@kvack.org>, Alexander Potapenko <glider@google.com>, Chintan Pandya <cpandya@codeaurora.org>, Christoph Lameter <cl@linux.com>, Ingo Molnar <mingo@kernel.org>, Jacob Bramley <Jacob.Bramley@arm.com>, Jann Horn <jannh@google.com>, Mark Brand <markbrand@google.com>, kasan-dev <kasan-dev@googlegroups.com>, linux-sparse@vger.kernel.org, Geert Uytterhoeven <geert@linux-m68k.org>, Linux ARM <linux-arm-kernel@lists.infradead.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Evgeniy Stepanov <eugen>
 List-Id: linux-sparse@vger.kernel.org
 
 On Thu, Jun 28, 2018 at 08:56:41PM +0200, Andrey Konovalov wrote:
@@ -37,11 +37,21 @@ On Thu, Jun 28, 2018 at 08:56:41PM +0200, Andrey Konovalov wrote:
 > allocations. I don't think it would make sense to calculate pointer
 > difference in this case.
 
-It might not seen sensible, but we could still be relying on this in the
-kernel and so this change would introduce a regression. I think we need
-a way to identify such pointer usage before these patches can seriously be
-considered for mainline inclusion. For example use of '>' and '<' to
-compare pointers in an rbtree could be affected by the introduction of
-tags.
+Well, there is a lot of pointer comparison in the kernel which means
+pointer difference. Take is_vmalloc_addr() for example, even if your
+patchset does not cover (IIUC) vmalloc() at the moment, this function
+may be called with slab addresses. Presumably they would all fail the
+check with a non-0xff tag but it's something needs understood. If you
+later add support for vmalloc(), this test would fail (as would the
+rb tree search in find_vmap_area(). Kmemleak would probably break as
+well as it makes heavy use of rb tree.
 
-Will
+Basically you need to be very clear about kernel pointer usage (with an
+associated tag or type) vs address range it refers to and in most cases
+converted to an unsigned long. See the other discussion on sparse, it
+could potentially be useful if we can detect the places where a pointer
+is converted to ulong and maybe hide such conversion behind a macro with
+the arm64 implementation also clearing the tag.
+
+-- 
+Catalin
