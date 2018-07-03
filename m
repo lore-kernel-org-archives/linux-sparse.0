@@ -1,40 +1,42 @@
-From: Evgenii Stepanov <eugenis@google.com>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
-Date: Mon, 2 Jul 2018 16:39:51 -0700
-Message-ID: <CAFKCwrg=3J-ARaOJgc73oRE7hQxs1VV7YiZEPS7Dt8Gfn6cWQA@mail.gmail.com>
-References: <cover.1530018818.git.andreyknvl@google.com> <20180627160800.3dc7f9ee41c0badbf7342520@linux-foundation.org>
- <CAN=P9pivApAo76Kjc0TUDE0kvJn0pET=47xU6e=ioZV2VqO0Rg@mail.gmail.com> <20180702203321.GA8371@bombadil.infradead.org>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
+ sanitizer
+Date: Tue, 3 Jul 2018 18:36:08 +0100
+Message-ID: <20180703173608.GF27243@arm.com>
+References: <cover.1530018818.git.andreyknvl@google.com>
+ <20180628105057.GA26019@e103592.cambridge.arm.com>
+ <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
+ <20180629110709.GA17859@arm.com>
+ <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180702203321.GA8371@bombadil.infradead.org>
+Content-Disposition: inline
+In-Reply-To: <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Matthew Wilcox <willy@infradead.org>
-Cc: Kostya Serebryany <kcc@google.com>, Andrew Morton <akpm@linux-foundation.org>, Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Dave Martin <Dave.Martin@arm.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Jul 2, 2018 at 1:33 PM, Matthew Wilcox <willy@infradead.org> wrote:
-> On Wed, Jun 27, 2018 at 05:04:28PM -0700, Kostya Serebryany wrote:
->> The problem is more significant on mobile devices than on desktop/server.
->> I'd love to have [K]HWASAN on x86_64 as well, but it's less trivial since x86_64
->> doesn't have an analog of aarch64's top-byte-ignore hardware feature.
->
-> Well, can we emulate it in software?
->
-> We've got 48 bits of virtual address space on x86.  If we need all 8
-> bits, then that takes us down to 40 bits (39 bits for user and 39 bits
-> for kernel).  My laptop only has 34 bits of physical memory, so could
-> we come up with a memory layout which works for me?
+On Fri, Jun 29, 2018 at 06:36:10PM +0200, Andrey Konovalov wrote:
+> On Fri, Jun 29, 2018 at 1:07 PM, Will Deacon <will.deacon@arm.com> wrote:
+> > It might not seen sensible, but we could still be relying on this in the
+> > kernel and so this change would introduce a regression. I think we need
+> > a way to identify such pointer usage before these patches can seriously be
+> > considered for mainline inclusion.
+> 
+> Another point that I have here is that KHWASAN is a debugging tool not
+> meant to be used in production. We're not trying to change the ABI or
+> something like that (referring to the other HWASAN patchset). We can
+> fix up the non obvious places where untagging is needed in a case by
+> case basis with additional patches when testing reveals it.
 
-Yes, probably.
+Hmm, but elsewhere in this thread, Evgenii is motivating the need for this
+patch set precisely because the lower overhead means it's suitable for
+"near-production" use. So I don't think writing this off as a debugging
+feature is the right approach, and we instead need to put effort into
+analysing the impact of address tags on the kernel as a whole. Playing
+whack-a-mole with subtle tag issues sounds like the worst possible outcome
+for the long-term.
 
-We've tried this in userspace by mapping a file multiple times, but
-that's very slow, likely because of the extra TLB pressure.
-It should be possible to achieve better performance in the kernel with
-some page table tricks (i.e. if we take top 8 bits out of 48, then
-there would be only two second-level tables, and the top-level table
-will look like [p1, p2, p1, p2, ...]). I'm not 100% sure if that would
-work.
-
-I don't think this should be part of this patchset, but it's good to
-keep this in mind.
+Will
