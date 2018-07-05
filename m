@@ -1,42 +1,40 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
- sanitizer
-Date: Tue, 3 Jul 2018 18:36:08 +0100
-Message-ID: <20180703173608.GF27243@arm.com>
-References: <cover.1530018818.git.andreyknvl@google.com>
- <20180628105057.GA26019@e103592.cambridge.arm.com>
- <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
- <20180629110709.GA17859@arm.com>
- <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Dave Martin <Dave.Martin@arm.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
+From: Bart Van Assche <bart.vanassche@wdc.com>
+Subject: [PATCH] compiler.h, sparse, smatch: Do not define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW
+Date: Thu,  5 Jul 2018 08:57:26 -0700
+Message-ID: <20180705155726.26716-1-bart.vanassche@wdc.com>
+Return-path: <stable-owner@vger.kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org, Bart Van Assche <bart.vanassche@wdc.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <keescook@chromium.org>, Dan Carpenter <dan.carpenter@oracle.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, stable@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Jun 29, 2018 at 06:36:10PM +0200, Andrey Konovalov wrote:
-> On Fri, Jun 29, 2018 at 1:07 PM, Will Deacon <will.deacon@arm.com> wrote:
-> > It might not seen sensible, but we could still be relying on this in the
-> > kernel and so this change would introduce a regression. I think we need
-> > a way to identify such pointer usage before these patches can seriously be
-> > considered for mainline inclusion.
-> 
-> Another point that I have here is that KHWASAN is a debugging tool not
-> meant to be used in production. We're not trying to change the ABI or
-> something like that (referring to the other HWASAN patchset). We can
-> fix up the non obvious places where untagging is needed in a case by
-> case basis with additional patches when testing reveals it.
+Both sparse and smatch identify themselves as gcc. However, neither
+static analyzer supports any of the __builtin_*_overflow() functions.
+Hence do not define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW for these
+static checkers.
 
-Hmm, but elsewhere in this thread, Evgenii is motivating the need for this
-patch set precisely because the lower overhead means it's suitable for
-"near-production" use. So I don't think writing this off as a debugging
-feature is the right approach, and we instead need to put effort into
-analysing the impact of address tags on the kernel as a whole. Playing
-whack-a-mole with subtle tag issues sounds like the worst possible outcome
-for the long-term.
+Fixes: f0907827a8a9 ("compiler.h: enable builtin overflow checkers and add fallback code")
+Signed-off-by: Bart Van Assche <bart.vanassche@wdc.com>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: <stable@vger.kernel.org>
+---
+ include/linux/compiler-gcc.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Will
+diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+index f1a7492a5cc8..15e55b89e952 100644
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -344,6 +344,6 @@
+  */
+ #define uninitialized_var(x) x = x
+ 
+-#if GCC_VERSION >= 50100
++#if GCC_VERSION >= 50100 && !defined(__CHECKER__)
+ #define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW 1
+ #endif
+-- 
+2.18.0
