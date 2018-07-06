@@ -1,62 +1,31 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Bart Van Assche <Bart.VanAssche@wdc.com>
 Subject: Re: [PATCH] compiler.h, sparse, smatch: Do not define
  COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW
-Date: Sat, 7 Jul 2018 00:46:01 +0200
-Message-ID: <20180706224600.cerzr5p5yyorqttw@ltop.local>
+Date: Fri, 6 Jul 2018 22:53:08 +0000
+Message-ID: <279ce5d2df9ecd195d595933792c12cf6d943444.camel@wdc.com>
 References: <20180705155726.26716-1-bart.vanassche@wdc.com>
- <20180706173120.4pg5wwtuqggl6sah@ltop.local>
- <e18b8d7326e41cb858ce1e892664489f8aba995b.camel@wdc.com>
+         <20180706173120.4pg5wwtuqggl6sah@ltop.local>
+         <e18b8d7326e41cb858ce1e892664489f8aba995b.camel@wdc.com>
+         <20180706224600.cerzr5p5yyorqttw@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <e18b8d7326e41cb858ce1e892664489f8aba995b.camel@wdc.com>
+In-Reply-To: <20180706224600.cerzr5p5yyorqttw@ltop.local>
+Content-Language: en-US
+Content-ID: <B913623351E472479E1F1BC48507B5A7@namprd04.prod.outlook.com>
 Sender: stable-owner@vger.kernel.org
-To: Bart Van Assche <Bart.VanAssche@wdc.com>
+To: "luc.vanoostenryck@gmail.com" <luc.vanoostenryck@gmail.com>
 Cc: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux@rasmusvillemoes.dk" <linux@rasmusvillemoes.dk>, "dan.carpenter@oracle.com" <dan.carpenter@oracle.com>, "keescook@chromium.org" <keescook@chromium.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "sparse@chrisli.org" <sparse@chrisli.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Jul 06, 2018 at 05:38:33PM +0000, Bart Van Assche wrote:
-> 
-> Hello Luc,
-> 
-> Thanks, I had missed Miroslav's patch. BTW, which sparse repository do you
-> recommend that I pull from to obtain a recent and stable version of sparse? The
-> git://git.kernel.org/pub/scm/devel/sparse/sparse.git repository mentioned on
-> https://sparse.wiki.kernel.org/index.php/Main_Page, https://github.com/lucvoo/sparse
-> or https://github.com/lucvoo/sparse-dev?
-> 
-> Thanks,
-
-The tree at:
-	https://github.com/lucvoo/sparse-dev
-is my own development/work-in-progrees tree. It mainly contains
-my WIP topic branches. These branches are not stable and are rebased.
-I mainly use this tree to share patch series for testing & review.
-
-The official tree is the one on kernel.org:
-	git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-and is stable and relatively recent but:
-1) it lacks some essential patches to avoid tons of useless noises,
-   like for example the patch:
-	https://patchwork.kernel.org/patch/10334355/
-2) it lacks numerous fixes and improvements, like these overflow
-   builtins, but many others too.
-3) Christopher, the maintainer, is AWOL since a few months. He even
-   never sent an announcement for the last release.
-
-So, I collect patches from myself and from others in the tree:
-	  git://github.com/lucvoo/sparse.git
-	https://github.com/lucvoo/sparse
-This tree is stable, very well tested, never rebased and contains 
-numerous fixes and improvements.
-
-Of course, ideally, my stable tree should be merged into the official
-tree, like Linus already asked Chris to do (twice). But for now,
-I strongly suggest to use my stable & up-to-date tree on github:
-	git://github.com/lucvoo/sparse.git
-
-Sorry if the situation is a bit confusing. I'm far from being satisfied
-with it myself.
-
--- Luc Van Oostenryck
+T24gU2F0LCAyMDE4LTA3LTA3IGF0IDAwOjQ2ICswMjAwLCBMdWMgVmFuIE9vc3RlbnJ5Y2sgd3Jv
+dGU6DQo+IDEpIGl0IGxhY2tzIHNvbWUgZXNzZW50aWFsIHBhdGNoZXMgdG8gYXZvaWQgdG9ucyBv
+ZiB1c2VsZXNzIG5vaXNlcywNCj4gICAgbGlrZSBmb3IgZXhhbXBsZSB0aGUgcGF0Y2g6DQo+IAlo
+dHRwczovL3BhdGNod29yay5rZXJuZWwub3JnL3BhdGNoLzEwMzM0MzU1Lw0KDQpIZWxsbyBMdWMs
+DQoNClRvIHN1cHByZXNzIHRoZSBzaXplb2Yodm9pZCkgd2FybmluZ3MgSSBzZW50IHRoZSBmb2xs
+b3dpbmcgcGF0Y2ggdG8gTGludXM6DQoiW1BBVENIXSBrZXJuZWwuaDogQXZvaWQgdGhhdCBzcGFy
+c2UgY29tcGxhaW5zIGFib3V0IHVzaW5nIHNpemVvZih2b2lkKSINCihodHRwczovL2xvcmUua2Vy
+bmVsLm9yZy9sa21sLzIwMTgwNzA1MTYxNzA5LjE3MDI4LTEtYmFydC52YW5hc3NjaGVAd2RjLmNv
+bS8pLg0KUGxlYXNlIGFkdmlzZSBob3cgdG8gcHJvY2VlZCB3aXRoIHRoYXQgcGF0Y2guDQoNClRo
+YW5rcywNCg0KQmFydC4NCg0KDQoNCg==
