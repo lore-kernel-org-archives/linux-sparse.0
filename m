@@ -1,60 +1,59 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Bart Van Assche <Bart.VanAssche@wdc.com>
 Subject: Re: [PATCH] compiler.h, sparse, smatch: Do not define
  COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW
-Date: Fri, 6 Jul 2018 19:31:21 +0200
-Message-ID: <20180706173120.4pg5wwtuqggl6sah@ltop.local>
+Date: Fri, 6 Jul 2018 17:38:33 +0000
+Message-ID: <e18b8d7326e41cb858ce1e892664489f8aba995b.camel@wdc.com>
 References: <20180705155726.26716-1-bart.vanassche@wdc.com>
+         <20180706173120.4pg5wwtuqggl6sah@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <stable-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180705155726.26716-1-bart.vanassche@wdc.com>
+In-Reply-To: <20180706173120.4pg5wwtuqggl6sah@ltop.local>
+Content-Language: en-US
+Content-ID: <FC3832FF251D154BAB699B393E586C6C@namprd04.prod.outlook.com>
 Sender: stable-owner@vger.kernel.org
-To: Bart Van Assche <bart.vanassche@wdc.com>
-Cc: Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Kees Cook <keescook@chromium.org>, Dan Carpenter <dan.carpenter@oracle.com>, stable@vger.kernel.org
+To: "luc.vanoostenryck@gmail.com" <luc.vanoostenryck@gmail.com>
+Cc: "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, "linux@rasmusvillemoes.dk" <linux@rasmusvillemoes.dk>, "dan.carpenter@oracle.com" <dan.carpenter@oracle.com>, "keescook@chromium.org" <keescook@chromium.org>, "stable@vger.kernel.org" <stable@vger.kernel.org>, "sparse@chrisli.org" <sparse@chrisli.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Jul 05, 2018 at 08:57:26AM -0700, Bart Van Assche wrote:
-> Both sparse and smatch identify themselves as gcc. However, neither
-> static analyzer supports any of the __builtin_*_overflow() functions.
-> Hence do not define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW for these
-> static checkers.
-> 
-> Fixes: f0907827a8a9 ("compiler.h: enable builtin overflow checkers and add fallback code")
-> Signed-off-by: Bart Van Assche <bart.vanassche@wdc.com>
-> Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-> Cc: Kees Cook <keescook@chromium.org>
-> Cc: Dan Carpenter <dan.carpenter@oracle.com>
-> Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> Cc: <stable@vger.kernel.org>
-> ---
->  include/linux/compiler-gcc.h | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-> index f1a7492a5cc8..15e55b89e952 100644
-> --- a/include/linux/compiler-gcc.h
-> +++ b/include/linux/compiler-gcc.h
-> @@ -344,6 +344,6 @@
->   */
->  #define uninitialized_var(x) x = x
->  
-> -#if GCC_VERSION >= 50100
-> +#if GCC_VERSION >= 50100 && !defined(__CHECKER__)
->  #define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW 1
->  #endif
-> -- 
-
-Hi,
-
-A similar patch has already been posted 2 or 3 weeks ago [1].
-
-Also, the development version of sparse [2] supports the
-__builtin_*_overflow() functions *and* supports the __has_builtin()
-macro. So I think it's preferable to use __has_builtin(),
-at least for sparse (maybe smatch is interested in it too).
-
--- Luc Van Oostenryck
-
-[1] https://lore.kernel.org/lkml/alpine.LSU.2.21.1806071258310.7958@pobox.suse.cz/
-[2] git://github.com/lucvoo/sparse.git
+T24gRnJpLCAyMDE4LTA3LTA2IGF0IDE5OjMxICswMjAwLCBMdWMgVmFuIE9vc3RlbnJ5Y2sgd3Jv
+dGU6DQo+IE9uIFRodSwgSnVsIDA1LCAyMDE4IGF0IDA4OjU3OjI2QU0gLTA3MDAsIEJhcnQgVmFu
+IEFzc2NoZSB3cm90ZToNCj4gPiBCb3RoIHNwYXJzZSBhbmQgc21hdGNoIGlkZW50aWZ5IHRoZW1z
+ZWx2ZXMgYXMgZ2NjLiBIb3dldmVyLCBuZWl0aGVyDQo+ID4gc3RhdGljIGFuYWx5emVyIHN1cHBv
+cnRzIGFueSBvZiB0aGUgX19idWlsdGluXypfb3ZlcmZsb3coKSBmdW5jdGlvbnMuDQo+ID4gSGVu
+Y2UgZG8gbm90IGRlZmluZSBDT01QSUxFUl9IQVNfR0VORVJJQ19CVUlMVElOX09WRVJGTE9XIGZv
+ciB0aGVzZQ0KPiA+IHN0YXRpYyBjaGVja2Vycy4NCj4gPiANCj4gPiBGaXhlczogZjA5MDc4Mjdh
+OGE5ICgiY29tcGlsZXIuaDogZW5hYmxlIGJ1aWx0aW4gb3ZlcmZsb3cgY2hlY2tlcnMgYW5kIGFk
+ZCBmYWxsYmFjayBjb2RlIikNCj4gPiBTaWduZWQtb2ZmLWJ5OiBCYXJ0IFZhbiBBc3NjaGUgPGJh
+cnQudmFuYXNzY2hlQHdkYy5jb20+DQo+ID4gQ2M6IFJhc211cyBWaWxsZW1vZXMgPGxpbnV4QHJh
+c211c3ZpbGxlbW9lcy5kaz4NCj4gPiBDYzogS2VlcyBDb29rIDxrZWVzY29va0BjaHJvbWl1bS5v
+cmc+DQo+ID4gQ2M6IERhbiBDYXJwZW50ZXIgPGRhbi5jYXJwZW50ZXJAb3JhY2xlLmNvbT4NCj4g
+PiBDYzogTHVjIFZhbiBPb3N0ZW5yeWNrIDxsdWMudmFub29zdGVucnlja0BnbWFpbC5jb20+DQo+
+ID4gQ2M6IDxzdGFibGVAdmdlci5rZXJuZWwub3JnPg0KPiA+IC0tLQ0KPiA+ICBpbmNsdWRlL2xp
+bnV4L2NvbXBpbGVyLWdjYy5oIHwgMiArLQ0KPiA+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRp
+b24oKyksIDEgZGVsZXRpb24oLSkNCj4gPiANCj4gPiBkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51
+eC9jb21waWxlci1nY2MuaCBiL2luY2x1ZGUvbGludXgvY29tcGlsZXItZ2NjLmgNCj4gPiBpbmRl
+eCBmMWE3NDkyYTVjYzguLjE1ZTU1Yjg5ZTk1MiAxMDA2NDQNCj4gPiAtLS0gYS9pbmNsdWRlL2xp
+bnV4L2NvbXBpbGVyLWdjYy5oDQo+ID4gKysrIGIvaW5jbHVkZS9saW51eC9jb21waWxlci1nY2Mu
+aA0KPiA+IEBAIC0zNDQsNiArMzQ0LDYgQEANCj4gPiAgICovDQo+ID4gICNkZWZpbmUgdW5pbml0
+aWFsaXplZF92YXIoeCkgeCA9IHgNCj4gPiAgDQo+ID4gLSNpZiBHQ0NfVkVSU0lPTiA+PSA1MDEw
+MA0KPiA+ICsjaWYgR0NDX1ZFUlNJT04gPj0gNTAxMDAgJiYgIWRlZmluZWQoX19DSEVDS0VSX18p
+DQo+ID4gICNkZWZpbmUgQ09NUElMRVJfSEFTX0dFTkVSSUNfQlVJTFRJTl9PVkVSRkxPVyAxDQo+
+ID4gICNlbmRpZg0KPiA+IC0tIA0KPiANCj4gSGksDQo+IA0KPiBBIHNpbWlsYXIgcGF0Y2ggaGFz
+IGFscmVhZHkgYmVlbiBwb3N0ZWQgMiBvciAzIHdlZWtzIGFnbyBbMV0uDQo+IA0KPiBBbHNvLCB0
+aGUgZGV2ZWxvcG1lbnQgdmVyc2lvbiBvZiBzcGFyc2UgWzJdIHN1cHBvcnRzIHRoZQ0KPiBfX2J1
+aWx0aW5fKl9vdmVyZmxvdygpIGZ1bmN0aW9ucyAqYW5kKiBzdXBwb3J0cyB0aGUgX19oYXNfYnVp
+bHRpbigpDQo+IG1hY3JvLiBTbyBJIHRoaW5rIGl0J3MgcHJlZmVyYWJsZSB0byB1c2UgX19oYXNf
+YnVpbHRpbigpLA0KPiBhdCBsZWFzdCBmb3Igc3BhcnNlIChtYXliZSBzbWF0Y2ggaXMgaW50ZXJl
+c3RlZCBpbiBpdCB0b28pLg0KPiANCj4gLS0gTHVjIFZhbiBPb3N0ZW5yeWNrDQo+IA0KPiBbMV0g
+aHR0cHM6Ly9sb3JlLmtlcm5lbC5vcmcvbGttbC9hbHBpbmUuTFNVLjIuMjEuMTgwNjA3MTI1ODMx
+MC43OTU4QHBvYm94LnN1c2UuY3ovDQo+IFsyXSBnaXQ6Ly9naXRodWIuY29tL2x1Y3Zvby9zcGFy
+c2UuZ2l0DQoNCkhlbGxvIEx1YywNCg0KVGhhbmtzLCBJIGhhZCBtaXNzZWQgTWlyb3NsYXYncyBw
+YXRjaC4gQlRXLCB3aGljaCBzcGFyc2UgcmVwb3NpdG9yeSBkbyB5b3UNCnJlY29tbWVuZCB0aGF0
+IEkgcHVsbCBmcm9tIHRvIG9idGFpbiBhIHJlY2VudCBhbmQgc3RhYmxlIHZlcnNpb24gb2Ygc3Bh
+cnNlPyBUaGUNCmdpdDovL2dpdC5rZXJuZWwub3JnL3B1Yi9zY20vZGV2ZWwvc3BhcnNlL3NwYXJz
+ZS5naXQgcmVwb3NpdG9yeSBtZW50aW9uZWQgb24NCmh0dHBzOi8vc3BhcnNlLndpa2kua2VybmVs
+Lm9yZy9pbmRleC5waHAvTWFpbl9QYWdlLCBodHRwczovL2dpdGh1Yi5jb20vbHVjdm9vL3NwYXJz
+ZQ0Kb3IgaHR0cHM6Ly9naXRodWIuY29tL2x1Y3Zvby9zcGFyc2UtZGV2Pw0KDQpUaGFua3MsDQoN
+CkJhcnQuDQoNCg0KDQoNCg==
