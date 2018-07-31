@@ -1,86 +1,67 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address sanitizer
-Date: Tue, 31 Jul 2018 15:22:13 +0200
-Message-ID: <CAAeHK+xc1E64tXEEHoXqOuUNZ7E_kVyho3_mNZTCc+LTGHYFdA@mail.gmail.com>
-References: <cover.1530018818.git.andreyknvl@google.com> <20180628105057.GA26019@e103592.cambridge.arm.com>
- <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
- <20180629110709.GA17859@arm.com> <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
- <20180703173608.GF27243@arm.com> <CAAeHK+wTcH+2hgm_BTkLLdn1GkjBtkhQ=vPWZCncJ6KenqgKpg@mail.gmail.com>
+From: Andrey Ryabinin <aryabinin@virtuozzo.com>
+Subject: Re: [PATCH v4 13/17] khwasan: add hooks implementation
+Date: Tue, 31 Jul 2018 17:50:00 +0300
+Message-ID: <8240d4f9-c8df-cfe9-119d-6e933f8b13df@virtuozzo.com>
+References: <cover.1530018818.git.andreyknvl@google.com>
+ <a2a93370d43ec85b02abaf8d007a15b464212221.1530018818.git.andreyknvl@google.com>
+ <09cb5553-d84a-0e62-5174-315c14b88833@arm.com>
+ <CAAeHK+yC3XRPoTByhH1QPrX45pG3QY_2Q4gz=dfDgxfzu1Fyfw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAeHK+wTcH+2hgm_BTkLLdn1GkjBtkhQ=vPWZCncJ6KenqgKpg@mail.gmail.com>
+In-Reply-To: <CAAeHK+yC3XRPoTByhH1QPrX45pG3QY_2Q4gz=dfDgxfzu1Fyfw@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>, Will Deacon <will.deacon@arm.com>, Catalin Marinas <catalin.marinas@arm.com>
-Cc: Dave Martin <Dave.Martin@arm.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@linuxfoundation.org>, Mike Rapoport <rppt@linux.vnet.ibm.com>, kasan-dev <kasan>
+To: Andrey Konovalov <andreyknvl@google.com>, vincenzo.frascino@arm.com
+Cc: Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@l>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Jul 18, 2018 at 7:16 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
-> On Tue, Jul 3, 2018 at 7:36 PM, Will Deacon <will.deacon@arm.com> wrote:
->> Hmm, but elsewhere in this thread, Evgenii is motivating the need for this
->> patch set precisely because the lower overhead means it's suitable for
->> "near-production" use. So I don't think writing this off as a debugging
->> feature is the right approach, and we instead need to put effort into
->> analysing the impact of address tags on the kernel as a whole. Playing
->> whack-a-mole with subtle tag issues sounds like the worst possible outcome
->> for the long-term.
->
-> I don't see a way to find cases where pointer tags would matter
-> statically, so I've implemented the dynamic approach that I mentioned
-> above. I've instrumented all pointer comparisons/subtractions in an
-> LLVM compiler pass and used a kernel module that would print a bug
-> report whenever two pointers with different tags are being
-> compared/subtracted (ignoring comparisons with NULL pointers and with
-> pointers obtained by casting an error code to a pointer type). Then I
-> tried booting the kernel in QEMU and on an Odroid C2 board and I ran
-> syzkaller overnight.
->
-> This yielded the following results.
->
-> ======
->
-> The two places that look interesting are:
->
-> is_vmalloc_addr in include/linux/mm.h (already mentioned by Catalin)
-> is_kernel_rodata in mm/util.c
->
-> Here we compare a pointer with some fixed untagged values to make sure
-> that the pointer lies in a particular part of the kernel address
-> space. Since KWHASAN doesn't add tags to pointers that belong to
-> rodata or vmalloc regions, this should work as is. To make sure I've
-> added debug checks to those two functions that check that the result
-> doesn't change whether we operate on pointers with or without
-> untagging.
->
-> ======
->
-> A few other cases that don't look that interesting:
->
-> Comparing pointers to achieve unique sorting order of pointee objects
-> (e.g. sorting locks addresses before performing a double lock):
->
-> tty_ldisc_lock_pair_timeout in drivers/tty/tty_ldisc.c
-> pipe_double_lock in fs/pipe.c
-> unix_state_double_lock in net/unix/af_unix.c
-> lock_two_nondirectories in fs/inode.c
-> mutex_lock_double in kernel/events/core.c
->
-> ep_cmp_ffd in fs/eventpoll.c
-> fsnotify_compare_groups fs/notify/mark.c
->
-> Nothing needs to be done here, since the tags embedded into pointers
-> don't change, so the sorting order would still be unique.
->
-> Check that a pointer belongs to some particular allocation:
->
-> is_sibling_entry lib/radix-tree.c
-> object_is_on_stack in include/linux/sched/task_stack.h
->
-> Nothing needs to be here either, since two pointers can only belong to
-> the same allocation if they have the same tag.
->
-> ======
->
-> Will, Catalin, WDYT?
 
-ping
+
+On 07/31/2018 04:05 PM, Andrey Konovalov wrote:
+> On Wed, Jul 25, 2018 at 3:44 PM, Vincenzo Frascino@Foss
+> <vincenzo.frascino@arm.com> wrote:
+>> On 06/26/2018 02:15 PM, Andrey Konovalov wrote:
+>>
+>>> @@ -325,18 +341,41 @@ void kasan_init_slab_obj(struct kmem_cache *cache,
+>>> const void *object)
+>>>     void *kasan_slab_alloc(struct kmem_cache *cache, void *object, gfp_t
+>>> flags)
+>>>   {
+>>> -       return kasan_kmalloc(cache, object, cache->object_size, flags);
+>>> +       object = kasan_kmalloc(cache, object, cache->object_size, flags);
+>>> +       if (IS_ENABLED(CONFIG_KASAN_HW) && unlikely(cache->ctor)) {
+>>> +               /*
+>>> +                * Cache constructor might use object's pointer value to
+>>> +                * initialize some of its fields.
+>>> +                */
+>>> +               cache->ctor(object);
+>>>
+>> This seams breaking the kmem_cache_create() contract: "The @ctor is run when
+>> new pages are allocated by the cache."
+>> (https://elixir.bootlin.com/linux/v3.7/source/mm/slab_common.c#L83)
+>>
+>> Since there might be preexisting code relying on it, this could lead to
+>> global side effects. Did you verify that this is not the case?
+>>
+>> Another concern is performance related if we consider this solution suitable
+>> for "near-production", since with the current implementation you call the
+>> ctor (where present) on an object multiple times and this ends up memsetting
+>> and repopulating the memory every time (i.e. inode.c: inode_init_once). Do
+>> you know what is the performance impact?
+> 
+> We can assign tags to objects with constructors when a slab is
+> allocated and call constructors once as usual. The downside is that
+> such object would always have the same tag when it is reallocated, so
+> we won't catch use-after-frees. 
+
+Actually you should do this for SLAB_TYPESAFE_BY_RCU slabs. Usually they are with ->ctors but there
+are few without constructors.
+We can't reinitialize or even retag them. The latter will definitely cause false-positive use-after-free reports.
+
+As for non-SLAB_TYPESAFE_BY_RCU caches with constructors, it's probably ok to reinitialize and retag such objects.
+I don't see how could any code rely on the current ->ctor() behavior in non-SLAB_TYPESAFE_BY_RCU case,
+unless it does something extremely stupid or weird.
+But let's not do it now. If you care, you cand do it later, with a separate patch, so we could just revert
+it if anything goes wrong.
