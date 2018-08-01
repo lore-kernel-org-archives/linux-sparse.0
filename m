@@ -1,94 +1,112 @@
-From: Andrey Ryabinin <aryabinin@virtuozzo.com>
-Subject: Re: [PATCH v4 13/17] khwasan: add hooks implementation
-Date: Tue, 31 Jul 2018 19:18:48 +0300
-Message-ID: <e73efbea-9f23-9d1f-bd1d-add0c0fe4710@virtuozzo.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH v4 00/17] khwasan: kernel hardware assisted address
+ sanitizer
+Date: Wed, 1 Aug 2018 17:35:39 +0100
+Message-ID: <20180801163538.GA10800@arm.com>
 References: <cover.1530018818.git.andreyknvl@google.com>
- <a2a93370d43ec85b02abaf8d007a15b464212221.1530018818.git.andreyknvl@google.com>
- <09cb5553-d84a-0e62-5174-315c14b88833@arm.com>
- <CAAeHK+yC3XRPoTByhH1QPrX45pG3QY_2Q4gz=dfDgxfzu1Fyfw@mail.gmail.com>
- <8240d4f9-c8df-cfe9-119d-6e933f8b13df@virtuozzo.com>
- <CACT4Y+Y=61VwwETQP3FwAN16ompSNJOCyDCG6Ew1Bm5f_Fe1Lw@mail.gmail.com>
- <b6b58786-85c9-e831-5571-58b5580c84ba@virtuozzo.com>
- <CACT4Y+aUs0YMTaQx4x9QiQsMjFNZ5gUFNuMkG_hneDPTb3Nu=Q@mail.gmail.com>
+ <20180628105057.GA26019@e103592.cambridge.arm.com>
+ <CAAeHK+w0T43+h3xqU4a-qutxd-qiEhsvk0eaZpmAn-T0hpaLZQ@mail.gmail.com>
+ <20180629110709.GA17859@arm.com>
+ <CAAeHK+wHd8B2nhat-Z2Y2=s4NVobPG7vjr2CynjFhqPTwQRepQ@mail.gmail.com>
+ <20180703173608.GF27243@arm.com>
+ <CAAeHK+wTcH+2hgm_BTkLLdn1GkjBtkhQ=vPWZCncJ6KenqgKpg@mail.gmail.com>
+ <CAAeHK+xc1E64tXEEHoXqOuUNZ7E_kVyho3_mNZTCc+LTGHYFdA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACT4Y+aUs0YMTaQx4x9QiQsMjFNZ5gUFNuMkG_hneDPTb3Nu=Q@mail.gmail.com>
-Content-Language: en-US
+Content-Disposition: inline
+In-Reply-To: <CAAeHK+xc1E64tXEEHoXqOuUNZ7E_kVyho3_mNZTCc+LTGHYFdA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Vyukov <dvyukov@google.com>
-Cc: Andrey Konovalov <andreyknvl@google.com>, vincenzo.frascino@arm.com, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Catalin Marinas <catalin.marinas@arm.com>, Dave Martin <Dave.Martin@arm.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
+Hi Andrey,
 
+On Tue, Jul 31, 2018 at 03:22:13PM +0200, Andrey Konovalov wrote:
+> On Wed, Jul 18, 2018 at 7:16 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
+> > On Tue, Jul 3, 2018 at 7:36 PM, Will Deacon <will.deacon@arm.com> wrote:
+> >> Hmm, but elsewhere in this thread, Evgenii is motivating the need for this
+> >> patch set precisely because the lower overhead means it's suitable for
+> >> "near-production" use. So I don't think writing this off as a debugging
+> >> feature is the right approach, and we instead need to put effort into
+> >> analysing the impact of address tags on the kernel as a whole. Playing
+> >> whack-a-mole with subtle tag issues sounds like the worst possible outcome
+> >> for the long-term.
+> >
+> > I don't see a way to find cases where pointer tags would matter
+> > statically, so I've implemented the dynamic approach that I mentioned
+> > above. I've instrumented all pointer comparisons/subtractions in an
+> > LLVM compiler pass and used a kernel module that would print a bug
+> > report whenever two pointers with different tags are being
+> > compared/subtracted (ignoring comparisons with NULL pointers and with
+> > pointers obtained by casting an error code to a pointer type). Then I
+> > tried booting the kernel in QEMU and on an Odroid C2 board and I ran
+> > syzkaller overnight.
+> >
+> > This yielded the following results.
+> >
+> > ======
+> >
+> > The two places that look interesting are:
+> >
+> > is_vmalloc_addr in include/linux/mm.h (already mentioned by Catalin)
+> > is_kernel_rodata in mm/util.c
+> >
+> > Here we compare a pointer with some fixed untagged values to make sure
+> > that the pointer lies in a particular part of the kernel address
+> > space. Since KWHASAN doesn't add tags to pointers that belong to
+> > rodata or vmalloc regions, this should work as is. To make sure I've
+> > added debug checks to those two functions that check that the result
+> > doesn't change whether we operate on pointers with or without
+> > untagging.
+> >
+> > ======
+> >
+> > A few other cases that don't look that interesting:
+> >
+> > Comparing pointers to achieve unique sorting order of pointee objects
+> > (e.g. sorting locks addresses before performing a double lock):
+> >
+> > tty_ldisc_lock_pair_timeout in drivers/tty/tty_ldisc.c
+> > pipe_double_lock in fs/pipe.c
+> > unix_state_double_lock in net/unix/af_unix.c
+> > lock_two_nondirectories in fs/inode.c
+> > mutex_lock_double in kernel/events/core.c
+> >
+> > ep_cmp_ffd in fs/eventpoll.c
+> > fsnotify_compare_groups fs/notify/mark.c
+> >
+> > Nothing needs to be done here, since the tags embedded into pointers
+> > don't change, so the sorting order would still be unique.
+> >
+> > Check that a pointer belongs to some particular allocation:
+> >
+> > is_sibling_entry lib/radix-tree.c
+> > object_is_on_stack in include/linux/sched/task_stack.h
+> >
+> > Nothing needs to be here either, since two pointers can only belong to
+> > the same allocation if they have the same tag.
+> >
+> > ======
+> >
+> > Will, Catalin, WDYT?
+> 
+> ping
 
-On 07/31/2018 07:08 PM, Dmitry Vyukov wrote:
-> On Tue, Jul 31, 2018 at 6:04 PM, Andrey Ryabinin
-> <aryabinin@virtuozzo.com> wrote:
->>>>>>> @@ -325,18 +341,41 @@ void kasan_init_slab_obj(struct kmem_cache *cache,
->>>>>>> const void *object)
->>>>>>>     void *kasan_slab_alloc(struct kmem_cache *cache, void *object, gfp_t
->>>>>>> flags)
->>>>>>>   {
->>>>>>> -       return kasan_kmalloc(cache, object, cache->object_size, flags);
->>>>>>> +       object = kasan_kmalloc(cache, object, cache->object_size, flags);
->>>>>>> +       if (IS_ENABLED(CONFIG_KASAN_HW) && unlikely(cache->ctor)) {
->>>>>>> +               /*
->>>>>>> +                * Cache constructor might use object's pointer value to
->>>>>>> +                * initialize some of its fields.
->>>>>>> +                */
->>>>>>> +               cache->ctor(object);
->>>>>>>
->>>>>> This seams breaking the kmem_cache_create() contract: "The @ctor is run when
->>>>>> new pages are allocated by the cache."
->>>>>> (https://elixir.bootlin.com/linux/v3.7/source/mm/slab_common.c#L83)
->>>>>>
->>>>>> Since there might be preexisting code relying on it, this could lead to
->>>>>> global side effects. Did you verify that this is not the case?
->>>>>>
->>>>>> Another concern is performance related if we consider this solution suitable
->>>>>> for "near-production", since with the current implementation you call the
->>>>>> ctor (where present) on an object multiple times and this ends up memsetting
->>>>>> and repopulating the memory every time (i.e. inode.c: inode_init_once). Do
->>>>>> you know what is the performance impact?
->>>>>
->>>>> We can assign tags to objects with constructors when a slab is
->>>>> allocated and call constructors once as usual. The downside is that
->>>>> such object would always have the same tag when it is reallocated, so
->>>>> we won't catch use-after-frees.
->>>>
->>>> Actually you should do this for SLAB_TYPESAFE_BY_RCU slabs. Usually they are with ->ctors but there
->>>> are few without constructors.
->>>> We can't reinitialize or even retag them. The latter will definitely cause false-positive use-after-free reports.
->>>
->>> Somewhat offtopic, but I can't understand how SLAB_TYPESAFE_BY_RCU
->>> slabs can be useful without ctors or at least memset(0). Objects in
->>> such slabs need to be type-stable, but I can't understand how it's
->>> possible to establish type stability without a ctor... Are these bugs?
->>
->> Yeah, I puzzled by this too. However, I think it's hard but possible to make it work, at least in theory.
->> There must be an initializer, which consists of two parts:
->> a) initilize objects fields
->> b) expose object to the world (add it to list or something like that)
->>
->> (a) part must somehow to be ok to race with another cpu which might already use the object.
->> (b) part must must use e.g. barriers to make sure that racy users will see previously inilized fields.
->> Racy users must have parring barrier of course.
->>
->> But it sound fishy, and very easy to fuck up.
-> 
-> 
-> Agree on both fronts: theoretically possible but easy to fuck up. Even
-> if it works, complexity of the code should be brain damaging and there
-> are unlikely good reasons to just not be more explicit and use a ctor.
-> 
-> 
->> I won't be surprised if every single one SLAB_TYPESAFE_BY_RCU user
->> without ->ctor is bogus. It certainly would be better to convert those to use ->ctor.
-> 
-> I have another hypothesis: they are not bogus, just don't need
-> SLAB_TYPESAFE_BY_RCU :)
-> 
+Thanks for tracking these cases down and going through each of them. The
+obvious follow-up question is: how do we ensure that we keep on top of
+this in mainline? Are you going to repeat your experiment at every kernel
+release or every -rc or something else? I really can't see how we can
+maintain this in the long run, especially given that the coverage we have
+is only dynamic -- do you have an idea of how much coverage you're actually
+getting for, say, a defconfig+modules build?
 
-I'd call this a bug too.
+I'd really like to enable pointer tagging in the kernel, I'm just still
+failing to see how we can do it in a controlled manner where we can reason
+about the semantic changes using something other than a best-effort,
+case-by-case basis which is likely to be fragile and error-prone.
+Unfortunately, if that's all we have, then this gets relegated to a
+debug feature, which sort of defeats the point in my opinion.
+
+Will
