@@ -1,35 +1,45 @@
 From: Nick Desaulniers <ndesaulniers@google.com>
 Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
-Date: Tue, 28 Aug 2018 16:00:55 -0700
-Message-ID: <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
+Date: Fri, 31 Aug 2018 09:46:02 -0700
+Message-ID: <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
 References: <1535220989-27645-1-git-send-email-yamada.masahiro@socionext.com>
  <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com> <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
- <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com>
+ <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com> <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com>
+In-Reply-To: <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: daniel.santos@pobox.com
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Linus Torvalds <torvalds@linux-foundation.org>, Kees Cook <keescook@chromium.org>, sparse@chrisli.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Kees Cook <keescook@chromium.org>, sparse@chrisli.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, daniel.santos@pobox.com
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Aug 27, 2018 at 1:42 PM Daniel Santos <daniel.santos@pobox.com> wrote:
+On Tue, Aug 28, 2018 at 4:00 PM Nick Desaulniers
+<ndesaulniers@google.com> wrote:
 >
-> Hello Nick,
+> On Mon, Aug 27, 2018 at 1:42 PM Daniel Santos <daniel.santos@pobox.com> wrote:
+> >
+> > Hello Nick,
+> >
+> > On 08/27/2018 03:09 PM, Nick Desaulniers wrote:
+> > >>> Let's give up __compiletime_assert_fallback().  This commit does not
+> > >>> change the current behavior since it just rips off the useless code.
+> > >> Clang is not the only target audience of
+> > >> __compiletime_assert_fallback().  Instead of ripping out something that
+> > >> may benefit builds with gcc 4.2 and earlier, why not override its
+> > > Note that with commit cafa0010cd51 ("Raise the minimum required gcc
+> > > version to 4.6") that gcc < 4.6 is irrelevant.
+> >
+> > Ah, I guess I'm not keeping up, that's wonderful news!  Considering that
+> > I guess I would be OK with its removal, but I still think it would be
+> > better if a similar mechanism to break the Clang build could be found.
 >
-> On 08/27/2018 03:09 PM, Nick Desaulniers wrote:
-> >>> Let's give up __compiletime_assert_fallback().  This commit does not
-> >>> change the current behavior since it just rips off the useless code.
-> >> Clang is not the only target audience of
-> >> __compiletime_assert_fallback().  Instead of ripping out something that
-> >> may benefit builds with gcc 4.2 and earlier, why not override its
-> > Note that with commit cafa0010cd51 ("Raise the minimum required gcc
-> > version to 4.6") that gcc < 4.6 is irrelevant.
->
-> Ah, I guess I'm not keeping up, that's wonderful news!  Considering that
-> I guess I would be OK with its removal, but I still think it would be
-> better if a similar mechanism to break the Clang build could be found.
+> I'm consulting with our best language lawyers to see what combinations
+> of _Static_assert and __builtin_constant_p would do the trick.
 
-I'm consulting with our best language lawyers to see what combinations
-of _Static_assert and __builtin_constant_p would do the trick.
+Linus,
+Can this patch be merged in the meantime?
+
+-- 
+Thanks,
+~Nick Desaulniers
