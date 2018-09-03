@@ -1,80 +1,116 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 06/12] Compiler Attributes: naked can be shared
-Date: Mon,  3 Sep 2018 22:33:10 +0200
-Message-ID: <20180903203316.16183-7-miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH 07/12] Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
+Date: Mon,  3 Sep 2018 22:33:11 +0200
+Message-ID: <20180903203316.16183-8-miguel.ojeda.sandonis@gmail.com>
 References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-The naked attribute is supported by at least gcc >= 4.6 (for ARM,
-which is the only current user), gcc >= 8 (for x86), clang >= 3.1
-and icc >= 13. See https://godbolt.org/z/350Dyc
+Sparse knows about a few more attributes now, so we can remove
+the __CHECKER__ conditions from them (which, in turn, allow us
+to move some of them later on to compiler_attributes.h).
 
-Therefore, move it out of compiler-gcc.h so that the definition
-is shared by all compilers.
+  * assume_aligned: since sparse's commit ffc860b ("sparse:
+    ignore __assume_aligned__ attribute"), included in 0.5.1
+
+  * error: since sparse's commit 0a04210 ("sparse: Add 'error'
+    to ignored attributes"), included in 0.5.0
+
+  * hotpatch: since sparse's commit 6043210 ("sparse/parse.c:
+    ignore hotpatch attribute"), included in 0.5.1
+
+  * warning: since sparse's commit 977365d ("Avoid "attribute
+    'warning': unknown attribute" warning"), included in 0.4.2
+
+On top of that, __must_be_array does not need it either because:
+
+  * Even ancient versions of sparse do not have a problem
+
+  * BUILD_BUG_ON_ZERO() is currently disabled for __CHECKER__
 
 Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Eli Friedman <efriedma@codeaurora.org>
 Cc: Christopher Li <sparse@chrisli.org>
 Cc: Kees Cook <keescook@chromium.org>
 Cc: Ingo Molnar <mingo@kernel.org>
 Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
 Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Joe Perches <joe@perches.com>
 Cc: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Nick Desaulniers <ndesaulniers@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: linux-sparse@vger.kernel.org
-Suggested-by: Arnd Bergmann <arnd@arndb.de>
+Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 ---
- include/linux/compiler-gcc.h   | 8 --------
- include/linux/compiler_types.h | 8 ++++++++
- 2 files changed, 8 insertions(+), 8 deletions(-)
+ include/linux/compiler-gcc.h   | 6 ++----
+ include/linux/compiler.h       | 4 ----
+ include/linux/compiler_types.h | 2 +-
+ 3 files changed, 3 insertions(+), 9 deletions(-)
 
 diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 4cd5e9264bce..3b32bbfa5a49 100644
+index 3b32bbfa5a49..1ca6a51cfaa9 100644
 --- a/include/linux/compiler-gcc.h
 +++ b/include/linux/compiler-gcc.h
-@@ -72,14 +72,6 @@
- #define __noretpoline __attribute__((__indirect_branch__("keep")))
- #endif
- 
--/*
-- * it doesn't make sense on ARM (currently the only user of __naked)
-- * to trace naked functions because then mcount is called without
-- * stack and frame pointer being set up and there is no chance to
-- * restore the lr register to the value before mcount was called.
-- */
--#define __naked		__attribute__((__naked__)) notrace
--
- #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
+@@ -76,14 +76,12 @@
  
  #define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
-diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index 759b3fea9216..f182f2ef3227 100644
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -223,6 +223,14 @@ struct ftrace_likely_data {
- #define notrace			__attribute__((__no_instrument_function__))
- #endif
  
-+/*
-+ * it doesn't make sense on ARM (currently the only user of __naked)
-+ * to trace naked functions because then mcount is called without
-+ * stack and frame pointer being set up and there is no chance to
-+ * restore the lr register to the value before mcount was called.
-+ */
-+#define __naked			__attribute__((__naked__)) notrace
-+
- #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
+-#ifndef __CHECKER__
+ #define __compiletime_warning(message) __attribute__((__warning__(message)))
+ #define __compiletime_error(message) __attribute__((__error__(message)))
+ 
+-#ifdef LATENT_ENTROPY_PLUGIN
++#if defined(LATENT_ENTROPY_PLUGIN) && !defined(__CHECKER__)
+ #define __latent_entropy __attribute__((latent_entropy))
+ #endif
+-#endif /* __CHECKER__ */
  
  /*
+  * calling noreturn functions, __builtin_unreachable() and __builtin_trap()
+@@ -131,7 +129,7 @@
+ 
+ /* gcc version specific checks */
+ 
+-#if GCC_VERSION >= 40900 && !defined(__CHECKER__)
++#if GCC_VERSION >= 40900
+ /*
+  * __assume_aligned(n, k): Tell the optimizer that the returned
+  * pointer can be assumed to be k modulo n. The second argument is
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 165b1d5683ed..4030a2940d6b 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -357,11 +357,7 @@ static inline void *offset_to_ptr(const int *off)
+ 	compiletime_assert(__native_word(t),				\
+ 		"Need native word sized stores/loads for atomicity.")
+ 
+-#ifdef __CHECKER__
+-#define __must_be_array(a)	0
+-#else
+ /* &a[0] degrades to a pointer: a different type from an array */
+ #define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+-#endif
+ 
+ #endif /* __LINUX_COMPILER_H */
+diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+index f182f2ef3227..65b10b1e2a59 100644
+--- a/include/linux/compiler_types.h
++++ b/include/linux/compiler_types.h
+@@ -217,7 +217,7 @@ struct ftrace_likely_data {
+ #define __must_check
+ #endif
+ 
+-#if defined(CC_USING_HOTPATCH) && !defined(__CHECKER__)
++#if defined(CC_USING_HOTPATCH)
+ #define notrace			__attribute__((hotpatch(0, 0)))
+ #else
+ #define notrace			__attribute__((__no_instrument_function__))
 -- 
 2.17.1
