@@ -1,7 +1,7 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 04/12] Compiler Attributes: homogenize __must_be_array
-Date: Mon,  3 Sep 2018 22:33:08 +0200
-Message-ID: <20180903203316.16183-5-miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH 03/12] Compiler Attributes: remove unneeded tests
+Date: Mon,  3 Sep 2018 22:33:07 +0200
+Message-ID: <20180903203316.16183-4-miguel.ojeda.sandonis@gmail.com>
 References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
@@ -10,18 +10,14 @@ To: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Different definitions of __must_be_array:
+Attributes const and always_inline have tests around them
+which are unneeded, since they are supported by gcc >= 4.6,
+clang >= 3 and icc >= 13. https://godbolt.org/z/DFPq37
 
-  * gcc: disabled for __CHECKER__
-
-  * clang: same definition as gcc's, but without __CHECKER__
-
-  * intel: the comment claims __builtin_types_compatible_p()
-    is unsupported; but icc seems to support it since 13.0.1
-    (released in 2012). See https://godbolt.org/z/S0l6QQ
-
-Therefore, we can remove all of them and have a single definition
-in compiler.h
+In the case of gnu_inline, we do not need to test for
+__GNUC_STDC_INLINE__ because, regardless of the current
+inlining behavior, we can simply always force the old
+GCC inlining behavior by using the attribute in all cases.
 
 Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
@@ -40,70 +36,71 @@ Cc: linux-sparse@vger.kernel.org
 Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 ---
- include/linux/compiler-clang.h | 1 -
- include/linux/compiler-gcc.h   | 7 -------
- include/linux/compiler-intel.h | 3 ---
- include/linux/compiler.h       | 7 +++++++
- 4 files changed, 7 insertions(+), 11 deletions(-)
+ include/linux/compiler_types.h | 24 +++---------------------
+ 1 file changed, 3 insertions(+), 21 deletions(-)
 
-diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
-index d11cad61ba5c..fa9532f8d885 100644
---- a/include/linux/compiler-clang.h
-+++ b/include/linux/compiler-clang.h
-@@ -41,6 +41,5 @@
-  * compilers, like ICC.
-  */
- #define barrier() __asm__ __volatile__("" : : : "memory")
--#define __must_be_array(a) BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
- #define __assume_aligned(a, ...)	\
- 	__attribute__((__assume_aligned__(a, ## __VA_ARGS__)))
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 371b6fa2d074..76f4907ef707 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -68,13 +68,6 @@
-  */
- #define uninitialized_var(x) x = x
+diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+index 2bc0f94df38e..759b3fea9216 100644
+--- a/include/linux/compiler_types.h
++++ b/include/linux/compiler_types.h
+@@ -158,10 +158,6 @@ struct ftrace_likely_data {
+ 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
+ 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
  
--#ifdef __CHECKER__
--#define __must_be_array(a)	0
--#else
--/* &a[0] degrades to a pointer: a different type from an array */
--#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+-#ifndef __attribute_const__
+-#define __attribute_const__	__attribute__((__const__))
 -#endif
 -
- #ifdef RETPOLINE
- #define __noretpoline __attribute__((__indirect_branch__("keep")))
+ #ifndef __noclone
+ #define __noclone
  #endif
-diff --git a/include/linux/compiler-intel.h b/include/linux/compiler-intel.h
-index fef8bb3e53ef..6004b4588bd4 100644
---- a/include/linux/compiler-intel.h
-+++ b/include/linux/compiler-intel.h
-@@ -29,9 +29,6 @@
+@@ -196,6 +192,7 @@ struct ftrace_likely_data {
+  * [...]
   */
- #define OPTIMIZER_HIDE_VAR(var) barrier()
- 
--/* Intel ECC compiler doesn't support __builtin_types_compatible_p() */
--#define __must_be_array(a) 0
+ #define __pure			__attribute__((__pure__))
++#define __attribute_const__	__attribute__((__const__))
+ #define __aligned(x)		__attribute__((__aligned__(x)))
+ #define __aligned_largest	__attribute__((__aligned__))
+ #define __printf(a, b)		__attribute__((__format__(printf, a, b)))
+@@ -211,7 +208,8 @@ struct ftrace_likely_data {
+ #define __alias(symbol)		__attribute__((__alias__(#symbol)))
+ #define __cold			__attribute__((__cold__))
+ #define __section(S)		__attribute__((__section__(#S)))
 -
- #endif
++#define __gnu_inline		__attribute__((__gnu_inline__))
++#define __always_inline		inline __attribute__((__always_inline__))
  
- /* icc has this, but it's called _bswap16 */
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index ec4a28bad2c6..165b1d5683ed 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -357,4 +357,11 @@ static inline void *offset_to_ptr(const int *off)
- 	compiletime_assert(__native_word(t),				\
- 		"Need native word sized stores/loads for atomicity.")
+ #ifdef CONFIG_ENABLE_MUST_CHECK
+ #define __must_check		__attribute__((__warn_unused_result__))
+@@ -227,18 +225,6 @@ struct ftrace_likely_data {
  
-+#ifdef __CHECKER__
-+#define __must_be_array(a)	0
-+#else
-+/* &a[0] degrades to a pointer: a different type from an array */
-+#define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
-+#endif
-+
- #endif /* __LINUX_COMPILER_H */
+ #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
+ 
+-/*
+- * Feature detection for gnu_inline (gnu89 extern inline semantics). Either
+- * __GNUC_STDC_INLINE__ is defined (not using gnu89 extern inline semantics,
+- * and we opt in to the gnu89 semantics), or __GNUC_STDC_INLINE__ is not
+- * defined so the gnu89 semantics are the default.
+- */
+-#ifdef __GNUC_STDC_INLINE__
+-# define __gnu_inline	__attribute__((__gnu_inline__))
+-#else
+-# define __gnu_inline
+-#endif
+-
+ /*
+  * Force always-inline if the user requests it so via the .config.
+  * GCC does not warn about unused static inline functions for
+@@ -263,10 +249,6 @@ struct ftrace_likely_data {
+ #define __inline inline
+ #define noinline	__attribute__((__noinline__))
+ 
+-#ifndef __always_inline
+-#define __always_inline inline __attribute__((__always_inline__))
+-#endif
+-
+ /*
+  * Rather then using noinline to prevent stack consumption, use
+  * noinline_for_stack instead.  For documentation reasons.
 -- 
 2.17.1
