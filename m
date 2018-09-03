@@ -1,7 +1,7 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 10/12] Compiler Attributes: KENTRY used twice the "used" attribute
-Date: Mon,  3 Sep 2018 22:33:14 +0200
-Message-ID: <20180903203316.16183-11-miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH 08/12] Compiler Attributes: add missing SPDX ID in compiler_types.h
+Date: Mon,  3 Sep 2018 22:33:12 +0200
+Message-ID: <20180903203316.16183-9-miguel.ojeda.sandonis@gmail.com>
 References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
@@ -27,21 +27,17 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: linux-sparse@vger.kernel.org
 Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 ---
- include/linux/compiler.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ include/linux/compiler_types.h | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 4030a2940d6b..17ee9165ca51 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -146,7 +146,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
- 	extern typeof(sym) sym;					\
- 	static const unsigned long __kentry_##sym		\
- 	__used							\
--	__attribute__((__section__("___kentry" "+" #sym ), used))	\
-+	__attribute__((__section__("___kentry" "+" #sym )))	\
- 	= (unsigned long)&sym;
- #endif
+diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+index 65b10b1e2a59..0cb40df59418 100644
+--- a/include/linux/compiler_types.h
++++ b/include/linux/compiler_types.h
+@@ -1,3 +1,4 @@
++/* SPDX-License-Identifier: GPL-2.0 */
+ #ifndef __LINUX_COMPILER_TYPES_H
+ #define __LINUX_COMPILER_TYPES_H
  
 -- 
 2.17.1
