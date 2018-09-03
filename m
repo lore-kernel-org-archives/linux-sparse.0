@@ -1,36 +1,34 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 07/12] Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
-Date: Mon,  3 Sep 2018 22:33:11 +0200
-Message-ID: <20180903203316.16183-8-miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH 09/12] Compiler Attributes: use feature checks instead of version checks
+Date: Mon,  3 Sep 2018 22:33:13 +0200
+Message-ID: <20180903203316.16183-10-miguel.ojeda.sandonis@gmail.com>
 References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Sparse knows about a few more attributes now, so we can remove
-the __CHECKER__ conditions from them (which, in turn, allow us
-to move some of them later on to compiler_attributes.h).
+Instead of using version checks per-compiler to define (or not)
+each attribute, use __has_attribute to test for them, following
+the cleanup started with commit 815f0ddb346c
+("include/linux/compiler*.h: make compiler-*.h mutually exclusive"),
+which is supported on gcc >= 5, clang >= 2.9 and icc >= 17.
+In the meantime, to support 4.6 <= gcc < 5, we implement
+__has_attribute by hand.
 
-  * assume_aligned: since sparse's commit ffc860b ("sparse:
-    ignore __assume_aligned__ attribute"), included in 0.5.1
+All the attributes that can be unconditionally defined and directly
+map to compiler attribute(s) (even if optional) have been moved
+to a new file include/linux/compiler_attributes.h
 
-  * error: since sparse's commit 0a04210 ("sparse: Add 'error'
-    to ignored attributes"), included in 0.5.0
+In an effort to make the file as regular as possible, comments
+stating the purpose of attributes have been removed. Instead,
+links to the compiler docs have been added (i.e. to gcc and,
+if available, to clang as well). In addition, they have been sorted.
 
-  * hotpatch: since sparse's commit 6043210 ("sparse/parse.c:
-    ignore hotpatch attribute"), included in 0.5.1
-
-  * warning: since sparse's commit 977365d ("Avoid "attribute
-    'warning': unknown attribute" warning"), included in 0.4.2
-
-On top of that, __must_be_array does not need it either because:
-
-  * Even ancient versions of sparse do not have a problem
-
-  * BUILD_BUG_ON_ZERO() is currently disabled for __CHECKER__
+Finally, if an attribute is optional (i.e. if it is guarded
+by __has_attribute), the reason has been stated for future reference.
 
 Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 Cc: Eli Friedman <efriedma@codeaurora.org>
@@ -43,74 +41,510 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Joe Perches <joe@perches.com>
 Cc: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: linux-sparse@vger.kernel.org
-Acked-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 ---
- include/linux/compiler-gcc.h   | 6 ++----
- include/linux/compiler.h       | 4 ----
- include/linux/compiler_types.h | 2 +-
- 3 files changed, 3 insertions(+), 9 deletions(-)
+ include/linux/compiler-clang.h      |   4 -
+ include/linux/compiler-gcc.h        |  51 ------
+ include/linux/compiler-intel.h      |   6 -
+ include/linux/compiler_attributes.h | 239 ++++++++++++++++++++++++++++
+ include/linux/compiler_types.h      |  69 +-------
+ 5 files changed, 245 insertions(+), 124 deletions(-)
+ create mode 100644 include/linux/compiler_attributes.h
 
+diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
+index fa9532f8d885..3e7dafb3ea80 100644
+--- a/include/linux/compiler-clang.h
++++ b/include/linux/compiler-clang.h
+@@ -21,8 +21,6 @@
+ #define __SANITIZE_ADDRESS__
+ #endif
+ 
+-#define __no_sanitize_address __attribute__((__no_sanitize__("address")))
+-
+ /*
+  * Not all versions of clang implement the the type-generic versions
+  * of the builtin overflow checkers. Fortunately, clang implements
+@@ -41,5 +39,3 @@
+  * compilers, like ICC.
+  */
+ #define barrier() __asm__ __volatile__("" : : : "memory")
+-#define __assume_aligned(a, ...)	\
+-	__attribute__((__assume_aligned__(a, ## __VA_ARGS__)))
 diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 3b32bbfa5a49..1ca6a51cfaa9 100644
+index 1ca6a51cfaa9..cfac027e1625 100644
 --- a/include/linux/compiler-gcc.h
 +++ b/include/linux/compiler-gcc.h
-@@ -76,14 +76,12 @@
+@@ -108,9 +108,6 @@
+ 		__builtin_unreachable();	\
+ 	} while (0)
  
- #define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
- 
--#ifndef __CHECKER__
- #define __compiletime_warning(message) __attribute__((__warning__(message)))
- #define __compiletime_error(message) __attribute__((__error__(message)))
- 
--#ifdef LATENT_ENTROPY_PLUGIN
-+#if defined(LATENT_ENTROPY_PLUGIN) && !defined(__CHECKER__)
- #define __latent_entropy __attribute__((latent_entropy))
+-/* Mark a function definition as prohibited from being cloned. */
+-#define __noclone	__attribute__((__noclone__, __optimize__("no-tracer")))
+-
+ #if defined(RANDSTRUCT_PLUGIN) && !defined(__CHECKER__)
+ #define __randomize_layout __attribute__((randomize_layout))
+ #define __no_randomize_layout __attribute__((no_randomize_layout))
+@@ -119,32 +116,6 @@
+ #define randomized_struct_fields_end	} __randomize_layout;
  #endif
--#endif /* __CHECKER__ */
  
- /*
-  * calling noreturn functions, __builtin_unreachable() and __builtin_trap()
-@@ -131,7 +129,7 @@
- 
- /* gcc version specific checks */
- 
--#if GCC_VERSION >= 40900 && !defined(__CHECKER__)
-+#if GCC_VERSION >= 40900
- /*
-  * __assume_aligned(n, k): Tell the optimizer that the returned
-  * pointer can be assumed to be k modulo n. The second argument is
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 165b1d5683ed..4030a2940d6b 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -357,11 +357,7 @@ static inline void *offset_to_ptr(const int *off)
- 	compiletime_assert(__native_word(t),				\
- 		"Need native word sized stores/loads for atomicity.")
- 
--#ifdef __CHECKER__
--#define __must_be_array(a)	0
--#else
- /* &a[0] degrades to a pointer: a different type from an array */
- #define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+-/*
+- * When used with Link Time Optimization, gcc can optimize away C functions or
+- * variables which are referenced only from assembly code.  __visible tells the
+- * optimizer that something else uses this function or variable, thus preventing
+- * this.
+- */
+-#define __visible	__attribute__((__externally_visible__))
+-
+-/* gcc version specific checks */
+-
+-#if GCC_VERSION >= 40900
+-/*
+- * __assume_aligned(n, k): Tell the optimizer that the returned
+- * pointer can be assumed to be k modulo n. The second argument is
+- * optional (default 0), so we use a variadic macro to make the
+- * shorthand.
+- *
+- * Beware: Do not apply this to functions which may return
+- * ERR_PTRs. Also, it is probably unwise to apply it to functions
+- * returning extra information in the low bits (but in that case the
+- * compiler should see some alignment anyway, when the return value is
+- * massaged by 'flags = ptr & 3; ptr &= ~3;').
+- */
+-#define __assume_aligned(a, ...) __attribute__((__assume_aligned__(a, ## __VA_ARGS__)))
 -#endif
+-
+ /*
+  * GCC 'asm goto' miscompiles certain code sequences:
+  *
+@@ -176,32 +147,10 @@
+ #define KASAN_ABI_VERSION 3
+ #endif
  
- #endif /* __LINUX_COMPILER_H */
+-#if GCC_VERSION >= 40902
+-/*
+- * Tell the compiler that address safety instrumentation (KASAN)
+- * should not be applied to that function.
+- * Conflicts with inlining: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=67368
+- */
+-#define __no_sanitize_address __attribute__((__no_sanitize_address__))
+-#endif
+-
+ #if GCC_VERSION >= 50100
+-/*
+- * Mark structures as requiring designated initializers.
+- * https://gcc.gnu.org/onlinedocs/gcc/Designated-Inits.html
+- */
+-#define __designated_init __attribute__((__designated_init__))
+ #define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW 1
+ #endif
+ 
+-#if !defined(__noclone)
+-#define __noclone	/* not needed */
+-#endif
+-
+-#if !defined(__no_sanitize_address)
+-#define __no_sanitize_address
+-#endif
+-
+ /*
+  * Turn individual warnings and errors on and off locally, depending
+  * on version.
+diff --git a/include/linux/compiler-intel.h b/include/linux/compiler-intel.h
+index 6004b4588bd4..517bd14e1222 100644
+--- a/include/linux/compiler-intel.h
++++ b/include/linux/compiler-intel.h
+@@ -34,9 +34,3 @@
+ /* icc has this, but it's called _bswap16 */
+ #define __HAVE_BUILTIN_BSWAP16__
+ #define __builtin_bswap16 _bswap16
+-
+-/* The following are for compatibility with GCC, from compiler-gcc.h,
+- * and may be redefined here because they should not be shared with other
+- * compilers, like clang.
+- */
+-#define __visible	__attribute__((__externally_visible__))
+diff --git a/include/linux/compiler_attributes.h b/include/linux/compiler_attributes.h
+new file mode 100644
+index 000000000000..ac7bf47ee9cd
+--- /dev/null
++++ b/include/linux/compiler_attributes.h
+@@ -0,0 +1,239 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef __LINUX_COMPILER_ATTRIBUTES_H
++#define __LINUX_COMPILER_ATTRIBUTES_H
++
++/*
++ * The attributes in this file are unconditionally defined and they directly
++ * map to compiler attribute(s) -- except those that are optional.
++ *
++ * Any other "attributes" (i.e. those that depend on a configuration option,
++ * on a compiler, on an architecture, on plugins, on other attributes...)
++ * should be defined elsewhere (e.g. compiler_types.h or compiler-*.h).
++ *
++ * This file is meant to be sorted (by actual attribute name,
++ * not by #define identifier). Use the __attribute__((__name__)) syntax
++ * (i.e. with underscores) to avoid future collisions with other macros.
++ * If an attribute is optional, state the reason in the comment.
++ */
++
++/*
++ * To check for optional attributes, we use __has_attribute, which is supported
++ * on gcc >= 5, clang >= 2.9 and icc >= 17. In the meantime, to support
++ * 4.6 <= gcc < 5, we implement __has_attribute by hand.
++ *
++ * sparse does not support __has_attribute (yet) and defines __GNUC_MINOR__
++ * depending on the compiler used to build it; however, these attributes have
++ * no semantic effects for sparse, so it does not matter. Also note that,
++ * in order to avoid sparse's warnings, even the unsupported ones must be
++ * defined to 0.
++ */
++#ifndef __has_attribute
++# define __has_attribute(x) __GCC4_has_attribute_##x
++# define __GCC4_has_attribute___assume_aligned__      (__GNUC_MINOR__ >= 9)
++# define __GCC4_has_attribute___designated_init__     0
++# define __GCC4_has_attribute___externally_visible__  1
++# define __GCC4_has_attribute___noclone__             1
++# define __GCC4_has_attribute___optimize__            1
++# define __GCC4_has_attribute___no_sanitize_address__ (__GNUC_MINOR__ >= 8)
++#endif
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-alias-function-attribute
++ */
++#define __alias(symbol)                 __attribute__((__alias__(#symbol)))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-aligned-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-aligned-type-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-aligned-variable-attribute
++ */
++#define __aligned(x)                    __attribute__((__aligned__(x)))
++#define __aligned_largest               __attribute__((__aligned__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-always_005finline-function-attribute
++ * clang: mentioned
++ */
++#define __always_inline                 inline __attribute__((__always_inline__))
++
++/*
++ * The second argument is optional (default 0), so we use a variadic macro
++ * to make the shorthand.
++ *
++ * Beware: Do not apply this to functions which may return
++ * ERR_PTRs. Also, it is probably unwise to apply it to functions
++ * returning extra information in the low bits (but in that case the
++ * compiler should see some alignment anyway, when the return value is
++ * massaged by 'flags = ptr & 3; ptr &= ~3;').
++ *
++ * Optional: only supported since gcc >= 4.9
++ * Optional: not supported by icc
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-assume_005faligned-function-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#assume-aligned
++ */
++#if __has_attribute(__assume_aligned__)
++# define __assume_aligned(a, ...)       __attribute__((__assume_aligned__(a, ## __VA_ARGS__)))
++#else
++# define __assume_aligned(a, ...)
++#endif
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-cold-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Label-Attributes.html#index-cold-label-attribute
++ */
++#define __cold                          __attribute__((__cold__))
++
++/*
++ * Note the long name.
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-const-function-attribute
++ */
++#define __attribute_const__             __attribute__((__const__))
++
++/*
++ * Don't. Just don't. See commit 771c035372a0 ("deprecate the '__deprecated'
++ * attribute warnings entirely and for good") for more information.
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-deprecated-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-deprecated-type-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-deprecated-variable-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Enumerator-Attributes.html#index-deprecated-enumerator-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#deprecated
++ */
++#define __deprecated
++
++/*
++ * Optional: only supported since gcc >= 5.1
++ * Optional: not supported by clang
++ * Optional: not supported by icc
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-designated_005finit-type-attribute
++ */
++#if __has_attribute(__designated_init__)
++# define __designated_init              __attribute__((__designated_init__))
++#else
++# define __designated_init
++#endif
++
++/*
++ * Optional: not supported by clang
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-externally_005fvisible-function-attribute
++ */
++#if __has_attribute(__externally_visible__)
++# define __visible                      __attribute__((__externally_visible__))
++#else
++# define __visible
++#endif
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-format-function-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#format
++ */
++#define __printf(a, b)                  __attribute__((__format__(printf, a, b)))
++#define __scanf(a, b)                   __attribute__((__format__(scanf, a, b)))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-gnu_005finline-function-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#gnu-inline
++ */
++#define __gnu_inline                    __attribute__((__gnu_inline__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
++ */
++#define __malloc                        __attribute__((__malloc__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-mode-type-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-mode-variable-attribute
++ */
++#define __mode(x)                       __attribute__((__mode__(x)))
++
++/*
++ * Optional: not supported by clang
++ * Note: icc does not recognize gcc's no-tracer
++ *
++ *  gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-noclone-function-attribute
++ *  gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-optimize-function-attribute
++ */
++#if __has_attribute(__noclone__)
++# if __has_attribute(__optimize__)
++#  define __noclone                     __attribute__((__noclone__, __optimize__("no-tracer")))
++# else
++#  define __noclone                     __attribute__((__noclone__))
++# endif
++#else
++# define __noclone
++#endif
++
++/*
++ * Note the missing underscores.
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-noinline-function-attribute
++ * clang: mentioned
++ */
++#define   noinline                      __attribute__((__noinline__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-noreturn-function-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#noreturn
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#id1
++ */
++#define __noreturn                      __attribute__((__noreturn__))
++
++/*
++ * Optional: only supported since gcc >= 4.8
++ * Optional: not supported by icc
++ *
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-no_005fsanitize_005faddress-function-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#no-sanitize-address-no-address-safety-analysis
++ */
++#if __has_attribute(__no_sanitize_address__)
++# define __no_sanitize_address          __attribute__((__no_sanitize_address__))
++#else
++# define __no_sanitize_address
++#endif
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-packed-type-attribute
++ * clang: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-packed-variable-attribute
++ */
++#define __packed                        __attribute__((__packed__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-pure-function-attribute
++ */
++#define __pure                          __attribute__((__pure__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-section-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-section-variable-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#section-declspec-allocate
++ */
++#define __section(S)                    __attribute__((__section__(#S)))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-unused-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Type-Attributes.html#index-unused-type-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-unused-variable-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Label-Attributes.html#index-unused-label-attribute
++ * clang: https://clang.llvm.org/docs/AttributeReference.html#maybe-unused-unused
++ */
++#define __always_unused                 __attribute__((__unused__))
++#define __maybe_unused                  __attribute__((__unused__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-used-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-used-variable-attribute
++ */
++#define __used                          __attribute__((__used__))
++
++/*
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html#index-weak-function-attribute
++ *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#index-weak-variable-attribute
++ */
++#define __weak                          __attribute__((__weak__))
++
++#endif /* __LINUX_COMPILER_ATTRIBUTES_H */
 diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index f182f2ef3227..65b10b1e2a59 100644
+index 0cb40df59418..0919865473d1 100644
 --- a/include/linux/compiler_types.h
 +++ b/include/linux/compiler_types.h
-@@ -217,7 +217,7 @@ struct ftrace_likely_data {
- #define __must_check
+@@ -55,6 +55,9 @@ extern void __chk_io_ptr(const volatile void __iomem *);
+ 
+ #ifdef __KERNEL__
+ 
++/* Attributes */
++#include <linux/compiler_attributes.h>
++
+ /* Compiler specific macros. */
+ #ifdef __clang__
+ #include <linux/compiler-clang.h>
+@@ -79,12 +82,6 @@ extern void __chk_io_ptr(const volatile void __iomem *);
+ #include <asm/compiler.h>
  #endif
  
--#if defined(CC_USING_HOTPATCH) && !defined(__CHECKER__)
-+#if defined(CC_USING_HOTPATCH)
- #define notrace			__attribute__((hotpatch(0, 0)))
+-/*
+- * Generic compiler-independent macros required for kernel
+- * build go below this comment. Actual compiler/compiler version
+- * specific implementations come from the above header files
+- */
+-
+ struct ftrace_branch_data {
+ 	const char *func;
+ 	const char *file;
+@@ -107,9 +104,6 @@ struct ftrace_likely_data {
+ 	unsigned long			constant;
+ };
+ 
+-/* Don't. Just don't. */
+-#define __deprecated
+-
+ #endif /* __KERNEL__ */
+ 
+ #endif /* __ASSEMBLY__ */
+@@ -119,10 +113,6 @@ struct ftrace_likely_data {
+  * compilers. We don't consider that to be an error, so set them to nothing.
+  * For example, some of them are for compiler specific plugins.
+  */
+-#ifndef __designated_init
+-# define __designated_init
+-#endif
+-
+ #ifndef __latent_entropy
+ # define __latent_entropy
+ #endif
+@@ -140,17 +130,6 @@ struct ftrace_likely_data {
+ # define randomized_struct_fields_end
+ #endif
+ 
+-#ifndef __visible
+-#define __visible
+-#endif
+-
+-/*
+- * Assume alignment of return value.
+- */
+-#ifndef __assume_aligned
+-#define __assume_aligned(a, ...)
+-#endif
+-
+ /* Are two types/vars the same type (ignoring qualifiers)? */
+ #define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
+ 
+@@ -159,10 +138,6 @@ struct ftrace_likely_data {
+ 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
+ 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
+ 
+-#ifndef __noclone
+-#define __noclone
+-#endif
+-
+ /* Helpers for emitting diagnostics in pragmas. */
+ #ifndef __diag
+ #define __diag(string)
+@@ -182,36 +157,6 @@ struct ftrace_likely_data {
+ #define __diag_error(compiler, version, option, comment) \
+ 	__diag_ ## compiler(version, error, option)
+ 
+-/*
+- * From the GCC manual:
+- *
+- * Many functions have no effects except the return value and their
+- * return value depends only on the parameters and/or global
+- * variables.  Such a function can be subject to common subexpression
+- * elimination and loop optimization just as an arithmetic operator
+- * would be.
+- * [...]
+- */
+-#define __pure			__attribute__((__pure__))
+-#define __attribute_const__	__attribute__((__const__))
+-#define __aligned(x)		__attribute__((__aligned__(x)))
+-#define __aligned_largest	__attribute__((__aligned__))
+-#define __printf(a, b)		__attribute__((__format__(printf, a, b)))
+-#define __scanf(a, b)		__attribute__((__format__(scanf, a, b)))
+-#define __maybe_unused		__attribute__((__unused__))
+-#define __always_unused		__attribute__((__unused__))
+-#define __mode(x)		__attribute__((__mode__(x)))
+-#define __malloc		__attribute__((__malloc__))
+-#define __used			__attribute__((__used__))
+-#define __noreturn		__attribute__((__noreturn__))
+-#define __packed		__attribute__((__packed__))
+-#define __weak			__attribute__((__weak__))
+-#define __alias(symbol)		__attribute__((__alias__(#symbol)))
+-#define __cold			__attribute__((__cold__))
+-#define __section(S)		__attribute__((__section__(#S)))
+-#define __gnu_inline		__attribute__((__gnu_inline__))
+-#define __always_inline		inline __attribute__((__always_inline__))
+-
+ #ifdef CONFIG_ENABLE_MUST_CHECK
+ #define __must_check		__attribute__((__warn_unused_result__))
  #else
- #define notrace			__attribute__((__no_instrument_function__))
+@@ -248,15 +193,13 @@ struct ftrace_likely_data {
+  */
+ #if !defined(CONFIG_ARCH_SUPPORTS_OPTIMIZED_INLINING) || \
+ 	!defined(CONFIG_OPTIMIZE_INLINING)
+-#define inline \
+-	inline __attribute__((__always_inline__, __unused__)) notrace __gnu_inline
++#define inline __always_inline __gnu_inline __maybe_unused notrace
+ #else
+-#define inline inline	__attribute__((__unused__)) notrace __gnu_inline
++#define inline          inline __gnu_inline __maybe_unused notrace
+ #endif
+ 
+ #define __inline__ inline
+-#define __inline inline
+-#define noinline	__attribute__((__noinline__))
++#define __inline   inline
+ 
+ /*
+  * Rather then using noinline to prevent stack consumption, use
 -- 
 2.17.1
