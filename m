@@ -1,106 +1,59 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 03/12] Compiler Attributes: remove unneeded tests
-Date: Mon,  3 Sep 2018 22:33:07 +0200
-Message-ID: <20180903203316.16183-4-miguel.ojeda.sandonis@gmail.com>
-References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: Re: [PATCH 10/12] Compiler Attributes: KENTRY used twice the "used" attribute
+Date: Tue, 4 Sep 2018 09:58:11 -0700
+Message-ID: <CAKwvOdk_yMOCGbEWcZH4aPP6ShS4DtSg0Qo6AnU-2+4WKu+Mqw@mail.gmail.com>
+References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com> <20180903203316.16183-11-miguel.ojeda.sandonis@gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
+In-Reply-To: <20180903203316.16183-11-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, linux-sparse@vger.kernel.org
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, LKML <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, luc.vanoostenryck@gmail.com, efriedma@codeaurora.org, sparse@chrisli.org, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg KH <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, joe@perches.com, asmadeus@codewreck.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Attributes const and always_inline have tests around them
-which are unneeded, since they are supported by gcc >= 4.6,
-clang >= 3 and icc >= 13. https://godbolt.org/z/DFPq37
+On Mon, Sep 3, 2018 at 1:34 PM Miguel Ojeda
+<miguel.ojeda.sandonis@gmail.com> wrote:
+>
+> Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+> Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> Cc: Eli Friedman <efriedma@codeaurora.org>
+> Cc: Christopher Li <sparse@chrisli.org>
+> Cc: Kees Cook <keescook@chromium.org>
+> Cc: Ingo Molnar <mingo@kernel.org>
+> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+> Cc: Arnd Bergmann <arnd@arndb.de>
+> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+> Cc: Joe Perches <joe@perches.com>
+> Cc: Dominique Martinet <asmadeus@codewreck.org>
+> Cc: Nick Desaulniers <ndesaulniers@google.com>
+> Cc: Linus Torvalds <torvalds@linux-foundation.org>
+> Cc: linux-sparse@vger.kernel.org
+> Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+> ---
+>  include/linux/compiler.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> index 4030a2940d6b..17ee9165ca51 100644
+> --- a/include/linux/compiler.h
+> +++ b/include/linux/compiler.h
+> @@ -146,7 +146,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+>         extern typeof(sym) sym;                                 \
+>         static const unsigned long __kentry_##sym               \
+>         __used                                                  \
+> -       __attribute__((__section__("___kentry" "+" #sym ), used))       \
+> +       __attribute__((__section__("___kentry" "+" #sym )))     \
+>         = (unsigned long)&sym;
+>  #endif
+>
+> --
+> 2.17.1
+>
 
-In the case of gnu_inline, we do not need to test for
-__GNUC_STDC_INLINE__ because, regardless of the current
-inlining behavior, we can simply always force the old
-GCC inlining behavior by using the attribute in all cases.
-
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Eli Friedman <efriedma@codeaurora.org>
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Arnd Bergmann <arnd@arndb.de>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Joe Perches <joe@perches.com>
-Cc: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-sparse@vger.kernel.org
 Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
-Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
----
- include/linux/compiler_types.h | 24 +++---------------------
- 1 file changed, 3 insertions(+), 21 deletions(-)
 
-diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index 2bc0f94df38e..759b3fea9216 100644
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -158,10 +158,6 @@ struct ftrace_likely_data {
- 	(sizeof(t) == sizeof(char) || sizeof(t) == sizeof(short) || \
- 	 sizeof(t) == sizeof(int) || sizeof(t) == sizeof(long))
- 
--#ifndef __attribute_const__
--#define __attribute_const__	__attribute__((__const__))
--#endif
--
- #ifndef __noclone
- #define __noclone
- #endif
-@@ -196,6 +192,7 @@ struct ftrace_likely_data {
-  * [...]
-  */
- #define __pure			__attribute__((__pure__))
-+#define __attribute_const__	__attribute__((__const__))
- #define __aligned(x)		__attribute__((__aligned__(x)))
- #define __aligned_largest	__attribute__((__aligned__))
- #define __printf(a, b)		__attribute__((__format__(printf, a, b)))
-@@ -211,7 +208,8 @@ struct ftrace_likely_data {
- #define __alias(symbol)		__attribute__((__alias__(#symbol)))
- #define __cold			__attribute__((__cold__))
- #define __section(S)		__attribute__((__section__(#S)))
--
-+#define __gnu_inline		__attribute__((__gnu_inline__))
-+#define __always_inline		inline __attribute__((__always_inline__))
- 
- #ifdef CONFIG_ENABLE_MUST_CHECK
- #define __must_check		__attribute__((__warn_unused_result__))
-@@ -227,18 +225,6 @@ struct ftrace_likely_data {
- 
- #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
- 
--/*
-- * Feature detection for gnu_inline (gnu89 extern inline semantics). Either
-- * __GNUC_STDC_INLINE__ is defined (not using gnu89 extern inline semantics,
-- * and we opt in to the gnu89 semantics), or __GNUC_STDC_INLINE__ is not
-- * defined so the gnu89 semantics are the default.
-- */
--#ifdef __GNUC_STDC_INLINE__
--# define __gnu_inline	__attribute__((__gnu_inline__))
--#else
--# define __gnu_inline
--#endif
--
- /*
-  * Force always-inline if the user requests it so via the .config.
-  * GCC does not warn about unused static inline functions for
-@@ -263,10 +249,6 @@ struct ftrace_likely_data {
- #define __inline inline
- #define noinline	__attribute__((__noinline__))
- 
--#ifndef __always_inline
--#define __always_inline inline __attribute__((__always_inline__))
--#endif
--
- /*
-  * Rather then using noinline to prevent stack consumption, use
-  * noinline_for_stack instead.  For documentation reasons.
 -- 
-2.17.1
+Thanks,
+~Nick Desaulniers
