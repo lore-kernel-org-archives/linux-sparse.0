@@ -1,62 +1,24 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 07/12] Compiler Attributes: remove unneeded sparse
- (__CHECKER__) tests
-Date: Wed, 5 Sep 2018 21:49:01 +0200
-Message-ID: <20180905194900.oln7qsifgcyuozrq@ltop.local>
-References: <20180903203316.16183-1-miguel.ojeda.sandonis@gmail.com>
- <20180903203316.16183-8-miguel.ojeda.sandonis@gmail.com>
- <20180905182038.muv535vfugm72spk@ltop.local>
- <20180905193035.GB3420@localhost>
- <CA+55aFxWcAqzuYOn1OPnRy5g5Uj69mQvxDK9Tn5HqecA-f3eiQ@mail.gmail.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v6 00/18] khwasan: kernel hardware assisted address
+ sanitizer
+Date: Wed, 5 Sep 2018 14:10:32 -0700
+Message-ID: <20180905141032.b1ddaab53d1b2b3bada95415@linux-foundation.org>
+References: <cover.1535462971.git.andreyknvl@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CA+55aFxWcAqzuYOn1OPnRy5g5Uj69mQvxDK9Tn5HqecA-f3eiQ@mail.gmail.com>
+In-Reply-To: <cover.1535462971.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Josh Triplett <josh@joshtriplett.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, efriedma@codeaurora.org, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@l>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Sep 05, 2018 at 12:40:26PM -0700, Linus Torvalds wrote:
-> On Wed, Sep 5, 2018 at 12:30 PM Josh Triplett <josh@joshtriplett.org> wrote:
-> >
-> > Unlike GCC, I don't think it's at all unreasonable to assume a
-> > *relatively* recent version of Sparse.
-> 
-> Yeah, sparse is small and easy to build and installs in your own
-> ~/bin/ directory by default.
-> 
-> Anybody who can build the kernel can trivially fetch and build sparse
-> in seconds.  It literally builds from scratch in 2.5s for me.
-> 
-> I don't think you even need any development packages that you don't
-> already need for the kernel. Just a C compiler and libc, basically.
-> 
-> Sure, some parts of sparse can use things like libxml and llvm and
-> even gtk, but that's for functionality that the "check kernel with
-> sparse" doesn't even need, and the makefile will automatically disable
-> them if you don't have it installed.
-> 
-> So if people are having trouble, just point them to the sparse repo,
-> and tell them that
-> 
->     git clone ...
->     cd sparse
->     make -j8
->     make install
-> 
-> fixes the issue in 30 seconds.
-> 
-> Although maybe I'm misstating just how easy sparse is to build and
-> install, and people have had problems?
-> 
+On Wed, 29 Aug 2018 13:35:04 +0200 Andrey Konovalov <andreyknvl@google.com> wrote:
 
-I never heard of anyone having a problem to build sparse but I
-guess that a lot of people just use their distro's version.
+> This patchset adds a new mode to KASAN [1], which is called KHWASAN
+> (Kernel HardWare assisted Address SANitizer).
 
-That said, I'm of course, all for encouraging people to upgrad
-to a recent version.
-
-
--- Luc
+We're at v6 and there are no reviewed-by's or acked-by's to be seen. 
+Is that a fair commentary on what has been happening, or have people
+been remiss in sending and gathering such things?
