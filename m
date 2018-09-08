@@ -1,61 +1,133 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] perf: enum overflow in uapi/linux/perf_event.h
-Date: Sat, 8 Sep 2018 01:55:54 +0200
-Message-ID: <20180907235552.6a6oytkzzpn4pcgl@ltop.local>
-References: <a70172863fa7d3c138f788b18d36524bd45b0a73.1536326078.git.christophe.leroy@c-s.fr>
- <20180907134246.GC24106@hirez.programming.kicks-ass.net>
- <ae32181d-37b2-1a13-3c72-66775e05ff88@c-s.fr>
- <20180907135817.GF24106@hirez.programming.kicks-ass.net>
- <7a086a56-a896-9513-7315-9d0d21b61a44@c-s.fr>
- <20180907184358.pg2ho4m4tc3dpwlw@ltop.local>
-Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH v4 00/13] Compiler Attributes
+Date: Sat,  8 Sep 2018 23:24:46 +0200
+Message-ID: <20180908212459.19736-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180907184358.pg2ho4m4tc3dpwlw@ltop.local>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Christophe LEROY <christophe.leroy@c-s.fr>
-Cc: Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, Arnaldo Carvalho de Melo <acme@kernel.org>, Alexander Shishkin <alexander.shishkin@linux.intel.com>, Jiri Olsa <jolsa@redhat.com>, Namhyung Kim <namhyung@kernel.org>, linux-kernel@vger.kernel.org, linuxppc-dev@lists.ozlabs.org, linux-sparse@vger.kernel.org
+To: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org, linux-doc@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Sep 07, 2018 at 08:43:59PM +0200, Luc Van Oostenryck wrote:
-> On Fri, Sep 07, 2018 at 04:15:33PM +0200, Christophe LEROY wrote:
-> > Le 07/09/2018 à 15:58, Peter Zijlstra a écrit :
-> > > On Fri, Sep 07, 2018 at 01:50:18PM +0000, Christophe Leroy wrote:
-> > > > 
-> > > > 
-> > > > On 09/07/2018 01:42 PM, Peter Zijlstra wrote:
-> > > > > On Fri, Sep 07, 2018 at 01:27:19PM +0000, Christophe Leroy wrote:
-> > > > > > On PPC32, enums are 32 bits, so __PERF_SAMPLE_CALLCHAIN_EARLY is
-> > > > > > out of scope. The following sparse warning is encountered:
-> > > > > > 
-> > > > > >     CHECK   arch/powerpc/kernel/process.c
-> > > > > > ./include/uapi/linux/perf_event.h:147:56: warning: cast truncates bits from constant value (8000000000000000 becomes 0)
-> > > > > 
-> > > > > Urgh... what compiler is that? I've not seen anything like that from the
-> > > > > build bots.
-> > > > > 
-> > > > 
-> > > > [root@pc16082vm linux-powerpc]# sparse --version
-> > > > 0.5.2
-> > > > 
-> > > > [root@pc16082vm linux-powerpc]# ppc-linux-gcc --version
-> > > > ppc-linux-gcc (GCC) 5.4.0
-> > > 
-> > > Ah, that's a sparse warning. But does your GCC agree? The thing is,
-> > > sparse uses the C enum spec, but I suspect GCC uses the C++ enum spec
-> > > and it all works fine.
-> 
-> Sparse is a bit weird about the exact underlying type used for enums.
-> 
-> > Ah yes, it seems that GCC is happy. So sparse should be fixed instead ?
-> 
-> I'll investigate (I suppose the same is given on x86-32).
+The Compiler Attributes series is an effort to disentangle
+the include/linux/compiler*.h headers and bring them up to date.
 
+The main idea behind the series is to use feature checking macros
+(i.e. __has_attribute) instead of compiler version checks (e.g. GCC_VERSION),
+which are compiler-agnostic (so they can be shared, reducing the size
+of compiler-specific headers) and version-agnostic.
 
-It's definitively a bug in sparse. A relatively nasty one and which
-open a can of worms. Fortunately, I had already looked at these
-problems in May, I just didn't had the time to push the patches.
+Other related improvements have been performed in the headers as well,
+which on top of the use of __has_attribute it has amounted to a significant
+simplification of these headers (e.g. GCC_VERSION is now only guarding 4
+non-attribute macros).
 
--- Luc
+This series should also help the efforts to support compiling the kernel
+with clang and icc. A fair amount of documentation and comments have also
+been added, clarified or removed; and the headers are now more readable,
+which should help kernel developers in general.
+
+The series was triggered due to the move to gcc >= 4.6. In turn, this series
+has also triggered Sparse to gain the ability to recognize __has_attribute
+on its own.
+
+You can also fetch it from:
+
+  https://github.com/ojeda/linux/tree/compiler-attributes-v4
+
+Enjoy!
+
+Cheers,
+Miguel
+
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Eli Friedman <efriedma@codeaurora.org>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-sparse@vger.kernel.org
+Cc: linux-doc@vger.kernel.org
+Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+
+v3 -> v4
+
+  This time it is an important fix I found while doing randconfigs, plus
+  the documentation sentence that Nick suggested and the MAINTAINERS file.
+
+  Compile-tested for a while on (x86_64, gcc-7.3) on a few randconfs.
+
+  New:
+
+  * Add MAINTAINERS entry for the new file (compiler_attributes.h)
+    so that we try to maintain that one as clean as possible.
+    (if someone else wants to join, feel free!)
+
+  Modified:
+
+  * Fix inline macro
+
+    __always_inline cannot be used in the inline macro,
+    because people marking a function as __always_inline would
+    expand to inline which in turn would expand back to __always_inline
+    (under some configs), which would not be expanded again.
+    Added a comment about this in the inline macro.
+
+    Also added another comment about __always_inline in compiler_attributes.h
+    to note that users expect to not have to write inline (as well as
+    the attribute). We cannot simply remove "inline" there (which would
+    solve the problem described above) because using the attribute is
+    not enough for gcc. A function marked as always_inline seems to require
+    to be marked as inline itself so that the attribute is applied:
+
+      "warning: always_inline function might not be inlinable [-Wattributes]"
+
+    From the gcc docs:
+
+      "For functions declared inline, this attribute inlines the function
+       independent of any restrictions that otherwise apply to inlining."
+
+    See https://godbolt.org/z/LpzUPj for an example.
+
+  From reviews:
+
+  * Add sentence about feature-detection in Docs (Nick)
+
+Miguel Ojeda (13):
+  Compiler Attributes: remove unused attributes
+  Compiler Attributes: always use the extra-underscores syntax
+  Compiler Attributes: remove unneeded tests
+  Compiler Attributes: homogenize __must_be_array
+  Compiler Attributes: naked was fixed in gcc 4.6
+  Compiler Attributes: naked can be shared
+  Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
+  Compiler Attributes: add missing SPDX ID in compiler_types.h
+  Compiler Attributes: use feature checks instead of version checks
+  Compiler Attributes: KENTRY used twice the "used" attribute
+  Compiler Attributes: remove uses of __attribute__ from compiler.h
+  Compiler Attributes: add Doc/process/programming-language.rst
+  Compiler Attributes: Add MAINTAINERS entry
+
+ Documentation/process/index.rst               |   1 +
+ .../process/programming-language.rst          |  45 ++++
+ MAINTAINERS                                   |   5 +
+ include/linux/compiler-clang.h                |   5 -
+ include/linux/compiler-gcc.h                  |  84 +-----
+ include/linux/compiler-intel.h                |   9 -
+ include/linux/compiler.h                      |  19 +-
+ include/linux/compiler_attributes.h           | 244 ++++++++++++++++++
+ include/linux/compiler_types.h                | 105 ++------
+ 9 files changed, 329 insertions(+), 188 deletions(-)
+ create mode 100644 Documentation/process/programming-language.rst
+ create mode 100644 include/linux/compiler_attributes.h
+
+-- 
+2.17.1
