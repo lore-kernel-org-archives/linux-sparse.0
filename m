@@ -1,34 +1,43 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH v4 00/13] Compiler Attributes
-Date: Sun, 9 Sep 2018 18:52:12 +0200
-Message-ID: <CANiq72k5GYk8x37mbWQQCLNyP82YcyzYOVunvL_2OO8ycqVTeg@mail.gmail.com>
+From: Jonathan Corbet <corbet@lwn.net>
+Subject: Re: [PATCH v4 12/13] Compiler Attributes: add
+ Doc/process/programming-language.rst
+Date: Sun, 9 Sep 2018 12:19:01 -0600
+Message-ID: <20180909121901.5a36d0fd@lwn.net>
 References: <20180908212459.19736-1-miguel.ojeda.sandonis@gmail.com>
+        <20180908212459.19736-13-miguel.ojeda.sandonis@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180908212459.19736-1-miguel.ojeda.sandonis@gmail.com>
+In-Reply-To: <20180908212459.19736-13-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org, Linux Doc Mailing List <linux-doc@vger.kernel.org>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org, linux-doc@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Hi all,
+On Sat,  8 Sep 2018 23:24:58 +0200
+Miguel Ojeda <miguel.ojeda.sandonis@gmail.com> wrote:
 
-On Sat, Sep 8, 2018 at 11:24 PM, Miguel Ojeda
-<miguel.ojeda.sandonis@gmail.com> wrote:
->
-> You can also fetch it from:
->
->   https://github.com/ojeda/linux/tree/compiler-attributes-v4
+>  Documentation/process/index.rst               |  1 +
+>  .../process/programming-language.rst          | 45 +++++++++++++++++++
+>  2 files changed, 46 insertions(+)
+>  create mode 100644 Documentation/process/programming-language.rst
+> 
+So I have some overall thoughts on the documentation; my apologies for
+not getting to this until you got to v4...
 
-In case it helps, I have also rebased it onto next-20180907 at:
+1) I think the document is mistitled.  It's not really about the language
+   that the kernel used, it's about compiler attributes.  So I would make
+   both the name of the document and it introduction reflect that.
 
-  https://github.com/ojeda/linux/tree/compiler-attributes-for-next
+2) This is an ideal opportunity to document what all of those attributes
+   actually mean.  I would guess that is the information many developers
+   will come here looking for, and they'll go away frustrated.  The ideal
+   thing to do, IMO, would be do say what each attribute means (rather
+   than just which compilers support it) in a DOC section in the new
+   compiler_attributes.h header, then use RST directives to pull all that
+   information into this document.
 
-The only conflict was the removal of __aligned_largest in f3569fd613f6
-("crypto: shash - Remove VLA usage in unaligned hashing").
+Thanks,
 
-(Luc's Reviewed-by is not included in that version)
-
-Cheers,
-Miguel
+jon
