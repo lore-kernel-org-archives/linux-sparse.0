@@ -1,36 +1,80 @@
-From: Ingo Molnar <mingo@kernel.org>
-Subject: Re: [PATCH v7 00/10] x86: macrofying inline asm for better compilation
-Date: Mon, 10 Sep 2018 15:00:29 +0200
-Message-ID: <20180910130029.GA66583@gmail.com>
-References: <20180809201554.168804-1-namit@vmware.com>
-	<4EDCB9E5-22C4-4168-A80A-4EC81ECE43EF@vmware.com>
+From: Christophe Leroy <christophe.leroy@c-s.fr>
+Subject: Re: Conflict between sparse and commit cafa0010cd51f ("Raise the
+ minimum required gcc version to 4.6")
+Date: Mon, 10 Sep 2018 13:19:07 +0000
+Message-ID: <9409138a-dc14-2b12-edc0-cfa0b471da6e@c-s.fr>
+References: <81a5fd11-366c-0897-4143-d8d041420a41@c-s.fr>
+ <1324e7d6-83f8-f40f-ad34-c46e4ad3139b@c-s.fr>
+ <CAKwvOdmuXydQsQyD2CUyoSkkDpF1e1CXg6v1SRv2q-bpYa9SQg@mail.gmail.com>
+ <20180907181337.peyfq7yvhahduvmq@ltop.local>
+ <CAKwvOdmXs+pWJGXu-zr-XSu7p-7hw=2m1vVQmVLwJcmGEFz0gg@mail.gmail.com>
+ <e6db84f1-ee8d-9377-5f1c-6a0e7972ba50@c-s.fr>
+ <20180910092835.v5nex5nzfgtl475m@ltop.local>
+ <061b3056-1a9a-af6b-de2a-49fea394320d@c-s.fr>
+ <20180910113448.dxnfvznyimtj3tkv@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-Content-Disposition: inline
-In-Reply-To: <4EDCB9E5-22C4-4168-A80A-4EC81ECE43EF@vmware.com>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Nadav Amit <namit@vmware.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Max Filippov <jcmvbkbc@gmail.com>, Jan Beulich <JBeulich@suse.com>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, X86 ML <x86@kernel.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, "linux-xtensa@linux-xtensa.org" <linux-xtensa@linux-xtensa.org>, Kees Cook <keescook@chromium.org>, Josh Poimboeuf <jpoimboe@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Juergen Gross <jgross@suse.com>, Chris Zankel <chris@zankel.net>, Masahiro Yamada <yamada.masahiro@socionext.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Ph
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180910113448.dxnfvznyimtj3tkv@ltop.local>
+Content-Language: en-US
+Sender: linux-kernel-owner@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, joe@perches.com, Kees Cook <keescook@chromium.org>, LKML <linux-kernel@vger.kernel.org>, linux-sparse@vger.kernel.org, sparse@chrisli.org, linuxppc-dev@lists.ozlabs.org
 List-Id: linux-sparse@vger.kernel.org
 
 
-* Nadav Amit <namit@vmware.com> wrote:
 
-> Ping.
+On 09/10/2018 11:34 AM, Luc Van Oostenryck wrote:
+> On Mon, Sep 10, 2018 at 09:56:33AM +0000, Christophe Leroy wrote:
+>>
+>> # export REAL_CC=ppc-linux-gcc
+>> # make CHECK="cgcc -target=ppc -D_CALL_ELF=2 -D__GCC__=5
+>> -D__GCC_MINOR__=4" C=2 arch/powerpc/kernel/process.o
+>> scripts/kconfig/conf  --syncconfig Kconfig
+>> #
+>> # configuration written to .config
+>> #
+>>    UPD     include/config/kernel.release
+>>    UPD     include/generated/utsrelease.h
+>>    CC      kernel/bounds.s
+>>    CC      arch/powerpc/kernel/asm-offsets.s
+>>    CALL    scripts/checksyscalls.sh
+>>    CHECK   scripts/mod/empty.c
+>> Can't exec "/bin/sh": Argument list too long at /usr/local/bin/cgcc line 86.
+>> make[2]: *** [scripts/mod/empty.o] Error 1
+>> make[1]: *** [scripts/mod] Error 2
+>> make: *** [scripts] Error 2
+> 
+> OK. Clearly nobody has ever used it so :(
+> There is an infinite loop because cgcc use the env var CHECK
+> to call sparse while kbuild use CHECK to call cgcc here.
+> 
+> The following seems to work here.
+> $ export REAL_CC=ppc-linux-gcc
+> $ make CHECK="CHECK=sparse cgcc -target=ppc ...
 
-Masahiro Yamada noted that some Reviewed-by tags were not added - could you please double check 
-past mails and add them and re-send against the latest kernel?
+Not yet ...
 
-Thanks,
+[root@pc16082vm linux-powerpc]# export REAL_CC=ppc-linux-gcc
+[root@pc16082vm linux-powerpc]# make CHECK="CHECK=sparse cgcc 
+-target=ppc -D_CALL_ELF=2 -D__GNUC__=5 -D__GNUC_MINOR__=4" C=2 
+arch/powerpc/kernel/process.o
+   CALL    scripts/checksyscalls.sh
+   CHECK   scripts/mod/empty.c
+<command-line>:0:0: warning: "__STDC__" redefined
+<built-in>: note: this is the location of the previous definition
+/opt/cldk-1.4.0/lib/gcc/ppc-linux/5.4.0/../../../../ppc-linux/lib/crt1.o:(.rodata+0x4): 
+undefined reference to `main'
+collect2: error: ld returned 1 exit status
+make[2]: *** [scripts/mod/empty.o] Error 1
+make[1]: *** [scripts/mod] Error 2
+make: *** [scripts] Error 2
 
-	Ingo
+Christophe
+
+> 
+> It's a bit kludgy, I admit.
+> 
+> -- Luc
+> 
