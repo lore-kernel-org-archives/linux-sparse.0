@@ -1,32 +1,38 @@
 From: Stefan Agner <stefan@agner.ch>
-Subject: Re: [PATCH v4 05/13] Compiler Attributes: naked was fixed in gcc 4.6
-Date: Mon, 10 Sep 2018 10:45:33 -0700
-Message-ID: <edf2141389d25ecb40d32575d1e31a26@agner.ch>
+Subject: Re: [PATCH v4 06/13] Compiler Attributes: naked can be shared
+Date: Mon, 10 Sep 2018 10:50:40 -0700
+Message-ID: <9daffa34182b7163c2bfdbbe5b688189@agner.ch>
 References: <20180908212459.19736-1-miguel.ojeda.sandonis@gmail.com>
- <20180908212459.19736-6-miguel.ojeda.sandonis@gmail.com>
+ <20180908212459.19736-7-miguel.ojeda.sandonis@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=US-ASCII
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180908212459.19736-6-miguel.ojeda.sandonis@gmail.com>
+In-Reply-To: <20180908212459.19736-7-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org, linux-kernel-owner@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, linux-kernel@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-sparse@vger.kernel.org, linux-kernel-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Hi,
-
 On 08.09.2018 14:24, Miguel Ojeda wrote:
-> Commit 9c695203a7dd ("compiler-gcc.h: gcc-4.5 needs noclone
-> and noinline on __naked functions") added noinline and noclone
-> as a workaround for a gcc 4.5 bug, which was resolved in 4.6.0.
+> The naked attribute is supported by at least gcc >= 4.6 (for ARM,
+> which is the only current user), gcc >= 8 (for x86), clang >= 3.1
+> and icc >= 13. See https://godbolt.org/z/350Dyc
 > 
-> Since now the minimum gcc supported version is 4.6,
-> we can clean it up.
+> Therefore, move it out of compiler-gcc.h so that the definition
+> is shared by all compilers.
 > 
-> See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=44290
-> and https://godbolt.org/z/h6NMIL
-> 
+
+This actually fixes Clang support for ARM32, it fixes: 815f0ddb346c
+("include/linux/compiler*.h: make compiler-*.h mutually exclusive").
+
+So this should go in v4.19. Is this patch set (patches 5/6 in
+particular) planned for v4.19? If not, we probably have to split out
+this fix...
+
+--
+Stefan
+
 > Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 > Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > Cc: Eli Friedman <efriedma@codeaurora.org>
@@ -34,7 +40,6 @@ On 08.09.2018 14:24, Miguel Ojeda wrote:
 > Cc: Kees Cook <keescook@chromium.org>
 > Cc: Ingo Molnar <mingo@kernel.org>
 > Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: Arnd Bergmann <arnd@arndb.de>
 > Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 > Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 > Cc: Joe Perches <joe@perches.com>
@@ -42,40 +47,48 @@ On 08.09.2018 14:24, Miguel Ojeda wrote:
 > Cc: Nick Desaulniers <ndesaulniers@google.com>
 > Cc: Linus Torvalds <torvalds@linux-foundation.org>
 > Cc: linux-sparse@vger.kernel.org
+> Suggested-by: Arnd Bergmann <arnd@arndb.de>
 > Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 > ---
->  include/linux/compiler-gcc.h | 8 +-------
->  1 file changed, 1 insertion(+), 7 deletions(-)
+>  include/linux/compiler-gcc.h   | 8 --------
+>  include/linux/compiler_types.h | 8 ++++++++
+>  2 files changed, 8 insertions(+), 8 deletions(-)
 > 
 > diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-> index 76f4907ef707..4cd5e9264bce 100644
+> index 4cd5e9264bce..3b32bbfa5a49 100644
 > --- a/include/linux/compiler-gcc.h
 > +++ b/include/linux/compiler-gcc.h
-> @@ -77,14 +77,8 @@
->   * to trace naked functions because then mcount is called without
->   * stack and frame pointer being set up and there is no chance to
->   * restore the lr register to the value before mcount was called.
-
-I think this is also no longer required since GCC 4.6 and newer only
-have the new mcount interface:
-
-https://lore.kernel.org/lkml/20180826214022.4889-1-stefan@agner.ch/T/#u
-
-That said, I am not sure whether it is a good idea to enable tracing for
-naked functions even with the mcount interface.
-
---
-Stefan
-
-
-> - *
-> - * The asm() bodies of naked functions often depend on standard calling
-> - * conventions, therefore they must be noinline and noclone.
-> - *
-> - * GCC 4.[56] currently fail to enforce this, so we must do so ourselves.
-> - * See GCC PR44290.
->   */
-> -#define __naked		__attribute__((__naked__)) noinline __noclone notrace
-> +#define __naked		__attribute__((__naked__)) notrace
+> @@ -72,14 +72,6 @@
+>  #define __noretpoline __attribute__((__indirect_branch__("keep")))
+>  #endif
 >  
+> -/*
+> - * it doesn't make sense on ARM (currently the only user of __naked)
+> - * to trace naked functions because then mcount is called without
+> - * stack and frame pointer being set up and there is no chance to
+> - * restore the lr register to the value before mcount was called.
+> - */
+> -#define __naked		__attribute__((__naked__)) notrace
+> -
 >  #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
+>  
+>  #define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
+> diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+> index 83475515bc39..5ff9cda893f4 100644
+> --- a/include/linux/compiler_types.h
+> +++ b/include/linux/compiler_types.h
+> @@ -224,6 +224,14 @@ struct ftrace_likely_data {
+>  #define notrace			__attribute__((__no_instrument_function__))
+>  #endif
+>  
+> +/*
+> + * it doesn't make sense on ARM (currently the only user of __naked)
+> + * to trace naked functions because then mcount is called without
+> + * stack and frame pointer being set up and there is no chance to
+> + * restore the lr register to the value before mcount was called.
+> + */
+> +#define __naked			__attribute__((__naked__)) notrace
+> +
+>  #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
+>  
+>  /*
