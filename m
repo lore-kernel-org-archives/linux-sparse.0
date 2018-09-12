@@ -1,7 +1,7 @@
 From: Dmitry Vyukov <dvyukov@google.com>
 Subject: Re: [PATCH v6 15/18] khwasan, arm64: add brk handler for inline instrumentation
-Date: Wed, 12 Sep 2018 19:13:31 +0200
-Message-ID: <CACT4Y+ZwLnk7V1cY-EAHbrfXPBxs6qyynZPhxoSKZZDWSK8Fuw@mail.gmail.com>
+Date: Wed, 12 Sep 2018 19:15:39 +0200
+Message-ID: <CACT4Y+aEwYiaVN--RH_0VBh0wbCcrf-Ndz+_eOaBNi6nKxrfQA@mail.gmail.com>
 References: <cover.1535462971.git.andreyknvl@google.com> <f5e73b5ead3355932ad8b5fc96b141c3f5b8c16c.1535462971.git.andreyknvl@google.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
@@ -118,23 +118,16 @@ On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
 > +        * this is controlled by current->kasan_depth). All these accesses are
 > +        * detected by the tool, even though the reports for them are not
 > +        * printed.
-
-
-I am not following this part.
-Slab accesses metadata. OK.
-This is detected as bad access. OK.
-Report is not printed. OK.
-We skip BRK and resume execution.
-What is the problem?
-
-
-
 > +        *
 > +        * This is something that might be fixed at some point in the future.
 > +        */
 > +       if (!recover)
 > +               die("Oops - KHWASAN", regs, 0);
-> +
+
+Why die and not panic? Die seems to be much less used function, and it
+calls panic anyway, and we call panic in kasan_report if panic_on_warn
+is set.
+
 > +       /* If thread survives, skip over the brk instruction and continue: */
 > +       __arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
 > +       return DBG_HOOK_HANDLED;
