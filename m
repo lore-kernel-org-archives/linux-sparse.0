@@ -1,90 +1,177 @@
 From: Dmitry Vyukov <dvyukov@google.com>
-Subject: Re: [PATCH v6 08/18] khwasan: preassign tags to objects with ctors or SLAB_TYPESAFE_BY_RCU
-Date: Wed, 12 Sep 2018 18:36:08 +0200
-Message-ID: <CACT4Y+awX48sFAYFCgx1Q-nJ=QrBhr08psMmHr+hDeCsQc0NRw@mail.gmail.com>
-References: <cover.1535462971.git.andreyknvl@google.com> <95b5beb7ec13b7e998efe84c9a7a5c1fa49a9fe3.1535462971.git.andreyknvl@google.com>
+Subject: Re: [PATCH v6 15/18] khwasan, arm64: add brk handler for inline instrumentation
+Date: Wed, 12 Sep 2018 19:13:31 +0200
+Message-ID: <CACT4Y+ZwLnk7V1cY-EAHbrfXPBxs6qyynZPhxoSKZZDWSK8Fuw@mail.gmail.com>
+References: <cover.1535462971.git.andreyknvl@google.com> <f5e73b5ead3355932ad8b5fc96b141c3f5b8c16c.1535462971.git.andreyknvl@google.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <95b5beb7ec13b7e998efe84c9a7a5c1fa49a9fe3.1535462971.git.andreyknvl@google.com>
+In-Reply-To: <f5e73b5ead3355932ad8b5fc96b141c3f5b8c16c.1535462971.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Andrey Konovalov <andreyknvl@google.com>
 Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
 List-Id: linux-sparse@vger.kernel.org
 
 On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
-> An object constructor can initialize pointers within this objects based on
-> the address of the object. Since the object address might be tagged, we
-> need to assign a tag before calling constructor.
+> KHWASAN inline instrumentation mode (which embeds checks of shadow memory
+> into the generated code, instead of inserting a callback) generates a brk
+> instruction when a tag mismatch is detected.
 >
-> The implemented approach is to assign tags to objects with constructors
-> when a slab is allocated and call constructors once as usual. The
-> downside is that such object would always have the same tag when it is
-> reallocated, so we won't catch use-after-frees on it.
->
-> Also pressign tags for objects from SLAB_TYPESAFE_BY_RCU caches, since
-> they can be validy accessed after having been freed.
+> This commit add a KHWASAN brk handler, that decodes the immediate value
+> passed to the brk instructions (to extract information about the memory
+> access that triggered the mismatch), reads the register values (x0 contains
+> the guilty address) and reports the bug.
 >
 > Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
 > ---
->  mm/slab.c | 6 +++++-
->  mm/slub.c | 4 ++++
->  2 files changed, 9 insertions(+), 1 deletion(-)
+>  arch/arm64/include/asm/brk-imm.h |  2 +
+>  arch/arm64/kernel/traps.c        | 69 +++++++++++++++++++++++++++++++-
+>  2 files changed, 69 insertions(+), 2 deletions(-)
 >
-> diff --git a/mm/slab.c b/mm/slab.c
-> index 6fdca9ec2ea4..3b4227059f2e 100644
-> --- a/mm/slab.c
-> +++ b/mm/slab.c
-> @@ -403,7 +403,11 @@ static inline struct kmem_cache *virt_to_cache(const void *obj)
->  static inline void *index_to_obj(struct kmem_cache *cache, struct page *page,
->                                  unsigned int idx)
->  {
-> -       return page->s_mem + cache->size * idx;
-> +       void *obj;
-> +
-> +       obj = page->s_mem + cache->size * idx;
-> +       obj = khwasan_preset_slab_tag(cache, idx, obj);
-> +       return obj;
+> diff --git a/arch/arm64/include/asm/brk-imm.h b/arch/arm64/include/asm/brk-imm.h
+> index ed693c5bcec0..e4a7013321dc 100644
+> --- a/arch/arm64/include/asm/brk-imm.h
+> +++ b/arch/arm64/include/asm/brk-imm.h
+> @@ -16,10 +16,12 @@
+>   * 0x400: for dynamic BRK instruction
+>   * 0x401: for compile time BRK instruction
+>   * 0x800: kernel-mode BUG() and WARN() traps
+> + * 0x9xx: KHWASAN trap (allowed values 0x900 - 0x9ff)
+>   */
+>  #define FAULT_BRK_IMM                  0x100
+>  #define KGDB_DYN_DBG_BRK_IMM           0x400
+>  #define KGDB_COMPILED_DBG_BRK_IMM      0x401
+>  #define BUG_BRK_IMM                    0x800
+> +#define KHWASAN_BRK_IMM                        0x900
+>
+>  #endif
+> diff --git a/arch/arm64/kernel/traps.c b/arch/arm64/kernel/traps.c
+> index 039e9ff379cc..fd70347d1ce7 100644
+> --- a/arch/arm64/kernel/traps.c
+> +++ b/arch/arm64/kernel/traps.c
+> @@ -35,6 +35,7 @@
+>  #include <linux/sizes.h>
+>  #include <linux/syscalls.h>
+>  #include <linux/mm_types.h>
+> +#include <linux/kasan.h>
+>
+>  #include <asm/atomic.h>
+>  #include <asm/bug.h>
+> @@ -269,10 +270,14 @@ void arm64_notify_die(const char *str, struct pt_regs *regs,
+>         }
 >  }
 >
->  /*
-> diff --git a/mm/slub.c b/mm/slub.c
-> index 4206e1b616e7..086d6558a6b6 100644
-> --- a/mm/slub.c
-> +++ b/mm/slub.c
-> @@ -1531,12 +1531,14 @@ static bool shuffle_freelist(struct kmem_cache *s, struct page *page)
->         /* First entry is used as the base of the freelist */
->         cur = next_freelist_entry(s, page, &pos, start, page_limit,
->                                 freelist_count);
-> +       cur = khwasan_preset_slub_tag(s, cur);
->         page->freelist = cur;
+> -void arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
+> +void __arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
+>  {
+>         regs->pc += size;
+> +}
 >
->         for (idx = 1; idx < page->objects; idx++) {
->                 setup_object(s, page, cur);
->                 next = next_freelist_entry(s, page, &pos, start, page_limit,
->                         freelist_count);
-> +               next = khwasan_preset_slub_tag(s, next);
->                 set_freepointer(s, cur, next);
->                 cur = next;
+> +void arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
+> +{
+> +       __arm64_skip_faulting_instruction(regs, size);
+>         /*
+>          * If we were single stepping, we want to get the step exception after
+>          * we return from the trap.
+> @@ -775,7 +780,7 @@ static int bug_handler(struct pt_regs *regs, unsigned int esr)
 >         }
-> @@ -1613,8 +1615,10 @@ static struct page *allocate_slab(struct kmem_cache *s, gfp_t flags, int node)
->         shuffle = shuffle_freelist(s, page);
 >
->         if (!shuffle) {
-> +               start = khwasan_preset_slub_tag(s, start);
->                 for_each_object_idx(p, idx, s, start, page->objects) {
->                         setup_object(s, page, p);
-> +                       p = khwasan_preset_slub_tag(s, p);
+>         /* If thread survives, skip over the BUG instruction and continue: */
+> -       arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
+> +       __arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
+>         return DBG_HOOK_HANDLED;
+>  }
+>
+> @@ -785,6 +790,59 @@ static struct break_hook bug_break_hook = {
+>         .fn = bug_handler,
+>  };
+>
+> +#ifdef CONFIG_KASAN_HW
+> +
+> +#define KHWASAN_ESR_RECOVER    0x20
+> +#define KHWASAN_ESR_WRITE      0x10
+> +#define KHWASAN_ESR_SIZE_MASK  0x0f
+> +#define KHWASAN_ESR_SIZE(esr)  (1 << ((esr) & KHWASAN_ESR_SIZE_MASK))
+> +
+> +static int khwasan_handler(struct pt_regs *regs, unsigned int esr)
+> +{
+> +       bool recover = esr & KHWASAN_ESR_RECOVER;
+> +       bool write = esr & KHWASAN_ESR_WRITE;
+> +       size_t size = KHWASAN_ESR_SIZE(esr);
+> +       u64 addr = regs->regs[0];
+> +       u64 pc = regs->pc;
+> +
+> +       if (user_mode(regs))
+> +               return DBG_HOOK_ERROR;
+> +
+> +       kasan_report(addr, size, write, pc);
+> +
+> +       /*
+> +        * The instrumentation allows to control whether we can proceed after
+> +        * a crash was detected. This is done by passing the -recover flag to
+> +        * the compiler. Disabling recovery allows to generate more compact
+> +        * code.
+> +        *
+> +        * Unfortunately disabling recovery doesn't work for the kernel right
+> +        * now. KHWASAN reporting is disabled in some contexts (for example when
+> +        * the allocator accesses slab object metadata; same is true for KASAN;
+> +        * this is controlled by current->kasan_depth). All these accesses are
+> +        * detected by the tool, even though the reports for them are not
+> +        * printed.
 
 
-As I commented in the previous patch, can't we do this in
-kasan_init_slab_obj(), which should be called in all the right places
-already?
+I am not following this part.
+Slab accesses metadata. OK.
+This is detected as bad access. OK.
+Report is not printed. OK.
+We skip BRK and resume execution.
+What is the problem?
 
 
->                         if (likely(idx < page->objects))
->                                 set_freepointer(s, p, p + s->size);
->                         else
+
+> +        *
+> +        * This is something that might be fixed at some point in the future.
+> +        */
+> +       if (!recover)
+> +               die("Oops - KHWASAN", regs, 0);
+> +
+> +       /* If thread survives, skip over the brk instruction and continue: */
+> +       __arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
+> +       return DBG_HOOK_HANDLED;
+> +}
+> +
+> +#define KHWASAN_ESR_VAL (0xf2000000 | KHWASAN_BRK_IMM)
+> +#define KHWASAN_ESR_MASK 0xffffff00
+> +
+> +static struct break_hook khwasan_break_hook = {
+> +       .esr_val = KHWASAN_ESR_VAL,
+> +       .esr_mask = KHWASAN_ESR_MASK,
+> +       .fn = khwasan_handler,
+> +};
+> +#endif
+> +
+>  /*
+>   * Initial handler for AArch64 BRK exceptions
+>   * This handler only used until debug_traps_init().
+> @@ -792,6 +850,10 @@ static struct break_hook bug_break_hook = {
+>  int __init early_brk64(unsigned long addr, unsigned int esr,
+>                 struct pt_regs *regs)
+>  {
+> +#ifdef CONFIG_KASAN_HW
+> +       if ((esr & KHWASAN_ESR_MASK) == KHWASAN_ESR_VAL)
+> +               return khwasan_handler(regs, esr) != DBG_HOOK_HANDLED;
+> +#endif
+>         return bug_handler(regs, esr) != DBG_HOOK_HANDLED;
+>  }
+>
+> @@ -799,4 +861,7 @@ int __init early_brk64(unsigned long addr, unsigned int esr,
+>  void __init trap_init(void)
+>  {
+>         register_break_hook(&bug_break_hook);
+> +#ifdef CONFIG_KASAN_HW
+> +       register_break_hook(&khwasan_break_hook);
+> +#endif
+>  }
 > --
 > 2.19.0.rc0.228.g281dcd1b4d0-goog
 >
