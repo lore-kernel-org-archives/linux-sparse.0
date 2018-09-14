@@ -1,94 +1,50 @@
-From: Dmitry Vyukov <dvyukov@google.com>
-Subject: Re: [PATCH v6 15/18] khwasan, arm64: add brk handler for inline instrumentation
-Date: Fri, 14 Sep 2018 07:11:09 +0200
-Message-ID: <CACT4Y+ahqiUrcfqfLjy1CKsG=NYMLZNOtQW6ofRYXh6ZHjpkrw@mail.gmail.com>
-References: <cover.1535462971.git.andreyknvl@google.com> <f5e73b5ead3355932ad8b5fc96b141c3f5b8c16c.1535462971.git.andreyknvl@google.com>
- <CACT4Y+aEwYiaVN--RH_0VBh0wbCcrf-Ndz+_eOaBNi6nKxrfQA@mail.gmail.com>
- <CAG48ez2oT1dtDcH8SfPLnoX5F8d6Pd=M-eOKHhYJ83EuL_j6wQ@mail.gmail.com>
- <CACT4Y+avu_68GoQcc32zpcOpAu-Pw7m71VmuKtEkOw=vKgxi7w@mail.gmail.com> <CAKwvOdns=3bktpXLEpo6o0J8OQPym6YE+x6Dvs_kYSBsuJKtSw@mail.gmail.com>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH v6 00/18] khwasan: kernel hardware assisted address
+ sanitizer
+Date: Fri, 14 Sep 2018 16:28:26 +0100
+Message-ID: <20180914152825.GC6236@arm.com>
+References: <cover.1535462971.git.andreyknvl@google.com>
+ <20180905141032.b1ddaab53d1b2b3bada95415@linux-foundation.org>
+ <20180906100543.GI3592@arm.com>
+ <CAAeHK+wStsNwh2oKv-KCG4kx5538FuDMQ6Yw2X=sK5LPrw2DZg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKwvOdns=3bktpXLEpo6o0J8OQPym6YE+x6Dvs_kYSBsuJKtSw@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <CAAeHK+wStsNwh2oKv-KCG4kx5538FuDMQ6Yw2X=sK5LPrw2DZg@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>
-Cc: Jann Horn <jannh@google.com>, Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg KH <gregkh@linuxfoundation.org>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Sep 13, 2018 at 8:09 PM, 'Nick Desaulniers' via kasan-dev
-<kasan-dev@googlegroups.com> wrote:
-> On Thu, Sep 13, 2018 at 1:37 AM Dmitry Vyukov <dvyukov@google.com> wrote:
->>
->> On Wed, Sep 12, 2018 at 7:39 PM, Jann Horn <jannh@google.com> wrote:
->> > On Wed, Sep 12, 2018 at 7:16 PM Dmitry Vyukov <dvyukov@google.com> wrote:
->> >> On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
->> > [...]
->> >> > +static int khwasan_handler(struct pt_regs *regs, unsigned int esr)
->> >> > +{
->> >> > +       bool recover = esr & KHWASAN_ESR_RECOVER;
->> >> > +       bool write = esr & KHWASAN_ESR_WRITE;
->> >> > +       size_t size = KHWASAN_ESR_SIZE(esr);
->> >> > +       u64 addr = regs->regs[0];
->> >> > +       u64 pc = regs->pc;
->> >> > +
->> >> > +       if (user_mode(regs))
->> >> > +               return DBG_HOOK_ERROR;
->> >> > +
->> >> > +       kasan_report(addr, size, write, pc);
->> >> > +
->> >> > +       /*
->> >> > +        * The instrumentation allows to control whether we can proceed after
->> >> > +        * a crash was detected. This is done by passing the -recover flag to
->> >> > +        * the compiler. Disabling recovery allows to generate more compact
->> >> > +        * code.
->> >> > +        *
->> >> > +        * Unfortunately disabling recovery doesn't work for the kernel right
->> >> > +        * now. KHWASAN reporting is disabled in some contexts (for example when
->> >> > +        * the allocator accesses slab object metadata; same is true for KASAN;
->> >> > +        * this is controlled by current->kasan_depth). All these accesses are
->> >> > +        * detected by the tool, even though the reports for them are not
->> >> > +        * printed.
->> >> > +        *
->> >> > +        * This is something that might be fixed at some point in the future.
->> >> > +        */
->> >> > +       if (!recover)
->> >> > +               die("Oops - KHWASAN", regs, 0);
->> >>
->> >> Why die and not panic? Die seems to be much less used function, and it
->> >> calls panic anyway, and we call panic in kasan_report if panic_on_warn
->> >> is set.
->> >
->> > die() is vaguely equivalent to BUG(); die() and BUG() normally only
->> > terminate the current process, which may or may not leave the system
->> > somewhat usable, while panic() always brings down the whole system.
->> > AFAIK panic() shouldn't be used unless you're in some very low-level
->> > code where you know that trying to just kill the current process can't
->> > work and the entire system is broken beyond repair.
->> >
->> > If KASAN traps on some random memory access, there's a good chance
->> > that just killing the current process will allow at least parts of the
->> > system to continue. I'm not sure whether BUG() or die() is more
->> > appropriate here, but I think it definitely should not be a panic().
->>
->>
->> Nick, do you know if die() will be enough to catch problems on Android
->> phones? panic_on_warn would turn this into panic, but I guess one does
->> not want panic_on_warn on a canary phone.
->
-> die() has arch specific implementations, so looking at:
->
-> arch/arm64/kernel/traps.c:196#die
->
-> it looks like panic is invoked if in_interrupt() or panic_on_oops(),
-> which is a configure option.  So maybe the config for KHWASAN should
-> also enable that? Otherwise seems easy to forget.  But maybe that
-> should remain configurable separately?
->
-> Looking at the kernel configs for the Pixel 2, it does seem like
-> CONFIG_PANIC_ON_OOPS=y is already enabled.
-> https://android.googlesource.com/kernel/msm/+/android-msm-wahoo-4.4-pie/arch/arm64/configs/wahoo_defconfig#746
+On Thu, Sep 06, 2018 at 01:06:23PM +0200, Andrey Konovalov wrote:
+> On Thu, Sep 6, 2018 at 12:05 PM, Will Deacon <will.deacon@arm.com> wrote:
+> > On Wed, Sep 05, 2018 at 02:10:32PM -0700, Andrew Morton wrote:
+> >> On Wed, 29 Aug 2018 13:35:04 +0200 Andrey Konovalov <andreyknvl@google.com> wrote:
+> >>
+> >> > This patchset adds a new mode to KASAN [1], which is called KHWASAN
+> >> > (Kernel HardWare assisted Address SANitizer).
+> >>
+> >> We're at v6 and there are no reviewed-by's or acked-by's to be seen.
+> >> Is that a fair commentary on what has been happening, or have people
+> >> been remiss in sending and gathering such things?
+> >
+> > I still have concerns about the consequences of merging this as anything
+> > other than a debug option [1]. Unfortunately, merging it as a debug option
+> > defeats the whole point, so I think we need to spend more effort on developing
+> > tools that can help us to find and fix the subtle bugs which will arise from
+> > enabling tagged pointers in the kernel.
+> 
+> I totally don't mind calling it a debug option. Do I need to somehow
+> specify it somewhere?
 
-Then I think we are good here.
+Ok, sorry, I completely misunderstood you earlier on then! For some reason
+I thought you wanted this on by default.
 
-> Specifically to catch problems on Android, our internal debug builds
-> can report on panics, but not oops, IIUC.
+In which case, I'm ok with the overall idea as long as we make the caveats
+clear in the Kconfig text. In particular, that enabling this option may
+introduce problems relating to pointer casting and comparison, but can
+offer better coverage and lower memory consumption than a fully
+software-based KASAN solution.
+
+Will
