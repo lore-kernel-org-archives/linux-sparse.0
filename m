@@ -1,84 +1,94 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH 2/2] Compiler Attributes: naked can be shared
-Date: Fri, 14 Sep 2018 01:59:41 +0200
-Message-ID: <20180913235941.31211-3-miguel.ojeda.sandonis@gmail.com>
-References: <20180913235941.31211-1-miguel.ojeda.sandonis@gmail.com>
+From: Dmitry Vyukov <dvyukov@google.com>
+Subject: Re: [PATCH v6 15/18] khwasan, arm64: add brk handler for inline instrumentation
+Date: Fri, 14 Sep 2018 07:11:09 +0200
+Message-ID: <CACT4Y+ahqiUrcfqfLjy1CKsG=NYMLZNOtQW6ofRYXh6ZHjpkrw@mail.gmail.com>
+References: <cover.1535462971.git.andreyknvl@google.com> <f5e73b5ead3355932ad8b5fc96b141c3f5b8c16c.1535462971.git.andreyknvl@google.com>
+ <CACT4Y+aEwYiaVN--RH_0VBh0wbCcrf-Ndz+_eOaBNi6nKxrfQA@mail.gmail.com>
+ <CAG48ez2oT1dtDcH8SfPLnoX5F8d6Pd=M-eOKHhYJ83EuL_j6wQ@mail.gmail.com>
+ <CACT4Y+avu_68GoQcc32zpcOpAu-Pw7m71VmuKtEkOw=vKgxi7w@mail.gmail.com> <CAKwvOdns=3bktpXLEpo6o0J8OQPym6YE+x6Dvs_kYSBsuJKtSw@mail.gmail.com>
+Mime-Version: 1.0
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180913235941.31211-1-miguel.ojeda.sandonis@gmail.com>
+In-Reply-To: <CAKwvOdns=3bktpXLEpo6o0J8OQPym6YE+x6Dvs_kYSBsuJKtSw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Stefan Agner <stefan@agner.ch>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, linux-sparse@vger.kernel.org
+To: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Jann Horn <jannh@google.com>, Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg KH <gregkh@linuxfoundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-The naked attribute is supported by at least gcc >= 4.6 (for ARM,
-which is the only current user), gcc >= 8 (for x86), clang >= 3.1
-and icc >= 13. See https://godbolt.org/z/350Dyc
+On Thu, Sep 13, 2018 at 8:09 PM, 'Nick Desaulniers' via kasan-dev
+<kasan-dev@googlegroups.com> wrote:
+> On Thu, Sep 13, 2018 at 1:37 AM Dmitry Vyukov <dvyukov@google.com> wrote:
+>>
+>> On Wed, Sep 12, 2018 at 7:39 PM, Jann Horn <jannh@google.com> wrote:
+>> > On Wed, Sep 12, 2018 at 7:16 PM Dmitry Vyukov <dvyukov@google.com> wrote:
+>> >> On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
+>> > [...]
+>> >> > +static int khwasan_handler(struct pt_regs *regs, unsigned int esr)
+>> >> > +{
+>> >> > +       bool recover = esr & KHWASAN_ESR_RECOVER;
+>> >> > +       bool write = esr & KHWASAN_ESR_WRITE;
+>> >> > +       size_t size = KHWASAN_ESR_SIZE(esr);
+>> >> > +       u64 addr = regs->regs[0];
+>> >> > +       u64 pc = regs->pc;
+>> >> > +
+>> >> > +       if (user_mode(regs))
+>> >> > +               return DBG_HOOK_ERROR;
+>> >> > +
+>> >> > +       kasan_report(addr, size, write, pc);
+>> >> > +
+>> >> > +       /*
+>> >> > +        * The instrumentation allows to control whether we can proceed after
+>> >> > +        * a crash was detected. This is done by passing the -recover flag to
+>> >> > +        * the compiler. Disabling recovery allows to generate more compact
+>> >> > +        * code.
+>> >> > +        *
+>> >> > +        * Unfortunately disabling recovery doesn't work for the kernel right
+>> >> > +        * now. KHWASAN reporting is disabled in some contexts (for example when
+>> >> > +        * the allocator accesses slab object metadata; same is true for KASAN;
+>> >> > +        * this is controlled by current->kasan_depth). All these accesses are
+>> >> > +        * detected by the tool, even though the reports for them are not
+>> >> > +        * printed.
+>> >> > +        *
+>> >> > +        * This is something that might be fixed at some point in the future.
+>> >> > +        */
+>> >> > +       if (!recover)
+>> >> > +               die("Oops - KHWASAN", regs, 0);
+>> >>
+>> >> Why die and not panic? Die seems to be much less used function, and it
+>> >> calls panic anyway, and we call panic in kasan_report if panic_on_warn
+>> >> is set.
+>> >
+>> > die() is vaguely equivalent to BUG(); die() and BUG() normally only
+>> > terminate the current process, which may or may not leave the system
+>> > somewhat usable, while panic() always brings down the whole system.
+>> > AFAIK panic() shouldn't be used unless you're in some very low-level
+>> > code where you know that trying to just kill the current process can't
+>> > work and the entire system is broken beyond repair.
+>> >
+>> > If KASAN traps on some random memory access, there's a good chance
+>> > that just killing the current process will allow at least parts of the
+>> > system to continue. I'm not sure whether BUG() or die() is more
+>> > appropriate here, but I think it definitely should not be a panic().
+>>
+>>
+>> Nick, do you know if die() will be enough to catch problems on Android
+>> phones? panic_on_warn would turn this into panic, but I guess one does
+>> not want panic_on_warn on a canary phone.
+>
+> die() has arch specific implementations, so looking at:
+>
+> arch/arm64/kernel/traps.c:196#die
+>
+> it looks like panic is invoked if in_interrupt() or panic_on_oops(),
+> which is a configure option.  So maybe the config for KHWASAN should
+> also enable that? Otherwise seems easy to forget.  But maybe that
+> should remain configurable separately?
+>
+> Looking at the kernel configs for the Pixel 2, it does seem like
+> CONFIG_PANIC_ON_OOPS=y is already enabled.
+> https://android.googlesource.com/kernel/msm/+/android-msm-wahoo-4.4-pie/arch/arm64/configs/wahoo_defconfig#746
 
-Therefore, move it out of compiler-gcc.h so that the definition
-is shared by all compilers.
+Then I think we are good here.
 
-This also fixes Clang support for ARM32 --- 815f0ddb346c
-("include/linux/compiler*.h: make compiler-*.h mutually exclusive").
-
-Cc: Stefan Agner <stefan@agner.ch>
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Eli Friedman <efriedma@codeaurora.org>
-Cc: Christopher Li <sparse@chrisli.org>
-Cc: Kees Cook <keescook@chromium.org>
-Cc: Ingo Molnar <mingo@kernel.org>
-Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Joe Perches <joe@perches.com>
-Cc: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: linux-sparse@vger.kernel.org
-Suggested-by: Arnd Bergmann <arnd@arndb.de>
-Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
-Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
----
- include/linux/compiler-gcc.h   | 8 --------
- include/linux/compiler_types.h | 8 ++++++++
- 2 files changed, 8 insertions(+), 8 deletions(-)
-
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 25d3dd6b2702..4d36b27214fd 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -79,14 +79,6 @@
- #define __noretpoline __attribute__((indirect_branch("keep")))
- #endif
- 
--/*
-- * it doesn't make sense on ARM (currently the only user of __naked)
-- * to trace naked functions because then mcount is called without
-- * stack and frame pointer being set up and there is no chance to
-- * restore the lr register to the value before mcount was called.
-- */
--#define __naked		__attribute__((naked)) notrace
--
- #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
- 
- #define __optimize(level)	__attribute__((__optimize__(level)))
-diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-index 3525c179698c..db192becfec4 100644
---- a/include/linux/compiler_types.h
-+++ b/include/linux/compiler_types.h
-@@ -226,6 +226,14 @@ struct ftrace_likely_data {
- #define notrace			__attribute__((no_instrument_function))
- #endif
- 
-+/*
-+ * it doesn't make sense on ARM (currently the only user of __naked)
-+ * to trace naked functions because then mcount is called without
-+ * stack and frame pointer being set up and there is no chance to
-+ * restore the lr register to the value before mcount was called.
-+ */
-+#define __naked			__attribute__((naked)) notrace
-+
- #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
- 
- /*
--- 
-2.17.1
+> Specifically to catch problems on Android, our internal debug builds
+> can report on panics, but not oops, IIUC.
