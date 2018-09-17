@@ -1,97 +1,83 @@
-From: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-Subject: Bug#906472: horst: FTBFS in buster/sid (unable to open 'stdarg.h')
-Date: Fri, 14 Sep 2018 21:45:44 +0200
-Message-ID: <20180914194543.GA22476@taurus.defre.kleine-koenig.org>
-References: <E1fqkJB-0004Wc-55@paradis.debian.org> <E1fqkJB-0004Wc-55@paradis.debian.org> <1535227396@msgid.manchmal.in-ulm.de> <20180914140409.GA25593@localhost> <E1fqkJB-0004Wc-55@paradis.debian.org>
-Reply-To: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, 906472@bugs.debian.org
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v6 03/18] khwasan: add CONFIG_KASAN_GENERIC and CONFIG_KASAN_HW
+Date: Mon, 17 Sep 2018 20:42:36 +0200
+Message-ID: <CAAeHK+yvVgV6LA8PgJz6ysCo+X38tCyLrMVhKOe08tFyZP_F0Q@mail.gmail.com>
+References: <cover.1535462971.git.andreyknvl@google.com> <868c9168481ff5103034ac1e37b830d28ed5f4ee.1535462971.git.andreyknvl@google.com>
+ <CACT4Y+baDKvmpKJ4SKoEuZG4ir2xRGscQ7Ro4hkVAX3jwiWnFg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
-	protocol="application/pgp-signature"; boundary="TB36FDmn/VVEgNH/"
-Return-path: <bounce-debian-bugs-rc=glddbr-debian-bugs-rc2=m.gmane.org@lists.debian.org>
-Resent-To: debian-bugs-dist@lists.debian.org
-Resent-Message-ID: <handler.906472.B906472.1536955363898@bugs.debian.org>
-Content-Disposition: inline
-In-Reply-To: <20180914140409.GA25593@localhost>
-List-URL: <https://lists.debian.org/debian-bugs-rc/>
-List-Post: <mailto:debian-bugs-rc@lists.debian.org>
-List-Help: <mailto:debian-bugs-rc-request@lists.debian.org?subject=help>
-List-Subscribe: <mailto:debian-bugs-rc-request@lists.debian.org?subject=subscribe>
-List-Unsubscribe: <mailto:debian-bugs-rc-request@lists.debian.org?subject=unsubscribe>
-To: Christoph Biedl <debian.axhn@manchmal.in-ulm.de>, Santiago Vila <sanvila@debian.org>
-Cc: 906472@bugs.debian.org, linux-sparse@vger.kernel.org, Adrian Bunk <bunk@debian.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CACT4Y+baDKvmpKJ4SKoEuZG4ir2xRGscQ7Ro4hkVAX3jwiWnFg@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Dmitry Vyukov <dvyukov@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
 List-Id: linux-sparse@vger.kernel.org
 
+On Wed, Sep 12, 2018 at 4:47 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
+> On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
 
---TB36FDmn/VVEgNH/
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+>>
+>>  #define __no_sanitize_address __attribute__((no_sanitize("address")))
+>> +#define __no_sanitize_hwaddress __attribute__((no_sanitize("hwaddress")))
+>
+> It seems that it would be better to have just 1 attribute for both types.
+> Currently __no_sanitize_address is used just in a single place. But if
+> it ever used more, people will need to always spell both which looks
+> unnecessary, or, worse will only fix asan but forget about khwasan.
+>
+> If we do just:
+>
+> #define __no_sanitize_address __attribute__((no_sanitize("address",
+> "hwaddress")))
+>
+> Then we don't need any changes in compiler-gcc.h nor in compiler.h,
+> and no chance or forgetting one of them.
 
-Hello,
+Will do in v7.
 
-[Cc +=3D sparse mailing list]
+>>  config KASAN
+>> -       bool "KASan: runtime memory debugger"
+>> +       bool "KASAN: runtime memory debugger"
+>> +       help
+>> +         Enables KASAN (KernelAddressSANitizer) - runtime memory debugger,
+>> +         designed to find out-of-bounds accesses and use-after-free bugs.
+>
+> Perhaps also give link to Documentation/dev-tools/kasan.rst while we are here.
 
-On Fri, Sep 14, 2018 at 05:04:09PM +0300, Adrian Bunk wrote:
-> Control: reassign -1 sparse 0.5.2-1
-> Control: affects -1 src:horst
->=20
-> On Sat, Aug 25, 2018 at 10:09:47PM +0200, Christoph Biedl wrote:
-> > Santiago Vila wrote...
-> >=20
-> > > 	make -j1 check
-> > > make[1]: Entering directory '/<<PKGBUILDDIR>>'
-> > > sparse -g -O2 -fdebug-prefix-map=3D/<<PKGBUILDDIR>>=3D. -fstack-prote=
-ctor-strong -Wformat -Werror=3Dformat-security -std=3Dgnu99 -Wall -Wextra -=
-g -I. -DDO_DEBUG -I/usr/include/libnl3 *.[ch]
-> > > /usr/include/err.h:25:11: error: unable to open 'stdarg.h'
-> >=20
-> > To reproduce this it's important to remove gcc-7 from the build chroot
-> > (apt purge libgcc-7-dev ; apt --purge autoremove).
-> >=20
-> > Problem is, sparse appearently uses hardcoded paths and looks for
-> > stdarg.h in (among other places)
-> >=20
-> > | /usr/lib/gcc/x86_64-linux-gnu/7//include/stdarg.h
-> > |                               ^
-> >=20
-> > ... which fails.
-> >=20
-> > Solution is to rebuild sparse, building horst was successful then.
-> > If this is true (please check!), the interesting question is why this
-> > wasn't a problem in earlier gcc version bumps.
+Will do in v7.
 
-I think this is a known limitation of sparse and there are three
-ways to fix this (in my order of preference):
+>
+>> +
+>> +choice
+>> +       prompt "KASAN mode"
+>> +       depends on KASAN
+>> +       default KASAN_GENERIC
+>> +       help
+>> +         KASAN has two modes: KASAN (a classic version, similar to userspace
+>
+> In these few sentences we call the old mode with 3 different terms:
+> "generic", "classic" and "KASAN" :)
+> This is somewhat confusing. Let's call it "generic" throughout (here
+> and in the docs patch). "Generic" as in "supported on multiple arch
+> and not-dependent on hardware features". "Classic" makes sense for
+> people who knew KASAN before, but for future readers in won't make
+> sense.
 
- a) let horst use cgcc -no-compile instead of sparse; or
- b) let sparse depend on libgcc-7-dev (or whatever provides the
-    necessary files); or
- c) use autodetection which gcc is used and pick its files.
+Will use "generic" in v7.
 
-I'm not sure if a) fixes the problem. It fixed another problem we had
-with horst's usage of sparse in the past though[1].
+>>
+>> +if HAVE_ARCH_KASAN_HW
+>
+> This choice looks somewhat weird on non-arm64. It's kinda a choice
+> menu, but one can't really choose anything. Should we put the whole
+> choice under HAVE_ARCH_KASAN_HW, and just select KASAN_GENERIC
+> otherwise? I don't know what't the practice here. Andrey R?
 
-The downside of c) is that running this autodetection on every call to
-sparse is probably slowing down sparse a bit which isn't nice.
+I think having one option that is auto selected is fine.
 
-Best regards
-Uwe
+>> +config KASAN_HW
+>> +       bool "KHWASAN: the hardware assisted mode"
 
-[1] https://bugs.debian.org/873508
+Do we need a hyphen here? hardware-assisted?
 
---TB36FDmn/VVEgNH/
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAABCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAlucD+QACgkQwfwUeK3K
-7AmwdQf+PuAzYgQgyvmQQ4VmxhkEjM5DT5qfn4mvrFoyE/vp3Vute6s3FivpIroW
-G73W7gUyio9+aKAduWQnBPqXEnMwtnju7IC7NbMY9D13+pn0TAo00U2N5M2z1NqB
-hCrc0rGSsr7ftTTiTqTNlIbIULhmPNHAFWjM1KM7vZ8S6zJCiCPtR1o+AnrTQpy0
-UgEHWrJle4o6KtuWGcPJV6ASEDgeP1duRmgQIP47cDfRRSDFxiLa1wxmiGomiBpf
-SwbBN5kpeAYRdSAQ0lLl7wGQQ9pNXzDrRYhAbbZZNQuUfkD2h4koksg/OzYiLXRr
-YzswkknBnJ33POSk4uNEMLbmJwoaRQ==
-=4NBx
------END PGP SIGNATURE-----
-
---TB36FDmn/VVEgNH/--
+Yes, will fix in v7.
