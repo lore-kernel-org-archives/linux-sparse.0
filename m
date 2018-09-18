@@ -1,31 +1,43 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v6 08/18] khwasan: preassign tags to objects with ctors or SLAB_TYPESAFE_BY_RCU
-Date: Tue, 18 Sep 2018 18:50:45 +0200
-Message-ID: <CAAeHK+z3W+JqC2d=-ZddsLv5D7BWa6oKpEdJFiyS1DbEYVnmqA@mail.gmail.com>
-References: <cover.1535462971.git.andreyknvl@google.com> <95b5beb7ec13b7e998efe84c9a7a5c1fa49a9fe3.1535462971.git.andreyknvl@google.com>
- <CACT4Y+awX48sFAYFCgx1Q-nJ=QrBhr08psMmHr+hDeCsQc0NRw@mail.gmail.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH v2 0/2] Compiler Attributes: (naked only, for v4.19)
+Date: Tue, 18 Sep 2018 18:55:40 +0200
+Message-ID: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACT4Y+awX48sFAYFCgx1Q-nJ=QrBhr08psMmHr+hDeCsQc0NRw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Vyukov <dvyukov@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Stefan Agner <stefan@agner.ch>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Sep 12, 2018 at 6:36 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
-> On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
+These two patches are the 5th and 6th of the Compiler Attributes series,
+which Stefan and Nick requested to go into v4.19 so that the clang ARM32
+build is fixed. The v5 of Compiler Attributes will have these two removed
+if this goes in.
 
->>         if (!shuffle) {
->> +               start = khwasan_preset_slub_tag(s, start);
->>                 for_each_object_idx(p, idx, s, start, page->objects) {
->>                         setup_object(s, page, p);
->> +                       p = khwasan_preset_slub_tag(s, p);
->
->
-> As I commented in the previous patch, can't we do this in
-> kasan_init_slab_obj(), which should be called in all the right places
-> already?
->
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Eli Friedman <efriedma@codeaurora.org>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Joe Perches <joe@perches.com>
+Cc: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Stefan Agner <stefan@agner.ch>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-sparse@vger.kernel.org
+Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 
-As per offline discussion, will do in v7.
+Miguel Ojeda (2):
+  Compiler Attributes: naked was fixed in gcc 4.6
+  Compiler Attributes: naked can be shared
+
+ include/linux/compiler-gcc.h   | 14 --------------
+ include/linux/compiler_types.h |  8 ++++++++
+ 2 files changed, 8 insertions(+), 14 deletions(-)
+
+-- 
+2.17.1
