@@ -1,17 +1,24 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [PATCH v2 0/2] Compiler Attributes: (naked only, for v4.19)
-Date: Tue, 18 Sep 2018 18:55:40 +0200
-Message-ID: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH v2 1/2] Compiler Attributes: naked was fixed in gcc 4.6
+Date: Tue, 18 Sep 2018 18:55:41 +0200
+Message-ID: <20180918165542.4691-2-miguel.ojeda.sandonis@gmail.com>
+References: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Stefan Agner <stefan@agner.ch>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-These two patches are the 5th and 6th of the Compiler Attributes series,
-which Stefan and Nick requested to go into v4.19 so that the clang ARM32
-build is fixed. The v5 of Compiler Attributes will have these two removed
-if this goes in.
+Commit 9c695203a7dd ("compiler-gcc.h: gcc-4.5 needs noclone
+and noinline on __naked functions") added noinline and noclone
+as a workaround for a gcc 4.5 bug, which was resolved in 4.6.0.
+
+Since now the minimum gcc supported version is 4.6,
+we can clean it up.
+
+See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=44290
+and https://godbolt.org/z/h6NMIL
 
 Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
 Cc: Eli Friedman <efriedma@codeaurora.org>
@@ -24,20 +31,36 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
 Cc: Joe Perches <joe@perches.com>
 Cc: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Stefan Agner <stefan@agner.ch>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Nick Desaulniers <ndesaulniers@google.com>
 Cc: Linus Torvalds <torvalds@linux-foundation.org>
 Cc: linux-sparse@vger.kernel.org
+Tested-by: Stefan Agner <stefan@agner.ch>
+Reviewed-by: Stefan Agner <stefan@agner.ch>
+Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
 Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+---
+ include/linux/compiler-gcc.h | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
 
-Miguel Ojeda (2):
-  Compiler Attributes: naked was fixed in gcc 4.6
-  Compiler Attributes: naked can be shared
-
- include/linux/compiler-gcc.h   | 14 --------------
- include/linux/compiler_types.h |  8 ++++++++
- 2 files changed, 8 insertions(+), 14 deletions(-)
-
+diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+index 763bbad1e258..25d3dd6b2702 100644
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -84,14 +84,8 @@
+  * to trace naked functions because then mcount is called without
+  * stack and frame pointer being set up and there is no chance to
+  * restore the lr register to the value before mcount was called.
+- *
+- * The asm() bodies of naked functions often depend on standard calling
+- * conventions, therefore they must be noinline and noclone.
+- *
+- * GCC 4.[56] currently fail to enforce this, so we must do so ourselves.
+- * See GCC PR44290.
+  */
+-#define __naked		__attribute__((naked)) noinline __noclone notrace
++#define __naked		__attribute__((naked)) notrace
+ 
+ #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
+ 
 -- 
 2.17.1
