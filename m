@@ -1,46 +1,51 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v6 17/18] khwasan: update kasan documentation
-Date: Tue, 18 Sep 2018 20:42:56 +0200
-Message-ID: <CAAeHK+wDhpX_E7cL8D4-BnM4WCT_Bb2Gp6wfqk7+P-4XAoiMOg@mail.gmail.com>
-References: <cover.1535462971.git.andreyknvl@google.com> <1a3b3030b6ee01931b397583b69f3af94e2a2308.1535462971.git.andreyknvl@google.com>
- <CACT4Y+a0A1n+FjbiQSEh4UMUPkq4KnqEOEXkfo-X+EwsVFZxMg@mail.gmail.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: Re: [PATCH v2 2/2] Compiler Attributes: naked can be shared
+Date: Tue, 18 Sep 2018 20:56:04 +0200
+Message-ID: <CANiq72=ZU61EaoWm2N4G1SZF0QUvzquULo50uEvDRU-hitOJVQ@mail.gmail.com>
+References: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
+ <20180918165542.4691-3-miguel.ojeda.sandonis@gmail.com> <20180918173428.GA21591@kroah.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACT4Y+a0A1n+FjbiQSEh4UMUPkq4KnqEOEXkfo-X+EwsVFZxMg@mail.gmail.com>
+In-Reply-To: <20180918173428.GA21591@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Vyukov <dvyukov@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Sep 12, 2018 at 8:39 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
-> On Wed, Aug 29, 2018 at 1:35 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
->> This patch updates KASAN documentation to reflect the addition of KHWASAN.
+Hi Greg,
 
->> -Currently KASAN is supported only for the x86_64 and arm64 architectures.
->> +KASAN uses compile-time instrumentation to insert validity checks before every
->> +memory access, and therefore requires a compiler version that supports that.
->> +For classic KASAN you need GCC version 4.9.2 or later. GCC 5.0 or later is
->> +required for detection of out-of-bounds accesses on stack and global variables.
->> +KHWASAN in turns is only supported in clang and requires revision 330044 or
+On Tue, Sep 18, 2018 at 7:34 PM, Greg Kroah-Hartman
+<gregkh@linuxfoundation.org> wrote:
+> On Tue, Sep 18, 2018 at 06:55:42PM +0200, Miguel Ojeda wrote:
+>> The naked attribute is supported by at least gcc >= 4.6 (for ARM,
+>> which is the only current user), gcc >= 8 (for x86), clang >= 3.1
+>> and icc >= 13. See https://godbolt.org/z/350Dyc
+>>
+>> Therefore, move it out of compiler-gcc.h so that the definition
+>> is shared by all compilers.
+>>
+>> This also fixes Clang support for ARM32 --- 815f0ddb346c
+>> ("include/linux/compiler*.h: make compiler-*.h mutually exclusive").
 >
-> in turn?
->
-
->> -and choose between CONFIG_KASAN_OUTLINE and CONFIG_KASAN_INLINE. Outline and
->> -inline are compiler instrumentation types. The former produces smaller binary
->> -the latter is 1.1 - 2 times faster. Inline instrumentation requires a GCC
->> +and choose between CONFIG_KASAN_GENERIC (to enable classic KASAN) and
->> +CONFIG_KASAN_HW (to enabled KHWASAN). You also need to choose choose between
->
-> to enable
+> So, with this applied, does clang really build an arm32 kernel
+> successfully?  No other problem at all?  And this isn't really a
+> regression, arm32 never really worked with clang yet, right?
 >
 
->> +     print_address_description+0x73/0x280 mm/kasan/report.c:254
->
->
-> KASAN does not print line numbers per se.
-> I think we need to show unmodified output to not confuse readers
-> (probably remove the useless ? lines).
+To recap a bit: these two patches come from the "Compiler Attributes"
+series which is meant as a general improvement. Since Linus/Andrew/you
+didn't comment on whether you wanted or not this for 4.19, we are
+assuming they would go in for 4.20. However, Stefan/Nick/... wanted
+this for 4.19 instead, they asked me to extract these patches two
+separately for 4.19. I let them comment further on the status of Clang
+on arm32.
 
-Will fix all in v7.
+I am going to send a v5 of the entire series without these two
+patches, based on -rc4 (or -next, which one do you prefer? I would say
+these patches should be applied early in the -next branches, so that
+everyone is ready for the change, given it "touches" every translation
+unit).
+
+Cheers,
+Miguel
