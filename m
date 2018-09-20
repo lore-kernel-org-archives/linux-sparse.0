@@ -1,34 +1,29 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH v2 2/2] Compiler Attributes: naked can be shared
-Date: Thu, 20 Sep 2018 14:18:24 +0200
-Message-ID: <CANiq72nkQBYnDM2QLKJvAaMJ6iCB=oXg1UZRbpXbf732f1OyZw@mail.gmail.com>
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Subject: Re: [PATCH v2 0/2] Compiler Attributes: (naked only, for v4.19)
+Date: Thu, 20 Sep 2018 15:57:48 +0200
+Message-ID: <20180920135748.GA7749@kroah.com>
 References: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
- <20180918165542.4691-3-miguel.ojeda.sandonis@gmail.com> <20180918173428.GA21591@kroah.com>
- <CANiq72=ZU61EaoWm2N4G1SZF0QUvzquULo50uEvDRU-hitOJVQ@mail.gmail.com>
- <20180919211458.GA8757@kroah.com> <20180919230504.GA20280@nautica>
- <CANiq72=C==Us7YjkzwVW7QHXnuGxHTowriYjX3Wsff19JO=uHw@mail.gmail.com>
- <20180920001024.GD20280@nautica> <20180920072205.GC11963@kroah.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180920072205.GC11963@kroah.com>
+Content-Disposition: inline
+In-Reply-To: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: Dominique Martinet <asmadeus@codewreck.org>, linux-kernel <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: linux-kernel@vger.kernel.org, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Stefan Agner <stefan@agner.ch>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Sep 20, 2018 at 9:22 AM, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
-> For this instance, I think we should just revert the offending patch,
-> which should resolve the issue for everyone and then you can try to redo
-> your series to get it right the next time.
->
-> Sound good?
+On Tue, Sep 18, 2018 at 06:55:40PM +0200, Miguel Ojeda wrote:
+> These two patches are the 5th and 6th of the Compiler Attributes series,
+> which Stefan and Nick requested to go into v4.19 so that the clang ARM32
+> build is fixed. The v5 of Compiler Attributes will have these two removed
+> if this goes in.
 
-On one hand, "reverting & retrying" is a good default policy. On the
-other hand, we are already in -rc4 (i.e. we lose the testing done
-until now --- note that in this case the revert implies a global
-change). So whatever makes you guys feel more comfortable.
+As these seem pretty "obvious" and they do fix a problem for one
+system/compiler that we want to support, and because odds are I would
+end up getting them submitted to the 4.19-stable tree eventually, I've
+now applied them to the tree.
 
-Cheers,
-Miguel
+thanks,
+
+greg k-h
