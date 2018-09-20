@@ -1,58 +1,75 @@
-From: Dominique Martinet <asmadeus@codewreck.org>
+From: Stefan Agner <stefan@agner.ch>
 Subject: Re: [PATCH v2 2/2] Compiler Attributes: naked can be shared
-Date: Thu, 20 Sep 2018 02:10:24 +0200
-Message-ID: <20180920001024.GD20280@nautica>
+Date: Wed, 19 Sep 2018 23:00:37 -0700
+Message-ID: <6837090afde15cd5ee155dbfabb0d556@agner.ch>
 References: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
  <20180918165542.4691-3-miguel.ojeda.sandonis@gmail.com>
  <20180918173428.GA21591@kroah.com>
  <CANiq72=ZU61EaoWm2N4G1SZF0QUvzquULo50uEvDRU-hitOJVQ@mail.gmail.com>
  <20180919211458.GA8757@kroah.com>
- <20180919230504.GA20280@nautica>
- <CANiq72=C==Us7YjkzwVW7QHXnuGxHTowriYjX3Wsff19JO=uHw@mail.gmail.com>
+ <CANiq72kS_w7p3Xe9cDCjCA9j1u-zQ1-C4ZX7N8G+AbP4u7SG8w@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANiq72=C==Us7YjkzwVW7QHXnuGxHTowriYjX3Wsff19JO=uHw@mail.gmail.com>
+In-Reply-To: <CANiq72kS_w7p3Xe9cDCjCA9j1u-zQ1-C4ZX7N8G+AbP4u7SG8w@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, Arnd Bergmann <arnd@arndb.de>, linux-kernel <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Miguel Ojeda wrote on Thu, Sep 20, 2018:
-> > I've not followed so closely, in particular I'm not sure if it's the
-> > only problem with arm32 right now, but that is a regression - the
-> > general serie is meant as an improvement, but these two patches fix
-> > 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h mutually
-> > exclusive") which was taken in 4.19-rc1
-> >
-> > (Miguel, perhaps a Fixes: tag might help remember that?)
+On 19.09.2018 16:00, Miguel Ojeda wrote:
+> On Wed, Sep 19, 2018 at 11:14 PM, Greg Kroah-Hartman
+> <gregkh@linuxfoundation.org> wrote:
+>> On Tue, Sep 18, 2018 at 08:56:04PM +0200, Miguel Ojeda wrote:
+>>> Hi Greg,
+>>>
+>>
+>>> Since Linus/Andrew/you
+>>> didn't comment on whether you wanted or not this for 4.19, we are
+>>> assuming they would go in for 4.20. However, Stefan/Nick/... wanted
+>>> this for 4.19 instead, they asked me to extract these patches two
+>>> separately for 4.19. I let them comment further on the status of Clang
+>>> on arm32.
+>>
+>> If these do not fix a regression, I don't see how they would be ready
+>> for 4.19-final.
+
+Clang on arm32 worked with v4.18 when using multi_v7_defconfig -CONFIG_EFI.
+
+With 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h mutually
+exclusive") it broke on v4.19-rc1. IMHO this is a regression and we should
+consider this two patches as a fix for it.
+
+
 > 
-> The commit is mentioned in the commit message, although not with the
-> Fixes: syntax -- is something now automatically parsing that? I guess
-> it is also easier for humans to parse :)
-
-As far as I'm aware, the backport to stable stuff parse these to know up
-till how far back they should backport, but it still requires explicit
-Cc to the stable@vger list... (not needed here as the "bad" commit never
-made it to stable)
-I'm not aware of anything else, but as you said, while I now see you
-naming the commit now, I managed to miss it earlier and I was somewhat
-following this so it's probably also easier on humans :)
-
-> > (If no-one in Cc has anything included in -next I could take them in my
-> > 9p branch, but that is quite a bit out of scope from what I advertised
-> > this branch as so I think it would be confusing ; I think it might
-> > almost be best if Miguel will keep maintaining these in the future to do
-> > his own request to inclusion in -next?)
+> Ok, I will wait a bit to send v5 until this is sorted out.
 > 
-> I can ask for my auxdisplay tree (or better, a new one) to be in -next
-> and use that (are non-kernel.org trees allowed to be in -next, by the
-> way?).
+> [CC'd Nick, Stefan, Arnd: I just noticed the Reviewed-by/... lines
+> were not picked as CC].
 
-I think a new one would be great, yes.
-(my branch is on github, so Stephen does not appear to mind
-non-kernel.org trees)
+Oh yeah thanks, really did not notice the discussion around v2 until
+you CC'd me now.
 
--- 
-Dominique Matinet
+--
+Stefan
+
+> 
+>>
+>>> I am going to send a v5 of the entire series without these two
+>>> patches, based on -rc4 (or -next, which one do you prefer? I would say
+>>> these patches should be applied early in the -next branches, so that
+>>> everyone is ready for the change, given it "touches" every translation
+>>> unit).
+>>
+>> That's up to whomever takes these into their tree for linux-next
+>> inclusion.  If you are about to break everything, then you might
+>> consider changing your patches so they do not do that :)
+>>
+> 
+> Well, the series shouldn't break anything (famous last words :), even
+> if everyone includes those headers. So, in theory, they *could* be
+> applied anywhere, anytime; but given they are global changes...
+> 
+> Cheers,
+> Miguel
