@@ -1,40 +1,141 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH v2 0/2] Compiler Attributes: (naked only, for v4.19)
-Date: Thu, 20 Sep 2018 18:13:43 +0200
-Message-ID: <CANiq72=OqZWGophkgH4SQG-Zrdq_Ue=gTrC4mqLqH_F7_VtC+A@mail.gmail.com>
-References: <20180918165542.4691-1-miguel.ojeda.sandonis@gmail.com>
- <20180920135748.GA7749@kroah.com> <20180920135936.GA9117@kroah.com>
-Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v5 00/15] Compiler Attributes
+Date: Thu, 20 Sep 2018 19:22:46 +0200
+Message-ID: <20180920172301.21868-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20180920135936.GA9117@kroah.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, Masahiro Yamada <yamada.masahiro@socionext.com>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Stefan Agner <stefan@agner.ch>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>, David Woodhouse <dwmw2@infradead.org>, Will
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Sep 20, 2018 at 3:59 PM, Greg Kroah-Hartman
-<gregkh@linuxfoundation.org> wrote:
-> On Thu, Sep 20, 2018 at 03:57:48PM +0200, Greg Kroah-Hartman wrote:
->> On Tue, Sep 18, 2018 at 06:55:40PM +0200, Miguel Ojeda wrote:
->> > These two patches are the 5th and 6th of the Compiler Attributes series,
->> > which Stefan and Nick requested to go into v4.19 so that the clang ARM32
->> > build is fixed. The v5 of Compiler Attributes will have these two removed
->> > if this goes in.
->>
->> As these seem pretty "obvious" and they do fix a problem for one
->> system/compiler that we want to support, and because odds are I would
->> end up getting them submitted to the 4.19-stable tree eventually, I've
->> now applied them to the tree.
+The Compiler Attributes series is an effort to disentangle
+the include/linux/compiler*.h headers and bring them up to date.
 
-Seems the easiest way forward for everyone, indeed.
+The main idea behind the series is to use feature checking macros
+(i.e. __has_attribute) instead of compiler version checks (e.g. GCC_VERSION),
+which are compiler-agnostic (so they can be shared, reducing the size
+of compiler-specific headers) and version-agnostic.
 
->
-> Also, it passed my build tests, I didn't just throw these in without
-> doing that :)
+Other related improvements have been performed in the headers as well,
+which on top of the use of __has_attribute it has amounted to a significant
+simplification of these headers (e.g. GCC_VERSION is now only guarding 4
+non-attribute macros).
 
-Thanks for double-checking! Sending in a bit the v5 of Compiler
-Attributes rebased on this commit then.
+This series should also help the efforts to support compiling the kernel
+with clang and icc. A fair amount of documentation and comments have also
+been added, clarified or removed; and the headers are now more readable,
+which should help kernel developers in general.
+
+The series was triggered due to the move to gcc >= 4.6. In turn, this series
+has also triggered Sparse to gain the ability to recognize __has_attribute
+on its own.
+
+Finally, the nonstring variable attribute series has been applied on top
+of this one.
+
+You can also fetch it from:
+
+  https://github.com/ojeda/linux/tree/compiler-attributes-v5
+
+Enjoy!
 
 Cheers,
 Miguel
+
+Cc: Andreas Dilger <adilger.kernel@dilger.ca>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Michal Marek <michal.lkml@markovi.net>
+Cc: Steven Rostedt <rostedt@goodmis.org>
+Cc: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Cc: Olof Johansson <olof@lxom.net>
+Cc: Konstantin Ryabitsev <konstantin@linuxfoundation.org>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Paul Lawrence <paullawrence@google.com>
+Cc: Sandipan Das <sandipan@linux.vnet.ibm.com>
+Cc: Andrey Konovalov <andreyknvl@google.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Philippe Ombredanne <pombredanne@nexb.com>
+Cc: Paul Burton <paul.burton@mips.com>
+Cc: David Rientjes <rientjes@google.com>
+Cc: Willy Tarreau <w@1wt.eu>
+Cc: Martin Sebor <msebor@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Joe Perches <joe@perches.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Stefan Agner <stefan@agner.ch>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-doc@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org
+Cc: linux-kbuild@vger.kernel.org
+
+v4 -> v5
+
+  * Removed the 2 __naked patches, since Greg just applied them to master;
+    and rebased on top of that. The only change in the range-diff is in
+    "Compiler Attributes: always use the extra-underscores syntax" due
+    to the move of __naked to compiler_types.h.
+
+  * Applied the nonstring series on top of this one (last 4 patches).
+    Rationale:
+      - the nonstring series would anyway be modified again by this one
+        (so it has been rebased after the general cleanup).
+      - ext4's "local" nonstring was merged
+      - easier to manage (and easier to see the end result)
+
+    The first 2 patches of the last 4 add the warning back at W=1 and
+    add the __nonstring attribute. The other two serve as an example
+    of usage and as a cleanup.
+
+  * Cc lists removed from each commit; using a single list in the cover letter;
+    and a new, revised list of Cc (wider audience).
+
+Miguel Ojeda (15):
+  Compiler Attributes: remove unused attributes
+  Compiler Attributes: always use the extra-underscores syntax
+  Compiler Attributes: remove unneeded tests
+  Compiler Attributes: homogenize __must_be_array
+  Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
+  Compiler Attributes: add missing SPDX ID in compiler_types.h
+  Compiler Attributes: use feature checks instead of version checks
+  Compiler Attributes: KENTRY used twice the "used" attribute
+  Compiler Attributes: remove uses of __attribute__ from compiler.h
+  Compiler Attributes: add Doc/process/programming-language.rst
+  Compiler Attributes: add MAINTAINERS entry
+  Compiler Attributes: add support for __nonstring (gcc >= 8)
+  Compiler Attributes: enable -Wstringop-truncation on W=1 (gcc >= 8)
+  Compiler Attributes: auxdisplay: panel: use __nonstring
+  Compiler Attributes: ext4: remove local __nonstring definition
+
+ Documentation/process/index.rst               |   1 +
+ .../process/programming-language.rst          |  45 +++
+ MAINTAINERS                                   |   5 +
+ drivers/auxdisplay/panel.c                    |   7 +-
+ fs/ext4/ext4.h                                |   9 -
+ include/linux/compiler-clang.h                |   5 -
+ include/linux/compiler-gcc.h                  |  70 +----
+ include/linux/compiler-intel.h                |   9 -
+ include/linux/compiler.h                      |  19 +-
+ include/linux/compiler_attributes.h           | 258 ++++++++++++++++++
+ include/linux/compiler_types.h                | 101 +------
+ scripts/Makefile.extrawarn                    |   1 +
+ 12 files changed, 341 insertions(+), 189 deletions(-)
+ create mode 100644 Documentation/process/programming-language.rst
+ create mode 100644 include/linux/compiler_attributes.h
+
+-- 
+2.17.1
