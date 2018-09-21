@@ -1,75 +1,89 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v8 16/20] kasan: add hooks implementation for tag-based mode
-Date: Fri, 21 Sep 2018 16:28:27 +0200
-Message-ID: <CAAeHK+wBcmoikVedBZFSGC4UGsF578AKCzFhNFNgMuJe6oWvZA@mail.gmail.com>
-References: <cover.1537383101.git.andreyknvl@google.com> <d3f5102da9792370158ed02203d8066dd5e07ff7.1537383101.git.andreyknvl@google.com>
- <CACT4Y+aD=ghemsrBaw2N_FJWtrWNf3r=BWxjWLkKBjNB-s=4Vg@mail.gmail.com>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH v8 00/10] x86: macrofying inline asm for better compilation
+Date: Fri, 21 Sep 2018 11:26:38 -0700
+Message-ID: <CAGXu5jK307b+bs6h-1f6dhRCj3HfoQQmbACuurOE9RbhzijHAQ@mail.gmail.com>
+References: <20180918212847.199085-1-namit@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CACT4Y+aD=ghemsrBaw2N_FJWtrWNf3r=BWxjWLkKBjNB-s=4Vg@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Dmitry Vyukov <dvyukov@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20180918212847.199085-1-namit@vmware.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Nadav Amit <namit@vmware.com>
+Cc: Kate Stewart <kstewart@linuxfoundation.org>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, virtualization@lists.linux-foundation.org, Max Filippov <jcmvbkbc@gmail.com>, Jan Beulich <JBeulich@suse.com>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>, Thomas Gleixner <tglx@linutronix.de>, X86 ML <x86@kernel.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, linux-xtensa@linux-xtensa.org, Josh Poimboeuf <jpoimboe@redhat.com>, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, Chris Zankel <chris@zankel.net>, Masahiro Yamada <yamada.masahiro@socionext.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Philippe Ombredanne <pombredanne@nexb.com>, Linus Torvalds <torvalds@linux-foundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Sep 21, 2018 at 1:37 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
-> On Wed, Sep 19, 2018 at 8:54 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
-
->> +       /*
->> +        * Since it's desirable to only call object contructors ones during
+On Tue, Sep 18, 2018 at 2:28 PM, Nadav Amit <namit@vmware.com> wrote:
+> This patch-set deals with an interesting yet stupid problem: kernel code
+> that does not get inlined despite its simplicity. There are several
+> causes for this behavior: "cold" attribute on __init, different function
+> optimization levels; conditional constant computations based on
+> __builtin_constant_p(); and finally large inline assembly blocks.
 >
-> s/ones/once/
-
-Will fix.
-
+> This patch-set deals with the inline assembly problem. I separated these
+> patches from the others (that were sent in the RFC) for easier
+> inclusion. I also separated the removal of unnecessary new-lines which
+> would be sent separately.
 >
->> +        * slab allocation, we preassign tags to all such objects.
+> The problem with inline assembly is that inline assembly is often used
+> by the kernel for things that are other than code - for example,
+> assembly directives and data. GCC however is oblivious to the content of
+> the blocks and assumes their cost in space and time is proportional to
+> the number of the perceived assembly "instruction", according to the
+> number of newlines and semicolons. Alternatives, paravirt and other
+> mechanisms are affected, causing code not to be inlined, and degrading
+> compilation quality in general.
 >
-> While we are here, it can make sense to mention that we can't repaint
-> objects with ctors after reallocation (even for
-> non-SLAB_TYPESAFE_BY_RCU) because the ctor code can memorize pointer
-> to the object somewhere (e.g. in the object itself). Then if we
-> repaint it, the old memorized pointer will become invalid.
-
-Will mention.
-
->> -       kasan_unpoison_shadow(object, size);
->> +       /* See the comment in kasan_init_slab_obj regarding preassigned tags */
->> +       if (IS_ENABLED(CONFIG_KASAN_SW_TAGS) &&
->> +                       (cache->ctor || cache->flags & SLAB_TYPESAFE_BY_RCU)) {
->> +#ifdef CONFIG_SLAB
->> +               struct page *page = virt_to_page(object);
->> +
->> +               tag = (u8)obj_to_index(cache, page, (void *)object);
->> +#else
->> +               tag = get_tag(object);
->> +#endif
+> The solution that this patch-set carries for this problem is to create
+> an assembly macro, and then call it from the inline assembly block.  As
+> a result, the compiler sees a single "instruction" and assigns the more
+> appropriate cost to the code.
 >
-> This kinda _almost_ matches the chunk of code in kasan_init_slab_obj,
-> but not exactly. Wonder if there is some nice way to unify this code?
+> To avoid uglification of the code, as many noted, the macros are first
+> precompiled into an assembly file, which is later assembled together
+> with the C files. This also enables to avoid duplicate implementation
+> that was set before for the asm and C code. This can be seen in the
+> exception table changes.
 >
-> Maybe something like:
+> Overall this patch-set slightly increases the kernel size (my build was
+> done using my Ubuntu 18.04 config + localyesconfig for the record):
 >
-> static u8 tag_for_object(struct kmem_cache *cache, const void *object, new bool)
-> {
->     if (!IS_ENABLED(CONFIG_KASAN_SW_TAGS) ||
->         !cache->ctor && !(cache->flags & SLAB_TYPESAFE_BY_RCU))
->         return random_tag();
-> #ifdef CONFIG_SLAB
->     struct page *page = virt_to_page(object);
->     return (u8)obj_to_index(cache, page, (void *)object);
-> #else
->     return new ? random_tag() : get_tag(object);
-> #endif
-> }
+>    text    data     bss     dec     hex filename
+> 18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
+> 18163608 10227348 2957312 31348268 1de562c ./vmlinux after (+0.1%)
 >
-> Then we can call this in both places.
+> The number of static functions in the image is reduced by 379, but
+> actually inlining is even better, which does not always shows in these
+> numbers: a function may be inlined causing the calling function not to
+> be inlined.
+>
+> I ran some limited number of benchmarks, and in general the performance
+> impact is not very notable. You can still see >10 cycles shaved off some
+> syscalls that manipulate page-tables (e.g., mprotect()), in which
+> paravirt caused many functions not to be inlined. In addition this
+> patch-set can prevent issues such as [1], and improves code readability
+> and maintainability.
+>
+> [1] https://patchwork.kernel.org/patch/10450037/
+>
+> v7->v8: * Add acks (Masahiro, Max)
+>         * Rebase on 4.19 (Ingo)
 
-Will do, however I think it's better to do the CONFIG_KASAN_SW_TAGS
-check outside this helper function.
+I've tested the series for booting and with the refcount lkdtm tests.
+Looks good, thanks!
 
-> As a side effect this will assign tags to pointers during slab
-> initialization even if we don't have ctors, but it should be fine (?).
+Tested-by: Kees Cook <keescook@chromium.org>
 
-We don't have to assign tag in this case, can just leave 0xff.
+-Kees
+
+-- 
+Kees Cook
+Pixel Security
