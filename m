@@ -1,89 +1,58 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH v8 00/10] x86: macrofying inline asm for better compilation
-Date: Fri, 21 Sep 2018 11:26:38 -0700
-Message-ID: <CAGXu5jK307b+bs6h-1f6dhRCj3HfoQQmbACuurOE9RbhzijHAQ@mail.gmail.com>
-References: <20180918212847.199085-1-namit@vmware.com>
+From: Dmitry Vyukov <dvyukov@google.com>
+Subject: Re: [PATCH v8 09/20] kasan: preassign tags to objects with ctors or SLAB_TYPESAFE_BY_RCU
+Date: Mon, 24 Sep 2018 11:19:17 +0200
+Message-ID: <CACT4Y+b6qe1S_4dAhYGPm0r1nFWW4Fn1rCNbSZW-7w7jMpcTtQ@mail.gmail.com>
+References: <cover.1537383101.git.andreyknvl@google.com> <d74e710797323db0e43f047ea698fbc85060fc57.1537383101.git.andreyknvl@google.com>
+ <CACT4Y+aoFSySFTd9FzA0xzRYQXSbs-wzX7B67hD3jTGAQEXBOA@mail.gmail.com> <CAAeHK+zBh0BiYq65QDxD-nxkHHF0QL6UQx8fs40K39R6XJJfzA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-In-Reply-To: <20180918212847.199085-1-namit@vmware.com>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: Nadav Amit <namit@vmware.com>
-Cc: Kate Stewart <kstewart@linuxfoundation.org>, Peter Zijlstra <peterz@infradead.org>, Christopher Li <sparse@chrisli.org>, virtualization@lists.linux-foundation.org, Max Filippov <jcmvbkbc@gmail.com>, Jan Beulich <JBeulich@suse.com>, "H. Peter Anvin" <hpa@zytor.com>, Sam Ravnborg <sam@ravnborg.org>, Thomas Gleixner <tglx@linutronix.de>, X86 ML <x86@kernel.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, linux-xtensa@linux-xtensa.org, Josh Poimboeuf <jpoimboe@redhat.com>, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, Chris Zankel <chris@zankel.net>, Masahiro Yamada <yamada.masahiro@socionext.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, LKML <linux-kernel@vger.kernel.org>, Philippe Ombredanne <pombredanne@nexb.com>, Linus Torvalds <torvalds@linux-foundation.org>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAAeHK+zBh0BiYq65QDxD-nxkHHF0QL6UQx8fs40K39R6XJJfzA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Sep 18, 2018 at 2:28 PM, Nadav Amit <namit@vmware.com> wrote:
-> This patch-set deals with an interesting yet stupid problem: kernel code
-> that does not get inlined despite its simplicity. There are several
-> causes for this behavior: "cold" attribute on __init, different function
-> optimization levels; conditional constant computations based on
-> __builtin_constant_p(); and finally large inline assembly blocks.
+On Fri, Sep 21, 2018 at 2:24 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
+> On Fri, Sep 21, 2018 at 1:25 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
+>> On Wed, Sep 19, 2018 at 8:54 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
 >
-> This patch-set deals with the inline assembly problem. I separated these
-> patches from the others (that were sent in the RFC) for easier
-> inclusion. I also separated the removal of unnecessary new-lines which
-> would be sent separately.
+>>>         if (!shuffle) {
+>>>                 for_each_object_idx(p, idx, s, start, page->objects) {
+>>> -                       setup_object(s, page, p);
+>>> -                       if (likely(idx < page->objects))
+>>> -                               set_freepointer(s, p, p + s->size);
+>>> -                       else
+>>> +                       if (likely(idx < page->objects)) {
+>>> +                               next = p + s->size;
+>>> +                               next = setup_object(s, page, next);
+>>> +                               set_freepointer(s, p, next);
+>>> +                       } else
+>>>                                 set_freepointer(s, p, NULL);
+>>>                 }
+>>> -               page->freelist = fixup_red_left(s, start);
+>>> +               start = fixup_red_left(s, start);
+>>> +               start = setup_object(s, page, start);
+>>> +               page->freelist = start;
+>>>         }
+>>
+>> Just want to double-check that this is correct.
+>> We now do an additional setup_object call after the loop, but we do 1
+>> less in the loop. So total number of calls should be the same, right?
+>> However, after the loop we call setup_object for the first object (?),
+>> but inside of the loop we skip the call for the last object (?). Am I
+>> missing something, or we call ctor twice for the last object and don't
+>> call it for the first one?
 >
-> The problem with inline assembly is that inline assembly is often used
-> by the kernel for things that are other than code - for example,
-> assembly directives and data. GCC however is oblivious to the content of
-> the blocks and assumes their cost in space and time is proportional to
-> the number of the perceived assembly "instruction", according to the
-> number of newlines and semicolons. Alternatives, paravirt and other
-> mechanisms are affected, causing code not to be inlined, and degrading
-> compilation quality in general.
+> Inside the loop we call setup_object for the "next" object. So we
+> start iterating on the first one, but call setup_object for the
+> second. Then the loop moves on to the second one and calls
+> setup_object for the third. And so on. So the loop calls setup_object
+> for every object (including the last one) except for the first one.
 >
-> The solution that this patch-set carries for this problem is to create
-> an assembly macro, and then call it from the inline assembly block.  As
-> a result, the compiler sees a single "instruction" and assigns the more
-> appropriate cost to the code.
->
-> To avoid uglification of the code, as many noted, the macros are first
-> precompiled into an assembly file, which is later assembled together
-> with the C files. This also enables to avoid duplicate implementation
-> that was set before for the asm and C code. This can be seen in the
-> exception table changes.
->
-> Overall this patch-set slightly increases the kernel size (my build was
-> done using my Ubuntu 18.04 config + localyesconfig for the record):
->
->    text    data     bss     dec     hex filename
-> 18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
-> 18163608 10227348 2957312 31348268 1de562c ./vmlinux after (+0.1%)
->
-> The number of static functions in the image is reduced by 379, but
-> actually inlining is even better, which does not always shows in these
-> numbers: a function may be inlined causing the calling function not to
-> be inlined.
->
-> I ran some limited number of benchmarks, and in general the performance
-> impact is not very notable. You can still see >10 cycles shaved off some
-> syscalls that manipulate page-tables (e.g., mprotect()), in which
-> paravirt caused many functions not to be inlined. In addition this
-> patch-set can prevent issues such as [1], and improves code readability
-> and maintainability.
->
-> [1] https://patchwork.kernel.org/patch/10450037/
->
-> v7->v8: * Add acks (Masahiro, Max)
->         * Rebase on 4.19 (Ingo)
+> The idea is that we want the freelist pointer that is stored in the
+> current object to have a tagged pointer to the next one, so we need to
+> assign a tag to the next object before storing the pointer in the
+> current one.
 
-I've tested the series for booting and with the refcount lkdtm tests.
-Looks good, thanks!
-
-Tested-by: Kees Cook <keescook@chromium.org>
-
--Kees
-
--- 
-Kees Cook
-Pixel Security
+Ah, OK, then false alarm.
