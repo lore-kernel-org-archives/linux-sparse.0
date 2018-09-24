@@ -1,58 +1,47 @@
-From: Dmitry Vyukov <dvyukov@google.com>
-Subject: Re: [PATCH v8 09/20] kasan: preassign tags to objects with ctors or SLAB_TYPESAFE_BY_RCU
-Date: Mon, 24 Sep 2018 11:19:17 +0200
-Message-ID: <CACT4Y+b6qe1S_4dAhYGPm0r1nFWW4Fn1rCNbSZW-7w7jMpcTtQ@mail.gmail.com>
-References: <cover.1537383101.git.andreyknvl@google.com> <d74e710797323db0e43f047ea698fbc85060fc57.1537383101.git.andreyknvl@google.com>
- <CACT4Y+aoFSySFTd9FzA0xzRYQXSbs-wzX7B67hD3jTGAQEXBOA@mail.gmail.com> <CAAeHK+zBh0BiYq65QDxD-nxkHHF0QL6UQx8fs40K39R6XJJfzA@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH v5 00/15] Compiler Attributes
+Date: Mon, 24 Sep 2018 16:36:10 +0200
+Message-ID: <20180924143608.aiyehiibgc7isk7k@ltop.local>
+References: <20180920172301.21868-1-miguel.ojeda.sandonis@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAAeHK+zBh0BiYq65QDxD-nxkHHF0QL6UQx8fs40K39R6XJJfzA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20180920172301.21868-1-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kst>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>, David Woodhouse <dwmw2@infradead.org>, Will
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Sep 21, 2018 at 2:24 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
-> On Fri, Sep 21, 2018 at 1:25 PM, Dmitry Vyukov <dvyukov@google.com> wrote:
->> On Wed, Sep 19, 2018 at 8:54 PM, Andrey Konovalov <andreyknvl@google.com> wrote:
->
->>>         if (!shuffle) {
->>>                 for_each_object_idx(p, idx, s, start, page->objects) {
->>> -                       setup_object(s, page, p);
->>> -                       if (likely(idx < page->objects))
->>> -                               set_freepointer(s, p, p + s->size);
->>> -                       else
->>> +                       if (likely(idx < page->objects)) {
->>> +                               next = p + s->size;
->>> +                               next = setup_object(s, page, next);
->>> +                               set_freepointer(s, p, next);
->>> +                       } else
->>>                                 set_freepointer(s, p, NULL);
->>>                 }
->>> -               page->freelist = fixup_red_left(s, start);
->>> +               start = fixup_red_left(s, start);
->>> +               start = setup_object(s, page, start);
->>> +               page->freelist = start;
->>>         }
->>
->> Just want to double-check that this is correct.
->> We now do an additional setup_object call after the loop, but we do 1
->> less in the loop. So total number of calls should be the same, right?
->> However, after the loop we call setup_object for the first object (?),
->> but inside of the loop we skip the call for the last object (?). Am I
->> missing something, or we call ctor twice for the last object and don't
->> call it for the first one?
->
-> Inside the loop we call setup_object for the "next" object. So we
-> start iterating on the first one, but call setup_object for the
-> second. Then the loop moves on to the second one and calls
-> setup_object for the third. And so on. So the loop calls setup_object
-> for every object (including the last one) except for the first one.
->
-> The idea is that we want the freelist pointer that is stored in the
-> current object to have a tagged pointer to the next one, so we need to
-> assign a tag to the next object before storing the pointer in the
-> current one.
+On Thu, Sep 20, 2018 at 07:22:46PM +0200, Miguel Ojeda wrote:
+> The Compiler Attributes series is an effort to disentangle
+> the include/linux/compiler*.h headers and bring them up to date.
+> 
+> The main idea behind the series is to use feature checking macros
+> (i.e. __has_attribute) instead of compiler version checks (e.g. GCC_VERSION),
+> which are compiler-agnostic (so they can be shared, reducing the size
+> of compiler-specific headers) and version-agnostic.
+> 
+> Other related improvements have been performed in the headers as well,
+> which on top of the use of __has_attribute it has amounted to a significant
+> simplification of these headers (e.g. GCC_VERSION is now only guarding 4
+> non-attribute macros).
+> 
+> This series should also help the efforts to support compiling the kernel
+> with clang and icc. A fair amount of documentation and comments have also
+> been added, clarified or removed; and the headers are now more readable,
+> which should help kernel developers in general.
+> 
+> The series was triggered due to the move to gcc >= 4.6. In turn, this series
+> has also triggered Sparse to gain the ability to recognize __has_attribute
+> on its own.
+> 
+> Finally, the nonstring variable attribute series has been applied on top
+> of this one.
 
-Ah, OK, then false alarm.
+Hi Miguel,
+Feel free to add my
+  Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+on patches 11-15 (I think the others ones already have it).
+
+-- Luc
