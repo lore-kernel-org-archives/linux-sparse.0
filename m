@@ -1,95 +1,53 @@
 From: Matthias Kaehlcke <mka@chromium.org>
-Subject: Re: [PATCH v3 1/2] Compiler Attributes: naked can be shared
-Date: Tue, 25 Sep 2018 12:03:49 -0700
-Message-ID: <20180925190349.GB22824@google.com>
-References: <20180925185339.80701-1-mka@chromium.org>
- <20180925185339.80701-2-mka@chromium.org>
+Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
+Date: Wed, 26 Sep 2018 11:00:19 -0700
+Message-ID: <20180926180019.GD22824@google.com>
+References: <1535220989-27645-1-git-send-email-yamada.masahiro@socionext.com>
+ <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com>
+ <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
+ <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com>
+ <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
+ <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20180925185339.80701-2-mka@chromium.org>
+In-Reply-To: <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J . Wysocki" <rafael@kernel.org>, Sakari Ailus <sakari.ailus@linux.intel.com>, Marcin Wojtas <mw@semihalf.com>, Andy Shevchenko <andriy.shevchenko@linux.intel.com>, Sinan Kaya <okaya@codeaurora.org>, Marcel Holtmann <marcel@holtmann.org>, Johan Hedberg <johan.hedberg@gmail.com>, Andrew Morton <akpm@linux-foundation.org>, Pekka Enberg <penberg@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Alexey Dobriyan <adobriyan@gmail.com>
-Cc: linux-kernel@vger.kernel.org, linux-bluetooth@vger.kernel.org, Balakrishna Godavarthi <bgodavar@codeaurora.org>, Loic Poulain <loic.poulain@linaro.org>, Brian Norris <briannorris@chromium.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Eli Friedman <efriedma@codeaurora.org>, Christopher Li <sparse@chrisli.org>, Kees Cook <keescook@chromium.org>, Ingo Molnar <mingo@kernel.org>, Geert Uytterhoeven <geert@linux-m68k.org>, Joe Perches <joe@perches.com>, Dominique Martinet <asmadeus@codewreck.org>, Linus Torvalds <torvalds@linux-foundation.org>, linux-sparse@vger.kernel.org
+To: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Kees Cook <keescook@chromium.org>, sparse@chrisli.org, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>, daniel.santos@pobox.com, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@intel.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Sorry, this series got messed up. Apparently the branch was still
-rebasing when I ran 'git send-email' :/
+On Fri, Aug 31, 2018 at 09:46:02AM -0700, Nick Desaulniers wrote:
+> On Tue, Aug 28, 2018 at 4:00 PM Nick Desaulniers
+> <ndesaulniers@google.com> wrote:
+> >
+> > On Mon, Aug 27, 2018 at 1:42 PM Daniel Santos <daniel.santos@pobox.com> wrote:
+> > >
+> > > Hello Nick,
+> > >
+> > > On 08/27/2018 03:09 PM, Nick Desaulniers wrote:
+> > > >>> Let's give up __compiletime_assert_fallback().  This commit does not
+> > > >>> change the current behavior since it just rips off the useless code.
+> > > >> Clang is not the only target audience of
+> > > >> __compiletime_assert_fallback().  Instead of ripping out something that
+> > > >> may benefit builds with gcc 4.2 and earlier, why not override its
+> > > > Note that with commit cafa0010cd51 ("Raise the minimum required gcc
+> > > > version to 4.6") that gcc < 4.6 is irrelevant.
+> > >
+> > > Ah, I guess I'm not keeping up, that's wonderful news!  Considering that
+> > > I guess I would be OK with its removal, but I still think it would be
+> > > better if a similar mechanism to break the Clang build could be found.
+> >
+> > I'm consulting with our best language lawyers to see what combinations
+> > of _Static_assert and __builtin_constant_p would do the trick.
+> 
+> Linus,
+> Can this patch be merged in the meantime?
 
-On Tue, Sep 25, 2018 at 11:53:38AM -0700, Matthias Kaehlcke wrote:
-> From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-> 
-> The naked attribute is supported by at least gcc >= 4.6 (for ARM,
-> which is the only current user), gcc >= 8 (for x86), clang >= 3.1
-> and icc >= 13. See https://godbolt.org/z/350Dyc
-> 
-> Therefore, move it out of compiler-gcc.h so that the definition
-> is shared by all compilers.
-> 
-> This also fixes Clang support for ARM32 --- 815f0ddb346c
-> ("include/linux/compiler*.h: make compiler-*.h mutually exclusive").
-> 
-> Fixes: 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h mutually exclusive")
-> Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-> Cc: Eli Friedman <efriedma@codeaurora.org>
-> Cc: Christopher Li <sparse@chrisli.org>
-> Cc: Kees Cook <keescook@chromium.org>
-> Cc: Ingo Molnar <mingo@kernel.org>
-> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> Cc: Joe Perches <joe@perches.com>
-> Cc: Dominique Martinet <asmadeus@codewreck.org>
-> Cc: Linus Torvalds <torvalds@linux-foundation.org>
-> Cc: linux-sparse@vger.kernel.org
-> Suggested-by: Arnd Bergmann <arnd@arndb.de>
-> Tested-by: Stefan Agner <stefan@agner.ch>
-> Reviewed-by: Stefan Agner <stefan@agner.ch>
-> Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
-> Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-> Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
-> ---
->  include/linux/compiler-gcc.h   | 8 --------
->  include/linux/compiler_types.h | 8 ++++++++
->  2 files changed, 8 insertions(+), 8 deletions(-)
-> 
-> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-> index 25d3dd6b2702..4d36b27214fd 100644
-> --- a/include/linux/compiler-gcc.h
-> +++ b/include/linux/compiler-gcc.h
-> @@ -79,14 +79,6 @@
->  #define __noretpoline __attribute__((indirect_branch("keep")))
->  #endif
->  
-> -/*
-> - * it doesn't make sense on ARM (currently the only user of __naked)
-> - * to trace naked functions because then mcount is called without
-> - * stack and frame pointer being set up and there is no chance to
-> - * restore the lr register to the value before mcount was called.
-> - */
-> -#define __naked		__attribute__((naked)) notrace
-> -
->  #define __UNIQUE_ID(prefix) __PASTE(__PASTE(__UNIQUE_ID_, prefix), __COUNTER__)
->  
->  #define __optimize(level)	__attribute__((__optimize__(level)))
-> diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
-> index 3525c179698c..db192becfec4 100644
-> --- a/include/linux/compiler_types.h
-> +++ b/include/linux/compiler_types.h
-> @@ -226,6 +226,14 @@ struct ftrace_likely_data {
->  #define notrace			__attribute__((no_instrument_function))
->  #endif
->  
-> +/*
-> + * it doesn't make sense on ARM (currently the only user of __naked)
-> + * to trace naked functions because then mcount is called without
-> + * stack and frame pointer being set up and there is no chance to
-> + * restore the lr register to the value before mcount was called.
-> + */
-> +#define __naked			__attribute__((naked)) notrace
-> +
->  #define __compiler_offsetof(a, b)	__builtin_offsetof(a, b)
->  
->  /*
+friendly ping :)
+
+With c5c2b11894f4 ("drm/i915: Warn against variable length arrays")
+clang raises plenty of vla warnings about
+__compiletime_error_fallback() in the i915 driver. Would be great to
+get rid of those without having to revert that commit.
