@@ -1,51 +1,53 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
-Date: Wed, 26 Sep 2018 12:35:06 -0700
-Message-ID: <CAGXu5jKRn2EsPwNMtVTPyKyDnt+vqHZF=jdr+DajN_iN1DWjSw@mail.gmail.com>
-References: <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com>
- <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
- <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com> <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
- <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
- <20180926180019.GD22824@google.com> <CAKwvOd=xYG+r4KU+QurUTyaxkPB2AMane4YfWxuvKtONvVtLxQ@mail.gmail.com>
- <CAGXu5jLBz1YanL5X4HFZjhb8NZe5QK=Q1ySfBkBDNWqEg4hs5g@mail.gmail.com>
- <20180926184259.GB14797@kroah.com> <CAGXu5jJaJ+1Sg3uwaZ8hzw3wFbiLrftpZDO8vdjY9_tB+P-HPQ@mail.gmail.com>
- <20180926190303.GA18293@kroah.com> <CAKwvOdnx6D+_LeSZ-1v_s8dLErXq4B5Nx1UQozdr1+ZaGYWnrA@mail.gmail.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: Re: [PATCH v5 00/15] Compiler Attributes
+Date: Sun, 30 Sep 2018 13:13:36 +0200
+Message-ID: <CANiq72=Aom+D8LsvMDgD3Am9n3DH13CzZKuL3dfanyqFEGyNbA@mail.gmail.com>
+References: <20180920172301.21868-1-miguel.ojeda.sandonis@gmail.com> <20180924143608.aiyehiibgc7isk7k@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKwvOdnx6D+_LeSZ-1v_s8dLErXq4B5Nx1UQozdr1+ZaGYWnrA@mail.gmail.com>
+In-Reply-To: <20180924143608.aiyehiibgc7isk7k@ltop.local>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>
-Cc: Matthias Kaehlcke <mka@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, LKML <linux-kernel@vger.kernel.org>, Daniel Santos <daniel.santos@pobox.com>, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@intel.com>, Greg KH <gregkh@linuxfoundation.org>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Greg KH <gregkh@linuxfoundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>, David Woodhouse <dwmw2@infradead.org>, Will
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Sep 26, 2018 at 12:29 PM, Nick Desaulniers
-<ndesaulniers@google.com> wrote:
-> On Wed, Sep 26, 2018 at 12:03 PM Greg KH <gregkh@linuxfoundation.org> wrote:
->>
->> On Wed, Sep 26, 2018 at 11:45:19AM -0700, Kees Cook wrote:
->> > On Wed, Sep 26, 2018 at 11:42 AM, Greg KH <gregkh@linuxfoundation.org> wrote:
->> > > I'm not digging up a compiler.h patch from a web site and adding it to
->> > > the tree this late in the release cycle.  Especially given that it
->> > > hasn't had any testing anywhere...
->> >
->> > Good point about it not living in -next.
->> >
->> > Who should be carrying these sorts of patches? In the past it's been
->> > Andrew or Masahiro, yes? For linux-next, maybe it can go via -mm?
->>
->> Either is fine with me, as long as it isn't one of my trees :)
->>
->> thanks,
->>
->> greg k-h
+On Mon, Sep 24, 2018 at 4:36 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
 >
-> Besides, I think we want the v2: https://lkml.org/lkml/2018/8/25/103
+> On Thu, Sep 20, 2018 at 07:22:46PM +0200, Miguel Ojeda wrote:
+> > The Compiler Attributes series is an effort to disentangle
+> > the include/linux/compiler*.h headers and bring them up to date.
+> >
+> > The main idea behind the series is to use feature checking macros
+> > (i.e. __has_attribute) instead of compiler version checks (e.g. GCC_VERSION),
+> > which are compiler-agnostic (so they can be shared, reducing the size
+> > of compiler-specific headers) and version-agnostic.
+> >
+> > Other related improvements have been performed in the headers as well,
+> > which on top of the use of __has_attribute it has amounted to a significant
+> > simplification of these headers (e.g. GCC_VERSION is now only guarding 4
+> > non-attribute macros).
+> >
+> > This series should also help the efforts to support compiling the kernel
+> > with clang and icc. A fair amount of documentation and comments have also
+> > been added, clarified or removed; and the headers are now more readable,
+> > which should help kernel developers in general.
+> >
+> > The series was triggered due to the move to gcc >= 4.6. In turn, this series
+> > has also triggered Sparse to gain the ability to recognize __has_attribute
+> > on its own.
+> >
+> > Finally, the nonstring variable attribute series has been applied on top
+> > of this one.
+>
+> Hi Miguel,
+> Feel free to add my
+>   Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> on patches 11-15 (I think the others ones already have it).
+>
 
-Yeah, that's what I'd linked to in the patchwork URL. Andrew, can you take this?
+Done for both Nick and you!
 
--Kees
-
--- 
-Kees Cook
-Pixel Security
+Cheers,
+Miguel
