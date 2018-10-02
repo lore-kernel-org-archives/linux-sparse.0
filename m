@@ -1,77 +1,66 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: [GIT PULL linux-next] Add Compiler Attributes tree
-Date: Tue, 2 Oct 2018 15:47:12 +0200
-Message-ID: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
+From: Stephen Rothwell <sfr@canb.auug.org.au>
+Subject: Re: [GIT PULL linux-next] Add Compiler Attributes tree
+Date: Wed, 3 Oct 2018 07:10:59 +1000
+Message-ID: <20181003071059.02b3fd6f@canb.auug.org.au>
+References: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ boundary="Sig_/Wy1yG25pA/9_Y8n97w8zq9H"; protocol="application/pgp-signature"
 Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>
-Cc: Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>, David Woodhouse <dwmw2@infradead.org>, Will Deacon <will.deacon@arm.com>, Philippe Ombredanne <pombredanne@nexb.com>Paul
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Stephen,
+--Sig_/Wy1yG25pA/9_Y8n97w8zq9H
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: quoted-printable
 
-The Compiler Attributes series has been stable for 10+ days. To
-increase testing before 4.20, I would to request it being picked up
-for -next.
+Hi Miguel,
 
-The changes w.r.t. v5 in the LKML:
+On Tue, 2 Oct 2018 15:47:12 +0200 Miguel Ojeda <miguel.ojeda.sandonis@gmail=
+.com> wrote:
+>
+> The Compiler Attributes series has been stable for 10+ days. To
+> increase testing before 4.20, I would to request it being picked up
+> for -next.
+>=20
+> The changes w.r.t. v5 in the LKML:
+>=20
+>   - Rebased on top of next-20180928, which required removing
 
-  - Rebased on top of next-20180928, which required removing
-aligned_largest, which was removed by 9503cd9cbaba
-("include/linux/compiler*.h: add version detection to
-asm_volatile_goto").
-  - Added latest Reviewed-by's and Tested-by's.
+Unfortunately, trees/branches included in linux-next must be based on
+something stable (usually Linus' tree, but it could be another
+tree/branch that is included in linux-next that does not rebase).
+Linux-next itself rebases every day, so snything based on it would drag
+in a previous version of all the other trees :-(
 
-Thanks!
+> aligned_largest, which was removed by 9503cd9cbaba
+> ("include/linux/compiler*.h: add version detection to
+> asm_volatile_goto").
 
+That commit is from Andrew's patch series which also rebases (usually
+at least every week), so you cannot depend on it.
+
+--=20
 Cheers,
-Miguel
+Stephen Rothwell
 
-The following changes since commit 4794a36bf08dfa89fe636e5080db9d8350e255dd:
+--Sig_/Wy1yG25pA/9_Y8n97w8zq9H
+Content-Type: application/pgp-signature
+Content-Description: OpenPGP digital signature
 
-  Add linux-next specific files for 20180928 (2018-09-28 15:26:51 +1000)
+-----BEGIN PGP SIGNATURE-----
 
-are available in the Git repository at:
+iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAluz3uMACgkQAVBC80lX
+0GzohQf/dtnIEaWJKYtEJwhXt0bAjk5Bk2GPjxi8aCFnm2lUZC46HW7EBT3oyM9n
+oPDpt3MbdeUAnDj8b3Z4JzizqRry1RBpdh+ezyHTql35gteBfsu95PW/PPja8wB6
+AJfTmoA44zNa2kANpBnfnV9ETn5HGyNjJBwZhsfwwUruF09NUp11zr0Qy8qne2Nb
+Ex6DaQ8uBJRAhCfchSd3O4FyTBvva1UlPzdB0b97439EIqyvlK5p9Rg1uWP1StOc
++u5o8hd+EyDO+wbCfpzRYWqC6wpS6JbpHeMoqQuZiO+1cw1Q8HgGOwFU6P+CmYiD
+ULrX9yaIUybv2T7GDwiFdDAp28s/7Q==
+=GxsG
+-----END PGP SIGNATURE-----
 
-  https://github.com/ojeda/linux.git compiler-attributes
-
-for you to fetch changes up to dbce062c0b519db1cdad8d87ab46851f0be6bdea:
-
-  Compiler Attributes: ext4: remove local __nonstring definition
-(2018-10-02 15:11:26 +0200)
-
-----------------------------------------------------------------
-Miguel Ojeda (15):
-      Compiler Attributes: remove unused attributes
-      Compiler Attributes: always use the extra-underscores syntax
-      Compiler Attributes: remove unneeded tests
-      Compiler Attributes: homogenize __must_be_array
-      Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
-      Compiler Attributes: add missing SPDX ID in compiler_types.h
-      Compiler Attributes: use feature checks instead of version checks
-      Compiler Attributes: KENTRY used twice the "used" attribute
-      Compiler Attributes: remove uses of __attribute__ from compiler.h
-      Compiler Attributes: add Doc/process/programming-language.rst
-      Compiler Attributes: add MAINTAINERS entry
-      Compiler Attributes: add support for __nonstring (gcc >= 8)
-      Compiler Attributes: enable -Wstringop-truncation on W=1 (gcc >= 8)
-      Compiler Attributes: auxdisplay: panel: use __nonstring
-      Compiler Attributes: ext4: remove local __nonstring definition
-
- Documentation/process/index.rst                |   1 +
- Documentation/process/programming-language.rst |  45 +++++
- MAINTAINERS                                    |   5 +
- drivers/auxdisplay/panel.c                     |   7 +-
- fs/ext4/ext4.h                                 |   9 -
- include/linux/compiler-clang.h                 |   5 -
- include/linux/compiler-gcc.h                   |  70 +------
- include/linux/compiler-intel.h                 |   9 -
- include/linux/compiler.h                       |  19 +-
- include/linux/compiler_attributes.h            | 257 +++++++++++++++++++++++++
- include/linux/compiler_types.h                 | 100 ++--------
- scripts/Makefile.extrawarn                     |   1 +
- 12 files changed, 340 insertions(+), 188 deletions(-)
- create mode 100644 Documentation/process/programming-language.rst
- create mode 100644 include/linux/compiler_attributes.h
+--Sig_/Wy1yG25pA/9_Y8n97w8zq9H--
