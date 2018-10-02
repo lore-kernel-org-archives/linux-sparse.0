@@ -1,74 +1,87 @@
-From: Stephen Rothwell <sfr@canb.auug.org.au>
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
 Subject: Re: [GIT PULL linux-next] Add Compiler Attributes tree
-Date: Wed, 3 Oct 2018 09:00:10 +1000
-Message-ID: <20181003090010.5150f914@canb.auug.org.au>
+Date: Tue, 2 Oct 2018 19:24:54 -0400
+Message-ID: <20181002232454.GB2483@thunk.org>
 References: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
-        <20181003071059.02b3fd6f@canb.auug.org.au>
-        <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
-        <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
-        <20181002223652.GA4290@nautica>
+ <20181003071059.02b3fd6f@canb.auug.org.au>
+ <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
+ <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha256;
- boundary="Sig_/Pi_fuJWlk3fcJlLoIKV/0xY"; protocol="application/pgp-signature"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181002223652.GA4290@nautica>
+Content-Disposition: inline
+In-Reply-To: <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>
 List-Id: linux-sparse@vger.kernel.org
 
---Sig_/Pi_fuJWlk3fcJlLoIKV/0xY
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: quoted-printable
+On Wed, Oct 03, 2018 at 12:12:10AM +0200, Miguel Ojeda wrote:
+> As I have read, -next is supposed to be a vision of what the merge
+> window will look like after merging everything, i.e. ideally -rc1. For
+> that to work for files out-of-tree (like these ones, which are not
+> maintained by a single tree), changes should be allowed to be stacked
+> on each other; otherwise, we cannot handle conflicts :-(
 
-Hi Miguel,
+In general, best practice is to base tree on an -rcX commit.  I
+usually will use something like -rc4 which is after most of the major
+changes have gone in.  This tends to reduce conflicts for most git
+trees.
 
-On Wed, 3 Oct 2018 00:36:52 +0200 Dominique Martinet <asmadeus@codewreck.or=
-g> wrote:
->
-> Miguel Ojeda wrote on Wed, Oct 03, 2018:
-> > As I have read, -next is supposed to be a vision of what the merge
-> > window will look like after merging everything, i.e. ideally -rc1. For
-> > that to work for files out-of-tree (like these ones, which are not
-> > maintained by a single tree), changes should be allowed to be stacked
-> > on each other; otherwise, we cannot handle conflicts :-( =20
->=20
-> The rule is the same as with a regular mainline pull; I don't have the
-> reference at hand but in some recent-ish pull request Linus said he
-> prefers the stable version with the conflict, and optionally you can
-> provide a second branch with the conflict resolved for reference, but
-> the pull request should be based on something stable even if it has
-> conflicts
->=20
-> If there is a conflict Stefen will resolve it like Linus/Greg would, and
-> the resolved bit will be carried over everyday so it's not much more
-> work -- exactly like a regular pull request for inclusion in the main
-> tree :)
+There are times when a commit in one tree needs to depend on a commit
+in another tree.  What to do depends on the circumstances.
 
-Exactly what Dominique said.  I will fix up the conflict (unless it is
-a very complex conflict, in which case the author(s) should help) and
-the Linus (or Greg) will do the same.  If you do depend on a patch in
-Andrew's series, what happens if that patch does not get sent to Linus
-during the merge window or Linus rejects it?
+One solution is to base one subsystem's git tree on another
+subsystem's git tree --- *if* that git tree is one that doesn't get
+rebase.  You'll need to talk to the subsystem maintainer to find out
+whether or not that's the case.  But that's actually not a great
+solution, because what can happen is if the tree A is based on tree B,
+and there is something in tree B which Linus objects to, tree B won't
+get pulled.  And since tree A depends on tree B, Linus will refuse to
+pull tree A as well.  We recently had a case where a subsystem pull
+got delayed by a full development cycle because of this.
 
---=20
+So another solution is to simply evade the problem.  If the reason why
+tree A needs to depend on tree B is that tree B is using some
+interface which has changed, if it's a minor change, then Stephen will
+fix it up when he pulls the changes; just as Linus will.
+
+If the issue is that there is some common infrastructure which two git
+tree needs, what will often happen is that just those patches which
+provide the new infastructure will get put on a branch based on -rcX
+on one of the git trees.  And then the subsystems will base their work
+on that sub-branche.  For example, suppose the file system developers
+have collectively decided that there should be a new fallocate(2)
+flag, FALLOC_FL_DONT_RANDOMLY_LOSE (ala RFC 748).  The work to define
+and enable that feature in the VFS layer might be placed on the
+randomly-lose git branch on xfs.git.  And then the xfs and ext4
+development branches will both be based on the randomly-lose branch.
+
+Yet another solution is to arrange the code changes to avoid needing
+commits that might conflict.  For example, in fs/ext4/ext4.h, I very
+deliberately did this.
+
+/* Until this gets included into linux/compiler-gcc.h */
+#ifndef __nonstring
+#if defined(GCC_VERSION) && (GCC_VERSION >= 80000)
+#define __nonstring __attribute__((nonstring))
+#else
+#define __nonstring
+#endif
+#endif
+
+You included a cleanup patch to remove it in your git tree, but it
+wasn't actually necessary.  If there was a merge conflict, it would be
+simple enough to just drop your cleanup patch, since I had carefully
+used #ifndef __nonstring... #endif.  So the idea was that if someone
+defined __nonstring somewhere else, it wouldn't break the build with a
+duplicate #define since it was protected with an #ifndef.
+
+I didn't mind that you included a cleanup patch; but I set things up
+so that it would not be necessary, since often the best way to solve a
+merge conflict is by avoiding the need for the change (in some other
+git tree) in the first place.  :-)
+
 Cheers,
-Stephen Rothwell
 
---Sig_/Pi_fuJWlk3fcJlLoIKV/0xY
-Content-Type: application/pgp-signature
-Content-Description: OpenPGP digital signature
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEENIC96giZ81tWdLgKAVBC80lX0GwFAluz+HoACgkQAVBC80lX
-0GwB6Af/QRmuvQ4ntPviR4hY99kAVf71n2hG+jM6yJp/+JjLvGaMxGSq+ZFAMk0V
-qnVWGZKhMDjl8b1Z+UrEJU35kn5GoWIAIbaXsBSgGWo5Hc6Z9u3PDfF6/Z0pMUEw
-KE8e8PS/1KVk24EBb5foc0l3VvVYKttUroqVfUglkYVgvizRV6kdzkMAbOaqdiVh
-eMIWmB0ZxYoOyM2rAQt9ul4VhQLrLKiIPlzjUQa3pMJmcaHT38RuuZ/Cpv4M3L0a
-uNbiOJCyY+hUp4Q6Twi69Srk9IWU5GdaSWwTOM0SvWRQhh1ge/K0mC+b21D8ANDh
-utwC/WyGrQiXJcpRJKiQpefzWwcWbQ==
-=9ecB
------END PGP SIGNATURE-----
-
---Sig_/Pi_fuJWlk3fcJlLoIKV/0xY--
+					- Ted
