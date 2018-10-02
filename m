@@ -1,56 +1,68 @@
 From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
 Subject: Re: [GIT PULL linux-next] Add Compiler Attributes tree
-Date: Wed, 3 Oct 2018 00:04:29 +0200
-Message-ID: <CANiq72nh0nybEC8SizQ9rv=RvncMuTH-dt5vciRtvQ1aFBzJcg@mail.gmail.com>
+Date: Wed, 3 Oct 2018 00:12:10 +0200
+Message-ID: <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
 References: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
- <20181003071059.02b3fd6f@canb.auug.org.au>
+ <20181003071059.02b3fd6f@canb.auug.org.au> <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181003071059.02b3fd6f@canb.auug.org.au>
+In-Reply-To: <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Stephen Rothwell <sfr@canb.auug.org.au>
+To: Nick Desaulniers <ndesaulniers@google.com>
 Cc: Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Stephen,
+Hi Nick,
 
-On Tue, Oct 2, 2018 at 11:11 PM Stephen Rothwell <sfr@canb.auug.org.au> wrote:
+On Tue, Oct 2, 2018 at 11:16 PM Nick Desaulniers
+<ndesaulniers@google.com> wrote:
 >
-> Hi Miguel,
->
-> On Tue, 2 Oct 2018 15:47:12 +0200 Miguel Ojeda <miguel.ojeda.sandonis@gmail.com> wrote:
+> On Tue, Oct 2, 2018 at 2:11 PM Stephen Rothwell <sfr@canb.auug.org.au> wrote:
 > >
-> > The Compiler Attributes series has been stable for 10+ days. To
-> > increase testing before 4.20, I would to request it being picked up
-> > for -next.
+> > Hi Miguel,
 > >
-> > The changes w.r.t. v5 in the LKML:
+> > On Tue, 2 Oct 2018 15:47:12 +0200 Miguel Ojeda <miguel.ojeda.sandonis@gmail.com> wrote:
+> > >
+> > > The Compiler Attributes series has been stable for 10+ days. To
+> > > increase testing before 4.20, I would to request it being picked up
+> > > for -next.
+> > >
+> > > The changes w.r.t. v5 in the LKML:
+> > >
+> > >   - Rebased on top of next-20180928, which required removing
 > >
-> >   - Rebased on top of next-20180928, which required removing
+> > Unfortunately, trees/branches included in linux-next must be based on
+> > something stable (usually Linus' tree, but it could be another
+> > tree/branch that is included in linux-next that does not rebase).
+> > Linux-next itself rebases every day, so snything based on it would drag
+> > in a previous version of all the other trees :-(
 >
-> Unfortunately, trees/branches included in linux-next must be based on
-> something stable (usually Linus' tree, but it could be another
-> tree/branch that is included in linux-next that does not rebase).
-> Linux-next itself rebases every day, so snything based on it would drag
-> in a previous version of all the other trees :-(
+> I think of this like a branch that's force pushed to.  Can't base
+> other branches or trees off of it cause it's always moving/force
+> rewriting history.
 
-I assumed you could apply changes as a diff/patches/cherry-pick, not
-as a merge, for those that went on top of others (so that at the new
-merge window, conflicts were already solved). Otherwise, why are
-next-* tags/branches provided anyway?
+As I have read, -next is supposed to be a vision of what the merge
+window will look like after merging everything, i.e. ideally -rc1. For
+that to work for files out-of-tree (like these ones, which are not
+maintained by a single tree), changes should be allowed to be stacked
+on each other; otherwise, we cannot handle conflicts :-(
 
 >
-> > aligned_largest, which was removed by 9503cd9cbaba
-> > ("include/linux/compiler*.h: add version detection to
-> > asm_volatile_goto").
+> >
+> > > aligned_largest, which was removed by 9503cd9cbaba
+> > > ("include/linux/compiler*.h: add version detection to
+> > > asm_volatile_goto").
+> >
+> > That commit is from Andrew's patch series which also rebases (usually
+> > at least every week), so you cannot depend on it.
 >
-> That commit is from Andrew's patch series which also rebases (usually
-> at least every week), so you cannot depend on it.
+> Miguel, you should be able to drop that patch from your set then,
+> since Andrew's -mm tree flows into this -next tree as well, IIUC.
+> We'll take up that patch from there.
 
-Then who is solving the conflict?
-
-Thanks!
+Not sure what you mean by "drop that patch". There is no patch to
+drop, there is a conflict with a change already in -next.
 
 Cheers,
 Miguel
