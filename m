@@ -1,30 +1,137 @@
-From: Randy Dunlap <rdunlap@infradead.org>
-Subject: Re: Sparse warnings from calls to max3() and max
-Date: Wed, 3 Oct 2018 13:43:06 -0700
-Message-ID: <45c184f7-8e1d-59bd-a448-97675e6de81a@infradead.org>
-References: <3afaa0ad-33a1-33d1-f306-8e0e467936dd@lwfinger.net>
+From: Nadav Amit <namit@vmware.com>
+Subject: [PATCH v9 03/10] x86: objtool: use asm macro for better compiler decisions
+Date: Wed, 3 Oct 2018 14:30:53 -0700
+Message-ID: <20181003213100.189959-4-namit@vmware.com>
+References: <20181003213100.189959-1-namit@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3afaa0ad-33a1-33d1-f306-8e0e467936dd@lwfinger.net>
-Content-Language: en-US
+In-Reply-To: <20181003213100.189959-1-namit@vmware.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Larry Finger <Larry.Finger@lwfinger.net>, LKML <linux-kernel@vger.kernel.org>, Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>
+To: Ingo Molnar <mingo@redhat.com>
+Cc: linux-kernel@vger.kernel.org, x86@kernel.org, Nadav Amit <namit@vmware.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-[adding linux-sparse mailing list]
+GCC considers the number of statements in inlined assembly blocks,
+according to new-lines and semicolons, as an indication to the cost of
+the block in time and space. This data is distorted by the kernel code,
+which puts information in alternative sections. As a result, the
+compiler may perform incorrect inlining and branch optimizations.
 
+In the case of objtool, this distortion is extreme, since anyhow the
+annotations of objtool are discarded during linkage.
 
-On 10/2/18 4:44 PM, Larry Finger wrote:
-> Hi,
-> 
-> Sparse has suddenly started issuing as many as 11 warnings of "expression using sizeof(void)" for each call to max3(). There are similar warnings for calls to max(), thus I think this is the origin of the problem. My sparse version is 20180324-1.3-x86_64 installed in openSUSE Tumbleweed. My kernel is 4.19.0-rc6.
-> 
-> Thanks,
-> 
-> Larry
+The solution is to set an assembly macro and call it from the inline
+assembly block. As a result GCC considers the inline assembly block as
+a single instruction.
 
+This patch slightly increases the kernel size.
 
+   text	   data	    bss	    dec	    hex	filename
+18140829 10224724 2957312 31322865 1ddf2f1 ./vmlinux before
+18140970 10225412 2957312 31323694 1ddf62e ./vmlinux after (+829)
+
+Static text symbols:
+Before:	40321
+After:	40302	(-19)
+
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: linux-sparse@vger.kernel.org
+Acked-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Reviewed-by: Josh Poimboeuf <jpoimboe@redhat.com>
+Tested-by: Kees Cook <keescook@chromium.org>
+Signed-off-by: Nadav Amit <namit@vmware.com>
+---
+ arch/x86/kernel/macros.S |  2 ++
+ include/linux/compiler.h | 56 ++++++++++++++++++++++++++++++----------
+ 2 files changed, 45 insertions(+), 13 deletions(-)
+
+diff --git a/arch/x86/kernel/macros.S b/arch/x86/kernel/macros.S
+index cfc1c7d1a6eb..cee28c3246dc 100644
+--- a/arch/x86/kernel/macros.S
++++ b/arch/x86/kernel/macros.S
+@@ -5,3 +5,5 @@
+  * commonly used. The macros are precompiled into assmebly file which is later
+  * assembled together with each compiled file.
+  */
++
++#include <linux/compiler.h>
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 681d866efb1e..1921545c6351 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -99,22 +99,13 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+  * unique, to convince GCC not to merge duplicate inline asm statements.
+  */
+ #define annotate_reachable() ({						\
+-	asm volatile("%c0:\n\t"						\
+-		     ".pushsection .discard.reachable\n\t"		\
+-		     ".long %c0b - .\n\t"				\
+-		     ".popsection\n\t" : : "i" (__COUNTER__));		\
++	asm volatile("ANNOTATE_REACHABLE counter=%c0"			\
++		     : : "i" (__COUNTER__));				\
+ })
+ #define annotate_unreachable() ({					\
+-	asm volatile("%c0:\n\t"						\
+-		     ".pushsection .discard.unreachable\n\t"		\
+-		     ".long %c0b - .\n\t"				\
+-		     ".popsection\n\t" : : "i" (__COUNTER__));		\
++	asm volatile("ANNOTATE_UNREACHABLE counter=%c0"			\
++		     : : "i" (__COUNTER__));				\
+ })
+-#define ASM_UNREACHABLE							\
+-	"999:\n\t"							\
+-	".pushsection .discard.unreachable\n\t"				\
+-	".long 999b - .\n\t"						\
+-	".popsection\n\t"
+ #else
+ #define annotate_reachable()
+ #define annotate_unreachable()
+@@ -299,6 +290,45 @@ static inline void *offset_to_ptr(const int *off)
+ 	return (void *)((unsigned long)off + *off);
+ }
+ 
++#else /* __ASSEMBLY__ */
++
++#ifdef __KERNEL__
++#ifndef LINKER_SCRIPT
++
++#ifdef CONFIG_STACK_VALIDATION
++.macro ANNOTATE_UNREACHABLE counter:req
++\counter:
++	.pushsection .discard.unreachable
++	.long \counter\()b -.
++	.popsection
++.endm
++
++.macro ANNOTATE_REACHABLE counter:req
++\counter:
++	.pushsection .discard.reachable
++	.long \counter\()b -.
++	.popsection
++.endm
++
++.macro ASM_UNREACHABLE
++999:
++	.pushsection .discard.unreachable
++	.long 999b - .
++	.popsection
++.endm
++#else /* CONFIG_STACK_VALIDATION */
++.macro ANNOTATE_UNREACHABLE counter:req
++.endm
++
++.macro ANNOTATE_REACHABLE counter:req
++.endm
++
++.macro ASM_UNREACHABLE
++.endm
++#endif /* CONFIG_STACK_VALIDATION */
++
++#endif /* LINKER_SCRIPT */
++#endif /* __KERNEL__ */
+ #endif /* __ASSEMBLY__ */
+ 
+ #ifndef __optimize
 -- 
-~Randy
+2.17.1
