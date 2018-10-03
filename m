@@ -1,36 +1,46 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+From: Steven Rostedt <rostedt@goodmis.org>
 Subject: Re: [GIT PULL linux-next] Add Compiler Attributes tree
-Date: Wed, 3 Oct 2018 14:14:28 +0200
-Message-ID: <CANiq72=M2xQa6FJ1YZ2kKuNXES-XSn1O9yJ+FbhgMawND_kAqA@mail.gmail.com>
+Date: Wed, 3 Oct 2018 08:30:43 -0400
+Message-ID: <20181003083043.380a2c74@gandalf.local.home>
 References: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
- <20181003071059.02b3fd6f@canb.auug.org.au> <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
- <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com> <20181002223652.GA4290@nautica>
+        <20181003071059.02b3fd6f@canb.auug.org.au>
+        <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
+        <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
+        <20181002223652.GA4290@nautica>
+        <CANiq72=M2xQa6FJ1YZ2kKuNXES-XSn1O9yJ+FbhgMawND_kAqA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181002223652.GA4290@nautica>
+In-Reply-To: <CANiq72=M2xQa6FJ1YZ2kKuNXES-XSn1O9yJ+FbhgMawND_kAqA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dominique Martinet <asmadeus@codewreck.org>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Dominique Martinet <asmadeus@codewreck.org>, Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.co>
 List-Id: linux-sparse@vger.kernel.org
 
-HI Dominique,
+On Wed, 3 Oct 2018 14:14:28 +0200
+Miguel Ojeda <miguel.ojeda.sandonis@gmail.com> wrote:
 
-On Wed, Oct 3, 2018 at 12:37 AM Dominique Martinet
-<asmadeus@codewreck.org> wrote:
+> HI Dominique,
+> 
+> On Wed, Oct 3, 2018 at 12:37 AM Dominique Martinet
+> <asmadeus@codewreck.org> wrote:
+> >
+> > Miguel Ojeda wrote on Wed, Oct 03, 2018:  
+> > > As I have read, -next is supposed to be a vision of what the merge
+> > > window will look like after merging everything, i.e. ideally -rc1. For
+> > > that to work for files out-of-tree (like these ones, which are not
+> > > maintained by a single tree), changes should be allowed to be stacked
+> > > on each other; otherwise, we cannot handle conflicts :-(  
+> >
+> > The rule is the same as with a regular mainline pull; I don't have the
+> > reference at hand but in some recent-ish pull request Linus said he  
+> 
+> That is actually the first problem: there is no
+> reference/documentation at hand. :-P
 >
-> Miguel Ojeda wrote on Wed, Oct 03, 2018:
-> > As I have read, -next is supposed to be a vision of what the merge
-> > window will look like after merging everything, i.e. ideally -rc1. For
-> > that to work for files out-of-tree (like these ones, which are not
-> > maintained by a single tree), changes should be allowed to be stacked
-> > on each other; otherwise, we cannot handle conflicts :-(
->
-> The rule is the same as with a regular mainline pull; I don't have the
-> reference at hand but in some recent-ish pull request Linus said he
 
-That is actually the first problem: there is no
-reference/documentation at hand. :-P
+Yes, and one of the topics for Maintainers Summit is to create one. One
+is actually in the works led by Dan Williams.
 
-Cheers,
-Miguel
+-- Steve
