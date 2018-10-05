@@ -1,97 +1,77 @@
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: [GIT PULL linux-next] Add Compiler Attributes tree
-Date: Thu, 4 Oct 2018 01:01:40 -0400
-Message-ID: <20181004050140.GC646@thunk.org>
-References: <CANiq72=rgT9cPWH64Tf_8gAU09EiH5FvGqFUdOjV=spVbM5m8Q@mail.gmail.com>
- <20181003071059.02b3fd6f@canb.auug.org.au>
- <CAKwvOdmt4-jFv6d-ZVUH5OOvXSz38jpuNvQy-jtoSS3xEoh78A@mail.gmail.com>
- <CANiq72mmxiO6RWBTQfWYDaa6gmOF01nXmN6BJNCAjAFz3QJqqA@mail.gmail.com>
- <20181002232454.GB2483@thunk.org>
- <CANiq72=cRpqnB3BxLsmj-rMdUGJK+pac1SRppoRgsON69ErfQg@mail.gmail.com>
- <20181003153303.GC2835@thunk.org>
- <CANiq72=Jq8HZ1=CsSvV4GenG+F6z3vRFmiB7Joct5VKdUFo8pA@mail.gmail.com>
- <CANiq72nMu6NXg1Ovn49qJ=FP_S4_LQJSwPuS+Q_zofhOEbVZng@mail.gmail.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: [GIT PULL linux-next] Add Compiler Attributes (v6) tree
+Date: Fri, 5 Oct 2018 13:32:25 +0200
+Message-ID: <CANiq72kuTr09CjE0jcNFkdO-gOFCjYp+REuLPq5V9c4Y8KvWXA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CANiq72nMu6NXg1Ovn49qJ=FP_S4_LQJSwPuS+Q_zofhOEbVZng@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>
+To: Stephen Rothwell <sfr@canb.auug.org.au>, Andrew Morton <akpm@linux-foundation.org>, Greg KH <gregkh@linuxfoundation.org>, Linux-Next Mailing List <linux-next@vger.kernel.org>
+Cc: Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>, David Woodhouse <dwmw2@infradead.org>, Will Deacon <will.deacon@arm.com>, Philippe Ombredanne <pombredanne@nexb.com>Paul
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Oct 03, 2018 at 11:41:08PM +0200, Miguel Ojeda wrote:
-> 
-> I forgot to mention that if the definitions were different, it could
-> have caused a problem, because your definition wouldn't apply, so your
-> 27+ hours of testing wouldn't have mattered :-P Without the #ifndef,
-> we would have at least got a redefinition warning about it.
+Hi Stephen,
 
-In this case, yes.  Again, I emphasize that I was using the ext4.h
-cleanup as an *example*.  The point I was trying to make was that your
-change did *not* do a full set of deep ext4 regression tests because
-the your change didn't go through the ext4.git tree.  I have seen
-cases where "simple mechanical changes" were anything but, and while
-the kernel *compiled* it resulted in the file system not working.
-(And in the worst case, it resulted actual data loss or file system
-corruption.)
+As discussed, here it is the Compiler Attributes series for
+linux-next. This time the original v6, based on -rc6.
 
-My test scripts are public, and in fact I've gone out of my way to
-make them easy for other people to run them, with documentation[1][2],
-slide sets[3], etc.  But the vast majority of people who submit
-patches to ext4.git don't bother --- and as far as I know *no one* who
-sends ext4 changes via other git trees *ever* bothered.  (And, for one
-recent patchset where the ext4 developer spent a lot of time using
-kvm-xfstests before submission, accepting that set of changes was easy
-and was a joy.  I'm a big believe in tests.)
+The changes w.r.t. v5:
 
-[1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/gce-xfstests.md
-[2] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
-[3] https://thunk.org/gce-xfstests
+  - Added latest Reviewed-by's and Tested-by's.
 
-As far as what you want to do, there are solutions, but they require a
-radically different way of developing.  For example, inside Google,
-for the non-public sources (e.g., excluding Android, Chrome OS, etc.)
-there is a single source tree, with thousands of projects.  They use
-common set of C++ utility libraries/classes, and there is a
-standardized build system (bazel[4]), and a standardized way of
-writing tests.  More importantly, there is a fully automated
-continuous testing system which will automatically trigger and run the
-appropriate tests --- at the moment when the patch is submitted into
-the Google's custom code review system --- and the results of the test
-are automatically submitted as comments in the code review system, so
-the automated testing is integrated into the code review.  For changes
-that affected all or substantially all projects, it's possible to run
-tests across the entire source tree using automated, centralized
-resources, and even then it can take a significantlly non-trivial (as
-in days) of calendar time running on many systems in parallel.
+The conflicts are trivial to solve, but if you want a reference, take
+a look at (rebased on top of next-20181005):
 
-[4] https://bazel.build/
+  https://github.com/ojeda/linux.git compiler-attributes-rebased
 
-So if you are willing to completely standardize your testing
-infrastructure and devote utterly lavish amounts of automated testing
-which is deeply integrated into a standardized, non-email code review
-system, the challenge you have identified *has* been solved.  But
-trust me when I say that it is a very non-trivial thing to do, and it
-requires a lot of very strict code development practices that are
-imposed on all Google C++ developers working in the common tree (which
-is probably 90%+ of the SWE's inside Google).  I'm not at all
-convinced that it could be adopted or imposed on the kernel
-development process.  In fact, I'm quite confident it could not be.
-
-I actually think the Linux Kernel's approach of carefully segregating
-how code and headers to avoid merge conflicts (and worse, semantic
-conflicts that may git merge and build succesfully, but then blow up
-in subtle ways leading to user data loss) is actually a pretty good
-way of doing things.  It works 99.99% of the the commits.  True, it
-wasn't optimal for the changes you were trying to make; but your
-experience is the exception, not the rule.
-
-The risk here is that it's very easy to engineer changes in processes
-for corner cases, and which make things much worse (either taking more
-time, or more effort, or being less reliable) for the common case.
+Thanks!
 
 Cheers,
+Miguel
 
-					- Ted
+The following changes since commit 17b57b1883c1285f3d0dc2266e8f79286a7bef38:
+
+  Linux 4.19-rc6 (2018-09-30 07:15:35 -0700)
+
+are available in the Git repository at:
+
+  https://github.com/ojeda/linux.git compiler-attributes
+
+for you to fetch changes up to f0604f63033d4020f019d2aaee805c1075b1077b:
+
+  Compiler Attributes: ext4: remove local __nonstring definition
+(2018-09-30 20:14:04 +0200)
+
+----------------------------------------------------------------
+Miguel Ojeda (15):
+      Compiler Attributes: remove unused attributes
+      Compiler Attributes: always use the extra-underscores syntax
+      Compiler Attributes: remove unneeded tests
+      Compiler Attributes: homogenize __must_be_array
+      Compiler Attributes: remove unneeded sparse (__CHECKER__) tests
+      Compiler Attributes: add missing SPDX ID in compiler_types.h
+      Compiler Attributes: use feature checks instead of version checks
+      Compiler Attributes: KENTRY used twice the "used" attribute
+      Compiler Attributes: remove uses of __attribute__ from compiler.h
+      Compiler Attributes: add Doc/process/programming-language.rst
+      Compiler Attributes: add MAINTAINERS entry
+      Compiler Attributes: add support for __nonstring (gcc >= 8)
+      Compiler Attributes: enable -Wstringop-truncation on W=1 (gcc >= 8)
+      Compiler Attributes: auxdisplay: panel: use __nonstring
+      Compiler Attributes: ext4: remove local __nonstring definition
+
+ Documentation/process/index.rst                |   1 +
+ Documentation/process/programming-language.rst |  45 +++++
+ MAINTAINERS                                    |   5 +
+ drivers/auxdisplay/panel.c                     |   7 +-
+ fs/ext4/ext4.h                                 |   9 -
+ include/linux/compiler-clang.h                 |   5 -
+ include/linux/compiler-gcc.h                   |  70 +------
+ include/linux/compiler-intel.h                 |   9 -
+ include/linux/compiler.h                       |  19 +-
+ include/linux/compiler_attributes.h            | 258 +++++++++++++++++++++++++
+ include/linux/compiler_types.h                 | 101 ++--------
+ scripts/Makefile.extrawarn                     |   1 +
+ 12 files changed, 341 insertions(+), 189 deletions(-)
+ create mode 100644 Documentation/process/programming-language.rst
+ create mode 100644 include/linux/compiler_attributes.h
