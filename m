@@ -1,96 +1,99 @@
-From: Segher Boessenkool <segher@kernel.crashing.org>
+From: Michael Matz <matz@suse.de>
 Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Sun, 7 Oct 2018 10:14:28 -0500
-Message-ID: <20181007151427.GK29268@gate.crashing.org>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org> <20181007141349.GD30687@zn.tnic>
+Date: Sun, 7 Oct 2018 15:53:26 +0000 (UTC)
+Message-ID: <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de>
+References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <gcc-return-197344-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Unsubscribe: <mailto:gcc-unsubscribe-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Archive: <http://gcc.gnu.org/ml/gcc/>
-List-Post: <mailto:gcc@gcc.gnu.org>
-List-Help: <http://gcc.gnu.org/ml/>
-Sender: gcc-owner@gcc.gnu.org
-Content-Disposition: inline
-In-Reply-To: <20181007141349.GD30687@zn.tnic>
-To: Borislav Petkov <bp@alien8.de>
-Cc: gcc@gcc.gnu.org, Richard Biener <rguenther@suse.de>, Michael Matz <matz@suse.de>, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, x86@kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredan ne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.linux-found
+Content-Type: text/plain; charset=US-ASCII
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181007132228.GJ29268@gate.crashing.org>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Segher Boessenkool <segher@kernel.crashing.org>
+Cc: Borislav Petkov <bp@alien8.de>, gcc@gcc.gnu.org, Richard Biener <rguenther@suse.de>, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, x86@kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutroni>
 List-Id: linux-sparse@vger.kernel.org
 
-On Sun, Oct 07, 2018 at 04:13:49PM +0200, Borislav Petkov wrote:
-> On Sun, Oct 07, 2018 at 08:22:28AM -0500, Segher Boessenkool wrote:
-> > GCC already estimates the *size* of inline asm, and this is required
-> > *for correctness*.
+Hi Segher,
+
+On Sun, 7 Oct 2018, Segher Boessenkool wrote:
+
+> On Sun, Oct 07, 2018 at 11:18:06AM +0200, Borislav Petkov wrote:
+> > this is an attempt to see whether gcc's inline asm heuristic when
+> > estimating inline asm statements' cost for better inlining can be
+> > improved.
 > 
-> I didn't say it didn't - but the heuristic could use improving.
+> GCC already estimates the *size* of inline asm, and this is required
+> *for correctness*.  So any workaround that works against this will only
+> end in tears.
 
-How?  It is as sharp an estimate as can be *already*: number of insns
-times maximum size per insn.
+You're right and wrong.  GCC can't even estimate the size of mildly 
+complicated inline asms right now, so your claim of it being necessary for 
+correctness can't be true in this absolute form.  I know what you try to 
+say, but still, consider inline asms like this:
 
-If you get this wrong, conditional branches (and similar things, but
-conditional branches usually hit first, and hurt most) will stop working
-correctly, unless binutils uses relaxation for those on your architecture
-(most don't).
+     insn1
+  .section bla
+     insn2
+  .previous
 
-> > So I guess the real issue is that the inline asm size estimate for x86
-> > isn't very good (since it has to be pessimistic, and x86 insns can be
-> > huge)?
-> 
-> Well, the size thing could be just a "parameter" or "hint" of sorts, to
-> tell gcc to inline the function X which is inlining the asm statement
-> into the function Y which is calling function X. If you look at the
-> patchset, it is moving everything to asm macros where gcc is apparently
-> able to do better inlining.
+or
+   invoke_asm_macro foo,bar
 
-Yes, that will cause fewer problems I think: do not override size _at all_,
-but give a hint to the inliner.
+in both cases GCCs size estimate will be wrong however you want to count 
+it.  This is actually the motivating example for the kernel guys, the 
+games they play within their inline asms make the estimates be wildly 
+wrong to a point it interacts with the inliner.
 
-> > >  3) asm ("...") __attribute__((asm_size(<size-expr>)));
+> So I guess the real issue is that the inline asm size estimate for x86 
+> isn't very good (since it has to be pessimistic, and x86 insns can be 
+> huge)?
+
+No, see above, even if we were to improve the size estimates (e.g. based 
+on some average instruction size) the kernel examples would still be off 
+because they switch sections back and forth, use asm macros and computed 
+.fill directives and maybe further stuff.  GCC will never be able to 
+accurately calculate these sizes (without an built-in assembler which 
+hopefully noone proposes).
+
+So, there is a case for extending the inline-asm facility to say 
+"size is complicated here, assume this for inline decisions".
+
+> > Now, Richard suggested doing something like:
 > > 
-> > Eww.
+> >  1) inline asm ("...")
 > 
-> Why?
+> What would the semantics of this be?
 
-Attributes are clumsy and clunky and kludgy.
+The size of the inline asm wouldn't be counted towards the inliner size 
+limits (or be counted as "1").
 
-It never is well-defined how attributes interact, and the more attributes
-we define and use, the more that matters.
+> I don't like 2) either.  But 1) looks interesting, depends what its
+> semantics would be?  "Don't count this insn's size for inlining decisions",
+> maybe?
 
-> > More precise *size* estimates, yes.  And if the user lies he should not
-> > be surprised to get assembler errors, etc.
-> 
-> Yes.
-> 
-> Another option would be if gcc parses the inline asm directly and
-> does a more precise size estimation. Which is a lot more involved and
-> complicated solution so I guess we wanna look at the simpler ones first.
-> 
-> :-)
+TBH, I like the inline asm (...) suggestion most currently, but what if we 
+want to add more attributes to asms?  We could add further special 
+keywords to the clobber list:
+  asm ("...." : : : "cc,memory,inline");
+sure, it might seem strange to "clobber" inline, but if we reinterpret the 
+clobber list as arbitrary set of attributes for this asm, it'd be fine.
 
-Which is *impossible* to do.  Inline assembler is free-form text.
+> Another option is to just force inlining for those few functions where 
+> GCC currently makes an inlining decision you don't like.  Or are there 
+> more than a few?
 
-> > I don't like 2) either.  But 1) looks interesting, depends what its
-> > semantics would be?  "Don't count this insn's size for inlining decisions",
-> > maybe?
-> 
-> Or simply "this asm statement has a size of 1" to mean, inline it
-> everywhere. Which has the same caveats as above.
+I think the examples I saw from Boris were all indirect inlines:
 
-"Has minimum length" then (size 1 cannot work on most archs).
+  static inline void foo() { asm("large-looking-but-small-asm"); }
+  static void bar1() { ... foo() ... }
+  static void bar2() { ... foo() ... }
+  void goo (void) { bar1(); }  // bar1 should have been inlined
 
-> > Another option is to just force inlining for those few functions where
-> > GCC currently makes an inlining decision you don't like.  Or are there
-> > more than a few?
-> 
-> I'm afraid they're more than a few and this should work automatically,
-> if possible.
-
-Would counting *all* asms as having minimum length for inlining decisions
-work?  Will that give bad side effects?
-
-Or since this problem is quite specific to x86, maybe some target hook is
-wanted?  Things work quite well elsewhere as-is, degrading that is not a
-good idea.
+So, while the immediate asm user was marked as always inline that in turn 
+caused users of it to become non-inlined.  I'm assuming the kernel guys 
+did proper measurements that they _really_ get some non-trivial speed 
+benefit by inlining bar1/bar2, but for some reasons (I didn't inquire) 
+didn't want to mark them all as inline as well.
 
 
-Segher
+Ciao,
+Michael.
