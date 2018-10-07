@@ -1,99 +1,71 @@
-From: Michael Matz <matz@suse.de>
+From: Nadav Amit <namit@vmware.com>
 Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Sun, 7 Oct 2018 15:53:26 +0000 (UTC)
-Message-ID: <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org>
+Date: Sun, 7 Oct 2018 16:09:30 +0000
+Message-ID: <4F2F1BCE-7875-4160-9E1E-9F8EF962D989@vmware.com>
+References: <20181003213100.189959-1-namit@vmware.com>
+ <20181007091805.GA30687@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181007132228.GJ29268@gate.crashing.org>
+In-Reply-To: <20181007091805.GA30687@zn.tnic>
+Content-Language: en-US
+Content-ID: <94027636BB8A334E9165C9BF3FF18CC7@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Segher Boessenkool <segher@kernel.crashing.org>
-Cc: Borislav Petkov <bp@alien8.de>, gcc@gcc.gnu.org, Richard Biener <rguenther@suse.de>, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, x86@kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutroni>
+To: Borislav Petkov <bp@alien8.de>, "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>, Richard Biener <rguenther@suse.de>, Michael Matz <matz@suse.de>
+Cc: Ingo Molnar <mingo@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.li
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Segher,
-
-On Sun, 7 Oct 2018, Segher Boessenkool wrote:
-
-> On Sun, Oct 07, 2018 at 11:18:06AM +0200, Borislav Petkov wrote:
-> > this is an attempt to see whether gcc's inline asm heuristic when
-> > estimating inline asm statements' cost for better inlining can be
-> > improved.
-> 
-> GCC already estimates the *size* of inline asm, and this is required
-> *for correctness*.  So any workaround that works against this will only
-> end in tears.
-
-You're right and wrong.  GCC can't even estimate the size of mildly 
-complicated inline asms right now, so your claim of it being necessary for 
-correctness can't be true in this absolute form.  I know what you try to 
-say, but still, consider inline asms like this:
-
-     insn1
-  .section bla
-     insn2
-  .previous
-
-or
-   invoke_asm_macro foo,bar
-
-in both cases GCCs size estimate will be wrong however you want to count 
-it.  This is actually the motivating example for the kernel guys, the 
-games they play within their inline asms make the estimates be wildly 
-wrong to a point it interacts with the inliner.
-
-> So I guess the real issue is that the inline asm size estimate for x86 
-> isn't very good (since it has to be pessimistic, and x86 insns can be 
-> huge)?
-
-No, see above, even if we were to improve the size estimates (e.g. based 
-on some average instruction size) the kernel examples would still be off 
-because they switch sections back and forth, use asm macros and computed 
-.fill directives and maybe further stuff.  GCC will never be able to 
-accurately calculate these sizes (without an built-in assembler which 
-hopefully noone proposes).
-
-So, there is a case for extending the inline-asm facility to say 
-"size is complicated here, assume this for inline decisions".
-
-> > Now, Richard suggested doing something like:
-> > 
-> >  1) inline asm ("...")
-> 
-> What would the semantics of this be?
-
-The size of the inline asm wouldn't be counted towards the inliner size 
-limits (or be counted as "1").
-
-> I don't like 2) either.  But 1) looks interesting, depends what its
-> semantics would be?  "Don't count this insn's size for inlining decisions",
-> maybe?
-
-TBH, I like the inline asm (...) suggestion most currently, but what if we 
-want to add more attributes to asms?  We could add further special 
-keywords to the clobber list:
-  asm ("...." : : : "cc,memory,inline");
-sure, it might seem strange to "clobber" inline, but if we reinterpret the 
-clobber list as arbitrary set of attributes for this asm, it'd be fine.
-
-> Another option is to just force inlining for those few functions where 
-> GCC currently makes an inlining decision you don't like.  Or are there 
-> more than a few?
-
-I think the examples I saw from Boris were all indirect inlines:
-
-  static inline void foo() { asm("large-looking-but-small-asm"); }
-  static void bar1() { ... foo() ... }
-  static void bar2() { ... foo() ... }
-  void goo (void) { bar1(); }  // bar1 should have been inlined
-
-So, while the immediate asm user was marked as always inline that in turn 
-caused users of it to become non-inlined.  I'm assuming the kernel guys 
-did proper measurements that they _really_ get some non-trivial speed 
-benefit by inlining bar1/bar2, but for some reasons (I didn't inquire) 
-didn't want to mark them all as inline as well.
-
-
-Ciao,
-Michael.
+YXQgMjoxOCBBTSwgQm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU+IHdyb3RlOg0KDQo+IEhp
+IHBlb3BsZSwNCj4gDQo+IHRoaXMgaXMgYW4gYXR0ZW1wdCB0byBzZWUgd2hldGhlciBnY2MncyBp
+bmxpbmUgYXNtIGhldXJpc3RpYyB3aGVuDQo+IGVzdGltYXRpbmcgaW5saW5lIGFzbSBzdGF0ZW1l
+bnRzJyBjb3N0IGZvciBiZXR0ZXIgaW5saW5pbmcgY2FuIGJlDQo+IGltcHJvdmVkLg0KPiANCj4g
+QUZBSVUsIHRoZSBwcm9ibGVtYXRpYyBhcmlzZXMgd2hlbiBvbmUgZW5kcyB1cCB1c2luZyBhIGxv
+dCBvZiBpbmxpbmUNCj4gYXNtIHN0YXRlbWVudHMgaW4gdGhlIGtlcm5lbCBidXQgZHVlIHRvIHRo
+ZSBpbmxpbmUgYXNtIGNvc3QgZXN0aW1hdGlvbg0KPiBoZXVyaXN0aWMgd2hpY2ggY291bnRzIGxp
+bmVzLCBJIHRoaW5rLCBmb3IgZXhhbXBsZSBsaWtlIGluIHRoaXMgaGVyZQ0KPiBtYWNybzoNCj4g
+DQo+IGh0dHBzOi8vbmEwMS5zYWZlbGlua3MucHJvdGVjdGlvbi5vdXRsb29rLmNvbS8/dXJsPWh0
+dHBzJTNBJTJGJTJGZ2l0Lmtlcm5lbC5vcmclMkZwdWIlMkZzY20lMkZsaW51eCUyRmtlcm5lbCUy
+RmdpdCUyRnRvcnZhbGRzJTJGbGludXguZ2l0JTJGdHJlZSUyRmFyY2glMkZ4ODYlMkZpbmNsdWRl
+JTJGYXNtJTJGY3B1ZmVhdHVyZS5oJTIzbjE2MiZhbXA7ZGF0YT0wMiU3QzAxJTdDbmFtaXQlNDB2
+bXdhcmUuY29tJTdDNmRiMTI1OGM2NWVhNDViYmU0ZWEwOGQ2MmMzNWNlZWMlN0NiMzkxMzhjYTNj
+ZWU0YjRhYTRkNmNkODNkOWRkNjJmMCU3QzElN0MwJTdDNjM2NzQ1MDA3MDA2ODM4Mjk5JmFtcDtz
+ZGF0YT1pZWhsJTJGYjhoJTJCWkUlMkZycWI0cWphYzE5V2VrU2dPT2JjOSUyQk0xSnRvMVZnRjQl
+M0QmYW1wO3Jlc2VydmVkPTANCj4gDQo+IHRoZSByZXN1bHRpbmcgY29kZSBlbmRzIHVwIG5vdCBp
+bmxpbmluZyB0aGUgZnVuY3Rpb25zIHRoZW1zZWx2ZXMgd2hpY2gNCj4gdXNlIHRoaXMgbWFjcm8u
+IEkuZS4sIHlvdSBzZWUgYSBDQUxMIDxmdW5jdGlvbj4gaW5zdGVhZCBvZiBpdHMgYm9keQ0KPiBn
+ZXR0aW5nIGlubGluZWQgZGlyZWN0bHkuDQo+IA0KPiBFdmVuIHRob3VnaCBpdCBzaG91bGQgYmUg
+YmVjYXVzZSB0aGUgYWN0dWFsIGluc3RydWN0aW9ucyBhcmUgb25seSBhDQo+IGNvdXBsZSBpbiBt
+b3N0IGNhc2VzIGFuZCBhbGwgdGhvc2Ugb3RoZXIgZGlyZWN0aXZlcyBlbmQgdXAgaW4gYW5vdGhl
+cg0KPiBzZWN0aW9uIGFueXdheS4NCj4gDQo+IFRoZSBpc3N1ZSBpcyBleHBsYWluZWQgYmVsb3cg
+aW4gdGhlIGZvcndhcmRlZCBtYWlsIGluIGEgbGFyZ2VyIGRldGFpbA0KPiB0b28uDQo+IA0KPiBO
+b3csIFJpY2hhcmQgc3VnZ2VzdGVkIGRvaW5nIHNvbWV0aGluZyBsaWtlOg0KPiANCj4gMSkgaW5s
+aW5lIGFzbSAoIi4uLiIpDQo+IDIpIGFzbSAoIi4uLiIgOiA6IDogOiA8c2l6ZS1leHByPikNCj4g
+MykgYXNtICgiLi4uIikgX19hdHRyaWJ1dGVfXygoYXNtX3NpemUoPHNpemUtZXhwcj4pKSk7DQo+
+IA0KPiB3aXRoIHdoaWNoIHVzZXIgY2FuIHRlbGwgZ2NjIHdoYXQgdGhlIHNpemUgb2YgdGhhdCBp
+bmxpbmUgYXNtIHN0YXRlbWVudA0KPiBpcyBhbmQgdGh1cyBhbGxvdyBmb3IgbW9yZSBwcmVjaXNl
+IGNvc3QgZXN0aW1hdGlvbiBhbmQgaW4gdGhlIGVuZCBiZXR0ZXINCj4gaW5saW5pbmcuDQo+IA0K
+PiBBbmQgRldJVyAzKSBsb29rcyBwcmV0dHkgc3RyYWlnaHQtZm9yd2FyZCB0byBtZSBiZWNhdXNl
+IGF0dHJpYnV0ZXMgYXJlDQo+IHByZXR0eSBjb21tb24gYW55d2F5cy4NCj4gDQo+IEJ1dCBJJ20g
+c3VyZSB0aGVyZSBhcmUgb3RoZXIgb3B0aW9ucyBhbmQgSSdtIHN1cmUgcGVvcGxlIHdpbGwgaGF2
+ZQ0KPiBiZXR0ZXIvZGlmZmVyZW50IGlkZWFzIHNvIGZlZWwgZnJlZSB0byBjaGltZSBpbi4NCg0K
+VGhhbmtzIGZvciB0YWtpbmcgY2FyZSBvZiBpdC4gSSB3b3VsZCBsaWtlIHRvIG1lbnRpb24gYSBz
+ZWNvbmQgaXNzdWUsIHNpbmNlDQp5b3UgbWF5IHdhbnQgdG8gcmVzb2x2ZSBib3RoIHdpdGggYSBz
+aW5nbGUgc29sdXRpb246IG5vdCBpbmxpbmluZw0KY29uZGl0aW9uYWwgX19idWlsdGluX2NvbnN0
+YW50X3AoKSwgaW4gd2hpY2ggdGhlcmUgYXJlIHR3byBjb2RlLXBhdGhzIC0gb25lDQpmb3IgY29u
+c3RhbnRzIGFuZCBvbmUgZm9yIHZhcmlhYmxlcy4NCg0KQ29uc2lkZXIgZm9yIGV4YW1wbGUgdGhl
+IExpbnV4IGtlcm5lbCBpbG9nMiBtYWNybywgd2hpY2ggaGFzIGEgY29uZGl0aW9uDQpiYXNlZCBv
+biBfX2J1aWx0aW5fY29uc3RhbnRfcCgpICgNCmh0dHBzOi8vZWxpeGlyLmJvb3RsaW4uY29tL2xp
+bnV4L3Y0LjE5LXJjNy9zb3VyY2UvaW5jbHVkZS9saW51eC9sb2cyLmgjTDE2MA0KKS4gVGhlIGNv
+bXBpbGVyIG1pc3Rha2VubHkgY29uc2lkZXJzIHRoZSDigJxoZWF2eeKAnSBjb2RlLXBhdGggdGhh
+dCBpcyBzdXBwb3NlZA0KdG8gYmUgZXZhbHVhdGVkIG9ubHkgaW4gY29tcGlsYXRpb24gdGltZSB0
+byBldmFsdWF0ZSB0aGUgY29kZSBzaXplLiBUaGlzDQpjYXVzZXMgdGhlIGtlcm5lbCB0byBjb25z
+aWRlciBmdW5jdGlvbnMgc3VjaCBhcyBrbWFsbG9jKCkgYXMg4oCcYmln4oCdLg0Ka21hbGxvYygp
+IGlzIG1hcmtlZCB3aXRoIGFsd2F5c19pbmxpbmUgYXR0cmlidXRlLCBzbyBpbnN0ZWFkIHRoZSBj
+YWxsaW5nDQpmdW5jdGlvbnMsIHN1Y2ggYXMga3phbGxvYygpIGFyZSBub3QgaW5saW5lZC4NCg0K
+V2hlbiBJIHRob3VnaHQgYWJvdXQgaGFja2luZyBnY2MgdG8gc29sdmUgdGhpcyBpc3N1ZSwgSSBj
+b25zaWRlcmVkIGFuDQppbnRyaW5zaWMgdGhhdCB3b3VsZCBvdmVycmlkZSB0aGUgY29zdCBvZiBh
+IGdpdmVuIHN0YXRlbWVudC4gVGhpcyBzb2x1dGlvbg0KaXMgbm90IHRvbyBuaWNlLCBidXQgbWF5
+IHNvbHZlIGJvdGggaXNzdWVzLg0KDQpJbiBhZGRpdGlvbiwgbm90ZSB0aGF0IEFGQUlVIHRoZSBp
+bXBhY3Qgb2YgYSB3cm9uZyBjb3N0IG9mIGNvZGUgZXN0aW1hdGlvbg0KY2FuIGFsc28gaW1wYWN0
+IGxvb3AgYW5kIG90aGVyIG9wdGltaXphdGlvbnMuDQoNClJlZ2FyZHMsDQpOYWRhdg==
