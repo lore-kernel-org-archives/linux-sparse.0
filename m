@@ -1,88 +1,103 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: [RESEND] PROPOSAL: Extend inline asm syntax with size spec
-Date: Sun, 7 Oct 2018 16:13:19 +0000
-Message-ID: <B8C87E7E-50EF-4047-80AA-A5432C4CD8A1@vmware.com>
+From: Richard Biener <rguenther@suse.de>
+Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
+Date: Sun, 07 Oct 2018 18:46:24 +0200
+Message-ID: <FC56B15B-0D4A-4A4A-81DA-A5093B56A210@suse.de>
 References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <4F2F1BCE-7875-4160-9E1E-9F8EF962D989@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <gcc-return-197346-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Unsubscribe: <mailto:gcc-unsubscribe-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Archive: <http://gcc.gnu.org/ml/gcc/>
-List-Post: <mailto:gcc@gcc.gnu.org>
-List-Help: <http://gcc.gnu.org/ml/>
-Sender: gcc-owner@gcc.gnu.org
+Content-Type: text/plain;
+ charset=utf-8
+Content-Transfer-Encoding: 8BIT
+Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <4F2F1BCE-7875-4160-9E1E-9F8EF962D989@vmware.com>
-To: Borislav Petkov <bp@alien8.de>, "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>, Richard Biener <rguenther@suse.de>, Michael Matz <matz@suse.de>
-Cc: Ingo Molnar <mingo@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Linus T orvalds <torvalds@linux-foundation.org>, Chris Zankel <chris@zankel.net>, Max Filippov <jcmvbkbc@g>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Nadav Amit <namit@vmware.com>, Borislav Petkov <bp@alien8.de>, "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>, Michael Matz <matz@suse.de>
+Cc: Ingo Molnar <mingo@redhat.com>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>, "x86@kernel.org" <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.li
 List-Id: linux-sparse@vger.kernel.org
 
-U2Vjb25kIHRyeSBhZnRlciBiZWluZyBibG9ja2VkIGJ5IGdjYyBtYWlsaW5n
-IGxpc3Q6DQoNCmF0IDk6MDkgQU0sIE5hZGF2IEFtaXQgPG5hbWl0QHZtd2Fy
-ZS5jb208bWFpbHRvOm5hbWl0QHZtd2FyZS5jb20+PiB3cm90ZToNCg0KYXQg
-MjoxOCBBTSwgQm9yaXNsYXYgUGV0a292IDxicEBhbGllbjguZGU8bWFpbHRv
-OmJwQGFsaWVuOC5kZT4+IHdyb3RlOg0KDQpIaSBwZW9wbGUsDQoNCnRoaXMg
-aXMgYW4gYXR0ZW1wdCB0byBzZWUgd2hldGhlciBnY2MncyBpbmxpbmUgYXNt
-IGhldXJpc3RpYyB3aGVuDQplc3RpbWF0aW5nIGlubGluZSBhc20gc3RhdGVt
-ZW50cycgY29zdCBmb3IgYmV0dGVyIGlubGluaW5nIGNhbiBiZQ0KaW1wcm92
-ZWQuDQoNCkFGQUlVLCB0aGUgcHJvYmxlbWF0aWMgYXJpc2VzIHdoZW4gb25l
-IGVuZHMgdXAgdXNpbmcgYSBsb3Qgb2YgaW5saW5lDQphc20gc3RhdGVtZW50
-cyBpbiB0aGUga2VybmVsIGJ1dCBkdWUgdG8gdGhlIGlubGluZSBhc20gY29z
-dCBlc3RpbWF0aW9uDQpoZXVyaXN0aWMgd2hpY2ggY291bnRzIGxpbmVzLCBJ
-IHRoaW5rLCBmb3IgZXhhbXBsZSBsaWtlIGluIHRoaXMgaGVyZQ0KbWFjcm86
-DQoNCmh0dHBzOi8vbmEwMS5zYWZlbGlua3MucHJvdGVjdGlvbi5vdXRsb29r
-LmNvbS8/dXJsPWh0dHBzJTNBJTJGJTJGZ2l0Lmtlcm5lbC5vcmclMkZwdWIl
-MkZzY20lMkZsaW51eCUyRmtlcm5lbCUyRmdpdCUyRnRvcnZhbGRzJTJGbGlu
-dXguZ2l0JTJGdHJlZSUyRmFyY2glMkZ4ODYlMkZpbmNsdWRlJTJGYXNtJTJG
-Y3B1ZmVhdHVyZS5oJTIzbjE2MiZhbXA7ZGF0YT0wMiU3QzAxJTdDbmFtaXQl
-NDB2bXdhcmUuY29tJTdDNmRiMTI1OGM2NWVhNDViYmU0ZWEwOGQ2MmMzNWNl
-ZWMlN0NiMzkxMzhjYTNjZWU0YjRhYTRkNmNkODNkOWRkNjJmMCU3QzElN0Mw
-JTdDNjM2NzQ1MDA3MDA2ODM4Mjk5JmFtcDtzZGF0YT1pZWhsJTJGYjhoJTJC
-WkUlMkZycWI0cWphYzE5V2VrU2dPT2JjOSUyQk0xSnRvMVZnRjQlM0QmYW1w
-O3Jlc2VydmVkPTANCg0KdGhlIHJlc3VsdGluZyBjb2RlIGVuZHMgdXAgbm90
-IGlubGluaW5nIHRoZSBmdW5jdGlvbnMgdGhlbXNlbHZlcyB3aGljaA0KdXNl
-IHRoaXMgbWFjcm8uIEkuZS4sIHlvdSBzZWUgYSBDQUxMIDxmdW5jdGlvbj4g
-aW5zdGVhZCBvZiBpdHMgYm9keQ0KZ2V0dGluZyBpbmxpbmVkIGRpcmVjdGx5
-Lg0KDQpFdmVuIHRob3VnaCBpdCBzaG91bGQgYmUgYmVjYXVzZSB0aGUgYWN0
-dWFsIGluc3RydWN0aW9ucyBhcmUgb25seSBhDQpjb3VwbGUgaW4gbW9zdCBj
-YXNlcyBhbmQgYWxsIHRob3NlIG90aGVyIGRpcmVjdGl2ZXMgZW5kIHVwIGlu
-IGFub3RoZXINCnNlY3Rpb24gYW55d2F5Lg0KDQpUaGUgaXNzdWUgaXMgZXhw
-bGFpbmVkIGJlbG93IGluIHRoZSBmb3J3YXJkZWQgbWFpbCBpbiBhIGxhcmdl
-ciBkZXRhaWwNCnRvby4NCg0KTm93LCBSaWNoYXJkIHN1Z2dlc3RlZCBkb2lu
-ZyBzb21ldGhpbmcgbGlrZToNCg0KMSkgaW5saW5lIGFzbSAoIi4uLiIpDQoy
-KSBhc20gKCIuLi4iIDogOiA6IDogPHNpemUtZXhwcj4pDQozKSBhc20gKCIu
-Li4iKSBfX2F0dHJpYnV0ZV9fKChhc21fc2l6ZSg8c2l6ZS1leHByPikpKTsN
-Cg0Kd2l0aCB3aGljaCB1c2VyIGNhbiB0ZWxsIGdjYyB3aGF0IHRoZSBzaXpl
-IG9mIHRoYXQgaW5saW5lIGFzbSBzdGF0ZW1lbnQNCmlzIGFuZCB0aHVzIGFs
-bG93IGZvciBtb3JlIHByZWNpc2UgY29zdCBlc3RpbWF0aW9uIGFuZCBpbiB0
-aGUgZW5kIGJldHRlcg0KaW5saW5pbmcuDQoNCkFuZCBGV0lXIDMpIGxvb2tz
-IHByZXR0eSBzdHJhaWdodC1mb3J3YXJkIHRvIG1lIGJlY2F1c2UgYXR0cmli
-dXRlcyBhcmUNCnByZXR0eSBjb21tb24gYW55d2F5cy4NCg0KQnV0IEknbSBz
-dXJlIHRoZXJlIGFyZSBvdGhlciBvcHRpb25zIGFuZCBJJ20gc3VyZSBwZW9w
-bGUgd2lsbCBoYXZlDQpiZXR0ZXIvZGlmZmVyZW50IGlkZWFzIHNvIGZlZWwg
-ZnJlZSB0byBjaGltZSBpbi4NCg0KVGhhbmtzIGZvciB0YWtpbmcgY2FyZSBv
-ZiBpdC4gSSB3b3VsZCBsaWtlIHRvIG1lbnRpb24gYSBzZWNvbmQgaXNzdWUs
-IHNpbmNlDQp5b3UgbWF5IHdhbnQgdG8gcmVzb2x2ZSBib3RoIHdpdGggYSBz
-aW5nbGUgc29sdXRpb246IG5vdCBpbmxpbmluZw0KY29uZGl0aW9uYWwgX19i
-dWlsdGluX2NvbnN0YW50X3AoKSwgaW4gd2hpY2ggdGhlcmUgYXJlIHR3byBj
-b2RlLXBhdGhzIC0gb25lDQpmb3IgY29uc3RhbnRzIGFuZCBvbmUgZm9yIHZh
-cmlhYmxlcy4NCg0KQ29uc2lkZXIgZm9yIGV4YW1wbGUgdGhlIExpbnV4IGtl
-cm5lbCBpbG9nMiBtYWNybywgd2hpY2ggaGFzIGEgY29uZGl0aW9uDQpiYXNl
-ZCBvbiBfX2J1aWx0aW5fY29uc3RhbnRfcCgpICgNCmh0dHBzOi8vZWxpeGly
-LmJvb3RsaW4uY29tL2xpbnV4L3Y0LjE5LXJjNy9zb3VyY2UvaW5jbHVkZS9s
-aW51eC9sb2cyLmgjTDE2MA0KKS4gVGhlIGNvbXBpbGVyIG1pc3Rha2VubHkg
-Y29uc2lkZXJzIHRoZSDigJxoZWF2eeKAnSBjb2RlLXBhdGggdGhhdCBpcyBz
-dXBwb3NlZA0KdG8gYmUgZXZhbHVhdGVkIG9ubHkgaW4gY29tcGlsYXRpb24g
-dGltZSB0byBldmFsdWF0ZSB0aGUgY29kZSBzaXplLiBUaGlzDQpjYXVzZXMg
-dGhlIGtlcm5lbCB0byBjb25zaWRlciBmdW5jdGlvbnMgc3VjaCBhcyBrbWFs
-bG9jKCkgYXMg4oCcYmln4oCdLg0Ka21hbGxvYygpIGlzIG1hcmtlZCB3aXRo
-IGFsd2F5c19pbmxpbmUgYXR0cmlidXRlLCBzbyBpbnN0ZWFkIHRoZSBjYWxs
-aW5nDQpmdW5jdGlvbnMsIHN1Y2ggYXMga3phbGxvYygpIGFyZSBub3QgaW5s
-aW5lZC4NCg0KV2hlbiBJIHRob3VnaHQgYWJvdXQgaGFja2luZyBnY2MgdG8g
-c29sdmUgdGhpcyBpc3N1ZSwgSSBjb25zaWRlcmVkIGFuDQppbnRyaW5zaWMg
-dGhhdCB3b3VsZCBvdmVycmlkZSB0aGUgY29zdCBvZiBhIGdpdmVuIHN0YXRl
-bWVudC4gVGhpcyBzb2x1dGlvbg0KaXMgbm90IHRvbyBuaWNlLCBidXQgbWF5
-IHNvbHZlIGJvdGggaXNzdWVzLg0KDQpJbiBhZGRpdGlvbiwgbm90ZSB0aGF0
-IEFGQUlVIHRoZSBpbXBhY3Qgb2YgYSB3cm9uZyBjb3N0IG9mIGNvZGUgZXN0
-aW1hdGlvbg0KY2FuIGFsc28gaW1wYWN0IGxvb3AgYW5kIG90aGVyIG9wdGlt
-aXphdGlvbnMuDQoNClJlZ2FyZHMsDQpOYWRhdg0KDQoNCg==
+On October 7, 2018 6:09:30 PM GMT+02:00, Nadav Amit <namit@vmware.com> wrote:
+>at 2:18 AM, Borislav Petkov <bp@alien8.de> wrote:
+>
+>> Hi people,
+>> 
+>> this is an attempt to see whether gcc's inline asm heuristic when
+>> estimating inline asm statements' cost for better inlining can be
+>> improved.
+>> 
+>> AFAIU, the problematic arises when one ends up using a lot of inline
+>> asm statements in the kernel but due to the inline asm cost
+>estimation
+>> heuristic which counts lines, I think, for example like in this here
+>> macro:
+>> 
+>>
+>https://na01.safelinks.protection.outlook.com/?url=https%3A%2F%2Fgit.kernel.org%2Fpub%2Fscm%2Flinux%2Fkernel%2Fgit%2Ftorvalds%2Flinux.git%2Ftree%2Farch%2Fx86%2Finclude%2Fasm%2Fcpufeature.h%23n162&amp;data=02%7C01%7Cnamit%40vmware.com%7C6db1258c65ea45bbe4ea08d62c35ceec%7Cb39138ca3cee4b4aa4d6cd83d9dd62f0%7C1%7C0%7C636745007006838299&amp;sdata=iehl%2Fb8h%2BZE%2Frqb4qjac19WekSgOObc9%2BM1Jto1VgF4%3D&amp;reserved=0
+>> 
+>> the resulting code ends up not inlining the functions themselves
+>which
+>> use this macro. I.e., you see a CALL <function> instead of its body
+>> getting inlined directly.
+>> 
+>> Even though it should be because the actual instructions are only a
+>> couple in most cases and all those other directives end up in another
+>> section anyway.
+>> 
+>> The issue is explained below in the forwarded mail in a larger detail
+>> too.
+>> 
+>> Now, Richard suggested doing something like:
+>> 
+>> 1) inline asm ("...")
+>> 2) asm ("..." : : : : <size-expr>)
+>> 3) asm ("...") __attribute__((asm_size(<size-expr>)));
+>> 
+>> with which user can tell gcc what the size of that inline asm
+>statement
+>> is and thus allow for more precise cost estimation and in the end
+>better
+>> inlining.
+>> 
+>> And FWIW 3) looks pretty straight-forward to me because attributes
+>are
+>> pretty common anyways.
+>> 
+>> But I'm sure there are other options and I'm sure people will have
+>> better/different ideas so feel free to chime in.
+>
+>Thanks for taking care of it. I would like to mention a second issue,
+>since
+>you may want to resolve both with a single solution: not inlining
+>conditional __builtin_constant_p(), in which there are two code-paths -
+>one
+>for constants and one for variables.
+>
+>Consider for example the Linux kernel ilog2 macro, which has a
+>condition
+>based on __builtin_constant_p() (
+>https://elixir.bootlin.com/linux/v4.19-rc7/source/include/linux/log2.h#L160
+>). The compiler mistakenly considers the “heavy” code-path that is
+>supposed
+>to be evaluated only in compilation time to evaluate the code size.
+
+But this is a misconception about __builtin_constant_p. It doesn't guard sth like 'constexpr' regions. If you try to use it with those semantics you'll fail (appearantly you do). 
+
+Of course IPA CP code size estimates when seeing a constant fed to bcp might be not optimal, that's another issue of course. 
+
+Richard. 
+
+>This
+>causes the kernel to consider functions such as kmalloc() as “big”.
+>kmalloc() is marked with always_inline attribute, so instead the
+>calling
+>functions, such as kzalloc() are not inlined.
+>
+>When I thought about hacking gcc to solve this issue, I considered an
+>intrinsic that would override the cost of a given statement. This
+>solution
+>is not too nice, but may solve both issues.
+>
+>In addition, note that AFAIU the impact of a wrong cost of code
+>estimation
+>can also impact loop and other optimizations.
+>
+>Regards,
+>Nadav
