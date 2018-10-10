@@ -1,45 +1,50 @@
-From: Richard Biener <rguenther@suse.de>
-Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Wed, 10 Oct 2018 12:29:03 +0200 (CEST)
-Message-ID: <alpine.LSU.2.20.1810101228180.16707@zhemvz.fhfr.qr>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org> <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de> <20181008073128.GL29268@gate.crashing.org> <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr>
- <20181009145330.GT29268@gate.crashing.org> <alpine.LSU.2.20.1810100909140.16707@zhemvz.fhfr.qr> <20181010072240.GB103159@gmail.com> <20181010080324.GV29268@gate.crashing.org>
+From: Kees Cook <keescook@chromium.org>
+Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
+Date: Wed, 10 Oct 2018 07:49:16 -0700
+Message-ID: <CAGXu5jKShFRJcP3vroEcZUevcHBSi53Towgs-t0v1JyEqmHJCA@mail.gmail.com>
+References: <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com>
+ <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
+ <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com> <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
+ <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
+ <20180926180019.GD22824@google.com> <CAKwvOd=xYG+r4KU+QurUTyaxkPB2AMane4YfWxuvKtONvVtLxQ@mail.gmail.com>
+ <CAGXu5jLBz1YanL5X4HFZjhb8NZe5QK=Q1ySfBkBDNWqEg4hs5g@mail.gmail.com>
+ <20180926184259.GB14797@kroah.com> <CAGXu5jJaJ+1Sg3uwaZ8hzw3wFbiLrftpZDO8vdjY9_tB+P-HPQ@mail.gmail.com>
+ <20180926190303.GA18293@kroah.com> <CAKwvOdnx6D+_LeSZ-1v_s8dLErXq4B5Nx1UQozdr1+ZaGYWnrA@mail.gmail.com>
+ <CAGXu5jKRn2EsPwNMtVTPyKyDnt+vqHZF=jdr+DajN_iN1DWjSw@mail.gmail.com>
+ <CACPK8XeAbiMk_yW-t+8HdW_WLqaFJFX-xnNnDSZJ5ZfhK63euA@mail.gmail.com> <CANiq72nGrNMEqnPrxGXCp_iKf1_FuJLMvoV1+bbfYYCKnfTPVw@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181010080324.GV29268@gate.crashing.org>
+In-Reply-To: <CANiq72nGrNMEqnPrxGXCp_iKf1_FuJLMvoV1+bbfYYCKnfTPVw@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Segher Boessenkool <segher@kernel.crashing.org>
-Cc: Ingo Molnar <mingo@kernel.org>, Michael Matz <matz@suse.de>, Borislav Petkov <bp@alien8.de>, gcc@gcc.gnu.org, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, linux-kernel@vger.kernel.org, x86@kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Joel Stanley <joel@jms.id.au>, Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Matthias Kaehlcke <mka@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Daniel Santos <daniel.santos@pobox.com>, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@intel.com>, Greg KH <gregkh@linuxfoundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, 10 Oct 2018, Segher Boessenkool wrote:
+On Wed, Oct 10, 2018 at 12:03 AM, Miguel Ojeda
+<miguel.ojeda.sandonis@gmail.com> wrote:
+> On Wed, Oct 10, 2018 at 8:12 AM Joel Stanley <joel@jms.id.au> wrote:
+>>
+>> On Thu, 27 Sep 2018 at 05:07, Kees Cook <keescook@chromium.org> wrote:
+>> >
+>> > Yeah, that's what I'd linked to in the patchwork URL. Andrew, can you take this?
+>>
+>> clang built -next is blowing up now that Kees' -Wvla patch has been
+>> included. This patch fixes it.
+>>
+>> Kees, perhaps it should go in your tree along side of the -Wvla patch
+>> if no one else wants to take it?
+>>
+>
+> I can take it along in the compiler attributes tree, since that
+> touches the compiler*.h stuff. Although that would make it
+> not-only-attributes, i.e. slightly lying :-)
 
-> On Wed, Oct 10, 2018 at 09:22:40AM +0200, Ingo Molnar wrote:
-> > * Richard Biener <rguenther@suse.de> wrote:
-> > > Can kernel folks give this a second and third thought please so we
-> > > don't implement sth that in the end won't satisfy you guys?
-> > 
-> > So this basically passes '0 size' to the inliner, which should be better
-> > than passing in the explicit size, as we'd inevitably get it wrong
-> > in cases.
-> 
-> The code immediately after this makes it size 1, even for things like
-> asm(""), I suppose this works better for the inliner.  But that's a detail
-> (and it might change); the description says "consider this asm as minimum
-> length and cost for inlining decisions", which works for either 0 or 1.
+Oh, I had assumed Masahiro was going to carry it. If that's not true,
+sure I'll pick it up as part of my VLA "series".
 
-It was made 1 as otherwise the inliner happily explodes on
+-Kees
 
-void foo () { asm(""); foo(); }
-
-> > I also like 'size 0' for the reason that we tend to write assembly code
-> > and mark it 'inline' if we really think it matters to performance,
-> > so making it more likely to be inlined when used within another inline
-> > function is a plus as well.
-> 
-> You can think of it as meaning "we want this asm inlined always", and then
-> whether that actually happens depends on if the function around it is
-> inlined or not.
-
-Richard.
+-- 
+Kees Cook
+Pixel Security
