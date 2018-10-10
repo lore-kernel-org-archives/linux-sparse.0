@@ -1,50 +1,50 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
-Date: Wed, 10 Oct 2018 07:49:16 -0700
-Message-ID: <CAGXu5jKShFRJcP3vroEcZUevcHBSi53Towgs-t0v1JyEqmHJCA@mail.gmail.com>
-References: <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com>
- <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
- <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com> <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
- <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
- <20180926180019.GD22824@google.com> <CAKwvOd=xYG+r4KU+QurUTyaxkPB2AMane4YfWxuvKtONvVtLxQ@mail.gmail.com>
- <CAGXu5jLBz1YanL5X4HFZjhb8NZe5QK=Q1ySfBkBDNWqEg4hs5g@mail.gmail.com>
- <20180926184259.GB14797@kroah.com> <CAGXu5jJaJ+1Sg3uwaZ8hzw3wFbiLrftpZDO8vdjY9_tB+P-HPQ@mail.gmail.com>
- <20180926190303.GA18293@kroah.com> <CAKwvOdnx6D+_LeSZ-1v_s8dLErXq4B5Nx1UQozdr1+ZaGYWnrA@mail.gmail.com>
- <CAGXu5jKRn2EsPwNMtVTPyKyDnt+vqHZF=jdr+DajN_iN1DWjSw@mail.gmail.com>
- <CACPK8XeAbiMk_yW-t+8HdW_WLqaFJFX-xnNnDSZJ5ZfhK63euA@mail.gmail.com> <CANiq72nGrNMEqnPrxGXCp_iKf1_FuJLMvoV1+bbfYYCKnfTPVw@mail.gmail.com>
+From: Nadav Amit <namit@vmware.com>
+Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
+Date: Wed, 10 Oct 2018 16:31:41 +0000
+Message-ID: <5ACDEDEA-0E42-45F2-BC80-B96EC2ABC01D@vmware.com>
+References: <20181003213100.189959-1-namit@vmware.com>
+ <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org>
+ <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de>
+ <20181008073128.GL29268@gate.crashing.org>
+ <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr>
+ <20181009145330.GT29268@gate.crashing.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CANiq72nGrNMEqnPrxGXCp_iKf1_FuJLMvoV1+bbfYYCKnfTPVw@mail.gmail.com>
+In-Reply-To: <20181009145330.GT29268@gate.crashing.org>
+Content-Language: en-US
+Content-ID: <5A119F1B1E5059458EBD0D02CC174E28@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Cc: Joel Stanley <joel@jms.id.au>, Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Matthias Kaehlcke <mka@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Christopher Li <sparse@chrisli.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Daniel Santos <daniel.santos@pobox.com>, Chris Wilson <chris@chris-wilson.co.uk>, Jani Nikula <jani.nikula@intel.com>, Greg KH <gregkh@linuxfoundation.org>
+To: Segher Boessenkool <segher@kernel.crashing.org>, Richard Biener <rguenther@suse.de>
+Cc: Michael Matz <matz@suse.de>, Borislav Petkov <bp@alien8.de>, "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>, Ingo Molnar <mingo@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Oct 10, 2018 at 12:03 AM, Miguel Ojeda
-<miguel.ojeda.sandonis@gmail.com> wrote:
-> On Wed, Oct 10, 2018 at 8:12 AM Joel Stanley <joel@jms.id.au> wrote:
->>
->> On Thu, 27 Sep 2018 at 05:07, Kees Cook <keescook@chromium.org> wrote:
->> >
->> > Yeah, that's what I'd linked to in the patchwork URL. Andrew, can you take this?
->>
->> clang built -next is blowing up now that Kees' -Wvla patch has been
->> included. This patch fixes it.
->>
->> Kees, perhaps it should go in your tree along side of the -Wvla patch
->> if no one else wants to take it?
->>
->
-> I can take it along in the compiler attributes tree, since that
-> touches the compiler*.h stuff. Although that would make it
-> not-only-attributes, i.e. slightly lying :-)
-
-Oh, I had assumed Masahiro was going to carry it. If that's not true,
-sure I'll pick it up as part of my VLA "series".
-
--Kees
-
--- 
-Kees Cook
-Pixel Security
+YXQgNzo1MyBBTSwgU2VnaGVyIEJvZXNzZW5rb29sIDxzZWdoZXJAa2VybmVsLmNyYXNoaW5nLm9y
+Zz4gd3JvdGU6DQoNCj4gT24gTW9uLCBPY3QgMDgsIDIwMTggYXQgMTE6MDc6NDZBTSArMDIwMCwg
+UmljaGFyZCBCaWVuZXIgd3JvdGU6DQo+PiBPbiBNb24sIDggT2N0IDIwMTgsIFNlZ2hlciBCb2Vz
+c2Vua29vbCB3cm90ZToNCj4+PiBPbiBTdW4sIE9jdCAwNywgMjAxOCBhdCAwMzo1MzoyNlBNICsw
+MDAwLCBNaWNoYWVsIE1hdHogd3JvdGU6DQo+Pj4+IE9uIFN1biwgNyBPY3QgMjAxOCwgU2VnaGVy
+IEJvZXNzZW5rb29sIHdyb3RlOg0KPj4+Pj4gT24gU3VuLCBPY3QgMDcsIDIwMTggYXQgMTE6MTg6
+MDZBTSArMDIwMCwgQm9yaXNsYXYgUGV0a292IHdyb3RlOg0KPj4+Pj4+IE5vdywgUmljaGFyZCBz
+dWdnZXN0ZWQgZG9pbmcgc29tZXRoaW5nIGxpa2U6DQo+Pj4+Pj4gDQo+Pj4+Pj4gMSkgaW5saW5l
+IGFzbSAoIi4uLiIpDQo+Pj4+PiANCj4+Pj4+IFdoYXQgd291bGQgdGhlIHNlbWFudGljcyBvZiB0
+aGlzIGJlPw0KPj4+PiANCj4+Pj4gVGhlIHNpemUgb2YgdGhlIGlubGluZSBhc20gd291bGRuJ3Qg
+YmUgY291bnRlZCB0b3dhcmRzIHRoZSBpbmxpbmVyIHNpemUgDQo+Pj4+IGxpbWl0cyAob3IgYmUg
+Y291bnRlZCBhcyAiMSIpLg0KPj4+IA0KPj4+IFRoYXQgc291bmRzIGxpa2UgYSBnb29kIG9wdGlv
+bi4NCj4+IA0KPj4gWWVzLCBJIGFsc28gbGlrZSBpdCBmb3Igc2ltcGxpY2l0eS4gIEl0IGFsc28g
+YXZvaWRzIHRoZSByZXF1aXJlbWVudA0KPj4gb2YgdHJhbnNsYXRpbmcgdGhlIG51bWJlciAoaW4g
+Ynl0ZXM/KSBnaXZlbiBieSB0aGUgdXNlciB0bw0KPj4gIm51bWJlciBvZiBHSU1QTEUgaW5zdHJ1
+Y3Rpb25zIiBhcyBuZWVkZWQgYnkgdGhlIGlubGluZXIuDQo+IA0KPiBUaGlzIHBhdGNoIGltcGxl
+bWVudHMgdGhpcywgZm9yIEMgb25seSBzbyBmYXIuICBBbmQgdGhlIHN5bnRheCBpcw0KPiAiYXNt
+IGlubGluZSIsIHdoaWNoIGlzIG1vcmUgaW4gbGluZSB3aXRoIG90aGVyIHN5bnRheC4NCj4gDQo+
+IEhvdyBkb2VzIHRoaXMgbG9vaz8NCg0KSXQgbG9va3MgZ29vZCB0byBtZSBpbiBnZW5lcmFsLiBJ
+IGhhdmUgYSBjb3VwbGUgb2YgcmVzZXJ2YXRpb25zLCBidXQgSQ0Kc3VzcGVjdCB5b3Ugd2lsbCBu
+b3Qgd2FudCB0byBhZGRyZXNzIHRoZW06DQoNCjEuIEl0IGlzIG5vdCBiYWNrd2FyZCBjb21wYXRp
+YmxlLCByZXF1aXJpbmcgYSBDIG1hY3JvIHRvIHdyYXAgaXQsIGFzIHRoZSANCmtlcm5lbCBtaWdo
+dCBiZSBidWlsdCB3aXRoIGRpZmZlcmVudCBjb21waWxlcnMuDQoNCjIuIEl0IGlzIHNwZWNpZmlj
+IHRvIGFzbS4gSSBkbyBub3QgaGF2ZSBpbiBtaW5kIGFub3RoZXIgdXNlIGNhc2UgKGV4Y2x1ZGlu
+Zw0KdGhlIF9fYnVpbHRpbl9jb25zdGFudF9wKSwgYnV0IGl0IHdvdWxkIGJlIG5pY2VyIElNSE8g
+dG8gaGF2ZSBhIGJ1aWx0aW4NCnNheWluZyDigJxpZ25vcmUgdGhlIGNvc3Qgb2YgdGhpcyBzdGF0
+ZW1lbnTigJ0gZm9yIHRoZSBtYXR0ZXIgb2Ygb3B0aW1pemF0aW9ucy4NCg0KUmVnYXJkcywNCk5h
+ZGF2
