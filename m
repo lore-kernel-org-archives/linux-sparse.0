@@ -1,54 +1,61 @@
-From: Segher Boessenkool <segher@kernel.crashing.org>
-Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Wed, 10 Oct 2018 14:21:12 -0500
-Message-ID: <20181010192111.GD29268@gate.crashing.org>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org> <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de> <20181008073128.GL29268@gate.crashing.org> <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr> <20181009145330.GT29268@gate.crashing.org> <5ACDEDEA-0E42-45F2-BC80-B96EC2ABC01D@vmware.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2] compiler.h: give up __compiletime_assert_fallback()
+Date: Thu, 11 Oct 2018 11:48:59 +0900
+Message-ID: <CAK7LNATXiJkXa4bfrCMb-kuWrn2gg-7jJg3qT3UR6HVSpC3Y3w@mail.gmail.com>
+References: <84cf6ae0-97c8-6b73-ca86-b3d3b3daba5b@pobox.com>
+ <CAKwvOdm7RrGpwk4LMFhsKx=5QMDoFAF8JX=RMZ9YXwOptDfhCg@mail.gmail.com>
+ <8d5cf8c6-556a-96a1-610d-c92355783a9f@pobox.com> <CAKwvOdkD0cmF5373LRS92U--ptRvikSrG_oKyE-AiaybCQYMBg@mail.gmail.com>
+ <CAKwvOdnyA=Y_+KnJrDc5mu7twTAEOMXvb8cAZhwzsXTi7a9sEA@mail.gmail.com>
+ <20180926180019.GD22824@google.com> <CAKwvOd=xYG+r4KU+QurUTyaxkPB2AMane4YfWxuvKtONvVtLxQ@mail.gmail.com>
+ <CAGXu5jLBz1YanL5X4HFZjhb8NZe5QK=Q1ySfBkBDNWqEg4hs5g@mail.gmail.com>
+ <20180926184259.GB14797@kroah.com> <CAGXu5jJaJ+1Sg3uwaZ8hzw3wFbiLrftpZDO8vdjY9_tB+P-HPQ@mail.gmail.com>
+ <20180926190303.GA18293@kroah.com> <CAKwvOdnx6D+_LeSZ-1v_s8dLErXq4B5Nx1UQozdr1+ZaGYWnrA@mail.gmail.com>
+ <CAGXu5jKRn2EsPwNMtVTPyKyDnt+vqHZF=jdr+DajN_iN1DWjSw@mail.gmail.com>
+ <CACPK8XeAbiMk_yW-t+8HdW_WLqaFJFX-xnNnDSZJ5ZfhK63euA@mail.gmail.com>
+ <CANiq72nGrNMEqnPrxGXCp_iKf1_FuJLMvoV1+bbfYYCKnfTPVw@mail.gmail.com> <CAGXu5jKShFRJcP3vroEcZUevcHBSi53Towgs-t0v1JyEqmHJCA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: quoted-printable
-Return-path: <gcc-return-197402-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Unsubscribe: <mailto:gcc-unsubscribe-gcg-devel-2=m.gmane.org@gcc.gnu.org>
-List-Archive: <http://gcc.gnu.org/ml/gcc/>
-List-Post: <mailto:gcc@gcc.gnu.org>
-List-Help: <http://gcc.gnu.org/ml/>
-Sender: gcc-owner@gcc.gnu.org
-Content-Disposition: inline
-In-Reply-To: <5ACDEDEA-0E42-45F2-BC80-B96EC2ABC01D@vmware.com>
-To: Nadav Amit <namit@vmware.com>
-Cc: Richard Biener <rguenther@suse.de>, Michael Matz <matz@suse.de>, Borislav Petkov <bp@alien8.de>, "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>, Ingo Molnar <mingo@redhat.com>, LKML <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <CAGXu5jKShFRJcP3vroEcZUevcHBSi53Towgs-t0v1JyEqmHJCA@mail.gmail.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Kees Cook <keescook@chromium.org>
+Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Joel Stanley <joel@jms.id.au>, Nick Desaulniers <ndesaulniers@google.com>, Andrew Morton <akpm@linux-foundation.org>, Matthias Kaehlcke <mka@chromium.org>, Linus Torvalds <torvalds@linux-foundation.org>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, Daniel Santos <daniel.santos@pobox.com>, Chris Wilson <chris@chris-wilson.co.uk>, jani.nikula@intel.com, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Nadav,
+On Wed, Oct 10, 2018 at 11:51 PM Kees Cook <keescook@chromium.org> wrote:
+>
+> On Wed, Oct 10, 2018 at 12:03 AM, Miguel Ojeda
+> <miguel.ojeda.sandonis@gmail.com> wrote:
+> > On Wed, Oct 10, 2018 at 8:12 AM Joel Stanley <joel@jms.id.au> wrote:
+> >>
+> >> On Thu, 27 Sep 2018 at 05:07, Kees Cook <keescook@chromium.org> wrote:
+> >> >
+> >> > Yeah, that's what I'd linked to in the patchwork URL. Andrew, can you take this?
+> >>
+> >> clang built -next is blowing up now that Kees' -Wvla patch has been
+> >> included. This patch fixes it.
+> >>
+> >> Kees, perhaps it should go in your tree along side of the -Wvla patch
+> >> if no one else wants to take it?
+> >>
+> >
+> > I can take it along in the compiler attributes tree, since that
+> > touches the compiler*.h stuff. Although that would make it
+> > not-only-attributes, i.e. slightly lying :-)
+>
+> Oh, I had assumed Masahiro was going to carry it.
 
-On Wed, Oct 10, 2018 at 04:31:41PM +0000, Nadav Amit wrote:
-> at 7:53 AM, Segher Boessenkool <segher@kernel.crashing.org> wrote:
-> > How does this look?
->=20
-> It looks good to me in general. I have a couple of reservations, but I
-> suspect you will not want to address them:
->=20
-> 1. It is not backward compatible, requiring a C macro to wrap it, as the=
-=20
-> kernel might be built with different compilers.
+No, I am not.
 
-How *could* it be backward compatible?  There should be an error or at least
-a warning if the compiler does not support this, in general.
-
-For the kernel, the kernel already has plenty of infrastructure to support
-this (compiler.h etc.)  For other applications it is quite trivial, too.
-
-> 2. It is specific to asm.
-
-Yes, and that is on purpose.
-
-> I do not have in mind another use case (excluding
-> the __builtin_constant_p), but it would be nicer IMHO to have a builtin
-> saying =E2=80=9Cignore the cost of this statement=E2=80=9D for the matter=
- of optimizations.
-
-That is a hundred or a thousand times more work to design and implement
-(including testing etc.)  I'm not going to do it, but feel free to try
-yourself!
+Putting all sort of things into kbuild basket
+is painful for me.
 
 
-Segher
+
+> If that's not true,
+> sure I'll pick it up as part of my VLA "series".
+
+
+-- 
+Best Regards
+Masahiro Yamada
