@@ -1,31 +1,43 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH] compiler.h: update definition of unreachable()
-Date: Mon, 15 Oct 2018 23:14:57 +0200
-Message-ID: <CANiq72=PMEqu__HjQ-Y7DmzbWMRQPY6gQ5MF0cd9gF6vbCj=8Q@mail.gmail.com>
-References: <20181015172221.35709-1-ndesaulniers@google.com>
- <CANiq72kLs-Z=ZDdWU_1JV-NG+D5yPEfgREny+nXQgPioyOB=mg@mail.gmail.com> <CAKwvOdnwfXSdBw_Y2zpAEdcn3aWRqUq9Fh8uk8EnkxPMC+c2Sw@mail.gmail.com>
+From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Subject: [PATCH 1/3] kbuild: Add -Wshadow to sparse
+Date: Wed, 17 Oct 2018 19:05:52 +0200
+Message-ID: <20181017170554.18841-2-bigeasy@linutronix.de>
+References: <20181017170554.18841-1-bigeasy@linutronix.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAKwvOdnwfXSdBw_Y2zpAEdcn3aWRqUq9Fh8uk8EnkxPMC+c2Sw@mail.gmail.com>
+In-Reply-To: <20181017170554.18841-1-bigeasy@linutronix.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Nick Desaulniers <ndesaulniers@google.com>
-Cc: luto@amacapital.net, Josh Poimboeuf <jpoimboe@redhat.com>, Nathan Chancellor <natechancellor@gmail.com>, Christopher Li <sparse@chrisli.org>, linux-sparse@vger.kernel.org, linux-kernel <linux-kernel@vger.kernel.org>
+To: linux-kernel@vger.kernel.org
+Cc: tglx@linutronix.de, linux-kbuild@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, linux-sparse@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Oct 15, 2018 at 10:13 PM Nick Desaulniers
-<ndesaulniers@google.com> wrote:
->
-> Looking at commit cb984d101b30 ("compiler-gcc: integrate the various
-> compiler-gcc[345].h files") it seems that the comment is referring to
-> gcc 4.4 not supporting __builtin_unreachable().  Looks like it was
-> added in 4.5 timeframe: https://godbolt.org/z/ugv5QO, so the comment
-> can be deleted.  Would you prefer a v2 (single patch), or an
-> additional patch on top?
+I remember that `sparse' used to warn about shadowed variables but it
+seems not to do it by default anymore. It was useful.
 
-Split would be better, I think, since the changes can be applied
-independetly even if related. If you are busy, I can do it myself, so
-don't worry too much. :)
+Enable `-Wshadow' while invoking sparse.
 
-Cheers,
-Miguel
+Cc: linux-sparse@vger.kernel.org
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Michal Marek <michal.lkml@markovi.net>
+Cc: linux-kbuild@vger.kernel.org
+Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+---
+ Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/Makefile b/Makefile
+index bf3786e4ffece..0160c6b5dd45d 100644
+--- a/Makefile
++++ b/Makefile
+@@ -390,7 +390,7 @@ PYTHON3		= python3
+ CHECK		= sparse
+ 
+ CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
+-		  -Wbitwise -Wno-return-void -Wno-unknown-attribute $(CF)
++		  -Wbitwise -Wno-return-void -Wno-unknown-attribute -Wshadow $(CF)
+ NOSTDINC_FLAGS  =
+ CFLAGS_MODULE   =
+ AFLAGS_MODULE   =
+-- 
+2.19.1
