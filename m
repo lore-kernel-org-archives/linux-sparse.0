@@ -1,43 +1,32 @@
-From: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
-Subject: [PATCH 1/3] kbuild: Add -Wshadow to sparse
-Date: Wed, 17 Oct 2018 19:05:52 +0200
-Message-ID: <20181017170554.18841-2-bigeasy@linutronix.de>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 1/3] kbuild: Add -Wshadow to sparse
+Date: Wed, 17 Oct 2018 21:25:02 +0200
+Message-ID: <20181017192501.3yqfq77q2n4xdq7l@ltop.local>
 References: <20181017170554.18841-1-bigeasy@linutronix.de>
+ <20181017170554.18841-2-bigeasy@linutronix.de>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181017170554.18841-1-bigeasy@linutronix.de>
+Content-Disposition: inline
+In-Reply-To: <20181017170554.18841-2-bigeasy@linutronix.de>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org
-Cc: tglx@linutronix.de, linux-kbuild@vger.kernel.org, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, linux-sparse@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>
+To: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
+Cc: linux-kernel@vger.kernel.org, tglx@linutronix.de, linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>
 List-Id: linux-sparse@vger.kernel.org
 
-I remember that `sparse' used to warn about shadowed variables but it
-seems not to do it by default anymore. It was useful.
+On Wed, Oct 17, 2018 at 07:05:52PM +0200, Sebastian Andrzej Siewior wrote:
+> I remember that `sparse' used to warn about shadowed variables but it
+> seems not to do it by default anymore. It was useful.
+> 
+> Enable `-Wshadow' while invoking sparse.
 
-Enable `-Wshadow' while invoking sparse.
+Hi,
 
-Cc: linux-sparse@vger.kernel.org
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Michal Marek <michal.lkml@markovi.net>
-Cc: linux-kbuild@vger.kernel.org
-Signed-off-by: Sebastian Andrzej Siewior <bigeasy@linutronix.de>
----
- Makefile | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I made a quick test and I saw it would add a lot of noise because of
+(valid) warnings coming from macros using a statement expression
+redeclaring variables like '__u', 'tmp', ...
 
-diff --git a/Makefile b/Makefile
-index bf3786e4ffece..0160c6b5dd45d 100644
---- a/Makefile
-+++ b/Makefile
-@@ -390,7 +390,7 @@ PYTHON3		= python3
- CHECK		= sparse
- 
- CHECKFLAGS     := -D__linux__ -Dlinux -D__STDC__ -Dunix -D__unix__ \
--		  -Wbitwise -Wno-return-void -Wno-unknown-attribute $(CF)
-+		  -Wbitwise -Wno-return-void -Wno-unknown-attribute -Wshadow $(CF)
- NOSTDINC_FLAGS  =
- CFLAGS_MODULE   =
- AFLAGS_MODULE   =
--- 
-2.19.1
+BTW, as far as I can see, sparse never had it enabled by default.
+
+Kind regards,
+-- Luc Van Oostenryck
