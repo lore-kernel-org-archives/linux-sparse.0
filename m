@@ -1,7 +1,7 @@
 From: Du Changbin <changbin.du@gmail.com>
-Subject: [PATCH v2 1/4] x86/mm: surround level4_kernel_pgt with #ifdef CONFIG_X86_5LEVEL...#endif
-Date: Fri, 19 Oct 2018 12:49:18 +0000
-Message-ID: <20181019124921.13780-2-changbin.du@gmail.com>
+Subject: [PATCH v2 2/4] kernel hacking: new config NO_AUTO_INLINE to disable compiler auto-inline optimizations
+Date: Fri, 19 Oct 2018 12:49:19 +0000
+Message-ID: <20181019124921.13780-3-changbin.du@gmail.com>
 References: <20181019124921.13780-1-changbin.du@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
 In-Reply-To: <20181019124921.13780-1-changbin.du@gmail.com>
@@ -10,57 +10,65 @@ To: yamada.masahiro@socionext.com, michal.lkml@markovi.net, tglx@linutronix.de, 
 Cc: rostedt@goodmis.org, x86@kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sparse@vger.kernel.org, robin.murphy@arm.com, Du Changbin <changbin.du@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
 
-The level4_kernel_pgt is only defined when X86_5LEVEL is enabled. So
-surround level4_kernel_pgt with #ifdef CONFIG_X86_5LEVEL...#endif to
-make code correct.
+This patch add a new kernel hacking option NO_AUTO_INLINE. Selecting
+this option will prevent the compiler from optimizing the kernel by
+auto-inlining functions not marked with the inline keyword.
+
+With this option, only functions explicitly marked with "inline" will
+be inlined. This will allow the function tracer to trace more functions
+because it only traces functions that the compiler has not inlined.
 
 Signed-off-by: Du Changbin <changbin.du@gmail.com>
 Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
 ---
- arch/x86/include/asm/pgtable_64.h |  2 ++
- arch/x86/kernel/head64.c          | 13 ++++++-------
- 2 files changed, 8 insertions(+), 7 deletions(-)
+ Makefile          |  6 ++++++
+ lib/Kconfig.debug | 17 +++++++++++++++++
+ 2 files changed, 23 insertions(+)
 
-diff --git a/arch/x86/include/asm/pgtable_64.h b/arch/x86/include/asm/pgtable_64.h
-index 9c85b54bf03c..9333f7fa5bdb 100644
---- a/arch/x86/include/asm/pgtable_64.h
-+++ b/arch/x86/include/asm/pgtable_64.h
-@@ -16,7 +16,9 @@
- #include <linux/threads.h>
- #include <asm/fixmap.h>
+diff --git a/Makefile b/Makefile
+index e8b599b4dcde..757d6507cb5c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -749,6 +749,12 @@ KBUILD_CFLAGS 	+= $(call cc-option, -femit-struct-debug-baseonly) \
+ 		   $(call cc-option,-fno-var-tracking)
+ endif
  
-+#ifdef CONFIG_X86_5LEVEL
- extern p4d_t level4_kernel_pgt[512];
-+#endif
- extern p4d_t level4_ident_pgt[512];
- extern pud_t level3_kernel_pgt[512];
- extern pud_t level3_ident_pgt[512];
-diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-index ddee1f0870c4..4a59ef93c258 100644
---- a/arch/x86/kernel/head64.c
-+++ b/arch/x86/kernel/head64.c
-@@ -151,16 +151,15 @@ unsigned long __head __startup_64(unsigned long physaddr,
++ifdef CONFIG_NO_AUTO_INLINE
++KBUILD_CFLAGS   += $(call cc-option, -fno-inline-functions) \
++		   $(call cc-option, -fno-inline-small-functions) \
++		   $(call cc-option, -fno-inline-functions-called-once)
++endif
++
+ ifdef CONFIG_FUNCTION_TRACER
+ ifdef CONFIG_FTRACE_MCOUNT_RECORD
+   # gcc 5 supports generating the mcount tables directly
+diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
+index 4966c4fbe7f7..c7c28ee01dfc 100644
+--- a/lib/Kconfig.debug
++++ b/lib/Kconfig.debug
+@@ -211,6 +211,23 @@ config GDB_SCRIPTS
+ 	  instance. See Documentation/dev-tools/gdb-kernel-debugging.rst
+ 	  for further details.
  
- 	pgd = fixup_pointer(&early_top_pgt, physaddr);
- 	p = pgd + pgd_index(__START_KERNEL_map);
--	if (la57)
--		*p = (unsigned long)level4_kernel_pgt;
--	else
--		*p = (unsigned long)level3_kernel_pgt;
--	*p += _PAGE_TABLE_NOENC - __START_KERNEL_map + load_delta;
--
-+#ifdef CONFIG_X86_5LEVEL
- 	if (la57) {
-+		*p = (unsigned long)level4_kernel_pgt;
- 		p4d = fixup_pointer(&level4_kernel_pgt, physaddr);
- 		p4d[511] += load_delta;
--	}
-+	} else
-+#endif
-+		*p = (unsigned long)level3_kernel_pgt;
-+	*p += _PAGE_TABLE_NOENC - __START_KERNEL_map + load_delta;
- 
- 	pud = fixup_pointer(&level3_kernel_pgt, physaddr);
- 	pud[510] += load_delta;
++config NO_AUTO_INLINE
++	bool "Disable compiler auto-inline optimizations"
++	help
++	  This will prevent the compiler from optimizing the kernel by
++	  auto-inlining functions not marked with the inline keyword.
++	  With this option, only functions explicitly marked with
++	  "inline" will be inlined. This will allow the function tracer
++	  to trace more functions because it only traces functions that
++	  the compiler has not inlined.
++
++	  Enabling this function can help debugging a kernel if using
++	  the function tracer. But it can also change how the kernel
++	  works, because inlining functions may change the timing,
++	  which could make it difficult while debugging race conditions.
++
++	  If unsure, select N.
++
+ config ENABLE_MUST_CHECK
+ 	bool "Enable __must_check logic"
+ 	default y
 -- 
 2.17.1
