@@ -1,176 +1,82 @@
-From: Du Changbin <changbin.du@gmail.com>
-Subject: [PATCH v2 4/4] kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING to apply GCC -Og optimization
-Date: Fri, 19 Oct 2018 12:49:21 +0000
-Message-ID: <20181019124921.13780-5-changbin.du@gmail.com>
-References: <20181019124921.13780-1-changbin.du@gmail.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: [PATCH 0/2] Compiler Attributes: __fallthrough
+Date: Sun, 21 Oct 2018 19:14:12 +0200
+Message-ID: <20181021171414.22674-1-miguel.ojeda.sandonis@gmail.com>
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181019124921.13780-1-changbin.du@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: yamada.masahiro@socionext.com, michal.lkml@markovi.net, tglx@linutronix.de, mingo@redhat.com, linux@armlinux.org.uk, akpm@linux-foundation.org
-Cc: rostedt@goodmis.org, x86@kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sparse@vger.kernel.org, robin.murphy@arm.com, Du Changbin <changbin.du@gmail.com>
+To: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: linux-kernel@vger.kernel.org, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Dan Carpenter <dan.carpenter@oracle.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>David
 List-Id: linux-sparse@vger.kernel.org
 
-This will apply GCC '-Og' optimization level which is supported
-since GCC 4.8. This optimization level offers a reasonable level
-of optimization while maintaining fast compilation and a good
-debugging experience. It is similar to '-O1' while perferring
-to keep debug ability over runtime speed.
+These are two patches are meant to go on top of the rest of the compiler
+attributes series on:
 
-If enabling this option breaks your kernel, you should either
-disable this or find a fix (mostly in the arch code). Currently
-this option has only been tested on x86_64 and arm platform.
+  https://github.com/ojeda/linux/tree/compiler-attributes
 
-This option can satisfy people who was searching for a method
-to disable compiler optimizations so to achieve better kernel
-debugging experience with kgdb or qemu.
+which will be sent to Greg for the next merge window.
 
-The main problem of '-Og' is we must not use __attribute__((error(msg))).
-The compiler will report error though the call to error function
-still can be optimize out. So we must fallback to array tricky.
+Please review them and let me know! (specially if someone is against
+__fallthrough for some reason :-).
 
-Comparison of vmlinux size: a bit smaller.
+The first patch introduces the attribute and gives the rationale.
+The second patch is an example of usage.
 
-    w/o CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
-    $ size vmlinux
-       text    data     bss     dec     hex filename
-    22665554   9709674  2920908 35296136        21a9388 vmlinux
+This was started in the following thread:
 
-    w/ CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
-    $ size vmlinux
-       text    data     bss     dec     hex filename
-    21499032   10102758 2920908 34522698        20ec64a vmlinux
+  https://lore.kernel.org/lkml/20181017062255.oiu44y4zuuwilan3@mwanda/
 
-Comparison of system performance: a bit drop (~6%).
-    This benchmark of kernel compilation is suggested by Ingo Molnar.
-    https://lkml.org/lkml/2018/5/2/74
+Cheers,
+Miguel
 
-    Preparation: Set cpufreq to 'performance'.
-    for ((cpu=0; cpu<120; cpu++)); do
-      G=/sys/devices/system/cpu/cpu$cpu/cpufreq/scaling_governor
-      [ -f $G ] && echo performance > $G
-    done
+Cc: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Andreas Dilger <adilger.kernel@dilger.ca>
+Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Michal Marek <michal.lkml@markovi.net>
+Cc: Steven Rostedt <rostedt@goodmis.org>
+Cc: Mauro Carvalho Chehab <mchehab+samsung@kernel.org>
+Cc: Olof Johansson <olof@lxom.net>
+Cc: Konstantin Ryabitsev <konstantin@linuxfoundation.org>
+Cc: David S. Miller <davem@davemloft.net>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>
+Cc: Kees Cook <keescook@chromium.org>
+Cc: Thomas Gleixner <tglx@linutronix.de>
+Cc: Ingo Molnar <mingo@kernel.org>
+Cc: Paul Lawrence <paullawrence@google.com>
+Cc: Sandipan Das <sandipan@linux.vnet.ibm.com>
+Cc: Andrey Konovalov <andreyknvl@google.com>
+Cc: David Woodhouse <dwmw2@infradead.org>
+Cc: Will Deacon <will.deacon@arm.com>
+Cc: Philippe Ombredanne <pombredanne@nexb.com>
+Cc: Paul Burton <paul.burton@mips.com>
+Cc: David Rientjes <rientjes@google.com>
+Cc: Willy Tarreau <w@1wt.eu>
+Cc: Martin Sebor <msebor@gmail.com>
+Cc: Christopher Li <sparse@chrisli.org>
+Cc: Jonathan Corbet <corbet@lwn.net>
+Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Joe Perches <joe@perches.com>
+Cc: Arnd Bergmann <arnd@arndb.de>
+Cc: Dominique Martinet <asmadeus@codewreck.org>
+Cc: Stefan Agner <stefan@agner.ch>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Andrew Morton <akpm@linux-foundation.org>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Cc: linux-doc@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org
+Cc: linux-kbuild@vger.kernel.org
 
-    w/o CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
-    $ perf stat --repeat 5 --null --pre                 '\
-        cp -a kernel ../kernel.copy.$(date +%s);         \
-        rm -rf *;                                        \
-        git checkout .;                                  \
-        echo 1 > /proc/sys/vm/drop_caches;               \
-        find ../kernel* -type f | xargs cat >/dev/null;  \
-        make -j kernel >/dev/null;                       \
-        make clean >/dev/null 2>&1;                      \
-        sync                                            '\
-                                                         \
-        make -j8 >/dev/null
+Miguel Ojeda (2):
+  Compiler Attributes: add support for __fallthrough (gcc >= 7.1)
+  Compiler Attributes: auxdisplay: panel: use __fallthrough
 
-    Performance counter stats for 'make -j8' (5 runs):
+ drivers/auxdisplay/panel.c          |  6 +++---
+ include/linux/compiler_attributes.h | 18 ++++++++++++++++++
+ 2 files changed, 21 insertions(+), 3 deletions(-)
 
-        219.764246652 seconds time elapsed                   ( +-  0.78% )
-
-    w/ CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
-    $ perf stat --repeat 5 --null --pre                 '\
-        cp -a kernel ../kernel.copy.$(date +%s);         \
-        rm -rf *;                                        \
-        git checkout .;                                  \
-        echo 1 > /proc/sys/vm/drop_caches;               \
-        find ../kernel* -type f | xargs cat >/dev/null;  \
-        make -j kernel >/dev/null;                       \
-        make clean >/dev/null 2>&1;                      \
-        sync                                            '\
-                                                         \
-        make -j8 >/dev/null
-
-    Performance counter stats for 'make -j8' (5 runs):
-
-         233.574187771 seconds time elapsed                  ( +-  0.19% )
-
-Signed-off-by: Du Changbin <changbin.du@gmail.com>
-Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
----
- Makefile                     |  5 +++++
- include/linux/compiler-gcc.h |  2 +-
- include/linux/compiler.h     |  2 +-
- init/Kconfig                 | 19 +++++++++++++++++++
- 4 files changed, 26 insertions(+), 2 deletions(-)
-
-diff --git a/Makefile b/Makefile
-index 757d6507cb5c..ea908cfe8594 100644
---- a/Makefile
-+++ b/Makefile
-@@ -657,6 +657,10 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, format-truncation)
- KBUILD_CFLAGS	+= $(call cc-disable-warning, format-overflow)
- KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
- 
-+ifdef CONFIG_CC_OPTIMIZE_FOR_DEBUGGING
-+KBUILD_CFLAGS	+= $(call cc-option, -Og)
-+KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
-+else
- ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
- KBUILD_CFLAGS	+= $(call cc-option,-Oz,-Os)
- KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
-@@ -667,6 +671,7 @@ else
- KBUILD_CFLAGS   += -O2
- endif
- endif
-+endif
- 
- KBUILD_CFLAGS += $(call cc-ifversion, -lt, 0409, \
- 			$(call cc-disable-warning,maybe-uninitialized,))
-diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 4d36b27214fd..2a76f7c64b54 100644
---- a/include/linux/compiler-gcc.h
-+++ b/include/linux/compiler-gcc.h
-@@ -85,7 +85,7 @@
- 
- #define __compiletime_object_size(obj) __builtin_object_size(obj, 0)
- 
--#ifndef __CHECKER__
-+#if !defined(__CHECKER__) && !defined(CONFIG_CC_OPTIMIZE_FOR_DEBUGGING)
- #define __compiletime_warning(message) __attribute__((warning(message)))
- #define __compiletime_error(message) __attribute__((error(message)))
- 
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 681d866efb1e..9385c62e9f00 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -320,7 +320,7 @@ static inline void *offset_to_ptr(const int *off)
-  * sparse see a constant array size without breaking compiletime_assert on old
-  * versions of GCC (e.g. 4.2.4), so hide the array from sparse altogether.
-  */
--# ifndef __CHECKER__
-+# if !defined(__CHECKER__) && !defined(CONFIG_CC_OPTIMIZE_FOR_DEBUGGING)
- #  define __compiletime_error_fallback(condition) \
- 	do { ((void)sizeof(char[1 - 2 * condition])); } while (0)
- # endif
-diff --git a/init/Kconfig b/init/Kconfig
-index 1e234e2f1cba..b01c7c654570 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -1081,6 +1081,25 @@ config CC_OPTIMIZE_FOR_SIZE
- 
- 	  If unsure, say N.
- 
-+config CC_OPTIMIZE_FOR_DEBUGGING
-+	bool "Optimize for better debugging experience (-Og)"
-+	select NO_AUTO_INLINE
-+	help
-+	  This will apply GCC '-Og' optimization level which is supported
-+	  since GCC 4.8. This optimization level offers a reasonable level
-+	  of optimization while maintaining fast compilation and a good
-+	  debugging experience. It is similar to '-O1' while preferring to
-+	  keep debug ability over runtime speed. The overall performance
-+	  will drop a bit (~6%).
-+
-+	  Use only if you want to debug the kernel, especially if you want
-+	  to have better kernel debugging experience with gdb facilities
-+	  like kgdb or qemu. If enabling this option breaks your kernel,
-+	  you should either disable this or find a fix (mostly in the arch
-+	  code).
-+
-+	  If unsure, select N.
-+
- endchoice
- 
- config HAVE_LD_DEAD_CODE_DATA_ELIMINATION
 -- 
 2.17.1
