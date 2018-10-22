@@ -1,52 +1,62 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH 2/2] Compiler Attributes: auxdisplay: panel: use __fallthrough
-Date: Mon, 22 Oct 2018 11:51:59 +0200
-Message-ID: <CANiq72=Eo-c7M1g1gmE0kXNpxe4vkOBT54n9gMB9UBSEfzTMAw@mail.gmail.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH 1/2] Compiler Attributes: add support for __fallthrough
+ (gcc >= 7.1)
+Date: Mon, 22 Oct 2018 13:27:43 +0300
+Message-ID: <20181022102743.nua5fgbscyeymzal@mwanda>
 References: <20181021171414.22674-1-miguel.ojeda.sandonis@gmail.com>
- <20181021171414.22674-3-miguel.ojeda.sandonis@gmail.com> <f46baa5bb0e3373c89d09b6e0d15170902e5f55c.camel@perches.com>
+ <20181021171414.22674-2-miguel.ojeda.sandonis@gmail.com>
+ <20181021222712.GI1617@thunk.org>
+ <8fb78062-b6d4-6f2d-d943-44bec6b95ff0@petrovitsch.priv.at>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <f46baa5bb0e3373c89d09b6e0d15170902e5f55c.camel@perches.com>
+Content-Disposition: inline
+In-Reply-To: <8fb78062-b6d4-6f2d-d943-44bec6b95ff0@petrovitsch.priv.at>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Joe Perches <joe@perches.com>
-Cc: Greg KH <gregkh@linuxfoundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Dan <dan.carpenter@oracle.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>
+To: Bernd Petrovitsch <bernd@petrovitsch.priv.at>
+Cc: "Theodore Y. Ts'o" <tytso@mit.edu>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>Andre
 List-Id: linux-sparse@vger.kernel.org
 
-On Sun, Oct 21, 2018 at 8:11 PM Joe Perches <joe@perches.com> wrote:
->
-> On Sun, 2018-10-21 at 19:14 +0200, Miguel Ojeda wrote:
-> > Let gcc know these cases are meant to fall through to the next label
-> > by annotating them with the new __fallthrough statement attribute;
-> > and remove the comment since it conveys the same information
-> > (which was also parsed by gcc to suppress the warning).
->
-> Instead of many individual conversion patches,
-> perhaps a script to do all the conversions at once.
+On Mon, Oct 22, 2018 at 11:41:56AM +0200, Bernd Petrovitsch wrote:
+> On 22/10/2018 00:27, Theodore Y. Ts'o wrote:
+> > On Sun, Oct 21, 2018 at 07:14:13PM +0200, Miguel Ojeda wrote:
+> >> From the GCC manual:
+> >>
+> >>   fallthrough
+> >>
+> >>     The fallthrough attribute with a null statement serves as a
+> >>     fallthrough statement. It hints to the compiler that a statement
+> >>     that falls through to another case label, or user-defined label
+> >>     in a switch statement is intentional and thus the -Wimplicit-fallthrough
+> >>     warning must not trigger. The fallthrough attribute may appear
+> >>     at most once in each attribute list, and may not be mixed with
+> >>     other attributes. It can only be used in a switch statement
+> >>     (the compiler will issue an error otherwise), after a preceding
+> >>     statement and before a logically succeeding case label,
+> >>     or user-defined label.
+> >>
+> >>   https://gcc.gnu.org/onlinedocs/gcc/Statement-Attributes.html
+> > 
+> > Do we know if coverity understands the fallthrough attribute?  One of
+> > the reasons why I started using /* fallthrough */ is because it kept
+> > Coverity happy.
+> 
+> FWIW, current "eclipse" has the same "problem".
+> 
+> > If the conversion from /* fallthrough */ to the __fallthrough__
+> > attribute means that we start gethting a lot of Coverity warnings,
+> 
+> We could keep both.
 
-Note that this was only an example of the attribute (some people asked
-for an example when introducing another one, so I preemptively did it
-for this one).
+What does that even mean?  Use both the attribute and the comment until
+Eclipse is updated?
 
-Doing the conversion (and how :-) I left it for afterwards, if people
-agree with the attribute.
+	case 3:
+		frob();
+		__fall_through; /* fall through */
+	case 4:
 
->
-> Maybe:
->
-> pattern='(?:\/\*\s*fall(?:\s*|\s*\-\s*)thr(?:u|ough)\s*\*\/|\/\/\s*fall\s*thr(?:u|ough)\s*$)'
-> git grep -P -i --name-only "$pattern" -- '*.[ch]' |
->     xargs perl -p -i -e "s/$pattern/__fallthrough;/gi"
+That seems like a wrong idea...
 
-
-By the way, I checked first if coccinelle could match input comments,
-but it doesn't, according to Julia. I am also thinking whether a
-compiler plugin could easily do this, but I don't have my hopes high
-given these are comments...
-
-Also, regardless of how it is done, the patches need to be sent
-individually to maintainers, no? I have a vague memory that big &
-automated conversions were a bit frozen upon in the kernel. Greg...?
-
-Cheers,
-Miguel
+regards,
+dan carpenter
