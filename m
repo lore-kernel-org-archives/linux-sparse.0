@@ -1,8 +1,8 @@
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
+From: Matthew Wilcox <willy@infradead.org>
 Subject: Re: [PATCH 1/2] Compiler Attributes: add support for __fallthrough
  (gcc >= 7.1)
-Date: Sun, 21 Oct 2018 18:27:12 -0400
-Message-ID: <20181021222712.GI1617@thunk.org>
+Date: Sun, 21 Oct 2018 17:42:18 -0700
+Message-ID: <20181022004217.GA4941@bombadil.infradead.org>
 References: <20181021171414.22674-1-miguel.ojeda.sandonis@gmail.com>
  <20181021171414.22674-2-miguel.ojeda.sandonis@gmail.com>
 Mime-Version: 1.0
@@ -16,30 +16,15 @@ Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.or
 List-Id: linux-sparse@vger.kernel.org
 
 On Sun, Oct 21, 2018 at 07:14:13PM +0200, Miguel Ojeda wrote:
-> From the GCC manual:
-> 
->   fallthrough
-> 
->     The fallthrough attribute with a null statement serves as a
->     fallthrough statement. It hints to the compiler that a statement
->     that falls through to another case label, or user-defined label
->     in a switch statement is intentional and thus the -Wimplicit-fallthrough
->     warning must not trigger. The fallthrough attribute may appear
->     at most once in each attribute list, and may not be mixed with
->     other attributes. It can only be used in a switch statement
->     (the compiler will issue an error otherwise), after a preceding
->     statement and before a logically succeeding case label,
->     or user-defined label.
-> 
->   https://gcc.gnu.org/onlinedocs/gcc/Statement-Attributes.html
+> +#if __has_attribute(__fallthrough__)
+> +# define __fallthrough                  __attribute__((__fallthrough__))
+> +#else
+> +# define __fallthrough
+> +#endif
 
-Do we know if coverity understands the fallthrough attribute?  One of
-the reasons why I started using /* fallthrough */ is because it kept
-Coverity happy.
+Why is the #else not:
 
-If the conversion from /* fallthrough */ to the __fallthrough__
-attribute means that we start gethting a lot of Coverity warnings,
-that would be unfortunate.  OTOH, if this is getting standardized,
-maybe we can get Coverity to understand this attribute?
+# define __fallthrough		/* fallthrough */
 
-						- Ted
+Would this solve the Coverity problem, or does Coverity look at the raw
+source code before preprocessing?
