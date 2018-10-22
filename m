@@ -1,45 +1,34 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH 1/2] Compiler Attributes: add support for __fallthrough
  (gcc >= 7.1)
-Date: Mon, 22 Oct 2018 13:24:03 +0200
-Message-ID: <CANiq72kpCoVwCzMUVYB_km+9xr41gBZLo_K203e_t4_QZ9-r1Q@mail.gmail.com>
+Date: Mon, 22 Oct 2018 13:07:02 +0100
+Message-ID: <20181022120658.jm7dv7jiq7riuqci@ltop.local>
 References: <20181021171414.22674-1-miguel.ojeda.sandonis@gmail.com>
- <20181021171414.22674-2-miguel.ojeda.sandonis@gmail.com> <20181021222712.GI1617@thunk.org>
- <CANiq72mXV6WTyHXNZJDTfFOpPrXD0zD6cB30bGOuKO44AvRiog@mail.gmail.com>
- <CAGXu5jKb-0H+smRAW6ngQKDZ-PbTThhMwhmu34iB8vjTa-4H8Q@mail.gmail.com>
- <CANiq72n4+HDXPqr7xySSGx49g8vEcXaxO7a-By9cSg7YSxOS_A@mail.gmail.com> <CAGXu5jLzfuEnWpJFL1Caq94nKbPps-QTaYGpge2CfZWj1Zzf9g@mail.gmail.com>
+ <20181021171414.22674-2-miguel.ojeda.sandonis@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAGXu5jLzfuEnWpJFL1Caq94nKbPps-QTaYGpge2CfZWj1Zzf9g@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20181021171414.22674-2-miguel.ojeda.sandonis@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Kees Cook <keescook@chromium.org>
-Cc: "Gustavo A. R. Silva" <gustavo@embeddedor.com>, Ted Ts'o <tytso@mit.edu>, Greg KH <gregkh@linuxfoundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, Dan <dan.carpenter@oracle.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, David Miller <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreykn>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: Greg Kroah-Hartman <gregkh@linuxfoundation.org>, linux-kernel@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>, Andreas Dilger <adilger.kernel@dilger.ca>, Masahiro Yamada <yamada.masahiro@socionext.com>, Michal Marek <michal.lkml@markovi.net>, Steven Rostedt <rostedt@goodmis.org>, Mauro Carvalho Chehab <mchehab+samsung@kernel.org>, Olof Johansson <olof@lxom.net>, Konstantin Ryabitsev <konstantin@linuxfoundation.org>, "David S . Miller" <davem@davemloft.net>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Kees Cook <keescook@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Sandipan Das <sandipan@linux.vnet.ibm.com>, Andrey Konovalov <andreyknvl@google.com>David
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Oct 22, 2018 at 12:53 PM Kees Cook <keescook@chromium.org> wrote:
->
-> On Mon, Oct 22, 2018 at 2:41 AM, Miguel Ojeda
-> <miguel.ojeda.sandonis@gmail.com> wrote:
-> > Please take a look at the rationale (also more details at the linked thread):
-> >
-> >   * gcc 7.1 added -Wimplicit-fallthrough at the same time as the
-> > attribute and the comment parsing.
->
-> Ah, perfect. I missed this. :)
+On Sun, Oct 21, 2018 at 07:14:13PM +0200, Miguel Ojeda wrote:
+> 
+> While comment parsing is a good idea to deal with old codebases
+> that used such a comment as documentation for humans, the best
+> solution is to use the attribute:
+> 
+>   * It is a "real" part of the AST (=> better for tooling).
 
-No problem! I know the commit message is a bit too long, so I understand :)
+This will create a problem for the recent versions of sparse which
+support __has_attribute() because sparse falsely pretends to support
+this attribute while, to play nice with -Wdeclaration-after-statement,
+it needs some adaptation to the parsing (it's actually seen not as a 
+statement but as a declaration).  I'll see to fix it this evening.
 
->
-> >   * clang does *not* support the attribute in C.
->
-> Well that's not good. :)
 
-I will see with clang if they plan to add it.
-
-(By the way, if the "*not*" sounded rude, sorry; I wanted to emphasize
-it is surprising that it doesn't -- I also assumed the opposite until
-I checked it).
-
-Cheers,
-Miguel
+Regards,
+-- Luc
