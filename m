@@ -1,45 +1,37 @@
-From: "Jason A. Donenfeld" <Jason@zx2c4.com>
-Subject: [PATCH sparse] parse: shifting by full number of bits is undefined
-Date: Fri, 26 Oct 2018 05:17:00 +0200
-Message-ID: <20181026031700.12310-1-Jason@zx2c4.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH sparse] parse: shifting by full number of bits is
+ undefined
+Date: Fri, 26 Oct 2018 11:01:37 +0200
+Message-ID: <20181026090136.2fidq6kicv4szwjd@ltop.local>
 References: <CAHmME9oZk7Afns=W=xM=6waqvVfV+iAdAcB6731xzUUcm4P0zA@mail.gmail.com>
+ <20181026031700.12310-1-Jason@zx2c4.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <CAHmME9oZk7Afns=W=xM=6waqvVfV+iAdAcB6731xzUUcm4P0zA@mail.gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20181026031700.12310-1-Jason@zx2c4.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
-Cc: "Jason A. Donenfeld" <Jason@zx2c4.com>
+To: "Jason A. Donenfeld" <Jason@zx2c4.com>
+Cc: linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-The type checker wasn't identifying upper bounds for huge unsigned
-64-bit numbers, because the right shift turned into a no-op:
+On Fri, Oct 26, 2018 at 05:17:00AM +0200, Jason A. Donenfeld wrote:
+> The type checker wasn't identifying upper bounds for huge unsigned
+> 64-bit numbers, because the right shift turned into a no-op:
+> 
+> zx2c4@thinkpad /tmp $ cat sparse.c
+> enum { sparse_does_not_like_this = 0x8000000000000003ULL };
+> zx2c4@thinkpad /tmp $ sparse sparse.c
+> sparse.c:1:36: warning: cast truncates bits from constant value (8000000000000003 becomes 3)
 
-zx2c4@thinkpad /tmp $ cat sparse.c
-enum { sparse_does_not_like_this = 0x8000000000000003ULL };
-zx2c4@thinkpad /tmp $ sparse sparse.c
-sparse.c:1:36: warning: cast truncates bits from constant value (8000000000000003 becomes 3)
+Hi Jason,
 
-This works around the issue by detecting when we're going to shift by
-the size of the variable and treat that as always zero.
+This is already fixed in the development tree:
+   git://github.com/lucvoo/sparse.git
+together with some other fixes & changes regarding enums.
 
-Signed-off-by: Jason A. Donenfeld <Jason@zx2c4.com>
----
- parse.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+I hope to be able to push this to the official tree real soon now.
 
-diff --git a/parse.c b/parse.c
-index 02a55a7..02d0615 100644
---- a/parse.c
-+++ b/parse.c
-@@ -788,7 +788,7 @@ static int type_is_ok(struct symbol *type, Num *upper, Num *lower)
- 
- 	if (!is_unsigned)
- 		shift--;
--	if (upper->x == 0 && upper->y >> shift)
-+	if (upper->x == 0 && (shift < (sizeof(upper->y) << 3)) && upper->y >> shift)
- 		return 0;
- 	if (lower->x == 0 || (!is_unsigned && (~lower->y >> shift) == 0))
- 		return 1;
--- 
-2.19.1
+
+Kind regards,
+-- Luc
