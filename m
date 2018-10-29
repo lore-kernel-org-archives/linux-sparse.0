@@ -1,48 +1,71 @@
-From: Steven Rostedt <rostedt@goodmis.org>
-Subject: Re: [PATCH v3 1/4] x86/mm: declare check_la57_support() as inline
-Date: Sun, 28 Oct 2018 14:09:11 -0400
-Message-ID: <20181028140911.21d49629@vmware.local.home>
-References: <20181028130945.23581-1-changbin.du@gmail.com>
-        <20181028130945.23581-2-changbin.du@gmail.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2 4/4] kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING
+ to apply GCC -Og optimization
+Date: Mon, 29 Oct 2018 22:01:44 +0900
+Message-ID: <CAK7LNAQ0iZDHP8zQZ_Ws4Wy4H6rwiV5p-A0bM1yVJLP51sqQeg@mail.gmail.com>
+References: <20181019124921.13780-1-changbin.du@gmail.com> <20181019124921.13780-5-changbin.du@gmail.com>
+ <CAK7LNARW0=0d7m5DAgZOir=h0Y4tssqZoQRGasnGPNnvNf_+pg@mail.gmail.com>
+ <20181028125106.azcn2dxia3snplin@mail.google.com> <CAK7LNARr7bE=DVuzim5771heuN5os0=5-D+jXfUyBb2e1xYoRA@mail.gmail.com>
+ <20181028131357.parhzj32feapxncb@mail.google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181028130945.23581-2-changbin.du@gmail.com>
+In-Reply-To: <20181028131357.parhzj32feapxncb@mail.google.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Changbin Du <changbin.du@gmail.com>
-Cc: yamada.masahiro@socionext.com, michal.lkml@markovi.net, tglx@linutronix.de, mingo@redhat.com, linux@armlinux.org.uk, akpm@linux-foundation.org, gregkh@linuxfoundation.org, x86@kernel.org, linux-kbuild@vger.kernel.org, linux-kernel@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-sparse@vger.kernel.org, robin.murphy@arm.com
+Cc: Michal Marek <michal.lkml@markovi.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@armlinux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Steven Rostedt <rostedt@goodmis.org>, X86 ML <x86@kernel.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-sparse@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Sun, 28 Oct 2018 13:09:42 +0000
-Changbin Du <changbin.du@gmail.com> wrote:
+Hi.
 
-> The level4_kernel_pgt is only defined when X86_5LEVEL is enabled.
-> So declare check_la57_support() as inline to make sure the code
-> referring to level4_kernel_pgt is optimized out. This is a preparation
-> for CONFIG_CC_OPTIMIZE_FOR_DEBUGGING.
-> 
-> Signed-off-by: Changbin Du <changbin.du@gmail.com>
 
-Reviewed-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+On Sun, Oct 28, 2018 at 10:14 PM Changbin Du <changbin.du@gmail.com> wrote:
+>
+> On Sun, Oct 28, 2018 at 10:09:21PM +0900, Masahiro Yamada wrote:
+> > Hi Changbin,
+> >
+> > On Sun, Oct 28, 2018 at 9:52 PM Changbin Du <changbin.du@gmail.com> wrote:
+> >
+> > > >
+> > > Thanks for pointing this out and kind suggestions. I have tested with your
+> > > modification. Will update patch serias soon.
+> >
+> >
+> > I have one more request.
+> >
+> > The patch subject
+> > "kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING to apply GCC -Og
+> > optimization"
+> > is too long (83 characters)
+> >
+> >
+> > I'd like the subject to be within 70 columns or so.
+> >
+> oh, I just sent new version. Could me update the title if there are more
+> suggestions then?
 
--- Steve
 
-> Cc: Masahiro Yamada <yamada.masahiro@socionext.com>
-> ---
->  arch/x86/kernel/head64.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/arch/x86/kernel/head64.c b/arch/x86/kernel/head64.c
-> index 5dc377dc9d7b..5ae682f2aa83 100644
-> --- a/arch/x86/kernel/head64.c
-> +++ b/arch/x86/kernel/head64.c
-> @@ -98,7 +98,7 @@ static bool __head check_la57_support(unsigned long physaddr)
->  	return true;
->  }
->  #else
-> -static bool __head check_la57_support(unsigned long physaddr)
-> +static inline bool __head check_la57_support(unsigned long physaddr)
->  {
->  	return false;
->  }
+
+How about this?
+
+2/4: kernel hacking: add a config option to disable compiler auto-inlining
+3/4: ARM: mm: fix build error in fix_to_virt with -Og optimization level
+4/4: kernel hacking: support building kernel with -Og optimization level
+
+(The CONFIG name is so long that the subject
+would easily exceeds 80-columns with it.)
+
+
+I applied this series to linux-kbuild,
+and will send another pull request in this MW.
+
+
+If you come up with better patch titles,
+please let me know.
+I will fix them up locally.
+
+
+
+-- 
+Best Regards
+Masahiro Yamada
