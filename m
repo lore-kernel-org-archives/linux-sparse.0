@@ -1,69 +1,91 @@
 From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: [PATCH v2 4/4] kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING
- to apply GCC -Og optimization
-Date: Mon, 29 Oct 2018 22:01:44 +0900
-Message-ID: <CAK7LNAQ0iZDHP8zQZ_Ws4Wy4H6rwiV5p-A0bM1yVJLP51sqQeg@mail.gmail.com>
-References: <20181019124921.13780-1-changbin.du@gmail.com> <20181019124921.13780-5-changbin.du@gmail.com>
- <CAK7LNARW0=0d7m5DAgZOir=h0Y4tssqZoQRGasnGPNnvNf_+pg@mail.gmail.com>
- <20181028125106.azcn2dxia3snplin@mail.google.com> <CAK7LNARr7bE=DVuzim5771heuN5os0=5-D+jXfUyBb2e1xYoRA@mail.gmail.com>
- <20181028131357.parhzj32feapxncb@mail.google.com>
+Subject: Re: [PATCH v3 2/4] kernel hacking: new config NO_AUTO_INLINE to
+ disable compiler auto-inline optimizations
+Date: Mon, 29 Oct 2018 22:03:38 +0900
+Message-ID: <CAK7LNASiGPar_Aj1KDu8E+S=NKRf7mEJ8gwe2=OMUGggZmtfNQ@mail.gmail.com>
+References: <20181028130945.23581-1-changbin.du@gmail.com> <20181028130945.23581-3-changbin.du@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181028131357.parhzj32feapxncb@mail.google.com>
+In-Reply-To: <20181028130945.23581-3-changbin.du@gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Changbin Du <changbin.du@gmail.com>
-Cc: Michal Marek <michal.lkml@markovi.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@armlinux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Steven Rostedt <rostedt@goodmis.org>, X86 ML <x86@kernel.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-sparse@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>
+Cc: Michal Marek <michal.lkml@markovi.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@armlinux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Steven Rostedt <rostedt@goodmis.org>, X86 ML <x86@kernel.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-sparse@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi.
-
-
-On Sun, Oct 28, 2018 at 10:14 PM Changbin Du <changbin.du@gmail.com> wrote:
+On Sun, Oct 28, 2018 at 10:13 PM Changbin Du <changbin.du@gmail.com> wrote:
 >
-> On Sun, Oct 28, 2018 at 10:09:21PM +0900, Masahiro Yamada wrote:
-> > Hi Changbin,
-> >
-> > On Sun, Oct 28, 2018 at 9:52 PM Changbin Du <changbin.du@gmail.com> wrote:
-> >
-> > > >
-> > > Thanks for pointing this out and kind suggestions. I have tested with your
-> > > modification. Will update patch serias soon.
-> >
-> >
-> > I have one more request.
-> >
-> > The patch subject
-> > "kernel hacking: new config CC_OPTIMIZE_FOR_DEBUGGING to apply GCC -Og
-> > optimization"
-> > is too long (83 characters)
-> >
-> >
-> > I'd like the subject to be within 70 columns or so.
-> >
-> oh, I just sent new version. Could me update the title if there are more
-> suggestions then?
+> This patch add a new kernel hacking option NO_AUTO_INLINE. Selecting
+
+
+I fixed "This patch add ..." to "This patch adds ..."
+then applied to linux-kbuild.
 
 
 
-How about this?
 
-2/4: kernel hacking: add a config option to disable compiler auto-inlining
-3/4: ARM: mm: fix build error in fix_to_virt with -Og optimization level
-4/4: kernel hacking: support building kernel with -Og optimization level
-
-(The CONFIG name is so long that the subject
-would easily exceeds 80-columns with it.)
-
-
-I applied this series to linux-kbuild,
-and will send another pull request in this MW.
-
-
-If you come up with better patch titles,
-please let me know.
-I will fix them up locally.
-
+> this option will prevent the compiler from optimizing the kernel by
+> auto-inlining functions not marked with the inline keyword.
+>
+> With this option, only functions explicitly marked with "inline" will
+> be inlined. This will allow the function tracer to trace more functions
+> because it only traces functions that the compiler has not inlined.
+>
+> Signed-off-by: Changbin Du <changbin.du@gmail.com>
+> Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+> ---
+>  Makefile          |  6 ++++++
+>  lib/Kconfig.debug | 17 +++++++++++++++++
+>  2 files changed, 23 insertions(+)
+>
+> diff --git a/Makefile b/Makefile
+> index 7d4ba5196010..04beb822ddfc 100644
+> --- a/Makefile
+> +++ b/Makefile
+> @@ -749,6 +749,12 @@ KBUILD_CFLAGS      += $(call cc-option, -femit-struct-debug-baseonly) \
+>                    $(call cc-option,-fno-var-tracking)
+>  endif
+>
+> +ifdef CONFIG_NO_AUTO_INLINE
+> +KBUILD_CFLAGS   += $(call cc-option, -fno-inline-functions) \
+> +                  $(call cc-option, -fno-inline-small-functions) \
+> +                  $(call cc-option, -fno-inline-functions-called-once)
+> +endif
+> +
+>  ifdef CONFIG_FUNCTION_TRACER
+>  ifdef CONFIG_FTRACE_MCOUNT_RECORD
+>    # gcc 5 supports generating the mcount tables directly
+> diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
+> index 04adfc3b185e..d50711b41dad 100644
+> --- a/lib/Kconfig.debug
+> +++ b/lib/Kconfig.debug
+> @@ -211,6 +211,23 @@ config GDB_SCRIPTS
+>           instance. See Documentation/dev-tools/gdb-kernel-debugging.rst
+>           for further details.
+>
+> +config NO_AUTO_INLINE
+> +       bool "Disable compiler auto-inline optimizations"
+> +       help
+> +         This will prevent the compiler from optimizing the kernel by
+> +         auto-inlining functions not marked with the inline keyword.
+> +         With this option, only functions explicitly marked with
+> +         "inline" will be inlined. This will allow the function tracer
+> +         to trace more functions because it only traces functions that
+> +         the compiler has not inlined.
+> +
+> +         Enabling this function can help debugging a kernel if using
+> +         the function tracer. But it can also change how the kernel
+> +         works, because inlining functions may change the timing,
+> +         which could make it difficult while debugging race conditions.
+> +
+> +         If unsure, select N.
+> +
+>  config ENABLE_MUST_CHECK
+>         bool "Enable __must_check logic"
+>         default y
+> --
+> 2.17.1
+>
 
 
 -- 
