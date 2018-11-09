@@ -1,87 +1,68 @@
-From: Mark Rutland <mark.rutland@arm.com>
-Subject: Re: [PATCH v10 12/22] kasan, arm64: fix up fault handling logic
-Date: Thu, 8 Nov 2018 12:22:29 +0000
-Message-ID: <20181108122228.xqwhpkjritrvqneq@lakrids.cambridge.arm.com>
-References: <cover.1541525354.git.andreyknvl@google.com>
- <4891a504adf61c0daf1e83642b6f7519328dfd5f.1541525354.git.andreyknvl@google.com>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v3 1/4] x86/mm: declare check_la57_support() as inline
+Date: Sat, 10 Nov 2018 01:27:29 +0900
+Message-ID: <CAK7LNAQcdpU+_LOYQ8X+4K4sxd3D-+Z7k6BuBjUOJ9LR0j+zfA@mail.gmail.com>
+References: <20181028130945.23581-1-changbin.du@gmail.com> <20181028130945.23581-2-changbin.du@gmail.com>
+ <20181028140911.21d49629@vmware.local.home> <CAK7LNATixykqHqdu5W3NpfXqBXMNsP0OLKjNdsFc_EzJ_diOxA@mail.gmail.com>
+ <20181102112728.GC14602@zn.tnic>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <4891a504adf61c0daf1e83642b6f7519328dfd5f.1541525354.git.andreyknvl@google.com>
+In-Reply-To: <20181102112728.GC14602@zn.tnic>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
+To: Borislav Petkov <bp@alien8.de>
+Cc: Steven Rostedt <rostedt@goodmis.org>, Changbin Du <changbin.du@gmail.com>, Michal Marek <michal.lkml@markovi.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@armlinux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, X86 ML <x86@kernel.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-sparse@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Nov 06, 2018 at 06:30:27PM +0100, Andrey Konovalov wrote:
-> show_pte in arm64 fault handling relies on the fact that the top byte of
-> a kernel pointer is 0xff, which isn't always the case with tag-based
-> KASAN.
+On Fri, Nov 2, 2018 at 8:28 PM Borislav Petkov <bp@alien8.de> wrote:
+>
+> On Mon, Oct 29, 2018 at 10:04:46PM +0900, Masahiro Yamada wrote:
+> > On Mon, Oct 29, 2018 at 3:09 AM Steven Rostedt <rostedt@goodmis.org> wrote:
+> > >
+> > > On Sun, 28 Oct 2018 13:09:42 +0000
+> > > Changbin Du <changbin.du@gmail.com> wrote:
+> > >
+> > > > The level4_kernel_pgt is only defined when X86_5LEVEL is enabled.
+> > > > So declare check_la57_support() as inline to make sure the code
+> > > > referring to level4_kernel_pgt is optimized out. This is a preparation
+> > > > for CONFIG_CC_OPTIMIZE_FOR_DEBUGGING.
+> > > >
+> > > > Signed-off-by: Changbin Du <changbin.du@gmail.com>
+> > >
+> > > Reviewed-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+> > >
+> > > -- Steve
+> > >
+> >
+> > Applied to linux-kbuild.
+>
+> Next time, before you route a patch through your tree, please get an x86
+> maintainer's ACK first.
 
-That's for the TTBR1 check, right?
 
-i.e. for the following to work:
+I changed my mind, and did not include this in my previous pull request
+because this series is causing many warnings.
 
-	if (addr >= VA_START)
+Now, it is aiming for v5.0-rc1
 
-... we need the tag bits to be an extension of bit 55...
+So, it is not too late.
 
-> 
-> This patch resets the top byte in show_pte.
-> 
-> Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
-> Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
-> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
-> ---
->  arch/arm64/mm/fault.c | 3 +++
->  1 file changed, 3 insertions(+)
-> 
-> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
-> index 7d9571f4ae3d..d9a84d6f3343 100644
-> --- a/arch/arm64/mm/fault.c
-> +++ b/arch/arm64/mm/fault.c
-> @@ -32,6 +32,7 @@
->  #include <linux/perf_event.h>
->  #include <linux/preempt.h>
->  #include <linux/hugetlb.h>
-> +#include <linux/kasan.h>
->  
->  #include <asm/bug.h>
->  #include <asm/cmpxchg.h>
-> @@ -141,6 +142,8 @@ void show_pte(unsigned long addr)
->  	pgd_t *pgdp;
->  	pgd_t pgd;
->  
-> +	addr = (unsigned long)kasan_reset_tag((void *)addr);
+If x86 maintainers issue Acked-by,
+I am happy to add it.
 
-... but this ORs in (0xffUL << 56), which is not correct for addresses
-which aren't TTBR1 addresses to begin with, where bit 55 is clear, and
-throws away useful information.
 
-We could use untagged_addr() here, but that wouldn't be right for
-kernels which don't use TBI1, and we'd erroneously report addresses
-under the TTBR1 range as being in the TTBR1 range.
 
-I also see that the entry assembly for el{1,0}_{da,ia} clears the tag
-for EL0 addresses.
 
-So we could have:
+> Thx.
+>
+> --
+> Regards/Gruss,
+>     Boris.
+>
+> Good mailing practices for 400: avoid top-posting and trim the reply.
 
-static inline bool is_ttbr0_addr(unsigned long addr)
-{
-	/* entry assembly clears tags for TTBR0 addrs */
-	return addr < TASK_SIZE_64;
-}
 
-static inline bool is_ttbr1_addr(unsigned long addr)
-{
-	/* TTBR1 addresses may have a tag if HWKASAN is in use */
-	return arch_kasan_reset_tag(addr) >= VA_START;
-}
 
-... and use those in the conditionals, leaving the addr as-is for
-reporting purposes.
-
-Thanks,
-Mark.
+-- 
+Best Regards
+Masahiro Yamada
