@@ -1,80 +1,72 @@
-From: Changbin Du <changbin.du@gmail.com>
-Subject: Re: [PATCH v3 1/4] x86/mm: declare check_la57_support() as inline
-Date: Sat, 10 Nov 2018 09:41:12 +0800
-Message-ID: <20181110010708.d3nayrzuy5d3lrkd@mail.google.com>
-References: <20181028130945.23581-1-changbin.du@gmail.com>
- <20181028130945.23581-2-changbin.du@gmail.com>
- <20181028140911.21d49629@vmware.local.home>
- <CAK7LNATixykqHqdu5W3NpfXqBXMNsP0OLKjNdsFc_EzJ_diOxA@mail.gmail.com>
- <20181102112728.GC14602@zn.tnic>
- <CAK7LNAQcdpU+_LOYQ8X+4K4sxd3D-+Z7k6BuBjUOJ9LR0j+zfA@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] arm64: sysreg: fix sparse warnings
+Date: Sat, 10 Nov 2018 18:54:05 +0100
+Message-ID: <20181110175404.gnks6sj3zzlz2it7@ltop.local>
+References: <20181109204747.10008-1-geomatsi@gmail.com>
+ <20181110001615.GA5665@brain-police>
+ <20181110111647.GA3511@speedy.hunter>
+ <20181110170311.GA7700@brain-police>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
 Content-Disposition: inline
-In-Reply-To: <CAK7LNAQcdpU+_LOYQ8X+4K4sxd3D-+Z7k6BuBjUOJ9LR0j+zfA@mail.gmail.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Borislav Petkov <bp@alien8.de>, Steven Rostedt <rostedt@goodmis.org>, Changbin Du <changbin.du@gmail.com>, Michal Marek <michal.lkml@markovi.net>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Russell King <linux@armlinux.org.uk>, Andrew Morton <akpm@linux-foundation.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, X86 ML <x86@kernel.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, linux-arm-kernel <linux-arm-kernel@lists.infradead.org>, linux-sparse@vger.kernel.org, Robin Murphy <robin.murphy@arm.com>
+In-Reply-To: <20181110170311.GA7700@brain-police>
+List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
+List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
+List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
+List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
+List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
+ <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
+Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
+Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
+To: Will Deacon <will.deacon@arm.com>
+Cc: Sergey Matyukevich <geomatsi@gmail.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.infradead.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Sat, Nov 10, 2018 at 01:27:29AM +0900, Masahiro Yamada wrote:
-> On Fri, Nov 2, 2018 at 8:28 PM Borislav Petkov <bp@alien8.de> wrote:
-> >
-> > On Mon, Oct 29, 2018 at 10:04:46PM +0900, Masahiro Yamada wrote:
-> > > On Mon, Oct 29, 2018 at 3:09 AM Steven Rostedt <rostedt@goodmis.org> wrote:
-> > > >
-> > > > On Sun, 28 Oct 2018 13:09:42 +0000
-> > > > Changbin Du <changbin.du@gmail.com> wrote:
-> > > >
-> > > > > The level4_kernel_pgt is only defined when X86_5LEVEL is enabled.
-> > > > > So declare check_la57_support() as inline to make sure the code
-> > > > > referring to level4_kernel_pgt is optimized out. This is a preparation
-> > > > > for CONFIG_CC_OPTIMIZE_FOR_DEBUGGING.
-> > > > >
-> > > > > Signed-off-by: Changbin Du <changbin.du@gmail.com>
-> > > >
-> > > > Reviewed-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
-> > > >
-> > > > -- Steve
-> > > >
-> > >
-> > > Applied to linux-kbuild.
-> >
-> > Next time, before you route a patch through your tree, please get an x86
-> > maintainer's ACK first.
+On Sat, Nov 10, 2018 at 05:03:21PM +0000, Will Deacon wrote:
+> On Sat, Nov 10, 2018 at 02:16:47PM +0300, Sergey Matyukevich wrote:
+> > On Sat, Nov 10, 2018 at 12:16:16AM +0000, Will Deacon wrote:
+> > > On Fri, Nov 09, 2018 at 11:47:47PM +0300, Sergey Matyukevich wrote:
+> > > > Specify correct type for the constants to avoid
+> > > > the following sparse complaints:
+> > > > 
+> > > > ./arch/arm64/include/asm/sysreg.h:471:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
+> > > > ./arch/arm64/include/asm/sysreg.h:512:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
+> > > > 
+> > > > Signed-off-by: Sergey Matyukevich <geomatsi@gmail.com>
+> > > > ---
+> > > >  arch/arm64/include/asm/sysreg.h | 4 ++--
+> > > >  1 file changed, 2 insertions(+), 2 deletions(-)
+> > > 
+> > > I thought this was fixed in newer versions of sparse so that it treats
+> > > AArch64 as 64-bit? [see sparse commit 49d56b6969d2f]
+> > 
+> > I am using up-to-date sparse. However this warning still appears,
+> > not sure why. Maybe sparse treats such constants as unsigned int ?
+> > 
+> > Meanwhile it looks like I chose wrong type: it is enough to use UL
+> > instead of ULL to make sparse happy. In fact warning is clear
+> > about it.
 > 
+> Ah yes, sorry. I misread the patch the first time around and thought you were
+> changing a UL suffix to a ULL suffix. So actually, I think this is just a
+> case of sparse getting confused about this constant because it's actually
+> going to get parsed by the pre-processor, which says:
 > 
-> I changed my mind, and did not include this in my previous pull request
-> because this series is causing many warnings.
->
-Most of the new warnings are false warnings. Since this series didn't change any
-code where the warnings happen. I'll make patches to make gcc happy.
+>   | It [the preprocessor parsing #if] carries out all calculations in the
+>   | widest integer type known to the compiler; on most machines supported by
+>   | GCC this is 64 bits
+> 
+> so I still think this is a false positive. Adding Luc in case he has any
+> ideas.
 
-> Now, it is aiming for v5.0-rc1
-> 
-> So, it is not too late.
-> 
-> If x86 maintainers issue Acked-by,
-> I am happy to add it.
-> 
-> 
-> 
-> 
-> > Thx.
-> >
-> > --
-> > Regards/Gruss,
-> >     Boris.
-> >
-> > Good mailing practices for 400: avoid top-posting and trim the reply.
-> 
-> 
-> 
-> -- 
-> Best Regards
-> Masahiro Yamada
+Well, I think the warning is 'correct' (and the message is quite
+clear about the 'possible' problem) but probably not useful enough.
+In fact, some months ago, it was agreed that sparse will only issue
+this warning when -Wpedantic is set but this flag is not yet handled.
 
--- 
-Thanks,
-Changbin Du
+I'll look at this next week.
+
+-- Luc
