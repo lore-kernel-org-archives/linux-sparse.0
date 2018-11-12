@@ -1,100 +1,72 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH] arm64: sysreg: fix sparse warnings
-Date: Mon, 12 Nov 2018 16:32:31 +0000
-Message-ID: <2bb3e247-3b6f-adc6-6d6f-1e62f48a43e6@ramsayjones.plus.com>
-References: <20181109204747.10008-1-geomatsi@gmail.com>
- <20181110001615.GA5665@brain-police> <20181110111647.GA3511@speedy.hunter>
- <20181110170311.GA7700@brain-police>
- <20181110175404.gnks6sj3zzlz2it7@ltop.local>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v10 06/22] kasan, arm64: adjust shadow size for tag-based mode
+Date: Mon, 12 Nov 2018 18:50:57 +0100
+Message-ID: <CAAeHK+zOk9SDzUE38d2dJBE+mbwPwYr2pawV1JYEZFUCmR=ViA@mail.gmail.com>
+References: <cover.1541525354.git.andreyknvl@google.com> <86d1b17c755d8bfd6e44e6869a16f4a409e7bd06.1541525354.git.andreyknvl@google.com>
+ <20181107165438.34kb5ufoe5ve2f6i@lakrids.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-In-Reply-To: <20181110175404.gnks6sj3zzlz2it7@ltop.local>
-Content-Language: en-GB
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Will Deacon <will.deacon@arm.com>
-Cc: Sergey Matyukevich <geomatsi@gmail.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181107165438.34kb5ufoe5ve2f6i@lakrids.cambridge.arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
 List-Id: linux-sparse@vger.kernel.org
 
+On Wed, Nov 7, 2018 at 5:54 PM, Mark Rutland <mark.rutland@arm.com> wrote:
+
+[...]
+
+>> --- a/arch/arm64/Makefile
+>> +++ b/arch/arm64/Makefile
+>> @@ -94,7 +94,7 @@ endif
+>>  # KASAN_SHADOW_OFFSET = VA_START + (1 << (VA_BITS - KASAN_SHADOW_SCALE_SHIFT))
+>>  #                             - (1 << (64 - KASAN_SHADOW_SCALE_SHIFT))
+>>  # in 32-bit arithmetic
+>> -KASAN_SHADOW_SCALE_SHIFT := 3
+>> +KASAN_SHADOW_SCALE_SHIFT := $(if $(CONFIG_KASAN_SW_TAGS), 4, 3)
+>
+>
+> We could make this something like:
+>
+> ifeq ($(CONFIG_KASAN_SW_TAGS), y)
+> KASAN_SHADOW_SCALE_SHIFT := 4
+> else
+> KASAN_SHADOW_SCALE_SHIFT := 3
+> endif
+>
+> KBUILD_CFLAGS += -DKASAN_SHADOW_SCALE_SHIFT=$(KASAN_SHADOW_SCALE_SHIFT)
+
+Seems that we need the same for KBUILD_CPPFLAGS and KBUILD_AFLAGS.
 
 
-On 10/11/2018 17:54, Luc Van Oostenryck wrote:
-> On Sat, Nov 10, 2018 at 05:03:21PM +0000, Will Deacon wrote:
->> On Sat, Nov 10, 2018 at 02:16:47PM +0300, Sergey Matyukevich wrote:
->>> On Sat, Nov 10, 2018 at 12:16:16AM +0000, Will Deacon wrote:
->>>> On Fri, Nov 09, 2018 at 11:47:47PM +0300, Sergey Matyukevich wrote:
->>>>> Specify correct type for the constants to avoid
->>>>> the following sparse complaints:
->>>>>
->>>>> ./arch/arm64/include/asm/sysreg.h:471:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
->>>>> ./arch/arm64/include/asm/sysreg.h:512:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
->>>>>
->>>>> Signed-off-by: Sergey Matyukevich <geomatsi@gmail.com>
->>>>> ---
->>>>>  arch/arm64/include/asm/sysreg.h | 4 ++--
->>>>>  1 file changed, 2 insertions(+), 2 deletions(-)
->>>>
->>>> I thought this was fixed in newer versions of sparse so that it treats
->>>> AArch64 as 64-bit? [see sparse commit 49d56b6969d2f]
->>>
->>> I am using up-to-date sparse. However this warning still appears,
->>> not sure why. Maybe sparse treats such constants as unsigned int ?
->>>
->>> Meanwhile it looks like I chose wrong type: it is enough to use UL
->>> instead of ULL to make sparse happy. In fact warning is clear
->>> about it.
+>> diff --git a/arch/arm64/include/asm/memory.h b/arch/arm64/include/asm/memory.h
+>> index b96442960aea..0f1e024a951f 100644
+>> --- a/arch/arm64/include/asm/memory.h
+>> +++ b/arch/arm64/include/asm/memory.h
+>> @@ -74,12 +74,17 @@
+>>  #define KERNEL_END        _end
 >>
->> Ah yes, sorry. I misread the patch the first time around and thought you were
->> changing a UL suffix to a ULL suffix. So actually, I think this is just a
->> case of sparse getting confused about this constant because it's actually
->> going to get parsed by the pre-processor, which says:
->>
->>   | It [the preprocessor parsing #if] carries out all calculations in the
->>   | widest integer type known to the compiler; on most machines supported by
->>   | GCC this is 64 bits
->>
->> so I still think this is a false positive. Adding Luc in case he has any
->> ideas.
-> 
-> Well, I think the warning is 'correct' (and the message is quite
-> clear about the 'possible' problem) but probably not useful enough.
+>>  /*
+>> - * KASAN requires 1/8th of the kernel virtual address space for the shadow
+>> - * region. KASAN can bloat the stack significantly, so double the (minimum)
+>> - * stack size when KASAN is in use.
+>> + * Generic and tag-based KASAN require 1/8th and 1/16th of the kernel virtual
+>> + * address space for the shadow region respectively. They can bloat the stack
+>> + * significantly, so double the (minimum) stack size when they are in use.
+>>   */
+>> -#ifdef CONFIG_KASAN
+>> +#ifdef CONFIG_KASAN_GENERIC
+>>  #define KASAN_SHADOW_SCALE_SHIFT 3
+>> +#endif
+>> +#ifdef CONFIG_KASAN_SW_TAGS
+>> +#define KASAN_SHADOW_SCALE_SHIFT 4
+>> +#endif
+>> +#ifdef CONFIG_KASAN
+>
+> ... and remove the constant entirely here, avoiding duplication.
+>
+> Maybe factor that into a Makefile.kasan if things are going to get much
+> more complicated.
 
-yes, the warning is correct. I think the message is quite clear, so
-would be happy to hear any possible improvements! ;-)
-
-(Also, correcting the source, in order to suppress these warnings,
-should take mere seconds - for each such warning, of course).
-
-> In fact, some months ago, it was agreed that sparse will only issue
-> this warning when -Wpedantic is set but this flag is not yet handled.
-
-I have patches, but I have been waiting for the 'official repo' issue
-to get resolved. (If you remember, I was building on top of the current
-official repo and continually merging to the master branch of your
-github sparse.git - but I got bored of doing that!).
-
-> I'll look at this next week.
-
-I stopped work on my patches months ago, after doing just enough to
-enable me to work on git without tearing my hair out on Linux Mint 19
-(or Ubuntu 18.04, Fedora 27+ etc.). ;-)
-
-I was working on -Wsystem-headers, so this warning (along with some
-other __extension__ warnings in the system headers) do not cause me
-any further issues on git. (that would not help on the kernel, of course).
-
-[BTW, I have been building/testing/running the master branch of
-git://github.com/lucvoo/sparse.git for months now, without seeing
-any regressions.]
-
-ATB,
-Ramsay Jones
+Will do in v11, thanks!
