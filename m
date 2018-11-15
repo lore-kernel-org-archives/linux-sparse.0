@@ -1,96 +1,133 @@
-From: Sergey Matyukevich <geomatsi@gmail.com>
-Subject: Re: [PATCH] arm64: sysreg: fix sparse warnings
-Date: Thu, 15 Nov 2018 11:35:35 +0300
-Message-ID: <20181115083535.usyjcdoz2f6zmssq@bars>
-References: <20181109204747.10008-1-geomatsi@gmail.com>
- <20181110001615.GA5665@brain-police>
- <20181110111647.GA3511@speedy.hunter>
- <20181110170311.GA7700@brain-police>
- <20181110175404.gnks6sj3zzlz2it7@ltop.local>
- <2bb3e247-3b6f-adc6-6d6f-1e62f48a43e6@ramsayjones.plus.com>
- <20181114222540.fgddrx4xxsne5pdq@ltop.local>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v10 12/22] kasan, arm64: fix up fault handling logic
+Date: Thu, 15 Nov 2018 14:33:02 +0100
+Message-ID: <CAAeHK+zqkyb7rknhNT7ZUt0SBJb2s775UFnhpOjc0_yWHFgrvA@mail.gmail.com>
+References: <cover.1541525354.git.andreyknvl@google.com> <4891a504adf61c0daf1e83642b6f7519328dfd5f.1541525354.git.andreyknvl@google.com>
+ <20181108122228.xqwhpkjritrvqneq@lakrids.cambridge.arm.com>
+ <CAAeHK+xPkbg_9P9oCkS-iB8S81vTxD3p5SbyWHy-vrp2ybkKmg@mail.gmail.com>
+ <20181113220728.2h3kz67b2bz36wty@blommer> <CAAeHK+xe5LqbyWnYSDv2+QrLR=GK0JMzniAZBfL8kjXRwJravA@mail.gmail.com>
+ <20181114201738.sb2lla7umljsx3qx@blommer>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org>
-Content-Disposition: inline
-In-Reply-To: <20181114222540.fgddrx4xxsne5pdq@ltop.local>
-List-Unsubscribe: <http://lists.infradead.org/mailman/options/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=unsubscribe>
-List-Archive: <http://lists.infradead.org/pipermail/linux-arm-kernel/>
-List-Post: <mailto:linux-arm-kernel@lists.infradead.org>
-List-Help: <mailto:linux-arm-kernel-request@lists.infradead.org?subject=help>
-List-Subscribe: <http://lists.infradead.org/mailman/listinfo/linux-arm-kernel>,
- <mailto:linux-arm-kernel-request@lists.infradead.org?subject=subscribe>
-Sender: "linux-arm-kernel" <linux-arm-kernel-bounces@lists.infradead.org>
-Errors-To: linux-arm-kernel-bounces+linux-arm-kernel=m.gmane.org@lists.infradead.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Suzuki K Poulose <suzuki.poulose@arm.com>, Marc Zyngier <marc.zyngier@arm.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, linux-sparse@vger.kernel.org, linux-arm-kernel@lists.infradead.org
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20181114201738.sb2lla7umljsx3qx@blommer>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Mark Rutland <mark.rutland@arm.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
 List-Id: linux-sparse@vger.kernel.org
 
-> > >>>>> the following sparse complaints:
-> > >>>>>
-> > >>>>> ./arch/arm64/include/asm/sysreg.h:471:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
-> > >>>>> ./arch/arm64/include/asm/sysreg.h:512:42: warning: constant 0xffffffffffffffff is so big it is unsigned long
-> > >>>>>
-> > >>>>> Signed-off-by: Sergey Matyukevich <geomatsi@gmail.com>
-> > >>>>> ---
-> > >>>>>  arch/arm64/include/asm/sysreg.h | 4 ++--
-> > >>>>>  1 file changed, 2 insertions(+), 2 deletions(-)
-> > >>>>
-> > >>>> I thought this was fixed in newer versions of sparse so that it treats
-> > >>>> AArch64 as 64-bit? [see sparse commit 49d56b6969d2f]
-> > >>>
-> > >>> I am using up-to-date sparse. However this warning still appears,
-> > >>> not sure why. Maybe sparse treats such constants as unsigned int ?
-> > >>>
-> > >>> Meanwhile it looks like I chose wrong type: it is enough to use UL
-> > >>> instead of ULL to make sparse happy. In fact warning is clear
-> > >>> about it.
-> > >>
-> > >> Ah yes, sorry. I misread the patch the first time around and thought you were
-> > >> changing a UL suffix to a ULL suffix. So actually, I think this is just a
-> > >> case of sparse getting confused about this constant because it's actually
-> > >> going to get parsed by the pre-processor, which says:
-> > >>
-> > >>   | It [the preprocessor parsing #if] carries out all calculations in the
-> > >>   | widest integer type known to the compiler; on most machines supported by
-> > >>   | GCC this is 64 bits
-> > >>
-> > >> so I still think this is a false positive. Adding Luc in case he has any
-> > >> ideas.
-> > > 
-> > > Well, I think the warning is 'correct' (and the message is quite
-> > > clear about the 'possible' problem) but probably not useful enough.
-> > 
-> > yes, the warning is correct. I think the message is quite clear, so
-> > would be happy to hear any possible improvements! ;-)
-> 
-> Oh, I was not talking about the message but, like Linus explained, that
-> since no bits are lost here (and sparse has another warning in case some
-> bits would be lost) and nothing is incorrect, the warning is not really
-> interesting.
->  
-> > (Also, correcting the source, in order to suppress these warnings,
-> > should take mere seconds - for each such warning, of course).
-> 
-> Yes, sure, it was even the origin of the thread.
->  
-> > > In fact, some months ago, it was agreed that sparse will only issue
-> > > this warning when -Wpedantic is set but this flag is not yet handled.
-> > 
-> > I have patches, but I have been waiting for the 'official repo' issue
-> > to get resolved. (If you remember, I was building on top of the current
-> > official repo and continually merging to the master branch of your
-> > github sparse.git - but I got bored of doing that!).
-> 
-> Yes, I understand. This should be solved now.
- 
-Hi,
+On Wed, Nov 14, 2018 at 9:17 PM, Mark Rutland <mark.rutland@arm.com> wrote:
+> On Wed, Nov 14, 2018 at 09:06:23PM +0100, Andrey Konovalov wrote:
+>> On Tue, Nov 13, 2018 at 11:07 PM, Mark Rutland <mark.rutland@arm.com> wrote:
+>> > On Tue, Nov 13, 2018 at 04:01:27PM +0100, Andrey Konovalov wrote:
+>> >> On Thu, Nov 8, 2018 at 1:22 PM, Mark Rutland <mark.rutland@arm.com> wrote:
+>> >> > On Tue, Nov 06, 2018 at 06:30:27PM +0100, Andrey Konovalov wrote:
+>> >> >> show_pte in arm64 fault handling relies on the fact that the top byte of
+>> >> >> a kernel pointer is 0xff, which isn't always the case with tag-based
+>> >> >> KASAN.
+>> >> >
+>> >> > That's for the TTBR1 check, right?
+>> >> >
+>> >> > i.e. for the following to work:
+>> >> >
+>> >> >         if (addr >= VA_START)
+>> >> >
+>> >> > ... we need the tag bits to be an extension of bit 55...
+>> >> >
+>> >> >>
+>> >> >> This patch resets the top byte in show_pte.
+>> >> >>
+>> >> >> Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
+>> >> >> Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
+>> >> >> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+>> >> >> ---
+>> >> >>  arch/arm64/mm/fault.c | 3 +++
+>> >> >>  1 file changed, 3 insertions(+)
+>> >> >>
+>> >> >> diff --git a/arch/arm64/mm/fault.c b/arch/arm64/mm/fault.c
+>> >> >> index 7d9571f4ae3d..d9a84d6f3343 100644
+>> >> >> --- a/arch/arm64/mm/fault.c
+>> >> >> +++ b/arch/arm64/mm/fault.c
+>> >> >> @@ -32,6 +32,7 @@
+>> >> >>  #include <linux/perf_event.h>
+>> >> >>  #include <linux/preempt.h>
+>> >> >>  #include <linux/hugetlb.h>
+>> >> >> +#include <linux/kasan.h>
+>> >> >>
+>> >> >>  #include <asm/bug.h>
+>> >> >>  #include <asm/cmpxchg.h>
+>> >> >> @@ -141,6 +142,8 @@ void show_pte(unsigned long addr)
+>> >> >>       pgd_t *pgdp;
+>> >> >>       pgd_t pgd;
+>> >> >>
+>> >> >> +     addr = (unsigned long)kasan_reset_tag((void *)addr);
+>> >> >
+>> >> > ... but this ORs in (0xffUL << 56), which is not correct for addresses
+>> >> > which aren't TTBR1 addresses to begin with, where bit 55 is clear, and
+>> >> > throws away useful information.
+>> >> >
+>> >> > We could use untagged_addr() here, but that wouldn't be right for
+>> >> > kernels which don't use TBI1, and we'd erroneously report addresses
+>> >> > under the TTBR1 range as being in the TTBR1 range.
+>> >> >
+>> >> > I also see that the entry assembly for el{1,0}_{da,ia} clears the tag
+>> >> > for EL0 addresses.
+>> >> >
+>> >> > So we could have:
+>> >> >
+>> >> > static inline bool is_ttbr0_addr(unsigned long addr)
+>> >> > {
+>> >> >         /* entry assembly clears tags for TTBR0 addrs */
+>> >> >         return addr < TASK_SIZE_64;
+>> >> > }
+>> >> >
+>> >> > static inline bool is_ttbr1_addr(unsigned long addr)
+>> >> > {
+>> >> >         /* TTBR1 addresses may have a tag if HWKASAN is in use */
+>> >> >         return arch_kasan_reset_tag(addr) >= VA_START;
+>> >> > }
+>> >> >
+>> >> > ... and use those in the conditionals, leaving the addr as-is for
+>> >> > reporting purposes.
+>> >>
+>> >> Actually it looks like 276e9327 ("arm64: entry: improve data abort
+>> >> handling of tagged pointers") already takes care of both user and
+>> >> kernel fault addresses and correctly removes tags from them. So I
+>> >> think we need to drop this patch.
+>> >
+>> > The clear_address_tag macro added in that commit only removes tags from TTBR0
+>> > addresses, so that's not sufficient if the kernel is used tagged addresses
+>> > (which will be in the TTBR1 range).
+>>
+>> Do I understand correctly that TTBR0 means user space addresses and
+>> TTBR1 means kernel addresses?
+>
+> Effectively, yes. The address space is split into two halves (with a gap in the
+> middle). The high half (where we map the kernel) is covered by TTBR1, and the
+> low half (where we map userspace) is covered by TTBR0.
+>
+> The TTBRs are the Translation Table Base Registers -- the two halves have
+> separate page tables.
+>
+>> In that commit I see that the clear_address_tag() macro is used in el0_da and
+>> in el1_da, which means that it untags both user and kernel addresses (on data
+>> aborts). Do I misunderstand something?
+>
+> It's called for faults taken from EL0 and EL1, but it only removes the tags
+> from addresses covered by TTBR0. The logic is:
+>
+>         .macro  clear_address_tag, dst, addr
+>         tst     \addr, #(1 << 55)
+>         bic     \dst, \addr, #(0xff << 56)
+>         csel    \dst, \dst, \addr, eq
+>         .endm
+>
+> ... which in C would be:
+>
+>         if (!(addr & (1UL << 55))) {
+>                 addr &= ~(0xffUL << 56);
+>         }
+>
+> ... and therefore does not affect TTBR1 addresses.
 
-Could you please clarify what is your resolution regarding that warning.
-I pulled all the changes from sparse repository on kernel.org. However
-the same warning is still here when building modules with C=2 option.
-
-Regards,
-Sergey
+Got it, will fix in v11, thanks!
