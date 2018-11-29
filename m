@@ -1,93 +1,70 @@
-From: Will Deacon <will.deacon@arm.com>
-Subject: Re: [PATCH v12 20/25] kasan, arm64: add brk handler for inline
- instrumentation
-Date: Thu, 29 Nov 2018 18:01:38 +0000
-Message-ID: <20181129180138.GB4318@arm.com>
-References: <cover.1543337629.git.andreyknvl@google.com>
- <e825441eda1dbbbb7f583f826a66c94e6f88316a.1543337629.git.andreyknvl@google.com>
+From: Segher Boessenkool <segher@kernel.crashing.org>
+Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
+Date: Thu, 29 Nov 2018 06:25:02 -0600
+Message-ID: <20181129122500.GX23873@gate.crashing.org>
+References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org> <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de> <20181008073128.GL29268@gate.crashing.org> <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr> <20181009145330.GT29268@gate.crashing.org> <CAK7LNARmrdtyE7JRAdJH_zbfvD_cej+TGLh+5KfT20o538KUcA@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Return-path: <gcc-return-197771-gcg-devel-2=m.gmane.org@gcc.gnu.org>
+List-Unsubscribe: <mailto:gcc-unsubscribe-gcg-devel-2=m.gmane.org@gcc.gnu.org>
+List-Archive: <http://gcc.gnu.org/ml/gcc/>
+List-Post: <mailto:gcc@gcc.gnu.org>
+List-Help: <http://gcc.gnu.org/ml/>
+Sender: gcc-owner@gcc.gnu.org
 Content-Disposition: inline
-In-Reply-To: <e825441eda1dbbbb7f583f826a66c94e6f88316a.1543337629.git.andreyknvl@google.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrey Konovalov <andreyknvl@google.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
+In-Reply-To: <CAK7LNARmrdtyE7JRAdJH_zbfvD_cej+TGLh+5KfT20o538KUcA@mail.gmail.com>
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, rguenther@suse.de, matz@suse.de, Borislav Petkov <bp@alien8.de>, gcc@gcc.gnu.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, "Peter Zijlstra (Intel)" <peterz@infradead.org>, Philippe Ombredanne <pomb redanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>, virtualization@lists.linux-
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Nov 27, 2018 at 05:55:38PM +0100, Andrey Konovalov wrote:
-> Tag-based KASAN inline instrumentation mode (which embeds checks of shadow
-> memory into the generated code, instead of inserting a callback) generates
-> a brk instruction when a tag mismatch is detected.
+On Thu, Nov 29, 2018 at 08:46:34PM +0900, Masahiro Yamada wrote:
+> On Wed, Oct 10, 2018 at 1:14 AM Segher Boessenkool
+> <segher@kernel.crashing.org> wrote:
+> >
+> > On Mon, Oct 08, 2018 at 11:07:46AM +0200, Richard Biener wrote:
+> > > On Mon, 8 Oct 2018, Segher Boessenkool wrote:
+> > > > On Sun, Oct 07, 2018 at 03:53:26PM +0000, Michael Matz wrote:
+> > > > > On Sun, 7 Oct 2018, Segher Boessenkool wrote:
+> > > > > > On Sun, Oct 07, 2018 at 11:18:06AM +0200, Borislav Petkov wrote:
+> > > > > > > Now, Richard suggested doing something like:
+> > > > > > >
+> > > > > > >  1) inline asm ("...")
+> > > > > >
+> > > > > > What would the semantics of this be?
+> > > > >
+> > > > > The size of the inline asm wouldn't be counted towards the inliner size
+> > > > > limits (or be counted as "1").
+> > > >
+> > > > That sounds like a good option.
+> > >
+> > > Yes, I also like it for simplicity.  It also avoids the requirement
+> > > of translating the number (in bytes?) given by the user to
+> > > "number of GIMPLE instructions" as needed by the inliner.
+> >
+> > This patch implements this, for C only so far.  And the syntax is
+> > "asm inline", which is more in line with other syntax.
+> >
+> > How does this look?
 > 
-> This commit adds a tag-based KASAN specific brk handler, that decodes the
-> immediate value passed to the brk instructions (to extract information
-> about the memory access that triggered the mismatch), reads the register
-> values (x0 contains the guilty address) and reports the bug.
 > 
-> Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
-> Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
-> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
-> ---
->  arch/arm64/include/asm/brk-imm.h |  2 +
->  arch/arm64/kernel/traps.c        | 68 +++++++++++++++++++++++++++++++-
->  include/linux/kasan.h            |  3 ++
->  3 files changed, 71 insertions(+), 2 deletions(-)
+> Thank you very much for your work.
 > 
-> diff --git a/arch/arm64/include/asm/brk-imm.h b/arch/arm64/include/asm/brk-imm.h
-> index ed693c5bcec0..2945fe6cd863 100644
-> --- a/arch/arm64/include/asm/brk-imm.h
-> +++ b/arch/arm64/include/asm/brk-imm.h
-> @@ -16,10 +16,12 @@
->   * 0x400: for dynamic BRK instruction
->   * 0x401: for compile time BRK instruction
->   * 0x800: kernel-mode BUG() and WARN() traps
-> + * 0x9xx: tag-based KASAN trap (allowed values 0x900 - 0x9ff)
->   */
->  #define FAULT_BRK_IMM			0x100
->  #define KGDB_DYN_DBG_BRK_IMM		0x400
->  #define KGDB_COMPILED_DBG_BRK_IMM	0x401
->  #define BUG_BRK_IMM			0x800
-> +#define KASAN_BRK_IMM			0x900
->  
->  #endif
-> diff --git a/arch/arm64/kernel/traps.c b/arch/arm64/kernel/traps.c
-> index 5f4d9acb32f5..04bdc53716ef 100644
-> --- a/arch/arm64/kernel/traps.c
-> +++ b/arch/arm64/kernel/traps.c
-> @@ -35,6 +35,7 @@
->  #include <linux/sizes.h>
->  #include <linux/syscalls.h>
->  #include <linux/mm_types.h>
-> +#include <linux/kasan.h>
->  
->  #include <asm/atomic.h>
->  #include <asm/bug.h>
-> @@ -284,10 +285,14 @@ void arm64_notify_die(const char *str, struct pt_regs *regs,
->  	}
->  }
->  
-> -void arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
-> +void __arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
->  {
->  	regs->pc += size;
-> +}
->  
-> +void arm64_skip_faulting_instruction(struct pt_regs *regs, unsigned long size)
-> +{
-> +	__arm64_skip_faulting_instruction(regs, size);
->  	/*
->  	 * If we were single stepping, we want to get the step exception after
->  	 * we return from the trap.
-> @@ -959,7 +964,7 @@ static int bug_handler(struct pt_regs *regs, unsigned int esr)
->  	}
->  
->  	/* If thread survives, skip over the BUG instruction and continue: */
-> -	arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
-> +	__arm64_skip_faulting_instruction(regs, AARCH64_INSN_SIZE);
+> 
+> https://gcc.gnu.org/ml/gcc-patches/2018-10/msg01932.html
+> 
+> How is the progress of this in GCC ML?
 
-Why do you want to avoid the single-step logic here? Given that we're
-skipping over the brk instruction, why wouldn't you want that to trigger
-a step exception if single-step is enabled?
+Latest patch was pinged a few times:
+https://gcc.gnu.org/ml/gcc-patches/2018-11/msg01569.html .
 
-Will
+I'll ping it again.  Will fix the subject as well if I remember to, sigh.
+
+> I am really hoping the issue will be solved by compiler
+> instead of the in-kernel workaround.
+
+This will only be fixed from GCC 9 on, if the compiler adopts it.  The
+kernel wants to support ancient GCC, so it will need to have a workaround
+for older GCC versions anyway.
+
+
+Segher
