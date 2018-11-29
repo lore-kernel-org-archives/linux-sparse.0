@@ -1,34 +1,39 @@
-From: Richard Biener <rguenther@suse.de>
-Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Thu, 29 Nov 2018 14:24:55 +0100 (CET)
-Message-ID: <alpine.LSU.2.20.1811291423490.1827@zhemvz.fhfr.qr>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic> <20181007132228.GJ29268@gate.crashing.org> <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de> <20181008073128.GL29268@gate.crashing.org> <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr>
- <20181009145330.GT29268@gate.crashing.org> <CAK7LNARmrdtyE7JRAdJH_zbfvD_cej+TGLh+5KfT20o538KUcA@mail.gmail.com> <20181129130718.GA3070@nazgul.tnic> <alpine.LSU.2.20.1811291408400.1827@zhemvz.fhfr.qr> <20181129131611.GC3070@nazgul.tnic>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH v12 23/25] kasan, arm64: select HAVE_ARCH_KASAN_SW_TAGS
+Date: Thu, 29 Nov 2018 18:01:35 +0000
+Message-ID: <20181129180134.GA4318@arm.com>
+References: <cover.1543337629.git.andreyknvl@google.com>
+ <996c9b3898bb3c5de977d00215ddc4bf8cf154c1.1543337629.git.andreyknvl@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181129131611.GC3070@nazgul.tnic>
+Content-Disposition: inline
+In-Reply-To: <996c9b3898bb3c5de977d00215ddc4bf8cf154c1.1543337629.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Segher Boessenkool <segher@kernel.crashing.org>, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, matz@suse.de, gcc@gcc.gnu.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, "Peter Zijlstra (Intel)" <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, 29 Nov 2018, Borislav Petkov wrote:
+On Tue, Nov 27, 2018 at 05:55:41PM +0100, Andrey Konovalov wrote:
+> Now, that all the necessary infrastructure code has been introduced,
+> select HAVE_ARCH_KASAN_SW_TAGS for arm64 to enable software tag-based
+> KASAN mode.
+> 
+> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+> ---
+>  arch/arm64/Kconfig | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+> index 787d7850e064..8b331dcfb48e 100644
+> --- a/arch/arm64/Kconfig
+> +++ b/arch/arm64/Kconfig
+> @@ -111,6 +111,7 @@ config ARM64
+>  	select HAVE_ARCH_JUMP_LABEL
+>  	select HAVE_ARCH_JUMP_LABEL_RELATIVE
+>  	select HAVE_ARCH_KASAN if !(ARM64_16K_PAGES && ARM64_VA_BITS_48)
+> +	select HAVE_ARCH_KASAN_SW_TAGS if !(ARM64_16K_PAGES && ARM64_VA_BITS_48)
 
-> On Thu, Nov 29, 2018 at 02:09:25PM +0100, Richard Biener wrote:
-> > I'd be not opposed to backporting the asm inline support.
-> 
-> Even better! :-)
-> 
-> > Of course we still have to be happy with it and install the patch ;)
-> > 
-> > Are you (kernel folks) happy with asm inline ()?
-> 
-> Yes, I think we are:
-> 
-> https://lkml.kernel.org/r/20181031125526.GA13219@hirez.programming.kicks-ass.net
+Can you do if HAVE_ARCH_KASAN instead?
 
-OK, Segher - can you ping the latest version of the patch please?
-
-Thanks,
-Richard.
+Will
