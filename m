@@ -1,103 +1,59 @@
-From: Pavel Machek <pavel@ucw.cz>
-Subject: Re: [PATCH v11 00/13] Intel SGX1 support
-Date: Sun, 9 Dec 2018 21:06:00 +0100
-Message-ID: <20181209200600.GA11608@amd>
-References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
- <20180612105011.GA26931@amd>
- <20180619145943.GC8034@linux.intel.com>
- <20180619200414.GA3143@amd>
- <20180619214833.GA5873@localhost>
+From: Tycho Andersen <tycho@tycho.ws>
+Subject: [RFC v1] copy_{to,from}_user(): only inline when !__CHECKER__
+Date: Sun,  9 Dec 2018 13:44:49 -0700
+Message-ID: <20181209204449.18906-1-tycho@tycho.ws>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="bp/iNruPH9dso1Pn"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20180619214833.GA5873@localhost>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Josh Triplett <josh@joshtriplett.org>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, x86@kernel.org, platform-driver-x86@vger.kernel.org, dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad Rzeszutek Wilk <konrad.wi>
+To: linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com
+Cc: linux-kernel@vger.kernel.org, Tycho Andersen <tycho@tycho.ws>
 List-Id: linux-sparse@vger.kernel.org
 
+While working on some additional copy_to_user() checks for sparse, I
+noticed that sparse's current copy_to_user() checks are not triggered. This
+is because copy_to_user() is declared as __always_inline, and sparse
+specifically looks for a call instruction to copy_to_user() when it tries
+to apply the checks.
 
---bp/iNruPH9dso1Pn
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+A quick fix is to explicitly not inline when __CHECKER__ is defined, so
+that sparse will be able to analyze all the copy_{to,from}_user calls.
+There may be some refactoring in sparse that we can do to fix this,
+although it's not immediately obvious to me how, hence the RFC-ness of this
+patch.
 
-Hi!
+Signed-off-by: Tycho Andersen <tycho@tycho.ws>
+---
+ include/linux/uaccess.h | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
 
-(sorry to bring up old thread).
-
-> > > > > Intel(R) SGX is a set of CPU instructions that can be used by app=
-lications
-> > > > > to set aside private regions of code and data. The code outside t=
-he enclave
-> > > > > is disallowed to access the memory inside the enclave by the CPU =
-access
-> > > > > control.  In a way you can think that SGX provides inverted sandb=
-ox. It
-> > > > > protects the application from a malicious host.
-> > > >=20
-> > > > Do you intend to allow non-root applications to use SGX?
-> > > >=20
-> > > > What are non-evil uses for SGX?
-> > > >=20
-> > > > ...because it is quite useful for some kinds of evil:
-> > >=20
-> > > The default permissions for the device are 600.
-> >=20
-> > Good. This does not belong to non-root.
->=20
-> There are entirely legitimate use cases for using this as an
-> unprivileged user. However, that'll be up to system and distribution
-> policy, which can evolve over time, and it makes sense for the *initial*
-> kernel permission to start out root-only and then adjust permissions via
-> udev.
-
-Agreed.
-
-> > What are some non-evil uses for SGX?
->=20
-> Building a software certificate store. Hardening key-agent software like
-> ssh-agent or gpg-agent. Building a challenge-response authentication
-> system. Providing more assurance that your server infrastructure is
-> uncompromised. Offloading computation to a system without having to
-> fully trust that system.
-
-I think you can do the crypto stuff... as crypto already verifies the
-results. But I don't think you can do the computation offload.
-
-> As one of many possibilities, imagine a distcc that didn't have to trust
-> the compile nodes. The compile nodes could fail to return results at
-> all, but they couldn't alter the results.
-
-distcc on untrusted nodes ... oh yes, that would be great.
-
-Except that you can't do it, right? :-).
-
-First, AFAICT it would be quite hard to get gcc to run under SGX. But
-maybe you have spare month or three and can do it.
-
-But ... you really can't guarantee getting right results. Evil owner
-of the machine might intentionaly overheat the CPU, glitch the power,
-induce single-bit errors using gamma source, ... You can't do it.
-
-									Pavel
---=20
-(english) http://www.livejournal.com/~pavelmachek
-(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
-g.html
-
---bp/iNruPH9dso1Pn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAlwNdagACgkQMOfwapXb+vLmBACglfRsX3Mr2i4qikFMap6DH0ZS
-3OwAnj5BaVdvd6w1ipEHlMOQVSTpim9l
-=7YhW
------END PGP SIGNATURE-----
-
---bp/iNruPH9dso1Pn--
+diff --git a/include/linux/uaccess.h b/include/linux/uaccess.h
+index efe79c1cdd47..f20a2d173e1f 100644
+--- a/include/linux/uaccess.h
++++ b/include/linux/uaccess.h
+@@ -140,7 +140,13 @@ extern unsigned long
+ _copy_to_user(void __user *, const void *, unsigned long);
+ #endif
+ 
+-static __always_inline unsigned long __must_check
++#ifdef __CHECKER__
++#define uaccess_inline __attribute__((__noinline__))
++#else
++#define uaccess_inline __always_inline
++#endif
++
++static uaccess_inline unsigned long __must_check
+ copy_from_user(void *to, const void __user *from, unsigned long n)
+ {
+ 	if (likely(check_copy_size(to, n, false)))
+@@ -148,7 +154,7 @@ copy_from_user(void *to, const void __user *from, unsigned long n)
+ 	return n;
+ }
+ 
+-static __always_inline unsigned long __must_check
++static uaccess_inline unsigned long __must_check
+ copy_to_user(void __user *to, const void *from, unsigned long n)
+ {
+ 	if (likely(check_copy_size(from, n, true)))
+-- 
+2.19.1
