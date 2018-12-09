@@ -1,7 +1,7 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Al Viro <viro@zeniv.linux.org.uk>
 Subject: Re: [RFC v1] copy_{to,from}_user(): only inline when !__CHECKER__
-Date: Sun, 9 Dec 2018 22:39:52 +0100
-Message-ID: <20181209213951.kumz33u6prb2seqz@ltop.local>
+Date: Sun, 9 Dec 2018 21:46:00 +0000
+Message-ID: <20181209214600.GC2217@ZenIV.linux.org.uk>
 References: <20181209204449.18906-1-tycho@tycho.ws>
  <20181209210220.GB2217@ZenIV.linux.org.uk>
  <20181209212523.GE30796@cisco>
@@ -12,26 +12,11 @@ Content-Disposition: inline
 In-Reply-To: <20181209212523.GE30796@cisco>
 Sender: linux-kernel-owner@vger.kernel.org
 To: Tycho Andersen <tycho@tycho.ws>
-Cc: Al Viro <viro@zeniv.linux.org.uk>, linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com, linux-kernel@vger.kernel.org
+Cc: linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com, linux-kernel@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
 On Sun, Dec 09, 2018 at 02:25:23PM -0700, Tycho Andersen wrote:
-> Hi Al,
-> 
-> On Sun, Dec 09, 2018 at 09:02:21PM +0000, Al Viro wrote:
-> > On Sun, Dec 09, 2018 at 01:44:49PM -0700, Tycho Andersen wrote:
-> > > While working on some additional copy_to_user() checks for sparse, I
-> > > noticed that sparse's current copy_to_user() checks are not triggered. This
-> > > is because copy_to_user() is declared as __always_inline, and sparse
-> > > specifically looks for a call instruction to copy_to_user() when it tries
-> > > to apply the checks.
-> > > 
-> > > A quick fix is to explicitly not inline when __CHECKER__ is defined, so
-> > > that sparse will be able to analyze all the copy_{to,from}_user calls.
-> > > There may be some refactoring in sparse that we can do to fix this,
-> > > although it's not immediately obvious to me how, hence the RFC-ness of this
-> > > patch.
-> > 
+
 > > Which sparse checks do not trigger?  Explain, please - as it is, I had been
 > > unable to guess what could "specifically looks for a call instruction" refer
 > > to.
@@ -40,23 +25,18 @@ On Sun, Dec 09, 2018 at 02:25:23PM -0700, Tycho Andersen wrote:
 > there's an instruction of OP_CALL type in the basic block. This simply
 > compares against the name of the call target to determine whether or
 > not to call check_ctu().
-> 
-> I think what's happening here is that the call is getting inlined, and
-> so the OP_CALL goes away, and check_call_instruction() never gets
-> called.
 
-Yes, it's what's happening.
+Oh, that Linus' experiment with "look for huge constant size argument
+to memcpy() et.al."?  Frankly, it's not only the wrong place to put the
+checks, but breaking inlining loses the _real_ "known constant size"
+checks in there.
 
-There are several more or less bad/good solutions, like:
-* add raw_copy_{to,from}_user() in the list of checked function
-  (not inlined in most archs).
-* add a new annotation to force sparse to check the byte count
-  (I'm thinking about __range__/OP_RANGE or something similar).
-* do these checks before functions are inlined (but then some
-  constant count could not yet be seen as constant).
-* ...
+I don't know if the check_ctu thing has ever caught a bug...  What kind of
+checks do you want to add?  Because this place is almost certainly wrong
+for anything useful...
 
-Wasn't there some plan to remove all these __always_inline
-because of the future 'asm inline'?
-
--- Luc
+If anything, I would suggest simulating this behaviour with something like
+	if (__builtin_constant_p(size) && size > something)
+		/* something that would trigger a warning */
+_inside_ copy_from_user()/copy_to_user() and to hell with name-recognizing
+magic...
