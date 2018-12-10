@@ -1,67 +1,100 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: Re: PROPOSAL: Extend inline asm syntax with size spec
-Date: Mon, 10 Dec 2018 17:16:28 +0900
-Message-ID: <CAK7LNARSRZEctnTGiB8GOC-D5Q9_d5GpNm8JQ1EJ--WioDe_DA@mail.gmail.com>
-References: <20181003213100.189959-1-namit@vmware.com> <20181007091805.GA30687@zn.tnic>
- <20181007132228.GJ29268@gate.crashing.org> <alpine.LSU.2.21.1810071534220.7867@wotan.suse.de>
- <20181008073128.GL29268@gate.crashing.org> <alpine.LSU.2.20.1810081105350.16707@zhemvz.fhfr.qr>
- <20181009145330.GT29268@gate.crashing.org> <CAK7LNARmrdtyE7JRAdJH_zbfvD_cej+TGLh+5KfT20o538KUcA@mail.gmail.com>
- <20181129122500.GX23873@gate.crashing.org> <CF26ACBE-500C-47E8-B79D-E1ABE938031D@alien8.de>
- <20181130131633.GU23873@gate.crashing.org>
+From: Pavel Machek <pavel@ucw.cz>
+Subject: Re: [PATCH v11 00/13] Intel SGX1 support
+Date: Mon, 10 Dec 2018 09:27:04 +0100
+Message-ID: <20181210082704.GA14594@amd>
+References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
+ <20180612105011.GA26931@amd>
+ <20180619145943.GC8034@linux.intel.com>
+ <20180619200414.GA3143@amd>
+ <20180619214833.GA5873@localhost>
+ <20181209200600.GA11608@amd>
+ <20181210074717.GA9880@localhost>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="EeQfGwPcQSOJBaQU"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181130131633.GU23873@gate.crashing.org>
+Content-Disposition: inline
+In-Reply-To: <20181210074717.GA9880@localhost>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Segher Boessenkool <segher@kernel.crashing.org>
-Cc: Borislav Petkov <bp@alien8.de>, Nadav Amit <namit@vmware.com>, Ingo Molnar <mingo@redhat.com>, "H. Peter Anvin" <hpa@zytor.com>, rguenther@suse.de, matz@suse.de, gcc@gcc.gnu.org, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, X86 ML <x86@kernel.org>, Sam Ravnborg <sam@ravnborg.org>, Alok Kataria <akataria@vmware.com>, Christopher Li <sparse@chrisli.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Jan Beulich <JBeulich@suse.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Juergen Gross <jgross@suse.com>, Kate Stewart <kstewart@linuxfoundation.org>, Kees Cook <keescook@chromium.org>, linux-sparse@vger.kernel.org, "Peter Zijlstra (Intel)" <peterz@infradead.org>, Philippe Ombredanne <pombredanne@nexb.com>, Thomas Gleixner <tglx@linutronix.de>
+To: Josh Triplett <josh@joshtriplett.org>
+Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, x86@kernel.org, platform-driver-x86@vger.kernel.org, dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad Rzeszutek Wilk <konrad.wi>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Segher,
+
+--EeQfGwPcQSOJBaQU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+Content-Transfer-Encoding: quoted-printable
+
+On Sun 2018-12-09 23:47:17, Josh Triplett wrote:
+> On Sun, Dec 09, 2018 at 09:06:00PM +0100, Pavel Machek wrote:
+> ...
+> > > > > The default permissions for the device are 600.
+> > > >=20
+> > > > Good. This does not belong to non-root.
+> > >=20
+> > > There are entirely legitimate use cases for using this as an
+> > > unprivileged user. However, that'll be up to system and distribution
+> > > policy, which can evolve over time, and it makes sense for the *initi=
+al*
+> > > kernel permission to start out root-only and then adjust permissions =
+via
+> > > udev.
+> >=20
+> > Agreed.
+> >=20
+> > > Building a software certificate store. Hardening key-agent software l=
+ike
+> > > ssh-agent or gpg-agent. Building a challenge-response authentication
+> > > system. Providing more assurance that your server infrastructure is
+> > > uncompromised. Offloading computation to a system without having to
+> > > fully trust that system.
+> >=20
+> > I think you can do the crypto stuff... as crypto already verifies the
+> > results. But I don't think you can do the computation offload.
+>=20
+> You can, as long as you can do attestation.
+
+You can not, because random errors are very easy to trigger for person
+with physical access, as I explained in the part of email you
+stripped.
+
+> > > As one of many possibilities, imagine a distcc that didn't have to tr=
+ust
+> > > the compile nodes. The compile nodes could fail to return results at
+> > > all, but they couldn't alter the results.
+> >=20
+> > distcc on untrusted nodes ... oh yes, that would be great.
+> >=20
+> > Except that you can't do it, right? :-).
+> >=20
+> > First, AFAICT it would be quite hard to get gcc to run under SGX. But
+> > maybe you have spare month or three and can do it.
+>=20
+> Assuming you don't need to #include files, gcc seems quite simple to run
+> in an enclave: data in, computation inside, data out.
+
+So is there a plan to run dynamically linked binaries inside enclave?
+Or maybe even python/shell scripts? It looked to me like virtual
+memory will be "interesting" for enclaves.
 
 
-On Sun, Dec 2, 2018 at 3:48 PM Segher Boessenkool
-<segher@kernel.crashing.org> wrote:
->
-> On Fri, Nov 30, 2018 at 10:06:02AM +0100, Boris Petkov wrote:
-> > On November 29, 2018 1:25:02 PM GMT+01:00, Segher Boessenkool <segher@kernel.crashing.org> wrote:
-> > >This will only be fixed from GCC 9 on, if the compiler adopts it.  The
-> > >kernel wants to support ancient GCC, so it will need to have a
-> > >workaround
-> > >for older GCC versions anyway.
-> >
-> > What about backporting it, like Richard says?
->
-> Let me first get it into GCC trunk :-)
->
-> It should backport fine, sure; and I'll work on that.
->
+								Pavel
+--=20
+(english) http://www.livejournal.com/~pavelmachek
+(cesky, pictures) http://atrey.karlin.mff.cuni.cz/~pavel/picture/horses/blo=
+g.html
 
+--EeQfGwPcQSOJBaQU
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: Digital signature
 
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v1
 
-Now, I can see it in the GCC trunk.  Hooray!!!
+iEYEARECAAYFAlwOI1gACgkQMOfwapXb+vLmawCgoL+ivKPUBf9B9dD7LjJnawsy
+T8YAoIpGC5LiF84jvJgnIzvNVAFu+Wrx
+=jQvj
+-----END PGP SIGNATURE-----
 
-
-
-commit 6de46ad5326fc5e6b730a2feb8c62d09c1561f92
-Author: segher <segher@138bc75d-0d04-0410-961f-82ee72b054a4>
-Date:   Thu Dec 6 17:56:58 2018 +0000
-
-    asm inline
-
-    The Linux kernel people want a feature that makes GCC pretend some
-    inline assembler code is tiny (while it would think it is huge), so
-    that such code will be inlined essentially always instead of
-    essentially never.
-
-    This patch lets you say "asm inline" instead of just "asm", with the
-    result that that inline assembler is always counted as minimum cost
-    for inlining.  It implements this for C and C++, making "inline"
-    another asm-qualifier (supplementing "volatile" and "goto").
-
-
-
-
--- 
-Best Regards
-Masahiro Yamada
+--EeQfGwPcQSOJBaQU--
