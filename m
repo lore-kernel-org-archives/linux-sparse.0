@@ -1,50 +1,27 @@
-From: Sean Christopherson <sean.j.christopherson@intel.com>
-Subject: Re: [PATCH v11 00/13] Intel SGX1 support
-Date: Tue, 11 Dec 2018 10:31:01 -0800
-Message-ID: <20181211183101.GE14731@linux.intel.com>
-References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
- <20180612105011.GA26931@amd>
- <20180619145943.GC8034@linux.intel.com>
- <20180619200414.GA3143@amd>
- <20180619214833.GA5873@localhost>
- <20181209200600.GA11608@amd>
- <20181210074717.GA9880@localhost>
- <20181210082704.GA14594@amd>
- <20181210231159.GA10718@localhost>
- <12301623-0a63-10ac-1d5e-828569a953e5@intel.com>
+From: Andrew Morton <akpm@linux-foundation.org>
+Subject: Re: [PATCH v13 00/25] kasan: add software tag-based mode for arm64
+Date: Tue, 11 Dec 2018 13:44:57 -0800
+Message-ID: <20181211134457.2eff4a98b13ceda564ab9b37@linux-foundation.org>
+References: <cover.1544099024.git.andreyknvl@google.com>
+        <20181211151829.GB11718@edgewater-inn.cambridge.arm.com>
+        <CAAeHK+xxNsOfaUZhcErc+fjEEv0YZ-dbQ0fTXzQUO4dZbM-GgA@mail.gmail.com>
+        <20181211160018.GA12597@edgewater-inn.cambridge.arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <12301623-0a63-10ac-1d5e-828569a953e5@intel.com>
+In-Reply-To: <20181211160018.GA12597@edgewater-inn.cambridge.arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dave Hansen <dave.hansen@intel.com>
-Cc: Josh Triplett <josh@joshtriplett.org>, Pavel Machek <pavel@ucw.cz>, Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, x86@kernel.org, platform-driver-x86@vger.kernel.org, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad
+To: Will Deacon <will.deacon@arm.com>
+Cc: Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Dec 11, 2018 at 10:10:38AM -0800, Dave Hansen wrote:
-> On 12/10/18 3:12 PM, Josh Triplett wrote:
-> >> Or maybe even python/shell scripts? It looked to me like virtual
-> >> memory will be "interesting" for enclaves.
-> > Memory management doesn't seem that hard to deal with.
-> 
-> The problems are:
-> 
-> 1. SGX enclave memory (EPC) is statically allocated at boot and can't
->    grow or shrink
-> 2. EPC is much smaller than regular RAM
-> 3. The core VM has no comprehension of EPC use, thus can not help
->    with its algorithms, like the LRU
-> 4. The SGX driver implements its own VM which is substantially simpler
->    than the core VM, but less feature-rich, fast, or scalable
+On Tue, 11 Dec 2018 16:00:19 +0000 Will Deacon <will.deacon@arm.com> wrote:
 
-I'd also add:
+> > Yes, that was the intention of sending v13. Should have I sent a
+> > separate patch with v12->v13 fixes instead? I don't know what's the
+> > usual way to make changes to the patchset once it's in the mm tree.
 
-  5. Swapping EPC pages can only be done through SGX specific ISA that
-     has strict concurrency requirements and enforces TLB flushing.
-  6. There are specialized types of EPC pages that have different
-     swapping requirements than regular EPC pages.
-  7. EPC pages that are exposed to a KVM guest have yet another set of
-     swapping requirements.
-
-In other words, extending the core VM to SGX EPC is painfully difficult.
+I usually convert replacement patches into deltas so people can see
+what changed.  In this case it got messy so I dropped v12 and remerged
+v13 wholesale.
