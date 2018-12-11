@@ -1,85 +1,37 @@
-From: Josh Triplett <josh@joshtriplett.org>
-Subject: Re: [PATCH v11 00/13] Intel SGX1 support
-Date: Mon, 10 Dec 2018 15:12:00 -0800
-Message-ID: <20181210231159.GA10718@localhost>
-References: <20180608171216.26521-1-jarkko.sakkinen@linux.intel.com>
- <20180612105011.GA26931@amd>
- <20180619145943.GC8034@linux.intel.com>
- <20180619200414.GA3143@amd>
- <20180619214833.GA5873@localhost>
- <20181209200600.GA11608@amd>
- <20181210074717.GA9880@localhost>
- <20181210082704.GA14594@amd>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH v13 00/25] kasan: add software tag-based mode for arm64
+Date: Tue, 11 Dec 2018 15:18:30 +0000
+Message-ID: <20181211151829.GB11718@edgewater-inn.cambridge.arm.com>
+References: <cover.1544099024.git.andreyknvl@google.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <20181210082704.GA14594@amd>
+In-Reply-To: <cover.1544099024.git.andreyknvl@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Pavel Machek <pavel@ucw.cz>
-Cc: Jarkko Sakkinen <jarkko.sakkinen@linux.intel.com>, x86@kernel.org, platform-driver-x86@vger.kernel.org, dave.hansen@intel.com, sean.j.christopherson@intel.com, nhorman@redhat.com, npmccallum@redhat.com, Alexei Starovoitov <ast@kernel.org>, Andi Kleen <ak@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, Andy Lutomirski <luto@kernel.org>, Borislav Petkov <bp@suse.de>, "David S. Miller" <davem@davemloft.net>, David Woodhouse <dwmw@amazon.co.uk>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "H. Peter Anvin" <hpa@zytor.com>, Ingo Molnar <mingo@kernel.org>, "open list:INTEL SGX" <intel-sgx-kernel-dev@lists.01.org>, Janakarajan Natarajan <Janakarajan.Natarajan@amd.com>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Konrad Rzeszutek Wilk <konrad.wi>
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <ks>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Dec 10, 2018 at 09:27:04AM +0100, Pavel Machek wrote:
-> On Sun 2018-12-09 23:47:17, Josh Triplett wrote:
-> > On Sun, Dec 09, 2018 at 09:06:00PM +0100, Pavel Machek wrote:
-> > ...
-> > > > > > The default permissions for the device are 600.
-> > > > > 
-> > > > > Good. This does not belong to non-root.
-> > > > 
-> > > > There are entirely legitimate use cases for using this as an
-> > > > unprivileged user. However, that'll be up to system and distribution
-> > > > policy, which can evolve over time, and it makes sense for the *initial*
-> > > > kernel permission to start out root-only and then adjust permissions via
-> > > > udev.
-> > > 
-> > > Agreed.
-> > > 
-> > > > Building a software certificate store. Hardening key-agent software like
-> > > > ssh-agent or gpg-agent. Building a challenge-response authentication
-> > > > system. Providing more assurance that your server infrastructure is
-> > > > uncompromised. Offloading computation to a system without having to
-> > > > fully trust that system.
-> > > 
-> > > I think you can do the crypto stuff... as crypto already verifies the
-> > > results. But I don't think you can do the computation offload.
-> > 
-> > You can, as long as you can do attestation.
+Hi Andrey,
+
+On Thu, Dec 06, 2018 at 01:24:18PM +0100, Andrey Konovalov wrote:
+> This patchset adds a new software tag-based mode to KASAN [1].
+> (Initially this mode was called KHWASAN, but it got renamed,
+>  see the naming rationale at the end of this section).
 > 
-> You can not, because random errors are very easy to trigger for person
-> with physical access,
+> The plan is to implement HWASan [2] for the kernel with the incentive,
+> that it's going to have comparable to KASAN performance, but in the same
+> time consume much less memory, trading that off for somewhat imprecise
+> bug detection and being supported only for arm64.
 
-Random errors can also just happen, so if you're concerned about that
-you might want to build each object on two different machines and
-compare. Good luck generating the *same* random errors on two machines.
+For the arm64 parts:
 
-(And, of course, someone can also DoS you in any number of other ways,
-such as accepting data and then never sending back a result. So you'll
-need timeouts and failovers.)
+Acked-by: Will Deacon <will.deacon@arm.com>
 
-> > > > As one of many possibilities, imagine a distcc that didn't have to trust
-> > > > the compile nodes. The compile nodes could fail to return results at
-> > > > all, but they couldn't alter the results.
-> > > 
-> > > distcc on untrusted nodes ... oh yes, that would be great.
-> > > 
-> > > Except that you can't do it, right? :-).
-> > > 
-> > > First, AFAICT it would be quite hard to get gcc to run under SGX. But
-> > > maybe you have spare month or three and can do it.
-> > 
-> > Assuming you don't need to #include files, gcc seems quite simple to run
-> > in an enclave: data in, computation inside, data out.
-> 
-> So is there a plan to run dynamically linked binaries inside enclave?
+I assume that you plan to replace the current patches in -mm with this
+series?
 
-I've seen some approaches for that, but you could also just statically
-link your compiler. (Since you'd need attestation for all the individual
-libraries, you'd need to know the versions of all those libraries, so
-you might as well just statically link.)
+Cheers,
 
-> Or maybe even python/shell scripts? It looked to me like virtual
-> memory will be "interesting" for enclaves.
-
-Memory management doesn't seem that hard to deal with.
+Will
