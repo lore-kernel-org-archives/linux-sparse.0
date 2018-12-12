@@ -1,27 +1,77 @@
-From: Andrew Morton <akpm@linux-foundation.org>
-Subject: Re: [PATCH v13 00/25] kasan: add software tag-based mode for arm64
-Date: Tue, 11 Dec 2018 13:44:57 -0800
-Message-ID: <20181211134457.2eff4a98b13ceda564ab9b37@linux-foundation.org>
-References: <cover.1544099024.git.andreyknvl@google.com>
-        <20181211151829.GB11718@edgewater-inn.cambridge.arm.com>
-        <CAAeHK+xxNsOfaUZhcErc+fjEEv0YZ-dbQ0fTXzQUO4dZbM-GgA@mail.gmail.com>
-        <20181211160018.GA12597@edgewater-inn.cambridge.arm.com>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v13 19/25] kasan: add hooks implementation for tag-based mode
+Date: Wed, 12 Dec 2018 16:04:20 +0100
+Message-ID: <CAAeHK+xc6R_p26-tu--9W1L1PvUAFb70J23ByiEukKz3uVC3EQ@mail.gmail.com>
+References: <cover.1544099024.git.andreyknvl@google.com> <bda78069e3b8422039794050ddcb2d53d053ed41.1544099024.git.andreyknvl@google.com>
+ <2bf7415e-2724-b3c3-9571-20c8b6d43b92@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181211160018.GA12597@edgewater-inn.cambridge.arm.com>
+In-Reply-To: <2bf7415e-2724-b3c3-9571-20c8b6d43b92@arm.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Will Deacon <will.deacon@arm.com>
-Cc: Andrey Konovalov <andreyknvl@google.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kste>
+To: Vincenzo Frascino <vincenzo.frascino@arm.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linu>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, 11 Dec 2018 16:00:19 +0000 Will Deacon <will.deacon@arm.com> wrote:
+On Tue, Dec 11, 2018 at 5:22 PM Vincenzo Frascino
+<vincenzo.frascino@arm.com> wrote:
+>
+> Hi Andrey,
+>
+> On 06/12/2018 12:24, Andrey Konovalov wrote:
+> > This commit adds tag-based KASAN specific hooks implementation and
+> > adjusts common generic and tag-based KASAN ones.
+> >
+> > 1. When a new slab cache is created, tag-based KASAN rounds up the size of
+> >    the objects in this cache to KASAN_SHADOW_SCALE_SIZE (== 16).
+> >
+> > 2. On each kmalloc tag-based KASAN generates a random tag, sets the shadow
+> >    memory, that corresponds to this object to this tag, and embeds this
+> >    tag value into the top byte of the returned pointer.
+> >
+> > 3. On each kfree tag-based KASAN poisons the shadow memory with a random
+> >    tag to allow detection of use-after-free bugs.
+> >
+> > The rest of the logic of the hook implementation is very much similar to
+> > the one provided by generic KASAN. Tag-based KASAN saves allocation and
+> > free stack metadata to the slab object the same way generic KASAN does.
+> >
+> > Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
+> > Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
+> > Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+> > ---
+> >  mm/kasan/common.c | 116 ++++++++++++++++++++++++++++++++++++++--------
+> >  mm/kasan/kasan.h  |   8 ++++
+> >  mm/kasan/tags.c   |  48 +++++++++++++++++++
+> >  3 files changed, 153 insertions(+), 19 deletions(-)
+> >
+>
+>
+> [...]
+>
+> > @@ -265,6 +290,8 @@ void kasan_cache_create(struct kmem_cache *cache, unsigned int *size,
+> >               return;
+> >       }
+> >
+> > +     cache->align = round_up(cache->align, KASAN_SHADOW_SCALE_SIZE);
+> > +
+>
+> Did you consider to set ARCH_SLAB_MINALIGN instead of this round up?
 
-> > Yes, that was the intention of sending v13. Should have I sent a
-> > separate patch with v12->v13 fixes instead? I don't know what's the
-> > usual way to make changes to the patchset once it's in the mm tree.
+I didn't know about this macro. Looks like we can use it to do the
+same thing. Do you think it's a better solution to redefine
+ARCH_SLAB_MINALIGN to KASAN_SHADOW_SCALE_SIZE for arm64 when tag-based
+KASAN is enabled instead of adjusting cache->align in
+kasan_cache_create?
 
-I usually convert replacement patches into deltas so people can see
-what changed.  In this case it got messy so I dropped v12 and remerged
-v13 wholesale.
+>
+> --
+> Regards,
+> Vincenzo
+>
+> --
+> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
+> To post to this group, send email to kasan-dev@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/2bf7415e-2724-b3c3-9571-20c8b6d43b92%40arm.com.
+> For more options, visit https://groups.google.com/d/optout.
