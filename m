@@ -1,56 +1,100 @@
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: [PATCH] kbuild, x86: revert macros in extended asm workarounds
-Date: Thu, 13 Dec 2018 11:51:46 +0100
-Message-ID: <20181213105146.GH5289@hirez.programming.kicks-ass.net>
-References: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com>
+From: Vincenzo Frascino <vincenzo.frascino@arm.com>
+Subject: Re: [PATCH v13 19/25] kasan: add hooks implementation for tag-based
+ mode
+Date: Fri, 14 Dec 2018 12:35:38 +0000
+Message-ID: <b99b331d-22ca-b9db-8677-4896c427ef10@arm.com>
+References: <cover.1544099024.git.andreyknvl@google.com>
+ <bda78069e3b8422039794050ddcb2d53d053ed41.1544099024.git.andreyknvl@google.com>
+ <2bf7415e-2724-b3c3-9571-20c8b6d43b92@arm.com>
+ <CAAeHK+xc6R_p26-tu--9W1L1PvUAFb70J23ByiEukKz3uVC3EQ@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com>
+In-Reply-To: <CAAeHK+xc6R_p26-tu--9W1L1PvUAFb70J23ByiEukKz3uVC3EQ@mail.gmail.com>
+Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Richard Biener <rguenther@suse.de>, Nadav Amit <namit@vmware.com>, Logan Gunthorpe <logang@deltatee.com>, Sedat Dilek <sedat.dilek@gmail.com>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-kernel@vger.kernel.org, virtualization@lists.linux-foundation.org, Michal Marek <michal.lkml@markovi.net>, linux-sparse@vger.kernel.org, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>, linux-kbuild@vger.kernel.org
+To: Andrey Konovalov <andreyknvl@google.com>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linu>
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Dec 13, 2018 at 06:17:41PM +0900, Masahiro Yamada wrote:
-> Revert the following commits:
+On 12/12/18 3:04 PM, Andrey Konovalov wrote:
+> On Tue, Dec 11, 2018 at 5:22 PM Vincenzo Frascino
+> <vincenzo.frascino@arm.com> wrote:
+>>
+>> Hi Andrey,
+>>
+>> On 06/12/2018 12:24, Andrey Konovalov wrote:
+>>> This commit adds tag-based KASAN specific hooks implementation and
+>>> adjusts common generic and tag-based KASAN ones.
+>>>
+>>> 1. When a new slab cache is created, tag-based KASAN rounds up the size of
+>>>    the objects in this cache to KASAN_SHADOW_SCALE_SIZE (== 16).
+>>>
+>>> 2. On each kmalloc tag-based KASAN generates a random tag, sets the shadow
+>>>    memory, that corresponds to this object to this tag, and embeds this
+>>>    tag value into the top byte of the returned pointer.
+>>>
+>>> 3. On each kfree tag-based KASAN poisons the shadow memory with a random
+>>>    tag to allow detection of use-after-free bugs.
+>>>
+>>> The rest of the logic of the hook implementation is very much similar to
+>>> the one provided by generic KASAN. Tag-based KASAN saves allocation and
+>>> free stack metadata to the slab object the same way generic KASAN does.
+>>>
+>>> Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
+>>> Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
+>>> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+>>> ---
+>>>  mm/kasan/common.c | 116 ++++++++++++++++++++++++++++++++++++++--------
+>>>  mm/kasan/kasan.h  |   8 ++++
+>>>  mm/kasan/tags.c   |  48 +++++++++++++++++++
+>>>  3 files changed, 153 insertions(+), 19 deletions(-)
+>>>
+>>
+>>
+>> [...]
+>>
+>>> @@ -265,6 +290,8 @@ void kasan_cache_create(struct kmem_cache *cache, unsigned int *size,
+>>>               return;
+>>>       }
+>>>
+>>> +     cache->align = round_up(cache->align, KASAN_SHADOW_SCALE_SIZE);
+>>> +
+>>
+>> Did you consider to set ARCH_SLAB_MINALIGN instead of this round up?
 > 
-> - 5bdcd510c2ac9efaf55c4cbd8d46421d8e2320cd
->   ("x86/jump-labels: Macrofy inline assembly code to work around GCC inlining bugs")
-> 
-> - d5a581d84ae6b8a4a740464b80d8d9cf1e7947b2
->   ("x86/cpufeature: Macrofy inline assembly code to work around GCC inlining bugs")
-> 
-> - 0474d5d9d2f7f3b11262f7bf87d0e7314ead9200.
->   ("x86/extable: Macrofy inline assembly code to work around GCC inlining bugs")
-> 
-> - 494b5168f2de009eb80f198f668da374295098dd.
->   ("x86/paravirt: Work around GCC inlining bugs when compiling paravirt ops")
-> 
-> - f81f8ad56fd1c7b99b2ed1c314527f7d9ac447c6.
->   ("x86/bug: Macrofy the BUG table section handling, to work around GCC inlining bugs")
-> 
-> - 77f48ec28e4ccff94d2e5f4260a83ac27a7f3099.
->   ("x86/alternatives: Macrofy lock prefixes to work around GCC inlining bugs")
-> 
-> - 9e1725b410594911cc5981b6c7b4cea4ec054ca8.
->   ("x86/refcount: Work around GCC inlining bug")
->   (Conflicts: arch/x86/include/asm/refcount.h)
-> 
-> - c06c4d8090513f2974dfdbed2ac98634357ac475.
->   ("x86/objtool: Use asm macros to work around GCC inlining bugs")
-> 
-> - 77b0bf55bc675233d22cd5df97605d516d64525e.
->   ("kbuild/Makefile: Prepare for using macros in inline assembly code to work around asm() related GCC inlining bugs")
-> 
+> I didn't know about this macro. Looks like we can use it to do the
+> same thing. Do you think it's a better solution to redefine
+> ARCH_SLAB_MINALIGN to KASAN_SHADOW_SCALE_SIZE for arm64 when tag-based
+> KASAN is enabled instead of adjusting cache->align in
+> kasan_cache_create?
+>
 
-I don't think we want to blindly revert all that. Some of them actually
-made sense and did clean up things irrespective of the asm-inline issue.
+Yes, I think it is better because in this way we do not need to add extra code
+to do the rounding.
 
-In particular I like the jump-label one. The cpufeature one OTOh, yeah,
-I'd love to get that reverted.
+Curiosity, did you try your patches with SLUB red zoning enabled?
+Since the area used for the Redzone is just after the payload, aligning the
+object_size independently from the allocator could have side effects, at least
+if I understand well how the mechanism works.
 
-And as a note; the normal commit quoting style is:
+Setting ARCH_SLAB_MINALIGN should avoid this as well.
 
-  d5a581d84ae6 ("x86/cpufeature: Macrofy inline assembly code to work around GCC inlining bugs")
+What do you think?
+
+>>
+>> --
+>> Regards,
+>> Vincenzo
+>>
+>> --
+>> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
+>> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
+>> To post to this group, send email to kasan-dev@googlegroups.com.
+>> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/2bf7415e-2724-b3c3-9571-20c8b6d43b92%40arm.com.
+>> For more options, visit https://groups.google.com/d/optout.
+
+-- 
+Regards,
+Vincenzo
