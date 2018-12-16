@@ -1,84 +1,79 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
+From: Nadav Amit <namit@vmware.com>
 Subject: Re: [PATCH] kbuild, x86: revert macros in extended asm workarounds
-Date: Sat, 15 Dec 2018 09:51:12 +0900
-Message-ID: <CAK7LNASB=HvU8DwUQQkz_r3sY1DN8Vv-qfNa54-ZDXSpfvEYpg@mail.gmail.com>
-References: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com> <20181213105146.GH5289@hirez.programming.kicks-ass.net>
+Date: Sun, 16 Dec 2018 02:33:39 +0000
+Message-ID: <07BE39B2-1F99-4AE4-97F3-0871A39C5E7D@vmware.com>
+References: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com>
+ <20181213105146.GH5289@hirez.programming.kicks-ass.net>
+ <CAK7LNASB=HvU8DwUQQkz_r3sY1DN8Vv-qfNa54-ZDXSpfvEYpg@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181213105146.GH5289@hirez.programming.kicks-ass.net>
+In-Reply-To: <CAK7LNASB=HvU8DwUQQkz_r3sY1DN8Vv-qfNa54-ZDXSpfvEYpg@mail.gmail.com>
+Content-Language: en-US
+Content-ID: <85A242CF1B9B20409566BB977F231D11@namprd05.prod.outlook.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, Richard Biener <rguenther@suse.de>, Nadav Amit <namit@vmware.com>, Logan Gunthorpe <logang@deltatee.com>, Sedat Dilek <sedat.dilek@gmail.com>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch <linux-arch@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, virtualization@lists.linux-foundation.org, Michal Marek <michal.lkml@markovi.net>, linux-sparse@vger.kernel.org, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, Andy Lutomirski <luto@kernel.org>L
+To: Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, Richard Biener <rguenther@suse.de>, Logan Gunthorpe <logang@deltatee.com>, Sedat Dilek <sedat.dilek@gmail.com>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch <linux-arch@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Michal Marek <michal.lkml@markovi.net>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Alok Kataria <akataria@vm>
 List-Id: linux-sparse@vger.kernel.org
 
-Hi Peter,
-
-On Thu, Dec 13, 2018 at 7:53 PM Peter Zijlstra <peterz@infradead.org> wrote:
->
-> On Thu, Dec 13, 2018 at 06:17:41PM +0900, Masahiro Yamada wrote:
-> > Revert the following commits:
-> >
-> > - 5bdcd510c2ac9efaf55c4cbd8d46421d8e2320cd
-> >   ("x86/jump-labels: Macrofy inline assembly code to work around GCC inlining bugs")
-> >
-> > - d5a581d84ae6b8a4a740464b80d8d9cf1e7947b2
-> >   ("x86/cpufeature: Macrofy inline assembly code to work around GCC inlining bugs")
-> >
-> > - 0474d5d9d2f7f3b11262f7bf87d0e7314ead9200.
-> >   ("x86/extable: Macrofy inline assembly code to work around GCC inlining bugs")
-> >
-> > - 494b5168f2de009eb80f198f668da374295098dd.
-> >   ("x86/paravirt: Work around GCC inlining bugs when compiling paravirt ops")
-> >
-> > - f81f8ad56fd1c7b99b2ed1c314527f7d9ac447c6.
-> >   ("x86/bug: Macrofy the BUG table section handling, to work around GCC inlining bugs")
-> >
-> > - 77f48ec28e4ccff94d2e5f4260a83ac27a7f3099.
-> >   ("x86/alternatives: Macrofy lock prefixes to work around GCC inlining bugs")
-> >
-> > - 9e1725b410594911cc5981b6c7b4cea4ec054ca8.
-> >   ("x86/refcount: Work around GCC inlining bug")
-> >   (Conflicts: arch/x86/include/asm/refcount.h)
-> >
-> > - c06c4d8090513f2974dfdbed2ac98634357ac475.
-> >   ("x86/objtool: Use asm macros to work around GCC inlining bugs")
-> >
-> > - 77b0bf55bc675233d22cd5df97605d516d64525e.
-> >   ("kbuild/Makefile: Prepare for using macros in inline assembly code to work around asm() related GCC inlining bugs")
-> >
->
-> I don't think we want to blindly revert all that. Some of them actually
-> made sense and did clean up things irrespective of the asm-inline issue.
->
-> In particular I like the jump-label one.
-
-[1] The #error message is unnecessary.
-
-[2] keep STATC_BRANCH_NOP/JMP instead of STATIC_JUMP_IF_TRUE/FALSE
-
-
-
-In v2, I will make sure to not re-add [1].
-I am not sure about [2].
-
-
-Do you mean only [1],
-or both of them?
-
-
-
-> The cpufeature one OTOh, yeah,
-> I'd love to get that reverted.
->
-> And as a note; the normal commit quoting style is:
->
->   d5a581d84ae6 ("x86/cpufeature: Macrofy inline assembly code to work around GCC inlining bugs")
-
-
-OK. I will do so in v2.
-
-
---
-Best Regards
-Masahiro Yamada
+PiBPbiBEZWMgMTQsIDIwMTgsIGF0IDQ6NTEgUE0sIE1hc2FoaXJvIFlhbWFkYSA8eWFtYWRhLm1h
+c2FoaXJvQHNvY2lvbmV4dC5jb20+IHdyb3RlOg0KPiANCj4gSGkgUGV0ZXIsDQo+IA0KPiBPbiBU
+aHUsIERlYyAxMywgMjAxOCBhdCA3OjUzIFBNIFBldGVyIFppamxzdHJhIDxwZXRlcnpAaW5mcmFk
+ZWFkLm9yZz4gd3JvdGU6DQo+PiBPbiBUaHUsIERlYyAxMywgMjAxOCBhdCAwNjoxNzo0MVBNICsw
+OTAwLCBNYXNhaGlybyBZYW1hZGEgd3JvdGU6DQo+Pj4gUmV2ZXJ0IHRoZSBmb2xsb3dpbmcgY29t
+bWl0czoNCj4+PiANCj4+PiAtIDViZGNkNTEwYzJhYzllZmFmNTVjNGNiZDhkNDY0MjFkOGUyMzIw
+Y2QNCj4+PiAgKCJ4ODYvanVtcC1sYWJlbHM6IE1hY3JvZnkgaW5saW5lIGFzc2VtYmx5IGNvZGUg
+dG8gd29yayBhcm91bmQgR0NDIGlubGluaW5nIGJ1Z3MiKQ0KPj4+IA0KPj4+IC0gZDVhNTgxZDg0
+YWU2YjhhNGE3NDA0NjRiODBkOGQ5Y2YxZTc5NDdiMg0KPj4+ICAoIng4Ni9jcHVmZWF0dXJlOiBN
+YWNyb2Z5IGlubGluZSBhc3NlbWJseSBjb2RlIHRvIHdvcmsgYXJvdW5kIEdDQyBpbmxpbmluZyBi
+dWdzIikNCj4+PiANCj4+PiAtIDA0NzRkNWQ5ZDJmN2YzYjExMjYyZjdiZjg3ZDBlNzMxNGVhZDky
+MDAuDQo+Pj4gICgieDg2L2V4dGFibGU6IE1hY3JvZnkgaW5saW5lIGFzc2VtYmx5IGNvZGUgdG8g
+d29yayBhcm91bmQgR0NDIGlubGluaW5nIGJ1Z3MiKQ0KPj4+IA0KPj4+IC0gNDk0YjUxNjhmMmRl
+MDA5ZWI4MGYxOThmNjY4ZGEzNzQyOTUwOThkZC4NCj4+PiAgKCJ4ODYvcGFyYXZpcnQ6IFdvcmsg
+YXJvdW5kIEdDQyBpbmxpbmluZyBidWdzIHdoZW4gY29tcGlsaW5nIHBhcmF2aXJ0IG9wcyIpDQo+
+Pj4gDQo+Pj4gLSBmODFmOGFkNTZmZDFjN2I5OWIyZWQxYzMxNDUyN2Y3ZDlhYzQ0N2M2Lg0KPj4+
+ICAoIng4Ni9idWc6IE1hY3JvZnkgdGhlIEJVRyB0YWJsZSBzZWN0aW9uIGhhbmRsaW5nLCB0byB3
+b3JrIGFyb3VuZCBHQ0MgaW5saW5pbmcgYnVncyIpDQo+Pj4gDQo+Pj4gLSA3N2Y0OGVjMjhlNGNj
+ZmY5NGQyZTVmNDI2MGE4M2FjMjdhN2YzMDk5Lg0KPj4+ICAoIng4Ni9hbHRlcm5hdGl2ZXM6IE1h
+Y3JvZnkgbG9jayBwcmVmaXhlcyB0byB3b3JrIGFyb3VuZCBHQ0MgaW5saW5pbmcgYnVncyIpDQo+
+Pj4gDQo+Pj4gLSA5ZTE3MjViNDEwNTk0OTExY2M1OTgxYjZjN2I0Y2VhNGVjMDU0Y2E4Lg0KPj4+
+ICAoIng4Ni9yZWZjb3VudDogV29yayBhcm91bmQgR0NDIGlubGluaW5nIGJ1ZyIpDQo+Pj4gIChD
+b25mbGljdHM6IGFyY2gveDg2L2luY2x1ZGUvYXNtL3JlZmNvdW50LmgpDQo+Pj4gDQo+Pj4gLSBj
+MDZjNGQ4MDkwNTEzZjI5NzRkZmRiZWQyYWM5ODYzNDM1N2FjNDc1Lg0KPj4+ICAoIng4Ni9vYmp0
+b29sOiBVc2UgYXNtIG1hY3JvcyB0byB3b3JrIGFyb3VuZCBHQ0MgaW5saW5pbmcgYnVncyIpDQo+
+Pj4gDQo+Pj4gLSA3N2IwYmY1NWJjNjc1MjMzZDIyY2Q1ZGY5NzYwNWQ1MTZkNjQ1MjVlLg0KPj4+
+ICAoImtidWlsZC9NYWtlZmlsZTogUHJlcGFyZSBmb3IgdXNpbmcgbWFjcm9zIGluIGlubGluZSBh
+c3NlbWJseSBjb2RlIHRvIHdvcmsgYXJvdW5kIGFzbSgpIHJlbGF0ZWQgR0NDIGlubGluaW5nIGJ1
+Z3MiKQ0KPj4gDQo+PiBJIGRvbid0IHRoaW5rIHdlIHdhbnQgdG8gYmxpbmRseSByZXZlcnQgYWxs
+IHRoYXQuIFNvbWUgb2YgdGhlbSBhY3R1YWxseQ0KPj4gbWFkZSBzZW5zZSBhbmQgZGlkIGNsZWFu
+IHVwIHRoaW5ncyBpcnJlc3BlY3RpdmUgb2YgdGhlIGFzbS1pbmxpbmUgaXNzdWUuDQo+PiANCj4+
+IEluIHBhcnRpY3VsYXIgSSBsaWtlIHRoZSBqdW1wLWxhYmVsIG9uZS4NCj4gDQo+IFsxXSBUaGUg
+I2Vycm9yIG1lc3NhZ2UgaXMgdW5uZWNlc3NhcnkuDQo+IA0KPiBbMl0ga2VlcCBTVEFUQ19CUkFO
+Q0hfTk9QL0pNUCBpbnN0ZWFkIG9mIFNUQVRJQ19KVU1QX0lGX1RSVUUvRkFMU0UNCj4gDQo+IA0K
+PiANCj4gSW4gdjIsIEkgd2lsbCBtYWtlIHN1cmUgdG8gbm90IHJlLWFkZCBbMV0uDQo+IEkgYW0g
+bm90IHN1cmUgYWJvdXQgWzJdLg0KPiANCj4gDQo+IERvIHlvdSBtZWFuIG9ubHkgWzFdLA0KPiBv
+ciBib3RoIG9mIHRoZW0/DQo+IA0KPiANCj4gDQo+PiBUaGUgY3B1ZmVhdHVyZSBvbmUgT1RPaCwg
+eWVhaCwNCj4+IEknZCBsb3ZlIHRvIGdldCB0aGF0IHJldmVydGVkLg0KPj4gDQo+PiBBbmQgYXMg
+YSBub3RlOyB0aGUgbm9ybWFsIGNvbW1pdCBxdW90aW5nIHN0eWxlIGlzOg0KPj4gDQo+PiAgZDVh
+NTgxZDg0YWU2ICgieDg2L2NwdWZlYXR1cmU6IE1hY3JvZnkgaW5saW5lIGFzc2VtYmx5IGNvZGUg
+dG8gd29yayBhcm91bmQgR0NDIGlubGluaW5nIGJ1Z3MiKQ0KPiANCj4gDQo+IE9LLiBJIHdpbGwg
+ZG8gc28gaW4gdjIuDQoNCkkgcmVjb21tZW5kIHRvIGRvIHRoZSBmb2xsb3dpbmcgZm9yIHYyOg0K
+DQoxLiBSdW4gc29tZSBzdGF0aWMgbWVhc3VyZW1lbnRzIChlLmcuLCBmdW5jdGlvbiBzaXplcywg
+bnVtYmVyIG9mIGZ1bmN0aW9uDQpzeW1ib2xzKSB0byBlbnN1cmUgdGhhdCBHQ0Mgd29ya3MgYXMg
+aXQgc2hvdWxkLiBJZiBwb3NzaWJsZSwgcnVuIHNtYWxsDQpwZXJmb3JtYW5jZSBldmFsdWF0aW9u
+cy4gSUlSQywgSSBzYXcgc21hbGwgYnV0IGNvbnNpc3RlbnQgcGVyZm9ybWFuY2UNCmRpZmZlcmVu
+Y2Ugd2hlbiBJIHJhbiBhIGxvb3Agd2l0aCBtcHJvdGVjdCgpIHRoYXQga2VwdCBjaGFuZ2luZyBw
+ZXJtaXNzaW9ucy4NClRoaXMgd2FzIGR1ZSB0byBQViBNTVUgZnVuY3Rpb25zIHRoYXQgY2F1c2Vk
+IGlubGluaW5nIG1lc3MuDQoNCjIuIEJyZWFrIHRoZSBwYXRjaCBpbnRvIHNlcGFyYXRlIHBhdGNo
+ZXMsIGJhc2VkIG9uIHRoZSBvcmlnaW5hbCBwYXRjaC1zZXQNCm9yZGVyIChyZXZlcnNlZCkuIFRo
+aXMgaXMgdGhlIGNvbW1vbiBwcmFjdGljZSwgd2hpY2ggYWxsb3dzIHBlb3BsZSB0byByZXZpZXcN
+CnBhdGNoZXMsIHBlcmZvcm0gYmlzZWN0aW9ucywgYW5kIHJldmVydCB3aGVuIG5lZWRlZC4NCg0K
+My4gQ2MgdGhlIHJlbGV2YW50IHBlb3BsZSB3aG8gYWNrJ2QgdGhlIG9yaWdpbmFsIHBhdGNoZXMs
+IGUuZy4sIEtlZXMgQ29vaywNCndob+KAmXMgb24gdG9wIG9mIHRoZSByZWZlcmVuY2UtY291bnRl
+cnMgYW5kIExpbnVzLCB3aG8gcHJvcG9zZWQgdGhpcw0KYXBwcm9hY2guDQoNCkluIGdlbmVyYWws
+IEkgdGhpbmsgdGhhdCBmcm9tIHRoZSBzdGFydCBpdCB3YXMgY2xlYXIgdGhhdCB0aGUgbW90aXZh
+dGlvbiBmb3INCnRoZSBwYXRjaC1zZXQgaXMgbm90IGp1c3QgcGVyZm9ybWFuY2UgYW5kIGFsc28g
+YmV0dGVyIGNvZGUuIEZvciBleGFtcGxlLCBJDQpzZWUgbm8gcmVhc29uIHRvIHJldmVydCB0aGUg
+UFYtY2hhbmdlcyBvciB0aGUgbG9jay1wcmVmaXggY2hhbmdlcyB0aGF0DQppbXByb3ZlZCB0aGUg
+Y29kZSByZWFkYWJpbGl0eS4NCg0KUmVnYXJkcywNCk5hZGF2
