@@ -1,75 +1,63 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: Re: [PATCH v2] x86, kbuild: revert macrofying inline assembly code
-Date: Sun, 16 Dec 2018 03:28:23 +0000
-Message-ID: <9691ECB6-D659-4E88-B8AF-4947B9431AF1@vmware.com>
-References: <1544928632-9717-1-git-send-email-yamada.masahiro@socionext.com>
+From: Borislav Petkov via Virtualization
+	<virtualization@lists.linux-foundation.org>
+Subject: Re: [PATCH] kbuild, x86: revert macros in extended asm workarounds
+Date: Sun, 16 Dec 2018 11:00:42 +0100
+Message-ID: <20181216100042.GA815@zn.tnic>
+References: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com>
+	<20181213105146.GH5289@hirez.programming.kicks-ass.net>
+	<CAK7LNASB=HvU8DwUQQkz_r3sY1DN8Vv-qfNa54-ZDXSpfvEYpg@mail.gmail.com>
+	<07BE39B2-1F99-4AE4-97F3-0871A39C5E7D@vmware.com>
+Reply-To: Borislav Petkov <bp@alien8.de>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1544928632-9717-1-git-send-email-yamada.masahiro@socionext.com>
-Content-Language: en-US
-Content-ID: <4AA835CDA2BF8D448F7B19D2F3BC68B7@namprd05.prod.outlook.com>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: X86 ML <x86@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, Richard Biener <rguenther@suse.de>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch <linux-arch@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Michal Marek <michal.lkml@markovi.net>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, "linux-kbuild@vger.kernel.org" <linux-kbuild@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+Content-Disposition: inline
+In-Reply-To: <07BE39B2-1F99-4AE4-97F3-0871A39C5E7D@vmware.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: Nadav Amit <namit@vmware.com>, Masahiro Yamada <yamada.masahiro@socionext.com>
+Cc: linux-arch <linux-arch@vger.kernel.org>, Juergen Gross <jgross@suse.com>, Michal Marek <michal.lkml@markovi.net>, Richard Biener <rguenther@suse.de>, Arnd Bergmann <arnd@arndb.de>, Segher Boessenkool <segher@kernel.crashing.org>, Linux Kbuild mailing list <linux-kbuild@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, X86 ML <x86@kernel.org>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Ingo Molnar <mingo@redhat.com>, Andy Lutomirski <luto@kernel.org>, "H . Peter Anvin" <hpa@zytor.com>, Sedat Dilek <sedat.dilek@gmail.com>, Thomas Gleixner <tglx@linutronix.de>, Logan Gunthorpe <logang@deltatee.com>, Alok Kataria <akataria@vmware.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
 
-PiBPbiBEZWMgMTUsIDIwMTgsIGF0IDY6NTAgUE0sIE1hc2FoaXJvIFlhbWFkYSA8eWFtYWRhLm1h
-c2FoaXJvQHNvY2lvbmV4dC5jb20+IHdyb3RlOg0KPiANCj4gUmV2ZXJ0IHRoZSBmb2xsb3dpbmcg
-OSBjb21taXRzOg0KPiANCj4gWzFdIDViZGNkNTEwYzJhYyAoIng4Ni9qdW1wLWxhYmVsczogTWFj
-cm9meSBpbmxpbmUgYXNzZW1ibHkgY29kZSB0bw0KPiAgICB3b3JrIGFyb3VuZCBHQ0MgaW5saW5p
-bmcgYnVncyIpDQo+IA0KPiAgICBUaGlzIHdhcyBwYXJ0aWFsbHkgcmV2ZXJ0ZWQgYmVjYXVzZSBp
-dCBtYWRlIGdvb2QgY2xlYW51cHMNCj4gICAgaXJyZXNwZWN0aXZlIG9mIHRoZSBpbmxpbmluZyBp
-c3N1ZTsgdGhlIGVycm9yIG1lc3NhZ2UgaXMgc3RpbGwNCj4gICAgdW5uZWVkZWQsIGFuZCB0aGUg
-Y29udmVyc2lvbiB0byBTVEFUSUNfQlJBTkNIX3tOT1AsSlVNUH0gc2hvdWxkDQo+ICAgIGJlIGtl
-cHQuDQo+IA0KPiBbMl0gZDVhNTgxZDg0YWU2ICgieDg2L2NwdWZlYXR1cmU6IE1hY3JvZnkgaW5s
-aW5lIGFzc2VtYmx5IGNvZGUgdG8NCj4gICAgd29yayBhcm91bmQgR0NDIGlubGluaW5nIGJ1Z3Mi
-KQ0KPiANCj4gWzNdIDA0NzRkNWQ5ZDJmNyAoIng4Ni9leHRhYmxlOiBNYWNyb2Z5IGlubGluZSBh
-c3NlbWJseSBjb2RlIHRvIHdvcmsNCj4gICAgYXJvdW5kIEdDQyBpbmxpbmluZyBidWdzIikNCj4g
-DQo+IFs0XSA0OTRiNTE2OGYyZGUgKCJ4ODYvcGFyYXZpcnQ6IFdvcmsgYXJvdW5kIEdDQyBpbmxp
-bmluZyBidWdzIHdoZW4NCj4gICAgY29tcGlsaW5nIHBhcmF2aXJ0IG9wcyIpDQo+IA0KPiBbNV0g
-ZjgxZjhhZDU2ZmQxICgieDg2L2J1ZzogTWFjcm9meSB0aGUgQlVHIHRhYmxlIHNlY3Rpb24gaGFu
-ZGxpbmcsDQo+ICAgIHRvIHdvcmsgYXJvdW5kIEdDQyBpbmxpbmluZyBidWdzIikNCj4gDQo+IFs2
-XSA3N2Y0OGVjMjhlNGMgKCJ4ODYvYWx0ZXJuYXRpdmVzOiBNYWNyb2Z5IGxvY2sgcHJlZml4ZXMg
-dG8gd29yaw0KPiAgIGFyb3VuZCBHQ0MgaW5saW5pbmcgYnVncyIpDQo+IA0KPiBbN10gOWUxNzI1
-YjQxMDU5ICgieDg2L3JlZmNvdW50OiBXb3JrIGFyb3VuZCBHQ0MgaW5saW5pbmcgYnVnIikNCj4g
-DQo+ICAgIFJlc29sdmVkIGNvbmZsaWN0cyBpbiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9yZWZjb3Vu
-dC5oIGNhdXNlZCBieQ0KPiAgICAyODhlNDUyMWYwZjYgKCJ4ODYvYXNtOiAnU2ltcGxpZnknIEdF
-Tl8qX1JNV2NjKCkgbWFjcm9zIikuDQo+IA0KPiBbOF0gYzA2YzRkODA5MDUxICgieDg2L29ianRv
-b2w6IFVzZSBhc20gbWFjcm9zIHRvIHdvcmsgYXJvdW5kIEdDQw0KPiAgICBpbmxpbmluZyBidWdz
-IikNCj4gDQo+IFs5XSA3N2IwYmY1NWJjNjcgKCJrYnVpbGQvTWFrZWZpbGU6IFByZXBhcmUgZm9y
-IHVzaW5nIG1hY3JvcyBpbiBpbmxpbmUNCj4gICAgYXNzZW1ibHkgY29kZSB0byB3b3JrIGFyb3Vu
-ZCBhc20oKSByZWxhdGVkIEdDQyBpbmxpbmluZyBidWdzIikNCj4gDQo+IEEgZmV3IGRheXMgYWZ0
-ZXIgdGhvc2UgY29tbWl0cyBhcHBsaWVkLCBkaXNjdXNzaW9uIHN0YXJ0ZWQgdG8gc29sdmUNCj4g
-dGhlIGlzc3VlIG1vcmUgZWxlZ2FudGx5IHdpdGggdGhlIGhlbHAgb2YgY29tcGlsZXI6DQo+IA0K
-PiAgaHR0cHM6Ly9uYTAxLnNhZmVsaW5rcy5wcm90ZWN0aW9uLm91dGxvb2suY29tLz91cmw9aHR0
-cHMlM0ElMkYlMkZsa21sLm9yZyUyRmxrbWwlMkYyMDE4JTJGMTAlMkY3JTJGOTImYW1wO2RhdGE9
-MDIlN0MwMSU3Q25hbWl0JTQwdm13YXJlLmNvbSU3Q2U4OTNjZTg4MDY1ZTRjNTkyMzYzMDhkNjYz
-MDE5NDI0JTdDYjM5MTM4Y2EzY2VlNGI0YWE0ZDZjZDgzZDlkZDYyZjAlN0MwJTdDMCU3QzYzNjgw
-NTI1NTc4NzYwNzE3OCZhbXA7c2RhdGE9bWlpVW5kbVBmR05LdnJ6RDVtdHRDMSUyQm42ck5hb0lG
-ZWJqWk9Ba0JyMjRZJTNEJmFtcDtyZXNlcnZlZD0wDQo+IA0KPiBUaGUgbmV3IHN5bnRheCAiYXNt
-IGlubGluZSIgd2FzIGltcGxlbWVudGVkIGJ5IFNlZ2hlciBCb2Vzc2Vua29vbCwgYW5kDQo+IG5v
-dyBxdWV1ZWQgdXAgZm9yIEdDQyA5LiAoUGVvcGxlIHdlcmUgcG9zaXRpdmUgZXZlbiBmb3IgYmFj
-ay1wb3J0aW5nIGl0DQo+IHRvIG9sZGVyIGNvbXBpbGVycykuDQo+IA0KPiBTaW5jZSB0aGUgaW4t
-a2VybmVsIHdvcmthcm91bmRzIG1lcmdlZCwgc29tZSBpc3N1ZXMgaGF2ZSBiZWVuIHJlcG9ydGVk
-Og0KPiBicmVha2FnZSBvZiBidWlsZGluZyB3aXRoIGRpc3RjYy9pY2VjYywgYnJlYWthZ2Ugb2Yg
-ZGlzdHJvIHBhY2thZ2VzIGZvcg0KPiBtb2R1bGUgYnVpbGRpbmcuIChNb3JlIGZ1bmRhbWVudGFs
-bHksIHdlIGNhbm5vdCBidWlsZCBleHRlcm5hbCBtb2R1bGVzDQo+IGFmdGVyICdtYWtlIGNsZWFu
-Jy4pDQo+IA0KPiBJIGRvIG5vdCB3YW50IHRvIG1lc3MgdXAgdGhlIGJ1aWxkIHN5c3RlbSBhbnkg
-bW9yZS4NCj4gDQo+IEdpdmVuIHRoYXQgdGhpcyBpc3N1ZSB3aWxsIGJlIHNvbHZlZCBpbiBhIGNs
-ZWFuZXIgd2F5IHNvb25lciBvciBsYXRlciwNCj4gbGV0J3MgcmV2ZXJ0IHRoZSBpbi1rZXJuZWwg
-d29ya2Fyb3VuZHMsIGFuZCB3YWl0IGZvciBHQ0MgOS4NCj4gDQo+IFJlcG9ydGVkLWJ5OiBMb2dh
-biBHdW50aG9ycGUgPGxvZ2FuZ0BkZWx0YXRlZS5jb20+ICMgZGlzdGNjDQo+IFJlcG9ydGVkLWJ5
-OiBTZWRhdCBEaWxlayA8c2VkYXQuZGlsZWtAZ21haWwuY29tPiAjIGRlYi9ycG0gcGFja2FnZQ0K
-DQpJdCBpcyBjdXN0b21hcnkgdG8gY2MgdGhvc2Ugd2hvIHJlcG9ydCBhbiBpc3N1ZS4NCg0KVGhl
-IGRpc3RjYyBpc3N1ZSBoYXMgYWxyZWFkeSBiZWVuIHJlc29sdmVkIGJvdGggaW4gZGlzdGNjIGFu
-ZCBpbiB0aGUgcGF0Y2hlcw0KSeKAmXZlIHNlbnQ6IGh0dHBzOi8vbGttbC5vcmcvbGttbC8yMDE4
-LzExLzE1LzQ2NyAuIFNvIEkgY2Fubm90IHVuZGVyc3RhbmQgd2h5DQppdCBpcyBtZW50aW9uZWQg
-YXMgYSBtb3RpdmF0aW9uLg0KDQpJdCBzb3VuZHMgdGhhdCB0aGUgZXh0ZXJuYWwgbW9kdWxlcyBj
-YW4gZWFzaWx5IGJlIHJlc29sdmVkLiBDYW4geW91IHBsZWFzZQ0KcHJvdmlkZSBhIGxpbmsgZm9y
-IHRoZSBidWcgcmVwb3J0Pw0KDQpQbGVhc2UgcmVnYXJkIG15IGNvbW1lbnRzIHJlZ2FyZGluZyB2
-MS4gSSBtdXN0IGFkbWl0IHRoYXQgSeKAmW0gdmVyeSBzdXJwcmlzZWQNCnRoYXQgeW91IGRvbuKA
-mXQgbGlrZSB0aGUgcGF0Y2hlcyBzaW5jZSB5b3UgYWNr4oCZZCB0aGUgb3JpZ2luYWwgcGF0Y2gt
-c2V0IChhbmQNCmFjdHVhbGx5IGFzc2lzdGVkIG1lIGluIGNoYW5naW5nIHRoZSBNYWtlZmlsZSku
-DQoNCg==
+On Sun, Dec 16, 2018 at 02:33:39AM +0000, Nadav Amit wrote:
+> In general, I think that from the start it was clear that the motivation for
+> the patch-set is not just performance and also better code. For example, I
+> see no reason to revert the PV-changes or the lock-prefix changes that
+> improved the code readability.
+
+One thing that has caught my eye with the asm macros, which actually
+decreases readability, is that I can't see the macro properly expanded
+when I do
+
+make <filename>.s
+
+For example, I get
+
+#APP
+# 164 "./arch/x86/include/asm/cpufeature.h" 1
+        STATIC_CPU_HAS bitnum=$8 cap_byte="boot_cpu_data+35(%rip)" feature=123 t_yes=.L75 t_no=.L78 always=117  #, MEM[(const char *)&boot_cpu_data + 35B],,,,
+# 0 "" 2
+        .loc 11 164 2 view .LVU480
+#NO_APP
+
+but I'd like to see the actual asm as it is really helpful when hacking
+on inline asm stuff. And I haven't found a way to make gcc expand asm
+macros in .s output.
+
+Now, assuming the gcc inline patch will be backported to gcc8, I think
+we should be covered on all modern distros going forward. So I think we
+should revert at least the more complex macros.
+
+-- 
+Regards/Gruss,
+    Boris.
+
+Good mailing practices for 400: avoid top-posting and trim the reply.
