@@ -1,117 +1,112 @@
-From: Masahiro Yamada <yamada.masahiro@socionext.com>
-Subject: [PATCH v3 00/12] x86, kbuild: revert macrofying inline assembly code
-Date: Tue, 18 Dec 2018 01:03:15 +0900
-Message-ID: <1545062607-8599-1-git-send-email-yamada.masahiro@socionext.com>
+From: Andrey Konovalov <andreyknvl@google.com>
+Subject: Re: [PATCH v13 19/25] kasan: add hooks implementation for tag-based mode
+Date: Mon, 17 Dec 2018 20:33:42 +0100
+Message-ID: <CAAeHK+w2jppKbb26bBk6uP9ydZeHrtNc6b2CVv4xbvt6ecVooA@mail.gmail.com>
+References: <cover.1544099024.git.andreyknvl@google.com> <bda78069e3b8422039794050ddcb2d53d053ed41.1544099024.git.andreyknvl@google.com>
+ <2bf7415e-2724-b3c3-9571-20c8b6d43b92@arm.com> <CAAeHK+xc6R_p26-tu--9W1L1PvUAFb70J23ByiEukKz3uVC3EQ@mail.gmail.com>
+ <b99b331d-22ca-b9db-8677-4896c427ef10@arm.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Transfer-Encoding: 7bit
-Return-path: <virtualization-bounces@lists.linux-foundation.org>
-List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
-List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
-List-Post: <mailto:virtualization@lists.linux-foundation.org>
-List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
-List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
-	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
-Sender: virtualization-bounces@lists.linux-foundation.org
-Errors-To: virtualization-bounces@lists.linux-foundation.org
-To: x86@kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>
-Cc: Peter Zijlstra <peterz@infradead.org>, Alexei Starovoitov <ast@kernel.org>, virtualization@lists.linux-foundation.org, Masahiro Yamada <yamada.masahiro@socionext.com>, Nadav Amit <namit@vmware.com>, Jan Beulich <JBeulich@suse.com>, Andrey Ryabinin <aryabinin@virtuozzo.com>, linux-arch@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, linux-kbuild@vger.kernel.org, linux-sparse@vger.kernel.org, Yonghong Song <yhs@fb.com>, Alexey Dobriyan <adobriyan@gmail.com>, Kees Cook <keescook@chromium.org>, Segher Boessenkool <segher@kernel.crashing.org>, Jann Horn <jannh@google.com>, Arnaldo Carvalho de Melo <acme@redhat.com>, Josh Poimboeuf <jpoimboe@redhat.com>, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, Michal Marek <michal.lkml@markovi.net>, Richard Biener <rguenther@suse.de>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, linux-kernel@vger.kernel.org, David
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <b99b331d-22ca-b9db-8677-4896c427ef10@arm.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: Vincenzo Frascino <vincenzo.frascino@arm.com>, Andrew Morton <akpm@linux-foundation.org>
+Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A. Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@li>
 List-Id: linux-sparse@vger.kernel.org
 
-This series reverts the in-kernel workarounds for inlining issues.
+On Fri, Dec 14, 2018 at 1:34 PM Vincenzo Frascino
+<vincenzo.frascino@arm.com> wrote:
+>
+> On 12/12/18 3:04 PM, Andrey Konovalov wrote:
+> > On Tue, Dec 11, 2018 at 5:22 PM Vincenzo Frascino
+> > <vincenzo.frascino@arm.com> wrote:
+> >>
+> >> Hi Andrey,
+> >>
+> >> On 06/12/2018 12:24, Andrey Konovalov wrote:
+> >>> This commit adds tag-based KASAN specific hooks implementation and
+> >>> adjusts common generic and tag-based KASAN ones.
+> >>>
+> >>> 1. When a new slab cache is created, tag-based KASAN rounds up the size of
+> >>>    the objects in this cache to KASAN_SHADOW_SCALE_SIZE (== 16).
+> >>>
+> >>> 2. On each kmalloc tag-based KASAN generates a random tag, sets the shadow
+> >>>    memory, that corresponds to this object to this tag, and embeds this
+> >>>    tag value into the top byte of the returned pointer.
+> >>>
+> >>> 3. On each kfree tag-based KASAN poisons the shadow memory with a random
+> >>>    tag to allow detection of use-after-free bugs.
+> >>>
+> >>> The rest of the logic of the hook implementation is very much similar to
+> >>> the one provided by generic KASAN. Tag-based KASAN saves allocation and
+> >>> free stack metadata to the slab object the same way generic KASAN does.
+> >>>
+> >>> Reviewed-by: Andrey Ryabinin <aryabinin@virtuozzo.com>
+> >>> Reviewed-by: Dmitry Vyukov <dvyukov@google.com>
+> >>> Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
+> >>> ---
+> >>>  mm/kasan/common.c | 116 ++++++++++++++++++++++++++++++++++++++--------
+> >>>  mm/kasan/kasan.h  |   8 ++++
+> >>>  mm/kasan/tags.c   |  48 +++++++++++++++++++
+> >>>  3 files changed, 153 insertions(+), 19 deletions(-)
+> >>>
+> >>
+> >>
+> >> [...]
+> >>
+> >>> @@ -265,6 +290,8 @@ void kasan_cache_create(struct kmem_cache *cache, unsigned int *size,
+> >>>               return;
+> >>>       }
+> >>>
+> >>> +     cache->align = round_up(cache->align, KASAN_SHADOW_SCALE_SIZE);
+> >>> +
+> >>
+> >> Did you consider to set ARCH_SLAB_MINALIGN instead of this round up?
+> >
+> > I didn't know about this macro. Looks like we can use it to do the
+> > same thing. Do you think it's a better solution to redefine
+> > ARCH_SLAB_MINALIGN to KASAN_SHADOW_SCALE_SIZE for arm64 when tag-based
+> > KASAN is enabled instead of adjusting cache->align in
+> > kasan_cache_create?
+> >
+>
+> Yes, I think it is better because in this way we do not need to add extra code
+> to do the rounding.
+>
+> Curiosity, did you try your patches with SLUB red zoning enabled?
+> Since the area used for the Redzone is just after the payload, aligning the
+> object_size independently from the allocator could have side effects, at least
+> if I understand well how the mechanism works.
+>
+> Setting ARCH_SLAB_MINALIGN should avoid this as well.
+>
+> What do you think?
 
-The commit description of 77b0bf55bc67 mentioned
-"We also hope that GCC will eventually get fixed,..."
+Sounds good to me.
 
-Now, GCC provides a solution.
+Andrew, how should proceed with this? Send another fixup patch or
+resend the whole series?
 
-https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html
-explains the new "asm inline" syntax.
-
-The performance issue will be eventually solved.
-
-[About Code cleanups]
-
-I know Nadam Amit is opposed to the full revert.
-He also claims his motivation for macrofying was not only
-performance, but also cleanups.
-
-IIUC, the criticism addresses the code duplication between C and ASM.
-
-If so, I'd like to suggest a different approach for cleanups.
-Please see the last 3 patches.
-IMHO, preprocessor approach is more straight-forward, and readable.
-Basically, this idea should work because it is what we already do for
-__ASM_FORM() etc.
-
-[Quick Test of "asm inline" of GCC 9]
-
-If you want to try "asm inline" feature, the patch is available:
-https://lore.kernel.org/patchwork/patch/1024590/
-
-The number of symbols for arch/x86/configs/x86_64_defconfig:
-
-                            nr_symbols
-  [1]    v4.20-rc7       :   96502
-  [2]    [1]+full revert :   96705   (+203)
-  [3]    [2]+"asm inline":   96568   (-137)
-
-[3]: apply my patch, then replace "asm" -> "asm_inline"
-    for _BUG_FLAGS(), refcount_add(), refcount_inc(), refcount_dec(),
-        annotate_reachable(), annotate_unreachable()
-
-
-Changes in v3:
-  - Split into per-commit revert (per Nadav Amit)
-  - Add some cleanups with preprocessor approach
-
-Changes in v2:
-  - Revive clean-ups made by 5bdcd510c2ac (per Peter Zijlstra)
-  - Fix commit quoting style (per Peter Zijlstra)
-
-Masahiro Yamada (12):
-  Revert "x86/jump-labels: Macrofy inline assembly code to work around
-    GCC inlining bugs"
-  Revert "x86/cpufeature: Macrofy inline assembly code to work around
-    GCC inlining bugs"
-  Revert "x86/extable: Macrofy inline assembly code to work around GCC
-    inlining bugs"
-  Revert "x86/paravirt: Work around GCC inlining bugs when compiling
-    paravirt ops"
-  Revert "x86/bug: Macrofy the BUG table section handling, to work
-    around GCC inlining bugs"
-  Revert "x86/alternatives: Macrofy lock prefixes to work around GCC
-    inlining bugs"
-  Revert "x86/refcount: Work around GCC inlining bug"
-  Revert "x86/objtool: Use asm macros to work around GCC inlining bugs"
-  Revert "kbuild/Makefile: Prepare for using macros in inline assembly
-    code to work around asm() related GCC inlining bugs"
-  linux/linkage: add ASM() macro to reduce duplication between C/ASM
-    code
-  x86/alternatives: consolidate LOCK_PREFIX macro
-  x86/asm: consolidate ASM_EXTABLE_* macros
-
- Makefile                                  |  9 +--
- arch/x86/Makefile                         |  7 ---
- arch/x86/include/asm/alternative-asm.h    | 22 +------
- arch/x86/include/asm/alternative-common.h | 47 +++++++++++++++
- arch/x86/include/asm/alternative.h        | 30 +---------
- arch/x86/include/asm/asm.h                | 46 +++++----------
- arch/x86/include/asm/bug.h                | 98 +++++++++++++------------------
- arch/x86/include/asm/cpufeature.h         | 82 +++++++++++---------------
- arch/x86/include/asm/jump_label.h         | 22 +++++--
- arch/x86/include/asm/paravirt_types.h     | 56 +++++++++---------
- arch/x86/include/asm/refcount.h           | 81 +++++++++++--------------
- arch/x86/kernel/macros.S                  | 16 -----
- include/asm-generic/bug.h                 |  8 +--
- include/linux/compiler.h                  | 56 ++++--------------
- include/linux/linkage.h                   |  8 +++
- scripts/Kbuild.include                    |  4 +-
- scripts/mod/Makefile                      |  2 -
- 17 files changed, 249 insertions(+), 345 deletions(-)
- create mode 100644 arch/x86/include/asm/alternative-common.h
- delete mode 100644 arch/x86/kernel/macros.S
-
--- 
-2.7.4
+>
+> >>
+> >> --
+> >> Regards,
+> >> Vincenzo
+> >>
+> >> --
+> >> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
+> >> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
+> >> To post to this group, send email to kasan-dev@googlegroups.com.
+> >> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/2bf7415e-2724-b3c3-9571-20c8b6d43b92%40arm.com.
+> >> For more options, visit https://groups.google.com/d/optout.
+>
+> --
+> Regards,
+> Vincenzo
+>
+> --
+> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
+> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
+> To post to this group, send email to kasan-dev@googlegroups.com.
+> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/b99b331d-22ca-b9db-8677-4896c427ef10%40arm.com.
+> For more options, visit https://groups.google.com/d/optout.
