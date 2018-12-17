@@ -1,79 +1,172 @@
-From: Nadav Amit <namit@vmware.com>
-Subject: Re: [PATCH] kbuild, x86: revert macros in extended asm workarounds
-Date: Mon, 17 Dec 2018 01:00:50 +0000
-Message-ID: <834EC537-EC42-4563-AA39-3326681ED968@vmware.com>
-References: <1544692661-9455-1-git-send-email-yamada.masahiro@socionext.com>
- <20181213105146.GH5289@hirez.programming.kicks-ass.net>
- <CAK7LNASB=HvU8DwUQQkz_r3sY1DN8Vv-qfNa54-ZDXSpfvEYpg@mail.gmail.com>
- <07BE39B2-1F99-4AE4-97F3-0871A39C5E7D@vmware.com>
- <20181216100042.GA815@zn.tnic>
+From: Masahiro Yamada <yamada.masahiro@socionext.com>
+Subject: Re: [PATCH v2] x86, kbuild: revert macrofying inline assembly code
+Date: Mon, 17 Dec 2018 11:54:13 +0900
+Message-ID: <CAK7LNARcSYvc-3xhdwFMk=q20LYW2i1ahscofYsYka2hg0Oszw@mail.gmail.com>
+References: <1544928632-9717-1-git-send-email-yamada.masahiro@socionext.com> <9691ECB6-D659-4E88-B8AF-4947B9431AF1@vmware.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20181216100042.GA815@zn.tnic>
-Content-Language: en-US
-Content-ID: <89DD256D3BD73D4C90A72BA26FA76DBB@namprd05.prod.outlook.com>
+In-Reply-To: <9691ECB6-D659-4E88-B8AF-4947B9431AF1@vmware.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Borislav Petkov <bp@alien8.de>
-Cc: Masahiro Yamada <yamada.masahiro@socionext.com>, Peter Zijlstra <peterz@infradead.org>, Ingo Molnar <mingo@redhat.com>, Thomas Gleixner <tglx@linutronix.de>, "H . Peter Anvin" <hpa@zytor.com>, X86 ML <x86@kernel.org>, Richard Biener <rguenther@suse.de>, Logan Gunthorpe <logang@deltatee.com>, Sedat Dilek <sedat.dilek@gmail.com>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch <linux-arch@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Michal Marek <michal.lkml@markovi.net>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Alok
+To: Nadav Amit <namit@vmware.com>
+Cc: X86 ML <x86@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, Richard Biener <rguenther@suse.de>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch <linux-arch@vger.kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, "virtualization@lists.linux-foundation.org" <virtualization@lists.linux-foundation.org>, Michal Marek <michal.lkml@markovi.net>, "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, "linux-kbuild@vger.kernel.org" <linux-kbuild@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
 
-PiBPbiBEZWMgMTYsIDIwMTgsIGF0IDI6MDAgQU0sIEJvcmlzbGF2IFBldGtvdiA8YnBAYWxpZW44
-LmRlPiB3cm90ZToNCj4gDQo+IE9uIFN1biwgRGVjIDE2LCAyMDE4IGF0IDAyOjMzOjM5QU0gKzAw
-MDAsIE5hZGF2IEFtaXQgd3JvdGU6DQo+PiBJbiBnZW5lcmFsLCBJIHRoaW5rIHRoYXQgZnJvbSB0
-aGUgc3RhcnQgaXQgd2FzIGNsZWFyIHRoYXQgdGhlIG1vdGl2YXRpb24gZm9yDQo+PiB0aGUgcGF0
-Y2gtc2V0IGlzIG5vdCBqdXN0IHBlcmZvcm1hbmNlIGFuZCBhbHNvIGJldHRlciBjb2RlLiBGb3Ig
-ZXhhbXBsZSwgSQ0KPj4gc2VlIG5vIHJlYXNvbiB0byByZXZlcnQgdGhlIFBWLWNoYW5nZXMgb3Ig
-dGhlIGxvY2stcHJlZml4IGNoYW5nZXMgdGhhdA0KPj4gaW1wcm92ZWQgdGhlIGNvZGUgcmVhZGFi
-aWxpdHkuDQo+IA0KPiBPbmUgdGhpbmcgdGhhdCBoYXMgY2F1Z2h0IG15IGV5ZSB3aXRoIHRoZSBh
-c20gbWFjcm9zLCB3aGljaCBhY3R1YWxseQ0KPiBkZWNyZWFzZXMgcmVhZGFiaWxpdHksIGlzIHRo
-YXQgSSBjYW4ndCBzZWUgdGhlIG1hY3JvIHByb3Blcmx5IGV4cGFuZGVkDQo+IHdoZW4gSSBkbw0K
-PiANCj4gbWFrZSA8ZmlsZW5hbWU+LnMNCj4gDQo+IEZvciBleGFtcGxlLCBJIGdldA0KPiANCj4g
-I0FQUA0KPiAjIDE2NCAiLi9hcmNoL3g4Ni9pbmNsdWRlL2FzbS9jcHVmZWF0dXJlLmgiIDENCj4g
-ICAgICAgIFNUQVRJQ19DUFVfSEFTIGJpdG51bT0kOCBjYXBfYnl0ZT0iYm9vdF9jcHVfZGF0YSsz
-NSglcmlwKSIgZmVhdHVyZT0xMjMgdF95ZXM9Lkw3NSB0X25vPS5MNzggYWx3YXlzPTExNyAgIywg
-TUVNWyhjb25zdCBjaGFyICopJmJvb3RfY3B1X2RhdGEgKyAzNUJdLCwsLA0KPiAjIDAgIiIgMg0K
-PiAgICAgICAgLmxvYyAxMSAxNjQgMiB2aWV3IC5MVlU0ODANCj4gI05PX0FQUA0KPiANCj4gYnV0
-IEknZCBsaWtlIHRvIHNlZSB0aGUgYWN0dWFsIGFzbSBhcyBpdCBpcyByZWFsbHkgaGVscGZ1bCB3
-aGVuIGhhY2tpbmcNCj4gb24gaW5saW5lIGFzbSBzdHVmZi4gQW5kIEkgaGF2ZW4ndCBmb3VuZCBh
-IHdheSB0byBtYWtlIGdjYyBleHBhbmQgYXNtDQo+IG1hY3JvcyBpbiAucyBvdXRwdXQuDQoNCllv
-deKAmXJlIHJpZ2h0LCBhbHRob3VnaCB0aGVyZSB3ZXJlIGFscmVhZHkgNzIgYXNzZW1ibHkgbWFj
-cm9zIGZvciBkZWZpbmVkIGluDQp4ODYgLmggZmlsZXMsIGFuZCBzb21lIG1heSBmaW5kIHRoZSB1
-bmV4cGFuZGVkIG1hY3JvIGluIHRoZSDigJguc+KAmSBmaWxlIG1vcmUNCmZyaWVuZGx5ICh3ZWxs
-LCBhIHNtYWxsIGNvbW1lbnQgaW4gaW5saW5lIGFzc2VtYmx5IGNvdWxkIGhhdmUgcmVzb2x2ZWQg
-dGhpcw0KaXNzdWUpLg0KDQpBbnlob3csIHVzaW5nIGdudSBhc20gbGlzdGluZ3Mgc2hvdWxkIGJl
-IGEgcmVsYXRpdmVseSByZWFzb25hYmxlIHdvcmthcm91bmQNCmZvciB0aGlzIGxpbWl0YXRpb24g
-KHVubGVzcyB5b3Ugd2FudCB0byBoYWNrIHRoZSBjb2RlIGJlZm9yZSBhc3NlbWJseSkuDQoNCkZv
-ciBleGFtcGxlLCB1c2luZyBgIGFzIC1hbG0gYXJjaC94ODYva2VybmVsL21hY3Jvcy5zIGFyY2gv
-eDg2L2t2bS92bXgucyBgDQoNCndvdWxkIGdpdmUgeW91Og0KDQogNDIxICAgICAgICAgICAgICAg
-ICAgICAjIC4vYXJjaC94ODYvaW5jbHVkZS9hc20vY3B1ZmVhdHVyZS5oOjE2NDogICAgICBhc21f
-dm9sYXRpbGVfZ290bygiU1RBVElDX0NQVV9IQVMgYml0bnVtPSVbYml0bnVtXSAiDQogNDIyICAg
-ICAgICAgICAgICAgICAgICAgICAgICAgIC5maWxlIDggIi4vYXJjaC94ODYvaW5jbHVkZS9hc20v
-Y3B1ZmVhdHVyZS5oIg0KIDQyMyAgICAgICAgICAgICAgICAgICAgICAgICAgICAubG9jIDggMTY0
-IDANCiA0MjQgICAgICAgICAgICAgICAgICAgICNBUFANCiA0MjUgICAgICAgICAgICAgICAgICAg
-ICMgMTY0ICIuL2FyY2gveDg2L2luY2x1ZGUvYXNtL2NwdWZlYXR1cmUuaCIgMQ0KIDQyNiAgICAg
-ICAgICAgICAgICAgICAgICAgICAgICBTVEFUSUNfQ1BVX0hBUyBiaXRudW09JDIgY2FwX2J5dGU9
-ImJvb3RfY3B1X2RhdGErMzgoJXJpcCkiIGZlYXR1cmU9MTQ1IHRfeWVzPS5MMTcgdF9ubz0uTDE4
-IGFsd2F5cw0KIDQyNiAgICAgICAgICAgICAgICAgICAgPiAxOg0KIDQyNiAwMGQ4IEU5MDAwMDAw
-ICAgICAgPiAgam1wIDZmDQogNDI2ICAgICAgMDANCiA0MjYgICAgICAgICAgICAgICAgICAgID4g
-MjoNCiA0MjYgICAgICAgICAgICAgICAgICAgID4gIC5za2lwIC0oKCg1Zi00ZiktICgyYi0xYikp
-PjApKiAoKDVmLTRmKS0gKDJiLTFiKSksMHg5MA0KIDQyNiAgICAgICAgICAgICAgICAgICAgPiAz
-Og0KIDQyNiAgICAgICAgICAgICAgICAgICAgPiAgLnNlY3Rpb24gLmFsdGluc3RydWN0aW9ucywi
-YSINCiA0MjYgMDAwZCAwMDAwMDAwMCAgICAgID4gIC5sb25nIDFiIC0gLg0KIDQyNiAwMDExIDAw
-MDAwMDAwICAgICAgPiAgLmxvbmcgNGYgLSAuDQogNDI2IDAwMTUgNzUwMCAgICAgICAgICA+ICAu
-d29yZCAxMTcNCg0K4oCmDQoNClRoaXMgY2FuIGJlIGluY29ycG9yYXRlZCBpbnRvIGEgbWFrZWZp
-bGUgb3B0aW9uLCBJIHN1cHBvc2UuDQoNCg0KPiBOb3csIGFzc3VtaW5nIHRoZSBnY2MgaW5saW5l
-IHBhdGNoIHdpbGwgYmUgYmFja3BvcnRlZCB0byBnY2M4LCBJIHRoaW5rDQo+IHdlIHNob3VsZCBi
-ZSBjb3ZlcmVkIG9uIGFsbCBtb2Rlcm4gZGlzdHJvcyBnb2luZyBmb3J3YXJkLiBTbyBJIHRoaW5r
-IHdlDQo+IHNob3VsZCByZXZlcnQgYXQgbGVhc3QgdGhlIG1vcmUgY29tcGxleCBtYWNyb3MuDQoN
-CkkgdW5kZXJzdGFuZCwgYW5kIHBlcmhhcHMgU1RBVElDX0NQVV9IQVMgaXMgbm90IGEgZ29vZCB1
-c2UtY2FzZSAob25jZQ0KaW5saW5pbmcgaXMgcmVzb2x2ZWQgaW4gYSBkaWZmZXJlbnQgbWFubmVy
-KS4gSSB0aGluayB0aGF0IHRoZSBtYWluIHF1ZXN0aW9uDQpzaG91bGQgYmUgd2hldGhlciB0aGUg
-d2hvbGUgaW5mcmFzdHJ1Y3R1cmUgc2hvdWxkIGJlIHJlbW92ZWQgb3IgdG8gYmUNCnNlbGVjdGl2
-ZS4gDQoNCkluIHRoZSBjYXNlIG9mIGV4Y2VwdGlvbiB0YWJsZXMsIGZvciBpbnN0YW5jZSwgdGhl
-IHJlc3VsdCBpcyBtdWNoIGNsZWFuZXIsDQphcyBpdCBhbGxvd3MgdG8gY29uc29saWRhdGUgdGhl
-IEMgYW5kIGFzc2VtYmx5IGltcGxlbWVudGF0aW9ucy4gVGhlcmUgaXMgYW4NCmFsdGVybmF0aXZl
-IHNvbHV0aW9uIG9mIHR1cm5pbmcgdGhlIGFzc2VtYmx5IG1hY3JvcyBpbnRvIEMgbWFjcm9zLCB3
-aGljaA0Kd291bGQgbWFrZSB0aGUgTWFrZSBzeXN0ZW0gaGFja3MgZ28gYXdheSwgYnV0IHdvdWxk
-IG1ha2UgdGhlIGNvZGUgbm90IGFzDQpuaWNlLg0KDQo=
+On Sun, Dec 16, 2018 at 12:29 PM Nadav Amit <namit@vmware.com> wrote:
+>
+> > On Dec 15, 2018, at 6:50 PM, Masahiro Yamada <yamada.masahiro@socionext=
+.com> wrote:
+> >
+> > Revert the following 9 commits:
+> >
+> > [1] 5bdcd510c2ac ("x86/jump-labels: Macrofy inline assembly code to
+> >    work around GCC inlining bugs")
+> >
+> >    This was partially reverted because it made good cleanups
+> >    irrespective of the inlining issue; the error message is still
+> >    unneeded, and the conversion to STATIC_BRANCH_{NOP,JUMP} should
+> >    be kept.
+> >
+> > [2] d5a581d84ae6 ("x86/cpufeature: Macrofy inline assembly code to
+> >    work around GCC inlining bugs")
+> >
+> > [3] 0474d5d9d2f7 ("x86/extable: Macrofy inline assembly code to work
+> >    around GCC inlining bugs")
+> >
+> > [4] 494b5168f2de ("x86/paravirt: Work around GCC inlining bugs when
+> >    compiling paravirt ops")
+> >
+> > [5] f81f8ad56fd1 ("x86/bug: Macrofy the BUG table section handling,
+> >    to work around GCC inlining bugs")
+> >
+> > [6] 77f48ec28e4c ("x86/alternatives: Macrofy lock prefixes to work
+> >   around GCC inlining bugs")
+> >
+> > [7] 9e1725b41059 ("x86/refcount: Work around GCC inlining bug")
+> >
+> >    Resolved conflicts in arch/x86/include/asm/refcount.h caused by
+> >    288e4521f0f6 ("x86/asm: 'Simplify' GEN_*_RMWcc() macros").
+> >
+> > [8] c06c4d809051 ("x86/objtool: Use asm macros to work around GCC
+> >    inlining bugs")
+> >
+> > [9] 77b0bf55bc67 ("kbuild/Makefile: Prepare for using macros in inline
+> >    assembly code to work around asm() related GCC inlining bugs")
+> >
+> > A few days after those commits applied, discussion started to solve
+> > the issue more elegantly with the help of compiler:
+> >
+> >  https://na01.safelinks.protection.outlook.com/?url=3Dhttps%3A%2F%2Flkm=
+l.org%2Flkml%2F2018%2F10%2F7%2F92&amp;data=3D02%7C01%7Cnamit%40vmware.com%7=
+Ce893ce88065e4c59236308d663019424%7Cb39138ca3cee4b4aa4d6cd83d9dd62f0%7C0%7C=
+0%7C636805255787607178&amp;sdata=3DmiiUndmPfGNKvrzD5mttC1%2Bn6rNaoIFebjZOAk=
+Br24Y%3D&amp;reserved=3D0
+> >
+> > The new syntax "asm inline" was implemented by Segher Boessenkool, and
+> > now queued up for GCC 9. (People were positive even for back-porting it
+> > to older compilers).
+> >
+> > Since the in-kernel workarounds merged, some issues have been reported:
+> > breakage of building with distcc/icecc, breakage of distro packages for
+> > module building. (More fundamentally, we cannot build external modules
+> > after 'make clean'.)
+> >
+> > I do not want to mess up the build system any more.
+> >
+> > Given that this issue will be solved in a cleaner way sooner or later,
+> > let's revert the in-kernel workarounds, and wait for GCC 9.
+> >
+> > Reported-by: Logan Gunthorpe <logang@deltatee.com> # distcc
+> > Reported-by: Sedat Dilek <sedat.dilek@gmail.com> # deb/rpm package
+>
+> It is customary to cc those who report an issue.
+
+OK.
+
+> The distcc issue has already been resolved both in distcc
+
+Precisely, the fix-up was submitted,
+but not pulled yet as of writing.
+https://github.com/distcc/distcc/pull/313
+
+
+> and in the patches
+> I=E2=80=99ve sent: https://lkml.org/lkml/2018/11/15/467 .
+
+I was scared by this ugly fix-up, so I rejected it.
+
+
+
+> So I cannot understand why
+> it is mentioned as a motivation.
+>
+> It sounds that the external modules can easily be resolved. Can you pleas=
+e
+> provide a link for the bug report?
+
+
+https://www.spinics.net/lists/linux-kbuild/msg20037.html
+
+We can fix it under circumstances "we can do anything"
+although I am scared by endless Makefile hacks.
+
+
+
+> Please regard my comments regarding v1.
+
+I will try my best, although I felt some of your requests were too much.
+I am not an x86 developer.
+
+
+I posted this so people can play with 'asm inline'
+https://lore.kernel.org/patchwork/patch/1024590/
+
+You can confirm vmlinux size is increased,
+and some symbols disappears.
+
+
+
+> I must admit that I=E2=80=99m very surprised
+> that you don=E2=80=99t like the patches since you ack=E2=80=99d the origi=
+nal patch-set
+
+
+I think ack and "I like it" are different.
+
+There are situations where we had to accept something reluctantly.
+
+
+Without my ack, your patch series would not have been
+merged via x86 tree.
+
+There was no other solution at that time.
+Also, I could not predict potential problems, which turned out later.
+
+So I let it go.
+
+It would have been better if
+the following discussion had stared earlier.
+https://lkml.org/lkml/2018/10/7/92
+
+
+Now, we got a much cleaner solution.
+
+I believe we should replace the workarounds with it.
+
+
+
+> (and
+> actually assisted me in changing the Makefile).
+
+You were clearly breaking the build system.
+So, I provided a less ugly solution.
+
+Again, the in-kernel hack was the only solution at that time,
+but the situation has changed then.
+
+
+
+--=20
+Best Regards
+Masahiro Yamada
