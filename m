@@ -1,25 +1,36 @@
-From: Andi Kleen <ak@linux.intel.com>
-Subject: Re: [PATCH v2] x86, kbuild: revert macrofying inline assembly code
-Date: Fri, 21 Dec 2018 10:44:28 -0800
-Message-ID: <87woo23ek3.fsf@linux.intel.com>
-References: <1544928632-9717-1-git-send-email-yamada.masahiro@socionext.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [RFC v1 0/4] static analysis of copy_to_user()
+Date: Fri, 21 Dec 2018 23:47:19 +0100
+Message-ID: <20181221224717.zixqkz26xujllmq4@ltop.local>
+References: <20181220195931.20331-1-tycho@tycho.ws>
 Mime-Version: 1.0
-Content-Type: text/plain
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <1544928632-9717-1-git-send-email-yamada.masahiro@socionext.com>
-        (Masahiro Yamada's message of "Sun, 16 Dec 2018 11:50:32 +0900")
-Sender: linux-kernel-owner@vger.kernel.org
-To: Masahiro Yamada <yamada.masahiro@socionext.com>
-Cc: x86@kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H . Peter Anvin" <hpa@zytor.com>, Richard Biener <rguenther@suse.de>, Nadav Amit <namit@vmware.com>, Segher Boessenkool <segher@kernel.crashing.org>, linux-arch@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-kernel@vger.kernel.org, virtualization@lists.linux-foundation.org, Michal Marek <michal.lkml@markovi.net>, linux-sparse@vger.kernel.org, Alok Kataria <akataria@vmware.com>, Juergen Gross <jgross@suse.com>, linux-kbuild@vger.kernel.org
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-14809-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Content-Disposition: inline
+In-Reply-To: <20181220195931.20331-1-tycho@tycho.ws>
+To: Tycho Andersen <tycho@tycho.ws>
+Cc: linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-sparse@vger.kernel.org
 
-Masahiro Yamada <yamada.masahiro@socionext.com> writes:
+On Thu, Dec 20, 2018 at 12:59:27PM -0700, Tycho Andersen wrote:
+> Hi all,
+> 
+> A while ago I talked with various people about whether some static
+> analsys of copy_to_user() could be productive in finding infoleaks.
+> Unfortunately, due to the various issues outlined in the patch notes, it
+> doesn't seem like it is. Perhaps these checks are useful to put in just
+> to future proof ourselves against these sorts of issues, though.
+> 
+> Anyway, here's the code. Thoughts welcome!
 
-> Revert the following 9 commits:
+Hi,
 
-FWIW the -Wa additional also broke LTO builds because it doesn't really
-support -Wa for individual files.
+I'm taking the first patch directly but I won't be able to look
+closer at the other patches until next week.
 
-So I'm glad they got reverted.
-
--Andi
+Best regards,
+-- Luc 
