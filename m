@@ -1,58 +1,51 @@
-From: "Michael S. Tsirkin" <mst@redhat.com>
-Subject: Re: [PATCH RFC 3/4] barriers: convert a control to a data dependency
-Date: Mon, 7 Jan 2019 11:22:23 -0500
-Message-ID: <20190107112007-mutt-send-email-mst@kernel.org>
+From: Will Deacon <will.deacon@arm.com>
+Subject: Re: [PATCH RFC 2/4] include/linux/compiler.h: allow memory operands
+Date: Mon, 7 Jan 2019 17:54:27 +0000
+Message-ID: <20190107175427.GB22911@fuggles.cambridge.arm.com>
 References: <20190102205715.14054-1-mst@redhat.com>
- <20190102205715.14054-4-mst@redhat.com>
- <86023cbe-d1ae-a0d6-7b75-26556f1a0c1f@redhat.com>
- <20190106231756-mutt-send-email-mst@kernel.org>
- <20190107094610.GA2861@worktop.programming.kicks-ass.net>
- <20190107082223-mutt-send-email-mst@kernel.org>
- <20190107155423.GM2218@hirez.programming.kicks-ass.net>
+	<20190102205715.14054-3-mst@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
 Content-Disposition: inline
-In-Reply-To: <20190107155423.GM2218@hirez.programming.kicks-ass.net>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Peter Zijlstra <peterz@infradead.org>
-Cc: Jason Wang <jasowang@redhat.com>, linux-kernel@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, netdev@vger.kernel.org, virtualization@lists.linux-foundation.org, Jonathan Corbet <corbet@lwn.net>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Arnd Bergmann <arnd@arnd>
+In-Reply-To: <20190102205715.14054-3-mst@redhat.com>
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: "Michael S. Tsirkin" <mst@redhat.com>
+Cc: Andrea Parri <andrea.parri@amarulasolutions.com>, linux-arch@vger.kernel.org, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Peter Zijlstra <peterz@infradead.org>, Daniel Lustig <dlustig@nvidia.com>, Akira Yokosawa <akiyks@gmail.com>, linux-kernel@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>, virtualization@lists.linux-foundation.org, David Howells <dhowells@redhat.com>, linux-sparse@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, netdev@vger.kernel.org, Luc Maranget <luc.maranget@inria.fr>, Jade Alglave <j.alglave@ucl.ac.uk>, Boqun Feng <boqun.feng@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Jan 07, 2019 at 04:54:23PM +0100, Peter Zijlstra wrote:
-> On Mon, Jan 07, 2019 at 08:36:36AM -0500, Michael S. Tsirkin wrote:
-> > On Mon, Jan 07, 2019 at 10:46:10AM +0100, Peter Zijlstra wrote:
+On Wed, Jan 02, 2019 at 03:57:54PM -0500, Michael S. Tsirkin wrote:
+> We don't really care whether the variable is in-register
+> or in-memory. Relax the constraint accordingly.
 > 
-> > > How about naming the thing: dependent_ptr() ? That is without any (r)mb
-> > > implications at all. The address dependency is strictly weaker than an
-> > > rmb in that it will only order the two loads in qestion and not, like
-> > > rmb, any prior to any later load.
-> > 
-> > So I'm fine with this as it's enough for virtio, but I would like to point out two things:
-> > 
-> > 1. E.g. on x86 both SMP and DMA variants can be NOPs but
-> > the madatory one can't, so assuming we do not want
-> > it to be stronger than rmp then either we want
-> > smp_dependent_ptr(), dma_dependent_ptr(), dependent_ptr()
-> > or we just will specify that dependent_ptr() works for
-> > both DMA and SMP.
+> Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+> ---
+>  include/linux/compiler.h | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> The latter; the construct simply generates dependent loads. It is up to
-> the CPU as to what all that works for.
+> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> index 1ad367b4cd8d..6601d39e8c48 100644
+> --- a/include/linux/compiler.h
+> +++ b/include/linux/compiler.h
+> @@ -154,7 +154,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+>  #ifndef OPTIMIZER_HIDE_VAR
+>  /* Make the optimizer believe the variable can be manipulated arbitrarily. */
+>  #define OPTIMIZER_HIDE_VAR(var)						\
+> -	__asm__ ("" : "=r" (var) : "0" (var))
+> +	__asm__ ("" : "=rm" (var) : "0" (var))
+>  #endif
 
-But not on intel right? On intel loads are ordered so it can be a nop.
+I think this can break for architectures with write-back addressing modes
+such as arm, where the "m" constraint is assumed to be evaluated precisely
+once in the asm block.
 
-> > 2. Down the road, someone might want to order a store after a load.
-> > Address dependency does that for us too. Assuming we make
-> > dependent_ptr a NOP on x86, we will want an mb variant
-> > which isn't a NOP on x86. Will we want to rename
-> > dependent_ptr to dependent_ptr_rmb at that point?
-> 
-> Not sure; what is the actual overhead of the construct on x86 vs the
-> NOP?
-
-I'll have to check. There's a pipeline stall almost for sure - that's
-why we put it there after all :).
-
--- 
-MST
+Will
