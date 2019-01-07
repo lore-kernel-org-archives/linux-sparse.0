@@ -1,73 +1,107 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v2 1/3] kasan, arm64: use ARCH_SLAB_MINALIGN instead of
- manual aligning
-Date: Thu, 3 Jan 2019 19:46:20 +0100
-Message-ID: <CAAeHK+yE38g0dSbL7LiVPSgECgdcJ5w7+kwaiBaRYr5YkHtbjQ@mail.gmail.com>
-References: <cover.1546450432.git.andreyknvl@google.com> <b16c90197bb2c06c780e6e981c40345e03fda465.1546450432.git.andreyknvl@google.com>
- <20190102121436.5c2b72d1b0ec49affadc9692@linux-foundation.org>
+From: Jason Wang <jasowang@redhat.com>
+Subject: Re: [PATCH RFC 3/4] barriers: convert a control to a data dependency
+Date: Mon, 7 Jan 2019 11:58:23 +0800
+Message-ID: <86023cbe-d1ae-a0d6-7b75-26556f1a0c1f@redhat.com>
+References: <20190102205715.14054-1-mst@redhat.com>
+	<20190102205715.14054-4-mst@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190102121436.5c2b72d1b0ec49affadc9692@linux-foundation.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: Andrew Morton <akpm@linux-foundation.org>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Kate Stewart <kstewart@l>
+Content-Type: text/plain; charset="utf-8"; Format="flowed"
+Content-Transfer-Encoding: base64
+Return-path: <virtualization-bounces@lists.linux-foundation.org>
+In-Reply-To: <20190102205715.14054-4-mst@redhat.com>
+Content-Language: en-US
+List-Unsubscribe: <https://lists.linuxfoundation.org/mailman/options/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=unsubscribe>
+List-Archive: <http://lists.linuxfoundation.org/pipermail/virtualization/>
+List-Post: <mailto:virtualization@lists.linux-foundation.org>
+List-Help: <mailto:virtualization-request@lists.linux-foundation.org?subject=help>
+List-Subscribe: <https://lists.linuxfoundation.org/mailman/listinfo/virtualization>,
+	<mailto:virtualization-request@lists.linux-foundation.org?subject=subscribe>
+Sender: virtualization-bounces@lists.linux-foundation.org
+Errors-To: virtualization-bounces@lists.linux-foundation.org
+To: "Michael S. Tsirkin" <mst@redhat.com>, linux-kernel@vger.kernel.org
+Cc: Andrea Parri <andrea.parri@amarulasolutions.com>, linux-doc@vger.kernel.org, Peter Zijlstra <peterz@infradead.org>, Akira Yokosawa <akiyks@gmail.com>, Will Deacon <will.deacon@arm.com>, virtualization@lists.linux-foundation.org, David Howells <dhowells@redhat.com>, linux-arch@vger.kernel.org, Jonathan Corbet <corbet@lwn.net>, linux-sparse@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Matt Turner <mattst88@gmail.com>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Daniel Lustig <dlustig@nvidia.com>, Arnd Bergmann <arnd@arndb.de>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Luc Maranget <luc.maranget@inria.fr>, Richard Henderson <rth@twiddle.net>, Jade Alglave <j.alglave@ucl.ac.uk>, netdev@vger.kernel.org, linux-alpha@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Jan 2, 2019 at 9:14 PM Andrew Morton <akpm@linux-foundation.org> wrote:
->
-> On Wed,  2 Jan 2019 18:36:06 +0100 Andrey Konovalov <andreyknvl@google.com> wrote:
->
-> > Instead of changing cache->align to be aligned to KASAN_SHADOW_SCALE_SIZE
-> > in kasan_cache_create() we can reuse the ARCH_SLAB_MINALIGN macro.
-> >
-> > ...
-> >
-> > --- a/arch/arm64/include/asm/kasan.h
-> > +++ b/arch/arm64/include/asm/kasan.h
-> > @@ -36,6 +36,10 @@
-> >  #define KASAN_SHADOW_OFFSET     (KASAN_SHADOW_END - (1ULL << \
-> >                                       (64 - KASAN_SHADOW_SCALE_SHIFT)))
-> >
-> > +#ifdef CONFIG_KASAN_SW_TAGS
-> > +#define ARCH_SLAB_MINALIGN   (1ULL << KASAN_SHADOW_SCALE_SHIFT)
-> > +#endif
-> > +
-> >  void kasan_init(void);
-> >  void kasan_copy_shadow(pgd_t *pgdir);
-> >  asmlinkage void kasan_early_init(void);
-> > diff --git a/include/linux/slab.h b/include/linux/slab.h
-> > index 11b45f7ae405..d87f913ab4e8 100644
-> > --- a/include/linux/slab.h
-> > +++ b/include/linux/slab.h
-> > @@ -16,6 +16,7 @@
-> >  #include <linux/overflow.h>
-> >  #include <linux/types.h>
-> >  #include <linux/workqueue.h>
-> > +#include <linux/kasan.h>
-> >
->
-> This still seems unadvisable.  Like other architectures, arm defines
-> ARCH_SLAB_MINALIGN in arch/arm/include/asm/cache.h.
-> arch/arm/include/asm64/cache.h doesn't define ARCH_SLAB_MINALIGN
-> afaict.
->
-> If arch/arm/include/asm64/cache.h later gets a definition of
-> ARCH_SLAB_MINALIGN then we again face the risk that different .c files
-> will see different values of ARCH_SLAB_MINALIGN depending on which
-> headers they include.
->
-> So what to say about this?  The architecture's ARCH_SLAB_MINALIGN
-> should be defined in the architecture's cache.h, end of story.  Not in
-> slab.h, not in kasan.h.
-
-Done in v3, thanks!
-
->
->
-> --
-> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
-> To post to this group, send email to kasan-dev@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/20190102121436.5c2b72d1b0ec49affadc9692%40linux-foundation.org.
-> For more options, visit https://groups.google.com/d/optout.
+Ck9uIDIwMTkvMS8zIOS4iuWNiDQ6NTcsIE1pY2hhZWwgUy4gVHNpcmtpbiB3cm90ZToKPiBJdCdz
+IG5vdCB1bmNvbW1vbiB0byBoYXZlIHR3byBhY2Nlc3MgdHdvIHVucmVsYXRlZCBtZW1vcnkgbG9j
+YXRpb25zIGluIGEKPiBzcGVjaWZpYyBvcmRlci4gIEF0IHRoZSBtb21lbnQgb25lIGhhcyB0byB1
+c2UgYSBtZW1vcnkgYmFycmllciBmb3IgdGhpcy4KPgo+IEhvd2V2ZXIsIGlmIHRoZSBmaXJzdCBh
+Y2Nlc3Mgd2FzIGEgcmVhZCBhbmQgdGhlIHNlY29uZCB1c2VkIGFuIGFkZHJlc3MKPiBkZXBlbmRp
+bmcgb24gdGhlIGZpcnN0IG9uZSB3ZSB3b3VsZCBoYXZlIGEgZGF0YSBkZXBlbmRlbmN5IGFuZCBu
+bwo+IGJhcnJpZXIgd291bGQgYmUgbmVjZXNzYXJ5Lgo+Cj4gVGhpcyBhZGRzIGEgbmV3IGludGVy
+ZmFjZTogZGVwZW5kZW50X3B0cl9tYiB3aGljaCBkb2VzIGV4YWN0bHkgdGhpczogaXQKPiByZXR1
+cm5zIGEgcG9pbnRlciB3aXRoIGEgZGF0YSBkZXBlbmRlbmN5IG9uIHRoZSBzdXBwbGllZCB2YWx1
+ZS4KPgo+IFNpZ25lZC1vZmYtYnk6IE1pY2hhZWwgUy4gVHNpcmtpbiA8bXN0QHJlZGhhdC5jb20+
+Cj4gLS0tCj4gICBEb2N1bWVudGF0aW9uL21lbW9yeS1iYXJyaWVycy50eHQgfCAyMCArKysrKysr
+KysrKysrKysrKysrKwo+ICAgYXJjaC9hbHBoYS9pbmNsdWRlL2FzbS9iYXJyaWVyLmggIHwgIDEg
+Kwo+ICAgaW5jbHVkZS9hc20tZ2VuZXJpYy9iYXJyaWVyLmggICAgIHwgMTggKysrKysrKysrKysr
+KysrKysrCj4gICBpbmNsdWRlL2xpbnV4L2NvbXBpbGVyLmggICAgICAgICAgfCAgNCArKysrCj4g
+ICA0IGZpbGVzIGNoYW5nZWQsIDQzIGluc2VydGlvbnMoKykKPgo+IGRpZmYgLS1naXQgYS9Eb2N1
+bWVudGF0aW9uL21lbW9yeS1iYXJyaWVycy50eHQgYi9Eb2N1bWVudGF0aW9uL21lbW9yeS1iYXJy
+aWVycy50eHQKPiBpbmRleCBjMWQ5MTM5NDRhZDguLjlkYmFhMmUxZGJmNiAxMDA2NDQKPiAtLS0g
+YS9Eb2N1bWVudGF0aW9uL21lbW9yeS1iYXJyaWVycy50eHQKPiArKysgYi9Eb2N1bWVudGF0aW9u
+L21lbW9yeS1iYXJyaWVycy50eHQKPiBAQCAtNjkxLDYgKzY5MSwxOCBAQCBjYXNlIHdoYXQncyBh
+Y3R1YWxseSByZXF1aXJlZCBpczoKPiAgIAkJcCA9IFJFQURfT05DRShiKTsKPiAgIAl9Cj4gICAK
+PiArQWx0ZXJuYXRpdmVseSwgYSBjb250cm9sIGRlcGVuZGVuY3kgY2FuIGJlIGNvbnZlcnRlZCB0
+byBhIGRhdGEgZGVwZW5kZW5jeSwKPiArZS5nLjoKPiArCj4gKwlxID0gUkVBRF9PTkNFKGEpOwo+
+ICsJaWYgKHEpIHsKPiArCQliID0gZGVwZW5kZW50X3B0cl9tYihiLCBxKTsKPiArCQlwID0gUkVB
+RF9PTkNFKGIpOwo+ICsJfQo+ICsKPiArTm90ZSBob3cgdGhlIHJlc3VsdCBvZiBkZXBlbmRlbnRf
+cHRyX21iIG11c3QgYmUgdXNlZCB3aXRoIHRoZSBmb2xsb3dpbmcKPiArYWNjZXNzZXMgaW4gb3Jk
+ZXIgdG8gaGF2ZSBhbiBlZmZlY3QuCj4gKwo+ICAgSG93ZXZlciwgc3RvcmVzIGFyZSBub3Qgc3Bl
+Y3VsYXRlZC4gIFRoaXMgbWVhbnMgdGhhdCBvcmRlcmluZyAtaXMtIHByb3ZpZGVkCj4gICBmb3Ig
+bG9hZC1zdG9yZSBjb250cm9sIGRlcGVuZGVuY2llcywgYXMgaW4gdGhlIGZvbGxvd2luZyBleGFt
+cGxlOgo+ICAgCj4gQEAgLTgzNiw2ICs4NDgsMTIgQEAgb3V0LWd1ZXNzIHlvdXIgY29kZS4gIE1v
+cmUgZ2VuZXJhbGx5LCBhbHRob3VnaCBSRUFEX09OQ0UoKSBkb2VzIGZvcmNlCj4gICB0aGUgY29t
+cGlsZXIgdG8gYWN0dWFsbHkgZW1pdCBjb2RlIGZvciBhIGdpdmVuIGxvYWQsIGl0IGRvZXMgbm90
+IGZvcmNlCj4gICB0aGUgY29tcGlsZXIgdG8gdXNlIHRoZSByZXN1bHRzLgo+ICAgCj4gK0NvbnZl
+cnRpbmcgdG8gYSBkYXRhIGRlcGVuZGVuY3kgaGVscHMgd2l0aCB0aGlzIHRvbzoKPiArCj4gKwlx
+ID0gUkVBRF9PTkNFKGEpOwo+ICsJYiA9IGRlcGVuZGVudF9wdHJfbWIoYiwgcSk7Cj4gKwlXUklU
+RV9PTkNFKGIsIDEpOwo+ICsKPiAgIEluIGFkZGl0aW9uLCBjb250cm9sIGRlcGVuZGVuY2llcyBh
+cHBseSBvbmx5IHRvIHRoZSB0aGVuLWNsYXVzZSBhbmQKPiAgIGVsc2UtY2xhdXNlIG9mIHRoZSBp
+Zi1zdGF0ZW1lbnQgaW4gcXVlc3Rpb24uICBJbiBwYXJ0aWN1bGFyLCBpdCBkb2VzCj4gICBub3Qg
+bmVjZXNzYXJpbHkgYXBwbHkgdG8gY29kZSBmb2xsb3dpbmcgdGhlIGlmLXN0YXRlbWVudDoKPiBA
+QCAtODc1LDYgKzg5Myw4IEBAIHRvIHRoZSBDUFUgY29udGFpbmluZyBpdC4gIFNlZSB0aGUgc2Vj
+dGlvbiBvbiAiTXVsdGljb3B5IGF0b21pY2l0eSIKPiAgIGZvciBtb3JlIGluZm9ybWF0aW9uLgo+
+ICAgCj4gICAKPiArCj4gKwo+ICAgSW4gc3VtbWFyeToKPiAgIAo+ICAgICAoKikgQ29udHJvbCBk
+ZXBlbmRlbmNpZXMgY2FuIG9yZGVyIHByaW9yIGxvYWRzIGFnYWluc3QgbGF0ZXIgc3RvcmVzLgo+
+IGRpZmYgLS1naXQgYS9hcmNoL2FscGhhL2luY2x1ZGUvYXNtL2JhcnJpZXIuaCBiL2FyY2gvYWxw
+aGEvaW5jbHVkZS9hc20vYmFycmllci5oCj4gaW5kZXggOTJlYzQ4NmE0ZjllLi5iNDkzNGU4YzU1
+MWIgMTAwNjQ0Cj4gLS0tIGEvYXJjaC9hbHBoYS9pbmNsdWRlL2FzbS9iYXJyaWVyLmgKPiArKysg
+Yi9hcmNoL2FscGhhL2luY2x1ZGUvYXNtL2JhcnJpZXIuaAo+IEBAIC01OSw2ICs1OSw3IEBACj4g
+ICAgKiBhcyBBbHBoYSwgInkiIGNvdWxkIGJlIHNldCB0byAzIGFuZCAieCIgdG8gMC4gIFVzZSBy
+bWIoKQo+ICAgICogaW4gY2FzZXMgbGlrZSB0aGlzIHdoZXJlIHRoZXJlIGFyZSBubyBkYXRhIGRl
+cGVuZGVuY2llcy4KPiAgICAqLwo+ICsjZGVmaW5lIEFSQ0hfTkVFRFNfUkVBRF9CQVJSSUVSX0RF
+UEVORFMgMQo+ICAgI2RlZmluZSByZWFkX2JhcnJpZXJfZGVwZW5kcygpIF9fYXNtX18gX192b2xh
+dGlsZV9fKCJtYiI6IDogOiJtZW1vcnkiKQo+ICAgCj4gICAjaWZkZWYgQ09ORklHX1NNUAo+IGRp
+ZmYgLS1naXQgYS9pbmNsdWRlL2FzbS1nZW5lcmljL2JhcnJpZXIuaCBiL2luY2x1ZGUvYXNtLWdl
+bmVyaWMvYmFycmllci5oCj4gaW5kZXggMmNhZmRiYjlhZTRjLi5mYTJlMmVmNzJiNjggMTAwNjQ0
+Cj4gLS0tIGEvaW5jbHVkZS9hc20tZ2VuZXJpYy9iYXJyaWVyLmgKPiArKysgYi9pbmNsdWRlL2Fz
+bS1nZW5lcmljL2JhcnJpZXIuaAo+IEBAIC03MCw2ICs3MCwyNCBAQAo+ICAgI2RlZmluZSBfX3Nt
+cF9yZWFkX2JhcnJpZXJfZGVwZW5kcygpCXJlYWRfYmFycmllcl9kZXBlbmRzKCkKPiAgICNlbmRp
+Zgo+ICAgCj4gKyNpZiBkZWZpbmVkKENPTVBJTEVSX0hBU19PUFRJTUlaRVJfSElERV9WQVIpICYm
+IFwKPiArCSFkZWZpbmVkKEFSQ0hfTkVFRFNfUkVBRF9CQVJSSUVSX0RFUEVORFMpCj4gKwo+ICsj
+ZGVmaW5lIGRlcGVuZGVudF9wdHJfbWIocHRyLCB2YWwpICh7CQkJCQlcCj4gKwlsb25nIGRlcGVu
+ZGVudF9wdHJfbWJfdmFsID0gKGxvbmcpKHZhbCk7CQkJXAo+ICsJbG9uZyBkZXBlbmRlbnRfcHRy
+X21iX3B0ciA9IChsb25nKShwdHIpIC0gZGVwZW5kZW50X3B0cl9tYl92YWw7CVwKPiArCQkJCQkJ
+CQkJXAo+ICsJQlVJTERfQlVHX09OKHNpemVvZih2YWwpID4gc2l6ZW9mKGxvbmcpKTsJCQlcCj4g
+KwlPUFRJTUlaRVJfSElERV9WQVIoZGVwZW5kZW50X3B0cl9tYl92YWwpOwkJCVwKPiArCSh0eXBl
+b2YocHRyKSkoZGVwZW5kZW50X3B0cl9tYl9wdHIgKyBkZXBlbmRlbnRfcHRyX21iX3ZhbCk7CVwK
+PiArfSkKPiArCj4gKyNlbHNlCj4gKwo+ICsjZGVmaW5lIGRlcGVuZGVudF9wdHJfbWIocHRyLCB2
+YWwpICh7IG1iKCk7IChwdHIpOyB9KQoKClNvIGZvciB0aGUgZXhhbXBsZSBvZiBwYXRjaCA0LCB3
+ZSdkIGJldHRlciBmYWxsIGJhY2sgdG8gcm1iKCkgb3IgbmVlZCBhIApkZXBlbmRlbnRfcHRyX3Jt
+YigpPwoKVGhhbmtzCgoKPiArCj4gKyNlbmRpZgo+ICsKPiAgICNpZmRlZiBDT05GSUdfU01QCj4g
+ICAKPiAgICNpZm5kZWYgc21wX21iCj4gZGlmZiAtLWdpdCBhL2luY2x1ZGUvbGludXgvY29tcGls
+ZXIuaCBiL2luY2x1ZGUvbGludXgvY29tcGlsZXIuaAo+IGluZGV4IDY2MDFkMzllOGM0OC4uZjU5
+OWMzMGYxYjI4IDEwMDY0NAo+IC0tLSBhL2luY2x1ZGUvbGludXgvY29tcGlsZXIuaAo+ICsrKyBi
+L2luY2x1ZGUvbGludXgvY29tcGlsZXIuaAo+IEBAIC0xNTIsOSArMTUyLDEzIEBAIHZvaWQgZnRy
+YWNlX2xpa2VseV91cGRhdGUoc3RydWN0IGZ0cmFjZV9saWtlbHlfZGF0YSAqZiwgaW50IHZhbCwK
+PiAgICNlbmRpZgo+ICAgCj4gICAjaWZuZGVmIE9QVElNSVpFUl9ISURFX1ZBUgo+ICsKPiAgIC8q
+IE1ha2UgdGhlIG9wdGltaXplciBiZWxpZXZlIHRoZSB2YXJpYWJsZSBjYW4gYmUgbWFuaXB1bGF0
+ZWQgYXJiaXRyYXJpbHkuICovCj4gICAjZGVmaW5lIE9QVElNSVpFUl9ISURFX1ZBUih2YXIpCQkJ
+CQkJXAo+ICAgCV9fYXNtX18gKCIiIDogIj1ybSIgKHZhcikgOiAiMCIgKHZhcikpCj4gKwo+ICsj
+ZGVmaW5lIENPTVBJTEVSX0hBU19PUFRJTUlaRVJfSElERV9WQVIgMQo+ICsKPiAgICNlbmRpZgo+
+ICAgCj4gICAvKiBOb3QtcXVpdGUtdW5pcXVlIElELiAqLwpfX19fX19fX19fX19fX19fX19fX19f
+X19fX19fX19fX19fX19fX19fX19fX19fXwpWaXJ0dWFsaXphdGlvbiBtYWlsaW5nIGxpc3QKVmly
+dHVhbGl6YXRpb25AbGlzdHMubGludXgtZm91bmRhdGlvbi5vcmcKaHR0cHM6Ly9saXN0cy5saW51
+eGZvdW5kYXRpb24ub3JnL21haWxtYW4vbGlzdGluZm8vdmlydHVhbGl6YXRpb24=
