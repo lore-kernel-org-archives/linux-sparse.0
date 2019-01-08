@@ -1,100 +1,130 @@
-From: "Paul E. McKenney" <paulmck@linux.ibm.com>
-Subject: Re: [PATCH RFC 3/4] barriers: convert a control to a data dependency
-Date: Mon, 7 Jan 2019 11:25:34 -0800
-Message-ID: <20190107192534.GG1215@linux.ibm.com>
-References: <20190102205715.14054-1-mst@redhat.com>
- <20190102205715.14054-4-mst@redhat.com>
- <86023cbe-d1ae-a0d6-7b75-26556f1a0c1f@redhat.com>
- <20190106231756-mutt-send-email-mst@kernel.org>
- <20190107094610.GA2861@worktop.programming.kicks-ass.net>
- <20190107082223-mutt-send-email-mst@kernel.org>
- <20190107190236.GF1215@linux.ibm.com>
- <20190107140447-mutt-send-email-mst@kernel.org>
-Reply-To: paulmck@linux.ibm.com
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: Re: [PATCH RFC 1/4] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
+Date: Tue, 8 Jan 2019 09:44:28 -0800
+Message-ID: <CAKwvOdk3b6mnpTEEyY-JFrej8K12w9oTMLqi7q5aNiRMyJo6Ow@mail.gmail.com>
+References: <20190102205715.14054-1-mst@redhat.com> <20190102205715.14054-2-mst@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
-Return-path: <netdev-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190107140447-mutt-send-email-mst@kernel.org>
-Sender: netdev-owner@vger.kernel.org
-To: "Michael S. Tsirkin" <mst@redhat.com>
-Cc: Peter Zijlstra <peterz@infradead.org>, Jason Wang <jasowang@redhat.com>, linux-kernel@vger.kernel.org, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, netdev@vger.kernel.org, virtualization@lists.linux-foundation.org, Jonathan Corbet <corbet@lwn.net>, Richard Henderson <rth@twiddle.net>, Ivan Kokshaysky <ink@jurassic.park.msu.ru>, Matt Turner <mattst88@gmail.com>, Arnd Bergmann <arnd@arndb.de>
+Content-Type: text/plain; charset="UTF-8"
+Return-path: <linux-kernel-owner@vger.kernel.org>
+In-Reply-To: <20190102205715.14054-2-mst@redhat.com>
+Sender: linux-kernel-owner@vger.kernel.org
+To: "Michael S. Tsirkin" <mst@redhat.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Cc: LKML <linux-kernel@vger.kernel.org>, Jason Wang <jasowang@redhat.com>, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, netdev@vger.kernel.org, virtualization@lists.linux-foundation.org, Eli Friedman <efriedma@codeaurora.org>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Jan 07, 2019 at 02:13:29PM -0500, Michael S. Tsirkin wrote:
-> On Mon, Jan 07, 2019 at 11:02:36AM -0800, Paul E. McKenney wrote:
-> > On Mon, Jan 07, 2019 at 08:36:36AM -0500, Michael S. Tsirkin wrote:
-> > > On Mon, Jan 07, 2019 at 10:46:10AM +0100, Peter Zijlstra wrote:
-> > > > On Sun, Jan 06, 2019 at 11:23:07PM -0500, Michael S. Tsirkin wrote:
-> > > > > On Mon, Jan 07, 2019 at 11:58:23AM +0800, Jason Wang wrote:
-> > > > > > On 2019/1/3 上午4:57, Michael S. Tsirkin wrote:
-> > > > 
-> > > > > > > +#if defined(COMPILER_HAS_OPTIMIZER_HIDE_VAR) && \
-> > > > > > > +	!defined(ARCH_NEEDS_READ_BARRIER_DEPENDS)
-> > > > > > > +
-> > > > > > > +#define dependent_ptr_mb(ptr, val) ({					\
-> > > > > > > +	long dependent_ptr_mb_val = (long)(val);			\
-> > > > > > > +	long dependent_ptr_mb_ptr = (long)(ptr) - dependent_ptr_mb_val;	\
-> > > > > > > +									\
-> > > > > > > +	BUILD_BUG_ON(sizeof(val) > sizeof(long));			\
-> > > > > > > +	OPTIMIZER_HIDE_VAR(dependent_ptr_mb_val);			\
-> > > > > > > +	(typeof(ptr))(dependent_ptr_mb_ptr + dependent_ptr_mb_val);	\
-> > > > > > > +})
-> > > > > > > +
-> > > > > > > +#else
-> > > > > > > +
-> > > > > > > +#define dependent_ptr_mb(ptr, val) ({ mb(); (ptr); })
-> > > > > > 
-> > > > > > 
-> > > > > > So for the example of patch 4, we'd better fall back to rmb() or need a
-> > > > > > dependent_ptr_rmb()?
-> > > > > > 
-> > > > > > Thanks
-> > > > > 
-> > > > > You mean for strongly ordered architectures like Intel?
-> > > > > Yes, maybe it makes sense to have dependent_ptr_smp_rmb,
-> > > > > dependent_ptr_dma_rmb and dependent_ptr_virt_rmb.
-> > > > > 
-> > > > > mb variant is unused right now so I'll remove it.
-> > > > 
-> > > > How about naming the thing: dependent_ptr() ? That is without any (r)mb
-> > > > implications at all. The address dependency is strictly weaker than an
-> > > > rmb in that it will only order the two loads in qestion and not, like
-> > > > rmb, any prior to any later load.
-> > > 
-> > > So I'm fine with this as it's enough for virtio, but I would like to point out two things:
-> > > 
-> > > 1. E.g. on x86 both SMP and DMA variants can be NOPs but
-> > > the madatory one can't, so assuming we do not want
-> > > it to be stronger than rmp then either we want
-> > > smp_dependent_ptr(), dma_dependent_ptr(), dependent_ptr()
-> > > or we just will specify that dependent_ptr() works for
-> > > both DMA and SMP.
-> > > 
-> > > 2. Down the road, someone might want to order a store after a load.
-> > > Address dependency does that for us too. Assuming we make
-> > > dependent_ptr a NOP on x86, we will want an mb variant
-> > > which isn't a NOP on x86. Will we want to rename
-> > > dependent_ptr to dependent_ptr_rmb at that point?
-> > 
-> > But x86 preserves store-after-load orderings anyway, and even Alpha
-> > respects ordering from loads to dependent stores.  So what am I missing
-> > here?
-> > 
-> > 							Thanx, Paul
-> 
-> Oh you are right. Stores are not reordered with older loads on x86.
-> 
-> So point 2 is moot. Sorry about the noise.
-> 
-> I guess at this point the only sticking point is the ECC compiler.
-> I'm inclined to stick an mb() there, seeing as it doesn't even
-> have spectre protection enabled. Slow but safe.
+Thanks for the patch and sorry for the delay; was totally unplugged
+for the holidays.
 
-Well, there is a mention of DMA above, which on some systems throws in
-a wild card.  I would certainly hope that DMA would integrate nicely
-with the cache-coherence protocols these days, unlike 25 years ago,
-but who knows?
+On Wed, Jan 2, 2019 at 12:57 PM Michael S. Tsirkin <mst@redhat.com> wrote:
+>
+> Since commit 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h
+> mutually exclusive") clang no longer reuses the OPTIMIZER_HIDE_VAR macro
+> from compiler-gcc - instead it gets the version in
+> include/linux/compiler.h.  Unfortunately that version doesn't actually
+> prevent compiler from optimizing out the variable.
 
-							Thanx, Paul
+Good catch. Did you find this via eyeballing the code, a test, or some
+other way?
+
+>
+> Fix up by moving the macro out from compiler-gcc.h to compiler.h.
+> Compilers without incline asm support will keep working
+> since it's protected by an ifdef.
+>
+> Also fix up comments to match reality since we are no longer overriding
+> any macros.
+>
+> Build-tested with gcc and clang.
+>
+> Fixes: 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h mutually exclusive")
+> Cc: Eli Friedman <efriedma@codeaurora.org>
+> Cc: Joe Perches <joe@perches.com>
+> Cc: Nick Desaulniers <ndesaulniers@google.com>
+> Cc: Linus Torvalds <torvalds@linux-foundation.org>
+> Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+
+Also for more context, see:
+commit 7829fb09a2b4 ("lib: make memzero_explicit more robust against
+dead store elimination")
+
+> ---
+>  include/linux/compiler-clang.h | 5 ++---
+>  include/linux/compiler-gcc.h   | 4 ----
+>  include/linux/compiler-intel.h | 4 +---
+>  include/linux/compiler.h       | 4 +++-
+>  4 files changed, 6 insertions(+), 11 deletions(-)
+>
+> diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
+> index 3e7dafb3ea80..7ddaeb5182e3 100644
+> --- a/include/linux/compiler-clang.h
+> +++ b/include/linux/compiler-clang.h
+> @@ -3,9 +3,8 @@
+>  #error "Please don't include <linux/compiler-clang.h> directly, include <linux/compiler.h> instead."
+>  #endif
+>
+> -/* Some compiler specific definitions are overwritten here
+> - * for Clang compiler
+> - */
+> +/* Compiler specific definitions for Clang compiler */
+> +
+>  #define uninitialized_var(x) x = *(&(x))
+>
+>  /* same as gcc, this was present in clang-2.6 so we can assume it works
+> diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+> index 2010493e1040..72054d9f0eaa 100644
+> --- a/include/linux/compiler-gcc.h
+> +++ b/include/linux/compiler-gcc.h
+> @@ -58,10 +58,6 @@
+>         (typeof(ptr)) (__ptr + (off));                                  \
+>  })
+>
+> -/* Make the optimizer believe the variable can be manipulated arbitrarily. */
+> -#define OPTIMIZER_HIDE_VAR(var)                                                \
+> -       __asm__ ("" : "=r" (var) : "0" (var))
+> -
+>  /*
+>   * A trick to suppress uninitialized variable warning without generating any
+>   * code
+> diff --git a/include/linux/compiler-intel.h b/include/linux/compiler-intel.h
+> index 517bd14e1222..b17f3cd18334 100644
+> --- a/include/linux/compiler-intel.h
+> +++ b/include/linux/compiler-intel.h
+> @@ -5,9 +5,7 @@
+>
+>  #ifdef __ECC
+>
+> -/* Some compiler specific definitions are overwritten here
+> - * for Intel ECC compiler
+> - */
+> +/* Compiler specific definitions for Intel ECC compiler */
+>
+>  #include <asm/intrinsics.h>
+>
+> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+> index 06396c1cf127..1ad367b4cd8d 100644
+> --- a/include/linux/compiler.h
+> +++ b/include/linux/compiler.h
+> @@ -152,7 +152,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+>  #endif
+>
+>  #ifndef OPTIMIZER_HIDE_VAR
+> -#define OPTIMIZER_HIDE_VAR(var) barrier()
+> +/* Make the optimizer believe the variable can be manipulated arbitrarily. */
+> +#define OPTIMIZER_HIDE_VAR(var)                                                \
+> +       __asm__ ("" : "=r" (var) : "0" (var))
+>  #endif
+
+This should be fine, thanks for the cleanup!  For now, we're not yet
+confident to turn on Clang's integrated assembler for the kernel, but
+I'll make sure to revisit this should we, in case Clang is then able
+to optimize this out.
++ Eric, who might know of a better trick for what we're trying to
+accomplish with this macro.
+
+Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+
++ Miguel
+Miguel, would you mind taking this into your compiler-attributes tree?
+-- 
+Thanks,
+~Nick Desaulniers
