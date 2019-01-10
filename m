@@ -1,39 +1,46 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Bug#873508: sparse test failures on ppc32le (and other not so common archs)
-Date: Thu, 10 Jan 2019 12:39:32 +0100
-Message-ID: <20190110113931.takknuklkbebzeij@ltop.local>
-References: <20170830161435.krq44m5zub4mq43x@taurus.defre.kleine-koenig.org> <c1cfea1b-c9e6-0df2-855e-cf66e25c9ccc@ramsayjones.plus.com> <20170830173652.2s26nti2s2mgupnd@taurus.defre.kleine-koenig.org> <CANeU7QmV0z58dGW2NTE+qH33OqW+WWCHZARF=h=XiiwhnS5jPg@mail.gmail.com> <20170831205514.vxmirle2yoc3rm44@taurus.defre.kleine-koenig.org> <c0e4a9fe-05ff-1280-f1ee-0c757ba3310b@ramsayjones.plus.com> <20170901074643.rivm2rit53mavkjr@taurus.defre.kleine-koenig.org> <87sgy1uty1.fsf@curie.anarc.at> <150392922734.24087.13050909898214597041.reportbug@curie.anarc.at>
-Reply-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, 873508@bugs.debian.org
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: [PATCH RFC 1/4] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
+Date: Thu, 10 Jan 2019 16:41:39 +0300
+Message-ID: <20190110134139.GE1743@kadam>
+References: <20190102205715.14054-1-mst@redhat.com>
+ <20190102205715.14054-2-mst@redhat.com>
+ <CAKwvOdk3b6mnpTEEyY-JFrej8K12w9oTMLqi7q5aNiRMyJo6Ow@mail.gmail.com>
+ <CANiq72nEiw8+cZNnBOwF1ehv232ZJe5qzhdbaTEg0rOoV2p4sg@mail.gmail.com>
+ <20190109213543-mutt-send-email-mst@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <bounce-debian-bugs-dist=glddb-debian-bugs-dist2=m.gmane.org@lists.debian.org>
-Resent-To: debian-bugs-dist@lists.debian.org
-Resent-Message-ID: <handler.873508.B873508.154712037716119@bugs.debian.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <87sgy1uty1.fsf@curie.anarc.at>
-List-URL: <https://lists.debian.org/debian-bugs-dist/>
-List-Post: <mailto:debian-bugs-dist@lists.debian.org>
-List-Help: <mailto:debian-bugs-dist-request@lists.debian.org?subject=help>
-List-Subscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=subscribe>
-List-Unsubscribe: <mailto:debian-bugs-dist-request@lists.debian.org?subject=unsubscribe>
-To: Antoine =?UTF-8?Q?Beaupr=C3=A9?= <anarcat@debian.org>
-Cc: Uwe =?UTF-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>, Ramsay Jones <ramsay@ramsayjones.plus.com>, Christopher Li <sparse@chrisli.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, 873508@bugs.debian.org
+In-Reply-To: <20190109213543-mutt-send-email-mst@kernel.org>
+Sender: netdev-owner@vger.kernel.org
+To: "Michael S. Tsirkin" <mst@redhat.com>
+Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, LKML <linux-kernel@vger.kernel.org>, Jason Wang <jasowang@redhat.com>, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, Network Development <netdev@vger.kernel.org>, virtualization@lists.linux-foundation.org, Eli
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Jan 09, 2019 at 09:28:54PM -0500, Antoine Beaupré wrote:
-> Control: forwarded -1 https://github.com/br101/horst/issues/93
+On Wed, Jan 09, 2019 at 09:36:41PM -0500, Michael S. Tsirkin wrote:
+> On Wed, Jan 09, 2019 at 11:35:52AM +0100, Miguel Ojeda wrote:
+> > On Tue, Jan 8, 2019 at 6:44 PM Nick Desaulniers <ndesaulniers@google.com> wrote:
+> > >
+> > > Also for more context, see:
+> > > commit 7829fb09a2b4 ("lib: make memzero_explicit more robust against
+> > > dead store elimination")
+> > 
+> > By the way, shouldn't that barrier_data() be directly in compiler.h
+> > too, since it is for both gcc & clang?
+> > 
+> > > Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+> > >
+> > > + Miguel
+> > > Miguel, would you mind taking this into your compiler-attributes tree?
+> > 
+> > Sure, at least we get quickly some linux-next time.
+> 
+> 
+> BTW why linux-next? shouldn't this go into 5.0 and stable? It's a bugfix after all.
+> 
 
-Hi,
+It doesn't hurt to put things in linux-next for a week and then 5.0 and
+-stable.  Not a lot of testing happens on linux-next, but some does.
 
-The issue showed there, more precisely the one:
-  /usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h:21:1: error: Expected ) in function declarator
-is caused by sparse's lack of support for _Float128 and occurs with
-recent version of glibc.
-
-This has been fixed and upstreamed (see
-https://git.kernel.org/pub/scm/devel/sparse/sparse.git/commit/?id=4e9c8ee467dd87d41d5aaa3c5a487e3f05ffb79c
-for more details).
- 
-Best regards,
--- Luc
+regards,
+dan carpenter
