@@ -1,79 +1,33 @@
-From: Andrey Konovalov <andreyknvl@google.com>
-Subject: Re: [PATCH v3 1/3] kasan, arm64: use ARCH_SLAB_MINALIGN instead of
- manual aligning
-Date: Fri, 11 Jan 2019 14:48:52 +0100
-Message-ID: <CAAeHK+wYo95G3pSoxDWwUs2wf-tBoupwf+0XjO68WXjLzsNWaw@mail.gmail.com>
-References: <cover.1546540962.git.andreyknvl@google.com> <52ddd881916bcc153a9924c154daacde78522227.1546540962.git.andreyknvl@google.com>
- <fc93e5a4-fa54-98a1-ea5f-4708568d7857@arm.com>
+From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Subject: Re: [PATCH RFC 1/4] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
+Date: Sat, 19 Jan 2019 19:35:33 +0100
+Message-ID: <CANiq72npFGsoHmBQUSNRLohDmMBNQFka8AcmhMz--QU1v2Aorg@mail.gmail.com>
+References: <20190102205715.14054-1-mst@redhat.com> <20190102205715.14054-2-mst@redhat.com>
+ <CAKwvOdk3b6mnpTEEyY-JFrej8K12w9oTMLqi7q5aNiRMyJo6Ow@mail.gmail.com>
+ <CANiq72nEiw8+cZNnBOwF1ehv232ZJe5qzhdbaTEg0rOoV2p4sg@mail.gmail.com> <20190109094959-mutt-send-email-mst@kernel.org>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <fc93e5a4-fa54-98a1-ea5f-4708568d7857@arm.com>
+In-Reply-To: <20190109094959-mutt-send-email-mst@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Vincenzo Frascino <vincenzo.frascino@arm.com>
-Cc: Andrey Ryabinin <aryabinin@virtuozzo.com>, Alexander Potapenko <glider@google.com>, Dmitry Vyukov <dvyukov@google.com>, Catalin Marinas <catalin.marinas@arm.com>, Will Deacon <will.deacon@arm.com>, Christoph Lameter <cl@linux.com>, Andrew Morton <akpm@linux-foundation.org>, Mark Rutland <mark.rutland@arm.com>, Nick Desaulniers <ndesaulniers@google.com>, Marc Zyngier <marc.zyngier@arm.com>, Dave Martin <dave.martin@arm.com>, Ard Biesheuvel <ard.biesheuvel@linaro.org>, "Eric W . Biederman" <ebiederm@xmission.com>, Ingo Molnar <mingo@kernel.org>, Paul Lawrence <paullawrence@google.com>, Geert Uytterhoeven <geert@linux-m68k.org>, Arnd Bergmann <arnd@arndb.de>, "Kirill A . Shutemov" <kirill.shutemov@linux.intel.com>, Greg Kroah-Hartman <gregkh@lin>
+To: "Michael S. Tsirkin" <mst@redhat.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, LKML <linux-kernel@vger.kernel.org>, Jason Wang <jasowang@redhat.com>, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, Network Development <netdev@vger.kernel.org>, virtualization@lists.linux-foundation.org, Eli Friedman <efriedma@codeaurora.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Jan 9, 2019 at 11:10 AM Vincenzo Frascino
-<vincenzo.frascino@arm.com> wrote:
->
-> On 03/01/2019 18:45, Andrey Konovalov wrote:
-> > Instead of changing cache->align to be aligned to KASAN_SHADOW_SCALE_SIZE
-> > in kasan_cache_create() we can reuse the ARCH_SLAB_MINALIGN macro.
-> >
-> > Suggested-by: Vincenzo Frascino <vincenzo.frascino@arm.com>
-> > Signed-off-by: Andrey Konovalov <andreyknvl@google.com>
-> > ---
-> >  arch/arm64/include/asm/cache.h | 6 ++++++
-> >  mm/kasan/common.c              | 2 --
-> >  2 files changed, 6 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/arch/arm64/include/asm/cache.h b/arch/arm64/include/asm/cache.h
-> > index 13dd42c3ad4e..eb43e09c1980 100644
-> > --- a/arch/arm64/include/asm/cache.h
-> > +++ b/arch/arm64/include/asm/cache.h
-> > @@ -58,6 +58,12 @@
-> >   */
-> >  #define ARCH_DMA_MINALIGN    (128)
-> >
-> > +#ifdef CONFIG_KASAN_SW_TAGS
-> > +#define ARCH_SLAB_MINALIGN   (1ULL << KASAN_SHADOW_SCALE_SHIFT)
-> > +#else
-> > +#define ARCH_SLAB_MINALIGN   __alignof__(unsigned long long)
-> > +#endif
-> > +
->
-> Could you please remove the "#else" case here, because it is redundant (it is
-> defined in linux/slab.h as ifndef) and could be misleading in future?
+Hi Michael,
 
-Sure, sent a patch. Thanks!
+On Wed, Jan 9, 2019 at 3:50 PM Michael S. Tsirkin <mst@redhat.com> wrote:
+>
+> On Wed, Jan 09, 2019 at 11:35:52AM +0100, Miguel Ojeda wrote:
+> > Note it would be nice to separate the patch into two (one for the
+> > comments, another for OPTIMIZER_HIDE_VAR), and also possibly another
+> > for barrier_data().
+>
+> Okay, I will try.
 
->
-> >  #ifndef __ASSEMBLY__
-> >
-> >  #include <linux/bitops.h>
-> > diff --git a/mm/kasan/common.c b/mm/kasan/common.c
-> > index 03d5d1374ca7..44390392d4c9 100644
-> > --- a/mm/kasan/common.c
-> > +++ b/mm/kasan/common.c
-> > @@ -298,8 +298,6 @@ void kasan_cache_create(struct kmem_cache *cache, unsigned int *size,
-> >               return;
-> >       }
-> >
-> > -     cache->align = round_up(cache->align, KASAN_SHADOW_SCALE_SIZE);
-> > -
-> >       *flags |= SLAB_KASAN;
-> >  }
-> >
-> >
->
-> --
-> Regards,
-> Vincenzo
->
-> --
-> You received this message because you are subscribed to the Google Groups "kasan-dev" group.
-> To unsubscribe from this group and stop receiving emails from it, send an email to kasan-dev+unsubscribe@googlegroups.com.
-> To post to this group, send email to kasan-dev@googlegroups.com.
-> To view this discussion on the web visit https://groups.google.com/d/msgid/kasan-dev/fc93e5a4-fa54-98a1-ea5f-4708568d7857%40arm.com.
-> For more options, visit https://groups.google.com/d/optout.
+Did you have a chance to do it (or maybe I missed the patches)? If
+not, no worries, I can send this to Linus as it is and get it in
+already, then we can do the barrier_data later.
+
+Cheers,
+Miguel
