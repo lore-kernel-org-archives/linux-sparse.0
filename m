@@ -1,27 +1,43 @@
-From: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Subject: Re: [PATCH RFC 1/4] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
-Date: Sun, 20 Jan 2019 16:36:14 +0100
-Message-ID: <CANiq72nrX0WKaG1j8mP4eptLvv6dX7J2tBRz5erGKN4OwMiJZQ@mail.gmail.com>
-References: <20190102205715.14054-1-mst@redhat.com> <20190102205715.14054-2-mst@redhat.com>
- <CAKwvOdk3b6mnpTEEyY-JFrej8K12w9oTMLqi7q5aNiRMyJo6Ow@mail.gmail.com>
- <CANiq72nEiw8+cZNnBOwF1ehv232ZJe5qzhdbaTEg0rOoV2p4sg@mail.gmail.com>
- <20190109094959-mutt-send-email-mst@kernel.org> <CANiq72npFGsoHmBQUSNRLohDmMBNQFka8AcmhMz--QU1v2Aorg@mail.gmail.com>
- <20190120094237-mutt-send-email-mst@kernel.org>
+From: Tycho Andersen <tycho@tycho.ws>
+Subject: Re: [RFC v1 0/4] static analysis of copy_to_user()
+Date: Mon, 21 Jan 2019 08:05:10 +1300
+Message-ID: <20190120190510.GC3987@cisco>
+References: <20181220195931.20331-1-tycho@tycho.ws>
+ <20181221224717.zixqkz26xujllmq4@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190120094237-mutt-send-email-mst@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
-To: "Michael S. Tsirkin" <mst@redhat.com>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, LKML <linux-kernel@vger.kernel.org>, Jason Wang <jasowang@redhat.com>, Alan Stern <stern@rowland.harvard.edu>, Andrea Parri <andrea.parri@amarulasolutions.com>, Will Deacon <will.deacon@arm.com>, Peter Zijlstra <peterz@infradead.org>, Boqun Feng <boqun.feng@gmail.com>, Nicholas Piggin <npiggin@gmail.com>, David Howells <dhowells@redhat.com>, Jade Alglave <j.alglave@ucl.ac.uk>, Luc Maranget <luc.maranget@inria.fr>, "Paul E. McKenney" <paulmck@linux.vnet.ibm.com>, Akira Yokosawa <akiyks@gmail.com>, Daniel Lustig <dlustig@nvidia.com>, linux-arch@vger.kernel.org, Network Development <netdev@vger.kernel.org>, virtualization@lists.linux-foundation.org, Eli Friedman <efriedma@codeaurora.org>
+Content-Type: text/plain; charset=us-ascii
+Return-path: <kernel-hardening-return-14940-glkh-kernel-hardening=m.gmane.org@lists.openwall.com>
+List-Post: <mailto:kernel-hardening@lists.openwall.com>
+List-Help: <mailto:kernel-hardening-help@lists.openwall.com>
+List-Unsubscribe: <mailto:kernel-hardening-unsubscribe@lists.openwall.com>
+List-Subscribe: <mailto:kernel-hardening-subscribe@lists.openwall.com>
+Content-Disposition: inline
+In-Reply-To: <20181221224717.zixqkz26xujllmq4@ltop.local>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, kernel-hardening@lists.openwall.com
 List-Id: linux-sparse@vger.kernel.org
 
-On Sun, Jan 20, 2019 at 3:43 PM Michael S. Tsirkin <mst@redhat.com> wrote:
->
-> No not yet. Sorry! Pls send this one in, barrier_data will likely miss
-> the next merge window.
+Hey Luc,
 
-No worries! Done.
+On Fri, Dec 21, 2018 at 11:47:19PM +0100, Luc Van Oostenryck wrote:
+> On Thu, Dec 20, 2018 at 12:59:27PM -0700, Tycho Andersen wrote:
+> > Hi all,
+> > 
+> > A while ago I talked with various people about whether some static
+> > analsys of copy_to_user() could be productive in finding infoleaks.
+> > Unfortunately, due to the various issues outlined in the patch notes, it
+> > doesn't seem like it is. Perhaps these checks are useful to put in just
+> > to future proof ourselves against these sorts of issues, though.
+> > 
+> > Anyway, here's the code. Thoughts welcome!
+> 
+> Hi,
+> 
+> I'm taking the first patch directly but I won't be able to look
+> closer at the other patches until next week.
+
+Any chance you can take a peek at these?
 
 Cheers,
-Miguel
+
+Tycho
