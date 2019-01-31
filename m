@@ -1,222 +1,193 @@
 From: Thomas Garnier <thgarnie@chromium.org>
-Subject: [PATCH v6 15/27] compiler: Option to default to hidden symbols
-Date: Thu, 31 Jan 2019 11:24:22 -0800
-Message-ID: <20190131192533.34130-16-thgarnie@chromium.org>
-References: <20190131192533.34130-1-thgarnie@chromium.org>
+Subject: [PATCH v6 00/27] x86: PIE support and option to extend
+ KASLR randomization
+Date: Thu, 31 Jan 2019 11:24:07 -0800
+Message-ID: <20190131192533.34130-1-thgarnie@chromium.org>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190131192533.34130-1-thgarnie@chromium.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
+Return-path: <xen-devel-bounces@lists.xenproject.org>
+List-Unsubscribe: <https://lists.xenproject.org/mailman/options/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=unsubscribe>
+List-Post: <mailto:xen-devel@lists.xenproject.org>
+List-Help: <mailto:xen-devel-request@lists.xenproject.org?subject=help>
+List-Subscribe: <https://lists.xenproject.org/mailman/listinfo/xen-devel>,
+ <mailto:xen-devel-request@lists.xenproject.org?subject=subscribe>
+Errors-To: xen-devel-bounces@lists.xenproject.org
+Sender: "Xen-devel" <xen-devel-bounces@lists.xenproject.org>
 To: kernel-hardening@lists.openwall.com
-Cc: kristen@linux.intel.com, Thomas Garnier <thgarnie@chromium.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, x86@kernel.org, Luis Chamberlain <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Steven Rostedt <rostedt@goodmis.org>, Jason Baron <jbaron@akamai.com>, Thomas Garnier <thgarnie@google.com>, Jordan Borgner <mail@jordan-borgner.de>, Masami Hiramatsu <mhiramat@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, "Peter Zijlstra (Intel)" <peterz@infradead.org>, Andrew Morton <akpm@linux-foundation.org>, Kee
+Cc: Jan Kiszka <jan.kiszka@siemens.com>, Pavel Machek <pavel@ucw.cz>, Andrey Ryabinin <aryabinin@virtuozzo.com>, Christoph Lameter <cl@linux.com>, =?UTF-8?q?Rafael=20=C3=81vila=20de=20Esp=C3=ADndola?= <rafael@espindo.la>, linux-arch@vger.kernel.org, Andi Kleen <ak@linux.intel.com>, Michael Ellerman <mpe@ellerman.id.au>, linux-sparse@vger.kernel.org, xen-devel@lists.xenproject.org, Alexander Popov <alex.popov@linux.com>, Len Brown <len.brown@intel.com>, linux-pm@vger.kernel.org, Nicholas Piggin <npiggin@gmail.com>, Cao jin <caoj.fnst@cn.fujitsu.com>, Mike Rapoport <rppt@linux.vnet.ibm.com>, Andy Lutomirski <luto@kernel.org>, Dennis Zhou <dennis@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, nixiaoming <nixiaoming@huawei.com>, Michal Marek <michal.lkml@markovi.net>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-kernel@vge
 List-Id: linux-sparse@vger.kernel.org
 
-Provide an option to default visibility to hidden except for key
-symbols. This option is disabled by default and will be used by x86_64
-PIE support to remove errors between compilation units.
-
-The default visibility is also enabled for external symbols that are
-compared as they maybe equals (start/end of sections). In this case,
-older versions of GCC will remove the comparison if the symbols are
-hidden. This issue exists at least on gcc 4.9 and before.
-
-Signed-off-by: Thomas Garnier <thgarnie@chromium.org>
----
- arch/x86/boot/boot.h                 |  2 +-
- arch/x86/include/asm/setup.h         |  2 +-
- arch/x86/kernel/cpu/microcode/core.c |  4 ++--
- drivers/base/firmware_loader/main.c  |  4 ++--
- include/asm-generic/sections.h       |  6 ++++++
- include/linux/compiler.h             |  7 +++++++
- init/Kconfig                         |  7 +++++++
- kernel/kallsyms.c                    | 16 ++++++++--------
- kernel/trace/trace.h                 |  4 ++--
- lib/dynamic_debug.c                  |  4 ++--
- 10 files changed, 38 insertions(+), 18 deletions(-)
-
-diff --git a/arch/x86/boot/boot.h b/arch/x86/boot/boot.h
-index 32a09eb5c101..c4afcfecc817 100644
---- a/arch/x86/boot/boot.h
-+++ b/arch/x86/boot/boot.h
-@@ -193,7 +193,7 @@ static inline bool memcmp_gs(const void *s1, addr_t s2, size_t len)
- }
- 
- /* Heap -- available for dynamic lists. */
--extern char _end[];
-+extern char _end[] __default_visibility;
- extern char *HEAP;
- extern char *heap_end;
- #define RESET_HEAP() ((void *)( HEAP = _end ))
-diff --git a/arch/x86/include/asm/setup.h b/arch/x86/include/asm/setup.h
-index ed8ec011a9fd..74f0a8d87986 100644
---- a/arch/x86/include/asm/setup.h
-+++ b/arch/x86/include/asm/setup.h
-@@ -71,7 +71,7 @@ static inline void x86_ce4100_early_setup(void) { }
-  * This is set up by the setup-routine at boot-time
-  */
- extern struct boot_params boot_params;
--extern char _text[];
-+extern char _text[] __default_visibility;
- 
- static inline bool kaslr_enabled(void)
- {
-diff --git a/arch/x86/kernel/cpu/microcode/core.c b/arch/x86/kernel/cpu/microcode/core.c
-index 97f9ada9ceda..04ca89e65f79 100644
---- a/arch/x86/kernel/cpu/microcode/core.c
-+++ b/arch/x86/kernel/cpu/microcode/core.c
-@@ -149,8 +149,8 @@ static bool __init check_loader_disabled_bsp(void)
- 	return *res;
- }
- 
--extern struct builtin_fw __start_builtin_fw[];
--extern struct builtin_fw __end_builtin_fw[];
-+extern struct builtin_fw __start_builtin_fw[] __default_visibility;
-+extern struct builtin_fw __end_builtin_fw[] __default_visibility;
- 
- bool get_builtin_firmware(struct cpio_data *cd, const char *name)
- {
-diff --git a/drivers/base/firmware_loader/main.c b/drivers/base/firmware_loader/main.c
-index 8e9213b36e31..f04096161a52 100644
---- a/drivers/base/firmware_loader/main.c
-+++ b/drivers/base/firmware_loader/main.c
-@@ -94,8 +94,8 @@ static struct firmware_cache fw_cache;
- 
- #ifdef CONFIG_FW_LOADER
- 
--extern struct builtin_fw __start_builtin_fw[];
--extern struct builtin_fw __end_builtin_fw[];
-+extern struct builtin_fw __start_builtin_fw[] __default_visibility;
-+extern struct builtin_fw __end_builtin_fw[] __default_visibility;
- 
- static void fw_copy_to_prealloc_buf(struct firmware *fw,
- 				    void *buf, size_t size)
-diff --git a/include/asm-generic/sections.h b/include/asm-generic/sections.h
-index d79abca81a52..94f072f3a48d 100644
---- a/include/asm-generic/sections.h
-+++ b/include/asm-generic/sections.h
-@@ -32,6 +32,9 @@
-  *	__softirqentry_text_start, __softirqentry_text_end
-  *	__start_opd, __end_opd
-  */
-+#ifdef CONFIG_DEFAULT_HIDDEN_SYMS
-+#pragma GCC visibility push(default)
-+#endif
- extern char _text[], _stext[], _etext[];
- extern char _data[], _sdata[], _edata[];
- extern char __bss_start[], __bss_stop[];
-@@ -49,6 +52,9 @@ extern char __start_once[], __end_once[];
- 
- /* Start and end of .ctors section - used for constructor calls. */
- extern char __ctors_start[], __ctors_end[];
-+#ifdef CONFIG_DEFAULT_HIDDEN_SYMS
-+#pragma GCC visibility pop
-+#endif
- 
- /* Start and end of .opd section - used for function descriptors. */
- extern char __start_opd[], __end_opd[];
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 87692fdae97a..5c0723604a52 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -287,6 +287,13 @@ unsigned long read_word_at_a_time(const void *addr)
- 	__u.__val;					\
- })
- 
-+#ifdef CONFIG_DEFAULT_HIDDEN_SYMS
-+#pragma GCC visibility push(hidden)
-+#define __default_visibility  __attribute__((visibility ("default")))
-+#else
-+#define __default_visibility
-+#endif
-+
- #endif /* __KERNEL__ */
- 
- /*
-diff --git a/init/Kconfig b/init/Kconfig
-index bb383615823a..116e0de4817f 100644
---- a/init/Kconfig
-+++ b/init/Kconfig
-@@ -1848,6 +1848,13 @@ config CMDLINE_OVERRIDE
- 
- endif
- 
-+#
-+# Default to hidden visibility for all symbols.
-+# Useful for Position Independent Code to reduce global references.
-+#
-+config DEFAULT_HIDDEN_SYMS
-+	bool
-+
- endmenu		# General setup
- 
- source "arch/Kconfig"
-diff --git a/kernel/kallsyms.c b/kernel/kallsyms.c
-index 14934afa9e68..547affc40b68 100644
---- a/kernel/kallsyms.c
-+++ b/kernel/kallsyms.c
-@@ -29,24 +29,24 @@
-  * These will be re-linked against their real values
-  * during the second link stage.
-  */
--extern const unsigned long kallsyms_addresses[] __weak;
--extern const int kallsyms_offsets[] __weak;
--extern const u8 kallsyms_names[] __weak;
-+extern const unsigned long kallsyms_addresses[] __weak __default_visibility;
-+extern const int kallsyms_offsets[] __weak __default_visibility;
-+extern const u8 kallsyms_names[] __weak __default_visibility;
- 
- /*
-  * Tell the compiler that the count isn't in the small data section if the arch
-  * has one (eg: FRV).
-  */
- extern const unsigned int kallsyms_num_syms
--__attribute__((weak, section(".rodata")));
-+__attribute__((weak, section(".rodata"))) __default_visibility;
- 
- extern const unsigned long kallsyms_relative_base
--__attribute__((weak, section(".rodata")));
-+__attribute__((weak, section(".rodata"))) __default_visibility;
- 
--extern const u8 kallsyms_token_table[] __weak;
--extern const u16 kallsyms_token_index[] __weak;
-+extern const u8 kallsyms_token_table[] __weak __default_visibility;
-+extern const u16 kallsyms_token_index[] __weak __default_visibility;
- 
--extern const unsigned int kallsyms_markers[] __weak;
-+extern const unsigned int kallsyms_markers[] __weak __default_visibility;
- 
- /*
-  * Expand a compressed symbol data into the resulting uncompressed string,
-diff --git a/kernel/trace/trace.h b/kernel/trace/trace.h
-index 08900828d282..5246977a2db7 100644
---- a/kernel/trace/trace.h
-+++ b/kernel/trace/trace.h
-@@ -1809,8 +1809,8 @@ extern int trace_event_enable_disable(struct trace_event_file *file,
- 				      int enable, int soft_disable);
- extern int tracing_alloc_snapshot(void);
- 
--extern const char *__start___trace_bprintk_fmt[];
--extern const char *__stop___trace_bprintk_fmt[];
-+extern const char *__start___trace_bprintk_fmt[] __default_visibility;
-+extern const char *__stop___trace_bprintk_fmt[] __default_visibility;
- 
- extern const char *__start___tracepoint_str[];
- extern const char *__stop___tracepoint_str[];
-diff --git a/lib/dynamic_debug.c b/lib/dynamic_debug.c
-index dbf2b457e47e..05482e65ae7d 100644
---- a/lib/dynamic_debug.c
-+++ b/lib/dynamic_debug.c
-@@ -37,8 +37,8 @@
- #include <linux/device.h>
- #include <linux/netdevice.h>
- 
--extern struct _ddebug __start___verbose[];
--extern struct _ddebug __stop___verbose[];
-+extern struct _ddebug __start___verbose[] __default_visibility;
-+extern struct _ddebug __stop___verbose[] __default_visibility;
- 
- struct ddebug_table {
- 	struct list_head link;
--- 
-2.20.1.495.gaa96b0ce6b-goog
+VGhlcmUgaGFzIGJlZW4gbm8gbWFqb3IgY29uY2VybiBpbiB0aGUgbGF0ZXN0IGl0ZXJhdGlvbnMu
+IEkgYW0gaW50ZXJlc3RlZCBvbgp3aGF0IHdvdWxkIGJlIHRoZSBiZXN0IHdheSB0byBzbG93bHkg
+aW50ZWdyYXRlIHRoaXMgcGF0Y2hzZXQgdXBzdHJlYW0uCgpDaGFuZ2VzOgogLSBwYXRjaCB2NjoK
+ICAgLSBSZWJhc2Ugb24gbGF0ZXN0IGNoYW5nZXMgaW4ganVtcCB0YWJsZXMgYW5kIGNyeXB0by4K
+ICAgLSBGaXggd29yZGluZyBvbiBjb3VwbGUgY29tbWl0cy4KICAgLSBSZXZpc2l0IGNoZWNrcGF0
+Y2ggd2FybmluZ3MuCiAgIC0gTW92aW5nIHRvIEBjaHJvbWl1bS5vcmcuCiAtIHBhdGNoIHY1Ogog
+ICAtIEFkYXB0IG5ldyBjcnlwdG8gbW9kdWxlcyBmb3IgUElFLgogICAtIEltcHJvdmUgcGVyLWNw
+dSBjb21taXQgbWVzc2FnZS4KICAgLSBGaXggeGVuIDMyLWJpdCBidWlsZCBlcnJvciB3aXRoIC5x
+dWFkLgogICAtIFJlbW92ZSBleHRyYSBjb2RlIGZvciBmdHJhY2UuCiAtIHBhdGNoIHY0OgogICAt
+IFNpbXBsaWZ5IGVhcmx5IGJvb3QgYnkgcmVtb3ZpbmcgZ2xvYmFsIHZhcmlhYmxlcy4KICAgLSBN
+b2RpZnkgdGhlIG1jb3VudCBsb2NhdGlvbiBzY3JpcHQgZm9yIF9fbWNvdW50X2xvYyBpbnRlYWQg
+b2YgdGhlIGFkZHJlc3MKICAgICByZWFkIGluIHRoZSBmdHJhY2UgaW1wbGVtZW50YXRpb24uCiAg
+IC0gRWRpdCBjb21taXQgZGVzY3JpcHRpb24gdG8gZXhwbGFpbiBiZXR0ZXIgd2hlcmUgdGhlIGtl
+cm5lbCBjYW4gYmUgbG9jYXRlZC4KICAgLSBTdHJlYW1saW5lZCB0aGUgdGVzdGluZyBkb25lIG9u
+IGVhY2ggcGF0Y2ggcHJvcG9zYWwuIEFsd2F5cyB0ZXN0aW5nCiAgICAgaGliZXJuYXRpb24sIHN1
+c3BlbmQsIGZ0cmFjZSBhbmQga3Byb2JlIHRvIGVuc3VyZSBubyByZWdyZXNzaW9ucy4KIC0gcGF0
+Y2ggdjM6CiAgIC0gVXBkYXRlIG9uIG1lc3NhZ2UgdG8gZGVzY3JpYmUgbG9uZ2VyIHRlcm0gUElF
+IGdvYWwuCiAgIC0gTWlub3IgY2hhbmdlIG9uIGZ0cmFjZSBpZiBjb25kaXRpb24uCiAgIC0gQ2hh
+bmdlZCBjb2RlIHVzaW5nIHhjaGdxLgogLSBwYXRjaCB2MjoKICAgLSBBZGFwdCBwYXRjaCB0byB3
+b3JrIHBvc3QgS1BUSSBhbmQgY29tcGlsZXIgY2hhbmdlcwogICAtIFJlZG8gYWxsIHBlcmZvcm1h
+bmNlIHRlc3Rpbmcgd2l0aCBsYXRlc3QgY29uZmlncyBhbmQgY29tcGlsZXJzCiAgIC0gU2ltcGxp
+ZnkgbW92IG1hY3JvIG9uIFBJRSAoTU9WQUJTIG5vdykKICAgLSBSZWR1Y2UgR09UIGZvb3Rwcmlu
+dAogLSBwYXRjaCB2MToKICAgLSBTaW1wbGlmeSBmdHJhY2UgaW1wbGVtZW50YXRpb24uCiAgIC0g
+VXNlIGdjYyBtc3RhY2stcHJvdGVjdG9yLWd1YXJkLXJlZz0lZ3Mgd2l0aCBQSUUgd2hlbiBwb3Nz
+aWJsZS4KIC0gcmZjIHYzOgogICAtIFVzZSAtLWVtaXQtcmVsb2NzIGluc3RlYWQgb2YgLXBpZSB0
+byByZWR1Y2UgZHluYW1pYyByZWxvY2F0aW9uIHNwYWNlIG9uCiAgICAgbWFwcGVkIG1lbW9yeS4g
+SXQgYWxzbyBzaW1wbGlmaWVzIHRoZSByZWxvY2F0aW9uIHByb2Nlc3MuCiAgIC0gTW92ZSB0aGUg
+c3RhcnQgdGhlIG1vZHVsZSBzZWN0aW9uIG5leHQgdG8gdGhlIGtlcm5lbC4gUmVtb3ZlIHRoZSBu
+ZWVkIGZvcgogICAgIC1tY21vZGVsPWxhcmdlIG9uIG1vZHVsZXMuIEV4dGVuZHMgbW9kdWxlIHNw
+YWNlIGZyb20gMSB0byAyRyBtYXhpbXVtLgogICAtIFN1cHBvcnQgZm9yIFhFTiBQVkggYXMgMzIt
+Yml0IHJlbG9jYXRpb25zIGNhbiBiZSBpZ25vcmVkIHdpdGgKICAgICAtLWVtaXQtcmVsb2NzLgog
+ICAtIFN1cHBvcnQgZm9yIEdPVCByZWxvY2F0aW9ucyBwcmV2aW91c2x5IGRvbmUgYXV0b21hdGlj
+YWxseSB3aXRoIC1waWUuCiAgIC0gUmVtb3ZlIG5lZWQgZm9yIGR5bmFtaWMgUExUIGluIG1vZHVs
+ZXMuCiAgIC0gU3VwcG9ydCBkeW1hbWljIEdPVCBmb3IgbW9kdWxlcy4KIC0gcmZjIHYyOgogICAt
+IEFkZCBzdXBwb3J0IGZvciBnbG9iYWwgc3RhY2sgY29va2llIHdoaWxlIGNvbXBpbGVyIGRlZmF1
+bHQgdG8gZnMgd2l0aG91dAogICAgIG1jbW9kZWw9a2VybmVsCiAgIC0gQ2hhbmdlIHBhdGNoIDcg
+dG8gY29ycmVjdGx5IGp1bXAgb3V0IG9mIHRoZSBpZGVudGl0eSBtYXBwaW5nIG9uIGtleGVjIGxv
+YWQKICAgICBwcmVzZXJ2ZS4KClRoZXNlIHBhdGNoZXMgbWFrZSB0aGUgY2hhbmdlcyBuZWNlc3Nh
+cnkgdG8gYnVpbGQgdGhlIGtlcm5lbCBhcyBQb3NpdGlvbgpJbmRlcGVuZGVudCBFeGVjdXRhYmxl
+IChQSUUpIG9uIHg4Nl82NC4gQSBQSUUga2VybmVsIGNhbiBiZSByZWxvY2F0ZWQgYmVsb3cKdGhl
+IHRvcCAyRyBvZiB0aGUgdmlydHVhbCBhZGRyZXNzIHNwYWNlLiBJdCBhbGxvd3MgdG8gb3B0aW9u
+YWxseSBleHRlbmQgdGhlCktBU0xSIHJhbmRvbWl6YXRpb24gcmFuZ2UgZnJvbSAxRyB0byAzRy4g
+VGhlIGNob3NlbiByYW5nZSBpcyB0aGUgb25lIGN1cnJlbnRseQphdmFpbGFibGUsIGZ1dHVyZSBj
+aGFuZ2VzIHdpbGwgYWxsb3cgdGhlIGtlcm5lbCBtb2R1bGUgdG8gaGF2ZSBhIHdpZGVyCnJhbmRv
+bWl6YXRpb24gcmFuZ2UuCgpUaGFua3MgYSBsb3QgdG8gQXJkIEJpZXNoZXV2ZWwgJiBLZWVzIENv
+b2sgb24gdGhlaXIgZmVlZGJhY2sgb24gY29tcGlsZXIKY2hhbmdlcywgUElFIHN1cHBvcnQgYW5k
+IEtBU0xSIGluIGdlbmVyYWwuIFRoYW5rcyB0byBSb2xhbmQgTWNHcmF0aCBvbiBoaXMKZmVlZGJh
+Y2sgZm9yIHVzaW5nIC1waWUgdmVyc3VzIC0tZW1pdC1yZWxvY3MgYW5kIGRldGFpbHMgb24gY29t
+cGlsZXIgY29kZQpnZW5lcmF0aW9uLgoKVGhlIHBhdGNoZXM6CiAtIDEtMiwgNC0xMywgMTgtMTk6
+IENoYW5nZSBpbiBhc3NlbWJseSBjb2RlIHRvIGJlIFBJRSBjb21wbGlhbnQuCiAtIDM6IEFkZCBh
+IG5ldyBfQVNNX01PVkFCUyBtYWNybyB0byBmZXRjaCBhIHN5bWJvbCBhZGRyZXNzIGdlbmVyaWNh
+bGx5LgogLSAxNDogQWRhcHQgcGVyY3B1IGRlc2lnbiB0byB3b3JrIGNvcnJlY3RseSB3aGVuIFBJ
+RSBpcyBlbmFibGVkLgogLSAxNTogUHJvdmlkZSBhbiBvcHRpb24gdG8gZGVmYXVsdCB2aXNpYmls
+aXR5IHRvIGhpZGRlbiBleGNlcHQgZm9yIGtleSBzeW1ib2xzLgogICAgICAgSXQgcmVtb3ZlcyBl
+cnJvcnMgYmV0d2VlbiBjb21waWxhdGlvbiB1bml0cy4KIC0gMTY6IEFkZCBQUk9WSURFX0hJRERF
+TiByZXBsYWNlbWVudCBvbiB0aGUgbGlua2VyIHNjcmlwdCBmb3Igd2VhayBzeW1ib2xzIHRvCiAg
+ICAgICByZWR1Y2UgR09UIGZvb3RwcmludC4KIC0gMTc6IEFkYXB0IHJlbG9jYXRpb24gdG9vbCB0
+byBoYW5kbGUgUElFIGJpbmFyeSBjb3JyZWN0bHkuCiAtIDIwOiBBZGQgc3VwcG9ydCBmb3IgZ2xv
+YmFsIGNvb2tpZS4KIC0gMjE6IFN1cHBvcnQgZnRyYWNlIHdpdGggUElFICh1c2VkIG9uIFVidW50
+dSBjb25maWcpLgogLSAyMjogQWRkIG9wdGlvbiB0byBtb3ZlIHRoZSBtb2R1bGUgc2VjdGlvbiBq
+dXN0IGFmdGVyIHRoZSBrZXJuZWwuCiAtIDIzOiBBZGFwdCBtb2R1bGUgbG9hZGluZyB0byBzdXBw
+b3J0IFBJRSB3aXRoIGR5bmFtaWMgR09ULgogLSAyNDogTWFrZSB0aGUgR09UIHJlYWQtb25seS4K
+IC0gMjU6IEFkZCB0aGUgQ09ORklHX1g4Nl9QSUUgb3B0aW9uIChvZmYgYnkgZGVmYXVsdCkuCiAt
+IDI2OiBBZGFwdCByZWxvY2F0aW9uIHRvb2wgdG8gZ2VuZXJhdGUgYSA2NC1iaXQgcmVsb2NhdGlv
+biB0YWJsZS4KIC0gMjc6IEFkZCB0aGUgQ09ORklHX1JBTkRPTUlaRV9CQVNFX0xBUkdFIG9wdGlv
+biB0byBpbmNyZWFzZSByZWxvY2F0aW9uIHJhbmdlCiAgICAgICBmcm9tIDFHIHRvIDNHIChvZmYg
+YnkgZGVmYXVsdCkuCgpQZXJmb3JtYW5jZS9TaXplIGltcGFjdDoKClNpemUgb2Ygdm1saW51eCAo
+RGVmYXVsdCBjb25maWd1cmF0aW9uKToKIEZpbGUgc2l6ZToKIC0gUElFIGRpc2FibGVkOiArMC4x
+OCUKIC0gUElFIGVuYWJsZWQ6IC0xLjk3NyUgKGxlc3MgcmVsb2NhdGlvbnMpCiAudGV4dCBzZWN0
+aW9uOgogLSBQSUUgZGlzYWJsZWQ6IHNhbWUKIC0gUElFIGVuYWJsZWQ6IHNhbWUKClNpemUgb2Yg
+dm1saW51eCAoVWJ1bnR1IGNvbmZpZ3VyYXRpb24pOgogRmlsZSBzaXplOgogLSBQSUUgZGlzYWJs
+ZWQ6ICswLjIxJQogLSBQSUUgZW5hYmxlZDogKzEwJQogLnRleHQgc2VjdGlvbjoKIC0gUElFIGRp
+c2FibGVkOiBzYW1lCiAtIFBJRSBlbmFibGVkOiArMC4wMDElCgpUaGUgc2l6ZSBpbmNyZWFzZSBp
+cyBtYWlubHkgZHVlIHRvIG5vdCBoYXZpbmcgYWNjZXNzIHRvIHRoZSAzMi1iaXQgc2lnbmVkCnJl
+bG9jYXRpb24gdGhhdCBjYW4gYmUgdXNlZCB3aXRoIG1jbW9kZWw9a2VybmVsLiBBIHNtYWxsIHBh
+cnQgaXMgZHVlIHRvIHJlZHVjZWQKb3B0aW1pemF0aW9uIGZvciBQSUUgY29kZS4gVGhpcyBidWcg
+WzFdIHdhcyBvcGVuZWQgd2l0aCBnY2MgdG8gcHJvdmlkZSBhIGJldHRlcgpjb2RlIGdlbmVyYXRp
+b24gZm9yIGtlcm5lbCBQSUUuCgpIYWNrYmVuY2ggKDUwJSBhbmQgMTYwMCUgb24gdGhyZWFkL3By
+b2Nlc3MgZm9yIHBpcGUvc29ja2V0cyk6CiAtIFBJRSBkaXNhYmxlZDogbm8gc2lnbmlmaWNhbnQg
+Y2hhbmdlIChhdmcgLS8rIDAuNSUgb24gbGF0ZXN0IHRlc3QpLgogLSBQSUUgZW5hYmxlZDogYmV0
+d2VlbiAtMSUgdG8gKzElIGluIGF2ZXJhZ2UgKGRlZmF1bHQgYW5kIFVidW50dSBjb25maWcpLgoK
+S2VybmJlbmNoIChhdmVyYWdlIG9mIDEwIEhhbGYgYW5kIE9wdGltYWwgcnVucyk6CiBFbGFwc2Vk
+IFRpbWU6CiAtIFBJRSBkaXNhYmxlZDogbm8gc2lnbmlmaWNhbnQgY2hhbmdlIChhdmcgLTAuNSUp
+CiAtIFBJRSBlbmFibGVkOiBhdmVyYWdlIC0wLjUlIHRvICswLjUlCiBTeXN0ZW0gVGltZToKIC0g
+UElFIGRpc2FibGVkOiBubyBzaWduaWZpY2FudCBjaGFuZ2UgKGF2ZyAtMC4xJSkKIC0gUElFIGVu
+YWJsZWQ6IGF2ZXJhZ2UgLTAuNCUgdG8gKzAuNCUuCgpbMV0gaHR0cHM6Ly9nY2MuZ251Lm9yZy9i
+dWd6aWxsYS9zaG93X2J1Zy5jZ2k/aWQ9ODIzMDMKCmRpZmZzdGF0OgogRG9jdW1lbnRhdGlvbi94
+ODYveDg2XzY0L21tLnR4dCAgICAgICAgICAgICAgfCAgICAzIAogTWFrZWZpbGUgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgICAzIAogYXJjaC94ODYvS2NvbmZpZyAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDQ1ICsrKysrKwogYXJjaC94ODYvTWFrZWZpbGUg
+ICAgICAgICAgICAgICAgICAgICAgICAgICAgfCAgIDU4ICsrKysrKysrCiBhcmNoL3g4Ni9ib290
+L2Jvb3QuaCAgICAgICAgICAgICAgICAgICAgICAgICB8ICAgIDIgCiBhcmNoL3g4Ni9ib290L2Nv
+bXByZXNzZWQvTWFrZWZpbGUgICAgICAgICAgICB8ICAgIDUgCiBhcmNoL3g4Ni9ib290L2NvbXBy
+ZXNzZWQvbWlzYy5jICAgICAgICAgICAgICB8ICAgMTAgKwogYXJjaC94ODYvY3J5cHRvL2FlZ2lz
+MTI4LWFlc25pLWFzbS5TICAgICAgICAgfCAgICA2IAogYXJjaC94ODYvY3J5cHRvL2FlZ2lzMTI4
+bC1hZXNuaS1hc20uUyAgICAgICAgfCAgICA4IC0KIGFyY2gveDg2L2NyeXB0by9hZWdpczI1Ni1h
+ZXNuaS1hc20uUyAgICAgICAgIHwgICAgNiAKIGFyY2gveDg2L2NyeXB0by9hZXMteDg2XzY0LWFz
+bV82NC5TICAgICAgICAgIHwgICA0NSArKysrLS0KIGFyY2gveDg2L2NyeXB0by9hZXNuaS1pbnRl
+bF9hc20uUyAgICAgICAgICAgIHwgICAgOCAtCiBhcmNoL3g4Ni9jcnlwdG8vY2FtZWxsaWEtYWVz
+bmktYXZ4LWFzbV82NC5TICB8ICAgNDIgKysrLS0tCiBhcmNoL3g4Ni9jcnlwdG8vY2FtZWxsaWEt
+YWVzbmktYXZ4Mi1hc21fNjQuUyB8ICAgNDQgKysrLS0tCiBhcmNoL3g4Ni9jcnlwdG8vY2FtZWxs
+aWEteDg2XzY0LWFzbV82NC5TICAgICB8ICAgIDggLQogYXJjaC94ODYvY3J5cHRvL2Nhc3Q1LWF2
+eC14ODZfNjQtYXNtXzY0LlMgICAgfCAgIDUwICsrKystLS0KIGFyY2gveDg2L2NyeXB0by9jYXN0
+Ni1hdngteDg2XzY0LWFzbV82NC5TICAgIHwgICA0NCArKystLS0KIGFyY2gveDg2L2NyeXB0by9k
+ZXMzX2VkZS1hc21fNjQuUyAgICAgICAgICAgIHwgICA5NiArKysrKysrKystLS0tLQogYXJjaC94
+ODYvY3J5cHRvL2doYXNoLWNsbXVsbmktaW50ZWxfYXNtLlMgICAgfCAgICA0IAogYXJjaC94ODYv
+Y3J5cHRvL2dsdWVfaGVscGVyLWFzbS1hdnguUyAgICAgICAgfCAgICA0IAogYXJjaC94ODYvY3J5
+cHRvL2dsdWVfaGVscGVyLWFzbS1hdngyLlMgICAgICAgfCAgICA2IAogYXJjaC94ODYvY3J5cHRv
+L21vcnVzMTI4MC1hdngyLWFzbS5TICAgICAgICAgfCAgICA0IAogYXJjaC94ODYvY3J5cHRvL21v
+cnVzMTI4MC1zc2UyLWFzbS5TICAgICAgICAgfCAgICA4IC0KIGFyY2gveDg2L2NyeXB0by9tb3J1
+czY0MC1zc2UyLWFzbS5TICAgICAgICAgIHwgICAgNiAKIGFyY2gveDg2L2NyeXB0by9zaGEyNTYt
+YXZ4Mi1hc20uUyAgICAgICAgICAgIHwgICAyMyArKy0KIGFyY2gveDg2L2VudHJ5L2NhbGxpbmcu
+aCAgICAgICAgICAgICAgICAgICAgIHwgICAgMiAKIGFyY2gveDg2L2VudHJ5L2VudHJ5XzMyLlMg
+ICAgICAgICAgICAgICAgICAgIHwgICAgMyAKIGFyY2gveDg2L2VudHJ5L2VudHJ5XzY0LlMgICAg
+ICAgICAgICAgICAgICAgIHwgICAyMyArKy0KIGFyY2gveDg2L2luY2x1ZGUvYXNtL2FsdGVybmF0
+aXZlLmggICAgICAgICAgIHwgICAgNiAKIGFyY2gveDg2L2luY2x1ZGUvYXNtL2FzbS5oICAgICAg
+ICAgICAgICAgICAgIHwgICAgMSAKIGFyY2gveDg2L2luY2x1ZGUvYXNtL2p1bXBfbGFiZWwuaCAg
+ICAgICAgICAgIHwgICAgOCAtCiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9rdm1faG9zdC5oICAgICAg
+ICAgICAgICB8ICAgIDggLQogYXJjaC94ODYvaW5jbHVkZS9hc20vbW9kdWxlLmggICAgICAgICAg
+ICAgICAgfCAgIDExICsKIGFyY2gveDg2L2luY2x1ZGUvYXNtL3BhZ2VfNjRfdHlwZXMuaCAgICAg
+ICAgIHwgICAxMCArCiBhcmNoL3g4Ni9pbmNsdWRlL2FzbS9wYXJhdmlydF90eXBlcy5oICAgICAg
+ICB8ICAgMTIgKwogYXJjaC94ODYvaW5jbHVkZS9hc20vcGVyY3B1LmggICAgICAgICAgICAgICAg
+fCAgIDI1ICsrLQogYXJjaC94ODYvaW5jbHVkZS9hc20vcGd0YWJsZV82NF90eXBlcy5oICAgICAg
+fCAgICA2IAogYXJjaC94ODYvaW5jbHVkZS9hc20vcG0tdHJhY2UuaCAgICAgICAgICAgICAgfCAg
+ICAyIAogYXJjaC94ODYvaW5jbHVkZS9hc20vcHJvY2Vzc29yLmggICAgICAgICAgICAgfCAgIDEz
+ICsKIGFyY2gveDg2L2luY2x1ZGUvYXNtL3NlY3Rpb25zLmggICAgICAgICAgICAgIHwgICAgNCAK
+IGFyY2gveDg2L2luY2x1ZGUvYXNtL3NldHVwLmggICAgICAgICAgICAgICAgIHwgICAgMiAKIGFy
+Y2gveDg2L2luY2x1ZGUvYXNtL3N0YWNrcHJvdGVjdG9yLmggICAgICAgIHwgICAxOSArKwogYXJj
+aC94ODYva2VybmVsL01ha2VmaWxlICAgICAgICAgICAgICAgICAgICAgfCAgICA2IAogYXJjaC94
+ODYva2VybmVsL2FjcGkvd2FrZXVwXzY0LlMgICAgICAgICAgICAgfCAgIDMxICsrLS0KIGFyY2gv
+eDg2L2tlcm5lbC9hc20tb2Zmc2V0cy5jICAgICAgICAgICAgICAgIHwgICAgMyAKIGFyY2gveDg2
+L2tlcm5lbC9hc20tb2Zmc2V0c18zMi5jICAgICAgICAgICAgIHwgICAgMyAKIGFyY2gveDg2L2tl
+cm5lbC9hc20tb2Zmc2V0c182NC5jICAgICAgICAgICAgIHwgICAgMyAKIGFyY2gveDg2L2tlcm5l
+bC9jcHUvY29tbW9uLmMgICAgICAgICAgICAgICAgIHwgICAgMyAKIGFyY2gveDg2L2tlcm5lbC9j
+cHUvbWljcm9jb2RlL2NvcmUuYyAgICAgICAgIHwgICAgNCAKIGFyY2gveDg2L2tlcm5lbC9mdHJh
+Y2UuYyAgICAgICAgICAgICAgICAgICAgIHwgICA1MSArKysrKysrCiBhcmNoL3g4Ni9rZXJuZWwv
+aGVhZDY0LmMgICAgICAgICAgICAgICAgICAgICB8ICAgMjMgKystCiBhcmNoL3g4Ni9rZXJuZWwv
+aGVhZF8zMi5TICAgICAgICAgICAgICAgICAgICB8ICAgIDMgCiBhcmNoL3g4Ni9rZXJuZWwvaGVh
+ZF82NC5TICAgICAgICAgICAgICAgICAgICB8ICAgMzEgKysrLQogYXJjaC94ODYva2VybmVsL2t2
+bS5jICAgICAgICAgICAgICAgICAgICAgICAgfCAgICA2IAogYXJjaC94ODYva2VybmVsL21vZHVs
+ZS5jICAgICAgICAgICAgICAgICAgICAgfCAgMTgxICsrKysrKysrKysrKysrKysrKysrKysrKysr
+LQogYXJjaC94ODYva2VybmVsL21vZHVsZS5sZHMgICAgICAgICAgICAgICAgICAgfCAgICAzIAog
+YXJjaC94ODYva2VybmVsL3Byb2Nlc3MuYyAgICAgICAgICAgICAgICAgICAgfCAgICA1IAogYXJj
+aC94ODYva2VybmVsL3JlbG9jYXRlX2tlcm5lbF82NC5TICAgICAgICAgfCAgICAyIAogYXJjaC94
+ODYva2VybmVsL3NldHVwX3BlcmNwdS5jICAgICAgICAgICAgICAgfCAgICA1IAogYXJjaC94ODYv
+a2VybmVsL3ZtbGludXgubGRzLlMgICAgICAgICAgICAgICAgfCAgIDEzICsKIGFyY2gveDg2L2t2
+bS9zdm0uYyAgICAgICAgICAgICAgICAgICAgICAgICAgIHwgICAgNCAKIGFyY2gveDg2L2t2bS92
+bXgvdm14LmMgICAgICAgICAgICAgICAgICAgICAgIHwgICAgMiAKIGFyY2gveDg2L2xpYi9jbXB4
+Y2hnMTZiX2VtdS5TICAgICAgICAgICAgICAgIHwgICAgOCAtCiBhcmNoL3g4Ni9tbS9kdW1wX3Bh
+Z2V0YWJsZXMuYyAgICAgICAgICAgICAgICB8ICAgIDMgCiBhcmNoL3g4Ni9wbGF0Zm9ybS9wdmgv
+aGVhZC5TICAgICAgICAgICAgICAgICB8ICAgMTQgKy0KIGFyY2gveDg2L3Bvd2VyL2hpYmVybmF0
+ZV9hc21fNjQuUyAgICAgICAgICAgIHwgICAgNCAKIGFyY2gveDg2L3Rvb2xzL3JlbG9jcy5jICAg
+ICAgICAgICAgICAgICAgICAgIHwgIDE3MyArKysrKysrKysrKysrKysrKysrKysrKy0tCiBhcmNo
+L3g4Ni90b29scy9yZWxvY3MuaCAgICAgICAgICAgICAgICAgICAgICB8ICAgIDQgCiBhcmNoL3g4
+Ni90b29scy9yZWxvY3NfY29tbW9uLmMgICAgICAgICAgICAgICB8ICAgMTUgKy0KIGFyY2gveDg2
+L3hlbi94ZW4tYXNtLlMgICAgICAgICAgICAgICAgICAgICAgIHwgICAxMiAtCiBhcmNoL3g4Ni94
+ZW4veGVuLWhlYWQuUyAgICAgICAgICAgICAgICAgICAgICB8ICAgMTEgLQogZHJpdmVycy9iYXNl
+L2Zpcm13YXJlX2xvYWRlci9tYWluLmMgICAgICAgICAgfCAgICA0IAogaW5jbHVkZS9hc20tZ2Vu
+ZXJpYy9zZWN0aW9ucy5oICAgICAgICAgICAgICAgfCAgICA2IAogaW5jbHVkZS9hc20tZ2VuZXJp
+Yy92bWxpbnV4Lmxkcy5oICAgICAgICAgICAgfCAgIDEyICsKIGluY2x1ZGUvbGludXgvY29tcGls
+ZXIuaCAgICAgICAgICAgICAgICAgICAgIHwgICAgNyArCiBpbml0L0tjb25maWcgICAgICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgICB8ICAgMTYgKysKIGtlcm5lbC9rYWxsc3ltcy5jICAgICAg
+ICAgICAgICAgICAgICAgICAgICAgIHwgICAxNiArLQoga2VybmVsL3RyYWNlL3RyYWNlLmggICAg
+ICAgICAgICAgICAgICAgICAgICAgfCAgICA0IAogbGliL2R5bmFtaWNfZGVidWcuYyAgICAgICAg
+ICAgICAgICAgICAgICAgICAgfCAgICA0IAogc2NyaXB0cy9saW5rLXZtbGludXguc2ggICAgICAg
+ICAgICAgICAgICAgICAgfCAgIDE0ICsrCiBzY3JpcHRzL3JlY29yZG1jb3VudC5jICAgICAgICAg
+ICAgICAgICAgICAgICB8ICAgNzggKysrKysrKy0tLS0KIDgxIGZpbGVzIGNoYW5nZWQsIDExMzAg
+aW5zZXJ0aW9ucygrKSwgMzUwIGRlbGV0aW9ucygtKQoKUGF0Y2hzZXQgaXMgYmFzZWQgb24gbmV4
+dC0yMDE5MDEzMC4KCgoKX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19fX19f
+X19fX18KWGVuLWRldmVsIG1haWxpbmcgbGlzdApYZW4tZGV2ZWxAbGlzdHMueGVucHJvamVjdC5v
+cmcKaHR0cHM6Ly9saXN0cy54ZW5wcm9qZWN0Lm9yZy9tYWlsbWFuL2xpc3RpbmZvL3hlbi1kZXZl
+bA==
