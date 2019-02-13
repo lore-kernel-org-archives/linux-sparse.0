@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.20 041/105] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
-Date: Tue, 12 Feb 2019 21:32:32 -0500
-Message-ID: <20190213023336.19019-41-sashal@kernel.org>
-References: <20190213023336.19019-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 35/83] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
+Date: Tue, 12 Feb 2019 21:36:13 -0500
+Message-ID: <20190213023701.20286-35-sashal@kernel.org>
+References: <20190213023701.20286-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190213023336.19019-1-sashal@kernel.org>
+In-Reply-To: <20190213023701.20286-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: "Michael S. Tsirkin" <mst@redhat.com>, Eli Friedman <efriedma@codeaurora.org>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
@@ -47,7 +47,7 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  4 files changed, 6 insertions(+), 11 deletions(-)
 
 diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
-index 3e7dafb3ea80..7ddaeb5182e3 100644
+index b1ce500fe8b3..d756f2318efe 100644
 --- a/include/linux/compiler-clang.h
 +++ b/include/linux/compiler-clang.h
 @@ -3,9 +3,8 @@
@@ -63,7 +63,7 @@ index 3e7dafb3ea80..7ddaeb5182e3 100644
  
  /* same as gcc, this was present in clang-2.6 so we can assume it works
 diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
-index 977ddf2774f9..c61c4bb2bd15 100644
+index 0242f6eec4ea..a8ff0ca0c321 100644
 --- a/include/linux/compiler-gcc.h
 +++ b/include/linux/compiler-gcc.h
 @@ -58,10 +58,6 @@
@@ -78,7 +78,7 @@ index 977ddf2774f9..c61c4bb2bd15 100644
   * A trick to suppress uninitialized variable warning without generating any
   * code
 diff --git a/include/linux/compiler-intel.h b/include/linux/compiler-intel.h
-index 517bd14e1222..b17f3cd18334 100644
+index 4c7f9befa9f6..f1fc60f10317 100644
 --- a/include/linux/compiler-intel.h
 +++ b/include/linux/compiler-intel.h
 @@ -5,9 +5,7 @@
@@ -93,10 +93,10 @@ index 517bd14e1222..b17f3cd18334 100644
  #include <asm/intrinsics.h>
  
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index fc5004a4b07d..445348facea9 100644
+index 681d866efb1e..269d376f5a11 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -161,7 +161,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+@@ -158,7 +158,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  #endif
  
  #ifndef OPTIMIZER_HIDE_VAR
