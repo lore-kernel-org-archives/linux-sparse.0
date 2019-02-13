@@ -1,34 +1,111 @@
-From: Thomas Garnier <thgarnie@google.com>
-Subject: Re: [PATCH v6 15/27] compiler: Option to default to hidden symbols
-Date: Fri, 1 Feb 2019 09:35:00 -0800
-Message-ID: <CAJcbSZEkc2Rc7uemA0Qw2uJhvNciLRxPrMVSQV_-O_N8zozZ_Q@mail.gmail.com>
-References: <20190131192533.34130-1-thgarnie@chromium.org> <20190131192533.34130-16-thgarnie@chromium.org>
- <3a2bdc07-e8c4-c340-dde7-516ab0de66f2@intel.com>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.20 041/105] include/linux/compiler*.h: fix OPTIMIZER_HIDE_VAR
+Date: Tue, 12 Feb 2019 21:32:32 -0500
+Message-ID: <20190213023336.19019-41-sashal@kernel.org>
+References: <20190213023336.19019-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <3a2bdc07-e8c4-c340-dde7-516ab0de66f2@intel.com>
+In-Reply-To: <20190213023336.19019-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Adrian Hunter <adrian.hunter@intel.com>
-Cc: Thomas Garnier <thgarnie@chromium.org>, Kernel Hardening <kernel-hardening@lists.openwall.com>, kristen@linux.intel.com, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, the arch/x86 maintainers <x86@kernel.org>, Luis Chamberlain <mcgrof@kernel.org>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>, "Rafael J. Wysocki" <rafael@kernel.org>, Arnd Bergmann <arnd@arndb.de>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Steven Rostedt <rostedt@goodmis.org>, Jason Baron <jbaron@akamai.com>, Jordan Borgner <mail@jordan-borgner.de>, Masami Hiramatsu <mhiramat@kernel.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, "Peter Zijlstra (Intel)" <peterz@infradead.org>
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: "Michael S. Tsirkin" <mst@redhat.com>, Eli Friedman <efriedma@codeaurora.org>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Feb 1, 2019 at 12:24 AM Adrian Hunter <adrian.hunter@intel.com> wrote:
->
-> On 31/01/19 9:24 PM, Thomas Garnier wrote:
-> > Provide an option to default visibility to hidden except for key
-> > symbols. This option is disabled by default and will be used by x86_64
-> > PIE support to remove errors between compilation units.
-> >
-> > The default visibility is also enabled for external symbols that are
-> > compared as they maybe equals (start/end of sections). In this case,
-> > older versions of GCC will remove the comparison if the symbols are
-> > hidden. This issue exists at least on gcc 4.9 and before.
->
-> What does this mean, if anything, for what/how symbols appear in /proc/kallsyms?
+From: "Michael S. Tsirkin" <mst@redhat.com>
 
-No, they will still appear in kallsyms. Some symbols are not absolute
-anymore or moved sections but still present.
+[ Upstream commit 3e2ffd655cc6a694608d997738989ff5572a8266 ]
 
+Since commit 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h
+mutually exclusive") clang no longer reuses the OPTIMIZER_HIDE_VAR macro
+from compiler-gcc - instead it gets the version in
+include/linux/compiler.h.  Unfortunately that version doesn't actually
+prevent compiler from optimizing out the variable.
+
+Fix up by moving the macro out from compiler-gcc.h to compiler.h.
+Compilers without incline asm support will keep working
+since it's protected by an ifdef.
+
+Also fix up comments to match reality since we are no longer overriding
+any macros.
+
+Build-tested with gcc and clang.
+
+Fixes: 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h mutually exclusive")
+Cc: Eli Friedman <efriedma@codeaurora.org>
+Cc: Joe Perches <joe@perches.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
+Reviewed-by: Nick Desaulniers <ndesaulniers@google.com>
+Signed-off-by: Michael S. Tsirkin <mst@redhat.com>
+Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ include/linux/compiler-clang.h | 5 ++---
+ include/linux/compiler-gcc.h   | 4 ----
+ include/linux/compiler-intel.h | 4 +---
+ include/linux/compiler.h       | 4 +++-
+ 4 files changed, 6 insertions(+), 11 deletions(-)
+
+diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
+index 3e7dafb3ea80..7ddaeb5182e3 100644
+--- a/include/linux/compiler-clang.h
++++ b/include/linux/compiler-clang.h
+@@ -3,9 +3,8 @@
+ #error "Please don't include <linux/compiler-clang.h> directly, include <linux/compiler.h> instead."
+ #endif
+ 
+-/* Some compiler specific definitions are overwritten here
+- * for Clang compiler
+- */
++/* Compiler specific definitions for Clang compiler */
++
+ #define uninitialized_var(x) x = *(&(x))
+ 
+ /* same as gcc, this was present in clang-2.6 so we can assume it works
+diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+index 977ddf2774f9..c61c4bb2bd15 100644
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -58,10 +58,6 @@
+ 	(typeof(ptr)) (__ptr + (off));					\
+ })
+ 
+-/* Make the optimizer believe the variable can be manipulated arbitrarily. */
+-#define OPTIMIZER_HIDE_VAR(var)						\
+-	__asm__ ("" : "=r" (var) : "0" (var))
+-
+ /*
+  * A trick to suppress uninitialized variable warning without generating any
+  * code
+diff --git a/include/linux/compiler-intel.h b/include/linux/compiler-intel.h
+index 517bd14e1222..b17f3cd18334 100644
+--- a/include/linux/compiler-intel.h
++++ b/include/linux/compiler-intel.h
+@@ -5,9 +5,7 @@
+ 
+ #ifdef __ECC
+ 
+-/* Some compiler specific definitions are overwritten here
+- * for Intel ECC compiler
+- */
++/* Compiler specific definitions for Intel ECC compiler */
+ 
+ #include <asm/intrinsics.h>
+ 
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index fc5004a4b07d..445348facea9 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -161,7 +161,9 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #endif
+ 
+ #ifndef OPTIMIZER_HIDE_VAR
+-#define OPTIMIZER_HIDE_VAR(var) barrier()
++/* Make the optimizer believe the variable can be manipulated arbitrarily. */
++#define OPTIMIZER_HIDE_VAR(var)						\
++	__asm__ ("" : "=r" (var) : "0" (var))
+ #endif
+ 
+ /* Not-quite-unique ID. */
 -- 
-Thomas
+2.19.1
