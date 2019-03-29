@@ -1,32 +1,48 @@
-From: Al Viro <viro@zeniv.linux.org.uk>
-Subject: Re: [PATCH v2 3/4] x86/fpu: Fix __user annotations
-Date: Fri, 29 Mar 2019 19:42:08 +0000
-Message-ID: <20190329194208.GE2217@ZenIV.linux.org.uk>
-References: <20190329163047.223508-1-jannh@google.com>
- <20190329163047.223508-3-jannh@google.com>
- <20190329180329.hl3t7a43sg3sshsf@ltop.local>
- <CAG48ez2+AeBuJ8i8RKL3THc1Nq1_vPyqLTXep8CvJgqVtGYCig@mail.gmail.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] trace: events: fix  error directive in argument list
+Date: Sat, 30 Mar 2019 00:12:32 +0100
+Message-ID: <20190329231231.suwcypwnyunvysyd@ltop.local>
+References: <20190325195303.GA20629@hari-Inspiron-1545>
+ <20190327115330.04b5b481@gandalf.local.home>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <CAG48ez2+AeBuJ8i8RKL3THc1Nq1_vPyqLTXep8CvJgqVtGYCig@mail.gmail.com>
+In-Reply-To: <20190327115330.04b5b481@gandalf.local.home>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Jann Horn <jannh@google.com>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, "H. Peter Anvin" <hpa@zytor.com>, the arch/x86 maintainers <x86@kernel.org>, kernel list <linux-kernel@vger.kernel.org>, Qiaowei Ren <qiaowei.ren@intel.com>
+To: Steven Rostedt <rostedt@goodmis.org>
+Cc: Hariprasad Kelam <hariprasad.kelam@gmail.com>, mingo@redhat.com, roopa@cumulusnetworks.com, davem@davemloft.net, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Mar 29, 2019 at 08:25:25PM +0100, Jann Horn wrote:
-> Oooh, it's a sparse bug.
+On Wed, Mar 27, 2019 at 11:53:30AM -0400, Steven Rostedt wrote:
+> On Tue, 26 Mar 2019 01:23:03 +0530
+> Hariprasad Kelam <hariprasad.kelam@gmail.com> wrote:
+> 
+> > This patch fixes below spare errors.
+> > 
+> > Sparse error:
+> > make C=2 CF=-D__CHECK_ENDIAN__ M=net/core
+> > ./include/trace/events/neigh.h:73:1: error: directive in argument list
+> > ./include/trace/events/neigh.h:78:1: error: directive in argument list
+> > ./include/trace/events/neigh.h:150:1: error: directive in argument list
+> > ./include/trace/events/neigh.h:155:1: error: directive in argument list
+> > 
+> 
+> I have nothing really against these patches, but why is the current
+> code considered wrong?
+> 
+> Note, TRACE_EVENTS() are "special macros". They hold structure
+> definitions and full code inside the argument list. There should be no
+> reason that this is causing a warning.
 
-It's *not* a bug.  
+The problem is that #ifdefs at line 73 & 150 are inside TRACE_EVENT()'s
+invocation and this is undefined behaviour. From the standard:
+	... If there are sequences of preprocessing tokens within the
+	list of arguments that would otherwise act as preprocessing
+	directives, the behavior is undefined. 
 
-> Apparently it's significant that the user pointer is stored as a
-> __u64, and __u64 is defined as unsigned long long.
+	[C90 6.8.3, C99 & C11 6.10.3p11]
 
-Yes, it is.  Casts to uintptr_t (== unsigned long on all targets)
-are OK; any other arithmetical type gives a warning, and quite
-deliberately so.
+GCC can handle it (and sparse too) but yes sparse complains about it.
 
-Don't do it.  If you want to say "I'm converting it to integer,
-all traces of its origin are gone", use an idiomatic cast.
+-- Luc Van Oostenryck
