@@ -1,48 +1,60 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] trace: events: fix  error directive in argument list
-Date: Sat, 30 Mar 2019 00:12:32 +0100
-Message-ID: <20190329231231.suwcypwnyunvysyd@ltop.local>
-References: <20190325195303.GA20629@hari-Inspiron-1545>
- <20190327115330.04b5b481@gandalf.local.home>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 15/37] compiler.h: update definition of unreachable()
+Date: Fri, 29 Mar 2019 21:29:58 -0400
+Message-ID: <20190330013020.379-15-sashal@kernel.org>
+References: <20190330013020.379-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190327115330.04b5b481@gandalf.local.home>
+In-Reply-To: <20190330013020.379-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Steven Rostedt <rostedt@goodmis.org>
-Cc: Hariprasad Kelam <hariprasad.kelam@gmail.com>, mingo@redhat.com, roopa@cumulusnetworks.com, davem@davemloft.net, linux-kernel@vger.kernel.org, linux-sparse@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: "ndesaulniers@google.com" <ndesaulniers@google.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Mar 27, 2019 at 11:53:30AM -0400, Steven Rostedt wrote:
-> On Tue, 26 Mar 2019 01:23:03 +0530
-> Hariprasad Kelam <hariprasad.kelam@gmail.com> wrote:
-> 
-> > This patch fixes below spare errors.
-> > 
-> > Sparse error:
-> > make C=2 CF=-D__CHECK_ENDIAN__ M=net/core
-> > ./include/trace/events/neigh.h:73:1: error: directive in argument list
-> > ./include/trace/events/neigh.h:78:1: error: directive in argument list
-> > ./include/trace/events/neigh.h:150:1: error: directive in argument list
-> > ./include/trace/events/neigh.h:155:1: error: directive in argument list
-> > 
-> 
-> I have nothing really against these patches, but why is the current
-> code considered wrong?
-> 
-> Note, TRACE_EVENTS() are "special macros". They hold structure
-> definitions and full code inside the argument list. There should be no
-> reason that this is causing a warning.
+From: "ndesaulniers@google.com" <ndesaulniers@google.com>
 
-The problem is that #ifdefs at line 73 & 150 are inside TRACE_EVENT()'s
-invocation and this is undefined behaviour. From the standard:
-	... If there are sequences of preprocessing tokens within the
-	list of arguments that would otherwise act as preprocessing
-	directives, the behavior is undefined. 
+[ Upstream commit fe0640eb30b7da261ae84d252ed9ed3c7e68dfd8 ]
 
-	[C90 6.8.3, C99 & C11 6.10.3p11]
+Fixes the objtool warning seen with Clang:
+arch/x86/mm/fault.o: warning: objtool: no_context()+0x220: unreachable
+instruction
 
-GCC can handle it (and sparse too) but yes sparse complains about it.
+Fixes commit 815f0ddb346c ("include/linux/compiler*.h: make compiler-*.h
+mutually exclusive")
 
--- Luc Van Oostenryck
+Josh noted that the fallback definition was meant to work around a
+pre-gcc-4.6 bug. GCC still needs to work around
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=82365, so compiler-gcc.h
+defines its own version of unreachable().  Clang and ICC can use this
+shared definition.
+
+Link: https://github.com/ClangBuiltLinux/linux/issues/204
+Suggested-by: Andy Lutomirski <luto@amacapital.net>
+Suggested-by: Josh Poimboeuf <jpoimboe@redhat.com>
+Tested-by: Nathan Chancellor <natechancellor@gmail.com>
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+Signed-off-by: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ include/linux/compiler.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index a704d032713b..67c3934fb9ed 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -119,7 +119,10 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ # define ASM_UNREACHABLE
+ #endif
+ #ifndef unreachable
+-# define unreachable() do { annotate_reachable(); do { } while (1); } while (0)
++# define unreachable() do {		\
++	annotate_unreachable();		\
++	__builtin_unreachable();	\
++} while (0)
+ #endif
+ 
+ /*
+-- 
+2.19.1
