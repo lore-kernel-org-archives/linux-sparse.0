@@ -1,12 +1,12 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.14 15/37] compiler.h: update definition of unreachable()
-Date: Fri, 29 Mar 2019 21:29:58 -0400
-Message-ID: <20190330013020.379-15-sashal@kernel.org>
-References: <20190330013020.379-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 21/57] compiler.h: update definition of unreachable()
+Date: Fri, 29 Mar 2019 21:28:14 -0400
+Message-ID: <20190330012854.32212-21-sashal@kernel.org>
+References: <20190330012854.32212-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20190330013020.379-1-sashal@kernel.org>
+In-Reply-To: <20190330012854.32212-1-sashal@kernel.org>
 Sender: linux-kernel-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: "ndesaulniers@google.com" <ndesaulniers@google.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
@@ -41,10 +41,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index a704d032713b..67c3934fb9ed 100644
+index 269d376f5a11..81c2238b884c 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -119,7 +119,10 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+@@ -124,7 +124,10 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
  # define ASM_UNREACHABLE
  #endif
  #ifndef unreachable
