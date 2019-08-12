@@ -1,71 +1,181 @@
-From: Kees Cook <keescook@chromium.org>
-Subject: Re: [PATCH net-next] net: can: Fix compiling warning
-Date: Mon, 12 Aug 2019 10:19:27 -0700
-Message-ID: <201908121001.0AC0A90@keescook>
-References: <20190802033643.84243-1-maowenan@huawei.com>
- <0050efdb-af9f-49b9-8d83-f574b3d46a2e@hartkopp.net>
- <20190806135231.GJ1974@kadam>
- <6e1c5aa0-8ed3-eec3-a34d-867ea8f54e9d@hartkopp.net>
- <20190807105042.GK1974@kadam>
+From: Nick Desaulniers <ndesaulniers@google.com>
+Subject: [PATCH 14/16] include/linux: prefer __section from compiler_attributes.h
+Date: Mon, 12 Aug 2019 14:50:47 -0700
+Message-ID: <20190812215052.71840-14-ndesaulniers@google.com>
+References: <20190812215052.71840-1-ndesaulniers@google.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <20190807105042.GK1974@kadam>
+In-Reply-To: <20190812215052.71840-1-ndesaulniers@google.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Oliver Hartkopp <socketcan@hartkopp.net>, Patrick Bellasi <patrick.bellasi@arm.com>, linux-sparse@vger.kernel.org, Mao Wenan <maowenan@huawei.com>, davem@davemloft.net, netdev@vger.kernel.org, linux-kernel@vger.kernel.org, kernel-janitors@vger.kernel.org, Ingo Molnar <mingo@kernel.org>
+To: akpm@linux-foundation.org
+Cc: sedat.dilek@gmail.com, jpoimboe@redhat.com, yhs@fb.com, miguel.ojeda.sandonis@gmail.com, clang-built-linux@googlegroups.com, Nick Desaulniers <ndesaulniers@google.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Lai Jiangshan <jiangshanlai@gmail.com>, "Paul E. McKenney" <paulmck@linux.ibm.com>, Josh Triplett <josh@joshtriplett.org>, Steven Rostedt <rostedt@goodmis.org>, Mathieu Desnoyers <mathieu.desnoyers@efficios.com>, Alexei Starovoitov <ast@kernel.org>, Daniel Borkmann <daniel@iogearbox.net>, Martin KaFai Lau <kafai@fb.com>, Song Liu <songliubraving@fb.com>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@kernel.org>, "Peter Zijlstra (Intel)" <peterz@infradead.org>, Nicholas Piggin <npiggin@gmail.com>, Jiri Kosina <jkosina>
 List-Id: linux-sparse@vger.kernel.org
 
-On Wed, Aug 07, 2019 at 01:50:42PM +0300, Dan Carpenter wrote:
-> On Tue, Aug 06, 2019 at 06:41:44PM +0200, Oliver Hartkopp wrote:
-> > I compiled the code (the original version), but I do not get that "Should it
-> > be static?" warning:
-> > 
-> > user@box:~/net-next$ make C=1
-> >   CALL    scripts/checksyscalls.sh
-> >   CALL    scripts/atomic/check-atomics.sh
-> >   DESCEND  objtool
-> >   CHK     include/generated/compile.h
-> >   CHECK   net/can/af_can.c
-> > ./include/linux/sched.h:609:43: error: bad integer constant expression
-> > ./include/linux/sched.h:609:73: error: invalid named zero-width bitfield
-> > `value'
-> > ./include/linux/sched.h:610:43: error: bad integer constant expression
-> > ./include/linux/sched.h:610:67: error: invalid named zero-width bitfield
-> > `bucket_id'
-> >   CC [M]  net/can/af_can.o
-> 
-> The sched.h errors suppress Sparse warnings so it's broken/useless now.
-> The code looks like this:
-> 
-> include/linux/sched.h
->    613  struct uclamp_se {
->    614          unsigned int value              : bits_per(SCHED_CAPACITY_SCALE);
->    615          unsigned int bucket_id          : bits_per(UCLAMP_BUCKETS);
->    616          unsigned int active             : 1;
->    617          unsigned int user_defined       : 1;
->    618  };
-> 
-> bits_per() is zero and Sparse doesn't like zero sized bitfields.
+Link: https://github.com/ClangBuiltLinux/linux/issues/619
+Reported-by: Sedat Dilek <sedat.dilek@gmail.com>
+Suggested-by: Josh Poimboeuf <jpoimboe@redhat.com>
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+---
+ include/linux/cache.h       | 6 +++---
+ include/linux/compiler.h    | 8 ++++----
+ include/linux/cpu.h         | 2 +-
+ include/linux/export.h      | 2 +-
+ include/linux/init_task.h   | 4 ++--
+ include/linux/interrupt.h   | 5 ++---
+ include/linux/sched/debug.h | 2 +-
+ include/linux/srcutree.h    | 2 +-
+ 8 files changed, 15 insertions(+), 16 deletions(-)
 
-I just noticed these sparse warnings too -- what's happening here? Are
-they _supposed_ to be 0-width fields? It doesn't look like it to me:
-
-CONFIG_UCLAMP_BUCKETS_COUNT=5
-...
-#define UCLAMP_BUCKETS CONFIG_UCLAMP_BUCKETS_COUNT
-...
-        unsigned int bucket_id          : bits_per(UCLAMP_BUCKETS);
-
-I would expect this to be 3 bits wide. ... Looks like gcc agrees:
-
-struct uclamp_se {
-    unsigned int               value:11;             /*     0: 0  4 */
-    unsigned int               bucket_id:3;          /*     0:11  4 */
-...
-
-So this is a sparse issue?
-
+diff --git a/include/linux/cache.h b/include/linux/cache.h
+index 750621e41d1c..3f4df9eef1e1 100644
+--- a/include/linux/cache.h
++++ b/include/linux/cache.h
+@@ -28,7 +28,7 @@
+  * but may get written to during init, so can't live in .rodata (via "const").
+  */
+ #ifndef __ro_after_init
+-#define __ro_after_init __attribute__((__section__(".data..ro_after_init")))
++#define __ro_after_init __section(.data..ro_after_init)
+ #endif
+ 
+ #ifndef ____cacheline_aligned
+@@ -45,8 +45,8 @@
+ 
+ #ifndef __cacheline_aligned
+ #define __cacheline_aligned					\
+-  __attribute__((__aligned__(SMP_CACHE_BYTES),			\
+-		 __section__(".data..cacheline_aligned")))
++	__aligned(SMP_CACHE_BYTES)				\
++	__section(.data..cacheline_aligned)
+ #endif /* __cacheline_aligned */
+ 
+ #ifndef __cacheline_aligned_in_smp
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index f0fd5636fddb..5e88e7e33abe 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -24,7 +24,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ 			long ______r;					\
+ 			static struct ftrace_likely_data		\
+ 				__aligned(4)				\
+-				__section("_ftrace_annotated_branch")	\
++				__section(_ftrace_annotated_branch)	\
+ 				______f = {				\
+ 				.data.func = __func__,			\
+ 				.data.file = __FILE__,			\
+@@ -60,7 +60,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ #define __trace_if_value(cond) ({			\
+ 	static struct ftrace_branch_data		\
+ 		__aligned(4)				\
+-		__section("_ftrace_branch")		\
++		__section(_ftrace_branch)		\
+ 		__if_trace = {				\
+ 			.func = __func__,		\
+ 			.file = __FILE__,		\
+@@ -118,7 +118,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ 	".popsection\n\t"
+ 
+ /* Annotate a C jump table to allow objtool to follow the code flow */
+-#define __annotate_jump_table __section(".rodata..c_jump_table")
++#define __annotate_jump_table __section(.rodata..c_jump_table)
+ 
+ #else
+ #define annotate_reachable()
+@@ -298,7 +298,7 @@ unsigned long read_word_at_a_time(const void *addr)
+  * visible to the compiler.
+  */
+ #define __ADDRESSABLE(sym) \
+-	static void * __section(".discard.addressable") __used \
++	static void * __section(.discard.addressable) __used \
+ 		__PASTE(__addressable_##sym, __LINE__) = (void *)&sym;
+ 
+ /**
+diff --git a/include/linux/cpu.h b/include/linux/cpu.h
+index fcb1386bb0d4..186bbd79d6ce 100644
+--- a/include/linux/cpu.h
++++ b/include/linux/cpu.h
+@@ -166,7 +166,7 @@ void cpu_startup_entry(enum cpuhp_state state);
+ void cpu_idle_poll_ctrl(bool enable);
+ 
+ /* Attach to any functions which should be considered cpuidle. */
+-#define __cpuidle	__attribute__((__section__(".cpuidle.text")))
++#define __cpuidle	__section(.cpuidle.text)
+ 
+ bool cpu_in_idle(unsigned long pc);
+ 
+diff --git a/include/linux/export.h b/include/linux/export.h
+index fd8711ed9ac4..808c1a0c2ef9 100644
+--- a/include/linux/export.h
++++ b/include/linux/export.h
+@@ -104,7 +104,7 @@ struct kernel_symbol {
+  * discarded in the final link stage.
+  */
+ #define __ksym_marker(sym)	\
+-	static int __ksym_marker_##sym[0] __section(".discard.ksym") __used
++	static int __ksym_marker_##sym[0] __section(.discard.ksym) __used
+ 
+ #define __EXPORT_SYMBOL(sym, sec)				\
+ 	__ksym_marker(sym);					\
+diff --git a/include/linux/init_task.h b/include/linux/init_task.h
+index 6049baa5b8bc..50139505da34 100644
+--- a/include/linux/init_task.h
++++ b/include/linux/init_task.h
+@@ -51,12 +51,12 @@ extern struct cred init_cred;
+ 
+ /* Attach to the init_task data structure for proper alignment */
+ #ifdef CONFIG_ARCH_TASK_STRUCT_ON_STACK
+-#define __init_task_data __attribute__((__section__(".data..init_task")))
++#define __init_task_data __section(.data..init_task)
+ #else
+ #define __init_task_data /**/
+ #endif
+ 
+ /* Attach to the thread_info data structure for proper alignment */
+-#define __init_thread_info __attribute__((__section__(".data..init_thread_info")))
++#define __init_thread_info __section(.data..init_thread_info)
+ 
+ #endif
+diff --git a/include/linux/interrupt.h b/include/linux/interrupt.h
+index 5b8328a99b2a..29debfe4dd0f 100644
+--- a/include/linux/interrupt.h
++++ b/include/linux/interrupt.h
+@@ -741,8 +741,7 @@ extern int arch_early_irq_init(void);
+ /*
+  * We want to know which function is an entrypoint of a hardirq or a softirq.
+  */
+-#define __irq_entry		 __attribute__((__section__(".irqentry.text")))
+-#define __softirq_entry  \
+-	__attribute__((__section__(".softirqentry.text")))
++#define __irq_entry	__section(.irqentry.text)
++#define __softirq_entry	__section(.softirqentry.text)
+ 
+ #endif
+diff --git a/include/linux/sched/debug.h b/include/linux/sched/debug.h
+index 95fb9e025247..e17b66221fdd 100644
+--- a/include/linux/sched/debug.h
++++ b/include/linux/sched/debug.h
+@@ -42,7 +42,7 @@ extern void proc_sched_set_task(struct task_struct *p);
+ #endif
+ 
+ /* Attach to any functions which should be ignored in wchan output. */
+-#define __sched		__attribute__((__section__(".sched.text")))
++#define __sched		__section(.sched.text)
+ 
+ /* Linker adds these: start and end of __sched functions */
+ extern char __sched_text_start[], __sched_text_end[];
+diff --git a/include/linux/srcutree.h b/include/linux/srcutree.h
+index 9cfcc8a756ae..9de652f4e1bd 100644
+--- a/include/linux/srcutree.h
++++ b/include/linux/srcutree.h
+@@ -124,7 +124,7 @@ struct srcu_struct {
+ # define __DEFINE_SRCU(name, is_static)					\
+ 	is_static struct srcu_struct name;				\
+ 	struct srcu_struct * const __srcu_struct_##name			\
+-		__section("___srcu_struct_ptrs") = &name
++		__section(___srcu_struct_ptrs) = &name
+ #else
+ # define __DEFINE_SRCU(name, is_static)					\
+ 	static DEFINE_PER_CPU(struct srcu_data, name##_srcu_data);	\
 -- 
-Kees Cook
+2.23.0.rc1.153.gdeed80330f-goog
