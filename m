@@ -1,50 +1,71 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse: __pure declaration only
-Date: Sun, 20 Oct 2019 07:52:53 +0200
-Message-ID: <20191020055252.2ymxfrskpodxhuxs@ltop.local>
-References: <09d824ac-5371-830e-466d-7f78ccdae065@codethink.co.uk>
- <CAHk-=wiYQ=F5H-uwQvj4eMS3xREmqE6tPuDVVLVML02xaThqVQ@mail.gmail.com>
+From: Joe Perches <joe@perches.com>
+Subject: Re: [PATCH] compiler*.h: Add '__' prefix and suffix to all
+ __attribute__ #defines
+Date: Mon, 28 Oct 2019 10:59:47 -0700
+Message-ID: <19fd23e98bab65a1ee624445193bd2ed86108881.camel@perches.com>
+References: <7a15bc8ad7437dc3a044a4f9cd283500bd0b5f36.camel@perches.com>
+         <CANiq72=B6XKwfkC9L4=+OxWtjxCp-94TWRG1a=pC=y636gzckA@mail.gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-kernel-owner@vger.kernel.org>
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wiYQ=F5H-uwQvj4eMS3xREmqE6tPuDVVLVML02xaThqVQ@mail.gmail.com>
+In-Reply-To: <CANiq72=B6XKwfkC9L4=+OxWtjxCp-94TWRG1a=pC=y636gzckA@mail.gmail.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>
-Cc: Ben Dooks <ben.dooks@codethink.co.uk>, Sparse Mailing-list <linux-sparse@vger.kernel.org>, "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>
+To: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+Cc: Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, clang-built-linux <clang-built-linux@googlegroups.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Oct 18, 2019 at 08:31:48AM -0700, Linus Torvalds wrote:
-> On Fri, Oct 18, 2019 at 4:15 AM Ben Dooks <ben.dooks@codethink.co.uk> wrote:
-> >
-> > is this a valid warning? if not, should sparse be ignoring these.
+On Mon, 2019-10-28 at 18:37 +0100, Miguel Ojeda wrote:
+> On Mon, Oct 28, 2019 at 12:43 PM Joe Perches <joe@perches.com> wrote:
+> > diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+> > index 72393a..b8c2145 100644
+> > --- a/include/linux/compiler_types.h
+> > +++ b/include/linux/compiler_types.h
+> > @@ -5,27 +5,27 @@
+> >  #ifndef __ASSEMBLY__
+> > 
+> >  #ifdef __CHECKER__
+> > -# define __user                __attribute__((noderef, address_space(1)))
+[]
+> Just in case: for these ones (i.e. __CHECKER__), did you check if
+> sparse handles this syntax? (I don't recall myself if it does).
 > 
-> It's technically valid, but maybe it's not useful.
-> 
-> If we make sure that any pure bits from a declaration always make it
-> into the definition, then I suspect that the "was not declared"
-> warning (if the definition is non-static and seen without a
-> declaration) is sufficient.
-> 
-> Of course, sparse doesn't actually _care_ about "pure" in the
-> definition, only in the use, so right now it doesn't even make any
-> difference to sparse whether the definition has the "pure" or not.
-> It's only when the function is used that the "pure" matters (it makes
-> the call instruction be CSE'd like any other random instruction).
+> Other than that, thanks for the cleanup too! I can pick it up in the
+> the compiler-attributes tree and put it in -next.
 
-Yes, for 'pure' it doesn't matter much but it's a problem anyway.
-For example with 'static':
+Thanks for asking and no, I did  not until just now.
+Turns out sparse does _not_ handle these changes and
+the checking fails for these __<changes>__.
 
-$ cat file.c
-static void foo(void);
-void foo(void) { }
+sparse would have to update parse.c or the __CHECKER__
+changes would need to be reverted.
 
-$ sparse file.c
-file.c:2:6: warning: symbol 'foo' was not declared. Should it be static?
+Perhaps update parse.c like:
+---
+ parse.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-Which is kinda absurd: foo() was declared and was even declared static.
-But the definition is a different symbol than its declaration (OK) which
-doesn't 'inherit' the declaration's specifier/modifier/attributes.
-It's on my to-be-fixed list for a long time but ..
-
--- Luc
+diff --git a/parse.c b/parse.c
+index 48a63..4464e 100644
+--- a/parse.c
++++ b/parse.c
+@@ -549,13 +549,19 @@ static struct init_keyword {
+ 	{ "aligned",	NS_KEYWORD, .op = &aligned_op },
+ 	{ "__aligned__",NS_KEYWORD, .op = &aligned_op },
+ 	{ "nocast",	NS_KEYWORD,	MOD_NOCAST,	.op = &attr_mod_op },
++	{ "__nocast__",	NS_KEYWORD,	MOD_NOCAST,	.op = &attr_mod_op },
+ 	{ "noderef",	NS_KEYWORD,	MOD_NODEREF,	.op = &attr_mod_op },
++	{ "__noderef__",NS_KEYWORD,	MOD_NODEREF,	.op = &attr_mod_op },
+ 	{ "safe",	NS_KEYWORD,	MOD_SAFE, 	.op = &attr_mod_op },
++	{ "__safe__",	NS_KEYWORD,	MOD_SAFE, 	.op = &attr_mod_op },
+ 	{ "force",	NS_KEYWORD,	.op = &attr_force_op },
++	{ "__force__",	NS_KEYWORD,	.op = &attr_force_op },
+ 	{ "bitwise",	NS_KEYWORD,	MOD_BITWISE,	.op = &attr_bitwise_op },
+ 	{ "__bitwise__",NS_KEYWORD,	MOD_BITWISE,	.op = &attr_bitwise_op },
+ 	{ "address_space",NS_KEYWORD,	.op = &address_space_op },
++	{ "__address_space__",NS_KEYWORD,	.op = &address_space_op },
+ 	{ "context",	NS_KEYWORD,	.op = &context_op },
++	{ "__context__",NS_KEYWORD,	.op = &context_op },
+ 	{ "designated_init",	NS_KEYWORD,	.op = &designated_init_op },
+ 	{ "__designated_init__",	NS_KEYWORD,	.op = &designated_init_op },
+ 	{ "transparent_union",	NS_KEYWORD,	.op = &transparent_union_op },
