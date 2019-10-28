@@ -1,46 +1,82 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: detecting misuse of of_get_property
-Date: Mon, 28 Oct 2019 23:49:15 +0100
-Message-ID: <20191028224914.enpqjkcvbxyeexnl@desk.local>
-References: <ec277c12-c608-6326-7723-be8cab4f524a@rasmusvillemoes.dk>
+Subject: Re: [PATCH] compiler*.h: Add '__' prefix and suffix to all
+ __attribute__ #defines
+Date: Tue, 29 Oct 2019 00:03:50 +0100
+Message-ID: <20191028230349.xlhm42ripxktx43y@desk.local>
+References: <7a15bc8ad7437dc3a044a4f9cd283500bd0b5f36.camel@perches.com>
+ <CANiq72=B6XKwfkC9L4=+OxWtjxCp-94TWRG1a=pC=y636gzckA@mail.gmail.com>
+ <19fd23e98bab65a1ee624445193bd2ed86108881.camel@perches.com>
+ <20191028221523.vlzdk6dkcglxei6v@desk.local>
+ <00c5ef125a4e62f538de7ddddc9d8fe7085794a3.camel@perches.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <ec277c12-c608-6326-7723-be8cab4f524a@rasmusvillemoes.dk>
+In-Reply-To: <00c5ef125a4e62f538de7ddddc9d8fe7085794a3.camel@perches.com>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Dan Carpenter <dan.carpenter@oracle.co>, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+To: Joe Perches <joe@perches.com>
+Cc: Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, linux-sparse@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, clang-built-linux <clang-built-linux@googlegroups.com>
 List-Id: linux-sparse@vger.kernel.org
 
-On Mon, Oct 28, 2019 at 08:32:42PM +0100, Rasmus Villemoes wrote:
-> Hi,
+On Mon, Oct 28, 2019 at 03:28:17PM -0700, Joe Perches wrote:
+> On Mon, 2019-10-28 at 23:15 +0100, Luc Van Oostenryck wrote:
+> > On Mon, Oct 28, 2019 at 10:59:47AM -0700, Joe Perches wrote:
+> > > On Mon, 2019-10-28 at 18:37 +0100, Miguel Ojeda wrote:
+> > > > Just in case: for these ones (i.e. __CHECKER__), did you check if
+> > > > sparse handles this syntax? (I don't recall myself if it does).
+> > > > 
+> > > > Other than that, thanks for the cleanup too! I can pick it up in the
+> > > > the compiler-attributes tree and put it in -next.
+> > > 
+> > > Thanks for asking and no, I did  not until just now.
+> > > Turns out sparse does _not_ handle these changes and
+> > > the checking fails for these __<changes>__.
+> > > 
+> > > sparse would have to update parse.c or the __CHECKER__
+> > > changes would need to be reverted.
+> > > 
+> > > Perhaps update parse.c like:
+> > 
+> > ...
+> > 
+> > Yes, this was missing. Thanks.
+> > Can I have your SoB for this?
 > 
-> I just spent some time trying to convert some so far PPC-only drivers to
-> be more generic. One of the things I had to do was convert stuff like
-> 
->   u32 *val = of_get_property(np, "bla", NULL);
->   do_stuff_with(*val);
-> 
-> with
-> 
->   of_property_read_u32(np, "bla", &val);
->   do_stuff_with(val);
-> 
-> (error checking omitted for simplicity). The problem is that
-> of_get_property() just returns void*. When the property is just a
-> string, there's no problem interpreting that as a char*. But when the
-> property is a number of array of numbers, I'd like some way to flag
-> casting it to u32* as an error - if you cast it to a (pointer to integer
-> type wider than char), it must be to a __be32*. Is there some way
-> sparse/smatch could help find such cases?
+> I'm not sure this actually works as there's
+> some possible sparse parsing changes in the
+> use of __context__.
 
-If I understand you correctly, you would need a kind of 'soft'
-bitwise pointer?
-I guess it shouldn't be too hard to add a new flag which would
-allow cast of bitwise pointers to pointers to char/void (see
-at end of evaluate.c:evaluate_cast()).
-
-Note: casts from bitwise pointer to void* are already allowed.
+Yes, indeed. The following shoud be squashed on top of
+your patch (not tested yet on linux side):
 
 -- Luc
+
+diff --git a/parse.c b/parse.c
+index 4464e2667..4b0a1566c 100644
+--- a/parse.c
++++ b/parse.c
+@@ -345,6 +345,7 @@ static struct symbol_op goto_op = {
+ 
+ static struct symbol_op __context___op = {
+ 	.statement = parse_context_statement,
++	.attribute = attribute_context,
+ };
+ 
+ static struct symbol_op range_op = {
+@@ -537,6 +538,7 @@ static struct init_keyword {
+ 	{ "while",	NS_KEYWORD, .op = &while_op },
+ 	{ "do",		NS_KEYWORD, .op = &do_op },
+ 	{ "goto",	NS_KEYWORD, .op = &goto_op },
++	{ "context",	NS_KEYWORD, .op = &context_op },
+ 	{ "__context__",NS_KEYWORD, .op = &__context___op },
+ 	{ "__range__",	NS_KEYWORD, .op = &range_op },
+ 	{ "asm",	NS_KEYWORD, .op = &asm_op },
+@@ -560,8 +562,6 @@ static struct init_keyword {
+ 	{ "__bitwise__",NS_KEYWORD,	MOD_BITWISE,	.op = &attr_bitwise_op },
+ 	{ "address_space",NS_KEYWORD,	.op = &address_space_op },
+ 	{ "__address_space__",NS_KEYWORD,	.op = &address_space_op },
+-	{ "context",	NS_KEYWORD,	.op = &context_op },
+-	{ "__context__",NS_KEYWORD,	.op = &context_op },
+ 	{ "designated_init",	NS_KEYWORD,	.op = &designated_init_op },
+ 	{ "__designated_init__",	NS_KEYWORD,	.op = &designated_init_op },
+ 	{ "transparent_union",	NS_KEYWORD,	.op = &transparent_union_op },
