@@ -1,61 +1,85 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] compiler*.h: Add '__' prefix and suffix to all
- __attribute__ #defines
-Date: Tue, 29 Oct 2019 09:07:01 +0100
-Message-ID: <20191029080701.qpvscbz3xptadhbd@ltop.local>
-References: <7a15bc8ad7437dc3a044a4f9cd283500bd0b5f36.camel@perches.com>
- <CANiq72=B6XKwfkC9L4=+OxWtjxCp-94TWRG1a=pC=y636gzckA@mail.gmail.com>
- <19fd23e98bab65a1ee624445193bd2ed86108881.camel@perches.com>
- <20191028221523.vlzdk6dkcglxei6v@desk.local>
- <00c5ef125a4e62f538de7ddddc9d8fe7085794a3.camel@perches.com>
- <20191028230349.xlhm42ripxktx43y@desk.local>
- <61eb73ad-5c30-0005-5031-6584df72ad5f@ramsayjones.plus.com>
+From: Dan Carpenter <dan.carpenter@oracle.com>
+Subject: Re: detecting misuse of of_get_property
+Date: Tue, 29 Oct 2019 13:50:58 +0300
+Message-ID: <20191029104917.GI1944@kadam>
+References: <ec277c12-c608-6326-7723-be8cab4f524a@rasmusvillemoes.dk>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <61eb73ad-5c30-0005-5031-6584df72ad5f@ramsayjones.plus.com>
+In-Reply-To: <ec277c12-c608-6326-7723-be8cab4f524a@rasmusvillemoes.dk>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Joe Perches <joe@perches.com>, Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>, linux-sparse@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-kernel <linux-kernel@vger.kernel.org>, clang-built-linux <clang-built-linux@googlegroups.com>
+To: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dan Carpenter <dan.carpenter@oracle.co>, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On Tue, Oct 29, 2019 at 02:38:54AM +0000, Ramsay Jones wrote:
-> On 28/10/2019 23:03, Luc Van Oostenryck wrote:
-> > diff --git a/parse.c b/parse.c
-> > index 4464e2667..4b0a1566c 100644
-> > --- a/parse.c
-> > +++ b/parse.c
-> > @@ -345,6 +345,7 @@ static struct symbol_op goto_op = {
-> >  
-> >  static struct symbol_op __context___op = {
-> >  	.statement = parse_context_statement,
-> > +	.attribute = attribute_context,
-> 
-> Hmm, so why is do we have a context_op and a __context___op?
-> 
-> >  };
-> >  
-> >  static struct symbol_op range_op = {
-> > @@ -537,6 +538,7 @@ static struct init_keyword {
-> >  	{ "while",	NS_KEYWORD, .op = &while_op },
-> >  	{ "do",		NS_KEYWORD, .op = &do_op },
-> >  	{ "goto",	NS_KEYWORD, .op = &goto_op },
-> > +	{ "context",	NS_KEYWORD, .op = &context_op },
-> >  	{ "__context__",NS_KEYWORD, .op = &__context___op },
-> 
-> So, can '__context__' be used in a statement, as well as an
-> attribute, while 'context' can only be used in an attribute?
+This should probably work?
 
-Yes, indeed.
-'__context__' was only parsed as a statement and 'context'
-only as an attribute. But now we also want to be able to use
-'__context__' as an attribute (because 'context' is not a
-reserved keyword and can thus be a used defined macro).
+regards,
+dan carpenter
 
-There is no reason, though, we should now also want to use
-'context' as a statement since it's a sparse extension. Hence
-adding attribute_context to '__context___op' and keeping
-'context_op' as such (but moving them together).
-
--- Luc
+diff --git a/check_list.h b/check_list.h
+index 564bd1c2..5fa9a269 100644
+--- a/check_list.h
++++ b/check_list.h
+@@ -191,6 +191,7 @@ CK(check_nospec_barrier)
+ CK(check_spectre)
+ CK(check_spectre_second_half)
+ CK(check_implicit_dependencies)
++CK(check_of_get_property)
+ 
+ /* wine specific stuff */
+ CK(check_wine_filehandles)
+diff --git a/check_of_get_property.c b/check_of_get_property.c
+new file mode 100644
+index 00000000..b7aa8824
+--- /dev/null
++++ b/check_of_get_property.c
+@@ -0,0 +1,47 @@
++/*
++ * Copyright (C) 2019 Oracle.
++ *
++ * This program is free software; you can redistribute it and/or
++ * modify it under the terms of the GNU General Public License
++ * as published by the Free Software Foundation; either version 2
++ * of the License, or (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see http://www.gnu.org/copyleft/gpl.txt
++ */
++
++#include "smatch.h"
++#include "smatch_slist.h"
++
++static int my_id;
++
++static void match_of_get_property(const char *fn, struct expression *expr, void *unused)
++{
++	struct expression *left = expr->left;
++	struct symbol *type;
++
++	type = get_type(left);
++	if (!type || type->type != SYM_PTR)
++		return;
++	type = get_base_type(type);
++	if (type_bits(type) == 8)
++		return;
++	if (type->type == SYM_RESTRICT)
++		return;
++	sm_warning("'%s' returns big endian data", fn);
++}
++
++void check_of_get_property(int id)
++{
++	my_id = id;
++
++	if (option_project != PROJ_KERNEL)
++		return;
++
++	add_function_assign_hook("of_get_property", &match_of_get_property, NULL);
++}
