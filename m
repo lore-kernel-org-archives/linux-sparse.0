@@ -1,28 +1,35 @@
-From: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: detecting misuse of of_get_property
-Date: Tue, 29 Oct 2019 12:43:24 +0100
-Message-ID: <e255d01b-ecd7-8386-e99e-b3226dac27c4@rasmusvillemoes.dk>
+Date: Tue, 29 Oct 2019 12:47:50 +0100
+Message-ID: <20191029114750.a7inago2vd2o4lzl@ltop.local>
 References: <ec277c12-c608-6326-7723-be8cab4f524a@rasmusvillemoes.dk>
  <20191029104917.GI1944@kadam>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=windows-1252
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
+Content-Disposition: inline
 In-Reply-To: <20191029104917.GI1944@kadam>
-Content-Language: en-US
 Sender: linux-kernel-owner@vger.kernel.org
 To: Dan Carpenter <dan.carpenter@oracle.com>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Dan Carpenter <dan.carpenter@oracle.co>, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>, Dan Carpenter <dan.carpenter@oracle.co>, linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>
 List-Id: linux-sparse@vger.kernel.org
 
-On 29/10/2019 11.50, Dan Carpenter wrote:
-> This should probably work?
+On Tue, Oct 29, 2019 at 01:50:58PM +0300, Dan Carpenter wrote:
+> +static void match_of_get_property(const char *fn, struct expression *expr, void *unused)
+> +{
+> +	struct expression *left = expr->left;
+> +	struct symbol *type;
+> +
+> +	type = get_type(left);
+> +	if (!type || type->type != SYM_PTR)
+> +		return;
+> +	type = get_base_type(type);
+> +	if (type_bits(type) == 8)
+> +		return;
+> +	if (type->type == SYM_RESTRICT)
+> +		return;
 
-I haven't tested it, but yes, something like that. Can you also do the
-case of struct property::value, i.e. handling
+Wouldn't this also silently accept assignments to any bitwise
+type: __le32, __be16, ... ? 
 
-  struct property *p = ...;
-  u32 *v = p->value;
-
-Thanks,
-Rasmus
+-- Luc
