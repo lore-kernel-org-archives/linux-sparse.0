@@ -1,37 +1,73 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v6 3/5] locking/qspinlock: Introduce CNA into the slow
- path of qspinlock
-Date: Fri, 15 Nov 2019 01:38:21 +0100
-Message-ID: <20191115003821.raskzlj7hscz7vax@ltop.local>
-References: <20191107174622.61718-4-alex.kogan@oracle.com>
- <201911110540.8p3UoQAR%lkp@intel.com>
- <58623E4A-973B-46CC-8FA8-29E68DB5EFF4@oracle.com>
+Subject: Re: [PATCH] locking/refcount: add sparse annotations to dec-and-lock
+ functions
+Date: Tue, 31 Dec 2019 00:38:14 +0100
+Message-ID: <20191230233814.2fgmsgtnhruhklnu@ltop.local>
+References: <20191226152922.2034-1-ebiggers@kernel.org>
+ <20191228114918.GU2827@hirez.programming.kicks-ass.net>
+ <201912301042.FB806E1133@keescook>
+ <20191230191547.GA1501@zzz.localdomain>
+ <201912301131.2C7C51E8C6@keescook>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-kernel-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <58623E4A-973B-46CC-8FA8-29E68DB5EFF4@oracle.com>
+In-Reply-To: <201912301131.2C7C51E8C6@keescook>
 Sender: linux-kernel-owner@vger.kernel.org
-To: Alex Kogan <alex.kogan@oracle.com>
-Cc: kbuild test robot <lkp@intel.com>, linux-sparse@vger.kernel.org, kbuild-all@lists.01.org, linux@armlinux.org.uk, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, will.deacon@arm.com, arnd@arndb.de, longman@redhat.com, linux-arch@vger.kernel.org, linux-arm-kernel@lists.infradead.org, linux-kernel@vger.kernel.org, tglx@linutronix.de, bp@alien8.de, hpa@zytor.com, x86@kernel.org, guohanjun@huawei.com, jglauber@marvell.com, steven.sistare@oracle.com, daniel.m.jordan@oracle.com, dave.dice@oracle.com, rahul.x.yadav@oracle.com
+To: Kees Cook <keescook@chromium.org>
+Cc: Eric Biggers <ebiggers@kernel.org>, Peter Zijlstra <peterz@infradead.org>, linux-kernel@vger.kernel.org, Ingo Molnar <mingo@redhat.com>, Will Deacon <will@kernel.org>, Elena Reshetova <elena.reshetova@intel.com>, Thomas Gleixner <tglx@linutronix.de>, Anna-Maria Gleixner <anna-maria@linutronix.de>, Sebastian Andrzej Siewior <bigeasy@linutronix.de>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-On Thu, Nov 14, 2019 at 03:57:34PM -0500, Alex Kogan wrote:
-> + linux-sparse mailing list
+On Mon, Dec 30, 2019 at 11:32:31AM -0800, Kees Cook wrote:
+> On Mon, Dec 30, 2019 at 01:15:47PM -0600, Eric Biggers wrote:
+> > 
+> > The annotation needs to go in the .h file, not the .c file, because sparse only
+> > analyzes individual translation units.
+> > 
+> > It needs to be a wrapper macro because it needs to tie the acquisition of the
+> > lock to the return value being true.  I.e. there's no annotation you can apply
+> > directly to the function prototype that means "if this function returns true, it
+> > acquires the lock that was passed in parameter N".
 > 
-> It seems like a bug in the way sparse handles “pure” functions that return
-> a pointer.
-
-Yes, it's a bug in sparse.
- 
-> The warnings can be eliminated by adding an explicit cast, e.g.:
+> Gotcha. Well, I guess I leave it to Will and Peter to hash out...
 > 
-> 	node = (struct mcs_spinlock *)grab_mcs_node(node, idx);
-> 
-> but this seems wrong (unnecessary) to me.
+> Is there a meaningful proposal anywhere for sparse to DTRT here? If
+> not, it seems best to use what you've proposed until sparse reaches the
+> point of being able to do this on its own.
 
-Indeed, it would be wrong.
+What "Right Thing" are you thinking about?
+One of the simplest situation with these conditional locks is:
 
-Thanks for analyzing and reporting this,
--- Luc 
+	if (test)
+		lock();
+
+	do_stuff();
+
+	if (test)
+		unlock();
+
+No program can check that the second test gives the same result than
+the first one, it's undecidable. I mean, it's undecidable even on
+if single threaded and without interrupts. The best you can do is
+to simulate the whole thing (and be sure your simulation will halt).
+
+As far as I understand, it was the intention behind Sparse's design
+regarding locking ("context in sparse's parlance) to discourage
+such code and instead encourage to write things like:
+
+	if (test) {
+		do_stuff_unlocked();
+	} else {
+		lock();
+		do_stuff_unlocked();
+		unlock();
+	}
+
+where it is easy to check localy that the lock/unlock are balanced.
+
+So, of course Sparse could be improved to prove that some of the
+conditional locks are equivalent to unconditional ones like here
+just above (it already does but only for very simple cases where
+everything is inlined) but I don't thing there is a RT.
+
+-- Luc Van Oostenryck
