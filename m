@@ -1,35 +1,54 @@
-From: Rick Schaech <cathben72@gmail.com>
-Subject: I wait for your swift response,
-Date: Mon, 13 Jan 2020 01:52:37 -0400
-Message-ID: <CAEcBxO=DoZZeZuHjVOxQpB8CM4fADYg6sCQVLkjP+qQwsNEH9A__25464.9270138302$1578894814$gmane$org@mail.gmail.com>
-Reply-To: rickschaech@gmail.com
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: [PATCH] show_parse: avoid null pointer dereference in do_show_type()
+Date: Thu, 16 Jan 2020 18:48:38 +0100
+Message-ID: <20200116174838.GA32100@redhat.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-oi1-f195.google.com ([209.85.167.195]:35631 "EHLO
-        mail-oi1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387608AbgAMFwj (ORCPT
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:34931 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2394372AbgAPRsu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jan 2020 00:52:39 -0500
-Received: by mail-oi1-f195.google.com with SMTP id k4so7232718oik.2
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Jan 2020 21:52:38 -0800 (PST)
+        Thu, 16 Jan 2020 12:48:50 -0500
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-Dear, I'm Mr Rick Schaech, I am the General Account Auditor, Though i
-know we have not meet each other before but sometimes in life God have
-a reason of bringing two people from two different countries together
-as business partners or life partners.
+do_show_type() checks sym->type inside the "if (!sym || ...)" block.
 
-My dear friend, I have the sum of 15.7 Million USD i wish to put in
-your name due to the death of my late client who died several years
-ago as his next of kin column still remain blank. Though the internet
-medium is highly abuse these days but am assuring you that this
-transaction is legitimate and I am contacting you that we may have a
-deal, note for your cooperation and collaboration 40% of the sum will
-be for you while the other 60% will be for me as well. I wait for your
-swift response for more details. please forward your response to my
-personal E-mail: rickschaech@gmail.com
+While at it, remove the trailing whitespaces.
 
-Yours sincerely,
-Rick Schaech.
+Fixes: 0fe7ebb9 ("show-parse: do not display base type's redundant specifie=
+rs")
+Reported-by: Alexey Gladkov <gladkov.alexey@gmail.com>
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+---
+ show-parse.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/show-parse.c b/show-parse.c
+index f0ea9ca..044465e 100644
+--- a/show-parse.c
++++ b/show-parse.c
+@@ -300,12 +300,12 @@ deeper:
+ =09=09if (as)
+ =09=09=09prepend(name, "%s ", show_as(as));
+=20
+-=09=09if (sym->type =3D=3D SYM_BASETYPE || sym->type =3D=3D SYM_ENUM)
++=09=09if (sym && (sym->type =3D=3D SYM_BASETYPE || sym->type =3D=3D SYM_EN=
+UM))
+ =09=09=09mod &=3D ~MOD_SPECIFIER;
+ =09=09s =3D modifier_string(mod);
+ =09=09len =3D strlen(s);
+-=09=09name->start -=3D len;   =20
+-=09=09memcpy(name->start, s, len); =20
++=09=09name->start -=3D len;
++=09=09memcpy(name->start, s, len);
+ =09=09mod =3D 0;
+ =09=09as =3D NULL;
+ =09}
+--=20
+2.5.0
