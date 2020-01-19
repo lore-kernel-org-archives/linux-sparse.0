@@ -1,31 +1,25 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] show_parse: avoid null pointer dereference in
- do_show_type()
-Date: Thu, 16 Jan 2020 20:26:32 +0100
-Message-ID: <20200116192632.niymcq4xv2wgnix4@ltop.local>
-References: <20200116174838.GA32100@redhat.com>
+From: Favor Desmond <contecindy5@gmail.com>
+Subject: HELLO
+Date: Sun, 19 Jan 2020 18:44:18 +0000
+Message-ID: <CAOfCPNxgSoAU_ns0j9jYL-ArKfcD=i8NkJvHsR4-OGvFBVDMZg__1163.19286623678$1579459464$gmane$org@mail.gmail.com>
+Reply-To: favordens@email.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:45920 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728898AbgAPT0i (ORCPT
+Received: from mail-il1-f195.google.com ([209.85.166.195]:37501 "EHLO
+        mail-il1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728811AbgASSoU (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 16 Jan 2020 14:26:38 -0500
-Received: by mail-wr1-f66.google.com with SMTP id j42so20324268wrj.12
-        for <linux-sparse@vger.kernel.org>; Thu, 16 Jan 2020 11:26:37 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20200116174838.GA32100@redhat.com>
+        Sun, 19 Jan 2020 13:44:20 -0500
+Received: by mail-il1-f195.google.com with SMTP id t8so25514084iln.4
+        for <linux-sparse@vger.kernel.org>; Sun, 19 Jan 2020 10:44:20 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-On Thu, Jan 16, 2020 at 06:48:38PM +0100, Oleg Nesterov wrote:
-> do_show_type() checks sym->type inside the "if (!sym || ...)" block.
-> 
-> While at it, remove the trailing whitespaces.
-
-Thank you! Applied and pushed. 
-
--- Luc
+Hello Dear
+Greetings to you,I am Favor Desmond from Ivory coast currently living
+in  Togo Republic,I would like to know you more, so that i can tell
+you little amount myself and my photo, email address is
+favordens@email.com
+Thanks
+Favor
