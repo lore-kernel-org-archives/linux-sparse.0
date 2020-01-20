@@ -1,43 +1,57 @@
-From: john.levon@joyent.com
-Subject: [PATCH] add necessary defined for sunos-derived systems
-Date: Mon, 20 Jan 2020 02:48:25 -0800
-Message-ID: <20200120104825.20915-1-john.levon@joyent.com>
+From: "Prof, William Roberts" <eco.bank1204@gmail.com>
+Subject: Contact Diplomatic Agent, Mr. Mcclaine John to receive your ATM CARD
+ valued the sum of $12.8Million United States Dollars
+Date: Mon, 20 Jan 2020 20:32:40 +0100
+Message-ID: <CAOE+jABpcHQWZWhtskhDFbtTqfBe7h065WE2kC1G+jQD+tQiTA__15631.9658317202$1579548773$gmane$org@mail.gmail.com>
+Reply-To: mcclainejohn.13@gmail.com
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [8.12.47.4] ([8.12.47.4]:12737 "EHLO jlevon"
-        rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726619AbgATKwJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Jan 2020 05:52:09 -0500
+Received: from mail-ed1-f65.google.com ([209.85.208.65]:33431 "EHLO
+        mail-ed1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727692AbgATTcm (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 20 Jan 2020 14:32:42 -0500
+Received: by mail-ed1-f65.google.com with SMTP id r21so641617edq.0
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Jan 2020 11:32:42 -0800 (PST)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: John Levon <john.levon@joyent.com>
 
-From: John Levon <john.levon@joyent.com>
+Attn: Dear Beneficiary,
 
-Signed-off-by: John Levon <john.levon@joyent.com>
----
- lib.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+I wish to inform you that the diplomatic agent conveying your ATM CARD
+valued the sum of $12.8Million United States Dollars has misplaced
+your address and he is currently stranded at (George Bush
+International Airport) Houston Texas USA now
+We required you to reconfirm the following information's below to him
+so that he can deliver your Payment CARD to you today or tomorrow
+morning as information provided with open communications via email and
+telephone for security reasons.
+HERE IS THE DETAILS  HE NEED FROM YOU URGENT
+YOUR FULL NAME:========
+ADDRESS:========
+MOBILE NO:========
+NAME OF YOUR NEAREST AIRPORT:========
+A COPY OF YOUR IDENTIFICATION :========
 
-diff --git a/lib.c b/lib.c
-index 739074d1..7181c84f 100644
---- a/lib.c
-+++ b/lib.c
-@@ -1630,6 +1630,13 @@ static void predefined_macros(void)
- 		predefine("__PIE__", 0, "%d", fpie);
- 	}
- 
-+	if (arch_os == OS_SUNOS) {
-+		predefine("__sun__", 1, "1");
-+		predefine("__sun", 1, "1");
-+		predefine("sun", 1, "1");
-+		predefine("__svr4__", 1, "1");
-+	}
-+
- 	predefined_cmodel();
- }
- 
--- 
-2.23.0
+Note; do contact the diplomatic agent immediately through the
+information's listed below
+Contact Person: Diplomatic Agent, Mr. Mcclaine John
+EMAIL: mcclainejohn.13@gmail.com
+Tel:(223) 777-7518
+
+Contact the diplomatic agent immediately
+because he is waiting to hear from you today with the needed information's.
+
+NOTE: The Diplomatic agent does not know that the content of the
+consignment box is $12.800,000,00 Million United States Dollars and on
+no circumstances should you let him know the content. The consignment
+was moved from here as family treasures, so never allow him to open
+the box. Please I have paid delivery fees for you but the only money
+you must send to Mcclaine John is your ATM CARD delivery fee $25.00
+only. text Him as you contact Him Immediately
+
+Thanks,
+with Regards.
+Prof, William Roberts
+Director DHL COURIER SERVICES-Benin
