@@ -1,57 +1,48 @@
-From: "Prof, William Roberts" <eco.bank1204@gmail.com>
-Subject: Contact Diplomatic Agent, Mr. Mcclaine John to receive your ATM CARD
- valued the sum of $12.8Million United States Dollars
-Date: Mon, 20 Jan 2020 20:32:40 +0100
-Message-ID: <CAOE+jABpcHQWZWhtskhDFbtTqfBe7h065WE2kC1G+jQD+tQiTA__15631.9658317202$1579548773$gmane$org@mail.gmail.com>
-Reply-To: mcclainejohn.13@gmail.com
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] correct sparcv9 defines
+Date: Tue, 21 Jan 2020 01:13:22 +0100
+Message-ID: <20200121001322.zikj2xsacqt765fi@ltop.local>
+References: <20200120103824.20746-1-john.levon@joyent.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-ed1-f65.google.com ([209.85.208.65]:33431 "EHLO
-        mail-ed1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727692AbgATTcm (ORCPT
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:39186 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727009AbgAUAN1 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Jan 2020 14:32:42 -0500
-Received: by mail-ed1-f65.google.com with SMTP id r21so641617edq.0
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Jan 2020 11:32:42 -0800 (PST)
+        Mon, 20 Jan 2020 19:13:27 -0500
+Received: by mail-wm1-f68.google.com with SMTP id 20so1165896wmj.4
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Jan 2020 16:13:25 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20200120103824.20746-1-john.levon@joyent.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: john.levon@joyent.com
+Cc: linux-sparse@vger.kernel.org, Toomas Soome <tsoome@me.com>
 
-Attn: Dear Beneficiary,
+On Mon, Jan 20, 2020 at 02:38:24AM -0800, john.levon@joyent.com wrote:
+> From: Toomas Soome <tsoome@me.com>
+> 
+> The SPARCV9 compile check needs to look for __sparcv9 on some systems,
+> and should also define "sparc".
 
-I wish to inform you that the diplomatic agent conveying your ATM CARD
-valued the sum of $12.8Million United States Dollars has misplaced
-your address and he is currently stranded at (George Bush
-International Airport) Houston Texas USA now
-We required you to reconfirm the following information's below to him
-so that he can deliver your Payment CARD to you today or tomorrow
-morning as information provided with open communications via email and
-telephone for security reasons.
-HERE IS THE DETAILS  HE NEED FROM YOU URGENT
-YOUR FULL NAME:========
-ADDRESS:========
-MOBILE NO:========
-NAME OF YOUR NEAREST AIRPORT:========
-A COPY OF YOUR IDENTIFICATION :========
+Hi.
 
-Note; do contact the diplomatic agent immediately through the
-information's listed below
-Contact Person: Diplomatic Agent, Mr. Mcclaine John
-EMAIL: mcclainejohn.13@gmail.com
-Tel:(223) 777-7518
+Thanks for the patch.
+Is it possible to have Toomas' Signed-off-by for this patch?
+No need to resend the patch, just a reply to this email
+saying it's OK is enough.
 
-Contact the diplomatic agent immediately
-because he is waiting to hear from you today with the needed information's.
+>  	case MACH_SPARC32:
+>  		predefine("__sparc__", 1, "1");
+>  		predefine("__sparc", 1, "1");
+> +		predefine("sparc", 1, "1");
 
-NOTE: The Diplomatic agent does not know that the content of the
-consignment box is $12.800,000,00 Million United States Dollars and on
-no circumstances should you let him know the content. The consignment
-was moved from here as family treasures, so never allow him to open
-the box. Please I have paid delivery fees for you but the only money
-you must send to Mcclaine John is your ATM CARD delivery fee $25.00
-only. text Him as you contact Him Immediately
+I'm wondering if there is a real need for this one or if
+it's just to reflect what GCC do? I'm a bit reluctant to
+add it since it lies in the user's namespace. But I'm fine
+to add it if there is a real use case for it (in which case
+I'll just slightly change the patch to not predefine it if
+one of the ISO dialect is selected (via --std=c99, ...)).
 
-Thanks,
-with Regards.
-Prof, William Roberts
-Director DHL COURIER SERVICES-Benin
+-- Luc
