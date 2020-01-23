@@ -1,37 +1,26 @@
-From: john.levon@joyent.com
-Subject: [PATCH] predefine "i386" if needed
-Date: Wed, 22 Jan 2020 16:01:36 -0800
-Message-ID: <20200123000136.24109-1-john.levon@joyent.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] predefine "i386" if needed
+Date: Thu, 23 Jan 2020 18:37:57 +0100
+Message-ID: <20200123173757.p4tgt5yd5eu5ermp@ltop.local>
+References: <20200123000136.24109-1-john.levon@joyent.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from [8.12.47.4] ([8.12.47.4]:29003 "EHLO jlevon"
-        rhost-flags-FAIL-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725911AbgAWAFj (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Jan 2020 19:05:39 -0500
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:42225 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726605AbgAWRiC (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 23 Jan 2020 12:38:02 -0500
+Received: by mail-wr1-f66.google.com with SMTP id q6so4031441wro.9
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Jan 2020 09:38:00 -0800 (PST)
+Content-Disposition: inline
+In-Reply-To: <20200123000136.24109-1-john.levon@joyent.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: John Levon <john.levon@joyent.com>
+To: john.levon@joyent.com
+Cc: linux-sparse@vger.kernel.org
 
-From: John Levon <john.levon@joyent.com>
+Applied and upstreamed.
+Thank you.
 
-Signed-off-by: John Levon <john.levon@joyent.com>
----
- target-x86.c | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/target-x86.c b/target-x86.c
-index 01d213ef..d770349c 100644
---- a/target-x86.c
-+++ b/target-x86.c
-@@ -29,6 +29,7 @@ static void predefine_i386(const struct target *self)
- {
- 	predefine("__i386__", 1, "1");
- 	predefine("__i386", 1, "1");
-+	predefine_nostd("i386");
- }
- 
- const struct target target_i386 = {
--- 
-2.23.0
+-- Luc
