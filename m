@@ -1,194 +1,125 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix type compatibility of _Atomic
-Date: Thu,  6 Feb 2020 22:43:51 +0100
-Message-ID: <20200206214351.20197-1-luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: sparse problem with Linux kernel v5.5
+Date: Thu, 6 Feb 2020 15:47:21 -0800
+Message-ID: <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
+References: <6ee65b69-9ffc-78c6-66b7-3ce586687d74@infradead.org>
+ <CAHk-=wgQM29j0BJ-b0fTfwA9nc_fiS09Mi2oO8hX34oRxR6+xA@mail.gmail.com>
+ <20200206114619.bfszxgs6jmdgroo6@ltop.local> <3b68ba4b-f16a-8404-4e07-27788ebbfce3@infradead.org>
+ <20200206200610.7ktqp2yzriw7zurx@ltop.local>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:36689 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727443AbgBFVn7 (ORCPT
+Received: from mail-lf1-f67.google.com ([209.85.167.67]:42596 "EHLO
+        mail-lf1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726502AbgBFXrp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 6 Feb 2020 16:43:59 -0500
-Received: by mail-wr1-f68.google.com with SMTP id z3so223143wru.3
-        for <linux-sparse@vger.kernel.org>; Thu, 06 Feb 2020 13:43:57 -0800 (PST)
+        Thu, 6 Feb 2020 18:47:45 -0500
+Received: by mail-lf1-f67.google.com with SMTP id y19so276899lfl.9
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Feb 2020 15:47:42 -0800 (PST)
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com. [209.85.208.169])
+        by smtp.gmail.com with ESMTPSA id i4sm320549ljg.102.2020.02.06.15.47.38
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 06 Feb 2020 15:47:38 -0800 (PST)
+Received: by mail-lj1-f169.google.com with SMTP id x14so129361ljd.13
+        for <linux-sparse@vger.kernel.org>; Thu, 06 Feb 2020 15:47:38 -0800 (PST)
+In-Reply-To: <20200206200610.7ktqp2yzriw7zurx@ltop.local>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Alexei Starovoitov <ast@kernel.org>
+Cc: Randy Dunlap <rdunlap@infradead.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Martin KaFai Lau <kafai@fb.com>, Arthur Fabre <afabre@cloudflare.com>
 
-When _atomic was introduced, for most purposes it was treated
-like the other qualifiers.
+On Thu, Feb 6, 2020 at 12:06 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> However, I thought that the 5+seconds of runtime with 2.9Gb of memory
+> consumption I reported earlier was somehow excessive. So, I looked
+> at the preprocessed file and my editor (and several other tools) chocked
+> near the end ... It appears that one line is 2.8Mb on a total of 6.2MB
+> and contains 28968 times the expression for num_possible_cpus().
 
-However, it's best to consider _Atomic as an qualifier only for
-syntaxic reasons. In particular, an _Atomic type may have different
-size and alignment that its corresponding unqualified type.
-Also, an _Atomic type is never compatible with its corresponding
-unqualified type, and thus, for type checking, this qualifier must
-never be ignored.
+Whee..
 
-Fix this by removing MOD_ATOMIC from MOD_QUALIFIER. Essentially, this
-has the effect to stop to ignore MOD_ATOMIC when comparing types.
+> The origin of this is situted at line 647:
+>         smap->bucket_log = max_t(u32, 1, ilog2(roundup_pow_of_two(...));
+> because ilog2() is an 'interesting' macro which is already expanded
+> inside roundup_pow_of_two().
 
-Fixes: ffe9f9fef003d29b65d29b8da5416aff72baff5a
-Repoted-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- symbol.h                 |  6 ++---
- validation/c11-atomic.c  | 58 +++++++++++++++++++++++++---------------
- validation/typeof-mods.c |  2 +-
- 3 files changed, 41 insertions(+), 25 deletions(-)
+Yeah, so we have "const_ilog2()" expanding its argument 63 times (to
+handle the "just turn it into a constant" case), and so
 
-diff --git a/symbol.h b/symbol.h
-index 9ef5a886172f..2b8aa2d831dd 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -248,10 +248,10 @@ struct symbol {
- #define MOD_SIGNEDNESS	(MOD_SIGNED | MOD_UNSIGNED | MOD_EXPLICITLY_SIGNED)
- #define MOD_SPECIFIER	MOD_SIGNEDNESS
- #define MOD_IGNORE	(MOD_STORAGE | MOD_ACCESS | MOD_USERTYPE | MOD_EXPLICITLY_SIGNED | MOD_EXT_VISIBLE)
--#define	MOD_QUALIFIER	(MOD_CONST | MOD_VOLATILE | MOD_RESTRICT | MOD_ATOMIC)
--#define MOD_PTRINHERIT	(MOD_QUALIFIER | MOD_NODEREF | MOD_NORETURN | MOD_NOCAST)
-+#define MOD_QUALIFIER	(MOD_CONST | MOD_VOLATILE | MOD_RESTRICT)
-+#define MOD_PTRINHERIT	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NODEREF | MOD_NORETURN | MOD_NOCAST)
- /* modifiers preserved by typeof() operator */
--#define MOD_TYPEOF	(MOD_QUALIFIER | MOD_NOCAST | MOD_SPECIFIER)
-+#define MOD_TYPEOF	(MOD_QUALIFIER | MOD_ATOMIC | MOD_NOCAST | MOD_SPECIFIER)
- /* modifiers for function attributes */
- #define MOD_FUN_ATTR	(MOD_PURE|MOD_NORETURN)
- /* like cvr-qualifiers but 'reversed' (OK: source <= target) */
-diff --git a/validation/c11-atomic.c b/validation/c11-atomic.c
-index 17720861ffb7..85461f64d1d3 100644
---- a/validation/c11-atomic.c
-+++ b/validation/c11-atomic.c
-@@ -6,7 +6,7 @@ void f03(int _Atomic *dst);
- int _Atomic qo;
- int         uo;
- 
--void f00(int dst)	  { }	/* check-should-pass */
-+void f00(int dst)	  { }	/* check-should-fail */
- void f01(typeof(&qo) dst) { }	/* check-should-pass */
- void f02(int *dst)	  { }	/* check-should-fail */
- void f03(typeof(&uo) dst) { }	/* check-should-fail */
-@@ -21,12 +21,12 @@ void ref(void)
- {
- 	const int qo;
- 	int uo;
--	extern const int *pqo;
--	extern       int *puo;
-+	const int *pqo;
-+	      int *puo;
- 
- 	pqo = &qo;		/* check-should-pass */
- 	pqo = &uo;		/* check-should-pass */
--	pqo = puo;
-+	pqo = puo;		/* check-should-pass */
- 
- 	puo = &uo;		/* check-should-pass */
- 
-@@ -36,12 +36,12 @@ void ref(void)
- 
- void bar(void)
- {
--	extern int _Atomic *pqo;
--	extern int         *puo;
-+	int _Atomic *pqo;
-+	int         *puo;
- 
- 	pqo = &qo;		/* check-should-pass */
--	pqo = &uo;		/* check-should-pass */
--	pqo = puo;
-+	pqo = &uo;		/* check-should-fail */
-+	pqo = puo;		/* check-should-fail */
- 
- 	puo = &uo;		/* check-should-pass */
- 
-@@ -51,12 +51,12 @@ void bar(void)
- 
- void baz(void)
- {
--	extern typeof(&qo) pqo;
--	extern typeof(&uo) puo;
-+	typeof(&qo) pqo;
-+	typeof(&uo) puo;
- 
- 	pqo = &qo;		/* check-should-pass */
--	pqo = &uo;		/* check-should-pass */
--	pqo = puo;
-+	pqo = &uo;		/* check-should-fail*/
-+	pqo = puo;		/* check-should-fail */
- 
- 	puo = &uo;		/* check-should-pass */
- 
-@@ -69,6 +69,10 @@ void baz(void)
-  * check-command: sparse -Wno-decl $file
-  *
-  * check-error-start
-+c11-atomic.c:9:6: error: symbol 'f00' redeclared with different type (incompatible argument 1 (different modifiers)):
-+c11-atomic.c:9:6:    void extern [addressable] [toplevel] f00( ... )
-+c11-atomic.c:1:6: note: previously declared as:
-+c11-atomic.c:1:6:    void extern [addressable] [toplevel] f00( ... )
- c11-atomic.c:11:6: error: symbol 'f02' redeclared with different type (incompatible argument 1 (different modifiers)):
- c11-atomic.c:11:6:    void extern [addressable] [toplevel] f02( ... )
- c11-atomic.c:3:6: note: previously declared as:
-@@ -78,22 +82,34 @@ c11-atomic.c:12:6:    void extern [addressable] [toplevel] f03( ... )
- c11-atomic.c:4:6: note: previously declared as:
- c11-atomic.c:4:6:    void extern [addressable] [toplevel] f03( ... )
- c11-atomic.c:33:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:33:13:    expected int *extern [assigned] puo
-+c11-atomic.c:33:13:    expected int *[assigned] puo
- c11-atomic.c:33:13:    got int const *
- c11-atomic.c:34:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:34:13:    expected int *extern [assigned] puo
--c11-atomic.c:34:13:    got int const *extern [assigned] pqo
-+c11-atomic.c:34:13:    expected int *[assigned] puo
-+c11-atomic.c:34:13:    got int const *[assigned] pqo
-+c11-atomic.c:43:13: warning: incorrect type in assignment (different modifiers)
-+c11-atomic.c:43:13:    expected int [atomic] *[assigned] pqo
-+c11-atomic.c:43:13:    got int *
-+c11-atomic.c:44:13: warning: incorrect type in assignment (different modifiers)
-+c11-atomic.c:44:13:    expected int [atomic] *[assigned] pqo
-+c11-atomic.c:44:13:    got int *puo
- c11-atomic.c:48:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:48:13:    expected int *extern [assigned] puo
-+c11-atomic.c:48:13:    expected int *[assigned] puo
- c11-atomic.c:48:13:    got int [atomic] *
- c11-atomic.c:49:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:49:13:    expected int *extern [assigned] puo
--c11-atomic.c:49:13:    got int [atomic] *extern [assigned] pqo
-+c11-atomic.c:49:13:    expected int *[assigned] puo
-+c11-atomic.c:49:13:    got int [atomic] *[assigned] pqo
-+c11-atomic.c:58:13: warning: incorrect type in assignment (different modifiers)
-+c11-atomic.c:58:13:    expected int [atomic] *[assigned] pqo
-+c11-atomic.c:58:13:    got int *
-+c11-atomic.c:59:13: warning: incorrect type in assignment (different modifiers)
-+c11-atomic.c:59:13:    expected int [atomic] *[assigned] pqo
-+c11-atomic.c:59:13:    got int *puo
- c11-atomic.c:63:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:63:13:    expected int *extern [assigned] puo
-+c11-atomic.c:63:13:    expected int *[assigned] puo
- c11-atomic.c:63:13:    got int [atomic] *
- c11-atomic.c:64:13: warning: incorrect type in assignment (different modifiers)
--c11-atomic.c:64:13:    expected int *extern [assigned] puo
--c11-atomic.c:64:13:    got int [atomic] *extern [assigned] pqo
-+c11-atomic.c:64:13:    expected int *[assigned] puo
-+c11-atomic.c:64:13:    got int [atomic] *[assigned] pqo
-  * check-error-end
-  */
-diff --git a/validation/typeof-mods.c b/validation/typeof-mods.c
-index aa880f373088..117269c027ed 100644
---- a/validation/typeof-mods.c
-+++ b/validation/typeof-mods.c
-@@ -102,7 +102,7 @@ static void test_static(void)
- 
- static void test_tls(void)
- {
--	__thread int obj, *ptr;
-+	static __thread int obj, *ptr;
- 	typeof(obj) var = obj;
- 	typeof(ptr) ptr2 = ptr;
- 	typeof(*ptr) var2 = obj;
+   ilog2(roundup_pow_of_two(x))
 
-base-commit: 100509c0789f1176fc5881da45917e9af77597ca
--- 
-2.25.0
+where both ilog2() and roundup_pow_of_two() contains a const_ilog()
+ends up internally essentially expanding x 63*63 times. Plus a couple
+for the non-constant case.
+
+And in this case 'x' wasn't all that simple to begin with on SMP.
+
+And then the "max_t" thing adds another factor of 7 due to the whole
+"let's keep a constant expression constant" with all the careful "can
+I use a variable or not" code.
+
+So you get 7*63*63 expansions of num_possible_cpus(), plus that "some
+slop" for the other cases.
+
+I wonder if we could just make sparse _warn_ about this kind of
+situation with expressions that are very big - even if they turn into
+nothing)?
+
+Because I bet it's not good for a real compiler either. Compile time
+does matter to people, and this clearly wasn't intentional.
+
+And even if we apply a patch to avoid it here, that's fine, but others
+might be lurking.
+
+Of course, sometimes you do want to have that kind of nested expansion
+on purpose - creating huge expression lists for some initializer or
+whatever. And sometimes the constant value is what you care about, and
+are willing to have complex expressions.
+
+I don't think anybody intended for the expression to be quite _that_
+complex, though..
+
+> This exists since the introduction of this file in commit
+>     6ac99e8f23d4 bpf: Introduce bpf sk local storage
+> but back then it made sparse consume only about 500Mb of memory on it.
+
+Well, the fact that sparse memory use has exploded by a factor of 6 is
+not exactly good either. What happened?
+
+> but a better patch should, I think, directly use ilog2() and avoid the roundup.
+
+No, I think it would be better to just split that expression up.
+
+Right now the code does:
+
+        /* Use at least 2 buckets, select_bucket() is undefined
+behavior with 1 bucket */
+        smap->bucket_log = max_t(u32, 1,
+ilog2(roundup_pow_of_two(num_possible_cpus())));
+        nbuckets = 1U << smap->bucket_log;
+
+so it calculates the log2, and then does "1U << log2".
+
+Instead, it could just calculate the nbuckets first, and then do the
+"log2()" on that:
+
+        /* Use at least 2 buckets, select_bucket() is undefined
+behavior with 1 bucket */
+        nbuckets = max_t(u32, 2, roundup_pow_of_two(num_possible_cpus()));
+        smap->bucket_log = ilog2(buckets);
+
+because honestly, that is just a whole lot more legible anyway. Maybe
+even split _that_ up, and have the max_t as a separate thing.
+
+Right now the constant in the comment (2) doesn't match the constant
+in the code (1) because the code is too dense for its own good.
+
+Of course, currently that "too dense for its own good" code ends up
+evaluating to a constant on UP. Which the easier-to-read code does
+not.
+
+I'm not convinced that it makes sense to optimize for UP that much.
+
+                Linus
