@@ -1,59 +1,47 @@
-From: Martin KaFai Lau <kafai@fb.com>
-Subject: Re: sparse problem with Linux kernel v5.5
-Date: Fri, 7 Feb 2020 00:29:54 -0800
-Message-ID: <20200207082954.majgsx5trepwb46n@kafai-mbp>
-References: <6ee65b69-9ffc-78c6-66b7-3ce586687d74@infradead.org>
- <CAHk-=wgQM29j0BJ-b0fTfwA9nc_fiS09Mi2oO8hX34oRxR6+xA@mail.gmail.com>
- <20200206114619.bfszxgs6jmdgroo6@ltop.local>
- <3b68ba4b-f16a-8404-4e07-27788ebbfce3@infradead.org>
- <20200206200610.7ktqp2yzriw7zurx@ltop.local>
- <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
- <b6d24fd2-e5b8-7010-86b5-c46f65536eef@kleine-koenig.org>
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH] dissect: introduce dissect_ctx
+Date: Fri, 7 Feb 2020 11:01:50 +0100
+Message-ID: <20200207100150.GB9260@redhat.com>
+References: <20200206170132.GA8908@redhat.com>
+ <20200206204518.qx5qtyl52al37njy@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:9658 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726130AbgBGIaV (ORCPT
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:26248 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726587AbgBGKB6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Feb 2020 03:30:21 -0500
+        Fri, 7 Feb 2020 05:01:58 -0500
+In-Reply-To: <20200206204518.qx5qtyl52al37njy@ltop.local>
 Content-Disposition: inline
-In-Reply-To: <b6d24fd2-e5b8-7010-86b5-c46f65536eef@kleine-koenig.org>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Alexei Starovoitov <ast@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Arthur Fabre <afabre@cloudflare.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-On Fri, Feb 07, 2020 at 07:34:57AM +0100, Uwe Kleine-König wrote:
-> Hello,
-> 
-> On 2/7/20 12:47 AM, Linus Torvalds wrote:
-> > Instead, it could just calculate the nbuckets first, and then do the
-> > "log2()" on that:
-> > 
-> >         /* Use at least 2 buckets, select_bucket() is undefined
-> > behavior with 1 bucket */
-> >         nbuckets = max_t(u32, 2, roundup_pow_of_two(num_possible_cpus()));
-> >         smap->bucket_log = ilog2(buckets);
-> 
-> 
-> Isn't it kind of ineffective to first round to a power of two and then
-> take the ilog2 of it?
-> 
-> At a first glance I'd say that
-> 
-> 	ilog2(roundup_pow_of_two(x)) == ilog(x - 1) + 1
-> 
-> for x > 1. (Maybe even for x == 1? Didn't care to check, I think it
-> doesn't matter for the case at hand.)
-> 
-> This RHS might be easier to optimize for the compiler?!
-I believe x == 1 needs an extra case since ilog2(0) won't work.
+On 02/06, Luc Van Oostenryck wrote:
+>
+> On Thu, Feb 06, 2020 at 06:01:32PM +0100, Oleg Nesterov wrote:
+> > Points to the current function or to the global variable in case of
+> > compound initializer.
+> >
+> > Kill the ugly test-dissect.c:storage() and change print_usage() to
+> > report dissect_ctx->ident instead.
+>
+> Having the ful ident will be good, I think, but the cost is to have
+> to maintain this context. I suppose it would be too painful to
+> propgate this context via an additional argument to all involved
+> functions?
 
-Since this function (map creation) is not on the fast path,
-I currently opt for Linus's suggestion which its code is more
-self-explanatory.
+Oh, I'd prefer to not do this. This needs to add the additional "ctx"
+arg to every do_.*() function in dissect.c, and for what? IMHO, this
+will just complicate the code for no reason.
+
+I can unexport the global "struct symbol *dissect_ctx" introduced by
+this patch and pass it as the additional (new) argument to every to
+every callback, but I'd like to do this later, along with other
+"incompatible" changes for the new tool Alexey is working on.
 
 Thanks,
-Martin
+
+Oleg.
