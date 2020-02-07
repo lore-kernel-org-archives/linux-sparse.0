@@ -1,49 +1,41 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: sparse problem with Linux kernel v5.5
-Date: Fri, 7 Feb 2020 13:43:05 +0100
-Message-ID: <20200207124305.islfnt5kissyv6b6@ltop.local>
-References: <6ee65b69-9ffc-78c6-66b7-3ce586687d74@infradead.org>
- <CAHk-=wgQM29j0BJ-b0fTfwA9nc_fiS09Mi2oO8hX34oRxR6+xA@mail.gmail.com>
- <20200206114619.bfszxgs6jmdgroo6@ltop.local>
- <3b68ba4b-f16a-8404-4e07-27788ebbfce3@infradead.org>
- <20200206200610.7ktqp2yzriw7zurx@ltop.local>
- <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
- <b6d24fd2-e5b8-7010-86b5-c46f65536eef@kleine-koenig.org>
- <20200207082954.majgsx5trepwb46n@kafai-mbp>
- <f41aa7cb-399d-277b-eda8-4173f45d7123@kleine-koenig.org>
+Subject: Re: [PATCH bpf] bpf: Improve bucket_log calculation logic
+Date: Fri, 7 Feb 2020 14:07:21 +0100
+Message-ID: <20200207130721.pitlvbxcx656c7ur@ltop.local>
+References: <20200207081810.3918919-1-kafai@fb.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm1-f68.google.com ([209.85.128.68]:35241 "EHLO
-        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726674AbgBGMnJ (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Feb 2020 07:43:09 -0500
-Received: by mail-wm1-f68.google.com with SMTP id b17so2654990wmb.0
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Feb 2020 04:43:08 -0800 (PST)
+Content-Type: text/plain; charset=us-ascii
+Return-path: <netdev-owner@vger.kernel.org>
 Content-Disposition: inline
-In-Reply-To: <f41aa7cb-399d-277b-eda8-4173f45d7123@kleine-koenig.org>
-Sender: linux-sparse-owner@vger.kernel.org
+In-Reply-To: <20200207081810.3918919-1-kafai@fb.com>
+Sender: netdev-owner@vger.kernel.org
+To: Martin KaFai Lau <kafai@fb.com>
+Cc: bpf@vger.kernel.org, Alexei Starovoitov <ast@kernel.org>, Daniel Borkmann <daniel@iogearbox.net>, David Miller <davem@davemloft.net>, kernel-team@fb.com, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, netdev@vger.kernel.org, Randy Dunlap <rdunlap@infradead.org>
 List-Id: linux-sparse@vger.kernel.org
-To: Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-Cc: Martin KaFai Lau <kafai@fb.com>, Linus Torvalds <torvalds@linux-foundation.org>, Alexei Starovoitov <ast@kernel.org>, Randy Dunlap <rdunlap@infradead.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Arthur Fabre <afabre@cloudflare.com>
 
-On Fri, Feb 07, 2020 at 12:34:02PM +0100, Uwe Kleine-König wrote:
-> On 2/7/20 9:29 AM, Martin KaFai Lau wrote:
-> > I believe x == 1 needs an extra case since ilog2(0) won't work.
-> > 
-> > Since this function (map creation) is not on the fast path,
-> > I currently opt for Linus's suggestion which its code is more
-> > self-explanatory.
+On Fri, Feb 07, 2020 at 12:18:10AM -0800, Martin KaFai Lau wrote:
 > 
-> If you put my suggestion in a macro that is called for example
-> 
-> 	ilog2_roundup()
-> 
-> you might have both: easier code and self-explanation.
+> diff --git a/net/core/bpf_sk_storage.c b/net/core/bpf_sk_storage.c
+> index 458be6b3eda9..3ab23f698221 100644
+> --- a/net/core/bpf_sk_storage.c
+> +++ b/net/core/bpf_sk_storage.c
+> @@ -643,9 +643,10 @@ static struct bpf_map *bpf_sk_storage_map_alloc(union bpf_attr *attr)
+>  		return ERR_PTR(-ENOMEM);
+>  	bpf_map_init_from_attr(&smap->map, attr);
+>  
+> +	nbuckets = roundup_pow_of_two(num_possible_cpus());
+>  	/* Use at least 2 buckets, select_bucket() is undefined behavior with 1 bucket */
+> -	smap->bucket_log = max_t(u32, 1, ilog2(roundup_pow_of_two(num_possible_cpus())));
+> -	nbuckets = 1U << smap->bucket_log;
+> +	nbuckets = max_t(u32, 2, nbuckets);
+> +	smap->bucket_log = ilog2(nbuckets);
+>  	cost = sizeof(*smap->buckets) * nbuckets + sizeof(*smap);
+>  
+>  	ret = bpf_map_charge_init(&smap->map.memory, cost);
+> -- 
 
-This is, essentially, the same as the existing order_base_2().
+Yes, that's much nicer to read. Feel free to add my
 
-Best regards,
+Reviewed-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+
 -- Luc
