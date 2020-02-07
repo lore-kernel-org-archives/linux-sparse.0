@@ -1,56 +1,82 @@
 From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: [PATCH bpf] bpf: Improve bucket_log calculation logic
-Date: Fri, 7 Feb 2020 10:07:32 -0800
-Message-ID: <CAHk-=wieADOQcYkehVN7meevnd3jZrq06NkmyH9GGR==2rEpuQ@mail.gmail.com>
-References: <20200207081810.3918919-1-kafai@fb.com>
+Date: Fri, 7 Feb 2020 11:39:24 -0800
+Message-ID: <CAHk-=wjbhawNieeiEig4LnPVRTRPgY8xag7NuAKuM9NKXCTLeQ@mail.gmail.com>
+References: <20200207081810.3918919-1-kafai@fb.com> <CAHk-=wieADOQcYkehVN7meevnd3jZrq06NkmyH9GGR==2rEpuQ@mail.gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-lj1-f194.google.com ([209.85.208.194]:41213 "EHLO
-        mail-lj1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726951AbgBGSHw (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Feb 2020 13:07:52 -0500
-Received: by mail-lj1-f194.google.com with SMTP id h23so242665ljc.8
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Feb 2020 10:07:51 -0800 (PST)
-Received: from mail-lj1-f180.google.com (mail-lj1-f180.google.com. [209.85.208.180])
-        by smtp.gmail.com with ESMTPSA id s22sm1691645ljm.41.2020.02.07.10.07.48
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 07 Feb 2020 10:07:49 -0800 (PST)
-Received: by mail-lj1-f180.google.com with SMTP id o15so255256ljg.6
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Feb 2020 10:07:48 -0800 (PST)
-In-Reply-To: <20200207081810.3918919-1-kafai@fb.com>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Return-path: <netdev-owner@vger.kernel.org>
+In-Reply-To: <CAHk-=wieADOQcYkehVN7meevnd3jZrq06NkmyH9GGR==2rEpuQ@mail.gmail.com>
+Sender: netdev-owner@vger.kernel.org
 To: Martin KaFai Lau <kafai@fb.com>
 Cc: bpf@vger.kernel.org, Alexei Starovoitov <ast@kernel.org>, Daniel Borkmann <daniel@iogearbox.net>, David Miller <davem@davemloft.net>, kernel-team@fb.com, Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Netdev <netdev@vger.kernel.org>, Randy Dunlap <rdunlap@infradead.org>
+List-Id: linux-sparse@vger.kernel.org
 
-On Fri, Feb 7, 2020 at 12:18 AM Martin KaFai Lau <kafai@fb.com> wrote:
+On Fri, Feb 7, 2020 at 10:07 AM Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
 >
-> It was reported that the max_t, ilog2, and roundup_pow_of_two macros have
-> exponential effects on the number of states in the sparse checker.
+> I do think this is a good test-case for sparse. Luc, have you looked
+> at what it is that then makes sparse use *so* much memory for this one
+> line?
 
-Patch looks good, but I'd like to point out that it's not just sparse.
+Looking at the profile, it's doing a lot of "copy_expression()".
 
-You can see it with a simple
+Which comes from inlining.
 
-    make net/core/bpf_sk_storage.i
-    grep 'smap->bucket_log = ' net/core/bpf_sk_storage.i | wc
+I think the problem may be that with that macro expansion from hell we
+end up with 28968 copies of cpumask_weight(), and sparse will inline
+every one of them into the parse tree - even though basically none of
+them are _used_.
 
-and see the end result:
+In fact, it's worse than that: we end up having a few rounds of
+inlining thanks to
 
-      1  365071 2686974
+static inline unsigned int cpumask_weight(const struct cpumask *srcp)
+{
+        return bitmap_weight(cpumask_bits(srcp), nr_cpumask_bits);
+}
 
-That's one line (the assignment line) that is 2,686,974 characters in length.
+static __always_inline int bitmap_weight(const unsigned long *src,
+unsigned int nbits)
+{
+        if (small_const_nbits(nbits))
+                return hweight_long(*src & BITMAP_LAST_WORD_MASK(nbits));
+        return __bitmap_weight(src, nbits);
+}
 
-Now, sparse does happen to react particularly badly to that (I didn't
-look to why, but I suspect it's just that evaluating all the types
-that don't actually ever end up getting used ends up being much more
-expensive than it should be), but I bet it's not good for gcc either.
+static __always_inline unsigned long hweight_long(unsigned long w)
+{
+        return sizeof(w) == 4 ? hweight32(w) : hweight64(w);
+}
 
-I do think this is a good test-case for sparse. Luc, have you looked
-at what it is that then makes sparse use *so* much memory for this one
-line?
+where those hweight*() things aren't simple either, they end up doing
 
-             Linus
+  #define hweight32(w) (__builtin_constant_p(w) ? __const_hweight32(w)
+: __arch_hweight32(w))
+  #define hweight64(w) (__builtin_constant_p(w) ? __const_hweight64(w)
+: __arch_hweight64(w))
+
+where the __const_hweight*() in turn are more expansions of a macro
+with several levels in order to turn it all into a constant value.
+
+So we may have "only" 28968 calls to cpumask_weight(), but it results
+in millions of expressions being expanded.
+
+If we did some basic simplification of constant ops before inlining,
+that would likely help a lot.
+
+But currently sparse does inline function expansion at type evaluation
+time - so long before it does any simplification of the tree at all.
+
+So that explains why sparse happens to react _so_ badly to this thing.
+A real compiler would do inlining much later.
+
+Inlining that early is partly because originally one of the design
+ideas in sparse was to make inline functions act basically as
+templates, so they'd react to the types of the context. But it really
+bites us in the ass here.
+
+Luc, any ideas? Yes, this is solvable in the kernel, but it does show
+that sparse simply does a _lot_ of unnecessary work.
+
+               Linus
