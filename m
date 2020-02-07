@@ -1,101 +1,58 @@
-From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
-Subject: Re: sparse problem with Linux kernel v5.5
-Date: Fri, 7 Feb 2020 07:34:57 +0100
-Message-ID: <b6d24fd2-e5b8-7010-86b5-c46f65536eef@kleine-koenig.org>
-References: <6ee65b69-9ffc-78c6-66b7-3ce586687d74@infradead.org>
- <CAHk-=wgQM29j0BJ-b0fTfwA9nc_fiS09Mi2oO8hX34oRxR6+xA@mail.gmail.com>
- <20200206114619.bfszxgs6jmdgroo6@ltop.local>
- <3b68ba4b-f16a-8404-4e07-27788ebbfce3@infradead.org>
- <20200206200610.7ktqp2yzriw7zurx@ltop.local>
- <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
+From: Martin KaFai Lau <kafai@fb.com>
+Subject: [PATCH bpf] bpf: Improve bucket_log calculation logic
+Date: Fri, 7 Feb 2020 00:18:10 -0800
+Message-ID: <20200207081810.3918919-1-kafai@fb.com>
 Mime-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha512;
- protocol="application/pgp-signature";
- boundary="vUSs11wPwhSDFirf79TH6zS1B4IDPrDmL"
+Content-Type: text/plain
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from antares.kleine-koenig.org ([94.130.110.236]:35728 "EHLO
-        antares.kleine-koenig.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726417AbgBGGmm (ORCPT
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:53702 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726136AbgBGISZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Feb 2020 01:42:42 -0500
-In-Reply-To: <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
+        Fri, 7 Feb 2020 03:18:25 -0500
+Received: from pps.filterd (m0001303.ppops.net [127.0.0.1])
+        by m0001303.ppops.net (8.16.0.42/8.16.0.42) with SMTP id 0178ILAs005106
+        for <linux-sparse@vger.kernel.org>; Fri, 7 Feb 2020 00:18:24 -0800
+Received: from mail.thefacebook.com ([163.114.132.120])
+        by m0001303.ppops.net with ESMTP id 2y0exsdtts-6
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT)
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Feb 2020 00:18:23 -0800
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Alexei Starovoitov <ast@kernel.org>
-Cc: Randy Dunlap <rdunlap@infradead.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Martin KaFai Lau <kafai@fb.com>, Arthur Fabre <afabre@cloudflare.com>
+To: bpf@vger.kernel.org
+Cc: Alexei Starovoitov <ast@kernel.org>, Daniel Borkmann <daniel@iogearbox.net>, David Miller <davem@davemloft.net>, kernel-team@fb.com, Linus Torvalds <torvalds@linux-foundation.org>, Linux-Sparse <linux-sparse@vger.kernel.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, netdev@vger.kernel.org, Randy Dunlap <rdunlap@infradead.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---vUSs11wPwhSDFirf79TH6zS1B4IDPrDmL
-Content-Type: multipart/mixed; boundary="acogQGp72xlxDbDrziOdgvlMtlcKKL8ci";
- protected-headers="v1"
-From: =?UTF-8?Q?Uwe_Kleine-K=c3=b6nig?= <uwe@kleine-koenig.org>
-To: Linus Torvalds <torvalds@linux-foundation.org>,
- Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
- Alexei Starovoitov <ast@kernel.org>
-Cc: Randy Dunlap <rdunlap@infradead.org>,
- Linux-Sparse <linux-sparse@vger.kernel.org>, Martin KaFai Lau
- <kafai@fb.com>, Arthur Fabre <afabre@cloudflare.com>
-Message-ID: <b6d24fd2-e5b8-7010-86b5-c46f65536eef@kleine-koenig.org>
-Subject: Re: sparse problem with Linux kernel v5.5
-References: <6ee65b69-9ffc-78c6-66b7-3ce586687d74@infradead.org>
- <CAHk-=wgQM29j0BJ-b0fTfwA9nc_fiS09Mi2oO8hX34oRxR6+xA@mail.gmail.com>
- <20200206114619.bfszxgs6jmdgroo6@ltop.local>
- <3b68ba4b-f16a-8404-4e07-27788ebbfce3@infradead.org>
- <20200206200610.7ktqp2yzriw7zurx@ltop.local>
- <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
-In-Reply-To: <CAHk-=whEFcgPW8oD=rGGyDiML_7AaCP0DGdW=WXjvF9zAv6Vrg@mail.gmail.com>
+It was reported that the max_t, ilog2, and roundup_pow_of_two macros have
+exponential effects on the number of states in the sparse checker.
 
---acogQGp72xlxDbDrziOdgvlMtlcKKL8ci
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+This patch breaks them up by calculating the "nbuckets" first so
+that the "bucket_log" only needs to take ilog2().
 
-Hello,
+Fixes: 6ac99e8f23d4 ("bpf: Introduce bpf sk local storage")
+Reported-by: Randy Dunlap <rdunlap@infradead.org>
+Reported-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Martin KaFai Lau <kafai@fb.com>
+---
+ net/core/bpf_sk_storage.c | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
 
-On 2/7/20 12:47 AM, Linus Torvalds wrote:
-> Instead, it could just calculate the nbuckets first, and then do the
-> "log2()" on that:
->=20
->         /* Use at least 2 buckets, select_bucket() is undefined
-> behavior with 1 bucket */
->         nbuckets =3D max_t(u32, 2, roundup_pow_of_two(num_possible_cpus=
-()));
->         smap->bucket_log =3D ilog2(buckets);
-
-
-Isn't it kind of ineffective to first round to a power of two and then
-take the ilog2 of it?
-
-At a first glance I'd say that
-
-	ilog2(roundup_pow_of_two(x)) =3D=3D ilog(x - 1) + 1
-
-for x > 1. (Maybe even for x =3D=3D 1? Didn't care to check, I think it
-doesn't matter for the case at hand.)
-
-This RHS might be easier to optimize for the compiler?!
-
-Best regards
-Uwe
-
-
---acogQGp72xlxDbDrziOdgvlMtlcKKL8ci--
-
---vUSs11wPwhSDFirf79TH6zS1B4IDPrDmL
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCgAdFiEEfnIqFpAYrP8+dKQLwfwUeK3K7AkFAl49BRUACgkQwfwUeK3K
-7AnAHQgAmB3inJoqwIbxVUp5mDThs78UM5ywTO4PrJMdb9duLWEfwMhD1MJTh/5I
-3MT2tB271jhFsaB+O2CmHYVcamEKLhCXn9e5fxCm+4iYkx9L6ylTSjN67bg/Xbvw
-XEseS0kOm6c9d3WFxYjK1h74RUMN9Kd7NODqty9RCpizDx0yzjqoo6DG4b0ZyAUK
-AytscKJdews5O/LZQfTfES063hFl/vVmk28zmrEfFGD5p51cDRAsd8lgvBX5dzv3
-rmT35eofvzuXkvdQHYAF+TPfzKvZ7xXMNnwnobLpzNzvgDmQ053AqzbZKy+Z3z2T
-g0KdxCZ4uLPlx1SvHIVswopaYMNs+A==
-=WWnX
------END PGP SIGNATURE-----
-
---vUSs11wPwhSDFirf79TH6zS1B4IDPrDmL--
+diff --git a/net/core/bpf_sk_storage.c b/net/core/bpf_sk_storage.c
+index 458be6b3eda9..3ab23f698221 100644
+--- a/net/core/bpf_sk_storage.c
++++ b/net/core/bpf_sk_storage.c
+@@ -643,9 +643,10 @@ static struct bpf_map *bpf_sk_storage_map_alloc(union bpf_attr *attr)
+ 		return ERR_PTR(-ENOMEM);
+ 	bpf_map_init_from_attr(&smap->map, attr);
+ 
++	nbuckets = roundup_pow_of_two(num_possible_cpus());
+ 	/* Use at least 2 buckets, select_bucket() is undefined behavior with 1 bucket */
+-	smap->bucket_log = max_t(u32, 1, ilog2(roundup_pow_of_two(num_possible_cpus())));
+-	nbuckets = 1U << smap->bucket_log;
++	nbuckets = max_t(u32, 2, nbuckets);
++	smap->bucket_log = ilog2(nbuckets);
+ 	cost = sizeof(*smap->buckets) * nbuckets + sizeof(*smap);
+ 
+ 	ret = bpf_map_charge_init(&smap->map.memory, cost);
+-- 
+2.17.1
