@@ -1,95 +1,65 @@
 From: Oleg Nesterov <oleg@redhat.com>
-Subject: [PATCH] dissect: change do_symbol(SYM_FN) to check base_type->stmt
- != NULL
-Date: Fri, 7 Feb 2020 11:32:07 +0100
-Message-ID: <20200207103207.GA16991@redhat.com>
+Subject: [PATCH] dissect: kill return_type
+Date: Fri, 7 Feb 2020 11:32:13 +0100
+Message-ID: <20200207103213.GA17010@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from us-smtp-1.mimecast.com ([207.211.31.81]:38712 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726867AbgBGKcN (ORCPT
+Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:57811 "EHLO
+        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726890AbgBGKcS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Feb 2020 05:32:13 -0500
+        Fri, 7 Feb 2020 05:32:18 -0500
 Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-examine_fn_arguments() silently degenerates function arguments into
-pointers but dissect doesn't do evaluate_symbol_list(), that is why
-do_sym_list(type->arguments) can report the bogus definitions.
-
-Test case:
-
-	void extf(int MUST_NOT_BE_REPORTED);
-	typedef void (fptr_t)(int MUST_NOT_BE_REPORTED);
-
-	void func1(fptr_t fptr) {}
-	void func2(typeof(extf) fptr) {}
-	void func3(void) { typeof(extf) fptr; };
-	void func4(void (fptr)(int MUST_NOT_BE_REPORTED)) {}
-
-without this patch:
-
-	4:6                    def  func1                            void ( ... )
-	4:12  func1            def  fptr                             void ( ... )
-	2:23  fptr             def  MUST_NOT_BE_REPORTED             int
-	5:6                    def  func2                            void ( ... )
-	5:19  func2            ---  extf                             void ( ... )
-	5:12  func2            def  fptr                             void ( ... )
-	1:11  fptr             def  MUST_NOT_BE_REPORTED             int
-	6:6                    def  func3                            void ( ... )
-	6:27  func3            ---  extf                             void ( ... )
-	6:33  func3            def  fptr                             void ( ... )
-	1:11  fptr             def  MUST_NOT_BE_REPORTED             int
-	7:6                    def  func4                            void ( ... )
-	7:12  func4            def  fptr                             void ( ... )
-	7:24  fptr             def  MUST_NOT_BE_REPORTED             int
+Now that we have dissect_ctx do_statement(STMT_RETURN) can use
+base_type(dissect_ctx->ctype.base_type) instead.
 
 Signed-off-by: Oleg Nesterov <oleg@redhat.com>
 ---
- dissect.c | 17 ++++++++++++++---
- 1 file changed, 14 insertions(+), 3 deletions(-)
+ dissect.c | 9 ++++-----
+ 1 file changed, 4 insertions(+), 5 deletions(-)
 
 diff --git a/dissect.c b/dissect.c
-index 54e11d2..b48cd85 100644
+index b48cd85..85489a2 100644
 --- a/dissect.c
 +++ b/dissect.c
-@@ -589,6 +589,7 @@ static inline struct symbol *do_symbol(struct symbol *sym)
- {
- 	struct symbol *type = base_type(sym);
- 	struct symbol *dctx = dissect_ctx;
-+	struct statement *stmt;
+@@ -54,7 +54,6 @@ typedef unsigned usage_t;
+ struct symbol *dissect_ctx;
  
- 	reporter->r_symdef(sym);
+ static struct reporter *reporter;
+-static struct symbol *return_type;
  
-@@ -603,12 +604,22 @@ static inline struct symbol *do_symbol(struct symbol *sym)
- 		dissect_ctx = dctx;
+ static void do_sym_list(struct symbol_list *list);
  
- 	break; case SYM_FN:
-+		stmt = sym->ctype.modifiers & MOD_INLINE
-+			? type->inline_stmt
-+			: type->stmt;
-+		if (!stmt)
-+			break;
-+
-+		if (dctx)
-+			sparse_error(dctx->pos,
-+				"dissect_ctx change %.*s -> %s",
-+				dctx->ident->len, dctx->ident->name,
-+				show_ident(sym->ident));
-+
+@@ -489,8 +488,10 @@ static struct symbol *do_statement(usage_t mode, struct statement *stmt)
+ 	break; case STMT_EXPRESSION:
+ 		ret = do_expression(mode, stmt->expression);
+ 
+-	break; case STMT_RETURN:
+-		do_expression(u_lval(return_type), stmt->expression);
++	break; case STMT_RETURN: {
++		struct symbol *type = dissect_ctx->ctype.base_type;
++		do_expression(u_lval(base_type(type)), stmt->expression);
++	}
+ 
+ 	break; case STMT_ASM:
+ 		do_expression(U_R_VAL, stmt->asm_string);
+@@ -617,11 +618,9 @@ static inline struct symbol *do_symbol(struct symbol *sym)
+ 				show_ident(sym->ident));
+ 
  		dissect_ctx = sym;
- 		return_type = base_type(type);
+-		return_type = base_type(type);
  		do_sym_list(type->arguments);
--		do_statement(U_VOID, sym->ctype.modifiers & MOD_INLINE
--					? type->inline_stmt
--					: type->stmt);
-+		do_statement(U_VOID, stmt);
+ 		do_statement(U_VOID, stmt);
  		dissect_ctx = dctx;
- 		return_type = NULL;
+-		return_type = NULL;
  	}
+ 
+ 	return type;
 -- 
 2.5.0
