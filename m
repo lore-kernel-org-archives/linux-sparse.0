@@ -1,90 +1,34 @@
-From: Oleg Nesterov <oleg@redhat.com>
-Subject: [PATCH 2/2] dissect: enforce sym->kind='f' when it looks like a
- function call
-Date: Mon, 10 Feb 2020 17:20:38 +0100
-Message-ID: <20200210162038.GA29643@redhat.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 1/2] dissect: set sym->kind for reporter
+Date: Tue, 11 Feb 2020 00:32:12 +0100
+Message-ID: <20200210233212.xfsktwxhewxgtvr3@ltop.local>
 References: <20200210162018.GA29634@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from us-smtp-2.mimecast.com ([205.139.110.61]:53037 "EHLO
-        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1727722AbgBJQUq (ORCPT
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:54635 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727431AbgBJXcT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 10 Feb 2020 11:20:46 -0500
-In-Reply-To: <20200210162018.GA29634@redhat.com>
+        Mon, 10 Feb 2020 18:32:19 -0500
+Received: by mail-wm1-f68.google.com with SMTP id g1so1187674wmh.4
+        for <linux-sparse@vger.kernel.org>; Mon, 10 Feb 2020 15:32:16 -0800 (PST)
 Content-Disposition: inline
+In-Reply-To: <20200210162018.GA29634@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Oleg Nesterov <oleg@redhat.com>
 Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-A separate change for documentation purposes.
+On Mon, Feb 10, 2020 at 05:20:18PM +0100, Oleg Nesterov wrote:
+> Change dissect to report ctags-like kind passed in sym->kind.
+> Currently only v,f,s and m kinds are possible.
+> 
+> SYM_UNION doesn't differ from SYM_STRUCT and has ->kind = 's'.
+> 
+> Signed-off-by: Oleg Nesterov <oleg@redhat.com>
 
-dissect() tries to work even if the parsed code is buggy or incomplete,
-thus it makes sense to change expr_symbol() to set kind = 'f' when it
-likely looks like a function name.
+Thanks.
+Both patches applied and pushed.
 
-We can safely abuse EXPR_SYMBOL->op to pass the hint to expr_symbol(),
-it must be 0.
-
-Test-case:
-
-	void call(void)
-	{
-		func();
-	}
-
-before this patch
-
-	1:14                   def f call                             void ( ... )
-	3:17  call             --r v func                             bad type
-
-after:
-
-	1:14                   def f call                             void ( ... )
-	3:17  call             --r f func                             bad type
-
-Signed-off-by: Oleg Nesterov <oleg@redhat.com>
----
- dissect.c      | 4 +++-
- test-dissect.c | 2 +-
- 2 files changed, 4 insertions(+), 2 deletions(-)
-
-diff --git a/dissect.c b/dissect.c
-index 20456b2..d9ca142 100644
---- a/dissect.c
-+++ b/dissect.c
-@@ -166,7 +166,7 @@ static inline struct symbol *expr_symbol(struct expression *expr)
- 			sym = alloc_symbol(expr->pos, SYM_BAD);
- 			bind_symbol(sym, expr->symbol_name, NS_SYMBOL);
- 			sym->ctype.modifiers = MOD_EXTERN;
--			sym->kind = 'v';
-+			sym->kind = expr->op ?: 'v'; /* see EXPR_CALL */
- 		}
- 	}
- 
-@@ -374,6 +374,8 @@ again:
- 		ret = do_expression(mode, expr->cond_false);
- 
- 	break; case EXPR_CALL:
-+		if (expr->fn->type == EXPR_SYMBOL)
-+			expr->fn->op = 'f'; /* for expr_symbol() */
- 		ret = do_expression(U_R_PTR, expr->fn);
- 		if (is_ptr(ret))
- 			ret = ret->ctype.base_type;
-diff --git a/test-dissect.c b/test-dissect.c
-index 81cc89d..ece2253 100644
---- a/test-dissect.c
-+++ b/test-dissect.c
-@@ -55,7 +55,7 @@ static void r_symbol(unsigned mode, struct position *pos, struct symbol *sym)
- 		goto err;
- 
- 	case 'f':
--		if (sym->ctype.base_type->type != SYM_FN)
-+		if (sym->type != SYM_BAD && sym->ctype.base_type->type != SYM_FN)
- 			goto err;
- 	case 'v':
- 		if (sym->type == SYM_NODE || sym->type == SYM_BAD)
--- 
-2.5.0
+-- Luc
