@@ -1,69 +1,41 @@
-From: Shannon Nelson <snelson@pensando.io>
-Subject: smatch/sparse complaints on static assertion
-Date: Tue, 11 Feb 2020 09:41:05 -0800
-Message-ID: <ecdd10cb-0022-8f8a-ec36-9d51b3ae85ee@pensando.io>
-References: <e588417e-1bf4-35e3-d8d9-9911fe29e0f5@pensando.io>
+From: Hilda Hancock <accueil@abbayedubec.com>
+Subject: Greetings From Mrs. Hilda Kickett Hancock.
+Date: Tue, 11 Feb 2020 23:59:27 +0100
+Message-ID: <02b65f7bfcadb694689f378eeac96561__20712.0957480342$1581466435$gmane$org@abbayeup.fr.fto>
+Reply-To: hildhancock@yahoo.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII;
+ format=flowed
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pl1-f172.google.com ([209.85.214.172]:37775 "EHLO
-        mail-pl1-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728797AbgBKRlH (ORCPT
+Received: from smtp-out05.msg.oleane.net ([62.161.7.49]:16065 "EHLO
+        smtp-out05.msg.oleane.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728005AbgBLANp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 11 Feb 2020 12:41:07 -0500
-Received: by mail-pl1-f172.google.com with SMTP id c23so4548040plz.4
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 09:41:07 -0800 (PST)
-In-Reply-To: <e588417e-1bf4-35e3-d8d9-9911fe29e0f5@pensando.io>
-Content-Language: en-US
+        Tue, 11 Feb 2020 19:13:45 -0500
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Dan Carpenter <dan.carpenter@oracle.com>
 
-Hi All,
 
-I'm getting complaints from smatch on the ionic network driver's static 
-assertions and am not sure why it was complaining.  Dan Carpenter 
-suggested this might be an issue in sparse with how it is calculating 
-the sizes of the unions.
 
-I ran this at the top of a pretty recent net-next tree 
-(v5.5-rc7-1839-g8192c36)
-$ ../smatch/smatch_scripts/kchecker drivers/net/ethernet/pensando/ionic/
+-- 
+Greetings From Mrs. Hilda Hancock.
 
-And got several copies of this:
+May this day bring you peace, happiness, prosperity, good health and 
+every blessings from above, may all of your wishes and dreams come true!
 
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:38:1: error: static 
-assertion failed: "sizeof(union ionic_dev_regs) == 4096"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:40:1: error: static 
-assertion failed: "sizeof(union ionic_dev_cmd_regs) == 2048"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:56:1: error: static 
-assertion failed: "sizeof(struct ionic_dev_getattr_comp) == 16"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:57:1: error: static 
-assertion failed: "sizeof(struct ionic_dev_setattr_cmd) == 64"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:58:1: error: static 
-assertion failed: "sizeof(struct ionic_dev_setattr_comp) == 16"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:68:1: error: static 
-assertion failed: "sizeof(struct ionic_port_getattr_comp) == 16"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:78:1: error: static 
-assertion failed: "sizeof(struct ionic_lif_getattr_comp) == 16"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:79:1: error: static 
-assertion failed: "sizeof(struct ionic_lif_setattr_cmd) == 64"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:80:1: error: static 
-assertion failed: "sizeof(struct ionic_lif_setattr_comp) == 16"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:82:1: error: static 
-assertion failed: "sizeof(struct ionic_q_init_cmd) == 64"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:117:1: error: static 
-assertion failed: "sizeof(struct ionic_vf_setattr_cmd) == 64"
-drivers/net/ethernet/pensando/ionic/ionic_dev.h:120:1: error: static 
-assertion failed: "sizeof(struct ionic_vf_getattr_comp) == 16"
+I was touched to send this message to you after I have carefully gone 
+through your profile that speaks good of you in your country.
 
-These static assertion lines have been fine up until now and I'm pretty 
-sure they are correct.
+I am Dr. Mrs. Hilda Kickett Hancock a 69 years old woman from Australia, 
+I am writing this message to let you know my heart desire to establish a 
+charity foundation in your country through your noble assistance.
 
-Has this issue been seen elsewhere?  Or is there something I can do in 
-our code to get rid of the complaints?
+For more information, please respond to me immediately.
 
-Thanks,
-sln
+The future belongs to those who believe in the beauty of their dreams.
+
+Yours respectfully,
+
+Mrs. Hilda Hancock
+Email: hildakicketthancock@gmail.com
