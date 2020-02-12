@@ -1,55 +1,60 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
 Subject: Re: smatch/sparse complaints on static assertion
-Date: Wed, 12 Feb 2020 01:31:28 +0100
-Message-ID: <20200212003128.pieng2rlw7mykhvk@ltop.local>
-References: <e588417e-1bf4-35e3-d8d9-9911fe29e0f5@pensando.io>
- <ecdd10cb-0022-8f8a-ec36-9d51b3ae85ee@pensando.io>
+Date: Tue, 11 Feb 2020 16:36:10 -0800
+Message-ID: <CAHk-=wi7jGZ+bVbt-UfXOkpEQdHzF3Z2HBjkGdjh8q4dvPPGWQ@mail.gmail.com>
+References: <e588417e-1bf4-35e3-d8d9-9911fe29e0f5@pensando.io> <ecdd10cb-0022-8f8a-ec36-9d51b3ae85ee@pensando.io>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f45.google.com ([209.85.221.45]:37938 "EHLO
-        mail-wr1-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728060AbgBLAbc (ORCPT
+Received: from mail-lj1-f181.google.com ([209.85.208.181]:46853 "EHLO
+        mail-lj1-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728041AbgBLAg3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 11 Feb 2020 19:31:32 -0500
-Received: by mail-wr1-f45.google.com with SMTP id y17so63643wrh.5
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 16:31:31 -0800 (PST)
-Content-Disposition: inline
+        Tue, 11 Feb 2020 19:36:29 -0500
+Received: by mail-lj1-f181.google.com with SMTP id x14so222738ljd.13
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 16:36:28 -0800 (PST)
+Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com. [209.85.167.41])
+        by smtp.gmail.com with ESMTPSA id b1sm3501589ljp.72.2020.02.11.16.36.26
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 11 Feb 2020 16:36:26 -0800 (PST)
+Received: by mail-lf1-f41.google.com with SMTP id z18so284703lfe.2
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 16:36:26 -0800 (PST)
 In-Reply-To: <ecdd10cb-0022-8f8a-ec36-9d51b3ae85ee@pensando.io>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: Shannon Nelson <snelson@pensando.io>
-Cc: linux-sparse@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>
 
-On Tue, Feb 11, 2020 at 09:41:05AM -0800, Shannon Nelson wrote:
-> Hi All,
-> 
-> I'm getting complaints from smatch on the ionic network driver's static
-> assertions and am not sure why it was complaining.  Dan Carpenter suggested
-> this might be an issue in sparse with how it is calculating the sizes of the
-> unions.
-> 
-> I ran this at the top of a pretty recent net-next tree
-> (v5.5-rc7-1839-g8192c36)
-> $ ../smatch/smatch_scripts/kchecker drivers/net/ethernet/pensando/ionic/
-> 
-> And got several copies of this:
-> 
-> drivers/net/ethernet/pensando/ionic/ionic_dev.h:38:1: error: static
-> assertion failed: "sizeof(union ionic_dev_regs) == 4096"
+On Tue, Feb 11, 2020 at 9:41 AM Shannon Nelson <snelson@pensando.io> wrote:
+>
+> drivers/net/ethernet/pensando/ionic/ionic_dev.h:56:1: error: static
+> assertion failed: "sizeof(struct ionic_dev_getattr_comp) == 16"
 
-...
- 
-> These static assertion lines have been fine up until now and I'm pretty sure
-> they are correct.
-> 
-> Has this issue been seen elsewhere?  Or is there something I can do in our
-> code to get rid of the complaints?
+As Luc says, this is because those structures are mis-declared.
 
-This is caused by the packing of the structs. It's using
-	#pragma pack(push, 1) / #pragma pack(pop)
-which is not supported by Sparse. Packing via __attribute__((packed))
-is incomplete but the pragmas are currently completly ignored.
+See this, for example:
 
--- Luc Van Oostenryck
+  struct ionic_dev_getattr_comp {
+        u8     status;
+        u8     rsvd[3];
+        union {
+                __le64  features;
+                u8      rsvd2[11];
+        };
+        u8     color;
+  };
+
+and notice how "__le64  features" is a 64-bit entity but it's in a
+union with a "u8 rsvd2[11];".
+
+That makes the whole union align to the same as the __le64 (on x86-32,
+that's 32-bit, for bad legacy reasons, on everything else it's
+64-bit).
+
+Mark the associated types properly packed individually, rather than
+use the disgusting "pragma pack()" that should never be used.
+
+This is not a recent sparse change, it must never have worked.
+
+            Linus
