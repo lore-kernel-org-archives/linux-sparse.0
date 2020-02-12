@@ -1,45 +1,58 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] dissect: introduce sym_is_local() for reporter
-Date: Wed, 12 Feb 2020 01:41:35 +0100
-Message-ID: <20200212004135.cyzcqtwwcuewa4gj@ltop.local>
-References: <20200211160136.GA14027@redhat.com>
+From: Shannon Nelson <snelson@pensando.io>
+Subject: Re: smatch/sparse complaints on static assertion
+Date: Tue, 11 Feb 2020 17:01:45 -0800
+Message-ID: <23e34336-22fa-d14d-c765-877abc05df12@pensando.io>
+References: <e588417e-1bf4-35e3-d8d9-9911fe29e0f5@pensando.io>
+ <ecdd10cb-0022-8f8a-ec36-9d51b3ae85ee@pensando.io>
+ <20200212003128.pieng2rlw7mykhvk@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:43766 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728057AbgBLAlh (ORCPT
+Received: from mail-pf1-f169.google.com ([209.85.210.169]:46991 "EHLO
+        mail-pf1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728128AbgBLBBr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 11 Feb 2020 19:41:37 -0500
-Received: by mail-wr1-f66.google.com with SMTP id r11so60646wrq.10
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 16:41:37 -0800 (PST)
-Content-Disposition: inline
-In-Reply-To: <20200211160136.GA14027@redhat.com>
+        Tue, 11 Feb 2020 20:01:47 -0500
+Received: by mail-pf1-f169.google.com with SMTP id k29so312662pfp.13
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Feb 2020 17:01:47 -0800 (PST)
+In-Reply-To: <20200212003128.pieng2rlw7mykhvk@ltop.local>
+Content-Language: en-US
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
-Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Dan Carpenter <dan.carpenter@oracle.com>
 
-On Tue, Feb 11, 2020 at 05:01:36PM +0100, Oleg Nesterov wrote:
-> Can be used to filter out the usage of local variables.
+On 2/11/20 4:31 PM, Luc Van Oostenryck wrote:
+> On Tue, Feb 11, 2020 at 09:41:05AM -0800, Shannon Nelson wrote:
+>> Hi All,
+>>
+>> I'm getting complaints from smatch on the ionic network driver's static
+>> assertions and am not sure why it was complaining.  Dan Carpenter suggested
+>> this might be an issue in sparse with how it is calculating the sizes of the
+>> unions.
+>>
+>> I ran this at the top of a pretty recent net-next tree
+>> (v5.5-rc7-1839-g8192c36)
+>> $ ../smatch/smatch_scripts/kchecker drivers/net/ethernet/pensando/ionic/
+>>
+>> And got several copies of this:
+>>
+>> drivers/net/ethernet/pensando/ionic/ionic_dev.h:38:1: error: static
+>> assertion failed: "sizeof(union ionic_dev_regs) == 4096"
+> ...
+>   
+>> These static assertion lines have been fine up until now and I'm pretty sure
+>> they are correct.
+>>
+>> Has this issue been seen elsewhere?  Or is there something I can do in our
+>> code to get rid of the complaints?
+> This is caused by the packing of the structs. It's using
+> 	#pragma pack(push, 1) / #pragma pack(pop)
+> which is not supported by Sparse. Packing via __attribute__((packed))
+> is incomplete but the pragmas are currently completly ignored.
+>
+> -- Luc Van Oostenryck
 
-...
- 
-> diff --git a/dissect.h b/dissect.h
-> index efe2c0b..178dba5 100644
-> --- a/dissect.h
-> +++ b/dissect.h
-> @@ -27,6 +27,11 @@ struct reporter
->  
->  extern struct symbol *dissect_ctx;
->  
-> +static inline bool sym_is_local(struct symbol *sym)
-> +{
-> +	return sym->kind == 'v' && !(sym->ctype.modifiers & MOD_TOPLEVEL);
-> +}
-> +
-
-Shouldn't MOD_STATIC be added to the test?
-It depends on what exactly you want for 'local'.
-
--- Luc
+Ah, that makes sense.  Thanks.
+sln
