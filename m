@@ -1,70 +1,42 @@
-From: Oleg Nesterov <oleg@redhat.com>
-Subject: [PATCH 3/3] dissect: enforce MOD_TOPLEVEL if SYM_STRUCT was not
- defined
-Date: Fri, 14 Feb 2020 12:34:07 +0100
-Message-ID: <20200214113407.GB31587@redhat.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH 1/3] struct_union_enum_specifier: set MOD_TOPLEVEL if
+ toplevel(sym->scope)
+Date: Mon, 17 Feb 2020 22:46:10 +0100
+Message-ID: <20200217214610.uxbnfh5zooqve4yc@ltop.local>
 References: <20200214113320.GA31578@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from us-smtp-delivery-1.mimecast.com ([205.139.110.120]:22223 "EHLO
-        us-smtp-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726092AbgBNLeN (ORCPT
+Received: from mail-wr1-f68.google.com ([209.85.221.68]:39286 "EHLO
+        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728935AbgBQVqP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 14 Feb 2020 06:34:13 -0500
-In-Reply-To: <20200214113320.GA31578@redhat.com>
+        Mon, 17 Feb 2020 16:46:15 -0500
+Received: by mail-wr1-f68.google.com with SMTP id y11so21492745wrt.6
+        for <linux-sparse@vger.kernel.org>; Mon, 17 Feb 2020 13:46:12 -0800 (PST)
 Content-Disposition: inline
+In-Reply-To: <20200214113320.GA31578@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Oleg Nesterov <oleg@redhat.com>
 Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-A separate change for documentation purposes.
+On Fri, Feb 14, 2020 at 12:33:20PM +0100, Oleg Nesterov wrote:
+> With this change dissect can know the scope of SYM_STRUCT/UNION/ENUM,
+> see the next patch.
+> 
+> Note that MOD_TOPLEVEL can be set even if struct/union/enum type is
+> private and bind_symbol() is not called.
 
-Test-case:
+I don't like that very much. For example: why this is needed for
+struct/union/enum and not other types?
+Should it be possible to use the function toplevel() or add and
+helper for it in scope.c?
 
-	void func(void)
-	{
-		struct UNDEFINED x;
-		x.member = 0;
-	}
+> IIUC nobody else looks at SYM_STRUCT->ctype.modifiers, "make check"
+> doesn't show any difference.
 
-output:
-
-   1:6                    def   f func                             void ( ... )
-   3:26  func             def . v x                                struct UNDEFINED
-   4:9   func             -w- . v x                                struct UNDEFINED
-   4:10  func             -w- . m UNDEFINED.member                 bad type
-
-but in this case is_sym_local(UNDEFINED) = F makes more sense, most
-probably this struct was defined somewhere else but __sparse() didn't
-see its definition.
-
-Change lookup_member() to set MOD_TOPLEVEL if !SYM_STRUCT symbol_list.
-This is not 100% correct, but struct_union_enum_specifier() does the
-same with the following comment:
-
-	// The following test is actually wrong for empty
-	// structs, but (1) they are not C99, (2) gcc does
-	// the same thing, and (3) it's easier.
-
-Signed-off-by: Oleg Nesterov <oleg@redhat.com>
----
- dissect.c | 2 ++
- 1 file changed, 2 insertions(+)
-
-diff --git a/dissect.c b/dissect.c
-index 1465760..f60999e 100644
---- a/dissect.c
-+++ b/dissect.c
-@@ -305,6 +305,8 @@ static struct symbol *lookup_member(struct symbol *type, struct ident *name, int
- 			.kind = 'm',
- 		};
+Yes, it's true and it shouldn't make any difference but still I
+would prefer to not mix symbols and types more than they already are.
  
-+		if (!type->symbol_list)
-+			type->ctype.modifiers |= MOD_TOPLEVEL;
- 		mem = &bad_member;
- 		mem->ident = name;
- 	}
--- 
-2.5.0
+-- Luc
