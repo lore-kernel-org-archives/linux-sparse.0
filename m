@@ -1,54 +1,68 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH v2 1/2] struct_union_enum_specifier: always initialize
- sym->scope
-Date: Thu, 20 Feb 2020 13:15:44 +0100
-Message-ID: <20200220121544.7kwxkuytjzahk7ed@ltop.local>
-References: <20200219162911.GA26790@redhat.com>
- <20200220005602.gd22zbd7c5qy4t6k@ltop.local>
- <20200220115736.GB27143@redhat.com>
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: [PATCH] dissect: enforce toplevel() if SYM_STRUCT was not defined
+Date: Thu, 27 Feb 2020 16:21:15 +0100
+Message-ID: <20200227152115.GA19970@redhat.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm1-f67.google.com ([209.85.128.67]:38848 "EHLO
-        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726885AbgBTMPr (ORCPT
+Received: from us-smtp-1.mimecast.com ([205.139.110.61]:51525 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729084AbgB0PVX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 20 Feb 2020 07:15:47 -0500
-Received: by mail-wm1-f67.google.com with SMTP id a9so1804952wmj.3
-        for <linux-sparse@vger.kernel.org>; Thu, 20 Feb 2020 04:15:46 -0800 (PST)
+        Thu, 27 Feb 2020 10:21:23 -0500
 Content-Disposition: inline
-In-Reply-To: <20200220115736.GB27143@redhat.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Oleg Nesterov <oleg@redhat.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Cc: Alexey Gladkov <gladkov.alexey@gmail.com>, linux-sparse@vger.kernel.org
 
-On Thu, Feb 20, 2020 at 12:57:37PM +0100, Oleg Nesterov wrote:
-> On 02/20, Luc Van Oostenryck wrote:
-> >
-> > On Wed, Feb 19, 2020 at 05:29:11PM +0100, Oleg Nesterov wrote:
-> > > Currently it is not possible to figure out the scope of the private
-> > > struct/union/enum type, its ->scope is NULL because bind_symbol() is
-> > > not called.
-> > >
-> > > Change struct_union_enum_specifier() to set sym->scope = block_scope
-> > > in this case, this is what bind_symbol() does when type has a name.
-> >
-> > Thanks.
-> > I've just changed the comment to "used by dissect"
-> 
-> Great, thanks!
-> 
-> > because
-> > elsewhere the scope or toplevel()s only relevant for symbols.
-> 
-> Cough... can't resist ;)
-> 
-> Not really, see struct_union_enum_specifier()->is_outer_scope(). But
-> yes sure, this is only when ->ident != NULL.
+A separate change for documentation purposes.
 
-Ah yes, sorry, I wasn't clear enough here. By 'symbol' here, I
-effectively meant: "a name (with its associated semantic)", not
-a 'struct symbol'.
+Test-case:
+
+	void func(void)
+	{
+		struct UNDEFINED x;
+		x.member = 0;
+	}
+
+output:
+
+   1:6                    def   f func                             void ( ... )
+   3:26  func             def . v x                                struct UNDEFINED
+   4:9   func             -w- . v x                                struct UNDEFINED
+   4:10  func             -w- . m UNDEFINED.member                 bad type
+
+but in this case is_sym_local(UNDEFINED) = F makes more sense, most
+probably this struct was defined somewhere else but __sparse() didn't
+see its definition.
+
+Change lookup_member() to set type->scope = file_scope if !symbol_list.
+This is not 100% correct, but struct_union_enum_specifier() does the
+same check with the following comment:
+
+	// The following test is actually wrong for empty
+	// structs, but (1) they are not C99, (2) gcc does
+	// the same thing, and (3) it's easier.
+
+Signed-off-by: Oleg Nesterov <oleg@redhat.com>
+---
+ dissect.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/dissect.c b/dissect.c
+index c48214b9..1970e46f 100644
+--- a/dissect.c
++++ b/dissect.c
+@@ -304,6 +304,9 @@ static struct symbol *lookup_member(struct symbol *type, struct ident *name, int
+ 			.kind = 'm',
+ 		};
  
--- Luc
++		if (!type->symbol_list)
++			type->scope = file_scope;
++
+ 		mem = &bad_member;
+ 		mem->ident = name;
+ 	}
+-- 
+2.25.1.362.g51ebf55
