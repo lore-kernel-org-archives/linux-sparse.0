@@ -1,67 +1,87 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [RFC] cpp: remove extra newlines during macro expansion
-Date: Thu, 12 Mar 2020 21:25:33 +0100
-Message-ID: <20200312202533.52465-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] cpp: sanitize redefining a macro during its own expansion
+Date: Thu, 12 Mar 2020 21:30:52 +0100
+Message-ID: <20200312203052.52764-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wm1-f42.google.com ([209.85.128.42]:52047 "EHLO
-        mail-wm1-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725268AbgCLUZk (ORCPT
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:44581 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726706AbgCLUc6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 12 Mar 2020 16:25:40 -0400
-Received: by mail-wm1-f42.google.com with SMTP id a132so7580786wme.1
-        for <linux-sparse@vger.kernel.org>; Thu, 12 Mar 2020 13:25:40 -0700 (PDT)
+        Thu, 12 Mar 2020 16:32:58 -0400
+Received: by mail-wr1-f66.google.com with SMTP id l18so9198738wru.11
+        for <linux-sparse@vger.kernel.org>; Thu, 12 Mar 2020 13:32:56 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Oleg Nesterov <oleg@redhat.com>
 
-During macro expansion, Sparse doesn't strip newlines from
-the arguments as required by 6.10.3p10 and done by gcc & clang.
+The presence of preprocessor directives within the arguments
+of a macro invocation is Undefined Behaviour. Some of these
+directives, like the conditionals, are harmless.
 
-So, remove these newlines.
+OTOH, the redefinition of a macro during its own expansion
+is really nasty. However, it can be given a reasonable meaning:
+* use the initial definition for the macro body
+* use the new defintion for its arguments, in text order.
+It's what gcc & clang do. But Sparse can't handle this
+because during the expansion, a reference to the initial
+macro's body is not kept. What is used instead is the
+'body currently associated with the macro'.
 
-Note: the current behaviour may make the preprocessed output
-      more readable (and so may be considered as a feature).
+Fix this by always using the body associated with the
+macro at the time of its invocation.
 
+Testcase-by: Oleg Nesterov <oleg@redhat.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- pre-process.c                           |  1 +
- validation/preprocessor/expand-and-nl.c | 14 ++++++++++++++
- 2 files changed, 15 insertions(+)
- create mode 100644 validation/preprocessor/expand-and-nl.c
+ pre-process.c                          |  4 ++--
+ validation/preprocessor/expand-redef.c | 15 +++++++++++++++
+ 2 files changed, 17 insertions(+), 2 deletions(-)
+ create mode 100644 validation/preprocessor/expand-redef.c
 
 diff --git a/pre-process.c b/pre-process.c
-index 479c8d225602..2893c3ab65d4 100644
+index 2893c3ab65d4..6670fb0cd557 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -306,6 +306,7 @@ static struct token *collect_arg(struct token *prev, int vararg, struct position
- 		next->pos.stream = pos->stream;
- 		next->pos.line = pos->line;
- 		next->pos.pos = pos->pos;
-+		next->pos.newline = 0;
- 		p = &next->next;
- 	}
- 	*p = &eof_token_entry;
-diff --git a/validation/preprocessor/expand-and-nl.c b/validation/preprocessor/expand-and-nl.c
+@@ -756,7 +756,7 @@ static int expand(struct token **list, struct symbol *sym)
+ 	struct token *last;
+ 	struct token *token = *list;
+ 	struct ident *expanding = token->ident;
+-	struct token **tail;
++	struct token **tail, *expansion = sym->expansion;
+ 	int nargs = sym->arglist ? sym->arglist->count.normal : 0;
+ 	struct arg args[nargs];
+ 
+@@ -776,7 +776,7 @@ static int expand(struct token **list, struct symbol *sym)
+ 	expanding->tainted = 1;
+ 
+ 	last = token->next;
+-	tail = substitute(list, sym->expansion, args);
++	tail = substitute(list, expansion, args);
+ 	/*
+ 	 * Note that it won't be eof - at least TOKEN_UNTAINT will be there.
+ 	 * We still can lose the newline flag if the sucker expands to nothing,
+diff --git a/validation/preprocessor/expand-redef.c b/validation/preprocessor/expand-redef.c
 new file mode 100644
-index 000000000000..06f6ab5cd91b
+index 000000000000..4ca13e661fa4
 --- /dev/null
-+++ b/validation/preprocessor/expand-and-nl.c
-@@ -0,0 +1,14 @@
-+#define M(X) X-X
++++ b/validation/preprocessor/expand-redef.c
+@@ -0,0 +1,15 @@
++#define f(x) x x
++f(1
++#undef  f
++#define f 2
++  f)
 +
-+M(a
-+b)
 +/*
-+ * check-name: expand-and-nl
-+ * check-command: sparse -E $file
-+ * check-known-to-fail
++ * check-name: expand-redef
++ * check-command: sparse -E -Wno-directive-within-macro $file
 + *
 + * check-output-start
 +
-+a b-a b
++1 2 1 2
 + * check-output-end
 + */
 -- 
