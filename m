@@ -1,102 +1,77 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] cpp: silently allow conditional directives within macro
-Date: Thu, 12 Mar 2020 22:16:30 +0100
-Message-ID: <20200312211630.53710-1-luc.vanoostenryck@gmail.com>
+From: Oleg Nesterov <oleg@redhat.com>
+Subject: Re: [PATCH] cpp: silently allow conditional directives within macro
+Date: Fri, 13 Mar 2020 17:17:48 +0100
+Message-ID: <20200313161748.GA22910@redhat.com>
 References: <CAHk-=wiNPBt4wNkfgSd_utshPkjqQv-z7cg5iCji2jbFAUrLkg@mail.gmail.com>
+ <20200312211630.53710-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:32979 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726442AbgCLVQh (ORCPT
+Received: from us-smtp-2.mimecast.com ([205.139.110.61]:40222 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726620AbgCMQRy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 12 Mar 2020 17:16:37 -0400
-Received: by mail-wr1-f68.google.com with SMTP id a25so9426125wrd.0
-        for <linux-sparse@vger.kernel.org>; Thu, 12 Mar 2020 14:16:36 -0700 (PDT)
-In-Reply-To: <CAHk-=wiNPBt4wNkfgSd_utshPkjqQv-z7cg5iCji2jbFAUrLkg@mail.gmail.com>
+        Fri, 13 Mar 2020 12:17:54 -0400
+In-Reply-To: <20200312211630.53710-1-luc.vanoostenryck@gmail.com>
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Oleg Nesterov <oleg@redhat.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Linus Torvalds <torvalds@linux-foundation.org>
 
-The presence of preprocessor directives within the arguments
-of a macro invocation is Undefined Behaviour [6.10.3p11].
-However, conditional directives are harmless here and are
-useful (and commonly used in the kernel).
+On 03/12, Luc Van Oostenryck wrote:
+>
+> @@ -2098,6 +2103,12 @@ static void handle_preprocessor_line(struct stream *stream, struct token **line,
+>  		if (false_nesting)
+>  			goto out;
+>  	}
+> +
+> +	if (expanding) {
+> +		if (Wdirective_within_macro && !is_cond)
+                    ^^^^^^^^^^^^^^^^^^^^^^^
+I am not sure Wdirective_within_macro is really useful after this change,
+I'd suggest to drop my patch but this is up to you.
 
-So, relax the warning by restricting it to non-conditional
-directives.
+Anyway,
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- pre-process.c | 19 +++++++++++++++----
- 1 file changed, 15 insertions(+), 4 deletions(-)
+> +			warning(start->pos, "directive in macro's argument list");
+> +		expanding = 0;		// warn only once
+> +	}
 
-diff --git a/pre-process.c b/pre-process.c
-index 6670fb0cd557..4b2cd054f897 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -48,6 +48,7 @@ static struct ident_list *macros;	// only needed for -dD
- static int false_nesting = 0;
- static int counter_macro = 0;		// __COUNTER__ expansion
- static int include_level = 0;
-+static int expanding = 0;
+then you should probably update preprocessor22.c ? See below.
+
+I am not sure about validation/preprocessor/expand-redef.c added by the
+previous patch,
+
+	 * check-output-start
+
+	 1 2 1 2
+	 * check-output-end
+
+shouldn't you add check-known-to-fail into this file or change the output
+
+	1
+	2 1
+	2
+
+?
+
+Oleg.
+
+
+--- a/validation/preprocessor/preprocessor22.c
++++ b/validation/preprocessor/preprocessor22.c
+@@ -19,13 +19,6 @@ define_struct(a, {
+  *
+  * check-command: sparse -E $file
+  *
+- * check-error-start
+-preprocessor/preprocessor22.c:6:1: warning: directive in macro's argument list
+-preprocessor/preprocessor22.c:8:1: warning: directive in macro's argument list
+-preprocessor/preprocessor22.c:10:1: warning: directive in macro's argument list
+-preprocessor/preprocessor22.c:12:1: warning: directive in macro's argument list
+- * check-error-end
+- *
+  * check-output-start
  
- #define INCLUDEPATHS 300
- const char *includepath[INCLUDEPATHS+1] = {
-@@ -232,8 +233,13 @@ static int expand_one_symbol(struct token **list)
- 		sym->expander(token);
- 		return 1;
- 	} else {
-+		int rc;
-+
- 		sym->used_in = file_scope;
--		return expand(list, sym);
-+		expanding = 1;
-+		rc = expand(list, sym);
-+		expanding = 0;
-+		return rc;
- 	}
- }
- 
-@@ -271,9 +277,6 @@ static struct token *collect_arg(struct token *prev, int vararg, struct position
- 	while (!eof_token(next = scan_next(p))) {
- 		if (next->pos.newline && match_op(next, '#')) {
- 			if (!next->pos.noexpand) {
--				if (Wdirective_within_macro)
--					warning(next->pos,
--						"directive in macro's argument list");
- 				preprocessor_line(stream, p);
- 				__free_token(next);	/* Free the '#' token */
- 				continue;
-@@ -2075,6 +2078,7 @@ static void handle_preprocessor_line(struct stream *stream, struct token **line,
- 	int (*handler)(struct stream *, struct token **, struct token *);
- 	struct token *token = start->next;
- 	int is_normal = 1;
-+	int is_cond = 0;	// is one of {is,ifdef,ifndef,elif,else,endif}
- 
- 	if (eof_token(token))
- 		return;
-@@ -2084,6 +2088,7 @@ static void handle_preprocessor_line(struct stream *stream, struct token **line,
- 		if (sym) {
- 			handler = sym->handler;
- 			is_normal = sym->normal;
-+			is_cond = !sym->normal;
- 		} else {
- 			handler = handle_nondirective;
- 		}
-@@ -2098,6 +2103,12 @@ static void handle_preprocessor_line(struct stream *stream, struct token **line,
- 		if (false_nesting)
- 			goto out;
- 	}
-+
-+	if (expanding) {
-+		if (Wdirective_within_macro && !is_cond)
-+			warning(start->pos, "directive in macro's argument list");
-+		expanding = 0;		// warn only once
-+	}
- 	if (!handler(stream, line, token))	/* all set */
- 		return;
- 
--- 
-2.25.1
+ struct {
