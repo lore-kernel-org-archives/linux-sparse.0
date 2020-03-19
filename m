@@ -1,174 +1,40 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: [PATCH 1/5] add testcases for OP_UNREACH
-Date: Thu, 19 Mar 2020 22:24:28 +0000
-Message-ID: <48b264ee-c07f-9545-ba92-04934aca9752@ramsayjones.plus.com>
+Date: Fri, 20 Mar 2020 00:54:48 +0100
+Message-ID: <20200319235448.j4l72vgoo6sl64tn@ltop.local>
 References: <20200318173120.63939-1-luc.vanoostenryck@gmail.com>
  <20200318173120.63939-2-luc.vanoostenryck@gmail.com>
+ <48b264ee-c07f-9545-ba92-04934aca9752@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout01.plus.net ([84.93.230.227]:36186 "EHLO
-        avasout01.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727091AbgCSWcC (ORCPT
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:44350 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726663AbgCSXzV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 19 Mar 2020 18:32:02 -0400
-In-Reply-To: <20200318173120.63939-2-luc.vanoostenryck@gmail.com>
-Content-Language: en-GB
+        Thu, 19 Mar 2020 19:55:21 -0400
+Received: by mail-wr1-f66.google.com with SMTP id o12so4923273wrh.11
+        for <linux-sparse@vger.kernel.org>; Thu, 19 Mar 2020 16:55:20 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <48b264ee-c07f-9545-ba92-04934aca9752@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: linux-sparse@vger.kernel.org
 
-
-
-On 18/03/2020 17:31, Luc Van Oostenryck wrote:
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  validation/context-unreachable.c              | 16 ++++++++++
->  validation/linear/builtin_unreachable0.c      | 30 +++++++++++++++++++
->  ...n_unreachable.c => builtin_unreachable1.c} | 14 ++++-----
->  validation/linear/noreturn-unreachable0.c     | 23 ++++++++++++++
->  4 files changed, 76 insertions(+), 7 deletions(-)
->  create mode 100644 validation/context-unreachable.c
->  create mode 100644 validation/linear/builtin_unreachable0.c
->  rename validation/linear/{builtin_unreachable.c => builtin_unreachable1.c} (65%)
->  create mode 100644 validation/linear/noreturn-unreachable0.c
+On Thu, Mar 19, 2020 at 10:24:28PM +0000, Ramsay Jones wrote:
+> On 18/03/2020 17:31, Luc Van Oostenryck wrote:
+> > diff --git a/validation/linear/builtin_unreachable0.c b/validation/linear/builtin_unreachable0.c
+> > new file mode 100644
+> > index 000000000000..5da9d074ae5f
+> > --- /dev/null
+> > +++ b/validation/linear/builtin_unreachable0.c
+> > @@ -0,0 +1,30 @@
+> > +extern void die(void) __attribute__((noreturn));
 > 
-> diff --git a/validation/context-unreachable.c b/validation/context-unreachable.c
-> new file mode 100644
-> index 000000000000..3e330403ce01
-> --- /dev/null
-> +++ b/validation/context-unreachable.c
-> @@ -0,0 +1,16 @@
-> +int fun(void);
-> +
-> +static void foo(void)
-> +{
-> +	__context__(1);
-> +	if (!fun()) {
-> +		__builtin_unreachable();
-> +		return;
-> +	}
-> +	__context__(-1);
-> +}
-> +
-> +/*
-> + * check-name: context-unreachable
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/linear/builtin_unreachable0.c b/validation/linear/builtin_unreachable0.c
-> new file mode 100644
-> index 000000000000..5da9d074ae5f
-> --- /dev/null
-> +++ b/validation/linear/builtin_unreachable0.c
-> @@ -0,0 +1,30 @@
-> +extern void die(void) __attribute__((noreturn));
+> Hmm, is this declaration intended?
 
-Hmm, is this declaration intended?
+Only before it was cut-and-pasted ;)
+Thanks for noticing.
 
-ATB,
-Ramsay Jones
-
-> +
-> +int foo(int p)
-> +{
-> +	if (p == 3)
-> +		__builtin_unreachable();
-> +	return p;
-> +}
-> +
-> +/*
-> + * check-name: builtin_unreachable0
-> + * check-command: test-linearize -Wno-decl $file
-> + * check-known-to-fail
-> + *
-> + * check-output-start
-> +foo:
-> +.L0:
-> +	<entry-point>
-> +	seteq.32    %r2 <- %arg1, $3
-> +	cbr         %r2, .L1, .L3
-> +
-> +.L1:
-> +	unreach
-> +
-> +.L3:
-> +	ret.32      %arg1
-> +
-> +
-> + * check-output-end
-> + */
-> diff --git a/validation/linear/builtin_unreachable.c b/validation/linear/builtin_unreachable1.c
-> similarity index 65%
-> rename from validation/linear/builtin_unreachable.c
-> rename to validation/linear/builtin_unreachable1.c
-> index 4f13b892af54..280f853d8a07 100644
-> --- a/validation/linear/builtin_unreachable.c
-> +++ b/validation/linear/builtin_unreachable1.c
-> @@ -1,15 +1,15 @@
-> -void function_that_never_returns(void);
-> +extern void die(void);
->  
->  int foo(int c)
->  {
->  	if (c)
->  		return 1;
-> -	function_that_never_returns();
-> +	die();
->  	__builtin_unreachable();
->  }
->  
->  /*
-> - * check-name: __builtin_unreachable()
-> + * check-name: builtin_unreachable1
->   * check-command: test-linearize -Wno-decl $file
->   *
->   * check-known-to-fail
-> @@ -19,13 +19,13 @@ foo:
->  	<entry-point>
->  	cbr         %arg1, .L3, .L2
->  
-> -.L2:
-> -	call        function_that_never_returns
-> -	unreach
-> -
->  .L3:
->  	ret.32      $1
->  
-> +.L2:
-> +	call        die
-> +	unreach
-> +
->  
->   * check-output-end
->   */
-> diff --git a/validation/linear/noreturn-unreachable0.c b/validation/linear/noreturn-unreachable0.c
-> new file mode 100644
-> index 000000000000..b76319458e96
-> --- /dev/null
-> +++ b/validation/linear/noreturn-unreachable0.c
-> @@ -0,0 +1,23 @@
-> +extern void die(void) __attribute__((noreturn));
-> +
-> +int foo(void)
-> +{
-> +	die();
-> +	return 0;
-> +}
-> +
-> +/*
-> + * check-name: noreturn-unreachable0
-> + * check-command: test-linearize -Wno-decl $file
-> + * check-known-to-fail
-> + *
-> + * check-output-start
-> +foo:
-> +.L0:
-> +	<entry-point>
-> +	call        die
-> +	unreach
-> +
-> +
-> + * check-output-end
-> + */
-> 
+-- Luc 
