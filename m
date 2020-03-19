@@ -1,41 +1,174 @@
-From: "Mr.Michea Sawadogo" <honbarrzongoibrahim@gmail.com>
-Subject: HI
-Date: Thu, 19 Mar 2020 04:33:54 -0700
-Message-ID: <CAKZhgJTNvYZAbX2o7f3-zD_6S+HfwrfyNcVzCEa44_4YqemqBA__32771.0301544116$1584617641$gmane$org@mail.gmail.com>
-Reply-To: micheasawadogo072@gmail.com
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH 1/5] add testcases for OP_UNREACH
+Date: Thu, 19 Mar 2020 22:24:28 +0000
+Message-ID: <48b264ee-c07f-9545-ba92-04934aca9752@ramsayjones.plus.com>
+References: <20200318173120.63939-1-luc.vanoostenryck@gmail.com>
+ <20200318173120.63939-2-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:34762 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727063AbgCSLd4 (ORCPT
+Received: from avasout01.plus.net ([84.93.230.227]:36186 "EHLO
+        avasout01.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727091AbgCSWcC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 19 Mar 2020 07:33:56 -0400
-Received: by mail-pl1-f193.google.com with SMTP id a23so955796plm.1
-        for <linux-sparse@vger.kernel.org>; Thu, 19 Mar 2020 04:33:55 -0700 (PDT)
+        Thu, 19 Mar 2020 18:32:02 -0400
+In-Reply-To: <20200318173120.63939-2-luc.vanoostenryck@gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
 
--- 
-Hello,
 
-We are here to notify you that the sum of US$2,800,000.00 was
-generated and awarded to you by the United Arab Emirates, and Qatar's
-United Development (UD) under (CBI) Foundation of Burkina Faso, for a
-charity project, The achieve and results of this is to help financial
-problem in the nation.
 
-This award was been selected through the internet, where your e-mail
-address was indicated and notified. The Foundation collect all the
-email addresses of the people that are active online, among the
-Billions of customers who used all those means of Money Transfer, in
-their business transactions. Four people are selected yearly to
-benefit from this promotion and you are one of the Selected Winners.
+On 18/03/2020 17:31, Luc Van Oostenryck wrote:
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  validation/context-unreachable.c              | 16 ++++++++++
+>  validation/linear/builtin_unreachable0.c      | 30 +++++++++++++++++++
+>  ...n_unreachable.c => builtin_unreachable1.c} | 14 ++++-----
+>  validation/linear/noreturn-unreachable0.c     | 23 ++++++++++++++
+>  4 files changed, 76 insertions(+), 7 deletions(-)
+>  create mode 100644 validation/context-unreachable.c
+>  create mode 100644 validation/linear/builtin_unreachable0.c
+>  rename validation/linear/{builtin_unreachable.c => builtin_unreachable1.c} (65%)
+>  create mode 100644 validation/linear/noreturn-unreachable0.c
+> 
+> diff --git a/validation/context-unreachable.c b/validation/context-unreachable.c
+> new file mode 100644
+> index 000000000000..3e330403ce01
+> --- /dev/null
+> +++ b/validation/context-unreachable.c
+> @@ -0,0 +1,16 @@
+> +int fun(void);
+> +
+> +static void foo(void)
+> +{
+> +	__context__(1);
+> +	if (!fun()) {
+> +		__builtin_unreachable();
+> +		return;
+> +	}
+> +	__context__(-1);
+> +}
+> +
+> +/*
+> + * check-name: context-unreachable
+> + * check-known-to-fail
+> + */
+> diff --git a/validation/linear/builtin_unreachable0.c b/validation/linear/builtin_unreachable0.c
+> new file mode 100644
+> index 000000000000..5da9d074ae5f
+> --- /dev/null
+> +++ b/validation/linear/builtin_unreachable0.c
+> @@ -0,0 +1,30 @@
+> +extern void die(void) __attribute__((noreturn));
 
-For your prize contact the Agent: Mr Michea Sawadogo. With this code
-(X220E) His E-mail (micheasawadogo072@gmail.com) he will direct you on what
-to do for the releasing of your prize.
+Hmm, is this declaration intended?
 
-Yours Faithfully,
-Awards Coordinator Mr. Samie Salam,
-Chief executive Jassim Al-Othman.
+ATB,
+Ramsay Jones
+
+> +
+> +int foo(int p)
+> +{
+> +	if (p == 3)
+> +		__builtin_unreachable();
+> +	return p;
+> +}
+> +
+> +/*
+> + * check-name: builtin_unreachable0
+> + * check-command: test-linearize -Wno-decl $file
+> + * check-known-to-fail
+> + *
+> + * check-output-start
+> +foo:
+> +.L0:
+> +	<entry-point>
+> +	seteq.32    %r2 <- %arg1, $3
+> +	cbr         %r2, .L1, .L3
+> +
+> +.L1:
+> +	unreach
+> +
+> +.L3:
+> +	ret.32      %arg1
+> +
+> +
+> + * check-output-end
+> + */
+> diff --git a/validation/linear/builtin_unreachable.c b/validation/linear/builtin_unreachable1.c
+> similarity index 65%
+> rename from validation/linear/builtin_unreachable.c
+> rename to validation/linear/builtin_unreachable1.c
+> index 4f13b892af54..280f853d8a07 100644
+> --- a/validation/linear/builtin_unreachable.c
+> +++ b/validation/linear/builtin_unreachable1.c
+> @@ -1,15 +1,15 @@
+> -void function_that_never_returns(void);
+> +extern void die(void);
+>  
+>  int foo(int c)
+>  {
+>  	if (c)
+>  		return 1;
+> -	function_that_never_returns();
+> +	die();
+>  	__builtin_unreachable();
+>  }
+>  
+>  /*
+> - * check-name: __builtin_unreachable()
+> + * check-name: builtin_unreachable1
+>   * check-command: test-linearize -Wno-decl $file
+>   *
+>   * check-known-to-fail
+> @@ -19,13 +19,13 @@ foo:
+>  	<entry-point>
+>  	cbr         %arg1, .L3, .L2
+>  
+> -.L2:
+> -	call        function_that_never_returns
+> -	unreach
+> -
+>  .L3:
+>  	ret.32      $1
+>  
+> +.L2:
+> +	call        die
+> +	unreach
+> +
+>  
+>   * check-output-end
+>   */
+> diff --git a/validation/linear/noreturn-unreachable0.c b/validation/linear/noreturn-unreachable0.c
+> new file mode 100644
+> index 000000000000..b76319458e96
+> --- /dev/null
+> +++ b/validation/linear/noreturn-unreachable0.c
+> @@ -0,0 +1,23 @@
+> +extern void die(void) __attribute__((noreturn));
+> +
+> +int foo(void)
+> +{
+> +	die();
+> +	return 0;
+> +}
+> +
+> +/*
+> + * check-name: noreturn-unreachable0
+> + * check-command: test-linearize -Wno-decl $file
+> + * check-known-to-fail
+> + *
+> + * check-output-start
+> +foo:
+> +.L0:
+> +	<entry-point>
+> +	call        die
+> +	unreach
+> +
+> +
+> + * check-output-end
+> + */
+> 
