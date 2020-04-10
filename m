@@ -1,37 +1,66 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [SPARSE PATCH 0/5] detect invalid branches in the IR
-Date: Fri, 10 Apr 2020 20:49:13 +0200
-Message-ID: <20200410184918.64692-1-luc.vanoostenryck@gmail.com>
+Subject: [SPARSE PATCH 4/5] extract add_jump() from add_goto()
+Date: Fri, 10 Apr 2020 20:49:17 +0200
+Message-ID: <20200410184918.64692-5-luc.vanoostenryck@gmail.com>
+References: <20200410184918.64692-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail-wr1-f50.google.com ([209.85.221.50]:45745 "EHLO
-        mail-wr1-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726676AbgDJStb (ORCPT
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:37942 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726203AbgDJStd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 10 Apr 2020 14:49:31 -0400
-Received: by mail-wr1-f50.google.com with SMTP id v5so3240057wrp.12
-        for <linux-sparse@vger.kernel.org>; Fri, 10 Apr 2020 11:49:29 -0700 (PDT)
+        Fri, 10 Apr 2020 14:49:33 -0400
+Received: by mail-wm1-f65.google.com with SMTP id f20so3612761wmh.3
+        for <linux-sparse@vger.kernel.org>; Fri, 10 Apr 2020 11:49:32 -0700 (PDT)
+In-Reply-To: <20200410184918.64692-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-It's not allowed to do a goto into an expression statement.
-For exemple, it's not well defined what should happen if such
-an expression is not otherwise reachable and/or can be optimized
-away. For such situations GCC issues an error, clang doesn't
-and produce a valid IR but spare produce an invalid IR with
-branches to unexisting BBs.
+add_goto() uses the active BB (and automaticallydesactive
+it just after). This is fine at linearization but is not
+what is needed at later stages.
 
-The goal of the patches in this series is:
-*) To detect such gotos and issue a sensible error.
-*) To make the IR somehow valid. Since the original
-   expression has been optimized away, the IR replace
-   the goto by a branch to itself.
+So, extract the gist into a separate helper: add_jump().
 
--- Luc
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ linearize.c | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
 
-base-commit: 79f7ac984473d031dfb9cef00119c2d542d0d4a6
+diff --git a/linearize.c b/linearize.c
+index 4e9f9b3693e9..a2cde941ce18 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -633,16 +633,21 @@ static void finish_block(struct entrypoint *ep)
+ 		ep->active = NULL;
+ }
+ 
++static void add_jump(struct basic_block *src, struct basic_block *dst)
++{
++	struct instruction *br = alloc_instruction(OP_BR, 0);
++	br->bb_true = dst;
++	add_bb(&dst->parents, src);
++	add_bb(&src->children, dst);
++	br->bb = src;
++	add_instruction(&src->insns, br);
++}
++
+ static void add_goto(struct entrypoint *ep, struct basic_block *dst)
+ {
+ 	struct basic_block *src = ep->active;
+ 	if (bb_reachable(src)) {
+-		struct instruction *br = alloc_instruction(OP_BR, 0);
+-		br->bb_true = dst;
+-		add_bb(&dst->parents, src);
+-		add_bb(&src->children, dst);
+-		br->bb = src;
+-		add_instruction(&src->insns, br);
++		add_jump(src, dst);
+ 		ep->active = NULL;
+ 	}
+ }
 -- 
 2.26.0
