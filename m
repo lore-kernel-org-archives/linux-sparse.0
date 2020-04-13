@@ -1,76 +1,128 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 17/17] bad-goto: cleanup evaluate_goto()
-Date: Mon, 13 Apr 2020 18:16:05 +0200
-Message-ID: <20200413161605.95900-18-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 12/17] scope: s/{start,end}_symbol_scope/{start,end}_block_scope/
+Date: Mon, 13 Apr 2020 18:16:00 +0200
+Message-ID: <20200413161605.95900-13-luc.vanoostenryck@gmail.com>
 References: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38458 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731409AbgDMQQ3 (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38510 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1731409AbgDMQQu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Apr 2020 12:16:29 -0400
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ED341C0A3BDC
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:28 -0700 (PDT)
-Received: by mail-wr1-x444.google.com with SMTP id d27so1511487wra.1
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:28 -0700 (PDT)
+        Mon, 13 Apr 2020 12:16:50 -0400
+Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C5EDDC0A3BDC
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:49 -0700 (PDT)
+Received: by mail-wr1-x442.google.com with SMTP id h9so10720403wrc.8
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:49 -0700 (PDT)
 In-Reply-To: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Reorganize the code to not repeat the test of the
-label's namespace.
+The names {start,end}_symbol_scope() are misleading as these
+function really start & end a block scope and not all symbols
+are declared inside a block scope.
 
-Also, make all namespaces other than NS_LABEL & NS_ITERATOR
-as bogus and add some comments.
+So, rename them to their more direct name: {start,end}_block_scope().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c | 26 ++++++++++++++------------
- 1 file changed, 14 insertions(+), 12 deletions(-)
+ parse.c | 12 ++++++------
+ scope.c |  4 ++--
+ scope.h |  4 ++--
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
-diff --git a/evaluate.c b/evaluate.c
-index 2b845a301d6b..663540ff6445 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -3748,20 +3748,22 @@ static void evaluate_goto_statement(struct statement *stmt)
- 		return;
- 	}
+diff --git a/parse.c b/parse.c
+index 5da314cd05ee..1a2c7af22ff4 100644
+--- a/parse.c
++++ b/parse.c
+@@ -2222,7 +2222,7 @@ static void start_iterator(struct statement *stmt)
+ {
+ 	struct symbol *cont, *brk;
  
--	if (label->namespace == NS_LABEL && !label->stmt) {
--		sparse_error(stmt->pos, "label '%s' was not declared", show_ident(label->ident));
--		current_fn->bogus_linear = 1;
--	}
--	if (label->namespace == NS_LABEL && label->stmt) {
--		if (is_in_scope(label->label_scope, stmt->goto_scope))
--			return;
--		sparse_error(stmt->pos, "goto into statement expression");
--		info(label->stmt->pos,"   label '%s' is defined here",
--					show_ident(label->ident));
-+	switch (label->namespace) {
-+	case NS_ITERATOR:	// break / continue
-+		break;
-+	case NS_LABEL:		// goto + ident
-+		if (!label->stmt) {
-+			sparse_error(stmt->pos, "label '%s' was not declared",
-+						show_ident(label->ident));
-+		} else if (!is_in_scope(label->label_scope, stmt->goto_scope)) {
-+			sparse_error(stmt->pos, "goto into statement expression");
-+			info(label->stmt->pos,"   label '%s' is defined here",
-+						show_ident(label->ident));
-+		} else
-+			break;
-+	default:
- 		current_fn->bogus_linear = 1;
- 	}
--	if (label->namespace == NS_NONE)
--		current_fn->bogus_linear = 1;
+-	start_symbol_scope();
++	start_block_scope();
+ 	cont = alloc_symbol(stmt->pos, SYM_NODE);
+ 	bind_symbol(cont, &continue_ident, NS_ITERATOR);
+ 	brk = alloc_symbol(stmt->pos, SYM_NODE);
+@@ -2237,7 +2237,7 @@ static void start_iterator(struct statement *stmt)
+ 
+ static void end_iterator(struct statement *stmt)
+ {
+-	end_symbol_scope();
++	end_block_scope();
  }
  
- struct symbol *evaluate_statement(struct statement *stmt)
+ static struct statement *start_function(struct symbol *sym)
+@@ -2282,7 +2282,7 @@ static void start_switch(struct statement *stmt)
+ {
+ 	struct symbol *brk, *switch_case;
+ 
+-	start_symbol_scope();
++	start_block_scope();
+ 	brk = alloc_symbol(stmt->pos, SYM_NODE);
+ 	bind_symbol(brk, &break_ident, NS_ITERATOR);
+ 
+@@ -2302,7 +2302,7 @@ static void end_switch(struct statement *stmt)
+ {
+ 	if (!stmt->switch_case->symbol_list)
+ 		warning(stmt->pos, "switch with no cases");
+-	end_symbol_scope();
++	end_block_scope();
+ }
+ 
+ static void add_case_statement(struct statement *stmt)
+@@ -2655,9 +2655,9 @@ static struct token *parameter_type_list(struct token *token, struct symbol *fn)
+ struct token *compound_statement(struct token *token, struct statement *stmt)
+ {
+ 	stmt->type = STMT_COMPOUND;
+-	start_symbol_scope();
++	start_block_scope();
+ 	token = statement_list(token, &stmt->stmts);
+-	end_symbol_scope();
++	end_block_scope();
+ 	return token;
+ }
+ 
+diff --git a/scope.c b/scope.c
+index 175d72c23762..be042a45357d 100644
+--- a/scope.c
++++ b/scope.c
+@@ -84,7 +84,7 @@ void start_file_scope(void)
+ 	block_scope = scope;
+ }
+ 
+-void start_symbol_scope(void)
++void start_block_scope(void)
+ {
+ 	start_scope(&block_scope);
+ }
+@@ -129,7 +129,7 @@ void new_file_scope(void)
+ 	start_file_scope();
+ }
+ 
+-void end_symbol_scope(void)
++void end_block_scope(void)
+ {
+ 	end_scope(&block_scope);
+ }
+diff --git a/scope.h b/scope.h
+index 3cad514ac128..83741459eb6a 100644
+--- a/scope.h
++++ b/scope.h
+@@ -47,8 +47,8 @@ extern void start_file_scope(void);
+ extern void end_file_scope(void);
+ extern void new_file_scope(void);
+ 
+-extern void start_symbol_scope(void);
+-extern void end_symbol_scope(void);
++extern void start_block_scope(void);
++extern void end_block_scope(void);
+ 
+ extern void start_function_scope(void);
+ extern void end_function_scope(void);
 -- 
 2.26.0
