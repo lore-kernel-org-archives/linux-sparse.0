@@ -1,65 +1,57 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 08/17] bad-goto: catch labels with reserved names
-Date: Mon, 13 Apr 2020 18:15:56 +0200
-Message-ID: <20200413161605.95900-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 09/17] scope: no memset() needed after __alloc_scope()
+Date: Mon, 13 Apr 2020 18:15:57 +0200
+Message-ID: <20200413161605.95900-10-luc.vanoostenryck@gmail.com>
 References: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38420 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38426 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731402AbgDMQQU (ORCPT
+        with ESMTP id S1731400AbgDMQQV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Apr 2020 12:16:20 -0400
-Received: from mail-wm1-x344.google.com (mail-wm1-x344.google.com [IPv6:2a00:1450:4864:20::344])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E59B9C008748
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:19 -0700 (PDT)
-Received: by mail-wm1-x344.google.com with SMTP id h2so9802740wmb.4
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:19 -0700 (PDT)
+        Mon, 13 Apr 2020 12:16:21 -0400
+Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62A2FC0A3BDC
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:21 -0700 (PDT)
+Received: by mail-wm1-x341.google.com with SMTP id d77so9802459wmd.3
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:21 -0700 (PDT)
 In-Reply-To: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-If a reserved name is used as the destination of a goto,
-its associated label won't be valid and at linearization
-time no BB will can be created for it, resulting in an
-invalid IR.
+When starting some scopes, the newly allocated struct is
+memset'ed with zero but this is unneeded since the allocator
+always returns zeroed memory.
 
-So, catch such gotos at evaluation time and mark the
-function to not be linearized.
+Remove the unneeded call to memset().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                          | 2 ++
- validation/linear/invalid-labels0.c | 1 -
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ scope.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/evaluate.c b/evaluate.c
-index 14953f195fcc..99a9ee72d11f 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -3751,6 +3751,8 @@ static void evaluate_goto_statement(struct statement *stmt)
- 		sparse_error(stmt->pos, "label '%s' was not declared", show_ident(label->ident));
- 		current_fn->bogus_linear = 1;
- 	}
-+	if (label->namespace == NS_NONE)
-+		current_fn->bogus_linear = 1;
+diff --git a/scope.c b/scope.c
+index 420c0f5a3f51..0e4fb3b42150 100644
+--- a/scope.c
++++ b/scope.c
+@@ -68,7 +68,6 @@ void rebind_scope(struct symbol *sym, struct scope *new)
+ static void start_scope(struct scope **s)
+ {
+ 	struct scope *scope = __alloc_scope(0);
+-	memset(scope, 0, sizeof(*scope));
+ 	scope->next = *s;
+ 	*s = scope;
  }
+@@ -77,7 +76,6 @@ void start_file_scope(void)
+ {
+ 	struct scope *scope = __alloc_scope(0);
  
- struct symbol *evaluate_statement(struct statement *stmt)
-diff --git a/validation/linear/invalid-labels0.c b/validation/linear/invalid-labels0.c
-index ae3bf7283fb8..a15e9d434011 100644
---- a/validation/linear/invalid-labels0.c
-+++ b/validation/linear/invalid-labels0.c
-@@ -11,7 +11,6 @@ void bar(void)
- /*
-  * check-name: invalid-labels0
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-excludes: END
+-	memset(scope, 0, sizeof(*scope));
+ 	scope->next = &builtin_scope;
+ 	file_scope = scope;
+ 
 -- 
 2.26.0
