@@ -1,121 +1,107 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 13/17] scope: let labels have their own scope
-Date: Mon, 13 Apr 2020 18:16:01 +0200
-Message-ID: <20200413161605.95900-14-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 16/17] bad-goto: catch gotos inside expression statements
+Date: Mon, 13 Apr 2020 18:16:04 +0200
+Message-ID: <20200413161605.95900-17-luc.vanoostenryck@gmail.com>
 References: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38438 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38452 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731400AbgDMQQ0 (ORCPT
+        with ESMTP id S1731408AbgDMQQ3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Apr 2020 12:16:26 -0400
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DA56BC0A3BDC
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:24 -0700 (PDT)
-Received: by mail-wm1-x342.google.com with SMTP id v8so10420779wma.0
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:24 -0700 (PDT)
+        Mon, 13 Apr 2020 12:16:29 -0400
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C9DB9C008749
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:27 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id h9so10719090wrc.8
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Apr 2020 09:16:27 -0700 (PDT)
 In-Reply-To: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-One way of detecting gotos inside an statement expression
-is to use a new kind of scope for the gotos & labels.
+It's not allowed to do a goto into an expression statement.
+For exemple, it's not well defined what should happen if such
+an expression is not evaluated because unnneded and optimized
+away at expand time.
 
-So create this new scope and open/close them when
-entering/leaving statement expressions.
+For such situations GCC issues an error, clang doesn't and
+produces a valid IR. Spare produces an invalid IR with branches
+to unexisting BBs.
+
+Fix this by:
+*) detecting this situation at evaluation time
+*) issue an error
+*) mark the function to not be linearized.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- expression.c |  2 ++
- scope.c      | 14 ++++++++++++++
- scope.h      |  4 ++++
- 3 files changed, 20 insertions(+)
+ evaluate.c                              | 9 +++++++++
+ validation/label-stmt-expr1.c           | 1 -
+ validation/linear/goto-and-expr-stmt0.c | 9 +++++++--
+ 3 files changed, 16 insertions(+), 3 deletions(-)
 
-diff --git a/expression.c b/expression.c
-index 78e577cf10a1..08650724a988 100644
---- a/expression.c
-+++ b/expression.c
-@@ -71,7 +71,9 @@ struct token *parens_expression(struct token *token, struct expression **expr, c
- 		struct statement *stmt = alloc_statement(token->pos, STMT_COMPOUND);
- 		*expr = e;
- 		e->statement = stmt;
-+		start_label_scope();
- 		token = compound_statement(token->next, stmt);
-+		end_label_scope();
- 		token = expect(token, '}', "at end of statement expression");
- 	} else
- 		token = parse_expression(token, expr);
-diff --git a/scope.c b/scope.c
-index be042a45357d..24c8a7a484f7 100644
---- a/scope.c
-+++ b/scope.c
-@@ -36,6 +36,7 @@
- static struct scope builtin_scope = { .next = &builtin_scope };
+diff --git a/evaluate.c b/evaluate.c
+index 99a9ee72d11f..2b845a301d6b 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -42,6 +42,7 @@
+ #include "symbol.h"
+ #include "target.h"
+ #include "expression.h"
++#include "scope.h"
  
- struct scope	*block_scope = &builtin_scope,		// regular automatic variables etc
-+		*label_scope = &builtin_scope,		// expr-stmt labels
- 		*function_scope = &builtin_scope,	// labels, arguments etc
- 		*file_scope = &builtin_scope,		// static
- 		*global_scope = &builtin_scope;		// externally visible
-@@ -81,6 +82,7 @@ void start_file_scope(void)
+ struct symbol *current_fn;
  
- 	/* top-level stuff defaults to file scope, "extern" etc will choose global scope */
- 	function_scope = scope;
-+	label_scope = scope;
- 	block_scope = scope;
+@@ -3751,6 +3752,14 @@ static void evaluate_goto_statement(struct statement *stmt)
+ 		sparse_error(stmt->pos, "label '%s' was not declared", show_ident(label->ident));
+ 		current_fn->bogus_linear = 1;
+ 	}
++	if (label->namespace == NS_LABEL && label->stmt) {
++		if (is_in_scope(label->label_scope, stmt->goto_scope))
++			return;
++		sparse_error(stmt->pos, "goto into statement expression");
++		info(label->stmt->pos,"   label '%s' is defined here",
++					show_ident(label->ident));
++		current_fn->bogus_linear = 1;
++	}
+ 	if (label->namespace == NS_NONE)
+ 		current_fn->bogus_linear = 1;
  }
+diff --git a/validation/label-stmt-expr1.c b/validation/label-stmt-expr1.c
+index 47ba54ae7305..f4f178c9d951 100644
+--- a/validation/label-stmt-expr1.c
++++ b/validation/label-stmt-expr1.c
+@@ -19,7 +19,6 @@ l:
  
-@@ -93,6 +95,7 @@ void start_function_scope(void)
- {
- 	start_scope(&block_scope);
- 	function_scope = block_scope;
-+	label_scope = function_scope;
- }
- 
- static void remove_symbol_scope(struct symbol *sym)
-@@ -138,6 +141,17 @@ void end_function_scope(void)
- {
- 	end_scope(&block_scope);
- 	function_scope = block_scope;
-+	label_scope = function_scope;
-+}
-+
-+void start_label_scope(void)
-+{
-+	start_scope(&label_scope);
-+}
-+
-+void end_label_scope(void)
-+{
-+	end_scope(&label_scope);
- }
- 
- int is_outer_scope(struct scope *scope)
-diff --git a/scope.h b/scope.h
-index 83741459eb6a..ddcb90bd146b 100644
---- a/scope.h
-+++ b/scope.h
-@@ -34,6 +34,7 @@ struct scope {
- 
- extern struct scope
- 		*block_scope,
-+		*label_scope,
- 		*function_scope,
- 		*file_scope,
- 		*global_scope;
-@@ -53,6 +54,9 @@ extern void end_block_scope(void);
- extern void start_function_scope(void);
- extern void end_function_scope(void);
- 
-+extern void start_label_scope(void);
-+extern void end_label_scope(void);
-+
- extern void set_current_scope(struct symbol *);
- extern void bind_scope(struct symbol *, struct scope *);
- extern void rebind_scope(struct symbol *, struct scope *);
+ /*
+  * check-name: label-stmt-expr1
+- * check-known-to-fail
+  *
+  * check-error-start
+ label-stmt-expr1.c:3:9: error: goto into statement expression
+diff --git a/validation/linear/goto-and-expr-stmt0.c b/validation/linear/goto-and-expr-stmt0.c
+index 548813531779..c6b6621a6a81 100644
+--- a/validation/linear/goto-and-expr-stmt0.c
++++ b/validation/linear/goto-and-expr-stmt0.c
+@@ -20,9 +20,14 @@ a:
+ /*
+  * check-name: goto-and-expr-stmt0
+  * check-command: test-linearize -Wno-decl $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-excludes: END
+- * check-error-ignore
++ *
++ * check-error-start
++linear/goto-and-expr-stmt0.c:3:9: error: goto into statement expression
++linear/goto-and-expr-stmt0.c:5:1:    label 'inside' is defined here
++linear/goto-and-expr-stmt0.c:17:9: error: goto into statement expression
++linear/goto-and-expr-stmt0.c:14:1:    label 'a' is defined here
++ * check-error-end
+  */
 -- 
 2.26.0
