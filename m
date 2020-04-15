@@ -1,13 +1,13 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.19 23/40] compiler.h: fix error in BUILD_BUG_ON() reporting
-Date: Wed, 15 Apr 2020 07:46:06 -0400
-Message-ID: <20200415114623.14972-23-sashal@kernel.org>
-References: <20200415114623.14972-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.14 18/30] compiler.h: fix error in BUILD_BUG_ON() reporting
+Date: Wed, 15 Apr 2020 07:46:59 -0400
+Message-ID: <20200415114711.15381-18-sashal@kernel.org>
+References: <20200415114711.15381-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-kernel-owner@vger.kernel.org>
-In-Reply-To: <20200415114623.14972-1-sashal@kernel.org>
-Sender: linux-kernel-owner@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20200415114711.15381-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -62,10 +62,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index bb22908c79e83..75112aa8064e8 100644
+index f84d332085c31..3ffe3f3f79035 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -345,7 +345,7 @@ static inline void *offset_to_ptr(const int *off)
+@@ -331,7 +331,7 @@ unsigned long read_word_at_a_time(const void *addr)
   * compiler has support to do so.
   */
  #define compiletime_assert(condition, msg) \
