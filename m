@@ -1,20 +1,16 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.4 53/84] compiler.h: fix error in BUILD_BUG_ON() reporting
-Date: Wed, 15 Apr 2020 07:44:10 -0400
-Message-ID: <20200415114442.14166-53-sashal@kernel.org>
-References: <20200415114442.14166-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.6 082/129] compiler.h: fix error in BUILD_BUG_ON() reporting
+Date: Wed, 15 Apr 2020 07:33:57 -0400
+Message-ID: <20200415113445.11881-82-sashal@kernel.org>
+References: <20200415113445.11881-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:40010 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2409215AbgDOLpp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Apr 2020 07:45:45 -0400
-In-Reply-To: <20200415114442.14166-1-sashal@kernel.org>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20200415113445.11881-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
 
 From: Vegard Nossum <vegard.nossum@oracle.com>
 
