@@ -1,71 +1,78 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [PATCH 15/17] scope: give a scope for labels & gotos
-Date: Tue, 14 Apr 2020 17:59:18 -0700
-Message-ID: <CAHk-=whoCQ9hiNsNS_PKJGt+dxhXng8+YLJ-CzGG0eESfv0f0g@mail.gmail.com>
-References: <20200413161605.95900-1-luc.vanoostenryck@gmail.com>
- <20200413161605.95900-16-luc.vanoostenryck@gmail.com> <CAHk-=wiy-BFXMpmm9-GNT_WtDKVLeR0ki4OTj83xPk=npuNSHA@mail.gmail.com>
- <20200413185452.pgj75pj5g7a42kik@ltop.local> <CAHk-=wjMSeVVQHZ23=HJ3V-yYPooeuHNHmZtexUVRKg_e5VMXA@mail.gmail.com>
- <CAHk-=whNLSTtSsmMD5a6D3s_LtjEYwZPWOSvUdz4mCd5kFO26Q@mail.gmail.com>
- <20200413233900.t7fczyyqrees5gwr@ltop.local> <20200414074934.urvzzgpi2a36jdf2@ltop.local>
- <CAHk-=wiahqumRaQkkcQ_kFhknA9z==DCWNKK-j0GRJH7GUtPEw@mail.gmail.com> <20200414230908.kb44bx5fgu3hzq7r@ltop.local>
+From: Sasha Levin <sashal@kernel.org>
+Subject: [PATCH AUTOSEL 5.5 070/106] compiler.h: fix error in BUILD_BUG_ON() reporting
+Date: Wed, 15 Apr 2020 07:41:50 -0400
+Message-ID: <20200415114226.13103-70-sashal@kernel.org>
+References: <20200415114226.13103-1-sashal@kernel.org>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="UTF-8"
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54408 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1733273AbgDOA7l (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 14 Apr 2020 20:59:41 -0400
-Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BB47C061A0C
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Apr 2020 17:59:38 -0700 (PDT)
-Received: by mail-lf1-x142.google.com with SMTP id w145so1293169lff.3
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Apr 2020 17:59:38 -0700 (PDT)
-Received: from mail-lj1-f176.google.com (mail-lj1-f176.google.com. [209.85.208.176])
-        by smtp.gmail.com with ESMTPSA id x67sm11344837lfa.76.2020.04.14.17.59.35
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Tue, 14 Apr 2020 17:59:35 -0700 (PDT)
-Received: by mail-lj1-f176.google.com with SMTP id u15so1854819ljd.3
-        for <linux-sparse@vger.kernel.org>; Tue, 14 Apr 2020 17:59:35 -0700 (PDT)
-In-Reply-To: <20200414230908.kb44bx5fgu3hzq7r@ltop.local>
-Sender: linux-sparse-owner@vger.kernel.org
+Content-Transfer-Encoding: 8bit
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20200415114226.13103-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
+To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-On Tue, Apr 14, 2020 at 4:09 PM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> +                       if (s->scope != s->declared_scope) {
->
-> This comparison can never succeed for labels declared with __label__
-> because s->scope is a block scope and s->declared_scope a label one.
+From: Vegard Nossum <vegard.nossum@oracle.com>
 
-Hold on.. I'm sure I tested it.
+[ Upstream commit af9c5d2e3b355854ff0e4acfbfbfadcd5198a349 ]
 
-Oh.
+compiletime_assert() uses __LINE__ to create a unique function name.  This
+means that if you have more than one BUILD_BUG_ON() in the same source
+line (which can happen if they appear e.g.  in a macro), then the error
+message from the compiler might output the wrong condition.
 
-What I tested wasn't what I sent you, and I'd fixed things due to the
-testing but not updated the patch file.
+For this source file:
 
-Oops.
+	#include <linux/build_bug.h>
 
-The test is supposed to be
+	#define macro() \
+		BUILD_BUG_ON(1); \
+		BUILD_BUG_ON(0);
 
-                        if (s->declared_scope != label_scope) {
+	void foo()
+	{
+		macro();
+	}
 
-which is the whole point of that 'declared_scope'.
+gcc would output:
 
-So the concept of the patch is that the 'declared_scope' (and
-'label_scope') are the same kind of scope (and comparable): it is the
-applicability of the label itself (either the whole function or some
-sub-expression statement).
+./include/linux/compiler.h:350:38: error: call to `__compiletime_assert_9' declared with attribute error: BUILD_BUG_ON failed: 0
+  _compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
 
-And the the visibility of the -symbol- ends up being different, and is
-the s->scope thing.
+However, it was not the BUILD_BUG_ON(0) that failed, so it should say 1
+instead of 0. With this patch, we use __COUNTER__ instead of __LINE__, so
+each BUILD_BUG_ON() gets a different function name and the correct
+condition is printed:
 
-But while my testing wasn't quite as limited as my wrong-version patch
-implied, it _was_ limited. So it might miss some other case.
+./include/linux/compiler.h:350:38: error: call to `__compiletime_assert_0' declared with attribute error: BUILD_BUG_ON failed: 1
+  _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
 
-              Linus
+Signed-off-by: Vegard Nossum <vegard.nossum@oracle.com>
+Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
+Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
+Reviewed-by: Daniel Santos <daniel.santos@pobox.com>
+Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
+Cc: Ian Abbott <abbotti@mev.co.uk>
+Cc: Joe Perches <joe@perches.com>
+Link: http://lkml.kernel.org/r/20200331112637.25047-1-vegard.nossum@oracle.com
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ include/linux/compiler.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 5e88e7e33abec..034b0a644efcc 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -347,7 +347,7 @@ static inline void *offset_to_ptr(const int *off)
+  * compiler has support to do so.
+  */
+ #define compiletime_assert(condition, msg) \
+-	_compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
++	_compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
+ 
+ #define compiletime_assert_atomic_type(t)				\
+ 	compiletime_assert(__native_word(t),				\
+-- 
+2.20.1
