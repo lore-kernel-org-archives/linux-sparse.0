@@ -1,16 +1,20 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.5 070/106] compiler.h: fix error in BUILD_BUG_ON() reporting
-Date: Wed, 15 Apr 2020 07:41:50 -0400
-Message-ID: <20200415114226.13103-70-sashal@kernel.org>
-References: <20200415114226.13103-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.4 10/14] compiler.h: fix error in BUILD_BUG_ON() reporting
+Date: Wed, 15 Apr 2020 07:48:10 -0400
+Message-ID: <20200415114814.15954-10-sashal@kernel.org>
+References: <20200415114814.15954-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200415114226.13103-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from mail.kernel.org ([198.145.29.99]:44178 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2409452AbgDOLs1 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 15 Apr 2020 07:48:27 -0400
+In-Reply-To: <20200415114814.15954-1-sashal@kernel.org>
+Sender: linux-sparse-owner@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
 
 From: Vegard Nossum <vegard.nossum@oracle.com>
 
@@ -62,10 +66,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 5e88e7e33abec..034b0a644efcc 100644
+index 5508011cc0c79..5f8749440c6af 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -347,7 +347,7 @@ static inline void *offset_to_ptr(const int *off)
+@@ -502,7 +502,7 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
   * compiler has support to do so.
   */
  #define compiletime_assert(condition, msg) \
