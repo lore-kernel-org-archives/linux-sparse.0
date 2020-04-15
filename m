@@ -1,20 +1,16 @@
 From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 4.4 10/14] compiler.h: fix error in BUILD_BUG_ON() reporting
-Date: Wed, 15 Apr 2020 07:48:10 -0400
-Message-ID: <20200415114814.15954-10-sashal@kernel.org>
-References: <20200415114814.15954-1-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.9 13/21] compiler.h: fix error in BUILD_BUG_ON() reporting
+Date: Wed, 15 Apr 2020 07:47:40 -0400
+Message-ID: <20200415114748.15713-13-sashal@kernel.org>
+References: <20200415114748.15713-1-sashal@kernel.org>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:44178 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2409452AbgDOLs1 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Apr 2020 07:48:27 -0400
-In-Reply-To: <20200415114814.15954-1-sashal@kernel.org>
-Sender: linux-sparse-owner@vger.kernel.org
-List-Id: linux-sparse@vger.kernel.org
+Return-path: <stable-owner@vger.kernel.org>
+In-Reply-To: <20200415114748.15713-1-sashal@kernel.org>
+Sender: stable-owner@vger.kernel.org
 To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
+List-Id: linux-sparse@vger.kernel.org
 
 From: Vegard Nossum <vegard.nossum@oracle.com>
 
@@ -66,10 +62,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 5508011cc0c79..5f8749440c6af 100644
+index 0020ee1cab37a..7837afabbd78e 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -502,7 +502,7 @@ static __always_inline void __write_once_size(volatile void *p, void *res, int s
+@@ -546,7 +546,7 @@ unsigned long read_word_at_a_time(const void *addr)
   * compiler has support to do so.
   */
  #define compiletime_assert(condition, msg) \
