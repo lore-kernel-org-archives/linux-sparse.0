@@ -1,78 +1,50 @@
-From: Sasha Levin <sashal@kernel.org>
-Subject: [PATCH AUTOSEL 5.6 082/129] compiler.h: fix error in BUILD_BUG_ON() reporting
-Date: Wed, 15 Apr 2020 07:33:57 -0400
-Message-ID: <20200415113445.11881-82-sashal@kernel.org>
-References: <20200415113445.11881-1-sashal@kernel.org>
+From: Quentin Monnet <quentin@isovalent.com>
+Subject: [PATCH] build: fix LLVM version detection
+Date: Mon, 20 Apr 2020 16:53:52 +0100
+Message-ID: <20200420155352.11364-1-quentin@isovalent.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
-Return-path: <stable-owner@vger.kernel.org>
-In-Reply-To: <20200415113445.11881-1-sashal@kernel.org>
-Sender: stable-owner@vger.kernel.org
-To: linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc: Vegard Nossum <vegard.nossum@oracle.com>, Andrew Morton <akpm@linux-foundation.org>, Masahiro Yamada <yamada.masahiro@socionext.com>, Daniel Santos <daniel.santos@pobox.com>, Rasmus Villemoes <linux@rasmusvillemoes.dk>, Ian Abbott <abbotti@mev.co.uk>, Joe Perches <joe@perches.com>, Linus Torvalds <torvalds@linux-foundation.org>, Sasha Levin <sashal@kernel.org>, linux-sparse@vger.kernel.org
+Return-path: <linux-sparse-owner@vger.kernel.org>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34536 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1725875AbgDTPyU (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 20 Apr 2020 11:54:20 -0400
+Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74404C061A0C
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Apr 2020 08:54:20 -0700 (PDT)
+Received: by mail-wr1-x442.google.com with SMTP id k13so11618614wrw.7
+        for <linux-sparse@vger.kernel.org>; Mon, 20 Apr 2020 08:54:20 -0700 (PDT)
+Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Quentin Monnet <quentin@isovalent.com>
 
-From: Vegard Nossum <vegard.nossum@oracle.com>
+The regex match used for detecting the LLVM version works for versions
+with a single-digit major number. Now that LLVM v10 is out, detection
+can fail, resulting in sparse-llvm not being built.
 
-[ Upstream commit af9c5d2e3b355854ff0e4acfbfbfadcd5198a349 ]
+Fix detection by extracting the major version number to compare with the
+minimum supported.
 
-compiletime_assert() uses __LINE__ to create a unique function name.  This
-means that if you have more than one BUILD_BUG_ON() in the same source
-line (which can happen if they appear e.g.  in a macro), then the error
-message from the compiler might output the wrong condition.
-
-For this source file:
-
-	#include <linux/build_bug.h>
-
-	#define macro() \
-		BUILD_BUG_ON(1); \
-		BUILD_BUG_ON(0);
-
-	void foo()
-	{
-		macro();
-	}
-
-gcc would output:
-
-./include/linux/compiler.h:350:38: error: call to `__compiletime_assert_9' declared with attribute error: BUILD_BUG_ON failed: 0
-  _compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
-
-However, it was not the BUILD_BUG_ON(0) that failed, so it should say 1
-instead of 0. With this patch, we use __COUNTER__ instead of __LINE__, so
-each BUILD_BUG_ON() gets a different function name and the correct
-condition is printed:
-
-./include/linux/compiler.h:350:38: error: call to `__compiletime_assert_0' declared with attribute error: BUILD_BUG_ON failed: 1
-  _compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
-
-Signed-off-by: Vegard Nossum <vegard.nossum@oracle.com>
-Signed-off-by: Andrew Morton <akpm@linux-foundation.org>
-Reviewed-by: Masahiro Yamada <yamada.masahiro@socionext.com>
-Reviewed-by: Daniel Santos <daniel.santos@pobox.com>
-Cc: Rasmus Villemoes <linux@rasmusvillemoes.dk>
-Cc: Ian Abbott <abbotti@mev.co.uk>
-Cc: Joe Perches <joe@perches.com>
-Link: http://lkml.kernel.org/r/20200331112637.25047-1-vegard.nossum@oracle.com
-Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Sasha Levin <sashal@kernel.org>
+Signed-off-by: Quentin Monnet <quentin@isovalent.com>
 ---
- include/linux/compiler.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ Makefile | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 5e88e7e33abec..034b0a644efcc 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -347,7 +347,7 @@ static inline void *offset_to_ptr(const int *off)
-  * compiler has support to do so.
-  */
- #define compiletime_assert(condition, msg) \
--	_compiletime_assert(condition, msg, __compiletime_assert_, __LINE__)
-+	_compiletime_assert(condition, msg, __compiletime_assert_, __COUNTER__)
- 
- #define compiletime_assert_atomic_type(t)				\
- 	compiletime_assert(__native_word(t),				\
+diff --git a/Makefile b/Makefile
+index 85d15edca948..e93cfd66d0c9 100644
+--- a/Makefile
++++ b/Makefile
+@@ -183,7 +183,8 @@ arch := x32
+ endif
+ ifneq ($(filter ${arch},i386 i486 i586 i686 x86_64 amd64),)
+ LLVM_VERSION:=$(shell $(LLVM_CONFIG) --version)
+-ifeq ($(shell expr "$(LLVM_VERSION)" : '[3-9]\.'),2)
++LLVM_VERSION_MAJOR:=$(firstword $(subst ., ,$(LLVM_VERSION)))
++ifeq ($(shell expr "$(LLVM_VERSION_MAJOR)" '>=' 3),1)
+ LLVM_PROGS := sparse-llvm
+ $(LLVM_PROGS): LD := g++
+ LLVM_LDFLAGS := $(shell $(LLVM_CONFIG) --ldflags)
 -- 
 2.20.1
