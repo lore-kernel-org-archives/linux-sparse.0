@@ -1,63 +1,53 @@
-From: Mrs Elizabeth Edawrds <alhajihassankareem@gmail.com>
-Subject: Attn: Dear Friend
-Date: Mon, 20 Apr 2020 22:31:35 +0200
-Message-ID: <CAJC1dGogzANXtrKbxiG=WpX9qHv6rswo9b0Wrm0a5HoToAO=hA@mail.gmail.com>
-Reply-To: elisabeth1981@mail.com
+From: "Mrs. Angella Michelle" <info.zennitbankplcnigerian@gmail.com>
+Subject: Contact Eco bank-Benin to receive your payment funds transfer amount
+ of $12.800.000,00 Million USD,approved this morning by IMF.
+Date: Thu, 23 Apr 2020 20:27:12 +0200
+Message-ID: <CABHzvrnzZLe4Z0E4acOdcsDJTPa3wvp-Oz12f_M4TQ03PAGZkw__1270.23301772482$1587666448$gmane$org@mail.gmail.com>
+Reply-To: boa.benin107@yahoo.com
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50872 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725774AbgDTUbg (ORCPT
+        with ESMTP id S1730377AbgDWS1O (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Apr 2020 16:31:36 -0400
-Received: from mail-io1-xd43.google.com (mail-io1-xd43.google.com [IPv6:2607:f8b0:4864:20::d43])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C1698C061A0C
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Apr 2020 13:31:36 -0700 (PDT)
-Received: by mail-io1-xd43.google.com with SMTP id w4so5388534ioc.6
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Apr 2020 13:31:36 -0700 (PDT)
+        Thu, 23 Apr 2020 14:27:14 -0400
+Received: from mail-io1-xd42.google.com (mail-io1-xd42.google.com [IPv6:2607:f8b0:4864:20::d42])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DC067C09B04A
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Apr 2020 11:27:13 -0700 (PDT)
+Received: by mail-io1-xd42.google.com with SMTP id z2so7490150iol.11
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Apr 2020 11:27:13 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 
-Dear Friend,
-
-Please forgive me for stressing you with my predicaments as I know
-that this letter may come to you as big surprise. Actually, as my
-pastor advised me to reject earthly reward and thinks by handing the
-project to someone I have never seen or met for a greater reward in
-heaven awaits for whoever can give such a costly donation. I came
-across your E-mail from my personal search, and I decided to email you
-directly believing that you will be honest to fulfill my final wish
-before or after my death.
-
- Meanwhile, I am Madam Elizabeth Edwards, 73 years, am from USA, still
-childless. I am suffering from Adenocarcinoma Cancer of the lungs for
-the past 8 years and from all indication my condition is really
-deteriorating as my doctors have confirmed and courageously advised me
-that I may not live beyond 2 weeks from now for the reason that my
-tumor has reached a critical stage which has defiled all forms of
-medical treatment.
-
-Since my days are numbered, I=E2=80=99ve decided willingly to fulfill my
-long-time vow to donate to the underprivileged the sum of Eighteen
-million five hundred thousand dollars ($18.5m) I deposited in a
-different account over 8 years now because I have tried to handle this
-project by myself but I have seen that my health could not allow me to
-do so anymore. My promise for the poor includes building of
-well-equipped charity foundation hospital and a technical school for
-their survival.
-
-If you will be honest, kind and willing to assist me handle this
-charity project as I=E2=80=99ve mentioned here, I will like you to provide =
-me
-your personal data like. Contact me through this email address
-(elisabethe1981@mail.com) and also send me your private email address.
-
-(1) Your full name:
-(2) country:
-(3) phone number:
-(4) Age:
-
-Best Regards!
-Mrs. Elizabeth Edwards
+Attn Dear.
+Contact Bank of Africa-Benin to receive your payment funds transfer amount =
+of
+$12.800.000,00 Million USD,approved this morning by IMF.
+Happy to inform you, we have finally deposited your payment funds
+$12.8 million us dollars with the Paying Bank of Africa-Benin
+to transfer the payment amount of $12.800,000,00 Million Us Dollars to you
+Contact the bank immediately you receive this email now.
+Director Bank of Africa-Benin: Dr. Festus Obiara
+Email id:  boa.benin107@yahoo.com
+Tel/mobile, (229) 62819378
+BOA-BENIN | GROUPE BANK OF AFRICA, boa-benin
+Avenue Jean-Paul II - 08 BP 0879 - Cotonou - B=C3=A9nin
+Phone:(229) 62819378.
+2020 GROUPE BANK OF AFRICA
+Be advised to re-confirm your bank details to this bank as listed.
+Your account Holder's name----------------
+Bank Name----------------------------------------------------------
+Bank address----------------------------------------------
+Account Numbers---------------------------------------
+Rounting-----------------------------------------------------------------
+Your direct Phone Numbers----------------------------------------------
+Note,I have paid the deposit and insurance fees for you
+But the only money you are to send to this bank is $150.00 us dollars
+Been for the wire transfer fees of your funds
+Contact Him now to receive your transfer deposited this morning
+I wait for your reply upon confirmation
+Mrs. Angella Michelle
+Editor, Zenith Bank- Companies Benin
+mrsa9389@gmail.com
