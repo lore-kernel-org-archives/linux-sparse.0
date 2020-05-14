@@ -1,36 +1,59 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] show-parse: null pointer dereference in do_show_type()
-Date: Thu, 14 May 2020 23:14:17 +0200
-Message-ID: <20200514211417.uibjj2jubdw754yk@ltop.local>
-References: <20200511030620.10329-1-davidsondfgl@gmail.com>
+Subject: Re: [PATCH 1/4] C: s/0/NULL/ for pointer type
+Date: Thu, 14 May 2020 23:37:10 +0200
+Message-ID: <20200514213710.vxm6vrkggdfad6kd@ltop.local>
+References: <cover.1587648870.git.congdanhqx@gmail.com>
+ <c4fac2ae9d10bc426cb26e4a102b808549696763.1587648870.git.congdanhqx@gmail.com>
+ <1df91aa4-dda5-64da-6ae3-5d65e50a55c5@ramsayjones.plus.com>
+ <xmqqd07xem9l.fsf@gitster.c.googlers.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42402 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726201AbgENVOU (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45940 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726241AbgENVhP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 14 May 2020 17:14:20 -0400
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6CD9CC061A0C
-        for <linux-sparse@vger.kernel.org>; Thu, 14 May 2020 14:14:20 -0700 (PDT)
-Received: by mail-wr1-x444.google.com with SMTP id e16so586240wra.7
-        for <linux-sparse@vger.kernel.org>; Thu, 14 May 2020 14:14:20 -0700 (PDT)
+        Thu, 14 May 2020 17:37:15 -0400
 Content-Disposition: inline
-In-Reply-To: <20200511030620.10329-1-davidsondfgl@gmail.com>
+In-Reply-To: <xmqqd07xem9l.fsf@gitster.c.googlers.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Davidson Francis <davidsondfgl@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: Junio C Hamano <gitster@pobox.com>
+Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, =?utf-8?B?xJBvw6BuIFRy4bqnbiBDw7RuZw==?= Danh <congdanhqx@gmail.com>, git@vger.kernel.org, linux-sparse@vger.kernel.org
 
-On Mon, May 11, 2020 at 12:06:20AM -0300, Davidson Francis wrote:
-> In do_show_type() the first if statement allows passing null
-> pointers, which can cause a null pointer dereference in some
-> cases, which I believe is not the desired behavior.
+On Thu, Apr 23, 2020 at 05:54:30PM -0700, Junio C Hamano wrote:
+> Ramsay Jones <ramsay@ramsayjones.plus.com> writes:
 > 
-> Fix this by changing the first if statement comparison.
+> > Actually, I have a patch somewhere which suppressed the sparse warning
+> > for the '= { 0 }' token sequence used in these initializations. However,
+> > I don't seem to be able to find them at the moment! :(
+> 
+> AHHHHHhhhhhhhh.  
+> 
+> Thanks for reminding.  Yeah, I recall that the concensus of those
+> who were vocal in that old discussion [*1*] was that "= { 0 }"
+> should be taken as an idiom and should not be subject to s/0/NULL/
+> conversion.
+> 
+> > [Luc, this topic came up on the sparse and kernel mailing-lists at one
+> > point, but I didn't get around to posting my patch to the list - something
+> > came up. Hopefully, I will find some time to find it and post it soon.]
+> 
+> 
+> [References]
+> 
+> *1*
+> 
+> https://lore.kernel.org/git/e6796c60-a870-e761-3b07-b680f934c537@ramsayjones.plus.com/
 
-Oh yes ...
-Applied & pushed. Thanks.
+Sorry for the late reply.
 
--- Luc 
+I hadn't seen this old discussion but I vaguely remember 2 emails about
+this problem, probaly on lkml, without a real discussion, but where the
+opinion was the opposite.
+
+Personally, I prefer '= { }' but yes it's not legit and it seems that
+some compilers don't like it. I'll be glad to add an option to Sparse
+to shut up the warnings now given by '{ 0 }'.
+
+-- Luc
