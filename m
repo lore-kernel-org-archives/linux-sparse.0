@@ -1,42 +1,74 @@
-From: Derek M Jones <derek@knosof.co.uk>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 Subject: Re: complain about re-declared functions with different modifiers
-Date: Fri, 15 May 2020 18:03:08 +0100
-Message-ID: <e938cf36-8fe2-ab97-4179-e7927473d4fd@knosof.co.uk>
+Date: Sun, 17 May 2020 06:56:37 +0200
+Message-ID: <20200517045637.5e4l6pxiuwsimjxf@ltop.local>
 References: <20200514140451.GD2078@kadam>
  <CAHk-=wih1XbdV_MQ2OkcYPx2xZkvuhWKcLaZ=_wd8+5r3yLJQA@mail.gmail.com>
  <20200514205604.f4uxvv7lf4wrg4un@ltop.local>
- <CAHk-=wh_1ycEjZGN+qFBP8==XPF-+wsiyJ0=-J5JSMDMxmo32g@mail.gmail.com>
+ <20200515133617.GF2078@kadam>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from know-smtprelay-omc-3.server.virginmedia.net ([80.0.253.67]:55393
-        "EHLO know-smtprelay-omc-3.server.virginmedia.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726023AbgEORIp (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 15 May 2020 13:08:45 -0400
-In-Reply-To: <CAHk-=wh_1ycEjZGN+qFBP8==XPF-+wsiyJ0=-J5JSMDMxmo32g@mail.gmail.com>
-Content-Language: en-US
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56072 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725861AbgEQE4n (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sun, 17 May 2020 00:56:43 -0400
+Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BAE1C061A0C
+        for <linux-sparse@vger.kernel.org>; Sat, 16 May 2020 21:56:41 -0700 (PDT)
+Received: by mail-wm1-x334.google.com with SMTP id f134so6001425wmf.1
+        for <linux-sparse@vger.kernel.org>; Sat, 16 May 2020 21:56:41 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <20200515133617.GF2078@kadam>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Dan Carpenter <dan.carpenter@oracle.com>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Dan Carpenter <dan.carpenter@oracle.com>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Linus,
+On Fri, May 15, 2020 at 04:36:17PM +0300, Dan Carpenter wrote:
+> On Thu, May 14, 2020 at 10:56:04PM +0200, Luc Van Oostenryck wrote:
+> > Not sure if it's related to Dan's problem or not but with the
+> > following code:
+> > 
+> > 	static inline int foo(void)
+> > 	{
+> > 		return 1;
+> > 	}
+> > 	
+> > 	extern int foo(void);
+> > 	
+> > 	int dummy(void)
+> > 	{
+> > 		return foo();
+> > 	}
+> > 
+> > the static definition of foo() and the extern declaration are
+> > distinct symbols (in the sense that neither has its sym->same_symbol
+> > pointing to the other). As far as I understand, this is correct
+> > because they have a different 'scope'. The problem occurs later,
+> > when doing the lookup in dummy(): which symbol should be returned?
+> 
+> Yeah.  That's it.  When I see the call, I want to parse the statements
+> so I need the symbol with the implementation.
 
-> So I think sparse is in the wrong here, and we should consider both
-> external and static symbols to be in the same scope and conflict with
-> each other unless their declarations match.
+There must something else too.
+In the example here above I added 'extern' to the second declaration.
+But in your first example no storage was given:
+	void nvme_put_ctrl(struct nvme_ctrl *ctrl);'
+and in this case, Sparse give it the storage/linkage from the previous
+declaration which was 'static'.
+So in the case, the second occurent has its ->same_symbol set to the
+previous static inline version and it's ->definition points to it too.
 
-Yes.
+So, I think everything is correct here regarding Sparse (the question
+of a warning is something else: IMO none should be give for a static
+declaration/definition followed by a plain declaration (thus implicitly
+static) but well if followed by an extern one. One is also when
+a static follow an extern or a plain (implicitly extern).
 
-The C standard only has one one file scope (i.e., the is no
-file scope+extra_stuff):
-http://c0x.coding-guidelines.com/6.2.1.html
+Doesn't smatch uses ->same_symbol and more importantly ->definition?
 
-Difference between extern/static revolve around the concept of linkage:
-http://c0x.coding-guidelines.com/6.2.2.html
 
--- 
-Derek M. Jones           Evidence-based software engineering
-tel: +44 (0)1252 520667  blog:shape-of-code.coding-guidelines.com
+Regards,
+-- Luc
