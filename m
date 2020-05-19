@@ -1,84 +1,72 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v1 01/28] misc: fix testcase typeof-safe
-Date: Tue, 19 May 2020 02:57:01 +0200
-Message-ID: <20200519005728.84594-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v1 02/28] misc: s/fntype/rettype/
+Date: Tue, 19 May 2020 02:57:02 +0200
+Message-ID: <20200519005728.84594-3-luc.vanoostenryck@gmail.com>
 References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43106 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43110 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726720AbgESA5e (ORCPT
+        with ESMTP id S1726720AbgESA5f (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 May 2020 20:57:34 -0400
+        Mon, 18 May 2020 20:57:35 -0400
 Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D32FC061A0C
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:34 -0700 (PDT)
-Received: by mail-ed1-x543.google.com with SMTP id k19so10173590edv.9
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:34 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B9F7C061A0C
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:35 -0700 (PDT)
+Received: by mail-ed1-x543.google.com with SMTP id d24so2277077eds.11
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:35 -0700 (PDT)
 In-Reply-To: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This testcase was marked as known-to-fail but it was
-simply the expected error messages that were missing.
+In evaluate_return_expression(), it's checked if the type of
+the return statement match the function return type.
 
-So, slightly reorganize the test a little bit, add the
-expected messages and remove the 'known-to-fail' tag.
+But, the variable used to hold this type is named 'fntype'
+which is slightly confusing.
+
+So, rename the variable holding the return type to 'rettype'
+and only use 'fntype' for the one hoding the full function type.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/typeof-safe.c | 26 ++++++++++++++++++++------
- 1 file changed, 20 insertions(+), 6 deletions(-)
+ evaluate.c | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/validation/typeof-safe.c b/validation/typeof-safe.c
-index 614863fba381..508bd39204c5 100644
---- a/validation/typeof-safe.c
-+++ b/validation/typeof-safe.c
-@@ -2,16 +2,24 @@
- 
- static void test_safe(void)
+diff --git a/evaluate.c b/evaluate.c
+index b7bb1f52aa91..54cd5fa136e6 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3450,13 +3450,14 @@ void evaluate_symbol_list(struct symbol_list *list)
+ static struct symbol *evaluate_return_expression(struct statement *stmt)
  {
--	int __safe obj, *ptr;
--	typeof(obj) var = obj;
--	typeof(ptr) ptr2 = ptr;
-+	int obj;
-+	int __safe *ptr;
-+
-+	int __safe *ptr2 = ptr;
-+	typeof(ptr) ptr3 = ptr;
- 	typeof(*ptr) var2 = obj;
--	typeof(*ptr) *ptr3 = ptr;
--	typeof(obj) *ptr4 = ptr;
-+	int __safe  var3 = obj;
-+	int *ptr4 = &obj;
-+	int *ptr4 = ptr;		// KO
-+
-+	typeof(*ptr) sobj;
-+	typeof(&sobj) ptr5 = &obj;
-+	typeof(&sobj) ptr6 = ptr;	// KO
-+
- 	obj = obj;
- 	ptr = ptr;
--	ptr = &obj;
- 	obj = *ptr;
-+	ptr = (int __safe *) &obj;
+ 	struct expression *expr = stmt->expression;
+-	struct symbol *fntype;
++	struct symbol *fntype, *rettype;
+ 
+ 	evaluate_expression(expr);
+-	fntype = current_fn->ctype.base_type;
+-	if (!fntype || fntype == &void_ctype) {
++	fntype = current_fn;
++	rettype = fntype->ctype.base_type;
++	if (!rettype || rettype == &void_ctype) {
+ 		if (expr && expr->ctype != &void_ctype)
+-			expression_error(expr, "return expression in %s function", fntype?"void":"typeless");
++			expression_error(expr, "return expression in %s function", rettype?"void":"typeless");
+ 		if (expr && Wreturn_void)
+ 			warning(stmt->pos, "returning void-valued expression");
+ 		return NULL;
+@@ -3468,7 +3469,7 @@ static struct symbol *evaluate_return_expression(struct statement *stmt)
+ 	}
+ 	if (!expr->ctype)
+ 		return NULL;
+-	compatible_assignment_types(expr, fntype, &stmt->expression, "return expression");
++	compatible_assignment_types(expr, rettype, &stmt->expression, "return expression");
+ 	return NULL;
  }
  
- /*
-@@ -19,5 +27,11 @@ static void test_safe(void)
-  * check-known-to-fail
-  *
-  * check-error-start
-+typeof-safe.c:13:21: warning: incorrect type in initializer (different modifiers)
-+typeof-safe.c:13:21:    expected int *ptr4
-+typeof-safe.c:13:21:    got int [safe] *ptr
-+typeof-safe.c:17:30: warning: incorrect type in initializer (different modifiers)
-+typeof-safe.c:17:30:    expected int *ptr6
-+typeof-safe.c:17:30:    got int [safe] *ptr
-  * check-error-end
-  */
 -- 
 2.26.2
