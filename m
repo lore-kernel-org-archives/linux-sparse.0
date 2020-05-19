@@ -1,73 +1,67 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v1 25/28] bad-goto: check declaration of label expressions
-Date: Tue, 19 May 2020 02:57:25 +0200
-Message-ID: <20200519005728.84594-26-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v1 26/28] bad-label: check for unused labels
+Date: Tue, 19 May 2020 02:57:26 +0200
+Message-ID: <20200519005728.84594-27-luc.vanoostenryck@gmail.com>
 References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43214 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43218 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
         with ESMTP id S1726731AbgESA57 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 18 May 2020 20:57:59 -0400
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA5DDC061A0C
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:58 -0700 (PDT)
-Received: by mail-ej1-x643.google.com with SMTP id h21so10388229ejq.5
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:58 -0700 (PDT)
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94D57C061A0C
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:59 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id n24so2399519ejd.0
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:57:59 -0700 (PDT)
 In-Reply-To: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Issue an error when taking the address of an undeclared label
-and mark the mark the function as improper for linearization
-since the resulting IR would be invalid.
+Issue a warning if a label is defined but not used.
+
+Note: this should take in account the attribute 'unused'.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                            | 1 +
- validation/label-scope-cgoto.c        | 1 -
- validation/linear/label-scope-cgoto.c | 1 -
- 3 files changed, 1 insertion(+), 2 deletions(-)
+ scope.c                   | 8 ++++++++
+ validation/label-unused.c | 1 -
+ 2 files changed, 8 insertions(+), 1 deletion(-)
 
-diff --git a/evaluate.c b/evaluate.c
-index b272e3f642b2..63d75d9031d1 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -3344,6 +3344,7 @@ struct symbol *evaluate_expression(struct expression *expr)
+diff --git a/scope.c b/scope.c
+index 017c0dcd8600..03593d823d6d 100644
+--- a/scope.c
++++ b/scope.c
+@@ -150,6 +150,14 @@ void start_label_scope(void)
  
- 	case EXPR_LABEL:
- 		expr->ctype = &ptr_ctype;
-+		check_label_declaration(expr->pos, expr->label_symbol);
- 		return &ptr_ctype;
+ void end_label_scope(void)
+ {
++	struct symbol *sym;
++
++	FOR_EACH_PTR(label_scope->symbols, sym) {
++		if (!sym->stmt || sym->used)
++			continue;
++		warning(sym->pos, "unused label '%s'", show_ident(sym->ident));
++	} END_FOR_EACH_PTR(sym);
++
+ 	end_scope(&label_scope);
+ }
  
- 	case EXPR_TYPE:
-diff --git a/validation/label-scope-cgoto.c b/validation/label-scope-cgoto.c
-index c5d278d3d654..1edb9948d8cf 100644
---- a/validation/label-scope-cgoto.c
-+++ b/validation/label-scope-cgoto.c
-@@ -65,7 +65,6 @@ l:		 1;
+diff --git a/validation/label-unused.c b/validation/label-unused.c
+index c136c7a8813e..a654ef7742be 100644
+--- a/validation/label-unused.c
++++ b/validation/label-unused.c
+@@ -15,7 +15,6 @@ l:
+ 
  /*
-  * check-name: label-scope-cgoto
-  * check-command: sparse -Wno-decl $file
+  * check-name: label-unused
 - * check-known-to-fail
   *
   * check-error-start
- label-scope-cgoto.c:12:19: error: label 'l' used outside statement expression
-diff --git a/validation/linear/label-scope-cgoto.c b/validation/linear/label-scope-cgoto.c
-index 592f1ce4f664..0eba05aea3c7 100644
---- a/validation/linear/label-scope-cgoto.c
-+++ b/validation/linear/label-scope-cgoto.c
-@@ -3,7 +3,6 @@
- /*
-  * check-name: linear/label-scope-cgoto
-  * check-command: test-linearize -Wno-decl -I. $file
-- * check-known-to-fail
-  *
-  * check-error-ignore
-  * check-output-ignore
+ label-unused.c:3:1: warning: unused label 'l'
 -- 
 2.26.2
