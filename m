@@ -1,115 +1,64 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v1 28/28] bad-label: respect attribute((unused))
-Date: Tue, 19 May 2020 02:57:28 +0200
-Message-ID: <20200519005728.84594-29-luc.vanoostenryck@gmail.com>
-References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH v1 18/28] scope: make function_scope invalid outside functions
+Date: Mon, 18 May 2020 18:38:17 -0700
+Message-ID: <CAHk-=wgSBgpXKfMD=yC1B6vH-YxP+6y_KUBuDODXB_i=K7sdNg@mail.gmail.com>
+References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com> <20200519005728.84594-19-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43226 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49614 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726731AbgESA6B (ORCPT
+        with ESMTP id S1726532AbgESBig (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 May 2020 20:58:01 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 416C2C061A0C
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:58:01 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id yc10so10346425ejb.12
-        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 17:58:01 -0700 (PDT)
-In-Reply-To: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
+        Mon, 18 May 2020 21:38:36 -0400
+Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 713A2C061A0C
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 18:38:36 -0700 (PDT)
+Received: by mail-lf1-x143.google.com with SMTP id c12so6331046lfc.10
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 18:38:36 -0700 (PDT)
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com. [209.85.167.43])
+        by smtp.gmail.com with ESMTPSA id s8sm7899810lfd.61.2020.05.18.18.38.33
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 18 May 2020 18:38:33 -0700 (PDT)
+Received: by mail-lf1-f43.google.com with SMTP id h188so9804141lfd.7
+        for <linux-sparse@vger.kernel.org>; Mon, 18 May 2020 18:38:33 -0700 (PDT)
+In-Reply-To: <20200519005728.84594-19-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-Currently, attributes on labels were simply ignored. This was fine
-since nothing was done wth them anyway.
+On Mon, May 18, 2020 at 5:57 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> So, mainly in preparation for some incoming changes, let
+> function_scope's parent be NULL instead of the builtin scope.
 
-But now that Sparse can give a warning for unused labels it would
-be nice to also support the attribute 'unused' not to issues the
-warning when not desired.
+Hmm. Gcc nested functions?
 
-So, add a small helper around handle_attributes() and use this
-instead of skipping the attributes.
+Sparse doesn't _support_ them, but the symbol nesting part actually
+does work, afaik. This looks like it might break it.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- parse.c                   | 11 ++++++++++-
- scope.c                   |  2 ++
- symbol.h                  |  1 +
- validation/label-unused.c |  6 ++++++
- 4 files changed, 19 insertions(+), 1 deletion(-)
+Yes, gcc function nesting is disgusting. But it's a thing.
 
-diff --git a/parse.c b/parse.c
-index a8e4a02e90e4..3cd84a3c7703 100644
---- a/parse.c
-+++ b/parse.c
-@@ -2554,6 +2554,15 @@ static struct token *parse_range_statement(struct token *token, struct statement
- 	return expect(token, ';', "after range statement");
- }
- 
-+static struct token *handle_label_attributes(struct token *token, struct symbol *label)
-+{
-+	struct decl_state ctx = { };
-+
-+	token = handle_attributes(token, &ctx, KW_ATTRIBUTE);
-+	label->label_modifiers = ctx.ctype.modifiers;
-+	return token;
-+}
-+
- static struct token *statement(struct token *token, struct statement **tree)
- {
- 	struct statement *stmt = alloc_statement(token->pos, STMT_NONE);
-@@ -2566,7 +2575,7 @@ static struct token *statement(struct token *token, struct statement **tree)
- 
- 		if (match_op(token->next, ':')) {
- 			struct symbol *s = label_symbol(token, 0);
--			token = skip_attributes(token->next->next);
-+			token = handle_label_attributes(token->next->next, s);
- 			if (s->stmt) {
- 				sparse_error(stmt->pos, "label '%s' redefined", show_ident(s->ident));
- 				// skip the label to avoid multiple definitions
-diff --git a/scope.c b/scope.c
-index 03593d823d6d..4c1badb2c135 100644
---- a/scope.c
-+++ b/scope.c
-@@ -155,6 +155,8 @@ void end_label_scope(void)
- 	FOR_EACH_PTR(label_scope->symbols, sym) {
- 		if (!sym->stmt || sym->used)
- 			continue;
-+		if (sym->label_modifiers & MOD_UNUSED)
-+			continue;
- 		warning(sym->pos, "unused label '%s'", show_ident(sym->ident));
- 	} END_FOR_EACH_PTR(sym);
- 
-diff --git a/symbol.h b/symbol.h
-index 2293d06dd4fb..6f90479505cc 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -170,6 +170,7 @@ struct symbol {
- 		struct /* NS_LABEL */ {
- 			struct scope *label_scope;
- 			struct position label_pos;
-+			unsigned long label_modifiers;
- 		};
- 		struct /* NS_SYMBOL */ {
- 			unsigned long	offset;
-diff --git a/validation/label-unused.c b/validation/label-unused.c
-index a654ef7742be..e3f255e1b5de 100644
---- a/validation/label-unused.c
-+++ b/validation/label-unused.c
-@@ -13,6 +13,12 @@ l:
- 	});
- }
- 
-+static void baz(void)
-+{
-+l: __attribute__((unused));
-+	return;
-+}
-+
- /*
-  * check-name: label-unused
-  *
--- 
-2.26.2
+Stupid test-case that almost works with sparse:
+
+    int test(int a, int b)
+    {
+        inline int nested(int i)
+        {
+                return a*2 + i;
+        }
+        return nested(b);
+    }
+
+and by "almost works with sparse" I mean that it actually linearizes
+correctly, even if it's mostly by mistake, and you get a warning about
+
+    t.c:5:24: warning: unreplaced symbol 'a'
+
+because sparse really doesn't support nested functions and it really
+only works because of inlining.
+
+            Linus
