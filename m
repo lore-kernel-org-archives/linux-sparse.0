@@ -1,128 +1,128 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
 Subject: Re: [SPARSE PATCH] univ-init: conditionally accept { 0 } without
  warnings
-Date: Wed, 20 May 2020 22:40:01 +0200
-Message-ID: <20200520204001.2nkuowfeftp7uhpl@ltop.local>
+Date: Wed, 20 May 2020 23:03:27 +0100
+Message-ID: <0e81e382-5dde-6029-35d7-0de72e5a0a99@ramsayjones.plus.com>
 References: <20200518235446.84256-1-luc.vanoostenryck@gmail.com>
  <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
+ <20200520204001.2nkuowfeftp7uhpl@ltop.local>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57978 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726827AbgETUkF (ORCPT
+Received: from avasout01.plus.net ([84.93.230.227]:60374 "EHLO
+        avasout01.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728183AbgETWDd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 20 May 2020 16:40:05 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E742AC061A0E
-        for <linux-sparse@vger.kernel.org>; Wed, 20 May 2020 13:40:04 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id a2so5831193ejb.10
-        for <linux-sparse@vger.kernel.org>; Wed, 20 May 2020 13:40:04 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
+        Wed, 20 May 2020 18:03:33 -0400
+In-Reply-To: <20200520204001.2nkuowfeftp7uhpl@ltop.local>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: linux-sparse@vger.kernel.org, Junio C Hamano <gitster@pobox.com>, =?utf-8?B?xJBvw6BuIFRy4bqnbiBDw7RuZw==?= Danh <congdanhqx@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Junio C Hamano <gitster@pobox.com>, =?UTF-8?B?xJBvw6BuIFRy4bqnbiBDw7RuZyBEYW5o?= <congdanhqx@gmail.com>
 
-On Wed, May 20, 2020 at 01:22:22AM +0100, Ramsay Jones wrote:
-> Hi Luc,
+
+
+On 20/05/2020 21:40, Luc Van Oostenryck wrote:
+> On Wed, May 20, 2020 at 01:22:22AM +0100, Ramsay Jones wrote:
+[snip]
+
+>>
+>> I remember the discussion (on lkml and sparse ml) in which
+>> there was general agreement that '{}' would be preferred
+>> solution (if only it was standard C!). However, I thought
+>> that (since some compilers don't support it e.g. msvc) the
+>> next best solution would be for sparse to suppress the
+>> warning if given the '= { 0 }' token sequence. (ie. no mention
+>> of it being conditional on a option).
 > 
-> Sorry for not getting back to you sooner on this (you would
-> think I was busy! ;-D ).
+> Yes, I kinda agree but concerning the kernel, my understanding is
+> that the warning is desired (cfr. https://marc.info/?t=154704602900003 ) 
 
-No problem, really. And I haven't been quite reactive myself lately. 
+Oh, my lord, I had no recollection of that thread - and it was
+only just over a year ago! ;-P
 
-> I have now found (one of) the patch(es) I was referring to before
-> (as a patch file on a memory stick - don't ask!).
-I won't, promise ;) 
+Hmm, yes it's a shame, but I guess the kernel usage takes precedence.
 
-> On 19/05/2020 00:54, Luc Van Oostenryck wrote:
-> > In standard C '{ 0 }' is valid to initialize any compound object.
-> > OTOH, Sparse allows '{ }' for the same purpose but:
-> > 1) '{ }' is not standard
-> > 2) Sparse warns when using '0' to initialize pointers.
-> > 
-> > Some projects (git) legitimately like to be able to use the
-> > standard '{ 0 }' without the null-pointer warnings
-> > 
-> > So, add a new warning flag (-Wno-universal-initializer) to
-> > handle '{ 0 }' as '{ }', suppressing the warnings.
+> For example, for cases like:
+> 	int *array[16] = { 0 };
 > 
-> Hmm, I didn't think this would use a warning flag at all!
+> So, I want to keep the current behavior as the default.
 > 
-> I remember the discussion (on lkml and sparse ml) in which
-> there was general agreement that '{}' would be preferred
-> solution (if only it was standard C!). However, I thought
-> that (since some compilers don't support it e.g. msvc) the
-> next best solution would be for sparse to suppress the
-> warning if given the '= { 0 }' token sequence. (ie. no mention
-> of it being conditional on a option).
-
-Yes, I kinda agree but concerning the kernel, my understanding is
-that the warning is desired (cfr. https://marc.info/?t=154704602900003 ) 
-For example, for cases like:
-	int *array[16] = { 0 };
-
-So, I want to keep the current behavior as the default.
-
-> ...  but this may well
-> give the impression of a C++ like 'int i{}' type initializer!
-
-This syntax is really terrible **shiver**.
-
-> > @@ -2750,6 +2750,13 @@ static struct token *initializer_list(struct expression_list **list, struct toke
-> >  {
-> >  	struct expression *expr;
-> >  
-> > +	// '{ 0 }' is equivalent to '{ }' unless wanting all possible
-> > +	// warnings about using '0' to initialize a null-pointer.
-> > +	if (!Wuniversal_initializer) {
-> > +		if (match_token_zero(token) && match_op(token->next, '}'))
-> > +			token = token->next;
-> > +	}
-> > +
+>>> @@ -2750,6 +2750,13 @@ static struct token *initializer_list(struct expression_list **list, struct toke
+>>>  {
+>>>  	struct expression *expr;
+>>>  
+>>> +	// '{ 0 }' is equivalent to '{ }' unless wanting all possible
+>>> +	// warnings about using '0' to initialize a null-pointer.
+>>> +	if (!Wuniversal_initializer) {
+>>> +		if (match_token_zero(token) && match_op(token->next, '}'))
+>>> +			token = token->next;
+>>> +	}
+>>> +
+>>
+>> Ha! This made me LOL! (see my patch below).
+>>
+>> So simple. (I did think, at first, that deleting the '0' token was
+>> not a good idea - then I realized that it's more like skipping/ignoring
+>> the token than deleting it.)
 > 
-> Ha! This made me LOL! (see my patch below).
+> Well ... I'm lazy, so ... and it gave me the garantee that it will
+> behave exactly like '{ }'.
 > 
-> So simple. (I did think, at first, that deleting the '0' token was
-> not a good idea - then I realized that it's more like skipping/ignoring
-> the token than deleting it.)
+>> The patch below was (I think) my third attempt. If memory serves
+>> me, the first patch attempted to determine the '{0}' initializer
+>> from the 'struct expession *' passed to bad_null() alone. However,
+>> that did not allow me to distinguish '= { 0 }' from '= { 0, }',
+>> so I needed to backup from evaluation to the parse.
+> 
+> I think it's fine to allow the comma, I probably need to change
+> this is my version.
 
-Well ... I'm lazy, so ... and it gave me the garantee that it will
-behave exactly like '{ }'.
+No, No, that would definitely be wrong. In fact, I would go further
+and say _only_ '= { 0 } ;' should suppress the warning (yes I added
+the semi-colon). (I did think that maybe other forms of 'integer
+constant with value zero' could be added; e.g. 0x0, but I am not
+sure even that is useful).
 
-> The patch below was (I think) my third attempt. If memory serves
-> me, the first patch attempted to determine the '{0}' initializer
-> from the 'struct expession *' passed to bad_null() alone. However,
-> that did not allow me to distinguish '= { 0 }' from '= { 0, }',
-> so I needed to backup from evaluation to the parse.
+['designated initializers' would also not work to suppress the
+warnings, of course!]
 
-I think it's fine to allow the comma, I probably need to change
-this is my version.
+BTW, I was not entirely convinced by the git-list discussion which
+lead to this patch. However, limiting the suppression of the warning
+to _just_ '= { 0 } ;' would leave the majority of use-cases issuing
+the warning anyway. The main benefit would be, as argued by others,
+that when you switch the order/type of fields in a struct (say) that
+you would not have to change the initializer from/to {0}/{NULL}.
+(Again, I don't see that as a huge advantage ...)
 
-> Also, I didn't test the initialization of embedded struct/array fields
-> (and what should happen anyway? should '{ 0 }' also work for initializing
-> the sub-structure(s), or should it only work at the top-level?).
+>> Also, I didn't test the initialization of embedded struct/array fields
+>> (and what should happen anyway? should '{ 0 }' also work for initializing
+>> the sub-structure(s), or should it only work at the top-level?).
 
-In fact, it works for literally anything: simple arrays, multi-dimensional
-arrays (it must be because the braces doesn't need to match:
-	int a[2][2] = { 1, 2, 3, 4 };
-is perfectly legal), structures with a scalar as first member, more complex
-strutures, sub-structures, and more suprisingly even for simple types:
-	int a = { 0 };
-	_Bool b = { 0 };
-	double f = { 0 };
-	int *ptr = { 0 };
+And so, given the above, I don't think the warnings should be suppressed
+on sub-structures.
 
-If it is fine for you, I'll reuse your testcases.
+> In fact, it works for literally anything: simple arrays, multi-dimensional
+> arrays (it must be because the braces doesn't need to match:
+> 	int a[2][2] = { 1, 2, 3, 4 };
 
-> Also, I have just noticed, it seems that I can't decide if it should
-> be called 'zero aggregate initializer' or 'aggregate zero initializer'! :-P
+Heh, yes indeed.
 
-I don't think it has a specfic name in the standard but has Danh said
-in his reply, in some books, articles, GCC & clang patches it's
-called "universal [zero] initializer".
+> is perfectly legal), structures with a scalar as first member, more complex
+> strutures, sub-structures, and more suprisingly even for simple types:
+> 	int a = { 0 };
+> 	_Bool b = { 0 };
+> 	double f = { 0 };
+> 	int *ptr = { 0 };
 
-Best regards,
--- Luc
+Ah, yes, I wonder if that would be a problem. ;-)
+My initial reaction would be that non-aggregate types would still
+issue warnings (even with ={0};), but that starts getting harder
+to do ... :(
+
+I don't have any simple answers.
+
+ATB,
+Ramsay Jones
