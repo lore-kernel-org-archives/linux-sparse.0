@@ -1,82 +1,71 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH v1 03/28] misc: always use the node for current_fn
-Date: Wed, 20 May 2020 01:37:03 +0100
-Message-ID: <0883c784-5ad0-e536-239e-6ed086cf624d@ramsayjones.plus.com>
-References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
- <20200519005728.84594-4-luc.vanoostenryck@gmail.com>
+From: =?utf-8?B?xJBvw6BuIFRy4bqnbiBDw7RuZw==?= Danh
+        <congdanhqx@gmail.com>
+Subject: Re: [SPARSE PATCH] univ-init: conditionally accept { 0 } without
+ warnings
+Date: Wed, 20 May 2020 07:41:51 +0700
+Message-ID: <20200520004151.GB12509@danh.dev>
+References: <20200518235446.84256-1-luc.vanoostenryck@gmail.com>
+ <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout02.plus.net ([212.159.14.17]:60705 "EHLO
-        avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726178AbgETAhG (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40110 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726178AbgETAly (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 May 2020 20:37:06 -0400
-In-Reply-To: <20200519005728.84594-4-luc.vanoostenryck@gmail.com>
-Content-Language: en-GB
+        Tue, 19 May 2020 20:41:54 -0400
+Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6DDAC061A0E
+        for <linux-sparse@vger.kernel.org>; Tue, 19 May 2020 17:41:54 -0700 (PDT)
+Received: by mail-pj1-x1041.google.com with SMTP id nu7so464190pjb.0
+        for <linux-sparse@vger.kernel.org>; Tue, 19 May 2020 17:41:54 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
-Cc: Linus Torvalds <torvalds@linux-foundation.org>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org, Junio C Hamano <gitster@pobox.com>
 
+Hi Luc,
 
-
-On 19/05/2020 01:57, Luc Van Oostenryck wrote:
-> At evaluation time and at expansion time, current_fn is set
-> to the function's base type (SYM_FN) but at parse time it's
-> set to its parent type (SYM_NODE).
+On 2020-05-20 01:22:22+0100, Ramsay Jones <ramsay@ramsayjones.plus.com> wrote:
+> > In standard C '{ 0 }' is valid to initialize any compound object.
+> > OTOH, Sparse allows '{ }' for the same purpose but:
+> > 1) '{ }' is not standard
+> > 2) Sparse warns when using '0' to initialize pointers.
+> > 
+> > Some projects (git) legitimately like to be able to use the
+> > standard '{ 0 }' without the null-pointer warnings
+> > 
+> > So, add a new warning flag (-Wno-universal-initializer) to
+> > handle '{ 0 }' as '{ }', suppressing the warnings.
 > 
-> Since current_fn is used to access the corresponding ident,
-> it should be set to the node type, not the base.
+> Hmm, I didn't think this would use a warning flag at all!
 > 
-> So, always set current_fn to the node type.
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  evaluate.c | 4 ++--
->  expand.c   | 2 +-
->  2 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/evaluate.c b/evaluate.c
-> index 54cd5fa136e6..c18ae81df5ad 100644
-> --- a/evaluate.c
-> +++ b/evaluate.c
-> @@ -3422,7 +3422,7 @@ static struct symbol *evaluate_symbol(struct symbol *sym)
->  		if (sym->definition && sym->definition != sym)
->  			return evaluate_symbol(sym->definition);
->  
-> -		current_fn = base_type;
-> +		current_fn = sym;
->  
->  		examine_fn_arguments(base_type);
->  		if (!base_type->stmt && base_type->inline_stmt)
-> @@ -3453,7 +3453,7 @@ static struct symbol *evaluate_return_expression(struct statement *stmt)
->  	struct symbol *fntype, *rettype;
->  
->  	evaluate_expression(expr);
-> -	fntype = current_fn;
-> +	fntype = current_fn->ctype.base_type;
+> I remember the discussion (on lkml and sparse ml) in which
+> there was general agreement that '{}' would be preferred
+> solution (if only it was standard C!). However, I thought
+> that (since some compilers don't support it e.g. msvc) the
+> next best solution would be for sparse to suppress the
+> warning if given the '= { 0 }' token sequence. (ie. no mention
+> of it being conditional on a option).
 
-Ah, OK, question answered!
+I'm also in the camp of favouring no -W at all.
+But, have another -W is fine to me.
 
-ATB,
-Ramsay Jones
-
->  	rettype = fntype->ctype.base_type;
->  	if (!rettype || rettype == &void_ctype) {
->  		if (expr && expr->ctype != &void_ctype)
-> diff --git a/expand.c b/expand.c
-> index e75598781b6c..ab296c730efd 100644
-> --- a/expand.c
-> +++ b/expand.c
-> @@ -918,7 +918,7 @@ static int expand_symbol_call(struct expression *expr, int cost)
->  			struct symbol *fn = def->ctype.base_type;
->  			struct symbol *curr = current_fn;
->  
-> -			current_fn = fn;
-> +			current_fn = def;
->  			evaluate_statement(expr->statement);
->  			current_fn = curr;
->  
+> > Suggestions for a better name than this -W[no-]universal-initializer
+> > are warmly welcome.
 > 
+> Heh, you know that I am no good at naming things - but this may well
+> give the impression of a C++ like 'int i{}' type initializer!
+
+From this discussion in GCC's BugZilla [1], I think compiler people
+tend to call that style as zero-initialization, or universal zero
+initialization.
+
+[1]: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119#c12
+
+
+
+-- 
+Danh
