@@ -1,71 +1,105 @@
-From: =?utf-8?B?xJBvw6BuIFRy4bqnbiBDw7RuZw==?= Danh
-        <congdanhqx@gmail.com>
-Subject: Re: [SPARSE PATCH] univ-init: conditionally accept { 0 } without
- warnings
-Date: Wed, 20 May 2020 07:41:51 +0700
-Message-ID: <20200520004151.GB12509@danh.dev>
-References: <20200518235446.84256-1-luc.vanoostenryck@gmail.com>
- <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH v1 14/28] scope: extract bind_symbol_with_scope() from
+ bind_symbol()
+Date: Wed, 20 May 2020 01:44:12 +0100
+Message-ID: <94c72b94-814a-ee32-b107-523f43ad9299@ramsayjones.plus.com>
+References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
+ <20200519005728.84594-15-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40110 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726178AbgETAly (ORCPT
+Received: from avasout02.plus.net ([212.159.14.17]:32814 "EHLO
+        avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726178AbgETAoQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 May 2020 20:41:54 -0400
-Received: from mail-pj1-x1041.google.com (mail-pj1-x1041.google.com [IPv6:2607:f8b0:4864:20::1041])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6DDAC061A0E
-        for <linux-sparse@vger.kernel.org>; Tue, 19 May 2020 17:41:54 -0700 (PDT)
-Received: by mail-pj1-x1041.google.com with SMTP id nu7so464190pjb.0
-        for <linux-sparse@vger.kernel.org>; Tue, 19 May 2020 17:41:54 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <2fcda487-733b-8ed1-e1f4-6c6204a68569@ramsayjones.plus.com>
+        Tue, 19 May 2020 20:44:16 -0400
+In-Reply-To: <20200519005728.84594-15-luc.vanoostenryck@gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org, Junio C Hamano <gitster@pobox.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+Cc: Linus Torvalds <torvalds@linux-foundation.org>
 
-Hi Luc,
 
-On 2020-05-20 01:22:22+0100, Ramsay Jones <ramsay@ramsayjones.plus.com> wrote:
-> > In standard C '{ 0 }' is valid to initialize any compound object.
-> > OTOH, Sparse allows '{ }' for the same purpose but:
-> > 1) '{ }' is not standard
-> > 2) Sparse warns when using '0' to initialize pointers.
-> > 
-> > Some projects (git) legitimately like to be able to use the
-> > standard '{ 0 }' without the null-pointer warnings
-> > 
-> > So, add a new warning flag (-Wno-universal-initializer) to
-> > handle '{ 0 }' as '{ }', suppressing the warnings.
+
+On 19/05/2020 01:57, Luc Van Oostenryck wrote:
+> In most cases, the scope that must be used for a symbol is
+> given by its namespace.
 > 
-> Hmm, I didn't think this would use a warning flag at all!
+> However, in some situations a different scope must be used.
+> This is then set, for exemple by doing the lookup with
+
+s/exemple/example/
+
+ATB,
+Ramsay Jones
+
+> the wrong namespace (but corresponding to the desired scope)
+> and changing it just after to its correct value.
 > 
-> I remember the discussion (on lkml and sparse ml) in which
-> there was general agreement that '{}' would be preferred
-> solution (if only it was standard C!). However, I thought
-> that (since some compilers don't support it e.g. msvc) the
-> next best solution would be for sparse to suppress the
-> warning if given the '= { 0 }' token sequence. (ie. no mention
-> of it being conditional on a option).
-
-I'm also in the camp of favouring no -W at all.
-But, have another -W is fine to me.
-
-> > Suggestions for a better name than this -W[no-]universal-initializer
-> > are warmly welcome.
+> To avoid these contortions, extract from bind_symbol() a version
+> where the scope can be explicitly given: bind_symbol_with_scope().
 > 
-> Heh, you know that I am no good at naming things - but this may well
-> give the impression of a C++ like 'int i{}' type initializer!
-
-From this discussion in GCC's BugZilla [1], I think compiler people
-tend to call that style as zero-initialization, or universal zero
-initialization.
-
-[1]: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=53119#c12
-
-
-
--- 
-Danh
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  symbol.c | 13 +++++++++----
+>  symbol.h |  1 +
+>  2 files changed, 10 insertions(+), 4 deletions(-)
+> 
+> diff --git a/symbol.c b/symbol.c
+> index c2e6f0b426b3..7044ab3f78ce 100644
+> --- a/symbol.c
+> +++ b/symbol.c
+> @@ -671,9 +671,8 @@ static void inherit_static(struct symbol *sym)
+>  	}
+>  }
+>  
+> -void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
+> +void bind_symbol_with_scope(struct symbol *sym, struct ident *ident, enum namespace ns, struct scope *scope)
+>  {
+> -	struct scope *scope;
+>  	if (sym->bound) {
+>  		sparse_error(sym->pos, "internal error: symbol type already bound");
+>  		return;
+> @@ -690,7 +689,6 @@ void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
+>  	sym->ident = ident;
+>  	sym->bound = 1;
+>  
+> -	scope = block_scope;
+>  	if (ns == NS_SYMBOL && toplevel(scope)) {
+>  		unsigned mod = MOD_ADDRESSABLE | MOD_TOPLEVEL;
+>  
+> @@ -704,11 +702,18 @@ void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
+>  		}
+>  		sym->ctype.modifiers |= mod;
+>  	}
+> +	bind_scope(sym, scope);
+> +}
+> +
+> +void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
+> +{
+> +	struct scope *scope = block_scope;;
+> +
+>  	if (ns == NS_MACRO)
+>  		scope = file_scope;
+>  	if (ns == NS_LABEL)
+>  		scope = function_scope;
+> -	bind_scope(sym, scope);
+> +	bind_symbol_with_scope(sym, ident, ns, scope);
+>  }
+>  
+>  struct symbol *create_symbol(int stream, const char *name, int type, int namespace)
+> diff --git a/symbol.h b/symbol.h
+> index 50dba78a654a..c297c778dfdf 100644
+> --- a/symbol.h
+> +++ b/symbol.h
+> @@ -332,6 +332,7 @@ extern void show_type_list(struct symbol *);
+>  extern void show_symbol_list(struct symbol_list *, const char *);
+>  extern void add_symbol(struct symbol_list **, struct symbol *);
+>  extern void bind_symbol(struct symbol *, struct ident *, enum namespace);
+> +extern void bind_symbol_with_scope(struct symbol *, struct ident *, enum namespace, struct scope *);
+>  
+>  extern struct symbol *examine_symbol_type(struct symbol *);
+>  extern struct symbol *examine_pointer_target(struct symbol *);
+> 
