@@ -1,19 +1,19 @@
 From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH v1 02/28] misc: s/fntype/rettype/
-Date: Wed, 20 May 2020 01:35:13 +0100
-Message-ID: <0556fd1c-566d-3b3a-d760-418fecf115c0@ramsayjones.plus.com>
+Subject: Re: [PATCH v1 03/28] misc: always use the node for current_fn
+Date: Wed, 20 May 2020 01:37:03 +0100
+Message-ID: <0883c784-5ad0-e536-239e-6ed086cf624d@ramsayjones.plus.com>
 References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
- <20200519005728.84594-3-luc.vanoostenryck@gmail.com>
+ <20200519005728.84594-4-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout02.plus.net ([212.159.14.17]:60631 "EHLO
+Received: from avasout02.plus.net ([212.159.14.17]:60705 "EHLO
         avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726352AbgETAfR (ORCPT
+        with ESMTP id S1726178AbgETAhG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 May 2020 20:35:17 -0400
-In-Reply-To: <20200519005728.84594-3-luc.vanoostenryck@gmail.com>
+        Tue, 19 May 2020 20:37:06 -0400
+In-Reply-To: <20200519005728.84594-4-luc.vanoostenryck@gmail.com>
 Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -23,59 +23,60 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>
 
 
 On 19/05/2020 01:57, Luc Van Oostenryck wrote:
-> In evaluate_return_expression(), it's checked if the type of
-> the return statement match the function return type.
+> At evaluation time and at expansion time, current_fn is set
+> to the function's base type (SYM_FN) but at parse time it's
+> set to its parent type (SYM_NODE).
 > 
-> But, the variable used to hold this type is named 'fntype'
-> which is slightly confusing.
+> Since current_fn is used to access the corresponding ident,
+> it should be set to the node type, not the base.
 > 
-> So, rename the variable holding the return type to 'rettype'
-> and only use 'fntype' for the one hoding the full function type.
-
-s/hoding/holding/
-
+> So, always set current_fn to the node type.
 > 
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  evaluate.c | 11 ++++++-----
->  1 file changed, 6 insertions(+), 5 deletions(-)
+>  evaluate.c | 4 ++--
+>  expand.c   | 2 +-
+>  2 files changed, 3 insertions(+), 3 deletions(-)
 > 
 > diff --git a/evaluate.c b/evaluate.c
-> index b7bb1f52aa91..54cd5fa136e6 100644
+> index 54cd5fa136e6..c18ae81df5ad 100644
 > --- a/evaluate.c
 > +++ b/evaluate.c
-> @@ -3450,13 +3450,14 @@ void evaluate_symbol_list(struct symbol_list *list)
->  static struct symbol *evaluate_return_expression(struct statement *stmt)
->  {
->  	struct expression *expr = stmt->expression;
-> -	struct symbol *fntype;
-> +	struct symbol *fntype, *rettype;
+> @@ -3422,7 +3422,7 @@ static struct symbol *evaluate_symbol(struct symbol *sym)
+>  		if (sym->definition && sym->definition != sym)
+>  			return evaluate_symbol(sym->definition);
+>  
+> -		current_fn = base_type;
+> +		current_fn = sym;
+>  
+>  		examine_fn_arguments(base_type);
+>  		if (!base_type->stmt && base_type->inline_stmt)
+> @@ -3453,7 +3453,7 @@ static struct symbol *evaluate_return_expression(struct statement *stmt)
+>  	struct symbol *fntype, *rettype;
 >  
 >  	evaluate_expression(expr);
-> -	fntype = current_fn->ctype.base_type;
-> -	if (!fntype || fntype == &void_ctype) {
-> +	fntype = current_fn;
-> +	rettype = fntype->ctype.base_type;
+> -	fntype = current_fn;
+> +	fntype = current_fn->ctype.base_type;
 
-So, do you need to keep the 'fntype' variable?
+Ah, OK, question answered!
 
 ATB,
 Ramsay Jones
 
-> +	if (!rettype || rettype == &void_ctype) {
+>  	rettype = fntype->ctype.base_type;
+>  	if (!rettype || rettype == &void_ctype) {
 >  		if (expr && expr->ctype != &void_ctype)
-> -			expression_error(expr, "return expression in %s function", fntype?"void":"typeless");
-> +			expression_error(expr, "return expression in %s function", rettype?"void":"typeless");
->  		if (expr && Wreturn_void)
->  			warning(stmt->pos, "returning void-valued expression");
->  		return NULL;
-> @@ -3468,7 +3469,7 @@ static struct symbol *evaluate_return_expression(struct statement *stmt)
->  	}
->  	if (!expr->ctype)
->  		return NULL;
-> -	compatible_assignment_types(expr, fntype, &stmt->expression, "return expression");
-> +	compatible_assignment_types(expr, rettype, &stmt->expression, "return expression");
->  	return NULL;
->  }
+> diff --git a/expand.c b/expand.c
+> index e75598781b6c..ab296c730efd 100644
+> --- a/expand.c
+> +++ b/expand.c
+> @@ -918,7 +918,7 @@ static int expand_symbol_call(struct expression *expr, int cost)
+>  			struct symbol *fn = def->ctype.base_type;
+>  			struct symbol *curr = current_fn;
+>  
+> -			current_fn = fn;
+> +			current_fn = def;
+>  			evaluate_statement(expr->statement);
+>  			current_fn = curr;
 >  
 > 
