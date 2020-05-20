@@ -1,20 +1,19 @@
 From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH v1 14/28] scope: extract bind_symbol_with_scope() from
- bind_symbol()
-Date: Wed, 20 May 2020 01:44:12 +0100
-Message-ID: <94c72b94-814a-ee32-b107-523f43ad9299@ramsayjones.plus.com>
+Subject: Re: [PATCH v1 15/28] scope: __func__ is special
+Date: Wed, 20 May 2020 01:45:50 +0100
+Message-ID: <cbeaeb8a-698b-56e2-6e31-90547de54e89@ramsayjones.plus.com>
 References: <20200519005728.84594-1-luc.vanoostenryck@gmail.com>
- <20200519005728.84594-15-luc.vanoostenryck@gmail.com>
+ <20200519005728.84594-16-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout02.plus.net ([212.159.14.17]:32814 "EHLO
+Received: from avasout02.plus.net ([212.159.14.17]:32933 "EHLO
         avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726178AbgETAoQ (ORCPT
+        with ESMTP id S1726178AbgETApx (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 19 May 2020 20:44:16 -0400
-In-Reply-To: <20200519005728.84594-15-luc.vanoostenryck@gmail.com>
+        Tue, 19 May 2020 20:45:53 -0400
+In-Reply-To: <20200519005728.84594-16-luc.vanoostenryck@gmail.com>
 Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -24,82 +23,40 @@ Cc: Linus Torvalds <torvalds@linux-foundation.org>
 
 
 On 19/05/2020 01:57, Luc Van Oostenryck wrote:
-> In most cases, the scope that must be used for a symbol is
-> given by its namespace.
+> __func__ needs to be in the namepsace for symbols: NS_SYMBOL
+> but doesn't follow the usual scope rules of them: it always
+> needs to be declared in the function scope.
 > 
-> However, in some situations a different scope must be used.
-> This is then set, for exemple by doing the lookup with
+> So, use bind_symbol_scoped() instead of first using bind_symbol()
 
-s/exemple/example/
+s/bind_symbol_scoped/bind_symbol_with_scope/
 
 ATB,
 Ramsay Jones
 
-> the wrong namespace (but corresponding to the desired scope)
-> and changing it just after to its correct value.
-> 
-> To avoid these contortions, extract from bind_symbol() a version
-> where the scope can be explicitly given: bind_symbol_with_scope().
+> and then changing the namespace.
+> Also change the comment to better express that it's the scope
+> that is the unusual thing.
 > 
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  symbol.c | 13 +++++++++----
->  symbol.h |  1 +
->  2 files changed, 10 insertions(+), 4 deletions(-)
+>  expression.c | 5 ++---
+>  1 file changed, 2 insertions(+), 3 deletions(-)
 > 
-> diff --git a/symbol.c b/symbol.c
-> index c2e6f0b426b3..7044ab3f78ce 100644
-> --- a/symbol.c
-> +++ b/symbol.c
-> @@ -671,9 +671,8 @@ static void inherit_static(struct symbol *sym)
->  	}
->  }
+> diff --git a/expression.c b/expression.c
+> index 78e577cf10a1..ffb3c2dce4d5 100644
+> --- a/expression.c
+> +++ b/expression.c
+> @@ -122,9 +122,8 @@ static struct symbol *handle_func(struct token *token)
+>  	decl->ctype.modifiers = MOD_STATIC;
+>  	decl->endpos = token->pos;
 >  
-> -void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
-> +void bind_symbol_with_scope(struct symbol *sym, struct ident *ident, enum namespace ns, struct scope *scope)
->  {
-> -	struct scope *scope;
->  	if (sym->bound) {
->  		sparse_error(sym->pos, "internal error: symbol type already bound");
->  		return;
-> @@ -690,7 +689,6 @@ void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
->  	sym->ident = ident;
->  	sym->bound = 1;
+> -	/* function-scope, but in NS_SYMBOL */
+> -	bind_symbol(decl, ident, NS_LABEL);
+> -	decl->namespace = NS_SYMBOL;
+> +	/* NS_SYMBOL but in function-scope */
+> +	bind_symbol_with_scope(decl, ident, NS_SYMBOL, function_scope);
 >  
-> -	scope = block_scope;
->  	if (ns == NS_SYMBOL && toplevel(scope)) {
->  		unsigned mod = MOD_ADDRESSABLE | MOD_TOPLEVEL;
->  
-> @@ -704,11 +702,18 @@ void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
->  		}
->  		sym->ctype.modifiers |= mod;
->  	}
-> +	bind_scope(sym, scope);
-> +}
-> +
-> +void bind_symbol(struct symbol *sym, struct ident *ident, enum namespace ns)
-> +{
-> +	struct scope *scope = block_scope;;
-> +
->  	if (ns == NS_MACRO)
->  		scope = file_scope;
->  	if (ns == NS_LABEL)
->  		scope = function_scope;
-> -	bind_scope(sym, scope);
-> +	bind_symbol_with_scope(sym, ident, ns, scope);
->  }
->  
->  struct symbol *create_symbol(int stream, const char *name, int type, int namespace)
-> diff --git a/symbol.h b/symbol.h
-> index 50dba78a654a..c297c778dfdf 100644
-> --- a/symbol.h
-> +++ b/symbol.h
-> @@ -332,6 +332,7 @@ extern void show_type_list(struct symbol *);
->  extern void show_symbol_list(struct symbol_list *, const char *);
->  extern void add_symbol(struct symbol_list **, struct symbol *);
->  extern void bind_symbol(struct symbol *, struct ident *, enum namespace);
-> +extern void bind_symbol_with_scope(struct symbol *, struct ident *, enum namespace, struct scope *);
->  
->  extern struct symbol *examine_symbol_type(struct symbol *);
->  extern struct symbol *examine_pointer_target(struct symbol *);
+>  	len = current_fn->ident->len;
+>  	string = __alloc_string(len + 1);
 > 
