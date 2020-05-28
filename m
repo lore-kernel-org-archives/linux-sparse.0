@@ -1,67 +1,39 @@
 From: bugzilla-daemon@bugzilla.kernel.org
-Subject: [Bug 207959] New: Don't warn about the universal zero initializer
- for a structure with the 'designated_init' attribute.
-Date: Thu, 28 May 2020 16:27:17 +0000
-Message-ID: <bug-207959-200559@https.bugzilla.kernel.org/>
+Subject: [Bug 207959] Don't warn about the universal zero initializer for a
+ structure with the 'designated_init' attribute.
+Date: Thu, 28 May 2020 19:22:14 +0000
+Message-ID: <bug-207959-200559-IG36fkwdeW@https.bugzilla.kernel.org/>
+References: <bug-207959-200559@https.bugzilla.kernel.org/>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:60622 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:50288 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2404861AbgE1Q1R (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 28 May 2020 12:27:17 -0400
+        id S2406445AbgE1TWP (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 28 May 2020 15:22:15 -0400
+In-Reply-To: <bug-207959-200559@https.bugzilla.kernel.org/>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 
 https://bugzilla.kernel.org/show_bug.cgi?id=207959
 
-            Bug ID: 207959
-           Summary: Don't warn about the universal zero initializer for a
-                    structure with the 'designated_init' attribute.
-           Product: Tools
-           Version: unspecified
-    Kernel Version: Sparse 0.6.1 (Debian: 0.6.1-2+b1)
-          Hardware: All
-                OS: Linux
-              Tree: Mainline
-            Status: NEW
-          Severity: enhancement
-          Priority: P1
-         Component: Sparse
-          Assignee: tools_sparse@kernel-bugs.kernel.org
-          Reporter: AsDaGo@posteo.net
-        Regression: No
+Luc Van Oostenryck (luc.vanoostenryck@gmail.com) changed:
 
-Created attachment 289383
-  --> https://bugzilla.kernel.org/attachment.cgi?id=289383&action=edit
-A test program illustrating the issue
+           What    |Removed                     |Added
+----------------------------------------------------------------------------
+                 CC|                            |luc.vanoostenryck@gmail.com
 
-I reported this bug to GCC here:
-https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95379
+--- Comment #1 from Luc Van Oostenryck (luc.vanoostenryck@gmail.com) ---
+In fact, sparse already support this via the option
+'-Wno-universal-initializer'. It's really very recent and thus only in the
+mainline tree, not in a release (and it was introduced for another warning but
+the result is the same).
 
-They don't want to diverge GCC's behavior from Sparse's, but I think this would
-be a useful feature, and I think it should be implemented in Sparse as well.
-Below is my bug report to GCC.
-
-> When the 'designated_init' attribute is used on a structure type, GCC warns
-> when an instance of that structure is initialized with '{ 0 }'. I think GCC
-> should make an exception for this, since '{ 0 }' is often used to initialize
-> all fields of a structure to 0, and it does not depend on the internal
-> structure of the structure type.
-> 
-> If '{ }' is used to initialize the structure, GCC does not warn. However,
-> although '{ }' seems to initialize the structure to zero in GCC, I'm not
-> sure if it's as portable as '{ 0 }' (and it's less readable, IMO). I think
-> '{ }' is part of the C++ standard; does anyone know if it's part of C too?
-> 
-> See the attached test program (compile with 'gcc -o test test.c').
-
-I have also included the same program I attached in the GCC bug report.
-
-Also, since this isn't a bug report for the kernel, I've used Sparse's version
-number for the "Kernel Version" field.
+My very personal point of view is that the correct syntax should be '{ }'
+because it conveys much better the idea of a default initializer. This single
+zero in '{ 0 }' is just confusing.
 
 -- 
 You are receiving this mail because:
