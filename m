@@ -1,25 +1,35 @@
-From: bugzilla-daemon@bugzilla.kernel.org
-Subject: [Bug 207959] Don't warn about the universal zero initializer for a
- structure with the 'designated_init' attribute.
-Date: Thu, 28 May 2020 22:26:01 +0000
-Message-ID: <bug-207959-200559-Of344ruqqL@https.bugzilla.kernel.org/>
-References: <bug-207959-200559@https.bugzilla.kernel.org/>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [Bug 207959] Don't warn about the universal zero initializer for
+ a structure with the 'designated_init' attribute.
+Date: Thu, 28 May 2020 15:25:39 -0700
+Message-ID: <CAHk-=wiKCXoeynr6am-B-_=XP=mQxtxREjP+q_zzMfe5CaeJeQ@mail.gmail.com>
+References: <bug-207959-200559@https.bugzilla.kernel.org/> <bug-207959-200559-nznJfyeqKD@https.bugzilla.kernel.org/>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.kernel.org ([198.145.29.99]:32780 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2437074AbgE1W0G (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 28 May 2020 18:26:06 -0400
-In-Reply-To: <bug-207959-200559@https.bugzilla.kernel.org/>
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60030 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2437062AbgE1WZ7 (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 28 May 2020 18:25:59 -0400
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A367C08C5C6
+        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:59 -0700 (PDT)
+Received: by mail-lj1-x244.google.com with SMTP id q2so119006ljm.10
+        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:58 -0700 (PDT)
+Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com. [209.85.167.52])
+        by smtp.gmail.com with ESMTPSA id a16sm1651844ljh.111.2020.05.28.15.25.56
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 28 May 2020 15:25:56 -0700 (PDT)
+Received: by mail-lf1-f52.google.com with SMTP id 82so112151lfh.2
+        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:56 -0700 (PDT)
+In-Reply-To: <bug-207959-200559-nznJfyeqKD@https.bugzilla.kernel.org/>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
+To: bugzilla-daemon@bugzilla.kernel.org
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
-https://bugzilla.kernel.org/show_bug.cgi?id=207959
-
---- Comment #4 from Linus Torvalds (torvalds@linux-foundation.org) ---
 On Thu, May 28, 2020 at 2:24 PM <bugzilla-daemon@bugzilla.kernel.org> wrote:
 >
 > Well, that's really the point.
@@ -38,7 +48,3 @@ It's not like we use pedantic and portable standard C to begin with.
 So yeah, the sparse defaults may be a bit kernel-centric.
 
              Linus
-
--- 
-You are receiving this mail because:
-You are watching the assignee of the bug.
