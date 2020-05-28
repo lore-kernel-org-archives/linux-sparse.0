@@ -1,50 +1,47 @@
-From: Linus Torvalds <torvalds@linux-foundation.org>
-Subject: Re: [Bug 207959] Don't warn about the universal zero initializer for
- a structure with the 'designated_init' attribute.
-Date: Thu, 28 May 2020 15:25:39 -0700
-Message-ID: <CAHk-=wiKCXoeynr6am-B-_=XP=mQxtxREjP+q_zzMfe5CaeJeQ@mail.gmail.com>
-References: <bug-207959-200559@https.bugzilla.kernel.org/> <bug-207959-200559-nznJfyeqKD@https.bugzilla.kernel.org/>
+From: bugzilla-daemon@bugzilla.kernel.org
+Subject: [Bug 207959] Don't warn about the universal zero initializer for a
+ structure with the 'designated_init' attribute.
+Date: Thu, 28 May 2020 22:31:58 +0000
+Message-ID: <bug-207959-200559-E7pP0OflsO@https.bugzilla.kernel.org/>
+References: <bug-207959-200559@https.bugzilla.kernel.org/>
 Mime-Version: 1.0
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60030 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2437062AbgE1WZ7 (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 28 May 2020 18:25:59 -0400
-Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0A367C08C5C6
-        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:59 -0700 (PDT)
-Received: by mail-lj1-x244.google.com with SMTP id q2so119006ljm.10
-        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:58 -0700 (PDT)
-Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com. [209.85.167.52])
-        by smtp.gmail.com with ESMTPSA id a16sm1651844ljh.111.2020.05.28.15.25.56
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Thu, 28 May 2020 15:25:56 -0700 (PDT)
-Received: by mail-lf1-f52.google.com with SMTP id 82so112151lfh.2
-        for <linux-sparse@vger.kernel.org>; Thu, 28 May 2020 15:25:56 -0700 (PDT)
-In-Reply-To: <bug-207959-200559-nznJfyeqKD@https.bugzilla.kernel.org/>
+Received: from mail.kernel.org ([198.145.29.99]:34200 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2436803AbgE1Wb7 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 28 May 2020 18:31:59 -0400
+In-Reply-To: <bug-207959-200559@https.bugzilla.kernel.org/>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: bugzilla-daemon@bugzilla.kernel.org
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
 
-On Thu, May 28, 2020 at 2:24 PM <bugzilla-daemon@bugzilla.kernel.org> wrote:
->
-> Well, that's really the point.
-> The problem Sparse also gives the warnings corresponding to clang's -Wnonnull
-> and my understanding is that these warnings are desired for the kernel even
-> when coming from using '{ 0 }'.
+https://bugzilla.kernel.org/show_bug.cgi?id=207959
 
-In the kernel, the empty initializer is be the usual way to create a
-zero initializer. So yes, { 0 } may exist, but it generally should be
-used for initializing something that is known to be an integer. And if
-it's a pointer, it should warn, because '0' should never have been a
-valid pointer, traditional C or not.
+Linus Torvalds (torvalds@linux-foundation.org) changed:
 
-It's not like we use pedantic and portable standard C to begin with.
+           What    |Removed                     |Added
+----------------------------------------------------------------------------
+                 CC|                            |torvalds@linux-foundation.o
+                   |                            |rg
 
-So yeah, the sparse defaults may be a bit kernel-centric.
+--- Comment #5 from Linus Torvalds (torvalds@linux-foundation.org) ---
+That said, I'm not sure the kernel cares. If sparse makes '{ 0 }' be eqivalent
+to '{ }' and doesn't warn for it, it's not like it's a huge deal.
 
-             Linus
+The problem with using 0 instead of NULL (or vice versa, which is a crime, and
+which is why NULL should never have been defined to plain 0) comes when it is
+actually confusing. 
+
+For something like a silly zero struct initializer it's not like it's the end
+of the world. I do find the whole "0 could be a pointer, and NULL could be used
+for an integer or float" to be very distasteful, and the C++ people in
+particular were in denial about their brokenness for much much too long.
+
+So I'd prefer the "0 for NULL" warning, even if this may not be the most
+important case for it.
+
+-- 
+You are receiving this mail because:
+You are watching the assignee of the bug.
