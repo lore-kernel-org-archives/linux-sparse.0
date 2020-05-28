@@ -1,20 +1,42 @@
-From: "manuel franco" <manuel@info.com>
-Subject: Spende von 2.000.000,00 Euro
-Date: Thu, 28 May 2020 18:29:55 +0200
-Message-ID: <20200528163007.5582238E0A19__42419.1900224955$1590705261$gmane$org@correo.bnv.gob.ve>
-Reply-To: manuelfrancospende11@gmail.com
+From: bugzilla-daemon@bugzilla.kernel.org
+Subject: [Bug 207959] Don't warn about the universal zero initializer for a
+ structure with the 'designated_init' attribute.
+Date: Thu, 28 May 2020 22:47:33 +0000
+Message-ID: <bug-207959-200559-zVgylh0m00@https.bugzilla.kernel.org/>
+References: <bug-207959-200559@https.bugzilla.kernel.org/>
 Mime-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: 8BIT
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from mail.bnv.gob.ve ([201.249.200.115]:35496 "EHLO
-        correo.bnv.gob.ve" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2437219AbgE1WeG (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 28 May 2020 18:34:06 -0400
-Content-Description: Mail message body
+Received: from mail.kernel.org ([198.145.29.99]:40930 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2437200AbgE1Wre (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 28 May 2020 18:47:34 -0400
+In-Reply-To: <bug-207959-200559@https.bugzilla.kernel.org/>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Recipients <manuel@info.com>
+To: linux-sparse@vger.kernel.org
 
-Ich bin Manuel Franco, ich spende Ihnen 2.000.000,00 Euro. Nehmen Sie jetzt Kontakt mit mir auf, damit wir fortfahren können.
+https://bugzilla.kernel.org/show_bug.cgi?id=207959
+
+--- Comment #6 from Asher Gordon (AsDaGo@posteo.net) ---
+(In reply to Luc Van Oostenryck from comment #3)
+> Can't you just add this option in your
+> SPARSE_FLAGS or something like that?
+
+Well, actually I'm not using Sparse for my project. I want to use the
+'designated_init' attribute since it is supported by GCC. And I want to use the
+attribute mainly so that users of my library get the warning, and I can't
+control what flags the user uses (and GCC doesn't have a
+-Wno-universal-initializer flag anyway).
+
+(In reply to Linus Torvalds from comment #4)
+> So yeah, the sparse defaults may be a bit kernel-centric.
+
+That's fine, but perhaps GCC should add something like
+-Wno-universal-initializer and use it by default. I'll suggest that in the GCC
+bug (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=95379).
+
+-- 
+You are receiving this mail because:
+You are watching the assignee of the bug.
