@@ -1,39 +1,45 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] evaluate: mark evaluate_generic_selection() as static
-Date: Sat, 30 May 2020 19:58:46 +0200
-Message-ID: <20200530175846.65it7dkpk4shjhrk@ltop.local>
-References: <37ef319f-ed1e-071d-ff4b-cb3a997fbf65@ramsayjones.plus.com>
+From: ''Tayeb Souami'' <yoshi@bestprofit-futures.co.id>
+Subject: =?utf-8?q?Wohlt=C3=A4tigkeitsspende_von_2=2E000=2E000_Millionen_Euro?=
+Date: Mon, 01 Jun 2020 03:05:56 +0200
+Message-ID: <20200601010604.D1AA3526910@mx.bestprofit-futures.co.id>
+Reply-To: Tayebsouam.spende@gmail.com
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43016 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729026AbgE3R6t (ORCPT
+Received: from hs-162.6.buanalintas.co.id ([223.165.6.162]:56240 "EHLO
+        mx.bestprofit-futures.co.id" rhost-flags-OK-FAIL-OK-OK)
+        by vger.kernel.org with ESMTP id S1725831AbgFAGwp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 30 May 2020 13:58:49 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 63492C03E969
-        for <linux-sparse@vger.kernel.org>; Sat, 30 May 2020 10:58:49 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id f7so5262090ejq.6
-        for <linux-sparse@vger.kernel.org>; Sat, 30 May 2020 10:58:49 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <37ef319f-ed1e-071d-ff4b-cb3a997fbf65@ramsayjones.plus.com>
+        Mon, 1 Jun 2020 02:52:45 -0400
+Content-Description: Mail message body
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: Recipients <yoshi@bestprofit-futures.co.id>
 
-On Sat, May 30, 2020 at 06:51:38PM +0100, Ramsay Jones wrote:
-> 
-> Commit c100a7ab (add support for _Generic, 2020-05-28) added the
-> function evaluate_generic_selection() as an external symbol, without
-> providing an external declaration in a header file. This causes
-> sparse to issue a warning as part of the 'selfcheck' target.
-> 
-> Since this function does not (currently) need to be an external symbol,
-> mark it as static.
+Lieber Freund,
 
-Hmm, yes. I should taste my own dogfood and use 'make selfcheck' ...
-Thanks.
+Ich bin Herr Tayeb Souami, New Jersey, Vereinigte Staaten von Amerika, der =
+Mega-Gewinner von $ 315million In Mega Millions Jackpot, spende ich an 5 zu=
+f=C3=A4llige Personen, wenn Sie diese E-Mail erhalten, dann wurde Ihre E-Ma=
+il nach einem Spinball ausgew=C3=A4hlt.Ich habe den gr=C3=B6=C3=9Ften Teil =
+meines Verm=C3=B6gens auf eine Reihe von Wohlt=C3=A4tigkeitsorganisationen =
+und Organisationen verteilt.Ich habe mich freiwillig dazu entschieden, die =
+Summe von =E2=82=AC 2.000.000,00 an Sie als eine der ausgew=C3=A4hlten 5 zu=
+ spenden, um meine Gewinne zu =C3=BCberpr=C3=BCfen, sehen Sie bitte meine Y=
+ou Tube Seite unten.
 
--- Luc 
+UHR MICH HIER: https://www.youtube.com/watch?v=3DZ6ui8ZDQ6Ks
+
+
+Das ist dein Spendencode: [TS530342018]
+
+
+Antworten Sie mit dem SPENDE-CODE an diese
+
+ E-Mail:Tayebsouam.spende@gmail.com
+
+Ich hoffe, Sie und Ihre Familie gl=C3=BCcklich zu machen.
+
+Gr=C3=BC=C3=9Fe
+Herr Tayeb Souami
