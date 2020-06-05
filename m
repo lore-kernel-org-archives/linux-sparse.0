@@ -1,71 +1,38 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: [PATCH] pre-process: fix a compiler array subscript type warning
-Date: Fri, 5 Jun 2020 22:29:24 +0100
-Message-ID: <fbb9ba2b-14fa-c6e1-a730-80d35547ea52@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] pre-process: fix a compiler array subscript type warning
+Date: Sat, 6 Jun 2020 01:09:53 +0200
+Message-ID: <20200605230953.oe5pfjmpuvkxdkl3@ltop.local>
+References: <fbb9ba2b-14fa-c6e1-a730-80d35547ea52@ramsayjones.plus.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout02.plus.net ([212.159.14.17]:58133 "EHLO
-        avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728247AbgFEV33 (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47932 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728296AbgFEXJ5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 5 Jun 2020 17:29:29 -0400
-Content-Language: en-GB
+        Fri, 5 Jun 2020 19:09:57 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1993BC08C5C2
+        for <linux-sparse@vger.kernel.org>; Fri,  5 Jun 2020 16:09:57 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id q13so8693747edi.3
+        for <linux-sparse@vger.kernel.org>; Fri, 05 Jun 2020 16:09:57 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <fbb9ba2b-14fa-c6e1-a730-80d35547ea52@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Fri, Jun 05, 2020 at 10:29:24PM +0100, Ramsay Jones wrote:
+> Hi Luc,
+> 
+> Having not done so in a while, last night I updated my cygwin
+> installation. This resulted in updates to the versions of the
+> libc/headers/gcc, among other things. (eg. gcc is now v9.3.0).
+> 
+> This patch fixes the new compiler warning that results!
 
-On cygwin, the <ctype.h> header is written in such a way as to cause
-a gcc compiler warning if a plain 'char' is passed to the character
-classification macros (in this case isdigit). The result is defined
-only if the parameter is representable as an unsigned char, or if it
-is EOF.
+Nice catch! I really hate the spec of these functions.
 
-When passing a 'char' type argument to isdigit(), the compiler warns
-like so:
-
-    CC      pre-process.o
-  In file included from pre-process.c:33:
-  pre-process.c: In function ‘predefine’:
-  pre-process.c:1429:18: warning: array subscript has type ‘char’ [-Wchar-subscripts]
-   1429 |   if (isdigit(buf[0])) {
-        |               ~~~^~~
-
-In order to suppress the warning, cast the argument of isdigit() to
-an 'unsigned char' type.
-
-Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
----
-
-Hi Luc,
-
-Having not done so in a while, last night I updated my cygwin
-installation. This resulted in updates to the versions of the
-libc/headers/gcc, among other things. (eg. gcc is now v9.3.0).
-
-This patch fixes the new compiler warning that results!
-
-ATB,
-Ramsay Jones
-
- pre-process.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/pre-process.c b/pre-process.c
-index c8725dc8..d96035e2 100644
---- a/pre-process.c
-+++ b/pre-process.c
-@@ -1426,7 +1426,7 @@ void predefine(const char *name, int weak, const char *fmt, ...)
- 		va_end(ap);
- 
- 		value = __alloc_token(0);
--		if (isdigit(buf[0])) {
-+		if (isdigit((unsigned char)buf[0])) {
- 			token_type(value) = TOKEN_NUMBER;
- 			value->number = xstrdup(buf);
- 		} else {
--- 
-2.27.0
+Thanks,
+-- Luc
