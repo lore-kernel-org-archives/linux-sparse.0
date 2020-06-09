@@ -1,88 +1,56 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] generic: fix crash when nothing match
-Date: Tue,  9 Jun 2020 01:32:38 +0200
-Message-ID: <20200608233238.66101-1-luc.vanoostenryck@gmail.com>
+Subject: [SPARSE PATCH] nios2: add declaration for __builtin_{rd,wr}ctl()
+Date: Tue,  9 Jun 2020 20:45:21 +0200
+Message-ID: <20200609184521.47758-1-luc.vanoostenryck@gmail.com>
+References: <20200609151329.GU23011@xsang-OptiPlex-9020>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41546 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49964 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732490AbgFHXcp (ORCPT
+        with ESMTP id S1728400AbgFISpa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:32:45 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 39F36C08C5C2
-        for <linux-sparse@vger.kernel.org>; Mon,  8 Jun 2020 16:32:44 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id m21so14828670eds.13
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Jun 2020 16:32:44 -0700 (PDT)
+        Tue, 9 Jun 2020 14:45:30 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 008C9C05BD1E
+        for <linux-sparse@vger.kernel.org>; Tue,  9 Jun 2020 11:45:29 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id o15so23521948ejm.12
+        for <linux-sparse@vger.kernel.org>; Tue, 09 Jun 2020 11:45:29 -0700 (PDT)
+In-Reply-To: <20200609151329.GU23011@xsang-OptiPlex-9020>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Era Mayflower <mayflowerera@gmail.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, kbuild test robot <lkp@intel.com>
 
-The code for the generic selection doesn't take in account
-the fact that the default entry could be absent.
+These 2 are used for the kernel and the lack of a
+declaration is causing problems.
 
-Catch the case where nothing matches and issue an error.
+So add the declarations for these 2 builtins.
+At the same time also add one for '__builtin_custom_ini()'
+since this one may also be used in the kernel.
 
-Fixes: c100a7ab2504f9e6fe6b6d3f9a010a8ea5ed30a3
+Note: a better fix should be to move this to target-nios2.c
+
+Link: https://lore.kernel.org/lkml/20200609151329.GU23011@xsang-OptiPlex-9020/
+Reported-by: kbuild test robot <lkp@intel.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                |  8 ++++++--
- validation/generic-bad0.c | 23 +++++++++++++++++++++++
- 2 files changed, 29 insertions(+), 2 deletions(-)
- create mode 100644 validation/generic-bad0.c
+ builtin.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/evaluate.c b/evaluate.c
-index bc69a1fa57ee..95aef4dc0758 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -3299,11 +3299,15 @@ static struct symbol *evaluate_generic_selection(struct expression *expr)
- 			continue;
- 
- 		res = map->expr;
--		goto end;
-+		goto found;
- 	}
- 	res = expr->def;
-+	if (!res) {
-+		sparse_error(expr->pos, "no generic selection for '%s'", show_typename(ctrl));
-+		return NULL;
-+	}
- 
--end:
-+found:
- 	*expr = *res;
- 	return evaluate_expression(expr);
+diff --git a/builtin.c b/builtin.c
+index debc22c036ec..5ed17700d422 100644
+--- a/builtin.c
++++ b/builtin.c
+@@ -613,4 +613,9 @@ void declare_builtins(void)
+ 	declare_builtin("__builtin_bfin_csync", &void_ctype, 0, NULL);
+ 	declare_builtin("__builtin_bfin_ssync", &void_ctype, 0, NULL);
+ 	declare_builtin("__builtin_bfin_norm_fr1x32", &int_ctype, 0, &int_ctype, NULL);
++
++	// Nios-II-specific
++	declare_builtin("__builtin_rdctl", &int_ctype, 0, &int_ctype, NULL);
++	declare_builtin("__builtin_wrctl", &void_ctype, 0, &int_ctype, &int_ctype, NULL);
++	declare_builtin("__builtin_custom_ini", &int_ctype, 0, &int_ctype, NULL);
  }
-diff --git a/validation/generic-bad0.c b/validation/generic-bad0.c
-new file mode 100644
-index 000000000000..acc3d5e78b53
---- /dev/null
-+++ b/validation/generic-bad0.c
-@@ -0,0 +1,23 @@
-+struct s;
-+
-+void foo(int n)
-+{
-+	_Generic(n, default: 1, default: 2);
-+	_Generic(n, int[n]:0, default:1);
-+	_Generic(n, struct s:0, default:1);
-+	_Generic(n, void:0, default:1);
-+	_Generic(n, void (void):0, default:1);
-+	_Generic(&n, int:5, signed int:7, default:23);
-+	_Generic(n, void *:5);
-+}
-+
-+/*
-+ * check-name: generic-bad0
-+ *
-+ * check-error-start
-+generic-bad0.c:5:33: warning: multiple default in generic expression
-+generic-bad0.c:5:30: note: previous was here
-+generic-bad0.c:6:25: warning: Variable length array is used.
-+generic-bad0.c:11:17: error: no generic selection for 'int [addressable] n'
-+ * check-error-end
-+ */
 -- 
 2.27.0
