@@ -1,66 +1,81 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/7] move arch-specific builtins to their own table
-Date: Wed, 10 Jun 2020 22:27:28 +0200
-Message-ID: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/7] builtin: add support for arch-specific builtins
+Date: Wed, 10 Jun 2020 22:27:32 +0200
+Message-ID: <20200610202735.84968-5-luc.vanoostenryck@gmail.com>
+References: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34504 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34522 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728674AbgFJU1o (ORCPT
+        with ESMTP id S1728694AbgFJU1s (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 10 Jun 2020 16:27:44 -0400
+        Wed, 10 Jun 2020 16:27:48 -0400
 Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22ACAC03E96B
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:44 -0700 (PDT)
-Received: by mail-ej1-x643.google.com with SMTP id y13so4103572eju.2
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:44 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BAE8EC03E96F
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:47 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id q19so4070223eja.7
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:47 -0700 (PDT)
+In-Reply-To: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The goal of this to avoid the declaration of arch-specific builtins
-when the architecture doesn't match. As nice side-effects it also:
-* add support for arch-specific builtins in their target-<arch>.c
-* let these builtins declarations be done via a table (it was done
-  via a serie of function calls, one by builtin).
-* add minimal support for the architectures Alpha, Blackfin & Nios2.
+Now that a table is used for the declaration of builtin functions
+it's easy to support arch-specific builtins.
 
-These changes are motivated by a recent report from the kbuild test
-bot (which seems to find lately much more sparse-related issues
-in the kernel than it used to, often address-space & endianness
-problems).
+The main objective is to not 'pollute' the main table with
+arch-specfic entries for uncommon architectures.
 
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ builtin.c | 4 ++++
+ target.h  | 4 ++++
+ 2 files changed, 8 insertions(+)
 
-Luc Van Oostenryck (7):
-  builtin: can be initialized later
-  builtin: use a table for the builtins
-  builtin: unify the 2 tables of builtins
-  builtin: add support for arch-specific builtins
-  arch: add specificities for Nios2
-  arch: add specificities for Blackfin
-  arch: add specificities for Alpha
-
- Makefile       |   3 +
- builtin.c      | 439 ++++++++++++++++++++++---------------------------
- builtin.h      |  15 ++
- lib.c          |   2 +-
- machine.h      |   5 +
- symbol.c       |   1 -
- symbol.h       |   1 -
- target-alpha.c |  30 ++++
- target-bfin.c  |  26 +++
- target-nios2.c |  31 ++++
- target.c       |   6 +
- target.h       |   7 +
- 12 files changed, 321 insertions(+), 245 deletions(-)
- create mode 100644 builtin.h
- create mode 100644 target-alpha.c
- create mode 100644 target-bfin.c
- create mode 100644 target-nios2.c
-
-
-base-commit: 42323db3955557b223268ec4196acb77308ab204
+diff --git a/builtin.c b/builtin.c
+index bb9ec65b2d20..dcf8200ec002 100644
+--- a/builtin.c
++++ b/builtin.c
+@@ -391,6 +391,9 @@ static void declare_one_builtin(const struct builtin_fn *entry)
+ 
+ static void declare_builtins(const struct builtin_fn tbl[])
+ {
++	if (!tbl)
++		return;
++
+ 	while (tbl->name)
+ 		declare_one_builtin(tbl++);
+ }
+@@ -587,5 +590,6 @@ void init_builtins(int stream)
+ {
+ 
+ 	declare_builtins(builtins_common);
++	declare_builtins(arch_target->builtins);
+ 	init_linearized_builtins(stream);
+ }
+diff --git a/target.h b/target.h
+index a89e21b63563..1202c0be1ac9 100644
+--- a/target.h
++++ b/target.h
+@@ -54,6 +54,8 @@ extern int bits_in_enum;
+ extern int enum_alignment;
+ 
+ 
++struct builtin_fn;
++
+ struct target {
+ 	enum machine	mach;
+ 	enum bitness	bitness;
+@@ -71,6 +73,8 @@ struct target {
+ 	const struct target *target_32bit;
+ 	const struct target *target_64bit;
+ 
++	const struct builtin_fn *builtins;
++
+ 	void (*init)(const struct target *self);
+ 	void (*predefine)(const struct target *self);
+ };
 -- 
 2.27.0
