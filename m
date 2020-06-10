@@ -1,62 +1,66 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/7] builtin: can be initialized later
-Date: Wed, 10 Jun 2020 22:27:29 +0200
-Message-ID: <20200610202735.84968-2-luc.vanoostenryck@gmail.com>
-References: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/7] move arch-specific builtins to their own table
+Date: Wed, 10 Jun 2020 22:27:28 +0200
+Message-ID: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34506 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34504 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728675AbgFJU1p (ORCPT
+        with ESMTP id S1728674AbgFJU1o (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 10 Jun 2020 16:27:45 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DFD2EC03E96B
+        Wed, 10 Jun 2020 16:27:44 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22ACAC03E96B
         for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:44 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id o15so4037859ejm.12
+Received: by mail-ej1-x643.google.com with SMTP id y13so4103572eju.2
         for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:44 -0700 (PDT)
-In-Reply-To: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The itialization of the buitins can be done later,
-after that the types have been initialized.
+The goal of this to avoid the declaration of arch-specific builtins
+when the architecture doesn't match. As nice side-effects it also:
+* add support for arch-specific builtins in their target-<arch>.c
+* let these builtins declarations be done via a table (it was done
+  via a serie of function calls, one by builtin).
+* add minimal support for the architectures Alpha, Blackfin & Nios2.
 
-So move the call to init_builtins() to just before declare_builtins().
-This will allow some other small improvements.
+These changes are motivated by a recent report from the kbuild test
+bot (which seems to find lately much more sparse-related issues
+in the kernel than it used to, often address-space & endianness
+problems).
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- lib.c    | 1 +
- symbol.c | 1 -
- 2 files changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/lib.c b/lib.c
-index 8f071bfe96ef..aa1c1d656b9d 100644
---- a/lib.c
-+++ b/lib.c
-@@ -1595,6 +1595,7 @@ struct symbol_list *sparse_initialize(int argc, char **argv, struct string_list
- 
- 		predefined_macros();
- 		create_builtin_stream();
-+		init_builtins(0);
- 		declare_builtins();
- 
- 		list = sparse_initial();
-diff --git a/symbol.c b/symbol.c
-index 7044ab3f78ce..6ee521ba48d8 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -783,7 +783,6 @@ void init_symbols(void)
- #include "ident-list.h"
- 
- 	init_parser(stream);
--	init_builtins(stream);
- }
- 
- // For fix-sized types
+Luc Van Oostenryck (7):
+  builtin: can be initialized later
+  builtin: use a table for the builtins
+  builtin: unify the 2 tables of builtins
+  builtin: add support for arch-specific builtins
+  arch: add specificities for Nios2
+  arch: add specificities for Blackfin
+  arch: add specificities for Alpha
+
+ Makefile       |   3 +
+ builtin.c      | 439 ++++++++++++++++++++++---------------------------
+ builtin.h      |  15 ++
+ lib.c          |   2 +-
+ machine.h      |   5 +
+ symbol.c       |   1 -
+ symbol.h       |   1 -
+ target-alpha.c |  30 ++++
+ target-bfin.c  |  26 +++
+ target-nios2.c |  31 ++++
+ target.c       |   6 +
+ target.h       |   7 +
+ 12 files changed, 321 insertions(+), 245 deletions(-)
+ create mode 100644 builtin.h
+ create mode 100644 target-alpha.c
+ create mode 100644 target-bfin.c
+ create mode 100644 target-nios2.c
+
+
+base-commit: 42323db3955557b223268ec4196acb77308ab204
 -- 
 2.27.0
