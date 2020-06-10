@@ -1,287 +1,144 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/7] builtin: unify the 2 tables of builtins
-Date: Wed, 10 Jun 2020 22:27:31 +0200
-Message-ID: <20200610202735.84968-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/7] arch: add specificities for Blackfin
+Date: Wed, 10 Jun 2020 22:27:34 +0200
+Message-ID: <20200610202735.84968-7-luc.vanoostenryck@gmail.com>
 References: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34514 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34528 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726988AbgFJU1s (ORCPT
+        with ESMTP id S1726668AbgFJU1t (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 10 Jun 2020 16:27:48 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 085E7C03E96B
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:47 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id g1so2354113edv.6
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:46 -0700 (PDT)
+        Wed, 10 Jun 2020 16:27:49 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 807B3C03E96B
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:49 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id t21so2339350edr.12
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Jun 2020 13:27:49 -0700 (PDT)
 In-Reply-To: <20200610202735.84968-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Till now, 2 tables are used to initialize builtin functions:
-* an older, small one, without type information, used to set
-  a symbol_op to evaluate and/or expand the ones that have
-  effectively an effect.
-* a newer and bigger one which only contains what is effectively
-  the prototype for these builtins in order to avoid warnings
-  about undeclared functions.
-
-It's kinda annoying to have 2 tables for this, even more so
-because most entries in the first table also need to be in the
-second one (for arguments type & number checking).
-
-Fix this by:
-* adding a field in the second table for the symbol_op
-* merging or moving the entries in the first table into
-  the second one.
+The real goal here is in fact to move the bfin-specfic
+builtins out of the main builtins table.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- builtin.c | 145 +++++++++++++++++++-----------------------------------
- builtin.h |   1 +
- 2 files changed, 51 insertions(+), 95 deletions(-)
+ Makefile      |  1 +
+ builtin.c     |  5 -----
+ machine.h     |  1 +
+ target-bfin.c | 26 ++++++++++++++++++++++++++
+ target.c      |  2 ++
+ target.h      |  1 +
+ 6 files changed, 31 insertions(+), 5 deletions(-)
+ create mode 100644 target-bfin.c
 
+diff --git a/Makefile b/Makefile
+index 69fae4828e62..bee6a324b1c7 100644
+--- a/Makefile
++++ b/Makefile
+@@ -67,6 +67,7 @@ LIB_OBJS += symbol.o
+ LIB_OBJS += target.o
+ LIB_OBJS += target-arm.o
+ LIB_OBJS += target-arm64.o
++LIB_OBJS += target-bfin.o
+ LIB_OBJS += target-default.o
+ LIB_OBJS += target-m68k.o
+ LIB_OBJS += target-mips.o
 diff --git a/builtin.c b/builtin.c
-index aa9ce09c0f40..bb9ec65b2d20 100644
+index 9442fb5b89ef..dd467db425df 100644
 --- a/builtin.c
 +++ b/builtin.c
-@@ -377,6 +377,7 @@ static void declare_one_builtin(const struct builtin_fn *entry)
- 	sym->ctype.base_type = fun;
- 	sym->ctype.modifiers = MOD_TOPLEVEL;
- 	sym->builtin = 1;
-+	sym->op = entry->op;
+@@ -573,11 +573,6 @@ static const struct builtin_fn builtins_common[] = {
+ 	{ "__builtin_alpha_insql", &long_ctype, 0, { &long_ctype, &long_ctype }},
+ 	{ "__builtin_alpha_inswl", &long_ctype, 0, { &long_ctype, &long_ctype }},
  
- 	fun->ctype.base_type = get_ctype(entry->ret_type);
- 	fun->variadic = entry->variadic;
-@@ -397,39 +398,39 @@ static void declare_builtins(const struct builtin_fn tbl[])
- static const struct builtin_fn builtins_common[] = {
- #define size_t_ctype	&size_t_alias
- #define va_list_ctype	&ptr_ctype
-+	{ "__builtin_choose_expr", NULL, 1, .op = &choose_op },
-+	{ "__builtin_constant_p", NULL, 1, .op = &constant_p_op },
-+	{ "__builtin_expect", &long_ctype, 0, { &long_ctype ,&long_ctype }, .op = &expect_op },
-+	{ "__builtin_safe_p", NULL, 1, .op = &safe_p_op },
-+	{ "__builtin_warning", NULL, 1, .op = &warning_op },
-+
- 	{ "__builtin_abort", &void_ctype, 0 },
- 	{ "__builtin_abs", &int_ctype , 0, { &int_ctype }},
-+	{ "__builtin_add_overflow", &bool_ctype, 1, .op = &overflow_op },
-+	{ "__builtin_add_overflow_p", &bool_ctype, 1, .op = &overflow_p_op },
- 	{ "__builtin_alloca", &ptr_ctype, 0, { size_t_ctype }},
--	{ "__builtin_alpha_cmpbge", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_extbl", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_extwl", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_insbl", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_inslh", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_insql", &long_ctype, 0, { &long_ctype, &long_ctype }},
--	{ "__builtin_alpha_inswl", &long_ctype, 0, { &long_ctype, &long_ctype }},
- 	{ "__builtin_bcmp", &int_ctype , 0, { &const_ptr_ctype, &const_ptr_ctype, size_t_ctype }},
- 	{ "__builtin_bcopy", &void_ctype, 0, { &const_ptr_ctype, &ptr_ctype, size_t_ctype }},
--	{ "__builtin_bswap16", &ushort_ctype, 0, { &ushort_ctype }},
--	{ "__builtin_bswap32", &uint_ctype, 0, { &uint_ctype }},
--	{ "__builtin_bswap64", &ullong_ctype, 0, { &ullong_ctype }},
-+	{ "__builtin_bswap16", &ushort_ctype, 0, { &ushort_ctype }, .op = &bswap_op },
-+	{ "__builtin_bswap32", &uint_ctype, 0, { &uint_ctype }, .op = &bswap_op },
-+	{ "__builtin_bswap64", &ullong_ctype, 0, { &ullong_ctype }, .op = &bswap_op },
- 	{ "__builtin_bzero", &void_ctype, 0, { &ptr_ctype, size_t_ctype }},
- 	{ "__builtin_calloc", &ptr_ctype, 0, { size_t_ctype, size_t_ctype }},
--	{ "__builtin_clrsb", &int_ctype, 0, { &int_ctype }},
--	{ "__builtin_clrsbl", &int_ctype, 0, { &long_ctype }},
--	{ "__builtin_clrsbll", &int_ctype, 0, { &llong_ctype }},
--	{ "__builtin_clz", &int_ctype, 0, { &int_ctype }},
--	{ "__builtin_clzl", &int_ctype, 0, { &long_ctype }},
--	{ "__builtin_clzll", &int_ctype, 0, { &llong_ctype }},
--	{ "__builtin_ctz", &int_ctype, 0, { &int_ctype }},
--	{ "__builtin_ctzl", &int_ctype, 0, { &long_ctype }},
--	{ "__builtin_ctzll", &int_ctype, 0, { &llong_ctype }},
-+	{ "__builtin_clrsb", &int_ctype, 0, { &int_ctype }, .op = &clrsb_op },
-+	{ "__builtin_clrsbl", &int_ctype, 0, { &long_ctype }, .op = &clrsb_op },
-+	{ "__builtin_clrsbll", &int_ctype, 0, { &llong_ctype }, .op = &clrsb_op },
-+	{ "__builtin_clz", &int_ctype, 0, { &int_ctype }, .op = &clz_op },
-+	{ "__builtin_clzl", &int_ctype, 0, { &long_ctype }, .op = &clz_op },
-+	{ "__builtin_clzll", &int_ctype, 0, { &llong_ctype }, .op = &clz_op },
-+	{ "__builtin_ctz", &int_ctype, 0, { &int_ctype }, .op = &ctz_op },
-+	{ "__builtin_ctzl", &int_ctype, 0, { &long_ctype }, .op = &ctz_op },
-+	{ "__builtin_ctzll", &int_ctype, 0, { &llong_ctype }, .op = &ctz_op },
- 	{ "__builtin_exit", &void_ctype, 0, { &int_ctype }},
--	{ "__builtin_expect", &long_ctype, 0, { &long_ctype ,&long_ctype }},
- 	{ "__builtin_extract_return_addr", &ptr_ctype, 0, { &ptr_ctype }},
- 	{ "__builtin_fabs", &double_ctype, 0, { &double_ctype }},
--	{ "__builtin_ffs", &int_ctype, 0, { &int_ctype }},
--	{ "__builtin_ffsl", &int_ctype, 0, { &long_ctype }},
--	{ "__builtin_ffsll", &int_ctype, 0, { &llong_ctype }},
-+	{ "__builtin_ffs", &int_ctype, 0, { &int_ctype }, .op = &ffs_op },
-+	{ "__builtin_ffsl", &int_ctype, 0, { &long_ctype }, .op = &ffs_op },
-+	{ "__builtin_ffsll", &int_ctype, 0, { &llong_ctype }, .op = &ffs_op },
- 	{ "__builtin_frame_address", &ptr_ctype, 0, { &uint_ctype }},
- 	{ "__builtin_free", &void_ctype, 0, { &ptr_ctype }},
- 	{ "__builtin_huge_val", &double_ctype, 0 },
-@@ -439,16 +440,16 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_inf", &double_ctype, 0 },
- 	{ "__builtin_inff", &float_ctype, 0 },
- 	{ "__builtin_infl", &ldouble_ctype, 0 },
--	{ "__builtin_isfinite", &int_ctype, 1 },
-+	{ "__builtin_isfinite", &int_ctype, 1, .op = &fp_unop_op },
- 	{ "__builtin_isgreater", &int_ctype, 0, { &float_ctype, &float_ctype }},
- 	{ "__builtin_isgreaterequal", &int_ctype, 0, { &float_ctype, &float_ctype }},
--	{ "__builtin_isinf", &int_ctype, 1 },
--	{ "__builtin_isinf_sign", &int_ctype, 1 },
-+	{ "__builtin_isinf", &int_ctype, 1, .op = &fp_unop_op },
-+	{ "__builtin_isinf_sign", &int_ctype, 1, .op = &fp_unop_op },
- 	{ "__builtin_isless", &int_ctype, 0, { &float_ctype, &float_ctype }},
- 	{ "__builtin_islessequal", &int_ctype, 0, { &float_ctype, &float_ctype }},
- 	{ "__builtin_islessgreater", &int_ctype, 0, { &float_ctype, &float_ctype }},
--	{ "__builtin_isnan", &int_ctype, 1 },
--	{ "__builtin_isnormal", &int_ctype, 1 },
-+	{ "__builtin_isnan", &int_ctype, 1, .op = &fp_unop_op },
-+	{ "__builtin_isnormal", &int_ctype, 1, .op = &fp_unop_op },
- 	{ "__builtin_isunordered", &int_ctype, 0, { &float_ctype, &float_ctype }},
- 	{ "__builtin_labs", &long_ctype, 0, { &long_ctype }},
- 	{ "__builtin_llabs", &llong_ctype, 0, { &llong_ctype }},
-@@ -459,16 +460,18 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_memmove", &ptr_ctype, 0, { &ptr_ctype, &const_ptr_ctype, size_t_ctype }},
- 	{ "__builtin_mempcpy", &ptr_ctype, 0, { &ptr_ctype, &const_ptr_ctype, size_t_ctype }},
- 	{ "__builtin_memset", &ptr_ctype, 0, { &ptr_ctype, &int_ctype, size_t_ctype }},
-+	{ "__builtin_mul_overflow", &bool_ctype, 1, .op = &overflow_op },
-+	{ "__builtin_mul_overflow_p", &bool_ctype, 1, .op = &overflow_p_op },
- 	{ "__builtin_nan", &double_ctype, 0, { &const_string_ctype }},
- 	{ "__builtin_nanf", &float_ctype, 0, { &const_string_ctype }},
- 	{ "__builtin_nanl", &ldouble_ctype, 0, { &const_string_ctype }},
- 	{ "__builtin_object_size", size_t_ctype, 0, { &const_ptr_ctype, &int_ctype }},
--	{ "__builtin_parity", &int_ctype, 0, { &uint_ctype }},
--	{ "__builtin_parityl", &int_ctype, 0, { &ulong_ctype }},
--	{ "__builtin_parityll", &int_ctype, 0, { &ullong_ctype }},
--	{ "__builtin_popcount", &int_ctype, 0, { &uint_ctype }},
--	{ "__builtin_popcountl", &int_ctype, 0, { &ulong_ctype }},
--	{ "__builtin_popcountll", &int_ctype, 0, { &ullong_ctype }},
-+	{ "__builtin_parity", &int_ctype, 0, { &uint_ctype }, .op = &parity_op },
-+	{ "__builtin_parityl", &int_ctype, 0, { &ulong_ctype }, .op = &parity_op },
-+	{ "__builtin_parityll", &int_ctype, 0, { &ullong_ctype }, .op = &parity_op },
-+	{ "__builtin_popcount", &int_ctype, 0, { &uint_ctype }, .op = &popcount_op },
-+	{ "__builtin_popcountl", &int_ctype, 0, { &ulong_ctype }, .op = &popcount_op },
-+	{ "__builtin_popcountll", &int_ctype, 0, { &ullong_ctype }, .op = &popcount_op },
- 	{ "__builtin_prefetch", &void_ctype, 1, { &const_ptr_ctype }},
- 	{ "__builtin_printf", &int_ctype, 1, { &const_string_ctype }},
- 	{ "__builtin_puts", &int_ctype, 0, { &const_string_ctype }},
-@@ -478,7 +481,7 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_sadd_overflow", &bool_ctype, 0, { &int_ctype, &int_ctype, &int_ptr_ctype }},
- 	{ "__builtin_saddl_overflow", &bool_ctype, 0, { &long_ctype, &long_ctype, &long_ptr_ctype }},
- 	{ "__builtin_saddll_overflow", &bool_ctype, 0, { &llong_ctype, &llong_ctype, &llong_ptr_ctype }},
--	{ "__builtin_signbit", &int_ctype, 1 },
-+	{ "__builtin_signbit", &int_ctype, 1 , .op = &fp_unop_op },
- 	{ "__builtin_smul_overflow", &bool_ctype, 0, { &int_ctype, &int_ctype, &int_ptr_ctype }},
- 	{ "__builtin_smull_overflow", &bool_ctype, 0, { &long_ctype, &long_ctype, &long_ptr_ctype }},
- 	{ "__builtin_smulll_overflow", &bool_ctype, 0, { &llong_ctype, &llong_ctype, &llong_ptr_ctype }},
-@@ -508,6 +511,8 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_strrchr", &string_ctype, 0, { &const_string_ctype, &int_ctype }},
- 	{ "__builtin_strspn", size_t_ctype, 0, { &const_string_ctype, &const_string_ctype }},
- 	{ "__builtin_strstr", &string_ctype, 0, { &const_string_ctype, &const_string_ctype }},
-+	{ "__builtin_sub_overflow", &bool_ctype, 1, .op = &overflow_op },
-+	{ "__builtin_sub_overflow_p", &bool_ctype, 1, .op = &overflow_p_op },
- 	{ "__builtin_trap", &void_ctype, 0 },
- 	{ "__builtin_uadd_overflow", &bool_ctype, 0, { &uint_ctype, &uint_ctype, &uint_ptr_ctype }},
- 	{ "__builtin_uaddl_overflow", &bool_ctype, 0, { &ulong_ctype, &ulong_ctype, &ulong_ptr_ctype }},
-@@ -556,6 +561,15 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__sync_val_compare_and_swap", &int_ctype, 1, { &ptr_ctype }},
- 	{ "__sync_xor_and_fetch", &int_ctype, 1, { &ptr_ctype }},
- 
-+	// Alpha-specific
-+	{ "__builtin_alpha_cmpbge", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_extbl", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_extwl", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_insbl", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_inslh", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_insql", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+	{ "__builtin_alpha_inswl", &long_ctype, 0, { &long_ctype, &long_ctype }},
-+
- 	// Blackfin-specific stuff
- 	{ "__builtin_bfin_csync", &void_ctype, 0 },
- 	{ "__builtin_bfin_ssync", &void_ctype, 0 },
-@@ -569,68 +583,9 @@ static const struct builtin_fn builtins_common[] = {
+-	// Blackfin-specific stuff
+-	{ "__builtin_bfin_csync", &void_ctype, 0 },
+-	{ "__builtin_bfin_ssync", &void_ctype, 0 },
+-	{ "__builtin_bfin_norm_fr1x32", &int_ctype, 0, { &int_ctype }},
+-
  	{ }
  };
  
--static struct symbol builtin_fn_type = { .type = SYM_FN /* , .variadic =1 */ };
--static struct sym_init {
--	const char *name;
--	struct symbol *base_type;
--	unsigned int modifiers;
--	struct symbol_op *op;
--} builtins_table[] = {
--	{ "__builtin_constant_p", &builtin_fn_type, MOD_TOPLEVEL, &constant_p_op },
--	{ "__builtin_safe_p", &builtin_fn_type, MOD_TOPLEVEL, &safe_p_op },
--	{ "__builtin_warning", &builtin_fn_type, MOD_TOPLEVEL, &warning_op },
--	{ "__builtin_expect", &builtin_fn_type, MOD_TOPLEVEL, &expect_op },
--	{ "__builtin_choose_expr", &builtin_fn_type, MOD_TOPLEVEL, &choose_op },
--	{ "__builtin_bswap16", &builtin_fn_type, MOD_TOPLEVEL, &bswap_op },
--	{ "__builtin_bswap32", &builtin_fn_type, MOD_TOPLEVEL, &bswap_op },
--	{ "__builtin_bswap64", &builtin_fn_type, MOD_TOPLEVEL, &bswap_op },
--	{ "__builtin_clrsb", &builtin_fn_type, MOD_TOPLEVEL, &clrsb_op },
--	{ "__builtin_clrsbl", &builtin_fn_type, MOD_TOPLEVEL, &clrsb_op },
--	{ "__builtin_clrsbll", &builtin_fn_type, MOD_TOPLEVEL, &clrsb_op },
--	{ "__builtin_clz", &builtin_fn_type, MOD_TOPLEVEL, &clz_op },
--	{ "__builtin_clzl", &builtin_fn_type, MOD_TOPLEVEL, &clz_op },
--	{ "__builtin_clzll", &builtin_fn_type, MOD_TOPLEVEL, &clz_op },
--	{ "__builtin_ctz", &builtin_fn_type, MOD_TOPLEVEL, &ctz_op },
--	{ "__builtin_ctzl", &builtin_fn_type, MOD_TOPLEVEL, &ctz_op },
--	{ "__builtin_ctzll", &builtin_fn_type, MOD_TOPLEVEL, &ctz_op },
--	{ "__builtin_ffs", &builtin_fn_type, MOD_TOPLEVEL, &ffs_op },
--	{ "__builtin_ffsl", &builtin_fn_type, MOD_TOPLEVEL, &ffs_op },
--	{ "__builtin_ffsll", &builtin_fn_type, MOD_TOPLEVEL, &ffs_op },
--	{ "__builtin_isfinite", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_isinf", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_isinf_sign", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_isnan", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_isnormal", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_parity", &builtin_fn_type, MOD_TOPLEVEL, &parity_op },
--	{ "__builtin_parityl", &builtin_fn_type, MOD_TOPLEVEL, &parity_op },
--	{ "__builtin_parityll", &builtin_fn_type, MOD_TOPLEVEL, &parity_op },
--	{ "__builtin_popcount", &builtin_fn_type, MOD_TOPLEVEL, &popcount_op },
--	{ "__builtin_popcountl", &builtin_fn_type, MOD_TOPLEVEL, &popcount_op },
--	{ "__builtin_popcountll", &builtin_fn_type, MOD_TOPLEVEL, &popcount_op },
--	{ "__builtin_signbit", &builtin_fn_type, MOD_TOPLEVEL, &fp_unop_op },
--	{ "__builtin_add_overflow", &builtin_fn_type, MOD_TOPLEVEL, &overflow_op },
--	{ "__builtin_sub_overflow", &builtin_fn_type, MOD_TOPLEVEL, &overflow_op },
--	{ "__builtin_mul_overflow", &builtin_fn_type, MOD_TOPLEVEL, &overflow_op },
--	{ "__builtin_add_overflow_p", &builtin_fn_type, MOD_TOPLEVEL, &overflow_p_op },
--	{ "__builtin_sub_overflow_p", &builtin_fn_type, MOD_TOPLEVEL, &overflow_p_op },
--	{ "__builtin_mul_overflow_p", &builtin_fn_type, MOD_TOPLEVEL, &overflow_p_op },
--	{ NULL,		NULL,		0 }
--};
--
- void init_builtins(int stream)
- {
--	struct sym_init *ptr;
--
--	builtin_fn_type.variadic = 1;
--	for (ptr = builtins_table; ptr->name; ptr++) {
--		struct symbol *sym;
--		sym = create_symbol(stream, ptr->name, SYM_NODE, NS_SYMBOL);
--		sym->ctype.base_type = ptr->base_type;
--		sym->ctype.modifiers = ptr->modifiers;
--		sym->op = ptr->op;
--		sym->builtin = 1;
--	}
- 
--	init_linearized_builtins(stream);
- 	declare_builtins(builtins_common);
-+	init_linearized_builtins(stream);
- }
-diff --git a/builtin.h b/builtin.h
-index 233cf2806760..d0d3fd2ccf87 100644
---- a/builtin.h
-+++ b/builtin.h
-@@ -9,6 +9,7 @@ struct builtin_fn {
- 	unsigned int variadic:1;
- 	struct symbol *args[6];
- 	struct symbol *_args_null_tail;
-+	struct symbol_op *op;
- };
- 
- #endif
+diff --git a/machine.h b/machine.h
+index a211345c80ce..b9f22850b9db 100644
+--- a/machine.h
++++ b/machine.h
+@@ -32,6 +32,7 @@ enum machine {
+ 	MACH_RISCV32,	MACH_RISCV64,
+ 	MACH_SPARC32,	MACH_SPARC64,
+ 	MACH_S390,	MACH_S390X,
++	MACH_BFIN,
+ 	MACH_M68K,
+ 	MACH_NIOS2,
+ 	MACH_UNKNOWN
+diff --git a/target-bfin.c b/target-bfin.c
+new file mode 100644
+index 000000000000..b84cd5de8d54
+--- /dev/null
++++ b/target-bfin.c
+@@ -0,0 +1,26 @@
++#include "symbol.h"
++#include "target.h"
++#include "machine.h"
++#include "builtin.h"
++
++
++static void predefine_bfin(const struct target *self)
++{
++	predefine("__BFIN__", 1, "1");
++	predefine("__bfin__", 1, "1");
++}
++
++static const struct builtin_fn builtins_bfin[] = {
++	{ "__builtin_bfin_csync", &void_ctype, 0 },
++	{ "__builtin_bfin_ssync", &void_ctype, 0 },
++	{ "__builtin_bfin_norm_fr1x32", &int_ctype, 0, { &int_ctype }},
++	{ }
++};
++
++const struct target target_bfin = {
++	.mach = MACH_BFIN,
++	.bitness = ARCH_LP32,
++
++	.predefine = predefine_bfin,
++	.builtins = builtins_bfin,
++};
+diff --git a/target.c b/target.c
+index 0ef0eb5a14ae..1fd066da8639 100644
+--- a/target.c
++++ b/target.c
+@@ -60,6 +60,7 @@ static const struct target *targets[] = {
+ 	[MACH_ARM] =		&target_arm,
+ 	[MACH_ARM64] =		&target_arm64,
+ 	[MACH_I386] =		&target_i386,
++	[MACH_BFIN] =		&target_bfin,
+ 	[MACH_X86_64] =		&target_x86_64,
+ 	[MACH_MIPS32] =		&target_mips32,
+ 	[MACH_MIPS64] =		&target_mips64,
+@@ -88,6 +89,7 @@ enum machine target_parse(const char *name)
+ 		{ "arm64",	MACH_ARM64,	64, },
+ 		{ "arm",	MACH_ARM,	32, },
+ 		{ "i386",	MACH_I386,	32, },
++		{ "bfin",	MACH_BFIN,	32, },
+ 		{ "m68k",	MACH_M68K,	32, },
+ 		{ "mips",	MACH_MIPS32,	0,  },
+ 		{ "nios2",	MACH_NIOS2,	32, },
+diff --git a/target.h b/target.h
+index 4c184d8f2fbe..9674d0995fd5 100644
+--- a/target.h
++++ b/target.h
+@@ -82,6 +82,7 @@ struct target {
+ extern const struct target target_default;
+ extern const struct target target_arm;
+ extern const struct target target_arm64;
++extern const struct target target_bfin;
+ extern const struct target target_m68k;
+ extern const struct target target_mips32;
+ extern const struct target target_mips64;
 -- 
 2.27.0
