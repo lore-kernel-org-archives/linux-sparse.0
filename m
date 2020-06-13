@@ -1,213 +1,171 @@
-Return-Path: <SRS0=Ikl2=7W=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=iZGx=72=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C2E0C433E1
-	for <linux-sparse@archiver.kernel.org>; Tue,  9 Jun 2020 00:40:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DA696C433E0
+	for <linux-sparse@archiver.kernel.org>; Sat, 13 Jun 2020 14:29:07 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0BA8120737
-	for <linux-sparse@archiver.kernel.org>; Tue,  9 Jun 2020 00:40:31 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1591663231;
-	bh=ykA2/1B6WlQZ3TXxlaaNUqKEm5FMxSR7j0S3cwhJ6Vk=;
-	h=From:To:Cc:Subject:Date:In-Reply-To:References:List-ID:From;
-	b=VBjajOtPU7e9iNyF1alUfxfShxcFyK/Q9y1WDpnMa945rGI0uno0amWGzzxKEA7US
-	 I7kNwr9lKlfU+ObqS0Do47npXAF1VdicxoyuZ+ZCKde49JvZBIaNGVabjRbcbvQakk
-	 qsS7t42E2u/zA8y4lDR5IaKXyhW/Eu2tqUDPRHJc=
+	by mail.kernel.org (Postfix) with ESMTP id A450320792
+	for <linux-sparse@archiver.kernel.org>; Sat, 13 Jun 2020 14:29:07 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YXuwHu8f"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729439AbgFIAka (ORCPT
+        id S1726277AbgFMO3H (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 8 Jun 2020 20:40:30 -0400
-Received: from mail.kernel.org ([198.145.29.99]:60924 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729206AbgFHXNC (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 8 Jun 2020 19:13:02 -0400
-Received: from sasha-vm.mshome.net (c-73-47-72-35.hsd1.nh.comcast.net [73.47.72.35])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id D77AF208C7;
-        Mon,  8 Jun 2020 23:13:00 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=default; t=1591657981;
-        bh=ykA2/1B6WlQZ3TXxlaaNUqKEm5FMxSR7j0S3cwhJ6Vk=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=ADKYFVZe8XuzibmgVvYqd1ZF5DH2wVEwOI0JxgwuwfXbvwsi9eGV1qS40aH1c7dmM
-         FZd3oAHFc9KjMGAxMooxYYNDrEVa1KZ0sgdG89IcweTqUMpIXcU6mjWOamVrsp2bxc
-         XpaMxvHc6ahoV5zdcWtxb1AG/GEbuczUvr1XaZzM=
-From:   Sasha Levin <sashal@kernel.org>
-To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
-Cc:     Borislav Petkov <bp@suse.de>,
-        Sergei Trofimovich <slyfox@gentoo.org>,
-        Kalle Valo <kvalo@codeaurora.org>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        xen-devel@lists.xenproject.org, linux-sparse@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.6 042/606] x86: Fix early boot crash on gcc-10, third try
-Date:   Mon,  8 Jun 2020 19:02:47 -0400
-Message-ID: <20200608231211.3363633-42-sashal@kernel.org>
-X-Mailer: git-send-email 2.25.1
-In-Reply-To: <20200608231211.3363633-1-sashal@kernel.org>
-References: <20200608231211.3363633-1-sashal@kernel.org>
+        Sat, 13 Jun 2020 10:29:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49700 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726102AbgFMO3G (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sat, 13 Jun 2020 10:29:06 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 437E6C03E96F;
+        Sat, 13 Jun 2020 07:29:05 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id o15so12894719ejm.12;
+        Sat, 13 Jun 2020 07:29:05 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:content-transfer-encoding:in-reply-to;
+        bh=+BkDFDheDHOPpgm1F921wfzFLj6m4THP0S3m//P7le8=;
+        b=YXuwHu8ff6zs06tRTRiny1vPe+ybEdBxhKg3ZxyfyYe7KYTwOOBXiAZvIOiaTbMNhn
+         kjL5Oy4TstXbciUqXyk7vCU0SyxhF+M72/6jIHSPdB8OdgncpWF8t0oqtDdqftiMKYBp
+         /Xfwbyrq/Z+O4JgYekypIXuKk9nAYMjkB3iBu/iT+13fPC2JGFC1CSettBsCP73ueL33
+         7u9jsAHqQosNR9ONydbExpvsuDphj5siDsLsnX4P6Vq72i3gGVMTw6vM6CU2ySvt7KT1
+         R3R8CxG8nc1kyW7YZRER94kPfzruQZPXDqeVKJSe77qYUDA9Wn6mS1W9NPJN4/uZt3id
+         8HUQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:content-transfer-encoding
+         :in-reply-to;
+        bh=+BkDFDheDHOPpgm1F921wfzFLj6m4THP0S3m//P7le8=;
+        b=VsuiuW2yAfKTGSexszQLi5xI7I89EDVqxdKJGlt1TLCnWXqE67jGP5OhGL8BgsAaBK
+         SGqAmtZv74gbbW7/cMrRKqQqRXNlWNgGXqmvS5n54FRgMVuuc8c+K/DbkzjO5xWPY+6v
+         9ofncDPKnKjBIIEX/qZOn8WKtWDHZwixksdD0L+IqWpamntOLKAThhxvR8nDeMYquJDX
+         vkcW0RoqjqZMGT4jkGDBbbZvrP8s1+sDdj+b9xVzcVYoRyq3zp2P9FaWGT9W+9H7N98y
+         H/a6iZfQlqESf4TMBPcHNULRt5mdP5CFOr1dDyVdaHD43tt/g4hZvrLckVjfdTS+CdtM
+         tKDQ==
+X-Gm-Message-State: AOAM530LHIhkv6mEaYPpp73ufR0/7GT4jTMcR9sdrY0PxfHUDjrcbG66
+        i8HZxet0dz+PJ8MEfUNnZc0=
+X-Google-Smtp-Source: ABdhPJxyhQNJ4bAigIo3yiP/n0LNFOOCbb92aqQdHj+9uqkoQCfYdiBa+7gwIZiftbFKMs6lLBaCuQ==
+X-Received: by 2002:a17:906:c102:: with SMTP id do2mr17440801ejc.126.1592058543630;
+        Sat, 13 Jun 2020 07:29:03 -0700 (PDT)
+Received: from ltop.local ([2a02:a03f:b7f9:7600:2959:2a41:9bce:9e89])
+        by smtp.gmail.com with ESMTPSA id j2sm5001629edn.30.2020.06.13.07.29.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 13 Jun 2020 07:29:02 -0700 (PDT)
+Date:   Sat, 13 Jun 2020 16:29:01 +0200
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Herbert Xu <herbert@gondor.apana.org.au>
+Cc:     kernel test robot <lkp@intel.com>, linux-sparse@vger.kernel.org,
+        Petr Mladek <pmladek@suse.com>,
+        Sergey Senozhatsky <sergey.senozhatsky@gmail.com>,
+        Steven Rostedt <rostedt@goodmis.org>,
+        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
+        kbuild-all@lists.01.org
+Subject: Re: [PATCH] printk: Make linux/printk.h self-contained
+Message-ID: <20200613142901.65xieioomt6bbqa6@ltop.local>
+References: <20200611125144.GA2506@gondor.apana.org.au>
+ <20200613122834.GA23739@xsang-OptiPlex-9020>
+ <20200613130949.GA22005@gondor.apana.org.au>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
-X-stable: review
-X-Patchwork-Hint: Ignore
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200613130949.GA22005@gondor.apana.org.au>
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
-Message-ID: <20200608230247.EujX0AIzdEBWugvw3RCVhuzTRmWLd-xpUzksSFeIuKc@z>
+Message-ID: <20200613142901.qqsiYgseNT5jpuoY0rmBYXN_0z0eFkUKhx_6nw5a5y8@z>
 
-From: Borislav Petkov <bp@suse.de>
+On Sat, Jun 13, 2020 at 11:09:49PM +1000, Herbert Xu wrote:
+> On Sat, Jun 13, 2020 at 08:28:34PM +0800, kernel test robot wrote:
+> > 
+> > Hi Herbert,
+> > 
+> > I love your patch! Perhaps something to improve:
+> > 
+> > [auto build test WARNING on linus/master]
+> > [also build test WARNING on v5.7 next-20200611]
+> > [if your patch is applied to the wrong git tree, please drop us a note to help
+> > improve the system. BTW, we also suggest to use '--base' option to specify the
+> > base tree in git format-patch, please see https://stackoverflow.com/a/37406982]
+> > 
+> > url:    https://github.com/0day-ci/linux/commits/Herbert-Xu/printk-Make-linux-printk-h-self-contained/20200611-205340
+> > base:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git b29482fde649c72441d5478a4ea2c52c56d97a5e
+> > :::::: branch date: 13 hours ago
+> > :::::: commit date: 13 hours ago
+> > config: powerpc-randconfig-s031-20200611 (attached as .config)
+> > compiler: powerpc64le-linux-gcc (GCC) 9.3.0
+> > reproduce:
+> >         # apt-get install sparse
+> >         # sparse version: v0.6.1-250-g42323db3-dirty
+> >         # save the attached .config to linux build tree
+> >         make W=1 C=1 ARCH=powerpc CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__'
+> > 
+> > If you fix the issue, kindly add following tag as appropriate
+> > Reported-by: kernel test robot <lkp@intel.com>
+> > 
+> > 
+> > sparse warnings: (new ones prefixed by >>)
+> > 
+> > >> include/linux/ratelimit_types.h:16:25: sparse: sparse: expected ; at end of declaration
+> >    include/linux/ratelimit_types.h:16:25: sparse: sparse: Expected } at end of struct-union-enum-specifier
+> >    include/linux/ratelimit_types.h:16:25: sparse: sparse: got lock
+> >    include/linux/ratelimit_types.h:24:1: sparse: sparse: Expected ; at the end of type declaration
+> >    include/linux/ratelimit_types.h:24:1: sparse: sparse: got }
+> 
+> This looks like a bug in sparse as the same code compiles just
+> fine.
 
-commit a9a3ed1eff3601b63aea4fb462d8b3b92c7c1e7e upstream.
+Hi,
 
-... or the odyssey of trying to disable the stack protector for the
-function which generates the stack canary value.
+When trying to reproduce, before using sparse, I get:
+      CC      kernel/ptrace.o
+    In file included from ./include/linux/printk.h:10:0,
+                     from ./include/linux/kernel.h:15,
+                     from ./include/linux/list.h:9,
+                     from ./include/linux/lockdep.h:43,
+                     from ./include/linux/spinlock_types.h:18,
+                     from ./arch/powerpc/include/asm/lppaca.h:45,
+                     from ./arch/powerpc/include/asm/paca.h:17,
+                     from ./arch/powerpc/include/asm/current.h:13,
+                     from ./include/linux/sched.h:12,
+                     from kernel/ptrace.c:13:
+    ./include/linux/ratelimit_types.h:16:2: error: unknown type name ‘raw_spinlock_t’
+      raw_spinlock_t lock;  /* protect the state */
+      ^
+    In file included from ./include/linux/wait.h:9:0,
+                     from ./include/linux/pid.h:6,
+                     from ./include/linux/sched.h:14,
+                     from kernel/ptrace.c:13:
+    ./include/linux/ratelimit.h: In function ‘ratelimit_state_init’:
+    ./include/linux/spinlock.h:100:16: warning: passing argument 1 of ‘__raw_spin_lock_init’ from incompatible pointer type [enabled by default]
+      static struct lock_class_key __key;    \
+                    ^
+    ./include/linux/ratelimit.h:14:2: note: in expansion of macro ‘raw_spin_lock_init’
+      raw_spin_lock_init(&rs->lock);
+      ^
+    ./include/linux/spinlock.h:95:15: note: expected ‘struct raw_spinlock_t *’ but argument is of type ‘int *’
+       extern void __raw_spin_lock_init(raw_spinlock_t *lock, const char *name,
+                   ^
+    make[1]: *** [scripts/Makefile.build:281: kernel/ptrace.o] Error 1
+    make: *** [Makefile:1777: kernel] Error 2
 
-The whole story started with Sergei reporting a boot crash with a kernel
-built with gcc-10:
 
-  Kernel panic — not syncing: stack-protector: Kernel stack is corrupted in: start_secondary
-  CPU: 1 PID: 0 Comm: swapper/1 Not tainted 5.6.0-rc5—00235—gfffb08b37df9 #139
-  Hardware name: Gigabyte Technology Co., Ltd. To be filled by O.E.M./H77M—D3H, BIOS F12 11/14/2013
-  Call Trace:
-    dump_stack
-    panic
-    ? start_secondary
-    __stack_chk_fail
-    start_secondary
-    secondary_startup_64
-  -—-[ end Kernel panic — not syncing: stack—protector: Kernel stack is corrupted in: start_secondary
+while there is no such problem with the previous commit.
+I think the problem is that:
+* ratelimit.h needs raw_spinlock_t
+* spinlock_types.h needs lockdep.h
+* lockdep.h needs ratelimit.h
 
-This happens because gcc-10 tail-call optimizes the last function call
-in start_secondary() - cpu_startup_entry() - and thus emits a stack
-canary check which fails because the canary value changes after the
-boot_init_stack_canary() call.
 
-To fix that, the initial attempt was to mark the one function which
-generates the stack canary with:
-
-  __attribute__((optimize("-fno-stack-protector"))) ... start_secondary(void *unused)
-
-however, using the optimize attribute doesn't work cumulatively
-as the attribute does not add to but rather replaces previously
-supplied optimization options - roughly all -fxxx options.
-
-The key one among them being -fno-omit-frame-pointer and thus leading to
-not present frame pointer - frame pointer which the kernel needs.
-
-The next attempt to prevent compilers from tail-call optimizing
-the last function call cpu_startup_entry(), shy of carving out
-start_secondary() into a separate compilation unit and building it with
--fno-stack-protector, was to add an empty asm("").
-
-This current solution was short and sweet, and reportedly, is supported
-by both compilers but we didn't get very far this time: future (LTO?)
-optimization passes could potentially eliminate this, which leads us
-to the third attempt: having an actual memory barrier there which the
-compiler cannot ignore or move around etc.
-
-That should hold for a long time, but hey we said that about the other
-two solutions too so...
-
-Reported-by: Sergei Trofimovich <slyfox@gentoo.org>
-Signed-off-by: Borislav Petkov <bp@suse.de>
-Tested-by: Kalle Valo <kvalo@codeaurora.org>
-Cc: <stable@vger.kernel.org>
-Link: https://lkml.kernel.org/r/20200314164451.346497-1-slyfox@gentoo.org
-Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
----
- arch/x86/include/asm/stackprotector.h | 7 ++++++-
- arch/x86/kernel/smpboot.c             | 8 ++++++++
- arch/x86/xen/smp_pv.c                 | 1 +
- include/linux/compiler.h              | 6 ++++++
- init/main.c                           | 2 ++
- 5 files changed, 23 insertions(+), 1 deletion(-)
-
-diff --git a/arch/x86/include/asm/stackprotector.h b/arch/x86/include/asm/stackprotector.h
-index 91e29b6a86a5..9804a7957f4e 100644
---- a/arch/x86/include/asm/stackprotector.h
-+++ b/arch/x86/include/asm/stackprotector.h
-@@ -55,8 +55,13 @@
- /*
-  * Initialize the stackprotector canary value.
-  *
-- * NOTE: this must only be called from functions that never return,
-+ * NOTE: this must only be called from functions that never return
-  * and it must always be inlined.
-+ *
-+ * In addition, it should be called from a compilation unit for which
-+ * stack protector is disabled. Alternatively, the caller should not end
-+ * with a function call which gets tail-call optimized as that would
-+ * lead to checking a modified canary value.
-  */
- static __always_inline void boot_init_stack_canary(void)
- {
-diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 69881b2d446c..9674321ce3a3 100644
---- a/arch/x86/kernel/smpboot.c
-+++ b/arch/x86/kernel/smpboot.c
-@@ -262,6 +262,14 @@ static void notrace start_secondary(void *unused)
- 
- 	wmb();
- 	cpu_startup_entry(CPUHP_AP_ONLINE_IDLE);
-+
-+	/*
-+	 * Prevent tail call to cpu_startup_entry() because the stack protector
-+	 * guard has been changed a couple of function calls up, in
-+	 * boot_init_stack_canary() and must not be checked before tail calling
-+	 * another function.
-+	 */
-+	prevent_tail_call_optimization();
- }
- 
- /**
-diff --git a/arch/x86/xen/smp_pv.c b/arch/x86/xen/smp_pv.c
-index 802ee5bba66c..0cebe5db691d 100644
---- a/arch/x86/xen/smp_pv.c
-+++ b/arch/x86/xen/smp_pv.c
-@@ -92,6 +92,7 @@ asmlinkage __visible void cpu_bringup_and_idle(void)
- 	cpu_bringup();
- 	boot_init_stack_canary();
- 	cpu_startup_entry(CPUHP_AP_ONLINE_IDLE);
-+	prevent_tail_call_optimization();
- }
- 
- void xen_smp_intr_free_pv(unsigned int cpu)
-diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 034b0a644efc..448c91bf543b 100644
---- a/include/linux/compiler.h
-+++ b/include/linux/compiler.h
-@@ -356,4 +356,10 @@ static inline void *offset_to_ptr(const int *off)
- /* &a[0] degrades to a pointer: a different type from an array */
- #define __must_be_array(a)	BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
- 
-+/*
-+ * This is needed in functions which generate the stack canary, see
-+ * arch/x86/kernel/smpboot.c::start_secondary() for an example.
-+ */
-+#define prevent_tail_call_optimization()	mb()
-+
- #endif /* __LINUX_COMPILER_H */
-diff --git a/init/main.c b/init/main.c
-index 8ee04f875b21..6bcad75d60ad 100644
---- a/init/main.c
-+++ b/init/main.c
-@@ -1032,6 +1032,8 @@ asmlinkage __visible void __init start_kernel(void)
- 
- 	/* Do the rest non-__init'ed, we're now alive */
- 	arch_call_rest_init();
-+
-+	prevent_tail_call_optimization();
- }
- 
- /* Call all constructor functions linked into the kernel. */
--- 
-2.25.1
-
+Best regards,
+Luc
