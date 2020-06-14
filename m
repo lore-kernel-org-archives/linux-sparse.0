@@ -1,18 +1,18 @@
 From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH] attribute: parse but ignore enum attributes
-Date: Sun, 14 Jun 2020 20:35:10 +0100
-Message-ID: <402dc19b-9d5f-d42b-169f-a96a2cc16a58@ramsayjones.plus.com>
-References: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
+Subject: Re: [ANNOUNCE] Sparse v0.6.2-rc1
+Date: Sun, 14 Jun 2020 20:35:51 +0100
+Message-ID: <c80024d2-6d91-4fe7-a919-3edcf4a9b80a@ramsayjones.plus.com>
+References: <20200613020735.iqb2vd23jpomisbq@ltop.local>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
 Received: from avasout06.plus.net ([212.159.14.18]:44385 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726648AbgFNTfP (ORCPT
+        with ESMTP id S1726648AbgFNTfy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Jun 2020 15:35:15 -0400
-In-Reply-To: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
+        Sun, 14 Jun 2020 15:35:54 -0400
+In-Reply-To: <20200613020735.iqb2vd23jpomisbq@ltop.local>
 Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
@@ -20,37 +20,20 @@ To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.o
 
 
 
-On 14/06/2020 17:02, Luc Van Oostenryck wrote:
-> Currently, sparse is confused whne encountering an enum attribute.
+On 13/06/2020 03:07, Luc Van Oostenryck wrote:
+> Sparse v0.6.2-rc1 is now out.
 
-s/whne/when/
+Tested in the usual places (Linux Mint 19.3, 64-bit and 32-bit and
+64-bit cygwin) and in the usual way; no issues found!
+
+Well, I say no issues - I did notice some spelling errors and
+the formatting of the release notes does not look correct to
+me (https://sparse.docs.kernel.org/en/latest/release-notes/v0.6.2.html).
+Unfortunately, I don't know anything about the documentation tools
+you are using, so I can't try to fix this. (It seems to be the only
+attempt at nested 'bulleted lists', ...)
+
+I will send a (spelling) patch soon.
 
 ATB,
 Ramsay Jones
-
-> 
-> Teach sparse about these attributes and, for now, ignore them.
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  parse.c | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/parse.c b/parse.c
-> index 570b2516714f..70d8b237ce5e 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -937,8 +937,12 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
->  	while (token_type(token) == TOKEN_IDENT) {
->  		struct expression *expr = NULL;
->  		struct token *next = token->next;
-> +		struct decl_state ctx = { };
->  		struct symbol *sym;
->  
-> +		// FIXME: only 'deprecated' should be accepted
-> +		next = handle_attributes(next, &ctx, KW_ATTRIBUTE);
-> +
->  		if (match_op(next, '=')) {
->  			next = constant_expression(next->next, &expr);
->  			lastval = get_expression_value(expr);
-> 
