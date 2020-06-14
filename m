@@ -1,50 +1,56 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] attribute: parse but ignore enum attributes
-Date: Sun, 14 Jun 2020 18:02:35 +0200
-Message-ID: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
+From: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Subject: Re: [PATCH] attribute: parse but ignore enum attributes
+Date: Sun, 14 Jun 2020 20:35:10 +0100
+Message-ID: <402dc19b-9d5f-d42b-169f-a96a2cc16a58@ramsayjones.plus.com>
+References: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57398 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726717AbgFNQCl (ORCPT
+Received: from avasout06.plus.net ([212.159.14.18]:44385 "EHLO
+        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726648AbgFNTfP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Jun 2020 12:02:41 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 869B5C05BD43
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 09:02:41 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id c35so9750491edf.5
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 09:02:41 -0700 (PDT)
+        Sun, 14 Jun 2020 15:35:15 -0400
+In-Reply-To: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
+Content-Language: en-GB
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
 
-Currently, sparse is confused whne encountering an enum attribute.
 
-Teach sparse about these attributes and, for now, ignore them.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- parse.c | 4 ++++
- 1 file changed, 4 insertions(+)
+On 14/06/2020 17:02, Luc Van Oostenryck wrote:
+> Currently, sparse is confused whne encountering an enum attribute.
 
-diff --git a/parse.c b/parse.c
-index 570b2516714f..70d8b237ce5e 100644
---- a/parse.c
-+++ b/parse.c
-@@ -937,8 +937,12 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
- 	while (token_type(token) == TOKEN_IDENT) {
- 		struct expression *expr = NULL;
- 		struct token *next = token->next;
-+		struct decl_state ctx = { };
- 		struct symbol *sym;
- 
-+		// FIXME: only 'deprecated' should be accepted
-+		next = handle_attributes(next, &ctx, KW_ATTRIBUTE);
-+
- 		if (match_op(next, '=')) {
- 			next = constant_expression(next->next, &expr);
- 			lastval = get_expression_value(expr);
--- 
-2.27.0
+s/whne/when/
+
+ATB,
+Ramsay Jones
+
+> 
+> Teach sparse about these attributes and, for now, ignore them.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  parse.c | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/parse.c b/parse.c
+> index 570b2516714f..70d8b237ce5e 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -937,8 +937,12 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
+>  	while (token_type(token) == TOKEN_IDENT) {
+>  		struct expression *expr = NULL;
+>  		struct token *next = token->next;
+> +		struct decl_state ctx = { };
+>  		struct symbol *sym;
+>  
+> +		// FIXME: only 'deprecated' should be accepted
+> +		next = handle_attributes(next, &ctx, KW_ATTRIBUTE);
+> +
+>  		if (match_op(next, '=')) {
+>  			next = constant_expression(next->next, &expr);
+>  			lastval = get_expression_value(expr);
+> 
