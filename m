@@ -1,50 +1,50 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] sindex: use -stdc=gnu99
-Date: Sun, 14 Jun 2020 13:35:08 +0200
-Message-ID: <20200614113508.19924-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] attribute: parse but ignore enum attributes
+Date: Sun, 14 Jun 2020 18:02:35 +0200
+Message-ID: <20200614160235.22320-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44950 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57398 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726786AbgFNLfl (ORCPT
+        with ESMTP id S1726717AbgFNQCl (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Jun 2020 07:35:41 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C5FBC05BD43
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 04:35:41 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id l27so14467670ejc.1
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 04:35:41 -0700 (PDT)
+        Sun, 14 Jun 2020 12:02:41 -0400
+Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 869B5C05BD43
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 09:02:41 -0700 (PDT)
+Received: by mail-ed1-x544.google.com with SMTP id c35so9750491edf.5
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 09:02:41 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Alexey Gladkov <gladkov.alexey@gmail.com>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-sindex use C99 for-loops:
-	for (int i = 0, ....)
+Currently, sparse is confused whne encountering an enum attribute.
 
-No problem with this but sparse doesn't use this elsewhere yet
-and older compilers don't allow C99 by default.
+Teach sparse about these attributes and, for now, ignore them.
 
-Fix this by adding '-std=gnu99' to the sindex-specific CFLAGS.
-
-Cc: Alexey Gladkov <gladkov.alexey@gmail.com>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Makefile | 1 +
- 1 file changed, 1 insertion(+)
+ parse.c | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-diff --git a/Makefile b/Makefile
-index d1486a0ce373..4bf96f406e5a 100644
---- a/Makefile
-+++ b/Makefile
-@@ -153,6 +153,7 @@ INST_PROGRAMS += sindex
- INST_MAN1 += sindex.1
- sindex-ldlibs := $(shell $(PKG_CONFIG) --libs sqlite3)
- sindex-cflags := $(shell $(PKG_CONFIG) --cflags sqlite3)
-+sindex-cflags += -std=gnu99
- else
- $(warning Your SQLite3 version ($(SQLITE_VERSION)) is too old, 3.24.0 or later is required.)
- endif
+diff --git a/parse.c b/parse.c
+index 570b2516714f..70d8b237ce5e 100644
+--- a/parse.c
++++ b/parse.c
+@@ -937,8 +937,12 @@ static struct token *parse_enum_declaration(struct token *token, struct symbol *
+ 	while (token_type(token) == TOKEN_IDENT) {
+ 		struct expression *expr = NULL;
+ 		struct token *next = token->next;
++		struct decl_state ctx = { };
+ 		struct symbol *sym;
+ 
++		// FIXME: only 'deprecated' should be accepted
++		next = handle_attributes(next, &ctx, KW_ATTRIBUTE);
++
+ 		if (match_op(next, '=')) {
+ 			next = constant_expression(next->next, &expr);
+ 			lastval = get_expression_value(expr);
 -- 
 2.27.0
