@@ -1,110 +1,199 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: [PATCH] doc: correct some spelling
-Date: Sun, 14 Jun 2020 20:36:38 +0100
-Message-ID: <a03299d8-fd2f-8f04-2bd0-e94091247bdb@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] doc: reindent the sublists in the relnotes
+Date: Sun, 14 Jun 2020 23:10:08 +0200
+Message-ID: <20200614211008.24700-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout06.plus.net ([212.159.14.18]:44385 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726648AbgFNTgl (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47876 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726896AbgFNVKP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Jun 2020 15:36:41 -0400
-Content-Language: en-GB
+        Sun, 14 Jun 2020 17:10:15 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9B705C03E97C
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 14:10:14 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id gl26so15255783ejb.11
+        for <linux-sparse@vger.kernel.org>; Sun, 14 Jun 2020 14:10:14 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, Ramsay Jones <ramsay@ramsayjones.plus.com>
 
+The html-generated version of the release notes looked
+terrible because the used indentation was too small.
 
-Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Fix this by indenting the sublists by 4 instead of 2
+
+Reported-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
-
-Hi Luc,
-
-The only spelling fixes in the manpage are s/exemple/example/,
-s/trigered/triggered/ and s/&/and/. I would not normally change
-any 'formatting' in sparse.1, but the '{ 0 }' and '{ }' got
-split across line-endings, so I removed the spaces.
-(other solutions are possible ...)
-
-ATB,
-Ramsay Jones
-
- Documentation/release-notes/v0.6.2.rst |  8 ++++----
- sparse.1                               | 10 +++++-----
- 2 files changed, 9 insertions(+), 9 deletions(-)
+ Documentation/release-notes/v0.6.2.rst | 136 ++++++++++++-------------
+ 1 file changed, 67 insertions(+), 69 deletions(-)
 
 diff --git a/Documentation/release-notes/v0.6.2.rst b/Documentation/release-notes/v0.6.2.rst
-index 0ef67fc5..7439724c 100644
+index 7439724c3d45..3d0e4ba06967 100644
 --- a/Documentation/release-notes/v0.6.2.rst
 +++ b/Documentation/release-notes/v0.6.2.rst
-@@ -10,7 +10,7 @@ V0.6.2
+@@ -9,92 +9,90 @@ V0.6.2
+ 
  * add support for _Generic
  
- * fully propagate declarations downward
--  For exemple, it means that code like:
-+  For example, it means that code like:
+-* fully propagate declarations downward
+-  For example, it means that code like:
++* fully propagate declarations downward.
++    For example, it means that code like:
  
          static int foo(void);
          int foo(void) { return 0; }
-@@ -21,7 +21,7 @@ V0.6.2
-   * allow a single sparse executable to be used for multiple architectures
-   * add support for -mcmodel & -f{pic,PIC,pie,PIE}, mainly for RISC-V
-   * add new option, --arch=$ARCH, to specify the target architecture
--  * move all arch-specifc code in separated files (target-$ARCH.c) 
-+  * move all arch-specific code into separate files (target-$ARCH.c)
-   * try to support the various floating-point ABIs on ARM
-   * fix wchar_t & wint_t for openbsd
-   * add missing predefines for PPC
-@@ -72,7 +72,7 @@ V0.6.2
-   * define _BIG_ENDIAN when needed
-   * remove definition of _STRING_ARCH_unaligned (defined by glibc)
-   * removed unneeded predefines for integers (now defined by sparse)
--  * better mult-arch support by using --arch=$ARCH
-+  * better multi-arch support by using --arch=$ARCH
+ 
+-  now behaves as expected: foo() is effectively static
++    now behaves as expected: foo() is effectively static.
+ 
+ * multi-arch:
+-  * allow a single sparse executable to be used for multiple architectures
+-  * add support for -mcmodel & -f{pic,PIC,pie,PIE}, mainly for RISC-V
+-  * add new option, --arch=$ARCH, to specify the target architecture
+-  * move all arch-specific code into separate files (target-$ARCH.c)
+-  * try to support the various floating-point ABIs on ARM
+-  * fix wchar_t & wint_t for openbsd
+-  * add missing predefines for PPC
+-  * add missing predfines: __amd64 & __amd64__
+-  * sparc32 on SunOS/Solaris uses 128-bit long double
+-  * fix wchar_t & wint_t on SunOS/Solaris
+-  * teach sparse about -fshort-wchar
+-  * keep cygwin specifics with i386/x86-64 specifics
+-  * keep BSD & Darwin specifics with i386/x86-64 specifics
+-  * fix the signedness of plain chars
+-  * add support for s390 (ILP32)
+-  * add predefine for __mips__
+-  * predefine "i386" if needed
+-  * pre-define __unix__ and friends
+-  * add necessary defined for sunos-derived systems
+-  * improved detection of the native OS
++    * allow a single sparse executable to be used for multiple architectures
++    * add support for -mcmodel & -f{pic,PIC,pie,PIE}, mainly for RISC-V
++    * add new option, --arch=$ARCH, to specify the target architecture
++    * move all arch-specific code into separate files (target-$ARCH.c)
++    * try to support the various floating-point ABIs on ARM
++    * fix wchar_t & wint_t for openbsd
++    * add missing predefines for PPC
++    * add missing predfines: __amd64 & __amd64__
++    * sparc32 on SunOS/Solaris uses 128-bit long double
++    * fix wchar_t & wint_t on SunOS/Solaris
++    * teach sparse about -fshort-wchar
++    * keep cygwin specifics with i386/x86-64 specifics
++    * keep BSD & Darwin specifics with i386/x86-64 specifics
++    * fix the signedness of plain chars
++    * add support for s390 (ILP32)
++    * add predefine for __mips__
++    * predefine "i386" if needed
++    * pre-define __unix__ and friends
++    * add necessary defined for sunos-derived systems
++    * improved detection of the native OS
+ 
+-* warnings
+-  * improve diagnostic message about wrong redeclaration
+-  * conditionally accept { 0 } without warnings
+-  * add -Wexternal-function-has-definition
+-  * display the bitfield name in error messages
+-  * oversized bitfields are now errors
+-  * add an option to suppress warning 'no newline at EOF'
+-  * warn when jumping into statement expressions
+-  * warn when using undefined labels
+-  * warn on defined but unused labels
++* warnings:
++    * improve diagnostic message about wrong redeclaration
++    * conditionally accept { 0 } without warnings
++    * add -Wexternal-function-has-definition
++    * display the bitfield name in error messages
++    * oversized bitfields are now errors
++    * add an option to suppress warning 'no newline at EOF'
++    * warn when jumping into statement expressions
++    * warn when using undefined labels
++    * warn on defined but unused labels
+ 
+ * attributes:
+-  * allows '__<attribute-name>__' for all attributes.
+-  * improve handling of function attributes
+-  * separate modifiers into type/declaration
+-  * add support for attributes 'unused' & 'gnu_inline'
+-  * simplify parsing of inline/__tls/__visible
+-  * better handle function-only attributes
+-  * teach sparse about gnu_inline
+-
+-* typeof:
+-  * ensure that typeofs are evaluated before using show_typename()
+-  * use a single way to expand typeofs
++    * allows '__<attribute-name>__' for all attributes.
++    * improve handling of function attributes
++    * separate modifiers into type/declaration
++    * add support for attributes 'unused' & 'gnu_inline'
++    * simplify parsing of inline/__tls/__visible
++    * better handle function-only attributes
++    * teach sparse about gnu_inline
+ 
+ * cgcc:
+-  * use -fshort-char for Cygwin
+-  * add support for riscv32 & riscv64
+-  * don't define __CYGWIN32__ on 64-bit
+-  * filter-out sparse-specific -msize-long & -msize-llp64
+-  * use -mfloat-abi=hard for armhf
+-  * define _BIG_ENDIAN when needed
+-  * remove definition of _STRING_ARCH_unaligned (defined by glibc)
+-  * removed unneeded predefines for integers (now defined by sparse)
+-  * better multi-arch support by using --arch=$ARCH
++    * use -fshort-char for Cygwin
++    * add support for riscv32 & riscv64
++    * don't define __CYGWIN32__ on 64-bit
++    * filter-out sparse-specific -msize-long & -msize-llp64
++    * use -mfloat-abi=hard for armhf
++    * define _BIG_ENDIAN when needed
++    * remove definition of _STRING_ARCH_unaligned (defined by glibc)
++    * removed unneeded predefines for integers (now defined by sparse)
++    * better multi-arch support by using --arch=$ARCH
  
  * testsuite:
-   * avoid standard includes in the tests
-@@ -90,7 +90,7 @@ V0.6.2
+-  * avoid standard includes in the tests
+-  * fix testcase with non-constant initializer
++    * avoid standard includes in the tests
++    * fix testcase with non-constant initializer
+     
+ * IR
+-  * add support for the linearization of builtins
+-  * generate OP_UNREACH from  __builtin_unreachable()
+-  * add OP_UNREACH after calls to __noreturn functions
++    * add support for the linearization of builtins
++    * generate OP_UNREACH from  __builtin_unreachable()
++    * add OP_UNREACH after calls to __noreturn functions
+ 
+ * doc:
+-  * do not use obsolete sphinx's AutodocReporter
+-  * add basic doc about the type system
+-  * doc is now accessible as: https://sparse.docs.kernel.org
++    * do not use obsolete sphinx's AutodocReporter
++    * add basic doc about the type system
++    * doc is now accessible as: https://sparse.docs.kernel.org
  
  * misc:
-   * add support for '-std=c17/c18'
--  * simplify testng of which version of the standard is used
-+  * simplify testing of which version of the standard is used
-   * various improvements to the 'dissect' tool
-   * simplify the parsing of type specifiers
-   * improve diagnostic messages concerning bitfields
-diff --git a/sparse.1 b/sparse.1
-index bbcffc41..e8994a66 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -437,20 +437,20 @@ Sparse does not issue these warnings by default.
- .
- .TP
- .B \-Wuniversal\-initializer
--Do not suppress warnings caused by using '{ 0 }' instead of '{ }' on
-+Do not suppress warnings caused by using '{0}' instead of '{}' on
- aggregate types, ignoring its special status as universal initializer.
--The concerned warnings are, for exemple, those trigered by
-+The concerned warnings are, for example, those triggered by
- \fB\-Wdesignated\-init\fR or \fB\-Wnon\-pointer\-null\fR.
+-  * add support for '-std=c17/c18'
+-  * simplify testing of which version of the standard is used
+-  * various improvements to the 'dissect' tool
+-  * simplify the parsing of type specifiers
+-  * improve diagnostic messages concerning bitfields
+-  * fix premature examination of dereferenced object
+-  * various fixes for the expansion of constant symbols
+-  * fix type compatibility of _Atomic types
++    * add support for '-std=c17/c18'
++    * simplify testing of which version of the standard is used
++    * ensure that typeofs are evaluated before using show_typename()
++    * use a single way to expand typeofs
++    * various improvements to the 'dissect' tool
++    * simplify the parsing of type specifiers
++    * improve diagnostic messages concerning bitfields
++    * fix premature examination of dereferenced object
++    * various fixes for the expansion of constant symbols
++    * fix type compatibility of _Atomic types
  
--Sparse does not issue these warnings by default, processing '{ 0 }'
--the same as '{ }'.
-+Sparse does not issue these warnings by default, processing '{0}'
-+the same as '{}'.
- .
- .SH MISC OPTIONS
- .TP
- .B \-\-arch=\fIARCH\fR
- Specify the target architecture.
- For architectures having both a 32-bit and a 64-bit variant (mips, powerpc,
--riscv & sparc) the architecture name can be suffixed with \fI32\fR or \fI64\fR.
-+riscv and sparc) the architecture name can be suffixed with \fI32\fR or \fI64\fR.
- 
- The default architecture & size is the one of the machine used to build Sparse.
- .
 -- 
 2.27.0
