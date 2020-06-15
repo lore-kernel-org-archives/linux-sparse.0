@@ -1,50 +1,39 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] doc: minimal version for Sphinx is 1.7
-Date: Mon, 15 Jun 2020 18:40:22 +0200
-Message-ID: <20200615164022.59492-1-luc.vanoostenryck@gmail.com>
+From: Steven Rostedt <rostedt@goodmis.org>
+Subject: Re: [PATCH] printk: Make linux/printk.h self-contained
+Date: Mon, 15 Jun 2020 15:17:27 -0400
+Message-ID: <20200615151727.3c7e9786@oasis.local.home>
+References: <20200611125144.GA2506@gondor.apana.org.au>
+        <20200613122834.GA23739@xsang-OptiPlex-9020>
+        <20200613130949.GA22005@gondor.apana.org.au>
+        <20200613142901.65xieioomt6bbqa6@ltop.local>
+        <20200615114038.GA20708@gondor.apana.org.au>
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=US-ASCII
+Content-Transfer-Encoding: 7bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58334 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729966AbgFOQk1 (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 15 Jun 2020 12:40:27 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A3526C061A0E
-        for <linux-sparse@vger.kernel.org>; Mon, 15 Jun 2020 09:40:27 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id f7so18154165ejq.6
-        for <linux-sparse@vger.kernel.org>; Mon, 15 Jun 2020 09:40:27 -0700 (PDT)
+Received: from mail.kernel.org ([198.145.29.99]:44020 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729354AbgFOTRa (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 15 Jun 2020 15:17:30 -0400
+In-Reply-To: <20200615114038.GA20708@gondor.apana.org.au>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Ramsay Jones <ramsay@ramsayjones.plus.com>, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Herbert Xu <herbert@gondor.apana.org.au>
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, kernel test robot <lkp@intel.com>, linux-sparse@vger.kernel.org, Petr Mladek <pmladek@suse.com>, Sergey Senozhatsky <sergey.senozhatsky@gmail.com>, Linux Kernel Mailing List <linux-kernel@vger.kernel.org>, kbuild-all@lists.01.org
 
-Because of the changes needed after the removal of the obsolete
-sphinx.ext.autodoc.AutodocReporter, the minimal version of Sphinx
-is 1.7 (the first one containing switch_source_input()).
+On Mon, 15 Jun 2020 21:40:38 +1000
+Herbert Xu <herbert@gondor.apana.org.au> wrote:
 
-So, update this information in the conf file.
+> Thanks for investigating.  I now realise that this was sent against
+> my first patch which did have this problem, which was fixed in my
+> second patch.  Sorry for the false alarm.
 
-Fixes: b741a793e63c0fd4a333cd575ac2339f5a9b2698
-Reported-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- Documentation/conf.py | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Which is why it is recommended that new patches start their own threads ;-)
 
-diff --git a/Documentation/conf.py b/Documentation/conf.py
-index 90583908c5ed..bd2532f7c777 100644
---- a/Documentation/conf.py
-+++ b/Documentation/conf.py
-@@ -21,7 +21,7 @@ import datetime
- 
- # -- General configuration ------------------------------------------------
- 
--needs_sphinx = '1.3'
-+needs_sphinx = '1.7'
- 
- # Add any Sphinx extension module names here, as strings. They can be
- # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
--- 
-2.27.0
+That said,
+
+Acked-by: Steven Rostedt (VMware) <rostedt@goodmis.org>
+
+for the v2 patch.
+
+-- Steve
