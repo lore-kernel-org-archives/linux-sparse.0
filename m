@@ -1,97 +1,57 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: Re: [PATCH] doc: add intro stolen from the wiki
-Date: Tue, 16 Jun 2020 02:38:26 +0100
-Message-ID: <1d164023-8e9d-8950-7fec-b1bd7b673c31@ramsayjones.plus.com>
-References: <20200616001122.65350-1-luc.vanoostenryck@gmail.com>
+From: Linus Torvalds <torvalds@linux-foundation.org>
+Subject: Re: [PATCH] predefine: add a macro telling about named address spaces
+Date: Tue, 16 Jun 2020 12:13:18 -0700
+Message-ID: <CAHk-=whHKXbJS62Nrcsn6cy0EcHh3PrGbESBkM0MOAjFx-CVsQ@mail.gmail.com>
+References: <20200616005012.66141-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout03.plus.net ([84.93.230.244]:39750 "EHLO
-        avasout03.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725891AbgFPBic (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:50360 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729841AbgFPTNi (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 15 Jun 2020 21:38:32 -0400
-In-Reply-To: <20200616001122.65350-1-luc.vanoostenryck@gmail.com>
-Content-Language: en-GB
+        Tue, 16 Jun 2020 15:13:38 -0400
+Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AC019C061573
+        for <linux-sparse@vger.kernel.org>; Tue, 16 Jun 2020 12:13:37 -0700 (PDT)
+Received: by mail-lj1-x242.google.com with SMTP id z9so24928184ljh.13
+        for <linux-sparse@vger.kernel.org>; Tue, 16 Jun 2020 12:13:37 -0700 (PDT)
+Received: from mail-lf1-f52.google.com (mail-lf1-f52.google.com. [209.85.167.52])
+        by smtp.gmail.com with ESMTPSA id 11sm4551714lju.118.2020.06.16.12.13.34
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 16 Jun 2020 12:13:34 -0700 (PDT)
+Received: by mail-lf1-f52.google.com with SMTP id g2so4827701lfb.0
+        for <linux-sparse@vger.kernel.org>; Tue, 16 Jun 2020 12:13:34 -0700 (PDT)
+In-Reply-To: <20200616005012.66141-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>, linux-sparse@vger.kernel.org
+To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Mon, Jun 15, 2020 at 5:50 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> Sparse supports named address spaces since v0.6.0-rc1.
+> This gives much nicer warnings ('... __user' instead of '... <asn:1>')
+> but this featres is not yet used in the kernel since it could be
+> a problem for people using an older version of Sparse.
 
+Actually, I think it's more that nobody has sent a tested patch.
 
-On 16/06/2020 01:11, Luc Van Oostenryck wrote:
-> The wiki has a small into, perfectable but nice
+I don't think it's a big burden to say "you need a newer version of
+sparse" for kernel checkers, and in fact a number of the problems
+people report then get answered with "update your sparse version"
+anyway for other reasons.
 
-s/into/intro/ or s/into/introduction/
-s/perfectable but/which could be improved, but is/
+In fact, I'd personally like to just make the kernel use _Generic()
+everywhere now that we started getting our toes wet, but the fact that
+we would have to require gcc-4.9 (instead of gcc-4.8 which is
+currently the minimum version) is holding us back.
 
-> enough while the doc here has no such thing.
+So I'd be perfectly happy to take a patch to do the ASN names, and to
+remove the __CHECKER__ thing that holds us back from using _Generic()
+with sparse. And just document that you need to have a recent enough
+release..
 
-s/enough/enough,/
-
-> 
-> So, copy the intro from the wiki into the entrypoint
-
-s/intro/introduction/ maybe.
-
-ATB,
-Ramsay Jones
-
-> of the documentation (and convert the wikimedia markup
-> into restructuredtext).
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  Documentation/index.rst | 37 +++++++++++++++++++++++++++++++++++++
->  1 file changed, 37 insertions(+)
-> 
-> diff --git a/Documentation/index.rst b/Documentation/index.rst
-> index eb3de63c9ca7..415da4bb27af 100644
-> --- a/Documentation/index.rst
-> +++ b/Documentation/index.rst
-> @@ -6,6 +6,43 @@ Welcome to sparse's documentation
->  .. toctree::
->     :maxdepth: 1
->  
-> +About Sparse
-> +------------
-> +
-> +Sparse, the semantic parser, provides a compiler frontend capable of
-> +parsing most of ANSI C as well as many GCC extensions, and a collection
-> +of sample compiler backends, including a static analyzer also called `sparse`.
-> +Sparse provides a set of annotations designed to convey semantic information
-> +about types, such as what address space pointers point to, or what locks
-> +function acquires or releases.
-> +
-> +Linus Torvalds started writing Sparse in 2003, initially targeting issues such
-> +as mixing pointers to user address space and pointers to kernel address space.
-> +
-> +Josh Triplett was Sparse's first maintainer in 2006. This role was taken over
-> +by Christopher Li in 2009 and by Luc Van Oostenryck in late 2018.
-> +
-> +Getting Sparse
-> +--------------
-> +
-> +You can find released versions of sparse at http://www.kernel.org/pub/software/devel/sparse/dist/
-> +
-> +Obtaining sparse via Git
-> +~~~~~~~~~~~~~~~~~~~~~~~~
-> +
-> +Sparse uses the `Git version control system <http://git-scm.com/>`_. You can obtain the most recent version of sparse directly from the Git repository with the command::
-> +
-> +	git clone git://git.kernel.org/pub/scm/devel/sparse/sparse.git
-> +
-> +You can also `browse the Git repository <https://git.kernel.org/pub/scm/devel/sparse/sparse.git>`_.
-> +
-> +Mailing list
-> +~~~~~~~~~~~~
-> +
-> +Discussions about sparse occurs on the sparse mailing list, linux-sparse@vger.kernel.org. To subscribe to the list, send an email with ``subscribe linux-sparse`` in the body to ``majordomo@vger.kernel.org``.
-> +
-> +You can browse the list archives at https://marc.info/?l=linux-sparse.
-> +
->  User documentation
->  ------------------
->  .. toctree::
-> 
+             Linus
