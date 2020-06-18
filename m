@@ -1,129 +1,135 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/5] pre-process: add support for builtin macros
-Date: Thu, 18 Jun 2020 22:47:14 +0200
-Message-ID: <20200618204716.3896-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/5] pre-process: add support for __has_feature() & __has_extension()
+Date: Thu, 18 Jun 2020 22:47:15 +0200
+Message-ID: <20200618204716.3896-5-luc.vanoostenryck@gmail.com>
 References: <20200618204716.3896-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57512 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57514 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725912AbgFRUti (ORCPT
+        with ESMTP id S1728196AbgFRUtj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 18 Jun 2020 16:49:38 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0C9DBC06174E
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:38 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id o15so7827440ejm.12
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:37 -0700 (PDT)
+        Thu, 18 Jun 2020 16:49:39 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44BA6C0613EE
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:39 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id n24so7898424ejd.0
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:39 -0700 (PDT)
 In-Reply-To: <20200618204716.3896-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-Sparse support the expansion of one-symbol-builtin macros like __FILE__.
-It also support builtin macros with an argument, like 'defined()'
-or '__has_attribute()'.
-
-However, these last one are only expanded inside a pre-processor
-conditional expression. This is correct for 'defined()' but macros
-like '__has_attribute()' should be expanded in all contexts,
-like user defined macros.
-
-So, add support for the general expansion of such macros.
+Add the trivial methods for the expansion of these macros with:
+c_alignas, c_alignof, c_generic_selections and c_static_assert.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- pre-process.c | 34 ++++++++++++++++++++++++++++++++++
- symbol.h      |  2 ++
- 2 files changed, 36 insertions(+)
+ ident-list.h                          |  4 ++
+ pre-process.c                         | 54 +++++++++++++++++++++++++++
+ validation/preprocessor/has-feature.c |  1 -
+ 3 files changed, 58 insertions(+), 1 deletion(-)
 
+diff --git a/ident-list.h b/ident-list.h
+index 75740b9d9f77..a3a282587c67 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -61,6 +61,10 @@ IDENT(defined);
+ IDENT(once);
+ IDENT(__has_attribute);
+ IDENT(__has_builtin);
++IDENT(c_alignas);
++IDENT(c_alignof);
++IDENT(c_generic_selections);
++IDENT(c_static_assert);
+ __IDENT(pragma_ident, "__pragma__", 0);
+ __IDENT(__VA_ARGS___ident, "__VA_ARGS__", 0);
+ __IDENT(__func___ident, "__func__", 0);
 diff --git a/pre-process.c b/pre-process.c
-index 059a7c1d9b7b..d2e13400711e 100644
+index d2e13400711e..7a39b1715f31 100644
 --- a/pre-process.c
 +++ b/pre-process.c
-@@ -777,6 +777,9 @@ static int expand(struct token **list, struct symbol *sym)
- 		expand_arguments(nargs, args);
- 	}
- 
-+	if (sym->expand)
-+		return sym->expand(token, args) ? 0 : 1;
-+
- 	expanding->tainted = 1;
- 
- 	last = token->next;
-@@ -2000,6 +2003,34 @@ static int handle_nondirective(struct stream *stream, struct token **line, struc
+@@ -2003,6 +2003,58 @@ static int handle_nondirective(struct stream *stream, struct token **line, struc
  	return 1;
  }
  
-+static void create_arglist(struct symbol *sym, int count)
++static bool expand_has_extension(struct token *token, struct arg *args)
 +{
-+	struct token *token;
-+	struct token **next;
++	struct token *arg = args[0].expanded;
++	struct ident *ident;
++	bool val = false;
 +
-+	if (!count)
-+		return;
-+
-+	token = __alloc_token(0);
-+	token_type(token) = TOKEN_ARG_COUNT;
-+	token->count.normal = count;
-+	sym->arglist = token;
-+	next = &token->next;
-+
-+	while (count--) {
-+		struct token *id, *uses;
-+		id = __alloc_token(0);
-+		token_type(id) = TOKEN_IDENT;
-+		uses = __alloc_token(0);
-+		token_type(uses) = TOKEN_ARG_COUNT;
-+		uses->count.normal = 1;
-+
-+		*next = id;
-+		id->next = uses;
-+		next = &uses->next;
++	if (token_type(arg) != TOKEN_IDENT) {
++		sparse_error(arg->pos, "identifier expected");
++		return false;
 +	}
-+	*next = &eof_token_entry;
++
++	ident = arg->ident;
++	if (ident == &c_alignas_ident)
++		val = true;
++	else if (ident == &c_alignof_ident)
++		val = true;
++	else if (ident == &c_generic_selections_ident)
++		val = true;
++	else if (ident == &c_static_assert_ident)
++		val = true;
++
++	replace_with_bool(token, val);
++	return 1;
 +}
- 
- static void init_preprocessor(void)
++
++static bool expand_has_feature(struct token *token, struct arg *args)
++{
++	struct token *arg = args[0].expanded;
++	struct ident *ident;
++	bool val = false;
++
++	if (token_type(arg) != TOKEN_IDENT) {
++		sparse_error(arg->pos, "identifier expected");
++		return false;
++	}
++
++	ident = arg->ident;
++	if (standard >= STANDARD_C11) {
++		if (ident == &c_alignas_ident)
++			val = true;
++		else if (ident == &c_alignof_ident)
++			val = true;
++		else if (ident == &c_generic_selections_ident)
++			val = true;
++		else if (ident == &c_static_assert_ident)
++			val = true;
++	}
++
++	replace_with_bool(token, val);
++	return 1;
++}
++
+ static void create_arglist(struct symbol *sym, int count)
  {
-@@ -2041,6 +2072,7 @@ static void init_preprocessor(void)
- 	static struct {
- 		const char *name;
- 		void (*expand_simple)(struct token *);
-+		bool (*expand)(struct token *, struct arg *args);
- 	} dynamic[] = {
- 		{ "__LINE__",		expand_line },
- 		{ "__FILE__",		expand_file },
-@@ -2067,6 +2099,8 @@ static void init_preprocessor(void)
- 		struct symbol *sym;
- 		sym = create_symbol(stream, dynamic[i].name, SYM_NODE, NS_MACRO);
- 		sym->expand_simple = dynamic[i].expand_simple;
-+		if ((sym->expand = dynamic[i].expand) != NULL)
-+			create_arglist(sym, 1);
- 	}
+ 	struct token *token;
+@@ -2081,6 +2133,8 @@ static void init_preprocessor(void)
+ 		{ "__TIME__",		expand_time },
+ 		{ "__COUNTER__",	expand_counter },
+ 		{ "__INCLUDE_LEVEL__",	expand_include_level },
++		{ "__has_extension",	NULL, expand_has_extension },
++		{ "__has_feature",	NULL, expand_has_feature },
+ 	};
  
- 	counter_macro = 0;
-diff --git a/symbol.h b/symbol.h
-index 6b483101548a..e256322e83a2 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -114,6 +114,7 @@ struct decl_state {
+ 	for (i = 0; i < ARRAY_SIZE(normal); i++) {
+diff --git a/validation/preprocessor/has-feature.c b/validation/preprocessor/has-feature.c
+index 3ab7c3e039fa..e0f2e7f63cda 100644
+--- a/validation/preprocessor/has-feature.c
++++ b/validation/preprocessor/has-feature.c
+@@ -12,7 +12,6 @@ __has_feature()??? Quesako?
+ /*
+  * check-name: has-feature
+  * check-command: sparse -E $file
+- * check-known-to-fail
+  *
+  * check-output-start
  
- struct pseudo;
- struct entrypoint;
-+struct arg;
- 
- struct symbol_op {
- 	enum keyword type;
-@@ -161,6 +162,7 @@ struct symbol {
- 			struct token *arglist;
- 			struct scope *used_in;
- 			void (*expand_simple)(struct token *);
-+			bool (*expand)(struct token *, struct arg *args);
- 		};
- 		struct /* NS_PREPROCESSOR */ {
- 			int (*handler)(struct stream *, struct token **, struct token *);
 -- 
 2.27.0
