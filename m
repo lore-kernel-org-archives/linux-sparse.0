@@ -1,54 +1,74 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] testsuite: be less paranoid with timeout
-Date: Tue, 16 Jun 2020 23:11:06 +0200
-Message-ID: <20200616211106.78251-1-luc.vanoostenryck@gmail.com>
+From: garritfra <garritfranke@gmail.com>
+Subject: [PATCH] ir-validate: remove orphan comments
+Date: Thu, 18 Jun 2020 16:09:14 +0200
+Message-ID: <20200618140913.25321-1-garritfranke@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40390 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52100 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725768AbgFPVLK (ORCPT
+        with ESMTP id S1730622AbgFROJ6 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 16 Jun 2020 17:11:10 -0400
+        Thu, 18 Jun 2020 10:09:58 -0400
 Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A238FC061573
-        for <linux-sparse@vger.kernel.org>; Tue, 16 Jun 2020 14:11:10 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id n24so23292545ejd.0
-        for <linux-sparse@vger.kernel.org>; Tue, 16 Jun 2020 14:11:10 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D8810C0613ED
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 07:09:55 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id mb16so6585521ejb.4
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 07:09:55 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: luc.vanoostenryck@gmail.com, linux-sparse@vger.kernel.org
+Cc: garritfra <garritfranke@gmail.com>
 
-For some testcases, the testsuite use the command 'timeout'
-to ensure that the test finish after a reasonable amount of
-time. This is mainly used for some testcases which, in the past,
-were stuck in an infinite loop. This the command 'timeout' is
-used with an extra option (-k 1s) to issue a second kill signal
-in case the first one would have been ignored.
+Please let me know if these comments have a right to be there, but I
+think they are orphans and can be removed.
 
-However, this extra option is not supported on all implementations
-(Alpine) and its use seems a bit paranoid for sparse.
-
-So, remove this extra option.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Signed-off-by: Garrit Franke <garritfranke@gmail.com>
 ---
- validation/test-suite | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ optimize.c | 7 -------
+ 1 file changed, 7 deletions(-)
 
-diff --git a/validation/test-suite b/validation/test-suite
-index 64a3e08fb4dd..a22f70135fb3 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -338,7 +338,7 @@ do_test()
- 	# do we want a timeout?
- 	pre_cmd=""
- 	if [ $check_timeout -ne 0 ]; then
--		pre_cmd="timeout -k 1s $check_timeout"
-+		pre_cmd="timeout $check_timeout"
- 	fi
+diff --git a/optimize.c b/optimize.c
+index e8cb7fc3..31d94e61 100644
+--- a/optimize.c
++++ b/optimize.c
+@@ -75,7 +75,6 @@ repeat:
+ 	 */
+ 	do {
+ 		simplify_memops(ep);
+-		//ir_validate(ep);
+ 		do {
+ 			repeat_phase = 0;
+ 			clean_up_insns(ep);
+@@ -86,15 +85,11 @@ repeat:
  
- 	shift
+ 			if (repeat_phase & REPEAT_SYMBOL_CLEANUP)
+ 				simplify_memops(ep);
+-			//ir_validate(ep);
+ 		} while (repeat_phase);
+ 		pack_basic_blocks(ep);
+-		//ir_validate(ep);
+ 		if (repeat_phase & REPEAT_CFG_CLEANUP)
+ 			kill_unreachable_bbs(ep);
+-		//ir_validate(ep);
+ 	} while (repeat_phase);
+-	//ir_validate(ep);
+ 
+ 	vrfy_flow(ep);
+ 
+@@ -111,13 +106,11 @@ repeat:
+ 	 * again
+ 	 */
+ 	if (simplify_flow(ep)) {
+-		//ir_validate(ep);
+ 		clear_liveness(ep);
+ 		if (repeat_phase & REPEAT_CFG_CLEANUP)
+ 			kill_unreachable_bbs(ep);
+ 		goto repeat;
+ 	}
+-	//ir_validate(ep);
+ 
+ 	/* Finally, add deathnotes to pseudos now that we have them */
+ 	if (dbg_dead)
 -- 
-2.27.0
+2.25.1
