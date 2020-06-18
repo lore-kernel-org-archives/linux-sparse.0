@@ -1,37 +1,43 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH] ir-validate: remove orphan comments
-Date: Thu, 18 Jun 2020 20:58:47 +0200
-Message-ID: <20200618185847.ib25p2kt7kbsudbo@ltop.local>
-References: <20200618140913.25321-1-garritfranke@gmail.com>
+Subject: [PATCH 0/5] support builtin macros & __has_feature()
+Date: Thu, 18 Jun 2020 22:47:11 +0200
+Message-ID: <20200618204716.3896-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40346 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57496 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728245AbgFRS6u (ORCPT
+        with ESMTP id S1725829AbgFRUtf (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 18 Jun 2020 14:58:50 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0BC85C06174E
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 11:58:50 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id gl26so7522667ejb.11
-        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 11:58:49 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <20200618140913.25321-1-garritfranke@gmail.com>
+        Thu, 18 Jun 2020 16:49:35 -0400
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 065D9C06174E
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:35 -0700 (PDT)
+Received: by mail-ej1-x632.google.com with SMTP id mb16so7883376ejb.4
+        for <linux-sparse@vger.kernel.org>; Thu, 18 Jun 2020 13:49:34 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: garritfra <garritfranke@gmail.com>
-Cc: linux-sparse@vger.kernel.org
+To: linux-sparse@vger.kernel.org
+Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Thu, Jun 18, 2020 at 04:09:14PM +0200, garritfra wrote:
+This series adds:
+* support for builtin macros with arguments
+* support for __has_feature() & __has_extension()
 
-Hi,
+Luc Van Oostenryck (5):
+  pre-process: add testcases for __has_feature() & __has_extension()
+  pre-process: rename 'expander' into 'expand_simple'
+  pre-process: add support for builtin macros
+  pre-process: add support for __has_feature() & __has_extension()
+  pre-process: make __has_{attribute,builtin}() true builtin macros
 
-> Please let me know if these comments have a right to be there, but I
-> think they are orphans and can be removed.
+ ident-list.h                          |   6 +-
+ lib.c                                 |   2 -
+ pre-process.c                         | 180 ++++++++++++++++++--------
+ symbol.h                              |   4 +-
+ validation/preprocessor/has-feature.c |  20 +++
+ 5 files changed, 151 insertions(+), 61 deletions(-)
+ create mode 100644 validation/preprocessor/has-feature.c
 
-Indeed, they have been commited more or less by error and have
-never been removed.
-
-Thanks for the patch.
--- Luc
+-- 
+2.27.0
