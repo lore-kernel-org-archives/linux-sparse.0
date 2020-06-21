@@ -1,77 +1,66 @@
-From: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Subject: [PATCH] evaluate.c: fix a gcc 'may be used uninitialized' warning
-Date: Sun, 21 Jun 2020 20:34:31 +0100
-Message-ID: <b3ff0d78-ceea-768e-339c-22466b84b81d@ramsayjones.plus.com>
+From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: Re: [PATCH] evaluate.c: fix a gcc 'may be used uninitialized' warning
+Date: Sun, 21 Jun 2020 22:18:04 +0200
+Message-ID: <20200621201804.iww6chjwknkldo7n@ltop.local>
+References: <b3ff0d78-ceea-768e-339c-22466b84b81d@ramsayjones.plus.com>
 Mime-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from avasout06.plus.net ([212.159.14.18]:51755 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730036AbgFUTee (ORCPT
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58486 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730572AbgFUUSv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Jun 2020 15:34:34 -0400
-Content-Language: en-GB
+        Sun, 21 Jun 2020 16:18:51 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 08FEDC061794
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Jun 2020 13:18:51 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id l12so15839367ejn.10
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Jun 2020 13:18:50 -0700 (PDT)
+Content-Disposition: inline
+In-Reply-To: <b3ff0d78-ceea-768e-339c-22466b84b81d@ramsayjones.plus.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: Ramsay Jones <ramsay@ramsayjones.plus.com>
 Cc: Sparse Mailing-list <linux-sparse@vger.kernel.org>
 
+On Sun, Jun 21, 2020 at 08:34:31PM +0100, Ramsay Jones wrote:
+> 
+> Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
+> ---
+> 
+> Hi Luc,
+> 
+> Thanks for v0.6.2! :-D
+> 
+> However, I am seeing a gcc compiler warning:
+> 
+>     CC      evaluate.o
+>   evaluate.c: In function ‘evaluate_generic_selection’:
+>   evaluate.c:3310:38: warning: ‘base’ may be used uninitialized in this function [-Wmaybe-uninitialized]
+>      if (base->type == SYM_ARRAY && base->array_size) {
+>                                     ~~~~^~~~~~~~~~~~
+> 
+> This patch is just an FYI/quick-fix for this warning. The patch
+> I wanted to send, moved the declaration of the base symbol into
+> a new block at the 'if (stype->type == SYM_NODE)' conditional,
+> which would now include the (indented) SYM_ARRAY conditional
+> block. This, of course, meant that the SYM_ARRAY conditional was
+> indented too far to the right ... ;-)
+> 
+> [perhaps this argues for that code to be refactored into a function]
 
-Signed-off-by: Ramsay Jones <ramsay@ramsayjones.plus.com>
----
-
-Hi Luc,
-
-Thanks for v0.6.2! :-D
-
-However, I am seeing a gcc compiler warning:
-
-    CC      evaluate.o
-  evaluate.c: In function ‘evaluate_generic_selection’:
-  evaluate.c:3310:38: warning: ‘base’ may be used uninitialized in this function [-Wmaybe-uninitialized]
-     if (base->type == SYM_ARRAY && base->array_size) {
-                                    ~~~~^~~~~~~~~~~~
-
-This patch is just an FYI/quick-fix for this warning. The patch
-I wanted to send, moved the declaration of the base symbol into
-a new block at the 'if (stype->type == SYM_NODE)' conditional,
-which would now include the (indented) SYM_ARRAY conditional
-block. This, of course, meant that the SYM_ARRAY conditional was
-indented too far to the right ... ;-)
-
-[perhaps this argues for that code to be refactored into a function]
-
-Thanks!
-
-ATB,
-Ramsay Jones
-
-
- evaluate.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
-
-diff --git a/evaluate.c b/evaluate.c
-index aa0f2080..19a15ca3 100644
---- a/evaluate.c
-+++ b/evaluate.c
-@@ -3299,7 +3299,7 @@ static struct symbol *evaluate_generic_selection(struct expression *expr)
- 	source.ctype.modifiers &= ~(MOD_QUALIFIER|MOD_ATOMIC);
- 	for (map = expr->map; map; map = map->next) {
- 		struct symbol *stype = map->type;
--		struct symbol *base;
-+		struct symbol *base = NULL;
+I just saw this warning too. Of course, *after* the release is made.
  
- 		if (!evaluate_symbol(stype))
- 			continue;
-@@ -3307,7 +3307,7 @@ static struct symbol *evaluate_generic_selection(struct expression *expr)
- 		if (stype->type == SYM_NODE)
- 			base = stype->ctype.base_type;
- 
--		if (base->type == SYM_ARRAY && base->array_size) {
-+		if (base && base->type == SYM_ARRAY && base->array_size) {
- 			get_expression_value_silent(base->array_size);
- 			if (base->array_size->type == EXPR_VALUE)
- 				continue;
--- 
-2.27.0
+What I had in made while writing the code was:
+		base = stype;
+		if (stype->type == SYM_NODE)
+			base = stype->ctype.base_type;
+
+Your patch here below will work correctly but is not semantically
+correct if stype->type != SYM_NODE. Fortunately, it's guaranteed
+to always be a SYM_NODE (typename() is so). So, I'll probably
+commit the following:
+
+-               if (stype->type == SYM_NODE)
+-                       base = stype->ctype.base_type;
