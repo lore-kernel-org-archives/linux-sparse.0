@@ -1,60 +1,68 @@
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] testsuite: fix 'format help' / validate number of arguments
-Date: Tue, 23 Jun 2020 01:34:52 +0200
-Message-ID: <20200622233452.89993-1-luc.vanoostenryck@gmail.com>
+From: Sarah Koffi <paulwiliam782@gmail.com>
+Subject: Greetings From Mrs. Sarah Koffi
+Date: Tue, 23 Jun 2020 12:15:57 +0100
+Message-ID: <CAHqcnY1sQc2pQ+0Uyz5Y25va64Mmiq7PVAFb=gqiSCPOaqkzpA__2690.10444624058$1592910972$gmane$org@mail.gmail.com>
+Reply-To: sarahkoffi389@yahoo.co.jp
 Mime-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57460 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52624 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730296AbgFVXe6 (ORCPT
+        with ESMTP id S1732495AbgFWLP7 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 22 Jun 2020 19:34:58 -0400
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9D3B6C061573
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Jun 2020 16:34:57 -0700 (PDT)
-Received: by mail-ed1-x543.google.com with SMTP id k8so14990068edq.4
-        for <linux-sparse@vger.kernel.org>; Mon, 22 Jun 2020 16:34:57 -0700 (PDT)
+        Tue, 23 Jun 2020 07:15:59 -0400
+Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 74B9BC061795
+        for <linux-sparse@vger.kernel.org>; Tue, 23 Jun 2020 04:15:59 -0700 (PDT)
+Received: by mail-wr1-x441.google.com with SMTP id b6so20082481wrs.11
+        for <linux-sparse@vger.kernel.org>; Tue, 23 Jun 2020 04:15:59 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: linux-sparse@vger.kernel.org
-Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To: sarahkoffi389@yahoo.co.jp
 
-The subcommand 'format help' is broken because the of the way
-arguments are parsed without validating the number of arguments.
+Greetings From Mrs. Sarah Koffi
 
-Fix this by parsing all arguments (even if there is only one)
-and validate the number of arguments at the end of the loop.
+I'm contacting you based on your good profiles I read and for a good
+reasons, I am in search of a property to buy in your country as I
+intended to come over to your
+country for investment, Though I have not meet with you before but I
+believe that one has to risk confiding in someone to succeed sometimes
+in life.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- validation/test-suite | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+My name is Mrs. Sarah Koffi. My late husband deals on Crude Oil with
+Federal Government of Sudan and he has a personal Oil firm in Bentiu
+Oil zone town and Upper
+Nile city. What I have experience physically, I don't wish to
+experience it again in my life due to the recent civil Ethnic war
+cause by our President Mr. Salva Kiir
+and the rebel leader Mr Riek Machar, I have been Under United Nation
+refuge camp in chad to save my life and that of my little daughter.
 
-diff --git a/validation/test-suite b/validation/test-suite
-index a22f70135fb3..d351ebf3c428 100755
---- a/validation/test-suite
-+++ b/validation/test-suite
-@@ -474,7 +474,7 @@ do_format()
- 	linear=0
- 	fail=0
- 
--	while [ $# -gt 1 ] ; do
-+	while [ $# -gt 0 ] ; do
- 		case "$1" in
- 		-a)
- 			append=1 ;;
-@@ -493,6 +493,11 @@ do_format()
- 		continue
- 	done
- 
-+	if [ $# -lt 1 -o $# -gt 3 ]; then
-+		do_format_help
-+		return 0
-+	fi
-+
- 	arg_file "$1" || return 1
- 
- 	file="$1"
--- 
-2.27.0
+Though, I do not know how you will feel to my proposal, but the truth
+is that I sneaked into Chad our neighboring country where I am living
+now as a refugee.
+I escaped with my little daughter when the rebels bust into our house
+and killed my husband as one of the big oil dealers in the country,
+ever since then, I have being on the run.
+
+I left my country and move to Chad our neighboring country with the
+little ceasefire we had, due to the face to face peace meeting accord
+coordinated by the US Secretary of State, Mr John Kerry and United
+Nations in Ethiopia (Addis Ababa) between our President Mr Salva Kiir
+and the rebel leader Mr Riek Machar to stop this war.
+
+I want to solicit for your partnership with trust to invest the $8
+million dollars deposited by my late husband in Bank because my life
+is no longer safe in our country, since the rebels are looking for the
+families of all the oil business men in the country to kill, saying
+that they are they one that is milking the country dry.
+
+I will offer you 20% of the total fund for your help while I will
+partner with you for the investment in your country.
+If I get your reply.
+
+I will wait to hear from you so as to give you details.With love from
+
+ i need you to contact me here sarahkoffi389@yahoo.co.jp
+
+Mrs. Sarah Koffi
