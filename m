@@ -1,120 +1,64 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: Re: [PATCH 2/3] add memory asm constraint for PPC
-Date: Sun, 5 Jul 2020 00:44:39 +0200
-Message-ID: <20200704224439.h2lwfccvsdgwhkbw@ltop.local>
-References: <20200704135747.87752-1-luc.vanoostenryck@gmail.com>
- <20200704135747.87752-3-luc.vanoostenryck@gmail.com>
- <693a3fa0-5202-3695-54cf-aa1cc1f514fd@ramsayjones.plus.com>
- <20200704193248.simtaedrt7gbiepy@ltop.local>
- <900dd2ad-9037-cefb-6a22-27cd0b971716@ramsayjones.plus.com>
+Subject: [PATCH] sindex: avoid a warning with 'case -1:'
+Date: Sun,  5 Jul 2020 01:54:53 +0200
+Message-ID: <20200704235453.7756-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57852 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:40396 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727816AbgGDWon (ORCPT
+        with ESMTP id S1728004AbgGDXzA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 4 Jul 2020 18:44:43 -0400
+        Sat, 4 Jul 2020 19:55:00 -0400
 Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07388C061794
-        for <linux-sparse@vger.kernel.org>; Sat,  4 Jul 2020 15:44:43 -0700 (PDT)
-Received: by mail-ed1-x542.google.com with SMTP id e15so31230189edr.2
-        for <linux-sparse@vger.kernel.org>; Sat, 04 Jul 2020 15:44:42 -0700 (PDT)
-Content-Disposition: inline
-In-Reply-To: <900dd2ad-9037-cefb-6a22-27cd0b971716@ramsayjones.plus.com>
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3A3D1C061794
+        for <linux-sparse@vger.kernel.org>; Sat,  4 Jul 2020 16:55:00 -0700 (PDT)
+Received: by mail-ed1-x542.google.com with SMTP id d16so24736349edz.12
+        for <linux-sparse@vger.kernel.org>; Sat, 04 Jul 2020 16:55:00 -0700 (PDT)
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
-To: Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc: linux-sparse@vger.kernel.org
+To: Alexey Gladkov <gladkov.alexey@gmail.com>
+Cc: linux-sparse@vger.kernel.org, Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-On Sat, Jul 04, 2020 at 10:07:15PM +0100, Ramsay Jones wrote:
-> 
-> 
-> On 04/07/2020 20:32, Luc Van Oostenryck wrote:
-> > On Sat, Jul 04, 2020 at 06:44:53PM +0100, Ramsay Jones wrote:
-> 
-> >> On 04/07/2020 14:57, Luc Van Oostenryck wrote:
-> >>> The 'Z' asm constraint is used for doing IO accessors on PPC but
-> >>> isn't part of the 'common constraints'. It's responsible for
-> >>> more than half of all warnings (with defconfig + allyesconfig).
-> >>
-> >> Not a problem, but this made me think 'half of which warnings'. :-D
-> >> I assume, but it's just a guess, this means 'half of all asm-constraints
-> >> warnings on the kernel PPC build'.
-> >>
-> >> How many warnings is that? What percentage is that of _all_ sparse
-> >> warnings on a typical kernel build?
-> > 
-> > It's literally more than half of all warnings issued by sparse when doing
-> > a build of the kernel with 'defconfig' and another one with 'allyesconfig'
-> > (all my tests on kernel builds are done like so) on a ppc64 machine:
-> > 	$ grep ': \(error\|warning\):' log-master-master | wc -l
-> > 	138581
-> > 	$ grep ': \(error\|warning\):' log-arch-asm-mem | wc -l
-> > 	50006
-> > So, this series eliminates about 64% of all warnings, a nice
-> > improvement of the S/N ratio.
-> 
-> Oh, nice!
-> 
-> It's a _long_ time since I last built the kernel (about when reading
-> Greg's 'Linux Kernel in a Nutshell' book, so about 2006), and I don't
-> even recall if I ran sparse over it. (Hmm, did you have to specify
-> a C parameter to make or something?).
+When parsing the format, there is a 'case -1:' which:
+* seems to be there only for the following label (but mixing
+  labels with cases, like here, is OK).
+* on architectures where chars are unsigned, the compiler complains:
+	warning: case label value is less than minimum value for type
 
-Yes, the simplest is to use 'make C=2'.
+So, remove the unneeded 'case -1:' and use an explicit 'default:'
+to catch invalid formats. Also, align the label with the cases,
+it looks nicer so.
 
-> Anyway, that is still a very large number of error/warnings - has it
-> always been that bad?
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ sindex.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-Well, I like to think that it has improved considerably the last years.
-But yes, it's still very much. The problem is not very simple and has,
-I think, multiple causes, like (in random order):
-  * not all developers use sparse
-    * some don't really know about it
-    * some don't want to use it anymore
-  * support for architectures other than i386/x86_64 was very weak
-  * sparse used to (and still) issue a lot of false negatives
-  * documentation for sparse is very ... sparse
-  * sparse's warnings are not always easy to understand
-  * developers doesn't always seem to know/understand well the
-    kind of checks sparse is doing, what's it is possible, what it is
-    capable (I'm thinking of the address spaces, the context/locking
-    and bitwise).
-  * it's not always obvious what is the value of sparse warnings
-  * it's not always obvious what is the value of fixing sparse warnings
-  * fixing sparse warnings in the kernel is not very gratifying
-  * devs are usually paid (and like) to add features, not to touch to
-    code that seems to work.
-  * very strict typing, like created with __bitwise, sometimes requires
-    a lot of interfaces variant (one for each type/arguments/return value)
-    otherwise functionally identical and C has essentially no support
-    for generic programming (everything must be done with macros & typeof).
-  * for several reasons, it can very quickly become very frustrating
-    to make (series of) patches that fix sparse warnings in the kernel.
-   
-OTOH, on x86, the vast majority of warnings I see are totally valid ones.
-By far, the most common ones are those involving __bitwise, then missing
-static, then problems with address space (especially with __rcu), then
-with contexts. The remaining ones are drops of water in the ocean.
-
-Also, the kernel has about 30 millions lines of code, thousands of devs,
-hundreds of new devs every releases, ... So, maybe it's not so bad.
-
-Finally, CI/bot testing/building has progressed a lot lately and have
-a very positive effect on sparse warnings (it can also be quite
-frustrating because every day you see automatic reports, take a
-quick look, think "oh, it shouldn't be hard to fix it" but then it's
-"oh, well ..." because you have absolutely not the bandwidth for it).
-
-> Yep, I know what you mean. However, I don't think you should shy
-> away from clean-ups for too long - it will be counter-productive
-> in the end.
-
-Yes. I generally do this on a kind of "on demand basis". When I need
-to touch some code and it's too hard to change or follow, I first
-reorganize or simplify it. Sometimes it's really needed, sometimes
-it's only a kind of nice side-effect, like here (I have 3 incoming
-series on top of it).
-
--- Luc
+diff --git a/sindex.c b/sindex.c
+index ea092a4a434b..22836a957213 100644
+--- a/sindex.c
++++ b/sindex.c
+@@ -970,8 +970,8 @@ static int search_query_callback(void *data, int argc, char **argv, char **colna
+ 					print_file_line(argv[0], atoi(argv[1]));
+ 					fmt++;
+ 					break;
+-				case -1:
+-print_string:
++
++				print_string:
+ 					if (n) {
+ 						printf("%.*s", n, buf);
+ 						n = 0;
+@@ -979,6 +979,9 @@ print_string:
+ 					printf("%s", argv[colnum]);
+ 					fmt++;
+ 					break;
++				default:
++					break;
++
+ 			}
+ 
+ 			if (pos == fmt)
+-- 
+2.27.0
