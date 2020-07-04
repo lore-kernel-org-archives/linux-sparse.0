@@ -1,79 +1,63 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/3] add memory asm constraint for S390
-Date: Sat,  4 Jul 2020 15:57:47 +0200
-Message-ID: <20200704135747.87752-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/3] add support for arch specific asm constraints
+Date: Sat,  4 Jul 2020 15:57:45 +0200
+Message-ID: <20200704135747.87752-2-luc.vanoostenryck@gmail.com>
 References: <20200704135747.87752-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33492 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726738AbgGDN5z (ORCPT
+        with ESMTP id S1726738AbgGDN5x (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 4 Jul 2020 09:57:55 -0400
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7E749C061794
-        for <linux-sparse@vger.kernel.org>; Sat,  4 Jul 2020 06:57:55 -0700 (PDT)
-Received: by mail-ed1-x543.google.com with SMTP id dm19so24073258edb.13
-        for <linux-sparse@vger.kernel.org>; Sat, 04 Jul 2020 06:57:55 -0700 (PDT)
+        Sat, 4 Jul 2020 09:57:53 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6101BC061794
+        for <linux-sparse@vger.kernel.org>; Sat,  4 Jul 2020 06:57:53 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id w6so37383318ejq.6
+        for <linux-sparse@vger.kernel.org>; Sat, 04 Jul 2020 06:57:53 -0700 (PDT)
 In-Reply-To: <20200704135747.87752-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The 'Q', 'R', 'S' & 'T'' asm constraint are used for for memory
-operands on S390 but only 'Q' belong to the 'common constraints'.
+When evaluating asm operands it must be known if they correspond
+to a memory operand or not in order to process/ignore the 'noderef'
+attribute.
 
-Fix this by handling the 3 others with an arch-specific method.
+This is done for operands specified with the common constraints
+but not for the machine specific constraints.
+
+So, add support for processing machine specific constraints.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- target-s390.c | 13 +++++++++++++
- 1 file changed, 13 insertions(+)
+ evaluate.c | 5 ++++-
+ target.h   | 3 ++-
+ 2 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/target-s390.c b/target-s390.c
-index 8fe7d93677b2..9dbc810e507c 100644
---- a/target-s390.c
-+++ b/target-s390.c
-@@ -1,6 +1,7 @@
- #include "symbol.h"
- #include "target.h"
- #include "machine.h"
-+#include "expression.h"
+diff --git a/evaluate.c b/evaluate.c
+index 3b9aec3c13c0..f515ce6f2de6 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -3642,7 +3642,10 @@ static void parse_asm_constraint(struct asm_operand *op)
+ 			return;
  
- 
- static void predefine_s390(const struct target *self)
-@@ -8,6 +9,16 @@ static void predefine_s390(const struct target *self)
- 	predefine("__s390__", 1, "1");
- }
- 
-+static const char *asm_constraint_s390(struct asm_operand *op, int c, const char *str)
-+{
-+	switch (c) {
-+	case 'R': case 'S': case 'T':
-+		op->is_memory = true;
-+		break;
-+	}
-+	return str;
-+}
+ 		default:
+-			// FIXME: arch-specific (and multi-letter) constraints
++			if (arch_target->asm_constraint)
++				str = arch_target->asm_constraint(op, c, str);
 +
- const struct target target_s390 = {
- 	.mach = MACH_S390,
- 	.bitness = ARCH_LP32,
-@@ -21,6 +32,7 @@ const struct target target_s390 = {
- 	.target_64bit = &target_s390x,
++			// FIXME: multi-letter constraints
+ 			break;
+ 		}
+ 	}
+diff --git a/target.h b/target.h
+index 8640026cc6d4..3ef0d520f83c 100644
+--- a/target.h
++++ b/target.h
+@@ -53,7 +53,7 @@ extern int pointer_alignment;
+ extern int bits_in_enum;
+ extern int enum_alignment;
  
- 	.predefine = predefine_s390,
-+	.asm_constraint = asm_constraint_s390,
- };
- 
- 
-@@ -45,4 +57,5 @@ const struct target target_s390x = {
- 	.target_32bit = &target_s390,
- 
- 	.predefine = predefine_s390x,
-+	.asm_constraint = asm_constraint_s390,
- };
--- 
-2.27.0
