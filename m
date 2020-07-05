@@ -1,175 +1,124 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] testsuite: add testcase for bogus linearization of >>= & /=
-Date: Sun,  5 Jul 2020 14:38:50 +0200
-Message-ID: <20200705123850.25924-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 01/15] options: let handle_onoff_switch() use null terminated arrays
+Date: Sun,  5 Jul 2020 15:02:06 +0200
+Message-ID: <20200705130220.26230-2-luc.vanoostenryck@gmail.com>
+References: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44066 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47688 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726819AbgGEMi6 (ORCPT
+        with ESMTP id S1726792AbgGENCa (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Jul 2020 08:38:58 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57789C061794
-        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 05:38:58 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id dm19so25904738edb.13
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Jul 2020 05:38:58 -0700 (PDT)
+        Sun, 5 Jul 2020 09:02:30 -0400
+Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03DA9C08C5DE
+        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 06:02:30 -0700 (PDT)
+Received: by mail-ed1-x542.google.com with SMTP id z17so32200812edr.9
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Jul 2020 06:02:29 -0700 (PDT)
+In-Reply-To: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-When doing a shift operation, both arguments are subjected to
-integer promotion and the type of the result is simply the type
-of the promoted left operand. Easy.
-
-But for a shift-assignment, things are slightly more complex:
-  -) 'a >>= n' should be equivalent to 'a = a >> n'
-  -) but the type of the result must be the type of the left
-     operand *before* integer promotion.
-
-Currently, the linearization code use the type of the right
-operand to infer of the type of the operation. But simply changing
-the code to use the type of the left operand will also be wrong
-(for example for signed/unsigned divisions). Nasty.
-
-For example, the following C code:
-	int s = ...;
-	s >>= 11U;
-is linearized as a logical shift:
-	lsr.32      %r2 <- %arg1, $11
-while, of course it's an arithmetic shift that is expected:
-	asr.32      %r2 <- %arg1, $11
-
-So, add a testcase for these.
+This makes things slightly easier to use.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/linear/bug-assign-op0.c | 115 +++++++++++++++++++++++++++++
- 1 file changed, 115 insertions(+)
- create mode 100644 validation/linear/bug-assign-op0.c
+ lib.c | 20 +++++++++++---------
+ 1 file changed, 11 insertions(+), 9 deletions(-)
 
-diff --git a/validation/linear/bug-assign-op0.c b/validation/linear/bug-assign-op0.c
-new file mode 100644
-index 000000000000..0cabc6222b8a
---- /dev/null
-+++ b/validation/linear/bug-assign-op0.c
-@@ -0,0 +1,115 @@
-+int asr(int s)
-+{
-+	s >>= 11U;
-+	return s;
-+}
-+
-+unsigned int lsr(unsigned int u)
-+{
-+	u >>= 11;
-+	return u;
-+}
-+
-+int divr(int s, unsigned long u)
-+{
-+	extern int use(int, unsigned);
-+	int t = s;
-+	s = s / u;
-+	u = u / t;
-+	return use(s, u);
-+}
-+
-+int sdivul(int s, unsigned long u)
-+{
-+	s /= u;			// divu
-+	return s;
-+}
-+
-+unsigned int udivsl(unsigned int u, long s)
-+{
-+	u /= s;			// divs
-+	return u;
-+}
-+
-+int uldivs(int s, unsigned long u)
-+{
-+	u /= s;			// divu
-+	return u;
-+}
-+
-+unsigned int sldivu(unsigned int u, long s)
-+{
-+	s /= u;			// divs
-+	return s;
-+}
-+
-+/*
-+ * check-name: bug-assign-op0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-start
-+asr:
-+.L0:
-+	<entry-point>
-+	asr.32      %r2 <- %arg1, $11
-+	ret.32      %r2
-+
-+
-+lsr:
-+.L2:
-+	<entry-point>
-+	lsr.32      %r6 <- %arg1, $11
-+	ret.32      %r6
-+
-+
-+divr:
-+.L4:
-+	<entry-point>
-+	sext.64     %r11 <- (32) %arg1
-+	divu.64     %r13 <- %r11, %arg2
-+	trunc.32    %r14 <- (64) %r13
-+	divu.64     %r18 <- %arg2, %r11
-+	trunc.32    %r21 <- (64) %r18
-+	call.32     %r22 <- use, %r14, %r21
-+	ret.32      %r22
-+
-+
-+sdivul:
-+.L6:
-+	<entry-point>
-+	sext.64     %r26 <- (32) %arg1
-+	divu.64     %r27 <- %r26, %arg2
-+	trunc.32    %r28 <- (64) %r27
-+	ret.32      %r28
-+
-+
-+udivsl:
-+.L8:
-+	<entry-point>
-+	zext.64     %r33 <- (32) %arg1
-+	divs.64     %r34 <- %r33, %arg2
-+	trunc.32    %r35 <- (64) %r34
-+	ret.32      %r35
-+
-+
-+uldivs:
-+.L10:
-+	<entry-point>
-+	sext.64     %r39 <- (32) %arg1
-+	divu.64     %r41 <- %arg2, %r39
-+	trunc.32    %r43 <- (64) %r41
-+	ret.32      %r43
-+
-+
-+sldivu:
-+.L12:
-+	<entry-point>
-+	zext.64     %r46 <- (32) %arg1
-+	divs.64     %r48 <- %arg2, %r46
-+	trunc.32    %r50 <- (64) %r48
-+	ret.32      %r50
-+
-+
-+ * check-output-end
-+ */
+diff --git a/lib.c b/lib.c
+index e56788260cb7..709dd5176112 100644
+--- a/lib.c
++++ b/lib.c
+@@ -529,14 +529,14 @@ enum {
+ 	WARNING_FORCE_OFF
+ };
+ 
+-static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[], int n)
++static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[])
+ {
+ 	int flag = WARNING_ON;
+ 	char *p = arg + 1;
+ 	unsigned i;
+ 
+ 	if (!strcmp(p, "sparse-all")) {
+-		for (i = 0; i < n; i++) {
++		for (i = 0; warnings[i].name; i++) {
+ 			if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i].flag != &Wsparse_error)
+ 				*warnings[i].flag = WARNING_ON;
+ 		}
+@@ -551,7 +551,7 @@ static char **handle_onoff_switch(char *arg, char **next, const struct flag warn
+ 		flag = WARNING_FORCE_OFF;
+ 	}
+ 
+-	for (i = 0; i < n; i++) {
++	for (i = 0; warnings[i].name; i++) {
+ 		if (!strcmp(p,warnings[i].name)) {
+ 			*warnings[i].flag = flag;
+ 			return next;
+@@ -789,11 +789,12 @@ static const struct flag warnings[] = {
+ 	{ "universal-initializer", &Wuniversal_initializer },
+ 	{ "unknown-attribute", &Wunknown_attribute },
+ 	{ "vla", &Wvla },
++	{ }
+ };
+ 
+ static char **handle_switch_W(char *arg, char **next)
+ {
+-	char ** ret = handle_onoff_switch(arg, next, warnings, ARRAY_SIZE(warnings));
++	char ** ret = handle_onoff_switch(arg, next, warnings);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -808,12 +809,13 @@ static struct flag debugs[] = {
+ 	{ "entry", &dbg_entry},
+ 	{ "ir", &dbg_ir},
+ 	{ "postorder", &dbg_postorder},
++	{ }
+ };
+ 
+ 
+ static char **handle_switch_v(char *arg, char **next)
+ {
+-	char ** ret = handle_onoff_switch(arg, next, debugs, ARRAY_SIZE(debugs));
++	char ** ret = handle_onoff_switch(arg, next, debugs);
+ 	if (ret)
+ 		return ret;
+ 
+@@ -856,11 +858,11 @@ static char **handle_switch_d(char *arg, char **next)
+ }
+ 
+ 
+-static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
++static void handle_onoff_switch_finalize(const struct flag warnings[])
+ {
+ 	unsigned i;
+ 
+-	for (i = 0; i < n; i++) {
++	for (i = 0; warnings[i].name; i++) {
+ 		if (*warnings[i].flag == WARNING_FORCE_OFF)
+ 			*warnings[i].flag = WARNING_OFF;
+ 	}
+@@ -868,7 +870,7 @@ static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
+ 
+ static void handle_switch_W_finalize(void)
+ {
+-	handle_onoff_switch_finalize(warnings, ARRAY_SIZE(warnings));
++	handle_onoff_switch_finalize(warnings);
+ 
+ 	/* default Wdeclarationafterstatement based on the C dialect */
+ 	if (-1 == Wdeclarationafterstatement) {
+@@ -886,7 +888,7 @@ static void handle_switch_W_finalize(void)
+ 
+ static void handle_switch_v_finalize(void)
+ {
+-	handle_onoff_switch_finalize(debugs, ARRAY_SIZE(debugs));
++	handle_onoff_switch_finalize(debugs);
+ }
+ 
+ static char **handle_switch_U(char *arg, char **next)
 -- 
 2.27.0
