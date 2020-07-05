@@ -1,157 +1,147 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 06/15] options: move helpers up
-Date: Sun,  5 Jul 2020 15:02:11 +0200
-Message-ID: <20200705130220.26230-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 08/15] options: avoid spaces between function name and arguments list
+Date: Sun,  5 Jul 2020 15:02:13 +0200
+Message-ID: <20200705130220.26230-9-luc.vanoostenryck@gmail.com>
 References: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47712 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47720 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726792AbgGENCf (ORCPT
+        with ESMTP id S1726962AbgGENCg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Jul 2020 09:02:35 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC7D9C061794
-        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 06:02:34 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id w16so39593499ejj.5
-        for <linux-sparse@vger.kernel.org>; Sun, 05 Jul 2020 06:02:34 -0700 (PDT)
+        Sun, 5 Jul 2020 09:02:36 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A431C08C5DE
+        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 06:02:36 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id by13so22328544edb.11
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Jul 2020 06:02:36 -0700 (PDT)
 In-Reply-To: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-The helpers for parsing the options are often situated just above the
-first function using them. As result, these helpers can be found a bit
-everywhere in the code, it's messy and doesn't help to reuse these helpers.
+It's a stylistic detail but a lot of the strcmp() calls used for
+the processing of the options are written 'strcmp (...)'. Two
+other functions calls are also in the case.
 
-So, move all these helpers to the top.
+Reformat them to the usual style for function calls: without
+the space between the function name and the arguments.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- lib.c | 87 ++++++++++++++++++++++++++++++-----------------------------
- 1 file changed, 44 insertions(+), 43 deletions(-)
+ lib.c | 34 +++++++++++++++++-----------------
+ 1 file changed, 17 insertions(+), 17 deletions(-)
 
 diff --git a/lib.c b/lib.c
-index c27773097127..4868154fa3de 100644
+index 5f4e6b2d76c8..b3bacb180cac 100644
 --- a/lib.c
 +++ b/lib.c
-@@ -364,6 +364,15 @@ void add_pre_buffer(const char *fmt, ...)
- ////////////////////////////////////////////////////////////////////////////////
- // Helpers for option parsing
+@@ -570,7 +570,7 @@ OPT_NUMERIC(uint, unsigned int, strtoul)
  
-+static const char *match_option(const char *arg, const char *prefix)
-+{
-+	unsigned int n = strlen(prefix);
-+	if (strncmp(arg, prefix, n) == 0)
-+		return arg + n;
-+	return NULL;
-+}
-+
-+
- struct val_map {
- 	const char *name;
- 	int val;
-@@ -438,14 +447,6 @@ end:
- }
- 
- 
--static const char *match_option(const char *arg, const char *prefix)
--{
--	unsigned int n = strlen(prefix);
--	if (strncmp(arg, prefix, n) == 0)
--		return arg + n;
--	return NULL;
--}
--
- #define OPT_INVERSE	1
- #define OPT_VAL		2
- struct flag {
-@@ -497,6 +498,41 @@ static int handle_switches(const char *ori, const char *opt, const struct flag *
- 	return 0;
- }
- 
-+static char **handle_onoff_switch(char *arg, char **next, const struct flag flags[])
-+{
-+	int flag = FLAG_ON;
-+	char *p = arg + 1;
-+	unsigned i;
-+
-+	// Prefixes "no" and "no-" mean to turn warning off.
-+	if (p[0] == 'n' && p[1] == 'o') {
-+		p += 2;
-+		if (p[0] == '-')
-+			p++;
-+		flag = FLAG_FORCE_OFF;
-+	}
-+
-+	for (i = 0; flags[i].name; i++) {
-+		if (!strcmp(p,flags[i].name)) {
-+			*flags[i].flag = flag;
-+			return next;
-+		}
-+	}
-+
-+	// Unknown.
-+	return NULL;
-+}
-+
-+static void handle_onoff_switch_finalize(const struct flag flags[])
-+{
-+	unsigned i;
-+
-+	for (i = 0; flags[i].name; i++) {
-+		if (*flags[i].flag == FLAG_FORCE_OFF)
-+			*flags[i].flag = FLAG_OFF;
-+	}
-+}
-+
- static int handle_switch_setval(const char *arg, const char *opt, const struct flag *flag, int options)
+ static char **handle_switch_a(char *arg, char **next)
  {
- 	*(flag->flag) = flag->mask;
-@@ -529,31 +565,6 @@ static int opt_##NAME(const char *arg, const char *opt, TYPE *ptr, int flag)	\
- OPT_NUMERIC(ullong, unsigned long long, strtoull)
- OPT_NUMERIC(uint, unsigned int, strtoul)
+-	if (!strcmp (arg, "ansi"))
++	if (!strcmp(arg, "ansi"))
+ 		standard = STANDARD_C89;
  
--static char **handle_onoff_switch(char *arg, char **next, const struct flag flags[])
--{
--	int flag = FLAG_ON;
--	char *p = arg + 1;
--	unsigned i;
--
--	// Prefixes "no" and "no-" mean to turn warning off.
--	if (p[0] == 'n' && p[1] == 'o') {
--		p += 2;
--		if (p[0] == '-')
--			p++;
--		flag = FLAG_FORCE_OFF;
--	}
--
--	for (i = 0; flags[i].name; i++) {
--		if (!strcmp(p,flags[i].name)) {
--			*flags[i].flag = flag;
--			return next;
--		}
--	}
--
--	// Unknown.
--	return NULL;
--}
--
- ////////////////////////////////////////////////////////////////////////////////
- // Option parsing
+ 	return next;
+@@ -759,7 +759,7 @@ static char **handle_switch_f(char *arg, char **next)
  
-@@ -858,16 +869,6 @@ static char **handle_switch_d(char *arg, char **next)
+ static char **handle_switch_G(char *arg, char **next)
+ {
+-	if (!strcmp (arg, "G") && *next)
++	if (!strcmp(arg, "G") && *next)
+ 		return next + 1; // "-G 0"
+ 	else
+ 		return next;     // "-G0" or (bogus) terminal "-G"
+@@ -775,7 +775,7 @@ static char **handle_base_dir(char *arg, char **next)
+ 
+ static char **handle_switch_g(char *arg, char **next)
+ {
+-	if (!strcmp (arg, "gcc-base-dir"))
++	if (!strcmp(arg, "gcc-base-dir"))
+ 		return handle_base_dir(arg, next);
+ 
+ 	return next;
+@@ -907,7 +907,7 @@ static char **handle_nostdinc(char *arg, char **next)
+ 
+ static char **handle_switch_n(char *arg, char **next)
+ {
+-	if (!strcmp (arg, "nostdinc"))
++	if (!strcmp(arg, "nostdinc"))
+ 		return handle_nostdinc(arg, next);
+ 
+ 	return next;
+@@ -925,7 +925,7 @@ static char **handle_switch_O(char *arg, char **next)
+ 
+ static char **handle_switch_o(char *arg, char **next)
+ {
+-	if (!strcmp (arg, "o")) {       // "-o foo"
++	if (!strcmp(arg, "o")) {	// "-o foo"
+ 		if (!*++next)
+ 			die("argument to '-o' is missing");
+ 		outfile = *next;
+@@ -949,23 +949,23 @@ static char **handle_switch_p(char *arg, char **next)
+ static char **handle_switch_s(const char *arg, char **next)
+ {
+ 	if ((arg = match_option(arg, "std="))) {
+-		if (!strcmp (arg, "c89") ||
+-		    !strcmp (arg, "iso9899:1990"))
++		if (!strcmp(arg, "c89") ||
++		    !strcmp(arg, "iso9899:1990"))
+ 			standard = STANDARD_C89;
+ 
+-		else if (!strcmp (arg, "iso9899:199409"))
++		else if (!strcmp(arg, "iso9899:199409"))
+ 			standard = STANDARD_C94;
+ 
+-		else if (!strcmp (arg, "c99") ||
+-			 !strcmp (arg, "c9x") ||
+-			 !strcmp (arg, "iso9899:1999") ||
+-			 !strcmp (arg, "iso9899:199x"))
++		else if (!strcmp(arg, "c99") ||
++			 !strcmp(arg, "c9x") ||
++			 !strcmp(arg, "iso9899:1999") ||
++			 !strcmp(arg, "iso9899:199x"))
+ 			standard = STANDARD_C99;
+ 
+-		else if (!strcmp (arg, "gnu89"))
++		else if (!strcmp(arg, "gnu89"))
+ 			standard = STANDARD_GNU89;
+ 
+-		else if (!strcmp (arg, "gnu99") || !strcmp (arg, "gnu9x"))
++		else if (!strcmp(arg, "gnu99") || !strcmp(arg, "gnu9x"))
+ 			standard = STANDARD_GNU99;
+ 
+ 		else if (!strcmp(arg, "c11") ||
+@@ -986,7 +986,7 @@ static char **handle_switch_s(const char *arg, char **next)
+ 			standard = STANDARD_GNU17;
+ 
+ 		else
+-			die ("Unsupported C dialect");
++			die("Unsupported C dialect");
+ 	}
+ 
+ 	return next;
+@@ -995,7 +995,7 @@ static char **handle_switch_s(const char *arg, char **next)
+ static char **handle_switch_U(char *arg, char **next)
+ {
+ 	const char *name = arg + 1;
+-	add_pre_buffer ("#undef %s\n", name);
++	add_pre_buffer("#undef %s\n", name);
+ 	return next;
  }
  
+@@ -1516,7 +1516,7 @@ static struct symbol_list *sparse_file(const char *filename)
+ 	int fd;
+ 	struct token *token;
  
--static void handle_onoff_switch_finalize(const struct flag flags[])
--{
--	unsigned i;
--
--	for (i = 0; flags[i].name; i++) {
--		if (*flags[i].flag == FLAG_FORCE_OFF)
--			*flags[i].flag = FLAG_OFF;
--	}
--}
+-	if (strcmp (filename, "-") == 0) {
++	if (strcmp(filename, "-") == 0) {
+ 		fd = 0;
+ 	} else {
+ 		fd = open(filename, O_RDONLY);
+-- 
+2.27.0
