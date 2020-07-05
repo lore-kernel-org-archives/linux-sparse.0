@@ -1,124 +1,66 @@
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 01/15] options: let handle_onoff_switch() use null terminated arrays
-Date: Sun,  5 Jul 2020 15:02:06 +0200
-Message-ID: <20200705130220.26230-2-luc.vanoostenryck@gmail.com>
-References: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 00/15] tidy-up options / reorganize lib.c
+Date: Sun,  5 Jul 2020 15:02:05 +0200
+Message-ID: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Mime-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Return-path: <linux-sparse-owner@vger.kernel.org>
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47688 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47684 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726792AbgGENCa (ORCPT
+        with ESMTP id S1726792AbgGENC3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 5 Jul 2020 09:02:30 -0400
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 03DA9C08C5DE
-        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 06:02:30 -0700 (PDT)
-Received: by mail-ed1-x542.google.com with SMTP id z17so32200812edr.9
+        Sun, 5 Jul 2020 09:02:29 -0400
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 70B82C061794
+        for <linux-sparse@vger.kernel.org>; Sun,  5 Jul 2020 06:02:29 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id w16so39593361ejj.5
         for <linux-sparse@vger.kernel.org>; Sun, 05 Jul 2020 06:02:29 -0700 (PDT)
-In-Reply-To: <20200705130220.26230-1-luc.vanoostenryck@gmail.com>
 Sender: linux-sparse-owner@vger.kernel.org
 List-Id: linux-sparse@vger.kernel.org
 To: linux-sparse@vger.kernel.org
 Cc: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-This makes things slightly easier to use.
+A lot of content in lib.c have been added by just appending at the
+bottom of what was already present. As consequence, things are now
+not well organized at all, especially when related to the options.
+So, reorganize things a little bit here:
+*) move all helpers on top
+*) keep things alphabetically sorted
+*) move options parsing in a separate file
+*) move predefine-related stuff in a separate file
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- lib.c | 20 +++++++++++---------
- 1 file changed, 11 insertions(+), 9 deletions(-)
 
-diff --git a/lib.c b/lib.c
-index e56788260cb7..709dd5176112 100644
---- a/lib.c
-+++ b/lib.c
-@@ -529,14 +529,14 @@ enum {
- 	WARNING_FORCE_OFF
- };
- 
--static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[], int n)
-+static char **handle_onoff_switch(char *arg, char **next, const struct flag warnings[])
- {
- 	int flag = WARNING_ON;
- 	char *p = arg + 1;
- 	unsigned i;
- 
- 	if (!strcmp(p, "sparse-all")) {
--		for (i = 0; i < n; i++) {
-+		for (i = 0; warnings[i].name; i++) {
- 			if (*warnings[i].flag != WARNING_FORCE_OFF && warnings[i].flag != &Wsparse_error)
- 				*warnings[i].flag = WARNING_ON;
- 		}
-@@ -551,7 +551,7 @@ static char **handle_onoff_switch(char *arg, char **next, const struct flag warn
- 		flag = WARNING_FORCE_OFF;
- 	}
- 
--	for (i = 0; i < n; i++) {
-+	for (i = 0; warnings[i].name; i++) {
- 		if (!strcmp(p,warnings[i].name)) {
- 			*warnings[i].flag = flag;
- 			return next;
-@@ -789,11 +789,12 @@ static const struct flag warnings[] = {
- 	{ "universal-initializer", &Wuniversal_initializer },
- 	{ "unknown-attribute", &Wunknown_attribute },
- 	{ "vla", &Wvla },
-+	{ }
- };
- 
- static char **handle_switch_W(char *arg, char **next)
- {
--	char ** ret = handle_onoff_switch(arg, next, warnings, ARRAY_SIZE(warnings));
-+	char ** ret = handle_onoff_switch(arg, next, warnings);
- 	if (ret)
- 		return ret;
- 
-@@ -808,12 +809,13 @@ static struct flag debugs[] = {
- 	{ "entry", &dbg_entry},
- 	{ "ir", &dbg_ir},
- 	{ "postorder", &dbg_postorder},
-+	{ }
- };
- 
- 
- static char **handle_switch_v(char *arg, char **next)
- {
--	char ** ret = handle_onoff_switch(arg, next, debugs, ARRAY_SIZE(debugs));
-+	char ** ret = handle_onoff_switch(arg, next, debugs);
- 	if (ret)
- 		return ret;
- 
-@@ -856,11 +858,11 @@ static char **handle_switch_d(char *arg, char **next)
- }
- 
- 
--static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
-+static void handle_onoff_switch_finalize(const struct flag warnings[])
- {
- 	unsigned i;
- 
--	for (i = 0; i < n; i++) {
-+	for (i = 0; warnings[i].name; i++) {
- 		if (*warnings[i].flag == WARNING_FORCE_OFF)
- 			*warnings[i].flag = WARNING_OFF;
- 	}
-@@ -868,7 +870,7 @@ static void handle_onoff_switch_finalize(const struct flag warnings[], int n)
- 
- static void handle_switch_W_finalize(void)
- {
--	handle_onoff_switch_finalize(warnings, ARRAY_SIZE(warnings));
-+	handle_onoff_switch_finalize(warnings);
- 
- 	/* default Wdeclarationafterstatement based on the C dialect */
- 	if (-1 == Wdeclarationafterstatement) {
-@@ -886,7 +888,7 @@ static void handle_switch_W_finalize(void)
- 
- static void handle_switch_v_finalize(void)
- {
--	handle_onoff_switch_finalize(debugs, ARRAY_SIZE(debugs));
-+	handle_onoff_switch_finalize(debugs);
- }
- 
- static char **handle_switch_U(char *arg, char **next)
+Luc Van Oostenryck (15):
+  options: let handle_onoff_switch() use null terminated arrays
+  options: move -Wsparse-all's processing out of handle_onoff_switch()
+  options: move on top the definition of warning type enums
+  options: make Wsparse_error less special
+  options: handle_onoff_switch() can handle any flags, not only warnings
+  options: move helpers up
+  options: alphasort the handle_switch_[a-zA_Z]()
+  options: avoid spaces between function name and arguments list
+  options: move declaration of tabstop out of "token.h"
+  options: add a small helper: handle_switch_finalize()
+  options: move option parsing in a separate file
+  options: keep the options sorted
+  cleanup: move predefines in a separate file
+  cleanup: move parsing helpers to parse.c
+  cleanup: move hexval() to utils.c
+
+ Makefile    |    2 +
+ lib.c       | 1256 +--------------------------------------------------
+ lib.h       |  119 +----
+ options.c   |  998 ++++++++++++++++++++++++++++++++++++++++
+ options.h   |  137 ++++++
+ parse.c     |   38 ++
+ predefine.c |  225 +++++++++
+ token.h     |    1 -
+ utils.c     |   17 +
+ utils.h     |    4 +
+ 10 files changed, 1427 insertions(+), 1370 deletions(-)
+ create mode 100644 options.c
+ create mode 100644 options.h
+ create mode 100644 predefine.c
+
 -- 
 2.27.0
