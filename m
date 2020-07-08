@@ -1,150 +1,157 @@
-Return-Path: <SRS0=SlCC=AS=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=1LG9=AT=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 54E1EC433E0
-	for <linux-sparse@archiver.kernel.org>; Tue,  7 Jul 2020 23:49:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C1C81C433E0
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 00:06:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 295792067D
-	for <linux-sparse@archiver.kernel.org>; Tue,  7 Jul 2020 23:49:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8F25120771
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 00:06:56 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CU2HKzTH"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="N5ToQjsL"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728819AbgGGXta (ORCPT
+        id S1728296AbgGHAG4 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 7 Jul 2020 19:49:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54840 "EHLO
+        Tue, 7 Jul 2020 20:06:56 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57568 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728782AbgGGXt3 (ORCPT
+        with ESMTP id S1728184AbgGHAGz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Jul 2020 19:49:29 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37C66C061755
-        for <linux-sparse@vger.kernel.org>; Tue,  7 Jul 2020 16:49:29 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id rk21so48527561ejb.2
-        for <linux-sparse@vger.kernel.org>; Tue, 07 Jul 2020 16:49:29 -0700 (PDT)
+        Tue, 7 Jul 2020 20:06:55 -0400
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7B16EC061755;
+        Tue,  7 Jul 2020 17:06:55 -0700 (PDT)
+Received: by mail-ed1-x530.google.com with SMTP id by13so30298453edb.11;
+        Tue, 07 Jul 2020 17:06:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=TDDfCIxyrrcX4p7j6JYK+t3XmT6KSqOZ6cVBNdk2Jkc=;
-        b=CU2HKzTHKUxZygFiJ+mzQGak/Zjjlxkb7q/RlhVNMX6zpYWevFK/eg7DP5ovoGN8gR
-         XKIOnSWSU7rqYFiKO1DMtO0G///e7HaOXGFMwwDcqR0gRbVo+iUGDwa/f5QPx77mcQjy
-         KAP5nGiT8tFEs2n4t79YtRskvqP/QOCFVmbEJqgLhHBpuWYb3wJEgP+0aQNSmxeuH2x0
-         bGRe4IF10nwYq9t0mc/Dsk/kuXtzUu++xu0a7PhrEVonBeyNumlFnXOVBaIr/Mhy40jK
-         6ohwkyWziDmdBYHhJCutPbYDCk/RtuBkI9Q3rZoh3tQG9IfnGcv6TNdTOzSwj8+GMCpY
-         ht3A==
+        h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
+        bh=5u59B3j/I1X4s0AMR7GmGfqCIPTDy7Yx0A6CGhS03ZI=;
+        b=N5ToQjsLjnK6wZEzcaRPU9Y+knUc86dCs8SeQPKdRgGWdPboUoOi7UORyDTXadYsv3
+         7CBYkyUD3dX+4gQB1KGXwZtWQ2kfEaVqfTHwc60UpDuqAyor4ABFEINpckUFoOILizJe
+         oQBv6Iji5JFNf9QSLlW/vq7fHjjr/EwMN5JyZWwuTpMZJz5JKbc/lPROdiUJlJGHauGi
+         RD7u21Eye++Fiol+bUJQB66ufveXulVlmvGzcKAFamYgjiZfRM1bhaMKNmSVf9y3e1B7
+         OdvnD5pc5Egb/oSEu7hgwK5d3NXv/a1YbpoydVt7Uk5QFjk/7Oa2DygHQGntW5m8QnbY
+         g+oA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=TDDfCIxyrrcX4p7j6JYK+t3XmT6KSqOZ6cVBNdk2Jkc=;
-        b=GUvBo3x86iQqZKcJk0kSq9TidoQy+OZMX0gOXKNrNQnOEPp9JwB9HVK9AwOojZvPkD
-         VrThlUlV3urSZZUkdVnmB1no8ZkzxE+l68+cqgCLskDASu9kjMiR2wSldG3fGC8qYvuN
-         RnqwCl5YXMpWYbBaMNaIx0DlQn/zQTXKiueHyB533M7/hRGr9BVsbSgNZCeVn7M5R6b4
-         EgEd61WO5o3zj1PXAsn/yxLuzUfa25P5WJD5qOXeloylKzfqEJi7b/y6H0BjtEzDhkIN
-         UCZ6GwtjjTnPc7Drfol/YuomV6zmX7GSZcNsymb1F0Fjo/EHqPMSckpBrxhNcVjr8wLk
-         a/1g==
-X-Gm-Message-State: AOAM530jp90zO1jh+YVlSXfy+Z/6tD0z1zDVGh8CH5v4Lyi8Fthudt0f
-        0A4Z/plorzyk07X1Wq8iWtS/TC8B
-X-Google-Smtp-Source: ABdhPJzNWqVt/oFulbL7xpYNQaQjI30ty9s2jVV30AJOzHtzD14rRj3aamR6fYix7wFIw5SJcCmoQw==
-X-Received: by 2002:a17:906:240d:: with SMTP id z13mr46823177eja.346.1594165766685;
-        Tue, 07 Jul 2020 16:49:26 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:9501:ad60:97b5:4cc9])
-        by smtp.gmail.com with ESMTPSA id g22sm26172348eds.67.2020.07.07.16.49.25
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
+         :content-disposition;
+        bh=5u59B3j/I1X4s0AMR7GmGfqCIPTDy7Yx0A6CGhS03ZI=;
+        b=pSmbUYBDKLwdMHabuTv1SJ6s0f7N8CVq3n/myiJ3ZmeG8PTQTNGwLNI4nJNW+3tshI
+         ogAXZGe65sVfGZGC54dt1sUWqV2KiaNtUDwo/rI6YNrJuCNXZW8BIxGaXYc1e0PYWa61
+         wm8s2BGXKGxS/Avsx70gCPPzUwYvkrCqekwKpV5hTEq1VGbMswvkNk2sQaqr8QGF+wiM
+         TjRNM/Q/C5okfOW8g0ptRGIyEsNJbhVmY1ieZK6N7CqW8tQ5K3v5G/2NJ14ZyodMXve8
+         wKgmAxjB/CI4+fH6Lj/7cO+hyKut6vLPjRQKb55cSMfmnmJfJ+PdTaAFDHqGtqQhyFQi
+         hKFg==
+X-Gm-Message-State: AOAM530uOwwSg7T98veBvequFT28PSybxr3aIWlhZGtF5oGByAVVLW+o
+        9zqY7EZAb4tHg1wgEDcZXYxHVvPI
+X-Google-Smtp-Source: ABdhPJywQjpe6f713ksCWGGvOeROqfyqL4v3zrI5FFbi60qlBQjl58fYLu+MK5Y/LYkh0q8yk8Nraw==
+X-Received: by 2002:aa7:c24d:: with SMTP id y13mr66898293edo.123.1594166813826;
+        Tue, 07 Jul 2020 17:06:53 -0700 (PDT)
+Received: from ltop.local ([2a02:a03f:b7f9:7600:9501:ad60:97b5:4cc9])
+        by smtp.gmail.com with ESMTPSA id j19sm27123807edt.44.2020.07.07.17.06.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 07 Jul 2020 16:49:25 -0700 (PDT)
+        Tue, 07 Jul 2020 17:06:52 -0700 (PDT)
+Date:   Wed, 8 Jul 2020 02:06:51 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] c2x: message in _Static_assert() is now optional
-Date:   Wed,  8 Jul 2020 01:49:22 +0200
-Message-Id: <20200707234922.73866-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.27.0
+Cc:     linux-kernel@vger.kernel.org
+Subject: Sparse improvements & regressions for Linux v5.7-rc1 -> v5.8-rc1
+Message-ID: <20200708000651.f5bykhd3mhgsbvk7@ltop.local>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-It seems that in the next version of the standard, the
-second argument of _Static_assert() will be optional.
+I've finally written a silly script to easily compare my tests
+of Sparse on the kernel. So, it's now easy to share those results.
 
-Nice. Let sparse already support this now.
+It's a comparison of Sparse's unique warnings between v5.7-rc1 &
+v5.8-rc1 on x86-64 (defconfig + allyesconfig). The results are
+quite similar on other architectures.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- parse.c                    | 24 ++++++++++++++++--------
- validation/static_assert.c |  5 +++++
- 2 files changed, 21 insertions(+), 8 deletions(-)
+Note that the differences can be caused by changes in the kernel
+code or in Sparse code.
 
-diff --git a/parse.c b/parse.c
-index a9222e7cbf08..bd8989ca8dd4 100644
---- a/parse.c
-+++ b/parse.c
-@@ -2223,17 +2223,25 @@ static struct token *parse_static_assert(struct token *token, struct symbol_list
- 	token = constant_expression(token, &cond);
- 	if (!cond)
- 		sparse_error(token->pos, "Expected constant expression");
--	token = expect(token, ',', "after conditional expression in _Static_assert");
--	token = string_expression(token, &message, "_Static_assert()");
--	if (!message)
--		cond = NULL;
-+	if (match_op(token, ',')) {
-+		token = token->next;
-+		token = string_expression(token, &message, "_Static_assert()");
-+		if (!message)
-+			cond = NULL;
-+	}
- 	token = expect(token, ')', "after diagnostic message in _Static_assert");
--
- 	token = expect(token, ';', "after _Static_assert()");
- 
--	if (cond && !const_expression_value(cond) && cond->type == EXPR_VALUE)
--		sparse_error(cond->pos, "static assertion failed: %s",
--			     show_string(message->string));
-+	if (cond && !const_expression_value(cond) && cond->type == EXPR_VALUE) {
-+		const char *sep = "", *msg = "";
-+
-+		if (message) {
-+			sep = ": ";
-+			msg = show_string(message->string);
-+		}
-+		sparse_error(cond->pos, "static assertion failed%s%s", sep, msg);
-+	}
-+
- 	return token;
- }
- 
-diff --git a/validation/static_assert.c b/validation/static_assert.c
-index dd5e0c08c044..0ab5844edef1 100644
---- a/validation/static_assert.c
-+++ b/validation/static_assert.c
-@@ -53,6 +53,10 @@ _Static_assert(1, );
- _Static_assert(, "");
- _Static_assert(,);
- 
-+// C2x's version: without message
-+_Static_assert(1);
-+_Static_assert(0);
-+
- /*
-  * check-name: static assertion
-  *
-@@ -67,5 +71,6 @@ static_assert.c:52:19: error: string literal expected for _Static_assert()
- static_assert.c:53:16: error: Expected constant expression
- static_assert.c:54:16: error: Expected constant expression
- static_assert.c:54:17: error: string literal expected for _Static_assert()
-+static_assert.c:58:16: error: static assertion failed
-  * check-error-end
-  */
--- 
-2.27.0
+Have fun.
 
+- 20114 19249 Total
+
++    95   161 Initializer entry defined twice
+-   152    98 Using plain integer as NULL pointer
+    394   394 advancing past deep designator
+      4     4 arithmetics on pointers to functions
++    15    16 bad assignment to restricted type
+      4     4 cast between address spaces (<asn:3> -> <asn:4>)
++     0    38 cast from non-scalar
+-   288   276 cast from restricted type
+-    43    41 cast removes address space '<asn:1>' of expression
+    142   142 cast removes address space '<asn:2>' of expression
+      1     1 cast removes address space '<asn:3>' of expression
++    10    15 cast removes address space '<asn:4>' of expression
++    13    51 cast to non-scalar
+-  4796  4512 cast to restricted type
++   595   609 cast truncates bits from constant value
++   335   349 context imbalance - different lock contexts for basic block
+-   463   453 context imbalance - unexpected unlock
+-   198   189 context imbalance - wrong count at exit
++   117   118 dereference of noderef expression
++    10    13 dubious: !x & y
++     0     1 dubious: !x | !y
+      6     6 dubious: !x | y
++    56    57 dubious: x & !y
+     21    21 dubious: x | !y
++    17    21 function with external linkage has definition
+      2     2 implicit cast from nocast type
++   497   500 incompatible types in comparison expression (different address spaces)
+      3     3 incompatible types in comparison expression (different base types)
+      1     1 incompatible types in comparison expression (different type sizes)
++     5     6 incompatible types in conditional expression (different base types)
++  1216  1225 incorrect type in argument (different address spaces)
+-   528   515 incorrect type in argument (different base types)
++     0     5 incorrect type in argument (different modifiers)
+-    11    10 incorrect type in argument (different type sizes)
++     0     1 incorrect type in argument (incompatible argument (different address spaces))
+      1     1 incorrect type in argument (incompatible argument (different base types))
++   369   388 incorrect type in assignment (different address spaces)
+-  5607  4945 incorrect type in assignment (different base types)
+      1     1 incorrect type in assignment (different modifiers)
++   139   141 incorrect type in initializer (different address spaces)
+-   141   132 incorrect type in initializer (different base types)
++     4     7 incorrect type in initializer (incompatible argument (different address spaces))
+-    27    26 incorrect type in return expression (different address spaces)
+-    30    26 incorrect type in return expression (different base types)
+-   516   451 invalid assignement
+     37    37 invalid bitfield specifier for type restricted type.
+     13    13 invalid initializer
+      1     1 marked inline, but without a definition
+      1     1 memcpy with byte count of ...
+      5     5 memset with byte count of ...
+-    10     0 missing braces around initializer
+      7     7 mixed bitwiseness
+     10    10 mixing different enum types:
+      1     1 multiple address spaces given
+-     2     1 no newline at end of file
+      1     1 non-scalar type in conditional:
+-     1     0 preprocessor token offsetof redefined
++   948   959 restricted type degrades to integer
++    42    43 return expression in void function
+      3     3 shift count is (-1)
+      5     5 shift too big for type
+     12    12 static assertion failed
+      5     5 subtraction of different types can't work (different address spaces)
++    23    24 subtraction of functions? Share your drugs
+      1     1 switch with no cases
++     0     5 symbol redeclared with different type (incompatible argument (different address spaces))
++  2109  2135 symbol was not declared. Should it be static?
+      1     1 too long token expansion
+      3     3 trying to concatenate long character string (8191 bytes max)
