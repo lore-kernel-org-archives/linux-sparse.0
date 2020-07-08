@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A8D6EC433DF
-	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0B075C433E0
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 852B720720
+	by mail.kernel.org (Postfix) with ESMTP id DE49620775
 	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B2uWJ/YN"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WN4KxaWe"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726044AbgGHXmB (ORCPT
+        id S1726320AbgGHXmB (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Wed, 8 Jul 2020 19:42:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51084 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51090 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726320AbgGHXmA (ORCPT
+        with ESMTP id S1726278AbgGHXmB (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Jul 2020 19:42:00 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC8F1C061A0B
-        for <linux-sparse@vger.kernel.org>; Wed,  8 Jul 2020 16:41:59 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id w6so279573ejq.6
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Jul 2020 16:41:59 -0700 (PDT)
+        Wed, 8 Jul 2020 19:42:01 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F07BCC061A0B
+        for <linux-sparse@vger.kernel.org>; Wed,  8 Jul 2020 16:42:00 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id lx13so290058ejb.4
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Jul 2020 16:42:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Y5VUZyYR8Ws24HoRf33dgh74kOHN07JnlrqUnHFvy0w=;
-        b=B2uWJ/YNLodL9bFb7WJfUvIsE7X5NNWDrKAp6C87/4gGsDVFLClOb4BLMlxfkAqgq+
-         z373PwEbMB1mzNE/X78+/ghUZoM8Enln0SbheA98WNYZ9j7NYBzgbaTYZnGXei4ycuXK
-         FuiIvXJa1V9ppUyU+VCgmV+GOQxlyUzsXGHLKzvA45FH+bJcuE2TU0Ke1c9I/NojrkVb
-         9+ebgouMkRK+OvKAraxdT54M3BgfouG2s/jw1FOqArMJygvzwL9DX7qP+nfK4l+6BFrl
-         e8sy0EhKmo5EXe+Fjrq/xDnXVcNodjIjJrj5q7hlqukZo15SPy0VC1hji5i6O49wDkE9
-         bG1g==
+        bh=bWrDCZEz3T9JwfRoOmoWHcDsRZzaJrqs9bYrVl8ZG3c=;
+        b=WN4KxaWeQx/sRA0OoEnCLELrlwP/dJIsE8jFg80jGlJVIOI0E/u3YYnN4dijZKjKyI
+         o4n5wQRhOuFgwciUyyFffxfOAR1RMFBo/aserY8a21oZDOSUk6V1cq7ptwZsgdEZKcj1
+         fDMEw8jaAd97IqX/VLKu9ii+6UIpMkO8cRM33KNm9QyslMrUIMnZARa87wLsI/sFzCMa
+         MrU+NCywSgi0wh91FIFRxreVgkdwLaWhy/qEU2OTxhV1zZLUiKJpo1Rxf903a/GJfFVE
+         Q5mKInege5Ii5JBURUIFm6tsPe62PJb6b4jqOQzqKRnki9ZlQwv3tddLJqSDT7nsoGTO
+         TAIg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Y5VUZyYR8Ws24HoRf33dgh74kOHN07JnlrqUnHFvy0w=;
-        b=H+dDTRIE8isEJHdotiPbe/Pm7f04FGt0WHQITsRUaaMCDz7ZGeomFZqBgU8r1GfzE2
-         wVsD8uhdtDd/t6N/DhN7WYGgEk+lAjwvRiumbhotCIK9hqecp2Oz6mZ/ZsMQsMkjvaem
-         hW+KqdFB35GFT2MFEXCRt20HqGSFdrn5pc6UNTaCi7e+ifTrvh9UQf5+Xju3YM3JYcpw
-         P1tOG3hVLHVLKSRBBhPnuSDSPSp/wz8rWCG/6UgAYcoF5A0EtI8ciQMxVhzlDsQOQ+sa
-         BdTb6baRlFNhOOBv0zIsgYWJsg3rzBYMnHYsXkUqxY2ggkucIXPmYESIIFeGOlp8Shkr
-         wOfg==
-X-Gm-Message-State: AOAM5318U3Qs4Ty4ZVHy8Ks76UngHowjeG/mZWwkTCkB8/U/PvFlrP8+
-        mldcxtMO4BFGOIF80v1TID0mtd/w
-X-Google-Smtp-Source: ABdhPJwFxwFNrDSQTPhV8cyEeWSnhmDzK7Cyh24noqtdVFg4txt/j1gNG8Lwh9Q7Oeit/obv9Ps5pw==
-X-Received: by 2002:a17:906:c002:: with SMTP id e2mr50568759ejz.244.1594251718412;
-        Wed, 08 Jul 2020 16:41:58 -0700 (PDT)
+        bh=bWrDCZEz3T9JwfRoOmoWHcDsRZzaJrqs9bYrVl8ZG3c=;
+        b=KKu0hNoy/X2o8rbRylyrFWU31Lx4HnOw+o5c7aq/R0rfL8DG4VuVHBs/lHAkmH70NF
+         eFODpSQqtC5knGfGzO8+32PSZxf/uSOzgKH/uyMz3Rwxu+nV8fFjEMWbHsYSNlUkh/61
+         Nl9B1nbR7cDGaT6g5mof61iLJHB8oqWCvREeb9jrEnx5btfaZpmyfk1IEguJ8ph1R5f9
+         otwr4ZiASk2iTFD2S0qxtEjy0jtATQcwEQwW5oPCxfisY7iHWlB6C7YKZYwGHfU35Uec
+         nJLnrnNJX5CHTryDGVwWwZW0q5U2/FiXnXPdFFw56xR7Udc9/G0LdOh4khZTs69Zi0OL
+         N4cw==
+X-Gm-Message-State: AOAM533bs2n+JoeN7CMPXQXTCwsZQiFm4Fg2LhnAgNZ64i6AP5uRa6Ts
+        rTKObhiYapGGtPmEtLjEFoRVFB0U
+X-Google-Smtp-Source: ABdhPJyo/Rxr5HMbmOlDnCSvPHqssux4x34agVva7o4iyIGkyaeljNzTWAEjX2/daQ1k0suU5v+7Fg==
+X-Received: by 2002:a17:906:3146:: with SMTP id e6mr45202767eje.2.1594251719509;
+        Wed, 08 Jul 2020 16:41:59 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:8478:3ba8:10ed:37ab])
-        by smtp.gmail.com with ESMTPSA id z25sm616464ejd.38.2020.07.08.16.41.57
+        by smtp.gmail.com with ESMTPSA id z25sm616464ejd.38.2020.07.08.16.41.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jul 2020 16:41:57 -0700 (PDT)
+        Wed, 08 Jul 2020 16:41:59 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/9] arch: add an option to specify the OS: --os=$OS
-Date:   Thu,  9 Jul 2020 01:41:44 +0200
-Message-Id: <20200708234151.57845-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/9] predefine: add __linux__ & __linux
+Date:   Thu,  9 Jul 2020 01:41:45 +0200
+Message-Id: <20200708234151.57845-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200708234151.57845-1-luc.vanoostenryck@gmail.com>
 References: <20200708234151.57845-1-luc.vanoostenryck@gmail.com>
@@ -76,134 +76,36 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This is not needed when doing native 'compilation' but is
-quite handy when testing the predefined types & macros.
-The supported OSes are: 'linux', 'freebsd', 'openbsd', 'netbsd'
-'darwin', 'sunos', 'cygwin' and a generic 'unix'.
+These are already defined in cgcc but not yet by sparse
+itself. So, add them now.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- machine.h |  1 +
- options.c | 11 +++++++++++
- sparse.1  | 10 ++++++++++
- target.c  | 29 +++++++++++++++++++++++++++++
- target.h  |  1 +
- 5 files changed, 52 insertions(+)
+ predefine.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
 
-diff --git a/machine.h b/machine.h
-index 7407e71627e1..cc02818c81bf 100644
---- a/machine.h
-+++ b/machine.h
-@@ -94,6 +94,7 @@ enum fp_abi {
+diff --git a/predefine.c b/predefine.c
+index d05b1018fdce..0e9f73eb2340 100644
+--- a/predefine.c
++++ b/predefine.c
+@@ -216,10 +216,16 @@ void predefined_macros(void)
+ 		predefine_nostd("unix");
+ 	}
  
- enum {
- 	OS_UNKNOWN,
-+	OS_NONE,
- 	OS_UNIX,
- 	OS_CYGWIN,
- 	OS_DARWIN,
-diff --git a/options.c b/options.c
-index 9f05bdf9cf4f..530d15adeffd 100644
---- a/options.c
-+++ b/options.c
-@@ -925,6 +925,16 @@ static char **handle_param(char *arg, char **next)
- 	return next;
+-	if (arch_os == OS_SUNOS) {
++	switch (arch_os) {
++	case OS_LINUX:
++		predefine("__linux__", 1, "1");
++		predefine("__linux", 1, "1");
++		break;
++	case OS_SUNOS:
+ 		predefine("__sun__", 1, "1");
+ 		predefine("__sun", 1, "1");
+ 		predefine_nostd("sun");
+ 		predefine("__svr4__", 1, "1");
++		break;
+ 	}
  }
- 
-+static char **handle_os(char *arg, char **next)
-+{
-+	if (*arg++ != '=')
-+		die("missing argument for --os option");
-+
-+	target_os(arg);
-+
-+	return next;
-+}
-+
- static char **handle_version(char *arg, char **next)
- {
- 	printf("%s\n", SPARSE_VERSION);
-@@ -941,6 +951,7 @@ static char **handle_long_options(char *arg, char **next)
- {
- 	static struct switches cmd[] = {
- 		{ "arch", handle_arch, 1 },
-+		{ "os",   handle_os, 1 },
- 		{ "param", handle_param, 1 },
- 		{ "version", handle_version },
- 		{ NULL, NULL }
-diff --git a/sparse.1 b/sparse.1
-index d916ad9ee54e..82467b23330b 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -464,6 +464,16 @@ Look for system headers in the multiarch subdirectory \fIdir\fR.
- The \fIdir\fR name would normally take the form of the target's
- normalized GNU triplet. (e.g. i386-linux-gnu).
- .
-+.TP
-+.B \-\-os=\fIOS\fR
-+Specify the target Operating System.
-+This only makes a few differences with the predefined types.
-+The accepted values are: linux, unix, freebsd, netbsd, opensd, sunos, darwin
-+and cygwin.
-+
-+The default OS is the one of the machine used to build Sparse if it can be
-+detected, oherwise some generic settings are used.
-+.
- .SH DEBUG OPTIONS
- .TP
- .B \-fmem-report
-diff --git a/target.c b/target.c
-index 6776c3a1cbb0..8de1b1f3d9d2 100644
---- a/target.c
-+++ b/target.c
-@@ -136,6 +136,35 @@ enum machine target_parse(const char *name)
- 	return MACH_UNKNOWN;
- }
- 
-+void target_os(const char *name)
-+{
-+	static const struct os {
-+		const char *name;
-+		int os;
-+	} oses[] = {
-+		{ "cygwin",	OS_CYGWIN },
-+		{ "darwin",	OS_DARWIN },
-+		{ "freebsd",	OS_FREEBSD },
-+		{ "linux",	OS_LINUX },
-+		{ "native",	OS_NATIVE, },
-+		{ "netbsd",	OS_NETBSD },
-+		{ "none",	OS_NONE },
-+		{ "openbsd",	OS_OPENBSD },
-+		{ "sunos",	OS_SUNOS },
-+		{ "unix",	OS_UNIX },
-+		{ NULL },
-+	}, *p;
-+
-+	for (p = &oses[0]; p->name; p++) {
-+		if (!strcmp(p->name, name)) {
-+			arch_os = p->os;
-+			return;
-+		}
-+	}
-+
-+	die("invalid os: %s", name);
-+}
-+
- 
- void target_config(enum machine mach)
- {
-diff --git a/target.h b/target.h
-index 8f79426c096a..0a8e2deba306 100644
---- a/target.h
-+++ b/target.h
-@@ -105,6 +105,7 @@ extern const struct target target_x86_64;
- extern const struct target *arch_target;
- 
- enum machine target_parse(const char *name);
-+void target_os(const char *name);
- void target_config(enum machine mach);
- void target_init(void);
- 
 -- 
 2.27.0
 
