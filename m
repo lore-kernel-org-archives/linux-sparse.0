@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3FA10C433DF
-	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 22:25:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 83572C433DF
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 22:26:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1947320720
-	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 22:25:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 599DA20772
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 22:26:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VnG9ACYU"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XSBIrWQ8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726122AbgGHWZf (ORCPT
+        id S1726117AbgGHW0X (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 8 Jul 2020 18:25:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39254 "EHLO
+        Wed, 8 Jul 2020 18:26:23 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39376 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725903AbgGHWZf (ORCPT
+        with ESMTP id S1725903AbgGHW0W (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Jul 2020 18:25:35 -0400
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEB5AC061A0B
-        for <linux-sparse@vger.kernel.org>; Wed,  8 Jul 2020 15:25:34 -0700 (PDT)
-Received: by mail-ed1-x543.google.com with SMTP id d18so260227edv.6
-        for <linux-sparse@vger.kernel.org>; Wed, 08 Jul 2020 15:25:34 -0700 (PDT)
+        Wed, 8 Jul 2020 18:26:22 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 89F2AC061A0B
+        for <linux-sparse@vger.kernel.org>; Wed,  8 Jul 2020 15:26:22 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id dr13so152984ejc.3
+        for <linux-sparse@vger.kernel.org>; Wed, 08 Jul 2020 15:26:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=JEV25Ugnd/QNL5vyqk+GfmnAzH/CfumLCfZsdl6hVaA=;
-        b=VnG9ACYUDUqyjTBjDr2L4UPRz42pgh5Dpw9ufhdatp9ME7apfqfp8IHdnROqXJFIGi
-         bLgACzT8y1zzrhC4uQJ+MRKXkbxcUVlfN99JjTwm04EB70NMSSOhx5Q2iwdhaLys9961
-         zNNWHcYn5BukN8TxtsOhrrWyU+l8ub5FYEOkFmBOrpB2gtWBv1YMT1yD2DEDNv7DNJ48
-         rtjrEpoCvzFqmlrjNyjvX6hOt+QHSSQqskva7l5OXSX+twjeE2HI3B4QDPrmymjBKljn
-         iT1lUaxS7kugWPp4GFLVVlk9qXFj8MS/Cy/X5FM4W+WrB6J9o8LhJCdFGhVZkq0whzJB
-         rsOg==
+        bh=PbUoneishhPwkbxLtp6Clg4SxV22UZi8/lo3FyV9Z0M=;
+        b=XSBIrWQ8KCFPO8kaBpDmmHWfkQXZ5O8Fcd44bqY0BXKWe8z+nry83d3ItsC47u+s0a
+         6Cj6LWk76QfaeR9gd214IKYHxA5sbRq+XX2adNulHD5L+F6rPJC6gdtbTz2chFq8cSKl
+         JaawM1Vx6EoKzI+10fHCHWg3oJi0iDPmTZ+UyzGFq+JPzv5/rkhSM+mm66kfN8dA4Etl
+         10Vzv5n7J/rnhfvsZZkpYuKT4sJjNoxy+RRPMYtdAL769xENgtFFlWjZS0TCcEvJuoMq
+         YXMrtjtdoZ7XBBdMnIqHQUJSjg0ArITyIsGw7UG6XZOpXgrKIUelNmdLJ9DdZZLjKjlZ
+         svYQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=JEV25Ugnd/QNL5vyqk+GfmnAzH/CfumLCfZsdl6hVaA=;
-        b=g79WDpSaTtUrHJMu1j6uUZ8pElZ42cSIf1GDP68Viw+z9b6xvTG8vq23vuBPW7iTgk
-         lPQl4n4EDlDX1EpkC4evL4d/PBPRw3v+JXfu71VdzaiCplNUUF3yTr3w91CwjCqTRmKY
-         foak9CS8CjKrcqUDl/56IdggbVrw26AicRHFSjzHVdk1cQ9hl49mCFFGQWmCN4zVRmsY
-         czWkRNnearb6EthnaZZmWPfY93DDROnG92J6yNdVKq8A2cLwz87xI3q2HMDt/kiXh4ua
-         nKiMgkULGEXcuxDttKYDW4QXhyvC3kSAZUVyuZx15CAuUmkD010YnJV8MzqONog0nTQk
-         3YIw==
-X-Gm-Message-State: AOAM533FV0sHjA42jvJJq64AQBl2p03xzj3tOn6RBXn1c4vzliKS1uz2
-        b6RZvke6fNRIe2+tAkXp6nU+lbwv
-X-Google-Smtp-Source: ABdhPJxg1TWs1dt6OFl5wKqBGIyar8cusLggq8VKYlCZa0QA4h6yVocVP1ei3SQvPVtMWK7R7kiYLw==
-X-Received: by 2002:a50:d9cb:: with SMTP id x11mr66336013edj.93.1594247133369;
-        Wed, 08 Jul 2020 15:25:33 -0700 (PDT)
+        bh=PbUoneishhPwkbxLtp6Clg4SxV22UZi8/lo3FyV9Z0M=;
+        b=Um1J26fNPIpDP4xLDrD/BjX9axtz6rAFMQkpcUxPsJyr0ZggiBz332ic5XD/fwA9de
+         h8EUq9VrAWE4ttqr3mQBstsf/yvpNDmeIcDV5IoZe+37HWUekeH8f8z4Ozmks/3U3wkB
+         5UYVK1DYJyB5zya2NguL7VO9nLmAB4D1xMlviPYNgHz2KJao1vIgmzzG+yRRwBAlOaQh
+         JD5B+nz9HnYL/GZDiyTgNbG71j++9dKwcj4YAADxuc6+chu6GYc9Zac/l0GFSkbpQiTD
+         7c66pk7gEFw+feEJ16R0Jj39dQFfEC5buYyFa3u+bzT9rbjulZ9gwpWwafnzSrSK+xoh
+         ZeqA==
+X-Gm-Message-State: AOAM532KVEz9lYVudvZCP75xPBj5yqaJi+VpY4MC12213rSM4k+Yag8W
+        vx7a3z7tgFzrItkCr1L7lC+eLv3z
+X-Google-Smtp-Source: ABdhPJwYmYnit5cMV65zuLXeR0br8cosu5o0N0iSKjBRBAYLEUD3rex5BOyG3CRu4W3lpXPDY4Xcbg==
+X-Received: by 2002:a17:906:8157:: with SMTP id z23mr32137427ejw.349.1594247180917;
+        Wed, 08 Jul 2020 15:26:20 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:8478:3ba8:10ed:37ab])
-        by smtp.gmail.com with ESMTPSA id a1sm506654ejk.125.2020.07.08.15.25.32
+        by smtp.gmail.com with ESMTPSA id h10sm565656eds.0.2020.07.08.15.26.20
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 08 Jul 2020 15:25:32 -0700 (PDT)
+        Wed, 08 Jul 2020 15:26:20 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] target: keep tables sorted
-Date:   Thu,  9 Jul 2020 00:24:10 +0200
-Message-Id: <20200708222410.56854-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] h8300: add minimal support
+Date:   Thu,  9 Jul 2020 00:24:58 +0200
+Message-Id: <20200708222458.56909-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -74,46 +74,112 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+This is now the only architecture needing '-msize-long'.
+
+Prepare the obsolescence of this option by adding the
+target file for this architecture.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- target.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ Makefile       |  1 +
+ machine.h      |  1 +
+ target-h8300.c | 27 +++++++++++++++++++++++++++
+ target.c       |  2 ++
+ target.h       |  1 +
+ 5 files changed, 32 insertions(+)
+ create mode 100644 target-h8300.c
 
+diff --git a/Makefile b/Makefile
+index 35098940080b..d7cfe4f5c4f6 100644
+--- a/Makefile
++++ b/Makefile
+@@ -73,6 +73,7 @@ LIB_OBJS += target-arm.o
+ LIB_OBJS += target-arm64.o
+ LIB_OBJS += target-bfin.o
+ LIB_OBJS += target-default.o
++LIB_OBJS += target-h8300.o
+ LIB_OBJS += target-m68k.o
+ LIB_OBJS += target-microblaze.o
+ LIB_OBJS += target-mips.o
+diff --git a/machine.h b/machine.h
+index 7407e71627e1..1b8b862a5175 100644
+--- a/machine.h
++++ b/machine.h
+@@ -34,6 +34,7 @@ enum machine {
+ 	MACH_S390,	MACH_S390X,
+ 	MACH_ALPHA,
+ 	MACH_BFIN,
++	MACH_H8300,
+ 	MACH_M68K,
+ 	MACH_MICROBLAZE,
+ 	MACH_NIOS2,
+diff --git a/target-h8300.c b/target-h8300.c
+new file mode 100644
+index 000000000000..47872b38a1ad
+--- /dev/null
++++ b/target-h8300.c
+@@ -0,0 +1,27 @@
++#include "symbol.h"
++#include "target.h"
++#include "machine.h"
++
++
++static void init_h8300(const struct target *self)
++{
++	ssize_t_ctype = &long_ctype;
++	size_t_ctype = &ulong_ctype;
++	wchar_ctype = &ushort_ctype;
++}
++
++static void predefine_h8300(const struct target *self)
++{
++	predefine("__H8300H__", 1, "1");
++}
++
++const struct target target_h8300 = {
++	.mach = MACH_H8300,
++	.bitness = ARCH_LP32,
++	.big_endian = true,
++
++	.bits_in_longdouble = 64,
++
++	.init = init_h8300,
++	.predefine = predefine_h8300,
++};
 diff --git a/target.c b/target.c
-index 6776c3a1cbb0..e512f7f1b618 100644
+index e512f7f1b618..b39661515005 100644
 --- a/target.c
 +++ b/target.c
-@@ -60,9 +60,9 @@ static const struct target *targets[] = {
- 	[MACH_ALPHA] =		&target_alpha,
+@@ -61,6 +61,7 @@ static const struct target *targets[] = {
  	[MACH_ARM] =		&target_arm,
  	[MACH_ARM64] =		&target_arm64,
--	[MACH_I386] =		&target_i386,
  	[MACH_BFIN] =		&target_bfin,
--	[MACH_X86_64] =		&target_x86_64,
-+	[MACH_I386] =		&target_i386,
-+	[MACH_M68K] =		&target_m68k,
++	[MACH_H8300] =		&target_h8300,
+ 	[MACH_I386] =		&target_i386,
+ 	[MACH_M68K] =		&target_m68k,
  	[MACH_MICROBLAZE] =	&target_microblaze,
- 	[MACH_MIPS32] =		&target_mips32,
- 	[MACH_MIPS64] =		&target_mips64,
-@@ -75,7 +75,7 @@ static const struct target *targets[] = {
- 	[MACH_S390X] =		&target_s390x,
- 	[MACH_SPARC32] =	&target_sparc32,
- 	[MACH_SPARC64] =	&target_sparc64,
--	[MACH_M68K] =		&target_m68k,
-+	[MACH_X86_64] =		&target_x86_64,
- 	[MACH_UNKNOWN] =	&target_default,
- };
- const struct target *arch_target = &target_default;
-@@ -91,8 +91,8 @@ enum machine target_parse(const char *name)
- 		{ "aarch64",	MACH_ARM64,	64, },
+@@ -92,6 +93,7 @@ enum machine target_parse(const char *name)
  		{ "arm64",	MACH_ARM64,	64, },
  		{ "arm",	MACH_ARM,	32, },
--		{ "i386",	MACH_I386,	32, },
  		{ "bfin",	MACH_BFIN,	32, },
-+		{ "i386",	MACH_I386,	32, },
++		{ "h8300",	MACH_H8300,	32, },
+ 		{ "i386",	MACH_I386,	32, },
  		{ "m68k",	MACH_M68K,	32, },
  		{ "microblaze",	MACH_MICROBLAZE,32, },
- 		{ "mips",	MACH_MIPS32,	0,  },
+diff --git a/target.h b/target.h
+index 8f79426c096a..45ee40f1ca12 100644
+--- a/target.h
++++ b/target.h
+@@ -85,6 +85,7 @@ extern const struct target target_alpha;
+ extern const struct target target_arm;
+ extern const struct target target_arm64;
+ extern const struct target target_bfin;
++extern const struct target target_h8300;
+ extern const struct target target_m68k;
+ extern const struct target target_microblaze;
+ extern const struct target target_mips32;
+
+base-commit: bb372492c40d71cc27952e815612db36aadf65bb
 -- 
 2.27.0
 
