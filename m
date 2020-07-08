@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C1DECC433E0
-	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8D6EC433DF
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9E9EE20772
-	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 852B720720
+	for <linux-sparse@archiver.kernel.org>; Wed,  8 Jul 2020 23:42:01 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YfYmLRoP"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="B2uWJ/YN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726302AbgGHXmA (ORCPT
+        id S1726044AbgGHXmB (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 8 Jul 2020 19:42:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51080 "EHLO
+        Wed, 8 Jul 2020 19:42:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726044AbgGHXl7 (ORCPT
+        with ESMTP id S1726320AbgGHXmA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 8 Jul 2020 19:41:59 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 17F4AC061A0B
+        Wed, 8 Jul 2020 19:42:00 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC8F1C061A0B
         for <linux-sparse@vger.kernel.org>; Wed,  8 Jul 2020 16:41:59 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id y10so306817eje.1
+Received: by mail-ej1-x641.google.com with SMTP id w6so279573ejq.6
         for <linux-sparse@vger.kernel.org>; Wed, 08 Jul 2020 16:41:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=wTDo4uiVP1Rg1rSnC2axBJHeU4i7bPp4soH7oKct6gY=;
-        b=YfYmLRoP5PNjDqj3A2m5dn11KxfFRoBnPLtIxC6Zq+8iouWbr2Oy2UCqPNJ04KvhM5
-         mX5ms5ZHe3x52NIxQwQftt4+xXghBwX1MVw/4gCYHRHer6BGF+qo5m2/3Rr+a65zKJfa
-         ARIqvLX3kjQZWvTZJMJ2LsFt8DQlLOcRv6W3lpQDmsmGSN5JilILYqReQZ36M4kwbz/j
-         FDGY0omPD/mJhWx6q+uukIGj9YZPMz49PXEBu0d0ubG0kP7PxdPngzd5BbLr8YEz0Eqh
-         uPuq3Rl67Osjyn6jCSRa9B1e+daf/sx6jAm98cdiq0pp+L3uUPaenYsHu13oFb5oWUmq
-         LtBg==
+        bh=Y5VUZyYR8Ws24HoRf33dgh74kOHN07JnlrqUnHFvy0w=;
+        b=B2uWJ/YNLodL9bFb7WJfUvIsE7X5NNWDrKAp6C87/4gGsDVFLClOb4BLMlxfkAqgq+
+         z373PwEbMB1mzNE/X78+/ghUZoM8Enln0SbheA98WNYZ9j7NYBzgbaTYZnGXei4ycuXK
+         FuiIvXJa1V9ppUyU+VCgmV+GOQxlyUzsXGHLKzvA45FH+bJcuE2TU0Ke1c9I/NojrkVb
+         9+ebgouMkRK+OvKAraxdT54M3BgfouG2s/jw1FOqArMJygvzwL9DX7qP+nfK4l+6BFrl
+         e8sy0EhKmo5EXe+Fjrq/xDnXVcNodjIjJrj5q7hlqukZo15SPy0VC1hji5i6O49wDkE9
+         bG1g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=wTDo4uiVP1Rg1rSnC2axBJHeU4i7bPp4soH7oKct6gY=;
-        b=bsLKAcjV8hbgha89i9wE89dRqiX7x82Zt7kHg1m1OeCIfKNi6oaFf71sJaIR9Pyflr
-         waMNWGL/QchDq37qlDd6PY3q4DpF1R+XElLgKGO0m8WnGCYEhjmdw+MgsJ+MaTMMDNYF
-         1snzdRCHbyzX5dRJMRbVz7ZAkTvrdQRmi1hR6LlQG8SpuK6w7xtSDJpVrIHuOgwOMn1l
-         xEZzBHzQGD7bggWsoVzOIoB5GskcXRNqwPTSp8+454csgahRTPxkaVU211lssaHBwbrP
-         CpcKk/1rH8+zyFxa31AhBh31PV1e9RRiAi5ImD3x/rOfLxIZHSgmX+KpnOf4Vitm/aVk
-         uSRw==
-X-Gm-Message-State: AOAM532MVcMy+p4YVvEvhTlhUH/5Z0VUShYIPdCIrLLm4xzXR4EV9ofa
-        UqaW3F3Od5VXTnq0+oXVkZzMXz4V
-X-Google-Smtp-Source: ABdhPJxkOWd+aahguQBMYMu0sPuUkIsZ7vGTaQNtlVFwo6eqvO3AhQQnGb9NKSB8lvE46O5lFcMK8Q==
-X-Received: by 2002:a17:906:4acc:: with SMTP id u12mr29728973ejt.358.1594251717558;
-        Wed, 08 Jul 2020 16:41:57 -0700 (PDT)
+        bh=Y5VUZyYR8Ws24HoRf33dgh74kOHN07JnlrqUnHFvy0w=;
+        b=H+dDTRIE8isEJHdotiPbe/Pm7f04FGt0WHQITsRUaaMCDz7ZGeomFZqBgU8r1GfzE2
+         wVsD8uhdtDd/t6N/DhN7WYGgEk+lAjwvRiumbhotCIK9hqecp2Oz6mZ/ZsMQsMkjvaem
+         hW+KqdFB35GFT2MFEXCRt20HqGSFdrn5pc6UNTaCi7e+ifTrvh9UQf5+Xju3YM3JYcpw
+         P1tOG3hVLHVLKSRBBhPnuSDSPSp/wz8rWCG/6UgAYcoF5A0EtI8ciQMxVhzlDsQOQ+sa
+         BdTb6baRlFNhOOBv0zIsgYWJsg3rzBYMnHYsXkUqxY2ggkucIXPmYESIIFeGOlp8Shkr
+         wOfg==
+X-Gm-Message-State: AOAM5318U3Qs4Ty4ZVHy8Ks76UngHowjeG/mZWwkTCkB8/U/PvFlrP8+
+        mldcxtMO4BFGOIF80v1TID0mtd/w
+X-Google-Smtp-Source: ABdhPJwFxwFNrDSQTPhV8cyEeWSnhmDzK7Cyh24noqtdVFg4txt/j1gNG8Lwh9Q7Oeit/obv9Ps5pw==
+X-Received: by 2002:a17:906:c002:: with SMTP id e2mr50568759ejz.244.1594251718412;
+        Wed, 08 Jul 2020 16:41:58 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:8478:3ba8:10ed:37ab])
-        by smtp.gmail.com with ESMTPSA id z25sm616464ejd.38.2020.07.08.16.41.56
+        by smtp.gmail.com with ESMTPSA id z25sm616464ejd.38.2020.07.08.16.41.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Wed, 08 Jul 2020 16:41:57 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/9] x86: reorg the target file
-Date:   Thu,  9 Jul 2020 01:41:43 +0200
-Message-Id: <20200708234151.57845-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/9] arch: add an option to specify the OS: --os=$OS
+Date:   Thu,  9 Jul 2020 01:41:44 +0200
+Message-Id: <20200708234151.57845-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200708234151.57845-1-luc.vanoostenryck@gmail.com>
 References: <20200708234151.57845-1-luc.vanoostenryck@gmail.com>
@@ -76,112 +76,134 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-More, specifically, split the 'init' method into a common part
-and add one for each of the i386 (32-bit) and another one for 64-bit.
+This is not needed when doing native 'compilation' but is
+quite handy when testing the predefined types & macros.
+The supported OSes are: 'linux', 'freebsd', 'openbsd', 'netbsd'
+'darwin', 'sunos', 'cygwin' and a generic 'unix'.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- target-x86.c | 52 +++++++++++++++++++++++++++++++++++-----------------
- 1 file changed, 35 insertions(+), 17 deletions(-)
+ machine.h |  1 +
+ options.c | 11 +++++++++++
+ sparse.1  | 10 ++++++++++
+ target.c  | 29 +++++++++++++++++++++++++++++
+ target.h  |  1 +
+ 5 files changed, 52 insertions(+)
 
-diff --git a/target-x86.c b/target-x86.c
-index d770349c27e7..01117bb6ecc8 100644
---- a/target-x86.c
-+++ b/target-x86.c
-@@ -3,17 +3,28 @@
- #include "machine.h"
+diff --git a/machine.h b/machine.h
+index 7407e71627e1..cc02818c81bf 100644
+--- a/machine.h
++++ b/machine.h
+@@ -94,6 +94,7 @@ enum fp_abi {
  
- 
--static void init_x86(const struct target *target)
-+static void predefine_i386(const struct target *self)
-+{
-+	predefine("__i386__", 1, "1");
-+	predefine("__i386", 1, "1");
-+	predefine_nostd("i386");
-+}
-+
-+static void predefine_x86_64(const struct target *self)
-+{
-+	predefine("__x86_64__", 1, "1");
-+	predefine("__x86_64", 1, "1");
-+	predefine("__amd64__", 1, "1");
-+	predefine("__amd64", 1, "1");
-+}
-+
-+
-+static void init_x86_common(const struct target *target)
- {
- 	switch (arch_os) {
- 	case OS_CYGWIN:
- 		wchar_ctype = &ushort_ctype;
- 		break;
--	case OS_DARWIN:
--		int64_ctype = &llong_ctype;
--		uint64_ctype = &ullong_ctype;
--		wint_ctype = &int_ctype;
--		break;
- 	case OS_FREEBSD:
- 		wint_ctype = &int_ctype;
- 		break;
-@@ -25,11 +36,9 @@ static void init_x86(const struct target *target)
+ enum {
+ 	OS_UNKNOWN,
++	OS_NONE,
+ 	OS_UNIX,
+ 	OS_CYGWIN,
+ 	OS_DARWIN,
+diff --git a/options.c b/options.c
+index 9f05bdf9cf4f..530d15adeffd 100644
+--- a/options.c
++++ b/options.c
+@@ -925,6 +925,16 @@ static char **handle_param(char *arg, char **next)
+ 	return next;
  }
  
- 
--static void predefine_i386(const struct target *self)
-+static void init_i386(const struct target *target)
++static char **handle_os(char *arg, char **next)
++{
++	if (*arg++ != '=')
++		die("missing argument for --os option");
++
++	target_os(arg);
++
++	return next;
++}
++
+ static char **handle_version(char *arg, char **next)
  {
--	predefine("__i386__", 1, "1");
--	predefine("__i386", 1, "1");
--	predefine_nostd("i386");
-+	init_x86_common(target);
+ 	printf("%s\n", SPARSE_VERSION);
+@@ -941,6 +951,7 @@ static char **handle_long_options(char *arg, char **next)
+ {
+ 	static struct switches cmd[] = {
+ 		{ "arch", handle_arch, 1 },
++		{ "os",   handle_os, 1 },
+ 		{ "param", handle_param, 1 },
+ 		{ "version", handle_version },
+ 		{ NULL, NULL }
+diff --git a/sparse.1 b/sparse.1
+index d916ad9ee54e..82467b23330b 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -464,6 +464,16 @@ Look for system headers in the multiarch subdirectory \fIdir\fR.
+ The \fIdir\fR name would normally take the form of the target's
+ normalized GNU triplet. (e.g. i386-linux-gnu).
+ .
++.TP
++.B \-\-os=\fIOS\fR
++Specify the target Operating System.
++This only makes a few differences with the predefined types.
++The accepted values are: linux, unix, freebsd, netbsd, opensd, sunos, darwin
++and cygwin.
++
++The default OS is the one of the machine used to build Sparse if it can be
++detected, oherwise some generic settings are used.
++.
+ .SH DEBUG OPTIONS
+ .TP
+ .B \-fmem-report
+diff --git a/target.c b/target.c
+index 6776c3a1cbb0..8de1b1f3d9d2 100644
+--- a/target.c
++++ b/target.c
+@@ -136,6 +136,35 @@ enum machine target_parse(const char *name)
+ 	return MACH_UNKNOWN;
  }
  
- const struct target target_i386 = {
-@@ -42,19 +51,28 @@ const struct target target_i386 = {
- 	.bits_in_longdouble = 96,
- 	.max_fp_alignment = 4,
- 
--	.init = init_x86,
- 	.target_64bit = &target_x86_64,
- 
-+	.init = init_i386,
- 	.predefine = predefine_i386,
- };
- 
- 
--static void predefine_x86_64(const struct target *self)
-+static void init_x86_64(const struct target *target)
- {
--	predefine("__x86_64__", 1, "1");
--	predefine("__x86_64", 1, "1");
--	predefine("__amd64__", 1, "1");
--	predefine("__amd64", 1, "1");
-+	init_x86_common(target);
++void target_os(const char *name)
++{
++	static const struct os {
++		const char *name;
++		int os;
++	} oses[] = {
++		{ "cygwin",	OS_CYGWIN },
++		{ "darwin",	OS_DARWIN },
++		{ "freebsd",	OS_FREEBSD },
++		{ "linux",	OS_LINUX },
++		{ "native",	OS_NATIVE, },
++		{ "netbsd",	OS_NETBSD },
++		{ "none",	OS_NONE },
++		{ "openbsd",	OS_OPENBSD },
++		{ "sunos",	OS_SUNOS },
++		{ "unix",	OS_UNIX },
++		{ NULL },
++	}, *p;
 +
-+	switch (arch_os) {
-+	case OS_CYGWIN:
-+		break;
-+	case OS_DARWIN:
-+		int64_ctype = &llong_ctype;
-+		uint64_ctype = &ullong_ctype;
-+		wint_ctype = &int_ctype;
-+		break;
-+	case OS_FREEBSD:
-+		break;
++	for (p = &oses[0]; p->name; p++) {
++		if (!strcmp(p->name, name)) {
++			arch_os = p->os;
++			return;
++		}
 +	}
- }
++
++	die("invalid os: %s", name);
++}
++
  
- const struct target target_x86_64 = {
-@@ -67,8 +85,8 @@ const struct target target_x86_64 = {
- 	.bits_in_longdouble = 128,
- 	.max_fp_alignment = 16,
+ void target_config(enum machine mach)
+ {
+diff --git a/target.h b/target.h
+index 8f79426c096a..0a8e2deba306 100644
+--- a/target.h
++++ b/target.h
+@@ -105,6 +105,7 @@ extern const struct target target_x86_64;
+ extern const struct target *arch_target;
  
--	.init = init_x86,
- 	.target_32bit = &target_i386,
+ enum machine target_parse(const char *name);
++void target_os(const char *name);
+ void target_config(enum machine mach);
+ void target_init(void);
  
-+	.init = init_x86_64,
- 	.predefine = predefine_x86_64,
- };
 -- 
 2.27.0
 
