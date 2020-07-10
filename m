@@ -2,105 +2,105 @@ Return-Path: <SRS0=t/C/=AV=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0F08FC433DF
-	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:16:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 72CB0C433E0
+	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 09:01:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E15C52065F
-	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:16:23 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4CEEB206E2
+	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 09:01:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sAcPdBSb"
+	dkim=pass (2048-bit key) header.d=oracle.com header.i=@oracle.com header.b="vaLnWi5z"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726444AbgGJAQX (ORCPT
+        id S1728037AbgGJJBk (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 9 Jul 2020 20:16:23 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53710 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726272AbgGJAQX (ORCPT
+        Fri, 10 Jul 2020 05:01:40 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:60364 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728006AbgGJJBj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Jul 2020 20:16:23 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2E7C3C08C5CE;
-        Thu,  9 Jul 2020 17:16:23 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id dr13so4136181ejc.3;
-        Thu, 09 Jul 2020 17:16:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=SeE4mVVnUBNm2sdoUXO/sXXIz4sYexLJOEDokzvwJcE=;
-        b=sAcPdBSbr/CDqjcyynsYyIGAOzfym++0lfmyCkEGJI3khVo2/JKXRYnw6yZNpOTNM8
-         5JdLUvpXMP6mbi8WfFmcwvfgKEBBTh3zCvyaInq+wT+lVSlOPOfM0ujMIDoEWBe4B2LL
-         4GTefctjAIXrVyPoEm16Rvfuwg62S4FYkBUaENEKo3P5cv+RrLj3q/QpIwsdFUKxsdMF
-         7bd8yCprcWO9wiL0W030itN7R37XyCXUU61W/lSHQ/GQvGZ4OYPXvdD+slE5lHjyRwZk
-         XXaHK1L7+LLx+0ppBsubSN5vqugQNnQ4AbEP486ilLPqDsqxMqs9ahjXvSK3ZUdj2CW8
-         tsuA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=SeE4mVVnUBNm2sdoUXO/sXXIz4sYexLJOEDokzvwJcE=;
-        b=CIPA4lBoVTl9xEFzIxqHrgJ7e13eVBuSh++8R9rz6UGpYfZ1h0U39+ORY79Qw8TssI
-         uNdRtgkOR925slssWCCbpspZ8cDCylt2rXS+wT3YKoD0YahlOui9UxqHIbZ6Wgdok+XN
-         nj+j3BX1XsJYauUbagBKnSjPMn94JC4idiADI7GIcDCP+87K00JO9ht+Xu1kV6nmb39V
-         +Nm492G/NCYZe9qXi08iQkzck8JdQy+VUiay+EokjeqRN0F0quY42MjkXEQ8ru/qnKeb
-         WhFZepk1MRCcpsAvIu4lWBdZ2QpJ9zwCiOdJADv1cICMwoSnLAz9qlWtT5Y7URwKjiNs
-         OnVg==
-X-Gm-Message-State: AOAM530iPXBwC7WHlikXCwAv77/9huKzmZaERUSFqForHDCyF1RK9yXX
-        mYtWhGQCpjq95guOYiKG9fw=
-X-Google-Smtp-Source: ABdhPJwA/umm+AiGyQJ9IjKL40K0uPDdzfujzwjzZTjsnrre5Emtb/1qye3Xl8NBBS6U6V0LBqsqMA==
-X-Received: by 2002:a17:907:20ba:: with SMTP id pw26mr57395987ejb.425.1594340181902;
-        Thu, 09 Jul 2020 17:16:21 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:b7f9:7600:c80f:e21c:9480:e854])
-        by smtp.gmail.com with ESMTPSA id o6sm3002223edr.94.2020.07.09.17.16.20
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Jul 2020 17:16:21 -0700 (PDT)
-Date:   Fri, 10 Jul 2020 02:16:20 +0200
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Herbert Xu <herbert@gondor.apana.org.au>
-Cc:     Ard Biesheuvel <ardb@kernel.org>,
-        Linux Crypto Mailing List <linux-crypto@vger.kernel.org>,
-        linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 5/5] crypto: arm/ghash - use variably sized key struct
-Message-ID: <20200710001620.he3twpsil2wnl4vj@ltop.local>
-References: <20200629073925.127538-1-ardb@kernel.org>
- <20200629073925.127538-6-ardb@kernel.org>
- <20200709082200.GA1892@gondor.apana.org.au>
- <CAMj1kXE8HELm1j3jx-+mHrK3OjG6Rjp4jtP_QEYorRBnRxA+=w@mail.gmail.com>
- <20200709120937.GA13332@gondor.apana.org.au>
+        Fri, 10 Jul 2020 05:01:39 -0400
+Received: from pps.filterd (aserp2120.oracle.com [127.0.0.1])
+        by aserp2120.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06A90P2F085962;
+        Fri, 10 Jul 2020 09:01:34 GMT
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
+ : subject : message-id : references : mime-version : content-type :
+ content-transfer-encoding : in-reply-to; s=corp-2020-01-29;
+ bh=8MUeMa9l1CPaRw5c5O0mdldTbVLp6xGOtUMBDkdgEEk=;
+ b=vaLnWi5zngoVi8uHQ/Ab7le/7mRgF2TSGbUMAE07VEGH5qswVjpySpD0okxW8398ALfh
+ NgaA1gahkDTeSeTuxrx8/5SHIByCD775jiOHsrh+7X4nbuPsf7n6ug6VdPkaL0qaPrI4
+ Qw4znHfpaNFVyh7qXdyUDOa2cojbmTl9sopYazunEH4yT9f+wtRfx9E5KhKTNwbGyaQz
+ vSRqXqos2Kygq+LVL/Hv4ABjzrW91aL9BNhPuuz51zCYaCPLg9GB+5JJpgHEbOkNL1ka
+ OWY6E0csQ76d3rsreKIRYJ5skBsUIew5OLOJtVuJ0Df3VXhzBMRyuG/DvDdTTNIDEITl dg== 
+Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
+        by aserp2120.oracle.com with ESMTP id 325y0ape21-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=FAIL);
+        Fri, 10 Jul 2020 09:01:34 +0000
+Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
+        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 06A8xJjR001425;
+        Fri, 10 Jul 2020 08:59:34 GMT
+Received: from aserv0121.oracle.com (aserv0121.oracle.com [141.146.126.235])
+        by aserp3020.oracle.com with ESMTP id 325k3kpayj-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
+        Fri, 10 Jul 2020 08:59:34 +0000
+Received: from abhmp0011.oracle.com (abhmp0011.oracle.com [141.146.116.17])
+        by aserv0121.oracle.com (8.14.4/8.13.8) with ESMTP id 06A8xW54011882;
+        Fri, 10 Jul 2020 08:59:32 GMT
+Received: from kadam (/41.57.98.10)
+        by default (Oracle Beehive Gateway v4.0)
+        with ESMTP ; Fri, 10 Jul 2020 01:59:32 -0700
+Date:   Fri, 10 Jul 2020 11:59:27 +0300
+From:   Dan Carpenter <dan.carpenter@oracle.com>
+To:     =?iso-8859-1?Q?Aur=E9lien?= Aptel <aaptel@suse.com>
+Cc:     linux-sparse@vger.kernel.org
+Subject: Re: using sparse to catch refcount leaks
+Message-ID: <20200710085927.GN2549@kadam>
+References: <871rlk6630.fsf@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20200709120937.GA13332@gondor.apana.org.au>
+Content-Transfer-Encoding: 8bit
+In-Reply-To: <871rlk6630.fsf@suse.com>
+User-Agent: Mutt/1.9.4 (2018-02-28)
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9677 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 spamscore=0 mlxscore=0 mlxlogscore=999
+ phishscore=0 adultscore=0 suspectscore=0 malwarescore=0 bulkscore=0
+ classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2006250000
+ definitions=main-2007100062
+X-Proofpoint-Virus-Version: vendor=nai engine=6000 definitions=9677 signatures=668680
+X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 adultscore=0 mlxscore=0
+ priorityscore=1501 spamscore=0 phishscore=0 clxscore=1011 mlxlogscore=999
+ lowpriorityscore=0 malwarescore=0 bulkscore=0 suspectscore=0
+ impostorscore=0 classifier=spam adjust=0 reason=mlx scancount=1
+ engine=8.12.0-2006250000 definitions=main-2007100061
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Jul 09, 2020 at 10:09:37PM +1000, Herbert Xu wrote:
-> On Thu, Jul 09, 2020 at 11:51:10AM +0300, Ard Biesheuvel wrote:
-> >
-> > That looks like a sparse bug to me. Since when is it not allowed to
-> > pass a non-const value as a const parameter?
-> > 
-> > I.e., you can pass a u64[] to a function that takes a u64 const *,
-> > giving the caller the guarantee that their u64[] will not be modified
-> > during the call, even if it is passed by reference.
-> > 
-> > Here, we are dealing with u64[][2], but the same reasoning holds. A
-> > const u64[][2] formal parameter (or u64 const (*)[2] which comes down
-> > to the same thing) does not require a const argument, it only tells
-> > the caller that the array will be left untouched. This is why the
-> > compiler is perfectly happy with this arrangement.
+On Thu, Jul 09, 2020 at 05:50:11PM +0200, Aurélien Aptel wrote:
+> Hi,
 > 
-> You're right.  Luc, here is the patch that triggers the bogus
-> warning with sparse.
+> I was thinking the same mechanism for lock checks (lock() has matching
+> unlock()) could be used for detecting refcount leaks (get() has matching
+> put()).
+> 
+> This could be used to catch bugs like that:
+> 
+> https://lore.kernel.org/linux-cifs/CAH2r5mtJg0OONLuAYmcggj=M3euDDxRa3Y5-_W1=qxwbeZypqA@mail.gmail.com/T/#mf0e0397aa0b63043d7b3bb0981f0b7323713bfdc
 
-Thanks for the analysis and the bug report.
-A fix is under way and should be upstreamed in a few days.
+You might be better off copying the Smatch's locking test instead of
+Sparse's.  Smatch does cross function flow analysis which can help.
 
--- Luc 
+In this CIFS case, the leak is on the success path (as well as the
+failure path) so my theory would be that it would be caught in testing
+and will only cause false positives for static analysis.  I can't see
+any automated way to know which success paths should take a reference
+and which should not.
+
+regards,
+dan carpenter
+
