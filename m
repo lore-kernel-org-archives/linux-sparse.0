@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2FCDBC433E0
-	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:13:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5ABB7C433E0
+	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:13:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0C2382065F
-	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:13:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3451C2065F
+	for <linux-sparse@archiver.kernel.org>; Fri, 10 Jul 2020 00:13:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sREkKSzN"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BbjrQYdB"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726444AbgGJAN4 (ORCPT
+        id S1726446AbgGJAN6 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 9 Jul 2020 20:13:56 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53328 "EHLO
+        Thu, 9 Jul 2020 20:13:58 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53334 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726272AbgGJAN4 (ORCPT
+        with ESMTP id S1726272AbgGJAN5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 9 Jul 2020 20:13:56 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45F5DC08C5CE
-        for <linux-sparse@vger.kernel.org>; Thu,  9 Jul 2020 17:13:56 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id d15so3198117edm.10
-        for <linux-sparse@vger.kernel.org>; Thu, 09 Jul 2020 17:13:56 -0700 (PDT)
+        Thu, 9 Jul 2020 20:13:57 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 777C1C08C5CE
+        for <linux-sparse@vger.kernel.org>; Thu,  9 Jul 2020 17:13:57 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id d18so3213867edv.6
+        for <linux-sparse@vger.kernel.org>; Thu, 09 Jul 2020 17:13:57 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=AOL8Q1fyd1mMfBqZxN0k86XPezSoFii1BDx7sfPR3m4=;
-        b=sREkKSzNBrx9gwNBpp5JLeUQ0bY+Xzn6RTq3jz/t4srxXIy86Fce7diBvwqqcwMdSr
-         TEAmDuYB3ujNTYCanTT/rEnWmWE9ZRqGV3hGmRL1ejAAw6NZdZFIzxxjUhfnSPEIk5Qa
-         2jtATh2+1znNjfTacAGk8HBn4P+l3wcP3FnAJSp7Rg6G6S7EmV++vqoWKTQTaZExY5Nb
-         AqtjXo4Lts0ru02/sYByzn+dEbBqEnZNNKd1F03nhJAqg6+SUHTf/SSxK8RQlEMDpSz+
-         GYEJJPxlj3W+tfSdRZWSdvEwEeKgbNVWYwQLOj/NucmyA3z2QthSN4NJi1QGEDZkwSdE
-         MNew==
+        bh=enqFYqd6tgsb8MMCP7k85/ExV0OhBL6Pij31QI8um0w=;
+        b=BbjrQYdBvuDokD3tLCVfsja/S3ZSlELJpPcfMfoUH52dLyCHaReSBI8ut+TCmxUn+4
+         K4YT5jowiAOYplcpUzZkBDh0j+/wlWmsNPvZlKCzab/N0CuDIQGgPX47rRhaalNY+eZ5
+         C/HWv1TcQPTkyabeth3pnGfdD/zr51hpxaGEYmf/AHfsf/dVWfFhd/u2+ZCkr2ZHFYVD
+         wLI+lLev77DeR/gmIGNBzxrIm/MrZhRySAt1jFh0Qyny+59pfedf3OD/f8f8reBArrrt
+         tzLuEv6XrQ1QJHYDb0SlP3AtnISDHReAOvHpCl2cqdB7qZMhb+odX3yQukvFv+42kQe2
+         zvkQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=AOL8Q1fyd1mMfBqZxN0k86XPezSoFii1BDx7sfPR3m4=;
-        b=KXbPMH9VIdUr8v31EaZSTVaUTIO7BzHOKyZhZ5EO5hpN4Fzus41szXTpGKT5wS7brh
-         PZOKk+9V2n1psJgdgZngTz2dzVIpsib3VsIa7KUDHAaIyhbgQX2Sry5QecjLHhfqPoFt
-         nrWjtIAQkTXuWRZzp1WISbCVlBe8gjzP50QKlNhWg6AfQJl8gHPNeENRvaYaUEZHuf9E
-         AtrMxbZmGjoq9wLzQj8TYS2LWT44273NUVsF1Q51v/cORtDqC4NPTSKjTbjQCn55R/vE
-         8oRxiRKhZIvBVw4du0PS6r+Y7ig3cz4SCyC+EaZmX/yh9CP33F06PUoreP4Vylk/18Rq
-         Fnwg==
-X-Gm-Message-State: AOAM530Dq7KO/2jjB4NZJZgeKpnqwQqDPV4fwIL3MW4EhwXkePPPsCLq
-        2dLtyN6a9zJLXwQRi/8PF8RlOXHL
-X-Google-Smtp-Source: ABdhPJxED9aXI14FoqhZiDSNIElMFfydyaE5UuKgmVA2MoPBkgE362BYHbdM6T/nOt5SSIjUrh6klA==
-X-Received: by 2002:a05:6402:2211:: with SMTP id cq17mr50071301edb.95.1594340034747;
-        Thu, 09 Jul 2020 17:13:54 -0700 (PDT)
+        bh=enqFYqd6tgsb8MMCP7k85/ExV0OhBL6Pij31QI8um0w=;
+        b=p00y4vB6zZatxdvd3lSDAbs4tQcY+PtZhWtqz8+yaDkLqCv7SHZpzwlO3IsvGqZKMS
+         fk5gUXc4eSboHuTGEfzy/pye/wD6n9VG9q6Wl/fRxYzyLLDDK8hPPu4rII4nvDm1oe8/
+         mFCDOGnS7Wrw4nw5mi4vVcayM43TEvWLWq+u2qv9TziFtpXCA2KE/SI/rBP8B7SxSPrh
+         Qfg+GQ0hFzIFsaJ1GLNk2cQE7lK8rAgzO/1s1NhLmcZjs2VGJ4pY+jzQGQnGcc/VNCZO
+         4Ub9toOMOl4CE0nfs+iQeCG3Zr7og9ZcfYJ8qOlhdteJKj2NHR4Y5I8GPc/ClsJE1uIQ
+         53Gg==
+X-Gm-Message-State: AOAM532UmiI2F1LETQi/1TT7uLrjwVveMICwoh3/RyQz/bHfaaiE1aAx
+        K+zPe7zH9ufiWO6R0FNpeKh5eKXG
+X-Google-Smtp-Source: ABdhPJye6ZpsMNYeSOpcZnFr+8iAjNoHozCc7gR47c6G7PNuTtfVpAS6X1eGJ24ouScD8JNg4ElIuA==
+X-Received: by 2002:a50:d49e:: with SMTP id s30mr1702835edi.228.1594340035952;
+        Thu, 09 Jul 2020 17:13:55 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:c80f:e21c:9480:e854])
-        by smtp.gmail.com with ESMTPSA id u8sm2614199ejm.65.2020.07.09.17.13.53
+        by smtp.gmail.com with ESMTPSA id u8sm2614199ejm.65.2020.07.09.17.13.54
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 09 Jul 2020 17:13:54 -0700 (PDT)
+        Thu, 09 Jul 2020 17:13:55 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/4] add another testcase  with const array/pointer
-Date:   Fri, 10 Jul 2020 02:13:20 +0200
-Message-Id: <20200710001322.18391-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/4] add testcase for missing warning for assignment to const
+Date:   Fri, 10 Jul 2020 02:13:21 +0200
+Message-Id: <20200710001322.18391-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200710001322.18391-1-luc.vanoostenryck@gmail.com>
 References: <20200710001322.18391-1-luc.vanoostenryck@gmail.com>
@@ -76,68 +76,48 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Those are cases that sparse should warn about but doesn't.
+The problem is seems to be related with evaluate_dereference()
+where all mods are dropped when the type is a node.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/eval/array-quals1.c | 50 ++++++++++++++++++++++++++++++++++
- 1 file changed, 50 insertions(+)
- create mode 100644 validation/eval/array-quals1.c
+ validation/eval/array-quals-node.c | 29 +++++++++++++++++++++++++++++
+ 1 file changed, 29 insertions(+)
+ create mode 100644 validation/eval/array-quals-node.c
 
-diff --git a/validation/eval/array-quals1.c b/validation/eval/array-quals1.c
+diff --git a/validation/eval/array-quals-node.c b/validation/eval/array-quals-node.c
 new file mode 100644
-index 000000000000..a1c3905826d5
+index 000000000000..99a4db13e4da
 --- /dev/null
-+++ b/validation/eval/array-quals1.c
-@@ -0,0 +1,50 @@
-+typedef const int ci_t;
-+typedef       int  ia_t[2];
-+typedef const int cia_t[2];
++++ b/validation/eval/array-quals-node.c
+@@ -0,0 +1,29 @@
++struct s {
++	int a;
++	int b[3];
++	int c[2][3];
++};
 +
-+static const int	ci__a[2];
-+static ci_t		cit_a[2];
-+static const ia_t	c_iat;
-+static cia_t		ciat_;
-+static cia_t		ciata[2];
++struct c {
++	const struct s s;
++};
 +
-+static const void *const ok_ci__a = &ci__a;
-+static       void *const ko_ci__a = &ci__a;
-+static const void *const ok_cit_a = &cit_a;
-+static       void *const ko_cit_a = &cit_a;
-+static const void *const ok_c_iat = &c_iat;
-+static       void *const ko_c_iat = &c_iat;
-+static const void *const ok_ciat_ = &ciat_;
-+static       void *const ko_ciat_ = &ciat_;
-+static const void *const ok_ciata = &ciata;
-+static       void *const ko_ciata = &ciata;
++extern struct c v;
 +
-+static volatile int	vi__a[2];
-+static volatile void *const ok_vi__a = &vi__a;
-+static          void *const ko_vi__a = &vi__a;
++void f(void)
++{
++	  v.s.a = 0;
++	 *v.s.b = 0;
++	**v.s.c = 0;
++}
 +
 +/*
-+ * check-name: array-quals1
++ * check-name: array-quals-node
 + * check-known-to-fail
 + *
 + * check-error-start
-+eval/array-quals1.c:12:38: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:12:38:    expected void *static const [toplevel] ko_ci__a
-+eval/array-quals1.c:12:38:    got int const ( * )[2]
-+eval/array-quals1.c:14:38: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:14:38:    expected void *static const [toplevel] ko_cit_a
-+eval/array-quals1.c:14:38:    got int const [usertype] ( * )[2]
-+eval/array-quals1.c:16:38: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:16:38:    expected void *static const [toplevel] ko_c_iat
-+eval/array-quals1.c:16:38:    got int const ( * )[2]
-+eval/array-quals1.c:18:38: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:18:38:    expected void *static const [toplevel] ko_ciat_
-+eval/array-quals1.c:18:38:    got int const ( * )[2]
-+eval/array-quals1.c:20:38: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:20:38:    expected void *static const [toplevel] ko_ciata
-+eval/array-quals1.c:20:38:    got int const [usertype] ( * )[2][2]
-+eval/array-quals1.c:24:41: warning: incorrect type in initializer (different modifiers)
-+eval/array-quals1.c:24:41:    expected void *static const [toplevel] ko_vi__a
-+eval/array-quals1.c:24:41:    got int volatile ( * )[2]
++eval/array-quals-node.c:15:14: error: assignment to const expression
++eval/array-quals-node.c:16:14: error: assignment to const expression
++eval/array-quals-node.c:17:14: error: assignment to const expression
 + * check-error-end
 + */
 -- 
