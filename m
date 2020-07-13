@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A49C433DF
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9A354C433DF
 	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 59D0E2089D
+	by mail.kernel.org (Postfix) with ESMTP id 78F8A20DD4
 	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="t2o/TEJM"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JhI2L/Fn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726345AbgGMWdS (ORCPT
+        id S1726432AbgGMWdS (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Mon, 13 Jul 2020 18:33:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48016 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726432AbgGMWdQ (ORCPT
+        with ESMTP id S1726442AbgGMWdR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jul 2020 18:33:16 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09622C08C5DD
+        Mon, 13 Jul 2020 18:33:17 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CB7C8C061755
         for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:16 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id a1so9734619edt.10
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:15 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id a1so9734646edt.10
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=g5VuQJWO6epFKSIA5jo6jeiqlwweo8XLjawSGp92FRM=;
-        b=t2o/TEJMfvweG07+cUxpWtv+QEvz5qoCXu62SpoQXnotfYwd5n3jepP78i7X8/wi/r
-         MGAA9WgUdgG7ztl+jTdyPjYcFCQVNjvwwZRMQ/YZgfBNddhh2wSK3c0uqerJufqkjxpF
-         rIhxjUR1wzyrWScnMciQ46ytjcr1Q547XxoGlvQKy+z4W6os4W5yaP8VQeFepqKHkgsU
-         gnR5CWIIBCIL8mzOBpEvCAbu/8MTZd9/TvZMdTdQqikJzfbl0mcUNCgC+sK8kejph5Ve
-         JQ1FPSgoKTA2aQuSepKIZR7MlxH6VX4RL6pXZ6+SGOmrwpkNo6ArH+Pf6lxO2BjQZ+/7
-         3z5A==
+        bh=PYeNADQPBpM9u+rFh8J9FhNBQ2UpyHrJlgeDfOKAop0=;
+        b=JhI2L/FnD3kgqupuoP4xkAKCahRkdCJ5uf+ht0cnEKmbs4rUIBMOOQgGehcZgnzLAb
+         YmJikv2iruL/3inzCmWExNs47I5cYQKXyXDCl0EDJ/X+HyCFnrUiJL7knDxrBvgYY2Y+
+         55120aGKPnKmICl/YVEdoR9rE1zgGcaPvqqK9kJ3oDCIqBsMBnO+KFjyLBIbqtZyniI+
+         x3r2DdkgcjSmRXZoBNishgGJhinJ5+7zMr1N+WKm7viZMVTVbgPKoDtjjpKT3d2RtcPS
+         XrASkcXrpc+oR5hvrvXtPEVzxF9kWKAcfD7ISgZC+aktM7eh/SI3g7E76K8HiHJfYgZH
+         g97w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=g5VuQJWO6epFKSIA5jo6jeiqlwweo8XLjawSGp92FRM=;
-        b=CTTuH6Uj0RuGkKlpd1uUpxfG4RMHf290U4a98PMQas0ba1RU++oT7o3HRv4r+HNJkR
-         QODGSm0EimyyNnVeLB90Q5GQyb8X1xEN4UK2c2oNmG0QsryNFdMx0UsIQcXRO8uIZPXC
-         iGBawzAgjlzqMR7Nc2vCJdaRgZCn25WxY+EC62fIIa2ied3eJj1dYZCd4tcmHiEP+i5p
-         723RY+K4Y83ggk3P1uWbqzjUXl4Wd+1Fo7pRXIzbi3nzjaYwpUZjs3YgCQJ6iD7PdGUG
-         IuTUDZlC3W7J1Cwb3NDvf9X57lox4R4sgNdacpNRBBPh/4PzkvRMcIR6tj5/o7II/Oty
-         pOZQ==
-X-Gm-Message-State: AOAM532y6QzgX+Ww94P1Nr8499kJCa98VlTihiL5vITWhtCBRF4xb2sm
-        RUTuSRwLjIPEThQpMehqPvZfW/9B
-X-Google-Smtp-Source: ABdhPJz5YzKqp1+OtiyNPpCpGUusMMxOE5tUGGe3U7s58xfYhQuPJ88P8ekrvovtnRngaPtIZiZxkA==
-X-Received: by 2002:a50:ee8d:: with SMTP id f13mr1496587edr.302.1594679594548;
-        Mon, 13 Jul 2020 15:33:14 -0700 (PDT)
+        bh=PYeNADQPBpM9u+rFh8J9FhNBQ2UpyHrJlgeDfOKAop0=;
+        b=ZLoNlSp0SUkumr2/+l+wlx/TwXBXIaiU6hFNiOQibas0LjDLbveij0i8x5sxvk1Q7Q
+         ImO4b+wa7ouqME5iwJB9axiLXxvDrdVrbk528J0j8WWlnaN4xk4oNIC4NT8DOLrUziSM
+         8ctixKEsJSW1CFwaLyu/mHrHnQilu/Nnf8qeu5stHufTO0Vmw+dPucSXdW03XeFWNFyw
+         3W5ZLOcKitliXhq6VL6xvC2v8fHhQ+j4CbSCcQhk6Ft8VEgZaIS7Q00scNyVZy04hYWs
+         K/FGbhZ7dx/ptyS+lKTwLtm35xkppUKvAmC1T6ZbKXD/vhmjtWZ1LayBtJI2zDocZu34
+         FvPA==
+X-Gm-Message-State: AOAM532ilFTIdCFlqeJiTez9BjiWjO3+bKd265LT4HbYGIaPejqcAAJy
+        je+5U9nHN+93tEZX+HwJRDv/Tps/
+X-Google-Smtp-Source: ABdhPJwl9VQqsDdhuBxEpeLLKL8wjs56r3hzlXl8HcvlHbf2JLuPQoit20FFT9R6l2C1T8hYDyGTXA==
+X-Received: by 2002:a50:e60d:: with SMTP id y13mr1495693edm.225.1594679595339;
+        Mon, 13 Jul 2020 15:33:15 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:64:f40c:5c10:8e2d])
-        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.13
+        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2020 15:33:13 -0700 (PDT)
+        Mon, 13 Jul 2020 15:33:14 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 8/9] x86-x32: fix it by defining a separate target for it
-Date:   Tue, 14 Jul 2020 00:33:02 +0200
-Message-Id: <20200713223304.83666-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 9/9] predefine: let predefine_width() take the usual interface
+Date:   Tue, 14 Jul 2020 00:33:03 +0200
+Message-Id: <20200713223304.83666-10-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
 References: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
@@ -76,113 +76,46 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On x86-64, the x32 ABI was processed as a kind of special case
-of the usual 32-bit variant. But this doesn't work very well.
+All the helpers for type-related predefines directly take in
+argument the pointer to the type. All but predefine_width().
+This must be an historical relic.
 
-Fix it and help avoiding possible future problems by defining
-a separate target for it.
+So, let predefine_width() to also take the pointer to the type
+in argument.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- target-x86.c | 32 ++++++++++++++++++++++++++++++++
- target.c     | 11 ++++++++---
- target.h     |  1 +
- 3 files changed, 41 insertions(+), 3 deletions(-)
+ predefine.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/target-x86.c b/target-x86.c
-index e69594edac0e..b7ff8f2ab4ed 100644
---- a/target-x86.c
-+++ b/target-x86.c
-@@ -67,6 +67,37 @@ const struct target target_i386 = {
- };
+diff --git a/predefine.c b/predefine.c
+index 7120d4381f16..f898cdfa39b8 100644
+--- a/predefine.c
++++ b/predefine.c
+@@ -25,12 +25,12 @@ static void predefined_sizeof(const char *name, const char *suffix, unsigned bit
+ 	predefine(buf, 1, "%d", bits/8);
+ }
  
- 
-+static void init_x86_x32(const struct target *target)
-+{
-+	init_x86_common(target);
-+
-+	max_int_alignment = 8;
-+
-+	fast16_ctype = &int_ctype;
-+	ufast16_ctype = &uint_ctype;
-+	fast32_ctype = &int_ctype;
-+	ufast32_ctype = &uint_ctype;
-+	wchar_ctype = &long_ctype;
-+}
-+
-+static const struct target target_x86_x32 = {
-+	.mach = MACH_X86_64,
-+	.bitness = ARCH_X32,
-+	.big_endian = 0,
-+	.unsigned_char = 0,
-+	.has_int128 = 1,
-+
-+	.bits_in_longdouble = 128,
-+	.max_fp_alignment = 16,
-+
-+	.target_32bit = &target_i386,
-+	.target_64bit = &target_x86_64,
-+
-+	.init = init_x86_x32,
-+	.predefine = predefine_x86_64,
-+};
-+
-+
- static void init_x86_64(const struct target *target)
+-static void predefined_width(const char *name, unsigned bits)
++static void predefined_width(const char *name, struct symbol *type)
  {
- 	init_x86_common(target);
-@@ -124,6 +155,7 @@ const struct target target_x86_64 = {
- 	.max_fp_alignment = 16,
+ 	char buf[32];
  
- 	.target_32bit = &target_i386,
-+	.target_x32bit = &target_x86_x32,
+ 	snprintf(buf, sizeof(buf), "__%s_WIDTH__", name);
+-	predefine(buf, 1, "%d", bits);
++	predefine(buf, 1, "%d", type->bit_size);
+ }
  
- 	.init = init_x86_64,
- 	.predefine = predefine_x86_64,
-diff --git a/target.c b/target.c
-index 308386b8fa7d..8ae22d744f40 100644
---- a/target.c
-+++ b/target.c
-@@ -213,10 +213,17 @@ void target_init(void)
- 	const struct target *target = arch_target;
+ static void predefined_max(const char *name, struct symbol *type)
+@@ -78,7 +78,7 @@ static void predefined_ctype(const char *name, struct symbol *type, int flags)
+ 	if (flags & PTYPE_TYPE)
+ 		predefined_type(name, type);
+ 	if (flags & PTYPE_WIDTH)
+-		predefined_width(name, bits);
++		predefined_width(name, type);
+ }
  
- 	switch (arch_m64) {
-+	case ARCH_X32:
-+		if (target->target_x32bit)
-+			target = target->target_x32bit;
-+		goto case_32bit;
-+
- 	case ARCH_LP32:
- 		max_int_alignment = 4;
-+		if (target->target_32bit)
-+			target = target->target_32bit;
- 		/* fallthrough */
--	case ARCH_X32:
-+	case_32bit:
- 		bits_in_long = 32;
- 		bits_in_pointer = 32;
- 		pointer_alignment = 4;
-@@ -228,8 +235,6 @@ void target_init(void)
- 		uintmax_ctype = &ullong_ctype;
- 		fast64_ctype = &llong_ctype;
- 		ufast64_ctype = &ullong_ctype;
--		if (target->target_32bit)
--			target = target->target_32bit;
- 		break;
- 
- 	case ARCH_LLP64:
-diff --git a/target.h b/target.h
-index 8ffd8e882906..92b8af9169d7 100644
---- a/target.h
-+++ b/target.h
-@@ -92,6 +92,7 @@ struct target {
- 	unsigned int	max_fp_alignment;
- 
- 	const struct target *target_32bit;
-+	const struct target *target_x32bit;
- 	const struct target *target_64bit;
- 
- 	const struct builtin_fn *builtins;
+ void predefined_macros(void)
 -- 
 2.27.0
 
