@@ -5,67 +5,67 @@ X-Spam-Level:
 X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E72FBC433DF
-	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:17 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 81A49C433DF
+	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C2E3D20C56
-	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:17 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 59D0E2089D
+	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:18 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MGZ1AO5x"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="t2o/TEJM"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726374AbgGMWdR (ORCPT
+        id S1726345AbgGMWdS (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 13 Jul 2020 18:33:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48012 "EHLO
+        Mon, 13 Jul 2020 18:33:18 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48016 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726345AbgGMWdP (ORCPT
+        with ESMTP id S1726432AbgGMWdQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jul 2020 18:33:15 -0400
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 342D0C08C5DB
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:15 -0700 (PDT)
-Received: by mail-ed1-x541.google.com with SMTP id d18so15178870edv.6
+        Mon, 13 Jul 2020 18:33:16 -0400
+Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 09622C08C5DD
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:16 -0700 (PDT)
+Received: by mail-ed1-x544.google.com with SMTP id a1so9734619edt.10
         for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=juJkRHEXgBeQsv7FfiIuEkhutk94RaoUqgXWqpQkuxU=;
-        b=MGZ1AO5xal1850TAoLFF7ZWXM9Pq+GBTB/YaM3tViGhQYlJyHMFGpanEmip39g54KL
-         7v2+XuZNn2XJ59G0QXx6nQOoB2DOxJWELCtUernD2pLycePBuxb/q1pxpPJRcTE1GWHx
-         DTYp40KegY/19V6TdHNGYRPfqB/dg85SzlRkeCaY0l5H0Q/9k9KPrDfJTitxuLM9pXFx
-         km4cAcjNthwiAm6On+S6ZHhZaAzc1zmOuJpmAhHLrjWoJFQr66gjPsNVijHt7IVwPWpl
-         rdAjlYG+BGCg06mc/kkl0Rf+7JiUQTz5dV2U5s6+dfQAwsvJ516n0DA7kijBo6NQv1XY
-         +zOA==
+        bh=g5VuQJWO6epFKSIA5jo6jeiqlwweo8XLjawSGp92FRM=;
+        b=t2o/TEJMfvweG07+cUxpWtv+QEvz5qoCXu62SpoQXnotfYwd5n3jepP78i7X8/wi/r
+         MGAA9WgUdgG7ztl+jTdyPjYcFCQVNjvwwZRMQ/YZgfBNddhh2wSK3c0uqerJufqkjxpF
+         rIhxjUR1wzyrWScnMciQ46ytjcr1Q547XxoGlvQKy+z4W6os4W5yaP8VQeFepqKHkgsU
+         gnR5CWIIBCIL8mzOBpEvCAbu/8MTZd9/TvZMdTdQqikJzfbl0mcUNCgC+sK8kejph5Ve
+         JQ1FPSgoKTA2aQuSepKIZR7MlxH6VX4RL6pXZ6+SGOmrwpkNo6ArH+Pf6lxO2BjQZ+/7
+         3z5A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=juJkRHEXgBeQsv7FfiIuEkhutk94RaoUqgXWqpQkuxU=;
-        b=LI9fjAaHEzBpGstZN2OnarAvyUoONBBRjjMWkcKphcXKq5pz3pJffeD1BJkl4zRLRo
-         3dmDfdJQmpoi36LNKkWk+9EnsMwXBX6KzfXd0NeaAY/4TD2+nOb7oT1NLSxAQYkBF85j
-         +F/vK3zAFiloji7O0UE2Fwlrq+NafNHlejuVGiEPtaphmogYgoJT+7DY9G3dM6UoL4By
-         Dv9llVTUqFLutFS5LZYJEy/+Wb5xeWoDKE+u5b8YCt06+4ZN7iolRUcp7tCPoDIcgQcg
-         djEIfKjGH0Grdualq2rNnm4beXerBEwLRx4YSDGXyrQ6evMMGx+l1coXKiAdAXtxFLZf
-         NTmQ==
-X-Gm-Message-State: AOAM532LtOzRcvVYek8G2uR4XP6XPO6jzrgywrB/NGf8+V3oW4Set/UC
-        AwcLOB0YZhMKLEQCKlU2Ag1YJWfs
-X-Google-Smtp-Source: ABdhPJxEj6rMu+8mWArTtU15CdJ0HgSRv7nSCc1qeEVtErrfxGqMl5n5Dkq/uo5Pzj1xwvgEpWzydw==
-X-Received: by 2002:a05:6402:1841:: with SMTP id v1mr1567531edy.198.1594679593711;
-        Mon, 13 Jul 2020 15:33:13 -0700 (PDT)
+        bh=g5VuQJWO6epFKSIA5jo6jeiqlwweo8XLjawSGp92FRM=;
+        b=CTTuH6Uj0RuGkKlpd1uUpxfG4RMHf290U4a98PMQas0ba1RU++oT7o3HRv4r+HNJkR
+         QODGSm0EimyyNnVeLB90Q5GQyb8X1xEN4UK2c2oNmG0QsryNFdMx0UsIQcXRO8uIZPXC
+         iGBawzAgjlzqMR7Nc2vCJdaRgZCn25WxY+EC62fIIa2ied3eJj1dYZCd4tcmHiEP+i5p
+         723RY+K4Y83ggk3P1uWbqzjUXl4Wd+1Fo7pRXIzbi3nzjaYwpUZjs3YgCQJ6iD7PdGUG
+         IuTUDZlC3W7J1Cwb3NDvf9X57lox4R4sgNdacpNRBBPh/4PzkvRMcIR6tj5/o7II/Oty
+         pOZQ==
+X-Gm-Message-State: AOAM532y6QzgX+Ww94P1Nr8499kJCa98VlTihiL5vITWhtCBRF4xb2sm
+        RUTuSRwLjIPEThQpMehqPvZfW/9B
+X-Google-Smtp-Source: ABdhPJz5YzKqp1+OtiyNPpCpGUusMMxOE5tUGGe3U7s58xfYhQuPJ88P8ekrvovtnRngaPtIZiZxkA==
+X-Received: by 2002:a50:ee8d:: with SMTP id f13mr1496587edr.302.1594679594548;
+        Mon, 13 Jul 2020 15:33:14 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:64:f40c:5c10:8e2d])
-        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.12
+        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Mon, 13 Jul 2020 15:33:13 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/9] arch: allow target specific [u]intptr_t & ptrdiff_t
-Date:   Tue, 14 Jul 2020 00:33:01 +0200
-Message-Id: <20200713223304.83666-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 8/9] x86-x32: fix it by defining a separate target for it
+Date:   Tue, 14 Jul 2020 00:33:02 +0200
+Message-Id: <20200713223304.83666-9-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
 References: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
@@ -76,138 +76,113 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-These types are aliased to size_t & ssize_t but this is not
-correct for all architectures.
+On x86-64, the x32 ABI was processed as a kind of special case
+of the usual 32-bit variant. But this doesn't work very well.
 
-So, add a variable for them so that target files can adjust them.
+Fix it and help avoiding possible future problems by defining
+a separate target for it.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- predefine.c    | 6 +++---
- symbol.c       | 7 +++++++
- symbol.h       | 3 ---
- target-h8300.c | 2 ++
- target-s390.c  | 3 +++
- target-sh.c    | 2 ++
- target.c       | 3 +++
- target.h       | 3 +++
- 8 files changed, 23 insertions(+), 6 deletions(-)
+ target-x86.c | 32 ++++++++++++++++++++++++++++++++
+ target.c     | 11 ++++++++---
+ target.h     |  1 +
+ 3 files changed, 41 insertions(+), 3 deletions(-)
 
-diff --git a/predefine.c b/predefine.c
-index 60ecc7070045..7120d4381f16 100644
---- a/predefine.c
-+++ b/predefine.c
-@@ -165,9 +165,9 @@ void predefined_macros(void)
+diff --git a/target-x86.c b/target-x86.c
+index e69594edac0e..b7ff8f2ab4ed 100644
+--- a/target-x86.c
++++ b/target-x86.c
+@@ -67,6 +67,37 @@ const struct target target_i386 = {
+ };
  
- 	predefined_ctype("INTMAX",    intmax_ctype, PTYPE_MAX|PTYPE_TYPE|PTYPE_WIDTH);
- 	predefined_ctype("UINTMAX",  uintmax_ctype, PTYPE_MAX|PTYPE_TYPE);
--	predefined_ctype("INTPTR",   ssize_t_ctype, PTYPE_MAX|PTYPE_TYPE|PTYPE_WIDTH);
--	predefined_ctype("UINTPTR",   size_t_ctype, PTYPE_MAX|PTYPE_TYPE);
--	predefined_ctype("PTRDIFF",  ssize_t_ctype, PTYPE_ALL_T|PTYPE_TYPE);
-+	predefined_ctype("INTPTR",    intptr_ctype, PTYPE_MAX|PTYPE_TYPE|PTYPE_WIDTH);
-+	predefined_ctype("UINTPTR",  uintptr_ctype, PTYPE_MAX|PTYPE_TYPE);
-+	predefined_ctype("PTRDIFF",  ptrdiff_ctype, PTYPE_ALL_T|PTYPE_TYPE);
- 	predefined_ctype("SIZE",      size_t_ctype, PTYPE_ALL_T|PTYPE_TYPE);
- 	predefined_ctype("POINTER",     &ptr_ctype, PTYPE_SIZEOF);
- 	predefined_ctype("SIG_ATOMIC", sig_atomic_ctype, PTYPE_MAX|PTYPE_MIN|PTYPE_TYPE|PTYPE_WIDTH);
-diff --git a/symbol.c b/symbol.c
-index 6ee521ba48d8..c0ca79e42e96 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -899,4 +899,11 @@ void init_ctype(void)
- 		char_ctype.ctype.modifiers |= MOD_UNSIGNED;
- 		char_ctype.ctype.modifiers &= ~MOD_SIGNED;
- 	}
+ 
++static void init_x86_x32(const struct target *target)
++{
++	init_x86_common(target);
 +
-+	if (!ptrdiff_ctype)
-+		ptrdiff_ctype = ssize_t_ctype;
-+	if (!intptr_ctype)
-+		intptr_ctype = ssize_t_ctype;
-+	if (!uintptr_ctype)
-+		uintptr_ctype = size_t_ctype;
- }
-diff --git a/symbol.h b/symbol.h
-index 67464d659cc2..c2b60ce91c27 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -304,9 +304,6 @@ extern struct symbol	float128_ctype;
- extern struct symbol	const_void_ctype, const_char_ctype;
- extern struct symbol	const_ptr_ctype, const_string_ctype;
- 
--#define	uintptr_ctype	 size_t_ctype
--#define	 intptr_ctype	ssize_t_ctype
--
- /* Special internal symbols */
- extern struct symbol	zero_int;
- 
-diff --git a/target-h8300.c b/target-h8300.c
-index 84d168b7410a..c3652350bac7 100644
---- a/target-h8300.c
-+++ b/target-h8300.c
-@@ -5,6 +5,8 @@
- 
- static void init_h8300(const struct target *self)
- {
-+	intptr_ctype = &int_ctype;
-+	uintptr_ctype = &uint_ctype;
- 	ssize_t_ctype = &long_ctype;
- 	size_t_ctype = &ulong_ctype;
- 	wchar_ctype = &ushort_ctype;
-diff --git a/target-s390.c b/target-s390.c
-index cdbd685a2099..84889c0aa7ad 100644
---- a/target-s390.c
-+++ b/target-s390.c
-@@ -6,6 +6,9 @@
- 
- static void init_s390(const struct target *self)
- {
-+	intptr_ctype = &int_ctype;
-+	uintptr_ctype = &uint_ctype;
++	max_int_alignment = 8;
 +
- 	fast16_ctype = &int_ctype;
- 	ufast16_ctype = &uint_ctype;
- 	fast32_ctype = &int_ctype;
-diff --git a/target-sh.c b/target-sh.c
-index d4ddf45504cf..d3a66180a0aa 100644
---- a/target-sh.c
-+++ b/target-sh.c
-@@ -7,6 +7,8 @@ static void init_sh(const struct target *self)
++	fast16_ctype = &int_ctype;
++	ufast16_ctype = &uint_ctype;
++	fast32_ctype = &int_ctype;
++	ufast32_ctype = &uint_ctype;
++	wchar_ctype = &long_ctype;
++}
++
++static const struct target target_x86_x32 = {
++	.mach = MACH_X86_64,
++	.bitness = ARCH_X32,
++	.big_endian = 0,
++	.unsigned_char = 0,
++	.has_int128 = 1,
++
++	.bits_in_longdouble = 128,
++	.max_fp_alignment = 16,
++
++	.target_32bit = &target_i386,
++	.target_64bit = &target_x86_64,
++
++	.init = init_x86_x32,
++	.predefine = predefine_x86_64,
++};
++
++
+ static void init_x86_64(const struct target *target)
  {
- 	int64_ctype = &llong_ctype;
- 	uint64_ctype = &ullong_ctype;
-+	intptr_ctype = &int_ctype;
-+	uintptr_ctype = &uint_ctype;
+ 	init_x86_common(target);
+@@ -124,6 +155,7 @@ const struct target target_x86_64 = {
+ 	.max_fp_alignment = 16,
  
- 	fast16_ctype = &int_ctype;
- 	ufast16_ctype = &uint_ctype;
+ 	.target_32bit = &target_i386,
++	.target_x32bit = &target_x86_x32,
+ 
+ 	.init = init_x86_64,
+ 	.predefine = predefine_x86_64,
 diff --git a/target.c b/target.c
-index f320ab525dfb..308386b8fa7d 100644
+index 308386b8fa7d..8ae22d744f40 100644
 --- a/target.c
 +++ b/target.c
-@@ -5,6 +5,9 @@
- #include "target.h"
- #include "machine.h"
+@@ -213,10 +213,17 @@ void target_init(void)
+ 	const struct target *target = arch_target;
  
-+struct symbol *ptrdiff_ctype;
-+struct symbol *intptr_ctype;
-+struct symbol *uintptr_ctype;
- struct symbol *size_t_ctype = &ulong_ctype;
- struct symbol *ssize_t_ctype = &long_ctype;
- struct symbol *intmax_ctype = &long_ctype;
+ 	switch (arch_m64) {
++	case ARCH_X32:
++		if (target->target_x32bit)
++			target = target->target_x32bit;
++		goto case_32bit;
++
+ 	case ARCH_LP32:
+ 		max_int_alignment = 4;
++		if (target->target_32bit)
++			target = target->target_32bit;
+ 		/* fallthrough */
+-	case ARCH_X32:
++	case_32bit:
+ 		bits_in_long = 32;
+ 		bits_in_pointer = 32;
+ 		pointer_alignment = 4;
+@@ -228,8 +235,6 @@ void target_init(void)
+ 		uintmax_ctype = &ullong_ctype;
+ 		fast64_ctype = &llong_ctype;
+ 		ufast64_ctype = &ullong_ctype;
+-		if (target->target_32bit)
+-			target = target->target_32bit;
+ 		break;
+ 
+ 	case ARCH_LLP64:
 diff --git a/target.h b/target.h
-index 5bbce397bba5..8ffd8e882906 100644
+index 8ffd8e882906..92b8af9169d7 100644
 --- a/target.h
 +++ b/target.h
-@@ -5,6 +5,9 @@
+@@ -92,6 +92,7 @@ struct target {
+ 	unsigned int	max_fp_alignment;
  
- extern struct symbol *size_t_ctype;
- extern struct symbol *ssize_t_ctype;
-+extern struct symbol *ptrdiff_ctype;
-+extern struct symbol *intptr_ctype;
-+extern struct symbol *uintptr_ctype;
- extern struct symbol *intmax_ctype;
- extern struct symbol *uintmax_ctype;
- extern struct symbol *int64_ctype;
+ 	const struct target *target_32bit;
++	const struct target *target_x32bit;
+ 	const struct target *target_64bit;
+ 
+ 	const struct builtin_fn *builtins;
 -- 
 2.27.0
 
