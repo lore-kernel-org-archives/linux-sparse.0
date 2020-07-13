@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6B8B0C433DF
-	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 51B39C433E1
+	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 481DE20B80
-	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 27DB92089D
+	for <linux-sparse@archiver.kernel.org>; Mon, 13 Jul 2020 22:33:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="mLSpV1tL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="d1GRHqiU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726352AbgGMWdM (ORCPT
+        id S1726376AbgGMWdN (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 13 Jul 2020 18:33:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47988 "EHLO
+        Mon, 13 Jul 2020 18:33:13 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47994 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726345AbgGMWdK (ORCPT
+        with ESMTP id S1726150AbgGMWdL (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jul 2020 18:33:10 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7DCBEC061794
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:10 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id dr13so19293510ejc.3
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:10 -0700 (PDT)
+        Mon, 13 Jul 2020 18:33:11 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3D8F3C061755
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:11 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id f12so19266973eja.9
+        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 15:33:11 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=QMQe2tqOpAVUKTveFHXq9bnPleopodnl0hV+CX/mlnw=;
-        b=mLSpV1tLl1zylf7256kUiFrtqeSIrLCTAMzgyGfjEYcrl1EOuTVD1owyfis1aXppry
-         0BM4squmNA95JFckJz7WQ6ts3R61UnG+O3i+qztFuohPpJB4k+BuIBd438JcZAep5BJF
-         W5SaCjAasgHEpXCImthJA2NA9nm69TlpMYdystA3X1Eretz3LdWV421VGYb0vVPT7uXV
-         ra2zPDSkFLzSwcnAaxEHDJpZyPHW64pUNzGpG0sM6W3GHLsu4GP50L7viyp4jJ9A5zpF
-         O+tO+KaDFTQRdD31+4r+gAh9F4/L54TO9rVhh7rmeUhE01ocXI79xajr+5dpFmHAsgTb
-         RVnA==
+        bh=YqptpQoyUU0nrCtw/BWlXLGY0AcY1EzlZpqEzaO1DR8=;
+        b=d1GRHqiUpfx+ffLRlwRYqpP2ToTg7jf+jKM5SPaB0YtC7e0SM4qOp7sUzuxzLyXlKG
+         X7/usQ1u8DidGA63IVF/s/eRusEecBoLPYzVOf1gaHu6Zu/DxWxpRsuSUNrdSM3VEqqR
+         dB+zIOvtLl74WK1LIp1TYvBb3OzjDAySV2N7Gqim5XJ6kHuBHwCg4E3KCdcZtkn4TaUL
+         oainAPnaPySXkiyrfB9vyIEGpu8J96YfZ60XSk3x2ldSZ0LpmKpaPQJKqV1SXGCLoN/R
+         hA54zcd7ris/PJ9wuWeWyG95kolDy18kNaA51l70Yyuv+X6mifGMSWapt2TYSwCutRWq
+         uAbw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=QMQe2tqOpAVUKTveFHXq9bnPleopodnl0hV+CX/mlnw=;
-        b=o7CA7l1I/eWzvC0IHBhyfQqX+wvDIqeeVoHlu7gHb8Kct4P33nBX+S4i2bSCGiK23x
-         7seyZdg/dboW/WCo6wBMtI1n8RJmbuastCHwXCxCYNapQU6cLgtD3G446Ag1ZsyPVXb0
-         nhVxN3S0Y6ONWDHohW1wQvk+cZQlk0q0for97jBkwkGep/d/y0NUh4ZxkzWADLEgluYs
-         jkxVu9HuWOyP2d2pmQcSP763vC3qox62c/exUOwNfVlS0BaovT256teZQ9Y6WnZG8HV9
-         o1htCUCJR4jOjj6LsMPqw0MaHJp7YP1Hnq3D1DShxjA+WviZq1hZj9jOSOuZTU3bSjtc
-         RZvw==
-X-Gm-Message-State: AOAM530V3v153H2WCiIixTIEdJ7OJ/anH6O2FIraC0DFjtUssBxEHVyp
-        P0oegCKr07jO1MfkSkC4RgQy+anQ
-X-Google-Smtp-Source: ABdhPJwjTfniHZ6Z20gtjQypyFp3J5qHftXPJkLOmGVJ4eQ5yKZYszWKR3YABzJkpWFDvjKV9vnr7w==
-X-Received: by 2002:a17:906:40d7:: with SMTP id a23mr1720819ejk.421.1594679589011;
+        bh=YqptpQoyUU0nrCtw/BWlXLGY0AcY1EzlZpqEzaO1DR8=;
+        b=mjbQnqRMHlyNuttFymeo9yucVpiSHi0GwceTt7DZpipDQm6dy7MEPw6hh2NMO/noyc
+         KMlvN1SMDfydT7vFs/SblE0vhCDlphytSCji5fuer5rpwLwDqET2mFT+LLGqCAzX+wAE
+         tCbj0hIcIZ2t3PhlmxfaUMBZHmcGBf1D/eZizgBhSa4SKea0l3mS6pHdm9jZG7ab2iS6
+         Prb4ol5uekqiJe6YuQA+vWBleQ03/9OtzrksMvByNm2Fpb9sdodBmm4j3ZPK8r43UAok
+         Hq5GDcaq8vxHE4A5mKozDqT5GsqXe7yYgVt8/mxkERbzYXEcAivDs341HstkRZi277as
+         vJYw==
+X-Gm-Message-State: AOAM533N75mh26l981JOwJlHhKQatsjVLax/Cb0OB0vn83+JVPY0u6SA
+        fcerAs1xI6FMbQqv4mTNrkW7g2gx
+X-Google-Smtp-Source: ABdhPJyisr4G+UAkqpwESZsyMWVHA8V5ECbLIaBDHIq0EDrufSs+ZCg0cVSpI3mSspB+paiopJJ8YQ==
+X-Received: by 2002:a17:906:700f:: with SMTP id n15mr1890788ejj.390.1594679589792;
         Mon, 13 Jul 2020 15:33:09 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7f9:7600:64:f40c:5c10:8e2d])
-        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.08
+        by smtp.gmail.com with ESMTPSA id y7sm10792431ejd.73.2020.07.13.15.33.09
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2020 15:33:08 -0700 (PDT)
+        Mon, 13 Jul 2020 15:33:09 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/9] sparc: add 'sparcv8' predefines for sparc32
-Date:   Tue, 14 Jul 2020 00:32:55 +0200
-Message-Id: <20200713223304.83666-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/9] alpha: has 64-bit long double & int128
+Date:   Tue, 14 Jul 2020 00:32:56 +0200
+Message-Id: <20200713223304.83666-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
 References: <20200713223304.83666-1-luc.vanoostenryck@gmail.com>
@@ -76,74 +76,32 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-By default, the architecture version is 'v8' for sparc32
-and 'v9' for sparc64.
-The predefines were added for sparc64 but not for sparc32.
+Support for alpha was added in order to move the specific builtins
+away from the common list without changing the defaults.
 
-Fix this by adding a generic 'sparcv%d' together with a
-variable to hold the architecture version and initialize
-this one accordingly.
+Improve the support for this arch by fixing a few specificities:
+* support of 128-bit integers
+* long doubles are 64-bit.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- target-sparc.c | 19 ++++++++++++++++---
- 1 file changed, 16 insertions(+), 3 deletions(-)
+ target-alpha.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/target-sparc.c b/target-sparc.c
-index 865dbc8a2180..be4e968ec604 100644
---- a/target-sparc.c
-+++ b/target-sparc.c
-@@ -3,16 +3,25 @@
- #include "machine.h"
- 
- 
-+static int sparc_version;
+diff --git a/target-alpha.c b/target-alpha.c
+index 3f582997eb96..4c622aec194f 100644
+--- a/target-alpha.c
++++ b/target-alpha.c
+@@ -24,6 +24,9 @@ static const struct builtin_fn builtins_alpha[] = {
+ const struct target target_alpha = {
+ 	.mach = MACH_ALPHA,
+ 	.bitness = ARCH_LP64,
++	.has_int128 = 1,
 +
- static void predefine_sparc(const struct target *self)
- {
- 	predefine("__sparc__", 1, "1");
- 	predefine("__sparc", 1, "1");
- 	predefine_nostd("sparc");
-+
-+	predefine_weak("__sparc_v%d__", sparc_version);
-+	predefine_weak("__sparcv%d__", sparc_version);
-+	predefine_weak("__sparcv%d", sparc_version);
- }
++	.bits_in_longdouble = 64,
  
- 
- static void init_sparc32(const struct target *target)
- {
-+	if (!sparc_version)
-+		sparc_version = 8;
-+
- 	if (arch_os == OS_SUNOS) {
- 		wint_ctype = &long_ctype;
- 		wchar_ctype = &long_ctype;
-@@ -45,11 +54,14 @@ const struct target target_sparc32 = {
- };
- 
- 
-+static void init_sparc64(const struct target *target)
-+{
-+	if (!sparc_version)
-+		sparc_version = 9;
-+}
-+
- static void predefine_sparc64(const struct target *self)
- {
--	predefine("__sparc_v9__", 1, "1");
--	predefine("__sparcv9__", 1, "1");
--	predefine("__sparcv9", 1, "1");
- 	predefine("__sparc64__", 1, "1");
- 	predefine("__arch64__", 1, "1");
- 
-@@ -65,5 +77,6 @@ const struct target target_sparc64 = {
- 
- 	.target_32bit = &target_sparc32,
- 
-+	.init = init_sparc64,
- 	.predefine = predefine_sparc64,
- };
+ 	.predefine = predefine_alpha,
+ 	.builtins = builtins_alpha,
 -- 
 2.27.0
 
