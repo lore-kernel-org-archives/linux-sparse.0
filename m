@@ -8,67 +8,65 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 73C02C433E5
-	for <linux-sparse@archiver.kernel.org>; Tue, 14 Jul 2020 00:00:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E8EA1C433E0
+	for <linux-sparse@archiver.kernel.org>; Tue, 14 Jul 2020 21:43:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 54562208C3
-	for <linux-sparse@archiver.kernel.org>; Tue, 14 Jul 2020 00:00:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C138F206D9
+	for <linux-sparse@archiver.kernel.org>; Tue, 14 Jul 2020 21:43:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="KvAxA7EH"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EzuODihg"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726962AbgGNAAj (ORCPT
+        id S1727058AbgGNVn5 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 13 Jul 2020 20:00:39 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33206 "EHLO
+        Tue, 14 Jul 2020 17:43:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37830 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726364AbgGNAAi (ORCPT
+        with ESMTP id S1726710AbgGNVn5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 13 Jul 2020 20:00:38 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 37126C061794
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 17:00:38 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id d18so15339278edv.6
-        for <linux-sparse@vger.kernel.org>; Mon, 13 Jul 2020 17:00:38 -0700 (PDT)
+        Tue, 14 Jul 2020 17:43:57 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 07163C061755
+        for <linux-sparse@vger.kernel.org>; Tue, 14 Jul 2020 14:43:57 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id a21so39957ejj.10
+        for <linux-sparse@vger.kernel.org>; Tue, 14 Jul 2020 14:43:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=+7NKC35zYu/WqB4Ko2xyV3Qm+R140510PUYkaY2PzcU=;
-        b=KvAxA7EHps6UjjEOS+x0969Abjc+U4KMhHWcCoaLTsOKgFvOosAJ/DyzQ0MZG3u6Qs
-         ty7oP2WY1s15rh65P4JiMANJ2LMiUnXXq4Ml72HxfbiveIbySI3LTNWToyXRpeKHzwvi
-         b6KL/2faBf/ZtUz60NL/3lQlcZyftLaGa5jp231LDWox2wPVe3ahRI6SnQSgVYpfsZDa
-         h54r96lWPx46PUHgxZ89jaGZ6/dQP9upU2Dj7tAOKWRJftnBnFgNtihPrBuLkhUo/Izi
-         uVno3HIZQAxVlslDmTd5z8ziKbkXSCg+pPS5Ei3MxRw9Aot8n8XksUucVSKZ2GcglI3V
-         mzAA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZzxIMt2wFWdx5137XHFTBBx9SYUQFYeG+atOeVOoB5Y=;
+        b=EzuODihgg+S9lo5ynbumNjUcfY7ztXUcMVHcfErxXR3S49MfUvSyMCwHxPhaUowf4e
+         nMFPEGQRV3cvffbw/Q1yo4HIUKcfrd/xj+AjcABo6ZhMtFUD66J79yzfe8wOXthTbrQO
+         aqywWWVyqplrf8JvTdm+BBzeHn27b83Hl9CKY/yVUwFYw2niu7E6Phz7RvbTR7LTheL1
+         jSJkmX4s2mZeVM2jgaR7THT1OA4Xe9iPXin3+v9CiKq5Z5wh1VIKNF70kNpVWZ4life5
+         Mr8DjH8H3QYBs0vzoLr1PmZB8LLD2m7ieuLji+Py0e8zfJSRLDtoAW6XyEddgpvgfWEw
+         bcAg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=+7NKC35zYu/WqB4Ko2xyV3Qm+R140510PUYkaY2PzcU=;
-        b=sPZPRHd5R56kRTYm1pVPyXVtnCT9pe04iLQ2EwHYM3SD6o/njN5vydr+Gx4nQyMxa+
-         KngDq6UoxraS8ukUGRbG47U5G3QdhX6hYoBE0aZW1g3R62P6gPNmzcADGVduB31BklP9
-         eTPo+u6tJ8hMwmNKDlSDGIWYhLzu5S7m9QAvmrJVAd2g4sRCA0m0pPrsXIeDwnMzxyay
-         uw0iN6hk25vbFlRFFHsang+JTbZigONkN4dPbPRj7E3QytQ3iT6oiuebL4Zk64nPI65K
-         tP9V+QuHutOFCuAEL/XMS8M/p18F8czjL1Ym11klZIbMtL/iHJX6i4UUz49oYcdG9maW
-         tnHA==
-X-Gm-Message-State: AOAM5309LJRBuubfEdFwkeSkxdmOTTS2pYKjA5XFQlqzr6LkvTCtXTtc
-        fxk5yDnn7rPuY8gBM4NNbPRZMDhq
-X-Google-Smtp-Source: ABdhPJwMYWT2D6FyMkl32GGEn2Al8VdsRnBmfXGWnAtRHTdFiDd7yNDdc8DfUb9ap8zc25q9kukpcA==
-X-Received: by 2002:a50:cd1a:: with SMTP id z26mr1922899edi.120.1594684836788;
-        Mon, 13 Jul 2020 17:00:36 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:5931:bb22:b701:e8f6])
-        by smtp.gmail.com with ESMTPSA id z5sm7959443ejw.114.2020.07.13.17.00.36
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZzxIMt2wFWdx5137XHFTBBx9SYUQFYeG+atOeVOoB5Y=;
+        b=cPTUJYYp6mg3lBXEgP1yxeSxGhBhBi2sP6PFwwap4uxtCIOXwHokVmSQDGFXJ1yIHL
+         FRubVWAg1Le3cSkcdOyie8McoBpa9TpPnsIosi1hLrsWGLtapiYsA3m6zYsqF7T1A0v6
+         JzPHyj4YL2ig+B01tesYDcgxELGtHvJUYJTifdtQyWlWp+Ziu4kYvnfY3HxYkb1w7+mc
+         r+5f59PHdWOPihuOJVQwjvh1j+CVjfiblgiXd0RSIGdBouMwnnVrsbWwvDrblP+THeal
+         bMQjkpcfrLTy2dlKCPPp9F80xTz9dN45P4VwUr2nZvVhb018g4DWplGO5KmgpY+RGqWB
+         wiwA==
+X-Gm-Message-State: AOAM5327EXQs3oew74ygqjoT2aA9KreGmc3qR0JvhaPjUWdcu7nXNt9P
+        1nxUwI7QgU0Bh24rJUpLpUT+wXWB
+X-Google-Smtp-Source: ABdhPJy24E6YJgt+xMF2TYdl+hMdAvOUA2iAXRZXSaE0VLl1rayWnqhKPMvVgpfI+1kuWmP+pdQkmQ==
+X-Received: by 2002:a17:907:7245:: with SMTP id ds5mr6745723ejc.67.1594763035535;
+        Tue, 14 Jul 2020 14:43:55 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:5cd9:fc:d7bc:c84f])
+        by smtp.gmail.com with ESMTPSA id s13sm31921ejd.117.2020.07.14.14.43.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 13 Jul 2020 17:00:36 -0700 (PDT)
+        Tue, 14 Jul 2020 14:43:54 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/3] warn on empty initializations
-Date:   Tue, 14 Jul 2020 02:00:30 +0200
-Message-Id: <20200714000030.85886-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] syntax errors in numbers are not fatal
+Date:   Tue, 14 Jul 2020 23:43:51 +0200
+Message-Id: <20200714214351.14516-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
-In-Reply-To: <20200714000030.85886-1-luc.vanoostenryck@gmail.com>
-References: <20200714000030.85886-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: linux-sparse-owner@vger.kernel.org
@@ -76,45 +74,34 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Currently sparse accepts an empty initialization like:
-	int a = ;
+When parsing expressions, if an invalid number is reached, a fatal
+error is issued. But this is not the kind of error for which
+continuing the processing doesn't make sense, since the token
+was already categorized as a number during the tokenization.
 
-Make this an error.
+So, change the fatal error into a normal one (and set the value to 0).
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c                        | 5 ++++-
- validation/empty-initializer.c | 1 -
- 2 files changed, 4 insertions(+), 2 deletions(-)
+ expression.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/parse.c b/parse.c
-index a9222e7cbf08..d0a41b14b914 100644
---- a/parse.c
-+++ b/parse.c
-@@ -3117,7 +3117,10 @@ struct token *external_declaration(struct token *token, struct symbol_list **lis
+diff --git a/expression.c b/expression.c
+index 1160cd9cc593..02bb5b159d9f 100644
+--- a/expression.c
++++ b/expression.c
+@@ -379,7 +379,10 @@ Float:
+ 	return;
  
- 	for (;;) {
- 		if (!is_typedef && match_op(token, '=')) {
--			token = initializer(&decl->initializer, token->next);
-+			struct token *next = token->next;
-+			token = initializer(&decl->initializer, next);
-+			if (token == next)
-+				sparse_error(token->pos, "expression expected before '%s'", show_token(token));
- 		}
- 		if (!is_typedef) {
- 			if (validate_decl)
-diff --git a/validation/empty-initializer.c b/validation/empty-initializer.c
-index 0ca763f699a0..950679991401 100644
---- a/validation/empty-initializer.c
-+++ b/validation/empty-initializer.c
-@@ -2,7 +2,6 @@ static int i = ;		// KO
+ Enoint:
+-	error_die(expr->pos, "constant %s is not a valid number", show_token(token));
++	sparse_error(expr->pos, "constant %s is not a valid number", show_token(token));
++	expr->type = EXPR_VALUE;
++	expr->value = 0;
++	expr->ctype = &int_ctype;
+ }
  
- /*
-  * check-name: empty-initializer
-- * check-known-to-fail
-  *
-  * check-error-start
- empty-initializer.c:1:16: error: expression expected before ';'
+ static struct token *generic_selection(struct token *token, struct expression **tree)
 -- 
 2.27.0
 
