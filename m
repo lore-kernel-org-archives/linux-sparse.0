@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B2614C433E4
-	for <linux-sparse@archiver.kernel.org>; Thu, 23 Jul 2020 23:46:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 23E7DC433E0
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Jul 2020 23:46:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8645220792
-	for <linux-sparse@archiver.kernel.org>; Thu, 23 Jul 2020 23:46:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 02FAD20792
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Jul 2020 23:46:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Na4d6EvL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="YF/aHDIU"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728173AbgGWXqw (ORCPT
+        id S1728134AbgGWXqw (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Thu, 23 Jul 2020 19:46:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51094 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51098 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728134AbgGWXqv (ORCPT
+        with ESMTP id S1728162AbgGWXqv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Thu, 23 Jul 2020 19:46:51 -0400
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7365C0619E3
-        for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2020 16:46:50 -0700 (PDT)
-Received: by mail-ed1-x543.google.com with SMTP id d18so5755581edv.6
-        for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2020 16:46:50 -0700 (PDT)
+Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7EF6BC0619E4
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2020 16:46:51 -0700 (PDT)
+Received: by mail-ed1-x544.google.com with SMTP id a1so5731838edt.10
+        for <linux-sparse@vger.kernel.org>; Thu, 23 Jul 2020 16:46:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=JzwBVD/Z06tfecBn7ZNH+Tj6HQy0ne9RDaKa5mpt0rA=;
-        b=Na4d6EvLL76spa4NbWN2pveD9OqImCP1nHUTRyw4QD/rYWCvotokPvFiJcLSwnbHTz
-         LzEpjNn488f2m77OCo7jFVzkevMuIOFnO6yullyQRyJ5jzeffreGHzryLW0f76YAxDkK
-         iO0CK4jQekFFcq0oZoNmFFbxrRRScdRW/5FfaL9Df099W/eXr1Xf3JC+XLnjiXDZ5c6Y
-         VUOa8vYLF82UePXr/1tO9tF0nYBMUiCFIUCF0/GiZdciO+tSRMncqetMTtg9tTyoOlX1
-         1o0RS25qSsxnNpj09/2YNIX65J25QOP8zeWmvOMU7stUaEUYAJbrS6R+Ns4ZSr3e3bKb
-         +SqA==
+        bh=BbBhSbMkzlC0oTJ91E6fEcPBnqPn5hnAhobeToziTqk=;
+        b=YF/aHDIUYtguy9hUuxGUyHIedAxBPwHbP+cim1sdDQOCoESHK9t3aM26MlHuoFy4qC
+         voMXGaSonY6BgwBrRbZGDQglikyPNxJ5jnWaMv4jtPov0pyzCZs+JsAje8MX56kT3vrV
+         HT6QMkYdNEPKSJrZGJVbAmodINPNPa/xNst1OlKZ7sP9Fn8WchItA0bt7Emlt5/EVsgs
+         GOSYyqRux2YBYdpjqKXzBqbDd2DNhjfobiJnIk0H92UnbwdTqjxnKjKtzAynw4XvRyIy
+         33qwrLGA58mRO97inKYTLIiKR+JNZ1SbMZ55IkJR1h39ngcOf2m5Izt8TbFWO6jb54CX
+         dhlQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=JzwBVD/Z06tfecBn7ZNH+Tj6HQy0ne9RDaKa5mpt0rA=;
-        b=VQ+nD7oNGxqm2/avuNoJd5aL5fs/k840ehttJdndW9fG7Sxfk605BWS835wvvM1MV/
-         uUNtuPzpPA56UF7CQQe7HrspVye3OHPp+8eHv9KDBdJ0/GSDI2kTS7X0AxRPCkgTUv+w
-         kDEJF/M4moMTOSNJBSCVDbOa+wwop8g7X2R28lD8Rn0t0qi7zveb1Xdp0Fua+EW4QOtz
-         NGNMd26/W0tZbNPAVDPXLTmd8yuGbXanLkcGrDHu4BqPDXwMXgIQ+xEh/QFN9hZp8jKb
-         YqajEPulQMIXpG2K4k8BiFvpXebMbCqpt/f5E0kOysH+uVMlUdcfeOPZY8rN3feBnH+l
-         uiGg==
-X-Gm-Message-State: AOAM532ZJNM3LDuPsQeCcZ22ui1rzyUGnJVGG/co95Nppm6y3aC7c+I5
-        eapfqbQgPK8O2eqclf1LBDH6ZSmE
-X-Google-Smtp-Source: ABdhPJz8Ie+lvu1/CGz+MU9tDEbLf6+rUTPYOcrLuXohnYc/Y/hJI1Pn2fk0HIdsfPLqlTRXxr+iYQ==
-X-Received: by 2002:a50:d8c2:: with SMTP id y2mr6459893edj.114.1595548009160;
-        Thu, 23 Jul 2020 16:46:49 -0700 (PDT)
+        bh=BbBhSbMkzlC0oTJ91E6fEcPBnqPn5hnAhobeToziTqk=;
+        b=HgG6wEoV2nMPUrU3qnH/gwZIwJnzuHG3JOGBx1JQSi5VB4som4PwAry9YHfHccCG/L
+         lMzC9vwXmCN2lWqnhCwZlJQ5HLJTaH92crF0d7gA82Au7MXXuJg64wVxiu+VHfgkH3W3
+         prCL48ztoQpx0RHwkp/TijmN2FCWERbXwwhfTWCBAgnNM+MDyxV0biKxWSluWPEaZrzA
+         uCsMh/L/hrWV2TWXFyKtjWKXaJ7n0HWgWiJvSZPUi0fDjP5KPpbAnalrtif28w9+TtPV
+         LJA4VpDOvf6QRz9KPiUrT3tFLOEmBoO5obrETHUIRCCoeSox6jpqFaLMIZ+wsQMy+spV
+         ki7Q==
+X-Gm-Message-State: AOAM532s5R8JCIEKuHCcqL8mzq2U+zGcoG6Ku7IjmK/gsGImpjOWhWPo
+        fzqHWxERo77zCaOx1zfjqJtgYDB2
+X-Google-Smtp-Source: ABdhPJxJ7li3mSXZ6stOKBlxGxtZd9jyfU151HtLWhY7oaaRHVhfCg9WWh07vU0WxUOnJGpzZ14EFQ==
+X-Received: by 2002:aa7:d283:: with SMTP id w3mr6534326edq.76.1595548010072;
+        Thu, 23 Jul 2020 16:46:50 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:a981:5f61:c34f:8c32])
-        by smtp.gmail.com with ESMTPSA id bq8sm3086975ejb.103.2020.07.23.16.46.48
+        by smtp.gmail.com with ESMTPSA id bq8sm3086975ejb.103.2020.07.23.16.46.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 23 Jul 2020 16:46:48 -0700 (PDT)
+        Thu, 23 Jul 2020 16:46:49 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/6] simplify & fix parsing of array declarators
-Date:   Fri, 24 Jul 2020 01:46:39 +0200
-Message-Id: <20200723234641.78462-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/6] remove now unused match_idents()
+Date:   Fri, 24 Jul 2020 01:46:40 +0200
+Message-Id: <20200723234641.78462-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.27.0
 In-Reply-To: <20200723234641.78462-1-luc.vanoostenryck@gmail.com>
 References: <20200723234641.78462-1-luc.vanoostenryck@gmail.com>
@@ -76,99 +76,45 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Any type qualifier is valid inside an abstract-array-declarator
-but currently only 'restrict' is accepted. Also the parsing of
-this is somehow more complex than needed and done by comparing
-the identifiers instead of being driven by the keyword table.
+match_idents() is now unused and identifier matching should
+preferably be done via the keyword table.
 
-So, simplify & fix the parsing of these declarators by:
-1) using the keyword type KW_QUALIFIER to identify all type
-   qualifier at once.
-2) add a new keyword type just for 'static'
-3) folding the helper abstract_array_static_declarator() into
-   the main function: abstract_array_declarator().
+So, remove this function.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c                                      | 28 +++++++-------------
- symbol.h                                     |  2 +-
- validation/abstract-array-declarator-quals.c |  1 -
- 3 files changed, 11 insertions(+), 20 deletions(-)
+ parse.c | 18 ------------------
+ 1 file changed, 18 deletions(-)
 
 diff --git a/parse.c b/parse.c
-index 182f4ad30b9c..ec69e0c6e9ca 100644
+index ec69e0c6e9ca..c7ca3dce7f6b 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -171,7 +171,7 @@ static struct symbol_op register_op = {
- };
- 
- static struct symbol_op static_op = {
--	.type = KW_MODIFIER,
-+	.type = KW_MODIFIER|KW_STATIC,
- 	.declarator = static_specifier,
- };
- 
-@@ -1721,28 +1721,20 @@ static struct token *declaration_specifiers(struct token *token, struct decl_sta
- 	return token;
+@@ -678,24 +678,6 @@ static void fn_local_symbol(struct symbol *sym)
+ 		add_symbol(function_symbol_list, sym);
  }
  
--static struct token *abstract_array_static_declarator(struct token *token, int *has_static)
+-static int SENTINEL_ATTR match_idents(struct token *token, ...)
 -{
--	while (token->ident == &static_ident) {
--		if (*has_static)
--			sparse_error(token->pos, "duplicate array static declarator");
+-	va_list args;
+-	struct ident * next;
 -
--		*has_static = 1;
--		token = token->next;
--	}
--	return token;
+-	if (token_type(token) != TOKEN_IDENT)
+-		return 0;
 -
+-	va_start(args, token);
+-	do {
+-		next = va_arg(args, struct ident *);
+-	} while (next && token->ident != next);
+-	va_end(args);
+-
+-	return next && token->ident == next;
 -}
 -
- static struct token *abstract_array_declarator(struct token *token, struct symbol *sym)
- {
- 	struct expression *expr = NULL;
- 	int has_static = 0;
- 
--	token = abstract_array_static_declarator(token, &has_static);
 -
--	if (match_idents(token, &restrict_ident, &__restrict_ident, &__restrict___ident, NULL))
--		token = abstract_array_static_declarator(token->next, &has_static);
-+	while (token_type(token) == TOKEN_IDENT) {
-+		struct symbol *sym = lookup_keyword(token->ident, NS_TYPEDEF);
-+		if (!sym || !(sym->op->type & (KW_STATIC|KW_QUALIFIER)))
-+			break;
-+		if (has_static && (sym->op->type & KW_STATIC))
-+			sparse_error(token->pos, "duplicate array static declarator");
-+		has_static |= (sym->op->type & KW_STATIC);
-+		token = token->next;
-+	}
- 	token = assignment_expression(token, &expr);
- 	sym->array_size = expr;
- 	return token;
-diff --git a/symbol.h b/symbol.h
-index c2b60ce91c27..147306481c20 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -81,7 +81,7 @@ enum keyword {
- 	KW_BUILTIN	= 1 << 4,
- 	KW_ASM		= 1 << 5,
- 	KW_MODE		= 1 << 6,
--     // KW UNUSED	= 1 << 7,
-+	KW_STATIC	= 1 << 7,
-      // KW UNUSED	= 1 << 8,
- 	KW_EXACT	= 1 << 9,
- };
-diff --git a/validation/abstract-array-declarator-quals.c b/validation/abstract-array-declarator-quals.c
-index 85a35a2aca7c..e69df902b895 100644
---- a/validation/abstract-array-declarator-quals.c
-+++ b/validation/abstract-array-declarator-quals.c
-@@ -18,5 +18,4 @@ void ok7(int a[const volatile restrict static N]);
- 
- /*
-  * check-name: abstract-array-declarator-quals
-- * check-known-to-fail
-  */
+ struct statement *alloc_statement(struct position pos, int type)
+ {
+ 	struct statement *stmt = __alloc_statement(0);
 -- 
 2.27.0
 
