@@ -1,166 +1,134 @@
-Return-Path: <SRS0=kwZw=BJ=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=qc3T=BK=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.6 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DBE29C433E0
-	for <linux-sparse@archiver.kernel.org>; Thu, 30 Jul 2020 21:05:24 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 26CBEC433DF
+	for <linux-sparse@archiver.kernel.org>; Fri, 31 Jul 2020 14:43:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C07E02070B
-	for <linux-sparse@archiver.kernel.org>; Thu, 30 Jul 2020 21:05:24 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 02EC522B3F
+	for <linux-sparse@archiver.kernel.org>; Fri, 31 Jul 2020 14:43:08 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="CytbJRxy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728630AbgG3VFY (ORCPT
+        id S1728961AbgGaOnI (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 30 Jul 2020 17:05:24 -0400
-Received: from out03.mta.xmission.com ([166.70.13.233]:42858 "EHLO
-        out03.mta.xmission.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728153AbgG3VFY (ORCPT
+        Fri, 31 Jul 2020 10:43:08 -0400
+Received: from us-smtp-1.mimecast.com ([207.211.31.81]:48852 "EHLO
+        us-smtp-delivery-1.mimecast.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726353AbgGaOnI (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 30 Jul 2020 17:05:24 -0400
-Received: from in01.mta.xmission.com ([166.70.13.51])
-        by out03.mta.xmission.com with esmtps  (TLS1.2) tls TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-        (Exim 4.93)
-        (envelope-from <ebiederm@xmission.com>)
-        id 1k1Fju-001peC-EA; Thu, 30 Jul 2020 15:05:22 -0600
-Received: from ip68-227-160-95.om.om.cox.net ([68.227.160.95] helo=x220.xmission.com)
-        by in01.mta.xmission.com with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        (Exim 4.87)
-        (envelope-from <ebiederm@xmission.com>)
-        id 1k1Fjt-0002B6-Gz; Thu, 30 Jul 2020 15:05:22 -0600
-From:   ebiederm@xmission.com (Eric W. Biederman)
-To:     Alexey Gladkov <gladkov.alexey@gmail.com>
-Cc:     linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-References: <20200730132033.613554-1-gladkov.alexey@gmail.com>
-Date:   Thu, 30 Jul 2020 16:02:12 -0500
-In-Reply-To: <20200730132033.613554-1-gladkov.alexey@gmail.com> (Alexey
-        Gladkov's message of "Thu, 30 Jul 2020 15:20:33 +0200")
-Message-ID: <87d04c67jf.fsf@x220.int.ebiederm.org>
-User-Agent: Gnus/5.13 (Gnus v5.13) Emacs/26.1 (gnu/linux)
+        Fri, 31 Jul 2020 10:43:08 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1596206586;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=KpQYRFrcE8HXPYN3GrirZ8qI6AXFmUt2JnG65PGUoOM=;
+        b=CytbJRxy+ufSLRuuXoYtrc5M+D/KT3iWVC5E1AMctAWgMjq71TTm9DdQxcOT3+2/8PjiRW
+        wJ/GhXbTfoEbEUD2QNDbWjJmLXHjmEfbmbQ6e8W2iYG9zoo1T+BkJJKSWoO2moKeSsmoNa
+        X8H0t/xkqO05A3ZgjzmIYWOGXtUKxPc=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-459-GGN-8ZaINu-obGHPbJEppw-1; Fri, 31 Jul 2020 10:43:04 -0400
+X-MC-Unique: GGN-8ZaINu-obGHPbJEppw-1
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A766B8015F7;
+        Fri, 31 Jul 2020 14:43:03 +0000 (UTC)
+Received: from dhcp-27-174.brq.redhat.com (unknown [10.40.192.196])
+        by smtp.corp.redhat.com (Postfix) with SMTP id 9C3AE7C0E0;
+        Fri, 31 Jul 2020 14:43:02 +0000 (UTC)
+Received: by dhcp-27-174.brq.redhat.com (nbSMTP-1.00) for uid 1000
+        oleg@redhat.com; Fri, 31 Jul 2020 16:43:03 +0200 (CEST)
+Date:   Fri, 31 Jul 2020 16:43:01 +0200
+From:   Oleg Nesterov <oleg@redhat.com>
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Alexey Gladkov <gladkov.alexey@gmail.com>,
+        linux-sparse@vger.kernel.org
+Subject: Re: [PATCH] dissect: add support for _Generic
+Message-ID: <20200731144300.GB13775@redhat.com>
+References: <20200728183507.422662-1-gladkov.alexey@gmail.com>
+ <20200728194937.GA2467@redhat.com>
+ <20200728231058.3yakpfw3dqslxq5t@ltop.local>
+ <20200729112801.GA4360@redhat.com>
+ <20200729145025.g26jqfpqcnhd5wed@ltop.local>
+ <20200730150837.GA6956@redhat.com>
+ <20200730200046.qsbaw4iabb4idjly@ltop.local>
 MIME-Version: 1.0
-Content-Type: text/plain
-X-XM-SPF: eid=1k1Fjt-0002B6-Gz;;;mid=<87d04c67jf.fsf@x220.int.ebiederm.org>;;;hst=in01.mta.xmission.com;;;ip=68.227.160.95;;;frm=ebiederm@xmission.com;;;spf=neutral
-X-XM-AID: U2FsdGVkX1/fmdB5dXTEvCFJN4DsdaH9gR6PHr962w8=
-X-SA-Exim-Connect-IP: 68.227.160.95
-X-SA-Exim-Mail-From: ebiederm@xmission.com
-Subject: Re: [PATCH v1] sindex: allow indexing outside the project tree
-X-SA-Exim-Version: 4.2.1 (built Thu, 05 May 2016 13:38:54 -0600)
-X-SA-Exim-Scanned: Yes (on in01.mta.xmission.com)
+In-Reply-To: <20200730200046.qsbaw4iabb4idjly@ltop.local>
+User-Agent: Mutt/1.5.24 (2015-08-30)
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.13
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Alexey Gladkov <gladkov.alexey@gmail.com> writes:
+On 07/30, Luc Van Oostenryck wrote:
+>
+> On Thu, Jul 30, 2020 at 05:08:37PM +0200, Oleg Nesterov wrote:
+> > On 07/29, Luc Van Oostenryck wrote:
+> > > The returned type will just be
+> > > quite arbitrary, but I don't know how much it matters.
+> >
+> > Of course. And this is not good. For example:
+> >
+> > 	void func(void)
+> > 	{
+> > 		struct B *b; struct C *c; struct D *d;
+> > 		_Generic(a,
+> > 			int:		b,
+> > 			void*:		c,
+> > 			default:	d
+> > 		) ->mem++;
+> > 	}
+> >
+> > output:
+> >
+> >    1:6                    def   f func                             void ( ... )
+> >    3:18  func             def . v b                                struct B *
+> >    3:31  func             def . v c                                struct C *
+> >    3:44  func             def . v d                                struct D *
+> >    4:18  func             ---   v a                                bad type
+> >    5:33  func             --m . v b                                struct B *
+> >    6:33  func             --m . v c                                struct C *
+> >    7:33  func             --m . v d                                struct D *
+> >    8:11  func             -m-   m D.mem                            bad type
+> >
+> > But I do not know how to improve it without serious complications, and
+>
+> Are you thinking about calling evaluate_symbol_list()
 
-> One possible way to compile the linux kernel is by using the O=<DIR>
-> parameter to place all generated files outside the source tree.
->
-> Prior to this patch, sindex filters processed sources to exclude system
-> files. The base directory of the project was the current directory.
->
-> When compiled outside of the source tree, this may not be the case.
-> This patch adds a parameter and an environment variable to specify
-> the source tree.
->
-> You can use it like this:
->
-> $ make O=$PWD-build C=2 CHECK="sindex -B $PWD add --"
->
-> This parameter is also needed for searching if you want to display
-> the source code line because sindex does not store lines in the database
-> but reads them from source files.
+I meant, it is not simple to teach dissect() to handle this case correctly.
+It understand the types, but for example it doesn't even try to distinguish
+"int" and "float".
 
-Tested-by: "Eric W. Biederman" <ebiederm@xmission.com>
+And I would like to avoid evaluate_expression/etc.
 
-This simple little example search now works for me:
+> or about
+> something else?
 
-sindex --database=$PWD-build/sindex.sqlite search -m w task_struct.pid 
+And something else. See the example above, this code is incomplete and in this
+case evaluate can't help. Ideally dissect should also report the (possible) usage
+of B.mem and C.mem.
 
-> Signed-off-by: Alexey Gladkov <gladkov.alexey@gmail.com>
-> ---
->  sindex.c | 21 +++++++++++++++++----
->  1 file changed, 17 insertions(+), 4 deletions(-)
+> > (so far) I think it doesn't worth the effort.
 >
-> diff --git a/sindex.c b/sindex.c
-> index 22836a95..bff6d8c4 100644
-> --- a/sindex.c
-> +++ b/sindex.c
-> @@ -101,11 +101,13 @@ static void show_help(int ret)
->  	    "\n"
->  	    "Options:\n"
->  	    "  -D, --database=FILE    Specify database file (default: %2$s);\n"
-> +	    "  -B, --basedir=DIR      Define project top directory (default is the current directory);\n"
->  	    "  -v, --verbose          Show information about what is being done;\n"
->  	    "  -h, --help             Show this text and exit.\n"
->  	    "\n"
->  	    "Environment:\n"
->  	    "  SINDEX_DATABASE        Database file location.\n"
-> +	    "  SINDEX_BASEDIR         Project top directory.\n"
->  	    "\n"
->  	    "Report bugs to authors.\n"
->  	    "\n",
-> @@ -125,9 +127,6 @@ static void show_help_add(int ret)
->  	    "  -v, --verbose          Show information about what is being done;\n"
->  	    "  -h, --help             Show this text and exit.\n"
->  	    "\n"
-> -	    "Environment:\n"
-> -	    "  SINDEX_BASEDIRE        Project top directory.\n"
-> -	    "\n"
->  	    "Report bugs to authors.\n"
->  	    "\n",
->  	    progname);
-> @@ -251,21 +250,26 @@ static void parse_cmdline(int argc, char **argv)
->  {
->  	static const struct option long_options[] = {
->  		{ "database", required_argument, NULL, 'D' },
-> +		{ "basedir", required_argument, NULL, 'B' },
->  		{ "verbose", no_argument, NULL, 'v' },
->  		{ "help", no_argument, NULL, 'h' },
->  		{ NULL }
->  	};
->  	int c;
-> +	char *basedir = getenv("SINDEX_BASEDIR");
->  	char *env;
->  
->  	if ((env = getenv("SINDEX_DATABASE")) != NULL)
->  		sindex_dbfile = env;
->  
-> -	while ((c = getopt_long(argc, argv, "+D:vh", long_options, NULL)) != -1) {
-> +	while ((c = getopt_long(argc, argv, "+B:D:vh", long_options, NULL)) != -1) {
->  		switch (c) {
->  			case 'D':
->  				sindex_dbfile = optarg;
->  				break;
-> +			case 'B':
-> +				basedir = optarg;
-> +				break;
->  			case 'v':
->  				sindex_verbose++;
->  				break;
-> @@ -278,6 +282,12 @@ static void parse_cmdline(int argc, char **argv)
->  		message("command required");
->  		show_usage();
->  	}
-> +
-> +	if (basedir) {
-> +		if (!realpath(basedir, cwd))
-> +			sindex_error(1, errno, "unable to get project base directory");
-> +		n_cwd = strlen(cwd);
-> +	}
->  }
->  
->  static void parse_cmdline_add(int argc, char **argv)
-> @@ -1016,6 +1026,9 @@ static void command_search(int argc, char **argv)
->  	char *dberr = NULL;
->  	sqlite3_str *query = sqlite3_str_new(sindex_db);
->  
-> +	if (chdir(cwd) < 0)
-> +		sindex_error(1, errno, "unable to change directory: %s", cwd);
-> +
->  	if (query_appendf(query,
->  	                  "SELECT"
->  	                  " file.name,"
+> Yes, _Generic() clearly makes things a bit more complicated here.
+> Same for __auto_type,
+
+Yes, but hopefully dissect needs much more simple changes to handle __auto_type.
+
+Thanks,
+
+Oleg.
+
