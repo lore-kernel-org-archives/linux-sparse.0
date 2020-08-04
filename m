@@ -7,95 +7,116 @@ X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A49B2C433DF
-	for <linux-sparse@archiver.kernel.org>; Tue,  4 Aug 2020 20:02:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 832F6C433E0
+	for <linux-sparse@archiver.kernel.org>; Tue,  4 Aug 2020 20:25:51 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 89EDF20842
-	for <linux-sparse@archiver.kernel.org>; Tue,  4 Aug 2020 20:02:06 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 655BC206D8
+	for <linux-sparse@archiver.kernel.org>; Tue,  4 Aug 2020 20:25:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J2KYWiXu"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="crdZWV5E"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725981AbgHDUCG (ORCPT
+        id S1726859AbgHDUZv (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 4 Aug 2020 16:02:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52104 "EHLO
+        Tue, 4 Aug 2020 16:25:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55812 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725922AbgHDUCG (ORCPT
+        with ESMTP id S1726568AbgHDUZu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 4 Aug 2020 16:02:06 -0400
-Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C835FC06174A
-        for <linux-sparse@vger.kernel.org>; Tue,  4 Aug 2020 13:02:05 -0700 (PDT)
-Received: by mail-ed1-x529.google.com with SMTP id bs17so12042855edb.1
-        for <linux-sparse@vger.kernel.org>; Tue, 04 Aug 2020 13:02:05 -0700 (PDT)
+        Tue, 4 Aug 2020 16:25:50 -0400
+Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3547DC06174A
+        for <linux-sparse@vger.kernel.org>; Tue,  4 Aug 2020 13:25:50 -0700 (PDT)
+Received: by mail-ed1-x544.google.com with SMTP id l23so17129262edv.11
+        for <linux-sparse@vger.kernel.org>; Tue, 04 Aug 2020 13:25:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=DXCLE5mc0n5Czq37GHUE6F5f7JCJxIYV87enNbiw78o=;
-        b=J2KYWiXu+Gb9eHJ9u5rZ1dfp//t1DmKpT0sg3r39vQrZ49qf/fQA2K908PgxCwHbMR
-         NiUg5O8rNOZ6o2hkHBAUUGzVeLK0wdJJXzdodmcUxJAqusy2c4tDAwtf8k9BMJga4uUY
-         SCI3yVAGkt5/43lf/DLtPIQX+ZEpiekbZ4yIThIz4u5g9Ec2E/Y3qIjdopQ7L8fiWl7y
-         Fk0492Uif0AH39WcBxxAqQZioIQG1bR7zc2uhedMrcDCrFBylNQGlZABuMLOD6xhGAdq
-         7AAbxffSt8dfATgwxY5UWFusu9SQg+la6whdHFUTNbn7flM8TKfuzd7Jd3vifPDAjqWf
-         ZLLA==
+        bh=5G5qgEosHt+RiJ9HCVv7XSYAagR/WidQQrAJSs0ZDkk=;
+        b=crdZWV5E+ctUBAlflXFfH7jhpSmL8TY9LZwGy3MYywcpn8mL10K7RgpgVmmtJlHqdJ
+         I6gLLSiSFvqLBn9p2BhLmYp0zCd/77DYdp+plyGBjRIKVlzv3VhtNQmUMqdyWeX5RlCl
+         z8XU7RBB3CrFvReDxXt4jZZ0QWr++mGIUtWVr4MaeNvMnQ7SwRnV2hbvEN4bsSIJBC7z
+         EmJ0XvOLvsrteX9JPVh4Wnbw0HHqk2TcNFh9wbUlCVlNCRj24mnUuF/0tv0hU8ayPAyT
+         pCtf4YI6a+HuVxl1JJObiYep319qzk8F67a/5Or9zucSZ5+XVdiTbWaUrSv6f4UHR2Up
+         J0NA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=DXCLE5mc0n5Czq37GHUE6F5f7JCJxIYV87enNbiw78o=;
-        b=LIirXZcd2wNOlZqzgJuAUfn5j+qj2cw36jWmftUUGK4jR1Z78zocLBDBCbu1nmPNSJ
-         QZ/Zej8xZdY4bUWfeHzhIP2wkDcwAns2J4xbycI68VZSapfnRA8pKcush3cAJIxFCGXP
-         ag8Ca2qGhgpJuhTqz4pdeLaC2rOK20DyWlFYDKxP7rXk5uFbLMzJ9s8LYl/32/Vejhd5
-         KEgsXrLEY5EcNKeSG0mDHqV7C2bkGnxWQsrCXNimkIEYcOKH8TBQ3BwKjWXvHC9WtQWG
-         Bh2cdVi4phwCX9qtzIvqKDpNtsJboY8Trh4+Exe4uLWEVh0TxkrFytrXs9B5QXqM5My0
-         N61A==
-X-Gm-Message-State: AOAM533jFtUUpD4UGqa47AEK42wFZZQf9XOUkUmRmXp5i4Zdj0ynngPY
-        v7I/ZN/RmNVuiRfkCELvU1E=
-X-Google-Smtp-Source: ABdhPJzKoVKYhMv8/adBqnk5CqbrtTwJXzX2U3x6UsWa91UA2K1xU9aExNvNzwxpxwZV52r4FBGrEQ==
-X-Received: by 2002:aa7:dd49:: with SMTP id o9mr22457898edw.92.1596571323593;
-        Tue, 04 Aug 2020 13:02:03 -0700 (PDT)
+        bh=5G5qgEosHt+RiJ9HCVv7XSYAagR/WidQQrAJSs0ZDkk=;
+        b=dZTFgiENalIOVkrRHNLsEPsM2MnGwEHQJRAIAAXiG3u+o81V8oKa79UdhI6t7hpFjW
+         juMVNNac48729dCdAPeCU9hqL0h48wRwgUP/COoBpNKZlMb4qcED08NpT2KCjJyXYYDW
+         ihE1qXIwOUlzkOIuHD7bv2MWY2PRtFrC/sjba6GlktLmNfyHYtEHZ+ZhoSPTMvvvY6l+
+         jxrdDkmt67SCyP2kmeOmVGodv6DYK1zuIKetYcP4QPZNvOe7s1XcV/un3lxslexJgbtn
+         2tgVT77eql5QcwX0v2uEh3mwY1BI8rb53ZHMIDiXNFYRs6ScCo1VG0u09R4VmKwTjB2N
+         gvkw==
+X-Gm-Message-State: AOAM531hxtfi4kPQvaHPvmTxrc5653m6x5g+bWq0gWHHgGLTBiPDZCaK
+        IVTxxMBQuU9EKn6kXRdaI75zpPC6
+X-Google-Smtp-Source: ABdhPJzmH+1QrHn9O5MKmU9IBTOAYHFLBlTy3ual6ruDivB8DYe5HF0H7FxvLO+jxjFRMzNx5yYVCQ==
+X-Received: by 2002:aa7:da46:: with SMTP id w6mr18881659eds.7.1596572748843;
+        Tue, 04 Aug 2020 13:25:48 -0700 (PDT)
 Received: from ltop.local ([2a02:a03f:a7fb:e200:d068:a44f:fa3b:62da])
-        by smtp.gmail.com with ESMTPSA id g10sm19044691ejm.120.2020.08.04.13.02.01
+        by smtp.gmail.com with ESMTPSA id o7sm33985edq.53.2020.08.04.13.25.48
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 04 Aug 2020 13:02:02 -0700 (PDT)
-Date:   Tue, 4 Aug 2020 22:02:01 +0200
+        Tue, 04 Aug 2020 13:25:48 -0700 (PDT)
+Date:   Tue, 4 Aug 2020 22:25:47 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Alexey Gladkov <gladkov.alexey@gmail.com>
-Cc:     Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= / sparse 
-        <gitlab+9b7df497d06cab14c2bf3c1022d8ca15@salsa.debian.org>,
-        linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>
-Subject: Re: sparse | upgrade to upstream v0.6.2 (!2)
-Message-ID: <20200804200201.enysyyt6vo3l5ggl@ltop.local>
-References: <reply-9b7df497d06cab14c2bf3c1022d8ca15@salsa.debian.org>
- <merge_request_28506@salsa.debian.org>
- <note_185002@salsa.debian.org>
- <note_185155@salsa.debian.org>
- <20200802213035.w7bexg4zdusr25xf@ltop.local>
- <20200803145308.o2y4mln5fzlgdr4v@comp-core-i7-2640m-0182e6>
- <20200804163812.l2njaeyo7fcsbogt@comp-core-i7-2640m-0182e6>
+To:     Stafford Horne <shorne@gmail.com>
+Cc:     linux-sparse@vger.kernel.org
+Subject: Re: Issue with inline functions and switch statements
+Message-ID: <20200804202547.vqeihhonjsikxtio@ltop.local>
+References: <20200803142903.GK80756@lianli.shorne-pla.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200804163812.l2njaeyo7fcsbogt@comp-core-i7-2640m-0182e6>
+In-Reply-To: <20200803142903.GK80756@lianli.shorne-pla.net>
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Tue, Aug 04, 2020 at 06:38:12PM +0200, Alexey Gladkov wrote:
-> Don't get me wrong, I don't mind renaming the utility. This is a good
-> short term solution but to be honest I don't like the name 'sparse-sindex'
-> because it is very long.
+On Mon, Aug 03, 2020 at 11:29:03PM +0900, Stafford Horne wrote:
+> Hello,
 
-I also think 'sparse-sindex' would be a bad name for anything
-but this 'very-short-term-solution-for-this-package'.
+Hi,
+ 
+> I am the maintainer of the OpenRISC architecture linux port, and recently have
+> started to look at the kbuild sparse errors.
+> 
+> The Linux kernel kbuild process is reporting sparse error:
+> 
+>    net/dccp/proto.c: note: in included file (through include/asm-generic/atomic.h, arch/openrisc/include/asm/atomic.h, include/linux/atomic.h, ...):
+>    arch/openrisc/include/asm/cmpxchg.h:101:29: sparse: sparse: shift too big (32) for type int
+> 
+> Example: https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2256733.html
+> 
+> I have traced this down to the case like the below.
+> 
+> It reports an unexpected warning:
+> 
+>    simple_test.c:7:18: warning: shift too big (32) for type int
+> 
+> This is not pssible because size = 4 should never call shift_small.
+> 
+> I have debugged sparse when this is running and it seems that when checking the switch
+> cases it evaluates all cases, and thinks size = 4 is possible.  I am not sure if this
+> is a problem with the sparse front end of the check logic.
+> 
+> Can you help?
 
-> Can we think of something shorter ?
+Sure. The problem is sparse sees the expression '1 << (4 * 8)' 
+and warns about it before it can know it will never be evaluated.
+The exact same problem happens with an even simpler example:
+	int foo(void)
+	{
+		return 0;
+		return 1 << 32;
+	}
 
-Yes, of course. Propose anything. You're the author of this tool,
-as such I consider that you have full moral rights on it, including
-its name.  It's really up to you.
+I have an old series for this problem, I would just need to dust off.
+It shouldn't take much time, probably just a few days, maximum 10
+(but I vaguely remember there was a nasty complication, which is
+why it's still pending).
 
 Best regards,
 -- Luc
