@@ -2,97 +2,76 @@ Return-Path: <SRS0=17k7=BP=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,DKIM_ADSP_CUSTOM_MED,
+	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C863C433DF
-	for <linux-sparse@archiver.kernel.org>; Wed,  5 Aug 2020 19:58:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D9F9C433E0
+	for <linux-sparse@archiver.kernel.org>; Wed,  5 Aug 2020 20:13:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1354C22CA0
-	for <linux-sparse@archiver.kernel.org>; Wed,  5 Aug 2020 19:58:36 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kn3mOjzG"
+	by mail.kernel.org (Postfix) with ESMTP id 5B3D422B42
+	for <linux-sparse@archiver.kernel.org>; Wed,  5 Aug 2020 20:13:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727842AbgHET6f (ORCPT
+        id S1727022AbgHEUNY (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 5 Aug 2020 15:58:35 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48552 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729703AbgHET6b (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 5 Aug 2020 15:58:31 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DB10AC061575
-        for <linux-sparse@vger.kernel.org>; Wed,  5 Aug 2020 12:58:30 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id qc22so32938749ejb.4
-        for <linux-sparse@vger.kernel.org>; Wed, 05 Aug 2020 12:58:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=Cpe7PWUIXDxcwwXs6oe9FZfyyAUB0Go8L3Ngj344DuY=;
-        b=kn3mOjzGKernompHjiNB6kp3Wt37YgFZ0R6IcaMfln/sCdFgya5S3bUz21czicPUfH
-         wsHp58Ck2zWYKi8x6dOIptmqhz09p8x1VAJYmH+ta5RowivzvM5pt51l5rsu++ByiEds
-         sXFrUuQ1YBuIFwo3pwBSlYKR4HzMeJ7ZR5gheX3zU3lQvAtNzB3AKawRmaN7jQwQzz7g
-         XGsLYDnvOjJ9U8/Ha8L26SsiRhroWXQaF3dwcH2KUzOg7zaISdZTizAlU6R1cKyewQ4p
-         3NogSj0Vy5pRGdMa3eCkST1rGHzau2kpfnm5KU4JZIClvKLVmUkxAJpbM3HoyAZkAW7j
-         nFkA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Cpe7PWUIXDxcwwXs6oe9FZfyyAUB0Go8L3Ngj344DuY=;
-        b=oHf/6HoiaU2MS2KhvMGxkcORs2beKHbOWE2rKNFYN3lQVEQnwKqJ6fzR11jcGRuFmd
-         dvQHYWVvl0lTBC0sgXZKM4C9M/4Ph5QVE+I/7RWK4xof9R9ZlL4MBbMZeUitod2JQhcx
-         hXEngnMZu6X5Gsrkm+K1d4Yd3xRXAZluQYMzJ8ji/0kOjVv+0wWtBAE3LBl4uwc8PHJg
-         mbkCuYOsBMMc3r5TvUmIJwNYPhZ3VPudsVVEL3lenjwo3QIg6/b8u/mqKQxcOGbDrAQa
-         rSJRVQEb3tRBv054YAI+/Xe0E6feDBoqOnx1ytGAEBtWZ4xVBJ5IW38ZRhjDN2VFuuux
-         iGuA==
-X-Gm-Message-State: AOAM533OkV0FqU7/evkGutSfa6P9O+z4jYLg/DGhFnYOVrXAM15/zmM+
-        d24Xy3I3u/u4gc5+dmJ3Nam/V2HI
-X-Google-Smtp-Source: ABdhPJzlzDsdeHCvIoGXrlwYQ8wc4Fvcbqzp042m7SWuJiJmZAezr5MLRYaZQc5MNmwr5XMRwf1wTQ==
-X-Received: by 2002:a17:907:41dc:: with SMTP id og20mr971140ejb.183.1596657505673;
-        Wed, 05 Aug 2020 12:58:25 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:a7fb:e200:917a:43b0:ff2a:9935])
-        by smtp.gmail.com with ESMTPSA id m12sm2008028edv.94.2020.08.05.12.58.24
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 05 Aug 2020 12:58:24 -0700 (PDT)
-Date:   Wed, 5 Aug 2020 21:58:23 +0200
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Alexey Gladkov <gladkov.alexey@gmail.com>
-Cc:     linux-sparse@vger.kernel.org,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+        Wed, 5 Aug 2020 16:13:24 -0400
+Received: from raptor.unsafe.ru ([5.9.43.93]:41888 "EHLO raptor.unsafe.ru"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726802AbgHEQXz (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 5 Aug 2020 12:23:55 -0400
+Received: from comp-core-i7-2640m-0182e6 (ip-89-102-33-211.net.upcbroadband.cz [89.102.33.211])
+        (using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits))
+        (No client certificate requested)
+        by raptor.unsafe.ru (Postfix) with ESMTPSA id 520FC209AB;
+        Wed,  5 Aug 2020 10:16:46 +0000 (UTC)
+Date:   Wed, 5 Aug 2020 12:16:44 +0200
+From:   Alexey Gladkov <gladkov.alexey@gmail.com>
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= / sparse 
+        <gitlab+9b7df497d06cab14c2bf3c1022d8ca15@salsa.debian.org>,
+        linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>
 Subject: Re: sparse | upgrade to upstream v0.6.2 (!2)
-Message-ID: <20200805195823.uwidzoysnfvfinqm@ltop.local>
-References: <note_185453@salsa.debian.org>
- <note_185458@salsa.debian.org>
- <note_185460@salsa.debian.org>
- <note_185461@salsa.debian.org>
- <note_185530@salsa.debian.org>
- <note_185532@salsa.debian.org>
- <20200805110418.iutr56vyewhbqr7v@ltop.local>
- <20200805112141.ier2xkhm5sqjtbck@comp-core-i7-2640m-0182e6>
- <20200805152026.djv66eopgsgrtqyk@ltop.local>
- <20200805154449.jya7d45vfoi4eea6@comp-core-i7-2640m-0182e6>
+Message-ID: <20200805101644.thiecht24afwoxxe@comp-core-i7-2640m-0182e6>
+References: <reply-9b7df497d06cab14c2bf3c1022d8ca15@salsa.debian.org>
+ <merge_request_28506@salsa.debian.org>
+ <note_185002@salsa.debian.org>
+ <note_185155@salsa.debian.org>
+ <20200802213035.w7bexg4zdusr25xf@ltop.local>
+ <20200803145308.o2y4mln5fzlgdr4v@comp-core-i7-2640m-0182e6>
+ <20200804163812.l2njaeyo7fcsbogt@comp-core-i7-2640m-0182e6>
+ <20200804200201.enysyyt6vo3l5ggl@ltop.local>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20200805154449.jya7d45vfoi4eea6@comp-core-i7-2640m-0182e6>
+In-Reply-To: <20200804200201.enysyyt6vo3l5ggl@ltop.local>
+X-Greylist: Sender succeeded SMTP AUTH, not delayed by milter-greylist-4.6.1 (raptor.unsafe.ru [5.9.43.93]); Wed, 05 Aug 2020 10:16:46 +0000 (UTC)
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Aug 05, 2020 at 05:44:49PM +0200, Alexey Gladkov wrote:
-> On Wed, Aug 05, 2020 at 05:20:26PM +0200, Luc Van Oostenryck wrote:
-> > 
-> > Excellent.
-> > Can I apply the attached patch with your signoff and you as author?
+On Tue, Aug 04, 2020 at 10:02:01PM +0200, Luc Van Oostenryck wrote:
+> On Tue, Aug 04, 2020 at 06:38:12PM +0200, Alexey Gladkov wrote:
+> > Don't get me wrong, I don't mind renaming the utility. This is a good
+> > short term solution but to be honest I don't like the name 'sparse-sindex'
+> > because it is very long.
 > 
-> Sure.
+> I also think 'sparse-sindex' would be a bad name for anything
+> but this 'very-short-term-solution-for-this-package'.
+> 
+> > Can we think of something shorter ?
+> 
+> Yes, of course. Propose anything. You're the author of this tool,
+> as such I consider that you have full moral rights on it, including
+> its name.  It's really up to you.
 
-Thanks. I just pushed it upstream.
+Oh my ... You are asking to come up with a new name for a person whose
+fantasy is the same as that of a stone :)
 
--- Luc 
+I like Oleg's idea. Let's call the utility 'dissect' if it's not already
+in use.
+
+-- 
+Rgrds, legion
+
