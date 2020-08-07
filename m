@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3DD28C433DF
-	for <linux-sparse@archiver.kernel.org>; Fri,  7 Aug 2020 20:45:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 623BDC433E1
+	for <linux-sparse@archiver.kernel.org>; Fri,  7 Aug 2020 20:45:15 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1DCF52177B
-	for <linux-sparse@archiver.kernel.org>; Fri,  7 Aug 2020 20:45:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3F2F62177B
+	for <linux-sparse@archiver.kernel.org>; Fri,  7 Aug 2020 20:45:15 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EM+cZh8o"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OTzNAB8N"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728469AbgHGUpN (ORCPT
+        id S1728479AbgHGUpP (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 7 Aug 2020 16:45:13 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46658 "EHLO
+        Fri, 7 Aug 2020 16:45:15 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728479AbgHGUpN (ORCPT
+        with ESMTP id S1728481AbgHGUpO (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 7 Aug 2020 16:45:13 -0400
+        Fri, 7 Aug 2020 16:45:14 -0400
 Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 473C9C061757
-        for <linux-sparse@vger.kernel.org>; Fri,  7 Aug 2020 13:45:13 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id m19so3371132ejd.8
-        for <linux-sparse@vger.kernel.org>; Fri, 07 Aug 2020 13:45:13 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5C7A3C061756
+        for <linux-sparse@vger.kernel.org>; Fri,  7 Aug 2020 13:45:14 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id a26so3402032ejc.2
+        for <linux-sparse@vger.kernel.org>; Fri, 07 Aug 2020 13:45:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=5wNdu1/DOW8/XoVW/DK2D8C8Zj8Bf0PQgzDE0AvkqKI=;
-        b=EM+cZh8o0OY6lIbz3Jd1hVzrmCh6lyZBwZuTcksNY4ZyCfZqmd9waPfLxz6chqoq/m
-         hms5Xq3STwR4OGvflsAcK1Ll3eS1/rka8nUU+hBZmEnRnOsqnnk/vBSF7jqkew3l00rh
-         HeFCITgg2u77nmNfR/sLe9ztwzBAeZIrSVmgE9w4PskMgZe2MT6U9JzDojBuRgUISffK
-         hFvAo2QMKkxzPg/m3X9WABJlV1jCLFdzJQk/pJzauSG3G0l74nV17p1v7OLsoxOt/BMx
-         FxXbu3OBc7faIkAtoAFaIxG91eiGrMX37H9XumbR9mvBJV1PR+eOW8yelHLi8Cg3ofs8
-         m/EA==
+        bh=yabDseEFwoeIWFsjEprp8Old7fvi4uHYQ6vv3rBmhIQ=;
+        b=OTzNAB8NtWUYRwK9a90sL/PDaFLFA+YyY+JoraNG6CAw/uF3WCcFFupoVObMaZERSf
+         V0zN1n89S9DAJ4SZS6zrJcNaqe1NShuDMdaX9dH3VYhZ6XDE6bV45rlUPKeZW3MzJv5l
+         ryNTtRGHC1qh5fwX7oj0nvJFNDfYP0uPGnXCrlLTqoLICSAgjSEy1SWqYQk6hbWwgPb5
+         2XZpu+6kGGj25x+IuyEdUzLNeJfs3qRsjNaJsYHyPSXp6m7rwZLvsbVsKwtuxSxB+BjL
+         aEWOxCp5j1bcg7uEJYAy5BJWn04XtMslIrkkkD5s23SInqCriLhGbGEmDwT5OyMk5vHd
+         57fA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=5wNdu1/DOW8/XoVW/DK2D8C8Zj8Bf0PQgzDE0AvkqKI=;
-        b=mCAkKSAzzJgaHhgYY0Y9kAgGZ3LLTbhZhDvpAu5IGrOPj0/W6KFHvphOLUoAu/X4r2
-         V9XWuYSnRb6eQnjRSE0p6z2Teq2Eksl4axvHb9gnwdceF+E3b5UGO8sFCpNS2lt2CoN1
-         5agyaQ3f9Mrau8SRRBGCpaQXbF9E5AZyBXQlrCzfoR8JKS5TdnBeGEZubmpi2Mfjg0h4
-         x4S5ctcaYocJ3FJ3ORT+diCI05NYUr2Gaz7czOPTaaJJKUSBptD9HJF2SaaTZqujT1XK
-         PV7ZEaz4k99HBfQJ2bHC7s5OpONCquMMudu9FRGtN2SCJbmmclF9XiZezvd0gTdXHcYA
-         1T1Q==
-X-Gm-Message-State: AOAM531pBRYKI2FDAQa7GzoZ1HgHVOUYonaE85KWeCKlyR1uEwtLoP77
-        XxBoet74RVDlKXqlaCkDwqwS+rwK
-X-Google-Smtp-Source: ABdhPJyVLivDnQh92j5jAm6ma4xkioCkhIfu3uNYCed+E5wpUz/REY5NkP5JrWe6gy4LSOQFeGhBOQ==
-X-Received: by 2002:a17:906:d159:: with SMTP id br25mr10762739ejb.16.1596833111751;
-        Fri, 07 Aug 2020 13:45:11 -0700 (PDT)
+        bh=yabDseEFwoeIWFsjEprp8Old7fvi4uHYQ6vv3rBmhIQ=;
+        b=L3TFJXr7spTfleNPGJ/Ih1sTCy+GqI38C2TLIU43ApBbCbI769DBsKuQuKWrasAVfR
+         n0BvEO/uXPVO3e2EG1eD6mg9aisXmRs4io6uR6o18hCn3YdK2X512Oxth19R5uTzmchi
+         vux8Ts9lCvmrI06xB0DOfQQNZcysOO6V37jDDE4gTaaG7C8aU759rdNGSo9Srj4NZjGr
+         bzj5MhzQdOdm9E7MR47jFrRzLoANMw5En3Nwon4KGORAKwHsfmICcHgCefgn4do+LZjA
+         tqn++UckdyQbE7locnK+PDs1jmI7v0QY964Wm9hV+g1igImcUG5U7mRO4h/IsfCO5R9D
+         bY9w==
+X-Gm-Message-State: AOAM532zOIhBHKB4AoNVwHXVuSiO54PdpAg7zh+uUEojk+Wtj8qd9VuX
+        m8fXaW4LdPH9+Pc33haDQcdikk5+
+X-Google-Smtp-Source: ABdhPJz94nfqtQOuGb03bQ0X/tGXeu/neNknX5M7dd++rICn0T+D6C8Gf66+BkZ4RTJTYC+a2qX9xg==
+X-Received: by 2002:a17:906:9618:: with SMTP id s24mr11112369ejx.53.1596833112873;
+        Fri, 07 Aug 2020 13:45:12 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:8076:aed9:5a81:5448])
         by smtp.gmail.com with ESMTPSA id u4sm6120883edy.18.2020.08.07.13.45.11
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 07 Aug 2020 13:45:11 -0700 (PDT)
+        Fri, 07 Aug 2020 13:45:12 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/3] add testcases for __sync_{bool,val}_compare_and_swap()
-Date:   Fri,  7 Aug 2020 22:45:04 +0200
-Message-Id: <20200807204506.1100-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/3] export evaluate_arguments()
+Date:   Fri,  7 Aug 2020 22:45:05 +0200
+Message-Id: <20200807204506.1100-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200807204506.1100-1-luc.vanoostenryck@gmail.com>
 References: <20200807204506.1100-1-luc.vanoostenryck@gmail.com>
@@ -76,43 +76,72 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+evaluate_arguments() is local to evaluate.c but the same functionality
+is needed for builtins.
+
+So, in order to not duplicate this code:
+*) change slightly its interface to accept the expected types as a list
+*) make this function extern.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/builtin-sync-cas.c | 26 ++++++++++++++++++++++++++
- 1 file changed, 26 insertions(+)
+ evaluate.c | 7 +++----
+ evaluate.h | 7 +++++++
+ 2 files changed, 10 insertions(+), 4 deletions(-)
 
-diff --git a/validation/builtin-sync-cas.c b/validation/builtin-sync-cas.c
-new file mode 100644
-index 000000000000..e289eba2949b
---- /dev/null
-+++ b/validation/builtin-sync-cas.c
-@@ -0,0 +1,26 @@
-+static int *foo(int *ptr)
-+{
-+	__sync_val_compare_and_swap(ptr, 123, 0L);
-+	return __sync_val_compare_and_swap(&ptr, ptr, ptr);
-+}
+diff --git a/evaluate.c b/evaluate.c
+index dddea76182ad..7c63cc60e91b 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -2333,14 +2333,13 @@ static struct symbol *evaluate_alignof(struct expression *expr)
+ 	return size_t_ctype;
+ }
+ 
+-static int evaluate_arguments(struct symbol *fn, struct expression_list *head)
++int evaluate_arguments(struct symbol_list *argtypes, struct expression_list *head)
+ {
+ 	struct expression *expr;
+-	struct symbol_list *argument_types = fn->arguments;
+ 	struct symbol *argtype;
+ 	int i = 1;
+ 
+-	PREPARE_PTR_LIST(argument_types, argtype);
++	PREPARE_PTR_LIST(argtypes, argtype);
+ 	FOR_EACH_PTR (head, expr) {
+ 		struct expression **p = THIS_ADDRESS(expr);
+ 		struct symbol *ctype, *target;
+@@ -3149,7 +3148,7 @@ static struct symbol *evaluate_call(struct expression *expr)
+ 		if (!sym->op->args(expr))
+ 			return NULL;
+ 	} else {
+-		if (!evaluate_arguments(ctype, arglist))
++		if (!evaluate_arguments(ctype->arguments, arglist))
+ 			return NULL;
+ 		args = expression_list_size(expr->args);
+ 		fnargs = symbol_list_size(ctype->arguments);
+diff --git a/evaluate.h b/evaluate.h
+index f68f7fb7c367..a16e97036b2a 100644
+--- a/evaluate.h
++++ b/evaluate.h
+@@ -2,6 +2,7 @@
+ #define EVALUATE_H
+ 
+ struct expression;
++struct expression_list;
+ struct statement;
+ struct symbol;
+ struct symbol_list;
+@@ -25,4 +26,10 @@ struct symbol *evaluate_statement(struct statement *stmt);
+ // @list: the list of the symbol to be evaluated
+ void evaluate_symbol_list(struct symbol_list *list);
+ 
++///
++// evaluate the arguments of a function
++// @argtypes: the list of the types in the prototype
++// @args: the list of the effective arguments
++int evaluate_arguments(struct symbol_list *argtypes, struct expression_list *args);
 +
-+static long bar(long *ptr)
-+{
-+	return __sync_val_compare_and_swap(ptr, ptr, 1);
-+}
-+
-+static _Bool boz(_Bool *ptr)
-+{
-+	return __sync_bool_compare_and_swap(ptr, 0, ptr);
-+}
-+
-+/*
-+ * check-name: builtin-sync-cas
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+builtin-sync-cas.c:9:49: warning: incorrect type in argument 2 (different base types)
-+builtin-sync-cas.c:9:49:    expected long
-+builtin-sync-cas.c:9:49:    got long *ptr
-+ * check-error-end
-+ */
+ #endif
 -- 
 2.28.0
 
