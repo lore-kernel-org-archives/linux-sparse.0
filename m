@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B88BDC433DF
-	for <linux-sparse@archiver.kernel.org>; Sat,  8 Aug 2020 16:12:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9E140C433E0
+	for <linux-sparse@archiver.kernel.org>; Sat,  8 Aug 2020 16:12:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9834720716
-	for <linux-sparse@archiver.kernel.org>; Sat,  8 Aug 2020 16:12:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7A45420716
+	for <linux-sparse@archiver.kernel.org>; Sat,  8 Aug 2020 16:12:02 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="pUMfylmD"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nybDJ8XT"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726296AbgHHQMA (ORCPT
+        id S1726316AbgHHQMB (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 8 Aug 2020 12:12:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55662 "EHLO
+        Sat, 8 Aug 2020 12:12:01 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55664 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726200AbgHHQMA (ORCPT
+        with ESMTP id S1726291AbgHHQMA (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sat, 8 Aug 2020 12:12:00 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5AADBC061756
-        for <linux-sparse@vger.kernel.org>; Sat,  8 Aug 2020 09:11:59 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id bo3so5146156ejb.11
-        for <linux-sparse@vger.kernel.org>; Sat, 08 Aug 2020 09:11:59 -0700 (PDT)
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5560DC061A27
+        for <linux-sparse@vger.kernel.org>; Sat,  8 Aug 2020 09:12:00 -0700 (PDT)
+Received: by mail-ed1-x543.google.com with SMTP id c10so3403606edk.6
+        for <linux-sparse@vger.kernel.org>; Sat, 08 Aug 2020 09:12:00 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Icp4hhn0az23eIZYVDnmbGyHTZnxC2AyA0XHZdihlQc=;
-        b=pUMfylmDLtIzZd6/L5DwgCmbsX2jE7bg8gsNnmOEn2xQHCMeFuFjHcyLmr7m02qQmk
-         UrU9LkWns3D7dMkpKGnlaEsbarxUbxSYrD2tzIt72Kpa+v7fPgbBea/Oe5HtqZFd5tfS
-         Lx+TOpYw1m2s6iXOuP54oRz82HFFDcdpSxa1OxPYZkJzq7C+HQxNxCFv0a3H57NuWafr
-         NaIurrrR9hFJWnTfoE4UsLxpZBbw6efHzhO7MInEcBFiSWUd77O1dl6T2XPwbOLbEo/m
-         sVttbxMEl3aBN+WJpe9ONu4cWFdkvUFURZR/h3t079bmkZ+EVSdkqxp1MRxoaCvjadfr
-         Murg==
+        bh=i0YBbxB9z/tlOZGarQXmwSVJk5l+FnIa/DLNKdhToNQ=;
+        b=nybDJ8XTY3lmqTerTTS+lRdDhAaJzYKm1DTkzsQSusrRTP3ZJZvhFDnilgDrtFs72O
+         aLS2oQ1CvqpLiQI68NMwNeqt8Ajm/llBaqz/V+okCVg4SnFepdWFptcpqmgTlB4DGi7m
+         BCTuVyJCRmsOmeke0b7h2qPZjdSpVSC0NghqeY0QXPSj7+AoKS10QSOptoU7wiTu0Wmc
+         6vpgSQ6CzL8Y9vrfA1y2UBp7JWePc0kJs8EAUHNx8C9vZMPfjhiDQ9ZUyZNVbBRInDHa
+         kxkbkh8N6gQK46kIjSXhAeDW5606QYI7f/4aCfj6x0yEVUmiQOxHsBA492A3D4B6XYCe
+         fzvA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Icp4hhn0az23eIZYVDnmbGyHTZnxC2AyA0XHZdihlQc=;
-        b=dsnkkN1Rvdx6FKcGPVwSHqcnbN3cQyFyMV7lOZYRzdWui5gi3Vt/ETw1axEVD7jMqq
-         kTd4h1G/LiEilJumGYfw7g41sC9G5xSeP8QwvFf2ONnUDDk/TVtq84nGTe1bDj2bLs8M
-         fQF/5IRBMDt9VB3Ko1twP0wKZE68o9TYUbLdZxfovZhQlS8t9oCDv+vg8Tm3INYrnC2D
-         kR5EOL8kCXIHT/rvVbvoqhLMXVGlI9diwARHmPvip2TpuEt7dngV5wsmXb867N8CrcRX
-         8v6FtyJdFI4y1bmbZc6rf8Yq7Be9lsD9lc9b42P+1dSo0SPJDJa4Y9LGaESJ8F+FIUUT
-         Y9SA==
-X-Gm-Message-State: AOAM530uA7dVSSd2oPuPG6VuC5ZEmyQsRREV53XsFcE+F1IHgibHP8Sv
-        xiDhcaRKHfVFsbo/MeFgj5u9XGz2
-X-Google-Smtp-Source: ABdhPJy1zMA4Qp2l36qxf2gQ3PfI9gLlNW5Vah/WpV3vZ3DQay+OWB9/0YsgQ7n2xfYYTzs1atdl5w==
-X-Received: by 2002:a17:906:260f:: with SMTP id h15mr14304554ejc.48.1596903117896;
-        Sat, 08 Aug 2020 09:11:57 -0700 (PDT)
+        bh=i0YBbxB9z/tlOZGarQXmwSVJk5l+FnIa/DLNKdhToNQ=;
+        b=CQfrMw+ikroPCptpwK028lXvF7QWbUrFpcsYe+/sGoIi1u1ZRIO1mn3MaucMU8ySly
+         Jxm7UZ/Kb9ndO94x2IrT65BkTGpjF09kilOdOi1BfcLAQnCWN6zHG6eNQ9N86vL78YgH
+         onJz6iuPpnbhpg7FGZ+OQbaNemY9xCRkK7O6Lq9j/d4qD0vDckC4BF+6y7i2mZ17PZCR
+         dn0EvFIhqt6QhKtamDClI7F33HimE6nHwU9Z+pcL5D1xvlaDhv/HXFQDpC+7qIhSsdHE
+         k5rwHNVywXhNkwtR14MTCjoRfPbSsy7MxUCsYLy0VF85Waqu/thqboxw48EgoKVwzbdp
+         9HlA==
+X-Gm-Message-State: AOAM53079/8IuLLk9icuqA5kAGmPsTZQsym39F/N0uGcriwqdiYzQ9cB
+        eQ3FD1Jrh/cLcN9fP6C2FTgWio/Y
+X-Google-Smtp-Source: ABdhPJxsZnQKN4p5rOo/kCBbPzOrJhu/pG1K+N4NLbpbHoUZtjLILtpLltuwh+5UxoLflPQJ2bNBtw==
+X-Received: by 2002:a05:6402:1457:: with SMTP id d23mr13998316edx.149.1596903118840;
+        Sat, 08 Aug 2020 09:11:58 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:658a:a334:d0cb:45f5])
-        by smtp.gmail.com with ESMTPSA id g25sm8145725edp.22.2020.08.08.09.11.56
+        by smtp.gmail.com with ESMTPSA id g25sm8145725edp.22.2020.08.08.09.11.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 08 Aug 2020 09:11:57 -0700 (PDT)
+        Sat, 08 Aug 2020 09:11:58 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/6] wstring: add support for examination of string initialization
-Date:   Sat,  8 Aug 2020 18:11:40 +0200
-Message-Id: <20200808161143.28272-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/6] wstring: add helper is_wchar_type()
+Date:   Sat,  8 Aug 2020 18:11:41 +0200
+Message-Id: <20200808161143.28272-5-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200808161143.28272-1-luc.vanoostenryck@gmail.com>
 References: <20200808161143.28272-1-luc.vanoostenryck@gmail.com>
@@ -76,64 +76,31 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The examination of a string initializer doesn't know about wide
-strings. The only thing needed is if the base type is some kind
-of char but for wide chars, this type is the same as 'int' and
-an array of ints can't be treated the same as an array of chars.
-
-So, do the detection for wide string initializers as:
-1) check that the LHS base type is wchar_ctype
-2) check that the RHS is a kind of string expression
-   (possibly between braces or parenthesis, recursively).
+Like is_byte_type() but for wide chars.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- symbol.c | 25 +++++++++++++++++++++++++
- 1 file changed, 25 insertions(+)
+ symbol.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
 
-diff --git a/symbol.c b/symbol.c
-index 6fcb1b150d27..7f0c85580f06 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -307,6 +307,29 @@ void merge_type(struct symbol *sym, struct symbol *base_type)
- 		merge_type(sym, sym->ctype.base_type);
+diff --git a/symbol.h b/symbol.h
+index 8e7a286019c7..0e15f7bf6ba8 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -430,6 +430,13 @@ static inline int is_byte_type(struct symbol *type)
+ 	return type->bit_size == bits_in_char && type->type != SYM_BITFIELD;
  }
  
-+static bool is_wstring_expr(struct expression *expr)
++static inline int is_wchar_type(struct symbol *type)
 +{
-+	while (expr) {
-+		switch (expr->type) {
-+		case EXPR_STRING:
-+			return 1;
-+		case EXPR_INITIALIZER:
-+			if (expression_list_size(expr->expr_list) != 1)
-+				return 0;
-+			expr = first_expression(expr->expr_list);
-+			break;
-+		case EXPR_PREOP:
-+			if (expr->op == '(') {
-+				expr = expr->unop;
-+				break;
-+			}
-+		default:
-+			return 0;
-+		}
-+	}
-+	return 0;
++	if (type->type == SYM_NODE)
++		type = type->ctype.base_type;
++	return type == wchar_ctype;
 +}
 +
- static int count_array_initializer(struct symbol *t, struct expression *expr)
+ static inline int is_void_type(struct symbol *type)
  {
- 	int nr = 0;
-@@ -321,6 +344,8 @@ static int count_array_initializer(struct symbol *t, struct expression *expr)
- 	 */
- 	if (t->ctype.base_type == &int_type && t->rank == -2)
- 		is_char = 1;
-+	else if (t == wchar_ctype && is_wstring_expr(expr))
-+		is_char = 1;
- 
- 	switch (expr->type) {
- 	case EXPR_INITIALIZER: {
+ 	if (type->type == SYM_NODE)
 -- 
 2.28.0
 
