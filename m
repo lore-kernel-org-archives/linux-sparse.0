@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ECE83C433E0
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 14:17:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5B328C433E1
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 14:17:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CC50C206B2
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 14:17:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3AB5E206E9
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 14:17:45 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ivaNQ3sz"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="gy7bIST/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726242AbgHIORn (ORCPT
+        id S1726175AbgHIORo (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 9 Aug 2020 10:17:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59952 "EHLO
+        Sun, 9 Aug 2020 10:17:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59958 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726175AbgHIORl (ORCPT
+        with ESMTP id S1726236AbgHIORm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Aug 2020 10:17:41 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7BF96C061756
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 07:17:40 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id t10so2484115ejs.8
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 07:17:40 -0700 (PDT)
+        Sun, 9 Aug 2020 10:17:42 -0400
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D567C061787
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 07:17:42 -0700 (PDT)
+Received: by mail-ed1-x543.google.com with SMTP id i26so4582141edv.4
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 07:17:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=tihCaIaZ8hO8FrGKsGmEVleU+9e1Nh2kqy6MJhKG7B0=;
-        b=ivaNQ3szIjcJwCQtSIPpQFimUWq15bm6Q+6zErXOQcYomcPHIVxKP2LHaWqfweTzkG
-         JJojF4HevIAi43s0vS/PXO8DQQBNjumY7MRBByd4qhYSlyHXoDcW4CyOVV5LvVF1sBMa
-         t+iFurLDDhPQsVUyYyNaKlSQIOfFJKXBsi9GnODhtV71MDZfvFO61lSZEqKQj5A1W5Gx
-         71xcjnMaGfL75WiZhAxE6I734R+sb3r+fA6U6D8Ai2eXsWCQncyo2X8zcwIlsdItGS2L
-         McjE46gfs/uVgXSlODh/BJ0gcS8KZQwniMaJN15l+y46UNX6Q8HPJJOokYLcauDiY6sl
-         Ko/A==
+        bh=ItfZzrkH2XxylQjc1Fg63UxGYkx3Ea15KMrGhNnI6xc=;
+        b=gy7bIST/whvb8qjtZhH6FDsrpUHR729r4XoUHCIq/pLaHpbxcFLwmFrdgmTIZk1MKo
+         MrkveBs8CwhG56hbvb1b/veRA3pGh3aHVB1gqZSJKkEaSxXZOIUwExAqBhWeYNK/Z9sk
+         7m/7mQCp/9ytSjs2eMrbicw5V068zpoxl0MGC/D3A3c3ybmYOnlns1H/h36zb8hazUQS
+         TSjluy2vROEdrv2N0SE6E/hcXcrA2NQxoKzpv55DJnkoa3HasKoHPbbu6bu/Ux0Cmb0m
+         G5U8NNfR0W9RxCUArU5zhKOn37Jnbq4e1tVyekqWmoehAd7m5gwgaIL6sKb0P4qyyRXj
+         81kw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=tihCaIaZ8hO8FrGKsGmEVleU+9e1Nh2kqy6MJhKG7B0=;
-        b=LzNJTvXT9XWF9zH9v4vq1NH/H+WkeTfVu0qMKKCsxZgkwDGRRrW0EPgiYpiIraretH
-         M9ssC4awyrVX3mSBjRUY82HMgzxbzcvaCbfeUqft8mtL4DD1RykN04Ls9rPxeFOS5CfO
-         JENG0AzShPQKz5YiSWv6/hem3cAREtbmjxYGbOBfIb3lmgvyhNIYFWU6Srx41qKNWomX
-         PnLlWIeO8fRwraWnnvlg6srM4S7ym3K2TgaJ6+gC6hisR28eQUQbClymPMhY8UAvTTgT
-         f4+QVWy+q1OdwoAbQSnTTiCEA7CIkXBVXcv2+8rb9jPrZ65cmq5Cx62f9L3ZbKknshZH
-         PKqA==
-X-Gm-Message-State: AOAM530NnLaFm4IpmA+tSKSGltXQZwOMyUGev97zMqBqdDDU+Ual5qDr
-        PTQQv0AR5RUX9ka3BKbAQ7STRieU
-X-Google-Smtp-Source: ABdhPJwTnh2ZL92U9IEH0XNcZ0E/Sknse7xQso6mTCsYXDCMNXrscOrW429HVOxZAtdKxqtFhMiwRg==
-X-Received: by 2002:a17:906:9512:: with SMTP id u18mr15960602ejx.207.1596982658966;
-        Sun, 09 Aug 2020 07:17:38 -0700 (PDT)
+        bh=ItfZzrkH2XxylQjc1Fg63UxGYkx3Ea15KMrGhNnI6xc=;
+        b=ttvdxhyzzoE9Uh8UXsqMVaiHGyFutdIuIfwStoeNAZyRscxemtUTHSmvJq8vd3TSba
+         p6+jK4rqM1o0CT2783uZJ3NG0B1+dzWQsWHgyCRFyGBEmzymAZW4To0/6VDwKOaxUwmy
+         honeIHuxEaLfa1mnLVqGI3gIdGBiMWP9TxzCzx4EWg48/SPPVhIBBeTk+AmKT46+LN8v
+         uwOmGEvA8ueTMrNRglxqJBZrRXZt7wWYrSY9YBHFcHoVK/X4gezaSD0/c+dDBrWVy5R9
+         aq2vddggiyrdViGkm8fkYNsJPP6381wiP2kZDb1h7sk01GABgWDy++Tppni7QpyLP6wo
+         NWBQ==
+X-Gm-Message-State: AOAM530UtliHdDa6meH9iN554ks/5fPOW2G82DcZ17vXv4QvSQvTQrXc
+        Q1dw+wYUQR4S4TDLLqc6fk0kXbV0
+X-Google-Smtp-Source: ABdhPJzGYBuQqXlwb1ANJ3iblbxIjS3oFrHdZjM8M6ip9QLexp/8SpbtNgA9qLqSG7mgPcgXoPB08A==
+X-Received: by 2002:a05:6402:17c2:: with SMTP id s2mr16742321edy.188.1596982660893;
+        Sun, 09 Aug 2020 07:17:40 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:788a:816d:ff27:8087])
-        by smtp.gmail.com with ESMTPSA id p1sm9917956edu.11.2020.08.09.07.17.37
+        by smtp.gmail.com with ESMTPSA id p1sm9917956edu.11.2020.08.09.07.17.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 07:17:38 -0700 (PDT)
+        Sun, 09 Aug 2020 07:17:40 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/5] doc: add index to the sidebar
-Date:   Sun,  9 Aug 2020 16:17:29 +0200
-Message-Id: <20200809141731.32433-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/5] doc: shorter title for "submitting-patches.md"
+Date:   Sun,  9 Aug 2020 16:17:31 +0200
+Message-Id: <20200809141731.32433-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200809141731.32433-1-luc.vanoostenryck@gmail.com>
 References: <20200809141731.32433-1-luc.vanoostenryck@gmail.com>
@@ -76,31 +76,29 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-It's very useful to be able to access the index from the sidebar
-but no change in the configuration seems to allow this. Trying
-to abuse the toctree give the same result.
+The documentation for submitting patches has ": the sparse version"
+is in its title. This is quite useless and makes it longer than
+needed.
 
-So, add it directly via the template system.
+So, remove this part from the title.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/templates/layout.html | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ Documentation/submitting-patches.md | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/Documentation/templates/layout.html b/Documentation/templates/layout.html
-new file mode 100644
-index 000000000000..a2fe215fcef6
---- /dev/null
-+++ b/Documentation/templates/layout.html
-@@ -0,0 +1,8 @@
-+{% extends "!layout.html" %}
-+{% block menu %}
-+    {{ super() }}
-+    <p class="caption"><span class="caption-text">Index</span></p>
-+    <ul>
-+    <li class="toctree-l1"><a class="reference internal" href="{{ pathto('genindex') }}">Index</a></li>
-+    </ul>
-+{% endblock %}
+diff --git a/Documentation/submitting-patches.md b/Documentation/submitting-patches.md
+index fb176ce51d46..6a4275c3fd35 100644
+--- a/Documentation/submitting-patches.md
++++ b/Documentation/submitting-patches.md
+@@ -1,5 +1,5 @@
+-Submitting patches: the sparse version
+-======================================
++Submitting patches
++==================
+ 
+ Sparse uses a patch submit process similar to the Linux Kernel
+ [Submitting Patches](https://www.kernel.org/doc/html/v4.12/process/submitting-patches.html)
 -- 
 2.28.0
 
