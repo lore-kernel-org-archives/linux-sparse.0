@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E9465C433E1
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7180C433E3
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C5613206D8
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 82DA7206C3
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="qPYo6OtL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="m6OSHHTK"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726406AbgHIUxn (ORCPT
+        id S1726418AbgHIUxo (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 9 Aug 2020 16:53:43 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35654 "EHLO
+        Sun, 9 Aug 2020 16:53:44 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35656 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726418AbgHIUxm (ORCPT
+        with ESMTP id S1726400AbgHIUxn (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Aug 2020 16:53:42 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 40092C061787
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 13:53:42 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id kq25so7407723ejb.3
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 13:53:42 -0700 (PDT)
+        Sun, 9 Aug 2020 16:53:43 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F75CC061756
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 13:53:43 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id qc22so7403957ejb.4
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 13:53:43 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=45mOpsfV/8z5dL/fgRcBxvWR+3JFX0fOxkfrnBhPz8g=;
-        b=qPYo6OtLvDVs9UDz5tSL/6moH6luZvxq962OpeNPM40yW3zgIZc4hBRKyRaPAhQqGu
-         U9P1a77PWMmiSN7usmOJQKEeL2IwPaCQtHt/FL/U7kanHGMI41cUDGmrD4RICv4GcPdQ
-         KsaZjYiJrjkofjGR4Mpk2K4++8mMXoYQu5EOaQK9Ka9X2S3ubbdPv36DuANDyCuai4FL
-         7zHRMh0R8bpAwvGJAkHnFRD661TuHqa1M5QhYjZqc3EYsC8NFko2ABbogYSLHu6LOEiM
-         rtUe6X6tlMVnj27sUMSbvYU1So9fCbqBusQs8Sxluc3H8F1lL/Pra+NKo47j5sSWHk3F
-         03EA==
+        bh=9uLSE3sMjtLd8YmuuFJpILZqhYeg0jd0r3m+B11eDVc=;
+        b=m6OSHHTKFhegInjACLF5qmwaDfqyYeCKjW/D1WhT9+k23VBqrKPF+PNL+ACvRRhFY3
+         HAseWyZrEOvAz2pX1qiYZkkMEdwQWJvgZ0LQj+M0Kmlc4jA59pw9hA5QLuEvngRrWe8t
+         /XikSKdYltFwDINXoigQcOhQGCMjjaJBAo4OErHNDjvs0bf02XsXNFFZPcXfkZwiySct
+         X32TQZlhauKjOptc7u55lQxrHaw5ZtYcPB6PS6Ip7LGWlzKIxcRumFKsOcBklrpEc/jH
+         9f6rgS4uCv4Qiti2B0jjmLREUED+fvMbMT3av+7Q0C6D5vVgqDTU0/xznMvnIwEHl3Qw
+         +Bhw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=45mOpsfV/8z5dL/fgRcBxvWR+3JFX0fOxkfrnBhPz8g=;
-        b=I7evF0sZOMw/hPK/HTTlZq1DOpiN0g4j+LXeDEjT1PrVdGmpuJGCfo8+SPcszley+k
-         syP7FJ9GfcYDjI5Ba7k+qvvJ1mZyUB/45/20BaDd9XSkE1vdRFaJslAz71yibcO9Bwhy
-         8WvP0NGD1KBIiCHFCaYdJwcIgHDMd2PXlkzyETXU+UwcYisiToCvwrjSJU9HVR8F6IYM
-         XwfH3AbZPm2JDEUxYEoqse70//O2I3O+ZMAk02Rb22EBQihL38C9wQLm5bQCY0YaY2CN
-         yM3TvSi8wfOlZP1qP9xXhtOo0v1TOnhhxGsXEyuLc1uxUShOcy0Qbr2Kf70WwLiSJ1Ny
-         djiw==
-X-Gm-Message-State: AOAM533F/awvo9g6akGCqWSkcPHHynBLjHULA/okMFNEVGzRcKuUTiAD
-        otKMvSPRiyNuNKMCGjVNOIqArc8I
-X-Google-Smtp-Source: ABdhPJzkXAP5dj94jhNvxNefVLx4NF4lDi7dC1BBZZhKWc6YBIEnHx8NMr76vsllGnC339G5SfZDbQ==
-X-Received: by 2002:a17:906:84cf:: with SMTP id f15mr19689765ejy.259.1597006420804;
-        Sun, 09 Aug 2020 13:53:40 -0700 (PDT)
+        bh=9uLSE3sMjtLd8YmuuFJpILZqhYeg0jd0r3m+B11eDVc=;
+        b=ixnG7xVwbSsi1ydG0Tz4Jr1DYejsKB6X5VY9jMkusFwUjos5E9t4a/wRiUGydmw+DL
+         04U0fJ2wNsa0tTHkQmPLQKj/f32JzrF1QwWkB4MlEl8LNqdC2RIa//hoTVGYeevC5iej
+         HQHnxT3K82Na1wUeWj25E6xZfM3nQP3pqW39r/uYgH/hKno0mc1nOnrcoDd111EW956l
+         jLkN7Q/FNIN8G4/nLoy8FQHPaKCAlwHedaKaGkv78LBA3uFQzOSLAmUSVvheaSGmECGU
+         NviGcr4b+9bzKKe6J7F6d87Ks5p28elPzjXgV/n8qu8NLrS5OD2QEKSJL9oP7Ut45Kz4
+         7SuA==
+X-Gm-Message-State: AOAM533BxIF2N25RS/Ry4wD3u+Ok/qJFpppNya2+c9hZZGCupBwJAuIx
+        CB/tUlrduysE3gjrx/0XdcaXDjKi
+X-Google-Smtp-Source: ABdhPJxFbRCAE6UaZXK9C9vWe/ASXa7ht5gIdwec8gIEHgBi9QRZoNxgw0gj8Wu2230YMrLOREtcnA==
+X-Received: by 2002:a17:906:2717:: with SMTP id z23mr583471ejc.19.1597006421548;
+        Sun, 09 Aug 2020 13:53:41 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:b5f4:fb07:8fe3:ee8e])
         by smtp.gmail.com with ESMTPSA id m20sm11258203ejk.90.2020.08.09.13.53.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 13:53:40 -0700 (PDT)
+        Sun, 09 Aug 2020 13:53:41 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 08/10] testing for SYM_KEYWORD is unneeded for lookup_keyword()
-Date:   Sun,  9 Aug 2020 22:53:27 +0200
-Message-Id: <20200809205329.42811-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 09/10] testing for sym->op is unneeded for lookup_keyword()
+Date:   Sun,  9 Aug 2020 22:53:28 +0200
+Message-Id: <20200809205329.42811-10-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200809205329.42811-1-luc.vanoostenryck@gmail.com>
 References: <20200809205329.42811-1-luc.vanoostenryck@gmail.com>
@@ -81,46 +81,29 @@ because either:
    1) it's in NS_KEYWORD (and all symbol in NS_KEYWORD are SYM_KEYWORD)
    2) it's in NS_TYPEDEF and all *keywords* in NS_TYPEDEF are reserved
       and so can't be user defined and so must be SYM_KEYWORD.
-It's thus unneeded to test it.
+Thus, they all have a symbol_op associated to them and it's
+unneeded to test it.
 
 So, remove the unneeded test.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c | 6 ++----
- 1 file changed, 2 insertions(+), 4 deletions(-)
+ parse.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/parse.c b/parse.c
-index f2fdbc9b5a7b..2b7ef2ae23c4 100644
+index 2b7ef2ae23c4..d378f1255fee 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -1620,8 +1620,6 @@ static struct token *handle_qualifiers(struct token *t, struct decl_state *ctx)
- 		struct symbol *s = lookup_keyword(t->ident, NS_TYPEDEF);
- 		if (!s)
- 			break;
--		if (s->type != SYM_KEYWORD)
--			break;
- 		if (!(s->op->type & (KW_ATTRIBUTE | KW_QUALIFIER)))
- 			break;
- 		t = t->next;
-@@ -1749,7 +1747,7 @@ static struct token *handle_asm_name(struct token *token, struct decl_state *ctx
- 	if (token_type(token) != TOKEN_IDENT)
- 		return token;
- 	keyword = lookup_keyword(token->ident, NS_KEYWORD);
--	if (!keyword || keyword->type != SYM_KEYWORD)
-+	if (!keyword)
- 		return token;
- 	if (!(keyword->op->type & KW_ASM))
- 		return token;
-@@ -1770,7 +1768,7 @@ static bool match_attribute(struct token *token)
- 	if (token_type(token) != TOKEN_IDENT)
- 		return false;
- 	sym = lookup_keyword(token->ident, NS_TYPEDEF);
--	if (!sym || sym->type != SYM_KEYWORD)
-+	if (!sym)
- 		return false;
- 	return sym->op->type & KW_ATTRIBUTE;
- }
+@@ -2160,7 +2160,7 @@ static struct token *parse_asm_statement(struct token *token, struct statement *
+ 	stmt->type = STMT_ASM;
+ 	while (token_type(token) == TOKEN_IDENT) {
+ 		struct symbol *s = lookup_keyword(token->ident, NS_TYPEDEF);
+-		if (s && s->op  && s->op->asm_modifier)
++		if (s && s->op->asm_modifier)
+ 			s->op->asm_modifier(token, &mods);
+ 		else if (token->ident == &goto_ident)
+ 			asm_modifier(token, &mods, MOD_ASM_GOTO);
 -- 
 2.28.0
 
