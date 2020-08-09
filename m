@@ -2,85 +2,99 @@ Return-Path: <SRS0=O0OO=BT=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-4.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 34729C433E0
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 19:21:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C631EC433E0
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id F2783206C0
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 19:21:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9AF76206C3
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="N3cDFtdL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kftPkMxr"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726291AbgHITVL (ORCPT
+        id S1726398AbgHIUxg (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 9 Aug 2020 15:21:11 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49822 "EHLO
+        Sun, 9 Aug 2020 16:53:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35618 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726289AbgHITVL (ORCPT
+        with ESMTP id S1726307AbgHIUxf (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Aug 2020 15:21:11 -0400
-Received: from mail-ej1-x62b.google.com (mail-ej1-x62b.google.com [IPv6:2a00:1450:4864:20::62b])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3E235C061756
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 12:21:11 -0700 (PDT)
-Received: by mail-ej1-x62b.google.com with SMTP id f24so7287800ejx.6
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 12:21:11 -0700 (PDT)
+        Sun, 9 Aug 2020 16:53:35 -0400
+Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BC670C061756
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 13:53:34 -0700 (PDT)
+Received: by mail-ed1-x533.google.com with SMTP id i6so4970636edy.5
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 13:53:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=8hqtZesgm9V2FVf3D3vHVvRBSYGIt8uCvxS9gdZa9MI=;
-        b=N3cDFtdLgnol2nETseLUNjeH5OZPz3cCH58v5kv0R5X+nyQKVBfMcxr85oBmmCioXK
-         jd5IrI4ZFNYU1a5RcR3IW9zHcSwJogzucAIaRUJnCFLTC+aStOeYloqiE1KoAwA8U8MK
-         CvUjsoKhklubFuMBgHWkBMrF1URV8Dz2OCC985LaPSlQrBgyUwQ1dWMcXAgtqNeqvEjy
-         IKnwlcMHTNuIprMfDDEUq1QDuxTBa5UyphL46a8zFaSxfnOCqHE65ICnABkAleEBdaJQ
-         TajDSsrd4FbUfxsmnw+BuEY9/zNFQk494n35nKbkC4BXA4jQLYCm7ZQKdxkiy9v+/O08
-         Wgyg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=C3+/1AhaeQwKQecDsEvoZWjlQ+B2CLc29C6mUV1Yxm8=;
+        b=kftPkMxretYKiXBbIB0GnTHnPC3mQLkiBpPgchKlfcOacMpbtfpRS53SWpe6cKynAf
+         /UVhzMxx7wmPYL2WRDsVlb38J0NlA18qntC31gT+pLkFgkCA8vIrx6FmgwbmRdOtODWn
+         aAU5f05WNoeY86S0KA64lYc0f1hgJXXpdUNWbyNXlslM1pz/62EF/uOPYNYxKt3nHJmM
+         5Hdbl83nTOKCHOK8DNX2clFkqlfeGtENfTJ3IE6xm9+za7MPGxxl1rbAU0sJEqK+KGD3
+         mbpGYASKhCzEbY7ArBPplIkWvWfC9fhPtuhk5jWYpueEVwZYy/Nb1amj7iQCIVZtDkKh
+         gE1A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=8hqtZesgm9V2FVf3D3vHVvRBSYGIt8uCvxS9gdZa9MI=;
-        b=OBDDnfYboydjx44RtFBP5mHbHBucNllntd/HYaNe+/UXVAU/DbZ71DxsON13eYcH2g
-         h474X2dZTAd68u5G+dAqxmzljAsRiVLT8OJWDzP/+jh5emFEJsppAU8tpaCOrEi/VeFj
-         g3wDUZjhl/pxfqzmGqwtMaXEDZ1nea94YryapJWuVdHvSmlRH9yUpNwlk1HXi4VDvVBg
-         6T/f1h1dVcimGIn8Cd0VQ+8/6raW35xJ77VtKinSDC3QQgWRog+PKLYL+wBJhWbh7wWF
-         s588Zk124mKyQLCNh3Jpdlw56AySMdUud+tR3LUyj/QvAwPe0HhsUSPLCiWQ37RSL0wE
-         BB/A==
-X-Gm-Message-State: AOAM532e+uCWFgQ52zu6ZJ7zeQMjbktSi2J4MOiiCgshwZKjWEGoxvsh
-        biWyKZZBoWJ9BMu6ag3g61zO2gpO
-X-Google-Smtp-Source: ABdhPJxYU+H9eWf2Fg0fwwygrdpwkfU96I2cqovDHuFoWWyEz/8m4QHSIagMXERGKnKHFtfcLJrWGQ==
-X-Received: by 2002:a17:906:ce59:: with SMTP id se25mr19935160ejb.359.1597000868959;
-        Sun, 09 Aug 2020 12:21:08 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:a7fb:e200:b5f4:fb07:8fe3:ee8e])
-        by smtp.gmail.com with ESMTPSA id lj26sm11144957ejb.26.2020.08.09.12.21.07
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=C3+/1AhaeQwKQecDsEvoZWjlQ+B2CLc29C6mUV1Yxm8=;
+        b=TzRhwNfXwm21bNDqQcKBU6q/hIEoWFgONn+Uvp+kVzFRHXjkhD/jlEMwCBwpSPw8t5
+         CrwkycIj9yxedPECHyUIzBLJuaR/DDqFVi+CxT1FdTFJiPfGa1FnCpEQPYM6hgPHa4qo
+         MQuN9th7nowMaLktV4Z2Ot0ka1/S/Hu0j+NC+7/t8cmV3Lc11uJvpdq8J+xSDamY6u6+
+         gMocQ9Q16UiL3ONOmr3vRgyi9fA68C5j/Yux/Ye/9x8b7XOQFsG16DftjYqS83PB1jWV
+         yGwyv5hevNDSPz+r8hclBm4zmAb5JQD+uUHITlUfo8+aNH3VJJhIhfjCXXWnIbU6x3Xe
+         l2GQ==
+X-Gm-Message-State: AOAM532+OCOdJV0rzB/3Hrv7mtTZrgJZqdtZx0KQ8EjpCtMAInIKmuEW
+        48krRMWC6mz56ocoQt8fB6hZ3qsa
+X-Google-Smtp-Source: ABdhPJzzi7chU9Jh0NeHZs+FTYw7KyZ/hF1QbBnNgEZs2uQJ4DZzEdwXPFhXGChpdyMjLhT2u1inQw==
+X-Received: by 2002:aa7:c45a:: with SMTP id n26mr18469033edr.45.1597006413113;
+        Sun, 09 Aug 2020 13:53:33 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:b5f4:fb07:8fe3:ee8e])
+        by smtp.gmail.com with ESMTPSA id m20sm11258203ejk.90.2020.08.09.13.53.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 12:21:07 -0700 (PDT)
-Date:   Sun, 9 Aug 2020 21:21:06 +0200
+        Sun, 09 Aug 2020 13:53:32 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= / sparse 
-        <gitlab+f2c7a505ea576c194910ce335a7779a8@salsa.debian.org>
-Cc:     linux-sparse@vger.kernel.org,
-        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
-Subject: Re: sparse | upgrade to upstream v0.6.2 (!2)
-Message-ID: <20200809192106.ddombg3xdmjiiciw@ltop.local>
-References: <reply-f2c7a505ea576c194910ce335a7779a8@salsa.debian.org>
- <merge_request_28506@salsa.debian.org>
- <note_184882@salsa.debian.org>
+To:     linux-sparse@vger.kernel.org
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 00/10] separate parsing of asm-names from attributes
+Date:   Sun,  9 Aug 2020 22:53:19 +0200
+Message-Id: <20200809205329.42811-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <note_184882@salsa.debian.org>
+Content-Transfer-Encoding: 8bit
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-I see that sparse v0.6.2 have made it to Debian testing.
+This series separate the parsing of asm-names from the parsing
+of attributes. In itself this has not much value but this series
+is part of a larger super-series aiming at rationalizing the
+handling of attributes and modifiers.
 
-Thanks a lot for having made this possible.
+Luc Van Oostenryck (10):
+  use lookup_keyword() for qualifiers
+  attribute: split handle_asm_name() from handle_attributes()
+  attribute: fold parse_asm_declarator() into handle_asm_name()
+  attribute: remove argument 'keywords' from handle_attributes()
+  attribute: directly use attribute_specifier() to handle attributes
+  attribute: factorize matching of '__attribute__'
+  attribute: no need to lookup '__attribute__' in NS_KEYWORD
+  testing for SYM_KEYWORD is unneeded for lookup_keyword()
+  testing for sym->op is unneeded for lookup_keyword()
+  keyword type is a bitmask and must be tested so
 
--- Luc
+ parse.c | 103 +++++++++++++++++++++++++++++---------------------------
+ 1 file changed, 54 insertions(+), 49 deletions(-)
+
+
+base-commit: ab77399f33b800f0a1568e512e86df71dd70f566
+-- 
+2.28.0
+
