@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 114DEC433E1
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57CC5C433E0
 	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:52:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E556D206B2
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:52:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37429206B2
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:52:58 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oq1Lxo/b"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="svv9MBco"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726236AbgHIQw5 (ORCPT
+        id S1726241AbgHIQw5 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Sun, 9 Aug 2020 12:52:57 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55456 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55432 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726323AbgHIQwx (ORCPT
+        with ESMTP id S1726299AbgHIQwx (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sun, 9 Aug 2020 12:52:53 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 97012C061351
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 09:52:44 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id bo3so7054901ejb.11
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 09:52:44 -0700 (PDT)
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C8F6CC06178B
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 09:52:42 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id a26so7092818ejc.2
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 09:52:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=v0yEyYaJiwM/8R0MJ0SDvJwBNEKNiIGLxNx+W5A9kuY=;
-        b=oq1Lxo/boIUm6jSqL5rLY9URNGYAi4pL47CnBRlK0EvDdxZjUaS5XFVY2cv4MDesV9
-         WnkLINSNxY1IKiRf5wp1sZRjSKJrsGLQT/+7kpEH0m7eW0rAYLjS6Piy4RFiu44I2dyA
-         Z2Rzn85JsI5vkK/mLj9IYpC837T5UU6lj00XSW1dA+gQ3GeytrvZ8JAbJE3LhaTKE5VZ
-         REZq9yeL2TtxwhlsYaiV2s/n7VnXBnJ4dWvj3FnZINRIHkSWPL+Eqk4AEeyve0pISoZR
-         qLIjKhebskfnJ9G1jJO5F2pqcCGSZkOauk0uF6jPctxKX7/CihO6nt5eDvMochljEodg
-         G8PQ==
+        bh=z3jGEjYlLuoC5oiPPhhzdoh4+6E8yvDmRVYxKL7tI38=;
+        b=svv9MBco5UadjVc/mtw8iPfM901QVbWIEORr1uv8YJMRvt6oWg3jKuhn0zFWIrDE4k
+         ofk4K2lLlyst6EAC64xlG9+2LFdzLhgMl4/tshvm4TzPhVmxsnIPl0aP57CnItwFEGuq
+         pLj72+WXfJS+xcdy12D+KzzBJmVQYy8cEguJfu6h4y1FFoYSOX6VWr8uuK7nSHcvNEa3
+         GJYQFdQ3Q0VaYdVw/OSpN+K3das1kJtnf1Jx66Ua+yQKAj5EbnbSyvxNvg8GNie5KiFT
+         ZKmYnNnFvfdcYLsA2nhM4pwMcxh+NCa7ugPuROEeaxLHIzyZ3ofRYhUFaTPOW+wVw4fQ
+         2xuw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=v0yEyYaJiwM/8R0MJ0SDvJwBNEKNiIGLxNx+W5A9kuY=;
-        b=tfLdLWdRT48d9X5pUHBRkGVd4Us24fulEx0PZs7EXgTc+sWdhDf6RP57POr4eq0y5o
-         tZhp+fEf9jl+y3tUa5+7bz28al6ZL7I3EIVrVDnbIVKwXwv/iGsHXYyOE3XkMREEGD+s
-         AoRlkPq8E6OjNM7vXoD5gNN+8IOzF4BexJ3STaNq+M2NIT0BUZlHYZ3YuG/50j43wYCm
-         sEwT4z3hato651mh87Uo/4UIkQkU3z6UPtn52lB/V5KwsJZHMw/9dqU5FQiTpmNM6sJu
-         a6xLVeBEWJKlUeVY31Q2t3FUKgrMKKHxpj859WZj0mkIAGjOaBsw5uENa7lDjQBtPnlH
-         8/7g==
-X-Gm-Message-State: AOAM532U2IF4yGVYNLZtXaRDkEigtuqQ6keFzNTvKZnLzsYbYFM2LGGF
-        TkOu/bpXTejhYhz7OFc2CwoqgUPG
-X-Google-Smtp-Source: ABdhPJzzPpLORdDXLLWel+1mMKRWxk9KgxVRlRoxANIMuNcySCtjv3AchJ3o7xI+zJSlR/JJc5Yi4g==
-X-Received: by 2002:a17:906:7104:: with SMTP id x4mr19147183ejj.417.1596991963124;
-        Sun, 09 Aug 2020 09:52:43 -0700 (PDT)
+        bh=z3jGEjYlLuoC5oiPPhhzdoh4+6E8yvDmRVYxKL7tI38=;
+        b=FyoJTKHw8zl0b+DiNteH0guSR8SjpKEnzAJ2VvC9buI1fVEFZJPxOzVXVdnvFMNNX3
+         GSPs8CDNlutwmcLQ2liBR6pmAFVBZx+PzNw7YHeYbAhvBEpnffiWBZBCzEDZbUcrjn8q
+         O8kAng10sphkfrwQDd8m7Z0wWPa/UygTsbDJimm7aSB1G7FkjgTuI/5iC2RnBspx+vdb
+         1vwQHNxtt9lmGFGruZsigmTYJMrWHTLqwcp3Dyk4uY2f8XOeElMaevUkt/A4gKMnwmc7
+         VMtehE7qNdBqHIvikMbtaEBh74ywvPKJMq8cNIEOTooV+K/NZKSRT2cH0l+KYpgDCp8u
+         6BkA==
+X-Gm-Message-State: AOAM532ovCrEFVcCbDkla3t8QXJbZ7iTEMDyoHjpUKlNwNJdPUdLP3XX
+        bKBnuWPPf63r9Dkk7KDQXUGjWuqF
+X-Google-Smtp-Source: ABdhPJyn+csvg69E/9bIpdpZC1cR1cgm7ryVz4YU1Mg1NsXdZwr2XSPsZCZxApBuSwjeU66yK3gOXQ==
+X-Received: by 2002:a17:906:c002:: with SMTP id e2mr19102061ejz.244.1596991961286;
+        Sun, 09 Aug 2020 09:52:41 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:79f2:f43a:7be8:9ec8])
-        by smtp.gmail.com with ESMTPSA id j11sm10810427ejx.0.2020.08.09.09.52.42
+        by smtp.gmail.com with ESMTPSA id j11sm10810427ejx.0.2020.08.09.09.52.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 09:52:42 -0700 (PDT)
+        Sun, 09 Aug 2020 09:52:40 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 8/8] parse: simplify set_storage_class()
-Date:   Sun,  9 Aug 2020 18:52:29 +0200
-Message-Id: <20200809165229.36677-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/8] parse: let asm_modifier() use the keyword modifier
+Date:   Sun,  9 Aug 2020 18:52:27 +0200
+Message-Id: <20200809165229.36677-7-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200809165229.36677-1-luc.vanoostenryck@gmail.com>
 References: <20200809165229.36677-1-luc.vanoostenryck@gmail.com>
@@ -76,33 +76,80 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The second test is now made as the else part of the first test,
-saving a 'return' that is otherwise not needed.
+Now that 'MOD_INLINE' & 'MOD_VOLATILE' are associated with their
+corresponding keyword, a single asm_modifier() method can cover
+both cases.
+
+So, replace asm_modifier_inline() & asm_modifier_volatile() by
+a single, generic version: asm_modifier().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c | 7 ++-----
- 1 file changed, 2 insertions(+), 5 deletions(-)
+ parse.c  | 16 +++-------------
+ symbol.h |  2 +-
+ 2 files changed, 4 insertions(+), 14 deletions(-)
 
 diff --git a/parse.c b/parse.c
-index 92ca1b66e140..f3f33790eac0 100644
+index 37fe90c016fe..fad41d36dda6 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -1385,12 +1385,9 @@ static struct token *storage_specifier(struct token *next, struct symbol *sym, s
- 	const char *storage = modifier_name(class);
+@@ -120,16 +120,6 @@ static void asm_modifier(struct token *token, unsigned long *mods, unsigned long
+ 	*mods |= mod;
+ }
  
- 	/* __thread can be used alone, or with extern or static */
--	if (is_tls && (class & ~(MOD_STATIC|MOD_EXTERN))) {
-+	if (is_tls && (class & ~(MOD_STATIC|MOD_EXTERN)))
- 		sparse_error(next->pos, "__thread cannot be used with '%s'", storage);
--		return next;
--	}
+-static void asm_modifier_volatile(struct token *token, unsigned long *mods)
+-{
+-	asm_modifier(token, mods, MOD_VOLATILE);
+-}
 -
--	if (!ctx->storage_class)
-+	else if (!ctx->storage_class)
- 		ctx->storage_class = class;
- 	else if (ctx->storage_class == class)
- 		sparse_error(next->pos, "duplicate %s", storage);
+-static void asm_modifier_inline(struct token *token, unsigned long *mods)
+-{
+-	asm_modifier(token, mods, MOD_INLINE);
+-}
+-
+ static struct symbol_op typedef_op = {
+ 	.type = KW_MODIFIER,
+ 	.declarator = storage_specifier,
+@@ -138,7 +128,7 @@ static struct symbol_op typedef_op = {
+ static struct symbol_op inline_op = {
+ 	.type = KW_MODIFIER,
+ 	.declarator = generic_qualifier,
+-	.asm_modifier = asm_modifier_inline,
++	.asm_modifier = asm_modifier,
+ };
+ 
+ static struct symbol_op noreturn_op = {
+@@ -185,7 +175,7 @@ static struct symbol_op const_op = {
+ static struct symbol_op volatile_op = {
+ 	.type = KW_QUALIFIER,
+ 	.declarator = generic_qualifier,
+-	.asm_modifier = asm_modifier_volatile,
++	.asm_modifier = asm_modifier,
+ };
+ 
+ static struct symbol_op restrict_op = {
+@@ -2076,7 +2066,7 @@ static struct token *parse_asm_statement(struct token *token, struct statement *
+ 	while (token_type(token) == TOKEN_IDENT) {
+ 		struct symbol *s = lookup_keyword(token->ident, NS_TYPEDEF);
+ 		if (s && s->op  && s->op->asm_modifier)
+-			s->op->asm_modifier(token, &mods);
++			s->op->asm_modifier(token, &mods, s->ctype.modifiers);
+ 		else if (token->ident == &goto_ident)
+ 			asm_modifier(token, &mods, MOD_ASM_GOTO);
+ 		token = token->next;
+diff --git a/symbol.h b/symbol.h
+index 657a6e0fb354..4f9dd7417cc3 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -131,7 +131,7 @@ struct symbol_op {
+ 	struct token *(*toplevel)(struct token *token, struct symbol_list **list);
+ 	struct token *(*attribute)(struct token *token, struct symbol *attr, struct decl_state *ctx);
+ 	struct symbol *(*to_mode)(struct symbol *);
+-	void          (*asm_modifier)(struct token *token, unsigned long *mods);
++	void (*asm_modifier)(struct token *token, unsigned long *mods, unsigned long mod);
+ 
+ 	int test, set, class;
+ };
 -- 
 2.28.0
 
