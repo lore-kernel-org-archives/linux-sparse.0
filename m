@@ -2,70 +2,69 @@ Return-Path: <SRS0=O0OO=BT=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 068C7C433DF
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:41:20 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CC1DC433DF
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:52:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C9116206C3
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:41:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 63DA8206B2
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 16:52:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="sPybrYbB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CURrjRcP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726210AbgHIQlS (ORCPT
+        id S1726210AbgHIQwj (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 9 Aug 2020 12:41:18 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53670 "EHLO
+        Sun, 9 Aug 2020 12:52:39 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55400 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726175AbgHIQlQ (ORCPT
+        with ESMTP id S1726175AbgHIQwi (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Aug 2020 12:41:16 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9E1CC061756
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 09:41:13 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id i6so4727203edy.5
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 09:41:13 -0700 (PDT)
+        Sun, 9 Aug 2020 12:52:38 -0400
+Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2C96AC061756
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 09:52:37 -0700 (PDT)
+Received: by mail-ed1-x542.google.com with SMTP id ba10so4738591edb.3
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 09:52:37 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=+JKrzqvrsYPSF8z+ynm4f0nIRxLndAmUnk4WP89ZCv0=;
-        b=sPybrYbB6+MNEPVilSAXXdIE+2PhVTPo7vmY5rFx+u/xDYOC5myZKz/ZREmjIFCzSZ
-         gUXsR1XwAbbyEGUhMiQS73eiKMyxkY3Ih3X+dSY8qkXw4faydOyHjYvMV3/R5LD12SQi
-         dSQS7iezSRaNO3f6st+k3kXFyn6FF9+/LDQjyIl1PsXQDCgNUYgE2M8WWknlejRqZMEI
-         SW2qwgntDwqKsBnfFU8CrXMU+j5eoUVVRkENQKAesGAUwbt6KKLd/a4w3tDOP75AizTc
-         nBvmoXltiyXPtPn/G+Vr8VX1JFoJZazmdhbxcqenbVOXfF284beMrQuPO1ruSTfzwuzh
-         5lcw==
+        bh=VgGZ6BAVk3bgQJSuPUVP0KqLhTQfVS2nfTb3xgLr9qg=;
+        b=CURrjRcPrA7/tdDW1bnSfFNct8yaQeEMlScot97tAYlB8G2w5zvgO+9fo8uXfDVQWX
+         i9HXb2U82ITcX/zm038fT2LP1+t38WdQ38K8/++6b+GnueKWHJbWvVS9CUoJu6Lahk2T
+         egl8LZKGIqbOkfDORk7T4vHGxMj3/klP2WK+LOe3c/qnYoN+85PTRYgFuaLF8uAkqIMY
+         0BggEBoYfSYGnVhKA+cDQSY3l7YOb+maDZVx208Weixy3rUGKR6G8Yf5geiB7NMU5hvw
+         X3pMXSp1T1fVyBGi2c9iV2Uw8cMceYUWzwXCdsNLz8emmeMeo+ww/nZOJnzSWPzDPDxU
+         lKpw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=+JKrzqvrsYPSF8z+ynm4f0nIRxLndAmUnk4WP89ZCv0=;
-        b=dlHpUPlBcCgTpODeug+kkFrYKHp1wfx0qqYKfi58dLe0dauJWHOoC4XiGZXsD9ZTZC
-         yQpDgPcd8rW74njiPyWp9jZrSeB5qyxPpI6PP2eNiG1zOEo61Xe5gTPhN452JmJDYsF4
-         knM1BIQVEZ1K9uY/NaY+G7ocE7LXu9U+h5kQQg1pyd0EJyF7P8oDuXscqk1lV/1Y7cjm
-         TdWYuFBI1g+x+M4SBqacilJXVAk1B6JPD6UmsissCdS9AdcThPZhJP0Rqa7s9I/IJWF1
-         qW6VxRBcci76GyN9DP8Kn0jl2Za28AVVvpXIwB+1qpwx9/jJRHB6fpIQXRFBtNyBCdQI
-         6oHg==
-X-Gm-Message-State: AOAM533/YWG1OlPYhjdC+UTabBJS8ALlsYZgHkZo+R2RjGdwhYyqfhKF
-        Ac5ZQappiOtr2WWqT6NqVTweem1B
-X-Google-Smtp-Source: ABdhPJx3rm5OntJ4G+lJDqudaFpTsFeSmRUGkqPlTkxtTC8ijvaP47sBhxIz7F2G4qy8DIHelCWJcw==
-X-Received: by 2002:a05:6402:a5b:: with SMTP id bt27mr18023872edb.120.1596991272202;
-        Sun, 09 Aug 2020 09:41:12 -0700 (PDT)
+        bh=VgGZ6BAVk3bgQJSuPUVP0KqLhTQfVS2nfTb3xgLr9qg=;
+        b=P976jmrEojLBkaA3QVjFcBBam1xEvpvY5E1qJniX2b0qFY0ERLmiKUz03NEwDC9aN7
+         rYRgXq10PmDIkanFdux+gun9chjgZ9a8Jv2rkQ2lEl1vx/Z7nAkaid/tABj0bZ+UW4tR
+         n+AyAim1w0+1sy0FZxI7zQqr7e0gANOKu7fQU0Zc38eYSZ0omqgv09ep3eEsosiuuS3N
+         3cWlj1PWvDQkFYMimLT6iDiqIBZDkDycpwKgg5qpjAKNUkjK+e9eYHPVTNlSYtLe2yom
+         wfDHlQC+1ZChIROM+fDWKI0vysPAS5l8NpXfNVks7IUk4Mj7Pm41e1IeYa/zPjxUUp7Z
+         99tA==
+X-Gm-Message-State: AOAM532JT+bI0rETnpdchPnY8FLAv3y0pyOa+l6q9mrLQ0My59jEVbBV
+        jfwS1/l278UGwthzTWtDMCcHMOek
+X-Google-Smtp-Source: ABdhPJwfZ0cSWJu81nUps86oCs1r/FtsOD7Tz+7jE+th99rAPvWxV/Jg/K4jvPJuwZlJWgrIQhQLXw==
+X-Received: by 2002:a05:6402:896:: with SMTP id e22mr18317849edy.210.1596991955421;
+        Sun, 09 Aug 2020 09:52:35 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:79f2:f43a:7be8:9ec8])
-        by smtp.gmail.com with ESMTPSA id bd13sm10194032edb.38.2020.08.09.09.41.10
+        by smtp.gmail.com with ESMTPSA id j11sm10810427ejx.0.2020.08.09.09.52.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 09:41:11 -0700 (PDT)
+        Sun, 09 Aug 2020 09:52:34 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] force to 0 expressions which are erroneously non-constant
-Date:   Sun,  9 Aug 2020 18:41:05 +0200
-Message-Id: <20200809164105.36446-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/8] simplify parsing of storage modifiers
+Date:   Sun,  9 Aug 2020 18:52:21 +0200
+Message-Id: <20200809165229.36677-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -74,49 +73,27 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-When an expression that needs to be constant but is, in fact,
-not constant, sparse throws an error and leaves it as-is.
-But some code makes the assumption that the expression is
-constant and uses its value, with some random result.
+This series simplify the parsing of storage modifiers and
+is part of a larger super-series aiming at rationalize the
+handling of attributes and modifiers
 
-One situation where this happens is in code like:
-	switch (x) {
-	case <some non-const expression>: ...
+Luc Van Oostenryck (8):
+  show-mod: add helper to show the modifiers but without ending space
+  show-mod: no ending space when showing a single modifier
+  show-mod: no extra space when showing modifiers + ident
+  parse: rework handling of storage_class
+  parse: associate modifiers with their keyword
+  parse: let asm_modifier() use the keyword modifier
+  parse: improve error messages concerning storage specifiers
+  parse: simplify set_storage_class()
 
-In this case, the linearization of the switch/case statement
-will unconditionally use the value of the case expression
-but the expression has no value.
+ parse.c      | 237 +++++++++++++++------------------------------------
+ show-parse.c |  20 ++++-
+ symbol.h     |   9 +-
+ 3 files changed, 91 insertions(+), 175 deletions(-)
 
-One way to avoid this would be to add defensive checks each
-time a value is retrieved but this is a lot of work and time
-for no benefits.
 
-So, change this by forcing the expression to be a constant
-value of 0 just after the error message has been issued.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- expand.c | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/expand.c b/expand.c
-index 623b180025ad..c4f806dee1ba 100644
---- a/expand.c
-+++ b/expand.c
-@@ -1177,8 +1177,12 @@ static void expand_const_expression(struct expression *expr, const char *where)
- {
- 	if (expr) {
- 		expand_expression(expr);
--		if (expr->type != EXPR_VALUE)
-+		if (expr->type != EXPR_VALUE) {
- 			expression_error(expr, "Expected constant expression in %s", where);
-+			expr->ctype = &int_ctype;
-+			expr->type = EXPR_VALUE;
-+			expr->value = 0;
-+		}
- 	}
- }
- 
+base-commit: eb6779f6f62173672b533cfbbff59758f710fb4f
 -- 
 2.28.0
 
