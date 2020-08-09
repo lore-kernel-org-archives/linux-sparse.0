@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 44914C433E0
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EAFB4C433E1
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B2E2206D8
-	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id BC5BB207DA
+	for <linux-sparse@archiver.kernel.org>; Sun,  9 Aug 2020 20:53:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ADLe2Ph6"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IXs5FIpQ"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726392AbgHIUxi (ORCPT
+        id S1726396AbgHIUxk (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 9 Aug 2020 16:53:38 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35634 "EHLO
+        Sun, 9 Aug 2020 16:53:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35638 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726396AbgHIUxi (ORCPT
+        with ESMTP id S1726400AbgHIUxj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 9 Aug 2020 16:53:38 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF352C061756
-        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 13:53:37 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id a26so7420669ejc.2
-        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 13:53:37 -0700 (PDT)
+        Sun, 9 Aug 2020 16:53:39 -0400
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 796B8C061786
+        for <linux-sparse@vger.kernel.org>; Sun,  9 Aug 2020 13:53:39 -0700 (PDT)
+Received: by mail-ed1-x543.google.com with SMTP id q4so4954498edv.13
+        for <linux-sparse@vger.kernel.org>; Sun, 09 Aug 2020 13:53:39 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=sROBVrf/B4od4o0cJu0K2fHnIqYEHEOYftCZZrRpOCM=;
-        b=ADLe2Ph6E8vGhd8DBKtwRnx9522XXioxEMuFk6rdF5JXkyGxzBFM8tI7OneLZBxrk5
-         H2WcsYxOef9ZpdZt878QUYtdJOydmQWA2XDIntSqmAOUrTHhXuclg9YPpfyqkUR2Xhn4
-         GOifOEWFGYMfhpGjPjnNV37ZBtqAZQmgIMh2aaSp3oTT7P6MKe1Zy6BeEdVU4EQSin5j
-         oeS9cJ2XyTFqhXEGOBKM3vnogabjDSFy4g4MEp4sfGezqWqIUcqYt+zmyhPIrXgMDOcQ
-         Egvq/2fkfuSxnKqIvpCPKgUqU0YmRL2uF5FTToaLs8eUmOjuvyiKcZjWpdQ4DsTRod8O
-         bkPg==
+        bh=Ow0cd4Ts9W/w9vnedCVwmDPzR0E8rZSwgRou1wCSTWI=;
+        b=IXs5FIpQpB/wO7Nmeot8b4o4EVY/9GXo2YdVge5xl/h+tw1ZEsymbgC+/1wOn6C8mv
+         E/9Z3SWKEj2NjsxJ7IkVn6F/vEv0ckGrGEtIMISlwjVCtPsrJBchSPIHgRsXcRrPpYpn
+         xNmPLlcqzOBp3/wT+uJi8SgfTArY0H4vaK5lkjk+cHi4YRDGC4Uf9IcclHtxMPw3ewSL
+         ZvcARr23WxutdLGcdHuw3j7BoYBXXgQ31ltOCGONReL1rCk3KK34FrRjNCEmNyCVWs0/
+         HgcVE2cKHf6CCP7yXuzO3fxKqJgAmZ8HE89iewXQzy1xhSj1nJfMb8r2j/4DfOKQ3YPf
+         i6Bg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=sROBVrf/B4od4o0cJu0K2fHnIqYEHEOYftCZZrRpOCM=;
-        b=rVwEmDLrICe1KodhYIpD954zaNXx5xmiQW/xHWnBMsMcJ9DKkjhYfcpbr5ruVmBl5Y
-         hgMa0OFgaXNzO+Xf+A0KIBKzQWH7GzdbHxKyyWG+Zu3xsh4gazKU7NniXHpKJgo+Wb3Q
-         +vTw2/QWZrhBj0e2zOOApjETe8ILxtuWnp2JsOew2PzlqZZ+6pOoN5jEBct4DSiViNsr
-         PZb6nNz0bESoSDGVFnnbdxFtSiMKs4qMUUFIPSvLynbOh4daKryWIiJQmKqH7ElW75mW
-         3oahUSx2DUs549urf+uvll2cz9hYcfs27rkHB8YF2DfsNVUBPntG2nx4sm0Z5SquGwed
-         rHNA==
-X-Gm-Message-State: AOAM531BwdK2iaYBnyGHb7tliBUEn8kjP1xDA8uT50gvlcD8g9RTJdrZ
-        d3u9iThG5PUhNMP+BZPIskQe9JQw
-X-Google-Smtp-Source: ABdhPJy3B/lp+r97ehwNl94i5YRQk95A7rsxaIIIOTv3mFT8jr1755Fm5zdfk9JN3pOs0KGXMh11EA==
-X-Received: by 2002:a17:906:cb0a:: with SMTP id lk10mr2899335ejb.209.1597006416262;
-        Sun, 09 Aug 2020 13:53:36 -0700 (PDT)
+        bh=Ow0cd4Ts9W/w9vnedCVwmDPzR0E8rZSwgRou1wCSTWI=;
+        b=Ck80xiI0VZEyaHWPD70tP4gx+CCegFHlxNrESZaxn8q1frr8zgraL/r9AI3sTrY6vp
+         AQTga7kK5Xdt3dv6BwWHl+JgzuzZxgWNIJJBeJbfZweTBJMugXS/0npxO7J5G9WX69Ap
+         JaeBd+RcmQxgLi183G6lLDoVV753tCQUIp9cDVbdmNnvHVd8PrvvZr7FbDhBjDA7EmjQ
+         hXlR2OIkmqgr/qNBqqpzFb1MhMlWkOCmT2yfu8Eh70uu0+7PRZdZy019CLoBGWDqqhQt
+         T/i7H8oWi3kDsFoMUq+hFuZChTzIuYibLmOyKS30eBFGqAlCjdzWVHriA2r1uIl17j5X
+         z+pg==
+X-Gm-Message-State: AOAM530E57XtzGEThPDDMarXkwhDF9yDA+wC97EjpEmy9+Anj1fr7psY
+        5eG9mx2dgRd1bBPtq2GqyJZJjazE
+X-Google-Smtp-Source: ABdhPJx81+vd7eEuH4Ro2B/n1U+oXlUOCHnIj85WzHvkEco55XJMLDZ/TOYtanKIsJGH8iKC6kkFSQ==
+X-Received: by 2002:a05:6402:1c85:: with SMTP id cy5mr5677282edb.6.1597006418017;
+        Sun, 09 Aug 2020 13:53:38 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:b5f4:fb07:8fe3:ee8e])
-        by smtp.gmail.com with ESMTPSA id m20sm11258203ejk.90.2020.08.09.13.53.35
+        by smtp.gmail.com with ESMTPSA id m20sm11258203ejk.90.2020.08.09.13.53.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 09 Aug 2020 13:53:35 -0700 (PDT)
+        Sun, 09 Aug 2020 13:53:37 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 03/10] attribute: fold parse_asm_declarator() into handle_asm_name()
-Date:   Sun,  9 Aug 2020 22:53:22 +0200
-Message-Id: <20200809205329.42811-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 05/10] attribute: directly use attribute_specifier() to handle attributes
+Date:   Sun,  9 Aug 2020 22:53:24 +0200
+Message-Id: <20200809205329.42811-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200809205329.42811-1-luc.vanoostenryck@gmail.com>
 References: <20200809205329.42811-1-luc.vanoostenryck@gmail.com>
@@ -76,77 +76,31 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-An asm name is not really a declarator, it must only be placed
-*after* a declarator and is directly handled by handle_asm_name().
-It's thus not needed and possibly confusing to treat it like a
-generic declarator.
+handle_attributes() used to also handle asm names and so used
+the declarator method associated to the taken. But now, asm names
+are handled in a separated function.
 
-So, fold parse_asm_declarator() into handle_asm_name() and remove it.
+So, directly use attribute_specifier() to handle the attributes
+instead of using it via the declarator method.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c | 20 ++++++++------------
- 1 file changed, 8 insertions(+), 12 deletions(-)
+ parse.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/parse.c b/parse.c
-index cf897e5d2804..73ec579cfa7f 100644
+index ec675f20ef01..14b1746d38c5 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -54,7 +54,7 @@ static struct token *handle_attributes(struct token *token, struct decl_state *c
- typedef struct token *declarator_t(struct token *, struct decl_state *);
- static declarator_t
- 	struct_specifier, union_specifier, enum_specifier,
--	attribute_specifier, typeof_specifier, parse_asm_declarator,
-+	attribute_specifier, typeof_specifier,
- 	typedef_specifier, inline_specifier, auto_specifier,
- 	register_specifier, static_specifier, extern_specifier,
- 	thread_specifier, const_qualifier, volatile_qualifier;
-@@ -363,7 +363,6 @@ static struct symbol_op range_op = {
- 
- static struct symbol_op asm_op = {
- 	.type = KW_ASM,
--	.declarator = parse_asm_declarator,
- 	.statement = parse_asm_statement,
- 	.toplevel = toplevel_asm_declaration,
- };
-@@ -1744,6 +1743,7 @@ static struct token *declarator(struct token *token, struct decl_state *ctx);
- 
- static struct token *handle_asm_name(struct token *token, struct decl_state *ctx)
- {
-+	struct expression *expr;
- 	struct symbol *keyword;
- 
- 	if (token_type(token) != TOKEN_IDENT)
-@@ -1753,7 +1753,12 @@ static struct token *handle_asm_name(struct token *token, struct decl_state *ctx
- 		return token;
- 	if (!(keyword->op->type & KW_ASM))
- 		return token;
--	return keyword->op->declarator(token->next, ctx);
-+
-+	token = token->next;
-+	token = expect(token, '(', "after asm");
-+	token = string_expression(token, &expr, "asm name");
-+	token = expect(token, ')', "after asm");
-+	return token;
+@@ -1816,7 +1816,7 @@ static struct token *handle_attributes(struct token *token, struct decl_state *c
+ 			break;
+ 		if (!(keyword->op->type & KW_ATTRIBUTE))
+ 			break;
+-		token = keyword->op->declarator(token->next, ctx);
++		token = attribute_specifier(token->next, ctx);
+ 	}
+ 	return token;
  }
- 
- static struct token *skip_attribute(struct token *token)
-@@ -2181,15 +2186,6 @@ static struct token *parse_asm_statement(struct token *token, struct statement *
- 	return expect(token, ';', "at end of asm-statement");
- }
- 
--static struct token *parse_asm_declarator(struct token *token, struct decl_state *ctx)
--{
--	struct expression *expr;
--	token = expect(token, '(', "after asm");
--	token = string_expression(token, &expr, "inline asm");
--	token = expect(token, ')', "after asm");
--	return token;
--}
--
- static struct token *parse_static_assert(struct token *token, struct symbol_list **unused)
- {
- 	struct expression *cond = NULL, *message = NULL;
 -- 
 2.28.0
 
