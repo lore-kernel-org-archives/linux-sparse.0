@@ -2,70 +2,70 @@ Return-Path: <SRS0=DkR5=BU=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE6E3C433E0
-	for <linux-sparse@archiver.kernel.org>; Mon, 10 Aug 2020 21:54:48 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4960CC433E0
+	for <linux-sparse@archiver.kernel.org>; Mon, 10 Aug 2020 21:54:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 89EE4206B5
-	for <linux-sparse@archiver.kernel.org>; Mon, 10 Aug 2020 21:54:48 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1F8D7206B5
+	for <linux-sparse@archiver.kernel.org>; Mon, 10 Aug 2020 21:54:50 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="XJUnpObW"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QD7UwhO7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726690AbgHJVys (ORCPT
+        id S1726697AbgHJVyu (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 10 Aug 2020 17:54:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39190 "EHLO
+        Mon, 10 Aug 2020 17:54:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39192 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726517AbgHJVyq (ORCPT
+        with ESMTP id S1726648AbgHJVyr (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 10 Aug 2020 17:54:46 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9104CC061756
-        for <linux-sparse@vger.kernel.org>; Mon, 10 Aug 2020 14:54:45 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id qc22so10934419ejb.4
-        for <linux-sparse@vger.kernel.org>; Mon, 10 Aug 2020 14:54:45 -0700 (PDT)
+        Mon, 10 Aug 2020 17:54:47 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 85686C061787
+        for <linux-sparse@vger.kernel.org>; Mon, 10 Aug 2020 14:54:46 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id c16so10910899ejx.12
+        for <linux-sparse@vger.kernel.org>; Mon, 10 Aug 2020 14:54:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=HsYWgjnoCq7jmh/iEc3W3dsbe17gaOmkLeKdtns2fpM=;
-        b=XJUnpObWQZifsSFskaJKflhfOmpn4cXql1KxpsDXo6AzgODz+k9oggD96cJ1k98umD
-         ysIIV/sWnlPl8PGvTmCkBPld6BzbZrfI58rtPQL1zmMRErrGLKZU3pk56Ee94VW7unFE
-         qWVSo4Yce7U9UnljqT5Oqok+P0s7YbsjYa6dpK8F8JtrWBYkwvbfT/dlcwUDLGCczMUM
-         ekfPPJ7TPulHwC8n8vAfTFFyv1PmCERv8j/AiOP8TQjiKLfLShoaoKwwLIzpG+pKog8E
-         oRr7i4Y8nBT3HeqHQ+SWlXKw3QHAiQ9ba6nkRUDTpXU6yfYZP7OQC2l1a1SKZPlhXtJ5
-         h+Og==
+        bh=O+bRI7gklBgcfuIh8mPjPrpgZq3OU1dsJquvdnGMjdI=;
+        b=QD7UwhO7LLoH8YE5kZ6lxnGbEWrJbg6rpnrY2+B6UJPT1pxKLZG6fnHwR/SZI4j3CO
+         z1emUbXq/6ePGRrxUlhtWDjBaC7EmNb0m95mOu9bnDrdo8IYxiII/t6FU9P/h+3rj5qr
+         Lcc+74Cw7XWAbOmf/3Wctlq2cxv4nzwOC15MBXppqmhk40sm4+MTxYGoUqQHeBTmGi2e
+         HkIVMCp+UIIffDzzxCe9+ASp1FUHXxGHYPyseJsWqZavI3fAEqesB+TVB2RagwaasFv1
+         o8/xyjuBXmfSmXuq+4eBAOlH6ICTRVDjsS7GZANKdgNkej2IOun7Iu3UAkZpnOd+D7x8
+         EgzQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=HsYWgjnoCq7jmh/iEc3W3dsbe17gaOmkLeKdtns2fpM=;
-        b=CH1zUYPZeM8WHqbVwuzvVhJlKlsa2EZakGZK0CniUmTOkDR6TUFJswQTzesWKl6Jvk
-         4yz0nXHn2ROnA94Qlp0E8eMmPBaRjr2AZkQUzdF5qdKB1Hhk5OuGdOi0RNHh2YJnU7xX
-         T73qFSTbNTxRVeLbdbTc5QmfmI+2NG8kBGtKns+5Ro1d16zoMLt9GnCGPQIPFBscEo1R
-         SoBYv6+RmAVRVLO31eAG9zf6Vnp03RKPLoabjjReB0JKvkFAtlquqENlsj5nI8sS4qmZ
-         /p4EkalFfaAUZ52EHVegBgxmKZatF4JO1x4H2XIBPbGDPV8UFuC7RdStsRbTKosktVqc
-         3gEw==
-X-Gm-Message-State: AOAM532J6XzK0CnCM9CGQ8Vo8DisdS7XAH+hYaTxgOcuSJ+uc+cVRCvZ
-        LaUhRXPOIXRpgW+C2QnD7DaLeTKH
-X-Google-Smtp-Source: ABdhPJyYPALdJgVbdPIKgS9LBqDWD/BvA/LDjwKpwx2QKCVEeE/X2BRNOhH+eCDycNGhZpY/mycGMg==
-X-Received: by 2002:a17:907:405f:: with SMTP id ns23mr22564401ejb.511.1597096484097;
-        Mon, 10 Aug 2020 14:54:44 -0700 (PDT)
+        bh=O+bRI7gklBgcfuIh8mPjPrpgZq3OU1dsJquvdnGMjdI=;
+        b=pEGYxUl41QfAixM6FnY5w+TNyv/Y533yYRQhr6/kwB3+yn8kKyPKlEjpOI0lziEGJf
+         /sb+o0VlAoMPYUKwYH0wA9uFLiRRaPpcALWbW/Jr2gLP38tJeVv9XR6cAvC5+O5CndtT
+         ylTzF7LUGFxwtmpHZ53p3lYztWPVhlNEab0aqarAeSB1mvazSapLWkx+jLACjg3UhYIg
+         l4kSAgB5x8hwBeT6OH/y3xDK1hzUJ4AFufDTzTdiogkLCOfw+wd/Z2b+Cj0kForqCDMF
+         o+oa6xasqZ0GBiT4I+jLyABaMWtr0eStAg/+j54DveCLurmrvMil+c6WWdgEdEPUbVxf
+         WQYw==
+X-Gm-Message-State: AOAM53005Ffp5GBwb1vDquMFPiwp2eQCsoTjhnu0uoAiddDiaSSqQquG
+        z5HMe1LdfogOSJzI1JLX+QcIm2/b
+X-Google-Smtp-Source: ABdhPJxYixNF6Yi/A95Wdc1TZj14fdamkVnD8HO+FPhpksd5n7IKvxRJp/7c7TcFI9YdnwMbNneXQA==
+X-Received: by 2002:a17:906:1f8e:: with SMTP id t14mr23966659ejr.336.1597096485005;
+        Mon, 10 Aug 2020 14:54:45 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:80df:2003:9ede:fcdf])
-        by smtp.gmail.com with ESMTPSA id p8sm13771777ejx.53.2020.08.10.14.54.43
+        by smtp.gmail.com with ESMTPSA id p8sm13771777ejx.53.2020.08.10.14.54.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 10 Aug 2020 14:54:43 -0700 (PDT)
+        Mon, 10 Aug 2020 14:54:44 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/7] doc: move down info about tarballs, after git repositories
-Date:   Mon, 10 Aug 2020 23:53:33 +0200
-Message-Id: <20200810215336.76070-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/7] doc: reorganize the table of content
+Date:   Mon, 10 Aug 2020 23:53:34 +0200
+Message-Id: <20200810215336.76070-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200810215336.76070-1-luc.vanoostenryck@gmail.com>
 References: <20200810215336.76070-1-luc.vanoostenryck@gmail.com>
@@ -76,37 +76,49 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Better to have the information about the GIT repositories
-first because I'm not sure if anyone still use the tarballs.
+Reorganize the table of of content with user documentation first
+then all documentation useful for development on sparse itself.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/index.rst | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ Documentation/index.rst | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/Documentation/index.rst b/Documentation/index.rst
-index 4047343a5a75..321a947ec9c5 100644
+index 321a947ec9c5..4bca8c7e47f3 100644
 --- a/Documentation/index.rst
 +++ b/Documentation/index.rst
-@@ -25,9 +25,6 @@ by Christopher Li in 2009 and by Luc Van Oostenryck in late 2018.
- Getting Sparse
- --------------
+@@ -64,22 +64,22 @@ Bugs can also be reported and tracked via the `Linux kernel's bugzilla for spars
  
--You can find tarballs of released versions of Sparse at
--https://www.kernel.org/pub/software/devel/sparse/dist/.
--
- The most recent version can be obtained directly from the Git
- repository with the command::
  
-@@ -35,6 +32,8 @@ repository with the command::
+ .. toctree::
+-   :caption: Documentation
++   :caption: User Documentation
+    :maxdepth: 1
  
- You can also `browse the Git repository <https://git.kernel.org/pub/scm/devel/sparse/sparse.git>`_
- or use the mirror at https://github.com/lucvoo/sparse.
-+The tarballs of released versions of Sparse and their signatures can be found at
-+https://www.kernel.org/pub/software/devel/sparse/dist/.
+    annotations
+-   dev-options
+-   types
+-   api
+-   IR
+-   test-suite
+-   doc-guide
  
- Once you have the sources, to build Sparse and install it in your ~/bin
- directory, just do::
+ .. toctree::
+-   :caption: How to contribute
++   :caption: Development
+    :maxdepth: 1
+ 
+    submitting-patches
++   types
++   api
++   dev-options
++   IR
++   test-suite
++   doc-guide
+    TODO
+ 
+ .. toctree::
 -- 
 2.28.0
 
