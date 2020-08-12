@@ -1,130 +1,94 @@
-Return-Path: <SRS0=GPIt=BV=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=dH8I=BW=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.1 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,FROM_LOCAL_HEX,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 76746C433E0
-	for <linux-sparse@archiver.kernel.org>; Tue, 11 Aug 2020 16:47:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 950B6C433DF
+	for <linux-sparse@archiver.kernel.org>; Wed, 12 Aug 2020 01:07:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 432572076B
-	for <linux-sparse@archiver.kernel.org>; Tue, 11 Aug 2020 16:47:47 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="P3M+/8cC"
+	by mail.kernel.org (Postfix) with ESMTP id 7C71C206B5
+	for <linux-sparse@archiver.kernel.org>; Wed, 12 Aug 2020 01:07:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728975AbgHKQrr (ORCPT
+        id S1726426AbgHLBHG (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 11 Aug 2020 12:47:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43904 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728962AbgHKQrq (ORCPT
+        Tue, 11 Aug 2020 21:07:06 -0400
+Received: from mail-il1-f198.google.com ([209.85.166.198]:52309 "EHLO
+        mail-il1-f198.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726405AbgHLBHG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 11 Aug 2020 12:47:46 -0400
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DDB7C06174A
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2020 09:47:46 -0700 (PDT)
-Received: by mail-ed1-x542.google.com with SMTP id m20so9585108eds.2
-        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2020 09:47:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=H5DEcYS61pJ7APhq/eOh53K4EFVBvaoIwp3FcSFZIKE=;
-        b=P3M+/8cCECbgjGj5TpiU+qEPH7dRLAQlIquewdT8Vww44cDtB17VqOT0NpH3G4jO0e
-         8N1oFaJZxKcN9ha5KGTiiRDnSrQEK6VIv9zaIqaUfhKsbljVRzrHZTM4UK2pb+sWUZMB
-         oxZez9ibZOR+4hMERXPS0PEtUzVPbHXaFVmIe9XS/5aptf4NqlkJ0L/rWSSdro99KD9U
-         Erh4gMwoJUgiY4bR43quijl2byz139e0ltamPbSxrafpFBRKLtxpf/GE4My35koi7VhD
-         bD5P4Y4IB4RTzZnMSijdR53JuqvyBMh9m0MQAJHepGOmSY96+mOVhYuM9XW3RIlXTr64
-         76dw==
+        Tue, 11 Aug 2020 21:07:06 -0400
+Received: by mail-il1-f198.google.com with SMTP id z14so611881ilk.19
+        for <linux-sparse@vger.kernel.org>; Tue, 11 Aug 2020 18:07:05 -0700 (PDT)
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=H5DEcYS61pJ7APhq/eOh53K4EFVBvaoIwp3FcSFZIKE=;
-        b=kJTsJl9FDyUg9E9bakI6+hSJI3yWdN+dfPA/NkFm9QN434wfcGkbsdcnEtyJSZRt+n
-         Gst701T6bBYzA+kqExl+2ZiAtZwXrEp6WRWIeK1RbxN7rgUbb8pY9hU/OpdgmoV6rYQK
-         JN5ci4pfZSBIdmRSoaJDLK6N6lCI7+6JPCEJ/A3yb+RLqp7bR6fahYyUwJcPiPzIC79P
-         H0SEehsYAQ4e91YKiakfH51u2dku5lZPd8LngXAy9RCjIzjbXWSGFP1JGF74B+DwQmpk
-         +KWmMfkC1sTbZWI125NE4odMFlqPO9jIV983yLzC06pRt+ho/FpBGxfBS47zDb7F4AMu
-         j/uQ==
-X-Gm-Message-State: AOAM532Tq/tiW9juH+ygL58UYr6C4VTIOXzmN6N58URMd8wcd7hLOA81
-        IhuhL7wYNX/79aAjJYCOGpn7sigI
-X-Google-Smtp-Source: ABdhPJw/8UiWsQQkftdqgekmRAuSIecullU4l1vYv+exSzLZZpkqGdkrZGtipO4Dtx6PW0eHJul1+Q==
-X-Received: by 2002:aa7:d8d8:: with SMTP id k24mr28250956eds.32.1597164464783;
-        Tue, 11 Aug 2020 09:47:44 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:302d:f138:51cb:bace])
-        by smtp.gmail.com with ESMTPSA id fx15sm15551359ejb.1.2020.08.11.09.47.43
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 11 Aug 2020 09:47:43 -0700 (PDT)
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] fix is_scalar_type(): fouled types are scalars
-Date:   Tue, 11 Aug 2020 18:47:40 +0200
-Message-Id: <20200811164740.43766-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.28.0
+        h=x-gm-message-state:mime-version:date:in-reply-to:message-id:subject
+         :from:to;
+        bh=X3NiX6nVSgp11EpijWT3pX7H1MOgqhCnBt3mOeEwKPI=;
+        b=ZMUeIV27FJ7cOfImKb/vj1BBHL6Oa2pdctiWSnrpLimhMKQinIwwmlUN3WE1bTDnjr
+         RtjpUPcQK6/p2VHrLlpmozGtyiPZxlmjW42i8s8B5FYFSRmDyLQSANLmpz7IBajNY0Xq
+         tSncdZyp7ZEHyi4IMFGlfNyzswQjhl+yWAa7nCC2oMNINkABNDWDYE7O49GXpmVdOWLg
+         B/IGoZhV7kbdt43+QhUzUSYri0IwUcQ/tc748Vj2tarDjU0rCxRmBl2aPLi7XIU/ti9W
+         XRdHOqiwvK6HNvsIlUCKLp53cvY3Vxb8tZKvCb6P4rfNBbuaV7XcE6i1/KVWCqTTXi17
+         2c3Q==
+X-Gm-Message-State: AOAM533BU7gmBc2tkDmzu3bLsNHwDVb0ociJFn0mwZaISzikBka860FB
+        yoxevbNRb6o2Yokm9/Tmq+1evgHxXMTe/8jE/AiBPbsWYaOZ
+X-Google-Smtp-Source: ABdhPJzflhizS6nniBWRSpW8mHijAZdmSAeiEp/VNDrTlrQJdIKYs08rqIEDvlb4OOzwu63y0W80MTCFDtmUkUL4JXTKE6e0ZT1S
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+X-Received: by 2002:a92:bbc6:: with SMTP id x67mr26231257ilk.235.1597194425363;
+ Tue, 11 Aug 2020 18:07:05 -0700 (PDT)
+Date:   Tue, 11 Aug 2020 18:07:05 -0700
+In-Reply-To: <000000000000b6b450059870d703@google.com>
+X-Google-Appengine-App-Id: s~syzkaller
+X-Google-Appengine-App-Id-Alias: syzkaller
+Message-ID: <0000000000005c72d405aca3ce17@google.com>
+Subject: Re: KASAN: global-out-of-bounds Read in precalculate_color
+From:   syzbot <syzbot+02d9172bf4c43104cd70@syzkaller.appspotmail.com>
+To:     a.darwish@linutronix.de, akpm@linux-foundation.org,
+        bsegall@google.com, changbin.du@intel.com,
+        clang-built-linux@googlegroups.com, davem@davemloft.net,
+        dietmar.eggemann@arm.com, dvyukov@google.com, elver@google.com,
+        ericvh@gmail.com, hverkuil-cisco@xs4all.nl, jpa@git.mail.kapsi.fi,
+        juri.lelli@redhat.com, kasan-dev@googlegroups.com,
+        keescook@chromium.org, linux-kbuild@vger.kernel.org,
+        linux-kernel@vger.kernel.org, linux-media@vger.kernel.org,
+        linux-sparse@vger.kernel.org, luc.vanoostenryck@gmail.com,
+        lucho@ionkov.net, mark.rutland@arm.com, masahiroy@kernel.org,
+        mchehab@kernel.org, mgorman@suse.de, mhiramat@kernel.org,
+        michal.lkml@markovi.net, miguel.ojeda.sandonis@gmail.com,
+        mingo@redhat.com, netdev@vger.kernel.org, paulmck@kernel.org,
+        peterz@infradead.org, rminnich@sandia.gov, rostedt@goodmis.org,
+        rppt@kernel.org, samitolvanen@google.com,
+        syzkaller-bugs@googlegroups.com, tglx@linutronix.de,
+        v9fs-developer@lists.sourceforge.net, vincent.guittot@linaro.org,
+        viro@zeniv.linux.org.uk, vivek.kasireddy@intel.com,
+        will@kernel.org, yepeilin.cs@gmail.com
+Content-Type: text/plain; charset="UTF-8"
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-is_scalar_type() accept SYM_RESTRICT but not SYM_FOULED
-but both are for integer types (and only for them).
+syzbot suspects this issue was fixed by commit:
 
-So, let it accept SYM_FOULED too. Same for is_integral_type().
+commit dfd402a4c4baae42398ce9180ff424d589b8bffc
+Author: Marco Elver <elver@google.com>
+Date:   Thu Nov 14 18:02:54 2019 +0000
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- symbol.h                 |  2 ++
- validation/foul-scalar.c | 13 +++++++++++++
- 2 files changed, 15 insertions(+)
- create mode 100644 validation/foul-scalar.c
+    kcsan: Add Kernel Concurrency Sanitizer infrastructure
 
-diff --git a/symbol.h b/symbol.h
-index 873d69fcf547..a3ed95678ee5 100644
---- a/symbol.h
-+++ b/symbol.h
-@@ -463,6 +463,7 @@ static inline int is_scalar_type(struct symbol *type)
- 	case SYM_BITFIELD:
- 	case SYM_PTR:
- 	case SYM_RESTRICT:	// OK, always integer types
-+	case SYM_FOULED:	// idem
- 		return 1;
- 	default:
- 		break;
-@@ -483,6 +484,7 @@ static inline bool is_integral_type(struct symbol *type)
- 	case SYM_ENUM:
- 	case SYM_PTR:
- 	case SYM_RESTRICT:	// OK, always integer types
-+	case SYM_FOULED:	// idem
- 		return 1;
- 	default:
- 		break;
-diff --git a/validation/foul-scalar.c b/validation/foul-scalar.c
-new file mode 100644
-index 000000000000..8e053b96edbd
---- /dev/null
-+++ b/validation/foul-scalar.c
-@@ -0,0 +1,13 @@
-+#define __bitwise __attribute__((bitwise))
-+
-+typedef unsigned short __bitwise __be16;
-+
-+static void foo(__be16 x)
-+{
-+	if (~x)
-+		;
-+}
-+
-+/*
-+ * check-name: foul-scalar
-+ */
--- 
-2.28.0
+bisection log:  https://syzkaller.appspot.com/x/bisect.txt?x=13eb65d6900000
+start commit:   46cf053e Linux 5.5-rc3
+git tree:       upstream
+kernel config:  https://syzkaller.appspot.com/x/.config?x=ed9d672709340e35
+dashboard link: https://syzkaller.appspot.com/bug?extid=02d9172bf4c43104cd70
+syz repro:      https://syzkaller.appspot.com/x/repro.syz?x=147e5ac1e00000
+C reproducer:   https://syzkaller.appspot.com/x/repro.c?x=14b49e71e00000
 
+If the result looks correct, please mark the issue as fixed by replying with:
+
+#syz fix: kcsan: Add Kernel Concurrency Sanitizer infrastructure
+
+For information about bisection process see: https://goo.gl/tpsmEJ#bisection
