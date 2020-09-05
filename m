@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8CCF2C43461
-	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0D11DC2D0A7
+	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3BD5720757
+	by mail.kernel.org (Postfix) with ESMTP id B8DC32074B
 	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:32 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X9X5LLo4"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PtTfYx/4"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728423AbgIELM3 (ORCPT
+        id S1728430AbgIELMc (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 5 Sep 2020 07:12:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52940 "EHLO
+        Sat, 5 Sep 2020 07:12:32 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52950 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728430AbgIELMW (ORCPT
+        with ESMTP id S1728441AbgIELMW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sat, 5 Sep 2020 07:12:22 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C95EDC061245
-        for <linux-sparse@vger.kernel.org>; Sat,  5 Sep 2020 04:12:20 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id i22so11858697eja.5
-        for <linux-sparse@vger.kernel.org>; Sat, 05 Sep 2020 04:12:20 -0700 (PDT)
+Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 298DAC061247
+        for <linux-sparse@vger.kernel.org>; Sat,  5 Sep 2020 04:12:22 -0700 (PDT)
+Received: by mail-ed1-x544.google.com with SMTP id c8so8386946edv.5
+        for <linux-sparse@vger.kernel.org>; Sat, 05 Sep 2020 04:12:22 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=QvU1Zc6FDCgpXPiz8LPz25ihK1xA0Tr5Bo0r+9cilEk=;
-        b=X9X5LLo45V8hU/3Dmt/VZN1bu2v7oUmJhRxgbli5hByC9PTvq6alIlCNFWGexZBQkg
-         31fjOfTpx23ODFkT6zdyICQ9jRVnJ47AODA0HSzxCMur0+Ixieyv+F95PFyM+SR+YIwG
-         WRSo99U1UV2MyIDe1R8oVraAgINR3rURCkzyaNDM2wjldr0+b+CyPTrHRfCR9dPGOY/V
-         M0qOh/UQ0sBjzASBAzCqnpJB17SeJkmo7kKWW4pB/WmepfGunj0k9WGVT6gsS9FFb+90
-         thonqLBpkY1uY8sDv0soPMHtxj8tNoiCYGQfizCD6cEg8Vc8X3dQRma+VBdOztu8thq5
-         Ewpw==
+        bh=QO3anLvSeGn6IAwSx7rlCmQM1i8Y1JKz/q4br5mhYZs=;
+        b=PtTfYx/4iD1fQbI3/GuLS1JSe8VdUKEc123FKf5+LeCBlpi1pf3BMxMDBFvfKRbZdI
+         67IsB/rcYoAmcNpjn1Jdhez49EtgaKQV7PTJTBs0IPH2Mjl271RPbK0rGBoefqxtALlp
+         VYrm5Z/x6lzunJK4yhxqhKaGCsI3hX3hgOOefO6N5AuTDUd94DLm5Jo2x9lqY85yuMCP
+         E4vaqL1PqjOn7NXogtKxRVhavONKJxtqH3/pOY32/OchNb2ATwThTh8/SSTjczoHDMQX
+         0oIXVPFZmRfWk6mMQOMXI5aU+kHdEu0qte9zCE/aY7AB8NOf0JOX9MeMWp9NwX2KbWQG
+         L86Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=QvU1Zc6FDCgpXPiz8LPz25ihK1xA0Tr5Bo0r+9cilEk=;
-        b=YeLmkieqsbkVRj9nUlqTny25G0x9vGHhUq6akqxR4YpXbTr8R/YdPxINBMLXrmdiiG
-         DTHKEk6CDGgo99hj78tI+KVS8qc6IARjmmKAjw589I8puoshwBT6sIII14T5Ufla4Xxc
-         XpBQzCT4xizZ4iz9fdsxGltsPoFH5L0kHPsKOQ5A2ytBnMefmwvhoaMXqchcMP7ioQMq
-         dEHl7r3TnZq3qpWXt4e3EXmkIsan3cCPd43sd2Zs8yUEczCktMRrwjtx+MTwvJHGI7RY
-         1Qp9V2VivNrHpmw7EoF3HLD+evWezfsJcT2mFoYwYASWKv6vIJJceoS1+LE8YmyY9yl5
-         Y71g==
-X-Gm-Message-State: AOAM53023yq8d33+N8qrG6AHwb+xroIcKJIGATvz3bL0UnTuIHUuwlmm
-        ZVBL5eLMdnE3twI6IxbrhD6PdrIDEzA=
-X-Google-Smtp-Source: ABdhPJze+gzTuNbHSAgdDaZVFP9z6W15Vu//ib/xcmPl4fhICIGig5C+oqK84Vx/47hd4YN8dPiX1Q==
-X-Received: by 2002:a17:906:8690:: with SMTP id g16mr11737931ejx.187.1599304337838;
-        Sat, 05 Sep 2020 04:12:17 -0700 (PDT)
+        bh=QO3anLvSeGn6IAwSx7rlCmQM1i8Y1JKz/q4br5mhYZs=;
+        b=IY4snggzyCKdV66r60zoT+5mmwOUe/8AHeNXI2K+iHj7QEyLpIZiBLyVAFlStFJoDr
+         3zI7hLTHjhyXQypzbHzxchpxof0Wdc4dwZbQjZxpxbOD87S+N2Kbj1x2sZdS4x0li898
+         0aaxl+V1vbvyMv9Mitk5npnrz+20FWNHDp6pEuDcIUelzexWPZeUmPJvljJQPQaYqfAv
+         H1ZmSquYh3GFVRgv3ci/+k0RQUr8rKUl7f+EX4mJ3qbseVSIkDydhqMF3aywlsvdJ+bB
+         Xq+vknDkJUGxOsIUfySEUV8BIpO8o8blBGGBsg5DfZqzfTGxX0trV+pwurN+qpXGyp6S
+         y31A==
+X-Gm-Message-State: AOAM5331HMwvWrEE94oiaJ5Nfb3vwhg/zONPabUVA8k2Imu0BxZOs8Ks
+        xGiLUuev3QBcrAjANuDdBO6ZrTED5Gs=
+X-Google-Smtp-Source: ABdhPJySMvNBh0NhaqaHnDga8QGS33KMU12HWifHJ/qWyYfMHLdD396hiBWvVrrGetBVyQBNYCJkMA==
+X-Received: by 2002:a50:f69a:: with SMTP id d26mr12654752edn.21.1599304340539;
+        Sat, 05 Sep 2020 04:12:20 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:e1b1:2430:dffc:e425])
-        by smtp.gmail.com with ESMTPSA id u15sm8319506edj.69.2020.09.05.04.12.16
+        by smtp.gmail.com with ESMTPSA id u15sm8319506edj.69.2020.09.05.04.12.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Sep 2020 04:12:17 -0700 (PDT)
+        Sat, 05 Sep 2020 04:12:19 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/4] add support for a new instruction: OP_FMA
-Date:   Sat,  5 Sep 2020 13:12:08 +0200
-Message-Id: <20200905111211.82199-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/4] builtin: teach sparse to linearize __builtin_fma()
+Date:   Sat,  5 Sep 2020 13:12:11 +0200
+Message-Id: <20200905111211.82199-5-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200905111211.82199-1-luc.vanoostenryck@gmail.com>
 References: <20200905111211.82199-1-luc.vanoostenryck@gmail.com>
@@ -76,48 +76,56 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This will be the instruction for fused multiply-add
-but the motivation for it is some experimentation with
-the linearization of builtins.
+The support for the linearization of builtins was already
+added for __builtin_unreachable() but this builtin has
+no arguments and no return value.
+
+So, to complete the experience of builtin linearization,
+add the linearization of __builtin_fma().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 2 ++
- opcode.def  | 1 +
- 2 files changed, 3 insertions(+)
+ linearize.c | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
 
 diff --git a/linearize.c b/linearize.c
-index 5a8e74970d98..1a2677713123 100644
+index bf55045bcbce..7157ba511671 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -244,6 +244,7 @@ static const char *opcodes[] = {
+@@ -2585,6 +2585,23 @@ struct entrypoint *linearize_symbol(struct symbol *sym)
+  * Builtin functions
+  */
  
- 	/* Special three-input */
- 	[OP_SEL] = "select",
-+	[OP_FMA] = "fma",
- 	
- 	/* Memory */
- 	[OP_LOAD] = "load",
-@@ -461,6 +462,7 @@ const char *show_instruction(struct instruction *insn)
- 		break;
- 
- 	case OP_SEL:
-+	case OP_FMA:
- 		buf += sprintf(buf, "%s <- %s, %s, %s", show_pseudo(insn->target),
- 			show_pseudo(insn->src1), show_pseudo(insn->src2), show_pseudo(insn->src3));
- 		break;
-diff --git a/opcode.def b/opcode.def
-index 2583e2f4a602..58fe9983cbc2 100644
---- a/opcode.def
-+++ b/opcode.def
-@@ -91,6 +91,7 @@ OPCODE(SLICE,           BADOP,    BADOP,    BADOP, 1, OPF_TARGET)
- 
- /* Select - three input values */
- OPCODE(SEL,             BADOP,    BADOP,    BADOP, 3, OPF_TARGET)
-+OPCODE(FMA,             BADOP,    BADOP,    BADOP, 3, OPF_TARGET)
- 
- /* Memory */
- OPCODE(LOAD,            BADOP,    BADOP,    BADOP, 1, OPF_TARGET)
++static pseudo_t linearize_fma(struct entrypoint *ep, struct expression *expr)
++{
++	struct instruction *insn = alloc_typed_instruction(OP_FMA, expr->ctype);
++	struct expression *arg;
++
++	PREPARE_PTR_LIST(expr->args, arg);
++		insn->src1 = linearize_expression(ep, arg);
++		NEXT_PTR_LIST(arg)
++		insn->src2 = linearize_expression(ep, arg);
++		NEXT_PTR_LIST(arg)
++		insn->src3 = linearize_expression(ep, arg);
++	FINISH_PTR_LIST(arg);
++
++	add_one_insn(ep, insn);
++	return insn->target = alloc_pseudo(insn);
++}
++
+ static pseudo_t linearize_unreachable(struct entrypoint *ep, struct expression *exp)
+ {
+ 	add_unreachable(ep);
+@@ -2597,6 +2614,9 @@ static struct sym_init {
+ 	struct symbol_op op;
+ } builtins_table[] = {
+ 	// must be declared in builtin.c:declare_builtins[]
++	{ "__builtin_fma", linearize_fma },
++	{ "__builtin_fmaf", linearize_fma },
++	{ "__builtin_fmal", linearize_fma },
+ 	{ "__builtin_unreachable", linearize_unreachable },
+ 	{ }
+ };
 -- 
 2.28.0
 
