@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CEB22C433E2
-	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BEC6C433E2
+	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CCC02074B
-	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 0256E2074B
+	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="CYmC09K6"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="tBOlTF6O"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728445AbgIELM2 (ORCPT
+        id S1726597AbgIELM3 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 5 Sep 2020 07:12:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52942 "EHLO
+        Sat, 5 Sep 2020 07:12:29 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52938 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726597AbgIELMW (ORCPT
+        with ESMTP id S1728423AbgIELMW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sat, 5 Sep 2020 07:12:22 -0400
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 462DFC061246
-        for <linux-sparse@vger.kernel.org>; Sat,  5 Sep 2020 04:12:21 -0700 (PDT)
-Received: by mail-ed1-x541.google.com with SMTP id l63so8364506edl.9
-        for <linux-sparse@vger.kernel.org>; Sat, 05 Sep 2020 04:12:21 -0700 (PDT)
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A5A0FC061244
+        for <linux-sparse@vger.kernel.org>; Sat,  5 Sep 2020 04:12:20 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id gr14so10741417ejb.1
+        for <linux-sparse@vger.kernel.org>; Sat, 05 Sep 2020 04:12:20 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=zVrIHyAXQ1SLiiV8C9LWNogRBbUIjq8pdftnJ8yMazE=;
-        b=CYmC09K6Oc2cEQhg4dI7tH7fuzNrnrOuKTg/60LnfnrCoxqvSOIW09PsmKgM7eJmDP
-         bXI+ME5VZFL1Hz7mhXLnGKBlaCWOpz9iNDruGzgrJEQluq07xZoh7uX0Cep8g4xSsS1W
-         B0Fvi0a4ul0BMtYDRa3TmlNxxKfZsqC5Rxnnai/mZKzPW82x12POEPIVNVQfUVyu/sp5
-         tbno3254m6PG719yT32BndfyqVpBbl0tNTfsmkADa29OAUQFxiADTBQb4nxhiCBuAYdk
-         3Px4VFpO9CAWE2JsyH14ltf2JOskyhGFC0bK9EnhJDtHwdA0hx+fPl9/+nGadv/hn4Pl
-         KSWQ==
+        bh=418VP1+1t5fc4HhZsGx+u9DZBLjOWfYxJXcHSQhE0bY=;
+        b=tBOlTF6OOAh5jgOPtFUt/SXximaztvoIYruABcacBkqI1Y5qZGD8IEN8FgLSCHsAOU
+         ZNfyt9sfzxmlIkFn5jHTFs80xYYrpRF5ykufBnwSKAPKjRFKXCAnYJj+wOSpr50zdyYs
+         +8f+SJSA84uXMrrMXqOot8tkFrY2Ci++Tih1YRVvoXrEXsitWfTwdPA1nqWk+UE/eZT6
+         u8sO3TQN1jACpv7oVCwOL5sO6gKS6ZFdnWyPL9v7dIckPuSyMP0dXLDM4YEATZxxYy0U
+         S4DlEyKIiur5Or6PJ/HLM9DDq27053rpNeLVYiDisgF4mG1UdIUJT+DKWwS6g+ogtoIQ
+         KuqQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=zVrIHyAXQ1SLiiV8C9LWNogRBbUIjq8pdftnJ8yMazE=;
-        b=mJlaFZu5VqDKD2zoz1PUsVlLqUHqtrIsQsV0xcK/hU22QEHeksKwsH0BviZXdmOSZu
-         INWMXdaEevGQzZfLJmwSp/HN3/L+dYdSNd3qKE0VrYESiF8XkRzyOvG4LkR5iD56PVKd
-         DJf5LjXueZKZJV01OZpisDzVehl8zCe8S+nncE2GpZJQP4EIBAtFbBSwwEO0F2xgkPmh
-         KiPZUgXbulGrihj9S9AUqz0k3K8xi1/cSmFsrfCf+wALD7KX59iJQG2/eSznRIIB1THe
-         1+Q7alk6sgAu3GajtKTK6RSr16U4YrH7plEqVjXQ7BQ5+OPa4AkJYk8Zq2nTOAI1LLOy
-         CkLg==
-X-Gm-Message-State: AOAM533Y0jX1/c/XpE8y4VfwKEvkLBSvmOy7Jq1yCGicUo+u4yekQQn+
-        AFMgFsjt23Bn+9t2R9kG84WCRJ4a5fM=
-X-Google-Smtp-Source: ABdhPJz5/o+FyK3n3qL+QInpMIGhgEOAAGWrieX7x3hVCioyxhlhMZpw81kpOORS1Oms1d08UCgtdA==
-X-Received: by 2002:aa7:cb92:: with SMTP id r18mr13158151edt.158.1599304339622;
-        Sat, 05 Sep 2020 04:12:19 -0700 (PDT)
+        bh=418VP1+1t5fc4HhZsGx+u9DZBLjOWfYxJXcHSQhE0bY=;
+        b=pJDtzmB0/ZUGVC9AdWJS4NwP7z+mORxIMZ7c4O/eMo6PwPAmKk6zAgi8AwZ3xBRLK9
+         /fEqlo21HEXMrVwzsWDoYQY9nTkTSK2/HGvejLYaz05yA1ySW1guqtPfH8TebYK0kPgc
+         830bEesTWVotiNERQi2GaSjqbJhCjL+TVEOj978VHsYK9n6eOighSgjtwX08WKRdglq6
+         7jNYbZp6ItfatlwFXWNVv5qyMzwTGyKMriU94BvDa2ymHFHcmilDNVMEbwJujlw6wFwb
+         sxbK8OQvzGGeYfrbvRarQKZWnMJbIc5VfM/9K8u/PVoO1DEm2ccV5lrh+Br/Gbey6g9j
+         r6+Q==
+X-Gm-Message-State: AOAM530C+Eh84VedKZKE2qykeN/vd5KWCbbYNYjIXcRn/qOtlm16F2FT
+        3T5a3U9Br7z4ExYEOs1VsM3qVUlH8d8=
+X-Google-Smtp-Source: ABdhPJwO6h+fG9C41O5reX+0NEhoVDm6ZlLvG8ByccyQiDbE62nZpgiGQY7i8uuStKgoC2UtAVw5ZA==
+X-Received: by 2002:a17:906:3053:: with SMTP id d19mr12510900ejd.190.1599304338714;
+        Sat, 05 Sep 2020 04:12:18 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:e1b1:2430:dffc:e425])
-        by smtp.gmail.com with ESMTPSA id u15sm8319506edj.69.2020.09.05.04.12.18
+        by smtp.gmail.com with ESMTPSA id u15sm8319506edj.69.2020.09.05.04.12.17
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 05 Sep 2020 04:12:19 -0700 (PDT)
+        Sat, 05 Sep 2020 04:12:18 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/4] builtin: add declaration for __builtin_fma{,f,l}()
-Date:   Sat,  5 Sep 2020 13:12:10 +0200
-Message-Id: <20200905111211.82199-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/4] builtin: allow linearization to fail
+Date:   Sat,  5 Sep 2020 13:12:09 +0200
+Message-Id: <20200905111211.82199-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200905111211.82199-1-luc.vanoostenryck@gmail.com>
 References: <20200905111211.82199-1-luc.vanoostenryck@gmail.com>
@@ -76,28 +76,33 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The motivation for this is to experiment with adding infrastructure
-for the linearization of builtins.
+Allow the linearization of builtins to fail and continue with
+the normal linearization of OP_CALLs. The motivation for this
+is for the linearization of target specific builtins.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- builtin.c | 3 +++
- 1 file changed, 3 insertions(+)
+ linearize.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
 
-diff --git a/builtin.c b/builtin.c
-index 2e9be8be8adb..26b612dc401b 100644
---- a/builtin.c
-+++ b/builtin.c
-@@ -490,6 +490,9 @@ static const struct builtin_fn builtins_common[] = {
- 	{ "__builtin_ffs", &int_ctype, 0, { &int_ctype }, .op = &ffs_op },
- 	{ "__builtin_ffsl", &int_ctype, 0, { &long_ctype }, .op = &ffs_op },
- 	{ "__builtin_ffsll", &int_ctype, 0, { &llong_ctype }, .op = &ffs_op },
-+	{ "__builtin_fma", &double_ctype, 0, { &double_ctype, &double_ctype, &double_ctype }},
-+	{ "__builtin_fmaf", &float_ctype, 0, { &float_ctype, &float_ctype, &float_ctype }},
-+	{ "__builtin_fmal", &ldouble_ctype, 0, { &ldouble_ctype, &ldouble_ctype, &ldouble_ctype }},
- 	{ "__builtin_frame_address", &ptr_ctype, 0, { &uint_ctype }},
- 	{ "__builtin_free", &void_ctype, 0, { &ptr_ctype }},
- 	{ "__builtin_huge_val", &double_ctype, 0 },
+diff --git a/linearize.c b/linearize.c
+index 1a2677713123..bf55045bcbce 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1513,8 +1513,11 @@ static pseudo_t linearize_call_expression(struct entrypoint *ep, struct expressi
+ 	fntype = fn->ctype;
+ 
+ 	// handle builtins
+-	if (fntype->op && fntype->op->linearize)
+-		return fntype->op->linearize(ep, expr);
++	if (fntype->op && fntype->op->linearize) {
++		retval = fntype->op->linearize(ep, expr);
++		if (retval)
++			return retval;
++	}
+ 
+ 	ctype = &fntype->ctype;
+ 	if (fntype->type == SYM_NODE)
 -- 
 2.28.0
 
