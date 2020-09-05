@@ -1,116 +1,97 @@
-Return-Path: <SRS0=hg07=B5=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=ez6N=CO=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.4 required=3.0 tests=BAYES_00,DKIM_INVALID,
-	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 277ECC433DF
-	for <linux-sparse@archiver.kernel.org>; Wed, 19 Aug 2020 21:48:41 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B618BC433E2
+	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03269207DE
-	for <linux-sparse@archiver.kernel.org>; Wed, 19 Aug 2020 21:48:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5BA502074B
+	for <linux-sparse@archiver.kernel.org>; Sat,  5 Sep 2020 11:12:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=fail reason="signature verification failed" (2048-bit key) header.d=infradead.org header.i=@infradead.org header.b="MkNtqNn9"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ww/w/7u/"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726701AbgHSVsk (ORCPT
+        id S1728405AbgIELMU (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 19 Aug 2020 17:48:40 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:33730 "EHLO
+        Sat, 5 Sep 2020 07:12:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52932 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726466AbgHSVsk (ORCPT
+        with ESMTP id S1726597AbgIELMT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 19 Aug 2020 17:48:40 -0400
-Received: from casper.infradead.org (casper.infradead.org [IPv6:2001:8b0:10b:1236::1])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 607FEC061757
-        for <linux-sparse@vger.kernel.org>; Wed, 19 Aug 2020 14:48:40 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; q=dns/txt; c=relaxed/relaxed;
-        d=infradead.org; s=casper.20170209; h=Content-Transfer-Encoding:Content-Type:
-        In-Reply-To:MIME-Version:Date:Message-ID:From:References:Cc:To:Subject:Sender
-        :Reply-To:Content-ID:Content-Description;
-        bh=XI931J5aWMaR2GzOayvEjRTTxUcZVkAksFuJEHSOgbI=; b=MkNtqNn9nrnMwXQTUr3FNLzfVh
-        qbRyqGF/mz0jvRSZiUieeSSgLgFyhOD4N8E34SZ0VqqS8TPbpSeSIew+t6SDqQ4wdYDUiEtI0kMR3
-        VYYc1YmRLviAby87cD8Sd87DnUODksrUGOubg2TBHq8wGfwqsIn4EGQLCRS0gzjRQjiKE29PNZjEf
-        Kwe0LDZKXQ328vSKz9cAxhSAkXxkjkaWUfURExYp7qeH0SE4PkCLjpEpvgRcjfAdqHg51Cz5I/XIs
-        lEoJTMkkGSYCGGWYPBKKiSuow+UM7yQFuNEuX5nuPVc6W80fJgsFliWM7RNCMmJ0EoaIZWbTR7+gg
-        Udp+E12g==;
-Received: from [2601:1c0:6280:3f0::19c2]
-        by casper.infradead.org with esmtpsa (Exim 4.92.3 #3 (Red Hat Linux))
-        id 1k8Vwk-0002Jy-6x; Wed, 19 Aug 2020 21:48:38 +0000
-Subject: Re: sparse multiple address spaces?
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     Linux-Sparse <linux-sparse@vger.kernel.org>
-References: <e9deb689-e470-49e5-a339-252cb05ee119@infradead.org>
- <20200819200655.mqpjzfwlbyfxrksa@ltop.local>
- <20200819205234.ulgeccdi4fsidwou@ltop.local>
-From:   Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <2bbeb226-8bd1-9e47-ecf1-ed69b4e5f08b@infradead.org>
-Date:   Wed, 19 Aug 2020 14:48:33 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Sat, 5 Sep 2020 07:12:19 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BA6BDC061244
+        for <linux-sparse@vger.kernel.org>; Sat,  5 Sep 2020 04:12:18 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id a26so11902657ejc.2
+        for <linux-sparse@vger.kernel.org>; Sat, 05 Sep 2020 04:12:18 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hWD0uL4akOQ32S9DjiBXlPXP8TW0t/Qk1tVIPwEzdEc=;
+        b=Ww/w/7u/ttLsO7tGvoszVSOKbWJd0veATalgdwJzAVq3fDjzAr1JcsuT27mINzHHD3
+         R69+quFeqhfBVkxBLAbIuFO/H8VsxcwAGELMyCN/0pU2SMEikJYn++fSBoZR/MyLF2/n
+         xtpj5HY3bDhAVirNheB84ne5hemHWSU5IIzKvMTpKpfClnri/HZCJB9lmBdzqLROOg1L
+         ko09Nv/DrqdKHwKcLLpRW9dJLl0+Cp6JHQgmimEb2wMAuBjPd9A8nGPgohKzMVlhSX7n
+         WQjl2R1V6dXZ67eCXC6olk720BUp/ypDJbAQxL8p7qQvLjYX1kiL25iqW55mQ/WR3mt4
+         kQKQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=hWD0uL4akOQ32S9DjiBXlPXP8TW0t/Qk1tVIPwEzdEc=;
+        b=Ng47errnAmfPhn8ipHSOjlyAvd3eG2Sc+ySkXQy0ZofVwE4dyYE8zaB/GueuJlwzFQ
+         pkGH9RJgZ1QWIYnn24RuPT3f6iLyZpTn9q1TdzufVTOjSioH68FVJgz2aGZS9qLnxTJJ
+         Dh39bjEFeK3BfIQoER0CyV2F2HjohI3UMopS5wdEL3G3pdDMLGAJgDBbjx2+0FB6Z2mQ
+         AYYQymzbIKekiFZ2COiXdXrlliePtiJNzDNagoFkYqeRUvNq3L/RbGjqvsedsp1n/3lb
+         eiDZ7lZfqWCY7i8GUmb1jcyvHjzMRKlqGTyve6GvISO9T17sNdpmowJxqgxFz0xU6kDe
+         rOww==
+X-Gm-Message-State: AOAM530SHzE6dtSrbQmL0GcJpHfeH/U/eNw4pzgz7jsycFKAWeeFsxk/
+        m8gOLlYg+3a2PcqJufj1dWyDEg9bACU=
+X-Google-Smtp-Source: ABdhPJw7wP6y0l1ff0akJXrxzT/6nXXcSlbT5T277zqaHENbNQXjQ0beHGBuag71ALTOmw7U2OsRHw==
+X-Received: by 2002:a17:906:4c81:: with SMTP id q1mr11550098eju.72.1599304336673;
+        Sat, 05 Sep 2020 04:12:16 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:e1b1:2430:dffc:e425])
+        by smtp.gmail.com with ESMTPSA id u15sm8319506edj.69.2020.09.05.04.12.15
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 05 Sep 2020 04:12:15 -0700 (PDT)
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/4] builtin: teach sparse to linearize __builtin_fma()
+Date:   Sat,  5 Sep 2020 13:12:07 +0200
+Message-Id: <20200905111211.82199-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-In-Reply-To: <20200819205234.ulgeccdi4fsidwou@ltop.local>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On 8/19/20 1:52 PM, Luc Van Oostenryck wrote:
-> On Wed, Aug 19, 2020 at 10:06:55PM +0200, Luc Van Oostenryck wrote:
->> On Wed, Aug 19, 2020 at 12:15:46PM -0700, Randy Dunlap wrote:
->>> On Linux kernel tree v5.9-rc1, with sparse v0.6.2-180-g49f7e13a,
->>> I see this sparse warning which I don't grok:
->>>
->>> ../include/uapi/asm-generic/signal-defs.h:19:29: CK: error: multiple address spaces given
->>>
->>> for this source code:
->>>
->>> typedef void __signalfn_t(int);
->>> typedef __signalfn_t __user *__sighandler_t; <<<<< line 19
->>>
->>> Are there multiple address spaces there?  What are they?
->>>
->>>
->>>
->>> or: is the warning related to the other nearby warnings?  (e.g.:)
->>>
->>> ../kernel/signal.c:541:53: CK: warning: incorrect type in initializer (different address spaces)
->>> ../kernel/signal.c:541:53: CK:    expected struct k_sigaction *ka
->>> ../kernel/signal.c:541:53: CK:    got struct k_sigaction [noderef] __rcu *
->>> ../include/uapi/asm-generic/signal-defs.h:19:29: CK: error: multiple address spaces given
->>> ../kernel/signal.c:694:33: CK: warning: incorrect type in argument 1 (different address spaces)
->>> ../kernel/signal.c:694:33: CK:    expected struct spinlock [usertype] *lock
->>> ../kernel/signal.c:694:33: CK:    got struct spinlock [noderef] __rcu *
->>
->> I would guess that this __sighandler_t is used somewhere in a
->> struct which is itself accessed via a __rcu pointer.
->> But that would not explain the level of dereference.
->>
->> I'll need to check this one.
-> 
-> The location of the warning should be the assignment in kernel/signal.c:69
-> 
-> 	static void __user *sig_handler(struct task_struct *t, int sig) 
-> 	{
-> 		return t->sighand->action[sig - 1].sa.sa_handler;
-> 	}
->  
-> There is a lot of type abuses in this file, between 'void __user *' and
-> __sighandler_t, but the root cause of the warning is the '__rcu' in 
-> 
-> 	struct task_struct {
-> 		...
-> 		struct sighand_struct __rcu *sighand;
-> 		...
-> 	}
+This series is the second part experimenting with adding the
+infrastructure needed for the linearization of builtins.
 
-OK, thanks for all of your excavation work. :)
+The first part added support for __builtin_unreachable()
+but this builtin has no arguments and no return value.
+Now, there is an example showing how to do it when arguments
+and/or a return value are present.
+
+Luc Van Oostenryck (4):
+  add support for a new instruction: OP_FMA
+  builtin: allow linearization to fail
+  builtin: add declaration for __builtin_fma{,f,l}()
+  builtin: teach sparse to linearize __builtin_fma()
+
+ builtin.c   |  3 +++
+ linearize.c | 29 +++++++++++++++++++++++++++--
+ opcode.def  |  1 +
+ 3 files changed, 31 insertions(+), 2 deletions(-)
 
 -- 
-~Randy
+2.28.0
 
