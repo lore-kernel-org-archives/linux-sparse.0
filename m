@@ -2,108 +2,234 @@ Return-Path: <SRS0=5g4H=CP=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-13.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 255A4C433E2
-	for <linux-sparse@archiver.kernel.org>; Sun,  6 Sep 2020 12:41:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1E445C433E2
+	for <linux-sparse@archiver.kernel.org>; Sun,  6 Sep 2020 16:20:18 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D86D3208B3
-	for <linux-sparse@archiver.kernel.org>; Sun,  6 Sep 2020 12:41:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80CEE2075A
+	for <linux-sparse@archiver.kernel.org>; Sun,  6 Sep 2020 16:20:17 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E0371i+h"
+	dkim=pass (2048-bit key) header.d=plus.com header.i=@plus.com header.b="FZwEQr8m"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727773AbgIFMl1 (ORCPT
+        id S1726931AbgIFQUQ (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 6 Sep 2020 08:41:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60560 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728663AbgIFMlI (ORCPT
+        Sun, 6 Sep 2020 12:20:16 -0400
+Received: from avasout04.plus.net ([212.159.14.19]:35034 "EHLO
+        avasout04.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728779AbgIFQUP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 6 Sep 2020 08:41:08 -0400
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D91B9C061574
-        for <linux-sparse@vger.kernel.org>; Sun,  6 Sep 2020 05:40:46 -0700 (PDT)
-Received: by mail-ed1-x542.google.com with SMTP id b12so10016210edz.11
-        for <linux-sparse@vger.kernel.org>; Sun, 06 Sep 2020 05:40:46 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vRfyAdivijKYd1eHjviR6opeYtxEZgXCZ6i80Txf3gQ=;
-        b=E0371i+h3+SeCN5JjFEfHo2W1BELPn3E31X5YJETy7atpF5OSMyGXnxRgd0m4tzKGR
-         gvEr8sWEaKwDxSJmO2Ofac87BW6+jbwXwo/HnK0UVJwmfqtWzjSyBt4IQ+e6zjAQ13SB
-         v1O+00/gAzs9MUpyDSvPyu6iXzFrPa5TdysQaPfkfV/qOs9UTFmWNGRhCnntaZFYJUTi
-         r77Rmk3Z7/3lkNluNR1hzj81ISD51WOA1XNRCKNn2L92O+y/X6GSjolZ7YmUj0jMOzbk
-         pwZxzO5IdF1gOksdOUGDe7te1gZ9IRZrum9smNc411F2AkN3UlU98UOGR7tLCY6et3w0
-         X3TQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vRfyAdivijKYd1eHjviR6opeYtxEZgXCZ6i80Txf3gQ=;
-        b=JbvChmpkzIaOY0vuyFCUYgC6j1uxz+ZpCTdS7Kwz+AmmN+vBrK13Czbf0r4s/Eiofb
-         84FfpExLJj+SNleudw/oP9whYf+ZimBGVlcA9xEkTMgndcISoO0uN4V7eyZunfEBSEMv
-         DG8yGQ/AakLP9ykk3wGn9476tRdoVILrNmDZJgTOfN1Et2Za6t4X30K3/OCLyr2pZiWB
-         WO0XB2yOmaRnxGXo+Z42dL/LHyUiLmTafLuFJPThtbKp2b7onsD68PKSsDi7amtxZK78
-         AGCMl9/ZfgKLy4p+MorMTvoXII0Af07IL3O43sh7k+5m7bxkEmRMQdgfXx3HRDChKD/T
-         rfcA==
-X-Gm-Message-State: AOAM532LyZ1bVZeuXqiNee7qbGQgPIL9sYnwCEauWR1KdsmvKqnFtXpN
-        8QnVv8UzcsOM+XPBMUFwcCDalirij1Q=
-X-Google-Smtp-Source: ABdhPJwsyC1yQprX/CbXUWmCEFDO7zaUUaoAxbaKKgVZQBjR8oXHjpZQ3ja3mor1D0sBIGA1H2ceQw==
-X-Received: by 2002:aa7:cada:: with SMTP id l26mr17955423edt.112.1599396042906;
-        Sun, 06 Sep 2020 05:40:42 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:a7fb:e200:6c5d:e4e0:a162:77b6])
-        by smtp.gmail.com with ESMTPSA id b6sm11591124eds.46.2020.09.06.05.40.41
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 06 Sep 2020 05:40:41 -0700 (PDT)
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/3] fix & extend mask related testcases
-Date:   Sun,  6 Sep 2020 14:40:35 +0200
-Message-Id: <20200906124038.46786-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.28.0
+        Sun, 6 Sep 2020 12:20:15 -0400
+X-Greylist: delayed 450 seconds by postgrey-1.27 at vger.kernel.org; Sun, 06 Sep 2020 12:20:14 EDT
+Received: from [10.0.2.15] ([195.213.6.112])
+        by smtp with ESMTPA
+        id ExHUkqBrLrXCcExHWkzGgq; Sun, 06 Sep 2020 17:12:42 +0100
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+        t=1599408762; bh=TwusdC5SXSsVfLEKUqFIT0rw9z6aJJEalfwtAkRVKlU=;
+        h=Subject:To:References:From:Date:In-Reply-To;
+        b=FZwEQr8m0Iq4elQ0jqmf9hgcgwgo2g5HsbvKzOTjiAmFIf9MFBf7ElxBQD5KXnfP9
+         ElORsq3DBHZalYAoTTSQLqLBC3nMTgH6/ryxkDhGv8ui0YhzKJL+VGV3mgUNJdX+En
+         zHN1PH5Lxl1i/1azmM4UAkbsKDP8XLkBbvOEah3HRRLkNHCZuCftlJ9mDHZgAOvYAY
+         v8/sBGOvSlEcm5+hE03zofmXMNbb3fIIO5bsc1rw2A/JNe/yZwClM6ZSdJwLUmnXPe
+         lA9KrwgHEVUIrTFpR95H8IC0GCwrrfDz3LVqkmxRnuyniypE/xLeAwAugp1SMTIxhs
+         ssIAw/1Z4AmAw==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.3 cv=Q+xJH7+a c=1 sm=1 tr=0
+ a=/rD2idLCdDHnmLflUbi9CQ==:117 a=/rD2idLCdDHnmLflUbi9CQ==:17
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=9xaCok67IMOZZ_14N7cA:9 a=QEXdDO2ut3YA:10
+X-AUTH: ramsayjones@:2500
+Subject: Re: [PATCH 1/3] add more testcases for existing AND/OR
+ simplifications
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        linux-sparse@vger.kernel.org
+References: <20200906124038.46786-1-luc.vanoostenryck@gmail.com>
+ <20200906124038.46786-2-luc.vanoostenryck@gmail.com>
+From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
+Message-ID: <b699c65e-5173-79dc-3ddb-20242646f0f1@ramsayjones.plus.com>
+Date:   Sun, 6 Sep 2020 17:12:40 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20200906124038.46786-2-luc.vanoostenryck@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4wfFRvRIrKJg7rAwjUU1JVM5iqX4+WFii0IDGxMc6NWkfATpr1yToRnHz5u1JDkq9tDmABHquyJtlLjneaMBThMgqGLceBgbMb2rrjWO6WRJoQCxUsjLph
+ cbyjnm760zpWJS5BBKuSo+mBqN17uw9s94iOpXWhbhJlhUSFpPtrSu83t1RJAK/WmjN0gNUToKxH0A==
 Sender: linux-sparse-owner@vger.kernel.org
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This is a preparatory step for some incoming series.
 
-Luc Van Oostenryck (3):
-  add more testcases for existing AND/OR simplifications
-  add more testcases for AND/OR simplification
-  optim: fix some testcases related to bitfield manipulation
 
- validation/optim/and-lsr-or-shl0.c  | 12 ++++++++++++
- validation/optim/and-lsr-or-shl1.c  | 12 ++++++++++++
- validation/optim/and-shl-or-and0.c  | 13 +++++++++++++
- validation/optim/and-shl-or-lsr0.c  | 13 +++++++++++++
- validation/optim/lsr-or-and0.c      | 23 +++++++++++++++++++++++
- validation/optim/lsr-or-lsr0.c      | 20 ++++++++++++++++++++
- validation/optim/sext.c             |  7 +++----
- validation/optim/shl-or-constant0.c | 12 ++++++++++++
- validation/optim/shl-or-constant1.c | 12 ++++++++++++
- validation/optim/shl-or-constant2.c | 12 ++++++++++++
- validation/optim/trunc-or-shl.c     |  4 +++-
- validation/optim/trunc-or-shl0.c    | 19 +++++++++++++++++++
- 12 files changed, 154 insertions(+), 5 deletions(-)
- create mode 100644 validation/optim/and-lsr-or-shl0.c
- create mode 100644 validation/optim/and-lsr-or-shl1.c
- create mode 100644 validation/optim/and-shl-or-and0.c
- create mode 100644 validation/optim/and-shl-or-lsr0.c
- create mode 100644 validation/optim/lsr-or-and0.c
- create mode 100644 validation/optim/lsr-or-lsr0.c
- create mode 100644 validation/optim/shl-or-constant0.c
- create mode 100644 validation/optim/shl-or-constant1.c
- create mode 100644 validation/optim/shl-or-constant2.c
- create mode 100644 validation/optim/trunc-or-shl0.c
+On 06/09/2020 13:40, Luc Van Oostenryck wrote:
+> Add a few more testcases to catch possible future regressions.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  validation/optim/and-shl-or-and0.c  | 13 +++++++++++++
+>  validation/optim/lsr-or-and0.c      | 23 +++++++++++++++++++++++
+>  validation/optim/shl-or-constant0.c | 12 ++++++++++++
+>  validation/optim/shl-or-constant1.c | 12 ++++++++++++
+>  validation/optim/shl-or-constant2.c | 12 ++++++++++++
+>  5 files changed, 72 insertions(+)
+>  create mode 100644 validation/optim/and-shl-or-and0.c
+>  create mode 100644 validation/optim/lsr-or-and0.c
+>  create mode 100644 validation/optim/shl-or-constant0.c
+>  create mode 100644 validation/optim/shl-or-constant1.c
+>  create mode 100644 validation/optim/shl-or-constant2.c
+> 
+> diff --git a/validation/optim/and-shl-or-and0.c b/validation/optim/and-shl-or-and0.c
+> new file mode 100644
+> index 000000000000..ea08d2622a95
+> --- /dev/null
+> +++ b/validation/optim/and-shl-or-and0.c
+> @@ -0,0 +1,13 @@
+> +unsigned and_shl_or_and0(unsigned a, unsigned b)
+> +{
+> +	return (((a & 0xfff00000) | b) << 12) & 0xfff00000;
 
--- 
-2.28.0
+->(((a & 0xfff00000) << 12) | (b << 12)) & 0xfff00000
+->(( 0 | (b << 12)) & 0xfff00000
+->((b << 12)) & 0xfff00000
+> +}
+> +
+> +/*
+> + * check-name: and-shl-or-and0
+> + * check-command: test-linearize -Wno-decl $file
+> + *
+> + * check-output-ignore
+> + * check-output-excludes: or\\.
+> + * check-output-excludes: lsr\\.
+
+why would there be a right-shift to begin with?
+(maybe add check-output-excludes: %arg1)
+
+> + */
+> diff --git a/validation/optim/lsr-or-and0.c b/validation/optim/lsr-or-and0.c
+> new file mode 100644
+> index 000000000000..3c369cb9497e
+> --- /dev/null
+> +++ b/validation/optim/lsr-or-and0.c
+> @@ -0,0 +1,23 @@
+> +#define	S	12
+> +
+> +//	((x & M) | b) >> S;
+> +// ->	((x >> S) & (M >> S)) | (b >> S)
+
+OK
+
+> +// 0a:  (M >> S) == 0
+> +// 0b:  (x >> S) == 0
+> +// 0c:  (b >> S) == 0
+
+I do not understand what these three lines are trying to say! :(
+
+> +
+> +int lsr_or_and0a(unsigned int x, unsigned int b)
+
+s/and0a/and0/ - was there an '_and0b' at one time?
+
+> +{
+> +	return ((x & 0x00000fff) | b) >> S;
+
+->((x & 0x00000fff) >> S) | (b >> S)
+->((0)) | (b >> S)
+-> b >> S
+
+> +}
+> +
+> +/*
+> + * check-name: lsr-or-and0
+> + * check-command: test-linearize -Wno-decl $file
+> + *
+> + * check-output-ignore
+> + * check-output-pattern(1): lsr\\.
+> + * check-output-excludes: %arg1\\.
+> + * check-output-excludes: and\\.
+> + * check-output-excludes: or\\.
+
+OK
+
+> + */
+> diff --git a/validation/optim/shl-or-constant0.c b/validation/optim/shl-or-constant0.c
+> new file mode 100644
+> index 000000000000..25347b4b3b20
+> --- /dev/null
+> +++ b/validation/optim/shl-or-constant0.c
+> @@ -0,0 +1,12 @@
+> +unsigned shl_or_constant0(unsigned a)
+> +{
+> +	return (a | 0xfff00000) << 12;
+
+->(a << 12) | (0xfff00000 << 12)
+->(a << 12) | (0)
+-> a << 12
+
+> +}
+> +
+> +/*
+> + * check-name: shl-or-constant0
+> + * check-command: test-linearize -Wno-decl $file
+> + *
+> + * check-output-ignore
+> + * check-output-excludes: or\\.
+
+OK
+
+> + */
+> diff --git a/validation/optim/shl-or-constant1.c b/validation/optim/shl-or-constant1.c
+> new file mode 100644
+> index 000000000000..cd3ea8bb011b
+> --- /dev/null
+> +++ b/validation/optim/shl-or-constant1.c
+> @@ -0,0 +1,12 @@
+> +unsigned shl_or_constant1(unsigned a)
+> +{
+> +	return (a | 0x000fffff) << 12;
+> +}
+> +
+> +/*
+> + * check-name: shl-or-constant1
+> + * check-command: test-linearize -Wno-decl $file
+> + *
+> + * check-output-ignore
+> + * check-output-contains: ret\\..*\\$0xfffff000
+
+OK
+
+> + */
+> diff --git a/validation/optim/shl-or-constant2.c b/validation/optim/shl-or-constant2.c
+> new file mode 100644
+> index 000000000000..9dbde3b574d7
+> --- /dev/null
+> +++ b/validation/optim/shl-or-constant2.c
+> @@ -0,0 +1,12 @@
+> +unsigned shl_or_constant1(unsigned a)
+
+s/_constant1/_constant2/
+
+> +{
+> +	return (a | 0x00ffff0f) << 12;
+> +}
+> +
+> +/*
+> + * check-name: shl-or-constant2
+> + * check-command: test-linearize -Wno-decl $file
+> + *
+> + * check-output-ignore
+> + * check-output-contains: or\\..*\\$0xfff0f
+
+OK
+
+> + */
+> 
+
+ATB,
+Ramsay Jones
 
