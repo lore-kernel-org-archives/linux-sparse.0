@@ -2,137 +2,143 @@ Return-Path: <SRS0=Wnm1=C3=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9F6A6C43464
-	for <linux-sparse@archiver.kernel.org>; Fri, 18 Sep 2020 19:34:16 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8D013C43463
+	for <linux-sparse@archiver.kernel.org>; Fri, 18 Sep 2020 20:41:56 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 54FF921734
-	for <linux-sparse@archiver.kernel.org>; Fri, 18 Sep 2020 19:34:16 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1600457656;
-	bh=DA+zkwlp2bUWWKEfbWP6ReafFTgGDYlmBmFbdGgIwJ4=;
-	h=From:Date:Subject:To:Cc:List-ID:From;
-	b=J5Tr8N3VSKv1EYdk9Se7gfAat6cYAtDrk6E54TDs2+HO7/epRLI3l/4HsrgJ1FjCw
-	 swRpgGS7xm/7gdMh9wlhea5b6eEais7pE/klEoBgAWgUyntopvnEB/26fADO2FxsVE
-	 e4z7HLukB46GL43YwWB8eTjkb5XNZ2fQ3C5IzzZo=
+	by mail.kernel.org (Postfix) with ESMTP id 3B81C23719
+	for <linux-sparse@archiver.kernel.org>; Fri, 18 Sep 2020 20:41:56 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="LuBtDTA6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726154AbgIRTeQ (ORCPT
+        id S1726426AbgIRUlz (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 18 Sep 2020 15:34:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46400 "EHLO
+        Fri, 18 Sep 2020 16:41:55 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57104 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726118AbgIRTeP (ORCPT
+        with ESMTP id S1726187AbgIRUly (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 18 Sep 2020 15:34:15 -0400
-Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61006C0613CE
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Sep 2020 12:34:15 -0700 (PDT)
-Received: by mail-lf1-x142.google.com with SMTP id b12so7303772lfp.9
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Sep 2020 12:34:15 -0700 (PDT)
+        Fri, 18 Sep 2020 16:41:54 -0400
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2A5CEC0613CE
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Sep 2020 13:41:54 -0700 (PDT)
+Received: by mail-ed1-x529.google.com with SMTP id i1so7392830edv.2
+        for <linux-sparse@vger.kernel.org>; Fri, 18 Sep 2020 13:41:54 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:from:date:message-id:subject:to:cc;
-        bh=T8YU6GKhujKuJkFP+oVqBNNPtxt40ye36Nv+rhw9vZY=;
-        b=TSZjMRVqIj+LiySNekTJ/kBxIP/+lpOj+vdjYZFe0hyc6azWssw4J2enIw8aWO8WFv
-         v3uEAzauwGpWXv8nfFEHMLLxlaaOXK4FswdOmHla2WrmPzbKRv3VLpbna2DtUfQyz3HX
-         4xIZt50ctswgcIl+ahnNAwQ4lWHfGzNl7MV10=
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=sqN2Hq30MWQ50QUAVj2F94jSOHGxmAovjMqpfDqNAgk=;
+        b=LuBtDTA6LM22Y3Al8BaYZbf7F0nEv5382qw+z8w362vTIikDhPuP2b5EFbr5FfHchY
+         vU0Msf+aGMxa+0gbWHqyQLz5eLWVo/wl1ffuWtpnjYW+C/kKwEPNxCH0r5tArv3S8mta
+         QnXkpY2sh/5BFZYpQM+lJueOj8EVMyZOB2ym1xp83lAA2DSzlsbSPo6NdRM5Cl2fiM/I
+         7nu9476eWio9t4GoWtzgbJPgvTZnAdPBHxwqNT55pIlNGAWIGRZ+L/MN6p3i90A1FU+J
+         bezIqicDuha050HDnoeh5+CZNol/TJ9dOPRiCcv0ZLAX8Dl1IiuFPQHoJvLwO7hW4H/w
+         AWAQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:from:date:message-id:subject:to:cc;
-        bh=T8YU6GKhujKuJkFP+oVqBNNPtxt40ye36Nv+rhw9vZY=;
-        b=Vc5ZPvISrdSk6cgvM6gnIgIJK4IRAwwq16XT+sOXU4jp3BkONxC1Ql1xQKDyPceWSZ
-         tAzdOk3GHocEQ7RTVEBH0J1NjEeo/kpRzgJKFjFdgx0xal1LjHMVK3ORBjefTqccNnZC
-         aCyxFP5/IzxB6DO62mx0nV0nl3xpD9Ah1ZOBZKQR/SiwXvEDpJJErKxVwJsor7RfSlp7
-         r2jbuDCJe/JcpS15OICDsMhNwI9VzFrB/Ri9OIhCSkfUdX+r/XPQ200CWvxqIzFqZK6/
-         6nLFfmdOGdUbtQw/TQnZhfosRFF6kxK0a0UpDW3OSzFKP2v+DsWAlbtybPHCr+892huV
-         S+ww==
-X-Gm-Message-State: AOAM531IdDQVQtA6J1QImDQL89NxyZ1eq2RIVg7WzNpcivcZRjhcf73I
-        yTuQsyafioKYtlsSvuyLpq0eu4k3fEVyLA==
-X-Google-Smtp-Source: ABdhPJyFI01z0GfiZwxHwVFneobF8DLUxaT8GdRZnkk4S/T4j5X74abWlCEO19AAsb364TjCEnhNcg==
-X-Received: by 2002:a19:c48:: with SMTP id 69mr10709778lfm.262.1600457653358;
-        Fri, 18 Sep 2020 12:34:13 -0700 (PDT)
-Received: from mail-lj1-f182.google.com (mail-lj1-f182.google.com. [209.85.208.182])
-        by smtp.gmail.com with ESMTPSA id y9sm758436lfg.293.2020.09.18.12.34.12
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 18 Sep 2020 12:34:12 -0700 (PDT)
-Received: by mail-lj1-f182.google.com with SMTP id w3so6009166ljo.5
-        for <linux-sparse@vger.kernel.org>; Fri, 18 Sep 2020 12:34:12 -0700 (PDT)
-X-Received: by 2002:a05:651c:32e:: with SMTP id b14mr11436098ljp.314.1600457652002;
- Fri, 18 Sep 2020 12:34:12 -0700 (PDT)
-MIME-Version: 1.0
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Fri, 18 Sep 2020 12:33:56 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wgJZ05ap8VQdzWDWJVWVtZiOYTc6cnNB8gNeQzEnfm-tw@mail.gmail.com>
-Message-ID: <CAHk-=wgJZ05ap8VQdzWDWJVWVtZiOYTc6cnNB8gNeQzEnfm-tw@mail.gmail.com>
-Subject: Making structs with variable-sized arrays unsized?
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=sqN2Hq30MWQ50QUAVj2F94jSOHGxmAovjMqpfDqNAgk=;
+        b=QwHIgpu05+eKX40uTTkJ6q5+ZnXF993ZXTXKuIcvbyeCh00h0Z4aOuSvYH7nkaSJ2p
+         YXsPoBIkB+IYv4Rd7ih8TADxCmVHMvQZUNFJkCl1s3Zf47BvjEdibh23bXlYrxx/ls4j
+         BtF071E/f9pfkd2ogB0a8LdFMiwLqOdCzASCCl3REtbxemZaIrK9NKuCs9MwnqZaCQAW
+         lvyDUM1DK5jxfDTXuSF3qjFIXZsxNSS9Y4KUhYXpqSx25AMM11epn8fFT8eo3wLww0h8
+         4XHTF6O9RB81flICaGshWieesi5ykcCh7LIVSrcPWIW3/WHFMBqHBggt7VHeRbhak1LM
+         f5Gg==
+X-Gm-Message-State: AOAM533kpi3zwwG0zqem+nS7H35NGvq3wzQUdTHlC30vt3P30uRJG52d
+        y/KEyZs5jU1uOb7aB79cTqzkKT49eoo=
+X-Google-Smtp-Source: ABdhPJysccKvMJbDDLO5RqrxfgxHcEbRSQo3P3ol2JkqZ0izjhRkvilK41aPAJKy4jQxVkvUD7Olig==
+X-Received: by 2002:a50:88c6:: with SMTP id d64mr16144173edd.141.1600461712869;
+        Fri, 18 Sep 2020 13:41:52 -0700 (PDT)
+Received: from ltop.local ([2a02:a03f:b7fe:f700:a042:11c2:1f02:36ab])
+        by smtp.gmail.com with ESMTPSA id dc22sm3122976ejb.112.2020.09.18.13.41.51
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 18 Sep 2020 13:41:52 -0700 (PDT)
+Date:   Fri, 18 Sep 2020 22:41:49 +0200
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: Making structs with variable-sized arrays unsized?
+Message-ID: <20200918204149.eqpl352wygwem34a@ltop.local>
+References: <CAHk-=wgJZ05ap8VQdzWDWJVWVtZiOYTc6cnNB8gNeQzEnfm-tw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wgJZ05ap8VQdzWDWJVWVtZiOYTc6cnNB8gNeQzEnfm-tw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Luc,
- we've been making kernel structures use flexible arrays as a
-cleanliness thing, but it turns out that it doesn't find bugs that it
-_should_ find.
+On Fri, Sep 18, 2020 at 12:33:56PM -0700, Linus Torvalds wrote:
+> Luc,
+>  we've been making kernel structures use flexible arrays as a
+> cleanliness thing, but it turns out that it doesn't find bugs that it
+> _should_ find.
+> 
+> We have that nice "struct_size()" macro to determine the size of the
+> flexible structure given the number of elements, which uses "offsetof
+> + n*members". But sadly standard C still allows the (nonsensical)
+> 'sizeof()' to be used - and I merged another fix for that just today.
+> 
+> Ok, so that's a C standard problem, but it's something that sparse
+> *could* warn about.
 
-We have that nice "struct_size()" macro to determine the size of the
-flexible structure given the number of elements, which uses "offsetof
-+ n*members". But sadly standard C still allows the (nonsensical)
-'sizeof()' to be used - and I merged another fix for that just today.
+Yes, sure.
+I think that sparse treats flexible arrays exactly as if zero-sized,
+without the notion of 'incomplete type' and without check that it is
+the last member, so without any warnings.
+This, I think, explains the results in your tests here under.
 
-Ok, so that's a C standard problem, but it's something that sparse
-*could* warn about.
+I'll look to add some warnings for array declaration and sizeof()
+(explicit or implicit).
 
-Comments? Appended is a kind of test-case for odd situations that
-sparse happily and silently generates nonsensical code for (just
-tested with test-linearize).
+> Comments? Appended is a kind of test-case for odd situations that
+> sparse happily and silently generates nonsensical code for (just
+> tested with test-linearize).
 
-              Linus
+Thanks, these tests make a lot of sense.
+It should be noted, though, that test-linearize gives exactly the
+same result as GCC & clang (sparse IR 100% matches x86 & ARM64 here).
 
----
+I also have 2 questions here under.
 
-    struct bad {
-        unsigned long long a;
-        char b[];
-    };
+>     struct bad {
+>         unsigned long long a;
+>         char b[];
+>     };
+... 
+>     // The layout is odd
+>     // The code does "info->align_size = 0" for unsized arrays, but it
+> still works?
+>     int odd(struct bad *a)
+>     {
+>         return __alignof__(*a);
+>     }
 
-    // An option to warn about this?
-    static struct bad array[5];
+This returns 8. What's odd here?
+The 0 align_size is only for the member 'b' and shouldn't have any
+effect on the alignment of the whole struct. What am I missing?
 
-    int odd(struct bad *a);
-    int not_nice(struct bad p[2]);
-    int please_fix(struct bad *p);
-    void weird(struct bad *dst, const struct bad *src);
+>     // Arrays of flexible-array structures are pretty nonsensical
+>     // Plus we don't even optimize the constant return. Sad.
+>     int not_nice(struct bad p[2])
+>     {
+>         return (void *)(p+1) - (void *)p;
+>     }
 
-    // The layout is odd
-    // The code does "info->align_size = 0" for unsized arrays, but it
-still works?
-    int odd(struct bad *a)
-    {
-        return __alignof__(*a);
-    }
+I don't understand what you mean by 'optimize the constant return'.
+test-linearize returns the only possible sensical answer (if the size
+of the structure is accepted to be 8):
+	not_nice:
+	.L2:
+		<entry-point>
+		ret.32      $8
 
-    // Arrays of flexible-array structures are pretty nonsensical
-    // Plus we don't even optimize the constant return. Sad.
-    int not_nice(struct bad p[2])
-    {
-        return (void *)(p+1) - (void *)p;
-    }
+What could be optimized here?
 
-    // This should at least have an option to warn
-    int please_fix(struct bad *p)
-    {
-        return sizeof(*p);
-    }
-
-    void weird(struct bad *dst, const struct bad *src)
-    {
-        *dst = *src;
-    }
+-- Luc
