@@ -1,105 +1,113 @@
-Return-Path: <SRS0=AbyH=DC=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=CDBi=DG=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.9 required=3.0 tests=BAYES_00,DKIMWL_WL_MED,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED,USER_AGENT_GIT,USER_IN_DEF_DKIM_WL autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 159C0C4363D
-	for <linux-sparse@archiver.kernel.org>; Fri, 25 Sep 2020 08:46:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 599F3C4727C
+	for <linux-sparse@archiver.kernel.org>; Tue, 29 Sep 2020 19:43:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A39C1208B6
-	for <linux-sparse@archiver.kernel.org>; Fri, 25 Sep 2020 08:46:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EEC0120774
+	for <linux-sparse@archiver.kernel.org>; Tue, 29 Sep 2020 19:43:24 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L6J6Yr7a"
+	dkim=pass (2048-bit key) header.d=google.com header.i=@google.com header.b="JemOKWyu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727151AbgIYIqu (ORCPT
+        id S1728229AbgI2TnY (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 25 Sep 2020 04:46:50 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57310 "EHLO
+        Tue, 29 Sep 2020 15:43:24 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57302 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727067AbgIYIqu (ORCPT
+        with ESMTP id S1727740AbgI2TnY (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 25 Sep 2020 04:46:50 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C0F13C0613CE
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Sep 2020 01:46:49 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id o8so2523017ejb.10
-        for <linux-sparse@vger.kernel.org>; Fri, 25 Sep 2020 01:46:49 -0700 (PDT)
+        Tue, 29 Sep 2020 15:43:24 -0400
+Received: from mail-pg1-x54a.google.com (mail-pg1-x54a.google.com [IPv6:2607:f8b0:4864:20::54a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 61D29C0613D0
+        for <linux-sparse@vger.kernel.org>; Tue, 29 Sep 2020 12:43:24 -0700 (PDT)
+Received: by mail-pg1-x54a.google.com with SMTP id t128so3861085pgb.23
+        for <linux-sparse@vger.kernel.org>; Tue, 29 Sep 2020 12:43:24 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=JStmwhzQF8wQZ7DB/SAMfvBkRinHzJbCp2xKaEl4/O4=;
-        b=L6J6Yr7amSLknni/hmc3UZmUVrBHMm19bK+K5CsHtqTCKCM2D8bfPvGBGaHad8nmux
-         KXZTfUqD4I3t+c2QQc3IMuogIK1Y8ZLZ86tK337wi/PlDwlTq/if815KkJ/80avEvF2a
-         SZcO9WHD/p8xcm/E2n7sLM3I9Pj+rIxZTZLVHpv3gzdTR1Tdih5DcUBxdlWR5bjT6v5/
-         yjP25PQS6itysR8hMB4y1DEWvVKUYHtK31bQl+ZeJ1NQ3KLWvDqdG3G0snZ7dcZgQm7i
-         0DavsfM1nu3S0ApkqZqyTWb8cshEFxZ1V9hz85gxAgvaikelS5zCgZLucGl0Ivy7to25
-         mO4Q==
+        d=google.com; s=20161025;
+        h=sender:date:message-id:mime-version:subject:from:to:cc;
+        bh=L+ZQTMyUzbfAF4MuXzem6ruOy1jTior618txOZRQrDw=;
+        b=JemOKWyuOxhCUEgCq4LBeWvD9B32/OB1HfIHGAAvckrTpq5LIvBiCbRxwut5xE9GQC
+         I/JldAYejW65SqHWDgvHvxerNRwDBLsXyMM+Dt+L5JuB5GCPpRUXw+RCKyk3Ksx5pqLW
+         AhNOAiW8tmlj1kXInhu2megrBHMi+RnlZqpSjpPjNDtHh2oN0df0yIr4VH4A9Xh+tyCU
+         1EiH/TjvUzM8GS7CRv9lSwl6qBz97BcGLKw//F+BsHJ5E93w2ancnfTwPc1cifM8wNYY
+         MTMfoOi4ezt13lJAe/mSWgyD3p5bnAIf8juKQ0G4eW+/X0JoVhbzTIjxukpW2XDQvv9r
+         O4TQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=JStmwhzQF8wQZ7DB/SAMfvBkRinHzJbCp2xKaEl4/O4=;
-        b=fSaSUpOszH1pLuaNujkeFukS2O9+bOjzUOEs6V+n4AauOJHylb9vDIZqaCYr56ffCT
-         PTP3MX3r9snAoC4Am/EVkZaMtDxk8uARwM3QDHjifMEMZ6UARjnaoPKjOegYeYfRAzey
-         n/i+LGxHrm1ea8G2KpuXiEX2F7tC2qHT8wVgCPQLKogDISIjGvYWkpQfwudTiG1dB0RC
-         ZvSdwpVlp1IAtlJOgjLzhj0SdnUon8mkGnttIfacaUm0KiE7LTjpcUOUnmD7dOljYngJ
-         1XiIN03XZU2R7Zm6Dd5gpfQV6v9F0eucPtDcV/qUWDsGRySd/NZ68HI0+BkEorP4yc6u
-         KyvQ==
-X-Gm-Message-State: AOAM5302syEz4K9UpBrcGQkWm/P2QeonAh2ysnDNte+SZFcQF6XldpvU
-        oP6ZB+N1Dh//7vMc6X9V7n0=
-X-Google-Smtp-Source: ABdhPJyNrKozgFr5Iu+h5lV62nQVPMERG3Yt6TZf3jQR+I3gXXjBvKqZBMahc54RTBclS9q6p1he3Q==
-X-Received: by 2002:a17:906:3759:: with SMTP id e25mr1599966ejc.281.1601023608482;
-        Fri, 25 Sep 2020 01:46:48 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:4056:ade:a865:c9e1])
-        by smtp.gmail.com with ESMTPSA id g16sm1327006edf.20.2020.09.25.01.46.46
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 25 Sep 2020 01:46:47 -0700 (PDT)
-Date:   Fri, 25 Sep 2020 10:46:46 +0200
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Jiri Slaby <jirislaby@gmail.com>
-Cc:     Christian Eggers <ceggers@arri.de>, linux-sparse@vger.kernel.org,
-        Dirk Mueller <dmueller@suse.com>
-Subject: Re: Segmentation fault when running sparse with current linux master
-Message-ID: <20200925084646.56wyiphyl65qidwd@ltop.local>
-References: <1832426.vqaiCtIcaR@n95hx1g2>
- <20200917142017.5fhdjdfrwjyjqlpu@ltop.local>
- <4184357.m9dUj1Odhv@n95hx1g2>
- <20200924193817.5ilitvaqneach5pg@ltop.local>
- <141c85b6-f607-7594-ed3f-49684fe4bb3a@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <141c85b6-f607-7594-ed3f-49684fe4bb3a@gmail.com>
+        h=x-gm-message-state:sender:date:message-id:mime-version:subject:from
+         :to:cc;
+        bh=L+ZQTMyUzbfAF4MuXzem6ruOy1jTior618txOZRQrDw=;
+        b=Hx6+e/lc4QeCxWOn1TvijCkleDyU/4KQsR983XyyWGty4ak+XrZCTAajWGt0PbyXY5
+         kfxr19gnrEd7kU8Tqx75evdEY9OHX5GCjfbTQEBuksz11Uksm9/s/UMPSKe1oSjifj3S
+         zpZgF9rOvUjRB7uT9sNH6S6J8kn6vJMSyFy/IZhxlhNjgSJFYhGclEFMlwE3wAzqXitm
+         oUkq9cWc9oz+bOEReXFBBMDGcsUMEn5j1RhjvsxE4jlriWAGt9Bcp0LAZOwDWD4/aANZ
+         ESUN1WKtcl9eNQbI1XIBdyVuOi4/EXad1Bda6CU6QfjM+ugLGLodQlfj8UuZK46LhHAU
+         em8Q==
+X-Gm-Message-State: AOAM530fHYFMw8u1vbMfNe3FmegCF5e/9GjX3blutL808L/sEiJQT2Bk
+        3b4t/ct0QzU2R3dYQG6ooVrfe1O7w204UZwgm6o=
+X-Google-Smtp-Source: ABdhPJz+UMD9185MqbkmGncxHLJ1Duw6GZjw3eYdwaS9kGJ0XQZJB5AmmUFPQqITN9rot3EA3+wKUg5wqkY7TZbMxVk=
+Sender: "ndesaulniers via sendgmr" 
+        <ndesaulniers@ndesaulniers1.mtv.corp.google.com>
+X-Received: from ndesaulniers1.mtv.corp.google.com ([2620:15c:211:202:f693:9fff:fef4:4d25])
+ (user=ndesaulniers job=sendgmr) by 2002:a62:2c09:0:b029:142:2501:34f8 with
+ SMTP id s9-20020a622c090000b0290142250134f8mr5448080pfs.81.1601408603686;
+ Tue, 29 Sep 2020 12:43:23 -0700 (PDT)
+Date:   Tue, 29 Sep 2020 12:43:18 -0700
+Message-Id: <20200929194318.548707-1-ndesaulniers@google.com>
+Mime-Version: 1.0
+X-Mailer: git-send-email 2.28.0.709.gb0816b6eb0-goog
+Subject: [PATCH] compiler.h: avoid escaped section names
+From:   Nick Desaulniers <ndesaulniers@google.com>
+To:     Andrew Morton <akpm@linux-foundation.org>
+Cc:     Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
+        Nick Desaulniers <ndesaulniers@google.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        linux-sparse@vger.kernel.org, linux-kernel@vger.kernel.org,
+        clang-built-linux@googlegroups.com
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Sep 25, 2020 at 07:37:57AM +0200, Jiri Slaby wrote:
-> On 24. 09. 20, 21:38, Luc Van Oostenryck wrote:
-> > 
-> > In the official tree, there is a branch 'maint-v0.6.2' which just contain
-> > 4 patches fixing some problems with the release v0.6.2, the second patch
-> > 	77f35b796cc8 ("generic: fix missing inlining of generic expression")
-> > being the one fixing this problem.
-> 
-> Being fixed in Tumbleweed:
-> https://build.opensuse.org/request/show/837254
+The stringification operator, `#`, in the preprocessor escapes strings.
+For example, `# "foo"` becomes `"\"foo\""`.  GCC and Clang differ in how
+they treat section names that contain \".
 
-Awesome! Thank you.
+The portable solution is to not use a string literal with the
+preprocessor stringification operator.
+
+In this case, since __section unconditionally uses the stringification
+operator, we actually want the more verbose
+__attribute__((__section__())).
+
+Link: https://bugs.llvm.org/show_bug.cgi?id=42950
+Fixes: commit e04462fb82f8 ("Compiler Attributes: remove uses of __attribute__ from compiler.h")
+Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
+---
+ include/linux/compiler.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 92ef163a7479..ac45f6d40d39 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -155,7 +155,7 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+ 	extern typeof(sym) sym;					\
+ 	static const unsigned long __kentry_##sym		\
+ 	__used							\
+-	__section("___kentry" "+" #sym )			\
++	__attribute__((__section__("___kentry+" #sym)))		\
+ 	= (unsigned long)&sym;
+ #endif
  
-> If you want the fix on older distros, we can do that, but you have to
-> create a bug against the product first… 20180324 is pretty old version
-> and is both in 15.1 and even 15.2.
+-- 
+2.28.0.709.gb0816b6eb0-goog
 
-Mmmm, 20180324, that's sparse v0.5.2. It's very old indeed and
-unusable for current kernel development anyway.
-
-Best regards,
--- Luc
