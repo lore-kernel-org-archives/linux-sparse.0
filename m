@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C8819C47429
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 145D4C47425
 	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 919C22076A
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D396A2076B
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:51 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Bx/k+gbK"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="suCCZQau"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730470AbgI3XSo (ORCPT
+        id S1732169AbgI3XSv (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 30 Sep 2020 19:18:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58682 "EHLO
+        Wed, 30 Sep 2020 19:18:51 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58714 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732166AbgI3XSi (ORCPT
+        with ESMTP id S1730849AbgI3XSp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Sep 2020 19:18:38 -0400
-Received: from mail-wr1-x443.google.com (mail-wr1-x443.google.com [IPv6:2a00:1450:4864:20::443])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C6D3C061755
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:38 -0700 (PDT)
-Received: by mail-wr1-x443.google.com with SMTP id k15so3542229wrn.10
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:38 -0700 (PDT)
+        Wed, 30 Sep 2020 19:18:45 -0400
+Received: from mail-wm1-x344.google.com (mail-wm1-x344.google.com [IPv6:2a00:1450:4864:20::344])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ECFC0C0613D1
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:44 -0700 (PDT)
+Received: by mail-wm1-x344.google.com with SMTP id v12so1118444wmh.3
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=mFQL3i9zVNObV8k0iWLnJ89/KEx2uauUzxx+FFe+hXs=;
-        b=Bx/k+gbKuKN47gLJlE3PyXYwSVKakXUsYE95eG3pb2pp41w287XbaEWwldfvG9Rq4B
-         MA4i2tUiu5I/ZK0Hesz2Aqu8VXhRmsIX4btvyVPzHo4eAUckOxXZa/kpoSpPT6k22hWi
-         0RiRFEbbKrG/+B/3JkMJBNI0/UcBvTvYNUmjMdwlBiJnx9d0MKo6V2LOTnFtwYMI4IKN
-         knDDOpR8vhd3yQKPkN5cmfe+eLxj4aEgqXvq43NEdbM+BrLm6itkTVNaUs5E8o5Jz7LD
-         arQCvP8nfunTJOrXOVhiD/D/uyew8dDqndNY5K+Y0uqzWXd/qc/emCHW+6AVL0/aZz79
-         QrTQ==
+        bh=/WKLM2C6qMLkIZKOBs5AbUjGucYg3UVIUWBwmAZ7iUc=;
+        b=suCCZQaucZ+MgkqK9Rb370zLfwqghNOWgGU5gGO/xEeI7vCCPTmyVt8T3fmjtz7+wE
+         odi0M0yggU87p86n7jrmVjqp+NNQAxYMRS89HgPXJFgljjjK5MBkz7ZJb1SG/kB/NzuL
+         oPnGdMLU6JKj8rwW+x4ffpEvRq2cZ3DpyccrRxArnLNkTBy+/X4zAv/hjKxNfQwKEoIh
+         vFlq1olLAzq7tkYYzdjLq1EQYKEwbVAxSFP+1/CHm2ju6t55tfNtGaVgvZIB+vGxKQSk
+         I5z/i4zWVDytate2M6jOWDv7t9iMylAZqp9eJh9X2Xs3knlIoZC4Aqz5A6xDi8VWdRJs
+         hamA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=mFQL3i9zVNObV8k0iWLnJ89/KEx2uauUzxx+FFe+hXs=;
-        b=Vy5Tbj3TDrZdEJh6SF6OBBfcZEkQxDZDejk4Oftvm9s0nsgf1gS4K/QUtlfE6sPBuc
-         IGcXf2L2WL3peCvhgurnVobXTvPp1l428zPw9PtTlVhO1PTAkKDeEkwD2f0mtJACB31y
-         PjLqkgM79/mSPZE7meU6nSvHY0c5m+/K2PtHS4h+R8yrw8I/vnycb3CoxJPZbx2a9E6h
-         qt1qsTqq2lB6inPa/GgSvlK9xT4dTEjExcLomyWHH1fnmqjMQTZdAIBIbdTA9qHeW1rr
-         tJtoccVe37AbE/ZUPVXm6BDviPF2v//YlIV3c0CZZXbt/X+E2/x9aQhbgKLToS5TUnrT
-         86bA==
-X-Gm-Message-State: AOAM531bEn8IshKNPyrTngMw4YPsNmz/k192G9BqCSv+Q9qEIzkLn48R
-        2Fdz+4mPrBG7xGUpxQgotrWwcSlmDW8=
-X-Google-Smtp-Source: ABdhPJyv40LxhvPOWtffzCYMHw2r4m9TufS1gmtVQLz4DpJicKc3E4/cc2I/Ks4SHEm6KNuKI2WfRQ==
-X-Received: by 2002:adf:f88b:: with SMTP id u11mr5297252wrp.376.1601507916998;
-        Wed, 30 Sep 2020 16:18:36 -0700 (PDT)
+        bh=/WKLM2C6qMLkIZKOBs5AbUjGucYg3UVIUWBwmAZ7iUc=;
+        b=kL8zKMXbiCXFnHxVdJgWarcTS1ozmZRibFjkRFa341NAMjZYjdQxAsqoZrX5I3NYKv
+         infjhFYhKskmGiDhiiSJ5REAlKtlgeAQ4dFbT7g5SoPbY5ou88uZcF+X+KVuX5sbpaYn
+         HB4vXFOw9rZywt5J50waJoeyd8X56ElY+VG+WHv5RBl5UQgpUebOOUmKR1apmB61d62o
+         1Z6LY2T7DwxdLEAAKCa2qKkJ56Tsjm77HLKilr12GyPeLyL1jrxJ4/MDBxwwWQHW39c/
+         AQAsXBEabh3geByDnWd0NGvUlmKJHaNZ7grvLswf9N/bL95QaXAbLeYy3snz+OU1Xj/Z
+         06fg==
+X-Gm-Message-State: AOAM532W8A9u5ub3TW0zSRWJJeNKSH3E7T5cgaMslMOfGFVoKxEHXxCW
+        KpRc0xIHh/SxIRI1b0U9yyq/zxxLaEk=
+X-Google-Smtp-Source: ABdhPJzdWJOeVt2NnFUIqJVeC0IwlqmUQrdQ7+WxpK1CncZjlfcciQUOQi8k6pgy5SGrlbLulgrNYg==
+X-Received: by 2002:a1c:20ce:: with SMTP id g197mr5489188wmg.72.1601507923383;
+        Wed, 30 Sep 2020 16:18:43 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:d0c8:dbcc:51b0:75b9])
-        by smtp.gmail.com with ESMTPSA id l8sm5460065wrx.22.2020.09.30.16.18.36
+        by smtp.gmail.com with ESMTPSA id l8sm5460065wrx.22.2020.09.30.16.18.42
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Sep 2020 16:18:36 -0700 (PDT)
+        Wed, 30 Sep 2020 16:18:42 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 04/13] flex-array: flexible array members have zero size and alignment is OK
-Date:   Thu,  1 Oct 2020 01:18:19 +0200
-Message-Id: <20200930231828.66751-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 12/13] flex-array: warn on flexible array in nested aggregate types
+Date:   Thu,  1 Oct 2020 01:18:27 +0200
+Message-Id: <20200930231828.66751-13-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200930231828.66751-1-luc.vanoostenryck@gmail.com>
 References: <20200930231828.66751-1-luc.vanoostenryck@gmail.com>
@@ -76,45 +76,97 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-When doing the layout of structures, flexible arrays used to
-not align the resulting structure size.
-
-However, the standard specify that while for most purposes
-flexible arrays can be handled as if not present, they still
-may add some trailing padding (cfr. C11's 6.7.2.1p18).
-
-So, there is no reason to reset the alignment.
+A structure or a union containing another aggregate type containing,
+possibly recursively, a flexible array is quite error prone and make
+not much sense. So, add an option -Wflexible-array-nested to warn
+on such usage.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- symbol.c                      | 1 -
- validation/flex-array-align.c | 1 -
- 2 files changed, 2 deletions(-)
+ options.c                      | 2 ++
+ options.h                      | 1 +
+ sparse.1                       | 7 +++++++
+ symbol.c                       | 4 ++++
+ validation/flex-array-nested.c | 1 -
+ 5 files changed, 14 insertions(+), 1 deletion(-)
 
+diff --git a/options.c b/options.c
+index a8129ac1e952..b46900b973a6 100644
+--- a/options.c
++++ b/options.c
+@@ -101,6 +101,7 @@ int Wdo_while = 0;
+ int Wenum_mismatch = 1;
+ int Wexternal_function_has_definition = 1;
+ int Wflexible_array_array = 1;
++int Wflexible_array_nested = 0;
+ int Wflexible_array_sizeof = 0;
+ int Wimplicit_int = 1;
+ int Winit_cstring = 0;
+@@ -843,6 +844,7 @@ static const struct flag warnings[] = {
+ 	{ "enum-mismatch", &Wenum_mismatch },
+ 	{ "external-function-has-definition", &Wexternal_function_has_definition },
+ 	{ "flexible-array-array", &Wflexible_array_array },
++	{ "flexible-array-nested", &Wflexible_array_nested },
+ 	{ "flexible-array-sizeof", &Wflexible_array_sizeof },
+ 	{ "implicit-int", &Wimplicit_int },
+ 	{ "init-cstring", &Winit_cstring },
+diff --git a/options.h b/options.h
+index 7bcf925b6912..d23ed472eaac 100644
+--- a/options.h
++++ b/options.h
+@@ -100,6 +100,7 @@ extern int Wdo_while;
+ extern int Wenum_mismatch;
+ extern int Wexternal_function_has_definition;
+ extern int Wflexible_array_array;
++extern int Wflexible_array_nested;
+ extern int Wflexible_array_sizeof;
+ extern int Wimplicit_int;
+ extern int Winit_cstring;
+diff --git a/sparse.1 b/sparse.1
+index c1a74153c618..9b1a59c6b9d4 100644
+--- a/sparse.1
++++ b/sparse.1
+@@ -264,6 +264,13 @@ Sparse issues these warnings by default. To turn them off, use
+ \fB-Wno-flexible-array-array\fR.
+ .
+ .TP
++.B -Wflexible-array-nested
++Warn about structures containing a flexible array being contained into
++another structure, union or array.
++
++Sparse does not issue these warnings by default.
++.
++.TP
+ .B -Wflexible-array-sizeof
+ Warn about using the sizeof operator on a structure containing a flexible array,
+ possibly recursively.
 diff --git a/symbol.c b/symbol.c
-index 4c93a0fb4880..9acffeea7fad 100644
+index 02b9066e966a..a9f646eb053f 100644
 --- a/symbol.c
 +++ b/symbol.c
-@@ -127,7 +127,6 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
- 	if (base_size < 0) {
- 		if (!is_array_type(sym))
- 			return;
--		info->align_size = 0;
- 		base_size = 0;
- 	}
+@@ -197,6 +197,10 @@ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance
+ 				info.max_align = member->ctype.alignment;
+ 		}
  
-diff --git a/validation/flex-array-align.c b/validation/flex-array-align.c
-index 0cc67ab36997..9f28942a1ee1 100644
---- a/validation/flex-array-align.c
-+++ b/validation/flex-array-align.c
-@@ -12,7 +12,6 @@ static int foo(struct s *s)
++		if (has_flexible_array(member))
++			info.has_flex_array = 1;
++		if (has_flexible_array(member) && Wflexible_array_nested)
++			warning(sym->pos, "nested flexible arrays");
+ 		fn(member, &info);
+ 	} END_FOR_EACH_PTR(member);
+ 
+diff --git a/validation/flex-array-nested.c b/validation/flex-array-nested.c
+index 3503c329d7c3..63767683c56a 100644
+--- a/validation/flex-array-nested.c
++++ b/validation/flex-array-nested.c
+@@ -21,7 +21,6 @@ static int foo(struct s *s, union u *u)
  /*
-  * check-name: flex-array-align
-  * check-command: test-linearize -Wno-flexible-array-sizeof $file
+  * check-name: flex-array-nested
+  * check-command: sparse -Wflexible-array-nested $file
 - * check-known-to-fail
   *
-  * check-output-ignore
-  * check-output-contains: ret\\..*\\$0x80006
+  * check-error-start
+ flex-array-nested.c:6:8: warning: nested flexible arrays
 -- 
 2.28.0
 
