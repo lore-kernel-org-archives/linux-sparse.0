@@ -2,87 +2,181 @@ Return-Path: <SRS0=NWui=DH=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-13.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	NICE_REPLY_A,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-4.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E47D4C4363D
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 22:15:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 92C48C4363D
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:10:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A7D6B206F7
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 22:15:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E85420759
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:10:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730268AbgI3WPF (ORCPT
+        id S1732025AbgI3XKh (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 30 Sep 2020 18:15:05 -0400
-Received: from imap2.colo.codethink.co.uk ([78.40.148.184]:51650 "EHLO
-        imap2.colo.codethink.co.uk" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727210AbgI3WPF (ORCPT
+        Wed, 30 Sep 2020 19:10:37 -0400
+Received: from smtprelay0034.hostedemail.com ([216.40.44.34]:60362 "EHLO
+        smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1731987AbgI3XKg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Sep 2020 18:15:05 -0400
-Received: from cpc98990-stkp12-2-0-cust216.10-2.cable.virginm.net ([86.26.12.217] helo=[192.168.0.10])
-        by imap2.colo.codethink.co.uk with esmtpsa  (Exim 4.92 #3 (Debian))
-        id 1kNkNL-0006Bg-4i; Wed, 30 Sep 2020 23:15:03 +0100
-Subject: Re: update to format parsing branch
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     linux-sparse@vger.kernel.org
-References: <3960bea7-69ef-ed00-66cf-ac73d5cd8876@codethink.co.uk>
- <20200930202934.rjcfxikrzfvesxnc@ltop.local>
- <fb7680ab-eab1-9c32-f515-c2737b78d6a5@codethink.co.uk>
- <20200930213948.hh5dqfzaocgcgipi@ltop.local>
-From:   Ben Dooks <ben.dooks@codethink.co.uk>
-Organization: Codethink Limited.
-Message-ID: <2ddc169e-f996-c4bd-0339-7f1fd3c124d2@codethink.co.uk>
-Date:   Wed, 30 Sep 2020 23:15:02 +0100
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.12.0
+        Wed, 30 Sep 2020 19:10:36 -0400
+Received: from filter.hostedemail.com (clb03-v110.bra.tucows.net [216.40.38.60])
+        by smtprelay01.hostedemail.com (Postfix) with ESMTP id 8F5C1100E7B46;
+        Wed, 30 Sep 2020 23:10:34 +0000 (UTC)
+X-Session-Marker: 6A6F6540706572636865732E636F6D
+X-HE-Tag: bead66_560aee427196
+X-Filterd-Recvd-Size: 10014
+Received: from XPS-9350.home (unknown [47.151.133.149])
+        (Authenticated sender: joe@perches.com)
+        by omf08.hostedemail.com (Postfix) with ESMTPA;
+        Wed, 30 Sep 2020 23:10:32 +0000 (UTC)
+Message-ID: <75393e5ddc272dc7403de74d645e6c6e0f4e70eb.camel@perches.com>
+Subject: convert_section.pl attached
+From:   Joe Perches <joe@perches.com>
+To:     Nick Desaulniers <ndesaulniers@google.com>,
+        Arvind Sankar <nivedita@alum.mit.edu>
+Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
+        clang-built-linux <clang-built-linux@googlegroups.com>,
+        Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Wed, 30 Sep 2020 16:10:31 -0700
+In-Reply-To: <0e582a7f5144a33f465978d97701f9b3dcc377f3.camel@perches.com>
+References: <20200929194318.548707-1-ndesaulniers@google.com>
+         <20200929200801.GA2668747@rani.riverdale.lan>
+         <CAKwvOdm=H3GDOPo-dbgsqH7UXzC1twz1h2Rdcidh8OXtFtCY4Q@mail.gmail.com>
+         <ffe0224b2dc88e091d4d3bb32ee073ffc0585882.camel@perches.com>
+         <0e582a7f5144a33f465978d97701f9b3dcc377f3.camel@perches.com>
+Content-Type: multipart/mixed; boundary="=-C0QQNuhA3ALce9aKym+T"
+User-Agent: Evolution 3.36.4-0ubuntu1 
 MIME-Version: 1.0
-In-Reply-To: <20200930213948.hh5dqfzaocgcgipi@ltop.local>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On 30/09/2020 22:39, Luc Van Oostenryck wrote:
-> On Wed, Sep 30, 2020 at 10:05:36PM +0100, Ben Dooks wrote:
->> On 30/09/2020 21:29, Luc Van Oostenryck wrote:
->>> On Wed, Sep 30, 2020 at 09:35:50AM +0100, Ben Dooks wrote:
->>>> I've done a rebase to v0.6.2 and put the result up at:
->>>>
->>>> https://gitlab.com/CodethinkLabs/sparse bjdooks/printf-new3
->>>
->>> Great.
->>>
->>> I've one last request, the email address given as author is not the same
->>> as the one used in the Signed-off-by and the copyright notice.
->>>
->>> So, is it possible to respin the series with:
->>> * the small changes I've made here above
->>> * removing the changelogs from the commit messages
->>> * using the same email address for the author and the SoB?
->>
->> I can't see any diffs between git-authour and the SoB in the series.
-> 
-> 	$ git log 5c15b086cd50
-> 	commit 5c15b086cd501633be2ad5fedeeb97c09874409a (bjdooks/bjdooks/printf-new3)
-> 	Author: Ben Dooks <ben-linux@fluff.org>
-> 	Date:   2018-10-30 10:36:26 +0000
-> 	
-> 	    add -Wformat
-> 	
-> 	    Add option to enable/disable format checking (and default it to off)
-> 	
-> 	    Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 
-Ah, looks like my rebasing has re-authoured it.
+--=-C0QQNuhA3ALce9aKym+T
+Content-Type: text/plain; charset="ISO-8859-1"
+Content-Transfer-Encoding: 7bit
+
+Here's a new version that does not update arch/powerpc/boot/ files
+to avoid the defective conversions that Nick found in powerpc.
 
 
 
--- 
-Ben Dooks				http://www.codethink.co.uk/
-Senior Engineer				Codethink - Providing Genius
+--=-C0QQNuhA3ALce9aKym+T
+Content-Type: application/x-perl; name="convert_section.pl"
+Content-Disposition: attachment; filename="convert_section.pl"
+Content-Transfer-Encoding: base64
 
-https://www.codethink.co.uk/privacy.html
+IyEvdXNyL2Jpbi9lbnYgcGVybAoKIyBjb252ZXJ0IGxpbnV4LWtlcm5lbCBfX3NlY3Rpb24gdXNl
+cyBmcm9tIHVucXVvdGVkIHN0cmluZyB0byBxdW90ZWQgc3RyaW5nCiMgY29udmVydCBfX2F0dHJp
+YnV0ZV9fKChzZWN0aW9uKCJmb28iKSkpIHRvIF9fc2VjdGlvbigiZm9vIikKIyBjb252ZXJ0IF9f
+YXR0cmlidXRlX18oKGZvbywgc2VjdGlvbj0oImJhciIpLCBiYXopKQojICAgICAgdG8gX19zZWN0
+aW9uKCJiYXIiKSBhdHRyaWJ1dGUoKGZvbywgYmF6KSkKIyBjb252ZXJ0IF9fYXR0cmlidXRlX18K
+CnVzZSBzdHJpY3Q7CgojIHBhdGNoIGNvbXBpbGVyX2F0dHJpYnV0ZXMuaCB0byByZW1vdmUgcXVv
+dGluZyBvZiBzZWN0aW9uIG5hbWUKCm15ICRyZXN1bHQgPSBgcGF0Y2ggLXAxIDw8IkVPRiIKIGlu
+Y2x1ZGUvbGludXgvY29tcGlsZXJfYXR0cmlidXRlcy5oIHwgMiArLQogMSBmaWxlIGNoYW5nZWQs
+IDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51
+eC9jb21waWxlcl9hdHRyaWJ1dGVzLmggYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyX2F0dHJpYnV0
+ZXMuaAppbmRleCBlYTdiNzU2YjFjOGYuLmIyYTNmNGY2NDFhNyAxMDA2NDQKLS0tIGEvaW5jbHVk
+ZS9saW51eC9jb21waWxlcl9hdHRyaWJ1dGVzLmgKKysrIGIvaW5jbHVkZS9saW51eC9jb21waWxl
+cl9hdHRyaWJ1dGVzLmgKQEAgLTI1NCw3ICsyNTQsNyBAQAogICogICBnY2M6IGh0dHBzOi8vZ2Nj
+LmdudS5vcmcvb25saW5lZG9jcy9nY2MvQ29tbW9uLVZhcmlhYmxlLUF0dHJpYnV0ZXMuaHRtbCNp
+bmRleC1zZWN0aW9uLXZhcmlhYmxlLWF0dHJpYnV0ZQogICogY2xhbmc6IGh0dHBzOi8vY2xhbmcu
+bGx2bS5vcmcvZG9jcy9BdHRyaWJ1dGVSZWZlcmVuY2UuaHRtbCNzZWN0aW9uLWRlY2xzcGVjLWFs
+bG9jYXRlCiAgKi8KLSNkZWZpbmUgX19zZWN0aW9uKFMpICAgICAgICAgICAgICAgICAgICBfX2F0
+dHJpYnV0ZV9fKChfX3NlY3Rpb25fXygjUykpKQorI2RlZmluZSBfX3NlY3Rpb24oc2VjdGlvbikg
+ICAgICAgICAgICAgIF9fYXR0cmlidXRlX18oKF9fc2VjdGlvbl9fKHNlY3Rpb24pKSkKIAogLyoK
+ICAqICAgZ2NjOiBodHRwczovL2djYy5nbnUub3JnL29ubGluZWRvY3MvZ2NjL0NvbW1vbi1GdW5j
+dGlvbi1BdHRyaWJ1dGVzLmh0bWwjaW5kZXgtdW51c2VkLWZ1bmN0aW9uLWF0dHJpYnV0ZQpFT0Zg
+OwoKIyBwYXRjaCBzY3JpcHRzL21vZC9tb2Rwb3N0LmMgdG8gYWRkIHF1b3Rpbmcgb2Ygc2VjdGlv
+biBuYW1lCgpteSAkcmVzdWx0ID0gYHBhdGNoIC1wMSA8PCJFT0YiCiBzY3JpcHRzL21vZC9tb2Rw
+b3N0LmMgfCA0ICsrLS0KIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRp
+b25zKC0pCgpkaWZmIC0tZ2l0IGEvc2NyaXB0cy9tb2QvbW9kcG9zdC5jIGIvc2NyaXB0cy9tb2Qv
+bW9kcG9zdC5jCmluZGV4IDY5MzQxYjM2ZjI3MS4uZjg4MmNlMGQ5MzI3IDEwMDY0NAotLS0gYS9z
+Y3JpcHRzL21vZC9tb2Rwb3N0LmMKKysrIGIvc2NyaXB0cy9tb2QvbW9kcG9zdC5jCkBAIC0yMjU0
+LDcgKzIyNTQsNyBAQCBzdGF0aWMgdm9pZCBhZGRfaGVhZGVyKHN0cnVjdCBidWZmZXIgKmIsIHN0
+cnVjdCBtb2R1bGUgKm1vZCkKIAlidWZfcHJpbnRmKGIsICJNT0RVTEVfSU5GTyhuYW1lLCBLQlVJ
+TERfTU9ETkFNRSk7XFxuIik7CiAJYnVmX3ByaW50ZihiLCAiXFxuIik7CiAJYnVmX3ByaW50Zihi
+LCAiX192aXNpYmxlIHN0cnVjdCBtb2R1bGUgX190aGlzX21vZHVsZVxcbiIpOwotCWJ1Zl9wcmlu
+dGYoYiwgIl9fc2VjdGlvbiguZ251LmxpbmtvbmNlLnRoaXNfbW9kdWxlKSA9IHtcXG4iKTsKKwli
+dWZfcHJpbnRmKGIsICJfX3NlY3Rpb24oXFwiLmdudS5saW5rb25jZS50aGlzX21vZHVsZVxcIikg
+PSB7XFxuIik7CiAJYnVmX3ByaW50ZihiLCAiXFx0Lm5hbWUgPSBLQlVJTERfTU9ETkFNRSxcXG4i
+KTsKIAlpZiAobW9kLT5oYXNfaW5pdCkKIAkJYnVmX3ByaW50ZihiLCAiXFx0LmluaXQgPSBpbml0
+X21vZHVsZSxcXG4iKTsKQEAgLTIzMDgsNyArMjMwOCw3IEBAIHN0YXRpYyBpbnQgYWRkX3ZlcnNp
+b25zKHN0cnVjdCBidWZmZXIgKmIsIHN0cnVjdCBtb2R1bGUgKm1vZCkKIAogCWJ1Zl9wcmludGYo
+YiwgIlxcbiIpOwogCWJ1Zl9wcmludGYoYiwgInN0YXRpYyBjb25zdCBzdHJ1Y3QgbW9kdmVyc2lv
+bl9pbmZvIF9fX192ZXJzaW9uc1tdXFxuIik7Ci0JYnVmX3ByaW50ZihiLCAiX191c2VkIF9fc2Vj
+dGlvbihfX3ZlcnNpb25zKSA9IHtcXG4iKTsKKwlidWZfcHJpbnRmKGIsICJfX3VzZWQgX19zZWN0
+aW9uKFxcIl9fdmVyc2lvbnNcXCIpID0ge1xcbiIpOwogCiAJZm9yIChzID0gbW9kLT51bnJlczsg
+czsgcyA9IHMtPm5leHQpIHsKIAkJaWYgKCFzLT5tb2R1bGUpCkVPRmA7CgojIEdldCB0aGUgbGlz
+dCBvZiBmaWxlcyB0byBtb2RpZnkgKGNvbnRhaW5zIF9fc2VjdGlvbiBvciBfX2F0dHJpYnV0ZV9f
+LipzZWN0aW9uCiMgKGlnbm9yZSBzY3JpcHRzLCB0b29scywgdWFwaSwgYXJjaC9wb3dlcnBjL2Jv
+b3QgYW5kIGNvbXBpbGVyX2F0dHJpYnV0ZXMuaCkKCm15ICRvdXRwdXQgPSBgZ2l0IGdyZXAgLS1u
+YW1lLW9ubHkgLVAgIig/OlxcYl9fc2VjdGlvblxcYlx8XFxiX19hdHRyaWJ1dGVfX1xcYi4qc2Vj
+dGlvbikiIHwgZ3JlcCAtdlAgJ14oPzppbmNsdWRlL2xpbnV4L2NvbXBpbGVyX2F0dHJpYnV0ZXNc
+XC5ofHNjcmlwdHMvfHRvb2xzL3wvdWFwaS98YXJjaC9wb3dlcnBjL2Jvb3QvKSdgOwpteSBAZmls
+ZXMgPSBzcGxpdCgiXG4iLCAkb3V0cHV0KTsKIyBBZGQgdGhlIG9ubHkgZmlsZSBpbiB0b29scyB0
+aGF0IG5lZWRzIGNvbnZlcnNpb24KcHVzaCAoQGZpbGVzLCAidG9vbHMvaW5jbHVkZS9saW51eC9v
+Ymp0b29sLmgiKTsKCiMgTW9kaWZ5IGVhY2ggcG9zc2libGUgZmlsZQpmb3JlYWNoIChAZmlsZXMp
+IHsKICAgIGNob21wOwogICAgbXkgJGZpbGUgPSAkXzsKCiAgICAjIHJlYWQgdGhlIG9yaWdpbmFs
+IGZpbGUKICAgIG9wZW4oRkgsICc8JywgJGZpbGUpIG9yIGRpZSAkITsKICAgIG15IEBsaW5lcyA9
+IDxGSD47CiAgICBjbG9zZSBGSDsKCiAgICAjIHdyaXRlIHRoZSBtb2RpZmllZCBmaWxlIGxpbmUg
+YnkgbGluZQogICAgb3BlbiAoRkgsICc+JywgJGZpbGUpIG9yIGRpZSAkITsKICAgIGZvcmVhY2gg
+bXkgJGxpbmUgKEBsaW5lcykgewoJY2hvbXAgJGxpbmU7CglteSAkbmV3bGluZSA9ICRsaW5lOwoK
+CSMgQ29udmVydCBfX3NlY3Rpb24oZm9vKSB0byBfX3NlY3Rpb24oImZvbyIpCgkjIGlmICJmb28i
+IHVzZXMgbXVsdGlwbGUgdG9rZW4gcGFzdGluZywKCSMgICBwcmUgYW5kIHBvc3QgdG9rZW5zIHJl
+bW92ZWQgYW5kIGEgc2luZ2xlICMgaXMgdXNlZCB0aGVuICIgIiBhZGRlZAoJIyAgIGUuZy46ICBm
+b28gIyMgYmFyICMjIGJheiBiZWNvbWVzICJmb28iICNiYXIgImJheiIKCWlmICgkbGluZSA9fiBt
+L1xiX19zZWN0aW9uXHMqXChccyooPyEiKShbXlwpXSspXCkvKSB7CgkgICAgbXkgJG9sZHNlY3Rp
+b24gPSAkMTsKCSAgICBteSAkbmV3c2VjdGlvbiA9ICQxOwoJICAgIGlmICgkb2xkc2VjdGlvbiA9
+fiAvKC4qKSMjKC4qKSMjKC4qKS8pIHsKCQkkbmV3c2VjdGlvbiA9ICciJyAuIHRyaW0oJDEpIC4g
+JyIgIycgLiB0cmltKCQyKSAuICcgIicgLiB0cmltKCQzKSAuICciJzsKCSAgICB9IGVsc2UgewoJ
+CSRuZXdzZWN0aW9uID0gJyInIC4gdHJpbSgkb2xkc2VjdGlvbikgLiAnIic7CgkgICAgfQoJICAg
+ICRuZXdsaW5lID1+IHMvX19zZWN0aW9uXHMqXChccypcUSRvbGRzZWN0aW9uXEVccypcKS9fX3Nl
+Y3Rpb24oJG5ld3NlY3Rpb24pLzsKCX0KCgkjIGNvbnZlcnQgX19hdHRyaWJ1dGVfXygoc2VjdGlv
+bigiZm9vIikpKSB0byBfX3NlY3Rpb24oImZvbyIpCgkkbmV3bGluZSA9fiBzL1xiX19hdHRyaWJ1
+dGVfX1xzKlwoXHMqXChccypfKnNlY3Rpb25fKlxzKlwoXHMqKCJbXiJdKyIpXHMqXClccypcKVxz
+KlwpL19fc2VjdGlvbigkMSkvOwoKCSMgY29udmVydCBfX2F0dHJpYnV0ZV9fKChmb28sIHNlY3Rp
+b249KCJiYXIiKSwgYmF6KSkKCSMgdG8gX19zZWN0aW9uKCJiYXIiKSBhdHRyaWJ1dGUoKGZvbywg
+YmF6KSkKCWlmICgkbmV3bGluZSA9fiAvKFxiX19hdHRyaWJ1dGVfX1xzKlwoXHMqXCgoW14sX10r
+KT8oXHMqLD9ccypfKnNlY3Rpb25fKlxzKlwoXHMqKCJbXiJdKyIpXHMqXClccyosP1xzKikoLiop
+XHMqXClccypcKSkvKSB7CgkgICAgbXkgJHNlY3Rpb24gPSAkMzsKCSAgICBteSAkY29tbWEgPSAi
+IjsKCSAgICAkY29tbWEgPSAiLCAiIGlmICgkc2VjdGlvbiA9fiAvXlxzKiwvICYmICRzZWN0aW9u
+ID1+IC8sXHMqJC8pOwoJICAgICRuZXdsaW5lID1+IHMvXFEkc2VjdGlvblxFLyRjb21tYS87Cgkg
+ICAgJHNlY3Rpb24gPX4gcy9eW14iXSovLzsKCSAgICAkc2VjdGlvbiA9fiBzL14oIlteIl0qIiku
+Ki8kMS87CgkgICAgJG5ld2xpbmUgPX4gcy9cYl9fYXR0cmlidXRlX18vX19zZWN0aW9uKCRzZWN0
+aW9uKSBfX2F0dHJpYnV0ZV9fLzsKCX0KCgkjIGlmIHRoZSBsaW5lIGVuZGVkIHdpdGggYSBsaW5l
+IGNvbnRpbnVhdGlvbiBcLCB0cnkgdG8gbW92ZSB0aGUKCSMgY29udGludWF0aW9uIHRvIHRoZSBz
+YW1lIGxvY2F0aW9uIGJ5IHJlbW92aW5nIG9yIGFkZGluZyB0YWJzCglpZiAoJGxpbmUgPX4gL1xc
+JC8pIHsKCSAgICBteSAkb2xlbiA9IGxlbmd0aChleHBhbmRfdGFicygkbGluZSkpOwoJICAgIG15
+ICRubGVuID0gbGVuZ3RoKGV4cGFuZF90YWJzKCRuZXdsaW5lKSk7CgkgICAgaWYgKCRuZXdsaW5l
+ID1+IC9cdFxcJC8pIHsKCQlpZiAoJG5sZW4gPiAkb2xlbikgewoJCSAgICAkbmV3bGluZSA9fiBz
+L1x0XFwkL1xcLzsKCQl9IGVsc2UgewoJCSAgICB3aGlsZSAoJG5sZW4gPCAkb2xlbikgewoJCQkk
+bmV3bGluZSA9fiBzL1xcJC9cdFxcLzsKCQkJJG5sZW4gPSBsZW5ndGgoZXhwYW5kX3RhYnMoJG5l
+d2xpbmUpKTsKCQkgICAgfQoJCX0KCSAgICB9Cgl9CglwcmludCBGSCAiJG5ld2xpbmVcbiI7CiAg
+ICB9CiAgICBjbG9zZSBGSDsKfQoKIyBBbmQgZ2l0IGNvbW1pdCB0aGUgY2hhbmdlcwokcmVzdWx0
+ID0gcXh7Z2l0IGNvbW1pdCAtYSAtLWF1dGhvcj0nSm9lIFBlcmNoZXMgPGpvZVxAcGVyY2hlcy5j
+b20+JyAtRi0gPDwiRU9GIgp0cmVld2lkZTogQ29udmVydCBtYWNybyBhbmQgdXNlcyBvZiBfX3Nl
+Y3Rpb24oZm9vKSB0byBfX3NlY3Rpb24oImZvbyIpCgpVc2UgYSBtb3JlIGdlbmVyaWMgZm9ybSBm
+b3IgX19zZWN0aW9uIHRoYXQgcmVxdWlyZXMgcXVvdGVzIHRvIGF2b2lkCmNvbXBsaWNhdGlvbnMg
+d2l0aCBjbGFuZyBhbmQgZ2NjIGRpZmZlcmVuY2VzLgoKUmVtb3ZlIHRoZSBxdW90ZSBvcGVyYXRv
+ciAjIGZyb20gY29tcGlsZXJfYXR0cmlidXRlcy5oIF9fc2VjdGlvbiBtYWNyby4KCkNvbnZlcnQg
+YWxsIHVucXVvdGVkIF9fc2VjdGlvbihmb28pIHVzZXMgdG8gcXVvdGVkIF9fc2VjdGlvbigiZm9v
+IikuCkFsc28gY29udmVydCBfX2F0dHJpYnV0ZV9fKChzZWN0aW9uKCJmb28iKSkpIHVzZXMgdG8g
+X19zZWN0aW9uKCJmb28iKQpldmVuIGlmIHRoZSBfX2F0dHJpYnV0ZV9fIGhhcyBtdWx0aXBsZSBs
+aXN0IGVudHJ5IGZvcm1zLgoKU2lnbmVkLW9mZi1ieTogSm9lIFBlcmNoZXMgPGpvZVxAcGVyY2hl
+cy5jb20+CkVPRgp9OwoKIyB1dGlsaXR5IHN1YnJvdXRpbmVzCnN1YiB0cmltIHsKICAgIG15ICgk
+c3RyaW5nKSA9IEBfOwogICAgJHN0cmluZyA9fiBzL15ccyt8XHMrJC8vZzsKICAgIHJldHVybiAk
+c3RyaW5nOwp9CgpzdWIgZXhwYW5kX3RhYnMgewogICAgbXkgKCRzdHIpID0gQF87CgogICAgbXkg
+JHJlcyA9ICcnOwogICAgbXkgJG4gPSAwOwogICAgZm9yIG15ICRjIChzcGxpdCgvLywgJHN0cikp
+IHsKCWlmICgkYyBlcSAiXHQiKSB7CgkgICAgJHJlcyAuPSAnICc7CgkgICAgJG4rKzsKCSAgICBm
+b3IgKDsgKCRuICUgOCkgIT0gMDsgJG4rKykgewoJCSRyZXMgLj0gJyAnOwoJICAgIH0KCSAgICBu
+ZXh0OwoJfQoJJHJlcyAuPSAkYzsKCSRuKys7CiAgICB9CgogICAgcmV0dXJuICRyZXM7Cn0K
+
+
+--=-C0QQNuhA3ALce9aKym+T--
+
