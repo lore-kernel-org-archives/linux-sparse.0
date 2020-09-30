@@ -2,101 +2,113 @@ Return-Path: <SRS0=NWui=DH=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
-	version=3.4.0
+	SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 356B6C4727C
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 21:37:15 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id ED145C4727C
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 21:39:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id ED1A720739
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 21:37:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B02A82075F
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 21:39:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="R4dsgOr/"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ai2MW8dO"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730646AbgI3VhO (ORCPT
+        id S1730528AbgI3Vjy (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 30 Sep 2020 17:37:14 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42750 "EHLO
+        Wed, 30 Sep 2020 17:39:54 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725814AbgI3VhM (ORCPT
+        with ESMTP id S1725814AbgI3Vjx (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Sep 2020 17:37:12 -0400
-Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 24DDBC061755
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 14:37:12 -0700 (PDT)
-Received: by mail-wr1-x42a.google.com with SMTP id j2so3364953wrx.7
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 14:37:12 -0700 (PDT)
+        Wed, 30 Sep 2020 17:39:53 -0400
+Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44A6EC061755
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 14:39:51 -0700 (PDT)
+Received: by mail-wm1-x32e.google.com with SMTP id x23so932543wmi.3
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 14:39:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=XpoF8AgkpNmNHd1AFYdSvTmuMRzk5AKOYRUxIkhnnBM=;
-        b=R4dsgOr/JBomOuVhy4CpCaOoeeopZ6QRlw7h6UCB+/YGQ4o512RYFpEmFON8Ixn8ag
-         2heFKWHd93kVhCm+af4mYHU+awNZoG6CAZ4rSmQ0huu0cuVLbhcoCt6WFpecOfJjz5at
-         XGXOxdreYZuiEhP2QXZbKmPd3RjSMTOIOUsB3X9FJUeLSi9fbR+M2cgl0Z86tj64OYXX
-         RzpEzcMzpI0bzHQdY8QcWLO4q6Rm35q2yXPgFgQPhixWIOOJ0bda3/z6xWscO4tCIetC
-         9jWRr03qOl6A41tviSrvIgqLyOxRHbl/wFbsg98XawE34yqLnBZgLZyy9sOhW50w84mr
-         jwLg==
+        bh=7tZ9N8kTWYC7imy1jgiLGGjWpq3IkCNR0SqRY0NvEP0=;
+        b=Ai2MW8dOVHdk74yJl031gIhpvZx7xP0HDEp6Mo112KDevJJdIr5H9JSA16vY+by099
+         5Lr3pPkV549nnnA2igamQDF6uQ2PzXv8OAgT/1zY4Lt3aidO7teX4Of6ep+iVkDqAew5
+         3dPfJkAdRrAU9Pp1DELx/Pa9YMDIjWkfHjkddIPBKPmHiaHDAlbRXCiBq0XJW7rTrrBz
+         fe5ybb6+tCC1HKMGO9TyfFBc3UOmEOfBLRry+nGe2xThQ2pyYG18b2zFMXxOuzCmOFHe
+         K806F6OQtuB0hAa8SMLpRVuTLIUy3oQZn7mFrJiMiVTPr+AGbUqmrJUvHfkW8SSCVPLy
+         lO4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=XpoF8AgkpNmNHd1AFYdSvTmuMRzk5AKOYRUxIkhnnBM=;
-        b=L66nMnyEalY/6GJO0XQ12oyN2rSqTTWzRQLrXqqey7YOS6Sr4m5Yenndbz+Ox78vDt
-         IAaC3OZbWVyo1DcP22Lzhhr3hlec5oCC7yR90n1o4dMKEH4qlE3UhiDtIve5obbun0Oy
-         zPWNEek78RuZCoJfbkPO13L5W7deUqqT0/4IOQk6OqCbMMz3miJ8FoVVKKk/6J7DwiSg
-         WbFbusiH2+FPuCfJ7AsUYDBq9sh2OJxNyJ2N/ks57fJ2ebibO95LPf84NLBlFV5p19y2
-         utZBcfHeHWeFOjxo62o5RMuzNrM6QXwa04683cUp2aymOH67We5tLcmDuZsq/vIsBQyP
-         1hmw==
-X-Gm-Message-State: AOAM530mxjiub6LyQyZN6wwrGb0fEaE/7lgHRGTOSauvYIt/Cedzwv4w
-        fm2L+BiSAvVKWrmN8VoVjd7GynkjNik=
-X-Google-Smtp-Source: ABdhPJwepIxwCuMfRdaWJDY9HzqTsL9NfmfOEshdYahaOis33ouASiivxgmDRUABaWKyE1U4OUHiYA==
-X-Received: by 2002:adf:dccc:: with SMTP id x12mr5263812wrm.241.1601501830782;
-        Wed, 30 Sep 2020 14:37:10 -0700 (PDT)
+        bh=7tZ9N8kTWYC7imy1jgiLGGjWpq3IkCNR0SqRY0NvEP0=;
+        b=otVQwn16iQbJWV/gzGczOxAc/QwUurqkxgdG7AkPD/opkTEi2JkMo/bSzwTUMmDHy6
+         IP6pzmNv4M1f55E5v/6M68GFE9V0O+5unG7lWPzREVgYFuy1wFuXAMKdZKvQY1sy6w2m
+         nJ9HajqjjlLjip6NpVq9mpC8JjuZ3oLOUI+goOL9G7Yj1kH5oZwCPMBRyAWzPA9jX9yE
+         qdUODjywV6pZOKrekcqsZJPQWg9byjhJ8STPlTOQsjTtUTeiHyNFCPkt83M2dcNyeYyd
+         QRNEb7lDq+OryOMmTV4JekL0l1SkTiwNzPn0borO4KPmlbxN0blBc4mhYGCXYyyXvrPU
+         gFwQ==
+X-Gm-Message-State: AOAM531E9Skd2TMAhS1ZADko5gba0NfPT12Xq23bFBArdcRWIHEFwqby
+        thIVVCat24+i44gQvsfwWZVEKCVvESU=
+X-Google-Smtp-Source: ABdhPJzcejR7r6xQC8gZWfXwmKgJuYSRqGLErRtOz021IUxgAiLtazHatqdkBF50Qp0wK3y5PzOmXw==
+X-Received: by 2002:a1c:7d55:: with SMTP id y82mr5078822wmc.100.1601501990011;
+        Wed, 30 Sep 2020 14:39:50 -0700 (PDT)
 Received: from ltop.local ([2a02:a03f:b7fe:f700:d0c8:dbcc:51b0:75b9])
-        by smtp.gmail.com with ESMTPSA id m3sm445016wme.3.2020.09.30.14.37.09
+        by smtp.gmail.com with ESMTPSA id z9sm5117178wmg.46.2020.09.30.14.39.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Sep 2020 14:37:10 -0700 (PDT)
-Date:   Wed, 30 Sep 2020 23:37:09 +0200
+        Wed, 30 Sep 2020 14:39:49 -0700 (PDT)
+Date:   Wed, 30 Sep 2020 23:39:48 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     Ben Dooks <ben.dooks@codethink.co.uk>
 Cc:     linux-sparse@vger.kernel.org
 Subject: Re: update to format parsing branch
-Message-ID: <20200930213709.n2n6qwv5vrso3r5g@ltop.local>
+Message-ID: <20200930213948.hh5dqfzaocgcgipi@ltop.local>
 References: <3960bea7-69ef-ed00-66cf-ac73d5cd8876@codethink.co.uk>
  <20200930202934.rjcfxikrzfvesxnc@ltop.local>
- <e73b1efe-16ac-883f-4d33-4982d1a5782a@codethink.co.uk>
+ <fb7680ab-eab1-9c32-f515-c2737b78d6a5@codethink.co.uk>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <e73b1efe-16ac-883f-4d33-4982d1a5782a@codethink.co.uk>
+In-Reply-To: <fb7680ab-eab1-9c32-f515-c2737b78d6a5@codethink.co.uk>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Sep 30, 2020 at 09:59:12PM +0100, Ben Dooks wrote:
+On Wed, Sep 30, 2020 at 10:05:36PM +0100, Ben Dooks wrote:
 > On 30/09/2020 21:29, Luc Van Oostenryck wrote:
 > > On Wed, Sep 30, 2020 at 09:35:50AM +0100, Ben Dooks wrote:
 > > > I've done a rebase to v0.6.2 and put the result up at:
 > > > 
 > > > https://gitlab.com/CodethinkLabs/sparse bjdooks/printf-new3
-> 
-> [snip]
-> 
+> > 
+> > Great.
+> > 
+> > I've one last request, the email address given as author is not the same
+> > as the one used in the Signed-off-by and the copyright notice.
+> > 
 > > So, is it possible to respin the series with:
 > > * the small changes I've made here above
 > > * removing the changelogs from the commit messages
 > > * using the same email address for the author and the SoB?
 > 
-> Ok, will sort these out tonight.
-> 
-> What's the best branch to base-on for merge?
+> I can't see any diffs between git-authour and the SoB in the series.
 
-The one you used for your printf-new3:
-	24bdaac6682c ("Merge branch 'linear-fma' into next")
+	$ git log 5c15b086cd50
+	commit 5c15b086cd501633be2ad5fedeeb97c09874409a (bjdooks/bjdooks/printf-new3)
+	Author: Ben Dooks <ben-linux@fluff.org>
+	Date:   2018-10-30 10:36:26 +0000
+	
+	    add -Wformat
+	    
+	    Add option to enable/disable format checking (and default it to off)
+	    
+	    Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
 
-is perfect.
+
+The author is:  Ben Dooks <ben-linux@fluff.org>
+but the SoB is: Ben Dooks <ben.dooks@codethink.co.uk>
+
 -- Luc
