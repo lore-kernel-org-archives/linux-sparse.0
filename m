@@ -2,268 +2,197 @@ Return-Path: <SRS0=NWui=DH=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.0 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-11.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5F7B9C4727C
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 18:34:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4D62AC4727C
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 20:29:39 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DD302076B
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 18:34:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 009272076A
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 20:29:38 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lZxYrSzE"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725800AbgI3SeE (ORCPT
+        id S1725892AbgI3U3i (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 30 Sep 2020 14:34:04 -0400
-Received: from smtprelay0178.hostedemail.com ([216.40.44.178]:49740 "EHLO
-        smtprelay.hostedemail.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725771AbgI3SeE (ORCPT
+        Wed, 30 Sep 2020 16:29:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60618 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725814AbgI3U3i (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Sep 2020 14:34:04 -0400
-Received: from filter.hostedemail.com (clb03-v110.bra.tucows.net [216.40.38.60])
-        by smtprelay05.hostedemail.com (Postfix) with ESMTP id D49511803009B;
-        Wed, 30 Sep 2020 18:34:02 +0000 (UTC)
-X-Session-Marker: 6A6F6540706572636865732E636F6D
-X-HE-Tag: low83_630953527195
-X-Filterd-Recvd-Size: 13384
-Received: from XPS-9350.home (unknown [47.151.133.149])
-        (Authenticated sender: joe@perches.com)
-        by omf10.hostedemail.com (Postfix) with ESMTPA;
-        Wed, 30 Sep 2020 18:34:01 +0000 (UTC)
-Message-ID: <0e582a7f5144a33f465978d97701f9b3dcc377f3.camel@perches.com>
-Subject: Re: [PATCH] compiler.h: avoid escaped section names
-From:   Joe Perches <joe@perches.com>
-To:     Nick Desaulniers <ndesaulniers@google.com>,
-        Arvind Sankar <nivedita@alum.mit.edu>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
-        Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Nathan Chancellor <natechancellor@gmail.com>,
-        linux-sparse@vger.kernel.org, LKML <linux-kernel@vger.kernel.org>,
-        clang-built-linux <clang-built-linux@googlegroups.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Wed, 30 Sep 2020 11:33:59 -0700
-In-Reply-To: <ffe0224b2dc88e091d4d3bb32ee073ffc0585882.camel@perches.com>
-References: <20200929194318.548707-1-ndesaulniers@google.com>
-         <20200929200801.GA2668747@rani.riverdale.lan>
-         <CAKwvOdm=H3GDOPo-dbgsqH7UXzC1twz1h2Rdcidh8OXtFtCY4Q@mail.gmail.com>
-         <ffe0224b2dc88e091d4d3bb32ee073ffc0585882.camel@perches.com>
-Content-Type: multipart/mixed; boundary="=-aBohwTz58WA21h5mfNas"
-User-Agent: Evolution 3.36.4-0ubuntu1 
+        Wed, 30 Sep 2020 16:29:38 -0400
+Received: from mail-wm1-x330.google.com (mail-wm1-x330.google.com [IPv6:2a00:1450:4864:20::330])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1A8AAC061755
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 13:29:38 -0700 (PDT)
+Received: by mail-wm1-x330.google.com with SMTP id e17so809618wme.0
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 13:29:38 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=wvcjIxlBwNjoMSpbZ7w2RXmyMLWMXqvsxzx9cSoSeRw=;
+        b=lZxYrSzE7Rjhrdkb4S7SVtl9yVSIiea8czYIqA4JNe0ObGpHfrsICaXis8K2Ejrf6i
+         aMqrcO61xSZHovsFGiuthZpilxnDTBYoV1enF+SbW/T1M+U6SWR4hgaeH+/VaBEXg0rr
+         0WTdBs0zHJeCM2kYjd5gA0tdMyKc0gM5ziQmAYzUz7wuoO0BW0+IQ2+0jkUqZWc29K3P
+         iglwUgihsflu878Dx6QVZiFChFHI7h3/sVlVkJvY6Bq03hHqq/waUurojWx4i/wgqNKP
+         ZdI5VL5x+vg5D4UNwJw59wuyr0T6k6M9hlb4ncQqDjMCoLFmb4j2WNCvJ+UbMkkx6c75
+         bS/Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=wvcjIxlBwNjoMSpbZ7w2RXmyMLWMXqvsxzx9cSoSeRw=;
+        b=iKGWYoQ21FGNW5z84OLgpPyo0Jy/DC3Jiq7/jtwaeMz2zQS5rRlBIZTAWx4P70joO9
+         wxOY3oIRCJJwVqf61yTL5BybY6dH+Wiocegx1f5ieE8bdCkQ42XPm5VZfOkJRCUY7LJd
+         ptuAMGZR9k3dZWFC8geDC/Gqo+26qOHu6M6ZBuLFlH0Gte/ofaQ3e7Z8lAFv0S71O+Dk
+         AfNGtWID9jb3X5YSe+rKOKuzhiAHSi92cH1tGKKe8lMpX6tLd74V4EDXvYZimQn0uKgx
+         5MJPr1/CTr4mgqBGgxneigpGVlGUtxOk5RvVgnFLM5atJLYeXmc2NkUzPCjvQhmD6D9j
+         6mtQ==
+X-Gm-Message-State: AOAM530r+Y0gt/ml5VZPsUNXuDz3av6JN1VTArO6dHFtCLvrXlfrS52r
+        NfFTgngugojoYmpRyttVcaukB9bssbY=
+X-Google-Smtp-Source: ABdhPJyMDb91DpO+PnWgq6ZZiwXZ9OfY1JANPVsv+IbaIHm8Od3xvF72ZGvX6soVk5DdE3HroNkE/Q==
+X-Received: by 2002:a7b:ce96:: with SMTP id q22mr4521296wmj.132.1601497775915;
+        Wed, 30 Sep 2020 13:29:35 -0700 (PDT)
+Received: from ltop.local ([2a02:a03f:b7fe:f700:d0c8:dbcc:51b0:75b9])
+        by smtp.gmail.com with ESMTPSA id w2sm4784983wrs.15.2020.09.30.13.29.34
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 30 Sep 2020 13:29:34 -0700 (PDT)
+Date:   Wed, 30 Sep 2020 22:29:34 +0200
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Ben Dooks <ben.dooks@codethink.co.uk>
+Cc:     linux-sparse@vger.kernel.org
+Subject: Re: update to format parsing branch
+Message-ID: <20200930202934.rjcfxikrzfvesxnc@ltop.local>
+References: <3960bea7-69ef-ed00-66cf-ac73d5cd8876@codethink.co.uk>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <3960bea7-69ef-ed00-66cf-ac73d5cd8876@codethink.co.uk>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-
---=-aBohwTz58WA21h5mfNas
-Content-Type: text/plain; charset="ISO-8859-1"
-Content-Transfer-Encoding: 7bit
-
-On Wed, 2020-09-30 at 08:40 -0700, Joe Perches wrote:
-> On Tue, 2020-09-29 at 13:25 -0700, Nick Desaulniers wrote:
-> > And I don't remember what ever happened to Joe's script for treewide
-> > conversion of __section.
+On Wed, Sep 30, 2020 at 09:35:50AM +0100, Ben Dooks wrote:
+> I've done a rebase to v0.6.2 and put the result up at:
 > 
-> Nor do I but here (attached) is the script.
-> 
-> My recollection is there was some problem with mscros
-> with ## concatenation in some converted uses.
+> https://gitlab.com/CodethinkLabs/sparse bjdooks/printf-new3
 
-I believe I have it sorted now and I've attached
-a new version of the script.
+Great.
+It just needs a few very mnor changes:
 
-It runs against -next (or any other tree) and
-produces a single commit.
+%% diff --git a/evaluate.h b/evaluate.h
+%% index a16e97036b2a..bb8ec480691c 100644
+%% --- a/evaluate.h
+%% +++ b/evaluate.h
+%% @@ -26,10 +26,14 @@ struct symbol *evaluate_statement(struct statement *stmt);
+%%  // @list: the list of the symbol to be evaluated
+%%  void evaluate_symbol_list(struct symbol_list *list);
+%%  
+%% -///
 
-It converts all the various uses of
-	__attribute__((section(<foo>)))
-to
-	__section("<foo>")
+This is the marker for autodoc, so it needs to stay.
 
-changes the various macros with token pasting uses
-I believe appropriately as well.
+%%  // evaluate the arguments of a function
+%% +// @fn: the symbol of the prototype
+%%  // @argtypes: the list of the types in the prototype
+%%  // @args: the list of the effective arguments
+%% -int evaluate_arguments(struct symbol_list *argtypes, struct expression_list *args);
+%% +int evaluate_arguments(struct symbol *fn, struct symbol_list *argtypes, struct expression_list *args);
+%%  
+%% +// check if assignment types are compatible
+%% +// todo
 
-Please give it a spin.
+I've removed the 'todo'
 
-There were 4 problems as below.
+%% diff --git a/parse.c b/parse.c
+%% index 31ecef0f554d..a7ab5fd6e531 100644
+%% --- a/parse.c
+%% +++ b/parse.c
+%% @@ -377,6 +383,10 @@ static struct symbol_op attr_force_op = {
+%%  	.attribute = attribute_force,
+%%  };
+%%  
+%% +static struct symbol_op attr_format = {
 
-With these 4 items fixed, the build works (seems to at least)
+To stay coherent with existent naming, I've rename this into 'attr_format_op'
 
-1:  compiler_attributes.h needed to unquote the __section__(#S)
-    the old automated patch didn't apply as the file had changed
+%% @@ -515,6 +535,7 @@ static struct init_keyword {
+%%  	N("_Float64",		&spec_op,	.type = &float64_ctype),
+%%  	N("_Float64x",		&spec_op,	.type = &float64x_ctype),
+%%  	N("_Float128",		&spec_op,	.type = &float128_ctype),
+%% +
 
-diff --git a/include/linux/compiler_attributes.h b/include/linux/compiler_attri>
-index ea7b756b1c8f..b6fef9033c0b 100644
---- a/include/linux/compiler_attributes.h
-+++ b/include/linux/compiler_attributes.h
-@@ -254,7 +254,7 @@
-  *   gcc: https://gcc.gnu.org/onlinedocs/gcc/Common-Variable-Attributes.html#i>
-  * clang: https://clang.llvm.org/docs/AttributeReference.html#section-declspec>
-  */
--#define __section(S)                    __attribute__((__section__(#S)))
-+#define __section(section)              __attribute__((__section__(section)))
+Removd unneeded line.
 
-2:  The script needed to use different token pasting for
-    __section(foo##bar##baz)
+%% @@ -551,6 +572,9 @@ static struct init_keyword {
+%%  	D("pure",		&attr_fun_op,		.mods = MOD_PURE),
+%%  	A("const",		&attr_fun_op,		.mods = MOD_PURE),
+%%  	D("gnu_inline",		&attr_fun_op,		.mods = MOD_GNU_INLINE),
+%% +	N("format",		&attr_format),
+%% +	N("printf",		&attr_printf_op),
+%% +	N("scanf",		&attr_scanf_op),
 
-    The script converted this to
-	__section("foo" ## bar ## "baz")
-    instead this needed to be
-	__section("foo" #bar "baz")
+I've changed the 'N' into 'D' since the underscore versions are legit and
+often favored.
 
-3:  scripts/mod/modpost.c needed quoting of its internal __section uses:
+%% diff --git a/sparse.1 b/sparse.1
+%% index 48dab7a9a5c1..e46aafdb3e5e 100644
+%% --- a/sparse.1
+%% +++ b/sparse.1
+%% @@ -275,6 +275,15 @@ trouble.
+%%  Sparse does not issue these warnings by default.
+%%  .
+%%  .TP
+%% +.B \-Wformat
+%% +Warn about parameter mismatch to any variadic function which specifies
+%% +where the format string is specified with the 
+%% +.BI __attribute__((format( type, message, va_start )))
+%% +attribute.
+%% +
+%% +Sparse does not issue these warnings by default. To turn them on, use
+%% +\fB\-Wno\-format\fR
+%% +.TP
 
-diff --git a/scripts/mod/modpost.c b/scripts/mod/modpost.c
-index 69341b36f271..f882ce0d9327 100644
---- a/scripts/mod/modpost.c
-+++ b/scripts/mod/modpost.c
-@@ -2254,7 +2254,7 @@ static void add_header(struct buffer *b, struct module *mod)
-        buf_printf(b, "MODULE_INFO(name, KBUILD_MODNAME);\n");
-        buf_printf(b, "\n");
-        buf_printf(b, "__visible struct module __this_module\n");
--       buf_printf(b, "__section(.gnu.linkonce.this_module) = {\n");
-+       buf_printf(b, "__section(\".gnu.linkonce.this_module\") = {\n");
-        buf_printf(b, "\t.name = KBUILD_MODNAME,\n");
-        if (mod->has_init)
-                buf_printf(b, "\t.init = init_module,\n");
-@@ -2308,7 +2308,7 @@ static int add_versions(struct buffer *b, struct module *mod)
- 
-        buf_printf(b, "\n");
-        buf_printf(b, "static const struct modversion_info ____versions[]\n");
--       buf_printf(b, "__used __section(__versions) = {\n");
-+       buf_printf(b, "__used __section(\"__versions\") = {\n");
+I've moved this one position above, between '-Wexternal-...' and -Winit-..
+to keep the alphabetical order, removed some unneeded whitespace and
+added a final dot.
 
-4: tools/ was excluded, but now needs conversion
+%% diff --git a/symbol.h b/symbol.h
+%% index a3ed95678ee5..47e26816430c 100644
+%% --- a/symbol.h
+%% +++ b/symbol.h
+%% @@ -84,6 +84,7 @@ enum keyword {
+%%  	KW_STATIC	= 1 << 7,
+%%       // KW UNUSED	= 1 << 8,
+%%  	KW_EXACT	= 1 << 9,
+%% +	KW_FORMAT	= 1 << 10,
+%%  };
 
- tools/include/linux/objtool.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tools/include/linux/objtool.h b/tools/include/linux/objtool.h
-index ab82c793c897..577f51436cf9 100644
---- a/tools/include/linux/objtool.h
-+++ b/tools/include/linux/objtool.h
-@@ -60,7 +60,7 @@ struct unwind_hint {
-  * For more information, see tools/objtool/Documentation/stack-validation.txt.
-  */
- #define STACK_FRAME_NON_STANDARD(func) \
--	static void __used __section(.discard.func_stack_frame_non_standard) \
-+	static void __used __section(".discard.func_stack_frame_non_standard") \
- 		*__func_stack_frame_non_standard_##func = func
- 
- #else /* __ASSEMBLY__ */
-
---=-aBohwTz58WA21h5mfNas
-Content-Type: application/x-perl; name="convert_section.pl"
-Content-Disposition: attachment; filename="convert_section.pl"
-Content-Transfer-Encoding: base64
-
-IyEvdXNyL2Jpbi9lbnYgcGVybAoKIyBjb252ZXJ0IGxpbnV4LWtlcm5lbCBfX3NlY3Rpb24gdXNl
-cyBmcm9tIHVucXVvdGVkIHN0cmluZyB0byBxdW90ZWQgc3RyaW5nCiMgY29udmVydCBfX2F0dHJp
-YnV0ZV9fKChzZWN0aW9uKCJmb28iKSkpIHRvIF9fc2VjdGlvbigiZm9vIikKIyBjb252ZXJ0IF9f
-YXR0cmlidXRlX18oKGZvbywgc2VjdGlvbj0oImJhciIpLCBiYXopKQojICAgICAgdG8gX19zZWN0
-aW9uKCJiYXIiKSBhdHRyaWJ1dGUoKGZvbywgYmF6KSkKIyBjb252ZXJ0IF9fYXR0cmlidXRlX18K
-CnVzZSBzdHJpY3Q7CgojIHBhdGNoIGNvbXBpbGVyX2F0dHJpYnV0ZXMuaCB0byByZW1vdmUgcXVv
-dGluZyBvZiBzZWN0aW9uIG5hbWUKCm15ICRyZXN1bHQgPSBgcGF0Y2ggLXAxIDw8IkVPRiIKIGlu
-Y2x1ZGUvbGludXgvY29tcGlsZXJfYXR0cmlidXRlcy5oIHwgMiArLQogMSBmaWxlIGNoYW5nZWQs
-IDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pCgpkaWZmIC0tZ2l0IGEvaW5jbHVkZS9saW51
-eC9jb21waWxlcl9hdHRyaWJ1dGVzLmggYi9pbmNsdWRlL2xpbnV4L2NvbXBpbGVyX2F0dHJpYnV0
-ZXMuaAppbmRleCBlYTdiNzU2YjFjOGYuLmIyYTNmNGY2NDFhNyAxMDA2NDQKLS0tIGEvaW5jbHVk
-ZS9saW51eC9jb21waWxlcl9hdHRyaWJ1dGVzLmgKKysrIGIvaW5jbHVkZS9saW51eC9jb21waWxl
-cl9hdHRyaWJ1dGVzLmgKQEAgLTI1NCw3ICsyNTQsNyBAQAogICogICBnY2M6IGh0dHBzOi8vZ2Nj
-LmdudS5vcmcvb25saW5lZG9jcy9nY2MvQ29tbW9uLVZhcmlhYmxlLUF0dHJpYnV0ZXMuaHRtbCNp
-bmRleC1zZWN0aW9uLXZhcmlhYmxlLWF0dHJpYnV0ZQogICogY2xhbmc6IGh0dHBzOi8vY2xhbmcu
-bGx2bS5vcmcvZG9jcy9BdHRyaWJ1dGVSZWZlcmVuY2UuaHRtbCNzZWN0aW9uLWRlY2xzcGVjLWFs
-bG9jYXRlCiAgKi8KLSNkZWZpbmUgX19zZWN0aW9uKFMpICAgICAgICAgICAgICAgICAgICBfX2F0
-dHJpYnV0ZV9fKChfX3NlY3Rpb25fXygjUykpKQorI2RlZmluZSBfX3NlY3Rpb24oc2VjdGlvbikg
-ICAgICAgICAgICAgIF9fYXR0cmlidXRlX18oKF9fc2VjdGlvbl9fKHNlY3Rpb24pKSkKIAogLyoK
-ICAqICAgZ2NjOiBodHRwczovL2djYy5nbnUub3JnL29ubGluZWRvY3MvZ2NjL0NvbW1vbi1GdW5j
-dGlvbi1BdHRyaWJ1dGVzLmh0bWwjaW5kZXgtdW51c2VkLWZ1bmN0aW9uLWF0dHJpYnV0ZQpFT0Zg
-OwoKIyBwYXRjaCBzY3JpcHRzL21vZC9tb2Rwb3N0LmMgdG8gYWRkIHF1b3Rpbmcgb2Ygc2VjdGlv
-biBuYW1lCgpteSAkcmVzdWx0ID0gYHBhdGNoIC1wMSA8PCJFT0YiCiBzY3JpcHRzL21vZC9tb2Rw
-b3N0LmMgfCA0ICsrLS0KIDEgZmlsZSBjaGFuZ2VkLCAyIGluc2VydGlvbnMoKyksIDIgZGVsZXRp
-b25zKC0pCgpkaWZmIC0tZ2l0IGEvc2NyaXB0cy9tb2QvbW9kcG9zdC5jIGIvc2NyaXB0cy9tb2Qv
-bW9kcG9zdC5jCmluZGV4IDY5MzQxYjM2ZjI3MS4uZjg4MmNlMGQ5MzI3IDEwMDY0NAotLS0gYS9z
-Y3JpcHRzL21vZC9tb2Rwb3N0LmMKKysrIGIvc2NyaXB0cy9tb2QvbW9kcG9zdC5jCkBAIC0yMjU0
-LDcgKzIyNTQsNyBAQCBzdGF0aWMgdm9pZCBhZGRfaGVhZGVyKHN0cnVjdCBidWZmZXIgKmIsIHN0
-cnVjdCBtb2R1bGUgKm1vZCkKIAlidWZfcHJpbnRmKGIsICJNT0RVTEVfSU5GTyhuYW1lLCBLQlVJ
-TERfTU9ETkFNRSk7XFxuIik7CiAJYnVmX3ByaW50ZihiLCAiXFxuIik7CiAJYnVmX3ByaW50Zihi
-LCAiX192aXNpYmxlIHN0cnVjdCBtb2R1bGUgX190aGlzX21vZHVsZVxcbiIpOwotCWJ1Zl9wcmlu
-dGYoYiwgIl9fc2VjdGlvbiguZ251LmxpbmtvbmNlLnRoaXNfbW9kdWxlKSA9IHtcXG4iKTsKKwli
-dWZfcHJpbnRmKGIsICJfX3NlY3Rpb24oXFwiLmdudS5saW5rb25jZS50aGlzX21vZHVsZVxcIikg
-PSB7XFxuIik7CiAJYnVmX3ByaW50ZihiLCAiXFx0Lm5hbWUgPSBLQlVJTERfTU9ETkFNRSxcXG4i
-KTsKIAlpZiAobW9kLT5oYXNfaW5pdCkKIAkJYnVmX3ByaW50ZihiLCAiXFx0LmluaXQgPSBpbml0
-X21vZHVsZSxcXG4iKTsKQEAgLTIzMDgsNyArMjMwOCw3IEBAIHN0YXRpYyBpbnQgYWRkX3ZlcnNp
-b25zKHN0cnVjdCBidWZmZXIgKmIsIHN0cnVjdCBtb2R1bGUgKm1vZCkKIAogCWJ1Zl9wcmludGYo
-YiwgIlxcbiIpOwogCWJ1Zl9wcmludGYoYiwgInN0YXRpYyBjb25zdCBzdHJ1Y3QgbW9kdmVyc2lv
-bl9pbmZvIF9fX192ZXJzaW9uc1tdXFxuIik7Ci0JYnVmX3ByaW50ZihiLCAiX191c2VkIF9fc2Vj
-dGlvbihfX3ZlcnNpb25zKSA9IHtcXG4iKTsKKwlidWZfcHJpbnRmKGIsICJfX3VzZWQgX19zZWN0
-aW9uKFxcIl9fdmVyc2lvbnNcXCIpID0ge1xcbiIpOwogCiAJZm9yIChzID0gbW9kLT51bnJlczsg
-czsgcyA9IHMtPm5leHQpIHsKIAkJaWYgKCFzLT5tb2R1bGUpCkVPRmA7CgojIEdldCB0aGUgbGlz
-dCBvZiBmaWxlcyB0byBtb2RpZnkgKGNvbnRhaW5zIF9fc2VjdGlvbiBvciBfX2F0dHJpYnV0ZV9f
-LipzZWN0aW9uCiMgKGlnbm9yZSBzY3JpcHRzLCB0b29scywgdWFwaSwgYW5kIGNvbXBpbGVyX2F0
-dHJpYnV0ZXMuaCkKCm15ICRvdXRwdXQgPSBgZ2l0IGdyZXAgLS1uYW1lLW9ubHkgLVAgIig/Olxc
-Yl9fc2VjdGlvblxcYlx8XFxiX19hdHRyaWJ1dGVfX1xcYi4qc2VjdGlvbikiIHwgZ3JlcCAtdlAg
-J14oPzppbmNsdWRlL2xpbnV4L2NvbXBpbGVyX2F0dHJpYnV0ZXNcXC5ofHNjcmlwdHMvfHRvb2xz
-L3wvdWFwaS8pJ2A7Cm15IEBmaWxlcyA9IHNwbGl0KCJcbiIsICRvdXRwdXQpOwojIEFkZCB0aGUg
-b25seSBmaWxlIGluIHRvb2xzIHRoYXQgbmVlZHMgY29udmVyc2lvbgpwdXNoIChAZmlsZXMsICJ0
-b29scy9pbmNsdWRlL2xpbnV4L29ianRvb2wuaCIpOwoKIyBNb2RpZnkgZWFjaCBwb3NzaWJsZSBm
-aWxlCmZvcmVhY2ggKEBmaWxlcykgewogICAgY2hvbXA7CiAgICBteSAkZmlsZSA9ICRfOwoKICAg
-ICMgcmVhZCB0aGUgb3JpZ2luYWwgZmlsZQogICAgb3BlbihGSCwgJzwnLCAkZmlsZSkgb3IgZGll
-ICQhOwogICAgbXkgQGxpbmVzID0gPEZIPjsKICAgIGNsb3NlIEZIOwoKICAgICMgd3JpdGUgdGhl
-IG1vZGlmaWVkIGZpbGUgbGluZSBieSBsaW5lCiAgICBvcGVuIChGSCwgJz4nLCAkZmlsZSkgb3Ig
-ZGllICQhOwogICAgZm9yZWFjaCBteSAkbGluZSAoQGxpbmVzKSB7CgljaG9tcCAkbGluZTsKCW15
-ICRuZXdsaW5lID0gJGxpbmU7CgoJIyBDb252ZXJ0IF9fc2VjdGlvbihmb28pIHRvIF9fc2VjdGlv
-bigiZm9vIikKCSMgaWYgImZvbyIgdXNlcyBtdWx0aXBsZSB0b2tlbiBwYXN0aW5nLAoJIyAgIHBy
-ZSBhbmQgcG9zdCB0b2tlbnMgcmVtb3ZlZCBhbmQgYSBzaW5nbGUgIyBpcyB1c2VkIHRoZW4gIiAi
-IGFkZGVkCgkjICAgZS5nLjogIGZvbyAjIyBiYXIgIyMgYmF6IGJlY29tZXMgImZvbyIgI2JhciAi
-YmF6IgoJaWYgKCRsaW5lID1+IG0vXGJfX3NlY3Rpb25ccypcKFxzKig/ISIpKFteXCldKylcKS8p
-IHsKCSAgICBteSAkb2xkc2VjdGlvbiA9ICQxOwoJICAgIG15ICRuZXdzZWN0aW9uID0gJDE7Cgkg
-ICAgaWYgKCRvbGRzZWN0aW9uID1+IC8oLiopIyMoLiopIyMoLiopLykgewoJCSRuZXdzZWN0aW9u
-ID0gJyInIC4gdHJpbSgkMSkgLiAnIiAjJyAuIHRyaW0oJDIpIC4gJyAiJyAuIHRyaW0oJDMpIC4g
-JyInOwoJICAgIH0gZWxzZSB7CgkJJG5ld3NlY3Rpb24gPSAnIicgLiB0cmltKCRvbGRzZWN0aW9u
-KSAuICciJzsKCSAgICB9CgkgICAgJG5ld2xpbmUgPX4gcy9fX3NlY3Rpb25ccypcKFxzKlxRJG9s
-ZHNlY3Rpb25cRVxzKlwpL19fc2VjdGlvbigkbmV3c2VjdGlvbikvOwoJfQoKCSMgY29udmVydCBf
-X2F0dHJpYnV0ZV9fKChzZWN0aW9uKCJmb28iKSkpIHRvIF9fc2VjdGlvbigiZm9vIikKCSRuZXds
-aW5lID1+IHMvXGJfX2F0dHJpYnV0ZV9fXHMqXChccypcKFxzKl8qc2VjdGlvbl8qXHMqXChccyoo
-IlteIl0rIilccypcKVxzKlwpXHMqXCkvX19zZWN0aW9uKCQxKS87CgoJIyBjb252ZXJ0IF9fYXR0
-cmlidXRlX18oKGZvbywgc2VjdGlvbj0oImJhciIpLCBiYXopKQoJIyB0byBfX3NlY3Rpb24oImJh
-ciIpIGF0dHJpYnV0ZSgoZm9vLCBiYXopKQoJaWYgKCRuZXdsaW5lID1+IC8oXGJfX2F0dHJpYnV0
-ZV9fXHMqXChccypcKChbXixfXSspPyhccyosP1xzKl8qc2VjdGlvbl8qXHMqXChccyooIlteIl0r
-IilccypcKVxzKiw/XHMqKSguKilccypcKVxzKlwpKS8pIHsKCSAgICBteSAkc2VjdGlvbiA9ICQz
-OwoJICAgIG15ICRjb21tYSA9ICIiOwoJICAgICRjb21tYSA9ICIsICIgaWYgKCRzZWN0aW9uID1+
-IC9eXHMqLC8gJiYgJHNlY3Rpb24gPX4gLyxccyokLyk7CgkgICAgJG5ld2xpbmUgPX4gcy9cUSRz
-ZWN0aW9uXEUvJGNvbW1hLzsKCSAgICAkc2VjdGlvbiA9fiBzL15bXiJdKi8vOwoJICAgICRzZWN0
-aW9uID1+IHMvXigiW14iXSoiKS4qLyQxLzsKCSAgICAkbmV3bGluZSA9fiBzL1xiX19hdHRyaWJ1
-dGVfXy9fX3NlY3Rpb24oJHNlY3Rpb24pIF9fYXR0cmlidXRlX18vOwoJfQoKCSMgaWYgdGhlIGxp
-bmUgZW5kZWQgd2l0aCBhIGxpbmUgY29udGludWF0aW9uIFwsIHRyeSB0byBtb3ZlIHRoZQoJIyBj
-b250aW51YXRpb24gdG8gdGhlIHNhbWUgbG9jYXRpb24gYnkgcmVtb3Zpbmcgb3IgYWRkaW5nIHRh
-YnMKCWlmICgkbGluZSA9fiAvXFwkLykgewoJICAgIG15ICRvbGVuID0gbGVuZ3RoKGV4cGFuZF90
-YWJzKCRsaW5lKSk7CgkgICAgbXkgJG5sZW4gPSBsZW5ndGgoZXhwYW5kX3RhYnMoJG5ld2xpbmUp
-KTsKCSAgICBpZiAoJG5ld2xpbmUgPX4gL1x0XFwkLykgewoJCWlmICgkbmxlbiA+ICRvbGVuKSB7
-CgkJICAgICRuZXdsaW5lID1+IHMvXHRcXCQvXFwvOwoJCX0gZWxzZSB7CgkJICAgIHdoaWxlICgk
-bmxlbiA8ICRvbGVuKSB7CgkJCSRuZXdsaW5lID1+IHMvXFwkL1x0XFwvOwoJCQkkbmxlbiA9IGxl
-bmd0aChleHBhbmRfdGFicygkbmV3bGluZSkpOwoJCSAgICB9CgkJfQoJICAgIH0KCX0KCXByaW50
-IEZIICIkbmV3bGluZVxuIjsKICAgIH0KICAgIGNsb3NlIEZIOwp9CgojIEFuZCBnaXQgY29tbWl0
-IHRoZSBjaGFuZ2VzCiRyZXN1bHQgPSBxeHtnaXQgY29tbWl0IC1hIC0tYXV0aG9yPSdKb2UgUGVy
-Y2hlcyA8am9lXEBwZXJjaGVzLmNvbT4nIC1GLSA8PCJFT0YiCnRyZWV3aWRlOiBDb252ZXJ0IG1h
-Y3JvIGFuZCB1c2VzIG9mIF9fc2VjdGlvbihmb28pIHRvIF9fc2VjdGlvbigiZm9vIikKClVzZSBh
-IG1vcmUgZ2VuZXJpYyBmb3JtIGZvciBfX3NlY3Rpb24gdGhhdCByZXF1aXJlcyBxdW90ZXMgdG8g
-YXZvaWQKY29tcGxpY2F0aW9ucyB3aXRoIGNsYW5nIGFuZCBnY2MgZGlmZmVyZW5jZXMuCgpSZW1v
-dmUgdGhlIHF1b3RlIG9wZXJhdG9yICMgZnJvbSBjb21waWxlcl9hdHRyaWJ1dGVzLmggX19zZWN0
-aW9uIG1hY3JvLgoKQ29udmVydCBhbGwgdW5xdW90ZWQgX19zZWN0aW9uKGZvbykgdXNlcyB0byBx
-dW90ZWQgX19zZWN0aW9uKCJmb28iKS4KQWxzbyBjb252ZXJ0IF9fYXR0cmlidXRlX18oKHNlY3Rp
-b24oImZvbyIpKSkgdXNlcyB0byBfX3NlY3Rpb24oImZvbyIpCmV2ZW4gaWYgdGhlIF9fYXR0cmli
-dXRlX18gaGFzIG11bHRpcGxlIGxpc3QgZW50cnkgZm9ybXMuCgpTaWduZWQtb2ZmLWJ5OiBKb2Ug
-UGVyY2hlcyA8am9lXEBwZXJjaGVzLmNvbT4KRU9GCn07CgojIHV0aWxpdHkgc3Vicm91dGluZXMK
-c3ViIHRyaW0gewogICAgbXkgKCRzdHJpbmcpID0gQF87CiAgICAkc3RyaW5nID1+IHMvXlxzK3xc
-cyskLy9nOwogICAgcmV0dXJuICRzdHJpbmc7Cn0KCnN1YiBleHBhbmRfdGFicyB7CiAgICBteSAo
-JHN0cikgPSBAXzsKCiAgICBteSAkcmVzID0gJyc7CiAgICBteSAkbiA9IDA7CiAgICBmb3IgbXkg
-JGMgKHNwbGl0KC8vLCAkc3RyKSkgewoJaWYgKCRjIGVxICJcdCIpIHsKCSAgICAkcmVzIC49ICcg
-JzsKCSAgICAkbisrOwoJICAgIGZvciAoOyAoJG4gJSA4KSAhPSAwOyAkbisrKSB7CgkJJHJlcyAu
-PSAnICc7CgkgICAgfQoJICAgIG5leHQ7Cgl9CgkkcmVzIC49ICRjOwoJJG4rKzsKICAgIH0KCiAg
-ICByZXR1cm4gJHJlczsKfQo=
+I've just reused the UNUSED slot.
 
 
---=-aBohwTz58WA21h5mfNas--
+I've also exchanged patch 3 & 4 because the 3rd needed the definition of
+Wformat only added in patch 4 and fixed 2 or 3 typos in the commit messages. 
+I've pushed these changes at gitlab.com/lucvoo/sparse-dev format-check
 
+I've left for now the changelog parts in the commit messages but I would
+prefer to not have them in the final version.
+
+> Should I put this through a new round of review?
+
+I'm fine with the changes (moving the check to a verify-format.c +
+some changes related to excessively long lines).
+
+I've one last request, the email address given as author is not the same
+as the one used in the Signed-off-by and the copyright notice.
+
+So, is it possible to respin the series with:
+* the small changes I've made here above
+* removing the changelogs from the commit messages
+* using the same email address for the author and the SoB?
+
+Thanks,
+-- Luc
