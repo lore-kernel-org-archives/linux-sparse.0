@@ -1,104 +1,99 @@
-Return-Path: <SRS0=CDBi=DG=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=NWui=DH=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.0 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E65E4C4727D
-	for <linux-sparse@archiver.kernel.org>; Tue, 29 Sep 2020 21:38:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6612AC4727F
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 08:33:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7BD9D2083B
-	for <linux-sparse@archiver.kernel.org>; Tue, 29 Sep 2020 21:38:44 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UlhR/VAY"
+	by mail.kernel.org (Postfix) with ESMTP id 326BC2184D
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 08:33:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728099AbgI2Vio (ORCPT
+        id S1728149AbgI3Id3 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 29 Sep 2020 17:38:44 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46944 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727740AbgI2Vin (ORCPT
+        Wed, 30 Sep 2020 04:33:29 -0400
+Received: from eu-smtp-delivery-151.mimecast.com ([185.58.86.151]:31579 "EHLO
+        eu-smtp-delivery-151.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725779AbgI3Id2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 29 Sep 2020 17:38:43 -0400
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 82606C0613D1;
-        Tue, 29 Sep 2020 14:33:23 -0700 (PDT)
-Received: by mail-lf1-x143.google.com with SMTP id u8so7325728lff.1;
-        Tue, 29 Sep 2020 14:33:23 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=3dwCE+v0GZtE62h3ykTPVjBYnltbx4TcDziVD3ADHYA=;
-        b=UlhR/VAY11pK8/kOEEb2V2Sk7YVh2SsTM1fp5mhftb4GfVtcEep2R87RJMsy+h9OXL
-         krMeEYwjr4v0WBWrZqXAdmcg3CZCIG9y4UIwZNFmg532h1UGruvcpqixRcWbfObLKwUt
-         vzH6krIHv4D76CkP2FAYGIfF/z68FTakRAPjxd/yQxWIxysK+IyXFdY6+uQj0AnucBJj
-         xdiFInw/+bHarzuzrVaDGhHBGTV9QXfMUnQzjNu52Kmrz2sj4rGdnkJdqs8X3N7AFm4X
-         niM5GsUhSbL4JMLKy+YzgIxxfUeiDWyWPLQawpeJn0aloNvrFaZ276DtdHqjLZk2xpEn
-         oGcA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=3dwCE+v0GZtE62h3ykTPVjBYnltbx4TcDziVD3ADHYA=;
-        b=Z/VHcr1L48r2C0DPVyal3oAWNcRiUtQS5m1t2d8cXVbIuFDgnizzL09/f/X/Kfa+MV
-         dIJIARtg2kuuwIhWZVr6mEEVWAANsZ/hYyKOBN4q5kUkufsHXTgGy0CBVYFRhoKcOBD+
-         GUUfIiNAzyaChLxEWj11qIEQAFUvxFCFhdr8azjAl3crxM/7w74UQ7VFmd+m5qfo3a+7
-         jDh5gGJEX3qHsg5sKLiuoJNU31eccc/1di+7GWq9mkSqd4JlQ5cSVbRyHzGZZoybnBa3
-         Ga3jjb12ohOJ2PfvtrCLHdNN9f8cZGEPh2vLIkIlRehhEMHxYMFFsW7l/2Vcl8P/oXkt
-         BUsg==
-X-Gm-Message-State: AOAM532fXu4234U4q/oD95qU+dY90xv6WMnvUz6SXsESXw0xiYO8Eqhv
-        fVQHtyy+JD2cZ21xatWlgWK5/rkL9DuldEvRjuk=
-X-Google-Smtp-Source: ABdhPJwqS5IANoo/oW2mikNdyZRaSnTl1fqaWN9i8aZ6P3HTe46KWMXy8Z5Zke8FjOd/AxUwUa/m8bEkIpN9BvJhHr0=
-X-Received: by 2002:a19:e20b:: with SMTP id z11mr1939035lfg.440.1601415201947;
- Tue, 29 Sep 2020 14:33:21 -0700 (PDT)
-MIME-Version: 1.0
-References: <20200929194318.548707-1-ndesaulniers@google.com>
-In-Reply-To: <20200929194318.548707-1-ndesaulniers@google.com>
-From:   Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>
-Date:   Tue, 29 Sep 2020 23:33:10 +0200
-Message-ID: <CANiq72kHEhTm3-7WbZwmoKQV5Qn9fD_sk+yrVrdj_K0AqT6dNQ@mail.gmail.com>
-Subject: Re: [PATCH] compiler.h: avoid escaped section names
-To:     Nick Desaulniers <ndesaulniers@google.com>
-Cc:     Andrew Morton <akpm@linux-foundation.org>,
+        Wed, 30 Sep 2020 04:33:28 -0400
+Received: from AcuMS.aculab.com (156.67.243.126 [156.67.243.126]) (Using
+ TLS) by relay.mimecast.com with ESMTP id
+ uk-mta-83-EbugMQlIMW-FPsA0z6KcqA-1; Wed, 30 Sep 2020 09:33:21 +0100
+X-MC-Unique: EbugMQlIMW-FPsA0z6KcqA-1
+Received: from AcuMS.Aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) by
+ AcuMS.aculab.com (fd9f:af1c:a25b:0:43c:695e:880f:8750) with Microsoft SMTP
+ Server (TLS) id 15.0.1347.2; Wed, 30 Sep 2020 09:33:20 +0100
+Received: from AcuMS.Aculab.com ([fe80::43c:695e:880f:8750]) by
+ AcuMS.aculab.com ([fe80::43c:695e:880f:8750%12]) with mapi id 15.00.1347.000;
+ Wed, 30 Sep 2020 09:33:20 +0100
+From:   David Laight <David.Laight@ACULAB.COM>
+To:     'Nick Desaulniers' <ndesaulniers@google.com>,
+        Andrew Morton <akpm@linux-foundation.org>
+CC:     Miguel Ojeda <miguel.ojeda.sandonis@gmail.com>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         Nathan Chancellor <natechancellor@gmail.com>,
-        linux-sparse@vger.kernel.org,
-        linux-kernel <linux-kernel@vger.kernel.org>,
-        clang-built-linux <clang-built-linux@googlegroups.com>
-Content-Type: text/plain; charset="UTF-8"
+        "linux-sparse@vger.kernel.org" <linux-sparse@vger.kernel.org>,
+        "linux-kernel@vger.kernel.org" <linux-kernel@vger.kernel.org>,
+        "clang-built-linux@googlegroups.com" 
+        <clang-built-linux@googlegroups.com>
+Subject: RE: [PATCH] compiler.h: avoid escaped section names
+Thread-Topic: [PATCH] compiler.h: avoid escaped section names
+Thread-Index: AQHWlpjOE9lfY6yt4U2SwZo4K9hqIKmA2qhg
+Date:   Wed, 30 Sep 2020 08:33:20 +0000
+Message-ID: <059f629fcf5a4fe0825287a44fd24f52@AcuMS.aculab.com>
+References: <20200929194318.548707-1-ndesaulniers@google.com>
+In-Reply-To: <20200929194318.548707-1-ndesaulniers@google.com>
+Accept-Language: en-GB, en-US
+X-MS-Has-Attach: 
+X-MS-TNEF-Correlator: 
+x-ms-exchange-transport-fromentityheader: Hosted
+x-originating-ip: [10.202.205.107]
+MIME-Version: 1.0
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=C51A453 smtp.mailfrom=david.laight@aculab.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: aculab.com
+Content-Language: en-US
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: base64
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi Nick,
+RnJvbTogTmljayBEZXNhdWxuaWVycw0KPiBTZW50OiAyOSBTZXB0ZW1iZXIgMjAyMCAyMDo0Mw0K
+PiANCj4gVGhlIHN0cmluZ2lmaWNhdGlvbiBvcGVyYXRvciwgYCNgLCBpbiB0aGUgcHJlcHJvY2Vz
+c29yIGVzY2FwZXMgc3RyaW5ncy4NCj4gRm9yIGV4YW1wbGUsIGAjICJmb28iYCBiZWNvbWVzIGAi
+XCJmb29cIiJgLiAgR0NDIGFuZCBDbGFuZyBkaWZmZXIgaW4gaG93DQo+IHRoZXkgdHJlYXQgc2Vj
+dGlvbiBuYW1lcyB0aGF0IGNvbnRhaW4gXCIuDQo+IA0KPiBUaGUgcG9ydGFibGUgc29sdXRpb24g
+aXMgdG8gbm90IHVzZSBhIHN0cmluZyBsaXRlcmFsIHdpdGggdGhlDQo+IHByZXByb2Nlc3NvciBz
+dHJpbmdpZmljYXRpb24gb3BlcmF0b3IuDQo+IA0KPiBJbiB0aGlzIGNhc2UsIHNpbmNlIF9fc2Vj
+dGlvbiB1bmNvbmRpdGlvbmFsbHkgdXNlcyB0aGUgc3RyaW5naWZpY2F0aW9uDQo+IG9wZXJhdG9y
+LCB3ZSBhY3R1YWxseSB3YW50IHRoZSBtb3JlIHZlcmJvc2UNCj4gX19hdHRyaWJ1dGVfXygoX19z
+ZWN0aW9uX18oKSkpLg0KPiANCj4gTGluazogaHR0cHM6Ly9idWdzLmxsdm0ub3JnL3Nob3dfYnVn
+LmNnaT9pZD00Mjk1MA0KPiBGaXhlczogY29tbWl0IGUwNDQ2MmZiODJmOCAoIkNvbXBpbGVyIEF0
+dHJpYnV0ZXM6IHJlbW92ZSB1c2VzIG9mIF9fYXR0cmlidXRlX18gZnJvbSBjb21waWxlci5oIikN
+Cj4gU2lnbmVkLW9mZi1ieTogTmljayBEZXNhdWxuaWVycyA8bmRlc2F1bG5pZXJzQGdvb2dsZS5j
+b20+DQo+IC0tLQ0KPiAgaW5jbHVkZS9saW51eC9jb21waWxlci5oIHwgMiArLQ0KPiAgMSBmaWxl
+IGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspLCAxIGRlbGV0aW9uKC0pDQo+IA0KPiBkaWZmIC0tZ2l0
+IGEvaW5jbHVkZS9saW51eC9jb21waWxlci5oIGIvaW5jbHVkZS9saW51eC9jb21waWxlci5oDQo+
+IGluZGV4IDkyZWYxNjNhNzQ3OS4uYWM0NWY2ZDQwZDM5IDEwMDY0NA0KPiAtLS0gYS9pbmNsdWRl
+L2xpbnV4L2NvbXBpbGVyLmgNCj4gKysrIGIvaW5jbHVkZS9saW51eC9jb21waWxlci5oDQo+IEBA
+IC0xNTUsNyArMTU1LDcgQEAgdm9pZCBmdHJhY2VfbGlrZWx5X3VwZGF0ZShzdHJ1Y3QgZnRyYWNl
+X2xpa2VseV9kYXRhICpmLCBpbnQgdmFsLA0KPiAgCWV4dGVybiB0eXBlb2Yoc3ltKSBzeW07CQkJ
+CQlcDQo+ICAJc3RhdGljIGNvbnN0IHVuc2lnbmVkIGxvbmcgX19rZW50cnlfIyNzeW0JCVwNCj4g
+IAlfX3VzZWQJCQkJCQkJXA0KPiAtCV9fc2VjdGlvbigiX19fa2VudHJ5IiAiKyIgI3N5bSApCQkJ
+XA0KPiArCV9fYXR0cmlidXRlX18oKF9fc2VjdGlvbl9fKCJfX19rZW50cnkrIiAjc3ltKSkpCQlc
+DQo+ICAJPSAodW5zaWduZWQgbG9uZykmc3ltOw0KPiAgI2VuZGlmDQoNCkkgZ3Vlc3Mgd2hhdCB0
+aGlzIHJlYWxseSB3YW50cyBpczoNCglfX3NlY3Rpb24oX19rZW50cnkrIyNzeW0pDQpidXQgdGhh
+dCBnZW5lcmF0ZXMgYW4gZXJyb3IgYmVjYXVzZSB5b3UgY2FuIG9ubHkgdXNlICMjIGJldHdlZW4N
+CnZhcmlhYmxlIG5hbWVzLg0KDQpQZXJoYXBzIHNvbWVvbmUgc2hvdWxkbid0IGhhdmUgdHJpZXMg
+dG8gYmUgY2xldmVyIGFuZCBub3QgcHV0DQphbiB1bnVzdWFsIGNoYXJhY3RlciBpbiB0aGUgc2Vj
+dGlvbiBuYW1lLg0KDQoJRGF2aWQNCg0KLQ0KUmVnaXN0ZXJlZCBBZGRyZXNzIExha2VzaWRlLCBC
+cmFtbGV5IFJvYWQsIE1vdW50IEZhcm0sIE1pbHRvbiBLZXluZXMsIE1LMSAxUFQsIFVLDQpSZWdp
+c3RyYXRpb24gTm86IDEzOTczODYgKFdhbGVzKQ0K
 
-On Tue, Sep 29, 2020 at 9:43 PM Nick Desaulniers
-<ndesaulniers@google.com> wrote:
->
-> The stringification operator, `#`, in the preprocessor escapes strings.
-> For example, `# "foo"` becomes `"\"foo\""`.  GCC and Clang differ in how
-> they treat section names that contain \".
->
-> The portable solution is to not use a string literal with the
-> preprocessor stringification operator.
->
-> In this case, since __section unconditionally uses the stringification
-> operator, we actually want the more verbose
-> __attribute__((__section__())).
-
-Let's add a comment about this in the code -- otherwise we/someone
-will convert it back without noticing. Also we could add another on
-`__section` itself warning about this.
-
-> Link: https://bugs.llvm.org/show_bug.cgi?id=42950
-
-Is there a link / have we opened a bug on GCC's side too?
-
-Thanks!
-
-Cheers,
-Miguel
