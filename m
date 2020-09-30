@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E61D3C4727F
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:51 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7CD01C47428
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A6A9F2076A
-	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:51 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 481642076B
+	for <linux-sparse@archiver.kernel.org>; Wed, 30 Sep 2020 23:18:52 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="WbbaRumx"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="R15aPmUy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729912AbgI3XSv (ORCPT
+        id S1730849AbgI3XSw (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 30 Sep 2020 19:18:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58720 "EHLO
+        Wed, 30 Sep 2020 19:18:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58712 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732166AbgI3XSq (ORCPT
+        with ESMTP id S1730357AbgI3XSo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 30 Sep 2020 19:18:46 -0400
-Received: from mail-wr1-x441.google.com (mail-wr1-x441.google.com [IPv6:2a00:1450:4864:20::441])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABF27C0613D2
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:45 -0700 (PDT)
-Received: by mail-wr1-x441.google.com with SMTP id g4so3570997wrs.5
-        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:45 -0700 (PDT)
+        Wed, 30 Sep 2020 19:18:44 -0400
+Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1FAF9C0613D0
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:44 -0700 (PDT)
+Received: by mail-wr1-x442.google.com with SMTP id o5so3545280wrn.13
+        for <linux-sparse@vger.kernel.org>; Wed, 30 Sep 2020 16:18:44 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=uUHPvqTQBUJT7n0W3kOTdVjHQlKrWX1qMDvyZQ81Rbc=;
-        b=WbbaRumxtyUz7LrxjfqtxUVTiJW4UwLne9zbUPK7c+5qlWFKVkoPy8b0QnOp+8Q4co
-         9yWYXZneewImDVEHrvXoU+NgHmVDKH0pL8ZzKoKOLYsBnSlIpqMyvvbcbTlvhazSGHrl
-         JhNA5wMJPHFSY6njAoHyWxu6glVDp0Qv5al1/NzCy0P7qhe0pDT9xt544YnD7RUXDC8X
-         z4q896sL9BTW5Xbzhuc7U8oTZZHpczzTiT+qn7otNg0B5niIaLytUbirQ35nFzRBc98+
-         xisNxz0aAG0TBpW1pmi2fYvkkhz6vUDTB4atxJB1Qrk1YcdN5BadJs3/hZk1Mo8soQRU
-         uiBA==
+        bh=TbQLmC8gdfb42znA/sMTP6J8RyOXPvyy0YjXSQYAby4=;
+        b=R15aPmUy38g/FD2VE3+a6+vTrVqLWPlMPzMpVD9P5rN3iyaFjV/Zg2rr4lNleNaR5+
+         21slKeEf5lHNjIPd6uMEzNhkl9tv6B54H9M0W2AZUo0KS2w4WO6mDl5d6wWCQ6wT7gi9
+         GlKYceD6EqHcBF8kdQnWU5fS0GoZhd8/Uw81eCASRLm/RQr9A+KM1wcLnFyLN5Dg0uJT
+         wRiGYjNHl84HvcucmmhmRVxCxyQYCjHG/gTKvvYGU7nuFfly1Ml+lAYLetYcn8LmJEra
+         FIFOIfiYQRoOtT1ls7lrQ6BhwNEuj0RMBOemmSiyeqAoY20DWd6sTdUSF8NC23R7Spat
+         taEw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=uUHPvqTQBUJT7n0W3kOTdVjHQlKrWX1qMDvyZQ81Rbc=;
-        b=LyHb1HB52tPLPKzPV3UVpxEuDUgOX8cBqLPI4UyVvRWFv3eQEHsCX5wVdK+8pR3blf
-         6x2cadeUcFhZONDecFwhoZktgfGxHvqnBqNR/tq70XTFXqEQ6ghmAVltBh+PXFbJapuq
-         fCb++/U3xp1Dx20ggGf05PQW5AOaUTtpIqeY9RiN1VaTGIwcAc9U+OPcRPYu9rgU4tXt
-         dfw2xbNM3S8gwSj4imtGABKv9AoAUHC1o28tSezGLzFCCDNKmDORCwkdWhALZiQ+0rK3
-         Qx0PCbzOIiuWE6w3YJjmw7m6+xw+zs2lcqoiGAO046lbJP7td7PLjXkRyP1FWIy6c184
-         fW2A==
-X-Gm-Message-State: AOAM531qqyb/s6AVPPbGngdUQSnttUCjSJ9KnZobvYl9SO5eYyNivBPQ
-        qUlyCyD7EcVH9LHscaNlQQAALWoOAoE=
-X-Google-Smtp-Source: ABdhPJx6bBAAGaUUXBVGgW6QmOD8qbo87NufzLZN7t7F21XA3dKk+YKUKy1uN+QbORTOiTb0er4BPw==
-X-Received: by 2002:adf:f290:: with SMTP id k16mr5862638wro.124.1601507924172;
-        Wed, 30 Sep 2020 16:18:44 -0700 (PDT)
+        bh=TbQLmC8gdfb42znA/sMTP6J8RyOXPvyy0YjXSQYAby4=;
+        b=sokEM9F6JlqfxLFpnItNPBntgA6TLtjJleORilPCa2znCxZMRRT8XdO4u3X/uvJJ0U
+         ttO1UQXs2J8bhbAc97cWH31Vnfdv9bAtqBRmhP8NW7RrU0s6S+766ke1JMwKhaPHKHdX
+         k/fI77Of2I+gN2NON4wtDcqJrfGQrTOXt3Aly0SmZ4xc+pKTlxxiG/LjkAWhJGW0F+sK
+         M7VVbk/0zcZnvpzvE/8OkhmYYej839n5lYLOzwGNXCNhSwzoiUdwywbaa0HJkb0gEbDB
+         ysD0kPVnca4j6l7Mnf/wA/gaj6MuyN9HxnJa/uFa9mMkJKyx7DQR/1+ZVQkVvDSIdiFt
+         WfJw==
+X-Gm-Message-State: AOAM5329HTKrTPbQVMXoS366cJ+p7xQqpS6gI8l9Cj9ENYdI4CNCyZCV
+        9KuiFbc16Tunb4UkAeND9GaHApJhfEo=
+X-Google-Smtp-Source: ABdhPJw2srdzacWoHTdo94QPt7wo0rHJpxaMp4G9bCj3bvzWRbx42K4mNvV3R5iYUHbe31yDHeNHJQ==
+X-Received: by 2002:a5d:50cd:: with SMTP id f13mr5418177wrt.211.1601507922566;
+        Wed, 30 Sep 2020 16:18:42 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:d0c8:dbcc:51b0:75b9])
-        by smtp.gmail.com with ESMTPSA id l8sm5460065wrx.22.2020.09.30.16.18.43
+        by smtp.gmail.com with ESMTPSA id l8sm5460065wrx.22.2020.09.30.16.18.41
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 30 Sep 2020 16:18:43 -0700 (PDT)
+        Wed, 30 Sep 2020 16:18:42 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 13/13] flex-array: warn when a flexible array member has some padding
-Date:   Thu,  1 Oct 2020 01:18:28 +0200
-Message-Id: <20200930231828.66751-14-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 11/13] flex-array: warn an arrays containing a flexible array
+Date:   Thu,  1 Oct 2020 01:18:26 +0200
+Message-Id: <20200930231828.66751-12-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20200930231828.66751-1-luc.vanoostenryck@gmail.com>
 References: <20200930231828.66751-1-luc.vanoostenryck@gmail.com>
@@ -76,96 +76,94 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-If some padding is added because of the presence of a flexible
-array member, the size of the structure will be greater than
-the offset of this flexible array which can cause some
-problems if the assumption is made that these 2 size must be
-identical (which is easy to do since such flexible arrays are
-conceptually 'after' the structure itself).
+An array of some aggregate type containing, possibly recursively,
+a flexible array is pretty non-sensical. So, add an option
+-Wflexible-array-array to warn on such usage.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- options.c                       | 2 ++
- options.h                       | 1 +
- sparse.1                        | 6 ++++++
- symbol.c                        | 2 ++
- validation/flex-array-padding.c | 1 -
- 5 files changed, 11 insertions(+), 1 deletion(-)
+ options.c                     | 2 ++
+ options.h                     | 1 +
+ sparse.1                      | 7 +++++++
+ symbol.c                      | 2 ++
+ validation/flex-array-array.c | 1 -
+ 5 files changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/options.c b/options.c
-index b46900b973a6..92d64e6ab64e 100644
+index ce88fbf6ed61..a8129ac1e952 100644
 --- a/options.c
 +++ b/options.c
-@@ -102,6 +102,7 @@ int Wenum_mismatch = 1;
+@@ -100,6 +100,7 @@ int Wdesignated_init = 1;
+ int Wdo_while = 0;
+ int Wenum_mismatch = 1;
  int Wexternal_function_has_definition = 1;
- int Wflexible_array_array = 1;
- int Wflexible_array_nested = 0;
-+int Wflexible_array_padding = 0;
++int Wflexible_array_array = 1;
  int Wflexible_array_sizeof = 0;
  int Wimplicit_int = 1;
  int Winit_cstring = 0;
-@@ -845,6 +846,7 @@ static const struct flag warnings[] = {
+@@ -841,6 +842,7 @@ static const struct flag warnings[] = {
+ 	{ "do-while", &Wdo_while },
+ 	{ "enum-mismatch", &Wenum_mismatch },
  	{ "external-function-has-definition", &Wexternal_function_has_definition },
- 	{ "flexible-array-array", &Wflexible_array_array },
- 	{ "flexible-array-nested", &Wflexible_array_nested },
-+	{ "flexible-array-padding", &Wflexible_array_padding },
++	{ "flexible-array-array", &Wflexible_array_array },
  	{ "flexible-array-sizeof", &Wflexible_array_sizeof },
  	{ "implicit-int", &Wimplicit_int },
  	{ "init-cstring", &Winit_cstring },
 diff --git a/options.h b/options.h
-index d23ed472eaac..31d9c5859977 100644
+index feb351a36c9e..7bcf925b6912 100644
 --- a/options.h
 +++ b/options.h
-@@ -101,6 +101,7 @@ extern int Wenum_mismatch;
+@@ -99,6 +99,7 @@ extern int Wdesignated_init;
+ extern int Wdo_while;
+ extern int Wenum_mismatch;
  extern int Wexternal_function_has_definition;
- extern int Wflexible_array_array;
- extern int Wflexible_array_nested;
-+extern int Wflexible_array_padding;
++extern int Wflexible_array_array;
  extern int Wflexible_array_sizeof;
  extern int Wimplicit_int;
  extern int Winit_cstring;
 diff --git a/sparse.1 b/sparse.1
-index 9b1a59c6b9d4..8c61e869dc57 100644
+index 5f98df33a231..c1a74153c618 100644
 --- a/sparse.1
 +++ b/sparse.1
-@@ -268,6 +268,12 @@ Sparse issues these warnings by default. To turn them off, use
- Warn about structures containing a flexible array being contained into
- another structure, union or array.
- 
-+Sparse does not issue these warnings by default.
-+.
-+.TP
-+.B -Wflexible-array-padding
-+Warn about padding alignments caused by the presence of a flexible array member.
-+
- Sparse does not issue these warnings by default.
+@@ -257,6 +257,13 @@ Sparse issues these warnings by default.  To turn them off, use
+ \fB\-Wno\-external\-function\-has\-definition\fR.
  .
  .TP
++.B -Wflexible-array-array
++Warn about arrays of structures containing a flexible array.
++
++Sparse issues these warnings by default. To turn them off, use
++\fB-Wno-flexible-array-array\fR.
++.
++.TP
+ .B -Wflexible-array-sizeof
+ Warn about using the sizeof operator on a structure containing a flexible array,
+ possibly recursively.
 diff --git a/symbol.c b/symbol.c
-index a9f646eb053f..eabb2226651f 100644
+index bffdc135ba69..02b9066e966a 100644
 --- a/symbol.c
 +++ b/symbol.c
-@@ -213,6 +213,8 @@ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance
+@@ -267,6 +267,8 @@ static struct symbol * examine_array_type(struct symbol *sym)
+ 			bit_size = -1;
+ 		}
  	}
- 	if (info.flex_array) {
- 		info.has_flex_array = 1;
-+		if (sym->offset != bits_to_bytes(bit_size) && Wflexible_array_padding)
-+			warning(info.flex_array->pos, "flexible array member has padding");
- 	}
- 	if (info.has_flex_array)
- 		sym->has_flex_array = 1;
-diff --git a/validation/flex-array-padding.c b/validation/flex-array-padding.c
-index 2ba77971266e..95b349e1199a 100644
---- a/validation/flex-array-padding.c
-+++ b/validation/flex-array-padding.c
-@@ -12,7 +12,6 @@ static int foo(struct s *s)
++	if (has_flexible_array(base_type) && Wflexible_array_array)
++		warning(sym->pos, "array of flexible structures");
+ 	alignment = base_type->ctype.alignment;
+ 	if (!sym->ctype.alignment)
+ 		sym->ctype.alignment = alignment;
+diff --git a/validation/flex-array-array.c b/validation/flex-array-array.c
+index bda80d7a0a20..921a0698bb28 100644
+--- a/validation/flex-array-array.c
++++ b/validation/flex-array-array.c
+@@ -8,7 +8,6 @@ static struct s a[2];
  /*
-  * check-name: flex-array-padding
-  * check-command: test-linearize -Wflexible-array-padding $file
+  * check-name: flex-array-array
+  * check-command: sparse -Wflexible-array-array $file
 - * check-known-to-fail
   *
-  * check-output-ignore
-  *
+  * check-error-start
+ flex-array-array.c:6:18: warning: array of flexible structures
 -- 
 2.28.0
 
