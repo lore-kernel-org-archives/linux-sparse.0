@@ -2,408 +2,156 @@ Return-Path: <SRS0=XUoR=DI=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 84A53C4727C
-	for <linux-sparse@archiver.kernel.org>; Thu,  1 Oct 2020 09:59:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC3B8C4741F
+	for <linux-sparse@archiver.kernel.org>; Thu,  1 Oct 2020 16:35:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 517E720738
-	for <linux-sparse@archiver.kernel.org>; Thu,  1 Oct 2020 09:59:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8C5A520848
+	for <linux-sparse@archiver.kernel.org>; Thu,  1 Oct 2020 16:35:02 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1601570102;
+	bh=MzyyC7SFFiEli1hu98QHOFXwCHYKSsbqlA38vxzNXKs=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=gzbNFC8rRUjWEOzDq23+dZ98Xrr6x/FIOVpsWv1bE6xfF+NmLnIwL79C7Vfzco4cx
+	 wrQa/v39W016DmJdTIcqDvMlkVmEseg/EwC8HANvya9gW7p2oF5YiVJbrOVaP3Kd/1
+	 ZnxY6FtSZHpQBcPI89uG5ZlWbTdU7biLBWoVQHHY=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731704AbgJAJ7M (ORCPT
+        id S1732415AbgJAQfC (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 1 Oct 2020 05:59:12 -0400
-Received: from imap3.hz.codethink.co.uk ([176.9.8.87]:50068 "EHLO
-        imap3.hz.codethink.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726992AbgJAJ7M (ORCPT
+        Thu, 1 Oct 2020 12:35:02 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49082 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732046AbgJAQe5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 1 Oct 2020 05:59:12 -0400
-Received: from cpc98990-stkp12-2-0-cust216.10-2.cable.virginm.net ([86.26.12.217] helo=rainbowdash.codethink.co.uk)
-        by imap3.hz.codethink.co.uk with esmtpsa  (Exim 4.92 #3 (Debian))
-        id 1kNukJ-0006md-7p; Thu, 01 Oct 2020 10:19:27 +0100
-Received: from ben by rainbowdash.codethink.co.uk with local (Exim 4.94)
-        (envelope-from <ben@rainbowdash.codethink.co.uk>)
-        id 1kNukI-001YtS-Ch; Thu, 01 Oct 2020 10:19:26 +0100
-From:   Ben Dooks <ben.dooks@codethink.co.uk>
-To:     linux-sparse@vger.kernel.org
-Cc:     thomas.preston@codethink.co.uk, christopher.phang@codethink.co.uk,
-        Ben Dooks <ben.dooks@codethink.co.uk>
-Subject: [PATCH 1/4] tests: add varargs printf format tests
-Date:   Thu,  1 Oct 2020 10:19:20 +0100
-Message-Id: <20201001091923.372349-2-ben.dooks@codethink.co.uk>
-X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201001091923.372349-1-ben.dooks@codethink.co.uk>
-References: <20201001091923.372349-1-ben.dooks@codethink.co.uk>
+        Thu, 1 Oct 2020 12:34:57 -0400
+Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 311C4C0613D0
+        for <linux-sparse@vger.kernel.org>; Thu,  1 Oct 2020 09:34:57 -0700 (PDT)
+Received: by mail-lj1-x242.google.com with SMTP id k25so5194028ljg.9
+        for <linux-sparse@vger.kernel.org>; Thu, 01 Oct 2020 09:34:57 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=O2xnqR3tu4qgyrfJd4p0eVC6NG2Y5EAFQUWg2An+XuY=;
+        b=AtE/ujJMp5XiaTdXBN105vHCljzQw1OKWIl8lg2Z6JQPweT33A8qazzY+qb6VM0TXn
+         r3MzSR3TD+uaH0Q1l8Q+IP3LTSm6EtJnmYlhyiXxH8mPjBZe8vrpIY8dlA+yUwvUuTpN
+         a8QNMhZZUyRm2JRjM4X23KpSzbM+PYABzSPfw=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=O2xnqR3tu4qgyrfJd4p0eVC6NG2Y5EAFQUWg2An+XuY=;
+        b=UmXTt4y5c4aeLU8V2O1HjcPgz+4PSSzpt8Nijqt8QkKHBc626V3Tt3+sCLh8rQcC5d
+         TV0CRNDKPw7WQg5Ic9r467zN+ToyeS12PDhSPkLdbcLUr0wnRS36A0iXL1Yp3Q120r5w
+         fQ+Z1FAxCatOEN0flR/PhmDotBFTlzMPhzJY1Ba7XqjuLcbQBmKzPlJ8ETqUg1ARen04
+         5+BTQ9zSJ4eOlGoRZ//9K4cxnHi+gESeW8dQDlvLervuqjqFVF8Jje5hSgQf6kzLMZd4
+         y/DUWbi1grzIXs5wJvgek5d4G2WWxJ+LxPcYlz0dhX/6PsV3WEa7hWVKG/ZudpD+lmtt
+         iX+w==
+X-Gm-Message-State: AOAM530o2Z3mTQLAW2h/tQYRXiNLfSu+s/QrhIJCegvemRPAmxhTcfg/
+        mUye/mm7LvPEClJDKymh52h8MWi/F4NPMw==
+X-Google-Smtp-Source: ABdhPJx5WWEijFeCXOEhGAJmV6EpZApNTa7DXZfNQfVuCXw26Md+836Jqv4DCuwFu67smUG+zdoiWQ==
+X-Received: by 2002:a2e:9cc3:: with SMTP id g3mr2608068ljj.146.1601570095298;
+        Thu, 01 Oct 2020 09:34:55 -0700 (PDT)
+Received: from mail-lj1-f175.google.com (mail-lj1-f175.google.com. [209.85.208.175])
+        by smtp.gmail.com with ESMTPSA id n2sm484970lji.97.2020.10.01.09.34.53
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 01 Oct 2020 09:34:54 -0700 (PDT)
+Received: by mail-lj1-f175.google.com with SMTP id y4so5199091ljk.8
+        for <linux-sparse@vger.kernel.org>; Thu, 01 Oct 2020 09:34:53 -0700 (PDT)
+X-Received: by 2002:a05:651c:514:: with SMTP id o20mr2853086ljp.312.1601570093332;
+ Thu, 01 Oct 2020 09:34:53 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20200930231828.66751-1-luc.vanoostenryck@gmail.com> <20200930231828.66751-14-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20200930231828.66751-14-luc.vanoostenryck@gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu, 1 Oct 2020 09:34:37 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wiyAWuHQuDPBC290V-Bx5Eyu1izPj9iSSN0hdkSM2a4iQ@mail.gmail.com>
+Message-ID: <CAHk-=wiyAWuHQuDPBC290V-Bx5Eyu1izPj9iSSN0hdkSM2a4iQ@mail.gmail.com>
+Subject: Re: [PATCH 13/13] flex-array: warn when a flexible array member has
+ some padding
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Add some tests for the new printf format checking code.
-Note, these do not all pass yet.
+On Wed, Sep 30, 2020 at 4:18 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> If some padding is added because of the presence of a flexible
+> array member, the size of the structure will be greater than
+> the offset of this flexible array which can cause some
+> problems if the assumption is made that these 2 size must be
+> identical (which is easy to do since such flexible arrays are
+> conceptually 'after' the structure itself).
 
-Signed-off-by: Ben Dooks <ben.dooks@codethink.co.uk>
----
- validation/varargs-format-addrspace1.c |  36 ++++++++
- validation/varargs-format-bad.c        |  18 ++++
- validation/varargs-format-checking.c   |  21 +++++
- validation/varargs-format-position.c   |  32 +++++++
- validation/varargs-format-prefix.c     |  19 ++++
- validation/varargs-format-tests.c      |  55 ++++++++++++
- validation/varargs-type-formattest.c   | 117 +++++++++++++++++++++++++
- 7 files changed, 298 insertions(+)
- create mode 100644 validation/varargs-format-addrspace1.c
- create mode 100644 validation/varargs-format-bad.c
- create mode 100644 validation/varargs-format-checking.c
- create mode 100644 validation/varargs-format-position.c
- create mode 100644 validation/varargs-format-prefix.c
- create mode 100644 validation/varargs-format-tests.c
- create mode 100644 validation/varargs-type-formattest.c
+The warning seems pointless, and the explanation above is wrong.
 
-diff --git a/validation/varargs-format-addrspace1.c b/validation/varargs-format-addrspace1.c
-new file mode 100644
-index 00000000..3370ac67
---- /dev/null
-+++ b/validation/varargs-format-addrspace1.c
-@@ -0,0 +1,36 @@
-+
-+extern int variadic(char *msg, ...) __attribute__((format (printf, 1, 2)));
-+extern int variadic2(char *msg, int , ...) __attribute__((format (printf, 1, 3)));
-+extern int variadic3(int, char *msg,  ...) __attribute__((format (printf, 2, 3)));
-+
-+static void test(void) {
-+	void __attribute__((noderef, address_space(1))) *a;
-+	void *b;
-+
-+	variadic("%s\n", a);
-+	variadic("%s\n", b);
-+	variadic("%s %s\n", b, a);
-+	variadic2("%s %s\n", 1, b, a);
-+	variadic3(1, "%s %s\n", b, a);
-+	variadic3(1, "%s %p\n", b, a);
-+}
-+
-+/*
-+ * check-name: variadic formatting test with address-space to %s
-+ * check-command: sparse -Wformat $file
-+ *
-+ * check-error-start
-+varargs-format-addrspace1.c:10:26: warning: incorrect type in argument 2 (different address spaces)
-+varargs-format-addrspace1.c:10:26:    expected char const *
-+varargs-format-addrspace1.c:10:26:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:12:32: warning: incorrect type in argument 3 (different address spaces)
-+varargs-format-addrspace1.c:12:32:    expected char const *
-+varargs-format-addrspace1.c:12:32:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:13:36: warning: incorrect type in argument 4 (different address spaces)
-+varargs-format-addrspace1.c:13:36:    expected char const *
-+varargs-format-addrspace1.c:13:36:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:14:36: warning: incorrect type in argument 4 (different address spaces)
-+varargs-format-addrspace1.c:14:36:    expected char const *
-+varargs-format-addrspace1.c:14:36:    got void [noderef] <asn:1> *a
-+ * check-error-end
-+ */
-diff --git a/validation/varargs-format-bad.c b/validation/varargs-format-bad.c
-new file mode 100644
-index 00000000..82ae357c
---- /dev/null
-+++ b/validation/varargs-format-bad.c
-@@ -0,0 +1,18 @@
-+
-+extern int variadic(char *msg, ...) __attribute__((format (printf, 0, 0)));
-+extern int variadic2(char *msg, int , ...) __attribute__((format (printf, 2, 2)));
-+extern int variadic3(char *msg, int , ...) __attribute__((format (printf, 2, 1)));
-+
-+static void test(void) {
-+}
-+
-+/*
-+ * check-name: variadic formatting test with bad formatting parameters
-+ * check-command: sparse -Wformat $file
-+ *
-+ * check-error-start
-+varargs-format-bad.c:2:73: warning: bad format positions
-+varargs-format-bad.c:3:80: warning: bad format positions
-+varargs-format-bad.c:4:80: warning: format cannot be after va_args
-+* check-error-end
-+ */
-diff --git a/validation/varargs-format-checking.c b/validation/varargs-format-checking.c
-new file mode 100644
-index 00000000..9f3e5ac2
---- /dev/null
-+++ b/validation/varargs-format-checking.c
-@@ -0,0 +1,21 @@
-+
-+extern void pf(char *msg, ...) __attribute__((format (printf, 1, 2)));
-+
-+static void test(void) {
-+	pf("%u %lu %llu\n", 1U, 1UL, 1ULL);
-+	pf("%d %ld %lld\n", 1, 1L, 1LL);
-+	pf("%x %lx %llx\n", 1U, 1UL, 1ULL);
-+	pf("%d %ld %lld\n", 1, 1L, 1L);
-+}
-+
-+/*
-+ * check-name: variadic formatting test type checking
-+ * check-command: sparse -Wformat $file
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+varargs-format-checking.c:8:36: warning: incorrect type in argument 4 (different types)
-+varargs-format-checking.c:8:36:    expected long long
-+varargs-format-checking.c:8:36:    got long
-+ * check-error-end
-+ */
-diff --git a/validation/varargs-format-position.c b/validation/varargs-format-position.c
-new file mode 100644
-index 00000000..88a4dbc2
---- /dev/null
-+++ b/validation/varargs-format-position.c
-@@ -0,0 +1,32 @@
-+
-+extern void pf(char *msg, ...) __attribute__((format (printf, 1, 2)));
-+
-+static void test(void) {
-+	pf("%2$d %u\n", 1U, 1L);
-+	pf("%3$d %2$u\n", 1U, 1);
-+	pf("%1$d %2$d\n", 1L, 1);
-+}
-+
-+/*
-+ * check-name: variadic formatting test position checking
-+ * check-command: sparse -Wformat $file
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+varargs-format-position.c:5:29: warning: incorrect type in argument 3 (different types)
-+varargs-format-position.c:5:29:    expected int
-+varargs-format-position.c:5:29:    got long
-+varargs-format-position.c:5:12: warning: format 3: position: no position specified
-+varargs-format-position.c:5:29: warning: incorrect type in argument 3 (different types)
-+varargs-format-position.c:5:29:    expected unsigned int
-+varargs-format-position.c:5:29:    got long
-+varargs-format-position.c:6:12: warning: no argument at position '4'
-+varargs-format-position.c:6:31: warning: incorrect type in argument 3 (different types)
-+varargs-format-position.c:6:31:    expected unsigned int
-+varargs-format-position.c:6:31:    got int
-+varargs-format-position.c:7:27: warning: incorrect type in argument 2 (different types)
-+varargs-format-position.c:7:27:    expected int
-+varargs-format-position.c:7:27:    got long
-+ * check-error-end
-+ *
-+ */
-diff --git a/validation/varargs-format-prefix.c b/validation/varargs-format-prefix.c
-new file mode 100644
-index 00000000..8e2456e6
---- /dev/null
-+++ b/validation/varargs-format-prefix.c
-@@ -0,0 +1,19 @@
-+
-+extern int __attribute__((format (printf, 1, 2))) variadic(char *msg, ...);
-+
-+static int test(void) {
-+	void __attribute__((noderef, address_space(1))) *a;
-+
-+	variadic("%s\n", a);
-+}
-+
-+/*
-+ * check-name: variadic formatting test prefix based __attribute__
-+ * check-command: sparse -Wformat $file
-+ *
-+ * check-error-start
-+varargs-format-prefix.c:7:26: warning: incorrect type in argument 2 (different address spaces)
-+varargs-format-prefix.c:7:26:    expected char const *
-+varargs-format-prefix.c:7:26:    got void [noderef] <asn:1> *a
-+ * check-error-end
-+ */
-diff --git a/validation/varargs-format-tests.c b/validation/varargs-format-tests.c
-new file mode 100644
-index 00000000..659bbe94
---- /dev/null
-+++ b/validation/varargs-format-tests.c
-@@ -0,0 +1,55 @@
-+
-+extern void pf(char *msg, ...) __attribute__((format (printf, 1, 2)));
-+
-+static int test(void)
-+{
-+	pf("%*d\n", 5, 10);		/* value 10, print width is 5 */
-+	pf("%2$*1$d\n", 5, 10);		/* value 10, print width is 5 */
-+	pf("%3$*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$-*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$*2$-d\n", 1, 5, 10);	/* bad, the "-" shouldn't be before the 'd' */
-+	pf("%3$ *2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$+*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$0+*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$+0*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$+#*2$d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$+#*2$.5d\n", 1, 5, 10);	/* ok, skipping the '1' */
-+
-+	/* go with some precision as well as width strings */
-+	pf("%2$+*1$.6d\n", 5, 10);	/* ok */
-+	pf("%2$+*1$.*3$d\n", 5, 10, 6);	/* ok */
-+	pf("%2$+*3$.*1$d\n", 6, 10, 5);	/* ok */
-+	pf("%2$+*1$.*d\n", 5, 10, 6);	/* not ok */
-+
-+	pf("%s", "msg");
-+	return 0;
-+}
-+
-+static void test2(int x, int y, const void *p)
-+{
-+	pf("%02x%02x %8p\n", x, y, p);
-+}
-+
-+static inline void fn(int x) { pf("%08x\n", x); }
-+static void test3(int x)
-+{
-+	fn;
-+	fn(x);
-+}
-+
-+static void test4(int i, unsigned int u)
-+{
-+	pf("%d\n", i);
-+	pf("%x\n", u);
-+}
-+
-+/*
-+ * check-name: variadic formatting tests for width/precisions
-+ * check-command: sparse -Wformat $file
-+ *
-+ * check-error-start
-+varargs-format-tests.c:10:12: warning: cannot evaluate type '%3$*2$-d'
-+varargs-format-tests.c:10:12: warning: cannot evaluate format string
-+varargs-format-tests.c:22:12: warning: format 3: position: no position specified
-+ * check-error-end
-+ */
-diff --git a/validation/varargs-type-formattest.c b/validation/varargs-type-formattest.c
-new file mode 100644
-index 00000000..f01c6d89
---- /dev/null
-+++ b/validation/varargs-type-formattest.c
-@@ -0,0 +1,117 @@
-+
-+extern void pf1(char *msg, ...) __attribute__((format (printf, 1, 2)));
-+extern void pf2(int m, char *msg, ...) __attribute__((format (printf, 2, 3)));
-+
-+/* run all the tests with both of these printf formatted types */
-+#define pf(x...) do { pf1(x); pf2(1, x); } while(0);
-+
-+static void test(void) {
-+	/* first two are valid */
-+	pf("%*d", 5, 10);	/* value 10, print width is 5 */
-+	pf("%2$*1$d", 5, 10);	/* value 10, print width is 5 */
-+	pf("%2$*3$d", 5, 10);	/* value 10, print width is ?? */
-+
-+	pf("%*d", 5, 10);	/* value 10, print width is 5 */
-+	pf("%*d", 5, 10L);	/* value 10, print width is 5 (bad type) */
-+	pf("%*d", 5UL, 10L);	/* value 10, print width is 5 (bad type) */
-+
-+	pf("%3$*2$d", 1, 5, 10);	/* ok, skipping the '1' */
-+	pf("%3$*2$d", 1, 5, 10L);	/* bad print type */
-+	pf("%2$*3$d", 1UL, 10, 5);	/* ok, try with swapping width/val */
-+	pf("%2$*3$d", 1UL, 10L, 5);	/* bad, try with swapping width/val */
-+
-+	/* and now try with precision specifiers */
-+
-+	pf("%*.6d", 5, 10);	/* value 10, print width is 5 */
-+	pf("%*.6d", 5, 10L);	/* value 10, print width is 5 (bad type) */
-+	pf("%*.6d", 5UL, 10L);	/* value 10, print width is 5 (bad type) */
-+
-+	pf("%*.*d", 5, 6, 10);	/* value 10, print width is 5 */
-+	pf("%*.*d", 5, 6, 10L);	/* value 10, print width is 5 (bad type) */
-+	pf("%*.*d", 5UL, 6, 10L); /* value 10, print width is 5 (bad type) */
-+	pf("%*.*d", 5, 6UL, 10); /* value 10, print width is 5 (bad type) */
-+}
-+
-+/*
-+ * check-name: variadic formatting test position checking types
-+ * check-command: sparse -Wformat $file
-+ * check-known-to-fail
-+ *
-+ * check-error-start
-+varargs-type-formattest.c:12:9: warning: width: no argument at position 4
-+varargs-type-formattest.c:12:9: warning: width: no argument at position 5
-+varargs-type-formattest.c:15:9: warning: incorrect type in argument 3 (different types)
-+varargs-type-formattest.c:15:9:    expected int
-+varargs-type-formattest.c:15:9:    got long
-+varargs-type-formattest.c:15:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:15:9:    expected int
-+varargs-type-formattest.c:15:9:    got long
-+varargs-type-formattest.c:16:9: warning: incorrect type for width argument 2
-+varargs-type-formattest.c:16:9:    expected int
-+varargs-type-formattest.c:16:9:    got unsigned long
-+varargs-type-formattest.c:16:9: warning: incorrect type in argument 3 (different types)
-+varargs-type-formattest.c:16:9:    expected int
-+varargs-type-formattest.c:16:9:    got long
-+varargs-type-formattest.c:16:9: warning: incorrect type for width argument 3
-+varargs-type-formattest.c:16:9:    expected int
-+varargs-type-formattest.c:16:9:    got unsigned long
-+varargs-type-formattest.c:16:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:16:9:    expected int
-+varargs-type-formattest.c:16:9:    got long
-+varargs-type-formattest.c:19:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:19:9:    expected int
-+varargs-type-formattest.c:19:9:    got long
-+varargs-type-formattest.c:19:9: warning: incorrect type in argument 5 (different types)
-+varargs-type-formattest.c:19:9:    expected int
-+varargs-type-formattest.c:19:9:    got long
-+varargs-type-formattest.c:21:9: warning: incorrect type in argument 3 (different types)
-+varargs-type-formattest.c:21:9:    expected int
-+varargs-type-formattest.c:21:9:    got long
-+varargs-type-formattest.c:21:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:21:9:    expected int
-+varargs-type-formattest.c:21:9:    got long
-+varargs-type-formattest.c:26:9: warning: incorrect type in argument 3 (different types)
-+varargs-type-formattest.c:26:9:    expected int
-+varargs-type-formattest.c:26:9:    got long
-+varargs-type-formattest.c:26:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:26:9:    expected int
-+varargs-type-formattest.c:26:9:    got long
-+varargs-type-formattest.c:27:9: warning: incorrect type for width argument 2
-+varargs-type-formattest.c:27:9:    expected int
-+varargs-type-formattest.c:27:9:    got unsigned long
-+varargs-type-formattest.c:27:9: warning: incorrect type in argument 3 (different types)
-+varargs-type-formattest.c:27:9:    expected int
-+varargs-type-formattest.c:27:9:    got long
-+varargs-type-formattest.c:27:9: warning: incorrect type for width argument 3
-+varargs-type-formattest.c:27:9:    expected int
-+varargs-type-formattest.c:27:9:    got unsigned long
-+varargs-type-formattest.c:27:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:27:9:    expected int
-+varargs-type-formattest.c:27:9:    got long
-+varargs-type-formattest.c:30:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:30:9:    expected int
-+varargs-type-formattest.c:30:9:    got long
-+varargs-type-formattest.c:30:9: warning: incorrect type in argument 5 (different types)
-+varargs-type-formattest.c:30:9:    expected int
-+varargs-type-formattest.c:30:9:    got long
-+varargs-type-formattest.c:31:9: warning: incorrect type for width argument 2
-+varargs-type-formattest.c:31:9:    expected int
-+varargs-type-formattest.c:31:9:    got unsigned long
-+varargs-type-formattest.c:31:9: warning: incorrect type in argument 4 (different types)
-+varargs-type-formattest.c:31:9:    expected int
-+varargs-type-formattest.c:31:9:    got long
-+varargs-type-formattest.c:31:9: warning: incorrect type for width argument 3
-+varargs-type-formattest.c:31:9:    expected int
-+varargs-type-formattest.c:31:9:    got unsigned long
-+varargs-type-formattest.c:31:9: warning: incorrect type in argument 5 (different types)
-+varargs-type-formattest.c:31:9:    expected int
-+varargs-type-formattest.c:31:9:    got long
-+varargs-type-formattest.c:32:9: warning: incorrect type for position argument 3
-+varargs-type-formattest.c:32:9:    expected int
-+varargs-type-formattest.c:32:9:    got unsigned long
-+varargs-type-formattest.c:32:9: warning: incorrect type for position argument 4
-+varargs-type-formattest.c:32:9:    expected int
-+varargs-type-formattest.c:32:9:    got unsigned long
-+ * check-error-end
-+ *
-+ */
--- 
-2.28.0
+Flexible array padding is normal and good. IOW, if you have
 
+    struct odd_struct {
+        char c;
+        unsigned int flex[];
+    };
+
+then the flexible array - and the structure - very much should be
+aligned on 'unsigned int', and both the offset of the flex-array and
+the (bogus) size of the structure is 4.
+
+So this is a normal case and nothing wrong with it, and the above is
+the "flexible array caused padding" one (but sizeof and offsetof
+match).
+
+And the case that causes sizeof() and offsetof() to not match is
+normal too: but is not that the flexible array member caused padding,
+but that *other* members did.
+
+IOW, maybe you have a structure like this:
+
+    struct other {
+        uint64_t a;
+        uint32_t b;
+        char flex[];
+    };
+
+and now "offsetof(flex)" is 12, but "sizeof(struct other)" is 16,
+because the flex-array itself has no real alignment requirement and
+will just be laid out after the 12 bytes of a/b, but the structure has
+8-byte alignment due to 'a'.
+
+So I don't think the warning is interesting, because this is a
+perfectly normal condition too.
+
+And I don't think your explanation for the warning makes sense,
+because you say "padding is added because of the presence of a
+flexible array member", but that's not at all what is going on. The
+padding is added because of *other* members.
+
+Anyway, the above is just an example of why "sizeof()" itself makes no
+sense on these things. A "sizeof()" of a structure with a flexible
+array member is inherently pointless. You can't use it for anything
+really valid, and it doesn't have any sensible meaning.
+
+But I don't think that has anything to do with warning about padding.
+The padding is right - it's the sizeof() itself that is nonsensical.
+
+So in the kernel, we would
+
+ - start warning about 'sizeof(flex_struct)'
+
+ - make our "struct_size(s, m, N)" construct use
+"offsetof(m)+N*sizeof(*m)" instead of using sizeof().
+
+Of course, it may well be that we end up with trouble just because we
+end up _needing_ sizeof() for some reason. I can't think of any sane
+situation off the top of my head, but who knows what odd macros etc we
+might have that end up doing sizeof() as part of things..
+
+                  Linus
