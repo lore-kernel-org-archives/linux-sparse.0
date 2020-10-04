@@ -2,91 +2,121 @@ Return-Path: <SRS0=8Fyo=DL=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE101C4363C
-	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 11:43:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E011C4363C
+	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 11:43:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 60B9F20797
-	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 11:43:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3635420781
+	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 11:43:57 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rmMr/aqF"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K58YjPf7"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1725942AbgJDLny (ORCPT
+        id S1725956AbgJDLn5 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 4 Oct 2020 07:43:54 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47192 "EHLO
+        Sun, 4 Oct 2020 07:43:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47200 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725868AbgJDLny (ORCPT
+        with ESMTP id S1725949AbgJDLnz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 4 Oct 2020 07:43:54 -0400
-Received: from mail-wm1-x343.google.com (mail-wm1-x343.google.com [IPv6:2a00:1450:4864:20::343])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3FB97C0613CE
-        for <linux-sparse@vger.kernel.org>; Sun,  4 Oct 2020 04:43:54 -0700 (PDT)
-Received: by mail-wm1-x343.google.com with SMTP id y15so6024760wmi.0
-        for <linux-sparse@vger.kernel.org>; Sun, 04 Oct 2020 04:43:54 -0700 (PDT)
+        Sun, 4 Oct 2020 07:43:55 -0400
+Received: from mail-wr1-x42a.google.com (mail-wr1-x42a.google.com [IPv6:2a00:1450:4864:20::42a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 75903C0613CF
+        for <linux-sparse@vger.kernel.org>; Sun,  4 Oct 2020 04:43:55 -0700 (PDT)
+Received: by mail-wr1-x42a.google.com with SMTP id n15so745083wrq.2
+        for <linux-sparse@vger.kernel.org>; Sun, 04 Oct 2020 04:43:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=GTXqPE5C051bpd3xRzerX+kqhJ1tT7fcen6fXZc1wn8=;
-        b=rmMr/aqFpr3er/i0sLcCgaak/hFjFIyKyM6VUDsdhM2w2SrkMgn5wIjrwCW8Mg9+n8
-         otxZIAxpSkqnMbOCe8yZe4jPCTNSQ2LMFOEzfo8xKduymLasYSUcXsTeOmHJ+rALLZE3
-         AE3Rcg8WHovIATQSRh1k1msiKrAFUI16UyefS5IBKBctFmQmkxWMFei+fdqaksxPuHI1
-         n3SJpyvFlr8p2mwE9GiZ+vGZx2xZYMDGPXMz2JbfHGrF7IbLxe6GrQgg+sbXBnb6U60s
-         eVqntKvzvbLakbz47vQOmwnxejluaaepPrSHmTjLiReRManAjLwqquL+ggHG7tEzOkSb
-         IvPA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=7W92ghzttWRReSna6gtAQN6Di0jQj6URH+63EazcdvI=;
+        b=K58YjPf75eUzUFGpJK2++TZVTPWcvGHTBkp6BAXC+Y9oILhqaRD5YbNyqNcNqRxDaq
+         J5OzCM2g4MFOtdgsbIr9n3qELUKybsLXgaORokHfT3k9cG1ql43LNTKrN5AoKqMecyk0
+         mP/Z5qhmOu4A+s3CyJ+cPd/Rq6NmieV7vNPXEcZCZmuj+RuVx27yCIOplBFg4PcotQ0o
+         +8CqTQXo3p7Q2rcjhfU9S/T+/3vQj4rsnQIoG/IvAshpptztuV7FVeXzWm1PvZrieb0C
+         dixHNA1Ep4x3qlDn59z+OmjdILoHuLS04m79zQgHVsI1H5soBvaTPDCaRsD5UwT1UE3V
+         iSVg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=GTXqPE5C051bpd3xRzerX+kqhJ1tT7fcen6fXZc1wn8=;
-        b=AwWh7QgPUCCS+ktNlbLxu0Ozz7s0olEXhJ//n42KW5SCW1DcAT+t2tI/CmNhMnyFew
-         5lmmUOm2fSc0MIfHilkcx6dAO+YTD9sBb4fwMkNjyUwDJy+4vqJNraQ59tJ5Me+/N1ua
-         /oXRKDNC86GcMGMA6RF8sfIZIeG9jssfOywEWHiowqG5vqzwmX5krYSUsjAAq1++PrTH
-         Rsn2gOIe8NeapejXAetzlSfB2RYTiO1oO0HusdFYR+eNIjCK1pumuJn7iiUBjntDVHUU
-         k6STGCbFnr/8Vb2d6NtBlan3uxLMYhb4pRvECKOp034o8nEud3WfGRIq1uac90XFcli6
-         BmTQ==
-X-Gm-Message-State: AOAM533CxarS6qYA7a0ndAkz1r8ZkPxY8ywrG4M2b8bWeLhb1OW/ijjh
-        YT0vpFA57oJKjcieXrVcQrlu0RTXpNs=
-X-Google-Smtp-Source: ABdhPJzDSPk5M7Diijpym9iOLux27BmP+N3C7P5BVGtbWHKLfmytyJW6bW6CvxvkmfQsjRt12q+3SA==
-X-Received: by 2002:a1c:9c4b:: with SMTP id f72mr11685709wme.188.1601811832384;
-        Sun, 04 Oct 2020 04:43:52 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=7W92ghzttWRReSna6gtAQN6Di0jQj6URH+63EazcdvI=;
+        b=sGd3kb0r5yQsjvZWjfk66xjGpsdoQ8DbCSnZ4mVyn7OqqcCwXV31UUmuYnbB93+i12
+         pGTLSy3OEFpZYBQgtERQ2GzkdCrrN6T1CllPHq5ICS7Iyp7EuL4gvj6ihHB3A7sO+R0e
+         5g/d6OucbUIgmm/kc0XQGPruq17yF54vLhnz9ivsu1dKyfoMlPrOWUF8WkqB8hb5wX16
+         lf7RK2CQnykY2edBcIO6KqymdsEB4qVz+QAP48wORXIfo6nQezlb51Y/gEA3jV7cgV2c
+         mwStd/CfESlQgpbTnoqO6ZDz12PCbxwxsgDDThNm+y+FJIw34SDg9bdGXgnwLLSSu4Om
+         cwWw==
+X-Gm-Message-State: AOAM530ZYcep52V1AiciJyyXXsljeGu/BClHB8LibS2XWnkDgQej9Kr1
+        Wa4EgF7AUZA2bNznwtdAnkHkrMmsnUM=
+X-Google-Smtp-Source: ABdhPJwejYx7zxT8eEenkQNw/B053COR+Vb2XH+FPmDgao2rbNeFK0QZPL6n4yEjMkMjNjKVxcu+zQ==
+X-Received: by 2002:adf:a31a:: with SMTP id c26mr2448759wrb.378.1601811833881;
+        Sun, 04 Oct 2020 04:43:53 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f14e:9b66:59e7:4769])
-        by smtp.gmail.com with ESMTPSA id l19sm8244801wmi.8.2020.10.04.04.43.51
+        by smtp.gmail.com with ESMTPSA id l19sm8244801wmi.8.2020.10.04.04.43.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Oct 2020 04:43:51 -0700 (PDT)
+        Sun, 04 Oct 2020 04:43:53 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Ben Dooks <ben.dooks@codethink.co.uk>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/3] add some builtin types for printf format checking
-Date:   Sun,  4 Oct 2020 13:43:46 +0200
-Message-Id: <20201004114349.81440-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/3] add builtin types for signed char* and short *
+Date:   Sun,  4 Oct 2020 13:43:48 +0200
+Message-Id: <20201004114349.81440-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201004114349.81440-1-luc.vanoostenryck@gmail.com>
+References: <20201004114349.81440-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The checking of printf format strings needs a few more builtin types.
-For example, a type for wide string is needed for "%Ls" and more are
-needed to support "%n" with the different possible lenght modifiers.
+This is needed for printf format checking of "%hhn" & "%hn".
 
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ symbol.c | 3 +++
+ symbol.h | 1 +
+ 2 files changed, 4 insertions(+)
 
-Luc Van Oostenryck (3):
-  add builtin type for wide strings
-  add builtin types for signed char* and short *
-  add builtin types for size_t*, intmax_t* & ptrdiff_t*
-
- symbol.c | 19 +++++++++++++++++++
- symbol.h |  3 +++
- 2 files changed, 22 insertions(+)
-
+diff --git a/symbol.c b/symbol.c
+index 9065bd527d60..a29e0b140d16 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -782,6 +782,7 @@ struct symbol	bool_ctype, void_ctype, type_ctype,
+ 		incomplete_ctype, label_ctype, bad_ctype,
+ 		null_ctype;
+ struct symbol	autotype_ctype;
++struct symbol	schar_ptr_ctype, short_ptr_ctype;
+ struct symbol	int_ptr_ctype, uint_ptr_ctype;
+ struct symbol	long_ptr_ctype, ulong_ptr_ctype;
+ struct symbol	llong_ptr_ctype, ullong_ptr_ctype;
+@@ -877,6 +878,8 @@ static const struct ctype_declare {
+ 	{ &null_ctype,         T_PTR(&void_ctype) },
+ 	{ &label_ctype,        T_PTR(&void_ctype) },
+ 	{ &lazy_ptr_ctype,     T_PTR(&void_ctype) },
++	{ &schar_ptr_ctype,    T_PTR(&schar_ctype) },
++	{ &short_ptr_ctype,    T_PTR(&short_ctype) },
+ 	{ &int_ptr_ctype,      T_PTR(&int_ctype) },
+ 	{ &uint_ptr_ctype,     T_PTR(&uint_ctype) },
+ 	{ &long_ptr_ctype,     T_PTR(&long_ctype) },
+diff --git a/symbol.h b/symbol.h
+index f82484f5c978..d39048cb478d 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -298,6 +298,7 @@ extern struct symbol	bool_ctype, void_ctype, type_ctype,
+ 			incomplete_ctype, label_ctype, bad_ctype,
+ 			null_ctype;
+ extern struct symbol	autotype_ctype;
++extern struct symbol	schar_ptr_ctype, short_ptr_ctype;
+ extern struct symbol	int_ptr_ctype, uint_ptr_ctype;
+ extern struct symbol	long_ptr_ctype, ulong_ptr_ctype;
+ extern struct symbol	llong_ptr_ctype, ullong_ptr_ctype;
 -- 
 2.28.0
 
