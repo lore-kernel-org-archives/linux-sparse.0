@@ -1,72 +1,72 @@
-Return-Path: <SRS0=8Fyo=DL=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=4is7=DM=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-11.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BF15C4363C
-	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 16:13:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D44E8C4363D
+	for <linux-sparse@archiver.kernel.org>; Mon,  5 Oct 2020 02:00:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 16FB12068D
-	for <linux-sparse@archiver.kernel.org>; Sun,  4 Oct 2020 16:13:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CF8E2073A
+	for <linux-sparse@archiver.kernel.org>; Mon,  5 Oct 2020 02:00:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="vRUJlndp"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aUcl//qj"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726105AbgJDQNc (ORCPT
+        id S1725845AbgJECAK (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 4 Oct 2020 12:13:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60062 "EHLO
+        Sun, 4 Oct 2020 22:00:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36590 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726206AbgJDQN0 (ORCPT
+        with ESMTP id S1725841AbgJECAJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 4 Oct 2020 12:13:26 -0400
-Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 707FBC0613CE
-        for <linux-sparse@vger.kernel.org>; Sun,  4 Oct 2020 09:13:26 -0700 (PDT)
-Received: by mail-wm1-x341.google.com with SMTP id d81so1138940wmc.1
-        for <linux-sparse@vger.kernel.org>; Sun, 04 Oct 2020 09:13:26 -0700 (PDT)
+        Sun, 4 Oct 2020 22:00:09 -0400
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8FDFEC0613CE
+        for <linux-sparse@vger.kernel.org>; Sun,  4 Oct 2020 19:00:09 -0700 (PDT)
+Received: by mail-wr1-x444.google.com with SMTP id s12so7702999wrw.11
+        for <linux-sparse@vger.kernel.org>; Sun, 04 Oct 2020 19:00:09 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=t1qRtzB2152SDiuCx7/mNks8hIErVLRMflD+dO7jgpE=;
-        b=vRUJlndpxLjNvn9cqoe/T753eu1BdnEJ0Or4Izk3yevny9vE8J10Hb/vWnwPNALcwc
-         OtL8ZbCPYebT86TVnQrPf5KBlTdx39xMOSl0H9SUnUTWKEuRFQvuN93vIsFCguu3jx7s
-         XqUj9kcyS3gSAxP30vV+hpF8+8gRAtst8Jk3yhbdbETdzJkSQFCWiD2QqYm8BtK0ASza
-         BDOUJl2nZuugJltKPnhwe/wqZIka9VnLN0hiurhR8lgSqGfEwc9OUqxgTWB5Cx129JLr
-         gEJgMX7Gz4T8Aidr3ndTj8xrZY/xfgFRXdfMmmqXm8p6djbo7xqayhg+64SoOqjh5ECD
-         xmbw==
+        bh=magGOrBbBi78VY0f+JfqP+GY11q9fpeccdmQ4h+ueT0=;
+        b=aUcl//qj1DGJA2iYjPbC/J8p63BcC/TllhGp4RVdqyVsMGt9kTQ70S5hFQ7bNlp3/z
+         N/tuoRB7A1X1IGKB1K9SOMSZ6d8NsKyH9836bFIIzq3uTvLTfYzM8fevTmyzOfF4JpRZ
+         jUPd8OAxf8qSHyehEhgIwlgAUIUzj6iIVPwz56M443/+sMGkDZgYQ80nLfCyOFmqxLfq
+         eH6mPLTGRQeZD4hGhhLxvQq23JB5mgFU1FHU1Na7WJsNG9vkiNsApyrZGwqF0EaVwcu0
+         OmVD091O7eus4g4LBmj8Ombf/s7Tc7259Q7R5yPiO2hAO9vu/L/AorTw8SftzyFq+Iky
+         69Xg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=t1qRtzB2152SDiuCx7/mNks8hIErVLRMflD+dO7jgpE=;
-        b=KyGmZBsKZqWTgo9vc2vr+sDLZY/Jdkc7owzjFW5YtspiSPaATtQl2IrsBFypyFGm3a
-         c7coPMnNmvBsecFvnMDiJFdoxngKyJ6jg8+ijiFyatXlSiNoDKGKM87nG84GdYObGt9/
-         JFxA/fuaAGxBS0BxqlKqmDbG6sGwGExU2+jJN40Na+BjeuakKii6yl2nGIDt4FHt56NH
-         Hrtp0k3jwTdHzYrucg95ySOCBWv0izJxF/t/qr8ElHwUYtjNj2Ax3puHvIhq3E+swkEl
-         m9N4VHlMmnqtJkZcw3yVh1dVDHxdrKepb0YVRz2SbugIlFg1/i1I7+pQtaMjqeSFNn7w
-         3K4Q==
-X-Gm-Message-State: AOAM533Adole9dzc/9h+YiPY4J6x5rJQC9PzdStborq2R9OsUJ1ur4uT
-        IycQj9XdHR5Pw3cs1nsHdIh01RL25HE=
-X-Google-Smtp-Source: ABdhPJwAXIykpEX05ivSgmzS9EqDFSBKThf5zVkF/uUo/GD77OR6HI7f04e58VsTVr7gz1KklNvg+g==
-X-Received: by 2002:a7b:c0ca:: with SMTP id s10mr12398894wmh.103.1601828004858;
-        Sun, 04 Oct 2020 09:13:24 -0700 (PDT)
+        bh=magGOrBbBi78VY0f+JfqP+GY11q9fpeccdmQ4h+ueT0=;
+        b=Y2+0dZCq6uylS712kJm5FoZcy5SOqpONKDA3Q84XuS1tp0W2ZPmeCxDn67tRv0UBX/
+         FFtfFXlMezry6Lv2ExRCYA+kdROsC685KjxWI7S/PDlhigKcrKfkLqfWHpXEu9+/cc0I
+         ffzCGJzPTpg5P72PDmMTb526PSsp/sU6uT6f7RPa4HWRF8q1WUYKrbihPyxcwM/aFpUd
+         0pyqNxpOWeVWVNzXnuDkOz2dcjZdiOQF6F01ufzrJHi2ttvZSNgW3/lyq6min8u7FNCS
+         csSsyler8YcHrAWR5V35ZPfS7PhpMPGXjyO6kCfxgpUUy/nKsWZZ84EBkOeBqxcNEeGX
+         CGHg==
+X-Gm-Message-State: AOAM533cmYsK/i1i0LZfqLtqceONm7ngT/8M5q6bwO99PKiyDZj2PY6R
+        d2j+tG7txiTe2R7QYRsVzKz18MhaozI=
+X-Google-Smtp-Source: ABdhPJxpQMvXn8Gxf4DTVXrG0e9/fbQeGgUl510NCtIbAMajtigu9hGpHvlguvkkhCMzsJC2hTMBGA==
+X-Received: by 2002:adf:fe43:: with SMTP id m3mr14761030wrs.19.1601863207918;
+        Sun, 04 Oct 2020 19:00:07 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f14e:9b66:59e7:4769])
-        by smtp.gmail.com with ESMTPSA id c25sm9236201wml.31.2020.10.04.09.13.23
+        by smtp.gmail.com with ESMTPSA id b189sm5541132wmb.37.2020.10.04.19.00.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 04 Oct 2020 09:13:24 -0700 (PDT)
+        Sun, 04 Oct 2020 19:00:07 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Ben Dooks <ben.dooks@codethink.co.uk>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] add helper get_nth_expression()
-Date:   Sun,  4 Oct 2020 18:13:21 +0200
-Message-Id: <20201004161321.75380-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/8] format check tweaks
+Date:   Mon,  5 Oct 2020 03:59:54 +0200
+Message-Id: <20201005020002.1108-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -74,29 +74,38 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This will be used for -Wformat.
+Ben, these are small changes I think should be applied with
+your series, on top of the patches I send yesterday.
+I've pushed everything at:
+	git://github.com/lucvoo/sparse-dev.git format-check
+If you're fine with these, I can squeeze them with the series.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- lib.h | 5 +++++
- 1 file changed, 5 insertions(+)
+There are also a few tests I don't agree with:
+	const void *ptr = ...
+	printf("%s", ptr);
+These tests silently accept this, but they should warn.
+But this can be fixed at a later step.
 
-diff --git a/lib.h b/lib.h
-index b35debc83288..957586dbd80a 100644
---- a/lib.h
-+++ b/lib.h
-@@ -199,6 +199,11 @@ static inline struct expression *first_expression(struct expression_list *head)
- 	return first_ptr_list((struct ptr_list *)head);
- }
- 
-+static inline struct expression *get_nth_expression(struct expression_list *head, unsigned int n)
-+{
-+	return ptr_list_nth_entry((struct ptr_list *)head, n);
-+}
-+
- static inline pseudo_t first_pseudo(struct pseudo_list *head)
- {
- 	return first_ptr_list((struct ptr_list *)head);
+
+Luc Van Oostenryck (8):
+  need to strip SYM_NODE before comparing types
+  add helper get_nth_expression()
+  move the definition of FMT_{PRINTF,SCANF}
+  parse format attribute less verbosely
+  call verify_format_attribute() unconditionally
+  s/data/type/ for struct format_type
+  add support for "%ls"
+  add support for "%Lx" (and "%Ls")
+
+ evaluate.c                           |  4 +--
+ lib.h                                |  5 +++
+ parse.c                              | 30 +++++++----------
+ symbol.h                             |  7 ++++
+ validation/varargs-format-dyn-prec.c | 11 ++++++
+ verify-format.c                      | 50 ++++++++++++++++------------
+ 6 files changed, 65 insertions(+), 42 deletions(-)
+ create mode 100644 validation/varargs-format-dyn-prec.c
+
 -- 
 2.28.0
 
