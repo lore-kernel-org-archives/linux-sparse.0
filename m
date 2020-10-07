@@ -2,169 +2,101 @@ Return-Path: <SRS0=ZUDq=DO=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 21E95C4363C
-	for <linux-sparse@archiver.kernel.org>; Wed,  7 Oct 2020 11:58:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B48EBC4363D
+	for <linux-sparse@archiver.kernel.org>; Wed,  7 Oct 2020 22:48:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CEEE220782
-	for <linux-sparse@archiver.kernel.org>; Wed,  7 Oct 2020 11:58:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6F33521789
+	for <linux-sparse@archiver.kernel.org>; Wed,  7 Oct 2020 22:48:17 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Ga7oMk/W"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726219AbgJGL6a (ORCPT
+        id S1728891AbgJGWsR (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 7 Oct 2020 07:58:30 -0400
-Received: from mslow2.mail.gandi.net ([217.70.178.242]:35932 "EHLO
-        mslow2.mail.gandi.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728041AbgJGL61 (ORCPT
+        Wed, 7 Oct 2020 18:48:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52828 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727353AbgJGWsR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 7 Oct 2020 07:58:27 -0400
-Received: from relay2-d.mail.gandi.net (unknown [217.70.183.194])
-        by mslow2.mail.gandi.net (Postfix) with ESMTP id 430953B6580
-        for <linux-sparse@vger.kernel.org>; Wed,  7 Oct 2020 11:53:03 +0000 (UTC)
-X-Originating-IP: 78.45.89.65
-Received: from im-t490s.redhat.com (ip-78-45-89-65.net.upcbroadband.cz [78.45.89.65])
-        (Authenticated sender: i.maximets@ovn.org)
-        by relay2-d.mail.gandi.net (Postfix) with ESMTPSA id E10634000E;
-        Wed,  7 Oct 2020 11:52:40 +0000 (UTC)
-From:   Ilya Maximets <i.maximets@ovn.org>
-To:     linux-sparse@vger.kernel.org,
+        Wed, 7 Oct 2020 18:48:17 -0400
+Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9F55BC061755
+        for <linux-sparse@vger.kernel.org>; Wed,  7 Oct 2020 15:48:16 -0700 (PDT)
+Received: by mail-ed1-x541.google.com with SMTP id o18so3892419edq.4
+        for <linux-sparse@vger.kernel.org>; Wed, 07 Oct 2020 15:48:16 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/nh7PkMBSCElOkYPB6x8C5gvF99WWfjyqZuaE0g4D/8=;
+        b=Ga7oMk/W2H27rcwF9D9Oijz5nOD9ubhm/wM9KNR7kkRYCugmnfBxCyidPcJvxdoibJ
+         h8uCs7XDHx4QPw4poqlzC5///HzwueIwq4Xj7GEOtO4smjNmS06SnmEBftrSK8ps3ECt
+         mseLNUKD19ij0MOhVS3+bGZ4/1v0PK8yBHkMyxYuqdrjgztwmR9Tau2qkHvLzNZneRBY
+         UejTPlP41G4GZ8Arjgtg55t/qmDapaa62Zj5wJslOCi67uo4nn5NVIn46T0cxGB/t3sp
+         rM8stottoCRnHw7gbymSPtacy6pfac1pGvYt9cKJ6hif5XIr8WvNaetFapX2YuIJgZUb
+         D/aw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=/nh7PkMBSCElOkYPB6x8C5gvF99WWfjyqZuaE0g4D/8=;
+        b=hZTE6SmxMNE7oCcObG8Vs3acU4c70FdVQEbZ+1aqaZu1wAc44XSsXATCrPVnXwZAY8
+         kfqQANCDTCR8iz5kc6RI/5I3xXlxthKmE8C8EIIy6FAK29vNjTR+zinqJsxdOQ8IPyyE
+         qNIdww3AIhCzF9421G945XPGdz5E/q5fga37zOUCNOsnHrRGL8jwxvlU4+3j5XlJ6AnT
+         LxPKMZISmwXDRKLO1jEDUEx5Wlf59OzzwAL0KJUMvKCV8NqKTkOv6soiauGwSC5fIWid
+         KW0/G097US60a+4WET8xhWbKvONQp8b8MzTUjt468Q1f+ISj7p0Wk+Wg9mFlSRB+fmAe
+         AO3Q==
+X-Gm-Message-State: AOAM5300lp0H8+Sx7Hwc/34QwBIs0fqNSSFHWNsQom6IUDf+bvytMALn
+        EaToW13zEcQA6Fi4+Rdlszo6LGc5dnk=
+X-Google-Smtp-Source: ABdhPJyjhmKteHeNdlowql0jcJup481BTYwEgP8iEzGjEParOmaTts7ogjE2JGyANW2zRxVnW7YewA==
+X-Received: by 2002:aa7:db82:: with SMTP id u2mr6210414edt.262.1602110895033;
+        Wed, 07 Oct 2020 15:48:15 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:9daf:ccef:2e0a:ac1c])
+        by smtp.gmail.com with ESMTPSA id c5sm2573888edx.58.2020.10.07.15.48.13
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 07 Oct 2020 15:48:14 -0700 (PDT)
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Ilya Maximets <i.maximets@ovn.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     ovs-dev@openvswitch.org, Ian Stokes <ian.stokes@intel.com>,
-        Aaron Conole <aconole@redhat.com>,
-        Ilya Maximets <i.maximets@ovn.org>
-Subject: [PATCH] flex-array: allow arrays of unions with flexible members.
-Date:   Wed,  7 Oct 2020 13:52:34 +0200
-Message-Id: <20201007115234.1482603-1-i.maximets@ovn.org>
-X-Mailer: git-send-email 2.25.4
+Subject: [PATCH] add helpers is_struct_type() &  is_union_type()
+Date:   Thu,  8 Oct 2020 00:48:09 +0200
+Message-Id: <20201007224809.3289-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-There is a common pattern on how to allocate memory for a flexible-size
-structure, e.g.
-
-  union {
-      struct flex f;  /* Structure that contains a flexible array. */
-      char buf[MAX_SIZE];  /* Memeory buffer for structure 'flex' and
-                              its flexible array. */
-  };
-
-There is another exmaple of such thing in CMSG manpage with the
-alignment purposes:
-
-  union {         /* Ancillary data buffer, wrapped in a union
-                     in order to ensure it is suitably aligned */
-      char buf[CMSG_SPACE(sizeof(myfds))];
-      struct cmsghdr align;
-  } u;
-
-Such unions could form an array in case user wants multiple
-instances of them.  For example, if you want receive up to
-32 network packets via recvmmsg(), you will need 32 unions like 'u'.
-Open vSwitch does exactly that and fails the check.
-
-Disabling this check by default for unions.  Adding new option
--Wflex-union-array to enable it back.  This option works only
-if -Wflex-array-array enabled (which is default behavior).
+From: Ilya Maximets <i.maximets@ovn.org>
 
 Signed-off-by: Ilya Maximets <i.maximets@ovn.org>
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
+ symbol.h | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
 
-Not sure if this is a best way to fix the issue, but it works fine for
-openvswitch project.  The actual code in question that makes sparse fail
-OVS build could be found here:
-  https://github.com/openvswitch/ovs/blob/39fbd2c3f0392811689ec780f09baf90faceb877/lib/netdev-linux.c#L1238
-
- options.c                         |  2 ++
- options.h                         |  1 +
- sparse.1                          |  7 +++++++
- symbol.c                          |  3 ++-
- symbol.h                          |  7 +++++++
- validation/flex-union-array-no.c  |  9 +++++++++
- validation/flex-union-array-yes.c | 11 +++++++++++
- validation/flex-union-array.h     | 11 +++++++++++
- 8 files changed, 50 insertions(+), 1 deletion(-)
- create mode 100644 validation/flex-union-array-no.c
- create mode 100644 validation/flex-union-array-yes.c
- create mode 100644 validation/flex-union-array.h
-
-diff --git a/options.c b/options.c
-index b46900b9..cb935832 100644
---- a/options.c
-+++ b/options.c
-@@ -103,6 +103,7 @@ int Wexternal_function_has_definition = 1;
- int Wflexible_array_array = 1;
- int Wflexible_array_nested = 0;
- int Wflexible_array_sizeof = 0;
-+int Wflexible_union_array = 0;
- int Wimplicit_int = 1;
- int Winit_cstring = 0;
- int Wint_to_pointer_cast = 1;
-@@ -846,6 +847,7 @@ static const struct flag warnings[] = {
- 	{ "flexible-array-array", &Wflexible_array_array },
- 	{ "flexible-array-nested", &Wflexible_array_nested },
- 	{ "flexible-array-sizeof", &Wflexible_array_sizeof },
-+	{ "flexible-union-array", &Wflexible_union_array },
- 	{ "implicit-int", &Wimplicit_int },
- 	{ "init-cstring", &Winit_cstring },
- 	{ "int-to-pointer-cast", &Wint_to_pointer_cast },
-diff --git a/options.h b/options.h
-index d23ed472..a20c9f61 100644
---- a/options.h
-+++ b/options.h
-@@ -102,6 +102,7 @@ extern int Wexternal_function_has_definition;
- extern int Wflexible_array_array;
- extern int Wflexible_array_nested;
- extern int Wflexible_array_sizeof;
-+extern int Wflexible_union_array;
- extern int Wimplicit_int;
- extern int Winit_cstring;
- extern int Wint_to_pointer_cast;
-diff --git a/sparse.1 b/sparse.1
-index 9b1a59c6..ac45b67c 100644
---- a/sparse.1
-+++ b/sparse.1
-@@ -278,6 +278,13 @@ possibly recursively.
- Sparse does not issue these warnings by default.
- .
- .TP
-+.B -Wflexible-union-array
-+Warn about arrays of unions containing a flexible array.
-+
-+Sparse does not issue these warnings by default.
-+To turn them on, \fB-Wflexible-array-array\fR should be enabled too.
-+.
-+.TP
- .B \-Winit\-cstring
- Warn about initialization of a char array with a too long constant C string.
- 
-diff --git a/symbol.c b/symbol.c
-index 97c2e35d..7ad7351b 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -271,7 +271,8 @@ static struct symbol * examine_array_type(struct symbol *sym)
- 			bit_size = -1;
- 		}
- 	}
--	if (has_flexible_array(base_type) && Wflexible_array_array)
-+	if (has_flexible_array(base_type) && Wflexible_array_array &&
-+	    (!is_union_type(base_type) || Wflexible_union_array))
- 		warning(sym->pos, "array of flexible structures");
- 	alignment = base_type->ctype.alignment;
- 	if (!sym->ctype.alignment)
 diff --git a/symbol.h b/symbol.h
-index e1f53926..b208ce87 100644
+index e1f5392600ef..e75ea3abfcd3 100644
 --- a/symbol.h
 +++ b/symbol.h
-@@ -425,6 +425,13 @@ static inline int is_array_type(struct symbol *type)
+@@ -425,6 +425,20 @@ static inline int is_array_type(struct symbol *type)
  	return type->type == SYM_ARRAY;
  }
  
++static inline int is_struct_type(struct symbol *type)
++{
++	if (type->type == SYM_NODE)
++		type = type->ctype.base_type;
++	return type->type == SYM_STRUCT;
++}
++
 +static inline int is_union_type(struct symbol *type)
 +{
 +	if (type->type == SYM_NODE)
@@ -175,55 +107,6 @@ index e1f53926..b208ce87 100644
  static inline int is_float_type(struct symbol *type)
  {
  	if (type->type == SYM_NODE)
-diff --git a/validation/flex-union-array-no.c b/validation/flex-union-array-no.c
-new file mode 100644
-index 00000000..d370971c
---- /dev/null
-+++ b/validation/flex-union-array-no.c
-@@ -0,0 +1,9 @@
-+#include "flex-union-array.h"
-+
-+/*
-+ * check-name: flex-union-array-no
-+ * check-command: sparse -Wflexible-array-array -Wno-flexible-union-array $file
-+ *
-+ * check-error-start
-+ * check-error-end
-+ */
-diff --git a/validation/flex-union-array-yes.c b/validation/flex-union-array-yes.c
-new file mode 100644
-index 00000000..4c594386
---- /dev/null
-+++ b/validation/flex-union-array-yes.c
-@@ -0,0 +1,11 @@
-+#include "flex-union-array.h"
-+
-+/*
-+ * check-name: flex-union-array-yes
-+ * check-command: sparse -Wflexible-array-array -Wflexible-union-array $file
-+ *
-+ * check-error-start
-+flex-union-array-yes.c: note: in included file:
-+flex-union-array.h:11:17: warning: array of flexible structures
-+ * check-error-end
-+ */
-diff --git a/validation/flex-union-array.h b/validation/flex-union-array.h
-new file mode 100644
-index 00000000..b2a74d1a
---- /dev/null
-+++ b/validation/flex-union-array.h
-@@ -0,0 +1,11 @@
-+struct s_flex {
-+	int i;
-+	long f[];
-+};
-+
-+union s {
-+	struct s_flex flex;
-+	char buf[200];
-+};
-+
-+static union s a[2];
 -- 
-2.25.4
+2.28.0
 
