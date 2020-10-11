@@ -1,124 +1,108 @@
-Return-Path: <SRS0=CK19=DQ=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=hzTE=DS=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-10.2 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 08FE3C433DF
-	for <linux-sparse@archiver.kernel.org>; Fri,  9 Oct 2020 16:28:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 0512EC43457
+	for <linux-sparse@archiver.kernel.org>; Sun, 11 Oct 2020 19:52:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C0E462227F
-	for <linux-sparse@archiver.kernel.org>; Fri,  9 Oct 2020 16:28:30 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Wq4UfMuZ"
+	by mail.kernel.org (Postfix) with ESMTP id C4EC02087D
+	for <linux-sparse@archiver.kernel.org>; Sun, 11 Oct 2020 19:52:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2389736AbgJIQ2a (ORCPT
+        id S1726536AbgJKTwC (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 9 Oct 2020 12:28:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43826 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389144AbgJIQ2a (ORCPT
+        Sun, 11 Oct 2020 15:52:02 -0400
+Received: from imap2.colo.codethink.co.uk ([78.40.148.184]:42306 "EHLO
+        imap2.colo.codethink.co.uk" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726456AbgJKTwC (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 9 Oct 2020 12:28:30 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 15342C0613D2
-        for <linux-sparse@vger.kernel.org>; Fri,  9 Oct 2020 09:28:30 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id p13so9976437edi.7
-        for <linux-sparse@vger.kernel.org>; Fri, 09 Oct 2020 09:28:30 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hiPIHln4k0rftb9vSYWeQtExf1Juk8dwTWy/NblqH+0=;
-        b=Wq4UfMuZtz+vL47zuweJ+J6/5dCI3xGrs7u7f4GYftq4OX6HO9+OAy18dzU9x512ZX
-         2oTc9MoZWhKGQ+l1xX9/slm4ux0zG3RPTfSeerGleUTdmo6Qjdg7njdBlK3wIe+0i/Q6
-         Shjxu/gla3gl1EcmVhd9C7JRF8VTAiGZ9zcttT7QP8PTg8Gjp10U1NmlD9z0vLWe2eJj
-         5EJKPIotLoRZV9xcgPOQdOWlPettAlzPktbmePxIhp4GpnZnqabLNl4hRWsJWgafDhoW
-         RCpGKg1IdULHZRiPmOVVEIZPgGMlCg8eWJbuQmCguTzy+5zg8dJRLegHgyIOYFemPbXu
-         TfrQ==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=hiPIHln4k0rftb9vSYWeQtExf1Juk8dwTWy/NblqH+0=;
-        b=Jrs6fVauGQEELx59I/uqtK+gx75Mkhs1ESsVNCNOYbR1EA4qbmCOVj4Q/ZpxgE/Vjv
-         B7tMMICO9RCdpMSsDEcAQmG98dS6PcracTI9cf64azgSxSMMRgvpm6DHQT9aI4oOqyQT
-         dX4baQSXmBFwj0mDCdqu879afbasmaHfOGAeg2LprBnn57lkPXY0+Bkwgt/oc2aJgQPX
-         AXa031g9l/iq8TKLR8rkrVRfcw1xFpeuaEtPeD1CfTo20+cPSRq8N3IMDtznhJEKP5AR
-         JXvfbX4JW8E1D2e/5vB+YGDQ4XpzxlIy/M3EQU4HzRR6jDH1+WeI/E4otH1+rJWzIlyQ
-         zEWg==
-X-Gm-Message-State: AOAM530vLV5+dt7kshvf0PjbTr2ycbmozqqa8RP865CaiQUkyL/5qHOF
-        fs65LqYq1362bdfXHHklFM+tqdAw+qk=
-X-Google-Smtp-Source: ABdhPJzan/5fX9KexQPtccdNqar3EGCs/eciohoXqVatw88W/MIIpNQXmu267C2jmdRgtMmk2O3sdg==
-X-Received: by 2002:a05:6402:3184:: with SMTP id di4mr15732170edb.362.1602260908558;
-        Fri, 09 Oct 2020 09:28:28 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b916:75c5:e328:ad7c])
-        by smtp.gmail.com with ESMTPSA id ce14sm6565093edb.25.2020.10.09.09.28.27
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 09 Oct 2020 09:28:27 -0700 (PDT)
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Ilya Maximets <i.maximets@ovn.org>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] builtin: teach sparse about __builtin_ia32_pause()
-Date:   Fri,  9 Oct 2020 18:28:25 +0200
-Message-Id: <20201009162825.24498-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.28.0
+        Sun, 11 Oct 2020 15:52:02 -0400
+Received: from cpc98990-stkp12-2-0-cust216.10-2.cable.virginm.net ([86.26.12.217] helo=[192.168.0.10])
+        by imap2.colo.codethink.co.uk with esmtpsa  (Exim 4.92 #3 (Debian))
+        id 1kRhNw-00084C-Gs; Sun, 11 Oct 2020 20:52:00 +0100
+Subject: Re: [PATCH 0/8] format check tweaks
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     linux-sparse@vger.kernel.org
+References: <20201005020002.1108-1-luc.vanoostenryck@gmail.com>
+ <58d771f9-7560-f682-3173-78dea0f83711@codethink.co.uk>
+ <20201005234749.dfw34pvgb2uavuko@ltop.local>
+From:   Ben Dooks <ben.dooks@codethink.co.uk>
+Organization: Codethink Limited.
+Message-ID: <504d8f5f-d8bc-e7f5-a096-ee097411c3f9@codethink.co.uk>
+Date:   Sun, 11 Oct 2020 20:51:59 +0100
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.12.0
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+In-Reply-To: <20201005234749.dfw34pvgb2uavuko@ltop.local>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This builtin is used by Open vSwitch, so teach Sparse about it.
+On 06/10/2020 00:47, Luc Van Oostenryck wrote:
+> On Mon, Oct 05, 2020 at 10:04:43AM +0100, Ben Dooks wrote:
+>> On 05/10/2020 02:59, Luc Van Oostenryck wrote:
+>>> Ben, these are small changes I think should be applied with
+>>> your series, on top of the patches I send yesterday.
+>>> I've pushed everything at:
+>>> 	git://github.com/lucvoo/sparse-dev.git format-check
+>>> If you're fine with these, I can squeeze them with the series.
+>>>
+>>> There are also a few tests I don't agree with:
+>>> 	const void *ptr = ...
+>>> 	printf("%s", ptr);
+>>> These tests silently accept this, but they should warn.
+>>> But this can be fixed at a later step.
+>>
+>> ok, thanks.
+> 
+> Hi,
+> 
+> I've now pushed it on a separate branch on the official tree:
+>    git://git.kernel.org/pub/scm/devel/sparse/sparse.git format-check
+> 
+> It will thus not be rebased anymore and any changes will need to be
+> incrementally on top of it.
+> 
+>> I'm going to try and work out the best way to deal with the kernel
+>> extra funsies. I have a few ideas but yet to make a coherent document
+>> about them.
+> 
+> Well, the reason I've not yet merged it with the main branch is
+> because enabling -Wformat creates really a lot of warnings in
+> the kernel and people definitively use this.
+> 
+> Most of these warnings (if not all) is caused by using
+> check_assignment_types() which was good as a quick & dirty solution
+> in the early stages but isn't at all adequate as a true solution
+> and this for several reasons. I've also begin to take a look at
+> this with a relatively satisfying result by adopting the following
+> strategy:
+> 	Since no 'checking' function in evaluate.c has the needed
+> 	characteristics, simplest is to create in verify-format.c
+> 	what is needed.
+> This also gives the flexibility needed to support things like
+> -Wformat-signedness.
+> 
+> I add here below only small extract because it's for now quite
+> messy and need quite a bit of polishing.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- target-x86.c | 8 ++++++++
- 1 file changed, 8 insertions(+)
+I've not had time to run the latest against the kernel as I forgot
+the disc password to my main machine and have had to rebuild the
+system from scratch.
 
-diff --git a/target-x86.c b/target-x86.c
-index b7ff8f2ab4ed..9d82869a27b8 100644
---- a/target-x86.c
-+++ b/target-x86.c
-@@ -1,6 +1,7 @@
- #include "symbol.h"
- #include "target.h"
- #include "machine.h"
-+#include "builtin.h"
- 
- 
- static void predefine_i386(const struct target *self)
-@@ -39,6 +40,11 @@ static void init_x86_common(const struct target *target)
- 	}
- }
- 
-+static const struct builtin_fn builtins_x86_common[] = {
-+	{ "__builtin_ia32_pause", &void_ctype, 0, },
-+	{ }
-+};
-+
- 
- static void init_i386(const struct target *target)
- {
-@@ -64,6 +70,7 @@ const struct target target_i386 = {
- 
- 	.init = init_i386,
- 	.predefine = predefine_i386,
-+	.builtins = builtins_x86_common,
- };
- 
- 
-@@ -159,4 +166,5 @@ const struct target target_x86_64 = {
- 
- 	.init = init_x86_64,
- 	.predefine = predefine_x86_64,
-+	.builtins = builtins_x86_common,
- };
+Let me know if there's anything else I can help with.
+
+
+
 -- 
-2.28.0
+Ben Dooks				http://www.codethink.co.uk/
+Senior Engineer				Codethink - Providing Genius
 
+https://www.codethink.co.uk/privacy.html
