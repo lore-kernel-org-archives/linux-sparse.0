@@ -1,92 +1,121 @@
-Return-Path: <SRS0=wjqH=DT=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=XrIr=DV=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEA7CC433E7
-	for <linux-sparse@archiver.kernel.org>; Mon, 12 Oct 2020 22:38:27 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DEEE0C433E7
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:20:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 68A0520797
-	for <linux-sparse@archiver.kernel.org>; Mon, 12 Oct 2020 22:38:27 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8100420878
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:20:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L2J2LiZm"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HR75A0VH"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729586AbgJLWi1 (ORCPT
+        id S1730077AbgJNJUa (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 12 Oct 2020 18:38:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58414 "EHLO
+        Wed, 14 Oct 2020 05:20:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39936 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727376AbgJLWi0 (ORCPT
+        with ESMTP id S1730636AbgJNJUI (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 12 Oct 2020 18:38:26 -0400
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3DDDAC0613D0
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Oct 2020 15:38:25 -0700 (PDT)
-Received: by mail-ej1-x641.google.com with SMTP id u8so25483982ejg.1
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Oct 2020 15:38:25 -0700 (PDT)
+        Wed, 14 Oct 2020 05:20:08 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C77D3C05BD37
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:42 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id p15so2139841ejm.7
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:42 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=J8PUpUzeACy6LsDZHTcx0gz8UnSzmNpY+/27mXiPJZE=;
-        b=L2J2LiZmK9OoVkUQLP0DSvrMdeJx7fd96UHEqfGc8HNtWlDqy+brPghKRWRGI0fvk3
-         Zyz/R0RUeibGpLbd7iApeFkz+YvwhQHEIVz9+38errpADErs7RrhX0PvqIE0TkMe8Wdk
-         vLUkNPXqkMIQkkchhFVz87lgUWmSi0raWJTVHU4cd2/tQOS6ok9qZZ49YwFC2G8Ys/BR
-         cwcEhWc2/CwXG7+BWF6l7eOFkzGHDxf7fV87+smxjU74q4V1gNBXBpL5D7PlpzTb1AA/
-         uIVZyakPRbwvCty4ESLdwgXPIOtSkZIRXiU9/u1plWSWXR9X+bx1ilx7WBve79amEwgR
-         hxeQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=Y/JvTb126QV+80NBtR2WROH2033g+ofTSJfzhsB69Gk=;
+        b=HR75A0VHxzqgoQq2x677iUR0qLJ1yy/k1UB2vC6bb1uz/2QRNhTquFxial198dpzte
+         vrrx59rZnKblebZ/pSl0WgIzo6TjqOzJsiaDKFCelT0qb3hGKS9dztU8XLmLtsMXJ7SO
+         15lwPAQdcNvDI30U9yVt9hD773cgXZA1iRuqB3T26newjnFrRWsr6ftNNRyamC3N8xPf
+         0FDRwp3buPc/1RrdgdjeS+7nIiKJECNWZNdRgIb1cbhVxyGh9EY7N+dyBDCwenR6qKjU
+         0+j+IBQP1c/kzvCPvdRb5jB8XG/qpCWdU3jXdS4EGzQz+yt2ZyLaw0bzLr9uXdH7vmS5
+         Rcdw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=J8PUpUzeACy6LsDZHTcx0gz8UnSzmNpY+/27mXiPJZE=;
-        b=qlIuRTf2pDlmC4ZfTzbJ0l+e3KhcvoUhxbSUDSzsCMGunIzSWkn/GY3q4Zlmqd6ZUA
-         OEHTXcjaheWKQkrGNEpmQ2Dl640GgdFwJn34yOGowbOV6mgnkL/q526ZS+DcxEZPvkhH
-         JVOg/Zuqcm2HClgQCjhK9QMyFK6HghkuhgukA4IVPvbhYp8xNVwb+X8WXi7NToVnt+3c
-         g+rwjaisK/yMK5NjSSjxgdkgA+lGb9JFr+xmtdpkgw5pXSxHFsHyn8baipP8AP/cR5/L
-         9XiOD9b3+4wAHt5AlFawPXV3VMBcEXQdrBYZtYVJi8ZnU1JjdphmQ3tQtycwA97blAJe
-         RmZQ==
-X-Gm-Message-State: AOAM532VGSvWOohbbqsDh/7uGd0Qm+yRzienmOmklakycRsoiniEAXSV
-        QKLyI2SOBCfz7DkCG1wax8I=
-X-Google-Smtp-Source: ABdhPJwZgLYZRD+PhM6Eo80FjtxLmXKXFqGfqKfEnEwLs7H4oOsUo09qquzThy85pfRKibMH2Oe2kg==
-X-Received: by 2002:a17:906:4e19:: with SMTP id z25mr31312101eju.44.1602542303818;
-        Mon, 12 Oct 2020 15:38:23 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:68a0:d8d7:26ec:2090])
-        by smtp.gmail.com with ESMTPSA id sd18sm11085330ejb.24.2020.10.12.15.38.22
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=Y/JvTb126QV+80NBtR2WROH2033g+ofTSJfzhsB69Gk=;
+        b=IPv2yZo3wJ6jSjMmNZn0yk7cSGbV0aJtn/H7/4wbf+oPY7bMmThqPIOFnKvVzWM7c2
+         3HXTiDCVpXu3HzQ+c1qAGg1J4hoViUl/C+dnclOwjQkwl9tatJofRyLqt6/3o0mRk4M8
+         LRcIjOb+Nvi9irF2jbI/78PtWZ1uw8HCJSk14tTGAAG8xlDVXMP/gukU2aNS9kFCgeM4
+         HrGMmyMUh0nWAwCiOp+yviFIE7MhZAiFPHdPRTKj2JDRCDceKAmHFDW7zHazibuCf5Wq
+         WGu1tMjyUFYLZ6c7rg7jGBrkgBWKOi/qPZe/xzGHIv+dnIvwLeAp1ki0Se2nN2X9BzCQ
+         BenA==
+X-Gm-Message-State: AOAM532APIasiRriN5QvfOc11h6b4lZYqd8QqkUrLHLNEqzsaon5qW+N
+        dx2td9W61mCoG1/sTIf8B0d4Ei5J+LY=
+X-Google-Smtp-Source: ABdhPJx26OjbyFBhEx2bcf1BcbQTQ7ABLHbPZ5aedTO+YBMJ2zmq4h5bQfLA3e75s9yIrOMx7+uiww==
+X-Received: by 2002:a17:906:33c8:: with SMTP id w8mr2218704eja.233.1602631361276;
+        Tue, 13 Oct 2020 16:22:41 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:5515:f93d:cc48:6a5f])
+        by smtp.gmail.com with ESMTPSA id g8sm640902ejp.73.2020.10.13.16.22.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Oct 2020 15:38:22 -0700 (PDT)
-Date:   Tue, 13 Oct 2020 00:38:21 +0200
+        Tue, 13 Oct 2020 16:22:40 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ben Dooks <ben.dooks@codethink.co.uk>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 0/8] format check tweaks
-Message-ID: <20201012223821.i7fymzwxqwstx75r@ltop.local>
-References: <20201005020002.1108-1-luc.vanoostenryck@gmail.com>
- <58d771f9-7560-f682-3173-78dea0f83711@codethink.co.uk>
- <20201005234749.dfw34pvgb2uavuko@ltop.local>
- <504d8f5f-d8bc-e7f5-a096-ee097411c3f9@codethink.co.uk>
+To:     linux-sparse@vger.kernel.org
+Cc:     Ben Dooks <ben.dooks@codethink.co.uk>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 01/13] format-check: void * is not OK for strings, fix the test
+Date:   Wed, 14 Oct 2020 01:22:19 +0200
+Message-Id: <20201013232231.10349-2-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
+References: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <504d8f5f-d8bc-e7f5-a096-ee097411c3f9@codethink.co.uk>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, Oct 11, 2020 at 08:51:59PM +0100, Ben Dooks wrote:
-> 
-> I've not had time to run the latest against the kernel as I forgot
-> the disc password to my main machine and have had to rebuild the
-> system from scratch.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ validation/varargs-format-addrspace1.c | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-Definitively not fun :(
+diff --git a/validation/varargs-format-addrspace1.c b/validation/varargs-format-addrspace1.c
+index 3370ac67849c..53c210b78ae0 100644
+--- a/validation/varargs-format-addrspace1.c
++++ b/validation/varargs-format-addrspace1.c
+@@ -4,8 +4,8 @@ extern int variadic2(char *msg, int , ...) __attribute__((format (printf, 1, 3))
+ extern int variadic3(int, char *msg,  ...) __attribute__((format (printf, 2, 3)));
  
-> Let me know if there's anything else I can help with.
+ static void test(void) {
+-	void __attribute__((noderef, address_space(1))) *a;
+-	void *b;
++	const char __attribute__((noderef, address_space(1))) *a;
++	const char *b;
+ 
+ 	variadic("%s\n", a);
+ 	variadic("%s\n", b);
+@@ -22,15 +22,15 @@ static void test(void) {
+  * check-error-start
+ varargs-format-addrspace1.c:10:26: warning: incorrect type in argument 2 (different address spaces)
+ varargs-format-addrspace1.c:10:26:    expected char const *
+-varargs-format-addrspace1.c:10:26:    got void [noderef] <asn:1> *a
++varargs-format-addrspace1.c:10:26:    got char const [noderef] <asn:1> *a
+ varargs-format-addrspace1.c:12:32: warning: incorrect type in argument 3 (different address spaces)
+ varargs-format-addrspace1.c:12:32:    expected char const *
+-varargs-format-addrspace1.c:12:32:    got void [noderef] <asn:1> *a
++varargs-format-addrspace1.c:12:32:    got char const [noderef] <asn:1> *a
+ varargs-format-addrspace1.c:13:36: warning: incorrect type in argument 4 (different address spaces)
+ varargs-format-addrspace1.c:13:36:    expected char const *
+-varargs-format-addrspace1.c:13:36:    got void [noderef] <asn:1> *a
++varargs-format-addrspace1.c:13:36:    got char const [noderef] <asn:1> *a
+ varargs-format-addrspace1.c:14:36: warning: incorrect type in argument 4 (different address spaces)
+ varargs-format-addrspace1.c:14:36:    expected char const *
+-varargs-format-addrspace1.c:14:36:    got void [noderef] <asn:1> *a
++varargs-format-addrspace1.c:14:36:    got char const [noderef] <asn:1> *a
+  * check-error-end
+  */
+-- 
+2.28.0
 
-Better wait till I've something more or less complete, probably tomorrow.
-
--- Luc
