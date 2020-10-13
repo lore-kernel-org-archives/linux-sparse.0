@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DEEE0C433E7
-	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:20:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9767AC433E7
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:21:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8100420878
-	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:20:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3E93720BED
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:21:31 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HR75A0VH"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="oseX0Jgf"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730077AbgJNJUa (ORCPT
+        id S1730118AbgJNJVa (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 14 Oct 2020 05:20:30 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39936 "EHLO
+        Wed, 14 Oct 2020 05:21:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39960 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730636AbgJNJUI (ORCPT
+        with ESMTP id S1731031AbgJNJUm (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 14 Oct 2020 05:20:08 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C77D3C05BD37
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:42 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id p15so2139841ejm.7
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:42 -0700 (PDT)
+        Wed, 14 Oct 2020 05:20:42 -0400
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4BCC2C08E88F
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:51 -0700 (PDT)
+Received: by mail-ej1-x641.google.com with SMTP id a3so2102497ejy.11
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Y/JvTb126QV+80NBtR2WROH2033g+ofTSJfzhsB69Gk=;
-        b=HR75A0VHxzqgoQq2x677iUR0qLJ1yy/k1UB2vC6bb1uz/2QRNhTquFxial198dpzte
-         vrrx59rZnKblebZ/pSl0WgIzo6TjqOzJsiaDKFCelT0qb3hGKS9dztU8XLmLtsMXJ7SO
-         15lwPAQdcNvDI30U9yVt9hD773cgXZA1iRuqB3T26newjnFrRWsr6ftNNRyamC3N8xPf
-         0FDRwp3buPc/1RrdgdjeS+7nIiKJECNWZNdRgIb1cbhVxyGh9EY7N+dyBDCwenR6qKjU
-         0+j+IBQP1c/kzvCPvdRb5jB8XG/qpCWdU3jXdS4EGzQz+yt2ZyLaw0bzLr9uXdH7vmS5
-         Rcdw==
+        bh=sfUYoFMaKu/nk3VDPjMeSnhKaLJHp2Qpxho4VbNsmZk=;
+        b=oseX0JgfDyrAkf+rAOV30gslYYT6pGQMfo48bjaLJiTjAJV3zIOsDMrxLcxHRH0CNP
+         BQ5XUA7Q3rfc6Ilmz2iVZP8otsKNcSyc7T/pPMQ2pDENakrDGjH8hTajFcQQ+oQNf3rY
+         vtRf0dT3yDdR8BRplSC2gVCejexMyinJaliZitzUX9BvIJmJOOVR0Wl9nqHbPMfnGMKQ
+         FhPI86Pw1ZLX3qzLjbrinRkbViJ2R/KTRUmPaxbmgOqJ5T59T0oryHiwCCCej8Gy4yck
+         btN1/jgsp2s0MjNM3nVq1UNgYClprioOciGf6yeclmsI0GkKSufKEQNj8CJqSnxy8hZe
+         KWiw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Y/JvTb126QV+80NBtR2WROH2033g+ofTSJfzhsB69Gk=;
-        b=IPv2yZo3wJ6jSjMmNZn0yk7cSGbV0aJtn/H7/4wbf+oPY7bMmThqPIOFnKvVzWM7c2
-         3HXTiDCVpXu3HzQ+c1qAGg1J4hoViUl/C+dnclOwjQkwl9tatJofRyLqt6/3o0mRk4M8
-         LRcIjOb+Nvi9irF2jbI/78PtWZ1uw8HCJSk14tTGAAG8xlDVXMP/gukU2aNS9kFCgeM4
-         HrGMmyMUh0nWAwCiOp+yviFIE7MhZAiFPHdPRTKj2JDRCDceKAmHFDW7zHazibuCf5Wq
-         WGu1tMjyUFYLZ6c7rg7jGBrkgBWKOi/qPZe/xzGHIv+dnIvwLeAp1ki0Se2nN2X9BzCQ
-         BenA==
-X-Gm-Message-State: AOAM532APIasiRriN5QvfOc11h6b4lZYqd8QqkUrLHLNEqzsaon5qW+N
-        dx2td9W61mCoG1/sTIf8B0d4Ei5J+LY=
-X-Google-Smtp-Source: ABdhPJx26OjbyFBhEx2bcf1BcbQTQ7ABLHbPZ5aedTO+YBMJ2zmq4h5bQfLA3e75s9yIrOMx7+uiww==
-X-Received: by 2002:a17:906:33c8:: with SMTP id w8mr2218704eja.233.1602631361276;
-        Tue, 13 Oct 2020 16:22:41 -0700 (PDT)
+        bh=sfUYoFMaKu/nk3VDPjMeSnhKaLJHp2Qpxho4VbNsmZk=;
+        b=i4+AwvQfnxI3XlN595d8m/ij97qojwJkOPHj3rSkyv+rnnc0awMaMI9G+YggwHDd3A
+         vu4klfHAc7vVK0hZjq1pkybhQJIFjchgrvmScxKwD3eSO7n8TCqboqWtagEgi8FrLNCv
+         bXnRqeHUigYtVtpg+/MiocJ53OTVo2Rya92EZHXNGacIzNd3MFfp9dwjauTJaUKeKiyb
+         7yYVSj+WnxbrzwN7IWwSpF15T9Y5z6P+rFeHyaPjSPpP0WVKODKqs5SLzb8nJM31+f3b
+         G+SdL2qwy7z6WKSJscFaEbN27D3rqILPWmQTfu0o8yiSkSQ0LES3/OxX0jVCx/8AxRfD
+         2IhA==
+X-Gm-Message-State: AOAM5300MhgoPGVOk5NQFzw6HofO2St6YpqiPJriFGYWDR6yetDLYDQq
+        9ZEbUgfaJlb2KaBq+YWTwBRprrWGTaw=
+X-Google-Smtp-Source: ABdhPJwPHqz0KdPl0wcgrJOkQx6F2ywIXdzAFkiezn7N/T5lyQwcG2k0epK+ge7Er/zSI3Hg3uR6CQ==
+X-Received: by 2002:a17:906:b01:: with SMTP id u1mr2208166ejg.57.1602631369857;
+        Tue, 13 Oct 2020 16:22:49 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:5515:f93d:cc48:6a5f])
-        by smtp.gmail.com with ESMTPSA id g8sm640902ejp.73.2020.10.13.16.22.40
+        by smtp.gmail.com with ESMTPSA id g8sm640902ejp.73.2020.10.13.16.22.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Oct 2020 16:22:40 -0700 (PDT)
+        Tue, 13 Oct 2020 16:22:49 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Ben Dooks <ben.dooks@codethink.co.uk>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 01/13] format-check: void * is not OK for strings, fix the test
-Date:   Wed, 14 Oct 2020 01:22:19 +0200
-Message-Id: <20201013232231.10349-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 10/13] format-check: add a function to check the type of floats
+Date:   Wed, 14 Oct 2020 01:22:28 +0200
+Message-Id: <20201013232231.10349-11-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
 In-Reply-To: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
 References: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
@@ -76,46 +76,59 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+This checking is currently done by check_assignment_types()
+for all numeric types but this is not adequate because we
+want to have a better control over what is allowed or not
+
+So, add a custom checking function, currently just checking
+if the argument is one of the floating-point types.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/varargs-format-addrspace1.c | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ verify-format.c | 23 ++++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
 
-diff --git a/validation/varargs-format-addrspace1.c b/validation/varargs-format-addrspace1.c
-index 3370ac67849c..53c210b78ae0 100644
---- a/validation/varargs-format-addrspace1.c
-+++ b/validation/varargs-format-addrspace1.c
-@@ -4,8 +4,8 @@ extern int variadic2(char *msg, int , ...) __attribute__((format (printf, 1, 3))
- extern int variadic3(int, char *msg,  ...) __attribute__((format (printf, 2, 3)));
+diff --git a/verify-format.c b/verify-format.c
+index 34c3db96fe3a..6bcbfdfef1b4 100644
+--- a/verify-format.c
++++ b/verify-format.c
+@@ -106,6 +106,27 @@ static int printf_fmt_numtype(struct format_type *fmt,
+ 	return check_assignment_types(fmt->type, expr, typediff);
+ }
  
- static void test(void) {
--	void __attribute__((noderef, address_space(1))) *a;
--	void *b;
-+	const char __attribute__((noderef, address_space(1))) *a;
-+	const char *b;
- 
- 	variadic("%s\n", a);
- 	variadic("%s\n", b);
-@@ -22,15 +22,15 @@ static void test(void) {
-  * check-error-start
- varargs-format-addrspace1.c:10:26: warning: incorrect type in argument 2 (different address spaces)
- varargs-format-addrspace1.c:10:26:    expected char const *
--varargs-format-addrspace1.c:10:26:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:10:26:    got char const [noderef] <asn:1> *a
- varargs-format-addrspace1.c:12:32: warning: incorrect type in argument 3 (different address spaces)
- varargs-format-addrspace1.c:12:32:    expected char const *
--varargs-format-addrspace1.c:12:32:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:12:32:    got char const [noderef] <asn:1> *a
- varargs-format-addrspace1.c:13:36: warning: incorrect type in argument 4 (different address spaces)
- varargs-format-addrspace1.c:13:36:    expected char const *
--varargs-format-addrspace1.c:13:36:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:13:36:    got char const [noderef] <asn:1> *a
- varargs-format-addrspace1.c:14:36: warning: incorrect type in argument 4 (different address spaces)
- varargs-format-addrspace1.c:14:36:    expected char const *
--varargs-format-addrspace1.c:14:36:    got void [noderef] <asn:1> *a
-+varargs-format-addrspace1.c:14:36:    got char const [noderef] <asn:1> *a
-  * check-error-end
-  */
++static const char *check_printf_float(struct format_type *fmt, struct symbol *source)
++{
++	const char *typediff = "different base types";
++	struct symbol *target = fmt->type;
++	struct symbol *base;
++
++	if (type_class(source, &base) != CLASS_FLOAT)
++		return typediff;
++	if (base == target)
++		return NULL;
++	return typediff;
++}
++
++static int printf_fmt_float(struct format_type *fmt,
++			      struct expression **expr,
++			      struct symbol *ctype,
++			      const char **typediff)
++{
++	return !(*typediff = check_printf_float(fmt, ctype));
++}
++
+ // For 's' & 'S' specifiers
+ static const char *check_printf_string(struct format_type *fmt, struct symbol *source)
+ {
+@@ -310,7 +331,7 @@ static struct format_type *parse_printf_get_fmt(struct format_type *type,
+ 		break;
+ 	case 'e': case 'E': case 'f': case 'F': case 'g': case 'G':
+ 	case 'a': case 'A':
+-		type->test = printf_fmt_numtype;
++		type->test = printf_fmt_float;
+ 		switch (szmod) {
+ 		case LEN_none:
+ 			type->type = &double_ctype;
 -- 
 2.28.0
 
