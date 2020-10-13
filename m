@@ -5,159 +5,197 @@ X-Spam-Level:
 X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 851D5C433E7
-	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:23:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id EE601C43457
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:23:36 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2DEC4206DD
-	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:23:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8EBDC206DD
+	for <linux-sparse@archiver.kernel.org>; Wed, 14 Oct 2020 09:23:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="IweAzX9m"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aQGr2nqG"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730257AbgJNJXG (ORCPT
+        id S1727444AbgJNJXg (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 14 Oct 2020 05:23:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39930 "EHLO
+        Wed, 14 Oct 2020 05:23:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39926 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731219AbgJNJWy (ORCPT
+        with ESMTP id S1731253AbgJNJWz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 14 Oct 2020 05:22:54 -0400
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB0BEC0613B9
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 15:16:40 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id c22so2035532ejx.0
-        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 15:16:40 -0700 (PDT)
+        Wed, 14 Oct 2020 05:22:55 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B9F59C05BD3C
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:46 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id ce10so2157501ejc.5
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Oct 2020 16:22:46 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ZXP8KGBq3TnsOhyvBmE8YVLJhxM4G+TmkIEo8IsEkpA=;
-        b=IweAzX9mrcrY4mU7ZfzkGAQhT8POg8n9S0Qi+6aeykDsHKYvt0BdDj5TuUNKSu9JjI
-         m00Ys23Wa4EODAnUEDXlV/dYqauG/XqkU6waEsUXvKR3bEyLakEJr6czkPQbbZg9RGQX
-         BcrAA0OnGgEMsnNFxOmVnLzm4yYbZ1sMiMh199XzFaff0mjUUz+ayoqIU2fvFSD+95FT
-         sbQ6NohWCRXmDEMFNKlnwsw1OHnaBnMFSyXkzX2I6GmHONqDly2LOi4gaAiu+jIz35Jo
-         jgW6YvY9vRIRFrms53Bl/3imgQgc9AIOmJWXgToGo4KxBLPiVtO2uEti6IoUWPvuUECd
-         q7kQ==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=cq3ZpLYnkZzbzSCYWFDaS4KCdWAHKEfNSAdJkuiEDC4=;
+        b=aQGr2nqGLuEfJIN86uWLyxIDUmwbWxAadVo2gmBPaGG6LBmFHBZ+BVKqBJxDBoTcVI
+         oEXU9iKafmDmpvYNSK6nTKBBAgs9t27wUIZzI/vT9DTSHnurBNSQXm+KhZ8+swAIZqIi
+         fwMMtDra4I+osMWWhIpP8DzlPf6Xri3Bst8RtaX4gktYtQslcRlXt4VXMsZNDbc4VM4f
+         gSsG2Icq8wsWJlHSaY0dh6PWHw9L6kiAXf8JekLIHmcCpf5gjeadZweusmMnoDAK/Bu3
+         fcYvBNFh6lk6N/HdEblPb8jNsND6IUCoDobR0KHgYPp175ifTE7gVCKgkwg5Tbnq00UW
+         tCKQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ZXP8KGBq3TnsOhyvBmE8YVLJhxM4G+TmkIEo8IsEkpA=;
-        b=jBdUo+7mD2cK0she6g5ACQTq6BYHxT3Dk1hCmwbavAWmcYwKF/c9aFGUWO1zx05HPG
-         2o/XzakG9Dg1KBRhIqU8dBBHSyRCz9CzgMmBTz/wfX8LakuqPqqQci/kK7brT6Tx1Tek
-         CQNTSme53z/QD+rxYv3Yr/UgBZ60YCrrO0bdkc6qnDVFeQpTBItTeH3vVZDxa2AwsL12
-         kmAf4AX60n7zmUvH76YiF2eXrib0umTUIbMQUffOlT1OAZikW/ngGjacf0RUf3aBQm7d
-         fAfLsjiKC+hi8AOVZRxIy3gCQcIKpF1puK/A2LT1+RJvkzjQUzJmHLpp91BihA1T1+Wr
-         9ZUA==
-X-Gm-Message-State: AOAM532IeqbZYxttB0Ysc6MVsqlZ0hLIZxnQoRxXzxO4Pi6Er0vLWBa6
-        u9YjAiTWVzkmQ4T5IwVYjy5/mwvAyLA=
-X-Google-Smtp-Source: ABdhPJzOglFX2tyzxrc1SIVCrFYb9Qa9UgtefwGXSj8d+AEMs2rndCXVgOY7PR4YtNLjJ2R/jEcuoQ==
-X-Received: by 2002:a17:906:3541:: with SMTP id s1mr2053701eja.413.1602627399082;
-        Tue, 13 Oct 2020 15:16:39 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=cq3ZpLYnkZzbzSCYWFDaS4KCdWAHKEfNSAdJkuiEDC4=;
+        b=NSDOM3THqHKfaOZzhVep5lwvEigGKRucd0I2mxA9LefVPHOQnK9Dw3On7Mn0Kbq4qb
+         7tU9cs5OL6E7We87BEI8vSfFdB+egjEBX+Tbiq/7kvCP0dFA0M26gP1CPYk/mFBq+iws
+         5JBznl921IFo9u2wKsk28GSyW+4I0Lu4Q1V8vM7MFuWRm5KQB0dtDQntHJB0UGsI4Vaq
+         STuCYTsnWl6qUOREdO9i66sr8qcLsRA1gz9nQmtqYwB/9ff4yuqIGJjfILVLzmJnEw7W
+         1GolJyiOaKCNrgwjw3h8yTZcbtxhh7MesnKmxwy9F257KIeV+PWjK5+oq4H0+SP4jyUk
+         VjTQ==
+X-Gm-Message-State: AOAM532zCQiiROf2VIcgcuDUf44Nlhq34PFdpdEmmT8J88s5GSlbp+77
+        kGXIpJlFasHcLC+aqF6v1/tK5OlSeos=
+X-Google-Smtp-Source: ABdhPJzW6zKFC2WGwTgBIzPjaEcOoP9zAOogNPjAgtg9KbIoj0oHEwei7z8FlVqLaxPHNVy+3oj9wA==
+X-Received: by 2002:a17:906:1f53:: with SMTP id d19mr2206488ejk.255.1602631365198;
+        Tue, 13 Oct 2020 16:22:45 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:5515:f93d:cc48:6a5f])
-        by smtp.gmail.com with ESMTPSA id o11sm596087ejd.60.2020.10.13.15.16.38
+        by smtp.gmail.com with ESMTPSA id g8sm640902ejp.73.2020.10.13.16.22.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 13 Oct 2020 15:16:38 -0700 (PDT)
+        Tue, 13 Oct 2020 16:22:44 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] update TODOs
-Date:   Wed, 14 Oct 2020 00:16:36 +0200
-Message-Id: <20201013221636.7664-1-luc.vanoostenryck@gmail.com>
+Cc:     Ben Dooks <ben.dooks@codethink.co.uk>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 05/13] format-check: remove unneeded member: target
+Date:   Wed, 14 Oct 2020 01:22:23 +0200
+Message-Id: <20201013232231.10349-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
+References: <20201013232231.10349-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-A few things are now done: remove them from the TODO.
-A few things need to be done: add them to the TODO.
+The signature of the checking method allow to return the target
+type. But this is never needed as it is always statically known.
+
+So, remove this argument.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/TODO.md | 29 +++++++++++++++++++++--------
- 1 file changed, 21 insertions(+), 8 deletions(-)
+ verify-format.c | 33 +++++++++++++--------------------
+ 1 file changed, 13 insertions(+), 20 deletions(-)
 
-diff --git a/Documentation/TODO.md b/Documentation/TODO.md
-index e2043e481f99..4dc9e63ab207 100644
---- a/Documentation/TODO.md
-+++ b/Documentation/TODO.md
-@@ -4,13 +4,13 @@ TODO
- Essential
- ---------
- * SSA is broken by simplify_loads() & branches rewriting/simplification
--* attributes of struct, union & enums are ignored (and possibly in other
--  cases too).
--* add support for bitwise enums
-+* attributes of struct, union & enums are ignored (and maybe others too).
-+  This requires correct support for __packed which itself needs partial
-+  and unaligned loads & stores (wip)
-+* add support for bitwise enums (wip)
+diff --git a/verify-format.c b/verify-format.c
+index 99a36c8eef5f..0ef2cb863ae9 100644
+--- a/verify-format.c
++++ b/verify-format.c
+@@ -57,7 +57,6 @@ struct format_type {
+ 	int		(*test)(struct format_type *fmt,
+ 				struct expression **expr,
+ 				struct symbol *ctype,
+-				struct symbol **target,
+ 				const char **typediff);
+ 	struct symbol	*type;
+ };
+@@ -102,41 +101,35 @@ static inline int type_class(struct symbol *type, struct symbol **base)
+ static int printf_fmt_numtype(struct format_type *fmt,
+ 			      struct expression **expr,
+ 			      struct symbol *ctype,
+-			      struct symbol **target, const char **typediff)
++			      const char **typediff)
+ {
+-	struct symbol *type = fmt->type;
+-	*target = type;
+-	return check_assignment_types(*target, expr, typediff);
++	return check_assignment_types(fmt->type, expr, typediff);
+ }
  
- Documentation
- -------------
--* document the extensions
- * document the API
- * document the limitations of modifying ptrlists during list walking
- * document the data structures
-@@ -27,7 +27,7 @@ Core
+ static int printf_fmt_string(struct format_type *fmt,
+ 			     struct expression **expr,
+ 			     struct symbol *ctype,
+-			     struct symbol **target, const char **typediff)
++			     const char **typediff)
+ {
+-	*target = fmt->type;
+-	return check_assignment_types(*target, expr, typediff);
++	return check_assignment_types(fmt->type, expr, typediff);
+ }
  
- Testsuite
- ---------
--* there are more than 50 failing tests. They should be fixed
-+* there are 60 failing tests. They should be fixed
-   (but most are non-trivial to fix).
+ static int printf_fmt_pointer(struct format_type *fmt,
+ 			      struct expression **expr,
+ 			      struct symbol *ctype,
+-			      struct symbol **target, const char **typediff)
++			      const char **typediff)
+ {
+-	*target = &const_ptr_ctype;
+-	return check_assignment_types(*target, expr, typediff);
++	return check_assignment_types(fmt->type, expr, typediff);
+ }
  
- Misc
-@@ -36,15 +36,26 @@ Misc
- * parse __attribute_((fallthrough))
- * add support for format(printf())  (WIP by Ben Dooks)
- * make use of UNDEFs (issues warnings, simplification, ... ?)
--* add a pass to inline small functions during simplification.
-+* make memory accesses more explicit: add EXPR_ACCESS (wip)
-+* it would be nice to do our own parsing of floating point (wip)
-+* some header files needed for crypto/ need __vector or __fp16
-+* some even need __complex
+ static int printf_fmt_print_pointer(struct format_type *fmt,
+ 				    struct expression **expr,
+ 				    struct symbol *ctype,
+-				    struct symbol **target,
+ 				    const char **typediff)
+ {
+ 	// TODO TODO: fix this here!!!
+ 	int ret;
+-	*target = &const_ptr_ctype;
+-	ret = check_assignment_types(*target, expr, typediff);
++	ret = check_assignment_types(fmt->type, expr, typediff);
+ 	if (ret == 0) {
+ 		/* if just printing, ignore address-space mismatches */
+ 		if (strcmp(*typediff, "different address spaces") == 0)
+@@ -148,6 +141,7 @@ static int printf_fmt_print_pointer(struct format_type *fmt,
+ static struct format_type printf_fmt_ptr_ref = {
+ 	.format = "p",
+ 	.test = printf_fmt_pointer,
++	.type = &const_ptr_ctype,
+ };
  
- Optimization
- ------------
-+* a lot of small simplifications are waiting to be upstreamed
-+* the domtree need to be rebuilt (or updated)
-+* critical edges need to be split
- * the current way of doing CSE uses a lot of time
- * add SSA based DCE
- * add SSA based PRE
- * Add SSA based SCCP
-+* add a pass to inline small functions during simplification.
- * use better/more systematic use of internal verification framework
-+* tracking of operands size should be improved (WIP)
-+* OP_INLINE is sometimes in the way
-+* would be nice to strictly separate phases that don't changes the
-+  CFG and thus the dominance tree.
+ static struct format_type *parse_printf_get_fmt(struct format_type *type,
+@@ -295,6 +289,7 @@ static struct format_type *parse_printf_get_fmt(struct format_type *type,
+ 		break;
+ 	case 'p':
+ 		type->test = printf_fmt_print_pointer;
++		type->type = &const_ptr_ctype;
+ 		/* check for pointer being printed as hex explicitly */
+ 		if (*ptr == 'x' || *ptr == 'X') {
+ 			ptr++;
+@@ -309,6 +304,7 @@ static struct format_type *parse_printf_get_fmt(struct format_type *type,
+ 		// todo - we should construct pointer to int/etc //
+ 		// also should not have any flags or widths for this
+ 		type->test = printf_fmt_pointer;
++		type->type = &const_ptr_ctype;
+ 		break;
+ 	default:
+ 		// anything else here?
+@@ -474,7 +470,7 @@ static int parse_format_printf(const char **fmtstring,
+ 		type = &printf_fmt_ptr_ref;	/* probably some extension */
  
- IR
- --
-@@ -60,13 +71,15 @@ LLVM
+ 	if (type) {
+-		struct symbol *ctype, *target = NULL;
++		struct symbol *ctype;
+ 		const char *typediff = "different types";
+ 		int ret;
  
- Internal backends
- -----------------
--* add some basic register allocation
-+* it would be nice the upstream the code generator
- * add a pass to transform 3-addresses code to 2-addresses
-+* add some basic register allocation
-+* add a pass to order the BBs and changes 2-ways CBR into one-way branches
- * what can be done for x86?
-+* add support to add constraints in the MD rules
+@@ -490,13 +486,10 @@ static int parse_format_printf(const char **fmtstring,
+ 		if (!ctype)
+ 			return -3;
  
- Longer term/to investigate
- --------------------------
--* better architecture handling than current machine.h + target.c
- * attributes are represented as ctypes's alignment, modifiers & contexts
-   but plenty of attributes doesn't fit, for example they need arguments.
-   * format(printf, ...),
+-		ret = type->test(type, &expr, ctype, &target, &typediff);
+-		if (!target)	/* shouldn't happen, but catch anyway */
+-			return -4;
+-
++		ret = type->test(type, &expr, ctype, &typediff);
+ 		if (ret == 0) {
+ 			warning(expr->pos, "incorrect type in argument %d (%s)", pos, typediff);
+-			info(expr->pos, "   expected %s", show_typename(target));
++			info(expr->pos, "   expected %s", show_typename(type->type));
+ 			info(expr->pos, "   got %s", show_typename(ctype));
+ 		}
+ 	} else {
 -- 
 2.28.0
 
