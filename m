@@ -2,144 +2,113 @@ Return-Path: <SRS0=6y8R=D2=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 717DDC433E7
-	for <linux-sparse@archiver.kernel.org>; Mon, 19 Oct 2020 04:59:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7008FC433DF
+	for <linux-sparse@archiver.kernel.org>; Mon, 19 Oct 2020 16:12:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1FE312225F
-	for <linux-sparse@archiver.kernel.org>; Mon, 19 Oct 2020 04:59:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1B04C2225F
+	for <linux-sparse@archiver.kernel.org>; Mon, 19 Oct 2020 16:12:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="n8f7SKvC"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="MwNJltKW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728603AbgJSE7p (ORCPT
+        id S1730325AbgJSQMg (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 19 Oct 2020 00:59:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36566 "EHLO
+        Mon, 19 Oct 2020 12:12:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58108 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728471AbgJSE7p (ORCPT
+        with ESMTP id S1730320AbgJSQMg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 19 Oct 2020 00:59:45 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F994C061755
-        for <linux-sparse@vger.kernel.org>; Sun, 18 Oct 2020 21:59:45 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id p13so8828454edi.7
-        for <linux-sparse@vger.kernel.org>; Sun, 18 Oct 2020 21:59:45 -0700 (PDT)
+        Mon, 19 Oct 2020 12:12:36 -0400
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60D89C0613CE
+        for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2020 09:12:36 -0700 (PDT)
+Received: by mail-ej1-x644.google.com with SMTP id e22so14718944ejr.4
+        for <linux-sparse@vger.kernel.org>; Mon, 19 Oct 2020 09:12:36 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=AqMfgwc6rdAmp5ycZA+N8/OgjAHIkluSL3m4olTAh7U=;
-        b=n8f7SKvCbTnZyQKcPzfs5RTEsJVYHcMaynFGQoE9cDRqT+O7k+2S0HUQLpr4lezBrp
-         0leSe3Nm3KkVJw3w+5axdz4TaeI1IPl4QGjYfzasBvaA8BbDrWMMtWEhQAhCai8Mm8Ey
-         dZJY4p9W+bU4ipFnN6FoRivgW7f0pvNR9MEDDnR+E0814LO8eW0/Qf3Gzqet/VFWqOoy
-         mUzlz/CeeZ1RE/7IO+RHmqGA4pQHFoi6WuobEgJuBDXI1EskP2WHvggVJX4JFpMbGNFQ
-         vYOQsu9LqAx2MezMwbpxC4kD7iqatCymo2746uqOOL/OfgfLiDVFi8L7jZpveQu2oA9b
-         BuRw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=RVLEJT0ZVxtgRWnOxJIIVHT3GBrlIwdemFUbYpagKrs=;
+        b=MwNJltKWos2rr1hTKBnFj5KDj1jK0FbBQ8WHNqCOdnjxqhLAjoGGDwSiZNgi2GWLqK
+         RUxj95bMjRZbV9IQrMOn2E5wpks1U3FOjeW5Q3ws/4bREjhHgDvFhGnKj6oc7Qr5mqmX
+         +qhhGsYw2z4240k4kiv5c3fnYsG/l2UWgseHheQakkLmn7bIPNkwmBKBx1hB10fPt2HA
+         EWITp+lUcLx7gRM6Iq3aBKvsiPfCNLXL9CVSrldZAfDn7neAWoJmdvXdyqmuweI44Uvj
+         F+8hPEoiN9JIJUbDdY3EkfACvRpj/ntoP9s6CroIzCKPAjv36y7O3zGvLcVluX5CvaKk
+         m0dg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=AqMfgwc6rdAmp5ycZA+N8/OgjAHIkluSL3m4olTAh7U=;
-        b=TWIl6nM6LgIUjWHFG9qf4MgOpe7TEfLlgs9UFtZHTHCMOCab+MypWd5SIQem9yciL/
-         Cy6eejC2NrNRCHb9Q7pgBW+iWO5YV3tPSh+0Yd8knETFjPw8YLi0TkcF8RT7k6Ym4Pia
-         a8DbtPsnmmzaS3XeSQF77/Gji3RU5182pZCCyDuqvwzJFA/JJGGL8WowGbJ2D+uvE6qC
-         7i131TI21M1bW3WMS4TVxm6um9EH3nNCjd92VIYIsGX23ZO5VswK7NTwjXi+vN8TY397
-         5AmxfzAaTzG1A27n77M28Wp8omXnP18nXEHlkd7EaN0q+lhmx6vCEPMPjKdgI3dKfyaM
-         H6/A==
-X-Gm-Message-State: AOAM533Sem/7/7uFjmRSo0qzBdP5TGwe5iVYLDWmbp5LbJtcJ+qh9wmE
-        TkAqNW5Mz6CdFNLPFu0cKf+vJSkXEdk=
-X-Google-Smtp-Source: ABdhPJwnGjhG/dvHoq1UQ2BAnObee2LCv+buzHycdFxWgOP/AjSnsz5Gu5tcm99n9AQgUOq9PPHObA==
-X-Received: by 2002:a50:e8cc:: with SMTP id l12mr16307129edn.29.1603083583874;
-        Sun, 18 Oct 2020 21:59:43 -0700 (PDT)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:159c:4578:7f8d:4dab])
-        by smtp.gmail.com with ESMTPSA id c5sm9166039edx.58.2020.10.18.21.59.42
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=RVLEJT0ZVxtgRWnOxJIIVHT3GBrlIwdemFUbYpagKrs=;
+        b=el/HcewLtAk1Eyu/ul5XDuiRXW1uXiLb0FDlEKjgmBXvw4RuQhDNCJglmrupsg89+Z
+         h8m6zpMevk17wF+ORkr3Q/T7OPcNfKB/ttxG3xi/QDarwUhfYniay60xj/EjP4p66yi0
+         WylqitxLMA5f905xOO7B/rvpd2c65X5RtlPVDEif/rd6Jo9uHnB8OZtABbXBh47EXx7i
+         gkmp+S21gQwsnjNTTcVdKudYCMEy4sys3arHuk4s0fY8UpG31FfedlU0XGXLb6mY+0g/
+         68QL04RigiNxGAY/QwAaUzvufQyEmgQcVrFbdD4dmjWsrGqXRlKerhIB20ndYr+Dbj1A
+         SQhw==
+X-Gm-Message-State: AOAM532/knaiNYb1rVwhVe8Xf5dayYM4jGlGM6ZvxXTzCpBR2KK/ubu1
+        qeGbRFQAFjzb8jeXOr/BbbxaQDMsH7k=
+X-Google-Smtp-Source: ABdhPJxWmXITDFCvNzWD60nR2RycYq03PUOg0oalvBl5+qvzyRorTIhLk6NrgeU4xiRxnyqwZZ0ubA==
+X-Received: by 2002:a17:906:d41:: with SMTP id r1mr567175ejh.383.1603123954851;
+        Mon, 19 Oct 2020 09:12:34 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:d505:a252:4cc1:d15d])
+        by smtp.gmail.com with ESMTPSA id r24sm144658eds.67.2020.10.19.09.12.33
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 18 Oct 2020 21:59:43 -0700 (PDT)
-Date:   Mon, 19 Oct 2020 06:59:42 +0200
+        Mon, 19 Oct 2020 09:12:34 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 03/12] builtin: make eval_sync_compare_and_swap() more
- generic
-Message-ID: <20201019045942.jvjbfa25sn2hfnxb@ltop.local>
-References: <20201017225633.53274-1-luc.vanoostenryck@gmail.com>
- <20201017225633.53274-4-luc.vanoostenryck@gmail.com>
- <728b9b1a-600a-ee81-a2cb-16c684124d0e@ramsayjones.plus.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 00/12] fix and complete the evaluation of atomic builtins
+Date:   Mon, 19 Oct 2020 18:12:14 +0200
+Message-Id: <20201019161226.97429-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.28.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <728b9b1a-600a-ee81-a2cb-16c684124d0e@ramsayjones.plus.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, Oct 18, 2020 at 10:31:55PM +0100, Ramsay Jones wrote:
-> On 17/10/2020 23:56, Luc Van Oostenryck wrote:
-> > Most __sync_* or __atomic_* builtin functions have one or
-> > more arguments having its real type determined by the first
-> > argument: either the same type (a pointer to an integral type)
-> > or the type of the object it points to.
-> > 
-> > Currently, only __sync_{bool,val}_compare_and_swap() are handled
-> > but lots of very similar variants would be needed for the others.
-> > So, make it a generic function, able to handle all these builtins.
-> > 
-> > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> > ---
-> >  builtin.c | 47 +++++++++++++++++++++++++++++++----------------
-> >  1 file changed, 31 insertions(+), 16 deletions(-)
-> > 
-> > diff --git a/builtin.c b/builtin.c
-> > index 0d4cb12cca22..880dd54f647e 100644
-> > --- a/builtin.c
-> > +++ b/builtin.c
-> > @@ -31,6 +31,14 @@
-> >  #include "compat/bswap.h"
-> >  #include <stdarg.h>
-> >  
-> > +#define dyntype incomplete_ctype
-> > +static bool is_dynamic_type(struct symbol *t)
-> > +{
-> > +	if (t->type == SYM_NODE)
-> > +		t = t->ctype.base_type;
-> > +	return t == &dyntype;
-> > +}
-> > +
-> >  static int evaluate_to_int_const_expr(struct expression *expr)
-> >  {
-> >  	expr->ctype = &int_ctype;
-> > @@ -362,29 +370,32 @@ static struct symbol_op overflow_p_op = {
-> >  };
-> >  
-> >  
-> > -static int eval_sync_compare_and_swap(struct expression *expr)
-> > +static int eval_atomic_common(struct expression *expr)
-> >  {
-> > +	struct symbol *fntype = expr->fn->ctype->ctype.base_type;
-> >  	struct symbol_list *types = NULL;
-> >  	struct symbol *ctype = NULL;
-> > +	struct symbol *t;
-> >  	struct expression *arg;
-> >  	int n = 0;
-> >  
-> > -	/* the first arg is a pointer type; we'd already verified that */
-> > +	// The number of arguments have already be verified.
-> > +	// The first arg must be a pointer type to an integral type.
-> 
-> s/pointer type to/pointer to/
-> (it just sounds odd, otherwise)
-> or maybe ... must be a 'pointer to an integral' type. ?
+Sparse knew about the __sync_*() builtin functions but without real
+type checking and nothing about the more commonly used __atomic_*().
 
-Well, yes, it's a bit hard to express clearly. The real infos are:
-* it must be a 'struct symbol *', the are used for any type, pointer or not
-* the type represented by this 'struct symbol *' must indeed be a pointer :
-  (first_args->type == SYM_PTR) to an integral type:
-  (first_args->ctype.base_type = &int_ctype).
-So yes, "must be a 'pointer to an integral' type. " seems to do the job.
+This series fixes this by adding the full type evaluation for both sets.
 
-Thanks
--- Luc
+Changes since v1:
+* fix comment about the first argument (patch 3)
+* add a comment showng when the return type is set (patch 3).
+
+
+Luc Van Oostenryck (12):
+  builtin: add generic .args method
+  builtin: add builtin type for volatile void *
+  builtin: make eval_sync_compare_and_swap() more generic
+  builtin: evaluate __sync_*_fetch*()
+  builtin: fix evaluation of __sync_lock_release
+  builtin: __sync_synchronize() too is variadic
+  builtin: add predefines for __ATOMIC_RELAXED & friends
+  builtin: add support for __atomic_add_fetch(), ...
+  builtin: add support for others generic atomic builtins
+  builtin: add builtin type: [volatile] pointer to bool
+  builtin: add support for __atomic_clear()
+  builtin: add support for remaining atomic builtins
+
+ builtin.c                         | 114 +++++++++++++++++++++---------
+ predefine.c                       |   7 ++
+ symbol.c                          |   6 ++
+ symbol.h                          |   2 +
+ validation/builtin-atomic-clear.c |  15 ++++
+ validation/builtin-sync-fetch.c   |  24 +++++++
+ 6 files changed, 136 insertions(+), 32 deletions(-)
+ create mode 100644 validation/builtin-atomic-clear.c
+ create mode 100644 validation/builtin-sync-fetch.c
+
+
+base-commit: 5192dc1ff23dae8644480a89ada8ff420ebb674a
+-- 
+2.28.0
+
