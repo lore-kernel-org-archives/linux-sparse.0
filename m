@@ -1,4 +1,4 @@
-Return-Path: <SRS0=cyFV=D3=vger.kernel.org=linux-sparse-owner@kernel.org>
+Return-Path: <SRS0=Ka3J=D5=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
@@ -8,106 +8,198 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1005C4363A
-	for <linux-sparse@archiver.kernel.org>; Tue, 20 Oct 2020 21:10:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 89A11C388F9
+	for <linux-sparse@archiver.kernel.org>; Thu, 22 Oct 2020 22:55:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 93EC6222C8
-	for <linux-sparse@archiver.kernel.org>; Tue, 20 Oct 2020 21:10:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 209FC2245F
+	for <linux-sparse@archiver.kernel.org>; Thu, 22 Oct 2020 22:55:36 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="GF63IuJC"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PdniNiwR"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2438682AbgJTVKp (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 20 Oct 2020 17:10:45 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46006 "EHLO
+        id S373135AbgJVWzg (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 22 Oct 2020 18:55:36 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55188 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2438680AbgJTVKp (ORCPT
+        with ESMTP id S373134AbgJVWzg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 20 Oct 2020 17:10:45 -0400
+        Thu, 22 Oct 2020 18:55:36 -0400
 Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D85E9C0613CE
-        for <linux-sparse@vger.kernel.org>; Tue, 20 Oct 2020 14:10:44 -0700 (PDT)
-Received: by mail-ej1-x642.google.com with SMTP id t25so4822090ejd.13
-        for <linux-sparse@vger.kernel.org>; Tue, 20 Oct 2020 14:10:44 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 22B9EC0613CE
+        for <linux-sparse@vger.kernel.org>; Thu, 22 Oct 2020 15:55:35 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id lw21so4750419ejb.6
+        for <linux-sparse@vger.kernel.org>; Thu, 22 Oct 2020 15:55:34 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=acKBIWcSTlmgsn/k2kkJrbhc96RJoNBv/HxBlb6i9tk=;
-        b=GF63IuJCVwntSI3pYYl2QwEWP190iFuzpy/cVLHK7412eNFerdAL4m5fOIZQt5hlsN
-         jPzD35cAfLvNuKZXkTJDgzGOTMpvLfZNBttrNOOowsHljMDjzCnyDVESzr1Ud3VEvpbW
-         gmSOf6q5BZSpKOqhH6jCYYUDyYcA9nkhj2zk6jNFFyoVLzKkNIQMh7rnMin2DhLJc4qY
-         P0EYDLAu67kjdCvz3NZnkE7S83j/Hv1XLE7dkFplWFFr2Q2Z+75hfcoaZyHc2Pcig9NB
-         QM7aztstuOWu7LudOgv/unlvJ3yconBYY/f3GjEoDmXXXs8fv8zNcIJc6qyK41vRYinO
-         hwvA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=40LbRFKnPqtRIsdYUQ3biyKhn46IeafoSCY5DGQgQZs=;
+        b=PdniNiwRJ6ZfXSHRoVSKO+TB2irJzdqjFDIfVjYN9X0aJWiAriy9IM0TgUqoDLkxOa
+         D5crACsHEfQbFfsdQfuI9KMHzqjebVmHxbadN7YTBdrjytE/lwB2YkWeXYdyDSnus2Ji
+         hdMcmOWUMi4xdsT/eP9ZCMytdYt1dB3w2p2NPz/ozGznWgC2AYPHgB5XxGvkvl1QKJF7
+         r/2ltqz/DfA3xreT3VDPojsvm8Rfe2jTJi+aMiZPc8nGkEtyLOrcIg1SA+JqhDHGiJgX
+         LfEVv42sztc1VDtdgLjl6GMikbJGB1AC03yUKpcMp10WABdu5fmE7M9DUQaWIq5I4Kze
+         OK8A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=acKBIWcSTlmgsn/k2kkJrbhc96RJoNBv/HxBlb6i9tk=;
-        b=Y5EbKTKi1aVLFKrSKdMW3jo4WJrEE5Akm1ldNbDAu9Ul2Z3xHDOdG8SmA41y6SgriY
-         GMyNulWDHducxY5sK9UMBgDjVwZ5wFueiszRfi5I6aUrSAp+ifzFCpdzEHnabCbWI1uV
-         lRtmoVqrX+gvh9igJqbs8A5UcQPBYMmPyuw8QyKBs2YZdfW+dqpEmzsiRRKYTGolwHJI
-         8TORoQJ8pIIUFIpu1zhE4KeRZPVZFazJYks+SVqIFXOFxkXsGUBH30u4E/5gZMVQeBwO
-         2slvBTnRNGKYhLtTeByoxx03KsAjMpVXda4o5iqLXphxpfIdgY4RvD8VwROtxxHn11Ra
-         2svw==
-X-Gm-Message-State: AOAM5334qgG894LyB/f2anLg5RaXyFgxAXuW9k0jOs+QdWK4kOVWux62
-        xWdjTLqlYZmxK7HHrTJqFR2YwsQBLfM=
-X-Google-Smtp-Source: ABdhPJw3KfCj3d7Qzc75mwT0QEzCZntQ1q6HSYiU5HUn5hRS96TiIwPdW4J0dHOCPt2ZCVwtUK+Gdg==
-X-Received: by 2002:a17:907:42fd:: with SMTP id oa21mr77097ejb.247.1603228243408;
-        Tue, 20 Oct 2020 14:10:43 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:85fe:66cb:a92b:c664])
-        by smtp.gmail.com with ESMTPSA id d12sm4012848ejt.105.2020.10.20.14.10.42
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=40LbRFKnPqtRIsdYUQ3biyKhn46IeafoSCY5DGQgQZs=;
+        b=efTGzA9D4TGfaNPfuMUbyxtpRI9bRz6gZFgO/2pZoFAQx5yePm0+90cMMKPWnyaK0R
+         /GzyMYkJktT8lndmCLT4bn0tkbmtTMOPWkcBjIuu8XlMtGZnUojCAUhDZ/bHPJxSYh9M
+         SXQn3VGn9sGUBvrhSzTEWVRvzNL8ELMGyG3ZaPBgwdznuwsDuqXaEv2cyrNvKCxOkS18
+         kP3zl8Xvi4d+SBGi183rebj4U0aodeZSmrUZs1cVZQbG4SYb0KXYN941E+pHpttUOFKI
+         k8kZgyDZrgWQXtfcrR8bfg5sz4dCyXRyK1DCdUAhJP4b4Dko8z3P3Iu9aZ6RHZFNhANf
+         KOHQ==
+X-Gm-Message-State: AOAM532jDDQvruaL6SKFRKfVjMnM4ARVXqzkjArL/f1pUqdpY9HcoQk+
+        KqQrYN4Dkkgk3SLP2Jgxk8SaeVLHUY0=
+X-Google-Smtp-Source: ABdhPJxr1k2yCI2LLCAzSIh87nePX+vftQsQHJpSz/LYeTUJMa1XBNefEuiWObvW/+CChHI9Q0I7wQ==
+X-Received: by 2002:a17:906:e55:: with SMTP id q21mr4401521eji.338.1603407332480;
+        Thu, 22 Oct 2020 15:55:32 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:c06e:233e:fc9f:6083])
+        by smtp.gmail.com with ESMTPSA id r24sm1297482eds.67.2020.10.22.15.55.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 20 Oct 2020 14:10:42 -0700 (PDT)
+        Thu, 22 Oct 2020 15:55:31 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 22/22] sub: simplify x + (y - x) --> y
-Date:   Tue, 20 Oct 2020 23:10:21 +0200
-Message-Id: <20201020211021.82394-23-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] llvm: fix crash with llvm-11 / use real phi-nodes
+Date:   Fri, 23 Oct 2020 00:53:13 +0200
+Message-Id: <20201022225313.33229-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
-In-Reply-To: <20201020211021.82394-1-luc.vanoostenryck@gmail.com>
-References: <20201020211021.82394-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+sparse-llvm crashes with LLVM-11. From what I can see, it's because
+LLVM-11 doesn't like anymore that an instruction is first created
+unattached to a basic block (LLVMClearInsertionPosition()) and
+inserted at some later step (LLVMInsertIntoBuilder()). Since the
+corresponding function still exist I suppose they're working correctly
+and sparse-llvm somehow misuse them. I don't know.
+
+However, this functionality is only used to create the alloca
+instructions used to simulate the phi-nodes.
+
+So, fix this crash by using real phi instructions for the phi-nodes.
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                                | 4 ++++
- validation/optim/simplify-same-addl-sub.c | 1 -
- 2 files changed, 4 insertions(+), 1 deletion(-)
+ sparse-llvm.c | 75 ++++++++++++++++++++-------------------------------
+ 1 file changed, 29 insertions(+), 46 deletions(-)
 
-diff --git a/simplify.c b/simplify.c
-index 65fca35099a6..6caf6cbcf918 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -1380,6 +1380,10 @@ static int simplify_add(struct instruction *insn)
- 	case OP_NEG:				// (x + -y) --> (x - y)
- 		insn->opcode = OP_SUB;
- 		return replace_pseudo(insn, &insn->src2, def->src);
-+	case OP_SUB:
-+		if (src1 == def->src2)		// x + (y - x) --> y
-+			return replace_with_pseudo(insn, def->src1);
-+		break;
- 	}
+diff --git a/sparse-llvm.c b/sparse-llvm.c
+index c7a9fbb7eee1..c984dc877a61 100644
+--- a/sparse-llvm.c
++++ b/sparse-llvm.c
+@@ -826,37 +826,14 @@ static void output_op_call(struct function *fn, struct instruction *insn)
  
- 	return 0;
-diff --git a/validation/optim/simplify-same-addl-sub.c b/validation/optim/simplify-same-addl-sub.c
-index 51d2b07966f4..9cca1d12ff92 100644
---- a/validation/optim/simplify-same-addl-sub.c
-+++ b/validation/optim/simplify-same-addl-sub.c
-@@ -3,7 +3,6 @@ int foo(int x, int y) { return x + (y - x); }
- /*
-  * check-name: simplify-same-addl-sub
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-contains: ret\\..*%arg2
+ static void output_op_phisrc(struct function *fn, struct instruction *insn)
+ {
+-	LLVMValueRef v;
+-	struct instruction *phi;
+-
+-	assert(insn->target->priv == NULL);
+-
+-	/* target = src */
+-	v = get_operand(fn, insn->type, insn->phi_src);
+-
+-	FOR_EACH_PTR(insn->phi_users, phi) {
+-		LLVMValueRef load, ptr;
+-
+-		assert(phi->opcode == OP_PHI);
+-		/* phi must be load from alloca */
+-		load = phi->target->priv;
+-		assert(LLVMGetInstructionOpcode(load) == LLVMLoad);
+-		ptr = LLVMGetOperand(load, 0);
+-		/* store v to alloca */
+-		LLVMBuildStore(fn->builder, v, ptr);
+-	} END_FOR_EACH_PTR(phi);
++	insn->src->priv = get_operand(fn, insn->type, insn->src);
+ }
+ 
+ static void output_op_phi(struct function *fn, struct instruction *insn)
+ {
+-	LLVMValueRef load = insn->target->priv;
+-
+-	/* forward load */
+-	assert(LLVMGetInstructionOpcode(load) == LLVMLoad);
+-	/* forward load has no parent block */
+-	assert(!LLVMGetInstructionParent(load));
+-	/* finalize load in current block  */
+-	LLVMInsertIntoBuilder(fn->builder, load);
++	LLVMTypeRef dst_type = insn_symbol_type(insn);
++
++	insn->target->priv = LLVMBuildPhi(fn->builder, dst_type, "");
+ }
+ 
+ static void output_op_ptrcast(struct function *fn, struct instruction *insn)
+@@ -1161,30 +1138,11 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 		static int nr_bb;
+ 		LLVMBasicBlockRef bbr;
+ 		char bbname[32];
+-		struct instruction *insn;
+ 
+ 		sprintf(bbname, "L%d", nr_bb++);
+ 		bbr = LLVMAppendBasicBlock(function.fn, bbname);
+ 
+ 		bb->priv = bbr;
+-
+-		/* allocate alloca for each phi */
+-		FOR_EACH_PTR(bb->insns, insn) {
+-			LLVMBasicBlockRef entrybbr;
+-			LLVMTypeRef phi_type;
+-			LLVMValueRef ptr;
+-
+-			if (!insn->bb || insn->opcode != OP_PHI)
+-				continue;
+-			/* insert alloca into entry block */
+-			entrybbr = LLVMGetEntryBasicBlock(function.fn);
+-			LLVMPositionBuilderAtEnd(function.builder, entrybbr);
+-			phi_type = insn_symbol_type(insn);
+-			ptr = LLVMBuildAlloca(function.builder, phi_type, "");
+-			/* emit forward load for phi */
+-			LLVMClearInsertionPosition(function.builder);
+-			insn->target->priv = LLVMBuildLoad(function.builder, ptr, "phi");
+-		} END_FOR_EACH_PTR(insn);
+ 	}
+ 	END_FOR_EACH_PTR(bb);
+ 
+@@ -1194,6 +1152,31 @@ static void output_fn(LLVMModuleRef module, struct entrypoint *ep)
+ 		output_bb(&function, bb);
+ 	}
+ 	END_FOR_EACH_PTR(bb);
++
++	FOR_EACH_PTR(ep->bbs, bb) {	// complete the OP_PHIs
++		struct instruction *insn;
++
++		FOR_EACH_PTR(bb->insns, insn) {
++			pseudo_t phi;
++
++			if (!insn->bb || insn->opcode != OP_PHI)
++				continue;
++
++			FOR_EACH_PTR(insn->phi_list, phi) {
++				struct instruction *phisrc;
++				LLVMBasicBlockRef bref;
++				LLVMValueRef vref;
++
++				if (phi == VOID)
++					continue;
++
++				phisrc = phi->def;
++				bref = phisrc->bb->priv;
++				vref = phisrc->src->priv;
++				LLVMAddIncoming(insn->target->priv, &vref, &bref, 1);
++			} END_FOR_EACH_PTR(phi);
++		} END_FOR_EACH_PTR(insn);
++	} END_FOR_EACH_PTR(bb);
+ }
+ 
+ static LLVMValueRef output_data(LLVMModuleRef module, struct symbol *sym)
+
+base-commit: 2d3af347e4a217f95b4f939fed9e76541d8b72f2
 -- 
 2.28.0
 
