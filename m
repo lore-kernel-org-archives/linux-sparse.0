@@ -2,106 +2,123 @@ Return-Path: <SRS0=Zl/b=D6=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4A63AC4363A
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E5C2C388F9
 	for <linux-sparse@archiver.kernel.org>; Fri, 23 Oct 2020 16:39:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D5066206B5
-	for <linux-sparse@archiver.kernel.org>; Fri, 23 Oct 2020 16:39:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C26B22210
+	for <linux-sparse@archiver.kernel.org>; Fri, 23 Oct 2020 16:39:48 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="JgTpmu1p"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="eOQxedWh"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1752531AbgJWQjr (ORCPT
-        <rfc822;linux-sparse@archiver.kernel.org>);
+        id S464148AbgJWQjr (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Fri, 23 Oct 2020 12:39:47 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49954 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49962 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752444AbgJWQjo (ORCPT
+        with ESMTP id S1752500AbgJWQjq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 23 Oct 2020 12:39:44 -0400
-Received: from mail-ed1-x544.google.com (mail-ed1-x544.google.com [IPv6:2a00:1450:4864:20::544])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EC5E5C0613CE
-        for <linux-sparse@vger.kernel.org>; Fri, 23 Oct 2020 09:39:43 -0700 (PDT)
-Received: by mail-ed1-x544.google.com with SMTP id w23so2169939edl.0
-        for <linux-sparse@vger.kernel.org>; Fri, 23 Oct 2020 09:39:43 -0700 (PDT)
+        Fri, 23 Oct 2020 12:39:46 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F3D5AC0613CE
+        for <linux-sparse@vger.kernel.org>; Fri, 23 Oct 2020 09:39:45 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id p5so3258095ejj.2
+        for <linux-sparse@vger.kernel.org>; Fri, 23 Oct 2020 09:39:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=aJ5gzdN9j7w5S6ZhzkbYNNoAug+SfWWwrk5EYTzJWpY=;
-        b=JgTpmu1pm8D5YTc//mY7Lm80dWWv3ICPXFfrEdJXvSYkIx9u1JrTO/MWmy+Kma42aE
-         rablhyr0KMBATSjIWsk+NC7GEdN1qpnNIcCjOZFR1QQskgI7MAwLWJlZgFUePSKlv9bT
-         J9RD5HfQvvt+weC9xU/sZw9Qcc4I4hipZ+uZ4eGVtFfZ9taVXf4sJl9UbOlE3d9j7drH
-         +OJ3DlKbzV8xbRDLwxZZaSdrMLSqzamiDNUrjUN+iXnjBt/KlKEWCp6gJkm41/sNBT+s
-         LGxfeeMMzw7178xNaHwK3czhYb/EKhHyFlARmd0JzyYBqauqZETUB3Kpkxe/nJvHcIhd
-         t7gA==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=KDpipxFtyIu6yf4VGTryPfpHvoOsqP6AhViDOdPEcWI=;
+        b=eOQxedWhjQM4v7kIfDwZdl5pcRfnjakBAoiBGP5U6rsGjnpYnF+PT9zDO/YGdN6CLh
+         5ShA9m0dKtQbPPB9aDLQZJrwA32IlEYDXxC8nQrjgsqYcxzeX90hMJuwfsIITWqK33Yp
+         acIfd6Tm+/ccTjk8A/0egleN/JJMG1f/Njd81Z8vPO3CHMZhLX5s0anibax63VW5NmOk
+         HKKz2p2HEOseV3gqgcNU22vmq5H1w0iYnq4jurIcOQ68in6v/WHP9X/Y1JEIENr4T9bG
+         X/43UIUa4Tyk8wKada/x/yBWlL5byor0YH4x1Be7qo50WHw9woWZpfCIxZkq41nhfA/n
+         FxzA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=aJ5gzdN9j7w5S6ZhzkbYNNoAug+SfWWwrk5EYTzJWpY=;
-        b=MbZhKgKdK7K6MDTEKSL9AnO8ynyILEboQXe+t0Ix8198cmQpNNmahl8mnB9xVQx45r
-         WMS2YH2Ge3W6a8Z6MX7+kcFEJBmVd/PHrnkYxr5NI/gnQFjK5uGQo8RAVlgpbG6gWOdB
-         YYIGst+QMzx3jSX2r9+ZkBXVTusPigOmB7o0WpmMvGMs90p4P9rhntIMIptjGhp3udXI
-         VLJ90MxAzNgyM2d99K+voIoQPKoVuyPBbZzUyUxU340nJtMad6++8156HbstYS8kekOa
-         QoD3HPg3kDfsaVXVT0C9utLpc9wfju75wLao19ludaF97f9mdldoiZD5zz6qbcHLl6MQ
-         ql1Q==
-X-Gm-Message-State: AOAM531YIsDKNhDS76QCbPZKeuLqyLZVMqlXJcH/TsrDkcpiHyIVBSgW
-        gF9FpitNviXD4PAohWcvWbj5/nAy6m0=
-X-Google-Smtp-Source: ABdhPJxWAM6/5+Oz2z1Kwxiy3jmRyQo/3Xdfg+e2+Rmdi3iHe8T9OfbSnDHMncVQ0KkXcGZXWHDauw==
-X-Received: by 2002:aa7:dcc7:: with SMTP id w7mr3180989edu.54.1603471182443;
-        Fri, 23 Oct 2020 09:39:42 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=KDpipxFtyIu6yf4VGTryPfpHvoOsqP6AhViDOdPEcWI=;
+        b=jfWa1bTE9Mk4MmXSC8869y0OpOJFl/2wxvTkDUd59Noqmc8QZAXfP93Q8emc6dNbhM
+         ltN+Tt+rcvpRljCKcyp4A0K6n3G5AOqO+sriDZt0bd5IoVVrHxeMP/wPGWlBVeb797Tu
+         DJKeM0uHsSNS6UKlDn1d8cvtyndLqeR0/OT9dycW8pFV4uDCaH6opu6vLaY6gdQ9EEuc
+         z5AzbHO759GaBpfM7KYxVtUHkxclkfoBQM5wv/2zo3tII8UWiR8JnelBYl+sT42BFi4Y
+         AsfmDjYfahCaJQnQ0QScj1zxUg3Ocxkz3l4fQdnDai1YDXx4IjJ/259KiomtLHZ/h0zG
+         hbfg==
+X-Gm-Message-State: AOAM531dl7nMe5U5qqvoA/VStMnR3Av5DNEcItaRPOxLr/irXRJ6LUxi
+        zkj1CZWf1VRAevLSosCysOQ8DPvnOoQ=
+X-Google-Smtp-Source: ABdhPJzTLcDlzlmEF2ZGAd+AGlYXp4/OLp1f/zU164vG90bTAxEZ/wNH+zG4rG2iXi9IlDUfnoCplQ==
+X-Received: by 2002:a17:906:7210:: with SMTP id m16mr3005486ejk.490.1603471184458;
+        Fri, 23 Oct 2020 09:39:44 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:c9b0:42da:8135:1fa1])
-        by smtp.gmail.com with ESMTPSA id m25sm1020734edp.36.2020.10.23.09.39.41
+        by smtp.gmail.com with ESMTPSA id m25sm1020734edp.36.2020.10.23.09.39.43
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 23 Oct 2020 09:39:41 -0700 (PDT)
+        Fri, 23 Oct 2020 09:39:44 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/9] basic unop simplifications
-Date:   Fri, 23 Oct 2020 18:39:30 +0200
-Message-Id: <20201023163939.58359-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/9] unop: prepare simplify_unop() to handle more cases
+Date:   Fri, 23 Oct 2020 18:39:32 +0200
+Message-Id: <20201023163939.58359-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.28.0
+In-Reply-To: <20201023163939.58359-1-luc.vanoostenryck@gmail.com>
+References: <20201023163939.58359-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This is the second batch of basic simplifications & canonicalizations.
+Currently, simplify_unop() can only handle the simplification of
+-(-x) and ~(~x).
 
-Luc Van Oostenryck (9):
-  unop: add testcases for unop simplifications
-  unop: prepare simplify_unop() to handle more cases
-  unop: simplify -(x + C) --> -C - x
-  unop: simplify -(x - y) --> y - x
-  unop: simplify -(~x) --> x + 1
-  unop: simplify ~(x + C) --> ~C - x
-  unop: simplify ~(C - x) --> x + ~C
-  unop: simplify ~(x ^ C) --> x ^ ~C
-  unop: simplify ~(-x) --> x - 1
+Prepare it to handle more cases.
 
- simplify.c                              | 50 +++++++++++++++++++++++--
- validation/optim/simplify-neg-add-cte.c | 11 ++++++
- validation/optim/simplify-neg-not.c     |  9 +++++
- validation/optim/simplify-neg-sub.c     |  9 +++++
- validation/optim/simplify-not-add-cte.c | 11 ++++++
- validation/optim/simplify-not-neg.c     |  9 +++++
- validation/optim/simplify-not-sub-cte.c | 11 ++++++
- validation/optim/simplify-not-xor-cte.c | 11 ++++++
- 8 files changed, 118 insertions(+), 3 deletions(-)
- create mode 100644 validation/optim/simplify-neg-add-cte.c
- create mode 100644 validation/optim/simplify-neg-not.c
- create mode 100644 validation/optim/simplify-neg-sub.c
- create mode 100644 validation/optim/simplify-not-add-cte.c
- create mode 100644 validation/optim/simplify-not-neg.c
- create mode 100644 validation/optim/simplify-not-sub-cte.c
- create mode 100644 validation/optim/simplify-not-xor-cte.c
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ simplify.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
 
+diff --git a/simplify.c b/simplify.c
+index 6caf6cbcf918..2750a90512b8 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -1451,21 +1451,27 @@ static int simplify_constant_unop(struct instruction *insn)
+ 
+ static int simplify_unop(struct instruction *insn)
+ {
++	pseudo_t src = insn->src;
++
+ 	if (dead_insn(insn, &insn->src1, NULL, NULL))
+ 		return REPEAT_CSE;
+-	if (constant(insn->src1))
++	if (constant(src))
+ 		return simplify_constant_unop(insn);
+ 
+ 	switch (insn->opcode) {
+ 		struct instruction *def;
+ 
+ 	case OP_NOT:
+-		if (DEF_OPCODE(def, insn->src) == OP_NOT)
++		switch (DEF_OPCODE(def, src)) {
++		case OP_NOT:		// ~(~x) --> x
+ 			return replace_with_pseudo(insn, def->src);
++		}
+ 		break;
+ 	case OP_NEG:
+-		if (DEF_OPCODE(def, insn->src) == OP_NEG)
++		switch (DEF_OPCODE(def, src)) {
++		case OP_NEG:		// -(-x) --> x
+ 			return replace_with_pseudo(insn, def->src);
++		}
+ 		break;
+ 	default:
+ 		return 0;
 -- 
 2.28.0
 
