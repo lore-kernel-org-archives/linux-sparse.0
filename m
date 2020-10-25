@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AE54C388F7
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:58:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 63615C388F7
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:59:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C6C232074F
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:58:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 218A5222B9
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:59:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aJ4bqs+X"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UFW7cQmV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1416462AbgJYN61 (ORCPT
+        id S1416467AbgJYN7w (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 25 Oct 2020 09:58:27 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43360 "EHLO
+        Sun, 25 Oct 2020 09:59:52 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43600 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1416461AbgJYN61 (ORCPT
+        with ESMTP id S1416466AbgJYN7w (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 25 Oct 2020 09:58:27 -0400
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6F2FC0613CE
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:58:16 -0700 (PDT)
-Received: by mail-ej1-x643.google.com with SMTP id p5so9676021ejj.2
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:58:16 -0700 (PDT)
+        Sun, 25 Oct 2020 09:59:52 -0400
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 16A3CC0613CE
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:59:52 -0700 (PDT)
+Received: by mail-ed1-x543.google.com with SMTP id 33so6692353edq.13
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:59:52 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=UJO9zgi3VhaMLadbpF8zAkvRfvwVwXJSR1fmOb4a4Yw=;
-        b=aJ4bqs+Xu7MTlr7Iyc5LAVOQ+tJpRfFU3UYlTIbkNxNJioEeM3F5kNOA2KL7QswLqf
-         3oAMCOkzj8XqjraDVEZn/VUY/txZMJuPVN+bIvomBNpTuIuaWuRCUCg9Ne07GPTIpPM0
-         5wzvX9vboSSRp9poL0ftjOcJD5bJS4Gm7nHEU9vU9CcHUDOjS8iNWgxRWPjx+HUOW+Yi
-         Wb8jO7OUJHpS9HrS6/a6l652BoTxulufsfh9wh5ybJFLPvf1VBEmqeoKp/cC2+UAynQK
-         502twUrwPmNTvlHcqIWW++PacyTEEddubAEMGhQMQPH1J8ksQmSTwSvKgqYwLKCOpKUg
-         PqOw==
+        bh=rG5JGkbN/Y3fb3mMynx+fLU+r4TQWaPgC7GajnZ6Fv0=;
+        b=UFW7cQmV5NyR5iveWjcD63oMF0uqKw4Q0hyP8phCCFNwmPR6/udigB2ux1dpLX5CoM
+         dVs2qFOWt+nXv039UxEYnh009/Zj6/A8YccjJ9T7CiOv1WFzcQ5AhK32ZEl9EhNTHHWG
+         vbbmOz2E6fUfwwLIzV5ID2toeK892v8UjfNyOX8q03Rj82syIAYrQe9FMo4MtWYtNb8W
+         te0rdmmt4Y4hWe1ad81v9ivxgn90xACgqugbM4gAJLDvtPCsxu2MJsdHsH4IJ/Y6wKJa
+         ++h86xmMjCjN1KplK44ZR28kvEp0Z+7pnUChix9TqidypZpx1qSq6NifwVI7UNRoU+XG
+         WzCg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=UJO9zgi3VhaMLadbpF8zAkvRfvwVwXJSR1fmOb4a4Yw=;
-        b=nm/i+iWbxlDAI+DFkbuxoUZOW3hV4a++9KyrllrTAbu2jOyUJ4PslizNWr5pH15C/I
-         W+CZJW1Ur3ObgJ//MAsRXYxoBYP9wbTZd5rjJuG/TQAoAjzmIsIjVD1OQ1ztzYqJTEIY
-         2h6w2DAheJamqA7mn+6tlPRKFnCjKgWrMbTpFcxoKbO1DLGjjjpWuk2bp2dRjBlg0zPc
-         WwKt40LYQMRnmLspozDk2mIIURNOjWFjuK2zslJyD7bcDdrTCmnokC74+4bs/Gus34pb
-         FKEbR7dlOi1k1sTKWlPXYK4HJlmnOJdnqhmN996CR+vpLL/Y2GtaN8r6bbvNy5mB1DLQ
-         5aug==
-X-Gm-Message-State: AOAM532sia0InMSwCG7Gh0EFfy81SEEn2szkac1Mnp3KU8gynOV3s6/k
-        eeSGbb9TEKCMBVGBf52wopXBEoSoW1c=
-X-Google-Smtp-Source: ABdhPJzJ1I12AyYoKODf2UjxRIAJNc6fGJsyC6lJWy21zhYmM5SmQE+bRXAybc5rsv104GSWyEqfqw==
-X-Received: by 2002:a17:906:80d2:: with SMTP id a18mr11061212ejx.37.1603634295342;
-        Sun, 25 Oct 2020 06:58:15 -0700 (PDT)
+        bh=rG5JGkbN/Y3fb3mMynx+fLU+r4TQWaPgC7GajnZ6Fv0=;
+        b=Q4jHBpGtTSLApEoIs119j1yOHHTSX97XFpuYRWaxQVBi1Md3x3vJoqrryTLcslhCrO
+         2/nj+Hnhz12namfZav8mDgmcPsmbnRTl+4NC+TMVH5GHRr5QRobyIK0y6F0BFx2Ll2Fo
+         zoZ5JO+cNXjz7IcEfU0mUSqyUJpOz3YUS3T1IB+dYOqGDCQYQc6GWZ3CVfqzQllXrKMs
+         /rYEbPAH7zMZ3xhfq9wpdUUKMX0keL7uPdFrCpYYBl+2e2GKpwd9inBEJ7trobaN738J
+         DqZ408vROe1SwLuIcGJinTdUJbF0NnGSoatKLpRG71OUp9YzWqg917zMzE7kzIXMt6na
+         nqiQ==
+X-Gm-Message-State: AOAM533UG7td6JzIM/9fk5NoKuy3UURCNk6gsBXk2khM9Jvr+fThZITU
+        2CNlzyOq8RkM6N6BCDAbaxSYQw+TlKM=
+X-Google-Smtp-Source: ABdhPJzoXsJ71uBt3BU1LUSqP/YbJ8D9+IFgNYmpMEloBlOsunhT+37dbTX9rnSDCTNZwodHiqFH1A==
+X-Received: by 2002:a50:d69e:: with SMTP id r30mr11276137edi.383.1603634390578;
+        Sun, 25 Oct 2020 06:59:50 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f136:83e9:1c3d:13f2])
-        by smtp.gmail.com with ESMTPSA id g20sm4120372ejz.88.2020.10.25.06.58.14
+        by smtp.gmail.com with ESMTPSA id n3sm3638680edq.24.2020.10.25.06.59.49
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Oct 2020 06:58:14 -0700 (PDT)
+        Sun, 25 Oct 2020 06:59:50 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] add testcase for missing inline definition
-Date:   Sun, 25 Oct 2020 14:58:12 +0100
-Message-Id: <20201025135812.32732-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] replace nbr_users() by  multi_users()
+Date:   Sun, 25 Oct 2020 14:59:47 +0100
+Message-Id: <20201025135947.32822-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.0
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -73,56 +73,30 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-If the address of an inline function is taken, a definition
-for this function must be emitted.
+During simplification, we're only interested to know if a pseudo
+is used only once or more than once. This can be checked quicker
+than getting the exact number of users.
 
-However, sparse only do this if this inline function is defined
-before it is used.
-
-So add a testcase for this.
+So, replace the last call to nbr_users() by a call to multi_users().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/linear/inline-definition.c | 30 +++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
- create mode 100644 validation/linear/inline-definition.c
+ simplify.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/validation/linear/inline-definition.c b/validation/linear/inline-definition.c
-new file mode 100644
-index 000000000000..2918bd5d7527
---- /dev/null
-+++ b/validation/linear/inline-definition.c
-@@ -0,0 +1,30 @@
-+extern void use(void *);
-+
-+static inline int inl0(int a);
-+static inline int inl1(int a);
-+
-+static inline int inl0(int a)
-+{
-+	return a;
-+}
-+
-+void foo(void)
-+{
-+	use(inl0);
-+	use(inl1);
-+}
-+
-+static inline int inl1(int a)
-+{
-+	return a;
-+}
-+
-+/*
-+ * check-name: inline-definition
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-contains: inl0:
-+ * check-output-contains: inl1:
-+ */
+diff --git a/simplify.c b/simplify.c
+index 6caf6cbcf918..191c9e4928b2 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -871,7 +871,7 @@ static int simplify_shift(struct instruction *insn, pseudo_t pseudo, long long v
+ 				return replace_with_value(insn, 0);
+ 			if (nmask == mask)
+ 				return replace_pseudo(insn, &insn->src1, def->src1);
+-			if (nbr_users(pseudo) > 1)
++			if (multi_users(pseudo))
+ 				break;
+ 			def->opcode = OP_LSR;
+ 			def->src2 = insn->src2;
 -- 
 2.29.0
 
