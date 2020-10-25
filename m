@@ -8,106 +8,121 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AD980C388F7
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2AE54C388F7
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:58:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 715B42222F
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C6C232074F
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:58:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="lIwepRpc"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="aJ4bqs+X"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1416176AbgJYNJc (ORCPT
+        id S1416462AbgJYN61 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 25 Oct 2020 09:09:32 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35940 "EHLO
+        Sun, 25 Oct 2020 09:58:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43360 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1416173AbgJYNJb (ORCPT
+        with ESMTP id S1416461AbgJYN61 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 25 Oct 2020 09:09:31 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 95645C0613CE
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:30 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id d6so4922627ejb.11
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:30 -0700 (PDT)
+        Sun, 25 Oct 2020 09:58:27 -0400
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6F2FC0613CE
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:58:16 -0700 (PDT)
+Received: by mail-ej1-x643.google.com with SMTP id p5so9676021ejj.2
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:58:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=rLM8KpVoVG3YCdXsDKj/N/T54DNeEMgV0N6kdHzVU64=;
-        b=lIwepRpcLIYkWvsaOCkLyJ+6y6Xv7T95WRhp22OnohWL3bugs3LkHQTQ/Mg9ePkcdU
-         ic3LGu+wZzP/BYjTeZ52XFiFHOo/rh9b7Z3fb5onyB+AKTM2HmwxT18N2CZbun5EJXuO
-         C6B5a39jYAtI194inN+mZyurRUrxR78W/17iVY2cPiVHo8hPITo5rY8lJAyM77ZBtX80
-         t5wayS/wPtyJ5YSiVsWOIraYtHBr+osZ086jQpmworTaFxoMUWVrafhZVab/Qm+SniaY
-         klyywev3tsU4O0Ted/BbI3RAZHHU3dFDG+hQfMBw8u4lwJ4IEnguD3SqezGm5EEd9uhB
-         Royw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=UJO9zgi3VhaMLadbpF8zAkvRfvwVwXJSR1fmOb4a4Yw=;
+        b=aJ4bqs+Xu7MTlr7Iyc5LAVOQ+tJpRfFU3UYlTIbkNxNJioEeM3F5kNOA2KL7QswLqf
+         3oAMCOkzj8XqjraDVEZn/VUY/txZMJuPVN+bIvomBNpTuIuaWuRCUCg9Ne07GPTIpPM0
+         5wzvX9vboSSRp9poL0ftjOcJD5bJS4Gm7nHEU9vU9CcHUDOjS8iNWgxRWPjx+HUOW+Yi
+         Wb8jO7OUJHpS9HrS6/a6l652BoTxulufsfh9wh5ybJFLPvf1VBEmqeoKp/cC2+UAynQK
+         502twUrwPmNTvlHcqIWW++PacyTEEddubAEMGhQMQPH1J8ksQmSTwSvKgqYwLKCOpKUg
+         PqOw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=rLM8KpVoVG3YCdXsDKj/N/T54DNeEMgV0N6kdHzVU64=;
-        b=E7Qvbs4mKnVcm2ALDakwof8j3I/JfFUOT+npVEPRPMd84Qy1ZyAP6zZIAw0h0P9kNB
-         imljK000FiFFLNc+bjbBIRJxToJAeH+uAnncotRfXGm+2QsTO1zCBYCBJflEJwyS61g3
-         gdztpGZwCA3w8F/AxJEAC9iAaiJGO68FX3QM+24B7K5w2jEim+EUEl4boLq0xIxTCHQt
-         /YPQA+F4JSlCv1cpdB7quB0uT87+5YE3IvxfTtqv0GyhFpjhaYWkosazzXzpOuEokU8k
-         Z8Scc5EAPpDehobD7+AbS7AspdwAIF6DDjuUYMN9CgGZ/xS3p9wswE81DZfZrgjKaG26
-         igcw==
-X-Gm-Message-State: AOAM533h5ACuSK12z9IKUZwZUDmf5BlJigZny4BTct8MdHAaKfltjvLL
-        XzmsOO0WHmhWP77HFCBwX0uRWR0Ef3A=
-X-Google-Smtp-Source: ABdhPJwyrlKDDvvtkAHHqUv1TYuwIgcDeMY571K5eAvYcIrc+S+blnYCZDLW9tBpLFBygiqFOGA08Q==
-X-Received: by 2002:a17:906:1418:: with SMTP id p24mr10882042ejc.46.1603631369127;
-        Sun, 25 Oct 2020 06:09:29 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=UJO9zgi3VhaMLadbpF8zAkvRfvwVwXJSR1fmOb4a4Yw=;
+        b=nm/i+iWbxlDAI+DFkbuxoUZOW3hV4a++9KyrllrTAbu2jOyUJ4PslizNWr5pH15C/I
+         W+CZJW1Ur3ObgJ//MAsRXYxoBYP9wbTZd5rjJuG/TQAoAjzmIsIjVD1OQ1ztzYqJTEIY
+         2h6w2DAheJamqA7mn+6tlPRKFnCjKgWrMbTpFcxoKbO1DLGjjjpWuk2bp2dRjBlg0zPc
+         WwKt40LYQMRnmLspozDk2mIIURNOjWFjuK2zslJyD7bcDdrTCmnokC74+4bs/Gus34pb
+         FKEbR7dlOi1k1sTKWlPXYK4HJlmnOJdnqhmN996CR+vpLL/Y2GtaN8r6bbvNy5mB1DLQ
+         5aug==
+X-Gm-Message-State: AOAM532sia0InMSwCG7Gh0EFfy81SEEn2szkac1Mnp3KU8gynOV3s6/k
+        eeSGbb9TEKCMBVGBf52wopXBEoSoW1c=
+X-Google-Smtp-Source: ABdhPJzJ1I12AyYoKODf2UjxRIAJNc6fGJsyC6lJWy21zhYmM5SmQE+bRXAybc5rsv104GSWyEqfqw==
+X-Received: by 2002:a17:906:80d2:: with SMTP id a18mr11061212ejx.37.1603634295342;
+        Sun, 25 Oct 2020 06:58:15 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f136:83e9:1c3d:13f2])
-        by smtp.gmail.com with ESMTPSA id q3sm3571350edv.17.2020.10.25.06.09.28
+        by smtp.gmail.com with ESMTPSA id g20sm4120372ejz.88.2020.10.25.06.58.14
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Oct 2020 06:09:28 -0700 (PDT)
+        Sun, 25 Oct 2020 06:58:14 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] fix testing if a OP_CALL's function is pure
-Date:   Sun, 25 Oct 2020 14:09:21 +0100
-Message-Id: <20201025130921.20693-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] add testcase for missing inline definition
+Date:   Sun, 25 Oct 2020 14:58:12 +0100
+Message-Id: <20201025135812.32732-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.0
-In-Reply-To: <20201025130921.20693-1-luc.vanoostenryck@gmail.com>
-References: <20201025130921.20693-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-kill_instruction() will kill an OP_CALL but only if it's a
-forced kill or if the corresponding function is pure.
+If the address of an inline function is taken, a definition
+for this function must be emitted.
 
-However, only functions called via a symbol pseudo are so killed.
-Those called via a function pointer are not because only symbol
-pseudos contain the function type needed to test the presence of
-the MOD_PURE modifier.
+However, sparse only do this if this inline function is defined
+before it is used.
 
-Fix this by using the function type always available in the
-instruction's ::fntypes member.
+So add a testcase for this.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ validation/linear/inline-definition.c | 30 +++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
+ create mode 100644 validation/linear/inline-definition.c
 
-diff --git a/simplify.c b/simplify.c
-index 6caf6cbcf918..634a3ea66e91 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -351,9 +351,9 @@ int kill_insn(struct instruction *insn, int force)
- 	case OP_CALL:
- 		if (!force) {
- 			/* a "pure" function can be killed too */
--			if (!(insn->func->type == PSEUDO_SYM))
--				return 0;
--			if (!(insn->func->sym->ctype.modifiers & MOD_PURE))
-+			struct symbol *fntype = first_symbol(insn->fntypes);
+diff --git a/validation/linear/inline-definition.c b/validation/linear/inline-definition.c
+new file mode 100644
+index 000000000000..2918bd5d7527
+--- /dev/null
++++ b/validation/linear/inline-definition.c
+@@ -0,0 +1,30 @@
++extern void use(void *);
 +
-+			if (!(fntype->ctype.modifiers & MOD_PURE))
- 				return 0;
- 		}
- 		kill_use_list(insn->arguments);
++static inline int inl0(int a);
++static inline int inl1(int a);
++
++static inline int inl0(int a)
++{
++	return a;
++}
++
++void foo(void)
++{
++	use(inl0);
++	use(inl1);
++}
++
++static inline int inl1(int a)
++{
++	return a;
++}
++
++/*
++ * check-name: inline-definition
++ * check-command: test-linearize -Wno-decl $file
++ * check-known-to-fail
++ *
++ * check-output-ignore
++ * check-output-contains: inl0:
++ * check-output-contains: inl1:
++ */
 -- 
 2.29.0
 
