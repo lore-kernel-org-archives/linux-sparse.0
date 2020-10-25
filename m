@@ -2,94 +2,102 @@ Return-Path: <SRS0=+N6z=EA=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DAC21C388F7
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B1334C5517A
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 948622222F
-	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 625182222F
+	for <linux-sparse@archiver.kernel.org>; Sun, 25 Oct 2020 13:09:30 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="UcdgLqCj"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="h+qsYTMs"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1416174AbgJYNJ3 (ORCPT
+        id S1416175AbgJYNJa (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 25 Oct 2020 09:09:29 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35928 "EHLO
+        Sun, 25 Oct 2020 09:09:30 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35934 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1416173AbgJYNJ2 (ORCPT
+        with ESMTP id S1416173AbgJYNJ3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 25 Oct 2020 09:09:28 -0400
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 114CDC0613CE
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:28 -0700 (PDT)
-Received: by mail-ej1-x644.google.com with SMTP id c15so9609214ejs.0
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:27 -0700 (PDT)
+        Sun, 25 Oct 2020 09:09:29 -0400
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A05CC0613CE
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:29 -0700 (PDT)
+Received: by mail-ej1-x642.google.com with SMTP id dt13so9549868ejb.12
+        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 06:09:29 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=934SUTTvAe+2laGy0mD3l9NmxFrowDgS35VikC9JNh0=;
-        b=UcdgLqCjLTr2oxolg1XMxywQW9G74vLe60HI4A45ZxiPEoxUR9xMjUzii0DW7lpslV
-         Da0uGegTnTeSRBFGWLY6/clfyjX2UOR337z89fI6ARDZMUStT8bm8bDp+6lQCpAB5CUW
-         EsRGWiKuWuSLboFqk2uu0KiuTImi2dBSGnljNkWFS7bdvWMVcRggXkSOvF6xlUthy+Ls
-         CO0NnNXXe7YFUIG02y7RpkNflCniAgzE7NKTl4mkXCV7eKcxpHTBQgzoXfKYujIqAQJ8
-         WVKV3GVwmZqEIF5xRN0L2h1WLOfZMLIexcbNyb1zoG84Rm+lWEDyoAKSnJa+nLxkqRzt
-         ZG4A==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=OLBPnTW0xp6j2mSd+XL9Pevi0ZgADIBjRKi9Suf2Z3I=;
+        b=h+qsYTMs+Xeg73Dwm5VGn7Z4ixK96cvC7kRTv6mPF8QEsnFU3t/7aW+VOmIDQGtyen
+         RUdX32eAWNMTdhUaUzMWBSQlo9M4rFY3r3C0Gvgf/PkfZz+Nrxnp1Crzt2J8PN489Lq1
+         x7zj4u+iu18a6IEjApenFte1oJVQBv7sQOxcwKeyQo9OKKj8Bbvl9OZc+Pop6CRa3Xxq
+         dbLwmHtjT93401en8Wi0v+a1JIpshE1yBcQWJHAJ6JC3hLGm6CkRn8CWUo+MF475wdrp
+         KpVdTxh6xeY450fVemuQVd5oXu1CXOFXwix663kE5gUH/fxcKdxXDwCkrrhVDIBPt5VN
+         P/zA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=934SUTTvAe+2laGy0mD3l9NmxFrowDgS35VikC9JNh0=;
-        b=U1OaocXa827IvhXZv9XGgFMnBgF0At0CFSl0MLX+ASSgSG/jANti5FOWKfKCFTLtA3
-         ONg6mGc6pcd8mZeGUaSBenPZjUZ7GnJJqgmY8naRx8DEPQzUXZbvEU6PhvOccrKgSZEN
-         9fCORU22dIGDlVZVE1GZkapIhAp1exsh5MljJ0Ty2AhDH1c7hNw7FyZvo5P82OvMhJt/
-         wxYOx+ncs9mMAlpYoLwY2KpOxmzRA1CSGXpqsXHAVB2ZKj36oiO+6NX6uQPeqpLzHOUj
-         ZzY4qBliktcpre3aqplIyQBKN6XZmrOjBsTIUvfZKdDt9+/2sF/zPu4ixh5Jwa6YwjMS
-         z49Q==
-X-Gm-Message-State: AOAM531KWAIdvYwG29G3oflZenc5sWg2rm24lJB/a+RiAedswe3d3KKo
-        T8BMiMrStdd4OpBZXv5u9N9TPc9+r7U=
-X-Google-Smtp-Source: ABdhPJwRPQRx05MwkrbHbEJqIi/vPjF6+3F3p7MaLFmPX36U9epUy559J7uflod8RwgJlfDUgxwd/w==
-X-Received: by 2002:a17:906:1f42:: with SMTP id d2mr10858364ejk.407.1603631366430;
-        Sun, 25 Oct 2020 06:09:26 -0700 (PDT)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=OLBPnTW0xp6j2mSd+XL9Pevi0ZgADIBjRKi9Suf2Z3I=;
+        b=jqrbtSy+iiKK5GnMV4cOqQr3IeqTKGOQRzVXjm4ObUxzJpKfeOnkDAxMz5AuhZjh3J
+         6cnj/gg+qp2DjjdnDO/eyEKQU6ECEHg3naa49/EVLQnscK947J8wcFfokkP9AG74f/xj
+         zoM4soIOIEUrK2SSFoLQOGXe/XxJBaSNdn27GO+eMRQMjXB8/RKTg1dLkmGvx9cOth3I
+         UZkF5c6eiIValluwHO16k+0d/SeEuZ7UvcXSlQIAdzADeFDFRkHRsCep7nFCckJbmq2p
+         d4XI9NjE6jk/Dav5uIrgnKsv+CCrzhDfg7AWasDB9OtaEiKbA6pQS8hCGKD8JiK9cwCG
+         x8HQ==
+X-Gm-Message-State: AOAM5321iZXqERtvkbrY11RDZ9ioTkuBWN4wYkIpW+UY7mkusRBEYI6Q
+        0SJ3jQrYH8Fyf8wZ6Ij4HiBx4OrVQYo=
+X-Google-Smtp-Source: ABdhPJxU+mqztHMvz03GSmYKD9Dw7ELVvNwNWGKj0ETtz7DmrliZ/KJt90mCuuX6sZAu+VuAvPQQ1A==
+X-Received: by 2002:a17:906:1246:: with SMTP id u6mr11124500eja.432.1603631367928;
+        Sun, 25 Oct 2020 06:09:27 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f136:83e9:1c3d:13f2])
-        by smtp.gmail.com with ESMTPSA id q3sm3571350edv.17.2020.10.25.06.09.24
+        by smtp.gmail.com with ESMTPSA id q3sm3571350edv.17.2020.10.25.06.09.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Oct 2020 06:09:25 -0700 (PDT)
+        Sun, 25 Oct 2020 06:09:27 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/2] fix testing if a OP_CALL's function is pure
-Date:   Sun, 25 Oct 2020 14:09:19 +0100
-Message-Id: <20201025130921.20693-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/2] add helper first_symbol()
+Date:   Sun, 25 Oct 2020 14:09:20 +0100
+Message-Id: <20201025130921.20693-2-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.0
+In-Reply-To: <20201025130921.20693-1-luc.vanoostenryck@gmail.com>
+References: <20201025130921.20693-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-kill_instruction() will only kill an OP_CALL corresponding to
-a pure function but this can't be testing if the call is not
-done directly via the function's symbols.
+This is just a wrapper around first_ptr_list().
 
-These 2 patches fix this by using the function's type always
-available in the instruction itself.
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ lib.h | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-
-Luc Van Oostenryck (2):
-  add helper first_symbol()
-  fix testing if a OP_CALL's function is pure
-
- lib.h      | 5 +++++
- simplify.c | 6 +++---
- 2 files changed, 8 insertions(+), 3 deletions(-)
-
-
-base-commit: 8f7e21cadc21f49819d003e560d4607d720c647f
+diff --git a/lib.h b/lib.h
+index 0b1d4492e6bd..b4c3db93ab31 100644
+--- a/lib.h
++++ b/lib.h
+@@ -204,6 +204,11 @@ static inline pseudo_t first_pseudo(struct pseudo_list *head)
+ 	return first_ptr_list((struct ptr_list *)head);
+ }
+ 
++static inline struct symbol *first_symbol(struct symbol_list *head)
++{
++	return first_ptr_list((struct ptr_list *)head);
++}
++
+ static inline void concat_symbol_list(struct symbol_list *from, struct symbol_list **to)
+ {
+ 	concat_ptr_list((struct ptr_list *)from, (struct ptr_list **)to);
 -- 
 2.29.0
 
