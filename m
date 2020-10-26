@@ -2,91 +2,99 @@ Return-Path: <SRS0=2wv3=EB=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A53B8C4363A
-	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 17:41:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5690C4363A
+	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 20:48:53 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 64A0722242
-	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 17:41:58 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-	s=default; t=1603734118;
-	bh=vpQ5tFPiLCFJV1Sry9KtCxLmgeGjA4r+OILADzUOOlg=;
-	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
-	b=bGF7Y/sBLZEcFl6s/C2HQUQP8ZLnPzAdM+cgNkhM63w9i0OpN4e6iKhUYXEWSfv3G
-	 kIqQ5kaKsy+MEcxVgROCJEe8aW4cDHjhPsD3WVk6Vy59JGoPs2F5tYeedgYVQUglI1
-	 9CUBIqd2QekF/LGY37kf2XXPfjtv0Ggtc/iHKNdc=
+	by mail.kernel.org (Postfix) with ESMTP id 5DD4A2080A
+	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 20:48:53 +0000 (UTC)
+Authentication-Results: mail.kernel.org;
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="EsyCkpEV"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1788122AbgJZRl6 (ORCPT
+        id S1726164AbgJZUsx (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 26 Oct 2020 13:41:58 -0400
-Received: from mail-lj1-f193.google.com ([209.85.208.193]:40941 "EHLO
-        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1788121AbgJZRl5 (ORCPT
+        Mon, 26 Oct 2020 16:48:53 -0400
+Received: from mail-ed1-f66.google.com ([209.85.208.66]:46926 "EHLO
+        mail-ed1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726060AbgJZUsw (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 26 Oct 2020 13:41:57 -0400
-Received: by mail-lj1-f193.google.com with SMTP id 23so11136749ljv.7
-        for <linux-sparse@vger.kernel.org>; Mon, 26 Oct 2020 10:41:56 -0700 (PDT)
+        Mon, 26 Oct 2020 16:48:52 -0400
+Received: by mail-ed1-f66.google.com with SMTP id 33so10994393edq.13
+        for <linux-sparse@vger.kernel.org>; Mon, 26 Oct 2020 13:48:50 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=N6eZ8asGSWaNJRTlVJKaDhLMjE8/bJAq2MZ0ekD4X6g=;
-        b=AeAFuRraeqZz5d8YOAA8DA1QfybZuP9XAHWSEO5ynfw42p7hacF+tiFh4GFxSb4IeT
-         3duNsU6RTOLUrLpBz2jL1dYm8U7yML6Fp1oORukvh1ifny8InAI5YqyWNZ+dzgWnsSgo
-         8e99Qh2Ap4qCRxKxbpcPBArRqXRItufUUZJaE=
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=yvBmY6fG3HcniUYKWoOjal1ZhEVaapxXID2JEdztkQI=;
+        b=EsyCkpEVZatrvpvsECLRpThLMS5t++Uj1dldmnQ+vboLH/eojSR0kCqJybLgmgZAjj
+         /465F7F1Cq583EJwwlEdO15GVxT8YGEa9NI3sFUlGzl4lqvKBGDyiAMgLfiMKEGSso7M
+         Jjr7vi4iTiuLMB5X4q43C4i5t/pDW0d8TrgluBGuDE9RpoSUmnsGTYZHPCGeQHuEjdVh
+         qN/i6LEzVbZoIUoeN5RtqopXDNjDfSPA3HH3eXzWeRxffykQxupjR8d/Sv1Zmx3DSt6P
+         NeflvUtmsG8Gmo98fnBDoOi1CoTrcryElGSZdQcJ4pJD0SB9odMw9PZqXWo7uQGRF6ea
+         WGqw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=N6eZ8asGSWaNJRTlVJKaDhLMjE8/bJAq2MZ0ekD4X6g=;
-        b=qoFKdrx5PRBEVGpYBVt739KgDbssyVucP/Ln222ueHa5sxadIMCGsj1J1nMUUYVUob
-         uAMQhDd8yqKRQI4dO7GjsNSA3+GCprk+nzqUmiD3+xVZ+uvIe8bJ3mwPVThlvzWIkcwc
-         SoHTpM7LG/+tlRFLrbcEM6MVb3dADz0BxECihPP5G3v61uxxjeVQX7PupNpXdvMNp7jy
-         vjaapMbyZ3diBtcRVsUgwuYJdoYRddpE2k9FPwyfT6AQEpUibfsVZzHAij1b8bRLO+q6
-         OYPPpwQYG2SyrB7f10BeGWMbYSV4+8mBGZXmgP6UOGXt46K04IK9QDrhGeF9KEuecXBt
-         GPeg==
-X-Gm-Message-State: AOAM530V13jk4w5Wb+zn+wV9gpp35TpvPGnkLAdobsVQu1JoH1XEOyzw
-        B9EBv7gaJ6+qCTkDjUfo+HKl09TOzFtDZQ==
-X-Google-Smtp-Source: ABdhPJz+K3JB7D99rVDcHLc7Mw0dkaQoDs49TSvk0WRTv7ncMj+4TgKNQkLILoOlyXzwizQvorzCDg==
-X-Received: by 2002:a2e:87c6:: with SMTP id v6mr6785206ljj.233.1603734115012;
-        Mon, 26 Oct 2020 10:41:55 -0700 (PDT)
-Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com. [209.85.167.47])
-        by smtp.gmail.com with ESMTPSA id i139sm1100747lfi.276.2020.10.26.10.41.53
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
-Received: by mail-lf1-f47.google.com with SMTP id z2so13195430lfr.1
-        for <linux-sparse@vger.kernel.org>; Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
-X-Received: by 2002:a19:c703:: with SMTP id x3mr5104857lff.105.1603734113269;
- Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
-MIME-Version: 1.0
-References: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
-In-Reply-To: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon, 26 Oct 2020 10:41:36 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
-Message-ID: <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
-Subject: Re: [PATCH] handle more graciously labels with no statement
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=yvBmY6fG3HcniUYKWoOjal1ZhEVaapxXID2JEdztkQI=;
+        b=m6tIQdMujYPOQvhh+plPAeQkSr5vzhf2C7d5Osgd7VOXRKYcQY3NuOXk1ldKP2mBIW
+         8Kk+8HOTXtchTGEXFUs50flAVO93S7PxHHdDkhn/fllaiNdRtTFKnAxYjWZmRXuZ0k3p
+         mKtJKge9F89ZbuZql9LRiyUxTwiBQ9yAqyJG2dc/s12DxzdGfWdtCR2VbgtceXn4n8rm
+         f2U/ePIHBulLtsdnKNeR+fG0seai6kFA1/WRloyewx0Nxxixbp9YQ6gmBztMBMBVM6m5
+         Gr62xKTVRAH4Ts+UlXn2U+pavjfWWh9+TPkeHaCYjO/AZUr9R0WqnB4ttkTAWeV2n2dZ
+         H39Q==
+X-Gm-Message-State: AOAM531jbi6Nfx96F09vF+jdHIYWED1LcTP4jd7V/tNn/zxmV1zl5bw8
+        EAFvT1PEzr8N1dByOLw4hkiy6SS9HCk=
+X-Google-Smtp-Source: ABdhPJwh15J2MSxn5dYqGuRQvcD3Xp3g/XPibxy4pds6Qpa5/3E47mi7Hiim5E+yQQn7btJP8tV9Lw==
+X-Received: by 2002:a50:8adb:: with SMTP id k27mr17389330edk.254.1603745329470;
+        Mon, 26 Oct 2020 13:48:49 -0700 (PDT)
+Received: from ltop.local ([2a02:a03f:b7fe:f700:19a8:8f98:6135:ae35])
+        by smtp.gmail.com with ESMTPSA id cz11sm5803720edb.62.2020.10.26.13.48.48
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 26 Oct 2020 13:48:48 -0700 (PDT)
+Date:   Mon, 26 Oct 2020 21:48:47 +0100
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH] handle more graciously labels with no statement
+Message-ID: <20201026204847.h3uokzvm74g5ykcn@ltop.local>
+References: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
+ <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, Oct 25, 2020 at 9:53 PM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> This occurs currently on v5.10-rc1 because of some ifdefery.
+On Mon, Oct 26, 2020 at 10:41:36AM -0700, Linus Torvalds wrote:
+> On Sun, Oct 25, 2020 at 9:53 PM Luc Van Oostenryck
+> <luc.vanoostenryck@gmail.com> wrote:
+> >
+> > This occurs currently on v5.10-rc1 because of some ifdefery.
+> 
+> Well, sparse being more robust is good, so the patch looks sane to me..
+> 
+> But can you point to the actual 5.10-rc1 problem? I haven't seen the
+> report, and afaik gcc will complain about this too ("label at end of
+> compound statement") so I'm surprised sparse hits it..
 
-Well, sparse being more robust is good, so the patch looks sane to me..
+Well, I was surprised it wasn't caught and was ready to send a patch
+but it can only happen when using sparse, see below, quite ironical:
+	drivers/scsi/qla2xxx/qla_tmpl.c:1052.
+	1050         }
+	1051 
+	1052 bailout:
+	1053 #ifndef __CHECKER__
+	1054         if (!hardware_locked)
+	1055                 spin_unlock_irqrestore(&vha->hw->hardware_lock, flags);
+	1056 #endif
+	1057 }
 
-But can you point to the actual 5.10-rc1 problem? I haven't seen the
-report, and afaik gcc will complain about this too ("label at end of
-compound statement") so I'm surprised sparse hits it..
 
-                Linus
+-- Luc
