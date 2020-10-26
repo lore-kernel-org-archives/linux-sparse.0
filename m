@@ -2,103 +2,91 @@ Return-Path: <SRS0=2wv3=EB=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CD540C2D0A3
-	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 04:53:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A53B8C4363A
+	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 17:41:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7ACD420885
-	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 04:53:52 +0000 (UTC)
-Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BAM3vO2t"
+	by mail.kernel.org (Postfix) with ESMTP id 64A0722242
+	for <linux-sparse@archiver.kernel.org>; Mon, 26 Oct 2020 17:41:58 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+	s=default; t=1603734118;
+	bh=vpQ5tFPiLCFJV1Sry9KtCxLmgeGjA4r+OILADzUOOlg=;
+	h=References:In-Reply-To:From:Date:Subject:To:Cc:List-ID:From;
+	b=bGF7Y/sBLZEcFl6s/C2HQUQP8ZLnPzAdM+cgNkhM63w9i0OpN4e6iKhUYXEWSfv3G
+	 kIqQ5kaKsy+MEcxVgROCJEe8aW4cDHjhPsD3WVk6Vy59JGoPs2F5tYeedgYVQUglI1
+	 9CUBIqd2QekF/LGY37kf2XXPfjtv0Ggtc/iHKNdc=
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1421727AbgJZExw (ORCPT
+        id S1788122AbgJZRl6 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 26 Oct 2020 00:53:52 -0400
-Received: from mail-ed1-f65.google.com ([209.85.208.65]:42728 "EHLO
-        mail-ed1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1421724AbgJZExv (ORCPT
+        Mon, 26 Oct 2020 13:41:58 -0400
+Received: from mail-lj1-f193.google.com ([209.85.208.193]:40941 "EHLO
+        mail-lj1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1788121AbgJZRl5 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 26 Oct 2020 00:53:51 -0400
-Received: by mail-ed1-f65.google.com with SMTP id v19so7935051edx.9
-        for <linux-sparse@vger.kernel.org>; Sun, 25 Oct 2020 21:53:50 -0700 (PDT)
+        Mon, 26 Oct 2020 13:41:57 -0400
+Received: by mail-lj1-f193.google.com with SMTP id 23so11136749ljv.7
+        for <linux-sparse@vger.kernel.org>; Mon, 26 Oct 2020 10:41:56 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vHuVCeZqXXjUwloiAlWVyPXFVkqUORu74pKpfM7S7Mk=;
-        b=BAM3vO2tWDWGn0NtNR55WU8Hcw9jY7JDD1RO2pgP4NalyGgl1p0XQjIwOSjYg3bedk
-         UzwKMauL3XNTEa03G5i4IM9CtxFJq8JsOWRBBnUfs6n4S+7r400LAhEzSrUCPMe3XujO
-         0A2wFACpr8U86MM6SbxSYCJfcQmkRzp/9gqM2C2IXQvgMmwDgX7XGPmQc35mZA3op/cY
-         O0KKpteakwWWv/BEWnoql3QZuu1XY4SX2rbqgTmyQVwJWabl3Or7O5XGpRWrZHdsOEyd
-         OaVUweG+jxzauhPHzHmL89m/Zj5wGnrNKzpNxKT1sj9QeXwz/4MgYa4b7A6PoG2QHjc/
-         tL8w==
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=N6eZ8asGSWaNJRTlVJKaDhLMjE8/bJAq2MZ0ekD4X6g=;
+        b=AeAFuRraeqZz5d8YOAA8DA1QfybZuP9XAHWSEO5ynfw42p7hacF+tiFh4GFxSb4IeT
+         3duNsU6RTOLUrLpBz2jL1dYm8U7yML6Fp1oORukvh1ifny8InAI5YqyWNZ+dzgWnsSgo
+         8e99Qh2Ap4qCRxKxbpcPBArRqXRItufUUZJaE=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=vHuVCeZqXXjUwloiAlWVyPXFVkqUORu74pKpfM7S7Mk=;
-        b=dr+r3ZlqCyIM0JqwkWN7wKJw+ijlhjPFBvzuJursYvGL27Bich1b5/dswunuP3GOEl
-         zdCFewBa93XbkRdWPTF56jFEAE9to/5H2ArYX1twDYOOZm+suQTauG9mHZOx5+XOZx2m
-         6qHrKxxPjV8MnaFmuaK+sLmy2ozbenY/jnNN56yYTWavXLe01R6G80qhAS+ddI0N8feB
-         l2Fj8CFpN1WjLwRnnqUpWmqqYHBt/82n0hiKAgRUQqejY7i5TD/86QeQyMF/AHF8yotT
-         Nx3j9vw0cW0uGg0Yf9093+9+vkFk8dKXOXjKclUjGoKgqY9/xnusabC6Vg/kK0e492X0
-         W5/g==
-X-Gm-Message-State: AOAM533SKOCmKwQNHlX6fTrwmJO88qg4n0NRnqo7MTUXgZYKisM4Ftb+
-        vwzi1hIOcrnnr6krSjIOlEkvpi54Ozw=
-X-Google-Smtp-Source: ABdhPJxHe+ahXPpP3QdhglOKxyu6HXmFin1JwcAzMNe7F9e2/k5paokHixu30X3klwWz6l8cpHXN9A==
-X-Received: by 2002:aa7:d892:: with SMTP id u18mr14414603edq.305.1603688029785;
-        Sun, 25 Oct 2020 21:53:49 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:386e:dbb8:c5ed:3b46])
-        by smtp.gmail.com with ESMTPSA id z22sm4949699ejw.107.2020.10.25.21.53.48
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 25 Oct 2020 21:53:49 -0700 (PDT)
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] handle more graciously labels with no statement
-Date:   Mon, 26 Oct 2020 05:53:38 +0100
-Message-Id: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.29.0
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=N6eZ8asGSWaNJRTlVJKaDhLMjE8/bJAq2MZ0ekD4X6g=;
+        b=qoFKdrx5PRBEVGpYBVt739KgDbssyVucP/Ln222ueHa5sxadIMCGsj1J1nMUUYVUob
+         uAMQhDd8yqKRQI4dO7GjsNSA3+GCprk+nzqUmiD3+xVZ+uvIe8bJ3mwPVThlvzWIkcwc
+         SoHTpM7LG/+tlRFLrbcEM6MVb3dADz0BxECihPP5G3v61uxxjeVQX7PupNpXdvMNp7jy
+         vjaapMbyZ3diBtcRVsUgwuYJdoYRddpE2k9FPwyfT6AQEpUibfsVZzHAij1b8bRLO+q6
+         OYPPpwQYG2SyrB7f10BeGWMbYSV4+8mBGZXmgP6UOGXt46K04IK9QDrhGeF9KEuecXBt
+         GPeg==
+X-Gm-Message-State: AOAM530V13jk4w5Wb+zn+wV9gpp35TpvPGnkLAdobsVQu1JoH1XEOyzw
+        B9EBv7gaJ6+qCTkDjUfo+HKl09TOzFtDZQ==
+X-Google-Smtp-Source: ABdhPJz+K3JB7D99rVDcHLc7Mw0dkaQoDs49TSvk0WRTv7ncMj+4TgKNQkLILoOlyXzwizQvorzCDg==
+X-Received: by 2002:a2e:87c6:: with SMTP id v6mr6785206ljj.233.1603734115012;
+        Mon, 26 Oct 2020 10:41:55 -0700 (PDT)
+Received: from mail-lf1-f47.google.com (mail-lf1-f47.google.com. [209.85.167.47])
+        by smtp.gmail.com with ESMTPSA id i139sm1100747lfi.276.2020.10.26.10.41.53
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
+Received: by mail-lf1-f47.google.com with SMTP id z2so13195430lfr.1
+        for <linux-sparse@vger.kernel.org>; Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
+X-Received: by 2002:a19:c703:: with SMTP id x3mr5104857lff.105.1603734113269;
+ Mon, 26 Oct 2020 10:41:53 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201026045338.55218-1-luc.vanoostenryck@gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon, 26 Oct 2020 10:41:36 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
+Message-ID: <CAHk-=wigYApoRH_LS2wu-i7fNp0wF1eJz27od02oo124qXvBjw@mail.gmail.com>
+Subject: Re: [PATCH] handle more graciously labels with no statement
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-In C a label must precede a statement. A null statement is OK
-but a closing braces is not.
+On Sun, Oct 25, 2020 at 9:53 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> This occurs currently on v5.10-rc1 because of some ifdefery.
 
-So, catch this situation, emit a warning and continue as if a
-null statement was there.
+Well, sparse being more robust is good, so the patch looks sane to me..
 
-This occurs currently on v5.10-rc1 because of some ifdefery.
+But can you point to the actual 5.10-rc1 problem? I haven't seen the
+report, and afaik gcc will complain about this too ("label at end of
+compound statement") so I'm surprised sparse hits it..
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- parse.c | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/parse.c b/parse.c
-index 31ecef0f554d..b6090d38cc61 100644
---- a/parse.c
-+++ b/parse.c
-@@ -2468,6 +2468,11 @@ static struct token *statement(struct token *token, struct statement **tree)
- 					warn_label_usage(stmt->pos, s->label_pos, s->ident);
- 			}
- 			s->stmt = stmt;
-+			if (match_op(token, '}')) {
-+				warning(token->pos, "statement expected after label");
-+				stmt->label_statement = alloc_statement(token->pos, STMT_NONE);
-+				return token;
-+			}
- 			return statement(token, &stmt->label_statement);
- 		}
- 	}
--- 
-2.29.0
-
+                Linus
