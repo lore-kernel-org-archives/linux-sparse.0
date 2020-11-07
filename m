@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D1EBC55179
-	for <linux-sparse@archiver.kernel.org>; Sat,  7 Nov 2020 11:42:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 972D9C4742C
+	for <linux-sparse@archiver.kernel.org>; Sat,  7 Nov 2020 11:42:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 22C5720888
-	for <linux-sparse@archiver.kernel.org>; Sat,  7 Nov 2020 11:42:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5755D20888
+	for <linux-sparse@archiver.kernel.org>; Sat,  7 Nov 2020 11:42:34 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="OUpIiWwh"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="o63un7LS"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726832AbgKGLmd (ORCPT
+        id S1727380AbgKGLme (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 7 Nov 2020 06:42:33 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44232 "EHLO
+        Sat, 7 Nov 2020 06:42:34 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44238 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727298AbgKGLmc (ORCPT
+        with ESMTP id S1727298AbgKGLmd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 7 Nov 2020 06:42:32 -0500
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B367FC0613D2
-        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 03:42:31 -0800 (PST)
-Received: by mail-ed1-x541.google.com with SMTP id y15so3749265ede.11
-        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 03:42:31 -0800 (PST)
+        Sat, 7 Nov 2020 06:42:33 -0500
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5F81BC0613CF
+        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 03:42:33 -0800 (PST)
+Received: by mail-ed1-x543.google.com with SMTP id a71so3887430edf.9
+        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 03:42:33 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=yjYjNkgWjmMIc5uso+F56+hNknduB00wPJ4s7Ix2yqk=;
-        b=OUpIiWwhOxa+Xee++/LvazYTqphhhzl1UTlzBz0frDs5V2RX4g5iJMMrQCFRLA3LGM
-         W+m/vmgHr6WYRHvWRxhrURQVc6M4vaww/aQ2wkG114TnswF4mAGcUQDAsVZrZeUMtHld
-         t97M+A+VoGnjeVWSv8/qZ/14rThdJ0TrJA+Cy7Dy0J/DNwL25dboeKM7xoL+f1QIs5HB
-         sY7dYZO5lMkH7nUzehg2gj194s93WpQO6zXluRk3qNw5qtEY6GJTzq3z8arVXYSIw4IK
-         3yi1oWJ1am8ZNNW9ViwUejii75LsMS/CVhiOYG/xIKKfl4oVdzESeKePJkQjPolZbaHs
-         zQ6w==
+        bh=R2sUtEHvCLrCt/e21J8At3wo4kIFRpgi6Q+W2pGm6ew=;
+        b=o63un7LS9vh+v0W2dDDPASbPg2nVYxNt5PEMGAftkh1m6hjBI6vQo2ajCn9oaPzBET
+         8QxSDmVBqYyOyrWpxH7+s5z2bwx+YJf/VKHkgwrl6hmlul8g+tPgJRUgJgaY2erO+fd0
+         aqVRe9hwIXC2H7gc/zS2vODzgz+uy/pVNJrhETEVyERUFH+k17wl+Cij1XLtbqvszZZJ
+         j/epJbNf0qgDTLPmy6XL3/CrtCUIze2vEw3Ngx5FRQJDoq0BPR+nL9jYR/KDIqAmuxXG
+         UWLDLh6CNxuHbu7teIgH96fjsa/p1806bSsVESCjhLUZrUsb0tofxLtDSnhCLrwcWaXQ
+         qb9g==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=yjYjNkgWjmMIc5uso+F56+hNknduB00wPJ4s7Ix2yqk=;
-        b=Hqwj8Aymsbd6pG+2ChPB0+CYwZEBkhGtNM9WIgoS6wsFtx1YNnYOkPIrxTVRBrM9zN
-         HHD+wYLABeUUxHgWcCdUzVtOTEPt3t5ToUyorqqX2mMq8penKVTCaEv0kKK/E3bwdsL3
-         pwPTLZhZJ3oi2mcTEVlM5Ki3ZnoUe7D8dZHR3bfxXo3eP1T9bRvgdyXLyo2in+NQJZOw
-         TjHitUV+Kp1p1ZWROEQ+4TeZ0OKsrqNIeZ22hb00jwXHjlmD+7lvKYXPmQQA+Lrhors9
-         e35P4ssI6f25tw1xA3+owuRoZqsTDqIOwBXlVxbyd8ELzFiHAXtJIwnRCapb/Pi1dql0
-         C94g==
-X-Gm-Message-State: AOAM533+l+hhVY08WTo+vldA/JhjIRjEIpZMX8Eb33w25jTcuPXWY1Fy
-        ykRhC3Ae6Ul5eA0ci2bLEiUjT2tr51E=
-X-Google-Smtp-Source: ABdhPJyie/3rLjRACEGsJfPj4c7UZg0w6rrvD/K8YaJpgetjJ2Ir9MkTiTh/+VMSTW7L7iOEc3gtWg==
-X-Received: by 2002:aa7:d2d9:: with SMTP id k25mr6366234edr.310.1604749350164;
-        Sat, 07 Nov 2020 03:42:30 -0800 (PST)
+        bh=R2sUtEHvCLrCt/e21J8At3wo4kIFRpgi6Q+W2pGm6ew=;
+        b=oyIInWUAqiFrr56NZNaqCoWQr2lxeuhx5JkjTwI3fmVeca9eiCH/OitytvYmNLE4Ry
+         Gd5DAgxBPRU3uoM52s/uX9QFUKhw5afwIgARI/4D8UbHRyznAlcbmMBQ3RlbK4fApE1q
+         ez1r2IiSOINoNMNCM6/qXNlkyQh+LosI1pfQ7IObB+iXEyHH3a+b3qXB85cjzMLGJy7C
+         b6RB4qT5ryKwYTGqizTQQ2/EOhCd/m6sD/Fkkn60EABee13lAOBTIB3oXQ0jTipUA+NU
+         DrhLeH1Ebm+81Rp9WlwQBPxi/+RuPJ2FWsqwPBf7J0MyTGJG5tfSA5CLnrByyeryLJEQ
+         MVAA==
+X-Gm-Message-State: AOAM533/EnQ1IGxfue84NLrDZ5RN9VPRawshB8Sxoc+OQVQBo5TFkkUE
+        llyOixUc+x5l77iponrYFQKSFAucYKk=
+X-Google-Smtp-Source: ABdhPJwSzUbJLDZJz3pyQKhvEXmBGUMpIVoqhQ1H9tav/O0pYq+qZFgrc4iss+d93koZVJoIkTOqYw==
+X-Received: by 2002:a50:eb87:: with SMTP id y7mr6728697edr.187.1604749351859;
+        Sat, 07 Nov 2020 03:42:31 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:9030:856f:68be:7b84])
-        by smtp.gmail.com with ESMTPSA id s21sm3308311edc.42.2020.11.07.03.42.29
+        by smtp.gmail.com with ESMTPSA id s21sm3308311edc.42.2020.11.07.03.42.31
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 Nov 2020 03:42:29 -0800 (PST)
+        Sat, 07 Nov 2020 03:42:31 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/5] select: simplify SEL(SEL(x, C1, C2), y, z) --> y (with C1, C2 != 0)
-Date:   Sat,  7 Nov 2020 12:42:21 +0100
-Message-Id: <20201107114222.11866-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/5] select: simplify handling of constant cond or src1 == src2
+Date:   Sat,  7 Nov 2020 12:42:22 +0100
+Message-Id: <20201107114222.11866-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201107114222.11866-1-luc.vanoostenryck@gmail.com>
 References: <20201107114222.11866-1-luc.vanoostenryck@gmail.com>
@@ -76,50 +76,55 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-If the condition of a select is also a select, with constant
-but non-zero operands, then the result of this inner select
-is always true and the outer select can be replaced by its
-second operand.
+If the operands of a select instruction are identical, then
+this select can be replaced by its operand.
+If the condition of a select is a constant, the this select
+can be replaced by one of its condition, depending on the
+truth value of the condition.
+
+This simplification is already done but:
+* when src1 == src2, the condition's value is tested although
+  it may not be a constant. It's kinda OK because in all case
+  one of the operand will be selected and both are identical
+  but it's a bit weird and unclean.
+* since the instruction will be replaced, the usage of its
+  condition and operands must be removed. This is done here but
+  the kill_instruction() inside replace_with_pseudo() take
+  already care of this.
+
+So, separate the two cases and simply use replace_with_pseudo()
+for both without bothering killing the operands.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                                 | 3 +++
- validation/optim/select-select-true-true.c | 1 -
- 2 files changed, 3 insertions(+), 1 deletion(-)
+ simplify.c | 14 ++++++--------
+ 1 file changed, 6 insertions(+), 8 deletions(-)
 
 diff --git a/simplify.c b/simplify.c
-index 1fcfc691579a..20ea5f1be71a 100644
+index 20ea5f1be71a..20ab9b3b3ecf 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -1793,6 +1793,7 @@ static int simplify_select(struct instruction *insn)
- 			//	SEL(SEL(x, C, 0), y, z) --> SEL(x, y, z)
- 			//	SEL(SEL(x, C, 0), C, 0) --> SEL(x, C, 0) == cond
- 			//	SEL(SEL(x, 0, C), y, z) --> SEL(x, z, y)
-+			//	SEL(SEL(x, C1, C2), y, z) --> y
- 			if (!def->src3->value) {
- 				if ((src1 == def->src2) && (src2 == def->src3))
- 					return replace_with_pseudo(insn, cond);
-@@ -1802,6 +1803,8 @@ static int simplify_select(struct instruction *insn)
- 				switch_pseudo(insn, &insn->src2, insn, &insn->src3);
- 				return replace_pseudo(insn, &insn->cond, def->cond);
- 			}
-+			// both values must be non-zero
-+			return replace_with_pseudo(insn, src1);
- 		}
- 		break;
- 	}
-diff --git a/validation/optim/select-select-true-true.c b/validation/optim/select-select-true-true.c
-index e6fa2c89febb..c0c26fdd199a 100644
---- a/validation/optim/select-select-true-true.c
-+++ b/validation/optim/select-select-true-true.c
-@@ -3,7 +3,6 @@ int foo(int p, int a, int b) { return ((p ? 42 : 43) ? a : b) == a ; }
- /*
-  * check-name: select-select-true-true
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-returns: 1
+@@ -1753,14 +1753,12 @@ static int simplify_select(struct instruction *insn)
+ 	cond = insn->src1;
+ 	src1 = insn->src2;
+ 	src2 = insn->src3;
+-	if (constant(cond) || src1 == src2) {
+-		pseudo_t *kill, take;
+-		kill_use(&insn->src1);
+-		take = cond->value ? src1 : src2;
+-		kill = cond->value ? &insn->src3 : &insn->src2;
+-		kill_use(kill);
+-		return replace_with_pseudo(insn, take);
+-	}
++
++	if (constant(cond))
++		return replace_with_pseudo(insn, cond->value ? src1 : src2);
++	if (src1 == src2)
++		return replace_with_pseudo(insn, src1);
++
+ 	if (constant(src1) && constant(src2)) {
+ 		long long val1 = src1->value;
+ 		long long val2 = src2->value;
 -- 
 2.29.2
 
