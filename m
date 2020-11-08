@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 16DB2C388F9
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 491A2C388F7
 	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:21:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C97E5208FE
-	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:21:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1262D20885
+	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:21:38 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="HYmG5LQU"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="PT5DYhxW"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728531AbgKHBVh (ORCPT
+        id S1727871AbgKHBVh (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Sat, 7 Nov 2020 20:21:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57880 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57876 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727871AbgKHBVh (ORCPT
+        with ESMTP id S1728276AbgKHBVh (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sat, 7 Nov 2020 20:21:37 -0500
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 05721C0613D3
-        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 17:21:37 -0800 (PST)
-Received: by mail-ej1-x644.google.com with SMTP id o21so7266511ejb.3
-        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 17:21:36 -0800 (PST)
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EF89CC0613D2
+        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 17:21:35 -0800 (PST)
+Received: by mail-ej1-x643.google.com with SMTP id o23so7242902ejn.11
+        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 17:21:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=/9J992tTLG2w4CWdNXUkzfs6Rt3w4UoHYyRE09KHFY0=;
-        b=HYmG5LQUB3e+culG/vzQftPNAv0mYhMHHFHO7ULdbQAgyyyh0ERo6YORaZI03hrHlu
-         crIYPJd5sQmmRYKJ23p5kEaDFY1ZNCtJ5HJ97TFRAT4aoYv36sZSvjKDCuUDnz+/mm3+
-         4KEPAaB8f6wK81dgIrT6xzmVolhv9aNLwS/gdtcI+HKnMBVdSLp2st7eIUl9Il8Um7UL
-         9R4NUMmWv91u/akFjAd2UVOk+4//xqJZYCfG+geeVrAlv19OEzFUoCKsK90EeQrnDTOY
-         EFIuODu+2HzHr4MC8/dydEWqU9HDDCYw/yEBxA+Hwpu5yaTMADpPMSpFhDp8Thz7BcOG
-         AVWg==
+        bh=OYcfxfP7JfsJsqCV46fPWP5tjHEZ/zqMS2OWu7QVLyU=;
+        b=PT5DYhxWXQcVpJPfv9sZoGzRvf7ZAB8B6V5S/C6yGC/Z53+evnDpskskf7n1FT1qxE
+         +cPD3zM00wqo2MLZUBlAZhEe7cESYF8aiAHeYAA6lpUDgHW3RS3RWp1r1TExfGEdfYaE
+         MdJQhXgMn2yDhFIUqZ6zrC6ki9LDbhEJoTUt444QBXBbjDkWHfUTZtq+RbQ5pzuYVPVh
+         DMdtKt/rhyO9oxmucQyEZZAyDOSehurbjJz3kq7Ge7QQygzzTAaDnlopqpJWOzP2nUg8
+         BxO5q40ZAd5dOt5AvzMbqsL7HqIUF38h8PBiy3o3DMLNWx6hHPsNVFYkWPalhpMwa/Qd
+         sOgA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=/9J992tTLG2w4CWdNXUkzfs6Rt3w4UoHYyRE09KHFY0=;
-        b=UOtXUgOKVymLOz0rDeaPa68h2kCgGDlqQSCOQ6Iqu+0b4K+lYG9cRiEoc7THYHbNah
-         adGMK55nI21pfkVDtdtJ8SuowRSKyV+srXcfzZx0M4m9cU8H0WUhn6u3LXibm0ciXbEx
-         wBItiPeJY5uYv7Pp1tBofDVyedR1qbRupYs0rjs2SuuBKTxGivvyLO6tyXvUbUIOp0BP
-         +Ol/aNjihOM+loFRFh+ipp0swf6d5tsU0UZS+TEUaqxISuUH1iVKE/hpICcSs5uN3XMA
-         XcmmPxx0XZh4axurNQeQqCLwAq9DSpEFQuNVtSKBKLGgqKHZfWG+SkaUtgp0fyja6vGR
-         TwhQ==
-X-Gm-Message-State: AOAM530ih8o96QBZpKCi7sIUb1+X/nNeOAP/pv67X6fuHW80UYNHJrhI
-        yZGRd1vcu334ubUndQ5lI6jS28PGejk=
-X-Google-Smtp-Source: ABdhPJxRMsNqpAaKmi30ikXZnF8Sz2JaHO078SvxVNy916Rr7ccY7WOLUC/qdwuQyqi0MUWV3zOwHg==
-X-Received: by 2002:a17:906:400c:: with SMTP id v12mr9352913ejj.387.1604798495426;
-        Sat, 07 Nov 2020 17:21:35 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:fce6:5cb0:27db:5e8c])
-        by smtp.gmail.com with ESMTPSA id u25sm4511426eje.99.2020.11.07.17.21.34
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=OYcfxfP7JfsJsqCV46fPWP5tjHEZ/zqMS2OWu7QVLyU=;
+        b=NL5kLauV0uhov540Y4olDbRLv6GjhkMr26OBumlDaxO+hTZ0iutlHzkImPfhgdp8sP
+         pTYftM5zNVbkfgk0e1RQ+esmfb+Jskxwu1vk/zCSDSj+78vMVuPYS5YCdASHCSgSCIII
+         MoCF7uRQRIupUwlOhcP7hss7HN6GJgKX2oNHqLHfOSsB8oC7KOIDUbR70krfnoNeudgo
+         Tfa5HsPx1tQAW6mBTCgzyEi9D820EdkgBbcWJSaXzSuojlP+Pf+VNBj8BEaQ32GVzX0C
+         E4ji3urdB/K8gZeQHUdD4phWHEHimBHPb6B733/cs9wsX89l+pnzCf68ySif8+xBEGlQ
+         qciw==
+X-Gm-Message-State: AOAM530Hwj+KKC8ESgq1R094by0LXzHKXB8QUjdFQKi4lBNbQYA8D+mt
+        DEfYJHbyfxm8tZz6TLRabtbV8MZUd8k=
+X-Google-Smtp-Source: ABdhPJyNo1O/aeLJ4hABtgFSnW6QjC4xzVZF1lkINUHgEwejAftMa88rjrRLcPjNXCkhZsZiAzpkeA==
+X-Received: by 2002:a17:906:3fc1:: with SMTP id k1mr8555550ejj.287.1604798494484;
         Sat, 07 Nov 2020 17:21:34 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:fce6:5cb0:27db:5e8c])
+        by smtp.gmail.com with ESMTPSA id u25sm4511426eje.99.2020.11.07.17.21.33
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 07 Nov 2020 17:21:33 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 16/16] cmp: simplify compares and sign/zero extend
-Date:   Sun,  8 Nov 2020 02:21:26 +0100
-Message-Id: <20201108012126.94339-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 15/16] cmp: simplify zext(x) cmpu C
+Date:   Sun,  8 Nov 2020 02:21:25 +0100
+Message-Id: <20201108012126.94339-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201108012126.94339-1-luc.vanoostenryck@gmail.com>
 References: <20201108011939.94252-1-luc.vanoostenryck@gmail.com>
@@ -76,117 +76,39 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Compare instructions with both operands sign or zero-extended
-from the same original size are equivalent to a compare of
-the original values. If the values were zero-extended, a signed
-compare becomes an unsigned one.
+An unsigned compare of a zero-extended value against a
+constant outside of the original range is statically known.
 
-Simplify away the sign/zero-extensions.
+Simplify to the corresponding 0/1.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                       | 52 ++++++++++++++++++++++++++------
- validation/optim/cmp-sext-sext.c |  1 -
- validation/optim/cmp-zext-zext.c |  1 -
- 3 files changed, 42 insertions(+), 12 deletions(-)
+ simplify.c                        | 4 ++++
+ validation/optim/cmp-zext-uimm2.c | 1 -
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index 7538c9393b41..d56d4c89a078 100644
+index 83ae763eac72..7538c9393b41 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -422,6 +422,22 @@ static inline bool is_signed_constant(long long val, unsigned osize, unsigned ns
- 	return bits_extend(val, osize, 1) == bits_extend(val, nsize, 1);
- }
- 
-+///
-+// is @src generated by an instruction with the given opcode and size?
-+static inline pseudo_t is_same_op(pseudo_t src, int op, unsigned osize)
-+{
-+	struct instruction *def;
-+
-+	if (src->type != PSEUDO_REG)
-+		return NULL;
-+	def = src->def;
-+	if (def->opcode != op)
-+		return NULL;
-+	if (def->orig_type->bit_size != osize)
-+		return NULL;
-+	return def->src;
-+}
-+
- ///
- // replace the operand of an instruction
- // @insn: the instruction
-@@ -1570,6 +1586,30 @@ static int simplify_sub(struct instruction *insn)
- 	return 0;
- }
- 
-+static int simplify_compare(struct instruction *insn)
-+{
-+	pseudo_t src1 = insn->src1;
-+	pseudo_t src2 = insn->src2;
-+	struct instruction *def;
-+	unsigned int osize;
-+	pseudo_t src;
-+
-+	switch (DEF_OPCODE(def, src1)) {
-+	case OP_SEXT: case OP_ZEXT:
-+		osize = def->orig_type->bit_size;
-+		if ((src = is_same_op(src2, def->opcode, osize))) {
-+			const struct opcode_table *op = &opcode_table[insn->opcode];
-+			if ((def->opcode == OP_ZEXT) && (op->flags & OPF_SIGNED))
-+				insn->opcode = op->sign;
-+			insn->itype = def->orig_type;
-+			replace_pseudo(insn, &insn->src1, def->src);
-+			return replace_pseudo(insn, &insn->src2, src);
-+		}
-+		break;
-+	}
-+	return 0;
-+}
-+
- static int simplify_constant_unop(struct instruction *insn)
- {
- 	long long val = insn->src1->value;
-@@ -2083,17 +2123,9 @@ int simplify_instruction(struct instruction *insn)
- 	case OP_DIVS:
- 	case OP_MODU:
- 	case OP_MODS:
--	case OP_SET_EQ:
--	case OP_SET_NE:
--	case OP_SET_LE:
--	case OP_SET_GE:
--	case OP_SET_LT:
--	case OP_SET_GT:
--	case OP_SET_B:
--	case OP_SET_A:
--	case OP_SET_BE:
--	case OP_SET_AE:
+@@ -1198,6 +1198,10 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
+ 			else
+ 				return replace_with_value(insn, 1);
+ 			break;
++		case OP_SET_B: case OP_SET_BE:
++			return replace_with_value(insn, 1);
++		case OP_SET_AE: case OP_SET_A:
++			return replace_with_value(insn, 0);
+ 		}
  		break;
-+	case OP_BINCMP ... OP_BINCMP_END:
-+		return simplify_compare(insn);
- 	case OP_LOAD:
- 	case OP_STORE:
- 		return simplify_memop(insn);
-diff --git a/validation/optim/cmp-sext-sext.c b/validation/optim/cmp-sext-sext.c
-index ba6ed54e940c..3bd22fb738ca 100644
---- a/validation/optim/cmp-sext-sext.c
-+++ b/validation/optim/cmp-sext-sext.c
-@@ -11,7 +11,6 @@ _Bool cmpu_sext_sext(ARGS(INT32)) { return TEST(UINT64, UINT32, a, < , b); }
+ 	}
+diff --git a/validation/optim/cmp-zext-uimm2.c b/validation/optim/cmp-zext-uimm2.c
+index 64f30b9a3df5..214bd96fb4ce 100644
+--- a/validation/optim/cmp-zext-uimm2.c
++++ b/validation/optim/cmp-zext-uimm2.c
+@@ -23,7 +23,6 @@ int zext_gtu_m(unsigned x) { return (zext(x) >  0x0fffffffeUL) == (x >  0xffffff
  /*
-  * check-name: cmp-sext-sext
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-returns: 1
-diff --git a/validation/optim/cmp-zext-zext.c b/validation/optim/cmp-zext-zext.c
-index 9f188297e214..88f9078f9480 100644
---- a/validation/optim/cmp-zext-zext.c
-+++ b/validation/optim/cmp-zext-zext.c
-@@ -11,7 +11,6 @@ _Bool cmpu_zext_zext(ARGS(UINT32)) { return TEST(UINT64, UINT32, a, < , b); }
- /*
-  * check-name: cmp-zext-zext
+  * check-name: cmp-zext-uimm2
   * check-command: test-linearize -Wno-decl $file
 - * check-known-to-fail
   *
