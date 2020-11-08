@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5EE3C388F7
-	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:19:53 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A6971C388F9
+	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:19:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CBC520885
-	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:19:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6769E20885
+	for <linux-sparse@archiver.kernel.org>; Sun,  8 Nov 2020 01:19:54 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="X1YLamVB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rLoxAE6B"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728752AbgKHBTx (ORCPT
+        id S1728568AbgKHBTy (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 7 Nov 2020 20:19:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57602 "EHLO
+        Sat, 7 Nov 2020 20:19:54 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57606 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726060AbgKHBTx (ORCPT
+        with ESMTP id S1728279AbgKHBTy (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 7 Nov 2020 20:19:53 -0500
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C4941C0613D2
-        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 17:19:52 -0800 (PST)
-Received: by mail-ej1-x643.google.com with SMTP id cw8so7243168ejb.8
-        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 17:19:52 -0800 (PST)
+        Sat, 7 Nov 2020 20:19:54 -0500
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B7282C0613CF
+        for <linux-sparse@vger.kernel.org>; Sat,  7 Nov 2020 17:19:53 -0800 (PST)
+Received: by mail-ej1-x644.google.com with SMTP id k3so7238718ejj.10
+        for <linux-sparse@vger.kernel.org>; Sat, 07 Nov 2020 17:19:53 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=jKETXCOxbuPiYDn4OL3cUM1t7GC6XVLA7eZ9dGAEPbM=;
-        b=X1YLamVBVgxymqFzTFoDqI7/8cducrhgc8AockGhEue56JFDEPoZy5sLPoQyTenay+
-         5NZ1KD96SJuBWIm9XRu/zzetG1MYDw9AcWBxXM1+KUXeLFQB/6thS8idOafqC1hDZBCt
-         PrOk3h6G9YEZ2D3SVPyfXlFz3Dch5y44W1Btl7hQ3E3KxpKuTniDOMaUoM2TQqkCq6ze
-         f742jRRKwUrgy6vvf5r36+wMOAJ6ZlsiTFZNfdjoERmsBi4g4o4LBbDJx6I6fp63CN2w
-         6+KYFzCsObWbCY4mFCVRFOvVO2Flp6bsPj9dWaoHfHVHgX4fuJ+ccphrlwfqsT3RSsJO
-         B+Ug==
+        bh=xH1VUOFWIU3nomIe48C0/JIkSj0BwVm9wOVBaq6KPFU=;
+        b=rLoxAE6BZkO5WiRXZ9yz/rxvfNZA8V+rHdeAgIcFQE8z5kHUhF3SWi5kGJsTM7cj02
+         6Fw7MjRTkauUJftlPjN/SkSocc6mI5io28CS84ozGtFKukY4tWSoMTxvwlhEasbafr4G
+         4mGAJQqWuYZxPf1b5ve3Ld/fOlG84Nn1fUtwBfr0ZgJC4AydI3bpyTR/v5URyvlbUTn5
+         YM7+9SHlPP1NDTeRpfijUGYinW8a/cbiUmoB7daSDXDdE2o98igqWZ6GsYvf1Yx2XRue
+         kdjHh6TVECsTv4zCZ8w2bmp/p4XTHgQF5XV1AUdr3nM0iS45YJf8uYh377wzK1gXIMka
+         I0pw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=jKETXCOxbuPiYDn4OL3cUM1t7GC6XVLA7eZ9dGAEPbM=;
-        b=M+BK/Oy9nosAjsGt5ZsV3wON7iA1XAFztBpuv3XoZMRGor2zxOWhGuctDSv1jAfri3
-         3yVuT/AjkLjR448OYEJ4211aphqV2Iw81Rtt2Np3GQzUDLNkY72r2S0Ex7rc7nShQE31
-         hP7nOaSwIzq8Wh/PD6vyu/pE9lPp/ift1qTI4wxsEsuAJD+MB32IGcpbaWlr9KjAkCo5
-         p0dxUSAjhKqMhUCTDeOVspXhoNZLloHLC4fSYaTPtPNp9Y+6LgjHOq5pdXjG1vkvriun
-         HNsNYZQRa9hRFBG+b/ZnLuY5W5u5eekeWb9jK08SEgdFWfRI8hc556wvwki7q42NkBTM
-         uHXA==
-X-Gm-Message-State: AOAM533qsmcxTtn7bTUgThjK85/h/C7GN51LfjDOCA+/l/jjC3FbefSv
-        tCdLTn4c+y6Hu5gtLoNvoMbX1P0B8WY=
-X-Google-Smtp-Source: ABdhPJwrEJrJrasZgIEmNKcJtHwglcxSdPeZIci44Dy56kk8LFVWTugA55lSeT61LThLQaChvFcwaA==
-X-Received: by 2002:a17:906:6d99:: with SMTP id h25mr8841408ejt.281.1604798391270;
-        Sat, 07 Nov 2020 17:19:51 -0800 (PST)
+        bh=xH1VUOFWIU3nomIe48C0/JIkSj0BwVm9wOVBaq6KPFU=;
+        b=Wd2xDkjvuk+WRS7Y16AKZekD5dAoxgR/LPRx9bc6XwZ/7dmW9oUcXLWakOYKF5HvWE
+         x6XeZ+5NDAqB1kJvdMxMv+oUTr5q0NMyYzbbYD1F10CQmy4FZ9credwgfZfqEVfCpw6r
+         FIap/na5pfqtz3ThqnKNEkNScvh6fBSOB4yIu2VQKrs0q6mEiWYaQXWBAtTzhDYff1Z6
+         d2wVk2yhUIpDKVDhmmuqwZtcTVjg0XJcaJPPI5wA5x0ZxPnPM/oRBrBNpjAUthqm2BXL
+         BW/xH+CNcOn/kBxgqOuDQ74aS9V9F6mWlKfAEOAkJFudQUDKpY1tbQWRoqyRQ3/RYHS9
+         kZQQ==
+X-Gm-Message-State: AOAM532mzMiO3pvKyBYkl0gIuZvwOk+jWWdFmsQQTAza6+kWwN8ChPyI
+        hf69vkaZ4/6B0Vv+Y5Uga60DvifvIhQ=
+X-Google-Smtp-Source: ABdhPJwdz0bu4MlZ4nl2z4dV/Yf7HYzFJhSbqYSRiOsy6GCnUh6aDLzEyUWhwpkYdECRO4SQhaCFYg==
+X-Received: by 2002:a17:906:c315:: with SMTP id s21mr8576556ejz.285.1604798392263;
+        Sat, 07 Nov 2020 17:19:52 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:fce6:5cb0:27db:5e8c])
-        by smtp.gmail.com with ESMTPSA id t22sm4545127edq.64.2020.11.07.17.19.50
+        by smtp.gmail.com with ESMTPSA id t22sm4545127edq.64.2020.11.07.17.19.51
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 07 Nov 2020 17:19:50 -0800 (PST)
+        Sat, 07 Nov 2020 17:19:51 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 08/16] cmp: canonicalize unsigned compare with UMAX or UMAX-1
-Date:   Sun,  8 Nov 2020 02:19:38 +0100
-Message-Id: <20201108011939.94252-9-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 09/16] cmp: canonicalize unsigned (x {<=,>} SMAX)
+Date:   Sun,  8 Nov 2020 02:19:39 +0100
+Message-Id: <20201108011939.94252-10-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201108011939.94252-1-luc.vanoostenryck@gmail.com>
 References: <20201108011939.94252-1-luc.vanoostenryck@gmail.com>
@@ -75,65 +75,48 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Unsigned compares with UMAX (or UMAX-1) are equivalent to
-equality tests. These are preferable since it's easier to reason
-about them in other simplifications.
+Unsigned <= or > against SMAX are equivalent to testing if the
+value is positive or not (when interpreted as a signed number).
 
-So canonicalize these compares to equality tests.
+Canonicalize to this positive/negative test since it only needs
+the constant 0 which make it easier to handle at later steps.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                   | 8 ++++++++
- validation/optim/set-uimm2.c | 1 -
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ simplify.c                   | 4 ++++
+ validation/optim/set-uimm3.c | 1 -
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index 160a6ab15e7f..7921300f7280 100644
+index 7921300f7280..2176f90dc133 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -1090,6 +1090,8 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
- 			return replace_with_pseudo(insn, value_pseudo(0));
- 		if (value == 1)			// (x < 1) --> (x == 0)
- 			return replace_binop_value(insn, OP_SET_EQ, 0);
-+		else if (value == bits)		// (x < ~0) --> (x != ~0)
-+			return replace_binop_value(insn, OP_SET_NE, value);
- 		else				// (x < y) --> (x <= (y-1))
- 			changed |= replace_binop_value(insn, OP_SET_BE, value - 1);
- 		break;
-@@ -1098,6 +1100,8 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
+@@ -1112,6 +1112,8 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
  			return replace_with_pseudo(insn, value_pseudo(1));
- 		if (value == 1)			// (x >= 1) --> (x != 0)
- 			return replace_binop_value(insn, OP_SET_NE, 0);
-+		else if (value == bits)		// (x >= ~0) --> (x == ~0)
-+			return replace_binop_value(insn, OP_SET_EQ, value);
- 		else				// (x >= y) --> (x > (y-1)
- 			changed |= replace_binop_value(insn, OP_SET_A, value - 1);
- 		break;
-@@ -1106,12 +1110,16 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
- 			return replace_opcode(insn, OP_SET_EQ);
- 		if (value == bits)		// (x <= ~0) --> 1
- 			return replace_with_pseudo(insn, value_pseudo(1));
-+		if (value == (bits - 1))	// (x <= ~1) --> (x != ~0)
-+			return replace_binop_value(insn, OP_SET_NE, bits);
+ 		if (value == (bits - 1))	// (x <= ~1) --> (x != ~0)
+ 			return replace_binop_value(insn, OP_SET_NE, bits);
++		if (value == (bits >> 1))	// (x u<= SMAX) --> (x s>= 0)
++			changed |= replace_binop_value(insn, OP_SET_GE, 0);
  		break;
  	case OP_SET_A:
  		if (!value)			// (x > 0) --> (x != 0)
- 			return replace_opcode(insn, OP_SET_NE);
- 		if (value == bits)		// (x > ~0) --> 0
+@@ -1120,6 +1122,8 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
  			return replace_with_pseudo(insn, value_pseudo(0));
-+		if (value == (bits - 1))	// (x > ~1) --> (x == ~0)
-+			return replace_binop_value(insn, OP_SET_EQ, bits);
+ 		if (value == (bits - 1))	// (x > ~1) --> (x == ~0)
+ 			return replace_binop_value(insn, OP_SET_EQ, bits);
++		if (value == (bits >> 1))	// (x u> SMAX) --> (x s< 0)
++			changed |= replace_binop_value(insn, OP_SET_LT, 0);
  		break;
  	}
  	return changed;
-diff --git a/validation/optim/set-uimm2.c b/validation/optim/set-uimm2.c
-index efa326f532ce..9138ae7276e7 100644
---- a/validation/optim/set-uimm2.c
-+++ b/validation/optim/set-uimm2.c
-@@ -6,7 +6,6 @@ static _Bool setgt_umax(unsigned int a) { return (a >  ~1) == (a == ~0); }
+diff --git a/validation/optim/set-uimm3.c b/validation/optim/set-uimm3.c
+index b72ef8d6e819..5160f741d85b 100644
+--- a/validation/optim/set-uimm3.c
++++ b/validation/optim/set-uimm3.c
+@@ -4,7 +4,6 @@ int gt(int x) { return (x >  0x7fffffffU) == (x <  0); }
  /*
-  * check-name: set-uimm2
-  * check-command: test-linearize $file
+  * check-name: set-uimm3
+  * check-command: test-linearize -Wno-decl $file
 - * check-known-to-fail
   *
   * check-output-ignore
