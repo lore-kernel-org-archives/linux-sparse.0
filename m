@@ -7,34 +7,42 @@ X-Spam-Status: No, score=0.6 required=3.0 tests=BAYES_50,DKIM_ADSP_CUSTOM_MED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 941E1C83019
-	for <linux-sparse@archiver.kernel.org>; Sun, 15 Nov 2020 16:45:38 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 93A53C4742C
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 10:00:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7906F2419A
-	for <linux-sparse@archiver.kernel.org>; Sun, 15 Nov 2020 16:45:38 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3DAA720855
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 10:00:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727388AbgKOQoj convert rfc822-to-8bit (ORCPT
+        id S1728147AbgKPJZx convert rfc822-to-8bit (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 15 Nov 2020 11:44:39 -0500
-Received: from sw73-70-41.adsl.seed.net.tw ([203.73.70.41]:35044 "EHLO
-        oa.trendtek.com.tw" rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org
-        with ESMTP id S1727389AbgKOQoj (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 15 Nov 2020 11:44:39 -0500
-Received: from [156.96.44.214] ([156.96.44.214])
-        (authenticated bits=0)
-        by oa.trendtek.com.tw (8.13.8/8.13.1) with ESMTP id 0AFGiZJR000817
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 00:44:37 +0800
-Message-Id: <202011151644.0AFGiZJR000817@oa.trendtek.com.tw>
+        Mon, 16 Nov 2020 04:25:53 -0500
+Received: from tigeramira.ro ([88.158.78.30]:39541 "EHLO mail.tigeramira.ro"
+        rhost-flags-OK-FAIL-OK-OK) by vger.kernel.org with ESMTP
+        id S1726657AbgKPJZx (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 16 Nov 2020 04:25:53 -0500
+Received: from localhost (localhost [127.0.0.1])
+        by mail.tigeramira.ro (Postfix) with ESMTP id 0896FA7B94D
+        for <linux-sparse@vger.kernel.org>; Sat, 14 Nov 2020 11:41:13 +0200 (EET)
+Received: from mail.tigeramira.ro ([127.0.0.1])
+        by localhost (mail.tigeramira.ro [127.0.0.1]) (amavisd-new, port 10032)
+        with ESMTP id sky6SuznyR_D for <linux-sparse@vger.kernel.org>;
+        Sat, 14 Nov 2020 11:41:10 +0200 (EET)
+Received: from mail.tigeramira.ro (localhost [127.0.0.1])
+        by mail.tigeramira.ro (Postfix) with ESMTP id C290C79E64A
+        for <linux-sparse@vger.kernel.org>; Thu, 12 Nov 2020 02:37:28 +0200 (EET)
+Received: from [156.96.44.214] (unknown [192.168.12.254])
+        by mail.tigeramira.ro (Postfix) with ESMTP id 2991FD401BD
+        for <linux-sparse@vger.kernel.org>; Tue, 10 Nov 2020 17:10:42 +0200 (EET)
 Content-Type: text/plain; charset="iso-8859-1"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8BIT
 Content-Description: Mail message body
-Subject: Corporate and Personal Loan *
+Subject: Corporate and Personal Loan/
 To:     linux-sparse@vger.kernel.org
 From:   "Investment  Corporate" <financialcapability6@gmail.com>
-Date:   Sun, 15 Nov 2020 08:44:32 -0800
+Date:   Tue, 10 Nov 2020 06:11:10 -0800
 Reply-To: hmurrah39@gmail.com
+Message-Id: <20201110151043.2991FD401BD@mail.tigeramira.ro>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
