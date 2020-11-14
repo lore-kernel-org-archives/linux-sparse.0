@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 515EFC388F9
-	for <linux-sparse@archiver.kernel.org>; Fri, 13 Nov 2020 06:57:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B126FC5519F
+	for <linux-sparse@archiver.kernel.org>; Sat, 14 Nov 2020 08:22:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1501B206D9
-	for <linux-sparse@archiver.kernel.org>; Fri, 13 Nov 2020 06:57:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 53CA522254
+	for <linux-sparse@archiver.kernel.org>; Sat, 14 Nov 2020 08:22:14 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="QykKEE8c"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rFdBEar9"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726267AbgKMG5C (ORCPT
+        id S1726598AbgKNIWO (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 13 Nov 2020 01:57:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43720 "EHLO
+        Sat, 14 Nov 2020 03:22:14 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56368 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726217AbgKMG5C (ORCPT
+        with ESMTP id S1726594AbgKNIWN (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 13 Nov 2020 01:57:02 -0500
-Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12787C0613D1
-        for <linux-sparse@vger.kernel.org>; Thu, 12 Nov 2020 22:57:02 -0800 (PST)
-Received: by mail-ej1-x643.google.com with SMTP id i19so11762819ejx.9
-        for <linux-sparse@vger.kernel.org>; Thu, 12 Nov 2020 22:57:02 -0800 (PST)
+        Sat, 14 Nov 2020 03:22:13 -0500
+Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AA6FC0613D1
+        for <linux-sparse@vger.kernel.org>; Sat, 14 Nov 2020 00:22:13 -0800 (PST)
+Received: by mail-ed1-x542.google.com with SMTP id v4so13538394edi.0
+        for <linux-sparse@vger.kernel.org>; Sat, 14 Nov 2020 00:22:13 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=LhBa6CAsK60r3r24/ZpjQOMel9iZ1LQu98+mYp/yrFA=;
-        b=QykKEE8czbQwBt8gbAsUjn027QetjNgeK2ukG7AQzsYeKVukgJJR+DNoz0ebrvZ5U1
-         jWm/etxdJLg1gfVq0EsWNweqKa16fQbmjHqPr0qw6f21ZFlVqhh3dR5Y4H6XbiVf/A1/
-         eh7g8A1J0mjl7ELISLLjawORVmWAYYt1WYBNLmKCh1QuwXzDBCK+oN1XwSMX+JxR2/Re
-         bfq8Z/F7vCplxrsTdn6tCoIib6tTE1l1rSVQ+Voetr/j6ZZOXl3RN70xVAqTF/Sf6cr5
-         zPB47fZKItkLSbBKkU1vFsRRu1RYxczxLwZCiPsciVJupat7XUhOSLWZsOrdiYUn+6kS
-         H9QA==
+        bh=tps0+7Mfd4vmp2/PRi1xEKQaiKxYuC1/2wwABI2eNsA=;
+        b=rFdBEar9+6XiN3OVcoLa3pOxqVNCUbI5khi5+45iegufvgaUFrESAXPOnuhvR3Fniq
+         Uuwgd7SRyW0tvxdtT8Q19ljO36ZDj2JTukt1GFWXOQYAwzMI8pxyDcS4pbrCiD8kkvlh
+         BWFvjPWrT+YfVVcz173IqmWGMJusCesd/eIkbQcZJr43BRgnzM+XsbgAZyDOqm7MahiY
+         RAA9i9wCu3OY5warUCmZd9lZvtZ1LYWGLhfpY7YjVtiv34YVFwJGX7MuuJgMI0ltDc4x
+         96Xl5zB9U+Oey08wNqiDg7R9vRrVCW/G/AE0WIGxWz04zBU4bXqqwvzrv7qNU1IZKipA
+         Wv8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=LhBa6CAsK60r3r24/ZpjQOMel9iZ1LQu98+mYp/yrFA=;
-        b=EuU01uay32Zicjt3XPK9Jvf090iWwDMlmzxGTeFgVG0AhS2MJR5kum3nP/8cMYPA1k
-         barOmb6M5j7/SXj3uI0TQKU+rAFLg5+aTT3extN6D5WZsO8S60ttklf5UEjil5NIL3u3
-         PI2OE0mfEL98GlkePWCW7p2V7OguuVkwq4tSkuwlxxmQH0CyW9ZD2REZrsVM+pshQtpJ
-         OkeZ2bFUHfNWMSNl95FDAbf2qqIIcessS9mCrstOn8Mijm8NVZ3sMCvzoIYVOpX/HQ4Z
-         xC+V+KlTh9N1AR4hRQ6Esy0d+9hzIwfrc8iL48lfd2KUK/2UEii681vpsYWr6eR0VJ7i
-         E4yA==
-X-Gm-Message-State: AOAM532I+m7AE4c+3O2iuN0kOK2r8tym5VTFm26oJd6lMNempbgZGdOm
-        DX5OMQantwTkCjCNcXcy9CLkx5rETtA=
-X-Google-Smtp-Source: ABdhPJzrjmLawwDN+Avn7PeySeZwx494fg5+NOavnYTKSppLXY3wq6nQOiIwSua6HkQlGRVptIxFwg==
-X-Received: by 2002:a17:906:2818:: with SMTP id r24mr678405ejc.100.1605250620569;
-        Thu, 12 Nov 2020 22:57:00 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b8ad:4918:8d1f:1912])
-        by smtp.gmail.com with ESMTPSA id hp27sm2914173ejc.2.2020.11.12.22.56.59
+        bh=tps0+7Mfd4vmp2/PRi1xEKQaiKxYuC1/2wwABI2eNsA=;
+        b=ky0ILtyn2Aj4fANWB6XgUzn+if7k8EZ+icjrB/CajFCL6RO6jdyAKquEqBGcEzM6XL
+         xCfh+RfmyP/V/P7GTQhq6ixlrukeDKt6ykqYSOShNKB22joV2BWK9L5WIiTrEbeK8WTd
+         M0AZrR34FYzSTbL2iyjsuZRyU93zFibaNTR32Ksm5yng+uXVlL3S5QaKu7TR+KE+VxgJ
+         1kw36Q/n6BWnMcTyCgIKTzY/CpcmWgByP4zQmOTkdOwsNwJxDK9WLEAj+clUfeHf4HD5
+         BhczZ7haaiVHceMB5JYiDKHfXu8BbpOztaBNBdijl4crbyDa7YCrLSZjW2MBn65bqTUt
+         8GHw==
+X-Gm-Message-State: AOAM533w/yGlIqPRXvWgSqo48URKCNbcH5swXnj6LZxJCehDKYE5itk0
+        O+nRsGkUXPcUkUFEUHLK4w3FTWc7lYs=
+X-Google-Smtp-Source: ABdhPJwC5yGu1uWd5J2+Vam6r2F9dzJWeRm0O3Qy3eR4Twu3gSCwyx2xJgx7+o4yvo07hSMF+B0EIA==
+X-Received: by 2002:a05:6402:22ab:: with SMTP id cx11mr6277815edb.98.1605342131995;
+        Sat, 14 Nov 2020 00:22:11 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:e8ee:663e:d7a3:b425])
+        by smtp.gmail.com with ESMTPSA id s19sm5871293ejz.103.2020.11.14.00.22.10
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 12 Nov 2020 22:57:00 -0800 (PST)
+        Sat, 14 Nov 2020 00:22:11 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] doc: Sphinx's option ':noindex:' have been rename into ':noindexentry:'
-Date:   Fri, 13 Nov 2020 07:56:56 +0100
-Message-Id: <20201113065656.28815-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] simplify OP_COMPUTEDGOTO with known target
+Date:   Sat, 14 Nov 2020 09:22:08 +0100
+Message-Id: <20201114082208.58578-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -73,31 +73,98 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-and instead of keeping the old name for compatibility, no it's rejected.
-But well, purity of language is surely much more important than compatibility.
-*long deep sigh*
+If the OP_COMPUTEDGOTO's source pseudo is defined by an OP_SETVAL
+with a label, then this label is the only possible destination of
+the computed goto which can then be transformed into a simple branch.
 
-So, use the new name (but it will for sure create problems when using
-an older version of Sphinx).
+So, convert such computed goto into a simple OP_BR which may then
+participate in other flow simplifications.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- Documentation/doc-guide.rst | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ simplify.c                 | 30 ++++++++++++++++++++++++++++++
+ validation/optim/cgoto01.c | 24 ++++++++++++++++++++++++
+ 2 files changed, 54 insertions(+)
+ create mode 100644 validation/optim/cgoto01.c
 
-diff --git a/Documentation/doc-guide.rst b/Documentation/doc-guide.rst
-index 29f39aab360a..fb4cb32293a8 100644
---- a/Documentation/doc-guide.rst
-+++ b/Documentation/doc-guide.rst
-@@ -138,7 +138,7 @@ For example, a doc-block like::
- will be displayed like this:
+diff --git a/simplify.c b/simplify.c
+index e58fb6cf3941..08022c97437a 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -2112,6 +2112,34 @@ found:
+ 	return REPEAT_CSE;
+ }
  
- .. c:function:: int inc(int val)
--	:noindex:
-+	:noindexentry:
- 
- 	:param val: the value to increment
- 	:return: the incremented value
++static int simplify_cgoto(struct instruction *insn)
++{
++	struct basic_block *target, *bb = insn->bb;
++	struct instruction *def;
++	struct multijmp *jmp;
++
++	switch (DEF_OPCODE(def, insn->cond)) {
++	case OP_SETVAL:
++		if (def->val->type != EXPR_LABEL)
++			break;
++		target = def->val->symbol->bb_target;
++		if (!target->ep)
++			return 0;
++		FOR_EACH_PTR(insn->multijmp_list, jmp) {
++			if (jmp->target == target)
++				continue;
++			remove_bb_from_list(&jmp->target->parents, bb, 1);
++			remove_bb_from_list(&bb->children, jmp->target, 1);
++			MARK_CURRENT_DELETED(jmp);
++		} END_FOR_EACH_PTR(jmp);
++		kill_use(&insn->cond);
++		insn->opcode = OP_BR;
++		insn->bb_true = target;
++		return REPEAT_CSE|REPEAT_CFG_CLEANUP;
++	}
++	return 0;
++}
++
+ int simplify_instruction(struct instruction *insn)
+ {
+ 	unsigned flags;
+@@ -2190,6 +2218,8 @@ int simplify_instruction(struct instruction *insn)
+ 		return simplify_branch(insn);
+ 	case OP_SWITCH:
+ 		return simplify_switch(insn);
++	case OP_COMPUTEDGOTO:
++		return simplify_cgoto(insn);
+ 	case OP_RANGE:
+ 		return simplify_range(insn);
+ 	case OP_FADD:
+diff --git a/validation/optim/cgoto01.c b/validation/optim/cgoto01.c
+new file mode 100644
+index 000000000000..94b2c2c429db
+--- /dev/null
++++ b/validation/optim/cgoto01.c
+@@ -0,0 +1,24 @@
++void abort(void) __attribute__((__noreturn__));
++
++int foo(int a)
++{
++	void *label;
++
++	if (a == a)
++		label = &&L1;
++	else
++		label = &&L2;
++	goto *label;
++L1:	return 0;
++L2:	abort();
++}
++
++/*
++ * check-name: cgoto01
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-ignore
++ * check-output-excludes: set\\.
++ * check-output-excludes: jmp
++ * check-output-excludes: call
++ */
 -- 
 2.29.2
 
