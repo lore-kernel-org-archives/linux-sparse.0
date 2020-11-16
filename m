@@ -2,125 +2,143 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.9 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,SPF_HELO_NONE,SPF_PASS
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
+	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05EBCC4742C
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 11:55:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 353E0C63777
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:27:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A9D6D2224B
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 11:55:43 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id D879122447
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:27:53 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="iFSLUkEf"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rmy3Ubqu"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729185AbgKPKhI (ORCPT
+        id S1729660AbgKPW1x (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 16 Nov 2020 05:37:08 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:56022 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729183AbgKPKhH (ORCPT
+        Mon, 16 Nov 2020 17:27:53 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34892 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729659AbgKPW1x (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 16 Nov 2020 05:37:07 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1605523026;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=ah0fpG4PWNvzFpMdpbWnri6JpzL+gQo7D8V3E1P+olY=;
-        b=iFSLUkEfuPfP2RWaG2XZxmcMv9n6N/0DdEwg1yu+pWNhX4N/izW0b1IWbg19u6E71UIb4v
-        ppJcJmrFTNt+ocBm3O396WyS5EX9Bea+s6LASvxfT2jMz3O4sjtt213t8/7jiM4zPC+cMJ
-        Ko0QLmc51yhjxsVueynTjNj2Jg0T1IQ=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-84-Ac7rkxrNPLmHhBOCFv0S5A-1; Mon, 16 Nov 2020 05:37:04 -0500
-X-MC-Unique: Ac7rkxrNPLmHhBOCFv0S5A-1
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id A69F1186840E;
-        Mon, 16 Nov 2020 10:37:03 +0000 (UTC)
-Received: from gerbillo.redhat.com (ovpn-114-64.ams2.redhat.com [10.36.114.64])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5BDD0100239A;
-        Mon, 16 Nov 2020 10:37:02 +0000 (UTC)
-From:   Paolo Abeni <pabeni@redhat.com>
-To:     netdev@vger.kernel.org
-Cc:     Jakub Kicinski <kuba@kernel.org>,
+        Mon, 16 Nov 2020 17:27:53 -0500
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D84EC0613CF;
+        Mon, 16 Nov 2020 14:27:53 -0800 (PST)
+Received: by mail-ed1-x543.google.com with SMTP id t9so20399276edq.8;
+        Mon, 16 Nov 2020 14:27:53 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=iLbFaxcZtvef08Mzr8UqS8KoKu5hGYRojS9TGSmj9sU=;
+        b=rmy3UbquKvfScxFsFyBk/yaTm3ax16ix35yaIV5BK9RtNEq/T05qjfCFDVqdsPv9uK
+         6oIeZ2x0pVK+CoZ8vIU7SDp5Z6LwujvBn7rQW8U+QQQ4X6JB8yKrcNFroUMZTHfcFzg8
+         KTDB/Q5NvjjfaSv8QaBouMQqCxW2gsUUEAl1dim5Q14bnLbUXhhAcG8qJxyXV7aisOqp
+         5Wn2spUCtAiJ6U6/R0KycdwSQ6EAlcxQPXampYgKGbj4RaF1MptNcKLJ7v5pVDUYu2QG
+         vBXKsu9STY6lszhBUfq+mkGG+FgTen9u8yCnEFurltUKX/FiXV7p3PYmfKSQQw8wAR7j
+         b4Qg==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=iLbFaxcZtvef08Mzr8UqS8KoKu5hGYRojS9TGSmj9sU=;
+        b=U6GG0vOSXSEVmd9+IqUYFPEqp6TgsQtDX7aP1OIRLFDEg8M1M7zhDbOIXEHkRbfs22
+         dkH7tNwsR8a5Sajmo4ZToIVeIwue4Pgy7YGorqVPNpyfgubWCrhwlWHIcYTN3doXqgZY
+         CJplRIiVKwCPwHhAwK0AVXxES4IKHKab4Wy+782ydB/H5HaFA0bvheMPiWP1XE71ruSN
+         A1Lzzyf8eYlPpT6ky8HSUQfSt7A7qujogY0nHy1pjF6FusxRC+bDZK6mCS0iONIKRazA
+         JjYshVn/8HChD/hXWANxC5cGGJtxgnXlPSb8l1DQkI2cclOMFwoT0Q1Kguc5n4ODocYS
+         F5Rw==
+X-Gm-Message-State: AOAM532rS8ERy2F8GT/TZgbvjsalHAmRho+RgiQ9LMCrMU1f77XZWrBt
+        X9hN5gE24fEKvYBg5jhUlTIyvofhnng=
+X-Google-Smtp-Source: ABdhPJyYdAfIpjxBLlyaK0aU8qkVIC04BTB6lcZPe+aKY5JzWQ4Dh0vGfueeiy3eppz5E/u7G1zq4A==
+X-Received: by 2002:a50:fd15:: with SMTP id i21mr17244380eds.127.1605565671923;
+        Mon, 16 Nov 2020 14:27:51 -0800 (PST)
+Received: from ltop.local ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
+        by smtp.gmail.com with ESMTPSA id f25sm5289440ejr.120.2020.11.16.14.27.50
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Mon, 16 Nov 2020 14:27:51 -0800 (PST)
+Date:   Mon, 16 Nov 2020 23:27:50 +0100
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Paolo Abeni <pabeni@redhat.com>
+Cc:     netdev@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
         Eric Dumazet <edumazet@google.com>,
         linux-sparse@vger.kernel.org
-Subject: [PATCH net-next] net: add annotation for sock_{lock,unlock}_fast
-Date:   Mon, 16 Nov 2020 11:36:39 +0100
-Message-Id: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
+Subject: Re: [PATCH net-next] net: add annotation for sock_{lock,unlock}_fast
+Message-ID: <20201116222750.nmfyxnj6jvd3rww4@ltop.local>
+References: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.84 on 10.5.11.22
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The static checker is fooled by the non-static locking scheme
-implemented by the mentioned helpers.
-Let's make its life easier adding some unconditional annotation
-so that the helpers are now interpreted as a plain spinlock from
-sparse.
+On Mon, Nov 16, 2020 at 11:36:39AM +0100, Paolo Abeni wrote:
+> The static checker is fooled by the non-static locking scheme
+> implemented by the mentioned helpers.
+> Let's make its life easier adding some unconditional annotation
+> so that the helpers are now interpreted as a plain spinlock from
+> sparse.
+> 
+> Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+> ---
+>  include/net/sock.h | 9 ++++++---
+>  net/core/sock.c    | 3 ++-
+>  2 files changed, 8 insertions(+), 4 deletions(-)
+> 
+> diff --git a/include/net/sock.h b/include/net/sock.h
+> index 1d29aeae74fd..60d321c6b5a5 100644
+> --- a/include/net/sock.h
+> +++ b/include/net/sock.h
+> @@ -1595,7 +1595,8 @@ void release_sock(struct sock *sk);
+>  				SINGLE_DEPTH_NESTING)
+>  #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
+>  
+> -bool lock_sock_fast(struct sock *sk);
+> +bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock);
+> +
 
-Signed-off-by: Paolo Abeni <pabeni@redhat.com>
----
- include/net/sock.h | 9 ++++++---
- net/core/sock.c    | 3 ++-
- 2 files changed, 8 insertions(+), 4 deletions(-)
+Good.
 
-diff --git a/include/net/sock.h b/include/net/sock.h
-index 1d29aeae74fd..60d321c6b5a5 100644
---- a/include/net/sock.h
-+++ b/include/net/sock.h
-@@ -1595,7 +1595,8 @@ void release_sock(struct sock *sk);
- 				SINGLE_DEPTH_NESTING)
- #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
- 
--bool lock_sock_fast(struct sock *sk);
-+bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock);
-+
- /**
-  * unlock_sock_fast - complement of lock_sock_fast
-  * @sk: socket
-@@ -1606,10 +1607,12 @@ bool lock_sock_fast(struct sock *sk);
-  */
- static inline void unlock_sock_fast(struct sock *sk, bool slow)
- {
--	if (slow)
-+	if (slow) {
- 		release_sock(sk);
--	else
-+		__release(&sk->sk_lock.slock);
-+	} else {
- 		spin_unlock_bh(&sk->sk_lock.slock);
-+	}
- }
- 
- /* Used by processes to "lock" a socket state, so that
-diff --git a/net/core/sock.c b/net/core/sock.c
-index 727ea1cc633c..9badbe7bb4e4 100644
---- a/net/core/sock.c
-+++ b/net/core/sock.c
-@@ -3078,7 +3078,7 @@ EXPORT_SYMBOL(release_sock);
-  *
-  *   sk_lock.slock unlocked, owned = 1, BH enabled
-  */
--bool lock_sock_fast(struct sock *sk)
-+bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock)
- {
- 	might_sleep();
- 	spin_lock_bh(&sk->sk_lock.slock);
-@@ -3096,6 +3096,7 @@ bool lock_sock_fast(struct sock *sk)
- 	 * The sk_lock has mutex_lock() semantics here:
- 	 */
- 	mutex_acquire(&sk->sk_lock.dep_map, 0, 0, _RET_IP_);
-+	__acquire(&sk->sk_lock.slock);
- 	local_bh_enable();
- 	return true;
- }
--- 
-2.26.2
+>  /**
+>   * unlock_sock_fast - complement of lock_sock_fast
+>   * @sk: socket
+> @@ -1606,10 +1607,12 @@ bool lock_sock_fast(struct sock *sk);
+>   */
+>  static inline void unlock_sock_fast(struct sock *sk, bool slow)
+>  {
+> -	if (slow)
+> +	if (slow) {
+>  		release_sock(sk);
+> -	else
+> +		__release(&sk->sk_lock.slock);
 
+The correct solution would be to annotate the declaration of
+release_sock() with '__releases(&sk->sk_lock.slock)'.
+
+>  /* Used by processes to "lock" a socket state, so that
+> diff --git a/net/core/sock.c b/net/core/sock.c
+> index 727ea1cc633c..9badbe7bb4e4 100644
+> --- a/net/core/sock.c
+> +++ b/net/core/sock.c
+> @@ -3078,7 +3078,7 @@ EXPORT_SYMBOL(release_sock);
+>   *
+>   *   sk_lock.slock unlocked, owned = 1, BH enabled
+>   */
+> -bool lock_sock_fast(struct sock *sk)
+> +bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock)
+>  {
+>  	might_sleep();
+>  	spin_lock_bh(&sk->sk_lock.slock);
+> @@ -3096,6 +3096,7 @@ bool lock_sock_fast(struct sock *sk)
+>  	 * The sk_lock has mutex_lock() semantics here:
+>  	 */
+>  	mutex_acquire(&sk->sk_lock.dep_map, 0, 0, _RET_IP_);
+> +	__acquire(&sk->sk_lock.slock);
+
+OK, given that the mutexes are not annotated.
+
+-- Luc 
