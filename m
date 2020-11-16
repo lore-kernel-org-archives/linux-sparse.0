@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AE5EAC63777
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D2D10C5519F
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5DBD92244C
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7BCA220E65
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="ImguAacp"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="hJO35v+p"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730144AbgKPW3j (ORCPT
+        id S1730164AbgKPW3k (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 16 Nov 2020 17:29:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35182 "EHLO
+        Mon, 16 Nov 2020 17:29:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35186 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730140AbgKPW3i (ORCPT
+        with ESMTP id S1730156AbgKPW3k (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 16 Nov 2020 17:29:38 -0500
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F3CBC0613CF
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:38 -0800 (PST)
-Received: by mail-ej1-x641.google.com with SMTP id f23so26738488ejk.2
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:38 -0800 (PST)
+        Mon, 16 Nov 2020 17:29:40 -0500
+Received: from mail-ej1-x643.google.com (mail-ej1-x643.google.com [IPv6:2a00:1450:4864:20::643])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B061EC0613CF
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:39 -0800 (PST)
+Received: by mail-ej1-x643.google.com with SMTP id za3so26684591ejb.5
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Y20OTX9TInFXtpPpAYcH9brk/dtoPFRCRKNZm0BdChE=;
-        b=ImguAacp2RUO8Fxu3yW81XWcsTxbZy0L+FSIn20DARswIJ5DWa3TlxSgBziPdo6eve
-         WJ2JMarY0/eTPzwK68diKGQ1UMoc43f8xjOlaHVMcWsGt1c2SannfSsYzHVSq8/shBks
-         4dBnKEGU8rUpAobe4503YEvSVln1q75y17RFk2bKsUtea/QoXr+NxQN6Qtsw8MlhUE9h
-         UboE76JoGzNX0hAoWrJCOfZLsqZDE9zR+3eL9dEbrXrW69hsOstweAE0f+bJmunQ+xTb
-         CvJT9JYNAscr8tz3FAGDCYTwYs88Qq3uGb0xTVprXhJVWlhCdPKenaqIFCaSyy4vVb+m
-         GTxg==
+        bh=FA/hKoCDw1kyjHdjmVPcqeKfj2V8+QrYL9SmRN29fiY=;
+        b=hJO35v+pxLLZom9fia+IV3KEy1vCrkX5/zBA9mXspBmdBi1IsSwlueN74ITMFZ+Rg/
+         QEFWVVyhPoEh5MiCw/VdezU3EuPKodhZyKTu/wtUZJXjDUzJuwCMuu9xopz0BmpKvTxp
+         133YUL+OWwluuLGjfvPvxdzIVWpMuR7/kyXyappyfOo9n+YHd1FS1LrDlXJKxUcxUHmL
+         9H7vzZBCu9uUqFVNeuldRAohiskA+wB9UvSn2wdl0WtYPsHdEgoHhPbN6aUlmWT4bhol
+         nd4MlsTf4gtOYVkCD9zNwYgZxT0BwV4FUfh0ZPqyTxgYGsA4BYIvUj1zrdHIMEprKVeT
+         9r/Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Y20OTX9TInFXtpPpAYcH9brk/dtoPFRCRKNZm0BdChE=;
-        b=EhtopznbEPDblNE+ORMkH8Rw94yGm3dtY0QlXNzEa4RiCw5vp1qTNtsNe5CD5ez6dc
-         TjPReOdNj/kCWxFmXVFBVzGs7EkDbYHyxAe+aDLHb+oOJoyTGQMPBYIw+T9pg4VD82Tq
-         A5KeO7tVArnr06b4sm6TeBEKDinR1nSKRo+EL7B3pGH96UhpEt7FL9iC0DpV+Mj39yjG
-         i4L1TGKoayOd4UdV487RK8J2CmmJT+RIi4dGMTqje/ebD+dFHHzpjrPKOyqNr4BNe8xB
-         kCm++UWnoYGfVteM9OOwEKFopx1uOss5n86NYFJzJHMFR8m5N9NUzWcpTjbXJnuKVx4F
-         tcKg==
-X-Gm-Message-State: AOAM533xcNc34Tw6wo+qMnERaL9KDgsospT5t4iucVRXvultHfSc63Mq
-        zRbOXrVZBv7E2+0b021S84NrGcryB0o=
-X-Google-Smtp-Source: ABdhPJw3mL8Ybv2NN8gLjFjKjVD99ucwBafKyd/l6DTRoDmdSu7SQHlMDtY8nZyCtv1TD8J4GGZH+A==
-X-Received: by 2002:a17:907:b01:: with SMTP id h1mr16019645ejl.10.1605565777161;
-        Mon, 16 Nov 2020 14:29:37 -0800 (PST)
+        bh=FA/hKoCDw1kyjHdjmVPcqeKfj2V8+QrYL9SmRN29fiY=;
+        b=SzVoqGJ1DuBfZIQsDbzjrUkOSXtJi1Rsq52GNDj3awpgKJExo1EZQNcMVYyLpZHaRg
+         HIGugJL8zh8poh6M0zNq3uaUmplGySaPvs3N449Ak/mM+cn7lGNcLgkeot3t09QPjSUF
+         FrafMJDrhxs6Soa5IKQnkY1/Tyfpxdo/M1H9RN2XIdw/iakVobde7AKWw1CQXPXd8soY
+         TiWqozJg3prLpwmoKyTLPasM0aaCy9bMV7Dio7SMpI78QF4w2fublXqd58cz1MIFHICv
+         SQXYj0vCg0xwYofa1RN3SzfxHn4mcaP8NJ30N9KGCVjQM0746/RVrj/gwa9vKpbHxPZC
+         SrAg==
+X-Gm-Message-State: AOAM530iEIc87xg8buKN8yXb3s096pZXxbUBMpANwvO9T0K2H4+jQca4
+        M1vnYINjqqJBjyrnfAnh3a6vzWRFiK0=
+X-Google-Smtp-Source: ABdhPJzHRY9mwnmtNZo/XefRaWhqctBuLz5fvM8xcIzpDFjK0XR0jUeUfXHsdF+npBVSpeNJiovP4w==
+X-Received: by 2002:a17:906:6b86:: with SMTP id l6mr16685634ejr.524.1605565778229;
+        Mon, 16 Nov 2020 14:29:38 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
-        by smtp.gmail.com with ESMTPSA id bn25sm10805446ejb.76.2020.11.16.14.29.36
+        by smtp.gmail.com with ESMTPSA id bn25sm10805446ejb.76.2020.11.16.14.29.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Nov 2020 14:29:36 -0800 (PST)
+        Mon, 16 Nov 2020 14:29:37 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/8] cfg: adjust phi-nodes when merging BBs
-Date:   Mon, 16 Nov 2020 23:29:24 +0100
-Message-Id: <20201116222927.51939-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/8] cfg: add missing REPEAT_CFG_CLEANUP
+Date:   Mon, 16 Nov 2020 23:29:25 +0100
+Message-Id: <20201116222927.51939-7-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201116222927.51939-1-luc.vanoostenryck@gmail.com>
 References: <20201116222927.51939-1-luc.vanoostenryck@gmail.com>
@@ -75,59 +75,46 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-When merging BBs, it's possible that the top BB feeds one or
-several phi-nodes in the bottom BB. Since phi-nodes only make
-sense for values incoming from the parent BBs, these phi-nodes
-can and should be removed when merging the BBs.
+simplify_branch() & insert_branch() convert a conditional branch
+into an unconditional one, removing a child which may then
+become unreachable.
 
-So, when merging BBs, remove these related phi-nodes.
+However, these function doesn't set REPEAT_CFG_CLEANUP and the
+unreachable child may not be removed.
+
+Fix this by setting the missing REPEAT_CFG_CLEANUP in these functions.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c | 23 +++++++++++++++++++++++
- 1 file changed, 23 insertions(+)
+ linearize.c | 1 +
+ simplify.c  | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
-diff --git a/flow.c b/flow.c
-index e9c8f6b7355e..23886f9d84fa 100644
---- a/flow.c
-+++ b/flow.c
-@@ -760,6 +760,26 @@ static void adjust_phisrc(struct basic_block *top, struct instruction *insn)
- 	} END_FOR_EACH_PTR(phi);
+diff --git a/linearize.c b/linearize.c
+index ab91113d00eb..5d800b7f4006 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -726,6 +726,7 @@ void insert_branch(struct basic_block *bb, struct instruction *jmp, struct basic
+ 		remove_parent(child, bb);
+ 	} END_FOR_EACH_PTR(child);
+ 	PACK_PTR_LIST(&bb->children);
++	repeat_phase |= REPEAT_CFG_CLEANUP;
  }
+ 	
  
-+static void adjust_phi(struct basic_block *top, struct instruction *insn)
-+{
-+	pseudo_t phi;
-+
-+	FOR_EACH_PTR(insn->phi_list, phi) {
-+		struct instruction *def;
-+
-+		if (phi == VOID)
-+			continue;
-+
-+		def = phi->def;
-+		if (def->bb != top)
-+			continue;
-+
-+		convert_instruction_target(insn, def->src);
-+		kill_instruction(def);
-+		kill_instruction(insn);
-+	} END_FOR_EACH_PTR(phi);
-+}
-+
- ///
- // merge two BBs
- // @top: the first BB to be merged
-@@ -786,6 +806,9 @@ static int merge_bb(struct basic_block *top, struct basic_block *bot)
- 			continue;
- 		assert(insn->bb == bot);
- 		switch (insn->opcode) {
-+		case OP_PHI:
-+			adjust_phi(top, insn);
-+			continue;
- 		case OP_PHISOURCE:
- 			adjust_phisrc(top, insn);
- 			break;
+diff --git a/simplify.c b/simplify.c
+index e58fb6cf3941..a0e23d6de01f 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -2048,7 +2048,7 @@ static int simplify_branch(struct instruction *insn)
+ 		kill_use(&insn->cond);
+ 		insn->cond = NULL;
+ 		insn->opcode = OP_BR;
+-		return REPEAT_CSE;
++		return REPEAT_CSE|REPEAT_CFG_CLEANUP;
+ 	}
+ 
+ 	/* Conditional on a SETNE $0 or SETEQ $0 */
 -- 
 2.29.2
 
