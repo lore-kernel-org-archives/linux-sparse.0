@@ -2,143 +2,122 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-9.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-6.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SIGNED_OFF_BY,
-	SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	USER_AGENT_GIT autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 353E0C63777
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:27:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B02E3C388F9
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D879122447
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:27:53 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4E12D20E65
+	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 22:29:35 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="rmy3Ubqu"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="SubQwXU6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729660AbgKPW1x (ORCPT
+        id S1730112AbgKPW3f (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 16 Nov 2020 17:27:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34892 "EHLO
+        Mon, 16 Nov 2020 17:29:35 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35162 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729659AbgKPW1x (ORCPT
+        with ESMTP id S1726543AbgKPW3e (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 16 Nov 2020 17:27:53 -0500
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2D84EC0613CF;
-        Mon, 16 Nov 2020 14:27:53 -0800 (PST)
-Received: by mail-ed1-x543.google.com with SMTP id t9so20399276edq.8;
-        Mon, 16 Nov 2020 14:27:53 -0800 (PST)
+        Mon, 16 Nov 2020 17:29:34 -0500
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 55CD8C0613CF
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:34 -0800 (PST)
+Received: by mail-ej1-x642.google.com with SMTP id cw8so26662545ejb.8
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 14:29:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=iLbFaxcZtvef08Mzr8UqS8KoKu5hGYRojS9TGSmj9sU=;
-        b=rmy3UbquKvfScxFsFyBk/yaTm3ax16ix35yaIV5BK9RtNEq/T05qjfCFDVqdsPv9uK
-         6oIeZ2x0pVK+CoZ8vIU7SDp5Z6LwujvBn7rQW8U+QQQ4X6JB8yKrcNFroUMZTHfcFzg8
-         KTDB/Q5NvjjfaSv8QaBouMQqCxW2gsUUEAl1dim5Q14bnLbUXhhAcG8qJxyXV7aisOqp
-         5Wn2spUCtAiJ6U6/R0KycdwSQ6EAlcxQPXampYgKGbj4RaF1MptNcKLJ7v5pVDUYu2QG
-         vBXKsu9STY6lszhBUfq+mkGG+FgTen9u8yCnEFurltUKX/FiXV7p3PYmfKSQQw8wAR7j
-         b4Qg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=n4mbxrep/FifMdBJ0SCtBC3PkRnSlAxH3RxDKLhkHFU=;
+        b=SubQwXU6IO4cCv8ouP4LhLGuk7ADv2gdgNdi2WhUm977oHBluxuAASYuK0Eow5i9Dq
+         HFtWy8PhE3yAIqkTjrPzHSBbHDxQZhMP8CS9/k6DVSM7Se4SMIm61BnA45wE4xQ4rJk/
+         dEr+7/2yep3zzln7o3pmZK34RxKAd2gPvUos/NYK45rHgCOaBI51m8OW3PajxYItcfBh
+         lHGD8uMrLoQKR7Q4KYSNpBUuq+R22dAdSdccUhekVqQlmkAlvGBqM8i4hsZ+F6AkbcNu
+         K935Qezx11AM893c1o0AzXXEvpNelsntZb5z/oRYdOG0JOwHBFzYSdw03HK4INlOTbBr
+         7R8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=iLbFaxcZtvef08Mzr8UqS8KoKu5hGYRojS9TGSmj9sU=;
-        b=U6GG0vOSXSEVmd9+IqUYFPEqp6TgsQtDX7aP1OIRLFDEg8M1M7zhDbOIXEHkRbfs22
-         dkH7tNwsR8a5Sajmo4ZToIVeIwue4Pgy7YGorqVPNpyfgubWCrhwlWHIcYTN3doXqgZY
-         CJplRIiVKwCPwHhAwK0AVXxES4IKHKab4Wy+782ydB/H5HaFA0bvheMPiWP1XE71ruSN
-         A1Lzzyf8eYlPpT6ky8HSUQfSt7A7qujogY0nHy1pjF6FusxRC+bDZK6mCS0iONIKRazA
-         JjYshVn/8HChD/hXWANxC5cGGJtxgnXlPSb8l1DQkI2cclOMFwoT0Q1Kguc5n4ODocYS
-         F5Rw==
-X-Gm-Message-State: AOAM532rS8ERy2F8GT/TZgbvjsalHAmRho+RgiQ9LMCrMU1f77XZWrBt
-        X9hN5gE24fEKvYBg5jhUlTIyvofhnng=
-X-Google-Smtp-Source: ABdhPJyYdAfIpjxBLlyaK0aU8qkVIC04BTB6lcZPe+aKY5JzWQ4Dh0vGfueeiy3eppz5E/u7G1zq4A==
-X-Received: by 2002:a50:fd15:: with SMTP id i21mr17244380eds.127.1605565671923;
-        Mon, 16 Nov 2020 14:27:51 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
-        by smtp.gmail.com with ESMTPSA id f25sm5289440ejr.120.2020.11.16.14.27.50
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=n4mbxrep/FifMdBJ0SCtBC3PkRnSlAxH3RxDKLhkHFU=;
+        b=oGSwCAfvavLvks+4VOAQ0KflWAcWpMH7lUbOqueOdmT6lpWvDQaPFB8Zt14D+QS35W
+         LD1HTCTLbshWkWgex3RDpJt+63xhz4E0fDA00uwcwB5B6jWbpYbybINfrXPaQnATLbbM
+         bNiwEBWV5FJb9lGFtsDziD3S8rxvng6yEk1upjqTpxTL80GHn//oEy78uSHWKTmOf24Q
+         XVU/0Mf0JSCmyrRtFJMfT88RYWFKf62QW0RFUrAW3y+GeWzhz+yxlgJZdicQkyiyUrae
+         HC9iMohJVjwDjGH2sGqhW8piuV+UHbJYSzcQ/ONJhPBJyUX6GeDaApegBA3hcoSSGiZ0
+         ELTg==
+X-Gm-Message-State: AOAM532yV+a86XImSjG7JpvqwMdSOXzLppktIqJMV8jNLoP2jQJuPpt5
+        ucKzy1gP+F0ZSd7XLC6dmiAuHH5ycIo=
+X-Google-Smtp-Source: ABdhPJw2Na+W5SCqGDM80wsGuCGi6ytNQuIZhe6py6RHUBUWeW4upft9C4bs9IJwi9aLWAK6GFtgEw==
+X-Received: by 2002:a17:906:8144:: with SMTP id z4mr16383711ejw.251.1605565772832;
+        Mon, 16 Nov 2020 14:29:32 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
+        by smtp.gmail.com with ESMTPSA id bn25sm10805446ejb.76.2020.11.16.14.29.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Nov 2020 14:27:51 -0800 (PST)
-Date:   Mon, 16 Nov 2020 23:27:50 +0100
+        Mon, 16 Nov 2020 14:29:32 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Paolo Abeni <pabeni@redhat.com>
-Cc:     netdev@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        linux-sparse@vger.kernel.org
-Subject: Re: [PATCH net-next] net: add annotation for sock_{lock,unlock}_fast
-Message-ID: <20201116222750.nmfyxnj6jvd3rww4@ltop.local>
-References: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 0/8] cfg: early CFG simplification
+Date:   Mon, 16 Nov 2020 23:29:19 +0100
+Message-Id: <20201116222927.51939-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Nov 16, 2020 at 11:36:39AM +0100, Paolo Abeni wrote:
-> The static checker is fooled by the non-static locking scheme
-> implemented by the mentioned helpers.
-> Let's make its life easier adding some unconditional annotation
-> so that the helpers are now interpreted as a plain spinlock from
-> sparse.
-> 
-> Signed-off-by: Paolo Abeni <pabeni@redhat.com>
-> ---
->  include/net/sock.h | 9 ++++++---
->  net/core/sock.c    | 3 ++-
->  2 files changed, 8 insertions(+), 4 deletions(-)
-> 
-> diff --git a/include/net/sock.h b/include/net/sock.h
-> index 1d29aeae74fd..60d321c6b5a5 100644
-> --- a/include/net/sock.h
-> +++ b/include/net/sock.h
-> @@ -1595,7 +1595,8 @@ void release_sock(struct sock *sk);
->  				SINGLE_DEPTH_NESTING)
->  #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
->  
-> -bool lock_sock_fast(struct sock *sk);
-> +bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock);
-> +
+This series is a preparatory step for some other optimzations
+but is quite valuable in itself. It adds a new phase of CFG
+CFG simplification before any other simplifications. To be
+effective this pahse needs some other changes:
+* phi-sources & phi-nodes must be handled specifically
+  whne merinf BBs.
+* some missing REPEAT_CFG_CLEANUP must be added
+* simplify_memops() must be called unconditionally
 
-Good.
+These changes slightly decrease the number of 'context imbalance'
+warnings (32 less on a total of 995 warnings) and have otherwise a
+significant effect on the size of the generated IR (~0.4%).
 
->  /**
->   * unlock_sock_fast - complement of lock_sock_fast
->   * @sk: socket
-> @@ -1606,10 +1607,12 @@ bool lock_sock_fast(struct sock *sk);
->   */
->  static inline void unlock_sock_fast(struct sock *sk, bool slow)
->  {
-> -	if (slow)
-> +	if (slow) {
->  		release_sock(sk);
-> -	else
-> +		__release(&sk->sk_lock.slock);
+Luc Van Oostenryck (8):
+  testcase: avoid UNDEF
+  cfg: add testcase for phi-adjusting during BB merge
+  cfg: extract merge_bb() from pack_basic_blocks()
+  cfg: adjust phi-sources when merging BBs
+  cfg: adjust phi-nodes when merging BBs
+  cfg: add missing REPEAT_CFG_CLEANUP
+  cfg: call simplify_memops() unconditionally.
+  cfg: early CFG simplification
 
-The correct solution would be to annotate the declaration of
-release_sock() with '__releases(&sk->sk_lock.slock)'.
+ flow.c                                       | 201 ++++++++++++++++---
+ flow.h                                       |   1 +
+ linearize.c                                  |   1 +
+ memops.c                                     |   2 +
+ optimize.c                                   |   9 +-
+ simplify.c                                   |   2 +-
+ validation/call-inlined.c                    |   4 +
+ validation/expand/builtin_constant_inline0.c |   1 +
+ validation/inline_base0.c                    |   3 +
+ validation/linear/builtin_unreachable0.c     |   4 +-
+ validation/linear/builtin_unreachable1.c     |   4 +-
+ validation/linear/call-inline.c              |   2 +-
+ validation/mem2reg/cond-expr.c               |   4 +-
+ validation/mem2reg/cond-expr5.c              |   5 +-
+ validation/optim/cse-size.c                  |   5 +-
+ validation/optim/memops-missed01.c           |  23 +++
+ validation/optim/memops-missed02.c           |  14 ++
+ validation/optim/merge_bbe-adjust_phi.c      |  23 +++
+ 18 files changed, 269 insertions(+), 39 deletions(-)
+ create mode 100644 validation/optim/memops-missed01.c
+ create mode 100644 validation/optim/memops-missed02.c
+ create mode 100644 validation/optim/merge_bbe-adjust_phi.c
 
->  /* Used by processes to "lock" a socket state, so that
-> diff --git a/net/core/sock.c b/net/core/sock.c
-> index 727ea1cc633c..9badbe7bb4e4 100644
-> --- a/net/core/sock.c
-> +++ b/net/core/sock.c
-> @@ -3078,7 +3078,7 @@ EXPORT_SYMBOL(release_sock);
->   *
->   *   sk_lock.slock unlocked, owned = 1, BH enabled
->   */
-> -bool lock_sock_fast(struct sock *sk)
-> +bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock)
->  {
->  	might_sleep();
->  	spin_lock_bh(&sk->sk_lock.slock);
-> @@ -3096,6 +3096,7 @@ bool lock_sock_fast(struct sock *sk)
->  	 * The sk_lock has mutex_lock() semantics here:
->  	 */
->  	mutex_acquire(&sk->sk_lock.dep_map, 0, 0, _RET_IP_);
-> +	__acquire(&sk->sk_lock.slock);
+-- 
+2.29.2
 
-OK, given that the mutexes are not annotated.
-
--- Luc 
