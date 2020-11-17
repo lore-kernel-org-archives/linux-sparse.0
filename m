@@ -2,131 +2,141 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96E77C5519F
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 18:44:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 011F4C6379D
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 19:47:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3B0F0223C7
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 18:44:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8FE472222E
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 19:47:44 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W1DAMZl8"
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="WAp/QY/o"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726719AbgKQSoK (ORCPT
+        id S1731304AbgKQTrZ (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 17 Nov 2020 13:44:10 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:35902 "EHLO
-        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726579AbgKQSoJ (ORCPT
+        Tue, 17 Nov 2020 14:47:25 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34860 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728948AbgKQTrZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 17 Nov 2020 13:44:09 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1605638642;
-        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:
-         content-transfer-encoding:content-transfer-encoding;
-        bh=lGq5kCPtIOhdBf9qopiL98GXQjU4TKit31m1KspptsU=;
-        b=W1DAMZl88/57lDQ1+SpmOghF4CD3tKcpRY58qD3cuscZO1o2TCT0P5kyMyAsT20cQ8Hm+n
-        ZQwpJP9wJT5nFXdWrsb0048ok5xZLD1Ny99U9mgFTfDd+zQUc/fjvLrewi1lJwbxkt6M70
-        vBAxRmiBnNC6ODo4cZ74WhPNeD19oEs=
-Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
- [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-536-0GER-hQxMxS8KxvHiffQZQ-1; Tue, 17 Nov 2020 13:43:58 -0500
-X-MC-Unique: 0GER-hQxMxS8KxvHiffQZQ-1
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 361421009443;
-        Tue, 17 Nov 2020 18:43:57 +0000 (UTC)
-Received: from gerbillo.redhat.com (ovpn-112-19.ams2.redhat.com [10.36.112.19])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 778B15D9E8;
-        Tue, 17 Nov 2020 18:43:55 +0000 (UTC)
-From:   Paolo Abeni <pabeni@redhat.com>
-To:     netdev@vger.kernel.org
-Cc:     Jakub Kicinski <kuba@kernel.org>,
-        Eric Dumazet <edumazet@google.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org
-Subject: [PATCH net-next v2] net: add annotation for sock_{lock,unlock}_fast
-Date:   Tue, 17 Nov 2020 19:43:49 +0100
-Message-Id: <6ed7ae627d8271fb7f20e0a9c6750fbba1ac2635.1605634911.git.pabeni@redhat.com>
+        Tue, 17 Nov 2020 14:47:25 -0500
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A6204C0617A6
+        for <linux-sparse@vger.kernel.org>; Tue, 17 Nov 2020 11:47:24 -0800 (PST)
+Received: by mail-lf1-x142.google.com with SMTP id r9so31785841lfn.11
+        for <linux-sparse@vger.kernel.org>; Tue, 17 Nov 2020 11:47:24 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=cnkyAVecp11EuaSSIHVUkvuhVPfRdL80axLrsSWvTGU=;
+        b=WAp/QY/oph8KADFqhaQD5BfzLlD2oUQ2fAPHb+hMhPpU6g0TfPytQoH2QHQbBHqu2A
+         gB+u6Q++wNy0w4W5HoCIW8XuelQ5MT04pmzM6xUEXAF3oFrFcGo9e+dtWyckb8T3ddMk
+         oXPoDtLh3hNhaVoswhG/BRsXttfBviPFnJDzM=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=cnkyAVecp11EuaSSIHVUkvuhVPfRdL80axLrsSWvTGU=;
+        b=nYK5UBGZ1Qzcn3Fu+Z0DdYDbPfRgwP/29zm6FhQ/IpbPOs3wlG07IUWKiEyDj5cBLz
+         xmechfRxEJZTTRWOuD6srvqZ5p9L8mpJP80zAT1BJKCG8oxGlShoaPQXpWKdK/xe2zmV
+         LoU+XCwSMGomLz7Js/tI5c6B1h43lMXz9z2VsgU6YtjE9MeNShGaeIDYiFnaxZ2+undb
+         +7Hb3s9tD8dfZBf0ecY8xbNkwdD7+xFtmwj5qEJ/dO00HyLgoWPk137G+ZypK0qS1Kpw
+         1zPq36P1bSDZicQCDlT8lYNoO5bbrrdXgTM33vEi/Ox7ZuUU5i1vBZQWvd5JbHQIJ443
+         AnPg==
+X-Gm-Message-State: AOAM532RJbw4f6KxNWOG3zI/xuoO0wKFlFwt6k8PsQrsZzNE4l2fURC2
+        gjbfd3f6/7joxVLJXe56HC7BORlpM2AS3Q==
+X-Google-Smtp-Source: ABdhPJyhLsFvL/cE921cWUFZ3NXXFBJxAbBXcN3+cpOSfXSciMdnxrV34rsBQLr6XafinRUkNZAnvw==
+X-Received: by 2002:a19:5c8:: with SMTP id 191mr2208110lff.111.1605642442679;
+        Tue, 17 Nov 2020 11:47:22 -0800 (PST)
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com. [209.85.208.179])
+        by smtp.gmail.com with ESMTPSA id q22sm3278439lfj.145.2020.11.17.11.47.20
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Tue, 17 Nov 2020 11:47:21 -0800 (PST)
+Received: by mail-lj1-f179.google.com with SMTP id l10so25669229lji.4
+        for <linux-sparse@vger.kernel.org>; Tue, 17 Nov 2020 11:47:20 -0800 (PST)
+X-Received: by 2002:a05:651c:2cb:: with SMTP id f11mr2455992ljo.371.1605642440080;
+ Tue, 17 Nov 2020 11:47:20 -0800 (PST)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
+References: <1605437478.5370.9.camel@med.uni-goettingen.de>
+ <CAFiYyc1-qtU+4Tj3mkz=c608zeP8feyuD6UyRhQv19qjKjJcvg@mail.gmail.com>
+ <20201116111056.GA3121378@hirez.programming.kicks-ass.net> <CAHk-=wh_kn11vXfi2Ns8E4F0GgmUprQtD-=RnU6Eg+N7coY5gw@mail.gmail.com>
+In-Reply-To: <CAHk-=wh_kn11vXfi2Ns8E4F0GgmUprQtD-=RnU6Eg+N7coY5gw@mail.gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Tue, 17 Nov 2020 11:47:04 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wivBmCoux_bVz_tZ12byZS=oZ7+F2Og8OjJGM5aiM-KQQ@mail.gmail.com>
+Message-ID: <CAHk-=wivBmCoux_bVz_tZ12byZS=oZ7+F2Og8OjJGM5aiM-KQQ@mail.gmail.com>
+Subject: Re: Re: typeof and operands in named address spaces
+To:     Peter Zijlstra <peterz@infradead.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Richard Biener <richard.guenther@gmail.com>,
+        "Uecker, Martin" <Martin.Uecker@med.uni-goettingen.de>,
+        "gcc@gcc.gnu.org" <gcc@gcc.gnu.org>,
+        "amonakov@ispras.ru" <amonakov@ispras.ru>,
+        "ubizjak@gmail.com" <ubizjak@gmail.com>,
+        "luto@kernel.org" <luto@kernel.org>,
+        linux-toolchains@vger.kernel.org, Will Deacon <will@kernel.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The static checker is fooled by the non-static locking scheme
-implemented by the mentioned helpers.
-Let's make its life easier adding some unconditional annotation
-so that the helpers are now interpreted as a plain spinlock from
-sparse.
+On Tue, Nov 17, 2020 at 11:13 AM Linus Torvalds
+<torvalds@linux-foundation.org> wrote:
+>
+> > +#define __unqual_typeof(type)  typeof( (typeof(type))type )
+>
+> that's certainly a much nicer version than the existing pre-processor
+> expansion from hell.
 
-v1 -> v2:
- - add __releases() annotation to unlock_sock_fast()
+Oh, and sparse doesn't handle this, and doesn't remove any qualifiers
+for the above. And so this horror-test-case fails:
 
-Signed-off-by: Paolo Abeni <pabeni@redhat.com>
----
- include/net/sock.h | 10 +++++++---
- net/core/sock.c    |  3 ++-
- 2 files changed, 9 insertions(+), 4 deletions(-)
+    #define __unqual_typeof(type)  typeof( (typeof(type))(type) )
 
-diff --git a/include/net/sock.h b/include/net/sock.h
-index 1d29aeae74fd..093b51719c69 100644
---- a/include/net/sock.h
-+++ b/include/net/sock.h
-@@ -1595,7 +1595,8 @@ void release_sock(struct sock *sk);
- 				SINGLE_DEPTH_NESTING)
- #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
- 
--bool lock_sock_fast(struct sock *sk);
-+bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock);
-+
- /**
-  * unlock_sock_fast - complement of lock_sock_fast
-  * @sk: socket
-@@ -1605,11 +1606,14 @@ bool lock_sock_fast(struct sock *sk);
-  * If slow mode is on, we call regular release_sock()
-  */
- static inline void unlock_sock_fast(struct sock *sk, bool slow)
-+	__releases(&sk->sk_lock.slock)
- {
--	if (slow)
-+	if (slow) {
- 		release_sock(sk);
--	else
-+		__release(&sk->sk_lock.slock);
-+	} else {
- 		spin_unlock_bh(&sk->sk_lock.slock);
-+	}
- }
- 
- /* Used by processes to "lock" a socket state, so that
-diff --git a/net/core/sock.c b/net/core/sock.c
-index 727ea1cc633c..9badbe7bb4e4 100644
---- a/net/core/sock.c
-+++ b/net/core/sock.c
-@@ -3078,7 +3078,7 @@ EXPORT_SYMBOL(release_sock);
-  *
-  *   sk_lock.slock unlocked, owned = 1, BH enabled
-  */
--bool lock_sock_fast(struct sock *sk)
-+bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock)
- {
- 	might_sleep();
- 	spin_lock_bh(&sk->sk_lock.slock);
-@@ -3096,6 +3096,7 @@ bool lock_sock_fast(struct sock *sk)
- 	 * The sk_lock has mutex_lock() semantics here:
- 	 */
- 	mutex_acquire(&sk->sk_lock.dep_map, 0, 0, _RET_IP_);
-+	__acquire(&sk->sk_lock.slock);
- 	local_bh_enable();
- 	return true;
- }
--- 
-2.26.2
+    int *function(volatile int x)
+    {
+        extern __unqual_typeof(x) y;
+        return &y;
+    }
 
+with
+
+  t.c:6:17: warning: incorrect type in return expression (different modifiers)
+  t.c:6:17:    expected int *
+  t.c:6:17:    got int volatile *
+  t.c:3:5: warning: symbol 'function' was not declared. Should it be static?
+
+adding Luc and the sparse mailing list to the participants list.
+
+But it does work with both gcc and clang for me.
+
+For Luc, quoting some earlier emails:
+
+> > lvalue conversion drops qualifers in C.  In GCC, this is not
+> > implemented correctly as it is unobservable in standard C
+> > (but it using typeof).
+> >
+> > https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97702
+> >
+> > A have a working patch in preparation to change this. Then you
+> > could use
+> >
+> > typeof( ((void)0, x) )
+
+on another thing that fails with sparse. But since gcc gets that wrong
+too and it only works with clang, that's not so relevant for the
+kernel.
+
+Luc - same test-case as above, just
+
+    #define __unqual_typeof(x) typeof( ((void)0, (x)) )
+
+instead.
+
+           Linus
