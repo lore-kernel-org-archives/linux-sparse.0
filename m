@@ -2,108 +2,99 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 797C0C63777
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 23:47:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9733DC388F9
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 00:16:23 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2964024641
-	for <linux-sparse@archiver.kernel.org>; Mon, 16 Nov 2020 23:47:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 2F09F24654
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 00:16:23 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="kb8T36Na"
+	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="NnB5dEvd"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731082AbgKPXrQ (ORCPT
+        id S1726310AbgKQAQX (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 16 Nov 2020 18:47:16 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47276 "EHLO
+        Mon, 16 Nov 2020 19:16:23 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51716 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726182AbgKPXrP (ORCPT
+        with ESMTP id S1726156AbgKQAQW (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 16 Nov 2020 18:47:15 -0500
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 774D2C0613CF
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 15:47:15 -0800 (PST)
-Received: by mail-ej1-x644.google.com with SMTP id za3so26898624ejb.5
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 15:47:15 -0800 (PST)
+        Mon, 16 Nov 2020 19:16:22 -0500
+Received: from mail-lj1-x244.google.com (mail-lj1-x244.google.com [IPv6:2a00:1450:4864:20::244])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 077E7C0613CF
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 16:16:20 -0800 (PST)
+Received: by mail-lj1-x244.google.com with SMTP id x9so22246160ljc.7
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 16:16:20 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=KyLht7HxFEsIkS7JR6c50TtbTvt38CjYOrlTG/juufY=;
-        b=kb8T36NaLSDH3jukS7i7mZhJhnXpSshiUnS7Un6JLxpozRFktHGxLeb1pppkEzY1qF
-         m2CiTUssFmr1l5B4PugtHjYJTyQLv3aEeOn3Q4FjSFmsowGrO1MVzY1cSLoGRkFAx8xf
-         xvCQMN3cOeDO2c622y0qZpZVoTmgcLr3yoNYfRoIf4wo0azGEmMYvUeCnEffdWTsBqyL
-         +3ftZApTCk3ycgK9k1bZ/W/GPAAlV+H7rxhLDZn3QEyebrpcDiaFfKICuv+d+U3aSpvK
-         NedSzhrQMGPKzS6KvwFuIUUIyGNKoZx9+C0rHh9LKfU3OLf20TQvJ/wIzWTIawAwkAGa
-         Y5tQ==
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=akwxBPpXZQuUIxvn9F4Lr2r7OHDFDzTuPM6MJQGziCg=;
+        b=NnB5dEvd0S1wGFhnBkQjgRKTGajP7dbRv0F+XLIWy7CfBBOxj1u2A9MOmPzK7pgDZ0
+         v6WPLQ+jBiv26LE3intgH54QeFlRN3+Dv80Wumib0UYG3Qy/f7jlhWXXYOMVlQdk4fcG
+         SKsegHBYu5tiMouQVflEJfLePz4G9rdOa1sGs=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=KyLht7HxFEsIkS7JR6c50TtbTvt38CjYOrlTG/juufY=;
-        b=mi0r4djuhyqoyYBRq4sLXAz3nmpcYUTjrgnIbv8Jbq2CjUgfkXdO7p7DJpjOspb3+m
-         L8XB1UIbVFc7NJm5QwBMeeB2HlHWSrLOLmhAc6Ai9gJt86HATOKsQAJuEhrziw2SjVP7
-         VhdiPlTgRliebLO9blHe0Bvgt7LhV1671OdpRB5AI5FOyD1Qmw/deeA9l8m0WZREhW22
-         +B7cx3vKAjrLJtRqQZTGH8wpt93xt/z+U0G57N47dSv25hzvX0OkPGGuTsb0zsArEOdw
-         p6lfhl7v7YvB4MQUQkv4Xsqh9Qa6EpfjSXjbcv2CxH8WhgxkERd/+4IAhoLWewSjZAM+
-         9RHA==
-X-Gm-Message-State: AOAM530EQQjkVAOpvAxNg+q85zs53KLbfeV+1F+BiGZFmNwnpuUqO/uy
-        aD4OwMVFV05hJLm6hBNfUQdlMwCxdJ4=
-X-Google-Smtp-Source: ABdhPJxYMm8ymCud/8ww85nNGPfAQTt8roBKzO/fk4kXFa6FFUCFmZw164BaU6a9Muhbje+1OqZl7A==
-X-Received: by 2002:a17:906:9458:: with SMTP id z24mr17645262ejx.318.1605570434142;
-        Mon, 16 Nov 2020 15:47:14 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
-        by smtp.gmail.com with ESMTPSA id c8sm11424739edr.29.2020.11.16.15.47.13
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Nov 2020 15:47:13 -0800 (PST)
-Date:   Tue, 17 Nov 2020 00:47:12 +0100
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH 4/8] cfg: adjust phi-sources when merging BBs
-Message-ID: <20201116234712.7nk5ktce4ntcumbs@ltop.local>
-References: <20201116222927.51939-1-luc.vanoostenryck@gmail.com>
- <20201116222927.51939-5-luc.vanoostenryck@gmail.com>
- <CAHk-=wiSQ-=SRspfVWdE17ORGJtjJzPCvCOo7ETwM9jeUG6uvg@mail.gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=akwxBPpXZQuUIxvn9F4Lr2r7OHDFDzTuPM6MJQGziCg=;
+        b=qxzoA7d5bZO3r081XpFZ+YjI6LtqPda46ujaLCTJAooRPeZEnzMkYW0mwe7A0+D01n
+         QHjl3GjFW0rwwByFiEP3tBc3taroNOBUuqYfnVPHg08tp2rO2kx8H9aj4oyZZuM7SXFx
+         FFeJUcBQp970wWBKqc+UsxsaprAKYtfr5s0t6RWSRGHYN2RPK4BfwBBTMpWV6xDSz+/w
+         qXf1R/phEycl2gFWecqUzxwAQ+BiudpDMpGKL1vsAUkMQzayFwvetLue5jv6GfquLvjR
+         +OfdI+ZFI+ZJG4z9goJ4/9jQkdTgnKuX65GXe9h50VjpgE/Gq08sAksyc89YWAxOH9XZ
+         dJkQ==
+X-Gm-Message-State: AOAM532pyqVbzfCxBYwMGRjB93/8aTwo0m4BnFz1CcsBK/SLQ26jbMSJ
+        eONIOCRQApkOYJGAKGBiWXObh2f7YJp3bQ==
+X-Google-Smtp-Source: ABdhPJzYcGZcoNK3DYKBRXO/W3CzXeOifTwRfZmICEyxRo/keqVYvnMLg8dbsqN1wvCcqOASChXXkg==
+X-Received: by 2002:a05:651c:210e:: with SMTP id a14mr759838ljq.128.1605572179077;
+        Mon, 16 Nov 2020 16:16:19 -0800 (PST)
+Received: from mail-lj1-f169.google.com (mail-lj1-f169.google.com. [209.85.208.169])
+        by smtp.gmail.com with ESMTPSA id d28sm368451lfm.201.2020.11.16.16.16.17
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Mon, 16 Nov 2020 16:16:18 -0800 (PST)
+Received: by mail-lj1-f169.google.com with SMTP id o24so22228547ljj.6
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 16:16:17 -0800 (PST)
+X-Received: by 2002:a05:651c:2cb:: with SMTP id f11mr679537ljo.371.1605572177641;
+ Mon, 16 Nov 2020 16:16:17 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wiSQ-=SRspfVWdE17ORGJtjJzPCvCOo7ETwM9jeUG6uvg@mail.gmail.com>
+References: <20201116222927.51939-1-luc.vanoostenryck@gmail.com>
+ <20201116222927.51939-5-luc.vanoostenryck@gmail.com> <CAHk-=wiSQ-=SRspfVWdE17ORGJtjJzPCvCOo7ETwM9jeUG6uvg@mail.gmail.com>
+ <20201116234712.7nk5ktce4ntcumbs@ltop.local>
+In-Reply-To: <20201116234712.7nk5ktce4ntcumbs@ltop.local>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Mon, 16 Nov 2020 16:16:01 -0800
+X-Gmail-Original-Message-ID: <CAHk-=whOLb3-HR=imWNtKk4n2FwZTuZSgYDB2sH=307mqQN+SQ@mail.gmail.com>
+Message-ID: <CAHk-=whOLb3-HR=imWNtKk4n2FwZTuZSgYDB2sH=307mqQN+SQ@mail.gmail.com>
+Subject: Re: [PATCH 4/8] cfg: adjust phi-sources when merging BBs
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Nov 16, 2020 at 02:53:21PM -0800, Linus Torvalds wrote:
-> On Mon, Nov 16, 2020 at 2:30 PM Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > +static void adjust_phisrc(struct basic_block *top, struct instruction *insn)
-> 
-> My only issue is that this is a really odd name, and calling convention.
-> 
-> "adjust"?
-> 
-> Wouldn't it be more sensible to call this "remove_phisrc()", because
-> that's what it does. It removes the matching phisrc instruction in the
-> specified basic block.
+On Mon, Nov 16, 2020 at 3:47 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> This code is a bit weird though, because it actively use the fact
+> that each phi-sources feeds a single phi-node while the underlying
+> data structures are designed so that phi-sources can be shared
+> between phi-nodes (but I think that allowing them the be effectively
+> shared would bring too much problems).
 
-Yes, the name is horrible and doesn't mean much. I'll change it.
- 
-> (I also think it might be a bit more obvious to do the get_phinode()
-> in the caller, and simply pass in the OP_PHI instruction, but maybe
-> you had reasons to do it that way).
+Yeah, the phisource nodes are strange
 
-In fact, I wrote it first like that but then I've another piece
-of code that need exactly the same info so I change it into
-a separate function.
+ I was confused when I wrote the original phi code, and you fixed it
+all up (to the point where I suspect none of my original confusion
+exists ;^), but they are still a bit strange.
 
-This code is a bit weird though, because it actively use the fact
-that each phi-sources feeds a single phi-node while the underlying
-data structures are designed so that phi-sources can be shared
-between phi-nodes (but I think that allowing them the be effectively
-shared would bring too much problems).
+Could the phi_users list be just replaced by the target (OP_PHI)
+pseudo (or instruction)?
 
--- Luc
+           Linus
+
+          Linus
