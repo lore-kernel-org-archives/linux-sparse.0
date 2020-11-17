@@ -2,125 +2,131 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
-	autolearn_force=no version=3.4.0
+	INCLUDES_CR_TRAILER,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D1CC2D0E4
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:36:29 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 96E77C5519F
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 18:44:10 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CADCB20678
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:36:28 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3B0F0223C7
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 18:44:10 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pbw5I2ks"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="W1DAMZl8"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729590AbgKQRg2 (ORCPT
+        id S1726719AbgKQSoK (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 17 Nov 2020 12:36:28 -0500
-Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:34909 "EHLO
+        Tue, 17 Nov 2020 13:44:10 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:35902 "EHLO
         us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729476AbgKQRg2 (ORCPT
+        by vger.kernel.org with ESMTP id S1726579AbgKQSoJ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 17 Nov 2020 12:36:28 -0500
+        Tue, 17 Nov 2020 13:44:09 -0500
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
-        s=mimecast20190719; t=1605634587;
+        s=mimecast20190719; t=1605638642;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
-         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
-         in-reply-to:in-reply-to:references:references;
-        bh=ttfvIb6ojFXvnD7jK5/JUSS/M1skJOwi75jp84lLKuo=;
-        b=Pbw5I2kszJpjIblvjk4CV9QeSrVHQf6fw6P9RcXTQ09CaMFR7HryMSHqMKfGliKxOZ9xLn
-        GZRkNCEmJUmWAElVZHNK8GWxdYhS6yV/MckUivUrtqLiHl0VSjWrTxUDtrOqznA17VaKyU
-        1e3CdQ4XzxI5Gh5nyLXGp06/KcRw1gE=
+         to:to:cc:cc:mime-version:mime-version:
+         content-transfer-encoding:content-transfer-encoding;
+        bh=lGq5kCPtIOhdBf9qopiL98GXQjU4TKit31m1KspptsU=;
+        b=W1DAMZl88/57lDQ1+SpmOghF4CD3tKcpRY58qD3cuscZO1o2TCT0P5kyMyAsT20cQ8Hm+n
+        ZQwpJP9wJT5nFXdWrsb0048ok5xZLD1Ny99U9mgFTfDd+zQUc/fjvLrewi1lJwbxkt6M70
+        vBAxRmiBnNC6ODo4cZ74WhPNeD19oEs=
 Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
  [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
- us-mta-276-eNcysYIoOmOK6P2OyOHoDw-1; Tue, 17 Nov 2020 12:36:23 -0500
-X-MC-Unique: eNcysYIoOmOK6P2OyOHoDw-1
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+ us-mta-536-0GER-hQxMxS8KxvHiffQZQ-1; Tue, 17 Nov 2020 13:43:58 -0500
+X-MC-Unique: 0GER-hQxMxS8KxvHiffQZQ-1
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6EE0D1084D61;
-        Tue, 17 Nov 2020 17:36:21 +0000 (UTC)
-Received: from ovpn-112-19.ams2.redhat.com (ovpn-112-19.ams2.redhat.com [10.36.112.19])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A4BF160C04;
-        Tue, 17 Nov 2020 17:36:19 +0000 (UTC)
-Message-ID: <ad72a4d612d95e0d5c0b6923926e43239c506171.camel@redhat.com>
-Subject: Re: [PATCH net-next] net: add annotation for sock_{lock,unlock}_fast
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 361421009443;
+        Tue, 17 Nov 2020 18:43:57 +0000 (UTC)
+Received: from gerbillo.redhat.com (ovpn-112-19.ams2.redhat.com [10.36.112.19])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 778B15D9E8;
+        Tue, 17 Nov 2020 18:43:55 +0000 (UTC)
 From:   Paolo Abeni <pabeni@redhat.com>
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     netdev@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
+To:     netdev@vger.kernel.org
+Cc:     Jakub Kicinski <kuba@kernel.org>,
         Eric Dumazet <edumazet@google.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
-Date:   Tue, 17 Nov 2020 18:36:18 +0100
-In-Reply-To: <20201117165830.e44pu3nd5vx3jzmz@ltop.local>
-References: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
-         <20201116222750.nmfyxnj6jvd3rww4@ltop.local>
-         <a41e88a82b4d7433dded23e9fbd0465ad8529e36.camel@redhat.com>
-         <20201117165830.e44pu3nd5vx3jzmz@ltop.local>
-Content-Type: text/plain; charset="UTF-8"
-User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
+Subject: [PATCH net-next v2] net: add annotation for sock_{lock,unlock}_fast
+Date:   Tue, 17 Nov 2020 19:43:49 +0100
+Message-Id: <6ed7ae627d8271fb7f20e0a9c6750fbba1ac2635.1605634911.git.pabeni@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
-X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
+Content-Transfer-Encoding: 8bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.14
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hello,
+The static checker is fooled by the non-static locking scheme
+implemented by the mentioned helpers.
+Let's make its life easier adding some unconditional annotation
+so that the helpers are now interpreted as a plain spinlock from
+sparse.
 
-On Tue, 2020-11-17 at 17:58 +0100, Luc Van Oostenryck wrote:
-> On Tue, Nov 17, 2020 at 09:38:45AM +0100, Paolo Abeni wrote:
-> > Hello,
-> > 
-> > Thank you for the feedback!
-> > 
-> > On Mon, 2020-11-16 at 23:27 +0100, Luc Van Oostenryck wrote:
-> > > > @@ -1606,10 +1607,12 @@ bool lock_sock_fast(struct sock *sk);
-> > > >   */
-> > > >  static inline void unlock_sock_fast(struct sock *sk, bool slow)
-> > > >  {
-> > > > -	if (slow)
-> > > > +	if (slow) {
-> > > >  		release_sock(sk);
-> > > > -	else
-> > > > +		__release(&sk->sk_lock.slock);
-> > > 
-> > > The correct solution would be to annotate the declaration of
-> > > release_sock() with '__releases(&sk->sk_lock.slock)'.
-> > 
-> > If I add such annotation to release_sock(), I'll get several sparse
-> > warnings for context imbalance (on each lock_sock()/release_sock()
-> > pair), unless I also add an '__acquires()' annotation to lock_sock(). 
-> > 
-> > The above does not look correct to me ?!? When release_sock() completes
-> > the socket spin lock is not held.
-> 
-> Yes, that's fine, but I suppose it somehow releases the mutex that
-> is taken in lock_sock_fast() when returning true, right?
+v1 -> v2:
+ - add __releases() annotation to unlock_sock_fast()
 
-Well, it has mutex semantics, but does not really acquire any mutex.
+Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+---
+ include/net/sock.h | 10 +++++++---
+ net/core/sock.c    |  3 ++-
+ 2 files changed, 9 insertions(+), 4 deletions(-)
 
-> > The annotation added above is
-> > somewhat an artifact to let unlock_sock_fast() matches lock_sock_fast()
-> > from sparse perspective. I intentionally avoided changing
-> > the release_sock() annotation to avoid introducing more artifacts.
-> > 
-> > The proposed schema is not 100% accurate, as it will also allow e.g. a
-> > really-not-fitting bh_lock_sock()/unlock_sock_fast() pair, but I could
-> > not come-up with anything better.
-> > 
-> > Can we go with the schema I proposed?
-> 
-> Well, I suppose it's a first step.
-> But can you then add a '__releases(...)' to unlock_sock_fast()?
-> It's not needed by sparse because it's an inline function and sparse
-> can then deduce it but it will help to see the pairing with
-> lock_sock_fast() is OK.
-
-Ok, I'll send a v2 with such annotation.
-
-Thanks!
-
-Paolo
+diff --git a/include/net/sock.h b/include/net/sock.h
+index 1d29aeae74fd..093b51719c69 100644
+--- a/include/net/sock.h
++++ b/include/net/sock.h
+@@ -1595,7 +1595,8 @@ void release_sock(struct sock *sk);
+ 				SINGLE_DEPTH_NESTING)
+ #define bh_unlock_sock(__sk)	spin_unlock(&((__sk)->sk_lock.slock))
+ 
+-bool lock_sock_fast(struct sock *sk);
++bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock);
++
+ /**
+  * unlock_sock_fast - complement of lock_sock_fast
+  * @sk: socket
+@@ -1605,11 +1606,14 @@ bool lock_sock_fast(struct sock *sk);
+  * If slow mode is on, we call regular release_sock()
+  */
+ static inline void unlock_sock_fast(struct sock *sk, bool slow)
++	__releases(&sk->sk_lock.slock)
+ {
+-	if (slow)
++	if (slow) {
+ 		release_sock(sk);
+-	else
++		__release(&sk->sk_lock.slock);
++	} else {
+ 		spin_unlock_bh(&sk->sk_lock.slock);
++	}
+ }
+ 
+ /* Used by processes to "lock" a socket state, so that
+diff --git a/net/core/sock.c b/net/core/sock.c
+index 727ea1cc633c..9badbe7bb4e4 100644
+--- a/net/core/sock.c
++++ b/net/core/sock.c
+@@ -3078,7 +3078,7 @@ EXPORT_SYMBOL(release_sock);
+  *
+  *   sk_lock.slock unlocked, owned = 1, BH enabled
+  */
+-bool lock_sock_fast(struct sock *sk)
++bool lock_sock_fast(struct sock *sk) __acquires(&sk->sk_lock.slock)
+ {
+ 	might_sleep();
+ 	spin_lock_bh(&sk->sk_lock.slock);
+@@ -3096,6 +3096,7 @@ bool lock_sock_fast(struct sock *sk)
+ 	 * The sk_lock has mutex_lock() semantics here:
+ 	 */
+ 	mutex_acquire(&sk->sk_lock.dep_map, 0, 0, _RET_IP_);
++	__acquire(&sk->sk_lock.slock);
+ 	local_bh_enable();
+ 	return true;
+ }
+-- 
+2.26.2
 
