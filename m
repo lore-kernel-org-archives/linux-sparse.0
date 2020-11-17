@@ -2,104 +2,125 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
+	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7E9C8C5519F
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:27:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 37D1CC2D0E4
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:36:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 256B1241A7
-	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:27:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CADCB20678
+	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 17:36:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nFzePaWN"
+	dkim=pass (1024-bit key) header.d=redhat.com header.i=@redhat.com header.b="Pbw5I2ks"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726302AbgKQR13 (ORCPT
+        id S1729590AbgKQRg2 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 17 Nov 2020 12:27:29 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41142 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726174AbgKQR13 (ORCPT
+        Tue, 17 Nov 2020 12:36:28 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([63.128.21.124]:34909 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729476AbgKQRg2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 17 Nov 2020 12:27:29 -0500
-Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 12A94C0613CF
-        for <linux-sparse@vger.kernel.org>; Tue, 17 Nov 2020 09:27:29 -0800 (PST)
-Received: by mail-ej1-x641.google.com with SMTP id oq3so30533613ejb.7
-        for <linux-sparse@vger.kernel.org>; Tue, 17 Nov 2020 09:27:29 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=EMKiq0TF5Xmh71FEBJ2lUnRnaigH9YIcaPFQCmLGy8o=;
-        b=nFzePaWNo/FOLzVHkKFvwQLxnsBHs1ycdj1T8RTywOf26+cB2pTEyIBjU4dkbUJUFJ
-         ydSkhHq/qRkUZ1jR+8a4Uk9yhXv4YwfNXOjWqrPBhSQNO1OAhh62Q13g58jr6C1QC4BA
-         4lBKumn1heGifo0m0y5h7qA2hr5T26/HigAISllkttlu1V9fZ7uruUiEk15HMaSHQKip
-         HHXb/auNCy/dmWtSd/NdNnF1sQLzAEHVUt2QOxWqkJ99YUnNiatEyoj/R2uFl2R8YJDP
-         krXSFw8czDAPpWyRB0/MmeQ6f6kLOKaORHIt+EE9vXXi6yzE2KxrOZT0XDysxMO8Ze1l
-         D56w==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=EMKiq0TF5Xmh71FEBJ2lUnRnaigH9YIcaPFQCmLGy8o=;
-        b=qTookz0pYgm5NoWQLb0XYtvWlAjHo7hQy4d1BFusNlOXsAV7ThDf6BDPD/nQkNIyOe
-         yxxIb5Y99OAo4dApQOZbdwHX3mvPMLne7mEMO4ujuotB7ioXSj8cIF+vTckS69AmQhwZ
-         M3RILnwzNZBpujIXx+Wwwf9gYcM7z8PqDO4n4AToLDpSY/ynFQp3pbhXzManIhuBdT9W
-         84u58SSwGMrbNgl4jaHQsh8o4Tinc12jY+vcQ5tv5mpObsTIEqP5B3vcjMNMub7keCws
-         Rd8fIehaGPBqGbH/i/2uWYeFjtjF3Arghvevr04tObffvUFQzpFAkQkr6E+DwwFHzqJW
-         CLBQ==
-X-Gm-Message-State: AOAM533kPFGlbGRwf3lYWimOlIzR8E0jrNMO9gqjyduDc14RvMCP9fMT
-        Qrl53/XdMySdVPp06AkjLHSr2Fp7meM=
-X-Google-Smtp-Source: ABdhPJxR6dGnG1qTQB7rTvwiYhiUaUlgDJZ2JpFvNRQ3Gr7ennDU8+kVNt+6ywtqkvYUcB1lZQaALg==
-X-Received: by 2002:a17:906:ee2:: with SMTP id x2mr9429167eji.326.1605634047515;
-        Tue, 17 Nov 2020 09:27:27 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:ec88:97fa:6d80:7ccf])
-        by smtp.gmail.com with ESMTPSA id lu33sm11675228ejb.98.2020.11.17.09.27.25
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 17 Nov 2020 09:27:26 -0800 (PST)
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] linearize: remove unneeded forward declarations
-Date:   Tue, 17 Nov 2020 18:27:06 +0100
-Message-Id: <20201117172706.79905-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.29.2
+        Tue, 17 Nov 2020 12:36:28 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1605634587;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:mime-version:mime-version:content-type:content-type:
+         content-transfer-encoding:content-transfer-encoding:
+         in-reply-to:in-reply-to:references:references;
+        bh=ttfvIb6ojFXvnD7jK5/JUSS/M1skJOwi75jp84lLKuo=;
+        b=Pbw5I2kszJpjIblvjk4CV9QeSrVHQf6fw6P9RcXTQ09CaMFR7HryMSHqMKfGliKxOZ9xLn
+        GZRkNCEmJUmWAElVZHNK8GWxdYhS6yV/MckUivUrtqLiHl0VSjWrTxUDtrOqznA17VaKyU
+        1e3CdQ4XzxI5Gh5nyLXGp06/KcRw1gE=
+Received: from mimecast-mx01.redhat.com (mimecast-mx01.redhat.com
+ [209.132.183.4]) (Using TLS) by relay.mimecast.com with ESMTP id
+ us-mta-276-eNcysYIoOmOK6P2OyOHoDw-1; Tue, 17 Nov 2020 12:36:23 -0500
+X-MC-Unique: eNcysYIoOmOK6P2OyOHoDw-1
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mimecast-mx01.redhat.com (Postfix) with ESMTPS id 6EE0D1084D61;
+        Tue, 17 Nov 2020 17:36:21 +0000 (UTC)
+Received: from ovpn-112-19.ams2.redhat.com (ovpn-112-19.ams2.redhat.com [10.36.112.19])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id A4BF160C04;
+        Tue, 17 Nov 2020 17:36:19 +0000 (UTC)
+Message-ID: <ad72a4d612d95e0d5c0b6923926e43239c506171.camel@redhat.com>
+Subject: Re: [PATCH net-next] net: add annotation for sock_{lock,unlock}_fast
+From:   Paolo Abeni <pabeni@redhat.com>
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     netdev@vger.kernel.org, Jakub Kicinski <kuba@kernel.org>,
+        Eric Dumazet <edumazet@google.com>,
+        linux-sparse@vger.kernel.org
+Date:   Tue, 17 Nov 2020 18:36:18 +0100
+In-Reply-To: <20201117165830.e44pu3nd5vx3jzmz@ltop.local>
+References: <95cf587fe96127884e555f695fe519d50e63cc17.1605522868.git.pabeni@redhat.com>
+         <20201116222750.nmfyxnj6jvd3rww4@ltop.local>
+         <a41e88a82b4d7433dded23e9fbd0465ad8529e36.camel@redhat.com>
+         <20201117165830.e44pu3nd5vx3jzmz@ltop.local>
+Content-Type: text/plain; charset="UTF-8"
+User-Agent: Evolution 3.36.5 (3.36.5-1.fc32) 
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
+X-Scanned-By: MIMEDefang 2.79 on 10.5.11.12
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-These declarations are not needed, so remove them.
+Hello,
 
-A few of the other ones could/should be removed but
-it would need to shuffle some code around.
+On Tue, 2020-11-17 at 17:58 +0100, Luc Van Oostenryck wrote:
+> On Tue, Nov 17, 2020 at 09:38:45AM +0100, Paolo Abeni wrote:
+> > Hello,
+> > 
+> > Thank you for the feedback!
+> > 
+> > On Mon, 2020-11-16 at 23:27 +0100, Luc Van Oostenryck wrote:
+> > > > @@ -1606,10 +1607,12 @@ bool lock_sock_fast(struct sock *sk);
+> > > >   */
+> > > >  static inline void unlock_sock_fast(struct sock *sk, bool slow)
+> > > >  {
+> > > > -	if (slow)
+> > > > +	if (slow) {
+> > > >  		release_sock(sk);
+> > > > -	else
+> > > > +		__release(&sk->sk_lock.slock);
+> > > 
+> > > The correct solution would be to annotate the declaration of
+> > > release_sock() with '__releases(&sk->sk_lock.slock)'.
+> > 
+> > If I add such annotation to release_sock(), I'll get several sparse
+> > warnings for context imbalance (on each lock_sock()/release_sock()
+> > pair), unless I also add an '__acquires()' annotation to lock_sock(). 
+> > 
+> > The above does not look correct to me ?!? When release_sock() completes
+> > the socket spin lock is not held.
+> 
+> Yes, that's fine, but I suppose it somehow releases the mutex that
+> is taken in lock_sock_fast() when returning true, right?
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- linearize.c | 4 ----
- 1 file changed, 4 deletions(-)
+Well, it has mutex semantics, but does not really acquire any mutex.
 
-diff --git a/linearize.c b/linearize.c
-index d3c009b36d22..76c116ba112e 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -28,12 +28,8 @@ static pseudo_t linearize_expression(struct entrypoint *ep, struct expression *e
- 
- static pseudo_t add_cast(struct entrypoint *ep, struct symbol *to, struct symbol *from, int op, pseudo_t src);
- static pseudo_t add_binary_op(struct entrypoint *ep, struct symbol *ctype, int op, pseudo_t left, pseudo_t right);
--static pseudo_t add_setval(struct entrypoint *ep, struct symbol *ctype, struct expression *val);
- static pseudo_t linearize_one_symbol(struct entrypoint *ep, struct symbol *sym);
- 
--struct access_data;
--static pseudo_t add_load(struct entrypoint *ep, struct access_data *);
--static pseudo_t linearize_initializer(struct entrypoint *ep, struct expression *initializer, struct access_data *);
- static pseudo_t cast_pseudo(struct entrypoint *ep, pseudo_t src, struct symbol *from, struct symbol *to);
- 
- struct pseudo void_pseudo = {};
--- 
-2.29.2
+> > The annotation added above is
+> > somewhat an artifact to let unlock_sock_fast() matches lock_sock_fast()
+> > from sparse perspective. I intentionally avoided changing
+> > the release_sock() annotation to avoid introducing more artifacts.
+> > 
+> > The proposed schema is not 100% accurate, as it will also allow e.g. a
+> > really-not-fitting bh_lock_sock()/unlock_sock_fast() pair, but I could
+> > not come-up with anything better.
+> > 
+> > Can we go with the schema I proposed?
+> 
+> Well, I suppose it's a first step.
+> But can you then add a '__releases(...)' to unlock_sock_fast()?
+> It's not needed by sparse because it's an inline function and sparse
+> can then deduce it but it will help to see the pairing with
+> lock_sock_fast() is OK.
+
+Ok, I'll send a v2 with such annotation.
+
+Thanks!
+
+Paolo
 
