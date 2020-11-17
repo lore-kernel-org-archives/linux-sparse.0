@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-12.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E2D37C63798
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD96EC63777
 	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 01:11:28 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A02B924682
+	by mail.kernel.org (Postfix) with ESMTP id 72C482468D
 	for <linux-sparse@archiver.kernel.org>; Tue, 17 Nov 2020 01:11:28 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="BXJJK2jT"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="E6n+yPxC"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731769AbgKQBLF (ORCPT
+        id S1731771AbgKQBLF (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Mon, 16 Nov 2020 20:11:05 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60078 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60084 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731770AbgKQBLF (ORCPT
+        with ESMTP id S1731769AbgKQBLF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 16 Nov 2020 20:11:05 -0500
-Received: from mail-ed1-x542.google.com (mail-ed1-x542.google.com [IPv6:2a00:1450:4864:20::542])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C79C7C0613D2
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 17:11:03 -0800 (PST)
-Received: by mail-ed1-x542.google.com with SMTP id t11so20658626edj.13
-        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 17:11:03 -0800 (PST)
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B4D09C0613CF
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 17:11:04 -0800 (PST)
+Received: by mail-ed1-x543.google.com with SMTP id q16so5512300edv.10
+        for <linux-sparse@vger.kernel.org>; Mon, 16 Nov 2020 17:11:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=PogOt/5eU18LdI5Pzj7kakebc0wE7AlSqgelu/GyHR8=;
-        b=BXJJK2jTrba5Z+VAE6u35MbFUZiNaaHZ0m1dYw2IT+mZCAWykCC6X8Nic8aMX86uDO
-         JnDZczEbTS/N8B6lfyJ75WRbZuqsqqwIVtc/Plktlhr7Spg/AWSly2CfLozMBNmvU2qu
-         l2ZHDm62zDTiK0pBvZC5bcc1Ufk6LoDUN+sKf1ywHMn6KRO6tJv5AORdrD7Z9HnCUP7b
-         aQ2/kk+hgp6DL4czw21+TjRV6fC3G0LzDALdoy8UWgETAmFWtz/4HRgtSbLE7lJy1Eod
-         NRZYS3WH8gWjNyVIdkx1fs3ROudSxTQBpjY0QInSt1o8wrDJuD9sto7LxpcoD+6tGxAw
-         LVGQ==
+        bh=x/09FSWIzpL5xsYSy/Ze3njCPZzHIsRIcaRLmbGQUqs=;
+        b=E6n+yPxC35ksch3ZxSH16GtP+pdHSzlHGEFa60/FNwEOE7R3cV6ckJ3yIF6YOvqJQV
+         MUofVkWnpy5SIVoOt8QcHVs6BnwHqB8mdqqatthkEneiWjXsk96gofYHQV0/Pp42JHrM
+         09HpiYuXedw0Jjp9c4M4EQBJbQDBSK0cF8+3cqJHWIIHiscp1KTYzmdCkbo7Ed6rvLz4
+         sBCtpAkPQ6qdxD2/UaRFrjsKO0vRWfgE5DvrpyMomFT1tJKSH3pWQ2tggG+Rk6WZHGtE
+         Je7vZzpkwF+pxlAXjQny6CZAUY36ZjMNwHI4pc19VV85yXr6cIN7jQHgrImQjVKhFHip
+         zG4w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=PogOt/5eU18LdI5Pzj7kakebc0wE7AlSqgelu/GyHR8=;
-        b=pwm8Yy4wXSgSR86rWehyesezEmY9DeGUcESdgiGIqpl3qYU+se2cgNljF9bxac+xlJ
-         jLR+vHB+6l1P60Hz2vPit2qLQwd2Y4Gj+HKmWvsZy5eRKxB2YlOdWwVwu2QscdfssO8K
-         WJjb0QNi+6pWqxJhBj0bTBS36JikKMNK2Ws2mbDxofL0BVDWb9L8m9Egb7A9y+yqd/PX
-         493x4TTJSz/hl61L/S3Qrzl56hqRnUhavejUrHlZas4ggxIOFWmnR+1yUd5sBd9LseKg
-         dN/CVOHy16z04ZQRDBiqQDWc/pwQE8tR+rPAZN7r9YVwQ5/tQzTPn9x0oazDXFdF+6cb
-         iMzA==
-X-Gm-Message-State: AOAM533JsjxAcaVZOAJgmWzUIWXUu4tNJ50VJyh5XsXUAoIQ6kV/UHin
-        WbLAIzPBmaiXszIHiU8JfQTR/KKgUBk=
-X-Google-Smtp-Source: ABdhPJw/Ikxa/Sxu2RHKeo2Zh3g14WMjl0gXy+Fm+zaseRCDXnUW6r6FjQ7zaPyD6aZKduelDWhfxg==
-X-Received: by 2002:a50:c40d:: with SMTP id v13mr18697196edf.1.1605575462356;
-        Mon, 16 Nov 2020 17:11:02 -0800 (PST)
+        bh=x/09FSWIzpL5xsYSy/Ze3njCPZzHIsRIcaRLmbGQUqs=;
+        b=MTtDQsVX2eb1AM8AXsVdlS4RXNB2FdwQG1c8VCQNQPpQj3y4DdiIYsBoRmAcUDk+88
+         XXxtRDdcev8xMF85sBQ1WSNCKPHmmcK4/FXBXuJYSwr7ihcbJ145A0kWrnkttBB6m1Lp
+         jCPJREMiqNfexA21fNnG2uLpm/fSD63U0wfY5KS9xXQ+H+FCjSx/LgIymoQzcANyxtQo
+         eWgfI7DqH69bWGDkacse82bEdMThBpOfNJLQGY5zfKJlwC0pP6oyefDmE4+TQuWemyeS
+         fd0KgFNIyVM/BJOx3JvlHqIISncX4sx8QR6AW+Ap2lp/FRTbKV3HBxP18lUs6kpzSUyC
+         Hh3w==
+X-Gm-Message-State: AOAM532ifT6lS0IFBwp09Wz6LRrO3iuhHe1YhcHOMx1iKkB4ZJy+3M9/
+        sGwWSONP5RpMUt1ek+G6GkaVrpa9pbg=
+X-Google-Smtp-Source: ABdhPJwtPFttri2niH2BvtZJS/OKtyjllx2rnXQVrsKEalhZMgZYyWGzgdFOX6MILOCW5Wnzw5+F0g==
+X-Received: by 2002:aa7:c30e:: with SMTP id l14mr18615373edq.315.1605575463213;
+        Mon, 16 Nov 2020 17:11:03 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:a141:d91b:1f47:d972])
-        by smtp.gmail.com with ESMTPSA id e9sm11231812edn.30.2020.11.16.17.11.01
+        by smtp.gmail.com with ESMTPSA id e9sm11231812edn.30.2020.11.16.17.11.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 16 Nov 2020 17:11:01 -0800 (PST)
+        Mon, 16 Nov 2020 17:11:02 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/2] rebuild dominance tree during CFG cleanup
-Date:   Tue, 17 Nov 2020 02:10:57 +0100
-Message-Id: <20201117011058.53995-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/2] simplify CBR-CBR on the same condition
+Date:   Tue, 17 Nov 2020 02:10:58 +0100
+Message-Id: <20201117011058.53995-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201117011058.53995-1-luc.vanoostenryck@gmail.com>
 References: <20201117011058.53995-1-luc.vanoostenryck@gmail.com>
@@ -76,61 +76,170 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Currently, the dominance tree is build once, just before the
-SSA conversion.
+In situations like:
+		...
+		cbr	<cond>, L1, L2
 
-However, changes in the CFG potentially changes the dominance
-relationships.
+	L1:		L2:
+	...		...
 
-So, rebuild the dominance tree after changes to the CFG.
+		L3:
+		cbr	<cond>, L4, L5
 
-Note: This doesn't seems to significantly affect the performance
-      (at least when used on the kernel):
-	before			after
-	real	 4m15.854s	real	 4m16.95&s
-	user	71m11.390s	user	71m29.180s
-	sys	28m45.222s	sys	28m46.145s
+since the conditions are the same and L3 is empty but the CBR,
+all branches to L3 in L1 can be changed to branches to L4
+(idem with L5 in L2). The same can be done in all BB 'in the
+path between L1 and L3', more exactly in all BB dominated by L1,
+this guarantee that the changes is only done on the BB where
+the conditions match.
+
+Note: This simplification kinda generalizes the current
+      simplify_branch_branch() but should itself generalized
+      to handle the presence of phi-sources in L3.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- optimize.c | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ flow.c | 106 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 106 insertions(+)
 
-diff --git a/optimize.c b/optimize.c
-index 338714c78e68..c047495f26cf 100644
---- a/optimize.c
-+++ b/optimize.c
-@@ -45,6 +45,12 @@ static void clean_up_insns(struct entrypoint *ep)
- 	} END_FOR_EACH_PTR(bb);
+diff --git a/flow.c b/flow.c
+index f56e72db470c..88e0014c75ac 100644
+--- a/flow.c
++++ b/flow.c
+@@ -17,6 +17,7 @@
+ #include "linearize.h"
+ #include "flow.h"
+ #include "target.h"
++#include "flowgraph.h"
+ 
+ unsigned long bb_generation;
+ 
+@@ -85,6 +86,34 @@ static int pseudo_truth_value(pseudo_t pseudo)
+ 	}
  }
  
-+static void cleanup_cfg(struct entrypoint *ep)
++///
++// check if the BB is empty or only contains phi-sources
++static int bb_is_trivial(struct basic_block *bb)
 +{
-+	kill_unreachable_bbs(ep);
-+	domtree_build(ep);
++	struct instruction *insn;
++	int n = 0;
++
++	FOR_EACH_PTR(bb->insns, insn) {
++		if (!insn->bb)
++			continue;
++		switch (insn->opcode) {
++		case OP_TERMINATOR ... OP_TERMINATOR_END:
++			return n ? -1 : 1;
++		case OP_NOP:
++		case OP_INLINED_CALL:
++			continue;
++		case OP_PHISOURCE:
++			n++;
++			continue;
++		default:
++			goto out;
++		}
++	} END_FOR_EACH_PTR(insn);
++
++out:
++	return 0;
 +}
 +
- void optimize(struct entrypoint *ep)
+ /*
+  * Does a basic block depend on the pseudos that "src" defines?
+  */
+@@ -146,6 +175,81 @@ out:
+ 	return false;
+ }
+ 
++///
++// do jump threading in dominated BBs
++// @dom: the BB which must dominate the modified BBs.
++// @old: the old target BB
++// @new: the new target BB
++// @return: 0 if no chnages have been made, 1 otherwise.
++//
++// In all BB dominated by @dom, rewrite branches to @old into branches to @new
++static int retarget_bb(struct basic_block *dom, struct basic_block *old, struct basic_block *new)
++{
++	struct basic_block *bb;
++	int changed = 0;
++
++	if (new == old)
++		return 0;
++
++restart:
++	FOR_EACH_PTR(old->parents, bb) {
++		struct instruction *last;
++		struct multijmp *jmp;
++
++		if (!domtree_dominates(dom, bb))
++			continue;
++		last = last_instruction(bb->insns);
++		switch (last->opcode) {
++		case OP_BR:
++			changed |= rewrite_branch(bb, &last->bb_true,  old, new);
++			break;
++		case OP_CBR:
++			changed |= rewrite_branch(bb, &last->bb_true,  old, new);
++			changed |= rewrite_branch(bb, &last->bb_false, old, new);
++			break;
++		case OP_SWITCH:
++		case OP_COMPUTEDGOTO:
++			FOR_EACH_PTR(last->multijmp_list, jmp) {
++				changed |= rewrite_branch(bb, &jmp->target, old, new);
++			} END_FOR_EACH_PTR(jmp);
++			break;
++		default:
++			continue;
++		}
++
++		// since rewrite_branch() will modify old->parents() the list
++		// iteration won't work correctly. Several solution exist for
++		// this but in this case the simplest is to restart the loop.
++		goto restart;
++	} END_FOR_EACH_PTR(bb);
++	return changed;
++}
++
++static int simplify_cbr_cbr(struct instruction *insn)
++{
++	struct instruction *last;
++	struct basic_block *bot = insn->bb;
++	struct basic_block *top = bot->idom;
++	int changed = 0;
++	int trivial;
++
++	if (!top)
++		return 0;
++
++	trivial = bb_is_trivial(bot);
++	if (trivial == 0)
++		return 0;
++	if (trivial < 0)
++		return 0;
++	last = last_instruction(top->insns);
++	if (last->opcode != OP_CBR || last->cond != insn->cond)
++		return 0;
++
++	changed |= retarget_bb(last->bb_true , bot, insn->bb_true);
++	changed |= retarget_bb(last->bb_false, bot, insn->bb_false);
++	return changed;
++}
++
+ /*
+  * When we reach here, we have:
+  *  - a basic block that ends in a conditional branch and
+@@ -293,6 +397,8 @@ static int simplify_one_branch(struct basic_block *bb, struct instruction *br)
  {
- 	if (fdump_ir & PASS_LINEARIZE)
-@@ -93,7 +99,7 @@ repeat:
- 		} while (repeat_phase);
- 		pack_basic_blocks(ep);
- 		if (repeat_phase & REPEAT_CFG_CLEANUP)
--			kill_unreachable_bbs(ep);
-+			cleanup_cfg(ep);
- 	} while (repeat_phase);
- 
- 	vrfy_flow(ep);
-@@ -113,7 +119,7 @@ repeat:
- 	if (simplify_flow(ep)) {
- 		clear_liveness(ep);
- 		if (repeat_phase & REPEAT_CFG_CLEANUP)
--			kill_unreachable_bbs(ep);
-+			cleanup_cfg(ep);
- 		goto repeat;
- 	}
- 
+ 	if (simplify_phi_branch(bb, br))
+ 		return 1;
++	if (simplify_cbr_cbr(br))
++		return 1;
+ 	return simplify_branch_branch(bb, br, &br->bb_true, 1) |
+ 	       simplify_branch_branch(bb, br, &br->bb_false, 0);
+ }
 -- 
 2.29.2
 
