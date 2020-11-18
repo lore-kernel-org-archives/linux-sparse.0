@@ -8,65 +8,65 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C27FC64E75
-	for <linux-sparse@archiver.kernel.org>; Wed, 18 Nov 2020 21:12:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D9684C64E69
+	for <linux-sparse@archiver.kernel.org>; Wed, 18 Nov 2020 21:12:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B9D95246B2
+	by mail.kernel.org (Postfix) with ESMTP id 806E5246B0
 	for <linux-sparse@archiver.kernel.org>; Wed, 18 Nov 2020 21:12:08 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="u79TZIQK"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="M8YBfKip"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726719AbgKRVL5 (ORCPT
+        id S1726699AbgKRVL4 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 18 Nov 2020 16:11:57 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45070 "EHLO
+        Wed, 18 Nov 2020 16:11:56 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:45064 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726098AbgKRVL5 (ORCPT
+        with ESMTP id S1726098AbgKRVL4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 18 Nov 2020 16:11:57 -0500
-Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E6645C0613D4
-        for <linux-sparse@vger.kernel.org>; Wed, 18 Nov 2020 13:11:56 -0800 (PST)
-Received: by mail-ed1-x52d.google.com with SMTP id y4so3545637edy.5
-        for <linux-sparse@vger.kernel.org>; Wed, 18 Nov 2020 13:11:56 -0800 (PST)
+        Wed, 18 Nov 2020 16:11:56 -0500
+Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7928C0613D4
+        for <linux-sparse@vger.kernel.org>; Wed, 18 Nov 2020 13:11:55 -0800 (PST)
+Received: by mail-ed1-x536.google.com with SMTP id q16so3518374edv.10
+        for <linux-sparse@vger.kernel.org>; Wed, 18 Nov 2020 13:11:55 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=z3IZ+i/95LaVNeXZRa1HYtgvIV93YcdAD2zl2Q6dAA4=;
-        b=u79TZIQKdUo3Efn30JM2c3HmhvEzeQjNs/fzoVdbO7DKTqOJLhYaOM3+D1ky91/oR9
-         hswhjmtnFNLwZT2pn0CpE5c7dI8K7dv8w54r2DKSjOXLGFVKz9LYLDCdoGsqyiQDroWk
-         S9jAI5IeVGRXs4xzBDrhN3a35yy1RYSYfLv7bl29+QoudUuf4umdZzND9GH/osNXNYYD
-         6+wNST/DX5Tnjesw2RFAomiaru6WKCmZsHQRMA/VL5wmJsBV3vgXLMjVrgfcuASZYIFQ
-         /R70KQAOnu5OFdW6p2vBedfFrSdGu9ahBJdyPaO3nf/K23ogM99kItU2Kfdnr6TxeRch
-         Jjsg==
+        bh=diwXHAZLBE0IQzWJ276Ed2JgGJSuVV259wDFXcX4CVY=;
+        b=M8YBfKipFLd9vmcXywPnPEnkWbKUE9X3JAxXCRY2LdyO7R9Qt+c1x1uGp4Dc7c1oTI
+         +kTfeHlC9sqdrgY71f2XA/zGsJ5u+isinzLvb0wPdnosMFiX4C0C3uh9WEq5yWTtt6Hn
+         yX3Y6kKEBgTbew54qk8GSYR4p12q2FIPaSyjfL7ypfU6NHgJGPzAUwvo0UcoRNGgXCO7
+         EBAyEWYFhe9EnKKDoXYkHWX3Xeg7rCV3wFzMqDFui3OL5+9DwVNETVQ/ZjLoJLOf0PIa
+         tsh7ia0i1WazOAIx7e0LBjezchIf4rI+pMJ/IpNrUE67osej89Vd2zHon8PWjHZzvgYG
+         izGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=z3IZ+i/95LaVNeXZRa1HYtgvIV93YcdAD2zl2Q6dAA4=;
-        b=L76nuQjAPmMLRWOtSE6qP59MaoXxBNS9konXeRFigpcKwryitAeRCIAoHAffSBc/VW
-         2dQWdUTkmnZZEQ75+mhDsyubAIVu2nuZxR8DPwnjGWfzCBuafnWKezfN/A6mGT20SBjK
-         Fw98Y5DKrRZlZv23zDkSYxf6BjxXCk3h2QJJiILuTIfVGWNjna6tQyShn+um2IBJHftR
-         fGUVeVjklUP7d7jJ4mJiugZiOyEWqhqM6Ywoo6YYI6n30+Rg46Dflf765lXDR31nKcy2
-         u0WhB/oS6bjUn52MPVLHY/oh0e+aYKLIzOkUbDZeK7bhpUJ/0a89nC46wsWElu7u0Z9r
-         OonQ==
-X-Gm-Message-State: AOAM531kgcZsSLLZPH4WyUAcTjt3RRhS3HuoVfCmdD37YTj6AJetYkdX
-        EoaZ57VjW7ESL945CVv5w45ZrqavM4w=
-X-Google-Smtp-Source: ABdhPJxoBDs4gLjPst6mUSygFFAnB/YeYEXsPrh1QtZfLy4vKtZ96tXQ22/Af0TqFg30Xo84cC2aew==
-X-Received: by 2002:aa7:d8c4:: with SMTP id k4mr27327864eds.248.1605733915364;
-        Wed, 18 Nov 2020 13:11:55 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:491a:3e51:301b:6e24])
-        by smtp.gmail.com with ESMTPSA id rp13sm13510712ejb.79.2020.11.18.13.11.54
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=diwXHAZLBE0IQzWJ276Ed2JgGJSuVV259wDFXcX4CVY=;
+        b=kD+Qj677cQyHMszZ5tRpujIeZPkGqfwPSnknX6BJTZU0jF+wCwWZMpIwFLEO13uz+E
+         +8KGN1qcELtPYmS2tSrWAh9+1U//wn9FjSSANKJOIJ+KiHWxQkfKSAnDbh0tR+at1egC
+         pF3fcjZVQnd2ChL1OoCx1r3x/t/hvQmEzMbztdLrVBM+OEq+5DBkGmT9ewY7zV1aF90o
+         9MUFCMo4aP6ETUpnUEDc9rOYwo4PqB9PEYytmcOcvSFhkvMIvEegTyO28VjLqZEJwoUo
+         fP3sUGifQR5bR8ihnfbxsgSRqpu4pdSauKvot3pYl5LH9pwh0hdanz6umtkn51DyNGQC
+         DWDw==
+X-Gm-Message-State: AOAM530IjGyJmVC1LgdMBNScPd2b5ADKyXkvht1c+gKDLuk+KmFdVvD5
+        VNuh9rdvmVJHweTDL3aFML/3MaVAA0s=
+X-Google-Smtp-Source: ABdhPJw/7CxVuX6vxYUPllXmWE96M8YlVSMpRJNP/sN2oy+XMOoGo5pVnYT2nIt2/v0h5LogodFcqw==
+X-Received: by 2002:a50:a40c:: with SMTP id u12mr14871266edb.337.1605733914229;
         Wed, 18 Nov 2020 13:11:54 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:491a:3e51:301b:6e24])
+        by smtp.gmail.com with ESMTPSA id rp13sm13510712ejb.79.2020.11.18.13.11.53
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 18 Nov 2020 13:11:53 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/5] unqual: statement expressions should drop qualifiers
-Date:   Wed, 18 Nov 2020 22:11:46 +0100
-Message-Id: <20201118211147.10680-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/5] unqual: comma expressions should drop qualifiers
+Date:   Wed, 18 Nov 2020 22:11:45 +0100
+Message-Id: <20201118211147.10680-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201118211147.10680-1-luc.vanoostenryck@gmail.com>
 References: <20201118211147.10680-1-luc.vanoostenryck@gmail.com>
@@ -76,7 +76,7 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Statement expressions should be subjected to lvalue-conversion
+Comma expressions should be subjected to lvalue-conversion
 and thus should drop qualifiers.
 
 Fix this by calling unqualify_type() after array-to-pointer
@@ -84,31 +84,31 @@ conversion.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- evaluate.c                         | 2 +-
- validation/eval/unqual-stmt-expr.c | 1 -
+ evaluate.c                     | 2 +-
+ validation/eval/unqual-comma.c | 1 -
  2 files changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/evaluate.c b/evaluate.c
-index b6e8477185f4..48ce61f0302d 100644
+index fd84205c7f2c..b6e8477185f4 100644
 --- a/evaluate.c
 +++ b/evaluate.c
-@@ -3950,7 +3950,7 @@ struct symbol *evaluate_statement(struct statement *stmt)
- 			return NULL;
- 		if (stmt->expression->ctype == &null_ctype)
- 			stmt->expression = cast_to(stmt->expression, &ptr_ctype);
--		return degenerate(stmt->expression);
-+		return unqualify_type(degenerate(stmt->expression));
+@@ -1028,7 +1028,7 @@ static struct symbol *evaluate_binop(struct expression *expr)
  
- 	case STMT_COMPOUND: {
- 		struct statement *s;
-diff --git a/validation/eval/unqual-stmt-expr.c b/validation/eval/unqual-stmt-expr.c
-index bac6cb6b197f..280c2fe8e36e 100644
---- a/validation/eval/unqual-stmt-expr.c
-+++ b/validation/eval/unqual-stmt-expr.c
+ static struct symbol *evaluate_comma(struct expression *expr)
+ {
+-	expr->ctype = degenerate(expr->right);
++	expr->ctype = unqualify_type(degenerate(expr->right));
+ 	if (expr->ctype == &null_ctype)
+ 		expr->ctype = &ptr_ctype;
+ 	expr->flags &= expr->left->flags & expr->right->flags;
+diff --git a/validation/eval/unqual-comma.c b/validation/eval/unqual-comma.c
+index e06586cd43e3..11546d22348a 100644
+--- a/validation/eval/unqual-comma.c
++++ b/validation/eval/unqual-comma.c
 @@ -9,5 +9,4 @@ int *foo(volatile int x)
  
  /*
-  * check-name: unqual-stmt-expr
+  * check-name: unqual-comma
 - * check-known-to-fail
   */
 -- 
