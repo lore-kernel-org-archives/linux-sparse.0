@@ -2,86 +2,166 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2D07FC388F9
-	for <linux-sparse@archiver.kernel.org>; Sat, 21 Nov 2020 22:07:56 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCF38C388F9
+	for <linux-sparse@archiver.kernel.org>; Sat, 21 Nov 2020 22:47:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C7EE7221F7
-	for <linux-sparse@archiver.kernel.org>; Sat, 21 Nov 2020 22:07:55 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 790712151B
+	for <linux-sparse@archiver.kernel.org>; Sat, 21 Nov 2020 22:47:05 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (1024-bit key) header.d=linux-foundation.org header.i=@linux-foundation.org header.b="NVU8REuQ"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="AkqkfREy"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728567AbgKUWHz (ORCPT
+        id S1726662AbgKUWrF (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 21 Nov 2020 17:07:55 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41818 "EHLO
+        Sat, 21 Nov 2020 17:47:05 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47784 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728557AbgKUWHz (ORCPT
+        with ESMTP id S1726556AbgKUWrE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 21 Nov 2020 17:07:55 -0500
-Received: from mail-lj1-x242.google.com (mail-lj1-x242.google.com [IPv6:2a00:1450:4864:20::242])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BD29AC0613CF
-        for <linux-sparse@vger.kernel.org>; Sat, 21 Nov 2020 14:07:54 -0800 (PST)
-Received: by mail-lj1-x242.google.com with SMTP id i17so13902626ljd.3
-        for <linux-sparse@vger.kernel.org>; Sat, 21 Nov 2020 14:07:54 -0800 (PST)
+        Sat, 21 Nov 2020 17:47:04 -0500
+Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6D0F2C0613D1
+        for <linux-sparse@vger.kernel.org>; Sat, 21 Nov 2020 14:47:04 -0800 (PST)
+Received: by mail-wm1-x342.google.com with SMTP id x13so5244879wmj.1
+        for <linux-sparse@vger.kernel.org>; Sat, 21 Nov 2020 14:47:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=M1At7BX3Qv19a6tj5NIcuO18/7wL1HCDBdiQPuhNVRk=;
-        b=NVU8REuQN4aJmL//Jl9rU+micVwjfwGQTzxeWCmm/bGN0dNOvBSIDm5ey/+JG44IJ8
-         88aeN/FojKXI4RYt+1zIZMJ1l2/vJgUQ7/gQx8GV7EUare8S2lBvDuD5rcZtL5DqTTNM
-         xiyVAbq+DIdBzsooHXx4G+jwJSY32CUlFy69g=
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=0KJkBydqq/QFK0CWM8A2gjdEyjJaMqP6HXYipIhFing=;
+        b=AkqkfREyJrA6XLvZklwVRvu7Xum3oZwfgeBUKHZdXcWqKpkK5PZrgjHLDSSyNefr9E
+         kB8bNEecoXFSxUUMhdw/GSMGxOBIU7CS2nJMBAMO/dCXK4oQqPzQInlKFoCmONrD9mU6
+         tUDRRdHxmCxovKJtAL/BTmOcnEiZwwf6qzocaRVcYbddH8im0+PBt2K8a5pHkmN24HOk
+         h4g4COe9RRKTcfuWl7QBTSNhoxwXI8s5nt/qPNN/n58mPmabRl/ALK75Xig4LERpzuBy
+         VbjtNfopfDYjMAx2OH7bw6V/1VRtBnNv4wxGpgOY6ZOAnZuzZRSZ8jM/a45lJXZ/I/9s
+         nKNw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=M1At7BX3Qv19a6tj5NIcuO18/7wL1HCDBdiQPuhNVRk=;
-        b=EdF9/q+AztMVmxkZk9k3EYqi6588u/ADAoNjTLzezOEcjL0F791Ek45pZ45DENjEHc
-         cDk+NJ4A5jaLpV/ztB/ojtaocka958TD7kY4VP31fl+aAlv72+kqDMYmLgJmK/f1sEb2
-         m/MHdCUJBpklGqlklD1r3GIcdJ5JaRbd4GKVJIQimSTbFrhSfAYGgm0MKCKIUTG1ZuLI
-         C1mo9xyNG3tbtL6mcpg3HDuOcvCKP0vQJUxZffzZj/+MWmCvUr8Y0g6l94qLsadBpsRY
-         +wsg2fwEnoLyF5hyYxm0slLGLKF+Y3ZapdVsq/XQAK3pzPa9N5jNjTyw9oeE6lecZ1GR
-         7uOA==
-X-Gm-Message-State: AOAM5325o2Ezec3daStOME5h/o3gV5YDgU9JU5TWKcPbhZWiEcVieOWO
-        hP14PG+5ER0tswjS3bTPDm/n4SDiJpxJDw==
-X-Google-Smtp-Source: ABdhPJx1Dc0lze+Id3/VJ+yP7Uz6idEqO53qZ24gkIJ/xNu2ABcHeGKkIujNX457IrMZQuLdpjtAow==
-X-Received: by 2002:a2e:a17c:: with SMTP id u28mr10750634ljl.453.1605996472948;
-        Sat, 21 Nov 2020 14:07:52 -0800 (PST)
-Received: from mail-lf1-f50.google.com (mail-lf1-f50.google.com. [209.85.167.50])
-        by smtp.gmail.com with ESMTPSA id y63sm330298lff.196.2020.11.21.14.07.51
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sat, 21 Nov 2020 14:07:51 -0800 (PST)
-Received: by mail-lf1-f50.google.com with SMTP id d17so18522418lfq.10
-        for <linux-sparse@vger.kernel.org>; Sat, 21 Nov 2020 14:07:51 -0800 (PST)
-X-Received: by 2002:a19:3f55:: with SMTP id m82mr403415lfa.344.1605996471508;
- Sat, 21 Nov 2020 14:07:51 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=0KJkBydqq/QFK0CWM8A2gjdEyjJaMqP6HXYipIhFing=;
+        b=Fa3zj6hW9sIRxlXf6VXElo5i+S6Ja0/fF1QfBk4PlRwqksuuoxFwNPPm3npuLae7es
+         oc8olMVnlGy9ZvYrx7B4fWPGY7qmc3mTfo8CKPEVziIT+8voAd/7mlZ3MWV4euM09P/N
+         dboioP86vYewMQG1f6i28mmJdVkPgVCfCvhyhclZSEIhA3r8fpObzHLPGc9F9cdBHAIE
+         pSW1EZLUut+YQgvrnb9aEB1HSgq6IJNqeFEq3juHEbG2ly0Ov58KfM2unfevbTc0GD2B
+         ej3GxrC5z5UGhh1LjkObevS2Eddkljs1g6KfisK1UIaMKSl4n2MG5cdPl/d9K57Jm2uJ
+         QY/w==
+X-Gm-Message-State: AOAM532w473pQGq9bgmFlqgDe5UX5ZExwPFxu7cFU/Z57kBPsCEbccNC
+        wNA/hVUzJqHI0+aVD/4oVl5AzYl0/ZE=
+X-Google-Smtp-Source: ABdhPJwyNcQmM32rOvoMzS/aoeSzi1yoMPWi1FNpJIe7V2qTPrxh4paATZUJ9nWdyWeXv48N/ntVqw==
+X-Received: by 2002:a1c:dd8b:: with SMTP id u133mr890660wmg.107.1605998822937;
+        Sat, 21 Nov 2020 14:47:02 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:4ce2:b4ff:20e6:17bc])
+        by smtp.gmail.com with ESMTPSA id l14sm4830406wmi.33.2020.11.21.14.47.02
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 21 Nov 2020 14:47:02 -0800 (PST)
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/2] remove unneeded REPEAT_SYMBOL_CLEANUP
+Date:   Sat, 21 Nov 2020 23:46:56 +0100
+Message-Id: <20201121224657.96038-2-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20201121224657.96038-1-luc.vanoostenryck@gmail.com>
+References: <20201121224657.96038-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
-References: <20201121205300.94642-1-luc.vanoostenryck@gmail.com>
- <CAHk-=whC2Kygu6Vpgt+vnzVGAG-ZYHk1ucOcv7b9AcvmdrY-Eg@mail.gmail.com> <20201121214026.kv4pgimxlyykfb26@ltop.local>
-In-Reply-To: <20201121214026.kv4pgimxlyykfb26@ltop.local>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Sat, 21 Nov 2020 14:07:35 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wh_Zf6DdY234UX=WMPKjJiGGP2PN5Xibx0xRA2a4EzdKQ@mail.gmail.com>
-Message-ID: <CAHk-=wh_Zf6DdY234UX=WMPKjJiGGP2PN5Xibx0xRA2a4EzdKQ@mail.gmail.com>
-Subject: Re: [PATCH 0/4] simplification of computed goto
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sat, Nov 21, 2020 at 1:40 PM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> Bah, they're not really from real life.
+Since simplify_memops() must be called unconditionally (see [1])
+it's useless to set REPEAT_SYMBOL_CLEANUP (at the condition that
+REPEAT_CSE is set instead).
 
-Ok, I was worried I was missing something, and you'd find some really
-odd kernel code ;)
+So remove it's definition and set REPEAT_CSE instead when needed).
 
-             Linus
+[1] 6b5e7cf5ac39 ("cfg: call simplify_memops() unconditionally.")
+
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ flow.c     | 3 +--
+ flow.h     | 1 -
+ simplify.c | 7 ++-----
+ 3 files changed, 3 insertions(+), 8 deletions(-)
+
+diff --git a/flow.c b/flow.c
+index 162c27346def..1a871df16bd5 100644
+--- a/flow.c
++++ b/flow.c
+@@ -457,7 +457,6 @@ void convert_load_instruction(struct instruction *insn, pseudo_t src)
+ {
+ 	convert_instruction_target(insn, src);
+ 	kill_instruction(insn);
+-	repeat_phase |= REPEAT_SYMBOL_CLEANUP;
+ }
+ 
+ static int overlapping_memop(struct instruction *a, struct instruction *b)
+@@ -559,7 +558,7 @@ complex_phi:
+ 	insn->phi_list = dominators;
+ 
+ end:
+-	repeat_phase |= REPEAT_SYMBOL_CLEANUP;
++	repeat_phase |= REPEAT_CSE;
+ }
+ 
+ /* Kill a pseudo that is dead on exit from the bb */
+diff --git a/flow.h b/flow.h
+index 19a743c83b94..c3461c8c33bd 100644
+--- a/flow.h
++++ b/flow.h
+@@ -6,7 +6,6 @@
+ extern unsigned long bb_generation;
+ 
+ #define REPEAT_CSE		(1 << 0)
+-#define REPEAT_SYMBOL_CLEANUP	(1 << 1)
+ #define REPEAT_CFG_CLEANUP	(1 << 2)
+ 
+ struct entrypoint;
+diff --git a/simplify.c b/simplify.c
+index 4d0adf444e17..465624f72677 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -259,8 +259,6 @@ out:
+ static inline void rem_usage(pseudo_t p, pseudo_t *usep, int kill)
+ {
+ 	if (has_use_list(p)) {
+-		if (p->type == PSEUDO_SYM)
+-			repeat_phase |= REPEAT_SYMBOL_CLEANUP;
+ 		delete_pseudo_user_list_entry(&p->users, usep, 1);
+ 		if (kill && !p->users)
+ 			kill_instruction(p->def);
+@@ -338,7 +336,6 @@ int kill_insn(struct instruction *insn, int force)
+ 
+ 	case OP_SYMADDR:
+ 		kill_use(&insn->src);
+-		repeat_phase |= REPEAT_SYMBOL_CLEANUP;
+ 		break;
+ 
+ 	case OP_CBR:
+@@ -1715,7 +1712,7 @@ static int simplify_one_memop(struct instruction *insn, pseudo_t orig)
+ 		if (def->opcode == OP_SYMADDR && def->src) {
+ 			kill_use(&insn->src);
+ 			use_pseudo(insn, def->src, &insn->src);
+-			return REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
++			return REPEAT_CSE;
+ 		}
+ 		if (def->opcode == OP_ADD) {
+ 			new = def->src1;
+@@ -1751,7 +1748,7 @@ offset:
+ 	}
+ 	insn->offset += off->value;
+ 	replace_pseudo(insn, &insn->src, new);
+-	return REPEAT_CSE | REPEAT_SYMBOL_CLEANUP;
++	return REPEAT_CSE;
+ }
+ 
+ ///
+-- 
+2.29.2
+
