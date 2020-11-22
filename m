@@ -8,164 +8,115 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCD2EC6379F
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:42 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BFBD5C5519F
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 17:50:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 85C1420773
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7970E2076B
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 17:50:37 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="K6hRn/gj"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="nDc92kdN"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727876AbgKVP1m (ORCPT
+        id S1727897AbgKVRuh (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 22 Nov 2020 10:27:42 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59978 "EHLO
+        Sun, 22 Nov 2020 12:50:37 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53668 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727317AbgKVP1l (ORCPT
+        with ESMTP id S1727876AbgKVRug (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 22 Nov 2020 10:27:41 -0500
-Received: from mail-wm1-x342.google.com (mail-wm1-x342.google.com [IPv6:2a00:1450:4864:20::342])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8BBB5C0613CF
-        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:41 -0800 (PST)
-Received: by mail-wm1-x342.google.com with SMTP id c9so15530113wml.5
-        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:41 -0800 (PST)
+        Sun, 22 Nov 2020 12:50:36 -0500
+Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8D575C0613CF
+        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 09:50:36 -0800 (PST)
+Received: by mail-wr1-x442.google.com with SMTP id 64so2819911wra.11
+        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 09:50:36 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=Zltb2qLLAHtwKEbB3MDd2Q4e9WUZbVZ+eHiHjUTpFQw=;
-        b=K6hRn/gjKJq711s95wMK2hXdueFWQP8HodgZW0aUJ0cKRF2goGN4U/NprCXzcRWGcb
-         YP+nruKdzyOJcrCoFh2huXrogs0aEuYeqgdLF5l5/VwI4KYvMhdvDzwvQ/4Pg6Y+Cwji
-         CXiytIaFK1Z5QyrccWcMbzp0uRppLcN6QJO+nIJEY8+y+Z6adFO43ChiBWTPbswc5y6V
-         U3NRzu5bjhJEgsE8rILt1idJIgPt40IicNYN3K1IFn3gIfgFUbkBu1kTEms9d4Cc2tVu
-         DLJNcPrKx+hhJsNV8Jsv1wZf+6u+hwfKESA6hglK/BrSv5/CJ2mUPO7Sr0C+jKKsF2fp
-         ainw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZHzOS3UE5f7p9IIRbjMv52YVmYU0rnuQ9++3gIbvGyY=;
+        b=nDc92kdN/RdYvtfhIeNfxyenMe0APxSZTRsp89V0gk/Ep4AvmKRLn2TJRnS4mqnAjD
+         qwkftb5l5RWM96O6mVZDnViKseQ4OSXGYUGnP7Yrx73Zu858F+/5Er8Bp05b5de/gpLN
+         MlH9G/f9XLzYWxX/CuAYrC6To84/VHUXC51jKVCQdF425rqg0UjPXfVxSdFfOzvsMj7E
+         93+3bids/uvNro/7ijQKjciv4q/HF3bir8UkNgLHaBpF3zJbGQGAZHb01spUzZ8MNfGn
+         U3C4/g0KN/8uTFWclmOpBR5UyZI9ARmPqybjby7gm15ll6zIbuMIVfUtDdFhsjffqVNb
+         5QGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=Zltb2qLLAHtwKEbB3MDd2Q4e9WUZbVZ+eHiHjUTpFQw=;
-        b=rvaJBLmimPD7d2dkGkMu1bmPf7LzzEOtMjQOQnWfVxHWbRgY77oUU31F+zH9sF2kcJ
-         bPoXL3eO8xocvBp3fHlUnF6qNCJ3R7sTxBK9+4ROujQ/7C+HawAD2FjT4aGLCmodHDEM
-         rbtLoyOowNU6ACH0lyIiHvCgDp87uLTs1GJV07TAy8/otTt++VvdYf8pYmOpIHVVYKnt
-         O2lmZffo+NoBLM3i3ytUrsQdIrXj8WGwsCgPrIsY+laCNCvXV0kWAWJv7HmMkDU/JzS6
-         4zucNQqyMMOd1SyNrLL89DQIrUMLM6dsFLar4qu2XaSSMTbHIMuBy7l0MssaqC4nM32u
-         mcHg==
-X-Gm-Message-State: AOAM5331KMSX/hV6qpzk7zziFqgItCYZe5BR+/sQNlxgjcUlC2b6j93R
-        kxXQD20sxTgmc1biQGkW3PwKllf2v+c=
-X-Google-Smtp-Source: ABdhPJxTiQMzoiYGEex5XXD0wJV+bhhN64++XEw5aVNva0X5uyl9EOR7KnxJJ3upQjU+czlhQmUz+w==
-X-Received: by 2002:a1c:6a16:: with SMTP id f22mr11407539wmc.86.1606058860032;
-        Sun, 22 Nov 2020 07:27:40 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=ZHzOS3UE5f7p9IIRbjMv52YVmYU0rnuQ9++3gIbvGyY=;
+        b=pKUk+wpR/61+Qk8jWQhrHugXOAfPVoTyejyp2FxzXPbbFomHpC3m5H0w85mwhST474
+         LDwLgXsJU3HV71axPUaFPN4GG7UbXEkeVoaTcEy0xXxvmy3Ti+/dSg+KM/lHl7KRANB7
+         d8pjImyLEatY9I+Ui2DUqdHBHS1v1EdM75zOpnerDs37LdsEmHAyNlnOTNro/fMjkENU
+         raNJKbknQ0vi/QdcMVZdr2nMKxqevbXAiqW5sX54zHH01S+uXxTW34CGMEdoQ3H8VNet
+         77UU20ZSXyJO942/BQ6WySb92WCuGYLBizYnwV+5cTRvBHnTdRhkPdlt7bZeKe7DlluA
+         AatA==
+X-Gm-Message-State: AOAM530sx0odOKkDJ+4sh1A8NavkDj8Kmp95Q2lDIzNiD/k23i35fy+x
+        sOOPIIoPcq3FkGv4PVquMm22vU9lgyc=
+X-Google-Smtp-Source: ABdhPJwoh5DU/sffAsAslEuPbsn/4N+oVIn9lCnrjsubtQdphu+Ym27u2c5raAfNim2JMsTU7MblJA==
+X-Received: by 2002:a5d:6783:: with SMTP id v3mr25849391wru.45.1606067435069;
+        Sun, 22 Nov 2020 09:50:35 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b0e1:b041:18e2:46cf])
-        by smtp.gmail.com with ESMTPSA id k1sm13712265wrp.23.2020.11.22.07.27.39
+        by smtp.gmail.com with ESMTPSA id w17sm13778893wru.82.2020.11.22.09.50.34
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 Nov 2020 07:27:39 -0800 (PST)
+        Sun, 22 Nov 2020 09:50:34 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/7] not: simplify ((x cmp y) {&,|,^} (x !cmp y)) --> {0,1,1}
-Date:   Sun, 22 Nov 2020 16:27:31 +0100
-Message-Id: <20201122152731.10994-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] symaddr: give a type to OP_SYMADDR
+Date:   Sun, 22 Nov 2020 18:50:30 +0100
+Message-Id: <20201122175030.18689-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201122152731.10994-1-luc.vanoostenryck@gmail.com>
-References: <20201122152731.10994-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Simplify bitwise operations on a compare and its complement
-into 0 (for &) or 1 for (| and ^).
+Currently, OP_SYMADDRs are given a size but not a type.
+But the type is needed for several things, the idea being
+that for each instruction producing a pseudo (PSEUDO_REG)
+it's possible to:
+* retrieve its defining instruction
+* retrieve its type via this defining instruction
+
+Fix this by giving to OP_SYMADDRs the type of their symbol.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                   | 24 +++++++++++++++++++++---
- validation/optim/cse-not02.c |  1 -
- 2 files changed, 21 insertions(+), 4 deletions(-)
+ linearize.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/simplify.c b/simplify.c
-index b41c155735d1..9938a5974744 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -1632,7 +1632,7 @@ static int simplify_compare(struct instruction *insn)
- 
- static int simplify_and_one_side(struct instruction *insn, pseudo_t *p1, pseudo_t *p2)
- {
--	struct instruction *def;
-+	struct instruction *def, *defr = NULL;
- 	pseudo_t src1 = *p1;
- 
- 	switch (DEF_OPCODE(def, src1)) {
-@@ -1640,6 +1640,12 @@ static int simplify_and_one_side(struct instruction *insn, pseudo_t *p1, pseudo_
- 		if (def->src == *p2)
- 			return replace_with_value(insn, 0);
- 		break;
-+	case OP_BINCMP ... OP_BINCMP_END:
-+		if (DEF_OPCODE(defr, *p2) == opcode_negate(def->opcode)) {
-+			if (def->src1 == defr->src1 && def->src2 == defr->src2)
-+				return replace_with_value(insn, 0);
-+		}
-+		break;
- 	}
- 	return 0;
+diff --git a/linearize.c b/linearize.c
+index 8a3cf09bfae2..9fecb4b57e43 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -1128,13 +1128,13 @@ static pseudo_t add_setfval(struct entrypoint *ep, struct symbol *ctype, long do
+ 	return target;
  }
-@@ -1652,7 +1658,7 @@ static int simplify_and(struct instruction *insn)
  
- static int simplify_ior_one_side(struct instruction *insn, pseudo_t *p1, pseudo_t *p2)
+-static pseudo_t add_symbol_address(struct entrypoint *ep, struct symbol *sym)
++static pseudo_t add_symbol_address(struct entrypoint *ep, struct expression *expr)
  {
--	struct instruction *def;
-+	struct instruction *def, *defr = NULL;
- 	pseudo_t src1 = *p1;
+-	struct instruction *insn = alloc_instruction(OP_SYMADDR, bits_in_pointer);
++	struct instruction *insn = alloc_typed_instruction(OP_SYMADDR, expr->ctype);
+ 	pseudo_t target = alloc_pseudo(insn);
  
- 	switch (DEF_OPCODE(def, src1)) {
-@@ -1660,6 +1666,12 @@ static int simplify_ior_one_side(struct instruction *insn, pseudo_t *p1, pseudo_
- 		if (def->src == *p2)
- 			return replace_with_value(insn, bits_mask(insn->size));
- 		break;
-+	case OP_BINCMP ... OP_BINCMP_END:
-+		if (DEF_OPCODE(defr, *p2) == opcode_negate(def->opcode)) {
-+			if (def->src1 == defr->src1 && def->src2 == defr->src2)
-+				return replace_with_value(insn, 1);
-+		}
-+		break;
- 	}
- 	return 0;
+ 	insn->target = target;
+-	use_pseudo(insn, symbol_pseudo(ep, sym), &insn->src);
++	use_pseudo(insn, symbol_pseudo(ep, expr->symbol), &insn->src);
+ 	add_one_insn(ep, insn);
+ 	return target;
  }
-@@ -1672,7 +1684,7 @@ static int simplify_ior(struct instruction *insn)
+@@ -1914,7 +1914,7 @@ static pseudo_t linearize_expression(struct entrypoint *ep, struct expression *e
+ 	switch (expr->type) {
+ 	case EXPR_SYMBOL:
+ 		linearize_one_symbol(ep, expr->symbol);
+-		return add_symbol_address(ep, expr->symbol);
++		return add_symbol_address(ep, expr);
  
- static int simplify_xor_one_side(struct instruction *insn, pseudo_t *p1, pseudo_t *p2)
- {
--	struct instruction *def;
-+	struct instruction *def, *defr = NULL;
- 	pseudo_t src1 = *p1;
- 
- 	switch (DEF_OPCODE(def, src1)) {
-@@ -1680,6 +1692,12 @@ static int simplify_xor_one_side(struct instruction *insn, pseudo_t *p1, pseudo_
- 		if (def->src == *p2)
- 			return replace_with_value(insn, bits_mask(insn->size));
- 		break;
-+	case OP_BINCMP ... OP_BINCMP_END:
-+		if (DEF_OPCODE(defr, *p2) == opcode_negate(def->opcode)) {
-+			if (def->src1 == defr->src1 && def->src2 == defr->src2)
-+				return replace_with_value(insn, 1);
-+		}
-+		break;
- 	}
- 	return 0;
- }
-diff --git a/validation/optim/cse-not02.c b/validation/optim/cse-not02.c
-index aa54a375a9ea..70addebcfbb6 100644
---- a/validation/optim/cse-not02.c
-+++ b/validation/optim/cse-not02.c
-@@ -5,7 +5,6 @@ int xor(int a, int b) { return ((a == b) ^ (a != b)) == 1; }
- /*
-  * check-name: cse-not02
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-returns: 1
+ 	case EXPR_VALUE:
+ 		return value_pseudo(expr->value);
 -- 
 2.29.2
 
