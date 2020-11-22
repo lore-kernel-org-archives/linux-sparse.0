@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id AB98FC5519F
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 08A04C6379D
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 74D8720773
-	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C332720773
+	for <linux-sparse@archiver.kernel.org>; Sun, 22 Nov 2020 15:27:40 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="L4oFMKWd"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Q14tuRKP"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727728AbgKVP1j (ORCPT
+        id S1727646AbgKVP1k (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 22 Nov 2020 10:27:39 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59954 "EHLO
+        Sun, 22 Nov 2020 10:27:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59968 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727317AbgKVP1i (ORCPT
+        with ESMTP id S1727317AbgKVP1k (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 22 Nov 2020 10:27:38 -0500
-Received: from mail-wm1-x32f.google.com (mail-wm1-x32f.google.com [IPv6:2a00:1450:4864:20::32f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CAE68C0613CF
-        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:36 -0800 (PST)
-Received: by mail-wm1-x32f.google.com with SMTP id p22so15516998wmg.3
-        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:36 -0800 (PST)
+        Sun, 22 Nov 2020 10:27:40 -0500
+Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD6CDC0613D3
+        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:39 -0800 (PST)
+Received: by mail-wr1-x444.google.com with SMTP id 64so2579414wra.11
+        for <linux-sparse@vger.kernel.org>; Sun, 22 Nov 2020 07:27:39 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=hmr00zOWFqVtU2ZJqQ1XXCDojaeX8UGyp+GyZR8LHTU=;
-        b=L4oFMKWdmod+yJtpifXvWwb+wUAkc0DAbWg9abJzaYljfYz/ITPgt8Z6wI7hcvIr5v
-         JUMCQVSsMtYZIuF1zr2S0ZqWONemHLxHl/T9xLiFC5rNOtQq+C1Phnhvz0nP29Pm/X8h
-         ROprJ+/TVOIQl/MDIMAWXNEwceMCZXVI5f8z46VYKY19QqyX70z7UZUDf3ao44sC4L1W
-         wvuZWi7QBxQKN1H7TWGAIANyqcn2PZZ1gNeur8IsyKWeTMK3j6yVux2Xe/Qr/h5d1NAV
-         cjiHVgZ/ZUcAQvbxEr/D+YeVg3Gacvf4TG0sD6M0nqcLhg3mMxHreVVFd30cYND3gsne
-         aIeg==
+        bh=e3/QE1edvmloZ71nFb9phi4Ljg6NQPZDU9YiAutsAMQ=;
+        b=Q14tuRKPqxfaut1N8Bolv0wuhpoET7JRHTjngHv00uYoZPyo1Nc/MWW1VPtYAbWXaq
+         MTL8ILI/Zx48f7AMcAFv9/+RGvgzqHfg8+sCIhk7StYJfCB5izilnTlTKiBA8cdb8IUO
+         hQRTL81lNv5na48QiDvnCfA4r7oQ8IS1yoCSkL3jx6PvE/k81bHwihNrKLVs0wh18o0T
+         2hGpTGkHCmtDFErgtgcMnNWqtHdj0hSqmZvPUghWRdwYfRpGzBZQ1Qm02rzt2Iv/XSVV
+         J6BSOGgEtvSN5F4aFjYIU1HYEaERnlXAgTU+Q71jWa0cHN+c/zvEFfFCNLK5RozwpBI+
+         appg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=hmr00zOWFqVtU2ZJqQ1XXCDojaeX8UGyp+GyZR8LHTU=;
-        b=dgoQIpCpp9CnPFtFK4b8/zDWO9uzma1PoKYVVJOgmWaqFDw2D5SiSLcNNJARbtYgyd
-         EkV3wWQA5ILncVCXxLZe2nHO3n3rsvvgCrpT4YmhAJb5x30ZOYDmqWwWlLTJVwQrnFLX
-         t/XrxcAfHxsNy2WtJA+pRgI7joXHOa3y/qYreD9jO1ubfu7ZBwf9l/50TxiBYBrFASGw
-         CFkfeEBXWu9l3lM+pyYGpJzqEECPsSdLSJlv3F5b6U674WeRNWVSfyDJLGyDmjaLefsH
-         Z2jbcUkT0Y2Q5eMfPvZsZECxZ+gq6CmNYZCAaLtND36vynv+oCEfFltEcdT4jbLBEfYW
-         6dxg==
-X-Gm-Message-State: AOAM532lbPwNXPPFfbvG/H0ZWG5UC5ya++UTNomShRKsSG3vGL4LDC0D
-        FCRTwD1we9f+0sP6zH3bJbQ/boxId/E=
-X-Google-Smtp-Source: ABdhPJxSSb52z2ecip1BhTYfdqikT4xAGl64IJPDjaly0mjxR2DfpdGPt61Crpu/UuYIC/+lJRJg7g==
-X-Received: by 2002:a05:600c:2541:: with SMTP id e1mr20803299wma.185.1606058855288;
-        Sun, 22 Nov 2020 07:27:35 -0800 (PST)
+        bh=e3/QE1edvmloZ71nFb9phi4Ljg6NQPZDU9YiAutsAMQ=;
+        b=ec4hcp+pBm8mkHqW094osRFX4xOj8prXI5dr3kki4NvEefolWap5P4wQguL7LZX+55
+         BOmqfzIlX+iX1tOJf6aijak7+OeDCtTswGF4cgGNAsu/zBbYD3sGSLp7RAHihHkuem3N
+         jpcnnhbHhIzZ0f9apgjwoC99wle0XnT705Do7gkwW4rhHewlRqHdCb4Yohx+OsgLUdK7
+         BDseO2yS7C5e9El8c2bqS9rU+yrYHnhXHPawpPlLMCe59zXDnDEWjC52nsN9jRBuz7a5
+         glcfQewYsA0f/PDs8E3t3+5vrVVhZC5Jn3DCrkWweON7p4lcX0r3Qjs2Ie1gm3de4va8
+         SDiw==
+X-Gm-Message-State: AOAM532J3CYXYUJWOx3sVRMxxw4jqsyZcazcHv74RMBhfBb7Q7QLZLsJ
+        C9SoYTgtK2K5pZ+EVbC39Bqsaz7CmuY=
+X-Google-Smtp-Source: ABdhPJxjMFa+u/ZevIaAhufBRKc5QqmerqGf9mwTu5VJg579r4kS/StSF96L8UVUVB8XBuePIxCBeQ==
+X-Received: by 2002:adf:f102:: with SMTP id r2mr7786542wro.315.1606058858515;
+        Sun, 22 Nov 2020 07:27:38 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b0e1:b041:18e2:46cf])
-        by smtp.gmail.com with ESMTPSA id k1sm13712265wrp.23.2020.11.22.07.27.34
+        by smtp.gmail.com with ESMTPSA id k1sm13712265wrp.23.2020.11.22.07.27.37
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 22 Nov 2020 07:27:34 -0800 (PST)
+        Sun, 22 Nov 2020 07:27:38 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/7] not: add testcases for canonicalization & simplification of negations
-Date:   Sun, 22 Nov 2020 16:27:25 +0100
-Message-Id: <20201122152731.10994-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/7] opcode: add helpers opcode_negate() & opcode_swap()
+Date:   Sun, 22 Nov 2020 16:27:29 +0100
+Message-Id: <20201122152731.10994-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201122152731.10994-1-luc.vanoostenryck@gmail.com>
 References: <20201122152731.10994-1-luc.vanoostenryck@gmail.com>
@@ -77,129 +77,30 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/optim/canonical-arg.c | 20 ++++++++++++++++++++
- validation/optim/canonical-not.c |  9 +++++++++
- validation/optim/cse-arg01.c     | 10 ++++++++++
- validation/optim/cse-not01.c     | 12 ++++++++++++
- validation/optim/cse-not02.c     | 12 ++++++++++++
- validation/optim/cse-reg01.c     | 10 ++++++++++
- 6 files changed, 73 insertions(+)
- create mode 100644 validation/optim/canonical-arg.c
- create mode 100644 validation/optim/canonical-not.c
- create mode 100644 validation/optim/cse-arg01.c
- create mode 100644 validation/optim/cse-not01.c
- create mode 100644 validation/optim/cse-not02.c
- create mode 100644 validation/optim/cse-reg01.c
+ opcode.h | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/validation/optim/canonical-arg.c b/validation/optim/canonical-arg.c
-new file mode 100644
-index 000000000000..a8ecc9bd0083
---- /dev/null
-+++ b/validation/optim/canonical-arg.c
-@@ -0,0 +1,20 @@
-+int def(void);
-+
-+int canon_arg_arg(int a, int b)
+diff --git a/opcode.h b/opcode.h
+index 1524272f0320..b74ba02d94bd 100644
+--- a/opcode.h
++++ b/opcode.h
+@@ -32,6 +32,16 @@ extern const struct opcode_table {
+ } opcode_table[];
+ 
+ 
++static inline int opcode_negate(int opcode)
 +{
-+	return (a + b) == (b + a);
++	return opcode_table[opcode].negate;
 +}
 +
-+int canon_arg_reg(int a)
++static inline int opcode_swap(int opcode)
 +{
-+	int b = def();
-+	return (a + b) == (b + a);
++	return opcode_table[opcode].swap;
 +}
 +
-+/*
-+ * check-name: canonical-arg
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/canonical-not.c b/validation/optim/canonical-not.c
-new file mode 100644
-index 000000000000..9698590fd245
---- /dev/null
-+++ b/validation/optim/canonical-not.c
-@@ -0,0 +1,9 @@
-+int canon_not(int a, int b) { return (a & ~b) == (~b & a); }
-+
-+/*
-+ * check-name: canonical-not
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cse-arg01.c b/validation/optim/cse-arg01.c
-new file mode 100644
-index 000000000000..c3f2963ffdeb
---- /dev/null
-+++ b/validation/optim/cse-arg01.c
-@@ -0,0 +1,10 @@
-+int foo(int a, int b) { return (a < b) == (b > a); }
-+
-+/*
-+ * check-name: cse-arg01
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cse-not01.c b/validation/optim/cse-not01.c
-new file mode 100644
-index 000000000000..f87123f14f13
---- /dev/null
-+++ b/validation/optim/cse-not01.c
-@@ -0,0 +1,12 @@
-+int and(int a) { return (~a & a) ==  0; }
-+int ior(int a) { return (~a | a) == ~0; }
-+int xor(int a) { return (~a ^ a) == ~0; }
-+
-+/*
-+ * check-name: cse-not01
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cse-not02.c b/validation/optim/cse-not02.c
-new file mode 100644
-index 000000000000..aa54a375a9ea
---- /dev/null
-+++ b/validation/optim/cse-not02.c
-@@ -0,0 +1,12 @@
-+int and(int a, int b) { return ((a == b) & (a != b)) == 0; }
-+int ior(int a, int b) { return ((a == b) | (a != b)) == 1; }
-+int xor(int a, int b) { return ((a == b) ^ (a != b)) == 1; }
-+
-+/*
-+ * check-name: cse-not02
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cse-reg01.c b/validation/optim/cse-reg01.c
-new file mode 100644
-index 000000000000..938858f4649b
---- /dev/null
-+++ b/validation/optim/cse-reg01.c
-@@ -0,0 +1,10 @@
-+int foo(int a, int b) { int x = a + b, y = ~b; return (x < y) == (y > x); }
-+
-+/*
-+ * check-name: cse-reg01
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
+ static inline int opcode_float(int opcode, struct symbol *type)
+ {
+ 	if (!type || !is_float_type(type))
 -- 
 2.29.2
 
