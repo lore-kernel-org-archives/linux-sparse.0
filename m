@@ -5,68 +5,67 @@ X-Spam-Level:
 X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4117EC3E8C5
-	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 22:30:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A4CCC3E8C5
+	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 22:30:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 086EC21D46
-	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 22:30:30 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4882021D46
+	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 22:30:33 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="J7e9dNBg"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="G3cNNp5Y"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726721AbgK0W3a (ORCPT
+        id S1731355AbgK0WaU (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 27 Nov 2020 17:29:30 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51286 "EHLO
+        Fri, 27 Nov 2020 17:30:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51276 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731701AbgK0W1a (ORCPT
+        with ESMTP id S1731413AbgK0W12 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 27 Nov 2020 17:27:30 -0500
-Received: from mail-wm1-x344.google.com (mail-wm1-x344.google.com [IPv6:2a00:1450:4864:20::344])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 257D1C061A48
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 14:27:30 -0800 (PST)
-Received: by mail-wm1-x344.google.com with SMTP id u10so2497029wmm.0
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 14:27:30 -0800 (PST)
+        Fri, 27 Nov 2020 17:27:28 -0500
+Received: from mail-wr1-x442.google.com (mail-wr1-x442.google.com [IPv6:2a00:1450:4864:20::442])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2F36BC061A04
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 14:27:28 -0800 (PST)
+Received: by mail-wr1-x442.google.com with SMTP id k14so7046807wrn.1
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 14:27:28 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ZPOeT52Yy2HDZEE21W3er4FPZopoUAHQvnz+6jw6apU=;
-        b=J7e9dNBg9ic9Qae9At2VX68O+AL3Jo52W6j8o3TknS0zPvgFyotkX1/Qljt/b72OX6
-         eaz8XxetkgyEoMWxdHo5cFB2SyTGWdLD8C6EssyDQNUnMGIz6luoR2K2608Ds7ZSuqvR
-         bNnCIG34kjE9W3SX0OmLQ1zvVdu5Q+Q+2Ps+X1sB5+ZCx/P0GMmjdKu84/mM52XcVzBo
-         xC8Lmls5WOt4LJwoDmYxx+9MJOxSr1NE8rGLZ2zPQ03juCqCXew90VZOIabiQ9dg5PpM
-         pXgeAEqis1Vg6Nf/XGMvRqofbFI/gkdSevfeWztm30zCMl5rO1wHMrXCakSKefA8+V2I
-         RTkQ==
+        bh=fy1/8aHGLqmG6nr3Py2q0Ie8D12Oq5+K1Jwk8epTuy0=;
+        b=G3cNNp5YbHrTWnHEkQORnLpB3gfhjfGdrLKBJ+s5PwfcI59k6sDrCeuXQVcwyLheBY
+         YpOs2fIpTItnwDf2pptFS6KHmC1gNuriGshLa4H8QDmpA11nQNKPSmfF0ElvXKa6sRs8
+         livEdZJoAQIFh1LfsA/Fs3KyeGwYyAKqf9v2dIx98uIA1F/pJPl1zmPhiL1hXXpnqPW6
+         SOvKgJQM6SwoAonNrXGgNZWWUvKQpjyoxky2yhHJcpeaDHzW/MT1xiT7VGIVgi4S0OsD
+         yyWsrwzvW05vsZMw8O7nkTCZyzjcbkZFUacVO3aVqUmyqE1k0ITw3nBKV5qxxm/EbrH3
+         xxBg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ZPOeT52Yy2HDZEE21W3er4FPZopoUAHQvnz+6jw6apU=;
-        b=W5qGh6m1KQW9Idx5A7jvUG8WjTMgL7+7GtJPtdLFZ8CHg/Ob0urYaVbdIMJceJfyzT
-         +T4WWVFt5xip874/lIdw+wDVc+ko/cezOMTefEBPICwygIqnMB5UQIlcyeFuYhKvFKnV
-         iXDrpYiDslprkNN5DCB22l/tDqnSkfgZBhKuoDK85QJe3983g3vS4qd+xxfb2vnTqV2o
-         LfzWMesrOxPsKTu5f5GKoGpsaVVSRgGS9TjtZuQVcaRteiq4o5UN4GaZ8ff45mFA56UD
-         b/y41tjDtuzLUjOPyWABwfPNI1Xok7Xvgi5CtBdAJYv8XpNat/rkWioEZImc6aOkZhag
-         PqbA==
-X-Gm-Message-State: AOAM533ZMg4uGNNebkynpon46gpsboTxSvydWR9ruublelPRwAJh+nvR
-        DpJfNGOHmHgSMKXFeVUH758hnk2pBl4=
-X-Google-Smtp-Source: ABdhPJzjZ9bCy0D/GvkrTNC00Dvlo4yYzMrItxFy9LzCTLsQM7w83tGQJwZky6j/wLLeYrpR61CBYQ==
-X-Received: by 2002:a1c:3c04:: with SMTP id j4mr11411474wma.105.1606516048617;
-        Fri, 27 Nov 2020 14:27:28 -0800 (PST)
+        bh=fy1/8aHGLqmG6nr3Py2q0Ie8D12Oq5+K1Jwk8epTuy0=;
+        b=PYAHyoBbHUrSls4OHnJTCJqd/jo2zu9TLaFsqK6UPrq1FxHsS/XD0Qeec3iKShshbU
+         2qHdVWBO578m4elT4yTwRK8D2nYn/W88Kh+Hz5mE8NPPwn/heAztE1AbEiKVdjc3ArcK
+         y9PqNvDCAjEaKGpKY7+9jbAJDvo/wiBNmjNh05R6cvGx1+JbbNHHOUi8/i3VBKIQCRrZ
+         ElG8zbE00xJsVYjEPKUKG2BUX2M7XK8MtVjCNUC0CEgSDvRiaT3YOy9vRcmAeAPSZqru
+         +HZD3L2gDauqtdLTLxxg1qWol9OqnFT9MvAnirDQe+AO6OBX+yFJwopp2hBf+XZiZLU0
+         7HiQ==
+X-Gm-Message-State: AOAM530mSToIqAlEbYa8sK/xvPzt6D4DC0c+bW/zsEKTKbDFXo2K77QE
+        x4KYvQzb6PFEGGSyMTgatAB/9YAoETU=
+X-Google-Smtp-Source: ABdhPJwTdwkC0cIQaBWjkzXJhiI0CQBrnGOF9Flo43IsYiCUTdgr5Wnmncnvvidoc2r9APQD/ypYKg==
+X-Received: by 2002:adf:ba47:: with SMTP id t7mr13209731wrg.47.1606516046749;
+        Fri, 27 Nov 2020 14:27:26 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f469:b93b:e449:cc30])
-        by smtp.gmail.com with ESMTPSA id q16sm17347050wrn.13.2020.11.27.14.27.27
+        by smtp.gmail.com with ESMTPSA id q16sm17347050wrn.13.2020.11.27.14.27.25
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Nov 2020 14:27:28 -0800 (PST)
+        Fri, 27 Nov 2020 14:27:26 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Linus Torvalds <torvalds@linux-foundation.org>
-Subject: [PATCH 6/6] convert SEL(x & BIT1, BIT2, 0) into SHIFT(x & BIT1, S)
-Date:   Fri, 27 Nov 2020 23:25:15 +0100
-Message-Id: <20201127222516.44915-7-luc.vanoostenryck@gmail.com>
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/6] add helper is_pow2()
+Date:   Fri, 27 Nov 2020 23:25:13 +0100
+Message-Id: <20201127222516.44915-5-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201127222516.44915-1-luc.vanoostenryck@gmail.com>
 References: <CAHk-=wjoJXrG=2_vnOX37fro12eyZc+uo2WL+F-utk51g9WuBA@mail.gmail.com>
@@ -77,58 +76,33 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Convert an expression like:
-	(x & (1 << A)) ? (1 << B) : 0
-into:
-	(x & (1 << A)) << (B - A)
-or:
-	(x & (1 << A)) >> (A - B)
+Add is_pow2() to test if a pseudo is a power of 2.
 
-Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                          | 15 +++++++++++++++
- validation/optim/select-and-shift.c |  1 -
- 2 files changed, 15 insertions(+), 1 deletion(-)
+ simplify.c | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 diff --git a/simplify.c b/simplify.c
-index 0d9391e21a56..fc64e5b77adf 100644
+index d729b390ae76..0d9391e21a56 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -2271,6 +2271,21 @@ static int simplify_select(struct instruction *insn)
- 			// both values must be non-zero
- 			return replace_with_pseudo(insn, src1);
- 		}
-+	case OP_AND:
-+		if (is_pow2(def->src2) && is_pow2(src1) && is_zero(src2) && insn->size == def->size && one_use(cond)) {
-+			unsigned s1 = log2_exact(def->src2->value);
-+			unsigned s2 = log2_exact(insn->src2->value);
-+			unsigned shift;
-+
-+			if (s1 == s2)
-+				return replace_with_pseudo(insn, cond);
-+
-+			// SEL(x & A, B, 0) --> SHIFT(x & A, S)
-+			insn->opcode = (s1 < s2) ? OP_SHL : OP_LSR;
-+			shift = (s1 < s2) ? (s2 - s1) : (s1 - s2);
-+			insn->src2 = value_pseudo(shift);
-+			return REPEAT_CSE;
-+		}
- 		break;
- 	}
+@@ -52,6 +52,15 @@
+ // Utilities
+ // ^^^^^^^^^
  
-diff --git a/validation/optim/select-and-shift.c b/validation/optim/select-and-shift.c
-index fbe044c7cb44..5313fe4b1d86 100644
---- a/validation/optim/select-and-shift.c
-+++ b/validation/optim/select-and-shift.c
-@@ -11,7 +11,6 @@ int bar(int p) { return ((p & B) ? A : 0) == ((((unsigned)p) & B) >> S); }
- /*
-  * check-name: select-and-shift
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-returns: 1
++///
++// check if a pseudo is a power of 2
++static inline bool is_pow2(pseudo_t src)
++{
++	if (src->type != PSEUDO_VAL)
++		return false;
++	return is_power_of_2(src->value);
++}
++
+ ///
+ // find the trivial parent for a phi-source
+ static struct basic_block *phi_parent(struct basic_block *source, pseudo_t pseudo)
 -- 
 2.29.2
 
