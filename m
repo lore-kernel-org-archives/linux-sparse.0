@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2EE48C6379D
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5535CC64E7A
 	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 16:52:16 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id EFA9E221EB
-	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 16:52:15 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1D3B320795
+	for <linux-sparse@archiver.kernel.org>; Fri, 27 Nov 2020 16:52:16 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="f8cLEhKB"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="Fh/PmCRn"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731448AbgK0QwC (ORCPT
+        id S1732142AbgK0QwE (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 27 Nov 2020 11:52:02 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55668 "EHLO
+        Fri, 27 Nov 2020 11:52:04 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55674 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732128AbgK0QwC (ORCPT
+        with ESMTP id S1732128AbgK0QwD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 27 Nov 2020 11:52:02 -0500
-Received: from mail-wr1-x444.google.com (mail-wr1-x444.google.com [IPv6:2a00:1450:4864:20::444])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 395A0C0613D1
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 08:52:02 -0800 (PST)
-Received: by mail-wr1-x444.google.com with SMTP id s8so6214555wrw.10
-        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 08:52:02 -0800 (PST)
+        Fri, 27 Nov 2020 11:52:03 -0500
+Received: from mail-wm1-x341.google.com (mail-wm1-x341.google.com [IPv6:2a00:1450:4864:20::341])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 57980C0613D1
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 08:52:03 -0800 (PST)
+Received: by mail-wm1-x341.google.com with SMTP id f190so4086053wme.1
+        for <linux-sparse@vger.kernel.org>; Fri, 27 Nov 2020 08:52:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ScrtSZlA/2DvlbYC7iS+PdZe8g+yHK5UMOTMv5T7unI=;
-        b=f8cLEhKBpOX3vYYy6aJo0v1vBbfPnmoSm9PIjmU9gafpLD/RBmHn0jwrlfzvzV2ADE
-         13qha09KvHSAZFpALogmZAuUhDHPLc7idnyuORLB5T56wXUJ93t9wcuiX5+gSnXDi/4l
-         A7SVbONUIRU0OCC40nOSwACqz73IbjuxkuG3mWIwxFUinqJp9/RSJgOkfzmOJp0jnfMw
-         rOL/JqbEvWGM0d7ySHokx3C3/c7Q5EtW5pAtwEOEAwJJFDuueNGCa3ZHk6/CUuc1NtrY
-         PbbX8eSEeD7PAQ0JxY5meLnwOo1xuflRHcTWjh1v7os64obdArbFlkmw/0hwbE2/Mpuo
-         HEMQ==
+        bh=jAC7LnI9d+ILNNjboWAHlG+DH0oCS0kBDK+Bkm8Eovo=;
+        b=Fh/PmCRnulKfb7+Z4J7L74wEEEhKz20LXnJnhxOKyRUg/k16VyINUWnJBfCJabMKhP
+         TVhKKSrWVPbgz9pVQr+PAZOMslZwkV4m2AXC8XO/+RtiluaX6+QkCS+2/LdT+tklQNbC
+         t5ZswzgedH6dbLiv3u10sPIdWub/hJdBk/4IxwwNGIzVkIMmD1QlcqsmnSkqrnCViLiO
+         sfufcAIwmkh53jyWzGIyA2QygycPZhmBeK81dQKKvIyWkX84HcmaWeMvYVRWBLDhde4P
+         2XV9oYn2U1u2mLrLEIG5ufE7HpbCWJ7+9Go2ksBgN3K6QEk0myZLIYx9V0Xkm469RPQQ
+         9Qnw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ScrtSZlA/2DvlbYC7iS+PdZe8g+yHK5UMOTMv5T7unI=;
-        b=nING2ReSaRUfe8CfAdBHjmnjzXlFWcUaOmBXg9p4xJpuuQNiDh+1RoZHkL4M4r+JoG
-         1GYhK1yER2/PQy344053Ila+2m6wwcptxqkSF4PJ5YfMEkEEUb34taQWQ67UcQjORWf9
-         dbAakyxHK7jAmNmjCvdbgn9M1WQb7WaCk29uA2KwBeCpPkp12BaDOyNZM69lYdrmfZvg
-         gLMSGiAgJe9IEIvjpzX5gX2pVJTkNF5OTPtKFdVI2ScsB2RySIvJcvDBARfsYQFHDnSX
-         5bIvzPXZ+tznR/CCR4Iw6wFng6KQalCv/Onni0JwDQX225XGvgCwlvkNV2lxF+IqQqKG
-         j0ng==
-X-Gm-Message-State: AOAM531mtdE1NbFziqBXjQxPD9T0oXQYOHfXWgwHTlZtNQCxP9graFHc
-        zMF1mCkDdJ/b58NTX21Y+7Ur9Jk8AGA=
-X-Google-Smtp-Source: ABdhPJwxxVfC/nskA3wd1UZvjfkN5gBgxXXmXun1exeGQrBH7AaMzoUQjF35pJW5TLTieOneKLvShw==
-X-Received: by 2002:adf:e490:: with SMTP id i16mr11622076wrm.337.1606495920709;
-        Fri, 27 Nov 2020 08:52:00 -0800 (PST)
+        bh=jAC7LnI9d+ILNNjboWAHlG+DH0oCS0kBDK+Bkm8Eovo=;
+        b=Gc2RpF5SWPF8jeXa5azQBddoG5LHLfURgBtfuZnFwqKd50wZS1D1shyeLgI9dh8KWN
+         ZB7zaVR8Ts/K3wZn2vQsOLUar3HrTueyuzmItwswtKMOTURbLKD/Q+C5N198ysYjSN6r
+         E9E26mrdb8ww8IH249v6CGpJuaJWJUovnlU4pJP6eS0r5sKtU3rtOEvBADQ95nA6ZaY/
+         CBIK+BdRGhd3YpbP+w63NLn+MwdJSUP/VSxqbfVhD0N/FgZrASKmPRi4J/S/xT5Woc6R
+         sWvhmVR1UYH2xL/NXZcUkAuEyyrrDb95KdFp5OGpuaYOV6KSMSn1nnkZtdL2q0NxqRVP
+         /q0Q==
+X-Gm-Message-State: AOAM530TyGdJ/PMhvzirmz1kE5/bskV36EuAzJrrHrBo1ebTOpCRNes5
+        X9TP52FeA86ppDGI/IyZmCt5ZtPxPEg=
+X-Google-Smtp-Source: ABdhPJx34FGRXAn+p6xmYgK4Pk4Q4kz7vCplDvF63FH/i9LRyUAMOesxYdbWzI0Zn/UCrsV8QnqBeA==
+X-Received: by 2002:a7b:c1ce:: with SMTP id a14mr10192443wmj.169.1606495921904;
+        Fri, 27 Nov 2020 08:52:01 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:e9bd:38ae:745f:40ea])
-        by smtp.gmail.com with ESMTPSA id y2sm15895539wrn.31.2020.11.27.08.51.59
+        by smtp.gmail.com with ESMTPSA id y2sm15895539wrn.31.2020.11.27.08.52.00
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 27 Nov 2020 08:52:00 -0800 (PST)
+        Fri, 27 Nov 2020 08:52:01 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/8] reassoc: add helper can_move_to()
-Date:   Fri, 27 Nov 2020 17:49:44 +0100
-Message-Id: <20201127164950.41517-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/8] add helper make_insn_pair() & swap_insn()
+Date:   Fri, 27 Nov 2020 17:49:45 +0100
+Message-Id: <20201127164950.41517-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201127164950.41517-1-luc.vanoostenryck@gmail.com>
 References: <20201127164950.41517-1-luc.vanoostenryck@gmail.com>
@@ -75,72 +75,55 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-When transforming IR expressions, it may happen that we want to
-reuse an instruction and move a pseudo into it but that this pseudo
-is only defined later.
-
-Add a small help to check this: can_move_to().
+Add two helpers to create instruction pair OUT(IN(a, b), c).
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 37 +++++++++++++++++++++++++++++++++++++
- 1 file changed, 37 insertions(+)
+ simplify.c | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
 diff --git a/simplify.c b/simplify.c
-index de03d315ec33..d16390caed49 100644
+index d16390caed49..24b3dcb52428 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -46,6 +46,7 @@
- #include "linearize.h"
- #include "flow.h"
- #include "symbol.h"
-+#include "flowgraph.h"
- 
- ///
- // Utilities
-@@ -1508,6 +1509,42 @@ static inline int simple_pseudo(pseudo_t pseudo)
- 	return pseudo->type == PSEUDO_VAL || pseudo->type == PSEUDO_SYM;
+@@ -506,6 +506,37 @@ static inline int replace_opcode(struct instruction *insn, int op)
+ 	return REPEAT_CSE;
  }
  
 +///
-+// test if, in the given BB, the ordering of 2 instructions
-+static bool insn_before(struct basic_block *bb, struct instruction *x, struct instruction *y)
++// create an instruction pair OUT(IN(a, b), c)
++static int replace_insn_pair(struct instruction *out, int op_out, struct instruction *in, int op_in, pseudo_t a, pseudo_t b, pseudo_t c)
 +{
-+	struct instruction *insn;
++	pseudo_t old_a = in->src1;
++	pseudo_t old_b = in->src2;
++	pseudo_t old_1 = out->src1;
++	pseudo_t old_2 = out->src2;
 +
-+	FOR_EACH_PTR(bb->insns, insn) {
-+		if (insn == x)
-+			return true;
-+		if (insn == y)
-+			return false;
-+	} END_FOR_EACH_PTR(insn);
-+	return false;
++	use_pseudo(in, a, &in->src1);
++	use_pseudo(in, b, &in->src2);
++	use_pseudo(out, in->target, &out->src1);
++	use_pseudo(out, c, &out->src2);
++
++	remove_usage(old_a, &in->src1);
++	remove_usage(old_b, &in->src2);
++	remove_usage(old_1, &out->src1);
++	remove_usage(old_2, &out->src2);
++
++	out->opcode = op_out;
++	in->opcode = op_in;
++	return REPEAT_CSE;
 +}
 +
 +///
-+// check if it safe for a pseudo to be used by an instruction
-+static inline bool can_move_to(pseudo_t src, struct instruction *dst)
++// create an instruction pair OUT(IN(a, b), c) with swapped opcodes
++static inline int swap_insn(struct instruction *out, struct instruction *in, pseudo_t a, pseudo_t b, pseudo_t c)
 +{
-+	struct basic_block *bbs, *bbd;
-+	struct instruction *def;
-+
-+	if (!one_use(dst->target))
-+		return false;
-+	if (src->type != PSEUDO_REG)
-+		return true;
-+
-+	def = src->def;
-+	bbs = def->bb;
-+	bbd = dst->bb;
-+	if (bbs == bbd)
-+		return insn_before(bbs, def, dst);
-+	else
-+		return domtree_dominates(bbs, bbd);
++	return replace_insn_pair(out, in->opcode, in, out->opcode, a, b, c);
 +}
 +
- static int simplify_associative_binop(struct instruction *insn)
+ static inline int def_opcode(pseudo_t p)
  {
- 	struct instruction *def;
+ 	if (p->type != PSEUDO_REG)
 -- 
 2.29.2
 
