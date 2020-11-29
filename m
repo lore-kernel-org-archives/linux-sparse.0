@@ -8,64 +8,64 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ABE5FC64E7C
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E34D4C64E7D
 	for <linux-sparse@archiver.kernel.org>; Sun, 29 Nov 2020 14:50:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 639EE20825
+	by mail.kernel.org (Postfix) with ESMTP id 8BE8520829
 	for <linux-sparse@archiver.kernel.org>; Sun, 29 Nov 2020 14:50:25 +0000 (UTC)
 Authentication-Results: mail.kernel.org;
-	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="dT8SEZIL"
+	dkim=pass (2048-bit key) header.d=gmail.com header.i=@gmail.com header.b="VYTrHQS6"
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727531AbgK2OuM (ORCPT
+        id S1728083AbgK2OuN (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 29 Nov 2020 09:50:12 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55646 "EHLO
+        Sun, 29 Nov 2020 09:50:13 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55650 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725882AbgK2OuL (ORCPT
+        with ESMTP id S1725882AbgK2OuM (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 29 Nov 2020 09:50:11 -0500
-Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EBE2BC0613D3
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Nov 2020 06:49:30 -0800 (PST)
-Received: by mail-ej1-x642.google.com with SMTP id jx16so15097169ejb.10
-        for <linux-sparse@vger.kernel.org>; Sun, 29 Nov 2020 06:49:30 -0800 (PST)
+        Sun, 29 Nov 2020 09:50:12 -0500
+Received: from mail-ej1-x641.google.com (mail-ej1-x641.google.com [IPv6:2a00:1450:4864:20::641])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F1DA1C0613D4
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Nov 2020 06:49:31 -0800 (PST)
+Received: by mail-ej1-x641.google.com with SMTP id m19so9979457ejl.11
+        for <linux-sparse@vger.kernel.org>; Sun, 29 Nov 2020 06:49:31 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=CCiIEs6nNh78aSN1WYa7at1l/GNGiQmarIXqJd9KdtI=;
-        b=dT8SEZILjs71ogpoS3oosfO4obfRtcYreR+anhAPaEv0zQUNLHOtoq7K9Sml01VYC7
-         4uQ/agekFputh7OYcFoigLhLzvvD31y7P1ioxCElg50BctQHuJz4wtWLQJhMK+qNzkZa
-         A/ri+JjGfLunfbzhPe//xu6y4/cYf5xDL7f+5MMcnw9bTNh/7mZpjUk1yy2wNR/BIOg1
-         v0IGzQTOvdesIrEyXHnfh7/O129QDfctXJ0E/aiAGuu8/Fn+5ZBrhPHYkqPFpiiqcecM
-         wdeAEIx/4ZeVWRu6bXCJhwn0vVbBYzHiXd8pHqJyWBdiOKrerdqrLf+DRyckTS+Rvd7Y
-         5rEQ==
+        bh=5PRiPKcB1AyORpScnS0YuvpCigQr/HDEuor6qNADadM=;
+        b=VYTrHQS67lhB5ev7Q/bOizA3D0IegMYXjpL4chWIoWoqMKOIEFt5/TjxtXzqr29DoT
+         EKejebeh9+j4/94ju+CugdaLAPQ1zHzQ6loAXUo+TbmYPbrZ9vhNqUfPKRE8UWJtBdRR
+         2A5NrvdLxYddlAtWS6fDEgHFiQQ0KqzdVAISCbw6UyU8zZZoSMAKIkl8xeETkNPlMmE0
+         BYw7hncVs4wr9jgyUu8b2w5Hc6vv+FtniF4L9SqU8O0UrFXhyqh8uxllTo6YN91EuisA
+         cyE8dHFE7LwJs6AVKHduG21zjxLQLg4ib9rFPeuPmHc3FlE7XvOGdDUUx8spFp23TJ/A
+         MzNA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=CCiIEs6nNh78aSN1WYa7at1l/GNGiQmarIXqJd9KdtI=;
-        b=fSPntPQ3tmOuBfev9Dt2oaGZwJSowxte54YTx4+8qfKppQe1889xepGfK5gzZn3BNJ
-         c3X877ZPilARm/1Car86fxQ3JyyWOuLc3+Q0I2/vIUTcjWzypiaCXDAiptkyJCCOlYXp
-         5ju69G/nrBpkzxcl6cvapw66AoIx9gj2QHAAjCI1374VYK0R9zR2ZLI9E4WIEBkIqVJC
-         QmWc/XbJDINV4Va6EY1YG1oTj2BiYMkXXT3B5eKDLIBxXhUtna2qRB4uCbXZysTPOgjZ
-         3yHSjC6s7qME1AAiQcmtt/cqO29TsFPHuh6tXpWQ8arhLjYsKql85GPDnKokfaE8LAYt
-         sWUw==
-X-Gm-Message-State: AOAM533l/TF/sYCD3iIHYQYWX5gxapp3+6nzl2h0mXTuwie9r6a1Y6tP
-        bHuCWWHWM3BqE5TX6sxYzWo07bFfg1o=
-X-Google-Smtp-Source: ABdhPJz2XU+kSvpG7drJ6FwnPqViXgA3E0JvvKb953O7JyFu85CRO9qd7wpPw4tjkvX5c9k2xxRzpA==
-X-Received: by 2002:a17:906:d1c3:: with SMTP id bs3mr16169153ejb.306.1606661369439;
-        Sun, 29 Nov 2020 06:49:29 -0800 (PST)
+        bh=5PRiPKcB1AyORpScnS0YuvpCigQr/HDEuor6qNADadM=;
+        b=H9hmxd+qd8ft+1DxHQz/lrMF2bOsYUjmE1Sqtp9jDTeVzfB5Tj3vH0RQOJuVl6KKbA
+         LN1n1O9jY6gkeuZkXeTSkhAGtvlS/o0tkO1Ld7QBP5XVJu4shWPzka6NxP6gVNkXsj9k
+         VVODTTmokWXVYYl1YYoeYkY+cTAdReN9QEeCLMqRFnyl/n8PsogQHeuuwfB1Gt0cToUX
+         ieN1iT7TCaCNooM92g3ZepMRSd+1eAOHqavWBphhzfwVW2OWstvKRRewTd2rmDbJgd8R
+         3TvR+7GoHlK8wMQgWq+7tBtfZ9W6mLSRLMxYMMEIkPzuikquY9rfhRRbX6M/Yi1WxGLB
+         /4iQ==
+X-Gm-Message-State: AOAM532GLuuhhpSBuvNXBxdWn12KEb3LjIlAXbuNXlQDwZ6NNvzMSiw0
+        pyFQW0KhXRil/S0FdAqYyjYkHRxWUGI=
+X-Google-Smtp-Source: ABdhPJyVx0lObo9rpNPOuugHDNO0jy/EYxb2D+RzomUt9oGksNQOvjiwl/yRYTajz1fzaBJV30pasQ==
+X-Received: by 2002:a17:906:8617:: with SMTP id o23mr12186747ejx.274.1606661370502;
+        Sun, 29 Nov 2020 06:49:30 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:149a:de72:e1c0:dd0f])
-        by smtp.gmail.com with ESMTPSA id p25sm7435649eju.63.2020.11.29.06.49.28
+        by smtp.gmail.com with ESMTPSA id p25sm7435649eju.63.2020.11.29.06.49.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 29 Nov 2020 06:49:28 -0800 (PST)
+        Sun, 29 Nov 2020 06:49:29 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/5] make a header for simplification
-Date:   Sun, 29 Nov 2020 15:49:19 +0100
-Message-Id: <20201129144922.56209-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/5] make replace_with_pseudo() extern
+Date:   Sun, 29 Nov 2020 15:49:20 +0100
+Message-Id: <20201129144922.56209-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201129144922.56209-1-luc.vanoostenryck@gmail.com>
 References: <20201129144922.56209-1-luc.vanoostenryck@gmail.com>
@@ -75,70 +75,41 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The few external functions defined in simplify.h are declared
-in flow.h (for historical reasons).
+This function can be useful since it can be useful in other files,
+for example in memops.c
 
-In preparation for some changes, create a specific headers for these.
+So make it extern..
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.h     | 1 -
- optimize.c | 1 +
- simplify.c | 1 +
- simplify.h | 8 ++++++++
- 4 files changed, 10 insertions(+), 1 deletion(-)
- create mode 100644 simplify.h
+ simplify.c | 2 +-
+ simplify.h | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/flow.h b/flow.h
-index c3461c8c33bd..7cdc7c2a496b 100644
---- a/flow.h
-+++ b/flow.h
-@@ -21,7 +21,6 @@ extern int simplify_cfg_early(struct entrypoint *ep);
- 
- extern void convert_instruction_target(struct instruction *insn, pseudo_t src);
- extern void remove_dead_insns(struct entrypoint *);
--extern int simplify_instruction(struct instruction *);
- 
- extern void kill_bb(struct basic_block *);
- extern void kill_use(pseudo_t *);
-diff --git a/optimize.c b/optimize.c
-index 9b754831f8b0..3351e67b9d5e 100644
---- a/optimize.c
-+++ b/optimize.c
-@@ -12,6 +12,7 @@
- #include "flowgraph.h"
- #include "linearize.h"
- #include "liveness.h"
-+#include "simplify.h"
- #include "flow.h"
- #include "cse.h"
- #include "ir.h"
 diff --git a/simplify.c b/simplify.c
-index 29b368e94ff4..69eae4f8a5a1 100644
+index 69eae4f8a5a1..2c587bea3a8a 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -44,6 +44,7 @@
- #include "parse.h"
- #include "expression.h"
- #include "linearize.h"
-+#include "simplify.h"
- #include "flow.h"
- #include "symbol.h"
+@@ -443,7 +443,7 @@ static inline int replace_pseudo(struct instruction *insn, pseudo_t *pp, pseudo_
+ 	return REPEAT_CSE;
+ }
  
+-static int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
++int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo)
+ {
+ 	convert_instruction_target(insn, pseudo);
+ 	return kill_instruction(insn);
 diff --git a/simplify.h b/simplify.h
-new file mode 100644
-index 000000000000..200d79c00a83
---- /dev/null
+index 200d79c00a83..ed3dd9716a3e 100644
+--- a/simplify.h
 +++ b/simplify.h
-@@ -0,0 +1,8 @@
-+#ifndef SIMPLIFY_H
-+#define SIMPLIFY_H
+@@ -5,4 +5,6 @@
+ 
+ int simplify_instruction(struct instruction *insn);
+ 
++int replace_with_pseudo(struct instruction *insn, pseudo_t pseudo);
 +
-+#include "linearize.h"
-+
-+int simplify_instruction(struct instruction *insn);
-+
-+#endif
+ #endif
 -- 
 2.29.2
 
