@@ -2,146 +2,135 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BCF77C433FE
-	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:46:10 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A5C3BC433FE
+	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 18:16:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 76D0E22A83
-	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:46:10 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 51E9422B2E
+	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 18:16:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727536AbgLDRpv (ORCPT
+        id S1727008AbgLDSQa (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 4 Dec 2020 12:45:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:39680 "EHLO
+        Fri, 4 Dec 2020 13:16:30 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44480 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726606AbgLDRpv (ORCPT
+        with ESMTP id S1726775AbgLDSQ3 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 4 Dec 2020 12:45:51 -0500
-Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 58455C0613D1
-        for <linux-sparse@vger.kernel.org>; Fri,  4 Dec 2020 09:45:10 -0800 (PST)
-Received: by mail-ej1-x644.google.com with SMTP id ce23so6102441ejb.8
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 09:45:10 -0800 (PST)
+        Fri, 4 Dec 2020 13:16:29 -0500
+Received: from mail-lf1-x142.google.com (mail-lf1-x142.google.com [IPv6:2a00:1450:4864:20::142])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 519C0C0613D1
+        for <linux-sparse@vger.kernel.org>; Fri,  4 Dec 2020 10:15:49 -0800 (PST)
+Received: by mail-lf1-x142.google.com with SMTP id a9so8926517lfh.2
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 10:15:49 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=e8RzPgScIY0qoxSEhVG5lUFSm3d8pfDvIHCQ7otH9Ew=;
-        b=ZTw1RIXtmrEjm8vwFSypX4lj1e8SS4cJJgbgxUcBNmZ6DMMnJgv0n2YAYKWSub6W3e
-         ipqPcxOqORgyUkix5rPY8JF7uXthPm+5SOJrkN4XdwJyP66AB1LsPCaSzbe/ka5AalPR
-         qNRHDZb8LSTgD0Gipauda1ngZ84BiOIPaysZKTJjvvWojNxm32aVfUbaRx4+EoCWvQj7
-         oMnhtQ3Bxrce53b8gWz3cUJO9q/GKxdPDO9qmcrKgOelzXJu0yKWd6koY9/4dQ8rzBHd
-         hhWuA8QMHyETU30jFEwKBfaRQTzWV3uzkuvVRh+7NM4BLVw8Db0B9qhyd9NrkLhpVF4/
-         /bsA==
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=jfW7nC/Km02pcGLzusB+nZMBbs+X8EPyMTxJXshX3vs=;
+        b=XIHX9Jn0nL6M/htRxRc1/3CBpxGd1oIB2qijXkjhtvOeyDUhPEQqn0JDj/rhIAcRJ1
+         u4/A4uwvL3XVmCDYROqmV2wZf0uy+PAwrIHsginb2eeS7iYSIfGiMpYR25OnWPT+f9kt
+         hqLKc8v7RxaxyLj3/VDdR1mBm9191BnUTVzxk=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=e8RzPgScIY0qoxSEhVG5lUFSm3d8pfDvIHCQ7otH9Ew=;
-        b=PIethwWEviQfqA8KU6GqSAxzFHAYyHrxR0+869pV/RTChix0hwMP9v1wGKOZcWgvry
-         JxPpPUkiVrh1ZjhMjOxlONcnfz2CwwTtm45jks0b718WikQ38DXbP/TVBLpKTz68HL7u
-         EDDHT5T+RePuOfTZlAwiCyedI6iO1CX4vGxDunRp0V77oGNIcfFACrliOKONHe2tNQLf
-         IzctJns1UnwxsYQjnhpZ2YsqOgAb8ZKgjs/ofemXBfX7dJSqt1ejjRyVfxWJd2KP/dmR
-         ckHc8JN8Y0DdcHGl9kga02rjBJiXHr2qjO25JKsGKMznUNij9h+mMJO1Hj5Ot9fABfxy
-         wvhg==
-X-Gm-Message-State: AOAM532fSM+IpIT+mGoWz8Don9NM1TlUHFI4RBbcZgYt+6k6DSb6yx9r
-        L10MppOBcIbsRZ0G0qqIPWenUhNja4Q=
-X-Google-Smtp-Source: ABdhPJxxz4ZjbbFy4xv5t9HtLuYhgO8S8ackB/WooZ8sHLWS0BcFLEECGPD+YNLhOn7zRvEK/C/xMw==
-X-Received: by 2002:a17:906:e24f:: with SMTP id gq15mr6700726ejb.256.1607103909037;
-        Fri, 04 Dec 2020 09:45:09 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:8183:34c1:3ce4:9984])
-        by smtp.gmail.com with ESMTPSA id q24sm3905482edw.66.2020.12.04.09.45.03
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 04 Dec 2020 09:45:05 -0800 (PST)
-Date:   Fri, 4 Dec 2020 18:45:02 +0100
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH] experimental: code sinking
-Message-ID: <20201204174502.5wkqf7xashx2poet@ltop.local>
-References: <20201204163315.68538-1-luc.vanoostenryck@gmail.com>
- <CAHk-=witmTznTY4oH7KDr7aTufXey17w1fTaTBiMChk+4NUQ1Q@mail.gmail.com>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=jfW7nC/Km02pcGLzusB+nZMBbs+X8EPyMTxJXshX3vs=;
+        b=lHfIG8B1FKMTicJ9e/YWt7wPB1VigHd5KSvqcbQoYPxVMRpce6ThFW8NLidunbRuuQ
+         p+Rni/2Z1oyHeFFt1F6wxIt6JikAae6l6p+/o6ipXVW+hPznKCeGLHvHh+QeiWXCWJfZ
+         93Bo4qQrPt8Z+fF9NYy8fkCaOruA4x5Dc7Yek2MJULkcVHFbkzMPY17LBxcpGRgMUL42
+         BZjAObKxUYRlIQFaN9oexvV3keggf73ygHTwlQUCeiY/sEphc9JnCwf5AHdW3HWfE1Rk
+         9b33lUVk0o5eGhWRvvabPD6lX8X+JBKf7U1OHPNAxxyW2OCgFnek8SIKIh4zQiYd65ig
+         pk1g==
+X-Gm-Message-State: AOAM533temt9EqlG8XbAnyh0yu+PwMLRztCbpz3HBqh/lGrQguoS4Zuv
+        3/7+Kg1iiOqFlsKL4N4ruOWLHM1DiwwTvg==
+X-Google-Smtp-Source: ABdhPJwQR+CsFMeYVYC8wpQ/qIzrqyRR93bsU59xWqN1CJGd1b0y2jWPEIpQ14B/gQPlyayxD8cl4w==
+X-Received: by 2002:a19:f702:: with SMTP id z2mr3557265lfe.257.1607105747504;
+        Fri, 04 Dec 2020 10:15:47 -0800 (PST)
+Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com. [209.85.208.179])
+        by smtp.gmail.com with ESMTPSA id l16sm1982584ljb.69.2020.12.04.10.15.46
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Fri, 04 Dec 2020 10:15:46 -0800 (PST)
+Received: by mail-lj1-f179.google.com with SMTP id j10so7618512lja.5
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 10:15:46 -0800 (PST)
+X-Received: by 2002:a2e:9bd2:: with SMTP id w18mr3924366ljj.312.1607105746100;
+ Fri, 04 Dec 2020 10:15:46 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=witmTznTY4oH7KDr7aTufXey17w1fTaTBiMChk+4NUQ1Q@mail.gmail.com>
+References: <20201204163315.68538-1-luc.vanoostenryck@gmail.com>
+ <CAHk-=witmTznTY4oH7KDr7aTufXey17w1fTaTBiMChk+4NUQ1Q@mail.gmail.com> <20201204174502.5wkqf7xashx2poet@ltop.local>
+In-Reply-To: <20201204174502.5wkqf7xashx2poet@ltop.local>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Fri, 4 Dec 2020 10:15:30 -0800
+X-Gmail-Original-Message-ID: <CAHk-=wh15fTgsd+D7_goVzZY3NFPVke8ENTPtUdu5HYi2Pkgbw@mail.gmail.com>
+Message-ID: <CAHk-=wh15fTgsd+D7_goVzZY3NFPVke8ENTPtUdu5HYi2Pkgbw@mail.gmail.com>
+Subject: Re: [PATCH] experimental: code sinking
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Dec 04, 2020 at 09:13:50AM -0800, Linus Torvalds wrote:
-> On Fri, Dec 4, 2020 at 8:34 AM Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > A lot of the false 'context imbalance' warnings are caused by
-> > a potential jump-threading being blocked between 2 conditional
-> > branches on the same condition because the second CBR belong
-> > to a non-empty BB. Often the offending instructions can be moved
-> > to some other BB, sometimes even with some added advantages.
-> 
-> I hope you don't just use the context imbalance as a sign of this
-> being a good idea, because a lot of the context imbalances are likely
-> real and valid.
+On Fri, Dec 4, 2020 at 9:45 AM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> > There might be cases where instruction sinking makes sense even
+> > outside the "can we empty this bb entirely" issue. Not that I can
+> > think of any, but I wonder if this could be used to actually shrink
+> > liveness regions (if both the inputs to the sunk instruction are live
+> > _anyway_ at the target, then sinking the instruction should actually
+> > improve liveness in general, for example).
+>
+> I don't think I understand this. In the case of an UNOP, sinking it
+> increase the liveness and decrease the liveness of the output, so
+> it should not matter much.
 
-Not exactly, but I confess that currently I'm focusing a lot on the
-'*false* context imbalance' (those I can see in the C code or in
-the IR that should be OK but sparse warning on them nevertheless). 
-I've not a very clear idea of how much of those warnings are real
-(but I'm begin to think more and more than most are real).
+Right. The UNOP case should be a no-op from a liveness perspective, but:
 
-By far, the most common cause of these false warnings is a CBR-CBR
-on the same condition that is not simplified away because the second
-one is not empty.
+> In the case of an BINOP or select, sinking
+> it will decrease the liveness of the unique output but increase the
+> liveness of the inputs. So, it seems to me that sinking would
+> globally increase the liveness (contrary to moving up instructions).
+> Am I missing something?
 
-> I do think moving the instruction to the (single) user sounds like a
-> good idea in some cases, but I'm a bit worried about doing it quite
-> this mindlessly. It can expand on liveness a lot - while the liveness
-> of the result of the sunk instruction shrinks, the liveness of the
-> sources to the sunk instruction can grow a lot.
-> 
-> That's obviously a non-issue for the use of sparse as an analysis tool
-> (and that's clearly the primary use), but I'd still like to think that
-> code generation might matter.
+No, moving a binop could actually *shrink* liveness under the right
+circumstances - namely when the sources of the binop are live
+regardless.
 
-Yes, I agree for both points.
+Completely stupid example that makes no sense, and only exists to
+illustrate the issue:
 
-> So I think this might be better with more heuristics. And explaining
-> them. Right now you have one heuristic: you only sink instructions
-> from bb's that end with a conditional branch. I'm not entirely sure
-> that I understand the reason for that heuristic, it smells a bit
-> arbitrary to me (I suspect it was the case you saw when looking at
-> examples).
+    int diff(int x, int y);
+    int fn2(int x, int y, int sum, int diff);
 
-Yes, indeed, it's arbitrary because it's the only case I'm interested
-about for these 'false context imbalance'. But no worries, as explained
-in the patch description, it's not my intention to merge this, certainly
-not as-is. It's more a kind of experiment to play with, a kind of
-exploratory tool.
- 
-> On that note: would also be lovely to actually see examples of what
-> this results in - and not necessarily about just the context imbalance
-> again.
+    int test(int x, int y)
+    {
+        int sum = x+y;
 
-Yes, I'll add this (but I'm not sure to have anything significant
-not related to emptying a BB ending with a CBR).
+        return fn2(x, y, sum, diff(x,y));
+    }
 
-> There might be cases where instruction sinking makes sense even
-> outside the "can we empty this bb entirely" issue. Not that I can
-> think of any, but I wonder if this could be used to actually shrink
-> liveness regions (if both the inputs to the sunk instruction are live
-> _anyway_ at the target, then sinking the instruction should actually
-> improve liveness in general, for example).
+which generates
 
-I don't think I understand this. In the case of an UNOP, sinking it
-increase the liveness and decrease the liveness of the output, so
-it should not matter much. In the case of an BINOP or select, sinking
-it will decrease the liveness of the unique output but increase the
-liveness of the inputs. So, it seems to me that sinking would
-globally increase the liveness (contrary to moving up instructions).
-Am I missing something?
+    add.32      %r3 <- %arg1, %arg2
+    call.32     %r9 <- fn1, %arg1, %arg2
+    call.32     %r10 <- fn2, %arg1, %arg2, %r3, %r9
+    ret.32      %r10
 
--- Luc
+but it would actually improve liveness if that "add" was moved down -
+because even though it "expands" the liveness of %arg1/arg2 by moving
+the use of those down, both of those argument pseudos have later uses
+_anyway_. So that expansion of liveness is a non-issue.
+
+Instead, it shrinks the liveness region of %r3. Ergo, it actually
+shrinks liveness region in the big picture.
+
+Now, the above stupid example is one single bb, so in that sense it's
+not really relevant for your inter-bb movement, but that doesn't
+actually change the argument at all. Insert a conditional in there to
+get a multi-bb case.
+
+              Linus
