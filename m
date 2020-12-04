@@ -2,116 +2,91 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D0786C433FE
-	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:15:05 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id AF2EBC433FE
+	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:17:06 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7417D22B40
-	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:15:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7AE8322B40
+	for <linux-sparse@archiver.kernel.org>; Fri,  4 Dec 2020 17:17:06 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727352AbgLDROu (ORCPT
+        id S1729767AbgLDRQv (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 4 Dec 2020 12:14:50 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:34878 "EHLO
+        Fri, 4 Dec 2020 12:16:51 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35188 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726539AbgLDROt (ORCPT
+        with ESMTP id S1726173AbgLDRQu (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 4 Dec 2020 12:14:49 -0500
-Received: from mail-lf1-x143.google.com (mail-lf1-x143.google.com [IPv6:2a00:1450:4864:20::143])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA4A2C061A4F
-        for <linux-sparse@vger.kernel.org>; Fri,  4 Dec 2020 09:14:08 -0800 (PST)
-Received: by mail-lf1-x143.google.com with SMTP id s27so8648387lfp.5
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 09:14:08 -0800 (PST)
+        Fri, 4 Dec 2020 12:16:50 -0500
+Received: from mail-ej1-x642.google.com (mail-ej1-x642.google.com [IPv6:2a00:1450:4864:20::642])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 86975C0613D1
+        for <linux-sparse@vger.kernel.org>; Fri,  4 Dec 2020 09:16:10 -0800 (PST)
+Received: by mail-ej1-x642.google.com with SMTP id n26so9742002eju.6
+        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 09:16:10 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=pAg/m20itFUVeaJ0MmGzrM60lSJ3qDXKn9picUexREc=;
-        b=YmHPeLrRs9zH9HHLoQXuCFI+pC3JG+CEZhKCPsE49YX9+2wJDqNsk0l+VhkRaRCI3G
-         1azyieoDHp2bwp7GdJrzpuswSTif8x2J2UjPwcDb7zh3Zu9mUnxA7US/Bn/doLHVJOG2
-         hqdZyl2hc+deKZDv/FE3mRZ0Tq8F4NRRNlzTY=
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=MYT43gApx+COI5Ydq5+Mjbmsfbho5+vkN0i1J3yd8ok=;
+        b=bHz5voalS5QGnD2anxXEHHuZ/im2yCCWHwXoDu7S+RZvDQGPbYD2/sFdqMDw9aykKI
+         XNTRenC+nLsK+qjy3IJk3T21AVjAgRsjEzuiUnaPpi4GCPjjvSquT5aKFmSxjvwvnFUC
+         Hxx9OchoO509eBSpX2CEqga33RLHHGNP/wsAnnPr6zukxx+E2Te6ooZFmg36n1YYk/wI
+         7HbCg+WF+o/vPzPNoIVrnqSIG8ZnMPncKKmL3oD3Ck7+yCRpMQZrqJ0mN+WFYKCjtC7V
+         1ubVAjBo+O2Iqo/k4aIdtPlNgJaVdqrgVQNrdl1+yIiXub2038adNpjdPho0My2XMLcH
+         qXuA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=pAg/m20itFUVeaJ0MmGzrM60lSJ3qDXKn9picUexREc=;
-        b=OL60CMWu3lRk+IOVmZ6T4FrNRiAYWKYNy0ndnQwYqccWv65heasrSdwUf7EVIouX1g
-         5PTz8QNtke79M8PANVZkWp3ubNVSlBSx3ATgeUXnpJseYnMvI40DtuhLp9z63tQY21xL
-         tG0IchYEJqEx2WXXNVbMYOgmXNkRUeK2JqGJE6puWpEh757Qx6QczxK70nf7OMUHiPJW
-         tmas8zcANOsXeJuqMGoQjiSteAjSAXVEyV1qZYPGZMEFR9BzIYWOeA2PakfXNC1xbhUY
-         di+7HdDQlWLwmkFOSIrJZDU947POGC+Llyl+Hw7dU7AUM0h89D3vESO2uX/x+0YqeDAJ
-         jkNg==
-X-Gm-Message-State: AOAM530gsN4xDCgE+eWI3+TJ4KW8pbaic3DXPurUHsfJuylYPgq2TOyY
-        ty337L7zZrBnRNpnWE5be1Y0qP+5TwxwfA==
-X-Google-Smtp-Source: ABdhPJwZJiIxi0pBSF5o9JcRUqrFXTfkaJ7t/Fs6TyjzCYlB/glpByMEfDvGkoZ2dzs/7JwHmvp0ng==
-X-Received: by 2002:a19:7d8:: with SMTP id 207mr3819554lfh.376.1607102047102;
-        Fri, 04 Dec 2020 09:14:07 -0800 (PST)
-Received: from mail-lj1-f179.google.com (mail-lj1-f179.google.com. [209.85.208.179])
-        by smtp.gmail.com with ESMTPSA id a30sm1891515ljd.91.2020.12.04.09.14.06
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Fri, 04 Dec 2020 09:14:06 -0800 (PST)
-Received: by mail-lj1-f179.google.com with SMTP id y7so7415835lji.8
-        for <linux-sparse@vger.kernel.org>; Fri, 04 Dec 2020 09:14:06 -0800 (PST)
-X-Received: by 2002:a2e:7f13:: with SMTP id a19mr4002051ljd.70.1607102045900;
- Fri, 04 Dec 2020 09:14:05 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=MYT43gApx+COI5Ydq5+Mjbmsfbho5+vkN0i1J3yd8ok=;
+        b=cd770jxMH9kMVX3C5pPLbtwD7ccXx+6iGILHGbRjeUAtUj9fIIYlclBXJsmCaEJTEx
+         jVpaEUFuOhLTE/OusJvbWzQ9LKcu/xtgqHbc1wMJ5eIB6pzflkhTmqKB4lpm6Kn/SXvu
+         N2zomXHg2yDpnZnVIV+tBLJzPFGIX4O4BArf7UDDPuteKkfUh0Rf9Gle6FlgMU8KufNg
+         pnv4VqN/Fsm1lFBt3tx5oMELYLLot1Y83WmoPw+Z32vYdl723O9bOmJTIU/f8JXWseG9
+         ANffonpEt9pxN0xH7UXp9kvtHPbTd8PqBAfgUgEDgf2JaziLDDX3eMZMu8ZKOAyv036X
+         wB5w==
+X-Gm-Message-State: AOAM533LzejgPCS00aqzZXbOMj8y/vF+KNx0bMmBY/nPfFwRayIgmAtZ
+        tL/JzG0g2MaK5Js1qzYvEgdb7ukGP54=
+X-Google-Smtp-Source: ABdhPJzXsvZqX9EsPLKwZtnbTUGGSmHBt+U7tZgdAtwlCMq8g+UVBYkU6Xpmumc3qnMTKLjhiy51Mg==
+X-Received: by 2002:a17:907:2718:: with SMTP id w24mr7703648ejk.525.1607102168593;
+        Fri, 04 Dec 2020 09:16:08 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:8183:34c1:3ce4:9984])
+        by smtp.gmail.com with ESMTPSA id p35sm4024188edd.58.2020.12.04.09.16.07
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 04 Dec 2020 09:16:07 -0800 (PST)
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [RFC PATCH 0/2] cse: place common expressions in the Lowest Common Dominator
+Date:   Fri,  4 Dec 2020 18:16:02 +0100
+Message-Id: <20201204171604.69635-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-References: <20201204163315.68538-1-luc.vanoostenryck@gmail.com>
-In-Reply-To: <20201204163315.68538-1-luc.vanoostenryck@gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Fri, 4 Dec 2020 09:13:50 -0800
-X-Gmail-Original-Message-ID: <CAHk-=witmTznTY4oH7KDr7aTufXey17w1fTaTBiMChk+4NUQ1Q@mail.gmail.com>
-Message-ID: <CAHk-=witmTznTY4oH7KDr7aTufXey17w1fTaTBiMChk+4NUQ1Q@mail.gmail.com>
-Subject: Re: [PATCH] experimental: code sinking
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Dec 4, 2020 at 8:34 AM Luc Van Oostenryck
-<luc.vanoostenryck@gmail.com> wrote:
->
-> A lot of the false 'context imbalance' warnings are caused by
-> a potential jump-threading being blocked between 2 conditional
-> branches on the same condition because the second CBR belong
-> to a non-empty BB. Often the offending instructions can be moved
-> to some other BB, sometimes even with some added advantages.
+This series extend the current CSE by using the lowest common dominator
+instead of the more limiting 'common single parent'.
 
-I hope you don't just use the context imbalance as a sign of this
-being a good idea, because a lot of the context imbalances are likely
-real and valid.
+It allows significantly more common expressions to be eliminated.
+However, it has the annoying disadvantage of slightly making worse
+the 'context imbalance' problem. As such, it's not intended to be
+merged as-is.
 
-I do think moving the instruction to the (single) user sounds like a
-good idea in some cases, but I'm a bit worried about doing it quite
-this mindlessly. It can expand on liveness a lot - while the liveness
-of the result of the sunk instruction shrinks, the liveness of the
-sources to the sunk instruction can grow a lot.
+Luc Van Oostenryck (2):
+  flowgraph: add a function to calculate the Lowest Common Denominator
+  cse: place common expressions in the Lowest Common Dominator
 
-That's obviously a non-issue for the use of sparse as an analysis tool
-(and that's clearly the primary use), but I'd still like to think that
-code generation might matter.
+ cse.c       | 38 ++++++++++----------------------------
+ flowgraph.c | 15 +++++++++++++++
+ flowgraph.h |  4 ++++
+ 3 files changed, 29 insertions(+), 28 deletions(-)
 
-So I think this might be better with more heuristics. And explaining
-them. Right now you have one heuristic: you only sink instructions
-from bb's that end with a conditional branch. I'm not entirely sure
-that I understand the reason for that heuristic, it smells a bit
-arbitrary to me (I suspect it was the case you saw when looking at
-examples).
+-- 
+2.29.2
 
-On that note: would also be lovely to actually see examples of what
-this results in - and not necessarily about just the context imbalance
-again.
-
-There might be cases where instruction sinking makes sense even
-outside the "can we empty this bb entirely" issue. Not that I can
-think of any, but I wonder if this could be used to actually shrink
-liveness regions (if both the inputs to the sunk instruction are live
-_anyway_ at the target, then sinking the instruction should actually
-improve liveness in general, for example).
-
-             Linus
