@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BE901C4361B
-	for <linux-sparse@archiver.kernel.org>; Wed,  9 Dec 2020 23:32:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8FD4CC4361B
+	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 13:07:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 72082207D1
-	for <linux-sparse@archiver.kernel.org>; Wed,  9 Dec 2020 23:32:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5C54423E24
+	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 13:07:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728840AbgLIXcb (ORCPT
+        id S2436584AbgLKNHS (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 9 Dec 2020 18:32:31 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35636 "EHLO
+        Fri, 11 Dec 2020 08:07:18 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60080 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728464AbgLIXcY (ORCPT
+        with ESMTP id S2393478AbgLKNHF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 9 Dec 2020 18:32:24 -0500
-Received: from mail-ed1-x541.google.com (mail-ed1-x541.google.com [IPv6:2a00:1450:4864:20::541])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2FA28C0613CF
-        for <linux-sparse@vger.kernel.org>; Wed,  9 Dec 2020 15:31:44 -0800 (PST)
-Received: by mail-ed1-x541.google.com with SMTP id u19so3515508edx.2
-        for <linux-sparse@vger.kernel.org>; Wed, 09 Dec 2020 15:31:44 -0800 (PST)
+        Fri, 11 Dec 2020 08:07:05 -0500
+Received: from mail-ej1-x644.google.com (mail-ej1-x644.google.com [IPv6:2a00:1450:4864:20::644])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8F4ACC0613CF
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 05:06:24 -0800 (PST)
+Received: by mail-ej1-x644.google.com with SMTP id b9so12278309ejy.0
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 05:06:24 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=qSj+9xz0Xuv7H6CNykKmwRnUaXX6E9sJuvBIGVBChpA=;
-        b=hO4KCloDTInlDkjyd/Pwexk2FrwP0EFvXv6lDYeqtYg4R/bHN4iZkTXvGWApNt0dl2
-         dYM8AdXRCyCF5+TxZdEMj6zIzXX4CNGFRmD52P6I1sCDNhh5GNmqcapkuqIIBtXcTzlJ
-         jwZp1pGON5GO0Rdsf9S/tR1rZeAdpHf9bbZ8+OASlHGjrDl9z8Z3qkccxekB8hvK85ch
-         Kn7/D6GzomSlB8beFQqllS+hGL+YYoifeiTLTHBlCGY7KePSOFxbnwoao+ohSV3LrKdv
-         epoipEYNtFJ3K5cjmJop0teI0jKZCvSLsc+TzAeh0TlkwKyaCQF7kcmawSVn9ioY92VH
-         kbVg==
+        bh=agf7baCfcHbCjX+ivHtaYPZtN1jf7IfvzhDVpIQIwzI=;
+        b=hCV4Qlg21RjGIpQVSWlCskj4dLwil5TLjwfGK1+bVW3yjVc7szr+tr1feN6wRLhXVc
+         VApYtIXMweIiq7nZwVk9/xdpZL7MjObklBN+6NqJBRdqu70JpHnzoDX7i75Gz/eY4RVj
+         3B7yQ0YhzsQ5BtGE/gL7mEYvjy55XLHxZHpGCZ/5B/5Z1zyubmIv7j/y9El/fDS6ohBv
+         khst9OXMg14u/oHuRef43dYTl62vT+qOznp0xkKtQVYgWa1Vg9QLWXVJHIEBLNuSywWx
+         hiCp94DMtPols2Iew04dcWoeNsFvKuD/F5+GeY/wzStu3xNTjD+Ji2FjbLKpGHjr9FIV
+         Utxg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=qSj+9xz0Xuv7H6CNykKmwRnUaXX6E9sJuvBIGVBChpA=;
-        b=qJMnVBwpar09F+5S5uGPQWsrCOFTaBEJVUWxOH+R19ay8PTVt4+zkhXsRzBencToma
-         MOy0+0K+PYVIy4SmQNJjA+LklGlGeFhEBOnQBXqh5XrHxmDwdS32Gk3jLhaibGQztuMM
-         ikkSbg2hM00OOis68+ZCyPaYmWIysNb/kfVMAtw4NDkWZI1Lc1tWHoHSF0jJcj2yY4F4
-         lSGZLIiBzumqFIV+qe5c296+DnDh0wRAFD0Kkm3p2ZEoQnp2f3/H6aGDkOsC6Eb0M7bY
-         42lyTlFdTu1GB6+1CE6S8IB0yB2TwFT9FuMc9gLnbzF8zRCYoJv8bu+C+bH0jlNyo9Q2
-         +Uww==
-X-Gm-Message-State: AOAM530R/LPQuLrhiCPhMaYGC26x+az1uZ5nn6/SneOqGQIOnivwc16i
-        9JM5YoF73yvBXOYBoblP3w82bwybAZE=
-X-Google-Smtp-Source: ABdhPJzns+aY3Uhf0EMAibAHTMN7zw4jQ1CX93ffzon/Pzz5gwHnsocZlEJ6MtCC2HHG7eax6jLt+g==
-X-Received: by 2002:aa7:d41a:: with SMTP id z26mr4246066edq.267.1607556702922;
-        Wed, 09 Dec 2020 15:31:42 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f451:8d6a:c585:35fb])
-        by smtp.gmail.com with ESMTPSA id m7sm3038240eds.73.2020.12.09.15.31.41
+        bh=agf7baCfcHbCjX+ivHtaYPZtN1jf7IfvzhDVpIQIwzI=;
+        b=aI/nfTnYrB5ojz2UXuG1F1HgIKJAo1KjwCGp8BTOlKZQLRk2P4hBP/RQIl8A4OH/Qu
+         8+HWmJjxS2NmKrtVc22AUekFKsd0qbeGroYW6NttXrjV63j9qxdRBdLRRl0cgF1/6iQm
+         cqOaO8OKWnakVjwd75WfoBj/L30Yosd5ACg+Gr9icSHKjn+xLxT4ldjxsodV+Gia874h
+         hr7omvXJQd//r16Q4eDTsrlvD8oIDSkmvQtOTlUYMHCuJXKMxvZKwZsPEBgBvDmb4A3p
+         1IgS/DstfVO4ZmuOFpbfCTw9d/PlpNCQYDwhNOadzHTATJLWIcruvOuVjMiL/FVukqea
+         APPw==
+X-Gm-Message-State: AOAM5329uE7nKm/yE2rzRzDirPDwj+8VF1YD5t9IA4TfHIgRs87/PUNt
+        QxlNbQu1d2hpE3gSjM0rVun1lmGBO1I=
+X-Google-Smtp-Source: ABdhPJy8/otf+ZdldoPfqowGycSYka77/Zz4LJyhkXgbXrjxerf+vNftoU4c2HxJ0iwcu0nfehqg8A==
+X-Received: by 2002:a17:906:941a:: with SMTP id q26mr10876146ejx.227.1607691983314;
+        Fri, 11 Dec 2020 05:06:23 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:35e8:5147:5f47:7ab1])
+        by smtp.gmail.com with ESMTPSA id s26sm7360739edc.33.2020.12.11.05.06.21
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 09 Dec 2020 15:31:42 -0800 (PST)
+        Fri, 11 Dec 2020 05:06:22 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] move check_access() to late_warnings()
-Date:   Thu, 10 Dec 2020 00:31:38 +0100
-Message-Id: <20201209233138.76056-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] testsuite: fix parsing of tags used in the testcases
+Date:   Fri, 11 Dec 2020 14:06:19 +0100
+Message-Id: <20201211130619.71317-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -71,91 +71,31 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-check_access() is called at each run of simplify_loads().
+In testcases' tags, if a value contains 'check-' then this
+value will be used as the tagname instead of the value.
 
-However, a bad access can belong to a dead branch and thus a
-bad access warning can be issued for code that is not executed,
-maybe specifically excluded.
-
-So, move check_access() to late_warnings(), where all optimizations
-have been done.
+Fix this by adding a bit more context in the regexp used for parsing these.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c                    |  6 ++++++
- memops.c                       |  3 ---
- validation/bad-check-access0.c | 31 +++++++++++++++++++++++++++++++
- 3 files changed, 37 insertions(+), 3 deletions(-)
- create mode 100644 validation/bad-check-access0.c
+ validation/test-suite | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/linearize.c b/linearize.c
-index 9fecb4b57e43..0250c6bb17ef 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -2532,6 +2532,12 @@ static void late_warnings(struct entrypoint *ep)
- 				continue;
- 			if (insn->tainted)
- 				check_tainted_insn(insn);
-+			switch (insn->opcode) {
-+			case OP_LOAD:
-+				// Check for illegal offsets.
-+				check_access(insn);
-+				break;
-+			}
- 		} END_FOR_EACH_PTR(insn);
- 	} END_FOR_EACH_PTR(bb);
- }
-diff --git a/memops.c b/memops.c
-index d96bd8a9090d..0a1106b0e464 100644
---- a/memops.c
-+++ b/memops.c
-@@ -147,9 +147,6 @@ static void simplify_loads(struct basic_block *bb)
- 			struct pseudo_list *dominators;
- 			unsigned long generation;
+diff --git a/validation/test-suite b/validation/test-suite
+index 6935d40cee51..1b05c75e9f74 100755
+--- a/validation/test-suite
++++ b/validation/test-suite
+@@ -84,8 +84,8 @@ get_tag_value()
+ 	check_assert=""
+ 	check_cpp_if=""
  
--			/* Check for illegal offsets.. */
--			check_access(insn);
--
- 			if (insn->is_volatile)
- 				continue;
+-	lines=$(grep 'check-[a-z-]*' $1 | \
+-		sed -e 's/^.*\(check-[a-z-]*:*\) *\(.*\)$/\1 \2/')
++	lines=$(grep '^ \* check-[a-z-]*' $1 | \
++		sed -e 's/^ \* \(check-[a-z-]*:*\) *\(.*\)$/\1 \2/')
  
-diff --git a/validation/bad-check-access0.c b/validation/bad-check-access0.c
-new file mode 100644
-index 000000000000..3c4c023f2f89
---- /dev/null
-+++ b/validation/bad-check-access0.c
-@@ -0,0 +1,31 @@
-+#define SIZE	2
-+static int buf[SIZE];
-+
-+static inline int swt(int i)
-+{
-+	switch (i) {
-+	case 0 ... (SIZE-1):
-+		return buf[i];
-+	default:
-+		return 0;
-+	}
-+}
-+
-+static int switch_ok(void) { return swt(1); }
-+static int switch_ko(void) { return swt(2); }
-+
-+
-+static inline int cbr(int i, int p)
-+{
-+	if (p)
-+		return buf[i];
-+	else
-+		return 0;
-+}
-+
-+static int branch_ok(int x) { return cbr(1, x != x); }
-+static int branch_ko(int x) { return cbr(2, x != x); }
-+
-+/*
-+ * check-name: bad-check-access0
-+ */
+ 	while read tag val; do
+ 		#echo "-> tag: '$tag'"
 -- 
 2.29.2
 
