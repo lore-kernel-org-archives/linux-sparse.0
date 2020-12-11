@@ -2,100 +2,88 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4644DC4361B
-	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 17:43:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A7E6C4361B
+	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 21:23:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1B63223EF1
-	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 17:43:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DB59F2410A
+	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 21:23:21 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2387512AbgLKQkK (ORCPT
+        id S2394380AbgLKUPK (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 11 Dec 2020 11:40:10 -0500
-Received: from avasout04.plus.net ([212.159.14.19]:35886 "EHLO
-        avasout04.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388177AbgLKQkE (ORCPT
+        Fri, 11 Dec 2020 15:15:10 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41436 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2388123AbgLKUPF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 11 Dec 2020 11:40:04 -0500
-Received: from [10.0.2.15] ([80.189.83.3])
-        by smtp with ESMTPA
-        id nlRrk82NfrXCcnlRskgocM; Fri, 11 Dec 2020 16:39:16 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1607704756; bh=bpHXcSSAMyH6uk32Wmr8xGqYaf3VJSTNOnENDg7cNGQ=;
-        h=Subject:To:References:From:Date:In-Reply-To;
-        b=JXlD9o6hwSQtUvCB21YhKcHTQSPOHHHhqVIQCRhQ2YpF16UG7mwRpx1pz3nqYh3wj
-         /h3cbl8TeM4cBQ+R1yVguoSczJHG6XT/LTOK4X9HvjvEnMj5suLFgjLTfxzicrh66o
-         YMkKLXfWmVWbvrtNqPck5NBZxcw+ZS1un94N5phpQ8Xa8GxSJhYyWNAMQprJ0uiD4l
-         mbRrGD3tBCQ3uI5GQEBzkMLBqKSt4IQf6/lmYPKnacR2fwu3zTOuebNLYaJLGI8i7W
-         NgzN7d5M0hD/gf4iJON/IjvK6q6rQ/13MyNQ0eiVuy790qV7kPZuKPyCXpUz49Ytnj
-         2b78V8jZNJocg==
-X-Clacks-Overhead: "GNU Terry Pratchett"
-X-CM-Score: 0.00
-X-CNFS-Analysis: v=2.3 cv=Q+xJH7+a c=1 sm=1 tr=0
- a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=RokRPllCdvZ1-8MnbB8A:9 a=QEXdDO2ut3YA:10
-X-AUTH: ramsayjones@:2500
+        Fri, 11 Dec 2020 15:15:05 -0500
+Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 576D2C0613CF
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 12:14:25 -0800 (PST)
+Received: by mail-ed1-x543.google.com with SMTP id i24so10632510edj.8
+        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 12:14:25 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=Uli/o6eceoyXB2qiakFjMaGDF66c+5YraeXTkCoYzUo=;
+        b=njWUiLW+U8MpmbS2+01Z6B+stNCXPEPeLnxZV8wTZ3L4dsnC/rfavuUrgOHi4cQYdr
+         Lr6NMiuki4n14AVuaDl5KC+iH3S/Q78+GsON2cESp8eWUt3PhI57K19dC8+IKRhgMqV0
+         5rTOeSkQeTfDSuthLcYMruJ/nhCirG4sIxNlZr4lIqFtHFwXkNhQ9AmKRPg+jts61Tdq
+         lEmlyr8CBdqAdfn5DqUqyffDjYzJXZF8btpXr3o0tqCzYhKpDxUb5mwo81gfMA9MHzha
+         5N8pRCuB0yp8Q8r5C1GtFqSuypJc5I6Am+/zP11iLO+4AZMRjtKh4yofWGmR5BeTysCz
+         IsFw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=Uli/o6eceoyXB2qiakFjMaGDF66c+5YraeXTkCoYzUo=;
+        b=q4dqdf0faTrf1KaDoDhw4OuaNMhn68jewvfU0BMppV14DajSjRpFYAWfPpw+EOLWbZ
+         hEk/3nsUTPrRJIyQW2FVsoyMgq26Dy9J8HFhk9CNVgQQxqenp80+ZTcw7GncfXHWsvUA
+         lJVDMq9/1MYBEG5IIDSppakNTzYZHholWMrDwbrPB0zIeuvxomCF9LAqMuLauM4iZDlb
+         tcKHjzHTHmfHXpooTb5IIJyht/tAImgqdXCYgvw6m06aySWLOFbMA6agHtoBbf8XJKFI
+         iJqs4KTKFFbO0trdwpbfHiFSsOgUm8PZdlEV1uByBPIdWwFOkejx3T6zs+Yl3oKcP/Wm
+         +ndw==
+X-Gm-Message-State: AOAM533NA/6rFTwXXuL/I5NSMD33v3yn0yhabZIeuvTR6sFM0QhCZrpr
+        140Z3trhOV7bumbrQ+COM4PjKzDh58w=
+X-Google-Smtp-Source: ABdhPJwrfwkLuvtr5Cmxn7oNNqSHu4JNVxnrxIyXMKKXCYgt1kbGVDvIQBE2pdAVicHz0JA0pQTqyg==
+X-Received: by 2002:a05:6402:7d7:: with SMTP id u23mr13415460edy.325.1607717664115;
+        Fri, 11 Dec 2020 12:14:24 -0800 (PST)
+Received: from ltop.local ([2a02:a03f:b7fe:f700:5577:141:774:9c4b])
+        by smtp.gmail.com with ESMTPSA id m5sm3967549eja.11.2020.12.11.12.14.22
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Fri, 11 Dec 2020 12:14:23 -0800 (PST)
+Date:   Fri, 11 Dec 2020 21:14:22 +0100
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc:     linux-sparse@vger.kernel.org
 Subject: Re: [PATCH] testsuite: fix parsing of tags used in the testcases
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org
+Message-ID: <20201211201422.meemxz2bx5gqbxuu@ltop.local>
 References: <20201211130619.71317-1-luc.vanoostenryck@gmail.com>
-From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <4176615c-73b8-ff5e-d705-f6a71ea49cab@ramsayjones.plus.com>
-Date:   Fri, 11 Dec 2020 16:39:15 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <4176615c-73b8-ff5e-d705-f6a71ea49cab@ramsayjones.plus.com>
 MIME-Version: 1.0
-In-Reply-To: <20201211130619.71317-1-luc.vanoostenryck@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfBafB9ugynfwWMEaAu7J8MmPS3uYq87xJd88C7UhuC73K6z3jeIXn+qMS8zO1GCM4iRNdw+SP8c8X5DJuMZJTNjlxOOinrUxqzSUo2NQrFt8rV4Xc1+/
- iy1MdcuT747jnHBcTyuV0bw2EuwqpznTqE06VaqoTbA5cbsBp/S+6Dktk+1BxDihdpO/2xHYq9FVow==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <4176615c-73b8-ff5e-d705-f6a71ea49cab@ramsayjones.plus.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-
-
-On 11/12/2020 13:06, Luc Van Oostenryck wrote:
-> In testcases' tags, if a value contains 'check-' then this
-> value will be used as the tagname instead of the value.
+On Fri, Dec 11, 2020 at 04:39:15PM +0000, Ramsay Jones wrote:
 > 
-> Fix this by adding a bit more context in the regexp used for parsing these.
+> I needed to apply this to get the testsuite to pass on tonights
+> 'fetch'. However, my immediate thought was 'what if you had more
+> than one space before/after the '*'?
 > 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  validation/test-suite | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/validation/test-suite b/validation/test-suite
-> index 6935d40cee51..1b05c75e9f74 100755
-> --- a/validation/test-suite
-> +++ b/validation/test-suite
-> @@ -84,8 +84,8 @@ get_tag_value()
->  	check_assert=""
->  	check_cpp_if=""
->  
-> -	lines=$(grep 'check-[a-z-]*' $1 | \
-> -		sed -e 's/^.*\(check-[a-z-]*:*\) *\(.*\)$/\1 \2/')
-> +	lines=$(grep '^ \* check-[a-z-]*' $1 | \
-> +		sed -e 's/^ \* \(check-[a-z-]*:*\) *\(.*\)$/\1 \2/')
->  
->  	while read tag val; do
->  		#echo "-> tag: '$tag'"
-> 
+> It just so happens that I had a couple of 'warning: <file>: test unhandled'
+> after applying the patch (for asm-empty-clobber.c and asm-goto-labels.c)
+> where they had two spaces after the '*', so ... :-D
 
-I needed to apply this to get the testsuite to pass on tonights
-'fetch'. However, my immediate thought was 'what if you had more
-than one space before/after the '*'?
+Yes, I messed up twice here :(
+Thanks for noticing.
 
-It just so happens that I had a couple of 'warning: <file>: test unhandled'
-after applying the patch (for asm-empty-clobber.c and asm-goto-labels.c)
-where they had two spaces after the '*', so ... :-D
-
-ATB,
-Ramsay Jones
+-- Luc
