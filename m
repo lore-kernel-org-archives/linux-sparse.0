@@ -2,88 +2,186 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A7E6C4361B
-	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 21:23:22 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2F027C4361B
+	for <linux-sparse@archiver.kernel.org>; Tue, 15 Dec 2020 18:16:41 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id DB59F2410A
-	for <linux-sparse@archiver.kernel.org>; Fri, 11 Dec 2020 21:23:21 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DD4B622515
+	for <linux-sparse@archiver.kernel.org>; Tue, 15 Dec 2020 18:16:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2394380AbgLKUPK (ORCPT
+        id S1731457AbgLOSQX (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 11 Dec 2020 15:15:10 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41436 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2388123AbgLKUPF (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 11 Dec 2020 15:15:05 -0500
-Received: from mail-ed1-x543.google.com (mail-ed1-x543.google.com [IPv6:2a00:1450:4864:20::543])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 576D2C0613CF
-        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 12:14:25 -0800 (PST)
-Received: by mail-ed1-x543.google.com with SMTP id i24so10632510edj.8
-        for <linux-sparse@vger.kernel.org>; Fri, 11 Dec 2020 12:14:25 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=Uli/o6eceoyXB2qiakFjMaGDF66c+5YraeXTkCoYzUo=;
-        b=njWUiLW+U8MpmbS2+01Z6B+stNCXPEPeLnxZV8wTZ3L4dsnC/rfavuUrgOHi4cQYdr
-         Lr6NMiuki4n14AVuaDl5KC+iH3S/Q78+GsON2cESp8eWUt3PhI57K19dC8+IKRhgMqV0
-         5rTOeSkQeTfDSuthLcYMruJ/nhCirG4sIxNlZr4lIqFtHFwXkNhQ9AmKRPg+jts61Tdq
-         lEmlyr8CBdqAdfn5DqUqyffDjYzJXZF8btpXr3o0tqCzYhKpDxUb5mwo81gfMA9MHzha
-         5N8pRCuB0yp8Q8r5C1GtFqSuypJc5I6Am+/zP11iLO+4AZMRjtKh4yofWGmR5BeTysCz
-         IsFw==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=Uli/o6eceoyXB2qiakFjMaGDF66c+5YraeXTkCoYzUo=;
-        b=q4dqdf0faTrf1KaDoDhw4OuaNMhn68jewvfU0BMppV14DajSjRpFYAWfPpw+EOLWbZ
-         hEk/3nsUTPrRJIyQW2FVsoyMgq26Dy9J8HFhk9CNVgQQxqenp80+ZTcw7GncfXHWsvUA
-         lJVDMq9/1MYBEG5IIDSppakNTzYZHholWMrDwbrPB0zIeuvxomCF9LAqMuLauM4iZDlb
-         tcKHjzHTHmfHXpooTb5IIJyht/tAImgqdXCYgvw6m06aySWLOFbMA6agHtoBbf8XJKFI
-         iJqs4KTKFFbO0trdwpbfHiFSsOgUm8PZdlEV1uByBPIdWwFOkejx3T6zs+Yl3oKcP/Wm
-         +ndw==
-X-Gm-Message-State: AOAM533NA/6rFTwXXuL/I5NSMD33v3yn0yhabZIeuvTR6sFM0QhCZrpr
-        140Z3trhOV7bumbrQ+COM4PjKzDh58w=
-X-Google-Smtp-Source: ABdhPJwrfwkLuvtr5Cmxn7oNNqSHu4JNVxnrxIyXMKKXCYgt1kbGVDvIQBE2pdAVicHz0JA0pQTqyg==
-X-Received: by 2002:a05:6402:7d7:: with SMTP id u23mr13415460edy.325.1607717664115;
-        Fri, 11 Dec 2020 12:14:24 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:5577:141:774:9c4b])
-        by smtp.gmail.com with ESMTPSA id m5sm3967549eja.11.2020.12.11.12.14.22
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 11 Dec 2020 12:14:23 -0800 (PST)
-Date:   Fri, 11 Dec 2020 21:14:22 +0100
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH] testsuite: fix parsing of tags used in the testcases
-Message-ID: <20201211201422.meemxz2bx5gqbxuu@ltop.local>
-References: <20201211130619.71317-1-luc.vanoostenryck@gmail.com>
- <4176615c-73b8-ff5e-d705-f6a71ea49cab@ramsayjones.plus.com>
+        Tue, 15 Dec 2020 13:16:23 -0500
+Received: from mga17.intel.com ([192.55.52.151]:50546 "EHLO mga17.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731124AbgLOSQW (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 15 Dec 2020 13:16:22 -0500
+IronPort-SDR: ePnZqkYDgZvjo6ELoafDone508wfmipAlOSSCdYfU19atIn5S2/QTGfszz8NWed1foYyAwUQDD
+ LLtjiN3f3gEw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9836"; a="154734719"
+X-IronPort-AV: E=Sophos;i="5.78,422,1599548400"; 
+   d="scan'208";a="154734719"
+Received: from orsmga004.jf.intel.com ([10.7.209.38])
+  by fmsmga107.fm.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Dec 2020 10:15:39 -0800
+IronPort-SDR: VykVEpqdMrav/0g0t2yuCFlyvHg6veV+lfgb/ndEg6BuIKEJY/VgqhOP1KlgD0KvJnG73d1z9Z
+ YNnHzzPYkQ3Q==
+X-IronPort-AV: E=Sophos;i="5.78,422,1599548400"; 
+   d="scan'208";a="487980604"
+Received: from jekeller-mobl1.amr.corp.intel.com (HELO [10.209.14.218]) ([10.209.14.218])
+  by orsmga004-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 15 Dec 2020 10:15:38 -0800
+To:     linux-sparse@vger.kernel.org
+From:   Jacob Keller <jacob.e.keller@intel.com>
+Subject: sparse attribute packed on structures
+Organization: Intel Corporation
+Message-ID: <0e8d816a-0849-c761-e0dc-93c3e5674e62@intel.com>
+Date:   Tue, 15 Dec 2020 10:15:35 -0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.5.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <4176615c-73b8-ff5e-d705-f6a71ea49cab@ramsayjones.plus.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Fri, Dec 11, 2020 at 04:39:15PM +0000, Ramsay Jones wrote:
-> 
-> I needed to apply this to get the testsuite to pass on tonights
-> 'fetch'. However, my immediate thought was 'what if you had more
-> than one space before/after the '*'?
-> 
-> It just so happens that I had a couple of 'warning: <file>: test unhandled'
-> after applying the patch (for asm-empty-clobber.c and asm-goto-labels.c)
-> where they had two spaces after the '*', so ... :-D
+Hi,
 
-Yes, I messed up twice here :(
-Thanks for noticing.
+I'm looking into an issue with sparse not calculating the size of a
+packed structure correctly, causing some static assertions to fail due
+to an incorrect size.
 
--- Luc
+With a structure like this:
+
+struct a {
+	uint32_t a;
+	uint8_t b;
+	uint8_t c;
+} __attribute__ ((packed));
+
+The packed attribute doesn't seem to get applied to the whole structure.
+Thus, the sparse sizeof evaluation for this results in 8 bytes (64
+bits), when GCC would produce a structure of size 6 bytes (48 bits).
+
+If I use something instead like this:
+
+struct a {
+	uint32_t a __attribute__ ((packed));
+	uint8_t b __attribute__ ((packed));
+	uint8_t c __attribute__ ((packed));
+} __attribute__ ((packed));
+
+Then the size is calculated correctly.
+
+I saw that there is support in parse.c for parsing attribute packed, but
+it doesn't seem to have a way to propagate from a structure down to its
+members.
+
+I thought it would be relatively straight forward to implement by adding
+a MOD_PACKED, but that doesn't seem to actually get assigned to the
+struct symbol, so when I tried that it didn't work.
+
+I would very much like to help get structure size packing to work properly.
+
+The following diff is what I tried initially, but it doesn't actually
+work as expected. I'm not sure what is wrong, or what is the best method
+to actually get the packed modifier to save into the structure symbol so
+that it can be checked when determining the structure size.
+
+Help would be appreciated.
+
+Thanks,
+Jake
+
+---
+
+diff --git i/parse.c w/parse.c
+index 0b2685707b82..96beae80c300 100644
+--- i/parse.c
++++ w/parse.c
+@@ -1086,13 +1086,6 @@ static struct token *ignore_attribute(struct
+token *token, struct symbol *attr,
+        return token;
+ }
+
+-static struct token *attribute_packed(struct token *token, struct
+symbol *attr, struct decl_state *ctx)
+-{
+-       if (!ctx->ctype.alignment)
+-               ctx->ctype.alignment = 1;
+-       return token;
+-}
+-
+ static struct token *attribute_aligned(struct token *token, struct
+symbol *attr, struct decl_state *ctx)
+ {
+        int alignment = max_alignment;
+@@ -1142,6 +1135,14 @@ static struct token *attribute_bitwise(struct
+token *token, struct symbol *attr,
+        return token;
+ }
+
++static struct token *attribute_packed(struct token *token, struct
+symbol *attr, struct decl_state *ctx)
++{
++       apply_mod(&token->pos, &ctx->ctype.modifiers, MOD_PACKED);
++       if (!ctx->ctype.alignment)
++               ctx->ctype.alignment = 1;
++       return token;
++}
++
+ static struct ident *numerical_address_space(int asn)
+ {
+        char buff[32];
+diff --git i/symbol.c w/symbol.c
+index 1a083fb8432c..6e0d3ba74bd6 100644
+--- i/symbol.c
++++ w/symbol.c
+@@ -88,6 +88,7 @@ struct struct_union_info {
+        unsigned long bit_size;
+        int align_size;
+        char has_flex_array;
++       char is_packed;
+        struct symbol *flex_array;
+ };
+
+@@ -136,7 +137,10 @@ static void lay_out_struct(struct symbol *sym,
+struct struct_union_info *info)
+                info->flex_array = sym;
+        }
+
+-       align_bit_mask = bytes_to_bits(sym->ctype.alignment) - 1;
++       if (info->is_packed)
++               align_bit_mask = bytes_to_bits(1) - 1;
++       else
++               align_bit_mask = bytes_to_bits(sym->ctype.alignment) - 1;
+
+        /*
+         * Bitfields have some very special rules..
+@@ -181,6 +185,8 @@ static struct symbol *
+examine_struct_union_type(struct symbol *sym, int advance
+        void (*fn)(struct symbol *, struct struct_union_info *);
+        struct symbol *member;
+
++       info.is_packed = sym->ctype.modifiers & MOD_PACKED ? 1 : 0;
++
+        fn = advance ? lay_out_struct : lay_out_union;
+        FOR_EACH_PTR(sym->symbol_list, member) {
+                if (member->ctype.base_type == &autotype_ctype) {
+diff --git i/symbol.h w/symbol.h
+index 5c5a7f12affa..172b70257d20 100644
+--- i/symbol.h
++++ w/symbol.h
+@@ -242,7 +242,7 @@ struct symbol {
+
+ #define MOD_GNU_INLINE         0x00010000
+ #define MOD_USERTYPE           0x00020000
+-     // MOD UNUSED             0x00040000
++#define MOD_PACKED             0x00040000
+      // MOD UNUSED             0x00080000
+      // MOD UNUSED             0x00100000
+      // MOD UNUSED             0x00200000
+
