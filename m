@@ -7,127 +7,97 @@ X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
 	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5BD24C4361B
-	for <linux-sparse@archiver.kernel.org>; Wed, 16 Dec 2020 23:52:37 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 680DBC1B0D8
+	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:37:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2941A23730
-	for <linux-sparse@archiver.kernel.org>; Wed, 16 Dec 2020 23:52:37 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4127223719
+	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:37:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730801AbgLPXwh (ORCPT
+        id S1727629AbgLQAhI (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 16 Dec 2020 18:52:37 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42668 "EHLO
+        Wed, 16 Dec 2020 19:37:08 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49482 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726110AbgLPXwg (ORCPT
+        with ESMTP id S1727570AbgLQAhH (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Dec 2020 18:52:36 -0500
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D2F0C061794
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 15:51:56 -0800 (PST)
-Received: by mail-ej1-x636.google.com with SMTP id 6so20642868ejz.5
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 15:51:56 -0800 (PST)
+        Wed, 16 Dec 2020 19:37:07 -0500
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7343C0611CA
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 16:36:00 -0800 (PST)
+Received: by mail-ej1-x632.google.com with SMTP id x16so35401497ejj.7
+        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 16:36:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=RpUv1LwJtr71EFgGhj+Ra240W3N75TVb5/vWlKmCrbw=;
-        b=bMSDJeI/QEJ2EEvn1QiBGo+W0OeMLCmOUGezIr5Av+IKWS/l4QRtYfrecVAqtEkXWx
-         Mmrz49nOgSe8F7/AYRkhsoI4IMOVHlGoT4B1CVATm9WN3TcEWzzhqD1U7gdCSb/+0Tut
-         wu64F3jqmhDdhDuIyZP4OX8m7L+TE8xkfEjrF0zCZPPdLendAmSfb1nU/KIufCYpoprr
-         pnXAhWGa2GcaeoNRI0WvlXncIk3u99YqOw8Hr1x2nqZgI8DQekjXPa8fIkLV6IAgWrIE
-         VL8Ct+USi/NGV1Ib3mBgTg1jRS+hvgkeO/EBThwMm/ACgr+cUsOkfdGrbVkfTX9xAjpD
-         l0CQ==
+        bh=td63KZpe89LyUHK8egmDUgPelCfU1BBbZwUa97WsMI4=;
+        b=rr+ej9+ok866x918vDiUVpByX+3vDoS7EEsrPX1dMWdcIBB0uQivalWUB/uiTYMX4e
+         lF1yQeDYQofcDPI00M0dXV+cPXtP0zfjsPPx+efLMcZHo1bfI0WhJA/1wyRhfyY2PdZk
+         MD0+gLxkmv2n7Wzsm0c3kc7ftKM+iEuAmRQWzK/PtvAw1GZqEwEVSO4vfo9mdm21V5Ub
+         cDCoUbqmKltQzgiqHlXshrxseA+v5589sIOZU9RPyGdhyzp1g0LgUwwNnKDXBJKHL8BT
+         ImJGwinBsdypCSjWw4k9H2IgyXQ+fVWnaDDt1piSlDU/xZPPkeSSa/cCQShd5CuRNc9T
+         aV8Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=RpUv1LwJtr71EFgGhj+Ra240W3N75TVb5/vWlKmCrbw=;
-        b=j2HFXIoMwQ8eQZegwTmiuDIJUs/HTYPfJzsHVu/oVcKJQTnwImen1Lk2YVbRwQp/oG
-         aVn+hagpRfYPNMYjvoZsKiZHSUjfvczKjOjtrS4LOfab/I9JFjCaMz2gfz030gfuKzWO
-         QYYwXQ0+zIyqDfdaBLeqBxo0M4SPT249EjP0wObYbN6vLJDN20W+LISuiLLZ570w7gyx
-         RD8/qyWdqUcfB4z4Ftx+A72vFhXJNmaDWfFgkxJ/9olE19uW8PUbJYUyOIaiYJn0v3Qk
-         GDowtV5Za3jUE/ZKgOdbkWSBlhnjomCIbIUg6QtftlqUaw49OsY/ZMISAdaXBM4aFPA1
-         r5yA==
-X-Gm-Message-State: AOAM533hhV/LyEYQDo35/HoOQvyOzbly2il7nEl8Da/wrvoO9auTwRwD
-        vRIId1CZGuFKN02q/RD2zFLaUYmBbR8=
-X-Google-Smtp-Source: ABdhPJzIc3cKd1vjG7T/VetO34VjtoLdKI1F6wmoZMUUgz3FwU1xzhFsBG2jnK8jE4yhWi3w1zgyeg==
-X-Received: by 2002:a17:906:f894:: with SMTP id lg20mr32742071ejb.348.1608162715105;
-        Wed, 16 Dec 2020 15:51:55 -0800 (PST)
+        bh=td63KZpe89LyUHK8egmDUgPelCfU1BBbZwUa97WsMI4=;
+        b=bFJzw7zZTcMdW0cpyZEalkq4N/ZzoUTa5ZhfptjgRimGkZwPwJZIYM7EvBbrqVWIwB
+         e2Y3HFnkKXvjp/qa9zZ4sfyUoL2klDYjwA4AVcOBFqPvdL6DTO5rcOSPTncsov8Db5KS
+         9A/7Ar7vTZC3ZiAyOSp1AtBjv7rJmg6ONxchE08X1ESxbqU4F3oC7FVDWy78ITnbiGr6
+         h3M+zS6DK1IpqRrsEd9zZftcDqRxaTD184aprqTHKrHPU4TL0OEteTe3YkYGPiaUX2Ag
+         eiUC0wwaKij1jo2ZO8zAdAK4gPmU1JBkLK+zwfV+dkgJuZzwfXNJXfnD6gs8cvxNNhxi
+         SMeg==
+X-Gm-Message-State: AOAM533IvUCNkx75U0g1zdIZ8WPhRNiFkhg9hNCAll9jKffyB4XuCaiD
+        KFgLLXpCdLBerUjxhtpPYrPhEwDeWfw=
+X-Google-Smtp-Source: ABdhPJxMVeBvbnx5gymti6yxJxegBDWIpDktZcu9IX6pLEve6ktFWrRZ8Olee1PshiiPkxQ3ljx9cQ==
+X-Received: by 2002:a17:906:c414:: with SMTP id u20mr7982687ejz.511.1608165359671;
+        Wed, 16 Dec 2020 16:35:59 -0800 (PST)
 Received: from ltop.local ([2a02:a03f:b7fe:f700:30ac:ec9a:2892:f5b7])
-        by smtp.gmail.com with ESMTPSA id by30sm54773edb.15.2020.12.16.15.51.53
+        by smtp.gmail.com with ESMTPSA id t19sm2509001ejc.62.2020.12.16.16.35.58
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Dec 2020 15:51:54 -0800 (PST)
-Date:   Thu, 17 Dec 2020 00:51:52 +0100
+        Wed, 16 Dec 2020 16:35:58 -0800 (PST)
+Date:   Thu, 17 Dec 2020 01:35:57 +0100
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
 Subject: Re: [PATCH] warn when zero-extending a negation
-Message-ID: <20201216235152.6oinwuti3uzvwai5@ltop.local>
+Message-ID: <20201217003557.qpcawxx46cwmvz27@ltop.local>
 References: <CAHk-=wjiC6UejP6xob9BMQy98O6OLGDhy-qDfaFcOJxo90iOFg@mail.gmail.com>
  <20201216222448.2054-1-luc.vanoostenryck@gmail.com>
  <CAHk-=wiWSQgvyKxaVDac+1Fto7_hYCY9Nir8eaPu7dNmV+b=tA@mail.gmail.com>
+ <20201216235152.6oinwuti3uzvwai5@ltop.local>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAHk-=wiWSQgvyKxaVDac+1Fto7_hYCY9Nir8eaPu7dNmV+b=tA@mail.gmail.com>
+In-Reply-To: <20201216235152.6oinwuti3uzvwai5@ltop.local>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Dec 16, 2020 at 02:37:04PM -0800, Linus Torvalds wrote:
-> On Wed, Dec 16, 2020 at 2:25 PM Luc Van Oostenryck
-> <luc.vanoostenryck@gmail.com> wrote:
-> >
-> > I suppose that it is fine for you that I your SoB instead of the
-> > 'Originally-by' I used here?
+On Thu, Dec 17, 2020 at 12:51:52AM +0100, Luc Van Oostenryck wrote:
 > 
-> Either works for me.
-> 
-> Some of the cases I saw (from my very quick look) were because of
-> annoying zero extensions that should have been optimized away.
+> But replacing a trunc + zext by the corresponding masking, very
+> little, if anything is done for such 'mixed-width' expressions.
+> So, I'm even a bit surprised by the not.8 but well ... 
 
-...
- 
-> Zero-extend, and then truncate:
-> 
->   zext.32     %r2 <- (8) %arg1
->   shl.32      %r5 <- $1, %arg2
->   trunc.8     %r6 <- (32) %r5
-> 
-> then do the 'not' in 8 bits, because we did that part ok:
-> 
->    not.8       %r7 <- %r6
-> 
-> and then the zero-extend and truncate thing again:
-> 
->     zext.32     %r9 <- (8) %r7
->     and.32      %r10 <- %r2, %r9
->     trunc.8     %r11 <- (32) %r10
-> 
-> and then the return in 8 bits:
-> 
->     ret.8       %r11
-> 
-> because sparse doesn't do the simplification to just do the shl and
-> and in 8 bits (but sparse *does* do the simplification to do the 'not'
-> in 8 bits).
+This bothered me a bit and kept me awake, so I had to check.
 
-But replacing a trunc + zext by the corresponding masking, very
-little, if anything is done for such 'mixed-width' expressions.
-So, I'm even a bit surprised by the not.8 but well ... 
+I think that the situation is caused by some premature optimization
+for the ~ operator in expression.c:cast_to(). It saves the allocation
+and initialization of one expression but makes things more complicated
+at linearization and simplification. If this is disabled, then the IR
+simplification returns what I was expecting:
+	maskout:
+		zext.32     %r2 <- (8) %arg1
+		shl.32      %r5 <- $1, %arg2
+		not.32      %r6 <- %r5
+		and.32      %r9 <- %r6, $255
+		and.32      %r10 <- %r2, %r9
+		trunc.8     %r11 <- (32) %r10
+		ret.8       %r11
 
-I also confess, that coming from an ARM background, seeing a
-not.8 or a shl.8 seems quite unnatural to me. I would tend to
-force everything to at least the same width as 'int'.
-
-> So the warning comes from the fact that we kept that zero extend
-> around, even though it really wasn't relevant..
-> 
-> I don't know how many of the false positives were due to things like
-> this, but at least a couple were.
-
-Yes, most probably.
-I suppose my (old old) series about bitfield simplification will
-help a little bit here. I'll try to look at this during the holidays.
+and some reassociation patches (coming soon) will simplify away
+the masking with $255 and the trunc.8
 
 -- Luc
