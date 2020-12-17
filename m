@@ -2,102 +2,89 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 680DBC1B0D8
-	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:37:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2052C4361B
+	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:44:08 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4127223719
-	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:37:08 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6FC112376E
+	for <linux-sparse@archiver.kernel.org>; Thu, 17 Dec 2020 00:44:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1727629AbgLQAhI (ORCPT
+        id S1726354AbgLQAoI (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 16 Dec 2020 19:37:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49482 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727570AbgLQAhH (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 16 Dec 2020 19:37:07 -0500
-Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D7343C0611CA
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 16:36:00 -0800 (PST)
-Received: by mail-ej1-x632.google.com with SMTP id x16so35401497ejj.7
-        for <linux-sparse@vger.kernel.org>; Wed, 16 Dec 2020 16:36:00 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=td63KZpe89LyUHK8egmDUgPelCfU1BBbZwUa97WsMI4=;
-        b=rr+ej9+ok866x918vDiUVpByX+3vDoS7EEsrPX1dMWdcIBB0uQivalWUB/uiTYMX4e
-         lF1yQeDYQofcDPI00M0dXV+cPXtP0zfjsPPx+efLMcZHo1bfI0WhJA/1wyRhfyY2PdZk
-         MD0+gLxkmv2n7Wzsm0c3kc7ftKM+iEuAmRQWzK/PtvAw1GZqEwEVSO4vfo9mdm21V5Ub
-         cDCoUbqmKltQzgiqHlXshrxseA+v5589sIOZU9RPyGdhyzp1g0LgUwwNnKDXBJKHL8BT
-         ImJGwinBsdypCSjWw4k9H2IgyXQ+fVWnaDDt1piSlDU/xZPPkeSSa/cCQShd5CuRNc9T
-         aV8Q==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=td63KZpe89LyUHK8egmDUgPelCfU1BBbZwUa97WsMI4=;
-        b=bFJzw7zZTcMdW0cpyZEalkq4N/ZzoUTa5ZhfptjgRimGkZwPwJZIYM7EvBbrqVWIwB
-         e2Y3HFnkKXvjp/qa9zZ4sfyUoL2klDYjwA4AVcOBFqPvdL6DTO5rcOSPTncsov8Db5KS
-         9A/7Ar7vTZC3ZiAyOSp1AtBjv7rJmg6ONxchE08X1ESxbqU4F3oC7FVDWy78ITnbiGr6
-         h3M+zS6DK1IpqRrsEd9zZftcDqRxaTD184aprqTHKrHPU4TL0OEteTe3YkYGPiaUX2Ag
-         eiUC0wwaKij1jo2ZO8zAdAK4gPmU1JBkLK+zwfV+dkgJuZzwfXNJXfnD6gs8cvxNNhxi
-         SMeg==
-X-Gm-Message-State: AOAM533IvUCNkx75U0g1zdIZ8WPhRNiFkhg9hNCAll9jKffyB4XuCaiD
-        KFgLLXpCdLBerUjxhtpPYrPhEwDeWfw=
-X-Google-Smtp-Source: ABdhPJxMVeBvbnx5gymti6yxJxegBDWIpDktZcu9IX6pLEve6ktFWrRZ8Olee1PshiiPkxQ3ljx9cQ==
-X-Received: by 2002:a17:906:c414:: with SMTP id u20mr7982687ejz.511.1608165359671;
-        Wed, 16 Dec 2020 16:35:59 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:30ac:ec9a:2892:f5b7])
-        by smtp.gmail.com with ESMTPSA id t19sm2509001ejc.62.2020.12.16.16.35.58
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 16 Dec 2020 16:35:58 -0800 (PST)
-Date:   Thu, 17 Dec 2020 01:35:57 +0100
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH] warn when zero-extending a negation
-Message-ID: <20201217003557.qpcawxx46cwmvz27@ltop.local>
-References: <CAHk-=wjiC6UejP6xob9BMQy98O6OLGDhy-qDfaFcOJxo90iOFg@mail.gmail.com>
- <20201216222448.2054-1-luc.vanoostenryck@gmail.com>
- <CAHk-=wiWSQgvyKxaVDac+1Fto7_hYCY9Nir8eaPu7dNmV+b=tA@mail.gmail.com>
- <20201216235152.6oinwuti3uzvwai5@ltop.local>
+        Wed, 16 Dec 2020 19:44:08 -0500
+Received: from mga03.intel.com ([134.134.136.65]:42065 "EHLO mga03.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726098AbgLQAoI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 16 Dec 2020 19:44:08 -0500
+IronPort-SDR: csg2SVsaBmf2FL0cE36ZhAY//XJr8wMstIEK7h6+oSI95tM9dky5hbsGn9NGqbZkjpan0dQw1R
+ H0AGNFtfvhvw==
+X-IronPort-AV: E=McAfee;i="6000,8403,9837"; a="175266752"
+X-IronPort-AV: E=Sophos;i="5.78,425,1599548400"; 
+   d="scan'208";a="175266752"
+Received: from orsmga008.jf.intel.com ([10.7.209.65])
+  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Dec 2020 16:43:27 -0800
+IronPort-SDR: iFiVtfGeN3oqC65f9QCGQ8F/Wod7g5wm7+auKjoqpW76LUzrZJHuCMDo0xDjkK+j7oHA+wSRu8
+ DrYK5DQaFc8A==
+X-IronPort-AV: E=Sophos;i="5.78,425,1599548400"; 
+   d="scan'208";a="369435906"
+Received: from jekeller-mobl1.amr.corp.intel.com (HELO [10.252.136.67]) ([10.252.136.67])
+  by orsmga008-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 16 Dec 2020 16:43:27 -0800
+Subject: Re: sparse attribute packed on structures
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     linux-sparse@vger.kernel.org
+References: <0e8d816a-0849-c761-e0dc-93c3e5674e62@intel.com>
+ <20201215205618.scarwvtzzhhtdwvk@ltop.local>
+ <76c27364-e4cb-cdd4-6e55-178dd19c46ba@intel.com>
+ <20201216233021.qcnvgsup7efwanqs@ltop.local>
+From:   Jacob Keller <jacob.e.keller@intel.com>
+Organization: Intel Corporation
+Message-ID: <09a4e340-76d4-9ae3-ffe3-6e44706200ae@intel.com>
+Date:   Wed, 16 Dec 2020 16:43:24 -0800
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
+ Thunderbird/78.5.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20201216235152.6oinwuti3uzvwai5@ltop.local>
+In-Reply-To: <20201216233021.qcnvgsup7efwanqs@ltop.local>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Dec 17, 2020 at 12:51:52AM +0100, Luc Van Oostenryck wrote:
+
+
+On 12/16/2020 3:30 PM, Luc Van Oostenryck wrote:
+> On Tue, Dec 15, 2020 at 03:15:48PM -0800, Jacob Keller wrote:
+>>
+>> I did find one bug, in your step (3), you have a check against
+>> info->packed on symbol.c:162 in lay_out_struct, but nothing ever set the
+>> packed value. I think you just need to initialized info->packed from
+>> sym_packed at the top of examine_struct_union_type, i.e.
 > 
-> But replacing a trunc + zext by the corresponding masking, very
-> little, if anything is done for such 'mixed-width' expressions.
-> So, I'm even a bit surprised by the not.8 but well ... 
+> A yes, I see, thank you. I think it was on purpose that it wasn't
+> yet enabled (things are it fuzzy because the code is ~2 year old)
+> and as I said it's unfinished.
+> 
+> But, with your change, does it handles 'packed' more or less
+> correctly?
+> 
+> -- Luc
+> 
 
-This bothered me a bit and kept me awake, so I had to check.
+Yes. Obviously we're limited in that we no longer check for
+out-of-bounds accesses on bitfields, but it at least produces the
+correct sizes for structures, and avoids the warnings that I was running
+into.
 
-I think that the situation is caused by some premature optimization
-for the ~ operator in expression.c:cast_to(). It saves the allocation
-and initialization of one expression but makes things more complicated
-at linearization and simplification. If this is disabled, then the IR
-simplification returns what I was expecting:
-	maskout:
-		zext.32     %r2 <- (8) %arg1
-		shl.32      %r5 <- $1, %arg2
-		not.32      %r6 <- %r5
-		and.32      %r9 <- %r6, $255
-		and.32      %r10 <- %r2, %r9
-		trunc.8     %r11 <- (32) %r10
-		ret.8       %r11
+Overall, I think the changes in that branch are solid, and look correct
+to me.
 
-and some reassociation patches (coming soon) will simplify away
-the masking with $255 and the trunc.8
+I'm not sure what all the limitations are of having it produce incorrect
+load/store operations that don't work with the packed bitfields.. but at
+least for the code I was checking, it seems to be correct now.
 
--- Luc
+Thanks,
+Jake
