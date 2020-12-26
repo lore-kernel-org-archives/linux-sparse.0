@@ -2,69 +2,68 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF6A0C4332E
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 6922BC4332D
 	for <linux-sparse@archiver.kernel.org>; Sat, 26 Dec 2020 17:53:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C710820809
+	by mail.kernel.org (Postfix) with ESMTP id 4571E217A0
 	for <linux-sparse@archiver.kernel.org>; Sat, 26 Dec 2020 17:53:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726329AbgLZRxW (ORCPT
+        id S1726290AbgLZRxW (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Sat, 26 Dec 2020 12:53:22 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48166 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:48164 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726320AbgLZRxW (ORCPT
+        with ESMTP id S1726320AbgLZRxV (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 26 Dec 2020 12:53:22 -0500
-Received: from mail-wr1-x431.google.com (mail-wr1-x431.google.com [IPv6:2a00:1450:4864:20::431])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7AB41C06179E
-        for <linux-sparse@vger.kernel.org>; Sat, 26 Dec 2020 09:52:09 -0800 (PST)
-Received: by mail-wr1-x431.google.com with SMTP id a12so6660260wrv.8
-        for <linux-sparse@vger.kernel.org>; Sat, 26 Dec 2020 09:52:09 -0800 (PST)
+        Sat, 26 Dec 2020 12:53:21 -0500
+Received: from mail-wm1-x333.google.com (mail-wm1-x333.google.com [IPv6:2a00:1450:4864:20::333])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C27C8C06179C
+        for <linux-sparse@vger.kernel.org>; Sat, 26 Dec 2020 09:52:08 -0800 (PST)
+Received: by mail-wm1-x333.google.com with SMTP id n16so5231964wmc.0
+        for <linux-sparse@vger.kernel.org>; Sat, 26 Dec 2020 09:52:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=gJXiqKN0FincI2RnZabMb03+M1rtkN2yeJaFy6afhDs=;
-        b=A2o41Tsw4DS18nK3p1hMnauxQ2PamIKAKVXixBOEZ3qBYnPGFeaqd3ZgUR+xA/MSWw
-         OzGUYqgTIGi9DrYHmMP3MxCmoUn5qDCeGmf/O6AwRzsAQomdn30xGk6xj37hEJpmdMJg
-         vNCRqG5pFfSXTigs/0oHAX/bWZFQyG81L50FBxu34l3CyfDUAKqqAY0L79K34jNXcpPU
-         XA0xBZQbcbovlMZff3ulOYRIzRw5Y4QLv4qik0eiwgA/n7N9dU0aiiRKqKDyzyFfhaTq
-         Ari089WUz1fkUgofPNQxAastGHW7ZGILd0no7saDJ7bwwaEB474W8hOUC9PZjCVxdUyi
-         rowg==
+        bh=4bXVie8ybNT/p+UjZ1bhJZ/QIq8btroN1ur4QMsVIgo=;
+        b=QbKAH0l4ZEF7zXfdoaXl8NV/Rpng9foXgTo5hWDOJRMoR++0td7UVQLs6viQeUofTu
+         5M4Ys+huaCM0acTLlMEANIXKXB5BlwCI2OY6OBKa4J7H4Q4N+Xan+pAA6FhK9sbMsgzj
+         VohEodHSpKXd7nNWGU482OX8H5pQDQfLn5YKmmHYt2iLLoGmyKvPBqVqfuiUUuf+hnpT
+         Zb62EapW9s4e60zj8blkkeAsS/EBOJFTEmAdy4ZsU5fGcmz4XntO2/6TPOKrB5AyVczE
+         4qZ7Lb4xwfeCToIxqshPeN5M5PVqCoOEXqiGRrCNtiPpjZmiTuvzyJEAGS/yUMpYQcAB
+         LWUw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=gJXiqKN0FincI2RnZabMb03+M1rtkN2yeJaFy6afhDs=;
-        b=aFO4G1qcUsaKbWS5GFu52V7ivha4HxWKUvhvLwbRfHnQGFerj5eFfQCwlNCfWVoC7F
-         LaekC/aPC8jaijCyGCXmknlS77N5BXvPelBPg/wfsGOxfKWOxaDkQGXhHoHweJR/lfOm
-         cA04aH0iksl6PXQkGeJnbRTk8mdL3OoBiIh48vBowq5XtU1L+xjJaafKyKFwABmcmHQV
-         dQaDr6Vs/Mfq9FqXqGbg8vND+eRIXtjrhTQ1WYlz/LbT8Y1W+5aMA/ohggF0zMXVP8o0
-         515uFo5gP5o6W4ayhw5SBYB3eLi1XS0/ivHOlokX2rRNrRFlOxMoXbTh3Am2hy10E8+M
-         pnrg==
-X-Gm-Message-State: AOAM533eW5sxOj+a95LjLomKKPtlLggveHZi0umkGobSGq/3OwGCY+45
-        AkrHZvL+E/Cm/EMaMODo7xDbfkYE9Bw=
-X-Google-Smtp-Source: ABdhPJwCT6edtl5vnKwPz5DbZJ2uPZg208/X1WzPMsriUIFeopNP8NxVR1L5ADgE+ZC4Xoo7tQSJ0Q==
-X-Received: by 2002:a5d:6607:: with SMTP id n7mr42065554wru.206.1609005128291;
-        Sat, 26 Dec 2020 09:52:08 -0800 (PST)
+        bh=4bXVie8ybNT/p+UjZ1bhJZ/QIq8btroN1ur4QMsVIgo=;
+        b=NlwofB0ZXTNCKPNsUlHrMfINsek0i7tEdKHJJHwVNUzE+Q9e1OPRtzc3zugWMQE68r
+         giHUkRQxxWEEXH8BwxqWM1SVaZeCzOq/fZ2gxkTxVC4NXe1izpRMRKYD5lj0GOY1L92k
+         rsOpBTL97mliCON1xB6YySXnv9qhHnyZ5ocg4fcKmXmepzVPq/nzqu9SN4+knGo1Y8hL
+         0IXndQ7k/adnIfKzm7WpHUzbVUXRV5S+C/31d/2mUD9fGTZpveuUon5ayBo47WpcTFOf
+         KckcEWp4RPvh+C8QkD5P2zdoGZE3payylwRz5dt3/1XKloHLYxdNBnv2r5Qbme+W5g+a
+         C3xQ==
+X-Gm-Message-State: AOAM531o4yIDlX74dZalgSdgJp78NVD3Jh4BTGUi+E+79g2WeEXbm+U6
+        s/eyszT37YF68SJmVSxszAzQ+dwMqNo=
+X-Google-Smtp-Source: ABdhPJy0L7TM6kdPHwgdRZ70zglFSgChPwGohimQDPZ9WYSMgtHZCOIZsy4FS1z5BIRHstJsstj79g==
+X-Received: by 2002:a1c:6484:: with SMTP id y126mr13186333wmb.76.1609005127573;
+        Sat, 26 Dec 2020 09:52:07 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:10a5:37c9:8c28:d3e9])
-        by smtp.gmail.com with ESMTPSA id c4sm12780813wmf.19.2020.12.26.09.52.07
+        by smtp.gmail.com with ESMTPSA id c4sm12780813wmf.19.2020.12.26.09.52.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
         Sat, 26 Dec 2020 09:52:07 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         Jacob Keller <jacob.e.keller@intel.com>
-Subject: [PATCH v2 13/16] struct-attr: fix type attribute like 'struct __attr { ... }'
-Date:   Sat, 26 Dec 2020 18:51:26 +0100
-Message-Id: <20201226175129.9621-14-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 12/16] struct-attr: prepare to handle attributes at the end of struct definitions (3)
+Date:   Sat, 26 Dec 2020 18:51:25 +0100
+Message-Id: <20201226175129.9621-13-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
 References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
@@ -74,44 +73,45 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-In a declaration like:
-	struct <some attribute> { ... }
-the attribute belong to the type but is currently handled as belonging
-to the whole declaration.
+Type attributes for struct can be placed either just after the
+keyword 'struct' or after the '}' ending its definition but this
+later case is currently ignored.
 
-Fix this by handling such attributes in a local 'decl_state' and
-applying them once the closing '}' is reached.
-
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Prepare the handling of this by having the 3 following cases in sequence:
+1) a tag is present
+2) no tag present but is followed by an opening brace
+3) neither of these, so it's an error.
 ---
- parse.c | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ parse.c | 11 ++++-------
+ 1 file changed, 4 insertions(+), 7 deletions(-)
 
 diff --git a/parse.c b/parse.c
-index a67d567145d0..5f33ac178a45 100644
+index a90dcf7f7e4a..a67d567145d0 100644
 --- a/parse.c
 +++ b/parse.c
-@@ -719,10 +719,11 @@ static struct token *struct_union_enum_specifier(enum type type,
- 	struct token *token, struct decl_state *ctx,
- 	struct token *(*parse)(struct token *, struct symbol *))
- {
-+	struct decl_state attr = { };
- 	struct symbol *sym;
- 	struct position *repos;
+@@ -747,18 +747,15 @@ static struct token *struct_union_enum_specifier(enum type type,
+ 		if (sym->symbol_list)
+ 			error_die(token->pos, "redefinition of %s", show_typename (sym));
+ 		sym->pos = *repos;
+-		goto end;
+-	}
+-
+-	// private struct/union/enum type
+-	if (!match_op(token, '{')) {
++	} else if (match_op(token, '{')) {
++		// private struct/union/enum type
++		sym = alloc_symbol(token->pos, type);
++	} else {
+ 		sparse_error(token->pos, "expected declaration");
+ 		ctx->ctype.base_type = &bad_ctype;
+ 		return token;
+ 	}
  
--	token = handle_attributes(token, ctx);
-+	token = handle_attributes(token, &attr);
- 	if (token_type(token) == TOKEN_IDENT) {
- 		sym = lookup_symbol(token->ident, NS_STRUCT);
- 		if (!sym ||
-@@ -760,6 +761,7 @@ static struct token *struct_union_enum_specifier(enum type type,
+-	sym = alloc_symbol(token->pos, type);
+-end:
+ 	set_current_scope(sym);		// used by dissect
  	token = parse(token->next, sym);
  	ctx->ctype.base_type = sym;
- 	token =  expect(token, '}', "at end of specifier");
-+	apply_ctype(token->pos, &sym->ctype, &attr.ctype);
- 
- 	// Mark the structure as needing re-examination
- 	sym->examined = 0;
 -- 
 2.29.2
 
