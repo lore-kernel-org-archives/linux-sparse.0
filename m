@@ -2,87 +2,101 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 90FD8C433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A7829C433E0
 	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 09:29:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 52D7020799
+	by mail.kernel.org (Postfix) with ESMTP id 6D5F5207B2
 	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 09:29:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726103AbgL0J2o (ORCPT
+        id S1726104AbgL0J2p (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 27 Dec 2020 04:28:44 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49498 "EHLO
+        Sun, 27 Dec 2020 04:28:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49500 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726019AbgL0J2o (ORCPT
+        with ESMTP id S1726019AbgL0J2p (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 27 Dec 2020 04:28:44 -0500
-Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B70BBC061794
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:03 -0800 (PST)
-Received: by mail-wm1-x335.google.com with SMTP id c124so6960870wma.5
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:03 -0800 (PST)
+        Sun, 27 Dec 2020 04:28:45 -0500
+Received: from mail-wm1-x32c.google.com (mail-wm1-x32c.google.com [IPv6:2a00:1450:4864:20::32c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 945E2C061795
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:04 -0800 (PST)
+Received: by mail-wm1-x32c.google.com with SMTP id n16so5642809wmc.0
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:04 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=HQRZXPqCZ85pX5luD5eiYZf4Um+TYeyRxjmB8Blmqng=;
-        b=HUiuBwDtRQNQ1U8YR3S8D1YVvdjJ0E11pf5wVfcxig//VWH208rq0jFHkArSgSA7BI
-         3XXLRwD4FwS9VvxBPIC8LivXF3w6KAY5E9zU3QSqRFJsBDVJaTfILczCReuQdKYo5QXm
-         vDgYuKoks5EfYxsNGOQuAcD+wchRNhAnxnIPCgjEAr7FupMWxcRJqIseilPGP4kFmq9J
-         R7/Y3GoUGdjwOcs5MOYHgR/IUX3x8jNYvWadGW3HJvXTA2UypavxViIWADYFXaROUiQi
-         6Y65X1YGfHN6RpArI4mU1vr0u1NmuZnT0zt9dB+VIMgJ9mm9ux3SVqEKEWVVPFdHx9aD
-         q5dw==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=2tYiiSUsa92fCCZRs8VNLpkaZ9xFDp3m5JmvUmVDiZY=;
+        b=ZEBWOAJXlsIBTYDqDnUVX9gX256lk4EyjE0aQ3DGO4N+dHdD6nuOstQKDezXqA7UYt
+         K/QExcovssGP1eUKQVhfY9iD7GBAqvyxd/svsuai4gJQPx4x26HrQvZ0x/zR+qxQBgOa
+         Ty9ex4rKHxw9cTX01/0Qi7945KHZ+5ePfgkIMsstVGNYRT5/uPz8oB3RutHnOAOzbSOT
+         XhaJ61D/V2taiGrEt7Fc/SxPqhuJnjzIWY66P4sUCwNDigZI95avBmZ/lyEPcI2G7pgV
+         GqWTqLjsLLhhdblgKFuvgEJVrTLJWbD+SvmyrWAplTod37lQnGmBTs+klRRNJVTZnxuO
+         cdcg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=HQRZXPqCZ85pX5luD5eiYZf4Um+TYeyRxjmB8Blmqng=;
-        b=c2bNRZyE3xcA22r2sXfWsrbMXAX46Gpv6pyDVcYbChShO55sK418OkYMhBFFBbklMW
-         jOtq0iHXu4lls+nClI1aoyWzQ07H8NpWj4Kk8zvI6egM2Ky6syUbR4MCsSSEbfbcGfAX
-         YrTysub7SGk+Cjf08fqXlp8Bi2rS0HG7FT7xhjX7h2ku9emZVBUHd08sfS7B2+3G9UYR
-         ZncJB5LEyYY5OjTQea7h3SwTtfNDT9JAGsRzGbeh1qR/ZtbSA5Puks1uKTzogRZsWTcY
-         KtkGRqit+T3QwU8e3seQZA8Wqa6wgTfc32KXgfDft0yPGIaiRO0j0Abn1G9yPp5I/WgL
-         JP4w==
-X-Gm-Message-State: AOAM533cvNYAWBLF0hMKvARul8zpgi59GuOFEOKtzCnmN3M8i85uwNql
-        zFUB+4PCYIx0gg0RkiXFC53tePsyEqA=
-X-Google-Smtp-Source: ABdhPJyViEO1XfEQ3Vau+y412PDM78tsiDHq+ylXZJ1VV4b1OrDQG8kU9h9FOFjKIsYNsnuU7j9kbQ==
-X-Received: by 2002:a1c:61c3:: with SMTP id v186mr15679587wmb.146.1609061282468;
-        Sun, 27 Dec 2020 01:28:02 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=2tYiiSUsa92fCCZRs8VNLpkaZ9xFDp3m5JmvUmVDiZY=;
+        b=eSUM4n4NwrASFfhkz/+dvI34l9cqewPo0qDkUb47hjudj9VuajKdsZGRbgTztnI1SI
+         cwTH+H6Me0bGdeoTRK38QIqc1/YbVV/sfe3nByjvACDWcNwcN6U1qmIbMfM/7NUVWMdI
+         USElJ/UvDIMVhMAm3Iw4QXY4ieUD0Urh9coGZ6D+5iAunA3zj0RKvmLX9KStDzFbn8cY
+         2cJtirCFmQ8+frGWwlVkxZL9AXee9JMHlKuui76oOxwH9WPX2XHbTtfVaJFkSQM2bJcZ
+         rYU7IdIPb+68NMi9/LcgcayVMcfBO21ebpIryLcjnSJFe3HoEX3CLRYejMIsqWNbq3xQ
+         wHVA==
+X-Gm-Message-State: AOAM531QZrVH4utIUETg01DL2c1wVQ3+bv3z8x31D2w9IWO2cNTAK7SQ
+        O+3yjmA2XYCuyz6Xqsyp+x8pvXRrfik=
+X-Google-Smtp-Source: ABdhPJyyQGiy86w4Ml7Jt7ldlpqUQxTZTO2MmUGgcHWoWKjA8xPiIy9pUCRbfc6wVWE/AyR+9nvnZQ==
+X-Received: by 2002:a7b:c24d:: with SMTP id b13mr15667079wmj.151.1609061283356;
+        Sun, 27 Dec 2020 01:28:03 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:c99c:3949:2fe7:7420])
-        by smtp.gmail.com with ESMTPSA id n8sm49904007wrs.34.2020.12.27.01.28.01
+        by smtp.gmail.com with ESMTPSA id n8sm49904007wrs.34.2020.12.27.01.28.02
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Dec 2020 01:28:01 -0800 (PST)
+        Sun, 27 Dec 2020 01:28:02 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 0/2] fix rem_usage()
-Date:   Sun, 27 Dec 2020 10:27:57 +0100
-Message-Id: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/2] add helper has_definition()
+Date:   Sun, 27 Dec 2020 10:27:58 +0100
+Message-Id: <20201227092759.30999-2-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
+In-Reply-To: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
+References: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-These two patches fix a bug with rem_usage(), after having removed the
-last element of a def-use list, tries to kill the defining instruction
-although only PSEUDO_REGs and PSEUDO_PHIs have one.
+Add he helper has_definition() to check if the pseudo belong to one
+of the pseudo types having a definition: PSEUDO_REG & PSEUDO_PHI.
 
-
-Luc Van Oostenryck (2):
-  add helper has_definition()
-  fix rem_usage()
-
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
  linearize.h | 5 +++++
- simplify.c  | 2 +-
- 2 files changed, 6 insertions(+), 1 deletion(-)
+ 1 file changed, 5 insertions(+)
 
+diff --git a/linearize.h b/linearize.h
+index 2c548d43526f..c5bdd04257a1 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -249,6 +249,11 @@ static inline int has_use_list(pseudo_t p)
+ 	return (p && p->type != PSEUDO_VOID && p->type != PSEUDO_UNDEF && p->type != PSEUDO_VAL);
+ }
+ 
++static inline bool has_definition(pseudo_t p)
++{
++	return p->type == PSEUDO_REG || p->type == PSEUDO_PHI;
++}
++
+ static inline int pseudo_user_list_size(struct pseudo_user_list *list)
+ {
+ 	return ptr_list_size((struct ptr_list *)list);
 -- 
 2.29.2
 
