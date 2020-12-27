@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D3B2C433DB
-	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 10:09:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 36392C433E0
+	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 11:05:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CE53D207CF
-	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 10:09:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EA572224B8
+	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 11:05:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726031AbgL0KJR (ORCPT
+        id S1726072AbgL0LEt (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 27 Dec 2020 05:09:17 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55726 "EHLO
+        Sun, 27 Dec 2020 06:04:49 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:35944 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725841AbgL0KJQ (ORCPT
+        with ESMTP id S1726066AbgL0LEt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 27 Dec 2020 05:09:16 -0500
-Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA45BC061794
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 02:08:35 -0800 (PST)
-Received: by mail-wm1-x332.google.com with SMTP id v14so7019318wml.1
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 02:08:35 -0800 (PST)
+        Sun, 27 Dec 2020 06:04:49 -0500
+Received: from mail-wm1-x32a.google.com (mail-wm1-x32a.google.com [IPv6:2a00:1450:4864:20::32a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7C2ECC061794
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 03:04:08 -0800 (PST)
+Received: by mail-wm1-x32a.google.com with SMTP id g185so6791099wmf.3
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 03:04:08 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=1Kpux7LtnXjnElmtFZEqedHd9obm5A6EC/pj8BsOyn0=;
-        b=AA2vIGTEvqy6rlRZ6bsOac1GdO8qImCGEpUifO5JC0490iVohFadquZPqhafsr+T3j
-         Fbkv3zr4kIck7gFPZrYRh0rbLHKDdDMlS/FaNRp2hIKKvepS3HAFS1H2qaYoqZhaucvc
-         VGn+S30k2xU6VNRxwnyD1vS1Plx5VzvAqRDN2VJ5Ry7sTe+bP7c8GbfHe31VfpNyHpI+
-         Kcmr0KdZZ5u+5nD47JwOrDkJnlU7LxCkXJjtCzzjA6VrDbKauzY9GatTJeA5w/NRuLRA
-         f6ogd2aKEgLze53ADuKHXdQ05cOsVp9ny0GEVFdiZkUNWeQbFdSMugU9t/J01Dgp417X
-         SfyQ==
+        bh=TwsEre0+wy7WGpgCfW0B5sRI88WvSwX0ugiGXs0WJIg=;
+        b=cEYvwSCjWIzj2TrcBysu7yuvure/x14DEVI6lKVlESPJEpenMbOWnTOp3dNg5E2bKu
+         UCwP2iOrZ96zI2Hy9hYcrrPBqDUyMLBZtGkQyRdB8rBvdR1fMGKEPfcUw74FA7gkQaCW
+         U+pXVuk9nbSFT+7LJgvvWNch/3H7/IOld6+uZ/69i4xsjOLCKfhkgY2kru51Lmmtovh5
+         p/YvutNygNK7wKO5B5CnAfuXoW5U1ZI5G6htB/fVI3v5cn67PGwtEint4Lxyi9i5BF3z
+         1EP2UA2gdbbFgozuSJ7i5rKvH4KCwRLWXsO26Raa96142l2+lgC/bW3JyU66JagppsFV
+         VtvQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
          :content-transfer-encoding;
-        bh=1Kpux7LtnXjnElmtFZEqedHd9obm5A6EC/pj8BsOyn0=;
-        b=kQmnlR2k1GqBz30YNimANIiI7USXxXg9fseE3rJkFbgRVpEraOoWwb80ZrxTCcIPgW
-         xUezH/cZjaHY1ugKLtZ1icf2tW3v1FqTsD8q19lPnurYG1SK2ZyibXrWZeOUkUV7Z/tX
-         pkTqLL0ocFa/7pjL+xDnVPwo6uSkhj6vjaHKXwIl+7z4yk3Y4x/dN/fk8eYVnhXBKdwV
-         kqSAPp+8OSz+AOWtrxM03p14IZI5Ur02gPWg18xkAgvnGq9By0mActt3yJXASBtvC2Hw
-         CW6p0kzgNIdHuWk0XOJB/mek8GSHhJY+FliQc6UqFFYKfxo4hhIm6mJv4fROb8f3spNf
-         nHrg==
-X-Gm-Message-State: AOAM532K21El/FdgIaxpgfqryQwslUUQMW2WK6LF2QZoiLlquRrHfYws
-        LkmVeIVr8nTBOEyPyZV58kUH5jtztWA=
-X-Google-Smtp-Source: ABdhPJxaD9QdSHkv91VVyyiCstRRBX6kUOzj+d/4vU4VfT8No/5oXhglC05ZWpHk0l7N/70Tz5Ic/w==
-X-Received: by 2002:a1c:6689:: with SMTP id a131mr15868367wmc.33.1609063713594;
-        Sun, 27 Dec 2020 02:08:33 -0800 (PST)
+        bh=TwsEre0+wy7WGpgCfW0B5sRI88WvSwX0ugiGXs0WJIg=;
+        b=FAJi0rGleLmNzfIqZyxmC4d04qqmCrkiN6CHIjKvNPwAA1XUXc1SiozdldSVHeTEl/
+         B5BWkX88w1KGt4Z2C87Wnf5nM3zcm5P8ZHc9m3wrwpOCa5jWjN3cb5/Zw6xfNX4k9ecG
+         aC2EmG76O9vjvJPkZ+FOkRuvkAm/Kfa3QhRNopuMqBEBCznv+jrsmhoCOe7w22cwB7Uj
+         mZ26uJwp8px5UA1CmKCm+aUPgp6/7wwTFeunakqsUa7mfqIqHa2iElhGcLrKk1Xq5tBt
+         fNKiVF1cAIjQAqfGv+Rmo2hyw2OeH55yjAWhHqBNBhI7rzfWEpwGHY7VNoK/3subGbbN
+         pWcA==
+X-Gm-Message-State: AOAM532SC5WPBfgjHqN4H/LlYdvjyaviv8SSaMWIXkyNYJ6T+cozGo66
+        1M1wDgnGhvuYbK1Cx5mF8ZjktZ3euYs=
+X-Google-Smtp-Source: ABdhPJyErL5SzKuK9OtT/bHSIrTXkW14yJn1RQFT1Iu4wqqyY59g5GOP8rtUMXtfMqg+MRVBA/RoWQ==
+X-Received: by 2002:a1c:df85:: with SMTP id w127mr16331525wmg.166.1609067046235;
+        Sun, 27 Dec 2020 03:04:06 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:c99c:3949:2fe7:7420])
-        by smtp.gmail.com with ESMTPSA id u3sm58128494wre.54.2020.12.27.02.08.32
+        by smtp.gmail.com with ESMTPSA id z2sm16059307wml.23.2020.12.27.03.04.05
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Dec 2020 02:08:32 -0800 (PST)
+        Sun, 27 Dec 2020 03:04:05 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH] shrink struct BB
-Date:   Sun, 27 Dec 2020 11:08:29 +0100
-Message-Id: <20201227100829.33456-1-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] ptrlist: avoid mixing reverse and non-reverse macros
+Date:   Sun, 27 Dec 2020 12:04:01 +0100
+Message-Id: <20201227110401.34501-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
@@ -71,58 +71,119 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Reorganize the members of struct BB, avoiding padding and making better
-use of the union, to shrink its size from 104 to 96 bytes.
+The macros used to iterate the ptrlists exist in two kinds:
+those to iterate forward direction and those to iterate in the
+reverse direction.
+
+Those macros must be used in pair: one for the top of the loop and
+one at the end of the loop. However, if we mix them, for example like:
+	FOR_EACH_PTR(list, var) {
+		...
+	} FOR_EACH_PTR_REVERSE(var);
+
+things will still work for lists with a single block (most of them)
+but will behave strangely and of course wrongly when reaching the
+next block.
+
+So, to avoid future debugging fun, add a unused variable, discarded
+at compile time, but with distinct prefix for each direction. This way,
+mixing the macros will create a warning at compile time.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.h | 12 +++++-------
- ssa.c       |  1 +
- 2 files changed, 6 insertions(+), 7 deletions(-)
+ ptrlist.h | 29 +++++++++++++++++------------
+ 1 file changed, 17 insertions(+), 12 deletions(-)
 
-diff --git a/linearize.h b/linearize.h
-index 2c548d43526f..7093a815312a 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -160,21 +160,19 @@ struct instruction_list;
- struct basic_block {
- 	struct position pos;
- 	unsigned long generation;
--	union {
--		int context;
--		int postorder_nr;	/* postorder number */
--		int dom_level;		/* level in the dominance tree */
--	};
- 	struct entrypoint *ep;
- 	struct basic_block_list *parents; /* sources */
- 	struct basic_block_list *children; /* destinations */
- 	struct instruction_list *insns;	/* Linear list of instructions */
- 	struct basic_block *idom;	/* link to the immediate dominator */
-+	unsigned int nr;		/* unique id for label's names */
-+	int dom_level;			/* level in the dominance tree */
- 	struct basic_block_list *doms;	/* list of BB idominated by this one */
--	struct phi_map *phi_map;
- 	struct pseudo_list *needs, *defines;
- 	union {
--		unsigned int nr;	/* unique id for label's names */
-+		struct phi_map *phi_map;/* needed during SSA conversion */
-+		int postorder_nr;	/* postorder number */
-+		int context;		/* needed during context checking */
- 		void *priv;
- 	};
- };
-diff --git a/ssa.c b/ssa.c
-index a2e27030e4b6..4c86c55c2ec1 100644
---- a/ssa.c
-+++ b/ssa.c
-@@ -387,6 +387,7 @@ void ssa_convert(struct entrypoint *ep)
- 		int nr = bb->nr;
- 		if (nr > last)
- 			last = nr;
-+		bb->phi_map = NULL;
- 	} END_FOR_EACH_PTR(bb);
+diff --git a/ptrlist.h b/ptrlist.h
+index 2411e745ab24..4bf8c709ac08 100644
+--- a/ptrlist.h
++++ b/ptrlist.h
+@@ -89,27 +89,27 @@ extern void __free_ptr_list(struct ptr_list **);
+ 	DO_FINISH(ptr, __head##ptr, __list##ptr, __nr##ptr)
  
- 	processed = sset_init(first, last);
+ #define RECURSE_PTR_REVERSE(ptr, new)					\
+-	DO_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr,		\
++	DO_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##new, \
+ 		   new, __head##new, __list##new, __nr##new, PTR_ENTRY_UNTAG)
+ 
+ 
+ #define FOR_EACH_PTR(head, ptr) \
+-	DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY_NOTAG)
++	DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __name##ptr, PTR_ENTRY_NOTAG)
+ 
+ #define FOR_EACH_PTR_TAG(head, ptr) \
+-	DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY_UNTAG)
++	DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __name##ptr,  PTR_ENTRY_UNTAG)
+ 
+ #define END_FOR_EACH_PTR(ptr) \
+-	DO_END_FOR_EACH(ptr, __head##ptr, __list##ptr, __nr##ptr)
++	DO_END_FOR_EACH(ptr, __head##ptr, __list##ptr, __nr##ptr, __name##ptr)
+ 
+ #define FOR_EACH_PTR_REVERSE(head, ptr) \
+-	DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY_NOTAG)
++	DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##ptr,  PTR_ENTRY_NOTAG)
+ 
+ #define FOR_EACH_PTR_REVERSE_TAG(head, ptr) \
+-	DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, PTR_ENTRY_UNTAG)
++	DO_FOR_EACH_REVERSE(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##ptr, PTR_ENTRY_UNTAG)
+ 
+ #define END_FOR_EACH_PTR_REVERSE(ptr) \
+-	DO_END_FOR_EACH_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr)
++	DO_END_FOR_EACH_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##ptr)
+ 
+ #define THIS_ADDRESS(ptr) \
+ 	DO_THIS_ADDRESS(ptr, __head##ptr, __list##ptr, __nr##ptr)
+@@ -184,9 +184,10 @@ extern void __free_ptr_list(struct ptr_list **);
+ 		VRFY_PTR_LIST(__head); /* Sanity-check nesting */	\
+ 	} while (0)
+ 
+-#define DO_FOR_EACH(head, ptr, __head, __list, __nr, PTR_ENTRY) do {	\
++#define DO_FOR_EACH(head, ptr, __head, __list, __nr, __name, PTR_ENTRY) do {	\
+ 	__typeof__(head) __head = (head);				\
+ 	__typeof__(head) __list = __head;				\
++	__typeof__(head) __name = __head;				\
+ 	int __nr;							\
+ 	if (!__head)							\
+ 		break;							\
+@@ -196,14 +197,16 @@ extern void __free_ptr_list(struct ptr_list **);
+ 			if (__list->rm && !ptr)				\
+ 				continue;				\
+ 
+-#define DO_END_FOR_EACH(ptr, __head, __list, __nr)			\
++#define DO_END_FOR_EACH(ptr, __head, __list, __nr, __name)		\
+ 		}							\
+ 	} while ((__list = __list->next) != __head);			\
++	(void) __name;						\
+ } while (0)
+ 
+-#define DO_FOR_EACH_REVERSE(head, ptr, __head, __list, __nr, PTR_ENTRY) do { \
++#define DO_FOR_EACH_REVERSE(head, ptr, __head, __list, __nr, __name, PTR_ENTRY) do { \
+ 	__typeof__(head) __head = (head);				\
+ 	__typeof__(head) __list = __head;				\
++	__typeof__(head) __name = __head;				\
+ 	int __nr;							\
+ 	if (!head)							\
+ 		break;							\
+@@ -216,15 +219,17 @@ extern void __free_ptr_list(struct ptr_list **);
+ 				continue;				\
+ 
+ 
+-#define DO_END_FOR_EACH_REVERSE(ptr, __head, __list, __nr)		\
++#define DO_END_FOR_EACH_REVERSE(ptr, __head, __list, __nr, __name)	\
+ 		}							\
+ 	} while (__list != __head);					\
++	(void) __name;							\
+ } while (0)
+ 
+-#define DO_REVERSE(ptr, __head, __list, __nr, new, __newhead,		\
++#define DO_REVERSE(ptr, __head, __list, __nr, __name, new, __newhead,	\
+ 		   __newlist, __newnr, PTR_ENTRY) do {			\
+ 	__typeof__(__head) __newhead = __head;				\
+ 	__typeof__(__head) __newlist = __list;				\
++	__typeof__(__head) __name = __list;				\
+ 	int __newnr = __nr;						\
+ 	new = ptr;							\
+ 	goto __inside##new;						\
 -- 
 2.29.2
 
