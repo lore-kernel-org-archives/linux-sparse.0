@@ -8,97 +8,121 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BEC54C433E6
-	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 09:29:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1D3B2C433DB
+	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 10:09:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 87FE2207E2
-	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 09:29:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CE53D207CF
+	for <linux-sparse@archiver.kernel.org>; Sun, 27 Dec 2020 10:09:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726107AbgL0J2q (ORCPT
+        id S1726031AbgL0KJR (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 27 Dec 2020 04:28:46 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49504 "EHLO
+        Sun, 27 Dec 2020 05:09:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55726 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726019AbgL0J2p (ORCPT
+        with ESMTP id S1725841AbgL0KJQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 27 Dec 2020 04:28:45 -0500
-Received: from mail-wr1-x430.google.com (mail-wr1-x430.google.com [IPv6:2a00:1450:4864:20::430])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 840C8C061796
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:05 -0800 (PST)
-Received: by mail-wr1-x430.google.com with SMTP id t30so7889666wrb.0
-        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 01:28:05 -0800 (PST)
+        Sun, 27 Dec 2020 05:09:16 -0500
+Received: from mail-wm1-x332.google.com (mail-wm1-x332.google.com [IPv6:2a00:1450:4864:20::332])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id EA45BC061794
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 02:08:35 -0800 (PST)
+Received: by mail-wm1-x332.google.com with SMTP id v14so7019318wml.1
+        for <linux-sparse@vger.kernel.org>; Sun, 27 Dec 2020 02:08:35 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=O7n4RElj/o9VgPMDmk+wZnxQpcGKXr6GTzzgkPzIvSE=;
-        b=rEWRV6c3NOBqH5spuDTmtYV03H+WvcOhFWbLM7QOHJ3nxbJH+SsrUgC6c5ZKhab0QX
-         6wp/a9T1pp9l2t2E4V+3qBZD52Wdtk8kRanZYJOtLONBbJ8qG0EeLWhw16kmI3st6RwT
-         luh16bCnpByIIZHReapc5bPDGrv8/qzdMDk38TC7GtLMZ9fXTRzPRbngKjytWWbFAEaZ
-         azjWj6DPis2IV/33b6Luc5hyaO/pSXV2CjgTASE07/giX9403K3Wm9N/VLdiEbLPhkEK
-         h8eQXRcIA41sTSpFCpuN5m5PJZCrFi2qrCsutsDg7f08GkqfzLTwa5grz7WaFYYpX30u
-         ysSA==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1Kpux7LtnXjnElmtFZEqedHd9obm5A6EC/pj8BsOyn0=;
+        b=AA2vIGTEvqy6rlRZ6bsOac1GdO8qImCGEpUifO5JC0490iVohFadquZPqhafsr+T3j
+         Fbkv3zr4kIck7gFPZrYRh0rbLHKDdDMlS/FaNRp2hIKKvepS3HAFS1H2qaYoqZhaucvc
+         VGn+S30k2xU6VNRxwnyD1vS1Plx5VzvAqRDN2VJ5Ry7sTe+bP7c8GbfHe31VfpNyHpI+
+         Kcmr0KdZZ5u+5nD47JwOrDkJnlU7LxCkXJjtCzzjA6VrDbKauzY9GatTJeA5w/NRuLRA
+         f6ogd2aKEgLze53ADuKHXdQ05cOsVp9ny0GEVFdiZkUNWeQbFdSMugU9t/J01Dgp417X
+         SfyQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=O7n4RElj/o9VgPMDmk+wZnxQpcGKXr6GTzzgkPzIvSE=;
-        b=HBWO66x7rbUfgfaya4V0LvA1xRnuqbvfZWg/FvnONCgkucINghUL+RwqPtUz57wEWL
-         IWoB07WzHY1Nx/hzfd45EUNFKnNqoBGc6rsmAbfv1q5XEuclGUB36P+Aq/kxvxT1INr0
-         Ko/KyhFf6TPGXOBeyI3s6hibCP1bbrXoW+zLGHRZZm/2/kQF3W4G+73kGctEU75Vk/5l
-         Goz+Y4Q3Ghyvl2phxr4qu74wuudAOktF5iAgSQgY3No5ZRqmC7UEmPxzugoe/O+oxFVm
-         m1S51nS3+5n4sJopxjLTzX6Vb+NNTJ2KQf5wlJajms9toV0BsHznJ9GEsblcKoAropE2
-         hW0w==
-X-Gm-Message-State: AOAM5309+bKacKWHcNbcil8Ow2/2I3oj1VR5EUXIYXQullLu3SwpmtoW
-        0RGpQHkVueMI78+XkZRpjf0SOw2QkQY=
-X-Google-Smtp-Source: ABdhPJxpCdRHYmTRN8w5fcKst4qO29CVqtDLztafJeItFJwpyywVOeUlX0FMQRGhBz+H8g+1ke1Org==
-X-Received: by 2002:adf:f70c:: with SMTP id r12mr45724435wrp.234.1609061284389;
-        Sun, 27 Dec 2020 01:28:04 -0800 (PST)
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1Kpux7LtnXjnElmtFZEqedHd9obm5A6EC/pj8BsOyn0=;
+        b=kQmnlR2k1GqBz30YNimANIiI7USXxXg9fseE3rJkFbgRVpEraOoWwb80ZrxTCcIPgW
+         xUezH/cZjaHY1ugKLtZ1icf2tW3v1FqTsD8q19lPnurYG1SK2ZyibXrWZeOUkUV7Z/tX
+         pkTqLL0ocFa/7pjL+xDnVPwo6uSkhj6vjaHKXwIl+7z4yk3Y4x/dN/fk8eYVnhXBKdwV
+         kqSAPp+8OSz+AOWtrxM03p14IZI5Ur02gPWg18xkAgvnGq9By0mActt3yJXASBtvC2Hw
+         CW6p0kzgNIdHuWk0XOJB/mek8GSHhJY+FliQc6UqFFYKfxo4hhIm6mJv4fROb8f3spNf
+         nHrg==
+X-Gm-Message-State: AOAM532K21El/FdgIaxpgfqryQwslUUQMW2WK6LF2QZoiLlquRrHfYws
+        LkmVeIVr8nTBOEyPyZV58kUH5jtztWA=
+X-Google-Smtp-Source: ABdhPJxaD9QdSHkv91VVyyiCstRRBX6kUOzj+d/4vU4VfT8No/5oXhglC05ZWpHk0l7N/70Tz5Ic/w==
+X-Received: by 2002:a1c:6689:: with SMTP id a131mr15868367wmc.33.1609063713594;
+        Sun, 27 Dec 2020 02:08:33 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:c99c:3949:2fe7:7420])
-        by smtp.gmail.com with ESMTPSA id n8sm49904007wrs.34.2020.12.27.01.28.03
+        by smtp.gmail.com with ESMTPSA id u3sm58128494wre.54.2020.12.27.02.08.32
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 27 Dec 2020 01:28:03 -0800 (PST)
+        Sun, 27 Dec 2020 02:08:32 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/2] fix rem_usage()
-Date:   Sun, 27 Dec 2020 10:27:59 +0100
-Message-Id: <20201227092759.30999-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] shrink struct BB
+Date:   Sun, 27 Dec 2020 11:08:29 +0100
+Message-Id: <20201227100829.33456-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
-In-Reply-To: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
-References: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-rem_usage() is used to remove an element from a def-use chain. Optionally,
-if the chain become empty, the defining instruction can also be killed.
-
-This optional part is currently be done on all pseudos but only those
-having a definition should be concerned.
-
-Fix this by adding a check so that only PSEUDO_REGs and PSEUDO_PHIs are killed.
+Reorganize the members of struct BB, avoiding padding and making better
+use of the union, to shrink its size from 104 to 96 bytes.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ linearize.h | 12 +++++-------
+ ssa.c       |  1 +
+ 2 files changed, 6 insertions(+), 7 deletions(-)
 
-diff --git a/simplify.c b/simplify.c
-index a877b693b610..12482d787189 100644
---- a/simplify.c
-+++ b/simplify.c
-@@ -271,7 +271,7 @@ static inline void rem_usage(pseudo_t p, pseudo_t *usep, int kill)
- {
- 	if (has_use_list(p)) {
- 		delete_pseudo_user_list_entry(&p->users, usep, 1);
--		if (kill && !p->users)
-+		if (kill && !p->users && has_definition(p))
- 			kill_instruction(p->def);
- 	}
- }
+diff --git a/linearize.h b/linearize.h
+index 2c548d43526f..7093a815312a 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -160,21 +160,19 @@ struct instruction_list;
+ struct basic_block {
+ 	struct position pos;
+ 	unsigned long generation;
+-	union {
+-		int context;
+-		int postorder_nr;	/* postorder number */
+-		int dom_level;		/* level in the dominance tree */
+-	};
+ 	struct entrypoint *ep;
+ 	struct basic_block_list *parents; /* sources */
+ 	struct basic_block_list *children; /* destinations */
+ 	struct instruction_list *insns;	/* Linear list of instructions */
+ 	struct basic_block *idom;	/* link to the immediate dominator */
++	unsigned int nr;		/* unique id for label's names */
++	int dom_level;			/* level in the dominance tree */
+ 	struct basic_block_list *doms;	/* list of BB idominated by this one */
+-	struct phi_map *phi_map;
+ 	struct pseudo_list *needs, *defines;
+ 	union {
+-		unsigned int nr;	/* unique id for label's names */
++		struct phi_map *phi_map;/* needed during SSA conversion */
++		int postorder_nr;	/* postorder number */
++		int context;		/* needed during context checking */
+ 		void *priv;
+ 	};
+ };
+diff --git a/ssa.c b/ssa.c
+index a2e27030e4b6..4c86c55c2ec1 100644
+--- a/ssa.c
++++ b/ssa.c
+@@ -387,6 +387,7 @@ void ssa_convert(struct entrypoint *ep)
+ 		int nr = bb->nr;
+ 		if (nr > last)
+ 			last = nr;
++		bb->phi_map = NULL;
+ 	} END_FOR_EACH_PTR(bb);
+ 
+ 	processed = sset_init(first, last);
 -- 
 2.29.2
 
