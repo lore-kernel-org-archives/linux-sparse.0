@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D3B0C43381
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:29:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A24B5C4332B
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:48:02 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4885B208D5
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:29:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7CA8C20659
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:48:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2633593AbgL1Q3R (ORCPT
+        id S2441735AbgL1Qru (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Dec 2020 11:29:17 -0500
-Received: from avasout06.plus.net ([212.159.14.18]:58953 "EHLO
+        Mon, 28 Dec 2020 11:47:50 -0500
+Received: from avasout06.plus.net ([212.159.14.18]:59994 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2633597AbgL1Q3M (ORCPT
+        with ESMTP id S1730001AbgL1Qrt (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 11:29:12 -0500
+        Mon, 28 Dec 2020 11:47:49 -0500
 Received: from [10.0.2.15] ([80.189.83.3])
         by smtp with ESMTPA
-        id tvNgkPdsEhO4HtvNikCtnX; Mon, 28 Dec 2020 16:28:26 +0000
+        id tvfhkPfKahO4HtvfikCua6; Mon, 28 Dec 2020 16:47:02 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609172906; bh=ur+vCMDdPcT2J90JLb84ufFfdF5baeb4+7/ayDftrcU=;
+        t=1609174022; bh=34Fa3l6Nm/JvH5Uqm7025u+jg6ieOV7BWY7+nAri8MI=;
         h=Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=qZUGEw7dDwJPGw02/I/S2zATQiZbZU2U5F9cTObU6JVTvcra+9Jzy87k78xh9xMKu
-         1epjixhvilo7tJ2fAzlaNdxk5+3tOiaf3niTWRxKCsfe9RmYbGSENELjBwAw7F/gZ5
-         TaazzFrF31TBHUaV0VEWllxluV4odJ1Tc79LWcwaP2hfCEjvfwwwENzalCyI/RgUNB
-         ua2q2Gw/kmxMMxBCJEx/6tKTLoQXzpBBshf5hJFejFbBMizPu6ie80ONM4lllpDDu1
-         xs7KHcuTGsiSEejE2SXkFnAPjt1vzoYmXXhA9xSh8/HT8350ur+HYKAutx8Cm3VF4I
-         Cx60d9fab3ggw==
+        b=n6EVijsqrV2D6iK6JyKAGUnG93fFB+AyEM1+qTB5ufv/CphMSWEzeRIRd/P1LdLA1
+         GqtV4kGbYUZkjfaWjsDnudqF4oQKs5zZoQBYmBavpv6/u5Scw8iTX11DlAQADa8eRk
+         A4hILtFEKCPxnV4T6Mof9GUidaOXuZsYBgI81XEES7DE7CBcuW5j+SrRi9n/LW8NXs
+         G08KoTiqY5McKHTxH/N96BcwmKYeSxqHxv4KSw4azq6jja4nsWSQXHTc3l+0+SS9KK
+         /AOl/byUAmRqktHSk15qWFci5bXu9kfcL+b67jZvXlXmZfcUP1F0H3aXKuUyH3QejG
+         /ClDZ+oVqYGbg==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
  a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=L6HFMk6KsOFy63AIlGwA:9 a=QEXdDO2ut3YA:10
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=CDs8lwEEnlRZMw7_yhgA:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH v2 06/16] add testcases for packed bitfields
+Subject: Re: [PATCH v2 08/16] apply_ctype: reverse the order of arguments
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
 Cc:     Jacob Keller <jacob.e.keller@intel.com>
 References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
- <20201226175129.9621-7-luc.vanoostenryck@gmail.com>
+ <20201226175129.9621-9-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <2c40677d-a0a8-7f32-46c3-80dc0385efee@ramsayjones.plus.com>
-Date:   Mon, 28 Dec 2020 16:28:24 +0000
+Message-ID: <3be177c7-b744-2d79-7f9b-935bc22b3db9@ramsayjones.plus.com>
+Date:   Mon, 28 Dec 2020 16:47:01 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201226175129.9621-7-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201226175129.9621-9-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfHrgH6/XzoQ37n9vU+/2ELC645IWBPEPBRr4/Cva2TPwQrs2zr3KZA/RBxDBMoZH3eHz3Mq46s87idX26N/SZ/212TwJvd/MXQPqzqVZxLotMxRjNcWn
- u2W3uqpoa+RqXqeYgQYfD7TvUQiZ6WgJ2U22cRQntQCELAG/zwYh5w4LDw6UZvT9b+ONnNMDbbhtqQ==
+X-CMAE-Envelope: MS4wfOWE2u1Gv4JVA8IM66BhB8kYZ0DloEgp114o8ktdSj7Vnvy+zSkxCFnZ4etOdOp8LB7e2+GbZi2Hvm48IzKoCxjal8AI3HLq/hZur2KQyaFG+as8oSvH
+ ztUMbOeKZO9BLLjtRkHUNTNdiGgoClSNZvMQtXC5k80espqmeCcTPtyhGrA+oqtMhTc8epunO3RH6A==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -64,254 +64,79 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 On 26/12/2020 17:51, Luc Van Oostenryck wrote:
-> Currently, packed bitfields are not handled correctly.
+> apply_ctype()'s argument order is: src, dst (so the reading
+> direction) but the assignment/memcpy() order is much more used:
+> 	dst = src;
+> 	memcpy(dst, src, n);
+> than the order here is confusing.
 > 
-> Add some testcases for them.
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  validation/packed-bitfield0.c | 67 +++++++++++++++++++++++++++++++++++
->  validation/packed-bitfield1.c | 28 +++++++++++++++
->  validation/packed-bitfield2.c | 16 +++++++++
->  validation/packed-bitfield3.c | 29 +++++++++++++++
->  validation/packed-bitfield4.c | 19 ++++++++++
->  validation/packed-bitfield5.c | 21 +++++++++++
->  6 files changed, 180 insertions(+)
->  create mode 100644 validation/packed-bitfield0.c
->  create mode 100644 validation/packed-bitfield1.c
->  create mode 100644 validation/packed-bitfield2.c
->  create mode 100644 validation/packed-bitfield3.c
->  create mode 100644 validation/packed-bitfield4.c
->  create mode 100644 validation/packed-bitfield5.c
-> 
-> diff --git a/validation/packed-bitfield0.c b/validation/packed-bitfield0.c
-> new file mode 100644
-> index 000000000000..907500dedbf0
-> --- /dev/null
-> +++ b/validation/packed-bitfield0.c
-> @@ -0,0 +1,67 @@
-> +#define alignof(X)	__alignof__(X)
-> +#define __packed	__attribute__((packed))
-> +
-> +struct sa {
-> +	int a:7;
-> +	int c:10;
-> +	int b:2;
-> +} __packed;
-> +_Static_assert(alignof(struct sa) == 1, "alignof(struct sa)");
-> +_Static_assert( sizeof(struct sa) == 3,  "sizeof(struct sa)");
-> +
-> +struct __packed sb {
-> +	int a:7;
-> +	int c:10;
-> +	int b:2;
-> +};
-> +_Static_assert(alignof(struct sb) == 1, "alignof(struct sb)");
-> +_Static_assert( sizeof(struct sb) == 3,  "sizeof(struct sb)");
+> So, change its argument order to comply with the memcpy()/
+> assignement order and stop the confusion.
 
-Why 'struct sb'? It is not used in the rest of the test (and is
-identical to 'struct sa').
+Hmm, how about:
 
-> +
-> +
-> +static int get_size(void)
-> +{
-> +	return sizeof(struct sa);
-> +}
-> +
-> +static void chk_align(struct sa sa, struct sa *p)
-> +{
-> +	_Static_assert(alignof(sa) == 1, "alignof(sa)");
-> +	_Static_assert(alignof(*p) == 1, "alignof(*p)");
-> +}
-> +
-> +static int fp0(struct sa *sa)
-> +{
-> +	return sa->c;
-> +}
-> +
-> +static int fpx(struct sa *sa, int idx)
-> +{
-> +	return sa[idx].c;
-> +}
-> +
-> +static int fglobal(void)
-> +{
-> +	extern struct sa g;
-> +	return g.c;
-> +}
-> +
-> +static struct sa l;
-> +static int flocal(void)
-> +{
-> +	return l.c;
-> +}
-> +
-> +
-> +int main(void)
-> +{
-> +	extern void fun(struct sa *);
-> +	struct sa sa = { 0 };
-> +
-> +	fun(&sa);
-> +	return 0;
-> +}
-> +
-> +/*
-> + * check-name: packed-bitfield0
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/packed-bitfield1.c b/validation/packed-bitfield1.c
-> new file mode 100644
-> index 000000000000..208a3dc5127c
-> --- /dev/null
-> +++ b/validation/packed-bitfield1.c
-> @@ -0,0 +1,28 @@
-> +#define __packed	__attribute__((packed))
-> +
-> +struct s {
-> +	unsigned int f0:1;
-> +	unsigned int f1:1;
-> +	unsigned int pad:6;
-> +} __packed;
-> +_Static_assert(sizeof(struct s) == 1,  "sizeof(struct s)");
-> +
-> +extern struct s g;
-> +
-> +static int foo(struct s *ptr)
-> +{
-> +	int f = 0;
-> +
-> +	f += g.f0;
-> +	f += g.f1;
-> +
-> +	f += ptr->f0;
-> +	f += ptr->f1;
-> +
-> +	return f;
-> +}
-> +
-> +/*
-> + * check-name: packed-bitfield1
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/packed-bitfield2.c b/validation/packed-bitfield2.c
-> new file mode 100644
-> index 000000000000..4587ebec5c90
-> --- /dev/null
-> +++ b/validation/packed-bitfield2.c
-> @@ -0,0 +1,16 @@
-> +struct bf2 {
-> +	unsigned p1:2;
-> +	unsigned i1:32;
-> +	unsigned p2:2;
-> +	unsigned s9:9;
-> +	unsigned s9:9;
-> +	unsigned s9:9;
-> +	unsigned b1:1;
-> +} __attribute__((packed));
-> +
-> +_Static_assert(sizeof(struct bf2) == 8);
-> +
-> +/*
-> + * check-name: packed-bitfield2
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/packed-bitfield3.c b/validation/packed-bitfield3.c
-> new file mode 100644
-> index 000000000000..6acff875299f
-> --- /dev/null
-> +++ b/validation/packed-bitfield3.c
-> @@ -0,0 +1,29 @@
-> +#define __packed __attribute__((packed))
-> +
-> +typedef unsigned char   u8;
-> +typedef __UINT16_TYPE__ u16;
-> +typedef __UINT32_TYPE__ u32;
-> +typedef __UINT64_TYPE__ u64;
-> +
-> +struct b {
-> +	u32	a:1;
-> +	u32	b:2;
-> +	u32	c:4;
-> +	u32	d:8;
-> +	u32	e:16;
-> +} __packed;
-> +_Static_assert(__alignof(struct b) == 1);
-> +_Static_assert(   sizeof(struct b) == sizeof(u32));
+"""
+apply_ctype()'s argument order is 'src' then 'dst', which reads as
+copying 'src' to 'dst'. However, assignment, and many library functions
+(eg. memcpy()), use the opposite order for the source and destination
+of a copy operation.
 
-Again '== sizeof(u32)' does not seem useful. (what is it
-trying to say?)
+So, change the argument order of apply_ctype() to mimic the order of
+memcpy()/assignment, to hopefully reduce any potential confusion.
+"""
 
-> +
-> +struct c {
-> +	u8	a;
-> +	u8	b;
-> +	u64	c:48;
-> +} __packed;
-> +_Static_assert(__alignof(struct c) == 1);
-> +_Static_assert(   sizeof(struct c) == sizeof(u64));
+Heh, well that is probably not much better! ;-)
 
-ditto.
+However, what about the (er...) position of the 'pos' argument?
+Should it move to the end?
 
 ATB,
 Ramsay Jones
 
-> +
-> +/*
-> + * check-name: packed-bitfield3
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/packed-bitfield4.c b/validation/packed-bitfield4.c
-> new file mode 100644
-> index 000000000000..0342b2414b6e
-> --- /dev/null
-> +++ b/validation/packed-bitfield4.c
-> @@ -0,0 +1,19 @@
-> +#define __packed __attribute__((packed))
-> +
-> +typedef __UINT32_TYPE__ u32;
-> +
-> +struct s {
-> +	u32	f:24;
-> +} __packed;
-> +_Static_assert(sizeof(struct s) == 3);
-> +
-> +static int ld(struct s *s)
-> +{
-> +	return s->f;
-> +}
-> +
-> +/*
-> + * check-name: packed-bitfield4
-> + * check-description: Is check_access() OK with short packed bitfields?
-> + * check-known-to-fail
-> + */
-> diff --git a/validation/packed-bitfield5.c b/validation/packed-bitfield5.c
-> new file mode 100644
-> index 000000000000..8f44d4c2c277
-> --- /dev/null
-> +++ b/validation/packed-bitfield5.c
-> @@ -0,0 +1,21 @@
-> +#define __packed __attribute__((packed))
-> +
-> +typedef __UINT32_TYPE__ u32;
-> +
-> +struct s {
-> +	u32	a:5;
-> +	u32	f:30;
-> +	u32	z:5;
-> +} __packed;
-> +_Static_assert(sizeof(struct s) == 5);
-> +
-> +static int ld(struct s *s)
-> +{
-> +	return s->f;
-> +}
-> +
-> +/*
-> + * check-name: packed-bitfield5
-> + * check-description: is check_access() OK with 'overlapping' packed bitfields?
-> + * check-known-to-fail
-> + */
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  parse.c | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/parse.c b/parse.c
+> index 402214212d77..f106444f75d8 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -1043,7 +1043,7 @@ static struct token *enum_specifier(struct token *token, struct symbol *sym, str
+>  	return ret;
+>  }
+>  
+> -static void apply_ctype(struct position pos, struct ctype *src, struct ctype *dst);
+> +static void apply_ctype(struct position pos, struct ctype *dst, struct ctype *src);
+>  
+>  static struct token *typeof_specifier(struct token *token, struct symbol *sym, struct decl_state *ctx)
+>  {
+> @@ -1056,7 +1056,7 @@ static struct token *typeof_specifier(struct token *token, struct symbol *sym, s
+>  		struct symbol *sym;
+>  		token = typename(token->next, &sym, NULL);
+>  		ctx->ctype.base_type = sym->ctype.base_type;
+> -		apply_ctype(token->pos, &sym->ctype, &ctx->ctype);
+> +		apply_ctype(token->pos, &ctx->ctype, &sym->ctype);
+>  	} else {
+>  		struct symbol *typeof_sym = alloc_symbol(token->pos, SYM_TYPEOF);
+>  		token = parse_expression(token->next, &typeof_sym->initializer);
+> @@ -1427,7 +1427,7 @@ static struct token *generic_qualifier(struct token *next, struct symbol *sym, s
+>  	return next;
+>  }
+>  
+> -static void apply_ctype(struct position pos, struct ctype *src, struct ctype *dst)
+> +static void apply_ctype(struct position pos, struct ctype *dst, struct ctype *src)
+>  {
+>  	unsigned long mod = src->modifiers;
+>  
+> @@ -1529,7 +1529,7 @@ static struct token *declaration_specifiers(struct token *token, struct decl_sta
+>  				break;
+>  			seen |= Set_S | Set_T;
+>  			ctx->ctype.base_type = s->ctype.base_type;
+> -			apply_ctype(token->pos, &s->ctype, &ctx->ctype);
+> +			apply_ctype(token->pos, &ctx->ctype, &s->ctype);
+>  			token = token->next;
+>  			continue;
+>  		}
 > 
