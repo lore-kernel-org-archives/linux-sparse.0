@@ -8,135 +8,126 @@ X-Spam-Status: No, score=-12.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 444E8C4161F
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 82536C41620
 	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 23:13:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2D8472222A
+	by mail.kernel.org (Postfix) with ESMTP id 6C7E4222F9
 	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 23:13:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1729356AbgL1Wzv (ORCPT
+        id S1730599AbgL1Wzv (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
         Mon, 28 Dec 2020 17:55:51 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58258 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:57658 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729367AbgL1UG3 (ORCPT
+        with ESMTP id S1729356AbgL1UCd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 15:06:29 -0500
-Received: from mail-wm1-x32e.google.com (mail-wm1-x32e.google.com [IPv6:2a00:1450:4864:20::32e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2375AC061793
-        for <linux-sparse@vger.kernel.org>; Mon, 28 Dec 2020 12:05:49 -0800 (PST)
-Received: by mail-wm1-x32e.google.com with SMTP id v14so396941wml.1
-        for <linux-sparse@vger.kernel.org>; Mon, 28 Dec 2020 12:05:49 -0800 (PST)
+        Mon, 28 Dec 2020 15:02:33 -0500
+Received: from mail-wm1-x335.google.com (mail-wm1-x335.google.com [IPv6:2a00:1450:4864:20::335])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AB489C0613D6
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Dec 2020 12:01:52 -0800 (PST)
+Received: by mail-wm1-x335.google.com with SMTP id n16so375852wmc.0
+        for <linux-sparse@vger.kernel.org>; Mon, 28 Dec 2020 12:01:52 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=date:from:to:cc:subject:message-id:references:mime-version
          :content-disposition:in-reply-to;
-        bh=jubLZmNPoYcHIjV9WEye0XKaCN5ETfA9NxMHs2mHC1A=;
-        b=bs15TbxxVcHUODzS6fa/2Kt+EWq0sqEOjq0L80hiVCgVVPyiMxxF/XbkIg+NpaBMDB
-         cnyDqwlnMb4ZtOQ150EoPJ+DrNjsnAd+hVq7NiovBzcdIETtumhmQ5+DHxrOnl7z7ZMh
-         aRMZbRZj+dGXDdiKZ9m143lrq+jumLLnLNCEw8z35q7M0MfxflELh5xhuasPEGQeBRLh
-         3zXFa6LHaBKimi5gIJlzHsIhSoJrSLdGq3YB8KmcajoCn+Y06/UnWszKRkO+4YpdJaTj
-         HBXDQAE4CHqwmo14QRc7a4moQaKI0Fdq11dXkVqavF3E79O2SSBp0v5wA0MoQS58PS5i
-         uSQQ==
+        bh=A1W+++9hwvM/iaHlk0qenVvdQ/1gRCUUL5mFttdH9D8=;
+        b=a+wDmmQaqxW7dgUFfgiVhIgpBWSlw0yCceHv4CCJmscBlyaxplXtPR6AFs67hTCusa
+         3BfjNqrhYyqPCK/DRxba82WgHIXdPQF74FRn+RRXp2qdQqMTBTYJGSDXjUD2sLf5MzwH
+         TRGJlr8ycUEXY6tAwZe8nY/inxU04AeJFSKJGBpqx0z4740ryhuqqwO4NRcnhhh32MGe
+         qdjZpSjzZJtii2ifdluLffIuexG3PCdZtAWoxyuQz+KZ1opfYcXhVq4eR9dKXBFTtizz
+         fpao2pTQ1qxqUynyNhrrTcLrorZzAJ+DQayPRdKup/Tzs7yopm9+NODTOESviPLcFcVM
+         TFlA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
          :mime-version:content-disposition:in-reply-to;
-        bh=jubLZmNPoYcHIjV9WEye0XKaCN5ETfA9NxMHs2mHC1A=;
-        b=tnpQqs44mzPmZv5ZPz82I+5P6KUVda2gTOYZgxeontmBZ6crvWYIL284dDAa01ir+r
-         +arqo4U95X0Fha+Vn+buiRRgv8KACLW1qL6TYNqvU+1hyFmxIuOZXti7WrB7eZb2nq+w
-         5yPsFMGjx5Kuh/b6NI41dt+jRIOYmA1nSAbE7IT1d/Ymq6V4ZqKyVpfl1sLud1ZU/ZO3
-         FMG4RpPhWYJM3lDUJhe0cVaxdAI6+46c8NxjTZ+2CeU2Q1mOwUnhhPgIYc1l6zrg6EiF
-         MjVm/aONmO2BI5Q7UxcDo62CCV40BEBH3hbgCaEIXZGXhRPicjUBra3OQdtuviQa7HX0
-         RQpA==
-X-Gm-Message-State: AOAM5302nTrnWueFtVpLTCE3nNIszy6M6bLFBLxrqSBOuACZP/Ef0tad
-        So8XjdX6Mh/1Z6dJoEZJAao=
-X-Google-Smtp-Source: ABdhPJydiUPDAGCaWWsckut/E4CiPMu1usxtbhNfVNI55XQkjmo1WA10+7CIfCp1RYehho07LsCKkA==
-X-Received: by 2002:a1c:8d:: with SMTP id 135mr423546wma.177.1609185947965;
-        Mon, 28 Dec 2020 12:05:47 -0800 (PST)
+        bh=A1W+++9hwvM/iaHlk0qenVvdQ/1gRCUUL5mFttdH9D8=;
+        b=NKId/jPptqKQTmneXYBR4coxusW8ESRuYOyBtGMyGlEiM6IjtCT7KozAAjqiNRQcCi
+         nM1V1brEqXddkOu+RRH5Fpo+qBgqCdgfVvwMwm0AOMfkqONq7fwJ9RQs+Vm7n76BmMD8
+         r6ljonXhmhC98BcY8R/0vH9ccEEc36rNtOfzoGHS1yjZBo7FsMUW8kWud2iUm57iFysP
+         nH98WsBtKJqTZlocgkArSWy9Y3VtMFfokH0/hB5Q8Bhi6JTzyAY4DFeSZS8Fp5etLnli
+         8zx6bAfw1sJeExJ+CTviLaXl9GS3WL2l37iJ22K7zcB/sCrWFFFZZu00/1ojcjKLAbFS
+         7PtQ==
+X-Gm-Message-State: AOAM532B2FUHSTuPLm73C5WAVsYOY+OtpcvS7apnv8c2q69ZYds6XMZK
+        a7TSKYCrYMjOogRENSTC7fwJE5+jnsE=
+X-Google-Smtp-Source: ABdhPJwsVRwCo+op3xviahFT8sBb4vYVNPg5ON0SgiPDzSO/wX+8rwuahaoQP9hBneDefcLca+ngFQ==
+X-Received: by 2002:a1c:6287:: with SMTP id w129mr421754wmb.71.1609185711556;
+        Mon, 28 Dec 2020 12:01:51 -0800 (PST)
 Received: from ltop.local ([2a02:a03f:b7fe:f700:1cf:be4f:91b8:4ca6])
-        by smtp.gmail.com with ESMTPSA id c4sm460036wmf.19.2020.12.28.12.05.47
+        by smtp.gmail.com with ESMTPSA id j2sm56382213wrt.35.2020.12.28.12.01.50
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 28 Dec 2020 12:05:47 -0800 (PST)
-Date:   Mon, 28 Dec 2020 21:05:46 +0100
+        Mon, 28 Dec 2020 12:01:51 -0800 (PST)
+Date:   Mon, 28 Dec 2020 21:01:50 +0100
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
 Cc:     linux-sparse@vger.kernel.org,
         Jacob Keller <jacob.e.keller@intel.com>
-Subject: Re: [PATCH v2 06/16] add testcases for packed bitfields
-Message-ID: <20201228200546.co4ibljkw6zvp3pe@ltop.local>
+Subject: Re: [PATCH v2 05/16] add testcases for packed structures
+Message-ID: <20201228200150.xvvrfno2e3mol7v4@ltop.local>
 References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
- <20201226175129.9621-7-luc.vanoostenryck@gmail.com>
- <2c40677d-a0a8-7f32-46c3-80dc0385efee@ramsayjones.plus.com>
+ <20201226175129.9621-6-luc.vanoostenryck@gmail.com>
+ <860fe109-6819-ec55-e55f-90812b9f90f2@ramsayjones.plus.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <2c40677d-a0a8-7f32-46c3-80dc0385efee@ramsayjones.plus.com>
+In-Reply-To: <860fe109-6819-ec55-e55f-90812b9f90f2@ramsayjones.plus.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Dec 28, 2020 at 04:28:24PM +0000, Ramsay Jones wrote:
+On Mon, Dec 28, 2020 at 04:17:36PM +0000, Ramsay Jones wrote:
 > 
 > 
 > On 26/12/2020 17:51, Luc Van Oostenryck wrote:
-> > Currently, packed bitfields are not handled correctly.
+> > Currently, packed structs are not handled correctly.
 > > 
 > > Add some testcases for them.
 > > 
 > > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > > ---
-> >  validation/packed-bitfield0.c | 67 +++++++++++++++++++++++++++++++++++
-> >  validation/packed-bitfield1.c | 28 +++++++++++++++
-> >  validation/packed-bitfield2.c | 16 +++++++++
-> >  validation/packed-bitfield3.c | 29 +++++++++++++++
-> >  validation/packed-bitfield4.c | 19 ++++++++++
-> >  validation/packed-bitfield5.c | 21 +++++++++++
-> >  6 files changed, 180 insertions(+)
-> >  create mode 100644 validation/packed-bitfield0.c
-> >  create mode 100644 validation/packed-bitfield1.c
-> >  create mode 100644 validation/packed-bitfield2.c
-> >  create mode 100644 validation/packed-bitfield3.c
-> >  create mode 100644 validation/packed-bitfield4.c
-> >  create mode 100644 validation/packed-bitfield5.c
+> >  validation/packed-deref0.c | 24 ++++++++++++++++++++++++
+> >  validation/packed-struct.c | 33 +++++++++++++++++++++++++++++++++
+> >  2 files changed, 57 insertions(+)
+> >  create mode 100644 validation/packed-deref0.c
+> >  create mode 100644 validation/packed-struct.c
 > > 
-> > diff --git a/validation/packed-bitfield0.c b/validation/packed-bitfield0.c
+> > diff --git a/validation/packed-deref0.c b/validation/packed-deref0.c
 > > new file mode 100644
-> > index 000000000000..907500dedbf0
+> > index 000000000000..865ad68a4f37
 > > --- /dev/null
-> > +++ b/validation/packed-bitfield0.c
-> > @@ -0,0 +1,67 @@
-> > +#define alignof(X)	__alignof__(X)
-> > +#define __packed	__attribute__((packed))
+> > +++ b/validation/packed-deref0.c
+> > @@ -0,0 +1,24 @@
+> > +#define	__packed	__attribute__((packed))
 > > +
-> > +struct sa {
-> > +	int a:7;
-> > +	int c:10;
-> > +	int b:2;
-> > +} __packed;
-> > +_Static_assert(alignof(struct sa) == 1, "alignof(struct sa)");
-> > +_Static_assert( sizeof(struct sa) == 3,  "sizeof(struct sa)");
+> > +typedef struct {
+> > +	__INT8_TYPE__	a;
+> > +	__INT16_TYPE__	b;
+> > +	__INT32_TYPE__	c;
+> > +} __packed obj_t;
 > > +
-> > +struct __packed sb {
-> > +	int a:7;
-> > +	int c:10;
-> > +	int b:2;
-> > +};
-> > +_Static_assert(alignof(struct sb) == 1, "alignof(struct sb)");
-> > +_Static_assert( sizeof(struct sb) == 3,  "sizeof(struct sb)");
-> 
-> Why 'struct sb'? It is not used in the rest of the test (and is
-> identical to 'struct sa').
-
-Good question :)
-I've probably reused some previous file as a kind of template.
- 
-> > diff --git a/validation/packed-bitfield3.c b/validation/packed-bitfield3.c
+> > +_Static_assert(sizeof(obj_t) == 7, "sizeof packed struct");
+> > +
+> > +static void foo(obj_t *ptr, int val)
+> > +{
+> > +	ptr->c = val;
+> > +}
+> > +
+> > +static void bar(obj_t o)
+> > +{
+> > +	foo(&o, 0);
+> > +}
+> > +
+> > +/*
+> > + * check-name: packed-deref0
+> > + * check-known-to-fail
+> > + */
+> > diff --git a/validation/packed-struct.c b/validation/packed-struct.c
 > > new file mode 100644
-> > index 000000000000..6acff875299f
+> > index 000000000000..5039be4d0b45
 > > --- /dev/null
-> > +++ b/validation/packed-bitfield3.c
-> > @@ -0,0 +1,29 @@
+> > +++ b/validation/packed-struct.c
+> > @@ -0,0 +1,33 @@
 > > +#define __packed __attribute__((packed))
 > > +
 > > +typedef unsigned char   u8;
@@ -144,29 +135,15 @@ I've probably reused some previous file as a kind of template.
 > > +typedef __UINT32_TYPE__ u32;
 > > +typedef __UINT64_TYPE__ u64;
 > > +
-> > +struct b {
-> > +	u32	a:1;
-> > +	u32	b:2;
-> > +	u32	c:4;
-> > +	u32	d:8;
-> > +	u32	e:16;
+> > +struct a {
+> > +	u8 a;
+> > +	u8 b;
+> > +	u16 c;
 > > +} __packed;
-> > +_Static_assert(__alignof(struct b) == 1);
-> > +_Static_assert(   sizeof(struct b) == sizeof(u32));
+> > +_Static_assert(__alignof(struct a) == 1, "align struct");
+> > +_Static_assert(   sizeof(struct a) == sizeof(u32), " size struct");
 > 
-> Again '== sizeof(u32)' does not seem useful. (what is it
-> trying to say?)
-> 
-> > +
-> > +struct c {
-> > +	u8	a;
-> > +	u8	b;
-> > +	u64	c:48;
-> > +} __packed;
-> > +_Static_assert(__alignof(struct c) == 1);
-> > +_Static_assert(   sizeof(struct c) == sizeof(u64));
-> 
-> ditto.
+> Hmm, I don't think '== sizeof(u32)' is any better than '== 4'.
 
 Yes, I agree.
 
