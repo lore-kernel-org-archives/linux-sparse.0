@@ -7,56 +7,56 @@ X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5906EC4332D
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:14:47 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7B8DC4332E
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:18:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3935F20867
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:14:47 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8EB59207DE
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:18:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2438134AbgL1QOn (ORCPT
+        id S1733022AbgL1QS1 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Dec 2020 11:14:43 -0500
-Received: from avasout06.plus.net ([212.159.14.18]:57986 "EHLO
+        Mon, 28 Dec 2020 11:18:27 -0500
+Received: from avasout06.plus.net ([212.159.14.18]:58190 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728260AbgL1QOm (ORCPT
+        with ESMTP id S2633017AbgL1QSZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 11:14:42 -0500
+        Mon, 28 Dec 2020 11:18:25 -0500
 Received: from [10.0.2.15] ([80.189.83.3])
         by smtp with ESMTPA
-        id tv9ekPcmFhO4Htv9fkCtEi; Mon, 28 Dec 2020 16:13:56 +0000
+        id tvDEkPczkhO4HtvDGkCtIw; Mon, 28 Dec 2020 16:17:38 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609172036; bh=+/HrqG/VWtrINCJwq7gkxbatqYP2VBg3xJW1GGgRohQ=;
+        t=1609172258; bh=JbUv/8uy5WNBemNmRzHe6ntYBj3A59mYIgveYBVCVbY=;
         h=Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=H0aK8p6g1CCD/A7f5TdU1ay0qyT1AzZyCATEHDkEKJUemoaktRvBN9G0Bw2sxRCmu
-         CEgucbVJhoFHHmQj9SCHa7lpiqEuT5kO/QY77+xzEamb7pkxrpHResPOcbf4u7LXxz
-         F2Q2sOg+ijMxJ6jiRRBBx960MxdWhAO7Abbtpbm3H3xdJEJZ9ZzOyU6uDWgm3WsES5
-         pUKyatkpIS6ciUHiJsAIfX3AWBMmby0xjDC89gf1EIdSZwexWWm0bXujGfqebzasiS
-         dozYY+5F+GRsMPSkhy95FQYlzLL131prjgiwbfEnB4Db5Ate9HqtkXNoLxZoYtiSZe
-         ehpZSojlfyM2w==
+        b=YKn2gc4vFK+GTHzhOWAvnbkjFtf22Kz0jZWIKRKnWS10Pu3gs8wAya+SiX614wark
+         oFRfKF8bU2v4A8QZqlLg/z+vZvaFoBcDUtefuV+LF/0nBMmVgc3orghQo0iU5AAg7L
+         SzTRlcR0T+jAAxMyo4hyZGJXNOKazxhUM0mBCHx3E7D7zpj9B1i4IDbcSkca3mSSH4
+         +qUe8FwyCdDTymuwiCJpJ52j4TVj2HxHWb4aJk81PMVtSV2RSxbJc6sFWFYhC4Vo8f
+         N6nIYrjpe5B37lqJ/x/5KgJBvYBqfTu2DJHr8ClFOfuI+XLGxgIr5lQX8fjZIUuKbI
+         FtsTR0uD9HCPA==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
  a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=7FDETKbVEq9MJ04ngX8A:9 a=QEXdDO2ut3YA:10
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=SCBUOdos1vj2vPOXI-AA:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH v2 04/16] add testcases for type attributes
+Subject: Re: [PATCH v2 05/16] add testcases for packed structures
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
 Cc:     Jacob Keller <jacob.e.keller@intel.com>
 References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
- <20201226175129.9621-5-luc.vanoostenryck@gmail.com>
+ <20201226175129.9621-6-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <f39438bd-3ab3-b827-a488-510b49351eb5@ramsayjones.plus.com>
-Date:   Mon, 28 Dec 2020 16:13:54 +0000
+Message-ID: <860fe109-6819-ec55-e55f-90812b9f90f2@ramsayjones.plus.com>
+Date:   Mon, 28 Dec 2020 16:17:36 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201226175129.9621-5-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201226175129.9621-6-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfLRXqv4acy5L1DDZF+9WApaS++mzSFcilieijidi2vB9OlIcjBAiMcdcb91fu/Ioy7iElokJcTdYtnCDhcocvxR6mIlosmAhaYvHYbtPMyQ8gVDg7uGQ
- +JuDz4/+bS8gz5wU/hq4tON7y+LzeCAKHKSx/RUurku8dXjaMaiAFaIUTRehEv47A1t/L8pcxHRuXQ==
+X-CMAE-Envelope: MS4wfCa5tyJcrZh7UC0lFkOavlOnb5QyDzjxUQBd2dCERHEW/GRX9yamrZJqLCNcLzOYmr5+dGCxlLlEqAs/Kd1DOZWJme4OyqfYmM7zYyIp8gjULC1ZA02b
+ m/ciiepoe2vP6yS5Abh7v44zbZgXvIbGepd/QUJlSdLMfdBUPLwMKHYosx+sKsMqMfPvd0oBdyyenQ==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -64,138 +64,91 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 On 26/12/2020 17:51, Luc Van Oostenryck wrote:
-> Currently, type attributes are not handled correctly.
+> Currently, packed structs are not handled correctly.
 > 
 > Add some testcases for them.
 > 
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  validation/type-attribute-align.c | 20 ++++++++++++++++++
->  validation/type-attribute-as.c    | 34 +++++++++++++++++++++++++++++++
->  validation/type-attribute-mod.c   | 22 ++++++++++++++++++++
->  validation/type-attribute-qual.c  | 12 +++++++++++
->  4 files changed, 88 insertions(+)
->  create mode 100644 validation/type-attribute-align.c
->  create mode 100644 validation/type-attribute-as.c
->  create mode 100644 validation/type-attribute-mod.c
->  create mode 100644 validation/type-attribute-qual.c
+>  validation/packed-deref0.c | 24 ++++++++++++++++++++++++
+>  validation/packed-struct.c | 33 +++++++++++++++++++++++++++++++++
+>  2 files changed, 57 insertions(+)
+>  create mode 100644 validation/packed-deref0.c
+>  create mode 100644 validation/packed-struct.c
 > 
-> diff --git a/validation/type-attribute-align.c b/validation/type-attribute-align.c
+> diff --git a/validation/packed-deref0.c b/validation/packed-deref0.c
 > new file mode 100644
-> index 000000000000..d9358bff8327
+> index 000000000000..865ad68a4f37
 > --- /dev/null
-> +++ b/validation/type-attribute-align.c
-> @@ -0,0 +1,20 @@
-> +#define __aligned(N)	__attribute__((aligned(N)))
-> +#define alignof(X)	__alignof__(X)
+> +++ b/validation/packed-deref0.c
+> @@ -0,0 +1,24 @@
+> +#define	__packed	__attribute__((packed))
 > +
-> +struct s {
-> +	short a, b, c;
-> +} __aligned(2*sizeof(short));
+> +typedef struct {
+> +	__INT8_TYPE__	a;
+> +	__INT16_TYPE__	b;
+> +	__INT32_TYPE__	c;
+> +} __packed obj_t;
 > +
-> +static int fs(void) { return  sizeof(struct s); }
-> +static int fa(void) { return alignof(struct s); }
+> +_Static_assert(sizeof(obj_t) == 7, "sizeof packed struct");
 > +
-> +void main(void)
+> +static void foo(obj_t *ptr, int val)
 > +{
-> +	_Static_assert( sizeof(struct s) == 4 * sizeof(short), "size");
-> +	_Static_assert(alignof(struct s) == 2 * sizeof(short), "alignment");
+> +	ptr->c = val;
+> +}
+> +
+> +static void bar(obj_t o)
+> +{
+> +	foo(&o, 0);
 > +}
 > +
 > +/*
-> + * check-name: type-attribute-align
+> + * check-name: packed-deref0
 > + * check-known-to-fail
 > + */
-> diff --git a/validation/type-attribute-as.c b/validation/type-attribute-as.c
+> diff --git a/validation/packed-struct.c b/validation/packed-struct.c
 > new file mode 100644
-> index 000000000000..b40b4e7dddf5
+> index 000000000000..5039be4d0b45
 > --- /dev/null
-> +++ b/validation/type-attribute-as.c
-> @@ -0,0 +1,34 @@
-> +#define	__as		__attribute__((address_space(__as)))
+> +++ b/validation/packed-struct.c
+> @@ -0,0 +1,33 @@
+> +#define __packed __attribute__((packed))
 > +
-> +struct s {
-> +	int i;
-> +} __as;
+> +typedef unsigned char   u8;
+> +typedef __UINT16_TYPE__ u16;
+> +typedef __UINT32_TYPE__ u32;
+> +typedef __UINT64_TYPE__ u64;
 > +
-> +
-> +extern void use0(void *);
-> +extern void use1(void __as *);
-> +
-> +void main(void)
-> +{
-> +	struct s s;
-> +	int i;
-> +
-> +	use0(&s);	// KO
-> +	use0(&i);	// OK
-> +	use1(&s);	// OK
-> +	use1(&i);	// KO
-> +}
-> +
-> +/*
-> + * check-name: type-attribute-as
-> + * check-known-to-fail
-> + *
-> + * check-error-start
-> +type-attribute-as.c:16:15: warning: incorrect type in argument 1 (different address spaces)
-> +type-attribute-as.c:16:15:    expected void *
-> +type-attribute-as.c:16:15:    got struct s __as *
-> +type-attribute-as.c:19:15: warning: incorrect type in argument 1 (different address spaces)
-> +type-attribute-as.c:19:15:    expected void __as *
-> +type-attribute-as.c:19:15:    got int *
-> + * check-error-end
-> + */
-> diff --git a/validation/type-attribute-mod.c b/validation/type-attribute-mod.c
-> new file mode 100644
-> index 000000000000..0e7b166a4aec
-> --- /dev/null
-> +++ b/validation/type-attribute-mod.c
-> @@ -0,0 +1,22 @@
-> +#define	__noderef	__attribute__((noderef))
-> +
-> +struct s {
-> +	int i;
-> +} __noderef;
-> +
-> +
-> +void main(void)
-> +{
-> +	struct s s;
-> +
-> +	s.i = 0;
-> +}
-> +
-> +/*
-> + * check-name: type-attribute-mod
-> + * check-known-to-fail
-> + *
-> + * check-error-start
-> +type-attribute-mod.c:12:9: warning: dereference of noderef expression
-> + * check-error-end
-> + */
-> diff --git a/validation/type-attribute-qual.c b/validation/type-attribute-qual.c
-> new file mode 100644
-> index 000000000000..ab19a605bda1
-> --- /dev/null
-> +++ b/validation/type-attribute-qual.c
-> @@ -0,0 +1,12 @@
-> +static const struct s {
-> +	int x;
-> +} map[2];
-> +
-> +static void foo(struct s *p, int v)
-> +{
-> +	p->x += v;
-> +}
+> +struct a {
+> +	u8 a;
+> +	u8 b;
+> +	u16 c;
+> +} __packed;
+> +_Static_assert(__alignof(struct a) == 1, "align struct");
+> +_Static_assert(   sizeof(struct a) == sizeof(u32), " size struct");
 
-Hmm, I don't understand what this is testing! :(
+Hmm, I don't think '== sizeof(u32)' is any better than '== 4'.
 
 ATB,
 Ramsay Jones
 
 > +
+> +struct b {
+> +	u32	a;
+> +	u32	b;
+> +} __packed;
+> +_Static_assert(__alignof(struct b) == 1, "align struct");
+> +_Static_assert(   sizeof(struct b) == 8, "size struct");
+> +
+> +struct c {
+> +	u16	a;
+> +	u32	b;
+> +} __packed;
+> +_Static_assert(__alignof(struct c) == 1, "align struct");
+> +_Static_assert(   sizeof(struct c) == 6, "size struct");
+> +
 > +/*
-> + * check-name: type-attribute-qual
+> + * check-name: packed-struct
+> + * check-known-to-fail
 > + */
 > 
