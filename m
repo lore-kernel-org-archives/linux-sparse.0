@@ -7,56 +7,57 @@ X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A24B5C4332B
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:48:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E39B1C433E6
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:55:38 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 7CA8C20659
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:48:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B29E4223E8
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 16:55:38 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2441735AbgL1Qru (ORCPT
+        id S1728227AbgL1QzT (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Dec 2020 11:47:50 -0500
-Received: from avasout06.plus.net ([212.159.14.18]:59994 "EHLO
+        Mon, 28 Dec 2020 11:55:19 -0500
+Received: from avasout06.plus.net ([212.159.14.18]:60445 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730001AbgL1Qrt (ORCPT
+        with ESMTP id S1728207AbgL1QzS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 11:47:49 -0500
+        Mon, 28 Dec 2020 11:55:18 -0500
 Received: from [10.0.2.15] ([80.189.83.3])
         by smtp with ESMTPA
-        id tvfhkPfKahO4HtvfikCua6; Mon, 28 Dec 2020 16:47:02 +0000
+        id tvmwkPfv0hO4HtvmxkCurs; Mon, 28 Dec 2020 16:54:31 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609174022; bh=34Fa3l6Nm/JvH5Uqm7025u+jg6ieOV7BWY7+nAri8MI=;
+        t=1609174471; bh=HvVgluMByYysE6StWE1biSvSOKJ6CLJ/PHtx981axi8=;
         h=Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=n6EVijsqrV2D6iK6JyKAGUnG93fFB+AyEM1+qTB5ufv/CphMSWEzeRIRd/P1LdLA1
-         GqtV4kGbYUZkjfaWjsDnudqF4oQKs5zZoQBYmBavpv6/u5Scw8iTX11DlAQADa8eRk
-         A4hILtFEKCPxnV4T6Mof9GUidaOXuZsYBgI81XEES7DE7CBcuW5j+SrRi9n/LW8NXs
-         G08KoTiqY5McKHTxH/N96BcwmKYeSxqHxv4KSw4azq6jja4nsWSQXHTc3l+0+SS9KK
-         /AOl/byUAmRqktHSk15qWFci5bXu9kfcL+b67jZvXlXmZfcUP1F0H3aXKuUyH3QejG
-         /ClDZ+oVqYGbg==
+        b=kwdXKHNhm50iUGtjRs1HAhplJayEfOC8tYadJjF05SsiMTq6TEt/7P1WinZxrWThd
+         XfveGHS2xWAKIHFj04k9WssKCchUe0Zv6KGsRXeZtxYOD8yWfOV9A8cStxvYN7hDwN
+         BtZKtRbq0tEpmWdfIbNPL0xNRbQ0OiKSNR/KCtfn9e+GNUU6M5Y0TZGkqxLIdmKc6u
+         Y9iccfCXFQxouJf4QDIJLJKp2ANUaIKUOzI6MRUCowS4dRSOy9W7R7JoblXVEuB6zS
+         bXTg8hz2kHgTULCVbJ5/vSA4z9MGBjjDGJsViQLO7eKkIm/b3OJxVp219qZQ7//Z9M
+         6z7a6eFQrNZWw==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
  a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=CDs8lwEEnlRZMw7_yhgA:9 a=QEXdDO2ut3YA:10
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=8vK1M8yhuMJp1CfKBPMA:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH v2 08/16] apply_ctype: reverse the order of arguments
+Subject: Re: [PATCH v2 10/16] struct-attr: prepare to handle attributes at the
+ end of struct definitions (1)
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
 Cc:     Jacob Keller <jacob.e.keller@intel.com>
 References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
- <20201226175129.9621-9-luc.vanoostenryck@gmail.com>
+ <20201226175129.9621-11-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <3be177c7-b744-2d79-7f9b-935bc22b3db9@ramsayjones.plus.com>
-Date:   Mon, 28 Dec 2020 16:47:01 +0000
+Message-ID: <d15f0dbe-4645-6050-f995-7c815e86f8c0@ramsayjones.plus.com>
+Date:   Mon, 28 Dec 2020 16:54:30 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201226175129.9621-9-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201226175129.9621-11-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfOWE2u1Gv4JVA8IM66BhB8kYZ0DloEgp114o8ktdSj7Vnvy+zSkxCFnZ4etOdOp8LB7e2+GbZi2Hvm48IzKoCxjal8AI3HLq/hZur2KQyaFG+as8oSvH
- ztUMbOeKZO9BLLjtRkHUNTNdiGgoClSNZvMQtXC5k80espqmeCcTPtyhGrA+oqtMhTc8epunO3RH6A==
+X-CMAE-Envelope: MS4wfLXGGn2Ar7X5FdK0fg+K91kxmCnExDnAj/CNYNbr/DyZcR7KM3zv9YypT61xBtegb2Vz/M0yDeruGqrcXabRhTkAS4VirQ+o31jbmYfvxdqO4JuuFckL
+ hkYvuvpULWQRKBWA/WZbb2dTyiHI15zGnlgINuAu5NyQ/nWKJzwhm10iewSMhzMMGbmT9FIJcFek1A==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -64,79 +65,75 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 On 26/12/2020 17:51, Luc Van Oostenryck wrote:
-> apply_ctype()'s argument order is: src, dst (so the reading
-> direction) but the assignment/memcpy() order is much more used:
-> 	dst = src;
-> 	memcpy(dst, src, n);
-> than the order here is confusing.
+> Type attributes for struct can be placed either just after the
+> keyword 'struct' or after the '}' ending its definition but this
+> later case is currently ignored.
 > 
-> So, change its argument order to comply with the memcpy()/
-> assignement order and stop the confusion.
+> Prepare the handling of this by factoring the code common to both
+> cases in a single place.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  parse.c                        | 11 +++++------
+>  validation/parsing/enum-attr.c |  4 ++--
+>  2 files changed, 7 insertions(+), 8 deletions(-)
+> 
+> diff --git a/parse.c b/parse.c
+> index d6343f0e48bf..99d810910dab 100644
+> --- a/parse.c
+> +++ b/parse.c
+> @@ -745,12 +745,7 @@ static struct token *struct_union_enum_specifier(enum type type,
+>  			if (sym->symbol_list)
+>  				error_die(token->pos, "redefinition of %s", show_typename (sym));
+>  			sym->pos = *repos;
+> -			token = parse(token->next, sym);
+> -			token = expect(token, '}', "at end of struct-union-enum-specifier");
+> -
+> -			// Mark the structure as needing re-examination
+> -			sym->examined = 0;
+> -			sym->endpos = token->pos;
+> +			goto end;
+>  		}
+>  		return token;
+>  	}
+> @@ -763,10 +758,14 @@ static struct token *struct_union_enum_specifier(enum type type,
+>  	}
+>  
+>  	sym = alloc_symbol(token->pos, type);
+> +end:
+>  	set_current_scope(sym);		// used by dissect
+>  	token = parse(token->next, sym);
+>  	ctx->ctype.base_type = sym;
+>  	token =  expect(token, '}', "at end of specifier");
+> +
+> +	// Mark the structure as needing re-examination
+> +	sym->examined = 0;
+>  	sym->endpos = token->pos;
 
-Hmm, how about:
-
-"""
-apply_ctype()'s argument order is 'src' then 'dst', which reads as
-copying 'src' to 'dst'. However, assignment, and many library functions
-(eg. memcpy()), use the opposite order for the source and destination
-of a copy operation.
-
-So, change the argument order of apply_ctype() to mimic the order of
-memcpy()/assignment, to hopefully reduce any potential confusion.
-"""
-
-Heh, well that is probably not much better! ;-)
-
-However, what about the (er...) position of the 'pos' argument?
-Should it move to the end?
+Hmm, this is not a simple 1:1 code movement.
+Is the 'set_current_scope(sym);' or 'ctx->ctype.base_type = sym;'
+relevant to this change? It is not mentioned in the commit
+message (and I can't tell just looking at the patch text).
 
 ATB,
 Ramsay Jones
 
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  parse.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/parse.c b/parse.c
-> index 402214212d77..f106444f75d8 100644
-> --- a/parse.c
-> +++ b/parse.c
-> @@ -1043,7 +1043,7 @@ static struct token *enum_specifier(struct token *token, struct symbol *sym, str
->  	return ret;
->  }
 >  
-> -static void apply_ctype(struct position pos, struct ctype *src, struct ctype *dst);
-> +static void apply_ctype(struct position pos, struct ctype *dst, struct ctype *src);
->  
->  static struct token *typeof_specifier(struct token *token, struct symbol *sym, struct decl_state *ctx)
->  {
-> @@ -1056,7 +1056,7 @@ static struct token *typeof_specifier(struct token *token, struct symbol *sym, s
->  		struct symbol *sym;
->  		token = typename(token->next, &sym, NULL);
->  		ctx->ctype.base_type = sym->ctype.base_type;
-> -		apply_ctype(token->pos, &sym->ctype, &ctx->ctype);
-> +		apply_ctype(token->pos, &ctx->ctype, &sym->ctype);
->  	} else {
->  		struct symbol *typeof_sym = alloc_symbol(token->pos, SYM_TYPEOF);
->  		token = parse_expression(token->next, &typeof_sym->initializer);
-> @@ -1427,7 +1427,7 @@ static struct token *generic_qualifier(struct token *next, struct symbol *sym, s
->  	return next;
->  }
->  
-> -static void apply_ctype(struct position pos, struct ctype *src, struct ctype *dst)
-> +static void apply_ctype(struct position pos, struct ctype *dst, struct ctype *src)
->  {
->  	unsigned long mod = src->modifiers;
->  
-> @@ -1529,7 +1529,7 @@ static struct token *declaration_specifiers(struct token *token, struct decl_sta
->  				break;
->  			seen |= Set_S | Set_T;
->  			ctx->ctype.base_type = s->ctype.base_type;
-> -			apply_ctype(token->pos, &s->ctype, &ctx->ctype);
-> +			apply_ctype(token->pos, &ctx->ctype, &s->ctype);
->  			token = token->next;
->  			continue;
->  		}
+>  	return token;
+> diff --git a/validation/parsing/enum-attr.c b/validation/parsing/enum-attr.c
+> index a962d8b417af..8d851a162135 100644
+> --- a/validation/parsing/enum-attr.c
+> +++ b/validation/parsing/enum-attr.c
+> @@ -21,9 +21,9 @@ enum bad {
+>  parsing/enum-attr.c:10:15: error: typename in expression
+>  parsing/enum-attr.c:10:15: error: undefined identifier '__attribute__'
+>  parsing/enum-attr.c:10:15: error: bad constant expression type
+> -parsing/enum-attr.c:10:22: error: Expected } at end of struct-union-enum-specifier
+> +parsing/enum-attr.c:10:22: error: Expected } at end of specifier
+>  parsing/enum-attr.c:10:22: error: got 33
+> -parsing/enum-attr.c:14:18: error: Expected } at end of struct-union-enum-specifier
+> +parsing/enum-attr.c:14:18: error: Expected } at end of specifier
+>  parsing/enum-attr.c:14:18: error: got __attribute__
+>   * check-error-end
+>   */
 > 
