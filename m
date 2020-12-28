@@ -7,55 +7,55 @@ X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C11AC433E0
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:20:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BC11CC433DB
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:23:24 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 4A611229C4
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:20:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6201D22472
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:23:24 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726139AbgL1RUw (ORCPT
+        id S1728128AbgL1RXY (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Dec 2020 12:20:52 -0500
-Received: from avasout06.plus.net ([212.159.14.18]:33757 "EHLO
+        Mon, 28 Dec 2020 12:23:24 -0500
+Received: from avasout06.plus.net ([212.159.14.18]:33957 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726015AbgL1RUv (ORCPT
+        with ESMTP id S1728125AbgL1RXX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 12:20:51 -0500
+        Mon, 28 Dec 2020 12:23:23 -0500
 Received: from [10.0.2.15] ([80.189.83.3])
         by smtp with ESMTPA
-        id twC6kPhb0hO4HtwC7kCvc8; Mon, 28 Dec 2020 17:20:31 +0000
+        id twE8kPhlMhO4HtwE9kCvha; Mon, 28 Dec 2020 17:22:37 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609176031; bh=uw3xqnUVDUESnjBltIpdHZqKNJFRNbnoMOWlf/wi6ZI=;
+        t=1609176157; bh=9HphBOCOsL+h9B8ZuWYSAhoCeto8l4wI42spIcb7Bu4=;
         h=Subject:To:References:From:Date:In-Reply-To;
-        b=Ifvy/zfESoFseBDo7/t4260z2wp3BIXRF8oLCRnMoTHs+ivg1ttPCoa7OuYVY+RIT
-         yCMHBdkI4cuLtB5OYPwBS7twhux6xWmBlFHYBTj40CfUc5HNyCkxRB7ZybGPS2iRF1
-         oesrfVQS/tzZBPHiQ+WHaPv995zNutBeDRXWOep1kHGo5yw6tpRA5XwASlVnkAFV72
-         rfbf2OkHu+sapyBcGnZdCZnHQpSSUJe7m1CR/VMIkFeL5+W4J/44RjdT1Vi6NSHLNw
-         P/x9UKiGKGwcm9LdDbkhg6XcbcdR31W5brjrsQEckepsVzaPGTkW43P/fcO/p1J0Ls
-         tnZGh47XitJsQ==
+        b=VnTHaSHiy15rSBf0FIrgHKKzn9bTjCWrEolMgUW0TXR3WbQTnlKQ7dOlcfnrvRIud
+         MojcwbUXMV71N1ipjXziamj6t+A30YTMWGNWjG2eUz0Ws6juyAAWq7jxH53baIM3Xo
+         8z5jNY7JAJ5iB9Ym7R5LwDoX+D+ceCysZoKi42ydf1NV3ueWRAqZBv9iDQsTtL/FHb
+         9TW1G+doVYC4kJ0A6gEjdYwGvZdyRCHH0yzOpupdX3AlY/AMX+pI1Ac21qA0X1RxMd
+         3fAJpgZ35AsByRq5BoWJNP6XI+CehtmTIkKSdb3wYdmNd34a7/v4SIx1qa4cEMDW+O
+         viUlWllZfu/DQ==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
  a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=9YWXKKpNliN_FHuYpl0A:9 a=QEXdDO2ut3YA:10
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=U7EVDT20MNuem_F1dFEA:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH 1/2] add helper has_definition()
+Subject: Re: [PATCH 2/2] fix rem_usage()
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
 References: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
- <20201227092759.30999-2-luc.vanoostenryck@gmail.com>
+ <20201227092759.30999-3-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <0b310b49-2357-cc38-7e40-b215c6fe0773@ramsayjones.plus.com>
-Date:   Mon, 28 Dec 2020 17:20:29 +0000
+Message-ID: <52a111f5-aea4-d705-f0c3-d71ecb2226dc@ramsayjones.plus.com>
+Date:   Mon, 28 Dec 2020 17:22:36 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201227092759.30999-2-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201227092759.30999-3-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfLLPNc9l/GuTK69lX2O/pHS7qfHyQf/sZbM92mWEJ5uCP4xovGAwqm1ZGhrIaZBbOQ7zd+iWGd8Vlc7aemSO84ifTsLIGAhcMwNQuGhxa1XF5rhwEJen
- /X5C9/J0cWvM+e820QGoT1mU6KnjnuW9WBPu9xMjLbLuB5VO2uMwvxo/MwKv6x7l2+AzINcW0o1e3w==
+X-CMAE-Envelope: MS4wfP26TOaLa09HAfko8vUy2MjhZ0anGU+HysSUD8mbvecFJiTV4jJQJHjM5Bp62ZxRGvoW9pmVwLMWb3AWO2YDPk4oKuwvGcb/ezUZNyztKgvS7KXicddM
+ GTgQ1DPRjBWzPSdFQ2JnZnWMBC5kIT73Fmmt2QF4CqKAOUkDemztJhI5ApE1UcLbOUBTs0DntIuEZQ==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -63,34 +63,36 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 On 27/12/2020 09:27, Luc Van Oostenryck wrote:
-> Add he helper has_definition() to check if the pseudo belong to one
+> rem_usage() is used to remove an element from a def-use chain. Optionally,
 
-s/Add he/Add the/
+Hmm, rename this to 'remove_usage()' at the same time?
 
 ATB,
 Ramsay Jones
 
-> of the pseudo types having a definition: PSEUDO_REG & PSEUDO_PHI.
+> if the chain become empty, the defining instruction can also be killed.
+> 
+> This optional part is currently be done on all pseudos but only those
+> having a definition should be concerned.
+> 
+> Fix this by adding a check so that only PSEUDO_REGs and PSEUDO_PHIs are killed.
 > 
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  linearize.h | 5 +++++
->  1 file changed, 5 insertions(+)
+>  simplify.c | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
 > 
-> diff --git a/linearize.h b/linearize.h
-> index 2c548d43526f..c5bdd04257a1 100644
-> --- a/linearize.h
-> +++ b/linearize.h
-> @@ -249,6 +249,11 @@ static inline int has_use_list(pseudo_t p)
->  	return (p && p->type != PSEUDO_VOID && p->type != PSEUDO_UNDEF && p->type != PSEUDO_VAL);
->  }
->  
-> +static inline bool has_definition(pseudo_t p)
-> +{
-> +	return p->type == PSEUDO_REG || p->type == PSEUDO_PHI;
-> +}
-> +
->  static inline int pseudo_user_list_size(struct pseudo_user_list *list)
+> diff --git a/simplify.c b/simplify.c
+> index a877b693b610..12482d787189 100644
+> --- a/simplify.c
+> +++ b/simplify.c
+> @@ -271,7 +271,7 @@ static inline void rem_usage(pseudo_t p, pseudo_t *usep, int kill)
 >  {
->  	return ptr_list_size((struct ptr_list *)list);
+>  	if (has_use_list(p)) {
+>  		delete_pseudo_user_list_entry(&p->users, usep, 1);
+> -		if (kill && !p->users)
+> +		if (kill && !p->users && has_definition(p))
+>  			kill_instruction(p->def);
+>  	}
+>  }
 > 
