@@ -2,93 +2,95 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
+X-Spam-Status: No, score=-17.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5681BC433E6
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:19:39 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7C11AC433E0
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:20:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 281F5229C4
-	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:19:39 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 4A611229C4
+	for <linux-sparse@archiver.kernel.org>; Mon, 28 Dec 2020 17:20:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728134AbgL1RTi (ORCPT
+        id S1726139AbgL1RUw (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 28 Dec 2020 12:19:38 -0500
+        Mon, 28 Dec 2020 12:20:52 -0500
 Received: from avasout06.plus.net ([212.159.14.18]:33757 "EHLO
         avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728105AbgL1RTi (ORCPT
+        with ESMTP id S1726015AbgL1RUv (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 28 Dec 2020 12:19:38 -0500
+        Mon, 28 Dec 2020 12:20:51 -0500
 Received: from [10.0.2.15] ([80.189.83.3])
         by smtp with ESMTPA
-        id twAUkPhVRhO4HtwAVkCvaH; Mon, 28 Dec 2020 17:18:51 +0000
+        id twC6kPhb0hO4HtwC7kCvc8; Mon, 28 Dec 2020 17:20:31 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609175931; bh=Cwq5ns6HfwM8YpFaLArNYy3HF62ZFVsNx8SHqhMBk8c=;
-        h=Subject:To:Cc:References:From:Date:In-Reply-To;
-        b=rIu8hyTD0+zO0MZN58uPhu+xk7I0d2L/AbvHpMBOZ4j7kn7bYL6lifakZbyty7hXI
-         rRJZEO4+JuIm7SK5RTGY5cqZZJVh3+lHl45/iDg8OTcPbd0RGphXFL0dbLih6C/a5T
-         JpRKMeTDME0PtT69GcrcLnHCwR1pujE+kxntMBUBSini2/Stj9UbBeHhAbQ7c+Yzya
-         qP9D9oAocXJ8YyL4+KH5vPg3DGdoD1ZTscLurpDvsL5A4uc88jmuq3s8Rx9mGcHCkk
-         eflQ9TSDKj4DpovwgrJquR0+lLYH0w2DfAWjzQ9L11oHD/+KqEKDJLueUsXc+aoX4D
-         zaqDDohrVea2g==
+        t=1609176031; bh=uw3xqnUVDUESnjBltIpdHZqKNJFRNbnoMOWlf/wi6ZI=;
+        h=Subject:To:References:From:Date:In-Reply-To;
+        b=Ifvy/zfESoFseBDo7/t4260z2wp3BIXRF8oLCRnMoTHs+ivg1ttPCoa7OuYVY+RIT
+         yCMHBdkI4cuLtB5OYPwBS7twhux6xWmBlFHYBTj40CfUc5HNyCkxRB7ZybGPS2iRF1
+         oesrfVQS/tzZBPHiQ+WHaPv995zNutBeDRXWOep1kHGo5yw6tpRA5XwASlVnkAFV72
+         rfbf2OkHu+sapyBcGnZdCZnHQpSSUJe7m1CR/VMIkFeL5+W4J/44RjdT1Vi6NSHLNw
+         P/x9UKiGKGwcm9LdDbkhg6XcbcdR31W5brjrsQEckepsVzaPGTkW43P/fcO/p1J0Ls
+         tnZGh47XitJsQ==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
  a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=VwQbUJbxAAAA:8 a=RUjHBxmlvnOCVcm5UY8A:9 a=QEXdDO2ut3YA:10
- a=AjGcO6oz07-iQ99wixmX:22
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=9YWXKKpNliN_FHuYpl0A:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH 00/16] support __packed struct
+Subject: Re: [PATCH 1/2] add helper has_definition()
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
-Cc:     Jacob Keller <jacob.e.keller@intel.com>
-References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
+References: <20201227092759.30999-1-luc.vanoostenryck@gmail.com>
+ <20201227092759.30999-2-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <6a00eea2-7371-de84-05fc-1375603ed7eb@ramsayjones.plus.com>
-Date:   Mon, 28 Dec 2020 17:18:50 +0000
+Message-ID: <0b310b49-2357-cc38-7e40-b215c6fe0773@ramsayjones.plus.com>
+Date:   Mon, 28 Dec 2020 17:20:29 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20201227092759.30999-2-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfDt2k/tFgdBKrBjbXzzG3U6+PaKY5ORmByqd9KMfhBHGcliiD1RSMOjc93R1FBpyznHOrRpYQMUTzm6yVAmEk7/Gl+7Kmltx7lq0Wx3XW9oXKM35M+5Q
- Zckh8O08Y045OBD333TTlhILdh/ATuP77+Sh0UV0WNO2qj7rMQcm6ojbIZU5R4POldNHWTM97ROz+w==
+X-CMAE-Envelope: MS4wfLLPNc9l/GuTK69lX2O/pHS7qfHyQf/sZbM92mWEJ5uCP4xovGAwqm1ZGhrIaZBbOQ7zd+iWGd8Vlc7aemSO84ifTsLIGAhcMwNQuGhxa1XF5rhwEJen
+ /X5C9/J0cWvM+e820QGoT1mU6KnjnuW9WBPu9xMjLbLuB5VO2uMwvxo/MwKv6x7l2+AzINcW0o1e3w==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 
-On 26/12/2020 17:51, Luc Van Oostenryck wrote:
-> During parsing, Sparse recognizes the attribute 'packed' but this
-> attribute is otherwise ignored for several reasons:
-> 1) the attribute in 'struct __attr { ... }' is wrongly handled as
->    belonging to the whole declaration but it should belong to the type,
-> 2) the attribute in 'struct <name> { ... } __attr;' is simply ignored,
-> 3) the layout of packed bitfields need special care.
-> 
-> This series contains 2 parts:
-> 1) handling of type attributes
-> 2) correct layout of packed structs, including packed bitfields.
-> 
-> 
-> This series is also available for review and testing at:
->   git://git.kernel.org/pub/scm/devel/sparse/sparse-dev.git packed-v2
+On 27/12/2020 09:27, Luc Van Oostenryck wrote:
+> Add he helper has_definition() to check if the pseudo belong to one
 
-I left a couple of minor comments, but (apart from patch #16) this
-otherwise LGTM.
-
-Patch #16 also looks good, but I would need to study it a bit more
-than I have time available to be totally happy. It does not seem
-to be handling the 'lowering' of 'odd bit-sized' symbols created in
-the previous patch (to answer my own question), so I would have to
-apply the patches (or fetch the above branch) to study some more.
-
-Hope you had a good holiday.
+s/Add he/Add the/
 
 ATB,
 Ramsay Jones
+
+> of the pseudo types having a definition: PSEUDO_REG & PSEUDO_PHI.
+> 
+> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+> ---
+>  linearize.h | 5 +++++
+>  1 file changed, 5 insertions(+)
+> 
+> diff --git a/linearize.h b/linearize.h
+> index 2c548d43526f..c5bdd04257a1 100644
+> --- a/linearize.h
+> +++ b/linearize.h
+> @@ -249,6 +249,11 @@ static inline int has_use_list(pseudo_t p)
+>  	return (p && p->type != PSEUDO_VOID && p->type != PSEUDO_UNDEF && p->type != PSEUDO_VAL);
+>  }
+>  
+> +static inline bool has_definition(pseudo_t p)
+> +{
+> +	return p->type == PSEUDO_REG || p->type == PSEUDO_PHI;
+> +}
+> +
+>  static inline int pseudo_user_list_size(struct pseudo_user_list *list)
+>  {
+>  	return ptr_list_size((struct ptr_list *)list);
+> 
