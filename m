@@ -8,63 +8,63 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FBB9C433E9
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 10:12:08 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F1FF9C433DB
+	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 10:12:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D8E29207A3
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 10:12:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id CC83B207A3
+	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 10:12:17 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726503AbgLaKMH (ORCPT
+        id S1726329AbgLaKMR (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Dec 2020 05:12:07 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36696 "EHLO
+        Thu, 31 Dec 2020 05:12:17 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36670 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726536AbgLaKMF (ORCPT
+        with ESMTP id S1726302AbgLaKMR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Dec 2020 05:12:05 -0500
-Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1938C0617A7
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Dec 2020 02:10:53 -0800 (PST)
-Received: by mail-wr1-x42e.google.com with SMTP id d26so19664625wrb.12
-        for <linux-sparse@vger.kernel.org>; Thu, 31 Dec 2020 02:10:53 -0800 (PST)
+        Thu, 31 Dec 2020 05:12:17 -0500
+Received: from mail-wr1-x429.google.com (mail-wr1-x429.google.com [IPv6:2a00:1450:4864:20::429])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A9681C0617A9
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Dec 2020 02:10:54 -0800 (PST)
+Received: by mail-wr1-x429.google.com with SMTP id d13so19674071wrc.13
+        for <linux-sparse@vger.kernel.org>; Thu, 31 Dec 2020 02:10:54 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=uzs0PRBDwTm5xhuPVtkISBci8qATErI9BQqOhnyKri4=;
-        b=reOKdHltC1FhxtC4W8/y/wnEBBz97gdd34O+GWdypgxjhwW4RxRGTX+PBkhzWi32lO
-         +rVn6RABWUnxJGctCDnFMdK5HC38Z/sPlIvhRTUcsHZstA09zcCv4IKG5m1gfz/2NViL
-         mnQBPp0rFgEavUw9U850APRaci736u/K7xctaPba0Fb8l9pFUvE+vJwJq43u57dKSFq1
-         4MzXfr5sTcxYyiOOy6/pbGQrCsvFr0RS5NLTlg4JrR9FLUGCDvsgI6XgReH/4gU1e7ZZ
-         I7WSdwwZpDx6OOaY9BlafzA5u1/BGNjiZTTOyV5odfBLhvXPLco72DSZfi9enrg3f0Gf
-         JEAQ==
+        bh=hjiJHB3wV4XVzP2HATK56U+TgeS3+lb5sAu2Ag4G5+I=;
+        b=lmyij2dqgsFB+zkd3myTvVZ5whrc5Rxa6fucakzvNCAunJtgbzgiEPPFjhT6aILJCu
+         MMqSuD29sgDaKmGanPex0zT71Uz563I6vpGvjr8wjabrsdNY0M/huYsMNmoyto7OMEj0
+         JJpevPyghJk36ydUMrL1nmAIhH0+mS0rWY6Yg7FYmxl4AgCD98bJ84/8FJ5RCnuGWz8Y
+         1smkpzL12DgmuR5kma/hTHQRXZJzjca6TYJLAwRnSxL8woQyfCGmIv7Q5tJe8sEx+1c2
+         Hx0oUYLPGBrGxrlgnzJmETRwCwxWXoi09NZdatoonx/GnusKjUqOxYFQ1z+6HhBfe5gt
+         Y8sw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=uzs0PRBDwTm5xhuPVtkISBci8qATErI9BQqOhnyKri4=;
-        b=HFcF76oK1wv46c6ybniPoPpKQ14Rn3wcMLx3WdKCEEW1OlW3OEjCD4sChsnwaFHdQF
-         7bxj6XX1AJkeaoYEtZLQwOW2tlKrc6wDjnvmkvXi4FP/py/Nb3qQvS4RmVT15eCsthzi
-         e79OJkDhQEPX0lfvNPRubGxYcrV+dcKyQUf+yQrrjE8WVKrZh5gujYgok9I6JAG2484s
-         Gd2oMjnjVsTJlXY+Evo+TCOv4ktnpaMComRkO/3qebR58M3XggzS7kXo0mZAv1LLIoXH
-         kytOeDIckYg68tr6n2v5gqw0UNRblVgWdcqVQYjCrwXiqywkPX9/tSrJgQ9tEd/cH/yZ
-         A49g==
-X-Gm-Message-State: AOAM530dgPgyRypWkHYTLwKcalUTZheJD1RrHY1vqtlF36xHxGIrdpI4
-        vdflYuWtrEI5AX9ZuLlihNcHTrKi4BM=
-X-Google-Smtp-Source: ABdhPJxEI8XVbGQwYiTyYNm8t/YAM6yCVevz5ApvZlGf/nMivoo7PDhxd52wLSe9zM5bKqpj7p4Vcw==
-X-Received: by 2002:a5d:6cc9:: with SMTP id c9mr62675452wrc.411.1609409452677;
-        Thu, 31 Dec 2020 02:10:52 -0800 (PST)
+        bh=hjiJHB3wV4XVzP2HATK56U+TgeS3+lb5sAu2Ag4G5+I=;
+        b=IzmvUh9q3zp0VMxk3iZgX68+lv9sJ1dTEpcVU3Sm1XFRpp2gNvr2TaBZCZT+lPXQbs
+         atVTskPDOp5QkEah6ritcujTiEBprjsEf6QhdyraFIjMC3HckuucdSVdhZGVjZLivlEU
+         QR64ZuybN3w7YSpUHkzWoQ7zzVOVaWhQRU5XJennTCuxVbOxv+Q0FXZp/8zxAi1jPORR
+         GFoLQAhLPqleqr8yVCcgeXks6PLhY/04R/enJm9eGNCJEcc6P6jxvL+z0cFnAkzWyASw
+         UEG80MiHI1Z3Y4yJMCeC/7Ndh4PHfQbNAL2y49YbXkBXUa6VZ1oJPQoj4zj5w67Tyb6V
+         dKng==
+X-Gm-Message-State: AOAM532i5PyuSz1d3metjDTmbzId4J8KnOt2U/RCD02ZNldsXMCsgX44
+        i7dlGoIAZkRWlJiZLX9Qv5EOwfRm3n4=
+X-Google-Smtp-Source: ABdhPJz7SMwnuzHaC3AFIUx9iX/vMzeTBtGWtIuHyxzPqOE2+rQI5srJmuIvExAwtAGjgLSHw4riKQ==
+X-Received: by 2002:a5d:610d:: with SMTP id v13mr64668782wrt.425.1609409453527;
+        Thu, 31 Dec 2020 02:10:53 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:7c8c:1eb2:47fd:b5e7])
-        by smtp.gmail.com with ESMTPSA id n3sm66161019wrw.61.2020.12.31.02.10.51
+        by smtp.gmail.com with ESMTPSA id n3sm66161019wrw.61.2020.12.31.02.10.52
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 31 Dec 2020 02:10:52 -0800 (PST)
+        Thu, 31 Dec 2020 02:10:53 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v3 14/16] struct-attr: fix: do not ignore struct/union/enum type attributes
-Date:   Thu, 31 Dec 2020 11:10:32 +0100
-Message-Id: <20201231101034.59978-15-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v3 15/16] packed: no out-of-bound access of packed bitfields
+Date:   Thu, 31 Dec 2020 11:10:33 +0100
+Message-Id: <20201231101034.59978-16-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.29.2
 In-Reply-To: <20201231101034.59978-1-luc.vanoostenryck@gmail.com>
 References: <20201231101034.59978-1-luc.vanoostenryck@gmail.com>
@@ -74,115 +74,82 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-GCC's syntax for type attributes is specified as:
-    An attribute specifier list may appear as part of a struct,
-    union or enum specifier. It may go either immediately after
-    the struct, union or enum keyword, or after the closing brace.
-    The former syntax is preferred. Where attribute specifiers
-    follow the closing brace, they are considered to relate to
-    the structure, union or enumerated type defined, not to any
-    enclosing declaration the type specifier appears in, and the type
-    defined is not complete until after the attribute specifiers.
-In the section about type attributes, it's also said:
-    You may specify type attributes in an enum, struct or union type
-    declaration or definition by placing them immediately after the
-    struct, union or enum keyword. A less preferred syntax is to
-    place them just past the closing curly brace of the definition.
+There is (at least) 2 ways by which packed bitfields doesn't
+follow normal layout/access rules and as consequence can't (always)
+be accessed the usual way (load the whole underlying word, then shift
+and mask to isolate the bitfield).
 
-So, while placing the attribute after the closing curly is not
-preferred, it is cleary legal (and it seems to be much more popular
-than placing them just after the struct, union or enum keyword).
+At least two different cases are a concern:
+1) there is no padding at the end of a bitfield sequence. For example,
+   the following struct is only 3 bytes width:
+	struct s {
+		int f:24;
+	} __packed;
+   So, trying to access the bitfield by first doing a 32-bit load
+   will create an out-of-bound access.
 
-However, currently sparse doesn't handle this correctly:
-- these attributes are parsed in declaration_specifiers() and
-  added to the current decl_state
-- when the ';' ending the type declaration is reached, the plain
-  struct/union/enum is used and the content of the decl_state is
-  simply ignored.
-- if the declaration is for a variable, then those attributes
-  are assigned to the variable (but not to the type).
+2) a bitfield smaller than one word may need more than one word to be
+   accessed. For example, with the following struct
+	struct {
+		int a:5;
+		int f:30;
+		int z:5;
+	} __packed;
+   the bitfield 'f', while smaller than one 32-bit word, can't be accessed
+   with a single 32-bit access.
 
-Fix this by calling handle_attribute() once we have reached the
-closing '}' of a struct/union/enum definition and applying these
-attributes, if any, directly to the current base type.
+At machine level, these bitfields should be accessed with several, possibly
+smaller, loads and their corresponding values reconstructed from these,
+making things much more complicated than for non-packed bitfields.
+
+But at IR level, things can be a little more flexible and things can stay
+simple by using sub-word or super-word accesses (until these need to
+be lowered to be usable at machine level). In other words, the example here
+can be safely accessed with respectively a 24-bit and a 40-bit load.
+This is what is done in this patch.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- parse.c                           | 2 ++
- validation/packed-bitfield3.c     | 1 -
- validation/packed-bitfield4.c     | 1 -
- validation/type-attribute-align.c | 1 -
- validation/type-attribute-as.c    | 1 -
- validation/type-attribute-mod.c   | 1 -
- 6 files changed, 2 insertions(+), 5 deletions(-)
+ linearize.c | 13 +++++++++++--
+ symbol.h    |  1 +
+ 2 files changed, 12 insertions(+), 2 deletions(-)
 
-diff --git a/parse.c b/parse.c
-index b38615b8d61d..338e525f46b9 100644
---- a/parse.c
-+++ b/parse.c
-@@ -764,6 +764,8 @@ static struct token *struct_union_enum_specifier(enum type type,
- 
- 	token = parse(token->next, sym);
- 	token = expect(token, '}', "at end of specifier");
-+	attr.ctype.base_type = sym;
-+	token = handle_attributes(token, &attr);
- 	apply_ctype(token->pos, &sym->ctype, &attr.ctype);
- 
- 	sym->endpos = token->pos;
-diff --git a/validation/packed-bitfield3.c b/validation/packed-bitfield3.c
-index c06e7c41cbcd..13368c84469e 100644
---- a/validation/packed-bitfield3.c
-+++ b/validation/packed-bitfield3.c
-@@ -25,5 +25,4 @@ _Static_assert(   sizeof(struct c) == 8);
- 
- /*
-  * check-name: packed-bitfield3
-- * check-known-to-fail
-  */
-diff --git a/validation/packed-bitfield4.c b/validation/packed-bitfield4.c
-index 0342b2414b6e..1a956344f2d3 100644
---- a/validation/packed-bitfield4.c
-+++ b/validation/packed-bitfield4.c
-@@ -15,5 +15,4 @@ static int ld(struct s *s)
- /*
-  * check-name: packed-bitfield4
-  * check-description: Is check_access() OK with short packed bitfields?
-- * check-known-to-fail
-  */
-diff --git a/validation/type-attribute-align.c b/validation/type-attribute-align.c
-index d9358bff8327..5f3db14aceb1 100644
---- a/validation/type-attribute-align.c
-+++ b/validation/type-attribute-align.c
-@@ -16,5 +16,4 @@ void main(void)
- 
- /*
-  * check-name: type-attribute-align
-- * check-known-to-fail
-  */
-diff --git a/validation/type-attribute-as.c b/validation/type-attribute-as.c
-index b40b4e7dddf5..38f06b374e25 100644
---- a/validation/type-attribute-as.c
-+++ b/validation/type-attribute-as.c
-@@ -21,7 +21,6 @@ void main(void)
- 
- /*
-  * check-name: type-attribute-as
-- * check-known-to-fail
-  *
-  * check-error-start
- type-attribute-as.c:16:15: warning: incorrect type in argument 1 (different address spaces)
-diff --git a/validation/type-attribute-mod.c b/validation/type-attribute-mod.c
-index 0e7b166a4aec..d55011dfa09a 100644
---- a/validation/type-attribute-mod.c
-+++ b/validation/type-attribute-mod.c
-@@ -14,7 +14,6 @@ void main(void)
- 
- /*
-  * check-name: type-attribute-mod
-- * check-known-to-fail
-  *
-  * check-error-start
- type-attribute-mod.c:12:9: warning: dereference of noderef expression
+diff --git a/linearize.c b/linearize.c
+index 0250c6bb17ef..e80715ab2458 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -977,8 +977,17 @@ static struct symbol *bitfield_base_type(struct symbol *sym)
+ 	if (sym) {
+ 		if (sym->type == SYM_NODE)
+ 			base = base->ctype.base_type;
+-		if (base->type == SYM_BITFIELD)
+-			return base->ctype.base_type;
++		if (base->type == SYM_BITFIELD) {
++			base = base->ctype.base_type;
++			if (sym->packed) {
++				int size = bits_to_bytes(sym->bit_offset + sym->bit_size);
++				sym = __alloc_symbol(0);
++				*sym = *base;
++				sym->bit_size = bytes_to_bits(size);
++				return sym;
++			}
++			return base;
++		}
+ 	}
+ 	return sym;
+ }
+diff --git a/symbol.h b/symbol.h
+index 5c5a7f12affa..866d57522f49 100644
+--- a/symbol.h
++++ b/symbol.h
+@@ -192,6 +192,7 @@ struct symbol {
+ 					accessed:1,
+ 					builtin:1,
+ 					torename:1,
++					packed:1,
+ 					transparent_union:1;
+ 			int		rank:3;	// arithmetic's rank
+ 			struct expression *array_size;
 -- 
 2.29.2
 
