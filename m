@@ -2,157 +2,173 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-18.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,
-	MENTIONS_GIT_HOSTING,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-10.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5D6E9C433E0
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 15:31:14 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 86C5FC433E0
+	for <linux-sparse@archiver.kernel.org>; Sat,  2 Jan 2021 10:10:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2464620798
-	for <linux-sparse@archiver.kernel.org>; Thu, 31 Dec 2020 15:31:14 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 44082207AA
+	for <linux-sparse@archiver.kernel.org>; Sat,  2 Jan 2021 10:10:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1726317AbgLaPbO (ORCPT
+        id S1726486AbhABKK3 (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 31 Dec 2020 10:31:14 -0500
-Received: from avasout06.plus.net ([212.159.14.18]:36708 "EHLO
-        avasout06.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726080AbgLaPbN (ORCPT
+        Sat, 2 Jan 2021 05:10:29 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53706 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726327AbhABKK2 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 31 Dec 2020 10:31:13 -0500
-Received: from [10.0.2.15] ([80.189.83.3])
-        by smtp with ESMTPA
-        id uzuCkTIMYhO4HuzuEkE0Ml; Thu, 31 Dec 2020 15:30:26 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1609428626; bh=CMmiQamKFcmhTIa8L2TLFMM8YOllGLeVU+7i3/juNzU=;
-        h=Subject:To:References:From:Date:In-Reply-To;
-        b=ebPdT8N6F7UUJtwMXf5vE7DdVUuu0i05a0fk842DjK3oRHshzvOVdjosDoyn9BLfd
-         1t2jWCVWzA2SrnWfBdg0iW00Gt0Dps9kmF4YGh8y/caf4lO1g8SFAFjZAzc+Lxczq/
-         UH5HQWG9Qxo3emTdSq/x75/rEFJs/yhuI7FGgTMIw2NDoPlP1TNltSxT2GjJ/j3voh
-         sWrIdWsnJX62kwwcEPYOdH756d3GzRPIMSM+fpxvFFWDQBNfIKMFU+lJ3aAerCVV8r
-         wxio4I5EkVMA3L/HTVCE8fyXNqmVkTlatKMx86rGqK/CG99cWjCM33gbJeMOQcDPK3
-         JObliHvs8ha5g==
-X-Clacks-Overhead: "GNU Terry Pratchett"
-X-CM-Score: 0.00
-X-CNFS-Analysis: v=2.3 cv=SPPZqNnH c=1 sm=1 tr=0
- a=HN+d/rRCB1WM0IHjUF19mA==:117 a=HN+d/rRCB1WM0IHjUF19mA==:17
- a=IkcTkHD0fZMA:10 a=VwQbUJbxAAAA:8 a=JrmIlNXS2SXWZTdwscoA:9 a=QEXdDO2ut3YA:10
- a=AjGcO6oz07-iQ99wixmX:22
-X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH v3 00/16] support __packed struct
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org
-References: <20201231101034.59978-1-luc.vanoostenryck@gmail.com>
-From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <5c9945a4-f9bc-68a9-31f0-ae0958d06f84@ramsayjones.plus.com>
-Date:   Thu, 31 Dec 2020 15:30:24 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+        Sat, 2 Jan 2021 05:10:28 -0500
+Received: from mail-wr1-x433.google.com (mail-wr1-x433.google.com [IPv6:2a00:1450:4864:20::433])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 128FCC061573
+        for <linux-sparse@vger.kernel.org>; Sat,  2 Jan 2021 02:09:48 -0800 (PST)
+Received: by mail-wr1-x433.google.com with SMTP id d26so26076077wrb.12
+        for <linux-sparse@vger.kernel.org>; Sat, 02 Jan 2021 02:09:47 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=TDVpH9xgCVcNMsOyRyVmPG4M0g1mYCd9k9zNIBG+xzg=;
+        b=s6jyRIbINwKQOq0l02kZF5NnMjMyH30RIDVR6k4Ia7wde11C8ABIGb1SMAUaeHzwLp
+         NVz7IW2yIznNbeVIsB4w09dL2nMbMKdA2lb8liQBRVMSv7D7qBUNcXiEZ1n8vGgnddCG
+         CIZQWoXlLoyUQSY0pEZT1cwv0PQlEgsaS94KY9qEs+Yw+pDiw4blVgLV5pqHe3knNK7p
+         2QhdeF0pbFl9B9Gsr6/5Cix2OZPBmz3qQNvfGgLUWAy2O7U5DPdvkVwz2v8YycAkuKyO
+         ME6B46NNjZjF6PFfVIlNYsZwMoZH+esWtDbKyp22LV5OAuXf0R5WX7Nf/Zr+uibK4NP7
+         fyTw==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=TDVpH9xgCVcNMsOyRyVmPG4M0g1mYCd9k9zNIBG+xzg=;
+        b=KwtI3sRrf1ZqqHK+uq11RMX6RMqvpeoQ0WsLRC3uYfivu4Y7FjyxNAY7YYZ5WLhF2o
+         7GiYnbJD2NJa5g8Fgx1I2Rnd5Fpd66zzQ5NQ5XOXiv4zNS0ltAf68P5PPh44y7e8GyM3
+         wZsZV8agDFvlBZbb1bB65pklyuD17xEntbljOEIWm8a10BEMo9KR6D2j6omqwHnftwwz
+         Hl8Jbhn37zDndEihjxSX6tMYYfXgR9w+zlvtvSViFRKdZx9PDgWkC/YumS3TInMgDM7V
+         xaVQX+0dVqdFKZAsV2h/50raPsxAmHtY4cU+YAS/BWgXNJ2b90HTs/VKXFYV7+7bH38H
+         hanQ==
+X-Gm-Message-State: AOAM532+Q5LdMlteu+pdy81an1yQz6H/z/MVScGxBkyp2tO1VTlMCkhI
+        hZdPN5JdKnQREyb3xXDMY+myiCpAXxk=
+X-Google-Smtp-Source: ABdhPJy91l1NKARBJJpuMii9EpuJ+4RgPfj6P3uJXTT6467anZse/owKcH+CfSDmSvrW7GNLbCAYgg==
+X-Received: by 2002:adf:f70c:: with SMTP id r12mr71204059wrp.234.1609582186322;
+        Sat, 02 Jan 2021 02:09:46 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:9416:7242:911d:d307])
+        by smtp.gmail.com with ESMTPSA id h15sm76994446wru.4.2021.01.02.02.09.45
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 02 Jan 2021 02:09:45 -0800 (PST)
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] RFC: problems with cast optimization at evaluation time
+Date:   Sat,  2 Jan 2021 11:09:34 +0100
+Message-Id: <20210102100934.28459-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.29.2
 MIME-Version: 1.0
-In-Reply-To: <20201231101034.59978-1-luc.vanoostenryck@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfKhpd7R+03+zCWXaR+sJZa9m9Gef/4QfAF63m2MZ7cfceLzAWSzPiFmL+kga9s4oj0rKuqRrkD7E6T7zJxPoRJH2z+9385NXghmUa9Yp06sCR9Acf+2l
- +OaE7C84ajSqWZiJOxitfVBmvmDtnkPr5KRHfB8F9SpTUnJUeEu6ocItiW3cYHkkILVC/5ycEluhOg==
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+The current code will, at evaluation time, optimize some cast.
+For example, code like:
+	int i  = <some value>;
+	char c = ~i;
+will be optimized to what would essentially be:
+	int i = <some value>;
+	char c = ~(char) i;
 
+This is fine but it has at least two problems:
+	int i = <some value>;
+	bool b = ~i;
+is not the same as the 'optimized' (it's would only be for 0 and -1):
+	int i = <some value>;
+	bool b = ~(bool)i;
+Same with floats:
+	int i = <some value>;
+	float f = ~i;
+in this case the 'optimized' form doesn't even make sense:
+	int i = <some value>;
+	float f = ~(float)i;
 
-On 31/12/2020 10:10, Luc Van Oostenryck wrote:
-> During parsing, Sparse recognizes the attribute 'packed' but this
-> attribute is otherwise ignored for several reasons:
-> 1) the attribute in 'struct __attr { ... }' is wrongly handled as
->    belonging to the whole declaration but it should belong to the type,
-> 2) the attribute in 'struct <name> { ... } __attr;' is simply ignored,
-> 3) the layout of packed bitfields need special care.
-> 
-> This series contains 2 parts:
-> 1) handling of type attributes
-> 2) correct layout of packed structs, including packed bitfields.
-> 
-> 
-> This series is also available for review and testing at:
->   git://git.kernel.org/pub/scm/devel/sparse/sparse-dev.git packed-v3
-> 
-> 
-> Changes since v2 (all thanks to Ramsay Jones):
-> * correct several typos
-> * add an explanation for one of the test
-> * avoid sizeof() in tests where the size is constrained to some fixed value
-> * remove a redundency in a test (struct sb identical to struct sa)
-> * reformulate the commit message for apply_ctype()'s arguments reversal
-> * tweak the not-so-1-to-1 code movement
-> * fix the truncated commit message of the last patch
+It's easy enough to add a test to only allow this on 'true' integer types
+like done in the patch.
 
-This all LGTM. Thanks!
+However, the same problem also exist for the optimization of the
+sequence of two implied cast (only that this is rare and I haven't
+succeed to reproduce a case where it is wrong). For example,
+a conversion of an integer to a float can overflow, so a conversion
+like 'int -> float -> int' is not always a no-op.
 
-ATB,
-Ramsay Jones
+Again it's easy enough to add some checks but I wonder if all this
+is really worth. My gut feeling is that this should not be done at
+evaluation time and should only be done after linearization.
+I just wonder if this simplification wasn't done for some specific
+purpose other than avoiding an allocation and keeping the AST small?
 
-> 
-> Changes since v1:
-> * fix layout of packed bitfields
-> 
-> 
-> Luc Van Oostenryck (16):
->   add testcases for dubious enum values
->   add testcases for exotic enum values
->   add testcases for enum attributes
->   add testcases for type attributes
->   add testcases for packed structures
->   add testcases for packed bitfields
->   apply_ctype: use self-explanatory argument name
->   apply_ctype: reverse the order of arguments
->   apply_ctype: move up its declaration
->   struct-attr: prepare to handle attributes at the end of struct
->     definitions (1)
->   struct-attr: prepare to handle attributes at the end of struct
->     definitions (2)
->   struct-attr: prepare to handle attributes at the end of struct
->     definitions (3)
->   struct-attr: fix type attribute like 'struct __attr { ... }'
->   struct-attr: fix: do not ignore struct/union/enum type attributes
->   packed: no out-of-bound access of packed bitfields
->   packed: add support for __packed struct
-> 
->  Documentation/TODO.md             |  3 --
->  linearize.c                       | 13 +++++-
->  parse.c                           | 78 ++++++++++++++++---------------
->  symbol.c                          | 12 +++--
->  symbol.h                          |  2 +
->  validation/enum-type-dubious.c    | 18 +++++++
->  validation/enum-type-exotic.c     | 28 +++++++++++
->  validation/packed-bitfield0.c     | 58 +++++++++++++++++++++++
->  validation/packed-bitfield1.c     | 27 +++++++++++
->  validation/packed-bitfield2.c     | 15 ++++++
->  validation/packed-bitfield3.c     | 28 +++++++++++
->  validation/packed-bitfield4.c     | 18 +++++++
->  validation/packed-bitfield5.c     | 20 ++++++++
->  validation/packed-deref0.c        | 23 +++++++++
->  validation/packed-struct.c        | 32 +++++++++++++
->  validation/parsing/enum-attr.c    | 29 ++++++++++++
->  validation/type-attribute-align.c | 19 ++++++++
->  validation/type-attribute-as.c    | 33 +++++++++++++
->  validation/type-attribute-mod.c   | 21 +++++++++
->  validation/type-attribute-qual.c  | 15 ++++++
->  20 files changed, 447 insertions(+), 45 deletions(-)
->  create mode 100644 validation/enum-type-dubious.c
->  create mode 100644 validation/enum-type-exotic.c
->  create mode 100644 validation/packed-bitfield0.c
->  create mode 100644 validation/packed-bitfield1.c
->  create mode 100644 validation/packed-bitfield2.c
->  create mode 100644 validation/packed-bitfield3.c
->  create mode 100644 validation/packed-bitfield4.c
->  create mode 100644 validation/packed-bitfield5.c
->  create mode 100644 validation/packed-deref0.c
->  create mode 100644 validation/packed-struct.c
->  create mode 100644 validation/parsing/enum-attr.c
->  create mode 100644 validation/type-attribute-align.c
->  create mode 100644 validation/type-attribute-as.c
->  create mode 100644 validation/type-attribute-mod.c
->  create mode 100644 validation/type-attribute-qual.c
-> 
+-- Luc
+---
+ evaluate.c                       |  2 +-
+ validation/eval/not-cast-bool.c  | 14 ++++++++++++++
+ validation/eval/not-cast-float.c | 14 ++++++++++++++
+ 3 files changed, 29 insertions(+), 1 deletion(-)
+ create mode 100644 validation/eval/not-cast-bool.c
+ create mode 100644 validation/eval/not-cast-float.c
+
+diff --git a/evaluate.c b/evaluate.c
+index 41871e18503a..843b56a0386a 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -337,7 +337,7 @@ static struct expression * cast_to(struct expression *old, struct symbol *type)
+ 	case EXPR_PREOP:
+ 		if (old->ctype->bit_size < type->bit_size)
+ 			break;
+-		if (old->op == '~') {
++		if (old->op == '~' && is_int_type(type) && !is_bool_type(type)) {
+ 			old->ctype = type;
+ 			old->unop = cast_to(old->unop, type);
+ 			return old;
+diff --git a/validation/eval/not-cast-bool.c b/validation/eval/not-cast-bool.c
+new file mode 100644
+index 000000000000..acd8bbf293db
+--- /dev/null
++++ b/validation/eval/not-cast-bool.c
+@@ -0,0 +1,14 @@
++static _Bool foo(void)
++{
++	unsigned char c = 1;
++	_Bool b = ~c;
++	return b;
++}
++
++/*
++ * check-name: not-cast-bool
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-ignore
++ * check-output-returns: 1
++ */
+diff --git a/validation/eval/not-cast-float.c b/validation/eval/not-cast-float.c
+new file mode 100644
+index 000000000000..d474d69bdda3
+--- /dev/null
++++ b/validation/eval/not-cast-float.c
+@@ -0,0 +1,14 @@
++static int foo(void)
++{
++	int i = 123;
++	float x = ~i;
++	return (x < 0);
++}
++
++/*
++ * check-name: eval-bool-zext-neg
++ * check-command: test-linearize -Wno-decl $file
++ *
++ * check-output-ignore
++ * check-output-returns: 1
++ */
+-- 
+2.29.2
+
