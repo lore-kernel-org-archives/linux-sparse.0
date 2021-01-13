@@ -2,91 +2,115 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.5 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
-	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-16.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 9FFCEC4332E
-	for <linux-sparse@archiver.kernel.org>; Tue,  5 Jan 2021 22:08:50 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 957F0C43381
+	for <linux-sparse@archiver.kernel.org>; Wed, 13 Jan 2021 10:58:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 77B6222D75
-	for <linux-sparse@archiver.kernel.org>; Tue,  5 Jan 2021 22:08:50 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5339023159
+	for <linux-sparse@archiver.kernel.org>; Wed, 13 Jan 2021 10:58:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1731728AbhAEWIm (ORCPT
+        id S1727179AbhAMK6g (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 5 Jan 2021 17:08:42 -0500
-Received: from mga03.intel.com ([134.134.136.65]:12556 "EHLO mga03.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729518AbhAEWIl (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 5 Jan 2021 17:08:41 -0500
-IronPort-SDR: F8SstZ3hyMEa0wAuvNjLVH53sOD8snxrcjyidyNl4ZA+CfR7ZpUqTzfAJTNxRJpJSTci0G6c59
- cCoDWLHecqdg==
-X-IronPort-AV: E=McAfee;i="6000,8403,9855"; a="177287375"
-X-IronPort-AV: E=Sophos;i="5.78,478,1599548400"; 
-   d="scan'208";a="177287375"
-Received: from orsmga006.jf.intel.com ([10.7.209.51])
-  by orsmga103.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2021 14:08:00 -0800
-IronPort-SDR: 2Tf2L8N+BqIDMK0TiKXbRRO7XO7jbFYOoq+F2OBd87gkkbOTw7rcL65LCwbrSQjE0XAzHyzG9p
- dHVsdMNhLjDw==
-X-IronPort-AV: E=Sophos;i="5.78,478,1599548400"; 
-   d="scan'208";a="350011825"
-Received: from jekeller-mobl1.amr.corp.intel.com (HELO [10.212.7.147]) ([10.212.7.147])
-  by orsmga006-auth.jf.intel.com with ESMTP/TLS/ECDHE-RSA-AES256-GCM-SHA384; 05 Jan 2021 14:08:00 -0800
-Subject: Re: [PATCH 00/16] support __packed struct
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
-        linux-sparse@vger.kernel.org
-References: <20201226175129.9621-1-luc.vanoostenryck@gmail.com>
- <6a00eea2-7371-de84-05fc-1375603ed7eb@ramsayjones.plus.com>
- <20201228213338.e5tspbe3od27lo4x@ltop.local>
- <49f5ad45-5776-ab70-53c9-13fd23a1c082@intel.com>
- <20210105203909.vnuhix3ukl7zxgt6@ltop.local>
-From:   Jacob Keller <jacob.e.keller@intel.com>
-Organization: Intel Corporation
-Message-ID: <70519c76-29df-bc72-d3ad-81c53dcb8a47@intel.com>
-Date:   Tue, 5 Jan 2021 14:07:57 -0800
-User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101
- Thunderbird/78.6.0
-MIME-Version: 1.0
-In-Reply-To: <20210105203909.vnuhix3ukl7zxgt6@ltop.local>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        Wed, 13 Jan 2021 05:58:36 -0500
+Received: from mail.loongson.cn ([114.242.206.163]:54198 "EHLO loongson.cn"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727116AbhAMK6f (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 13 Jan 2021 05:58:35 -0500
+Received: from linux.localdomain (unknown [113.200.148.30])
+        by mail.loongson.cn (Coremail) with SMTP id AQAAf9Dxr78d0v5fhLMDAA--.6498S4;
+        Wed, 13 Jan 2021 18:57:37 +0800 (CST)
+From:   Tiezhu Yang <yangtiezhu@loongson.cn>
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Alexei Starovoitov <ast@kernel.org>,
+        Daniel Borkmann <daniel@iogearbox.net>,
+        Andrii Nakryiko <andrii@kernel.org>,
+        Martin KaFai Lau <kafai@fb.com>,
+        Song Liu <songliubraving@fb.com>, Yonghong Song <yhs@fb.com>,
+        John Fastabend <john.fastabend@gmail.com>,
+        KP Singh <kpsingh@kernel.org>,
+        Nathan Chancellor <natechancellor@gmail.com>,
+        Nick Desaulniers <ndesaulniers@google.com>
+Cc:     linux-sparse@vger.kernel.org, netdev@vger.kernel.org,
+        bpf@vger.kernel.org, clang-built-linux@googlegroups.com,
+        linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Xuefeng Li <lixuefeng@loongson.cn>
+Subject: [PATCH 2/2] compiler.h: Include asm/rwonce.h under ARM64 and ALPHA to fix build errors
+Date:   Wed, 13 Jan 2021 18:57:33 +0800
+Message-Id: <1610535453-2352-3-git-send-email-yangtiezhu@loongson.cn>
+X-Mailer: git-send-email 2.1.0
+In-Reply-To: <1610535453-2352-1-git-send-email-yangtiezhu@loongson.cn>
+References: <1610535453-2352-1-git-send-email-yangtiezhu@loongson.cn>
+X-CM-TRANSID: AQAAf9Dxr78d0v5fhLMDAA--.6498S4
+X-Coremail-Antispam: 1UD129KBjvJXoW7Kw1UZFyrZr1rXr4kAw4kCrg_yoW8XrW3pF
+        1DZr18KFW5ur1UGr98Aw12y347Zw4rGF17AFyDu348ZFyaq393X390gryYkF97Za9FqFWx
+        Kr9rWrW3Cr1UZ3DanT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDU0xBIdaVrnRJUUUPK14x267AKxVWrJVCq3wAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+        rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2048vs2IY020E87I2jVAFwI0_Jryl82xGYIkIc2
+        x26xkF7I0E14v26ryj6s0DM28lY4IEw2IIxxk0rwA2F7IY1VAKz4vEj48ve4kI8wA2z4x0
+        Y4vE2Ix0cI8IcVAFwI0_Gr0_Xr1l84ACjcxK6xIIjxv20xvEc7CjxVAFwI0_Cr0_Gr1UM2
+        8EF7xvwVC2z280aVAFwI0_Cr1j6rxdM28EF7xvwVC2z280aVCY1x0267AKxVW0oVCq3wAS
+        0I0E0xvYzxvE52x082IY62kv0487Mc02F40EFcxC0VAKzVAqx4xG6I80ewAv7VC0I7IYx2
+        IY67AKxVWUJVWUGwAv7VC2z280aVAFwI0_Cr0_Gr1UMcvjeVCFs4IE7xkEbVWUJVW8JwAC
+        jcxG0xvY0x0EwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2Y2ka0x
+        kIwI1lc2xSY4AK67AK6r4DMxAIw28IcxkI7VAKI48JMxC20s026xCaFVCjc4AY6r1j6r4U
+        MI8I3I0E5I8CrVAFwI0_Jr0_Jr4lx2IqxVCjr7xvwVAFwI0_JrI_JrWlx4CE17CEb7AF67
+        AKxVW8ZVWrXwCIc40Y0x0EwIxGrwCI42IY6xIIjxv20xvE14v26r1j6r1xMIIF0xvE2Ix0
+        cI8IcVCY1x0267AKxVWxJVW8Jr1lIxAIcVCF04k26cxKx2IYs7xG6r1j6r1xMIIF0xvEx4
+        A2jsIE14v26r1j6r4UMIIF0xvEx4A2jsIEc7CjxVAFwI0_Gr0_Gr1UYxBIdaVFxhVjvjDU
+        0xZFpf9x0JUCzuAUUUUU=
+X-CM-SenderInfo: p1dqw3xlh2x3gn0dqz5rrqw2lrqou0/
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+When make M=samples/bpf on the Loongson 3A3000 platform which
+belongs to MIPS arch, there exists many similar build errors
+about 'asm/rwonce.h' file not found, so include it only under
+CONFIG_ARM64 and CONFIG_ALPHA due to it exists only in arm64
+and alpha arch.
 
+  CLANG-bpf  samples/bpf/xdpsock_kern.o
+In file included from samples/bpf/xdpsock_kern.c:2:
+In file included from ./include/linux/bpf.h:9:
+In file included from ./include/linux/workqueue.h:9:
+In file included from ./include/linux/timer.h:5:
+In file included from ./include/linux/list.h:9:
+In file included from ./include/linux/kernel.h:10:
+./include/linux/compiler.h:246:10: fatal error: 'asm/rwonce.h' file not found
+         ^~~~~~~~~~~~~~
+1 error generated.
 
-On 1/5/2021 12:39 PM, Luc Van Oostenryck wrote:
-> On Tue, Jan 05, 2021 at 09:56:05AM -0800, Jacob Keller wrote:
->> On 12/28/2020 1:33 PM, Luc Van Oostenryck wrote:
->>> On Mon, Dec 28, 2020 at 05:18:50PM +0000, Ramsay Jones wrote:
->>>>
->>>> Patch #16 also looks good, but I would need to study it a bit more
->>>> than I have time available to be totally happy. It does not seem
->>>> to be handling the 'lowering' of 'odd bit-sized' symbols created in
->>>> the previous patch (to answer my own question), so I would have to
->>>> apply the patches (or fetch the above branch) to study some more.
->>>
->>> Well, patch #16 doesn't contain the lowering, it kinda just enables
->>> the last bits to support (without out-of-bound access) packed structures
->>> including packed bitfields.
->>>
->>
->> What does the 'lowering' gain us? Or, in other words, what is still
->> missing after this series?
-> 
-> As a static checker, nothing is missing and the series is now mainlined.
-> 
-> The 'lowering' only matters if you want to somehow translate the
-> instructions used in the IR (Intermediate Representation) into
-> instructions for a more concrete machine, because now there are things
-> like: 'do a load of a 5-byte word'.
-> 
-> -- Luc
-> 
+$ find . -name rwonce.h
+./include/asm-generic/rwonce.h
+./arch/arm64/include/asm/rwonce.h
+./arch/alpha/include/asm/rwonce.h
 
-Ok thanks, that makes sense.
+Signed-off-by: Tiezhu Yang <yangtiezhu@loongson.cn>
+---
+ include/linux/compiler.h | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-- Jake
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index b8fe0c2..bdbe759 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -243,6 +243,12 @@ static inline void *offset_to_ptr(const int *off)
+  */
+ #define prevent_tail_call_optimization()	mb()
+ 
++#ifdef CONFIG_ARM64
+ #include <asm/rwonce.h>
++#endif
++
++#ifdef CONFIG_ALPHA
++#include <asm/rwonce.h>
++#endif
+ 
+ #endif /* __LINUX_COMPILER_H */
+-- 
+2.1.0
+
