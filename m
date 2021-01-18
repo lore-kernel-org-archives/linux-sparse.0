@@ -2,73 +2,29 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.4 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,MSGID_FROM_MTA_HEADER,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.4 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id A963CC433E0
-	for <linux-sparse@archiver.kernel.org>; Mon, 18 Jan 2021 18:51:40 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D85B7C433DB
+	for <linux-sparse@archiver.kernel.org>; Mon, 18 Jan 2021 20:09:37 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 663B022CA1
-	for <linux-sparse@archiver.kernel.org>; Mon, 18 Jan 2021 18:51:40 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id A1A7122D6F
+	for <linux-sparse@archiver.kernel.org>; Mon, 18 Jan 2021 20:09:37 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S2407652AbhARSu3 (ORCPT
+        id S2388352AbhARKod (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 18 Jan 2021 13:50:29 -0500
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:46810 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S2407718AbhARSpo (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 18 Jan 2021 13:45:44 -0500
-Received: from pps.filterd (m0001303.ppops.net [127.0.0.1])
-        by m0001303.ppops.net (8.16.0.43/8.16.0.43) with SMTP id 10IIbxR4001071;
-        Mon, 18 Jan 2021 10:44:43 -0800
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.com; h=subject : to : cc :
- references : from : message-id : date : in-reply-to : content-type :
- content-transfer-encoding : mime-version; s=facebook;
- bh=zdcXkMI0brlHzakV3N18fHNxl2tGDD54ZYNpfJP0ZP8=;
- b=d32WlKOseYQ/IavGM4tJynbfpucRhPWQ3Ai9F1LsOYdIYZN43DklcHs4w0dZ8ZUWTuQf
- OSD751uFkCUTik844S2ZfjbbO2ezNK6nBO1OXDGhSVWCgNveYLS4B4ZM8SdEWd58iVfr
- 7nJC1zEWy0EJeV6tJm7IBS9RNWC+tTYeAoM= 
-Received: from maileast.thefacebook.com ([163.114.130.16])
-        by m0001303.ppops.net with ESMTP id 363vps0bqm-12
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128 verify=NOT);
-        Mon, 18 Jan 2021 10:44:42 -0800
-Received: from NAM12-DM6-obe.outbound.protection.outlook.com (100.104.31.183)
- by o365-in.thefacebook.com (100.104.35.172) with Microsoft SMTP Server
- (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256) id
- 15.1.1979.3; Mon, 18 Jan 2021 10:44:37 -0800
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=DiLGroO7cIx0nn5hocMssgKegjTjBJwvMBqd4kVbIxQpmSEcpDdMlTlFobjpDcnDK0dFoZ+I5qqb5xr2CvPFlKw2Y54SMNJaizxce0KccCwyT5x/onSFAv6fOACyYEzWKwi7QfaXAjsVoxE8HZ+O5dLE8cOFGOkBWwvgKlNtyTKW/ysS/N0W71anes10DNROXzek2di2nic8x9l6pjW2F0eu6B6YxFlSxfBe3rVbB73BuBkA94ch8gZAxoeZJZV9oKukBa4GUS9BWOLrGaeH3O9h+uGOGnLsrNTqhw7e0pXiyTBb9cekzo0eul7x8mIv5PbE2IxdVbfItjwiOZgd6w==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zdcXkMI0brlHzakV3N18fHNxl2tGDD54ZYNpfJP0ZP8=;
- b=dQcetQFuva/2WO3UlfkElMV6LwI4hHdeWa2t91t2m8XdpGQm3aAsOmU8rNBJO3Zp7cC/Hr4GGdGf5rEf/jmn58xlfQeuQPE/o54jmIM8tb9ftsCAfpd7U/Jb+l5x0TktwiKLK+sMO0Fc0piZmeaAFbqFgZTZzuP/TfSDoMfVU+YReScqUBMKSbpGXNdajvldaNzOBrUYgUHIgUNx2u+exAJ3SM+8Ct9OmG8RPho5TcRBZ09SNeHSHb5ynQxPiQ+ZcCA1HcMWUebuXTYDMaCRjpQHbe7C/Zq8kZOLKjruw/j5OPg5WXM6fiJ3gsTu3/sBlhuwDpr0qPkUjkJl2ySchA==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=fb.com; dmarc=pass action=none header.from=fb.com; dkim=pass
- header.d=fb.com; arc=none
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=fb.onmicrosoft.com;
- s=selector2-fb-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=zdcXkMI0brlHzakV3N18fHNxl2tGDD54ZYNpfJP0ZP8=;
- b=BgaS+yAdEpKsUj6twiH+uVlMEMVVsV7g2TN2ojyouw05CAz/q7iKr7fSkSO76LngzSVi56P5f8H7wp/EDdVwMWYdVYYNlDUI98JYeDkDCnQhan6hmnrechodCTUCkkApSJNc6YcZKwSjazfZLOfvGyEJdYnJfYamJvsAUSVW77Y=
-Authentication-Results: loongson.cn; dkim=none (message not signed)
- header.d=none;loongson.cn; dmarc=none action=none header.from=fb.com;
-Received: from BYAPR15MB4088.namprd15.prod.outlook.com (2603:10b6:a02:c3::18)
- by BYAPR15MB2888.namprd15.prod.outlook.com (2603:10b6:a03:b5::15) with
- Microsoft SMTP Server (version=TLS1_2,
- cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3763.14; Mon, 18 Jan
- 2021 18:44:36 +0000
-Received: from BYAPR15MB4088.namprd15.prod.outlook.com
- ([fe80::9ae:1628:daf9:4b03]) by BYAPR15MB4088.namprd15.prod.outlook.com
- ([fe80::9ae:1628:daf9:4b03%7]) with mapi id 15.20.3763.014; Mon, 18 Jan 2021
- 18:44:36 +0000
-Subject: Re: [PATCH bpf 1/2] samples/bpf: Set flag __SANE_USERSPACE_TYPES__
- for MIPS to fix build warnings
-To:     Tiezhu Yang <yangtiezhu@loongson.cn>,
+        Mon, 18 Jan 2021 05:44:33 -0500
+Received: from mail.loongson.cn ([114.242.206.163]:46270 "EHLO loongson.cn"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S2388223AbhARJ1s (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Mon, 18 Jan 2021 04:27:48 -0500
+Received: from [10.130.0.135] (unknown [113.200.148.30])
+        by mail.loongson.cn (Coremail) with SMTP id AQAAf9DxSL4PVAVguK4GAA--.10639S3;
+        Mon, 18 Jan 2021 17:25:36 +0800 (CST)
+Subject: Re: [PATCH 2/2] compiler.h: Include asm/rwonce.h under ARM64 and
+ ALPHA to fix build errors
+To:     Yonghong Song <yhs@fb.com>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         Alexei Starovoitov <ast@kernel.org>,
         Daniel Borkmann <daniel@iogearbox.net>,
@@ -79,222 +35,89 @@ To:     Tiezhu Yang <yangtiezhu@loongson.cn>,
         KP Singh <kpsingh@kernel.org>,
         Nathan Chancellor <natechancellor@gmail.com>,
         Nick Desaulniers <ndesaulniers@google.com>
-CC:     <linux-sparse@vger.kernel.org>, <netdev@vger.kernel.org>,
-        <bpf@vger.kernel.org>, <clang-built-linux@googlegroups.com>,
-        <linux-mips@vger.kernel.org>, <linux-kernel@vger.kernel.org>,
-        Xuefeng Li <lixuefeng@loongson.cn>
 References: <1610535453-2352-1-git-send-email-yangtiezhu@loongson.cn>
- <1610535453-2352-2-git-send-email-yangtiezhu@loongson.cn>
- <e3eb5919-4573-4576-e6aa-bd8ff56409ed@fb.com>
- <f077bcae-97be-fc7f-c3fa-c6026bfe25d2@loongson.cn>
-From:   Yonghong Song <yhs@fb.com>
-Message-ID: <313a7ed5-a34d-5eed-4715-06fed4a75c40@fb.com>
-Date:   Mon, 18 Jan 2021 10:44:34 -0800
-User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:78.0)
- Gecko/20100101 Thunderbird/78.6.1
-In-Reply-To: <f077bcae-97be-fc7f-c3fa-c6026bfe25d2@loongson.cn>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
-X-Originating-IP: [2620:10d:c090:400::5:4199]
-X-ClientProxiedBy: SJ0PR13CA0006.namprd13.prod.outlook.com
- (2603:10b6:a03:2c0::11) To BYAPR15MB4088.namprd15.prod.outlook.com
- (2603:10b6:a02:c3::18)
+ <1610535453-2352-3-git-send-email-yangtiezhu@loongson.cn>
+ <33050fcc-a4a0-af2e-6fba-dca248f5f23b@fb.com>
+Cc:     linux-sparse@vger.kernel.org, netdev@vger.kernel.org,
+        bpf@vger.kernel.org, clang-built-linux@googlegroups.com,
+        linux-mips@vger.kernel.org, linux-kernel@vger.kernel.org,
+        Xuefeng Li <lixuefeng@loongson.cn>,
+        Sergei Shtylyov <sergei.shtylyov@gmail.com>,
+        kernel test robot <lkp@intel.com>
+From:   Tiezhu Yang <yangtiezhu@loongson.cn>
+Message-ID: <5663510d-2aa5-c1f2-d0c8-5313cc2a4a18@loongson.cn>
+Date:   Mon, 18 Jan 2021 17:25:35 +0800
+User-Agent: Mozilla/5.0 (X11; Linux mips64; rv:45.0) Gecko/20100101
+ Thunderbird/45.4.0
 MIME-Version: 1.0
-X-MS-Exchange-MessageSentRepresentingType: 1
-Received: from [IPv6:2620:10d:c085:21d6::10cf] (2620:10d:c090:400::5:4199) by SJ0PR13CA0006.namprd13.prod.outlook.com (2603:10b6:a03:2c0::11) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.3784.7 via Frontend Transport; Mon, 18 Jan 2021 18:44:35 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 052e3727-a8fd-4fa0-a296-08d8bbe11a8f
-X-MS-TrafficTypeDiagnostic: BYAPR15MB2888:
-X-MS-Exchange-Transport-Forked: True
-X-Microsoft-Antispam-PRVS: <BYAPR15MB28880DCF9FAB63F478618247D3A40@BYAPR15MB2888.namprd15.prod.outlook.com>
-X-FB-Source: Internal
-X-MS-Oob-TLC-OOBClassifiers: OLM:1186;
-X-MS-Exchange-SenderADCheck: 1
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: dT2+a9PcL+sp77zMLyZgZkySxD6KGeh/9ZRZGxOHYyiWRFHNJO4TN5O595yhLDFqoWx/PXRdgc6e9NEMbWlrLa0MsFu+9vVsABSNTh/3MEqMs6nfajY0azjX3iF3lfVeoEHQ6ZIhi/0fqnbnNyKxJc/PA8KuuJvsmjiEira3Tmn8rIW/QecDAoPVaZoxMboGTdC9919yHdrqie1slSso7mZL6q258j6AKcuYZMHGRIjm7Vw/U6Q0/vi0KCx1V8R2EU6Rgn6ZBOXwNDHJaCJz454REj9I0t+xUy2Jg3iwmy6Qeab5QZwIuRHajwKn13TnlaEDvo5fGBjtE/DL2H5Nx19177PlXXdeiE9/7DJOohlqJy9tx3gWv/QZo0AYlNS38EdWfgEedX0uQSzLSd2b4yNEqz/R6zBN2RFuP97LW+tjIG8t5ddrx2vlfEEVduNMsIHVRMPgQCVqus1QR7HX9VOgpC7edkj1dx9FscLjW6jZT0rcCOoqtZxdglnQIx8tcETZUuWGI5m73innRRyFTA==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:BYAPR15MB4088.namprd15.prod.outlook.com;PTR:;CAT:NONE;SFS:(376002)(346002)(366004)(136003)(39860400002)(396003)(8676002)(66556008)(8936002)(31696002)(86362001)(66946007)(66476007)(2906002)(5660300002)(36756003)(921005)(31686004)(110136005)(478600001)(2616005)(52116002)(7416002)(316002)(186003)(83380400001)(6486002)(16526019)(4326008)(53546011)(3714002)(43740500002)(45980500001);DIR:OUT;SFP:1102;
-X-MS-Exchange-AntiSpam-MessageData: =?utf-8?B?cnhzNTNkSnY2VzFuKzc5cjFISHV3c29TczZyU05BN3lZaEpkUEx0S2xaNUVW?=
- =?utf-8?B?RDZXV0hWQ0U5eDUvQmNMSGRnTTZ2djE2cEloQkhCdFcvMW11UzNqcTdpV1E2?=
- =?utf-8?B?QU1XRjF2cW1oWDRJRUNqRFh1bjRQWnY5UTgzalc2SXVpMGt6Z1dlM3d1NW84?=
- =?utf-8?B?NnRqWi90U3FuSVhnQ0ljZkhhdDlzRDNVekhMVnhKc1c5dEk1aXAwT0ZsaXBt?=
- =?utf-8?B?ZHBQOE9sU3VZUVlEejNTS2VoUXNNVHVvSEw4OFU2QTJPYzBkV284SmY1RDAy?=
- =?utf-8?B?ZWM3Tm5RUCtnZ0sxV1Voa1p1NC9YcG5zOVorbWlmT3lHb0REUUlJeEVsdGF1?=
- =?utf-8?B?aHRFZVdVRUFZd05jMHROUC9qd05kRUhGZnpuV3lFcnJ3TXlRbnpsZzBUZTM2?=
- =?utf-8?B?TldZWWZINGlZcTYvKzdFVzZ1NFhQRXI5R2QyQ2MrT2xDWGZkRDY2OE15QTg3?=
- =?utf-8?B?VE1TZE1tU0ZuaUtqQXkzVlM0Q0hRQmN4c1MwcUtPTjlZcGNKamlvcThEOVJ5?=
- =?utf-8?B?Z1RRZFVTZ1paaWpLY2hqT0FsT2NQSWIwYWI0blVXSnk0aUVENjFxUCtSSWpY?=
- =?utf-8?B?VTU2a0taTXcrT1ZsUjVXa1Y0dHN0TzBuZVIxNi9Wa240NTI4djV1Zlk5cldL?=
- =?utf-8?B?WWFqMW1iTWhIY3hBV0NCSWtyUktnNnF4NmdFU1N5amw4bW43ZzhNNGMwOWxI?=
- =?utf-8?B?UWZHaHZIemREVmhHeUhsRExnLzUyT3drS3JoRVFxb0tFbk9TanVjUjlxVE1T?=
- =?utf-8?B?K1BacFBlZmVUUStFeWhnMmRWbzVLNjh2aDJ2TlRNNTdBdmZMWnozZnRFcERO?=
- =?utf-8?B?MEdiSVN0V2QvNk94MXZmQldSV1dGVld1b1ZxYnRvVFZOK3BPSWZ0S29TL0Js?=
- =?utf-8?B?ZXNGVlh3RDhjOG9BZW1JMUZNMFpvcGZaQ1c1bVNLTjBsd0VxZFVZUWlnRGtD?=
- =?utf-8?B?NmlNbFB6a1lKUEhZY2VRZCtRbWFFZmVkblc3WVZaZFdvNnZKRmJRRlZkWmpG?=
- =?utf-8?B?ZFY1dVhEOUlVdGJudHVGbGl2bE9qV2tzVDVZMkk5UytYT3Y0UDBaUzRPNm5R?=
- =?utf-8?B?UWh4eVdLUnFzandEOTcrUjA4ZUxCaUpyVzVTMHJJOFR4aDdaRyt5L3FYTU95?=
- =?utf-8?B?cjNLMHhNdWdVVEE2OWYvaEJpMGZ3Z2FRSnpDMXBEQXprZStrU0NicTRWcENo?=
- =?utf-8?B?MEdpRTJHNHlKQ0M3UUJGRUJGM3NxTjlCeExyTndxdTl6cnIrc0llbFVQN2N6?=
- =?utf-8?B?VkFyajZ4cmVBamFjQ0xCSitpejVLQ3NVdzhLY0JkRzFNdmt3NDRNKzFWeVR3?=
- =?utf-8?B?TlZUK2pKVG0wdWZzNGcvRXZ2Yk9IbjhtRXI1a3JwS3QxYjBJb2VVcjRNYnFs?=
- =?utf-8?B?cE5JMzlqU3JLRVE9PQ==?=
-X-MS-Exchange-CrossTenant-Network-Message-Id: 052e3727-a8fd-4fa0-a296-08d8bbe11a8f
-X-MS-Exchange-CrossTenant-AuthSource: BYAPR15MB4088.namprd15.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 18 Jan 2021 18:44:36.2630
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 8ae927fe-1255-47a7-a2af-5f3a069daaa2
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: 0xuFn0UPomPSW5O/AmOkE8oykEtuhU9TZlTyAhjLWrwVvUOajGSKI3ApvlSOWCdK
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: BYAPR15MB2888
-X-OriginatorOrg: fb.com
-X-Proofpoint-Virus-Version: vendor=fsecure engine=2.50.10434:6.0.343,18.0.737
- definitions=2021-01-18_14:2021-01-18,2021-01-18 signatures=0
-X-Proofpoint-Spam-Details: rule=fb_default_notspam policy=fb_default score=0 mlxlogscore=999
- spamscore=0 malwarescore=0 clxscore=1015 impostorscore=0 phishscore=0
- bulkscore=0 suspectscore=0 lowpriorityscore=0 adultscore=0 mlxscore=0
- priorityscore=1501 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2009150000 definitions=main-2101180112
-X-FB-Internal: deliver
+In-Reply-To: <33050fcc-a4a0-af2e-6fba-dca248f5f23b@fb.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Transfer-Encoding: 7bit
+X-CM-TRANSID: AQAAf9DxSL4PVAVguK4GAA--.10639S3
+X-Coremail-Antispam: 1UD129KBjvJXoW7uw1rtF4UCF4xKw1xJr13Jwb_yoW8GFWxpF
+        4DZr4kKrZ8Wry5JrsYvr12kr43A39xGrW5tF97W348Z3WIqFy7GanYgwn8CF4xWanIqFWI
+        k3W2gry3Jw4jv37anT9S1TB71UUUUUUqnTZGkaVYY2UrUUUUjbIjqfuFe4nvWSU5nxnvy2
+        9KBjDU0xBIdaVrnRJUUUB014x267AKxVW5JVWrJwAFc2x0x2IEx4CE42xK8VAvwI8IcIk0
+        rVWrJVCq3wAFIxvE14AKwVWUJVWUGwA2ocxC64kIII0Yj41l84x0c7CEw4AK67xGY2AK02
+        1l84ACjcxK6xIIjxv20xvE14v26ryj6F1UM28EF7xvwVC0I7IYx2IY6xkF7I0E14v26F4j
+        6r4UJwA2z4x0Y4vEx4A2jsIE14v26F4UJVW0owA2z4x0Y4vEx4A2jsIEc7CjxVAFwI0_Gc
+        CE3s1le2I262IYc4CY6c8Ij28IcVAaY2xG8wAqx4xG64xvF2IEw4CE5I8CrVC2j2WlYx0E
+        2Ix0cI8IcVAFwI0_Jr0_Jr4lYx0Ex4A2jsIE14v26r4j6F4UMcvjeVCFs4IE7xkEbVWUJV
+        W8JwACjcxG0xvEwIxGrwACjI8F5VA0II8E6IAqYI8I648v4I1lFIxGxcIEc7CjxVA2Y2ka
+        0xkIwI1lc7I2V7IY0VAS07AlzVAYIcxG8wCY02Avz4vE14v_GFWl42xK82IYc2Ij64vIr4
+        1l4I8I3I0E4IkC6x0Yz7v_Jr0_Gr1lx2IqxVAqx4xG67AKxVWUJVWUGwC20s026x8GjcxK
+        67AKxVWUGVWUWwC2zVAF1VAY17CE14v26r4a6rW5MIIYrxkI7VAKI48JMIIF0xvE2Ix0cI
+        8IcVAFwI0_Jr0_JF4lIxAIcVC0I7IYx2IY6xkF7I0E14v26r4j6F4UMIIF0xvE42xK8VAv
+        wI8IcIk0rVWrJr0_WFyUJwCI42IY6I8E87Iv67AKxVWUJVW8JwCI42IY6I8E87Iv6xkF7I
+        0E14v26r4j6r4UJbIYCTnIWIevJa73UjIFyTuYvjfU83kuDUUUU
+X-CM-SenderInfo: p1dqw3xlh2x3gn0dqz5rrqw2lrqou0/
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+On 01/14/2021 01:14 AM, Yonghong Song wrote:
+> I do not think this fix is correct. x86 does not define its own
+> rwonce.h and still compiles fine.
+>
+> As noted in the above, we have include/asm-generic/rwonce.h.
+> Once you do a proper build, you will have rwonce.h in arch
+> generated directory like
+>
+> -bash-4.4$ find . -name rwonce.h
+> ./include/asm-generic/rwonce.h
+> ./arch/alpha/include/asm/rwonce.h
+> ./arch/arm64/include/asm/rwonce.h
+> ./arch/x86/include/generated/asm/rwonce.h
+>
+> for mips, it should generated in 
+> arch/mips/include/generated/asm/rwonce.h. Please double check why this 
+> does not happen.
+
+Hi Yonghong,
+
+Thank you very much for your reply.
+You are right, this patch is meaningless.
+
+I find this build error when make M=samples/bpf after make clean,
+so the ./arch/mips/include/generated/asm/rwonce.h is not exist.
+
+After rebuild the kernel, this header file can be found when make
+M=samples/bpf due to samples/bpf/Makefile contains $LINUXINCLUDE.
+
+$ find . -name rwonce.h
+./include/asm-generic/rwonce.h
+./arch/arm64/include/asm/rwonce.h
+./arch/mips/include/generated/asm/rwonce.h
+./arch/alpha/include/asm/rwonce.h
+$ cat ./arch/mips/include/generated/asm/rwonce.h
+#include <asm-generic/rwonce.h>
 
 
-On 1/17/21 7:22 PM, Tiezhu Yang wrote:
-> On 01/14/2021 01:12 AM, Yonghong Song wrote:
->>
->>
->> On 1/13/21 2:57 AM, Tiezhu Yang wrote:
->>> MIPS needs __SANE_USERSPACE_TYPES__ before <linux/types.h> to select
->>> 'int-ll64.h' in arch/mips/include/uapi/asm/types.h and avoid compile
->>> warnings when printing __u64 with %llu, %llx or %lld.
->>
->> could you mention which command produces the following warning?
-> 
-> make M=samples/bpf
-> 
->>
->>>
->>>      printf("0x%02x : %llu\n", key, value);
->>>                       ~~~^          ~~~~~
->>>                       %lu
->>>     printf("%s/%llx;", sym->name, addr);
->>>                ~~~^               ~~~~
->>>                %lx
->>>    printf(";%s %lld\n", key->waker, count);
->>>                ~~~^                 ~~~~~
->>>                %ld
->>>
->>> Signed-off-by: Tiezhu Yang <yangtiezhu@loongson.cn>
->>> ---
->>>   samples/bpf/Makefile        | 4 ++++
->>>   tools/include/linux/types.h | 3 +++
->>>   2 files changed, 7 insertions(+)
->>>
->>> diff --git a/samples/bpf/Makefile b/samples/bpf/Makefile
->>> index 26fc96c..27de306 100644
->>> --- a/samples/bpf/Makefile
->>> +++ b/samples/bpf/Makefile
->>> @@ -183,6 +183,10 @@ BPF_EXTRA_CFLAGS := $(ARM_ARCH_SELECTOR)
->>>   TPROGS_CFLAGS += $(ARM_ARCH_SELECTOR)
->>>   endif
->>>   +ifeq ($(ARCH), mips)
->>> +TPROGS_CFLAGS += -D__SANE_USERSPACE_TYPES__
->>> +endif
->>> +
->>
->> This change looks okay based on description in
->> arch/mips/include/uapi/asm/types.h
->>
->> '''
->> /*
->>  * We don't use int-l64.h for the kernel anymore but still use it for
->>  * userspace to avoid code changes.
->>  *
->>  * However, some user programs (e.g. perf) may not want this. They can
->>  * flag __SANE_USERSPACE_TYPES__ to get int-ll64.h here.
->>  */
->> '''
->>
->>>   TPROGS_CFLAGS += -Wall -O2
->>>   TPROGS_CFLAGS += -Wmissing-prototypes
->>>   TPROGS_CFLAGS += -Wstrict-prototypes
->>> diff --git a/tools/include/linux/types.h b/tools/include/linux/types.h
->>> index 154eb4e..e9c5a21 100644
->>> --- a/tools/include/linux/types.h
->>> +++ b/tools/include/linux/types.h
->>> @@ -6,7 +6,10 @@
->>>   #include <stddef.h>
->>>   #include <stdint.h>
->>>   +#ifndef __SANE_USERSPACE_TYPES__
->>>   #define __SANE_USERSPACE_TYPES__    /* For PPC64, to get LL64 types */
->>> +#endif
->>
->> What problem this patch fixed?
-> 
-> If add "TPROGS_CFLAGS += -D__SANE_USERSPACE_TYPES__" in
-> samples/bpf/Makefile, it appears the following error:
-> 
-> Auto-detecting system features:
-> ...                        libelf: [ on  ]
-> ...                          zlib: [ on  ]
-> ...                           bpf: [ OFF ]
-> 
-> BPF API too old
-> make[3]: *** [Makefile:293: bpfdep] Error 1
-> make[2]: *** [Makefile:156: all] Error 2
-> 
-> With #ifndef __SANE_USERSPACE_TYPES__  in tools/include/linux/types.h,
-> the above error has gone.
-> 
->> If this header is used, you can just
->> change comment from "PPC64" to "PPC64/MIPS", right?
-> 
-> If include <linux/types.h> in the source files which have compile warnings
-> when printing __u64 with %llu, %llx or %lld, it has no effect due to 
-> actually
-> it includes usr/include/linux/types.h instead of 
-> tools/include/linux/types.h,
-> this is because the include-directories in samples/bpf/Makefile are 
-> searched
-> in the order, -I./usr/include is in the front of -I./tools/include.
-> 
-> So I think define __SANE_USERSPACE_TYPES__ for MIPS in samples/bpf/Makefile
-> is proper, at the same time, add #ifndef __SANE_USERSPACE_TYPES__ in
-> tools/include/linux/types.h can avoid build error and have no side effect.
-> 
-> I will send v2 later with mention in the commit message that this is
-> mips related.
+Hi Sergei and kernel test robot,
 
-It would be good if you can add the above information to the commit
-message so people will know what the root cause of the issue.
+Thank you for your suggestion and report,
+please ignore this patch, sorry for the noise.
 
-If I understand correctly, if we could have include path
-"tools/include" earlier than "usr/include", we might not have this 
-issue. The problem is that "usr/include" is preferred first (uapi)
-than "tools/include" (including kernel dev headers).
+Thanks,
+Tiezhu
 
-I am wondering whether we could avoid changes in 
-tools/include/linux/types.h, e.g., by undef __SANE_USER_SPACE_TYPES 
-right before include
-path tools/include. But that sounds like a ugly hack and actually
-the change in tools/include/linux/types.h does not hurt other
-compilations.
-
-So your current change looks good to me, but please have better
-explanation of the problem and why for each change in the commit
-message.
-
-> 
-> Thanks,
-> Tiezhu
-> 
->>
->>> +
->>>   #include <asm/types.h>
->>>   #include <asm/posix_types.h>
->>>
-> 
