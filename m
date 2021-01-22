@@ -2,113 +2,154 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D9BA7C43219
-	for <linux-sparse@archiver.kernel.org>; Thu, 21 Jan 2021 00:48:57 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B7463C433DB
+	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 16:27:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 98FD32389E
-	for <linux-sparse@archiver.kernel.org>; Thu, 21 Jan 2021 00:48:57 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 7B03023A79
+	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 16:27:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1730524AbhAUALI (ORCPT
+        id S1729731AbhAVQ1p (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 20 Jan 2021 19:11:08 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49154 "EHLO
+        Fri, 22 Jan 2021 11:27:45 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49282 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390809AbhATW4B (ORCPT
+        with ESMTP id S1729715AbhAVQ1S (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 20 Jan 2021 17:56:01 -0500
-Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A7727C06138D
-        for <linux-sparse@vger.kernel.org>; Wed, 20 Jan 2021 14:55:20 -0800 (PST)
-Received: by mail-ej1-x62a.google.com with SMTP id 6so35840856ejz.5
-        for <linux-sparse@vger.kernel.org>; Wed, 20 Jan 2021 14:55:20 -0800 (PST)
+        Fri, 22 Jan 2021 11:27:18 -0500
+Received: from mail-ed1-x52e.google.com (mail-ed1-x52e.google.com [IPv6:2a00:1450:4864:20::52e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6E005C061786
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 08:26:34 -0800 (PST)
+Received: by mail-ed1-x52e.google.com with SMTP id d22so7263313edy.1
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 08:26:34 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=prx4TgoAM0iGjwcSsf6XX8du+rp0vqdA31wC2Teo9qk=;
-        b=dbk/tnT9mP8h7HdKE4U8pkVbb9bxIOMLdcYXhMM5NIPfqEG14EPh2Yi9whMffwuQ8b
-         gSUEevNAyqr6cgwjsUkmOkEj6jIdksepXMhkovjp2UxC+ljkNEz6SyuVZ/ZjzUs552hn
-         gSOP/wklOS+/01SrFOV+nDs4Y0a2QtAKhuLRIqAutqoyK5Wh2Y8rkACyPZrAC6xbVB0O
-         HeP7DLPdREvCVD+XgVld37J1cJfVS7WLDvqPkgfpqe652KNUdIh80mPWRRh3rx7V+TWF
-         fl0E6cz7JWhI6vGKHAiVn/VCI9TfU+3yj4nN2xYZlRljDjVw6kXtKWf9/rnmu+0FWMrB
-         STow==
+        h=from:to:cc:subject:date:message-id:in-reply-to:references
+         :mime-version:content-transfer-encoding;
+        bh=0qMrYhw/JpGefi9QcHRMWf1KFYFi1rHH7cCzTpDn30I=;
+        b=d3q/krWld++YczzE0u/Qpk3U6UzXzrcpbrj8qot3skYbt+79XmR00/iX6wlS67budW
+         U44MFOFUwSBasgnE83O6dF4i/A7mIwUIQ4Jwqev9vjVFHx7JfbF4JLrS0R3Tj7IIJQCP
+         CBqVv4V8F4d+fFRll6d3BZDXlx18ycR4D00QX2iLwpp8N1dskNk1Noq9DCQZN36jWV5N
+         Bc2WqS2dej4P0di3TZnYIXaHTXZ+0eCCUeGVIXsrH2JIJIlJ9bTpf1FA+QfZqj33uDwN
+         a6m3YnLhXIyqf2PWu/IJQ2b8Uu3Pslrte/KAUuY7qd17bw+vzIIRggy24h8IqxSp67r1
+         E1sw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=prx4TgoAM0iGjwcSsf6XX8du+rp0vqdA31wC2Teo9qk=;
-        b=YsKOzLU0LDyA4Mswp6jdxiLZcVvposjAQNVJ2uSySbPC3Gxkc31px2RiBp6cKKlz8Y
-         7xHJOyjFHPSQePkr2xAUVqEfF2sfLxC0bxDkeKKiAHbOip9ARLPdWEqxPPdMFYzymSsm
-         jYoRHufySgtDcDIH3rqZU+fq3gIbFkUACEyWfhCKR4/iZuz7albmjaJD0J5Wd/E2L4JE
-         FwFn6mCp9/RLieTZ2fv9lA31q0vjmDgJOoTYgHAd9txTweK0A1LmGsFrot+337BWyYKz
-         MJuIP3uFf177IWRGGVmBu5wcR1JFuWno2yRaLCkLoY2iV6s65Z9Ch0eay1SR/PYfMuGi
-         pUmQ==
-X-Gm-Message-State: AOAM530FA9uWKIb2nC4Sob3h4xPGjKC/Kbu3eCFjCIp/SqIvmhDMgvlx
-        jWgGUQaeGBlSPI4TzvrU92OqnFM7tjY=
-X-Google-Smtp-Source: ABdhPJwDMD+rUJ8oEO7tEoiy6xokbGqSYtHtYSNI3aD+IaT6hl+NiIw/fxkZ1bp33jiAaGuNxOxrrQ==
-X-Received: by 2002:a17:906:3553:: with SMTP id s19mr7220021eja.95.1611183319345;
-        Wed, 20 Jan 2021 14:55:19 -0800 (PST)
-Received: from ltop.local ([2a02:a03f:b7fe:f700:d67:6443:f51a:1cf4])
-        by smtp.gmail.com with ESMTPSA id w18sm1462788ejq.59.2021.01.20.14.55.17
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
+         :references:mime-version:content-transfer-encoding;
+        bh=0qMrYhw/JpGefi9QcHRMWf1KFYFi1rHH7cCzTpDn30I=;
+        b=HjFYIrmPplXOXAGM+JFOi3SWdpzP+dPzhJLZAxqhCbkk6qUcanQr5wcFk4RL2slIh6
+         MF6FtF2dFpH8njR0IoPgH0n0UMn96CZeZoqN3Ec+l3/gVdlhVrD5YrrHZYQvgiP3ojgv
+         H1bsPUTb0zQJognPRWCT+iosfhB5soj3F2C810YnlqSrJSqhK1fh3H/gWFR0sOAKUEds
+         1259nvJ9kdLP1XSQ+q1epCDaKdBzGS+1GrNK4C9nFP2/07sfaKpIOtaM15iN+pm673pt
+         jqpMFQ5a0wPor8CiBIwup8mZwVGyMxpYzMq814Wo3NwUUxqVuHKmeOkun9nF+CkwsTmn
+         gqUA==
+X-Gm-Message-State: AOAM5309vgg1F48PM4yxnOk+3/tr32Q6bXhaMNfUbZ+Ni2J+g7cQYGan
+        E0pXj1KeftyMrlxWhSL8C0bHm0ZTNzM=
+X-Google-Smtp-Source: ABdhPJy89QtPmqAQHn0ez/nf6d/fS6+pj408jxXYGIl9P/RYDNmtZQlIPQ+opoYp56adz0vMkSTe+A==
+X-Received: by 2002:aa7:d0d4:: with SMTP id u20mr3634732edo.203.1611332793161;
+        Fri, 22 Jan 2021 08:26:33 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:acac:599f:da7a:3dd7])
+        by smtp.gmail.com with ESMTPSA id m22sm5717963edp.81.2021.01.22.08.26.30
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 20 Jan 2021 14:55:18 -0800 (PST)
-Date:   Wed, 20 Jan 2021 23:55:17 +0100
+        Fri, 22 Jan 2021 08:26:31 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: 'const' unnamed structures
-Message-ID: <20210120225517.hhckg3rtpbmxrkwu@ltop.local>
+To:     linux-sparse@vger.kernel.org
+Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH] handle qualified anonymous structures
+Date:   Fri, 22 Jan 2021 17:26:25 +0100
+Message-Id: <20210122162625.73007-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.30.0
+In-Reply-To: <CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com>
 References: <CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Jan 20, 2021 at 11:21:46AM -0800, Linus Torvalds wrote:
-> So the kernel was trying to use a unnamed struct to mark a group of
-> fields as being 'const', and while gcc is perfectly happy with that,
-> it turns out clang is not.
+The kernel is trying to use a unnamed struct to mark a group of
+fields as being 'const' and get a warning if one of its member is
+assigned. GCC gives indeed a warning but Sparse and clang don't.
 
-...
+So, the type qualifiers of the anonymous struct need to be propagate
+to the members.
+
+An easy solution is to handle this inside find_identifier(), where
+access to are recursively searched inside sub-structures. It's
+very easy but it feels wrong to do semantics inside this function.
+Worse, it's only working for fields that are effectively accessed,
+doing a type evaluation on the anonymous struct (or its parent)
+would not by itself handle this.
+
+So, the solution chosen here is to handle this during type examination,
+more precisely, inside examine_struct_union_type(), where things are
+a bit more complicated (it can't be done when examining the members
+themselves because only the parent SYM_STRUCT is accessible and the
+qualifiers are in the SYM_NODE, so it needs to be done when examining
+the anonymous struct itself) but can be done for all members.
+
+Note: It would seems to logical to also handle at least all qualifier-like
+      attributes but GCC seems to only bother with the true qualifiers
+      and ignore things like attributes and  alignment specifiers.
+
+Link: lore.kernel.org/r/CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com
+Link: lore.kernel.org/r/CAHk-=wjdJmL22+zk3_rWAfEJJCf=oDxiJ530qk-WNk_Ji0qhxw@mail.gmail.com
+Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+---
+ symbol.c | 26 ++++++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
+
+diff --git a/symbol.c b/symbol.c
+index aa02c8c5ad80..0030afb5f3f5 100644
+--- a/symbol.c
++++ b/symbol.c
+@@ -175,6 +175,30 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
+ 	// warning (sym->pos, "regular: offset=%d", sym->offset);
+ }
  
-> Basically, I see two possibilities
-> 
->  (a) since the const is there in the unnamed sub-struct, we can "fix"
-> it at evaluate lo time, in find_identifier().
-> 
->      We'd have to add a "unsigned int qual" as an argument - initially
-> zero - to "find_identifier()", and then in the recursive unnamed
-> union/struct case we'd or in the qualifiers for this one.
-> 
->      And then we'd modify the symbol result as per the qualifier when
-> we return it.
-> 
-> Honestly, (a) strikes me as ugly and wrong, but it might be simpler
-> than what I think might be the right model:
++///
++// propagate properties of anonymous structs or unions into their members.
++//
++// :note: GCC seems to only propagate the qualifiers.
++// :note: clang doesn't propagate anything at all.
++static void examine_anonymous_member(struct symbol *sym)
++{
++	struct symbol *parent = sym;
++	struct symbol *sub;
++
++	if (parent->type == SYM_NODE)
++		parent = sym->ctype.base_type;
++	if (parent->type != SYM_STRUCT && parent->type != SYM_UNION)
++		return;
++
++	FOR_EACH_PTR(parent->symbol_list, sub) {
++		sub->ctype.modifiers |= sym->ctype.modifiers & MOD_QUALIFIER;
++
++		// if nested, propagate all the way down
++		if (!sub->ident)
++			examine_anonymous_member(sub);
++	} END_FOR_EACH_PTR(sub);
++}
++
+ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance)
+ {
+ 	struct struct_union_info info = {
+@@ -196,6 +220,8 @@ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance
+ 		if (info.flex_array)
+ 			sparse_error(info.flex_array->pos, "flexible array member '%s' is not last", show_ident(info.flex_array->ident));
+ 		examine_symbol_type(member);
++		if (!member->ident)
++			examine_anonymous_member(member);
+ 
+ 		if (member->ctype.alignment > info.max_align && !sym->packed) {
+ 			// Unnamed bitfields do not affect alignment.
+-- 
+2.30.0
 
-Yes, and it would anyway need more than a simple "unsigned int qual"
-because attributes (and alignment via _Alignas()) are also concerned.
-But I don't think an additional argument is needed: merging the
-modifiers, alignment and AS can be done inside find_identifier()
-itself, in the recursive part. This would make it a little less ugly.
-
-> Obviously, the third possibility is to say "ok, clang also gets this
-> wrong, the clang people are trying to argue that the standard is not
-> clear about it, and sparse might as well ignore this until it's a
-> bigger problem".
-
-Hehe, this third possibility is kinda tempting but for once the
-standard seems quite clear to me (the grammar clearly allow it,
-why it should then be ignored at the semantic level?).
-
-I'll look at this in the next days.
-
--- Luc
