@@ -2,168 +2,130 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=ham autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DB58DC433E0
-	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 21:24:33 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1C7B3C433DB
+	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 21:30:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AABF023AF8
-	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 21:24:33 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DB23A23AF8
+	for <linux-sparse@archiver.kernel.org>; Fri, 22 Jan 2021 21:30:41 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S1728893AbhAVVYO (ORCPT
+        id S1727908AbhAVVak (ORCPT
         <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 22 Jan 2021 16:24:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:56906 "EHLO
+        Fri, 22 Jan 2021 16:30:40 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41424 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729368AbhAVVYJ (ORCPT
+        with ESMTP id S1730917AbhAVUMk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 22 Jan 2021 16:24:09 -0500
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id CEDACC06174A
-        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 13:23:28 -0800 (PST)
-Received: by mail-ej1-x62e.google.com with SMTP id gx5so9660876ejb.7
-        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 13:23:28 -0800 (PST)
+        Fri, 22 Jan 2021 15:12:40 -0500
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E9814C061788
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 12:11:59 -0800 (PST)
+Received: by mail-ej1-x635.google.com with SMTP id rv9so9394944ejb.13
+        for <linux-sparse@vger.kernel.org>; Fri, 22 Jan 2021 12:11:59 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ng+UDbYpl22P+1nB4roKmmfd4KXBE6VcTX4pYmzkbIM=;
-        b=Yec4cXLvxZgC1rHVEs0OHPRGdCAyZwK+EUr2XS4JcbQG5xF72ojuRrgNkynXkOiids
-         jOF6dhYWNXq9SKOAJUOHAbfKg0cuARU0oDIvLwAt5AZyy4d2iMlHPrLAPqvJuPp+7PB2
-         li4gZguJFWek+7OI73bbSovqeHRZSni3GqiXT4edZMt3JjZCmLhyh/DAMaKWGheIZv9Q
-         BIxGIPT8HOJz5bj3+gd4xmFIKAIPy12TiaBB7KjySWUbYJnTvWLKyqISvss+vc7mqKCk
-         ZcBD9ppzyZrmyAuci6TKWPfcH8NybU7bMQ7PLpOZTmH+fav1uWJi8dnkr0+VuEtmzM8a
-         6wNg==
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=ybchXrQ9mVE6dKMVMYWYkzKX9keQFRjzCeNMpqp6d2Q=;
+        b=pabwrYFSpxyK+fyFD3eWFVmT4HSRYb4BZ/Y5/Kf2U1vf/vTFo6/2RRiZOsTLFNnGWH
+         UhoFKbV7GV1U/g/yxOzr6zu5J4lpq9sB9XLtaT1/2yb7TeT4PCw//jf9Ey4v/rENbtTd
+         ojSZhKnyI80AbEZE9RRhHK3gqt3xXcc1zSYrc55jLZnifR7blbjvGezF8IDaakT7Ikdo
+         OB0g4jmOLF2jKARwziUbtf5f3TG88q/+cGN/ljg6zR1xy4p5uftT5Z8GpK6jigHDnAfn
+         LZvB/PO5ZFt6Yy4M1U4YLypKbrxnbT1I3iT45wZK87OgXiSrfWDX59Xv5AU9Kw9sE0aO
+         yg3w==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
-         :content-transfer-encoding;
-        bh=ng+UDbYpl22P+1nB4roKmmfd4KXBE6VcTX4pYmzkbIM=;
-        b=HrATUZ2bZI6xyuFHzhfRJDJfwvvG9srHyTgFzq+m2fgEiLOTrdsLNPPt8mkpc6raoW
-         iOXFTqdyNSEU6ldGNtki2xUCMk2l1WZfhcHPAwSds9Rzz+oFuZ1op0TZQsTZDiV1iIki
-         3vRga1U68DeRxLpmlCMG2mmP6RjADLz8iSUhRT+dILXhSfmxYF4QFDw/P9ZpJ9v7Clbx
-         JPFkn3ZUy9BpjtIGrq2yZhamuYOaJKRlwvP0fvorTpu5YdYWuFZZL2ueebx/v1JvjAp5
-         W1FvVWWVnsHKZK0Im1grmuHo00Stcq/Fw9I1MhbzNd4Gp2Mkx3gfV44agxFQ3AickbLB
-         I6ag==
-X-Gm-Message-State: AOAM531PYVRtAZn2bLmACSAFefYpkEeLMbh9uVb15mGFSjXvagTpy6VC
-        +VgtM330RfmBAFjN+HWrqEOIgvbfMnk=
-X-Google-Smtp-Source: ABdhPJxvHfHzdz0lSC7xefaBK4aNOgNPM05esGkllb0zz6AY7I/CfxnNlyNdREnGXlIQN0pRldNqIw==
-X-Received: by 2002:a17:906:a669:: with SMTP id en9mr4370493ejb.353.1611350607645;
-        Fri, 22 Jan 2021 13:23:27 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:e13f:8447:6e59:7f11])
-        by smtp.gmail.com with ESMTPSA id g14sm5230044ejr.105.2021.01.22.13.23.26
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=ybchXrQ9mVE6dKMVMYWYkzKX9keQFRjzCeNMpqp6d2Q=;
+        b=YVoy1LDrtV3RzGceEx05GscOzXRPFNKoTxaI/e/v6UxaULy88xvGH3fRy6QKjpcqHG
+         M3VvyyE0IfvypT7hhqZm7JvsdNQUydtYc0wv8yZfbOytDjesfAk8Ih2Zvuyfmce9PW6k
+         oBUVMA8WE+3ODyAkF4Zmt/czPkdmG10Llc2HwlSHR9hlna4MzWm1Kev7ziu0xP1RZgnW
+         39VcEwZGUYYV6zlskT40LSO4gxMLrVjHDzwKKzamxkr0EGm+nt3AajZN2fTOmVGEGsjM
+         H1qgOphjafEKHljJUz/IaD2O9lySwpYNKKCrUfBW8EzcbeWHCacWr88dBA7FdKRAxSrd
+         P67Q==
+X-Gm-Message-State: AOAM532Ko8LeDCA4qlDjNFmoJk3DJz17vAVRij1H0S91oypXf4Qxk/m5
+        qGC5Tg4plu1MXBwhDqyH1IXHIVCF3nI=
+X-Google-Smtp-Source: ABdhPJy216/0QEtp2ZRsXinibdaWZVCNVFNl5HR+9CBENQPTUg422A+7AhyLt7mZazhIxmtdU2eEEA==
+X-Received: by 2002:a17:906:d0c1:: with SMTP id bq1mr257598ejb.202.1611346318699;
+        Fri, 22 Jan 2021 12:11:58 -0800 (PST)
+Received: from mail ([2a02:a03f:b7fe:f700:e13f:8447:6e59:7f11])
+        by smtp.gmail.com with ESMTPSA id i18sm6037811edt.68.2021.01.22.12.11.56
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 22 Jan 2021 13:23:26 -0800 (PST)
+        Fri, 22 Jan 2021 12:11:57 -0800 (PST)
+Date:   Fri, 22 Jan 2021 21:11:56 +0100
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     linux-sparse@vger.kernel.org
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2] handle qualified anonymous structures
-Date:   Fri, 22 Jan 2021 22:23:23 +0100
-Message-Id: <20210122212323.80203-1-luc.vanoostenryck@gmail.com>
-X-Mailer: git-send-email 2.30.0
+To:     Linus Torvalds <torvalds@linux-foundation.org>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Subject: Re: [PATCH] handle qualified anonymous structures
+Message-ID: <20210122201156.7knkorg7yqr3dwdp@mail>
+References: <CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com>
+ <20210122162625.73007-1-luc.vanoostenryck@gmail.com>
+ <CAHk-=wj3v1hm3x0x_3ui1PQDLbn7V5PoxGyDf_UB6TCxMTgjQw@mail.gmail.com>
+ <CAHk-=wiGgNEWybdqu1pmV_zCXJ+woyni2ie3+2pnFZfzwY8NEA@mail.gmail.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wiGgNEWybdqu1pmV_zCXJ+woyni2ie3+2pnFZfzwY8NEA@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The kernel is trying to use a unnamed struct to mark a group of
-fields as being 'const' and get a warning if one of its member is
-assigned. GCC gives indeed a warning but Sparse and clang don't.
+On Fri, Jan 22, 2021 at 10:01:40AM -0800, Linus Torvalds wrote:
+> On Fri, Jan 22, 2021 at 9:35 AM Linus Torvalds
+> <torvalds@linux-foundation.org> wrote:
+> >
+> > Anyway, looks good, and obviously passes my trivial test-case.
+> 
+> Oh, and then I tried a slightly more complex test-case, and didn't get
+> the result I expected.
+> 
+> In this:
+> 
+>     struct dummy {
+>         const struct {
+>                 int a;
+>                 volatile struct {
+>                         int b;
+>                 };
+>         };
+>         int c;
+>     };
+> 
+>     int *test(struct dummy *a)
+>     {
+>         a->a = a->c;
+>         return &a->b;
+>     }
+> 
+> I expected to also get a warning about how we return the wrong type
+> (ie "&a->b" is of type "const volatile *int", but "test()" returns an
+> "int *").
+> 
+> That seems to have nothing to do with the anonymous struct type,
+> though. It is just because we never warn about that pointer conversion
+> at all.
+>
+> Interestingly, It does show up as a "ptrcast" instruction in the
+> linearization, so I can tell that yes, sparse saw that it was a
+> different pointer type. It just didn't care to warn.
+>
+> Not a huge deal, but I thought I'd mention it since it showed up in my test.
 
-So, the type qualifiers of the anonymous struct need to be propagate
-to the members.
-
-An easy, one-liner, solution is to handle this inside find_identifier(),
-where access to the members are recursively searched inside sub-structures.
-It's very easy but it feels wrong to do semantics inside this function.
-Worse, it's only working for members that are effectively accessed,
-doing a type evaluation on the anonymous struct (or its parent)
-would, by itself, not handle this.
-
-So, the solution chosen here is to handle this during type examination,
-more precisely, inside examine_struct_union_type(), where things are
-a bit more complicated (it can't be done when examining the members
-themselves because only the parent SYM_STRUCT is accessible and the
-qualifiers are in the SYM_NODE, so it needs to be done when examining
-the anonymous struct itself) but can be done for all members.
-
-Note: It would seem logical to also handle at least all qualifier-like
-      attributes but GCC seems to only bother with the true qualifiers
-      and ignore things like attributes and alignment specifiers.
-
-Link: lore.kernel.org/r/CAHk-=wj4Kviw8q2Sx9vrrvyn3uWK-zNi4uGRx=5bzde0Cio8uQ@mail.gmail.com
-Link: lore.kernel.org/r/CAHk-=wjdJmL22+zk3_rWAfEJJCf=oDxiJ530qk-WNk_Ji0qhxw@mail.gmail.com
-Thanks-to: Linus Torvalds <torvalds@linux-foundation.org>
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
-
-Change since v1:
-* factor out the modifiers from the 'sub' loop
-* remove the sym-vs-parent thing thanks to the previous point
-* check that sub-members are always a SYM_NODE (via an assert, sorry)
-
- symbol.c | 28 ++++++++++++++++++++++++++++
- 1 file changed, 28 insertions(+)
-
-diff --git a/symbol.c b/symbol.c
-index aa02c8c5ad80..91352a3a447b 100644
---- a/symbol.c
-+++ b/symbol.c
-@@ -25,6 +25,7 @@
- #include <stdlib.h>
- #include <stdio.h>
- #include <string.h>
-+#include <assert.h>
+Thank you to mention this.
+It's because once an error has been issued, warnings are not displayed
+anymore. For example, the following will return the expected warning:
+	int *test(struct dummy *a)
+	{
+		return &a->b;
+	}
  
- #include "lib.h"
- #include "allocate.h"
-@@ -175,6 +176,31 @@ static void lay_out_struct(struct symbol *sym, struct struct_union_info *info)
- 	// warning (sym->pos, "regular: offset=%d", sym->offset);
- }
- 
-+///
-+// propagate properties of anonymous structs or unions into their members.
-+//
-+// :note: GCC seems to only propagate the qualifiers.
-+// :note: clang doesn't propagate anything at all.
-+static void examine_anonymous_member(struct symbol *sym)
-+{
-+	unsigned long mod = sym->ctype.modifiers & MOD_QUALIFIER;
-+	struct symbol *sub;
-+
-+	if (sym->type == SYM_NODE)
-+		sym = sym->ctype.base_type;
-+	if (sym->type != SYM_STRUCT && sym->type != SYM_UNION)
-+		return;
-+
-+	FOR_EACH_PTR(sym->symbol_list, sub) {
-+		assert(sub->type == SYM_NODE);
-+		sub->ctype.modifiers |= mod;
-+
-+		// if nested, propagate all the way down
-+		if (!sub->ident)
-+			examine_anonymous_member(sub);
-+	} END_FOR_EACH_PTR(sub);
-+}
-+
- static struct symbol * examine_struct_union_type(struct symbol *sym, int advance)
- {
- 	struct struct_union_info info = {
-@@ -196,6 +222,8 @@ static struct symbol * examine_struct_union_type(struct symbol *sym, int advance
- 		if (info.flex_array)
- 			sparse_error(info.flex_array->pos, "flexible array member '%s' is not last", show_ident(info.flex_array->ident));
- 		examine_symbol_type(member);
-+		if (!member->ident)
-+			examine_anonymous_member(member);
- 
- 		if (member->ctype.alignment > info.max_align && !sym->packed) {
- 			// Unnamed bitfields do not affect alignment.
--- 
-2.30.0
+I think it's something that made a lot of sense before but which is
+more and more annoying because it hides legitimate warnings, like here
+(of course, it also hides silly/'second order' warnings).
 
+-- Luc
