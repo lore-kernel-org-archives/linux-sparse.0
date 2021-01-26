@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EF0ABC433DB
-	for <linux-sparse@archiver.kernel.org>; Wed, 27 Jan 2021 03:46:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CC48C433DB
+	for <linux-sparse@archiver.kernel.org>; Wed, 27 Jan 2021 03:46:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BABE4206B9
-	for <linux-sparse@archiver.kernel.org>; Wed, 27 Jan 2021 03:46:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id E2548206B5
+	for <linux-sparse@archiver.kernel.org>; Wed, 27 Jan 2021 03:46:13 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237068AbhA0Dpx (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 26 Jan 2021 22:45:53 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59276 "EHLO
+        id S237072AbhA0DqB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 26 Jan 2021 22:46:01 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58790 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728166AbhAZWFZ (ORCPT
+        with ESMTP id S1728170AbhAZWF0 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 26 Jan 2021 17:05:25 -0500
-Received: from mail-wm1-x334.google.com (mail-wm1-x334.google.com [IPv6:2a00:1450:4864:20::334])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6C4DEC061793
-        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2021 14:04:45 -0800 (PST)
-Received: by mail-wm1-x334.google.com with SMTP id u14so3724974wml.4
-        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2021 14:04:45 -0800 (PST)
+        Tue, 26 Jan 2021 17:05:26 -0500
+Received: from mail-wr1-x42e.google.com (mail-wr1-x42e.google.com [IPv6:2a00:1450:4864:20::42e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51709C061794
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2021 14:04:46 -0800 (PST)
+Received: by mail-wr1-x42e.google.com with SMTP id d16so17426742wro.11
+        for <linux-sparse@vger.kernel.org>; Tue, 26 Jan 2021 14:04:46 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=UiDtC0rGEvDBNd5KuO4qSXEFzNoVybxHjeCANkLQb90=;
-        b=GkgJ/gyJ/Eyxyq/clbj/M4nyNgImYOo+0AXcoeIU6dkKkPaswpxji+ipOrvYe1gJEq
-         EZR5DhnVqaNX8CeJh/V8g46VrNt2On0+nEPVl61hj7YI9MfO7fZU/YUjl8xgkZr5c7wM
-         PccpkzW45hE671dMO2rv8Txeh/sDxYWfZvAeJk4k8ezd8Hy9I4Xgo1T1hWFB2VmFuWvV
-         Jfm64H4mItkpk3vmHkFcInygj4kzntJKJ3IoH1tDdJ3THCT9glFtY83uCA8qg8bli2sq
-         IkIpPKUJJSZuAMg3GvwEKhIqeLOWzmcPbI7LwJ6mzi/jbYy1XB9lQDJFHUfKCRlUIWmS
-         MKIA==
+        bh=kgm7kxF29Ax0Vo6bQpRB0+xryXYstzCCJl7s01b9uBM=;
+        b=UtBavKqqWrhcWOl80vDMmhHzFAJ/4+i0+qnox2WivFJ9yZLIZKEmI1WJqwRkE5pGfi
+         4N6rVQdaz3f6+7piTa20Hk7WZ7xm8F0lqvifmCHqrqmN+BmKdZeti5qgqhY7v9sF4uNJ
+         rsd7hceSYezCOWLezL3x6EmBiJNi189L1eiLajPDu6nd5DYOwqKqBB95l+IPIF7o1U7x
+         NI4xVG2ryU53f1cjl6x6rXpXYp5V5ONJrWb1StPmgBZjz3mPbaS/BWL8ZdC7b46T44q4
+         RC02zs9gY2rvqcaguVfGtp5fuIl5PaH/O/AuKUxcqMP9GvqHUa4czlucFdvfzh/RmGRY
+         sMwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=UiDtC0rGEvDBNd5KuO4qSXEFzNoVybxHjeCANkLQb90=;
-        b=an8z0Ex1/uP+2hElPnk6286CGS91UFuVKnNA7RE85uovuwMMWyw5xnumpUiErKULba
-         1Bop1fPVJZE/FTVp07sdwB9TSeFlj42fuXqJDp7blR35mMhOZtUWyIZizW1z67naJ9Kx
-         hr9cS9a0ObA3vWG/j8vaO5CjOY7Skaf55xhRiDxxKGkuq0dx+hGHaJ6EfH12il0qzL3N
-         8njMFbJw7KC1mjuUB+wYqEPcb8ecxdP5j7KdBKGrOz7Te20e2O+BJhE4b5szSA6sTqYC
-         34iDTyfOmbCFThwaxiz2VCo8GG+rNKmqwSnlDVz1Yuwk4MDeasE7uwrtIadJOgAF/FR7
-         la8w==
-X-Gm-Message-State: AOAM532ZfFcm7opmzNo4YgQGkfjupSY8+3jpkhaCGYdIxTWqWdw83363
-        Q5S/Tq81VFq/d9mbvk29oa0Ad6P1DQY=
-X-Google-Smtp-Source: ABdhPJz6Ib3KNYP1e6lRZecpn8pPCVRTkAUnSpA20rKncYd3AXULfMxRptb486O+mzgulU5MB256Fg==
-X-Received: by 2002:a1c:4984:: with SMTP id w126mr1402302wma.139.1611698684274;
-        Tue, 26 Jan 2021 14:04:44 -0800 (PST)
+        bh=kgm7kxF29Ax0Vo6bQpRB0+xryXYstzCCJl7s01b9uBM=;
+        b=h42IH9wXKRimh6+WMPhwIXFP/xxvkxIBdhcGdRZNRklpUFop1pjqRDuFKP50Op5a7G
+         7mcLmJmJMsRpXT3hx+oSe0ekurkX1bvOfz3B6D2RulZpIPLvY3LcYBGlIMZL3NPnqD20
+         qn93A5snAqBSksqgqQBbcvC7+x7JOZlzBhBA0qc6qgqnugMRoeXI4HRKYcHbddenBKvb
+         XneBtxVJxaHq+Qfk8N0pVPYohuc+JNDASnyXoumNqR5ks8wqat2OkOQx072VKzXVW+tQ
+         +1++2xrB+LHWCwf4QSjZSHSJra7m8n2ck/Nrpf4QZ+PWw3ogw8rdps6m6X75g8J/xM/4
+         wXNg==
+X-Gm-Message-State: AOAM533AADLjRULzqvdie9Zfs7v8nkfEpIutMdxjEi1f/3gd43KZS8m/
+        PAgyP8ugJVjhMirvtGKy1yV604gnNco=
+X-Google-Smtp-Source: ABdhPJxKT1nSKm3zR4eJ6MkQSTCytIkELUIPzSbtWfmKbhh6SrvYegOlTVRc95K4X7pC6txOrf851w==
+X-Received: by 2002:a5d:453b:: with SMTP id j27mr8305833wra.92.1611698685163;
+        Tue, 26 Jan 2021 14:04:45 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:285a:40db:3257:f0fd])
-        by smtp.gmail.com with ESMTPSA id b132sm5268447wmh.21.2021.01.26.14.04.43
+        by smtp.gmail.com with ESMTPSA id b132sm5268447wmh.21.2021.01.26.14.04.44
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 26 Jan 2021 14:04:43 -0800 (PST)
+        Tue, 26 Jan 2021 14:04:44 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 07/10] cmps: canonicalize SMIN/SMAX +- 1 --> EQ/NE
-Date:   Tue, 26 Jan 2021 23:04:29 +0100
-Message-Id: <20210126220432.58265-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 08/10] cmps: canonicalize signed compares with constant
+Date:   Tue, 26 Jan 2021 23:04:30 +0100
+Message-Id: <20210126220432.58265-9-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210126220432.58265-1-luc.vanoostenryck@gmail.com>
 References: <20210126220432.58265-1-luc.vanoostenryck@gmail.com>
@@ -72,62 +72,50 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Compares with SMIN  + 1 or SMAX - 1 are equivalent to an equality
-testing. For example, (x < SMIN + 1) is the same as (x == SMIN).
+Modify the constants to canonicalize (x < C) to (x <= (C-1)) and
+(x <= C) to (x > (C-1)). This choice is partially arbitrary but
+1) it's the one with the smallest positive constants,
+2) it eliminates all OP_SET_LT & OP_SET_GE with a constant.
+A disadvantage of this choice is that we lost some compares with 0:
+(x < 0) is now canonicalized into (x <= -1).
 
-Canonicalize these to the equality testing since these are usually
-simpler to handle.
+Note: Another good choice would be to canonicalize using the
+      smallest absolute constants. This would keep compares with 0
+      but would also keep the 4 kinds of comparison.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                               | 8 ++++++++
- validation/optim/canonical-cmpe-minmax.c | 1 -
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ simplify.c                        | 2 ++
+ validation/optim/canonical-cmps.c | 1 -
+ 2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index f7c6c68d4ce9..ad3adb11595e 100644
+index ad3adb11595e..b29f5d5b2444 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -1175,24 +1175,32 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
- 			return replace_with_pseudo(insn, value_pseudo(0));
- 		if (value == sign_mask(size))	// (x <  SMAX) --> (x != SMAX)
+@@ -1177,6 +1177,7 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
  			return replace_opcode(insn, OP_SET_NE);
-+		if (value == sign_bit(size) + 1)// (x < SMIN + 1) --> (x == SMIN)
-+			return replace_binop_value(insn, OP_SET_EQ, sign_bit(size));
+ 		if (value == sign_bit(size) + 1)// (x < SMIN + 1) --> (x == SMIN)
+ 			return replace_binop_value(insn, OP_SET_EQ, sign_bit(size));
++		changed |= replace_binop_value(insn, OP_SET_LE, (value - 1) & bits);
  		break;
  	case OP_SET_LE:
  		if (value == sign_mask(size))	// (x <= SMAX) --> 1
- 			return replace_with_pseudo(insn, value_pseudo(1));
- 		if (value == sign_bit(size))	// (x <= SMIN) --> (x == SMIN)
+@@ -1193,6 +1194,7 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
  			return replace_opcode(insn, OP_SET_EQ);
-+		if (value == sign_mask(size) - 1) // (x <= SMAX - 1) --> (x != SMAX)
-+			return replace_binop_value(insn, OP_SET_NE, sign_mask(size));
- 		break;
- 	case OP_SET_GE:
- 		if (value == sign_bit(size))	// (x >= SMIN) --> 1
- 			return replace_with_pseudo(insn, value_pseudo(1));
- 		if (value == sign_mask(size))	// (x >= SMAX) --> (x == SMAX)
- 			return replace_opcode(insn, OP_SET_EQ);
-+		if (value == sign_bit(size) + 1)// (x >= SMIN + 1) --> (x != SMIN)
-+			return replace_binop_value(insn, OP_SET_NE, sign_bit(size));
+ 		if (value == sign_bit(size) + 1)// (x >= SMIN + 1) --> (x != SMIN)
+ 			return replace_binop_value(insn, OP_SET_NE, sign_bit(size));
++		changed |= replace_binop_value(insn, OP_SET_GT, (value - 1) & bits);
  		break;
  	case OP_SET_GT:
  		if (value == sign_mask(size))	// (x >  SMAX) --> 0
- 			return replace_with_pseudo(insn, value_pseudo(0));
- 		if (value == sign_bit(size))	// (x >  SMIN) --> (x != SMIN)
- 			return replace_opcode(insn, OP_SET_NE);
-+		if (value == sign_mask(size) - 1) // (x > SMAX - 1) --> (x == SMAX)
-+			return replace_binop_value(insn, OP_SET_EQ, sign_mask(size));
- 		break;
- 
- 	case OP_SET_B:
-diff --git a/validation/optim/canonical-cmpe-minmax.c b/validation/optim/canonical-cmpe-minmax.c
-index c72819244b95..32b272435fa2 100644
---- a/validation/optim/canonical-cmpe-minmax.c
-+++ b/validation/optim/canonical-cmpe-minmax.c
-@@ -10,7 +10,6 @@ int ge_smin(int a) { return (a >= (SMIN + 1)) == (a != SMIN); }
+diff --git a/validation/optim/canonical-cmps.c b/validation/optim/canonical-cmps.c
+index f42664b21e04..42801cdce520 100644
+--- a/validation/optim/canonical-cmps.c
++++ b/validation/optim/canonical-cmps.c
+@@ -10,7 +10,6 @@ _Bool ge_x(int a) { return (a >= 1234) == (a > 1233); }
  /*
-  * check-name: canonical-cmpe-minmax
+  * check-name: canonical-cmps
   * check-command: test-linearize -Wno-decl $file
 - * check-known-to-fail
   *
