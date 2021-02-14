@@ -2,132 +2,97 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=unavailable autolearn_force=no
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4E669C433E0
-	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 17:17:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 1785AC433E0
+	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 18:41:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 1367664DCF
-	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 17:17:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id DAC1E64DFF
+	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 18:41:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229740AbhBNRRq (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 14 Feb 2021 12:17:46 -0500
-Received: from honk.sigxcpu.org ([24.134.29.49]:49700 "EHLO honk.sigxcpu.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S229884AbhBNRRo (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Feb 2021 12:17:44 -0500
-X-Greylist: delayed 641 seconds by postgrey-1.27 at vger.kernel.org; Sun, 14 Feb 2021 12:17:43 EST
-Received: from localhost (localhost [127.0.0.1])
-        by honk.sigxcpu.org (Postfix) with ESMTP id CB983FB03;
-        Sun, 14 Feb 2021 18:06:18 +0100 (CET)
-X-Virus-Scanned: Debian amavisd-new at honk.sigxcpu.org
-Received: from honk.sigxcpu.org ([127.0.0.1])
-        by localhost (honk.sigxcpu.org [127.0.0.1]) (amavisd-new, port 10024)
-        with ESMTP id 3oNCoDZm0plg; Sun, 14 Feb 2021 18:06:16 +0100 (CET)
-Date:   Sun, 14 Feb 2021 18:06:15 +0100
-From:   Guido =?iso-8859-1?Q?G=FCnther?= <agx@sigxcpu.org>
-To:     kernel test robot <rong.a.chen@intel.com>
-Cc:     Heikki Krogerus <heikki.krogerus@linux.intel.com>,
-        Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
-        linux-kernel@vger.kernel.org, linux-usb@vger.kernel.org,
-        kbuild-all@lists.01.org, linux-sparse@vger.kernel.org
+        id S229758AbhBNSlB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 14 Feb 2021 13:41:01 -0500
+Received: from avasout02.plus.net ([212.159.14.17]:34833 "EHLO
+        avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229642AbhBNSlA (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Sun, 14 Feb 2021 13:41:00 -0500
+X-Greylist: delayed 543 seconds by postgrey-1.27 at vger.kernel.org; Sun, 14 Feb 2021 13:40:59 EST
+Received: from [10.0.2.15] ([147.147.167.73])
+        by smtp with ESMTPA
+        id BMAmlWt0bjOtyBMAnlyiRA; Sun, 14 Feb 2021 18:31:09 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+        t=1613327469; bh=yk6k3r3Lc+Q2xV1cJNES+LP60UeYdJigmbJYZoJliEY=;
+        h=Subject:To:References:Cc:From:Date:In-Reply-To;
+        b=gfHBgn2nr6eEYv5XI4rK6jaxgHcWDd9bEM25jKV1mTY4aV5X1wJ4z/Pv4gZv2fT3g
+         RFk77Mvut43UUrw8QTIHy//ULc9F0VzDe/aS9RArg+pU2vdsLz9dLgOqbINULFpjm7
+         gdXZhjqnYklUGSxXYVv5kvPyuW6uCPA9cJPTRLEHuwQaVjtnqiJKpcqbIqP88cEqiA
+         mGpBWk/2XtMmVD6Xln1vnp7VgSaXsz/Q7HnCro8uUR5Sc+CMSGxf2acmUnWThXbdGJ
+         KjW0zd2d5uuiVJs4UT6EBKE6MecxXB+IRuHvjdusT/Od6ODj4+e8RfumgIWhC0LtG0
+         lQ/tMyBXyFZag==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.3 cv=UcTKtJaN c=1 sm=1 tr=0
+ a=nK5asC+3lBOC3EoKtwbYYg==:117 a=nK5asC+3lBOC3EoKtwbYYg==:17
+ a=IkcTkHD0fZMA:10 a=QyXUC8HyAAAA:8 a=lYq4HjzFCrfmUBwGw_8A:9 a=QEXdDO2ut3YA:10
+X-AUTH: ramsayjones@:2500
 Subject: Re: [PATCH v2 2/4] usb: typec: tps6598x: Add trace event for status
  register
-Message-ID: <YClYh7pqDlbXy8qh@bogon.m.sigxcpu.org>
+To:     =?UTF-8?Q?Guido_G=c3=bcnther?= <agx@sigxcpu.org>
 References: <651ac50b9ff6ed3db8cab9f176514900f6a02a0c.1613131413.git.agx@sigxcpu.org>
- <20210213031237.GP219708@shao2-debian>
+ <20210213031237.GP219708@shao2-debian> <YClYh7pqDlbXy8qh@bogon.m.sigxcpu.org>
+Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>
+From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
+Message-ID: <6a8eb07f-16d5-f461-cf0b-6c4aaf93b014@ramsayjones.plus.com>
+Date:   Sun, 14 Feb 2021 18:31:08 +0000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
+In-Reply-To: <YClYh7pqDlbXy8qh@bogon.m.sigxcpu.org>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
 Content-Transfer-Encoding: 8bit
-In-Reply-To: <20210213031237.GP219708@shao2-debian>
+X-CMAE-Envelope: MS4wfEE5ufXw+kJ92UNnX3AIS9iRpF55xeJYNjK0/nNmIXp1OXxEWHMq0GcGwptj+BhVcSItCFONvLTSE+dTVG+MNsSEBWVSFLQc9b4VnVPlKnkZi3ewuEnU
+ VWBUQCD+5Q4gX+97D5LutejG71wTzKT1pBSuh89al+Gmc647M5LSKNHc/96/WSHoUlAL30vneFqwaw==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi ,
-On Sat, Feb 13, 2021 at 11:12:37AM +0800, kernel test robot wrote:
-> Hi "Guido,
-> 
-> I love your patch! Perhaps something to improve:
-> 
-> [auto build test WARNING on usb/usb-testing]
-> [also build test WARNING on v5.11-rc7 next-20210211]
-> [If your patch is applied to the wrong git tree, kindly drop us a note.
-> And when submitting patch, we suggest to use '--base' as documented in
-> https://git-scm.com/docs/git-format-patch]
-> 
-> url:    https://github.com/0day-ci/linux/commits/Guido-G-nther/usb-typec-tps6598x-Add-IRQ-flag-and-register-tracing/20210212-200855
-> base:   https://git.kernel.org/pub/scm/linux/kernel/git/gregkh/usb.git usb-testing
-> config: openrisc-randconfig-s032-20210209 (attached as .config)
-> compiler: or1k-linux-gcc (GCC) 9.3.0
-> reproduce:
->         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbin/make.cross -O ~/bin/make.cross
->         chmod +x ~/bin/make.cross
->         # apt-get install sparse
->         # sparse version: v0.6.3-215-g0fb77bb6-dirty
->         # https://github.com/0day-ci/linux/commit/ba45e1d5e1fd25b6aed8724106e6c7d5adef7a20
->         git remote add linux-review https://github.com/0day-ci/linux
->         git fetch --no-tags linux-review Guido-G-nther/usb-typec-tps6598x-Add-IRQ-flag-and-register-tracing/20210212-200855
->         git checkout ba45e1d5e1fd25b6aed8724106e6c7d5adef7a20
->         # save the attached .config to linux build tree
->         COMPILER_INSTALL_PATH=$HOME/0day COMPILER=gcc-9.3.0 make.cross C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' ARCH=openrisc 
-> 
-> If you fix the issue, kindly add following tag as appropriate
-> Reported-by: kernel test robot <rong.a.chen@intel.com>
-> 
-> 
-> "sparse warnings: (new ones prefixed by >>)"
->    drivers/usb/typec/tps6598x.c: note: in included file (through include/trace/trace_events.h, include/trace/define_trace.h, drivers/usb/typec/tps6598x_trace.h):
-> >> drivers/usb/typec/./tps6598x_trace.h:157:1: sparse: sparse: too long token expansion
-> 
 
-I looked around but didn't find any hints how to fix this. Any pointers
-I missed (added the sparse list to cc:)?
+[trimmed CC: list]
 
-Cheers,
- -- Guido
-
-> vim +157 drivers/usb/typec/./tps6598x_trace.h
+On 14/02/2021 17:06, Guido GÃ¼nther wrote:
+[snip]
+>> If you fix the issue, kindly add following tag as appropriate
+>> Reported-by: kernel test robot <rong.a.chen@intel.com>
+>>
+>>
+>> "sparse warnings: (new ones prefixed by >>)"
+>>    drivers/usb/typec/tps6598x.c: note: in included file (through include/trace/trace_events.h, include/trace/define_trace.h, drivers/usb/typec/tps6598x_trace.h):
+>>>> drivers/usb/typec/./tps6598x_trace.h:157:1: sparse: sparse: too long token expansion
+>>
 > 
-> c90c0282e4ce33 Guido Günther 2021-02-12  156  
-> ba45e1d5e1fd25 Guido Günther 2021-02-12 @157  TRACE_EVENT(tps6598x_status,
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  158  	    TP_PROTO(u32 status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  159  	    TP_ARGS(status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  160  
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  161  	    TP_STRUCT__entry(
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  162  			     __field(u32, status)
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  163  			     ),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  164  
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  165  	    TP_fast_assign(
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  166  			   __entry->status = status;
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  167  			   ),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  168  
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  169  	    TP_printk("conn: %s, pp_5v0: %s, pp_hv: %s, pp_ext: %s, pp_cable: %s, "
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  170  		      "pwr-src: %s, vbus: %s, usb-host: %s, legacy: %s, flags: %s",
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  171  		      show_status_conn_state(__entry->status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  172  		      show_status_pp_switch_state(TPS_STATUS_PP_5V0_SWITCH(__entry->status)),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  173  		      show_status_pp_switch_state(TPS_STATUS_PP_HV_SWITCH(__entry->status)),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  174  		      show_status_pp_switch_state(TPS_STATUS_PP_EXT_SWITCH(__entry->status)),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  175  		      show_status_pp_switch_state(TPS_STATUS_PP_CABLE_SWITCH(__entry->status)),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  176  		      show_status_power_sources(__entry->status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  177  		      show_status_vbus_status(__entry->status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  178  		      show_status_usb_host_present(__entry->status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  179  		      show_status_legacy(__entry->status),
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  180  		      show_status_flags(__entry->status)
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  181  		    )
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  182  );
-> ba45e1d5e1fd25 Guido Günther 2021-02-12  183  
-> 
-> ---
-> 0-DAY CI Kernel Test Service, Intel Corporation
-> https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
+> I looked around but didn't find any hints how to fix this. Any pointers
+> I missed (added the sparse list to cc:)?
 
+This is a limitation of sparse; when using the 'stringize' pre-processor
+operator #, the maximum size of the resulting string is about 8k (if I
+remember correctly).
 
-> _______________________________________________
-> kbuild mailing list -- kbuild@lists.01.org
-> To unsubscribe send an email to kbuild-leave@lists.01.org
+It just so happens that I have a WIP patch from 2011 hanging around to
+fix this - I didn't submit the patch, since it was easier to change the
+original source (so that it didn't need such a huge string!). ;-)
+
+Also, it was a very 'quick-n-dirty' patch which could probably be somewhat
+improved (and may not even apply to the current codebase*).
+
+ATB,
+Ramsay Jones
+
+*) I just tried to apply the patch but, as expected, there are conflicts.
+
 
