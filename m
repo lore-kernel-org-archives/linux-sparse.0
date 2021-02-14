@@ -2,106 +2,114 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5275BC433E6
-	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 19:08:36 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7D498C433DB
+	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 19:32:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 2346364E56
-	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 19:08:36 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 465A964E29
+	for <linux-sparse@archiver.kernel.org>; Sun, 14 Feb 2021 19:32:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229789AbhBNTIY (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 14 Feb 2021 14:08:24 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60544 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229772AbhBNTIW (ORCPT
+        id S229772AbhBNTc0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 14 Feb 2021 14:32:26 -0500
+Received: from avasout02.plus.net ([212.159.14.17]:37605 "EHLO
+        avasout02.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229788AbhBNTcZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 14 Feb 2021 14:08:22 -0500
-Received: from mail-lj1-x232.google.com (mail-lj1-x232.google.com [IPv6:2a00:1450:4864:20::232])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73F34C061756
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Feb 2021 11:07:36 -0800 (PST)
-Received: by mail-lj1-x232.google.com with SMTP id k22so4626133ljg.3
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Feb 2021 11:07:36 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=+iR6zFaRNY/fhsrzqmwn/JVZVFCvk6DBCPYDYIQyHfo=;
-        b=RI+o6311ff6/KY2oB1MDn2aYFIZ37ZO7+ElRP2boyLDgrEezQY2kcJmhjWwQssySKS
-         o3jxGgKHe3icceIXdUvRBS4zM10EMA0Sff4F62aHaU4ESBBDXYXw4cash1EmqdeDAWhj
-         SSPqJrJI3i2beVLxhS1rUn455sMCpu97c6TWM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20161025;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=+iR6zFaRNY/fhsrzqmwn/JVZVFCvk6DBCPYDYIQyHfo=;
-        b=stqygn86tYun0bEoStV4NclK2uq8su6yqyZCUw1oCFjckfETBKR2qczANApva5ooS/
-         vvNG+GasE6ABVpab+a+yoB7MnzHRSni1m/LehJcp9gFPRNlHpp5ugjySq3nuEVsa60yw
-         TAzrEpXHIPZgQYO2EZbXzpx74SVQw6ULsmNxSreU7XVgrX/nwHKCYlQyUnbXoynMvDNN
-         SvmgsQzhu0ti9KNnjx3K5ljY3LdNj5nrBBI3q2V0R15jsyda6v+XBYfpEYJcSeqyk+xb
-         IoLPmhXeuihhzNzovKU1mTI1wDCXQHLPQ53upWywuYzTafqJBpxEJPQn1JRvM08IZqO2
-         dlmg==
-X-Gm-Message-State: AOAM530x65oGgALVoo1+tLxlL+ouupEo6ThwH2p46dzhv8RDFefVoyZe
-        bP6CjuGtbIYp5+fHUsN0P5JhGKrFSGWr3A==
-X-Google-Smtp-Source: ABdhPJyKWg264LgONxdKPlsCjvuzaGnVCfSFfIGYqNLDuoApqi44ZTh/GLHIZlN8i6Y5ubLb912C8g==
-X-Received: by 2002:a2e:8158:: with SMTP id t24mr6153384ljg.260.1613329654463;
-        Sun, 14 Feb 2021 11:07:34 -0800 (PST)
-Received: from mail-lj1-f178.google.com (mail-lj1-f178.google.com. [209.85.208.178])
-        by smtp.gmail.com with ESMTPSA id r25sm42720lfn.213.2021.02.14.11.07.33
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 14 Feb 2021 11:07:33 -0800 (PST)
-Received: by mail-lj1-f178.google.com with SMTP id q14so5285530ljp.4
-        for <linux-sparse@vger.kernel.org>; Sun, 14 Feb 2021 11:07:33 -0800 (PST)
-X-Received: by 2002:a05:651c:112:: with SMTP id a18mr7593997ljb.465.1613329653401;
- Sun, 14 Feb 2021 11:07:33 -0800 (PST)
-MIME-Version: 1.0
-References: <651ac50b9ff6ed3db8cab9f176514900f6a02a0c.1613131413.git.agx@sigxcpu.org>
- <20210213031237.GP219708@shao2-debian> <YClYh7pqDlbXy8qh@bogon.m.sigxcpu.org>
- <6a8eb07f-16d5-f461-cf0b-6c4aaf93b014@ramsayjones.plus.com> <CAHk-=wjCAVj7J+KAC1pvtdeM-c76oXZq7k=v40-maKjTo6qfVw@mail.gmail.com>
-In-Reply-To: <CAHk-=wjCAVj7J+KAC1pvtdeM-c76oXZq7k=v40-maKjTo6qfVw@mail.gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Sun, 14 Feb 2021 11:07:17 -0800
-X-Gmail-Original-Message-ID: <CAHk-=wjvoGNnqWQiz3js43fiXf9kcAfCbABaHdz98Q+3-3zg6A@mail.gmail.com>
-Message-ID: <CAHk-=wjvoGNnqWQiz3js43fiXf9kcAfCbABaHdz98Q+3-3zg6A@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] usb: typec: tps6598x: Add trace event for status register
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
+        Sun, 14 Feb 2021 14:32:25 -0500
+Received: from [10.0.2.15] ([147.147.167.73])
+        by smtp with ESMTPA
+        id BN7JlWwUqjOtyBN7KlyjNE; Sun, 14 Feb 2021 19:31:39 +0000
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
+        t=1613331099; bh=rbBTkQvF1/bHKKJPCULfkb7AgNO6MtpJ1dpZEYcT4v4=;
+        h=Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=KgyiiVzXLbMdFHwjT7zzZyt1Q0Ig8zL2Gox3iU2hCMfAbtOVbzEGVt+Uldoo56rwD
+         80XucEghPm55KJVYMogSTWC6kWLgrH4Xbb4HGQqz9WIgMbsUxKWOKePtiECQ2Fz6WG
+         21nPGQPOL0TxS8Tr63wmN6GJJu1eau5RAta0qUtEtJOC1WWZhHTuevaA3qJbkVSdyV
+         h6s5paFEly9fwj0+snCb/kXq11mVVU1YwdfwC7PMT8wpqrogYIr95BpY3IEYVVuljP
+         wi9aLD5t5KBdy1ZslTjK0YfnGvDudPztKyFy4IwI9Wso+lQSHiwb385Q7wZH372tX2
+         A/0emcUVTNVcw==
+X-Clacks-Overhead: "GNU Terry Pratchett"
+X-CM-Score: 0.00
+X-CNFS-Analysis: v=2.3 cv=UcTKtJaN c=1 sm=1 tr=0
+ a=nK5asC+3lBOC3EoKtwbYYg==:117 a=nK5asC+3lBOC3EoKtwbYYg==:17
+ a=IkcTkHD0fZMA:10 a=EBOSESyhAAAA:8 a=Wm_VZl6z05tM19AFg1QA:9 a=QEXdDO2ut3YA:10
+ a=yJM6EZoI5SlJf8ks9Ge_:22
+X-AUTH: ramsayjones@:2500
+Subject: Re: [PATCH v2 2/4] usb: typec: tps6598x: Add trace event for status
+ register
+To:     Linus Torvalds <torvalds@linux-foundation.org>,
         Greg Kroah-Hartman <gregkh@linuxfoundation.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-usb@vger.kernel.org
-Cc:     =?UTF-8?Q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>,
+Cc:     =?UTF-8?Q?Guido_G=c3=bcnther?= <agx@sigxcpu.org>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <651ac50b9ff6ed3db8cab9f176514900f6a02a0c.1613131413.git.agx@sigxcpu.org>
+ <20210213031237.GP219708@shao2-debian> <YClYh7pqDlbXy8qh@bogon.m.sigxcpu.org>
+ <6a8eb07f-16d5-f461-cf0b-6c4aaf93b014@ramsayjones.plus.com>
+ <CAHk-=wjCAVj7J+KAC1pvtdeM-c76oXZq7k=v40-maKjTo6qfVw@mail.gmail.com>
+From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
+Message-ID: <c48e4250-a42a-9f99-1280-69b0b5cfb69d@ramsayjones.plus.com>
+Date:   Sun, 14 Feb 2021 19:31:37 +0000
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
+ Thunderbird/68.10.0
+MIME-Version: 1.0
+In-Reply-To: <CAHk-=wjCAVj7J+KAC1pvtdeM-c76oXZq7k=v40-maKjTo6qfVw@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-GB
+Content-Transfer-Encoding: 7bit
+X-CMAE-Envelope: MS4wfNP4XvRkmslJwffwPQeMIGYrKbTU61JRu5ZUxKvTcxp9GMfdQDrom3Wkch4HgFGUNKYwx0cCH+ZuOJx/z5lSpS2ZfBjLfC1wGKSqJ5KxzHf1fAP7ElsZ
+ OUJyceFi3Tz/0AAAuDLhjc9g1+3AQVf164fH9NjDZsyjTcd0+9PrDtE5Fkga8z22xjiFVBq6PxlcVg==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, Feb 14, 2021 at 11:00 AM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
+
+
+On 14/02/2021 19:00, Linus Torvalds wrote:
+> On Sun, Feb 14, 2021 at 10:42 AM Ramsay Jones
+> <ramsay@ramsayjones.plus.com> wrote:
+>>
+>>>
+>>> I looked around but didn't find any hints how to fix this. Any pointers
+>>> I missed (added the sparse list to cc:)?
+>>
+>> This is a limitation of sparse; when using the 'stringize' pre-processor
+>> operator #, the maximum size of the resulting string is about 8k (if I
+>> remember correctly).
+> 
+> Well, yes and no.
+> 
 > The C89 standard actually says that a string literal can be at most
 > 509 characters to be portable. C99 increased it to 4095 characters.
->
+> 
 > Sparse makes the limit higher, and the limit could easily be expanded
 > way past 8kB - but the point is that large string literals are
 > actually not guaranteed to be valid C.
+> 
+> So honestly, it really sounds like that TRACE_EVENT() thing is doing
+> something it shouldn't be doing.
 
-Looking around, there's a couple of other similar cases:
+Yep, as I said, I didn't submit the patch - rather I changed the source
+so as not to need such a long string.
 
-  drivers/infiniband/hw/hfi1/./trace_tx.h:727:1: error: too long token expansion
-  arch/x86/purgatory/kexec-purgatory.c:1340:9: warning: trying to
-concatenate 21400-character string (8191 bytes max)
-  drivers/scsi/constants.c:318:9: warning: trying to concatenate
-26550-character string (8191 bytes max)
-  kernel/trace/trace.c:5290:1: warning: trying to concatenate
-10842-character string (8191 bytes max)
+> I don't think there's any fundamental limit why sparse does 8kB as a
+> limit (just a few random buffers). Making sparse accept larger ones
+> should be as simple as just increasing MAX_STRING, but I really don't
+> think the kernel should encourage that kind of excessive string sizes.
 
-but those four are the only ones I see from a quick x86-64 allmodconfig build.
+I agree, but I wiggled my patch (which doesn't increase MAX_STRING) to
+apply to the current codebase, and ... it now fails two tests! ;-)
+(It seems, in the intervening 9 years, the show_token_sequence() function
+fixed the quoting of double-quotes in the resulting strings, which
+my patch fails to do).
 
-Please try to avoid it.
+Sorry for the noise.
 
-          Linus
+ATB,
+Ramsay Jones
+
