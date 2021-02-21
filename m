@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 89B32C433E9
-	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:35:54 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D469FC433DB
+	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:36:35 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5A72D61606
-	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:35:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 9F78964EBE
+	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:36:35 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231760AbhBUWfp (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Feb 2021 17:35:45 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52974 "EHLO
+        id S231767AbhBUWgU (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Feb 2021 17:36:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53112 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231695AbhBUWfk (ORCPT
+        with ESMTP id S231752AbhBUWgS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Feb 2021 17:35:40 -0500
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8C06BC06178B
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:34:59 -0800 (PST)
-Received: by mail-ej1-x629.google.com with SMTP id d8so26228273ejc.4
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:34:59 -0800 (PST)
+        Sun, 21 Feb 2021 17:36:18 -0500
+Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1C08C061793
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:35:00 -0800 (PST)
+Received: by mail-ej1-x633.google.com with SMTP id u20so25515747ejb.7
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:35:00 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=/EzbR+Du2BxaJJadZeD2HbcmcwMUcvujgdONk2vLKNQ=;
-        b=JGMslxXiA4l/HqLLmh0a7bkzBkb3dFSaO2ozayzefDIZheaVUfv8cYetPfli0vrGt3
-         orJS0zHUUMBwgxoHOGR5Gy9Xy2Y6eJG/rSCAQJNBwAjwbD7sMJjzDYUYaU4jnNbr1iWN
-         3jV8CgiFQfHzsbvB1ZqKmJWA09CXSMkcQRgCovus8As86QLKuL+S5XVN/RQk5FvStc6R
-         7uPBStxrBkdiuX9XbJxZJRv0S8C1szP+I4+Kd2I1qxeQgAKSisRHEVUyNBVuuDjr0zpF
-         JIRpDxMmtEq7YIi+qh5r8Epuz2qrrPJnfJDfGfxeYIp9dsMSiSQ03XqcsezToziTWZNE
-         4Zsw==
+        bh=I9nMWVEoxwtXF283A8tddKxyHk0BWKf9Ft8bmoloBW4=;
+        b=LLSQKlBlbq2536UjQAIMDXX7bRKsQlEiCYEbVorLr131hnoQN7BbxIuCJKDl/KjMk8
+         HC+LYvwh9m4f+h1OdhOUgUNYVbkhfcpHk58Rb2H5ZzKRoVJTgYiQGt8Zpn3sm8AJEBJD
+         Kz0aFI6NYW1/v79PWT0n9IK6LvJunkctPr+piNbinc1P+Oyx6uDpoNzwnVD+Z/r7Q3Ya
+         bxYyfee9aCxjklR4zhQwtffT89jbrDscKxS1Hq4azoWWA6c5B61Ob2JAMMs4EHPjGP1b
+         4RtIqAbsANWhWHi4YDA0ey9pp820x2te+xdjKNcq4oVGFwdEypmloaasA+ozKzpiQ8Tb
+         H4hg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=/EzbR+Du2BxaJJadZeD2HbcmcwMUcvujgdONk2vLKNQ=;
-        b=dng6GUg5+hnHnOjY9eZKcalm5LSqP3yOToOQELreGs1YThdpX/j/8bxHAYLoq5lmPj
-         hUatq0TfbHHTjGqxBV2QtJOSs7MjHQpP2PguXOSVi58nd5Hu7AW8KEEhE/KA4CYl6cvY
-         BkEiBv7FeIx21zWRBJBhqLdIEtvgJ5kap45yxCPegWww2ykuJ2TsvZCm/Cb61pKLe2PF
-         NrimDjyjtu21KfGMxbO2ZbhFNpMAdnMCDGMNji/cdDzzjMjxYTx2Z/j0bQ3yNT5e5jPB
-         CoTSQ1duHdvMgbWS76mb8h61vagw7B1b34M24BvV5oJyGLMIYhs3155oeCpFdwme1xrX
-         17ZQ==
-X-Gm-Message-State: AOAM531eVCJ3gHiWJgifGkmvkHSbaOKyg+inxl/brjRt2XQy3cC7CrX9
-        ztduxbWL6JNRdEJcLfiraNMB5vSCfYI=
-X-Google-Smtp-Source: ABdhPJwHOMpae5b3Qpg/i4AubJ9xFG5tDhMSk5gFrGQoC4r2ml8dFrc3N9o/LEDQgyOKMauD2pb8SA==
-X-Received: by 2002:a17:906:b0d8:: with SMTP id bk24mr18675378ejb.252.1613946898327;
-        Sun, 21 Feb 2021 14:34:58 -0800 (PST)
+        bh=I9nMWVEoxwtXF283A8tddKxyHk0BWKf9Ft8bmoloBW4=;
+        b=Z64hYO/RMoxOpzuxaCcz+j4ePb3kObJPehxs6rz0wSGcMjnbtfJI6FBzIs9Lu1Kq9k
+         gzUIiZ1bYiiRhXTX0G3bUW1ubmiNYgsUETwphoocG/ygT70ij8PjGt3s4BR7Ldq0zKzP
+         YcGMt/K+7LrRjmQgUGKxjGHayAnIMOAaE2KYX4Sm5a0ZMsBawAzDjPaEnGfNPe/aw2mN
+         mkBHI60eX+s/V1hFD93USbhrzsI2kHZq4p+cR5/Xf/Z4YVRXjv+2nvpjJPjRAQUdF/c4
+         dGeadVigjowa1ZSehcZ6zwthlRHuU3D/syz4I1mW0ryaDCblOTUZu/pYMEYs3ebGen5w
+         Jijg==
+X-Gm-Message-State: AOAM5325FK1A88OMhXu8AiXa6Xqk6yeDTu7bgljtaAEKDq4JBB2FtSc4
+        3ER6qlyFIW3gF8r+11YLmqYuO3yvqb4=
+X-Google-Smtp-Source: ABdhPJzWPLwo+phI9cdlcfc2krmuPqAMRLFt+8uRXBpwPsUJERPGbsJS3o4fVoBGgGFtwFQFrwLdGw==
+X-Received: by 2002:a17:906:b24c:: with SMTP id ce12mr16894666ejb.278.1613946899590;
+        Sun, 21 Feb 2021 14:34:59 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:9463:3f6a:e4eb:cf54])
-        by smtp.gmail.com with ESMTPSA id p2sm10433622edm.94.2021.02.21.14.34.57
+        by smtp.gmail.com with ESMTPSA id p2sm10433622edm.94.2021.02.21.14.34.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Feb 2021 14:34:58 -0800 (PST)
+        Sun, 21 Feb 2021 14:34:59 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/5] asm-mem: does it clobber memory?
-Date:   Sun, 21 Feb 2021 23:34:50 +0100
-Message-Id: <20210221223452.8075-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/5] asm-mem: teach dominates() about OP_ASM
+Date:   Sun, 21 Feb 2021 23:34:52 +0100
+Message-Id: <20210221223452.8075-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210221223452.8075-1-luc.vanoostenryck@gmail.com>
 References: <20210221223452.8075-1-luc.vanoostenryck@gmail.com>
@@ -72,54 +72,47 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-An asm statement can specify that it clobbers memory.
-Add this info directly in the corresponding instruction, avoiding
-the need to scan the clobber list each time.
+The function dominates() needs to know if an OP_ASM instruction
+may modify.
+
+Use the information now available in the instruction to return
+the answer.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 8 +++++++-
- linearize.h | 1 +
- 2 files changed, 8 insertions(+), 1 deletion(-)
+ flow.c                           | 6 ++++++
+ validation/mem2reg/asm-reload0.c | 1 -
+ 2 files changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/linearize.c b/linearize.c
-index 33d641b40de6..4140b60caebd 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -2174,7 +2174,7 @@ static void add_asm_output(struct entrypoint *ep, struct instruction *insn, stru
- static pseudo_t linearize_asm_statement(struct entrypoint *ep, struct statement *stmt)
- {
- 	struct instruction *insn;
--	struct expression *expr;
-+	struct expression *expr, *clob;
- 	struct asm_rules *rules;
- 	struct asm_operand *op;
- 
-@@ -2206,6 +2206,12 @@ static pseudo_t linearize_asm_statement(struct entrypoint *ep, struct statement
- 		add_asm_output(ep, insn, op);
- 	} END_FOR_EACH_PTR(op);
- 
-+	/* and finally, look if it clobbers memory */
-+	FOR_EACH_PTR(stmt->asm_clobbers, clob) {
-+		if (!strcmp(clob->string->data, "memory"))
-+			insn->clobber_memory = 1;
-+	} END_FOR_EACH_PTR(clob);
-+
- 	return VOID;
- }
- 
-diff --git a/linearize.h b/linearize.h
-index a77e4b3e5f6f..fb51327684bb 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -150,6 +150,7 @@ struct instruction {
- 		struct /* asm */ {
- 			const char *string;
- 			struct asm_rules *asm_rules;
-+			int clobber_memory:1;
- 		};
- 	};
- };
+diff --git a/flow.c b/flow.c
+index 5751ce756518..5d63018798d6 100644
+--- a/flow.c
++++ b/flow.c
+@@ -495,6 +495,12 @@ int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom
+ 		return local ? 0 : -1;
+ 	case OP_LOAD: case OP_STORE:
+ 		break;
++	case OP_ASM:
++		if (dom->clobber_memory)
++			return -1;
++		if (dom->output_memory)
++			return -1;
++		return 0;
+ 	default:
+ 		return 0;
+ 	}
+diff --git a/validation/mem2reg/asm-reload0.c b/validation/mem2reg/asm-reload0.c
+index c9e297dde428..ce1829e02724 100644
+--- a/validation/mem2reg/asm-reload0.c
++++ b/validation/mem2reg/asm-reload0.c
+@@ -8,7 +8,6 @@ static int asm_reload(void)
+ /*
+  * check-name: asm-reload0
+  * check-command: test-linearize $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-contains: load\\.
 -- 
 2.30.0
 
