@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D45B8C43381
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C3F84C433E6
 	for <linux-sparse@archiver.kernel.org>; Thu, 25 Feb 2021 23:40:14 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id A388064F06
+	by mail.kernel.org (Postfix) with ESMTP id 7AB8964F2D
 	for <linux-sparse@archiver.kernel.org>; Thu, 25 Feb 2021 23:40:14 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232161AbhBYXj7 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 25 Feb 2021 18:39:59 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58932 "EHLO
+        id S232081AbhBYXj6 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 25 Feb 2021 18:39:58 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58922 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232642AbhBYXj4 (ORCPT
+        with ESMTP id S232631AbhBYXjz (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 25 Feb 2021 18:39:56 -0500
-Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BE72C061786
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 15:39:16 -0800 (PST)
-Received: by mail-ej1-x630.google.com with SMTP id n20so11742751ejb.5
-        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 15:39:16 -0800 (PST)
+        Thu, 25 Feb 2021 18:39:55 -0500
+Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5D60EC06174A
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 15:39:14 -0800 (PST)
+Received: by mail-ej1-x62a.google.com with SMTP id a22so11728430ejv.9
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 15:39:14 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=dayAgQkgoEWMtY8d4KcJ4zW79UMvO9gP8YBMcQY0lks=;
-        b=ekBAEoCQj4pnVWwi6/Y43MkHjoaV0e/g+Xs7QYaQc4lpoiyttTR9HqAggz9e2/68Je
-         CZrGFewy3IQTn5vBvfnBGf+ra5lKlZFeJEDvWxebHIgeusExPaplFA31LlIa6cM3V1oq
-         Jz3ysMNi1dfMmAXtxbKpBqXUsNRWIxWTSYN5HxuuVl4w3ZHCLBKm/7Ea1b9jbehpb/l+
-         CtkGEraFBwgMJvUM6sk3zLJuHzwn894cbJ+6Ie/er6Y4lkTjVRy/LvHXn4HBpERf+6Q3
-         SLmbMw+Ds9thzIN+Ytzd20m7ihTNcn5d9sG4DOo+LGFbfwtg4Uk7kr8D5sRPSFwHeY1P
-         Z7+g==
+        bh=rvGgaKQqNrs9hJBiKofBIDXJNgwVq583kxTESq+8cgU=;
+        b=RApM9hYbIgR6/KYudyl/K2t1Sg7vzuvc6HSCRHsUlsSepZj69qjcKG3NCAIivci/Dt
+         arQADery4bEPDRMulRABuqhkwvP+Oi02Y+9ihpaSmCWgIQxDRN1fFHLwvA7D42uxU+2L
+         PRYxpv/f6op+UBSDQlBHM04kRUpyNOrYCzIi3+HPgqD1BmBvCWr7ElCZp+Z0F9MWY0ty
+         lZmw8ZDjujNlF1g//OwIPMzHWPTGMWtjJBOUiYHkjSAqtZ4hk1+QUD1Bp2S/eUnLpS3d
+         1zEAO7htKvTjDggFGRC699uwK2v4/UXQempBXvhqW4tp/sHrar/zxvpY4sQrDLMEyhaf
+         qsMQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=dayAgQkgoEWMtY8d4KcJ4zW79UMvO9gP8YBMcQY0lks=;
-        b=IrnflMxIzhAE3nxIy59WZCvbpfrWeDfAXKX7Z5K5D0Kbk9aXY3Z2jL98btPw3ZZT05
-         Q6Alv8lxHu/ni6T1Dss7K25nDnpw+BF4Q0EkF5BDNLOtByPmjRDjm5gUwE+GMB4aCTlU
-         qF9/XLA8E/ZDgpSmRZBB+QjIuvAmgrN08dsb75m8CkrfrQLWfwvGpWXS8j1aqvkvsuLw
-         imvVfUDuBXyTrHPrHFughpejCx6RZNLg75hkF6pa+SCPdiq6xpoSrWzURkZ6sFEE0Htx
-         u6kUakX7BNv1i8x4gmj8owfOMBITgrrOJkcUoKXdBmkZ19u32GA52ZGz9kzqZX6TIN35
-         YmnQ==
-X-Gm-Message-State: AOAM532vpE2WchqAM3rsSgtiRG6KyAbAk/T2XalkZEkBfqcFi0GNB4yj
-        P0VCukmjBa+9JNy8Ygmdi2bPi9EaESM=
-X-Google-Smtp-Source: ABdhPJyIVUineH+6rDFrFm22bBmwXYBTkF8SXa6CONP2hdnQr8B1ZBQsAIsYelUmepsZMDq/4UH5Fg==
-X-Received: by 2002:a17:906:f9cc:: with SMTP id lj12mr85998ejb.544.1614296354948;
-        Thu, 25 Feb 2021 15:39:14 -0800 (PST)
+        bh=rvGgaKQqNrs9hJBiKofBIDXJNgwVq583kxTESq+8cgU=;
+        b=stQK8Dd2BSwTany78GT6ALL3tYljAvl7711sZEm75CseswmL4ZEVxBGu87XuGK9Jtz
+         czkihjBF/XON132hBVifjCm096oRvP+Al2z8f7XjBxNz2wbpDPI3yTMBjMtDKyVHbdns
+         mJq0H1GtKOZJ8wwahPJ9DGICdUBI/4svldamrA4N+HLMiz+N4axRoBn7V+v/KixTHYa2
+         0Mb6kFU30RdnNCCTyYWCDJdqKIjtC0gGmxYuI82NG8DXg0VIhe81N8/gY+gDwLvOsVzc
+         UFkmTPdhDAgdfaE0RP7M91oadvvd9Gp7z5vr125G1uJRX316sgL5e1KPjEPwWSD1xr/l
+         T15Q==
+X-Gm-Message-State: AOAM531Ux8WvKoJSV/3ZI6xnfmmKltOHOdBXwoaM2AYECwTWIPQJImGB
+        pEIp3ETuux25Npl0NL/LiuGdHIcdvKI=
+X-Google-Smtp-Source: ABdhPJx+OeVxQPstGg1MLmuFRNffmNn1RvZbjMahjDX7ZNFGt4C9ma49XhtqrxBkUlbBjX/wihyHKw==
+X-Received: by 2002:a17:907:9619:: with SMTP id gb25mr132919ejc.64.1614296353099;
+        Thu, 25 Feb 2021 15:39:13 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:2cfa:d768:30f4:f221])
-        by smtp.gmail.com with ESMTPSA id q27sm3906167ejc.74.2021.02.25.15.39.14
+        by smtp.gmail.com with ESMTPSA id q27sm3906167ejc.74.2021.02.25.15.39.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Thu, 25 Feb 2021 15:39:14 -0800 (PST)
+        Thu, 25 Feb 2021 15:39:12 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/4] slice: OP_SLICE needs the source's type: make it a kind of unop
-Date:   Fri, 26 Feb 2021 00:39:07 +0100
-Message-Id: <20210225233908.97275-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 1/4] slice: remove unneeded len from OP_SLICE
+Date:   Fri, 26 Feb 2021 00:39:05 +0100
+Message-Id: <20210225233908.97275-2-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210225233908.97275-1-luc.vanoostenryck@gmail.com>
 References: <20210225233908.97275-1-luc.vanoostenryck@gmail.com>
@@ -72,88 +72,63 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-OP_SLICE's source's type is needed for some simplifications.
-For example, in some cases it can be simplified into OP_TRUNC.
-
-So, merge its representation with the one for unops which also
-need the source's type.
+OP_SLICE::len is necessarily equal to the result size.
+So remove this redundancy.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 5 +++--
- linearize.h | 5 +----
- liveness.c  | 5 +----
- 3 files changed, 5 insertions(+), 10 deletions(-)
+ Documentation/IR.rst | 2 +-
+ linearize.c          | 3 +--
+ linearize.h          | 2 +-
+ 3 files changed, 3 insertions(+), 4 deletions(-)
 
+diff --git a/Documentation/IR.rst b/Documentation/IR.rst
+index 38df84ff3954..c7db32073361 100644
+--- a/Documentation/IR.rst
++++ b/Documentation/IR.rst
+@@ -408,7 +408,7 @@ Others
+ 	Extract a "slice" from an aggregate.
+ 
+ 	* .base: (pseudo_t) aggregate (alias .src)
+-	* .from, .len: offet & size of the "slice" within the aggregate
++	* .from: offet of the "slice" within the aggregate
+ 	* .target: result
+ 	* .type: type of .target
+ 
 diff --git a/linearize.c b/linearize.c
-index 96a717bc2909..7ab69d3ac968 100644
+index 0c9b0e59cc4b..96a717bc2909 100644
 --- a/linearize.c
 +++ b/linearize.c
 @@ -470,7 +470,7 @@ const char *show_instruction(struct instruction *insn)
  		break;
  
  	case OP_SLICE:
--		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from);
-+		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->src), insn->from);
+-		buf += sprintf(buf, "%s <- %s, %d, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from, insn->len);
++		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from);
  		break;
  
  	case OP_NOT: case OP_NEG:
-@@ -1239,7 +1239,8 @@ static pseudo_t linearize_slice(struct entrypoint *ep, struct expression *expr)
+@@ -1239,7 +1239,6 @@ static pseudo_t linearize_slice(struct entrypoint *ep, struct expression *expr)
  
  	insn->target = new;
  	insn->from = expr->r_bitpos;
--	use_pseudo(insn, pre, &insn->base);
-+	insn->orig_type = expr->base->ctype;
-+	use_pseudo(insn, pre, &insn->src);
+-	insn->len = expr->r_nrbits;
+ 	use_pseudo(insn, pre, &insn->base);
  	add_one_insn(ep, insn);
  	return new;
- }
 diff --git a/linearize.h b/linearize.h
-index 4d83675caaf1..429f4797e359 100644
+index cf0cf066a8e5..4d83675caaf1 100644
 --- a/linearize.h
 +++ b/linearize.h
-@@ -113,6 +113,7 @@ struct instruction {
+@@ -129,7 +129,7 @@ struct instruction {
  		};
- 		struct /* unops */ {
- 			pseudo_t src;
-+			unsigned from;			/* slice */
- 			struct symbol *orig_type;	/* casts */
+ 		struct /* slice */ {
+ 			pseudo_t base;
+-			unsigned from, len;
++			unsigned from;
  		};
- 		struct /* memops */ {
-@@ -127,10 +128,6 @@ struct instruction {
- 			pseudo_t _src1, _src2;		// alias .src[12]
- 			struct symbol *itype;		// input operands' type
- 		};
--		struct /* slice */ {
--			pseudo_t base;
--			unsigned from;
--		};
  		struct /* setval */ {
  			struct expression *val;
- 		};
-diff --git a/liveness.c b/liveness.c
-index 30a9a5b6b169..755509e59b52 100644
---- a/liveness.c
-+++ b/liveness.c
-@@ -76,6 +76,7 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 	/* Uni */
- 	case OP_UNOP ... OP_UNOP_END:
- 	case OP_SYMADDR:
-+	case OP_SLICE:
- 		USES(src1); DEFINES(target);
- 		break;
- 
-@@ -121,10 +122,6 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
- 		} END_FOR_EACH_PTR(pseudo);
- 		break;
- 
--	case OP_SLICE:
--		USES(base); DEFINES(target);
--		break;
--
- 	case OP_ASM:
- 		asm_liveness(bb, insn, def, use);
- 		break;
 -- 
 2.30.0
 
