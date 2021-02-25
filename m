@@ -8,111 +8,127 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D469FC433DB
-	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:36:35 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id BCF3EC433DB
+	for <linux-sparse@archiver.kernel.org>; Thu, 25 Feb 2021 22:06:25 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9F78964EBE
-	for <linux-sparse@archiver.kernel.org>; Sun, 21 Feb 2021 22:36:35 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 67D1F60238
+	for <linux-sparse@archiver.kernel.org>; Thu, 25 Feb 2021 22:06:25 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231767AbhBUWgU (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Feb 2021 17:36:20 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53112 "EHLO
+        id S230010AbhBYWGY (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 25 Feb 2021 17:06:24 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38854 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231752AbhBUWgS (ORCPT
+        with ESMTP id S229952AbhBYWGX (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Feb 2021 17:36:18 -0500
-Received: from mail-ej1-x633.google.com (mail-ej1-x633.google.com [IPv6:2a00:1450:4864:20::633])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1C08C061793
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:35:00 -0800 (PST)
-Received: by mail-ej1-x633.google.com with SMTP id u20so25515747ejb.7
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Feb 2021 14:35:00 -0800 (PST)
+        Thu, 25 Feb 2021 17:06:23 -0500
+Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D1654C061574
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 14:05:42 -0800 (PST)
+Received: by mail-ed1-x531.google.com with SMTP id d2so8712396edq.10
+        for <linux-sparse@vger.kernel.org>; Thu, 25 Feb 2021 14:05:42 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=I9nMWVEoxwtXF283A8tddKxyHk0BWKf9Ft8bmoloBW4=;
-        b=LLSQKlBlbq2536UjQAIMDXX7bRKsQlEiCYEbVorLr131hnoQN7BbxIuCJKDl/KjMk8
-         HC+LYvwh9m4f+h1OdhOUgUNYVbkhfcpHk58Rb2H5ZzKRoVJTgYiQGt8Zpn3sm8AJEBJD
-         Kz0aFI6NYW1/v79PWT0n9IK6LvJunkctPr+piNbinc1P+Oyx6uDpoNzwnVD+Z/r7Q3Ya
-         bxYyfee9aCxjklR4zhQwtffT89jbrDscKxS1Hq4azoWWA6c5B61Ob2JAMMs4EHPjGP1b
-         4RtIqAbsANWhWHi4YDA0ey9pp820x2te+xdjKNcq4oVGFwdEypmloaasA+ozKzpiQ8Tb
-         H4hg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1DYPJIyODZzzYOsQ4uA/jRxpME1EpYW1TR9D5kt9n7g=;
+        b=CyPmLqIoHoNI5gnJwo9PNFn/37lu1JIoDT4vbSctuS8web94QGpegA9qpT4n9tz57B
+         +6sJfagenFQJuXuKZqYsVv7MrZV1xDr4ThlOyJBTgePKHYeHXEGuX/TYZ5Z/x961h47g
+         /LZdq3gGEfXT2OtHXabnngOygDzZZPFzY2VVv+Zg/8WEcURo10l21AgvMeVokgi7DY0Y
+         DzkX/ZxUf5aOr2TV+6EOzj1dL1EvdE0b4hfCCxbSj+XsSq5Ed7oF8Z0CXYhapyDfwA0K
+         Kpi04J/qBYdKDU+5O0khs+6fbXqsgMfh8l5cunme1QCzCHxahdiUN/rb4ZOa77CE4KWL
+         FKwA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=I9nMWVEoxwtXF283A8tddKxyHk0BWKf9Ft8bmoloBW4=;
-        b=Z64hYO/RMoxOpzuxaCcz+j4ePb3kObJPehxs6rz0wSGcMjnbtfJI6FBzIs9Lu1Kq9k
-         gzUIiZ1bYiiRhXTX0G3bUW1ubmiNYgsUETwphoocG/ygT70ij8PjGt3s4BR7Ldq0zKzP
-         YcGMt/K+7LrRjmQgUGKxjGHayAnIMOAaE2KYX4Sm5a0ZMsBawAzDjPaEnGfNPe/aw2mN
-         mkBHI60eX+s/V1hFD93USbhrzsI2kHZq4p+cR5/Xf/Z4YVRXjv+2nvpjJPjRAQUdF/c4
-         dGeadVigjowa1ZSehcZ6zwthlRHuU3D/syz4I1mW0ryaDCblOTUZu/pYMEYs3ebGen5w
-         Jijg==
-X-Gm-Message-State: AOAM5325FK1A88OMhXu8AiXa6Xqk6yeDTu7bgljtaAEKDq4JBB2FtSc4
-        3ER6qlyFIW3gF8r+11YLmqYuO3yvqb4=
-X-Google-Smtp-Source: ABdhPJzWPLwo+phI9cdlcfc2krmuPqAMRLFt+8uRXBpwPsUJERPGbsJS3o4fVoBGgGFtwFQFrwLdGw==
-X-Received: by 2002:a17:906:b24c:: with SMTP id ce12mr16894666ejb.278.1613946899590;
-        Sun, 21 Feb 2021 14:34:59 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:9463:3f6a:e4eb:cf54])
-        by smtp.gmail.com with ESMTPSA id p2sm10433622edm.94.2021.02.21.14.34.59
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=1DYPJIyODZzzYOsQ4uA/jRxpME1EpYW1TR9D5kt9n7g=;
+        b=HSi14nktjIdfbnGRqGqDmLOf06TxwyAjdCMpkJUhrjnNuIMwvjzy4oNTFst84Hb1u/
+         FlELyEw0StzqDj5A9NKAmDUyfEUA+0fBoO/XfkvajM9HATSDE1jPkmB/HRoIYnyWQxOA
+         Ybw6BJj97ChoZ3R0ZV6O12gpEDOVorprogrr8tOFvDgLbMZVwBUyXb7Jx8jXEsKFgHz2
+         k+EVvL7uS/oO3B1u98dZ5xqGoS0D8FzFR9g08Wurf2m1WAIYCWgZ5a1/Nymh58v7vPMl
+         UNuwg4NrFsHKixkpYtmVBRXNacwoVwL0EtZsT6Iau/nP2m9YA3n5LyBXfL7lG27dV6uE
+         wwyg==
+X-Gm-Message-State: AOAM533F3GG1kE8R6Md1Ue/AbKtCH4bB2Iy0OdCQQNOQKjRg6qRCY4DA
+        XaXe+2mmLQgSV46c78a93Pjs6tGxBgA=
+X-Google-Smtp-Source: ABdhPJw16ay6CqUv9m1bIc+3G2N3t8uBYor08CNy3uwnwX4JYQspFKLmR2SGXqKiBGW0EpqYA2DQ8w==
+X-Received: by 2002:a05:6402:34c4:: with SMTP id w4mr71160edc.153.1614290741606;
+        Thu, 25 Feb 2021 14:05:41 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:2cfa:d768:30f4:f221])
+        by smtp.gmail.com with ESMTPSA id h12sm4202352edb.70.2021.02.25.14.05.40
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Feb 2021 14:34:59 -0800 (PST)
+        Thu, 25 Feb 2021 14:05:40 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/5] asm-mem: teach dominates() about OP_ASM
-Date:   Sun, 21 Feb 2021 23:34:52 +0100
-Message-Id: <20210221223452.8075-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] fix eval of the assignment of a non-restricted value to a restricted variable
+Date:   Thu, 25 Feb 2021 23:05:37 +0100
+Message-Id: <20210225220537.95335-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
-In-Reply-To: <20210221223452.8075-1-luc.vanoostenryck@gmail.com>
-References: <20210221223452.8075-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The function dominates() needs to know if an OP_ASM instruction
-may modify.
+Assignment to restricted variables are severely ... restricted.
+Nevertheless, one value is always fine because it has always
+the same bit representation: 0.
 
-Use the information now available in the instruction to return
-the answer.
+So, 0 is accepted unconditionally but this creates a problem
+because the type of this 0 needs to be adjusted. Otherwise
+0 (int) is assigned as-is even on restricted variable with a
+different bit-length.
+
+Fix this by casting the value to the target type before accepting it.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                           | 6 ++++++
- validation/mem2reg/asm-reload0.c | 1 -
- 2 files changed, 6 insertions(+), 1 deletion(-)
+ evaluate.c                             |  2 +-
+ validation/eval/assign-restricted-ok.c | 22 ++++++++++++++++++++++
+ 2 files changed, 23 insertions(+), 1 deletion(-)
+ create mode 100644 validation/eval/assign-restricted-ok.c
 
-diff --git a/flow.c b/flow.c
-index 5751ce756518..5d63018798d6 100644
---- a/flow.c
-+++ b/flow.c
-@@ -495,6 +495,12 @@ int dominates(pseudo_t pseudo, struct instruction *insn, struct instruction *dom
- 		return local ? 0 : -1;
- 	case OP_LOAD: case OP_STORE:
- 		break;
-+	case OP_ASM:
-+		if (dom->clobber_memory)
-+			return -1;
-+		if (dom->output_memory)
-+			return -1;
-+		return 0;
- 	default:
- 		return 0;
- 	}
-diff --git a/validation/mem2reg/asm-reload0.c b/validation/mem2reg/asm-reload0.c
-index c9e297dde428..ce1829e02724 100644
---- a/validation/mem2reg/asm-reload0.c
-+++ b/validation/mem2reg/asm-reload0.c
-@@ -8,7 +8,6 @@ static int asm_reload(void)
- /*
-  * check-name: asm-reload0
-  * check-command: test-linearize $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-contains: load\\.
+diff --git a/evaluate.c b/evaluate.c
+index 41871e18503a..a661027f8df6 100644
+--- a/evaluate.c
++++ b/evaluate.c
+@@ -1442,7 +1442,7 @@ static int check_assignment_types(struct symbol *target, struct expression **rp,
+ 			if (sclass & TYPE_FOULED && unfoul(s) == t)
+ 				goto Cast;
+ 			if (!restricted_value(*rp, target))
+-				return 1;
++				goto Cast;
+ 			if (s == t)
+ 				return 1;
+ 		} else if (!(sclass & TYPE_RESTRICT))
+diff --git a/validation/eval/assign-restricted-ok.c b/validation/eval/assign-restricted-ok.c
+new file mode 100644
+index 000000000000..df94d8c9d6d0
+--- /dev/null
++++ b/validation/eval/assign-restricted-ok.c
+@@ -0,0 +1,22 @@
++#ifdef __CHECKER__
++#define __bitwise __attribute__((bitwise))
++#else
++#define __bitwise
++#endif
++
++typedef __INT16_TYPE__ __bitwise __be16;
++
++static __be16 foo(void)
++{
++	__be16 val = 0;
++	return val;
++}
++
++/*
++ * check-name: assign-restricted-ok
++ * check-command: test-linearize -fdump-ir $file
++ *
++ * check-output-ignore
++ * check-output-contains: store\\.16
++ * check-output-excludes: store\\.32
++ */
 -- 
 2.30.0
 
