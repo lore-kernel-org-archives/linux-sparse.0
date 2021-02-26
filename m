@@ -7,54 +7,55 @@ X-Spam-Status: No, score=-15.6 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 05799C433E0
-	for <linux-sparse@archiver.kernel.org>; Fri, 26 Feb 2021 23:47:55 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 97EACC433E0
+	for <linux-sparse@archiver.kernel.org>; Fri, 26 Feb 2021 23:57:48 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B986364F0D
-	for <linux-sparse@archiver.kernel.org>; Fri, 26 Feb 2021 23:47:54 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5CE0964F03
+	for <linux-sparse@archiver.kernel.org>; Fri, 26 Feb 2021 23:57:48 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229949AbhBZXri (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 26 Feb 2021 18:47:38 -0500
-Received: from avasout03.plus.net ([84.93.230.244]:48745 "EHLO
+        id S230018AbhBZX5s (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 26 Feb 2021 18:57:48 -0500
+Received: from avasout03.plus.net ([84.93.230.244]:49185 "EHLO
         avasout03.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229912AbhBZXrh (ORCPT
+        with ESMTP id S229993AbhBZX5r (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 26 Feb 2021 18:47:37 -0500
+        Fri, 26 Feb 2021 18:57:47 -0500
 Received: from [10.0.2.15] ([147.147.167.73])
         by smtp with ESMTPA
-        id Fmorl8axUEfgXFmotlx06s; Fri, 26 Feb 2021 23:46:51 +0000
+        id Fmygl8bKeEfgXFmyhlx0AW; Fri, 26 Feb 2021 23:57:00 +0000
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1614383211; bh=2OK+9goV+HGnOJIokVc4z6VccLjZE+Eta1Vs5p2r6zw=;
+        t=1614383820; bh=vLZOt0J4Ip6//D92b8pqwG4x3kNe60jQA08BAkQ1UcQ=;
         h=Subject:To:References:From:Date:In-Reply-To;
-        b=ZAjy4OFQK24zeaonGhWhxJSiPZ0JoCX1JX00DNNyt+NR6chSW5NdANcCNlWqvdLvP
-         2V/L8uHxfyKUBCH7H2lre8+pDn975fS0AS4l+nuK7Uk4NQiRmWV9SwXmB9PDkSyZIq
-         sLykg8NzUezq2IPIQ0uMpS92ZdT9tjLP5iDKxje/cg7Ib3aLSoGrgp56fm3MMJv3hE
-         31OkfdZSmd4zBOM7fBdKwLd6IKnJ+0NZgHelbuOxIb5hN08ZAAQiWJemfH2dKw3ZGr
-         zYZASqwka2VYS7/ZG9iHWtyyQwzt2sdYJpemERj0Bewoqdlf/NCZZoPhofyKtiN6GU
-         LtgSax1c5c/Sg==
+        b=Sbb9sxRkvOU5pGDbuvXSswcF2WpF0NNLBHLZzhR8SbZzgMCw+vcpYXqRfheT5045D
+         TkpgqIotZ8V1QGWri7Qozm4YoTsm2V3OEhug8Z+FND8Duvb4eCFkWWY/In6st2ykTO
+         156tetvMW4gI0DI6YkjjV2bELKRXmkBnz8N6m+0X89LdKOXm0EpUr9u034Rd3rbFgV
+         jSBR/ij01twF6gd+s2wH2T/fHaZG4GDjfcjC1Tya0ixgw1M9n/hS2CsvRo5b7eBQx0
+         q7phZbFdKz8vntgFNJ8728e0I/2vqFrIieqYeEJClkKiB15St9zlsAlAQoTy/tTowP
+         eeVAnjkC2iaqQ==
 X-Clacks-Overhead: "GNU Terry Pratchett"
 X-CM-Score: 0.00
 X-CNFS-Analysis: v=2.3 cv=WomwzeXv c=1 sm=1 tr=0
  a=nK5asC+3lBOC3EoKtwbYYg==:117 a=nK5asC+3lBOC3EoKtwbYYg==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=BvsfWK9VvvrgyxQ2MUkA:9 a=QEXdDO2ut3YA:10
+ a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=WRUKtI-64B4KGYDc1AYA:9 a=QEXdDO2ut3YA:10
 X-AUTH: ramsayjones@:2500
-Subject: Re: [PATCH 1/4] slice: remove unneeded len from OP_SLICE
+Subject: Re: [PATCH 3/4] slice: OP_SLICE needs the source's type: make it a
+ kind of unop
 To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
         linux-sparse@vger.kernel.org
 References: <20210225233908.97275-1-luc.vanoostenryck@gmail.com>
- <20210225233908.97275-2-luc.vanoostenryck@gmail.com>
+ <20210225233908.97275-4-luc.vanoostenryck@gmail.com>
 From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <558d59c7-ca74-706e-e1a6-68a15f6fc43a@ramsayjones.plus.com>
-Date:   Fri, 26 Feb 2021 23:46:49 +0000
+Message-ID: <bff5dc80-92cc-8bc0-2bd8-0e6f8f9f46a7@ramsayjones.plus.com>
+Date:   Fri, 26 Feb 2021 23:56:58 +0000
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
  Thunderbird/68.10.0
 MIME-Version: 1.0
-In-Reply-To: <20210225233908.97275-2-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20210225233908.97275-4-luc.vanoostenryck@gmail.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-GB
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfGBb/wR32mVUX0OslR5FSRnQe6LYfgt/sPBNRcLwM0Xc8GH77hClOqC9xMhRryDOstj1dEHAj3R1Yd4AWIbPKiK8TbyREtcjy1XkFcvU23qCmZbh8YBH
- HEFFe0ZGtIJ+xw8FP6PCoJzC/bn+gJwo8gomcG1u4kZL4+ZP5Qs3QlhlSrx6OkxkwgXY6F5mHz8k+w==
+X-CMAE-Envelope: MS4wfOIbO2zHl8H4t73UtP1thKLvy4NR/5vn7JtMdaHO76DLebshwLOusQU1nr7MYjI02V42LiVnNkWqL9O64k/JU8B/Dg9Caq6jl+JZfDcxL9hUjboohVfX
+ /NOB62ObG7R6bnvUTZcEP81/v/m1dZ3nIDTNwV94rRiuotbfQnouw9XA97cgE/V3G/szOA375c5xrw==
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
@@ -62,67 +63,92 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 
 On 25/02/2021 23:39, Luc Van Oostenryck wrote:
-> OP_SLICE::len is necessarily equal to the result size.
-> So remove this redundancy.
+> OP_SLICE's source's type is needed for some simplifications.
+> For example, in some cases it can be simplified into OP_TRUNC.
+> 
+> So, merge its representation with the one for unops which also
+> need the source's type.
 > 
 > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 > ---
->  Documentation/IR.rst | 2 +-
->  linearize.c          | 3 +--
->  linearize.h          | 2 +-
->  3 files changed, 3 insertions(+), 4 deletions(-)
+>  linearize.c | 5 +++--
+>  linearize.h | 5 +----
+>  liveness.c  | 5 +----
+>  3 files changed, 5 insertions(+), 10 deletions(-)
 > 
-> diff --git a/Documentation/IR.rst b/Documentation/IR.rst
-> index 38df84ff3954..c7db32073361 100644
-> --- a/Documentation/IR.rst
-> +++ b/Documentation/IR.rst
-> @@ -408,7 +408,7 @@ Others
->  	Extract a "slice" from an aggregate.
->  
->  	* .base: (pseudo_t) aggregate (alias .src)
-> -	* .from, .len: offet & size of the "slice" within the aggregate
-> +	* .from: offet of the "slice" within the aggregate
-
-s/offet/offset/
-
-ATB,
-Ramsay Jones
-
->  	* .target: result
->  	* .type: type of .target
->  
 > diff --git a/linearize.c b/linearize.c
-> index 0c9b0e59cc4b..96a717bc2909 100644
+> index 96a717bc2909..7ab69d3ac968 100644
 > --- a/linearize.c
 > +++ b/linearize.c
 > @@ -470,7 +470,7 @@ const char *show_instruction(struct instruction *insn)
 >  		break;
 >  
 >  	case OP_SLICE:
-> -		buf += sprintf(buf, "%s <- %s, %d, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from, insn->len);
-> +		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from);
+> -		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->base), insn->from);
+> +		buf += sprintf(buf, "%s <- %s, %d", show_pseudo(insn->target), show_pseudo(insn->src), insn->from);
 >  		break;
 >  
 >  	case OP_NOT: case OP_NEG:
-> @@ -1239,7 +1239,6 @@ static pseudo_t linearize_slice(struct entrypoint *ep, struct expression *expr)
+> @@ -1239,7 +1239,8 @@ static pseudo_t linearize_slice(struct entrypoint *ep, struct expression *expr)
 >  
 >  	insn->target = new;
 >  	insn->from = expr->r_bitpos;
-> -	insn->len = expr->r_nrbits;
->  	use_pseudo(insn, pre, &insn->base);
+> -	use_pseudo(insn, pre, &insn->base);
+> +	insn->orig_type = expr->base->ctype;
+> +	use_pseudo(insn, pre, &insn->src);
 >  	add_one_insn(ep, insn);
 >  	return new;
+>  }
 > diff --git a/linearize.h b/linearize.h
-> index cf0cf066a8e5..4d83675caaf1 100644
+> index 4d83675caaf1..429f4797e359 100644
 > --- a/linearize.h
 > +++ b/linearize.h
-> @@ -129,7 +129,7 @@ struct instruction {
+> @@ -113,6 +113,7 @@ struct instruction {
 >  		};
->  		struct /* slice */ {
->  			pseudo_t base;
-> -			unsigned from, len;
-> +			unsigned from;
+>  		struct /* unops */ {
+>  			pseudo_t src;
+> +			unsigned from;			/* slice */
+>  			struct symbol *orig_type;	/* casts */
 >  		};
+>  		struct /* memops */ {
+> @@ -127,10 +128,6 @@ struct instruction {
+>  			pseudo_t _src1, _src2;		// alias .src[12]
+>  			struct symbol *itype;		// input operands' type
+>  		};
+> -		struct /* slice */ {
+> -			pseudo_t base;
+> -			unsigned from;
+> -		};
 >  		struct /* setval */ {
 >  			struct expression *val;
+>  		};
+> diff --git a/liveness.c b/liveness.c
+> index 30a9a5b6b169..755509e59b52 100644
+> --- a/liveness.c
+> +++ b/liveness.c
+> @@ -76,6 +76,7 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
+>  	/* Uni */
+>  	case OP_UNOP ... OP_UNOP_END:
+>  	case OP_SYMADDR:
+> +	case OP_SLICE:
+>  		USES(src1); DEFINES(target);
+
+wouldn't USES(src) be more appropriate? They are not binops.
+
+ATB,
+Ramsay Jones
+
+>  		break;
+>  
+> @@ -121,10 +122,6 @@ static void track_instruction_usage(struct basic_block *bb, struct instruction *
+>  		} END_FOR_EACH_PTR(pseudo);
+>  		break;
+>  
+> -	case OP_SLICE:
+> -		USES(base); DEFINES(target);
+> -		break;
+> -
+>  	case OP_ASM:
+>  		asm_liveness(bb, insn, def, use);
+>  		break;
 > 
