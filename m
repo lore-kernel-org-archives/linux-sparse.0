@@ -2,153 +2,107 @@ Return-Path: <SRS0=i4AA=IE=vger.kernel.org=linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-15.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
-	autolearn=ham autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
+	autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 8A9FDC433E0
-	for <linux-sparse@archiver.kernel.org>; Sat,  6 Mar 2021 16:43:59 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 94A7EC433DB
+	for <linux-sparse@archiver.kernel.org>; Sat,  6 Mar 2021 17:46:52 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 62EBA64FFD
-	for <linux-sparse@archiver.kernel.org>; Sat,  6 Mar 2021 16:43:59 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5506764FC1
+	for <linux-sparse@archiver.kernel.org>; Sat,  6 Mar 2021 17:46:52 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230390AbhCFQn2 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 6 Mar 2021 11:43:28 -0500
-Received: from avasout01.plus.net ([84.93.230.227]:41599 "EHLO
-        avasout01.plus.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231147AbhCFQnZ (ORCPT
+        id S230346AbhCFRqU (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 6 Mar 2021 12:46:20 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46006 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230329AbhCFRqI (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 6 Mar 2021 11:43:25 -0500
-Received: from [10.0.2.15] ([147.147.167.73])
-        by smtp with ESMTPA
-        id Ia1SlZX9zg7CTIa1TlzKni; Sat, 06 Mar 2021 16:43:23 +0000
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=plus.com; s=042019;
-        t=1615049003; bh=YC3KakqjtUHwYpd3L8TQ1bdrfOqBRvVD5L1gfFWzFW0=;
-        h=Subject:To:References:From:Date:In-Reply-To;
-        b=qM3QTyyGhuDy/0Md+GiLC92RBwZzMan3VymBaIApJvYVXvKz9/MwxFcJ5TI4oOTZe
-         M/bTELYYkVjYS+Tr1fdzwCuP5pPx0nJ3Qz3iKsr/C0hPf8QUDFmd0opk93Zrtwyf7S
-         rsMyDEzggGvOwrFV6t/8uewqfxS4zXnybInD50wafOZO5zn7IOjIRDORCQTVOk7ktY
-         vMytbVcgu4geAq/VtOvoSHKxh/h+IblmshYVk4kfErejs+EdtD1YDbLAeSlAocq1BG
-         ekC4rkg2HEONFUsb7/1wMa47NSuynEGx2WJzCAPswGYw+G9c8eYXcvxvrGzZLdHC0N
-         9dM8Z5/Fb52qA==
-X-Clacks-Overhead: "GNU Terry Pratchett"
-X-CM-Score: 0.00
-X-CNFS-Analysis: v=2.3 cv=cYFJUkLM c=1 sm=1 tr=0
- a=nK5asC+3lBOC3EoKtwbYYg==:117 a=nK5asC+3lBOC3EoKtwbYYg==:17
- a=IkcTkHD0fZMA:10 a=pGLkceISAAAA:8 a=B1Rj5xMdshEJKRxQVj0A:9
- a=AZrEKOhJ7TPWCF0j:21 a=gZbytGJhm3U958oI:21 a=QEXdDO2ut3YA:10
-X-AUTH: ramsayjones@:2500
+        Sat, 6 Mar 2021 12:46:08 -0500
+Received: from mail-ed1-x529.google.com (mail-ed1-x529.google.com [IPv6:2a00:1450:4864:20::529])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id ABF3EC06174A
+        for <linux-sparse@vger.kernel.org>; Sat,  6 Mar 2021 09:46:07 -0800 (PST)
+Received: by mail-ed1-x529.google.com with SMTP id x9so7889894edd.0
+        for <linux-sparse@vger.kernel.org>; Sat, 06 Mar 2021 09:46:07 -0800 (PST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20161025;
+        h=date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=N1FwX0fduy2WpxOBMc/XDEW8k+Fok1F4BFbxBuh3b0s=;
+        b=oOWXFmBXyvg08FobaJx0y1B0ismqIH8BoM+3tbO8f1yYgd9hJRk63A7OKK8CotNICS
+         oZXZAhKXk3oO6vJcE87Zx0Bzn9acCV+vh6W2HixqK7QzVOZSRCVeRVn5XzQWy3fOYku5
+         v5XOQGcxTIrU+nlrlg1+1d1bNFvDs7NmysqP5UYPjhIohN6Xite0mh5IC22yfZRIMPq4
+         CE3BJT+lPMYWBhs0lAhz5xroXxAHkXBiTQQyTMHSPsTISczcnmCPNhfaf/MDDVRMoN5O
+         58gYHeztvWDktoztz3weu5NCs0X8GeFc1fvuF8bnyg8G/J73y387krZiPeVhY05x5V2U
+         W1ig==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20161025;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=N1FwX0fduy2WpxOBMc/XDEW8k+Fok1F4BFbxBuh3b0s=;
+        b=mDJIBG3d7AEoS4dd7AIVVlTAaUkXzJjBqmjUiJXwIatmigKtQYExOty6sfUoeKcUP7
+         aBiKhWqAYzN/1ed82KbsQ1/SK3D1qL2xtC/9B/s4IUdhbsRp+74C6QU6vM5/uhXIhy4d
+         TNijyRySwjQLFXoWfNUbijphjc3Inqhcl55vMf9KCNlDj1QpguA8gK1eAXs0TmyM9i3j
+         p9VTm9zODb9v+NSrqLTZosgeggaesZ0r7pBJoLZeOwYCHdMA7ukVEnyaZmDdbG8oHO2D
+         Y8AISIj0F2oKxnFSjP7XymfoKmaa2ruQjl1lgfHZb9ZiLB+mv2qM/2/6BiZHcp9DkGjR
+         IIgA==
+X-Gm-Message-State: AOAM533EqSR6g40izjy4h9ZkL135gNNLPzrJ+4Mmf3VfddilT5mzMx8S
+        5o9uoQi5MMcN2D44z6EzBqbPHVhad2M=
+X-Google-Smtp-Source: ABdhPJxghafZjX5NFDtO4PfNZIkvOR46gxyBzqBKFBQZ8R3mHqEq47iLJMJqSrU+mQ3iaOOiFtkLnQ==
+X-Received: by 2002:aa7:c983:: with SMTP id c3mr14803036edt.185.1615052766346;
+        Sat, 06 Mar 2021 09:46:06 -0800 (PST)
+Received: from mail ([2a02:a03f:b7fe:f700:b855:e560:6f86:989e])
+        by smtp.gmail.com with ESMTPSA id u15sm4039542eds.6.2021.03.06.09.46.05
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Sat, 06 Mar 2021 09:46:05 -0800 (PST)
+Date:   Sat, 6 Mar 2021 18:46:04 +0100
+From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
+Cc:     linux-sparse@vger.kernel.org
 Subject: Re: [PATCH 6/6] ptrlist: change return value of
  linearize_ptr_list()/ptr_list_to_array()
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        linux-sparse@vger.kernel.org
+Message-ID: <20210306174604.iki62afa2rv7xsvw@mail>
 References: <20210306100552.33784-1-luc.vanoostenryck@gmail.com>
  <20210306100552.33784-7-luc.vanoostenryck@gmail.com>
-From:   Ramsay Jones <ramsay@ramsayjones.plus.com>
-Message-ID: <b9f7ecdf-ee6d-0c77-560e-e05b26bcec02@ramsayjones.plus.com>
-Date:   Sat, 6 Mar 2021 16:43:21 +0000
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:68.0) Gecko/20100101
- Thunderbird/68.10.0
+ <b9f7ecdf-ee6d-0c77-560e-e05b26bcec02@ramsayjones.plus.com>
 MIME-Version: 1.0
-In-Reply-To: <20210306100552.33784-7-luc.vanoostenryck@gmail.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-GB
-Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4wfNnY1w6elRRg3roRQYk3ORa+56kAZveaAKKu3edEiizlrkeVnxudQ3xD9yMqCsjhIlQzeQgxYJTAkoY2tnspOc7DRjwlzI7YDmYHDk06iKKESvgOjoyY
- FjMfcqXfK60tfTafXpHCYjgYtPsRgS8Jv0QyrNG/j1ETeZmg4wz8kEcOqeqdzPDZjmuz4UQpkQ7bmQ==
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <b9f7ecdf-ee6d-0c77-560e-e05b26bcec02@ramsayjones.plus.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-
-
-On 06/03/2021 10:05, Luc Van Oostenryck wrote:
-> The function linearize_ptr_list() is annoying to use because it
-> returns the number of elements put in the array. So, if you need
-> to know if the list contained the expected number of entries,
-> you need to allocate to array with one more entries and check
-
-s/allocate to array/allocate an array/
-
-> that the return value is one less than the maximum size.
+On Sat, Mar 06, 2021 at 04:43:21PM +0000, Ramsay Jones wrote:
+> On 06/03/2021 10:05, Luc Van Oostenryck wrote:
+> > Change this, so that this function returns the total number of
+> > entries in the list, much like it's done for snprintf().
 > 
-> Change this, so that this function returns the total number of
-> entries in the list, much like it's done for snprintf().
+> But this requires setting max == 0, right? This isn't documented.
 
-But this requires setting max == 0, right? This isn't documented.
+No no, there is nothing special with max == 0 at the interface level.
+If the list contains 3 elements but you're only interested in the cases
+it contains 2, you now call:
+	... array[2];
+	int nbr = linearize_ptr_list(list, array, 2);
+and it'll only fill 2 elements but it will return 3, so can you write:
+	if (nbr == 2) {
+		... do stuff ...
+	}
+IOW, it returns the number of elements that would have been written
+to the array if 'max' would have been infinite.
 
-> 
-> Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> ---
->  ptrlist.c  | 10 +++++-----
->  simplify.c |  4 ++--
->  2 files changed, 7 insertions(+), 7 deletions(-)
-> 
-> diff --git a/ptrlist.c b/ptrlist.c
-> index 0f0b3f6d818f..ecfbc07b2b6d 100644
-> --- a/ptrlist.c
-> +++ b/ptrlist.c
-> @@ -154,10 +154,10 @@ void *ptr_list_nth_entry(struct ptr_list *list, unsigned int idx)
->  // @head: the list to be linearized
->  // @arr: a ``void*`` array to fill with @head's entries
->  // @max: the maximum number of entries to store into @arr
-> -// @return: the number of entries linearized.
-> +// @return: the number of entries in the list.
->  //
->  // Linearize the entries of a list up to a total of @max,
-> -// and return the nr of entries linearized.
-> +// and return the nunmber of entries in the list.
+Previously, it would have returned 2 because the return value was
+capped to 'max' / it returned he number of elements written. So you
+had no idea if the list effectively contained only 2 elements of if
+there was some more and so you had to call it with one extra element
+to check this:
+	... array[3];
+	int nbr = linearize_ptr_list(list, array, 3);
+	if (nbr == 2) {
+		...
+	}
 
-s/nunmber/number/
-
-Somewhere here, the behaviour with max == 0 on input needs to
-be documented.
-
-ATB,
-Ramsay Jones
-
->  //
->  // The array to linearize into (@arr) should really
->  // be ``void *x[]``, but we want to let people fill in any kind
-> @@ -170,14 +170,14 @@ int linearize_ptr_list(struct ptr_list *head, void **arr, int max)
->  
->  		do {
->  			int i = list->nr;
-> +			nr += i;
-> +			if (max == 0)
-> +				continue;
->  			if (i > max) 
->  				i = max;
->  			memcpy(arr, list->list, i*sizeof(void *));
->  			arr += i;
-> -			nr += i;
->  			max -= i;
-> -			if (!max)
-> -				break;
->  		} while ((list = list->next) != head);
->  	}
->  	return nr;
-> diff --git a/simplify.c b/simplify.c
-> index cf5b3d748808..207af8edf28f 100644
-> --- a/simplify.c
-> +++ b/simplify.c
-> @@ -108,7 +108,7 @@ static int get_phisources(struct instruction *sources[], int nbr, struct instruc
->  static int if_convert_phi(struct instruction *insn)
->  {
->  	struct instruction *array[2];
-> -	struct basic_block *parents[3];
-> +	struct basic_block *parents[2];
->  	struct basic_block *bb, *bb1, *bb2, *source;
->  	struct instruction *br;
->  	pseudo_t p1, p2;
-> @@ -116,7 +116,7 @@ static int if_convert_phi(struct instruction *insn)
->  	bb = insn->bb;
->  	if (get_phisources(array, 2, insn))
->  		return 0;
-> -	if (ptr_list_to_array(bb->parents, parents, 3) != 2)
-> +	if (ptr_list_to_array(bb->parents, parents, 2) != 2)
->  		return 0;
->  	p1 = array[0]->phi_src;
->  	bb1 = array[0]->bb;
-> 
+Thanks for noticing all these typos,
+-- Luc
