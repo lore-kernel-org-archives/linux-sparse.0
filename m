@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id BB5C5C43381
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CD176C4332B
 	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 94A9E64FC9
+	by mail.kernel.org (Postfix) with ESMTP id A5F3064FAB
 	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232874AbhCJWLO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S232502AbhCJWLO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Wed, 10 Mar 2021 17:11:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46978 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46976 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233171AbhCJWLE (ORCPT
+        with ESMTP id S233157AbhCJWLD (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 10 Mar 2021 17:11:04 -0500
-Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4B3F2C061574
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:04 -0800 (PST)
-Received: by mail-ed1-x52c.google.com with SMTP id t1so95480eds.7
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:04 -0800 (PST)
+        Wed, 10 Mar 2021 17:11:03 -0500
+Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 60575C061574
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:03 -0800 (PST)
+Received: by mail-ej1-x62d.google.com with SMTP id jt13so41987358ejb.0
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:03 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=AEMYXmUNr/t1XuFCn4KA85j2yUZiAEd59KILiE7RemI=;
-        b=pu91w+OB2fSbcKPsvS9lYPinfxCPak20Xj96HnpZvwwN8ANQAiNwoUYK9KRKRI+9se
-         gyo+P9D6xEFPtdRQy1/ip40VQrD4UChpZPMI22AnTKXbKP45wAwngsP4IxhMp/jMWXKs
-         Kaz26mt8w0zXBfhqQ1aWLJDQ/9I6DUwX0WDYVgZin8jALHMO7ksSF3N5Vw8XafYT6kXs
-         FqL4/7Xv2Gg6xNNtx+2DcLcPgJAYdUJOHHWMktTEsR3uyg6jcp3bBnVhRGAqmIZsUVIq
-         g3ef8HEACY8iyFCyOCgojngbnOKWqauVBsp8n7fNZEfDdCugeuM56Kufx70wTQ72NBjl
-         16UQ==
+        bh=MKxt5LUBVm+Q16Mixc+0ghRopZAZs/iOW4EmhpRAzq4=;
+        b=k3a84pw1abqjjdBkc4Ue0tXdTDT7AeoZWHPd1MZnC5G4TVCbYB0D+XAftzfLFH4s29
+         vXjAfB0Gp1XpXOQxWw0che5wL/wYbgZJXSL+9NPKSHyZvarWQGvkRBG1eCUyDyM9qVZd
+         yUyY4Djno3hbvMNPHyMW07udkHvWvMqb2WvlslJgVYwtoQPeT4mUnDfc8ogArpJRWIH1
+         +wfMgVD3nSgeOGhobkSoMJvx5XHY0niy+esQ5O2bLFXeDR2vD868yTzyiNMZf80C4MjA
+         14kf2KmHxcX5q0AYl0csi+Kehl5bnd2mSxOytVw8dNLadAH5XYWjrTJ4RpStOQqo2R05
+         3HLQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=AEMYXmUNr/t1XuFCn4KA85j2yUZiAEd59KILiE7RemI=;
-        b=sLc565BdmztYfrudrcmGWr3f+6bdwZEHBCPq4089+xVK/UnW/tv5MaFS5Uwz1sxibb
-         3VElV4FasHbcuNEU5PllyvcG4XV0YhsPyY3tifsp9LV+cHVdDu7gWUXluZ+Dvl2aghzx
-         yWf/hzpSl+42sQIvX7EPsthjEh/DkIz2g34jFlWGB2oBC3yxDjri1MLp0il6lVFO3SJz
-         uwff9NW333DeZvaiA2GcH0IJlpjHMOoTkcwYaAsOEpG+f1BsJf6XKOyoHX2N69o01lZh
-         V9P+q96GMyQxDFat+urECZp5H1gWZYVBJXtwYGsCavg3zM27OivgHJfNVZ6eW19p4vup
-         12jw==
-X-Gm-Message-State: AOAM5307lTu+afnGVuowYw+QSsqlsRpiNgbM9koIGqHjVWXd9OjYmIEm
-        dHxInpE+JXyr0yP0rNcoFRMstFvJvFI=
-X-Google-Smtp-Source: ABdhPJzDUySDnNp2XfUEWE4RTk2B1x9VRmoznlaRx+wutGVqtbCULSV7hJwvVT1a2+DaNJIGIxJ2nw==
-X-Received: by 2002:a50:f391:: with SMTP id g17mr5567955edm.26.1615414263010;
-        Wed, 10 Mar 2021 14:11:03 -0800 (PST)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:196c:c08:d4ab:a1ba])
-        by smtp.gmail.com with ESMTPSA id ld19sm344326ejb.102.2021.03.10.14.11.02
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        bh=MKxt5LUBVm+Q16Mixc+0ghRopZAZs/iOW4EmhpRAzq4=;
+        b=EeE+cOo1rodW0Tcn7EjWUMzie65PeoUbuviHeK2epbpvGpmWS+MtmQEF2Daxhc33cm
+         G1KdiVMBYOEJIARX4lS5qts2h+oYtZcDmauDJjShsgb8VTpUhhAvD+ssQ+LTSqIfpi4P
+         UnHNWFPG3rFpw6F7HXzLarT6464Xw8F+ml8yGmTkWtqiDT9UO2qByQtb+YO/Zw1xqbAE
+         e2SheqcZ7qmM+FeVJqGrEQQ8Ek2SrEK/RG99IYHz7wY0IjhSx3qEs7lKleRaRHIINpDh
+         RaoOtZb0pMpMJw8iAahx1uU5ErZ6YPj99/xCizQUj9Q2eZ7zQ2faTZDZ92nIQgDc4Ndj
+         aprA==
+X-Gm-Message-State: AOAM5312zdTo1mqk0lBdYZHK5B/SHswfhJcIRq+Erys2KvKKxCmdb3Rr
+        0ml1hny/4944l0zyDECM8Gq6LqIOqCg=
+X-Google-Smtp-Source: ABdhPJwVzixx5rLF1Sbx6Et6IcyXCCWToEwsczSF9STAnf6BaZc3qIA5Wdio3w1S7qQATv4z2ieE1w==
+X-Received: by 2002:a17:906:ac6:: with SMTP id z6mr42029ejf.505.1615414262118;
         Wed, 10 Mar 2021 14:11:02 -0800 (PST)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:196c:c08:d4ab:a1ba])
+        by smtp.gmail.com with ESMTPSA id ld19sm344326ejb.102.2021.03.10.14.11.01
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 10 Mar 2021 14:11:01 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/9] simplify (x & M) cmpu C
-Date:   Wed, 10 Mar 2021 22:49:45 +0100
-Message-Id: <20210310214950.84192-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/9] simplify (x & M) cmps C
+Date:   Wed, 10 Mar 2021 22:49:44 +0100
+Message-Id: <20210310214950.84192-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210310214950.84192-1-luc.vanoostenryck@gmail.com>
 References: <20210310214950.84192-1-luc.vanoostenryck@gmail.com>
@@ -74,44 +74,53 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- simplify.c                   | 16 ++++++++++++++++
- validation/optim/cmpu-and0.c |  1 -
- 2 files changed, 16 insertions(+), 1 deletion(-)
+ simplify.c                   | 25 +++++++++++++++++++++++++
+ validation/optim/cmps-and0.c |  1 -
+ 2 files changed, 25 insertions(+), 1 deletion(-)
 
 diff --git a/simplify.c b/simplify.c
-index 90b0c5ba0127..ee29c9619bdc 100644
+index 207af8edf28f..90b0c5ba0127 100644
 --- a/simplify.c
 +++ b/simplify.c
-@@ -1281,6 +1281,22 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
- 			if (value >= (long long)bits)
- 				return replace_with_value(insn, 0);
- 			break;
-+		case OP_SET_B:
-+			if (value > bits)
+@@ -1258,6 +1258,31 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
+ 	src2 = insn->src2;
+ 	value = src2->value;
+ 	switch (DEF_OPCODE(def, src1)) {
++	case OP_AND:
++		if (!constant(def->src2))
++			break;
++		bits = def->src2->value;
++		switch (insn->opcode) {
++		case OP_SET_LE:
++			value = sign_extend(value, def->size);
++			if (bits & sign_bit(def->size))
++				break;
++			if (value < 0)
++				return replace_with_value(insn, 0);
++			if (value >= (long long)bits)
 +				return replace_with_value(insn, 1);
 +			break;
-+		case OP_SET_BE:
-+			if (value >= bits)
++		case OP_SET_GT:
++			value = sign_extend(value, def->size);
++			if (bits & sign_bit(def->size))
++				break;
++			if (value < 0)
 +				return replace_with_value(insn, 1);
-+			break;
-+		case OP_SET_AE:
-+			if (value > bits)
++			if (value >= (long long)bits)
 +				return replace_with_value(insn, 0);
 +			break;
-+		case OP_SET_A:
-+			if (value >= bits)
-+				return replace_with_value(insn, 0);
-+			break;
- 		}
- 		break;
++		}
++		break;
  	case OP_SEXT:				// sext(x) cmp C --> x cmp trunc(C)
-diff --git a/validation/optim/cmpu-and0.c b/validation/optim/cmpu-and0.c
-index 253212941779..927b9fb65f52 100644
---- a/validation/optim/cmpu-and0.c
-+++ b/validation/optim/cmpu-and0.c
-@@ -11,7 +11,6 @@ int cmps_and_gtu_eq(int a) { return ((a & MASK) >  (MASK + 0)) + 1; }
+ 		osize = def->orig_type->bit_size;
+ 		if (is_signed_constant(value, osize, size)) {
+diff --git a/validation/optim/cmps-and0.c b/validation/optim/cmps-and0.c
+index 097ec2f9f16c..962fbd2d29f8 100644
+--- a/validation/optim/cmps-and0.c
++++ b/validation/optim/cmps-and0.c
+@@ -15,7 +15,6 @@ int cmps_and_ge_gtm(int a) { return ((a & MASK) >= (MASK + 1)) + 1; }
  /*
-  * check-name: cmpu-and0
+  * check-name: cmps-and0
   * check-command: test-linearize -Wno-decl $file
 - * check-known-to-fail
   *
