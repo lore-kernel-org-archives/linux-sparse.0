@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E7F0FC4332E
-	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 32E32C43333
+	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:46 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id BC5F764FC3
-	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1A5F764FAB
+	for <linux-sparse@archiver.kernel.org>; Wed, 10 Mar 2021 22:11:46 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231935AbhCJWLO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S233131AbhCJWLO (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Wed, 10 Mar 2021 17:11:14 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46968 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46992 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233131AbhCJWLC (ORCPT
+        with ESMTP id S233450AbhCJWLG (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 10 Mar 2021 17:11:02 -0500
-Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 929B3C061574
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:02 -0800 (PST)
-Received: by mail-ej1-x62f.google.com with SMTP id ox4so26299816ejb.11
-        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:02 -0800 (PST)
+        Wed, 10 Mar 2021 17:11:06 -0500
+Received: from mail-ed1-x530.google.com (mail-ed1-x530.google.com [IPv6:2a00:1450:4864:20::530])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 78C7AC061574
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:06 -0800 (PST)
+Received: by mail-ed1-x530.google.com with SMTP id b13so143441edx.1
+        for <linux-sparse@vger.kernel.org>; Wed, 10 Mar 2021 14:11:06 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=ztCjPU6H5NUjyIzKarCMxklwx0LRyOBxLTvY6YHpE1c=;
-        b=WGR4ZDS1z2rCDSn96/YTUn+Xbn1PD+GMWM7+K6NkjHV2382M501LTE8cf1JE0UhASg
-         4n72BcqP5OhfaChYMP3FGA3jv6Bvv7sQdLX9tq6c5ayQtPqY1I0YhXsZEwWafFAmU6VB
-         VEnNtAwkKMeFb2eZAk40TsiKqL1CArEbYPIvlmiHqu7Ys6qdAg4lvK5wRsvEYxqm4Ph1
-         sc6TXKIaqUrQRkYf7p4aXL29Wa/ydIIpV26BIC7NWJHvtCkTQgxywU1Lap184iZbTAGR
-         yMw7SlDjjqaXmXuRdoOGOSKcIkKZX+1S8Gj5PjhpQmGkh2Hc9KLDGfeNjwHTdfCfMOVH
-         ji8g==
+        bh=XRz/c+V0KLbt7rcYnVpHcsX3x3H0fM14HqWzYEQ8oos=;
+        b=rkQQfkapgcQ5QTQNYe35hALGVrVB2xHTt6C8ZGzfG0RuJZi9Y26hCb0JkO2wQ01rjT
+         aVQ2a5AzLK05ajLz3ka6khGA+yY5uhHrLA+R9wzIrQslvcISmI8cZFzHp50woSiO1PVm
+         NCddHr4mD5nWKxHBrJ63o4iz48WGrMLBfG506LnL3hx22Pz5TZABCj77+yBd03/BmNyK
+         BFzuc8Xd++ZaGSVlTJMHRrKMdX7wB2GHXtbbWfT+6GrfLxwrJ+wWnLVM0/o2xN52O3x8
+         USyS27bM5/FBVsJNW0P5X9ULDeokrx/df+Kv7N441I/gBInSpmTGmZL301UF2+DWuRzZ
+         71pw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=ztCjPU6H5NUjyIzKarCMxklwx0LRyOBxLTvY6YHpE1c=;
-        b=sSMvapWKJ6IQu80SuwGuKgDpD5DGIg0xIpTXn+9jXlDALLHC+cZs2fTbpiVtLnDndo
-         6peZ0neQyrIlPaGB2Gm7ADyfiLVQpWoA7ivn3Eck2Fvkw9WZFHfmSOorRvfPeId/a1HE
-         qcw+VGwU4GFMeoSbQqflMFf3st2+NIY/aNYdW5PhRLiV5iHceWmuAW/IarAEDKUjazeM
-         yPLzF+srellwZnmqLQhvKtndylHJpDaxDh9btquWGTsSMQwNaLmlSdCxGzG4nkJ2iQE0
-         srNJ/TMuPW19xIxqnws73JLjPqcq4Y9KEVpaQ6OSJv8hd/HfRGb9p7+sDCz9xjY3Ewif
-         WhiA==
-X-Gm-Message-State: AOAM530yyq9dmmYGvRFhsOT9y+Ey6dPHMYBwWcuzvu2ROnjNn0nVIgRa
-        +kG7isCBQdz+do+SMuWkfaB/M4CKLrY=
-X-Google-Smtp-Source: ABdhPJyQXEv1hAPrNqId1eieZju1khNoW1SJOo1iLtSqxFMYt2qIk/xDo0dKsKE2mB7slQiRC7pxgw==
-X-Received: by 2002:a17:906:b4c:: with SMTP id v12mr77333ejg.330.1615414261319;
-        Wed, 10 Mar 2021 14:11:01 -0800 (PST)
+        bh=XRz/c+V0KLbt7rcYnVpHcsX3x3H0fM14HqWzYEQ8oos=;
+        b=hHb2U4cg8TLtBZWhmhNNXUIkUCQWev7UmtCAtncD5arJIuTD0I8yrOjzaLglCHhWZZ
+         OfT+sC5NcOtfYZ2MOvT6U8GyiTBgoxc2MmyH13+GFgLwYuG7kDJ3xHUNvnLkKedfIIld
+         rGo9Gj2I2GcqZPYuhU6NHZqxGPgK5TiPGlQBSxaxDUlTfaJlLpQls87OBCIiVh5eXMbb
+         PBADEF8nrjFkLO7CLSVpCn6glceUIZvbEIClUu6ZpQLjHYAn3z1tvNRoFjmqEbwWoYoN
+         tGLjPNUNdezIRRvwSU9JrYTXt5ey3l0Otg4M81LXtb1698kipw25qYSXlCmG5kpYFknm
+         byDw==
+X-Gm-Message-State: AOAM531G+bLTySh9U3I5Iy6JWJtLmvP12abygDFhP5hZVYwYDoi4km3N
+        jj1915dnwXGA36TEPwjNGWTKCJPJ16k=
+X-Google-Smtp-Source: ABdhPJyspMtoBDhfy40vij6VvgoZ9NzRvRMeh6O1AE6TOLJTxmDiEu19X2xsEF2OvHWVBTbNuq6WOQ==
+X-Received: by 2002:aa7:d987:: with SMTP id u7mr5500081eds.326.1615414265277;
+        Wed, 10 Mar 2021 14:11:05 -0800 (PST)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:196c:c08:d4ab:a1ba])
-        by smtp.gmail.com with ESMTPSA id ld19sm344326ejb.102.2021.03.10.14.11.00
+        by smtp.gmail.com with ESMTPSA id ld19sm344326ejb.102.2021.03.10.14.11.04
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Wed, 10 Mar 2021 14:11:00 -0800 (PST)
+        Wed, 10 Mar 2021 14:11:04 -0800 (PST)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/9] add testcases for constant compares against AND/OR
-Date:   Wed, 10 Mar 2021 22:49:43 +0100
-Message-Id: <20210310214950.84192-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 7/9] simplify (x | M) {==,!=} C
+Date:   Wed, 10 Mar 2021 22:49:48 +0100
+Message-Id: <20210310214950.84192-8-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.30.0
 In-Reply-To: <20210310214950.84192-1-luc.vanoostenryck@gmail.com>
 References: <20210310214950.84192-1-luc.vanoostenryck@gmail.com>
@@ -74,180 +74,48 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- validation/optim/cmpe-and0.c  | 11 +++++++++++
- validation/optim/cmpe-or0.c   | 11 +++++++++++
- validation/optim/cmps-and0.c  | 22 ++++++++++++++++++++++
- validation/optim/cmps-or0.c   | 22 ++++++++++++++++++++++
- validation/optim/cmps0-and0.c | 13 +++++++++++++
- validation/optim/cmpu-and0.c  | 18 ++++++++++++++++++
- validation/optim/cmpu-or0.c   | 19 +++++++++++++++++++
- 7 files changed, 116 insertions(+)
- create mode 100644 validation/optim/cmpe-and0.c
- create mode 100644 validation/optim/cmpe-or0.c
- create mode 100644 validation/optim/cmps-and0.c
- create mode 100644 validation/optim/cmps-or0.c
- create mode 100644 validation/optim/cmps0-and0.c
- create mode 100644 validation/optim/cmpu-and0.c
- create mode 100644 validation/optim/cmpu-or0.c
+ simplify.c                  | 15 +++++++++++++++
+ validation/optim/cmpe-or0.c |  1 -
+ 2 files changed, 15 insertions(+), 1 deletion(-)
 
-diff --git a/validation/optim/cmpe-and0.c b/validation/optim/cmpe-and0.c
-new file mode 100644
-index 000000000000..7db608365568
---- /dev/null
-+++ b/validation/optim/cmpe-and0.c
-@@ -0,0 +1,11 @@
-+int cmpe_and_eq(int a) { return ((a & 0xff00) == 0xff01) + 1; }
-+int cmpe_and_ne(int a) { return ((a & 0xff00) != 0xff01) + 0; }
-+
-+/*
-+ * check-name: cmpe-and0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
+diff --git a/simplify.c b/simplify.c
+index b46e08c3b79a..865fadfb590e 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -1311,6 +1311,21 @@ static int simplify_compare_constant(struct instruction *insn, long long value)
+ 			break;
+ 		}
+ 		break;
++	case OP_OR:
++		if (!constant(def->src2))
++			break;
++		bits = def->src2->value;
++		switch (insn->opcode) {
++		case OP_SET_EQ:
++			if ((value & bits) != bits)
++				return replace_with_value(insn, 0);
++			break;
++		case OP_SET_NE:
++			if ((value & bits) != bits)
++				return replace_with_value(insn, 1);
++			break;
++		}
++		break;
+ 	case OP_SEXT:				// sext(x) cmp C --> x cmp trunc(C)
+ 		osize = def->orig_type->bit_size;
+ 		if (is_signed_constant(value, osize, size)) {
 diff --git a/validation/optim/cmpe-or0.c b/validation/optim/cmpe-or0.c
-new file mode 100644
-index 000000000000..bef2316120f7
---- /dev/null
+index bef2316120f7..2e89d611117d 100644
+--- a/validation/optim/cmpe-or0.c
 +++ b/validation/optim/cmpe-or0.c
-@@ -0,0 +1,11 @@
-+int cmp_eq(int a) { return ((a | 1) != 0) + 0; }
-+int cmp_ne(int a) { return ((a | 1) == 0) + 1; }
-+
-+/*
-+ * check-name: cmpe-or0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cmps-and0.c b/validation/optim/cmps-and0.c
-new file mode 100644
-index 000000000000..097ec2f9f16c
---- /dev/null
-+++ b/validation/optim/cmps-and0.c
-@@ -0,0 +1,22 @@
-+#define MINUS_ONE	-1
-+#define MASK		32
-+
-+
-+int cmps_and_lt_lt0(int a) { return ((a & MASK) <  MINUS_ONE)  + 1; }
-+int cmps_and_lt_gtm(int a) { return ((a & MASK) <  (MASK + 1)) + 0; }
-+int cmps_and_le_lt0(int a) { return ((a & MASK) <= MINUS_ONE)  + 1; }
-+int cmps_and_le_gtm(int a) { return ((a & MASK) <= (MASK + 1)) + 0; }
-+
-+int cmps_and_gt_lt0(int a) { return ((a & MASK) >  MINUS_ONE)  + 0; }
-+int cmps_and_gt_gtm(int a) { return ((a & MASK) >  (MASK + 1)) + 1; }
-+int cmps_and_ge_lt0(int a) { return ((a & MASK) >= MINUS_ONE)  + 0; }
-+int cmps_and_ge_gtm(int a) { return ((a & MASK) >= (MASK + 1)) + 1; }
-+
-+/*
-+ * check-name: cmps-and0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cmps-or0.c b/validation/optim/cmps-or0.c
-new file mode 100644
-index 000000000000..40a2092c58a4
---- /dev/null
-+++ b/validation/optim/cmps-or0.c
-@@ -0,0 +1,22 @@
-+#define EQ(X)		+ (X == 0)
-+#define SIGN		(1 << 31)
-+#define MASK		(SIGN | 32)
-+
-+
-+int cmps_ior_lt_x(int a) { return ((a | MASK) <  4) EQ(1); }
-+int cmps_ior_lt_0(int a) { return ((a | MASK) <  0) EQ(1); }
-+int cmps_ior_le_x(int a) { return ((a | MASK) <= 4) EQ(1); }
-+int cmps_ior_le_0(int a) { return ((a | MASK) <= 0) EQ(1); }
-+int cmps_ior_ge_x(int a) { return ((a | MASK) >= 4) EQ(0); }
-+int cmps_ior_ge_0(int a) { return ((a | MASK) >= 0) EQ(0); }
-+int cmps_ior_gt_x(int a) { return ((a | MASK) >  4) EQ(0); }
-+int cmps_ior_gt_0(int a) { return ((a | MASK) >  0) EQ(0); }
-+
-+/*
-+ * check-name: cmps-or0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cmps0-and0.c b/validation/optim/cmps0-and0.c
-new file mode 100644
-index 000000000000..819a1dc2a793
---- /dev/null
-+++ b/validation/optim/cmps0-and0.c
-@@ -0,0 +1,13 @@
-+#define M		32
-+
-+int cmps_and_sle0(int a) { return ((a & M) <= 0) == ((a & M) == 0); }
-+int cmps_and_sgt0(int a) { return ((a & M) >  0) == ((a & M) != 0); }
-+
-+/*
-+ * check-name: cmps0-and
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cmpu-and0.c b/validation/optim/cmpu-and0.c
-new file mode 100644
-index 000000000000..253212941779
---- /dev/null
-+++ b/validation/optim/cmpu-and0.c
-@@ -0,0 +1,18 @@
-+#define MASK		32U
-+
-+
-+int cmps_and_ltu_gt(int a) { return ((a & MASK) <  (MASK + 1)) + 0; }
-+int cmps_and_leu_gt(int a) { return ((a & MASK) <= (MASK + 1)) + 0; }
-+int cmps_and_leu_eq(int a) { return ((a & MASK) <= (MASK + 0)) + 0; }
-+int cmps_and_geu_gt(int a) { return ((a & MASK) >= (MASK + 1)) + 1; }
-+int cmps_and_gtu_gt(int a) { return ((a & MASK) >  (MASK + 1)) + 1; }
-+int cmps_and_gtu_eq(int a) { return ((a & MASK) >  (MASK + 0)) + 1; }
-+
-+/*
-+ * check-name: cmpu-and0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
-diff --git a/validation/optim/cmpu-or0.c b/validation/optim/cmpu-or0.c
-new file mode 100644
-index 000000000000..77360d3feb0f
---- /dev/null
-+++ b/validation/optim/cmpu-or0.c
-@@ -0,0 +1,19 @@
-+#define EQ(X)		+ (X == 0)
-+#define MASK		32U
-+
-+
-+int cmpu_ior_lt_lt(int a) { return ((a | MASK) <  (MASK - 1)) EQ(0); }
-+int cmpu_ior_lt_eq(int a) { return ((a | MASK) <  (MASK    )) EQ(0); }
-+int cmpu_ior_le_lt(int a) { return ((a | MASK) <= (MASK - 1)) EQ(0); }
-+int cmpu_ior_ge_lt(int a) { return ((a | MASK) >= (MASK - 1)) EQ(1); }
-+int cmpu_ior_ge_eq(int a) { return ((a | MASK) >= (MASK    )) EQ(1); }
-+int cmpu_ior_gt_lt(int a) { return ((a | MASK) >  (MASK - 1)) EQ(1); }
-+
-+/*
-+ * check-name: cmpu-or0
-+ * check-command: test-linearize -Wno-decl $file
-+ * check-known-to-fail
-+ *
-+ * check-output-ignore
-+ * check-output-returns: 1
-+ */
+@@ -4,7 +4,6 @@ int cmp_ne(int a) { return ((a | 1) == 0) + 1; }
+ /*
+  * check-name: cmpe-or0
+  * check-command: test-linearize -Wno-decl $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-returns: 1
 -- 
 2.30.0
 
