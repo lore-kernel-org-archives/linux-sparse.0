@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 113ADC433E5
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 105DFC433E2
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E2A4A6193A
+	by mail.kernel.org (Postfix) with ESMTP id CFBFD61939
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230053AbhCUQS0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Mar 2021 12:18:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44008 "EHLO
+        id S230042AbhCUQSZ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Mar 2021 12:18:25 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43986 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230057AbhCUQSS (ORCPT
+        with ESMTP id S230045AbhCUQSP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 12:18:18 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D4EC6C061762
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:17 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id a7so17366086ejs.3
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:17 -0700 (PDT)
+        Sun, 21 Mar 2021 12:18:15 -0400
+Received: from mail-ej1-x630.google.com (mail-ej1-x630.google.com [IPv6:2a00:1450:4864:20::630])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A2FE3C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:14 -0700 (PDT)
+Received: by mail-ej1-x630.google.com with SMTP id t18so17352246ejc.13
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:14 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=WN5VWFGjCfI+jnZKuvmUolfrJcEpyaIRmr0S+DqXjlk=;
-        b=vMKiIR9i6nKGRIWjw2Iu7uPr70LX++2m4ETEjRaXQv7u8HPLNL4/9jWY8t9e63VPP8
-         uydBzLSIKv7Rie6pK8AgtyQkUboE9puwySTGolXjbfqpMraul5dIwV8WJtoVbio8uBkB
-         Tgf8TpsqlBCtXfk/7iAZ8CUwrAEoB7YjJocMtdRLfdurxmBpnS9Smx9mGZZ0QtQuD2jq
-         QRG3QNdoMGQDrLAYCWYgyMeSVrQfELOpHk3xFsudZ4H+Tvsw5udknBwii2AyaADSklwC
-         0kAYDkpT8iOPIHYhZ26FJMDV2MLwgJII2aWKbDsyIRmS+NNUmE5OUxTstVKmYocd/b2k
-         kzqQ==
+        bh=qfzNAIQKTocxOKBw2AQcH96LuSXXG5QoeqiTaPup7WA=;
+        b=Im9IPBFIIOjEiRK55BQ+nYCuXsQcZebfs6jIKLZY2Soaj6DSdGB/t/6JlqLbARnzhD
+         s8yFPFeV0ncGHeyeC+2KIQRKic80CS8arcEeGXao2NKsnlmOCM1N5SxkYildAMIstG+l
+         B7g3ZCruwFEzQJG6OI0t0Cvw/WE/1xEYHFFRrf/v73GCqtUxFzCg1OAId22EllcYwVKA
+         mUvIw/dOkRCLvIlDmyb8t+6KE2jO1BA7E+VdROv223WRfUTU/kFyURE0kpQhfXfX+ooh
+         yXdeKOS6S0+fprNOk0WefDzi9cSUVshEgHRj6SiPhk33pyKoazkuw91onDg2T0/iK3g+
+         JRjA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=WN5VWFGjCfI+jnZKuvmUolfrJcEpyaIRmr0S+DqXjlk=;
-        b=RlhOSjC32R4uIrnO2OvFvJYHujkf/dIoNUujQjxt1G5i4Kd8a7KQGX7seXNoIU7gMG
-         sQ/uhD3ors4XGnTQ/b064P1efEtuOHhGkCA+Wgfe91wGy3rpE0MVTBYjNl1T4ZEY1/0L
-         JQU2EQGW5jsQRayevqqnOKXL5HrIFoJLHaeCM7JBgUPazAxxC5zVLVTupoHvN61JfvJa
-         BsS2dbfQEtyHcfjNz9JWbVn0C/QwgVSjJd79p/GvK6m3GGN6a3g9XcM3gRuvrj9nQ3G9
-         GmYpgHNEo8snEnvEEm7+TFMTjfupZVNPsdGPDQJPiEVI/HXVSrUqIL6/6K6Pv8WDVKas
-         PrXg==
-X-Gm-Message-State: AOAM533UXRZfTyURYuR7I937joJZIY3kiT8SnCZXjiz+BUFTiJouB/ZY
-        fOWVlTVKeXY19jLdxWEueBFCiIaL8No=
-X-Google-Smtp-Source: ABdhPJwLOnt7iPgkVPFgfXFcWTpeKnNrDWR0UkiuB27Ov9ieAZJhOhN51lIESYyopboJKh5Lpm5JnQ==
-X-Received: by 2002:a17:906:4015:: with SMTP id v21mr15619769ejj.433.1616343496704;
-        Sun, 21 Mar 2021 09:18:16 -0700 (PDT)
+        bh=qfzNAIQKTocxOKBw2AQcH96LuSXXG5QoeqiTaPup7WA=;
+        b=md3ptIfoRL1reJhC3UGjQUY1afBbAvLnq3CoGmqtMyfJ05KUEp/IlKHOw6Q9YZjDIv
+         3+rq333cp5KY3k/dZcYwKW6xDGG/guBGI+ChwYxBiDzQp/WeNYDo2Qk0ZGN2OG2blEcg
+         QLvRkmab2QqcHwHgww4jcRrgHcoIzyf3fKKua59hc62HqZk7pWxgyPwPKxipleLUSPZl
+         V+Hv5LpIvOSJlA5Lsq8rV/65Q2IushsCiPNn61aHUj4UkzJrQgxyyavorizRxC7+ZkDy
+         lUSlizyed6ivWfs9oLuhpA2giq0FASrqVytNJHBhQp+hX7b4YvSjItbUOrYP22AwF1K1
+         Co2A==
+X-Gm-Message-State: AOAM532RXAgrQEUJdYPN4orPvjONRSj6j8UwOlaQy8ODipXvQK+M3/Zx
+        Lyf9Vo6kYQs9M4Rp60t79oFQadB3dGg=
+X-Google-Smtp-Source: ABdhPJyzTP/jGvp8cVku+1ymLOJUx3rWn5xEyvOrlrMGLzNwXa5TLp9pMYYWFPWdZqSQuhuCl1prVg==
+X-Received: by 2002:a17:907:3ea0:: with SMTP id hs32mr14783344ejc.411.1616343493497;
+        Sun, 21 Mar 2021 09:18:13 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:dc34:259e:8292:82c0])
-        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.16
+        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 09:18:16 -0700 (PDT)
+        Sun, 21 Mar 2021 09:18:13 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 6/6] let ssa_rename_phi() use insert_last_instruction()
-Date:   Sun, 21 Mar 2021 17:16:09 +0100
-Message-Id: <20210321161609.45905-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 2/6] replace add_instruction_to_end() by insert_last_instruction()
+Date:   Sun, 21 Mar 2021 17:16:05 +0100
+Message-Id: <20210321161609.45905-3-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
 References: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
@@ -72,30 +72,44 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+add_instruction_to_end() and insert_last_instruction() do exactly
+the same thing but with the arguments in the opposite order.
+
+So, replace add_instruction_to_end() by insert_last_instruction().
+
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- ssa.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+ cse.c | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
 
-diff --git a/ssa.c b/ssa.c
-index b9044207db16..5f1a52b8fe94 100644
---- a/ssa.c
-+++ b/ssa.c
-@@ -345,11 +345,11 @@ static void ssa_rename_phi(struct instruction *insn)
- 	if (!var->torename)
- 		return;
- 	FOR_EACH_PTR(insn->bb->parents, par) {
--		struct instruction *term = delete_last_instruction(&par->insns);
- 		pseudo_t val = lookup_var(par, var);
--		pseudo_t phi = alloc_phi(par, val, var);
-+		struct instruction *phisrc = alloc_phisrc(val, var);
-+		pseudo_t phi = phisrc->target;
- 		phi->ident = var->ident;
--		add_instruction(&par->insns, term);
-+		insert_last_instruction(par, phisrc);
- 		link_phi(insn, phi);
- 		mark_phi_used(val);
- 	} END_FOR_EACH_PTR(par);
+diff --git a/cse.c b/cse.c
+index 1e58a973ecf6..b59581814ab7 100644
+--- a/cse.c
++++ b/cse.c
+@@ -298,14 +298,6 @@ static inline void remove_instruction(struct instruction_list **list, struct ins
+ 	delete_ptr_list_entry((struct ptr_list **)list, insn, count);
+ }
+ 
+-static void add_instruction_to_end(struct instruction *insn, struct basic_block *bb)
+-{
+-	struct instruction *br = delete_last_instruction(&bb->insns);
+-	insn->bb = bb;
+-	add_instruction(&bb->insns, insn);
+-	add_instruction(&bb->insns, br);
+-}
+-
+ static struct instruction * try_to_cse(struct entrypoint *ep, struct instruction *i1, struct instruction *i2)
+ {
+ 	struct basic_block *b1, *b2, *common;
+@@ -343,7 +335,7 @@ static struct instruction * try_to_cse(struct entrypoint *ep, struct instruction
+ 	if (common) {
+ 		i1 = cse_one_instruction(i2, i1);
+ 		remove_instruction(&b1->insns, i1, 1);
+-		add_instruction_to_end(i1, common);
++		insert_last_instruction(common, i1);
+ 	} else {
+ 		i1 = i2;
+ 	}
 -- 
 2.31.0
 
