@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 69F1BC433DB
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E4C50C433E1
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 34BA261864
+	by mail.kernel.org (Postfix) with ESMTP id 9FA3961937
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229784AbhCUQSZ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Mar 2021 12:18:25 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43984 "EHLO
+        id S230050AbhCUQS0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Mar 2021 12:18:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43990 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230042AbhCUQSO (ORCPT
+        with ESMTP id S230046AbhCUQSQ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 12:18:14 -0400
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id D2D8FC061762
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:13 -0700 (PDT)
-Received: by mail-ed1-x533.google.com with SMTP id b16so16481833eds.7
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:13 -0700 (PDT)
+        Sun, 21 Mar 2021 12:18:16 -0400
+Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id A8960C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:15 -0700 (PDT)
+Received: by mail-ej1-x629.google.com with SMTP id b9so17383918ejc.11
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=Wah0v4FjWHZbJaov8QIevKHi9R8Q9SEewwcmnNESkh8=;
-        b=ctOaDbn/ug1qvoTGVy1xqGPrEYhQhGvewTuOlSjab61fbm60A9SRcFA5ZRUAS9H59I
-         +o05TSnM0lN5CEsK5umDJah36j9q1AcukhrGmLuetXyK3cXjtMt9DH9s5pRiX4TnzARu
-         uwx5U86b1wVzlGP0vemLu0UT+j6F4HnKiOgJO6Bl0vng+1I3Jq8YeJb/kcoX8hwNGzCi
-         71KLO/S5gHIETfBv0ZXc78bq8bpXR2Uy946O24UBxCqJp3QMfxiN2MWgza4CpsjJ6y1m
-         pVrT44W2RqKTrqXS/RzFzRwlEjpIlaDld+fUNrBUM/7xd+dUpqpB/YoD0D6/ZlGfNPAY
-         x5hQ==
+        bh=iCsFKI9TUgdSg1jVahlz/s+ILL2yniqy6o05AhOsS0I=;
+        b=RoKk+FdsGk00WzygtKkgCQvvj1Dt5h6PVh9M5rp840QP1Ev1PO9XBdRyBql6eGJhI1
+         aFjd3+Vw5rKDyWoXtaMCYj0r2QifNgTH8IXYwn7qg0UBKV/JmUX8neHV5hv0AT3ZRiEv
+         JTyR/QejzM6VXCz8+wQOB748+L3FgSyUxHGRmDa3SlfVRnZJC82l1ygpoaI4zKN0ekQ3
+         QGCi1S0cN3nm/DfUssmLJskb077F+XN08SuwsaFENL8z6696qDohVxGSzECqTqObB4Hz
+         785nQMb4EtUalAq4aRHjpL45zT6ZEv+pPDa74T9EL5QpYTQTE46/dWCxzTZaL20lyPRe
+         qzeg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=Wah0v4FjWHZbJaov8QIevKHi9R8Q9SEewwcmnNESkh8=;
-        b=MG1+fNcj6vZMuB9TBh0GbWhZqRU24X8yNKk0o8aDsQd4amfmbtUvNjItungrkrJbP2
-         j2nb5T4pmDsTxjf5BJ64PwOw5milm2XwW7GVa8uCRUELkd1LYFuGMLt6Ah4jrN70QEUU
-         31OT9EInZygNDytEQDxM4sDtMLkvlVIIsqFjXoj6WNMzfPd0l6vprAeN/+V/YsPAP5Lv
-         JsogO9dMBJnkS5SlH0hMWzGjzlFKOkPb9e1Emlwzsw9xselOq89j8G+7QTRws9Wsu/Uy
-         0dHmMZi939KVWJ8WyqCQZnhkBA4kst9Vqc41P8TILnW+nhNgEewrzt7WBFFrN8NZj3y2
-         +BxA==
-X-Gm-Message-State: AOAM5331WFiOa0TcolCHJlqKMEWbdPOvSDcljSjTOSP1a+jWk4nzQjUW
-        3iKrnMD9a0CPmXKAPfKItLM7iYGcOUA=
-X-Google-Smtp-Source: ABdhPJwIFLFMqny6hm5t45KsdEzPj+UUrQ/gK3l+pbea/7zLAdMewltP/Uy3Vfn1dbYTMsef3IFyzA==
-X-Received: by 2002:aa7:d385:: with SMTP id x5mr21405147edq.289.1616343492632;
-        Sun, 21 Mar 2021 09:18:12 -0700 (PDT)
+        bh=iCsFKI9TUgdSg1jVahlz/s+ILL2yniqy6o05AhOsS0I=;
+        b=B/1Pd8swMbC+xykwCXxOQEsr5TzkppSLmDRCAU5tLwj++SCT2aZKV+iZFyp+/MJkaN
+         1iJ7AfYVa8UIiRrtYnI+3fX5EBI8SbuBI0wi1mPtnJ9pgxS5O8V4a08wobz8Y5BunIx/
+         /h8O3FALdqus0kDnJJK64VQJFlD4JlIRk+jmB+2aG7nU1LPvE2uL/mEpx0/7ipgg5i8f
+         XQvPZOE0Sb/xkzWErE/Vvgg6PEbVCi5/x5amr+D4+dye7K2vaDnii2/c6sDZrrmQKAq3
+         gUQx6+YS56o0H/W4MyTm7sWlGmGkexSwDNXMQqXGrBM8px3N920BfzPimrHDMzVVrAtG
+         z9ww==
+X-Gm-Message-State: AOAM5310iaqP5JvEyfKJyYxiOAN+TIbeXyYRJPlsL99fwHaut8qMInV+
+        zAsrtZxqw7qI2egqKiOr/xiLRM6/IXU=
+X-Google-Smtp-Source: ABdhPJwUuRApPPdcwX5uqFYYBjM5FcGUDsWSJLDJMN28y5KNyCNXKI08Uy3fLnux9K/l0liW92fabQ==
+X-Received: by 2002:a17:907:9611:: with SMTP id gb17mr15458067ejc.325.1616343494407;
+        Sun, 21 Mar 2021 09:18:14 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:dc34:259e:8292:82c0])
-        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.12
+        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.13
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 09:18:12 -0700 (PDT)
+        Sun, 21 Mar 2021 09:18:13 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 1/6] add insert_last_instruction()
-Date:   Sun, 21 Mar 2021 17:16:04 +0100
-Message-Id: <20210321161609.45905-2-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/6] let insert_select() use insert_last_instruction()
+Date:   Sun, 21 Mar 2021 17:16:06 +0100
+Message-Id: <20210321161609.45905-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
 References: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
@@ -72,42 +72,37 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-It's relatively common to have to add an instruction at the end of a BB.
-More exactly, at the end but just before the terminator instruction.
-What is done for this is:
-1) remove the terminator
-2) add the new instruction
-3) add the terminator back
-
-This is a bit tedious, need to declare a temporary variable for the
-terminator and, more generally, it's low-level details.
-
-So, add an helper for doing this: insert_last_instruction().
-
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.h | 8 ++++++++
- 1 file changed, 8 insertions(+)
+ linearize.c | 7 +------
+ 1 file changed, 1 insertion(+), 6 deletions(-)
 
-diff --git a/linearize.h b/linearize.h
-index b6c8bf134065..493f6be1074c 100644
---- a/linearize.h
-+++ b/linearize.h
-@@ -195,6 +195,14 @@ static inline void add_instruction(struct instruction_list **list, struct instru
- 	add_ptr_list(list, insn);
+diff --git a/linearize.c b/linearize.c
+index e6aa01f1b9fe..4787689b37b8 100644
+--- a/linearize.c
++++ b/linearize.c
+@@ -697,11 +697,7 @@ void insert_select(struct basic_block *bb, struct instruction *br, struct instru
+ 	pseudo_t target;
+ 	struct instruction *select;
+ 
+-	/* Remove the 'br' */
+-	delete_last_instruction(&bb->insns);
+-
+ 	select = alloc_typed_instruction(OP_SEL, phi_node->type);
+-	select->bb = bb;
+ 
+ 	assert(br->cond);
+ 	use_pseudo(select, br->cond, &select->src1);
+@@ -714,8 +710,7 @@ void insert_select(struct basic_block *bb, struct instruction *br, struct instru
+ 	use_pseudo(select, if_true, &select->src2);
+ 	use_pseudo(select, if_false, &select->src3);
+ 
+-	add_instruction(&bb->insns, select);
+-	add_instruction(&bb->insns, br);
++	insert_last_instruction(bb, select);
  }
  
-+static inline void insert_last_instruction(struct basic_block *bb, struct instruction *insn)
-+{
-+	struct instruction *last = delete_last_instruction(&bb->insns);
-+	add_instruction(&bb->insns, insn);
-+	add_instruction(&bb->insns, last);
-+	insn->bb = bb;
-+}
-+
- static inline void add_multijmp(struct multijmp_list **list, struct multijmp *multijmp)
- {
- 	add_ptr_list(list, multijmp);
+ static inline int bb_empty(struct basic_block *bb)
 -- 
 2.31.0
 
