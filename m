@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id E8BDFC433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B9FCAC433E0
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:03 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B934C61934
+	by mail.kernel.org (Postfix) with ESMTP id 8B2D261864
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 16:19:03 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230045AbhCUQS0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S230046AbhCUQS0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Sun, 21 Mar 2021 12:18:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43998 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:44002 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230050AbhCUQSQ (ORCPT
+        with ESMTP id S230053AbhCUQSR (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 12:18:16 -0400
-Received: from mail-ej1-x629.google.com (mail-ej1-x629.google.com [IPv6:2a00:1450:4864:20::629])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7634AC061574
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:16 -0700 (PDT)
-Received: by mail-ej1-x629.google.com with SMTP id kt15so7893562ejb.12
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:16 -0700 (PDT)
+        Sun, 21 Mar 2021 12:18:17 -0400
+Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 5A222C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:17 -0700 (PDT)
+Received: by mail-ej1-x62e.google.com with SMTP id b9so17383984ejc.11
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 09:18:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=DcxS5hCDG0lEfkrheNDZDSCZbWYpv20H6bBFF7zpaT8=;
-        b=mwhAF4/FCs/W+ME0S1AjKIsCu+1qH/fC3IBOQsXPM33AuTWSA2E1gXtiVEOGhXHezm
-         iSUduvZ+TyU3Ecx1AFgAo6sqC2a6ZXBhG59+fiQn105iB/PrPurh7Y0o9qiVYvQG6QhA
-         TKhXamINWnvfL0Q2MeCcVvaA/WLUv5vu0TpSN3HsKXc7M+2U4S77cE1rz+54wVHpt3hs
-         f9CUgdJDqSG0sQulGZD80XTC0ddPiPqL2nXh25lyyirjcHD6HXeKmbTCw+H7w8kNJ4+A
-         PgesampwNybjtBaAD24Z12g+KAL5uRKAAbDj21F8erriyzUP2cF2CVgqxEIro5EthAWZ
-         8oig==
+        bh=eo9svFSXNAbzExMJ8PSOaDkeNUCU7lNCsywyf5d6/FU=;
+        b=j9pUDGOXKq8vC0xW5OhcZuwmapD5CL6M8eaKQztEkm86TRKMNOZvyKTmLdY8d71jPI
+         ePM7TTsCE+f/kh6LJVJpu8irTXGpnrVNUIsCE+c7OLJzbzU38FTHVBwWAQUTpuCenDsz
+         vbUF5n36GNlm1wyRWd6lb+cJthY9g4TAyqEGg+E+0F3+5n++qdBgUqlzWCUglJx/E4s7
+         Y8Oxixf8yOSllMJjYaC7hC0mJ1Me42ESdFle4br407lsC3NHZam1D7WHAZd+/752NSvH
+         Gh5TrHygKQT1I8KAF3Qw8xIGMLequLlZ7muy97glMSiTF5i1VECPGqSYrTO1ZRcqqT/8
+         0oRA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=DcxS5hCDG0lEfkrheNDZDSCZbWYpv20H6bBFF7zpaT8=;
-        b=naUa8Ax9pKZoGrIsSxAGzp5L23ttj+9SVhyJW5T5MgVK6BftygeZdvQoNWqDko96M5
-         ibKVKRNAVx3mJ+cD9ZnGCY/RVeFpJzEIwKWIbnA9TwrQ+S3OGsmB4/uMDPZY/iCqNkL2
-         O4o9iH6x5o27YnVWGPQJ490X545DTgKWdotj8DCZ3NZss/myBxPVh+PTFxh6adwwNHsa
-         th2cTKYlQItqmEp61A60JIuJMWTxkVdiQnBibfXQOhBezBgHwyda+3ZG9ehjd3fMp+hc
-         TkGxcWdcqROuUSGo4xiFhsERwfwagRw19DO7VRgrhqh835IFbKM/TmuzPPYhhme8KW7F
-         H1eg==
-X-Gm-Message-State: AOAM53347ahpEF50m7K40vkEyx8ixp91+AVpvjC39BFQau+55gCDsS32
-        ElsXj/v3LCmdw8iLrQujeudg8MldInE=
-X-Google-Smtp-Source: ABdhPJwTqIz0mc2RKy57mI8uNj7sS4W5O1P3pDJJJGakwSErzbNVDrl3wxcayaU/1/YxlH0lpcp4hw==
-X-Received: by 2002:a17:906:3395:: with SMTP id v21mr15202169eja.322.1616343495253;
-        Sun, 21 Mar 2021 09:18:15 -0700 (PDT)
+        bh=eo9svFSXNAbzExMJ8PSOaDkeNUCU7lNCsywyf5d6/FU=;
+        b=bCDwwKdQD7M2c12JTmK6vPJslFu1ENzO127p0QRwDsjHQzisWiQxcnAEUTqMff5gSa
+         LUY5vmtZRfBmsvaSZWtA8+7zz7+IXgngCeFrCIzclc2zXF44TJGh2/SsxyWZVrakGqNc
+         xAYXY5QEF/LbO9htTb/8YVQ55ZrL/FtZvhc/9C22yPufp0slDPnZvmFGkxS1iWG+WmQr
+         LbUle7wM3BajxFWJgTHRkgKjrkdxZV/q26GmNENyl6SA0BXi79fdoKeGSOHsPWvNJvWX
+         X6pNZScpB3O+TvZ3s7i/ydwXHaJctjQj1gAPefqM45XRrdiLWndwcuz/alZ5r10XIANn
+         Jqfw==
+X-Gm-Message-State: AOAM532NRjYde2/xqnkDfwGkgf0PGLj2mtQWlwyZv26QI2Zbq7coxguS
+        LypCHe4Roh5CbvUkdCXRcpVmHUaoRyY=
+X-Google-Smtp-Source: ABdhPJwTAtDiFtkjYGpX6sEvyJdasnk9+OVZE+DJMImBPb8LrQ8db/qFmVvGiLAvQRc7YA1LyBe22A==
+X-Received: by 2002:a17:906:e0d6:: with SMTP id gl22mr14918049ejb.444.1616343496112;
+        Sun, 21 Mar 2021 09:18:16 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:dc34:259e:8292:82c0])
-        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.14
+        by smtp.gmail.com with ESMTPSA id c20sm7390295eja.22.2021.03.21.09.18.15
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 09:18:14 -0700 (PDT)
+        Sun, 21 Mar 2021 09:18:15 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/6] let insert_phis() use insert_last_instruction()
-Date:   Sun, 21 Mar 2021 17:16:07 +0100
-Message-Id: <20210321161609.45905-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/6] let find_dominating_parents() use insert_last_instruction()
+Date:   Sun, 21 Mar 2021 17:16:08 +0100
+Message-Id: <20210321161609.45905-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
 References: <20210321161609.45905-1-luc.vanoostenryck@gmail.com>
@@ -74,27 +74,40 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 7 +++----
- 1 file changed, 3 insertions(+), 4 deletions(-)
+ memops.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/linearize.c b/linearize.c
-index 4787689b37b8..95fb3b59b90b 100644
---- a/linearize.c
-+++ b/linearize.c
-@@ -1708,10 +1708,9 @@ static void insert_phis(struct basic_block *bb, pseudo_t src, struct symbol *cty
+diff --git a/memops.c b/memops.c
+index ff54208e2d54..f74bff2abf88 100644
+--- a/memops.c
++++ b/memops.c
+@@ -65,8 +65,8 @@ static int find_dominating_parents(pseudo_t pseudo, struct instruction *insn,
  	struct basic_block *parent;
  
  	FOR_EACH_PTR(bb->parents, parent) {
--		struct instruction *br = delete_last_instruction(&parent->insns);
--		pseudo_t phi = alloc_phi(parent, src, ctype);
--		add_instruction(&parent->insns, br);
--		link_phi(node, phi);
-+		struct instruction *phisrc = alloc_phisrc(src, ctype);
-+		insert_last_instruction(parent, phisrc);
-+		link_phi(node, phisrc->target);
- 	} END_FOR_EACH_PTR(parent);
- }
++		struct instruction *phisrc;
+ 		struct instruction *one;
+-		struct instruction *br;
+ 		pseudo_t phi;
  
+ 		FOR_EACH_PTR_REVERSE(parent->insns, one) {
+@@ -95,12 +95,12 @@ no_dominance:
+ 		continue;
+ 
+ found_dominator:
+-		br = delete_last_instruction(&parent->insns);
+-		phi = alloc_phi(parent, one->target, one->type);
++		phisrc = alloc_phisrc(one->target, one->type);
++		phisrc->phi_node = insn;
++		insert_last_instruction(parent, phisrc);
++		phi = phisrc->target;
+ 		phi->ident = phi->ident ? : one->target->ident;
+-		add_instruction(&parent->insns, br);
+ 		use_pseudo(insn, phi, add_pseudo(dominators, phi));
+-		phi->def->phi_node = insn;
+ 	} END_FOR_EACH_PTR(parent);
+ 	return 1;
+ }		
 -- 
 2.31.0
 
