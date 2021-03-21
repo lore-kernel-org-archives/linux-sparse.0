@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 3C755C433E3
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5A8CBC433E8
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 12:35:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 21AA46194D
+	by mail.kernel.org (Postfix) with ESMTP id 3FB996194C
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 12:35:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229874AbhCUMf0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Mar 2021 08:35:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53008 "EHLO
+        id S229871AbhCUMf1 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Mar 2021 08:35:27 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53018 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229871AbhCUMfR (ORCPT
+        with ESMTP id S229875AbhCUMfS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 08:35:17 -0400
-Received: from mail-ed1-x531.google.com (mail-ed1-x531.google.com [IPv6:2a00:1450:4864:20::531])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7D1DCC061574
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:16 -0700 (PDT)
-Received: by mail-ed1-x531.google.com with SMTP id e7so16015528edu.10
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:16 -0700 (PDT)
+        Sun, 21 Mar 2021 08:35:18 -0400
+Received: from mail-ej1-x62a.google.com (mail-ej1-x62a.google.com [IPv6:2a00:1450:4864:20::62a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E1070C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:17 -0700 (PDT)
+Received: by mail-ej1-x62a.google.com with SMTP id b9so16837918ejc.11
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:17 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=1o4/AAviTzjOvQEMVjDCIR9CpsSISzmi4LdFcuk+Zm4=;
-        b=Y+eOpMH9SjhpJzAQeyKiU4A3d4n00HTehbUalNCkRnYca4rzKAjYTm6YudGOGS2nso
-         HxWpeOG3XFPftywjTUx02TaBmpUB7cpEkNINlU1lW6QS8tU/k8PoWLzoeSk62EXB5HXw
-         JxodhXMIzou3QO2xMoUyFlOGy8agQGu5QJfIuOPnAKV5Wn0U58JLfswghA2TGESIIICy
-         Um2feQdH5TRsy21FayhSo2tjm4s0ctrZZEyUrW/pNQvKoREf7zJMOAv4bfAUbO1P9ZXC
-         RItU1KKk9AU7/ufcugp0mZSGF9oap6IQ1eLWZLhPVB29zV4tFI4muisNnpoYEXaKCcNc
-         qdvg==
+        bh=uhHrSsFLQ8zGT4n2tnQ0BNI4MYw/+5QJZ+BU/ZQoXKQ=;
+        b=ngW9wWgGxGhD2zXfPXj0dpsgTJn4X9pSCj4m+eEc50BQQMpuxCc/Cw0o7BaCRFjswK
+         2nocK/YcFMHN6Pl/2EeqVXUj+qGIKDA03iP7htjmVWbYY0qHTPukhIQ4juerBE5Vwc7z
+         j42U3UgqShX8vmAquRlatrGNYqqt0K40n/qWP2t50C57Bnlkbs8g9CvXSL7AZDhc+s9c
+         8pfUd4jLXrwTA+ojxV2loddiZX4YJapt+mZul5Sl/mq8feI7MA8cBLJkoN7wD4LMkzwB
+         1h1B+AR925YMSOZIw9/OjNislTrYyZgNbbppgF/4zFfbyrOI9+BoUsSB8gQ9T87Y8qHN
+         Mmzw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=1o4/AAviTzjOvQEMVjDCIR9CpsSISzmi4LdFcuk+Zm4=;
-        b=qBYJY8dbHcsXMGTbJYzjbbaWe/xOfXRWiF1oB6deGqhzDIOHkctDN6XdwPa1WTZrJV
-         CWy01S5rXpVkZVa8ZoseFCKp0aPWyerfokVMBM+KKSfHEu+ar1IK/XS0cy9qo6mBkDTS
-         6Av4MCCYkHF9WX2GtQx1l7v2xoLo9rqQJWBR/Wxyc4zYWG4bWLHLLns9zDlOwUmLf/9H
-         HpXVNMlCzpFrRGNqCDxNt0PmdTsf5CHD+gBAiUCxbYAv9VOKZnlwO0E9J2Bc1XCQ+1Re
-         0nc2fVXRUzlmyc19vz0Aq6AOralZloX3Zf4zYIXqB1RITMJGiLKDWk4wTOTiMUxqBBHp
-         tr7w==
-X-Gm-Message-State: AOAM531gFRS2QhPnYMC0YcqqP6FAc1kz/kNlnuiTgLxUxtoX8KZGGTvL
-        rwqZKeB513FF5Zrg2ja9oVqNVWmhTUA=
-X-Google-Smtp-Source: ABdhPJz7XIB9jOhfDpKPBZ08SZuSZLBDN9db02Ll1GiqWdM7AvDDdwZiLZKXVORqlsYQIwuo+RKTFg==
-X-Received: by 2002:aa7:c353:: with SMTP id j19mr20193659edr.263.1616330115300;
-        Sun, 21 Mar 2021 05:35:15 -0700 (PDT)
+        bh=uhHrSsFLQ8zGT4n2tnQ0BNI4MYw/+5QJZ+BU/ZQoXKQ=;
+        b=KWpRuoSUaRIYiFyt1LX5s7Z25Sqk7DzzTEvj640eVXq2/cPIsyBOZVqX7ZgCPrPPYC
+         xfmeie0nxhAPiOT0WLwVM60Y2mbyHa62jWSAK+Oi4olSn2+Zcblp9Xrn+nDL6GmJAGko
+         KAp1LtlTBXePFA20yj0GG/L9EyZhnn+wIgj7X5+JZw1QDEcEXSd7+WmvL8LioaELlfNj
+         AkztjTXtsG7e5kpbNoGQEOM7HFSaiAL5cOzO56GA5eE+0ZHmPKFVYkida7wteaEyrJbR
+         iNYOc/oaxbTeVukE36IPMQ7JEd50d5ercZPXCv7u6vRQ7aigNepugirAFFjZiY0jT/p+
+         7LaQ==
+X-Gm-Message-State: AOAM53124wnQvZ5gA5Xn6ceC8mJqsgPpTZzGbd/bTFIGzNl/kx8NTgl6
+        gWKcJkrKxU6epIw28Jms8EWkBvrqyYg=
+X-Google-Smtp-Source: ABdhPJzDyeBDEPIqLuJvJvHxWs/ZX2Ef0enoqPFK9lHzcysy0oc1aoOG+f7VXZ34uYPfq2Gum4CUOw==
+X-Received: by 2002:a17:906:7842:: with SMTP id p2mr14913389ejm.87.1616330116665;
+        Sun, 21 Mar 2021 05:35:16 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b090:4406:df97:c155])
-        by smtp.gmail.com with ESMTPSA id jv19sm6998641ejc.74.2021.03.21.05.35.14
+        by smtp.gmail.com with ESMTPSA id jv19sm6998641ejc.74.2021.03.21.05.35.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 05:35:14 -0700 (PDT)
+        Sun, 21 Mar 2021 05:35:16 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 05/13] fold remove_parent() into insert_branch()
-Date:   Sun, 21 Mar 2021 13:34:57 +0100
-Message-Id: <20210321123505.27993-6-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 07/13] move insert_branch() to flow.c
+Date:   Sun, 21 Mar 2021 13:34:59 +0100
+Message-Id: <20210321123505.27993-8-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321123505.27993-1-luc.vanoostenryck@gmail.com>
 References: <20210321123505.27993-1-luc.vanoostenryck@gmail.com>
@@ -72,39 +72,117 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Fold remove_parent() into its only user, insert_branch(), since it's
-now just a wrapper around remove_bb_from_list().
+Now that insert_branch() doesn't need to allocate a new instruction,
+there is no more reasons to have it defined in linearize.c
+
+So move it to flow.c which is more concerned with CFG changes.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- linearize.c | 7 +------
- 1 file changed, 1 insertion(+), 6 deletions(-)
+ flow.c      | 26 ++++++++++++++++++++++++++
+ flow.h      |  1 +
+ linearize.c | 26 --------------------------
+ linearize.h |  1 -
+ 4 files changed, 27 insertions(+), 27 deletions(-)
 
+diff --git a/flow.c b/flow.c
+index f85c2a30c3cb..1f4b4ff08151 100644
+--- a/flow.c
++++ b/flow.c
+@@ -709,6 +709,32 @@ void vrfy_flow(struct entrypoint *ep)
+ 	assert(!entry);
+ }
+ 
++///
++// change a switch or a conditional branch into a branch
++void insert_branch(struct instruction *insn, struct basic_block *target)
++{
++	struct basic_block *bb = insn->bb;
++	struct basic_block *child;
++
++	kill_use(&insn->cond);
++	insn->bb_true = target;
++	insn->bb_false = NULL;
++	insn->cond = NULL;
++	insn->size = 0;
++	insn->opcode = OP_BR;
++
++	FOR_EACH_PTR(bb->children, child) {
++		if (child == target) {
++			target = NULL;	// leave first occurence
++			continue;
++		}
++		DELETE_CURRENT_PTR(child);
++		remove_bb_from_list(&child->parents, bb, 1);
++	} END_FOR_EACH_PTR(child);
++	PACK_PTR_LIST(&bb->children);
++	repeat_phase |= REPEAT_CFG_CLEANUP;
++}
++
+ static int retarget_parents(struct basic_block *bb, struct basic_block *target)
+ {
+ 	struct basic_block *parent;
+diff --git a/flow.h b/flow.h
+index 46d76a780484..f9213306dfd6 100644
+--- a/flow.h
++++ b/flow.h
+@@ -18,6 +18,7 @@ extern void simplify_symbol_usage(struct entrypoint *ep);
+ extern void simplify_memops(struct entrypoint *ep);
+ extern void pack_basic_blocks(struct entrypoint *ep);
+ extern int simplify_cfg_early(struct entrypoint *ep);
++extern void insert_branch(struct instruction *insn, struct basic_block *target);
+ 
+ extern void convert_instruction_target(struct instruction *insn, pseudo_t src);
+ extern void remove_dead_insns(struct entrypoint *);
 diff --git a/linearize.c b/linearize.c
-index 6bb1287efcb0..2268b0951376 100644
+index 1d85cf2ba208..e6aa01f1b9fe 100644
 --- a/linearize.c
 +++ b/linearize.c
-@@ -692,11 +692,6 @@ static void set_activeblock(struct entrypoint *ep, struct basic_block *bb)
+@@ -692,32 +692,6 @@ static void set_activeblock(struct entrypoint *ep, struct basic_block *bb)
  		add_bb(&ep->bbs, bb);
  }
  
--static void remove_parent(struct basic_block *child, struct basic_block *parent)
+-/* Change a "switch" or a conditional branch into a branch */
+-void insert_branch(struct instruction *jmp, struct basic_block *target)
 -{
--	remove_bb_from_list(&child->parents, parent, 1);
--}
+-	struct basic_block *bb = jmp->bb;
+-	struct basic_block *child;
 -
- /* Change a "switch" or a conditional branch into a branch */
- void insert_branch(struct instruction *jmp, struct basic_block *target)
+-	kill_use(&jmp->cond);
+-	jmp->bb_true = target;
+-	jmp->bb_false = NULL;
+-	jmp->cond = NULL;
+-	jmp->size = 0;
+-	jmp->opcode = OP_BR;
+-
+-	FOR_EACH_PTR(bb->children, child) {
+-		if (child == target) {
+-			target = NULL;	/* Trigger just once */
+-			continue;
+-		}
+-		DELETE_CURRENT_PTR(child);
+-		remove_bb_from_list(&child->parents, bb, 1);
+-	} END_FOR_EACH_PTR(child);
+-	PACK_PTR_LIST(&bb->children);
+-	repeat_phase |= REPEAT_CFG_CLEANUP;
+-}
+-	
+-
+ void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi_node, pseudo_t if_true, pseudo_t if_false)
  {
-@@ -720,7 +715,7 @@ void insert_branch(struct instruction *jmp, struct basic_block *target)
- 			continue;
- 		}
- 		DELETE_CURRENT_PTR(child);
--		remove_parent(child, bb);
-+		remove_bb_from_list(&child->parents, bb, 1);
- 	} END_FOR_EACH_PTR(child);
- 	PACK_PTR_LIST(&bb->children);
- 	repeat_phase |= REPEAT_CFG_CLEANUP;
+ 	pseudo_t target;
+diff --git a/linearize.h b/linearize.h
+index 1bb9d77eba1f..b6c8bf134065 100644
+--- a/linearize.h
++++ b/linearize.h
+@@ -319,7 +319,6 @@ struct entrypoint {
+ };
+ 
+ extern void insert_select(struct basic_block *bb, struct instruction *br, struct instruction *phi, pseudo_t if_true, pseudo_t if_false);
+-extern void insert_branch(struct instruction *br, struct basic_block *target);
+ 
+ struct instruction *alloc_phisrc(pseudo_t pseudo, struct symbol *type);
+ struct instruction *alloc_phi_node(struct basic_block *bb, struct symbol *type, struct ident *ident);
 -- 
 2.31.0
 
