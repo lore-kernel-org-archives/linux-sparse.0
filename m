@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BCE3C433E4
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4BD78C433E5
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 17:09:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3417361944
+	by mail.kernel.org (Postfix) with ESMTP id 1259B61946
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 17:09:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230201AbhCURJI (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Mar 2021 13:09:08 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54786 "EHLO
+        id S230186AbhCURJH (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Mar 2021 13:09:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54794 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230205AbhCURIa (ORCPT
+        with ESMTP id S230215AbhCURIb (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 13:08:30 -0400
-Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 20449C061762
+        Sun, 21 Mar 2021 13:08:31 -0400
+Received: from mail-ej1-x62f.google.com (mail-ej1-x62f.google.com [IPv6:2a00:1450:4864:20::62f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id C28C6C061574
         for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:30 -0700 (PDT)
-Received: by mail-ej1-x635.google.com with SMTP id u5so17502699ejn.8
+Received: by mail-ej1-x62f.google.com with SMTP id u9so17489822ejj.7
         for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=v+voen80HxgUrnrUvPyBBSXSDXFTN7ud5BWjQyoJVio=;
-        b=ncMhhhvgt/m7M6P4xg+pOR43yU6es5d7pt6zY53wG+7mtBdNLTdCEgnhSJNxicUizq
-         vD8tblEVTc17fr/XhFdU/9AkZrhly86L4l1n7YGRU9Y0u/fOxz4NZamIFf557tLHv3FX
-         HwWcjZLkPlBx/0m9/iVeWajS399g2ShiNXnG/6hByKwkuC8JBGcz8NottqS0LF9O/DgH
-         WhvZjUzpxqnoBWVSl0WeQ+IvTTCs9E4PgEj6LcYjmZH/6HQRMVPIoN+m3RwSiup3rz4P
-         9fg3VmaLA9Mq42rGniWrWnSLBCqRobwHcSaOUnVniT7fqgB5R4UoJ/Jsm4xPvG+ghyd8
-         RAcA==
+        bh=o9O/t7DIwQXjQjmlQ8dOVimiEpImz/xtfBcJterv9Ss=;
+        b=A07jUq6b/8OnJ0alfY1ZqqtDdg3XhKF4Pr8bw71y310NvbajpxxlxgLVeE1TA6bL6y
+         IsbXhKQ22sizG7WVh93SggeibD/kykbtMchbBfANqR4vsnEVnayXvV96u+1V3uFFqwkQ
+         gh/YeEcm1DhlebmtHnqrGfAxE5IjCcY1H1nGnOFmq17Oq2/FAfdRP6Qwkdi8ivn8snVG
+         G3wU+VQpQIUoxynTbQBVvAEZJErxYcghaAKQlhd03QXwX5i95m5Z8NQUZkStBBm6mYVW
+         Iweod+LUV4Ui3Qpaa9im4wIx/OU93jrqevJsw/Q91SsJ6SinEbHrLlgvyuW1oenDDP/x
+         w7FQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=v+voen80HxgUrnrUvPyBBSXSDXFTN7ud5BWjQyoJVio=;
-        b=b1PYqh/8xJ2BdKDM5c/ijcxDD/GpeUCG3EBQqFPq0XVrokNnfNtWNwbAItykhLWl2X
-         kXBlg5xjF9CXNRF9TNFXo+fw2iPnTKP2fiKnOVXVhb2/sqasvifMNxd6Q4NtwBiotNx0
-         mnswjvxpaHDzyMAJg7oA2miI9mJte5fErVa6+ymOFHF1zue5C8jtuOcfbz00rlOCQj+f
-         7umI7UACpY7FWwIi4TsaOiLlLGdY3gyOSHlMpp+0TCwLlvAVX1dI/sjNVX22QyOLWIzY
-         sUu0qy1EFYbr4DmSbWhSaTwfvzTbGqEC7JC1AuZzi/8prtoyxzXV+IqdG101qOLrLad2
-         oZUw==
-X-Gm-Message-State: AOAM531Wh0ItKHIZK/iy2hu7LOW96bmn5pl47Vt+qOhU79/vYkLRe5C5
-        g1aDK2RDcIYPtSMCjwMFlW9hCJc+XK8=
-X-Google-Smtp-Source: ABdhPJxdYnm5YiB6qt9Th2k681oMhjAP2HW8ZH5a5CiedpBhnbxKfibYEG3/3oWXkxN3T2GsESQ3nA==
-X-Received: by 2002:a17:906:948d:: with SMTP id t13mr14978340ejx.402.1616346508936;
-        Sun, 21 Mar 2021 10:08:28 -0700 (PDT)
+        bh=o9O/t7DIwQXjQjmlQ8dOVimiEpImz/xtfBcJterv9Ss=;
+        b=Cn7PJra8t3OfXoMN2z8Rbynl0apRauV6V5A97h4ubUzk/7HFnN7E1vfQ6+GjQ28ddD
+         4/wauhxLiRmfNM+llUXrHSpnTR22RbMNhE4mskbWMRSced3+68IWgs5DOjLHm5omvIvK
+         j2t7RA4ep+8B2PoGfNv/aIuI7MRBbNrgYJlLcCNjAPaP5T2z0mrUqNpvHzYAwii/0SWm
+         tzsBd4l0VTdkMoFtchSz9i98OYdtA2pr+KUws9thcBb370AuHeuRJ/rPDRr2UAj266NR
+         3MR4/qeSjWUzTx76Zm5k1XzSDOQzYudYD5NfUyuUgyZ2OX0Mb2NHAJTNrFNVRlciIrBE
+         L3Jg==
+X-Gm-Message-State: AOAM530VnF7hTSvzL0S4/fe7DHKdz2vLRwkAydhc6Adx1lNPtJc6gL8N
+        X9+AgGm3abo4YZ/neT/2kONlN6Ka4QE=
+X-Google-Smtp-Source: ABdhPJySC82nmu3LmURTJ3K+nd5B0mSaU87RgivX0zCooxkTb2bXLWDf+f5ex34cKU4gh1UJg8fC1g==
+X-Received: by 2002:a17:906:f6ce:: with SMTP id jo14mr15637580ejb.476.1616346509603;
+        Sun, 21 Mar 2021 10:08:29 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:dc34:259e:8292:82c0])
-        by smtp.gmail.com with ESMTPSA id 90sm9108044edr.69.2021.03.21.10.08.28
+        by smtp.gmail.com with ESMTPSA id 90sm9108044edr.69.2021.03.21.10.08.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 10:08:28 -0700 (PDT)
+        Sun, 21 Mar 2021 10:08:29 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/6] memops: do not mess up with phisource's source ident
-Date:   Sun, 21 Mar 2021 18:08:20 +0100
-Message-Id: <20210321170822.46854-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 5/6] memops: avoid using first_pseudo()
+Date:   Sun, 21 Mar 2021 18:08:21 +0100
+Message-Id: <20210321170822.46854-6-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321170822.46854-1-luc.vanoostenryck@gmail.com>
 References: <20210321170822.46854-1-luc.vanoostenryck@gmail.com>
@@ -72,32 +72,44 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-In rewrite_load_instruction(), when testing if all phi-sources are
-the same, the candidate is given an identifier if it hasn't one already.
-But doing this inside this loop is strange:
-* the pseudo may, at the end, not be selected but is changed anyway
-* the identifier should be given either when the phi-source is created
-  or at the end of the loop if selected.
+The loop in rewrite_load_instruction() uses first_pseudo() to not have
+to special case the first element.
 
-So, do not change the identifier inside the selection loop.
+But this slightly complicates further changes.
+
+So, simply use a null-or-no-null test inside the loop to identify
+this first element.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- memops.c | 1 -
- 1 file changed, 1 deletion(-)
+ memops.c | 8 +++++---
+ 1 file changed, 5 insertions(+), 3 deletions(-)
 
 diff --git a/memops.c b/memops.c
-index 5386c5a1f416..119a39a180d5 100644
+index 119a39a180d5..897fb6bf57fe 100644
 --- a/memops.c
 +++ b/memops.c
-@@ -29,7 +29,6 @@ static void rewrite_load_instruction(struct instruction *insn, struct pseudo_lis
- 	FOR_EACH_PTR(dominators, phi) {
- 		if (new != phi->def->phi_src)
- 			goto complex_phi;
--		new->ident = new->ident ? : phi->ident;
- 	} END_FOR_EACH_PTR(phi);
+@@ -19,15 +19,17 @@
+ 
+ static void rewrite_load_instruction(struct instruction *insn, struct pseudo_list *dominators)
+ {
+-	pseudo_t new, phi;
++	pseudo_t new = NULL;
++	pseudo_t phi;
  
  	/*
+ 	 * Check for somewhat common case of duplicate
+ 	 * phi nodes.
+ 	 */
+-	new = first_pseudo(dominators)->def->phi_src;
+ 	FOR_EACH_PTR(dominators, phi) {
+-		if (new != phi->def->phi_src)
++		if (!new)
++			new = phi->def->phi_src;
++		else if (new != phi->def->phi_src)
+ 			goto complex_phi;
+ 	} END_FOR_EACH_PTR(phi);
+ 
 -- 
 2.31.0
 
