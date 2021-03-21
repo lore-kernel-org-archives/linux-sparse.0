@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38BADC433E0
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3F8B3C433E2
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 17:09:42 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 03FCE61947
-	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 17:09:41 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 238396192C
+	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 17:09:42 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230079AbhCURJG (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 21 Mar 2021 13:09:06 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54784 "EHLO
+        id S230205AbhCURJJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 21 Mar 2021 13:09:09 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:54802 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230186AbhCURI3 (ORCPT
+        with ESMTP id S230221AbhCURId (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 13:08:29 -0400
-Received: from mail-ed1-x533.google.com (mail-ed1-x533.google.com [IPv6:2a00:1450:4864:20::533])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 8522EC061574
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:29 -0700 (PDT)
-Received: by mail-ed1-x533.google.com with SMTP id h10so16529437edt.13
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:29 -0700 (PDT)
+        Sun, 21 Mar 2021 13:08:33 -0400
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id AFC03C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:32 -0700 (PDT)
+Received: by mail-ed1-x52d.google.com with SMTP id dm8so16588537edb.2
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 10:08:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=GlKgS8okPEknJRnDBRtjMVSR0o1/pphCbVaJfk7IUEE=;
-        b=Sh5bo4oPPPP+cPRkoCzbT2faUdSLOcjYcgBuQTZeLfam3FXqkCvJ8IhdQYioEPu48s
-         yJr1RtDiq6x3Y3/VlgwtYPs+Yh+rwcrIw9L22Qy067Q4wjDXW+ibkrZBOa0MnqPZ1MSd
-         BavF5s3w/jhcGOGgmtLWqdPbMXDrNMdSMWBurPgFxGZLgr8fzkQPj8FNmKHFBFKzTYwz
-         HujtFZ2WS8naszs++wMz9SUgFotqtFpHd8UJgOD/Rt4ku+0L+OW7R+tSxwzRBWnKq/AL
-         tcJcSklPXQOz9OcI9ow0V2+7Im0aTtqwFNGNI47uRqgtlXLMzuLRewipN1dVglza+jse
-         +A7w==
+        bh=gCVNznYt4xWAEnmklaw669LNcnYdLkZR1+ec1waUP5Q=;
+        b=jN7Gj1iIEKM+HATbnIiLGsbhF4krR5UvgqrWD2TwciwsumHb3gi3V4FlQ+Qclt9yNN
+         IVGPWKFlz9p/IPfavjff3fa4yeBySH7kBquWWtdzNXbt6LksJEA9G1ZmxPvdpmqrbLU3
+         9YTVfNjQvmd3K0thY1hqAI3R0GhEPb/CQXvvxztjMmrm8GLwVjKRKs3AXa4YlD/2r4qB
+         t4QqBodQed2khpGYQSVwluiVl+S8UdJrDNXKkya8N7LIRiYDgHDFPxvntDo3Pxp8dTH7
+         RglEgAI76bgQUNKlNK3rzN5YeXkvKH94fZ7OViHwnt6EyD+qnkT+Yt+Ij/9rBANx4ebh
+         dDJA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=GlKgS8okPEknJRnDBRtjMVSR0o1/pphCbVaJfk7IUEE=;
-        b=gAsedBr+uPMjGii91MbxLDpVwU9+vtDm6ZQ/OlrL6M9+WgMxhg+mvbY+PuwCMnT6SV
-         vpGhG2xpMLuu45Po6C/GlmcXFZy7fK2UYISO9E0M4OKJQVSKZA5RzL4HhFIdr4gEJl9e
-         0/kxcePOiBweR7tCQoXFP8Wmem1GNg1wb/NGqanXg0KaQGvgKfyct2q5ke2svjO6hEn5
-         C1q9GOmDN2lm82EXGL7DVMmyWTbpGABwfTc/xSsdvodpT4ZtnxCRY8E+Jp2dLnS4vMAe
-         kOcneoww9rp9CexU6DwrMfJfrkaI6uOwznrCpjnP1J0FwbAAEHw2KxSvrnOEYXbiZoeZ
-         YwCQ==
-X-Gm-Message-State: AOAM5320GkcYUnihMXUfNMID/qwac5yARoMOAZu7aeHh54btBcD875pF
-        p2UBzPoMU4TddOhLvqIiIldvRVtkYRY=
-X-Google-Smtp-Source: ABdhPJx5dlYIRS2fyIzWq9gHK+T3KS4B788ErrGpxC4rVqTjd4D5B9pI9mLUkrpsv8s8kCi/e8CShg==
-X-Received: by 2002:aa7:d813:: with SMTP id v19mr21543890edq.213.1616346508333;
-        Sun, 21 Mar 2021 10:08:28 -0700 (PDT)
+        bh=gCVNznYt4xWAEnmklaw669LNcnYdLkZR1+ec1waUP5Q=;
+        b=SWnM+GaLXGnxJlRbegbEMKgLcZcxHhn8RktIyUGRZXVsx+8293BWT0Nx8Hh33sgZgy
+         GS48FwE7UWrqf8fPtvVl501rA1lk+zUQ4mF3b7goIOQFKJmo6OgEmDN4x74fm0KyyLvs
+         b4DBW/VBo+NRKCS9sPvr7ntLoeSS+eiPnTz5WxcbD+/8lEPiucnfhHlatDUIR3oObfxw
+         cfwzLTitJ5hHjsXM0JkOonfh2AqayPheHtJ7vYnuBfX/3kaZrtGCVp6n3FWBXqN5qtzM
+         eLUl3DgK+KtnreWbmNmMx0/Fik9azGQgyKk6pFp48Fodk8TK/HJf+PhePMwprhZbkhEw
+         uYLQ==
+X-Gm-Message-State: AOAM530/DX6owFPZlUeX3NOUB5vR0nk8AyV6olfQWPSoD8TsZfM5W7On
+        Gzc7oxd0B/LRAP5+yamdDbmVVA5Vr60=
+X-Google-Smtp-Source: ABdhPJx759j6lLtqlmhzZXdXFWG+boO+6+PkzUDLGWH4o/12jjKJqjSTBK8e1I5oRSy/fU6L34B6iA==
+X-Received: by 2002:aa7:c353:: with SMTP id j19mr21297608edr.263.1616346510334;
+        Sun, 21 Mar 2021 10:08:30 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:dc34:259e:8292:82c0])
-        by smtp.gmail.com with ESMTPSA id 90sm9108044edr.69.2021.03.21.10.08.27
+        by smtp.gmail.com with ESMTPSA id 90sm9108044edr.69.2021.03.21.10.08.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 10:08:28 -0700 (PDT)
+        Sun, 21 Mar 2021 10:08:30 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/6] memops: remove obsolete comment
-Date:   Sun, 21 Mar 2021 18:08:19 +0100
-Message-Id: <20210321170822.46854-4-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 6/6] memops: we can kill addresses unconditionally
+Date:   Sun, 21 Mar 2021 18:08:22 +0100
+Message-Id: <20210321170822.46854-7-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321170822.46854-1-luc.vanoostenryck@gmail.com>
 References: <20210321170822.46854-1-luc.vanoostenryck@gmail.com>
@@ -72,34 +72,39 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The comment above rewrite_load_instruction(), about comparing phi-lists
-for equality, was (most probably) written when there was some intention
-to do CSE on phi-nodes or phi-sources.
+In rewrite_load_instruction(), if the load instruction is converted
+into a phi-node, its address is then no more used and must be removed.
 
-However, such CSE is currently not an objective at all.
+However, this is only done when this address is not a symbol.
+This was explicitly done in the following commit because of the problem
+of removing an element from the usage list while walking this list:
+   602f6b6c0d41 ("Leave symbol pseudo usage intact when doing phi-node conversion.")
 
-So, remove this comment.
+But currently rewrite_load_instruction() is only used during memops
+simplification where the usage list is not walked.
+
+So, kill the address' usage unconditionally.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- memops.c | 4 ----
- 1 file changed, 4 deletions(-)
+ memops.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
 
 diff --git a/memops.c b/memops.c
-index 753eb3a7a914..5386c5a1f416 100644
+index 897fb6bf57fe..6d24604c2aae 100644
 --- a/memops.c
 +++ b/memops.c
-@@ -17,10 +17,6 @@
- #include "simplify.h"
- #include "flow.h"
+@@ -45,9 +45,7 @@ static void rewrite_load_instruction(struct instruction *insn, struct pseudo_lis
+ 	goto end;
  
--/*
-- * We should probably sort the phi list just to make it easier to compare
-- * later for equality.
-- */
- static void rewrite_load_instruction(struct instruction *insn, struct pseudo_list *dominators)
- {
- 	pseudo_t new, phi;
+ complex_phi:
+-	/* We leave symbol pseudos with a bogus usage list here */
+-	if (insn->src->type != PSEUDO_SYM)
+-		kill_use(&insn->src);
++	kill_use(&insn->src);
+ 	insn->opcode = OP_PHI;
+ 	insn->phi_list = dominators;
+ 
 -- 
 2.31.0
 
