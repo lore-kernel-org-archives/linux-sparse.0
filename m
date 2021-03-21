@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 75E87C433E9
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8B872C433EB
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 12:35:57 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 613976194D
+	by mail.kernel.org (Postfix) with ESMTP id 71D316194C
 	for <linux-sparse@archiver.kernel.org>; Sun, 21 Mar 2021 12:35:57 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229884AbhCUMf2 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S229893AbhCUMf2 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Sun, 21 Mar 2021 08:35:28 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53034 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53020 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229920AbhCUMfU (ORCPT
+        with ESMTP id S229884AbhCUMfS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 21 Mar 2021 08:35:20 -0400
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 4D9E3C061574
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:20 -0700 (PDT)
-Received: by mail-ed1-x532.google.com with SMTP id j3so16028560edp.11
-        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:20 -0700 (PDT)
+        Sun, 21 Mar 2021 08:35:18 -0400
+Received: from mail-ej1-x635.google.com (mail-ej1-x635.google.com [IPv6:2a00:1450:4864:20::635])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7385CC061762
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:18 -0700 (PDT)
+Received: by mail-ej1-x635.google.com with SMTP id r12so16831851ejr.5
+        for <linux-sparse@vger.kernel.org>; Sun, 21 Mar 2021 05:35:18 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=gb/WVZ1THkivgKLK4xRh0ywfmgqDYSFXZFQyeEHJhos=;
-        b=GcHMio2ZAjadcHnwvoLstBumWAlrYV6HyGub2FKtaxNPDIich8Uj7K3wi5jgv4E8AZ
-         cMA0CYsWqnMSbpbiWUCX+/U3oqtmkNpEbVjdok5uVrWs9H0GcUbaYj+V2/dBeFOo9ARZ
-         MdOvb5sJRs80ieh2s9Hl1x0vrNsI0ZaDaNvPM8Cv3djq8t31YCCtzRiOnfkYlUj8NjQv
-         9jLy4vEEE1EFQLqEQbZkpJValVAtDul1w4zOTVREmpQHF7pbUWYDi8fkqWvb5IB/0Cmr
-         hEO4TsoFhjZ0DT7AQKX1lM23xDg9PiVZzlX3e3YmJMZ2CaGQYI2VseXJBRiajzw1Wcc7
-         Ni5w==
+        bh=qdCvsHh96rDSYiMxCeNGHa83d2TUkZ2fHdWdWFmKug0=;
+        b=g/RbVzwBKzAATT/imme5OnK9/76UFiDzgDikA6e0u5IUoTM+ckD6c5OtGMh1yvnJVI
+         1kBnBS2SRypsHVl2DiPpvVpCzwsZRvfGRy2jei++T7dIIPu4hV1nKIEmjXxsUjfdgpN+
+         BP5AmROVDrXZtNDWiLjEIPJR1ci1mOHD+0OON/k+NL2JuIQ6FIQFBiEuAAFnwedBc9oC
+         VPn+b1EzWxFutlmfhRUeTcSPDcK9hCnCm6x1URgLXnVkuzbk9mJ5MHnOOtYy7NX6bjMP
+         0rVBDrbw1Ta9jInpam9g8tTTaHgwyK4qyoCuvUJshLBPeVjtfmCyhC9Oim06UZd+683+
+         AkTA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=gb/WVZ1THkivgKLK4xRh0ywfmgqDYSFXZFQyeEHJhos=;
-        b=k5Ymm0oxm/U7BQ+eukL0BU7DBpPYVtO7K4PobvoH08VlE6Pko+PQ8f7EYjOjiZOc4z
-         p6tAOC1jYeXP0MfTB7jEjaefbgvkHxorb8Akebv4BFrOlrjGLhVbpjtWgIabHC350+As
-         x0OYw1lOxb0rPDPXQhWkRWdqiN0VAF99PbTSp77In9t+5xcdjIl+XKaR0LGOyKEDIzwx
-         PCloDBF5tLJ1OHHkhg8PXqrBLmztCrZq4dV1BjYBGrUmaYEHoB/V+/RWlgpJJMJ88PPj
-         tlW9/DXWiWU1Lw38jO0M1d/ZLzAsI5wAbMAEc5bO2vRWEpRYS+IUg1Zp0R4t7Vq80kPl
-         ntXA==
-X-Gm-Message-State: AOAM533eWltlR4MJwPETomXFxmT1naxO/bjVJKAc6Gbyk0q6gFy+1gT+
-        k8GX0aPxSVdUhdv9ylxcme1mW3ebiFw=
-X-Google-Smtp-Source: ABdhPJwItPAR/mfBTbdhYqksnRIdlbdifPYgomihuzWk9sszn4ia1ABAow4XpiCpsqLhofobuwyiJQ==
-X-Received: by 2002:a05:6402:447:: with SMTP id p7mr20378196edw.89.1616330119097;
-        Sun, 21 Mar 2021 05:35:19 -0700 (PDT)
+        bh=qdCvsHh96rDSYiMxCeNGHa83d2TUkZ2fHdWdWFmKug0=;
+        b=RntVzn4ttrIBttwYz4jyH6FHCjBGfUVCh7JC3+xWK0uDvB7JU+k3v2HmQcKk/jLYu7
+         FNLLhc9GPkTLpTp+8CqI3kfC54O6asMf/Cp6K47Pb4Ts5ad4GPAmH5im8AaPegMLOpfe
+         8aGg8cqaMa6aToBJ4CEoaZvaRWO0oBVhrpiqzEjtaJj1CRH0lfQlK4IxQyXU1mjsK2Ve
+         YdiMMyXGzte/qXmNE3IcsK/vF0pFnqTccNKxLrKugTVvDnTWiD6ZyK6V1DPsJHpZ1qs+
+         jMD7NbGdrQmqIu/LcHhw8az6lrhBvJmZURNJMkkE/QyhSLlJobPf4uEEA9whP19lvlAB
+         kkNA==
+X-Gm-Message-State: AOAM533fk0GoXUXkD5AcoojHyO0AZKpspCkPFLbK7ZXfJ74rwjRogaIx
+        FDG0kFvxBDDXV4NDkdv8GSTPsg08grA=
+X-Google-Smtp-Source: ABdhPJwOGgN6JdLA+0bBF1g6GYdIJOjlmHyOrr6gMm9LNJBatgiyBR0PXSxEEZE+iBYRKz7Jw1038Q==
+X-Received: by 2002:a17:907:20e4:: with SMTP id rh4mr14399630ejb.369.1616330117291;
+        Sun, 21 Mar 2021 05:35:17 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b090:4406:df97:c155])
-        by smtp.gmail.com with ESMTPSA id jv19sm6998641ejc.74.2021.03.21.05.35.18
+        by smtp.gmail.com with ESMTPSA id jv19sm6998641ejc.74.2021.03.21.05.35.16
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 21 Mar 2021 05:35:18 -0700 (PDT)
+        Sun, 21 Mar 2021 05:35:16 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 11/13] fix phisources during CBR-BR conversion
-Date:   Sun, 21 Mar 2021 13:35:03 +0100
-Message-Id: <20210321123505.27993-12-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 08/13] let insert_branch() return a status
+Date:   Sun, 21 Mar 2021 13:35:00 +0100
+Message-Id: <20210321123505.27993-9-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.0
 In-Reply-To: <20210321123505.27993-1-luc.vanoostenryck@gmail.com>
 References: <20210321123505.27993-1-luc.vanoostenryck@gmail.com>
@@ -72,61 +72,111 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-When a parent is removed from a BB containing one or several phi-nodes,
-the corresponding phi-sources must be removed from the phi-node.
+insert_branch() modifies the CFG and the usage of pseudos so these
+changes must be, in a way or another, notify to the upper layers.
+Currently this is done by setting 'repeat_phase' in the function
+itself.
 
-However this is not done and consequentially:
-* it becomes impossibly to correctly reason about the flow of values
-  through these phi-nodes.
-* simplifications are missed (e.g. if-conversion).
+Let this function to also report the changes via its return value
+since this is usually useful for the caller to know and tend to
+leaner code too.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                          | 5 +++++
- validation/optim/bad-phisrc1.c  | 1 -
- validation/optim/bad-phisrc1a.c | 1 -
- 3 files changed, 5 insertions(+), 2 deletions(-)
+ flow.c     |  7 +++++--
+ flow.h     |  2 +-
+ simplify.c | 21 +++++++--------------
+ 3 files changed, 13 insertions(+), 17 deletions(-)
 
 diff --git a/flow.c b/flow.c
-index 4952562a373d..69d95a98a512 100644
+index 1f4b4ff08151..38e0ccade722 100644
 --- a/flow.c
 +++ b/flow.c
-@@ -760,6 +760,11 @@ int convert_to_jump(struct instruction *insn, struct basic_block *target)
- 	struct basic_block *child;
- 	int changed = REPEAT_CSE;
+@@ -711,10 +711,11 @@ void vrfy_flow(struct entrypoint *ep)
  
-+	switch (insn->opcode) {
-+	case OP_CBR:
-+		changed |= remove_phisources(insn->bb, insn->bb_true == target ? insn->bb_false : insn->bb_true);
-+		break;
-+	}
+ ///
+ // change a switch or a conditional branch into a branch
+-void insert_branch(struct instruction *insn, struct basic_block *target)
++int insert_branch(struct instruction *insn, struct basic_block *target)
+ {
+ 	struct basic_block *bb = insn->bb;
+ 	struct basic_block *child;
++	int changed = REPEAT_CSE;
+ 
  	kill_use(&insn->cond);
  	insn->bb_true = target;
- 	insn->bb_false = NULL;
-diff --git a/validation/optim/bad-phisrc1.c b/validation/optim/bad-phisrc1.c
-index 59c5e4f1e66a..aa12dd0ae542 100644
---- a/validation/optim/bad-phisrc1.c
-+++ b/validation/optim/bad-phisrc1.c
-@@ -8,7 +8,6 @@ void foo(int a, int b)
- /*
-  * check-name: bad-phisrc1
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-excludes: phi\\.
-diff --git a/validation/optim/bad-phisrc1a.c b/validation/optim/bad-phisrc1a.c
-index cf07573b1fd3..b7519ee7cf5d 100644
---- a/validation/optim/bad-phisrc1a.c
-+++ b/validation/optim/bad-phisrc1a.c
-@@ -16,7 +16,6 @@ out:
- /*
-  * check-name: bad-phisrc1a
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-contains: select\\.
+@@ -730,9 +731,11 @@ void insert_branch(struct instruction *insn, struct basic_block *target)
+ 		}
+ 		DELETE_CURRENT_PTR(child);
+ 		remove_bb_from_list(&child->parents, bb, 1);
++		changed |= REPEAT_CFG_CLEANUP;
+ 	} END_FOR_EACH_PTR(child);
+ 	PACK_PTR_LIST(&bb->children);
+-	repeat_phase |= REPEAT_CFG_CLEANUP;
++	repeat_phase |= changed;
++	return changed;
+ }
+ 
+ static int retarget_parents(struct basic_block *bb, struct basic_block *target)
+diff --git a/flow.h b/flow.h
+index f9213306dfd6..cad1de7723d5 100644
+--- a/flow.h
++++ b/flow.h
+@@ -18,7 +18,7 @@ extern void simplify_symbol_usage(struct entrypoint *ep);
+ extern void simplify_memops(struct entrypoint *ep);
+ extern void pack_basic_blocks(struct entrypoint *ep);
+ extern int simplify_cfg_early(struct entrypoint *ep);
+-extern void insert_branch(struct instruction *insn, struct basic_block *target);
++extern int insert_branch(struct instruction *insn, struct basic_block *target);
+ 
+ extern void convert_instruction_target(struct instruction *insn, pseudo_t src);
+ extern void remove_dead_insns(struct entrypoint *);
+diff --git a/simplify.c b/simplify.c
+index 930c0fa7e83f..0bc201e84313 100644
+--- a/simplify.c
++++ b/simplify.c
+@@ -2440,10 +2440,8 @@ static int simplify_branch(struct instruction *insn)
+ 	pseudo_t cond = insn->cond;
+ 
+ 	/* Constant conditional */
+-	if (constant(cond)) {
+-		insert_branch(insn, cond->value ? insn->bb_true : insn->bb_false);
+-		return REPEAT_CSE;
+-	}
++	if (constant(cond))
++		return insert_branch(insn, cond->value ? insn->bb_true : insn->bb_false);
+ 
+ 	/* Same target? */
+ 	if (insn->bb_true == insn->bb_false) {
+@@ -2472,14 +2470,10 @@ static int simplify_branch(struct instruction *insn)
+ 			if (constant(def->src2) && constant(def->src3)) {
+ 				long long val1 = def->src2->value;
+ 				long long val2 = def->src3->value;
+-				if (!val1 && !val2) {
+-					insert_branch(insn, insn->bb_false);
+-					return REPEAT_CSE;
+-				}
+-				if (val1 && val2) {
+-					insert_branch(insn, insn->bb_true);
+-					return REPEAT_CSE;
+-				}
++				if (!val1 && !val2)
++					return insert_branch(insn, insn->bb_false);
++				if (val1 && val2)
++					return insert_branch(insn, insn->bb_true);
+ 				if (val2) {
+ 					struct basic_block *tmp = insn->bb_true;
+ 					insn->bb_true = insn->bb_false;
+@@ -2515,8 +2509,7 @@ static int simplify_switch(struct instruction *insn)
+ 	return 0;
+ 
+ found:
+-	insert_branch(insn, jmp->target);
+-	return REPEAT_CSE;
++	return insert_branch(insn, jmp->target);
+ }
+ 
+ static struct basic_block *is_label(pseudo_t pseudo)
 -- 
 2.31.0
 
