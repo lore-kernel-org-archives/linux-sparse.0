@@ -2,102 +2,62 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.3 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
-	USER_AGENT_SANE_1 autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=0.8 required=3.0 tests=BAYES_50,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C18E7C433C1
-	for <linux-sparse@archiver.kernel.org>; Tue, 23 Mar 2021 10:04:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id F0E0BC433E0
+	for <linux-sparse@archiver.kernel.org>; Mon, 29 Mar 2021 07:56:27 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8F290619BB
-	for <linux-sparse@archiver.kernel.org>; Tue, 23 Mar 2021 10:04:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AB5866196B
+	for <linux-sparse@archiver.kernel.org>; Mon, 29 Mar 2021 07:56:27 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S229995AbhCWKEM (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 23 Mar 2021 06:04:12 -0400
-Received: from jabberwock.ucw.cz ([46.255.230.98]:38454 "EHLO
-        jabberwock.ucw.cz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229639AbhCWKEA (ORCPT
+        id S231163AbhC2Hzz (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 29 Mar 2021 03:55:55 -0400
+Received: from mail.digitalprior.com ([80.211.186.237]:55728 "EHLO
+        mail.digitalprior.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230364AbhC2Hzo (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 23 Mar 2021 06:04:00 -0400
-Received: by jabberwock.ucw.cz (Postfix, from userid 1017)
-        id C58E71C0B81; Tue, 23 Mar 2021 11:03:57 +0100 (CET)
-Date:   Tue, 23 Mar 2021 11:03:56 +0100
-From:   Pavel Machek <pavel@ucw.cz>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     David Laight <David.Laight@aculab.com>,
-        Tom Tromey <tom@tromey.com>,
-        Alexey Dobriyan <adobriyan@gmail.com>,
-        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Andrew Morton <akpm@linux-foundation.org>,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH 00/11] pragma once: treewide conversion
-Message-ID: <20210323100356.GA20449@amd>
-References: <YDvLYzsGu+l1pQ2y@localhost.localdomain>
- <CAHk-=wjFWZMVWTbvUMVxQqGKvGMC_BNrahCtTkpEjxoC0k-T=A@mail.gmail.com>
- <YDvwVlG/fqVxVYlQ@localhost.localdomain>
- <CAHk-=wi54DEScexxpMrO+Q2Nag_Tup+Y5YBHc_9_xGLeRfP8pA@mail.gmail.com>
- <877dmo10m3.fsf@tromey.com>
- <CAHk-=wi13+FLcRo4zmnRUmmY=AAns-Yd5NR_mVdcAd6ZrPq2fA@mail.gmail.com>
- <4835ec1d2ecc40b285596288a0df4f47@AcuMS.aculab.com>
- <CAHk-=wh8PptzH-=ak1D7C5Zp6EJ8eurYqVqGdQauupAFaNuG4g@mail.gmail.com>
+        Mon, 29 Mar 2021 03:55:44 -0400
+Received: by mail.digitalprior.com (Postfix, from userid 1001)
+        id 66C0AA2258; Mon, 29 Mar 2021 08:55:28 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=digitalprior.com;
+        s=mail; t=1617004542;
+        bh=tegSUSO8UdW4nPAN+CTxUCS0b4WeMgxljdiMdwCnwbk=;
+        h=Date:From:To:Subject:From;
+        b=YWv3OIRcBGyIrBUkX0EVC3taaQ6q2MmPcgVKxlvTI2w4ukZFlqsMxbJXhvosc8NnW
+         XVfrop1EfX/87CLG94bCLteaSuNxYcX8BU2uuojFfRRmkkUGucvGsoN3vZIi+oy3xf
+         Raymf/ZRPo1HehKelDCOg21NRUVI4ErkBan6txHZd/zzUnmH+UeuZqBrYO2QWzfFCn
+         wwTfVqQnKEK/7FQS6Fnp4pxVy0chNtyw4Y6ncahgMn8gIxqFSRX/Pl1nr27m1qpYOj
+         btQ0ic6i7q8OFCwYNowoFwHIgynIL5sKznQWzfE6cge1Bf//58wA/6qwaJ33X7Hcjh
+         lPuFMGzWVTO+w==
+Received: by mail.digitalprior.com for <linux-sparse@vger.kernel.org>; Mon, 29 Mar 2021 07:55:12 GMT
+Message-ID: <20210329074501-0.1.1o.75x.0.a1l4f8gn82@digitalprior.com>
+Date:   Mon, 29 Mar 2021 07:55:12 GMT
+From:   "Alarico Veloz" <alarico.veloz@digitalprior.com>
+To:     <linux-sparse@vger.kernel.org>
+Subject: Servicio de la flota
+X-Mailer: mail.digitalprior.com
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="Q68bSM7Ycu6FN28Q"
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wh8PptzH-=ak1D7C5Zp6EJ8eurYqVqGdQauupAFaNuG4g@mail.gmail.com>
-User-Agent: Mutt/1.5.23 (2014-03-12)
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
+Buenos d=C3=ADas:
 
---Q68bSM7Ycu6FN28Q
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
+mercado.
 
-Hi!
+La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
+uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
+e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
+iciente.
 
-> > >  (a) the traditional include guard optimization HAS NO HIDDEN SEMANTIC
-> > > MEANING. It's a pure optimization that doesn't actually change
-> > > anything else. If you don't do the optimization, absolutely nothing
-> > > changes.
-> >
-> > And if the parser is well written the optimisation is probably
-> > irrelevant compared to the compile time.
->=20
-> That's actually surprisingly not even remotely true.
->=20
-> People always think that the optimization phases of a compiler are the
-> expensive ones. And yes, there are certain optimizations that can be
-> *really* expensive, and people just don't even do them because they
-> are _so_ expensive and are exponential in time.
+=C2=BFQuiere conocer los detalles?
 
-Well, linux kernel can be compiled in two _seconds_ if you take
-compiler optimized for fast parsing... and quick code generation.
 
-See "SUSE Labs Conference 2018 - Compiling the Linux kernel in a
-second (give or take)" on youtube.
-
-So yes, gcc's frontend may be slow, but that does not mean job can not
-be done quickly by suitable compiler.
-
-Best regards,
-								Pavel
---=20
-http://www.livejournal.com/~pavelmachek
-
---Q68bSM7Ycu6FN28Q
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: Digital signature
-
------BEGIN PGP SIGNATURE-----
-Version: GnuPG v1
-
-iEYEARECAAYFAmBZvQwACgkQMOfwapXb+vLR0ACfatm3DVUfTM8cgSE0Pni4q3eV
-rVUAn1gfH3rymd+a8lNl/5Rdelsy0u78
-=qraN
------END PGP SIGNATURE-----
-
---Q68bSM7Ycu6FN28Q--
+Atentamente,
+Alarico Veloz
