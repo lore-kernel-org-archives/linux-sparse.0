@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5269C43460
-	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:09 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CAA1C433B4
+	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 907E46113E
-	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:09 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 020EA6113E
+	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236569AbhDBU0J (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 2 Apr 2021 16:26:09 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38788 "EHLO
+        id S236580AbhDBU0M (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 2 Apr 2021 16:26:12 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38804 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236574AbhDBU0I (ORCPT
+        with ESMTP id S231406AbhDBU0M (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 2 Apr 2021 16:26:08 -0400
-Received: from mail-ej1-x62e.google.com (mail-ej1-x62e.google.com [IPv6:2a00:1450:4864:20::62e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 04E2DC061788
-        for <linux-sparse@vger.kernel.org>; Fri,  2 Apr 2021 13:26:06 -0700 (PDT)
-Received: by mail-ej1-x62e.google.com with SMTP id a7so8809096ejs.3
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Apr 2021 13:26:05 -0700 (PDT)
+        Fri, 2 Apr 2021 16:26:12 -0400
+Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF8ABC0613E6
+        for <linux-sparse@vger.kernel.org>; Fri,  2 Apr 2021 13:26:08 -0700 (PDT)
+Received: by mail-ed1-x534.google.com with SMTP id bx7so6459651edb.12
+        for <linux-sparse@vger.kernel.org>; Fri, 02 Apr 2021 13:26:08 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=hNmtcZ/e6H/x3zSvyuDHsMo4X4OY6U5g11MOGEqOP2o=;
-        b=PTgw+nlawMX+kfH7NKlPt50wPtg1Ux+eXQKI+BG5xSZUvoGiKXwmF9NtDhkHs78BsS
-         LiHsHxWJ5APJhfKu+Ur+DAOwBbmOiObIZ1hUiorAWiqoPTrQ9Fwk15u7GS7aZ45rYUr1
-         oOWXE56WUOsQpGxyRz/ixnGy4ioQWqWuMCi9ZWCwcYy7/zMEKcegt1ub7VQ8g1ZIHBuV
-         lTGHvLZRSHRAYTIMkuekZglfPbhI/8HoKHA0RD2tbdJI9V4MJYXS/E9fUfH+vHYhUK/V
-         zQviO+e6OvzR7zP3IGXHkNxA/xJRMPCQAd5HqTVy/QdHMb6aQJuIuzB7H5QljC/3t/yp
-         A2Fg==
+        bh=1zMArcpK8fFpQxYXd8UpEaQh2pRufQVTZa79MgkLdmY=;
+        b=NHrtxmG+4JqZmna+nsOkjTI5o0QYR3vFzBkzB0DHJ6JZIS2JGrxByfvOMVkx1acZxs
+         MgVWgArO4JyG7c8L142wYSwXaJBrqxQIKwrGDViLUzD9A83o3kFu2D7KNb17ibPM2+b2
+         aEV0ZDHkLkIYJYdHDGpoEjBlfAfdnMTQdFtID7e99B/mapK/cCLDg+VzB1E7tizNdlsg
+         bBC7Vzdm6/HItbttc7ARsuNwCIGu6gwBx1RK9bOyWS+tLjS87BOPuSZRU74gNHsOZjpl
+         smffvnHQIgLui64sIEK3E49J6Sl5UIyOuU1opE2PVUHJF+Jfy7eL6s44b4+5gOKZtFSt
+         /HDg==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=hNmtcZ/e6H/x3zSvyuDHsMo4X4OY6U5g11MOGEqOP2o=;
-        b=j4lqRvQk6O2QMybGUbh7RFWcwNIeM59ZOD9QfEi79I/CvZ4LQM5nHDi/B/GjXKRA2/
-         QD9pg4l4n6RdpfhkgU/suNkMODRgJjjj5eYKtX1jvNM6tcsxMbAAGH1jV7E3ocEtUoWu
-         2YFdJPK65Z1h9uzUjLQRBH0Jn7jHvNYah7AbG1ifKrpC5QtOJVH3GpBJZ9ty/P6RGAbx
-         1ZPFJRzG7g2SeUe5Pga8HKw0B360k2NCGxcVmj07wUmxYLXlv7oQacICUZUvAqfPZlAx
-         uglaavwahGeeGVkFHH1MqgaRm4bvozNgJSIRN1YAzQqssKOMMtHALYP5h3aHdtux/ovv
-         ylaw==
-X-Gm-Message-State: AOAM531XmHjV2q4c0rJsR/n/VNvrDraHpS8VS7pEFxL6/U94Mc1e2w4O
-        fVM3JUYO4FhsD5OrCN5ROadM1uPUfG8=
-X-Google-Smtp-Source: ABdhPJxwr3U+N7hyswXpOmD2ej8spg68Ph5BX6dYOth7vnbYpPfoi18YFk1qEMiiL06bhWmNC54X5w==
-X-Received: by 2002:a17:906:3751:: with SMTP id e17mr16002772ejc.553.1617395164781;
-        Fri, 02 Apr 2021 13:26:04 -0700 (PDT)
+        bh=1zMArcpK8fFpQxYXd8UpEaQh2pRufQVTZa79MgkLdmY=;
+        b=BFL6ve096LiEKZp5K4CdpCHFI1N0l9Mj8kyhvMdvCF3B4fBg0GOFBY6ApikVYSHVJY
+         iBE4sTpKLQvlHa8r5bMVYtOJWNlzcnpOii8eOYs95LIJphDRI7s3WjIFd2zUwCFYAaXd
+         i/+1kqyoqSFTOI/40DQFq8YRqAT9y8/BnzpXp5DGUJemwbrUADpQYYS0uLTI/JRMyurZ
+         0Eb9zVGvFyAa+peAOlA088nxL5TS2yNDln1AT2sg2drdUW93NMPzra7XTVXxBtVTRPmk
+         VajF34FqCJpX4HvLqzptb3nig7Ogmc0+HlFRwArXCPN2xtgcgsXyOfplDHom1PKf6dmB
+         PPoA==
+X-Gm-Message-State: AOAM530S2THlTKhgbhK/kZRaBhfcZRCCjF4gL4Qh8vHSxds0qctoKoKj
+        +QzwUdk6tHeXQ5qLvPumekSlGgzS3MY=
+X-Google-Smtp-Source: ABdhPJzpYlye2Kmi6ZCmWHMTSfm7C73+TZ1WeUAsGW5+1CSOH9eEDgXtTubrROBKwDcaXQm1dEP3EQ==
+X-Received: by 2002:aa7:c4d1:: with SMTP id p17mr17487461edr.387.1617395167673;
+        Fri, 02 Apr 2021 13:26:07 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:e8a3:6a32:4891:b7b])
-        by smtp.gmail.com with ESMTPSA id p24sm6011890edt.5.2021.04.02.13.26.04
+        by smtp.gmail.com with ESMTPSA id p24sm6011890edt.5.2021.04.02.13.26.06
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Apr 2021 13:26:04 -0700 (PDT)
+        Fri, 02 Apr 2021 13:26:06 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/4] correctly count phi arguments
-Date:   Fri,  2 Apr 2021 22:25:56 +0200
-Message-Id: <20210402202558.54504-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 4/4] fix remove_merging_phisrc()
+Date:   Fri,  2 Apr 2021 22:25:58 +0200
+Message-Id: <20210402202558.54504-5-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210402202558.54504-1-luc.vanoostenryck@gmail.com>
 References: <20210402202558.54504-1-luc.vanoostenryck@gmail.com>
@@ -72,85 +72,97 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-In a phi-node,pseudo_list_size() can't be used for counting its arguments
-because VOIDs must be ignored.
+The current implementation of remove_merging_phisrc() can't work correctly
+when these phi-sources belong to a basic block with several children
+to the same target basic block (this happens commonly with OP_SWITCH).
 
+Fix this by directly scanning the source basic block for the presence
+of any phi-source. Once identified, the processing is kept unchanged:
+remove these phi-sources if a sibling phi-source will 'overwrite' them
+in the target block.
+
+Fixes: 2fdaca9e7175e62f08d259f5cb3ec7c9725bba68
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                         | 18 +++++++++++++++++-
- validation/optim/phi-count00.c | 27 +++++++++++++++++++++++++++
- 2 files changed, 44 insertions(+), 1 deletion(-)
- create mode 100644 validation/optim/phi-count00.c
+ flow.c                          | 30 ++++++++++++++++++++----------
+ validation/optim/multi-phisrc.c |  1 -
+ 2 files changed, 20 insertions(+), 11 deletions(-)
 
 diff --git a/flow.c b/flow.c
-index cb94fcf20834..58807432b3aa 100644
+index c866dec80480..d46d0ee1bb7e 100644
 --- a/flow.c
 +++ b/flow.c
-@@ -189,6 +189,22 @@ out:
- 	return false;
+@@ -843,21 +843,26 @@ static int retarget_parents(struct basic_block *bb, struct basic_block *target)
+ 	return REPEAT_CFG_CLEANUP;
  }
  
-+///
-+// count the true number of argument of a phi-node
-+// VOID arguments must be ignored, so pseudo_list_size() can't be used for this.
-+static int phi_count(struct instruction *node)
-+{
-+	pseudo_t phi;
-+	int n = 0;
+-static void remove_merging_phisrc(struct basic_block *top, struct instruction *insn)
++static void remove_merging_phisrc(struct instruction *insn, struct basic_block *bot)
+ {
+-	struct instruction *user = insn->phi_node;
++	struct instruction *node = insn->phi_node;
+ 	pseudo_t phi;
+ 
+-	FOR_EACH_PTR(user->phi_list, phi) {
++	if (!node) {
++		kill_instruction(insn);
++		return;
++	}
 +
 +	FOR_EACH_PTR(node->phi_list, phi) {
-+		if (phi == VOID)
-+			continue;
-+		n++;
-+	} END_FOR_EACH_PTR(phi);
-+	return n;
-+}
-+
- /*
-  * When we reach here, we have:
-  *  - a basic block that ends in a conditional branch and
-@@ -211,7 +227,7 @@ static int try_to_simplify_bb(struct basic_block *bb, struct instruction *first,
- 	 * simplify_symbol_usage()/conversion to SSA form.
- 	 * No sane simplification can be done when we have this.
- 	 */
--	bogus = bb_list_size(bb->parents) != pseudo_list_size(first->phi_list);
-+	bogus = bb_list_size(bb->parents) != phi_count(first);
+ 		struct instruction *phisrc;
  
- 	FOR_EACH_PTR(first->phi_list, phi) {
- 		struct instruction *def = phi->def;
-diff --git a/validation/optim/phi-count00.c b/validation/optim/phi-count00.c
-new file mode 100644
-index 000000000000..38db0edaea0e
---- /dev/null
-+++ b/validation/optim/phi-count00.c
-@@ -0,0 +1,27 @@
-+inline int inl(int d, int e, int f)
-+{
-+	switch (d) {
-+	case 0:
-+		return e;
-+	case 1:
-+		return f;
-+	default:
-+		return 0;
-+	}
-+}
+ 		if (phi == VOID)
+ 			continue;
+ 		phisrc = phi->def;
+-		if (phisrc->bb != top)
+-			continue;
+-		REPLACE_CURRENT_PTR(phi, VOID);
+-		kill_instruction(phisrc);
++		if (phisrc->bb == bot) {
++			kill_instruction(insn);
++			return;
++		}
+ 	} END_FOR_EACH_PTR(phi);
+ }
+ 
+@@ -901,6 +906,14 @@ static int merge_bb(struct basic_block *top, struct basic_block *bot)
+ 		replace_bb_in_list(&bb->parents, bot, top, 1);
+ 	} END_FOR_EACH_PTR(bb);
+ 
++	FOR_EACH_PTR(top->insns, insn) {
++		if (!insn->bb)
++			continue;
++		if (insn->opcode != OP_PHISOURCE)
++			continue;
++		remove_merging_phisrc(insn, bot);
++	} END_FOR_EACH_PTR(insn);
 +
-+void foo(int a, int b, int c)
-+{
-+	while (1) {
-+		if (inl(a, b, c))
-+			break;
-+	}
-+}
-+
-+/*
-+ * check-name: phi-count00
-+ * check-command: test-linearize -Wno-decl $file
-+ *
-+ * check-output-ignore
-+ * check-output-pattern(0,2): phisrc
-+ */
+ 	kill_instruction(delete_last_instruction(&top->insns));
+ 	FOR_EACH_PTR(bot->insns, insn) {
+ 		if (!insn->bb)
+@@ -910,9 +923,6 @@ static int merge_bb(struct basic_block *top, struct basic_block *bot)
+ 		case OP_PHI:
+ 			remove_merging_phi(top, insn);
+ 			continue;
+-		case OP_PHISOURCE:
+-			remove_merging_phisrc(top, insn);
+-			break;
+ 		}
+ 		insn->bb = top;
+ 		add_instruction(&top->insns, insn);
+diff --git a/validation/optim/multi-phisrc.c b/validation/optim/multi-phisrc.c
+index c6f21f2db15a..ff31c0834e58 100644
+--- a/validation/optim/multi-phisrc.c
++++ b/validation/optim/multi-phisrc.c
+@@ -17,7 +17,6 @@ void foo(int p, int a)
+ /*
+  * check-name: multi-phisrc
+  * check-command: test-linearize -Wno-decl $file
+- * check-known-to-fail
+  *
+  * check-output-ignore
+  * check-output-excludes: phi
 -- 
 2.31.1
 
