@@ -8,161 +8,113 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 2CAA1C433B4
-	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A8871C433B4
+	for <linux-sparse@archiver.kernel.org>; Sun,  4 Apr 2021 19:38:01 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 020EA6113E
-	for <linux-sparse@archiver.kernel.org>; Fri,  2 Apr 2021 20:26:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 66A8D6124B
+	for <linux-sparse@archiver.kernel.org>; Sun,  4 Apr 2021 19:38:01 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236580AbhDBU0M (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Fri, 2 Apr 2021 16:26:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38804 "EHLO
+        id S230495AbhDDTiF (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 4 Apr 2021 15:38:05 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:51352 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231406AbhDBU0M (ORCPT
+        with ESMTP id S230169AbhDDTiE (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Fri, 2 Apr 2021 16:26:12 -0400
-Received: from mail-ed1-x534.google.com (mail-ed1-x534.google.com [IPv6:2a00:1450:4864:20::534])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DF8ABC0613E6
-        for <linux-sparse@vger.kernel.org>; Fri,  2 Apr 2021 13:26:08 -0700 (PDT)
-Received: by mail-ed1-x534.google.com with SMTP id bx7so6459651edb.12
-        for <linux-sparse@vger.kernel.org>; Fri, 02 Apr 2021 13:26:08 -0700 (PDT)
+        Sun, 4 Apr 2021 15:38:04 -0400
+Received: from mail-ed1-x52a.google.com (mail-ed1-x52a.google.com [IPv6:2a00:1450:4864:20::52a])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id BB416C061756
+        for <linux-sparse@vger.kernel.org>; Sun,  4 Apr 2021 12:37:59 -0700 (PDT)
+Received: by mail-ed1-x52a.google.com with SMTP id b16so10583199eds.7
+        for <linux-sparse@vger.kernel.org>; Sun, 04 Apr 2021 12:37:59 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=from:to:cc:subject:date:message-id:in-reply-to:references
-         :mime-version:content-transfer-encoding;
-        bh=1zMArcpK8fFpQxYXd8UpEaQh2pRufQVTZa79MgkLdmY=;
-        b=NHrtxmG+4JqZmna+nsOkjTI5o0QYR3vFzBkzB0DHJ6JZIS2JGrxByfvOMVkx1acZxs
-         MgVWgArO4JyG7c8L142wYSwXaJBrqxQIKwrGDViLUzD9A83o3kFu2D7KNb17ibPM2+b2
-         aEV0ZDHkLkIYJYdHDGpoEjBlfAfdnMTQdFtID7e99B/mapK/cCLDg+VzB1E7tizNdlsg
-         bBC7Vzdm6/HItbttc7ARsuNwCIGu6gwBx1RK9bOyWS+tLjS87BOPuSZRU74gNHsOZjpl
-         smffvnHQIgLui64sIEK3E49J6Sl5UIyOuU1opE2PVUHJF+Jfy7eL6s44b4+5gOKZtFSt
-         /HDg==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=J5dsBjy3ZMxZRt/0WTWGyAfNHFkqqfQPUl+UPjFNqYM=;
+        b=HP00ZhzR5sKoiZ5w3D38gg08TzvUkqS8Iy7FRD1ozXZLq5rmRn30QqYIlaCksxP6Hf
+         0pA8LA92yt/pHD2m3qSfjPdIK77zXGMysh2cxVhuK1DYaNwtYByRRFPq2ZwqKFxECkGc
+         h8apNcI/IYr6SpjDDSjkMxM7+4mo+Zdd1YfqQZbCSMBgEhZZaJ44fYiP1gNaGMQU+Ew9
+         BFTXP0Jx2UJmxosySS+6p6ppt6N+sK6cI+teer46IRZ2rngb8kbMClooIJq8gdJgnXcw
+         Zt5JXiWxCbmuPDCt1fXsx00uliRkkNW7un6qkqYXPSjLZIBPdCBM/ufvkCk7UphKIbma
+         waGQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
-         :references:mime-version:content-transfer-encoding;
-        bh=1zMArcpK8fFpQxYXd8UpEaQh2pRufQVTZa79MgkLdmY=;
-        b=BFL6ve096LiEKZp5K4CdpCHFI1N0l9Mj8kyhvMdvCF3B4fBg0GOFBY6ApikVYSHVJY
-         iBE4sTpKLQvlHa8r5bMVYtOJWNlzcnpOii8eOYs95LIJphDRI7s3WjIFd2zUwCFYAaXd
-         i/+1kqyoqSFTOI/40DQFq8YRqAT9y8/BnzpXp5DGUJemwbrUADpQYYS0uLTI/JRMyurZ
-         0Eb9zVGvFyAa+peAOlA088nxL5TS2yNDln1AT2sg2drdUW93NMPzra7XTVXxBtVTRPmk
-         VajF34FqCJpX4HvLqzptb3nig7Ogmc0+HlFRwArXCPN2xtgcgsXyOfplDHom1PKf6dmB
-         PPoA==
-X-Gm-Message-State: AOAM530S2THlTKhgbhK/kZRaBhfcZRCCjF4gL4Qh8vHSxds0qctoKoKj
-        +QzwUdk6tHeXQ5qLvPumekSlGgzS3MY=
-X-Google-Smtp-Source: ABdhPJzpYlye2Kmi6ZCmWHMTSfm7C73+TZ1WeUAsGW5+1CSOH9eEDgXtTubrROBKwDcaXQm1dEP3EQ==
-X-Received: by 2002:aa7:c4d1:: with SMTP id p17mr17487461edr.387.1617395167673;
-        Fri, 02 Apr 2021 13:26:07 -0700 (PDT)
-Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:e8a3:6a32:4891:b7b])
-        by smtp.gmail.com with ESMTPSA id p24sm6011890edt.5.2021.04.02.13.26.06
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=J5dsBjy3ZMxZRt/0WTWGyAfNHFkqqfQPUl+UPjFNqYM=;
+        b=emYp53Do9zcyzFTs70Z2HchDEWl+dToYETrjzrfELvedMxOAsmgrMsNrEx7u6ZI8qi
+         VNCd9t2JikCyZK0PDLd+4OTjTPCJ9u9P1DijcWVz5+6DY85bWo537ISCsFGTO1I/d4lO
+         GVH3Ji46xuU7JtVRlx1lsKpWgwnYULlJqYZktclvYcYeCpudM5nu+eQq/jwzQUIojaVE
+         8MO/5q0AIg22u5Ug+v2IVfnWqfbmPVxOiNpiEi083VqtJ1o6/dHeMNzvYZ/nbAsZGPZw
+         tOP+rlU2vJh7Dnq/OnWF7nF28MF8tj5eSbf+uuIkSFgie5/a+zT/vNwji+wjjQirYWsb
+         BQQA==
+X-Gm-Message-State: AOAM532PiudbB5tPqVrOL6Y2uraEK/zGzLhLFfWkj2NQ78xFt8GY8bkw
+        YTmAj4DCd7vq4uDtduzOMiJDmkZ6ouU=
+X-Google-Smtp-Source: ABdhPJzT8dYh9RE0VoXdpCXwGMiPCR6Qz16vk5M/wSfK3XD8/obbeYLqMmUS4bzEoyU/yIjX4IzMRQ==
+X-Received: by 2002:a05:6402:254f:: with SMTP id l15mr27611866edb.189.1617565078312;
+        Sun, 04 Apr 2021 12:37:58 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:b520:40cc:e61c:a906])
+        by smtp.gmail.com with ESMTPSA id s11sm9074333edt.27.2021.04.04.12.37.57
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Fri, 02 Apr 2021 13:26:06 -0700 (PDT)
+        Sun, 04 Apr 2021 12:37:57 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 4/4] fix remove_merging_phisrc()
-Date:   Fri,  2 Apr 2021 22:25:58 +0200
-Message-Id: <20210402202558.54504-5-luc.vanoostenryck@gmail.com>
+Subject: [PATCH] fix null-pointer crash with with ident same as one of the attributes
+Date:   Sun,  4 Apr 2021 21:37:51 +0200
+Message-Id: <20210404193751.1986-1-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.1
-In-Reply-To: <20210402202558.54504-1-luc.vanoostenryck@gmail.com>
-References: <20210402202558.54504-1-luc.vanoostenryck@gmail.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-The current implementation of remove_merging_phisrc() can't work correctly
-when these phi-sources belong to a basic block with several children
-to the same target basic block (this happens commonly with OP_SWITCH).
+match_attribute() will crash when the token has the same identifier
+as one of the attributes but is not an attribute. In this case,
+the corresponding symbol_op will be null but this is not checked.
+This seems to happen only with old-style declarations.
 
-Fix this by directly scanning the source basic block for the presence
-of any phi-source. Once identified, the processing is kept unchanged:
-remove these phi-sources if a sibling phi-source will 'overwrite' them
-in the target block.
+Fix this by adding the missing null-check.
 
-Fixes: 2fdaca9e7175e62f08d259f5cb3ec7c9725bba68
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- flow.c                          | 30 ++++++++++++++++++++----------
- validation/optim/multi-phisrc.c |  1 -
- 2 files changed, 20 insertions(+), 11 deletions(-)
+ parse.c                     |  2 +-
+ validation/knr-attr-crash.c | 12 ++++++++++++
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+ create mode 100644 validation/knr-attr-crash.c
 
-diff --git a/flow.c b/flow.c
-index c866dec80480..d46d0ee1bb7e 100644
---- a/flow.c
-+++ b/flow.c
-@@ -843,21 +843,26 @@ static int retarget_parents(struct basic_block *bb, struct basic_block *target)
- 	return REPEAT_CFG_CLEANUP;
+diff --git a/parse.c b/parse.c
+index 70be616c45ae..bc1c0602fcb4 100644
+--- a/parse.c
++++ b/parse.c
+@@ -1653,7 +1653,7 @@ static bool match_attribute(struct token *token)
+ 	if (token_type(token) != TOKEN_IDENT)
+ 		return false;
+ 	sym = lookup_keyword(token->ident, NS_TYPEDEF);
+-	if (!sym)
++	if (!sym || !sym->op)
+ 		return false;
+ 	return sym->op->type & KW_ATTRIBUTE;
  }
- 
--static void remove_merging_phisrc(struct basic_block *top, struct instruction *insn)
-+static void remove_merging_phisrc(struct instruction *insn, struct basic_block *bot)
- {
--	struct instruction *user = insn->phi_node;
-+	struct instruction *node = insn->phi_node;
- 	pseudo_t phi;
- 
--	FOR_EACH_PTR(user->phi_list, phi) {
-+	if (!node) {
-+		kill_instruction(insn);
-+		return;
-+	}
+diff --git a/validation/knr-attr-crash.c b/validation/knr-attr-crash.c
+new file mode 100644
+index 000000000000..176ff5032120
+--- /dev/null
++++ b/validation/knr-attr-crash.c
+@@ -0,0 +1,12 @@
++typedef int word;
 +
-+	FOR_EACH_PTR(node->phi_list, phi) {
- 		struct instruction *phisrc;
- 
- 		if (phi == VOID)
- 			continue;
- 		phisrc = phi->def;
--		if (phisrc->bb != top)
--			continue;
--		REPLACE_CURRENT_PTR(phi, VOID);
--		kill_instruction(phisrc);
-+		if (phisrc->bb == bot) {
-+			kill_instruction(insn);
-+			return;
-+		}
- 	} END_FOR_EACH_PTR(phi);
- }
- 
-@@ -901,6 +906,14 @@ static int merge_bb(struct basic_block *top, struct basic_block *bot)
- 		replace_bb_in_list(&bb->parents, bot, top, 1);
- 	} END_FOR_EACH_PTR(bb);
- 
-+	FOR_EACH_PTR(top->insns, insn) {
-+		if (!insn->bb)
-+			continue;
-+		if (insn->opcode != OP_PHISOURCE)
-+			continue;
-+		remove_merging_phisrc(insn, bot);
-+	} END_FOR_EACH_PTR(insn);
++void foo(word x);
 +
- 	kill_instruction(delete_last_instruction(&top->insns));
- 	FOR_EACH_PTR(bot->insns, insn) {
- 		if (!insn->bb)
-@@ -910,9 +923,6 @@ static int merge_bb(struct basic_block *top, struct basic_block *bot)
- 		case OP_PHI:
- 			remove_merging_phi(top, insn);
- 			continue;
--		case OP_PHISOURCE:
--			remove_merging_phisrc(top, insn);
--			break;
- 		}
- 		insn->bb = top;
- 		add_instruction(&top->insns, insn);
-diff --git a/validation/optim/multi-phisrc.c b/validation/optim/multi-phisrc.c
-index c6f21f2db15a..ff31c0834e58 100644
---- a/validation/optim/multi-phisrc.c
-+++ b/validation/optim/multi-phisrc.c
-@@ -17,7 +17,6 @@ void foo(int p, int a)
- /*
-  * check-name: multi-phisrc
-  * check-command: test-linearize -Wno-decl $file
-- * check-known-to-fail
-  *
-  * check-output-ignore
-  * check-output-excludes: phi
++void foo(x)
++	word x;
++{ }
++
++/*
++ * check-name: knr-attr-crash
++ * check-command: sparse -Wno-old-style-definition $file
++ */
 -- 
 2.31.1
 
