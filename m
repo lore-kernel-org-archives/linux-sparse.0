@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id ADD20C433B4
-	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:30:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4F0B0C43460
+	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:30:59 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 8D4C561028
-	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:30:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 285E261028
+	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:30:59 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234808AbhDJNbM (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S234787AbhDJNbM (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Sat, 10 Apr 2021 09:31:12 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43920 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43928 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234805AbhDJNbJ (ORCPT
+        with ESMTP id S234799AbhDJNbK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 10 Apr 2021 09:31:09 -0400
-Received: from mail-ej1-x636.google.com (mail-ej1-x636.google.com [IPv6:2a00:1450:4864:20::636])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 73D45C061762
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:30:54 -0700 (PDT)
-Received: by mail-ej1-x636.google.com with SMTP id sd23so4252977ejb.12
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:30:54 -0700 (PDT)
+        Sat, 10 Apr 2021 09:31:10 -0400
+Received: from mail-ej1-x632.google.com (mail-ej1-x632.google.com [IPv6:2a00:1450:4864:20::632])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 62E89C061764
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:30:55 -0700 (PDT)
+Received: by mail-ej1-x632.google.com with SMTP id hq27so12888349ejc.9
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:30:55 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=oXBP0BK4rvrYi98UKOMLaLbLxhBUv2Q9UXrRM1XKjNs=;
-        b=O3naIuZ0RD+d3n5ncJ0CSATT/IrGXqm02hnx8RU2KxKZaq+Huh1wgCIG+zUMZkX16d
-         qPzhfEn6O1IlApqV7hyKMu+VKvhvaQfLLo0Me8wvJ6SXPwfSZ50OSAHwgE/8E4IRq3rc
-         i580TS/B153LPK1CiHYUjX2k7/UtCfNz075wzscipGb5GNbnbM7RAMhk3+OFmhe04Is6
-         k247osq6NkfPzSwEUCznBJTjPY6hel+xy/tmsvWcvHSvC8NBi2CVvaSpnSO1TE6Vfqn6
-         kMrFz5KvGKbC+qvLZ9nK5393dzqSo4ntJrGxvXpgIbVOtwmjOTp9lO+rkcP4HwbahH8Y
-         iG5g==
+        bh=MtBnJvpqiIeBmNYe9hP4F4mtkSRnyV2MSG0yXiMSTMw=;
+        b=fZLbQ3nKarEli+tC2P6Y0GA6gSJV68AC2Br6N3m+qyjkyWO5mZ872uRc0OdR4Hz6fD
+         zaw+PsHAca5wn6SuXlNK8S2wwEBO2e5NHxUBwyX64QTKa9ok6/jXnXU3Jkf4psbL2RfV
+         gbmEGntRjaLqXcPOY+l8ldncKv2jiT2AAd15eeTYa803NvwJQ5M5BVNNXVRA6GykVQG8
+         9lJZ6ZJcqGlszQnIpTqLPg16u2rWO8Zu3ZF65M7jZXH3ofSkWNgc7+O1GIO3lY9nY8rb
+         TGjf7PPzV4phd+qpMVa3K/eZhMzvLFZAsylGBRknyehASm0qdlxbZqReb9gEHCtufc7V
+         1shQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=oXBP0BK4rvrYi98UKOMLaLbLxhBUv2Q9UXrRM1XKjNs=;
-        b=dAXtkLqF5RS+bbTHiogLbVnk+Ju3VXLXWA9u/1iTbpb7W9cm6bwZStaQd7bRRymIh9
-         J2hg2i/f2WNdJpRXopEyyBSSHAVR/9dQizm9zPi7IA3lRfXhFApnRYXbC30PLB6S4MfY
-         QSJosMC+JAFYKtzBBWBfsZlLV7U2UM7h4d9KJ6oUrYzlhwLM0fSDejX0pZxL7HQwsXvh
-         d+oLoddJazgwOg690n+StCI1n+eo55zxH0gkZIvdYR0AQGsxbBBk0Iku0vVTihS3Y5XW
-         l/68UGnYGd0txpqCC6scenvhb5yE8CBc0RlIX3qPJRvFJE9cOKPKfx7KHQUoeATprrjy
-         tziA==
-X-Gm-Message-State: AOAM532BjKat4qfvg1DB9Wiutjuu4cFYAmmeT5lD8Hf0QQdcnWA7K8xs
-        o+FQ9dvS+sSSpad/JBO7jsSRkEgL/9o=
-X-Google-Smtp-Source: ABdhPJxG9dYt9AZJDtXD8nR822k9VqYmWjHqYq+iDyXBjXtTmqaHnUS6RpYRBFI0MiWX2GR162sKFA==
-X-Received: by 2002:a17:906:37da:: with SMTP id o26mr672788ejc.413.1618061453306;
-        Sat, 10 Apr 2021 06:30:53 -0700 (PDT)
+        bh=MtBnJvpqiIeBmNYe9hP4F4mtkSRnyV2MSG0yXiMSTMw=;
+        b=tvbNS1Xq3n4GmVnGXqMR1BTcMj8XShCv7i3tF8XyxrhQmcdEntIg708z4HO6srwRXf
+         iE764oAwLLF5h8uYaZkULeoDngyY3A33gXW+XHyaKLp2hDUxzXi2szmcVaGFTjrTQAco
+         flO82YmbdeQ24qJ/W1JL7w3/uo2Wq7rMt5vNlbYe88O9/FKoRTfY4fGAT/SenP1Bik4S
+         bvee9hz1L9w+T6JUORhq//uL51P1kldscsF4ff0Nv1zSXb/JN/LWciGYyrCkaX5lCrHP
+         G8AfYf7CGTXSfJ9NI1ptfZtx7qXXWtr3xwAGAbrp8J4hwhnDSgDBqGCAc23uFIeyTlp9
+         +Nfw==
+X-Gm-Message-State: AOAM530jgcSIHqGaxy+Lf+X5A2sOaVouGxKnGQQUNj+R2NuiR323FbVE
+        vCf3aC32HmOzFT85fPYjHWXhc8yH4rY=
+X-Google-Smtp-Source: ABdhPJwUXcFoLNjEvY40Lsyd9LiXTG4FyZj26U1w2PBCvXW3VyHP7zuFkoNY5s9rGt8nPLSeoc9/ZA==
+X-Received: by 2002:a17:906:1749:: with SMTP id d9mr19579006eje.12.1618061454195;
+        Sat, 10 Apr 2021 06:30:54 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f96a:804d:4fe5:372f])
-        by smtp.gmail.com with ESMTPSA id g26sm2594910ejz.70.2021.04.10.06.30.52
+        by smtp.gmail.com with ESMTPSA id g26sm2594910ejz.70.2021.04.10.06.30.53
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 10 Apr 2021 06:30:52 -0700 (PDT)
+        Sat, 10 Apr 2021 06:30:53 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 2/8] builtin: define a symbol_op for a generic op acting on integer
-Date:   Sat, 10 Apr 2021 15:30:39 +0200
-Message-Id: <20210410133045.53189-3-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 3/8] .gitignore is a bit too greedy
+Date:   Sat, 10 Apr 2021 15:30:40 +0200
+Message-Id: <20210410133045.53189-4-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210410133045.53189-1-luc.vanoostenryck@gmail.com>
 References: <20210410133045.53189-1-luc.vanoostenryck@gmail.com>
@@ -72,91 +72,68 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-This can be used to define some generic (polymorphic) builtin
-with a signature like:
-	op(T)
-	op(T, T)
-	op(T,T, ... T)
-where T is some integer type.
+The current .gitignore specifies that the generated programs
+must be ignored. Good.
+
+However, this is done by just specifying the name of the program
+which has the effect of having any files or directories with the
+same name to be ignored too. This is not intended.
+
+Fix this using the pattern '/<name>' instead so that they match
+in the root folder.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- builtin.c | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
- builtin.h |  2 ++
- 2 files changed, 52 insertions(+)
+ .gitignore | 34 +++++++++++++++++-----------------
+ 1 file changed, 17 insertions(+), 17 deletions(-)
 
-diff --git a/builtin.c b/builtin.c
-index ff03dbab9a06..f03bf109c818 100644
---- a/builtin.c
-+++ b/builtin.c
-@@ -390,6 +390,56 @@ static struct symbol_op overflow_p_op = {
- };
+diff --git a/.gitignore b/.gitignore
+index 63c74afdb156..6a28fa50f8bb 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -8,25 +8,25 @@
+ .*.swp
  
+ # generated
+-version.h
++/version.h
  
-+///
-+// Evaluate the arguments of 'generic' integer operators.
-+//
-+// All arguments must be the same basic integer type and
-+// their number comes from the prototype and is already checked.
-+static int evaluate_generic_int_op(struct expression *expr)
-+{
-+	struct symbol *fntype = expr->fn->ctype->ctype.base_type;
-+	struct symbol_list *types = NULL;
-+	struct symbol *ctype = NULL;
-+	struct expression *arg;
-+	struct symbol *t;
-+	int n = 0;
-+
-+	PREPARE_PTR_LIST(fntype->arguments, t);
-+	FOR_EACH_PTR(expr->args, arg) {
-+		struct symbol *type;
-+
-+		if (++n == 1) {
-+			t = arg->ctype;
-+			if (!arg || !(type = arg->ctype))
-+				return 0;
-+			if (type->type == SYM_NODE)
-+				type = type->ctype.base_type;
-+			if (!type)
-+				return 0;
-+			if (type->ctype.base_type != &int_type || type == &bool_ctype)
-+				goto err;
-+		} else {
-+			t = ctype;
-+		}
-+		add_ptr_list(&types, t);
-+		NEXT_PTR_LIST(t);
-+	} END_FOR_EACH_PTR(arg);
-+	FINISH_PTR_LIST(t);
-+	return evaluate_arguments(types, expr->args);
-+
-+err:
-+	sparse_error(arg->pos, "non-integer type for argument %d:", n);
-+	info(arg->pos, "        %s", show_typename(arg->ctype));
-+	expr->ctype = &bad_ctype;
-+	return 0;
-+}
-+
-+struct symbol_op generic_int_op = {
-+	.args = args_prototype,
-+	.evaluate = evaluate_generic_int_op,
-+};
-+
-+
- static int eval_atomic_common(struct expression *expr)
- {
- 	struct symbol *fntype = expr->fn->ctype->ctype.base_type;
-diff --git a/builtin.h b/builtin.h
-index 9cb6728444fe..5fe77c926244 100644
---- a/builtin.h
-+++ b/builtin.h
-@@ -14,4 +14,6 @@ struct builtin_fn {
+ # programs
+-c2xml
+-compile
+-ctags
+-example
+-graph
+-obfuscate
+-sparse
+-sparse-llvm
+-semind
+-test-dissect
+-test-inspect
+-test-lexing
+-test-linearize
+-test-parsing
+-test-show-type
+-test-unssa
++/c2xml
++/compile
++/ctags
++/example
++/graph
++/obfuscate
++/semind
++/sparse
++/sparse-llvm
++/test-dissect
++/test-inspect
++/test-lexing
++/test-linearize
++/test-parsing
++/test-show-type
++/test-unssa
  
- void declare_builtins(int stream, const struct builtin_fn tbl[]);
- 
-+extern struct symbol_op generic_int_op;
-+
- #endif
+ # tags
+ tags
 -- 
 2.31.1
 
