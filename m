@@ -8,61 +8,61 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C4B09C433B4
-	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:31:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 640B6C433ED
+	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:31:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 946FE61028
-	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:31:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 379D361028
+	for <linux-sparse@archiver.kernel.org>; Sat, 10 Apr 2021 13:31:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234807AbhDJNbQ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 10 Apr 2021 09:31:16 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43952 "EHLO
+        id S234091AbhDJNbR (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 10 Apr 2021 09:31:17 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:43954 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234091AbhDJNbP (ORCPT
+        with ESMTP id S234806AbhDJNbP (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Sat, 10 Apr 2021 09:31:15 -0400
-Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 51D8CC061762
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:31:00 -0700 (PDT)
-Received: by mail-ej1-x62c.google.com with SMTP id hq27so12888596ejc.9
-        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:31:00 -0700 (PDT)
+Received: from mail-ed1-x52d.google.com (mail-ed1-x52d.google.com [IPv6:2a00:1450:4864:20::52d])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1BEF1C061764
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:31:01 -0700 (PDT)
+Received: by mail-ed1-x52d.google.com with SMTP id x4so9722617edd.2
+        for <linux-sparse@vger.kernel.org>; Sat, 10 Apr 2021 06:31:01 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=XGPFV+OYP7ikzGx0Wa0qXJJq6+m5hh+0ZKKsoGUXT48=;
-        b=R+hCm/RtuSoyUFjCj01kbdDCzPWkfrDue3l3Zj/o+oTHfj/QgdCSZp5XgLi9fbRlYe
-         keFH9rmNbW7yVIT5Kip4jWT9Qe5xzNGWHsDO0FoNfLRwiQn5tW/AX3G3OBRy+GKpUQsX
-         JgKq7vnMHMW7N0mCnIADP2BOpESctzitwOPtCWn6N3IN7UoZpSXLq/7OD9v+X1rzLdIC
-         UqK5ocyQBsLgqW+N9UgOtmXA3Celdjd3C354Rt69H5CzYz5tuMTNgRQfAaAeRbLLkk4O
-         gpF00KkTgFeOUhGT/93G1J8LNJHHoHVRN7DPpSu0fEtuIkmF7SFKvg+XInR0Pera3obu
-         s0uw==
+        bh=7GyhyKuCGDerdGuoNjbX1b5UU6r+UUpK9bAjsPh002U=;
+        b=Lfov4o0wSsKkgCwmT00i//X0LmRgtQNOPv8TcIHRS6o4BLlGXDQhMvCnHKCG/CjTBd
+         BW8LTLNoXeP8+vqpdMVbT1G8NdUZH+jtJl72iIJvxosDxXOcP9XlaS38IIpPbbdicrsE
+         uLUCJefWdsbKJTNGzp9Nd9UaWgHwxFrPP6QPTHyWVzW9WsqK8idBz2MYCtKwX5RpVLA8
+         X04hrdlGGCEsyBzXUVmicD0Ikf2EE0l/94bG6pi1AD6N03jydxHrKhiyUtjOdGcYI53F
+         6Fe+2l5V5Ngok686brxZ/kgw/FVS9a/A6Ij6mWNjMyGbe5ue/dosELf+WLub4XwRk6ao
+         Op0Q==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=XGPFV+OYP7ikzGx0Wa0qXJJq6+m5hh+0ZKKsoGUXT48=;
-        b=bHxsYHLLEpQz78Uh3U+NFfXrATfMy3UoLm62g8ghyqexdEOuGXYWKVJBZYmVaJOaG6
-         s3+c8CFlPbQupC4Ns4uKkiqw7TrOSGH8INFeP3eU6klSOaVMHKOREWg1Lk71W6qRqEZn
-         K9U68rkritL1fsmPEmxjO4ignQa7zFV+v2Kv3qkZNp/mEqSdeKxYHGLpY+RHVCNKoOgc
-         XHGwBWjQCk+ijycQTdhYzt/so15B/b48dkDvTASVyTM2PKz4MNuui3OjCpVc8//axC6s
-         +78/9SAHo3v/wicWX9d/17wOsWEEHPsrMINqj96DlMiZwTS22LEbHVDtVg2p/ctLM6vX
-         xe0g==
-X-Gm-Message-State: AOAM533qlj9TEyM8yqh9MmGRJygMyS0WlDsqclLovRWxQLpS81wBqzBC
-        vsCxD9avOgMtA9z9WJ+5y/kTYpNtnm8=
-X-Google-Smtp-Source: ABdhPJx2N/divIMkb99/YYKWFMi1nzbG/tW/oOsirLK6zfff9g3pptUUUxAt3pcKn5ECov0kOERP9A==
-X-Received: by 2002:a17:907:16a8:: with SMTP id hc40mr19915401ejc.40.1618061459095;
+        bh=7GyhyKuCGDerdGuoNjbX1b5UU6r+UUpK9bAjsPh002U=;
+        b=cAadWSb+Yx864AZAJ0injWnxOZbJxU7GdCYkW+8ozJReW31JZCy0As8S/cfXOio5gb
+         y6XtvlaMBkf8Mhxh+2wxlwu6exsiuF4tTZX80ObKk1hMPM7U2tNBleZn8pATXDU3gy+c
+         cbBIfysFVqFWa1KhtRBTfpfoPjoyrysBvt+ElDrO5oQ+yTnvpm7p/XMR4KhUTOV5WWvc
+         lZi9+YXiFhdytpYh0NpYG4+oicoVTDppOPhQSfIQnF06SSSt9bAqu5ep55HK0jvr98S3
+         q3RCVz2nZp2DXXP7zDjTDoZo4mNRRFjr5wfSY3vNGUpt9JF3i+8SC/M7tX9yiIuzE0Kd
+         RQNw==
+X-Gm-Message-State: AOAM53125rYBeK8xt1R4smDnt25ttBEeEC00ZphkIvc81UgqyAgjyMux
+        uaBqG5aflrcIbASRSDokO8dGbgM6h+8=
+X-Google-Smtp-Source: ABdhPJxz5c34O3QoJqQn0esRVm8ihzJD7Cd135ks7yNNyKAfmhgFz6bQK9Ck63Ak+2bzlsa85/CYYQ==
+X-Received: by 2002:a50:85cd:: with SMTP id q13mr22115272edh.114.1618061459901;
         Sat, 10 Apr 2021 06:30:59 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:f96a:804d:4fe5:372f])
-        by smtp.gmail.com with ESMTPSA id g26sm2594910ejz.70.2021.04.10.06.30.58
+        by smtp.gmail.com with ESMTPSA id g26sm2594910ejz.70.2021.04.10.06.30.59
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 10 Apr 2021 06:30:58 -0700 (PDT)
+        Sat, 10 Apr 2021 06:30:59 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 7/8] scheck: assert_const()
-Date:   Sat, 10 Apr 2021 15:30:44 +0200
-Message-Id: <20210410133045.53189-8-luc.vanoostenryck@gmail.com>
+Subject: [PATCH 8/8] scheck: support pre-conditions via __assume()
+Date:   Sat, 10 Apr 2021 15:30:45 +0200
+Message-Id: <20210410133045.53189-9-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210410133045.53189-1-luc.vanoostenryck@gmail.com>
 References: <20210410133045.53189-1-luc.vanoostenryck@gmail.com>
@@ -72,89 +72,154 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Since, the symbolic checker check expressions at the ... symbolic
-level, this can be used to check if two expressions are equivalent
-but not if this equivalence is effectively used.
+A lot of simplifications are only valid when their variables
+satisfy to some conditions (like "is within a given range" or
+"is a power of two").
 
-So, add a new assertion (this time not at the symbolic level) to
-check if an expression which is expected to simplify to a constant
-is effectively simplified to this constant.
+So, allow to add such pre-conditions via new _assume() statements.
+Internally, all such preconditions are ANDed together and what is
+checked is they imply the assertions:
+	AND(pre-condition) implies assertion 1
+	...
+
+Note: IIUC, it seems that boolector has a native mechanism for such
+      things but I'm not sure if t can be used here.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
  ident-list.h           |  1 +
- scheck.c               | 19 +++++++++++++++++++
- validation/scheck/ok.c |  1 +
- 3 files changed, 21 insertions(+)
+ scheck.c               | 33 ++++++++++++++++++++++++---------
+ validation/scheck/ok.c |  6 ++++++
+ 3 files changed, 31 insertions(+), 9 deletions(-)
 
 diff --git a/ident-list.h b/ident-list.h
-index ab5bc5f52e01..6264fd062534 100644
+index 6264fd062534..3c08e8ca9aa4 100644
 --- a/ident-list.h
 +++ b/ident-list.h
-@@ -81,6 +81,7 @@ IDENT(main);
+@@ -79,6 +79,7 @@ IDENT(copy_to_user); IDENT(copy_from_user);
+ IDENT(main);
+ 
  /* used by the symbolic checker */
++IDENT(__assume);
  IDENT(__assert);
  IDENT(__assert_eq);
-+IDENT(__assert_const);
- 
- #undef __IDENT
- #undef IDENT
+ IDENT(__assert_const);
 diff --git a/scheck.c b/scheck.c
-index 26f88a4a028e..ff140aaa1e95 100644
+index ff140aaa1e95..b8bc9bb28498 100644
 --- a/scheck.c
 +++ b/scheck.c
-@@ -33,6 +33,7 @@
+@@ -31,6 +31,7 @@
+ 
+ #define dyntype incomplete_ctype
  static const struct builtin_fn builtins_scheck[] = {
++	{ "__assume", &void_ctype, 0, { &dyntype }, .op = &generic_int_op },
  	{ "__assert", &void_ctype, 0, { &bool_ctype }, .op = &generic_int_op },
  	{ "__assert_eq", &void_ctype, 0, { &dyntype, &dyntype }, .op = &generic_int_op },
-+	{ "__assert_const", &void_ctype, 0, { &dyntype, &dyntype }, .op = &generic_int_op },
- 	{}
- };
- 
-@@ -222,6 +223,22 @@ static bool check_equal(Btor *btor, struct instruction *insn)
- 	return check_btor(btor, n, insn);
+ 	{ "__assert_const", &void_ctype, 0, { &dyntype, &dyntype }, .op = &generic_int_op },
+@@ -184,11 +185,22 @@ static void ternop(Btor *btor, struct instruction *insn)
+ 	insn->target->priv = t;
  }
  
-+static bool check_const(Btor *ctxt, struct instruction *insn)
+-static bool check_btor(Btor *btor, BoolectorNode *n, struct instruction *insn)
++static bool add_precondition(Btor *btor, BoolectorNode **pre, struct instruction *insn)
 +{
-+	pseudo_t src1 = ptr_list_nth(insn->arguments, 0);
-+	pseudo_t src2 = ptr_list_nth(insn->arguments, 1);
-+
-+	if (src2->type != PSEUDO_VAL)
-+		sparse_error(insn->pos, "should be a constant: %s", show_pseudo(src2));
-+	if (src1 == src2)
-+		return 1;
-+	if (src1->type != PSEUDO_VAL)
-+		sparse_error(insn->pos, "not a constant: %s", show_pseudo(src1));
-+	else
-+		sparse_error(insn->pos, "invalid value: %s != %s", show_pseudo(src1), show_pseudo(src2));
-+	return 0;
++	BoolectorNode *a = get_arg(btor, insn, 0);
++	BoolectorNode *z = boolector_zero(btor, boolector_get_sort(btor, a));
++	BoolectorNode *n = boolector_ne(btor, a, z);
++	BoolectorNode *p = boolector_and(btor, *pre, n);
++	*pre = p;
++	return true;
 +}
 +
- static bool check_call(Btor *btor, struct instruction *insn)
++static bool check_btor(Btor *btor, BoolectorNode *p, BoolectorNode *n, struct instruction *insn)
  {
- 	pseudo_t func = insn->func;
-@@ -231,6 +248,8 @@ static bool check_call(Btor *btor, struct instruction *insn)
- 		return check_assert(btor, insn);
- 	if (ident == &__assert_eq_ident)
- 		return check_equal(btor, insn);
-+	if (ident == &__assert_const_ident)
-+		return check_const(btor, insn);
+ 	char model_format[] = "btor";
+ 	int res;
+ 
++	n = boolector_implies(btor, p, n);
+ 	boolector_assert(btor, boolector_not(btor, n));
+ 	res = boolector_sat(btor);
+ 	switch (res) {
+@@ -207,20 +219,20 @@ static bool check_btor(Btor *btor, BoolectorNode *n, struct instruction *insn)
  	return 0;
  }
  
-diff --git a/validation/scheck/ok.c b/validation/scheck/ok.c
-index f4a0daabfe9a..8f65013e1618 100644
---- a/validation/scheck/ok.c
-+++ b/validation/scheck/ok.c
-@@ -2,6 +2,7 @@ static void ok(int x)
+-static bool check_assert(Btor *btor, struct instruction *insn)
++static bool check_assert(Btor *btor, BoolectorNode *pre, struct instruction *insn)
  {
- 	__assert((~x) == (~0 - x));	// true but not simplified yet
- 	__assert_eq(~x, ~0 - x);
-+	__assert_const(x & 0, 0);
+ 	BoolectorNode *a = get_arg(btor, insn, 0);
+ 	BoolectorNode *z = boolector_zero(btor, boolector_get_sort(btor, a));
+ 	BoolectorNode *n = boolector_ne(btor, a, z);
+-	return check_btor(btor, n, insn);
++	return check_btor(btor, pre, n, insn);
  }
  
- static void always(int x)
+-static bool check_equal(Btor *btor, struct instruction *insn)
++static bool check_equal(Btor *btor, BoolectorNode *pre, struct instruction *insn)
+ {
+ 	BoolectorNode *a = get_arg(btor, insn, 0);
+ 	BoolectorNode *b = get_arg(btor, insn, 1);
+ 	BoolectorNode *n = boolector_eq(btor, a, b);
+-	return check_btor(btor, n, insn);
++	return check_btor(btor, pre, n, insn);
+ }
+ 
+ static bool check_const(Btor *ctxt, struct instruction *insn)
+@@ -239,15 +251,17 @@ static bool check_const(Btor *ctxt, struct instruction *insn)
+ 	return 0;
+ }
+ 
+-static bool check_call(Btor *btor, struct instruction *insn)
++static bool check_call(Btor *btor, BoolectorNode **pre, struct instruction *insn)
+ {
+ 	pseudo_t func = insn->func;
+ 	struct ident *ident = func->ident;
+ 
++	if (ident == &__assume_ident)
++		return add_precondition(btor, pre, insn);
+ 	if (ident == &__assert_ident)
+-		return check_assert(btor, insn);
++		return check_assert(btor, *pre, insn);
+ 	if (ident == &__assert_eq_ident)
+-		return check_equal(btor, insn);
++		return check_equal(btor, *pre, insn);
+ 	if (ident == &__assert_const_ident)
+ 		return check_const(btor, insn);
+ 	return 0;
+@@ -256,6 +270,7 @@ static bool check_call(Btor *btor, struct instruction *insn)
+ static bool check_function(struct entrypoint *ep)
+ {
+ 	Btor *btor = boolector_new();
++	BoolectorNode *pre = boolector_true(btor);
+ 	struct basic_block *bb;
+ 	int rc = 0;
+ 
+@@ -281,7 +296,7 @@ static bool check_function(struct entrypoint *ep)
+ 				ternop(btor, insn);
+ 				break;
+ 			case OP_CALL:
+-				rc &= check_call(btor, insn);
++				rc &= check_call(btor, &pre, insn);
+ 				break;
+ 			case OP_RET:
+ 				goto out;
+diff --git a/validation/scheck/ok.c b/validation/scheck/ok.c
+index 8f65013e1618..1e5314f24ded 100644
+--- a/validation/scheck/ok.c
++++ b/validation/scheck/ok.c
+@@ -10,6 +10,12 @@ static void always(int x)
+ 	__assert((x - x) == 0);		// true and simplified
+ }
+ 
++static void assumed(int x, int a, int b)
++{
++	__assume((a & ~b) == 0);
++	__assert_eq((x ^ a) | b, x | b);
++}
++
+ /*
+  * check-name: scheck-ok
+  * check-command: scheck $file
 -- 
 2.31.1
 
