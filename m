@@ -2,110 +2,127 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-12.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-10.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=ham autolearn_force=no
-	version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,USER_AGENT_GIT autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C2228C433B4
-	for <linux-sparse@archiver.kernel.org>; Sun, 11 Apr 2021 22:05:19 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id E3825C433ED
+	for <linux-sparse@archiver.kernel.org>; Mon, 12 Apr 2021 21:21:22 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 6DB2B6008E
-	for <linux-sparse@archiver.kernel.org>; Sun, 11 Apr 2021 22:05:19 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id C23D461278
+	for <linux-sparse@archiver.kernel.org>; Mon, 12 Apr 2021 21:21:22 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235377AbhDKWFd (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 11 Apr 2021 18:05:33 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38276 "EHLO
+        id S240456AbhDLVVk (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 12 Apr 2021 17:21:40 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60834 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235284AbhDKWFd (ORCPT
+        with ESMTP id S241461AbhDLVVk (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 11 Apr 2021 18:05:33 -0400
+        Mon, 12 Apr 2021 17:21:40 -0400
 Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 46D42C061574
-        for <linux-sparse@vger.kernel.org>; Sun, 11 Apr 2021 15:05:16 -0700 (PDT)
-Received: by mail-ej1-x62d.google.com with SMTP id w3so17084032ejc.4
-        for <linux-sparse@vger.kernel.org>; Sun, 11 Apr 2021 15:05:16 -0700 (PDT)
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 7A07FC061574
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Apr 2021 14:21:21 -0700 (PDT)
+Received: by mail-ej1-x62d.google.com with SMTP id g5so15904250ejx.0
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Apr 2021 14:21:21 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=u4si2dSAxfn0m5fRKyNgdlc+qCZhufRCPhIdYAyjldU=;
-        b=p5iMg7Xy/5NsmsxGCGBkkhD5RsgCwbAsgoEevTNtYkmp1FFiYPW2AKlgZSlorQyoUM
-         o4D1GQJCTga/bEN6jW0V1RInfh14FYyuFp5s6067/ePRK3S4yXR52VXouqFVezDdzfa7
-         Xz/hJ+5T1tts1M1+4qyghKYwAJJatd7BOTepw+7rM5r+LaYgsNzVQWsyStBKuOkYLmV2
-         ru1lXtLVIO+T9Khdc0CV32hZZUIg2ryIQs/S2mCArsGYOABQL8kDAVQOrwAbVYkUVEFV
-         Tb7677BGqShSNapfgweaiJ+tPsTijmQroiiienujyZ7oOpAIpm9gWwyABfKBKdsN1xmC
-         dmmw==
+        h=from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Jbq/cm8iIZ017+WXbyzBxEfFiHNAPj3tM0FXZwwD9ZE=;
+        b=VsDtQqr9raroptkpwR8OHssPGT2fGEYc08KqVHBbPURYM3adUw9FjicYNPbjUJpPnY
+         CRQjJmUW7HHxc23eRrDBy/rO9VOMZGuy8HZEPwiANMNbCEMYA8ePwg0DFjoxlIYj42dm
+         UGHZy3cKmvjOlR2RwwxRHdWOhd/i7Wmnz7uRYvDT7hIllJq8l4zItfDsWFgp38PjEZ3E
+         +dShlKgTM0Em9VDGJ7grCFeE89xXN11FZg9VCHi0SQONREFBnK4wKpSvSTorEnqPaQ7g
+         gdQFFLCMElPZLfhKIs5Y0P3Gj8oiiQelSkAVdJjn6ara02G6KTNCQiDNXxFAkVZ75skT
+         ZqxA==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=u4si2dSAxfn0m5fRKyNgdlc+qCZhufRCPhIdYAyjldU=;
-        b=tAXd5aqpH5jGR+KxwmDjymjNW3FeTuijt2KwJYxj236iJ+x+rD+xrWP6Rk2f8arbXQ
-         j6Tc5p9UM0NmfpOWNyl8Xpj/hTU1fbCwC3pfOkw+CSJpgLuP9OJDJG8VhOzLl8j2V6q7
-         XALGCTtYwRipEFXo9TEWfnF0DEZlyhiLKPfwoeOp1WP+3yqmn5o1z/CIOKxhNygrBB1Q
-         rXNwo/yq4TdWNgEpKzrq71f7wOfGUdFoxtvvWnD0MI2Et/zfffYu4bxLx5Ofo9AwEMDq
-         xldUpGFvwCikOZwDWRY0qOMzo0YWi6ZBARsBvVS7dnofK0e+V2ibqjWJfUyiOmI1VmjN
-         MOXQ==
-X-Gm-Message-State: AOAM532KrUnWjsukMNPVojrGcUfrPK+fp6qT748sR6HKgWf7IbXtp/29
-        X695Lob5EFb6M9Hmh2xod6KFFObm4bk=
-X-Google-Smtp-Source: ABdhPJwJa9ghe3MDpogEuAVwwVuHc+Bad5VlxTXlq5kC2lHQ1Lweonu3L6KQfOOSgVktpmxCmtv6BA==
-X-Received: by 2002:a17:907:969e:: with SMTP id hd30mr24859447ejc.5.1618178714985;
-        Sun, 11 Apr 2021 15:05:14 -0700 (PDT)
-Received: from mail ([2a02:a03f:b7fe:f700:7910:ab4b:7e77:688f])
-        by smtp.gmail.com with ESMTPSA id f10sm5184894edd.29.2021.04.11.15.05.13
+        h=x-gm-message-state:from:to:cc:subject:date:message-id:mime-version
+         :content-transfer-encoding;
+        bh=Jbq/cm8iIZ017+WXbyzBxEfFiHNAPj3tM0FXZwwD9ZE=;
+        b=kwjYI72k/R+XE/N4bLPJ752KLkviuuk+Lf32Nspq6P2GfwAqv/28vTamq1rWQhyROq
+         jMQ0C0stpa+o8HujIq2kbt0qe66kE+joP9j8kxkxcRUNHTgIsLzpuwxaS4oRHn/5YH0F
+         HCae3oS2j6E0EIxbQxxYHHlfUTHho8uVvRmWhZVzGKUTJG6AnIlS1/qDPgITFyIIKMzN
+         M6N2JJX45Sj9FmVayQggcyrugICxpUpsAYyQuzxN03TFK/hCIvE9LRjiD6cr/e72OvgP
+         NccgouSJovAX6SZ928gE9N9vmK13VTYoy+T2Ge02BhautGB9XdhNDhhhJX8/e87nmz9h
+         68hg==
+X-Gm-Message-State: AOAM530ytkZZcAYTkXYmDWZoiz2c8OOYhuIFKjS21rB2PnFiswya/z1v
+        ZKj+cFZKtTVaDyRROEU8UZM7Iwm4OwU=
+X-Google-Smtp-Source: ABdhPJyFsxMD4x5UAQMUxMEycSXqpVdiabMRrpoCy/ZdS8ghILSQgT+ALd/gFw/XnqYAqxCpsRgXWA==
+X-Received: by 2002:a17:907:3da3:: with SMTP id he35mr28351380ejc.148.1618262480274;
+        Mon, 12 Apr 2021 14:21:20 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:6903:692b:54da:df0c])
+        by smtp.gmail.com with ESMTPSA id g11sm7744156edt.35.2021.04.12.14.21.19
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sun, 11 Apr 2021 15:05:14 -0700 (PDT)
-Date:   Mon, 12 Apr 2021 00:05:13 +0200
+        Mon, 12 Apr 2021 14:21:19 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 2/8] builtin: define a symbol_op for a generic op acting
- on integer
-Message-ID: <20210411220513.plsj6wwv6o57phfq@mail>
-References: <20210410133045.53189-1-luc.vanoostenryck@gmail.com>
- <20210410133045.53189-3-luc.vanoostenryck@gmail.com>
- <9bca36d1-b84a-7b6f-37cb-fd5285a86f0f@ramsayjones.plus.com>
+To:     linux-sparse@vger.kernel.org
+Cc:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
+        Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 0/8] scheck: add a symbolic checker
+Date:   Mon, 12 Apr 2021 23:21:03 +0200
+Message-Id: <20210412212111.29186-1-luc.vanoostenryck@gmail.com>
+X-Mailer: git-send-email 2.31.1
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <9bca36d1-b84a-7b6f-37cb-fd5285a86f0f@ramsayjones.plus.com>
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, Apr 11, 2021 at 09:40:19PM +0100, Ramsay Jones wrote:
-> On 10/04/2021 14:30, Luc Van Oostenryck wrote:
-> > This can be used to define some generic (polymorphic) builtin
-> > with a signature like:
-> > 	op(T)
-> > 	op(T, T)
-> > 	op(T,T, ... T)
-> > where T is some integer type.
-> > 
-> > Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-> > ---
-> >  builtin.c | 50 ++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  builtin.h |  2 ++
-> >  2 files changed, 52 insertions(+)
-> > 
-> > diff --git a/builtin.c b/builtin.c
-> > index ff03dbab9a06..f03bf109c818 100644
-> > --- a/builtin.c
-> > +++ b/builtin.c
-> > @@ -390,6 +390,56 @@ static struct symbol_op overflow_p_op = {
-> >  };
-> >  
-> 
-> I must apologize in advance, I've got a head cold, I'm tired and
-> should probably not be commenting (especially since I am only
-> skimming these patches), but ...
+Some instruction simplifications can be quite tricky and thus
+easy to get wrong. Often, they are also hard to test (for example,
+you can test them with a few input values but of course not all
+combinations, it's not clear what are the conditions for which
+they're valid, ...).
 
-Sorry to hear this, and it's me that should apology, really.
-This patch was a quick rough draft that I forget to return to it.
-It's indeed very broken.
+This series add a tool, scheck, which feeds Sparse's IR into a
+bitvector SMT solver (Boolector). This, together with assertions
+added at C level, allows to symbolically check the validity of these
+assertions. In other words, it allows to check if these assertions
+are valid for all possible values (but these expressions are limited
+to pure integer expressions, so no floats, no branches, no memory
+accesses, no functions calls).
 
-Thank you very much for noticing this.
+Now, you may ask yourself "Nice, but how can I be sure that this
+checker is working correctly?". And the answer to this question
+is obviously "You should write another checker, of course. And
+then another one, all the way down!".
 
--- Luc
+Notes: This needs to have the SMT solver's librarie installed
+       and having 'BOOLECTORDIR' and 'HAVE_BOOLECTOR' configured.
+
+Changes since v1:
+* Rewrite evaluate_generic_int_op() which was very broken
+  (thanks to Ramsay Jones for noticing it).
+* When translating compare instructions, the input bitvectors
+  must use the instructions' input type, not the target type).
+
+
+Luc Van Oostenryck (8):
+  export declare_builtins()
+  builtin: define a symbol_op for a generic op acting on integer
+  .gitignore is a bit too greedy
+  scheck: add a symbolic checker
+  scheck: assert_eq()
+  scheck: allow multiple assertions
+  scheck: assert_const()
+  scheck: support pre-conditions via __assume()
+
+ .gitignore             |  35 ++--
+ Makefile               |   7 +
+ builtin.c              |  63 ++++++-
+ builtin.h              |   4 +
+ ident-list.h           |   6 +
+ scheck.c               | 361 +++++++++++++++++++++++++++++++++++++++++
+ validation/scheck/ko.c |  10 ++
+ validation/scheck/ok.c |  22 +++
+ validation/test-suite  |   6 +
+ 9 files changed, 496 insertions(+), 18 deletions(-)
+ create mode 100644 scheck.c
+ create mode 100644 validation/scheck/ko.c
+ create mode 100644 validation/scheck/ok.c
+
+-- 
+2.31.1
+
