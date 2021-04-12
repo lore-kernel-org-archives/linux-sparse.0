@@ -8,62 +8,62 @@ X-Spam-Status: No, score=-15.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 6E201C433ED
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CA072C43460
 	for <linux-sparse@archiver.kernel.org>; Mon, 12 Apr 2021 21:21:30 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 502716135C
+	by mail.kernel.org (Postfix) with ESMTP id AFAA061278
 	for <linux-sparse@archiver.kernel.org>; Mon, 12 Apr 2021 21:21:30 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S244790AbhDLVVs (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        id S237777AbhDLVVs (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
         Mon, 12 Apr 2021 17:21:48 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60866 "EHLO
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60870 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S242321AbhDLVVq (ORCPT
+        with ESMTP id S242786AbhDLVVq (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
         Mon, 12 Apr 2021 17:21:46 -0400
-Received: from mail-ed1-x536.google.com (mail-ed1-x536.google.com [IPv6:2a00:1450:4864:20::536])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 652A9C061756
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Apr 2021 14:21:27 -0700 (PDT)
-Received: by mail-ed1-x536.google.com with SMTP id bx20so15631041edb.12
+Received: from mail-ej1-x62c.google.com (mail-ej1-x62c.google.com [IPv6:2a00:1450:4864:20::62c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0FE5CC06175F
+        for <linux-sparse@vger.kernel.org>; Mon, 12 Apr 2021 14:21:28 -0700 (PDT)
+Received: by mail-ej1-x62c.google.com with SMTP id mh2so1042152ejb.8
         for <linux-sparse@vger.kernel.org>; Mon, 12 Apr 2021 14:21:27 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20161025;
         h=from:to:cc:subject:date:message-id:in-reply-to:references
          :mime-version:content-transfer-encoding;
-        bh=7viAuovfFnmrqFKiDenn6AEET5zy1s11tBohzUeWfCk=;
-        b=icAnPDIYN1u4XLPGHYYFSQhfOWXUSlSwMHFkOrHWXV+v04MXGmgGdhCYPfvAvBn3Xj
-         gOTgI0ggI7xunZ8aqFVogt2AFftNlPW6o5/0MzC6veKoowsmPF/D12eXOPdo93HubMNT
-         NeezVsq9Vg9O33/Kp1vr96u60L8u2FemstwfMWWqGj6IBgno+GhkwX1aEsL85DwIO5el
-         Af/V0B/yQ5jL/rACxX/0B8DrWyEK27iY6WS2/zreHLjhRs/zFa15ZQ6jJqSePO5lhGU4
-         lYifreWgRNaJHCEINd/dklXEM2SNjX+HkMYYI9mFNyyOVotKFPQUPBLDQ2YAPlgp11bo
-         jXlA==
+        bh=a3Atag3Uhwbwc86Jz5JwLkrDGBV8Qf2M+gfpyGrCfvo=;
+        b=sPLFFq8fzjhcuxnjwbrQ+zb9boNHeulDeLBsT3/zUq1avOml8HXpiTggj01GH58lbO
+         CQUCUE3eXqaQjZs2fNCUHLAY4MeHv4JacZT+uE1AVouoQomOPHeffvdDf7GEHKbZYJUX
+         vkMJ/vAIKU3hfO9OLuvCDklSeWZSvDNhTWcgtZEvUq1p2S3fbYuGkq2cU7CybElTx37g
+         MY7vV1l0bhLsFsfOPnvJJT3rnz2IUWfRZrHNI+9nnbgbGSXf2/iBdY0bHqkwIt5GVCCK
+         k3DDq0kL1t7IwTeScFq+57vPwfeoB4No6VYpYU1CAB6J/BYJP9DoGQG3ka+KCmBSb49n
+         CoYw==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:from:to:cc:subject:date:message-id:in-reply-to
          :references:mime-version:content-transfer-encoding;
-        bh=7viAuovfFnmrqFKiDenn6AEET5zy1s11tBohzUeWfCk=;
-        b=ABGhciwRXwHLCWHyyJLPM4TMIz5SIKCJeNrVk27UJXyHR5936PYhBnlEPQ88jUHa9P
-         iYlAsOGTXdTml97KBXWWBwNHmYHUUJJlNwsU57Iqenm033n8Zcet+NXUgpwLSkhRc5Bj
-         9Fk+1mqEk7YPGHOnr0uH6cj+S+QENP/xeVw0KSCwnqR9y9dl1X8i+/5f/+DU626BvD0u
-         xbK5QjwpVcTI6tphrJ/pVGhZDoOqGPHio75Bu6VYdVeGK0qrdsli4xU/3Q7XCbv0pIg9
-         zZeVrw4R1Ztn3Iice+Y5RH7WsqTTPstFWTLyIgbU/v/HnXdOUwFjDOujCh/jjYaP8u79
-         m8Ww==
-X-Gm-Message-State: AOAM530yQ91i+vDOgChS5c9i/eAyUjWgQ3X0aDQLUJ6comeyBblLfmqm
-        pqPvWMyoWJcxn1dhxi4Tv6dIydK+Hn4=
-X-Google-Smtp-Source: ABdhPJzX4QQalnrVO18slVdgZbpji7CJ8Y4OpLGZxr9okFXIR7QPdz72u+sjXSshyZtqnGCf7NANuQ==
-X-Received: by 2002:aa7:db9a:: with SMTP id u26mr30764537edt.292.1618262486189;
+        bh=a3Atag3Uhwbwc86Jz5JwLkrDGBV8Qf2M+gfpyGrCfvo=;
+        b=Gzg6CTiv5rB17iosqeY4T6xdQCZM7tssPACuJ+HJC0HOARFJ/fFq60fWQWlBXzhlYL
+         w4PVJJglEXxmYQRYEEgL6FQCTBiASXZAhdB0kY0NlpVcPRmu9x5xv4Ka7hIN6eZr/Ksb
+         CVar0ddPZeV3AHBqiOFUSayPaRX8jRUPnPCNUPK9ugE5KMTQgT8iSYzLxDjm3+96MdR9
+         vebRXVaHeosWfUkMttAMR0dx4/20G+/aGDDOlrMajQmMdshUwdXacDIv/1ae9l8ReOTm
+         0aHoRkg5Y8tQ6Ytsi9j+OCguSKyE+G3TfflxhFxiUPhl1PXtlxhQHs0+yg2RpRr9FtKf
+         /6qQ==
+X-Gm-Message-State: AOAM532q5EVCco+2l6qVIdSZsWfpeaoditocv1Y/+OjRLAd7gt+Vfl9l
+        k4bSZqg2DtrHsMNZ2rPslTh6JCKybsM=
+X-Google-Smtp-Source: ABdhPJyjQVhu0QByvdW74Amr/HdOTAnq4cplv+MGR40P/EiHogZCjm/hvJkUp+OF8hSd+X1SUmLCwg==
+X-Received: by 2002:a17:907:2137:: with SMTP id qo23mr29541216ejb.442.1618262486815;
         Mon, 12 Apr 2021 14:21:26 -0700 (PDT)
 Received: from localhost.localdomain ([2a02:a03f:b7fe:f700:6903:692b:54da:df0c])
-        by smtp.gmail.com with ESMTPSA id g11sm7744156edt.35.2021.04.12.14.21.24
+        by smtp.gmail.com with ESMTPSA id g11sm7744156edt.35.2021.04.12.14.21.26
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 12 Apr 2021 14:21:25 -0700 (PDT)
+        Mon, 12 Apr 2021 14:21:26 -0700 (PDT)
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
 Cc:     Ramsay Jones <ramsay@ramsayjones.plus.com>,
         Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH v2 6/8] scheck: allow multiple assertions
-Date:   Mon, 12 Apr 2021 23:21:09 +0200
-Message-Id: <20210412212111.29186-7-luc.vanoostenryck@gmail.com>
+Subject: [PATCH v2 7/8] scheck: assert_const()
+Date:   Mon, 12 Apr 2021 23:21:10 +0200
+Message-Id: <20210412212111.29186-8-luc.vanoostenryck@gmail.com>
 X-Mailer: git-send-email 2.31.1
 In-Reply-To: <20210412212111.29186-1-luc.vanoostenryck@gmail.com>
 References: <20210412212111.29186-1-luc.vanoostenryck@gmail.com>
@@ -73,61 +73,89 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-With the SMT solver used here, by default, once an expression is
-checked it's kinda consumed by the process and can't be reused
-anymore for another check.
+Since, the symbolic checker check expressions at the ... symbolic
+level, this can be used to check if two expressions are equivalent
+but not if this equivalence is effectively used.
 
-So, enable the incremental mode: it allows to call boolecter_sat()
-several times.
-
-Note: Another would be, of course, to just AND together all assertions
-      and just check this but then we would lost the finer grained
-      diagnostic in case of failure.
+So, add a new assertion (this time not at the symbolic level) to
+check if an expression which is expected to simplify to a constant
+is effectively simplified to this constant.
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- scheck.c               | 5 +++--
- validation/scheck/ok.c | 4 ----
- 2 files changed, 3 insertions(+), 6 deletions(-)
+ ident-list.h           |  1 +
+ scheck.c               | 19 +++++++++++++++++++
+ validation/scheck/ok.c |  1 +
+ 3 files changed, 21 insertions(+)
 
+diff --git a/ident-list.h b/ident-list.h
+index ab5bc5f52e01..6264fd062534 100644
+--- a/ident-list.h
++++ b/ident-list.h
+@@ -81,6 +81,7 @@ IDENT(main);
+ /* used by the symbolic checker */
+ IDENT(__assert);
+ IDENT(__assert_eq);
++IDENT(__assert_const);
+ 
+ #undef __IDENT
+ #undef IDENT
 diff --git a/scheck.c b/scheck.c
-index c64e865136c5..efa5c1c3247b 100644
+index efa5c1c3247b..f5ea4cf11902 100644
 --- a/scheck.c
 +++ b/scheck.c
-@@ -252,6 +252,7 @@ static bool check_function(struct entrypoint *ep)
- 	int rc = 0;
+@@ -33,6 +33,7 @@
+ static const struct builtin_fn builtins_scheck[] = {
+ 	{ "__assert", &void_ctype, 0, { &bool_ctype }, .op = &generic_int_op },
+ 	{ "__assert_eq", &void_ctype, 0, { &dyntype, &dyntype }, .op = &generic_int_op },
++	{ "__assert_const", &void_ctype, 0, { &dyntype, &dyntype }, .op = &generic_int_op },
+ 	{}
+ };
  
- 	boolector_set_opt(btor, BTOR_OPT_MODEL_GEN, 1);
-+	boolector_set_opt(btor, BTOR_OPT_INCREMENTAL, 1);
- 
- 	FOR_EACH_PTR(ep->bbs, bb) {
- 		struct instruction *insn;
-@@ -274,8 +275,8 @@ static bool check_function(struct entrypoint *ep)
- 				ternop(btor, insn);
- 				break;
- 			case OP_CALL:
--				rc = check_call(btor, insn);
--				goto out;
-+				rc &= check_call(btor, insn);
-+				break;
- 			case OP_RET:
- 				goto out;
- 			default:
-diff --git a/validation/scheck/ok.c b/validation/scheck/ok.c
-index 76c04c4f6870..f4a0daabfe9a 100644
---- a/validation/scheck/ok.c
-+++ b/validation/scheck/ok.c
-@@ -1,10 +1,6 @@
- static void ok(int x)
- {
- 	__assert((~x) == (~0 - x));	// true but not simplified yet
--}
--
--static void also_ok(int x)
--{
- 	__assert_eq(~x, ~0 - x);
+@@ -233,6 +234,22 @@ static bool check_equal(Btor *btor, struct instruction *insn)
+ 	return check_btor(btor, n, insn);
  }
  
++static bool check_const(Btor *ctxt, struct instruction *insn)
++{
++	pseudo_t src1 = ptr_list_nth(insn->arguments, 0);
++	pseudo_t src2 = ptr_list_nth(insn->arguments, 1);
++
++	if (src2->type != PSEUDO_VAL)
++		sparse_error(insn->pos, "should be a constant: %s", show_pseudo(src2));
++	if (src1 == src2)
++		return 1;
++	if (src1->type != PSEUDO_VAL)
++		sparse_error(insn->pos, "not a constant: %s", show_pseudo(src1));
++	else
++		sparse_error(insn->pos, "invalid value: %s != %s", show_pseudo(src1), show_pseudo(src2));
++	return 0;
++}
++
+ static bool check_call(Btor *btor, struct instruction *insn)
+ {
+ 	pseudo_t func = insn->func;
+@@ -242,6 +259,8 @@ static bool check_call(Btor *btor, struct instruction *insn)
+ 		return check_assert(btor, insn);
+ 	if (ident == &__assert_eq_ident)
+ 		return check_equal(btor, insn);
++	if (ident == &__assert_const_ident)
++		return check_const(btor, insn);
+ 	return 0;
+ }
+ 
+diff --git a/validation/scheck/ok.c b/validation/scheck/ok.c
+index f4a0daabfe9a..8f65013e1618 100644
+--- a/validation/scheck/ok.c
++++ b/validation/scheck/ok.c
+@@ -2,6 +2,7 @@ static void ok(int x)
+ {
+ 	__assert((~x) == (~0 - x));	// true but not simplified yet
+ 	__assert_eq(~x, ~0 - x);
++	__assert_const(x & 0, 0);
+ }
+ 
+ static void always(int x)
 -- 
 2.31.1
 
