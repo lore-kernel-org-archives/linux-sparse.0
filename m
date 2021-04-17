@@ -2,89 +2,108 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id DCEC8C433ED
-	for <linux-sparse@archiver.kernel.org>; Sat, 17 Apr 2021 16:40:44 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4DB32C433B4
+	for <linux-sparse@archiver.kernel.org>; Sat, 17 Apr 2021 17:16:54 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id B8AEF6120F
-	for <linux-sparse@archiver.kernel.org>; Sat, 17 Apr 2021 16:40:44 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 1C8FB60FE5
+	for <linux-sparse@archiver.kernel.org>; Sat, 17 Apr 2021 17:16:54 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236660AbhDQQlA (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 17 Apr 2021 12:41:00 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:47160 "EHLO
+        id S236728AbhDQRRT (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 17 Apr 2021 13:17:19 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:55286 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236878AbhDQQjT (ORCPT
+        with ESMTP id S236595AbhDQRRT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 17 Apr 2021 12:39:19 -0400
-Received: from mail-ej1-x62d.google.com (mail-ej1-x62d.google.com [IPv6:2a00:1450:4864:20::62d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 3F398C061574
-        for <linux-sparse@vger.kernel.org>; Sat, 17 Apr 2021 09:38:53 -0700 (PDT)
-Received: by mail-ej1-x62d.google.com with SMTP id r9so46553647ejj.3
-        for <linux-sparse@vger.kernel.org>; Sat, 17 Apr 2021 09:38:53 -0700 (PDT)
+        Sat, 17 Apr 2021 13:17:19 -0400
+Received: from mail-lj1-x229.google.com (mail-lj1-x229.google.com [IPv6:2a00:1450:4864:20::229])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 290FAC061574
+        for <linux-sparse@vger.kernel.org>; Sat, 17 Apr 2021 10:16:51 -0700 (PDT)
+Received: by mail-lj1-x229.google.com with SMTP id m7so23729123ljp.10
+        for <linux-sparse@vger.kernel.org>; Sat, 17 Apr 2021 10:16:51 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
-        h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:in-reply-to;
-        bh=13usxRuXLuRBWCplxpwESBeo3ii7hlgCEHc12avH+C0=;
-        b=aeYj+35o6I7DYVVJhFhpMoAVw4uBVnWljlJDmHNUUjqRJFxzLPbvSvca8/+ix1sQzl
-         11nxAeZQb0dvi14mhLq4JFnkiBSnaL5lilD5v2YW3lUHQv1YLz+uLU1Wd2d8yU80EMBV
-         N1hxBMRIF1etC/2y/ScJcwe/QQWH89j3e67Q+q6A2Q++41vnrk1ZpVcG9uDL6//E5Im5
-         FqBzFpkPhCx/VR0J3FeXcBGJzOSv5mMjhPD67ref7vpvC3RowLpwBuQKnqShNkeZRhLr
-         Goju4CaSRC169eg5FFvMKnhcdpMmRXztz+ctbdASQzVRpMT2CBOUdKxegLZihjNk+1yx
-         FvUQ==
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=CzvVfomXvrq/PDPH96J96agD0uM1TWi4i3Ti2IZY1VE=;
+        b=dXLVksekIY3cFnEGK31fM1ct6jYu5KjR3V40/loDlXgVlFF0a2gqMYCEIkeQfksZCa
+         ERmaHjxcm4A1CaCal+1o2tyk92er+rdFsQL4m8vAqk7cFWalBV/pVyQaUS61p+driL6o
+         ZYv16ibb1FkrA0O7X9lBqaNh+czJczdmehvTw=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
-        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:in-reply-to;
-        bh=13usxRuXLuRBWCplxpwESBeo3ii7hlgCEHc12avH+C0=;
-        b=Fdde9MLgQO3TqStEkXgBzJVvS425y7Ii6EPM18WI7yElQT+m+d0JGgyQjOjtfYe0DS
-         Rlru28TPKd5LUXU213WFcsmfnv4gySdqK08JLvnOqRf0y8KwiDCBTchoPJjGNYqqGXvP
-         pB7G3Ztk1OP+sZvrdn+u4icG1hJha2kRFM27gohnwStJbk1Pj7QtMOaR32IVFkwkbDmj
-         T6e22hw6ApTuuCngROFzH62ziLjaDi3IIq0nexOAtQkXJH/ttSaRHcV9wX4ElT5FS2og
-         bF3KgiBOLkFcyAvAg7tCaIAshzBJ5Jv41ER3EUMDWExZtOY/zV1bqEbwqiu0V+TJdG93
-         NEAQ==
-X-Gm-Message-State: AOAM532vlwEDH47rdiBjrxWLx3ZQJ8fNQ63D5jlAiWuVClPUAaSRvluK
-        /wPEH677slNlScx6/osGnfJ2meJQe18=
-X-Google-Smtp-Source: ABdhPJyUNULjrfGOyDdakRbg+6G3At6/cH4i4W8t5RlIYAC7bgC178pUjk1IKD0svu3dWEU+mnlFng==
-X-Received: by 2002:a17:906:5d13:: with SMTP id g19mr13621208ejt.206.1618677531882;
-        Sat, 17 Apr 2021 09:38:51 -0700 (PDT)
-Received: from mail ([2a02:a03f:b7fe:f700:8120:1c81:5e73:b5c1])
-        by smtp.gmail.com with ESMTPSA id t15sm7967470edr.55.2021.04.17.09.38.51
-        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Sat, 17 Apr 2021 09:38:51 -0700 (PDT)
-Date:   Sat, 17 Apr 2021 18:38:50 +0200
-From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH] no needs to use MARK_CURRENT_DELETED() for multi-jumps
-Message-ID: <20210417163850.wqkrde74s33gfghv@mail>
-References: <20210417133154.53987-1-luc.vanoostenryck@gmail.com>
- <YHsKV2s9XW4w8tK9@satellite>
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=CzvVfomXvrq/PDPH96J96agD0uM1TWi4i3Ti2IZY1VE=;
+        b=tE8RxdHNNXkdfE+uf2KhCcme2tpMwMJL6b9rt/QeeRgEMGS5GRuwvKvFklTrvBSmL3
+         2ZRYvjk17MNE71tRTBGoyibEIWTSd2vOAs0T1E5uIiBiQth0HYZTA/9rHKDi8Cvnk3Xs
+         R/fnwlKyATkHDLgfeMZC9TDpaYBUtQMWRvwdmwyUtIrKqqmbxkmGSSiN5YNPg3qMDefC
+         hrQ8CYj8tn49i96J7crLF9kpC3yUdxCeT/BjOkAefdFxSrCT4CE0lBA/a4HB236rFAyN
+         lvmLvJOJdu7kThioTdjkf6xpfzmTHF4RVKgKleQc4o/fiEVfk4fsCfL4hxBOrx8hqoQU
+         SkDQ==
+X-Gm-Message-State: AOAM530v3sfD4eDDILc+8FfPXyZI61Z7Au4JV2l0vC9NdRcFIHb+ZHNu
+        VpkncNqFGTMDt15aI/+gqpAzL9h/LXd433yI
+X-Google-Smtp-Source: ABdhPJyhn8QEwdF/VjJES0QojQ2cLV0KI1gRMN+fD5mq4LrX0DrOVAffAd5vgKYVaz24dQ+NQN5N1w==
+X-Received: by 2002:a2e:878c:: with SMTP id n12mr6031059lji.492.1618679807959;
+        Sat, 17 Apr 2021 10:16:47 -0700 (PDT)
+Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com. [209.85.167.45])
+        by smtp.gmail.com with ESMTPSA id x4sm1308827lfa.173.2021.04.17.10.16.47
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sat, 17 Apr 2021 10:16:47 -0700 (PDT)
+Received: by mail-lf1-f45.google.com with SMTP id x19so19173028lfa.2
+        for <linux-sparse@vger.kernel.org>; Sat, 17 Apr 2021 10:16:47 -0700 (PDT)
+X-Received: by 2002:a05:6512:3763:: with SMTP id z3mr6411606lft.487.1618679807245;
+ Sat, 17 Apr 2021 10:16:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <YHsKV2s9XW4w8tK9@satellite>
+References: <20210126220432.58265-1-luc.vanoostenryck@gmail.com>
+In-Reply-To: <20210126220432.58265-1-luc.vanoostenryck@gmail.com>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Sat, 17 Apr 2021 10:16:31 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wgO=9N_Qz6MsXB2SVUGXHX53bFEvNDbmLHB6_W+dEBN-A@mail.gmail.com>
+Message-ID: <CAHk-=wgO=9N_Qz6MsXB2SVUGXHX53bFEvNDbmLHB6_W+dEBN-A@mail.gmail.com>
+Subject: Re: [PATCH 00/10] simplify and canonicalize signed compares
+To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sat, Apr 17, 2021 at 05:18:31PM +0100, Ramsay Jones wrote:
-> On Sat, Apr 17, 2021 at 03:31:54PM +0200, Luc Van Oostenryck wrote:
-> > MARK_CURRENT_DELETED() was added for the case(s) where an element
-> > must be removed from the list but the address of the other elements
-> > must not be changed. In this case of effectively removing the
-> > element from it list, the element is 'marked' as deleted in the list
-> > and the list walking macros will later take this in account.
-> > 
-> > However, this is not never needed for multi-jumps.
-> 
-> s/not never/not ever/ ?
+On Tue, Jan 26, 2021 at 7:45 PM Luc Van Oostenryck
+<luc.vanoostenryck@gmail.com> wrote:
+>
+> This series fixes and improves the simplification and the
+> canonicalization of signed compares.
 
-Hehe :) Thanks.
-Just 's/not never/never/'
+Hmm. Sorry for not replying earlier, but I just checked the most
+common simplification of signed compares, and it didn't work.
 
--- Luc
+This:
+
+    _Bool test(int a)
+    {
+        return a >=0 && a < 16;
+    }
+
+should simplify to be the same as
+
+    _Bool test(int a)
+    {
+        return (unsigned)a < 16;
+    }
+
+but it doesn't. It generates the silly - but straightforward - "two
+comparisons and a 'and' of the result".
+
+In fact, the recent canonicalizations means that the compare against
+zero is actually pessimised, and ">= 0" becomes "> 0xffffffff", which
+is often a much more expensive operation.
+
+This came up because I was looking at some kernel code that did
+exactly that "check that a signed value is within proper bounds", and
+the zero check is a very common bound.
+
+               Linus
