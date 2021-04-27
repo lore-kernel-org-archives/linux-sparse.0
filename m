@@ -2,102 +2,144 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.3 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,UNPARSEABLE_RELAY,USER_AGENT_SANE_1
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-8.6 required=3.0 tests=BAYES_00,DKIM_INVALID,
+	DKIM_SIGNED,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	MENTIONS_GIT_HOSTING,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=ham
+	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0E193C433B4
-	for <linux-sparse@archiver.kernel.org>; Wed, 21 Apr 2021 13:46:30 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 3D4EAC433ED
+	for <linux-sparse@archiver.kernel.org>; Tue, 27 Apr 2021 06:37:09 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C4AA06141C
-	for <linux-sparse@archiver.kernel.org>; Wed, 21 Apr 2021 13:46:29 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EEDCD613B0
+	for <linux-sparse@archiver.kernel.org>; Tue, 27 Apr 2021 06:37:08 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238306AbhDUNrC (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 21 Apr 2021 09:47:02 -0400
-Received: from aserp2130.oracle.com ([141.146.126.79]:39770 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S234093AbhDUNrB (ORCPT
+        id S230222AbhD0Ghu (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 27 Apr 2021 02:37:50 -0400
+Received: from Galois.linutronix.de ([193.142.43.55]:38896 "EHLO
+        galois.linutronix.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229977AbhD0Ght (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 21 Apr 2021 09:47:01 -0400
-Received: from pps.filterd (aserp2130.oracle.com [127.0.0.1])
-        by aserp2130.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 13LDiARH007416;
-        Wed, 21 Apr 2021 13:46:26 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to : cc
- : subject : message-id : references : mime-version : content-type :
- content-transfer-encoding : in-reply-to; s=corp-2020-01-29;
- bh=FHyTa2pFgxqLAhTJs9mN4OBtX6QiP3lLDKV/ZzBhQs4=;
- b=NNsRFhuaLsoNeFG5IJ2dcbzCLiS/ZVYEJweUU7+HVLFIecWpyYnqGDjYeG6YTknwWlrh
- /qll+yeGAeAHO365PgsR4IwOsSGk9sj1SVG7MVp6S950YrPwwfPhAm6f9zTvhDaphzAb
- jxHB5PZnEYxIN1VN3r173dUIPMZphYsKyHsRVBe/IbtOjVJ4PwM4eBCFJC25ZfoVC07v
- BoWbHekv1buHBe3V+oIID9NB9If6qRYb4PMDmFzqn6h2TbkiQpne3lH2sfvPHOIflNz2
- dhWklsJObFo2NEOO2xGENJcYYE6KEZJCX4awVMotWV6d3t+UQGzQcYavNgA8klKHREex 5w== 
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [141.146.126.70])
-        by aserp2130.oracle.com with ESMTP id 37yn6cadkh-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 21 Apr 2021 13:46:25 +0000
-Received: from pps.filterd (aserp3020.oracle.com [127.0.0.1])
-        by aserp3020.oracle.com (8.16.0.42/8.16.0.42) with SMTP id 13LDkBuA059621;
-        Wed, 21 Apr 2021 13:46:25 GMT
-Received: from pps.reinject (localhost [127.0.0.1])
-        by aserp3020.oracle.com with ESMTP id 3809k1x389-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 21 Apr 2021 13:46:25 +0000
-Received: from aserp3020.oracle.com (aserp3020.oracle.com [127.0.0.1])
-        by pps.reinject (8.16.0.36/8.16.0.36) with SMTP id 13LDkP1m060903;
-        Wed, 21 Apr 2021 13:46:25 GMT
-Received: from aserv0122.oracle.com (aserv0122.oracle.com [141.146.126.236])
-        by aserp3020.oracle.com with ESMTP id 3809k1x37v-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK);
-        Wed, 21 Apr 2021 13:46:25 +0000
-Received: from abhmp0017.oracle.com (abhmp0017.oracle.com [141.146.116.23])
-        by aserv0122.oracle.com (8.14.4/8.14.4) with ESMTP id 13LDkOMh012982;
-        Wed, 21 Apr 2021 13:46:24 GMT
-Received: from kadam (/102.36.221.92)
-        by default (Oracle Beehive Gateway v4.0)
-        with ESMTP ; Wed, 21 Apr 2021 06:46:24 -0700
-Date:   Wed, 21 Apr 2021 16:46:18 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     =?iso-8859-1?Q?Aur=E9lien?= Aptel <aaptel@suse.com>
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: check idea: warn when mixing signedness in ?: operator (got
- bitten by this recently)
-Message-ID: <20210421134618.GJ1959@kadam>
-References: <87wnsyzia4.fsf@suse.com>
- <20210420121602.GF1981@kadam>
- <87k0oxyvl3.fsf@suse.com>
- <20210421103036.GG1981@kadam>
- <87eef3zrbs.fsf@suse.com>
+        Tue, 27 Apr 2021 02:37:49 -0400
+From:   Thomas Gleixner <tglx@linutronix.de>
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020; t=1619505425;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=OVIyCdNcsW4x8PjKdsToGgt87+8FemshMVp2gK9444w=;
+        b=BB+N8SpyZ6wPmPd5OaJKmHJuI9/qLz3u5wYQyXaGlXAdSLyC91ZGID6eh/PHDrUca1X0XW
+        UYDTO0S2Puraw8xaLnxYkWiOhW6Egkyrr2bCv/QBMUSDmrt3xSsut8l+H1QmJWzUNud3oe
+        kFD6Nx/OnXc69YBWH7E6N1yy0lCl0thUn7hmaKYQiCFTmUXXO+sCT4FL5v8nHRRC+oZ45x
+        veHs40D2TFS21nejiR/qm3D2ufIg2JPivxcG+5lQWvnNBDkhd9FTkqRsCWsMgry7H0ga0n
+        IrMQoKzVYga4eHCCZHuYnHVoVSjCYZrmXZeug9nkiH+V+98idVO8tte0oTgMPg==
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=linutronix.de;
+        s=2020e; t=1619505425;
+        h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
+         to:to:cc:cc:cc:mime-version:mime-version:content-type:content-type:
+         in-reply-to:in-reply-to:references:references;
+        bh=OVIyCdNcsW4x8PjKdsToGgt87+8FemshMVp2gK9444w=;
+        b=JvcKvt9vsjPSpdmCREmF7BVAGbfk4ykNd2XSlefb/SIce8nk8s4yLG5LhEq/7/jyqb9xIr
+        UqmTAAGtAO6FO9AQ==
+To:     kernel test robot <lkp@intel.com>, Balbir Singh <sblbir@amazon.com>
+Cc:     kbuild-all@lists.01.org
+Cc:     linux-sparse@vger.kernel.org, luc.vanoostenryck@gmail.com
+Subject: Re: [tglx-devel:x86/l1dflush 7/9] arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces)
+In-Reply-To: <202104271144.G4fgnYlt-lkp@intel.com>
+References: <202104271144.G4fgnYlt-lkp@intel.com>
+Date:   Tue, 27 Apr 2021 08:37:05 +0200
+Message-ID: <87r1iwnsha.ffs@nanos.tec.linutronix.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <87eef3zrbs.fsf@suse.com>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-Proofpoint-GUID: fw82rkaOjDxRTCvQATv1GIc38J_MwDRm
-X-Proofpoint-ORIG-GUID: fw82rkaOjDxRTCvQATv1GIc38J_MwDRm
-X-Proofpoint-Virus-Version: vendor=nai engine=6200 definitions=9961 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 malwarescore=0 priorityscore=1501
- bulkscore=0 suspectscore=0 impostorscore=0 mlxscore=0 lowpriorityscore=0
- clxscore=1015 spamscore=0 mlxlogscore=999 adultscore=0 phishscore=0
- classifier=spam adjust=0 reason=mlx scancount=1 engine=8.12.0-2104060000
- definitions=main-2104210107
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Apr 21, 2021 at 03:43:03PM +0200, Aurélien Aptel wrote:
-> Dan Carpenter <dan.carpenter@oracle.com> writes:
-> > Yeah.  It finds it.  :)  It works pretty well.  The temptation is to
-> > ignore left shifts.  Otherwise I think I will just push this.
-> 
-> Great, glad to hear! I didn't check everything but these ones look like
-> real bugs (samples but still):
-> 
+On Tue, Apr 27 2021 at 11:00, kernel test robot wrote:
 
-Yeah.  They mostly are real bugs.  I'm going to send fixes for
-everything tomorrow.
+Cc+ sparse folks
 
-regards,
-dan carpenter
+> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/tglx/devel.git x86/l1dflush
+> head:   6955fbfdad4241331d1e33362306aec3a410803a
+> commit: 193cb89595f7f3f4549b03ab9392fb9838d123e3 [7/9] x86/mm: Prepare for opt-in based L1D flush in switch_mm()
+> config: i386-randconfig-s032-20210426 (attached as .config)
+> compiler: gcc-9 (Debian 9.3.0-22) 9.3.0
+> reproduce:
+>         # apt-get install sparse
+>         # sparse version: v0.6.3-341-g8af24329-dirty
+>         # https://git.kernel.org/pub/scm/linux/kernel/git/tglx/devel.git/commit/?id=193cb89595f7f3f4549b03ab9392fb9838d123e3
+>         git remote add tglx-devel https://git.kernel.org/pub/scm/linux/kernel/git/tglx/devel.git
+>         git fetch --no-tags tglx-devel x86/l1dflush
+>         git checkout 193cb89595f7f3f4549b03ab9392fb9838d123e3
+>         # save the attached .config to linux build tree
+>         make W=1 C=1 CF='-fdiagnostic-prefix -D__CHECK_ENDIAN__' W=1 ARCH=i386 
+>
+> If you fix the issue, kindly add following tag as appropriate
+> Reported-by: kernel test robot <lkp@intel.com>
+>
+>
+> sparse warnings: (new ones prefixed by >>)
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>>> arch/x86/mm/tlb.c:354:13: sparse: sparse: incorrect type in initializer (different address spaces) @@     expected void const [noderef] __percpu *__vpp_verify @@     got bool * @@
+>    arch/x86/mm/tlb.c:354:13: sparse:     expected void const [noderef] __percpu *__vpp_verify
+>    arch/x86/mm/tlb.c:354:13: sparse:     got bool *
+>
+> vim +354 arch/x86/mm/tlb.c
+>
+>    336	
+>    337	static void l1d_flush_evaluate(unsigned long prev_mm, unsigned long next_mm,
+>    338					struct task_struct *next)
+>    339	{
+>    340		/* Flush L1D if the outgoing task requests it */
+>    341		if (prev_mm & LAST_USER_MM_L1D_FLUSH)
+>    342			wrmsrl(MSR_IA32_FLUSH_CMD, L1D_FLUSH);
+>    343	
+>    344		/* Check whether the incoming task opted in for L1D flush */
+>    345		if (likely(!(next_mm & LAST_USER_MM_L1D_FLUSH)))
+>    346			return;
+>    347	
+>    348		/*
+>    349		 * Validate that it is not running on an SMT sibling as this would
+>    350		 * make the excercise pointless because the siblings share L1D. If
+>    351		 * it runs on a SMT sibling, notify it with SIGBUS on return to
+>    352		 * user/guest
+>    353		 */
+>  > 354		if (this_cpu_read(cpu_info.smt_active)) {
 
+That's a valid construct and the kernel of full of percpuvar.member reads/writes.
+
+>    355			clear_ti_thread_flag(&next->thread_info, TIF_SPEC_L1D_FLUSH);
+>    356			next->l1d_flush_kill.func = l1d_flush_force_sigbus;
+>    357			task_work_add(next, &next->l1d_flush_kill, TWA_RESUME);
+>    358		}
+>    359	}
+>    360	
+
+Thanks,
+
+        tglx
