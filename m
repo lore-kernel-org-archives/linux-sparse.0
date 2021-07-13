@@ -2,50 +2,49 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=0.0 required=3.0 tests=ADVANCE_FEE_3_NEW,BAYES_50,
+X-Spam-Status: No, score=0.1 required=3.0 tests=ADVANCE_FEE_3_NEW,BAYES_50,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id F1BBDC07E99
-	for <linux-sparse@archiver.kernel.org>; Mon, 12 Jul 2021 19:29:13 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2C303C11F66
+	for <linux-sparse@archiver.kernel.org>; Tue, 13 Jul 2021 20:57:50 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id CEE16610FA
-	for <linux-sparse@archiver.kernel.org>; Mon, 12 Jul 2021 19:29:13 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 10B8060FED
+	for <linux-sparse@archiver.kernel.org>; Tue, 13 Jul 2021 20:57:50 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236324AbhGLTcB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 12 Jul 2021 15:32:01 -0400
-Received: from flipppiebekerwealth.xyz ([84.22.107.20]:54294 "EHLO
-        host.flipppiebekerwealth.xyz" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S235784AbhGLTcB (ORCPT
+        id S235460AbhGMVAj (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 13 Jul 2021 17:00:39 -0400
+Received: from flipiebwealthmgs.xyz ([62.173.140.225]:36428 "EHLO
+        host.flipiebwealthmgs.xyz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S235328AbhGMVAj (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 12 Jul 2021 15:32:01 -0400
-X-Greylist: delayed 1825 seconds by postgrey-1.27 at vger.kernel.org; Mon, 12 Jul 2021 15:32:01 EDT
-Received: from flipppiebekerwealth.xyz (ec2-100-26-56-244.compute-1.amazonaws.com [100.26.56.244])
-        by host.flipppiebekerwealth.xyz (Postfix) with ESMTPA id 58A6AA1A01
-        for <linux-sparse@vger.kernel.org>; Mon, 12 Jul 2021 20:49:21 +0200 (CEST)
-DKIM-Filter: OpenDKIM Filter v2.11.0 host.flipppiebekerwealth.xyz 58A6AA1A01
+        Tue, 13 Jul 2021 17:00:39 -0400
+Received: from flipiebwealthmgs.xyz (ec2-100-25-23-12.compute-1.amazonaws.com [100.25.23.12])
+        by host.flipiebwealthmgs.xyz (Postfix) with ESMTPA id 5708B10C4DAE
+        for <linux-sparse@vger.kernel.org>; Tue, 13 Jul 2021 23:31:46 +0300 (MSK)
+DKIM-Filter: OpenDKIM Filter v2.11.0 host.flipiebwealthmgs.xyz 5708B10C4DAE
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=flipppiebekerwealth.xyz; s=default; t=1626115761;
+        d=flipiebwealthmgs.xyz; s=default; t=1626208306;
         bh=9G86e92kIq/Gm9ou9607oUaenJE7el5MfLTN8tJRQJU=;
         h=Reply-To:From:To:Subject:Date:From;
-        b=NSFiS1W5lh0NRU1e9kTiI60Wfx49Dx1DDKbnw3iyK8eibTzx/m6E5nad1XofGTmbO
-         ynAYQ1lvgaRhzeLFyaElBDIrd5+u/aJD4r8KpDVrZCw77kqNAgFMa3sqFLYxo683aP
-         AtGWOMLdELqk7q3cgyTIaKAINr9rUEhACyYoMAGc=
-DKIM-Filter: OpenDKIM Filter v2.11.0 host.flipppiebekerwealth.xyz 58A6AA1A01
+        b=gFoLU6SLhLy6af5zxLgEAczYk3k9Y9f+m/saBOS2wJ3g23vpYXxOAoU4J+ghbwed0
+         YkHd51E56/fhadIEZ5phCxsDYWykYWu1ZqRAU3gIRXiTv2djvyxmoiaxYv+0cqii3t
+         fCN5bKYM1Rmk2CxMizAcijh9m5R5jCjR8WUDba7M=
+DKIM-Filter: OpenDKIM Filter v2.11.0 host.flipiebwealthmgs.xyz 5708B10C4DAE
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=flipppiebekerwealth.xyz; s=default; t=1626115761;
+        d=flipiebwealthmgs.xyz; s=default; t=1626208306;
         bh=9G86e92kIq/Gm9ou9607oUaenJE7el5MfLTN8tJRQJU=;
         h=Reply-To:From:To:Subject:Date:From;
-        b=NSFiS1W5lh0NRU1e9kTiI60Wfx49Dx1DDKbnw3iyK8eibTzx/m6E5nad1XofGTmbO
-         ynAYQ1lvgaRhzeLFyaElBDIrd5+u/aJD4r8KpDVrZCw77kqNAgFMa3sqFLYxo683aP
-         AtGWOMLdELqk7q3cgyTIaKAINr9rUEhACyYoMAGc=
-Reply-To: jothamasuku01@flippiebeckerwealthservice.com
-From:   J Masuku <jothamasuku01@flipppiebekerwealth.xyz>
+        b=gFoLU6SLhLy6af5zxLgEAczYk3k9Y9f+m/saBOS2wJ3g23vpYXxOAoU4J+ghbwed0
+         YkHd51E56/fhadIEZ5phCxsDYWykYWu1ZqRAU3gIRXiTv2djvyxmoiaxYv+0cqii3t
+         fCN5bKYM1Rmk2CxMizAcijh9m5R5jCjR8WUDba7M=
+Reply-To: jothamasuku10@flippiebeckerwealthservice.com
+From:   Jotham Masuku <jothamasuku10@flipiebwealthmgs.xyz>
 To:     linux-sparse@vger.kernel.org
-Subject: Projects
-Date:   12 Jul 2021 18:49:21 +0000
-Message-ID: <20210712184921.364438ACF045E274@flipppiebekerwealth.xyz>
+Subject: Project
+Date:   13 Jul 2021 20:31:46 +0000
+Message-ID: <20210713203146.9608EB9823F83EC5@flipiebwealthmgs.xyz>
 Mime-Version: 1.0
 Content-Type: text/plain;
         charset="utf-8"
