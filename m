@@ -7,36 +7,36 @@ X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id B3306C432BE
-	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 8C039C4338F
+	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:05 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 9D18960ED4
-	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:03 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 6555360C51
+	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:05 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233871AbhG2VVG (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 29 Jul 2021 17:21:06 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56288 "EHLO mail.kernel.org"
+        id S233908AbhG2VVI (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 29 Jul 2021 17:21:08 -0400
+Received: from mail.kernel.org ([198.145.29.99]:56306 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233832AbhG2VVG (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 29 Jul 2021 17:21:06 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id 081A8604D7;
-        Thu, 29 Jul 2021 21:21:01 +0000 (UTC)
+        id S233832AbhG2VVH (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 29 Jul 2021 17:21:07 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id F13BE60C51;
+        Thu, 29 Jul 2021 21:21:02 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627593662;
-        bh=MZlTmP/R5JDvGn92H3J1GaaR3ZvW/p9+EXCYZrx1zKk=;
+        s=k20201202; t=1627593663;
+        bh=z9yk+mOEGcbUExGsrG2j4qFwgJXi9bpw+n9fat1ixzE=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=TNAWh+vYQ4F/dFFu1RyihzQF1+WQ+pSX0wAjExf0Wix2gAqibpiesFXtZ+oFUG9iM
-         0Dc8gTVSBLnqGViG+7rrWXZQyx/QSuqN+7LVCTvQUvTIRfA1IbjqvAt1uUzl/W887c
-         m0En16InMwfK1SU2eVKKsKaikesAHst1sGal5frA3k26keqyq0GtYYGOFl/gVIR8sO
-         FBw/jT3GA5//YhSlf4anZKhViEnxN5sRfOyfVrZLxCO1v0zr32f00eFQ7BKdCI55+v
-         7eWTj3UEALp5g4iaW8kc2/MMgg143aWyVGaBXvOypyOGPsU95Ardq1zN5EP36q43HE
-         qD2hyx9r46jHA==
+        b=kpXKpAlZkNv9OkGzsqZMUSFu4BVkRdlDi55zgnDq8XLDQtzQPvzbeKd2vqgyXHcSX
+         liFO48zu4ogjxV1PO47GP/50IT7TCKZnIFyYpSsXYPC5koRwDIVtq+TPbvSTvI9te2
+         kIu6oINrG7Dv4TH+Q/mIsVN44cx8m5aOmaPoAMXqvKXr9jF3Gbx60zzqZ4l77rVi4p
+         qNOW8U/8WpaNNCU4gOITsho5PheoxxpPgmacjeFmATBYAssWrounEOd5kfL4RJYlKQ
+         q35OEV48ILoIbdHz4JHxB6y+zh24vhuyedc18QkM9ZlzlaZQCUtXpdjuAUMfWa18XG
+         svLqKJFTPqEQA==
 From:   Luc Van Oostenryck <lucvoo@kernel.org>
 To:     linux-sparse@vger.kernel.org
 Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 3/5] scheck: constants are untyped
-Date:   Thu, 29 Jul 2021 23:20:52 +0200
-Message-Id: <20210729212054.34327-4-lucvoo@kernel.org>
+Subject: [PATCH 4/5] scheck: mkvar() with target or input type
+Date:   Thu, 29 Jul 2021 23:20:53 +0200
+Message-Id: <20210729212054.34327-5-lucvoo@kernel.org>
 X-Mailer: git-send-email 2.32.0
 In-Reply-To: <20210729212054.34327-1-lucvoo@kernel.org>
 References: <20210729212054.34327-1-lucvoo@kernel.org>
@@ -48,41 +48,42 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 
-in sparse, constants (PSEUDO_VALs) are not typed, so the same pseudo
-can be used to represent 1-bit 0, 8-bit 0, 16-bit 0, ...
+Most instructions have one associated type, the 'target type'.
+Some, like compares, have another one too, the 'input type'.
 
-That's incompatible with the bit vectors used here, so we can't associate
-a PSEUDO_VAL with its own bitvector like it's done for PSEUDO_REGs.
-A fresh one is needed for each occurrence (we could use a small table
-but won't bother).
+So, when creating a bitvector from an instruction, we need to specify
+the type in some way.
+
+So, create an helper for both cases: mktvar() and mkivar().
 
 Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 ---
- scheck.c | 5 ++---
- 1 file changed, 2 insertions(+), 3 deletions(-)
+ scheck.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
 
 diff --git a/scheck.c b/scheck.c
-index d3ebddd6c2f5..5e2b60abb163 100644
+index 5e2b60abb163..07b15a0600e3 100644
 --- a/scheck.c
 +++ b/scheck.c
-@@ -53,15 +53,14 @@ static BoolectorNode *mkvar(Btor *btor, BoolectorSort s, pseudo_t pseudo)
- 	static char buff[33];
- 	BoolectorNode *n;
+@@ -70,6 +70,18 @@ static BoolectorNode *mkvar(Btor *btor, BoolectorSort s, pseudo_t pseudo)
+ 	return pseudo->priv = n;
+ }
  
--	if (pseudo->priv)
--		return pseudo->priv;
--
- 	switch (pseudo->type) {
- 	case PSEUDO_VAL:
- 		sprintf(buff, "%llx", pseudo->value);
- 		return boolector_consth(btor, s, buff);
- 	case PSEUDO_ARG:
- 	case PSEUDO_REG:
-+		if (pseudo->priv)
-+			return pseudo->priv;
- 		n = boolector_var(btor, s, show_pseudo(pseudo));
- 		break;
- 	default:
++static BoolectorNode *mktvar(Btor *btor, struct instruction *insn, pseudo_t src)
++{
++	BoolectorSort s = get_sort(btor, insn->type, insn->pos);
++	return mkvar(btor, s, src);
++}
++
++static BoolectorNode *mkivar(Btor *btor, struct instruction *insn, pseudo_t src)
++{
++	BoolectorSort s = get_sort(btor, insn->itype, insn->pos);
++	return mkvar(btor, s, src);
++}
++
+ static BoolectorNode *get_arg(Btor *btor, struct instruction *insn, int idx)
+ {
+ 	pseudo_t arg = ptr_list_nth(insn->arguments, idx);
 -- 
 2.32.0
 
