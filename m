@@ -2,92 +2,61 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-19.7 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
-	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_GIT autolearn=ham
-	autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=0.0 required=3.0 tests=BAYES_40,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,UNWANTED_LANGUAGE_BODY autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0CE74C43214
-	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:06 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id A54B1C4338F
+	for <linux-sparse@archiver.kernel.org>; Fri, 30 Jul 2021 08:00:58 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E833960C51
-	for <linux-sparse@archiver.kernel.org>; Thu, 29 Jul 2021 21:21:05 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 80CA560C51
+	for <linux-sparse@archiver.kernel.org>; Fri, 30 Jul 2021 08:00:58 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233832AbhG2VVI (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 29 Jul 2021 17:21:08 -0400
-Received: from mail.kernel.org ([198.145.29.99]:56322 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233900AbhG2VVI (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 29 Jul 2021 17:21:08 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id E60F1604D7;
-        Thu, 29 Jul 2021 21:21:03 +0000 (UTC)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1627593664;
-        bh=nE32FZ8ab2v2n9Lf03BC/xIYv79pcx9aMJnX/IpA9Xw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=RhC5xKDNlG6pgR2+de21UkMKSuqlIpV+ImPOkIHXttFNoCcV6+mWeFlJiYFLU83I2
-         vfAWu0U3GDTPVFNr31M+OfIC39t2tv1vJ9p/oETp015bGu2ZxB6m7WqRM6YISokdCI
-         hiaLjyszAnehwUCp1PYBGqZKWsYHt13Rhwt7Ta0fxQxBPgKJHn1nxFwwyCVTsS/Aeq
-         O6UKMM4bAjrcgAcpaZW2elamix7Mp6MQ1TUKSDniIvXYCu5WTCoEGpiTLO6/vaqTt9
-         NBtiwuTz6H54A0fEI/ge1US6rcxBjjr+vmYk1+G17sjAjOzfCS2rljnMr46pJ5sXRC
-         SPbF+A23pH26g==
-From:   Luc Van Oostenryck <lucvoo@kernel.org>
-To:     linux-sparse@vger.kernel.org
-Cc:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Subject: [PATCH 5/5] scheck: fix type of operands in casts
-Date:   Thu, 29 Jul 2021 23:20:54 +0200
-Message-Id: <20210729212054.34327-6-lucvoo@kernel.org>
-X-Mailer: git-send-email 2.32.0
-In-Reply-To: <20210729212054.34327-1-lucvoo@kernel.org>
-References: <20210729212054.34327-1-lucvoo@kernel.org>
+        id S237888AbhG3IBC (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Fri, 30 Jul 2021 04:01:02 -0400
+Received: from mail.tradeias.com ([212.237.11.189]:33210 "EHLO
+        mail.tradeias.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S230240AbhG3IBB (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Fri, 30 Jul 2021 04:01:01 -0400
+Received: by mail.tradeias.com (Postfix, from userid 1001)
+        id E9B4AA3739; Fri, 30 Jul 2021 09:00:47 +0100 (BST)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=tradeias.com; s=mail;
+        t=1627632055; bh=tegSUSO8UdW4nPAN+CTxUCS0b4WeMgxljdiMdwCnwbk=;
+        h=Date:From:To:Subject:From;
+        b=qdlfViUMiAARwZkQN3L/Yz0KCmf66LcExLRUWnjqui1dBcf/4AdPZXknEBrjCKdPQ
+         wvQm2KNUItzSLBVPgekyWsmuiN1+bXxP9cCFDHmmSzsAP1Zcfy7aLI1TBsz+YnYs02
+         cnbQyYkYCmjyxtJRqt4ZeMs6ZfO9ljZ33Vc9zodWE4jL79uvRWZx6XCIBjRjE/cHlv
+         j0wcOs8AMVTzZ9pJ2AZex2eTrbDuHGfctEMs2rfMnn8QD4uik8KD6a6RLOw13BhoDP
+         gNYHnWRNVo8F1U5UA6Rz1sU8UOwWIwh+CoVyAzLM5kj1wmKZSKqK5+JRFU8xUGu0t2
+         /rdYyZcd2D/WQ==
+Received: by mail.tradeias.com for <linux-sparse@vger.kernel.org>; Fri, 30 Jul 2021 08:00:42 GMT
+Message-ID: <20210730074500-0.1.39.9jyj.0.39aff6w157@tradeias.com>
+Date:   Fri, 30 Jul 2021 08:00:42 GMT
+From:   "Alarico Veloz" <alarico.veloz@tradeias.com>
+To:     <linux-sparse@vger.kernel.org>
+Subject: Servicio de la flota
+X-Mailer: mail.tradeias.com
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-From: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
+Buenos d=C3=ADas:
 
-Casts were using the target type for their operands.
+Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
+mercado.
 
-Fix this by using the new helper mkivar() for them.
+La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
+uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
+e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
+iciente.
 
-Signed-off-by: Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
----
- scheck.c | 18 ++++++++----------
- 1 file changed, 8 insertions(+), 10 deletions(-)
+=C2=BFQuiere conocer los detalles?
 
-diff --git a/scheck.c b/scheck.c
-index 07b15a0600e3..bb052d97996d 100644
---- a/scheck.c
-+++ b/scheck.c
-@@ -165,18 +165,16 @@ static void icmp(Btor *btor, struct instruction *insn)
- 
- static void unop(Btor *btor, struct instruction *insn)
- {
--	BoolectorSort s = get_sort(btor, insn->type, insn->pos);
--	BoolectorNode *t, *a;
-+	pseudo_t src = insn->src;
-+	BoolectorNode *t;
- 
--	a = mkvar(btor, s, insn->src1);
--	if (!a)
--		return;
- 	switch (insn->opcode) {
--	case OP_NEG:	t = boolector_neg(btor, a); break;
--	case OP_NOT:	t = boolector_not(btor, a); break;
--	case OP_SEXT:	t = sext(btor, insn, a); break;
--	case OP_ZEXT:	t = zext(btor, insn, a); break;
--	case OP_TRUNC:	t = slice(btor, insn, a); break;
-+	case OP_SEXT:	t = sext(btor, insn, mkivar(btor, insn, src)); break;
-+	case OP_ZEXT:	t = zext(btor, insn, mkivar(btor, insn, src)); break;
-+	case OP_TRUNC:	t = slice(btor, insn, mkivar(btor, insn, src)); break;
-+
-+	case OP_NEG:	t = boolector_neg(btor, mktvar(btor, insn, src)); break;
-+	case OP_NOT:	t = boolector_not(btor, mktvar(btor, insn, src)); break;
- 	default:
- 		fprintf(stderr, "unsupported insn: %s\n", show_instruction(insn));
- 		return;
--- 
-2.32.0
 
+Atentamente,
+Alarico Veloz
