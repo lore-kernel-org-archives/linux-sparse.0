@@ -2,65 +2,66 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
 	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
 	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 898FAC432BE
-	for <linux-sparse@archiver.kernel.org>; Wed,  1 Sep 2021 05:02:00 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 19B07C433EF
+	for <linux-sparse@archiver.kernel.org>; Mon,  6 Sep 2021 04:21:17 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5C37461058
-	for <linux-sparse@archiver.kernel.org>; Wed,  1 Sep 2021 05:02:00 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id EBE4C60F70
+	for <linux-sparse@archiver.kernel.org>; Mon,  6 Sep 2021 04:21:16 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S241791AbhIAFCz (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 1 Sep 2021 01:02:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:38204 "EHLO
+        id S238141AbhIFEWU (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 6 Sep 2021 00:22:20 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36140 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230483AbhIAFCz (ORCPT
+        with ESMTP id S238102AbhIFEWT (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 1 Sep 2021 01:02:55 -0400
-Received: from mail-ed1-x532.google.com (mail-ed1-x532.google.com [IPv6:2a00:1450:4864:20::532])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0F0E3C061575
-        for <linux-sparse@vger.kernel.org>; Tue, 31 Aug 2021 22:01:59 -0700 (PDT)
-Received: by mail-ed1-x532.google.com with SMTP id g22so1865944edy.12
-        for <linux-sparse@vger.kernel.org>; Tue, 31 Aug 2021 22:01:58 -0700 (PDT)
+        Mon, 6 Sep 2021 00:22:19 -0400
+Received: from mail-ed1-x52c.google.com (mail-ed1-x52c.google.com [IPv6:2a00:1450:4864:20::52c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 83BBDC061575
+        for <linux-sparse@vger.kernel.org>; Sun,  5 Sep 2021 21:21:15 -0700 (PDT)
+Received: by mail-ed1-x52c.google.com with SMTP id g8so6417078edt.7
+        for <linux-sparse@vger.kernel.org>; Sun, 05 Sep 2021 21:21:15 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20161025;
+        d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:mime-version:content-disposition;
-        bh=22Z7Vttl/DsWSxg2K3fwNLKgVGLe63cGsEZccICH2HQ=;
-        b=UARPnAkNhVmm7GvXQHbHmrmMK26DDspjcS5sWxJ/+bXYtCdCM5yyZZUopXtzqvjgTL
-         AuzrAVEGjFwBSwV8SHpPYYqsyjgJu3Y0/FS4cMC+VRFjcTyWPf+K/946EgOV+j/F1SDk
-         2KpBdn6qsBp/eGuxyRTQFd9zFP29qj7gJtVsC8uAs/Un7b1WYdIkAADZ7mStBTlcxxAZ
-         IDJYW/pRZYq4hYDj90DmTvPsfBxHao/TAtuex48vlIZGVrD5JbC439E6hZxikFdt35Lg
-         ebFsBOKgNqDMlveEiVHXxQHSNCpGcCrDdTsGvs35t3vE0UcZi2g/ckI97Z3fLQ9mCIBG
-         daEA==
+        bh=I1ogvLXeomwuDo+cXQ+IEIFNFTsm7ngYi4aLip2WYRI=;
+        b=pa8C/tg+HRQfs95IeGWniB2EQQPrFpDzyhEOSv17uuoO8Cqk9qHu7uBNQrYM0Mzian
+         2K8rjc1Wl3RdHa2CoawmADX+tNG+bOpjBS8xAujgx/3r08wAOn2/V9ieyvxE7DvPAKFC
+         0tNzw27+oNc9/RKrtK9r+u4je7YJIoP/Ll+xjzpOxmcEhowrCeru++D3Gibo6sodvPrJ
+         DmnIX23kzvioHJ03bS7nWjIiFmd8wpDAFkVjlXNeL49p79+FlDeOrMr9KTYXn/7RDW+m
+         FvpaX6pK4iGPep8Zcrbg7jwslzAMLf3atre0AvY1GsotAF/t4m61B/gAUc29/kNu4QUX
+         Mbog==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:mime-version
          :content-disposition;
-        bh=22Z7Vttl/DsWSxg2K3fwNLKgVGLe63cGsEZccICH2HQ=;
-        b=n05p9L6thigwtReWJjntEBWwV5TSDguulLZ8L5mfVPnS1ha112X5TnRK9A4QxLTYAX
-         PSe+6AiYIy4ukn01PXDLJ9P02Ez1UdiL0TyTFn1LAIwUh4zdW1wL3ekXqQ2l4wQpYnDx
-         qte7ODVPdynBNxp7ZAoYUjc761iCP0oODMcqaHh6t8gurqgzNi2VAuVClX+Nl/supEae
-         2IUYQSqvFBkMqpQJxsiT1skYdGZjgDZfnb+iDl3qkmEhbCGT1mlZb5dN0WPmhoMCaDSI
-         egElpe29FnxqwNzjBCYgmfCVq0rVXn5CTjmSkfBOs2+RmbsQg7MUf6sVIpMdI6L1OwAy
-         TuGQ==
-X-Gm-Message-State: AOAM530Q8W+Ks7sDku4Yz10yHWc3wplj4d6TTm/6dJr9iMbvNcETZm/w
-        IXgk8d6TEVVyUyFDv8mp/LOeLQgRKIE=
-X-Google-Smtp-Source: ABdhPJwqh1SLybogI+JLJRdbP/EHpcTv22XBcpVJ4Y8SRuYIr8R47Jygkg2BHuFpDZCt/JGAYPJK3A==
-X-Received: by 2002:a05:6402:2708:: with SMTP id y8mr34022391edd.84.1630472517590;
-        Tue, 31 Aug 2021 22:01:57 -0700 (PDT)
-Received: from mail ([2a02:a03f:b7fe:f700:b8a9:48b7:67d9:7826])
-        by smtp.gmail.com with ESMTPSA id eg14sm10507997edb.64.2021.08.31.22.01.56
+        bh=I1ogvLXeomwuDo+cXQ+IEIFNFTsm7ngYi4aLip2WYRI=;
+        b=uV384SOUcLXDnIDlQcXmPNmqDZAdXgipGXZMQpvSIlj6yNGJyJeTvPHbOiq1VSjGxl
+         eBaqjUWuZM4irhXmZb7NpMp6CAzZruXSnqTdEMnjjFNPz0o4WZOk6/weR29zhyRc9nDk
+         xauUbSSV+r9+QqYDfN0miFsfz+wHD7wmA8Qoxv6Ztq6SCnr688+e7S5u3aYdSgdXW3vg
+         Vn5LuxFeDnQ5Ajf0Cmxs0a3hBc1g4Zvk31W4x/vY+r7BxocgYDnMljuI912w7JWnARVL
+         57HE/FETrQhSQQrrX393jpxVT/3GEFIyyBaBWmNWAlqQnoiDtgDIMDZQbnLKlnAupN3+
+         CxJQ==
+X-Gm-Message-State: AOAM53037/RNPASeN515Qnl9zJmPVESKSlE3yS81bbrTwPZQyrCrLxfl
+        /jB1Or5Z93SU+2/ge8oaGh+Dtu/He8s=
+X-Google-Smtp-Source: ABdhPJzHNH3nDOuD0zmg/JojMCP7gugL43kyMXw6jEsAdQ5BCM+Kc6Qc0JpzHSEByePpTujGl4KBXA==
+X-Received: by 2002:a05:6402:4404:: with SMTP id y4mr11473005eda.52.1630902074167;
+        Sun, 05 Sep 2021 21:21:14 -0700 (PDT)
+Received: from mail ([2a02:a03f:b7fe:f700:dcb2:e1e7:c99b:fc91])
+        by smtp.gmail.com with ESMTPSA id y20sm3082875eje.113.2021.09.05.21.21.12
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Tue, 31 Aug 2021 22:01:57 -0700 (PDT)
-Date:   Wed, 1 Sep 2021 07:01:56 +0200
+        Sun, 05 Sep 2021 21:21:13 -0700 (PDT)
+Date:   Mon, 6 Sep 2021 06:21:11 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
 To:     linux-sparse@vger.kernel.org
-Cc:     Jeff Layton <jlayton@redhat.com>
-Subject: [ANNOUNCE] Sparse v0.6.4-rc1
-Message-ID: <20210901050156.nzzi7dzcwjw4lsj4@mail>
+Cc:     Jeff Layton <jlayton@redhat.com>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: [ANNOUNCE] Sparse v0.6.4
+Message-ID: <20210906042111.lhoq7egtpmw3jcv6@mail>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
@@ -68,10 +69,10 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Sparse v0.6.4-rc1 is finally out.
+Sparse v0.6.4 is now out.
 
 The source code can be found at its usual repository:
-   git://git.kernel.org/pub/scm/devel/sparse/sparse.git v0.6.4-rc1
+   git://git.kernel.org/pub/scm/devel/sparse/sparse.git v0.6.4
 
 The tarballs can be found at:
    https://www.kernel.org/pub/software/devel/sparse/dist/
@@ -83,6 +84,9 @@ patches of this release:
 
 Release notes for v0.6.4
 ------------------------
+
+Changes since v0.6.4-rc1:
+  * none
 
 Fixes:
   * build: fix version.h dependencies
@@ -187,5 +191,4 @@ Cleanups:
   * linearize: remove unneeded forward declarations
   * linearize: only allocate call instructions when needed
 
--- Luc
-
+-- Luc Van Oostenryck
