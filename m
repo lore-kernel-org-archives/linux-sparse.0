@@ -2,188 +2,103 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+X-Spam-Status: No, score=-7.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,MENTIONS_GIT_HOSTING,
+	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D2941C433F5
-	for <linux-sparse@archiver.kernel.org>; Tue,  7 Sep 2021 06:15:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id D6DEBC433F5
+	for <linux-sparse@archiver.kernel.org>; Tue,  7 Sep 2021 06:29:33 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AA9CC61101
-	for <linux-sparse@archiver.kernel.org>; Tue,  7 Sep 2021 06:15:02 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AE6E661057
+	for <linux-sparse@archiver.kernel.org>; Tue,  7 Sep 2021 06:29:33 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230491AbhIGGQH (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 7 Sep 2021 02:16:07 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42918 "EHLO
+        id S232178AbhIGGai (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 7 Sep 2021 02:30:38 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:46150 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230286AbhIGGQH (ORCPT
+        with ESMTP id S231931AbhIGGai (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 7 Sep 2021 02:16:07 -0400
-Received: from mail-ej1-x631.google.com (mail-ej1-x631.google.com [IPv6:2a00:1450:4864:20::631])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 49F6EC061575
-        for <linux-sparse@vger.kernel.org>; Mon,  6 Sep 2021 23:15:01 -0700 (PDT)
-Received: by mail-ej1-x631.google.com with SMTP id n27so17509791eja.5
-        for <linux-sparse@vger.kernel.org>; Mon, 06 Sep 2021 23:15:01 -0700 (PDT)
+        Tue, 7 Sep 2021 02:30:38 -0400
+Received: from mail-ed1-x52b.google.com (mail-ed1-x52b.google.com [IPv6:2a00:1450:4864:20::52b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 6BFADC061575
+        for <linux-sparse@vger.kernel.org>; Mon,  6 Sep 2021 23:29:32 -0700 (PDT)
+Received: by mail-ed1-x52b.google.com with SMTP id r7so12372687edd.6
+        for <linux-sparse@vger.kernel.org>; Mon, 06 Sep 2021 23:29:32 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=date:from:to:cc:subject:message-id:references:mime-version
-         :content-disposition:content-transfer-encoding:in-reply-to;
-        bh=RriLPh3XKiDJH3euVT15JG0vcJ5b+eTsO4q9ksWN3wY=;
-        b=ZmO4WR6JASDn2xtKoGg6XwFbzzAqJpkI7DZpqvUbhimh9x+ybegQfcU31Zg/iIXcKF
-         xvRIXoUs97F9Spf09IEMQHwri6wilQcda+opzUSM7CrCA2a3BfjYZPlq8IpvSLQ+4d14
-         jIk9SC9XRAT9fnTt16E2GjfTE1iyk0O8RmT+6AXHlQ2oPKeiNZ7ORPI0gXN4wlprluID
-         yNjWDNhY3Bc4JYnxxK7PCPfmnBCEg24YNmrh6+bl56vsDNEVuRAaNCh3VYIIM+RGZf4f
-         P6MspJR1ZRhALr5EEX+uCzzpamb0Khb2fjx9Z93wLL5rDKTLn/nQkJWwY/Y52yQsEjcD
-         APyg==
+         :content-disposition:in-reply-to;
+        bh=DoUkTM9OSVPQyL0DYZj9FNsmQwyG4sWIIF0+q1weA+0=;
+        b=PCliyzw4KgnbCMQivRfufJPN5r6z06yBMMeX8noYH35pOgAui/MuHCPiBJ4ISpytgl
+         Efxw9POZ2Jia4orUJcgN5axQzcznaI0c7v5sX7CzbEoLMBQTOVkXedbCfkxVuTJD1l/9
+         lCPqBFew2eCWQLdWW9vaNJmzwxqnZmsJFE0NSUWnftGhd8xwAupcOEQ7Po4woBtUNzOW
+         EUmO5g4LTcKUMSvxvZBvaXkZ2pLBEuiZjhj0sp4sS+Gbfy64L+udKRh7xQwJKqTdCA1Y
+         RrTrY6de6ivkuPUxiHc4MizMlPuLXUEqYmqbgOjCFh6rbbWbrqr4dg/oMs5EYunX16eZ
+         +o3A==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20161025;
         h=x-gm-message-state:date:from:to:cc:subject:message-id:references
-         :mime-version:content-disposition:content-transfer-encoding
-         :in-reply-to;
-        bh=RriLPh3XKiDJH3euVT15JG0vcJ5b+eTsO4q9ksWN3wY=;
-        b=Ccl+OtBEL8qs0ijBRRNTvlJXz2cgr+3nQeDWg+rYfif7tucIZsnBeM5CdB4NcUtFCJ
-         JEOVUhEhAZPLR0kxCOkjJdp1P16+MngK6XhIKy4RFJsBRaO239C8m4LdIEAntjozqbS6
-         NC5viNOs7EG6C+J7Y9Nv1xl0X+DROTkXCO5jsyvRNj53ctU7D0cUFPM6v6o+pCshCYQK
-         mwZmf3atV9SghNPRyRc/h8/R2V8Bh1+O8q0FaMCLbEVcfXvi5KUFwi/ACsbyI+zFW46j
-         MQ0cUQKxDLnzn09XVNBCFJ0/6tzNBUzJ5ZklEnT+ILneji1PAcIFivdFGj50uSTj0NUt
-         0KpQ==
-X-Gm-Message-State: AOAM532DOAs3RLDi1tf9BOdpsJdmkU4pyQxlN+/AjlVUgGlythkK48TG
-        VPagoh9wFVaFUkS9gHevD/u8uGewK+Y=
-X-Google-Smtp-Source: ABdhPJzzSQrDE7Ir2xzQ3KwBLnBNFeLtunuKeMtxsFyCcPZ7fU44fbhwWU9YwoPDfw5rav8PmmNHJA==
-X-Received: by 2002:a17:906:304e:: with SMTP id d14mr14333002ejd.170.1630995299833;
-        Mon, 06 Sep 2021 23:14:59 -0700 (PDT)
+         :mime-version:content-disposition:in-reply-to;
+        bh=DoUkTM9OSVPQyL0DYZj9FNsmQwyG4sWIIF0+q1weA+0=;
+        b=iuBY6jlOnMuTTVb1m5E+KDQOFNMUkk/tcHWYvYk/kKrg9Lg3dpWr+lYJBmKSfvGPe0
+         IbKOpVDaDn9BETdnOko6BRyXAgFWmK8WajTqQ+CP4PEipUQBmQxAWlnTq6gOTVhsPCBG
+         u/+1FuLRAHxDQG+q/7CFgNEOrgB/RpER4dDGx/liqC+pKx3Sf/NIiYZGrjRIjOPIYxOS
+         71PkSG0kACwO5IizNJcXzndUjCiIwYTdS7L3CSaTzdp6qv1XnbfdZ4O/ZKtVS0gY2zL+
+         3QBD1LTbbpkPsV9FQQRinZEhhwdh1eJIvUZf08oiy/r4lKp37+A/PxPcF+5rhZCrkwJ3
+         O+Kw==
+X-Gm-Message-State: AOAM532h4jUMLqfpfxGhQftl4qCPY8gILf8+JHvhO8YNF+sBOH3RX3Pd
+        5Qmmuo8OYV2y6Ro0vGHlgsU=
+X-Google-Smtp-Source: ABdhPJy+3HAvqDn0ETWlUwl4GuvZvAxZtnQWiHFwbt8N4eW/SnVv2yEQh7rXFIQVzubunbgxfxvf+w==
+X-Received: by 2002:a05:6402:1907:: with SMTP id e7mr16485501edz.201.1630996171051;
+        Mon, 06 Sep 2021 23:29:31 -0700 (PDT)
 Received: from mail ([2a02:a03f:b7fe:f700:6d64:8b57:17a6:ebc0])
-        by smtp.gmail.com with ESMTPSA id h30sm5867057edz.40.2021.09.06.23.14.58
+        by smtp.gmail.com with ESMTPSA id b13sm5327171ede.97.2021.09.06.23.29.29
         (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
-        Mon, 06 Sep 2021 23:14:59 -0700 (PDT)
-Date:   Tue, 7 Sep 2021 08:14:57 +0200
+        Mon, 06 Sep 2021 23:29:30 -0700 (PDT)
+Date:   Tue, 7 Sep 2021 08:29:28 +0200
 From:   Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-To:     Ramsay Jones <ramsay@ramsayjones.plus.com>
-Cc:     Sparse Mailing-list <linux-sparse@vger.kernel.org>,
-        Junio C Hamano <gitster@pobox.com>
-Subject: Re: sparse v0.6.4
-Message-ID: <20210907061457.gqeaq5sy7vz2ukxz@mail>
-References: <e9edc9f5-9b88-4a6a-17f8-544270ec2450@ramsayjones.plus.com>
+To:     Ben Dooks <ben.dooks@codethink.co.uk>
+Cc:     linux-sparse@vger.kernel.org, Jeff Layton <jlayton@redhat.com>,
+        Uwe =?utf-8?Q?Kleine-K=C3=B6nig?= <uwe@kleine-koenig.org>
+Subject: Re: [ANNOUNCE] Sparse v0.6.4
+Message-ID: <20210907062928.qy37irlznwborcab@mail>
+References: <20210906042111.lhoq7egtpmw3jcv6@mail>
+ <0c4480ce-6c92-7788-772c-581a76c2df51@codethink.co.uk>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <e9edc9f5-9b88-4a6a-17f8-544270ec2450@ramsayjones.plus.com>
+In-Reply-To: <0c4480ce-6c92-7788-772c-581a76c2df51@codethink.co.uk>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Sep 06, 2021 at 07:53:19PM +0100, Ramsay Jones wrote:
+On Mon, Sep 06, 2021 at 11:04:14AM +0100, Ben Dooks wrote:
+> On 06/09/2021 05:21, Luc Van Oostenryck wrote:
+> > Sparse v0.6.4 is now out.
+> > 
+> > The source code can be found at its usual repository:
+> >     git://git.kernel.org/pub/scm/devel/sparse/sparse.git v0.6.4
+> > 
+> > The tarballs can be found at:
+> >     https://www.kernel.org/pub/software/devel/sparse/dist/
+> > 
+> > Many thanks to people who have somehow contributed to the 299
+> > patches of this release:
+> >     Ramsay Jones, Linus Torvalds, Kyle Russell
 > 
-> Hi Luc,
-> 
-> I have tested the new release, without issue, in the normal way on the
-> usual platforms (32- & 64-bit Linux, 64-bit cygwin).
+> This has reminded me I have lost track of the printf formatting
+> changes. Is it possible to re-sync and work out what still needs
+> to be done to get this work merged?
 
-Nice. Thank you.
- 
-> [Have you posted to the sparse mailing-list yet? I think my subscription
-> has lapsed or something! I recently had to re-subscribe to the git
-> mailing-list as well. :( ]
+Sure, the series can be merged with just a few trival conflicts.
 
-Yes, it was posted on the ML (archived as
-https://lore.kernel.org/linux-sparse/20210906042111.lhoq7egtpmw3jcv6@mail/ )
-I used to be unsubscribed from various kernel.org mailing list relatively
-often (but I think I haven't been the last 2 years or so, at least from the
-sparse ML).
+I think things were left at 
+https://lore.kernel.org/linux-sparse/20201013232231.10349-1-luc.vanoostenryck@gmail.com/T/#ma187dd3978640fccac03c0194fd5bdd84c437721
 
-> 
-> Sorry for being tardy, but about 3 months ago a sparse issue came up on
-> the git mailing-list (see [1]). Take a look at this:
-> 
->   $ cat -n junk.c
->        1	
->        2	static void func(int x)
->        3	{
->        4		switch (x) {
->        5			default:
->        6		}
->        7	}
->   $ sparse junk.c
->   junk.c:6:9: error: Expected ; at end of statement
->   junk.c:6:9: error: got }
->   junk.c:8:0: error: Expected } at end of compound statement
->   junk.c:8:0: error: got end-of-input
->   junk.c:8:0: error: Expected } at end of function
->   junk.c:8:0: error: got end-of-input
->   $ 
-> 
-> Note: a case label that doesn't label a statement is not valid C, so what
-> is the problem? Well, for me, the implication of the email exchange was
-> that gcc seems to accept it without problem, except (with gcc 9.3.0):
-> 
->   $ gcc junk.c
->   junk.c: In function ‘func’:
->   junk.c:5:3: error: label at end of compound statement
->       5 |   default:
->         |   ^~~~~~~
->   $ 
-> 
-> ... it doesn't for me!
-> 
-> So, I decided just to improve the error message issued by sparse. However,
-> that caused a moment of deja vu for me - hadn't you already fixed this
-> same issue? Having found your commit 0d6bb7e1 ("handle more graciously
-> labels with no statement", 2020-10-26), I realized that your fix only applied
-> for regular labels.
+but the series is now at:
+  git://github.com/lucvoo/sparse-dev.git format-check
 
-I vaguely remember there was some complications for switch labels but I can't
-remember the details.
+Are these patches fine for you?
 
-> The attached patch was the result of extending your
-> solution to case labels, like so:
-> 
->   $ ./sparse junk.c
->   junk.c:6:9: warning: statement expected after case label
->   $ 
-> 
-> Note, just like your earlier commit, this issues a warning, rather than an
-> error (which it should probably be).
-
-I tend more and more to use errors only for the cases where Sparse can't
-handle the following correctly anymore.
-
-> I wrote this patch back in June, and
-> then forgot about it. :( [well, it was only lightly tested (testsuite and
-> one run over git), no tests, no commit message and it should probably be
-> an error!]
-> 
-> About a month ago, I noticed that gcc 11.2 had been released and the
-> release notes mentioned "Labels may appear before declarations and at the
-> end of a compound statement."  This, in turn, caused me to check my
-> current draft C2x document (dated December 11, 2020), which includes the
-> following:'N2508 Free Positioning of Labels Inside Compound Statements'.
-> 
-> It just so happens that, last night, I updated my cygwin installation and
-> the version of gcc went from 10.2 to 11.2. I think you can probably guess
-> what comes next:
-> 
->   $ gcc -c junk.c
->   $
-> 
->   $ gcc -c -pedantic junk.c
->   junk.c: In function ‘func’:
->   junk.c:5:17: warning: label at end of compound statement [-Wpedantic]
->       5 |                 default:
->         |                 ^~~~~~~
->   $ 
-> 
-> [Note: I tried several -std=cxx, but none of them even warned without
-> -pedantic]
-> 
-> So, for now, the standard does not allow these constructs, but the next
-> standard (whenever that will be) will.
-
-Yes, I'm aware of this but IIRC the motivation was related to the mixing
-of statements and declarations. The next standard is planned for 2023,
-meanwhile I don't have a strong opinion about this error/warning (but
-I'm very fine making things coherent between switch and regular labels).
-
-Best regards,
 -- Luc
