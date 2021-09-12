@@ -6,65 +6,65 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 72925C433FE
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 19:12:07 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 4B511C433F5
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 19:13:32 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 5516560FDA
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 19:12:07 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3133C60FDA
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 19:13:32 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235953AbhILTNR (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 12 Sep 2021 15:13:17 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41218 "EHLO
+        id S235752AbhILTOp (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 12 Sep 2021 15:14:45 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41570 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235901AbhILTNN (ORCPT
+        with ESMTP id S235622AbhILTOp (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Sep 2021 15:13:13 -0400
-Received: from mail-lf1-x12a.google.com (mail-lf1-x12a.google.com [IPv6:2a00:1450:4864:20::12a])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 1DE6FC061574
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:11:59 -0700 (PDT)
-Received: by mail-lf1-x12a.google.com with SMTP id i7so91617lfr.13
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:11:59 -0700 (PDT)
+        Sun, 12 Sep 2021 15:14:45 -0400
+Received: from mail-lf1-x135.google.com (mail-lf1-x135.google.com [IPv6:2a00:1450:4864:20::135])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id E2761C061574
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:13:30 -0700 (PDT)
+Received: by mail-lf1-x135.google.com with SMTP id c8so16281540lfi.3
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:13:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=linux-foundation.org; s=google;
         h=mime-version:references:in-reply-to:from:date:message-id:subject:to
          :cc;
-        bh=E1PHZ6ydkqEkrZPVcY11k8G+o6nXM73c5JaOIi36jdM=;
-        b=Mmh3TCnuXic/hCA6XvkP2osD5zmauEUtEa852ODITJl9q7DRJZnlYFaFYG+mxH6vf6
-         Z+ggUrlsmP9EQRyIHakVw8bJD81GHQopdHiqd4QBP+UGydXePHYv5SH2cpjAaKjOE5af
-         i5L6vjez7vZKGjXnjuCG5wVITdXtC1IYH3rOc=
+        bh=tzZRty5syTefvslqvSNH1KyI4p4ePIHehKrpq3jNHak=;
+        b=UhV7ZB03lfxtT+Ye8FzC9W6hmCQoAxoCGQimJcLY7prrx8mbKe9DIiT4SGaXesQFeB
+         bwrVZJdZaPGgx4eSKLVt3nOkqcznQcyPpP9BRmCWBP8k038tMJltDQ1VrUpAU3aNMwNA
+         gTOxiP2LUi8KOIoIT19q3qZx861ljKejcehZM=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:mime-version:references:in-reply-to:from:date
          :message-id:subject:to:cc;
-        bh=E1PHZ6ydkqEkrZPVcY11k8G+o6nXM73c5JaOIi36jdM=;
-        b=p9xnyXi9cjDACAXlyh81ykZqQ4caN5UYsqWZY+Rk53Ia5PTDrX/BZg/TKe5rzeqOEg
-         YLtkjGolcXIbH5Nk+z/nhVv5Vp8husxu2nC1CaAk/Svwd5UJYNbt6nQzmnMHvih0PeUv
-         1zUUHoQ+/MWhDh0D6C8alM5+iB+ylEzXzRzU7EpxXdLOHTH+qQSo5elwl4hxZr0kKF5H
-         YjAZf0S3goADCxZ8J7XediH5juwY6Fk5eC4mnJoKAhsl0xXeVdBVYQcEqzNjL8RpOxPJ
-         /dqooexmNuRfvYcNgjn37JFSTG05di6abBsNu+lPKAbWb4gCPuuoNrGy+EOetAFnIatI
-         T7qg==
-X-Gm-Message-State: AOAM531LCxQJglW+fkC+wOgiqe4dmrjSXkimoRsVpGPYBLbhzoqW04mI
-        gxE891CHRJzBb73M/Cx+M5uQdyNuKcmR3wJ6150=
-X-Google-Smtp-Source: ABdhPJw1FO7LF2N/g83rWKSeCrtz8+D4BIDWX5Exsy48pd/Mo9KhgvWujbgYzs3KCLJwpKvFAdC/OQ==
-X-Received: by 2002:a05:6512:3501:: with SMTP id h1mr6135362lfs.446.1631473916861;
-        Sun, 12 Sep 2021 12:11:56 -0700 (PDT)
-Received: from mail-lf1-f41.google.com (mail-lf1-f41.google.com. [209.85.167.41])
-        by smtp.gmail.com with ESMTPSA id t2sm683243ljk.125.2021.09.12.12.11.54
+        bh=tzZRty5syTefvslqvSNH1KyI4p4ePIHehKrpq3jNHak=;
+        b=TXnGbdt5LZ5fC9iAe2DnJNKPM3nvqFyGYT334hMu+7VMi/9L6Viq63UYHY1xiE6vXb
+         PM+GuIJhUwXloYe/LULPH3Oq+HbKCpJCIjrS7XM3MhsoiC2F9N+e0AUu2+yX43rlUpsV
+         Ad6OWUJcPTxSUjczQQ8bFl5bxxaFHOCANTN3veoUygGtD0Vba9Ibzc/FeLS9csWnbull
+         Ok9/KwX+sMKKkLFHx75QnXyVVEb5Gs2o3lL0+3uEQPME9xvEc7Ln9/SX8eZtPrtjieQC
+         67cAJ+gPtgFkUaAWgDEXq3dX1ctIXc0zCCc3qS0tWKC7cVzEAWYB+UzZes5/N2yqfyqu
+         uMNQ==
+X-Gm-Message-State: AOAM5312R/gOjCtI3NHAq/2CsgHLnBLcibNEa8PvWW7VU9Lj6TrNl7Fa
+        SGtdEtU1vQW/SQlFU8hCK8lm/AYAjvEgybP/VHk=
+X-Google-Smtp-Source: ABdhPJyhPHcj57nOp8deHeq7F00rItXNxvKtoxZSUpolyH+Qt1U1ZjWiy1dHC7zf8eKPyZ9wZG4wbw==
+X-Received: by 2002:a05:6512:22d1:: with SMTP id g17mr6069335lfu.637.1631474008982;
+        Sun, 12 Sep 2021 12:13:28 -0700 (PDT)
+Received: from mail-lf1-f42.google.com (mail-lf1-f42.google.com. [209.85.167.42])
+        by smtp.gmail.com with ESMTPSA id a10sm594887lfj.49.2021.09.12.12.13.27
         for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Sep 2021 12:11:54 -0700 (PDT)
-Received: by mail-lf1-f41.google.com with SMTP id bq5so16230383lfb.9
-        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:11:54 -0700 (PDT)
-X-Received: by 2002:a05:6512:3d04:: with SMTP id d4mr6147162lfv.474.1631473913911;
- Sun, 12 Sep 2021 12:11:53 -0700 (PDT)
+        Sun, 12 Sep 2021 12:13:27 -0700 (PDT)
+Received: by mail-lf1-f42.google.com with SMTP id k4so16247655lfj.7
+        for <linux-sparse@vger.kernel.org>; Sun, 12 Sep 2021 12:13:27 -0700 (PDT)
+X-Received: by 2002:a05:6512:3da5:: with SMTP id k37mr6351605lfv.655.1631474006987;
+ Sun, 12 Sep 2021 12:13:26 -0700 (PDT)
 MIME-Version: 1.0
-References: <20210912160149.2227137-1-linux@roeck-us.net> <20210912160149.2227137-4-linux@roeck-us.net>
-In-Reply-To: <20210912160149.2227137-4-linux@roeck-us.net>
+References: <20210912160149.2227137-1-linux@roeck-us.net> <20210912160149.2227137-5-linux@roeck-us.net>
+In-Reply-To: <20210912160149.2227137-5-linux@roeck-us.net>
 From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Sun, 12 Sep 2021 12:11:38 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wi1TBvyk7SWX+5LLYN8ZnTJMut1keQbOrKCG=nb08hdiQ@mail.gmail.com>
-Message-ID: <CAHk-=wi1TBvyk7SWX+5LLYN8ZnTJMut1keQbOrKCG=nb08hdiQ@mail.gmail.com>
-Subject: Re: [PATCH 3/4] parisc: Use absolute_pointer for memcmp on fixed
+Date:   Sun, 12 Sep 2021 12:13:11 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wi1=8shingNuo1CtfJ7eDByDsmwsz750Nbxq=7q0Gs+zg@mail.gmail.com>
+Message-ID: <CAHk-=wi1=8shingNuo1CtfJ7eDByDsmwsz750Nbxq=7q0Gs+zg@mail.gmail.com>
+Subject: Re: [PATCH 4/4] alpha: Use absolute_pointer for strcmp on fixed
  memory location
 To:     Guenter Roeck <linux@roeck-us.net>
 Cc:     Richard Henderson <rth@twiddle.net>,
@@ -86,38 +86,16 @@ X-Mailing-List: linux-sparse@vger.kernel.org
 
 On Sun, Sep 12, 2021 at 9:02 AM Guenter Roeck <linux@roeck-us.net> wrote:
 >
-> -       running_on_qemu = (memcmp(&PAGE0->pad0, "SeaBIOS", 8) == 0);
-> +       running_on_qemu = (memcmp(absolute_pointer(&PAGE0->pad0), "SeaBIOS", 8) == 0);
+> -       if (strcmp(COMMAND_LINE, "INSTALL") == 0) {
+> +       if (strcmp(absolute_pointer(COMMAND_LINE), "INSTALL") == 0) {
 
-This seems entirely the wrong thing to do, and makes no sense. That
-"&PAGE0->pad0" is a perfectly valid pointer, and that's not where the
-problem is.
+Again, this feels very much like treating the symptoms, not actually
+fixing the real issue.
 
-The problem is "PAGE0" itself:
+It's COMMAND_LINE itself that should have been fixed up, not that one use of it.
 
-    #define PAGE0   ((struct zeropage *)__PAGE_OFFSET)
+Because the only reason you didn't get a warning from later uses is
+that 'strcmp()' is doing compiler-specific magic. You're just delaying
+the inevitable warnings about the other uses of that thing.
 
-which takes that absolute offset and creates a pointer out of it.
-
-IOW, _that_ is what should have the "absolute_pointer()" thing, and in
-that context the name of that macro and its use actually makes sense.
-
-No?
-
-An alternative - and possibly cleaner - approach that doesn't need
-absolute_pointer() at all might be to just do
-
-        extern struct zeropage PAGE0;
-
-and then make that PAGE0 be defined to __PAGE_OFFSET in the parisc
-vmlinux.lds.S file.
-
-Then doing things like
-
-        running_on_qemu = !memcmp(&PAGE0.pad0, "SeaBIOS", 8);
-
-would JustWork(tm).
-
-Hmm?
-
-             Linus
+            Linus
