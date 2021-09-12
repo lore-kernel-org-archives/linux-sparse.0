@@ -2,44 +2,65 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-17.3 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,
-	INCLUDES_PATCH,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_2
+X-Spam-Status: No, score=-18.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1
 	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96E6EC433F5
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 16:13:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 98B9DC433EF
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 16:16:12 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 653F561050
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 16:13:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 8242D61108
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 16:16:12 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231138AbhILQO0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 12 Sep 2021 12:14:26 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58476 "EHLO
+        id S232147AbhILQR0 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 12 Sep 2021 12:17:26 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:59230 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229726AbhILQOV (ORCPT
+        with ESMTP id S229653AbhILQRZ (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Sep 2021 12:14:21 -0400
-X-Greylist: delayed 64 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sun, 12 Sep 2021 09:13:01 PDT
-Received: from lb1-smtp-cloud9.xs4all.net (lb1-smtp-cloud9.xs4all.net [IPv6:2001:888:0:108::1c])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 9A374C061574;
-        Sun, 12 Sep 2021 09:13:01 -0700 (PDT)
-Received: from cust-3a8def63 ([IPv6:fc0c:c1c9:903d:e9b4:326e:d2bd:718e:17cc])
-        by smtp-cloud9.xs4all.net with ESMTPSA
-        id PS57m4UmccSrkPS59mriLd; Sun, 12 Sep 2021 18:11:54 +0200
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=xs4all.nl; s=s2;
-        t=1631463114; bh=Rkh5fe5ckn+qv2he4b3qNVogdA8plV7NpPMyL17OrJ0=;
-        h=Date:From:To:Subject:Message-ID:MIME-Version:Content-Type:From:
-         Subject;
-        b=tpeNy1kSwSoI+lvdLcKG52+7AwavVNtPziXnSj8+4LWYS6LcGN4DDcnfVZ9v7W33z
-         LSUjGuJcEw1KjQK/Nnl7I+SlZA3MPWMlCQMiS5oqo7hpOPJCnhYFHBWJiFcYZSEm+X
-         46nzMB1D8F2muY/J8Jaq1ou/0U9CY94ZMayOJGuOldK0QQUQmU0HiFLdHLUfi6i8HJ
-         GCw1YTrgoKsLiqVge5lE1ogiNLSeh3E3kjLrdgqJqkZMOhfuoFlYfA3XovSQee9pSy
-         bc3Hg9btUwwzvcQ9y5f54BKWWIXNc7GR5n/Zkq4rjVmMyv9rzPffGwbNGKGNULjOpC
-         Kq86eZmK0HkyA==
-Date:   Sun, 12 Sep 2021 18:11:48 +0200
-From:   Jeroen Roovers <jer@xs4all.nl>
-To:     Guenter Roeck <linux@roeck-us.net>
+        Sun, 12 Sep 2021 12:17:25 -0400
+Received: from mail-oo1-xc2f.google.com (mail-oo1-xc2f.google.com [IPv6:2607:f8b0:4864:20::c2f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 490D1C061574;
+        Sun, 12 Sep 2021 09:16:11 -0700 (PDT)
+Received: by mail-oo1-xc2f.google.com with SMTP id m11-20020a056820034b00b0028bb60b551fso2528920ooe.5;
+        Sun, 12 Sep 2021 09:16:11 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=gmail.com; s=20210112;
+        h=sender:subject:to:cc:references:from:message-id:date:user-agent
+         :mime-version:in-reply-to:content-language:content-transfer-encoding;
+        bh=962m9V5kVB1K2ya/iSo41D4jBqvuxZ4BddEpQ3+kojg=;
+        b=qM8u+hcIWzR8wMKQYhJCILmC9ZSlNy0NiWb4OY9hgIPBCZHgvM5qkKfgYvGPan/dWy
+         i5x/cft2ji93PA3JkhyD3LSkkMTIFc1uT4DGD0JuOsR6E7i+5w/QvbVTzSvWiBYtyvcb
+         ZwYQUAi0m60L2obsafgIs5DFtPB2dd11dxVqbdEuSt/wuCLZHR0w3rdAEg1ctjNwuBpV
+         FygbmW10nIEchgjXTB7XhMDbK3jxBDIHD8N01nOt0gxXTRXQC0Bkc0ayrYtjpe7vo5Lt
+         +tN2mV7Mu8coJuhIwpThaEPRcsMbFlXaxkMDf6YDj+oodAYc/UODDI+YBc3E3yvWM4cI
+         srpQ==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:sender:subject:to:cc:references:from:message-id
+         :date:user-agent:mime-version:in-reply-to:content-language
+         :content-transfer-encoding;
+        bh=962m9V5kVB1K2ya/iSo41D4jBqvuxZ4BddEpQ3+kojg=;
+        b=iCniXSU9P38GdOq+2FxnKjSZuCFrpKRv68Dd/yVOS+t40A21B1IMZGh9QGOMRKapTS
+         XOEgPTxLZmLLd4pUAgcXp72Zm+UpVrz6xXgTydWHG7Hf0xmPhaW2piM8IwpwJAKcIxg+
+         lm9Y1WG7kWVhtaou0rDkFmnuXcioJeRHofdHRtTaWo6ODBxXFUMDCmPFQIIoiPFrXqvj
+         kbbANwgheDDbfPZ2ljH7Ctp0hmW9LYAxiDfd9TCzVjM3qJyqmeKsFUg3rA3ITZ+jXjg1
+         HLN23CDb1mET0EeOjFUbkpLNFpb9AxpEclNWLz4bTxol5kaQtilX65m39M0z5CFZoEwR
+         SVMA==
+X-Gm-Message-State: AOAM5315musOhvwSYrRhjTtx9SB2kJNjoBRMhXrq/0UcyCAeqVX8KmGV
+        qeSYoCTu9LLUHKpdSxjz5tJEXzDPEE4=
+X-Google-Smtp-Source: ABdhPJzidRP3p6tQgWcre2x9ZhW/ZGNmxMG6SrrOt4xx2vFDvzYw3xFVcpEZpIPpeYjjtBJSrwFLow==
+X-Received: by 2002:a4a:98e1:: with SMTP id b30mr6093453ooj.34.1631463370452;
+        Sun, 12 Sep 2021 09:16:10 -0700 (PDT)
+Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id s8sm1202188otd.76.2021.09.12.09.16.08
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Sun, 12 Sep 2021 09:16:09 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Subject: Re: [PATCH 2/4] net: i825xx: Use absolute_pointer for memcpy on fixed
+ memory location
+To:     Jeroen Roovers <jer@xs4all.nl>
 Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
@@ -51,61 +72,66 @@ Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         linux-kernel@vger.kernel.org, linux-parisc@vger.kernel.org,
         netdev@vger.kernel.org, linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 2/4] net: i825xx: Use absolute_pointer for memcpy on
- fixed memory location
-Message-ID: <20210912181148.60f147c8@wim.jer>
-In-Reply-To: <20210912160149.2227137-3-linux@roeck-us.net>
 References: <20210912160149.2227137-1-linux@roeck-us.net>
-        <20210912160149.2227137-3-linux@roeck-us.net>
-X-Mailer: Claws Mail 3.18.0 (GTK+ 2.24.33; x86_64-pc-linux-gnu)
+ <20210912160149.2227137-3-linux@roeck-us.net>
+ <20210912181148.60f147c8@wim.jer>
+From:   Guenter Roeck <linux@roeck-us.net>
+Message-ID: <0d118e7b-e3cf-67df-00dc-f85b40ada682@roeck-us.net>
+Date:   Sun, 12 Sep 2021 09:16:07 -0700
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.13.0
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
+In-Reply-To: <20210912181148.60f147c8@wim.jer>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
-X-CMAE-Envelope: MS4xfDDN+TVFZlqrPTgn5UvnCAIeaDEYv00W+k2D6F8WSW6CaVM3Vx2T12jZ3P+tSZYXAkmi6pjvZgc8k9a2owRgUCSuC2zQGYxwEYaHCL5QuBfRHx9eHd4A
- eZyYC12vLAmsBCmCHogCVD9xE3ne1gBAFQDRn6Uhps5sLb4wxLrzmi1dmgm71vH2Wfg5Zo/38RPF174c6DCbDqlg5jY1DYgFNhjZRmkgOBlKBDogPiRpyJvO
- rSYfziqnvgoT+H1Z7UKwrCo3+7vE0g0DS+Ixf59o53mcejQTRA4uhlrw//Xqs9ImhWM63wROcfIQjpNcw6CV2sMPkV6zKEHqA195ny4fQNbT0QVM8upL4McG
- LSUypvGXg3M5ZkvPie7YQ0LfNW7tt8lvpT1pBb8VjoWYGotgEud9dI7fbj8E+5FVZodxbbOb6hdJ3QALRHXnhfhXE5nPARSrXDuwUKZjdtR0a9XvcCgbSsIx
- H1tc95ZpyxPmRkZbkm9MaLYADy5ZY/+pnwZnFJc6emWx3cqQkHacNyeI3LUqL/6OiqgRTb/WSUFYMINyofds3yUhef34fWvFE5Wd6mXsaGPi45ovRKZn7ECf
- 1pHG1fFaOiEmO5lUNWTgf7jaioAjG20J5MHd6blltY+B5RCj/nqb+OBg4Zv+tVOJLkgfAA2ACFfRwsIfCrDWx/jY
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sun, 12 Sep 2021 09:01:47 -0700
-Guenter Roeck <linux@roeck-us.net> wrote:
-
-> gcc 11.x reports the following compiler warning/error.
+On 9/12/21 9:11 AM, Jeroen Roovers wrote:
+> On Sun, 12 Sep 2021 09:01:47 -0700
+> Guenter Roeck <linux@roeck-us.net> wrote:
 > 
-> drivers/net/ethernet/i825xx/82596.c: In function 'i82596_probe':
->     ./arch/m68k/include/asm/string.h:72:25: error:
->             '__builtin_memcpy' reading 6 bytes from a region of size 0
->                     [-Werror=stringop-overread]
+>> gcc 11.x reports the following compiler warning/error.
+>>
+>> drivers/net/ethernet/i825xx/82596.c: In function 'i82596_probe':
+>>      ./arch/m68k/include/asm/string.h:72:25: error:
+>>              '__builtin_memcpy' reading 6 bytes from a region of size 0
+>>                      [-Werror=stringop-overread]
+>>
+>> Use absolute_address() to work around the problem.
 > 
-> Use absolute_address() to work around the problem.
-
-=> absolute_pointer()
-
-> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
-> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
-> ---
->  drivers/net/ethernet/i825xx/82596.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> => absolute_pointer()
 > 
-> diff --git a/drivers/net/ethernet/i825xx/82596.c
-> b/drivers/net/ethernet/i825xx/82596.c index
-> b8a40146b895..b482f6f633bd 100644 ---
-> a/drivers/net/ethernet/i825xx/82596.c +++
-> b/drivers/net/ethernet/i825xx/82596.c @@ -1144,7 +1144,7 @@ static
-> struct net_device * __init i82596_probe(void) err = -ENODEV;
->  			goto out;
->  		}
-> -		memcpy(eth_addr, (void *) 0xfffc1f2c,
-> ETH_ALEN);	/* YUCK! Get addr from NOVRAM */
-> +		memcpy(eth_addr, absolute_pointer(0xfffc1f2c),
-> ETH_ALEN); /* YUCK! Get addr from NOVRAM */ dev->base_addr =
-> MVME_I596_BASE; dev->irq = (unsigned) MVME16x_IRQ_I596;
->  		goto found;
 
+Oopsie. Thanks!
 
-Regards,
-      jer
+Guenter
+
+>> Cc: Geert Uytterhoeven <geert@linux-m68k.org>
+>> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+>> ---
+>>   drivers/net/ethernet/i825xx/82596.c | 2 +-
+>>   1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/drivers/net/ethernet/i825xx/82596.c
+>> b/drivers/net/ethernet/i825xx/82596.c index
+>> b8a40146b895..b482f6f633bd 100644 ---
+>> a/drivers/net/ethernet/i825xx/82596.c +++
+>> b/drivers/net/ethernet/i825xx/82596.c @@ -1144,7 +1144,7 @@ static
+>> struct net_device * __init i82596_probe(void) err = -ENODEV;
+>>   			goto out;
+>>   		}
+>> -		memcpy(eth_addr, (void *) 0xfffc1f2c,
+>> ETH_ALEN);	/* YUCK! Get addr from NOVRAM */
+>> +		memcpy(eth_addr, absolute_pointer(0xfffc1f2c),
+>> ETH_ALEN); /* YUCK! Get addr from NOVRAM */ dev->base_addr =
+>> MVME_I596_BASE; dev->irq = (unsigned) MVME16x_IRQ_I596;
+>>   		goto found;
+> 
+> 
+> Regards,
+>        jer
+> 
+
