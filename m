@@ -4,66 +4,66 @@ X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 X-Spam-Level: 
 X-Spam-Status: No, score=-8.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,
-	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=unavailable
-	autolearn_force=no version=3.4.0
+	SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=ham autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC785C433FE
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 20:28:58 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B2B4EC433FE
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 20:37:40 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 67D3D610F9
-	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 20:28:58 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 856C960EE7
+	for <linux-sparse@archiver.kernel.org>; Sun, 12 Sep 2021 20:37:40 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236217AbhILU3w (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 12 Sep 2021 16:29:52 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58020 "EHLO
+        id S231560AbhILUiu (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 12 Sep 2021 16:38:50 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:60096 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S236059AbhILU3u (ORCPT
+        with ESMTP id S235269AbhILUio (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 12 Sep 2021 16:29:50 -0400
-Received: from mail-ot1-x330.google.com (mail-ot1-x330.google.com [IPv6:2607:f8b0:4864:20::330])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 44CA4C061574;
-        Sun, 12 Sep 2021 13:28:36 -0700 (PDT)
-Received: by mail-ot1-x330.google.com with SMTP id q11-20020a9d4b0b000000b0051acbdb2869so10509886otf.2;
-        Sun, 12 Sep 2021 13:28:36 -0700 (PDT)
+        Sun, 12 Sep 2021 16:38:44 -0400
+Received: from mail-ot1-x32c.google.com (mail-ot1-x32c.google.com [IPv6:2607:f8b0:4864:20::32c])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 42342C061574;
+        Sun, 12 Sep 2021 13:37:30 -0700 (PDT)
+Received: by mail-ot1-x32c.google.com with SMTP id k12-20020a056830150c00b0051abe7f680bso10510968otp.1;
+        Sun, 12 Sep 2021 13:37:30 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=gmail.com; s=20210112;
         h=sender:to:cc:references:from:subject:message-id:date:user-agent
          :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=AXSxIvFJqTwiufjYo/D6s+CkMzPMpGZ/GlVxsFHvRNA=;
-        b=Q2WdxlOeY/qzPh2YwGGttsdCkzkxMQWwy7h0b8hpSJHAHJdc7mJzXYZEknKviVTv2A
-         D3co9DESFaNB1suY1HUJ8JIZUWr2nYh2P6sRRjejKeWqLuoC5qsKANE1i8LsJIZDJcmq
-         HvMtSDNIfEr64W0EWW3H4yxq4VzP7eh2JT4tV+akN5Jaxcmb+tVq+6X92PJCM8c6G8vi
-         XMv7rKFO8DcfArnvi3JOSOjA+CBiS0ChiXvX6NN9hp9TmsA/CLWfsIuC0LFuKKN/DXII
-         lT5pJ/otTNTX6SZhY3rkfw7LOwyu/BijLRvQ+PTsLxTFG5KtazRVUQMtrNcSo5zVauMT
-         rzbg==
+        bh=sGO52QCbtTKYdjcgj2GabgzNcLXhaoNx+6K218Q6YKM=;
+        b=BoFoBk6YCh+SHOSsUgl2enC7/u2I2Bj4b7E3MP/cJEMdjyirzvoalq82dA+5XeNWwl
+         /4MX3K/6+Xlj40bcX+GF4RP8Np3PeD5WLjyuCNRAh/yUxFLrsFfGqZHVTX+4voCDXThQ
+         NtCPmvzn6p+zmvtMjAf39/fOY68oVD2yl1mYDt0TXnPjWiPfwLnBaXyNVrTevhQVK5pD
+         aw64A7C41B/zB54y/F7R6iae8wdcyUP5mhh/68BIQ4hchpPoT6t+dOxtutYlJ8dqp3XS
+         yjBSGiq5nQNB+jK0YfSdbGNqMPP3srkCCqL2YC3AJg3enTDIsnt4wkcbYUuMIGJkyi31
+         IwEQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
         h=x-gm-message-state:sender:to:cc:references:from:subject:message-id
          :date:user-agent:mime-version:in-reply-to:content-language
          :content-transfer-encoding;
-        bh=AXSxIvFJqTwiufjYo/D6s+CkMzPMpGZ/GlVxsFHvRNA=;
-        b=J4RBwJQ+iLqJtpkZVuQowB7Ep93lLLW7R2xYZmIbJh5Lauxmt+l6XBzzlwDMv7ZQyy
-         JMW9Mrlf0MIFBqYCxin5cKIdF4Kqj1voK+0r4UlUAXGQ1+zIU5Xi4HTESEE1GEHdmslb
-         Ie2JgVSstUZUo+JYl7eJT9VohqQeEI8OE828R0KpYjeJk0aUwPuy3vxsNnC8khyhlxWr
-         z19g01HQkFlJICD5LC9QQuQgWV8lJRlibzd92g976ljqVdPgmX9B2pBYqTsAtfMEIZzk
-         vaJkKaZwRgB+K+h0jEVBSV+mIWTtbGLhMtFwMXjHubW4rIMs3qN+4+fB6nkqRewPfw+c
-         8OvA==
-X-Gm-Message-State: AOAM530602+2mMuU1WajW9a5sUbF7qSMPIexD/GEWldaATsg3C4jrBSw
-        mTQR91NtdIR+G5gItM8ljHmv8owPOHc=
-X-Google-Smtp-Source: ABdhPJxuFvecmPM2TZMockYIjqnp4xZdl21Ekd9EkR06uk2o6zhz+UuSEZrSpVHXNCjbELp04zmBiA==
-X-Received: by 2002:a9d:4b84:: with SMTP id k4mr6669955otf.98.1631478515438;
-        Sun, 12 Sep 2021 13:28:35 -0700 (PDT)
+        bh=sGO52QCbtTKYdjcgj2GabgzNcLXhaoNx+6K218Q6YKM=;
+        b=paT/axvKVvZ3RLeKhVFOKy2Flcfawc0EuHWAvAdtGgR/elc3hz2YZuYrhNlS4udQ6W
+         i8ZLtqD8jEX6jJpi2yLrqnrPLhb41hWUGXdJFoRyf/CAcOA28sYRlOeNwtVI377ypWCz
+         8JSI2Tgu+wgFKtxukBNYctYeSiCFaNjRTY7WelXfTLay/TGocCH2u7122z3KholPr+j6
+         2S8htr585OzXCRi/1hnV8y64LdzeIWnrixFs5sTA6KIfn5Q0OBtg4NOg6WC1ER/f1ODE
+         yVOUCeGbhhh29sMrM7Kp9uerxvPDgErF5GdtBuODmLqcjBUZ66aePkFNWcyc5Bhqiogj
+         2CcQ==
+X-Gm-Message-State: AOAM532DXDGfpcA5nCnvHEAmXKMBS/zvXsp9+iCcC5707lPf25ejh+Vn
+        2OnCLKfi77SdvwKNgI8f6BAVzP+iQxw=
+X-Google-Smtp-Source: ABdhPJyr/+V+h4oQD6vwcSYgo9ReR96NTjTaNALCXrvxkaPwBpC+OfD7ikcSEXFhco1iPgTbl+o8QA==
+X-Received: by 2002:a05:6830:10:: with SMTP id c16mr6943996otp.63.1631479049479;
+        Sun, 12 Sep 2021 13:37:29 -0700 (PDT)
 Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id r20sm1338260oot.16.2021.09.12.13.28.33
+        by smtp.gmail.com with ESMTPSA id 33sm1333791otx.19.2021.09.12.13.37.27
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Sun, 12 Sep 2021 13:28:35 -0700 (PDT)
+        Sun, 12 Sep 2021 13:37:28 -0700 (PDT)
 Sender: Guenter Roeck <groeck7@gmail.com>
-To:     Helge Deller <deller@gmx.de>,
-        Linus Torvalds <torvalds@linux-foundation.org>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
         Matt Turner <mattst88@gmail.com>,
         "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
+        Helge Deller <deller@gmx.de>,
         "David S . Miller" <davem@davemloft.net>,
         Jakub Kicinski <kuba@kernel.org>,
         alpha <linux-alpha@vger.kernel.org>,
@@ -72,18 +72,17 @@ Cc:     Richard Henderson <rth@twiddle.net>,
         linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>
 References: <20210912160149.2227137-1-linux@roeck-us.net>
- <20210912160149.2227137-4-linux@roeck-us.net>
- <CAHk-=wi1TBvyk7SWX+5LLYN8ZnTJMut1keQbOrKCG=nb08hdiQ@mail.gmail.com>
- <YT5b2HgrvL12Nrhx@ls3530>
+ <20210912160149.2227137-5-linux@roeck-us.net>
+ <CAHk-=wi1=8shingNuo1CtfJ7eDByDsmwsz750Nbxq=7q0Gs+zg@mail.gmail.com>
 From:   Guenter Roeck <linux@roeck-us.net>
-Subject: Re: [PATCH 3/4] parisc: Use absolute_pointer for memcmp on fixed
+Subject: Re: [PATCH 4/4] alpha: Use absolute_pointer for strcmp on fixed
  memory location
-Message-ID: <2702f518-da2f-5bca-11d3-35f5cd4316e6@roeck-us.net>
-Date:   Sun, 12 Sep 2021 13:28:32 -0700
+Message-ID: <0f36c218-d79c-145f-3368-7456dd39a3f2@roeck-us.net>
+Date:   Sun, 12 Sep 2021 13:37:26 -0700
 User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
  Thunderbird/78.13.0
 MIME-Version: 1.0
-In-Reply-To: <YT5b2HgrvL12Nrhx@ls3530>
+In-Reply-To: <CAHk-=wi1=8shingNuo1CtfJ7eDByDsmwsz750Nbxq=7q0Gs+zg@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 8bit
@@ -91,58 +90,25 @@ Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On 9/12/21 12:58 PM, Helge Deller wrote:
-> * Linus Torvalds <torvalds@linux-foundation.org>:
->> On Sun, Sep 12, 2021 at 9:02 AM Guenter Roeck <linux@roeck-us.net> wrote:
->>>
->>> -       running_on_qemu = (memcmp(&PAGE0->pad0, "SeaBIOS", 8) == 0);
->>> +       running_on_qemu = (memcmp(absolute_pointer(&PAGE0->pad0), "SeaBIOS", 8) == 0);
+On 9/12/21 12:13 PM, Linus Torvalds wrote:
+> On Sun, Sep 12, 2021 at 9:02 AM Guenter Roeck <linux@roeck-us.net> wrote:
 >>
->> This seems entirely the wrong thing to do, and makes no sense. That
->> "&PAGE0->pad0" is a perfectly valid pointer, and that's not where the
->> problem is.
->>
->> The problem is "PAGE0" itself:
->>
->>      #define PAGE0   ((struct zeropage *)__PAGE_OFFSET)
->>
->> which takes that absolute offset and creates a pointer out of it.
->>
->> IOW, _that_ is what should have the "absolute_pointer()" thing, and in
->> that context the name of that macro and its use actually makes sense.
->>
->> No?
->>
->> An alternative - and possibly cleaner - approach that doesn't need
->> absolute_pointer() at all might be to just do
->>
->>          extern struct zeropage PAGE0;
->>
->> and then make that PAGE0 be defined to __PAGE_OFFSET in the parisc
->> vmlinux.lds.S file.
->>
->> Then doing things like
->>
->>          running_on_qemu = !memcmp(&PAGE0.pad0, "SeaBIOS", 8);
->>
->> would JustWork(tm).
+>> -       if (strcmp(COMMAND_LINE, "INSTALL") == 0) {
+>> +       if (strcmp(absolute_pointer(COMMAND_LINE), "INSTALL") == 0) {
 > 
-> Yes, this second approach seems to work nicely, although the patch
-> then gets slightly bigger.
-> Below is a tested patch.
-> I'll check it some further and apply it to the parisc tree then.
+> Again, this feels very much like treating the symptoms, not actually
+> fixing the real issue.
+> 
+> It's COMMAND_LINE itself that should have been fixed up, not that one use of it.
+> 
+> Because the only reason you didn't get a warning from later uses is
+> that 'strcmp()' is doing compiler-specific magic. You're just delaying
+> the inevitable warnings about the other uses of that thing.
 > 
 
-There are several PAGE0-> references left in the code after applying your patch.
+COMMAND_LINE is, for whatever reason, defined in
+arch/alpha/include/uapi/asm/setup.h, ie in the uapi.
 
-$ git grep "PAGE0->"
-arch/parisc/kernel/firmware.c:  if (!PAGE0->mem_kbd.iodc_io)
-arch/parisc/kernel/firmware.c:  real32_call(PAGE0->mem_kbd.iodc_io,
-arch/parisc/kernel/firmware.c:              (unsigned long)PAGE0->mem_kbd.hpa, ENTRY_IO_CIN,
-arch/parisc/kernel/firmware.c:              PAGE0->mem_kbd.spa, __pa(PAGE0->mem_kbd.dp.layers),
-arch/parisc/kernel/smp.c:       WARN_ON(((unsigned long)(PAGE0->mem_pdc_hi) << 32
-arch/parisc/kernel/smp.c:                       | PAGE0->mem_pdc) != pdce_proc);
-
-After fixing those, I can build a parisc image and boot it in qemu (32 bit).
+Can I even touch that ?
 
 Guenter
