@@ -2,77 +2,42 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+X-Spam-Status: No, score=-3.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED,USER_AGENT_SANE_1 autolearn=no autolearn_force=no
 	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 0FA9FC433EF
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 19:50:43 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9BD1DC433FE
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 20:31:31 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id E15D06105A
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 19:50:42 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 836E16113E
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 20:31:31 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231490AbhIOTwB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 15 Sep 2021 15:52:01 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:49728 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229732AbhIOTwB (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Sep 2021 15:52:01 -0400
-Received: from mail-lf1-x12e.google.com (mail-lf1-x12e.google.com [IPv6:2a00:1450:4864:20::12e])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id B992AC061574
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:50:41 -0700 (PDT)
-Received: by mail-lf1-x12e.google.com with SMTP id p29so8802124lfa.11
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:50:41 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=nI3oXjB5y7fgBDUAfkrt5Qjrdw7kij1HF6V7usZScd0=;
-        b=dDkQ2iIzDzvrHagUv0HQt/yEqNuVlVfROtNamlO02CizTu2FICtXWd210Bes/CwlqB
-         vjF/fdxzFxIz7v0M5Mc4QD77K9x8ec18TENbGfCqGbSG3HiLnbhqoA4lCtQEqvSsm3+w
-         v6hYS+kH7FyOqPuDkRIGswKh56YqlIWBTmiYA=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=nI3oXjB5y7fgBDUAfkrt5Qjrdw7kij1HF6V7usZScd0=;
-        b=XxH8fVtlCTuJp83I5FratgMFbUQ87djbxHBYKq4DNFmsNABinrqit871H11G/J12TN
-         lnMGXDPGiM0cMB+9MLCbHb4H+an9XhDgHfQcBcDuXYUFnNYaNNYtxbpBSksrQpFaNvja
-         V/jBfwwE2Ys4JjZgm5R7+GoBfNtIKht/XiAXXdLBju+d61aQFVH8PkItZ75YH7sfdCGI
-         WPZRMeHVCcE7K1KLwqTOgZCtZTAHvwqBhzZpbxdBAQDd6OHXFg0UuGt6XmiGDQKDecPd
-         pmlJALNSjo5uJ/G0RNGm8Fc6V42SOJM2rYILvxvOacrAeNQ66nZaU5Jk96/JU7VgKuvU
-         k5rg==
-X-Gm-Message-State: AOAM530Oqna/1ZtD2k8qgwxqLEa2+8g5nzynEMM/2sy3S3qGyKHt9W86
-        ZF0+EFDEt+Jv0OlF8KUH7dp/1+dANejVmP6UbDw=
-X-Google-Smtp-Source: ABdhPJy5hWaWvcKphiIYjwGcIdR8FmEEHYDiTMe3uGtLTEpj8e8TlkIv8VZh/I7pplEhR5fqkrrXQw==
-X-Received: by 2002:a05:6512:3f8c:: with SMTP id x12mr1258692lfa.320.1631735439764;
-        Wed, 15 Sep 2021 12:50:39 -0700 (PDT)
-Received: from mail-lf1-f53.google.com (mail-lf1-f53.google.com. [209.85.167.53])
-        by smtp.gmail.com with ESMTPSA id a18sm95463ljd.4.2021.09.15.12.50.38
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 15 Sep 2021 12:50:38 -0700 (PDT)
-Received: by mail-lf1-f53.google.com with SMTP id i25so8891847lfg.6
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:50:38 -0700 (PDT)
-X-Received: by 2002:a05:6512:3991:: with SMTP id j17mr1268421lfu.280.1631735438424;
- Wed, 15 Sep 2021 12:50:38 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210915035227.630204-1-linux@roeck-us.net> <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
- <47fcc9cc-7d2e-bc79-122b-8eccfe00d8f3@roeck-us.net> <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
-In-Reply-To: <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Wed, 15 Sep 2021 12:50:22 -0700
-X-Gmail-Original-Message-ID: <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com>
-Message-ID: <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com>
+        id S232190AbhIOUct (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 15 Sep 2021 16:32:49 -0400
+Received: from mout.gmx.net ([212.227.15.19]:38563 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S232168AbhIOUco (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 15 Sep 2021 16:32:44 -0400
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=gmx.net;
+        s=badeba3b8450; t=1631737840;
+        bh=FT1bt5R/FOH6npv9XqUhIBjmnDojF0uwYc99SARbO9E=;
+        h=X-UI-Sender-Class:Subject:To:Cc:References:From:Date:In-Reply-To;
+        b=OuQsLKfmqSknDnjRmvpvF5gZFfr0LxiH64Sy2NNNbnXhiVtCWs2THcnQrkZ2gJfa0
+         FarOSuApUNS2SMtGZvzkKU/bBX+QOgxALG+Cyvz4Kynaff3TI7IoXsTtP37rpElwBa
+         wXl23EPHtoDcxUmKP/aZt692RXg3O2x7+PAF6JR0=
+X-UI-Sender-Class: 01bb95c1-4bf8-414a-932a-4f6e2808ef9c
+Received: from [192.168.20.60] ([92.116.186.236]) by mail.gmx.net (mrgmx005
+ [212.227.17.190]) with ESMTPSA (Nemesis) id 1MkHMZ-1nBFtp1KtF-00kkA3; Wed, 15
+ Sep 2021 22:30:40 +0200
 Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-To:     Guenter Roeck <linux@roeck-us.net>
+To:     Linus Torvalds <torvalds@linux-foundation.org>,
+        Guenter Roeck <linux@roeck-us.net>
 Cc:     Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
         Matt Turner <mattst88@gmail.com>,
         "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Helge Deller <deller@gmx.de>,
         "David S . Miller" <davem@davemloft.net>,
         Jakub Kicinski <kuba@kernel.org>,
         alpha <linux-alpha@vger.kernel.org>,
@@ -80,21 +45,59 @@ Cc:     Richard Henderson <rth@twiddle.net>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+References: <20210915035227.630204-1-linux@roeck-us.net>
+ <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
+ <47fcc9cc-7d2e-bc79-122b-8eccfe00d8f3@roeck-us.net>
+ <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
+From:   Helge Deller <deller@gmx.de>
+Message-ID: <3d30d1e0-f60a-3f48-65d9-f53b76640a9d@gmx.de>
+Date:   Wed, 15 Sep 2021 22:30:37 +0200
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
+ Thunderbird/78.11.0
+MIME-Version: 1.0
+In-Reply-To: <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+X-Provags-ID: V03:K1:kzjIuZ4FF57XuRnrtWz/7WvoEwJGS3VQsRTh7uoXah9oP27a9Fm
+ +YEHuPwy6Q8UkKWzaw8n+fHjilOKjuMGVzh4kcgGQ3ZXoEvrQSDcUCHcZlKbAuj+97BKCnz
+ DMxjrDA3ED7ThzeTC5DMK8tr+FjLHJVOL7l4beGLMCe414C3l/oEFp7UWf9hmFi3XHsD58h
+ Y8B6Naso2YHgadVrGC2NA==
+X-UI-Out-Filterresults: notjunk:1;V03:K0:HePgIiYQe0Q=:TYFKNrzKcQpBG3fJTKvXHg
+ S8l+Bfp0balC1rVZw07SbFMvRvFxnjKMJeyibWXfgfobr/EovYMy3POv44RA8KAn1ycriemwf
+ zXP1NbLDmtaR2+7DIMLQEn+3/WzmX4veYBcVDFQcKEvfMxFqqM/kRP4NsPJLDdzlzKHyWPHKe
+ b3MQ0iHP9P0g8zncl6akQre9ciKQAj+9S+sOJx077jKMF2/wtvE7HIDINn2I4hfwkW5Ffw0up
+ ZMAnrF3CaHQCb6+nbuJ4JLTLKaCJ8AvBAFBZ5osBm+vXaQpW8t1IEEf1IqOI01xGiHNoI6VMc
+ 8DXBcb091bFpHUJtw8F0VEQKyeJ8HDkVZQDaOk2wb6rQ9BC/xtx4tBaXPX5xbHhOrJi6flmEI
+ hNUvUCH/+GpfR6QgfC7sk0RC3X0QsPC/phrGUHYP+fifnLpIIZk58L7q+GoSC9c0uCusTyil4
+ +19lNweVA0eZZUTtHJSY2U+dJkoeHBMNzCq5mQn1JFQ9S/9ZqpgicO4Mayo3/+pSY8rRpTzpP
+ GDcIIstKjwfIGMnyV1XTFbFqOzSKgfnniK17U1eJPooqwDpRKPS2c8Hpj8KZbirNfxMcWYv0E
+ EWgG8C56UowFXtW09e0eE9zspTqaFYfx+5yVly+j/c4UPtU/zVLo1rrWvD3VAB3LG2pSTwBmF
+ OR1IieQzR6fk3kqBJ0kEOIWmS41M6SCFMaW+Xi63q+RCBtX0alNLytMe1VUucGldrsX4R322c
+ bQ1KhtSfRLM5rTdyYckvs3VrFc2V/2Eq5ceHOVsRT/Bp0/SfWYuYuhM1vrcOPm0VbnEoT0IP/
+ LkSmFwauiipmdMq0T5LbbaZpBNUkNVaJUYe9YcI9t02CfirrV2n3CIGMFcwJb91sU+prPJe5F
+ C7E3cjt8aKLdBZp/FY5KUajRlFYFD9+qZk3pQVct83i40oF1H5cvI37MhvhohzKHF427sW1sN
+ PBMIByo1I3MtOliX4FWF0zwBQOzKHRB8gWW4VW7YoZEEc0vdVm2fIivFYTs7sQIRg+fGAN92J
+ jdFzecx0E+xhLH8az4Celd87YvnVa3ucpxNUMQjn/lgagGDS4Yz+Fh+klgoXC24hBqfeY/3P5
+ n2e83PBoEd06qc=
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Sep 15, 2021 at 12:47 PM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
+On 9/15/21 9:47 PM, Linus Torvalds wrote:
+> On Wed, Sep 15, 2021 at 12:35 PM Guenter Roeck <linux@roeck-us.net> wrot=
+e:
+>>
+>> On a side note, we may revive the parisc patch. Helge isn't entirely
+>> happy with the other solution for parisc; it is quite invasive and
+>> touches a total of 19 files if I counted correctly.
 >
-> What other notable issues end up being still live? I sent out that one
-> patch for sparc, but didn't get any response to it. I'm inclined to
-> just apply it (the 'struct mdesc_hdr' pointer misuse one).
+> Ok, my suggestion to use the linker was not a "do it this way", it
+> really was just a "maybe alternate approach". So no objections if
+> absolute_pointer() ends up being the simpler solution.
 
-Oh, I forgot about the qnx4 one. That happens on sparc, possibly
-others, but not on x86-64.
+Yes, it's a lot simpler and makes backporting patches later much easier.
+I'll send a pull request with the updated parisc patch tomorrow.
 
-I'll go look at that patch too.
-
-          Linus
+Thanks,
+Helge
