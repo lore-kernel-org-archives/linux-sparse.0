@@ -2,73 +2,63 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
-	version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,
+	SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 52B07C433EF
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 21:20:01 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 57D19C433F5
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 22:33:49 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 37E8C61108
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 21:20:01 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 42163603E9
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 22:33:49 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S232154AbhIOVVT (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 15 Sep 2021 17:21:19 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:41728 "EHLO
+        id S232852AbhIOWfH (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 15 Sep 2021 18:35:07 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58292 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S230382AbhIOVVR (ORCPT
+        with ESMTP id S232800AbhIOWfF (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Sep 2021 17:21:17 -0400
-Received: from mail-lf1-x12d.google.com (mail-lf1-x12d.google.com [IPv6:2a00:1450:4864:20::12d])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 38C01C061574
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 14:19:58 -0700 (PDT)
-Received: by mail-lf1-x12d.google.com with SMTP id b18so8580545lfb.1
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 14:19:58 -0700 (PDT)
+        Wed, 15 Sep 2021 18:35:05 -0400
+Received: from mail-oi1-x22f.google.com (mail-oi1-x22f.google.com [IPv6:2607:f8b0:4864:20::22f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id F071FC061574;
+        Wed, 15 Sep 2021 15:33:45 -0700 (PDT)
+Received: by mail-oi1-x22f.google.com with SMTP id s20so6369897oiw.3;
+        Wed, 15 Sep 2021 15:33:45 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=w3BMwFy0chXS7YMqLdf36Rg6yUUlp6nBZba3YILPvA0=;
-        b=WsNqD0Opa3lPgwayobITOeBYzY09REebVD84cTigbwiVy8RERoiSXisEu8y+Nk+bfI
-         rwr6ffFTpZComKTqahfaOR7CdEVqoy7csTG2SKHpEYZNr9AVK2EZciaTVWrgEw6jv2ed
-         w803wR6rUWc2E3pW5t7Ag7qcjFS9X02JepaeA=
+        d=gmail.com; s=20210112;
+        h=sender:date:from:to:cc:subject:message-id:references:mime-version
+         :content-disposition:in-reply-to;
+        bh=ksGzvLSG/bzIwuiVwvc1qXj6lhrhSA0oI9AgijGYHnE=;
+        b=nRZgNNoxUrXzykvomyIvjO0p7RzeOhbJM1zC8+U67x+oop7phIOyMTUQB4VJu0Kpbg
+         Zn4X36T8Vr9ymebsW25ho7zLzT6PFgZAmn7yhqdaAwC4/MCiiw2nYq/g8KJSfwenD8Py
+         9itWXiC60IVoRsfLErpTSvMjP/sQx6dhiTdorErun+O5TGxn8m4rwP84aDjh/iedGZPe
+         1+08fd54Xo9mtzY64uBheFtDsGmXU47lVYE4EiWbU4UNdJYoRfdQ5qOEInqOQZqldrVa
+         rncW/OLp1FgJNfVU9xikewUURsQafqfMikHeqngulaNx1ELnUx1I2n6pzuPtyq6Lu19N
+         6sQQ==
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=w3BMwFy0chXS7YMqLdf36Rg6yUUlp6nBZba3YILPvA0=;
-        b=7PKNIsNi2Y7V/ZBgKGpIVpX0JWjtrXnho252QlnMAAGEX0rq7UeMPBzsR7MbfepRnt
-         kgFT0fGlajXqh53VUbqvgu7aCn0hsjLbNVgdy7icH6TxjfgNoVo9SYqSoBPfOmLABReI
-         Htqc3caW6XBD/+iJkR7/zQoDsQhc3/+KCm6QAS69zanX3UUw0QeoAvLuLMDJVhDiBY31
-         w0D053mORWDnZNTZYLoClsiyoWWHAr54sFGjlUn1PWSQ9h1dqgGgQM9dEKW29BpIDeMJ
-         pxisunWIyklFjm9l99DCbVlFKMz/ZA0l1ycAZ+sCQCcwkLPzKLuWpUQdo5hTBkcV5ASd
-         PEDg==
-X-Gm-Message-State: AOAM531xrqHbdnLNxACY3lggM4utoT8JJFBuQmHG8TUFiqvDz+tvidkK
-        1tI4iJIhmEQ1FQRmZpZ1xbXN6Zq9KUiYtdz3
-X-Google-Smtp-Source: ABdhPJznIc7xwG3NE/uaB2BrxXl+x3DkKTkC2IMY+COXNQyM/3M2BtW/RRZ+qimZ6DYI4HAndZeajQ==
-X-Received: by 2002:a05:6512:e98:: with SMTP id bi24mr1382151lfb.497.1631740796497;
-        Wed, 15 Sep 2021 14:19:56 -0700 (PDT)
-Received: from mail-lf1-f45.google.com (mail-lf1-f45.google.com. [209.85.167.45])
-        by smtp.gmail.com with ESMTPSA id p1sm115095ljn.130.2021.09.15.14.19.56
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 15 Sep 2021 14:19:56 -0700 (PDT)
-Received: by mail-lf1-f45.google.com with SMTP id c8so9843691lfi.3
-        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 14:19:56 -0700 (PDT)
-X-Received: by 2002:a2e:bc1e:: with SMTP id b30mr1593765ljf.191.1631740795868;
- Wed, 15 Sep 2021 14:19:55 -0700 (PDT)
-MIME-Version: 1.0
-References: <20210915035227.630204-1-linux@roeck-us.net> <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
- <47fcc9cc-7d2e-bc79-122b-8eccfe00d8f3@roeck-us.net> <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
- <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com>
-In-Reply-To: <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Wed, 15 Sep 2021 14:19:39 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wjynK7SSgTOvW7tfpFZZ0pzo67BsOsqtVHYtvju8F_bng@mail.gmail.com>
-Message-ID: <CAHk-=wjynK7SSgTOvW7tfpFZZ0pzo67BsOsqtVHYtvju8F_bng@mail.gmail.com>
-Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-To:     Guenter Roeck <linux@roeck-us.net>
+        h=x-gm-message-state:sender:date:from:to:cc:subject:message-id
+         :references:mime-version:content-disposition:in-reply-to;
+        bh=ksGzvLSG/bzIwuiVwvc1qXj6lhrhSA0oI9AgijGYHnE=;
+        b=E6EF3Q5zTWd+ahvsYlQSPZNK9jE4wfGozAWh3pFUbi7IjW8/g+tECuj6Z+w15Qxdgu
+         yuHl5CkPI7DpjkZmuM3k4ei115k37iYpmCUwxRdmfmBKXHweKGyFocA67GuZE5EJaH2R
+         c6+jCI9FIfK5jV0hf63/hRzB152dWeu1BQa73iWxQu9U/81K/iMLug3yQ68fKISzsouc
+         DvVlS0RdM1OK57u0cVdeFgy1VBfap24qYLrSPixeqHEXNYmqRKtY6R6Br7R8PU0Dss4p
+         m6Pp6Iu3RRX3K4gaPJPhFAKCLME+bj1Bh52O8mKf9R5WhEbGjJXdiCyzNfm4ZKvR2QWi
+         eCbg==
+X-Gm-Message-State: AOAM5325N8CSp4ZJbysN1Ft995uTuhQeiKv60+4d/LR7tFAksBYxvqC0
+        rCe+VoZcN91bfpJTHjygyQs=
+X-Google-Smtp-Source: ABdhPJy5trDub6V96dJLfGPZE5CcTNtlEsDea283NASQvaMM3CfvKy3c2V2VCuRN6ScxtjSVKcezMA==
+X-Received: by 2002:a05:6808:1481:: with SMTP id e1mr1480453oiw.5.1631745225297;
+        Wed, 15 Sep 2021 15:33:45 -0700 (PDT)
+Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
+        by smtp.gmail.com with ESMTPSA id p65sm360614oif.57.2021.09.15.15.33.43
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Wed, 15 Sep 2021 15:33:44 -0700 (PDT)
+Sender: Guenter Roeck <groeck7@gmail.com>
+Date:   Wed, 15 Sep 2021 15:33:42 -0700
+From:   Guenter Roeck <linux@roeck-us.net>
+To:     Linus Torvalds <torvalds@linux-foundation.org>
 Cc:     Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
         Matt Turner <mattst88@gmail.com>,
@@ -81,48 +71,171 @@ Cc:     Richard Henderson <rth@twiddle.net>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
+Message-ID: <20210915223342.GA1556394@roeck-us.net>
+References: <20210915035227.630204-1-linux@roeck-us.net>
+ <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
+ <47fcc9cc-7d2e-bc79-122b-8eccfe00d8f3@roeck-us.net>
+ <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wed, Sep 15, 2021 at 12:50 PM Linus Torvalds
-<torvalds@linux-foundation.org> wrote:
->
-> On Wed, Sep 15, 2021 at 12:47 PM Linus Torvalds
-> <torvalds@linux-foundation.org> wrote:
+On Wed, Sep 15, 2021 at 12:47:44PM -0700, Linus Torvalds wrote:
+> On Wed, Sep 15, 2021 at 12:35 PM Guenter Roeck <linux@roeck-us.net> wrote:
 > >
-> > What other notable issues end up being still live? I sent out that one
-> > patch for sparc, but didn't get any response to it. I'm inclined to
-> > just apply it (the 'struct mdesc_hdr' pointer misuse one).
->
-> Oh, I forgot about the qnx4 one. That happens on sparc, possibly
-> others, but not on x86-64.
->
-> I'll go look at that patch too.
+> > On a side note, we may revive the parisc patch. Helge isn't entirely
+> > happy with the other solution for parisc; it is quite invasive and
+> > touches a total of 19 files if I counted correctly.
+> 
+> Ok, my suggestion to use the linker was not a "do it this way", it
+> really was just a "maybe alternate approach". So no objections if
+> absolute_pointer() ends up being the simpler solution.
+> 
+> What other notable issues end up being still live? I sent out that one
+> patch for sparc, but didn't get any response to it. I'm inclined to
+> just apply it (the 'struct mdesc_hdr' pointer misuse one).
+> 
 
-Ok, I didn't love any of the patches I saw for the qnx4 problem, so I
-silenced that warning with a new patch of my own. Like the sparc64
-case, the fix is to describe more extensively to the compiler what the
-code is actually doing.
+You mean allmodconfig build failures ? There is still a bunch.
+For v5.15-rc1-27-gb7213ffa0e58:
 
-I think it ended up making it clearer what is going on to humans too.
-Although that may be the old "peeing in the snow" effect - it looks
-more understandable to me only because I spent so much time trying to
-understand what it does, and then wrote the fix based on that possibly
-flawed understanding. So of course I find it more understandable.
+alpha:
 
-Looking at the qnx4 code-base history, I don't think it has gotten any
-actual development outside of cleanups in the git history timeframe,
-which makes me suspect nobody uses this code.
+drivers/net/ethernet/3com/3c515.c: In function 'corkscrew_start_xmit':
+drivers/net/ethernet/3com/3c515.c:1053:22: error:
+	cast from pointer to integer of different size
 
-But hey, maybe it just works so well for the very specialized user base ...
+That is a typecast from a pointer to an int, which is then sent to an
+i/o port. That driver should probably be disabled for 64-bit builds.
 
-Anyway, I pushed it out. I have a clean "allmodconfig" build on all
-the architectures I tested, but I didn't test _that_ many.  sparc64,
-arm64, powerpc64.
+---
 
-Lots of dts warnings (which aren't fatal), though. Particularly for
-the powerpc64 build.
+drivers/net/wan/lmc/lmc_main.c: In function 'lmc_softreset':
+drivers/net/wan/lmc/lmc_main.c:1782:50: error:
+	passing argument 1 of 'virt_to_bus' discards 'volatile' qualifier from pointer target type
 
-             Linus
+and several other similar errors.
+
+patch:
+	https://lore.kernel.org/lkml/20210909050033.1564459-1-linux@roeck-us.net/
+Arnd sent an Ack, but it doesn't look like it was picked up.
+
+---
+drivers/net/hamradio/6pack.c: In function 'sixpack_open':
+drivers/net/hamradio/6pack.c:71:41: error:
+	unsigned conversion from 'int' to 'unsigned char' changes value from '256' to '0'
+
+patch:
+	https://lore.kernel.org/lkml/20210909035743.1247042-1-linux@roeck-us.net/
+David says it is wrong, and I don't know the code well enough
+to feel comfortable touching that code. That may be a lost cause.
+"depends on BROKEN if ALPHA" may be appropriate here.
+
+===
+arm:
+
+drivers/cpufreq/vexpress-spc-cpufreq.c: In function 've_spc_cpufreq_exit':
+drivers/cpufreq/vexpress-spc-cpufreq.c:454:13: error: unused variable 'cur_cluster'
+
+patch:
+	https://patchwork.kernel.org/project/linux-arm-kernel/patch/20210909184714.153068-1-linux@roeck-us.net/
+
+===
+m68k:
+
+arch/m68k/mvme147/config.c: In function 'mvme147_hwclk':
+arch/m68k/mvme147/config.c:174:2: error: #warning check me! [-Werror=cpp]
+  174 | #warning check me!
+      |  ^~~~~~~
+arch/m68k/mvme16x/config.c: In function 'mvme16x_hwclk':
+arch/m68k/mvme16x/config.c:439:2: error: #warning check me! [-Werror=cpp]
+
+drivers/misc/altera-stapl/altera-lpt.c: In function 'byteblaster_write':
+arch/m68k/include/asm/raw_io.h:30:32: error:
+	cast to pointer from integer of different size
+
+[ and several other similar problems ]
+
+Patches should be queued in m68k tree.
+
+===
+mips:
+
+In file included from arch/mips/include/asm/sibyte/sb1250.h:28,
+                 from drivers/watchdog/sb_wdog.c:58:
+arch/mips/include/asm/sibyte/bcm1480_scd.h:261: error: "M_SPC_CFG_CLEAR" redefined
+
+and similar. Patch:
+
+https://patchwork.kernel.org/project/linux-watchdog/patch/20210913073220.1159520-1-liu.yun@linux.dev/
+
+I'll need to get Wim to push it.
+
+===
+parisc:
+
+arch/parisc/kernel/setup.c: In function 'start_parisc':
+arch/parisc/kernel/setup.c:387:28: error:
+	'__builtin_memcmp_eq' specified bound 8 exceeds source size 0
+
+Waiting for the absolute_pointer patch
+
+===
+riscv32, riscv64:
+
+drivers/gpu/drm/rockchip/cdn-dp-core.c:1126:12: error: 'cdn_dp_resume' defined but not used
+
+patch:
+
+https://patchwork.kernel.org/project/linux-rockchip/patch/20200925215524.2899527-3-sam@ravnborg.org/
+
+Looks like that and similar patches were submitted several times,
+but never picked up.
+
+===
+s390:
+
+drivers/spi/spi-tegra20-slink.c:1200:12: error:
+	'tegra_slink_runtime_resume' defined but not used
+drivers/spi/spi-tegra20-slink.c:1188:12: error:
+	'tegra_slink_runtime_suspend' defined but not used
+
+patch:
+	https://patchwork.kernel.org/project/spi-devel-general/patch/20210907045358.2138282-1-linux@roeck-us.net/
+
+marked as accepted, so should hopefully find its way upstream soon.
+
+---
+lib/test_kasan.c: In function 'kasan_alloca_oob_right':
+lib/test_kasan.c:782:1: error: 'kasan_alloca_oob_right' uses dynamic stack allocation
+
+and a couple of similar errors. s390 has a special configuration option
+to enable warnings on dynamic stack allocations. A patch to remove that
+option is pending according to s390 maintainers.
+
+---
+drivers/gpu/drm/rockchip/cdn-dp-core.c:1126:12: error: 'cdn_dp_resume' defined but not used
+
+Same as for riscv.
+
+===
+xtensa:
+
+Various stack frame errors (more than 50).
+
+drivers/video/fbdev/omap2/omapfb/dss/dsi.c: In function 'dsi_dump_dsidev_irqs':
+drivers/video/fbdev/omap2/omapfb/dss/dsi.c:1623:1: error:
+	the frame size of 1104 bytes is larger than 1024 bytes
+
+Patch:
+
+https://lore.kernel.org/lkml/20210912025235.3514761-1-linux@roeck-us.net/
+
+Should find its way upstream through mmotm.
+
+Guenter
