@@ -2,66 +2,72 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-16.9 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
-	MAILING_LIST_MULTI,NICE_REPLY_A,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,
-	USER_AGENT_SANE_1 autolearn=unavailable autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-5.7 required=3.0 tests=BAYES_00,DKIM_SIGNED,
+	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
+	SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED autolearn=no autolearn_force=no
+	version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id EA4BEC433F5
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 14:03:32 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 879F6C433FE
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 19:19:19 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id D02CF611C1
-	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 14:03:32 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 5A58A61165
+	for <linux-sparse@archiver.kernel.org>; Wed, 15 Sep 2021 19:19:19 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236295AbhIOOEv (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 15 Sep 2021 10:04:51 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:53850 "EHLO
+        id S231439AbhIOTUh (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 15 Sep 2021 15:20:37 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:42662 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S233545AbhIOOEu (ORCPT
+        with ESMTP id S231153AbhIOTUg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 15 Sep 2021 10:04:50 -0400
-Received: from mail-oo1-xc30.google.com (mail-oo1-xc30.google.com [IPv6:2607:f8b0:4864:20::c30])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 94F9EC061574;
-        Wed, 15 Sep 2021 07:03:31 -0700 (PDT)
-Received: by mail-oo1-xc30.google.com with SMTP id q26-20020a4adc5a000000b002918a69c8eeso904251oov.13;
-        Wed, 15 Sep 2021 07:03:31 -0700 (PDT)
+        Wed, 15 Sep 2021 15:20:36 -0400
+Received: from mail-lf1-x12f.google.com (mail-lf1-x12f.google.com [IPv6:2a00:1450:4864:20::12f])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id DD644C061574
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:19:16 -0700 (PDT)
+Received: by mail-lf1-x12f.google.com with SMTP id i7so8381680lfr.13
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:19:16 -0700 (PDT)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=sender:subject:to:cc:references:from:message-id:date:user-agent
-         :mime-version:in-reply-to:content-language:content-transfer-encoding;
-        bh=dXV0TdJQZj6j+f/Hi7EIzy0MEGNbxXGsvCh8JJLlODg=;
-        b=WPi3IOT8Z+un52mSPLE4sfqcvjdnW6YB61L3883DmVLJCseKT0/X5+UxUhOCmGoe6Z
-         HIGh4/nwJMlyK+3dCdARsx7O83eqW0mxZ8VZ0aedkBHAaEN7l82Gy6kEnotJu0yF+MU+
-         5a+7S37ulW2eIr6nSMyrGUZyXeMv3h4t8ZlzhCuIPCpxyX7J/TepZavW275hbZyhW2Gk
-         YOa17FQn9TO4Gk7XgljwpYzkzDT+C2SZhOQvgqFsx4nDUuzNklzbH8Hgi4XLuqrfB5c3
-         eMXBKePg1BOAfA5WW84beOgutATln1NmsNbVFEakI6+C4NMzrKEuxWlWU4otT5aApJjU
-         fABw==
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=hRAe5/tE1Mx+glbEumA/10LHbf2sLTrpOcfg2d46p4U=;
+        b=VWatl0Tg6Rs2+8cyQ1nNI7llz+Jwjnz45GyA7Ialu8h0m7yH1LKoqAuI6k/Ywlygil
+         KDQQX525bUWsnQP59sCymg2Xi7UR5AijXzfqK2/Z2O+QbzWUet5is4fYAxM3ieQOdqUi
+         Q6n8XepF4xgcAuR6YdqHkkzo9csOkkBGuEk5Y=
 X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=1e100.net; s=20210112;
-        h=x-gm-message-state:sender:subject:to:cc:references:from:message-id
-         :date:user-agent:mime-version:in-reply-to:content-language
-         :content-transfer-encoding;
-        bh=dXV0TdJQZj6j+f/Hi7EIzy0MEGNbxXGsvCh8JJLlODg=;
-        b=lf/lxhHvy3JK2aJPkgydBUsoemjtuR+KI0105Nupx/NpGuVu7JvyzM8/6S6qSTxVBm
-         +IiG59FHPSbr5em/T4oTXqk6LBm04h14aYmPlOEHC0QCXiARbVnBi54Ah9N7C5XwwhEd
-         CPibysbq7N3TpOWbnKoHZBKlEL0/G7F9VNYeOhJXuub9kImyENfMwi5g1XRdUOomDNsH
-         d2E0N4ZizxQ+mCZBzsmskqsIaFaPkbTB02/c1kPr//p3EOz9cWQxbQs7iB+UEIBzvnKj
-         k+DvayEBKGAlHWj5N5whcl1QED2WexNkOcANgzEWnwgJ8qZ8vIreD+ltgXUi6kkTOJBo
-         5S7g==
-X-Gm-Message-State: AOAM531e8Bm3hWyaq8pqa1iIqIRKjkdExRXGL08OFZjzUTRAiM9P5rO/
-        uWN1KPgVr65ZW0dDMfcLbTaQwFxSQ0s=
-X-Google-Smtp-Source: ABdhPJxZWw0J/8Mllmga07N63Y8sT9KQNPV3ZJtz3dgQOrFH3hdHQmv0ainu2VlCw9qtyk8srn1muQ==
-X-Received: by 2002:a05:6820:555:: with SMTP id n21mr18699324ooj.56.1631714609412;
-        Wed, 15 Sep 2021 07:03:29 -0700 (PDT)
-Received: from server.roeck-us.net ([2600:1700:e321:62f0:329c:23ff:fee3:9d7c])
-        by smtp.gmail.com with ESMTPSA id v16sm11201oou.45.2021.09.15.07.03.27
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=hRAe5/tE1Mx+glbEumA/10LHbf2sLTrpOcfg2d46p4U=;
+        b=dTpGRY1sCTLkCz8Gkm1tWs615TDFQn8ZNys4CRnofRPCJqSbFLFeZm1q4mZRGLbuDF
+         Pnps/7ZbyL0kuz2KNuZW/kzM5nMkd2EBKS3YyCxtGIA8kh2V4YpXSiZdiQPa8jYSEIoT
+         bAv+UkfN+12+8lP0t9I5jQufdf3YNL/pHUguUgMmC6Wuwb4mU+L0JHfbOgaJgin6lwpb
+         HMEJRfiiPepcQIzPio2HBYhc/jroebLXBiSMNmTIzRqYVyz+A3E13alHbhU/D4nZ3C7i
+         B1Y7qomaoRxhSZSg9a723TXjG7OMMxh6UpuXM5BvZOWQ0T7cERAubAwQ8ZqTIDzas8VO
+         cIgg==
+X-Gm-Message-State: AOAM53345MaEq4kPWKUjKErA1nDYLp5nkk0z05SzJm2/GmX8RyQaqi3j
+        NhOmZt1rnzkZlI8hBUto6ckNXlyJMg8y+7TQw2k=
+X-Google-Smtp-Source: ABdhPJz382k3KzqJkgEB9rVZFxluAxDRaaCjHX2/zrSKdf1w5wv2djxFoPTYu102UBezYSvWokaOPg==
+X-Received: by 2002:a05:6512:c15:: with SMTP id z21mr1121382lfu.193.1631733554952;
+        Wed, 15 Sep 2021 12:19:14 -0700 (PDT)
+Received: from mail-lf1-f43.google.com (mail-lf1-f43.google.com. [209.85.167.43])
+        by smtp.gmail.com with ESMTPSA id k27sm95957ljn.72.2021.09.15.12.19.14
+        for <linux-sparse@vger.kernel.org>
         (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Wed, 15 Sep 2021 07:03:28 -0700 (PDT)
-Sender: Guenter Roeck <groeck7@gmail.com>
-Subject: Re: [PATCH v2 1/4] compiler.h: Introduce absolute_pointer macro
-To:     Geert Uytterhoeven <geert@linux-m68k.org>
-Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
-        Richard Henderson <rth@twiddle.net>,
+        Wed, 15 Sep 2021 12:19:14 -0700 (PDT)
+Received: by mail-lf1-f43.google.com with SMTP id i4so8553188lfv.4
+        for <linux-sparse@vger.kernel.org>; Wed, 15 Sep 2021 12:19:14 -0700 (PDT)
+X-Received: by 2002:a05:6512:94e:: with SMTP id u14mr1121103lft.173.1631733554128;
+ Wed, 15 Sep 2021 12:19:14 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210915035227.630204-1-linux@roeck-us.net>
+In-Reply-To: <20210915035227.630204-1-linux@roeck-us.net>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Wed, 15 Sep 2021 12:18:58 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
+Message-ID: <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
+To:     Guenter Roeck <linux@roeck-us.net>
+Cc:     Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
         Matt Turner <mattst88@gmail.com>,
         "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
@@ -69,63 +75,33 @@ Cc:     Linus Torvalds <torvalds@linux-foundation.org>,
         "David S . Miller" <davem@davemloft.net>,
         Jakub Kicinski <kuba@kernel.org>,
         alpha <linux-alpha@vger.kernel.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        Parisc List <linux-parisc@vger.kernel.org>,
-        netdev <netdev@vger.kernel.org>, linux-sparse@vger.kernel.org
-References: <20210915035227.630204-1-linux@roeck-us.net>
- <20210915035227.630204-2-linux@roeck-us.net>
- <CAMuHMdXZcrjGAE5OOipKsYpEgk9AZ_hrWKh+v81FMBtQTBv2LA@mail.gmail.com>
-From:   Guenter Roeck <linux@roeck-us.net>
-Message-ID: <ab67dccf-cf29-523d-3cf7-7554c493dcd1@roeck-us.net>
-Date:   Wed, 15 Sep 2021 07:03:26 -0700
-User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:78.0) Gecko/20100101
- Thunderbird/78.13.0
-MIME-Version: 1.0
-In-Reply-To: <CAMuHMdXZcrjGAE5OOipKsYpEgk9AZ_hrWKh+v81FMBtQTBv2LA@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+        linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
+        Sparse Mailing-list <linux-sparse@vger.kernel.org>
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On 9/15/21 12:13 AM, Geert Uytterhoeven wrote:
-> Hi Günter,
-> 
-> On Wed, Sep 15, 2021 at 5:52 AM Guenter Roeck <linux@roeck-us.net> wrote:
->> absolute_pointer() disassociates a pointer from its originating symbol
->> type and context. Use it to prevent compiler warnings/errors such as
->>
->> drivers/net/ethernet/i825xx/82596.c: In function 'i82596_probe':
->> ./arch/m68k/include/asm/string.h:72:25: error:
->>          '__builtin_memcpy' reading 6 bytes from a region of size 0
->>                  [-Werror=stringop-overread]
->>
->> Such warnings may be reported by gcc 11.x for string and memory operations
->> on fixed addresses.
->>
->> Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
->> Signed-off-by: Guenter Roeck <linux@roeck-us.net>
->> ---
->> v2: No change
->>
->>   include/linux/compiler.h | 2 ++
->>   1 file changed, 2 insertions(+)
->>
->> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
->> index b67261a1e3e9..3d5af56337bd 100644
->> --- a/include/linux/compiler.h
->> +++ b/include/linux/compiler.h
->> @@ -188,6 +188,8 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
->>       (typeof(ptr)) (__ptr + (off)); })
->>   #endif
->>
->> +#define absolute_pointer(val)  RELOC_HIDE((void *)(val), 0)
-> 
-> I guess we're not worried about "val" being evaluated multiple
-> times inside RELOC_HIDE(), as this is mainly intended for constants?
-> 
+On Tue, Sep 14, 2021 at 8:52 PM Guenter Roeck <linux@roeck-us.net> wrote:
+>
+> This patch series introduces absolute_pointer() to fix the problem.
+> absolute_pointer() disassociates a pointer from its originating symbol
+> type and context, and thus prevents gcc from making assumptions about
+> pointers passed to memory operations.
 
-No, we are not. It is quite similar to RELOC_HIDE() in that regard.
+Ok, I've applied this to my tree.
 
-Guenter
+I note that the physical BOOT_PCB addresses in the alpha setup.h file
+might be useful for things like MILO in user space, but since I
+couldn't even find MILO sources any more, I couldn't really check.
+
+I suspect alpha is basically on life support and presumably nobody
+would ever compile a bootloader anyway, so it's unlikely to matter.
+
+If somebody does find any issues, we'll know better and we can ask
+where the user space sources are that might use that alpha setup.h
+file.
+
+                Linus
