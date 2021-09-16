@@ -6,33 +6,67 @@ X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
 	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
 	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 551F4C433EF
-	for <linux-sparse@archiver.kernel.org>; Thu, 16 Sep 2021 07:08:12 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 7BFFBC433F5
+	for <linux-sparse@archiver.kernel.org>; Thu, 16 Sep 2021 17:53:29 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3C3DC61029
-	for <linux-sparse@archiver.kernel.org>; Thu, 16 Sep 2021 07:08:12 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 65887610A4
+	for <linux-sparse@archiver.kernel.org>; Thu, 16 Sep 2021 17:53:29 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S234568AbhIPHJ2 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Thu, 16 Sep 2021 03:09:28 -0400
-Received: from mail.alarsen.net ([144.76.18.233]:52260 "EHLO mail.alarsen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S232254AbhIPHJ1 (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Thu, 16 Sep 2021 03:09:27 -0400
-X-Greylist: delayed 345 seconds by postgrey-1.27 at vger.kernel.org; Thu, 16 Sep 2021 03:09:25 EDT
-Received: from oscar.alarsen.net (unknown [IPv6:fd8b:531:bccf:96:39a7:83c1:5247:58d7])
-        by joe.alarsen.net (Postfix) with ESMTPS id AAC7A180255;
-        Thu, 16 Sep 2021 09:02:17 +0200 (CEST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alarsen.net; s=joe;
-        t=1631775737; bh=oaWiy3941asGmQdU0t8Spdb3xrM4VKJq8AFtrBfhgJw=;
-        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=FA8bIvnmYzDGl1DiFArlpFrsxGozZYdTiPu3FAjfQ8BBaJL01aFd1YVLlrzsz8TEn
-         dv+GKlWr7ihbAGrWebwbn410wk8qOwdKRBK7xP0k6mB2I0HXtTuPbJCfnbgNIZytC4
-         jPDPqG0ytTKEtbkfS0IX9JQSPfWvwSGyORQqGtaA=
-Received: from oscar.localnet (localhost [IPv6:::1])
-        by oscar.alarsen.net (Postfix) with ESMTP id 9AAD227C050D;
-        Thu, 16 Sep 2021 09:02:17 +0200 (CEST)
-From:   Anders Larsen <al@alarsen.net>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
+        id S233662AbhIPRyn (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Thu, 16 Sep 2021 13:54:43 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37486 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1357085AbhIPRvY (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Thu, 16 Sep 2021 13:51:24 -0400
+Received: from mail-lf1-x12b.google.com (mail-lf1-x12b.google.com [IPv6:2a00:1450:4864:20::12b])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 0DB3BC09B116
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Sep 2021 09:25:57 -0700 (PDT)
+Received: by mail-lf1-x12b.google.com with SMTP id p29so20711234lfa.11
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Sep 2021 09:25:56 -0700 (PDT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=linux-foundation.org; s=google;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc;
+        bh=+MrqPwjGprB21xOrKUeLYED8somKhoDI07GyEYlbbo4=;
+        b=giK/CoBDhVKoZODX7QaMWenK7M0Ef7/VMrMC+JpDOGq7hzKKMIt4+9kYx+W6zhvGu1
+         ySoWjCQyGMBQPbPsmJ+MdLSpu5kCyHc8//rajgrLTwILPMxsnm4mLr03RxEorH1wc86u
+         czJJF+ua9fGukgNanz1FEl1kMG76Vh0A/SWxI=
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc;
+        bh=+MrqPwjGprB21xOrKUeLYED8somKhoDI07GyEYlbbo4=;
+        b=otcGdnI6Hfi2iE/1cjO6CZEDTzDSJ4HtOUE6dxj3/6UfW/LsuDSJRkJmmeOMr0/jpb
+         pq6ybl0GSkS7J2jzc0Fn6R7clv/M1gvLjZ65rUViZJ8EImzKLMZvJ3yCQuKWYglxMw2w
+         ISOXh+/ton4ZYfac3DIrJHlMgQsSUtMQnK+atferMDbKByGNJrn4IAI3opn9uxKnY8y/
+         OMqp16n5rwWwW8Dfk6sYorwo0AkG0MoxtK58A9CDnZNEahCfjoGzD8tKIfrck9nCMf5X
+         3EzRa36VrvT1/tNeIzW//PLF1ZjkhE8VUD3qD0birXcEaytV0R1jhoCqMr+YDvXXRKws
+         8sUg==
+X-Gm-Message-State: AOAM531UesCEYs56Q3x15M+BatytvrNgbiFiqkc90F4NyIJQ7TsT4lW1
+        z3GIkz7Tiqb/iwrfI7FugnneHNA7fZdZYxV5
+X-Google-Smtp-Source: ABdhPJwvyEuAWuwVDI8J9kivzUm2ftkS5GDyB1v71SPsGJg20sGY0Y0Q4YiIybOH39LHIjFU0lsppQ==
+X-Received: by 2002:a05:651c:17a5:: with SMTP id bn37mr5653074ljb.514.1631809555465;
+        Thu, 16 Sep 2021 09:25:55 -0700 (PDT)
+Received: from mail-lf1-f49.google.com (mail-lf1-f49.google.com. [209.85.167.49])
+        by smtp.gmail.com with ESMTPSA id k12sm387234ljm.65.2021.09.16.09.25.54
+        for <linux-sparse@vger.kernel.org>
+        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
+        Thu, 16 Sep 2021 09:25:55 -0700 (PDT)
+Received: by mail-lf1-f49.google.com with SMTP id bq5so20908978lfb.9
+        for <linux-sparse@vger.kernel.org>; Thu, 16 Sep 2021 09:25:54 -0700 (PDT)
+X-Received: by 2002:a2e:8185:: with SMTP id e5mr5452535ljg.31.1631809554490;
+ Thu, 16 Sep 2021 09:25:54 -0700 (PDT)
+MIME-Version: 1.0
+References: <20210915035227.630204-1-linux@roeck-us.net> <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com>
+ <CAHk-=wjynK7SSgTOvW7tfpFZZ0pzo67BsOsqtVHYtvju8F_bng@mail.gmail.com> <5497691.DvuYhMxLoT@alarsen.net>
+In-Reply-To: <5497691.DvuYhMxLoT@alarsen.net>
+From:   Linus Torvalds <torvalds@linux-foundation.org>
+Date:   Thu, 16 Sep 2021 09:25:38 -0700
+X-Gmail-Original-Message-ID: <CAHk-=wh84ks6FN2fBWrGZNKNhOmTZL-r5xZG7gYZ==jESG2GgA@mail.gmail.com>
+Message-ID: <CAHk-=wh84ks6FN2fBWrGZNKNhOmTZL-r5xZG7gYZ==jESG2GgA@mail.gmail.com>
+Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
+To:     Anders Larsen <al@alarsen.net>
 Cc:     Guenter Roeck <linux@roeck-us.net>,
         Richard Henderson <rth@twiddle.net>,
         Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
@@ -46,36 +80,76 @@ Cc:     Guenter Roeck <linux@roeck-us.net>,
         Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
         linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
         Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-Date:   Thu, 16 Sep 2021 09:02:17 +0200
-Message-ID: <5497691.DvuYhMxLoT@alarsen.net>
-In-Reply-To: <CAHk-=wjynK7SSgTOvW7tfpFZZ0pzo67BsOsqtVHYtvju8F_bng@mail.gmail.com>
-References: <20210915035227.630204-1-linux@roeck-us.net> <CAHk-=whSkMh9mc7+OSBZZvpoEEJmS6qY7kX3qixEXTLKGc=wgw@mail.gmail.com> <CAHk-=wjynK7SSgTOvW7tfpFZZ0pzo67BsOsqtVHYtvju8F_bng@mail.gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: text/plain; charset="UTF-8"
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Wednesday, 2021-09-15 23:19 Linus Torvalds wrote:
-> Ok, I didn't love any of the patches I saw for the qnx4 problem, so I
-> silenced that warning with a new patch of my own. Like the sparc64
-> case, the fix is to describe more extensively to the compiler what the
-> code is actually doing.
+On Thu, Sep 16, 2021 at 12:02 AM Anders Larsen <al@alarsen.net> wrote:
+>
+> On Wednesday, 2021-09-15 23:19 Linus Torvalds wrote:
+> >
+> > But hey, maybe it just works so well for the very specialized user base ...
+>
+> it's actually the latter (although I guess the user base is shrinking)
 
-thanks, looks good to me, too!
+Hey, so if it's actively used, maybe you can answer a question or two
+that I have just because I looked at the code..
 
-> Looking at the qnx4 code-base history, I don't think it has gotten any
-> actual development outside of cleanups in the git history timeframe,
-> which makes me suspect nobody uses this code.
-> 
-> But hey, maybe it just works so well for the very specialized user base ...
+In particular, the inode number calculation is odd. Is there a reason
+for the "-1"? Because iboth the link case and the direct inode case
+have it, but t's a _different_ "-1":
 
-it's actually the latter (although I guess the user base is shrinking)
+For the "inode_entry", it does
 
-Cheers
-Anders
+                ino = blknum * QNX4_INODES_PER_BLOCK + ix - 1;
 
+but it's worth noting that "ix" is zero-based (index within the
+block), so this kind of oddly removes one from a zero-based thing, and
+the 'ino' for the very first entry ends up being -1.
 
+Of course, it's possible that the first entry is always empty, but it
+does seem a bit odd.
 
+For the "link_info" case, it does
+
+            ino = ( le32_to_cpu(de->link.dl_inode_blk) - 1 ) *
+                    QNX4_INODES_PER_BLOCK +
+                    de->link.dl_inode_ndx;
+
+so now it takes the _block_ index, and does that "-1" on it, and then
+multiplies it by the "entries per block" number, and adds the index.
+
+So now if both are zero, the inode number is -8, not -1.
+
+But all of this matches what the *lookup* code does. It's very odd, though.
+
+But to make it stranger, then in "qnx4_iget()", the calculations all
+makes sense. There it just does "take the inode number, and look up
+block and index into the block using it".
+
+Very strange and confusing. Because it means that iget() seems to look
+up a *different* inode entry than "lookup" and "readdir" actually look
+at.
+
+I must be missing something. I obviously didn't touch any of this
+logic, I was just doing the "make the type system clearer for the
+compiler".
+
+Also, I have to say, since I was looking at compiler output, the
+calculations in readdir() are made much worse by the fact that the
+dir->pos is a "loff_t". That's signed. And then you use "%" to get the
+index within a block. Using '%' instead of bitops is fairly
+equivalent, but only for
+
+ (a) unsigned types
+
+ (b) when the divisor is a compile-time power-of-2
+
+In the qnx4 case, (b) is true, but (a) is not.
+
+Not a big deal. But usually, I tell people to avoid '% ENTRIES',
+because it really has very different behavior from '& MASK' for signed
+numbers.
+
+                  Linus
