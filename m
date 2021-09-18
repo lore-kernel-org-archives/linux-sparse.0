@@ -2,114 +2,225 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-2.2 required=3.0 tests=BAYES_00,
-	FREEMAIL_FORGED_FROMDOMAIN,FREEMAIL_FROM,HEADER_FROM_DIFFERENT_DOMAINS,
-	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,USER_AGENT_SANE_1 autolearn=no
+X-Spam-Status: No, score=-13.8 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS autolearn=unavailable
 	autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 38DF9C433EF
-	for <linux-sparse@archiver.kernel.org>; Sat, 18 Sep 2021 09:52:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id B55DAC433F5
+	for <linux-sparse@archiver.kernel.org>; Sat, 18 Sep 2021 13:51:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 0DA3160FBF
-	for <linux-sparse@archiver.kernel.org>; Sat, 18 Sep 2021 09:52:11 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 945DB6126A
+	for <linux-sparse@archiver.kernel.org>; Sat, 18 Sep 2021 13:51:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S236518AbhIRJxd (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 18 Sep 2021 05:53:33 -0400
-Received: from smtp-1.orcon.net.nz ([60.234.4.34]:47989 "EHLO
-        smtp-1.orcon.net.nz" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S232402AbhIRJxc (ORCPT
+        id S236424AbhIRNw5 (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 18 Sep 2021 09:52:57 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:36434 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S236010AbhIRNw4 (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 18 Sep 2021 05:53:32 -0400
-Received: from [121.99.228.40] (port=57284 helo=tower)
-        by smtp-1.orcon.net.nz with esmtpa (Exim 4.90_1)
-        (envelope-from <mcree@orcon.net.nz>)
-        id 1mRX0V-0006SB-Bq; Sat, 18 Sep 2021 21:51:40 +1200
-Date:   Sat, 18 Sep 2021 21:51:34 +1200
-From:   Michael Cree <mcree@orcon.net.nz>
-To:     Linus Torvalds <torvalds@linux-foundation.org>
-Cc:     Guenter Roeck <linux@roeck-us.net>,
-        Richard Henderson <rth@twiddle.net>,
-        Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
-        Matt Turner <mattst88@gmail.com>,
-        "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        "David S . Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        alpha <linux-alpha@vger.kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>
+        Sat, 18 Sep 2021 09:52:56 -0400
+X-Greylist: delayed 2387 seconds by postgrey-1.37 at lindbergh.monkeyblade.net; Sat, 18 Sep 2021 06:51:33 PDT
+Received: from wp441.webpack.hosteurope.de (wp441.webpack.hosteurope.de [IPv6:2a01:488:42:1000:50ed:85d2::])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 01374C061574;
+        Sat, 18 Sep 2021 06:51:32 -0700 (PDT)
+Received: from [2a03:7846:b79f:101:21c:c4ff:fe1f:fd93] (helo=valdese.nms.ulrich-teichert.org); authenticated
+        by wp441.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        id 1mRa7q-0001YE-NU; Sat, 18 Sep 2021 15:11:26 +0200
+Received: from valdese.nms.ulrich-teichert.org (localhost [127.0.0.1])
+        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Debian-8+deb9u1) with ESMTPS id 18IDBPWt005217
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Sat, 18 Sep 2021 15:11:25 +0200
+Received: (from ut@localhost)
+        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Submit) id 18IDBKQB005215;
+        Sat, 18 Sep 2021 15:11:20 +0200
+Message-Id: <202109181311.18IDBKQB005215@valdese.nms.ulrich-teichert.org>
 Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-Message-ID: <20210918095134.GA5001@tower>
-Mail-Followup-To: Michael Cree <mcree@orcon.net.nz>,
-        Linus Torvalds <torvalds@linux-foundation.org>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Richard Henderson <rth@twiddle.net>,
-        Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
-        Matt Turner <mattst88@gmail.com>,
-        "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        "David S . Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        alpha <linux-alpha@vger.kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-parisc@vger.kernel.org, Netdev <netdev@vger.kernel.org>,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>
-References: <20210915035227.630204-1-linux@roeck-us.net>
- <CAHk-=wjXr+NnNPTorhaW81eAbdF90foVo-5pQqRmXZi-ZGaX6Q@mail.gmail.com>
- <47fcc9cc-7d2e-bc79-122b-8eccfe00d8f3@roeck-us.net>
- <CAHk-=wgdEHPm6vGcJ_Zr-Q_p=Muv1Oby5H2+6QyPGxiZ7_Wv+w@mail.gmail.com>
- <20210915223342.GA1556394@roeck-us.net>
- <CAHk-=wgQ4jsPadbo4kr4=UKn0nR+UvWUZF9Q-xv0QUXb33SVRA@mail.gmail.com>
+To:     mcree@orcon.net.nz (Michael Cree)
+Date:   Sat, 18 Sep 2021 15:11:20 +0200 (CEST)
+Cc:     torvalds@linux-foundation.org (Linus Torvalds),
+        linux@roeck-us.net (Guenter Roeck),
+        rth@twiddle.net (Richard Henderson),
+        ink@jurassic.park.msu.ru (Ivan Kokshaysky),
+        mattst88@gmail.com (Matt Turner),
+        James.Bottomley@hansenpartnership.com (James E . J . Bottomley),
+        deller@gmx.de (Helge Deller),
+        davem@davemloft.net (David S . Miller),
+        kuba@kernel.org (Jakub Kicinski),
+        linux-alpha@vger.kernel.org (alpha),
+        geert@linux-m68k.org (Geert Uytterhoeven),
+        linux-kernel@vger.kernel.org (Linux Kernel Mailing List),
+        linux-parisc@vger.kernel.org, netdev@vger.kernel.org (Netdev),
+        linux-sparse@vger.kernel.org (Sparse Mailing-list)
+In-Reply-To: <20210918095134.GA5001@tower>
+From:   Ulrich Teichert <krypton@ulrich-teichert.org>
+X-Mailer: ELM [version 2.5 PL8]
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHk-=wgQ4jsPadbo4kr4=UKn0nR+UvWUZF9Q-xv0QUXb33SVRA@mail.gmail.com>
-User-Agent: Mutt/1.10.1 (2018-07-13)
-X-GeoIP: NZ
-X-Spam_score: -2.9
-X-Spam_score_int: -28
-X-Spam_bar: --
+Content-Transfer-Encoding: 7bit
+X-bounce-key: webpack.hosteurope.de;ut@ulrich-teichert.org;1631973093;f71a9507;
+X-HE-SMSGID: 1mRa7q-0001YE-NU
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Thu, Sep 16, 2021 at 11:35:36AM -0700, Linus Torvalds wrote:
-> On Wed, Sep 15, 2021 at 3:33 PM Guenter Roeck <linux@roeck-us.net> wrote:
-> >
-> > drivers/net/ethernet/3com/3c515.c: In function 'corkscrew_start_xmit':
-> > drivers/net/ethernet/3com/3c515.c:1053:22: error:
-> >         cast from pointer to integer of different size
-> >
-> > That is a typecast from a pointer to an int, which is then sent to an
-> > i/o port. That driver should probably be disabled for 64-bit builds.
-> 
-> Naah. I think the Jensen actually had an ISA slot. Came with a
-> whopping 8MB too, so the ISA DMA should work just fine.
-> 
-> Or maybe it was EISA only? I really don't remember.
-> 
-> It's possible that alpha should get rid of the ISA config option, and
-> use ISA_BUS instead. That would be the proper config if there aren't
-> actually any ISA _slots_, and it would disable the 3c515 driver.
-> 
-> But it turns out that the compile error is easy to fix. Just make it
-> use isa_virt_to_bus(), which that driver does elsewhere anyway.
-> 
-> I have no way - or interest - to test that on real hardware, but I did
-> check that if I relax the config I can at least build it cleanly on
-> x86-64 with that change.
-> 
-> It can't make matters worse, and it's the RightThing(tm).
-> 
-> Since Micheal replied about that other alpha issue, maybe he knows
-> about the ISA slot situation too?
+Hi,
 
-Ah, yeah, not really.  I am not familiar with the Jensen hardware,
-and have never played around with the EISA slot on the Alphas I do
-have.
+> 
+> On Thu, Sep 16, 2021 at 11:35:36AM -0700, Linus Torvalds wrote:
+> > On Wed, Sep 15, 2021 at 3:33 PM Guenter Roeck <linux@roeck-us.net> wrote:
+> > >
+> > > drivers/net/ethernet/3com/3c515.c: In function 'corkscrew_start_xmit':
+> > > drivers/net/ethernet/3com/3c515.c:1053:22: error:
+> > >         cast from pointer to integer of different size
+> > >
+> > > That is a typecast from a pointer to an int, which is then sent to an
+> > > i/o port. That driver should probably be disabled for 64-bit builds.
+> > 
+> > Naah. I think the Jensen actually had an ISA slot. Came with a
+> > whopping 8MB too, so the ISA DMA should work just fine.
+> > 
+> > Or maybe it was EISA only? I really don't remember.
 
-Cheers
-Michael.
+It's EISA only. I've made some pictures of a somewhat dusty inside of
+a Jensen with 4 EISA cards (from bottom to top: SCSI, video, 2x network):
+
+http://alpha.ulrich-teichert.org/
+
+(don't worry about the loose cable on one of the pictures, that's just
+my crude RTC battery replacment)
+
+> > I have no way - or interest - to test that on real hardware, but I did
+> > check that if I relax the config I can at least build it cleanly on
+> > x86-64 with that change.
+
+I could not get a recent kernel to boot, but it's booting ancient kernels
+just fine:
+
+Linux version 2.4.27-2-generic (tretkowski@bastille) (gcc version 3.3.5 (Debian 1:3.3.5-12)) #1 Sun May 29 18:40:58 UTC 2005
+Booting GENERIC on Jensen using machine vector Jensen from SRM
+Major Options: LEGACY_START 
+Command line: ro  root=/dev/sda3
+memcluster 0, usage 1, start        0, end      256
+memcluster 1, usage 0, start      256, end     8192
+freeing pages 256:384
+freeing pages 757:8192
+reserving pages 757:758
+Initial ramdisk at: 0xfffffc00039d2000 (5308416 bytes)
+Max ASN from HWRPB is bad (0xf)
+On node 0 totalpages: 8192
+zone(0): 8192 pages.
+zone(1): 0 pages.
+zone(2): 0 pages.
+Kernel command line: ro  root=/dev/sda3
+...
+
+> > It can't make matters worse, and it's the RightThing(tm).
+> > 
+> > Since Micheal replied about that other alpha issue, maybe he knows
+> > about the ISA slot situation too?
+> 
+> Ah, yeah, not really.  I am not familiar with the Jensen hardware,
+> and have never played around with the EISA slot on the Alphas I do
+> have.
+
+I know the feeling.... So many computers, so little time...
+While we're at it, during my vain attempts to get new kernels to boot,
+I tried to disable PCI support to make the kernels smaller (after all,
+the Jensen has only EISA, so what good would PCI support for?) and
+got it to compile with the attached patch (which fixes some warnings,
+too). Should apply cleanly to Linus tree.
+
+Enable compile for the Jensen without PCI support.
+
+Signed-off-by: Ulrich Teichert <ulrich.teichert@gmx.de>
+---
+ arch/alpha/include/asm/jensen.h | 8 ++++----
+ arch/alpha/kernel/sys_jensen.c  | 2 +-
+ include/asm-generic/pci_iomap.h | 6 +++++-
+ 3 files changed, 10 insertions(+), 6 deletions(-)
+
+diff --git a/arch/alpha/include/asm/jensen.h b/arch/alpha/include/asm/jensen.h
+index 916895155a88..1c4131453db2 100644
+--- a/arch/alpha/include/asm/jensen.h
++++ b/arch/alpha/include/asm/jensen.h
+@@ -111,18 +111,18 @@ __EXTERN_INLINE void jensen_set_hae(unsigned long addr)
+  * convinced that I need one of the newer machines.
+  */
+ 
+-static inline unsigned int jensen_local_inb(unsigned long addr)
++__EXTERN_INLINE unsigned int jensen_local_inb(unsigned long addr)
+ {
+ 	return 0xff & *(vuip)((addr << 9) + EISA_VL82C106);
+ }
+ 
+-static inline void jensen_local_outb(u8 b, unsigned long addr)
++__EXTERN_INLINE void jensen_local_outb(u8 b, unsigned long addr)
+ {
+ 	*(vuip)((addr << 9) + EISA_VL82C106) = b;
+ 	mb();
+ }
+ 
+-static inline unsigned int jensen_bus_inb(unsigned long addr)
++__EXTERN_INLINE unsigned int jensen_bus_inb(unsigned long addr)
+ {
+ 	long result;
+ 
+@@ -131,7 +131,7 @@ static inline unsigned int jensen_bus_inb(unsigned long addr)
+ 	return __kernel_extbl(result, addr & 3);
+ }
+ 
+-static inline void jensen_bus_outb(u8 b, unsigned long addr)
++__EXTERN_INLINE void jensen_bus_outb(u8 b, unsigned long addr)
+ {
+ 	jensen_set_hae(0);
+ 	*(vuip)((addr << 7) + EISA_IO + 0x00) = b * 0x01010101;
+diff --git a/arch/alpha/kernel/sys_jensen.c b/arch/alpha/kernel/sys_jensen.c
+index e5d870ff225f..40db6c3d9690 100644
+--- a/arch/alpha/kernel/sys_jensen.c
++++ b/arch/alpha/kernel/sys_jensen.c
+@@ -17,7 +17,7 @@
+ 
+ #include <asm/ptrace.h>
+ 
+-#define __EXTERN_INLINE inline
++#define __EXTERN_INLINE extern inline
+ #include <asm/io.h>
+ #include <asm/jensen.h>
+ #undef  __EXTERN_INLINE
+diff --git a/include/asm-generic/pci_iomap.h b/include/asm-generic/pci_iomap.h
+index df636c6d8e6c..446a0c576b33 100644
+--- a/include/asm-generic/pci_iomap.h
++++ b/include/asm-generic/pci_iomap.h
+@@ -18,6 +18,7 @@ extern void __iomem *pci_iomap_range(struct pci_dev *dev, int bar,
+ extern void __iomem *pci_iomap_wc_range(struct pci_dev *dev, int bar,
+ 					unsigned long offset,
+ 					unsigned long maxlen);
++extern void pci_iounmap(struct pci_dev *dev, void __iomem *p);
+ /* Create a virtual mapping cookie for a port on a given PCI device.
+  * Do not call this directly, it exists to make it easier for architectures
+  * to override */
+@@ -28,7 +29,7 @@ extern void __iomem *__pci_ioport_map(struct pci_dev *dev, unsigned long port,
+ #define __pci_ioport_map(dev, port, nr) ioport_map((port), (nr))
+ #endif
+ 
+-#elif defined(CONFIG_GENERIC_PCI_IOMAP)
++#elif defined(CONFIG_GENERIC_PCI_IOMAP) || !defined(CONFIG_PCI)
+ static inline void __iomem *pci_iomap(struct pci_dev *dev, int bar, unsigned long max)
+ {
+ 	return NULL;
+@@ -50,6 +51,9 @@ static inline void __iomem *pci_iomap_wc_range(struct pci_dev *dev, int bar,
+ {
+ 	return NULL;
+ }
++static inline void pci_iounmap(struct pci_dev *dev, void __iomem *p)
++{
++}
+ #endif
+ 
+ #endif /* __ASM_GENERIC_PCI_IOMAP_H */
+
+-- 
+Dipl. Inf. Ulrich Teichert|e-mail: Ulrich.Teichert@gmx.de | Listening to:
+Stormweg 24               |Eat Lipstick: Dirty Little Secret, The Baboon Show:
+24539 Neumuenster, Germany|Work Work Work, The Bellrays: Bad Reaction
