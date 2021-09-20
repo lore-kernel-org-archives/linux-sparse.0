@@ -2,125 +2,128 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-5.8 required=3.0 tests=BAYES_00,DKIM_SIGNED,
-	DKIM_VALID,DKIM_VALID_AU,HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,
-	SPF_HELO_NONE,SPF_PASS autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-3.7 required=3.0 tests=BAYES_00,
+	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,
+	URIBL_BLOCKED autolearn=no autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 43611C433EF
-	for <linux-sparse@archiver.kernel.org>; Tue, 21 Sep 2021 01:41:31 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 538B9C4332F
+	for <linux-sparse@archiver.kernel.org>; Tue, 21 Sep 2021 02:48:44 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 28B3861168
-	for <linux-sparse@archiver.kernel.org>; Tue, 21 Sep 2021 01:41:31 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 37AB160FC1
+	for <linux-sparse@archiver.kernel.org>; Tue, 21 Sep 2021 02:48:44 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S230331AbhIUBmz (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 20 Sep 2021 21:42:55 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:58812 "EHLO
+        id S231523AbhIUCuK (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Mon, 20 Sep 2021 22:50:10 -0400
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:37552 "EHLO
         lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231849AbhIUBin (ORCPT
+        with ESMTP id S245504AbhIUCKd (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 20 Sep 2021 21:38:43 -0400
-Received: from mail-lf1-x131.google.com (mail-lf1-x131.google.com [IPv6:2a00:1450:4864:20::131])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 785AFC128ED4
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Sep 2021 12:46:11 -0700 (PDT)
-Received: by mail-lf1-x131.google.com with SMTP id g1so72774842lfj.12
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Sep 2021 12:46:11 -0700 (PDT)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=linux-foundation.org; s=google;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc;
-        bh=z/4d6QJeGZCj2JNd8r06qB/o4KuGi6QEUdTRkNveq3w=;
-        b=Q3LhEPOHc010gdfUc6e/0+OwWkLDILQAryxm4+BRnojSGhKUZx3i2JKpwpPFiraRMu
-         E/I72DGNYfViGt4X8Hw5CpE7Nktij+mVRH+dEpKmPPQIoMBi3/lKCUfxw61t1pARyUwe
-         w3uR28CSEpRp+LIB6b1M9E+jNUiv+vNeaFNjM=
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc;
-        bh=z/4d6QJeGZCj2JNd8r06qB/o4KuGi6QEUdTRkNveq3w=;
-        b=r53cKCNe49SvCLW8MG5C2JuzITsC67j7IQRwtE11EvEnhQvJ9b0r6PflAY8iOEvz+D
-         W3UsZR6n+0G5urpfkMZ97UC1U/i7AhtbXzgpijHYOQ64/+qx3/SAESrfXkBsLK7d8TDg
-         ftwY1dxLgMPjhUBd7x62wCaMSydhpZqU78l04UfZzQog5kz87YrdlFRN+jNzlshdLa8p
-         agbxFFaCg7wP5nLG99RJ0joy7Jd7AdYkzmF6D1cMvS8bMULrJlkH4QIlRZtNgiRpTrBa
-         WH93yChIQwbkSh99wCgttVFgSZViwhMceSbMX9GTqPZbNsESGHY6i2fBZFLTOzqb1OhM
-         1hSQ==
-X-Gm-Message-State: AOAM530A+/j3ONT2QMH/dmpEvzWK4FHnybpKasUtgkvQwF9BSNNjZvhz
-        E6EiNV8kEIqyzPjfaqm7pVzU1f4SH3aUMQYn
-X-Google-Smtp-Source: ABdhPJwv8e73UGLMi56TokB0mM5YZsaVX8dqk2itwx7QMFH/jaxQJZcf3qH+Lb1Nw14iDAKtfczAYg==
-X-Received: by 2002:a05:6512:15a4:: with SMTP id bp36mr19924980lfb.509.1632167169881;
-        Mon, 20 Sep 2021 12:46:09 -0700 (PDT)
-Received: from mail-lf1-f46.google.com (mail-lf1-f46.google.com. [209.85.167.46])
-        by smtp.gmail.com with ESMTPSA id f15sm1865804ljn.120.2021.09.20.12.46.09
-        for <linux-sparse@vger.kernel.org>
-        (version=TLS1_3 cipher=TLS_AES_128_GCM_SHA256 bits=128/128);
-        Mon, 20 Sep 2021 12:46:09 -0700 (PDT)
-Received: by mail-lf1-f46.google.com with SMTP id g1so72774690lfj.12
-        for <linux-sparse@vger.kernel.org>; Mon, 20 Sep 2021 12:46:09 -0700 (PDT)
-X-Received: by 2002:a2e:3309:: with SMTP id d9mr12166105ljc.249.1632167169161;
- Mon, 20 Sep 2021 12:46:09 -0700 (PDT)
-MIME-Version: 1.0
-References: <CAHk-=wh-=tMO9iCA4v+WgPSd+Gbowe5kptwo+okahihnO2fAOA@mail.gmail.com>
- <202109201825.18KIPsV4026066@valdese.nms.ulrich-teichert.org>
- <CAHk-=wibRWoy4-ZkSVXUoGsUw5wKovPvRhS7r6VM+_GeBYZw1A@mail.gmail.com> <CAEdQ38HeUPDyiZhhriHqdA+Qeyrb3M=FoKWKgs0dZaEjbcpVUQ@mail.gmail.com>
-In-Reply-To: <CAEdQ38HeUPDyiZhhriHqdA+Qeyrb3M=FoKWKgs0dZaEjbcpVUQ@mail.gmail.com>
-From:   Linus Torvalds <torvalds@linux-foundation.org>
-Date:   Mon, 20 Sep 2021 12:45:52 -0700
-X-Gmail-Original-Message-ID: <CAHk-=wj1JWZ3sCrGz16nxEj7=0O+srMg6Ah3iPTDXSPKEws_SA@mail.gmail.com>
-Message-ID: <CAHk-=wj1JWZ3sCrGz16nxEj7=0O+srMg6Ah3iPTDXSPKEws_SA@mail.gmail.com>
+        Mon, 20 Sep 2021 22:10:33 -0400
+Received: from wp441.webpack.hosteurope.de (wp441.webpack.hosteurope.de [IPv6:2a01:488:42:1000:50ed:85d2::])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 45810C14D205;
+        Mon, 20 Sep 2021 11:26:11 -0700 (PDT)
+Received: from [2a03:7846:b79f:101:21c:c4ff:fe1f:fd93] (helo=valdese.nms.ulrich-teichert.org); authenticated
+        by wp441.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
+        id 1mSNzM-00027j-Q1; Mon, 20 Sep 2021 20:26:00 +0200
+Received: from valdese.nms.ulrich-teichert.org (localhost [127.0.0.1])
+        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Debian-8+deb9u1) with ESMTPS id 18KIPwvw026068
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
+        Mon, 20 Sep 2021 20:25:58 +0200
+Received: (from ut@localhost)
+        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Submit) id 18KIPsV4026066;
+        Mon, 20 Sep 2021 20:25:54 +0200
+Message-Id: <202109201825.18KIPsV4026066@valdese.nms.ulrich-teichert.org>
 Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-To:     Matt Turner <mattst88@gmail.com>
-Cc:     Ulrich Teichert <krypton@ulrich-teichert.org>,
-        Michael Cree <mcree@orcon.net.nz>,
-        Guenter Roeck <linux@roeck-us.net>,
-        Richard Henderson <rth@twiddle.net>,
-        Ivan Kokshaysky <ink@jurassic.park.msu.ru>,
-        "James E . J . Bottomley" <James.Bottomley@hansenpartnership.com>,
-        Helge Deller <deller@gmx.de>,
-        "David S . Miller" <davem@davemloft.net>,
-        Jakub Kicinski <kuba@kernel.org>,
-        alpha <linux-alpha@vger.kernel.org>,
-        Geert Uytterhoeven <geert@linux-m68k.org>,
-        Linux Kernel Mailing List <linux-kernel@vger.kernel.org>,
-        linux-parisc <linux-parisc@vger.kernel.org>,
-        Netdev <netdev@vger.kernel.org>,
-        Sparse Mailing-list <linux-sparse@vger.kernel.org>
-Content-Type: text/plain; charset="UTF-8"
+To:     torvalds@linux-foundation.org (Linus Torvalds)
+Date:   Mon, 20 Sep 2021 20:25:54 +0200 (CEST)
+Cc:     krypton@ulrich-teichert.org (Ulrich Teichert),
+        mcree@orcon.net.nz (Michael Cree),
+        linux@roeck-us.net (Guenter Roeck),
+        rth@twiddle.net (Richard Henderson),
+        ink@jurassic.park.msu.ru (Ivan Kokshaysky),
+        mattst88@gmail.com (Matt Turner),
+        James.Bottomley@hansenpartnership.com (James E . J . Bottomley),
+        deller@gmx.de (Helge Deller),
+        davem@davemloft.net (David S . Miller),
+        kuba@kernel.org (Jakub Kicinski),
+        linux-alpha@vger.kernel.org (alpha),
+        geert@linux-m68k.org (Geert Uytterhoeven),
+        linux-kernel@vger.kernel.org (Linux Kernel Mailing List),
+        linux-parisc@vger.kernel.org, netdev@vger.kernel.org (Netdev),
+        linux-sparse@vger.kernel.org (Sparse Mailing-list)
+In-Reply-To: <CAHk-=wh-=tMO9iCA4v+WgPSd+Gbowe5kptwo+okahihnO2fAOA@mail.gmail.com>
+From:   Ulrich Teichert <krypton@ulrich-teichert.org>
+X-Mailer: ELM [version 2.5 PL8]
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Transfer-Encoding: 7bit
+X-bounce-key: webpack.hosteurope.de;ut@ulrich-teichert.org;1632162371;b2cd99ed;
+X-HE-SMSGID: 1mSNzM-00027j-Q1
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Mon, Sep 20, 2021 at 11:59 AM Matt Turner <mattst88@gmail.com> wrote:
->
-> In the decade plus I've been around Linux on alpha I've don't actually
-> recall hearing of anyone using Linux on a Jensen system before :)
+Hi,
 
-Looking around, I'm pretty sure the system I did all my initial work
-on was a Jensen.
+[sorry for the late answer, I was sick yesterday with digestive
+system trouble, but nothing serious, just painful....]
+> On Sat, Sep 18, 2021 at 1:26 PM Ulrich Teichert
+> <krypton@ulrich-teichert.org> wrote:
+> >
+> > I was just tinkering with it to get it compiled without warning,
+> > I certainly didn't get the big picture :-/
+> 
+> Ok, you shamed me into some tinkering too, and I fixed a couple of
+> issues with the alpha build.
+> 
+> The whole "pci_iounmap()" mess is not something I solved (you were
+> cc'd on the email I sent out about that), but I did test a few
+> different Jensen configurations and fixed a couple of uglies.
+> 
+> So at least _some_ Jensen configurations build cleanly once more, and
+> I re-enabled JENSEN as a valid machine target.
 
-This is from the linux-.1.1.83 patch:
+Yes, I was able to build a minimal Jensen config without any warning
+after pulling today, thanks! I think investing a bit in cleaning up
+non-PCI configurations may help as soon as PCIe will be obsoleted
+by the next bus system ;-)
 
-- * I don't have any good documentation on the EISA hardware interrupt
-- * stuff: I don't know the mapping between the interrupt vector and the
-- * EISA interrupt number.
-- *
-- * It *seems* to be 0x8X0 for EISA interrupt X, and 0x9X0 for the
-- * local motherboard interrupts..
-+ * The vector is 0x8X0 for EISA interrupt X, and 0x9X0 for the local
-+ * motherboard interrupts.. This is for the Jensen.
+> But if it doesn't boot, it's all fairly moot. And those things are a
+> pain to debug, and if the last booting kernel was years and years ago,
+> I don't think it realistically will necessarily ever be fixed.
 
-So yup, my initial bringup machine was that DECpc AXP 150, aka "Jensen".
+The main trouble is that my system has only 64MB of memory and the smallest
+kernel image with all drivers I need was about 105MB big. According
+to: http://users.bart.nl/~geerten/FAQ-9.html
+the Jensen can take up to 128MB of RAM and the required PS/2 SIMMs
+with partity are still available on ebay, so I just bought 4x32 MB SIMMs.
+After setting CONFIG_CC_OPTIMIZE_FOR_SIZE the kernel image was still
+93MB big, but with 128MB I should be able to boot it. Let's see....
 
-The IO subsystem on that thing was absolutely horrendous. Largely
-because of the lack of byte/word accesses, so doing any PCI accesses
-had to be encoded on the address bus. Nasty nasty nasty.
+> Oh well. I have an odd love-hate relationship with alpha.
+> 
+> I think it's one of the worst architectures ever designed (memory
+> ordering is completely broken, and the lack of byte operations in the
+> original specs were a big reason for the initial problems and eventual
+> failure).
 
-The original design with only 32-bit and 64-bit memory accesses really
-was horribly horribly wrong, and all the arguments for it were
-garbage. Even outside of IO issues, it blew up code size enormously,
-but the IO side became truly horrendous.
+I didn't had the money for an Alpha at that time, but as soon as
+cheap systems were available on ebay, I took the opportunity. At the
+time I bought them, I considered the Miatas (the "Personal Workstations"
+from DEC) as quite fast - that must have been around 2004/2006.
 
-Oh well. Water under the bridge.
+> But at the same time, I really did enjoy it back in the day, and it
+> _was_ the first port I did, and the first truly integrated kernel
+> architecture (the original Linux m68k port that preceded it was a
+> "hack up and replace" job rather than "integrate")
 
-I did have another alpha at some point - going from the original
-150HMz EV4 to a 275MHz EV45. I forget what system that was.
+My experience is that each port is good for code quality, but I can
+only state that for user space applications, not having done much kernel
+work,
 
-               Linus
+CU,
+Uli
+-- 
+Dipl. Inf. Ulrich Teichert|e-mail: Ulrich.Teichert@gmx.de | Listening to:
+Stormweg 24               |Eat Lipstick: Dirty Little Secret, The Baboon Show:
+24539 Neumuenster, Germany|Work Work Work, The Bellrays: Bad Reaction
