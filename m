@@ -2,98 +2,92 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 X-Spam-Level: 
-X-Spam-Status: No, score=-3.8 required=3.0 tests=BAYES_00,
-	HEADER_FROM_DIFFERENT_DOMAINS,MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS
-	autolearn=no autolearn_force=no version=3.4.0
+X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
+	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
+	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
+	autolearn=unavailable autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id D8494C433F5
-	for <linux-sparse@archiver.kernel.org>; Wed, 22 Sep 2021 20:50:46 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id C5FA1C433EF
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:40:04 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id C219761100
-	for <linux-sparse@archiver.kernel.org>; Wed, 22 Sep 2021 20:50:46 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id AF54561214
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:40:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S237736AbhIVUwP (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 22 Sep 2021 16:52:15 -0400
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:32844 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S237592AbhIVUwO (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Sep 2021 16:52:14 -0400
-Received: from wp441.webpack.hosteurope.de (wp441.webpack.hosteurope.de [IPv6:2a01:488:42:1000:50ed:85d2::])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 2859FC061574;
-        Wed, 22 Sep 2021 13:50:44 -0700 (PDT)
-Received: from [2a03:7846:b79f:101:21c:c4ff:fe1f:fd93] (helo=valdese.nms.ulrich-teichert.org); authenticated
-        by wp441.webpack.hosteurope.de running ExIM with esmtpsa (TLS1.2:ECDHE_RSA_AES_256_GCM_SHA384:256)
-        id 1mT9CG-0005WO-MM; Wed, 22 Sep 2021 22:50:28 +0200
-Received: from valdese.nms.ulrich-teichert.org (localhost [127.0.0.1])
-        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Debian-8+deb9u1) with ESMTPS id 18MKoRqo007275
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=NOT);
-        Wed, 22 Sep 2021 22:50:27 +0200
-Received: (from ut@localhost)
-        by valdese.nms.ulrich-teichert.org (8.15.2/8.15.2/Submit) id 18MKoNUh007272;
-        Wed, 22 Sep 2021 22:50:23 +0200
-Message-Id: <202109222050.18MKoNUh007272@valdese.nms.ulrich-teichert.org>
-Subject: Re: [PATCH v2 0/4] Introduce and use absolute_pointer macro
-To:     torvalds@linux-foundation.org (Linus Torvalds)
-Date:   Wed, 22 Sep 2021 22:50:23 +0200 (CEST)
-Cc:     krypton@ulrich-teichert.org (Ulrich Teichert),
-        mcree@orcon.net.nz (Michael Cree),
-        linux@roeck-us.net (Guenter Roeck),
-        rth@twiddle.net (Richard Henderson),
-        ink@jurassic.park.msu.ru (Ivan Kokshaysky),
-        mattst88@gmail.com (Matt Turner),
-        James.Bottomley@hansenpartnership.com (James E . J . Bottomley),
-        deller@gmx.de (Helge Deller),
-        davem@davemloft.net (David S . Miller),
-        kuba@kernel.org (Jakub Kicinski),
-        linux-alpha@vger.kernel.org (alpha),
-        geert@linux-m68k.org (Geert Uytterhoeven),
-        linux-kernel@vger.kernel.org (Linux Kernel Mailing List),
-        linux-parisc@vger.kernel.org (linux-parisc),
-        netdev@vger.kernel.org (Netdev),
-        linux-sparse@vger.kernel.org (Sparse Mailing-list)
-In-Reply-To: <CAHk-=whwreptD=WByMRNsv-gfqR3oUu4v33i5Swd2dyeLObyRw@mail.gmail.com>
-From:   Ulrich Teichert <krypton@ulrich-teichert.org>
-X-Mailer: ELM [version 2.5 PL8]
+        id S239565AbhIWDle (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 22 Sep 2021 23:41:34 -0400
+Received: from mail.kernel.org ([198.145.29.99]:41226 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S239379AbhIWDkq (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 22 Sep 2021 23:40:46 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id C6B7B6124D;
+        Thu, 23 Sep 2021 03:39:10 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
+        s=k20201202; t=1632368351;
+        bh=0dxi+POJ2iYwd8maKH6Ogr4If9FX45mzsIKZJumt1Ag=;
+        h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
+        b=n1cLj8yfeRW9mC03J0nkZG3q2QBY539YG2p+hzUkZlEvbEqxDTnp8HEGC6jqlD8iz
+         Dnt+39mTNVJneYM7WG+B69t9blQFUfmc73I62rG0M256qbUY89HjoH3nbiQp5uHMRb
+         i62xTtJ151RW2YflwXeSx9a+esnyGm8QnrdXJVIAoVsAEDYjkFOllLT7BS5Y6qzP9d
+         IzSBzKr3ErflYHFcO+AukVDKUy1kPatcZ8tcpWA+NSUNCW/dVfJDfp4/ST+58dn8Vt
+         NwSFekiTYtnqtzGTMday2FK4VWptFsqm1ZIcDtgDfqLx8X1O5H81GvWNFSy/UR2dR4
+         8weBZbMuMhiXQ==
+From:   Sasha Levin <sashal@kernel.org>
+To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
+Cc:     Guenter Roeck <linux@roeck-us.net>,
+        Linus Torvalds <torvalds@linux-foundation.org>,
+        Geert Uytterhoeven <geert@linux-m68k.org>,
+        Sasha Levin <sashal@kernel.org>, luc.vanoostenryck@gmail.com,
+        linux-sparse@vger.kernel.org
+Subject: [PATCH AUTOSEL 5.4 11/19] compiler.h: Introduce absolute_pointer macro
+Date:   Wed, 22 Sep 2021 23:38:45 -0400
+Message-Id: <20210923033853.1421193-11-sashal@kernel.org>
+X-Mailer: git-send-email 2.30.2
+In-Reply-To: <20210923033853.1421193-1-sashal@kernel.org>
+References: <20210923033853.1421193-1-sashal@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-X-bounce-key: webpack.hosteurope.de;ut@ulrich-teichert.org;1632343844;1aa4b7df;
-X-HE-SMSGID: 1mT9CG-0005WO-MM
+X-stable: review
+X-Patchwork-Hint: Ignore
+Content-Transfer-Encoding: 8bit
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi,
+From: Guenter Roeck <linux@roeck-us.net>
 
-> > I would try the SRM bootimage (make bootimage), but the build is broken:
-> 
-> The attached patch is too ugly for words, and there's no way I will
-> commit anything like this.
-> 
-> But it at least builds for and seems to successfully make an alpha
-> bootimage even when cross-compiling on x86-64.
-> 
-> So something to test, perhaps..
+[ Upstream commit f6b5f1a56987de837f8e25cd560847106b8632a8 ]
 
-Sure, I burned it to a CDROM and booted from that per SRM. The screen
-went black for a second, then the SRM console came back with:
+absolute_pointer() disassociates a pointer from its originating symbol
+type and context. Use it to prevent compiler warnings/errors such as
 
-?05 HLT INSTR
-PC=00000000.20000014 PSL= 00000000.00000007
+  drivers/net/ethernet/i825xx/82596.c: In function 'i82596_probe':
+  arch/m68k/include/asm/string.h:72:25: error:
+	'__builtin_memcpy' reading 6 bytes from a region of size 0 [-Werror=stringop-overread]
 
-I wonder if we would be able to see more on a serial line - I can try
-that perhaps tomorrow or at the weekend. To find out to what code the
-PC is pointing to, I would need to understand to what point in memory SRM
-loads the image into.... But this way, the process of loading the kernel
-definitely worked - I still don't understand why aboot can load the
-old kernel but not the new one. I'll have a look at the aboot sources,
-perhaps there's a certain limit on kernel size?
+Such warnings may be reported by gcc 11.x for string and memory
+operations on fixed addresses.
 
-I'm not sure if we can call this progress,
-CU,
-Uli
+Suggested-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Guenter Roeck <linux@roeck-us.net>
+Reviewed-by: Geert Uytterhoeven <geert@linux-m68k.org>
+Signed-off-by: Linus Torvalds <torvalds@linux-foundation.org>
+Signed-off-by: Sasha Levin <sashal@kernel.org>
+---
+ include/linux/compiler.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/include/linux/compiler.h b/include/linux/compiler.h
+index 9446e8fbe55c..bce983406aaf 100644
+--- a/include/linux/compiler.h
++++ b/include/linux/compiler.h
+@@ -233,6 +233,8 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+     (typeof(ptr)) (__ptr + (off)); })
+ #endif
+ 
++#define absolute_pointer(val)	RELOC_HIDE((void *)(val), 0)
++
+ #ifndef OPTIMIZER_HIDE_VAR
+ /* Make the optimizer believe the variable can be manipulated arbitrarily. */
+ #define OPTIMIZER_HIDE_VAR(var)						\
 -- 
-Dipl. Inf. Ulrich Teichert|e-mail: Ulrich.Teichert@gmx.de | Listening to:
-Stormweg 24               |Eat Lipstick: Dirty Little Secret, The Baboon Show:
-24539 Neumuenster, Germany|Work Work Work, The Bellrays: Bad Reaction
+2.30.2
+
