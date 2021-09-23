@@ -5,32 +5,32 @@ X-Spam-Level:
 X-Spam-Status: No, score=-20.5 required=3.0 tests=BAYES_00,DKIMWL_WL_HIGH,
 	DKIM_SIGNED,DKIM_VALID,DKIM_VALID_AU,INCLUDES_CR_TRAILER,INCLUDES_PATCH,
 	MAILING_LIST_MULTI,SPF_HELO_NONE,SPF_PASS,URIBL_BLOCKED,USER_AGENT_GIT
-	autolearn=unavailable autolearn_force=no version=3.4.0
+	autolearn=ham autolearn_force=no version=3.4.0
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id C5FA1C433EF
-	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:40:04 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id CE759C433F5
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:41:00 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id AF54561214
-	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:40:04 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id B649F61353
+	for <linux-sparse@archiver.kernel.org>; Thu, 23 Sep 2021 03:41:00 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S239565AbhIWDle (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 22 Sep 2021 23:41:34 -0400
-Received: from mail.kernel.org ([198.145.29.99]:41226 "EHLO mail.kernel.org"
+        id S239323AbhIWDmW (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 22 Sep 2021 23:42:22 -0400
+Received: from mail.kernel.org ([198.145.29.99]:42692 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S239379AbhIWDkq (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 22 Sep 2021 23:40:46 -0400
-Received: by mail.kernel.org (Postfix) with ESMTPSA id C6B7B6124D;
-        Thu, 23 Sep 2021 03:39:10 +0000 (UTC)
+        id S239500AbhIWDlM (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 22 Sep 2021 23:41:12 -0400
+Received: by mail.kernel.org (Postfix) with ESMTPSA id 5D0336124F;
+        Thu, 23 Sep 2021 03:39:40 +0000 (UTC)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=kernel.org;
-        s=k20201202; t=1632368351;
-        bh=0dxi+POJ2iYwd8maKH6Ogr4If9FX45mzsIKZJumt1Ag=;
+        s=k20201202; t=1632368381;
+        bh=rhV09odn3N6lzn4H/XhQcSW3wW6sHFdFsL9736YOl2U=;
         h=From:To:Cc:Subject:Date:In-Reply-To:References:From;
-        b=n1cLj8yfeRW9mC03J0nkZG3q2QBY539YG2p+hzUkZlEvbEqxDTnp8HEGC6jqlD8iz
-         Dnt+39mTNVJneYM7WG+B69t9blQFUfmc73I62rG0M256qbUY89HjoH3nbiQp5uHMRb
-         i62xTtJ151RW2YflwXeSx9a+esnyGm8QnrdXJVIAoVsAEDYjkFOllLT7BS5Y6qzP9d
-         IzSBzKr3ErflYHFcO+AukVDKUy1kPatcZ8tcpWA+NSUNCW/dVfJDfp4/ST+58dn8Vt
-         NwSFekiTYtnqtzGTMday2FK4VWptFsqm1ZIcDtgDfqLx8X1O5H81GvWNFSy/UR2dR4
-         8weBZbMuMhiXQ==
+        b=kQtfCtoAnCig0wZfaxBdlkG+b925kwhNU7u4kyjUU8fGIWLMgyFHL6wdx8RWOrY8L
+         7ah7v9PAcZcBfsXrjW4GwM9X/NqFC1y8yvqQdrOfsryeIF0Ijs9LP8bA8dIhr+WHhf
+         mdMTJXyU51r3Aol6n/DOXuiHsmOJ5wQQ0H+uDp+6CZq1vOveNC+iigKawQmzbbWMzN
+         RwB101b4zfEpvyTR3UASdU05F6YlYM1+2neCMBb6i8KsHmRgOKi0q3TltVzbeY97WC
+         W5w6caZe1a5PTAPJTPfU5e6tc85w0GH3GqJc1utNYBfPbYeT7Yr9uyUDGI7G9MpC9v
+         LHrmN7+QC6fKQ==
 From:   Sasha Levin <sashal@kernel.org>
 To:     linux-kernel@vger.kernel.org, stable@vger.kernel.org
 Cc:     Guenter Roeck <linux@roeck-us.net>,
@@ -38,12 +38,12 @@ Cc:     Guenter Roeck <linux@roeck-us.net>,
         Geert Uytterhoeven <geert@linux-m68k.org>,
         Sasha Levin <sashal@kernel.org>, luc.vanoostenryck@gmail.com,
         linux-sparse@vger.kernel.org
-Subject: [PATCH AUTOSEL 5.4 11/19] compiler.h: Introduce absolute_pointer macro
-Date:   Wed, 22 Sep 2021 23:38:45 -0400
-Message-Id: <20210923033853.1421193-11-sashal@kernel.org>
+Subject: [PATCH AUTOSEL 4.19 07/15] compiler.h: Introduce absolute_pointer macro
+Date:   Wed, 22 Sep 2021 23:39:21 -0400
+Message-Id: <20210923033929.1421446-7-sashal@kernel.org>
 X-Mailer: git-send-email 2.30.2
-In-Reply-To: <20210923033853.1421193-1-sashal@kernel.org>
-References: <20210923033853.1421193-1-sashal@kernel.org>
+In-Reply-To: <20210923033929.1421446-1-sashal@kernel.org>
+References: <20210923033929.1421446-1-sashal@kernel.org>
 MIME-Version: 1.0
 X-stable: review
 X-Patchwork-Hint: Ignore
@@ -76,10 +76,10 @@ Signed-off-by: Sasha Levin <sashal@kernel.org>
  1 file changed, 2 insertions(+)
 
 diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-index 9446e8fbe55c..bce983406aaf 100644
+index 6a53300cbd1e..ab9dfb14f486 100644
 --- a/include/linux/compiler.h
 +++ b/include/linux/compiler.h
-@@ -233,6 +233,8 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
+@@ -228,6 +228,8 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
      (typeof(ptr)) (__ptr + (off)); })
  #endif
  
