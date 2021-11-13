@@ -2,153 +2,303 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 99BA1C433F5
-	for <linux-sparse@archiver.kernel.org>; Mon,  8 Nov 2021 11:48:52 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C180C433F5
+	for <linux-sparse@archiver.kernel.org>; Sat, 13 Nov 2021 14:46:45 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 66BD96120D
-	for <linux-sparse@archiver.kernel.org>; Mon,  8 Nov 2021 11:48:52 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 3EF2D6054E
+	for <linux-sparse@archiver.kernel.org>; Sat, 13 Nov 2021 14:46:45 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S238023AbhKHLvf (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Mon, 8 Nov 2021 06:51:35 -0500
-Received: from mx0b-00069f02.pphosted.com ([205.220.177.32]:31724 "EHLO
-        mx0b-00069f02.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S231401AbhKHLve (ORCPT
+        id S231912AbhKMOtg (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sat, 13 Nov 2021 09:49:36 -0500
+Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52144 "EHLO
+        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S229668AbhKMOtg (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Mon, 8 Nov 2021 06:51:34 -0500
-Received: from pps.filterd (m0246630.ppops.net [127.0.0.1])
-        by mx0b-00069f02.pphosted.com (8.16.1.2/8.16.1.2) with SMTP id 1A8AcH8Z029335
-        for <linux-sparse@vger.kernel.org>; Mon, 8 Nov 2021 11:48:49 GMT
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=oracle.com; h=date : from : to :
- subject : message-id : references : content-type : in-reply-to :
- mime-version; s=corp-2021-07-09;
- bh=1vCKTCsvl/9JGRasfDgP0KIP2zjfan5dsCu6CTQHUwc=;
- b=pmjwr/v+tvBm1OmES292HnEXfHUzKL8hKVkkfih2KH5nj4bOqyzqegCdYGICCWYJ1yTC
- bGdKCkWBTfyhKLUTzR+H5xYCMUlE/0BlfjW3sSy49omPtjkl5/mfymLkBpAuD7fTmejS
- QFAAFatQztl9Wy6a0KpnUksMO5zUzTv9Fpk6nps9L3qvcIEx+s3ysyJC9i9u28at8Fft
- Vs9sLpofaVtAlwrN91RpE/uEKR3zOeWahkJb4xFOVllq/Hz+YiqEbNOTU0oLuNZ6rLHD
- 86F/nY7oS4/4BXyATy5E+RkrgJgWon8OdhDE8UTWYfJh4EklNnD8SHj0RenMY8rsIVu8 DQ== 
-Received: from aserp3030.oracle.com (aserp3030.oracle.com [141.146.126.71])
-        by mx0b-00069f02.pphosted.com with ESMTP id 3c6sbk2ejk-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Nov 2021 11:48:48 +0000
-Received: from pps.filterd (aserp3030.oracle.com [127.0.0.1])
-        by aserp3030.oracle.com (8.16.1.2/8.16.1.2) with SMTP id 1A8Bjvhj155374
-        for <linux-sparse@vger.kernel.org>; Mon, 8 Nov 2021 11:48:47 GMT
-Received: from nam11-bn8-obe.outbound.protection.outlook.com (mail-bn8nam11lp2177.outbound.protection.outlook.com [104.47.58.177])
-        by aserp3030.oracle.com with ESMTP id 3c5frc6jma-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-GCM-SHA384 bits=256 verify=OK)
-        for <linux-sparse@vger.kernel.org>; Mon, 08 Nov 2021 11:48:47 +0000
-ARC-Seal: i=1; a=rsa-sha256; s=arcselector9901; d=microsoft.com; cv=none;
- b=On+JYw7O8GxAAeXGB0W/l7fVdRPrW7wNqk6JJbCadbWPnlt0dMwzmYpTM3lwE+fo6kpL5QU9BdHMWxD7C7AYZKsYrdtVQwTYaK+v8S1X5fI4mf2qn8ng5sKFJ+MZK3Awd+Z1kcu8EduZpwP/CH3sAS7/F25ddjWAOzbFuesG33ARBrqa77SMH+b+QmBYrSpJuHOTBhaRfFhdHToUOjDrsDp0tovOd94Bmot33OHUriArNedrBsB49RI5B58dxhTHoW5+O8ZgH5qt63RMjkcg1+D/3p4kd6Md1cjr0GSffPFcMD4r1iRK+4S9q+NzpH1nif4lG95AVTzYO1RIDlfRmQ==
-ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=microsoft.com;
- s=arcselector9901;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-AntiSpam-MessageData-ChunkCount:X-MS-Exchange-AntiSpam-MessageData-0:X-MS-Exchange-AntiSpam-MessageData-1;
- bh=1vCKTCsvl/9JGRasfDgP0KIP2zjfan5dsCu6CTQHUwc=;
- b=FHk3kN59Au2TvWBvFl7mO/rz5YkUqPQxK8RWD5wHViYZ8wB15+WYUSodTdeo7D6l8ebXTbn3ga8gltPeWE5jUCdVWd+iMZWlocN/3UhQ543UOEpPsvB7u5mBCQmS7RTP5wdBO415eZFEj3hPrWP7e9KG8CEASsSw6hcJu4Q8U0/fUTrbB1Dq/prh5ZbggeTY2hElLifjlWK+LAapOgruqqg3FfYol9HqQW2lWJFLQ9AK2yBXysfhNAEovfArEy0PftLHlOCJqrVmy7QD58KZS1N8t7Fw5cK051f413rCmY169RwYp5BnIBFOuArckJfc6nQv6sUTwBj0lUo2XKGLzQ==
-ARC-Authentication-Results: i=1; mx.microsoft.com 1; spf=pass
- smtp.mailfrom=oracle.com; dmarc=pass action=none header.from=oracle.com;
- dkim=pass header.d=oracle.com; arc=none
+        Sat, 13 Nov 2021 09:49:36 -0500
+Received: from mail-qt1-x835.google.com (mail-qt1-x835.google.com [IPv6:2607:f8b0:4864:20::835])
+        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 181A9C061766;
+        Sat, 13 Nov 2021 06:46:44 -0800 (PST)
+Received: by mail-qt1-x835.google.com with SMTP id t34so11268905qtc.7;
+        Sat, 13 Nov 2021 06:46:44 -0800 (PST)
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
- d=oracle.onmicrosoft.com; s=selector2-oracle-onmicrosoft-com;
- h=From:Date:Subject:Message-ID:Content-Type:MIME-Version:X-MS-Exchange-SenderADCheck;
- bh=1vCKTCsvl/9JGRasfDgP0KIP2zjfan5dsCu6CTQHUwc=;
- b=r8r99Ow/wsWmw7itT7jkKDRP2hgkgSr0WMhqHzyZuF2UpNnuSw3AFdZ2bmhm1RnxtI3kMw0ogT9slP/PX6ls3irOZEO+nwqYhrtKJgaGwfFHDQkHVd7eiG9hVbTZzo/4qAuSCXw8rZFXMdFRNHF3B29hs5w8TZqdkHIr5Nqi1qw=
-Authentication-Results: vger.kernel.org; dkim=none (message not signed)
- header.d=none;vger.kernel.org; dmarc=none action=none header.from=oracle.com;
-Received: from MWHPR1001MB2365.namprd10.prod.outlook.com (10.174.166.156) by
- MWHPR1001MB2367.namprd10.prod.outlook.com (10.174.168.30) with Microsoft SMTP
- Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
- 15.20.4669.16; Mon, 8 Nov 2021 11:48:46 +0000
-Received: from MWHPR1001MB2365.namprd10.prod.outlook.com
- ([fe80::d409:11b5:5eb2:6be9]) by MWHPR1001MB2365.namprd10.prod.outlook.com
- ([fe80::d409:11b5:5eb2:6be9%5]) with mapi id 15.20.4669.016; Mon, 8 Nov 2021
- 11:48:46 +0000
-Date:   Mon, 8 Nov 2021 14:48:27 +0300
-From:   Dan Carpenter <dan.carpenter@oracle.com>
-To:     linux-sparse@vger.kernel.org
-Subject: Re: __builtin_types_compatible_p() is too accepting
-Message-ID: <20211108114827.GF2001@kadam>
-References: <20211103133600.GU2794@kadam>
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211103133600.GU2794@kadam>
-User-Agent: Mutt/1.9.4 (2018-02-28)
-X-ClientProxiedBy: JN2P275CA0039.ZAFP275.PROD.OUTLOOK.COM (2603:1086:0:2::27)
- To MWHPR1001MB2365.namprd10.prod.outlook.com (2603:10b6:301:2d::28)
+        d=gmail.com; s=20210112;
+        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
+         :cc:content-transfer-encoding;
+        bh=JjEUDWCdGpRrio0lUJixEMAogthB5HiI1AmmBuP4PUI=;
+        b=NNYSjbJhbPxNaT8Dtrf3Io57P7UeJ2uETglS59ZGhuoMhk1F/Jz12wzSM1aKu+YpWc
+         9u1XASTIhK0IiarKidhL8drrq4wXZvbj9njELAZ4WpKTYJ1rrjcpZfh3uCsQ81NhWgxG
+         DXHQGoaEsRCTgRMl/lwpxua+YizPExyeuo9Ac04/TEhIQ24Tn4VeUX5KTjhc6RAvQIlB
+         gv/D8+FVPz98qr/QpakUsSt+jDClfnhNXEcCqrvha9D7KX7Cq4qAtZ9is4Gxt5BHaj29
+         p6wokl2OyknZuriA8jL6xezk9nOpmcU2HaC4rfS7wwFY+YdhcVYy0T43qXrQ7Z63t6f/
+         5KuA==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
+         :message-id:subject:to:cc:content-transfer-encoding;
+        bh=JjEUDWCdGpRrio0lUJixEMAogthB5HiI1AmmBuP4PUI=;
+        b=jyGeXKao5jTW8tOlAIwmQtGrMw/ozGjhYTrE5oB+7QL4a4Oj6M0C2Uuc8YN84lWm77
+         Q79DMZijZpUVSEITyrXtakX+T+Kbw1JJjn3YQ2Rslo8cPQdOaie40IvWGOX0/BHO26h2
+         i4QiEDYnjECNqtPZLC9povKPwFCGRslR4KCMzTbFUSkKIw3iKk2Dr4niXLnDofJq/A6h
+         r4hb/EUPQLVJvpgNJ8weTtQ88xN2hUxhbbuzglF3ClvRvQ0MxtCXZUbjq4joq97DzibR
+         XWiEgWIyJGpFSgGvqk2lr5AHnW5EzVgFb+mNongP/8iBjDaUMZawgPbZjyPDdwaZn/mj
+         ompA==
+X-Gm-Message-State: AOAM532KPTYvPWwCrdyJVSx92QfRaeVF9E+FjtpsLp29HaFJsYcw/xyk
+        5KJpVF0aNB5yXOjKzJXKTEaWQM9pCVqFovj2GeI=
+X-Google-Smtp-Source: ABdhPJzgyJhK9k+/FP+5qQ57snfwFccE8RZFOk9XDoWDpJGE1sam/tu1BHEU2DKg89Sh3IIxfKC935mjYarq2bgP3EY=
+X-Received: by 2002:ac8:147:: with SMTP id f7mr24770172qtg.329.1636814803225;
+ Sat, 13 Nov 2021 06:46:43 -0800 (PST)
 MIME-Version: 1.0
-Received: from kadam (102.222.70.114) by JN2P275CA0039.ZAFP275.PROD.OUTLOOK.COM (2603:1086:0:2::27) with Microsoft SMTP Server (version=TLS1_2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id 15.20.4669.10 via Frontend Transport; Mon, 8 Nov 2021 11:48:43 +0000
-X-MS-PublicTrafficType: Email
-X-MS-Office365-Filtering-Correlation-Id: 69f16ebe-3384-4afe-661b-08d9a2adb874
-X-MS-TrafficTypeDiagnostic: MWHPR1001MB2367:
-X-Microsoft-Antispam-PRVS: <MWHPR1001MB2367C9CAD05B141D167C1C888E919@MWHPR1001MB2367.namprd10.prod.outlook.com>
-X-MS-Oob-TLC-OOBClassifiers: OLM:7219;
-X-MS-Exchange-SenderADCheck: 1
-X-MS-Exchange-AntiSpam-Relay: 0
-X-Microsoft-Antispam: BCL:0;
-X-Microsoft-Antispam-Message-Info: ZoEfOr1JFDTIjCLAjS/LLprHhlxSvN8uFBAwvpix1Fuj9o9ec3NY+QJatUCJlx9Ii7f38wo0yBLxTvpnbrVsQLHumonpKXZ3juMr99IFtk4PzF/iVrxhzb89Pci8iIveXOXcsz640dQcpRqQzYRq+NRQG3Xm3hFxOyZk88IYAX0NgIsoOmiL1lHyATJirGSwAFk+RnciXnxeLSVDr/Cd1v4oe0EGGtQ3qmFwMuQYUevFyaA/GpsXUgS3oi552Uz5aaUKcSkfbAyuGIUZNQPOs9//SEK+dWcpCkS3xzuvVUtb9hDzcSLl+B/qPE2lYKofQBolcPb4YNxEp6gxsXFRj/kEGXugTFgi3T+K6QL3lxVz2P7Ru5Mcu2VRYO2yNGrGSYOGSiD8IHjhkXc5M71q2W4SCQMTC3FsjuGjmfqAFvMJHUcQZ+VRhsHy4LS3JhNDhQ11k9TfmXzdtJehePtx8KrFqsIppQ/j413UQShDMfLwpPSYds5l//lE6nx6Vs8nFQYgkvTXp3t0oLG0YSMeSx1uEqiPb8V7n2UtEgabZT7VuAmtwHU5RID+aK2xn0570fIVroIgXPnzxMA1oK/vmRHviC2mO1iAk0Wd6MoWNicZLcE7J+RdD718vHjoAJHKvo2XPKLngCRbTqw51j0PIho0pLEFe8N06QOHZS3szqgJsYfWGyfZd9Re/ScBAjZKrXLvRuFedDXtOmpkhfLyzg==
-X-Forefront-Antispam-Report: CIP:255.255.255.255;CTRY:;LANG:en;SCL:1;SRV:;IPV:NLI;SFV:NSPM;H:MWHPR1001MB2365.namprd10.prod.outlook.com;PTR:;CAT:NONE;SFS:(366004)(9686003)(316002)(33716001)(5660300002)(956004)(1076003)(6666004)(186003)(44832011)(26005)(2906002)(8676002)(9576002)(6496006)(55016002)(52116002)(6916009)(8936002)(38100700002)(38350700002)(33656002)(508600001)(4744005)(66476007)(66556008)(66946007)(86362001);DIR:OUT;SFP:1101;
-X-MS-Exchange-AntiSpam-MessageData-ChunkCount: 1
-X-MS-Exchange-AntiSpam-MessageData-0: =?us-ascii?Q?kn9JOkwCKRlsZqH9dsEpUXfA+YIoFW+22nKZS5iY9q7r/oviLRIOTW10lV/E?=
- =?us-ascii?Q?1cYt0Yyh8XtLkOu3g2bbChrW5HN8JbnqZHb4PyH7vd0PRP80H1nw9whif96O?=
- =?us-ascii?Q?ZoibVY/b3NZ6Gkf/N3fXR+kd3tn83jVwuLVLbfj3XwvmchEjfk1W4Dgw6sJU?=
- =?us-ascii?Q?EPLUPBAveYB0DW64O1/AUCqZOlIvwmrQfyu7n+GZ8cdMDO8bvtuwfRUEQ/b4?=
- =?us-ascii?Q?ob9pNzINoS4pJFFX8kQmVxx5odP01kMQWK/s0yaJ1cliCLV8BraYESSR9hnN?=
- =?us-ascii?Q?tm4FRrJSE7OeX6RDIkBlzyehsjUzlWP8adGmaQD9fAn2YtzFB02km5Q1non6?=
- =?us-ascii?Q?YDm9rdHfVKG+9K+xw4ypJfWVU1vDmJrNfHirihhnY23eua9SIU9QXa1BET+q?=
- =?us-ascii?Q?cctgTNvYa5KVZz8u1jC0Ym+odAw04yvG6uT62rd5m2tNZ5d7iK568ni8416L?=
- =?us-ascii?Q?pfFhB/k+BMt3HkAdeb8rG14PXVtcaGqtwkbPj6K/IUUcW4kuCBvrU65I+wjz?=
- =?us-ascii?Q?r17/T9uL51iHO17hfBcAVeuEJO7yt63sA+IxbCtdFiSIx8KTfuHnkb1mGMsp?=
- =?us-ascii?Q?LgHkImAnOaEh1o6cbeIbpHQYBxxZJ4DAz46cq8lVjPex18Uv63KAG7otD05Y?=
- =?us-ascii?Q?TNDYJ6BrNUeFcXtVHeAShwPVybcx1yC6adOjl8Z5oF4gEemMcZ1eylANwgKE?=
- =?us-ascii?Q?TCGt4iOIkPTjkHCDtxwpaxu+0oMLhXDaNV+0CQKPVEx4FerwEz68Figo+tYC?=
- =?us-ascii?Q?Z+QIxSWHYxi5mvDkBb5sGTGAiXcIIy44eGDlZ/cL5/dOMGoMn6Hg5wIfx5V6?=
- =?us-ascii?Q?EQJqjNr25JleAc5liYDMtVPucjGtLVEmatwEGatVt9LuErF7lAat/PchgBXx?=
- =?us-ascii?Q?EoPO559EgOo2Ee6iBDfVJ3mf16+APEPnlHmB8+5zscA7lRMmdD0cDKRHVuM+?=
- =?us-ascii?Q?3h2vOXVByveenSO3qVbk9GeiQB8DW1tlUYGdtnjJ25G+nD/aF8bKEAlzdlsg?=
- =?us-ascii?Q?jCnE1QM23hKm6WfaS8Gr4qbFqzPgohpVw7yNl4d6AXiaW2WhsVi2R94mzphA?=
- =?us-ascii?Q?WsSNm/91gg8G0m6lrpbrauUqeH8N83rWbkDF5GYnSG6Qt1ZYhjY5NfZIfYaz?=
- =?us-ascii?Q?BaoOnlQCcZQgQz5dn1SwV1qmoyGlzJE9uKCdH4eDDhxLUplQM+HWKQbGyMtm?=
- =?us-ascii?Q?owxCwuSLkYBEsXsEnOLOZYwj8H9O+0bLEnNPkGp6IwBg7c+dl/JHti1+zSMj?=
- =?us-ascii?Q?TTunhe3FHnUHaC/Q9570bf5/NC16+ZOoDAjZQVUhXUPT5artiphVZnmLax/H?=
- =?us-ascii?Q?OiT/+RR35SZEm8y8oOttvzhenG2OSKlvB+s1PcCnGX8WD5Hw9guQpkJZJSUR?=
- =?us-ascii?Q?sKifxwbelyMQMAbWGdt4V0O0yVBPQ4UtdP+1lBKqFoaLIvSm9/hgidCojdud?=
- =?us-ascii?Q?n12eiupeY50MlFWj+pcd/xD0ONStapfjlRzd5qRbDniGZxuopdkUM+V3EWH7?=
- =?us-ascii?Q?5h9UQ+IKmcPyBHm+cbVAGD4XOc9yZ3I4XYksi9V/8rM39dJTgowWcaxqX4a9?=
- =?us-ascii?Q?8xVnrvWLaZulkCHFgpTbneeJ2TvM8r3SFK5+9LyYrhgFfrLAD+r2DYF9gmSv?=
- =?us-ascii?Q?L0DrB5m1BbrIvWskNQ6rGqq7s2J6a8xMDzK2QdxSdm5cb4AYiGSt/VmyIfzr?=
- =?us-ascii?Q?Wyzdb5t2SqwTI9eDzWzu6XQJ/U8=3D?=
-X-OriginatorOrg: oracle.com
-X-MS-Exchange-CrossTenant-Network-Message-Id: 69f16ebe-3384-4afe-661b-08d9a2adb874
-X-MS-Exchange-CrossTenant-AuthSource: MWHPR1001MB2365.namprd10.prod.outlook.com
-X-MS-Exchange-CrossTenant-AuthAs: Internal
-X-MS-Exchange-CrossTenant-OriginalArrivalTime: 08 Nov 2021 11:48:45.9522
- (UTC)
-X-MS-Exchange-CrossTenant-FromEntityHeader: Hosted
-X-MS-Exchange-CrossTenant-Id: 4e2c6054-71cb-48f1-bd6c-3a9705aca71b
-X-MS-Exchange-CrossTenant-MailboxType: HOSTED
-X-MS-Exchange-CrossTenant-UserPrincipalName: me8kJqZx3WqFxYa0AGglVuqORyoEXEPdYRnR2mOGgfn7pW6mTkFuSi7yS9BUfOdO4dF4Eq+VgysY2mSjrDRCtrHO/ZwrOSAKJkHtagmH0/8=
-X-MS-Exchange-Transport-CrossTenantHeadersStamped: MWHPR1001MB2367
-X-Proofpoint-Virus-Version: vendor=nai engine=6300 definitions=10161 signatures=668683
-X-Proofpoint-Spam-Details: rule=notspam policy=default score=0 mlxlogscore=870 mlxscore=0
- suspectscore=0 bulkscore=0 spamscore=0 phishscore=0 malwarescore=0
- adultscore=0 classifier=spam adjust=0 reason=mlx scancount=1
- engine=8.12.0-2110150000 definitions=main-2111080074
-X-Proofpoint-GUID: t5rFyyzOI5kXY9SIhufuWKuwyGeUfgit
-X-Proofpoint-ORIG-GUID: t5rFyyzOI5kXY9SIhufuWKuwyGeUfgit
+References: <202111131205.eni58iWQ-lkp@intel.com>
+In-Reply-To: <202111131205.eni58iWQ-lkp@intel.com>
+From:   Yafang Shao <laoar.shao@gmail.com>
+Date:   Sat, 13 Nov 2021 22:46:04 +0800
+Message-ID: <CALOAHbBQfK16aXUwT3znCwLBWcpLwgovS=kYBBR=eL4Eb62t3g@mail.gmail.com>
+Subject: Re: /bin/bash: line 1: 45878 Segmentation fault sparse -D__linux__
+ -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void
+ -Wno-unknown-attribute -fdiagnostic-prefix -D__CHECK_ENDIAN__ -D__NDS32_EL__
+ --arch=nds32 -mlittle-endian -m32 -Wp,-MMD,ker...
+To:     kernel test robot <lkp@intel.com>
+Cc:     kbuild-all@lists.01.org, LKML <linux-kernel@vger.kernel.org>,
+        yujie.liu@intel.com, luc.vanoostenryck@gmail.com,
+        linux-sparse@vger.kernel.org
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-n Wed, Nov 03, 2021 at 04:36:00PM +0300, Dan Carpenter wrote:
-> The kunmap_atomic() has a BUILD_BUG_ON(__same_type((__addr), struct page *))
-> which does __builtin_types_compatible_p(typeof(a), typeof(b)).
-> 
-> The problem is that Sparse considers "void *" compatible with
-> "struct page *" so the BUILD_BUG_ON() triggers but GCC says they are not
-> compatible (which is the desired behavior for the kernel).
+On Sat, Nov 13, 2021 at 12:25 PM kernel test robot <lkp@intel.com> wrote:
+>
+> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.gi=
+t master
+> head:   66f4beaa6c1d28161f534471484b2daa2de1dce0
+> commit: 60f2415e19d3948641149ac6aca137a7be1d1952 sched: Make schedstats h=
+elpers independent of fair sched class
+> date:   6 weeks ago
+> config: nds32-randconfig-s031-20211015 (attached as .config)
+> compiler: nds32le-linux-gcc (GCC) 11.2.0
+> reproduce:
+>         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbi=
+n/make.cross -O ~/bin/make.cross
+>         chmod +x ~/bin/make.cross
+>         # apt-get install sparse
+>         # sparse version: v0.6.4-dirty
+>         # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.=
+git/commit/?id=3D60f2415e19d3948641149ac6aca137a7be1d1952
+>         git remote add linus https://git.kernel.org/pub/scm/linux/kernel/=
+git/torvalds/linux.git
+>         git fetch --no-tags linus master
+>         git checkout 60f2415e19d3948641149ac6aca137a7be1d1952
+>         # save the attached .config to linux build tree
+>         COMPILER_INSTALL_PATH=3D$HOME/0day COMPILER=3Dgcc-11.2.0 make.cro=
+ss C=3D1 CF=3D'-fdiagnostic-prefix -D__CHECK_ENDIAN__' ARCH=3Dnds32
+>
+> If you fix the issue, kindly add following tag as appropriate
+> Reported-by: kernel test robot <lkp@intel.com>
+>
+> All errors (new ones prefixed by >>):
+>
+>    include/linux/rtmutex.h:68:58: sparse: sparse: got $
+>    kernel/sched/fair.c: note: in included file (through include/linux/sch=
+ed.h, kernel/sched/sched.h):
+>    include/linux/seccomp.h:96:63: sparse: sparse: Expected ) in function =
+declarator
+>    include/linux/seccomp.h:96:63: sparse: sparse: got $
+>    include/linux/seccomp.h:99:1: sparse: sparse: Expected ; at the end of=
+ type declaration
+>    include/linux/seccomp.h:99:1: sparse: sparse: got }
+>    include/linux/seccomp.h:103:1: sparse: sparse: Expected ; at the end o=
+f type declaration
+>    include/linux/seccomp.h:103:1: sparse: sparse: got }
+>    include/linux/seccomp.h:116:1: sparse: sparse: Expected ; at the end o=
+f type declaration
+>    include/linux/seccomp.h:116:1: sparse: sparse: got }
+>    include/linux/seccomp.h:122:1: sparse: sparse: Expected ; at the end o=
+f type declaration
+>    include/linux/seccomp.h:122:1: sparse: sparse: got }
+>    kernel/sched/fair.c: note: in included file (through include/linux/nod=
+emask.h, include/linux/sched.h, kernel/sched/sched.h):
+>    include/linux/numa.h:50:1: sparse: sparse: Expected ; at the end of ty=
+pe declaration
+>    include/linux/numa.h:50:1: sparse: sparse: got }
+>    include/linux/numa.h:54:1: sparse: sparse: Expected ; at the end of ty=
+pe declaration
+>    include/linux/numa.h:54:1: sparse: sparse: got }
+>    include/linux/numa.h:58:1: sparse: sparse: Expected ; at the end of ty=
+pe declaration
+>    include/linux/numa.h:58:1: sparse: sparse: got }
+>    kernel/sched/fair.c: note: in included file (through include/linux/sch=
+ed.h, kernel/sched/sched.h):
+>    include/linux/nodemask.h:98:54: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:98:54: sparse: sparse: got }
+>    include/linux/nodemask.h:99:19: sparse: sparse: Expected ; at end of d=
+eclaration
+>    include/linux/nodemask.h:99:19: sparse: sparse: got _unused_nodemask_a=
+rg_
+>    include/linux/nodemask.h:109:68: sparse: sparse: Expected ) in functio=
+n declarator
+>    include/linux/nodemask.h:109:68: sparse: sparse: got *
+>    include/linux/nodemask.h:112:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:112:1: sparse: sparse: got }
+>    include/linux/nodemask.h:116:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:116:1: sparse: sparse: got }
+>    include/linux/nodemask.h:131:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:131:1: sparse: sparse: got }
+>    include/linux/nodemask.h:137:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:137:1: sparse: sparse: got }
+>    include/linux/nodemask.h:143:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:143:1: sparse: sparse: got }
+>    include/linux/nodemask.h:149:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:149:1: sparse: sparse: got }
+>    include/linux/nodemask.h:159:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:159:1: sparse: sparse: got }
+>    include/linux/nodemask.h:167:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:167:1: sparse: sparse: got }
+>    include/linux/nodemask.h:175:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:175:1: sparse: sparse: got }
+>    include/linux/nodemask.h:183:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:183:1: sparse: sparse: got }
+>    include/linux/nodemask.h:191:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:191:1: sparse: sparse: got }
+>    include/linux/nodemask.h:199:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:199:1: sparse: sparse: got }
+>    include/linux/nodemask.h:207:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:207:1: sparse: sparse: got }
+>    include/linux/nodemask.h:215:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:215:1: sparse: sparse: got }
+>    include/linux/nodemask.h:223:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:223:1: sparse: sparse: got }
+>    include/linux/nodemask.h:229:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:229:1: sparse: sparse: got }
+>    include/linux/nodemask.h:235:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:235:1: sparse: sparse: got }
+>    include/linux/nodemask.h:241:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:241:1: sparse: sparse: got }
+>    include/linux/nodemask.h:249:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:249:1: sparse: sparse: got }
+>    include/linux/nodemask.h:257:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:257:1: sparse: sparse: got }
+>    include/linux/nodemask.h:265:16: sparse: sparse: Expected ) in nested =
+declarator
+>    include/linux/nodemask.h:265:16: sparse: sparse: got <
+>    include/linux/nodemask.h:265:16: sparse: sparse: Expected ; at the end=
+ of type declaration
+>    include/linux/nodemask.h:265:16: sparse: sparse: got }
+>    include/linux/nodemask.h:266:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:266:1: sparse: sparse: got }
+>    include/linux/nodemask.h:271:16: sparse: sparse: Expected ) in nested =
+declarator
+>    include/linux/nodemask.h:271:16: sparse: sparse: got <
+>    include/linux/nodemask.h:271:16: sparse: sparse: Expected ; at the end=
+ of type declaration
+>    include/linux/nodemask.h:271:16: sparse: sparse: got }
+>    include/linux/nodemask.h:272:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:272:1: sparse: sparse: got }
+>    include/linux/nodemask.h:281:53: sparse: sparse: Expected ) in functio=
+n declarator
+>    include/linux/nodemask.h:281:53: sparse: sparse: got *
+>    include/linux/nodemask.h:284:9: sparse: sparse: Expected ) in function=
+ declarator
+>    include/linux/nodemask.h:284:9: sparse: sparse: got (
+>    include/linux/nodemask.h:285:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:285:1: sparse: sparse: got }
+>    include/linux/nodemask.h:301:16: sparse: sparse: Expected ) in nested =
+declarator
+>    include/linux/nodemask.h:301:16: sparse: sparse: got <
+>    include/linux/nodemask.h:301:16: sparse: sparse: Expected ; at the end=
+ of type declaration
+>    include/linux/nodemask.h:301:16: sparse: sparse: got }
+>    include/linux/nodemask.h:303:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:303:1: sparse: sparse: got }
+>    include/linux/nodemask.h:337:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:337:1: sparse: sparse: got }
+>    include/linux/nodemask.h:343:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:343:1: sparse: sparse: got }
+>    include/linux/nodemask.h:351:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:351:1: sparse: sparse: got }
+>    include/linux/nodemask.h:359:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:359:1: sparse: sparse: got }
+>    include/linux/nodemask.h:367:1: sparse: sparse: Expected ; at the end =
+of type declaration
+>    include/linux/nodemask.h:367:1: sparse: sparse: too many errors
+> >> /bin/bash: line 1: 45878 Segmentation fault      sparse -D__linux__ -D=
+linux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void -Wno-unknown-=
+attribute -fdiagnostic-prefix -D__CHECK_ENDIAN__ -D__NDS32_EL__ --arch=3Dnd=
+s32 -mlittle-endian -m32 -Wp,-MMD,kernel/sched/.fair.o.d -nostdinc -isystem=
+ /opt/cross/gcc-11.2.0-nolibc/nds32le-linux/bin/../lib/gcc/nds32le-linux/11=
+.2.0/include -Iarch/nds32/include -I./arch/nds32/include/generated -Iinclud=
+e -I./include -Iarch/nds32/include/uapi -I./arch/nds32/include/generated/ua=
+pi -Iinclude/uapi -I./include/generated/uapi -include include/linux/compile=
+r-version.h -include include/linux/kconfig.h -include include/linux/compile=
+r_types.h -D__KERNEL__ -fmacro-prefix-map=3D=3D -DKBUILD_EXTRA_WARN1 -Wall =
+-Wundef -Werror=3Dstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fn=
+o-common -fshort-wchar -fno-PIE -Werror=3Dimplicit-function-declaration -We=
+rror=3Dimplicit-int -Werror=3Dreturn-type -Wno-format-security -std=3Dgnu89=
+ -mno-sched-prolog-epilog -mcmodel=3Dlarge -mno-ext-fpu-sp -mno-ext-fpu-dp =
+-mfloat-abi=3Dsoft -EL -fno-delete-null-pointer-checks -Wno-frame-address -=
+Wno-format-truncation -Wno-format-overflow -Wno-address-of-packed-member -O=
+2 -fno-allow-store-data-races -Wframe-larger-than=3D1024 -fno-stack-protect=
+or -Wimplicit-fallthrough=3D5 -Wno-main -Wno-unused-but-set-variable -Wno-u=
+nused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -f=
+no-stack-clash-protection -fno-inline-functions-called-once -falign-functio=
+ns=3D64 -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop=
+-truncation -Wno-zero-length-bounds -Wno-array-bounds -Wno-stringop-overflo=
+w -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-stack-ch=
+eck -fconserve-stack -Werror=3Ddate-time -Werror=3Dincompatible-pointer-typ=
+es -Werror=3Ddesignated-init -Wno-packed-not-aligned -Wextra -Wunused -Wno-=
+unused-parameter -Wmissing-declarations -Wmissing-format-attribute -Wmissin=
+g-prototypes -Wold-style-definition -Wmissing-include-dirs -Wunused-but-set=
+-variable -Wunused-const-variable -Wpacked-not-aligned -Wstringop-truncatio=
+n -Wno-missing-field-initializers -Wno-sign-compare -Wno-type-limits -I ker=
+nel/sched -I ./kernel/sched -DKBUILD_MODFILE=3D'"kernel/sched/fair"' -DKBUI=
+LD_BASENAME=3D'"fair"' -DKBUILD_MODNAME=3D'"fair"' -D__KBUILD_MODNAME=3Dkmo=
+d_fair kernel/sched/fair.c
+>
+> ---
+> 0-DAY CI Kernel Test Service, Intel Corporation
+> https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
 
-Sorry, this was a bug in Smatch, not Sparse.
 
-regards,
-dan carpenter
+Hi ,
 
++ Yujie, Luc and linux-sparse folks
+
+This is a known issue. I replied to this issue several days earlier,
+see also https://lore.kernel.org/lkml/CALOAHbBs463r4WbGKqfq5L=3Dh=3DUs-En3v=
+0DmoQiBwO9Sh1mY1UQ@mail.gmail.com/
+. But it seems there's no progress by now.
+
+Hi sparse folks, could you pls. share some information ?
+
+--=20
+Thanks
+Yafang
