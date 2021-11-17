@@ -2,303 +2,177 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 5C180C433F5
-	for <linux-sparse@archiver.kernel.org>; Sat, 13 Nov 2021 14:46:45 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 53CFEC433F5
+	for <linux-sparse@archiver.kernel.org>; Wed, 17 Nov 2021 09:45:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 3EF2D6054E
-	for <linux-sparse@archiver.kernel.org>; Sat, 13 Nov 2021 14:46:45 +0000 (UTC)
+	by mail.kernel.org (Postfix) with ESMTP id 348BC61A07
+	for <linux-sparse@archiver.kernel.org>; Wed, 17 Nov 2021 09:45:34 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231912AbhKMOtg (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sat, 13 Nov 2021 09:49:36 -0500
-Received: from lindbergh.monkeyblade.net ([23.128.96.19]:52144 "EHLO
-        lindbergh.monkeyblade.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S229668AbhKMOtg (ORCPT
+        id S235363AbhKQJsa (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 17 Nov 2021 04:48:30 -0500
+Received: from wout1-smtp.messagingengine.com ([64.147.123.24]:40247 "EHLO
+        wout1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S235547AbhKQJsS (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Sat, 13 Nov 2021 09:49:36 -0500
-Received: from mail-qt1-x835.google.com (mail-qt1-x835.google.com [IPv6:2607:f8b0:4864:20::835])
-        by lindbergh.monkeyblade.net (Postfix) with ESMTPS id 181A9C061766;
-        Sat, 13 Nov 2021 06:46:44 -0800 (PST)
-Received: by mail-qt1-x835.google.com with SMTP id t34so11268905qtc.7;
-        Sat, 13 Nov 2021 06:46:44 -0800 (PST)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=gmail.com; s=20210112;
-        h=mime-version:references:in-reply-to:from:date:message-id:subject:to
-         :cc:content-transfer-encoding;
-        bh=JjEUDWCdGpRrio0lUJixEMAogthB5HiI1AmmBuP4PUI=;
-        b=NNYSjbJhbPxNaT8Dtrf3Io57P7UeJ2uETglS59ZGhuoMhk1F/Jz12wzSM1aKu+YpWc
-         9u1XASTIhK0IiarKidhL8drrq4wXZvbj9njELAZ4WpKTYJ1rrjcpZfh3uCsQ81NhWgxG
-         DXHQGoaEsRCTgRMl/lwpxua+YizPExyeuo9Ac04/TEhIQ24Tn4VeUX5KTjhc6RAvQIlB
-         gv/D8+FVPz98qr/QpakUsSt+jDClfnhNXEcCqrvha9D7KX7Cq4qAtZ9is4Gxt5BHaj29
-         p6wokl2OyknZuriA8jL6xezk9nOpmcU2HaC4rfS7wwFY+YdhcVYy0T43qXrQ7Z63t6f/
-         5KuA==
-X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
-        d=1e100.net; s=20210112;
-        h=x-gm-message-state:mime-version:references:in-reply-to:from:date
-         :message-id:subject:to:cc:content-transfer-encoding;
-        bh=JjEUDWCdGpRrio0lUJixEMAogthB5HiI1AmmBuP4PUI=;
-        b=jyGeXKao5jTW8tOlAIwmQtGrMw/ozGjhYTrE5oB+7QL4a4Oj6M0C2Uuc8YN84lWm77
-         Q79DMZijZpUVSEITyrXtakX+T+Kbw1JJjn3YQ2Rslo8cPQdOaie40IvWGOX0/BHO26h2
-         i4QiEDYnjECNqtPZLC9povKPwFCGRslR4KCMzTbFUSkKIw3iKk2Dr4niXLnDofJq/A6h
-         r4hb/EUPQLVJvpgNJ8weTtQ88xN2hUxhbbuzglF3ClvRvQ0MxtCXZUbjq4joq97DzibR
-         XWiEgWIyJGpFSgGvqk2lr5AHnW5EzVgFb+mNongP/8iBjDaUMZawgPbZjyPDdwaZn/mj
-         ompA==
-X-Gm-Message-State: AOAM532KPTYvPWwCrdyJVSx92QfRaeVF9E+FjtpsLp29HaFJsYcw/xyk
-        5KJpVF0aNB5yXOjKzJXKTEaWQM9pCVqFovj2GeI=
-X-Google-Smtp-Source: ABdhPJzgyJhK9k+/FP+5qQ57snfwFccE8RZFOk9XDoWDpJGE1sam/tu1BHEU2DKg89Sh3IIxfKC935mjYarq2bgP3EY=
-X-Received: by 2002:ac8:147:: with SMTP id f7mr24770172qtg.329.1636814803225;
- Sat, 13 Nov 2021 06:46:43 -0800 (PST)
-MIME-Version: 1.0
-References: <202111131205.eni58iWQ-lkp@intel.com>
-In-Reply-To: <202111131205.eni58iWQ-lkp@intel.com>
-From:   Yafang Shao <laoar.shao@gmail.com>
-Date:   Sat, 13 Nov 2021 22:46:04 +0800
-Message-ID: <CALOAHbBQfK16aXUwT3znCwLBWcpLwgovS=kYBBR=eL4Eb62t3g@mail.gmail.com>
-Subject: Re: /bin/bash: line 1: 45878 Segmentation fault sparse -D__linux__
- -Dlinux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void
- -Wno-unknown-attribute -fdiagnostic-prefix -D__CHECK_ENDIAN__ -D__NDS32_EL__
- --arch=nds32 -mlittle-endian -m32 -Wp,-MMD,ker...
-To:     kernel test robot <lkp@intel.com>
-Cc:     kbuild-all@lists.01.org, LKML <linux-kernel@vger.kernel.org>,
-        yujie.liu@intel.com, luc.vanoostenryck@gmail.com,
-        linux-sparse@vger.kernel.org
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+        Wed, 17 Nov 2021 04:48:18 -0500
+Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
+        by mailout.west.internal (Postfix) with ESMTP id AAF7D3201DE8;
+        Wed, 17 Nov 2021 04:45:17 -0500 (EST)
+Received: from imap42 ([10.202.2.92])
+  by compute1.internal (MEProxy); Wed, 17 Nov 2021 04:45:17 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=naive.systems;
+         h=mime-version:message-id:in-reply-to:references:date:from:to
+        :cc:subject:content-type; s=fm3; bh=qwtYvO1IWmfqnU/oDXcf/0GhGdE8
+        6fgVYRZ9X2PHneQ=; b=VdeMnxKdIbQ1YJcG06pFcpDRQXIx7k5DBLIUGHmtG5rh
+        JVw0S14RdTYpQFolZEC072bPw8KuWntAUh58a1AdrxocuAoFUDSAuVEFzejb04VB
+        3URw+XE/NHrrHIaDWvA9eA43tGWXWWgihzhSaC0+cWtIJKoV/QUcAwz+3uSG2y8J
+        U5Uox0KxK3sJ/2eT3ht8spkCrU7F73j1QTo7EIrEl5BWGJKkELhKTfh89nCPxTq6
+        x16pemnkWw2LUCrxFK1b9ByK8erwPjK+JYbr4l7aOEmeHNlesQr0lRVLiF23Ty5X
+        4zTA0rxVIPJS0Yd3427ENAttplm4v+uQ4sN1WP3myw==
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
+        messagingengine.com; h=cc:content-type:date:from:in-reply-to
+        :message-id:mime-version:references:subject:to:x-me-proxy
+        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=qwtYvO
+        1IWmfqnU/oDXcf/0GhGdE86fgVYRZ9X2PHneQ=; b=XJnY46hNjAT3Ev0YyS8I3L
+        hUe4TsVQgHJLr5uokZp2YTsc8Cfcoz4f+HCjkBRpgnpieQK3WG0az+zhzs1WpkcW
+        e1Qg5uCBRKJ4BOudLxMt9xA/fzTNRQ5ugSypIw9VNnUwF955e3iII8O2lrEAagFI
+        cktzG5xNyUGMRjVPX3aRzAsBjUX+BV6Dr3b2asjjdIlt80ETgGIIm13eQV/S1oEm
+        Jzhis6QEcMHqDBobf5yYwbSO3dPstWuoy9pntL7Bk7RiS5j3ysejq/tZkyC7nenW
+        m48OI1/NFsuaBO6N5PhHds+YKBtdt9ayRTje3YDmidSw0ExqwycLTX6MiFGpSUuw
+        ==
+X-ME-Sender: <xms:Lc-UYQYrD1UI5laxONcs2uaJY0fVvvVLWpratJV9j1j3jlw2sGAWKg>
+    <xme:Lc-UYbbRmv1EWmbTUtwlJqQfyeUdHeoDhxi-uFQF6CDtcXU_8Yyni0Jc0JavlNb6o
+    bHGHOe-Gm5B3Jm2T_o>
+X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvuddrfeeggddtfecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
+    uegrihhlohhuthemuceftddtnecunecujfgurhepofgfggfkjghffffhvffutgesthdtre
+    dtreertdenucfhrhhomhepfdgiihgrohculfhirgdfuceogihjihgrsehnrghivhgvrdhs
+    hihsthgvmhhsqeenucggtffrrghtthgvrhhnpefgteefvefhgedufeehhffgudeugfdtke
+    ehhedvveehgfekheejheeigeefheekgfenucevlhhushhtvghrufhiiigvpedtnecurfgr
+    rhgrmhepmhgrihhlfhhrohhmpeigjhhirgesnhgrihhvvgdrshihshhtvghmsh
+X-ME-Proxy: <xmx:Lc-UYa8mfTJBcx6gHKmF1XB3KGCRF9OC3nFNFIiv6g_w4Xqax2G8UA>
+    <xmx:Lc-UYaoeQqBON1AuvT38iA0-FbGVWest95rlc68eOGw2KeQmxLer6A>
+    <xmx:Lc-UYbqOr5AT5D_N-IG0PETv9J5BMUSrzy-2W8XOoDVq-4INvT0wDg>
+    <xmx:Lc-UYVFFR6LD9K8mUTsb28PUtwwQviJxn9iwLVLO_112PvLosWBHSA>
+Received: by mailuser.nyi.internal (Postfix, from userid 501)
+        id 36FFD218007A; Wed, 17 Nov 2021 04:45:17 -0500 (EST)
+X-Mailer: MessagingEngine.com Webmail Interface
+User-Agent: Cyrus-JMAP/3.5.0-alpha0-1371-g2296cc3491-fm-20211109.003-g2296cc34
+Mime-Version: 1.0
+Message-Id: <fd079590-6715-4840-8943-6627c950962e@www.fastmail.com>
+In-Reply-To: <20210813012511.65397-2-duke@naive.systems>
+References: <20210726182822.ylmd3vtm44txowoi@mail>
+ <20210813012511.65397-1-duke@naive.systems>
+ <20210813012511.65397-2-duke@naive.systems>
+Date:   Wed, 17 Nov 2021 17:44:56 +0800
+From:   "Xiao Jia" <xjia@naive.systems>
+To:     luc.vanoostenryck@gmail.com
+Cc:     linux-sparse@vger.kernel.org
+Subject: Re: [PATCH 1/2] expose more functions to C++ in header files
+Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Sat, Nov 13, 2021 at 12:25 PM kernel test robot <lkp@intel.com> wrote:
->
-> tree:   https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.gi=
-t master
-> head:   66f4beaa6c1d28161f534471484b2daa2de1dce0
-> commit: 60f2415e19d3948641149ac6aca137a7be1d1952 sched: Make schedstats h=
-elpers independent of fair sched class
-> date:   6 weeks ago
-> config: nds32-randconfig-s031-20211015 (attached as .config)
-> compiler: nds32le-linux-gcc (GCC) 11.2.0
-> reproduce:
->         wget https://raw.githubusercontent.com/intel/lkp-tests/master/sbi=
-n/make.cross -O ~/bin/make.cross
->         chmod +x ~/bin/make.cross
->         # apt-get install sparse
->         # sparse version: v0.6.4-dirty
->         # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.=
-git/commit/?id=3D60f2415e19d3948641149ac6aca137a7be1d1952
->         git remote add linus https://git.kernel.org/pub/scm/linux/kernel/=
-git/torvalds/linux.git
->         git fetch --no-tags linus master
->         git checkout 60f2415e19d3948641149ac6aca137a7be1d1952
->         # save the attached .config to linux build tree
->         COMPILER_INSTALL_PATH=3D$HOME/0day COMPILER=3Dgcc-11.2.0 make.cro=
-ss C=3D1 CF=3D'-fdiagnostic-prefix -D__CHECK_ENDIAN__' ARCH=3Dnds32
->
-> If you fix the issue, kindly add following tag as appropriate
-> Reported-by: kernel test robot <lkp@intel.com>
->
-> All errors (new ones prefixed by >>):
->
->    include/linux/rtmutex.h:68:58: sparse: sparse: got $
->    kernel/sched/fair.c: note: in included file (through include/linux/sch=
-ed.h, kernel/sched/sched.h):
->    include/linux/seccomp.h:96:63: sparse: sparse: Expected ) in function =
-declarator
->    include/linux/seccomp.h:96:63: sparse: sparse: got $
->    include/linux/seccomp.h:99:1: sparse: sparse: Expected ; at the end of=
- type declaration
->    include/linux/seccomp.h:99:1: sparse: sparse: got }
->    include/linux/seccomp.h:103:1: sparse: sparse: Expected ; at the end o=
-f type declaration
->    include/linux/seccomp.h:103:1: sparse: sparse: got }
->    include/linux/seccomp.h:116:1: sparse: sparse: Expected ; at the end o=
-f type declaration
->    include/linux/seccomp.h:116:1: sparse: sparse: got }
->    include/linux/seccomp.h:122:1: sparse: sparse: Expected ; at the end o=
-f type declaration
->    include/linux/seccomp.h:122:1: sparse: sparse: got }
->    kernel/sched/fair.c: note: in included file (through include/linux/nod=
-emask.h, include/linux/sched.h, kernel/sched/sched.h):
->    include/linux/numa.h:50:1: sparse: sparse: Expected ; at the end of ty=
-pe declaration
->    include/linux/numa.h:50:1: sparse: sparse: got }
->    include/linux/numa.h:54:1: sparse: sparse: Expected ; at the end of ty=
-pe declaration
->    include/linux/numa.h:54:1: sparse: sparse: got }
->    include/linux/numa.h:58:1: sparse: sparse: Expected ; at the end of ty=
-pe declaration
->    include/linux/numa.h:58:1: sparse: sparse: got }
->    kernel/sched/fair.c: note: in included file (through include/linux/sch=
-ed.h, kernel/sched/sched.h):
->    include/linux/nodemask.h:98:54: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:98:54: sparse: sparse: got }
->    include/linux/nodemask.h:99:19: sparse: sparse: Expected ; at end of d=
-eclaration
->    include/linux/nodemask.h:99:19: sparse: sparse: got _unused_nodemask_a=
-rg_
->    include/linux/nodemask.h:109:68: sparse: sparse: Expected ) in functio=
-n declarator
->    include/linux/nodemask.h:109:68: sparse: sparse: got *
->    include/linux/nodemask.h:112:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:112:1: sparse: sparse: got }
->    include/linux/nodemask.h:116:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:116:1: sparse: sparse: got }
->    include/linux/nodemask.h:131:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:131:1: sparse: sparse: got }
->    include/linux/nodemask.h:137:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:137:1: sparse: sparse: got }
->    include/linux/nodemask.h:143:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:143:1: sparse: sparse: got }
->    include/linux/nodemask.h:149:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:149:1: sparse: sparse: got }
->    include/linux/nodemask.h:159:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:159:1: sparse: sparse: got }
->    include/linux/nodemask.h:167:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:167:1: sparse: sparse: got }
->    include/linux/nodemask.h:175:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:175:1: sparse: sparse: got }
->    include/linux/nodemask.h:183:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:183:1: sparse: sparse: got }
->    include/linux/nodemask.h:191:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:191:1: sparse: sparse: got }
->    include/linux/nodemask.h:199:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:199:1: sparse: sparse: got }
->    include/linux/nodemask.h:207:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:207:1: sparse: sparse: got }
->    include/linux/nodemask.h:215:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:215:1: sparse: sparse: got }
->    include/linux/nodemask.h:223:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:223:1: sparse: sparse: got }
->    include/linux/nodemask.h:229:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:229:1: sparse: sparse: got }
->    include/linux/nodemask.h:235:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:235:1: sparse: sparse: got }
->    include/linux/nodemask.h:241:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:241:1: sparse: sparse: got }
->    include/linux/nodemask.h:249:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:249:1: sparse: sparse: got }
->    include/linux/nodemask.h:257:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:257:1: sparse: sparse: got }
->    include/linux/nodemask.h:265:16: sparse: sparse: Expected ) in nested =
-declarator
->    include/linux/nodemask.h:265:16: sparse: sparse: got <
->    include/linux/nodemask.h:265:16: sparse: sparse: Expected ; at the end=
- of type declaration
->    include/linux/nodemask.h:265:16: sparse: sparse: got }
->    include/linux/nodemask.h:266:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:266:1: sparse: sparse: got }
->    include/linux/nodemask.h:271:16: sparse: sparse: Expected ) in nested =
-declarator
->    include/linux/nodemask.h:271:16: sparse: sparse: got <
->    include/linux/nodemask.h:271:16: sparse: sparse: Expected ; at the end=
- of type declaration
->    include/linux/nodemask.h:271:16: sparse: sparse: got }
->    include/linux/nodemask.h:272:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:272:1: sparse: sparse: got }
->    include/linux/nodemask.h:281:53: sparse: sparse: Expected ) in functio=
-n declarator
->    include/linux/nodemask.h:281:53: sparse: sparse: got *
->    include/linux/nodemask.h:284:9: sparse: sparse: Expected ) in function=
- declarator
->    include/linux/nodemask.h:284:9: sparse: sparse: got (
->    include/linux/nodemask.h:285:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:285:1: sparse: sparse: got }
->    include/linux/nodemask.h:301:16: sparse: sparse: Expected ) in nested =
-declarator
->    include/linux/nodemask.h:301:16: sparse: sparse: got <
->    include/linux/nodemask.h:301:16: sparse: sparse: Expected ; at the end=
- of type declaration
->    include/linux/nodemask.h:301:16: sparse: sparse: got }
->    include/linux/nodemask.h:303:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:303:1: sparse: sparse: got }
->    include/linux/nodemask.h:337:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:337:1: sparse: sparse: got }
->    include/linux/nodemask.h:343:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:343:1: sparse: sparse: got }
->    include/linux/nodemask.h:351:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:351:1: sparse: sparse: got }
->    include/linux/nodemask.h:359:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:359:1: sparse: sparse: got }
->    include/linux/nodemask.h:367:1: sparse: sparse: Expected ; at the end =
-of type declaration
->    include/linux/nodemask.h:367:1: sparse: sparse: too many errors
-> >> /bin/bash: line 1: 45878 Segmentation fault      sparse -D__linux__ -D=
-linux -D__STDC__ -Dunix -D__unix__ -Wbitwise -Wno-return-void -Wno-unknown-=
-attribute -fdiagnostic-prefix -D__CHECK_ENDIAN__ -D__NDS32_EL__ --arch=3Dnd=
-s32 -mlittle-endian -m32 -Wp,-MMD,kernel/sched/.fair.o.d -nostdinc -isystem=
- /opt/cross/gcc-11.2.0-nolibc/nds32le-linux/bin/../lib/gcc/nds32le-linux/11=
-.2.0/include -Iarch/nds32/include -I./arch/nds32/include/generated -Iinclud=
-e -I./include -Iarch/nds32/include/uapi -I./arch/nds32/include/generated/ua=
-pi -Iinclude/uapi -I./include/generated/uapi -include include/linux/compile=
-r-version.h -include include/linux/kconfig.h -include include/linux/compile=
-r_types.h -D__KERNEL__ -fmacro-prefix-map=3D=3D -DKBUILD_EXTRA_WARN1 -Wall =
--Wundef -Werror=3Dstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fn=
-o-common -fshort-wchar -fno-PIE -Werror=3Dimplicit-function-declaration -We=
-rror=3Dimplicit-int -Werror=3Dreturn-type -Wno-format-security -std=3Dgnu89=
- -mno-sched-prolog-epilog -mcmodel=3Dlarge -mno-ext-fpu-sp -mno-ext-fpu-dp =
--mfloat-abi=3Dsoft -EL -fno-delete-null-pointer-checks -Wno-frame-address -=
-Wno-format-truncation -Wno-format-overflow -Wno-address-of-packed-member -O=
-2 -fno-allow-store-data-races -Wframe-larger-than=3D1024 -fno-stack-protect=
-or -Wimplicit-fallthrough=3D5 -Wno-main -Wno-unused-but-set-variable -Wno-u=
-nused-const-variable -fno-omit-frame-pointer -fno-optimize-sibling-calls -f=
-no-stack-clash-protection -fno-inline-functions-called-once -falign-functio=
-ns=3D64 -Wdeclaration-after-statement -Wvla -Wno-pointer-sign -Wno-stringop=
--truncation -Wno-zero-length-bounds -Wno-array-bounds -Wno-stringop-overflo=
-w -Wno-restrict -Wno-maybe-uninitialized -fno-strict-overflow -fno-stack-ch=
-eck -fconserve-stack -Werror=3Ddate-time -Werror=3Dincompatible-pointer-typ=
-es -Werror=3Ddesignated-init -Wno-packed-not-aligned -Wextra -Wunused -Wno-=
-unused-parameter -Wmissing-declarations -Wmissing-format-attribute -Wmissin=
-g-prototypes -Wold-style-definition -Wmissing-include-dirs -Wunused-but-set=
--variable -Wunused-const-variable -Wpacked-not-aligned -Wstringop-truncatio=
-n -Wno-missing-field-initializers -Wno-sign-compare -Wno-type-limits -I ker=
-nel/sched -I ./kernel/sched -DKBUILD_MODFILE=3D'"kernel/sched/fair"' -DKBUI=
-LD_BASENAME=3D'"fair"' -DKBUILD_MODNAME=3D'"fair"' -D__KBUILD_MODNAME=3Dkmo=
-d_fair kernel/sched/fair.c
->
+Hi Luc,
+
+Is this patchset getting your attention?  Ke has finished his internship so if there's anything needed please let me know.
+
+Thanks,
+Xiao
+
+On Fri, Aug 13, 2021, at 9:25 AM, Ke Du wrote:
+> Delete or shrink the ifndef __cplusplus guard to expose more facilities
+> to C++, such as sparse_initialize and the FOR_EACH_PTR macro.
+> 
+> Signed-off-by: Ke Du <duke@naive.systems>
+> Reviewed-by: Xiao Jia <xjia@naive.systems>
 > ---
-> 0-DAY CI Kernel Test Service, Intel Corporation
-> https://lists.01.org/hyperkitty/list/kbuild-all@lists.01.org
-
-
-Hi ,
-
-+ Yujie, Luc and linux-sparse folks
-
-This is a known issue. I replied to this issue several days earlier,
-see also https://lore.kernel.org/lkml/CALOAHbBs463r4WbGKqfq5L=3Dh=3DUs-En3v=
-0DmoQiBwO9Sh1mY1UQ@mail.gmail.com/
-. But it seems there's no progress by now.
-
-Hi sparse folks, could you pls. share some information ?
-
---=20
-Thanks
-Yafang
+> lib.h     | 4 ++--
+> ptrlist.h | 2 +-
+> symbol.h  | 3 ---
+> token.h   | 3 +--
+> 4 files changed, 4 insertions(+), 8 deletions(-)
+> 
+> diff --git a/lib.h b/lib.h
+> index 9809feee..0e9bd0cd 100644
+> --- a/lib.h
+> +++ b/lib.h
+> @@ -85,8 +85,6 @@ DECLARE_PTR_LIST(string_list, char);
+>  
+> typedef struct pseudo *pseudo_t;
+>  
+> -#ifndef __cplusplus
+> -
+> #ifdef __GNUC__
+> #define FORMAT_ATTR(pos) __attribute__ ((__format__ (__printf__, pos, pos+1)))
+> #define NORETURN_ATTR __attribute__ ((__noreturn__))
+> @@ -143,6 +141,8 @@ extern struct symbol_list *sparse_keep_tokens(char *filename);
+> extern struct symbol_list *sparse(char *filename);
+> extern void report_stats(void);
+>  
+> +#ifndef __cplusplus
+> +
+> static inline int symbol_list_size(struct symbol_list *list)
+> {
+> return ptr_list_size((struct ptr_list *)(list));
+> diff --git a/ptrlist.h b/ptrlist.h
+> index e281309f..67c7a208 100644
+> --- a/ptrlist.h
+> +++ b/ptrlist.h
+> @@ -109,6 +109,7 @@ extern void __free_ptr_list(struct ptr_list **);
+> DO_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##new, \
+>    new, __head##new, __list##new, __nr##new, PTR_ENTRY_UNTAG)
+>  
+> +#endif // __cpluplus
+>  
+> #define FOR_EACH_PTR(head, ptr) \
+> DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __name##ptr, PTR_ENTRY_NOTAG)
+> @@ -311,5 +312,4 @@ static inline void *tag_ptr(void *ptr, unsigned long tag)
+> return (void *)(tag | (unsigned long)ptr);
+> }
+>  
+> -#endif // __cpluplus
+> #endif /* PTR_LIST_H */
+> diff --git a/symbol.h b/symbol.h
+> index 503c9f09..c9d221e7 100644
+> --- a/symbol.h
+> +++ b/symbol.h
+> @@ -220,8 +220,6 @@ struct symbol {
+> pseudo_t pseudo;
+> };
+>  
+> -#ifndef __cplusplus
+> -
+> /* Modifiers */
+> #define MOD_AUTO 0x00000001
+> #define MOD_REGISTER 0x00000002
+> @@ -591,5 +589,4 @@ static inline void combine_address_space(struct position pos,
+> }
+> }
+>  
+> -#endif // __cplusplus
+> #endif /* SYMBOL_H */
+> diff --git a/token.h b/token.h
+> index 1f3601a9..804cc6f8 100644
+> --- a/token.h
+> +++ b/token.h
+> @@ -197,7 +197,7 @@ struct token {
+> };
+> };
+>  
+> -#ifndef __cplusplus
+> +
+>  
+> #define MAX_STRING 8191
+>  
+> @@ -251,5 +251,4 @@ static inline int match_token_zero(struct token *token)
+> return token->number[0] == '0' && !token->number[1];
+> }
+>  
+> -#endif // __cplusplus
+> #endif
+> -- 
+> 2.31.1
+> 
+> 
