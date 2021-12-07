@@ -1,178 +1,392 @@
 Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
-Received: from mail.kernel.org (mail.kernel.org [198.145.29.99])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 53CFEC433F5
-	for <linux-sparse@archiver.kernel.org>; Wed, 17 Nov 2021 09:45:34 +0000 (UTC)
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by mail.kernel.org (Postfix) with ESMTP id 348BC61A07
-	for <linux-sparse@archiver.kernel.org>; Wed, 17 Nov 2021 09:45:34 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id DAD23C433F5
+	for <linux-sparse@archiver.kernel.org>; Tue,  7 Dec 2021 14:07:02 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235363AbhKQJsa (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Wed, 17 Nov 2021 04:48:30 -0500
-Received: from wout1-smtp.messagingengine.com ([64.147.123.24]:40247 "EHLO
-        wout1-smtp.messagingengine.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S235547AbhKQJsS (ORCPT
+        id S232946AbhLGOKc (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 7 Dec 2021 09:10:32 -0500
+Received: from smtp-out1.suse.de ([195.135.220.28]:40914 "EHLO
+        smtp-out1.suse.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S232119AbhLGOKc (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Wed, 17 Nov 2021 04:48:18 -0500
-Received: from compute1.internal (compute1.nyi.internal [10.202.2.41])
-        by mailout.west.internal (Postfix) with ESMTP id AAF7D3201DE8;
-        Wed, 17 Nov 2021 04:45:17 -0500 (EST)
-Received: from imap42 ([10.202.2.92])
-  by compute1.internal (MEProxy); Wed, 17 Nov 2021 04:45:17 -0500
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=naive.systems;
-         h=mime-version:message-id:in-reply-to:references:date:from:to
-        :cc:subject:content-type; s=fm3; bh=qwtYvO1IWmfqnU/oDXcf/0GhGdE8
-        6fgVYRZ9X2PHneQ=; b=VdeMnxKdIbQ1YJcG06pFcpDRQXIx7k5DBLIUGHmtG5rh
-        JVw0S14RdTYpQFolZEC072bPw8KuWntAUh58a1AdrxocuAoFUDSAuVEFzejb04VB
-        3URw+XE/NHrrHIaDWvA9eA43tGWXWWgihzhSaC0+cWtIJKoV/QUcAwz+3uSG2y8J
-        U5Uox0KxK3sJ/2eT3ht8spkCrU7F73j1QTo7EIrEl5BWGJKkELhKTfh89nCPxTq6
-        x16pemnkWw2LUCrxFK1b9ByK8erwPjK+JYbr4l7aOEmeHNlesQr0lRVLiF23Ty5X
-        4zTA0rxVIPJS0Yd3427ENAttplm4v+uQ4sN1WP3myw==
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=
-        messagingengine.com; h=cc:content-type:date:from:in-reply-to
-        :message-id:mime-version:references:subject:to:x-me-proxy
-        :x-me-proxy:x-me-sender:x-me-sender:x-sasl-enc; s=fm1; bh=qwtYvO
-        1IWmfqnU/oDXcf/0GhGdE86fgVYRZ9X2PHneQ=; b=XJnY46hNjAT3Ev0YyS8I3L
-        hUe4TsVQgHJLr5uokZp2YTsc8Cfcoz4f+HCjkBRpgnpieQK3WG0az+zhzs1WpkcW
-        e1Qg5uCBRKJ4BOudLxMt9xA/fzTNRQ5ugSypIw9VNnUwF955e3iII8O2lrEAagFI
-        cktzG5xNyUGMRjVPX3aRzAsBjUX+BV6Dr3b2asjjdIlt80ETgGIIm13eQV/S1oEm
-        Jzhis6QEcMHqDBobf5yYwbSO3dPstWuoy9pntL7Bk7RiS5j3ysejq/tZkyC7nenW
-        m48OI1/NFsuaBO6N5PhHds+YKBtdt9ayRTje3YDmidSw0ExqwycLTX6MiFGpSUuw
-        ==
-X-ME-Sender: <xms:Lc-UYQYrD1UI5laxONcs2uaJY0fVvvVLWpratJV9j1j3jlw2sGAWKg>
-    <xme:Lc-UYbbRmv1EWmbTUtwlJqQfyeUdHeoDhxi-uFQF6CDtcXU_8Yyni0Jc0JavlNb6o
-    bHGHOe-Gm5B3Jm2T_o>
-X-ME-Proxy-Cause: gggruggvucftvghtrhhoucdtuddrgedvuddrfeeggddtfecutefuodetggdotefrodftvf
-    curfhrohhfihhlvgemucfhrghsthforghilhdpqfgfvfdpuffrtefokffrpgfnqfghnecu
-    uegrihhlohhuthemuceftddtnecunecujfgurhepofgfggfkjghffffhvffutgesthdtre
-    dtreertdenucfhrhhomhepfdgiihgrohculfhirgdfuceogihjihgrsehnrghivhgvrdhs
-    hihsthgvmhhsqeenucggtffrrghtthgvrhhnpefgteefvefhgedufeehhffgudeugfdtke
-    ehhedvveehgfekheejheeigeefheekgfenucevlhhushhtvghrufhiiigvpedtnecurfgr
-    rhgrmhepmhgrihhlfhhrohhmpeigjhhirgesnhgrihhvvgdrshihshhtvghmsh
-X-ME-Proxy: <xmx:Lc-UYa8mfTJBcx6gHKmF1XB3KGCRF9OC3nFNFIiv6g_w4Xqax2G8UA>
-    <xmx:Lc-UYaoeQqBON1AuvT38iA0-FbGVWest95rlc68eOGw2KeQmxLer6A>
-    <xmx:Lc-UYbqOr5AT5D_N-IG0PETv9J5BMUSrzy-2W8XOoDVq-4INvT0wDg>
-    <xmx:Lc-UYVFFR6LD9K8mUTsb28PUtwwQviJxn9iwLVLO_112PvLosWBHSA>
-Received: by mailuser.nyi.internal (Postfix, from userid 501)
-        id 36FFD218007A; Wed, 17 Nov 2021 04:45:17 -0500 (EST)
-X-Mailer: MessagingEngine.com Webmail Interface
-User-Agent: Cyrus-JMAP/3.5.0-alpha0-1371-g2296cc3491-fm-20211109.003-g2296cc34
-Mime-Version: 1.0
-Message-Id: <fd079590-6715-4840-8943-6627c950962e@www.fastmail.com>
-In-Reply-To: <20210813012511.65397-2-duke@naive.systems>
-References: <20210726182822.ylmd3vtm44txowoi@mail>
- <20210813012511.65397-1-duke@naive.systems>
- <20210813012511.65397-2-duke@naive.systems>
-Date:   Wed, 17 Nov 2021 17:44:56 +0800
-From:   "Xiao Jia" <xjia@naive.systems>
-To:     luc.vanoostenryck@gmail.com
-Cc:     linux-sparse@vger.kernel.org
-Subject: Re: [PATCH 1/2] expose more functions to C++ in header files
+        Tue, 7 Dec 2021 09:10:32 -0500
+Received: from relay2.suse.de (relay2.suse.de [149.44.160.134])
+        by smtp-out1.suse.de (Postfix) with ESMTP id 32FD62191E;
+        Tue,  7 Dec 2021 14:07:01 +0000 (UTC)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=suse.de; s=susede2_rsa;
+        t=1638886021;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type;
+        bh=wbRgmW+zXCMvnhV8IL0lLlGP7x2MmNNduatTHF949cM=;
+        b=Xj7/H93LNsHKEZ85IPanm73ZEWuaacvjcEMW3xDov2m4KgUmrIL1hNzmB8cVBS/xcCh2br
+        uUD4TvxU3DXi+M6pS7u3fBvFz/xlDO7Go+4jqbS1GZ72vI/wUUpf8nMm6BGR6RLCEnjsq0
+        bzW2urfD7wv4H50wrxRtBBcyKe1uAIY=
+DKIM-Signature: v=1; a=ed25519-sha256; c=relaxed/relaxed; d=suse.de;
+        s=susede2_ed25519; t=1638886021;
+        h=from:from:reply-to:reply-to:date:date:message-id:message-id:to:to:
+         cc:cc:mime-version:mime-version:content-type:content-type;
+        bh=wbRgmW+zXCMvnhV8IL0lLlGP7x2MmNNduatTHF949cM=;
+        b=sZEb/42EJDZArLoCY2ijly9UG952rU03536IHIVyEIVUfT6Qur+UitbbBt8SmY2lGPE9g4
+        KQsrpSM1GNNJNcBQ==
+Received: from g78 (unknown [10.163.17.14])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
+        (No client certificate requested)
+        by relay2.suse.de (Postfix) with ESMTPS id B4C6FA3B8C;
+        Tue,  7 Dec 2021 14:07:00 +0000 (UTC)
+User-agent: mu4e 1.6.9; emacs 27.2
+From:   Richard Palethorpe <rpalethorpe@suse.de>
+To:     linux-sparse@vger.kernel.org
+Cc:     pvorel@suze.cz, chrubis@suse.cz, io@richiejp.com
+Subject: Linux Test Project vendored Sparse
+Date:   Tue, 07 Dec 2021 13:33:56 +0000
+Reply-To: rpalethorpe@suse.de
+Message-ID: <87k0ggbjb0.fsf@suse.de>
+MIME-Version: 1.0
 Content-Type: text/plain
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi Luc,
+Hello Sparse contributors,
 
-Is this patchset getting your attention?  Ke has finished his internship so if there's anything needed please let me know.
+After trying a number of static analysis tools we settled on Sparse to
+roll our own C checks. There are some mistakes we see repeatedly when
+people are trying to write tests. Some of these are specific to the
+LTP's API, so we decided to try our own analysis.
 
-Thanks,
-Xiao
+So far we have checks for:
 
-On Fri, Aug 13, 2021, at 9:25 AM, Ke Du wrote:
-> Delete or shrink the ifndef __cplusplus guard to expose more facilities
-> to C++, such as sparse_initialize and the FOR_EACH_PTR macro.
-> 
-> Signed-off-by: Ke Du <duke@naive.systems>
-> Reviewed-by: Xiao Jia <xjia@naive.systems>
-> ---
-> lib.h     | 4 ++--
-> ptrlist.h | 2 +-
-> symbol.h  | 3 ---
-> token.h   | 3 +--
-> 4 files changed, 4 insertions(+), 8 deletions(-)
-> 
-> diff --git a/lib.h b/lib.h
-> index 9809feee..0e9bd0cd 100644
-> --- a/lib.h
-> +++ b/lib.h
-> @@ -85,8 +85,6 @@ DECLARE_PTR_LIST(string_list, char);
->  
-> typedef struct pseudo *pseudo_t;
->  
-> -#ifndef __cplusplus
-> -
-> #ifdef __GNUC__
-> #define FORMAT_ATTR(pos) __attribute__ ((__format__ (__printf__, pos, pos+1)))
-> #define NORETURN_ATTR __attribute__ ((__noreturn__))
-> @@ -143,6 +141,8 @@ extern struct symbol_list *sparse_keep_tokens(char *filename);
-> extern struct symbol_list *sparse(char *filename);
-> extern void report_stats(void);
->  
-> +#ifndef __cplusplus
-> +
-> static inline int symbol_list_size(struct symbol_list *list)
-> {
-> return ptr_list_size((struct ptr_list *)(list));
-> diff --git a/ptrlist.h b/ptrlist.h
-> index e281309f..67c7a208 100644
-> --- a/ptrlist.h
-> +++ b/ptrlist.h
-> @@ -109,6 +109,7 @@ extern void __free_ptr_list(struct ptr_list **);
-> DO_REVERSE(ptr, __head##ptr, __list##ptr, __nr##ptr, __rname##new, \
->    new, __head##new, __list##new, __nr##new, PTR_ENTRY_UNTAG)
->  
-> +#endif // __cpluplus
->  
-> #define FOR_EACH_PTR(head, ptr) \
-> DO_FOR_EACH(head, ptr, __head##ptr, __list##ptr, __nr##ptr, __name##ptr, PTR_ENTRY_NOTAG)
-> @@ -311,5 +312,4 @@ static inline void *tag_ptr(void *ptr, unsigned long tag)
-> return (void *)(tag | (unsigned long)ptr);
-> }
->  
-> -#endif // __cpluplus
-> #endif /* PTR_LIST_H */
-> diff --git a/symbol.h b/symbol.h
-> index 503c9f09..c9d221e7 100644
-> --- a/symbol.h
-> +++ b/symbol.h
-> @@ -220,8 +220,6 @@ struct symbol {
-> pseudo_t pseudo;
-> };
->  
-> -#ifndef __cplusplus
-> -
-> /* Modifiers */
-> #define MOD_AUTO 0x00000001
-> #define MOD_REGISTER 0x00000002
-> @@ -591,5 +589,4 @@ static inline void combine_address_space(struct position pos,
-> }
-> }
->  
-> -#endif // __cplusplus
-> #endif /* SYMBOL_H */
-> diff --git a/token.h b/token.h
-> index 1f3601a9..804cc6f8 100644
-> --- a/token.h
-> +++ b/token.h
-> @@ -197,7 +197,7 @@ struct token {
-> };
-> };
->  
-> -#ifndef __cplusplus
-> +
->  
-> #define MAX_STRING 8191
->  
-> @@ -251,5 +251,4 @@ static inline int match_token_zero(struct token *token)
-> return token->number[0] == '0' && !token->number[1];
-> }
->  
-> -#endif // __cplusplus
-> #endif
-> -- 
-> 2.31.1
-> 
-> 
+LTP-001	Library source files have tst_ prefix
+LTP-002	TST_RET and TST_ERR are never modified by test library functions
+LTP-003 Externally visible library symbols have the tst_ prefix
+LTP-004 Test executable symbols are marked static
+LTP-005 Array must terminate with a sentinel value (i.e. NULL or '{}')
+*       Deprecated symbols from the old API
+
+We use a mixture of the linearized form and AST. If you are interested
+please see:
+https://github.com/linux-test-project/ltp/blob/master/tools/sparse/
+Also I will attach the main code to the body of this e-mail it is only
+283 lines.
+
+I still don't have a firm grasp on how Sparse works, so any feedback
+would be welcome. BTW we include Sparse as a git module and so far there
+have been no complaints.
+
+// SPDX-License-Identifier: GPL-2.0-or-later
+/*
+ * Copyright (C) 2021 SUSE LLC <rpalethorpe@suse.com>
+ *
+ * Sparse allows us to perform checks on the AST (struct symbol) or on
+ * a linearized representation. In the latter case we are given a set
+ * of entry points (functions) containing basic blocks of
+ * instructions.
+ *
+ * The basic blocks contain byte code in SSA form. This is similar to
+ * the intermediate representation most compilers use during
+ * optimisation.
+ */
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include "lib.h"
+#include "allocate.h"
+#include "opcode.h"
+#include "token.h"
+#include "parse.h"
+#include "symbol.h"
+#include "expression.h"
+#include "linearize.h"
+
+/* The rules for test, library and tool code are different */
+enum ltp_tu_kind {
+	LTP_LIB,
+	LTP_OTHER,
+};
+
+static enum ltp_tu_kind tu_kind = LTP_OTHER;
+
+/* Check for LTP-002
+ *
+ * Inspects the destination symbol of each store instruction. If it is
+ * TST_RET or TST_ERR then emit a warning.
+ */
+static void check_lib_sets_TEST_vars(const struct instruction *insn)
+{
+	static struct ident *TST_RES_id, *TST_ERR_id;
+
+	if (!TST_RES_id) {
+		TST_RES_id = built_in_ident("TST_RET");
+		TST_ERR_id = built_in_ident("TST_ERR");
+	}
+
+	if (insn->opcode != OP_STORE)
+		return;
+	if (insn->src->ident != TST_RES_id &&
+	    insn->src->ident != TST_ERR_id)
+		return;
+
+	warning(insn->pos,
+		"LTP-002: Library should not write to TST_RET or TST_ERR");
+}
+
+static void do_basicblock_checks(struct basic_block *bb)
+{
+	struct instruction *insn;
+
+	FOR_EACH_PTR(bb->insns, insn) {
+		if (!bb_reachable(insn->bb))
+			continue;
+
+		if (tu_kind == LTP_LIB)
+			check_lib_sets_TEST_vars(insn);
+	} END_FOR_EACH_PTR(insn);
+}
+
+static void do_entrypoint_checks(struct entrypoint *ep)
+{
+	struct basic_block *bb;
+
+	FOR_EACH_PTR(ep->bbs, bb) {
+		do_basicblock_checks(bb);
+	} END_FOR_EACH_PTR(bb);
+}
+
+/* The old API can not comply with the rules. So when we see one of
+ * these symbols we know that it will result in further
+ * warnings. Probably these will suggest inappropriate things. Usually
+ * these symbols should be removed and the new API used
+ * instead. Otherwise they can be ignored until all tests have been
+ * converted to the new API.
+ */
+static bool check_symbol_deprecated(const struct symbol *const sym)
+{
+	static struct ident *TCID_id, *TST_TOTAL_id;
+	const struct ident *id = sym->ident;
+
+	if (!TCID_id) {
+		TCID_id = built_in_ident("TCID");
+		TST_TOTAL_id = built_in_ident("TST_TOTAL");
+	}
+
+	if (id != TCID_id && id != TST_TOTAL_id)
+		return false;
+
+	warning(sym->pos,
+		"Ignoring deprecated API symbol: '%s'. Should this code be converted to the new API?",
+		show_ident(id));
+
+	return true;
+}
+
+/* Check for LTP-003 and LTP-004
+ *
+ * Try to find cases where the static keyword was forgotten.
+ */
+static void check_symbol_visibility(const struct symbol *const sym)
+{
+	const unsigned long mod = sym->ctype.modifiers;
+	const char *const name = show_ident(sym->ident);
+	const int has_lib_prefix = !strncmp("tst_", name, 4) ||
+		!strncmp("TST_", name, 4) ||
+		!strncmp("ltp_", name, 4) ||
+		!strncmp("safe_", name, 5);
+
+	if (!(mod & MOD_TOPLEVEL))
+		return;
+
+	if (has_lib_prefix && (mod & MOD_STATIC) && !(mod & MOD_INLINE)) {
+		warning(sym->pos,
+			"LTP-003: Symbol '%s' has the LTP public library prefix, but is static (private).",
+			name);
+		return;
+	}
+
+	if ((mod & MOD_STATIC))
+		return;
+
+	if (tu_kind == LTP_LIB && !has_lib_prefix) {
+		warning(sym->pos,
+			"LTP-003: Symbol '%s' is a public library function, but is missing the 'tst_' prefix",
+			name);
+		return;
+	}
+
+	if (sym->same_symbol)
+		return;
+
+	if (sym->ident == &main_ident)
+		return;
+
+	warning(sym->pos,
+		"Symbol '%s' has no prototype or library ('tst_') prefix. Should it be static?",
+		name);
+}
+
+/* See base_type() in dissect.c */
+static struct symbol *unwrap_base_type(const struct symbol *sym)
+{
+	switch (sym->ctype.base_type->type) {
+	case SYM_ARRAY:
+	case SYM_NODE:
+	case SYM_PTR:
+		return unwrap_base_type(sym->ctype.base_type);
+	default:
+		return sym->ctype.base_type;
+	}
+}
+
+/* Checks if some struct array initializer is terminated with a blank
+ * (zeroed) item i.e. {}
+ */
+static bool is_terminated_with_null_struct(const struct symbol *const sym)
+{
+	const struct expression *const arr_init = sym->initializer;
+	const struct expression *item_init =
+		last_ptr_list((struct ptr_list *)arr_init->expr_list);
+
+	if (item_init->type == EXPR_POS)
+		item_init = item_init->init_expr;
+
+	return ptr_list_empty((struct ptr_list *)item_init->expr_list);
+}
+
+/* Check for (one instance of) LTP-005
+ *
+ * The tags array is only accessed when the test fails. So we perform
+ * a static check to ensure it ends with {}
+ */
+static void check_tag_initializer(const struct symbol *const sym)
+{
+	if (is_terminated_with_null_struct(sym))
+		return;
+
+	warning(sym->pos,
+		"LTP-005: test.tags array doesn't appear to be null-terminated; did you forget to add '{}' as the final entry?");
+}
+
+/* Find struct tst_test test = { ... } and perform tests on its initializer */
+static void check_test_struct(const struct symbol *const sym)
+{
+	static struct ident *tst_test, *tst_test_test, *tst_tag;
+	struct ident *ctype_name = NULL;
+	struct expression *init = sym->initializer;
+	struct expression *entry;
+
+	if (!sym->ctype.base_type)
+		return;
+
+	ctype_name = sym->ctype.base_type->ident;
+
+	if (!init)
+		return;
+
+	if (!tst_test_test) {
+		tst_test = built_in_ident("tst_test");
+		tst_test_test = built_in_ident("test");
+		tst_tag = built_in_ident("tst_tag");
+	}
+
+	if (sym->ident != tst_test_test)
+		return;
+
+	if (ctype_name != tst_test)
+		return;
+
+	FOR_EACH_PTR(init->expr_list, entry) {
+		if (entry->init_expr->type != EXPR_SYMBOL)
+			continue;
+
+		const struct symbol *entry_init = entry->init_expr->symbol;
+		const struct symbol *entry_ctype = unwrap_base_type(entry_init);
+
+		if (entry_ctype->ident == tst_tag)
+			check_tag_initializer(entry_init);
+	} END_FOR_EACH_PTR(entry);
+
+}
+
+/* AST level checks */
+static void do_symbol_checks(struct symbol *sym)
+{
+	if (check_symbol_deprecated(sym))
+		return;
+
+	check_symbol_visibility(sym);
+	check_test_struct(sym);
+}
+
+/* Compile the AST into a graph of basicblocks */
+static void process_symbols(struct symbol_list *list)
+{
+	struct symbol *sym;
+
+	FOR_EACH_PTR(list, sym) {
+		struct entrypoint *ep;
+
+		do_symbol_checks(sym);
+
+		expand_symbol(sym);
+		ep = linearize_symbol(sym);
+		if (!ep || !ep->entry)
+			continue;
+
+		do_entrypoint_checks(ep);
+
+		if (dbg_entry)
+			show_entry(ep);
+	} END_FOR_EACH_PTR(sym);
+}
+
+static void collect_info_from_args(const int argc, char *const *const argv)
+{
+	int i;
+
+	for (i = 0; i < argc; i++) {
+		if (!strcmp("-DLTPLIB", argv[i]))
+			tu_kind = LTP_LIB;
+	}
+}
+
+int main(int argc, char **argv)
+{
+	struct string_list *filelist = NULL;
+	char *file;
+
+	Waddress_space = 0;
+	Wbitwise = 0;
+	Wcast_truncate = 0;
+	Wcontext = 0;
+	Wdecl = 0;
+	Wexternal_function_has_definition = 0;
+	Wflexible_array_array = 0;
+	Wimplicit_int = 0;
+	Wint_to_pointer_cast = 0;
+	Wmemcpy_max_count = 0;
+	Wnon_pointer_null = 0;
+	Wone_bit_signed_bitfield = 0;
+	Woverride_init = 0;
+	Wpointer_to_int_cast = 0;
+	Wvla = 0;
+
+	do_output = 0;
+
+	collect_info_from_args(argc, argv);
+
+	process_symbols(sparse_initialize(argc, argv, &filelist));
+	FOR_EACH_PTR(filelist, file) {
+		process_symbols(sparse(file));
+	} END_FOR_EACH_PTR(file);
+
+	report_stats();
+	return 0;
+}
+
+
