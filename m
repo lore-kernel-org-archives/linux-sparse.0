@@ -2,61 +2,51 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 96852C433EF
-	for <linux-sparse@archiver.kernel.org>; Tue, 14 Dec 2021 15:17:02 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 078D5C433EF
+	for <linux-sparse@archiver.kernel.org>; Sun, 26 Dec 2021 09:43:11 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S235281AbhLNPRB (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Tue, 14 Dec 2021 10:17:01 -0500
-Received: from vmicros1.altlinux.org ([194.107.17.57]:34324 "EHLO
-        vmicros1.altlinux.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S235308AbhLNPQ7 (ORCPT
+        id S231768AbhLZJnK (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Sun, 26 Dec 2021 04:43:10 -0500
+Received: from slot0.jllresort.com ([62.197.136.5]:50170 "EHLO
+        slot0.jllresort.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S231739AbhLZJnK (ORCPT
         <rfc822;linux-sparse@vger.kernel.org>);
-        Tue, 14 Dec 2021 10:16:59 -0500
-Received: from imap.altlinux.org (imap.altlinux.org [194.107.17.38])
-        by vmicros1.altlinux.org (Postfix) with ESMTP id AC75F72C8DC;
-        Tue, 14 Dec 2021 18:16:56 +0300 (MSK)
-Received: from example.org (ip-78-45-37-102.net.upcbroadband.cz [78.45.37.102])
-        by imap.altlinux.org (Postfix) with ESMTPSA id 326714A46EA;
-        Tue, 14 Dec 2021 18:16:56 +0300 (MSK)
-Date:   Tue, 14 Dec 2021 16:16:55 +0100
-From:   Alexey Gladkov <gladkov.alexey@gmail.com>
-To:     Luc Van Oostenryck <luc.vanoostenryck@gmail.com>
-Cc:     linux-sparse@vger.kernel.org, Oleg Nesterov <oleg@redhat.com>
-Subject: Re: [PATCH 0/3] semind: Index more symbols
-Message-ID: <20211214151655.o6hank75ylvmr5un@example.org>
-References: <20211102140645.83081-1-gladkov.alexey@gmail.com>
+        Sun, 26 Dec 2021 04:43:10 -0500
+X-Greylist: delayed 745 seconds by postgrey-1.27 at vger.kernel.org; Sun, 26 Dec 2021 04:43:09 EST
+DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; s=dkim; d=jllresort.com;
+ h=Reply-To:From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:Content-Transfer-Encoding; i=ele.mon@jllresort.com;
+ bh=Cng4XUaULWsJcJnpPQ5VKPmaWXI=;
+ b=i6sTNbcpgnkB+QLL29kiCFWZzaVF0BEC2lvYdY3wht6ki3d0VmmW6+RoQXemwqgj2WhLKPOzPkyQ
+   k+h88+zsTbwQZAuF6RGq07vmheoRZQiZuLO7PKwvgJWqlhzuE/cS77MrLhZK6KUSv2l3nAbrQEZS
+   w0uruKNtAxucOcrnAj7jF8/t79qRqPs6iZKzP6PhWFTuhpx3nZwIKorCjrOn7visFQaXaU2tgOTB
+   6zVj1EYIek2NUeIGuXABTDLckG95qwky77wui6dimPBcOCBjVsjvAyoWCAW9AM/aFkjSOqKAY+BE
+   HQZtT4GZ7qlA/cl5BzhbfUfFRco/wzF12SUZAQ==
+DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns; s=dkim; d=jllresort.com;
+ b=ZtZw7uT16ddoWkzuxcKzttuTrk2Qlh+uUDIoOflUPdlQAzDVNdYUqQdG9f8efn3otXoAOlu4OQ7F
+   +kZ+dm3JDrTchoo+134v5/98VsZpjV0Q8tFv59ga4e3m61NLKug+hUx4JfIGPzJGRCp18yaE7eAQ
+   8its2JQt574iTKXAe5WAgo2/HBY9w0yh3dN27gvjgXsIXYpYbAZpc6ia3m5z8iFRiFPWpxcUuYPm
+   A++xsIr+JdKbdkL7qxDaGwgzj/rAyJEbaQ77St8rNIO9HrbiLX0yu4KeAju/Gs+7PpN6Jbzq8FMp
+   hrBqA10XAwudvG93jEAfP0Q2NpvdycyFA5cqFA==;
+Reply-To: mustafa.ayvaz@ayvazburosu.com
+From:   ele.mon@jllresort.com
+To:     linux-sparse@vger.kernel.org
+Subject: Happy Weekend:
+Date:   26 Dec 2021 10:29:36 +0100
+Message-ID: <20211226102855.B58EAE8D54AFEEFC@jllresort.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20211102140645.83081-1-gladkov.alexey@gmail.com>
+Content-Type: text/plain;
+        charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-On Tue, Nov 02, 2021 at 03:06:42PM +0100, Alexey Gladkov wrote:
-> Greetings!
-> 
-> For indexing purposes, macros definitions and typedefs are added to the
-> semind database. Functions that are not used in the code are also indexed.
+Greetings to you linux-sparse,
 
-careful ping.
+I was wondering if you got my previous email? I have been trying=20
+to reach you by email linux-sparse@vger.kernel.org, kindly get=20
+back to me swiftly, it is very important and urgent.
 
-> Alexey Gladkov (3):
->   dissect: Allow to show all symbols
->   dissect: Show macro definitions
->   dissect: Show typedefs
-> 
->  dissect.c      | 61 +++++++++++++++++++++++++++++++++++++++++++++++++-
->  options.c      |  5 +++++
->  options.h      |  2 ++
->  semind.c       |  1 +
->  test-dissect.c |  5 ++++-
->  5 files changed, 72 insertions(+), 2 deletions(-)
-> 
-> -- 
-> 2.33.0
-> 
-
--- 
-Rgrds, legion
-
+Thanks
+Mustafa Ayvaz
+Email: mustafa.ayvaz@ayvazburosu.com
