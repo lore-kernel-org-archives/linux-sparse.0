@@ -2,51 +2,53 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id 078D5C433EF
-	for <linux-sparse@archiver.kernel.org>; Sun, 26 Dec 2021 09:43:11 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 9D4CDC433F5
+	for <linux-sparse@archiver.kernel.org>; Wed, 29 Dec 2021 09:11:10 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S231768AbhLZJnK (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 26 Dec 2021 04:43:10 -0500
-Received: from slot0.jllresort.com ([62.197.136.5]:50170 "EHLO
-        slot0.jllresort.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S231739AbhLZJnK (ORCPT
-        <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 26 Dec 2021 04:43:10 -0500
-X-Greylist: delayed 745 seconds by postgrey-1.27 at vger.kernel.org; Sun, 26 Dec 2021 04:43:09 EST
-DKIM-Signature: v=1; a=rsa-sha1; c=relaxed/relaxed; s=dkim; d=jllresort.com;
- h=Reply-To:From:To:Subject:Date:Message-ID:MIME-Version:Content-Type:Content-Transfer-Encoding; i=ele.mon@jllresort.com;
- bh=Cng4XUaULWsJcJnpPQ5VKPmaWXI=;
- b=i6sTNbcpgnkB+QLL29kiCFWZzaVF0BEC2lvYdY3wht6ki3d0VmmW6+RoQXemwqgj2WhLKPOzPkyQ
-   k+h88+zsTbwQZAuF6RGq07vmheoRZQiZuLO7PKwvgJWqlhzuE/cS77MrLhZK6KUSv2l3nAbrQEZS
-   w0uruKNtAxucOcrnAj7jF8/t79qRqPs6iZKzP6PhWFTuhpx3nZwIKorCjrOn7visFQaXaU2tgOTB
-   6zVj1EYIek2NUeIGuXABTDLckG95qwky77wui6dimPBcOCBjVsjvAyoWCAW9AM/aFkjSOqKAY+BE
-   HQZtT4GZ7qlA/cl5BzhbfUfFRco/wzF12SUZAQ==
-DomainKey-Signature: a=rsa-sha1; c=nofws; q=dns; s=dkim; d=jllresort.com;
- b=ZtZw7uT16ddoWkzuxcKzttuTrk2Qlh+uUDIoOflUPdlQAzDVNdYUqQdG9f8efn3otXoAOlu4OQ7F
-   +kZ+dm3JDrTchoo+134v5/98VsZpjV0Q8tFv59ga4e3m61NLKug+hUx4JfIGPzJGRCp18yaE7eAQ
-   8its2JQt574iTKXAe5WAgo2/HBY9w0yh3dN27gvjgXsIXYpYbAZpc6ia3m5z8iFRiFPWpxcUuYPm
-   A++xsIr+JdKbdkL7qxDaGwgzj/rAyJEbaQ77St8rNIO9HrbiLX0yu4KeAju/Gs+7PpN6Jbzq8FMp
-   hrBqA10XAwudvG93jEAfP0Q2NpvdycyFA5cqFA==;
-Reply-To: mustafa.ayvaz@ayvazburosu.com
-From:   ele.mon@jllresort.com
-To:     linux-sparse@vger.kernel.org
-Subject: Happy Weekend:
-Date:   26 Dec 2021 10:29:36 +0100
-Message-ID: <20211226102855.B58EAE8D54AFEEFC@jllresort.com>
+        id S234956AbhL2JLJ (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
+        Wed, 29 Dec 2021 04:11:09 -0500
+Received: from mail.neweas.com ([80.211.187.56]:35994 "EHLO mail.neweas.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S234861AbhL2JLJ (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
+        Wed, 29 Dec 2021 04:11:09 -0500
+Received: by mail.neweas.com (Postfix, from userid 1001)
+        id 19B59A341B; Wed, 29 Dec 2021 09:11:23 +0000 (GMT)
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/simple; d=neweas.com; s=mail;
+        t=1640769086; bh=344ka1ykJ0mvfujTlqCYPtTosUKgQHFWZmLJzFrWq60=;
+        h=Date:From:To:Subject:From;
+        b=V/IGvZip0T8mjsHuwZUVOSZ6ziCs7XaUedz2MCCwKnWkeyqaEkz/qYTZw5u/msCRt
+         ZZYRzxsX2/b7D4Kanu7kcciTDhCOLZy6sFCsjXF0rL2i0YfDttxentwknYi+LGH66r
+         U1HhlZTzDZAqBHq7npKF/Dna+C3HilEm0c8OLqPM6OOrL+0OF0ELqr7W6wxEaWNxEp
+         j9BI73Wn7EgRMkmlVX6D4QhUS1qNF2kJyggbyuVavW2LXNCfNT25agW5lFHfAh35lg
+         gRMnKsfZJ0MXNAZPi8644kfNdljIKgnKTtyZti5AK71P+zY0WD7XvM6jFPmK2HCnC/
+         2UDZXKzeA4ELA==
+Received: by mail.neweas.com for <linux-sparse@vger.kernel.org>; Wed, 29 Dec 2021 09:10:56 GMT
+Message-ID: <20211229074500-0.1.38.hqst.0.iuhdp9ja71@neweas.com>
+Date:   Wed, 29 Dec 2021 09:10:56 GMT
+From:   =?UTF-8?Q? "Miguel_Rodr=C3=ADguez_Garc=C3=ADa" ?= 
+        <miguel.garcia@neweas.com>
+To:     <linux-sparse@vger.kernel.org>
+Subject: Servicio de la flota
+X-Mailer: mail.neweas.com
 MIME-Version: 1.0
-Content-Type: text/plain;
-        charset="utf-8"
+Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Greetings to you linux-sparse,
+Buenos d=C3=ADas:
 
-I was wondering if you got my previous email? I have been trying=20
-to reach you by email linux-sparse@vger.kernel.org, kindly get=20
-back to me swiftly, it is very important and urgent.
+Le escribo para hablarle sobre una de las mejores herramientas GPS en el =
+mercado.
 
-Thanks
-Mustafa Ayvaz
-Email: mustafa.ayvaz@ayvazburosu.com
+La herramienta, que me gustar=C3=ADa presentarle brevemente, dispone de m=
+uchas funciones =C3=BAtiles para su trabajo, que optimizan los procesos d=
+e transporte y le ayudan a realizar tareas de campo de manera m=C3=A1s ef=
+iciente.
+
+=C2=BFQuiere conocer los detalles?
+
+
+Atentamente,
+Miguel Rodr=C3=ADguez Garc=C3=ADa
