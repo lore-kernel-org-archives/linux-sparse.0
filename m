@@ -2,34 +2,60 @@ Return-Path: <linux-sparse-owner@kernel.org>
 X-Spam-Checker-Version: SpamAssassin 3.4.0 (2014-02-07) on
 	aws-us-west-2-korg-lkml-1.web.codeaurora.org
 Received: from vger.kernel.org (vger.kernel.org [23.128.96.18])
-	by smtp.lore.kernel.org (Postfix) with ESMTP id CC4EDC433EF
-	for <linux-sparse@archiver.kernel.org>; Sun, 16 Jan 2022 13:33:03 +0000 (UTC)
+	by smtp.lore.kernel.org (Postfix) with ESMTP id 2A879C433F5
+	for <linux-sparse@archiver.kernel.org>; Tue, 18 Jan 2022 19:23:04 +0000 (UTC)
 Received: (majordomo@vger.kernel.org) by vger.kernel.org via listexpand
-        id S233293AbiAPNdC (ORCPT <rfc822;linux-sparse@archiver.kernel.org>);
-        Sun, 16 Jan 2022 08:33:02 -0500
-Received: from mail.skyhub.de ([5.9.137.197]:51252 "EHLO mail.skyhub.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S233233AbiAPNdC (ORCPT <rfc822;linux-sparse@vger.kernel.org>);
-        Sun, 16 Jan 2022 08:33:02 -0500
-Received: from zn.tnic (dslb-088-067-202-008.088.067.pools.vodafone-ip.de [88.67.202.8])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES256-GCM-SHA384 (256/256 bits))
-        (No client certificate requested)
-        by mail.skyhub.de (SuperMail on ZX Spectrum 128k) with ESMTPSA id 8D2FC1EC0411;
-        Sun, 16 Jan 2022 14:32:56 +0100 (CET)
-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=alien8.de; s=dkim;
-        t=1642339976;
+        id S1343526AbiARTXD (ORCPT
+        <rfc822;linux-sparse@archiver.kernel.org>);
+        Tue, 18 Jan 2022 14:23:03 -0500
+Received: from us-smtp-delivery-124.mimecast.com ([170.10.129.124]:41366 "EHLO
+        us-smtp-delivery-124.mimecast.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S245464AbiARTXC (ORCPT
+        <rfc822;linux-sparse@vger.kernel.org>);
+        Tue, 18 Jan 2022 14:23:02 -0500
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=redhat.com;
+        s=mimecast20190719; t=1642533782;
         h=from:from:reply-to:subject:subject:date:date:message-id:message-id:
          to:to:cc:cc:mime-version:mime-version:content-type:content-type:
-         content-transfer-encoding:content-transfer-encoding:
          in-reply-to:in-reply-to:references:references;
-        bh=MPDfWSRyaloa+IRn4zTc2dCskgupJxpADilswV96HZA=;
-        b=AbXRzCUuKObTzJZIbpjg9rFqfDxrral+P7YYbs3UDxIUgA6u7MPIBYdVinp2b+AGB6cU4E
-        amv8LgzKghgkG5aBjXP6XYl1/QAmVORv69B5quD++6x25XhAd0cY5nQ0YH2CDPGG6PxkYj
-        BsPcpSSjj/DlltwyOSmocVAEDBL13RI=
-Date:   Sun, 16 Jan 2022 14:32:59 +0100
-From:   Borislav Petkov <bp@alien8.de>
-To:     Nick Desaulniers <ndesaulniers@google.com>
-Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
+        bh=szFzYuqp/rVABkm8mkSgMpFZFDViwmtCeMvEqr1ilK0=;
+        b=NKK6g+RQnheEQSf63PfiBny359nUJ1pDUcHi2nO1/O4uuS6tNx6N/eBlb1TJ/TdBmN9PdO
+        Na47DZc4LFoxxwRIyQlds9GxjaCL3XGGghJoHIpgSrtL6hhnl0nRnNpfLytliajODVwcNg
+        1bGch9Ub2qJLJrBXZSCEfD+LiAs+Q+I=
+Received: from mail-ot1-f71.google.com (mail-ot1-f71.google.com
+ [209.85.210.71]) by relay.mimecast.com with ESMTP with STARTTLS
+ (version=TLSv1.2, cipher=TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384) id
+ us-mta-529-ei62zZI8PtGevSZqc4Utjw-1; Tue, 18 Jan 2022 14:23:01 -0500
+X-MC-Unique: ei62zZI8PtGevSZqc4Utjw-1
+Received: by mail-ot1-f71.google.com with SMTP id h15-20020a9d6f8f000000b005986ef3f50aso6069810otq.3
+        for <linux-sparse@vger.kernel.org>; Tue, 18 Jan 2022 11:23:00 -0800 (PST)
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20210112;
+        h=x-gm-message-state:date:from:to:cc:subject:message-id:references
+         :mime-version:content-disposition:in-reply-to;
+        bh=szFzYuqp/rVABkm8mkSgMpFZFDViwmtCeMvEqr1ilK0=;
+        b=EYghRb7Nbfi2J3pJejHfWLK7Nq2uojLOTUHkoLR/ZNoQ/5yeKkGXXxUGdpwZ7qLhxY
+         wYBBxc22aDq0VMtI9BgChGJPbyu4aidz6h1l3nwNkDn9+UsXarQwIvXEjEku3nYEChAP
+         X3d7Moc6Gx0KezhcxX3czJaPCcyHRUBlS0qMnu2YN/atAluyYWqeI9SwrUhxiYII0raw
+         sCkuJeHM+hxMjp1nUIAOXEtyjwYYsL0QHZAqgcxzb3uC5PNaAnQHQ3ERf7EDO7StS9C4
+         xG0tTvM6FfxYVE1lkItm7CyOZBVurYVXrtKXnNOLhd0s+lSIgnw9heXW5Vlx+b4XawG1
+         r/8w==
+X-Gm-Message-State: AOAM531nX3YRlyP+X1l9Fumfa/Udsaup6xaQVMG4UMBtLBPScjyzsWKk
+        pi81tTdzcPAvrvWXJonJZgJaDaJwcEXx/VNRKEpQtbK0bg75uzbxhb/PkiYai2OjHEXCfRvQ0xo
+        V+lkz4D5qbo/9ObbmKrhmDoNJ
+X-Received: by 2002:a05:6830:148f:: with SMTP id s15mr12549736otq.242.1642533779971;
+        Tue, 18 Jan 2022 11:22:59 -0800 (PST)
+X-Google-Smtp-Source: ABdhPJwzr0wpP0kkTCgrhkGxkaIaWoXrzgt8LpYDiF/kTrxf2zstxk5uqrspsrdw765/b9E+vg16lA==
+X-Received: by 2002:a05:6830:148f:: with SMTP id s15mr12549720otq.242.1642533779776;
+        Tue, 18 Jan 2022 11:22:59 -0800 (PST)
+Received: from treble ([2600:1700:6e32:6c00::c])
+        by smtp.gmail.com with ESMTPSA id i25sm7472390otl.8.2022.01.18.11.22.58
+        (version=TLS1_3 cipher=TLS_AES_256_GCM_SHA384 bits=256/256);
+        Tue, 18 Jan 2022 11:22:59 -0800 (PST)
+Date:   Tue, 18 Jan 2022 11:22:56 -0800
+From:   Josh Poimboeuf <jpoimboe@redhat.com>
+To:     Borislav Petkov <bp@alien8.de>
+Cc:     Nick Desaulniers <ndesaulniers@google.com>,
         Vasily Gorbik <gor@linux.ibm.com>,
         Linus Torvalds <torvalds@linux-foundation.org>,
         Ingo Molnar <mingo@kernel.org>,
@@ -42,180 +68,39 @@ Cc:     Josh Poimboeuf <jpoimboe@redhat.com>,
         Nathan Chancellor <nathan@kernel.org>
 Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile &
  __COUNTER__
-Message-ID: <YeQei0xNzMq7bFdg@zn.tnic>
+Message-ID: <20220118192256.jzk5dnceeusq7x7u@treble>
 References: <20220114010526.1776605-1-ndesaulniers@google.com>
+ <YeQei0xNzMq7bFdg@zn.tnic>
 MIME-Version: 1.0
+In-Reply-To: <YeQei0xNzMq7bFdg@zn.tnic>
+Authentication-Results: relay.mimecast.com;
+        auth=pass smtp.auth=CUSA124A263 smtp.mailfrom=jpoimboe@redhat.com
+X-Mimecast-Spam-Score: 0
+X-Mimecast-Originator: redhat.com
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-Content-Transfer-Encoding: 8bit
-In-Reply-To: <20220114010526.1776605-1-ndesaulniers@google.com>
 Precedence: bulk
 List-ID: <linux-sparse.vger.kernel.org>
 X-Mailing-List: linux-sparse@vger.kernel.org
 
-Hi Nick,
-
-thanks for taking the time.
-
-Here are a bunch of nitpicks:
-
-On Thu, Jan 13, 2022 at 05:05:26PM -0800, Nick Desaulniers wrote:
-> Subject: Re: [PATCH] objtool: prefer memory clobber & %= to volatile &  __COUNTER__
-
-You probably wanna formulate that subject a little less cryptic and more
-to the point what the patch does:
-
-objtool: Use a memory clobber to prevent reachability annotations from getting merged
-
-or so.
-
-> commit dcce50e6cc4d ("compiler.h: Fix annotation macro misplacement with Clang")
-> mentions:
+On Sun, Jan 16, 2022 at 02:32:59PM +0100, Borislav Petkov wrote:
+> so I like the local label and how it is more readable this way.
 > 
-> > 'volatile' is ignored for some reason and Clang feels free to move the
-> > reachable() annotation away from its intended location.
+> So, provided the memory clobber works (I wonder here if Josh has some
+> concrete failing cases which could be tested with your version) and
+> after the nitpicks have been addressed
 > 
-> Indeed, volatile is not a compiler barrier. Particularly once `-march=`
-> flags are used under certain configs, LLVM's machine-scheduler can be
-> observed moving instructions across the asm statement meant to point to
-> known reachable or unreachable code, as reported by 0day bot.
-> 
-> Prefer a memory clobber which is a compiler barrier that prevents these
-> re-orderings and remove the volatile qualifier.
+> Acked-by: Borislav Petkov <bp@suse.de>
 
-Yah, Nathan's note about talking about gcc reordering volatile inline
-asms might make sense here as, apparently, that could have failed on gcc
-too but it didn't for whatever reason and the most important thing is
-that the memory clobber will prevent such reordering.
+I think Nick was already able to recreate the original issue.  I'll run
+it through some more testing.
 
-> Looking closer, the use of __COUNTER__ seems to have been used to
+I wanted to make this change years ago, but couldn't because of legacy
+toolchains.  Here's hoping this is the final solution for those @#$%^
+macros.
 
-"... it seems, __COUNTER__ has been used... " or so. Simpler.
-
-> prevent de-duplication of these asm statements. The GCC manual mentions:
-> 
-> > Under certain circumstances, GCC may duplicate (or remove duplicates
-> > of) your assembly code when optimizing. This can lead to unexpected
-> > duplicate symbol errors during compilation if your asm code defines
-> > symbols or labels. Using ‘%=’ (see AssemblerTemplate) may help resolve
-> > this problem.
-> >
-> > ‘%=’ Outputs a number that is unique to each instance of the asm
-> > statement in the entire compilation. This option is useful when
-> > creating local labels and referring to them multiple times in a single
-> > template that generates multiple assembler instructions.
-> 
-> commit 3d1e236022cc ("objtool: Prevent GCC from merging annotate_unreachable()")
-> 
-> Mentions that
-> 
-> > The inline asm ‘%=’ token could be used for that, but unfortunately
-> > older versions of GCC don't support it.
-> 
-> From testing all versions of GCC available on godbolt.org, GCC 4.1+
-> seems to support 4.1. Since the minimum supported version of GCC at the
-
-You mean "seems to support %=." here perhaps?
-
-> moment is GCC 5.1, it sounds like this is no longer a concern.
-> 
-> Prefer the %= assembler template to having to stringify __COUNTER__.
-> 
-> This commit is effectively a revert of the following commits:
-> commit dcce50e6cc4d ("compiler.h: Fix annotation macro misplacement with Clang")
-> commit f1069a8756b9 ("compiler.h: Avoid using inline asm operand modifiers")
-> commit c199f64ff93c ("instrumentation.h: Avoid using inline asm operand modifiers")
-> commit d0c2e691d1cb ("objtool: Add a comment for the unreachable annotation macros")
-> commit ec1e1b610917 ("objtool: Prevent GCC from merging annotate_unreachable(), take 2")
-> commit 3d1e236022cc ("objtool: Prevent GCC from merging annotate_unreachable()")
-> 
-> Link: https://github.com/ClangBuiltLinux/linux/issues/1566
-> Link: https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#Volatile
-> Link: https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html#AssemblerTemplate
-> Link: https://lore.kernel.org/llvm/202112080834.XFYU8b5Q-lkp@intel.com/
-> Link: https://lore.kernel.org/llvm/202111300857.IyINAyJk-lkp@intel.com/
-> Reported-by: kernel test robot <lkp@intel.com>
-> Debugged-by: Nathan Chancellor <nathan@kernel.org>
-> Signed-off-by: Nick Desaulniers <ndesaulniers@google.com>
-
-I very much definitely appreciate the extensive and comprehensive
-writeup - thanks for taking the time!
-
-> ---
->  include/linux/compiler.h        | 31 +++++++++++--------------------
->  include/linux/instrumentation.h | 24 ++++++++++--------------
->  2 files changed, 21 insertions(+), 34 deletions(-)
-> 
-> diff --git a/include/linux/compiler.h b/include/linux/compiler.h
-> index 429dcebe2b99..3ac21b888d20 100644
-> --- a/include/linux/compiler.h
-> +++ b/include/linux/compiler.h
-> @@ -108,30 +108,21 @@ void ftrace_likely_update(struct ftrace_likely_data *f, int val,
->  # define barrier_before_unreachable() do { } while (0)
->  #endif
->  
-> -/* Unreachable code */
-> +/* These macros help objtool understand GCC code flow for unreachable code. */
->  #ifdef CONFIG_STACK_VALIDATION
-> -/*
-> - * These macros help objtool understand GCC code flow for unreachable code.
-> - * The __COUNTER__ based labels are a hack to make each instance of the macros
-> - * unique, to convince GCC not to merge duplicate inline asm statements.
-> - */
-> -#define __stringify_label(n) #n
-> -
-> -#define __annotate_reachable(c) ({					\
-> -	asm volatile(__stringify_label(c) ":\n\t"			\
-> -		     ".pushsection .discard.reachable\n\t"		\
-> -		     ".long " __stringify_label(c) "b - .\n\t"		\
-> -		     ".popsection\n\t" : : "i" (c));			\
-> +#define annotate_reachable() ({			\
-> +	asm (".Lreachable%=:\n\t"			\
-	   ^
-
-	   no need for that space.
-
-
-> +	     ".pushsection .discard.reachable\n\t"	\
-> +	     ".long .Lreachable%= - .\n\t"		\
-> +	     ".popsection\n\t" ::: "memory");		\
-
-Btw, you don't need the "\t" on the last lines of the macros here. The
-asm output has a stray tab this way.
-
-As to the change itself, before it would look like this:
-
-# arch/x86/kernel/reboot.c:130: 	unreachable();
-# 130 "arch/x86/kernel/reboot.c" 1
-	333:
-	.pushsection .discard.unreachable
-	.long 333b - .
-	.popsection
-	
-
-
-and after
-
-# arch/x86/kernel/reboot.c:130: 	unreachable();
-# 130 "arch/x86/kernel/reboot.c" 1
-	.Lunreachable44:
-	.pushsection .discard.unreachable
-	.long .Lunreachable44 - .
-	.popsection
-
-
-so I like the local label and how it is more readable this way.
-
-So, provided the memory clobber works (I wonder here if Josh has some
-concrete failing cases which could be tested with your version) and
-after the nitpicks have been addressed
-
-Acked-by: Borislav Petkov <bp@suse.de>
-
-Thx.
+Boris, thanks for looping Nick in, I should have done so to begin with.
 
 -- 
-Regards/Gruss,
-    Boris.
+Josh
 
-https://people.kernel.org/tglx/notes-about-netiquette
